@@ -694,6 +694,8 @@ export const clienteEs = {
     // S61-A5 cura 1 — §6ter: el camino tocable del día sin lugar (LOTE S61)
     sinIniciosProbarDia: 'Probar {{dia}}',
     quienTitulo: 'Paseadores disponibles',
+    catalogoErrorTitulo: 'No pudimos cargar qué mascotas aplican',
+    catalogoErrorDetalle: 'Revisa tu conexión y prueba de nuevo. Preferimos no ofrecerte de más.',
     nadiePuede: 'Nadie puede a esa hora',
     nadiePuedeDetalle: 'Prueba con otro horario u otro día.',
     probarOtroHorario: 'Probar otro horario',

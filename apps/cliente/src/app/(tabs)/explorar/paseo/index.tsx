@@ -46,7 +46,6 @@ import {
 import {
   getEstadoOnboardingDueno,
   obtenerDiasCerrados,
-  obtenerEspeciesElegibles,
   obtenerIniciosPaseo,
   obtenerMascotasDeFamilia,
   obtenerOfertaPaseo,
@@ -57,6 +56,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 
@@ -87,7 +87,6 @@ export default function PaseoCuando() {
   // la mascota es el paso 0 y queda VISIBLE toda la reserva (rasgo 1);
   // el guard perro-only (§1bis) filtra ACÁ con voz honesta con camino.
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
-  const [especies, setEspecies] = useState<string[] | null>(null);
   // ⚠️ r15-bis · LA MASCOTA EQUIVOCADA — el defecto más caro de la
   // sesión, y su mecanismo tiene TRES eslabones que solo juntos fallan:
   //  ① el log llama con `router.navigate`, que REUSA la ruta si ya está
@@ -124,7 +123,8 @@ export default function PaseoCuando() {
   // S73 (letra de elegibilidad): la frontera UNICA del motor decide —
   // momento vital primero (memorial/perdida NO reservan), especie después.
   // La pantalla jamás re-computa elegibilidad (Ley 37: el filtro artesanal murió).
-  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], especies);
+  const faseEspecies = useEspeciesElegibles('paseo');
+  const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
 
@@ -157,9 +157,6 @@ export default function PaseoCuando() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      void obtenerEspeciesElegibles('paseo').then((r) => {
-        if (vigente && r.ok) setEspecies(r.data);
-      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente) return;
@@ -446,7 +443,17 @@ export default function PaseoCuando() {
               }
             />
           </View>
-        ) : elegibles.length === 0 ? (
+        ) : faseEspecies.fase === 'error' ? (
+          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+          // «todas» sería re-abrir el agujero que esta tanda cierra.
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('explorar.catalogoErrorTitulo')}
+              descripcion={t('explorar.catalogoErrorDetalle')}
+            />
+          </View>
+        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
           <View style={{ paddingHorizontal: spacing[4] }}>
             <EstadoVacio
               icono={<Icono nombre="paseo" tamano={48} />}

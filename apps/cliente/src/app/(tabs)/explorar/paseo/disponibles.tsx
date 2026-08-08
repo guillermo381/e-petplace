@@ -42,7 +42,6 @@ import {
 import {
   crearBloqueoAgenda,
   getEstadoOnboardingDueno,
-  obtenerEspeciesElegibles,
   obtenerMascotasDeFamilia,
   obtenerPaseadoresDisponibles,
   obtenerSaldoPaquete,
@@ -57,6 +56,7 @@ import {
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { PreviewPrestador } from '@/components/preview-prestador';
 
 export default function PaseoDisponibles() {
@@ -80,7 +80,6 @@ export default function PaseoDisponibles() {
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   // §1bis (v1.4): las especies que PUEDEN pasear — de la DB, jamás un if
   // por pantalla (null = todas mientras carga o sin config).
-  const [especies, setEspecies] = useState<string[] | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
   const [sinElegibles, setSinElegibles] = useState(false);
@@ -118,7 +117,8 @@ export default function PaseoDisponibles() {
   const [socialNo, setSocialNo] = useState<string | null>(null);
 
   // S73 (letra de elegibilidad): frontera única — momento vital + especie.
-  const elegibles = mascotasElegibles(mascotas, especies);
+  const faseEspecies = useEspeciesElegibles('paseo');
+  const elegibles = ofrecibles(mascotas, faseEspecies);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -131,9 +131,6 @@ export default function PaseoDisponibles() {
     useCallback(() => {
       let vigente = true;
       cargar();
-      void obtenerEspeciesElegibles('paseo').then((r) => {
-        if (vigente && r.ok) setEspecies(r.data);
-      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente || !estado.ok || !estado.data.familia_id) return;

@@ -587,6 +587,8 @@ export const clienteEn = {
     // S61-A5 cure 1 — §6ter: the tappable path out of an empty day (LOTE S61)
     sinIniciosProbarDia: 'Try {{dia}}',
     quienTitulo: 'Available walkers',
+    catalogoErrorTitulo: "We couldn't load which pets apply",
+    catalogoErrorDetalle: "Check your connection and try again. We'd rather not offer you more than we can.",
     nadiePuede: 'No one can at that time',
     nadiePuedeDetalle: 'Try another time or another day.',
     probarOtroHorario: 'Try another time',

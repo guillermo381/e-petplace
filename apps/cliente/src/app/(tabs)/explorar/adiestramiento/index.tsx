@@ -43,7 +43,6 @@ import {
   TIPO_ADIESTRAMIENTO,
   obtenerDiasCerradosServicio,
   obtenerOfertaAdiestramientoPublica,
-  obtenerEspeciesElegibles,
   obtenerIniciosAdiestramiento,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
@@ -53,6 +52,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 
@@ -67,7 +67,6 @@ export default function AdiestramientoCuando() {
 
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // §2: especies elegibles de la DB — la UI filtra, la DB manda.
-  const [especies, setEspecies] = useState<string[] | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   // ⚠️ r33 · LA MASCOTA VIAJA DESDE EL LOG y NO se vuelve a preguntar
   // (Ley 23: la puerta no pregunta lo que ya sabe). Se LEE VIVA, no se
@@ -118,16 +117,14 @@ export default function AdiestramientoCuando() {
   // S73 (letra de elegibilidad): la frontera UNICA del motor decide —
   // momento vital primero (memorial/perdida NO reservan), especie después.
   // La pantalla jamás re-computa elegibilidad (Ley 37: el filtro artesanal murió).
-  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], especies);
+  const faseEspecies = useEspeciesElegibles('adiestramiento');
+  const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      void obtenerEspeciesElegibles('adiestramiento').then((r) => {
-        if (vigente && r.ok) setEspecies(r.data);
-      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente) return;
@@ -256,7 +253,17 @@ export default function AdiestramientoCuando() {
             descripcion={t('hogar.errorHistoriaDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
           />
-        ) : elegibles.length === 0 ? (
+        ) : faseEspecies.fase === 'error' ? (
+          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+          // «todas» sería re-abrir el agujero que esta tanda cierra.
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('explorar.catalogoErrorTitulo')}
+              descripcion={t('explorar.catalogoErrorDetalle')}
+            />
+          </View>
+        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
           // §2 con camino: hoy solo perros — el vacío invita a actuar
           <EstadoVacio
             icono={<Icono nombre="training" tamano={48} />}
