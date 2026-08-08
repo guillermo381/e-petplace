@@ -46,6 +46,11 @@ export interface IdentidadMascota {
   /** S91 · solo acuarios: 'dulce' | 'marino'. Es el campo dos del alta de
    *  pez, en espejo de la raza (que un acuario no tiene). */
   tipo_agua: 'dulce' | 'marino' | null;
+  /** S91 (P7) · cuándo se MONTÓ el acuario. Solo acuarios (CHECK en la
+   *  fuente). **NO es `fecha_alta`**: registrarse en e-PetPlace y montarse
+   *  son dos hechos distintos, y usar uno por el otro fabricaría dato.
+   *  ISO 'YYYY-MM-DD'; null = el acuario no la declaró. */
+  fecha_montaje: string | null;
   /** P19 (S59): socialización del paseo grupal — null = sin responder. */
   paseo_social_ok: boolean | null;
   /** §3 grooming (S60): talla del perfil — null honesto hasta declarar.
@@ -125,7 +130,7 @@ export async function obtenerPerfilMascota(
       // S91 (pedido de D para la lámina del perfil): `origen` · `sujeto` ·
       // `tipo_agua`. Los tres YA existían en la fila y el perfil no los
       // traía — el dato estaba y la pantalla no podía verlo.
-      'id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z, origen, sujeto, tipo_agua',
+      'id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z, origen, sujeto, tipo_agua, fecha_montaje',
     )
     .eq('id', mascotaId)
     .maybeSingle();
@@ -210,6 +215,7 @@ export async function obtenerPerfilMascota(
           mascota.data.tipo_agua === 'dulce' || mascota.data.tipo_agua === 'marino'
             ? mascota.data.tipo_agua
             : null,
+        fecha_montaje: mascota.data.fecha_montaje ?? null,
         paseo_social_ok: mascota.data.paseo_social_ok ?? null,
         // Angostado verificando, jamás cast (regla 34): el CHECK de DB ya
         // garantiza estos valores; un dato fuera del CHECK se trata como
