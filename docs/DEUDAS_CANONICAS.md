@@ -9569,7 +9569,7 @@ miente: dice que quedó residuo.*
 **Origen: S91-A (hallazgo del chequeo de residuo del E2E). Letra ratificada
 por mesa y FIRMADA en el gate del founder, 8-ago-2026.**
 
-#### D-691 — ⚪ EL CHIP DE ENTIDAD TRUNCA LOS NOMBRES LARGOS («Labrador retrie…»)
+#### D-691 — ☠️ MUERTA (S91-B, `c94e1ca0`): nace `ChipEntidad`, UN solo chip en toda la casa
 
 **Reporte del founder en dispositivo (8-ago-2026), sobre los chips vivos del
 alta.** El nombre firmado no entra: se corta a mitad de palabra.
@@ -9636,6 +9636,17 @@ oportunidad de escribirla.
 (verificado por grep en `docs/` y `CLAUDE.md`) — vivió solo en dos mensajes
 de coordinación. Que no haya contaminado el canon fue suerte, no diseño.
 
+> ### ☠️ CERRADA EN EL MISMO DÍA EN QUE NACIÓ (S91-B, `c94e1ca0`)
+>
+> B no calibró el ancho del chip existente: **unificó todos los chips de
+> entidad de la casa en uno** (`ChipEntidad`, sobre la referencia firmada por
+> el founder). Contador de `packages/ui` re-medido por ella: **52 → 53**.
+>
+> *La lección de la ficha se sostiene igual, y vale más que la cura: el chip
+> no se había roto — le llegó un contenido que nunca había tenido.* Un ancho
+> calibrado para «Thor» recibió «Yorkshire terrier» el día que el catálogo de
+> razas existió. **Cuando una pieza empieza a fallar sin haber cambiado, lo
+> que cambió es lo que le entra.**
 #### D-692 — ⚪ CONEJO, ROEDOR Y PERRO NO TIENEN NINGÚN CHIP PROPIO (registro por firma, no defecto)
 
 **Medido al firmar el paquete del vocabulario (S91, 8-ago-2026):** chips
