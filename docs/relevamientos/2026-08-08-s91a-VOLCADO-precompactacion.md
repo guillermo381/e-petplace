@@ -308,6 +308,16 @@ lista de borrado).
    mi comentario nombraba `sin_contexto_activo` y el assert lo encontró.
 8. **`eas-cli` SIEMPRE desde `apps/<app>/`**, aunque solo estés MIRANDO
    (desde la raíz scaffoldea un `app.json` stub).
+9. **🆕 LOS BACKTICKS DE UN `git commit -m` SON SUSTITUCIÓN DE COMANDOS EN zsh.**
+   El commit `8ff94f19` salió con **tres identificadores comidos** —el nombre de
+   la tabla, la cláusula de orden vieja y `seq`— porque venían entre backticks:
+   la shell los EJECUTÓ (`command not found: acuario_composicion`) y dejó el
+   hueco. **El commit sale con status 0**: no falla, solo miente por omisión —
+   es la familia de L-191/L-200, la shell comiéndose el dato en silencio.
+   ⇒ **todo mensaje de commit con identificadores va por archivo
+   (`git commit -F`), jamás por `-m` con backticks.** *Y no se arregla con
+   `--amend`+force cuando otra pista comparte el árbol: se corrige con un
+   commit encima, que es lo que se hizo.*
 
 ---
 
