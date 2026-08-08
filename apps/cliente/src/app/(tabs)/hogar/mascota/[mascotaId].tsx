@@ -97,6 +97,7 @@ import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
+import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -110,7 +111,7 @@ const SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 /** El eje del filtro de la historia DENTRO de la ficha: SOLO servicio
  *  (el tramo temporal vive en la pantalla completa — contrato de la
  *  lámina 02, contexto 2). */
-type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento';
+type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento' | 'bitacora';
 
 /** r10-5 · el eje TEMPORAL de Vitales — el mismo que ya usa Su
  *  historia, con FiltroPills. NOTA DE API declarada: `calcularVitales`
@@ -363,6 +364,9 @@ export default function PerfilDeMascota() {
    *  de hace dos años. */
   const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
   const [pesoHoja, setPesoHoja] = useState(false);
+  const [razaHoja, setRazaHoja] = useState(false);
+  /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
+  const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
   const [filtroHistoria, setFiltroHistoria] = useState<FiltroHistoria>('todo');
   const [ventana, setVentana] = useState<VentanaVitales>('semana');
   // los paseos crudos: la ventana se computa acá (ver nota de API)
@@ -552,13 +556,12 @@ export default function PerfilDeMascota() {
    * lo que su sujeto no puede tener le está pidiendo perdón al dueño por
    * haberle preguntado mal.
    *
-   * Se decide por `especie` y no por `mascota.sujeto` porque el lector todavía
-   * no trae esa columna (pedido a A). Son equivalentes por construcción: el
-   * motor estampa `sujeto='acuario'` ⟺ `especie='pez'` (migración
-   * 20260807183000). Cuando `sujeto` llegue, esta línea lo lee y gana
-   * precisión sin cambiar nada más.
+   * Se decide por `sujeto` —que A ya sirve— y no por la especie: son
+   * equivalentes hoy por construcción del motor, pero `sujeto` es LA columna
+   * que declara qué clase de cosa es esta fila. El día que haya un terrario
+   * que no sea 'pez', esta línea ya está bien.
    */
-  const esAcuario = mascota.especie === 'pez';
+  const esAcuario = mascota.sujeto === 'acuario';
 
   /**
    * QUÉ MONTA ESTE PERFIL — la decisión, UNA vez y acá arriba.
@@ -576,15 +579,14 @@ export default function PerfilDeMascota() {
     ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false }
     : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true };
 
-  /** El tipo de agua — el «campo dos» del acuario, en espejo de la raza.
-   *  Mismo rojo honesto que el origen: el lector no lo trae todavía. */
-  const tipoAgua = (mascota as { tipo_agua?: string | null }).tipo_agua ?? null;
+  const tipoAgua = mascota.tipo_agua;
 
-  const origenCrudo = (mascota as { origen?: string | null }).origen ?? null;
-  const lineaOrigen = vozOrigen(origenCrudo, t);
+  /** El origen en humano. `desconocido` no tiene voz y por eso no se pinta —
+   *  es el default HONESTO de la columna, no una respuesta. */
+  const lineaOrigen = vozOrigen(mascota.origen, t);
 
   // Identidad progresiva: SOLO lo cargado (L-139 — nada fake).
-  const datosIdentidad: Array<{ etiqueta: string; valor: string; mono?: boolean }> = [];
+  const datosIdentidad: Array<{ etiqueta: string; valor: string; mono?: boolean; editable?: 'raza' }> = [];
   if (esAcuario) {
     // P7 · el acuario: su campo dos y cuándo se montó. Nada más — y lo que
     // falta no se nombra.
@@ -594,17 +596,21 @@ export default function PerfilDeMascota() {
         valor: tipoAgua === 'marino' ? t('perfil.aguaMarino') : t('perfil.aguaDulce'),
       });
     }
-    if (mascota.fecha_nacimiento !== null) {
-      datosIdentidad.push({
-        etiqueta: t('perfil.montadoEl'),
-        valor: fechaCortaMono(mascota.fecha_nacimiento, idioma),
-        mono: true,
-      });
-    }
+    // ⚠️ «MONTADO EL» ESPERA UN CAMPO EN EL LECTOR. `mascotas.fecha_montaje`
+    // existe (date) y el alta ya la escribe por su parámetro propio, pero
+    // `obtenerPerfilMascota` todavía no la selecciona — pedido a A, medido.
+    // NO se pinta `fecha_nacimiento` con el rótulo «Montado el»: un acuario no
+    // nace, y rotular una fecha con lo que no es sería peor que no mostrarla.
+    // Hasta que llegue, la fila simplemente no existe — que es la letra de P7.
   } else {
-    if (mascota.raza !== null && mascota.raza.length > 0) {
-      datosIdentidad.push({ etiqueta: t('perfil.raza'), valor: mascota.raza });
-    }
+    // P3: la raza SIEMPRE tiene fila, también vacía — la puerta de edición
+    // tiene que estar donde está la ausencia (mismo criterio que el peso).
+    const razaVista = razaLocal !== undefined ? razaLocal : mascota.raza;
+    datosIdentidad.push({
+      etiqueta: t('perfil.raza'),
+      valor: razaVista !== null && razaVista.length > 0 ? razaVista : t('perfil.hoySinRegistroCorto'),
+      editable: 'raza',
+    });
     if (mascota.sexo === 'macho' || mascota.sexo === 'hembra') {
       datosIdentidad.push({
         etiqueta: t('perfil.sexo'),
@@ -612,7 +618,17 @@ export default function PerfilDeMascota() {
       });
     }
     if (mascota.fecha_nacimiento !== null) {
-      datosIdentidad.push({ etiqueta: t('perfil.nacimiento'), valor: fechaCortaMono(mascota.fecha_nacimiento, idioma), mono: true });
+      // P3 · la fila de nacimiento habla la MISMA voz de precisión que la
+      // cabecera (P1): una fecha estimada pintada como `01 ene 2019` es la
+      // peor versión del problema — el día y el mes los puso el motor para
+      // poder ordenar y ahí se leen como si alguien los hubiera declarado.
+      datosIdentidad.push({
+        etiqueta: t('perfil.nacimiento'),
+        valor: vozNacimiento(mascota.fecha_nacimiento, mascota.fecha_nacimiento_precision, t, (iso) =>
+          fechaCortaMono(iso, idioma),
+        ),
+        mono: true,
+      });
     }
     if (peso_clinico_kg !== null) {
       datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
@@ -899,7 +915,7 @@ export default function PerfilDeMascota() {
         {/* ── ② LA TARJETA QUE MONTA EL BORDE (patrón 1 — el solape que
             r3 dejó declarado esperando la imagen). DOS hechos reales:
             "dos hechos reales valen más que tres con uno inventado". */}
-        {perfil.paseos_total > 0 || vacunas.length > 0 ? (
+        {monta.hechos && (perfil.paseos_total > 0 || vacunas.length > 0) ? (
           <View style={{ paddingHorizontal: spacing[5], marginTop: -spacing[8], zIndex: 2 }}>
             <Tarjeta elevacion="elevada">
               <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
@@ -926,7 +942,7 @@ export default function PerfilDeMascota() {
             "cuatro tarjetas para la ausencia"). El rótulo lleva su
             CUENTA. "Cargar el carnet" vive ACÁ, en la fila de la falta
             — por eso muere el segundo CTA de Vacunas. */}
-        {(() => {
+        {monta.comoEstaHoy ? (() => {
           // r10-2 · LOS TRES CASOS de vacunas (la celda medía mal y la
           // pantalla se contradecía: decía "sin registro" con 8 vacunas
           // en el carnet abajo). La celda mide si sabemos el ESTADO:
@@ -1090,7 +1106,7 @@ export default function PerfilDeMascota() {
                   pie. Ley 37: acá no queda un hueco, queda nada. */}
             </View>
           );
-        })()}
+        })() : null}
 
         {/* ── ④ IDENTIDAD sin caja por dato (lámina: "hoy son seis
             mini-tarjetas dentro de una tarjeta"): UNA superficie con
@@ -1111,7 +1127,20 @@ export default function PerfilDeMascota() {
               {datosIdentidad.map((d, i) => (
                 <View key={d.etiqueta}>
                   {i > 0 ? <Separador /> : null}
-                  <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                  {/* P3: la fila de raza LLEVA a su edición. Las demás son
+                      lectura — su productor vive en otro lado (el peso en P2,
+                      el microchip en la consulta). */}
+                  {d.editable === 'raza' ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`${d.etiqueta}, ${d.valor}`}
+                      onPress={() => setRazaHoja(true)}
+                    >
+                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                    </Pressable>
+                  ) : (
+                    <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                  )}
                 </View>
               ))}
               {mascota.especie === 'perro' ? (
@@ -1153,6 +1182,7 @@ export default function PerfilDeMascota() {
         {/* ── ⑤ VACUNAS — el resumen en UNA fila con el canto de SALUD y
             el pie que revela. "Cargar carnet" ya NO vive acá (se mudó a
             la fila de la ausencia): un solo gesto por sección. */}
+        {monta.vacunas ? (
         <View style={{ marginTop: spacing[8] }}>
           <RotuloSeccion titulo={t('perfil.vacunas')} cuenta={String(vacunas.length)} />
           <View style={{ paddingHorizontal: spacing[5] }}>
@@ -1208,6 +1238,7 @@ export default function PerfilDeMascota() {
             )}
           </View>
         </View>
+        ) : null}
 
         {/* ── S89 órdenes 8⑤/10① · LOS PAPELES DEL PRODUCTO ──────────────
             Los documentos viven JUNTOS: un solo lugar donde la familia sabe
@@ -1348,6 +1379,12 @@ export default function PerfilDeMascota() {
                 { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo', capa: 'cuidado' },
                 { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming', capa: 'cuidado' },
                 { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training', capa: 'cuidado' },
+                // P4 · LA BITÁCORA ENTRA POR SU HISTORIA. Su chip vive en la
+                // MISMA fila que los oficios y se dibuja con la misma regla
+                // (Ley 23: la puerta no ofrece lo que no tiene) — solo si hay
+                // entradas. Su capa es identidad y no cuidado: lo que la
+                // familia observa es del EXPEDIENTE, no de un servicio.
+                { codigo: 'bitacora', etiqueta: t('hogar.filtroBitacora'), icono: 'caso', capa: 'identidad' },
               ];
               const presentes = FAMILIAS.filter((f) => items.some((it) => FAMILIA_DE_TIPO[it.tipo] === f.codigo));
               const filtrados = filtroHistoria === 'todo' ? items : items.filter((it) => FAMILIA_DE_TIPO[it.tipo] === filtroHistoria);
@@ -1355,6 +1392,28 @@ export default function PerfilDeMascota() {
               return (
                 <>
                   <RotuloSeccion titulo={t('perfil.vida')} cuenta={String(items.length)} />
+
+                  {/* P4 · LA PUERTA DE LA BITÁCORA — un toque visible junto a
+                      Su historia. Hasta hoy la bitácora tenía UNA sola entrada
+                      en toda la app y era `/hogar/adiestramiento`: desde el
+                      perfil de la mascota no se llegaba (medido en el censo).
+                      Contar algo de hoy es del expediente de ESA mascota, así
+                      que su puerta vive donde vive su historia — y va con su
+                      `mascotaId` para que la pantalla no tenga que adivinar de
+                      quién se habla. */}
+                  <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[3] }}>
+                    <CeldaNavegacion
+                      icono="caso"
+                      titulo={t('perfil.bitacoraEntrada')}
+                      detalle={t('perfil.bitacoraDetalle', { nombre: mascota.nombre })}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/hogar/bitacora',
+                          params: { mascotaId: mascota.id },
+                        })
+                      }
+                    />
+                  </View>
                   {presentes.length > 1 ? (
                     <FiltroPills
                       activo={filtroHistoria}
@@ -1655,6 +1714,19 @@ export default function PerfilDeMascota() {
         mascotaId={mascota.id}
         onCerrar={() => setPesoHoja(false)}
         onRegistrado={() => setRecargaPeso((n) => n + 1)}
+      />
+
+      {/* P3 · la MISMA pieza del paso 2 del alta (§6: se comparte, no se
+          clona). No valida lo escrito: `mascotas.raza` es texto libre por la
+          letra de S59 y la RPC la respeta. */}
+      <EditarRazaHoja
+        visible={razaHoja}
+        mascotaId={mascota.id}
+        nombre={mascota.nombre}
+        especie={mascota.especie}
+        razaActual={razaLocal !== undefined ? razaLocal : mascota.raza}
+        onCerrar={() => setRazaHoja(false)}
+        onGuardada={(raza) => setRazaLocal(raza)}
       />
 
       {/* §3 grooming (S60): la MISMA Hoja de la reserva — editable siempre */}

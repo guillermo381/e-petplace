@@ -222,6 +222,7 @@ export const clienteEs = {
     filtroTodo: 'Todo',
     filtroSalud: 'Salud',
     filtroPaseos: 'Paseos',
+    filtroBitacora: 'Bitácora',
     filtroAdiestramiento: 'Adiestramiento',
     filtroEstetica: 'Estética',
     filtroSinMomentos: 'Nada por acá con ese filtro.',
@@ -407,6 +408,11 @@ export const clienteEs = {
     vinculoAlgo: 'Vamos conociendo a {{nombre}}. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
     vinculoPoco: 'Todavía estamos conociendo a {{nombre}}. Su expediente se completa de a poco.',
     // S91 · P7 — el acuario: su campo dos y su fecha propia.
+    // S91 · P3 — la raza editable, con la gramática del alta.
+    // S91 · P4 — la puerta de la bitácora, en Su historia.
+    bitacoraEntrada: 'Contanos algo de hoy',
+    razaHojaTitulo: '¿De qué raza es {{nombre}}?',
+    razaHojaGuardar: 'Guardar',
     tipoAgua: 'Agua',
     aguaDulce: 'Dulce',
     aguaMarino: 'Marino',

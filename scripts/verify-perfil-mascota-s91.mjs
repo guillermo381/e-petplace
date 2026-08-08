@@ -1,0 +1,96 @@
+// ============================================================================
+// VERIFY — LA LÁMINA DEL PERFIL, POR CAMINO REAL (S91-D)
+//
+// Tres sujetos, que es el gate que la mesa pidió: un PERRO con raza y origen ·
+// un GATO · un ACUARIO. El acuario es el discriminador de P7: si sus ausencias
+// estuvieran resueltas por `if` sueltos abajo en vez de por composición
+// arriba, alguna de las cuatro secciones se le colaría — y este verify lo
+// diría por sección, no en general.
+//
+// Limpia sus datos al final. Uso: con el dev server en :8082.
+// ============================================================================
+import { chromium } from 'playwright-core';
+const P = `http://localhost:${process.env.PORT_CLIENTE ?? '8082'}`;
+const CLAVE = 'Perfil-S91d-2026';
+let fallos = 0;
+const check = (c, n) => { console.log(`${c ? '  ok  ' : '  EN ROJO  '}${n}`); if (!c) fallos++; };
+
+const CASOS = [
+  { id: 'perro', especie: 'perro', nombre: 'PerfilThor', raza: 'Labrador retriever', origen: 'adoptado',
+    presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Contanos algo de hoy'],
+    ausentes: [] },
+  { id: 'gato', especie: 'gato', nombre: 'PerfilMishi', raza: 'Gato Común', origen: 'encontrado',
+    presentes: ['Cómo está hoy', 'Contanos algo de hoy'], ausentes: [] },
+  { id: 'acuario', especie: 'pez', nombre: 'PerfilAcuario', agua: 'dulce',
+    presentes: ['Agua', 'Contanos algo de hoy'],
+    // P7 · lo que un acuario NO tiene. Ausentes, no apagados.
+    ausentes: ['¿Es macho o hembra?', 'Peso', 'Vacunas', 'Raza'] },
+];
+
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const correos = [];
+
+for (const caso of CASOS) {
+  const correo = `s91d-perfil-${caso.id}-${Date.now()}@epetplace.dev`;
+  correos.push(correo);
+  const ctx = await browser.newContext({ locale: 'es-EC', viewport: { width: 420, height: 1600 }, deviceScaleFactor: 2 });
+  const page = await ctx.newPage();
+  const cuerpo = () => page.evaluate(() => document.body.innerText);
+  const esperar = async (a, n = 40) => { for (let i = 0; i < n; i++) { const t = await cuerpo(); if (t.includes(a)) return t; await page.waitForTimeout(500); } return cuerpo(); };
+  const tocar = async (txt) => {
+    const ok = await page.evaluate((x) => {
+      const c = [...document.querySelectorAll('div')].filter((d) => d.textContent === x && d.offsetParent !== null);
+      for (const el of c.reverse()) {
+        const r = el.getBoundingClientRect(); if (!r.width) continue;
+        const px = r.left + r.width / 2, py = r.top + r.height / 2;
+        const a = document.elementFromPoint(px, py); if (!a || !(el.contains(a) || a.contains(el))) continue;
+        const d = el.closest('[role="button"]') ?? el;
+        for (const k of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
+          d.dispatchEvent(new MouseEvent(k, { bubbles: true, cancelable: true, clientX: px, clientY: py }));
+        return true;
+      } return false;
+    }, txt);
+    if (!ok) throw new Error(`no se pudo tocar «${txt}»`);
+    await page.waitForTimeout(700);
+  };
+
+  await page.goto(`${P}/registro`, { waitUntil: 'networkidle', timeout: 180000 });
+  await page.waitForTimeout(2200);
+  await page.locator('input').nth(0).fill('Perfil D');
+  await page.locator('input').nth(1).fill(correo);
+  await page.locator('input[type="password"]').first().fill(CLAVE);
+  await tocar('Crear mi cuenta');
+  await esperar('¿Quién se suma a tu casa?');
+
+  // El alta por URL: la propiedad «URL-reconstruible» es declarada y así se
+  // EJERCE — y además esquiva el stack de RN-web (problema del arnés).
+  const p = new URLSearchParams({ nombre: caso.nombre, especie: caso.especie });
+  if (caso.raza !== undefined) p.set('raza', caso.raza);
+  if (caso.agua !== undefined) p.set('raza', caso.agua);
+  if (caso.origen !== undefined) p.set('origen', caso.origen);
+  p.set('fecha', '2021-03-14');
+  p.set('precision', 'estimada'); // ← P1: la edad honesta se prueba con esto
+  await page.goto(`${P}/onboarding/cierre?${p.toString()}`, { waitUntil: 'networkidle', timeout: 120000 });
+  await esperar('completar el perfil');
+  await tocar('Completar ahora');
+  await esperar(caso.nombre, 40);
+  await page.waitForTimeout(7000); // el catálogo de razas resuelve la cara
+
+  const t = await cuerpo();
+  console.log(`\n== ${caso.id} ==`);
+  for (const s of caso.presentes) check(t.includes(s), `${caso.id} · PRESENTE «${s}»`);
+  for (const s of caso.ausentes) check(!t.includes(s), `${caso.id} · AUSENTE «${s}» (P7: ausente, no apagado)`);
+  if (caso.id === 'perro') {
+    check(t.includes('Lo adoptaron'), 'P1 · el origen en humano bajo el nombre');
+    check(t.includes('hacia 2021'), 'P1 · la edad HONESTA: fecha estimada dice «hacia 2021», no un cumpleaños');
+    check(t.includes('Labrador retriever'), 'P3 · la raza, en Identidad');
+  }
+  if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
+  await page.screenshot({ path: `scripts/capturas/s91d-perfil-${caso.id}.png`, fullPage: true });
+  await ctx.close();
+}
+
+await browser.close();
+console.log('\ncuentas a limpiar:\n' + correos.join('\n'));
+console.log(fallos === 0 ? '\nVERDE — la lámina del perfil, en los tres sujetos.' : `\nEN ROJO — ${fallos} fallo(s).`);
+process.exit(fallos === 0 ? 0 : 1);

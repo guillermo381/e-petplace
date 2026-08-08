@@ -61,7 +61,15 @@ export function vozHecho(
 }
 
 /** La familia del hecho (el eje del filtro y del canto — Ley 3). */
-export const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'adiestramiento' | 'salud'> = {
+export const FAMILIA_DE_TIPO: Record<
+  string,
+  'paseos' | 'estetica' | 'adiestramiento' | 'salud' | 'bitacora'
+> = {
+  // S91 · P4 — la bitácora es familia PROPIA del filtro. No entra a 'salud'
+  // ni a un oficio: lo que la familia observa no es un servicio, y meterlo en
+  // una casilla ajena haría que el chip de ese oficio mintiera sobre lo que
+  // agrupa.
+  bitacora_familia_registrada: 'bitacora',
   atencion_paseo_registrada: 'paseos',
   atencion_grooming_registrada: 'estetica',
   atencion_adiestramiento_registrada: 'adiestramiento',
