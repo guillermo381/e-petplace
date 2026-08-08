@@ -124,6 +124,49 @@ for (const caso of CASOS) {
    * la composición promete: a un SISTEMA no se le pide carnet ni se le avisa
    * de vacunas.
    */
+  /**
+   * 🔴 EL CANTO, MEDIDO EN LAS DOS SUPERFICIES.
+   *
+   * El canto es VISUAL: no se puede afirmar leyendo texto, y por eso vivió sin
+   * verificar mientras el founder lo veía faltar. `CantoCurva` lo pinta como el
+   * FONDO del contenedor exterior, que asoma 6px porque el interior lleva
+   * `marginLeft: 6`; sin color, el exterior cae a `bg.card` y el margen a 0 —
+   * o sea que **la ausencia de canto es medible: el exterior es del color de la
+   * tarjeta y el interior no está corrido.**
+   *
+   * Se mide en el perfil Y en el Hogar porque la ley rige en las dos, y ya me
+   * pasó una vez afirmar sobre una y creer que hablaba de ambas.
+   */
+  const cantoDe = async (texto) =>
+    page.evaluate((tx) => {
+      const todos = Array.from(document.querySelectorAll('*'));
+      const nodo = todos.reverse().find((e) => (e.textContent ?? '').trim().startsWith(tx));
+      if (!nodo) return '(fila no encontrada)';
+      let n = nodo;
+      for (let i = 0; i < 8 && n; i += 1) {
+        const hijo = n.firstElementChild;
+        if (hijo) {
+          const ml = parseFloat(getComputedStyle(hijo).marginLeft || '0');
+          if (ml >= 4) return getComputedStyle(n).backgroundColor;
+        }
+        n = n.parentElement;
+      }
+      return '(sin canto)';
+    }, texto);
+
+  if (caso.id === 'acuario') {
+    const cantoPerfil = await cantoDe('Un mundo nuevo empieza');
+    console.log(`    canto en el PERFIL: ${cantoPerfil}`);
+    check(cantoPerfil !== '(sin canto)' && cantoPerfil !== '(fila no encontrada)', 'CANTO · el hito lleva su canto EN EL PERFIL');
+
+    await page.goto(`${P}/hogar`, { waitUntil: 'networkidle', timeout: 120000 });
+    await page.waitForTimeout(6000);
+    const cantoHogar = await cantoDe('Un mundo nuevo empieza');
+    console.log(`    canto en el HOGAR:  ${cantoHogar}`);
+    check(cantoHogar !== '(sin canto)' && cantoHogar !== '(fila no encontrada)', 'CANTO · el MISMO hecho lleva su canto EN EL HOGAR');
+    check(cantoHogar === cantoPerfil, 'CANTO · y es EL MISMO color en las dos (una sola verdad, no dos parecidas)');
+  }
+
   if (caso.id === 'acuario') {
     await page.goto(`${P}/hogar`, { waitUntil: 'networkidle', timeout: 120000 });
     await page.waitForTimeout(6000); // Ponte al día compone tras varios lectores
