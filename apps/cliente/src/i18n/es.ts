@@ -390,7 +390,11 @@ export const clienteEs = {
     // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
     // OBSERVAR, no de adiestrar: el Eje 6 es del dueño, no de un oficio.
     bitacora: 'Su bitácora',
-    bitacoraDetalle: 'Anota lo que ves en casa',
+    // A10 (gate, 2ª pasada) — LA VOZ FIRMADA POR LA MESA. «Contanos» era
+    // voseo y la app habla de tú («Ponte al día», «Elige», «Arrastra»); y el
+    // subtítulo dice el PORQUÉ, que es lo que convierte un pedido en una
+    // invitación.
+    bitacoraDetalle: 'Lo que ves en casa completa su expediente y ayuda a cuidarlo mejor.',
     descargarCarnetFalla: 'No pudimos preparar el carnet. Prueba de nuevo.',
     vacunasResumenUna: '1 vacuna en su carnet',
     vacunasResumen: '{{n}} vacunas en su carnet',
@@ -410,7 +414,7 @@ export const clienteEs = {
     // S91 · P7 — el acuario: su campo dos y su fecha propia.
     // S91 · P3 — la raza editable, con la gramática del alta.
     // S91 · P4 — la puerta de la bitácora, en Su historia.
-    bitacoraEntrada: 'Contanos algo de hoy',
+    bitacoraEntrada: 'Cuéntanos algo de {{nombre}}',
     razaHojaTitulo: '¿De qué raza es {{nombre}}?',
     razaHojaGuardar: 'Guardar',
     tipoAgua: 'Agua',

@@ -109,27 +109,40 @@ export function PasoFoto({
         }}
       >
         {foto === null ? (
-          <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-            <AvatarMascota
-              nombre={nombre}
-              especie={esEspecieUi(borrador.especie) ? borrador.especie : undefined}
-              fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
-              tamano="lg"
-            />
-            <Texto variante="apoyo" centrado>
-              {t('fotoEncuadre.elegirDetalle')}
-            </Texto>
-            {permisoDenegado ? (
-              <Texto variante="apoyo" color="danger" centrado>
-                {t('fotoEncuadre.permisoCamara')}
+          /**
+           * A3 (gate del founder, 2ª pasada) — LOS DOS CAMINOS TERMINAN IGUAL.
+           *
+           * El de la foto ya ordenaba «contenido → preview → acciones»; éste
+           * tenía «Elegir foto» en el MEDIO, con el preview colgando debajo y
+           * la salida al final. Dos remates distintos para el mismo paso.
+           *
+           * Y el preview vivía DENTRO del contenedor centrado: su encabezado
+           * («Así lo vas a ver») y su hilera están compuestos a la izquierda,
+           * así que el `alignItems: 'center'` de afuera los descolocaba. Por
+           * eso sale del centrado y respira a lo ancho, igual que en el otro
+           * camino — **el acabado no se copió: se compartió la disposición.**
+           *
+           * Las dos acciones cierran juntas y las dos son `bloque`: la salida
+           * gana la anatomía de secundario que la lámina le pide, y queda
+           * inconfundible como salida por ser `ghost` y por ir última.
+           */
+          <>
+            <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
+              <AvatarMascota
+                nombre={nombre}
+                especie={esEspecieUi(borrador.especie) ? borrador.especie : undefined}
+                fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
+                tamano="lg"
+              />
+              <Texto variante="apoyo" centrado>
+                {t('fotoEncuadre.elegirDetalle')}
               </Texto>
-            ) : null}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('fotoEncuadre.elegirFoto')}
-              onPress={() => setHojaAbierta(true)}
-            />
+              {permisoDenegado ? (
+                <Texto variante="apoyo" color="danger" centrado>
+                  {t('fotoEncuadre.permisoCamara')}
+                </Texto>
+              ) : null}
+            </View>
 
             {/* G5: el MISMO componente, con la cara de la galería. Antes esto
                 solo existía tras subir una foto propia — y es justamente el
@@ -143,9 +156,16 @@ export function PasoFoto({
                 z={zFijo}
               />
             ) : null}
+
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('fotoEncuadre.elegirFoto')}
+              onPress={() => setHojaAbierta(true)}
+            />
             {/* La salida, siempre visible y sin competir (ver cabecera ②). */}
-            <Boton variante="ghost" etiqueta={t('alta.ahoraNo')} onPress={avanzar} />
-          </View>
+            <Boton variante="ghost" bloque etiqueta={t('alta.ahoraNo')} onPress={avanzar} />
+          </>
         ) : (
           <>
             <EncuadreFoto

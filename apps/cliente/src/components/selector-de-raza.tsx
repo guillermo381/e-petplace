@@ -15,7 +15,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { Campo, SelectorOpcion, Texto, spacing, sugerir } from '@epetplace/ui';
+import { Campo, ChipEntidad, Texto, spacing, sugerir } from '@epetplace/ui';
 import { obtenerRazasDeEspecie, type RazaCatalogo } from '@epetplace/api';
 
 import { urlDeRutaGaleria, urlGenericaDeEspecie } from '@/lib/cara-mascota';
@@ -125,29 +125,58 @@ export function SelectorDeRaza({
         autoCapitalize="words"
       />
 
-      <SelectorOpcion
-        acento="control"
-        entidad
-        marcaPata
-        etiqueta={t('alta.razaSugerencias')}
-        opciones={chips}
-        seleccionada={valor.elegido}
-        onSelect={(codigo) => {
-          if (codigo === CODIGO_MESTIZO) {
-            onCambio({ raza: t('alta.razaMestizoValor'), slug: undefined, elegido: codigo });
-            return;
-          }
-          if (codigo === CODIGO_NO_SE) {
-            onCambio({ raza: undefined, slug: undefined, elegido: codigo });
-            return;
-          }
-          const elegida = sugerencias.find((r) => r.slug === codigo);
-          if (elegida === undefined) return;
-          // Elegir PISA el texto con el nombre firmado, con su acento: quien
-          // tipeó «aleman» ve escrito «Pastor alemán», no su propio typo.
-          onCambio({ raza: elegida.nombre, slug: codigo, elegido: codigo });
-        }}
-      />
+      {/**
+       * A2 · LA GRILLA LA ARMA ESTA CASA, EL CHIP LO PONE `packages/ui`.
+       *
+       * Es la letra de B al extraer `ChipEntidad`: **sube el chip, no el
+       * contenedor.** `FiltroMascotas` es una hilera horizontal y esto es una
+       * grilla de dos columnas; subir la hilera me habría obligado a
+       * envolverla o clonarla, que es justo lo que la pieza única viene a
+       * matar. Cada casa dispone sus chips; la unidad es la frontera.
+       *
+       * **El ancho lo pone el contenedor, y por eso está acá**: `flexBasis`
+       * de media columna es lo que le da a `numberOfLines={2}` una línea que
+       * llenar. Sin columna, el chip se estira al largo de su texto y la
+       * segunda línea no existe — «Guacamayo Azul y Amarillo» (25 caracteres)
+       * seguiría ilegible aunque la pieza permita envolver. **Esa es la mitad
+       * de D-691 que me tocaba a mí.**
+       *
+       * `sujeto="cosa"` (firma de mesa): una raza no es una mascota. Cuando
+       * el catálogo no trae cara, el fallback es su INICIAL — una huella
+       * sobre «Mestizo» diría que ese chip ES un animal, y es una categoría.
+       */}
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel={t('alta.razaSugerencias')}
+        style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}
+      >
+        {chips.map((c) => (
+          <View key={c.codigo} style={{ flexBasis: '47%', flexGrow: 1 }}>
+            <ChipEntidad
+              nombre={c.etiqueta}
+              {...(c.avatar.fotoUrl !== undefined ? { fotoUrl: c.avatar.fotoUrl } : null)}
+              sujeto="cosa"
+              tamano="general"
+              elegido={valor.elegido === c.codigo}
+              onPress={() => {
+                if (c.codigo === CODIGO_MESTIZO) {
+                  onCambio({ raza: t('alta.razaMestizoValor'), slug: undefined, elegido: c.codigo });
+                  return;
+                }
+                if (c.codigo === CODIGO_NO_SE) {
+                  onCambio({ raza: undefined, slug: undefined, elegido: c.codigo });
+                  return;
+                }
+                const elegida = sugerencias.find((r) => r.slug === c.codigo);
+                if (elegida === undefined) return;
+                // Elegir PISA el texto con el nombre firmado, con su acento:
+                // quien tipeó «aleman» ve escrito «Pastor alemán», no su typo.
+                onCambio({ raza: elegida.nombre, slug: c.codigo, elegido: c.codigo });
+              }}
+            />
+          </View>
+        ))}
+      </View>
 
       <Texto variante="apoyo">{t('alta.razaAyuda')}</Texto>
     </View>

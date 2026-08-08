@@ -15,7 +15,7 @@
 
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Boton, Hoja, Texto, spacing } from '@epetplace/ui';
+import { Boton, EvitaTeclado, Hoja, HojaScroll, Texto, spacing } from '@epetplace/ui';
 import { actualizarRazaMascota } from '@epetplace/api';
 
 import { SelectorDeRaza, type RazaElegida } from '@/components/selector-de-raza';
@@ -66,20 +66,41 @@ export function EditarRazaHoja({
 
   return (
     <Hoja visible={visible} onCerrar={onCerrar} titulo={t('perfil.razaHojaTitulo', { nombre })} altura="completa">
-      <View style={{ gap: spacing[4] }}>
-        <SelectorDeRaza especie={especie} valor={eleccion} onCambio={setEleccion} />
-        {error !== undefined ? (
-          <Texto variante="apoyo" color="danger">
-            {error}
-          </Texto>
-        ) : null}
-        <Boton
-          etiqueta={t('perfil.razaHojaGuardar')}
-          bloque
-          cargando={guardando}
-          onPress={() => void guardar()}
-        />
-      </View>
+      {/**
+       * ⚠️ A5 (gate del founder, 2ª pasada): la Hoja se TRABABA — la lista
+       * tapaba el campo de tipeo y no scrolleaba. Faltaban las dos piezas que
+       * el paso 2 del alta sí monta, y `altura="completa"` las volvía
+       * obligatorias: fija el alto en 0.9 de la ventana, así que 44 chips
+       * desbordan un contenedor que no scrollea.
+       *
+       * · `HojaScroll` y no `ScrollView` porque estamos DENTRO de una Hoja: es
+       *   la pieza que bloquea el pan del swipe-to-close mientras el toque
+       *   nace en la lista (L-132 — en web el ScrollView plano no delata el
+       *   problema; en Android el arrastre cierra la Hoja).
+       * · `EvitaTeclado` porque el campo vive arriba de la lista: sin él, el
+       *   teclado tapa justo lo que se está tipeando.
+       *
+       * **El botón queda AFUERA del scroll a propósito**: adentro obligaría a
+       * recorrer las 44 razas para volver a encontrarlo después de elegir.
+       */}
+      <EvitaTeclado>
+        <View style={{ flex: 1, gap: spacing[4] }}>
+          <HojaScroll contentContainerStyle={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <SelectorDeRaza especie={especie} valor={eleccion} onCambio={setEleccion} />
+          </HojaScroll>
+          {error !== undefined ? (
+            <Texto variante="apoyo" color="danger">
+              {error}
+            </Texto>
+          ) : null}
+          <Boton
+            etiqueta={t('perfil.razaHojaGuardar')}
+            bloque
+            cargando={guardando}
+            onPress={() => void guardar()}
+          />
+        </View>
+      </EvitaTeclado>
     </Hoja>
   );
 }
