@@ -9925,3 +9925,45 @@ Le falta en la oferta.*
 > un acuario.
 > **☠️ MUERTE:** `tipos_servicio` distingue **sujeto** además de especie, y la
 > elegibilidad del acuario se decide por ese eje.
+
+---
+
+#### D-695 — 🟢 EL GLIFO DE LA **HISTORIA CLÍNICA**: el préstamo apunta al revés de como se creyó
+
+**Letra de B depositada en el registry** (`packages/ui/src/components/Icono.tsx`),
+**ratificada por la mesa el 8-ago-2026.** B no reservó número porque `docs/` es
+territorio de A; el número se da acá y la letra NO se copia: vive donde se lee
+al construir.
+
+**El hallazgo, y es una inversión completa de la pregunta.** Tras cablear el
+glifo apilado, `documento` quedó en DOS usos (`historia_clinica` y
+`ficha_identidad`, en `apps/cliente/src/lib/papeles.ts`). La mesa preguntó si
+nacía el glifo propio de `ficha_identidad` o si su préstamo se declaraba
+permanente. **Contra el objeto, la pregunta estaba al revés:**
+
+- **`ficha_identidad` NO es la prestataria: es la DUEÑA.** El objeto del
+  registry es «identificación, cédula **con retrato**», y la ficha de identidad
+  de una mascota es exactamente eso — lleva foto.
+- **La que presta es `historia_clinica`.** Una historia clínica **no
+  identifica: registra.** Ahí el dibujo miente el objeto, que es precisamente
+  lo que la Ley 12 persigue.
+
+⇒ **Darle glifo propio a `ficha_identidad` habría dejado a la dueña con dibujo
+nuevo y a la prestataria con el que no le corresponde: el problema intacto y
+una pieza más en el registry.** *El valor de esta ficha no es el glifo que
+falta — es haber medido en qué dirección corría el préstamo antes de gastar en
+dibujarlo.*
+
+**Y la decisión de NO dibujar quedó firmada como CORRECTA**, no como pendiente
+tolerada: **dibujar para el objetivo equivocado es más caro que no dibujar**
+(§6b, la regla de economía — un glifo que nadie va a montar no se pide).
+
+> **Dueño: B** (registry de glifos y su gate por ícono).
+> **☠️ DISPARO — firmado, con sus dos exclusiones explícitas para que nadie lo
+> adelante por entusiasmo:** el **próximo arco que toque LOS PAPELES o EL
+> REGISTRY DE GLIFOS**. **NO S91** (nada nuevo se abre) · **NO S92** (loop de
+> seguridad, sin features). Cuando llegue: DOS candidatos con hoja de contacto
+> a 21px, la misma disciplina que «Documentos» —riesgo declarado por variante,
+> rasterizados y MIRADOS antes de dejarlos— y gate por ícono (§2.9).
+> **☠️ MUERTE:** el día que `historia_clinica` deje de pintar el dibujo de una
+> cédula.
