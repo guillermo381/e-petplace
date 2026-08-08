@@ -112,6 +112,7 @@ import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
 import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { composicionDe } from '@/lib/composicion-sujeto';
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -991,6 +992,11 @@ export default function Hogar() {
       ),
       // la alerta de vacuna (era la voz pideAtencion de la ficha)
       ...mascotas.flatMap((m): FilaReco_[] => {
+        // 🔴 LA COMPOSICIÓN TAMBIÉN RIGE ACÁ (reincidencia del gate): un
+        // acuario no se vacuna. Antes esta pantalla no miraba `sujeto` ni una
+        // vez — medido: cero referencias — y por eso «Ponte al día» le pedía
+        // el carnet. La pieza es la MISMA que compone el perfil.
+        if (!composicionDe(m.sujeto).vacunas) return [];
         const voz = vozDe(m.id);
         if (voz === null || voz.voz !== 'pideAtencion' || voz.causa === 'emergencia') return [];
         const titulo =
@@ -1034,6 +1040,8 @@ export default function Hogar() {
       }),
       // r6-2: el carnet vacío (era la acción de la ficha conociéndolo)
       ...mascotas.flatMap((m): FilaReco_[] => {
+        // 🔴 LA FILA QUE EL FOUNDER VIO: «cargá el carnet» de un ACUARIO.
+        if (!composicionDe(m.sujeto).vacunas) return [];
         const s = senalesPorMascota.get(m.id);
         if (!s || s.vacunas_total > 0) return [];
         return [
@@ -1061,6 +1069,7 @@ export default function Hogar() {
    * **La definición sube a `lib/pendientes.ts` y las dos superficies la
    * consumen** (letra de mesa, adoptada antes de que existiera el 2º consumidor).
    */
+  const mascotaDe = (id: string) => (Array.isArray(mascotas) ? mascotas.find((m) => m.id === id) : undefined);
   const fuentesDe = (id: string): FuentesDePendientes => {
     const s = senalesPorMascota.get(id);
     const voz = vozDe(id);
@@ -1068,8 +1077,15 @@ export default function Hogar() {
       solicitudes: solicitudesPend,
       presupuestos: presupuestosPend,
       porCoordinar,
-      tieneAlertaDeVacuna: voz !== null && voz.voz === 'pideAtencion' && voz.causa !== 'emergencia',
-      sinNingunaVacuna: s !== undefined && s.vacunas_total === 0,
+      // Las dos derivadas de vacuna se apagan con la MISMA pieza que apaga sus
+      // filas: si la fila no existe, contarla dejaría un pendiente inhallable.
+      tieneAlertaDeVacuna:
+        composicionDe(mascotaDe(id)?.sujeto).vacunas &&
+        voz !== null &&
+        voz.voz === 'pideAtencion' &&
+        voz.causa !== 'emergencia',
+      sinNingunaVacuna:
+        composicionDe(mascotaDe(id)?.sujeto).vacunas && s !== undefined && s.vacunas_total === 0,
     };
   };
   /** ⚠️ El apagado de MEMORIAL vive acá y no en la lib, y es a propósito: la

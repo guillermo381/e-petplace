@@ -102,6 +102,7 @@ import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
+import { composicionDe } from '@/lib/composicion-sujeto';
 import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
@@ -605,38 +606,14 @@ export default function PerfilDeMascota() {
    *  pendientes y la razón de «Lo próximo» la consumen, y una composición
    *  declarada DESPUÉS de sus consumidores no compone nada. */
   const esAcuario = mascota.sujeto === 'acuario';
-
   /**
-   * QUÉ MONTA ESTE PERFIL — la decisión, UNA vez y acá arriba.
-   *
-   * Letra de mesa (8-ago): la ausencia del acuario se resuelve por
-   * COMPOSICIÓN, jamás por `if` repartidos abajo. El porqué es de §6 y se
-   * paga siempre igual: ocho condiciones esparcidas por mil líneas son ocho
-   * lugares donde el próximo sujeto —un terrario, una colmena— se olvida en
-   * uno solo. Y ese olvido no rompe nada: pinta «peso» sobre un acuario y
-   * sigue compilando.
-   *
-   * Leer esta constante es leer la ficha entera de un sujeto.
+   * LA COMPOSICIÓN NO SE DECLARA ACÁ — se consulta. Vivía inline en esta
+   * pantalla, y por eso el Hogar (que habla de la misma mascota) no podía
+   * consultarla y componía por su cuenta: el acuario terminó pidiendo carnet
+   * de vacunas en «Ponte al día». **Arriba de la pantalla no alcanza: tiene
+   * que estar arriba de TODAS.** Ver `lib/composicion-sujeto.ts`.
    */
-  const monta = esAcuario
-    ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false, documentos: false, habitantes: true }
-    : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true, documentos: true, habitantes: false };
-  /**
-   * 🔎 `documentos: false` — re-gate del founder: **el acuario ofrecía CARNET
-   * DE VACUNAS**. La composición de P7 alcanza también a los papeles, y esto
-   * es la línea que lo dice: entra ARRIBA, con sus hermanas, y no como un `if`
-   * suelto abajo (§6 — ocho condiciones repartidas es como una se olvida, que
-   * es literalmente lo que pasó con ésta).
-   *
-   * **Por qué la sección ENTERA y no solo el carnet:** los cuatro papeles de
-   * hoy son de un INDIVIDUO —carnet de vacunas, historia clínica, receta y
-   * ficha de identidad—. Dejar la ficha sola imprimiría especie, sexo y
-   * microchip de un acuario, que es la misma clase de mentira con otro papel.
-   *
-   * ⚠️ NO decide que un acuario no tenga papeles nunca: decide que **los que
-   * hay hoy no son suyos**. Sus papeles necesitan su propia letra y viven en
-   * el arco del acuario (D-685). Hasta entonces: ausente, no vacío.
-   */
+  const monta = composicionDe(mascota.sujeto);
 
   const pendientes = esMemorial
     ? 0
