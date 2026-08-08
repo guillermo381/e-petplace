@@ -86,6 +86,7 @@ export const clienteEs = {
     // ── paso 1/4
     paso1Titulo: '¿Quién se suma a tu casa?',
     especieEtiqueta: '¿Qué especie es?',
+    especieAcuario: 'Acuario',
     cargandoEspecies: 'Cargando especies',
     reintentar: 'Reintentar',
     nombreLabel: '¿Cómo se llama?',
@@ -142,6 +143,7 @@ export const clienteEs = {
     nombreFamiliaFallback: 'Mi familia',
     guardando: 'Preparando el lugar de {{nombre}}',
     errorTitulo: 'No pudimos guardar todavía',
+    errorFotoPerdida: 'La foto no llegó hasta acá. Puedes probar de nuevo o seguir sin ella por ahora.',
     errorFoto: 'La foto no se pudo subir. Puedes probar de nuevo o seguir sin ella por ahora.',
     probarDeNuevo: 'Probar de nuevo',
     continuarSinFoto: 'Continuar sin foto',

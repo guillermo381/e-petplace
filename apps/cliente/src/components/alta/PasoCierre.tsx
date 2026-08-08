@@ -66,6 +66,18 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
       // Foto primero (S45-B4.1): sube a mascotas/{uid}/ y el vínculo entra
       // por la RPC. Si falla, se frena con error visible — jamás se pierde
       // la foto en silencio (regla 36).
+      // EL ESTADO IMPOSIBLE, DICHO (ver `conFoto` en tipos.ts): el paso 4
+      // declaró foto y acá no llegó la uri ⇒ se perdió en el viaje. Antes de
+      // esto la mascota nacía sin foto y en silencio, que es el bug más caro
+      // de diagnosticar porque no deja rastro en ningún lado.
+      if (borrador.conFoto === '1' && !borrador.fotoUri && !sinFoto) {
+        console.error('[alta/cierre] la foto se perdió entre el paso 4 y el cierre');
+        corriendoRef.current = false;
+        setErrorDeFoto(true);
+        setError(t('alta.errorFotoPerdida'));
+        return;
+      }
+
       let fotoPath: string | undefined;
       if (borrador.fotoUri && !sinFoto && sesion.ok && sesion.data !== null) {
         const subida = await subirAvatar({ uri: borrador.fotoUri, userId: sesion.data.user_id });
@@ -244,14 +256,21 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
 
       {/* EL MODAL — texto de la lámina firmada. `onCerrar` hace lo mismo que
           «Más tarde»: cerrar sin elegir NO puede dejar a la persona en una
-          pantalla de esqueleto para siempre. */}
+          pantalla de esqueleto para siempre.
+
+          ⚠️ LA PREGUNTA NO VA EN EL SLOT DE `titulo`, y el gate del founder lo
+          encontró: el título de `Hoja` es `numberOfLines={1}` (Hoja.tsx:323) —
+          es un ENCABEZADO, y está bien que lo sea. Meterle una pregunta con un
+          nombre variable adentro garantiza que el nombre se corte justo en las
+          mascotas de nombre largo, que son las que más ganas dan de leerlo.
+          Va como primera línea del cuerpo, donde envuelve. */}
       <Hoja
         visible={creada !== null}
         onCerrar={() => router.replace(MODO[modo].salida)}
         apertura="marca"
-        titulo={t('alta.modalTitulo', { nombre })}
       >
         <View style={{ gap: spacing[4] }}>
+          <Texto variante="titulo">{t('alta.modalTitulo', { nombre })}</Texto>
           <Texto variante="cuerpo">{t('alta.modalCuerpo')}</Texto>
           <Texto variante="apoyo">{t('alta.modalCuando')}</Texto>
           <Boton

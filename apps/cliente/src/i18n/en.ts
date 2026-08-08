@@ -64,6 +64,7 @@ export const clienteEn = {
   alta: {
     paso1Titulo: "Who's joining your home?",
     especieEtiqueta: 'What species are they?',
+    especieAcuario: 'Aquarium',
     cargandoEspecies: 'Loading species',
     reintentar: 'Try again',
     nombreLabel: "What's their name?",
@@ -112,6 +113,7 @@ export const clienteEn = {
     nombreFamiliaFallback: 'My family',
     guardando: "Getting {{nombre}}'s place ready",
     errorTitulo: "We couldn't save yet",
+    errorFotoPerdida: "The photo didn't make it here. You can try again or continue without it for now.",
     errorFoto: "The photo couldn't upload. You can try again or continue without it for now.",
     probarDeNuevo: 'Try again',
     continuarSinFoto: 'Continue without a photo',

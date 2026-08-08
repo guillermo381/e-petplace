@@ -69,6 +69,19 @@ export interface BorradorAlta {
   origen?: string;
   /** paso 4 */
   fotoUri?: string;
+  /** '1' si el paso 4 declaró que HABÍA foto.
+   *
+   *  ── POR QUÉ EXISTE UNA MARCA ADEMÁS DE LA URI ──────────────────────────
+   *  `fotoUri` es una ruta larga y con caracteres que el viaje por params
+   *  codifica y decodifica (en Expo Go trae `%40`/`%2F` LITERALES — L-137).
+   *  Si esa vuelta la rompe, el cierre no recibe nada… **y no tiene forma de
+   *  saber que faltaba algo**: crea la mascota sin foto y nadie se entera.
+   *  Ese es exactamente el modo de falla que L-192 prohíbe — el silencio.
+   *
+   *  `conFoto` es un `'1'`: sobrevive a cualquier codificación que una uri
+   *  larga pueda no sobrevivir. Con él, «declaré foto y no llegó» pasa de ser
+   *  invisible a ser un error CON NOMBRE. */
+  conFoto?: string;
   cx?: string;
   cy?: string;
   z?: string;

@@ -22,7 +22,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EvitaTeclado,
-  SelectorEspecie,
+  SelectorOpcion,
   Texto,
   spacing,
   useTheme,
@@ -36,6 +36,7 @@ import {
 
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
+import { urlGenericaDeEspecie } from './imagen-raza';
 import { esAcuario, type BorradorAlta, type ModoAlta } from './tipos';
 
 export function PasoEspecie({
@@ -73,14 +74,24 @@ export function PasoEspecie({
       }
       const validas: SelectorEspecieOpcion[] = [];
       for (const e of r.data) {
-        if (esEspecieUi(e.codigo)) validas.push({ codigo: e.codigo, nombre: e.nombre });
+        if (!esEspecieUi(e.codigo)) continue;
+        // (4) FIRMA FOUNDER: la tile de `pez` dice «Acuario».
+        // La voz se cambia ACÁ y no en `cat_especies.nombre` a propósito: esa
+        // columna la leen otras superficies (Explorar, los filtros de oficio,
+        // la ficha) donde «pez» sigue siendo la especie correcta. Lo que la
+        // cláusula firmó es que EN EL ALTA el sujeto es el acuario — y una
+        // voz de contexto se resuelve en su contexto, no renombrando el dato.
+        validas.push({
+          codigo: e.codigo,
+          nombre: esAcuario(e.codigo) ? t('alta.especieAcuario') : e.nombre,
+        });
       }
       setOpciones(validas);
     })();
     return () => {
       vigente = false;
     };
-  }, []);
+  }, [t]);
 
   /**
    * LA SEGUNDA MASCOTA OFRECE PRIMERO LA ESPECIE MÁS FRECUENTE DEL HOGAR
@@ -158,12 +169,38 @@ export function PasoEspecie({
             </EsqueletoGrupo>
           ) : null}
 
+          {/* MISMA GRAMÁTICA EN LOS DOS PASOS (firma de mesa, 8-ago): el chip
+              de entidad —cara + nombre, magenta y pata al elegir— es el mismo
+              en el paso 1 y en el paso 2. Antes acá vivía `SelectorEspecie`,
+              y salir de él cura DE UNA las dos observaciones del gate:
+
+              (2) cada tile muestra la imagen de su especie — el genérico de la
+                  galería, que es exactamente la cara que después acompaña a la
+                  raza y termina en el lugar de la foto. Un elemento, tres
+                  trabajos.
+              (3) MUERE EL FONDO VERDE, y su origen quedó medido:
+                  `SelectorEspecie.tsx:87-88` pinta `theme.capaBg.identidad`
+                  —verdeVital al 15%, `rgba(43,232,107,0.15)` leído del DOM—
+                  como `rellenoCatalogo` en las tiles NO seleccionadas. No era
+                  un accidente: era la ley 19.8 del relleno. Pero con la cara
+                  adentro el tinte pelea con la foto, y la foto gana.
+
+              ⚠️ `SelectorEspecie` NO se toca ni se retira: sigue vivo en las
+              dos pantallas del mostrador del prestador (`nueva.tsx`,
+              `autorizar.tsx`), que el gate no miró. Si el verde molesta
+              también ahí, es cura de B en su archivo — declarado, no supuesto. */}
           {ordenadas !== null ? (
-            <SelectorEspecie
-              opciones={ordenadas}
+            <SelectorOpcion
+              acento="control"
+              entidad
+              etiqueta={t('alta.especieEtiqueta')}
+              opciones={ordenadas.map((o) => ({
+                codigo: o.codigo,
+                etiqueta: o.nombre,
+                avatar: { nombre: o.nombre, fotoUrl: urlGenericaDeEspecie(o.codigo) },
+              }))}
               seleccionada={especie}
               onSelect={setEspecie}
-              etiqueta={t('alta.especieEtiqueta')}
             />
           ) : null}
 
