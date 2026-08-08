@@ -90,6 +90,40 @@ for (const caso of CASOS) {
     check(t.includes('Labrador retriever'), 'P3 · la raza, en Identidad');
   }
   if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
+
+  /**
+   * SONDA DE LA CAJA DE LA PUERTA (re-gate del founder, ley A6 «sin caja»).
+   *
+   * Tres lecturas del ÁRBOL dijeron que la puerta no tiene fondo
+   * (`CeldaNavegacion` es un Pressable transparente y el perfil la envuelve en
+   * un View con solo padding). El founder ve una caja blanca. **Cuando el
+   * código y el ojo no coinciden, gana el ojo y se mide el DOM VIVO** — leer
+   * el árbol otra vez sería la cuarta vez de lo mismo.
+   *
+   * Sube desde el texto de la puerta anotando quién pinta fondo. El primero
+   * que no sea transparente ES la caja, con su tamaño para reconocerlo.
+   */
+  if (caso.id === 'perro') {
+    const cadena = await page.evaluate(() => {
+      const todos = Array.from(document.querySelectorAll('*'));
+      const nodo = todos.reverse().find((e) => (e.textContent ?? '').startsWith('Cuéntanos algo de'));
+      if (!nodo) return ['(no encontré la puerta)'];
+      const salida = [];
+      let n = nodo;
+      for (let i = 0; i < 10 && n; i += 1) {
+        const cs = getComputedStyle(n);
+        const r = n.getBoundingClientRect();
+        salida.push(
+          `${i}: <${n.tagName.toLowerCase()}> bg=${cs.backgroundColor} radio=${cs.borderRadius} sombra=${cs.boxShadow.slice(0, 30)} ${Math.round(r.width)}x${Math.round(r.height)}`,
+        );
+        n = n.parentElement;
+      }
+      return salida;
+    });
+    console.log('\n  -- sonda de la caja de la puerta --');
+    cadena.forEach((l) => console.log('   ', l));
+    console.log('');
+  }
   await page.screenshot({ path: `scripts/capturas/s91d-perfil-${caso.id}.png`, fullPage: true });
   await ctx.close();
 }
