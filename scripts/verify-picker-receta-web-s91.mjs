@@ -18,6 +18,11 @@ const env = Object.fromEntries(
     .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
 );
 
+// EL PUERTO NO SE CLAVA: las tres pistas corren su propio metro y en S91
+// el 8082 estaba ocupado por D. Un smoke que asume puerto le roba el
+// servidor a otra pista o falla por algo que no es lo que mide.
+const BASE = process.env.SMOKE_BASE ?? 'http://localhost:8082';
+
 let fallos = 0;
 const check = (cond, nombre) => {
   console.log(`${cond ? '✓' : '✗ FALLO'} ${nombre}`);
@@ -44,7 +49,7 @@ async function esperar(frag, vueltas = 30) {
   return texto;
 }
 
-await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 180000 });
+await page.goto(`${BASE}/login`, { waitUntil: 'networkidle', timeout: 180000 });
 await page.getByPlaceholder('ej: ana@correo.com').fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.locator('input[type="password"]').fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
@@ -66,7 +71,7 @@ if ((await leer()).includes('El email o la contraseña no coinciden')) {
 }
 
 // ── ① Cuenta → Documentos del hogar (la casa de TODOS los papeles) ──
-await page.goto('http://localhost:8082/cuenta/documentos', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/cuenta/documentos`, { waitUntil: 'networkidle' });
 let texto = await esperar('Receta');
 check(texto.includes('Receta'), 'Documentos del hogar: la fila «Receta» monta');
 check(texto.includes('Carnet de vacunas'), 'Documentos del hogar: los otros papeles siguen vivos');
@@ -83,7 +88,7 @@ check(
 );
 
 // ── ② El perfil de la mascota (la otra superficie que baja papeles) ──
-await page.goto('http://localhost:8082/hogar', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/hogar`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(3000);
 texto = await leer();
 const nombre = (texto.match(/^(Zeus|Thor)$/m) ?? [])[0];
