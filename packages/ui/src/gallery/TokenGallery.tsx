@@ -2269,6 +2269,28 @@ function GaleriaInterna() {
           </View>
           <View style={{ height: spacing[3] }} />
           <Texto variante="apoyo">
+            S91-B · «COSA + CARA» — la combinación que antes era inexpresable: `fotoUrl` decide si hay
+            cara y `sujeto` decide SOLO el fallback. A la izquierda, una raza CON su imagen de la
+            galería; a la derecha, la misma sin imagen, cayendo a su inicial (jamás a una huella: una
+            raza no es un individuo).
+          </Texto>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], alignItems: 'flex-start' }}>
+            <View style={{ width: 170 }}>
+              <ChipEntidad
+                nombre="Labrador retriever"
+                sujeto="cosa"
+                tamano="general"
+                fotoUrl="https://zyltipqscdsdsxnjclhp.supabase.co/storage/v1/object/public/especies-razas/perro/labrador-retriever.webp"
+                elegido={false}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={{ width: 170 }}>
+              <ChipEntidad nombre="Labrador retriever" sujeto="cosa" tamano="general" elegido={false} onPress={() => {}} />
+            </View>
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
             El elegido NO se rellena: se HUNDE (pierde la elevación, baja a `bg.hundido`, se achica) y
             la pata lo pisa. Dos marcas para un mismo estado serían el tercer peso que no informa. La
             pata es la primitiva `MarcaEleccion`, no un dibujo propio — y su color sale de
