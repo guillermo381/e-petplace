@@ -9195,7 +9195,7 @@ de D): en el **perfil de la mascota**, la sección de documentos pide
 
 ---
 
-#### D-684 — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
+#### D-684 — ☠️ MUERTA (S91: el bucket sirve la imagen curada) — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
 ⚪ BAJA. **La imagen publicada como `pez/koi.webp` no es un koi:** el koi es
 una carpa alargada de patrón blanco/naranja/negro, y la imagen lee como
 CÍCLIDO (cuerpo corto, iridiscencia azul/roja). **Origen: hallazgo de C al
@@ -9225,6 +9225,34 @@ Origen: S90-C (publicación de la galería especie/raza).
 > generación de la galería. Se arregla en la MISMA pasada.
 > **☠️ DISPARO (compartido): la regeneración de cualquier imagen de la
 > galería.**
+
+> ### ☠️ MUERTA — S91, con su verificación por md5 (8-ago-2026)
+>
+> **La condición que C escribió se cumplió: el bucket sirve los 7.628 bytes.**
+> No se verificó por `content-length` solamente —eso probaría el tamaño, no el
+> contenido— sino **bajando el objeto y comparando md5**:
+> `b4e4eebad8afacf6c0dbc3c316ee6957`, idéntico al del archivo curado.
+>
+> **Subida a los DOS destinos, y el segundo es el que la mesa vio y yo no
+> habría visto: `perro/generico.webp` Y `perro/criollo.webp`** — el damero
+> vivía en los dos con md5 idéntico, y *Criollo es de las razas más elegidas
+> en Ecuador*, así que curar solo el genérico habría dejado el defecto en la
+> cara más pedida.
+>
+> **El reparto que lo resolvió:** C midió y curó la imagen pero **no puede
+> escribir al bucket** (cero policies de escritura: solo `service_role`), así
+> que dejó el archivo curado en el repo con su condición de muerte escrita y A
+> lo subió con `x-upsert: true`. *Los dos intentos por CLI que C registró son
+> su propia lección: `cp` rebota 409 y `rm` devuelve `{"deleted":[]}` SIN
+> error — un no-op silencioso de la familia L-192.*
+>
+> **Verificado además: 111 objetos en el bucket** (el upsert reemplazó, no
+> duplicó) y `gato/generico` intacto como control. La carpeta de rescate se
+> borró en el mismo acto — Ley 37, lo que ya no tiene trabajo no se queda.
+>
+> **Alcance que NO cierra con esto, dicho por C y conservado:** el defecto no
+> es sistémico (gato está limpio) pero **las otras cuatro genéricas no se
+> midieron.**
 #### D-685 — 🟡 EL ACUARIO: EL SUJETO ES EL SISTEMA, NO EL INDIVIDUO
 
 **La única de las siete familias donde el sujeto del producto no es el
