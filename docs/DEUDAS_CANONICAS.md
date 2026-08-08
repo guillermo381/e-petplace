@@ -8990,6 +8990,15 @@ los tres sin recibir citas.
 (superficie — pedido a C)~~ **construida por B en S90 y publicada en el OTA
 del prestador `019fddbf`** · el aviso al titular antes del corte · **las 16
 matrículas, que las carga el founder** (espera externa, no trabajo).
+
+> **📅 REGISTRO DE MESA (7-ago-2026): las 16 matrículas van PARA EL 15-AGO.**
+> Coherente con la letra vigente y por eso entra como registro y no como
+> trabajo: **el 15-ago es exactamente la frontera única** de
+> `_corte_matricula()` — desde ese día un vet nuevo no existe sin matrícula.
+> Cargarlas ese día alinea las dos mitades: los 16 existentes dejan de
+> depender de su exención de agenda, y los papeles clínicos empiezan a salir
+> con firmante real en vez de con el fallback del negocio. **Nada que
+> construir** — la captura ya viaja publicada.
 **☠️ MUERTE:** un vet nuevo no puede existir sin matrícula, y el papel
 clínico dice SU nombre y SU número.
 
@@ -9319,3 +9328,38 @@ medición, no un `REVOKE` masivo. *La cura barata acá es la peligrosa.*
 
 **Origen: S91-A (hallazgo al medir los grants de las tablas que acababa de
 crear; el barrido legacy quedó declarado por orden de mesa).**
+
+#### D-687 — ⚪ EL CATÁLOGO DE RAZAS MEZCLA DOS ESTILOS DE MAYÚSCULA (consecuencia de una firma, no defecto)
+
+**Medido al aplicar la firma de las 7 razas (S91-A, 7-ago-2026):** las **98
+filas sembradas del mapeo usan TITLE CASE** («Azul Ruso» · «Bosque de
+Noruega» · «Oriental de Pelo Corto» · «Cacatúa Alba» · «Guacamayo Azul y
+Amarillo») y las **7 firmadas usan la ortografía española** («Pastor alemán» ·
+«Labrador retriever» · «Bulldog francés»). **En una misma lista de
+sugerencias se van a ver los dos.**
+
+**No es un error de nadie:** el Title Case vino VERBATIM del mapeo (que era lo
+correcto — el nombre no se fabrica) y el otro estilo vino de una FIRMA del
+founder (que es lo que manda). *Dos fuentes legítimas produjeron dos estilos;
+el que sobra no se decide midiendo, se decide firmando.*
+
+**Por qué NO se barrieron las 98 en el mismo acto:** son 98 textos de
+producto. Reescribirlos derivándolos —bajando mayúsculas con una regla
+mecánica— es la misma clase de acto que el freno de B acaba de impedir:
+**fabricar texto en vez de firmarlo.** Y la regla no es mecanizable sin
+criterio: «Maine Coon» y «Scottish Fold» son nombres propios que NO bajan,
+«Bosque de Noruega» ya tiene su conector en minúscula, y «English Angora» es
+inglés. *Una pasada automática rompería más de lo que uniformaría.*
+
+**El costo de dejarlo:** cosmético y visible solo en la lista del alta. Cero
+efecto funcional (el nombre no es clave de nada — `mascotas.raza` es texto
+libre y sin FK, por la letra de D-379).
+
+> **☠️ DISPARO: el gate de pantalla del alta**, que es donde el founder ve la
+> lista REAL con los dos estilos juntos y puede decidir sobre píxeles en vez
+> de sobre una tabla (L-143).
+> **☠️ MUERTE:** el catálogo entero habla UN estilo, firmado — o la mesa firma
+> que la mezcla es aceptable y esta ficha se retira por decisión, no por
+> olvido.
+
+**Origen: S91-A (medición al aplicar la firma de mesa de las 7 razas).**

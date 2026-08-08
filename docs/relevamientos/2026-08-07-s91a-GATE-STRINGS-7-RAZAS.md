@@ -1,7 +1,48 @@
-# S91 · GATE DE STRINGS — LAS 7 RAZAS DE PERRO QUE NO TIENEN NOMBRE
+# S91 · GATE DE STRINGS — LAS 7 RAZAS DE PERRO QUE NO TENÍAN NOMBRE
 
-> **Es un gate del founder: 7 UPDATEs DESPUÉS de su firma, jamás antes.**
-> Lo de abajo es una PROPUESTA con su medición. A no firma strings.
+> # ✅ FIRMADO Y APLICADO — founder, 7-ago-2026
+>
+> **La firma, VERBATIM:** *«guion bajo → espacio + ortografía completa —
+> tilde y typo corregidos («Pastor alemán», «Jack Russell», y el resto por la
+> misma regla)».*
+>
+> **Aplicada en `20260807210000_s91a_razas_firmadas.sql`** — las dos formas
+> (la del archivo y la firmada) quedan literales adentro de la migración, por
+> orden de mesa. Verificado contra el objeto al aplicar:
+>
+> | slug | el archivo decía | la firma dice |
+> |---|---|---|
+> | `labrador-retriever` | `Labrador_Retriever` | **Labrador retriever** |
+> | `shih-tzu` | `Shih_Tzu` | **Shih tzu** |
+> | `yorkshire-terrier` | `Yorkshire_Terrier` | **Yorkshire terrier** |
+> | `pastor-aleman` | `Pastor_Aleman` | **Pastor alemán** |
+> | `bulldog-frances` | `Bulldog_Frances` | **Bulldog francés** |
+> | `bulldog-ingles` | `Bulldog_Ingles` | **Bulldog inglés** |
+> | `jack-rusell` | `Jack_Rusell` | **Jack Russell** |
+>
+> **Cinturones que lo probaron:** 105 activas / 0 apagadas · 44 perros · 0
+> nombres con guion bajo · **17 acentos** (los 14 previos + los 3 de la firma)
+> · y los tres literales con tilde comparados **uno por uno**, porque un
+> conteo puede cerrar con las tildes equivocadas. El CHECK
+> `chk_cat_razas_nombre_presentable` pasó de `NOT VALID` a **VALIDATE**: la
+> clase quedó cerrada para todas las filas, no solo para las nuevas.
+>
+> **De las tres decisiones que este gate elevaba, el founder resolvió las
+> tres:** el estilo es el de la ortografía española (② opción b) · el typo se
+> corrige · «Jack Russell» va MÍNIMO, sin «Terrier» (no se tomó el voto de A,
+> y así queda registrado).
+>
+> **Lo que la firma dejó abierto y no se tocó:** las otras 98 filas siguen en
+> Title Case, así que la lista mezcla dos estilos. **Se declara, no se
+> barre** — barrer 98 textos sin firma sería exactamente lo que este freno
+> vino a impedir. Ficha con disparo: **D-687**.
+
+---
+
+## EL EXPEDIENTE ORIGINAL DEL GATE (se conserva: es la evidencia sobre la que se firmó)
+
+> Era un gate del founder: 7 UPDATEs DESPUÉS de su firma, jamás antes.
+> Lo de abajo fue la PROPUESTA con su medición. A no firma strings.
 > Origen: freno de B (7-ago-2026), verificado por A contra la fuente.
 
 ## EL LITERAL DE HOY (medido en `cat_razas`, 7-ago-2026, no de memoria)
