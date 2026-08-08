@@ -190,31 +190,32 @@ export default function BitacoraFamilia() {
   const gruposVocabulario = useMemo(() => {
     const definiciones: Array<{ clave: string; etiqueta: string; pertenece: (v: ChipVocabularioAgrupado) => boolean }> = [
       { clave: 'casa', etiqueta: t('adiestramiento.bitacoraGrupoCasa'), pertenece: (v) => v.tipo === 'conducta' },
-      // 🔴 S91 · GATE — EL ACUARIO NO VE OBJETIVOS DE ADIESTRAMIENTO.
+      // 🔴 S91 · GATE DEL ACUARIO — **LA CONDICIÓN PROVISORIA SE RETIRÓ ACÁ**,
+      // y su retiro es la mitad que faltaba de la cura.
       //
-      // La causa medida, y no era la que se sospechaba: NO hay un seed viejo
-      // ni una lista inline. El catálogo de CONDUCTAS está impecable y ya
-      // universalizado («Ladra» no existe con ese texto en ningún lado: la
-      // fila dice «Hizo más ruido de lo normal»). La segunda fuente es el OTRO
-      // catálogo del mismo wrapper: `cat_objetivos_adiestramiento` se trae SIN
-      // filtro — y no por olvido, sino porque **no tiene columnas de
-      // aplicabilidad** (medido: 11 columnas, ninguna de especie ni sujeto).
-      // Sus 23 filas caían enteras sobre cualquier sujeto.
+      // El síntoma: un acuario ofrecía «Camina pegado a tu paso». La causa
+      // medida NO fue la que se sospechaba —no había seed viejo ni lista
+      // inline; el catálogo de CONDUCTAS ya estaba universalizado—, sino el
+      // OTRO catálogo del mismo wrapper: `cat_objetivos_adiestramiento` se
+      // traía SIN filtro porque **no tenía columnas de aplicabilidad**, y sus
+      // 23 filas de adiestramiento canino caían enteras sobre cualquier
+      // sujeto. La pantalla lo tapó con una condición local, DECLARADA como
+      // parcial y con su condición de muerte escrita: *el día que el catálogo
+      // tenga aplicabilidad, esto se retira porque el filtro va a vivir en la
+      // puerta.*
       //
-      // ⚠️ ESTA CURA ES PARCIAL Y SE DICE: cierra el caso del acuario, que es
-      // el del gate. **No cierra el caso general** — un gato sin programa de
-      // adiestramiento sigue viendo «Camina pegado a tu paso», y eso también
-      // está mal. La cura completa es darle aplicabilidad al catálogo de
-      // objetivos (columnas + seed): es DB, está pedida, y el día que llegue
-      // esta condición se retira porque el filtro va a vivir en la puerta.
-      ...(sujetoActivo === 'acuario'
-        ? []
-        : ([
+      // Ese día llegó (S91-A, `20260808070000`). Medido antes de retirar:
+      // `obj_acuario=0` **y `obj_gato=0`** — el cierre de A es más ancho que
+      // el pedido, porque cubre también el caso general que mi parche dejaba
+      // abierto (un gato sin programa veía los mismos 23). **Un filtro que
+      // sobrevive a la puerta que lo hizo innecesario es una segunda frontera
+      // esperando divergir** (Ley 37): el día que la mesa firme objetivos para
+      // otro sujeto, la condición local los seguiría escondiendo y las dos
+      // capas seguirían compilando.
       { clave: 'basico', etiqueta: t('adiestramiento.bitacoraGrupoBasico'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'basico' },
       { clave: 'medio', etiqueta: t('adiestramiento.bitacoraGrupoMedio'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'medio' },
       { clave: 'experto', etiqueta: t('adiestramiento.bitacoraGrupoExperto'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'experto' },
       { clave: 'otros', etiqueta: t('adiestramiento.bitacoraGrupoOtros'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === null },
-          ] as Array<{ clave: string; etiqueta: string; pertenece: (v: ChipVocabularioAgrupado) => boolean }>)),
     ];
     return definiciones
       .map((d) => ({ clave: d.clave, etiqueta: d.etiqueta, items: vocabulario.filter(d.pertenece) }))

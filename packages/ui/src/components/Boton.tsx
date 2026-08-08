@@ -101,6 +101,27 @@ export interface BotonProps {
   /** Slot de ícono — ReactNode, sin librería acoplada. */
   iconoIzq?: ReactNode
   /**
+   * S91-D (cruce declarado a B) — LA FLECHA SE ATA AL ACTO, NO A LA VARIANTE.
+   *
+   * La flecha ya vivía acá, pero condicionada a `variante === 'acento'`. Y el
+   * criterio de la casa es **E14, firmado**: *información DESPLIEGA · acción
+   * LLEVA* — `›` es de lo que navega a otra pantalla, no de una variante.
+   * Atada a la variante, un PRIMARIO que navega no tenía cómo decirlo, y la
+   * única salida era que la pantalla dibujara el path a mano — justo lo que
+   * `chevron.ts` prohíbe en su cabecera (*la pieza lo porta; la pantalla usa
+   * la pieza, jamás el path suelto*).
+   *
+   * ⚠️ EL DEFAULT NO SE MUEVE: sin declarar, sigue siendo `acento` y solo
+   * `acento`. Ningún consumidor vivo cambia de dibujo — la prop ABRE una
+   * puerta, no reescribe una decisión (mismo criterio con el que `compacto`
+   * quedó default en `ChipEntidad`: crecer para el uso nuevo, jamás una
+   * regresión en los viejos).
+   *
+   * Caso que la pidió: el CTA «Completá su perfil» del cierre del alta —
+   * primario, y lleva al perfil de la mascota recién creada.
+   */
+  chevron?: boolean
+  /**
    * S82-B r14 — EL DESHABILITADO QUE EXPLICA (candidata de C, evaluada y
    * construida). El motivo por el que el botón está apagado. Cuando
    * viene: el botón se pinta apagado PERO SIGUE TOCABLE, el toque NO
@@ -142,6 +163,7 @@ export function Boton({
   cargando = false,
   deshabilitado = false,
   iconoIzq,
+  chevron,
   razonDeshabilitado,
   onRazon,
 }: BotonProps) {
@@ -340,7 +362,7 @@ export function Boton({
      del MISMO slot que el label: la flecha es parte del control, no un
      adorno con vida propia, y sobre el muro invierte con él. */
   const flechaAcento =
-    variante === 'acento' ? (
+    (chevron ?? variante === 'acento') ? (
       <View
         style={[
           mostrarSpinner ? { opacity: 0 } : null,

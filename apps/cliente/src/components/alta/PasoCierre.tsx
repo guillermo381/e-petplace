@@ -282,6 +282,9 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
           <Boton
             etiqueta={t('alta.modalCompletar')}
             bloque
+            /* A4 — este CTA LLEVA: abre el perfil de la mascota recién
+               creada. E14 firmada: acción que navega, chevron `›`. */
+            chevron
             onPress={() => {
               if (creada === null) return;
               // Detrás de esto va EL PERFIL. Jamás una checklist ni una barra
