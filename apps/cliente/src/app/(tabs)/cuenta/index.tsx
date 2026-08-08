@@ -59,7 +59,13 @@ export default function Cuenta() {
     { etiqueta: t('cuenta.familia'), ruta: '/cuenta/familia' as const, icono: 'familia' as const },
     // S89-D orden 7 ②: la casa de los papeles de TODA la familia (el
     // perfil de cada mascota conserva los suyos, plegados).
-    { etiqueta: t('documentos.titulo'), ruta: '/cuenta/documentos' as const, icono: 'documento' as const },
+    // S91-B (firma founder 8-ago-2026): esta fila deja de prestar
+    // `documento` y consume el suyo. `documento` es UNA cédula con retrato
+    // y acá se entra a DÓNDE VIVEN LOS PAPELES — el plural es la
+    // diferencia, y el glifo apilado la dibuja. Con esto `documento` baja
+    // de TRIPLE a doble turno (le quedan `historia_clinica` y
+    // `ficha_identidad` en `lib/papeles.ts`, que es otra decisión abierta).
+    { etiqueta: t('documentos.titulo'), ruta: '/cuenta/documentos' as const, icono: 'documentos' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },

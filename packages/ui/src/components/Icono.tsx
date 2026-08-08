@@ -77,6 +77,28 @@ export type IconoNombre =
   //    propio. Éste es el propio. ✅ FIRMADO por la mesa el 7-ago-2026 y
   //    el préstamo RETIRADO en S91-B (`apps/cliente/src/lib/papeles.ts`).
   | 'receta'
+  // ── S91-B · DOCUMENTOS, en DOS CANDIDATOS (molde prime/primeCorona: el
+  //    founder elige a 21px y el perdedor muere con su lápida).
+  //    NACE PORQUE NO HAY GLIFO LIBRE, y está medido: `documento` hace
+  //    TRIPLE turno (historia_clinica · ficha_identidad · la entrada a
+  //    Documentos del hogar) y `carnet` está tomado por las vacunas. Tres
+  //    iguales en una sección abierta es la clase D-546.
+  //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
+  //    es lo que lo distingue de `documento` (que es UNA cédula con
+  //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
+  | 'documentos'
+  // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
+  //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
+  //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
+  //    el rasterizado lo confirmó— y la firma lo dio vuelta: **esa lectura
+  //    deja de ser el riesgo y pasa a ser el DESTINO**, para el centro de
+  //    avisos cuando crezca.
+  //    ⚠️ POR ESO SE RENOMBRA, y no es cosmética: `documentosSobre` decía
+  //    «documentos» y el dibujo dice «correo». Un nombre que contradice a
+  //    su dibujo es la clase de dato que esta casa caza (misma disciplina
+  //    con la que `mascotaId` pasó a `sujetoId`). **CERO consumidores hoy,
+  //    a propósito: está en reserva, no en uso.**
+  | 'correo'
   // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
   //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
   //    glifo mientras sus hermanas tienen el suyo — y las dos salidas
@@ -770,6 +792,40 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // rombo. Cero graduaciones, cero píldoras satélite: a 21px son ruido.
   // Grilla 24 · trazo 1.9 · aire 3.4 arriba (el más ajustado, medido).
   // La huella baja-izquierda con el mismo gesto que `vacuna`/`bitacora`.
+  // ── S91-B · CANDIDATO A — EL APILADO. **El plural ES el dibujo**: dos
+  // hojas desplazadas. Es lo único que separa «los documentos» de «un
+  // documento» sin inventar un objeto que no existe.
+  // ⚠️ SU PRIMERA VERSIÓN FALLÓ SU PROPIO GATE, y queda escrito porque la
+  // medición es el aporte: con DOS rectángulos COMPLETOS desplazados 3, a
+  // 21px se leía **un cuadrado dentro de otro** —concéntrico—, no un
+  // apilado. Era el riesgo que se había declarado y resultó real.
+  // LA CURA: la hoja de atrás deja de ser un rectángulo y pasa a ser lo
+  // ÚNICO que se vería de ella — su esquina superior derecha (una L). Con
+  // eso el ojo lee dos planos en vez de dos marcos. Rasterizado a 21px y
+  // mirado antes de dejarlo, no supuesto.
+  // Densidad 2 + huella; grilla 24 · trazo 1.9 · aire 3.5 arriba.
+  documentos: ({ tinta, huella }) => (
+    <>
+      <Path d="M11 3.5H21.5V14" {...trazo(tinta)} />
+      <Path d="M7.5 7H18V17.5H7.5Z" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
+  // ── S91-B · EL SOBRE — hoy `correo`, EN RESERVA DECLARADA (sin
+  // consumidores). Silueta LIBRE en todo el registry (rectángulo + V) y
+  // la más legible del par: la V es un gesto grande, no un detalle.
+  // ⚠️ LO QUE ERA SU RIESGO ES HOY SU RAZÓN DE SER. En el gate se declaró
+  // que a 21px «se lee nítido y se lee CORREO» —confirmado rasterizando,
+  // no supuesto— y eso lo descalificaba para Documentos. La firma del
+  // founder lo dio vuelta: se retira SIN cablear y queda para el centro de
+  // avisos. **El dibujo no cambió ni un punto; cambió qué nombra.**
+  correo: ({ tinta, huella }) => (
+    <>
+      <Path d="M6.5 5.5H21V16H6.5Z" {...trazo(tinta)} />
+      <Path d="M6.5 5.5 13.75 11.5 21 5.5" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
   receta: ({ tinta, huella }) => (
     <>
       <Path
@@ -1080,6 +1136,13 @@ export function Icono({
     // `caso`, `vacuna` y `carnet`. No va a `ocre`/CONSUMO aunque nombre
     // un medicamento: la receta no vende, indica.
     receta: identidad,
+    // S91-B: los papeles del hogar son del EXPEDIENTE — misma capa que sus
+    // hermanos (`documento`, `carnet`, `receta`), no una categoría nueva.
+    documentos: identidad,
+    // `correo` es un canal, no expediente — pero su capa se decide con su
+    // primer consumidor REAL, no ahora: hoy hereda `identidad` para no
+    // fabricar una decisión de taxonomía que nadie pidió (Ley 10).
+    correo: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un
