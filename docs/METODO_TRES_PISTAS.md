@@ -67,6 +67,76 @@ en el contrato):*
    **por commit** como paso fijo. *Nunca `git diff --stat` entre puntas: compara
    las dos puntas y muestra como BORRADO el trabajo que la otra rama no tiene.*
 2. **ABRIR LA VEDA ELLA MISMA** cuando alguien va a publicar.
+
+   > ### ✏️ ENMIENDA S91 — LA VEDA DEJA DE SER UN AVISO Y PASA A SER UN GUARD
+   >
+   > **`node scripts/verify-veda-publish.mjs --app <cliente|prestador>` corre
+   > ANTES de todo `eas update`. Rojo = el publish NO ocurre.**
+   >
+   > **Por qué esto y no un anuncio mejor redactado:** la candidata (e) de S75
+   > ya decía «la ventana de publish congela BILATERALMENTE» y **siguió siendo
+   > una intención durante quince sesiones**. En S91 chocó **tres veces en un
+   > día**. La razón por la que un aviso no puede funcionar acá es de forma,
+   > no de disciplina: **el daño no lo hace quien publica — lo hace quien
+   > ESCRIBE mientras el otro publica**, y esa persona, por definición, no
+   > está mirando el anuncio. *Un aviso que no frena, no frena* (D-584).
+   >
+   > **LOS TRES CHOQUES, medidos, porque cada uno enseña algo distinto:**
+   >
+   > | # | qué pasó | qué enseña |
+   > |---|---|---|
+   > | ① | El ancla salió **con asterisco**: al bundlear había un verify script de otra pista modificado | el asterisco **se imprime una vez y desaparece** — ver la corrección de abajo |
+   > | ② | Se publicó con `packages/api` **sin commitear**: código que no vivía en NINGÚN commit viajó al teléfono | el bundle puede contener lo que ningún commit contiene |
+   > | ③ | Un publish declaró «ancla `f4c9a134`» y su `gitCommitHash` real fue **`5012db53`** —un commit de OTRA pista— porque el árbol avanzó entre el commit propio y el bundling | **EL ANCLA ESCRITA A MANO MIENTE**, y nadie lo había nombrado |
+   >
+   > **El ③ es el que más duele y el menos obvio:** el mensaje del publish
+   > decía una cosa y el bundle salió de otra. Quien después verifique «por
+   > contenido» contra el ancla declarada (regla 84 ②) va a verificar el
+   > commit equivocado **y le va a dar verde**.
+   >
+   > **QUÉ EXIGE EL GUARD, y por qué cada cosa:**
+   >
+   > 1. **Árbol limpio, o aborta** — y **nombra los archivos con su
+   >    territorio** (y, en `scripts/`, con su último autor). No dice «hay
+   >    cosas sucias»: dice **a quién pedirle que commitee**. Eso es lo que
+   >    convierte la veda en bilateral sin necesidad de que la otra pista esté
+   >    mirando.
+   > 2. **HEAD en `origin/main`, o aborta** — un ancla que solo existe en un
+   >    disco no la puede reproducir nadie, y el gate del founder quedaría
+   >    sobre un bundle irreproducible.
+   > 3. **Imprime el ancla REAL y el comando con el ancla ya puesta.** **El
+   >    ancla no se escribe a mano nunca más**: se copia de la salida del
+   >    guard. Ese es el choque ③, cerrado en su origen.
+   >
+   > **Lo que el guard NO reemplaza:** avisar a la mesa sigue siendo cortesía
+   > y buena práctica. Lo que deja de depender del aviso es el modo de falla
+   > **silencioso**, que es el caro.
+   >
+   > ### ⚠️ CORRECCIÓN S91 — POR QUÉ ESTE GUARD NO TIENE SUPLENTE
+   >
+   > **Medido (C midió, A verificó contra el objeto):** el registro publicado
+   > **no guarda el estado del árbol.** `eas update:view --json` expone
+   > `branch · createdAt · gitCommitHash · group · id · isRollBackToEmbedded ·
+   > manifestPermalink · message · platform · runtimeVersion` — y **nada** con
+   > `dirty`, `clean` o `tree`. **El asterisco existe solo en la terminal, en
+   > el instante del publish.**
+   >
+   > **⇒ Un publish sucio es INAUDITABLE después.** Se puede saber de qué
+   > commit salió; no se puede saber si había WIP encima. Por eso este guard
+   > no es «una capa más»: **es la única**, y correrlo no es prolijidad — es
+   > la diferencia entre saber y no poder saber nunca.
+   >
+   > *Corolario para las actas: si el asterisco aparece, se transcribe EN EL
+   > MOMENTO. Y la ausencia de asterisco en un acta vieja no prueba árbol
+   > limpio — prueba que nadie lo escribió.*
+   > (Enmienda gemela en `CONTRATO_TRABAJO`, enmienda S83 de la regla 82.)
+   >
+   > **Su límite, declarado:** el guard mira el árbol **en el instante en que
+   > corre**. Si alguien escribe entre el guard y el `eas update`, no lo ve.
+   > El intervalo es de segundos y la cura sería un lock en el repo que todos
+   > tendrían que respetar —o sea, otro aviso—. *Se deja así a propósito: un
+   > mecanismo que cubre el 95% y lo dice es mejor que uno que promete el
+   > 100% apoyado en que todos se acuerden.*
 3. **VERIFICAR EL GROUP** antes de declarar cerrado — con `update:view`, **nunca
    `update:list`**, que no muestra el `gitCommitHash`. **Y CORRER EL GUARD
    (§3bis): el group prueba QUÉ GUARDASTE; el guard prueba QUÉ SE SIRVE.

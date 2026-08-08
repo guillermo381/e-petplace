@@ -17,11 +17,19 @@ export type ChipBitacoraTipo = 'objetivo' | 'conducta';
 
 const CODIGOS_ERROR_BITACORA = [
   'acceso_denegado',
-  // §7 v1: la bitácora vive dentro del programa/servicio activo — la
-  // universal es diferido declarado.
+  // ☠️ S91: `sin_contexto_activo` MURIÓ en el motor (la bitácora es
+  // universal por firma del founder). El código SE CONSERVA en el union a
+  // propósito: los bundles publicados antes de S91 lo pueden seguir
+  // recibiendo si alguien corre una versión vieja del motor, y un código
+  // que desaparece del union se vuelve `error_desconocido` — un rebote
+  // mudo. Se retira cuando no quede bundle vivo de antes de S91.
   'sin_contexto_activo',
   'bitacora_vacia',
   'chip_invalido',
+  // S91: el chip EXISTE pero no es para esta mascota (especie o sujeto).
+  // Es distinto de `chip_invalido` a propósito: «no existe» y «no es para
+  // vos» mandan a la UI a hacer cosas distintas.
+  'chip_no_aplica_a_la_mascota',
 ] as const;
 
 export type CodigoErrorBitacora = (typeof CODIGOS_ERROR_BITACORA)[number];
@@ -34,6 +42,8 @@ const MENSAJES: Record<
   sin_contexto_activo:  'La bitácora se abre con un programa o una sesión de adiestramiento activa.',
   bitacora_vacia:       'Elegí al menos una observación o escribí algo.',
   chip_invalido:        'Una de las observaciones elegidas ya no está disponible.',
+  chip_no_aplica_a_la_mascota:
+    'Esa observación no aplica a esta mascota.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
