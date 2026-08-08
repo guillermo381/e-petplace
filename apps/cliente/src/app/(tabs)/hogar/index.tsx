@@ -109,7 +109,7 @@ import { CoachHoja } from '@/components/coach';
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
-import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
 import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { CantoCurva } from '@/components/canto-curva';
@@ -1842,13 +1842,11 @@ export default function Hogar() {
                     ) : (
                       <View style={{ paddingHorizontal: spacing[4], gap: spacing[3] }}>
                         {visibles.map((it) => {
-                          const familia = FAMILIA_DE_TIPO[it.tipo];
-                          const color =
-                            familia === 'salud'
-                              ? theme.capa.identidad
-                              : familia !== undefined
-                                ? theme.capa.cuidado
-                                : null;
+                          // El canto sale del EJE que la fila ya trae, no de
+                          // un mapa de tipos que envejece (ver `capaDeHecho`):
+                          // siete tipos vivos se dibujaban sin canto.
+                          const capa = capaDeHecho(it.eje_jtbd);
+                          const color = capa === null ? null : theme.capa[capa];
                           const navega = it.tipo === 'historia_clinica_registrada';
                           const expandible = it.atencion_id !== null || it.tipo === 'vacuna_aplicada';
                           const abierto = hechosAbiertos[it.evento_id] === true;

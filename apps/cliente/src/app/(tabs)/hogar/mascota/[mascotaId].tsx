@@ -92,7 +92,7 @@ import {
   type MomentoVital,
   type VitalesPaseos,
 } from '@epetplace/domain';
-import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
 import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { CantoCurva } from '@/components/canto-curva';
@@ -1530,20 +1530,16 @@ export default function PerfilDeMascota() {
                       <>
                         {visibles.map((it) => {
                           const familia = FAMILIA_DE_TIPO[it.tipo];
-                          // S91 (gate): EL HITO ES UN MOMENTO DE IDENTIDAD y
-                          // se lee como tal. No entra a `FAMILIA_DE_TIPO`
-                          // porque ésa es la taxonomía de SERVICIOS y un hito
-                          // no es un servicio — pero sin canto quedaba como
-                          // una fila anónima entre las demás, que es media
-                          // explicación de «no apareció».
-                          const esHito = it.tipo === 'hito_narrativo';
-                          const color = esHito
-                            ? theme.capa.identidad
-                            : familia === 'salud'
-                              ? theme.capa.identidad
-                              : familia !== undefined
-                                ? theme.capa.cuidado
-                                : null;
+                          // S91 (re-gate): EL CANTO SALE DEL EJE. Acá vivía un
+                          // caso especial para `hito_narrativo` —cura de SITIO,
+                          // escrita cuando el hito era el único que se veía sin
+                          // canto—. La medición mostró que eran SIETE tipos, no
+                          // uno: el hito fue el síntoma que asomó primero.
+                          // `capaDeHecho` cura la causa y se lleva el parche
+                          // puesto (Ley 37: lo que sobrevive a su razón es
+                          // basura que nadie se anima a tocar).
+                          const capa = capaDeHecho(it.eje_jtbd);
+                          const color = capa === null ? null : theme.capa[capa];
                           const glifoFila: IconoNombre | null =
                             familia === 'salud'
                               ? 'veterinaria'
