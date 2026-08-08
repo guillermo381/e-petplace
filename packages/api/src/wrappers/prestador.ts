@@ -247,15 +247,23 @@ export async function obtenerMiPrestador(): Promise<
   const uid = await uidActual();
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
 
-  // (1) Titularidad — el camino de siempre, byte por byte: las 26
-  // pantallas del titular reciben EXACTAMENTE la misma fila que antes.
-  const { data, error } = await getClient()
-    .from('prestadores')
-    .select(COLUMNAS_MI_PRESTADOR)
-    .eq('user_id', uid)
-    .maybeSingle();
+  // (1) Titularidad — MISMA fila que siempre, por OTRA PUERTA.
+  //
+  // 🔴 S91: la lectura directa de `prestadores` MURIÓ para clientes. La
+  // tabla entregaba a cualquier autenticado la lat/lon EXACTA, la dirección
+  // y el email de negocios ajenos, salteando el ofuscado que S84 firmó
+  // (rojo reproducido: 4 · 5 · 1 filas). Se cerró por columna — y un grant
+  // por columna NO distingue dueño de ajeno, porque los dos son
+  // `authenticated`. De ahí esta RPC: el dueño necesitaba una puerta propia.
+  //
+  // `obtener_mi_prestador()` es DEFINER y gatea por `user_gestiona_prestador`
+  // — el MISMO predicado de la policy del dueño, así que titular Y equipo
+  // activo entran: la puerta del arco de equipo de S75 no se cierra con esto.
+  // Devuelve TABLE, así que llega como array de 0 o 1.
+  const { data: filas, error } = await getClient().rpc('obtener_mi_prestador');
 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  const data = Array.isArray(filas) && filas.length > 0 ? filas[0] : null;
   if (data !== null) {
     return { ok: true, data: { ...data, cohorte: estrecharCohorte(data.cohorte), ...(await leerZona(data.id)) } };
   }

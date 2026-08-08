@@ -18221,6 +18221,35 @@ export type Database = {
         Args: { p_prestador_id: string }
         Returns: Json
       }
+      obtener_mi_prestador: {
+        Args: never
+        Returns: {
+          ciudad: string
+          clip_url: string
+          cohorte: string
+          cohorte_anio: number
+          country_code: string
+          cuenta_comercial_id: string
+          descripcion: string
+          direccion: string
+          email_contacto: string
+          estado: string
+          expone_personas: boolean
+          foto_url: string
+          grooming_extra_pelaje_largo: number
+          grooming_recargo_domicilio: number
+          id: string
+          lat: number
+          lon: number
+          nombre_comercial: string
+          radio_cobertura_km: number
+          sector: string
+          sitio_web: string
+          telefono: string
+          tipo: string
+          whatsapp: string
+        }[]
+      }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json

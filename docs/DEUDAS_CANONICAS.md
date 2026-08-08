@@ -9689,3 +9689,35 @@ encorvada, estasis. **Nada de eso se propone acá.**
 
 **Origen: S91 (gate de strings del gato; la pregunta la abrió A midiendo y el
 founder la registró en vez de resolverla).**
+
+#### D-693 — 🟠 LA MATRÍCULA DEL NEGOCIO EN LA VITRINA: ¿sello de confianza? — GATE ABIERTO DE MESA
+
+**Nació al cerrar la fuga de `prestadores` (S91-A).** `matricula_profesional`
+es una de las 39 columnas que `authenticated` podía leer de la tabla, y al
+angostar los grants hubo que decidir una por una. **Las nueve sensibles se
+cerraron; `matricula_profesional` NO se tocó** — y esa no-decisión es la que
+queda registrada acá, porque tomarla de costado dentro de una migración de
+privacidad habría sido exactamente lo que esa migración vino a impedir.
+
+**La pregunta, que es de producto y no de motor:** ¿la matrícula del negocio
+es **dato interno** (y entonces se cierra como las otras nueve) o es **sello
+de confianza de la vitrina** (y entonces se muestra a propósito, con su
+diseño)? *Un número de matrícula visible junto al nombre de una clínica dice
+«esto es verificable» de una manera que ninguna insignia dibujada logra — y
+por eso puede ser un activo, no una filtración.*
+
+**Lo medido, para que la decisión no se tome a ciegas:** hoy la columna es
+legible por cualquier autenticado desde la tabla, **pero `v_prestadores_publicos`
+NO la expone** — así que la vitrina real (la vista, que desde S91 es la única
+puerta pública) **no la muestra**. El estado de hecho es «legible pero no
+mostrada», que es el peor de los tres: ni cerrada ni usada.
+
+> **☠️ DISPARO: la lámina de la vitrina del prestador** — se firma ahí, sobre
+> píxeles (L-143), junto con el resto de la ficha pública. **No se decide en
+> una migración.**
+> **☠️ MUERTE:** o la matrícula se cierra como las otras nueve, o entra a la
+> vista con su diseño de sello firmado.
+
+**Origen: S91-A (la cura de la fuga obligó a mirar las 39 columnas una por
+una; ésta es la única que quedó sin decisión y se registra en vez de
+resolverse de costado).**
