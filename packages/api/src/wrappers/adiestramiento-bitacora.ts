@@ -122,13 +122,25 @@ export async function obtenerVocabularioBitacora(
   if (filtro?.sujeto !== undefined) {
     qConductas = qConductas.contains('sujetos_aplicables', [filtro.sujeto]);
   }
+
+  // S91 · LOS OBJETIVOS TAMBIÉN FILTRAN, y esto era un hueco medido por D:
+  // sus 23 filas son de adiestramiento CANINO y caían enteras sobre cualquier
+  // mascota. El filtro es el MISMO que el de conductas — dos filtros hermanos
+  // que divergen es como se pierde una frontera.
+  let qObjetivos = cliente
+    .from('cat_objetivos_adiestramiento')
+    .select('codigo, nombre_familia, nombre_familia_en')
+    .eq('activo', true)
+    .order('orden_display', { ascending: true });
+  if (filtro?.especie !== undefined) {
+    qObjetivos = qObjetivos.contains('especies_aplicables', [filtro.especie]);
+  }
+  if (filtro?.sujeto !== undefined) {
+    qObjetivos = qObjetivos.contains('sujetos_aplicables', [filtro.sujeto]);
+  }
   const [conductas, objetivos, curriculum] = await Promise.all([
     qConductas,
-    cliente
-      .from('cat_objetivos_adiestramiento')
-      .select('codigo, nombre_familia, nombre_familia_en')
-      .eq('activo', true)
-      .order('orden_display', { ascending: true }),
+    qObjetivos,
     cliente
       .from('cat_curriculum_adiestramiento')
       .select('objetivo_codigo, nivel')
