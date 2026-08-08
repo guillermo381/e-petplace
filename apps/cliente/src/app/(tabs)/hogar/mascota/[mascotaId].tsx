@@ -1213,7 +1213,7 @@ export default function PerfilDeMascota() {
                                 <Texto variante="dato">{mes}</Texto>
                               </View>
                               <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                                <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
+                                <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre)}</Texto>
                                 {it.titulo_fuente !== null ? (
                                   <Texto variante="dato" numberOfLines={1}>{it.titulo_fuente.toLowerCase()}</Texto>
                                 ) : null}

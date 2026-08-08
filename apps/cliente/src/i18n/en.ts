@@ -187,6 +187,10 @@ export const clienteEn = {
     hechoVacuna: 'Got the {{nombre}} vaccine',
     hechoVacunaSinNombre: 'Got a vaccine',
     hechoConsulta: 'Vet visit',
+    // S91 · milestones. English is A's PROPOSAL — the founder signs.
+    hechoHitoVidaNueva: 'A new life begins',
+    hechoHitoLlegoALaFamilia: '{{nombre}} joined the family',
+    hechoHitoMundoNuevo: 'A new world begins',
     hechoMomento: 'A care moment',
     vidaCargarMas: 'Load more',
     acordeonCargando: 'Loading the moment',
