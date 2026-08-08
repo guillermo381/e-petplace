@@ -51,14 +51,23 @@ const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   // hogar/index.tsx:931, bitacora en adiestramiento.tsx:215, documento ya es
   // doble (acá + cuenta/index.tsx:62). El casillero no da: falta UN glifo y
   // dibujarlo es de B (hoja de contacto pedida en el reporte S90-A orden 5).
-  //   · receta → 'caso': la carpeta clínica — la receta nace de esa consulta;
-  //     libre en el cliente, préstamo declarado.
+  //
+  // ✅ S91-B — EL PRÉSTAMO DE LA RECETA SE RETIRA (firma de mesa, 7-ago-2026:
+  // «la cápsula construida en S90-B rige; el préstamo receta→'caso' se
+  // retira»). El glifo propio existe en el registry desde S90-B y ya estaba
+  // en la galería: lo que faltaba era la firma, y llegó.
+  //
+  // ⚠️ Y LO QUE NO SE CURÓ, que se dice en vez de callarse: la fila de abajo
+  // SIGUE con el préstamo. Retirar uno de los dos no cierra la tensión — la
+  // cierra a la mitad, y escribir «resuelto» acá haría que el próximo lector
+  // no vuelva a mirar.
   //   · ficha_identidad → 'documento': el objeto EXACTO del registry
   //     («identificación», cédula con RETRATO — y la ficha lleva foto). Que
   //     quede VECINA de historia_clinica con el mismo dibujo es Ley 12 en su
   //     forma vecina: PROVISIONAL A PROPÓSITO, la alternativa era mentir el
-  //     objeto. Se resuelve cuando B entregue el glifo que falta.
-  receta: { claveVoz: 'Receta', icono: 'caso' },
+  //     objeto. Sigue esperando decisión: o nace un cuarto dibujo, o la mesa
+  //     firma que estas dos filas comparten glifo a propósito.
+  receta: { claveVoz: 'Receta', icono: 'receta' },
   ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };
 
