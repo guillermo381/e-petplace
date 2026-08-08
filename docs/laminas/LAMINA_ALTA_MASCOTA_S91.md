@@ -88,23 +88,75 @@ deriva, country_code entra por default, y la especie no se hereda). Sí
 ofrece PRIMERO la especie más frecuente del hogar. Es UX, no herencia.
 
 ═══ DEPENDENCIAS DURAS — el alta NO se construye sin esto ═══
-1. D-379 · el catálogo de razas NO EXISTE (0 tablas). mascotas.raza es text
+1. ~~D-379 · el catálogo de razas NO EXISTE (0 tablas). mascotas.raza es text
    libre y solo lo escriben TRES RPCs del PRESTADOR. Las dos RPCs del dueño
-   no tienen el parámetro. Insumo listo: _mapeo.json con las 105 razas.
+   no tienen el parámetro.~~ Insumo listo: _mapeo.json con las 105 razas.
+   ✅ **PAGADA EN S91-A** (registro de A): `cat_razas` con las **105 filas y
+   sus acentos verbatim**, lector `obtenerRazasDeEspecie(especie)`, y las dos
+   RPCs del dueño con `p_raza`. **`mascotas.raza` sigue TEXTO LIBRE sin FK, a
+   propósito** — es la letra de D-379: el catálogo sugiere, «Mestizo / No sé»
+   son primera clase. *Sigue abierta la mitad ② de esa deuda: talla y pelaje
+   DEFAULT por raza no existen, así que el «default derivado invisible» de
+   arriba todavía no tiene de dónde derivar.*
 2. NO HAY COMPONENTE DE TIPEO PREDICTIVO en packages/ui. El patrón existe
    probado (Campo + SelectorOpcion + useMemo) pero vive INLINE en
    bitacora.tsx. Se generaliza, no se clona.
 3. La galería: bucket especies-razas, público, 105 objetos + 6 genéricos.
    URL base:
    https://zyltipqscdsdsxnjclhp.supabase.co/storage/v1/object/public/especies-razas/
-4. evento_hito_narrativo no existe: tabla nueva para «Una vida nueva
-   empieza».
+4. ~~evento_hito_narrativo no existe: tabla nueva para «Una vida nueva
+   empieza».~~ ✅ **EXISTE DESDE S91-A** (registro de A, migración
+   `20260807180000`): `evento_hito_narrativo` + `cat_hitos_narrativos` con
+   sus dos claves de MOTOR (`vida_nueva_empieza` · `mundo_nuevo_empieza`).
+   ⚠️ **NACE SIN EMISOR A PROPÓSITO:** nadie emite hitos hasta que la VOZ
+   esté firmada en el gate de pantalla y viva en i18n — emitir antes pintaría
+   «momento sin nombre» en los bundles vivos (el anti-patrón C8 de S72).
+   *El tipo `hito_narrativo` YA existía en `cat_tipos_evento` con
+   `tabla_tipada` NULL: no nació un tipo, se le dio cuerpo al que estaba.*
 
 ═══ EL ACUARIO — FUERA DEL CAMINO CRÍTICO ═══
-No tiene sujeto en el motor (0 tablas, 0 columnas; mascota_id es NOT NULL).
+~~No tiene sujeto en el motor (0 tablas, 0 columnas; mascota_id es NOT NULL).
 v1 registra peces como mascota individual con etiqueta «especie
-específica». El acuario es ARCO PROPIO de S91 — el sujeto es el sistema,
-no el individuo.
+específica».~~ ⬅ **SUPERADO POR EL ADDENDUM DE ABAJO (firma founder,
+7-ago-2026). Se tacha en vez de borrarse: la lámina firmada no se re-escribe
+— se enmienda a la vista.** El acuario sigue siendo ARCO PROPIO de S91 — el
+sujeto es el sistema, no el individuo.
+
+═══ ✏️ ADDENDUM FIRMADO — LA CLÁUSULA DEL PEZ (founder, 7-ago-2026, opción A) ═══
+> «en el alta, especie «Pez» registra el ACUARIO como sujeto. El nombre
+> pedido es el del acuario; el campo dos es tipo de agua (dulce/marino) en
+> espejo de la raza. Técnica: fila de `mascotas` con marca de sistema;
+> bitácora, hitos y papeles cuelgan de ella. NO nace entidad nueva ni
+> membresía — eso es arco propio posterior.»
+
+**LAS ONCE DECISIONES DE LA LÁMINA NO SE RE-ABREN.** Cambia UNA cláusula, y
+cambia acá y en D-685 — *en los dos lugares donde alguien la va a leer.*
+
+Qué significa para las cuatro pantallas, sin agregar un paso:
+· **PASO 1** — «Pez» sigue en la grilla de seis. Lo que cambia es a QUIÉN se
+  le pide el nombre: **el nombre es el del ACUARIO**, no el de un pez.
+· **PASO 2** — el título por especie ya cambiaba por firma; para pez la
+  pregunta deja de ser de raza y pasa a ser el **tipo de agua: dulce o
+  marino**. Es el CAMPO DOS en espejo de la raza — dos opciones, un toque,
+  cero tipeo predictivo (el catálogo de razas no participa).
+  ⚠️ Un acuario **no lleva raza**: el motor la rechaza tipado
+  (`raza_no_aplica_acuario`). No es validación de pantalla, es la fuente.
+· **PASO 3** — fecha/sexo/origen: **el sexo no aplica a un sistema**. La
+  forma fina la decide el gate; la lámina ya dice que el sexo se pregunta,
+  no se exige, así que omitirlo para acuario no contradice nada firmado.
+· **PASO 4** — la foto es del acuario. Sin foto, el círculo cae al genérico
+  `pez/generico.webp`, que **existe en el bucket** (medido).
+· **EL HITO** — el alta de un acuario emite `mundo_nuevo_empieza`, no
+  `vida_nueva_empieza`. **La VOZ se firma en el gate de pantalla** (firma ④
+  de mesa): el tenor de referencia es «Un mundo nuevo empieza», y referencia
+  no es letra.
+
+**Estado del motor al depositar (registro de A, no firma):** construido —
+`mascotas.sujeto` + `mascotas.tipo_agua` con sus cinco CHECKs (migración
+`20260807173000`) y las dos RPCs del dueño estampando la marca
+(`20260807183000`). **La marca la pone el MOTOR: la pantalla no la manda.**
+Las firmas de mesa completas, en
+`docs/relevamientos/2026-08-07-s91a-FIRMAS-DE-MESA.md`.
 
 ═══ ALCANCE ═══
 La lámina es CRITERIO, NO EVIDENCIA: está hecha en web y el producto es

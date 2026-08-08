@@ -1673,7 +1673,34 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 🟢 MEDIA. `prestador_horarios` admite `servicio_id` (NULL = franja para todo), pero el wizard de cada oficio (paseo S58, grooming S59 — sección horarios COMPARTIDA) escribe franjas generales: un prestador con DOS oficios no puede declarar "paseo por la mañana, grooming por la tarde". La estructura ya lo soporta — falta la UI y la letra fina (¿la franja general convive con la específica?). **Disparo: el primer prestador con dos oficios que pida horarios distintos.** Origen: relevamiento S59 (wizard grooming de la B sobre la sección compartida). **Letra founder (S60): el prestador con varios oficios ELIGE — horarios por servicio o franjas universales para todo (la franja general y la específica no conviven mezcladas: es una opción del prestador). Cláusula del arquitecto: la OCUPACIÓN del motor sigue siendo GLOBAL por prestador — las franjas declaradas se independizan, el cuerpo no. Disparo intacto.** **Hallazgo del relevamiento S61 (R0 parte 3, contra realidad): el motor HOY lee ADITIVO — los cuatro lectores (`obtener_inicios_paseo_disponibles`, `obtener_paseadores_disponibles`, `_inicios_disponibles_prestador` y por él las gemelas grooming) filtran `(servicio_id IS NULL OR servicio_id = <oferta>)`: la general aplica a todo Y una específica se SUMARÍA. La letra "no conviven mezcladas" exige un guard EXCLUYENTE nuevo (cirugía de motor pendiente — el SQL actual las mezclaría sin quejarse); además el UNIQUE no protege franjas generales (NULLs no colisionan) y la anti-duplicación vive solo en el wrapper. Los wizards siempre escriben `servicio_id` NULL; cero filas específicas en DB.** **Dueño declarado (cierre S61): el guard EXCLUYENTE es cirugía de MOTOR — pedido a la A en S62.** **Enmienda S62-A (motor CERRADO, migración `20260715130000`): nace `prestadores.modo_horarios` ('universal' default | 'por_servicio') + guard EXCLUYENTE por triggers (`_horarios_respetan_modo` sobre las franjas — muerde TODOS los caminos, las franjas se escriben directo por RLS — y `_modo_horarios_sin_franjas_ajenas` sobre el cambio de modo: con franjas del modo viejo vivas, rebota `franjas_del_otro_modo_existen`) + RPC `elegir_modo_horarios(p_modo)` con errores tipados + UNIQUE NULLS NOT DISTINCT con `empleado_id` en la clave (hallazgo del relevamiento: el prestador legacy 2052f109 tiene pares legítimos prestador/empleado que el UNIQUE viejo nunca mordió — la anti-duplicación por fin vive en DB). Diseño declarado: los NUEVE portadores del filtro aditivo (`servicio_id IS NULL OR = oferta`) NO se reescribieron — bajo el invariante del guard la mezcla no puede EXISTIR y el filtro devuelve exactamente las franjas de la elección; probado por asserts T0..T9 con ROLLBACK y residuos 0 (universal puro pasa · específico puro pasa · mezcla rebota en AMBOS sentidos · cambio de modo gateado incluso vía RPC · lectores respetan la elección · OCUPACIÓN GLOBAL intacta — cláusula del arquitecto: la cita de paseo consume el cupo del grooming · granularidad DECLARADA: la franja es de la OFERTA, no del oficio — en paseo hay una oferta por bloque de duración, T6d lo prueba). PATA ABIERTA: la UI de la elección en la sección de horarios del prestador = pedido 76(b) emitido a la B en S62.**
 
 #### D-379 — Catálogo de razas por especie con características
-🟡 ALTA. Catálogo de razas por especie con características (talla y pelaje DEFAULT → pre-llenan el perfil; más adelante, insumo del Coach y del producto-que-sabe). Reglas de la letra (founder S59, `MODELO_GROOMING.md` §3): **"Mestizo / No sé" es respuesta LEGÍTIMA** de primera clase; **el catálogo SUGIERE, el dueño CONFIRMA** — jamás pisa lo declarado. Grooming v1 NO lo espera (pregunta talla/pelaje directo). **Disparo: antes del soft launch.** Origen: S59 (letra del grooming).
+🟡 ALTA → **✅ SEMBRADO EN S91-A (la mitad ① pagada; la ② declarada abierta).** Catálogo de razas por especie con características (talla y pelaje DEFAULT → pre-llenan el perfil; más adelante, insumo del Coach y del producto-que-sabe). Reglas de la letra (founder S59, `MODELO_GROOMING.md` §3): **"Mestizo / No sé" es respuesta LEGÍTIMA** de primera clase; **el catálogo SUGIERE, el dueño CONFIRMA** — jamás pisa lo declarado. Grooming v1 NO lo espera (pregunta talla/pelaje directo). **Disparo: antes del soft launch.** Origen: S59 (letra del grooming).
+
+> **✅ MITAD ① — EL CATÁLOGO EXISTE Y SE LEE (S91-A, migración `20260807170000`).**
+> `cat_razas(especie, slug, nombre, ruta_imagen, activo)` con **105 filas
+> sembradas desde `supabase/dev/mapeo-razas-especies.json`** — el mapeo
+> rescatado del scratchpad de C en el cierre S90. **El nombre viaja VERBATIM**
+> (14 con acento/ñ, 11 con paréntesis aclaratorios): «Cacatúa Alba», jamás un
+> `cacatua-alba` recapitalizado — *el slug es del bucket, el nombre es del
+> humano, y des-slugificar era fabricar dato.* Cinturón de encoding adentro
+> de la migración (`octet_length <> char_length` = 14, aborta si el viaje los
+> perdió). Lector: `obtenerRazasDeEspecie(especie)` en `packages/api`.
+>
+> **LA LETRA, HECHA ESTRUCTURA — y esto es lo que hay que leer antes de
+> tocarlo: `mascotas.raza` NO ganó FK a este catálogo, A PROPÓSITO.** Un FK
+> convertiría la sugerencia en imposición y mataría «Mestizo / No sé». La
+> ausencia del FK **ES la letra**, no un olvido, y hay un cinturón en la
+> migración que aborta si alguien se lo agrega sin firma. La raza viaja
+> **texto libre** por las dos RPCs del dueño (`p_raza`, migración
+> `20260807183000`) — que hasta hoy **no tenían el parámetro**: `raza` solo
+> la escribían las tres RPCs del prestador (medido).
+>
+> **🔴 MITAD ② ABIERTA — LAS CARACTERÍSTICAS.** El título de esta deuda dice
+> «con características» y **eso NO se construyó**: el catálogo no tiene talla
+> ni pelaje DEFAULT por raza, así que el pre-llenado invisible que la lámina
+> del alta menciona («talla y pelaje entran como DEFAULT derivado») **todavía
+> no tiene de dónde derivar**. Se declara en vez de darse por hecho (regla
+> 77). **Disparo de la mitad ②: la primera superficie que quiera el
+> pre-llenado, o el arco del Coach.**
 
 #### D-380 — Grooming a DOMICILIO (segunda tanda de F1)
 🟡 ALTA. El groomer declara local/domicilio/ambos; v1 construye SOLO local (camino feliz). La tanda domicilio hereda dirección-en-cita (D-339, snapshot existente) + recargo opcional del groomer. Sin lugar en UI hasta la tanda — la oferta domicilio no se dibuja apagada. **Disparo: cierre del grooming local (A4) funcional.** Origen: S59, `MODELO_GROOMING.md` §4.
@@ -8959,12 +8986,28 @@ que nace desde el 7-ago nace completo**. Medición que la fundó: cero negocios
 tenían matrícula cargada y los vets vivos eran 3 — un gate duro los dejaba a
 los tres sin recibir citas.
 
-**LO QUE FALTA:** la **captura** en el alta/edición del empleado vet
-(superficie — pedido a C) · el aviso al titular antes del corte.
+**LO QUE FALTA:** ~~la **captura** en el alta/edición del empleado vet
+(superficie — pedido a C)~~ **construida por B en S90 y publicada en el OTA
+del prestador `019fddbf`** · el aviso al titular antes del corte · **las 16
+matrículas, que las carga el founder** (espera externa, no trabajo).
 **☠️ MUERTE:** un vet nuevo no puede existir sin matrícula, y el papel
 clínico dice SU nombre y SU número.
 
-**Origen: S89-A (medición de la receta, orden 11) + enmienda orden 14 ①.**
+> **✏️ ENMIENDA S91 — LA CONSTRUCCIÓN NO ESPERA AL DATO (firma founder,
+> 7-ago-2026):** *«la receta se construye completa como si la matrícula
+> existiera; el fallback del negocio cubre mientras haya 0/16.»*
+> **RATIFICA lo construido, no lo cambia** — y por eso entra como una línea y
+> no como un arco: la receta ya imprime el fallback **que se dice impreso**
+> (nombra al profesional y declara que su matrícula no está registrada).
+> **Lo que esta firma NO abre: ninguna gracia nueva.** La frontera única del
+> 15-ago sigue entera y la exención de los 16 existentes sigue siendo **de
+> AGENDA, jamás de FIRMA** — el certificado exige matrícula literal sin
+> gracia y la receta declara su fallback. *Construir contra un dato que
+> todavía no llegó es correcto cuando el papel DICE que falta; sería
+> falsificación si lo callara.*
+
+**Origen: S89-A (medición de la receta, orden 11) + enmienda orden 14 ① +
+enmienda S91 (firma de mesa ③).**
 
 ---
 
@@ -9174,11 +9217,48 @@ cero columnas de acuario/tanque/terrario en `public`;
 con etiqueta «especie específica» — A PROPÓSITO y declarado**: el acuario es
 ARCO PROPIO que lo corrige, no una espera que lo bloquea.
 
-> **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
-> **☠️ MUERTE:** el sistema existe como entidad con sus hitos, y los peces
-> del v1 migran a él sin perder su historia.
+> ### ✏️ ENMIENDA S91 — LA CLÁUSULA DEL PEZ (firma founder, 7-ago-2026, opción A)
+>
+> **La mitad de esta deuda se pagó ANTES de que naciera un solo pez-individuo,
+> y esa es toda la diferencia.** Firma de mesa: en el alta, especie «Pez»
+> registra **el ACUARIO como sujeto** — el nombre que se pide es el del
+> acuario y el campo dos es el **tipo de agua** (dulce/marino), en espejo de
+> la raza. Técnica firmada: **fila de `mascotas` con MARCA DE SISTEMA**;
+> bitácora, hitos y papeles cuelgan de ella. **NO nace entidad nueva ni
+> membresía** — eso sigue siendo este arco.
+>
+> **Construido en S91-A** (migración `20260807173000` + las dos RPCs del
+> dueño en `20260807183000`): `mascotas.sujeto` ('individuo' | 'acuario') y
+> `mascotas.tipo_agua`, con cinco CHECKs de coherencia (acuario ⟹ pez ∧ sin
+> raza; agua solo en acuario) y **la marca la estampa el MOTOR, jamás el
+> cliente**. Rojos producidos por el camino real: pez con raza rebota
+> `raza_no_aplica_acuario`; agua en un no-pez rebota `tipo_agua_solo_pez`.
+>
+> **☠️ LO QUE MUERE SIN NACER:** la «migración de peces v1» que esta ficha
+> preveía. **Medido al firmar: 0 mascotas `especie='pez'` en la DB** — no hay
+> historia que migrar, y desde hoy no la va a haber. *Un arco que ya no
+> arrastra migración de datos es un arco más barato y menos riesgoso: la
+> deuda no se pagó, se ACHICÓ.*
+>
+> **LO QUE SIGUE VIVO (el disparo NO se toca):** el acuario como **entidad
+> con habitantes, parámetros del agua y hitos de sistema**; la bitácora que
+> hoy cuelga de UNA fila (`evento_bitacora_familia.mascota_id` NOT NULL —
+> medición intacta); y la pregunta de la membresía. La marca `sujeto` es el
+> asidero sobre el que ese arco ENSANCHA — nació para eso.
+>
+> **Y la cláusula que queda SUPERADA, dicha en su lugar:** la lámina del alta
+> decía «pez como individuo, a propósito». **La firma del 7-ago la reemplaza
+> por addendum** (`docs/laminas/LAMINA_ALTA_MASCOTA_S91.md`) — *las once
+> decisiones de la lámina NO se re-abren; solo esa cláusula cambia, y cambia
+> escrita en los dos lugares donde alguien la va a leer.*
 
-**Origen: S90 (lámina del alta + brief S91, firma founder; medición A).**
+> **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
+> **☠️ MUERTE:** el sistema existe como entidad con sus hitos **y sus
+> habitantes** (los peces del v1 ya no son un problema de migración: nunca
+> existieron como individuos).
+
+**Origen: S90 (lámina del alta + brief S91, firma founder; medición A).
+Enmendada S91-A con la cláusula del pez firmada.**
 
 #### D-683 — ⚪ AGRUPAR LOS PAPELES POR CATEGORÍA — con disparo por NÚMERO
 
