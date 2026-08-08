@@ -75,11 +75,13 @@ const CALIBRE = {
 export interface ChipEntidadProps {
   nombre: string
   fotoUrl?: string
-  /** QUÉ MARCA LLEVA cuando no hay foto. `mascota` (default) cae a la
-   *  HUELLA DIGNA de `AvatarMascota`; `persona` dibuja su INICIAL —una pata
-   *  sobre el nombre de un humano diría que es un animal, y el monograma
-   *  como fallback honesto ya es letra de `LogoNegocio`—; `cosa` (una raza,
-   *  un objeto de catálogo) tampoco lleva huella: lleva su inicial. */
+  /** QUÉ MARCA LLEVA **CUANDO NO HAY FOTO** — y solo entonces: con
+   *  `fotoUrl` la cara se dibuja siempre, sea cual sea el sujeto.
+   *  `mascota` (default) cae a la HUELLA DIGNA de `AvatarMascota`;
+   *  `persona` dibuja su INICIAL —una pata sobre el nombre de un humano
+   *  diría que es un animal, y el monograma como fallback honesto ya es
+   *  letra de `LogoNegocio`—; `cosa` (una raza, un objeto de catálogo)
+   *  tampoco lleva huella: lleva su inicial. */
   sujeto?: ChipEntidadSujeto
   tamano?: ChipEntidadTamano
   elegido: boolean
@@ -96,7 +98,25 @@ export function ChipEntidad({
 }: ChipEntidadProps) {
   const { theme } = useTheme()
   const c = CALIBRE[tamano]
-  const conHuella = sujeto === 'mascota'
+  // ── S91-B · LA CARA SE DIBUJA SIEMPRE QUE EXISTA (pedido de D, firmado).
+  // ANTES: `conHuella = sujeto === 'mascota'` — y con eso, un sujeto que NO
+  // fuera mascota IGNORABA `fotoUrl` por completo. La combinación que el
+  // founder firmó para el chip de raza —«cosa + cara»— era INEXPRESABLE.
+  //
+  // AHORA los dos ejes se separan, que es lo que siempre debieron ser:
+  //   · `fotoUrl` decide SI HAY CARA.
+  //   · `sujeto` decide SOLO EL FALLBACK cuando no la hay.
+  // Cero cambio para los consumidores vivos: los que traen foto la siguen
+  // dibujando, y los que no, caen al mismo fallback de siempre.
+  //
+  // ⚠️ Y ESTA PIEZA YA HABÍA COBRADO SU PROPIO LÍMITE, que es lo que vuelve
+  // el pedido de D una corrección y no un gusto: el filtro de ESPECIE del
+  // histórico necesitaba imagen + fallback honesto, y la única forma de
+  // tener las dos era declarar la especie como `'mascota'`. Ahí funcionaba
+  // —una especie ES un animal, la huella es honesta—, pero fue esquivar el
+  // modelo, no usarlo. Con esto deja de hacer falta esquivarlo.
+  const conFoto = typeof fotoUrl === 'string' && fotoUrl.length > 0
+  const conAvatar = conFoto || sujeto === 'mascota'
 
   return (
     <Pressable
@@ -121,7 +141,7 @@ export function ChipEntidad({
         paddingVertical: spacing[1],
       }}
     >
-      {conHuella ? (
+      {conAvatar ? (
         <AvatarMascota nombre={nombre} fotoUrl={fotoUrl} tamano={c.avatar} anidadoEn="chip" />
       ) : (
         <View
