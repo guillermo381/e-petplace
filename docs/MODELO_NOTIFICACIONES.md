@@ -36,6 +36,39 @@
 
 ---
 
+## 0ter. S90 (7-ago-2026) — EL CANAL PUSH ESTÁ VIVO EN LAS DOS APPS, y es el PRIMER canal que la casa abre ENTERO
+
+**Todo leído del objeto al cierre de S90, nada de memoria:**
+
+- **Transporte:** `despachar-push` (Edge Function contra FCM v1, la llave
+  como secret custodiada por el founder — la opción (a) de S81, cumplida)
+  DESPLEGADA y probada: `{"modo":"transporte_vivo","entregadas":1}`.
+- **Tick propio:** cron **job 8**, `* * * * *` — push ya no cuelga del tick
+  del correo. Primera hora medida: 65/65 `succeeded`.
+- **El flip:** `cat_notificacion_canales.transporte_vivo = true` para push
+  (email ya lo estaba; whatsapp sigue false esperando a Meta). **El techo
+  duro y el kill switch RIGEN** — la primera hora: 0 diferidas por techo.
+- **El gate del founder, cumplido POR CAMINO REAL: los dos teléfonos
+  VIBRARON** — cliente (prueba dirigida de C sobre el bono vivo de Thor) y
+  prestador (dirigida de A sobre la cita viva, despachada POR EL TICK,
+  `estado=entregada`, `gate_que_corto: null`). El token del prestador se
+  registró SOLO al aplicar su OTA: *el canal nunca estuvo roto — era un
+  update sin aplicar.*
+- **⚖️ EL PRECEDENTE QUE QUEDA COMO LEY DE LA CASA — LA LEY DE SECUENCIA SE
+  CUMPLIÓ EN ORDEN:** ① el lector · ② la pieza · ③ el gate · ④ **recién
+  ahí** el UPDATE del flip, como último acto y de una fila. Dos veces en la
+  sesión un flip estuvo A UN COMANDO de distancia y no se adelantó (la
+  orden lo vedaba y la veda aguantó). **Es la forma en que se abre todo
+  canal futuro (WhatsApp incluido): el flip es lo ÚLTIMO, jamás lo
+  primero.**
+- La fila del estreno (`clave_dedup='prueba-push-s90c-1'`) **SE QUEDA como
+  registro** — firma founder, pedida cuatro veces.
+
+*(Este §0ter SUPERSEDE el 🔴 «EL BINARIO NO PUEDE RECIBIR PUSH» de §0bis —
+que queda abajo como foto de S87, con su nota.)*
+
+---
+
 ## 0bis. LO MEDIDO — el censo de S87 contra la DB viva *(ENMIENDA S87)*
 
 > **Acta completa con su literal:
@@ -101,7 +134,7 @@ trigger `trg_prestadores_gate_vitrina` la busca con `to_regprocedure` y
 **construirla abre el gate sola** — L-171) · **los módulos nativos de push en el
 binario** ⇒ **una build**.
 
-### 🔴 EL BINARIO NO PUEDE RECIBIR PUSH — y ordena todo el arco
+### ~~🔴 EL BINARIO NO PUEDE RECIBIR PUSH~~ — ⚠️ CADUCÓ (S90: ver §0ter — los binarios nuevos tienen FCM horneado, los tokens llegaron y los dos teléfonos vibraron). Queda como foto de S87:
 
 El guard de D-574 contra el APK **1.0.3** del prestador (`versionName`
 confirmado por `aapt2`): **✗ falta `google_app_id` · ✗ falta el listener

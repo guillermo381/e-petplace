@@ -8924,6 +8924,21 @@ una letra que las nombre productoras.
 > **15-AGO** exige documentos cargados para APARECER; sin matrícula no se
 > ofrece.* **Ofrecer a quien no puede recibir la cita es prometer.**
 
+> **➕ ENMIENDA FIRMADA S90 (orden 9 ① — 🔴 la divergencia que había):** lo
+> construido en S89 tenía TRES fechas sobre dos preguntas (7-ago para el que
+> nace · 15-ago apagando a los existentes · 1-sep huérfano en
+> `vets_sin_matricula`). **Lo que rige desde `20260807130000`: UNA SOLA
+> FECHA, EN UN SOLO LUGAR — `_corte_matricula()` = 15-ago, SIN reloj:**
+> exigido ⟺ la persona NACIÓ el 15-ago o después. **Los 16 existentes NO se
+> apagan JAMÁS** — la exención es de AGENDA, nunca de FIRMA (el certificado
+> exige matrícula literal SIN gracia; la receta cae al fallback del negocio
+> Y LO DICE IMPRESO). Cinturón anti-fecha-propia: ningún consumidor puede
+> volver a llevar fecha hardcodeada. Fixture 5 brazos con el borde exacto
+> (00:00 Guayaquil del 15 exigido · 23:59 del 14 exento). **Y la CAPTURA en
+> superficie existe desde S90-B** (Hoja del miembro, OTA `019fddbf`) — al
+> cierre seguían 0/16 cargadas: la espera es del founder/prestadores, no de
+> código.
+
 **EL HUECO QUE LA PARIÓ (medido S89-A):** `prestador_empleados` no tenía
 NINGUNA columna de credencial — 16 medidas, ninguna. La
 `matricula_profesional` vivía en `prestadores`, **o sea EN EL NEGOCIO**:
@@ -8973,7 +8988,12 @@ color, y **jamás porta información**: es cariño, no dato.
 
 **Origen: S89-A (orden 14 ⑤, letra del founder al ver los dos papeles).**
 
-> **➕ S90-A — CONSTRUIDA, gate impreso PENDIENTE.** La marca de agua vive en
+> **☠️ MUERTA (S90, 7-ago — gate impreso del founder): «se ve bien en papel».**
+> Montada en LOS CINCO (el certificado la consume de la plantilla en el punto
+> de montaje que D dejó comentado). La opacidad 6% queda FIRMADA y anotada en
+> `papel.ts`.
+>
+> *Registro de construcción (S90-A):* La marca de agua vive en
 > la plantilla compartida `supabase/functions/_shared/papel.ts` y sale en los
 > CUATRO papeles (carnet · historia clínica · receta · ficha de identidad):
 > el isotipo grande al centro, EN TINTA al 6%, jamás portando información.
@@ -9028,7 +9048,18 @@ cuatro puertas de inicio · y su par mirando la sombra real (L-207).
 
 ---
 
-#### D-680 — 🟠 LA INVITACIÓN DE AVISOS SOLO EXISTE EN EL CLIENTE
+#### D-680 — LA INVITACIÓN DE AVISOS SOLO EXISTE EN EL CLIENTE ✅
+
+**☠️ CERRADA (S90-B `b1254158`, mergeada y publicada en el OTA `019fddbf`,
+runtime 1.0.4):** el prestador ganó su `InvitacionAvisos` (port declarado de
+la pieza del cliente, lámina firmada entera: «Ahora no» siempre visible ·
+re-invitación solo por versión nativa · dos noes = silencio), montada en HOY
+con la sonda `moduloAvisosSiHayNativo` — y B de paso encontró y curó las DOS
+guardas que al CLIENTE le faltaban (`b90d8c14`, territorio cruzado
+RATIFICADO por mesa). **La prueba de que funciona es el objeto: el token del
+aparato del prestador se registró SOLO al aplicar el update (21:40:30 del
+7-ago), y la prueba dirigida llegó `entregada` — el teléfono vibró (gate
+founder, brief S91).** Ficha original:
 
 **La pieza `InvitacionAvisos` (lámina firmada) se construyó y montó en el
 CLIENTE** (S89-A, tren de push). **El prestador no la tiene** — y su casa
@@ -9068,7 +9099,13 @@ pagar dos veces el mismo gate.
 
 **Origen: S89 (barrido del founder al cierre).**
 
-> **➕ S90-A — LA PASADA CORRIÓ, gate impreso PENDIENTE.** El molde duplicado
+> **☠️ MUERTA (S90, 7-ago — el gate impreso del founder APROBÓ los cinco):**
+> folio en mono, procedencia fila por fila, banda de emisor, sobriedad —
+> aprobados. Las DOS correcciones que pidió quedaron EJECUTADAS en la misma
+> sesión: el aire bajo el filete (`AIRE_BAJO_FILETE`, un solo lugar) y la
+> foto del carnet escaneado ANEXA al final con su rótulo firmado.
+>
+> *Registro de construcción (S90-A):* El molde duplicado
 > murió: la cara entera vive en `supabase/functions/_shared/papel.ts` y los
 > cuatro papeles la consumen. Aplicado contra la espec de B: título 16/600
 > (era 24) · rótulos 9/600 en mayúsculas tinta .65 · cuerpo 10.5/15 ·
@@ -9095,6 +9132,15 @@ de D): en el **perfil de la mascota**, la sección de documentos pide
 
 **Origen: S89 (barrido del founder sobre el bundle publicado).**
 
+> **➕ S90 — CONSTRUIDA Y PUBLICADA; la muerte espera EL OJO.** C la cableó
+> (`14226835`: `Tarjeta relleno="ninguno"` + `CeldaNavegacion` con
+> `direccion` — muere la anatomía a mano) y viaja desde el OTA `019fddbe`
+> (hoy `019fde4c`). **El gate en dispositivo del founder NO quedó
+> confirmado**: en su primera mirada reportó no ver borde ni chevron, la
+> medición dio el código correcto en el bundle publicado, y la explicación
+> más plausible (mirada pre-aplicación del update) quedó como SOSPECHA en
+> el volcado de A — no se declara muerta hasta que su ojo la vea.
+
 ---
 
 #### D-684 — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
@@ -9113,6 +9159,26 @@ Con imágenes **generadas por IA**, un rótulo que no corresponde al dibujo es
 **Disparo: cuando se regenere cualquier imagen de la galería** — entra en
 ese mismo lote, no exige uno propio.
 Origen: S90-C (publicación de la galería especie/raza).
+
+#### D-685 — 🟡 EL ACUARIO: EL SUJETO ES EL SISTEMA, NO EL INDIVIDUO
+
+**La única de las siete familias donde el sujeto del producto no es el
+animal** — y el motor no lo sabe. **Medido (S90, cierre):** CERO tablas y
+cero columnas de acuario/tanque/terrario en `public`;
+`evento_bitacora_familia.mascota_id` es **NOT NULL** (`is_nullable = NO`,
+`information_schema.columns`) — hoy toda bitácora cuelga de UNA mascota.
+`MODELO_PRODUCTO` ya lo piensa como concepto («un acuario es comunidad» ·
+«hitos del acuario/terrario como sistema») pero no como entidad.
+
+**v1 del alta (lámina S91 firmada) registra peces como mascota individual
+con etiqueta «especie específica» — A PROPÓSITO y declarado**: el acuario es
+ARCO PROPIO que lo corrige, no una espera que lo bloquea.
+
+> **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
+> **☠️ MUERTE:** el sistema existe como entidad con sus hitos, y los peces
+> del v1 migran a él sin perder su historia.
+
+**Origen: S90 (lámina del alta + brief S91, firma founder; medición A).**
 
 #### D-683 — ⚪ AGRUPAR LOS PAPELES POR CATEGORÍA — con disparo por NÚMERO
 
