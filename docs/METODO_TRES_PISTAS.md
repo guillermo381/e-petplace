@@ -21,7 +21,21 @@
 |---|---|
 | **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
 | **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
-| **C** | `apps/prestador` · **el canal OTA** |
+| **C** | `apps/prestador` · **`apps/cliente`** · **el canal OTA** (los dos) |
+
+> **⚠️ ENMIENDA S91 (hallazgo de C, depositada por A — `docs/` es de A):**
+> esta tabla tenía un HUECO: **`apps/cliente` no estaba asignada a ninguna
+> pista.** No era una decisión de dejarla libre — era una omisión, y una
+> omisión en la tabla de territorios es la clase de dato que **no da síntoma
+> hasta que dos pistas tocan el mismo archivo**. Se asigna a **C**, que es
+> como la mesa viene operando de hecho (S90 y S91: el cliente lo trabajó C —
+> la lista de papeles derivada del catálogo, la tarjeta de D-682, la prueba
+> dirigida de push, el picker de receta). *La regla que esto deja: un
+> territorio que la mesa reparte en los hechos y la tabla no nombra sigue
+> siendo un territorio sin dueño — se escribe.*
+>
+> Cuando una pista trabaja **las dos apps a la vez**, sigue rigiendo 76(f2):
+> commit por pathspec, una app por commit — el índice es UNO por repo.
 
 **El corte no es por comodidad: es por DÓNDE VIVE LA VERDAD DE CADA COSA.**
 
@@ -30,8 +44,11 @@
   —*el motor se adelanta a su wrapper*— y cada vez costó un turno.
 - **B tiene el lint en exclusiva** porque **es quien puede romperlo sin que nadie
   lo note**: un guard es de quien lo mantiene, o se vuelve el guard de nadie.
-- **C tiene la app** porque es donde el craft se ve, y **el craft se firma sobre
-  la pantalla real** (regla 80).
+- **C tiene las apps** porque es donde el craft se ve, y **el craft se firma
+  sobre la pantalla real** (regla 80). *Las dos casas en una sola pista tienen
+  además una razón de contenido: la mitad de los desvíos del cliente nacen de
+  copiar el patrón del prestador sin su contexto (y al revés) — quien ve las
+  dos es quien puede matar el clon en vez de propagarlo.*
 
 **Las tres tocan `packages/ui` en LECTURA. Solo B lo escribe.**
 
