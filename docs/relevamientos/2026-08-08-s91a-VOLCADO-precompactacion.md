@@ -53,7 +53,34 @@ hash real fue `5012db53`.
 - **Secuencia:** merge de D → árbol quieto → `publicar-ota.mjs --app cliente`
   → el founder gatea.
 
-### PRESTADOR — espera a C
+### PRESTADOR — ✅ PUBLICADO (reorden de mesa: sale primero porque C es toda del cliente)
+
+- **group `c6b2c85c-665a-4871-82c2-615890bbe446`** · android
+  `019fe2ae-121c-7005-8a77-756dce6a8535` · ios
+  `019fe2ae-121c-7188-a4db-7013c2c2222e` · runtime **1.0.4** ·
+  `gitCommitHash 38aed580da4c290a0941ba4b6a03fb62ea173dfd` **CON ASTERISCO**
+  (leído del OBJETO con `update:view --json`, no del texto del mensaje).
+- **Lleva:** filtros del histórico COMPLETOS (`ff66a530` tipeo en los dos
+  mundos + `6c53c396` mundo persona + `c509c869` filtro de especie) · glifo
+  `documentos` apilado firmado (`90df2d4e`) · ensanche de `ChipEntidad`
+  (`e60d6389`). Los tres verificados ancestros de HEAD antes de bundlear.
+- **⚠️ EL ASTERISCO, TRANSCRIPTO EN EL MOMENTO** (el registro publicado **no**
+  lo guarda: `update:view` no expone `dirty`): el árbol se ensució durante el
+  bundling con **`apps/cliente/src/components/preview-prestador.tsx`**, creado
+  **13:40** — WIP del commit 2/2 de C. **Fuera del bundle del prestador, y
+  PROBADO, no supuesto:** cero sentencias `import`/`require` de `apps/cliente`
+  desde `apps/prestador` (los 2 hits del primer grep eran COMENTARIOS — L-170
+  en su cuarta aparición) ⇒ **el contenido del bundle es confiable.**
+- **LA CAUSA ESTRUCTURAL, medida:** `git worktree list` tiene
+  `e-petplace-s91-B` y `e-petplace-s91-D` **y NO tiene una de C** — **C trabaja
+  en el directorio primario, sobre `main`, el mismo árbol desde el que A
+  publica.** Eso explica el choque ③ **y** este cuarto: *el acto único cierra
+  la ventana entre verificar y bundlear, pero no puede cerrar la de una pista
+  que ESCRIBE en el árbol mientras Metro lee.* ⇒ **la cura que queda es
+  publicar desde un árbol que nadie más escribe** (la `worktree-detached` que
+  la regla 82 dejó CANDIDATA desde S81 y que ya cobró cuatro veces).
+
+### ~~PRESTADOR — espera a C~~ *(superseded por el bloque de arriba)*
 
 - **Último publicado:** group `cd5386db-7998-4dbc-abfa-8559f9015589` ·
   android `019fe1d8-0bdc-7e84-b22c-16a5c43a0ccb` · runtime **1.0.4** ·
