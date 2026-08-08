@@ -102,3 +102,25 @@ export function caraDeMascota(args: {
   if (args.fotoUri) return args.fotoUri;
   return urlDeRaza(args.especie, args.razaSlug) ?? urlGenericaDeEspecie(args.especie);
 }
+
+/**
+ * LA MISMA ESCALERA, PARA QUIEN TIENE EL PATH Y NO EL SLUG (S91-D, re-gate ③).
+ *
+ * El Hogar lee `MascotaResumen`, que desde A6 trae **`raza_ruta_imagen`** —el
+ * path que A resuelve por LOOKUP contra `cat_razas`, jamás slugificando el
+ * texto—. El perfil, en cambio, tiene el slug. Son dos entradas al MISMO
+ * escalón, y por eso viven las dos acá y no una en cada pantalla: el día que
+ * la escalera gane un peldaño, lo gana para las dos.
+ *
+ * Orden idéntico a `caraDeMascota`: **foto real → cara de su raza → genérico
+ * de su especie**. Que el Hogar y el perfil muestren caras distintas de la
+ * misma mascota fue exactamente el defecto que el founder marcó dos veces.
+ */
+export function caraDeMascotaPorRuta(args: {
+  especie: string | undefined;
+  rutaImagen: string | null | undefined;
+  fotoUri?: string | undefined;
+}): string | undefined {
+  if (args.fotoUri) return args.fotoUri;
+  return urlDeRutaGaleria(args.rutaImagen ?? undefined) ?? urlGenericaDeEspecie(args.especie);
+}

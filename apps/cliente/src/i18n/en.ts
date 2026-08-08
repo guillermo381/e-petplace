@@ -274,7 +274,7 @@ export const clienteEn = {
     volver: 'Back',
     compartir: 'Share',
     compartirMensaje: 'Meet {{nombre}} on e-PetPlace',
-    pastillaAlDia: 'Up to date',
+    pastillaAlDia: 'Care up to date',
     // r3 ③④ — mirror of es.ts (Espejo enforces parity).
     vozCardM1: '{{nombre}} is in their first months. This is the time for first vaccines and first habits.',
     vozCardM2: '{{nombre}} is growing up. This is the time to socialize and learn.',
@@ -318,7 +318,7 @@ export const clienteEn = {
     documentos: 'Documents',
     // S91-C — mirror of es.ts.
     bitacora: 'Their logbook',
-    bitacoraDetalle: 'What you see at home fills in their record and helps care for them better.',
+    bitacoraDetalle: 'What you see at home fills in their record.',
     descargarCarnetFalla: "We couldn't prepare the card. Please try again.",
     vacunasResumenUna: '1 vaccine on their card',
     vacunasResumen: '{{n}} vaccines on their card',
@@ -345,6 +345,8 @@ export const clienteEn = {
     reservarServicioDe: 'Book a service for {{nombre}}',
     pastillaAtencion: 'Needs attention',
     pastillaConociendo: 'Getting to know them',
+    pastillaPendientesUno: '1 to resolve',
+    pastillaPendientes: '{{n}} to resolve',
     hechosPaseos: 'Walks',
     hechosVacunas: 'Vaccines',
     reservarServicio: 'Book a service',

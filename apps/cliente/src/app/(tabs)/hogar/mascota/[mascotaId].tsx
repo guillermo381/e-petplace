@@ -78,6 +78,9 @@ import {
   type SenalesHogarMascota,
   obtenerHistoriaPeso,
   obtenerRazasDeEspecie,
+  obtenerSolicitudesPendientesDueno,
+  obtenerPresupuestosFamilia,
+  obtenerCitasActivasHogar,
   type PesoDeLaSerie,
 } from '@epetplace/api';
 import {
@@ -95,6 +98,7 @@ import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-pap
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
+import { contarPendientesDe } from '@/lib/pendientes';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
@@ -357,6 +361,11 @@ export default function PerfilDeMascota() {
   // hogar para esta mascota — alimenta la pastilla del header Y las
   // celdas de CÓMO ESTÁ HOY (una sola verdad, un solo fetch).
   const [senal, setSenal] = useState<SenalesHogarMascota | null>(null);
+  /** A8 — las fuentes de la cuenta de pendientes. Su DEFINICIÓN no vive acá:
+   *  vive en `lib/pendientes.ts`, que es la pieza que el Hogar también monta. */
+  const [solicitudes, setSolicitudes] = useState<{ mascotaId: string | null }[]>([]);
+  const [presupuestos, setPresupuestos] = useState<{ mascotaId: string | null }[]>([]);
+  const [porCoordinar, setPorCoordinar] = useState<{ mascotaId: string | null }[]>([]);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
   /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
@@ -467,6 +476,42 @@ export default function PerfilDeMascota() {
           if (!vigente || !eh.ok) return;
           setSenal(eh.data.senales.find((x) => x.mascota_id === mascotaId) ?? null);
         });
+        /**
+         * A8 — LAS TRES FUENTES QUE ESTA PANTALLA NO TENÍA.
+         *
+         * `obtenerEstadoHogar` ya daba tres de las seis clases (vacuna · cita ·
+         * carnet). Las otras tres son lectores propios, y **no se derivan de
+         * nada que el perfil ya tenga**: sin ellas la cuenta del perfil sería
+         * un subconjunto de la del Hogar, y dos números distintos para lo mismo
+         * es exactamente lo que A8 viene a cerrar.
+         *
+         * ⚠️ COSTO DECLARADO: son **+3 viajes al abrir el perfil** (familia
+         * D-497, el piso de performance). Los tres son family-wide y ya se
+         * pagan al abrir el Hogar; acá se vuelven a pagar porque el perfil es
+         * alcanzable por deep-link sin pasar por el Hogar. Si el piso aprieta,
+         * la cura es un caché con invalidación en foco, no borrar la cuenta.
+         *
+         * Un fallo NO cuenta como cero (L-178): deja las listas vacías y el
+         * conteo no promete que no haya nada — dice lo que pudo leer.
+         */
+        void obtenerSolicitudesPendientesDueno().then((s) => {
+          if (!vigente || !s.ok) return;
+          setSolicitudes(s.data.filter((x) => x.mascotaId === mascotaId));
+        });
+        void obtenerPresupuestosFamilia().then((pr) => {
+          if (!vigente || !pr.ok) return;
+          setPresupuestos(
+            pr.data.filter((x) => x.estadoEfectivo === 'enviado' && x.mascotaId === mascotaId),
+          );
+        });
+        void obtenerCitasActivasHogar([mascotaId]).then((rc) => {
+          if (!vigente || !rc.ok) return;
+          setPorCoordinar(
+            rc.data
+              .filter((c) => c.estado === 'por_coordinar')
+              .map((c) => ({ mascotaId: c.mascota_id })),
+          );
+        });
       })();
       return () => {
         vigente = false;
@@ -525,6 +570,36 @@ export default function PerfilDeMascota() {
         )
       : null;
   const pastilla = vozEstadoHogar?.voz ?? null;
+
+  /**
+   * A8 — LA CUENTA DE PENDIENTES, JUNTO A LA PASTILLA.
+   *
+   * Las dos conviven a la vista porque **son dos verdades distintas y ninguna
+   * miente**: la pastilla habla del CUIDADO (vacunas · emergencias · atención,
+   * vía `calcularVozHogar`) y esto cuenta LO QUE ESPERA. Thor puede estar al
+   * día en su cuidado y tener un presupuesto sin responder — el founder leyó
+   * «Al día» junto a un badge «1» y sonó a contradicción, y no lo era: la
+   * pastilla no decía de QUÉ estaba al día.
+   *
+   * El número sale de `lib/pendientes.ts`, **la misma pieza que monta el
+   * Hogar**: si esta pantalla lo re-implementara, las dos contarían distinto
+   * el día que nazca una clase nueva (letra de mesa, adoptada antes de que
+   * existiera este segundo consumidor).
+   *
+   * Memorial apaga, igual que en el Hogar y por la misma razón estructural.
+   */
+  const pendientes = esMemorial
+    ? 0
+    : contarPendientesDe(mascota.id, {
+        solicitudes,
+        presupuestos,
+        porCoordinar,
+        tieneAlertaDeVacuna:
+          vozEstadoHogar !== null &&
+          vozEstadoHogar.voz === 'pideAtencion' &&
+          vozEstadoHogar.causa !== 'emergencia',
+        sinNingunaVacuna: senal !== null && senal.vacunas_total === 0,
+      });
   const momento =
     umbrales !== null
       ? calcularMomentoVital({
@@ -576,8 +651,24 @@ export default function PerfilDeMascota() {
    * Leer esta constante es leer la ficha entera de un sujeto.
    */
   const monta = esAcuario
-    ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false }
-    : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true };
+    ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false, documentos: false }
+    : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true, documentos: true };
+  /**
+   * 🔎 `documentos: false` — re-gate del founder: **el acuario ofrecía CARNET
+   * DE VACUNAS**. La composición de P7 alcanza también a los papeles, y esto
+   * es la línea que lo dice: entra ARRIBA, con sus hermanas, y no como un `if`
+   * suelto abajo (§6 — ocho condiciones repartidas es como una se olvida, que
+   * es literalmente lo que pasó con ésta).
+   *
+   * **Por qué la sección ENTERA y no solo el carnet:** los cuatro papeles de
+   * hoy son de un INDIVIDUO —carnet de vacunas, historia clínica, receta y
+   * ficha de identidad—. Dejar la ficha sola imprimiría especie, sexo y
+   * microchip de un acuario, que es la misma clase de mentira con otro papel.
+   *
+   * ⚠️ NO decide que un acuario no tenga papeles nunca: decide que **los que
+   * hay hoy no son suyos**. Sus papeles necesitan su propia letra y viven en
+   * el arco del acuario (D-685). Hasta entonces: ausente, no vacío.
+   */
 
   const tipoAgua = mascota.tipo_agua;
 
@@ -824,6 +915,27 @@ export default function PerfilDeMascota() {
                             ? t('perfil.pastillaAtencion')
                             : t('perfil.pastillaConociendo')}
                       </Texto>
+                      {/* A8 · LA SEGUNDA VERDAD, al lado y no en lugar de la
+                          primera. Va en la MISMA pastilla a propósito: dos
+                          píldoras separadas se leerían como dos estados en
+                          competencia, y esto no compite — completa. El punto
+                          separador es terciario para que el peso siga siendo
+                          del estado de cuidado.
+                          Cero pendientes = NADA, jamás «0 por revisar»: un cero
+                          dicho es ruido, y la ausencia ya es la buena noticia
+                          (la misma firma que «Ponte al día» desapareciendo). */}
+                      {pendientes > 0 ? (
+                        <>
+                          <Texto variante="dato" color="tertiary">
+                            ·
+                          </Texto>
+                          <Texto variante="dato" color="secondary">
+                            {pendientes === 1
+                              ? t('perfil.pastillaPendientesUno')
+                              : t('perfil.pastillaPendientes', { n: pendientes })}
+                          </Texto>
+                        </>
+                      ) : null}
                     </View>
                   ) : null}
                 </Pressable>
@@ -1276,6 +1388,7 @@ export default function PerfilDeMascota() {
             puso: lo que la familia observa es historia, no una sección aparte.
             Ley 37: acá no queda un hueco, queda nada. */}
 
+        {monta.documentos ? (
         <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
           <Tarjeta relleno="ninguno" elevacion="reposo">
             <CeldaNavegacion
@@ -1308,6 +1421,7 @@ export default function PerfilDeMascota() {
             </View>
           ) : null}
         </View>
+        ) : null}
 
         {/* ── ⑥ SU HISTORIA — dentro de la ficha lleva UN SOLO EJE: el de
             SERVICIO con su glifo (el tramo temporal vive en la pantalla

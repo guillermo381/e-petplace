@@ -69,7 +69,20 @@ export const FAMILIA_DE_TIPO: Record<
   // ni a un oficio: lo que la familia observa no es un servicio, y meterlo en
   // una casilla ajena haría que el chip de ese oficio mintiera sobre lo que
   // agrupa.
-  bitacora_familia_registrada: 'bitacora',
+  // ⚠️ EL CÓDIGO ES `bitacora_familia`, SIN sufijo — medido contra la DB viva
+  // (`select tipo … where tipo ilike '%bitacora%'` → `bitacora_familia`, 2
+  // filas). Acá decía `bitacora_familia_registrada` por simetría con sus
+  // vecinos (`atencion_paseo_registrada`, `vacuna_aplicada`…), y esa simetría
+  // era una SUPOSICIÓN, no un dato.
+  //
+  // Lo que costó, y es lo que vale registrar: un tipo que no está en el mapa
+  // devuelve `undefined`, y `undefined` **no rompe nada** — el color cae a
+  // `null` y la fila se dibuja SIN canto, y su chip de filtro no matchea
+  // nunca. Dos defectos silenciosos de una sola letra. **Ningún typecheck lo
+  // ve, porque el índice es `Record<string, …>`**: la clave inventada es un
+  // string válido. Es L-192 en su forma más barata de producir y más cara de
+  // encontrar.
+  bitacora_familia: 'bitacora',
   atencion_paseo_registrada: 'paseos',
   atencion_grooming_registrada: 'estetica',
   atencion_adiestramiento_registrada: 'adiestramiento',

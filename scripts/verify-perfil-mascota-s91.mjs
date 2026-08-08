@@ -17,14 +17,18 @@ const check = (c, n) => { console.log(`${c ? '  ok  ' : '  EN ROJO  '}${n}`); if
 
 const CASOS = [
   { id: 'perro', especie: 'perro', nombre: 'PerfilThor', raza: 'Labrador retriever', origen: 'adoptado',
-    presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Contanos algo de hoy'],
+    presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Cuéntanos algo de'],
     ausentes: [] },
   { id: 'gato', especie: 'gato', nombre: 'PerfilMishi', raza: 'Gato Común', origen: 'encontrado',
-    presentes: ['Cómo está hoy', 'Contanos algo de hoy'], ausentes: [] },
+    presentes: ['Cómo está hoy', 'Cuéntanos algo de'], ausentes: [] },
   { id: 'acuario', especie: 'pez', nombre: 'PerfilAcuario', agua: 'dulce',
-    presentes: ['Agua', 'Contanos algo de hoy'],
+    presentes: ['Agua', 'Cuéntanos algo de'],
     // P7 · lo que un acuario NO tiene. Ausentes, no apagados.
-    ausentes: ['¿Es macho o hembra?', 'Peso', 'Vacunas', 'Raza'] },
+    // 'Documentos' entra al re-gate del founder: el acuario OFRECÍA carnet de
+    // vacunas. Los cuatro papeles de hoy son de un individuo, así que la
+    // sección entera no se monta — y esto lo prueba POR SECCIÓN, que es lo
+    // único que caza una composición declarada y no cableada.
+    ausentes: ['¿Es macho o hembra?', 'Peso', 'Vacunas', 'Raza', 'Documentos'] },
 ];
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
@@ -86,6 +90,70 @@ for (const caso of CASOS) {
     check(t.includes('Labrador retriever'), 'P3 · la raza, en Identidad');
   }
   if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
+
+  /**
+   * SONDA DE LA CAJA DE LA PUERTA (re-gate del founder, ley A6 «sin caja»).
+   *
+   * Tres lecturas del ÁRBOL dijeron que la puerta no tiene fondo
+   * (`CeldaNavegacion` es un Pressable transparente y el perfil la envuelve en
+   * un View con solo padding). El founder ve una caja blanca. **Cuando el
+   * código y el ojo no coinciden, gana el ojo y se mide el DOM VIVO** — leer
+   * el árbol otra vez sería la cuarta vez de lo mismo.
+   *
+   * Sube desde el texto de la puerta anotando quién pinta fondo. El primero
+   * que no sea transparente ES la caja, con su tamaño para reconocerlo.
+   */
+  if (caso.id === 'perro') {
+    const cadena = await page.evaluate(() => {
+      const todos = Array.from(document.querySelectorAll('*'));
+      const nodo = todos.reverse().find((e) => (e.textContent ?? '').startsWith('Cuéntanos algo de'));
+      if (!nodo) return ['(no encontré la puerta)'];
+      const salida = [];
+      let n = nodo;
+      for (let i = 0; i < 10 && n; i += 1) {
+        const cs = getComputedStyle(n);
+        const r = n.getBoundingClientRect();
+        salida.push(
+          `${i}: <${n.tagName.toLowerCase()}> bg=${cs.backgroundColor} radio=${cs.borderRadius} sombra=${cs.boxShadow.slice(0, 30)} ${Math.round(r.width)}x${Math.round(r.height)}`,
+        );
+        n = n.parentElement;
+      }
+      return salida;
+    });
+    /**
+     * LA CAPTURA DEL CHIP CON CARA (re-gate ①) — y por qué se toma ACÁ.
+     *
+     * El verificador del alta NO puede mostrarla: `cat_razas` concede SELECT
+     * solo a `authenticated` (`grant_anon=0`, medido) y ese arnés corre sin
+     * sesión, así que la grilla le sale vacía. Este arnés SÍ tiene sesión —
+     * crea sus cuentas—, y el perfil monta EL MISMO `SelectorDeRaza` en su
+     * Hoja de edición. La misma foto prueba dos cosas: la cara en el chip y
+     * que la Hoja de A5 ya scrollea sin tapar el campo.
+     */
+    /**
+     * ⚠️ EL OVERLAY SE RETIRA ANTES DE TOCAR, no antes de disparar.
+     * `#error-overlay` de expo-web (dev) **intercepta los pointer events**:
+     * dejó tres capturas negras y, cuando quise capturar el chip, se comió el
+     * click entero (60 reintentos de Playwright contra él). Es la trampa que
+     * S53 ya había registrado — *el overlay no tapa la foto: tapa el dedo*.
+     * Es andamio del entorno, jamás producto.
+     */
+    const sinOverlay = () =>
+      page.evaluate(() => {
+        document
+          .querySelectorAll('#error-overlay, #error-toast, [class*="LogBox"]')
+          .forEach((n) => n.remove());
+      });
+    await sinOverlay();
+    await page.getByText('Raza', { exact: false }).first().click();
+    await new Promise((r) => setTimeout(r, 2800));
+    await sinOverlay();
+    await page.screenshot({ path: 'scripts/capturas/s91d-chip-con-cara.png', fullPage: true });
+
+    console.log('\n  -- sonda de la caja de la puerta --');
+    cadena.forEach((l) => console.log('   ', l));
+    console.log('');
+  }
   await page.screenshot({ path: `scripts/capturas/s91d-perfil-${caso.id}.png`, fullPage: true });
   await ctx.close();
 }

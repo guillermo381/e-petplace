@@ -110,6 +110,8 @@ import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -809,11 +811,31 @@ export default function Hogar() {
               })),
           );
         });
+        /**
+         * ③ (re-gate del founder) — LA CARA DE GALERÍA LLEGA A LA TILE.
+         *
+         * Antes este mapa solo tenía FOTOS REALES, y encima solo se poblaba
+         * `if (paths.length > 0)`: una familia sin ninguna foto subida no
+         * entraba nunca al `then` y la tile se quedaba con la huella, mientras
+         * el perfil de la misma mascota ya mostraba su raza. **Dos caras para
+         * un animal.**
+         *
+         * Ahora se siembra PRIMERO la cara de galería —síncrona, sin red— y la
+         * foto real se superpone cuando resuelve. El orden importa: la galería
+         * es el mientras tanto, la foto propia gana siempre.
+         */
+        const caras: Record<string, string> = {};
+        lista.forEach((m) => {
+          const cara = caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.raza_ruta_imagen });
+          if (cara !== undefined) caras[m.id] = cara;
+        });
+        setFotos(caras);
+
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
           void resolverUrlsFotos(paths).then((urls) => {
             if (!vigente) return;
-            const porMascota: Record<string, string> = {};
+            const porMascota: Record<string, string> = { ...caras };
             lista.forEach((m) => {
               const url = m.foto_url ? urls.get(m.foto_url) : undefined;
               if (url) porMascota[m.id] = url;
@@ -898,23 +920,25 @@ export default function Hogar() {
     detalleMono?: boolean;
     onPress: () => void;
   };
+  /** A8: vive AFUERA del IIFE porque ahora tiene dos lectores — las filas y el
+   *  conteo. Adentro, el conteo habría tenido que re-calcularla. */
+  const vozDe = (id: string) => {
+    const s = senalesPorMascota.get(id);
+    if (!s) return null;
+    return calcularVozHogar(
+      {
+        tieneEmergenciaActiva: s.tiene_emergencia_activa,
+        vacunasTotal: s.vacunas_total,
+        ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+        proximaVacuna: s.proxima_vacuna,
+        ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+      },
+      hoy,
+    );
+  };
   const filasReco: FilaReco_[] = (() => {
     if (esMemorial) return [];
     const ahora = Date.now();
-    const vozDe = (id: string) => {
-      const s = senalesPorMascota.get(id);
-      if (!s) return null;
-      return calcularVozHogar(
-        {
-          tieneEmergenciaActiva: s.tiene_emergencia_activa,
-          vacunasTotal: s.vacunas_total,
-          ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
-          proximaVacuna: s.proxima_vacuna,
-          ultimaAtencionCerrada: s.ultima_atencion_cerrada,
-        },
-        hoy,
-      );
-    };
     const filas: FilaReco_[] = [
       ...solicitudesPend.map((s): FilaReco_ => {
         const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
@@ -1027,7 +1051,64 @@ export default function Hogar() {
     ];
     return filas;
   })();
-  const pendientesDe = (id: string) => filasReco.filter((f) => f.mascotaId === id).length;
+  /**
+   * A8 (S91-D) — EL CONTEO SALE DE LA LIB, NO DE LAS FILAS.
+   *
+   * Antes esto era `filasReco.filter(...).length`, y funcionaba: acá las filas
+   * SON los pendientes. Pero el perfil también necesita el número y no tiene
+   * estas filas —son de esta pantalla, con su router y sus glifos—, así que
+   * derivar del render dejaba una sola salida: que el perfil lo re-escribiera.
+   * **La definición sube a `lib/pendientes.ts` y las dos superficies la
+   * consumen** (letra de mesa, adoptada antes de que existiera el 2º consumidor).
+   */
+  const fuentesDe = (id: string): FuentesDePendientes => {
+    const s = senalesPorMascota.get(id);
+    const voz = vozDe(id);
+    return {
+      solicitudes: solicitudesPend,
+      presupuestos: presupuestosPend,
+      porCoordinar,
+      tieneAlertaDeVacuna: voz !== null && voz.voz === 'pideAtencion' && voz.causa !== 'emergencia',
+      sinNingunaVacuna: s !== undefined && s.vacunas_total === 0,
+    };
+  };
+  /** ⚠️ El apagado de MEMORIAL vive acá y no en la lib, y es a propósito: la
+   *  lib es dato puro y memorial es un modo de la casa. Un memorial no tiene
+   *  pendientes —no se le agenda, no se le cobra, no se le vacuna— y ése es un
+   *  apagado ESTRUCTURAL, no un filtro. (Sin esto mi propio chequeo gritaría:
+   *  `filasReco` ya devuelve `[]` en memorial.) */
+  const pendientesDe = (id: string) => (esMemorial ? 0 : contarPendientesDe(id, fuentesDe(id)));
+
+  /**
+   * ⚠️ EL CHEQUEO QUE VUELVE RUIDOSA LA DIVERGENCIA.
+   *
+   * El modo de falla de esta extracción es EL SILENCIO (L-192): si mañana nace
+   * una séptima clase de fila acá y nadie la agrega a la lib, las dos siguen
+   * compilando y las dos siguen mostrando un número creíble — solo que
+   * distinto en cada pantalla. Esto lo convierte en un aviso en la consola de
+   * dev, con la mascota y los dos números, en vez de en un bug que se descubre
+   * cuando un usuario los compara.
+   */
+  if (__DEV__) {
+    for (const m of Array.isArray(mascotas) ? mascotas : []) {
+      // ⚠️ `cita-` SE EXCLUYE del cotejo, por firma de mesa: la fila SIGUE
+      // existiendo en «Ponte al día» (una cita agendada es información que el
+      // dueño quiere ver) pero NO cuenta como pendiente, porque «N por
+      // resolver» no puede incluir algo que no se resuelve. La lista y el
+      // contador dejan de ser lo mismo, y por eso el cotejo lo dice acá en vez
+      // de disparar un falso aviso en cada arranque.
+      const porFilas = filasReco.filter(
+        (f) => f.mascotaId === m.id && !f.key.startsWith('cita-'),
+      ).length;
+      const porLib = pendientesDe(m.id);
+      if (porFilas !== porLib) {
+        console.warn(
+          `[pendientes] ${m.nombre}: las filas dicen ${porFilas} y la lib ${porLib}. ` +
+            'Nació una clase de fila que lib/pendientes.ts no conoce.',
+        );
+      }
+    }
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
