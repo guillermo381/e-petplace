@@ -77,6 +77,16 @@ export type IconoNombre =
   //    propio. Éste es el propio. ✅ FIRMADO por la mesa el 7-ago-2026 y
   //    el préstamo RETIRADO en S91-B (`apps/cliente/src/lib/papeles.ts`).
   | 'receta'
+  // ── S91-B · DOCUMENTOS, en DOS CANDIDATOS (molde prime/primeCorona: el
+  //    founder elige a 21px y el perdedor muere con su lápida).
+  //    NACE PORQUE NO HAY GLIFO LIBRE, y está medido: `documento` hace
+  //    TRIPLE turno (historia_clinica · ficha_identidad · la entrada a
+  //    Documentos del hogar) y `carnet` está tomado por las vacunas. Tres
+  //    iguales en una sección abierta es la clase D-546.
+  //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
+  //    es lo que lo distingue de `documento` (que es UNA cédula con
+  //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
+  | 'documentos' | 'documentosSobre'
   // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
   //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
   //    glifo mientras sus hermanas tienen el suyo — y las dos salidas
@@ -770,6 +780,41 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // rombo. Cero graduaciones, cero píldoras satélite: a 21px son ruido.
   // Grilla 24 · trazo 1.9 · aire 3.4 arriba (el más ajustado, medido).
   // La huella baja-izquierda con el mismo gesto que `vacuna`/`bitacora`.
+  // ── S91-B · CANDIDATO A — EL APILADO. **El plural ES el dibujo**: dos
+  // hojas desplazadas. Es lo único que separa «los documentos» de «un
+  // documento» sin inventar un objeto que no existe.
+  // ⚠️ SU PRIMERA VERSIÓN FALLÓ SU PROPIO GATE, y queda escrito porque la
+  // medición es el aporte: con DOS rectángulos COMPLETOS desplazados 3, a
+  // 21px se leía **un cuadrado dentro de otro** —concéntrico—, no un
+  // apilado. Era el riesgo que se había declarado y resultó real.
+  // LA CURA: la hoja de atrás deja de ser un rectángulo y pasa a ser lo
+  // ÚNICO que se vería de ella — su esquina superior derecha (una L). Con
+  // eso el ojo lee dos planos en vez de dos marcos. Rasterizado a 21px y
+  // mirado antes de dejarlo, no supuesto.
+  // Densidad 2 + huella; grilla 24 · trazo 1.9 · aire 3.5 arriba.
+  documentos: ({ tinta, huella }) => (
+    <>
+      <Path d="M11 3.5H21.5V14" {...trazo(tinta)} />
+      <Path d="M7.5 7H18V17.5H7.5Z" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
+  // ── S91-B · CANDIDATO B — EL SOBRE. Silueta LIBRE en todo el registry
+  // (rectángulo + V), y la más legible a 21px de las dos: la V es un
+  // gesto grande, no un detalle.
+  // ⚠️ SU RIESGO, y es de SIGNIFICADO, no de tamaño — **CONFIRMADO en el
+  // rasterizado a 21px, que es lo que lo vuelve un dato y no una opinión:
+  // se lee nítido y se lee «correo».** El sobre es más legible que el
+  // apilado; lo que dice está mal. Y arrastra un costo que el founder
+  // decide, no yo: si gana, la casa se queda sin su glifo de correo para
+  // el día que el centro de avisos crezca.
+  documentosSobre: ({ tinta, huella }) => (
+    <>
+      <Path d="M6.5 5.5H21V16H6.5Z" {...trazo(tinta)} />
+      <Path d="M6.5 5.5 13.75 11.5 21 5.5" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
   receta: ({ tinta, huella }) => (
     <>
       <Path
@@ -1080,6 +1125,10 @@ export function Icono({
     // `caso`, `vacuna` y `carnet`. No va a `ocre`/CONSUMO aunque nombre
     // un medicamento: la receta no vende, indica.
     receta: identidad,
+    // S91-B: los papeles del hogar son del EXPEDIENTE — misma capa que sus
+    // hermanos (`documento`, `carnet`, `receta`), no una categoría nueva.
+    documentos: identidad,
+    documentosSobre: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un
