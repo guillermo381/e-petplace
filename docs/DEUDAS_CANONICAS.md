@@ -9427,3 +9427,51 @@ mueva el filtro y encienda `recursosUi` sin saber por qué estaba afuera.
 > queda fuera queda fuera por decisión medida — no por la forma de un filtro.
 
 **Origen: S91-B (medición de B sobre su propio guard, elevada a mesa).**
+
+#### D-690 — 🟡 BORRAR UNA MASCOTA DEVUELVE ÉXITO Y NO BORRA NADA (el silencio, no la denegación)
+
+**Descubierto intentándolo (S91-A, el E2E de razas/acuario):** el dueño llama
+`from('mascotas').delete().eq('id', …)` con su propia mascota, **PostgREST
+responde 200 sin error y no se borra ni una fila**. El script lo cazó solo
+porque tiene un chequeo de RESIDUO — sin ese chequeo, el borrado habría
+pasado por hecho.
+
+**Medido, la causa exacta:** `mascotas` tiene DOS policies DELETE —
+`mascotas_delete_admin` (`is_admin()`) y `mascotas_delete_codueño`
+(`_user_es_codueño_mascota(id, auth.uid())`, la tabla **LEGACY** de codueños
+que el alta por RPC **no puebla**). El titular de la familia no entra por
+ninguna de las dos. Bajo RLS, una fila que no matchea no es un rechazo: es
+una fila que **no existe** para ese caller — y borrar cero filas es un éxito
+perfectamente válido para Postgres.
+
+**⚠️ Y LA LECTURA FÁCIL ES PROBABLEMENTE LA EQUIVOCADA: esto casi seguro NO
+es un permiso faltante.** El expediente de una mascota **no es borrable por
+diseño** — el camino de la casa es el MEMORIAL, y la ley de correcciones dice
+que *corregir es AGREGAR* (D-544). *Si eso es así, la ausencia de policy es
+la letra, igual que la ausencia del FK en `cat_razas`.*
+
+**Lo que SÍ es defecto, sin depender de esa decisión: que el intento no lo
+diga.** Es L-192 en su forma exacta —una operación cuyo modo de falla es el
+silencio— y su costo real no es este script: es la próxima superficie que
+ofrezca «eliminar» y muestre un toast de éxito sobre una fila que sigue viva.
+
+**LAS DOS MITADES, separadas porque tienen dueños distintos:**
+- **(a) DE LETRA (mesa):** ¿el dueño puede borrar una mascota, o el camino es
+  memorial y nada más? Roza **D-337** (eliminar cuenta, requisito de tiendas)
+  y **D-544**. Hasta que se firme, nadie construye un botón de borrar.
+- **(b) DE MOTOR (A), y NO espera a (a):** el borrado que no puede ocurrir
+  tiene que **decirlo**. Sea con un guard tipado en un wrapper, sea con la
+  regla escrita de que esa tabla no se borra desde el producto.
+
+**Mitigación vigente, declarada:** el fixture
+`scripts/verify-razas-acuario-s91.mjs` mide el residuo, **imprime los ids** y
+se pone ROJO cuando no pudo limpiar; la limpieza se hace SERVER-SIDE por A
+(relevando FKs antes, regla 41). *El gate no miente: dice que quedó residuo.*
+
+> **☠️ DISPARO: la primera superficie que ofrezca borrar una mascota** — o el
+> loop de seguridad de S92, que ya mira esta clase de agujeros silenciosos.
+> **☠️ MUERTE:** intentar borrar una mascota que no se puede borrar devuelve
+> un error TIPADO, y la letra de si se puede o no está firmada.
+
+**Origen: S91-A (hallazgo del chequeo de residuo del E2E — el borrado se creía
+hecho desde que el script existe).**

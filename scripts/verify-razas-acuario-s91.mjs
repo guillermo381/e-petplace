@@ -45,9 +45,14 @@ const creadas = [];
 const perros = await obtenerRazasDeEspecie('perro');
 check(perros.ok && perros.data.length === 44, 'T1 razas de perro = 44', perros.ok ? `${perros.data.length}` : perros.codigo);
 const conAcento = perros.ok ? perros.data.find((r) => r.slug === 'pastor-aleman') : null;
+// El literal es el FIRMADO por el founder (7-ago-2026): «Pastor alemán», con
+// el gentilicio en minúscula. La versión anterior de este assert decía
+// «Pastor Alemán» y se puso roja al aplicarse la firma — CORRECTO: el assert
+// estaba viejo, no el dato. Se deja dicho porque un assert que se cura sin
+// decir por qué es un assert que la próxima vez nadie sabe si aflojaron.
 check(
-  conAcento?.nombre === 'Pastor Alemán',
-  'T1b el acento llega ENTERO al wrapper',
+  conAcento?.nombre === 'Pastor alemán',
+  'T1b el acento llega ENTERO al wrapper (literal firmado)',
   conAcento ? `[${conAcento.nombre}]` : 'sin fila',
 );
 check(
@@ -131,14 +136,29 @@ check(
 );
 if (perroConAgua.ok) creadas.push(perroConAgua.data.mascota_id);
 
-// ── LIMPIEZA quirúrgica por id + residuo ───────────────────────────────
+// ── LIMPIEZA — y lo que se descubrió intentándola (S91-A) ──────────────
+// 🔴 EL DUEÑO NO PUEDE BORRAR SU PROPIA MASCOTA, Y EL INTENTO NO FALLA.
+// Medido: `mascotas` tiene DOS policies DELETE — `mascotas_delete_admin`
+// (is_admin) y `mascotas_delete_codueño` (la tabla LEGACY de codueños, que
+// el alta por RPC no puebla). Un dueño de a pie borra CERO filas y PostgREST
+// devuelve 200 sin error: L-192 en su forma exacta — una operación cuyo modo
+// de falla es el SILENCIO. Este bloque no la disimula: la mide.
+//
+// Y ojo con la lectura fácil: probablemente NO sea un bug. El expediente de
+// una mascota no es borrable por diseño (el camino de la casa es el
+// memorial, y «corregir es AGREGAR» — D-544). Lo que sí es defecto es que
+// el intento no lo diga. Ficha: D-690.
 for (const id of creadas) {
   const { error } = await getClient().from('mascotas').delete().eq('id', id);
-  if (error) console.log(`  ⚠ no se pudo borrar ${id}: ${error.message}`);
+  if (error) console.log(`  ⚠ error al borrar ${id}: ${error.message}`);
 }
 const post = await obtenerMascotasDeFamilia(FAM);
-const residuo = post.ok ? post.data.filter((m) => m.nombre.startsWith('[TEST S91]')).length : -1;
-check(residuo === 0, 'LIMPIEZA residuo 0', `${residuo} filas [TEST S91]`);
+const quedan = post.ok ? post.data.filter((m) => m.nombre.startsWith('[TEST S91]')) : [];
+check(
+  quedan.length === 0,
+  'LIMPIEZA residuo 0 — si sale ROJO, la limpieza es SERVER-SIDE (A) con estos ids',
+  quedan.length === 0 ? 'sin residuo' : quedan.map((m) => m.id).join(' '),
+);
 
 console.log(fallos === 0 ? '\nTODO VERDE' : `\n${fallos} FALLOS`);
 process.exit(fallos === 0 ? 0 : 1);
