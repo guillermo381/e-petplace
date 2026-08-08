@@ -38,7 +38,9 @@ import {
   SelectorOpcion,
   Tarjeta,
   Texto,
+  coincidenciasPrimero,
   spacing,
+  sugerir,
   useAviso,
   useTheme,
   useTraduccionUi,
@@ -62,17 +64,20 @@ import { FiltroPills } from '@/components/filtro-pills';
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
 // acentos, palabras de ≥4 letras.
-const normalizarVoz = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-const palabrasDe = (s: string) =>
-  normalizarVoz(s)
-    .split(/[^a-z0-9]+/)
-    .filter((p) => p.length >= 4);
+// S91-B — LA IMPLEMENTACIÓN SUBIÓ A `@epetplace/ui` (`sugerencias.ts`)
+// porque el alta de mascota necesita el MISMO matching para la RAZA: se
+// GENERALIZA, no se clona (§6 del método). Los DEFAULTS de la pieza son
+// los que esta pantalla tenía, así que su conducta no cambió — hay un
+// fixture de REGRESIÓN que lo prueba sobre el vocabulario VIVO
+// (`scripts/verify-sugerencias.ts`, brazo ①: implementa la versión vieja
+// verbatim y exige salida idéntica).
+//
+// Lo único que queda acá es la VOZ —qué texto del chip se compara, que
+// depende del idioma—, y queda a propósito: §6 firma que se comparte la
+// FORMA y jamás la voz. La pieza normaliza adentro, así que esto ya no
+// normaliza: devuelve el literal.
 const vozDelChip = (v: ChipVocabularioAgrupado, idioma: string) =>
-  normalizarVoz(idioma === 'en' ? v.nombre_familia_en : v.nombre_familia);
+  idioma === 'en' ? v.nombre_familia_en : v.nombre_familia;
 
 export default function BitacoraFamilia() {
   const { theme } = useTheme();
@@ -141,43 +146,30 @@ export default function BitacoraFamilia() {
 
   // §7 (S65) — el texto libre autocompleta sobre el vocabulario VIGENTE
   // (jamás propone vocabulario nuevo): las palabras escritas se comparan
-  // sin acentos contra la voz de familia del idioma activo.
-  const sugerencias = useMemo(() => {
-    // palabras de ≥4 letras del texto entero: "cuando salimos lloró"
-    // sugiere "Lloró cuando salimos" aunque la frase no coincida literal
-    const palabras = palabrasDe(texto);
-    if (palabras.length === 0) return [];
-    // ranking por palabras coincidentes: una palabra común ("cuando")
-    // no desplaza a la coincidencia específica dentro del tope de 4
-    return vocabulario
-      .map((v) => {
-        const voz = vozDelChip(v, idioma);
-        return { v, puntaje: palabras.filter((p) => voz.includes(p)).length };
-      })
-      .filter((s) => s.puntaje > 0)
-      .sort((a, b) => b.puntaje - a.puntaje)
-      .slice(0, 4)
-      .map((s) => s.v);
-  }, [texto, vocabulario, idioma]);
+  // sin acentos contra la voz de familia del idioma activo. "cuando
+  // salimos lloró" sugiere "Lloró cuando salimos" aunque la frase no
+  // coincida literal. Los defaults de la pieza (mínimo 4 · contiene ·
+  // tope 4) son los que esta pantalla siempre tuvo: se omiten porque
+  // escribirlos acá invitaría a "afinarlos" desde una pantalla.
+  const sugerencias = useMemo(
+    () => sugerir(vocabulario, { texto, vozDe: (v) => vozDelChip(v, idioma) }),
+    [texto, vocabulario, idioma],
+  );
 
   // S65→S81 — el filtro rápido sobre los chips (MISMO matching que el
   // autocompletado): mientras hay palabras, las coincidencias van
   // PRIMERO dentro de su grupo (mostrar primero, no esconder: todo
   // chip sigue alcanzable). El auto-expandir murió con el acordeón.
-  const palabrasFiltro = useMemo(() => palabrasDe(filtro), [filtro]);
-  const filtrando = palabrasFiltro.length > 0;
   const gruposRender = useMemo(
     () =>
-      gruposVocabulario.map((g) => {
-        if (!filtrando) return { ...g, itemsRender: g.items };
-        const con = g.items.filter((v) => {
-          const voz = vozDelChip(v, idioma);
-          return palabrasFiltro.some((p) => voz.includes(p));
-        });
-        if (con.length === 0) return { ...g, itemsRender: g.items };
-        return { ...g, itemsRender: [...con, ...g.items.filter((v) => !con.includes(v))] };
-      }),
-    [gruposVocabulario, palabrasFiltro, filtrando, idioma],
+      gruposVocabulario.map((g) => ({
+        ...g,
+        itemsRender: coincidenciasPrimero(g.items, {
+          texto: filtro,
+          vozDe: (v) => vozDelChip(v, idioma),
+        }),
+      })),
+    [gruposVocabulario, filtro, idioma],
   );
 
   const alternarChip = (codigo: string) =>
