@@ -534,6 +534,50 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 **LA EVIDENCIA — el incidente C17 (S83), medido:** el `git status --porcelain` salió **vacío en el paso ①** y el árbol estaba **sucio durante el publish**; el ancla salió **con asterisco**. Lo sucio eran **dos `.md`**, así que **el bundle salió limpio de CASUALIDAD, no por diseño** — un `.tsx` en esa misma ventana habría viajado adentro del OTA sin que nadie lo supiera. *(Forense de la ventana: el commit de docs de A es de las 22:51:26 y el siguiente de C de las 22:52:21 — la veda corrió en el medio.)*
 
+> ### ⚠️ ENMIENDA S91 — EL ASTERISCO NO ES UN REGISTRO: ES UN DESTELLO
+>
+> **Corrección de premisa, medida por C y verificada por A contra el objeto
+> (8-ago-2026).** El canon viene tratando el asterisco del ancla —desde S74 y
+> en este mismo párrafo de arriba— **como una marca que queda y se puede
+> auditar después.** No queda.
+>
+> **Lo medido:** el registro publicado de un update **no expone NINGÚN campo
+> de estado del árbol.** `eas update:view --json` devuelve exactamente estos
+> campos: `branch · createdAt · gitCommitHash · group · id ·
+> isRollBackToEmbedded · manifestPermalink · message · platform ·
+> runtimeVersion`. **Cero campos con `dirty`, `clean`, `tree` o `work`.** El
+> asterisco vive SOLO en la salida del CLI, en el instante del publish, y
+> desaparece con la terminal.
+>
+> **Las tres consecuencias, y la tercera es la que cambia decisiones:**
+>
+> 1. **Un publish pasado NO se puede auditar por limpieza.** Se puede saber
+>    de qué commit salió (`gitCommitHash`); **no se puede saber si había
+>    trabajo sin commitear encima.** Ese dato no existe en ninguna parte.
+> 2. **La ausencia de asterisco en un acta vieja NO prueba que el árbol
+>    estuviera limpio** — prueba, como mucho, que nadie lo transcribió. *Y es
+>    exactamente la clase de dato que S84 nombró: uno que dice «sí» se
+>    descubre al chocar; uno que no dice nada no se descubre nunca.*
+> 3. **⇒ El paso ⓪ y el guard son la ÚNICA red, no una red entre varias.**
+>    No hay verificación posterior que los respalde. Por eso la veda pasó de
+>    aviso a mecanismo en S91: `node scripts/verify-veda-publish.mjs`
+>    **rechaza el publish con árbol sucio**, que es el único momento en que
+>    este modo de falla es visible (enmienda en `METODO_TRES_PISTAS` §2).
+>
+> **Lo que el asterisco SÍ obliga, y sigue vigente:** si aparece en la
+> terminal, **se transcribe en el momento** — es su única oportunidad de
+> existir. El acta de S74 que lo escribió (`582b3d0*`) hizo lo correcto; lo
+> equivocado era creer que se podía volver a mirar.
+>
+> **Y un hallazgo hermano de la misma medición, que no lo tenía nadie: EL
+> ANCLA ESCRITA A MANO PUEDE MENTIR.** Medido en S91: un publish declaró en
+> su mensaje «ancla `f4c9a134`» y su `gitCommitHash` real fue `5012db53` —un
+> commit de OTRA pista— porque el árbol avanzó entre el commit propio y el
+> bundling. **Eso sí queda registrado y sí se puede auditar**, y hay que
+> hacerlo: quien verifique «por contenido» contra el ancla del *mensaje*
+> (regla 84 ②) puede estar verificando el commit equivocado **y obtener
+> verde**. El ancla se lee de `gitCommitHash`, jamás del texto del mensaje.
+
 **LA CAUSA, y es lo que fija la forma de la regla: la mesa descongeló a A para registrar el tercer verbo y NO la re-congeló al abrir la veda de C17.** **El error no fue de A ni de C** — A trabajó descongelada por orden expresa, y C bundleó con una confirmación que en su momento fue verdadera. **Fue de la mesa.** Y de ahí sale la única conclusión que importa para el diseño de la regla: **el protocolo tiene que sobrevivir a una mesa distraída.** Por eso el paso ⓪ **es de quien publica y no de quien coordina** — el que tiene el costo de un ancla sucia es el único con incentivo garantizado de verificar, y **una regla que depende de que el coordinador se acuerde ya falló una vez acá**.
 
 **Cruce con D-586 — ES LA MISMA CLASE EN OTRO PLANO: trabajo concurrente sobre un recurso compartido.** D-586 es el **índice** compartido; ésta es el **árbol de trabajo** compartido. **El worktree por pista (regla 85) curó el índice y NO cura ésta**, porque el OTA se publica desde el directorio de `main` — que sigue siendo de todos. **Candidata anotada para S84: medir `eas update` desde un worktree.** Si funciona, cierra las dos de raíz — el ancla deja de depender de que nadie toque el árbol, y el paso ⓪ pasa a ser red y no puerta. Es la misma candidata que la letra founder de arriba dejó abierta (worktree-detached), ahora **con un segundo incidente que la respalda**.

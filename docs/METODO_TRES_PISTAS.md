@@ -85,7 +85,7 @@ en el contrato):*
    >
    > | # | qué pasó | qué enseña |
    > |---|---|---|
-   > | ① | El ancla salió **con asterisco**: al bundlear había un verify script de otra pista modificado | el asterisco se imprime y nadie frena — **está en la salida, no en el camino** |
+   > | ① | El ancla salió **con asterisco**: al bundlear había un verify script de otra pista modificado | el asterisco **se imprime una vez y desaparece** — ver la corrección de abajo |
    > | ② | Se publicó con `packages/api` **sin commitear**: código que no vivía en NINGÚN commit viajó al teléfono | el bundle puede contener lo que ningún commit contiene |
    > | ③ | Un publish declaró «ancla `f4c9a134`» y su `gitCommitHash` real fue **`5012db53`** —un commit de OTRA pista— porque el árbol avanzó entre el commit propio y el bundling | **EL ANCLA ESCRITA A MANO MIENTE**, y nadie lo había nombrado |
    >
@@ -111,6 +111,25 @@ en el contrato):*
    > **Lo que el guard NO reemplaza:** avisar a la mesa sigue siendo cortesía
    > y buena práctica. Lo que deja de depender del aviso es el modo de falla
    > **silencioso**, que es el caro.
+   >
+   > ### ⚠️ CORRECCIÓN S91 — POR QUÉ ESTE GUARD NO TIENE SUPLENTE
+   >
+   > **Medido (C midió, A verificó contra el objeto):** el registro publicado
+   > **no guarda el estado del árbol.** `eas update:view --json` expone
+   > `branch · createdAt · gitCommitHash · group · id · isRollBackToEmbedded ·
+   > manifestPermalink · message · platform · runtimeVersion` — y **nada** con
+   > `dirty`, `clean` o `tree`. **El asterisco existe solo en la terminal, en
+   > el instante del publish.**
+   >
+   > **⇒ Un publish sucio es INAUDITABLE después.** Se puede saber de qué
+   > commit salió; no se puede saber si había WIP encima. Por eso este guard
+   > no es «una capa más»: **es la única**, y correrlo no es prolijidad — es
+   > la diferencia entre saber y no poder saber nunca.
+   >
+   > *Corolario para las actas: si el asterisco aparece, se transcribe EN EL
+   > MOMENTO. Y la ausencia de asterisco en un acta vieja no prueba árbol
+   > limpio — prueba que nadie lo escribió.*
+   > (Enmienda gemela en `CONTRATO_TRABAJO`, enmienda S83 de la regla 82.)
    >
    > **Su límite, declarado:** el guard mira el árbol **en el instante en que
    > corre**. Si alguien escribe entre el guard y el `eas update`, no lo ve.
