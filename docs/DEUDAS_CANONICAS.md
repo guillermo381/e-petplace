@@ -10110,3 +10110,57 @@ diagnósticos correctos sobre la tabla equivocada** (misma familia que el caso
 > de Aurora, que sí tiene con qué dibujarse).
 > **☠️ DISPARO:** el reclutamiento de la cohorte real — un negocio sin zona no
 > se puede ofertar por geografía (la firma S79 ya lo rige).
+
+---
+
+#### D-699 — 🟡 «TU NEGOCIO»: DOS EJES QUE HOY COINCIDEN, y el día que no, alguien ve una puerta que lo rechaza
+
+**Medido por C (S91).** La celda **«Tu negocio» se muestra** según
+`prestadores.user_id`, y **el destino valida** según
+`cuentas_comerciales.owner_profile_id`. **Son dos ejes distintos.** Hoy
+coinciden en los 7 prestadores vivos, así que nadie lo nota — *y ese es
+exactamente el problema: un desalineamiento que no se puede ver no se puede
+arreglar antes de que duela.*
+
+El día que un titular tenga su cuenta comercial a nombre de otro perfil
+(sociedad, cambio de titularidad, la fila-dueño de D-515), **la celda se le
+dibuja y el destino lo rechaza** — la Ley 23 al revés: la puerta ofrece lo que
+va a rechazar.
+
+**No se cura hoy** porque no hay caso y porque unificar el eje es decisión de
+modelo, no de pantalla: hay que decidir **cuál de los dos manda**.
+
+> **Dueños: C** (la celda) · **A** (si el eje se unifica en motor).
+> **☠️ DISPARO:** el próximo arco que toque **cuenta comercial o roles**.
+> **☠️ MUERTE:** mostrar y validar leen el MISMO eje.
+
+---
+
+#### D-700 — ⚪ EL HELPER QUE NO SE CONSTRUYÓ: ocho policies con el EXISTS crudo sobre `prestadores`
+
+**Propuesta de C durante el incidente del 42501 (S91), NO ejecutada y por eso
+registrada.** Ocho policies hacen `EXISTS (SELECT 1 FROM prestadores p WHERE
+p.cuenta_comercial_id = …)` **directo sobre la tabla**, así que **quedan atadas
+a los GRANTS de columna de `prestadores`**: cualquier revoke futuro sobre una
+columna que ese EXISTS toque las rompe todas de nuevo, y el síntoma aparece
+lejos (un titular que no abre su negocio, un vet que no abre un caso).
+
+**La cura correcta es la que C propuso:** mover el EXISTS a un **helper
+`SECURITY DEFINER`** — patrón de la casa, mismo que `user_gestiona_prestador` —
+para que la policy **no dependa de los permisos de tabla del que consulta.**
+
+**Por qué no se hizo en S91, dicho sin adorno:** el incidente se curó con un
+GRANT de una línea el día del gate de cierre. **Cirugía sobre ocho puertas —una
+de ellas clínica— sin gate que las mire habría sido cambiar un incidente
+conocido por un riesgo desconocido.** El grant restaura; el helper endurece, y
+endurecer se hace con tiempo.
+
+**Las ocho, censadas:** `cuentas_comerciales` ×2 · `caso_clinico` ·
+`caso_clinico_consultor` · `certificado_salud` ·
+`cobro_presencial_registrado` · `mascota_acceso_prestador` · `prestadores`.
+
+> **Dueño: A.**
+> **☠️ DISPARO: S92 (el loop de seguridad)** — encaja exacto con su norte, y su
+> parentesco con D-686 (grants `anon` en tablas legacy) lo vuelve la misma
+> pasada.
+> **☠️ MUERTE:** ninguna policy consulta `prestadores` sin helper.
