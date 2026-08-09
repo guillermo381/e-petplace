@@ -75,3 +75,67 @@ la regla no distingue. **Las borré en el mismo turno y verifiqué residuo 0**
 (`pg_proc where proname like '_sonda_d_s91%'` → 0). Queda declarado acá en vez de
 quedar en silencio, porque el próximo que mida con este método tiene que saber
 que el camino correcto era pedirle la sonda a A.
+
+---
+
+# SEGUNDA MEDICIÓN — POR EL CAMINO DE LA APP (no por SQL)
+
+> La mesa lo nombró exacto: *alguien está midiendo un lector distinto del que la
+> pantalla llama*. Y me incluía. Mi primera medición corrió por SQL, dentro de
+> una función que yo creé — **un lector medido en otro transporte no es el
+> lector**: PostgREST pasa por otro rol, otro pool y exige GRANT de EXECUTE
+> sobre las RPC, que un `perform` directo no ejerce igual.
+>
+> Instrumento: `scripts/sonda-grooming-camino-real-s91.mjs`. Abre la pantalla de
+> verdad con una sesión creada por la app y **transcribe lo que sale por el
+> cable** — cada request con su status y, si falla, su cuerpo crudo. No
+> interpreta.
+
+## ① LA LISTA COMPLETA, EN ORDEN — lo que el hub llama al montar
+
+| # | llamada | status |
+|:-:|---|:-:|
+| 1 | `rpc/get_estado_onboarding_dueno` | **200** |
+| 2 | `tipos_servicio?select=especies_elegibles&categoria=eq.grooming&activo=eq.true` | **200** |
+| 3 | `prestador_servicio_tallas?…&prestador_servicios.tipo_servicio=in.(grooming,grooming_completo)` | **200** |
+| 4 | `mascotas?select=…&familia_id=eq.…&order=fecha_alta.asc` | **200** |
+| 5 | `cat_razas?select=especie,nombre,ruta_imagen&nombre=in.(…)` | **200** |
+| 6-7 | `storage/…/especies-razas/{gato,perro}/generico.webp` | **200** |
+
+## ② CUÁL REBOTA: **NINGUNA**, en DOS reproducciones
+
+* **Hogar simple** (un perro): la pantalla carga.
+* **SU HOGAR EXACTO** — perro · gato · **acuario** · conejo, o sea dos especies
+  que el grooming no sirve y un sujeto que no es individuo: **la pantalla
+  carga igual**, y muestra «Baño», «Baño y corte» y la tira de días.
+
+⇒ **El camino de código está sano, y está sano con la forma de sus datos.** No
+es la composición, no es la elegibilidad, no es el catálogo, no es un 42501.
+
+## ③ ¿ES DE RED? — no se puede descartar, y la voz puede estar diciendo la verdad
+
+«Revisá tu conexión» es literal. Con la cadena verde en dos reproducciones, los
+candidatos que quedan son **de su sesión o de su transporte**: un token que no
+refrescó (un 401 en UNA de las siete), o la red del dispositivo.
+
+**EL DISCRIMINADOR CUESTA UN TOQUE, y es suyo:** cuando rebote, **tocar
+Reintentar**.
+* Si a la segunda carga → **transporte**. La voz decía la verdad y no hay bug de
+  permisos que buscar.
+* Si rebota SIEMPRE, con el mismo bundle → **es su sesión**, y ahí sí hay que
+  leer su consola: el `status` de esas siete llamadas en SU dispositivo es el
+  único dato que no tengo.
+
+## ④ LO QUE SÍ QUEDA COMO DEFECTO, y es de C
+
+Que esto llevara cinco vueltas tiene una causa concreta y arreglable: **las tres
+ramas de error del hub dicen la misma frase**. Con un detalle por rama —«no
+pudimos cargar tus mascotas» / «…la oferta» / «…los horarios»— el primer reporte
+del founder habría apuntado al lector, y ninguna de estas mediciones habría hecho
+falta.
+
+## ⚠️ RESIDUO DECLARADO
+
+La sonda **crea dos cuentas desechables y NO las borra** (misma convención que
+los verify: las declara). Son `s91d-groom-*@epetplace.dev` — la última,
+`s91d-groom-1786237298354`, con cuatro mascotas de prueba.
