@@ -11549,6 +11549,8 @@ defecto que se curó hoy en el cambio de clave.
 
   **La forma exigible, en dos:** ① cuando **tres mediciones seguidas salen sanas**, la hipótesis no se afina: **se cambia de pregunta** — tres verdes seguidos son un dato sobre el marco, no sobre el sistema; ② y el instrumento va **donde el síntoma se manifiesta**, no donde uno supone que está la causa. *La primera versión del instrumento quedó en el modal equivocado y no midió nada, lo que costó una vuelta entera y es la misma lección en chiquito.*
 
+  **⚖️ SU OTRA CARA, y es la que evita que esta lección se lea mal (founder, cierre de la jornada):** *medir bien no es en vano aunque la hipótesis caiga.* De las seis hipótesis, **cinco se descartaron — y tres de ellas encontraron defectos REALES en el camino**: el `.then` sin `catch` que dejaba el hook mudo para siempre, **D-725** (`is_admin()` volatile en 239 policies) y **D-728** (las pantallas que recargan al abrir una hoja, la punta de la lentitud general). **Ninguno era la causa; los tres eran defectos.** *Lo caro nunca fue medir: fue no corregir la pregunta a tiempo.* **Esta lección pide cambiar de pregunta después de tres verdes seguidos, no dejar de medir** — quien la lea al revés va a terminar adivinando, que es exactamente lo que L-220 castiga.
+
   **Su hermana:** **L-220** dice que verificar sobre el propio resumen da un verde falso. Ésta dice que **medir el lugar equivocado da un rojo verdadero e inútil**. Las dos se curan igual: con un dato que venga de afuera de la propia cabeza. Origen: S92-BIS (P0-C, tres diagnósticos y una traza).
 
 - **L-220 — CERTIFIQUÉ MI PROPIO RESUMEN Y SALIÓ VERDE: es L-192 del lado de quien verifica (S92-BIS).**
@@ -11987,8 +11989,43 @@ delante**.
 > **② se descarta activamente**: su riesgo es de la misma familia que el bug que
 > acabamos de pasar tres tandas curando.
 >
-> **Dueño: founder (decisión de diseño) + A (ejecución).**
-> **☠️ DISPARO: la primera sesión que toque el arco de reserva o la navegación
-> del cliente.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
+> ### ✅ DECISIÓN FIRMADA (founder, 9-ago) — OPCIÓN ①, EN SESIÓN PROPIA
+>
+> **Se extrae el flujo de reserva a una pieza compartida: una fuente, dos
+> consumidores.** La ficha del prestador **reserva de verdad**; la lista deja de
+> ser el único lugar que sabe hacerlo.
+>
+> **② queda DESCARTADA por decisión del founder, con su razón:** *un estado que
+> sobrevive a la navegación es la misma familia del bug de esta jornada.*
+>
+> **Y va en SESIÓN PROPIA, no de arrastre** (firmado): es refactor de la
+> pantalla más grande del cliente —897 líneas— horas después de cerrar un P0
+> que vivía justo ahí.
+>
+> ### 📋 PARA EL ARRANQUE DE ESA SESIÓN — los tres puntos, en orden
+>
+> **① EL BLOQUEANTE PREVIO SE RESUELVE PRIMERO.** La ficha recibe
+> `prestadorId` + `ofertaId` y **nada más**: no tiene **fecha, hora ni
+> duración**, que es lo que el hold necesita. **Es barato** —ya viajan por URL
+> en la lista— **pero sin eso no funciona ningún camino**, así que va antes que
+> cualquier extracción.
+>
+> **② LA LETRA VIGENTE QUEDA CORREGIDA: son CINCO Hojas de flujo, no tres.**
+> `senal-reserva.ts` dice «hasta tres» y el censo dio cinco:
+> `eligiendoMascota` · `plan` · `preguntaSocial` · `socialNo` · `conSaldo`
+> (más tres de estado/error, que no son del flujo). *La letra se corrige acá y
+> también en su archivo cuando la sesión lo toque — dos letras que no coinciden
+> son peores que una equivocada.*
+>
+> **③ LA UNIDAD A EXTRAER ES EL FLUJO, NO LAS HOJAS.** Montar las Hojas en la
+> ficha es trivial: son componentes, y tres de las cinco ya son piezas propias.
+> **Lo caro es de dónde sacan su estado y quién decide abrirlas** — hoy eso vive
+> en `alElegir` / `alElegirMascota`, con el espejo vivo, `mascotas`,
+> `faseEspecies` y `elegibles` detrás. **Mover las Hojas sin esa lógica es
+> exactamente el clon que hay que evitar**, y sería la segunda verdad que
+> `senal-reserva.ts` rechazó desde el principio.
+
+> **Dueño: founder (decidió) → A (ejecuta en sesión propia).**
+> **☠️ DISPARO: la sesión que el founder abra para esto.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
 > gesto, sin pantallas intermedias visibles. Origen: S92-BIS, prueba del
 > founder en los cuatro oficios.

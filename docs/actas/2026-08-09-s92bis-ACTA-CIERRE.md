@@ -608,3 +608,55 @@ correctos**, y las tres que sí encontraron algo —el `.catch` mudo, D-725, D-7
 **no eran la causa pero eran defectos reales**. *Medir bien nunca es en vano; lo
 que hay que corregir a tiempo es la pregunta.* Y lo que la corrigió **siempre**
 fue el mismo instrumento: **un dato del aparato**.
+
+---
+
+## ⑯ LA LECCIÓN DE NEGOCIO DE LA JORNADA (founder, verbatim en su idea)
+
+> **Medir bien no es en vano aunque la hipótesis caiga. Lo que sale caro es no
+> corregir la pregunta a tiempo.**
+
+**Y esta jornada lo probó de las dos maneras a la vez.** De las **seis**
+hipótesis del P0-C, **cinco se descartaron** — y **tres de esas cinco
+encontraron defectos reales que hoy tienen ficha propia**:
+
+| hipótesis descartada | lo que encontró igual |
+|---|---|
+| promesa colgada en el hook | el **`.then` sin `catch`**: una promesa rechazada dejaba el catálogo en `cargando` **para siempre y en silencio**. Curado. |
+| RLS / policies | **D-725** — `is_admin()` es `VOLATILE` y vive en **239 policies**: se re-evalúa por fila. Hoy cuesta 3 ms con 6 mascotas; **es defecto de escala** |
+| bucle de foco | **D-728** — las pantallas **recargan todo al abrir una hoja**, y en 7 de 8 no se nota porque cargan rápido. **Es la punta del ovillo de «la app se siente lenta»** |
+
+**Ninguno era la causa. Los tres eran defectos.** Sin esas mediciones —todas
+sobre hipótesis equivocadas— **no existirían tres de las fichas más útiles del
+día**, incluida la que le da punto de partida medido a la sesión de performance.
+
+**El costo no estuvo en medir: estuvo en tardar en cambiar de pregunta.** Por
+eso **L-221 se depositó con sus dos caras**: la que ordena cambiar de pregunta
+tras tres verdes seguidos, y ésta, que impide leerla como «medir de menos».
+*Quien la lea al revés va a terminar adivinando — que es justo lo que L-220
+castiga.*
+
+---
+
+## ⑰ D-730 — DECISIÓN FIRMADA: LA FICHA VA A RESERVAR DE VERDAD
+
+**Opción ① firmada por el founder: extraer el flujo de reserva a una pieza
+compartida** —una fuente, dos consumidores—, **en SESIÓN PROPIA y no de
+arrastre** (también firmado). **② descartada por el founder con su razón:** *un
+estado que sobrevive a la navegación es la misma familia del bug de hoy.*
+
+**El re-encuadre fue del founder y cambió la ficha entera:** el «preview» **es**
+la ficha del prestador, y su botón **está en el lugar correcto** — el flujo que
+él quiere es el que ya existe. **Lo que está mal es que la ficha no ejecuta la
+reserva: se la delega a la lista.** *El paso final vive en el lugar equivocado, y
+el parpadeo era solo cómo eso se filtraba a la vista.* La deuda dejó de ser de
+navegación y pasó a ser de **arquitectura del flujo de reserva**.
+
+**Y medir antes de costear corrigió dos cosas de la letra vigente:**
+· **el flujo pesado es SOLO del paseo** — 9 Hojas contra 0/0/1 de los otros tres
+oficios, que es exactamente por qué ellos reservan de una y el paseo no;
+· **son CINCO Hojas de flujo, no tres** como declara `senal-reserva.ts`.
+· Y el bloqueante que ninguna opción evita: **la ficha no recibe fecha, hora ni
+duración**, que es lo que el hold necesita.
+
+Los tres puntos de arranque quedaron escritos en la ficha, en orden.
