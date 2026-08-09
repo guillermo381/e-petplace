@@ -1,0 +1,22 @@
+[
+ {
+  "etiqueta": "POST /rpc/get_estado_onboarding_dueno",
+  "ms": 644,
+  "detalle": "HTTP 401"
+ },
+ {
+  "etiqueta": "GET /mascotas?familia_id=eq.…",
+  "ms": 245,
+  "detalle": "HTTP 200 · 0 fila(s)"
+ },
+ {
+  "etiqueta": "GET /tipos_servicio (catálogo del paseo)",
+  "ms": 197,
+  "detalle": "HTTP 200 · 0 fila(s)"
+ },
+ {
+  "etiqueta": "POST /auth/v1/token (¿el transporte de auth?)",
+  "ms": 354,
+  "detalle": "HTTP 400 (se espera 400: mide el VIAJE, no el login)"
+ }
+]
