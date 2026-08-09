@@ -19,3 +19,7 @@ undefined/
 # sobre `eas build --local` — el APK queda en apps/<app>/ y jamás entra
 # al repo; el artefacto canónico vive en EAS o en el dispositivo)
 apps/*/build-*.apk
+
+# Permisos locales de Claude Code — de ESTA máquina, jamás al repo
+**/.claude/settings.local.json
+**/.claude/settings.local.json.bak-*
