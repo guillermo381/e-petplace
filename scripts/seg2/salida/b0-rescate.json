@@ -1,0 +1,51 @@
+[
+ {
+  "rama": "pista/s86-b",
+  "archivo": "scripts/verify-rutas.mjs",
+  "accion": "RESCATADO",
+  "bytes": 11427,
+  "lineas": 250
+ },
+ {
+  "rama": "pista/s87-b",
+  "archivo": "docs/relevamientos/2026-08-06-s89b-acta-cierre.md",
+  "accion": "RESCATADO",
+  "bytes": 10625,
+  "lineas": 162
+ },
+ {
+  "rama": "pista/s87-c",
+  "archivo": "docs/relevamientos/2026-08-07-s89c-ESTADO-cierre.md",
+  "accion": "RESCATADO",
+  "bytes": 14989,
+  "lineas": 246
+ },
+ {
+  "rama": "pista/s87-d",
+  "archivo": "docs/relevamientos/2026-08-07-s89d-estado-de-cierre.md",
+  "accion": "RESCATADO",
+  "bytes": 8944,
+  "lineas": 146
+ },
+ {
+  "rama": "pista/s90-d",
+  "archivo": "docs/relevamientos/2026-08-07-s90-D-CIERRE.md",
+  "accion": "RESCATADO",
+  "bytes": 18852,
+  "lineas": 355
+ },
+ {
+  "rama": "pista/s91-b",
+  "archivo": "docs/relevamientos/2026-08-08-s91b-CIERRE.md",
+  "accion": "RESCATADO",
+  "bytes": 15546,
+  "lineas": 193
+ },
+ {
+  "rama": "pista/s91-d",
+  "archivo": "docs/relevamientos/2026-08-08-s91d-CIERRE.md",
+  "accion": "RESCATADO",
+  "bytes": 22753,
+  "lineas": 393
+ }
+]

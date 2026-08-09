@@ -1,0 +1,81 @@
+[
+ {
+  "rama": "pista/s86-b",
+  "commits": 2,
+  "asuntos": [
+   "4897a30e feat(S86-B): R31 — la voz del wrapper no se pinta (D-539)",
+   "47d9b1da feat(S86-B): verify-rutas — ningún camino lleva a una pantalla que no existe"
+  ],
+  "archivos": 3,
+  "faltantes_en_main": [
+   "scripts/verify-rutas.mjs"
+  ]
+ },
+ {
+  "rama": "pista/s87-b",
+  "commits": 1,
+  "asuntos": [
+   "8c2d722a docs(S89-B): ACTA DE CIERRE — lo construido (oro medido/firmado/pintado con su excepción a A · pata-p"
+  ],
+  "archivos": 3,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-06-s89b-acta-cierre.md"
+  ]
+ },
+ {
+  "rama": "pista/s87-c",
+  "commits": 1,
+  "asuntos": [
+   "f8b092ce docs(S89-C · cierre): EL ESTADO DE LA PISTA — lo pagado con su prueba (D-656 con el bloqueo REPRODUCI"
+  ],
+  "archivos": 1,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-07-s89c-ESTADO-cierre.md"
+  ]
+ },
+ {
+  "rama": "pista/s87-d",
+  "commits": 1,
+  "asuntos": [
+   "68453889 docs(S89-D · cierre): EL ESTADO DE LA PISTA DEL CLIENTE — los nueve commits del día con su asunto, el"
+  ],
+  "archivos": 2,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-07-s89d-estado-de-cierre.md"
+  ]
+ },
+ {
+  "rama": "pista/s90-d",
+  "commits": 2,
+  "asuntos": [
+   "92ccb04f cierre(S90-D · enmienda): LOS TRES PAPELES DEL GATE, AL DÍA — regenerados con la marca de agua de A (",
+   "7869cfa3 cierre(S90-D): EL VOLCADO DE LA PISTA D — lo que solo vivía en su contexto: la medición de D-379 en l"
+  ],
+  "archivos": 4,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-07-s90-D-CIERRE.md"
+  ]
+ },
+ {
+  "rama": "pista/s91-b",
+  "commits": 1,
+  "asuntos": [
+   "a3bb3801 cierre(S91-B): EL VOLCADO — lo que la sesión aprendió, antes de que el contexto se pierda. ① Lo entre"
+  ],
+  "archivos": 1,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-08-s91b-CIERRE.md"
+  ]
+ },
+ {
+  "rama": "pista/s91-d",
+  "commits": 1,
+  "asuntos": [
+   "68529d40 cierre(S91-D): EL ACTA DE LA PISTA D — lo entregado con su CAUSA, y la familia de verdes falsos que e"
+  ],
+  "archivos": 1,
+  "faltantes_en_main": [
+   "docs/relevamientos/2026-08-08-s91d-CIERRE.md"
+  ]
+ }
+]
