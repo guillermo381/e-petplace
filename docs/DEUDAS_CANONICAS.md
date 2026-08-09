@@ -10917,9 +10917,59 @@ con `crear_cliente_walkin` y funcionó;
 que nadie la usa:** cero invocaciones `functions.invoke('chat-ayuda')` en el
 monorepo *(no censado en los repos vecinos)*.
 
-> **Dueño: A.** **☠️ DISPARO: S93**, junto con D-714 (es su quinta mitad).
-> **☠️ MUERTE:** o tiene fuente versionada y guard, o no está desplegada.
-> Origen: S92-BIS.
+> ### ✏️ ENMIENDA (S92-BIS, 9-ago) — **RESCATADA**, y el indicio de arriba quedó CORREGIDO por la medición
+>
+> **El founder decidió darla de baja y ordenó MEDIR ANTES DE BORRAR.** Los
+> cuatro puntos, medidos:
+>
+> **① RESCATE — HECHO.** `supabase functions download chat-ayuda` funcionó:
+> **11 261 bytes** recuperados y commiteados **sin tocar una línea**, con un
+> `RESCATE.md` al lado que declara lo que el archivo no puede declarar de sí
+> mismo. *Una function sin fuente que se borra se pierde entera.*
+>
+> **② ¿LA LLAMA ALGUIEN? — SÍ, UNO, y el indicio original estaba incompleto.**
+> Barridos **los 17 repos** con `.git` bajo `~/proyectos/ePetPlace` (sin lista a
+> mano — el censo de `.env` de esta misma sesión ya se equivocó por usar una):
+> **`e-petplace-v2/src/components/HelpButton.tsx:71`** →
+> `supabase.functions.invoke('chat-ayuda', …)`. **El botón de ayuda de la web
+> legacy.** *La ficha decía «cero en el monorepo (no censado en los vecinos)» —
+> era honesta y estaba incompleta; ahora está censado.* Es **la misma web** cuyo
+> checkout usa `email_exists`, y sobre la que el founder ya firmó *«al aire pero
+> sin uso, ni yo la visito»*.
+>
+> **③ ¿GASTA PLATA? — SÍ.** `api.anthropic.com`, modelo
+> **`claude-haiku-4-5-20251001`**, con `ANTHROPIC_API_KEY`. Y era **la única de
+> las cinco facturables que respondía 200 con la anon key del bundle** — o sea
+> la única que un desconocido podía hacer correr de verdad.
+>
+> **④ LOGS DE INVOCACIÓN — NO MEDIBLE desde acá, y se dice (R5).** Esta versión
+> del CLI **no tiene `supabase functions logs`** (medido: `UnknownSubcommand`).
+> Las invocaciones viven en **Dashboard → Edge Functions → chat-ayuda → Logs /
+> Invocations**, y ahí las puede ver el founder en un minuto. **No se rellena
+> con una estimación.**
+>
+> **EL DATO QUE INCLINA LA DECISIÓN, y no estaba en la pregunta:** su
+> `KNOWLEDGE` embebido describe **la app v2** —carrito, checkout, guest
+> checkout— y un **«índice de salud» con puntaje numérico** que **contradice
+> `MODELO_LOYALTY` §3** (la moneda es invisible: nunca score en UI). *No es solo
+> una function sin uso: es una function que, si alguien la usa, le contesta con
+> el producto equivocado y con una voz que el canon prohíbe.*
+>
+> **RECOMENDACIÓN, con las dos opciones y su costo:**
+> **(a) BORRARLA** — corta el gasto y el riesgo de una vez; **rompe el botón de
+> ayuda de v2**, que hoy nadie visita. Reversible: la fuente ya está en el repo
+> y `deploy` la revive.
+> **(b) DEJARLA con el guard de sesión** (4 líneas, como sus cuatro hermanas) —
+> conserva el botón para quien caiga en v2, pero **sigue contestando con el
+> producto viejo**, que es el problema que no se arregla con un guard.
+> **Voto de la pista: (a).** *Mantener viva una boca que habla del producto de
+> hace dos versiones cuesta más que el botón que se pierde.*
+>
+> **NO SE BORRÓ EN ESTA CORRIDA** (orden explícita del founder).
+
+> **Dueño: founder (decide) → A (ejecuta).** **☠️ DISPARO: la palabra del
+> founder.** **☠️ MUERTE:** o tiene fuente versionada y guard, o no está
+> desplegada. Origen: S92-BIS.
 
 #### D-718 — 🟠 PODAR LOS WORKTREES MUERTOS — firmado por el founder, con ventana propia
 

@@ -1,0 +1,18 @@
+{
+ "repos": 17,
+ "invocaciones": [
+  {
+   "repo": "e-petplace",
+   "archivo": "docs/DEUDAS_CANONICAS.md",
+   "clase": "INVOCACIÓN",
+   "linea": "docs/DEUDAS_CANONICAS.md:10917:que nadie la usa:** cero invocaciones `functions.invoke('chat-ayuda')` en el"
+  },
+  {
+   "repo": "e-petplace-v2",
+   "archivo": "src/components/HelpButton.tsx",
+   "clase": "INVOCACIÓN",
+   "linea": "src/components/HelpButton.tsx:71:      const { data, error } = await supabase.functions.invoke('chat-ayuda', {"
+  }
+ ],
+ "otras": 60
+}
