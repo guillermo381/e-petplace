@@ -158,6 +158,17 @@ export const clienteEs = {
     entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
+    // S91-C · LAS VOCES POR RAMA (orden de mesa, hallazgo de D). Tres
+    // lectores caían en UNA frase —«no pudimos cargar el grooming» con
+    // Reintentar— y dos de ellos ni eso: hacían `return` y se callaban.
+    // Un síntoma que no se puede accionar es tan caro como el defecto que
+    // oculta: el caso del founder llevó cuatro vueltas por esto.
+    // Y la CONEXIÓN se nombra SOLO cuando es red: si la rama sabe que
+    // falló un lector, lo dice.
+    falloServicios: 'No pudimos traer tu historial de {{servicio}}',
+    falloMascotas: 'No pudimos traer tus mascotas',
+    falloCatalogo: 'No pudimos saber qué mascotas aplican a este servicio',
+    falloDetalle: 'El resto de la pantalla funciona. Prueba de nuevo.',
     titulo: 'Tu hogar',
     // saludo por franja horaria (S52-P2a — voz del lote gateado)
     saludoManana: 'Buenos días',

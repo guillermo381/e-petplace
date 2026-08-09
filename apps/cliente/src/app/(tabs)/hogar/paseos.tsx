@@ -112,6 +112,17 @@ export default function MisPaseos() {
   // r12-11: el CTA deshabilitado SIGUE TOCABLE y, al tocarlo, señala la
   // hilera: nunca un botón muerto que no responde.
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  /** S91-C · EL FALLO CON NOMBRE Y CÓDIGO (orden de mesa, hallazgo de D).
+   *  Las ramas de este hub caían en UNA frase —y dos de ellas ni eso:
+   *  hacían `if (!r.ok) return` y desaparecían EN SILENCIO—. Un síntoma
+   *  que no se puede accionar es tan caro como el defecto que oculta: el
+   *  caso del founder llevó CINCO vueltas por esto. Cada rama dice cuál
+   *  es y trae el código CRUDO del wrapper. */
+  const [fallos, setFallos] = useState<{ rama: string; codigo: string }[]>([]);
+  const sumarFallo = useCallback((rama: string, codigo: string) => {
+    setFallos((prev) => (prev.some((f) => f.rama === rama) ? prev : [...prev, { rama, codigo }]));
+  }, []);
+
   const scrollRef = useRef<ScrollView>(null);
   const [planes, setPlanes] = useState<PlanPaseo[] | 'cargando' | 'error'>('cargando');
   const [citas, setCitas] = useState<Record<string, CitaDePlan[]>>({});
@@ -137,9 +148,12 @@ export default function MisPaseos() {
     setPlanes('cargando');
     // r12: las mascotas del hogar alimentan el PRIMER filtro
     void getEstadoOnboardingDueno().then(async (e) => {
-      if (!e.ok || e.data.familia_id === null) return;
+      // ⚠️ ANTES ERA `return` A SECAS — el lector fallaba y la pantalla
+      // se callaba: el filtro de mascotas no aparecía y nadie decía por qué.
+      if (!e.ok) return sumarFallo('mascotas', e.codigo);
+      if (e.data.familia_id === null) return sumarFallo('mascotas', 'sin_familia');
       const r = await obtenerMascotasDeFamilia(e.data.familia_id);
-      if (!r.ok) return;
+      if (!r.ok) return sumarFallo('mascotas', r.codigo);
       const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       setMascotasHogar(
@@ -431,7 +445,8 @@ export default function MisPaseos() {
       ) : planes === 'error' ? (
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
-            titulo={t('cuenta.errorCargar')}
+            titulo={t('hogar.falloServicios', { servicio: t('hogar.railPaseos').toLowerCase() })}
+            descripcion={`${t('hogar.falloDetalle')}\n${fallos.map((f) => `${f.rama}: ${f.codigo}`).join(' · ')}`}
             accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={cargar} />}
           />
         </View>

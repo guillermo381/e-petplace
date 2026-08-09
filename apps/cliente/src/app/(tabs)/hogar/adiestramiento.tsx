@@ -118,6 +118,17 @@ export default function HubAdiestramiento() {
   const [vista, setVista] = useState<'proximos' | 'historial'>('proximos');
   const [citas, setCitas] = useState<AdiestramientoDelHogar[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
+  /** S91-C · EL FALLO CON NOMBRE Y CÓDIGO (orden de mesa, hallazgo de D).
+   *  Las ramas de este hub caían en UNA frase —y dos de ellas ni eso:
+   *  hacían `if (!r.ok) return` y desaparecían EN SILENCIO—. Un síntoma
+   *  que no se puede accionar es tan caro como el defecto que oculta: el
+   *  caso del founder llevó CINCO vueltas por esto. Cada rama dice cuál
+   *  es y trae el código CRUDO del wrapper. */
+  const [fallos, setFallos] = useState<{ rama: string; codigo: string }[]>([]);
+  const sumarFallo = useCallback((rama: string, codigo: string) => {
+    setFallos((prev) => (prev.some((f) => f.rama === rama) ? prev : [...prev, { rama, codigo }]));
+  }, []);
+
   const faseEspecies = useEspeciesElegibles('adiestramiento');
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
@@ -129,6 +140,7 @@ export default function HubAdiestramiento() {
     setCitas('cargando');
     void obtenerMisAdiestramientos().then((r) => {
       setCitas(r.ok ? r.data : 'error');
+      if (!r.ok) sumarFallo('servicios', r.codigo);
     });
   }, []);
 
@@ -138,9 +150,16 @@ export default function HubAdiestramiento() {
       let vigente = true;
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
-        if (!vigente || !estado.ok || !estado.data.familia_id) return;
+        if (!vigente) return;
+        // ⚠️ ANTES ERA UN `return` A SECAS: el lector fallaba y la pantalla
+        // se callaba — el filtro de mascotas no aparecía y nadie decía por
+        // qué. El `!vigente` SÍ vuelve mudo, y está bien: no es un fallo,
+        // es la pantalla que se fue.
+        if (!estado.ok) return sumarFallo('mascotas', estado.codigo);
+        if (!estado.data.familia_id) return sumarFallo('mascotas', 'sin_familia');
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (!vigente || !r.ok) return;
+        if (!vigente) return;
+        if (!r.ok) return sumarFallo('mascotas', r.codigo);
         setMascotas(r.data);
         // ⚠️ r43 · LAS FOTOS, AHORA SÍ. El lector trae `foto_url` (un PATH
         // del bucket privado), y pintarlo directo no muestra nada: hay que
@@ -261,8 +280,8 @@ export default function HubAdiestramiento() {
           </EsqueletoGrupo>
         ) : citas === 'error' ? (
           <EstadoVacio
-            titulo={t('adiestramiento.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
+            titulo={t('hogar.falloServicios', { servicio: t('hogar.railAdiestramiento').toLowerCase() })}
+            descripcion={`${t('hogar.falloDetalle')}\n${fallos.map((f) => `${f.rama}: ${f.codigo}`).join(' · ')}`}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
           />
         ) : visibles.length === 0 ? (

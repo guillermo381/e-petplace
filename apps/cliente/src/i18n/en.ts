@@ -126,6 +126,10 @@ export const clienteEn = {
     entradaDetalle: 'Each with their own story.',
   },
   hogar: {
+    falloServicios: "We couldn't load your {{servicio}} history",
+    falloMascotas: "We couldn't load your pets",
+    falloCatalogo: "We couldn't tell which pets apply to this service",
+    falloDetalle: 'The rest of the screen works. Try again.',
     titulo: 'Your home',
     saludoManana: 'Good morning',
     saludoTarde: 'Good afternoon',

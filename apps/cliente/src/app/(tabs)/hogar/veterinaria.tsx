@@ -102,6 +102,17 @@ export default function LogVeterinaria() {
   const [mascotaElegida, setMascotaElegida] = useState<string | null>(null);
   // r34 · el CTA vivo necesita señalar la hilera cuando falta la mascota
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  /** S91-C · EL FALLO CON NOMBRE Y CÓDIGO (orden de mesa, hallazgo de D).
+   *  Las ramas de este hub caían en UNA frase —y dos de ellas ni eso:
+   *  hacían `if (!r.ok) return` y desaparecían EN SILENCIO—. Un síntoma
+   *  que no se puede accionar es tan caro como el defecto que oculta: el
+   *  caso del founder llevó CINCO vueltas por esto. Cada rama dice cuál
+   *  es y trae el código CRUDO del wrapper. */
+  const [fallos, setFallos] = useState<{ rama: string; codigo: string }[]>([]);
+  const sumarFallo = useCallback((rama: string, codigo: string) => {
+    setFallos((prev) => (prev.some((f) => f.rama === rama) ? prev : [...prev, { rama, codigo }]));
+  }, []);
+
   const [abierta, setAbierta] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   // ② el ESTADO
@@ -116,9 +127,12 @@ export default function LogVeterinaria() {
     // el log del paseo, copiado al vecino (incluida la resolución de
     // fotos EN BATCH: una firma por foto sería N+1)
     void getEstadoOnboardingDueno().then(async (e) => {
-      if (!e.ok || e.data.familia_id === null) return;
+      // ⚠️ ANTES ERA `return` A SECAS — el lector fallaba y la pantalla
+      // se callaba: el filtro de mascotas no aparecía y nadie decía por qué.
+      if (!e.ok) return sumarFallo('mascotas', e.codigo);
+      if (e.data.familia_id === null) return sumarFallo('mascotas', 'sin_familia');
       const r = await obtenerMascotasDeFamilia(e.data.familia_id);
-      if (!r.ok) return;
+      if (!r.ok) return sumarFallo('mascotas', r.codigo);
       const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       setMascotas(
@@ -248,8 +262,8 @@ export default function LogVeterinaria() {
           </EsqueletoGrupo>
         ) : filas === 'error' ? (
           <EstadoVacio
-            titulo={t('logVet.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
+            titulo={t('hogar.falloServicios', { servicio: t('hogar.railVet').toLowerCase() })}
+            descripcion={`${t('hogar.falloDetalle')}\n${fallos.map((f) => `${f.rama}: ${f.codigo}`).join(' · ')}`}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
           />
         ) : visibles.length === 0 ? (

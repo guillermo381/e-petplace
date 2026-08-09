@@ -22,7 +22,7 @@
  * peldaño 2 = el parte del cierre (fotos + mensaje) vive en la historia.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -74,17 +74,32 @@ export default function HubGrooming() {
   const faseEspecies = useEspeciesElegibles('grooming');
   const [abierta, setAbierta] = useState<string | null>(null);
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  /** S91-C · EL FALLO CON NOMBRE Y CÓDIGO. Una sola bandera para tres
+   *  lectores es lo que hizo indiagnosticable el caso del founder —cuatro
+   *  vueltas a ciegas—. Cada rama dice CUÁL es y trae el código CRUDO del
+   *  wrapper: sin el literal, el próximo toque del founder vale lo mismo
+   *  que los cuatro anteriores. */
+  const [fallos, setFallos] = useState<{ rama: string; codigo: string }[]>([]);
+  const sumarFallo = useCallback((rama: string, codigo: string) => {
+    setFallos((prev) => (prev.some((f) => f.rama === rama) ? prev : [...prev, { rama, codigo }]));
+  }, []);
   const scrollRef = useRef<ScrollView>(null);
 
   const cargar = useCallback(() => {
     setFilas('cargando');
     void obtenerMisGroomings().then((r) => {
       setFilas(r.ok ? r.data : 'error');
+      if (!r.ok) sumarFallo('servicios', r.codigo);
     });
+    setFallos([]);
     void getEstadoOnboardingDueno().then(async (e) => {
-      if (!e.ok || e.data.familia_id === null) return;
+      // ⚠️ ANTES ESTO ERA `return` A SECAS — el lector fallaba y la
+      // pantalla se callaba: el filtro de mascotas simplemente NO
+      // APARECÍA y nadie decía por qué. L-192 en su forma exacta.
+      if (!e.ok) return sumarFallo('mascotas', e.codigo);
+      if (e.data.familia_id === null) return sumarFallo('mascotas', 'sin_familia');
       const r = await obtenerMascotasDeFamilia(e.data.familia_id);
-      if (!r.ok) return;
+      if (!r.ok) return sumarFallo('mascotas', r.codigo);
       const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       setMascotasHogar(
@@ -95,7 +110,11 @@ export default function HubGrooming() {
           }) })),
       );
     });
-  }, []);
+  }, [sumarFallo]);
+
+  useEffect(() => {
+    if (faseEspecies.fase === 'error') sumarFallo('catalogo', 'especies_elegibles');
+  }, [faseEspecies, sumarFallo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -250,8 +269,8 @@ export default function HubGrooming() {
           </EsqueletoGrupo>
         ) : filas === 'error' ? (
           <EstadoVacio
-            titulo={t('grooming.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
+            titulo={t('hogar.falloServicios', { servicio: t('hogar.railEstetica').toLowerCase() })}
+            descripcion={`${t('hogar.falloDetalle')}\n${fallos.map((f) => `${f.rama}: ${f.codigo}`).join(' · ')}`}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
           />
         ) : tap === 'proximos' ? (
