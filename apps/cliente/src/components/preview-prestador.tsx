@@ -50,10 +50,11 @@
 
 import { Image, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Celda, LogoNegocio, Texto, radius, spacing } from '@epetplace/ui';
+import { Celda, LogoNegocio, Texto, radius, spacing, useTheme } from '@epetplace/ui';
 import { resolverUrlLogoNegocio, type PerfilPublico } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { urlGaleria } from '@/lib/url-galeria';
 
 export function PreviewPrestador({
   prestadorId,
@@ -88,6 +89,7 @@ export function PreviewPrestador({
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
+  const { theme } = useTheme();
   const abrirPerfil = () =>
     router.push({
       pathname: '/prestador/[prestadorId]',
@@ -108,6 +110,27 @@ export function PreviewPrestador({
 
   const lugar = contexto ?? perfil?.sector ?? perfil?.ciudad ?? null;
 
+  /** LA ESCALERA DE LA PORTADA (firma founder, en orden):
+   *    ① imagen de portada → ② poster del video → ③ logo ampliado →
+   *    ④ genérica de la casa.
+   *
+   *  ①/② dan IMAGEN; ③/④ dan el bloque de marca de abajo. La tarjeta
+   *  MANTIENE SU ALTO en los cuatro: nunca un hueco blanco, nunca una
+   *  tarjeta a medias.
+   *
+   *  `portadas` viene como PATHS del bucket, no como URLs — pasar el path
+   *  crudo a `<Image>` reservaba el alto y lo dejaba en blanco: ése era el
+   *  defecto que el founder cazó, y por eso la resolución vive en una
+   *  frontera única (`lib/url-galeria`) y no en cada pantalla.
+   *
+   *  ⚠️ ② TODAVÍA NO EXISTE: `poster_url` es de A (se genera AL SUBIR, no
+   *  por render — extraer un fotograma en el cliente exige módulo nativo y
+   *  la performance de la lista manda). El escalón está CABLEADO con su
+   *  lectura defensiva: el día que A lo sirva, entra sin tocar esto. Hoy
+   *  un negocio cuya única portada es video cae a ③, que es honesto. */
+  const poster = (perfil as { poster_url?: string | null } | undefined)?.poster_url;
+  const portada = urlGaleria(perfil?.portadas[0]) ?? urlGaleria(poster);
+
   // LA COHORTE = «antigüedad», confirmada por el founder: CUÁNDO ENTRÓ A LA
   // PLATAFORMA. Los años de oficio NO existen en ninguna columna y no se
   // inventan — quedan como deuda de vitrina (pedido al prestador).
@@ -125,12 +148,40 @@ export function PreviewPrestador({
           `listarFotosGaleria` (viene ordenada), así que no se pregunta
           aparte. Sin portada NO se monta una caja vacía: la tarjeta cae a
           su fila de identidad, que es lo que el negocio siempre tiene. */}
-      {perfil !== undefined && perfil.portadas.length > 0 ? (
+      {portada === null ? (
+        /* ③/④ · EL BLOQUE DE MARCA — no es una foto fallida y no debe
+           leerse como tal. Por eso el logo NO se estira a sangre: va
+           CENTRADO a tamaño digno sobre la capa, que es el tratamiento
+           que la casa usa para «esto es identidad, no contenido».
+           `LogoNegocio` resuelve ④ SOLO: sin url cae a su monograma
+           honesto — la genérica de la casa ya existe adentro de la pieza,
+           así que no se inventa una imagen nueva (Ley 11). */
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('perfilPrestador.verPerfilDe', { nombre })}
+          onPress={abrirPerfil}
+          style={{
+            height: 168,
+            borderRadius: radius.md,
+            marginHorizontal: spacing[5],
+            marginBottom: spacing[2],
+            backgroundColor: theme.bg.overlay,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <LogoNegocio
+            nombre={nombre}
+            logoUrl={resolverUrlLogoNegocio(perfil?.foto_url ?? null)}
+            tamano={88}
+          />
+        </Pressable>
+      ) : (
         <Pressable accessibilityRole="button" accessibilityLabel={t('perfilPrestador.verPerfilDe', { nombre })} onPress={abrirPerfil}>
           {/* `Image` de RN, igual que la pieza: la casa no tiene
               componente de imagen y no se inventa uno acá (Ley 11). */}
           <Image
-            source={{ uri: perfil.portadas[0] }}
+            source={{ uri: portada }}
             style={{
               height: 168,
               borderRadius: radius.md,
@@ -140,7 +191,7 @@ export function PreviewPrestador({
             resizeMode="cover"
           />
         </Pressable>
-      ) : null}
+      )}
       {/* ① MIRAR — nunca toma un hold.
           `Celda interactiva` YA es el tocable y trae su propia física de
           presión: envolverla en un `Pressable` habría anidado dos

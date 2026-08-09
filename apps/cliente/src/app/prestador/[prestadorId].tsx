@@ -52,7 +52,6 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  getClient,
   obtenerPerfilesPublicos,
   resolverUrlLogoNegocio,
   type PerfilPublico,
@@ -61,13 +60,8 @@ import {
 import { useTraduccion } from '@/i18n';
 import { vozDeOficios } from '@/lib/voz-oficio';
 import { pedirReserva } from '@/lib/senal-reserva';
+import { urlGaleria } from '@/lib/url-galeria';
 import { FlechaVolver } from '@/components/flecha-volver';
-
-/** Mismo bucket y misma forma que resuelve el espejo del prestador
- *  (`lib/subir-galeria`): la pieza no toca storage — recibe URLs listas. */
-const BUCKET_GALERIA = 'prestador-galeria';
-const urlGaleria = (path: string) =>
-  getClient().storage.from(BUCKET_GALERIA).getPublicUrl(path).data.publicUrl;
 
 export default function PerfilPublicoPrestador() {
   const router = useRouter();
@@ -151,8 +145,8 @@ export default function PerfilPublicoPrestador() {
             cohorte={perfil.cohorte}
             cohorteAnio={perfil.cohorte_anio}
             logoUrl={resolverUrlLogoNegocio(perfil.foto_url)}
-            portadas={perfil.portadas.map(urlGaleria)}
-            clipUri={perfil.clip_url === null ? null : urlGaleria(perfil.clip_url)}
+            portadas={perfil.portadas.map(urlGaleria).filter((u): u is string => u !== null)}
+            clipUri={urlGaleria(perfil.clip_url)}
             zonaLat={perfil.zona_lat}
             zonaLon={perfil.zona_lon}
             zonaRadioM={perfil.zona_radio_m}
