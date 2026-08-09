@@ -11766,6 +11766,39 @@ disponibles tienen el patrón **idéntico**:
 `explorar/veterinaria/disponibles.tsx:126`. Un solo emisor:
 `prestador/[prestadorId].tsx:185` (`pedirReserva` + `router.back()`).
 
+> ### ✏️ ENMIENDA (mismo día) — EL FOUNDER PROBÓ LOS OTROS TRES Y EL DIAGNÓSTICO CAMBIA
+>
+> **Los CUATRO oficios rebotan al preview** — o sea que el rebote **no es un
+> bug del paseo: es el mecanismo**. En grooming, veterinaria y adiestramiento
+> la pantalla vuelve y **sigue sola al pago en menos de un segundo** (se ve el
+> parpadeo, pero avanza). **En el paseo el rebote ocurre y la continuación NO
+> se dispara la primera vez.**
+>
+> **EL DELTA, medido por lectura y sin ambigüedad — es a QUÉ llama cada uno:**
+>
+> | oficio | el pedido llama a | qué evalúa antes |
+> |---|---|---|
+> | grooming | `crearHold(oferta)` | **nada — directo** |
+> | adiestramiento | `reservarSesion(oferta)` | **nada — directo** |
+> | veterinaria | `tocarNegocio(oferta)` | **nada — directo** |
+> | **paseo** | **`alElegir(oferta)`** | **TRES guards** (fase del catálogo · mascotas cargadas · hay elegibles) |
+>
+> **Los tres guards son los del P0 y son CORRECTOS**: no se reserva un paseo sin
+> saber para qué mascota. *El problema no es que corten: es que cortan **en
+> silencio** cuando el disparo vino de un PEDIDO.* Cuando el usuario toca la
+> fila, el guard abre un modal y se entiende; cuando el disparo viene del
+> preview, **el usuario ya se fue de esa pantalla** y no ve nada.
+>
+> **Y contesta el sospechoso del founder (la cura 2), aunque no por el
+> mecanismo que él suponía:** no es que cachee de más — es que **el paseo pide
+> datos que los otros tres no necesitan**, y en el primer intento alguno todavía
+> no llegó. **En el segundo ya está en el estado de la pantalla, y por eso
+> pasa.** *El delta primer/segundo intento es exactamente eso.*
+>
+> **Cuál de los tres guards corta está INSTRUMENTADO y sin medir**: la traza
+> ahora imprime `▷ alElegir · fase=… · mascotas=… · elegibles=… · param=…` y
+> `⊘ CORTA guard N`. **Lo mide el founder** — no es reproducible desde acá.
+
 **⚠️ LO QUE NO ESTÁ PROBADO, y se dice:** que ÉSTE sea el motivo del síntoma
 exacto que el founder describe («me devuelve a la vista de preview»). El defecto
 del orden es **cierto**; que produzca ese rebote concreto es **hipótesis
@@ -11784,3 +11817,38 @@ pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
 > CUATRO oficios, no solo al paseo.**
 > **☠️ MUERTE:** el primer «Reservar» reserva, y si algún día no puede, lo dice.
 > Origen: S92-BIS, 2º síntoma del P0-C.
+
+
+---
+
+#### D-730 — 🟠 EL PARPADEO DEL PREVIEW: una pantalla que aparece y desaparece sin razón visible, en los CUATRO oficios
+
+**Reportado por el founder tras probar los cuatro (9-ago).** Al tocar
+**Reservar** en la vitrina del prestador, la app **vuelve a la lista y sigue
+sola al pago**, todo en menos de un segundo. **Funciona** — pero se ve el
+parpadeo de una pantalla que va y viene sin que el usuario haya pedido nada.
+
+**Por qué existe, y no es un descuido:** está declarado en
+`lib/senal-reserva.ts`. La firma manda que «Reservar» viva en el **detalle**,
+pero reservar necesita lo que solo la **lista** tiene —el objeto de oferta, las
+mascotas elegibles, el param de mascota— y abre hasta tres Hojas. Mudarlo al
+detalle sería **clonar el flujo entero**, y esa segunda verdad divergiría sola.
+⇒ *el detalle no reserva: PIDE, y vuelve.* **La decisión de arquitectura es
+sana y está bien argumentada.**
+
+**Lo que nadie decidió es que se VIERA.** El costo se pagó en arquitectura y se
+cobró en la cara del usuario: *una pantalla que salta sin explicación se lee
+como que algo falló, aunque haya funcionado.* Y es el mismo parpadeo en los
+cuatro oficios, o sea **en todo camino de reserva desde una vitrina**.
+
+**No es cura de esta sesión y no se propone una a ciegas:** las salidas posibles
+—que el detalle sepa reservar (clon, ya descartado), que la vuelta sea
+instantánea sin repintar, o que el paso se muestre como transición deliberada en
+vez de esconderse— **son decisiones de diseño de navegación, con la pantalla
+delante**.
+
+> **Dueño: founder (decisión de diseño) + A (ejecución).**
+> **☠️ DISPARO: la primera sesión que toque el arco de reserva o la navegación
+> del cliente.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
+> gesto, sin pantallas intermedias visibles. Origen: S92-BIS, prueba del
+> founder en los cuatro oficios.

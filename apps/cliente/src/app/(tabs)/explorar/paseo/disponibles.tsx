@@ -520,19 +520,37 @@ export default function PaseoDisponibles() {
        * El motor nunca estuvo en riesgo: el guard `mascota_no_elegible` de la
        * DB devuelve `true` para estos perros. Lo que fallaba era la PUERTA.
        */
+      /* 🔴 P0-C (2º síntoma) — POR QUÉ EL PASEO NO CONTINÚA Y LOS OTROS TRES SÍ.
+         Medido por lectura: en grooming/adiestramiento/veterinaria el pedido
+         llama **directo** a su `crearHold` / `reservarSesion` / `tocarNegocio`.
+         En el paseo llama a `alElegir`, que **evalúa tres guards antes** —los
+         del P0—, y cualquiera de ellos corta la continuación. *Los guards son
+         correctos: no se reserva sin saber a qué mascota. Lo que falta es que
+         digan por qué cortaron cuando el disparo vino de un PEDIDO.*
+         El guard 2 es el que reabrió el P0: el catálogo llega ANTES que el
+         hogar, así que con la fase ya en `listo` y las mascotas en vuelo,
+         `elegibles` es `[]` — eso le decía «no tenés perros» al founder.
+         ⚠️ Los tres guards van SEGUIDOS y sin comentarios en el medio a
+         propósito: R34 mira las 12 líneas previas para reconocer el guard de
+         fase, y **mi propia nota los separó lo suficiente como para que el lint
+         me frenara** — dos veces. *Un comentario largo entre un guard y su
+         consecuencia no es neutro: rompe la lectura, la del humano y la del
+         instrumento.* */
+      marcar(
+        `▷ alElegir · fase=${faseEspecies.fase} · mascotas=${Array.isArray(mascotas) ? `${mascotas.length}` : mascotas} · elegibles=${elegibles.length} · param=${mascotaIdParam ?? 'no'}`,
+      );
       if (faseEspecies.fase === 'cargando' || faseEspecies.fase === 'error') {
+        marcar(`⊘ CORTA guard 1: el catálogo está en «${faseEspecies.fase}»`);
         setIntentoSinDatos('catalogo');
         return;
       }
-      // 🔴 EL GUARD QUE FALTABA — el que reabrió el P0 (ver la nota completa
-      // arriba del estado `mascotas`). El catálogo llega ANTES que el hogar,
-      // así que con la fase ya en `listo` y las mascotas en vuelo, `elegibles`
-      // es `[]`: eso es lo que le decía «no tenés perros» al founder.
       if (!Array.isArray(mascotas)) {
+        marcar(`⊘ CORTA guard 2: las mascotas están en «${String(mascotas)}»`);
         setIntentoSinDatos('mascotas');
         return;
       }
       if (elegibles.length === 0) {
+        marcar('⊘ CORTA guard 3: cero mascotas elegibles (con el catálogo listo)');
         setSinElegibles(true);
         return;
       }
