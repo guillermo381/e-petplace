@@ -47,6 +47,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  CeldaNavegacion,
   EsqueletoGrupo,
   Esqueleto,
   EstadoVacio,
@@ -267,7 +268,28 @@ export default function ComoTeVen() {
              sección de fotos del Perfil, que es donde va a vivir el
              pipeline cuando A lo entregue. */
           onAgregarFotos={() => router.back()}
-          pie={<Texto variante="apoyo">{t('perfilNegocio.espejoPie')}</Texto>}
+          /* ✅ S91-C · LA VOZ DEL MAPA AUSENTE (firma founder). Cuando el
+             negocio NO tiene zona cargada, la pieza no monta mapa —
+             correcto— pero el hueco quedaba MUDO. Acá se dice, CON SALIDA
+             (Ley 23: nada bloquea sin dar camino).
+             ⚠️ VA EN EL `pie`, que es del ESPEJO por letra, y NO en la
+             pieza: el cliente simplemente no ve mapa, y no es asunto suyo
+             que el prestador no lo cargó. Meterlo en `FichaPrestador`
+             habría puesto una voz de gestión en la vitrina de la familia. */
+          pie={
+            <View style={{ gap: spacing[3] }}>
+              {prestador.zona_lat === null ? (
+                <CeldaNavegacion
+                  icono="ubicacion"
+                  titulo={t('perfilNegocio.sinDireccion')}
+                  detalle={t('perfilNegocio.sinDireccionDetalle')}
+                  registro="tinta"
+                  onPress={() => router.push('/cuenta/perfil')}
+                />
+              ) : null}
+              <Texto variante="apoyo">{t('perfilNegocio.espejoPie')}</Texto>
+            </View>
+          }
         />
         </ScrollView>
       )}

@@ -308,6 +308,8 @@ export const prestadorEn = {
     espejoRotulo: 'This is how your clients see you',
 
     // ── S84-C8bis · Espejo de es.ts ──
+    sinDireccion: 'No address yet',
+    sinDireccionDetalle: 'Add it so families can find you on the map.',
     espejoPie: 'This is how your card will look in the app.',
 
     // ── S84-C12 · Espejo de es.ts ──

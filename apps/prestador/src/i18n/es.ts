@@ -441,6 +441,8 @@ export const prestadorEs = {
 
     // ── S84-C8bis · la vitrina en su lugar ──
     espejoPie: 'Así se va a ver tu ficha en la app.',
+    sinDireccion: 'Sin dirección',
+    sinDireccionDetalle: 'Cárgala para que te encuentren en el mapa.',
 
     // ── S84-C12 · las fotos de la vitrina ──
     // ── S84-C15 · el escriba (MODELO_PRESENCIA §5) ──
