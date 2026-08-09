@@ -1,0 +1,83 @@
+{
+ "pruebas": [
+  {
+   "id": "login · s91d-groom-1786237847800",
+   "obtenido": "HTTP 400 · SIN sesión",
+   "ok": true
+  },
+  {
+   "id": "login · s91d-perfil-acuario-1786210724654",
+   "obtenido": "HTTP 400 · SIN sesión",
+   "ok": true
+  },
+  {
+   "id": "login · s91d-perfil-acuario-1786218299316",
+   "obtenido": "HTTP 400 · SIN sesión",
+   "ok": true
+  },
+  {
+   "id": "padrón · cuentas s91d-*",
+   "obtenido": "0 (eran 64)",
+   "ok": true
+  },
+  {
+   "id": "familias marcadas como prueba",
+   "obtenido": "64 de 80 · reales 16",
+   "ok": true
+  },
+  {
+   "id": "mascotas de prueba (por su familia)",
+   "obtenido": "48 de 72 · reales 24",
+   "ok": true
+  },
+  {
+   "id": "eventos marcados",
+   "obtenido": "48",
+   "ok": true
+  },
+  {
+   "id": "conteo de producto EXCLUYENDO prueba",
+   "obtenido": "24 mascotas reales (la consulta que toda métrica debe usar)",
+   "ok": true
+  },
+  {
+   "id": "usuarios en el padrón",
+   "obtenido": "150 (eran 214 · 214−64=150)",
+   "ok": true
+  },
+  {
+   "id": "prestadores",
+   "obtenido": "7 — intactos (0 colgaban de sondas)",
+   "ok": true
+  },
+  {
+   "id": "cuentas comerciales",
+   "obtenido": "7 — intactas",
+   "ok": true
+  },
+  {
+   "id": "citas",
+   "obtenido": "121 — intactas (0 colgaban de sondas)",
+   "ok": true
+  },
+  {
+   "id": "familias reales",
+   "obtenido": "16",
+   "ok": true
+  }
+ ],
+ "metricas": {
+  "eventos_prueba": 48,
+  "familias_prueba": 64,
+  "familias_total": 80,
+  "mascotas_prueba": 48,
+  "mascotas_total": 72
+ },
+ "real": {
+  "citas": 121,
+  "cuentas": 7,
+  "familias_reales": 16,
+  "prestadores": 7,
+  "usuarios": 150
+ }
+}

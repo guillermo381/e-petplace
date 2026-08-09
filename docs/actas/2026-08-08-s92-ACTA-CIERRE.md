@@ -13,15 +13,21 @@
 
 | eje | arranque | cierre |
 |---|---|---|
-| **DEFINER alcanzables por `anon`** (D-701) | **59** | **4** — y las cuatro con decisión escrita |
+| **DEFINER alcanzables por `anon`** (D-701) | **59** | **3** — las tres son helpers de policy, con decisión escrita |
 | **policies con `prestadores` crudo** (D-700) | **29** | **14** |
 | **grants de ESCRITURA a `anon`** (D-686) | 861 | 838 |
-| **tablas de `public` SIN RLS** | 4 | **3** (las tres son catálogos públicos con su escritura ya revocada) |
+| **tablas de `public` SIN RLS** | 4 | **3** — catálogos públicos, escritura en 0 (ver §⑩b) |
+| **teléfonos reales en la base** | **14 filas** | **0 — purgados** |
+| **cuentas de sonda en `auth`** | **64** | **0 — y 150 reales intactas** |
 
-**Re-corrida final: 22/22 verdes**, por camino real, sobre árbol quieto —
-incluye las curas de **S91** (que siguen rigiendo después de cinco migraciones
-nuevas) y las de hoy. **239 migraciones local = remoto.** Typechecks y
-`verify:diseno` en verde.
+**Todo por camino real, sobre árbol quieto.** Incluye la re-verificación de las
+curas de **S91**, que siguen rigiendo después de **siete** migraciones nuevas.
+**241 migraciones local = remoto.** Typechecks y `verify:diseno` en verde.
+
+> **Las cuatro decisiones del founder del 9-ago se ejecutaron DENTRO de S92**
+> (§⑨): los dos frenos que esta acta había declarado dejaron de serlo, y las dos
+> deudas de datos se pagaron. **D-703, D-704 y D-706 nacen y mueren en la misma
+> sesión.**
 
 ---
 
@@ -217,7 +223,170 @@ existe.** Las dos vías quedan servidas para que la decisión sí sea de una lí
 
 ---
 
-## ⑨ LO QUE S92 DEJA ESCRITO Y NO ES CÓDIGO
+## ⑨ ENMIENDA DEL 9-AGO — LA TANDA DE DECISIONES DEL FOUNDER, EJECUTADA DENTRO DE S92
+
+> **Las cuatro órdenes llegaron con el acta ya escrita y se ejecutaron antes del
+> cierre.** Los dos frenos que S92 había declarado **dejan de ser frenos: se
+> convirtieron en decisiones firmadas**, y las dos deudas de datos se pagaron.
+> **Nada de esto pasa a S93.**
+
+### ① `email_exists` — REVOCADA (D-703 ✅ CERRADA)
+
+**Firma del founder:** *«REVOCAR. Nada está desplegado públicamente con checkout;
+las webs legacy están al aire pero sin uso. Si el revoke le rompe algo a una
+página sin visitas, es costo aceptado y firmado.»*
+
+**Rojo producido antes, con el correo real del founder:** `true` para una cuenta
+que existe, `false` para una inventada. **Discrimina** — la definición del
+oráculo, medida y no supuesta.
+
+**El censo de las legacy, que era lo que había que dejar escrito.** Buscada la
+invocación `rpc('email_exists')` en los cinco repos que comparten esta DB
+(regla 69), separada de docs y tipos generados:
+
+| repo | invocaciones |
+|---|---|
+| **`e-petplace-v2`** | **1 — `src/pages/Checkout.tsx:214`** (+ su mención en `CONTEXT.md:575`, que es documentación) |
+| `e-petplace-prestadores` | **0** (solo `database.types.ts`) |
+| `e-petplace-admin` | **0** (solo `database.types.ts`) |
+| `e-petplace-sistema-pruebas` | **0** |
+| monorepo | **0 reales** — los 2 hits son falsos positivos: el tipo generado, y `wrappers/auth.ts:40`, donde `email_exists` es el **código de error de auth-js**, no la RPC |
+
+⇒ **El costo, con nombre y línea: si ese checkout volviera a usarse, su detección
+de «email ya registrado» dejaría de funcionar.** Aceptado y firmado.
+`authenticated` conserva EXECUTE.
+
+**Verde en dos brazos:** `anon` → **401 permission denied** · titular con sesión
+→ **200 `true`**. Migración `20260809010000`, cinturón verde.
+
+### ② LAS 64 SONDAS — CUENTAS BORRADAS, DATOS MARCADOS (D-704 ✅ CERRADA)
+
+**Firma del founder: la vía (a)**, la que la pista había votado.
+
+**Y la marca no fue un rodeo para esquivar los CHECKs: fue lo que los CHECKs
+pedían.** El modelo ya tenía la convención —`familia.created_by_sistema`
+(XOR, las dos columnas se mueven juntas) y `eventos_mascota.creado_por_sistema`
+(OR, alcanza con poblarlo)— con precedente vivo `backfill_s17_fase_c`. *Los
+CHECKs de procedencia no impedían la limpieza: exigían que la limpieza dijera de
+dónde venían esos datos.*
+
+**Ensayo completo con ROLLBACK antes de la corrida real**, y el ROLLBACK
+verificado (las 64 seguían vivas después del ensayo).
+
+| | antes | después |
+|---|---|---|
+| usuarios en `auth` | 214 | **150** |
+| cuentas `s91d-*` | 64 | **0** |
+| **cuentas NO-sonda** | **150** | **150 — intactas** |
+| familias marcadas `sonda_s91d_purgada` | — | **64** |
+| mascotas de prueba (por su familia) | — | **48** |
+| eventos marcados | — | **48** |
+
+**Verificación de los dos brazos que el founder pidió, 13/13 verdes:**
+- **«las 64 rebotan al login»** — probado **por el camino real de la app**
+  (`/auth/v1/token`), no mirando si la fila existe: **HTTP 400, sin sesión**, en
+  las tres sondas ensayadas. *Que una fila no esté no prueba que el login rebote;
+  lo prueba el login rebotando.*
+- **«ninguna métrica las cuenta»** — los datos quedan **separables por su marca**,
+  con la consulta que toda métrica debe usar escrita en el verificador.
+- **Constancia:** prestadores **7 intactos** · cuentas comerciales **7 intactas**
+  · citas **121 intactas** · familias reales **16**.
+
+> ### 🔴 Y UN HALLAZGO QUE NADIE FUE A BUSCAR, y que vale más que la limpieza
+> **De 80 familias, 64 eran sonda. De 72 mascotas, 48.** Es decir: **el 80 % de
+> las familias y el 67 % de las mascotas de esta base eran datos de prueba.**
+> Cualquier métrica de producto que se hubiera mirado antes de hoy estaba
+> inflada unas **tres veces**. *La limpieza no era higiene: era la diferencia
+> entre saber cuánto producto hay y creerlo.*
+
+### ③ LOS 14 TELÉFONOS — PURGADOS (D-706 ✅ CERRADA)
+
+**Firma del founder: purga.** Migración `20260809020000`, con guard que aborta si
+el número no es exactamente el que se firmó.
+
+**Conteo, del propio `NOTICE` de la migración:** `ANTES — 14 filas, 5 con
+teléfono` → `DESPUÉS — 14 filas borradas · quedan 0 · CERO teléfonos en la tabla`.
+
+**La forma de lo que había, en forma y no en contenido:** 14 filas · 5 con
+`valor_antes` y 5 con `valor_despues` (los E.164 completos) · 7 tablas trazadas ·
+todas del **2026-08-02 23:06:44 UTC**, o sea **una sola corrida** ya ejecutada.
+**Ningún número se transcribe en ninguna parte:** copiarlo para «dejar
+constancia» sería reintroducir por la puerta de atrás el dato que se vino a
+borrar.
+
+**Su reversa existe y dice, con todas las letras, que NO PUEDE revertir.** Es la
+única migración de S92 que borra datos, y por eso es la única que corrió por
+firma explícita y por ninguna otra razón. La tabla **no se dropea**: queda vacía
+y cerrada.
+
+---
+
+## ⑩ LOS TRES PENDIENTES DE LA MESA, RESPONDIDOS
+
+### (a) El **37 → 29** de las policies: explicado, no absorbido
+
+**Los dos números miden cosas distintas, y por eso ninguno está mal:**
+
+- **37** = policies cuyo `qual`/`with_check` **menciona la cadena `prestadores`**.
+  Es el censo del §5.2 del arranque, y es deliberadamente ancho.
+- **29** = de esas, las que **de verdad leen la tabla** (`FROM prestadores`) — el
+  subconjunto que D-700 nombra y el único que queda atado a los grants de
+  columna.
+
+**Las 8 de diferencia, clasificadas:** **5** mencionan `prestadores` **sin leer
+la tabla** (nombran otra cuyo nombre la contiene — `prestador_programas`,
+`prestador_servicio_tallas`, `caso_clinico_consultor`,
+`prestadores_insert_cuenta_propia`, `pst_public`), **2** son **MIXTAS**
+(helper + tabla cruda) y **1** ya usaba **solo helper**. **29 + 5 + 2 + 1 = 37.**
+
+**Y el número de hoy también cierra:** las 17 migradas dejaron de mencionar la
+cadena (sus helpers se llaman `es_mi_prestador` / `prestador_activo`, sin la `s`),
+así que **37 − 17 = 20** policies la mencionan hoy, de las cuales **11 crudas +
+3 mixtas = 14 siguen leyendo la tabla** — el 14 del burn-down. *Medido al
+cerrar, no arrastrado.*
+
+### (b) Las **3 tablas sin RLS**, nombradas y con su porqué
+
+| tabla | escritura de cliente | lectura `anon` | por qué NO lleva RLS |
+|---|---|---|---|
+| `cat_bancos` | **0** | sí (1 grant) | catálogo **público de lectura**: 17 bancos EC |
+| `cat_paises` | **0** | sí (1 grant) | catálogo **público de lectura**: 23 países |
+| `cat_tipos_documento_titular` | **0** | sí (1 grant) | catálogo **público de lectura** |
+
+**La razón, dicha entera:** son catálogos **cuyo contenido ES público por
+diseño** — la pantalla de registro los lee **sin sesión**. **RLS protege filas de
+lectores no autorizados; acá todo lector está autorizado a leer todo.** Lo que sí
+había que cerrar era la **escritura**, y hoy está en **0** (S92,
+`20260808200000`). *Encender RLS acá agregaría una capa que no defiende nada y un
+riesgo real: una policy mal escrita dejaría sin catálogos a la pantalla de
+registro.*
+
+**Deuda y disparo:** **NO nace deuda**, y se dice por qué en vez de dejar el
+hueco: el estado es **deliberado y verificado**, no heredado. **Lo que sí queda
+vigilado** es que su `SELECT` de `anon` no desaparezca — el cinturón de
+`20260808200000` **aborta** si alguno de los tres lo pierde. **Disparo de
+revisión:** si alguna vez un catálogo pasa a tener filas que **no** deban ser
+públicas (por país, por cliente), ese día nace la RLS y la deuda con ella.
+
+### (c) Las DEFINER que siguen alcanzables por `anon` — **son 3, no 2**, y cada una con su decisión
+
+*(eran 2 cuando el acta se escribió; `email_exists` acaba de cerrarse, y los dos
+helpers de D-700 nacieron entre medio.)*
+
+| función | policies que la llaman | decisión escrita |
+|---|---|---|
+| **`is_admin()`** | **239** | **QUEDA.** 11 de esas policies tienen rol `{public}`; revocarle EXECUTE a `anon` **no la asegura: rompe su evaluación** y con ella la lectura pública de adopción. Devuelve `false` sin sesión. **El cinturón de `20260808170000` vigila que nadie la cierre por prolijidad.** ⚠️ **`search_path` MUTABLE** ⇒ es el ítem más caliente de **D-708**. |
+| **`es_mi_prestador(uuid)`** | **13** | **QUEDA, y nació así hoy.** Es infraestructura de policy: sin EXECUTE para `anon`, una policy `{public}` evaluada por un anónimo **falla con 42501 en vez de devolver vacío**. `search_path` **fijo**. |
+| **`prestador_activo(uuid)`** | **5** | **QUEDA**, mismo criterio. `search_path` **fijo**. |
+
+**Las tres son infraestructura de policy, no puertas.** Ninguna devuelve datos:
+devuelven `boolean`, y sin sesión devuelven `false`. **El criterio que las une —y
+que D-701 pedía— es que su audiencia está ESCRITA en una migración, no heredada
+de un default.**
+
+---
+
+## ⑪ LO QUE S92 DEJA ESCRITO Y NO ES CÓDIGO
 
 El brief pedía **un procedimiento de cambio de permisos**, porque *«un loop que
 cierra 59 funciones y deja el procedimiento sin escribir va a volver a producir

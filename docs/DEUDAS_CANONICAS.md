@@ -10345,9 +10345,25 @@ aparece lejos**. **Mitigación ya viva:** el instrumento de censo
 > lo que llegue primero. **☠️ MUERTE:** ninguna policy consulta `prestadores` sin
 > helper. Origen: S92-A (D-700 parcial).
 
-#### D-703 — 🔴 `email_exists`: ENUMERACIÓN DE USUARIOS CON UN CONSUMIDOR VIVO
+#### D-703 — 🔴→✅ **CERRADA EL MISMO DÍA** · `email_exists`: LA ENUMERACIÓN DE USUARIOS
 
-**El único de los 59 que S92 NO cerró por FRENO, no por olvido.**
+> ### ✅ CERRADA (S92-A, 9-ago-2026, migración `20260809010000`)
+> **Firma del founder:** *«REVOCAR. Nada está desplegado públicamente con
+> checkout; las webs legacy están al aire pero sin uso. Si el revoke le rompe
+> algo a una página sin visitas, es costo aceptado y firmado.»*
+>
+> **Rojo con el correo real del founder:** `true` para la cuenta que existe,
+> `false` para una inventada — **discrimina**. **Verde en dos brazos:** `anon`
+> → 401 · titular con sesión → 200. **Censo de las cinco webs de la casa: UN
+> solo consumidor real, con nombre y línea — `e-petplace-v2/src/pages/Checkout.tsx:214`**
+> (cero en prestadores, admin, sistema-pruebas y el monorepo; los 2 hits del
+> monorepo son el tipo generado y un **código de error de auth-js**, no la RPC).
+> **El costo quedó nombrado y aceptado:** si ese checkout volviera a usarse, su
+> detección de «email ya registrado» dejaría de funcionar.
+> **☠️ MUERE porque `anon` ya no puede preguntar si un correo tiene cuenta.**
+
+**Texto original, conservado como historia:** *el único de los 59 que S92 no
+cerró por FRENO, no por olvido.*
 
 **Rojo:** `anon` la ejecuta y devuelve `true`/`false` según el correo exista —
 discrimina, que es la definición de un oráculo de enumeración. Es el hallazgo ④
@@ -10373,7 +10389,35 @@ desplegado?** Si no lo está, el REVOKE es gratis.
 > confirma que v2 no está desplegado. **☠️ MUERTE:** `anon` no puede preguntar si
 > un correo tiene cuenta. Origen: S92-A.
 
-#### D-704 — 🟠 LAS 64 SONDAS: LA ORDEN ES EJECUTABLE, PERO NO ES DE UNA LÍNEA
+#### D-704 — 🟠→✅ **CERRADA EL MISMO DÍA** · LAS 64 SONDAS
+
+> ### ✅ CERRADA (S92-A, 9-ago-2026, `scripts/s92/b6-sondas.mjs`)
+> **Firma del founder: la vía (a)**, la que la pista había votado — borrar las
+> cuentas y **marcar los datos como prueba**.
+>
+> **Y la marca no fue un rodeo para esquivar los CHECKs: era lo que los CHECKs
+> pedían.** El modelo ya tenía la convención (`familia.created_by_sistema` —XOR,
+> las dos columnas juntas— y `eventos_mascota.creado_por_sistema` —OR, alcanza
+> con poblarlo—), con precedente vivo `backfill_s17_fase_c`. *Los CHECKs de
+> procedencia no impedían la limpieza: exigían que la limpieza dijera de dónde
+> venían esos datos.*
+>
+> **Ensayo con ROLLBACK antes de la corrida real, y el ROLLBACK verificado.**
+> **214 → 150 usuarios · 64 sondas → 0 · las 150 cuentas reales INTACTAS ·
+> 64 familias y 48 eventos marcados `sonda_s91d_purgada` · 48 mascotas
+> identificables por su familia.** Verificación 13/13: **el login de una sonda
+> rebota por el camino real de la app** (HTTP 400, sin sesión — *que una fila no
+> esté no prueba que el login rebote; lo prueba el login rebotando*), los datos
+> quedan separables de toda métrica, y prestadores (7), cuentas (7) y citas (121)
+> siguen intactos.
+>
+> **🔴 EL HALLAZGO QUE NADIE FUE A BUSCAR:** **de 80 familias, 64 eran sonda; de
+> 72 mascotas, 48.** El **80 %** de las familias y el **67 %** de las mascotas de
+> esta base eran datos de prueba ⇒ **toda métrica de producto anterior a hoy
+> estaba inflada unas tres veces.** *La limpieza no era higiene: era la
+> diferencia entre saber cuánto producto hay y creerlo.*
+
+**Texto original, conservado como historia (su medición sigue siendo válida):**
 
 **Orden del founder al abrir S92**, intentada y **no ejecutada**, con su medición
 entera en `docs/relevamientos/2026-08-08-s92a-FRENO-borrado-de-sondas.md`.
@@ -10427,7 +10471,28 @@ está **congelado desde S38** y no versiona llaves.
 > **☠️ MUERTE:** `public` no tiene funciones cuyo nombre empiece con `test_`,
 > `simular_` o `escenario_`. Origen: S92-A.
 
-#### D-706 — 🟡 LOS 14 TELÉFONOS DE `_traza_promocion_e164` SIGUEN EN LA BASE
+#### D-706 — 🟡→✅ **CERRADA EL MISMO DÍA** · LOS 14 TELÉFONOS DE `_traza_promocion_e164`
+
+> ### ✅ CERRADA (S92-A, 9-ago-2026, migración `20260809020000`)
+> **Firma del founder: PURGA.** Conteo del propio `NOTICE`: `ANTES — 14 filas,
+> 5 con teléfono` → `DESPUÉS — 14 filas borradas · quedan 0 · CERO teléfonos en
+> la tabla`. Guard que **aborta si el número no es exactamente el que se firmó**.
+>
+> **Es la única migración de S92 que borra datos**, y por eso corrió solo con
+> firma explícita. **Su reversa existe y dice, con todas las letras, que NO PUEDE
+> revertir** — toda la disciplina de la sesión se apoya en que revocar un permiso
+> se deshace; borrar un dato no.
+>
+> **Lo que había, en forma y no en contenido:** 14 filas · 5 con `valor_antes` y
+> 5 con `valor_despues` (los E.164 completos) · 7 tablas trazadas · todas del
+> **2026-08-02 23:06:44 UTC**, una sola corrida ya ejecutada. **Ningún número se
+> transcribió en ninguna parte:** copiarlo para «dejar constancia» sería
+> reintroducir por la puerta de atrás el dato que se vino a borrar.
+>
+> **La tabla NO se dropea:** queda vacía y cerrada (RLS on, sin policies, sin
+> grants). El DROP arrastra otra decisión y nadie la pidió.
+
+**Texto original, conservado como historia:**
 
 **La puerta se cerró; el dato quedó.** S92 le encendió RLS sin policies y le
 revocó todos los grants de rol de cliente, tras medir que `anon` los leía **y

@@ -1,0 +1,70 @@
+{
+ "desglose": {
+  "TABLA CRUDA": [
+   "bonos.prestador_insert_bonos_walkin",
+   "estadias.prestador_insert_estadias_walkin",
+   "evento_cita_servicio.cita_insert_prestador_walkin",
+   "evento_cita_servicio.cita_select_prestador",
+   "evento_cita_servicio.cita_update_prestador",
+   "mascota_acceso_prestador.map_select_due",
+   "notificaciones.notif_insert_prestador_cita",
+   "prestador_atencion_log.atencion_log_select",
+   "prestador_empleado_servicios.empleado_servicios_dueño_elimina",
+   "prestador_empleado_servicios.empleado_servicios_dueño_inserta",
+   "suscripciones_servicio.prestador_insert_suscripciones_walkin"
+  ],
+  "solo HELPER": [
+   "caso_clinico.caso_clinico_insert_vet",
+   "cobro_presencial_registrado.cobro_presencial_select_cuenta"
+  ],
+  "menciona sin FROM (otra tabla con «prestador» en el nombre)": [
+   "caso_clinico_consultor.consultor_select_clinica_consultor_propia",
+   "prestador_programas.pp_public",
+   "prestador_servicio_tallas.pst_public",
+   "prestadores.prestadores_insert_cuenta_propia"
+  ],
+  "MIXTA (helper + tabla cruda)": [
+   "certificado_salud.certificado_select_acceso",
+   "cuentas_comerciales.owner_select_own_cuentas",
+   "cuentas_comerciales.owner_update_own_cuentas_data"
+  ]
+ },
+ "total": 20,
+ "sinRls": [
+  {
+   "grants_escritura": 0,
+   "lectura_anon": 1,
+   "tabla": "cat_bancos"
+  },
+  {
+   "grants_escritura": 0,
+   "lectura_anon": 1,
+   "tabla": "cat_paises"
+  },
+  {
+   "grants_escritura": 0,
+   "lectura_anon": 1,
+   "tabla": "cat_tipos_documento_titular"
+  }
+ ],
+ "abiertas": [
+  {
+   "firma": "es_mi_prestador(uuid)",
+   "policies": 13,
+   "proname": "es_mi_prestador",
+   "sp_mutable": false
+  },
+  {
+   "firma": "is_admin()",
+   "policies": 239,
+   "proname": "is_admin",
+   "sp_mutable": true
+  },
+  {
+   "firma": "prestador_activo(uuid)",
+   "policies": 5,
+   "proname": "prestador_activo",
+   "sp_mutable": false
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "antes": {
+  "reales": 150,
+  "sondas": 64,
+  "total": 214
+ },
+ "dentro": {
+  "familias_marcadas": 64,
+  "mascotas_de_prueba": 48,
+  "reales": 150,
+  "sondas": 0,
+  "usuarios_total": 150
+ },
+ "control": {
+  "reales": 150,
+  "sondas": 64,
+  "total": 214
+ }
+}

@@ -1,0 +1,236 @@
+[
+ {
+  "repo": "e-petplace-prestadores",
+  "archivo": "src/lib/database.types.ts",
+  "clase": "tipo generado",
+  "linea": "src/lib/database.types.ts:14598:      email_exists: { Args: { check_email: string }; Returns: boolean }"
+ },
+ {
+  "repo": "e-petplace-admin",
+  "archivo": "src/lib/database.types.ts",
+  "clase": "tipo generado",
+  "linea": "src/lib/database.types.ts:8339:      email_exists: { Args: { check_email: string }; Returns: boolean }"
+ },
+ {
+  "repo": "e-petplace-v2",
+  "archivo": "CONTEXT.md",
+  "clase": "doc",
+  "linea": "CONTEXT.md:197:CREATE OR REPLACE FUNCTION public.email_exists(check_email text)"
+ },
+ {
+  "repo": "e-petplace-v2",
+  "archivo": "CONTEXT.md",
+  "clase": "doc",
+  "linea": "CONTEXT.md:226:| Detección de email registrado en checkout | Usa RPC `email_exists`, muestra campo de password si ya tiene cuenta |"
+ },
+ {
+  "repo": "e-petplace-v2",
+  "archivo": "CONTEXT.md",
+  "clase": "INVOCACIÓN",
+  "linea": "CONTEXT.md:575:- **RPC:** `supabase.rpc('email_exists', { check_email: email })` para detección de email registrado"
+ },
+ {
+  "repo": "e-petplace-v2",
+  "archivo": "src/pages/Checkout.tsx",
+  "clase": "INVOCACIÓN",
+  "linea": "src/pages/Checkout.tsx:214:    const { data: existe } = await supabase.rpc('email_exists', { check_email: normalizedEmail });"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "CLAUDE.md",
+  "clase": "doc",
+  "linea": "CLAUDE.md:16:> - **D-701 · LAS 59 DEFINER, de 59 a 4.** Rojo producido por camino real: las 59 con `has_function_privilege('anon')=true` y **28 confirmadas EJECUTANDO de verdad** — entre ell"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "CLAUDE.md",
+  "clase": "doc",
+  "linea": "CLAUDE.md:24:> - **PARA S93 — TRES DECISIONES DE UNA LÍNEA, TODAS DEL FOUNDER Y TODAS SOBRE DATOS DE PERSONAS REALES:** ① **`email_exists`** (la pregunta que lo desbloquea: *¿`e-petplace-v2`"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md",
+  "clase": "doc",
+  "linea": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md:81:| **4** | **③ + ④ `debug_estado_user` y `email_exists`** | Enumeración de usuarios. **`debug_estado_user` probablemente se BORRA, no se cura"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md",
+  "clase": "doc",
+  "linea": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md:90:  `email_exists` · `encontrar_prestador_emergencia` · `get_country_config` ·"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md",
+  "clase": "doc",
+  "linea": "docs/2026-08-07-s90-LOOP-seguridad-para-s92.md:144:| ④ enumeración | `email_exists(real)` / `email_exists(falso)` | **`true` / `false`** — discrimina |"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/DEUDAS_CANONICAS.md",
+  "clase": "doc",
+  "linea": "docs/DEUDAS_CANONICAS.md:10302:> dueño y porqué:** `is_admin` y `email_exists` (ver D-703) más los **dos helpers"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/DEUDAS_CANONICAS.md",
+  "clase": "doc",
+  "linea": "docs/DEUDAS_CANONICAS.md:10348:#### D-703 — 🔴 `email_exists`: ENUMERACIÓN DE USUARIOS CON UN CONSUMIDOR VIVO"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/DEUDAS_CANONICAS.md",
+  "clase": "doc",
+  "linea": "docs/DEUDAS_CANONICAS.md:10360:positivo: `packages/api/src/wrappers/auth.ts:40` usa `email_exists` como"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/DEUDAS_CANONICAS.md",
+  "clase": "doc",
+  "linea": "docs/DEUDAS_CANONICAS.md:10479:fijan `search_path` — `email_exists` · `encontrar_prestador_emergencia` ·"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/actas/2026-08-08-s92-ACTA-CIERRE.md",
+  "clase": "doc",
+  "linea": "docs/actas/2026-08-08-s92-ACTA-CIERRE.md:81:- **`email_exists` — FRENO declarado** (freno 2: cambia comportamiento visible)."
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/actas/2026-08-08-s92-ACTA-CIERRE.md",
+  "clase": "doc",
+  "linea": "docs/actas/2026-08-08-s92-ACTA-CIERRE.md:166:| **`email_exists`** | enumeración probada, pero su consumidor es un checkout sin sesión | D-703 |"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/relevamientos/2026-08-07-s90-B-CIERRE.md",
+  "clase": "doc",
+  "linea": "docs/relevamientos/2026-08-07-s90-B-CIERRE.md:225:| ④ | `email_exists(email)`: **enumeración de usuarios** por `anon` | real → `true` · inexistente → `false` (**discrimina**) |"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/relevamientos/2026-08-07-s90-B-CIERRE.md",
+  "clase": "doc",
+  "linea": "docs/relevamientos/2026-08-07-s90-B-CIERRE.md:233:`email_exists`, `encontrar_prestador_emergencia`, `get_country_config`,"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "docs/relevamientos/2026-08-09-brief-s93.md",
+  "clase": "doc",
+  "linea": "docs/relevamientos/2026-08-09-brief-s93.md:32:1. **`email_exists` (D-703).** Enumeración de usuarios probada. Su único"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "packages/api/src/database.types.ts",
+  "clase": "tipo generado",
+  "linea": "packages/api/src/database.types.ts:17790:      email_exists: { Args: { check_email: string }; Returns: boolean }"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "packages/api/src/wrappers/auth.ts",
+  "clase": "otra mención",
+  "linea": "packages/api/src/wrappers/auth.ts:40:  email_exists:         'email_ya_registrado',"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/b1-verde-tanda2.mjs",
+  "clase": "otra mención",
+  "linea": "scripts/s92/b1-verde-tanda2.mjs:96:linea('     ↳ email_exists queda en FRENO declarado (su consumidor es un checkout sin sesión)');"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/b34-rojos.mjs",
+  "clase": "otra mención",
+  "linea": "scripts/s92/b34-rojos.mjs:11: *   ④ email_exists .................... FRENO declarado"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/b5-cierre.mjs",
+  "clase": "otra mención",
+  "linea": "scripts/s92/b5-cierre.mjs:63:  const DECIDIDAS = ['is_admin', 'email_exists', 'es_mi_prestador', 'prestador_activo'];"
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b0-definer.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b0-definer.json:158:  \"funcion\": \"email_exists(text)\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-clasificacion.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-clasificacion.json:315:  \"firma\": \"email_exists(text)\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-clasificacion.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-clasificacion.json:316:  \"nombre\": \"email_exists\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-clasificacion.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-clasificacion.json:327:   \"packages/api/src/wrappers/auth.ts:40:  email_exists:         'email_ya_registrado',\""
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-d701-restantes.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-d701-restantes.json:3:  \"funcion\": \"email_exists(text)\""
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-legado-fino.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-legado-fino.json:143:  \"nombre\": \"email_exists\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-legado-fino.json",
+  "clase": "INVOCACIÓN",
+  "linea": "scripts/s92/salida/b1-legado-fino.json:145:   \"e-petplace-v2: CONTEXT.md:575:- **RPC:** `supabase.rpc('email_exists', { check_email: email })` para detección de email registrado\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-legado-fino.json",
+  "clase": "INVOCACIÓN",
+  "linea": "scripts/s92/salida/b1-legado-fino.json:146:   \"e-petplace-v2: src/pages/Checkout.tsx:214:    const { data: existe } = await supabase.rpc('email_exists', { check_email: normalizedEmail });\""
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-rojos.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-rojos.json:447:  \"firma\": \"email_exists(text)\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-rojos.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-rojos.json:448:  \"nombre\": \"email_exists\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-rojos.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-rojos.json:459:   \"packages/api/src/wrappers/auth.ts:40:  email_exists:         'email_ya_registrado',\""
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b1-uso-legado.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b1-uso-legado.json:158:  \"nombre\": \"email_exists\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "scripts/s92/salida/b5-cierre.json",
+  "clase": "otra mención",
+  "linea": "scripts/s92/salida/b5-cierre.json:35:   \"obtenido\": \"0 sin decidir · 4 en total (eran 59): email_exists, es_mi_prestador, is_admin, prestador_activo\","
+ },
+ {
+  "repo": "e-petplace",
+  "archivo": "supabase/migrations/20260808170000_s92_revoke_autenticadas_y_legacy.sql",
+  "clase": "definición SQL",
+  "linea": "supabase/migrations/20260808170000_s92_revoke_autenticadas_y_legacy.sql:47:--   · **`email_exists`** — FRENO declarado (freno 2 del arranque: cambia"
+ }
+]

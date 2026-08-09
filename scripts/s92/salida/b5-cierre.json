@@ -32,7 +32,7 @@
   },
   {
    "id": "D-701 · DEFINER con anon SIN DECISIÓN",
-   "obtenido": "0 sin decidir · 4 en total (eran 59): email_exists, es_mi_prestador, is_admin, prestador_activo",
+   "obtenido": "0 sin decidir · 3 en total (eran 59): es_mi_prestador, is_admin, prestador_activo",
    "ok": true
   },
   {
@@ -46,8 +46,33 @@
    "ok": true
   },
   {
-   "id": "traza · filas intactas",
-   "obtenido": "14 (eran 14 — cerrar no es borrar)",
+   "id": "traza · teléfonos en la base",
+   "obtenido": "0 (eran 14 — PURGADOS por firma del 9-ago)",
+   "ok": true
+  },
+  {
+   "id": "anon · email_exists (D-703)",
+   "obtenido": "REBOTA 401",
+   "ok": true
+  },
+  {
+   "id": "titular · email_exists sigue viva",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "padrón · cuentas de sonda (D-704)",
+   "obtenido": "0 de 150 usuarios",
+   "ok": true
+  },
+  {
+   "id": "datos de sonda · marcados como prueba",
+   "obtenido": "64 familias con marca",
+   "ok": true
+  },
+  {
+   "id": "login de una sonda",
+   "obtenido": "HTTP 400 · SIN sesión",
    "ok": true
   },
   {
@@ -112,7 +137,7 @@
   }
  ],
  "burndown": {
-  "definer_anon": 4,
+  "definer_anon": 3,
   "grants_escritura": 838,
   "policies_crudas": 14,
   "tablas_sin_rls": 3

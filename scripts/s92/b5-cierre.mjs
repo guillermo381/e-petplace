@@ -14,7 +14,7 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { rest, rpc, sql, tokenDe, guardar, SALIDA, linea } from './lib-s92.mjs';
+import { rest, rpc, sql, tokenDe, guardar, SALIDA, URL, ANON, linea } from './lib-s92.mjs';
 
 const envTxt = readFileSync('/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/apps/cliente/.env.local', 'utf8');
 const DEMO_MAIL = envTxt.match(/^EXPO_PUBLIC_DEMO_EMAIL=(.+)$/m)[1].trim();
@@ -60,7 +60,7 @@ for (const [fn, args, rot] of [
    * DEFINER con anon» —eso rompería la casa—: pide que **ninguna lo tenga sin
    * que alguien lo haya decidido**. Eso es lo que se mide acá.
    */
-  const DECIDIDAS = ['is_admin', 'email_exists', 'es_mi_prestador', 'prestador_activo'];
+  const DECIDIDAS = ['is_admin', 'es_mi_prestador', 'prestador_activo'];
   const d701 = await sql(
     `SELECT p.proname FROM pg_proc p JOIN pg_namespace n2 ON n2.oid=p.pronamespace
      WHERE n2.nspname='public' AND p.prosecdef AND has_function_privilege('anon', p.oid,'EXECUTE')
@@ -87,7 +87,33 @@ for (const [fn, args, rot] of [
   anotar('anon · traza de teléfonos', `${traza.status >= 400 ? 'REBOTA' : traza.cuerpo.trim() === '[]' ? 'VACÍO' : '⚠️ ' + traza.cuerpo.slice(0, 40)} ${traza.status}`,
     traza.status >= 400 || traza.cuerpo.trim() === '[]');
   const filasTraza = await sql(`SELECT count(*)::int AS n FROM public._traza_promocion_e164`, 'cierre-traza');
-  anotar('traza · filas intactas', `${filasTraza[0].n} (eran 14 — cerrar no es borrar)`, filasTraza[0].n === 14);
+  anotar('traza · teléfonos en la base', `${filasTraza[0].n} (eran 14 — PURGADOS por firma del 9-ago)`, filasTraza[0].n === 0);
+
+  // ── LA TANDA DE DECISIONES DEL 9-AGO ──────────────────────────────────────
+  linea('\n②bis LAS DECISIONES DEL FOUNDER (9-ago), verificadas de nuevo\n');
+
+  const ee = await rpc('email_exists', { check_email: 'guillo381@gmail.com' });
+  anotar('anon · email_exists (D-703)', `${ee.status >= 400 ? 'REBOTA' : '⚠️ PASA'} ${ee.status}`, ee.status >= 400);
+  const eeAuth = await rpc('email_exists', { check_email: 'guillo381@gmail.com' }, { token: t });
+  anotar('titular · email_exists sigue viva', `HTTP ${eeAuth.status}`, eeAuth.status === 200);
+
+  const sondas = await sql(
+    `SELECT (SELECT count(*) FROM auth.users WHERE email LIKE 's91d-%@epetplace.dev')::int AS sondas,
+            (SELECT count(*) FROM auth.users)::int AS total,
+            (SELECT count(*) FROM public.familia WHERE created_by_sistema='sonda_s91d_purgada')::int AS marcadas`,
+    'cierre-sondas',
+  );
+  anotar('padrón · cuentas de sonda (D-704)', `${sondas[0].sondas} de ${sondas[0].total} usuarios`, sondas[0].sondas === 0);
+  anotar('datos de sonda · marcados como prueba', `${sondas[0].marcadas} familias con marca`, sondas[0].marcadas === 64);
+
+  // el login de una sonda, por el camino real de la app
+  const login = await fetch(`${URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { apikey: ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 's91d-groom-1786237847800@epetplace.dev', password: 'Sonda-2026!' }),
+  });
+  const dl = await login.json().catch(() => ({}));
+  anotar('login de una sonda', `HTTP ${login.status} · ${dl.access_token ? '⚠️ DIO TOKEN' : 'SIN sesión'}`, !dl.access_token);
 
   // catálogos: escritura fuera, lectura viva
   for (const t2 of ['cat_bancos', 'cat_paises', 'cat_tipos_documento_titular']) {

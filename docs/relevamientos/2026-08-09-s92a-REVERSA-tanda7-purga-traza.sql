@@ -1,0 +1,35 @@
+-- ══════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260809020000_s92_purga_traza_telefonos.sql` (S92-A · D-706)
+--
+-- ⚠️⚠️ **ESTA REVERSA NO REVIERTE NADA, Y SE ESCRIBE IGUAL PARA DECIRLO.**
+--
+-- La migración que acompaña **BORRA 14 FILAS con teléfonos reales**. Un DELETE
+-- de datos **no tiene reversa**: no hay SQL que devuelva un número de teléfono
+-- que ya no está. Toda la disciplina de esta sesión —reversa escrita antes de
+-- cada cambio— se apoya en que revocar un permiso se deshace; **borrar un dato
+-- no.**
+--
+-- Por eso la migración se aplicó **solo con firma explícita del founder**
+-- (9-ago-2026: *«PURGA firmada: borrar los 14 números de la base, con conteo
+-- antes/después y constancia en el acta»*), y no como consecuencia de una cura
+-- de permisos.
+--
+-- LO ÚNICO QUE ESTE ARCHIVO PUEDE HACER: dejar constancia de qué había, en
+-- forma y no en contenido — **ningún número se transcribe acá, que sería
+-- reintroducir por la puerta de atrás el dato que se vino a borrar.**
+--
+--   filas ............................ 14
+--   con `valor_antes` no vacío ....... 5
+--   con `valor_despues` no vacío ..... 5   (los E.164 completos)
+--   tablas distintas trazadas ........ 7
+--   momento .......................... 2026-08-02 23:06:44 UTC (una sola corrida)
+--
+-- SI HICIERA FALTA VOLVER A TENER ESA TRAZA: no se recupera de acá. Se
+-- reconstruye corriendo de nuevo la promoción a E.164 sobre los datos vivos,
+-- que es de donde salió.
+--
+-- La ESTRUCTURA sí vuelve: la tabla no se dropea (ver la migración). Lo que no
+-- vuelve son las filas.
+-- ══════════════════════════════════════════════════════════════════════════
+
+-- (intencionalmente sin sentencias: no hay nada que ejecutar)
