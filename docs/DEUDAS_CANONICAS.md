@@ -10025,3 +10025,88 @@ espeja, no se inventa.*
 > abre) · **NO S92** (loop de seguridad, sin features).
 > **☠️ MUERTE:** la superficie de subida muestra la vista previa del carrusel
 > **y** el recorte es acomodable.
+
+---
+
+#### D-697 — 🟡 EL PÓSTER DEL VIDEO: la lista pide un fotograma que RN no sabe extraer
+
+**Firma del founder:** cuando la portada de un negocio es video, **la lista
+muestra el primer FOTOGRAMA**, y el video queda solo dentro de la ficha.
+
+**EL COSTO, MEDIDO (A, 8-ago) — y por eso no entra a S91:**
+
+| vía | qué exige | veredicto |
+|---|---|---|
+| extraer el frame al RENDER | RN no lo hace sin módulo nativo | ❌ imposible hoy |
+| `expo-video-thumbnails` **al SUBIR** | **NO está instalado** (`expo-video@57.0.1` reproduce, no extrae) ⇒ **módulo nativo ⇒ BUILD NUEVA** | 🔴 caro: L-134 — sube `version`, y **los APK 1.0.3/1.0.4 del founder dejan de recibir OTA hasta reinstalar** |
+| frame server-side (Edge Function) | ffmpeg no existe en Deno de Supabase; el wasm son decenas de MB | 🔴 pieza de infraestructura |
+
+⇒ **El fotograma LITERAL es deuda de S92+, con tren de build.** No bloquea el
+cierre, y así lo declaró la mesa.
+
+**✅ PERO HAY SALIDA A COSTO CERO, Y YA ESTÁ SERVIDA.** El wrapper
+`obtenerPerfilesPublicos` **ya devuelve `portadas: string[]` ordenadas por
+`orden`** (S91-A). ⇒ **la lista puede mostrar `portadas[0]` como póster hoy
+mismo, sin motor nuevo, sin build y sin columna.** *Y probablemente sea mejor
+producto: una portada CURADA por el prestador dice más de su local que un
+fotograma arbitrario —el primer frame de un video suele ser una pared, una
+puerta entrando o un cuadro negro—.* La firma pide «que la lista no muestre
+video»; eso se cumple con la portada.
+
+**Lo que NO se hizo a propósito:** servir una columna `poster_url` vacía. **Sin
+productor sería motor sin puerta** — el patrón que este canon ya cobró en el
+caso clínico (D-585) y en el brazo del UPDATE de S77. La columna nace **con** su
+generador, no antes.
+
+**Medido: hoy hay 2 negocios con clip** (Clínica Aurora · Paseos Andres), así
+que el caso es real y no hipotético.
+
+> **Dueños: C** (consumir `portadas[0]` hoy) · **B/C + tren de build** (el
+> fotograma literal).
+> **☠️ DISPARO: S92+, y solo si viaja en un tren de build que otra cosa
+> justifique** — jamás una build sola por el póster (misma regla que rigió el
+> micrófono en D-456).
+> **☠️ MUERTE:** la lista nunca muestra un `<video>`, y el póster sale del
+> propio clip.
+
+---
+
+#### D-698 — ⚪ NOTA, NO DEFECTO: la ficha sin mapa — **y las DOS cosas que se llaman «zona»**
+
+**Elevado por C como dato y no como bug. La medición lo confirma a medias, y la
+otra mitad es la que vale.**
+
+**Lo medido en `v_prestadores_publicos` (8-ago):**
+
+| | |
+|---|---|
+| **CON** `zona_lat`/`zona_lon` — su ficha PUEDE dibujar mapa | **5**: Clínica Aurora · Clínica Los Shyris · Paseos Andres · Paseos Shyris · Satori Latam |
+| **SIN** coordenadas — su ficha legítimamente no tiene mapa | **1**: **Wizard** (`zona_lat`, `zona_lon` y `ciudad` en NULL) |
+
+⇒ **Para Wizard la nota es correcta y no hay nada que arreglar:** un negocio sin
+ubicación cargada no puede tener mapa, y dibujarle uno sería inventar. **Es
+pendiente del founder/prestador: cargar la zona, o aceptar la ficha sin mapa.**
+
+**⚠️ PERO PARA CLÍNICA AURORA LA NOTA NO SE SOSTIENE: SÍ tiene coordenadas**
+(`-0.197058…`, `-78.438188…`, Quito). Si su mapa no aparece, **eso no es dato:
+es algo para mirar**, y queda como pregunta abierta de C con su medición hecha.
+
+**Y ACÁ ESTÁ LO QUE PROBABLEMENTE CAUSÓ EL DIAGNÓSTICO — dos cosas distintas se
+llaman «zona» en esta casa:**
+
+1. **`prestadores.zona_lat` / `zona_lon`** — el **centro DESPLAZADO** que dibuja
+   el mapa de la ficha pública (S84: la coordenada exacta no viaja al teléfono).
+   **5 de 6 lo tienen.**
+2. **`prestador_zonas`** — el catálogo DECLARATIVO de cobertura (D-331). **Está
+   en CERO filas para TODOS**, incluidos los cinco que sí dibujan mapa.
+
+*Si uno mira `prestador_zonas` para preguntarse por qué falta un mapa, la
+respuesta es «nadie tiene zona» — y es verdad, y no tiene nada que ver: el mapa
+nunca salió de ahí.* **Dos nombres iguales para dos cosas distintas producen
+diagnósticos correctos sobre la tabla equivocada** (misma familia que el caso
+`modo_horarios` de S78, que gateaba por `servicio_id` y jamás miró `empleado_id`).
+
+> **Dueño: founder/prestador** (cargar la zona de Wizard) · **C** (mirar el mapa
+> de Aurora, que sí tiene con qué dibujarse).
+> **☠️ DISPARO:** el reclutamiento de la cohorte real — un negocio sin zona no
+> se puede ofertar por geografía (la firma S79 ya lo rige).
