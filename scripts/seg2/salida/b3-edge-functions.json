@@ -1,0 +1,122 @@
+[
+ {
+  "fn": "documento-carnet",
+  "id": "documento-carnet (papel clínico (PDF))",
+  "obtenido": "HTTP 400 rebota · token_invalido",
+  "ok": true
+ },
+ {
+  "fn": "documento-historia-clinica",
+  "id": "documento-historia-clinica (papel clínico (PDF))",
+  "obtenido": "HTTP 400 rebota · token_invalido",
+  "ok": true
+ },
+ {
+  "fn": "documento-receta",
+  "id": "documento-receta (papel clínico (PDF))",
+  "obtenido": "HTTP 400 rebota · token_invalido",
+  "ok": true
+ },
+ {
+  "fn": "documento-ficha-identidad",
+  "id": "documento-ficha-identidad (papel clínico (PDF))",
+  "obtenido": "HTTP 400 rebota · token_invalido",
+  "ok": true
+ },
+ {
+  "fn": "documento-certificado",
+  "id": "documento-certificado (papel clínico (PDF))",
+  "obtenido": "HTTP 400 rebota · token_invalido",
+  "ok": true
+ },
+ {
+  "fn": "despachar-push",
+  "id": "despachar-push (despachador (lo llama el cron))",
+  "obtenido": "HTTP 200 ⚠️ RESPONDE · {\"modo\":\"transporte_vivo\",\"proyecto\":\"e-petplace-7854e\",\"entregadas\":0",
+  "ok": false
+ },
+ {
+  "fn": "despachar-whatsapp",
+  "id": "despachar-whatsapp (despachador (lo llama el cron))",
+  "obtenido": "HTTP 200 ⚠️ RESPONDE · {\"modo\":\"transporte_vivo\",\"encoladas\":0,\"entregadas\":0,\"fallidas\":0,\"s",
+  "ok": false
+ },
+ {
+  "fn": "extract-vacuna",
+  "id": "extract-vacuna 💸 IA — Claude Sonnet",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "estructurar-nota-clinica",
+  "id": "estructurar-nota-clinica 💸 IA — Claude Sonnet",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "chat-ayuda",
+  "id": "chat-ayuda 💸 IA",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "escribir-presencia",
+  "id": "escribir-presencia 💸 IA — el escriba",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "lugares",
+  "id": "lugares 💸 Google Places (facturable)",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "crear_cliente_walkin",
+  "id": "crear_cliente_walkin alta de cliente",
+  "obtenido": "sin credencial → HTTP 401 REBOTA",
+  "ok": true
+ },
+ {
+  "fn": "extract-vacuna",
+  "id": "extract-vacuna con anon key",
+  "obtenido": "HTTP 400 ⚠️ ENTRÓ AL CUERPO · {\"codigo\":\"imagen_invalida\",\"mensaje\":\"imageBase64 requerido",
+  "ok": false
+ },
+ {
+  "fn": "estructurar-nota-clinica",
+  "id": "estructurar-nota-clinica con anon key",
+  "obtenido": "HTTP 400 ⚠️ ENTRÓ AL CUERPO · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"texto requerido (dic",
+  "ok": false
+ },
+ {
+  "fn": "chat-ayuda",
+  "id": "chat-ayuda con anon key",
+  "obtenido": "HTTP 200 ⚠️ ENTRÓ AL CUERPO · {\"text\":\"Lo siento, intenta de nuevo.\"}",
+  "ok": false
+ },
+ {
+  "fn": "escribir-presencia",
+  "id": "escribir-presencia con anon key",
+  "obtenido": "HTTP 400 ⚠️ ENTRÓ AL CUERPO · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"hechos requerido: [{",
+  "ok": false
+ },
+ {
+  "fn": "lugares",
+  "id": "lugares con anon key",
+  "obtenido": "HTTP 400 ⚠️ ENTRÓ AL CUERPO · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"Falta el token de se",
+  "ok": false
+ },
+ {
+  "fn": "supabase/functions/escribir-presencia/index.ts",
+  "id": "el escriba: muro en el prompt de SISTEMA",
+  "obtenido": "system: true · muro en el archivo: true · muro DENTRO del system: true",
+  "ok": true
+ },
+ {
+  "fn": "supabase/functions/estructurar-nota-clinica/index.ts",
+  "id": "la nota clínica: muro en el prompt de SISTEMA",
+  "obtenido": "system: false · muro en el archivo: true · muro DENTRO del system: false",
+  "ok": false
+ }
+]

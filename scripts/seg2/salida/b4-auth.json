@@ -1,0 +1,74 @@
+[
+ {
+  "eje": "largo mínimo aceptado",
+  "medido": "6 caracteres",
+  "recomendacion": "**RECOMENDACIÓN: subir a 10-12.** Con 6 caracteres una clave se rompe por fuerza bruta offline en minutos. Es un cambio de una perilla del dashboard y NO invalida las claves existentes — solo rige para las nuevas y los cambios.",
+  "ok": false
+ },
+ {
+  "eje": "contraseñas filtradas / obvias",
+  "medido": "ACEPTA 4 de 4 claves obvias",
+  "recomendacion": "**RECOMENDACIÓN: encender «Leaked password protection» (HaveIBeenPwned) en el dashboard.** Es un toggle, cuesta cero y bloquea las claves que ya están en filtraciones públicas — que es exactamente lo que un atacante prueba primero.",
+  "ok": false
+ },
+ {
+  "eje": "confirmación de email obligatoria",
+  "medido": "NO — el signup devuelve sesión de inmediato",
+  "recomendacion": "Es DELIBERADO en esta etapa (D-299: la verificación está apagada y su encendido es un click). **Recomendación: encenderla ANTES de la corrida con amigos de S105** — hasta entonces cualquiera crea cuentas con correos que no controla.",
+  "ok": null
+ },
+ {
+  "eje": "¿quién puede crear cuentas?",
+  "medido": "CUALQUIERA (signup abierto)",
+  "recomendacion": "Correcto para un producto abierto; es lo que sostiene el alta de la app.",
+  "ok": null
+ },
+ {
+  "eje": "vencimiento del access token",
+  "medido": "1 hora(s)",
+  "recomendacion": "el default recomendado",
+  "ok": true
+ },
+ {
+  "eje": "rol del token de una cuenta nueva",
+  "medido": "«authenticated»",
+  "recomendacion": null,
+  "ok": true
+ },
+ {
+  "eje": "intentos fallidos seguidos",
+  "medido": "12 intentos SIN corte (no hubo 429)",
+  "recomendacion": "**RECOMENDACIÓN: revisar el rate limit de auth en el dashboard.** Sin corte, una lista de contraseñas se prueba entera contra una cuenta conocida. Supabase lo trae configurable por hora; el default suele ser generoso.",
+  "ok": false
+ },
+ {
+  "eje": "último status observado",
+  "medido": "400",
+  "recomendacion": null,
+  "ok": null
+ },
+ {
+  "eje": "proveedores OAuth habilitados",
+  "medido": "⚠️ NO MEDIBLE desde el repo ni por SQL",
+  "recomendacion": "vive en el dashboard; lo único medible es que 8 cuentas TIENEN identidad google, o sea que el proveedor está habilitado",
+  "ok": null
+ },
+ {
+  "eje": "redirect URLs permitidas",
+  "medido": "⚠️ NO MEDIBLE desde el repo ni por SQL",
+  "recomendacion": "vive en el dashboard — y un comodín acá es la misma clase que D-558",
+  "ok": null
+ },
+ {
+  "eje": "vigencia del OTP y del refresh token",
+  "medido": "⚠️ NO MEDIBLE desde el repo ni por SQL",
+  "recomendacion": "la config remota no es legible; `config.toml` es del entorno LOCAL (S84)",
+  "ok": null
+ },
+ {
+  "eje": "plantillas de correo y su remitente",
+  "medido": "⚠️ NO MEDIBLE desde el repo ni por SQL",
+  "recomendacion": "dashboard; S84 ya lo declaró sin medir",
+  "ok": null
+ }
+]

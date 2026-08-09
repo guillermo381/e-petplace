@@ -1,0 +1,25 @@
+{
+ "antes": {
+  "fixtures": 11,
+  "resto": 150,
+  "total": 161
+ },
+ "despues": {
+  "fixtures": 0,
+  "resto": 150,
+  "total": 150
+ },
+ "lista": [
+  "seg2-alta-1786283316575@epetplace.dev",
+  "seg2-alta-1786283392858@epetplace.dev",
+  "seg2-login-1786283433156@epetplace.dev",
+  "seg2-storage-1786283604259@epetplace.dev",
+  "seg2-prestador-1786284929136@epetplace.dev",
+  "seg2-pw6-1786290192132@epetplace.dev",
+  "seg2-obv-1786290192609-pas@epetplace.dev",
+  "seg2-obv-1786290192867-123@epetplace.dev",
+  "seg2-obv-1786290193123-qwe@epetplace.dev",
+  "seg2-obv-1786290193401-aaa@epetplace.dev",
+  "seg2-conf-1786290193691@epetplace.dev"
+ ]
+}

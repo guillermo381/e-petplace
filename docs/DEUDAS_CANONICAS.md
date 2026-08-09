@@ -10715,3 +10715,139 @@ saneador no se puede olvidar. *La disciplina no alcanzó; el instrumento sí.*
 > porque la próxima sesión que escriba artefactos de medición tiene que heredar
 > el saneador, no re-descubrirlo. **☠️ MUERTE:** ninguna sesión escribe
 > artefactos sin redacción automática. Origen: S92-BIS (B2, hallazgo propio).
+
+#### D-713 — 🔴 LOS DOS DESPACHADORES RESPONDEN A CUALQUIERA, SIN NINGUNA CREDENCIAL
+
+**Rojo reproducido (S92-BIS, B3): un `POST` SIN apikey y SIN Authorization a
+`despachar-push` y a `despachar-whatsapp` devuelve HTTP 200 y procesa la cola.**
+
+```
+despachar-push      → 200 {"modo":"transporte_vivo","proyecto":"e-petplace-7854e","entregadas":0…}
+despachar-whatsapp  → 200 {"modo":"transporte_vivo","encoladas":0,"entregadas":0…}
+```
+
+**Por qué pasa, medido:** las dos están desplegadas con `verify_jwt: false`, y
+**ninguna de las dos configuraciones de Supabase las protegería**: con
+`verify_jwt: true` entraría cualquiera con la **anon key, que es pública y viaja
+en el bundle**. *El guard tiene que estar adentro, y no está.*
+
+**El riesgo, en lenguaje de negocio:** cualquiera en internet puede disparar el
+despachador de notificaciones tantas veces como quiera. Hoy la cola está vacía y
+entrega 0, así que el daño visible es cero — pero **consume cuota de FCM y de
+Meta**, y **con cola llena despacha antes de tiempo**. Es una factura abierta y
+un vector de abuso sobre el único canal que la casa tiene para hablarle a la
+gente.
+
+**LA CURA ESTÁ ESCRITA Y NO SE EJECUTA (freno 2).** Un secret compartido
+(`DESPACHO_SECRET`) en un header, verificado en el cuerpo de la function y
+agregado a los dos jobs de `cron.job` (#6 y #8). **No se hace en esta sesión
+porque tocar esas dos functions es tocar el canal de push que el founder gateó
+en dispositivo en S90** —los dos teléfonos vibraron— y **no hay quien lo
+re-gatee ahora**. Equivocarse acá deja al producto mudo y nadie se entera hasta
+que una notificación no llega.
+
+**Precondición para curarla:** el founder disponible para re-gatear el push
+después del cambio.
+
+> **Dueño: A (con gate del founder).** **☠️ DISPARO: S93**, o antes si el
+> founder puede gatear. **☠️ MUERTE:** los dos despachadores rebotan sin el
+> secret, y el cron sigue entregando. Origen: S92-BIS (B3).
+
+#### D-714 — 🟠 CINCO FUNCTIONS FACTURABLES ENTRAN AL CUERPO CON LA ANON KEY
+
+**`verify_jwt: true` valida que el JWT sea válido — y la anon key ES un JWT
+válido.** Medido: sin credencial las seis rebotan 401 ✅, **pero con la anon
+key del bundle cinco llegan al cuerpo** y rebotan recién por validación de
+entrada:
+
+| function | qué gasta | con anon key |
+|---|---|---|
+| `extract-vacuna` | Claude Sonnet | 400 `imagen_invalida` — **entró** |
+| `estructurar-nota-clinica` | Claude Sonnet | 400 `entrada_invalida` — **entró** |
+| `escribir-presencia` | Claude Sonnet | 400 `entrada_invalida` — **entró** |
+| `chat-ayuda` | IA | **200** — ejecutó y respondió |
+| `lugares` | Google Places (facturable) | 400 `entrada_invalida` — **entró** |
+
+**El riesgo:** quien tenga la anon key —cualquiera con la app instalada— puede
+mandar entradas VÁLIDAS y hacer correr el modelo. **La cuota de Anthropic y de
+Google Places la paga la casa.** No es una fuga de datos: es una fuga de plata.
+
+**La cura no es `verify_jwt`** (ya está en `true` y no alcanza): es exigir en el
+cuerpo una **sesión de usuario real** — que el JWT tenga `role: authenticated` y
+no `anon`. Son ~4 líneas por function, pero **son cinco redeploys y tocan dos
+flujos gateados** (el carnet por cámara y el dictado clínico) ⇒ freno 2.
+
+> **Dueño: A (con gate del founder sobre carnet y dictado).**
+> **☠️ DISPARO: S93.** **☠️ MUERTE:** ninguna function que gaste dinero se
+> ejecuta con la clave que viaja en el bundle. Origen: S92-BIS (B3).
+
+#### D-715 — 🟠 EL MURO §8.3 DE LA NOTA CLÍNICA VIVE EN EL PROMPT DE USUARIO, NO EN EL DE SISTEMA
+
+**Medido en `supabase/functions/estructurar-nota-clinica/index.ts`:** la llamada
+a Anthropic manda `messages: [{ role: 'user', content: prompt }]` **y no usa el
+campo `system`**. El `prompt` es `construirPrompt(...) + texto`, o sea que **las
+reglas del muro y el texto DICTADO POR EL VET viajan concatenados en el mismo
+mensaje de usuario**.
+
+**Por qué importa, y es seguridad y no estilo:** el muro §8.3 es la regla que
+impide que la IA **agregue contenido clínico no dictado** (L-139: el «todo bien»
+jamás se traduce a mediciones). Con las reglas en el mismo canal que el
+contenido, un dictado que contenga instrucciones —a propósito o por accidente—
+compite con ellas. **En un pipeline clínico eso significa datos inventados en
+una historia médica.**
+
+**Y la casa ya conoce la forma correcta:** `escribir-presencia` (el escriba) SÍ
+pone su muro en el campo `system` — medido en la misma pasada. *Es la misma
+forma que L-218: una pieza que ya está bien hecha en un lugar y no se adoptó en
+el otro.*
+
+**No se cura acá:** exige redeploy de una function del pipeline clínico y
+**re-gate del dictado**, que es un flujo firmado (S70). Freno 2.
+
+> **Dueño: A (con gate del founder sobre el dictado).** **☠️ DISPARO: S93**,
+> junto con D-714 (misma function, mismo redeploy). **☠️ MUERTE:** el muro §8.3
+> vive en el campo `system` de la llamada, y el validador sigue siendo su
+> segunda red. Origen: S92-BIS (B3).
+
+#### D-716 — 🔴 LA POLÍTICA DE CONTRASEÑAS: 6 CARACTERES, CLAVES FILTRADAS ACEPTADAS Y SIN FRENO A LA FUERZA BRUTA
+
+**Medido por CAMINO REAL (S92-BIS, B4) y no leyendo `config.toml`** — que es del
+entorno local y no del proyecto remoto (el límite que S84 dejó escrito). Se le
+pidió al endpoint de auth que hiciera cada cosa y se leyó qué contestó:
+
+| eje | estado medido | recomendación |
+|---|---|---|
+| **largo mínimo** | **6 caracteres** (aceptó `aaaaaa`) | **subir a 10-12** |
+| **claves filtradas** | **aceptó las 4 probadas**: `password`, `12345678`, `qwerty123`, `aaaaaaaa` | **encender «Leaked password protection»** (HaveIBeenPwned) |
+| **fuerza bruta** | **12 intentos fallidos seguidos SIN un solo 429** | **revisar el rate limit de auth** |
+| vencimiento del access token | **1 hora** ✅ | el default recomendado, no se toca |
+| confirmación de email | **no exigida** — el signup da sesión de inmediato | deliberado hoy (D-299); **encender antes de S105** |
+
+**Los tres rojos son la misma historia contada tres veces:** hoy, contra una
+cuenta cuyo correo se conozca, un atacante puede **probar la lista de
+contraseñas más comunes sin que nada lo frene**, y si el dueño eligió una de
+ellas —cosa que el sistema permite— entra. *No hace falta ninguna vulnerabilidad
+del código: alcanza con la puerta tal como está configurada.*
+
+**Y el costo de cerrarlo es casi nulo, que es lo que lo vuelve urgente:** los
+tres son **perillas del dashboard**, no código. **Subir el mínimo y encender la
+protección de filtradas NO invalida las claves existentes** — rigen para las
+nuevas y para los cambios. Lo único que hay que mirar con cuidado es el rate
+limit, porque un valor muy agresivo puede molestar a un usuario legítimo que se
+equivoca dos veces.
+
+**NO SE EJECUTA ACÁ (freno 2: cambia comportamiento para usuarios reales, y
+además vive en el dashboard, que esta sesión no toca).**
+
+**Lo que NO se pudo medir, y se dice (R5):** proveedores OAuth habilitados ·
+**redirect URLs permitidas** (un comodín ahí es la misma clase que D-558) ·
+vigencia del OTP y del refresh · plantillas de correo. **Todo eso vive en el
+dashboard y no es legible desde el repo ni por SQL.** Lo único inferible es que
+el proveedor Google está habilitado, porque 8 cuentas tienen identidad `google`.
+
+> **Dueño: founder (son perillas del dashboard).**
+> **☠️ DISPARO: antes de la corrida con amigos de S105** — es la primera vez que
+> entran cuentas de personas que no son el founder, y la puerta es lo primero
+> que toca alguien de afuera. **☠️ MUERTE:** mínimo ≥10, protección de filtradas
+> encendida, y un 429 que aparezca antes del intento 10.
+> Origen: S92-BIS (B4, medición por camino real).
