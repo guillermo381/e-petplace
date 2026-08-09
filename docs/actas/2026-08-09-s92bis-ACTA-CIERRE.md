@@ -478,3 +478,78 @@ este lote**.
 **⑥ ASTERISCOS: CERO**, en los dos publishes — el script re-verificó después de
 bundlear y confirmó que el ancla real es la verificada y el árbol no se movió.
 *Se declara la ausencia porque `eas update:view` no expone el estado del árbol.*
+
+---
+
+## ⑭ P0-C · LA CAUSA ERA UN CARTEL QUE NADIE APAGABA
+
+**El dato del aparato cerró lo que tres diagnósticos no pudieron.** La traza que
+el founder fotografió mostró la pantalla **cargando bien y completa**:
+
+```
+ 262ms · ◆ hook especies: RESUELVE ok=true · perro
+ 431ms · ② después · ok=true · 6 mascota(s)
+        · ✔ setMascotas(lista)
+2092ms · ✂ se limpia el efecto → vigente=false
+   0ms · ▶ entra al efecto (focus)     ← y todo otra vez
+```
+
+**Nada colgado, nada fallando, nada lento** — y el modal ahí igual.
+
+### La causa, en una línea
+
+`setCatalogoNoLlego(faseEspecies.fase)` guardaba **una COPIA de la fase** en el
+instante del toque, y **solo se limpiaba a mano**. Se tocaba a los ~100 ms con
+la fase en `cargando`; el catálogo llegaba a los 262 ms y la fase pasaba a
+`listo`, **pero la copia seguía diciendo `cargando` para siempre**. *El modal no
+esperaba nada: mostraba una foto del pasado.* La pantalla de atrás estaba lista;
+el cartel de adelante no se retiraba nunca. **Y lo escribí yo, en la cura
+anterior.**
+
+**Las cuatro preguntas del founder, contestadas:** ① el blur lo provoca **el
+propio modal** (un `Modal` de RN toma el foco) — es consecuencia, no causa · ②
+**no hay deps inestables ni remount**, y lo prueba la traza mejor que el código:
+*las dos vueltas aparecen en la MISMA traza*, así que el estado sobrevivió · ③
+el ciclo deja de importar para la cura · ④ el segundo ciclo **sí pinta**: lo que
+no se va es el cartel.
+
+### Las cuatro curas
+
+**① El estado deja de ser copia y se DERIVA de la fase viva** — cuando el dato
+llega, el modal se apaga solo, sin efecto que lo sincronice. *Un estado derivado
+de otro estado es una copia, y toda copia diverge.*
+**② El hogar no se vuelve a pedir si ya está** — solo en esta pantalla, por
+orden del founder: *extenderlo a las otras siete se decide con la medición en la
+mano, no por arrastre*, porque la disponibilidad de paseadores **sí** debe
+re-pedirse y el hogar no.
+**③ D-727 curada, con una enmienda que cambia el diagnóstico:** «Grooming para
+Thor» **no fue copia-pega** — el comentario de al lado declaraba el reuso a
+propósito (*«la misma voz del QUIÉN del grooming, Ley 17.3»*). **La decisión era
+sana; el literal no**: lo compartible era la FORMA («X para {nombre}»), no el
+texto, porque el texto nombra el oficio.
+**④ El instrumento se queda** hasta que el founder cierre el gate (D-726).
+
+### La señal transversal — D-728, medida y no supuesta
+
+**25 pantallas del cliente** y **42 del prestador** usan `useFocusEffect`; **8
+del cliente lo combinan con `<Hoja>`**. En `disponibles` el ciclo se vio porque
+había un cartel colgado; **en las otras siete no se ve** — recargan, los datos
+vuelven rápido, y *cargar todo dos o tres veces no se siente como un bug: se
+siente como lentitud.*
+
+Para confirmarlo se instrumentó **una segunda pantalla elegida a propósito**:
+`hogar/mascota/[mascotaId]`, **la que el founder probó y declaró que «entra
+bien»**. Cuenta cuántas veces pide todo y lo muestra al pie. **Si ese número
+sube al abrir una hoja, la ficha pasa de hipótesis a hecho** y es el punto de
+partida de la sesión de performance.
+
+### ⇒ L-221, la lección de la sesión
+
+*Todas las mediciones estaban bien; la pregunta estaba mal.* Se persiguió
+lentitud, promesas colgadas, policies, RLS, grants y bucles de foco — **y cada
+medición fue correcta**. La disciplina de no afirmar sin medir **cubre la
+respuesta, no la pregunta**, y una medición impecable sobre la pregunta
+equivocada **se siente como progreso**. Lo cortó **el dato del aparato**: ver la
+pantalla cargada CON el modal encima cambió la pregunta de *«¿por qué no llega
+el dato?»* a *«¿por qué sigue el cartel si el dato llegó?»*, y la causa apareció
+en una línea.

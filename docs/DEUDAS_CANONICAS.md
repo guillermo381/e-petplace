@@ -11539,6 +11539,18 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-221 — TODAS LAS MEDICIONES ESTABAN BIEN; LA PREGUNTA ESTABA MAL (S92-BIS).**
+
+  **El caso:** un modal que no se iba nunca. Se persiguió, en este orden y durante horas, **lentitud** (cronómetros por eslabón), **promesas colgadas** (sondas en cada `await`), **policies y RLS** (`EXPLAIN ANALYZE` con los claims reales del founder), **grants por columna** (13/13 verificados), **`is_admin()` volatile** (hallazgo real, descartado con números) y **bucles de foco** (traza del ciclo blur/focus). **Todas esas mediciones fueron correctas.** Ninguna estaba equivocada. Y ninguna encontró la causa, porque **la causa era que un cartel no se apagaba**: el estado del modal guardaba una COPIA de la fase en el instante del toque, el dato llegaba 262 ms después, y la copia seguía diciendo «cargando» para siempre.
+
+  **Lo que enseña, y es lo incómodo:** *medir bien no protege de preguntar mal.* Cada medición contestó con precisión una pregunta que no era la que había que hacer. La disciplina de la casa —no afirmar sin medir— **funcionó** y aun así el diagnóstico tardó, porque **la disciplina cubre la respuesta, no la pregunta**. Y una medición impecable sobre la pregunta equivocada **se siente como progreso**, que es lo que la vuelve cara: cada rojo descartado daba la sensación de estar cerca.
+
+  **Qué lo cortó:** **el dato del aparato**. La traza mostró la pantalla cargando bien —`ok=true`, 6 mascotas, `setMascotas` ejecutado— **y el modal ahí igual**. Recién con eso la pregunta cambió de *«¿por qué no llega el dato?»* a *«¿por qué sigue el cartel si el dato llegó?»*, y la causa apareció en una línea. *Ninguna cantidad de razonamiento sobre el backend podía llegar ahí, porque el backend nunca tuvo la culpa.*
+
+  **La forma exigible, en dos:** ① cuando **tres mediciones seguidas salen sanas**, la hipótesis no se afina: **se cambia de pregunta** — tres verdes seguidos son un dato sobre el marco, no sobre el sistema; ② y el instrumento va **donde el síntoma se manifiesta**, no donde uno supone que está la causa. *La primera versión del instrumento quedó en el modal equivocado y no midió nada, lo que costó una vuelta entera y es la misma lección en chiquito.*
+
+  **Su hermana:** **L-220** dice que verificar sobre el propio resumen da un verde falso. Ésta dice que **medir el lugar equivocado da un rojo verdadero e inútil**. Las dos se curan igual: con un dato que venga de afuera de la propia cabeza. Origen: S92-BIS (P0-C, tres diagnósticos y una traza).
+
 - **L-220 — CERTIFIQUÉ MI PROPIO RESUMEN Y SALIÓ VERDE: es L-192 del lado de quien verifica (S92-BIS).**
 
   **El caso:** el P0 del paseo se curó, se verificó **7/7**, se publicó, y **el bug seguía en el aparato**. El verde no era falso por descuido: era falso **por construcción**. `scripts/seg2/p0-verde.mts` hacía dos cosas que lo invalidaban para la pregunta que importaba: ① importaba `ofrecibles()` real —bien— pero **reescribía la decisión de la pantalla en una función local**, así que probaba mi transcripción y no el archivo que corre; ② **le pasaba las mascotas a mano** (`const THOR = {…}`). *Le di los perros al test y después celebré que encontrara perros.*
