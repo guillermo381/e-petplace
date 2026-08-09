@@ -79,7 +79,22 @@ export default function PaseoDisponibles() {
     typeof params.mascotaId === 'string' && params.mascotaId.length > 0 ? params.mascotaId : null;
 
   const [disponibles, setDisponibles] = useState<PaseadorDisponible[] | 'cargando' | 'error'>('cargando');
-  const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
+  /** 🔴 P0 REABIERTO (9-ago-2026) — LAS MASCOTAS TAMBIÉN TIENEN TRES ESTADOS.
+   *
+   *  Esto era `useState<MascotaResumen[]>([])`, y ahí vivía la causa que la
+   *  primera cura NO tocó: si la lectura fallaba, los dos `await` de abajo
+   *  hacían `return` **callado** y la lista se quedaba en `[]` **para
+   *  siempre**, sin reintento. Con el catálogo cargado —que es público y
+   *  rápido, así que llega igual— la pantalla leía ese `[]` como *«no tenés
+   *  perros»* y se lo decía al founder con dos perros vivos.
+   *
+   *  **Es L-218 exacta, un piso más arriba**: la cura anterior partió en tres
+   *  fases el vacío del CATÁLOGO y dejó el vacío de las MASCOTAS colapsado en
+   *  un array. *Se curó el vacío que el P0 mostró, no la clase.*
+   *
+   *  La forma se copia de `paseo/index.tsx`, que **ya lo hacía bien** — otra
+   *  vez cuatro pantallas cumpliendo una ley y una no. */
+  const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // §1bis (v1.4): las especies que PUEDEN pasear — de la DB, jamás un if
   // por pantalla (null = todas mientras carga o sin config).
   const [fotos, setFotos] = useState<Record<string, string>>({});
@@ -90,6 +105,15 @@ export default function PaseoDisponibles() {
    *  eso no comparte estado con `sinElegibles`: mezclarlos es exactamente el
    *  bug que se está curando. */
   const [catalogoNoLlego, setCatalogoNoLlego] = useState<'cargando' | 'error' | null>(null);
+  /** Hermano del anterior, para LAS MASCOTAS: son dos ausencias distintas y
+   *  no comparten estado. *«No llegó la info del servicio» y «no llegó tu
+   *  hogar» piden dos frases distintas, y una sola sería mentira en la
+   *  mitad de los casos.* */
+  const [mascotasNoLlegaron, setMascotasNoLlegaron] = useState<'cargando' | 'error' | null>(null);
+  /** Contador de reintentos: cambiarlo re-dispara la lectura del hogar. Sin
+   *  esto, «Reintentar» solo pondría el estado en `cargando` y nadie volvería
+   *  a pedir nada — un botón que no reintenta es peor que ningún botón. */
+  const [reintento, setReintento] = useState(0);
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
   // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
@@ -125,7 +149,7 @@ export default function PaseoDisponibles() {
 
   // S73 (letra de elegibilidad): frontera única — momento vital + especie.
   const faseEspecies = useEspeciesElegibles('paseo');
-  const elegibles = ofrecibles(mascotas, faseEspecies);
+  const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -154,27 +178,41 @@ export default function PaseoDisponibles() {
       let vigente = true;
       cargar();
       void (async () => {
+        /* ☠️ ACÁ VIVÍAN LOS DOS `return` MUDOS QUE REABRIERON EL P0.
+           Decían `if (!vigente || !estado.ok || !estado.data.familia_id) return;`
+           y `if (!vigente || !r.ok) return;` — y **el fallo se degradaba a lista
+           vacía en silencio**. Ahora cada rama dice qué pasó, y `!vigente` se
+           separa del fallo real: irse de la pantalla NO es un error y no debe
+           pintar uno. */
         const estado = await getEstadoOnboardingDueno();
-        if (!vigente || !estado.ok || !estado.data.familia_id) return;
+        if (!vigente) return;
+        if (!estado.ok || !estado.data.familia_id) {
+          setMascotas('error');
+          return;
+        }
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (!vigente || !r.ok) return;
-        setMascotas(r.data);
-        const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
-        if (conFoto.length > 0) {
-          const urls = await Promise.all(conFoto.map((m) => resolverUrlFoto(m.foto_url)));
-          if (!vigente) return;
-          const mapa: Record<string, string> = {};
-          conFoto.forEach((m, idx) => {
-            const u = urls[idx];
-            if (u !== null) mapa[m.id] = u;
-          });
-          setFotos(mapa);
+        if (!vigente) return;
+        setMascotas(r.ok ? r.data : 'error');
+        if (r.ok) {
+          const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
+          if (conFoto.length > 0) {
+            const urls = await Promise.all(conFoto.map((m) => resolverUrlFoto(m.foto_url)));
+            if (!vigente) return;
+            const mapa: Record<string, string> = {};
+            conFoto.forEach((m, idx) => {
+              const u = urls[idx];
+              if (u !== null) mapa[m.id] = u;
+            });
+            setFotos(mapa);
+          }
         }
       })();
       return () => {
         vigente = false;
       };
-    }, [cargar]),
+      // `reintento` está en las deps A PROPÓSITO: es lo que vuelve a disparar
+      // la lectura del hogar cuando la persona toca «Reintentar».
+    }, [cargar, reintento]),
   );
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
@@ -276,7 +314,10 @@ export default function PaseoDisponibles() {
   // con camino y la reserva NO avanza (el guard server es el cinturón).
   const alElegirMascota = useCallback(
     (p: PaseadorDisponible, mascotaId: string) => {
-      const m = mascotas.find((x) => x.id === mascotaId);
+      // `elegibles` YA es el subconjunto ofrecible y siempre es array: buscar
+      // acá es más correcto que en la lista cruda — nadie puede elegir una
+      // mascota que la pantalla no ofreció.
+      const m = elegibles.find((x) => x.id === mascotaId);
       if (m !== undefined && m.paseo_social_ok === null) {
         setPreguntaSocial({ paseador: p, mascota: m });
         return;
@@ -317,6 +358,14 @@ export default function PaseoDisponibles() {
         setCatalogoNoLlego(faseEspecies.fase);
         return;
       }
+      // 🔴 EL GUARD QUE FALTABA — el que reabrió el P0 (ver la nota completa
+      // arriba del estado `mascotas`). El catálogo llega ANTES que el hogar,
+      // así que con la fase ya en `listo` y las mascotas en vuelo, `elegibles`
+      // es `[]`: eso es lo que le decía «no tenés perros» al founder.
+      if (!Array.isArray(mascotas)) {
+        setMascotasNoLlegaron(mascotas);
+        return;
+      }
       if (elegibles.length === 0) {
         setSinElegibles(true);
         return;
@@ -332,7 +381,7 @@ export default function PaseoDisponibles() {
         setEligiendoMascota(p);
       }
     },
-    [elegibles, mascotaIdParam, alElegirMascota, faseEspecies.fase],
+    [elegibles, mascotaIdParam, alElegirMascota, faseEspecies.fase, mascotas],
   );
 
   return (
@@ -348,7 +397,7 @@ export default function PaseoDisponibles() {
           // (:alElegirMascota) se DICE acá — avatar y nombre visibles ANTES
           // de tocar nada. Auto-seleccionar en silencio era magia (cura b).
           const paraQuien =
-            mascotas.find((m) => m.id === mascotaIdParam) ??
+            elegibles.find((m) => m.id === mascotaIdParam) ??
             (elegibles.length === 1 ? elegibles[0] : null);
           return (
             <Celda
@@ -496,6 +545,40 @@ export default function PaseoDisponibles() {
         </View>
       </Hoja>
 
+      {/* 🔴 LA HERMANA DE LA ANTERIOR, para las MASCOTAS (P0 reabierto 9-ago).
+          Antes este caso no tenía voz: se caía en «no tenés un perro
+          registrado», que es una afirmación sobre el HOGAR de alguien hecha
+          sobre una lectura que falló. **La voz no culpa a las mascotas** —
+          dice que el dato no llegó— y **ofrece reintentar**, porque un error
+          sin salida obliga a salir de la pantalla y volver a entrar. */}
+      <Hoja
+        visible={mascotasNoLlegaron !== null}
+        titulo={t(mascotasNoLlegaron === 'cargando' ? 'paquete.misMascotasCargandoTitulo' : 'paquete.misMascotasErrorTitulo')}
+        onCerrar={() => setMascotasNoLlegaron(null)}
+        conCerrar
+      >
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          <Celda
+            titulo={t(
+              mascotasNoLlegaron === 'cargando'
+                ? 'paquete.misMascotasCargandoDetalle'
+                : 'paquete.misMascotasErrorDetalle',
+            )}
+          />
+          {mascotasNoLlegaron === 'error' ? (
+            <Boton
+              variante="secundario"
+              etiqueta={t('hogar.reintentar')}
+              onPress={() => {
+                setMascotasNoLlegaron(null);
+                setMascotas('cargando');
+                setReintento((n) => n + 1);
+              }}
+            />
+          ) : null}
+        </View>
+      </Hoja>
+
       {/* §1bis: hogar sin mascotas elegibles — voz honesta CON CAMINO */}
       <Hoja
         visible={sinElegibles}
@@ -526,7 +609,11 @@ export default function PaseoDisponibles() {
         onRespondida={(ok) => {
           if (preguntaSocial === null) return;
           const { paseador, mascota } = preguntaSocial;
-          setMascotas((prev) => prev.map((m) => (m.id === mascota.id ? { ...m, paseo_social_ok: ok } : m)));
+          // Solo se actualiza si HAY lista: si el estado es 'cargando'/'error',
+          // no hay nada que parchear y fabricar un array acá inventaría datos.
+          setMascotas((prev) =>
+            Array.isArray(prev) ? prev.map((m) => (m.id === mascota.id ? { ...m, paseo_social_ok: ok } : m)) : prev,
+          );
           setPreguntaSocial(null);
           if (ok) {
             continuarConMascota(paseador, mascota.id);

@@ -977,6 +977,11 @@ export const clienteEn = {
     catalogoCargandoDetalle: "We're still loading the walk details. Try again in a moment.",
     catalogoErrorTitulo: "We couldn't load the walk details",
     catalogoErrorDetalle: "Check your connection and come back in. Your pets are fine — what didn't load is the service info.",
+    // 🔴 P0 reabierto (9-ago) — el par en español lleva la nota completa.
+    misMascotasCargandoTitulo: 'One second',
+    misMascotasCargandoDetalle: "We're still loading your pets. Try again in a moment.",
+    misMascotasErrorTitulo: "We couldn't load your pets",
+    misMascotasErrorDetalle: "They're fine — what failed is the connection to your data, not them. Please try again.",
     presetsEtiqueta: 'How many walks?',
     presetSalidas: '{{n}} walks',
     vigenciaVoz: 'Walks last one month from purchase. If you buy another package before that date, unused walks carry over.',

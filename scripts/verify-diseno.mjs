@@ -1883,9 +1883,101 @@ function r34(archivos) {
       }
     }
   }
+  /* ═══ BRAZO B (S92-BIS, 9-ago — EL P0 REABIERTO) ════════════════════════
+   *
+   * ⚠️ ESTE BRAZO EXISTE PORQUE EL BRAZO A NO ALCANZÓ, y la prueba es que
+   * **el bug volvió con la cura puesta y publicada**. El brazo A vigila el
+   * resultado de `ofrecibles()`; el defecto se mudó **un piso más arriba**, a
+   * la lista que ALIMENTA a `ofrecibles`:
+   *
+   *   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);   // ← []
+   *   const estado = await getEstadoOnboardingDueno();
+   *   if (!vigente || !estado.ok || !estado.data.familia_id) return;    // ← mudo
+   *   const r = await obtenerMascotasDeFamilia(...);
+   *   if (!vigente || !r.ok) return;                                    // ← mudo
+   *   setMascotas(r.data);
+   *
+   * Si cualquiera de esos `return` dispara, la lista queda en `[]` **para
+   * siempre y sin decir nada**. Y como el catálogo es público y rápido, la
+   * fase llega a `listo` igual ⇒ el brazo A ve un guard de fase correcto y
+   * pasa, mientras la pantalla afirma que el hogar no tiene perros.
+   *
+   * ── LA REGLA, dicha en una línea ─────────────────────────────────────────
+   * **Una lista que se llena desde la red no puede arrancar en `[]`**: tiene
+   * que modelar sus tres estados, como ya hace `paseo/index.tsx`
+   * (`useState<T[] | 'cargando' | 'error'>('cargando')`).
+   *
+   * ── EL ALCANCE, ACOTADO A PROPÓSITO Y CON SU MEDICIÓN ────────────────────
+   * La v1 de este brazo marcaba **toda** lista de red que arrancara en `[]`, y
+   * al correrla dio **31 fallos en las dos apps**. Ese número es un dato y va
+   * a deuda —la clase es ancha de verdad—, pero **no puede ser el lint**: la
+   * mayoría no es el defecto (un autocomplete de direcciones que arranca vacío
+   * es correcto), y *un lint que enciende 31 rojos de golpe se apaga, y un lint
+   * apagado no protege nada*. Es la misma trampa que el header del brazo A ya
+   * nombra.
+   *
+   * Así que vigila **la familia donde el vacío se convierte en una AFIRMACIÓN
+   * sobre el hogar de alguien**: las listas que se llenan con
+   * `obtenerMascotasDeFamilia`. Ahí el `[]` no es «no muestro nada» — es *«no
+   * tenés un perro registrado»*, dicho a alguien que tiene dos.
+   *
+   * El escape es explícito y barato: que el fallo TENGA VOZ. Vale
+   * `setX('error')` (las fases) o un registro de fallo que la pantalla pinte
+   * —`sumarFallo(...)`, como ya hace `hogar/adiestramiento.tsx`—. La regla no
+   * exige una forma: exige que el fallo se pueda decir. */
+  let listasDeHogar = 0;
+  for (const { path, src } of archivos) {
+    /* ⚠️ SE ATA LA LISTA A SU FUENTE, y no alcanza con que el archivo mencione
+       el lector. La v2 marcaba cualquier lista vacía de un archivo que
+       nombrara `obtenerMascotasDeFamilia`, y encendió `ofertaPublica` y
+       `vocabulario` —dos listas que no son de mascotas— en pantallas sanas.
+       *Dos falsos positivos alcanzan para que nadie vuelva a leer el lint.*
+       Ahora se captura la variable que RECIBE la respuesta y solo se acusa al
+       setter que se llena con ella. */
+    /* Y además PROXIMIDAD, porque atar por nombre tampoco alcanzó: `r` es un
+       nombre universal, y `setOfertaPublica(r.data)` de un `.then((r) => …)`
+       en la línea 96 se leía como si viniera del `await` de la 136 — otro
+       scope, otra pantalla, rojo falso. Se exige que el `setX(<var>.data)`
+       viva DENTRO de las 15 líneas siguientes al await, que es el alcance real
+       de ese bloque. */
+    const lineasArchivo = src.split('\n');
+    const receptoras = [];
+    for (let i = 0; i < lineasArchivo.length; i++) {
+      const m = /(?:const|let)\s+(\w+)\s*=\s*await\s+obtenerMascotasDeFamilia\s*\(/.exec(lineasArchivo[i]);
+      if (m !== null) receptoras.push({ nombre: m[1], cerca: lineasArchivo.slice(i, i + 15).join('\n') });
+    }
+    if (receptoras.length === 0) continue;
+    // `const [X, setX] = useState<...[]>([])` — lista que nace vacía
+    for (const m of src.matchAll(/const\s*\[\s*(\w+)\s*,\s*(set\w+)\s*\]\s*=\s*useState<[^>]*\[\]>\(\[\]\)/g)) {
+      const [, nombre, setter] = m;
+      // ¿se llena con la respuesta DE ESE lector? (`setX(r.data)` con r = await …)
+      const seLlenaDelHogar = receptoras.some((r) =>
+        new RegExp(`${setter}\\(\\s*(?:\\w+\\.ok\\s*\\?\\s*)?${r.nombre}\\.data\\b`).test(r.cerca),
+      );
+      if (!seLlenaDelHogar) continue;
+      listasDeHogar++;
+      /* ⚠️ `'error'` EN CUALQUIER PARTE DEL ARGUMENTO, y no pegado al paréntesis.
+         La v3 exigía `setX('error'` literal y **no reconocía
+         `setX(r.ok ? r.data : 'error')`** — que es el patrón canónico de la
+         casa, el que usa `paseo/index.tsx` y el que se acaba de escribir en
+         `disponibles.tsx`. *El guard habría marcado en rojo la pantalla que lo
+         hace bien.* Lo destapó probar el brazo EN ROJO antes de confiar en él
+         (L-216): con el fixture ya curado, la auto-prueba no gritó
+         «decorativo» porque el fixture seguía fallando… por el motivo
+         equivocado. */
+      const tieneFases = new RegExp(`${setter}\\([^)]*'error'`).test(src);
+      const tieneRegistroDeFallo = /sumarFallo\s*\(/.test(src);
+      if (!tieneFases && !tieneRegistroDeFallo) {
+        fallos.push(
+          `${path} — \`${nombre}\` se llena con \`obtenerMascotasDeFamilia\` y arranca en \`[]\`, sin ningún \`${setter}('error')\` ni registro de fallo: si la lectura falla, la lista queda vacía EN SILENCIO y la pantalla lee ese vacío como «no tenés mascotas». Modelá las tres fases como \`paseo/index.tsx\`: \`useState<T[] | 'cargando' | 'error'>('cargando')\` (el 9-ago esto le dijo al founder que no tenía perros — DOS VECES, la segunda con la primera cura ya publicada)`,
+        );
+      }
+    }
+  }
+
   return {
     fallos,
-    info: `${decisiones} decisión/es sobre el resultado de ofrecibles() — todas tienen que mirar la fase`,
+    info: `${decisiones} decisión/es sobre el resultado de ofrecibles() + ${listasDeHogar} lista(s) del hogar que arrancan vacías — todas tienen que poder decir que fallaron`,
   };
 }
 
@@ -1956,6 +2048,22 @@ const EXTRAS_R16 = [
  *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
  *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
 const EXTRAS_BRAZOS = [
+  /* ── R34 brazo B: la lista de red que arranca vacía (S92-BIS) ──────────
+     Su rojo va APARTE del brazo A a propósito: el fixture de A no tiene
+     `useState<T[]>([])` y el de B no tiene `ofrecibles()`, así que ninguno
+     puede encender los dos y cada brazo queda probado por su cuenta. Es la
+     misma disciplina que R18 y R16 ya aplican.
+     El fixture es el CÓDIGO REAL que produjo el P0, recortado. */
+  ['R34·lista de red que arranca en [] y no puede decir que falló', r34, [
+    {
+      path: '(fixture)',
+      src:
+        'const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);\n' +
+        'const r = await obtenerMascotasDeFamilia(familiaId);\n' +
+        'if (!vigente || !r.ok) return;\n' +
+        'setMascotas(r.data);',
+    },
+  ]],
   // ── R14: los tres guards, en el orden en que la función los alcanza ──
   ['R14·sin la fuente (hogar/index.tsx ausente)', r14, [{ path: 'x/OTRO.tsx', src: '' }]],
   ['R14·constantes ausentes en el hogar', r14, [{ path: 'x/hogar/index.tsx', src: 'const NADA = 1;' }]],

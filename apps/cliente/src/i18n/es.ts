@@ -1104,6 +1104,14 @@ export const clienteEs = {
     catalogoCargandoDetalle: 'Estamos terminando de cargar los datos del paseo. Probá de nuevo en un momento.',
     catalogoErrorTitulo: 'No pudimos cargar los datos del paseo',
     catalogoErrorDetalle: 'Revisá tu conexión y volvé a entrar. Tus mascotas están bien: lo que no llegó es la información del servicio.',
+    /* 🔴 P0 REABIERTO (9-ago) — GATE PENDIENTE. Las MASCOTAS también tienen
+       tres estados, y sin estas voces el fallo de su lectura se contestaba
+       con «tu hogar no tiene un perro registrado»: una afirmación sobre el
+       hogar de alguien, hecha sobre un dato que nunca llegó. */
+    misMascotasCargandoTitulo: 'Un segundo',
+    misMascotasCargandoDetalle: 'Estamos terminando de cargar tus mascotas. Probá de nuevo en un momento.',
+    misMascotasErrorTitulo: 'No pudimos cargar tus mascotas',
+    misMascotasErrorDetalle: 'Están bien: lo que falló es la conexión con tus datos, no ellas. Probá de nuevo.',
     presetsEtiqueta: '¿Cuántas salidas?',
     presetSalidas: '{{n}} salidas',
     vigenciaVoz: 'Las salidas duran un mes desde la compra. Si compras otro paquete antes de esa fecha, las que no usaste se suman al nuevo.',

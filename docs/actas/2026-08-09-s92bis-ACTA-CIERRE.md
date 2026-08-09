@@ -341,3 +341,101 @@ sucio es inauditable después, y ésta es la única ventana para decirlo.*
 **Nota honesta:** este commit del acta es POSTERIOR al ancla `5c3046b5`, así que
 `main` avanza un paso respecto del bundle. Es normal y no ensucia nada — el
 ancla es el commit **del que salió el bundle**, y quedó registrado arriba.
+
+---
+
+## ⑫ 🔴 EL P0 DEL PASEO, REABIERTO — y la lección es sobre cómo verifico
+
+**El founder lo probó con el bundle nuevo ya en el aparato y el error persistía.**
+La primera cura era correcta **como cura** y estaba en el ancla publicada
+(`b8488231` es ancestro de `5c3046b5`, verificado) — **pero no era la causa
+completa**.
+
+### Lo que la verificación anterior contestó, y lo que no
+
+`p0-verde.mts` importaba `ofrecibles()` real, sí, **pero reescribía la decisión
+de la pantalla en una función local y le pasaba las mascotas a mano**
+(`const THOR = {…}`).
+
+> **Contestó:** *«dada una lista y una fase, ¿la lógica decide bien?»* — y sí.
+> **No contestó:** *«¿la pantalla RECIBE las mascotas?»* — que es donde estaba el bug.
+
+*Le di los perros al test y después celebré que encontrara perros.* **⇒ L-220.**
+
+### El backend, descartado por medición (no por confianza)
+
+| qué | resultado |
+|---|---|
+| Thor y Zeus en DB | `especie='perro'` · `estado_vida='activa'` ✅ |
+| catálogo de paseo | `["perro"]`, 5 filas activas ✅ |
+| grants de columna de `mascotas` para `authenticated` | **13/13** ✅ |
+
+**Nada se movió con S92.**
+
+### LA CAUSA — dos `return` mudos, en la línea de al lado de la cura anterior
+
+```ts
+const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);   // ← arranca vacío
+const estado = await getEstadoOnboardingDueno();
+if (!vigente || !estado.ok || !estado.data.familia_id) return;    // ← muere callado
+const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
+if (!vigente || !r.ok) return;                                    // ← muere callado
+```
+
+Si cualquiera dispara, la lista queda en `[]` **para siempre y sin reintento**. Y
+**el catálogo es público y rápido, así que llega ANTES**: con la fase ya en
+`listo` y las mascotas en vuelo, `elegibles` es `[]` y la pantalla afirmaba *«tu
+hogar no tiene un perro registrado»*. **Ésa es la explicación de «tocando
+rápido»** que el founder reportó desde el primer minuto y que se leyó como
+síntoma del catálogo.
+
+**Es L-218 exacta, un piso más arriba:** se partió en tres fases el vacío del
+CATÁLOGO y se dejó intacto el de las MASCOTAS. *Se curó el vacío que el P0
+mostró, no la clase.* **Y la casa ya lo hacía bien al lado**: `paseo/index.tsx`
+declara `MascotaResumen[] | 'cargando' | 'error'`.
+
+### Lo curado, y lo que NO se tocó por medición
+
+**Dos pantallas, no tres.** `paseo/disponibles.tsx` y `hogar/bitacora.tsx`
+modelan ahora las tres fases, **dicen** el fallo y ofrecen **reintentar** (con su
+contador, porque un botón que solo pone `cargando` y no vuelve a pedir es peor
+que ningún botón). Voz nueva en es/en, **GATE PENDIENTE**, y **no culpa a las
+mascotas**: *«Están bien: lo que falló es la conexión con tus datos, no ellas.»*
+
+**`hogar/adiestramiento.tsx` NO se tocó**: se midió que ya registra el fallo por
+rama (`sumarFallo`) y lo pinta. *Curar una pantalla sana es riesgo sin
+beneficio* — el founder autorizó tres y la medición dijo dos.
+
+### El guard (R34 brazo B), y los cuatro errores que costó afinarlo
+
+Se declaran porque son el valor del brazo, no su ruido:
+1. **v1: 31 rojos** en las dos apps. El número es real y va a deuda, pero **no
+   puede ser el lint** — *un lint que enciende 31 de golpe se apaga*. Acotado a
+   la familia donde el vacío se vuelve **una afirmación sobre el hogar**.
+2. **v2: dos falsos positivos** (`ofertaPublica`, `vocabulario`) por marcar
+   cualquier lista de un archivo que *mencionara* el lector.
+3. **v3: otro falso positivo** por atar la lista a su fuente **solo por nombre** —
+   `r` es universal, y un `.then((r) => …)` de otra pantalla se leía como el
+   `await`. Curado con **proximidad** (15 líneas).
+4. **v4, el que más enseña:** al probar el brazo **EN ROJO**, la auto-prueba no
+   gritó «decorativo»… porque el fixture curado **seguía fallando por el motivo
+   equivocado**: el regex exigía `setX('error')` literal y **no reconocía
+   `setX(r.ok ? r.data : 'error')`, el patrón canónico de la casa**. *El guard
+   habría marcado en rojo a la pantalla que lo hace bien.* Es L-216 en su forma:
+   el cinturón se prueba en rojo **antes** de confiar en él.
+
+**Estado: `verify:diseno` VERDE con 26 reglas**, brazo B con su rojo probado por
+separado (EXTRAS_BRAZOS), typechecks verdes, paridad es↔en 4/4.
+
+### ⚠️ LA VERIFICACIÓN VA **ROJA** — y así se declara (R5)
+
+**No se escribió otro test que transcriba la pantalla: ése fue el error.** Lo que
+se puede medir sin aparato está medido (backend, guard, typecheck); **lo que
+decide si el P0 murió solo se ve en el aparato**, y hasta que el founder lo
+corra esto **no está verde**.
+
+**Y queda pendiente una pregunta que puede cambiar el diagnóstico:** `verify-ota`
+avisó que hay **binarios huérfanos** (cliente en 1.0.0/1.0.1/1.0.2, y este lote
+es runtime **1.0.3**). Si el aparato corre una APK anterior, **sigue con el
+bundle viejo** y el bug persistiría con cualquier cura. Se resuelve mirando el
+pie de Cuenta: **`update 019fe79c…`** (L-138 segunda enmienda).

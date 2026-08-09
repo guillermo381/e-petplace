@@ -86,7 +86,17 @@ export default function BitacoraFamilia() {
   const { mostrar } = useAviso();
 
   const [entradas, setEntradas] = useState<EntradaBitacora[] | 'cargando' | 'error'>('cargando');
-  const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
+  /** Las tres fases, como en `paseo/index.tsx` (P0 reabierto, 9-ago): era
+   *  `useState<MascotaResumen[]>([])` y el fallo se degradaba a lista vacía
+   *  en silencio. Ver la nota en el efecto de abajo. */
+  const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
+  /** La lista, ya resuelta a array para los usos de lectura. Se calcula UNA
+   *  vez: repetir `Array.isArray(...) ? ... : []` en cada uso es la clase de
+   *  copia que después diverge. */
+  const listaMascotas = Array.isArray(mascotas) ? mascotas : [];
+  /** Re-dispara la lectura del hogar al tocar «Reintentar» — sin esto el
+   *  botón solo pondría el estado en `cargando` y nadie volvería a pedir. */
+  const [reintento, setReintento] = useState(0);
   const [vocabulario, setVocabulario] = useState<ChipVocabularioAgrupado[]>([]);
   const [hojaAbierta, setHojaAbierta] = useState(false);
   // S91-C · LA BITÁCORA NACE SABIENDO (letra madre del founder). Cuando
@@ -141,10 +151,27 @@ export default function BitacoraFamilia() {
       cargar();
       let vigente = true;
       void (async () => {
+        /* ☠️ LOS DOS `return` MUDOS, curados (P0 reabierto, 9-ago).
+           Eran idénticos a los del último paso del paseo —misma forma, mismo
+           archivo de origen— y tenían el mismo modo de falla: si la lectura
+           del hogar fallaba, `mascotas` se quedaba en `[]` **sin decir nada**
+           y sin reintento. Acá el daño es más callado que en el paseo: el
+           selector de mascota simplemente no aparece, y la persona escribe su
+           bitácora sin saber a quién se la está anotando.
+           `!vigente` se separa del fallo real: irse de la pantalla no es un
+           error y no debe pintar uno. */
         const estado = await getEstadoOnboardingDueno();
-        if (!vigente || !estado.ok || !estado.data.familia_id) return;
+        if (!vigente) return;
+        if (!estado.ok || !estado.data.familia_id) {
+          setMascotas('error');
+          return;
+        }
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (!vigente || !r.ok) return;
+        if (!vigente) return;
+        if (!r.ok) {
+          setMascotas('error');
+          return;
+        }
         setMascotas(r.data);
         // ⚠️ EL VOCABULARIO SE PIDE DESPUÉS DE CONOCER A LA MASCOTA, y ése
         // es el punto entero: los chips llegan YA FILTRADOS por especie y
@@ -166,16 +193,18 @@ export default function BitacoraFamilia() {
       return () => {
         vigente = false;
       };
-    }, [cargar, mascotaId]),
+      // `reintento` en las deps A PROPÓSITO: es lo que vuelve a disparar la
+      // lectura del hogar cuando la persona toca «Reintentar».
+    }, [cargar, mascotaId, reintento]),
   );
 
   // con UNA mascota, elegida sola (cero fricción). Con contexto de ruta
   // ya viene elegida y este efecto no tiene nada que hacer.
   useEffect(() => {
-    if (mascotaId === null && mascotas.length === 1) setMascotaId(mascotas[0].id);
+    if (mascotaId === null && listaMascotas.length === 1) setMascotaId(listaMascotas[0].id);
   }, [mascotas, mascotaId]);
 
-  const nombrePorMascota = useMemo(() => new Map(mascotas.map((m) => [m.id, m.nombre])), [mascotas]);
+  const nombrePorMascota = useMemo(() => new Map(listaMascotas.map((m) => [m.id, m.nombre])), [mascotas]);
   // §7 (S65) — los chips se agrupan por la convención VIVA de DB: las
   // conductas son su propio catálogo; los objetivos, el nivel que el
   // currículum ya les asigna. Grupo vacío no se monta (Ley 18: la
@@ -183,7 +212,7 @@ export default function BitacoraFamilia() {
   /** El SUJETO de la mascota elegida — `MascotaResumen` lo trae (A lo sirvió
    *  con la cláusula del pez). Decide qué vocabulario tiene sentido ofrecer. */
   const sujetoActivo = useMemo(
-    () => mascotas.find((m) => m.id === mascotaId)?.sujeto,
+    () => listaMascotas.find((m) => m.id === mascotaId)?.sujeto,
     [mascotas, mascotaId],
   );
 
@@ -348,13 +377,34 @@ export default function BitacoraFamilia() {
                 eligió ya: entrando desde el perfil, preguntar «¿de quién?»
                 sería pedir un dato que la pantalla anterior ya tenía en
                 la mano (Ley 23 — la puerta no pregunta lo que sabe). */}
-            {mascotas.length > 1 && !conContexto ? (
+            {listaMascotas.length > 1 && !conContexto ? (
               <SelectorOpcion
                 acento="control"
                 etiqueta={t('adiestramiento.paraQuien')}
-                opciones={mascotas.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
+                opciones={listaMascotas.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
                 seleccionada={mascotaId ?? undefined}
                 onSelect={setMascotaId}
+              />
+            ) : null}
+            {/* 🔴 P0 reabierto (9-ago) — LA LECTURA DEL HOGAR FALLÓ, y se dice.
+                Antes esto no existía: el selector simplemente **no se
+                dibujaba**, y la persona escribía su bitácora sin saber a quién
+                se la anotaba. La voz no culpa a las mascotas —dice que el dato
+                no llegó— y ofrece reintentar sin salir de la pantalla. */}
+            {mascotas === 'error' && !conContexto ? (
+              <EstadoVacio
+                titulo={t('paquete.misMascotasErrorTitulo')}
+                descripcion={t('paquete.misMascotasErrorDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('hogar.reintentar')}
+                    onPress={() => {
+                      setMascotas('cargando');
+                      setReintento((n) => n + 1);
+                    }}
+                  />
+                }
               />
             ) : null}
             {/* S65 (gate founder) — el filtro rápido: busca ENTRE los

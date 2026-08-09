@@ -11538,3 +11538,15 @@ defecto que se curó hoy en el cambio de clave.
 > nadie vigila este canal** — la construcción del flujo completo (pantalla de
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
+
+- **L-220 — CERTIFIQUÉ MI PROPIO RESUMEN Y SALIÓ VERDE: es L-192 del lado de quien verifica (S92-BIS).**
+
+  **El caso:** el P0 del paseo se curó, se verificó **7/7**, se publicó, y **el bug seguía en el aparato**. El verde no era falso por descuido: era falso **por construcción**. `scripts/seg2/p0-verde.mts` hacía dos cosas que lo invalidaban para la pregunta que importaba: ① importaba `ofrecibles()` real —bien— pero **reescribía la decisión de la pantalla en una función local**, así que probaba mi transcripción y no el archivo que corre; ② **le pasaba las mascotas a mano** (`const THOR = {…}`). *Le di los perros al test y después celebré que encontrara perros.*
+
+  **Lo que quedó sin contestar, y era todo:** *«¿la pantalla RECIBE las mascotas?»*. La causa real vivía un piso más arriba —dos `return` mudos que dejaban la lista en `[]` para siempre— y **ningún brazo del 7/7 la tocaba**.
+
+  **Por qué es L-192 y no una variante:** aquella dice *«una verificación cuyo modo de falla es el silencio no es una verificación»*. Ésta agrega el lado del verificador: **una verificación construida sobre mi propio resumen del código no verifica el código — verifica que sé leer lo que escribí.** Y su modo de falla es peor que el silencio: **es un verde**, que además autoriza a publicar.
+
+  **La forma exigible, en tres:** ① lo que se prueba se **importa**, incluida la decisión —si hay que reescribirla para probarla, eso es la señal de que hay que extraerla a una función que ambos consuman—; ② **las entradas no se fabrican en el sitio donde harían pasar la prueba**: si el bug puede estar en cómo llega el dato, dárselo hecho al test lo tapa; ③ cuando la respuesta honesta es *«esto solo se mide en el aparato»*, **se declara ROJO y se espera el gate** — un verde de laboratorio sobre una pregunta que el laboratorio no puede contestar es exactamente lo que hizo publicar una cura incompleta.
+
+  **Y el corolario que cobró en la misma sesión:** al construir el guard de la clase (R34 brazo B), probarlo **en rojo** destapó que su regex no reconocía `setX(r.ok ? r.data : 'error')` —el patrón canónico de la casa— y **habría marcado en rojo justo a la pantalla que lo hace bien**. *El guard que vigila esta lección casi nace con ella adentro.* Origen: S92-BIS (P0 reabierto por el founder en dispositivo, con el bundle nuevo ya instalado).
