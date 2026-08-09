@@ -11894,52 +11894,99 @@ instantánea sin repintar, o que el paso se muestre como transición deliberada 
 vez de esconderse— **son decisiones de diseño de navegación, con la pantalla
 delante**.
 
-> ### 📐 LAS OPCIONES, COSTEADAS (pedido del founder, 9-ago — para decidir, no para ejecutar)
+> ### ✏️ ENMIENDA DE MARCO (founder, 9-ago) — LA PREGUNTA NO ERA «CÓMO OCULTAMOS EL PARPADEO»
 >
-> **Lo medido primero, porque acota el problema:** el parpadeo dura **entre
-> medio segundo y dos**, ocurre en **los cuatro oficios**, y cae **justo antes
-> del pago** — el punto más delicado del flujo, donde una pantalla que salta se
-> lee como «algo falló» y puede frenar una compra.
+> **El «preview» ES la ficha del prestador, y el flujo que el founder quiere es
+> el que ya existe:** servicios → servicio → mascota → fecha/hora → lista de
+> prestadores que aplican → **ficha del prestador → reservar AHÍ**.
 >
-> **① NO CLONAR NADA — que la vuelta no repinte** *(la más barata)*
-> Hoy el `router.back()` devuelve a una lista que **vuelve a pedir su
-> disponibilidad** al recuperar el foco, y ese re-render es lo que se ve. Con la
-> misma cura que ya funciona en el paseo —**no re-pedir lo que sigue vigente**—
-> la vuelta sería instantánea y el ojo no la alcanzaría.
-> **Costo:** ~1 tanda, 4 pantallas, sin tocar arquitectura. **Riesgo:** hay que
-> decidir **por pantalla** qué caduca (la disponibilidad de slots caduca; el
-> hogar no) — es la decisión que D-728 deja abierta. **No elimina el paso: lo
-> vuelve invisible.**
+> ⇒ **El botón está en el lugar correcto. Lo que está mal es que la ficha no
+> ejecuta la reserva: se la delega a la lista.** *El paso final vive en el lugar
+> equivocado, y el parpadeo es solo cómo eso se filtra a la vista.* La ficha se
+> re-encuadra: no es de navegación, es de **arquitectura del flujo de reserva**.
 >
-> **② HACERLO DELIBERADO en vez de esconderlo** *(la más honesta)*
-> Si el paso existe, que se lea como transición: la vitrina muestra su propio
-> estado de «preparando tu reserva» y la lista aparece ya resuelta.
-> **Costo:** ~1 tanda + una decisión de diseño (qué se ve durante ese segundo).
-> **Ventaja:** no depende de que la vuelta sea rápida en un teléfono lento.
-> **Riesgo:** agrega una pantalla de espera donde hoy no hay ninguna — puede
-> sentirse *más* lento aunque dure lo mismo.
+> ### 📏 LO MEDIDO ANTES DE COSTEAR (9-ago)
 >
-> **③ QUE EL DETALLE RESERVE** *(descartada, y con su porqué)*
-> Es lo que el usuario cree que pasa. **Exige clonar el flujo entero** —objeto
-> de oferta, mascotas elegibles, param, y hasta tres Hojas— y `senal-reserva.ts`
-> ya documenta por qué se rechazó: *la segunda verdad diverge sola.*
-> **Costo:** varias tandas + una deuda permanente de dos caminos de reserva.
-> **No se recomienda.**
+> | qué | número |
+> |---|---|
+> | `explorar/paseo/disponibles.tsx` | **897 líneas · 14 estados · 9 Hojas** |
+> | `prestador/[prestadorId].tsx` (la ficha) | **193 líneas · 2 estados** |
+> | Hojas en **grooming** / **adiestramiento** / **veterinaria** | **0 · 0 · 1** |
 >
-> **④ EXTRAER EL FLUJO A UNA PIEZA que las dos pantallas consuman** *(la de
-> fondo)*
-> Cura la causa real —que solo la lista sabe reservar— sin duplicar: el flujo
-> vive en un hook/componente y tanto la vitrina como la lista lo montan.
-> **Costo:** la más cara, 2-3 tandas, toca los cuatro oficios y su gate.
-> **Ventaja:** el parpadeo desaparece **y** deja de existir la asimetría que lo
-> causó. **Es la única que cierra el tema para siempre.**
+> **🎯 EL DATO QUE REORDENA EL COSTEO: el flujo pesado es SOLO DEL PASEO.** Los
+> otros tres oficios casi no tienen Hojas —por eso reservan de una y el paseo
+> no—. **No hay que extraer «el flujo de reserva de los cuatro oficios»: hay que
+> resolver el del paseo**, que es el único con selector de mascota, guard
+> social, elección paquete-vs-suelto y plan.
 >
-> **Voto de la pista: ① ahora, ④ cuando el arco de reserva se toque de nuevo.**
-> ① compra tiempo con costo mínimo y **no cierra ninguna puerta**; ② arriesga
-> empeorar la percepción; ③ está descartada por su propia letra. *El parpadeo
-> no es un bug que rompe: es un costo de arquitectura que se cobró en la cara
-> del usuario, y merece pagarse con diseño, no con un truco.*
-
+> **Y una corrección a la letra vigente:** `senal-reserva.ts` dice que la
+> reserva «abre TRES Hojas». **Son CINCO de flujo** —`eligiendoMascota` ·
+> `plan` · `preguntaSocial` · `socialNo` · `conSaldo`— más 3 de estado/error.
+> *El costo real de mover esto es mayor que el que la letra declaraba.*
+>
+> **⚠️ Y el bloqueante que cualquier opción tiene que resolver primero:** la
+> ficha recibe **`prestadorId` + `ofertaId`, y NADA MÁS**. **No tiene fecha,
+> hora ni duración**, que son lo que el hold necesita. Sin ese contexto no puede
+> reservar por ningún camino. *Es barato —ya viajan por URL en la lista— pero
+> hay que hacerlo, y ninguna opción lo evita.*
+>
+> ### 📐 LAS OPCIONES, CON ESE MARCO
+>
+> **① EXTRAER EL FLUJO A UNA PIEZA COMPARTIDA — *una fuente, dos consumidores***
+> Un hook `useReservaPaseo(...)` que devuelva las acciones y el estado, y un
+> componente que monte las cinco Hojas. **La ficha y la lista lo consumen; el
+> flujo existe UNA vez.**
+> **Costo: 2-3 tandas.** Hay que mover 9 de los 14 estados y sus Hojas, y
+> re-gatear el camino completo en los dos puntos de entrada.
+> **Riesgo:** medio. Es refactor de la pantalla más grande del cliente (897
+> líneas) **con el P0 recién cerrado encima** — *tocar esto mañana es distinto
+> que tocarlo hoy.*
+> **Ventaja:** cierra el tema. La ficha reserva de verdad, sin segunda verdad, y
+> el rebote desaparece **porque deja de haber a dónde rebotar**.
+>
+> **② SUBIR EL ESTADO A UN NIVEL QUE LAS DOS PANTALLAS VEAN** (layout de la ruta
+> o contexto del flujo)
+> **Costo: 1-2 tandas**, menos código movido que ①.
+> **Riesgo: ALTO, y es el que menos se ve.** Un estado compartido entre dos
+> pantallas **sobrevive a la navegación**, así que hay que decidir cuándo se
+> limpia — y *eso es exactamente la familia del bug que se acaba de curar*: un
+> valor que sobrevive más de lo que debía. **Cambia un problema de arquitectura
+> por uno de ciclo de vida, que es más difícil de ver.** No se recomienda.
+>
+> **③ QUE LA FICHA MONTE EL FLUJO SIN COMPARTIR ESTADO** — recibe el contexto
+> por params y monta la pieza de ① con su propio estado.
+> **Costo: 1-2 tandas** *si ① ya existe* — en realidad es **la segunda mitad de
+> ①**, no una alternativa. Sola, sin extraer, sería clonar: descartada por la
+> misma razón de siempre.
+>
+> **④ QUE LA LISTA DEJE DE SER UN PASO** — la ficha es el destino y no hay
+> vuelta.
+> **Costo: 1 tanda** de navegación. **Pero no resuelve nada por sí sola**: si la
+> ficha sigue sin saber reservar, el problema se muda. **Solo tiene sentido
+> DESPUÉS de ①.**
+>
+> ### ¿PUEDEN LAS CINCO HOJAS VIVIR EN LA FICHA? — **sí, y no es lo caro**
+>
+> Son componentes: montarlas donde sea es trivial. **Lo caro no es dónde se
+> dibujan, es de dónde sacan su estado y quién decide abrirlas** — hoy eso vive
+> en `alElegir`/`alElegirMascota`, que dependen de `mascotas`, `faseEspecies`,
+> `elegibles` y el espejo vivo. *Mover las Hojas sin mover esa lógica es
+> exactamente el clon que hay que evitar.* **Por eso la unidad a extraer es el
+> FLUJO, no las Hojas.**
+>
+> Dos de ellas —`preguntaSocial` y `socialNo`— **ya son componentes propios**
+> (`PaseoSocialHoja`), y `plan` también (`PlanHoja`): **el trabajo real está en
+> las otras dos y en el estado que las gobierna**.
+>
+> ### VOTO DE LA PISTA
+>
+> **① , y no ahora.** Es la única que hace lo que el founder pide —que la ficha
+> reserve de verdad— sin crear una segunda verdad. **Pero es refactor mayor de
+> la pantalla más grande del cliente, con el P0 cerrado hace horas**: conviene
+> **una sesión propia**, con su gate, y no de arrastre al final de ésta.
+> **② se descarta activamente**: su riesgo es de la misma familia que el bug que
+> acabamos de pasar tres tandas curando.
+>
 > **Dueño: founder (decisión de diseño) + A (ejecución).**
 > **☠️ DISPARO: la primera sesión que toque el arco de reserva o la navegación
 > del cliente.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
