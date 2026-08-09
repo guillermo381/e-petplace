@@ -113,6 +113,28 @@ consola.length = 0;
 await page.goto(`${P}/explorar/grooming`, { waitUntil: 'networkidle', timeout: 120000 });
 await esperarMs(9000);
 
+/**
+ * ⚠️ EL HUECO DE MI PROPIA SONDA, cerrado.
+ *
+ * La primera versión abría el hub y declaraba «carga» — pero SIN ELEGIR
+ * MASCOTA, y con dos elegibles la pantalla no elige sola. O sea que las dos
+ * ramas de error que quedaban sospechadas (`oferta` e `inicios`) NUNCA
+ * CORRIERON: medí la mitad del hub y reporté sobre el hub entero.
+ *
+ * Es exactamente el defecto que vengo persiguiendo toda la sesión —un verde
+ * que responde otra pregunta— y esta vez lo escribí yo. Ahora se elige la
+ * mascota, se declara su talla (el hub la exige para dar precio) y recién ahí
+ * se lee lo que sale por el cable.
+ */
+await tocar('SondaPerro').catch(() => {});
+await esperarMs(3000);
+// la talla es la puerta del precio: sin ella el hub no pide la oferta
+for (const paso of ['Pequeño', 'Normal', 'Guardar', 'Declarar talla y pelaje']) {
+  await tocar(paso).catch(() => {});
+  await esperarMs(1200);
+}
+await esperarMs(8000);
+
 const texto = await page.evaluate(() => document.body.innerText);
 const rebota = texto.includes('No pudimos cargar el grooming');
 

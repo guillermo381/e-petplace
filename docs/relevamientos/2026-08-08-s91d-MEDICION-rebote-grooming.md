@@ -139,3 +139,52 @@ falta.
 La sonda **crea dos cuentas desechables y NO las borra** (misma convención que
 los verify: las declara). Son `s91d-groom-*@epetplace.dev` — la última,
 `s91d-groom-1786237298354`, con cuatro mascotas de prueba.
+
+---
+
+# TERCERA VUELTA — el publish, y el hueco de mi propia sonda
+
+## ⑤ EL PUBLISH: hubo DOS más, y eso responde la pregunta con literal
+
+`eas update:list --branch preview` desde `apps/cliente/`:
+
+| cuándo | group | ancla |
+|---|---|---|
+| **hace 10 minutos** | `192505e4-e42b-4d4d-a02d-7fcf78ba2458` | `af29540a` |
+| hace 1 hora | `47489d77-12bd-4aac-8c3c-de75df955ab9` | `df50edb9` |
+| hace 5 horas | `ac8ae4bf-c5cf-48fb-9854-4a7903ca12e0` | `54794755` |
+
+**No hay canal fantasma ni propagación por otra vía: A siguió publicando.** El
+founder recibe código posterior a `019fe3c0` porque salieron dos OTAs más — y
+eso explica que el filtro por servicio y el carrusel 4:3 ya le funcionen sin que
+él haya hecho nada.
+
+**Consecuencia para todo lo medido antes:** cada reporte suyo hay que fecharlo
+contra el group vigente, porque el suelo se movió tres veces en cinco horas.
+
+## ⑥ ⚠️ EL HUECO DE MI PROPIA SONDA — declarado, no tapado
+
+Mi medición anterior abría el hub y concluía «carga». **Pero nunca eligió
+mascota**, y con dos elegibles la pantalla no elige sola ⇒ **las dos ramas que
+seguían sospechadas (`oferta` e `inicios`) NUNCA CORRIERON.** Medí la mitad del
+hub y reporté sobre el hub entero.
+
+Es el mismo defecto que vengo persiguiendo toda la sesión —**un verde que
+responde otra pregunta**— y esta vez lo escribí yo, dos veces seguidas: primero
+midiendo por SQL en vez del transporte real, después midiendo media pantalla.
+
+**Intenté cerrarlo y NO PUDE:** el hub exige declarar talla y pelaje antes de
+pedir la oferta, y mis toques no completan esa Hoja en el arnés. Así que
+**sigo sin poder ejercitar `oferta` ni `inicios`.** Lo digo en vez de dejar el
+«carga» anterior como si cubriera todo.
+
+## ⑦ ⇒ LA CURA DE LAS TRES VOCES ES EL INSTRUMENTO, no un pulido
+
+La mesa lo cerró bien, y mi propio fracaso lo confirma desde el otro lado: **si
+yo, con la pantalla en la mano y el cable abierto, no logro llegar a esas dos
+ramas, el founder no tiene ninguna forma de decir cuál se rompió.** Con tres
+voces, su próximo toque nombra la rama exacta y esto se cierra en un mensaje en
+vez de en cinco vueltas.
+
+Es de C. Y no es cosmético: **es la diferencia entre un síntoma accionable y uno
+que obliga a adivinar.**
