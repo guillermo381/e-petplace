@@ -312,12 +312,25 @@ ahí **la ejerce**.
    era mi arnés. Consecuencia práctica: **las capturas del alta no pueden probar
    los 44 chips de raza, sus caras, ni el envolver a dos líneas de D-691.** Eso
    se juzga **en el teléfono del founder, con sesión**, y así quedó declarado.
-7. **El shell se come los backticks** en los mensajes de commit
+7. 🔴 **UN LECTOR SE SONDEA COPIANDO SU `select` LITERAL — jamás preguntándole
+   a su tabla.** El caso: el hub de grooming rebotaba con `42501` porque pide
+   `prestadores.select('id, nombre_comercial, direccion, ciudad')` y **dos de
+   esas columnas no tienen grant para `authenticated`**. Mi sonda hizo
+   `count(*) from prestadores` → 6 filas, **verde**. En Postgres el `SELECT` se
+   concede **POR COLUMNA**: «¿puedo leer esta tabla?» y «¿puedo correr esta
+   consulta?» son preguntas distintas. A midió 5/5 verde y yo 6/6 verde sobre un
+   lector roto, los dos por lo mismo.
+8. 🔴 **Y su hermana: un lector medido en otro TRANSPORTE tampoco es el lector.**
+   Medí por SQL con `set_config('role','authenticated')` dentro de una función
+   mía; PostgREST pasa por otro rol, otro pool y exige GRANT de EXECUTE. Para
+   medir de verdad: abrir la pantalla y escuchar el cable
+   (`scripts/sonda-grooming-camino-real-s91.mjs`).
+9. **El shell se come los backticks** en los mensajes de commit
    (`git commit -m "... \`foo\` ..."` pierde el literal). Me pasó dos veces.
    **Usá `-F <archivo>`.**
-8. **L-191, el exit del pipe.** `npx tsc … | head` devuelve el exit del `head`.
+10. **L-191, el exit del pipe.** `npx tsc … | head` devuelve el exit del `head`.
    Leé `$?` **del comando**, no del pipe. Me cobró una vez esta sesión.
-9. **`eas-cli` SIEMPRE desde `apps/<app>/`**, aunque solo estés mirando: desde
+11. **`eas-cli` SIEMPRE desde `apps/<app>/`**, aunque solo estés mirando: desde
    la raíz scaffoldea un `app.json` stub y **el árbol sucio saca el ancla con
    asterisco**.
 
