@@ -18556,6 +18556,15 @@ export type Database = {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
       }
+      obtener_sedes_de_mis_citas: {
+        Args: { p_prestador_ids: string[] }
+        Returns: {
+          ciudad: string
+          direccion: string
+          id: string
+          nombre_comercial: string
+        }[]
+      }
       obtener_serie_peso: {
         Args: { p_limite?: number; p_mascota_id: string }
         Returns: {

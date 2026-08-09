@@ -391,7 +391,14 @@ export async function obtenerMisGroomings(): Promise<
 
   const [prestadores, mascotas, atenciones] = await Promise.all([
     prestadorIds.length > 0
-      ? cliente.from('prestadores').select('id, nombre_comercial, direccion, ciudad').in('id', prestadorIds)
+      // ⚠️ NO se lee `prestadores` directo: `direccion` NO tiene grant para
+      // authenticated (S91 cerró la fuga de la tabla) y pedirla ahí tira 42501
+      // que se lleva puesto el hub ENTERO por una sola columna. Y el grant no
+      // era la cura: `v_prestadores_publicos` no expone la dirección, así que
+      // abrirla daría la dirección exacta de TODO negocio activo a cualquier
+      // autenticado. El lector angosto la entrega solo para los negocios donde
+      // esta familia YA tiene cita — molde D-455.
+      ? cliente.rpc('obtener_sedes_de_mis_citas', { p_prestador_ids: prestadorIds })
       : Promise.resolve({ data: [], error: null }),
     mascotaIds.length > 0
       ? cliente.from('mascotas').select('id, nombre').in('id', mascotaIds)

@@ -10159,11 +10159,40 @@ endurecer se hace con tiempo.
 `caso_clinico_consultor` · `certificado_salud` ·
 `cobro_presencial_registrado` · `mascota_acceso_prestador` · `prestadores`.
 
+> ### ✏️ ENMIENDA — LA REGLA DE S79 COBRÓ **DOS VECES EN UN DÍA**, y su instrumento sube de prioridad
+>
+> **Segundo cobro (aislado por C, mismas horas):** el hub del dueño
+> (`obtenerMisGroomings`) pedía `direccion` directo de `prestadores` y **el hub
+> ENTERO caía por UNA columna** — con `id, nombre_comercial` pasaba, agregando
+> `direccion` daba 42501.
+>
+> **Y acá la cura NO fue el grant, porque medirlo lo prohibió:**
+> `v_prestadores_publicos` **no expone `direccion`**, así que concederla habría
+> sido **exposición nueva** —la dirección exacta de todo negocio activo para
+> cualquier autenticado— deshaciendo S84 por la puerta de atrás para arreglar
+> una pantalla. Nació `obtener_sedes_de_mis_citas` (molde D-455): DEFINER
+> angosta donde **los ids son filtro y jamás permiso**, y un negocio sin cita
+> devuelve **cero filas**. Fixture 4/4 con su discriminador.
+>
+> **Los dos cobros tienen la misma forma y por eso son familia, no coincidencia:**
+> un cambio de GRANT rompe algo que **no menciona la columna en su código** —la
+> policy la nombra por dentro, el wrapper la pide en un `select` de cuatro
+> campos— y **el síntoma aparece lejos y en silencio**: no hay typecheck, no hay
+> gate, no hay guard. Solo un 42501 en producción, horas después, en otra
+> pantalla. **Es L-192 en su forma más cara.**
+>
+> ⇒ **El instrumento sube de prioridad y se escribe acá para que no se
+> re-invente:** antes de cada `REVOKE`/`GRANT` de columna sobre `prestadores`,
+> correr las DOS consultas — (a) qué **policies** nombran esa columna, (b) qué
+> **wrappers** la piden en un `select`. Las dos existen y están corridas en esta
+> sesión; lo que falta es que sean un paso obligatorio, no un hallazgo.
+
 > **Dueño: A.**
 > **☠️ DISPARO: S92 (el loop de seguridad)** — encaja exacto con su norte, y su
-> parentesco con D-686 (grants `anon` en tablas legacy) lo vuelve la misma
-> pasada.
-> **☠️ MUERTE:** ninguna policy consulta `prestadores` sin helper.
+> parentesco con D-686 (grants `anon` en tablas legacy) y **D-701 (las 59
+> DEFINER con `anon`)** lo vuelve la misma pasada.
+> **☠️ MUERTE:** ninguna policy consulta `prestadores` sin helper, **y el censo
+> de grants es un paso del procedimiento, no un descubrimiento.**
 
 ---
 
