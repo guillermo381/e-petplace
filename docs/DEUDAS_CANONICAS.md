@@ -10716,7 +10716,31 @@ saneador no se puede olvidar. *La disciplina no alcanzó; el instrumento sí.*
 > el saneador, no re-descubrirlo. **☠️ MUERTE:** ninguna sesión escribe
 > artefactos sin redacción automática. Origen: S92-BIS (B2, hallazgo propio).
 
-#### D-713 — 🔴 LOS DOS DESPACHADORES RESPONDEN A CUALQUIERA, SIN NINGUNA CREDENCIAL
+#### D-713 — 🔴→✅ **CERRADA EL MISMO DÍA** · LOS DOS DESPACHADORES
+
+> ### ✅ CERRADA (S92-BIS, 9-ago-2026, por orden del founder)
+> **Guard de secreto compartido** en las dos functions + el `cron.job` #8
+> mandando el header. **VERDE 9/9:** sin credencial 401 · **con la anon key del
+> bundle 401** · con secreto equivocado 401 · con el correcto 200 · **y el tick
+> REAL del cron corrió después de la cura con `succeeded`**.
+>
+> **La pregunta del founder, contestada ANTES de tocar:** el llamador legítimo
+> de `despachar-push` es **pg_cron #8, desde la BASE**; `despachar-whatsapp` no
+> tiene job (está congelado). El secreto vive en los secrets de la function y en
+> el comando del cron — **jamás en el bundle, porque quien despacha es la base y
+> no la app**, y B3 midió que `cron.job` no está expuesto por PostgREST ni tiene
+> grants a roles de cliente.
+>
+> **El orden fue lo único delicado:** primero el CRON, después el DEPLOY — al
+> revés había una ventana de un minuto con el push caído. **Y el guard no se
+> degrada:** sin el secreto configurado la function rebota en vez de pasar sin
+> verificar (L-192).
+>
+> **☠️ Queda un gate:** que una notificación real llegue al teléfono. Rollback
+> de una línea: `cron.alter_job` al comando previo, guardado en
+> `scripts/seg2/salida/d713-cron-antes.json`.
+
+**Texto original, conservado como historia:**
 
 **Rojo reproducido (S92-BIS, B3): un `POST` SIN apikey y SIN Authorization a
 `despachar-push` y a `despachar-whatsapp` devuelve HTTP 200 y procesa la cola.**
@@ -10753,7 +10777,23 @@ después del cambio.
 > founder puede gatear. **☠️ MUERTE:** los dos despachadores rebotan sin el
 > secret, y el cron sigue entregando. Origen: S92-BIS (B3).
 
-#### D-714 — 🟠 CINCO FUNCTIONS FACTURABLES ENTRAN AL CUERPO CON LA ANON KEY
+#### D-714 — 🟠→✅ **CERRADA (4 de 5)** · LAS FUNCTIONS FACTURABLES
+
+> ### ✅ CERRADA para las cuatro con fuente (S92-BIS, 9-ago-2026)
+> Nace **`supabase/functions/_shared/sesion.ts`**: exige `role: authenticated`
+> en el claim (`service_role` también pasa). **No hay perilla de Supabase que
+> distinga «JWT válido» de «sesión de persona»** — `verify_jwt` acepta los dos;
+> la distinción vive en el claim y leerlo es el guard.
+>
+> **VERDE 8/8:** con la anon key las cuatro rebotan `401 sesion_requerida`; con
+> sesión pasan la puerta y rebotan por validación de entrada — que es la prueba
+> de que llegaron al cuerpo. *La puerta pregunta si hay alguien; el expediente
+> pregunta quién (la RLS sigue adentro, intacta).*
+>
+> **⚠️ QUEDA UNA: `chat-ayuda`** — la quinta, y **la única que respondía 200**
+> con la anon key. **No se curó porque NO TIENE FUENTE EN EL REPO** (ver D-717).
+
+**Texto original, conservado como historia:**
 
 **`verify_jwt: true` valida que el JWT sea válido — y la anon key ES un JWT
 válido.** Medido: sin credencial las seis rebotan 401 ✅, **pero con la anon
@@ -10851,3 +10891,73 @@ el proveedor Google está habilitado, porque 8 cuentas tienen identidad `google`
 > que toca alguien de afuera. **☠️ MUERTE:** mínimo ≥10, protección de filtradas
 > encendida, y un 429 que aparezca antes del intento 10.
 > Origen: S92-BIS (B4, medición por camino real).
+>
+> **📋 La lista exacta de perillas (dónde, valor actual, valor propuesto) está
+> servida en `docs/relevamientos/2026-08-09-seg2-GATES-EN-DISPOSITIVO.md`.** El
+> founder las mueve; la re-medición es `node scripts/seg2/b4-auth.mjs`.
+
+#### D-717 — 🟠 `chat-ayuda`: DESPLEGADA, FACTURABLE Y SIN FUENTE EN EL REPO
+
+**Medido en S92-BIS (B3/B4):** `chat-ayuda` está **ACTIVE** en el proyecto
+(version 11), **gasta IA**, y fue **la única de las cinco facturables que
+respondió 200 con la anon key** — o sea que ejecutó. **No se pudo curar porque
+`supabase/functions/chat-ayuda/` NO EXISTE en el repo:** las otras cuatro
+recibieron el guard de sesión y ésta quedó afuera, no por criterio sino por
+ausencia de código.
+
+**Es exactamente la clase de `crear_cliente_walkin` en S48** (D-309): una
+function viva cuyo código nadie tiene. *Una function sin fuente no se puede
+auditar, ni curar, ni revertir — solo se puede apagar a ciegas.*
+
+**Dos caminos, con su costo:**
+**(a)** bajar la fuente desde el dashboard (Supabase permite ver el código
+desplegado), versionarla y aplicarle el mismo guard — es el camino que S48 usó
+con `crear_cliente_walkin` y funcionó;
+**(b)** apagarla, si se mide que ninguna superficie la llama. **Hay indicio de
+que nadie la usa:** cero invocaciones `functions.invoke('chat-ayuda')` en el
+monorepo *(no censado en los repos vecinos)*.
+
+> **Dueño: A.** **☠️ DISPARO: S93**, junto con D-714 (es su quinta mitad).
+> **☠️ MUERTE:** o tiene fuente versionada y guard, o no está desplegada.
+> Origen: S92-BIS.
+
+#### D-718 — 🟠 PODAR LOS WORKTREES MUERTOS — firmado por el founder, con ventana propia
+
+**El founder firmó el voto de podarlos** (S92-BIS) **y decidió que NO se ejecuta
+en esta sesión**: se hace con él, en una ventana propia y con el árbol quieto.
+Freno 3 — borrar es irreversible.
+
+**Por qué se poda, con las dos evidencias:** esos árboles ya causaron **dos
+incidentes en dos sesiones** — **siete actas de cierre que nunca llegaron al
+canon** (rescatadas en S92-BIS, L-217) y **una credencial vieja** (9 chars vs 32)
+que ayudó a un diagnóstico errado. Y guardan **la llave `service_role` en cuatro
+copias** (D-711). *Un árbol que nadie mira no es neutro: es donde las cosas se
+pierden y desde donde vuelven mal.*
+
+**LOS PASOS EXACTOS, en orden, para la ventana:**
+
+1. **Árbol quieto**: `git status --porcelain` en cero en el primario.
+2. **La red de seguridad, primero** — para cada worktree, verificar que no
+   queda trabajo sin mergear:
+   `git branch -a --no-merged main` · y para cada rama que aparezca,
+   `git log --name-only --pretty= main..<rama>` para ver **qué archivos** toca.
+   **Lo que falte en `main` se rescata ANTES** (checkout selectivo, como en
+   S92-BIS — **no** merge de rama vieja, que puede revertir trabajo nuevo).
+3. **Recién entonces**, por cada uno de los 12:
+   `git worktree remove <ruta>` *(agregar `--force` solo si el árbol tiene
+   basura no versionada y se verificó qué es)*.
+4. **Verificar que las credenciales se fueron con ellos:**
+   `node scripts/seg2/b2-secretos.mjs` — el conteo de `.env` con
+   `service_role` tiene que bajar de **5 a 1**, y los de
+   `EXPO_PUBLIC_DEMO_PASSWORD` de **16 a 2**.
+5. **Las RAMAS no se borran** en el mismo acto: `git worktree remove` saca el
+   árbol, no la rama. Borrar ramas es otra decisión y no hace falta para cerrar
+   el riesgo de credenciales.
+
+**Los 12 candidatos:** `e-petplace-B` · `e-petplace-C` · `s86-A` · `s86-B` ·
+`s86-C` · `s87-B` · `s87-C` · `s87-D` · `s90-B` · `s90-D` · `s91-B` · `s91-D`.
+
+> **Dueño: founder + A, en ventana propia.** **☠️ DISPARO: la ventana que el
+> founder abra.** **☠️ MUERTE:** `git worktree list` muestra solo el primario, y
+> `service_role` vive en un solo archivo de disco.
+> Origen: S92-BIS (B2), firmado por el founder.
