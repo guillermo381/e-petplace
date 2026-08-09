@@ -439,3 +439,42 @@ avisó que hay **binarios huérfanos** (cliente en 1.0.0/1.0.1/1.0.2, y este lot
 es runtime **1.0.3**). Si el aparato corre una APK anterior, **sigue con el
 bundle viejo** y el bug persistiría con cualquier cura. Se resuelve mirando el
 pie de Cuenta: **`update 019fe79c…`** (L-138 segunda enmienda).
+
+---
+
+## ⑬ EL SEGUNDO OTA — la cura del P0 reabierto (9-ago-2026)
+
+Mismo runbook de siete pasos, sin saltar eslabones.
+
+**⓪ VEDA declarada** — pista A única, `git status --porcelain` en **cero** y
+`git worktree list` con los 12 worktrees de sesiones cerradas. Ventana abierta y
+cerrada con el árbol verificado en los dos extremos.
+
+**② PUSH ANTES DE BUNDLEAR** — `origin/main` estaba en `4777209c`; **un commit
+pendiente**, declarado (`5c41613d`, la cura del P0 + R34 brazo B + L-220).
+Pusheado, y **`origin/main` re-medido DESDE EL REMOTO**: `5c41613d` = `main`.
+
+### ⑤ TRANSCRIPTO DEL OBJETO (`update:view` — `update:list` no expone el hash)
+
+| | **CLIENTE** | **PRESTADOR** |
+|---|---|---|
+| **group** | `a93ca861-8c6f-489a-af87-92c22ac4cd5b` | `91ec6559-5d3e-4500-a457-22af97fe71ed` |
+| **android** | `019fe7b9-9264-7b70-badf-2e6684d48872` | `019fe7ba-6614-7e82-b92a-3d0c5ada999a` |
+| **ios** | `019fe7b9-9264-7c26-9508-557f6fb8a169` | `019fe7ba-6614-7f9b-9c61-f903bb77bc95` |
+| **runtime** | **1.0.3** | **1.0.4** |
+| **gitCommitHash** | `5c41613d9fd2fb6bb7c59fad1ca3c2c1e43fc34c` | `5c41613d9fd2fb6bb7c59fad1ca3c2c1e43fc34c` |
+
+**⚠️ DECLARADO: esta tanda NO tocó código del prestador.** Su bundle no cambia
+funcionalmente; se re-publicó **para que las dos apps queden ancladas al mismo
+commit**, que es la disciplina que el canon ya aplicó en S91 (*el mismo ancla a
+propósito*). Quien audite el prestador no debe buscar cambios: no los hay.
+
+**④ VERIFICADO POR LO QUE SE SIRVE:** `verify-ota` **VERDE en las dos** — el
+canal sirve el update publicado y existe build `finished` para su runtime. Su
+aviso ③ (runtimes huérfanos) **sigue vigente y sigue importando**: cliente con
+binarios en 1.0.0/1.0.1/1.0.2 y prestador también en 1.0.3, **ninguno recibe
+este lote**.
+
+**⑥ ASTERISCOS: CERO**, en los dos publishes — el script re-verificó después de
+bundlear y confirmó que el ancla real es la verificada y el árbol no se movió.
+*Se declara la ausencia porque `eas update:view` no expone el estado del árbol.*
