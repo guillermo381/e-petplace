@@ -1,0 +1,37 @@
+[
+ {
+  "eje": "largo 6",
+  "status": 422,
+  "code": "weak_password",
+  "msg": "Password should be at least 8 characters.",
+  "creada": false
+ },
+ {
+  "eje": "largo 7",
+  "status": 422,
+  "code": "weak_password",
+  "msg": "Password should be at least 8 characters. Password is known to be weak and easy to guess, ",
+  "creada": false
+ },
+ {
+  "eje": "largo 8",
+  "status": 422,
+  "code": "weak_password",
+  "msg": "Password is known to be weak and easy to guess, please choose a different one.",
+  "creada": false
+ },
+ {
+  "eje": "filtrada pass…",
+  "status": 422,
+  "code": "weak_password",
+  "msg": "Password is known to be weak and easy to guess, please choose a different one.",
+  "creada": false
+ },
+ {
+  "eje": "filtrada qwer…",
+  "status": 422,
+  "code": "weak_password",
+  "msg": "Password is known to be weak and easy to guess, please choose a different one.",
+  "creada": false
+ }
+]

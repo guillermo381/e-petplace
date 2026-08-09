@@ -1,0 +1,254 @@
+{
+ "corte": 32,
+ "intentos": 32,
+ "registro": [
+  {
+   "fase": "baseline",
+   "status": 200,
+   "code": "",
+   "ok": true
+  },
+  {
+   "fase": "fallo",
+   "i": 1,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 2,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 3,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 4,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 5,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 6,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 7,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 8,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 9,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 10,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 11,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 12,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 13,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 14,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 15,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 16,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 17,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 18,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 19,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 20,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 21,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 22,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 23,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 24,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 25,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 26,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 27,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 28,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 29,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 30,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 31,
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "fallo",
+   "i": 32,
+   "status": 429,
+   "code": "over_request_rate_limit",
+   "ok": false
+  },
+  {
+   "fase": "post-corte-A",
+   "status": 429,
+   "code": "over_request_rate_limit",
+   "ok": false
+  },
+  {
+   "fase": "post-corte-B",
+   "status": 400,
+   "code": "invalid_credentials",
+   "ok": false
+  },
+  {
+   "fase": "post-ventana-A",
+   "status": 200,
+   "code": "",
+   "ok": true
+  }
+ ]
+}

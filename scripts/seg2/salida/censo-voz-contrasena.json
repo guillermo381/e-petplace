@@ -1,0 +1,22 @@
+[
+ {
+  "id": "(a) clave CORTA (6 chars)",
+  "code": "weak_password",
+  "msg": "Password should be at least 8 characters."
+ },
+ {
+  "id": "(b) clave FILTRADA (11 chars, no es corta)",
+  "code": "weak_password",
+  "msg": "Password is known to be weak and easy to guess, please choose a different one."
+ },
+ {
+  "id": "paso 2 · updateUser({password}) SIN current_password",
+  "code": "current_password_required",
+  "msg": "Current password required when setting new password.",
+  "nota": "🔴 EL CAMINO DE LA APP REBOTA. El wrapper mapea esto a `error_desconocido` ⇒ el usuario ve «Ocurrió un error inesperado»."
+ },
+ {
+  "id": "VEREDICTO_CAMBIO",
+  "roto": true
+ }
+]

@@ -1,0 +1,30 @@
+{
+ "correo": "seg2-cierre-1786293442323@epetplace.dev",
+ "filas": [
+  {
+   "id": "signup con 8 chars aleatorios",
+   "obtenido": "ACEPTADA (HTTP 200)",
+   "ok": true
+  },
+  {
+   "id": "login del fixture (sesión fresca)",
+   "obtenido": "OK",
+   "ok": true
+  },
+  {
+   "id": "cambiar clave SIN la actual (el hueco de S84)",
+   "obtenido": "HTTP 400 FRENADO · current_password_required Current password required when setting new password.",
+   "ok": true
+  },
+  {
+   "id": "cambiar clave CON la actual (el camino legítimo)",
+   "obtenido": "HTTP 200 CAMBIA ✅",
+   "ok": true
+  },
+  {
+   "id": "login con la clave NUEVA",
+   "obtenido": "HTTP 200 ENTRA",
+   "ok": true
+  }
+ ]
+}

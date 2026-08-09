@@ -11011,3 +11011,146 @@ pierden y desde donde vuelven mal.*
 > founder abra.** **☠️ MUERTE:** `git worktree list` muestra solo el primario, y
 > `service_role` vive en un solo archivo de disco.
 > Origen: S92-BIS (B2), firmado por el founder.
+
+---
+
+#### D-719 — 🔴 EL CAMBIO DE CONTRASEÑA DEL PRESTADOR ESTÁ CAÍDO desde que se encendió «require current password»
+
+**No es deuda de mensaje: es un camino que no llega.** `cambiarContrasena`
+(`packages/api/src/wrappers/seguridad.ts`) hace dos pasos: re-autentica con
+`signInWithPassword` **y después llama `updateUser({ password })` sin mandar
+`current_password`**. La perilla encendida hoy exige ese campo **en el PUT**, y
+no acepta la re-autenticación previa como sustituto.
+
+**Medido por el camino literal del wrapper**, no por parecido
+(`scripts/seg2/censo-voz-contrasena.mjs` ②):
+
+```
+paso 1 · re-autenticación               → HTTP 200, sesión FRESCA
+paso 2 · updateUser({password}) sin current_password
+        → HTTP 400 · current_password_required
+          "Current password required when setting new password."
+```
+
+**Y lo que ve el prestador:** el mapeo de `cambiarContrasena` prueba
+`/at least|should be|weak/i` sobre el mensaje. *"Current password required…"* no
+matchea ninguna de las tres ⇒ cae al catch-all y sale
+**«Ocurrió un error inesperado. Prueba de nuevo.»** — *el rebote no nombra lo que
+falta, y lo que falta es un campo que la pantalla sí tiene.* Probar de nuevo
+falla siempre.
+
+**La cura es de una línea** —pasar `current_password: input.actual` al
+`updateUser`, que el wrapper ya tiene en la mano— pero **no se hace en sesión de
+seguridad** (orden del founder: el arreglo es de la sesión de login).
+
+**⚠️ INCÓGNITA HERMANA, DECLARADA Y NO MEDIDA:** `establecerContrasenaNueva`
+(paso 2 de *recuperar*) llama `updateUser({ password })` con el **mismo** patrón,
+sobre la sesión que deja `verifyOtp`. **No se midió** porque exige un código real
+del correo, y generar uno por la API de admin pedía `service_role` (R6). **Su
+mapeo tampoco tiene brazo para `current_password_required`** ⇒ si rebota, sale el
+mismo «error inesperado». **Si las dos están caídas, el prestador no tiene
+NINGÚN camino a su contraseña.** Se resuelve en dos minutos: pedir el código al
+correo real y llegar al último paso.
+
+> **Dueño: sesión de login (founder, en dos semanas) — PERO el disparo es
+> ANTES.** **☠️ DISPARO: es lo primero que se mide y cura en esa sesión, y si el
+> founder necesita cambiar una contraseña antes, se cura ese día.**
+> **☠️ MUERTE:** un cambio de clave real completado en dispositivo, y la
+> incógnita de recuperar contestada por camino real.
+> Origen: S92-BIS, censo de voz de contraseña.
+
+---
+
+#### D-720 — 🟠 LA APP NO PUEDE DISTINGUIR «CLAVE CORTA» DE «CLAVE FILTRADA» — y dice la equivocada
+
+**El eje no viene.** Medido: las dos causas viajan con **el mismo
+`error_code: weak_password`** y solo se diferencian por el **texto en inglés** del
+proveedor:
+
+```
+(a) corta    → weak_password · "Password should be at least 8 characters."
+(b) filtrada → weak_password · "Password is known to be weak and easy to guess…"
+```
+
+*Así que una app que mapea por `code` —que es lo correcto, y es exactamente lo
+que D-659 ② ordenó tras el bug del regex— **no puede distinguirlas ni
+queriendo**.* La deuda no es que alguien haya elegido mal: es que **el único eje
+disponible es un literal humano que el proveedor reescribe sin avisar**.
+
+**La consecuencia, que es lo caro:** ante una clave filtrada, las cuatro
+superficies del monorepo muestran **«La contraseña necesita al menos 8
+caracteres»** — y `password123` **tiene once**. El mensaje es falso *y además
+irresoluble*: quien obedece agrega caracteres, prueba `password1234`, y recibe el
+mismo rebote. **Es el bucle de D-659 con otra causa** — el mismo defecto que el
+comentario de `apps/cliente/src/app/registro.tsx:38` ya nombra («una razón
+genérica sobre una clave corta sería el mensaje que miente»).
+
+**Las salidas posibles, para que la sesión de login elija con el costo a la
+vista:** ① un tercer código propio (`contrasena_filtrada`) mapeado por el
+literal, **con la fragilidad declarada** y un fixture que se rompa si el
+proveedor cambia el texto · ② un solo mensaje que cubra los dos casos sin mentir
+(*«Esa contraseña no sirve: es muy corta o es una de las más usadas. Probá una
+frase larga que solo vos sepas»*) — **no distingue, pero no miente y da camino**
+· ③ chequear la clave contra HaveIBeenPwned **antes** de enviarla. **Voto: ②
+ahora, ③ cuando haya sesión de login con tiempo** — ② cuesta cuatro strings y
+elimina el bucle hoy.
+
+**LAS 9 SUPERFICIES CENSADAS** (y las 2 ausencias, que son el otro hallazgo):
+
+| # | Superficie | (a) corta | (b) filtrada | (c) falta la actual |
+|---|---|---|---|---|
+| 1 | cliente · `registro.tsx` | «al menos 8», en el campo ✅ | **mismo mensaje — FALSO** 🔴 | n/a |
+| 2 | cliente · **cambiar clave** | **NO EXISTE** — el dueño no puede cambiar su contraseña en la app | | |
+| 3 | cliente · **recuperar** | **NO EXISTE** — ni «olvidé mi contraseña» en el login | | |
+| 4 | prestador · `registro.tsx` | «al menos 8» ✅ | **mismo mensaje — FALSO** 🔴 | n/a |
+| 5 | prestador · `cuenta/seguridad` | «al menos 8» ✅ | «al menos 8» — **FALSO** 🔴 | **«Ocurrió un error inesperado» — y no cambia nunca** 🔴 D-719 |
+| 6 | prestador · `recuperar` (paso clave) | «al menos 8» ✅ | «al menos 8» — **FALSO** 🔴 | incógnita de D-719 |
+| 7 | v2 · registro (`Login.tsx`) | `err.message` **crudo, en inglés** | **crudo — distingue, en inglés** ⚠️ | n/a |
+| 8 | v2 · cambiar clave (`Profile.tsx`) | crudo, en inglés | crudo, en inglés | **«Current password required…» en inglés** — no pide el campo 🔴 |
+| 9 | v2 · reset (`ResetPassword.tsx`) | crudo, en inglés | crudo, en inglés | n/a |
+| 10 | prestadores · wizard `Paso1Cuenta` | **«Error al crear la cuenta. Intenta de nuevo.»** 🔴 | **el mismo genérico ciego** 🔴 | n/a |
+| 11 | prestadores · `AceptarInvitacion` | crudo, en inglés | crudo, en inglés | n/a · **y ver D-721** |
+
+**La ironía, registrada porque enseña:** *los portales legados, que no tradujeron
+nada, son los únicos que le dicen a la persona cuál de las dos cosas pasó — en
+inglés. Las apps nuevas tradujeron bien y perdieron el eje.* **Traducir por
+código es lo correcto y aun así costó información**: el que falta es un código
+que el proveedor no manda.
+
+**El peor de los once es el #10**, que colapsa las dos causas en un genérico sin
+camino: la persona no sabe qué cambiar de su contraseña.
+
+> **Dueño: sesión de login (founder, en dos semanas).**
+> **☠️ DISPARO: esa sesión — llega con esta tabla como línea base.**
+> **☠️ MUERTE:** ninguna superficie de contraseña dice «al menos N caracteres»
+> ante una clave que no es corta, y un fixture lo verifica por camino real.
+> Origen: S92-BIS, censo pedido por el founder.
+
+---
+
+#### D-721 — 🟠 EL PORTAL DE PRESTADORES PIDE 6 CARACTERES DONDE EL SERVIDOR EXIGE 8
+
+`e-petplace-prestadores/src/pages/AceptarInvitacion.tsx:39` valida
+`password.length >= 6` y su rebote dice **«La contraseña debe tener al menos 6
+caracteres»**. El servidor exige **8** desde que el founder movió la perilla.
+
+**Lo que pasa:** quien tipea 7 pasa el guard local, viaja, y el servidor rebota;
+el `catch` muestra `err.message` crudo — *«Password should be at least 8
+characters.»*, en inglés, después de que la pantalla le dijo que 6 alcanzaba.
+**La pantalla pide una cosa y el motor exige otra**, que es exactamente el
+defecto que S88 curó en `packages/api` (el número vive UNA vez, en
+`MIN_LARGO_CONTRASENA`) **y que sobrevivió acá porque el portal no importa ese
+módulo**. La candidata #21 en carne: *el mensaje de un guard es parte del guard.*
+
+**Su hermano está sano:** `Paso1Cuenta.tsx:86` ya valida `< 8`. Es una sola
+pantalla desalineada, y la cura es un número y un string.
+
+**Alcance real, para dimensionar:** es el flujo por el que **una persona
+invitada a un equipo se crea la cuenta**. No es una pantalla muerta.
+
+> **Dueño: sesión de login (founder), junto con D-720 — misma tanda.**
+> **☠️ DISPARO: esa sesión, o la primera vez que alguien acepte una invitación
+> por el portal y rebote.**
+> **☠️ MUERTE:** el portal exige 8 y lo dice, o el flujo de invitación migra a
+> la app y la pantalla muere.
+> Origen: S92-BIS, censo de voz de contraseña.
