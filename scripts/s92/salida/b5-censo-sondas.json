@@ -1,0 +1,369 @@
+{
+ "sondas": [
+  {
+   "creada": "2026-08-09 01:10:53.496278+00",
+   "email": "s91d-groom-1786237847800@epetplace.dev",
+   "id": "097375f5-407b-4598-8ef8-73c8899706ad"
+  },
+  {
+   "creada": "2026-08-08 17:38:48.599123+00",
+   "email": "s91d-perfil-acuario-1786210724654@epetplace.dev",
+   "id": "905fc22e-fe35-4f75-8261-53b30fd2f245"
+  },
+  {
+   "creada": "2026-08-08 17:40:52.523726+00",
+   "email": "s91d-perfil-acuario-1786210849013@epetplace.dev",
+   "id": "35ee2e2b-464e-4275-bd72-8210b282a65d"
+  },
+  {
+   "creada": "2026-08-08 18:12:02.017351+00",
+   "email": "s91d-perfil-acuario-1786212718451@epetplace.dev",
+   "id": "1a663b4f-1df5-4415-8169-fb9e498c8924"
+  },
+  {
+   "creada": "2026-08-08 18:15:34.322511+00",
+   "email": "s91d-perfil-acuario-1786212930578@epetplace.dev",
+   "id": "ddd181dd-acd8-4919-977d-47d0474ab7e6"
+  },
+  {
+   "creada": "2026-08-08 18:36:57.890931+00",
+   "email": "s91d-perfil-acuario-1786214214351@epetplace.dev",
+   "id": "22ef7dab-7891-4b36-826a-897e549d0263"
+  },
+  {
+   "creada": "2026-08-08 18:40:10.673546+00",
+   "email": "s91d-perfil-acuario-1786214406967@epetplace.dev",
+   "id": "cd5eedbd-4e82-46a8-b2ee-5c95b7d1e475"
+  },
+  {
+   "creada": "2026-08-08 19:45:02.870222+00",
+   "email": "s91d-perfil-acuario-1786218299316@epetplace.dev",
+   "id": "77187085-b77b-4f59-b3b3-9005ddc7f949"
+  },
+  {
+   "creada": "2026-08-08 19:53:58.779006+00",
+   "email": "s91d-perfil-acuario-1786218834921@epetplace.dev",
+   "id": "e66ef7da-ee4f-4526-b342-f3f8815b6e2f"
+  },
+  {
+   "creada": "2026-08-08 19:55:06.653595+00",
+   "email": "s91d-perfil-acuario-1786218902830@epetplace.dev",
+   "id": "42f49951-f880-4ea3-ab1f-97f743bd9fd1"
+  },
+  {
+   "creada": "2026-08-08 19:58:01.320984+00",
+   "email": "s91d-perfil-acuario-1786219077786@epetplace.dev",
+   "id": "44d4775c-61cf-4651-b705-fe2cca760af6"
+  },
+  {
+   "creada": "2026-08-08 22:47:19.884089+00",
+   "email": "s91d-perfil-acuario-1786229236367@epetplace.dev",
+   "id": "6c78cc3f-a344-41cb-9955-7b32d15d8d09"
+  },
+  {
+   "creada": "2026-08-08 23:01:00.046343+00",
+   "email": "s91d-perfil-acuario-1786230056329@epetplace.dev",
+   "id": "8b028c77-bd8a-45e2-b288-7f7b4d5fa54c"
+  },
+  {
+   "creada": "2026-08-08 23:10:40.09701+00",
+   "email": "s91d-perfil-acuario-1786230636516@epetplace.dev",
+   "id": "c2ad8933-66bc-4039-b42b-42617efa2cfc"
+  },
+  {
+   "creada": "2026-08-08 23:13:24.830152+00",
+   "email": "s91d-perfil-acuario-1786230801334@epetplace.dev",
+   "id": "b44bfd27-86b0-4a4c-8171-c652ffe018ff"
+  },
+  {
+   "creada": "2026-08-08 23:20:48.289533+00",
+   "email": "s91d-perfil-acuario-1786231244758@epetplace.dev",
+   "id": "6297bb35-ebeb-4dad-a05d-b7adff6c092c"
+  },
+  {
+   "creada": "2026-08-08 23:35:00.050201+00",
+   "email": "s91d-perfil-acuario-1786232096453@epetplace.dev",
+   "id": "97b24dc4-b593-4dde-86f2-1020f62fccc3"
+  },
+  {
+   "creada": "2026-08-09 00:19:35.901671+00",
+   "email": "s91d-perfil-acuario-1786234772354@epetplace.dev",
+   "id": "0680f7b0-c1d6-413d-af5e-242c0248911e"
+  },
+  {
+   "creada": "2026-08-09 00:37:23.094904+00",
+   "email": "s91d-perfil-acuario-1786235839401@epetplace.dev",
+   "id": "2e2ce296-d959-4834-ac6e-471890d62256"
+  },
+  {
+   "creada": "2026-08-09 00:39:58.238315+00",
+   "email": "s91d-perfil-acuario-1786235994422@epetplace.dev",
+   "id": "8deecd25-e3b0-4b12-9731-2213e94324b9"
+  },
+  {
+   "creada": "2026-08-09 00:41:24.971413+00",
+   "email": "s91d-perfil-acuario-1786236081388@epetplace.dev",
+   "id": "3a9a04fe-5905-4468-9fb6-ec1d145a1d44"
+  },
+  {
+   "creada": "2026-08-08 17:38:35.234971+00",
+   "email": "s91d-perfil-gato-1786210711647@epetplace.dev",
+   "id": "714fb51c-3b19-4d2a-9010-8191cad8797d"
+  },
+  {
+   "creada": "2026-08-08 17:40:39.778261+00",
+   "email": "s91d-perfil-gato-1786210836201@epetplace.dev",
+   "id": "6505d5ee-cb04-484a-9a32-82b71ba301da"
+  },
+  {
+   "creada": "2026-08-08 18:11:49.188011+00",
+   "email": "s91d-perfil-gato-1786212705562@epetplace.dev",
+   "id": "c70cd238-dbdd-4545-a3da-3cc6936464b9"
+  },
+  {
+   "creada": "2026-08-08 18:15:21.304007+00",
+   "email": "s91d-perfil-gato-1786212917649@epetplace.dev",
+   "id": "2f2ab2ba-1676-4912-a4b6-4019825d740d"
+  },
+  {
+   "creada": "2026-08-08 18:36:45.020957+00",
+   "email": "s91d-perfil-gato-1786214201342@epetplace.dev",
+   "id": "a9be75d1-c4ad-4d6b-802a-718ceb259890"
+  },
+  {
+   "creada": "2026-08-08 18:39:57.650954+00",
+   "email": "s91d-perfil-gato-1786214394071@epetplace.dev",
+   "id": "0bb04440-1821-49d1-b0d7-fbb2c1c3578e"
+  },
+  {
+   "creada": "2026-08-08 19:44:50.048437+00",
+   "email": "s91d-perfil-gato-1786218286457@epetplace.dev",
+   "id": "61855b75-926e-40d7-b5ca-3725ca40bb22"
+  },
+  {
+   "creada": "2026-08-08 19:53:42.482095+00",
+   "email": "s91d-perfil-gato-1786218818457@epetplace.dev",
+   "id": "34c45dd9-95ff-4d2d-afab-efd3cf2916b8"
+  },
+  {
+   "creada": "2026-08-08 19:54:53.567639+00",
+   "email": "s91d-perfil-gato-1786218889966@epetplace.dev",
+   "id": "3b085f6f-5ec7-46ac-b62e-4496e8d992ca"
+  },
+  {
+   "creada": "2026-08-08 19:57:48.574635+00",
+   "email": "s91d-perfil-gato-1786219064935@epetplace.dev",
+   "id": "efe8e760-7d91-45e0-9044-ff41fc2d4ceb"
+  },
+  {
+   "creada": "2026-08-08 22:47:06.966616+00",
+   "email": "s91d-perfil-gato-1786229223432@epetplace.dev",
+   "id": "4a85e461-26e5-4854-8acd-14db9a6464d8"
+  },
+  {
+   "creada": "2026-08-08 23:00:46.9681+00",
+   "email": "s91d-perfil-gato-1786230043442@epetplace.dev",
+   "id": "d6fa18ea-9cd8-4127-884f-759da653ba09"
+  },
+  {
+   "creada": "2026-08-08 23:10:27.153112+00",
+   "email": "s91d-perfil-gato-1786230623594@epetplace.dev",
+   "id": "d66e2e43-c35f-4b0b-8f23-bc8ccf7b285f"
+  },
+  {
+   "creada": "2026-08-08 23:13:12.075318+00",
+   "email": "s91d-perfil-gato-1786230788380@epetplace.dev",
+   "id": "4e76a5b2-517a-4025-8a8e-635f4710b257"
+  },
+  {
+   "creada": "2026-08-08 23:20:35.447266+00",
+   "email": "s91d-perfil-gato-1786231231822@epetplace.dev",
+   "id": "9347c0c3-0e58-461d-81b4-9e7e05e7ac2c"
+  },
+  {
+   "creada": "2026-08-08 23:34:47.242329+00",
+   "email": "s91d-perfil-gato-1786232083594@epetplace.dev",
+   "id": "4c6551a0-c6b9-4e2d-b56a-784fdd7a3d0b"
+  },
+  {
+   "creada": "2026-08-09 00:19:23.046543+00",
+   "email": "s91d-perfil-gato-1786234759339@epetplace.dev",
+   "id": "4e1c456f-4d5d-4a44-89cb-6c6657eb4f27"
+  },
+  {
+   "creada": "2026-08-09 00:37:10.092183+00",
+   "email": "s91d-perfil-gato-1786235826394@epetplace.dev",
+   "id": "8e2703a3-0ad4-4db1-82cb-a4d3b7e0ad39"
+  },
+  {
+   "creada": "2026-08-09 00:39:45.137999+00",
+   "email": "s91d-perfil-gato-1786235981560@epetplace.dev",
+   "id": "4fd73177-8207-4ccf-b85f-11d15380e753"
+  },
+  {
+   "creada": "2026-08-09 00:41:12.214738+00",
+   "email": "s91d-perfil-gato-1786236068514@epetplace.dev",
+   "id": "bc8946ce-7e2c-47b7-a07f-7034bcee075c"
+  },
+  {
+   "creada": "2026-08-08 17:38:21.491027+00",
+   "email": "s91d-perfil-perro-1786210693871@epetplace.dev",
+   "id": "c269f293-51f5-4c53-b53c-c00a260a2b6c"
+  },
+  {
+   "creada": "2026-08-08 17:40:26.965805+00",
+   "email": "s91d-perfil-perro-1786210822793@epetplace.dev",
+   "id": "6f611e30-019e-4d13-82b3-6373d18b57bc"
+  },
+  {
+   "creada": "2026-08-08 18:11:35.432144+00",
+   "email": "s91d-perfil-perro-1786212690936@epetplace.dev",
+   "id": "191c0eb2-c729-4875-a50b-63d2b38d3e12"
+  },
+  {
+   "creada": "2026-08-08 18:15:07.924668+00",
+   "email": "s91d-perfil-perro-1786212903899@epetplace.dev",
+   "id": "cbcc3ddb-aff8-4eef-82d0-bd4b5eba0f69"
+  },
+  {
+   "creada": "2026-08-08 18:36:30.988268+00",
+   "email": "s91d-perfil-perro-1786214187046@epetplace.dev",
+   "id": "0431c468-5ed7-4088-ae25-135af0e64cc3"
+  },
+  {
+   "creada": "2026-08-08 18:38:10.196538+00",
+   "email": "s91d-perfil-perro-1786214286203@epetplace.dev",
+   "id": "d2a2d540-3ff8-4ca4-ad07-d1b1d116c801"
+  },
+  {
+   "creada": "2026-08-08 18:39:41.700494+00",
+   "email": "s91d-perfil-perro-1786214377163@epetplace.dev",
+   "id": "ebe7b1e6-b8f7-495f-b4e3-f7bab72a24e7"
+  },
+  {
+   "creada": "2026-08-08 19:44:33.759175+00",
+   "email": "s91d-perfil-perro-1786218269970@epetplace.dev",
+   "id": "a27d65e8-c276-4067-9431-a293c59e034c"
+  },
+  {
+   "creada": "2026-08-08 19:53:26.236746+00",
+   "email": "s91d-perfil-perro-1786218800970@epetplace.dev",
+   "id": "62663993-9f8d-4b97-b6a7-44bfca31075a"
+  },
+  {
+   "creada": "2026-08-08 19:54:37.902383+00",
+   "email": "s91d-perfil-perro-1786218873877@epetplace.dev",
+   "id": "441e20d2-0f3f-4ad6-9ff1-d5102b851061"
+  },
+  {
+   "creada": "2026-08-08 19:57:32.269969+00",
+   "email": "s91d-perfil-perro-1786219047389@epetplace.dev",
+   "id": "e0a0b9d2-46d0-4cdc-8bb6-c3ac3e228c7a"
+  },
+  {
+   "creada": "2026-08-08 22:46:50.031645+00",
+   "email": "s91d-perfil-perro-1786229204719@epetplace.dev",
+   "id": "9c8df055-33a3-45b5-aef4-4443f4a04e99"
+  },
+  {
+   "creada": "2026-08-08 23:00:30.557774+00",
+   "email": "s91d-perfil-perro-1786230024995@epetplace.dev",
+   "id": "17307c59-6396-45b7-a8af-8649d1a2e173"
+  },
+  {
+   "creada": "2026-08-08 23:10:10.72116+00",
+   "email": "s91d-perfil-perro-1786230605469@epetplace.dev",
+   "id": "b6311864-b7cc-4f81-bfe9-601b15064f3d"
+  },
+  {
+   "creada": "2026-08-08 23:11:27.475108+00",
+   "email": "s91d-perfil-perro-1786230683542@epetplace.dev",
+   "id": "332c7691-73c4-4a55-8342-fecc8fb9638f"
+  },
+  {
+   "creada": "2026-08-08 23:12:47.34522+00",
+   "email": "s91d-perfil-perro-1786230762756@epetplace.dev",
+   "id": "e2b15f66-7b63-46ac-9bdd-0606e155b2dc"
+  },
+  {
+   "creada": "2026-08-08 23:20:11.15802+00",
+   "email": "s91d-perfil-perro-1786231205932@epetplace.dev",
+   "id": "f8e78e83-3973-4a95-8afc-b4e16fea6715"
+  },
+  {
+   "creada": "2026-08-08 23:34:22.783746+00",
+   "email": "s91d-perfil-perro-1786232057310@epetplace.dev",
+   "id": "57992936-89ca-481d-9667-5558297b0320"
+  },
+  {
+   "creada": "2026-08-09 00:18:57.585078+00",
+   "email": "s91d-perfil-perro-1786234724541@epetplace.dev",
+   "id": "e94eaf3d-3d22-4359-8026-f64faf491f04"
+  },
+  {
+   "creada": "2026-08-09 00:36:45.510882+00",
+   "email": "s91d-perfil-perro-1786235797054@epetplace.dev",
+   "id": "ae439d03-1941-4e4c-8057-627d0c308459"
+  },
+  {
+   "creada": "2026-08-09 00:38:49.186687+00",
+   "email": "s91d-perfil-perro-1786235925182@epetplace.dev",
+   "id": "4024e9c4-7710-44d6-93e1-5a8d1881f38a"
+  },
+  {
+   "creada": "2026-08-09 00:39:20.890562+00",
+   "email": "s91d-perfil-perro-1786235957084@epetplace.dev",
+   "id": "dd855ca3-db4a-4f4a-b0f9-bc672b717c95"
+  },
+  {
+   "creada": "2026-08-09 00:40:47.729017+00",
+   "email": "s91d-perfil-perro-1786236043392@epetplace.dev",
+   "id": "92692ad3-ebab-4c69-b50b-d9c1acf37f22"
+  }
+ ],
+ "parecidas": [
+  {
+   "email": "s92a-ajeno@epetplace.dev"
+  }
+ ],
+ "total": 214,
+ "dependencias": [
+  {
+   "n": 0,
+   "que": "cuentas_comerciales"
+  },
+  {
+   "n": 0,
+   "que": "evento_cita_servicio (user_id)"
+  },
+  {
+   "n": 64,
+   "que": "familia (creada por)"
+  },
+  {
+   "n": 64,
+   "que": "familia_miembro"
+  },
+  {
+   "n": 48,
+   "que": "mascotas (user_id)"
+  },
+  {
+   "n": 0,
+   "que": "prestadores"
+  },
+  {
+   "n": 64,
+   "que": "profiles"
+  },
+  {
+   "n": 0,
+   "que": "push_tokens"
+  }
+ ],
+ "cruce": [
+  {
+   "n": 0
+  }
+ ]
+}

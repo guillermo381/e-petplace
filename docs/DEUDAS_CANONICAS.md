@@ -3284,6 +3284,22 @@ Origen: S86-A, medición para C.
 
   **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
 
+- **L-217 — «TODO EN ORIGIN» Y «TODO EN EL CANON» SON DOS AFIRMACIONES DISTINTAS (S92).**
+
+  **El caso:** cuatro artefactos de S90-B —entre ellos **la letra del loop de seguridad escrita para ejecutarse en S92** y el volcado con los nueve hallazgos probados— **nunca llegaron a `main`**. Vivían en `pista/s90-b` y en su remoto. El acta de S90 declaraba *«TODO en origin (`merge-base --is-ancestor` 15/15)»* **y era cierto**: un commit pusheado a su rama de pista está en `origin` sin estar en el canon.
+
+  **Por qué la regla 84 no lo caza:** sus cuatro eslabones verifican que lo tuyo llegó a `origin` y que el publish ancla el commit correcto. **Ninguno pregunta si la rama de otra pista tiene algo que `main` no tiene.** Y el pedido existía por escrito —el §6 del volcado de B pedía ese merge— y se perdió igual: *un pedido en un documento que nadie relee al cerrar no es un mecanismo.*
+
+  **La forma exigible:** al cerrar una sesión con más de una pista, se verifica **`git branch -a --no-merged main`** para las ramas de esa sesión, y lo que aparezca se mergea o se declara. *El canon no es lo que se pusheó: es lo que `main` contiene.* Ficha: **D-707**. Origen: S92-A (hallado leyendo el paso 0; rescatado con `--no-ff` al abrir).
+
+- **L-216 — UN `REVOKE … FROM anon` QUE DEJA `PUBLIC` INTACTO NO CIERRA NADA (S92).**
+
+  **Todo rol hereda los privilegios de `PUBLIC`.** Mientras `PUBLIC` conserve `EXECUTE` sobre una función, revocárselo a `anon` —o a `authenticated`— **no cambia absolutamente nada**, y `has_function_privilege` lo dice correctamente: sigue devolviendo `true`. *El revoke corre, no falla, y no cierra.*
+
+  **Cómo apareció, y es el argumento de L-192 en su forma más limpia:** el cinturón se estaba **probando en rojo** antes de confiarle la primera migración, y uno de sus brazos daba VERDE cuando debía fallar. No era un cinturón flojo: era la herencia de `PUBLIC` haciendo verdad la afirmación que el brazo intentaba desmentir. **Si el cinturón no se hubiera probado en rojo, las cinco migraciones de la sesión habrían corrido, salido verdes y cerrado cero puertas.**
+
+  **La forma exigible:** todo revoke de EXECUTE nombra **`anon, PUBLIC`** juntos (y `authenticated` cuando corresponda), y la verificación se hace con **`has_function_privilege`**, que cuenta la herencia. *Un `proacl` sin la entrada de `anon` no prueba que `anon` no pueda: prueba que no se lo concedieron directamente.* Hermana de **L-140** (los default privileges) y de **L-212** (el permiso se concede por columna). Origen: S92-A.
+
 - **L-215 — NADA AVISA CUÁNDO UN GRANT ROMPE UNA POLICY (S91).**
 
   **DOS COBROS EN UN DÍA, misma forma.** Un `REVOKE` de columna sobre `prestadores` rompió (a) **ocho policies** que hacen `EXISTS` sobre esa columna y (b) **un hub entero** que la pedía en un `select` de cuatro campos. **En los dos casos el código que se rompió NO MENCIONA la columna donde se ve el error**: la policy la nombra por dentro, el wrapper la pide entre otras tres.
@@ -10279,3 +10295,201 @@ es la diferencia entre una decisión y una herencia.
 > son la misma familia: **permisos heredados que nadie declaró.**
 > **☠️ MUERTE:** toda `SECURITY DEFINER` de `public` declara su audiencia, y la
 > que sea pública lo dice en su migración.
+>
+> ### ✅ ENMIENDA S92 — **PAGADA SALVO DOS, y las dos por decisión escrita.**
+> De **59 a 4**, en dos tandas con rojo producido antes y verde en dos brazos
+> después (`20260808160000`, `20260808170000`). **Las cuatro que quedan tienen
+> dueño y porqué:** `is_admin` y `email_exists` (ver D-703) más los **dos helpers
+> que S92 creó** (`es_mi_prestador`, `prestador_activo`), que reciben `anon` a
+> propósito porque una policy `{public}` evaluada por `anon` **falla con 42501 si
+> la función que llama no le da EXECUTE**. **La deuda no pedía «cero DEFINER con
+> anon» —eso rompe la casa—: pedía que ninguna lo tuviera sin que alguien lo
+> decidiera. Hoy: 0 sin decidir.**
+
+---
+
+### Deudas de S92 (D-702 → D-708) — el loop de seguridad
+
+#### D-702 — 🟠 LAS DOCE POLICIES COMPUESTAS QUE SIGUEN CON EL PREDICADO CRUDO
+
+**Mitad no pagada de D-700, declarada y no escondida (regla 77).** S92 migró
+**17 de 29**: las 5 de vitrina y las 12 del titular. **Quedan 12**, y no entraron
+por una razón concreta: son **COMPUESTAS** — mezclan el brazo del titular con
+brazos de `prestador_empleados` (walk-in, agenda, mostrador) y una tiene un
+`UNION`.
+
+**Las doce, censadas:** `evento_cita_servicio.cita_select_prestador` ·
+`evento_cita_servicio.cita_update_prestador` ({public}) ·
+`evento_cita_servicio.cita_insert_prestador_walkin` ·
+`bonos.prestador_insert_bonos_walkin` · `estadias.prestador_insert_estadias_walkin` ·
+`suscripciones_servicio.prestador_insert_suscripciones_walkin` ·
+`notificaciones.notif_insert_prestador_cita` ·
+`prestador_atencion_log.atencion_log_select` ·
+`prestador_empleado_servicios.empleado_servicios_dueño_elimina` ({public}) ·
+`prestador_empleado_servicios.empleado_servicios_dueño_inserta` ({public}) ·
+`mascota_acceso_prestador.map_select_due` · `certificado_salud.certificado_select_acceso`.
+
+**Por qué no se forzaron:** partir un predicado compuesto **exige su propio par
+discriminador POR BRAZO**, y un error ahí rompe la agenda o el walk-in — dos
+caminos que hoy funcionan. *Entre migrar doce con prisa y migrar diecisiete con
+prueba, la sesión eligió lo segundo y lo dice.*
+
+**El riesgo mientras tanto es el conocido:** siguen atadas a los grants de
+columna de `prestadores` (`id`, `user_id`, `estado`, `cuenta_comercial_id`), así
+que un revoke futuro sobre cualquiera de esas columnas las rompe **y el síntoma
+aparece lejos**. **Mitigación ya viva:** el instrumento de censo
+(`scripts/s92/censo-impacto.mjs`) las nombra antes de cualquier cambio.
+
+> **Dueño: A.** **☠️ DISPARO:** el próximo arco que toque agenda, walk-in o
+> mostrador — o el próximo `REVOKE`/`GRANT` sobre una columna de `prestadores`,
+> lo que llegue primero. **☠️ MUERTE:** ninguna policy consulta `prestadores` sin
+> helper. Origen: S92-A (D-700 parcial).
+
+#### D-703 — 🔴 `email_exists`: ENUMERACIÓN DE USUARIOS CON UN CONSUMIDOR VIVO
+
+**El único de los 59 que S92 NO cerró por FRENO, no por olvido.**
+
+**Rojo:** `anon` la ejecuta y devuelve `true`/`false` según el correo exista —
+discrimina, que es la definición de un oráculo de enumeración. Es el hallazgo ④
+del censo de S90, todavía vivo.
+
+**Por qué no se curó:** su **único consumidor medido** es
+`e-petplace-v2/src/pages/Checkout.tsx` — **un checkout, que por naturaleza corre
+sin sesión**. Revocarle `anon` puede romper un flujo de terceros ⇒ **freno 2 del
+arranque (cambia comportamiento visible)**. *(El hit en el monorepo es un falso
+positivo: `packages/api/src/wrappers/auth.ts:40` usa `email_exists` como
+**código de error de auth-js**, no como RPC.)*
+
+**Y hay una letra firmada que lo condena, escrita en S84:** *«NUNCA se declara si
+un correo existe»*. Un checkout que consulta si un email tiene cuenta es
+exactamente el anti-patrón que esa regla prohíbe. **La tensión es real y la
+arbitra el founder**, porque cerrarlo puede dejar sin checkout a un producto que
+quizá ya no corre.
+
+**Lo que hay que medir para decidir en una línea: ¿`e-petplace-v2` está
+desplegado?** Si no lo está, el REVOKE es gratis.
+
+> **Dueño: founder (decide) → A (ejecuta).** **☠️ DISPARO: S93**, o antes si se
+> confirma que v2 no está desplegado. **☠️ MUERTE:** `anon` no puede preguntar si
+> un correo tiene cuenta. Origen: S92-A.
+
+#### D-704 — 🟠 LAS 64 SONDAS: LA ORDEN ES EJECUTABLE, PERO NO ES DE UNA LÍNEA
+
+**Orden del founder al abrir S92**, intentada y **no ejecutada**, con su medición
+entera en `docs/relevamientos/2026-08-08-s92a-FRENO-borrado-de-sondas.md`.
+
+**Lo verificado (no hay que re-medirlo):** 64 cuentas exactas · 214 usuarios
+totales · **cero miembros no-sonda dentro de familias de sonda** ⇒ borrar **no
+arrastra a ninguna persona real** · cuelgan 64 familias, 64 perfiles y **48
+mascotas**.
+
+**Por qué abortó, dos veces:** `DELETE FROM auth.users` dispara `ON DELETE SET
+NULL` y eso viola **CHECKs de procedencia XOR** — primero
+`chk_familia_creador_xor`, después `chk_eventos_origen`. **Esta casa guarda de
+quién viene cada dato, y eso hace que una cuenta con historia no se pueda
+desconectar en silencio.** *No es un descuido del modelo: es el modelo
+defendiéndose.*
+
+**El tamaño de la alternativa, medido: 80 FKs apuntan a `mascotas`, 40 de ellas
+bloqueantes (`RESTRICT`/`NO ACTION`).**
+
+**La premisa del brief de S92 —*«es de una línea con el censo ya escrito; lo que
+falta es la palabra»*— quedó FALSADA.** El censo estaba escrito; la línea no
+existe.
+
+**Las dos vías, servidas:** **(a)** reetiquetar procedencia
+(`created_by_sistema='limpieza_s92_sondas'`, precedente vivo
+`backfill_s17_fase_c`) y borrar solo las cuentas, dejando los datos huérfanos y
+marcados — iterativo, bajo riesgo; **(b)** borrar el árbol entero — alto costo,
+**irreversible**, y toca 40+ tablas que nadie nombró. **Voto de la pista: (a)**,
+porque lo que el founder nombró son las CUENTAS.
+
+> **Dueño: founder (elige vía) → A (ejecuta).** **☠️ DISPARO: S93.**
+> **☠️ MUERTE:** cero cuentas `s91d-*` en `auth.users`. Origen: S92-A.
+
+#### D-705 — 🟡 EL ANDAMIAJE DE TEST SIGUE EXISTIENDO EN PRODUCCIÓN (revocado, no borrado)
+
+S92 le quitó el EXECUTE a `anon` **y a `authenticated`** a las nueve
+(`escenario_paseo_iniciado`, `simular_cliente_*` ×3, `simular_prestador_inicia_paseo`,
+`test_guard_activo`, `test_marca_metadata`, `test_marca_nombre`,
+`test_registry_insert`); `service_role` conserva.
+
+**Pero siguen ahí, y la letra de S90 es explícita: *«con guard o sin él, esa clase
+no vive en producción»*.** El DROP no se hizo **a propósito**: el portal legado
+comparte esta DB (regla 69) y el DROP es irreversible-hacia-afuera — mismo
+criterio con que D-471 dejó dos huérfanas revocadas y vivas.
+
+**Dato que ayuda a decidir:** el repo que las usa (`e-petplace-sistema-pruebas`)
+está **congelado desde S38** y no versiona llaves.
+
+> **Dueño: A.** **☠️ DISPARO:** el censo de callers del portal legado (o su
+> apagado definitivo) — el mismo de D-471, así que **mueren juntas**.
+> **☠️ MUERTE:** `public` no tiene funciones cuyo nombre empiece con `test_`,
+> `simular_` o `escenario_`. Origen: S92-A.
+
+#### D-706 — 🟡 LOS 14 TELÉFONOS DE `_traza_promocion_e164` SIGUEN EN LA BASE
+
+**La puerta se cerró; el dato quedó.** S92 le encendió RLS sin policies y le
+revocó todos los grants de rol de cliente, tras medir que `anon` los leía **y
+podía borrarlos**. **Las filas NO se tocaron: borrar datos es freno 3 y necesita
+palabra del founder** — y una migración de permisos no es el lugar.
+
+**Lo que hay:** 14 filas, 5 con E.164 completo en `valor_despues`, de una
+promoción de teléfonos ya ejecutada. **Cero funciones, cero triggers, cero
+consumidores** — nadie las lee ni las va a extrañar.
+
+**Por qué igual importa:** son datos personales de gente real guardados en una
+tabla de traza que ya cumplió su función. *Conservar un dato que ya no sirve es
+una decisión, y hoy nadie la tomó.*
+
+> **Dueño: founder (decide) → A (ejecuta).** **☠️ DISPARO: S93**, junto a D-704
+> (las dos son «qué hacemos con datos que sobraron»). **☠️ MUERTE:** la tabla se
+> vacía o se dropea, con su acta. Origen: S92-A.
+
+#### D-707 — 🟠 UN COMMIT EN `origin` NO ESTÁ EN EL CANON, Y NADA LO CAZA
+
+**Hallazgo del arranque de S92, y de los caros.** Cuatro artefactos de S90-B —**la
+letra del loop de seguridad escrita para ejecutarse en S92**, las dos skills de
+auditoría y el volcado con los nueve hallazgos probados— **nunca se mergearon a
+`main`**. Vivían en `pista/s90-b` y en su remoto.
+
+**El acta de S90 declara «TODO en origin (`merge-base --is-ancestor` 15/15 +
+cierres)». Era cierto.** Y aun así el canon no los tenía: **un commit pusheado a
+su rama de pista está en `origin` sin estar en `main`.** *«Todo en origin» y
+«todo en el canon» son dos afirmaciones distintas, y la regla 84 solo verifica la
+primera.*
+
+**El costo real, medido:** S92 abrió buscando su propio manual de instrucciones y
+casi lo re-deriva a mano. **Y el propio volcado de B pedía ese merge en su §6** —
+o sea que el pedido existía, escrito, y se perdió igual.
+
+**La cura barata, propuesta:** al cerrar, verificar `git branch -a --no-merged
+main` para las ramas de pista de la sesión, o que cada volcado que pide un merge
+lo declare como eslabón del cierre. **Hoy la regla 84 tiene cuatro eslabones y
+ninguno pregunta esto.**
+
+> **Dueño: A (y candidata a enmienda de la regla 84).** **☠️ DISPARO:** el
+> próximo cierre de sesión con más de una pista. **☠️ MUERTE:** existe un chequeo
+> que grita cuando una rama de pista tiene commits que `main` no tiene.
+> Origen: S92-A (rescatados con `--no-ff` al abrir).
+
+#### D-708 — ⚪ DOCE `SECURITY DEFINER` CON `search_path` MUTABLE
+
+El ⑬ del orden de S90, **medido de nuevo hoy**: 12 de las DEFINER de `public` no
+fijan `search_path` — `email_exists` · `encontrar_prestador_emergencia` ·
+`get_country_config` · `get_user_features` · `is_admin` · `log_admin_action` ·
+`log_analytics_event` · `service_active_in` · `update_device_last_seen` ·
+`use_beta_invite` · `user_has_feature` · `validate_beta_access`.
+
+**Una DEFINER con `search_path` mutable es escalable aunque su ACL esté sana**, y
+`is_admin` está en **239 policies**.
+
+**Por qué no se hizo en S92, dicho sin adorno:** fijar `search_path` puede
+**romper el cuerpo** de una función que referencia otro schema sin calificar
+(varias tocan `auth.users`). Exige leer los doce cuerpos uno por uno, y esta
+sesión eligió cerrar puertas antes que tocar cuerpos. *Cambiar cómo resuelve
+nombres una función es cirugía, no un grant.*
+
+> **Dueño: A.** **☠️ DISPARO: S93**, después de D-703 (que puede matar una de las
+> doce). **☠️ MUERTE:** toda DEFINER de `public` declara su `search_path`.
+> Origen: S90 (censo) · re-medida S92-A.

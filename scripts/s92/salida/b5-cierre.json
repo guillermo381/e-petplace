@@ -1,0 +1,120 @@
+{
+ "pruebas": [
+  {
+   "id": "anon · debug_estado_user",
+   "obtenido": "REBOTA 401",
+   "ok": true
+  },
+  {
+   "id": "anon · debug_session",
+   "obtenido": "REBOTA 401",
+   "ok": true
+  },
+  {
+   "id": "auth · prestadores.direccion",
+   "obtenido": "REBOTA 403",
+   "ok": true
+  },
+  {
+   "id": "auth · vista pública responde",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular · «Tu negocio» abre",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular · lector angosto",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "D-701 · DEFINER con anon SIN DECISIÓN",
+   "obtenido": "0 sin decidir · 4 en total (eran 59): email_exists, es_mi_prestador, is_admin, prestador_activo",
+   "ok": true
+  },
+  {
+   "id": "D-700 · policies con predicado crudo",
+   "obtenido": "14 (eran 29)",
+   "ok": true
+  },
+  {
+   "id": "anon · traza de teléfonos",
+   "obtenido": "REBOTA 401",
+   "ok": true
+  },
+  {
+   "id": "traza · filas intactas",
+   "obtenido": "14 (eran 14 — cerrar no es borrar)",
+   "ok": true
+  },
+  {
+   "id": "anon LEE cat_bancos",
+   "obtenido": "HTTP 200 con filas",
+   "ok": true
+  },
+  {
+   "id": "anon LEE cat_paises",
+   "obtenido": "HTTP 200 con filas",
+   "ok": true
+  },
+  {
+   "id": "anon LEE cat_tipos_documento_titular",
+   "obtenido": "HTTP 200 con filas",
+   "ok": true
+  },
+  {
+   "id": "escritura de cliente en catálogos/audit",
+   "obtenido": "0 grants",
+   "ok": true
+  },
+  {
+   "id": "titular lee · mascotas",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · familia_miembro",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · caso_clinico",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · evento_cita_servicio",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · prestador_servicios",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · prestador_horarios",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · bonos",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "titular lee · cuentas_comerciales",
+   "obtenido": "HTTP 200",
+   "ok": true
+  }
+ ],
+ "burndown": {
+  "definer_anon": 4,
+  "grants_escritura": 838,
+  "policies_crudas": 14,
+  "tablas_sin_rls": 3
+ }
+}
