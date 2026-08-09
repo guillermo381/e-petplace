@@ -238,15 +238,44 @@ export default function PaseoDisponibles() {
   // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
   // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
   // un solo flujo de reserva en toda la app.
+  /* 🔴 P0-C (2º síntoma, 9-ago) — «el primer Reservar rebota, el segundo pasa»,
+     3 de 3 en el aparato del founder. Instrumentado ACÁ, que es donde el
+     síntoma se manifiesta (L-221), y no donde yo suponga la causa.
+     ⚠️ EL DEFECTO QUE SE VE POR LECTURA, sin depender de la traza:
+     `tomarPedido()` **CONSUME la señal ANTES de verificar si puede usarla**.
+     La lectura es destructiva a propósito —para que no se re-dispare—, pero se
+     ejecuta antes del guard: si `disponibles` todavía no es un array, el
+     pedido se borra y **no lo ejecuta nadie**. *La señal muere en silencio, y
+     el segundo intento funciona porque la lista ya está.* Es el patrón que
+     acabamos de curar en el modal, con otra cara. */
   useFocusEffect(
     useCallback(() => {
       const pedida = tomarPedido();
-      if (pedida === null || !Array.isArray(disponibles)) return;
+      if (pedida !== null) {
+        marcar(
+          `⇢ PEDIDO recibido del preview · disponibles=${Array.isArray(disponibles) ? `${disponibles.length} oferta(s)` : disponibles}`,
+        );
+      }
+      if (pedida === null || !Array.isArray(disponibles)) {
+        if (pedida !== null) {
+          marcar('✖ PEDIDO DESCARTADO: la lista aún no estaba — la señal ya se consumió y se pierde');
+        }
+        return;
+      }
       const oferta = disponibles.find((p) => p.prestador_servicio_id === pedida);
       // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
       // reserva a ciegas: la lista habla sola en su próximo refresh.
-      if (oferta !== undefined) alElegir(oferta);
-    }, [disponibles]),
+      if (oferta === undefined) {
+        marcar(`✖ PEDIDO SIN OFERTA: el id pedido ya no está en la lista (slot ocupado?)`);
+        return;
+      }
+      marcar('✔ PEDIDO ejecutado → alElegir');
+      alElegir(oferta);
+      // ⚠️ deps: `disponibles` + `marcar` (estable). **`alElegir` NO entra a
+      // propósito**: cambia de identidad seguido y sumarlo haría correr este
+      // efecto más veces de las que corría — o sea que el instrumento
+      // cambiaría lo que vino a medir.
+    }, [disponibles, marcar]),
   );
 
   useFocusEffect(
@@ -617,6 +646,13 @@ export default function PaseoDisponibles() {
             ))}
           </Tarjeta>
         )}
+
+        {/* 🔴 LA TRAZA, TAMBIÉN EN LA PANTALLA (P0-C 2º síntoma, D-726).
+            Estaba solo dentro de los modales, y **el síntoma nuevo no abre
+            ningún modal: te saca de la pantalla**. Un instrumento que solo se
+            ve cuando sale un cartel no puede medir un rebote silencioso —
+            L-221 en chiquito, otra vez. */}
+        {bloqueTraza}
       </ScrollView>
 
       {/* La cita es de UNA mascota: con más de una en el hogar, se elige. */}

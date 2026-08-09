@@ -11727,3 +11727,60 @@ de paseadores DEBE re-pedirse en cada foco, y el hogar no.
 > **☠️ MUERTE:** o se prueba que el ciclo es solo del paseo (y la ficha se
 > cierra con su medición), o se decide pantalla por pantalla qué se re-pide al
 > recuperar el foco y qué no. Origen: S92-BIS, traza del founder en dispositivo.
+
+---
+
+#### D-729 — 🔴 EL PEDIDO DE RESERVA SE CONSUME ANTES DE PODER USARSE — en los CUATRO oficios
+
+**Síntoma del founder, 3 de 3 en dispositivo:** desde la vitrina del prestador
+toca **Reservar**, la app lo devuelve a la lista **sin reservar**; entra otra
+vez, toca de nuevo, **y ahí sí reserva**. *No es azar ni timing: es un estado
+que el primer intento deja listo para el segundo.*
+
+**EL DEFECTO, visible por lectura y sin depender de ninguna traza:**
+
+```ts
+const pedida = tomarPedido();                                  // ← CONSUME
+if (pedida === null || !Array.isArray(disponibles)) return;    // ← y recién acá verifica
+```
+
+`tomarPedido()` **borra la señal al leerla** —y eso es correcto y deliberado:
+su cabecera explica que un pedido que sobrevive a su ejecución reservaría dos
+veces—. **El error es el ORDEN:** se consume **antes** de comprobar si hay lista
+para ejecutarlo. Si `disponibles` todavía no es un array, el pedido **se borra
+sin que nadie lo ejecute**, y no queda rastro.
+
+**Por qué el segundo intento funciona:** al volver, la lista ya está cargada en
+el estado de la pantalla, así que el guard pasa y el pedido se ejecuta. *El
+primer intento no falla: paga el costo de que la lista no estuviera.*
+
+**ES LA MISMA CLASE QUE ACABAMOS DE CURAR** (L-218 · L-220 · el modal-snapshot):
+**un valor que se lee cuando todavía no se puede usar, y cuya pérdida no dice
+nada.** El rebote es **silencioso** — la pantalla no explica por qué no reservó,
+que es exactamente el «morir callado» que esta sesión viene matando.
+
+**ALCANCE — ES LA CLASE, NO EL CASO. Censado:** las **cuatro** pantallas de
+disponibles tienen el patrón **idéntico**:
+`explorar/paseo/disponibles.tsx:243` · `explorar/grooming/disponibles.tsx:109` ·
+`explorar/adiestramiento/disponibles.tsx:104` ·
+`explorar/veterinaria/disponibles.tsx:126`. Un solo emisor:
+`prestador/[prestadorId].tsx:185` (`pedirReserva` + `router.back()`).
+
+**⚠️ LO QUE NO ESTÁ PROBADO, y se dice:** que ÉSTE sea el motivo del síntoma
+exacto que el founder describe («me devuelve a la vista de preview»). El defecto
+del orden es **cierto**; que produzca ese rebote concreto es **hipótesis
+fuerte**. **No es reproducible desde acá**: es navegación entre pantallas en el
+aparato. Por eso se instrumentó el camino —la traza dice si el pedido llegó, con
+qué estado, y si se descartó— **y la medición la corre el founder**.
+
+**Las dos curas candidatas, sin aplicar:** ① **verificar antes de consumir**
+(mirar el pedido sin borrarlo, y borrarlo recién al ejecutarlo) — la más
+chica y la que respeta el diseño de un solo uso; ② que la pantalla **diga** que
+no pudo reservar en vez de quedarse muda. **Las dos van juntas**: la ① evita la
+pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
+
+> **Dueño: A, con el rojo del founder ya en la mano.**
+> **☠️ DISPARO: la lectura de la traza en el aparato — y la cura viaja a los
+> CUATRO oficios, no solo al paseo.**
+> **☠️ MUERTE:** el primer «Reservar» reserva, y si algún día no puede, lo dice.
+> Origen: S92-BIS, 2º síntoma del P0-C.
