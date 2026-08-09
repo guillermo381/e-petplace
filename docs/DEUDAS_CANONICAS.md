@@ -9967,3 +9967,61 @@ tolerada: **dibujar para el objetivo equivocado es más caro que no dibujar**
 > rasterizados y MIRADOS antes de dejarlos— y gate por ícono (§2.9).
 > **☠️ MUERTE:** el día que `historia_clinica` deje de pintar el dibujo de una
 > cédula.
+
+---
+
+#### D-696 — 🟡 LAS FOTOS DEL PRESTADOR Y LA ORIENTACIÓN: la superficie de subida no dice cómo van a quedar
+
+**Hoy la subida no dice nada sobre orientación y el carrusel muestra las fotos
+en su relación de aspecto sin que el prestador sepa qué va a pasar con las
+suyas.** Una vertical puede recortarse (se pierde el local), encogerse (bandas
+y pobreza) o deformarse (inaceptable).
+
+> ### LA LETRA — firma founder, 8-ago-2026
+>
+> - **La guía se DA MOSTRANDO, no explicando:** el prestador ve **la vista
+>   previa de cómo va a quedar su foto en el carrusel** antes de confirmarla —
+>   el mismo patrón que ya rige para la foto de mascota («Así lo vas a ver»).
+> - **El sistema SOBREVIVE a la vertical:** recorte centrado **con arrastre
+>   para acomodar**. **JAMÁS deformación.**
+> - **PRECONDICIÓN:** se define primero **la relación de aspecto del carrusel**
+>   (hoy en revisión — el founder pidió bajarlo de 16:9). *Una guía escrita
+>   antes de fijar el marco sería aspiracional; con el marco fijo, es honesta.*
+
+**✅ LA MEDICIÓN QUE LA LETRA DEJÓ PENDIENTE, HECHA (A, 8-ago) — y contesta cuál
+de los tres comportamientos hace hoy:** `FichaPrestador.tsx:347` pinta con
+**`resizeMode="cover"`** ⇒ **RECORTA, centrado.** No deforma y no encoge. *La
+mala noticia es la que el founder anticipó: una vertical pierde arriba y abajo,
+que es justo donde suele estar el local.* **El defecto es real y su forma ya no
+es hipótesis: es recorte ciego, sin que nadie lo elija.**
+
+**⚠️ Y UNA CORRECCIÓN A LA PREMISA DE LA LETRA, medida contra el objeto — es la
+que cambia el presupuesto de esta deuda:** la letra dice que el gesto de
+arrastre «ya está construido», y **es cierto a medias**. La pieza existe
+(`apps/cliente/src/components/EncuadreFoto.tsx` + `foto-encuadre.ts` +
+`HojaFotoMascota.tsx`), **pero vive SOLO en el cliente. El prestador NO la
+tiene**: la única mención en `apps/prestador` es un COMENTARIO que dice
+exactamente eso —*«el editor de zoom y encuadre no existe de este lado; vive en
+`apps/cliente/EncuadreFoto` y su promoción es de B»*— y el propio comentario
+explica por qué su botón no dice «Ajustar»: **prometería una pantalla que no
+abre.** *(L-170 en su quinta aparición: el grep encontró el nombre y el nombre
+estaba en prosa, no en código.)*
+
+⇒ **Hay una PRECONDICIÓN más, y tiene dueño distinto:** **la promoción de
+`EncuadreFoto` a `packages/ui` es de B.** Sin eso, esta deuda no se puede pagar
+del lado del prestador aunque el marco esté fijo.
+
+**LO QUE YA NO HAY QUE DISEÑAR, porque tiene precedente vivo:** el contrato de
+datos del recorte existe y está firmado — `foto_cx` / `foto_cy` / `foto_z`
+(centro ∈ [0,1], zoom ∈ [1,3] sobre `min(iw,ih)`, canónico `.5/.42/1.3`), con su
+puerta única `declararFotoMascota` y su rebote `encuadre_invalido` (lámina S82).
+*El encuadre de una foto de negocio es el mismo problema con otro sujeto: se
+espeja, no se inventa.*
+
+> **Dueños: C** (la superficie de subida y el carrusel) · **B** (la promoción de
+> `EncuadreFoto` a `packages/ui`) · **A** si el encuadre del negocio necesita
+> columnas propias.
+> **☠️ DISPARO: la próxima sesión de features.** **NO S91** (nada nuevo se
+> abre) · **NO S92** (loop de seguridad, sin features).
+> **☠️ MUERTE:** la superficie de subida muestra la vista previa del carrusel
+> **y** el recorte es acomodable.
