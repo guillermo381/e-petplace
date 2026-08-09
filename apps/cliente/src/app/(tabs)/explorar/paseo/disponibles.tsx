@@ -218,6 +218,37 @@ export default function PaseoDisponibles() {
   const faseEspecies = useEspeciesElegibles('paseo', marcar);
   const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
+  /* ═══ EL ESPEJO VIVO — la cura estructural del guard 2 (P0-C, 9-ago) ═════
+   *
+   * ☠️ LO QUE PASABA, con la traza del founder como prueba:
+   *     494ms · ✔ setMascotas(lista) — 6 mascotas
+   *       1ms · ⏭ el hogar YA está cargado — no se re-pide
+   *       1ms · ▷ alElegir · mascotas=cargando · elegibles=0   ← ¡MENTIRA!
+   *
+   * **Los datos estaban; la lectura era vieja.** El efecto que ejecuta el
+   * pedido tiene deps `[disponibles, marcar]` —yo saqué `alElegir` a propósito,
+   * para que no corriera de más—, así que **captura el `alElegir` del render en
+   * que se creó**, uno donde `mascotas` todavía era `'cargando'`. Al volver del
+   * preview corre ESE closure, que ve un mundo que ya no existe.
+   *
+   * *Datos presentes, semáforo en rojo* — y la causa no es el semáforo: es que
+   * se estaba mirando la foto de un semáforo viejo.
+   *
+   * ── POR QUÉ UN REF Y NO «SETEAR 'listo' EN ESE PUNTO» ────────────────────
+   * Un parche ahí arreglaría ESTE camino y dejaría vivos todos los demás: hay
+   * más de un lugar que puede leer estos valores desde un closure. **El ref se
+   * actualiza en CADA render**, así que quien lo lea ve la verdad de ahora, sin
+   * importar de qué render venga su clausura. *Mientras la lectura pueda ser
+   * vieja, esto vuelve — y ya volvió tres veces.*
+   *
+   * **No hay segunda fuente de verdad:** el estado sigue siendo uno
+   * (`mascotas`, `faseEspecies`); el ref es su ESPEJO, no una copia con vida
+   * propia — se pisa entero en cada render y nadie lo escribe aparte. */
+  const mascotasRef = useRef(mascotas);
+  mascotasRef.current = mascotas;
+  const faseEspeciesRef = useRef(faseEspecies);
+  faseEspeciesRef.current = faseEspecies;
+
   /* LOS DOS MODALES DE ESPERA, DERIVADOS DE LA FASE VIVA (ver la nota larga
      arriba de `intentoSinDatos`). Se calculan en cada render, así que **cuando
      el dato llega el modal se apaga solo**: no hay copia que sincronizar ni
@@ -271,10 +302,12 @@ export default function PaseoDisponibles() {
       }
       marcar('✔ PEDIDO ejecutado → alElegir');
       alElegir(oferta);
-      // ⚠️ deps: `disponibles` + `marcar` (estable). **`alElegir` NO entra a
-      // propósito**: cambia de identidad seguido y sumarlo haría correr este
-      // efecto más veces de las que corría — o sea que el instrumento
-      // cambiaría lo que vino a medir.
+      /* ⚠️ deps: `disponibles` + `marcar` (estable). `alElegir` no entra, y
+         **ya no importa**: desde la cura del espejo vivo, aunque este efecto
+         capture una versión vieja de la función, **los datos que esa función
+         lee son los de AHORA**. *Antes esta omisión era la causa del bug —el
+         closure veía `mascotas='cargando'` con seis mascotas cargadas—; ahora
+         es inofensiva, y ésa es la diferencia entre un parche y una cura.* */
     }, [disponibles, marcar]),
   );
 
@@ -480,10 +513,15 @@ export default function PaseoDisponibles() {
   // con camino y la reserva NO avanza (el guard server es el cinturón).
   const alElegirMascota = useCallback(
     (p: PaseadorDisponible, mascotaId: string) => {
-      // `elegibles` YA es el subconjunto ofrecible y siempre es array: buscar
-      // acá es más correcto que en la lista cruda — nadie puede elegir una
-      // mascota que la pantalla no ofreció.
-      const m = elegibles.find((x) => x.id === mascotaId);
+      /* Del ESPEJO VIVO, por la misma razón que `alElegir` (ver su nota).
+         Además esta función **usaba `elegibles` sin declararlo** en sus
+         dependencias: leía un valor del render capturado mientras decía
+         depender de `mascotas`. *Una dependencia que no se declara es una foto
+         vieja esperando su turno.* */
+      const vivas = mascotasRef.current;
+      const m = ofrecibles(Array.isArray(vivas) ? vivas : [], faseEspeciesRef.current).find(
+        (x) => x.id === mascotaId,
+      );
       if (m !== undefined && m.paseo_social_ok === null) {
         setPreguntaSocial({ paseador: p, mascota: m });
         return;
@@ -494,7 +532,7 @@ export default function PaseoDisponibles() {
       }
       continuarConMascota(p, mascotaId);
     },
-    [mascotas, continuarConMascota],
+    [continuarConMascota],
   );
 
   const alElegir = useCallback(
@@ -536,36 +574,51 @@ export default function PaseoDisponibles() {
          me frenara** — dos veces. *Un comentario largo entre un guard y su
          consecuencia no es neutro: rompe la lectura, la del humano y la del
          instrumento.* */
+      // ⚠️ TODO lo que decide se lee del ESPEJO VIVO, jamás del closure — ver
+      // la nota larga arriba. `elegiblesVivos` se DERIVA acá de esos dos
+      // valores: si se usara el `elegibles` del render capturado, la cura
+      // duraría hasta el próximo camino que llegue con una clausura vieja.
+      const mascotasVivas = mascotasRef.current;
+      const faseViva = faseEspeciesRef.current;
+      const elegiblesVivos = ofrecibles(Array.isArray(mascotasVivas) ? mascotasVivas : [], faseViva);
       marcar(
-        `▷ alElegir · fase=${faseEspecies.fase} · mascotas=${Array.isArray(mascotas) ? `${mascotas.length}` : mascotas} · elegibles=${elegibles.length} · param=${mascotaIdParam ?? 'no'}`,
+        `▷ alElegir · fase=${faseViva.fase} · mascotas=${Array.isArray(mascotasVivas) ? `${mascotasVivas.length}` : mascotasVivas} · elegibles=${elegiblesVivos.length} · param=${mascotaIdParam ?? 'no'}`,
       );
-      if (faseEspecies.fase === 'cargando' || faseEspecies.fase === 'error') {
-        marcar(`⊘ CORTA guard 1: el catálogo está en «${faseEspecies.fase}»`);
+      if (faseViva.fase === 'cargando' || faseViva.fase === 'error') {
+        marcar(`⊘ CORTA guard 1: el catálogo está en «${faseViva.fase}»`);
         setIntentoSinDatos('catalogo');
         return;
       }
-      if (!Array.isArray(mascotas)) {
-        marcar(`⊘ CORTA guard 2: las mascotas están en «${String(mascotas)}»`);
+      if (!Array.isArray(mascotasVivas)) {
+        marcar(`⊘ CORTA guard 2: las mascotas están en «${String(mascotasVivas)}»`);
         setIntentoSinDatos('mascotas');
         return;
       }
-      if (elegibles.length === 0) {
+      if (elegiblesVivos.length === 0) {
         marcar('⊘ CORTA guard 3: cero mascotas elegibles (con el catálogo listo)');
         setSinElegibles(true);
         return;
       }
       // S61-A3: la gramática canónica ya trae la mascota del paso 0.
-      if (mascotaIdParam !== null && elegibles.some((m) => m.id === mascotaIdParam)) {
+      if (mascotaIdParam !== null && elegiblesVivos.some((m) => m.id === mascotaIdParam)) {
+        marcar('✔ sigue con la mascota del param');
         alElegirMascota(p, mascotaIdParam);
         return;
       }
-      if (elegibles.length === 1) {
-        alElegirMascota(p, elegibles[0].id);
+      if (elegiblesVivos.length === 1) {
+        marcar('✔ sigue con la única elegible');
+        alElegirMascota(p, elegiblesVivos[0].id);
       } else {
+        marcar(`▣ abre el selector de mascota (${elegiblesVivos.length} elegibles)`);
         setEligiendoMascota(p);
       }
     },
-    [elegibles, mascotaIdParam, alElegirMascota, faseEspecies.fase, mascotas],
+    /* ⚠️ `mascotas`, `faseEspecies` y `elegibles` YA NO SON DEPENDENCIAS: se
+       leen del espejo vivo, así que esta función **no envejece**. Eso es la
+       cura, no una optimización — antes cambiaba de identidad con cada carga y
+       cualquier efecto que la hubiera capturado antes se quedaba con la foto
+       vieja. Ahora hay una sola `alElegir` y siempre mira el presente. */
+    [mascotaIdParam, alElegirMascota, marcar],
   );
 
   return (

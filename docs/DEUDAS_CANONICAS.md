@@ -11812,6 +11812,53 @@ chica y la que respeta el diseño de un solo uso; ② que la pantalla **diga** q
 no pudo reservar en vez de quedarse muda. **Las dos van juntas**: la ① evita la
 pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
 
+> ### ✅ CAUSA HALLADA POR LA TRAZA, Y CURADA — no era el orden de `tomarPedido`
+>
+> **La traza del founder dio la línea exacta**, y con ella la contradicción:
+>
+> ```
+>  494ms · ✔ setMascotas(lista) — 6 mascotas
+>    1ms · ⏭ el hogar YA está cargado — no se re-pide (cura 2)
+>    1ms · ▷ alElegir · mascotas=cargando · elegibles=0
+>    1ms · ⊘ CORTA guard 2: las mascotas están en «cargando»
+> ```
+>
+> **Seis mascotas cargadas, y el guard leyendo «cargando».** *Datos presentes,
+> semáforo en rojo.*
+>
+> **LA CAUSA: un CLOSURE OBSOLETO, y lo fabriqué yo.** El efecto que ejecuta el
+> pedido tiene deps `[disponibles, marcar]` — **saqué `alElegir` a propósito**
+> para que no corriera de más. Consecuencia: **captura el `alElegir` del render
+> en que se creó**, uno donde `mascotas` todavía era `'cargando'`. Al volver del
+> preview corre ESE closure, que ve un mundo que ya no existe. *La optimización
+> de dependencias era la causa.*
+>
+> **Y el mismo defecto estaba un piso más abajo:** `alElegirMascota` **usaba
+> `elegibles` sin declararlo** en sus dependencias — decía depender de
+> `mascotas` y leía otra cosa. *Una dependencia que no se declara es una foto
+> vieja esperando su turno.*
+>
+> **LA CURA ES ESTRUCTURAL, no un `setEstado('listo')` en ese punto** (orden del
+> founder, y tenía razón: un parche ahí arreglaba ese camino y dejaba vivos los
+> demás). **Nace el ESPEJO VIVO**: dos `ref` que se pisan enteros en **cada
+> render** con el valor actual de `mascotas` y `faseEspecies`. Todo lo que
+> decide —los tres guards y la derivación de `elegibles`— **lee del espejo,
+> jamás del closure**.
+>
+> **No hay segunda fuente de verdad:** el estado sigue siendo uno; el ref es su
+> espejo, no una copia con vida propia — nadie lo escribe aparte. Y `alElegir`
+> **dejó de tener `mascotas`, `faseEspecies` y `elegibles` en sus deps**, así
+> que ya no envejece: *hay una sola, y siempre mira el presente.*
+>
+> **Por qué esto cierra la clase y no solo el caso:** aunque un efecto capture
+> una versión vieja de la función, **los datos que lee son los de ahora**. La
+> omisión de dependencias pasó de ser la causa a ser inofensiva. *Ésa es la
+> diferencia entre un parche y una cura.*
+>
+> **⚠️ El defecto del ORDEN de `tomarPedido` (consumir antes de verificar) NO
+> era esta causa, PERO SIGUE VIVO** y en los cuatro oficios: si la lista aún no
+> llegó, el pedido se borra sin ejecutarse. Queda abierto en esta ficha.
+
 > **Dueño: A, con el rojo del founder ya en la mano.**
 > **☠️ DISPARO: la lectura de la traza en el aparato — y la cura viaja a los
 > CUATRO oficios, no solo al paseo.**
