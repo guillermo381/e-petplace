@@ -1,0 +1,32 @@
+[
+ {
+  "id": "supabase/functions/despachar-push/fcm-oauth.ts:38 — «BEGIN PRIVATE KEY»",
+  "veredicto": "es solo el RÓTULO del formato PEM, sin material de clave",
+  "real": false,
+  "detalle": "¿el valor viene de una variable de entorno cerca? no · contexto:  * normalizan las dos formas, porque las dos van a ocurrir. */ export async function importarClave(pem: string): Promise<CryptoKey> { const limpio = p"
+ },
+ {
+  "id": "packages/ui/src/gallery/TokenGallery.tsx — patrón «EAA…»",
+  "veredicto": "NO es un token: cae dentro de una URL o de un base64 de imagen",
+  "real": false,
+  "detalle": "contexto: … nombre=\"Thor\" fotoUrl=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNs6POsBw…"
+ },
+ {
+  "id": "docs/DEUDAS_CANONICAS.md — patrón «re_…»",
+  "veredicto": "hay una cadena que matchea",
+  "real": false,
+  "detalle": "contexto: …de, sin `anon`**. Migración: `supabase/migrations/20260720120000_s71_a_d455_nombre_negocio_y_orden_solicitudes.sql`. El texto original de la…"
+ },
+ {
+  "id": "apps/{cliente,prestador}/google-services.json — clave AIza",
+  "veredicto": "ES una clave real de Google, COMMITEADA A PROPÓSITO (S81-A27, decisión declarada en el canon)",
+  "real": false,
+  "detalle": "largo=39 · forma=AIza(Google) · …XVXU · son claves de CLIENTE Android, restringidas por package + SHA-1; su exposición está contemplada en el diseño de Firebase"
+ },
+ {
+  "id": "scripts/seg2/salida/b0-seis-flujos.json — JWT de sesión",
+  "veredicto": "ES un token de sesión REAL que yo dejé en un artefacto commiteado (claim role=authenticated)",
+  "real": true,
+  "detalle": "largo=1014 · forma=JWT · …c9Ug · expira 2026-08-09T14:49:53 · YA VENCIDO · es de una cuenta fixture seg2-*, no de una persona"
+ }
+]

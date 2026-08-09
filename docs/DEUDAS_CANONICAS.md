@@ -10647,3 +10647,71 @@ founder). La lista completa, con paths y tamaños, queda en
 > **☠️ MUERTE:** todo objeto de Storage o tiene una fila que lo referencia, o
 > una razón escrita para seguir existiendo.
 > Origen: S92-BIS (B1 paso 6).
+
+#### D-711 — 🟠 LA LLAVE MAESTRA VIVE EN 5 ARCHIVOS DE DISCO, Y 14 WORKTREES VIEJOS GUARDAN CREDENCIALES
+
+**Censo de S92-BIS (B2), buscando por FORMA y no por nombre** — se detectan JWTs
+y se decodifica su claim `role`, así que una llave renombrada aparece igual.
+
+**LO QUE ESTÁ BIEN, y es lo primero porque es lo que sostiene todo el loop de
+S92:** en el **árbol versionado NO hay ninguna `service_role`**. Los tres JWT
+que el repo contiene declaran `role: anon` — **pública por diseño, viaja en el
+bundle a propósito**. Y **ningún `.env` está trackeado por git.**
+
+**LO QUE APARECIÓ:**
+
+① **`service_role` —la llave que saltea TODA la RLS que S92 acaba de
+arreglar— vive en CINCO archivos de disco:**
+`e-petplace/supabase/dev/.env.local` y sus copias en los worktrees `s86-B`,
+`s86-C`, `s87-B` y `s90-B`. Ninguno versionado (bien), pero **cuatro de esos
+cinco están en árboles que nadie mira desde hace días o semanas.**
+
+② **19 archivos `.env.local` con la clave `anon`** repartidos por worktrees y
+repos vecinos, y **16 con `EXPO_PUBLIC_DEMO_PASSWORD`** — **con DOS valores
+distintos**: los 2 del monorepo tienen la credencial vigente (32 chars) y los
+**14 de worktrees tienen una vieja (9 chars)**. *Cualquiera que trabaje en uno
+de esos worktrees autentica contra otra credencial y diagnostica mal* — le pasó
+al founder en esta misma sesión, en la variante de al lado.
+
+**LA RECOMENDACIÓN, CON SU COSTO — y NO se ejecuta (freno 3: borrar worktrees o
+sus archivos es decisión del founder):**
+
+| opción | qué hace | costo | riesgo |
+|---|---|---|---|
+| **(a) podar los worktrees muertos** | `git worktree remove` de los 12 que ya no se usan (s83-B/C, s86, s87, s90, s91) — se lleva sus `.env` con ellos | bajo: son ramas ya fusionadas o con su trabajo rescatado en S92-BIS | **hay que verificar rama por rama** que no queda trabajo sin mergear (el rescate de esta sesión probó que sí lo había) |
+| **(b) borrar solo los `.env` de los worktrees** | deja los árboles, saca las credenciales | muy bajo | si alguien vuelve a usar un worktree, tiene que recrear su `.env` |
+| **(c) dejar todo como está** | — | cero | la llave maestra sigue en 5 lugares y las credenciales viejas siguen listas para confundir a quien las lea |
+
+**Voto de la pista: (a)**, y por una razón que excede la seguridad — **esos
+worktrees ya causaron dos incidentes en dos sesiones**: siete actas de cierre
+que nunca llegaron al canon (L-217) y una credencial vieja que ayudó a un
+diagnóstico errado. *Un árbol que nadie mira no es neutro: es un lugar donde las
+cosas se pierden y desde donde vuelven mal.*
+
+> **Dueño: founder (elige) → A (ejecuta).** **☠️ DISPARO: S93.**
+> **☠️ MUERTE:** `service_role` vive en UN solo lugar del disco, y ningún árbol
+> de trabajo muerto conserva credenciales.
+> Origen: S92-BIS (B2, censo por forma).
+
+#### D-712 — ⚪ UN ARTEFACTO DE AUDITORÍA FILTRÓ UN TOKEN DE SESIÓN (error propio, curado en el acto)
+
+**El censo de secretos de B2 encontró un JWT `role: authenticated` REAL dentro
+de `scripts/seg2/salida/b0-seis-flujos.json` — commiteado por mí, en esta misma
+sesión.** Era de una cuenta fixture `seg2-*` (no de una persona) y ya había
+vencido cuando se detectó, pero eso es suerte, no diseño.
+
+**Lo que enseña, y por eso queda escrito:** *los artefactos de una auditoría de
+seguridad son un vector nuevo.* Guardar «lo que salió por el cable» es
+exactamente lo que hace útil el reporte —y lo que lo vuelve peligroso—. **R6
+(«ningún secreto se transcribe») estaba escrita desde el arranque de la sesión y
+no lo evitó**, porque una regla que depende de que alguien se acuerde no
+protege un `JSON.stringify` de un objeto que arrastra un token.
+
+**CURADO EN EL ACTO, en dos capas:** el artefacto se redactó (1 → 0 tokens), y
+**`guardarSeg2()` ahora redacta cualquier JWT antes de escribir a disco** — el
+saneador no se puede olvidar. *La disciplina no alcanzó; el instrumento sí.*
+
+> **Dueño: A.** **☠️ DISPARO:** ya disparó — nace curada. Queda como ficha
+> porque la próxima sesión que escriba artefactos de medición tiene que heredar
+> el saneador, no re-descubrirlo. **☠️ MUERTE:** ninguna sesión escribe
+> artefactos sin redacción automática. Origen: S92-BIS (B2, hallazgo propio).

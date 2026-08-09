@@ -19,10 +19,35 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 
 export const SALIDA_SEG2 = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/scripts/seg2/salida';
 
+/**
+ * Redacta cualquier JWT antes de escribirlo a disco.
+ *
+ * ⚠️ NACE DE UN ERROR PROPIO, y por eso vive acá y no en la disciplina: el
+ * censo de secretos de B2 encontró **un token de sesión real que yo mismo había
+ * dejado** en `salida/b0-seis-flujos.json` y commiteado. Era de una cuenta
+ * fixture y ya venció, pero el punto es otro: **los artefactos de una auditoría
+ * de seguridad son un vector nuevo**. Guardar «lo que salió por el cable» es
+ * exactamente lo que hace útil el reporte y lo que lo vuelve peligroso.
+ *
+ * La disciplina no alcanzaba (R6 estaba escrita desde el arranque y no lo
+ * evitó); el saneador sí, porque no se puede olvidar.
+ */
+function redactar(valor) {
+  if (typeof valor === 'string') {
+    return valor.replace(/eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, (t) => `«JWT REDACTADO · largo=${t.length} · …${t.slice(-4)}»`);
+  }
+  if (Array.isArray(valor)) return valor.map(redactar);
+  if (valor && typeof valor === 'object') {
+    return Object.fromEntries(Object.entries(valor).map(([k, v]) => [k, redactar(v)]));
+  }
+  return valor;
+}
+
 export function guardarSeg2(nombre, datos) {
   mkdirSync(SALIDA_SEG2, { recursive: true });
   const p = join(SALIDA_SEG2, nombre);
-  writeFileSync(p, typeof datos === 'string' ? datos : JSON.stringify(datos, null, 1));
+  const limpio = redactar(datos);
+  writeFileSync(p, typeof limpio === 'string' ? limpio : JSON.stringify(limpio, null, 1));
   return p;
 }
 
