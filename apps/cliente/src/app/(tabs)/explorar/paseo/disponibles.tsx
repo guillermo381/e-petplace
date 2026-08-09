@@ -16,7 +16,7 @@
  *    enriquece por dato cuando existan, no por versión.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -114,6 +114,37 @@ export default function PaseoDisponibles() {
    *  esto, «Reintentar» solo pondría el estado en `cargando` y nadie volvería
    *  a pedir nada — un botón que no reintenta es peor que ningún botón. */
   const [reintento, setReintento] = useState(0);
+
+  /* ═══ INSTRUMENTO (P0-C, 9-ago) — NO ES DECORACIÓN: ES LA MEDICIÓN ═══════
+   *
+   * Síntoma medido por el founder: toca Reservar, sale «Estamos terminando de
+   * cargar tus mascotas» y **se queda ahí para siempre**. No hay un después.
+   *
+   * Y lo medido del otro lado descarta la lentitud: **la base responde en 11 ms
+   * y la red en ~650 ms**. *Una espera infinita sobre un backend de 11 ms no es
+   * lentitud: es una cadena que no resuelve, o un resultado que se descarta.*
+   *
+   * Las dos hipótesis vivas —`auth.getSession()` colgado en su refresh, o el
+   * guard `vigente` tirando la respuesta— **se distinguen mirando dónde se
+   * DETIENE la traza**, y por eso se marca cada eslabón con su tiempo. Sin esto
+   * seguimos deduciendo, y deducir ya falló dos veces (L-220).
+   *
+   * ⚠️ **SE VE EN PANTALLA, dentro del propio modal.** Un `console.log` exige
+   * cable y el aparato es del founder — la misma razón por la que L-160 se
+   * enmendó para que el marcador del update se RENDERICE. El `console.log`
+   * queda igual, para quien tenga consola.
+   *
+   * ☠️ MUERTE: con el gate del P0 cerrado. Ficha **D-726**. */
+  const [traza, setTraza] = useState<string[]>([]);
+  const t0Ref = useRef<number>(Date.now());
+  const marcar = useCallback((etiqueta: string) => {
+    const ms = Date.now() - t0Ref.current;
+    const linea = `${String(ms).padStart(5)}ms · ${etiqueta}`;
+    console.log(`[p0c] ${linea}`);
+    // Acotada: una traza sin techo sería otro cuelgue, esta vez de memoria.
+    setTraza((prev) => (prev.length > 40 ? prev : [...prev, linea]));
+  }, []);
+
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
   // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
@@ -176,7 +207,22 @@ export default function PaseoDisponibles() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+      t0Ref.current = Date.now();
+      marcar('▶ entra al efecto (focus)');
       cargar();
+
+      /* ═══ TECHO DE ESPERA — convierte un cuelgue en un error VISIBLE ══════
+       * No es la cura: es la RED. La causa sigue viva y la traza la sigue
+       * contando — *el techo no debe tapar lo que pasó por debajo*, que fue la
+       * condición del founder. Ocho segundos es holgado contra los ~650 ms que
+       * mide el camino real: si a los 8 s no llegó, no va a llegar. */
+      const techo = setTimeout(() => {
+        if (!vigente) return;
+        marcar('⏱ TECHO 8s — la carga NO llegó; se declara error');
+        setMascotas((prev) => (prev === 'cargando' ? 'error' : prev));
+        setMascotasNoLlegaron((prev) => (prev === 'cargando' ? 'error' : prev));
+      }, 8000);
+
       void (async () => {
         /* ☠️ ACÁ VIVÍAN LOS DOS `return` MUDOS QUE REABRIERON EL P0.
            Decían `if (!vigente || !estado.ok || !estado.data.familia_id) return;`
@@ -184,14 +230,27 @@ export default function PaseoDisponibles() {
            vacía en silencio**. Ahora cada rama dice qué pasó, y `!vigente` se
            separa del fallo real: irse de la pantalla NO es un error y no debe
            pintar uno. */
+        marcar('① antes de getEstadoOnboardingDueno (adentro hace auth.getSession)');
         const estado = await getEstadoOnboardingDueno();
-        if (!vigente) return;
+        marcar(`① después · ok=${estado.ok} · familia=${estado.ok ? (estado.data.familia_id !== null ? 'sí' : 'NULL') : '—'}`);
+        if (!vigente) {
+          marcar('✂ ABORTA: vigente=false tras el eslabón ① (el efecto se limpió)');
+          return;
+        }
         if (!estado.ok || !estado.data.familia_id) {
+          marcar('✖ sin familia → error');
           setMascotas('error');
           return;
         }
+        marcar('② antes de obtenerMascotasDeFamilia');
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (!vigente) return;
+        marcar(`② después · ok=${r.ok}${r.ok ? ` · ${r.data.length} mascota(s)` : ''}`);
+        if (!vigente) {
+          marcar('✂ ABORTA: vigente=false tras el eslabón ② (la respuesta LLEGÓ y se descarta)');
+          return;
+        }
+        clearTimeout(techo);
+        marcar(`✔ setMascotas(${r.ok ? 'lista' : "'error'"}) — el modal ya no debería salir`);
         setMascotas(r.ok ? r.data : 'error');
         if (r.ok) {
           const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
@@ -208,11 +267,18 @@ export default function PaseoDisponibles() {
         }
       })();
       return () => {
+        /* ⚠️ ESTA MARCA ES EL DISCRIMINADOR DE LA HIPÓTESIS 2. Si en la traza
+           aparece «✂ se limpia el efecto» ANTES de que llegue el eslabón ②, la
+           respuesta se va a descartar y la pantalla queda en `cargando` para
+           siempre — que es exactamente el síntoma. Si NO aparece, el cuelgue
+           está adentro de un `await` y la hipótesis viva es la 1. */
+        marcar('✂ se limpia el efecto (blur/re-ejecución) → vigente=false');
+        clearTimeout(techo);
         vigente = false;
       };
       // `reintento` está en las deps A PROPÓSITO: es lo que vuelve a disparar
       // la lectura del hogar cuando la persona toca «Reintentar».
-    }, [cargar, reintento]),
+    }, [cargar, reintento, marcar]),
   );
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
@@ -575,6 +641,26 @@ export default function PaseoDisponibles() {
                 setReintento((n) => n + 1);
               }}
             />
+          ) : null}
+          {/* LA TRAZA, EN PANTALLA — el instrumento de P0-C (D-726).
+              Va acá porque es donde el problema se manifiesta, y **sin cable**:
+              el aparato es del founder. Se retira con el gate del P0. */}
+          {traza.length > 0 ? (
+            <View
+              style={{
+                backgroundColor: theme.bg.overlay,
+                borderRadius: 10,
+                padding: spacing[3],
+                gap: 2,
+              }}
+            >
+              <Texto variante="dato">diagnóstico P0-C · dónde se detiene</Texto>
+              {traza.map((linea, i) => (
+                <Texto key={`${i}-${linea}`} variante="dato">
+                  {linea}
+                </Texto>
+              ))}
+            </View>
           ) : null}
         </View>
       </Hoja>

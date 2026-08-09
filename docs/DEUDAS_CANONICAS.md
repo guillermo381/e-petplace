@@ -11550,3 +11550,68 @@ defecto que se curó hoy en el cambio de clave.
   **La forma exigible, en tres:** ① lo que se prueba se **importa**, incluida la decisión —si hay que reescribirla para probarla, eso es la señal de que hay que extraerla a una función que ambos consuman—; ② **las entradas no se fabrican en el sitio donde harían pasar la prueba**: si el bug puede estar en cómo llega el dato, dárselo hecho al test lo tapa; ③ cuando la respuesta honesta es *«esto solo se mide en el aparato»*, **se declara ROJO y se espera el gate** — un verde de laboratorio sobre una pregunta que el laboratorio no puede contestar es exactamente lo que hizo publicar una cura incompleta.
 
   **Y el corolario que cobró en la misma sesión:** al construir el guard de la clase (R34 brazo B), probarlo **en rojo** destapó que su regex no reconocía `setX(r.ok ? r.data : 'error')` —el patrón canónico de la casa— y **habría marcado en rojo justo a la pantalla que lo hace bien**. *El guard que vigila esta lección casi nace con ella adentro.* Origen: S92-BIS (P0 reabierto por el founder en dispositivo, con el bundle nuevo ya instalado).
+
+---
+
+#### D-725 — 🟠 `is_admin()` ES `VOLATILE` Y VIVE EN LAS POLICIES DE MEDIA CASA
+
+**Medido (S92-BIS):** `provolatile = 'v'`. Sus cuatro hermanas de RLS
+—`es_mi_prestador`, `prestador_activo`, `user_tiene_acceso_a_mascota`,
+`user_acceso_clinico_a_mascota`— son **`STABLE`**. `is_admin()` no.
+
+**Por qué importa:** el planificador **no puede cachear una función volatile**,
+así que la **re-evalúa POR FILA**. Y `is_admin()` es `SECURITY DEFINER` que
+consulta tablas: cada fila leída paga una consulta extra. Está en **239 policies**
+(el número que S92 midió), incluidas las tres de `mascotas`.
+
+**⚠️ Y LO QUE ESTA FICHA EXISTE PARA IMPEDIR: HOY NO CUESTA NADA, Y ESO SE MIDIÓ.**
+Fue el sospechoso número uno del P0 del paseo y **quedó descartado con números**:
+`EXPLAIN (ANALYZE, BUFFERS)` con los claims reales del founder da **3.2 ms** para
+sus 6 mascotas (`Bitmap Index Scan`, `Buffers: shared hit=1`). *Con seis filas,
+seis evaluaciones no se notan.* **El defecto es de ESCALA, no de hoy** — y
+escribirlo como «causa de lentitud» sería exactamente el dato falso que este
+canon existe para no tener.
+
+**Dónde muerde el día que muerda:** cualquier lectura que devuelva **muchas
+filas** sobre una tabla con policy que llame `is_admin()`. Ahí el costo pasa de
+seis evaluaciones a miles.
+
+**⚠️ NO SE TOCA SIN FIRMA DEL FOUNDER, y él ya lo aprobó como deuda.** Marcarla
+`STABLE` es **cirugía de seguridad, no una optimización**: si su cuerpo depende
+de algo que cambia dentro de la misma sentencia, `STABLE` cambiaría el
+resultado, no solo la velocidad. Es la misma clase que **D-708** advierte sobre
+fijarle `search_path` a las DEFINER (*«puede romper el cuerpo de las que tocan
+`auth.users` sin calificar — es cirugía, no un grant»*).
+
+> **Dueño: la sesión de performance del founder.**
+> **☠️ DISPARO: la primera pantalla que lea cientos de filas de una tabla cuya
+> policy llame `is_admin()`, o esa sesión — lo que llegue antes.**
+> **☠️ MUERTE:** o es `STABLE` con su cuerpo auditado, o se mide que su costo
+> por fila es irrelevante a la escala real y se declara deliberado.
+> Origen: S92-BIS, buscando la causa del P0-C (y descartándola).
+
+---
+
+#### D-726 — ⚪ EL INSTRUMENTO DE P0-C SE RETIRA CON SU GATE
+
+`paseo/disponibles.tsx` lleva una **traza de diagnóstico visible en pantalla**
+—dentro del modal de «no llegaron tus mascotas»— que marca cada eslabón con su
+tiempo: entrada al efecto, antes/después de `getEstadoOnboardingDueno`,
+antes/después de `obtenerMascotasDeFamilia`, el valor de `vigente` en cada
+retorno, el techo de 8 s y cada `setState` con su valor.
+
+**Por qué en pantalla y no en el log:** *un `console.log` exige cable, y el
+aparato es del founder.* Es la misma razón por la que **L-160 se enmendó** para
+que el marcador del update se RENDERICE en el pie de Cuenta. El `console.log`
+(prefijo `[p0c]`) se conserva para quien tenga consola.
+
+**Por qué existe:** el P0 se diagnosticó dos veces por deducción y las dos veces
+falló (**L-220**). *La tercera se decide con un dato del aparato.*
+
+**Lo que NO se retira con él:** el **techo de espera de 8 s**, que es cura y se
+queda — una pantalla sin techo es una pantalla colgada.
+
+> **Dueño: A.** **☠️ DISPARO: el gate del founder sobre el P0-C.**
+> **☠️ MUERTE:** con la causa hallada y curada, la traza y su estado se borran
+> (y `verify:diseno` no la extraña: no es una regla, es un andamio).
+> Origen: S92-BIS.
