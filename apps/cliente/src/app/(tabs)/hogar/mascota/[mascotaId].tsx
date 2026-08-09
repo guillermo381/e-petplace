@@ -1476,11 +1476,20 @@ export default function PerfilDeMascota() {
                 })}
               </View>
             )}
-            <CeldaNavegacion
-              titulo={t('perfil.habitantesDeclarar')}
-              registro="tinta"
-              onPress={() => setHabitantesHoja(true)}
-            />
+            {/* ✅ SU PARED, igual que la puerta de la bitácora. Es la MISMA
+                familia —una puerta del perfil— y por eso lleva el mismo
+                `relleno` y la misma `elevacion` que sus vecinas: la coherencia
+                no es que se parezcan, es que se resuelvan igual.
+                Censo de la tanda: el perfil tiene TRES puertas —bitácora,
+                Documentos y ésta— y ésta era la ÚNICA sin superficie. No hay
+                una cuarta pelada. */}
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                titulo={t('perfil.habitantesDeclarar')}
+                registro="tinta"
+                onPress={() => setHabitantesHoja(true)}
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
@@ -1606,18 +1615,30 @@ export default function PerfilDeMascota() {
                       Con `marginBottom: 12` la pata aterrizaba justo sobre
                       «Lo que ves en casa…». Sube a 20: separación real, y la
                       caja NO vuelve (A6 pide sin superficie, no sin aire). */}
+                  {/* ✅ LA PUERTA RECUPERA SU SUPERFICIE (corrección de mesa).
+                      Anduvo cuatro vueltas curándose al revés por una lectura
+                      de «sin pared» que significaba lo contrario: el texto NO
+                      va suelto sobre el fondo — lleva su tarjeta, como sus
+                      vecinas de Su historia. Queda registrado porque el costo
+                      no fue el código (una línea) sino LAS CUATRO VUELTAS: una
+                      orden que se interpreta se verifica contra el OBJETO antes
+                      de curar, y acá el objeto era la pantalla del founder.
+                      Mismo `relleno`/`elevacion` que las filas vecinas: la
+                      puerta pertenece a esa familia, no es una excepción. */}
                   <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[5] }}>
-                    <CeldaNavegacion
-                      icono="caso"
-                      titulo={t('perfil.bitacoraEntrada', { nombre: mascota.nombre })}
-                      detalle={t('perfil.bitacoraDetalle')}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/hogar/bitacora',
-                          params: { mascotaId: mascota.id },
-                        })
-                      }
-                    />
+                    <Tarjeta relleno="ninguno" elevacion="reposo">
+                      <CeldaNavegacion
+                        icono="caso"
+                        titulo={t('perfil.bitacoraEntrada', { nombre: mascota.nombre })}
+                        detalle={t('perfil.bitacoraDetalle')}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/hogar/bitacora',
+                            params: { mascotaId: mascota.id },
+                          })
+                        }
+                      />
+                    </Tarjeta>
                   </View>
                   {presentes.length > 1 ? (
                     <FiltroPills
