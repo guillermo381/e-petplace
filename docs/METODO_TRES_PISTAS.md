@@ -555,3 +555,72 @@ credenciales reales, y una pista perdiendo tiempo midiendo si había roto algo.*
 *ningún contador, ancla, hash o `functiondef` se toma de un reporte previo —
 se lee del objeto en el turno en que se usa.* **La ventana de invalidación
 puede ser de minutos.**
+
+---
+
+## S91 — LO QUE EL MÉTODO APRENDIÓ DE UN DÍA DE CUATRO PISTAS
+
+### ① QUIEN PUBLICA ES QUIEN MERGEA *(enmienda a §2, firmada en sesión)*
+
+La fila de C decía «el canal OTA» y §2 decía «nadie más publica»: **dos líneas
+firmadas que se contradecían.** Se resolvió con el argumento de los hechos —
+**los choques de S91 pasaron porque el que publicaba y el que dominaba el árbol
+eran personas distintas.** *El acto de publicar es de A; la superficie de los
+dos canales sigue siendo de C.*
+
+### ② EL PUBLISH ES UN ACTO ÚNICO, Y AUN ASÍ TIENE UN LÍMITE MEDIDO
+
+`scripts/publicar-ota.mjs`: veda (como hijo) → publish → **re-verificación
+posterior que GRITA** si HEAD se movió, si el ancla real no es la verificada o
+si trae asterisco. **El `--mensaje` no lleva el ancla: la pone el script.**
+
+**Y el límite, que hay que saber:** el bundling tarda ~60 s, así que **ni un
+acto atómico impide que otra pista commitee mientras corre**. Lo único
+garantizable es **que sea imposible no enterarse**.
+
+**⚠️ Por eso importa más de lo que parece:** medido en S91, **`eas update:view`
+NO expone el estado del árbol** ⇒ **un publish sucio es inauditable después.**
+El script es la única oportunidad de saberlo, y **el asterisco se transcribe en
+el momento o se pierde.**
+
+### ③ UNA PISTA SIN WORKTREE ENVENENA LA VENTANA DE TODAS
+
+`git worktree list` en S91: worktrees de B y de D, **ninguna de C** — C trabajó
+en el directorio primario, **sobre `main`, el mismo árbol desde el que A
+publica**. Los cuatro asteriscos del día salieron de ahí.
+
+**El acto único cierra la ventana entre verificar y bundlear; no puede cerrar
+la de una pista que ESCRIBE mientras Metro lee.** *Los cuatro publishes limpios
+del cierre salieron limpios porque las cuatro pistas estaban en cero al mismo
+tiempo — no por el guard.* ⇒ **worktree por pista no es comodidad: es la
+condición para que el ancla signifique algo.** (La `worktree-detached` de la
+regla 82 sigue CANDIDATA desde S81 y ya cobró cuatro veces.)
+
+### ④ TODA LISTA DE COMMITS PENDIENTES SE VERIFICA CON `merge-base`
+
+**Tres veces en S91** una lista de pendientes llegó vieja: *doce* que era uno,
+*seis* que era uno, *tres* que eran cero. **Ninguna causó daño porque el
+`merge-base` se corrió igual.** Pasa por una razón estructural y no por
+descuido: **la lista se arma antes del merge anterior.**
+
+*Un merge que nombra commits ya fusionados sale VERDE igual y deja el acta
+afirmando algo falso* — y el acta es lo que la próxima sesión lee.
+
+### ⑤ UN SÍNTOMA CRUZA TERRITORIO COMO HIPÓTESIS, JAMÁS COMO ORDEN
+
+**Tres hipótesis en un día**, tres pistas, **ninguna con mala fe y las tres
+parcialmente equivocadas**: cada una descartó lo suyo con rigor y, por
+eliminación, apuntó afuera — donde no podía eliminar igual.
+
+**La forma:** el síntoma viaja **con su medición**, y **el dueño del territorio
+mide antes de curar** — sobre todo cuando la cura propuesta *abre* algo. *En
+S91 la orden que salvó el día fue la que traía su propio freno: «si `direccion`
+es la exacta, la cura NO es el grant».* (L-213, L-214.)
+
+### ⑥ EL PEDIDO ENTRE PISTAS, CUANDO ESTÁ BIEN HECHO
+
+El molde de S91 lo dejó D: **su mitad construida e INERTE** (el token de intento
+viaja en los params y **hoy no se manda**), más **un pedido autocontenido en
+disco** con el contrato exacto —`p_token_intento text DEFAULT NULL`, sin token =
+comportamiento de hoy, `ya_existia` como ÉXITO—. *Así el merge no puede romper
+nada y la puerta se abre con una línea el día que exista.*

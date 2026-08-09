@@ -1544,3 +1544,31 @@ Si tomás una sesión nueva sobre Bio-Expediente:
 - **v0.7 (15 May 2026 — S19)**: **Fase G ejecutada** (alta asistida cliente+mascota). Tabla `cliente_pendiente_registro` + 3 RPCs SECURITY DEFINER (`buscar_cliente_por_email`, `crear_alta_asistida_pendiente`, `crear_alta_asistida_existente`) + trigger `_trg_completar_pendiente_registro` sobre `profiles` + cleanup `cleanup_pendientes_vencidos` via pg_cron diario. ALTERs a CHECK constraints de `familia.tipo`, `mascotas.origen`, `mascota_acceso_prestador.metodo_otorgamiento`, `notificaciones.tipo` + 3 tipos nuevos en `cat_tipos_evento`. D-166 mitigada con REVOKE INSERT/UPDATE/DELETE de `mascota_perfil_vigente` desde authenticated (defense-in-depth). D-128 Fase H verificada cerrada (16 triggers usando códigos válidos del catálogo). Política P13 agregada a `POLITICAS_EPETPLACE.md` (alta asistida por prestador). Migración consolidada: `migrations/2026-05-15-S19.sql`. Bloque 9: 7 de 11 fases ejecutadas.
 - **v0.9 (20 Jul 2026 — S72)**: **Nace `A3 — Modulación del expediente por actor`** (letra de mesa founder + arquitecto), depositada después de A2. **Paga `Pendiente PE2`**, declarado pendiente desde S12, y **reemplaza el eje de `A2`/`AC5`** (`tipo_prestador`, muerto en S66 con el modelo de actor) por la **ley madre acto/rol**: el ACTO decide qué se MUESTRA (producto/UI), el ROL decide qué se PUEDE mostrar (RLS). Firmadas: la matriz `oficio × eje` con cuatro niveles de dosis (COMPLETO/DESTILADO/SEGURIDAD/NO), la dosis del vet (eje 3 COMPLETO + resto DESTILADO), lo que ve la recepción (identidad completa + alerta de seguridad, todo lo demás NO), el colapso del negocio unipersonal, el otorgamiento con oficio (`mascota_acceso_prestador.oficio`, N por cuenta, revocación por oficio, legadas `NULL` sin adivinar — L-139), la procedencia siempre visible con *"origen no registrado"* para los 83 legados, los treinta segundos como briefing, y contribuir ≠ leer. **`A3.9` (memorial) FIRMADA en el cierre de la misma sesión: camino (b)** — el acceso del prestador sobrevive una ventana y cae (caducidad de `cita_automatica`), en memorial el expediente se lee y no se escribe, y degrada visualmente sin push ni comercial. **`A3.0` depositada** (el diagnóstico del hueco vivo) con su nota de rótulo (P3 gobierna quién CREA, A3 quién LEE). **`A3.3` nivel SEGURIDAD firmado como destino pero GATEADO** por el modelo de alerta de manejo (**D-469**), que no existe en schema. **`A3.10` corregida con el relevamiento de B:** de los nueve lectores, cinco sirven tal cual, `leerDetalleAtencion` es ciego al oficio vet y `obtenerParteConsulta` está correctamente cerrado al prestador — D-459 es mitad cablear, mitad construir. A2 pasa a nota histórica marcada (los ejemplos se conservan); AC5 reescrita sobre la ley madre; A1 anotada. Deudas nuevas: **D-463** (`oficio` en el otorgamiento) · **D-464** (gate de rol en RLS — hueco de privacidad vivo) · **D-465** (la cara de la revocación, `AC2`/`AC3` sin UI) · **D-466** (resumen IA del expediente largo).
 - **v0.8 (17 Jul 2026 — S67)**: Nota de PROCEDENCIA en E1: la fundación V0 (migración `20260717170000`) creó `eventos_mascota.procedencia` con backfill del carnet a `declarado_por_familia` y gate en puerta única para los tipos clínicos (`cat_tipos_evento.es_clinico`); `verificado_por_prestador` queda tipado SIN productor hasta la verificación del vet (MODELO_VETERINARIA §14.2). E1/E2 heredan el campo al construirse.
+
+---
+
+# S91 — EL EJE 6 SE CUMPLIÓ: LA BITÁCORA UNIVERSAL ESTÁ VIVA
+
+**Este doc declaraba al dueño como PRODUCTOR del eje comportamiento y no había
+por dónde producir. Hoy lo hay.**
+
+- **Vocabulario firmado: 25 conductas** — las 10 originales universalizadas en
+  sus PALABRAS (tres reescrituras firmadas), **gestos propios por especie** (5
+  del gato: bandeja, bola de pelo, arañar, marcar, maullido nocturno) y **4 de
+  acuario** (agua turbia, habitante no bien, comieron todos, cambio de agua).
+- **La aplicabilidad es del motor, no de la pantalla:** `especies_aplicables` y
+  `sujetos_aplicables` en el catálogo, con **rebote tipado**
+  (`chip_no_aplica_a_la_mascota`). Un chip de individuo sobre un acuario **no se
+  puede registrar**, por construcción y no por convención.
+- **MURIÓ el guard `sin_contexto_activo`:** la bitácora dejó de exigir un
+  servicio activo. *Ese guard era la razón por la que el eje no tenía
+  productor — el dueño solo podía anotar si había alguien contratado.*
+- **Puerta desde el perfil de la mascota**, y los objetivos de adiestramiento
+  ganaron su aplicabilidad **derivada de `tipos_servicio.especies_elegibles`**
+  (no tipeada a mano: si mañana cambia el catálogo, cambia sola).
+
+**Lo que esto significa para el expediente:** el Eje 6 pasa de *eje declarado*
+a **eje alimentado por el dueño en cualquier momento**, que era la condición
+que este doc le ponía. **D-692** registra lo que falta: perro, conejo y roedor
+todavía tienen **cero** gestos propios — *y el caso del perro es el
+interesante: tiene cero porque las 16 originales se escribieron desde su vida.*

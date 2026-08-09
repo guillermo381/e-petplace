@@ -3284,6 +3284,42 @@ Origen: S86-A, medición para C.
 
   **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
 
+- **L-215 — NADA AVISA CUÁNDO UN GRANT ROMPE UNA POLICY (S91).**
+
+  **DOS COBROS EN UN DÍA, misma forma.** Un `REVOKE` de columna sobre `prestadores` rompió (a) **ocho policies** que hacen `EXISTS` sobre esa columna y (b) **un hub entero** que la pedía en un `select` de cuatro campos. **En los dos casos el código que se rompió NO MENCIONA la columna donde se ve el error**: la policy la nombra por dentro, el wrapper la pide entre otras tres.
+
+  **Y no hay instrumento:** ni typecheck, ni gate, ni guard. Solo un **42501 en producción, horas después, en otra pantalla**. *Es L-192 en su forma más cara: el modo de falla es el silencio, y el silencio dura hasta que un humano toca esa pantalla.*
+
+  **La forma exigible:** antes de cada `REVOKE`/`GRANT` de columna, correr **dos censos** — qué **policies** nombran esa columna, y qué **wrappers** la piden en un `select`. Las dos consultas existen (S91) y **lo que falta es que sean un paso del procedimiento, no un hallazgo**. Ficha: **D-700**.
+
+- **L-214 — LA HIPÓTESIS APUNTA AL SUBSISTEMA QUE UNO MENOS CONOCE (S91).**
+
+  **Tres veces en un día**, tres pistas distintas, ninguna con mala fe: cada una descartó lo suyo con rigor y, por eliminación, apuntó al territorio ajeno. *«La app resuelve otra familia» · «el mapa falta porque no hay zona» · «faltan grants de `direccion` y `ciudad`».* **Las tres eran razonables y las tres estaban parcialmente equivocadas** — la familia era única y correcta, el negocio sí tenía zona, y `ciudad` sí tenía grant.
+
+  **Por qué pasa, y no es descuido:** eliminar bien dentro del propio territorio **produce confianza en la conclusión de afuera**, donde uno no puede eliminar igual. **La forma exigible:** una hipótesis que cruza territorio viaja como **hipótesis con su medición**, y **el dueño del territorio la verifica antes de convertirla en cura** — porque curar sobre una premisa ajena no medida es construir en el lugar equivocado con toda la diligencia del mundo.
+
+- **L-213 — UN SÍNTOMA NO ES UNA ORDEN (S91, firma de método).**
+
+  «No puedo agendar grooming» y «faltan estos grants» son **cosas distintas**: el primero es un hecho, el segundo una lectura. **Convertir el segundo en directiva sin devolverlo medido produce curas correctas para problemas que no existen** — y en S91 casi produce una: conceder `SELECT (direccion)` habría **deshecho la privacidad que S84 firmó** para arreglar un hub que se curaba con un lector angosto.
+
+  **La forma exigible:** la mesa **devuelve su lectura al dueño del territorio antes de convertirla en orden**, y el dueño **mide antes de ejecutar** — sobre todo cuando la cura propuesta *abre* algo. *La orden que salvó el día fue precisamente la que traía su propio freno: «si `direccion` es la exacta, la cura NO es el grant».*
+
+- **L-212 — EL PERMISO SE CONCEDE POR COLUMNA: «¿PUEDO LEER LA TABLA?» NO CONTESTA «¿PUEDO CORRER ESTA CONSULTA?» (S91).**
+
+  **El verde falso que costó horas:** se midió `has_table_privilege(...,'SELECT')` sobre `prestadores` y sobre las 23 tablas de la familia, y **todo dio verde** — mientras el hub moría con 42501. **La tabla se podía leer; ESA columna no.**
+
+  **La forma exigible en una casa con privilegios por columna** (regla S79, `prestadores`): la pregunta se hace con **`has_column_privilege`**, y la prueba funcional se corre **con el `select` LITERAL del wrapper**, no con un `count(*)`. *Un `SELECT count(*)` es el peor test posible acá: no toca ninguna columna, así que pasa siempre.*
+
+- **L-211 — UN ASSERT SE JUZGA POR LA PREGUNTA QUE CONTESTA, JAMÁS POR SU COLOR (S91 — la familia de los verdes y rojos falsos).**
+
+  **Cuatro casos en una sesión, y los cuatro con el mismo hueso:**
+  · un **verde** sobre la tabla cuando la falla era de columna (L-212);
+  · un **verde** del verificador de D sobre la superficie equivocada — P7 vivía en el Hogar y él miraba el perfil: *certificaba algo que no era lo que la lámina pedía*;
+  · un **rojo verdadero por razón falsa** — mi cinturón buscó PUBLIC con `LIKE '%=X/%'` y matcheó `postgres=X/postgres`, abortando la migración **con el agujero todavía abierto**;
+  · un **rojo** del typecheck que solo existía porque otra pista estaba escribiendo el archivo en ese instante.
+
+  **La regla:** antes de creerle a un assert, se dice **qué pregunta contesta** y **con qué lo compara**. *Un verde sobre el lugar equivocado es peor que un rojo: el rojo se investiga; el verde se archiva.* **Y un guard que falla por su propia expresión se lee igual que un guard que encontró algo** — si uno le cree, cura lo que no era.
+
 - **L-210 — UN GUARD QUE CAZA PROSA VENCIDA NO DISTINGUE LA LETRA DE SU EPITAFIO (S88).**
 
   **EL CASO, en su propio turno:** la unificación corrigió una doctrina escrita en el cuerpo de una función (*«el motor no compone texto…»*) y puso un guard para que no reviviera. **El guard se disparó contra el comentario NUEVO** — el que explica qué cambió, y que necesariamente **cita** la frase muerta.

@@ -899,3 +899,57 @@ variantes de un token barato. **S84 le retira también eso.**
 **Evidencia de la propia sesión:** las **cuatro variantes del destello** se
 montaron en lámina **y el founder no las reportó**. *La lámina hizo su trabajo y
 nadie la miró — exactamente el modo de falla que la enmienda nombra.*
+
+---
+
+## 12. S91 — TRES PIEZAS DE CRAFT QUE NACIERON EN LA VITRINA
+
+### 12.1 EL CARRUSEL A SANGRE, Y POR QUÉ 4:3 NO ES UN NÚMERO SINO UNA FORMA
+
+`FichaPrestador` tenía la portada con **ALTO FIJO**, y ese es el defecto:
+**un alto fijo no tiene relación** — la misma foto se ve distinta en cada
+ancho de pantalla y la composición depende del dispositivo. Pasa a **relación
+4:3** (firma del founder, bajando de 16:9) y a **sangre**: la ficha deja de
+imponer su marco y cede el ancho completo.
+
+**Consecuencia exigible:** con relación fija, **el marco existe antes que la
+foto** — recién ahí una guía de encuadre para el prestador puede ser honesta.
+*Escribirla antes habría sido aspiracional* (es la precondición literal de
+**D-696**).
+
+### 12.2 EL CHIP DE ENTIDAD: DOS EJES QUE NUNCA DEBIERON ESTAR ATADOS
+
+`ChipEntidad` resolvía `conHuella = sujeto === 'mascota'` — o sea que **un
+sujeto que no fuera mascota IGNORABA la foto por completo**, y la combinación
+«cosa + cara» era **inexpresable**. Se separan:
+
+- **`fotoUrl` decide SI HAY CARA.**
+- **`sujeto` decide SOLO EL FALLBACK** cuando no la hay.
+
+**Y la pieza ya había cobrado su propio límite**, que es lo que vuelve esto una
+corrección y no un gusto: para que el filtro de especie tuviera imagen *y*
+fallback honesto hubo que declarar una especie como `sujeto='mascota'`.
+Funcionaba —una especie es un animal— pero era **esquivar el modelo en vez de
+usarlo**. Con el ensanche deja de hacer falta esquivarlo.
+
+*Regla que deja: cuando una pieza obliga a mentir una prop para lograr una
+combinación legítima, el defecto es de la pieza.*
+
+### 12.3 LA ESCALERA DE LA PORTADA — cuatro peldaños, ninguno vacío
+
+**① imagen de portada → ② poster del video → ③ logo CENTRADO → ④ monograma.**
+
+Y la corrección que ordena la escalera: **un logo estirado a sangre grita «acá
+falló algo»**. Un logo no es una fotografía: **se centra sobre su fondo, jamás
+se deforma para llenar un marco que no es suyo.** El monograma es el último
+peldaño y sigue siendo digno.
+
+**El peldaño ② no tiene sujeto hoy** (medido: ninguna portada es video; el
+`.mp4` vive en `clip_url` y nunca ocupa ese lugar) — vive escrito para cuando
+exista, con su costo en **D-697**.
+
+**⚠️ Y el defecto que la escalera cura no era «falta imagen», era «todavía no
+llegó»:** la tarjeta reservaba el alto de una foto que estaba en camino, así
+que **el estado «cargando» se dibujaba idéntico al estado «no hay»**. *Un
+espacio que promete algo que no llega miente* — Ley 23 aplicada al TIEMPO, no
+solo al contenido.

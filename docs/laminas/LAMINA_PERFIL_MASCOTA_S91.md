@@ -113,3 +113,20 @@ lo que ya existe de lo que hay que construir.*
    sostener: un `if (sujeto === 'acuario') return null` esparcido en ocho
    secciones es el clon que §6 prohíbe. *Vale una sola decisión de composición
    arriba, no ocho abajo.*
+
+---
+
+## ADDENDUM S91 — EL PERFIL DEL ACUARIO MUESTRA SU CENSO (firma founder, 8-ago)
+
+**El perfil de un `sujeto = 'acuario'` gana una sección que las demás familias
+no tienen: QUIÉNES VIVEN ACÁ.** Es el censo por especie —«5 neones, 3
+corydoras»— con la cara del catálogo cuando la especie es del catálogo.
+
+**Lo que la lámina NO habilita, y hay que leerlo junto:** ningún pez tiene
+ficha, nombre ni fila. **No hay navegación desde el censo a «un pez».** La
+sección se mira, no se entra — *«el pez se mira; el sistema se cuida»*.
+
+**Contrato servido:** `obtenerCensoDelAcuario` / `declararCensoDelAcuario`
+(puerta única; la tabla no tiene grants). `cantidad: 0` saca una especie del
+censo **sin borrar que estuvo**, y `esDelCatalogo` dice si la superficie puede
+dibujar imagen — **no se infiere de que haya ruta**.

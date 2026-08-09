@@ -3016,3 +3016,49 @@ Documento completo en su primera versión integral. Próximas evoluciones pueden
 - **v1.2 (13 May 2026 — S16):** Cierre de refactor de modelo de datos. 24 decisiones cerradas en Sub-bloques 1 (mapeo conceptual) + 2 (relevamiento literal de DB) + 3 (DDL conceptual) + 4 (plan de migración). Modificaciones: Sección 3.1.4 con nueva sub-sección "Estados de vida de la mascota" (3 valores activa | perdida | fallecida, transferencia como cambio de familia_id). Sección 4.6 con implicancias técnicas cerradas (núcleo familia + co-dueños + visibilidad + acciones destructivas). Sección 5.6 con implicancias multi-especie cerradas (cat_especies_perfil + cat_especies_vocabulario + calcular_momento_vital). Sección 9 consolidada distinguiendo CERRADAS vs DIFERIDAS por fase. Documento nuevo POLITICAS_EPETPLACE.md creado en paralelo con 12 políticas operativas derivadas. Enmienda S16 a CONTRATO_TRABAJO.md (regla 67 refinada + regla 70 nueva). Ejecución SQL del refactor pendiente Sub-bloque 5 (S17+).
 - **v1.3 (5 Jul 2026 — S42):** Agregado criterio operativo del wow ("cero explicación necesaria" con prueba de aceptación) en Sección 6, derivado de evidencia de prestadores reales. Referencia cruzada a `ESTRATEGIA_2026H2.md`.
 - **v1.4 (16 Jul 2026 — S66):** Enmienda founder a Sección 2.5, párrafo "e-PetPlace NO es un CRM veterinario" (disparada por `MODELO_VETERINARIA.md` v1.0 §15.2): el vet SÍ es cliente del software en las herramientas de GESTIÓN DEL NEGOCIO cuando regalarlas asegura que el cobro pase por la plataforma; el criterio de prioridad suma la segunda pregunta "¿hace que cobrar adentro sea más fácil que afuera?". El espíritu del párrafo queda intacto (no se venden licencias de CRM — se regalan las herramientas y se monetiza el flujo transaccional, precedente Fresha/Toast). Nada del párrafo original se borró.
+
+---
+
+# S91 — EL ACUARIO DEJA DE SER UN CONCEPTO Y ES UNA ENTIDAD
+
+> **Este bloque enmienda por CONTENIDO, no por versión.** Hasta hoy este doc
+> pensaba el acuario como *concepto* — «el concepto mascota individual es más
+> difuso» (§ especies), «hitos del acuario/terrario como sistema» (§ momentos).
+> **Eso quedó viejo el 8-ago-2026: el acuario tiene sujeto propio en el motor.**
+
+## La letra fundacional (firma founder, 8-ago-2026)
+
+> *«El perfil del acuario integrará la LISTA de sus peces… servicios, comida,
+> bitácora y todo lo contratable aplican SIEMPRE al ACUARIO, jamás a un pez
+> particular. **El pez se mira; el sistema se cuida.**»*
+
+**Esa frase hace decidible cada caso futuro sin volver a la mesa**, y por eso
+vale más que la implementación que la sigue.
+
+## Lo que cambió en el motor, y por qué importa al MODELO
+
+1. **`mascotas.sujeto` ∈ {`individuo`, `acuario`}** — la séptima familia **ya no
+   es una promesa: es una fila con marca de sistema**, y la marca **la estampa
+   el motor, jamás el cliente**. Con `tipo_agua` en el lugar donde las demás
+   especies llevan raza.
+2. **EL CENSO POR ESPECIE reemplazó a la «identidad ligera».** El acuario
+   declara *cuántos hay de cada especie* («5 neones, 3 corydoras»). **NO nacen
+   peces individuales: ni identidad, ni nombre, ni fila propia.**
+3. **La bitácora del acuario tiene sus propias conductas** (agua, mantenimiento,
+   observación del conjunto) y el motor **rechaza tipado** una conducta de
+   individuo sobre un acuario.
+
+## La consecuencia de MODELO que hay que leer, y no es técnica
+
+**El sujeto del producto sigue siendo la MASCOTA — pero «mascota» dejó de
+significar «un animal».** Para seis familias el sujeto es un individuo; para la
+séptima **es un sistema vivo con población**. El expediente, el cuidado
+continuo y la comunidad aplican igual; lo que cambia es **quién es el sujeto de
+la frase**.
+
+*Y el censo resolvió el nudo del arco sin pagarlo: la pregunta «¿los peces
+existen?» tenía dos respuestas malas —negarlos deja al dueño sin nombrar lo que
+le importa; darles entidad multiplica el producto por N y devuelve el sujeto al
+individuo—. **Existen para MIRARSE, no para contratarse**, y contarlos alcanza.*
+
+**Ficha viva: D-685** (el arco: parámetros del agua e hitos de sistema).

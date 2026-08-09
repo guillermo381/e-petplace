@@ -3598,3 +3598,32 @@ Este documento incorpora decisiones de modelo cerradas formalmente durante Sesi�
 - **v1.4 (22 Jul 2026 — S74, disparada por la firma de `LETRA_ROLES_EQUIPO_S74`):** la sección 14 pasa a **LETRA_EQUIPO v2** con el §14bis — los TRES ROLES con la ley madre (**el acceso clínico viene del CHIP, jamás del cargo**; recepción = EL PISO sin chips), el vocabulario en piedra (`especialista` prohibida), el TITULAR (creado por curaduría humana; **solo él nombra administradores**), la sección EQUIPO con sus cuatro reglas de superficie, el aviso de consentimiento antes de confirmar administrador (con la nota de oficio del botón "dar el rol"), y **las dos vías de invitación con los cuatro candados del link — vencimiento firmado en 48 h**. Incluye el estado de construcción honesto: el arco queda **DESCONECTADO** (D-512). La v1 se conserva íntegra debajo.
 - **v1.3 (22 Jul 2026 — transposición S73→S74):** Nace la sección 14 — LETRA_EQUIPO v1 (letra de mesa S73 sobre el relevamiento `500ee8d`), depositada ACTUALIZADA contra el motor construido: §3 backfill superado por la directiva 1-jul (desactivación `14e49fa`, cero adjudicación), §4 con la enmienda v3 (las tres policies de la hija por la puerta única), §5 de espec a estado (gate D-464 aplicado — `20260721230000`, 14 policies + `user_acceso_clinico_a_mascota`), y el estado post-S73 (motor completo; la superficie es S74). Resuelve las citas D-486 (§2/§7), D-494 (§4) y `MODELO_NOTIFICACIONES.md`.
 
+
+---
+
+# S91 — LA VITRINA EXISTE, Y SU ESPEJO TAMBIÉN
+
+**`FichaPrestador` nació en S84 con su mitad de cliente PREVISTA y no
+construida. Hoy está conectada:** el dueño abre `/prestador/[id]` desde las
+cuatro filas de oficio y ve el negocio — portada, oficios en voz de familia,
+línea de confianza en su escalera (con reseñas, «★ 4.8 · 12 reseñas»; sin
+reseñas, `total_citas`, que es un hecho verdadero; sin citas, **silencio**),
+precio «desde» y el mapa cuando hay zona.
+
+**Y el espejo se conserva como espejo:** «Cómo te ven» monta **la misma pieza**
+con el mismo carrusel, así que el prestador ve literalmente lo que ve la
+familia — no una maqueta parecida que diverge el mes que viene.
+
+**La fuente es la VISTA, jamás la tabla** (`v_prestadores_publicos` vía
+`obtenerPerfilesPublicos`): la coordenada exacta no viaja al teléfono (S84) y
+la dirección no se expone a cualquiera (S91).
+
+**Lo demás que ganó el portal:**
+- **El histórico navegable con cinco ejes de filtro** (tipeo en los dos mundos,
+  especie, y los demás), con la letra de los filtros COMPLETA.
+- **La relectura de recetas.**
+- **La frontera de S74 CONSERVADA ENTERA:** `obtener_nombres_reservador_por_cita`
+  entrega **nombre sí, correo y teléfono JAMÁS** — y su migración lleva un
+  cinturón de forma que **rebota si el cuerpo de la función llega a nombrar
+  `telefono` o `email`**. *La frontera no se sostiene por disciplina: se
+  sostiene porque romperla no compila.*

@@ -191,3 +191,25 @@ Coherencia con la casa: el motor escribe SOLO vía funciones (puerta
   Herencia decidida del chasis existente, motor de disparo diseñado,
   límites §8 en piedra, D-314 registrada, trenza B4 declarada como
   construcción nueva.
+
+---
+
+# S91 — EL MOTOR DE PROGRESO GANA SU PRIMERA SUPERFICIE HONESTA (A8)
+
+**§2 aplicándose, no una excepción a §2.** La pastilla nombrada y el contador
+**«N por resolver»** son *narrativa + un paso*, jamás checklist: dicen **cuánto
+falta y qué hacer**, sin puntos, sin niveles y sin badges. **La moneda sigue
+invisible** — lo visible es el progreso y la ganancia, que es exactamente lo que
+la decisión (a′) firmó.
+
+**Y una letra del founder que vale como precedente de diseño:** **«cita» quedó
+FUERA del contador.** Una cita agendada **no es algo por resolver** — ya se
+resolvió; lo que queda es esperar. *Meterla en el contador habría hecho que el
+número nunca bajara a cero, y un contador que no puede llegar a cero deja de
+ser progreso para volverse reproche* — que es la línea que §8 traza entre
+celebrar y castigar.
+
+**El caso que lo probó (S91-D):** la pastilla del acuario decía «1 por
+resolver» y ese 1 era el carnet de vacunas — **un pendiente que el dueño no
+podía resolver ni encontrar**. Lista y contador bajaron juntos. *Un contador
+que cuenta lo inalcanzable es peor que no tener contador.*
