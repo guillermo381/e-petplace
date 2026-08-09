@@ -272,3 +272,72 @@ de rebote.
 - **Nadie vigila el canal de correo** — sin monitor ni prueba periódica.
 - **La pantalla de recuperar NO EXISTE en la app del cliente** (ni «olvidé mi
   contraseña» en su login). Construirla es de la **sesión de login** del founder.
+
+---
+
+## ⑪ EL OTA — PUBLICADO Y VERIFICADO (9-ago-2026)
+
+**Lo que S92 y S92-BIS curaron llegó al aparato.** Hasta este acto el canal
+servía el ancla `c4c92933` de **S91** ⇒ *nada de lo que toca pantalla existía
+para el founder*, incluida la cura del paseo.
+
+### El runbook, eslabón por eslabón (regla 84)
+
+**⓪ VEDA declarada** aunque la pista fuera única: `git status --porcelain` en
+**cero** y `git worktree list` con **12 worktrees, todos de sesiones cerradas**
+(S83/S86/S87/S90/S91 — los de D-718). **Ninguna pista en vuelo.** Metro lee el
+primario, que estaba en `main` y limpio. Ventana **abierta y cerrada** con el
+árbol verificado en los dos extremos.
+
+**② PUSH ANTES DE BUNDLEAR.** Medido: `origin/main` estaba en **`017bd11f`**
+—el cierre de S91— o sea que **S92, S92-BIS y las curas de hoy no existían en
+remoto**. Se pushearon **26 commits** (rango declarado commit por commit,
+enmienda 79) y **`origin/main` se re-midió DESDE EL REMOTO** tras el push:
+`5c3046b5` = `main`. *Un OTA cuyo ancla no existe en origin deja el bundle del
+teléfono sin fuente auditable.*
+
+**③ PUBLISH como ACTO ÚNICO** (`scripts/publicar-ota.mjs`), que verifica,
+bundlea y **re-verifica después** — porque el bundling tarda ~60 s y ni un acto
+atómico impide que alguien commitee mientras corre; lo único garantizable es que
+sea imposible no enterarse.
+
+### ⑤ LO TRANSCRIPTO EN EL MOMENTO — leído del OBJETO con `update:view`
+
+*`update:list` NO expone el hash, que es justo lo que el eslabón verifica.*
+
+| | **CLIENTE** | **PRESTADOR** |
+|---|---|---|
+| **group** | `7311eab6-eadc-40aa-95cc-52aa0c748b07` | `a0831942-6edd-45b3-9e9f-d9d756c17c3f` |
+| **android** | `019fe79c-04de-77a5-b0af-8e6982c906f2` | `019fe79c-c27f-7246-b183-5b9d996c30bf` |
+| **ios** | `019fe79c-04de-723f-af8b-fc6979e3140c` | `019fe79c-c27f-7728-9b65-f735256e11ea` |
+| **runtime** | **1.0.3** | **1.0.4** |
+| **gitCommitHash** | `5c3046b5b0fa61f4c5eac86363d33f5ce2b4119e` | `5c3046b5b0fa61f4c5eac86363d33f5ce2b4119e` |
+
+**El ancla es la misma en las dos apps y es un commit de `main`**, no la punta de
+una rama — y está en `origin`, verificado antes de bundlear.
+
+### ④ VERIFICADO POR LO QUE SE SIRVE, no por lo que se guardó
+
+`verify-ota.mjs` **VERDE en las dos**: ① el canal **sirve** el update publicado
+· ② existe build `finished` para su runtime (cliente `522e948e` 1.0.3 ·
+prestador `b339f942` 1.0.4).
+
+⚠️ **Su aviso ③, que no frena y se transcribe igual: RUNTIMES HUÉRFANOS** — el
+cliente tiene binarios instalables en **1.0.0, 1.0.1 y 1.0.2** y el prestador en
+**1.0.0, 1.0.1, 1.0.2 y 1.0.3**, y **ninguno recibe este lote**. *Un aparato con
+una APK vieja no se rompe: se queda quieto con lo que ya tenía, y eso es
+exactamente lo que hizo creíble el diagnóstico equivocado del 4-ago.* **Si el
+founder mira una APK que no sea 1.0.3 (cliente) / 1.0.4 (prestador), no va a ver
+nada de esto y no será un fallo de las curas.**
+
+### ⑥ ASTERISCOS: **CERO** — y se declara
+
+Los **dos** publishes salieron con el árbol quieto: el script re-verificó
+después de bundlear y confirmó *«el ancla real es la verificada y el árbol no se
+movió»*. **Ningún archivo sucio, ninguno entrando al bundle.** *Se declara la
+ausencia porque `eas update:view` no expone el estado del árbol: un publish
+sucio es inauditable después, y ésta es la única ventana para decirlo.*
+
+**Nota honesta:** este commit del acta es POSTERIOR al ancla `5c3046b5`, así que
+`main` avanza un paso respecto del bundle. Es normal y no ensucia nada — el
+ancla es el commit **del que salió el bundle**, y quedó registrado arriba.
