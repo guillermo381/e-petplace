@@ -1,0 +1,426 @@
+{
+ "antes": [
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "tipos_servicio"
+  }
+ ],
+ "ahora": [
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "DELETE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "INSERT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "REFERENCES",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "SELECT",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRIGGER",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRUNCATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "UPDATE",
+   "table_name": "cat_especies"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "DELETE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "INSERT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "REFERENCES",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "SELECT",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRIGGER",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRUNCATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "UPDATE",
+   "table_name": "mascotas"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "DELETE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "INSERT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "REFERENCES",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "SELECT",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRIGGER",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRUNCATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "UPDATE",
+   "table_name": "prestador_servicios"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "DELETE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "INSERT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "REFERENCES",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "SELECT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRIGGER",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "TRUNCATE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "anon",
+   "privilege_type": "UPDATE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "DELETE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "INSERT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "REFERENCES",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "SELECT",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRIGGER",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "TRUNCATE",
+   "table_name": "tipos_servicio"
+  },
+  {
+   "grantee": "authenticated",
+   "privilege_type": "UPDATE",
+   "table_name": "tipos_servicio"
+  }
+ ]
+}

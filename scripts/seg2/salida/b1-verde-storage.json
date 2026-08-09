@@ -1,0 +1,67 @@
+[
+ {
+  "id": "ajeno escribe en avatars/ carpeta ajena",
+  "obtenido": "HTTP 400 REBOTA por POLICY",
+  "ok": true
+ },
+ {
+  "id": "ajeno escribe en la carpeta de otro uuid",
+  "obtenido": "HTTP 400 REBOTA por POLICY",
+  "ok": true
+ },
+ {
+  "id": "no-admin sube a adopcion-fotos",
+  "obtenido": "HTTP 400 REBOTA por POLICY",
+  "ok": true
+ },
+ {
+  "id": "el dueño sube a SU carpeta (patrón de la app)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "id": "y puede BORRAR lo suyo (D-616 pagada)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "id": "lectura pública sigue viva · avatars",
+  "obtenido": "HTTP 200 (77795 bytes)",
+  "ok": true
+ },
+ {
+  "id": "lectura pública sigue viva · especies-razas",
+  "obtenido": "HTTP 200 (10026 bytes)",
+  "ok": true
+ },
+ {
+  "id": "lectura pública sigue viva · marca-publica",
+  "obtenido": "HTTP 200 (4828 bytes)",
+  "ok": true
+ },
+ {
+  "id": "lectura pública sigue viva · prestador-galeria",
+  "obtenido": "HTTP 200 (252172 bytes)",
+  "ok": true
+ },
+ {
+  "id": "privado sigue cerrado al ajeno · cita-archivos",
+  "obtenido": "HTTP 400",
+  "ok": true
+ },
+ {
+  "id": "privado sigue cerrado al ajeno · mascotas",
+  "obtenido": "HTTP 400",
+  "ok": true
+ },
+ {
+  "id": "privado sigue cerrado al ajeno · prestador-documentos",
+  "obtenido": "HTTP 400",
+  "ok": true
+ },
+ {
+  "id": "residuo de mis pruebas",
+  "obtenido": "0 (esperado 0)",
+  "ok": true
+ }
+]

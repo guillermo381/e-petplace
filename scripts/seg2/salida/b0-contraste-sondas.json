@@ -1,0 +1,76 @@
+{
+ "auth": {
+  "baneadas": 0,
+  "borradas_soft": 0,
+  "sin_confirmar": 0,
+  "sin_credencial": 8,
+  "sondas_restantes": 0,
+  "total": 152
+ },
+ "marcas": [
+  {
+   "marca": "sonda_s91d_purgada",
+   "n": 64
+  },
+  {
+   "marca": "(sin marca — creada por un usuario)",
+   "n": 15
+  },
+  {
+   "marca": "backfill_s17_fase_c",
+   "n": 1
+  }
+ ],
+ "filas": [
+  {
+   "id": "cuentas en el padrón",
+   "obtenido": "152 (eran 214 · 214−64 = 150)",
+   "ok": false
+  },
+  {
+   "id": "sin credencial (no podrían autenticar)",
+   "obtenido": "8",
+   "ok": false
+  },
+  {
+   "id": "baneadas",
+   "obtenido": "0",
+   "ok": true
+  },
+  {
+   "id": "borradas por soft-delete",
+   "obtenido": "0",
+   "ok": true
+  },
+  {
+   "id": "sin email confirmado",
+   "obtenido": "0 (informativo: no impide autenticar en este proyecto)",
+   "ok": true
+  },
+  {
+   "id": "sondas que sobrevivieron",
+   "obtenido": "0",
+   "ok": true
+  },
+  {
+   "id": "login del titular demo (prestador)",
+   "obtenido": "token obtenido (810 chars)",
+   "ok": true
+  },
+  {
+   "id": "alta + login de una cuenta nueva",
+   "obtenido": "HTTP 200 · autentica",
+   "ok": true
+  },
+  {
+   "id": "familias marcadas que TODAVÍA tienen un miembro vivo",
+   "obtenido": "0 — si fuera >0, una persona real habría quedado en una familia marcada como prueba",
+   "ok": true
+  },
+  {
+   "id": "familias con OTRA marca de sistema",
+   "obtenido": "1 (el backfill histórico de S17)",
+   "ok": true
+  }
+ ]
+}

@@ -85,6 +85,11 @@ export default function PaseoDisponibles() {
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
   const [sinElegibles, setSinElegibles] = useState(false);
+  /** P0 (9-ago-2026): el catálogo de especies todavía no llegó (`cargando`) o
+   *  no llegó nunca (`error`). **No es lo mismo que no tener perros**, y por
+   *  eso no comparte estado con `sinElegibles`: mezclarlos es exactamente el
+   *  bug que se está curando. */
+  const [catalogoNoLlego, setCatalogoNoLlego] = useState<'cargando' | 'error' | null>(null);
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
   // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
@@ -287,8 +292,31 @@ export default function PaseoDisponibles() {
 
   const alElegir = useCallback(
     (p: PaseadorDisponible) => {
-      // §1bis: solo mascotas ELEGIBLES para pasear; hogar sin ninguna =
-      // voz honesta con camino (jamás oferta vacía ni final mudo).
+      /**
+       * §1bis: solo mascotas ELEGIBLES para pasear.
+       *
+       * ⚠️ SE MIRA LA FASE, JAMÁS EL LARGO — y acá está el bug que el founder
+       * cazó en dispositivo (P0, 9-ago-2026): `ofrecibles()` devuelve `[]` en
+       * **las tres** fases —`cargando`, `error` y «de verdad no hay»— así que
+       * `elegibles.length === 0` significaba tres cosas y las tres se le
+       * contestaban al usuario con la misma frase: *«tu hogar todavía no tiene
+       * un perro registrado»*. **Con dos perros vivos en el hogar.**
+       *
+       * Lo dice la propia lib que este archivo consume
+       * (`lib/especies-elegibles.ts`): *«la pantalla distingue ese vacío del
+       * vacío real mirando la fase, jamás el largo: "no tenés mascotas
+       * elegibles" y "todavía no sé" son dos frases distintas y una de las dos
+       * sería mentira»*. Las otras cuatro pantallas de servicio ya lo hacían
+       * (`faseEspecies.fase === 'listo' && elegibles.length === 0`); esta era
+       * la única que no.
+       *
+       * El motor nunca estuvo en riesgo: el guard `mascota_no_elegible` de la
+       * DB devuelve `true` para estos perros. Lo que fallaba era la PUERTA.
+       */
+      if (faseEspecies.fase === 'cargando' || faseEspecies.fase === 'error') {
+        setCatalogoNoLlego(faseEspecies.fase);
+        return;
+      }
       if (elegibles.length === 0) {
         setSinElegibles(true);
         return;
@@ -304,7 +332,7 @@ export default function PaseoDisponibles() {
         setEligiendoMascota(p);
       }
     },
-    [elegibles, mascotaIdParam, alElegirMascota],
+    [elegibles, mascotaIdParam, alElegirMascota, faseEspecies.fase],
   );
 
   return (
@@ -449,6 +477,23 @@ export default function PaseoDisponibles() {
             }}
           />
         ) : null}
+      </Hoja>
+
+      {/* P0: el catálogo de especies no llegó. Es OTRA cosa que no tener
+          perros, y por eso tiene su propia voz — decirle «no tenés un perro
+          registrado» a alguien que tiene dos es peor que no decir nada
+          (Ley 13: el error se dice, y se dice lo que ES). */}
+      <Hoja
+        visible={catalogoNoLlego !== null}
+        titulo={t(catalogoNoLlego === 'cargando' ? 'paquete.catalogoCargandoTitulo' : 'paquete.catalogoErrorTitulo')}
+        onCerrar={() => setCatalogoNoLlego(null)}
+        conCerrar
+      >
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          <Celda
+            titulo={t(catalogoNoLlego === 'cargando' ? 'paquete.catalogoCargandoDetalle' : 'paquete.catalogoErrorDetalle')}
+          />
+        </View>
       </Hoja>
 
       {/* §1bis: hogar sin mascotas elegibles — voz honesta CON CAMINO */}

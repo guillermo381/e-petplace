@@ -972,6 +972,11 @@ export const clienteEn = {
     sinPerrosTitulo: 'Walks are for dogs',
     sinPerrosDetalle: "Your home doesn't have a dog registered yet. Once you add one, walks open up on their own.",
     sinPerrosAccion: 'Add my dog',
+    /* P0 (9-ago-2026) · STRING GATE PENDING — see the Spanish note. */
+    catalogoCargandoTitulo: 'One second',
+    catalogoCargandoDetalle: "We're still loading the walk details. Try again in a moment.",
+    catalogoErrorTitulo: "We couldn't load the walk details",
+    catalogoErrorDetalle: "Check your connection and come back in. Your pets are fine — what didn't load is the service info.",
     presetsEtiqueta: 'How many walks?',
     presetSalidas: '{{n}} walks',
     vigenciaVoz: 'Walks last one month from purchase. If you buy another package before that date, unused walks carry over.',

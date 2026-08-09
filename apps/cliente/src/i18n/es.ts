@@ -1095,6 +1095,15 @@ export const clienteEs = {
     sinPerrosTitulo: 'El paseo es para perros',
     sinPerrosDetalle: 'Tu hogar todavía no tiene un perro registrado. Cuando lo agregues, el paseo se abre solo.',
     sinPerrosAccion: 'Agregar a mi perro',
+    /* P0 (9-ago-2026) · GATE DE STRINGS PENDIENTE. Nacen porque la pantalla
+       decía «tu hogar todavía no tiene un perro registrado» cuando el catálogo
+       de especies aún no había llegado — con dos perros vivos en el hogar. No
+       tener perros y no saber todavía son dos cosas distintas y una de las dos
+       era mentira. */
+    catalogoCargandoTitulo: 'Un segundo',
+    catalogoCargandoDetalle: 'Estamos terminando de cargar los datos del paseo. Probá de nuevo en un momento.',
+    catalogoErrorTitulo: 'No pudimos cargar los datos del paseo',
+    catalogoErrorDetalle: 'Revisá tu conexión y volvé a entrar. Tus mascotas están bien: lo que no llegó es la información del servicio.',
     presetsEtiqueta: '¿Cuántas salidas?',
     presetSalidas: '{{n}} salidas',
     vigenciaVoz: 'Las salidas duran un mes desde la compra. Si compras otro paquete antes de esa fecha, las que no usaste se suman al nuevo.',

@@ -1,0 +1,116 @@
+[
+ {
+  "flujo": 1,
+  "id": "obtener_mi_prestador",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 1,
+  "id": "cuenta comercial con sus columnas",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 1,
+  "id": "equipo del negocio",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 2,
+  "id": "INSERT caso_clinico (ids imposibles)",
+  "obtenido": "HTTP 400 · rebote de NEGOCIO ⇒ el permiso PASÓ · {\"code\":\"PGRST204\",\"details\":null,\"hint\":null,\"message\":\"Could not fin",
+  "ok": true
+ },
+ {
+  "flujo": 2,
+  "id": "lectura de casos clínicos",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 3,
+  "id": "agenda · citas con sus columnas",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 3,
+  "id": "franjas de horario",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 3,
+  "id": "oferta de servicios",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 3,
+  "id": "lector angosto de sedes (grooming)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 4,
+  "id": "adjuntos de evento (bucket + path)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 4,
+  "id": "vacunas (el carnet)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 4,
+  "id": "acceso a mascota por cita",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 5,
+  "id": "vista pública con portadas",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 5,
+  "id": "vitrina · prestador_fotos",
+  "obtenido": "HTTP 200 con filas",
+  "ok": true
+ },
+ {
+  "flujo": 5,
+  "id": "vitrina · prestador_especialidades",
+  "obtenido": "HTTP 200 con filas",
+  "ok": true
+ },
+ {
+  "flujo": 5,
+  "id": "vitrina · prestador_zonas",
+  "obtenido": "HTTP 200 con filas",
+  "ok": true
+ },
+ {
+  "flujo": 6,
+  "id": "signup de cuenta nueva",
+  "obtenido": "HTTP 200 · con sesión",
+  "ok": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImJiNjdhZjQxLTcxNTctNDM4NS04M2M4LTgxMjQwODE1M2Y1OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3p5bHRpcHFzY2RzZHN4bmpjbGhwLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3ODQwOGY0OC02ZDMzLTRjODItODUwNC1iOWRjNjBkNTVhMzQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzg2Mjg2OTkzLCJpYXQiOjE3ODYyODMzOTMsImVtYWlsIjoic2VnMi1hbHRhLTE3ODYyODMzOTI4NThAZXBldHBsYWNlLmRldiIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJzZWcyLWFsdGEtMTc4NjI4MzM5Mjg1OEBlcGV0cGxhY2UuZGV2IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbWJyZSI6IlNvbmRhIFBlcsOtbWV0cm8iLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6Ijc4NDA4ZjQ4LTZkMzMtNGM4Mi04NTA0LWI5ZGM2MGQ1NWEzNCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzg2MjgzMzkzfV0sInNlc3Npb25faWQiOiJmMjNmZWYzZS00OWMxLTQwNzItYTJkMy00NDA3YWE1ZmEyOGMiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.B-f3vNIrNVB0knE1eLewPb_x-rLsdTc3U-bTnKGTTiWYiIezSYHqkf6TuXkQZNuaX5navLS1-avwCTHekOc9Ug"
+ },
+ {
+  "flujo": 6,
+  "id": "estado de onboarding del recién llegado",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "flujo": 6,
+  "id": "catálogo de especies (lo lee el alta)",
+  "obtenido": "HTTP 200",
+  "ok": true
+ }
+]

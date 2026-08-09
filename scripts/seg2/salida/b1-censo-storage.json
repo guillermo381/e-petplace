@@ -1,0 +1,534 @@
+{
+ "buckets": [
+  {
+   "creado": "2026-05-04 05:57:12.975504+00",
+   "file_size_limit": null,
+   "id": "adopcion-fotos",
+   "mimes": "(sin restricción)",
+   "name": "adopcion-fotos",
+   "objetos": 0,
+   "public": true
+  },
+  {
+   "creado": "2026-04-28 21:24:17.079937+00",
+   "file_size_limit": null,
+   "id": "avatars",
+   "mimes": "(sin restricción)",
+   "name": "avatars",
+   "objetos": 12,
+   "public": true
+  },
+  {
+   "creado": "2026-08-07 20:58:16.25234+00",
+   "file_size_limit": 262144,
+   "id": "especies-razas",
+   "mimes": "image/webp",
+   "name": "especies-razas",
+   "objetos": 111,
+   "public": true
+  },
+  {
+   "creado": "2026-08-07 02:54:32.993859+00",
+   "file_size_limit": 2097152,
+   "id": "marca-publica",
+   "mimes": "image/png, image/jpeg, image/webp, image/svg+xml",
+   "name": "marca-publica",
+   "objetos": 1,
+   "public": true
+  },
+  {
+   "creado": "2026-08-02 17:34:12.696084+00",
+   "file_size_limit": 10485760,
+   "id": "prestador-galeria",
+   "mimes": "image/jpeg, image/png, image/webp, video/mp4, video/quicktime",
+   "name": "prestador-galeria",
+   "objetos": 8,
+   "public": true
+  },
+  {
+   "creado": "2026-05-04 07:30:36.50263+00",
+   "file_size_limit": null,
+   "id": "productos-fotos",
+   "mimes": "(sin restricción)",
+   "name": "productos-fotos",
+   "objetos": 0,
+   "public": true
+  },
+  {
+   "creado": "2026-07-16 04:04:14.243526+00",
+   "file_size_limit": 52428800,
+   "id": "adiestramiento-clips",
+   "mimes": "video/mp4, video/quicktime, video/webm",
+   "name": "adiestramiento-clips",
+   "objetos": 1,
+   "public": false
+  },
+  {
+   "creado": "2026-05-07 06:16:58.425035+00",
+   "file_size_limit": 10485760,
+   "id": "cita-archivos",
+   "mimes": "(sin restricción)",
+   "name": "cita-archivos",
+   "objetos": 11,
+   "public": false
+  },
+  {
+   "creado": "2026-05-21 18:43:24.435799+00",
+   "file_size_limit": 10485760,
+   "id": "grooming-archivos",
+   "mimes": "image/jpeg, image/png, image/webp, image/heic, application/pdf",
+   "name": "grooming-archivos",
+   "objetos": 25,
+   "public": false
+  },
+  {
+   "creado": "2026-04-22 20:05:10.522919+00",
+   "file_size_limit": 5242880,
+   "id": "mascotas",
+   "mimes": "image/jpeg, image/png, image/webp",
+   "name": "mascotas",
+   "objetos": 14,
+   "public": false
+  },
+  {
+   "creado": "2026-05-04 17:45:37.581866+00",
+   "file_size_limit": 5242880,
+   "id": "prestador-documentos",
+   "mimes": "image/jpeg, image/png, image/webp, image/heic, application/pdf",
+   "name": "prestador-documentos",
+   "objetos": 91,
+   "public": false
+  }
+ ],
+ "policies": [
+  {
+   "cmd": "DELETE",
+   "policyname": "Admin puede eliminar fotos adopcion",
+   "qual": "(bucket_id = 'adopcion-fotos'::text)",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "Admin puede subir fotos adopcion",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "(bucket_id = 'adopcion-fotos'::text)"
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "Avatar read",
+   "qual": "(bucket_id = 'avatars'::text)",
+   "roles": "{public}",
+   "with_check": ""
+  },
+  {
+   "cmd": "UPDATE",
+   "policyname": "Avatar update",
+   "qual": "((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))",
+   "roles": "{public}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "Avatar upload",
+   "qual": "",
+   "roles": "{public}",
+   "with_check": "((bucket_id = 'avatars'::text) AND (auth.role() = 'authenticated'::text))"
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "Users upload own pet photos",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'mascotas'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))"
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "adiestramiento_clips_storage_delete",
+   "qual": "((bucket_id = 'adiestramiento-clips'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "adiestramiento_clips_storage_insert",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'adiestramiento-clips'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))"
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "adiestramiento_clips_storage_select",
+   "qual": "((bucket_id = 'adiestramiento-clips'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "adiestramiento_clips_storage_select_acceso_mascota",
+   "qual": "((bucket_id = 'adiestramiento-clips'::text) AND (EXISTS ( SELECT 1\n   FROM evento_adiestramiento_clips c\n  WHERE ((c.storage_path = objects.name) AND user_tiene_acceso_a_mascota(c.mascota_id)))))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "admin_lee_documentos_prestadores",
+   "qual": "((bucket_id = 'prestador-documentos'::text) AND is_admin())",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "cita_archivos_select_acceso_mascota_grooming",
+   "qual": "((bucket_id = 'cita-archivos'::text) AND (EXISTS ( SELECT 1\n   FROM evento_grooming_archivos a\n  WHERE ((a.storage_path = objects.name) AND user_tiene_acceso_a_mascota(a.mascota_id)))))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "cita_archivos_storage_delete",
+   "qual": "((bucket_id = 'cita-archivos'::text) AND user_puede_acceder_prestador(((string_to_array(name, '/'::text))[1])::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "cita_archivos_storage_insert",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'cita-archivos'::text) AND user_puede_acceder_prestador(((string_to_array(name, '/'::text))[1])::uuid))"
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "cita_archivos_storage_select",
+   "qual": "((bucket_id = 'cita-archivos'::text) AND user_puede_acceder_prestador(((string_to_array(name, '/'::text))[1])::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "cita_archivos_storage_select_acceso_mascota",
+   "qual": "((bucket_id = 'cita-archivos'::text) AND (EXISTS ( SELECT 1\n   FROM evento_archivo_adjunto a\n  WHERE ((a.bucket = 'cita-archivos'::text) AND (a.storage_path = objects.name) AND user_tiene_acceso_a_mascota(a.mascota_id)))))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "UPDATE",
+   "policyname": "cita_archivos_storage_update",
+   "qual": "((bucket_id = 'cita-archivos'::text) AND user_puede_acceder_prestador(((string_to_array(name, '/'::text))[1])::uuid))",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'cita-archivos'::text) AND user_puede_acceder_prestador(((string_to_array(name, '/'::text))[1])::uuid))"
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "galeria prestador delete",
+   "qual": "((bucket_id = 'prestador-galeria'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "galeria prestador insert",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'prestador-galeria'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))"
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "galeria prestador lectura",
+   "qual": "(bucket_id = 'prestador-galeria'::text)",
+   "roles": "{public}",
+   "with_check": ""
+  },
+  {
+   "cmd": "UPDATE",
+   "policyname": "galeria prestador update",
+   "qual": "((bucket_id = 'prestador-galeria'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "grooming_archivos_delete",
+   "qual": "((bucket_id = 'grooming-archivos'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "grooming_archivos_insert",
+   "qual": "",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'grooming-archivos'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))"
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "grooming_archivos_select",
+   "qual": "((bucket_id = 'grooming-archivos'::text) AND user_puede_acceder_prestador((split_part(name, '/'::text, 1))::uuid))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "grooming_archivos_select_acceso_mascota",
+   "qual": "((bucket_id = 'grooming-archivos'::text) AND (EXISTS ( SELECT 1\n   FROM evento_grooming_archivos a\n  WHERE ((a.storage_path = objects.name) AND user_tiene_acceso_a_mascota(a.mascota_id)))))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "marca_publica_lectura",
+   "qual": "(bucket_id = 'marca-publica'::text)",
+   "roles": "{anon,authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "mascotas_delete_carpeta_propia",
+   "qual": "((bucket_id = 'mascotas'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "mascotas_select_dueno_o_acceso",
+   "qual": "((bucket_id = 'mascotas'::text) AND (((storage.foldername(name))[1] = (auth.uid())::text) OR (EXISTS ( SELECT 1\n   FROM mascotas m\n  WHERE ((m.foto_url = objects.name) AND user_tiene_acceso_a_mascota(m.id))))))",
+   "roles": "{authenticated}",
+   "with_check": ""
+  },
+  {
+   "cmd": "ALL",
+   "policyname": "prestador_archivos_propios",
+   "qual": "((bucket_id = 'prestador-documentos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text))",
+   "roles": "{authenticated}",
+   "with_check": "((bucket_id = 'prestador-documentos'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text))"
+  },
+  {
+   "cmd": "DELETE",
+   "policyname": "productos-fotos: delete admin",
+   "qual": "((bucket_id = 'productos-fotos'::text) AND ( SELECT is_admin() AS is_admin))",
+   "roles": "{public}",
+   "with_check": ""
+  },
+  {
+   "cmd": "SELECT",
+   "policyname": "productos-fotos: lectura pública",
+   "qual": "(bucket_id = 'productos-fotos'::text)",
+   "roles": "{public}",
+   "with_check": ""
+  },
+  {
+   "cmd": "INSERT",
+   "policyname": "productos-fotos: upload admin",
+   "qual": "",
+   "roles": "{public}",
+   "with_check": "((bucket_id = 'productos-fotos'::text) AND ( SELECT is_admin() AS is_admin))"
+  }
+ ],
+ "mapa": [
+  {
+   "column_name": "imagen_url",
+   "table_name": "campanas"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "certificaciones"
+  },
+  {
+   "column_name": "qr_code_url",
+   "table_name": "certificaciones"
+  },
+  {
+   "column_name": "grabacion_url",
+   "table_name": "cita_telemedicina_detalle"
+  },
+  {
+   "column_name": "room_url",
+   "table_name": "cita_telemedicina_detalle"
+  },
+  {
+   "column_name": "privacy_url",
+   "table_name": "country_config"
+  },
+  {
+   "column_name": "terms_url",
+   "table_name": "country_config"
+  },
+  {
+   "column_name": "contrato_url",
+   "table_name": "criadero_cachorros"
+  },
+  {
+   "column_name": "pedigree_url",
+   "table_name": "criadero_cachorros"
+  },
+  {
+   "column_name": "pedigree_madre_url",
+   "table_name": "criadero_camadas"
+  },
+  {
+   "column_name": "pedigree_padre_url",
+   "table_name": "criadero_camadas"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "criadero_documentos"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "criaderos"
+  },
+  {
+   "column_name": "tracking_url",
+   "table_name": "envios"
+  },
+  {
+   "column_name": "storage_path",
+   "table_name": "evento_adiestramiento_clips"
+  },
+  {
+   "column_name": "bucket",
+   "table_name": "evento_archivo_adjunto"
+  },
+  {
+   "column_name": "storage_path",
+   "table_name": "evento_archivo_adjunto"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "evento_certificado_emitido"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "evento_desparasitacion_aplicada"
+  },
+  {
+   "column_name": "storage_path",
+   "table_name": "evento_grooming_archivos"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "evento_vacuna_aplicada"
+  },
+  {
+   "column_name": "imagen_url",
+   "table_name": "eventos"
+  },
+  {
+   "column_name": "pdf_url",
+   "table_name": "facturas"
+  },
+  {
+   "column_name": "xml_url",
+   "table_name": "facturas"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "liquidaciones"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "lugares_pet_friendly"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "mascotas"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "prestador_documentos"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "prestador_empleados"
+  },
+  {
+   "column_name": "clip_url",
+   "table_name": "prestadores"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "prestadores"
+  },
+  {
+   "column_name": "imagen_url",
+   "table_name": "productos"
+  },
+  {
+   "column_name": "avatar_url",
+   "table_name": "profiles"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "profiles"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "refugios"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "seller_documentos"
+  },
+  {
+   "column_name": "archivo_url",
+   "table_name": "seller_liquidaciones"
+  },
+  {
+   "column_name": "banner_url",
+   "table_name": "seller_perfil"
+  },
+  {
+   "column_name": "logo_url",
+   "table_name": "seller_perfil"
+  },
+  {
+   "column_name": "vtex_fulfillment_url",
+   "table_name": "seller_perfil"
+  },
+  {
+   "column_name": "certificado_url",
+   "table_name": "servicios_exequiales"
+  },
+  {
+   "column_name": "memorial_url",
+   "table_name": "servicios_exequiales"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "v_criaderos_publicos"
+  },
+  {
+   "column_name": "clip_url",
+   "table_name": "v_prestadores_publicos"
+  },
+  {
+   "column_name": "foto_url",
+   "table_name": "v_prestadores_publicos"
+  },
+  {
+   "column_name": "avatar_url",
+   "table_name": "v_ranking_usuarios"
+  }
+ ],
+ "publicas": [
+  "apps/cliente/src/lib/cara-mascota.ts:49:  return `${url.replace(/\\/+$/, '')}/storage/v1/object/public/${BUCKET}`;",
+  "apps/cliente/src/lib/url-galeria.ts:28:  return getClient().storage.from(BUCKET_GALERIA).getPublicUrl(path).data.publicUrl;",
+  "apps/prestador/src/lib/subir-galeria.ts:55:  return getClient().storage.from(BUCKET).getPublicUrl(path).data.publicUrl;",
+  "packages/api/src/wrappers/catalogos.ts:152:  return getClient().storage.from(BUCKET_ESPECIES_RAZAS).getPublicUrl(ruta).data.publicUrl;",
+  "packages/api/src/wrappers/prestador.ts:508:  return getClient().storage.from(BUCKET_LOGOS).getPublicUrl(path).data.publicUrl;",
+  "packages/api/src/wrappers/prestador.ts:534:  return getClient().storage.from(BUCKET_GALERIA).getPublicUrl(path).data.publicUrl;",
+  "packages/ui/src/gallery/TokenGallery.tsx:2283:                fotoUrl=\"https://zyltipqscdsdsxnjclhp.supabase.co/storage/v1/object/public/especies-razas/perro/labrador-retriever.webp\"",
+  "supabase/functions/despachar-correo/index.ts:61:const ISOTIPO = 'https://zyltipqscdsdsxnjclhp.supabase.co/storage/v1/object/public/marca-publica/isotipo@2x.png';"
+ ],
+ "firmadas": [
+  "packages/api/src/wrappers/adiestramiento-reserva.ts:518:    .createSignedUrls(paths, 3600);",
+  "packages/api/src/wrappers/fotos.ts:45:    .createSignedUrl(path, TTL_SEGUNDOS);",
+  "packages/api/src/wrappers/fotos.ts:70:    .createSignedUrls(faltantes, TTL_SEGUNDOS);",
+  "packages/api/src/wrappers/prestador-documentos.ts:203:    .createSignedUrl(path, TTL_SEGUNDOS);",
+  "packages/api/src/wrappers/timeline.ts:220:  const firmadas = await getClient().storage.from(BUCKET_ADJUNTOS).createSignedUrls(paths, TTL_FOTOS);",
+  "packages/api/src/wrappers/timeline.ts:388:          .createSignedUrl(a.storage_path, 3600)",
+  "packages/api/src/wrappers/timeline.ts:393:            .createSignedUrl(a.storage_path, 3600)"
+ ]
+}

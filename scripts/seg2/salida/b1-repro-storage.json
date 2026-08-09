@@ -1,0 +1,116 @@
+{
+ "correoAjeno": "seg2-storage-1786283604259@epetplace.dev",
+ "filas": [
+  {
+   "bucket": "adiestramiento-clips",
+   "publico": false,
+   "objeto": "de300000-0000-4000-8000-0000000000e5/clip-a…",
+   "publica": 400,
+   "anon": 400,
+   "ajeno": 400,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "adopcion-fotos",
+   "publico": true,
+   "objeto": null,
+   "veredicto": "NO MEDIDO — bucket vacío"
+  },
+  {
+   "bucket": "avatars",
+   "publico": true,
+   "objeto": "c5d54e3a-cf1a-45c6-8605-dfd826b022ee/logo-n…",
+   "publica": 200,
+   "anon": 200,
+   "ajeno": 200,
+   "lista": 4,
+   "escritura": 200,
+   "limpieza": "borrado: HTTP 400"
+  },
+  {
+   "bucket": "cita-archivos",
+   "publico": false,
+   "objeto": "de300000-0000-4000-8000-0000000000e5/foto-p…",
+   "publica": 400,
+   "anon": 400,
+   "ajeno": 400,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "especies-razas",
+   "publico": true,
+   "objeto": "gato/generico.webp",
+   "publica": 200,
+   "anon": 200,
+   "ajeno": 200,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "grooming-archivos",
+   "publico": false,
+   "objeto": "de300000-0000-4000-8000-0000000000e5/foto-g…",
+   "publica": 400,
+   "anon": 400,
+   "ajeno": 400,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "marca-publica",
+   "publico": true,
+   "objeto": "isotipo@2x.png",
+   "publica": 200,
+   "anon": 200,
+   "ajeno": 200,
+   "lista": 1,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "mascotas",
+   "publico": false,
+   "objeto": "c2486b65-a958-4529-98cf-ab8bb156244c/avatar…",
+   "publica": 400,
+   "anon": 400,
+   "ajeno": 400,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "prestador-documentos",
+   "publico": false,
+   "objeto": "70076998-7e1d-48ca-9dda-4755997b43f6/regist…",
+   "publica": 400,
+   "anon": 400,
+   "ajeno": 400,
+   "lista": 0,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "prestador-galeria",
+   "publico": true,
+   "objeto": "4f572081-26a5-4d3b-9d80-25ea751fdc9c/galeri…",
+   "publica": 200,
+   "anon": 200,
+   "ajeno": 200,
+   "lista": 2,
+   "escritura": 400,
+   "limpieza": "no aplica"
+  },
+  {
+   "bucket": "productos-fotos",
+   "publico": true,
+   "objeto": null,
+   "veredicto": "NO MEDIDO — bucket vacío"
+  }
+ ]
+}

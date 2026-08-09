@@ -89,12 +89,22 @@ export async function listarBucket(bucket, token, prefijo = '') {
   return { status: r.status, objetos: n, cuerpo: texto.slice(0, 160) };
 }
 
-/** Intento de ESCRITURA sobre un path ajeno — el precedente de S47. */
-export async function subirObjeto(bucket, path, token, contenido = 'seg2-probe') {
+/**
+ * Intento de ESCRITURA sobre un path — el precedente de S47.
+ *
+ * ⚠️ El `tipo` es un parámetro y no una constante por una razón medida: la
+ * primera versión mandaba siempre `text/plain`, y cuando los buckets ganaron
+ * `allowed_mime_types` el rebote pasó a ser **415 invalid_mime_type**, que se
+ * lee igual que un rebote de policy y no lo es. Para probar una POLICY hay que
+ * mandar un tipo que el bucket acepte; si no, se está probando el filtro de
+ * mime. *Otra vez la misma trampa: un assert se juzga por la pregunta que
+ * contesta.*
+ */
+export async function subirObjeto(bucket, path, token, contenido = 'seg2-probe', tipo = 'text/plain') {
   const jwt = token ?? ANON_KEY;
   const r = await fetch(`${SUPA_URL}/storage/v1/object/${bucket}/${encodeURI(path)}`, {
     method: 'POST',
-    headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}`, 'Content-Type': 'text/plain' },
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}`, 'Content-Type': tipo },
     body: contenido,
   });
   return { status: r.status, cuerpo: (await r.text()).slice(0, 160) };

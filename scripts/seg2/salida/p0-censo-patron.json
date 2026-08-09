@@ -1,0 +1,77 @@
+[
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx",
+  "usaFase": true,
+  "decisiones": [
+   {
+    "n": 267,
+    "l": ") : faseEspecies.fase === 'listo' && elegibles.length === 0 ? ("
+   }
+  ]
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/explorar/grooming/index.tsx",
+  "usaFase": true,
+  "decisiones": [
+   {
+    "n": 301,
+    "l": ") : faseEspecies.fase === 'listo' && elegibles.length === 0 ? ("
+   }
+  ]
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/disponibles.tsx",
+  "usaFase": false,
+  "decisiones": [
+   {
+    "n": 292,
+    "l": "if (elegibles.length === 0) {"
+   }
+  ]
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/index.tsx",
+  "usaFase": true,
+  "decisiones": [
+   {
+    "n": 457,
+    "l": ") : faseEspecies.fase === 'listo' && elegibles.length === 0 ? ("
+   }
+  ]
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/explorar/veterinaria/index.tsx",
+  "usaFase": true,
+  "decisiones": [
+   {
+    "n": 288,
+    "l": ") : faseEspecies.fase === 'listo' && elegibles.length === 0 ? ("
+   }
+  ]
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/hogar/adiestramiento.tsx",
+  "usaFase": false,
+  "decisiones": []
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/hogar/grooming.tsx",
+  "usaFase": true,
+  "decisiones": []
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/hogar/paseos.tsx",
+  "usaFase": false,
+  "decisiones": []
+ },
+ {
+  "archivo": "apps/cliente/src/app/(tabs)/hogar/veterinaria.tsx",
+  "usaFase": false,
+  "decisiones": []
+ },
+ {
+  "archivo": "apps/cliente/src/lib/especies-elegibles.ts",
+  "usaFase": true,
+  "decisiones": []
+ }
+]

@@ -1,0 +1,266 @@
+{
+ "tipos": [
+  {
+   "codigo": "adiestramiento",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "certificado_apoyo",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "certificado_viaje",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "cirugia",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "consulta_especializada",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "consulta_general",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "ecografia",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "emergencia",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "grooming",
+   "es_medico": false,
+   "especies": "[\"perro\", \"gato\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "grooming_completo",
+   "es_medico": false,
+   "especies": "[\"perro\", \"gato\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "guarderia_dia",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "guarderia_mensual",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "hotel",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "hotel_dia",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "hotel_noche",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "laboratorio",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "paseo",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "paseo_30min",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "paseo_60min",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "paseo_mensual",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "paseo_paquete",
+   "es_medico": false,
+   "especies": "[\"perro\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "procedimiento",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "radiografia",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "registro_evento",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "servicio_exequial",
+   "es_medico": false,
+   "especies": null,
+   "reservable": true
+  },
+  {
+   "codigo": "telemedicina",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  },
+  {
+   "codigo": "urgencia_domicilio",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "urgencia_local",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "vacunacion",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": true
+  },
+  {
+   "codigo": "vacunacion_internacional",
+   "es_medico": true,
+   "especies": "[\"perro\", \"gato\", \"conejo\", \"ave\", \"roedor\", \"reptil\", \"pez\", \"huron\", \"cobaya\", \"otro\", \"equino\"]",
+   "reservable": false
+  }
+ ],
+ "mascotas": [
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "8e953ce9-269d-481f-a6b4-3a3b6c40833b",
+   "marca_familia": null,
+   "nombre": "Thor",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "79930830-1f09-4048-9b15-19dfd86bd31c",
+   "marca_familia": null,
+   "nombre": "Thor",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "d2e31d70-54fc-4d47-b425-1617239257eb",
+   "marca_familia": null,
+   "nombre": "Thor",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "e6ed9020-84b4-48de-aa01-5b023b7c0586",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "0ce7df92-9033-4fec-8978-8fdac42c14b7",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "fc441d35-76ea-4df5-b562-2f9a43824020",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "5af4f1f2-7658-4634-9f7f-32b8ed7780fb",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "a3332037-c487-45c1-875f-83caf342f59e",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "de300000-0000-4000-8000-000000000a5c",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  },
+  {
+   "especie": "perro",
+   "estado_vida": "activa",
+   "id": "e0c28888-6e3c-43aa-92f3-8428089d392b",
+   "marca_familia": null,
+   "nombre": "Zeus",
+   "sujeto": "individuo"
+  }
+ ]
+}
