@@ -162,3 +162,113 @@ El valor está limpio: sin espacios, comillas ni CRLF.
 - **El brief de S93 no se escribió, por orden del founder: ya existe.**
 - **Efecto declarado:** el retome de WhatsApp del canon ahora necesita el header
   `x-despacho-secret`; **el curl viejo rebota 401**.
+
+---
+
+## ⑩ ADENDA — LO QUE PASÓ DESPUÉS DE ESTE CIERRE (9-ago, mismo día)
+
+*Todo lo de abajo es posterior al acta y se anexa acá en vez de reescribirla:
+un acta firmada no se toca, pero un acta que calla lo que pasó después miente
+por omisión.*
+
+### ⑩.1 · `chat-ayuda` BORRADA (D-717 cerrada)
+
+El founder eligió **(a) borrarla**, tras la medición que pidió. **Qué era:** una
+boca de ayuda automática colgada del botón de la web vieja, que contestaba con
+IA. **Por qué se borró:** ① **cualquiera con la llave que viaja en la app podía
+hacerla correr**, y cada corrida facturaba contra la cuenta de la casa — era la
+única de las facturables que un desconocido podía ejecutar de verdad;
+② **contestaba con el producto de hace dos versiones** —carrito, checkout, un
+«índice de salud» con puntaje— en una voz que `MODELO_LOYALTY` §3 prohíbe. *Un
+guard arreglaba lo primero y no lo segundo.*
+
+**Verde por camino real:** el mismo POST con la misma anon key pasó de
+**`200`** a **`404`**, y **las otras 13 functions dieron el mismo status antes y
+después**.
+
+⚠️ **Y el instrumento se equivocó primero, lo que justificó el orden:** la v1 del
+script traía los nombres **tipeados a mano** y **tres estaban mal**, apareciendo
+como `404` en la corrida **«antes»**. *Si el orden hubiera sido
+borrar-y-después-medir, ese 404 se habría leído como «el delete se llevó tres
+functions por delante» — un rojo inventado sobre un acto irreversible.* Curado:
+la lista se lee de `functions list`.
+
+**Reversible:** la fuente (11 261 bytes) quedó en el repo, verificada **por
+contenido desde `main:`**. **Costo aceptado y firmado: el botón de ayuda de
+`e-petplace-v2` queda roto a propósito.** Nace **D-722** (si algún día se quiere
+un asistente, se construye nuevo).
+
+### ⑩.2 · EL HALLAZGO DEL BASELINE: LOS DESPACHADORES ERAN **TRES** (D-723 🔴)
+
+Midiendo el «antes» del borrado apareció que **`despachar-correo` responde `200`
+con la anon key y PROCESA LA COLA**. Es el defecto de D-713 — *y el censo de esa
+deuda dijo «los dos despachadores» cuando eran tres.*
+
+**Por qué se escapó:** los dos curados tienen `verify_jwt: false` y éste `true`,
+que **da sensación de puerta cerrada**. Pero L-714 ya lo había medido: *la anon
+key **es** un JWT válido.* **La lección estaba escrita y el censo igual se hizo
+por la propiedad equivocada.** No se curó: tiene la misma ventana delicada que
+D-713 (primero el cron, después el deploy) y es decisión del founder.
+
+### ⑩.3 · EL CENSO DE LA VOZ DE CONTRASEÑA — y el camino que estaba caído
+
+El founder pidió censar qué **ve** el usuario ante clave corta, clave filtrada y
+falta de la contraseña actual, en las dos apps y el portal. **El censo encontró
+algo que no era de mensajes:**
+
+🔴 **D-719 — el cambio de contraseña estaba CAÍDO desde que se encendió la
+perilla.** El wrapper re-autenticaba y después llamaba `updateUser` **sin**
+`current_password`; la perilla exige el campo **en el PUT** y la sesión fresca no
+alcanza. **El prestador veía «Ocurrió un error inesperado» y probar de nuevo
+fallaba siempre.** Curado (la línea que faltaba + brazo por `code` estable),
+**verde 7/7 por el wrapper** con el rojo reproducido y contra-caso.
+
+🟠 **D-720 — la app no puede distinguir «corta» de «filtrada», y decía la
+equivocada.** Las dos viajan con el **mismo** `weak_password`; solo cambia el
+texto en inglés. Ante `password123` —**once** caracteres— las cuatro superficies
+decían «necesita al menos 8»: falso **y además irresoluble**, porque quien
+obedecía agregaba caracteres y volvía a rebotar. *El bucle de D-659 con otra
+causa.* Curado con **voz única firmada por el founder**, verde 8/8.
+
+🟠 **D-721 — el portal pedía 6 donde el servidor exige 8**, y el censo por clase
+halló **dos casos más**, incluido uno que enseña: **`seguridad.largoMinimo`
+tenía el 8 a mano mientras su gemela de `recuperar` ya se interpolaba** — y el
+comentario de la gemela dice, textual, *«el hardcodeo parió el 6 vs 8»*. **Se
+curó el hermano y no el gemelo.**
+
+### ⑩.4 · D-724 — EL CORREO DE AUTH SALÍA DE UN DOMINIO BORRADO
+
+Preparando la medición de D-719 (b) apareció que **el correo de recuperación no
+salía** (`500 · Error sending recovery email`, reproducido ×2).
+
+**La causa raíz no estaba en este producto:** se **borró el dominio
+`avisos.epetplace.com` de Resend** y **el SMTP de auth siguió apuntando ahí**.
+Probado **por DNS público, sin tocar una credencial**: la raíz `epetplace.com`
+tiene DKIM, su `send.` tiene MX de bounces y SPF; `avisos.epetplace.com`
+responde **`NXDOMAIN`** — *no era «sin verificar»: no existía.*
+
+**Curado por el founder** (remitente → `hola@epetplace.com`). **`/recover` pasó
+de `500` a `200`**, con el falso verde esquivado: se probó sobre una cuenta que
+**existe**, porque `/recover` responde `200` aunque no exista.
+
+**Alcance acotado y medido:** la confirmación de cuenta está apagada (D-299),
+el magic link rebota por perilla de producto, **la invitación de prestador no
+usa correo de auth** (viaja por WhatsApp o carta), y **las notificaciones nunca
+estuvieron afectadas** — mandan por **API** de Resend desde el dominio bueno.
+*Por eso el canal parecía sano: el que funcionaba y el que fallaba no eran el
+mismo.*
+
+**⇒ L-219**, pariente de L-193: *un canal externo se cae por un cambio hecho en
+otro lado, y nada avisa.* **Y estuvo caído sin una sola alarma** — se descubrió
+de rebote.
+
+### ⑩.5 · LO QUE QUEDA ABIERTO DE ESTA ADENDA
+
+- **D-719 (b)** — si la perilla rompe la **recuperación** no se pudo medir hasta
+  tener un código real. *No se curó «por las dudas»: quien recupera **no
+  conoce** su contraseña actual, así que la cura de (a) no aplica y adivinar
+  dejaría el flujo roto con un mensaje bonito.*
+- **D-723** — el tercer despachador, abierto.
+- **Nadie vigila el canal de correo** — sin monitor ni prueba periódica.
+- **La pantalla de recuperar NO EXISTE en la app del cliente** (ni «olvidé mi
+  contraseña» en su login). Construirla es de la **sesión de login** del founder.
