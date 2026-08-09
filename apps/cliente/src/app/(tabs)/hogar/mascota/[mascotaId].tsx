@@ -1606,18 +1606,30 @@ export default function PerfilDeMascota() {
                       Con `marginBottom: 12` la pata aterrizaba justo sobre
                       «Lo que ves en casa…». Sube a 20: separación real, y la
                       caja NO vuelve (A6 pide sin superficie, no sin aire). */}
+                  {/* ✅ LA PUERTA RECUPERA SU SUPERFICIE (corrección de mesa).
+                      Anduvo cuatro vueltas curándose al revés por una lectura
+                      de «sin pared» que significaba lo contrario: el texto NO
+                      va suelto sobre el fondo — lleva su tarjeta, como sus
+                      vecinas de Su historia. Queda registrado porque el costo
+                      no fue el código (una línea) sino LAS CUATRO VUELTAS: una
+                      orden que se interpreta se verifica contra el OBJETO antes
+                      de curar, y acá el objeto era la pantalla del founder.
+                      Mismo `relleno`/`elevacion` que las filas vecinas: la
+                      puerta pertenece a esa familia, no es una excepción. */}
                   <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[5] }}>
-                    <CeldaNavegacion
-                      icono="caso"
-                      titulo={t('perfil.bitacoraEntrada', { nombre: mascota.nombre })}
-                      detalle={t('perfil.bitacoraDetalle')}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/hogar/bitacora',
-                          params: { mascotaId: mascota.id },
-                        })
-                      }
-                    />
+                    <Tarjeta relleno="ninguno" elevacion="reposo">
+                      <CeldaNavegacion
+                        icono="caso"
+                        titulo={t('perfil.bitacoraEntrada', { nombre: mascota.nombre })}
+                        detalle={t('perfil.bitacoraDetalle')}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/hogar/bitacora',
+                            params: { mascotaId: mascota.id },
+                          })
+                        }
+                      />
+                    </Tarjeta>
                   </View>
                   {presentes.length > 1 ? (
                     <FiltroPills
