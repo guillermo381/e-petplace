@@ -1,0 +1,385 @@
+[
+ {
+  "nombre": "_atencion_en_estados",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "_atencion_operable",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 16
+ },
+ {
+  "nombre": "_familia_tiene_miembros_vigentes",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_trg_eventos_auto_log_atencion",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 12
+ },
+ {
+  "nombre": "_trg_eventos_update_ultimo",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_trg_eventos_validar_profundidad",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_trg_mascotas_auto_crear_visibilidad_config",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 1
+ },
+ {
+  "nombre": "_trg_mascotas_crear_perfil_vigente",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "_trg_mascotas_espejar_user_id_a_titular",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 1
+ },
+ {
+  "nombre": "_trg_otorgar_acceso_por_cita_confirmada",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 1
+ },
+ {
+  "nombre": "_trg_propagar_estado_vida_desde_evento",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 2
+ },
+ {
+  "nombre": "_user_es_familiar_autorizado_mascota",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "_user_es_miembro_familia",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_user_es_titular_familia",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "_validar_ownership_cuenta_comercial",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_notificar_dueño_prestador",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "_user_es_codueño_mascota",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 6
+ },
+ {
+  "nombre": "agregar_novedad_paseo",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/paseo/index.ts:155:  const { data, error } = await supabase.rpc('agregar_novedad_paseo', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "audit_fee_configs",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 1
+ },
+ {
+  "nombre": "cerrar_paseo_con_calidad",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/paseo/index.ts:210:  const { data, error } = await supabase.rpc('cerrar_paseo_con_calidad', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "confirmar_cita_servicio",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/citas.ts:113:  const { data, error } = await supabase.rpc('confirmar_cita_servicio', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "desactivar_rasgo_identidad_personal",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/identidadPersonal/index.ts:85:  const { error } = await supabase.rpc('desactivar_rasgo_identidad_personal', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "email_exists",
+  "invocaciones": [
+   "e-petplace-v2: CONTEXT.md:575:- **RPC:** `supabase.rpc('email_exists', { check_email: email })` para detección de email registrado",
+   "e-petplace-v2: src/pages/Checkout.tsx:214:    const { data: existe } = await supabase.rpc('email_exists', { check_email: normalizedEmail });"
+  ],
+  "nInvocaciones": 2,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "email_status_para_invitacion",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "encontrar_prestador_emergencia",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "escenario_paseo_iniciado",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "get_country_config",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "get_estado_onboarding_dueno",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 0
+ },
+ {
+  "nombre": "get_estado_onboarding",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/onboarding.ts:27:    const { data, error } = await supabase.rpc('get_estado_onboarding');"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "get_user_features",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "iniciar_atencion_cita",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/citas.ts:161:  const { error } = await supabase.rpc('iniciar_atencion_cita', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "is_admin",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 16
+ },
+ {
+  "nombre": "log_admin_action",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "log_analytics_event",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "marcar_invitacion_aceptada",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/empleados.ts:256:  const { error: updateError } = await supabase.rpc('marcar_invitacion_aceptada', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 2
+ },
+ {
+  "nombre": "mi_email",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 1
+ },
+ {
+  "nombre": "obtener_alertas_activas_mascota_para_familia_servicio",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "obtener_paseo_por_cita",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/paseo/index.ts:246:  const { data, error } = await supabase.rpc('obtener_paseo_por_cita', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "obtener_resumen_actividad_prestador",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/actividad.ts:54:  const { data, error } = await supabase.rpc('obtener_resumen_actividad_prestador', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 8
+ },
+ {
+  "nombre": "rechazar_cita_servicio",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/citas.ts:137:  const { data, error } = await supabase.rpc('rechazar_cita_servicio', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "rechazar_invitacion_pendiente_login",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "registrar_archivo_atencion",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/atencion/index.ts:131:  const { data, error } = await supabase.rpc('registrar_archivo_atencion', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "registrar_track_paseo",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/paseo/index.ts:130:  const { data, error } = await supabase.rpc('registrar_track_paseo', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 2
+ },
+ {
+  "nombre": "service_active_in",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "simular_cliente_crea_familia",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 9
+ },
+ {
+  "nombre": "simular_cliente_crea_mascota",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 9
+ },
+ {
+  "nombre": "simular_cliente_otorga_acceso_prestador",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 7
+ },
+ {
+  "nombre": "simular_prestador_inicia_paseo",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 4
+ },
+ {
+  "nombre": "test_guard_activo",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 14
+ },
+ {
+  "nombre": "test_marca_metadata",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 7
+ },
+ {
+  "nombre": "test_marca_nombre",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 5
+ },
+ {
+  "nombre": "test_registry_insert",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 13
+ },
+ {
+  "nombre": "trg_prestador_documentos_notif_cambio_estado",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 2
+ },
+ {
+  "nombre": "update_device_last_seen",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 0
+ },
+ {
+  "nombre": "use_beta_invite",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "user_has_feature",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "user_puede_ver_dimension",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 6
+ },
+ {
+  "nombre": "validate_beta_access",
+  "invocaciones": [],
+  "nInvocaciones": 0,
+  "nSoloDefinicionOdoc": 3
+ },
+ {
+  "nombre": "verificar_identificacion_disponible",
+  "invocaciones": [
+   "e-petplace-prestadores: src/lib/cuentaComercial.ts:70:    const { data, error } = await supabase.rpc('verificar_identificacion_disponible', {"
+  ],
+  "nInvocaciones": 1,
+  "nSoloDefinicionOdoc": 4
+ }
+]

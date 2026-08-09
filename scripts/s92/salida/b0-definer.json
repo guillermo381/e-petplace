@@ -1,0 +1,415 @@
+[
+ {
+  "acl_default_public": false,
+  "funcion": "_atencion_en_estados(uuid,text[])",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_atencion_operable(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_familia_tiene_miembros_vigentes(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_eventos_auto_log_atencion()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_eventos_update_ultimo()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_eventos_validar_profundidad()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_mascotas_auto_crear_visibilidad_config()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_mascotas_crear_perfil_vigente()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_mascotas_espejar_user_id_a_titular()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_otorgar_acceso_por_cita_confirmada()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_trg_propagar_estado_vida_desde_evento()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_user_es_familiar_autorizado_mascota(uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_user_es_miembro_familia(uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_user_es_titular_familia(uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "_validar_ownership_cuenta_comercial(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "\"_notificar_dueño_prestador\"(uuid,text,text,text,text,jsonb)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "\"_user_es_codueño_mascota\"(uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "agregar_novedad_paseo(uuid,text,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "audit_fee_configs()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "cerrar_paseo_con_calidad(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "confirmar_cita_servicio(uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "desactivar_rasgo_identidad_personal(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "email_exists(text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "email_status_para_invitacion(text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "encontrar_prestador_emergencia(double precision,double precision,text,integer)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "escenario_paseo_iniciado()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "get_country_config(text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "get_estado_onboarding_dueno()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "get_estado_onboarding()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "get_user_features(uuid)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "iniciar_atencion_cita(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "is_admin()",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "log_admin_action(uuid,text,text,text,text,jsonb,jsonb)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "log_analytics_event(text,uuid,jsonb,text,text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "marcar_invitacion_aceptada(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "mi_email()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "obtener_alertas_activas_mascota_para_familia_servicio(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "obtener_paseo_por_cita(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "obtener_resumen_actividad_prestador(uuid,text,date,date)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "rechazar_cita_servicio(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "rechazar_invitacion_pendiente_login(uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "registrar_archivo_atencion(uuid,text,text,text,text,text,text,bigint)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "registrar_track_paseo(uuid,jsonb,boolean)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "service_active_in(text,text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "simular_cliente_crea_familia(uuid,text,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "simular_cliente_crea_mascota(uuid,text,uuid,uuid,text,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "simular_cliente_otorga_acceso_prestador(uuid,uuid,uuid,uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "simular_prestador_inicia_paseo(uuid,uuid,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "test_guard_activo()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "test_marca_metadata(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "test_marca_nombre(text,uuid)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "test_registry_insert(text,uuid,uuid,text,jsonb)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": false
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "trg_prestador_documentos_notif_cambio_estado()",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "update_device_last_seen()",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "use_beta_invite(uuid,uuid)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "user_has_feature(uuid,text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "user_puede_ver_dimension(uuid,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "validate_beta_access(text,text)",
+  "search_path_mutable": true,
+  "tiene_anon": true,
+  "tiene_public": true
+ },
+ {
+  "acl_default_public": false,
+  "funcion": "verificar_identificacion_disponible(text,text)",
+  "search_path_mutable": false,
+  "tiene_anon": true,
+  "tiene_public": true
+ }
+]

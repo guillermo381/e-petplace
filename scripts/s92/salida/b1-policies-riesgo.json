@@ -1,0 +1,90 @@
+[
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "caso_abierto_select",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "evento_caso_clinico_abierto"
+ },
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "caso_cerrado_select",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "evento_caso_clinico_cerrado"
+ },
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "caso_transferido_select",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "evento_caso_clinico_transferido"
+ },
+ {
+  "cmd": "DELETE",
+  "nombre": "is_admin",
+  "policyname": "hito_narrativo_delete_admin",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "evento_hito_narrativo"
+ },
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "admins_read_all_mascotas_adopcion",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "mascotas_adopcion"
+ },
+ {
+  "cmd": "DELETE",
+  "nombre": "is_admin",
+  "policyname": "productos-fotos: delete admin",
+  "roles": "{public}",
+  "schemaname": "storage",
+  "tablename": "objects"
+ },
+ {
+  "cmd": "INSERT",
+  "nombre": "is_admin",
+  "policyname": "productos-fotos: upload admin",
+  "roles": "{public}",
+  "schemaname": "storage",
+  "tablename": "objects"
+ },
+ {
+  "cmd": "UPDATE",
+  "nombre": "is_admin",
+  "policyname": "admins_update_pedidos",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "pedidos"
+ },
+ {
+  "cmd": "ALL",
+  "nombre": "is_admin",
+  "policyname": "admins_manage_productos",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "productos"
+ },
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "admins_read_all_profiles",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "profiles"
+ },
+ {
+  "cmd": "SELECT",
+  "nombre": "is_admin",
+  "policyname": "admins_read_all_solicitudes",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "solicitudes_adopcion"
+ }
+]

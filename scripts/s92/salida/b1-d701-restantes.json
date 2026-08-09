@@ -1,0 +1,8 @@
+[
+ {
+  "funcion": "email_exists(text)"
+ },
+ {
+  "funcion": "is_admin()"
+ }
+]

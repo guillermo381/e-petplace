@@ -1,0 +1,5 @@
+# Los `_*.sql` son los archivos que la lib le pasa al CLI (`db query --file`):
+# se reescriben en cada corrida y no son evidencia de nada. Los `.json` SÍ se
+# versionan a propósito — son la medición literal de esta sesión, y sin ellos el
+# acta afirmaría números que nadie puede volver a mirar.
+_*.sql

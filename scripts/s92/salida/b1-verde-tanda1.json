@@ -1,0 +1,86 @@
+[
+ {
+  "id": "30 funciones · anon EXECUTE",
+  "pregunta": "¿queda alguna de las 30 alcanzable por anon?",
+  "obtenido": "0 de 30 abiertas",
+  "ok": true
+ },
+ {
+  "id": "andamiaje · authenticated EXECUTE",
+  "pregunta": "¿un autenticado cualquiera alcanza el andamiaje de test?",
+  "obtenido": "0 de 9 abiertas",
+  "ok": true
+ },
+ {
+  "id": "camino real anon · mi_email",
+  "pregunta": "la que ANTES ejecutaba de verdad para anon, ¿rebota ahora?",
+  "obtenido": "HTTP 401 {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denie",
+  "ok": true
+ },
+ {
+  "id": "camino real anon · test_marca_nombre",
+  "pregunta": "la que ANTES ejecutaba de verdad para anon, ¿rebota ahora?",
+  "obtenido": "HTTP 401 {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denie",
+  "ok": true
+ },
+ {
+  "id": "camino real anon · _user_es_titular_familia",
+  "pregunta": "la que ANTES ejecutaba de verdad para anon, ¿rebota ahora?",
+  "obtenido": "HTTP 401 {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denie",
+  "ok": true
+ },
+ {
+  "id": "9 helpers · authenticated EXECUTE",
+  "pregunta": "¿quedó algún helper de policy cerrado a authenticated?",
+  "obtenido": "0 de 9 rotos",
+  "ok": true
+ },
+ {
+  "id": "titular lee · mascotas",
+  "pregunta": "policies de mascota (_user_es_codueño_mascota, 17 policies)",
+  "obtenido": "HTTP 200 [{\"id\":\"d2e31d70-54fc-4d47-b425-1617239257eb\",\"nombre\":\"Thor",
+  "ok": true
+ },
+ {
+  "id": "titular lee · familia_miembro",
+  "pregunta": "policies de familia (_user_es_titular_familia, 8)",
+  "obtenido": "HTTP 200 [{\"id\":\"de300000-0000-4000-8000-000000000fa1\",\"familia_id\":\"",
+  "ok": true
+ },
+ {
+  "id": "titular lee · evento_cita_servicio",
+  "pregunta": "agenda del prestador",
+  "obtenido": "HTTP 200 [{\"id\":\"c38ae350-ab1d-439e-967d-33d78187ce93\",\"estado\":\"conf",
+  "ok": true
+ },
+ {
+  "id": "titular lee · caso_clinico",
+  "pregunta": "caso clínico (la policy del INSERT del vet vive acá)",
+  "obtenido": "HTTP 200 [{\"id\":\"9f25d1dd-8f87-47f7-9a05-9d2ee9f0491d\",\"estado\":\"acti",
+  "ok": true
+ },
+ {
+  "id": "titular lee · mascota_acceso_prestador",
+  "pregunta": "acceso por cita",
+  "obtenido": "HTTP 200 [{\"id\":\"e14fdcba-cc07-4611-b9c2-2ef035b31d22\",\"mascota_id\":\"",
+  "ok": true
+ },
+ {
+  "id": "titular lee · cuentas_comerciales",
+  "pregunta": "la cuenta del titular",
+  "obtenido": "HTTP 200 [{\"id\":\"de300000-0000-4000-8000-0000000000cc\",\"estado\":\"acti",
+  "ok": true
+ },
+ {
+  "id": "titular · obtener_mi_prestador",
+  "pregunta": "«Tu negocio» abre",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "id": "titular · obtener_sedes_de_mis_citas",
+  "pregunta": "lector angosto",
+  "obtenido": "HTTP 200",
+  "ok": true
+ }
+]

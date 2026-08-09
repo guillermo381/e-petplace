@@ -1,0 +1,423 @@
+[
+ {
+  "nombre": "_atencion_en_estados",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "_atencion_operable",
+  "porRepo": {
+   "e-petplace-prestadores": 18
+  },
+  "total": 18
+ },
+ {
+  "nombre": "_familia_tiene_miembros_vigentes",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_trg_eventos_auto_log_atencion",
+  "porRepo": {
+   "e-petplace-prestadores": 4,
+   "e-petplace-sistema-pruebas": 8
+  },
+  "total": 12
+ },
+ {
+  "nombre": "_trg_eventos_update_ultimo",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_trg_eventos_validar_profundidad",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_trg_mascotas_auto_crear_visibilidad_config",
+  "porRepo": {
+   "e-petplace-prestadores": 1
+  },
+  "total": 1
+ },
+ {
+  "nombre": "_trg_mascotas_crear_perfil_vigente",
+  "porRepo": {
+   "e-petplace-prestadores": 4
+  },
+  "total": 4
+ },
+ {
+  "nombre": "_trg_mascotas_espejar_user_id_a_titular",
+  "porRepo": {
+   "e-petplace-prestadores": 1
+  },
+  "total": 1
+ },
+ {
+  "nombre": "_trg_otorgar_acceso_por_cita_confirmada",
+  "porRepo": {
+   "e-petplace-prestadores": 1
+  },
+  "total": 1
+ },
+ {
+  "nombre": "_trg_propagar_estado_vida_desde_evento",
+  "porRepo": {
+   "e-petplace-prestadores": 2
+  },
+  "total": 2
+ },
+ {
+  "nombre": "_user_es_familiar_autorizado_mascota",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ },
+ {
+  "nombre": "_user_es_miembro_familia",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_user_es_titular_familia",
+  "porRepo": {
+   "e-petplace-prestadores": 4
+  },
+  "total": 4
+ },
+ {
+  "nombre": "_validar_ownership_cuenta_comercial",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_notificar_dueño_prestador",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "_user_es_codueño_mascota",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "agregar_novedad_paseo",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ },
+ {
+  "nombre": "audit_fee_configs",
+  "porRepo": {
+   "e-petplace-prestadores": 1
+  },
+  "total": 1
+ },
+ {
+  "nombre": "cerrar_paseo_con_calidad",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "confirmar_cita_servicio",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "desactivar_rasgo_identidad_personal",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "email_exists",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 1,
+   "e-petplace-v2": 2
+  },
+  "total": 4
+ },
+ {
+  "nombre": "email_status_para_invitacion",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ },
+ {
+  "nombre": "encontrar_prestador_emergencia",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "escenario_paseo_iniciado",
+  "porRepo": {
+   "e-petplace-prestadores": 2,
+   "e-petplace-sistema-pruebas": 2
+  },
+  "total": 4
+ },
+ {
+  "nombre": "get_country_config",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "get_estado_onboarding",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ },
+ {
+  "nombre": "get_user_features",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "iniciar_atencion_cita",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "is_admin",
+  "porRepo": {
+   "e-petplace-prestadores": 14,
+   "e-petplace-admin": 2
+  },
+  "total": 16
+ },
+ {
+  "nombre": "log_admin_action",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "log_analytics_event",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "marcar_invitacion_aceptada",
+  "porRepo": {
+   "e-petplace-prestadores": 3
+  },
+  "total": 3
+ },
+ {
+  "nombre": "mi_email",
+  "porRepo": {
+   "e-petplace-prestadores": 1
+  },
+  "total": 1
+ },
+ {
+  "nombre": "obtener_alertas_activas_mascota_para_familia_servicio",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ },
+ {
+  "nombre": "obtener_paseo_por_cita",
+  "porRepo": {
+   "e-petplace-prestadores": 7
+  },
+  "total": 7
+ },
+ {
+  "nombre": "obtener_resumen_actividad_prestador",
+  "porRepo": {
+   "e-petplace-prestadores": 9
+  },
+  "total": 9
+ },
+ {
+  "nombre": "rechazar_cita_servicio",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "rechazar_invitacion_pendiente_login",
+  "porRepo": {
+   "e-petplace-prestadores": 4
+  },
+  "total": 4
+ },
+ {
+  "nombre": "registrar_archivo_atencion",
+  "porRepo": {
+   "e-petplace-prestadores": 7
+  },
+  "total": 7
+ },
+ {
+  "nombre": "registrar_track_paseo",
+  "porRepo": {
+   "e-petplace-prestadores": 4
+  },
+  "total": 4
+ },
+ {
+  "nombre": "service_active_in",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "simular_cliente_crea_familia",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 8
+  },
+  "total": 9
+ },
+ {
+  "nombre": "simular_cliente_crea_mascota",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 8
+  },
+  "total": 9
+ },
+ {
+  "nombre": "simular_cliente_otorga_acceso_prestador",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 6
+  },
+  "total": 7
+ },
+ {
+  "nombre": "simular_prestador_inicia_paseo",
+  "porRepo": {
+   "e-petplace-prestadores": 2,
+   "e-petplace-sistema-pruebas": 2
+  },
+  "total": 4
+ },
+ {
+  "nombre": "test_guard_activo",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 13
+  },
+  "total": 14
+ },
+ {
+  "nombre": "test_marca_metadata",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 6
+  },
+  "total": 7
+ },
+ {
+  "nombre": "test_marca_nombre",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 4
+  },
+  "total": 5
+ },
+ {
+  "nombre": "test_registry_insert",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-sistema-pruebas": 12
+  },
+  "total": 13
+ },
+ {
+  "nombre": "trg_prestador_documentos_notif_cambio_estado",
+  "porRepo": {
+   "e-petplace-prestadores": 2
+  },
+  "total": 2
+ },
+ {
+  "nombre": "use_beta_invite",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "user_has_feature",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "user_puede_ver_dimension",
+  "porRepo": {
+   "e-petplace-prestadores": 6
+  },
+  "total": 6
+ },
+ {
+  "nombre": "validate_beta_access",
+  "porRepo": {
+   "e-petplace-prestadores": 1,
+   "e-petplace-admin": 2
+  },
+  "total": 3
+ },
+ {
+  "nombre": "verificar_identificacion_disponible",
+  "porRepo": {
+   "e-petplace-prestadores": 5
+  },
+  "total": 5
+ }
+]

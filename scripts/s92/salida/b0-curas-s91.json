@@ -1,0 +1,72 @@
+[
+ {
+  "id": "D-701 debug_estado_user",
+  "pregunta": "¿anon puede pedir el oráculo de enumeración? (el mismo curl del rojo de S91)",
+  "esperado": "rebote 401/403/404",
+  "obtenido": "HTTP 401 · {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denied for function debug_estado_user\"}",
+  "ok": true
+ },
+ {
+  "id": "D-701 debug_session",
+  "pregunta": "¿anon puede pedir la hermana de la misma migración?",
+  "esperado": "rebote 4xx",
+  "obtenido": "HTTP 401 · {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denied for function debug_session\"}",
+  "ok": true
+ },
+ {
+  "id": "fuga/anon select=*",
+  "pregunta": "¿anon lee la tabla `prestadores` entera?",
+  "esperado": "rebote o vacío",
+  "obtenido": "HTTP 200 · []",
+  "ok": true
+ },
+ {
+  "id": "fuga/auth direccion",
+  "pregunta": "¿un autenticado pide `direccion` directo de la tabla? (la columna de S84)",
+  "esperado": "rebote 401/403 — la vista pública no la expone",
+  "obtenido": "HTTP 403 · {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denied for table prestadores\"}",
+  "ok": true
+ },
+ {
+  "id": "fuga/vista pública",
+  "pregunta": "¿la fuente canónica (`v_prestadores_publicos`) SIGUE respondiendo? — el lado sano",
+  "esperado": "PASA 200 con filas",
+  "obtenido": "HTTP 200 · [{\"id\":\"8026077e-f96f-4127-9597-8f4b2646a1b2\",\"nombre_comercial\":\"Paseos Shyris\"}, \n {\"id\":\"5e53c898",
+  "ok": true
+ },
+ {
+  "id": "fuga/vista sin direccion",
+  "pregunta": "¿la vista pública expone `direccion`? (si la expusiera, el lector angosto sobraría)",
+  "esperado": "rebote — la columna no existe en la vista",
+  "obtenido": "HTTP 400 · {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column v_prestadores_publicos.direccion does not exist\"}",
+  "ok": true
+ },
+ {
+  "id": "D-455 lector angosto",
+  "pregunta": "¿el lector angosto responde a un autenticado con sesión? (los ids son filtro, no permiso)",
+  "esperado": "PASA 200",
+  "obtenido": "HTTP 200 · []",
+  "ok": true
+ },
+ {
+  "id": "D-455 anon rebota",
+  "pregunta": "¿anon puede usar el lector angosto? — el otro brazo del par",
+  "esperado": "rebote o vacío",
+  "obtenido": "HTTP 401 · {\"code\":\"42501\",\"details\":null,\"hint\":null,\"message\":\"permission denied for function obtener_sedes_de_mis_citas\"}",
+  "ok": true
+ },
+ {
+  "id": "S91 regrant/obtener_mi_prestador",
+  "pregunta": "¿el titular abre «Tu negocio»? — el síntoma exacto del 42501 de S91",
+  "esperado": "PASA 200 con su fila",
+  "obtenido": "HTTP 200 · [{\"id\":\"de300000-0000-4000-8000-0000000000e5\",\"nombre_comercial\":\"Paseos Andres\",\"tipo\":\"paseador\",\"country_code\":\"EC\",\"",
+  "ok": true
+ },
+ {
+  "id": "S91 regrant/cuentas_comerciales",
+  "pregunta": "¿la policy de `cuentas_comerciales` (2 de las 8) sigue dejando pasar al dueño?",
+  "esperado": "PASA 200",
+  "obtenido": "HTTP 200 · [{\"id\":\"de300000-0000-4000-8000-0000000000cc\",\"estado\":\"activa\"}]",
+  "ok": true
+ }
+]

@@ -1,0 +1,335 @@
+[
+ {
+  "cmd": "SELECT",
+  "policyname": "bonos_prestador_own",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "bonos",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "bonos_prestador_update",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "bonos",
+  "with_check": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "prestador_insert_bonos_walkin",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "bonos",
+  "with_check": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (prestador_id IN ( SELECT prestador_empleados.prestador_id\n   FROM prestador_empleados\n  WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))"
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "caso_clinico_insert_vet",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "caso_clinico",
+  "with_check": "((EXISTS ( SELECT 1\n   FROM cuentas_comerciales cco\n  WHERE ((cco.id = caso_clinico.cuenta_comercial_tratante_id) AND ((cco.owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM (prestador_empleados pe\n             JOIN prestadores p ON ((p.id = pe.prestador_id)))\n          WHERE ((p.cuenta_comercial_id = caso_clinico.cuenta_comercial_tratante_id) AND (pe.user_id = auth.uid()) AND (pe.activo = true) AND empleado_tiene_rol(pe.prestador_id, ARRAY['dueño'::text, 'profesional'::text])))))))) AND (EXISTS ( SELECT 1\n   FROM mascota_acceso_prestador map\n  WHERE ((map.mascota_id = caso_clinico.mascota_id) AND (map.cuenta_comercial_id = caso_clinico.cuenta_comercial_tratante_id) AND (map.revocado_en IS NULL) AND ((map.expira_en IS NULL) OR (map.expira_en > now()))))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "consultor_select_clinica_consultor_propia",
+  "qual": "(EXISTS ( SELECT 1\n   FROM cuentas_comerciales cco\n  WHERE ((cco.id = caso_clinico_consultor.cuenta_comercial_consultor_id) AND ((cco.owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM (prestador_empleados pe\n             JOIN prestadores p ON ((p.id = pe.prestador_id)))\n          WHERE ((p.cuenta_comercial_id = caso_clinico_consultor.cuenta_comercial_consultor_id) AND (pe.user_id = auth.uid()) AND (pe.activo = true))))))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "caso_clinico_consultor",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "cert_prestador",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "certificaciones",
+  "with_check": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR is_admin())"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "certificado_select_acceso",
+  "qual": "(user_tiene_acceso_a_mascota(mascota_id) OR (EXISTS ( SELECT 1\n   FROM prestadores pr\n  WHERE ((pr.id = certificado_salud.prestador_id) AND _user_opera_cuenta_comercial(pr.cuenta_comercial_id, auth.uid())))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "certificado_salud",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "cobro_presencial_select_cuenta",
+  "qual": "(EXISTS ( SELECT 1\n   FROM (evento_cita_servicio ecs\n     JOIN prestadores p ON ((p.id = ecs.prestador_id)))\n  WHERE ((ecs.id = cobro_presencial_registrado.evento_cita_servicio_id) AND _user_opera_cuenta_comercial(p.cuenta_comercial_id, auth.uid()))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "cobro_presencial_registrado",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "owner_select_own_cuentas",
+  "qual": "((owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.cuenta_comercial_id = cuentas_comerciales.id) AND user_gestiona_prestador(p.id)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "cuentas_comerciales",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "owner_update_own_cuentas_data",
+  "qual": "((owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.cuenta_comercial_id = cuentas_comerciales.id) AND user_gestiona_prestador(p.id)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "cuentas_comerciales",
+  "with_check": "((owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.cuenta_comercial_id = cuentas_comerciales.id) AND user_gestiona_prestador(p.id)))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "estadias_prestador_own",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "estadias",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "estadias_prestador_update",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "estadias",
+  "with_check": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "prestador_insert_estadias_walkin",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "estadias",
+  "with_check": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (prestador_id IN ( SELECT prestador_empleados.prestador_id\n   FROM prestador_empleados\n  WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))"
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "cita_insert_prestador_walkin",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "evento_cita_servicio",
+  "with_check": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (empleado_id IN ( SELECT prestador_empleados.id\n   FROM prestador_empleados\n  WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "cita_select_prestador",
+  "qual": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (empleado_id IN ( SELECT prestador_empleados.id\n   FROM prestador_empleados\n  WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "evento_cita_servicio",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "cita_update_prestador",
+  "qual": "((prestador_id IN ( SELECT p.id\n   FROM prestadores p\n  WHERE (p.user_id = auth.uid()))) OR (empleado_id IN ( SELECT pe.id\n   FROM prestador_empleados pe\n  WHERE ((pe.user_id = auth.uid()) AND (pe.activo = true)))))",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "evento_cita_servicio",
+  "with_check": "((prestador_id IN ( SELECT p.id\n   FROM prestadores p\n  WHERE (p.user_id = auth.uid()))) OR (empleado_id IN ( SELECT pe.id\n   FROM prestador_empleados pe\n  WHERE ((pe.user_id = auth.uid()) AND (pe.activo = true)))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "map_select_due",
+  "qual": "((mascota_id IN ( SELECT mascotas.id\n   FROM mascotas\n  WHERE (mascotas.user_id = auth.uid()))) OR is_admin() OR (cuenta_comercial_id IN ( SELECT prestadores.cuenta_comercial_id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())\nUNION\n SELECT p.cuenta_comercial_id\n   FROM (prestador_empleados pe\n     JOIN prestadores p ON ((p.id = pe.prestador_id)))\n  WHERE ((pe.user_id = auth.uid()) AND (pe.activo = true)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "mascota_acceso_prestador",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "notif_insert_prestador_cita",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "notificaciones",
+  "with_check": "(user_id IN ( SELECT c.user_id\n   FROM evento_cita_servicio c\n  WHERE ((c.prestador_id IN ( SELECT prestadores.id\n           FROM prestadores\n          WHERE (prestadores.user_id = auth.uid()))) OR (c.empleado_id IN ( SELECT prestador_empleados.id\n           FROM prestador_empleados\n          WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "atencion_log_select",
+  "qual": "(is_admin() OR (prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (prestador_id IN ( SELECT pe.prestador_id\n   FROM prestador_empleados pe\n  WHERE ((pe.user_id = auth.uid()) AND (pe.activo = true)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_atencion_log",
+  "with_check": ""
+ },
+ {
+  "cmd": "DELETE",
+  "policyname": "empleado_servicios_dueño_elimina",
+  "qual": "(empleado_id IN ( SELECT pe.id\n   FROM prestador_empleados pe\n  WHERE (pe.prestador_id IN ( SELECT prestadores.id\n           FROM prestadores\n          WHERE (prestadores.user_id = auth.uid())))))",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "prestador_empleado_servicios",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "empleado_servicios_dueño_inserta",
+  "qual": "",
+  "roles": "{public}",
+  "schemaname": "public",
+  "tablename": "prestador_empleado_servicios",
+  "with_check": "(empleado_id IN ( SELECT pe.id\n   FROM prestador_empleados pe\n  WHERE (pe.prestador_id IN ( SELECT prestadores.id\n           FROM prestadores\n          WHERE (prestadores.user_id = auth.uid())))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "prestador_especialidades_public",
+  "qual": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.estado = 'activo'::text))) OR is_admin())",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_especialidades",
+  "with_check": ""
+ },
+ {
+  "cmd": "DELETE",
+  "policyname": "prestador_fotos_delete_titular",
+  "qual": "(EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.id = prestador_fotos.prestador_id) AND (p.user_id = auth.uid()))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_fotos",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "prestador_fotos_insert_titular",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_fotos",
+  "with_check": "(EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.id = prestador_fotos.prestador_id) AND (p.user_id = auth.uid()))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "prestador_fotos_select_vitrina",
+  "qual": "(EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.id = prestador_fotos.prestador_id) AND ((p.estado = 'activo'::text) OR (p.user_id = auth.uid())))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_fotos",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "prestador_fotos_update_titular",
+  "qual": "(EXISTS ( SELECT 1\n   FROM prestadores p\n  WHERE ((p.id = prestador_fotos.prestador_id) AND (p.user_id = auth.uid()))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_fotos",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "ph_public",
+  "qual": "(((activo = true) AND (prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.estado = 'activo'::text)))) OR is_admin())",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_horarios",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "pp_public",
+  "qual": "(activo AND (prestador_servicio_id IN ( SELECT ps.id\n   FROM (prestador_servicios ps\n     JOIN prestadores pr ON ((pr.id = ps.prestador_id)))\n  WHERE (ps.activo AND (pr.estado = 'activo'::text)))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_programas",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "pst_public",
+  "qual": "(prestador_servicio_id IN ( SELECT ps.id\n   FROM (prestador_servicios ps\n     JOIN prestadores pr ON ((pr.id = ps.prestador_id)))\n  WHERE (ps.activo AND (pr.estado = 'activo'::text))))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_servicio_tallas",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "ps_public",
+  "qual": "(((activo = true) AND (prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.estado = 'activo'::text)))) OR is_admin())",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_servicios",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "prestador_zonas_public",
+  "qual": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.estado = 'activo'::text))) OR is_admin())",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestador_zonas",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "prestadores_insert_cuenta_propia",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "prestadores",
+  "with_check": "(is_admin() OR (EXISTS ( SELECT 1\n   FROM cuentas_comerciales cc\n  WHERE ((cc.id = prestadores.cuenta_comercial_id) AND (cc.owner_profile_id = auth.uid())))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "pc_prestador_own",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "programas_contratados",
+  "with_check": ""
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "emergencia_prestador",
+  "qual": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR is_admin())",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "solicitudes_emergencia",
+  "with_check": ""
+ },
+ {
+  "cmd": "INSERT",
+  "policyname": "prestador_insert_suscripciones_walkin",
+  "qual": "",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "suscripciones_servicio",
+  "with_check": "((prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid()))) OR (prestador_id IN ( SELECT prestador_empleados.prestador_id\n   FROM prestador_empleados\n  WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestador_empleados.activo = true)))))"
+ },
+ {
+  "cmd": "SELECT",
+  "policyname": "suscr_servicio_prestador_own",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "suscripciones_servicio",
+  "with_check": ""
+ },
+ {
+  "cmd": "UPDATE",
+  "policyname": "suscr_servicio_prestador_update",
+  "qual": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))",
+  "roles": "{authenticated}",
+  "schemaname": "public",
+  "tablename": "suscripciones_servicio",
+  "with_check": "(prestador_id IN ( SELECT prestadores.id\n   FROM prestadores\n  WHERE (prestadores.user_id = auth.uid())))"
+ }
+]

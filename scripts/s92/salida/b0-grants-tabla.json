@@ -1,0 +1,7562 @@
+[
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "_test_resultado_d242"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "_traza_promocion_e164"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "accion_destructiva_pendiente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "admin_permisos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "admin_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "admin_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "admin_usuarios_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "adopcion_seguimiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "analytics_aggregated"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "analytics_events"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "app_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "audit_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "beta_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "bonos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "campanas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "caso_clinico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "caso_clinico_consultor"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_bancos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_categorias_archivo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_ciudades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_conductas_bitacora"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_curriculum_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_ejes_jtbd"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_especialidades_vet"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_especies"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_especies_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_especies_vocabulario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_incidencias_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_incidencias_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_novedades_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_objetivos_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_paises"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_productos_oficio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_restricciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_servicios_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_tipos_documento_titular"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_tipos_evento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_tipos_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_vacunas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cat_zonas_trabajo_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "certificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "checkout_sesiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cita_telemedicina_detalle"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cliente_pendiente_registro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cliente_pendiente_registro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cliente_pendiente_registro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cliente_pendiente_registro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cobro_presencial_registrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "consentimientos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "country_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "criadero_cachorros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "criadero_camadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "criadero_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "criadero_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "criaderos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cuenta_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cuentas_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cupon_usos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "cupones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "daas_api_clients"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "devoluciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "direcciones_guardadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "donaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "emergencia_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "empleado_invitaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "empleado_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "envio_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "envios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "estadias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_adiestramiento_clips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_adiestramiento_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_adiestramiento_objetivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_alergia_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_archivo_adjunto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_atencion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_bitacora_chips"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_bitacora_familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_cambio_nombre"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_caso_clinico_abierto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_caso_clinico_cerrado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_caso_clinico_transferido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_certificado_emitido"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_cita_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_condicion_cronica_diagnosticada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_correccion_dato_identidad"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_emergencia_solicitada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_examen_diagnostico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_archivos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_estados_pelaje"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_incidencias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_notas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_pausas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_productos_consumidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_servicios_aplicados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_grooming_zonas_trabajadas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_historia_clinica_registrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_identidad_personal"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_inscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_intervencion_permanente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_medicacion_administrada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_medicacion_prescrita"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_microchip_asignado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_nota_dueno"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_paseo_novedades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_peso_medicion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_temperamento_observacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "evento_vacuna_aplicada"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos_economicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos_mascota"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos_mascota_adiestramiento"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos_mascota_grooming"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "eventos_mascota_paseo"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "facturas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "familia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "familia_miembro"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "fee_configs"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "fee_configs_historial"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "grooming_talla_discrepancias"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "historial_pagos_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "likes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "liquidacion_eventos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "liquidacion_pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "lista_espera"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "logros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "logros_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "loyalty_b2b"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "lugares_pet_friendly"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "lugares_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascota_acceso_prestador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascota_codueño"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascota_familiar_autorizado"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascota_perfil_vigente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascota_perfil_vigente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascota_perfil_vigente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascota_perfil_vigente"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascota_visibilidad_config"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascotas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mascotas_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "mensajes_admin_seller"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "metricas_negocio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "niveles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "notas_admin_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "notificaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "paseo_social_negativas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "pedido_items"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "pedidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "pedidos_recurrentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "planes_nutricion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "planes_prime"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "post_comentarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "posts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_atencion_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_bloqueos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_empleado_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_empleados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_especialidades"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_horarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_programas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_recetas_frecuentes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_resenas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_servicio_tallas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_servicios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestador_zonas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "prestadores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "presupuesto"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "presupuesto_item"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "productos_comerciales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "profiles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "programas_contratados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "puntos_usuario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "push_tokens"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "referidos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "refugios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "reportes_programados"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "resenas_productos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "restricciones_mascota_activas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seguidores"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seguro_planes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seguro_polizas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seguro_siniestros"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_comisiones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_documentos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_inventario"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_liquidaciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_perfil"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "seller_reglas_asignacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "servicios_exequiales"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "solicitud_autorizacion_mostrador"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "solicitudes_adopcion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "solicitudes_emergencia"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "suscripciones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "suscripciones_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "ticket_mensajes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "tickets_soporte"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "tipos_cambio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "tipos_servicio"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "transacciones_puntos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "user_roles"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_conversion_funnel"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_crecimiento_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_criaderos_publicos"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_daas_eligible_users"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_dashboard_logistico"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_gmv_mensual"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_metricas_tiempo_real"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_mrr"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_pedido_liquidacion"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_pitch_metrics"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_ranking_usuarios"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_recurrentes_pendientes"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "v_resenas_todas"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "vtex_sync_log"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "wearable_alerts"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "wearable_devices"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "wearable_telemetry"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "wearable_zones"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "wishlist"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "DELETE",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "INSERT",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "REFERENCES",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "SELECT",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRIGGER",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "TRUNCATE",
+  "table_name": "zonas_cobertura"
+ },
+ {
+  "grantee": "anon",
+  "privilege_type": "UPDATE",
+  "table_name": "zonas_cobertura"
+ }
+]
