@@ -10164,3 +10164,53 @@ endurecer se hace con tiempo.
 > parentesco con D-686 (grants `anon` en tablas legacy) lo vuelve la misma
 > pasada.
 > **☠️ MUERTE:** ninguna policy consulta `prestadores` sin helper.
+
+---
+
+#### D-701 — 🔴→✅ EL ORÁCULO DE ENUMERACIÓN DE CUENTAS, CERRADO — y las 59 hermanas que quedan
+
+**CERRADA EN EL ACTO (S91-A, migración `20260808140000`). Se registra porque lo
+que importa no es el agujero: es CÓMO apareció y cuántos quedan.**
+
+**El hallazgo salió censando OTRA cosa** — el residuo de las sondas de D. Dos
+funciones `SECURITY DEFINER` viven en `public`, **no nacen de ninguna migración
+versionada**, y tenían EXECUTE para `anon` **y PUBLIC**:
+`debug_estado_user(text)` y `debug_session()`.
+
+**ROJO REPRODUCIDO como `anon`:** con solo un email, `debug_estado_user`
+devolvía `auth.users.id`, `email_confirmed_at`, `created_at`, el estado de
+onboarding del perfil y las filas de `cuentas_comerciales`, `prestadores` y
+`user_roles`. **La clave anon VIAJA EN EL BUNDLE de las dos apps** ⇒ era un
+oráculo de enumeración de cuentas para cualquiera con la app instalada.
+
+**Curado con REVOKE, no DROP** — el portal legado comparte esta DB (regla 69) y
+el REVOKE ya elimina el 100% del riesgo; el DROP se decide en S92 con el censo
+del legado delante. **VERDE por el mismo camino:** `anon` rebota `permission
+denied for function debug_estado_user`. Cero callers en el monorepo (solo
+aparecían en `database.types.ts`, que es generado).
+
+**⚠️ Y EL BARRIDO GENERAL, que es lo que esta ficha existe para dejar escrito:
+quedan 59 funciones `SECURITY DEFINER` con `anon` o PUBLIC en su `proacl`.**
+No se tocan hoy (nada nuevo se abre en S91) y **no todas son agujeros** —
+algunas son legítimamente públicas pre-login. Pero **ninguna lo declara**, y esa
+es la diferencia entre una decisión y una herencia.
+
+**LAS DOS LECCIONES, que valen más que el parche:**
+
+1. **Apareció barriendo residuos, no auditando features.** *Una herramienta de
+   diagnóstico del legado no se descubre leyendo el modelo: nadie la busca
+   porque nadie la usa.* Por eso L-140 exige mirar `proacl` y no razonar «esta
+   función no la llama nadie».
+2. **Mi primer cinturón dio un rojo VERDADERO por una razón FALSA:** usé
+   `LIKE '%=X/%'` para cazar a PUBLIC y también matcheaba `postgres=X/postgres`.
+   Abortó la migración con las funciones **todavía abiertas**. *Un guard que
+   falla por su propia expresión se lee igual que un guard que encontró algo —
+   y si uno lo cree, cura lo que no era.* La forma correcta es por ENTRADA de
+   acl (`unnest`), donde PUBLIC es el grantee vacío: la entrada empieza con `=`.
+
+> **Dueño: A.**
+> **☠️ DISPARO de las 59: S92 (el loop de seguridad)** — misma pasada que D-686
+> (grants `anon` en tablas legacy) y D-700 (el helper de las policies). Las tres
+> son la misma familia: **permisos heredados que nadie declaró.**
+> **☠️ MUERTE:** toda `SECURITY DEFINER` de `public` declara su audiencia, y la
+> que sea pública lo dice en su migración.
