@@ -63,8 +63,31 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
-/** Alto de la portada. Sangra a los lados: la pieza NO le pone padding
- *  horizontal — el borde de la portada es el borde de la pantalla. */
+/** ── S91-B · LA PORTADA DEJA DE TENER ALTO FIJO Y PASA A TENER RELACIÓN.
+ *
+ *  EL SÍNTOMA, del founder: «la imagen se ve muy rectangular, forzada a
+ *  16:9». LA CAUSA, medida: **era peor que 16:9** — `ALTO_PORTADA` era
+ *  176 FIJO, y contra el ancho de un teléfono típico (~390) eso da **2.2:1**,
+ *  más panorámico todavía que el 16:9 (1.78) que se le atribuía. Un alto
+ *  fijo no tiene relación: la TIENE distinta en cada ancho, y en una
+ *  tablet se estira hasta el absurdo.
+ *
+ *  LA CURA: se calibra la RELACIÓN, no el alto — y el ancho ya se medía
+ *  (la pieza vive en cajas de anchos distintos). 4:3 es el marco más
+ *  cuadrado que sigue leyéndose como portada y no como tarjeta, y su
+ *  porqué es de contenido, no de gusto: **cuanto más cuadrado el marco,
+ *  menos sufre una foto VERTICAL** — y las fotos de un negocio real
+ *  llegan como llegan. Conecta con D-696 (el recorte ciego de `cover`):
+ *  esto no lo cura, pero le baja el daño mientras tanto.
+ *
+ *  ⚠️ CON `aSangre`, EL INSET SE SUMA AL ALTO. Si no se sumara, la barra
+ *  de estado se comería su parte de la foto y la relación VISIBLE sería
+ *  otra —justo el error que se está curando—. Así la imagen sigue
+ *  naciendo en el borde de arriba y lo que se ve debajo de la barra
+ *  conserva su 4:3: *pinta desde el techo, y respira.* */
+const RELACION_PORTADA = 4 / 3
+/** El alto de arranque, ANTES de que `onLayout` mida. Dura un frame y no
+ *  se ve; existe para que la caja no nazca en cero y salte. */
 const ALTO_PORTADA = 176
 /** Cuánto monta la firma sobre la portada. El logo pisa el borde: es lo
  *  que ata la identidad a su fondo en vez de apilar dos bloques sueltos. */
@@ -281,6 +304,12 @@ export function FichaPrestador({
   // separados por el punto medio; con uno, va ese solo; sin ninguno, la
   // línea no se pinta — jamás nace un "Sin oficio", que sería inventar
   // una ausencia donde la familia simplemente no vería nada.
+  /** El alto VIVO: relación sobre el ancho medido, más el inset cuando la
+   *  portada vive en el techo. Con `ancho` en 0 (el primer frame, antes de
+   *  `onLayout`) cae al alto de arranque — jamás a cero. */
+  const altoPortada =
+    (ancho > 0 ? Math.round(ancho / RELACION_PORTADA) : ALTO_PORTADA) + (aSangre ? insets.top : 0)
+
   const linea = [oficio, ciudad].filter((x) => x !== null && x !== undefined && x !== '').join(' · ')
 
   return (
@@ -323,10 +352,10 @@ export function FichaPrestador({
               else if (v === N + 1) riel.current?.scrollTo({ x: ancho, animated: false })
             }}
             scrollEventThrottle={16}
-            style={{ height: ALTO_PORTADA }}
+            style={{ height: altoPortada }}
           >
             {tira.map((pos, i) => (
-              <View key={`${pos.url}-${i}`} style={{ width: ancho, height: ALTO_PORTADA }}>
+              <View key={`${pos.url}-${i}`} style={{ width: ancho, height: altoPortada }}>
                 {pos.esClip ? (
                   /* ☠️ ACÁ VIVÍA UNA `<Image>` CON EL PÓSTER Y UN ▶ QUE NO
                      REPRODUCÍA. Las dos mitades eran el mismo defecto: el
@@ -343,7 +372,7 @@ export function FichaPrestador({
                 ) : (
                   <Image
                     source={{ uri: pos.url }}
-                    style={{ width: ancho, height: ALTO_PORTADA }}
+                    style={{ width: ancho, height: altoPortada }}
                     resizeMode="cover"
                     accessibilityRole="image"
                     accessibilityLabel={`Foto ${indiceReal(i) + 1} de ${N}, ${nombre ?? 'el negocio'}`}
@@ -425,7 +454,7 @@ export function FichaPrestador({
       ) : montaVacio ? (
         <View
           style={{
-            height: ALTO_PORTADA,
+            height: altoPortada,
             backgroundColor: theme.bg.overlay,
             alignItems: 'center',
             justifyContent: 'center',
