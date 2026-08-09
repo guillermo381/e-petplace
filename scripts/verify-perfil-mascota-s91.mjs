@@ -94,6 +94,42 @@ for (const caso of CASOS) {
   }
   if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
 
+  const superficieDe = async (texto) =>
+    page.evaluate((tx) => {
+      const todos = Array.from(document.querySelectorAll('*'));
+      const nodo = todos.reverse().find((e) => (e.textContent ?? '').trim().startsWith(tx));
+      if (!nodo) return '(puerta no encontrada)';
+      let n = nodo;
+      for (let i = 0; i < 8 && n; i += 1) {
+        const bg = getComputedStyle(n).backgroundColor;
+        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+        n = n.parentElement;
+      }
+      return '(sin superficie)';
+    }, texto);
+
+  {
+    // ⚠️ SOLO PUERTAS. «Quiénes viven acá» estuvo en esta lista y el assert la
+    // marcó en rojo — con razón: es el TÍTULO DE SECCIÓN, y va sobre el fondo
+    // como «Identidad» o «Su historia». El instrumento cazó un error de MI
+    // censo, que es para lo que sirve: si hubiera puesto solo lo que ya sabía
+    // que estaba bien, no habría medido nada.
+    const puertas = caso.id === 'acuario'
+      ? ['Cuéntanos algo de', 'Declarar quiénes viven acá']
+      : ['Cuéntanos algo de', 'Documentos'];
+    for (const puerta of puertas) {
+      const bg = await superficieDe(puerta);
+      // ⚠️ «no encontrada» es ROJO, no verde. La primera versión de este
+      // assert solo rechazaba «sin superficie» y el rosa del fondo — así que
+      // una puerta AUSENTE pasaba. Es el verde falso que vengo cazando toda la
+      // sesión, escrito por mí: **un assert sobre una propiedad de algo que no
+      // está no es un assert que pasa, es un assert que no corrió.**
+      const bien = bg !== '(sin superficie)' && bg !== '(puerta no encontrada)' && bg !== 'rgb(250, 242, 245)';
+      check(bien, `PARED · «${puerta}» tiene su superficie (${bg})`);
+    }
+  }
+
+
   /**
    * A8 × P7 — LA CUENTA TAMBIÉN SE COMPONE.
    *
@@ -175,6 +211,21 @@ for (const caso of CASOS) {
     check(!h.includes('le vence'), 'P7 · el HOGAR no le avisa vencimientos de vacuna a un acuario');
     check(h.includes(caso.nombre), 'P7 · y sin embargo el acuario SÍ está en el Hogar (no se cayó de la casa)');
   }
+
+  /**
+   * LA SONDA, AHORA POR PUERTA — mide en LAS DOS DIRECCIONES.
+   *
+   * Nació para probar que la puerta de la bitácora NO tenía caja; la letra
+   * resultó ser la contraria y hoy prueba que SÍ la tiene. **Un instrumento
+   * que sirve para las dos direcciones es un guard; uno que solo confirma lo
+   * que uno cree es un espejo** — por eso se conserva y se ensancha en vez de
+   * morir con su primer hallazgo.
+   *
+   * Se corre POR PUERTA y no por pantalla: el perfil tiene TRES (bitácora ·
+   * Documentos · quiénes viven acá) y una sola estaba pelada. Afirmar «las
+   * puertas tienen superficie» mirando UNA es el mismo error que ya cometí
+   * afirmando P7 mirando una sola pantalla.
+   */
 
   /**
    * SONDA DE LA CAJA DE LA PUERTA (re-gate del founder, ley A6 «sin caja»).

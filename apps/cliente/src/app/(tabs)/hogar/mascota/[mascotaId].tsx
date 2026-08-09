@@ -1476,11 +1476,20 @@ export default function PerfilDeMascota() {
                 })}
               </View>
             )}
-            <CeldaNavegacion
-              titulo={t('perfil.habitantesDeclarar')}
-              registro="tinta"
-              onPress={() => setHabitantesHoja(true)}
-            />
+            {/* ✅ SU PARED, igual que la puerta de la bitácora. Es la MISMA
+                familia —una puerta del perfil— y por eso lleva el mismo
+                `relleno` y la misma `elevacion` que sus vecinas: la coherencia
+                no es que se parezcan, es que se resuelvan igual.
+                Censo de la tanda: el perfil tiene TRES puertas —bitácora,
+                Documentos y ésta— y ésta era la ÚNICA sin superficie. No hay
+                una cuarta pelada. */}
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                titulo={t('perfil.habitantesDeclarar')}
+                registro="tinta"
+                onPress={() => setHabitantesHoja(true)}
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
