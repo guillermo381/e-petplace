@@ -129,56 +129,19 @@ export default function PaseoDisponibles() {
    *  a pedir nada — un botón que no reintenta es peor que ningún botón. */
   const [reintento, setReintento] = useState(0);
 
-  /* ═══ INSTRUMENTO (P0-C, 9-ago) — NO ES DECORACIÓN: ES LA MEDICIÓN ═══════
-   *
-   * Síntoma medido por el founder: toca Reservar, sale «Estamos terminando de
-   * cargar tus mascotas» y **se queda ahí para siempre**. No hay un después.
-   *
-   * Y lo medido del otro lado descarta la lentitud: **la base responde en 11 ms
-   * y la red en ~650 ms**. *Una espera infinita sobre un backend de 11 ms no es
-   * lentitud: es una cadena que no resuelve, o un resultado que se descarta.*
-   *
-   * Las dos hipótesis vivas —`auth.getSession()` colgado en su refresh, o el
-   * guard `vigente` tirando la respuesta— **se distinguen mirando dónde se
-   * DETIENE la traza**, y por eso se marca cada eslabón con su tiempo. Sin esto
-   * seguimos deduciendo, y deducir ya falló dos veces (L-220).
-   *
-   * ⚠️ **SE VE EN PANTALLA, dentro del propio modal.** Un `console.log` exige
-   * cable y el aparato es del founder — la misma razón por la que L-160 se
-   * enmendó para que el marcador del update se RENDERICE. El `console.log`
-   * queda igual, para quien tenga consola.
-   *
-   * ☠️ MUERTE: con el gate del P0 cerrado. Ficha **D-726**. */
-  const [traza, setTraza] = useState<string[]>([]);
-  const t0Ref = useRef<number>(Date.now());
+  /* ☠️ ACÁ VIVIÓ EL INSTRUMENTO DE P0-C, retirado con su gate (D-726).
+     Fue una traza visible en pantalla —sin cable, porque el aparato es del
+     founder— que marcaba cada eslabón con su tiempo. **Su dato fue lo único
+     que cerró el diagnóstico** después de cinco hipótesis medidas y
+     descartadas: la traza mostró la pantalla cargada Y el guard leyendo
+     «cargando», y ahí apareció el closure obsoleto.
+     Lo que se queda es CURA, no instrumento: el espejo vivo, el techo de 8 s,
+     las tres fases y los modales derivados. */
+
   /** Cura 2: marca que el hogar ya se leyó en esta visita. Es un `ref` y no
    *  estado A PROPÓSITO — meterlo en las dependencias del efecto sería
    *  fabricar el bucle que se está curando. */
   const hogarCargadoRef = useRef(false);
-  const marcar = useCallback((etiqueta: string) => {
-    const ms = Date.now() - t0Ref.current;
-    const linea = `${String(ms).padStart(5)}ms · ${etiqueta}`;
-    console.log(`[p0c] ${linea}`);
-    // Acotada: una traza sin techo sería otro cuelgue, esta vez de memoria.
-    setTraza((prev) => (prev.length > 40 ? prev : [...prev, linea]));
-  }, []);
-
-  /** La traza montada como pieza, para que viva en LOS DOS modales de espera.
-   *  La primera foto del founder no mostró el recuadro **porque el instrumento
-   *  estaba en el modal que no salía**: el suyo es el del CATÁLOGO
-   *  («Estamos terminando de cargar los datos del paseo»), no el del hogar.
-   *  *Un instrumento en la pantalla equivocada no mide nada.* */
-  const bloqueTraza =
-    traza.length > 0 ? (
-      <View style={{ backgroundColor: theme.bg.overlay, borderRadius: 10, padding: spacing[3], gap: 2 }}>
-        <Texto variante="dato">diagnóstico P0-C · dónde se detiene</Texto>
-        {traza.map((linea, i) => (
-          <Texto key={`${i}-${linea}`} variante="dato">
-            {linea}
-          </Texto>
-        ))}
-      </View>
-    ) : null;
 
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
@@ -214,8 +177,7 @@ export default function PaseoDisponibles() {
   const [socialNo, setSocialNo] = useState<string | null>(null);
 
   // S73 (letra de elegibilidad): frontera única — momento vital + especie.
-  // 🔴 P0-C: `marcar` va como sonda — es el hook que el founder ve colgado.
-  const faseEspecies = useEspeciesElegibles('paseo', marcar);
+  const faseEspecies = useEspeciesElegibles('paseo');
   const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   /* ═══ EL ESPEJO VIVO — la cura estructural del guard 2 (P0-C, 9-ago) ═════
@@ -283,13 +245,9 @@ export default function PaseoDisponibles() {
     useCallback(() => {
       const pedida = tomarPedido();
       if (pedida !== null) {
-        marcar(
-          `⇢ PEDIDO recibido del preview · disponibles=${Array.isArray(disponibles) ? `${disponibles.length} oferta(s)` : disponibles}`,
-        );
       }
       if (pedida === null || !Array.isArray(disponibles)) {
         if (pedida !== null) {
-          marcar('✖ PEDIDO DESCARTADO: la lista aún no estaba — la señal ya se consumió y se pierde');
         }
         return;
       }
@@ -297,10 +255,8 @@ export default function PaseoDisponibles() {
       // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
       // reserva a ciegas: la lista habla sola en su próximo refresh.
       if (oferta === undefined) {
-        marcar(`✖ PEDIDO SIN OFERTA: el id pedido ya no está en la lista (slot ocupado?)`);
         return;
       }
-      marcar('✔ PEDIDO ejecutado → alElegir');
       alElegir(oferta);
       /* ⚠️ deps: `disponibles` + `marcar` (estable). `alElegir` no entra, y
          **ya no importa**: desde la cura del espejo vivo, aunque este efecto
@@ -308,14 +264,12 @@ export default function PaseoDisponibles() {
          lee son los de AHORA**. *Antes esta omisión era la causa del bug —el
          closure veía `mascotas='cargando'` con seis mascotas cargadas—; ahora
          es inofensiva, y ésa es la diferencia entre un parche y una cura.* */
-    }, [disponibles, marcar]),
+    }, [disponibles]),
   );
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      t0Ref.current = Date.now();
-      marcar('▶ entra al efecto (focus)');
       // La DISPONIBILIDAD sí se re-pide en cada foco, y es correcto: los slots
       // se ocupan mientras mirás. Lo que no se re-pide es el HOGAR.
       cargar();
@@ -335,9 +289,7 @@ export default function PaseoDisponibles() {
        * **con la medición en la mano, no por arrastre** — la ficha del censo
        * transversal es D-728. */
       if (hogarCargadoRef.current) {
-        marcar('⏭ el hogar YA está cargado — no se re-pide (cura 2)');
         return () => {
-          marcar('✂ se limpia el efecto (sin pedir nada)');
           vigente = false;
         };
       }
@@ -349,7 +301,6 @@ export default function PaseoDisponibles() {
        * mide el camino real: si a los 8 s no llegó, no va a llegar. */
       const techo = setTimeout(() => {
         if (!vigente) return;
-        marcar('⏱ TECHO 8s — la carga NO llegó; se declara error');
         setMascotas((prev) => (prev === 'cargando' ? 'error' : prev));
       }, 8000);
 
@@ -360,30 +311,22 @@ export default function PaseoDisponibles() {
            vacía en silencio**. Ahora cada rama dice qué pasó, y `!vigente` se
            separa del fallo real: irse de la pantalla NO es un error y no debe
            pintar uno. */
-        marcar('① antes de getEstadoOnboardingDueno (adentro hace auth.getSession)');
         const estado = await getEstadoOnboardingDueno();
-        marcar(`① después · ok=${estado.ok} · familia=${estado.ok ? (estado.data.familia_id !== null ? 'sí' : 'NULL') : '—'}`);
         if (!vigente) {
-          marcar('✂ ABORTA: vigente=false tras el eslabón ① (el efecto se limpió)');
           return;
         }
         if (!estado.ok || !estado.data.familia_id) {
-          marcar('✖ sin familia → error');
           setMascotas('error');
           return;
         }
-        marcar('② antes de obtenerMascotasDeFamilia');
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        marcar(`② después · ok=${r.ok}${r.ok ? ` · ${r.data.length} mascota(s)` : ''}`);
         if (!vigente) {
-          marcar('✂ ABORTA: vigente=false tras el eslabón ② (la respuesta LLEGÓ y se descarta)');
           return;
         }
         clearTimeout(techo);
         // Solo se marca como cargado si de verdad llegó: un fallo tiene que
         // poder reintentarse en el próximo foco.
         if (r.ok) hogarCargadoRef.current = true;
-        marcar(`✔ setMascotas(${r.ok ? 'lista' : "'error'"}) — el modal se apaga solo`);
         setMascotas(r.ok ? r.data : 'error');
         if (r.ok) {
           const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
@@ -405,13 +348,12 @@ export default function PaseoDisponibles() {
            respuesta se va a descartar y la pantalla queda en `cargando` para
            siempre — que es exactamente el síntoma. Si NO aparece, el cuelgue
            está adentro de un `await` y la hipótesis viva es la 1. */
-        marcar('✂ se limpia el efecto (blur/re-ejecución) → vigente=false');
         clearTimeout(techo);
         vigente = false;
       };
       // `reintento` está en las deps A PROPÓSITO: es lo que vuelve a disparar
       // la lectura del hogar cuando la persona toca «Reintentar».
-    }, [cargar, reintento, marcar]),
+    }, [cargar, reintento]),
   );
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
@@ -581,35 +523,26 @@ export default function PaseoDisponibles() {
       const mascotasVivas = mascotasRef.current;
       const faseViva = faseEspeciesRef.current;
       const elegiblesVivos = ofrecibles(Array.isArray(mascotasVivas) ? mascotasVivas : [], faseViva);
-      marcar(
-        `▷ alElegir · fase=${faseViva.fase} · mascotas=${Array.isArray(mascotasVivas) ? `${mascotasVivas.length}` : mascotasVivas} · elegibles=${elegiblesVivos.length} · param=${mascotaIdParam ?? 'no'}`,
-      );
       if (faseViva.fase === 'cargando' || faseViva.fase === 'error') {
-        marcar(`⊘ CORTA guard 1: el catálogo está en «${faseViva.fase}»`);
         setIntentoSinDatos('catalogo');
         return;
       }
       if (!Array.isArray(mascotasVivas)) {
-        marcar(`⊘ CORTA guard 2: las mascotas están en «${String(mascotasVivas)}»`);
         setIntentoSinDatos('mascotas');
         return;
       }
       if (elegiblesVivos.length === 0) {
-        marcar('⊘ CORTA guard 3: cero mascotas elegibles (con el catálogo listo)');
         setSinElegibles(true);
         return;
       }
       // S61-A3: la gramática canónica ya trae la mascota del paso 0.
       if (mascotaIdParam !== null && elegiblesVivos.some((m) => m.id === mascotaIdParam)) {
-        marcar('✔ sigue con la mascota del param');
         alElegirMascota(p, mascotaIdParam);
         return;
       }
       if (elegiblesVivos.length === 1) {
-        marcar('✔ sigue con la única elegible');
         alElegirMascota(p, elegiblesVivos[0].id);
       } else {
-        marcar(`▣ abre el selector de mascota (${elegiblesVivos.length} elegibles)`);
         setEligiendoMascota(p);
       }
     },
@@ -618,7 +551,7 @@ export default function PaseoDisponibles() {
        cura, no una optimización — antes cambiaba de identidad con cada carga y
        cualquier efecto que la hubiera capturado antes se quedaba con la foto
        vieja. Ahora hay una sola `alElegir` y siempre mira el presente. */
-    [mascotaIdParam, alElegirMascota, marcar],
+    [mascotaIdParam, alElegirMascota],
   );
 
   return (
@@ -723,7 +656,6 @@ export default function PaseoDisponibles() {
             ningún modal: te saca de la pantalla**. Un instrumento que solo se
             ve cuando sale un cartel no puede medir un rebote silencioso —
             L-221 en chiquito, otra vez. */}
-        {bloqueTraza}
       </ScrollView>
 
       {/* La cita es de UNA mascota: con más de una en el hogar, se elige. */}
@@ -797,7 +729,6 @@ export default function PaseoDisponibles() {
                 la Hoja gana `HojaScroll` para que se pueda DESLIZAR: sin él, una
                 traza larga quedaba fuera de pantalla y el instrumento volvía a
                 no medir nada. */}
-            {bloqueTraza}
             {/* Reintentar tiene que existir también acá: sin él, el modal del
                 catálogo es un callejón — se cierra y vuelve a salir al tocar. */}
             <Boton
@@ -845,7 +776,6 @@ export default function PaseoDisponibles() {
               }}
             />
           ) : null}
-          {bloqueTraza}
         </View>
       </Hoja>
 

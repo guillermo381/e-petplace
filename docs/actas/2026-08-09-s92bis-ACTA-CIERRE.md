@@ -553,3 +553,58 @@ equivocada **se siente como progreso**. Lo cortó **el dato del aparato**: ver l
 pantalla cargada CON el modal encima cambió la pregunta de *«¿por qué no llega
 el dato?»* a *«¿por qué sigue el cartel si el dato llegó?»*, y la causa apareció
 en una línea.
+
+---
+
+## ⑮ EL P0 DEL PASEO, CERRADO — la cadena de seis hipótesis
+
+**✅ GATE DEL FOUNDER, FIRMADO (9-ago, bundle `019fe7f4`):** los cuatro oficios
+reservan **en el primer intento** y llegan a pago. El guard 2 ya no corta.
+
+### La cadena completa — cinco medidas y descartadas, la sexta era la buena
+
+*Se escribe entera y no resumida, porque la cadena ES la lección.*
+
+| # | hipótesis | cómo se midió | veredicto |
+|---|---|---|---|
+| ① | **Lentitud** (la app «se siente lenta») | cronómetro por eslabón | **descartada**: base **11 ms**, red **200-650 ms** |
+| ② | **RLS / policies / `is_admin()` volatile** | `EXPLAIN (ANALYZE, BUFFERS)` con los claims REALES del founder | **descartada**: 3.2 ms, `Bitmap Index Scan`, `shared hit=1`. El defecto de volatilidad **existe** (D-725) y **no era la causa** |
+| ③ | **Grants por columna movidos por S92** | `has_column_privilege` sobre las 13 columnas | **descartada**: 13/13 intactos |
+| ④ | **Promesa colgada** (`auth.getSession`, el `.then` sin `catch`) | sonda en cada `await` del hook | **descartada**: resolvía `ok=true` en 262 ms. *Pero destapó un `.then` sin rama de error —modo de falla mudo— que se curó igual* |
+| ⑤ | **Bucle de foco / remount** | traza con las dos vueltas en el MISMO registro | **descartada como causa**: el estado sobrevivía ⇒ no había remount. *Pero destapó D-728* |
+| ⑥ | **Estado copiado que no se sincroniza** → luego **CLOSURE OBSOLETO** | la traza mostró la pantalla **cargada** y el guard leyendo `cargando` | **✅ LA CAUSA** |
+
+**Y fueron DOS causas encadenadas, no una:**
+**(a) el modal-snapshot** — `setCatalogoNoLlego(fase)` guardaba una copia de la
+fase en el instante del toque y **nadie la actualizaba**: el dato llegaba 262 ms
+después y el cartel seguía diciendo «cargando» para siempre.
+**(b) el closure obsoleto** — al sacar `alElegir` de las dependencias del efecto
+del pedido *(mi optimización)*, ese efecto capturaba una versión de la función
+donde `mascotas` todavía era `'cargando'`. **Datos presentes, semáforo en rojo.**
+
+**Las dos las escribí yo, y las dos son la misma familia:** *un valor que se
+lee desde una foto vieja*. La cura de (a) fue **derivar** el modal de la fase
+viva; la de (b), el **ESPEJO VIVO** —refs que se pisan enteros en cada render y
+que TODO guard consulta—. **Ninguna es un parche en el punto donde dolía**, que
+es lo que el founder exigió: *mientras haya una lectura que pueda ser vieja,
+esto vuelve.*
+
+### Lo que se retiró y lo que se queda
+
+**Retirado (D-726 ✅, su disparo era el gate):** la traza visible, sus 24 marcas,
+la sonda del hook y el bloque de los dos modales. **Verificado: cero trazas
+sueltas.**
+**Se queda, porque es CURA:** el espejo vivo · el techo de espera de 8 s · las
+tres fases de `mascotas` · los modales derivados · el `.catch` del hook · la
+cura 2 (no re-pedir el hogar) · la key propia del paseo (D-727).
+**Se queda a propósito y por recomendación:** el **contador del perfil**, para
+que el founder corra **una** medición y cierre D-728 sin otro OTA.
+
+### La lección, en acción
+
+**L-221** dice que *todas las mediciones pueden estar bien y la pregunta estar
+mal*. Esta cadena es su prueba: **seis hipótesis, cinco descartadas con datos
+correctos**, y las tres que sí encontraron algo —el `.catch` mudo, D-725, D-728—
+**no eran la causa pero eran defectos reales**. *Medir bien nunca es en vano; lo
+que hay que corregir a tiempo es la pregunta.* Y lo que la corrigió **siempre**
+fue el mismo instrumento: **un dato del aparato**.

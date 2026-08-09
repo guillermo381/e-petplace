@@ -11894,6 +11894,52 @@ instantánea sin repintar, o que el paso se muestre como transición deliberada 
 vez de esconderse— **son decisiones de diseño de navegación, con la pantalla
 delante**.
 
+> ### 📐 LAS OPCIONES, COSTEADAS (pedido del founder, 9-ago — para decidir, no para ejecutar)
+>
+> **Lo medido primero, porque acota el problema:** el parpadeo dura **entre
+> medio segundo y dos**, ocurre en **los cuatro oficios**, y cae **justo antes
+> del pago** — el punto más delicado del flujo, donde una pantalla que salta se
+> lee como «algo falló» y puede frenar una compra.
+>
+> **① NO CLONAR NADA — que la vuelta no repinte** *(la más barata)*
+> Hoy el `router.back()` devuelve a una lista que **vuelve a pedir su
+> disponibilidad** al recuperar el foco, y ese re-render es lo que se ve. Con la
+> misma cura que ya funciona en el paseo —**no re-pedir lo que sigue vigente**—
+> la vuelta sería instantánea y el ojo no la alcanzaría.
+> **Costo:** ~1 tanda, 4 pantallas, sin tocar arquitectura. **Riesgo:** hay que
+> decidir **por pantalla** qué caduca (la disponibilidad de slots caduca; el
+> hogar no) — es la decisión que D-728 deja abierta. **No elimina el paso: lo
+> vuelve invisible.**
+>
+> **② HACERLO DELIBERADO en vez de esconderlo** *(la más honesta)*
+> Si el paso existe, que se lea como transición: la vitrina muestra su propio
+> estado de «preparando tu reserva» y la lista aparece ya resuelta.
+> **Costo:** ~1 tanda + una decisión de diseño (qué se ve durante ese segundo).
+> **Ventaja:** no depende de que la vuelta sea rápida en un teléfono lento.
+> **Riesgo:** agrega una pantalla de espera donde hoy no hay ninguna — puede
+> sentirse *más* lento aunque dure lo mismo.
+>
+> **③ QUE EL DETALLE RESERVE** *(descartada, y con su porqué)*
+> Es lo que el usuario cree que pasa. **Exige clonar el flujo entero** —objeto
+> de oferta, mascotas elegibles, param, y hasta tres Hojas— y `senal-reserva.ts`
+> ya documenta por qué se rechazó: *la segunda verdad diverge sola.*
+> **Costo:** varias tandas + una deuda permanente de dos caminos de reserva.
+> **No se recomienda.**
+>
+> **④ EXTRAER EL FLUJO A UNA PIEZA que las dos pantallas consuman** *(la de
+> fondo)*
+> Cura la causa real —que solo la lista sabe reservar— sin duplicar: el flujo
+> vive en un hook/componente y tanto la vitrina como la lista lo montan.
+> **Costo:** la más cara, 2-3 tandas, toca los cuatro oficios y su gate.
+> **Ventaja:** el parpadeo desaparece **y** deja de existir la asimetría que lo
+> causó. **Es la única que cierra el tema para siempre.**
+>
+> **Voto de la pista: ① ahora, ④ cuando el arco de reserva se toque de nuevo.**
+> ① compra tiempo con costo mínimo y **no cierra ninguna puerta**; ② arriesga
+> empeorar la percepción; ③ está descartada por su propia letra. *El parpadeo
+> no es un bug que rompe: es un costo de arquitectura que se cobró en la cara
+> del usuario, y merece pagarse con diseño, no con un truco.*
+
 > **Dueño: founder (decisión de diseño) + A (ejecución).**
 > **☠️ DISPARO: la primera sesión que toque el arco de reserva o la navegación
 > del cliente.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
