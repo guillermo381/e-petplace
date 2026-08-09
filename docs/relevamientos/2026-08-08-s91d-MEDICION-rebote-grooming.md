@@ -188,3 +188,46 @@ vez de en cinco vueltas.
 
 Es de C. Y no es cosmético: **es la diferencia entre un síntoma accionable y uno
 que obliga a adivinar.**
+
+---
+
+# ⑧ CIERRE — la raíz, y por qué mis seis verdes eran verdes de otra pregunta
+
+**C aisló la causa por camino real:** el hub pide
+`prestadores.select('id, nombre_comercial, direccion, ciudad')`, y
+**`direccion`/`ciudad` no tienen grant para `authenticated`** → `42501`. Con
+`'id, nombre_comercial'` sola, pasa.
+
+## LA LECCIÓN, que es la que vale más que el caso
+
+**Mi sonda midió `select count(*) from prestadores` y dio 6 filas. Esa consulta
+NO PIDE NINGUNA COLUMNA.** En Postgres el `SELECT` se concede **por columna**,
+así que «¿puedo leer esta tabla?» y «¿puedo correr esta consulta?» son preguntas
+distintas — y yo respondí la primera creyendo que respondía la segunda.
+
+Por eso **A midió 5/5 verde y yo 6/6 verde sobre un lector que rebotaba**: los
+dos medimos tablas y RPCs, ninguno midió **la proyección exacta**. Un permiso de
+columna es invisible para toda sonda que no nombre la columna.
+
+⇒ **La forma correcta de sondear un lector es copiar su `select` literal**, no
+preguntarle a su tabla. Un lector medido con otra proyección no es el lector —
+igual que un lector medido en otro transporte no es el lector (⑥).
+
+## Y ES EL MISMO DEFECTO DE TODA LA SESIÓN, en su tercera cara
+
+Los tres verdes falsos que produje hoy son el mismo error con distinta ropa:
+
+1. **Otro transporte** — SQL con `set_config('role')` en vez de PostgREST.
+2. **Media pantalla** — el hub sin elegir mascota: dos ramas nunca corrieron.
+3. **Otra proyección** — `count(*)` en vez de las cuatro columnas que el hub pide.
+
+**Los tres dan verde y los tres responden una pregunta que nadie hizo.** Un
+assert no se juzga por su color: se juzga por si la pregunta que contesta es la
+que importa.
+
+## ESTADO
+
+Cura ordenada a A (grant, o que el hub deje de pedir la columna exacta — S84 la
+cerró por privacidad hoy mismo). **Nada pendiente de mi lado**: no hace falta
+llegar a `oferta`/`inicios`, ya se sabe qué rebota. Y la cura de las tres voces
+(C) sigue valiendo por lo que costó llegar acá: cinco vueltas.
