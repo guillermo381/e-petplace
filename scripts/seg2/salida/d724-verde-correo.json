@@ -1,0 +1,23 @@
+[
+ {
+  "id": "POST /recover sobre cuenta EXISTENTE",
+  "status": 200,
+  "code": "",
+  "msg": "",
+  "nota": "el servidor ACEPTÓ el envío. **Falta que el founder confirme que el correo LLEGÓ** — el 200 solo no alcanza."
+ },
+ {
+  "id": "POST /resend (type=signup)",
+  "status": 200,
+  "code": "",
+  "msg": "",
+  "nota": "el servidor aceptó el envío de confirmación"
+ },
+ {
+  "id": "POST /otp (magic link, sin crear usuario)",
+  "status": 422,
+  "code": "otp_disabled",
+  "msg": "Signups not allowed for otp",
+  "nota": "rebote a leer"
+ }
+]

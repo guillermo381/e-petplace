@@ -3284,6 +3284,18 @@ Origen: S86-A, medición para C.
 
   **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
 
+- **L-219 — UN CANAL EXTERNO SE CAE POR UN CAMBIO HECHO EN OTRO LADO, Y NADA AVISA (S92-BIS).**
+
+  **El caso:** el correo de recuperación de contraseña llevaba tiempo caído —`500 · Error sending recovery email`— y **nadie lo sabía**. La causa no estaba en Supabase ni en el código: **se borró el dominio `avisos.epetplace.com` de Resend** (una limpieza del lado de notificaciones) **y el SMTP de auth siguió configurado para enviar desde `avisos@avisos.epetplace.com`**. Dos sistemas que ninguna herramienta relaciona: el que borró el dominio no tenía forma de saber quién más lo usaba, y el que quedó apuntando a él no tenía forma de enterarse.
+
+  **La medición que lo probó, y por qué fue barata:** el DNS es **público**, así que la verificación de un remitente se contrasta **sin tocar una sola credencial** (R6 intacta). `resend._domainkey.epetplace.com` **tenía** la clave DKIM; `resend._domainkey.avisos.epetplace.com` estaba **vacío**; y `avisos.epetplace.com` respondía **`NXDOMAIN`** — o sea que el subdominio **no existía**, no que estuviera «sin verificar». *Tres consultas de DNS contestaron lo que ningún log de la aplicación decía.*
+
+  **Por qué es pariente de L-193 (la premisa heredada que nadie fechó):** allá el defecto era una premisa cierta cuando se escribió y falsa después; **acá es una CONFIGURACIÓN cierta cuando se escribió y falsa después** — y la diferencia es que ésta vive en otro producto, así que ni siquiera está en el repo donde alguien podría releerla. *La forma es la misma: algo que fue verdad, dejó de serlo, y el sistema siguió afirmándolo.*
+
+  **La forma exigible, en dos partes:** ① **todo remitente configurado en un sistema externo se declara junto al lugar donde se usa** —y su verificación se mide por DNS, que es barato y no necesita llaves—; ② **antes de borrar un dominio, un remitente o una llave de un proveedor, se censa quién más lo usa.** *Un recurso compartido entre dos sistemas no tiene dueño: tiene dos usuarios, y ninguno de los dos ve al otro.*
+
+  **Y la señal de fondo, que es lo que más costó:** el canal estuvo caído **sin una sola alarma** — no hay monitor de envíos ni prueba periódica del camino de recuperación. **Se descubrió de rebote**, al preparar la medición de otra deuda. *Un canal que solo se usa cuando alguien tiene un problema es exactamente el que nadie nota que murió.* Ficha: **D-724**. Origen: S92-BIS.
+
 - **L-218 — UNA LISTA QUE VIENE DE LA RED TIENE TRES ESTADOS, Y `length === 0` LOS CONFUNDE A LOS TRES (S92-BIS).**
 
   **El caso:** el 9-ago el founder no pudo reservar un paseo — el último paso le decía *«tu hogar todavía no tiene un perro registrado»* **con dos perros vivos adentro**. El motor devolvía `true`, los permisos estaban intactos y el catálogo respondía `["perro"]`. Lo que fallaba era una sola línea: `if (elegibles.length === 0)`, donde `elegibles` sale de una función que devuelve `[]` **mientras carga**, **si falla** y **si de verdad no hay**. Dos de esos tres casos producían una frase falsa.
@@ -11435,8 +11447,67 @@ Supabase, en inglés): *el canal de correo de auth nunca se terminó de montar.*
 recovery, y sin eso no se puede medir si el paso 2 de recuperar tiene el mismo
 defecto que se curó hoy en el cambio de clave.
 
-> **Dueño: founder (es config de dashboard) + A (re-mide después).**
-> **☠️ DISPARO: YA — es el único camino de recuperación de contraseña del
-> producto, y hoy no funciona para nadie.**
-> **☠️ MUERTE:** un código de recuperación llega a un buzón real, y con él se
-> mide y cierra D-719 (b). Origen: S92-BIS, al preparar la medición de D-719 (b).
+> ### 🎯 CAUSA RAÍZ HALLADA Y CURADA EL MISMO DÍA — y no estaba en este producto
+>
+> **En lenguaje de negocio:** el correo de auth se enviaba desde una dirección
+> de un **dominio que ya no existía**. Alguien —nosotros— **borró el dominio
+> `avisos.epetplace.com` de Resend** en una limpieza del lado de notificaciones,
+> y **la configuración de Supabase siguió apuntando ahí**. Resend rechazaba cada
+> envío por remitente no verificado, Supabase lo devolvía como `500`, y **nadie
+> se enteró hasta hoy**, porque un correo de recuperación solo se manda cuando
+> alguien ya tiene un problema.
+>
+> **LA MEDICIÓN QUE LO PROBÓ, sin tocar una sola credencial (R6 intacta):** el
+> DNS es público, así que la verificación de un remitente se contrasta desde
+> afuera:
+>
+> | consulta | resultado | lectura |
+> |---|---|---|
+> | `TXT resend._domainkey.epetplace.com` | **clave DKIM presente** | la raíz **está verificada** en Resend |
+> | `MX send.epetplace.com` | `feedback-smtp.sa-east-1.amazonses.com` | y tiene su ruta de rebotes |
+> | `TXT send.epetplace.com` | `v=spf1 include:amazonses.com ~all` | y su SPF |
+> | `TXT resend._domainkey.avisos.epetplace.com` | **vacío** | **sin DKIM** |
+> | `A / NS avisos.epetplace.com` | **`NXDOMAIN`** | **el subdominio NO EXISTE** |
+>
+> *No era «un dominio sin verificar»: era un dominio borrado.* Tres consultas de
+> DNS contestaron lo que ningún log de la aplicación decía.
+>
+> **LA CURA (founder):** el remitente del SMTP de auth pasa a
+> **`hola@epetplace.com`** — el mismo dominio verificado que el motor de
+> notificaciones ya usa por API y que funciona.
+>
+> **VERDE POR CAMINO REAL, con el falso verde esquivado a propósito:**
+> `/auth/v1/recover` sobre una cuenta que **existe** (creada y verificada antes
+> de medir) pasó de **`500 · Error sending recovery email`** a **`200`**.
+> ⚠️ *El `200` solo no alcanza y se dice: `/recover` responde `200` aunque la
+> cuenta no exista —nunca declara si un correo está registrado—, y esa trampa ya
+> se comió una medición mía en esta sesión. **El verde definitivo es el correo
+> en la bandeja.***
+>
+> **ALCANCE DEL DAÑO, medido y acotado — el canal de auth es más chico de lo que
+> parecía:**
+> · **recuperación de contraseña** → era el afectado, y era **el único camino
+>   vivo** hacia una contraseña olvidada.
+> · **confirmación de cuenta** → `/resend` devuelve `200`, pero **la
+>   confirmación de email está apagada en el proyecto** (D-299): no había correo
+>   que dejara de llegar.
+> · **magic link** → `422 · otp_disabled` — *perilla de producto, no fallo de
+>   correo*. No usa este camino.
+> · **invitación de prestador** → **NO manda correo de auth**: `invitar_prestador`
+>   solo consulta `auth.users` por email para resolver si la persona ya tiene
+>   cuenta; el link viaja por WhatsApp o en la carta física (PORTAL §2.2).
+> · **notificaciones del producto** → **nunca estuvo afectado**: manda desde
+>   `hola@epetplace.com` **por API de Resend**, no por SMTP. *Por eso el canal
+>   parecía sano: el que funcionaba y el que fallaba no eran el mismo.*
+>
+> **⇒ Lección L-219.** Un canal externo puede caerse por un cambio hecho en otro
+> lado, y nada avisa. **Y la señal de fondo: estuvo caído sin una sola alarma**
+> — no hay monitor de envíos ni prueba periódica del camino de recuperación; se
+> descubrió **de rebote**, preparando la medición de otra deuda.
+
+> **Dueño: founder (curó la config) → A (midió).**
+> **✅ CERRADA 9-ago-2026, con un pendiente de confirmación:** el correo en la
+> bandeja del founder. **Queda como deuda de fondo, sin ficha propia todavía:
+> nadie vigila este canal** — la construcción del flujo completo (pantalla de
+> recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
+> de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
