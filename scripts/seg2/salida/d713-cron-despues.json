@@ -1,0 +1,14 @@
+{
+ "job8": {
+  "active": true,
+  "jobid": 8,
+  "jobname": "despachar-push-tick",
+  "manda_secreto": true,
+  "sigue_apuntando_bien": true
+ },
+ "job6": {
+  "active": true,
+  "intacto": true,
+  "jobid": 6
+ }
+}

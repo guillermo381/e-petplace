@@ -45,10 +45,37 @@ function esE164(t: string | null | undefined): boolean {
   return typeof t === 'string' && /^\+[1-9][0-9]{7,14}$/.test(t);
 }
 
+/**
+ * EL GUARD DEL DESPACHO (S92-BIS · D-713) — gemelo del de `despachar-push`.
+ *
+ * Medido el 9-ago-2026: un `POST` sin ninguna credencial devolvía **200** y
+ * procesaba la cola. Acá el daño potencial es menor porque **WhatsApp está
+ * congelado** (`transporte_vivo=false`, cola en 0, y el token cargado no es de
+ * Meta) — pero el día que se descongele, la puerta ya está cerrada. *Curar lo
+ * que hoy no muerde, mientras no muerde, es la única vez que sale barato.*
+ *
+ * El secreto vive en los secrets de la function; **no viaja en ningún bundle**
+ * porque a esta función la llama la base o una mano, nunca la app.
+ */
+function guardDespacho(req: Request): Response | null {
+  const esperado = Deno.env.get('DESPACHO_SECRET');
+  if (!esperado) {
+    return Response.json({ error: 'despacho_sin_secreto_configurado' }, { status: 500 });
+  }
+  const dado = req.headers.get('x-despacho-secret');
+  if (dado !== esperado) {
+    return Response.json({ error: 'despacho_no_autorizado' }, { status: 401 });
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'solo_post' }, { status: 405 });
   }
+
+  const rechazo = guardDespacho(req);
+  if (rechazo) return rechazo;
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,

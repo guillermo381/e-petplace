@@ -56,6 +56,8 @@
 //     redaccion_fallida       422 — salida fuera de contrato, truncada, o que
 //                                   ROMPIÓ UN MURO (ver `superlativos`)
 
+import { exigirSesion } from '../_shared/sesion.ts'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -236,6 +238,16 @@ function construirEntrada(
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { status: 200, headers: corsHeaders })
+  }
+
+  // D-714: el escriba corre Claude. `verify_jwt` acepta la anon key del bundle;
+  // la puerta real es exigir SESIÓN de persona.
+  const sinSesion = exigirSesion(req)
+  if (sinSesion) {
+    return new Response(JSON.stringify(sinSesion.body), {
+      status: sinSesion.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   try {

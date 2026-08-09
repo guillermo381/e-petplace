@@ -1,0 +1,47 @@
+[
+ {
+  "id": "despachar-push · sin ninguna credencial",
+  "obtenido": "HTTP 401 · {\"error\":\"despacho_no_autorizado\"}",
+  "ok": true
+ },
+ {
+  "id": "despachar-push · CON la anon key del bundle",
+  "obtenido": "HTTP 401 · {\"error\":\"despacho_no_autorizado\"}",
+  "ok": true
+ },
+ {
+  "id": "despachar-push · con un secreto EQUIVOCADO",
+  "obtenido": "HTTP 401",
+  "ok": true
+ },
+ {
+  "id": "despachar-whatsapp · sin ninguna credencial",
+  "obtenido": "HTTP 401 · {\"error\":\"despacho_no_autorizado\"}",
+  "ok": true
+ },
+ {
+  "id": "despachar-whatsapp · CON la anon key del bundle",
+  "obtenido": "HTTP 401 · {\"error\":\"despacho_no_autorizado\"}",
+  "ok": true
+ },
+ {
+  "id": "despachar-whatsapp · con un secreto EQUIVOCADO",
+  "obtenido": "HTTP 401",
+  "ok": true
+ },
+ {
+  "id": "despachar-push · con el secreto correcto",
+  "obtenido": "HTTP 200 · {\"modo\":\"transporte_vivo\",\"proyecto\":\"e-petplace-7854e\",\"entregadas\":0",
+  "ok": true
+ },
+ {
+  "id": "despachar-whatsapp · con el secreto correcto",
+  "obtenido": "HTTP 200 · {\"modo\":\"transporte_vivo\",\"encoladas\":0,\"entregadas\":0,\"fallidas\":0,\"s",
+  "ok": true
+ },
+ {
+  "id": "tick del cron · 15:54:00",
+  "obtenido": "status=succeeded · 1 row",
+  "ok": true
+ }
+]

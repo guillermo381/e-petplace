@@ -31,6 +31,8 @@
 //     error_modelo            502 — Anthropic no-ok (429/5xx/otros)
 //     estructuracion_fallida  422 — la respuesta no cumple el contrato (parse/shape/truncada)
 
+import { exigirSesion } from '../_shared/sesion.ts'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -153,6 +155,16 @@ Dictado del veterinario:
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { status: 200, headers: corsHeaders })
+  }
+
+  // D-714: corre Claude. `verify_jwt` acepta la anon key del bundle; la puerta
+  // real es exigir SESIÓN de persona.
+  const sinSesion = exigirSesion(req)
+  if (sinSesion) {
+    return new Response(JSON.stringify(sinSesion.body), {
+      status: sinSesion.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   try {

@@ -1,0 +1,42 @@
+[
+ {
+  "id": "extract-vacuna · anon key",
+  "obtenido": "HTTP 401 · {\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación ",
+  "ok": true
+ },
+ {
+  "id": "estructurar-nota-clinica · anon key",
+  "obtenido": "HTTP 401 · {\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación ",
+  "ok": true
+ },
+ {
+  "id": "escribir-presencia · anon key",
+  "obtenido": "HTTP 401 · {\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación ",
+  "ok": true
+ },
+ {
+  "id": "lugares · anon key",
+  "obtenido": "HTTP 401 · {\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación ",
+  "ok": true
+ },
+ {
+  "id": "extract-vacuna · con sesión",
+  "obtenido": "HTTP 400 · {\"codigo\":\"imagen_invalida\",\"mensaje\":\"imageBase64 requ",
+  "ok": true
+ },
+ {
+  "id": "estructurar-nota-clinica · con sesión",
+  "obtenido": "HTTP 400 · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"texto requerido",
+  "ok": true
+ },
+ {
+  "id": "escribir-presencia · con sesión",
+  "obtenido": "HTTP 400 · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"hechos requerid",
+  "ok": true
+ },
+ {
+  "id": "lugares · con sesión",
+  "obtenido": "HTTP 400 · {\"codigo\":\"entrada_invalida\",\"mensaje\":\"Falta el token ",
+  "ok": true
+ }
+]

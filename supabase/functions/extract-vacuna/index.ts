@@ -52,6 +52,8 @@
 //     extraccion_fallida    422 — la respuesta del modelo no cumple el
 //                                 contrato (parse/shape/truncada)
 
+import { exigirSesion } from '../_shared/sesion.ts'
+
 const corsHeaders = {
   // '*' a sabiendas: los callers son apps nativas (fetch sin CORS) y no
   // existe todavía dominio web canónico que fijar. El gate real es
@@ -145,6 +147,16 @@ Reglas ESTRICTAS por campo:
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { status: 200, headers: corsHeaders })
+  }
+
+  // D-714: esta function corre Claude. `verify_jwt` acepta la anon key del
+  // bundle, así que la puerta real es exigir SESIÓN de persona.
+  const sinSesion = exigirSesion(req)
+  if (sinSesion) {
+    return new Response(JSON.stringify(sinSesion.body), {
+      status: sinSesion.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   try {

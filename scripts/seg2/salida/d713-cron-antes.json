@@ -1,0 +1,14 @@
+[
+ {
+  "command": "\n  SELECT net.http_post(\n    url     := 'https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/despachar-correo',\n    headers := jsonb_build_object(\n      'Content-Type', 'application/json',\n      'Authorization', 'Bearer «JWT REDACTADO · largo=208 · …SOxA»'),\n    body    := '{\"origen\":\"pg_cron\"}'::jsonb\n  );\n  ",
+  "jobid": 6,
+  "jobname": "despachar-notificaciones-tick",
+  "schedule": "* * * * *"
+ },
+ {
+  "command": "\n  SELECT net.http_post(\n    url     := 'https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/despachar-push',\n    headers := jsonb_build_object(\n      'Content-Type', 'application/json',\n      'Authorization', 'Bearer «JWT REDACTADO · largo=208 · …SOxA»'),\n    body    := '{\"origen\":\"pg_cron\"}'::jsonb\n  );\n",
+  "jobid": 8,
+  "jobname": "despachar-push-tick",
+  "schedule": "* * * * *"
+ }
+]

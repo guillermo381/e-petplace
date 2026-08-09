@@ -63,10 +63,50 @@ function tokenMuerto(status: number, cuerpo: string): boolean {
   return false;
 }
 
+/**
+ * EL GUARD DEL DESPACHO (S92-BIS · D-713) — la puerta que no existía.
+ *
+ * ── EL ROJO QUE LO PARIÓ, medido el 9-ago-2026 ─────────────────────────────
+ * Un `POST` **sin apikey y sin Authorization** devolvía **200** y procesaba la
+ * cola. Cualquiera en internet podía disparar el despachador tantas veces como
+ * quisiera: cuota de FCM quemada, y con cola llena, notificaciones despachadas
+ * antes de tiempo.
+ *
+ * ── POR QUÉ NO ALCANZABA `verify_jwt` ──────────────────────────────────────
+ * Con `verify_jwt: true` entraría cualquiera con la **anon key, que es pública
+ * y viaja en el bundle de las dos apps**. *Ninguna de las dos configuraciones
+ * de Supabase protege esto: el guard tiene que estar acá adentro.*
+ *
+ * ── POR QUÉ ESTE SECRETO NO ES OTRO AGUJERO ────────────────────────────────
+ * Vive en los secrets de la function y en el comando del `cron.job` — **jamás
+ * en el bundle**, porque **quien despacha es la base, no la app**. Y `cron.job`
+ * se midió cerrado: PostgREST no expone ese schema (404) y no tiene un solo
+ * grant a `anon` ni a `authenticated`.
+ *
+ * ── SI EL SECRETO NO ESTÁ CONFIGURADO ──────────────────────────────────────
+ * La función **rebota igual**. No se degrada a «pasar sin verificar»: eso
+ * convertiría un despliegue incompleto en una puerta abierta silenciosa, que es
+ * exactamente la clase de falla que L-192 prohíbe.
+ */
+function guardDespacho(req: Request): Response | null {
+  const esperado = Deno.env.get('DESPACHO_SECRET');
+  if (!esperado) {
+    return Response.json({ error: 'despacho_sin_secreto_configurado' }, { status: 500 });
+  }
+  const dado = req.headers.get('x-despacho-secret');
+  if (dado !== esperado) {
+    return Response.json({ error: 'despacho_no_autorizado' }, { status: 401 });
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'solo_post' }, { status: 405 });
   }
+
+  const rechazo = guardDespacho(req);
+  if (rechazo) return rechazo;
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,

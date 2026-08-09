@@ -29,6 +29,8 @@
 //     google_rechazo     502 — Places respondió no-200
 //     red                502 — no se pudo alcanzar Places
 
+import { exigirSesion } from '../_shared/sesion.ts';
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -52,6 +54,11 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return error(400, 'entrada_invalida', 'Solo POST.');
   }
+
+  // D-714: cada llamada a Places se factura. `verify_jwt` acepta la anon key
+  // del bundle; la puerta real es exigir SESIÓN de persona.
+  const sinSesion = exigirSesion(req);
+  if (sinSesion) return error(sinSesion.status, sinSesion.body.codigo, sinSesion.body.mensaje);
 
   const key = Deno.env.get('GOOGLE_PLACES_API_KEY');
   if (!key) {
