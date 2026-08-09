@@ -465,12 +465,12 @@ export const prestadorEn = {
   recuperar: {
     titulo: 'Recover your password',
     // S88-C (D-659): 6 → 8 (the real code length, measured) · two-step keys
-    ayudaPedir: "Type the email you sign in with and we'll send you an 8-digit code.",
+    ayudaPedir: "Type the email you sign in with and we'll send you an {{n}}-digit code.",
     email: 'Your email',
     pedir: 'Send the code',
-    siTieneCuenta: 'If {{email}} has an account, we just sent it an 8-digit code.',
+    siTieneCuenta: 'If {{email}} has an account, we just sent it an {{n}}-digit code.',
     avisoCorreo: "The email may arrive in English and from an address that isn't ours. If you don't see it, check spam.",
-    codigo: 'The 8-digit code',
+    codigo: 'The {{n}}-digit code',
     codigoVerificado: 'Code verified. Now choose your new password.',
     verificar: 'Verify the code',
     nueva: 'New password',

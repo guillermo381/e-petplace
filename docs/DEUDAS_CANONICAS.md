@@ -11226,10 +11226,37 @@ correo real y llegar al último paso.
 > servidor la exigiera ahí, el flujo sería imposible y la cura no sería un
 > mensaje sino apagar la perilla. Decidirlo sin medir sería adivinar.*
 
-> **Dueño: A (ejecutó (a)) → founder (habilita (b) al curar D-724).**
-> **✅ (a) CERRADA 9-ago-2026.** **🔴 (b) ABIERTA, bloqueada por D-724.**
-> **☠️ MUERTE de (b):** el paso 2 de recuperar medido por camino real con un
-> código que llegó de verdad. Origen: S92-BIS, censo de voz de contraseña.
+> ### ✅ (b) MEDIDA Y CERRADA — la perilla **NO** rompe la recuperación
+>
+> Curado D-724, el correo llegó y el founder pasó el código. Medido **por los
+> wrappers de la pantalla**, los dos pasos que D-659 partió a propósito:
+>
+> ```
+> paso 1 · verificarCodigoRecuperacion  → código VÁLIDO, deja sesión
+> paso 2 · establecerContrasenaNueva    → ACEPTADA  (sin current_password)
+> verde doble · login con la nueva      → ENTRA
+> ```
+>
+> **⇒ GoTrue EXIME a las sesiones de recovery de «require current password».**
+> Tenía que ser así o el flujo sería imposible —quien recupera no conoce su
+> contraseña—, **pero eso era una expectativa, no un dato**, y la diferencia
+> importa: si hubiera rebotado, la cura no era un mensaje sino apagar la perilla.
+> **Por eso no se curó «por las dudas»**: adivinar en la dirección equivocada
+> habría dejado el flujo roto con un mensaje bonito.
+>
+> **UNA FALSA ALARMA, declarada porque casi cuesta una cura innecesaria:** el
+> código real vino de **8 dígitos** y mi script validaba **6** —el default de
+> GoTrue—, así que por un momento pareció que la pantalla no podría tipearlo
+> entero. **Medido: `recuperar.tsx` ya usa `LARGO_CODIGO = 8`.** *La casa tenía
+> el dato bien; el que asumió el default fui yo.* El guard del script pasó a
+> aceptar 6-8 **sin recortar ni completar** — ajustar a mano un código que otro
+> tipeó es fabricar el dato que se vino a verificar.
+
+> **Dueño: A (ejecutó (a) y midió (b)) → founder (curó D-724, que la desbloqueó).**
+> **✅ (a) y (b) CERRADAS 9-ago-2026.**
+> **MUERTE CUMPLIDA:** el cambio de clave funciona por el camino de la pantalla,
+> y la recuperación también — las dos con verde doble (la contraseña nueva
+> **entra**). Origen: S92-BIS, censo de voz de contraseña.
 
 ---
 

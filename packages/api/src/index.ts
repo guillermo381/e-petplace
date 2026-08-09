@@ -1046,6 +1046,7 @@ export {
   pedirCodigoRecuperacion,
   verificarCodigoRecuperacion,
   MIN_LARGO_CONTRASENA,
+  LARGO_CODIGO_RECUPERACION,
   establecerContrasenaNueva,
   segundosDeEspera,
   type CodigoErrorSeguridad,

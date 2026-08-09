@@ -43,9 +43,13 @@
  *
  * Las CAJAS POR DÍGITO (`CampoCodigo`, S88-B — lámina firmada): un solo
  * TextInput invisible, las cajas son presentación. La pieza NO sabe
- * cuánto mide un código (su prop `largo` es obligatoria a propósito):
- * el 8 lo declara ESTA pantalla, que es quien promete «8 dígitos» en su
- * propia voz. Y `valor.length === largo` es de la pantalla: el botón de
+ * cuánto mide un código (su prop `largo` es obligatoria a propósito).
+ * **ENMENDADO S92-BIS:** el 8 ya NO lo declara esta pantalla — viene de
+ * `LARGO_CODIGO_RECUPERACION` (`packages/api`), **y sus tres voces lo
+ * interpolan en vez de decirlo a mano**. Estaba en cuatro lugares (la
+ * constante + tres textos, ×2 idiomas) y el largo lo elige el SERVIDOR
+ * (`MAILER_OTP_LENGTH`): si divergieran, la pantalla quedaba inusable con
+ * el motor sano. Y `valor.length === largo` sigue siendo de la pantalla: el botón de
  * verificar no se ofrece hasta que el código esté completo (Ley 23 — la
  * puerta no ofrece lo que el servidor va a rechazar).
  */
@@ -56,6 +60,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
+  LARGO_CODIGO_RECUPERACION,
   MIN_LARGO_CONTRASENA,
   cerrarSesion,
   establecerContrasenaNueva,
@@ -66,12 +71,17 @@ import {
 
 import { useTraduccion } from '@/i18n';
 
-/** El largo del código de recuperación. LO DECLARA LA PANTALLA (la prop
- *  de CampoCodigo es obligatoria a propósito) y sus voces dicen el mismo
- *  número. Medido en dispositivo (par S87): el proveedor emite 8; es
- *  config del server (otp_length) — si A la exporta algún día, este
- *  número y las tres voces se cuelgan de ahí. */
-const LARGO_CODIGO = 8;
+/** El largo del código de recuperación.
+ *
+ *  ✅ **LA CONDICIÓN QUE ESTA MISMA PANTALLA DEJÓ ESCRITA SE CUMPLIÓ** (S92-BIS):
+ *  decía *«si A la exporta algún día, este número y las tres voces se cuelgan de
+ *  ahí»*, y hoy `LARGO_CODIGO_RECUPERACION` vive en `packages/api`, junto a
+ *  `MIN_LARGO_CONTRASENA`. El número deja de estar en cuatro lugares (acá + las
+ *  tres voces, ×2 idiomas) y pasa a estar en uno.
+ *
+ *  Se conserva el alias local **solo** para no reescribir los tres usos de
+ *  abajo: la fuente es el import, no esta línea. */
+const LARGO_CODIGO = LARGO_CODIGO_RECUPERACION;
 
 export default function Recuperar() {
   const router = useRouter();
@@ -184,7 +194,7 @@ export default function Recuperar() {
         >
           {paso === 'pedir' ? (
             <>
-              <Texto variante="apoyo">{t('recuperar.ayudaPedir')}</Texto>
+              <Texto variante="apoyo">{t('recuperar.ayudaPedir', { n: LARGO_CODIGO })}</Texto>
               <Campo
                 label={t('recuperar.email')}
                 value={email}
@@ -201,7 +211,7 @@ export default function Recuperar() {
             <>
               {/* LA MISMA FRASE EXISTA O NO LA CUENTA. El condicional está
                   en el "si", no en nuestro conocimiento. */}
-              <Texto variante="cuerpo">{t('recuperar.siTieneCuenta', { email })}</Texto>
+              <Texto variante="cuerpo">{t('recuperar.siTieneCuenta', { email, n: LARGO_CODIGO })}</Texto>
               {/* D-628 — se dice ANTES de que lo busque, no después de que
                   crea que no llegó. */}
               <Texto variante="apoyo">{t('recuperar.avisoCorreo')}</Texto>
@@ -214,7 +224,7 @@ export default function Recuperar() {
                 largo={LARGO_CODIGO}
                 valor={codigo}
                 onCambio={setCodigo}
-                etiqueta={t('recuperar.codigo')}
+                etiqueta={t('recuperar.codigo', { n: LARGO_CODIGO })}
                 error={rebote ?? undefined}
                 deshabilitado={trabajando}
               />

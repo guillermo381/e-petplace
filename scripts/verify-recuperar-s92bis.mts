@@ -35,8 +35,12 @@ import {
 const CODIGO = process.argv[2];
 const EMAIL = 'guillo381+d719rec@gmail.com';
 
-if (!CODIGO || !/^\d{6}$/.test(CODIGO)) {
-  console.log('\n  Uso: pnpm tsx scripts/verify-recuperar-s92bis.mts <codigo-de-6-digitos>');
+// El largo del OTP es configurable en GoTrue (6 por defecto, pero no siempre).
+// El guard acepta 6-8 y **no recorta ni completa**: si el código llegara con
+// otro largo, lo manda tal cual y que el servidor lo juzgue. *Ajustar a mano un
+// código que otro tipeó es fabricar el dato que se vino a verificar.*
+if (!CODIGO || !/^\d{6,8}$/.test(CODIGO)) {
+  console.log('\n  Uso: pnpm tsx scripts/verify-recuperar-s92bis.mts <codigo>');
   console.log(`  (el código llegó al correo de ${EMAIL})\n`);
   process.exit(1);
 }

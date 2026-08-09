@@ -646,14 +646,14 @@ export const prestadorEs = {
     // el rótulo y el código juntos). Literal y no interpolado: el largo es
     // config del proveedor (otp_length) y A no exporta constante; si algún
     // día la exporta, estas tres frases pasan a {{n}}.
-    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de 8 dígitos.',
+    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.',
     email: 'Tu correo',
     pedir: 'Enviar el código',
     // la MISMA frase exista o no la cuenta
-    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de 8 dígitos.',
+    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de {{n}} dígitos.',
     // D-628 — se retira cuando S86 ponga plantilla y remitente propios
     avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
-    codigo: 'El código de 8 dígitos',
+    codigo: 'El código de {{n}} dígitos',
     // S88-C (D-659): el paso 2 abre diciendo que el código YA quedó atrás —
     // sin esta frase, un rebote de clave se lee como "algo del código".
     codigoVerificado: 'Código verificado. Ahora elige tu nueva contraseña.',

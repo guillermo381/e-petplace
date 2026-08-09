@@ -74,6 +74,27 @@ export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
  *  "8" es el defecto que la candidata #21 nombra. */
 export const MIN_LARGO_CONTRASENA = 8;
 
+/**
+ * LARGO DEL CÓDIGO DE RECUPERACIÓN — **espeja una config del SERVIDOR**.
+ *
+ * Lo elige GoTrue (`MAILER_OTP_LENGTH`), no nosotros: hoy manda **8 dígitos**,
+ * medido con un código real que llegó al correo del founder (S92-BIS).
+ *
+ * ⚠️ **LA DIVERGENCIA ACÁ ES MÁS PELIGROSA QUE LA DE `MIN_LARGO_CONTRASENA`, y
+ * conviene tenerlo claro:** con el largo de contraseña, el cliente **excede** al
+ * servidor y esa dirección es segura —pide de más, el servidor acepta—. Con el
+ * código **no hay dirección segura**: si acá dice 6 y llegan 8, el campo corta y
+ * el botón nunca se habilita; si dice 10 y llegan 8, el botón nunca se habilita
+ * tampoco. **Cualquiera de los dos lados que se mueva sin el otro deja la
+ * recuperación INUSABLE**, con el motor sano y la pantalla muda.
+ *
+ * Vive acá, una sola vez, porque el número no es de una pantalla: es de la
+ * política de auth. Si alguien cambia `MAILER_OTP_LENGTH` en el dashboard, este
+ * archivo es el único lugar que hay que tocar — **y nada va a avisar que hay
+ * que hacerlo** (la clase de L-219: la config vive en otro producto).
+ */
+export const LARGO_CODIGO_RECUPERACION = 8;
+
 /** Alias local histórico — el número vive UNA vez (firma founder S88). */
 const MIN_LARGO = MIN_LARGO_CONTRASENA;
 
