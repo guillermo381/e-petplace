@@ -1,0 +1,115 @@
+[
+ {
+  "bucket": "adiestramiento-clips",
+  "objetos": 1,
+  "referenciados": 1,
+  "huerfanos": 0,
+  "bytesHuerfanos": 0,
+  "muestra": []
+ },
+ {
+  "bucket": "adopcion-fotos",
+  "objetos": 0,
+  "referenciados": 0,
+  "huerfanos": 0,
+  "bytesHuerfanos": 0,
+  "sinMapa": true
+ },
+ {
+  "bucket": "avatars",
+  "objetos": 12,
+  "referenciados": 4,
+  "huerfanos": 10,
+  "bytesHuerfanos": 1411230,
+  "muestra": [
+   "4f572081-26a5-4d3b-9d80-25ea751fdc9c/logo-negocio-17",
+   "4f572081-26a5-4d3b-9d80-25ea751fdc9c/logo-negocio-17",
+   "4f572081-26a5-4d3b-9d80-25ea751fdc9c/logo-negocio-17",
+   "4f572081-26a5-4d3b-9d80-25ea751fdc9c/logo-negocio-17"
+  ]
+ },
+ {
+  "bucket": "cita-archivos",
+  "objetos": 11,
+  "referenciados": 4,
+  "huerfanos": 7,
+  "bytesHuerfanos": 2420374,
+  "muestra": [
+   "2052f109-143a-41d1-b338-de8973d8fb20/foto-paseo-1780",
+   "de300000-0000-4000-8000-0000000000e5/foto-grooming-f",
+   "e92e232a-6727-4878-bed5-36eec5f8b199/0fd2a351-3832-4",
+   "e92e232a-6727-4878-bed5-36eec5f8b199/0fd2a351-3832-4"
+  ]
+ },
+ {
+  "bucket": "especies-razas",
+  "objetos": 111,
+  "referenciados": null,
+  "huerfanos": null,
+  "bytesHuerfanos": null,
+  "sinMapa": true
+ },
+ {
+  "bucket": "grooming-archivos",
+  "objetos": 27,
+  "referenciados": 8,
+  "huerfanos": 20,
+  "bytesHuerfanos": 7386240,
+  "muestra": [
+   "2052f109-143a-41d1-b338-de8973d8fb20/10bf7412-6a1c-4",
+   "2052f109-143a-41d1-b338-de8973d8fb20/11ad837b-ed8e-4",
+   "2052f109-143a-41d1-b338-de8973d8fb20/11ad837b-ed8e-4",
+   "2052f109-143a-41d1-b338-de8973d8fb20/14550c0d-c3b7-4"
+  ]
+ },
+ {
+  "bucket": "marca-publica",
+  "objetos": 1,
+  "referenciados": null,
+  "huerfanos": null,
+  "bytesHuerfanos": null,
+  "sinMapa": true
+ },
+ {
+  "bucket": "mascotas",
+  "objetos": 14,
+  "referenciados": 7,
+  "huerfanos": 7,
+  "bytesHuerfanos": 1014220,
+  "muestra": [
+   "1038b1b9-e2f9-4ba4-aae3-caf23d9abe8f/avatar-17835524",
+   "1038b1b9-e2f9-4ba4-aae3-caf23d9abe8f/avatar-17835524",
+   "4e2c24a3-d6ec-444c-9427-e8607ee86c68/carnet-17853541",
+   "889a72c5-8d55-4cfd-a48f-b427cf9e9305/carnet-17835643"
+  ]
+ },
+ {
+  "bucket": "prestador-documentos",
+  "objetos": 91,
+  "referenciados": 9,
+  "huerfanos": 83,
+  "bytesHuerfanos": 74716502,
+  "muestra": [
+   "0aa249ec-23a9-4cf3-8568-5bb9da8ae3be/cedula-17779307",
+   "0aa249ec-23a9-4cf3-8568-5bb9da8ae3be/permiso_funcion",
+   "0aa249ec-23a9-4cf3-8568-5bb9da8ae3be/ruc-17779307906",
+   "0aa249ec-23a9-4cf3-8568-5bb9da8ae3be/titulo_profesio"
+  ]
+ },
+ {
+  "bucket": "prestador-galeria",
+  "objetos": 8,
+  "referenciados": 8,
+  "huerfanos": 0,
+  "bytesHuerfanos": 0,
+  "muestra": []
+ },
+ {
+  "bucket": "productos-fotos",
+  "objetos": 0,
+  "referenciados": 0,
+  "huerfanos": 0,
+  "bytesHuerfanos": 0,
+  "sinMapa": true
+ }
+]

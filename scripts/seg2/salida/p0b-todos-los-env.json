@@ -1,0 +1,166 @@
+[
+ {
+  "path": "e-petplace/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 32,
+  "fin": "NATl",
+  "md5": "9db678109c",
+  "mtime": "2026-08-08T04:40:29"
+ },
+ {
+  "path": "e-petplace/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 32,
+  "fin": "NATl",
+  "md5": "f75abffd8c",
+  "mtime": "2026-08-08T04:40:29"
+ },
+ {
+  "path": "e-petplace/supabase/dev/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-admin/.env.example",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-admin/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-prestadores/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-s86-B/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-04T19:45:41"
+ },
+ {
+  "path": "e-petplace-s86-B/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-04T19:45:49"
+ },
+ {
+  "path": "e-petplace-s86-B/supabase/dev/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-s86-C/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-04T15:11:31"
+ },
+ {
+  "path": "e-petplace-s86-C/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-04T15:11:31"
+ },
+ {
+  "path": "e-petplace-s86-C/supabase/dev/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-s87-B/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-05T03:09:36"
+ },
+ {
+  "path": "e-petplace-s87-B/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-05T03:09:36"
+ },
+ {
+  "path": "e-petplace-s87-B/supabase/dev/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-s87-C/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-05T03:09:55"
+ },
+ {
+  "path": "e-petplace-s87-D/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-05T03:09:54"
+ },
+ {
+  "path": "e-petplace-s90-B/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-07T06:16:30"
+ },
+ {
+  "path": "e-petplace-s90-B/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-07T06:16:30"
+ },
+ {
+  "path": "e-petplace-s90-B/supabase/dev/.env.local",
+  "tiene": false
+ },
+ {
+  "path": "e-petplace-s90-D/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-07T13:01:01"
+ },
+ {
+  "path": "e-petplace-s90-D/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-07T13:01:01"
+ },
+ {
+  "path": "e-petplace-s91-D/apps/cliente/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "0be50d4b3e",
+  "mtime": "2026-08-08T03:31:49"
+ },
+ {
+  "path": "e-petplace-s91-D/apps/prestador/.env.local",
+  "tiene": true,
+  "largo": 9,
+  "fin": "23..",
+  "md5": "3ba853abf5",
+  "mtime": "2026-08-08T03:31:49"
+ },
+ {
+  "path": "e-petplace-v2/.env.local",
+  "tiene": false
+ }
+]

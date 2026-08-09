@@ -1,0 +1,30 @@
+[
+ {
+  "path": "e-petplace/apps/cliente/.env.local",
+  "md5": "9db678109c30aab149d0670ba6f7fc13",
+  "bytes": 547,
+  "valorLargo": 32,
+  "mail": "demo-prestador@epetplace.dev"
+ },
+ {
+  "path": "e-petplace/apps/prestador/.env.local",
+  "md5": "f75abffd8c8810bd825470e9fde2efc3",
+  "bytes": 606,
+  "valorLargo": 32,
+  "mail": "demo-prestador@epetplace.dev"
+ },
+ {
+  "path": "e-petplace-s91-D/apps/cliente/.env.local",
+  "md5": "0be50d4b3ec3713f7f666e8ae717488f",
+  "bytes": 524,
+  "valorLargo": 9,
+  "mail": "demo-prestador@epetplace.dev"
+ },
+ {
+  "path": "e-petplace-s91-D/apps/prestador/.env.local",
+  "md5": "3ba853abf51deb37cbe685a271f88c1b",
+  "bytes": 583,
+  "valorLargo": 9,
+  "mail": "demo-prestador@epetplace.dev"
+ }
+]

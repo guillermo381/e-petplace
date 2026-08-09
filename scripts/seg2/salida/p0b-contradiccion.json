@@ -1,0 +1,62 @@
+{
+ "rutaAbsoluta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/apps/cliente/.env.local",
+ "cwd": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace",
+ "md5": "9db678109c30aab149d0670ba6f7fc13",
+ "lineas": 7,
+ "envs": [
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/apps/cliente/.env.local",
+   "bytes": 547,
+   "mtime": "2026-08-08T04:40:29.486Z",
+   "tieneDemo": true
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/apps/prestador/.env.local",
+   "bytes": 606,
+   "mtime": "2026-08-08T04:40:29.486Z",
+   "tieneDemo": true
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/supabase/dev/.env.local",
+   "bytes": 246,
+   "mtime": "2026-07-08T22:42:43.619Z",
+   "tieneDemo": false
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s91-D/apps/cliente/.env.local",
+   "bytes": 524,
+   "mtime": "2026-08-08T03:31:49.466Z",
+   "tieneDemo": true
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s91-D/apps/prestador/.env.local",
+   "bytes": 583,
+   "mtime": "2026-08-08T03:31:49.469Z",
+   "tieneDemo": true
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-v2/.env.local",
+   "bytes": 354,
+   "mtime": "2026-07-04T23:08:10.722Z",
+   "tieneDemo": false
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-admin/.env.example",
+   "bytes": 90,
+   "mtime": "2026-06-14T10:47:13.568Z",
+   "tieneDemo": false
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-admin/.env.local",
+   "bytes": 291,
+   "mtime": "2026-07-04T23:08:10.725Z",
+   "tieneDemo": false
+  },
+  {
+   "path": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-prestadores/.env.local",
+   "bytes": 386,
+   "mtime": "2026-07-04T23:08:10.727Z",
+   "tieneDemo": false
+  }
+ ]
+}

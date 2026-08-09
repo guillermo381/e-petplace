@@ -10601,3 +10601,49 @@ paseo, en otra capa.
 > o el arco de features que siga a seguridad. **☠️ MUERTE:** ninguna mascota sin
 > foto pinta un glifo que no sea el fallback de su sujeto.
 > Origen: S92-BIS (gate de dispositivo del founder).
+
+#### D-710 — 🟠 127 OBJETOS HUÉRFANOS EN STORAGE — 83 son DOCUMENTOS DE IDENTIDAD
+
+**Censo de S92-BIS (B1 paso 6), medido bucket por bucket cruzando
+`storage.objects` contra las columnas de la base que guardan paths:**
+
+| bucket | objetos | referenciados | **huérfanos** | peso |
+|---|---|---|---|---|
+| **`prestador-documentos`** | 91 | 9 | **83** | **71,26 MB** |
+| `grooming-archivos` | 27 | 8 | 20 | 7,04 MB |
+| `avatars` | 12 | 4 | 10 | 1,35 MB |
+| `cita-archivos` | 11 | 4 | 7 | 2,31 MB |
+| `mascotas` | 14 | 7 | 7 | 0,97 MB |
+| `adiestramiento-clips` · `prestador-galeria` | 1 · 8 | 1 · 8 | **0** · **0** | — |
+| **TOTAL** | | | **127** | **82,92 MB** |
+
+**Lo que de verdad importa no es el peso: es QUÉ son.** Los 83 de
+`prestador-documentos` son **cédulas, RUC, títulos profesionales y permisos de
+funcionamiento** de personas reales —los nombres de archivo lo dicen— que
+**ninguna fila de la base referencia**. Nadie los va a volver a mirar y siguen
+ahí.
+
+**No es un agujero de permisos:** ese bucket es privado y en S92-BIS se midió
+que rebota a anónimos y a autenticados ajenos por las cinco vías. **Es otra
+cosa: datos personales conservados sin propósito** — la misma familia que los
+14 teléfonos que S92 purgó por firma.
+
+**NO SE BORRÓ NADA** (freno 3 del arranque: borrar datos es decisión del
+founder). La lista completa, con paths y tamaños, queda en
+`scripts/seg2/salida/b1-huerfanos.json`.
+
+**Dos cosas que el próximo dueño no tiene que re-medir:**
+- **Los buckets `especies-razas` (111 objetos) y `marca-publica` (1) NO se
+  cuentan como huérfanos**, y se dice por qué en vez de inflar el número: son
+  catálogo y marca, **sin tabla que los referencie por diseño**. Contarlos daría
+  238 huérfanos y sería falso.
+- **`prestador-galeria` y `adiestramiento-clips` dieron CERO**, o sea que el
+  patrón de borrar el objeto al quitarlo de la vitrina **funciona donde está
+  implementado** — el problema es de los buckets que nunca lo tuvieron.
+
+> **Dueño: founder (decide qué se conserva) → A (ejecuta).**
+> **☠️ DISPARO: S93**, junto con la decisión de qué hacer con los datos de
+> prueba marcados (D-704) — son la misma pregunta: *qué se conserva y por qué.*
+> **☠️ MUERTE:** todo objeto de Storage o tiene una fila que lo referencia, o
+> una razón escrita para seguir existiendo.
+> Origen: S92-BIS (B1 paso 6).
