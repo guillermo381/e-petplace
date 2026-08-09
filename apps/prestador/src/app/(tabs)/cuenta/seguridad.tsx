@@ -77,6 +77,7 @@ import {
 } from '@epetplace/ui';
 import {
   cambiarContrasena,
+  MIN_LARGO_CONTRASENA,
   obtenerMiPerfil,
   segundosDeEspera,
 } from '@epetplace/api';
@@ -268,7 +269,7 @@ export default function Seguridad() {
               onChangeText={setNueva}
               secure
               autoCapitalize="none"
-              ayuda={t('seguridad.largoMinimo')}
+              ayuda={t('seguridad.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
             />
             <Campo
               label={t('seguridad.confirmar')}

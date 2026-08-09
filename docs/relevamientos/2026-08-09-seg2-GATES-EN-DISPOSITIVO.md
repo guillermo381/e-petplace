@@ -41,6 +41,36 @@ diccionario. Se ven **solo** si el catálogo tarda o falla:
 - [ ] `paquete.catalogoErrorTitulo` — «No pudimos cargar los datos del paseo»
 - [ ] `paquete.catalogoErrorDetalle` — «…Tus mascotas están bien: lo que no llegó es la información del servicio.»
 
+## ③bis LA VOZ DE CONTRASEÑA (D-720) — un texto, cinco superficies
+
+Firmado por vos en tuteo. **Se ve al elegir una contraseña que el servidor
+rechaza** — y ahora rechaza más que antes, porque las perillas están en 8 + lista
+de filtradas:
+
+> «Necesitamos una contraseña más fuerte: mínimo 8 caracteres y evita palabras o
+> combinaciones fáciles de identificar. Un truco: tres palabras que no tengan
+> relación, como melon-lampara-rio.»
+
+**Probalo tipeando `password123` en cualquiera de estas.** Antes decía «necesita
+al menos 8 caracteres» sobre una clave de **once** — y el consejo era imposible
+de seguir:
+
+- [ ] **cliente · registro** — el mensaje sale bajo el campo de contraseña
+- [ ] **prestador · registro** — ídem
+- [ ] **prestador · Cuenta → Seguridad** — al cambiar la clave
+- [ ] **prestador · recuperar** — al elegir la nueva *(⚠️ hoy no se llega: el
+      correo no sale — D-724)*
+- [ ] **portal · wizard de registro** — antes decía «Error al crear la cuenta.
+      Intenta de nuevo.» y no daba **ninguna** pista de qué cambiar
+
+**Lo que mirás además del texto:** que **entre en la pantalla sin romper el
+layout**. Si en alguna no entra, lo que se recorta es **el ejemplo** — nunca el
+mínimo.
+
+- [ ] **Y el cambio de contraseña, de punta a punta** (D-719): hasta hoy
+      **rebotaba siempre** con «Ocurrió un error inesperado». Cambiala de verdad
+      y volvé a entrar con la nueva.
+
 ## ④ LAS FUNCTIONS FACTURABLES — cuatro flujos que ahora exigen sesión
 
 La cura es invisible si todo anda; se nota **solo si rompió algo**.

@@ -11165,12 +11165,59 @@ mismo «error inesperado». **Si las dos están caídas, el prestador no tiene
 NINGÚN camino a su contraseña.** Se resuelve en dos minutos: pedir el código al
 correo real y llegar al último paso.
 
-> **Dueño: sesión de login (founder, en dos semanas) — PERO el disparo es
-> ANTES.** **☠️ DISPARO: es lo primero que se mide y cura en esa sesión, y si el
-> founder necesita cambiar una contraseña antes, se cura ese día.**
-> **☠️ MUERTE:** un cambio de clave real completado en dispositivo, y la
-> incógnita de recuperar contestada por camino real.
-> Origen: S92-BIS, censo de voz de contraseña.
+> ### ✅ (a) CURADA EL MISMO DÍA (orden del founder: «no dejamos deudas»)
+>
+> **La cura es la línea que faltaba:** `updateUser` ahora manda
+> `current_password: input.actual` — el valor que el wrapper ya tenía en la
+> mano. Y el mapeo ganó brazo por `code` estable para `current_password_required`
+> (además de `same_password` y `weak_password`), así que **el día que el
+> contrato del servidor cambie, el usuario no verá «error inesperado»**: verá que
+> la contraseña actual no coincide, que es un campo que la pantalla tiene y una
+> acción que puede hacer.
+>
+> **VERDE POR EL WRAPPER, no por `fetch`** (`scripts/verify-cambiar-contrasena-s92bis.mts`,
+> **7/7**). *Un assert por `fetch` mandaría lo que yo decida mandar y daría verde
+> con el wrapper roto — mediría mi curl, no el producto.* Los cuatro brazos:
+>
+> | brazo | resultado |
+> |---|---|
+> | ① **ROJO reproducido** — el camino viejo (`updateUser` sin el campo) | sigue rebotando `400 current_password_required` ⇒ **el assert discrimina** |
+> | ② `cambiarContrasena` curada | la contraseña **cambia** |
+> | ③ verde doble | **entra con la nueva** · la vieja **ya no entra** |
+> | ④ contra-caso — con la actual EQUIVOCADA | rebota `contrasena_actual_incorrecta` **y la clave no cambia** |
+>
+> *El brazo ① es el que impide el verde flojo: si el founder apagara la perilla,
+> la cura seguiría funcionando pero el assert dejaría de probar algo — y lo
+> diría.* El ④ es el que impide que un wrapper que ignore la actual pase igual.
+>
+> ### 🔴 (b) LA INCÓGNITA HERMANA — NO SE PUDO MEDIR, y por una razón peor que la pregunta
+>
+> Para medir `establecerContrasenaNueva` (paso 2 de *recuperar*) hace falta una
+> sesión de recovery real, o sea **un código que llegue por correo**. Se preparó
+> un fixture con `guillo381+d719rec@gmail.com` —plus-addressing: el correo llega
+> a la bandeja del founder y **la cuenta que se toca es descartable**, sin
+> `service_role` (R6) y sin rozar ninguna cuenta real—. **Y el correo no salió:**
+>
+> ```
+> POST /auth/v1/recover  → HTTP 500 · unexpected_failure
+>                          "Error sending recovery email"     (reproducido ×2)
+> ```
+>
+> ⇒ **nace D-724**, que es más grave que esta incógnita: el paso 1 de recuperar
+> está caído, así que el paso 2 es inalcanzable. **Sumado a (a), significa que
+> hasta hoy un prestador no tenía NINGÚN camino a su contraseña** — el cambio
+> rebotaba y la recuperación no envía.
+>
+> **Lo que sí se dejó curado a ciegas, y se declara como tal:** nada. *No se le
+> puso un brazo `current_password_required` a `establecerContrasenaNueva`
+> porque en recuperación la persona **no conoce** su contraseña actual — si el
+> servidor la exigiera ahí, el flujo sería imposible y la cura no sería un
+> mensaje sino apagar la perilla. Decidirlo sin medir sería adivinar.*
+
+> **Dueño: A (ejecutó (a)) → founder (habilita (b) al curar D-724).**
+> **✅ (a) CERRADA 9-ago-2026.** **🔴 (b) ABIERTA, bloqueada por D-724.**
+> **☠️ MUERTE de (b):** el paso 2 de recuperar medido por camino real con un
+> código que llegó de verdad. Origen: S92-BIS, censo de voz de contraseña.
 
 ---
 
@@ -11233,11 +11280,52 @@ que el proveedor no manda.
 **El peor de los once es el #10**, que colapsa las dos causas en un genérico sin
 camino: la persona no sabe qué cambiar de su contraseña.
 
-> **Dueño: sesión de login (founder, en dos semanas).**
-> **☠️ DISPARO: esa sesión — llega con esta tabla como línea base.**
-> **☠️ MUERTE:** ninguna superficie de contraseña dice «al menos N caracteres»
-> ante una clave que no es corta, y un fixture lo verifica por camino real.
-> Origen: S92-BIS, censo pedido por el founder.
+> ### ✅ CURADA EL MISMO DÍA — voz única, firmada por el founder
+>
+> **El texto, en tuteo, con sus TRES partes:**
+>
+> > *«Necesitamos una contraseña más fuerte: mínimo 8 caracteres y evita
+> > palabras o combinaciones fáciles de identificar. Un truco: tres palabras que
+> > no tengan relación, como melon-lampara-rio.»*
+>
+> **El mínimo · la advertencia · el ejemplo.** Si en alguna pantalla el espacio
+> no diera, **lo que se recorta es el ejemplo, jamás el mínimo** (orden del
+> founder).
+>
+> ### ⚠️ POR QUÉ EL EJEMPLO ES DE **FORMA** Y NO UNA CONTRASEÑA CONCRETA
+>
+> *Un ejemplo literal en pantalla termina usado por mucha gente — y en cuanto se
+> usa, entra a las listas de contraseñas filtradas. O sea que **nuestro propio
+> ejemplo pasaría a ser rechazado por nuestra propia perilla**, y quien lo
+> copiara del texto recibiría el rebote del texto que se lo sugirió.* Por eso
+> `melon-lampara-rio` enseña **la receta** (tres palabras sin relación), no una
+> clave para copiar. Observación del founder al firmar el texto.
+>
+> **VERDE por el wrapper** (`scripts/verify-voz-contrasena-s92bis.mts`, **8/8**):
+> las dos causas devuelven `password_debil` y **exactamente el mismo mensaje**;
+> el mensaje conserva las tres partes; **ya no es una afirmación de largo y nada
+> más** (el regex del assert se dispara contra el mensaje viejo literal); y el
+> contra-caso ④ —una clave sana ES aceptada— impide que un wrapper que rechace
+> todo pase los otros brazos.
+>
+> **DÓNDE PEGÓ** — la voz vive en los wrappers, así que **una edición cubre las
+> cuatro superficies del monorepo**: `password_debil` en `auth.ts` (registro de
+> las dos apps) y `contrasena_debil` en `seguridad.ts` (cambio de clave y
+> recuperar). **Y la quinta, el genérico ciego del wizard del portal (#10)**, que
+> era el peor del censo: ahora mapea `weak_password` por `code` estable a su
+> propia voz, y el genérico queda para lo que de verdad es inesperado.
+>
+> **LOS PORTALES LEGADOS EN INGLÉS NO SE TOCARON** — decisión del founder: son
+> superficie prescindible. *La excepción es el wizard, que no está en inglés y
+> además es por donde entra un prestador nuevo.*
+>
+> **Strings nuevos → a la lista de gates en dispositivo.**
+
+> **Dueño: A (ejecutó) → founder (gate de los strings en dispositivo).**
+> **✅ CERRADA 9-ago-2026.**
+> **MUERTE CUMPLIDA:** ninguna superficie del monorepo dice «al menos N
+> caracteres» ante una clave que no es corta, y un fixture lo verifica por
+> camino real. Origen: S92-BIS, censo pedido por el founder.
 
 ---
 
@@ -11261,9 +11349,94 @@ pantalla desalineada, y la cura es un número y un string.
 **Alcance real, para dimensionar:** es el flujo por el que **una persona
 invitada a un equipo se crea la cuenta**. No es una pantalla muerta.
 
-> **Dueño: sesión de login (founder), junto con D-720 — misma tanda.**
-> **☠️ DISPARO: esa sesión, o la primera vez que alguien acepte una invitación
-> por el portal y rebote.**
-> **☠️ MUERTE:** el portal exige 8 y lo dice, o el flujo de invitación migra a
-> la app y la pantalla muere.
+> ### ✅ CURADA EL MISMO DÍA — y el censo halló que la clase era más ancha
+>
+> **LO PRIMERO, que es lo que importa: el monorepo estaba LIMPIO.** El censo de
+> la clase —no del caso— buscó todo largo escrito a mano en los tres repos:
+> **cero literales en `apps/` y `packages/`**, todo pasa por
+> `MIN_LARGO_CONTRASENA`. La regla de S88 se sostuvo donde se firmó.
+>
+> **PERO aparecieron DOS casos más, y el primero es el que enseña:**
+>
+> **① `seguridad.largoMinimo` tenía el 8 escrito a mano (es y en)** mientras su
+> **gemela** de `recuperar` ya se interpolaba — y el comentario de la gemela
+> dice, textual: *«la regla se interpola desde MIN_LARGO_CONTRASENA — el
+> hardcodeo parió el «6 vs 8» entre registro y recuperar»*. **Se curó el hermano
+> y no el gemelo**, exactamente el patrón que `verificarCodigoRecuperacion` ya
+> tiene escrito en su propia lápida. *Cuando la causa de un defecto es un patrón,
+> la cura se barre por el patrón, jamás por el sitio que lo destapó.* Curado: las
+> dos leen `{{n}}` y `seguridad.tsx` pasa `MIN_LARGO_CONTRASENA`.
+>
+> **② El placeholder del wizard** (`"Mínimo 8 caracteres"`) también era literal.
+> Curado por interpolación.
+>
+> **③ Y el caso original, `AceptarInvitacion`: 6 → 8 en sus TRES ocurrencias.**
+>
+> ### ⚠️ EL LÍMITE QUE SE DECLARA EN VEZ DE DISIMULARSE
+>
+> El founder ordenó curar **importando `MIN_LARGO_CONTRASENA`, no escribiendo un
+> 8 nuevo**. **En el portal eso es imposible y hay que decirlo:** es un
+> **repositorio separado y congelado desde S42**, sin workspace ni
+> `node_modules` compartidos — no puede importar del monorepo. Lo que sí se
+> hizo, que es lo más cercano: **nace `e-petplace-prestadores/src/lib/password.ts`**
+> con el número **una sola vez para todo el portal** (antes vivía suelto en
+> cuatro sitios, y uno decía 6), y con una nota que dice, sin adornos, que **si
+> el mínimo cambia en el monorepo hay que cambiarlo acá y ningún mecanismo lo
+> va a avisar**. *Es el costo de que el portal viva afuera; publicar el paquete
+> sería la cura real y no es de esta sesión.*
+>
+> **VERDE:** `tsc` del portal con **73 errores con mis cambios y 73 sin ellos**
+> —medido con `git stash`, no supuesto— y **cero en los cuatro archivos
+> tocados**. *Los 73 son deuda preexistente del portal congelado (drift del
+> contrato de wrappers), y decirlo importa: sin el baseline, «73 errores» se
+> leería como que los rompí yo.* Typechecks del monorepo (`api`, `cliente`,
+> `prestador`): **verdes**.
+
+> **Dueño: A (ejecutó).** **✅ CERRADA 9-ago-2026.**
+> **MUERTE CUMPLIDA:** el portal exige 8 y lo dice, con el número en un solo
+> lugar. **Queda vivo el límite declarado** (la copia entre repos), cuya cura
+> real es publicar el paquete — sin disparo asignado.
 > Origen: S92-BIS, censo de voz de contraseña.
+
+---
+
+#### D-724 — 🔴 EL CORREO DE RECUPERACIÓN DE CONTRASEÑA NO SALE
+
+**Medido hoy, reproducido dos veces, sobre la única dirección con cuenta:**
+
+```
+POST /auth/v1/recover   { email: <cuenta que existe> }
+→ HTTP 500 · unexpected_failure · "Error sending recovery email"
+```
+
+**Lo que significa en lenguaje de negocio:** quien olvida su contraseña toca
+«Olvidé mi contraseña», la pantalla le dice que revise su correo — **y el correo
+nunca sale**. Espera, revisa spam, pide otro, y sigue afuera.
+
+**Y hasta hoy no tenía la otra salida:** el cambio de contraseña también estaba
+caído (D-719 (a), curado en esta misma sesión). **Los dos caminos a la
+contraseña estaban rotos al mismo tiempo**, y ninguno de los dos avisaba de una
+forma que dejara diagnosticar.
+
+⚠️ **CUIDADO CON EL FALSO VERDE AL MEDIRLO** — el primer diagnóstico lo tuvo:
+`/auth/v1/recover` devuelve **`200` para direcciones SIN cuenta**, por diseño
+(nunca declara si un correo existe). *Un `200` sobre una dirección inexistente
+no prueba que el envío funcione: prueba que no había nada que enviar.* La
+medición honesta exige **una dirección con cuenta real**.
+
+**LO QUE FALTA MEDIR, y es del dashboard:** si el proyecto tiene **SMTP propio**
+mal configurado, o está usando el **SMTP por defecto de Supabase** —que tiene un
+techo bajísimo de correos por hora y no es apto para producción—. Eso se ve en
+**Dashboard → Authentication → Emails / SMTP Settings**, y no es medible desde
+el CLI. **Es la misma familia que D-628** (las plantillas siguen siendo las de
+Supabase, en inglés): *el canal de correo de auth nunca se terminó de montar.*
+
+**Bloquea D-719 (b):** sin correo no hay código, sin código no hay sesión de
+recovery, y sin eso no se puede medir si el paso 2 de recuperar tiene el mismo
+defecto que se curó hoy en el cambio de clave.
+
+> **Dueño: founder (es config de dashboard) + A (re-mide después).**
+> **☠️ DISPARO: YA — es el único camino de recuperación de contraseña del
+> producto, y hoy no funciona para nadie.**
+> **☠️ MUERTE:** un código de recuperación llega a un buzón real, y con él se
+> mide y cierra D-719 (b). Origen: S92-BIS, al preparar la medición de D-719 (b).

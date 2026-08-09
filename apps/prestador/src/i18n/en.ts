@@ -449,7 +449,9 @@ export const prestadorEn = {
     ayuda: 'The password you use to sign in.',
     actual: 'Your current password',
     nueva: 'New password',
-    largoMinimo: 'At least 8 characters.',
+    // el par en español lleva la nota: este 8 estaba a mano y su gemela de
+    // `recuperar` ya se interpolaba (D-721).
+    largoMinimo: 'At least {{n}} characters.',
     confirmar: 'Repeat the new password',
     noCoinciden: "The two passwords don't match. Please type them again.",
     cambiar: 'Change password',

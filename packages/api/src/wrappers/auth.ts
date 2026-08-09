@@ -27,7 +27,13 @@ const MENSAJES_ERROR_AUTH: Record<
   email_ya_registrado:   'Ese email ya tiene cuenta. Probá iniciar sesión.',
   credenciales_invalidas: 'El email o la contraseña no coinciden.',
   email_invalido:        'Ese email no parece válido.',
-  password_debil:        `La contraseña necesita al menos ${MIN_LARGO_CONTRASENA} caracteres.`,
+  /* Misma voz única que `contrasena_debil` en seguridad.ts — ver el porqué
+     completo allá (D-720). Acá pega en el REGISTRO de las dos apps: es el
+     primer lugar donde alguien elige una contraseña, y era donde el mensaje
+     viejo mentía más seguido, porque `password123` es exactamente la clase de
+     clave que se tipea al crear una cuenta. */
+  password_debil:
+    `Necesitamos una contraseña más fuerte: mínimo ${MIN_LARGO_CONTRASENA} caracteres y evita palabras o combinaciones fáciles de identificar. Un truco: tres palabras que no tengan relación, como melon-lampara-rio.`,
   email_no_confirmado:   'Falta confirmar tu email. Revisá tu correo.',
   sin_sesion:            'No hay una sesión activa.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',

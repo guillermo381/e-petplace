@@ -1,0 +1,16 @@
+[
+ {
+  "email": "guillo381+d719rec2@gmail.com",
+  "status": 200,
+  "retryAfter": null,
+  "cuerpo": "{}",
+  "que": "otra dirección REAL (existe la cuenta? no — se creará nada, solo prueba envío)"
+ },
+ {
+  "email": "no-existe-jamas-8471@epetplace.dev",
+  "status": 200,
+  "retryAfter": null,
+  "cuerpo": "{}",
+  "que": "dirección INEXISTENTE (no hay nada que enviar)"
+ }
+]

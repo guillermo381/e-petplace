@@ -620,7 +620,11 @@ export const prestadorEs = {
     ayuda: 'La clave con la que entras a la app.',
     actual: 'Tu contraseña actual',
     nueva: 'La nueva contraseña',
-    largoMinimo: 'Al menos 8 caracteres.',
+    // ⚠️ ESTE 8 ESTABA ESCRITO A MANO mientras su GEMELA de `recuperar` ya se
+    // interpolaba — y el comentario de allá dice, textual, «el hardcodeo parió
+    // el 6 vs 8». *Se curó el hermano y no el gemelo* (D-721). Ahora las dos
+    // leen la misma fuente: MIN_LARGO_CONTRASENA.
+    largoMinimo: 'Al menos {{n}} caracteres.',
     confirmar: 'Repite la nueva contraseña',
     /** El ÚNICO error de esta pantalla que el servidor no puede cazar:
      *  para él las dos son válidas. Por eso la voz no culpa a nadie —

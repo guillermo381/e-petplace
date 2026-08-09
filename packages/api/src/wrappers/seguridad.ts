@@ -84,7 +84,17 @@ const MENSAJES: Record<CodigoErrorSeguridad, string> = {
   // la mandaría a probar claves que nunca existieron.
   sin_contrasena:               'Tu cuenta entra con Google y todavía no tiene contraseña. Usa "Olvidé mi contraseña" para crear una.',
   contrasena_actual_incorrecta: 'La contraseña actual no coincide.',
-  contrasena_debil:             `La contraseña nueva tiene que tener al menos ${MIN_LARGO} caracteres.`,
+  /* ⚠️ UNA SOLA VOZ PARA DOS CAUSAS, Y ES A PROPÓSITO (D-720, firma founder).
+     El servidor manda `weak_password` **tanto** para «muy corta» **como** para
+     «está en las listas de filtradas» — el mismo código, distinto texto en
+     inglés. *Mapear por código es lo correcto (D-659 ②) y aun así no alcanza
+     para distinguirlas.* El mensaje viejo decía «al menos 8 caracteres» ante
+     una clave filtrada de once, y quien obedecía agregaba caracteres y volvía a
+     rebotar: **el rebote empujaba a la acción que garantizaba el próximo
+     fracaso**, igual que el bucle de D-659.
+     Esta voz cubre las dos causas sin mentir en ninguna, y da camino. */
+  contrasena_debil:
+    `Necesitamos una contraseña más fuerte: mínimo ${MIN_LARGO} caracteres y evita palabras o combinaciones fáciles de identificar. Un truco: tres palabras que no tengan relación, como melon-lampara-rio.`,
   contrasena_igual:             'La contraseña nueva tiene que ser distinta de la actual.',
   /* ⚠️ ESTE MENSAJE ALIMENTABA EL BUCLE QUE CAZÓ EL FOUNDER (S88, re-prueba
      de D-659). Decía: «Ese código no es válido o ya venció. Pedí uno nuevo.»
@@ -175,8 +185,42 @@ export async function cambiarContrasena(input: {
     };
   }
 
-  const { error } = await getClient().auth.updateUser({ password: input.nueva });
+  /* ⚠️ `current_password` NO ES REDUNDANTE con la re-autenticación de arriba, y
+     su ausencia tuvo el camino CAÍDO (D-719, S92-BIS).
+
+     Cuando el founder encendió «require current password», GoTrue pasó a
+     exigir el campo **en el PUT mismo**: la sesión fresca que deja
+     `signInWithPassword` **no le alcanza**. Medido por el camino literal de
+     este wrapper — re-autenticación 200, y el `updateUser` siguiente
+     `400 current_password_required`. *Ningún prestador podía cambiar su
+     contraseña, y ése es el único camino legítimo que deja la regla 87.*
+
+     El valor ya estaba en la mano: `input.actual`. */
+  const { error } = await getClient().auth.updateUser({
+    password: input.nueva,
+    current_password: input.actual,
+  });
   if (error) {
+    // ⚠️ Se mapea por `code` ESTABLE primero (D-659 ②). El regex de abajo
+    // sobrevive solo como red para instancias que no manden código.
+    const codigoGoTrue = (error as { code?: string }).code;
+    if (codigoGoTrue === 'same_password') {
+      return { ok: false, codigo: 'contrasena_igual', mensaje: MENSAJES.contrasena_igual };
+    }
+    if (codigoGoTrue === 'weak_password') {
+      return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
+    }
+    /* El día que este brazo se dispare, algo cambió en el contrato del
+       servidor — pero el usuario NO tiene que ver «error inesperado» por eso:
+       la contraseña actual es un campo que la pantalla sí tiene, y decirle que
+       no coincide le da una acción. Es la voz honesta más cercana. */
+    if (codigoGoTrue === 'current_password_required') {
+      return {
+        ok: false,
+        codigo: 'contrasena_actual_incorrecta',
+        mensaje: MENSAJES.contrasena_actual_incorrecta,
+      };
+    }
     if (/at least|should be|weak/i.test(error.message)) {
       return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
     }

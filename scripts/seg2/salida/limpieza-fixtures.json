@@ -1,15 +1,16 @@
 {
  "antes": {
-  "fixtures": 1,
-  "resto": 150,
-  "total": 151
+  "fixtures": 2,
+  "resto": 151,
+  "total": 153
  },
  "despues": {
   "fixtures": 0,
-  "resto": 150,
-  "total": 150
+  "resto": 151,
+  "total": 151
  },
  "lista": [
-  "seg2-voz-cambio-1786293939485@epetplace.dev"
+  "seg2-d719-1786294713823@epetplace.dev",
+  "seg2-voz-9cf556fa@epetplace.dev"
  ]
 }
