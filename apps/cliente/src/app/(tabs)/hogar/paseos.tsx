@@ -74,9 +74,12 @@ import {
   type CitaPaseoDueno,
   type PaqueteSalidas,
   type PlanPaseo,
+  type EstadoVidaMascota,
 } from '@epetplace/api';
 import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
@@ -103,7 +106,8 @@ export default function MisPaseos() {
   // definición) y un eje que no parte no se dibuja.
   const [filtroMascota, setFiltroMascota] = useState<string | null>(null);
   const [ventanaFecha, setVentanaFecha] = useState<'todos' | 'semana' | 'mes'>('todos');
-  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
+  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string; especie: string; estado_vida: EstadoVidaMascota | null }[]>([]);
+  const faseEspecies = useEspeciesElegibles('paseo');
   const [abierta, setAbierta] = useState<string | null>(null);
   // r12-11: el CTA deshabilitado SIGUE TOCABLE y, al tocarlo, señala la
   // hilera: nunca un botón muerto que no responde.
@@ -142,7 +146,13 @@ export default function MisPaseos() {
         r.data.map((m) => ({
           id: m.id,
           nombre: m.nombre,
-          fotoUrl: m.foto_url ? urls.get(m.foto_url) : undefined,
+          especie: m.especie,
+          estado_vida: m.estado_vida,
+          fotoUrl: caraDeMascotaPorRuta({
+            especie: m.especie,
+            rutaImagen: m.raza_ruta_imagen,
+            fotoUri: m.foto_url ? urls.get(m.foto_url) : undefined,
+          }),
         })),
       );
     });
@@ -444,7 +454,7 @@ export default function MisPaseos() {
           {mascotasHogar.length > 1 ? (
             <View style={{ marginHorizontal: -spacing[4] }}>
               <FiltroMascotas
-                mascotas={mascotasHogar}
+                mascotas={ofrecibles(mascotasHogar, faseEspecies)}
                 elegida={filtroMascota}
                 onElegir={(id) => {
                   setFiltroMascota(id);

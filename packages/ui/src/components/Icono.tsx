@@ -128,6 +128,45 @@ export type IconoNombre =
   //    y `cuenta` lo usa la celda vecina (Ley 12 directa).
   //    EL OBJETO ES IDENTIFICACIÓN (cédula · RUC · NIT), no una carpeta
   //    ni un archivo genérico. GATE POR ÍCONO A 21px PENDIENTE (§2.9).
+  //
+  //    ⚠️ S91-B · SU DOBLE TURNO, MEDIDO — Y EL PRESTADO NO ES EL QUE SE
+  //    CREÍA. Tras cablear el apilado, `documento` queda en DOS usos:
+  //    `historia_clinica` y `ficha_identidad` (`apps/cliente/src/lib/
+  //    papeles.ts`). La mesa preguntó si nace el glifo propio de
+  //    `ficha_identidad` o su préstamo se declara permanente — y contra el
+  //    objeto la pregunta está AL REVÉS:
+  //      · **`ficha_identidad` NO es la prestataria: es la dueña.** El
+  //        objeto declarado dos líneas arriba es «identificación, cédula
+  //        CON RETRATO», y la ficha de identidad de una mascota es
+  //        exactamente eso — lleva foto. El propio `papeles.ts` ya lo dice
+  //        («el objeto EXACTO del registry»).
+  //      · **La que presta es `historia_clinica`.** Una historia clínica
+  //        NO es una cédula: no identifica, registra. Ahí el dibujo miente
+  //        el objeto, que es lo que la Ley 12 persigue.
+  //    ⇒ **El glifo que faltaría es el de la HISTORIA CLÍNICA**, y darle
+  //    uno propio a `ficha_identidad` dejaría a la dueña con dibujo nuevo
+  //    y a la prestataria con el que no le corresponde — el problema
+  //    intacto y una pieza más en el registry.
+  //
+  //    ✅ RATIFICADO POR LA MESA (8-ago-2026), con su letra: «la
+  //    prestataria es HISTORIA_CLINICA, no ficha_identidad — una historia
+  //    clínica no identifica, REGISTRA; la ficha de identidad SÍ es
+  //    identificación con retrato, es dueña legítima del dibujo». Y la
+  //    decisión de NO dibujar quedó firmada como correcta: **dibujar para
+  //    el objetivo equivocado es más caro que no dibujar** (§6b, la regla
+  //    de economía: un glifo que nadie va a montar no se pide).
+  //
+  //    ☠️ DISPARO DEL GLIFO DE HISTORIA CLÍNICA — firmado, y con sus dos
+  //    exclusiones explícitas para que nadie lo adelante por entusiasmo:
+  //    **el próximo arco que toque LOS PAPELES o EL REGISTRY DE GLIFOS.**
+  //    NO S91 (nada nuevo se abre) · NO S92 (loop de seguridad, sin
+  //    features). Cuando llegue: DOS candidatos con hoja de contacto a
+  //    21px, misma disciplina que «Documentos» —riesgo declarado por
+  //    variante, rasterizados y MIRADOS antes de dejarlos— y el gate por
+  //    ícono del founder decide.
+  //    ☠️ MUERTE: el día que `historia_clinica` deje de pintar el dibujo
+  //    de una cédula. Hasta entonces el préstamo VIVE y está declarado —
+  //    que es distinto de estar escondido: `ficha_identidad` NO se toca.
   | 'documento'
   // ── S84-B21: FISCAL y BANCARIO — las otras dos secciones de "Datos
   //    comerciales". Nacen JUNTAS y con `documento` porque el founder

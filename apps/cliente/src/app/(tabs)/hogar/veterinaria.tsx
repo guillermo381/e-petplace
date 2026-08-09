@@ -75,6 +75,7 @@ import {
   obtenerMascotasDeFamilia,
   resolverUrlsFotos,
   type ConsultaDelHogar,
+  type EstadoVidaMascota,
 } from '@epetplace/api';
 
 import { CantoCurva } from '@/components/canto-curva';
@@ -83,6 +84,8 @@ import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { DetalleCita } from '@/components/detalle-cita';
 import { vozServicio } from '@/lib/voz-servicio';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
 type Segmento = 'proximos' | 'historial';
 type EjeTipo = 'todos' | string;
@@ -93,7 +96,8 @@ export default function LogVeterinaria() {
   const { t, idioma } = useTraduccion();
 
   const [filas, setFilas] = useState<ConsultaDelHogar[] | 'cargando' | 'error'>('cargando');
-  const [mascotas, setMascotas] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
+  const [mascotas, setMascotas] = useState<{ id: string; nombre: string; fotoUrl?: string; especie: string; estado_vida: EstadoVidaMascota | null }[]>([]);
+  const faseEspecies = useEspeciesElegibles('veterinario');
   // ① la MASCOTA — el PRIMER filtro (null = todas, sin chip activo)
   const [mascotaElegida, setMascotaElegida] = useState<string | null>(null);
   // r34 · el CTA vivo necesita señalar la hilera cuando falta la mascota
@@ -121,7 +125,13 @@ export default function LogVeterinaria() {
         r.data.map((m) => ({
           id: m.id,
           nombre: m.nombre,
-          fotoUrl: m.foto_url ? urls.get(m.foto_url) : undefined,
+          especie: m.especie,
+          estado_vida: m.estado_vida,
+          fotoUrl: caraDeMascotaPorRuta({
+            especie: m.especie,
+            rutaImagen: m.raza_ruta_imagen,
+            fotoUri: m.foto_url ? urls.get(m.foto_url) : undefined,
+          }),
         })),
       );
     });
@@ -185,7 +195,7 @@ export default function LogVeterinaria() {
         {mascotas.length > 1 ? (
           <View style={{ marginHorizontal: -spacing[4] }}>
             <FiltroMascotas
-              mascotas={mascotas}
+              mascotas={ofrecibles(mascotas, faseEspecies)}
               elegida={mascotaElegida}
               onElegir={(id) => {
                 setMascotaElegida(id);

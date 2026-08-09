@@ -47,9 +47,12 @@ import {
   obtenerMisGroomings,
   resolverUrlsFotos,
   type GroomingDelHogar,
+  type EstadoVidaMascota,
 } from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
@@ -67,7 +70,8 @@ export default function HubGrooming() {
   // en próximos no parte los datos y un eje que no parte NO SE DIBUJA.
   const [filtroMascota, setFiltroMascota] = useState<string | null>(null);
   const [ventanaFecha, setVentanaFecha] = useState<'todos' | 'semana' | 'mes'>('todos');
-  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
+  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string; especie: string; estado_vida: EstadoVidaMascota | null }[]>([]);
+  const faseEspecies = useEspeciesElegibles('grooming');
   const [abierta, setAbierta] = useState<string | null>(null);
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
@@ -84,7 +88,11 @@ export default function HubGrooming() {
       const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       setMascotasHogar(
-        r.data.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: m.foto_url ? urls.get(m.foto_url) : undefined })),
+        r.data.map((m) => ({ id: m.id, nombre: m.nombre, especie: m.especie, estado_vida: m.estado_vida, fotoUrl: caraDeMascotaPorRuta({
+            especie: m.especie,
+            rutaImagen: m.raza_ruta_imagen,
+            fotoUri: m.foto_url ? urls.get(m.foto_url) : undefined,
+          }) })),
       );
     });
   }, []);
@@ -193,7 +201,7 @@ export default function HubGrooming() {
         {mascotasHogar.length > 1 ? (
           <View style={{ marginHorizontal: -spacing[4] }}>
             <FiltroMascotas
-              mascotas={mascotasHogar}
+              mascotas={ofrecibles(mascotasHogar, faseEspecies)}
               elegida={filtroMascota}
               onElegir={(id) => {
                 setFiltroMascota(id);

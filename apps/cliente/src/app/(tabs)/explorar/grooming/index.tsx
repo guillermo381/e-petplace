@@ -44,7 +44,6 @@ import {
 import {
   getEstadoOnboardingDueno,
   obtenerDiasCerradosServicio,
-  obtenerEspeciesElegibles,
   obtenerIniciosGrooming,
   obtenerMascotasDeFamilia,
   obtenerOfertaGrooming,
@@ -58,6 +57,8 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -73,7 +74,6 @@ export default function GroomingCuando() {
 
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // §5: especies elegibles de la DB — la UI filtra, la DB manda.
-  const [especies, setEspecies] = useState<string[] | null>(null);
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
   // S61-A5 cura 3 (letra founder): la oferta PÚBLICA del peldaño 0 —
@@ -111,7 +111,8 @@ export default function GroomingCuando() {
   // S73 (letra de elegibilidad): la frontera UNICA del motor decide —
   // momento vital primero (memorial/perdida NO reservan), especie después.
   // La pantalla jamás re-computa elegibilidad (Ley 37: el filtro artesanal murió).
-  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], especies);
+  const faseEspecies = useEspeciesElegibles('grooming');
+  const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
   // la pregunta única de §3: sin talla o pelaje no hay precio personal
@@ -120,9 +121,6 @@ export default function GroomingCuando() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      void obtenerEspeciesElegibles('grooming').then((r) => {
-        if (vigente && r.ok) setEspecies(r.data);
-      });
       void obtenerOfertaGroomingPublica().then((r) => {
         if (vigente) setOfertaPublica(r.ok ? r.data : 'error');
       });
@@ -290,7 +288,17 @@ export default function GroomingCuando() {
             descripcion={t('hogar.errorHistoriaDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
           />
-        ) : elegibles.length === 0 ? (
+        ) : faseEspecies.fase === 'error' ? (
+          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+          // «todas» sería re-abrir el agujero que esta tanda cierra.
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('explorar.catalogoErrorTitulo')}
+              descripcion={t('explorar.catalogoErrorDetalle')}
+            />
+          </View>
+        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
           // §5 con camino: el hogar no tiene mascotas elegibles (perro/gato)
           <EstadoVacio
             icono={<Icono nombre="grooming" tamano={48} />}
@@ -326,7 +334,19 @@ export default function GroomingCuando() {
             {mascota === null ? (
               <View style={{ marginHorizontal: -spacing[4] }}>
                 <FiltroMascotas
-                  mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                  mascotas={elegibles.map((m) => ({
+                    id: m.id,
+                    nombre: m.nombre,
+                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                    // propia → imagen de su RAZA → genérico de su especie. El
+                    // chip salía pelado porque se quedaba en el primer escalón,
+                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                    fotoUrl: caraDeMascotaPorRuta({
+                      especie: m.especie,
+                      rutaImagen: m.raza_ruta_imagen,
+                      fotoUri: fotos[m.id],
+                    }),
+                  }))}
                   elegida={mascotaId}
                   onElegir={setMascotaId}
                 />

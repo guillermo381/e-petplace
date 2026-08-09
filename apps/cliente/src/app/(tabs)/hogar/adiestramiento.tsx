@@ -70,6 +70,8 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { DetalleCita } from '@/components/detalle-cita';
@@ -116,6 +118,7 @@ export default function HubAdiestramiento() {
   const [vista, setVista] = useState<'proximos' | 'historial'>('proximos');
   const [citas, setCitas] = useState<AdiestramientoDelHogar[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
+  const faseEspecies = useEspeciesElegibles('adiestramiento');
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
   const [fotosMascota, setFotosMascota] = useState<Map<string, string>>(new Map());
@@ -184,13 +187,18 @@ export default function HubAdiestramiento() {
         {/* ① la MASCOTA — el PRIMER filtro (la pieza decide relleno vs
             barrido con L-b adentro). Entra SIN filtro: ninguna nace
             elegida. */}
-        {mascotas.length > 1 ? (
+        {ofrecibles(mascotas, faseEspecies).length > 1 ? (
           <View style={{ marginHorizontal: -spacing[4] }}>
             <FiltroMascotas
-              mascotas={mascotas.map((m) => ({
+              mascotas={ofrecibles(mascotas, faseEspecies).map((m) => ({
                 id: m.id,
                 nombre: m.nombre,
-                fotoUrl: m.foto_url !== null ? fotosMascota.get(m.foto_url) : undefined,
+                // la escalera del Hogar: foto → raza → genérico de especie
+                fotoUrl: caraDeMascotaPorRuta({
+                  especie: m.especie,
+                  rutaImagen: m.raza_ruta_imagen,
+                  fotoUri: m.foto_url !== null ? fotosMascota.get(m.foto_url) : undefined,
+                }),
               }))}
               elegida={mascotaId}
               onElegir={(id) => {

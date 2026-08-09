@@ -42,7 +42,6 @@ import {
 import {
   crearBloqueoAgenda,
   getEstadoOnboardingDueno,
-  obtenerEspeciesElegibles,
   obtenerMascotasDeFamilia,
   obtenerPaseadoresDisponibles,
   obtenerSaldoPaquete,
@@ -57,6 +56,9 @@ import {
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { tomarPedido } from '@/lib/senal-reserva';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { PreviewPrestador } from '@/components/preview-prestador';
 
 export default function PaseoDisponibles() {
@@ -80,7 +82,6 @@ export default function PaseoDisponibles() {
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   // §1bis (v1.4): las especies que PUEDEN pasear — de la DB, jamás un if
   // por pantalla (null = todas mientras carga o sin config).
-  const [especies, setEspecies] = useState<string[] | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
   const [sinElegibles, setSinElegibles] = useState(false);
@@ -118,7 +119,8 @@ export default function PaseoDisponibles() {
   const [socialNo, setSocialNo] = useState<string | null>(null);
 
   // S73 (letra de elegibilidad): frontera única — momento vital + especie.
-  const elegibles = mascotasElegibles(mascotas, especies);
+  const faseEspecies = useEspeciesElegibles('paseo');
+  const elegibles = ofrecibles(mascotas, faseEspecies);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -127,13 +129,25 @@ export default function PaseoDisponibles() {
     });
   }, [fecha, hora, duracion]);
 
+  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
+  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
+  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
+  // un solo flujo de reserva en toda la app.
+  useFocusEffect(
+    useCallback(() => {
+      const pedida = tomarPedido();
+      if (pedida === null || !Array.isArray(disponibles)) return;
+      const oferta = disponibles.find((p) => p.prestador_servicio_id === pedida);
+      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
+      // reserva a ciegas: la lista habla sola en su próximo refresh.
+      if (oferta !== undefined) alElegir(oferta);
+    }, [disponibles]),
+  );
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       cargar();
-      void obtenerEspeciesElegibles('paseo').then((r) => {
-        if (vigente && r.ok) setEspecies(r.data);
-      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente || !estado.ok || !estado.data.familia_id) return;
@@ -314,7 +328,7 @@ export default function PaseoDisponibles() {
                 paraQuien !== null ? (
                   // xs, no sm: la columna del metadataMono es intocable y con
                   // sm el titulo colapsaba a cero en 420 (hallazgo M3 S73).
-                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={fotos[paraQuien.id]} tamano="xs" />
+                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: paraQuien.especie, rutaImagen: paraQuien.raza_ruta_imagen, fotoUri: fotos[paraQuien.id] })} tamano="xs" />
                 ) : undefined
               }
               titulo={
@@ -372,13 +386,12 @@ export default function PaseoDisponibles() {
                 {i > 0 ? <Separador /> : null}
                 <PreviewPrestador
                   prestadorId={p.prestador_id}
+                  ofertaId={p.prestador_servicio_id}
                   nombre={p.prestador_nombre}
                   oficio={t('hogar.railPaseos')}
                   contexto={p.servicio_nombre}
                   precio={`$${p.precio.toFixed(2)} · ${p.duracion_minutos} min`}
                   perfil={perfiles[p.prestador_id]}
-                  etiquetaReservar={t('perfilPrestador.reservar')}
-                  onReservar={() => alElegir(p)}
                 />
               </View>
             ))}
@@ -398,7 +411,7 @@ export default function PaseoDisponibles() {
               {i > 0 ? <Separador /> : null}
               <Celda
                 titulo={m.nombre}
-                inicio={<AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="sm" />}
+                inicio={<AvatarMascota nombre={m.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.raza_ruta_imagen, fotoUri: fotos[m.id] })} tamano="sm" />}
                 interactiva
                 accessibilityRole="button"
                 onPress={() => {

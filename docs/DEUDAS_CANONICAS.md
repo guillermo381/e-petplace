@@ -9871,3 +9871,242 @@ en el primer envío real.
 **Su disparo: la construcción del trigger de normalización** (motor, con su
 rebote tipado) — precondición del encendido del canal, junto con la
 credencial.
+
+---
+
+#### D-694 — 🟡 EL ACUARIO NO SE OFERTA POR **AUSENCIA DE OFERTA**, NO POR DISEÑO
+
+**Declaración de D al cerrar su tanda del acuario (S91), verificada por A
+contra la DB viva.** Al construir la superficie del censo, D notó que un
+acuario nunca aparece como sujeto reservable — y que **el mecanismo que hoy lo
+impide no es el que uno supondría**: no lo frena la composición ni la marca
+`sujeto`, lo frena `tipos_servicio.especies_elegibles`. *Funciona. Pero
+funciona por dónde no se está mirando.*
+
+**LA MEDICIÓN AGRANDA LA DECLARACIÓN, y por eso se mide antes de escribir la
+ficha** (8-ago-2026):
+
+| | |
+|---|---|
+| servicios que **listan `'pez'` explícitamente** | **15** — todo el mundo clínico: `consulta_general` · `vacunacion` · `cirugia` · `ecografia` · `emergencia` · `telemedicina` · `laboratorio` · `radiografia` · `procedimiento` · las dos urgencias · los tres certificados |
+| servicios con `especies_elegibles = NULL`, que significa **TODAS** | **7** — `hotel` · `hotel_dia` · `hotel_noche` · `guarderia_dia` · `guarderia_mensual` · `servicio_exequial` · `registro_evento` |
+
+⇒ **La afirmación «el pez no es elegible» es FALSA en 22 de las filas del
+catálogo.** Lo que hoy impide que un acuario se ofrezca **no es la
+elegibilidad: es que ningún prestador tiene esos servicios activos con oferta
+reservable.** La puerta está cerrada **por ausencia de oferta**, y una ausencia
+no es un guard: se llena sola el día que alguien cargue su oferta.
+
+**POR QUÉ NO SE CURA HOY, y la razón no es pereza:** no hay caso — cero
+acuarios con cita, cero prestadores ofertando esos servicios — y la orden de
+mesa para el cierre de S91 es explícita: *cualquier hallazgo nuevo se registra
+con dueño y disparo, no se construye.* **Curar esto a esta altura sería tocar
+el catálogo de servicios el día del gate final.**
+
+**Y hay una razón de FONDO para no curarlo a las apuradas, que es la que
+importa:** la respuesta correcta probablemente **no** sea sacar `'pez'` de los
+quince. Un acuario **sí** puede necesitar una consulta veterinaria —el sistema
+enferma— y el arco del acuario (D-685) va a querer justamente eso. *El eje que
+falta no es «pez sí / pez no»: es que el motor no distingue **especie** de
+**sujeto**.* `especies_elegibles` responde «¿esta especie?» cuando la pregunta
+verdadera es «¿este servicio aplica a un SISTEMA o a un INDIVIDUO?». Un baño y
+un paseo son del individuo; una consulta puede ser del sistema.
+
+**Lo que ya está protegido y no hay que re-verificar:** la bitácora sí discrimina
+por sujeto (`sujetos_aplicables`, S91) y **rebota tipado** una conducta de
+individuo sobre un acuario. *El motor ya tiene el eje correcto — en la bitácora.
+Le falta en la oferta.*
+
+> **Dueño: A** (es catálogo + motor).
+> **☠️ DISPARO — el primero que ocurra:** (a) el **arco del acuario (D-685)**,
+> que va a tener que decidir qué servicios aplican a un sistema, o (b) **el
+> primer prestador que active una oferta reservable de cualquiera de las 22**
+> — ahí deja de ser hipótesis y se vuelve una pantalla que ofrece un baño para
+> un acuario.
+> **☠️ MUERTE:** `tipos_servicio` distingue **sujeto** además de especie, y la
+> elegibilidad del acuario se decide por ese eje.
+
+---
+
+#### D-695 — 🟢 EL GLIFO DE LA **HISTORIA CLÍNICA**: el préstamo apunta al revés de como se creyó
+
+**Letra de B depositada en el registry** (`packages/ui/src/components/Icono.tsx`),
+**ratificada por la mesa el 8-ago-2026.** B no reservó número porque `docs/` es
+territorio de A; el número se da acá y la letra NO se copia: vive donde se lee
+al construir.
+
+**El hallazgo, y es una inversión completa de la pregunta.** Tras cablear el
+glifo apilado, `documento` quedó en DOS usos (`historia_clinica` y
+`ficha_identidad`, en `apps/cliente/src/lib/papeles.ts`). La mesa preguntó si
+nacía el glifo propio de `ficha_identidad` o si su préstamo se declaraba
+permanente. **Contra el objeto, la pregunta estaba al revés:**
+
+- **`ficha_identidad` NO es la prestataria: es la DUEÑA.** El objeto del
+  registry es «identificación, cédula **con retrato**», y la ficha de identidad
+  de una mascota es exactamente eso — lleva foto.
+- **La que presta es `historia_clinica`.** Una historia clínica **no
+  identifica: registra.** Ahí el dibujo miente el objeto, que es precisamente
+  lo que la Ley 12 persigue.
+
+⇒ **Darle glifo propio a `ficha_identidad` habría dejado a la dueña con dibujo
+nuevo y a la prestataria con el que no le corresponde: el problema intacto y
+una pieza más en el registry.** *El valor de esta ficha no es el glifo que
+falta — es haber medido en qué dirección corría el préstamo antes de gastar en
+dibujarlo.*
+
+**Y la decisión de NO dibujar quedó firmada como CORRECTA**, no como pendiente
+tolerada: **dibujar para el objetivo equivocado es más caro que no dibujar**
+(§6b, la regla de economía — un glifo que nadie va a montar no se pide).
+
+> **Dueño: B** (registry de glifos y su gate por ícono).
+> **☠️ DISPARO — firmado, con sus dos exclusiones explícitas para que nadie lo
+> adelante por entusiasmo:** el **próximo arco que toque LOS PAPELES o EL
+> REGISTRY DE GLIFOS**. **NO S91** (nada nuevo se abre) · **NO S92** (loop de
+> seguridad, sin features). Cuando llegue: DOS candidatos con hoja de contacto
+> a 21px, la misma disciplina que «Documentos» —riesgo declarado por variante,
+> rasterizados y MIRADOS antes de dejarlos— y gate por ícono (§2.9).
+> **☠️ MUERTE:** el día que `historia_clinica` deje de pintar el dibujo de una
+> cédula.
+
+---
+
+#### D-696 — 🟡 LAS FOTOS DEL PRESTADOR Y LA ORIENTACIÓN: la superficie de subida no dice cómo van a quedar
+
+**Hoy la subida no dice nada sobre orientación y el carrusel muestra las fotos
+en su relación de aspecto sin que el prestador sepa qué va a pasar con las
+suyas.** Una vertical puede recortarse (se pierde el local), encogerse (bandas
+y pobreza) o deformarse (inaceptable).
+
+> ### LA LETRA — firma founder, 8-ago-2026
+>
+> - **La guía se DA MOSTRANDO, no explicando:** el prestador ve **la vista
+>   previa de cómo va a quedar su foto en el carrusel** antes de confirmarla —
+>   el mismo patrón que ya rige para la foto de mascota («Así lo vas a ver»).
+> - **El sistema SOBREVIVE a la vertical:** recorte centrado **con arrastre
+>   para acomodar**. **JAMÁS deformación.**
+> - **PRECONDICIÓN:** se define primero **la relación de aspecto del carrusel**
+>   (hoy en revisión — el founder pidió bajarlo de 16:9). *Una guía escrita
+>   antes de fijar el marco sería aspiracional; con el marco fijo, es honesta.*
+
+**✅ LA MEDICIÓN QUE LA LETRA DEJÓ PENDIENTE, HECHA (A, 8-ago) — y contesta cuál
+de los tres comportamientos hace hoy:** `FichaPrestador.tsx:347` pinta con
+**`resizeMode="cover"`** ⇒ **RECORTA, centrado.** No deforma y no encoge. *La
+mala noticia es la que el founder anticipó: una vertical pierde arriba y abajo,
+que es justo donde suele estar el local.* **El defecto es real y su forma ya no
+es hipótesis: es recorte ciego, sin que nadie lo elija.**
+
+**⚠️ Y UNA CORRECCIÓN A LA PREMISA DE LA LETRA, medida contra el objeto — es la
+que cambia el presupuesto de esta deuda:** la letra dice que el gesto de
+arrastre «ya está construido», y **es cierto a medias**. La pieza existe
+(`apps/cliente/src/components/EncuadreFoto.tsx` + `foto-encuadre.ts` +
+`HojaFotoMascota.tsx`), **pero vive SOLO en el cliente. El prestador NO la
+tiene**: la única mención en `apps/prestador` es un COMENTARIO que dice
+exactamente eso —*«el editor de zoom y encuadre no existe de este lado; vive en
+`apps/cliente/EncuadreFoto` y su promoción es de B»*— y el propio comentario
+explica por qué su botón no dice «Ajustar»: **prometería una pantalla que no
+abre.** *(L-170 en su quinta aparición: el grep encontró el nombre y el nombre
+estaba en prosa, no en código.)*
+
+⇒ **Hay una PRECONDICIÓN más, y tiene dueño distinto:** **la promoción de
+`EncuadreFoto` a `packages/ui` es de B.** Sin eso, esta deuda no se puede pagar
+del lado del prestador aunque el marco esté fijo.
+
+**LO QUE YA NO HAY QUE DISEÑAR, porque tiene precedente vivo:** el contrato de
+datos del recorte existe y está firmado — `foto_cx` / `foto_cy` / `foto_z`
+(centro ∈ [0,1], zoom ∈ [1,3] sobre `min(iw,ih)`, canónico `.5/.42/1.3`), con su
+puerta única `declararFotoMascota` y su rebote `encuadre_invalido` (lámina S82).
+*El encuadre de una foto de negocio es el mismo problema con otro sujeto: se
+espeja, no se inventa.*
+
+> **Dueños: C** (la superficie de subida y el carrusel) · **B** (la promoción de
+> `EncuadreFoto` a `packages/ui`) · **A** si el encuadre del negocio necesita
+> columnas propias.
+> **☠️ DISPARO: la próxima sesión de features.** **NO S91** (nada nuevo se
+> abre) · **NO S92** (loop de seguridad, sin features).
+> **☠️ MUERTE:** la superficie de subida muestra la vista previa del carrusel
+> **y** el recorte es acomodable.
+
+---
+
+#### D-697 — 🟡 EL PÓSTER DEL VIDEO: la lista pide un fotograma que RN no sabe extraer
+
+**Firma del founder:** cuando la portada de un negocio es video, **la lista
+muestra el primer FOTOGRAMA**, y el video queda solo dentro de la ficha.
+
+**EL COSTO, MEDIDO (A, 8-ago) — y por eso no entra a S91:**
+
+| vía | qué exige | veredicto |
+|---|---|---|
+| extraer el frame al RENDER | RN no lo hace sin módulo nativo | ❌ imposible hoy |
+| `expo-video-thumbnails` **al SUBIR** | **NO está instalado** (`expo-video@57.0.1` reproduce, no extrae) ⇒ **módulo nativo ⇒ BUILD NUEVA** | 🔴 caro: L-134 — sube `version`, y **los APK 1.0.3/1.0.4 del founder dejan de recibir OTA hasta reinstalar** |
+| frame server-side (Edge Function) | ffmpeg no existe en Deno de Supabase; el wasm son decenas de MB | 🔴 pieza de infraestructura |
+
+⇒ **El fotograma LITERAL es deuda de S92+, con tren de build.** No bloquea el
+cierre, y así lo declaró la mesa.
+
+**✅ PERO HAY SALIDA A COSTO CERO, Y YA ESTÁ SERVIDA.** El wrapper
+`obtenerPerfilesPublicos` **ya devuelve `portadas: string[]` ordenadas por
+`orden`** (S91-A). ⇒ **la lista puede mostrar `portadas[0]` como póster hoy
+mismo, sin motor nuevo, sin build y sin columna.** *Y probablemente sea mejor
+producto: una portada CURADA por el prestador dice más de su local que un
+fotograma arbitrario —el primer frame de un video suele ser una pared, una
+puerta entrando o un cuadro negro—.* La firma pide «que la lista no muestre
+video»; eso se cumple con la portada.
+
+**Lo que NO se hizo a propósito:** servir una columna `poster_url` vacía. **Sin
+productor sería motor sin puerta** — el patrón que este canon ya cobró en el
+caso clínico (D-585) y en el brazo del UPDATE de S77. La columna nace **con** su
+generador, no antes.
+
+**Medido: hoy hay 2 negocios con clip** (Clínica Aurora · Paseos Andres), así
+que el caso es real y no hipotético.
+
+> **Dueños: C** (consumir `portadas[0]` hoy) · **B/C + tren de build** (el
+> fotograma literal).
+> **☠️ DISPARO: S92+, y solo si viaja en un tren de build que otra cosa
+> justifique** — jamás una build sola por el póster (misma regla que rigió el
+> micrófono en D-456).
+> **☠️ MUERTE:** la lista nunca muestra un `<video>`, y el póster sale del
+> propio clip.
+
+---
+
+#### D-698 — ⚪ NOTA, NO DEFECTO: la ficha sin mapa — **y las DOS cosas que se llaman «zona»**
+
+**Elevado por C como dato y no como bug. La medición lo confirma a medias, y la
+otra mitad es la que vale.**
+
+**Lo medido en `v_prestadores_publicos` (8-ago):**
+
+| | |
+|---|---|
+| **CON** `zona_lat`/`zona_lon` — su ficha PUEDE dibujar mapa | **5**: Clínica Aurora · Clínica Los Shyris · Paseos Andres · Paseos Shyris · Satori Latam |
+| **SIN** coordenadas — su ficha legítimamente no tiene mapa | **1**: **Wizard** (`zona_lat`, `zona_lon` y `ciudad` en NULL) |
+
+⇒ **Para Wizard la nota es correcta y no hay nada que arreglar:** un negocio sin
+ubicación cargada no puede tener mapa, y dibujarle uno sería inventar. **Es
+pendiente del founder/prestador: cargar la zona, o aceptar la ficha sin mapa.**
+
+**⚠️ PERO PARA CLÍNICA AURORA LA NOTA NO SE SOSTIENE: SÍ tiene coordenadas**
+(`-0.197058…`, `-78.438188…`, Quito). Si su mapa no aparece, **eso no es dato:
+es algo para mirar**, y queda como pregunta abierta de C con su medición hecha.
+
+**Y ACÁ ESTÁ LO QUE PROBABLEMENTE CAUSÓ EL DIAGNÓSTICO — dos cosas distintas se
+llaman «zona» en esta casa:**
+
+1. **`prestadores.zona_lat` / `zona_lon`** — el **centro DESPLAZADO** que dibuja
+   el mapa de la ficha pública (S84: la coordenada exacta no viaja al teléfono).
+   **5 de 6 lo tienen.**
+2. **`prestador_zonas`** — el catálogo DECLARATIVO de cobertura (D-331). **Está
+   en CERO filas para TODOS**, incluidos los cinco que sí dibujan mapa.
+
+*Si uno mira `prestador_zonas` para preguntarse por qué falta un mapa, la
+respuesta es «nadie tiene zona» — y es verdad, y no tiene nada que ver: el mapa
+nunca salió de ahí.* **Dos nombres iguales para dos cosas distintas producen
+diagnósticos correctos sobre la tabla equivocada** (misma familia que el caso
+`modo_horarios` de S78, que gateaba por `servicio_id` y jamás miró `empleado_id`).
+
+> **Dueño: founder/prestador** (cargar la zona de Wizard) · **C** (mirar el mapa
+> de Aurora, que sí tiene con qué dibujarse).
+> **☠️ DISPARO:** el reclutamiento de la cohorte real — un negocio sin zona no
+> se puede ofertar por geografía (la firma S79 ya lo rige).

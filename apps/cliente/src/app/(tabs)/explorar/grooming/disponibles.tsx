@@ -50,6 +50,7 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { tomarPedido } from '@/lib/senal-reserva';
 import { PreviewPrestador } from '@/components/preview-prestador';
 import { vozServicio } from '@/lib/voz-servicio';
 
@@ -98,6 +99,21 @@ export default function GroomingDisponibles() {
       setDisponibles(r.ok ? r.data : 'error');
     });
   }, [fecha, hora, tipoServicio, mascotaId, modalidad]);
+
+  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
+  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
+  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
+  // un solo flujo de reserva en toda la app.
+  useFocusEffect(
+    useCallback(() => {
+      const pedida = tomarPedido();
+      if (pedida === null || !Array.isArray(disponibles)) return;
+      const oferta = disponibles.find((g) => g.prestador_servicio_id === pedida);
+      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
+      // reserva a ciegas: la lista habla sola en su próximo refresh.
+      if (oferta !== undefined) void crearHold(oferta);
+    }, [disponibles]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -206,6 +222,7 @@ export default function GroomingDisponibles() {
                 {i > 0 ? <Separador /> : null}
                 <PreviewPrestador
                     prestadorId={g.prestador_id}
+                  ofertaId={g.prestador_servicio_id}
                     nombre={g.prestador_nombre}
                     oficio={t('hogar.railEstetica')}
                     contexto={g.direccion !== null
@@ -213,8 +230,6 @@ export default function GroomingDisponibles() {
                       : t('grooming.enSuLocal')}
                     precio={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
                     perfil={perfiles[g.prestador_id]}
-                    etiquetaReservar={t('perfilPrestador.reservar')}
-                  onReservar={() => void crearHold(g)}
                 />
               </View>
             ))}

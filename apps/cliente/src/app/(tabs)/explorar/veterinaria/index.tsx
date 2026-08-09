@@ -56,6 +56,8 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -98,7 +100,8 @@ export default function VeterinariaCuando() {
   // S73 (letra de elegibilidad): la vet pasa TODAS las especies POR DISEÑO
   // (multi-especie es decisión, no omisión) — pero el momento vital manda:
   // memorial/perdida NO reservan. La frontera única lo resuelve.
-  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], null);
+  const faseEspecies = useEspeciesElegibles('veterinario');
+  const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
   const hoyISO = fechaLocalISO(new Date());
 
@@ -272,7 +275,17 @@ export default function VeterinariaCuando() {
             descripcion={t('hogar.errorHistoriaDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
           />
-        ) : elegibles.length === 0 ? (
+        ) : faseEspecies.fase === 'error' ? (
+          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+          // «todas» sería re-abrir el agujero que esta tanda cierra.
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('explorar.catalogoErrorTitulo')}
+              descripcion={t('explorar.catalogoErrorDetalle')}
+            />
+          </View>
+        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
           <EstadoVacio
             icono={<Icono nombre="veterinaria" tamano={48} />}
             titulo={t('veterinaria.sinMascotasTitulo')}
@@ -304,7 +317,19 @@ export default function VeterinariaCuando() {
             {mascota === null ? (
               <View style={{ marginHorizontal: -spacing[4] }}>
                 <FiltroMascotas
-                  mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                  mascotas={elegibles.map((m) => ({
+                    id: m.id,
+                    nombre: m.nombre,
+                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                    // propia → imagen de su RAZA → genérico de su especie. El
+                    // chip salía pelado porque se quedaba en el primer escalón,
+                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                    fotoUrl: caraDeMascotaPorRuta({
+                      especie: m.especie,
+                      rutaImagen: m.raza_ruta_imagen,
+                      fotoUri: fotos[m.id],
+                    }),
+                  }))}
                   elegida={mascotaId}
                   onElegir={setMascotaId}
                 />
