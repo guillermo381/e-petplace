@@ -145,6 +145,23 @@ export default function PaseoDisponibles() {
     setTraza((prev) => (prev.length > 40 ? prev : [...prev, linea]));
   }, []);
 
+  /** La traza montada como pieza, para que viva en LOS DOS modales de espera.
+   *  La primera foto del founder no mostró el recuadro **porque el instrumento
+   *  estaba en el modal que no salía**: el suyo es el del CATÁLOGO
+   *  («Estamos terminando de cargar los datos del paseo»), no el del hogar.
+   *  *Un instrumento en la pantalla equivocada no mide nada.* */
+  const bloqueTraza =
+    traza.length > 0 ? (
+      <View style={{ backgroundColor: theme.bg.overlay, borderRadius: 10, padding: spacing[3], gap: 2 }}>
+        <Texto variante="dato">diagnóstico P0-C · dónde se detiene</Texto>
+        {traza.map((linea, i) => (
+          <Texto key={`${i}-${linea}`} variante="dato">
+            {linea}
+          </Texto>
+        ))}
+      </View>
+    ) : null;
+
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
   // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
@@ -179,7 +196,8 @@ export default function PaseoDisponibles() {
   const [socialNo, setSocialNo] = useState<string | null>(null);
 
   // S73 (letra de elegibilidad): frontera única — momento vital + especie.
-  const faseEspecies = useEspeciesElegibles('paseo');
+  // 🔴 P0-C: `marcar` va como sonda — es el hook que el founder ve colgado.
+  const faseEspecies = useEspeciesElegibles('paseo', marcar);
   const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
   const cargar = useCallback(() => {
@@ -604,11 +622,28 @@ export default function PaseoDisponibles() {
         onCerrar={() => setCatalogoNoLlego(null)}
         conCerrar
       >
-        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-          <Celda
-            titulo={t(catalogoNoLlego === 'cargando' ? 'paquete.catalogoCargandoDetalle' : 'paquete.catalogoErrorDetalle')}
-          />
-        </View>
+        <HojaScroll>
+          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <Celda
+              titulo={t(catalogoNoLlego === 'cargando' ? 'paquete.catalogoCargandoDetalle' : 'paquete.catalogoErrorDetalle')}
+            />
+            {/* 🔴 P0-C · ESTE ES EL MODAL QUE EL FOUNDER VE. La traza va acá, y
+                la Hoja gana `HojaScroll` para que se pueda DESLIZAR: sin él, una
+                traza larga quedaba fuera de pantalla y el instrumento volvía a
+                no medir nada. */}
+            {bloqueTraza}
+            {/* Reintentar tiene que existir también acá: sin él, el modal del
+                catálogo es un callejón — se cierra y vuelve a salir al tocar. */}
+            <Boton
+              variante="secundario"
+              etiqueta={t('hogar.reintentar')}
+              onPress={() => {
+                setCatalogoNoLlego(null);
+                setReintento((n) => n + 1);
+              }}
+            />
+          </View>
+        </HojaScroll>
       </Hoja>
 
       {/* 🔴 LA HERMANA DE LA ANTERIOR, para las MASCOTAS (P0 reabierto 9-ago).
@@ -642,26 +677,7 @@ export default function PaseoDisponibles() {
               }}
             />
           ) : null}
-          {/* LA TRAZA, EN PANTALLA — el instrumento de P0-C (D-726).
-              Va acá porque es donde el problema se manifiesta, y **sin cable**:
-              el aparato es del founder. Se retira con el gate del P0. */}
-          {traza.length > 0 ? (
-            <View
-              style={{
-                backgroundColor: theme.bg.overlay,
-                borderRadius: 10,
-                padding: spacing[3],
-                gap: 2,
-              }}
-            >
-              <Texto variante="dato">diagnóstico P0-C · dónde se detiene</Texto>
-              {traza.map((linea, i) => (
-                <Texto key={`${i}-${linea}`} variante="dato">
-                  {linea}
-                </Texto>
-              ))}
-            </View>
-          ) : null}
+          {bloqueTraza}
         </View>
       </Hoja>
 

@@ -43,20 +43,49 @@ export type FaseEspecies =
 
 /** Lee las especies de una categoría con sus tres fases. La categoría es
  *  la del motor (`paseo` · `grooming` · `adiestramiento` · `veterinario`). */
-export function useEspeciesElegibles(categoria: string): FaseEspecies {
+export function useEspeciesElegibles(
+  categoria: string,
+  /** 🔴 P0-C (9-ago) — SONDA OPCIONAL, para saber DÓNDE se detiene.
+   *
+   *  El founder ve el modal «Estamos terminando de cargar los datos del
+   *  paseo» —o sea **esta** fase en `cargando`— y no sale nunca. La base
+   *  responde en 11 ms y la red en ~650 ms, así que no es lentitud: o la
+   *  promesa no resuelve, o el efecto se re-dispara y vuelve a `cargando`
+   *  antes de que resuelva.
+   *
+   *  **Las dos se distinguen mirando cuántas veces entra el efecto**, y eso
+   *  solo se ve marcando el hook. Es opcional a propósito: las otras ocho
+   *  pantallas que lo usan no pagan nada. Se retira con D-726. */
+  onMarca?: (etiqueta: string) => void,
+): FaseEspecies {
   const [estado, setEstado] = useState<FaseEspecies>({ fase: 'cargando' });
   useEffect(() => {
     let vigente = true;
+    onMarca?.(`◆ hook especies: ENTRA el efecto (categoria=${categoria}) → cargando`);
     setEstado({ fase: 'cargando' });
-    void obtenerEspeciesElegibles(categoria).then((r) => {
-      if (!vigente) return;
-      // El fallo NO cae a «todas»: cae a `error`, que la pantalla dice.
-      setEstado(r.ok ? { fase: 'listo', especies: r.data } : { fase: 'error' });
-    });
+    void obtenerEspeciesElegibles(categoria)
+      .then((r) => {
+        onMarca?.(`◆ hook especies: RESUELVE ok=${r.ok}${r.ok ? ` · ${r.data === null ? 'todas' : r.data.join(',')}` : ''}`);
+        if (!vigente) {
+          onMarca?.('◆ hook especies: ✂ vigente=false — la respuesta LLEGÓ y se descarta');
+          return;
+        }
+        // El fallo NO cae a «todas»: cae a `error`, que la pantalla dice.
+        setEstado(r.ok ? { fase: 'listo', especies: r.data } : { fase: 'error' });
+      })
+      /* Sin este `catch` una promesa RECHAZADA dejaba el hook en `cargando`
+         PARA SIEMPRE y en silencio — el `.then` sin rama de error es
+         exactamente la forma que L-192 describe. Se declara como hallazgo:
+         no sabemos aún si es la causa, pero era un modo de falla mudo. */
+      .catch((e: unknown) => {
+        onMarca?.(`◆ hook especies: ✖ RECHAZO — ${e instanceof Error ? e.message : String(e)}`);
+        if (vigente) setEstado({ fase: 'error' });
+      });
     return () => {
+      onMarca?.('◆ hook especies: ✂ se limpia el efecto');
       vigente = false;
     };
-  }, [categoria]);
+  }, [categoria, onMarca]);
   return estado;
 }
 

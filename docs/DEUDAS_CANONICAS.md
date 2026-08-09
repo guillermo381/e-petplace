@@ -11615,3 +11615,35 @@ queda — una pantalla sin techo es una pantalla colgada.
 > **☠️ MUERTE:** con la causa hallada y curada, la traza y su estado se borran
 > (y `verify:diseno` no la extraña: no es una regla, es un andamio).
 > Origen: S92-BIS.
+
+---
+
+#### D-727 — 🟠 LA PANTALLA DE PASEO DICE «GROOMING PARA THOR»
+
+**Hallado por el founder en dispositivo (9-ago), en la foto del P0-C.** El
+encabezado de *Paseadores disponibles* muestra **«Grooming para Thor»**.
+
+**Medido, y es de una línea:**
+`apps/cliente/src/app/(tabs)/explorar/paseo/disponibles.tsx:497` usa
+`t('grooming.ventanaPara', { nombre })`, cuyo literal es
+**`'Grooming para {{nombre}}'`** (`i18n/es.ts:962`, namespace **grooming**).
+Es una **key prestada de otro oficio** — copia-pega de la pantalla hermana.
+
+**Por qué no lo cazó nada:** las keys son tipadas y exigibles, así que el
+typecheck verifica **que la key EXISTA**, no que **pertenezca a esta pantalla**.
+`grooming.ventanaPara` existe y es válida. *Un sistema de tipos que garantiza
+que el texto está no garantiza que el texto sea el correcto* — la misma clase
+que L-218 y L-220: lo que falla no rompe nada, funciona mal.
+
+**La cura no es solo cambiar el string:** el paseo necesita su propia key
+(`paquete.ventanaPara` o equivalente) en es **y** en en, porque copiar el
+literal a mano reintroduce el mismo defecto en el otro idioma.
+
+**Candidato a guard, declarado sin construir:** una regla que exija que una
+pantalla de `explorar/<oficio>/` no consuma keys del namespace de OTRO oficio.
+Hoy no existe, y esto es su primer caso probado.
+
+> **Dueño: A.** **☠️ DISPARO: la tanda que cierre el P0-C — viaja con ella, no
+> merece OTA propio.** **☠️ MUERTE:** el paseo dice «Paseo para {{nombre}}» con
+> su key propia en los dos idiomas.
+> Origen: S92-BIS, foto del founder en dispositivo.
