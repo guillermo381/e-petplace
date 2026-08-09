@@ -1,0 +1,86 @@
+[
+ {
+  "nombre": "chat-ayuda",
+  "status": 404,
+  "cuerpo": "{\"code\":\"NOT_FOUND\",\"message\":\"Requested function was not found\"}",
+  "desaparecida": true
+ },
+ {
+  "nombre": "crear_cliente_walkin",
+  "status": 400,
+  "cuerpo": "{\"error\":\"email y nombre son obligatorios\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "despachar-correo",
+  "status": 200,
+  "cuerpo": "{\"modo\":\"transporte_vivo\",\"corrida\":{\"seco\":false,\"retenidas\":0,\"para_transporte\":0,\"retenidas_por_techo\":0,\"sombra_habr",
+  "desaparecida": false
+ },
+ {
+  "nombre": "despachar-push",
+  "status": 401,
+  "cuerpo": "{\"error\":\"despacho_no_autorizado\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "despachar-whatsapp",
+  "status": 401,
+  "cuerpo": "{\"error\":\"despacho_no_autorizado\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "documento-carnet",
+  "status": 400,
+  "cuerpo": "token_invalido",
+  "desaparecida": false
+ },
+ {
+  "nombre": "documento-certificado",
+  "status": 400,
+  "cuerpo": "token_invalido",
+  "desaparecida": false
+ },
+ {
+  "nombre": "documento-ficha-identidad",
+  "status": 400,
+  "cuerpo": "token_invalido",
+  "desaparecida": false
+ },
+ {
+  "nombre": "documento-historia-clinica",
+  "status": 400,
+  "cuerpo": "token_invalido",
+  "desaparecida": false
+ },
+ {
+  "nombre": "documento-receta",
+  "status": 400,
+  "cuerpo": "token_invalido",
+  "desaparecida": false
+ },
+ {
+  "nombre": "escribir-presencia",
+  "status": 401,
+  "cuerpo": "{\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación necesita una sesión iniciada.\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "estructurar-nota-clinica",
+  "status": 401,
+  "cuerpo": "{\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación necesita una sesión iniciada.\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "extract-vacuna",
+  "status": 401,
+  "cuerpo": "{\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación necesita una sesión iniciada.\"}",
+  "desaparecida": false
+ },
+ {
+  "nombre": "lugares",
+  "status": 401,
+  "cuerpo": "{\"codigo\":\"sesion_requerida\",\"mensaje\":\"Esta operación necesita una sesión iniciada.\"}",
+  "desaparecida": false
+ }
+]

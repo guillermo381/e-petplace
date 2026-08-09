@@ -40,4 +40,41 @@ puntaje **contradice `MODELO_LOYALTY` §3**, que prohíbe mostrar score. *No es
 solo una function sin uso: es una function que, si alguien la usa, contesta con
 el producto equivocado.*
 
-**Estado: esperando decisión del founder.** No se borra en esta corrida.
+## 🪦 ESTADO: BORRADA DEL PROYECTO — 9-ago-2026, por decisión del founder
+
+**Ya no está desplegada.** Se borró por dos razones, y la primera es la urgente:
+**era la única function facturable que un desconocido podía hacer correr con la
+llave que viaja en el bundle** (gasto contra la cuenta de la casa), y la segunda
+es que **contesta con el producto de hace dos versiones**, en una voz que el
+canon vigente prohíbe.
+
+**El botón de ayuda de `e-petplace-v2` queda roto A PROPÓSITO** — costo medido,
+aceptado y firmado por el founder.
+
+**Este archivo y el `index.ts` de al lado SE CONSERVAN**: son lo que hace que la
+decisión sea reversible.
+
+### Cómo revivirla (si alguna vez hiciera falta)
+
+```bash
+# desde la raíz del monorepo, con el proyecto linkeado (zyltipqscdsdsxnjclhp)
+npx supabase functions deploy chat-ayuda --use-api
+```
+
+`--use-api` despliega **sin Docker** (es como se desplegaron las seis functions
+de esta sesión). **Nombrar `chat-ayuda` no es opcional**: sin el nombre se
+despliegan TODAS, que es la trampa de la sección de arriba.
+
+Antes de revivirla hay que verificar dos cosas, o vuelve el agujero entero:
+
+1. **El secreto `ANTHROPIC_API_KEY` tiene que existir** en el proyecto
+   (`npx supabase secrets list`) — sin él la function despliega y falla en
+   caliente.
+2. **Ponerle el guard de sesión primero**: `exigirSesion` de
+   `supabase/functions/_shared/sesion.ts`, igual que sus cuatro hermanas
+   (D-714). *Revivirla tal cual es re-abrir la puerta que se cerró.*
+
+> **⚠️ Y lo que dice el canon: NO SE REVIVE ÉSTA.** Si algún día se quiere un
+> asistente de ayuda, **se construye nuevo contra el producto vigente y con
+> guard de sesión desde el primer commit** — ficha **D-722**. Este archivo existe
+> para poder auditar lo que corrió, no para volver a encenderlo.

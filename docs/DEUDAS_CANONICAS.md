@@ -10967,9 +10967,122 @@ monorepo *(no censado en los repos vecinos)*.
 >
 > **NO SE BORRÓ EN ESTA CORRIDA** (orden explícita del founder).
 
-> **Dueño: founder (decide) → A (ejecuta).** **☠️ DISPARO: la palabra del
-> founder.** **☠️ MUERTE:** o tiene fuente versionada y guard, o no está
-> desplegada. Origen: S92-BIS.
+> ### ✅ CERRADA — BORRADA DEL PROYECTO (9-ago-2026, opción (a) firmada por el founder)
+>
+> **Qué era, en lenguaje de negocio:** una boca de ayuda automática, colgada del
+> botón «¿Necesitás ayuda?» de la web vieja. Contestaba con IA.
+>
+> **Por qué se borró — dos razones, y la primera es de plata:**
+> ① **cualquiera con la llave que viaja en la app podía hacerla correr**, y cada
+> corrida factura contra la cuenta de la casa. Era **la única de las facturables
+> que un desconocido podía ejecutar de verdad**. ② **contestaba con el producto
+> de hace dos versiones** —carrito, checkout, un «índice de salud» con puntaje—
+> en una voz que `MODELO_LOYALTY` §3 prohíbe. *Un guard arreglaba lo primero y
+> no lo segundo.*
+>
+> **VERDE POR CAMINO REAL, no por «el comando no dio error»** — el mismo POST
+> con la misma anon key, antes y después:
+>
+> ```
+> ANTES   → HTTP 200  {"text":"Lo siento, intenta de nuevo."}
+> DESPUÉS → HTTP 404  {"code":"NOT_FOUND","message":"Requested function was not found"}
+> ```
+>
+> **Y NO SE ROMPIÓ NADA MÁS:** las **otras 13 functions** dieron **exactamente
+> el mismo status antes y después** — los dos despachadores curados hoy en su
+> `401 despacho_no_autorizado`, los **cinco papeles clínicos** en su
+> `400 token_invalido`, las facturables en su `401 sesion_requerida`.
+>
+> ⚠️ **EL INSTRUMENTO SE EQUIVOCÓ PRIMERO, y por eso el orden importó:** la v1
+> del script traía los nombres **tipeados por mí** y **tres estaban mal**
+> (`escriba` por `escribir-presencia`, `documento-historia` por
+> `documento-historia-clinica`, `documento-ficha` por
+> `documento-ficha-identidad`), más dos que faltaban. En la corrida **«antes»**
+> aparecieron como **404**. *Si el orden hubiera sido borrar-y-después-medir, ese
+> 404 se habría leído como «el delete se llevó tres functions por delante» — un
+> rojo inventado sobre un acto irreversible.* Curado de raíz: **la lista se lee
+> de `functions list`, jamás se escribe a mano** (L-141 en su forma operativa).
+>
+> **REVERSIBLE, y cómo:** la fuente (11 261 bytes) vive en
+> `supabase/functions/chat-ayuda/index.ts`, verificada **por contenido desde
+> `main:`** (`git cat-file -s main:… → 11261`), no desde el árbol. El comando
+> exacto de resurrección y sus dos precondiciones están en el `RESCATE.md` de al
+> lado. *Declarado: al momento del borrado el commit estaba en `main` local pero
+> **todavía no en `origin`** — el push es del founder y va con el OTA.*
+>
+> **EL COSTO ACEPTADO Y FIRMADO:** **el botón de ayuda de `e-petplace-v2` queda
+> roto A PROPÓSITO.** Es la misma web sobre la que el founder ya firmó *«al aire
+> pero sin uso, ni yo la visito»*, y cuyo checkout fue el único consumidor de
+> `email_exists` cuando se revocó.
+
+> **Dueño: founder (decidió) → A (ejecutó).** **✅ CERRADA 9-ago-2026.**
+> **MUERTE CUMPLIDA:** no está desplegada, y su fuente quedó versionada para
+> poder auditar lo que corrió. Origen: S92-BIS.
+
+---
+
+#### D-722 — 🟢 SI ALGÚN DÍA SE QUIERE UN ASISTENTE DE AYUDA, SE CONSTRUYE NUEVO — no se revive `chat-ayuda`
+
+**La letra, firmada por el founder al borrar D-717:** el asistente de ayuda que
+se borró **no vuelve**. Su fuente se conserva **para auditar lo que corrió**, no
+como punto de partida.
+
+**Las dos condiciones, que son las que lo hundieron:**
+① **se construye contra el producto VIGENTE** — el que murió explicaba carrito,
+checkout y un «índice de salud» con puntaje que `MODELO_LOYALTY` §3 prohíbe;
+② **nace con guard de sesión desde el PRIMER commit**, no como cura posterior
+(`exigirSesion` de `_shared/sesion.ts`, D-714). *Una boca que gasta IA sin
+sesión es un agujero de plata desde el minuto uno, y el minuto uno es el único
+momento barato para cerrarlo.*
+
+**Y la tercera, que es de esta casa:** su conocimiento **no se embebe en el
+código**. El de `chat-ayuda` quedó congelado en el producto de 2024 y nadie se
+enteró porque no había fuente que leer.
+
+> **Dueño: el founder, cuando quiera un asistente.**
+> **☠️ DISPARO: que alguien pida ayuda automática en el producto.**
+> **☠️ MUERTE:** existe un asistente nuevo con las tres condiciones, o se decide
+> que el producto no lleva asistente. Origen: S92-BIS, firmado por el founder.
+
+---
+
+#### D-723 — 🔴 LOS DESPACHADORES SON **TRES**, NO DOS: `despachar-correo` quedó abierto
+
+**Medido hoy, por camino real, con la anon key del bundle** (baseline del
+borrado de `chat-ayuda`):
+
+```
+POST /functions/v1/despachar-correo   con la anon key
+→ HTTP 200 {"modo":"transporte_vivo","corrida":{"seco":false,"retenidas":0,…}}
+```
+
+**No solo respondió: PROCESÓ LA COLA.** Es **exactamente el defecto de D-713**,
+que hoy se curó en `despachar-push` y `despachar-whatsapp` — *y el censo de esa
+deuda dijo «los dos despachadores» cuando eran tres.* **La familia se nombró por
+los que se encontraron, no por los que existían.**
+
+**Por qué se escapó, que es lo que enseña:** `despachar-correo` tiene
+`verify_jwt: true` y los otros dos `false`. Al censar el perímetro busqué los
+`verify_jwt: false` —las puertas obviamente abiertas— y **`verify_jwt: true` da
+sensación de puerta cerrada**. Pero L-714 ya lo había medido: *la anon key **es**
+un JWT válido*, así que `true` no frena a nadie. **La lección estaba escrita y
+el censo igual se hizo por la propiedad equivocada.**
+
+**LA CURA, y su orden — que es lo delicado:** es la misma de D-713
+(`guardDespacho` + `x-despacho-secret`), **pero el orden no es negociable**:
+**① primero el cron manda el header, ② después se despliega el guard.** Al revés
+queda una ventana con el correo caído. Es el mismo procedimiento ya ejecutado y
+verificado hoy dos veces.
+
+**⚠️ Y un efecto a declarar antes de tocar:** cualquier retome manual del correo
+(curl) va a necesitar el header, igual que pasó con WhatsApp.
+
+> **Dueño: A, con la palabra del founder** (tiene ventana de riesgo, como
+> D-713). **☠️ DISPARO: la próxima sesión que toque notificaciones — o antes, si
+> el founder lo pide: la puerta está abierta hoy.**
+> **☠️ MUERTE:** `despachar-correo` devuelve `401 despacho_no_autorizado` con la
+> anon key, y el tick real del cron sigue en `succeeded` después de la cura.
+> Origen: S92-BIS, hallado en el baseline del borrado de `chat-ayuda`.
 
 #### D-718 — 🟠 PODAR LOS WORKTREES MUERTOS — firmado por el founder, con ventana propia
 
