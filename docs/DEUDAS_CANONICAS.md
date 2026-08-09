@@ -11623,6 +11623,24 @@ queda — una pantalla sin techo es una pantalla colgada.
 **Hallado por el founder en dispositivo (9-ago), en la foto del P0-C.** El
 encabezado de *Paseadores disponibles* muestra **«Grooming para Thor»**.
 
+> ### ✏️ ENMIENDA (misma sesión, antes de curar) — **NO FUE COPIA-PEGA, y la diferencia importa**
+>
+> Al ir a curarlo apareció el comentario que estaba justo encima, y **declaraba
+> el reuso a propósito**: *«la MISMA voz del QUIÉN del grooming
+> (`grooming.ventanaPara` — Ley 17.3, **reuso declarado**)»*.
+>
+> **La decisión era sana; el literal no.** Lo que se quería compartir era **la
+> FORMA** —«X para {{nombre}}»—, y lo que se compartió fue **el texto, que
+> nombra el oficio**. *Una forma se reusa; una palabra que dice de qué oficio
+> hablás, no.*
+>
+> Se corrige la palabra «copia-pega» de abajo porque **es un diagnóstico
+> distinto**: no hubo descuido, hubo un reuso legítimo que arrastró un sustantivo
+> que no podía viajar. **La cura es la misma** —key propia por oficio, misma
+> forma— pero el guard candidato cambia: no alcanza con prohibir keys de otro
+> namespace, porque el reuso a veces es correcto. Lo que hay que cazar es **un
+> literal que nombre un oficio distinto al de su pantalla**.
+
 **Medido, y es de una línea:**
 `apps/cliente/src/app/(tabs)/explorar/paseo/disponibles.tsx:497` usa
 `t('grooming.ventanaPara', { nombre })`, cuyo literal es
@@ -11647,3 +11665,53 @@ Hoy no existe, y esto es su primer caso probado.
 > merece OTA propio.** **☠️ MUERTE:** el paseo dice «Paseo para {{nombre}}» con
 > su key propia en los dos idiomas.
 > Origen: S92-BIS, foto del founder en dispositivo.
+
+---
+
+#### D-728 — 🟠 LAS PANTALLAS SE RECARGAN SOLAS AL ABRIR UNA HOJA — la punta del ovillo de «la app se siente lenta»
+
+**Probado en UNA pantalla, con la traza del aparato del founder** (P0-C,
+9-ago). `paseo/disponibles` cargaba **bien y completo** —catálogo `ok` en
+262 ms, 6 mascotas en 431 ms, `setMascotas` ejecutado— y acto seguido:
+
+```
+2092ms · ✂ se limpia el efecto (blur/re-ejecución) → vigente=false
+   0ms · ▶ entra al efecto (focus)      ← y arranca TODO otra vez
+```
+
+**Nada se cuelga, nada falla, nada tarda: la pantalla se reinicia sola.** La
+causa: un `Modal` de React Native toma el foco de la ventana, React Navigation
+lo lee como **blur del screen**, y `useFocusEffect` vuelve a pedir todo al
+recuperar el foco. *Abrir una hoja cuesta una recarga completa.*
+
+**EL CENSO, medido:** **25 pantallas del cliente** y **42 del prestador** usan
+`useFocusEffect`. De las del cliente, **8 lo combinan con `<Hoja>`**:
+`parte/[eventoId]` · `explorar/paseo/paquete` · `explorar/paseo/disponibles` ·
+`explorar/veterinaria/disponibles` · `hogar/bitacora` · `hogar/paseos` ·
+`hogar/mascota/[mascotaId]` · `autorizacion/[solicitudId]`.
+
+**POR QUÉ IMPORTA MÁS QUE EL P0 QUE LO DESTAPÓ:** en `disponibles` el ciclo se
+volvió visible porque **había un cartel que no se apagaba**. En las otras siete
+**no se ve** — la pantalla recarga, los datos vuelven rápido y todo parece
+funcionar. *Cargar todo dos o tres veces no se siente como un bug: se siente
+como lentitud*, que es exactamente lo que el founder viene reportando.
+
+**⚠️ ESTADO: HIPÓTESIS FUERTE CON EVIDENCIA PARCIAL, y se dice así.** Está
+probado en **una** pantalla. Para confirmarlo se instrumentó **una segunda,
+elegida a propósito: `hogar/mascota/[mascotaId]`** — la que el founder probó y
+declaró que *«entra bien»*. Su sonda cuenta **cuántas veces pide todo** y lo
+muestra al pie. **Si ese número sube al abrir una hoja, el ciclo es
+transversal y esta ficha pasa de hipótesis a hecho.**
+
+**Lo que NO se hizo, por decisión del founder:** la cura de la pantalla
+(«no re-pedir lo que ya está») se aplicó **solo en `paseo/disponibles`**.
+*Extenderla a las otras siete se decide con la medición en la mano, no por
+arrastre* — porque no toda pantalla puede cachear lo mismo: la disponibilidad
+de paseadores DEBE re-pedirse en cada foco, y el hogar no.
+
+> **Dueño: la sesión de performance del founder — este es su punto de partida,
+> y sale MEDIDO en vez de supuesto.**
+> **☠️ DISPARO: la lectura del contador de la sonda en el aparato.**
+> **☠️ MUERTE:** o se prueba que el ciclo es solo del paseo (y la ficha se
+> cierra con su medición), o se decide pantalla por pantalla qué se re-pide al
+> recuperar el foco y qué no. Origen: S92-BIS, traza del founder en dispositivo.

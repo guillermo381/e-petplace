@@ -290,6 +290,11 @@ export default function PerfilDeMascota() {
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
+  /** Sonda transversal de P0-C (D-726/D-728): cuántas veces esta pantalla
+   *  vuelve a pedir TODO. El `ref` lleva la cuenta y el estado solo la pinta —
+   *  contar en el estado lo metería en el ciclo que se quiere medir. */
+  const vecesFocoRef = useRef(0);
+  const [vecesFoco, setVecesFoco] = useState(0);
   // P19 (S59-A4): la respuesta de socialización es EDITABLE desde acá.
   const [socialHojaAbierta, setSocialHojaAbierta] = useState(false);
   // §3 grooming (S60): talla y pelaje — declarados una vez, EDITABLES
@@ -458,6 +463,24 @@ export default function PerfilDeMascota() {
         router.replace('/hogar');
         return;
       }
+      /* 🔴 SONDA TRANSVERSAL (P0-C, 9-ago) — ¿ES SOLO EL PASEO O SON LAS 8?
+       *
+       * La traza del founder probó que `paseo/disponibles` **carga bien y se
+       * reinicia sola**: abrir un `Modal` de RN provoca blur y `useFocusEffect`
+       * vuelve a pedir todo. **Esta pantalla es la contraprueba elegida a
+       * propósito**: el founder la probó y dijo que *«entra bien»*.
+       *
+       * Si acá también recarga, queda probado que **el ciclo existe y no se
+       * nota porque carga rápido** — y eso es exactamente la lentitud general
+       * que el founder reporta: *cargar todo dos o tres veces se siente lento,
+       * no roto.* Si NO recarga, el defecto es del paseo y no hay ovillo.
+       *
+       * Cuenta VECES, no milisegundos: lo que se discute es cuántas. Se retira
+       * con D-726, junto con el instrumento del paseo. */
+      vecesFocoRef.current += 1;
+      console.log(`[p0c-transversal] perfil de mascota · entra al efecto por VEZ ${vecesFocoRef.current}`);
+      setVecesFoco(vecesFocoRef.current);
+
       let vigente = true;
       void (async () => {
         const r = await obtenerPerfilMascota(mascotaId);
@@ -1916,6 +1939,14 @@ export default function PerfilDeMascota() {
             </Tarjeta>
           </View>
         ) : null}
+
+        {/* 🔴 SONDA TRANSVERSAL DE P0-C (D-728) — se retira con D-726.
+            Va al PIE y en voz de dato: no es contenido del expediente. Si este
+            número sube al abrir una hoja, la pantalla recarga todo sin que se
+            note — la lentitud general del founder, medida. */}
+        <Texto variante="dato">
+          {`p0c · esta pantalla pidió todo ${vecesFoco} vez/veces`}
+        </Texto>
 
       </ScrollView>
 

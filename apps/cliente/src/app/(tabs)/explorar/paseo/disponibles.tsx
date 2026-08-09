@@ -104,12 +104,26 @@ export default function PaseoDisponibles() {
    *  no llegó nunca (`error`). **No es lo mismo que no tener perros**, y por
    *  eso no comparte estado con `sinElegibles`: mezclarlos es exactamente el
    *  bug que se está curando. */
-  const [catalogoNoLlego, setCatalogoNoLlego] = useState<'cargando' | 'error' | null>(null);
-  /** Hermano del anterior, para LAS MASCOTAS: son dos ausencias distintas y
-   *  no comparten estado. *«No llegó la info del servicio» y «no llegó tu
-   *  hogar» piden dos frases distintas, y una sola sería mentira en la
-   *  mitad de los casos.* */
-  const [mascotasNoLlegaron, setMascotasNoLlegaron] = useState<'cargando' | 'error' | null>(null);
+  /* ═══ LA CAUSA DEL P0-C, Y LA CURA ES DEJAR DE COPIAR ════════════════════
+   *
+   * ☠️ ACÁ VIVÍAN DOS `useState<'cargando'|'error'|null>` QUE GUARDABAN **UNA
+   * COPIA DE LA FASE** en el instante del toque. Y esa copia **nunca se
+   * actualizaba**: se seteaba al tocar y solo se limpiaba a mano.
+   *
+   * El resultado, medido en el aparato del founder: tocaba a los ~100 ms, la
+   * fase era `cargando`, se guardaba el string `'cargando'`… y **262 ms después
+   * el catálogo llegaba y la fase pasaba a `listo`, pero la copia seguía
+   * diciendo `'cargando'` PARA SIEMPRE**. *El modal no esperaba nada: mostraba
+   * una foto del pasado.* La pantalla de atrás estaba lista; el cartel de
+   * adelante no se retiraba nunca.
+   *
+   * **La cura es no tener la copia.** Lo único que se guarda es **qué intentó
+   * hacer la persona**; si el modal corresponde o no lo dice **la fase VIVA**,
+   * en cada render. Cuando el dato llega, el modal se apaga solo — sin efecto
+   * que lo sincronice, sin nadie que se acuerde de limpiarlo.
+   *
+   * *Un estado derivado de otro estado es una copia, y toda copia diverge.* */
+  const [intentoSinDatos, setIntentoSinDatos] = useState<'catalogo' | 'mascotas' | null>(null);
   /** Contador de reintentos: cambiarlo re-dispara la lectura del hogar. Sin
    *  esto, «Reintentar» solo pondría el estado en `cargando` y nadie volvería
    *  a pedir nada — un botón que no reintenta es peor que ningún botón. */
@@ -137,6 +151,10 @@ export default function PaseoDisponibles() {
    * ☠️ MUERTE: con el gate del P0 cerrado. Ficha **D-726**. */
   const [traza, setTraza] = useState<string[]>([]);
   const t0Ref = useRef<number>(Date.now());
+  /** Cura 2: marca que el hogar ya se leyó en esta visita. Es un `ref` y no
+   *  estado A PROPÓSITO — meterlo en las dependencias del efecto sería
+   *  fabricar el bucle que se está curando. */
+  const hogarCargadoRef = useRef(false);
   const marcar = useCallback((etiqueta: string) => {
     const ms = Date.now() - t0Ref.current;
     const linea = `${String(ms).padStart(5)}ms · ${etiqueta}`;
@@ -200,6 +218,15 @@ export default function PaseoDisponibles() {
   const faseEspecies = useEspeciesElegibles('paseo', marcar);
   const elegibles = ofrecibles(Array.isArray(mascotas) ? mascotas : [], faseEspecies);
 
+  /* LOS DOS MODALES DE ESPERA, DERIVADOS DE LA FASE VIVA (ver la nota larga
+     arriba de `intentoSinDatos`). Se calculan en cada render, así que **cuando
+     el dato llega el modal se apaga solo**: no hay copia que sincronizar ni
+     nadie que tenga que acordarse de limpiarla. */
+  const catalogoNoLlego: 'cargando' | 'error' | null =
+    intentoSinDatos === 'catalogo' && faseEspecies.fase !== 'listo' ? faseEspecies.fase : null;
+  const mascotasNoLlegaron: 'cargando' | 'error' | null =
+    intentoSinDatos === 'mascotas' && !Array.isArray(mascotas) ? mascotas : null;
+
   const cargar = useCallback(() => {
     setDisponibles('cargando');
     void obtenerPaseadoresDisponibles({ fecha, hora, duracion_minutos: duracion }).then((r) => {
@@ -227,7 +254,31 @@ export default function PaseoDisponibles() {
       let vigente = true;
       t0Ref.current = Date.now();
       marcar('▶ entra al efecto (focus)');
+      // La DISPONIBILIDAD sí se re-pide en cada foco, y es correcto: los slots
+      // se ocupan mientras mirás. Lo que no se re-pide es el HOGAR.
       cargar();
+
+      /* ═══ CURA 2 — EL HOGAR NO SE VUELVE A PEDIR SI YA ESTÁ ══════════════
+       * La traza del founder mostró la pantalla **cargando bien y
+       * reiniciándose sola**: `✂ se limpia el efecto` a los 2 s y `▶ entra al
+       * efecto` otra vez, tirando trabajo ya hecho. Abrir un `Modal` de React
+       * Native provoca blur del screen, y `useFocusEffect` lo lee como salida.
+       *
+       * Tus mascotas no cambian entre que abrís una hoja y la cerrás. **Se
+       * piden UNA vez por visita**; «Reintentar» limpia la marca y vuelve a
+       * pedir de verdad.
+       *
+       * ⚠️ ALCANCE: **solo esta pantalla**, por orden del founder. Hay otras 7
+       * con el mismo patrón (`useFocusEffect` + `Hoja`) y extenderlo se decide
+       * **con la medición en la mano, no por arrastre** — la ficha del censo
+       * transversal es D-728. */
+      if (hogarCargadoRef.current) {
+        marcar('⏭ el hogar YA está cargado — no se re-pide (cura 2)');
+        return () => {
+          marcar('✂ se limpia el efecto (sin pedir nada)');
+          vigente = false;
+        };
+      }
 
       /* ═══ TECHO DE ESPERA — convierte un cuelgue en un error VISIBLE ══════
        * No es la cura: es la RED. La causa sigue viva y la traza la sigue
@@ -238,7 +289,6 @@ export default function PaseoDisponibles() {
         if (!vigente) return;
         marcar('⏱ TECHO 8s — la carga NO llegó; se declara error');
         setMascotas((prev) => (prev === 'cargando' ? 'error' : prev));
-        setMascotasNoLlegaron((prev) => (prev === 'cargando' ? 'error' : prev));
       }, 8000);
 
       void (async () => {
@@ -268,7 +318,10 @@ export default function PaseoDisponibles() {
           return;
         }
         clearTimeout(techo);
-        marcar(`✔ setMascotas(${r.ok ? 'lista' : "'error'"}) — el modal ya no debería salir`);
+        // Solo se marca como cargado si de verdad llegó: un fallo tiene que
+        // poder reintentarse en el próximo foco.
+        if (r.ok) hogarCargadoRef.current = true;
+        marcar(`✔ setMascotas(${r.ok ? 'lista' : "'error'"}) — el modal se apaga solo`);
         setMascotas(r.ok ? r.data : 'error');
         if (r.ok) {
           const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
@@ -439,7 +492,7 @@ export default function PaseoDisponibles() {
        * DB devuelve `true` para estos perros. Lo que fallaba era la PUERTA.
        */
       if (faseEspecies.fase === 'cargando' || faseEspecies.fase === 'error') {
-        setCatalogoNoLlego(faseEspecies.fase);
+        setIntentoSinDatos('catalogo');
         return;
       }
       // 🔴 EL GUARD QUE FALTABA — el que reabrió el P0 (ver la nota completa
@@ -447,7 +500,7 @@ export default function PaseoDisponibles() {
       // así que con la fase ya en `listo` y las mascotas en vuelo, `elegibles`
       // es `[]`: eso es lo que le decía «no tenés perros» al founder.
       if (!Array.isArray(mascotas)) {
-        setMascotasNoLlegaron(mascotas);
+        setIntentoSinDatos('mascotas');
         return;
       }
       if (elegibles.length === 0) {
@@ -473,8 +526,14 @@ export default function PaseoDisponibles() {
       <Encabezado variante="navegacion" titulo={t('explorar.quienTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
-            visible (S61-A3, rasgo 1): la MISMA voz del QUIÉN del
-            grooming (grooming.ventanaPara — Ley 17.3, reuso declarado) */}
+            visible (S61-A3, rasgo 1).
+            ⚠️ D-727 — ACÁ SE REUSABA `grooming.ventanaPara`, y el reuso estaba
+            DECLARADO a propósito («la misma voz del QUIÉN del grooming, Ley
+            17.3»). **La decisión era sana; el literal no**: decía «Grooming
+            para {nombre}» y esta pantalla es de PASEO — el founder lo leyó en
+            su aparato. *Lo compartible era la FORMA («X para {nombre}»), no el
+            texto, porque el texto nombra el oficio.* Ahora cada oficio tiene su
+            key y comparten la forma. */}
         {(() => {
           // S73 (letra de elegibilidad, N=1 "no se pregunta pero SE DICE"):
           // sin param y con UNA sola elegible, la auto-elegida del tap
@@ -494,7 +553,7 @@ export default function PaseoDisponibles() {
               }
               titulo={
                 paraQuien !== null
-                  ? t('grooming.ventanaPara', { nombre: paraQuien.nombre })
+                  ? t('paquete.ventanaPara', { nombre: paraQuien.nombre })
                   : t('explorar.paseoTitulo')
               }
               // La ventana APILADA en la zona fin (S44-B4.1): en una sola
@@ -619,7 +678,7 @@ export default function PaseoDisponibles() {
       <Hoja
         visible={catalogoNoLlego !== null}
         titulo={t(catalogoNoLlego === 'cargando' ? 'paquete.catalogoCargandoTitulo' : 'paquete.catalogoErrorTitulo')}
-        onCerrar={() => setCatalogoNoLlego(null)}
+        onCerrar={() => setIntentoSinDatos(null)}
         conCerrar
       >
         <HojaScroll>
@@ -638,7 +697,7 @@ export default function PaseoDisponibles() {
               variante="secundario"
               etiqueta={t('hogar.reintentar')}
               onPress={() => {
-                setCatalogoNoLlego(null);
+                setIntentoSinDatos(null);
                 setReintento((n) => n + 1);
               }}
             />
@@ -655,7 +714,7 @@ export default function PaseoDisponibles() {
       <Hoja
         visible={mascotasNoLlegaron !== null}
         titulo={t(mascotasNoLlegaron === 'cargando' ? 'paquete.misMascotasCargandoTitulo' : 'paquete.misMascotasErrorTitulo')}
-        onCerrar={() => setMascotasNoLlegaron(null)}
+        onCerrar={() => setIntentoSinDatos(null)}
         conCerrar
       >
         <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
@@ -671,7 +730,9 @@ export default function PaseoDisponibles() {
               variante="secundario"
               etiqueta={t('hogar.reintentar')}
               onPress={() => {
-                setMascotasNoLlegaron(null);
+                setIntentoSinDatos(null);
+                // Reintentar de verdad: se limpia la marca de la cura 2.
+                hogarCargadoRef.current = false;
                 setMascotas('cargando');
                 setReintento((n) => n + 1);
               }}

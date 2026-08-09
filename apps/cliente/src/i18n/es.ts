@@ -1095,6 +1095,10 @@ export const clienteEs = {
     sinPerrosTitulo: 'El paseo es para perros',
     sinPerrosDetalle: 'Tu hogar todavía no tiene un perro registrado. Cuando lo agregues, el paseo se abre solo.',
     sinPerrosAccion: 'Agregar a mi perro',
+    // D-727: el paseo TENÍA prestada la key 'grooming.ventanaPara' y decía
+    // «Grooming para Thor» en la pantalla de paseadores. Cada oficio dice lo
+    // suyo — copiar el literal a mano habría repetido el defecto en el otro idioma.
+    ventanaPara: 'Paseo para {{nombre}}',
     /* P0 (9-ago-2026) · GATE DE STRINGS PENDIENTE. Nacen porque la pantalla
        decía «tu hogar todavía no tiene un perro registrado» cuando el catálogo
        de especies aún no había llegado — con dos perros vivos en el hogar. No

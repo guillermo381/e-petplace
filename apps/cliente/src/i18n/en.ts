@@ -972,6 +972,8 @@ export const clienteEn = {
     sinPerrosTitulo: 'Walks are for dogs',
     sinPerrosDetalle: "Your home doesn't have a dog registered yet. Once you add one, walks open up on their own.",
     sinPerrosAccion: 'Add my dog',
+    // D-727 — el par en español lleva la nota.
+    ventanaPara: 'Walk for {{nombre}}',
     /* P0 (9-ago-2026) · STRING GATE PENDING — see the Spanish note. */
     catalogoCargandoTitulo: 'One second',
     catalogoCargandoDetalle: "We're still loading the walk details. Try again in a moment.",
