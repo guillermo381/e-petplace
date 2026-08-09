@@ -1,0 +1,14 @@
+[
+ {
+  "tabla": "_traza_promocion_e164"
+ },
+ {
+  "tabla": "cat_bancos"
+ },
+ {
+  "tabla": "cat_paises"
+ },
+ {
+  "tabla": "cat_tipos_documento_titular"
+ }
+]

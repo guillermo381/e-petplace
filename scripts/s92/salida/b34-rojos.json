@@ -1,0 +1,104 @@
+[
+ {
+  "id": "anon LEE la traza",
+  "pregunta": "¿anon puede leer teléfonos reales?",
+  "obtenido": "HTTP 200 · 4+ filas visibles",
+  "abierto": true
+ },
+ {
+  "id": "RLS de la traza",
+  "pregunta": "¿tiene RLS encendida y policies?",
+  "obtenido": "rls=false · policies=0 · filas=14",
+  "abierto": true
+ },
+ {
+  "id": "cat_bancos · grants anon",
+  "pregunta": "¿anon puede ESCRIBIR el catálogo?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "cat_bancos · lectura anon",
+  "pregunta": "la pantalla de registro lo lee SIN sesión: esto NO se toca",
+  "obtenido": "HTTP 200 · con filas (se conserva)",
+  "abierto": false
+ },
+ {
+  "id": "cat_paises · grants anon",
+  "pregunta": "¿anon puede ESCRIBIR el catálogo?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "cat_paises · lectura anon",
+  "pregunta": "la pantalla de registro lo lee SIN sesión: esto NO se toca",
+  "obtenido": "HTTP 200 · con filas (se conserva)",
+  "abierto": false
+ },
+ {
+  "id": "cat_tipos_documento_titular · grants anon",
+  "pregunta": "¿anon puede ESCRIBIR el catálogo?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "cat_tipos_documento_titular · lectura anon",
+  "pregunta": "la pantalla de registro lo lee SIN sesión: esto NO se toca",
+  "obtenido": "HTTP 200 · con filas (se conserva)",
+  "abierto": false
+ },
+ {
+  "id": "consentimientos · grants anon",
+  "pregunta": "¿qué puede hacer anon?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "policy consentimientos_insert",
+  "pregunta": "la policy que lo habilita",
+  "obtenido": "[INSERT] {anon,authenticated} check=true",
+  "abierto": true
+ },
+ {
+  "id": "policy consentimientos_select",
+  "pregunta": "la policy que lo habilita",
+  "obtenido": "[SELECT] {authenticated} check=",
+  "abierto": false
+ },
+ {
+  "id": "audit_log · anon",
+  "pregunta": "¿quién puede escribir la bitácora de auditoría?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "audit_log · authenticated",
+  "pregunta": "¿quién puede escribir la bitácora de auditoría?",
+  "obtenido": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE",
+  "abierto": true
+ },
+ {
+  "id": "audit_log · policies",
+  "pregunta": "¿la RLS lo cubre?",
+  "obtenido": "2 policies",
+  "abierto": false
+ },
+ {
+  "id": "D-686 · escritura anon",
+  "pregunta": "cuántos grants de escritura tiene anon",
+  "obtenido": "861 grants sobre 217 tablas",
+  "abierto": true
+ },
+ {
+  "id": "D-686 · tablas SIN RLS",
+  "pregunta": "la RLS es la única defensa hoy; ¿cuántas no la tienen?",
+  "obtenido": "4 tablas sin RLS en public",
+  "abierto": true
+ },
+ {
+  "id": "D-686 · SIN RLS y legibles por anon",
+  "pregunta": "EL CRUCE QUE IMPORTA: sin RLS + grant a anon = lectura abierta",
+  "obtenido": "4 tablas",
+  "abierto": true
+ }
+]

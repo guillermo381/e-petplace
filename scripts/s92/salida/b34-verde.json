@@ -1,0 +1,74 @@
+[
+ {
+  "id": "anon lee la traza",
+  "pregunta": "la que devolvía teléfonos E.164 reales",
+  "obtenido": "REBOTA 401",
+  "ok": true
+ },
+ {
+  "id": "anon DELETE cat_bancos",
+  "pregunta": "S90 midió que borraba 17 y 23 filas de verdad",
+  "obtenido": "REBOTA 401",
+  "ok": true
+ },
+ {
+  "id": "anon DELETE cat_paises",
+  "pregunta": "S90 midió que borraba 17 y 23 filas de verdad",
+  "obtenido": "REBOTA 400",
+  "ok": true
+ },
+ {
+  "id": "anon DELETE cat_tipos_documento_titular",
+  "pregunta": "S90 midió que borraba 17 y 23 filas de verdad",
+  "obtenido": "REBOTA 401",
+  "ok": true
+ },
+ {
+  "id": "anon INSERT audit_log",
+  "pregunta": "un audit log que el auditado escribe no es un audit log",
+  "obtenido": "REBOTA 401",
+  "ok": true
+ },
+ {
+  "id": "anon DELETE consentimientos",
+  "pregunta": "un consentimiento no se borra",
+  "obtenido": "REBOTA 401",
+  "ok": true
+ },
+ {
+  "id": "anon LEE cat_bancos",
+  "pregunta": "la pantalla de registro lo lee SIN sesión — la trampa declarada de S90",
+  "obtenido": "HTTP 200 · con filas",
+  "ok": true
+ },
+ {
+  "id": "anon LEE cat_paises",
+  "pregunta": "la pantalla de registro lo lee SIN sesión — la trampa declarada de S90",
+  "obtenido": "HTTP 200 · con filas",
+  "ok": true
+ },
+ {
+  "id": "anon LEE cat_tipos_documento_titular",
+  "pregunta": "la pantalla de registro lo lee SIN sesión — la trampa declarada de S90",
+  "obtenido": "HTTP 200 · con filas",
+  "ok": true
+ },
+ {
+  "id": "RPC get_paises_activos",
+  "pregunta": "los lectores de catálogo del alta de cuenta comercial",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "id": "RPC get_bancos_activos_por_pais",
+  "pregunta": "los lectores de catálogo del alta de cuenta comercial",
+  "obtenido": "HTTP 200",
+  "ok": true
+ },
+ {
+  "id": "traza · filas intactas",
+  "pregunta": "cerrar la puerta no es borrar el dato (freno 3)",
+  "obtenido": "14 filas (eran 14)",
+  "ok": true
+ }
+]
