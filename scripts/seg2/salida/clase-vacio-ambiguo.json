@@ -1,0 +1,2207 @@
+{
+ "informe": [
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/documentos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "234",
+     "texto": ") : lista.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/familia.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "126",
+     "texto": "<Boton etiqueta={t('cuenta.guardar')} bloque cargando={guardando} deshabilitado={nombre.trim().length === 0} onPress={() => void guardar()} />"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/pagos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "73",
+     "texto": ") : pagos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/confirmar-programa.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "223",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 1,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "399",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/grooming/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "210",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/grooming/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "449",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "560",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "320",
+     "texto": "if (elegibles.length === 0) {"
+    },
+    {
+     "num": "402",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "475",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "598",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/paquete.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "93",
+     "texto": ") : lista.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/veterinaria/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "261",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/veterinaria/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "360",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "433",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/adiestramiento.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "287",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/bitacora.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "299",
+     "texto": ") : entradas.length === 0 ? ("
+    },
+    {
+     "num": "416",
+     "texto": "deshabilitado={guardando || mascotaId === null || (chips.length === 0 && texto.trim().length === 0)}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/grooming.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "277",
+     "texto": "proximos.length === 0 ? ("
+    },
+    {
+     "num": "287",
+     "texto": ") : historial.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "330",
+     "texto": "detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0 && detalle.fotos.length === 0;"
+    },
+    {
+     "num": "893",
+     "texto": "if (mascotas.length === 0) {"
+    },
+    {
+     "num": "1420",
+     "texto": "if (filas.length === 0) return null;"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "1352",
+     "texto": "{vacunas.length === 0 ? ("
+    },
+    {
+     "num": "1455",
+     "texto": ") : censo.habitantes.length === 0 ? ("
+    },
+    {
+     "num": "1570",
+     "texto": ") : items.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/paseos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "532",
+     "texto": "{paquetesVigentes.length === 0 && librasProximas.length === 0 && listaPlanes.length === 0 ? ("
+    },
+    {
+     "num": "721",
+     "texto": "{pasadasFusionadas.length === 0 ? ("
+    },
+    {
+     "num": "910",
+     "texto": ") : horasNuevas !== null && horasNuevas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/vacunas/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "279",
+     "texto": "{vacunas.length === 0 ? ("
+    },
+    {
+     "num": "380",
+     "texto": "{filtradas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/veterinaria.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "269",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/autorizacion/[solicitudId].tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/app/avisos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "154",
+     "texto": ") : avisos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/carnet.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/app/citas/[mascotaId].tsx",
+   "deRed": false,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/app/lamina-fusion.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/app/parte/[eventoId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "172",
+     "texto": "{estado.formula.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/paseo/[atencionId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/components/alta/PasoEspecie.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/components/alta/PasoRaza.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/components/coach.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "81",
+     "texto": "if (vacunas.length === 0) return t('coach.rCarnetVacio');"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/habitantes-acuario-hoja.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "237",
+     "texto": "deshabilitado={libre.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/plan-hoja.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "281",
+     "texto": "deshabilitado={dias.length === 0 || cubiertos === 'cargando' || estimado === 0 || precioMensual === null}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/selector-de-raza.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/lib/cara-mascota.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/lib/corte-agenda.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/lib/descarga-papel.ts",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/lib/registro-guard.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "27",
+     "texto": "if (i.nombre.trim().length === 0 || i.email.trim().length === 0 || i.password.length === 0) {"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/lib/url-galeria.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/cliente/src/lib/voz-oficio.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/cuenta/perfil.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 13,
+   "conMensaje": 5,
+   "protegidos": 0,
+   "expuestos": 5,
+   "detalle": [
+    {
+     "num": "732",
+     "texto": "if (crudo.length === 0) return null;"
+    },
+    {
+     "num": "765",
+     "texto": "if (crudo.length === 0) return null;"
+    },
+    {
+     "num": "778",
+     "texto": "if (crudo.length === 0) return null;"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 5,
+   "protegidos": 1,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "374",
+     "texto": "if (conHora.length === 0) return null;"
+    },
+    {
+     "num": "1297",
+     "texto": "citasHoy.length === 0 && conFiltro && filtroOficio !== 'todos' && citasHoySin.length > 0;"
+    },
+    {
+     "num": "2068",
+     "texto": ") : citasHoySin.length === 0 && pantalla.preparacion === null ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/mascotas.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 1,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/negocio.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "207",
+     "texto": "(ofertasGrooming === null || activasGrooming.length === 0 || preciosGrooming.length === 0"
+    },
+    {
+     "num": "218",
+     "texto": "(ofertas === null || activas.length === 0"
+    },
+    {
+     "num": "240",
+     "texto": "(mundoVeterinaria === null || serviciosVet.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/adiestramiento/antes/[mascotaId].tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "217",
+     "texto": "{ficha.senales.length === 0 ? ("
+    },
+    {
+     "num": "238",
+     "texto": "{ficha.programas_previos.length === 0 ? ("
+    },
+    {
+     "num": "262",
+     "texto": "{bitacora.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/adiestramiento/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "171",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "366",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/adiestramiento/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "211",
+     "texto": "programasActivos.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/avisos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "166",
+     "texto": ") : avisos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cita/[citaId]/cierre.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "141",
+     "texto": "if (catalogo.length === 0) {"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "276",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "522",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cuenta-comercial/bancarios.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "112",
+     "texto": "vNumero.length === 0 ||"
+    },
+    {
+     "num": "117",
+     "texto": "nuevos.numero = vNumero.length === 0 ? t('cuenta.campoObligatorio') : t('cuenta.numeroCuentaInvalido');"
+    },
+    {
+     "num": "122",
+     "texto": "vDocumento.length === 0 ||"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cuenta-comercial/nueva.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 5,
+   "protegidos": 0,
+   "expuestos": 5,
+   "detalle": [
+    {
+     "num": "117",
+     "texto": "if (valor.length === 0 || (mascara !== undefined && !new RegExp(mascara).test(valor))) {"
+    },
+    {
+     "num": "118",
+     "texto": "setErrorIdentificacion(valor.length === 0 ? t('cuenta.campoObligatorio') : t('cuenta.formatoInvalido'));"
+    },
+    {
+     "num": "141",
+     "texto": "setErrorRazon(vRazon.length === 0 ? t('cuenta.campoObligatorio') : null);"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "219",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "456",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    },
+    {
+     "num": "476",
+     "texto": "{aplicados.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 1,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "200",
+     "texto": ": activas.length === 0"
+    },
+    {
+     "num": "218",
+     "texto": "activas.length === 0 || desde === null"
+    },
+    {
+     "num": "247",
+     "texto": "franjasActivas.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/taller.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "443",
+     "texto": "if (algunoOfrecido && especies.length === 0) {"
+    },
+    {
+     "num": "624",
+     "texto": "{especies.length === 0 && <Texto variante=\"apoyo\">{t('tallerGrooming.especiesMinima')}</Texto>}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/historico.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "671",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/liquidaciones.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 1,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "277",
+     "texto": "{pantalla.liquidaciones.length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/mascota/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 3,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "298",
+     "texto": "{atenciones.length === 0 ? ("
+    },
+    {
+     "num": "348",
+     "texto": ") : expediente.length === 0 ? ("
+    },
+    {
+     "num": "401",
+     "texto": ") : familia.miembros.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/mostrador/atencion.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "513",
+     "texto": ") : servicios !== null && servicios.length === 0 ? ("
+    },
+    {
+     "num": "627",
+     "texto": "{!cargandoHoras && horas !== null && horas.length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/mostrador/autorizar.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/app/mostrador/index.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "196",
+     "texto": "{((resultado.estado === 'mascotas' && resultado.lista.length === 0) ||"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/negocio/equipo.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 7,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "379",
+     "texto": "if (ids.length === 0) {"
+    },
+    {
+     "num": "507",
+     "texto": "if (m.oficios.length === 0) return t('equipo.subtituloRecepcion');"
+    },
+    {
+     "num": "887",
+     "texto": "{chips !== null && chips.length === 0 && filasOficio.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/paseo/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 1,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "201",
+     "texto": ": activas.length === 0"
+    },
+    {
+     "num": "223",
+     "texto": "activas.length === 0"
+    },
+    {
+     "num": "231",
+     "texto": "franjasActivas.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/paseo/taller.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "592",
+     "texto": "{bloquesConCard.length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/pizarra.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 1,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "392",
+     "texto": ") : personas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/vacaciones.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 1,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/certificado/[citaId].tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "337",
+     "texto": "{declaracion.trim().length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/consulta/[citaId].tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 15,
+   "conMensaje": 12,
+   "protegidos": 0,
+   "expuestos": 12,
+   "detalle": [
+    {
+     "num": "508",
+     "texto": "{casos.length === 0 ? ("
+    },
+    {
+     "num": "536",
+     "texto": "{presupuestos.length === 0 ? ("
+    },
+    {
+     "num": "591",
+     "texto": "deshabilitado={dictado.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "278",
+     "texto": "{activos.length === 0 ? ("
+    },
+    {
+     "num": "324",
+     "texto": "mundo.procedimientos.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/movimiento.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 1,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/presupuesto/nuevo.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "130",
+     "texto": "if (cuentaId === null || items.length === 0 || enviando) return;"
+    },
+    {
+     "num": "261",
+     "texto": "deshabilitado={items.length === 0 || cuentaId === null}"
+    },
+    {
+     "num": "267",
+     "texto": "deshabilitado={items.length === 0 || cuentaId === null || enviando}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/procedimientos.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "234",
+     "texto": "{pantalla.procedimientos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/dictado-en-vivo.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "112",
+     "texto": "if (transcript.length === 0) return;"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/dona-mix.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/components/espejo-grooming.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "83",
+     "texto": "{lineas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/espejo-oferta.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "74",
+     "texto": "{lineas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/seccion-documentos.tsx",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "372",
+     "texto": "{varios && mios.length === 0 && <Texto variante=\"apoyo\">{t('documentos.capaSinDocumentos')}</Texto>}"
+    },
+    {
+     "num": "380",
+     "texto": "etiqueta={mios.length === 0 ? t('documentos.subir') : t('documentos.subirDeNuevo')}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/seccion-horarios.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 11,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "920",
+     "texto": "if (desdeSel === null || hastaSel === null || diasSel.length === 0) return;"
+    },
+    {
+     "num": "922",
+     "texto": "if (ofertas.length > 0 && ofertasSel.length === 0) {"
+    },
+    {
+     "num": "1002",
+     "texto": "if (patron.length === 0) {"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/lib/subir-imagen.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  },
+  {
+   "archivo": "apps/prestador/src/lib/track-gps-fondo.ts",
+   "deRed": false,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 0,
+   "protegidos": 0,
+   "expuestos": 0,
+   "detalle": []
+  }
+ ],
+ "riesgo": [
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/consulta/[citaId].tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 15,
+   "conMensaje": 12,
+   "protegidos": 0,
+   "expuestos": 12,
+   "detalle": [
+    {
+     "num": "508",
+     "texto": "{casos.length === 0 ? ("
+    },
+    {
+     "num": "536",
+     "texto": "{presupuestos.length === 0 ? ("
+    },
+    {
+     "num": "591",
+     "texto": "deshabilitado={dictado.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "330",
+     "texto": "detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0 && detalle.fotos.length === 0;"
+    },
+    {
+     "num": "893",
+     "texto": "if (mascotas.length === 0) {"
+    },
+    {
+     "num": "1420",
+     "texto": "if (filas.length === 0) return null;"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/negocio/equipo.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 7,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "379",
+     "texto": "if (ids.length === 0) {"
+    },
+    {
+     "num": "507",
+     "texto": "if (m.oficios.length === 0) return t('equipo.subtituloRecepcion');"
+    },
+    {
+     "num": "887",
+     "texto": "{chips !== null && chips.length === 0 && filasOficio.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/components/seccion-horarios.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 11,
+   "conMensaje": 6,
+   "protegidos": 0,
+   "expuestos": 6,
+   "detalle": [
+    {
+     "num": "920",
+     "texto": "if (desdeSel === null || hastaSel === null || diasSel.length === 0) return;"
+    },
+    {
+     "num": "922",
+     "texto": "if (ofertas.length > 0 && ofertasSel.length === 0) {"
+    },
+    {
+     "num": "1002",
+     "texto": "if (patron.length === 0) {"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/cuenta/perfil.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 13,
+   "conMensaje": 5,
+   "protegidos": 0,
+   "expuestos": 5,
+   "detalle": [
+    {
+     "num": "732",
+     "texto": "if (crudo.length === 0) return null;"
+    },
+    {
+     "num": "765",
+     "texto": "if (crudo.length === 0) return null;"
+    },
+    {
+     "num": "778",
+     "texto": "if (crudo.length === 0) return null;"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cuenta-comercial/nueva.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 5,
+   "protegidos": 0,
+   "expuestos": 5,
+   "detalle": [
+    {
+     "num": "117",
+     "texto": "if (valor.length === 0 || (mascara !== undefined && !new RegExp(mascara).test(valor))) {"
+    },
+    {
+     "num": "118",
+     "texto": "setErrorIdentificacion(valor.length === 0 ? t('cuenta.campoObligatorio') : t('cuenta.formatoInvalido'));"
+    },
+    {
+     "num": "141",
+     "texto": "setErrorRazon(vRazon.length === 0 ? t('cuenta.campoObligatorio') : null);"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "1352",
+     "texto": "{vacunas.length === 0 ? ("
+    },
+    {
+     "num": "1455",
+     "texto": ") : censo.habitantes.length === 0 ? ("
+    },
+    {
+     "num": "1570",
+     "texto": ") : items.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/paseos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "532",
+     "texto": "{paquetesVigentes.length === 0 && librasProximas.length === 0 && listaPlanes.length === 0 ? ("
+    },
+    {
+     "num": "721",
+     "texto": "{pasadasFusionadas.length === 0 ? ("
+    },
+    {
+     "num": "910",
+     "texto": ") : horasNuevas !== null && horasNuevas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/(tabs)/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 5,
+   "protegidos": 1,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "374",
+     "texto": "if (conHora.length === 0) return null;"
+    },
+    {
+     "num": "1297",
+     "texto": "citasHoy.length === 0 && conFiltro && filtroOficio !== 'todos' && citasHoySin.length > 0;"
+    },
+    {
+     "num": "2068",
+     "texto": ") : citasHoySin.length === 0 && pantalla.preparacion === null ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cuenta-comercial/bancarios.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "112",
+     "texto": "vNumero.length === 0 ||"
+    },
+    {
+     "num": "117",
+     "texto": "nuevos.numero = vNumero.length === 0 ? t('cuenta.campoObligatorio') : t('cuenta.numeroCuentaInvalido');"
+    },
+    {
+     "num": "122",
+     "texto": "vDocumento.length === 0 ||"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 0,
+   "expuestos": 4,
+   "detalle": [
+    {
+     "num": "219",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "456",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    },
+    {
+     "num": "476",
+     "texto": "{aplicados.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 1,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "200",
+     "texto": ": activas.length === 0"
+    },
+    {
+     "num": "218",
+     "texto": "activas.length === 0 || desde === null"
+    },
+    {
+     "num": "247",
+     "texto": "franjasActivas.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/mascota/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 3,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "298",
+     "texto": "{atenciones.length === 0 ? ("
+    },
+    {
+     "num": "348",
+     "texto": ") : expediente.length === 0 ? ("
+    },
+    {
+     "num": "401",
+     "texto": ") : familia.miembros.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/paseo/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 4,
+   "protegidos": 1,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "201",
+     "texto": ": activas.length === 0"
+    },
+    {
+     "num": "223",
+     "texto": "activas.length === 0"
+    },
+    {
+     "num": "231",
+     "texto": "franjasActivas.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/presupuesto/nuevo.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 4,
+   "conMensaje": 3,
+   "protegidos": 0,
+   "expuestos": 3,
+   "detalle": [
+    {
+     "num": "130",
+     "texto": "if (cuentaId === null || items.length === 0 || enviando) return;"
+    },
+    {
+     "num": "261",
+     "texto": "deshabilitado={items.length === 0 || cuentaId === null}"
+    },
+    {
+     "num": "267",
+     "texto": "deshabilitado={items.length === 0 || cuentaId === null || enviando}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/grooming/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 4,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "449",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "560",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "320",
+     "texto": "if (elegibles.length === 0) {"
+    },
+    {
+     "num": "402",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 6,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "475",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "598",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/veterinaria/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 5,
+   "conMensaje": 3,
+   "protegidos": 1,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "360",
+     "texto": ") : oferta.length === 0 ? ("
+    },
+    {
+     "num": "433",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/bitacora.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "299",
+     "texto": ") : entradas.length === 0 ? ("
+    },
+    {
+     "num": "416",
+     "texto": "deshabilitado={guardando || mascotaId === null || (chips.length === 0 && texto.trim().length === 0)}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/grooming.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "277",
+     "texto": "proximos.length === 0 ? ("
+    },
+    {
+     "num": "287",
+     "texto": ") : historial.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/vacunas/[mascotaId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "279",
+     "texto": "{vacunas.length === 0 ? ("
+    },
+    {
+     "num": "380",
+     "texto": "{filtradas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/adiestramiento/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "171",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "366",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cita/[citaId]/durante.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "276",
+     "texto": "if (cuerpo.length === 0 || enviandoNota) return;"
+    },
+    {
+     "num": "522",
+     "texto": "deshabilitado={texto.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/grooming/taller.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "443",
+     "texto": "if (algunoOfrecido && especies.length === 0) {"
+    },
+    {
+     "num": "624",
+     "texto": "{especies.length === 0 && <Texto variante=\"apoyo\">{t('tallerGrooming.especiesMinima')}</Texto>}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/mostrador/atencion.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "513",
+     "texto": ") : servicios !== null && servicios.length === 0 ? ("
+    },
+    {
+     "num": "627",
+     "texto": "{!cargandoHoras && horas !== null && horas.length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 2,
+   "protegidos": 0,
+   "expuestos": 2,
+   "detalle": [
+    {
+     "num": "278",
+     "texto": "{activos.length === 0 ? ("
+    },
+    {
+     "num": "324",
+     "texto": "mundo.procedimientos.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/documentos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "234",
+     "texto": ") : lista.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/familia.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "126",
+     "texto": "<Boton etiqueta={t('cuenta.guardar')} bloque cargando={guardando} deshabilitado={nombre.trim().length === 0} onPress={() => void guardar()} />"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/cuenta/pagos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "73",
+     "texto": ") : pagos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "223",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 1,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "399",
+     "texto": ") : inicios.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/grooming/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "210",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/paseo/paquete.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "93",
+     "texto": ") : lista.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/explorar/veterinaria/disponibles.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "261",
+     "texto": ") : disponibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/adiestramiento.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "287",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/(tabs)/hogar/veterinaria.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "269",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/avisos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "154",
+     "texto": ") : avisos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/app/parte/[eventoId].tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "172",
+     "texto": "{estado.formula.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/coach.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "81",
+     "texto": "if (vacunas.length === 0) return t('coach.rCarnetVacio');"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/habitantes-acuario-hoja.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "237",
+     "texto": "deshabilitado={libre.trim().length === 0}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/cliente/src/components/plan-hoja.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 3,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "281",
+     "texto": "deshabilitado={dias.length === 0 || cubiertos === 'cargando' || estimado === 0 || precioMensual === null}"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/adiestramiento/index.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "211",
+     "texto": "programasActivos.length === 0"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/avisos.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "166",
+     "texto": ") : avisos.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/cita/[citaId]/cierre.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "141",
+     "texto": "if (catalogo.length === 0) {"
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/historico.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "671",
+     "texto": ") : visibles.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/paseo/taller.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "592",
+     "texto": "{bloquesConCard.length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/pizarra.tsx",
+   "deRed": true,
+   "modelaFases": true,
+   "total": 2,
+   "conMensaje": 2,
+   "protegidos": 1,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "392",
+     "texto": ") : personas.length === 0 ? ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/certificado/[citaId].tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 2,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "337",
+     "texto": "{declaracion.trim().length === 0 && ("
+    }
+   ]
+  },
+  {
+   "archivo": "apps/prestador/src/app/veterinaria/procedimientos.tsx",
+   "deRed": true,
+   "modelaFases": false,
+   "total": 1,
+   "conMensaje": 1,
+   "protegidos": 0,
+   "expuestos": 1,
+   "detalle": [
+    {
+     "num": "234",
+     "texto": "{pantalla.procedimientos.length === 0 ? ("
+    }
+   ]
+  }
+ ]
+}

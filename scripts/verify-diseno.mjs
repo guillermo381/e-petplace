@@ -1551,6 +1551,10 @@ const FIXTURES = {
   R5: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.accent.cta }}\n<ThemeProvider cta="oficio">' }],
   R6: [{ path: '(fixture)', src: '<KeyboardAvoidingView behavior="padding">' }],
   R29: [{ path: '(fixture)', src: '<Campo label="Tel" sinPie />' }],
+  /* R34: el bug del 9-ago, en tres líneas — la decisión por largo sin fase.
+     Su hermano sano (`fase === 'listo' && x.length === 0`) NO debe salir rojo,
+     y eso lo prueba el repo real: las cuatro pantallas de índice lo usan. */
+  R34: [{ path: '(fixture)', src: "const elegibles = ofrecibles(mascotas, faseEspecies);\nif (elegibles.length === 0) { setSinElegibles(true); return; }" }],
   R7: [{ path: '(fixture)', src: Array(BASELINE_FADEIN + 1).fill('entering={FadeInDown}').join('\n') }],
   R8: [{ path: '(fixture)', src: '<Entrada><EstadoVacio titulo="x" /></Entrada>\n<Animated.View entering={FadeIn}><EstadoVacio titulo="y" /></Animated.View>' }],
   R10: [{ path: 'apps/cliente/src/app/otra-pantalla.tsx', src: '/** @override-s82c — copia ilegal */' }],
@@ -1798,7 +1802,94 @@ function r33(archivos) {
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33 };
+/**
+ * R34 (S92-BIS) — UNA LISTA DE TRES ESTADOS NO SE DECIDE POR EL LARGO.
+ *
+ * ── QUÉ LA PARIÓ, con su fecha ──────────────────────────────────────────────
+ * El 9-ago-2026 el founder no pudo reservar un paseo: el último paso le decía
+ * *«tu hogar todavía no tiene un perro registrado»* **con dos perros vivos
+ * adentro**. El motor estaba sano —el guard `mascota_no_elegible` devolvía
+ * `true`— y los permisos intactos. Lo que fallaba era la PANTALLA:
+ *
+ *   `ofrecibles()` devuelve `[]` en TRES situaciones distintas —«todavía no
+ *   llegó el catálogo», «no pudo llegar» y «llegó y no hay perros»— y
+ *   `elegibles.length === 0` **las confunde a las tres**, así que a dos de
+ *   ellas les contestaba una frase falsa.
+ *
+ * ── POR QUÉ ESTE LINT Y NO UNA LEY ESCRITA ──────────────────────────────────
+ * **La advertencia YA ESTABA ESCRITA**, en el header de la lib que ese mismo
+ * archivo importa: *«la pantalla distingue ese vacío del vacío real mirando la
+ * fase, jamás el largo: "no tenés mascotas elegibles" y "todavía no sé" son dos
+ * frases distintas y una de las dos sería mentira»*. Cuatro pantallas la
+ * cumplieron y una no, y **nada lo detectó durante meses**. *Una ley sin
+ * instrumento se olvida — y ésta ya se olvidó una vez.*
+ *
+ * ── ALCANCE, declarado ──────────────────────────────────────────────────────
+ * Vigila la familia donde el defecto MORDIÓ: el resultado de `ofrecibles(...)`.
+ * No intenta cazar toda lista vacía del repo —eso da falsos positivos y un lint
+ * que grita de más se apaga—. La clase completa queda censada en la deuda.
+ */
+function r34(archivos) {
+  const fallos = [];
+  let decisiones = 0;
+  for (const { path, src } of archivos) {
+    const nombres = [...src.matchAll(/(?:const|let)\s+(\w+)\s*=\s*ofrecibles\s*\(/g)].map((m) => m[1]);
+    if (nombres.length === 0) continue;
+
+    /**
+     * ⚠️ SE RECORRE EL ARCHIVO ORIGINAL, LÍNEA POR LÍNEA, y no el texto sin
+     * comentarios. La v1 decidía sobre `sinComentarios(src)` y NUMERABA sobre
+     * ese mismo texto: como quitar comentarios CORRE las líneas, los seis
+     * primeros hallazgos apuntaron a líneas que no eran (una señalaba un
+     * `conFoto.length > 0` inocente). *Un lint que manda a mirar el lugar
+     * equivocado gasta la confianza que necesita para que lo miren.*
+     */
+    const lineas = src.split('\n');
+    let enBloque = false;
+    for (let i = 0; i < lineas.length; i++) {
+      const cruda = lineas[i];
+      const t = cruda.trim();
+      if (enBloque) {
+        if (t.includes('*/')) enBloque = false;
+        continue;
+      }
+      if (t.startsWith('/*')) {
+        if (!t.includes('*/')) enBloque = true;
+        continue;
+      }
+      if (t.startsWith('//') || t.startsWith('*')) continue;
+
+      for (const nombre of nombres) {
+        /**
+         * SOLO «no hay ninguno»: `=== 0` y `< 1`. La v2 incluía `=== 1` y
+         * marcó como fallo un `if (elegibles.length === 1) elegirSola()`, que
+         * es **sano**: preguntar «¿hay exactamente una?» no afirma ausencia, y
+         * si la fase no llegó la lista está vacía y ese `if` simplemente no
+         * entra. *Un lint que marca lo correcto enseña a ignorarlo.*
+         */
+        const re = new RegExp(`(^|[^.\\w])${nombre}\\.length\\s*(===\\s*0|<\\s*1)\\b`);
+        if (!re.test(cruda)) continue;
+        decisiones++;
+        // la fase tiene que estar en la MISMA sentencia…
+        const enLinea = /\.fase\s*(===|!==)|'listo'|'cargando'|'error'/.test(cruda);
+        // …o en un guard que corta ANTES, en las 12 líneas previas
+        const previas = lineas.slice(Math.max(0, i - 12), i).join('\n');
+        const enGuard = /\.fase\s*(===|!==)\s*'(cargando|error|listo)'/.test(previas);
+        if (!enLinea && !enGuard) {
+          fallos.push(
+            `${path}:${i + 1} — decide sobre \`${nombre}\` por el LARGO y sin mirar la FASE: \`ofrecibles()\` devuelve [] mientras carga, si falla Y si de verdad no hay — las tres cosas no se le dicen igual a una persona (el 9-ago esto le dijo al founder que no tenía perros, con dos perros vivos)`,
+          );
+        }
+      }
+    }
+  }
+  return {
+    fallos,
+    info: `${decisiones} decisión/es sobre el resultado de ofrecibles() — todas tienen que mirar la fase`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1971,6 +2062,7 @@ corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 corridas.push(['R32 (la esquina compartida: los 20dp de la lámina)', r32(apps)]);
 corridas.push(['R33 (la superficie de la huella se declara)', r33(apps)]);
+corridas.push(['R34 (una lista de tres estados no se decide por el largo)', r34(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

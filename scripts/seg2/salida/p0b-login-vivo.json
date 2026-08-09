@@ -1,0 +1,50 @@
+{
+ "filas": [
+  {
+   "id": "login de demo-prestador@epetplace.dev",
+   "obtenido": "ENTRA (token de 810 chars)",
+   "ok": true
+  },
+  {
+   "id": "alta de una cuenta nueva",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "login de esa cuenta recién creada",
+   "obtenido": "ENTRA (token de 1026 chars)",
+   "ok": true
+  },
+  {
+   "id": "esa misma cuenta con clave EQUIVOCADA",
+   "obtenido": "HTTP 400 · invalid_credentials",
+   "ok": true
+  },
+  {
+   "id": "/auth/v1/user (quién soy)",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "obtener_mi_prestador (resuelve el negocio)",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "profiles (el perfil)",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "prestador_empleados (el vínculo)",
+   "obtenido": "HTTP 200",
+   "ok": true
+  },
+  {
+   "id": "empleado_roles (los chips de rol)",
+   "obtenido": "HTTP 200",
+   "ok": true
+  }
+ ],
+ "sinClave": 1
+}

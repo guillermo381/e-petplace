@@ -3284,6 +3284,16 @@ Origen: S86-A, medición para C.
 
   **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
 
+- **L-218 — UNA LISTA QUE VIENE DE LA RED TIENE TRES ESTADOS, Y `length === 0` LOS CONFUNDE A LOS TRES (S92-BIS).**
+
+  **El caso:** el 9-ago el founder no pudo reservar un paseo — el último paso le decía *«tu hogar todavía no tiene un perro registrado»* **con dos perros vivos adentro**. El motor devolvía `true`, los permisos estaban intactos y el catálogo respondía `["perro"]`. Lo que fallaba era una sola línea: `if (elegibles.length === 0)`, donde `elegibles` sale de una función que devuelve `[]` **mientras carga**, **si falla** y **si de verdad no hay**. Dos de esos tres casos producían una frase falsa.
+
+  **Lo que lo vuelve lección y no anécdota: LA ADVERTENCIA YA ESTABA ESCRITA**, en el header de la lib que ese mismo archivo importa — *«la pantalla distingue ese vacío del vacío real mirando la fase, jamás el largo: "no tenés mascotas elegibles" y "todavía no sé" son dos frases distintas y una de las dos sería mentira»*. Cuatro pantallas la cumplieron, una no, y **nada lo detectó**. *Una ley sin instrumento se olvida — y ésta se olvidó en el mismo commit en que se escribió.*
+
+  **La forma exigible, en dos capas:** ① el estado modela las tres fases (`{fase:'cargando'} | {fase:'error'} | {fase:'listo', datos}`), que es lo que la casa ya hacía en 12 lugares; ② **y existe un guard que lo vigila** — hoy **R34** de `verify:diseno`, que exige que toda decisión sobre el resultado de `ofrecibles()` mire la fase y no el largo.
+
+  **Y una nota sobre el guard, porque su construcción repitió la misma clase de error dos veces:** su v1 numeró las líneas sobre el texto SIN comentarios y mandó a mirar seis líneas equivocadas (una señalaba un `conFoto.length > 0` inocente); su v2 marcaba como fallo `length === 1`, que es sano —preguntar «¿hay exactamente una?» no afirma ausencia—. *Un lint que manda al lugar equivocado o que marca lo correcto enseña a ignorarlo*, y un lint ignorado es peor que ninguno. Origen: S92-BIS (P0 del founder en dispositivo).
+
 - **L-217 — «TODO EN ORIGIN» Y «TODO EN EL CANON» SON DOS AFIRMACIONES DISTINTAS (S92).**
 
   **El caso:** cuatro artefactos de S90-B —entre ellos **la letra del loop de seguridad escrita para ejecutarse en S92** y el volcado con los nueve hallazgos probados— **nunca llegaron a `main`**. Vivían en `pista/s90-b` y en su remoto. El acta de S90 declaraba *«TODO en origin (`merge-base --is-ancestor` 15/15)»* **y era cierto**: un commit pusheado a su rama de pista está en `origin` sin estar en el canon.
@@ -10558,3 +10568,36 @@ nombres una función es cirugía, no un grant.*
 > **Dueño: A.** **☠️ DISPARO: S93**, después de D-703 (que puede matar una de las
 > doce). **☠️ MUERTE:** toda DEFINER de `public` declara su `search_path`.
 > Origen: S90 (censo) · re-medida S92-A.
+
+---
+
+### Deudas de S92-BIS (el perímetro)
+
+#### D-709 — 🟡 LA MASCOTA SIN FOTO MUESTRA LA HUELLA VIEJA EN EL SERVICIO DE CITAS
+
+**Hallazgo del founder en el gate de dispositivo (9-ago-2026), reportado con sus
+palabras:** *«en el servicio de citas, la mascota SIN foto muestra la huella
+vieja en vez del fallback vigente»*.
+
+**La letra que incumple es de S91:** `ChipEntidad` separó **foto = cara** de
+**sujeto = fallback** — *antes «cosa + cara» era inexpresable*, y esa separación
+existe justamente para que una mascota sin foto muestre el fallback de su
+SUJETO y no un glifo genérico heredado.
+
+**NO SE CURA EN ESTA SESIÓN, y el porqué es la regla, no la pereza:** es
+**freno 4 del arranque** (*hallazgo de producto y no de seguridad*). Una sesión
+de perímetro que se pone a arreglar composición de UI deja de ser una sesión de
+perímetro — y el founder lo marcó como tal al reportarlo.
+
+**Lo que el próximo dueño no tiene que re-descubrir:** el defecto está en la
+superficie de CITAS del cliente (el founder lo vio ahí); el componente correcto
+ya existe y ya distingue los dos ejes; lo que falta es que esa pantalla lo monte
+con el `sujeto` en vez del glifo viejo. **Es una pantalla que no adoptó una
+pieza que ya estaba lista** — la misma forma que L-218 acaba de registrar en el
+paseo, en otra capa.
+
+> **Dueño: la pista de UI del cliente (C, o A si sigue siendo pista única).**
+> **☠️ DISPARO: la próxima sesión que toque la superficie de citas del cliente,**
+> o el arco de features que siga a seguridad. **☠️ MUERTE:** ninguna mascota sin
+> foto pinta un glifo que no sea el fallback de su sujeto.
+> Origen: S92-BIS (gate de dispositivo del founder).
