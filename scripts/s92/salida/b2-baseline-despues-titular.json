@@ -1,0 +1,182 @@
+[
+ {
+  "tabla": "bonos",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 2,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "certificaciones",
+  "titular_status": 200,
+  "titular_vacio": true,
+  "titular_muestra": 0,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "certificado_salud",
+  "titular_status": 200,
+  "titular_vacio": true,
+  "titular_muestra": 0,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "estadias",
+  "titular_status": 200,
+  "titular_vacio": true,
+  "titular_muestra": 0,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "evento_cita_servicio",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 3,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "mascota_acceso_prestador",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 3,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "notificaciones",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 1,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "prestador_atencion_log",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 4,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "prestador_empleado_servicios",
+  "titular_status": 400,
+  "titular_vacio": false,
+  "titular_muestra": "HTTP 400",
+  "ajeno_status": 400,
+  "ajeno_vacio": false,
+  "ajeno_muestra": "HTTP 400"
+ },
+ {
+  "tabla": "prestador_especialidades",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 1,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 1
+ },
+ {
+  "tabla": "prestador_fotos",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 4,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 4
+ },
+ {
+  "tabla": "prestador_horarios",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 4,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 4
+ },
+ {
+  "tabla": "prestador_servicios",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 4,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 4
+ },
+ {
+  "tabla": "prestador_zonas",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 2,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 2
+ },
+ {
+  "tabla": "programas_contratados",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 2,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "solicitudes_emergencia",
+  "titular_status": 200,
+  "titular_vacio": true,
+  "titular_muestra": 0,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "suscripciones_servicio",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 1,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "prestadores",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 5,
+  "ajeno_status": 200,
+  "ajeno_vacio": false,
+  "ajeno_muestra": 5
+ },
+ {
+  "tabla": "cuentas_comerciales",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 1,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ },
+ {
+  "tabla": "caso_clinico",
+  "titular_status": 200,
+  "titular_vacio": false,
+  "titular_muestra": 1,
+  "ajeno_status": 200,
+  "ajeno_vacio": true,
+  "ajeno_muestra": 0
+ }
+]

@@ -1,0 +1,450 @@
+[
+ {
+  "tabla": "bonos",
+  "policy": "bonos_prestador_own",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "bonos",
+  "policy": "bonos_prestador_update",
+  "cmd": "UPDATE",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "bonos",
+  "policy": "prestador_insert_bonos_walkin",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "caso_clinico",
+  "policy": "caso_clinico_insert_vet",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "helper",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "caso_clinico_consultor",
+  "policy": "consultor_select_clinica_consultor_propia",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "menciona sin FROM",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id",
+   "user_id"
+  ],
+  "qual": "(EXISTS ( SELECT 1 FROM cuentas_comerciales cco WHERE ((cco.id = caso_clinico_consultor.cuenta_comercial_consultor_id) AND ((cco.owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1 FROM (prestador_empleados pe JOIN prestadores p ON ((p.id "
+ },
+ {
+  "tabla": "certificaciones",
+  "policy": "cert_prestador",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "certificado_salud",
+  "policy": "certificado_select_acceso",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id"
+  ],
+  "qual": "(user_tiene_acceso_a_mascota(mascota_id) OR (EXISTS ( SELECT 1 FROM prestadores pr WHERE ((pr.id = certificado_salud.prestador_id) AND _user_opera_cuenta_comercial(pr.cuenta_comercial_id, auth.uid())))))"
+ },
+ {
+  "tabla": "cobro_presencial_registrado",
+  "policy": "cobro_presencial_select_cuenta",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "menciona sin FROM",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id"
+  ],
+  "qual": "(EXISTS ( SELECT 1 FROM (evento_cita_servicio ecs JOIN prestadores p ON ((p.id = ecs.prestador_id))) WHERE ((ecs.id = cobro_presencial_registrado.evento_cita_servicio_id) AND _user_opera_cuenta_comercial(p.cuenta_comercial_id, auth.uid())))"
+ },
+ {
+  "tabla": "cuentas_comerciales",
+  "policy": "owner_select_own_cuentas",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "MIXTA (helper + tabla cruda)",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id"
+  ],
+  "qual": "((owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1 FROM prestadores p WHERE ((p.cuenta_comercial_id = cuentas_comerciales.id) AND user_gestiona_prestador(p.id)))))"
+ },
+ {
+  "tabla": "cuentas_comerciales",
+  "policy": "owner_update_own_cuentas_data",
+  "cmd": "UPDATE",
+  "roles": "{authenticated}",
+  "forma": "MIXTA (helper + tabla cruda)",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id"
+  ],
+  "qual": "((owner_profile_id = auth.uid()) OR (EXISTS ( SELECT 1 FROM prestadores p WHERE ((p.cuenta_comercial_id = cuentas_comerciales.id) AND user_gestiona_prestador(p.id)))))"
+ },
+ {
+  "tabla": "estadias",
+  "policy": "estadias_prestador_own",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "estadias",
+  "policy": "estadias_prestador_update",
+  "cmd": "UPDATE",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "estadias",
+  "policy": "prestador_insert_estadias_walkin",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "evento_cita_servicio",
+  "policy": "cita_insert_prestador_walkin",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "evento_cita_servicio",
+  "policy": "cita_select_prestador",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "((prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid()))) OR (empleado_id IN ( SELECT prestador_empleados.id FROM prestador_empleados WHERE ((prestador_empleados.user_id = auth.uid()) AND (prestad"
+ },
+ {
+  "tabla": "evento_cita_servicio",
+  "policy": "cita_update_prestador",
+  "cmd": "UPDATE",
+  "roles": "{public}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "((prestador_id IN ( SELECT p.id FROM prestadores p WHERE (p.user_id = auth.uid()))) OR (empleado_id IN ( SELECT pe.id FROM prestador_empleados pe WHERE ((pe.user_id = auth.uid()) AND (pe.activo = true)))))"
+ },
+ {
+  "tabla": "mascota_acceso_prestador",
+  "policy": "map_select_due",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id",
+   "user_id"
+  ],
+  "qual": "((mascota_id IN ( SELECT mascotas.id FROM mascotas WHERE (mascotas.user_id = auth.uid()))) OR is_admin() OR (cuenta_comercial_id IN ( SELECT prestadores.cuenta_comercial_id FROM prestadores WHERE (prestadores.user_id = auth.uid()) UNION SEL"
+ },
+ {
+  "tabla": "notificaciones",
+  "policy": "notif_insert_prestador_cita",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "prestador_atencion_log",
+  "policy": "atencion_log_select",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(is_admin() OR (prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid()))) OR (prestador_id IN ( SELECT pe.prestador_id FROM prestador_empleados pe WHERE ((pe.user_id = auth.uid()) AND (pe.activo = t"
+ },
+ {
+  "tabla": "prestador_empleado_servicios",
+  "policy": "empleado_servicios_dueño_elimina",
+  "cmd": "DELETE",
+  "roles": "{public}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(empleado_id IN ( SELECT pe.id FROM prestador_empleados pe WHERE (pe.prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))))"
+ },
+ {
+  "tabla": "prestador_empleado_servicios",
+  "policy": "empleado_servicios_dueño_inserta",
+  "cmd": "INSERT",
+  "roles": "{public}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "prestador_especialidades",
+  "policy": "prestador_especialidades_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "((prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.estado = 'activo'::text))) OR is_admin())"
+ },
+ {
+  "tabla": "prestador_fotos",
+  "policy": "prestador_fotos_delete_titular",
+  "cmd": "DELETE",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(EXISTS ( SELECT 1 FROM prestadores p WHERE ((p.id = prestador_fotos.prestador_id) AND (p.user_id = auth.uid()))))"
+ },
+ {
+  "tabla": "prestador_fotos",
+  "policy": "prestador_fotos_insert_titular",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "prestador_fotos",
+  "policy": "prestador_fotos_select_vitrina",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "estado",
+   "id",
+   "user_id"
+  ],
+  "qual": "(EXISTS ( SELECT 1 FROM prestadores p WHERE ((p.id = prestador_fotos.prestador_id) AND ((p.estado = 'activo'::text) OR (p.user_id = auth.uid())))))"
+ },
+ {
+  "tabla": "prestador_fotos",
+  "policy": "prestador_fotos_update_titular",
+  "cmd": "UPDATE",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(EXISTS ( SELECT 1 FROM prestadores p WHERE ((p.id = prestador_fotos.prestador_id) AND (p.user_id = auth.uid()))))"
+ },
+ {
+  "tabla": "prestador_horarios",
+  "policy": "ph_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "(((activo = true) AND (prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.estado = 'activo'::text)))) OR is_admin())"
+ },
+ {
+  "tabla": "prestador_programas",
+  "policy": "pp_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "menciona sin FROM",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "(activo AND (prestador_servicio_id IN ( SELECT ps.id FROM (prestador_servicios ps JOIN prestadores pr ON ((pr.id = ps.prestador_id))) WHERE (ps.activo AND (pr.estado = 'activo'::text)))))"
+ },
+ {
+  "tabla": "prestador_servicio_tallas",
+  "policy": "pst_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "menciona sin FROM",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "(prestador_servicio_id IN ( SELECT ps.id FROM (prestador_servicios ps JOIN prestadores pr ON ((pr.id = ps.prestador_id))) WHERE (ps.activo AND (pr.estado = 'activo'::text))))"
+ },
+ {
+  "tabla": "prestador_servicios",
+  "policy": "ps_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "(((activo = true) AND (prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.estado = 'activo'::text)))) OR is_admin())"
+ },
+ {
+  "tabla": "prestador_zonas",
+  "policy": "prestador_zonas_public",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "estado",
+   "id"
+  ],
+  "qual": "((prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.estado = 'activo'::text))) OR is_admin())"
+ },
+ {
+  "tabla": "prestadores",
+  "policy": "prestadores_insert_cuenta_propia",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "menciona sin FROM",
+  "columnas": [
+   "cuenta_comercial_id",
+   "id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "programas_contratados",
+  "policy": "pc_prestador_own",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "solicitudes_emergencia",
+  "policy": "emergencia_prestador",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "((prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid()))) OR is_admin())"
+ },
+ {
+  "tabla": "suscripciones_servicio",
+  "policy": "prestador_insert_suscripciones_walkin",
+  "cmd": "INSERT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": ""
+ },
+ {
+  "tabla": "suscripciones_servicio",
+  "policy": "suscr_servicio_prestador_own",
+  "cmd": "SELECT",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ },
+ {
+  "tabla": "suscripciones_servicio",
+  "policy": "suscr_servicio_prestador_update",
+  "cmd": "UPDATE",
+  "roles": "{authenticated}",
+  "forma": "TABLA CRUDA",
+  "columnas": [
+   "id",
+   "user_id"
+  ],
+  "qual": "(prestador_id IN ( SELECT prestadores.id FROM prestadores WHERE (prestadores.user_id = auth.uid())))"
+ }
+]
