@@ -631,3 +631,139 @@ entró al bundle** — un `.astro` no es alcanzable desde el grafo de Metro.
 > **La nota que deja:** el asterisco no dice «algo malo entró». Dice **«no se
 > puede probar qué entró»** — y esa es exactamente la razón por la que se
 > declara en vez de encogerse de hombros.
+
+---
+
+## ⑱ D-734 — la vitrina y la evidencia se redimensionan (gate firmado)
+
+**Orden del founder: curar con el aparato a mano**, para que el «después» se
+midiera de verdad. Sus cinco condiciones, cumplidas:
+
+**① El censo dijo CLASE, no caso.** Nueve superficies capturan imagen; seis ya
+redimensionaban y **tres no**: la galería de la vitrina, **`EvidenciaFoto`** y el
+logo. `EvidenciaFoto` es la que lo vuelve clase — alimenta los dos «durante»
+(`cita-archivos` mediana **500 kB**, `grooming-archivos` **441 kB**) y pedía
+`calidad` sin pedir `redimensionarA`. *El defecto que el founder vio en la
+vitrina no era de la vitrina.*
+
+**② Misma pieza, 1600 y no los 800 del avatar** — medido, no argumentado:
+`FichaPrestador` pinta la portada **a sangre** en 4:3 (~1290 px reales en un
+teléfono de 430 pt a DPR 3) y la evidencia se abre a pantalla completa. **1600 no
+es un número nuevo:** es el de carnet y documentos.
+
+**③ El logo queda afuera con su razón** (⇒ **D-740**): el resize compartido
+devuelve JPEG y el logo es PNG-only por orden del founder — aplicarlo mataría el
+alpha **y la subida rebotaría su propio archivo**.
+
+**④ El transporte, medido y leído honesto:**
+
+| payload | p50 |
+|---|---|
+| 6.042 kB · peor caso real | **818 ms** |
+| 474 kB · mediana de hoy | **343 ms** |
+| 204 kB · la comparable a 1600 | **357 ms** |
+
+**A 474 kB la subida no mejora**; solo el caso monstruo, 2,3×. **La cura paga en
+la bajada**, que es por vista: una vitrina de 8 fotos pasa de ~3,8 MB a ~1,6 MB
+cada vez que un cliente la abre. ⇒ **L-227**.
+
+**⑤ Las ya subidas no se tocaron** (freno 3) ⇒ **D-741**, con su bloqueante.
+
+**✅ GATE FIRMADO:** *«Subí una foto pesada y la portada a sangre se ve bien —
+sin blandura ni pixelado. La cura de 1600 queda.»* Era **el único juicio que yo
+no podía emitir**: el riesgo de esta cura nunca fue que pesara de más, era que se
+viera peor. OTA prestador **`019febbb`**.
+
+---
+
+## ⑲ LOS BACKUPS — verificados, con sus dos límites escritos
+
+**Verificado por el founder en el panel (10-ago): 8 copias diarias consecutivas,
+la más reciente del 10-ago.** La base está respaldada. Lo que sigue son sus dos
+límites, y se escriben ahora porque *un límite de backup que se descubre el día
+del incidente ya no es un límite: es una pérdida*.
+
+**① Son FÍSICAS, no lógicas.** Restaurar es **volver la base entera a ese
+punto** — no se recupera una fila, ni una tabla, ni «lo de ayer de este
+prestador». Ante un borrado puntual, la única herramienta disponible **deshace
+también todo lo bueno que pasó desde el backup**.
+
+**② NO cubren Storage.** Los 91 documentos de identidad, las fotos de las
+mascotas, las vitrinas, la evidencia y los clips **viven fuera de Postgres y no
+tienen respaldo**. Y el cruce con lo que esta casa ya construyó lo vuelve
+concreto: **D-731 dejó una cola que borra objetos de Storage de verdad** — o sea
+que ya existe un camino automático que quita archivos y **ninguno que los
+devuelva**.
+
+⇒ **D-742**, con dueño: **legales decide QUÉ hay que poder restaurar y por
+cuánto tiempo; operación lo construye.** Su disparo es **la misma firma que
+destraba D-732 y D-733**: el día que se escriba el plazo de retención hay que
+decir, en la misma frase, con qué se restaura.
+
+---
+
+## ⑳ EL HALLAZGO DE FONDO, en lenguaje de negocio
+
+> **No hay consultas que optimizar. Hay viajes que eliminar.**
+
+Salimos a buscar por qué la app se sentía lenta, con la hipótesis de siempre:
+alguna consulta pesada, alguna tabla mal indexada. **No existe.** En 105 días de
+registro, ninguna consulta de la aplicación aparece antes del **0,2 %** del
+tiempo de la base; el servidor trabaja al **0,3 % de un núcleo**; ninguna tabla
+se recorre entera; el 100 % de lo que se lee está en memoria.
+
+Lo que sí encontramos es esto: **cada vez que la app le pide algo al servidor
+paga un peaje fijo de unos 150 milésimas de segundo**, sin importar si pide un
+dato o cien. Lo medimos: **traer 105 filas costó menos que traer una**.
+
+Y las pantallas piden muchas veces, **una después de otra**. La pantalla
+principal del prestador encadenaba **doce esperas** antes de poder mostrar algo:
+casi dos segundos de pura ida y vuelta, con el servidor sin hacer prácticamente
+nada. *La lentitud no era del motor: era la cantidad de veces que se lo
+molestaba.*
+
+**Lo que esto significa para las decisiones:**
+
+- **El techo no lo pone el servidor.** Con esta base —87 MB, todo en memoria— el
+  límite aparece mucho antes por la cantidad de peticiones por pantalla que por
+  la capacidad de la máquina. **Pagar un plan más grande no arreglaría nada de
+  lo que se sentía lento.**
+- **Cuántos usuarios aguanta hoy: ~170 simultáneos**, con supuestos declarados.
+  Y ese número **crece cuando se bajan los viajes**, no cuando se agranda el
+  servidor.
+- **Dónde está el trabajo que rinde:** hacer que una pantalla pida **una vez lo
+  que hoy pide cinco**. Las cuatro curas de esta sesión son eso, y sus números lo
+  muestran — el wrapper más usado de la app bajó **a la mitad** por dejar de
+  hacer un viaje.
+
+*Y su corolario, que es el que se olvida: cuando el peaje domina, el tamaño de
+lo que viaja casi no importa… salvo del lado de quien BAJA, que son muchos y
+repiten. Por eso la cura de las fotos vale por la vitrina que se abre mil veces,
+no por la foto que se sube una.*
+
+---
+
+## ㉑ EL SALDO DE LA SESIÓN
+
+**Cuatro curas aplicadas, las cuatro con antes/después medido y gate en
+dispositivo:**
+
+| # | cura | antes → después | gate |
+|---|---|---|---|
+| 1 | la zona viaja en la misma RPC | **316 → 158 ms** por llamada, en 28 efectos de foco | ✅ |
+| 2 | las fuentes se importan por peso | **11,36 → 8,99 MB** (y 10,60 → 8,23 en cliente) | ✅ |
+| 3 | **D-730** · la ficha reserva de verdad | **3-5 viajes descartados → 0** | ✅ |
+| 4 | **D-734** · vitrina y evidencia a 1600 | vitrina **3,8 → 1,6 MB** por apertura | ✅ |
+
+**Seis deudas nuevas con dueño y disparo:** D-735 (MaterialSymbols) · D-736
+(índices sin uso, freno 1) · D-737 (bundle de 7,2 MB) · D-738 (el prólogo serial
+del HOY, 622 ms) · D-739 (Realtime, con dueño en el legado) · **D-740** (el logo
+PNG con alpha) · **D-741** (el barrido de las fotos ya subidas) · **D-742** (los
+backups no cubren Storage).
+
+**Cinco lecciones: L-223 → L-227.**
+
+**Lo que NO hereda nadie:** el brief de la segunda pasada de performance queda
+**como está** · el brief de S93 queda **INTACTO — la landing no hereda nada** ·
+seguridad sigue cerrada, con D-732 y D-733 🔒 bloqueadas por la letra de
+retención.

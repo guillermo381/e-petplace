@@ -11617,6 +11617,16 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
+
+  **El caso:** D-734 hacía lo obvio —redimensionar antes de subir— y la justificación obvia era «la subida va a ser más rápida». Se midió contra el Storage vivo, 5 tiros por caso, y **la justificación obvia se cayó**: 474 kB tardaron **343 ms** y 204 kB tardaron **357 ms** — *la más liviana salió más lenta*. Por debajo de ~500 kB **el peaje por petición domina** y el tamaño no se nota. Solo el caso monstruo (5,9 MB → 818 ms) mejoró de verdad, 2,3×.
+
+  **Lo que enseña:** la cura era correcta y **el argumento con el que se la iba a vender era falso**. Donde sí paga es del otro lado del cable: **una vitrina de 8 fotos pasa de ~3,8 MB a ~1,6 MB cada vez que un cliente la abre** — y eso ocurre una vez por subida y **N veces por visita**, con N creciendo con el negocio. *El que sube es uno y lo hace una vez; los que bajan son todos y lo hacen siempre.*
+
+  **La forma exigible:** al costear una cura de peso, **contar las dos direcciones y decir cuál se está pagando** — subida (una vez, un actor) contra bajada (por vista, todos). Y si la medición desmiente el argumento con el que se propuso, **se cambia el argumento y se conserva la cura**, en vez de callar el número que no favorece. *Un número que no favorece y se omite es la forma más barata de mentir con datos ciertos.*
+
+  **Su hermana:** **L-223** dice que el costo está en los viajes y no en los datos. Ésta es su borde: *el tamaño empieza a importar recién cuando supera el peaje, y del lado que se repite.* Origen: S94-PERF, D-734.
+
 - **L-226 — UN LINT CUYO CORPUS SE DEFINE POR EXTENSIÓN NO PROTEGE EL CÓDIGO: PROTEGE UN DIRECTORIO (S94-PERF).**
 
   **El caso:** al extraer el flujo de reserva del paseo a `lib/reserva/paseo.ts` (D-730), el guard de tres estados que **R34 existe para vigilar** se mudó con él. `verify:diseno` siguió dando **VERDE** y su contador bajó de **5 a 4**. No porque el guard hubiera desaparecido: **porque el corpus recorría solo `.tsx`** y la lógica se había ido a un archivo sin JSX. *La regla nacida de un P0 dejó de mirar el código del P0, y lo hizo en silencio.*
@@ -12597,7 +12607,7 @@ falta es el productor y su ventana**, y la ventana la fija la letra.
 
 ## Deudas S94-PERF (el loop de velocidad, 9 Ago 2026 — números verificados libres por grep)
 
-#### D-734 — 🟠 LA GALERÍA DEL PRESTADOR SUBE SIN REDIMENSIONAR — y es la pantalla más pública del producto
+#### D-734 — ✅ CERRADA (10-ago, gate del founder firmado) — LA GALERÍA SUBÍA SIN REDIMENSIONAR, Y ERA LA CLASE
 
 **Medido en el bucket, no en el código:** `prestador-galeria` tiene 8 objetos y
 **17,9 MB**, con **mediana 474,4 kB** y **una foto de 5,9 MB**. Es el carrusel de
@@ -12627,6 +12637,63 @@ es tocar datos reales de negocios vivos — otra conversación, con otra firma.
 > **☠️ DISPARO: la próxima pasada de performance con teléfono.**
 > **☠️ MUERTE:** una foto subida por el camino real pesa ≤ 250 kB y el carrusel
 > se ve igual. Origen: S94-PERF, B2.
+
+> ### ✅ EJECUTADA Y GATEADA (10-ago) — Y ERA LA CLASE, NO EL CASO
+>
+> **Orden del founder: curar con el aparato a mano, para que el «después» se
+> pudiera medir de verdad.** Se cumplieron sus cinco condiciones.
+>
+> **① EL CENSO (su condición 2) — nueve superficies capturan imagen, TRES no
+> redimensionaban.** Seis ya lo hacían (carnet 1600 · documentos 1600 ·
+> verificación 1600 · avatar de persona 800 · avatar de mascota 800 · foto de
+> mascota 800). Las tres que no: la galería de la vitrina, **`EvidenciaFoto`** y
+> el logo.
+>
+> **`EvidenciaFoto` es lo que vuelve esto una CLASE**: pedía `calidad` sin pedir
+> `redimensionarA`, y alimenta los dos «durante» — `cita-archivos` (mediana
+> **500 kB**) y `grooming-archivos` (mediana **441 kB**). *El defecto que el
+> founder vio en la vitrina no era de la vitrina.*
+>
+> **② LA DIMENSIÓN: la misma pieza, pero 1600 y no los 800 del avatar** — y el
+> porqué se midió, no se argumentó: `FichaPrestador` pinta la portada con
+> `RELACION_PORTADA = 4/3` **a sangre**, o sea ~1290 px reales en un teléfono de
+> 430 pt a DPR 3; y la evidencia se abre en `VisorFoto` a pantalla completa. Con
+> 800 las dos quedarían blandas — *una foto liviana que se ve mal no es una cura,
+> es una regresión con mejor número*. **1600 no es un número nuevo:** es el que la
+> casa ya usa para carnet y documentos.
+>
+> **③ EL LOGO QUEDA AFUERA, con su razón medida** ⇒ **D-740**: el resize
+> compartido re-codifica a JPEG y el logo es PNG-only por orden del founder
+> (la transparencia es el punto); aplicarlo mataría el alpha **y la subida
+> rebotaría su propio archivo**.
+>
+> **④ EL TRANSPORTE MEDIDO (su condición 4)**, contra el Storage vivo, 5 tiros
+> por caso — **y se lee honesto**:
+>
+> | payload | p50 |
+> |---|---|
+> | 6.042 kB · peor caso real | **818 ms** |
+> | 474 kB · mediana de hoy | **343 ms** |
+> | 204 kB · la comparable ya subida a 1600 | **357 ms** |
+>
+> **A 474 kB la subida NO mejora** —el peaje por petición domina por debajo de
+> ~500 kB, y la más liviana salió incluso más lenta—; solo el caso monstruo
+> mejora, 2,3×. **Donde la cura paga es en la BAJADA**, que es por vista y se
+> repite: una vitrina de 8 fotos pasa de **~3,8 MB a ~1,6 MB** cada vez que un
+> cliente la abre. ⇒ **L-227**.
+>
+> **⑤ LAS YA SUBIDAS NO SE TOCARON** (freno 3, orden explícita) ⇒ fichado aparte
+> como **D-741**, con su bloqueante escrito.
+>
+> ### ✅ EL GATE, FIRMADO POR EL FOUNDER (10-ago)
+>
+> Subió una foto pesada a propósito y miró la portada a sangre: *«se ve bien —
+> sin blandura ni pixelado. La cura de 1600 queda. Firmado.»* **Era el único
+> juicio que yo no podía emitir**, porque el riesgo de esta cura no es que pese
+> de más: es que se vea peor. OTA del prestador **`019febbb`** (group
+> `576e2191`, runtime 1.0.4). *El instrumento de medición dejó residuo 0,
+> verificado por listado — y su primera corrida la rebotó la RLS por escribir
+> fuera de la carpeta propia: la cura de S92-BIS haciendo su trabajo.*
 
 #### D-735 — 🟢 0,93 MB DE `MaterialSymbols` EN LAS DOS APPS, SIN UN SOLO CONSUMIDOR
 
@@ -12746,3 +12813,95 @@ media medida en **0,3 % de un núcleo**, hoy no aprieta a nadie.
 > se apague, o que la ocupación pase del 30 % de un núcleo. **☠️ MUERTE:** la
 > publicación queda con las tablas que alguien escucha de verdad, censadas
 > consumidor por consumidor. Origen: S94-PERF, B0.
+
+---
+
+#### D-740 — 🟢 EL LOGO NO SE PUEDE REDIMENSIONAR CON LA PIEZA DE LA CASA: es PNG con alpha y el resize devuelve JPEG
+
+**Nace como EXCEPCIÓN DECLARADA de D-734, no como olvido.** Sus dos hermanas de
+esa tanda —la galería de la vitrina y `EvidenciaFoto`— ganaron `redimensionarA`.
+El logo no, y la razón se midió antes de dejarlo afuera:
+
+- el resize compartido (`capturaFoto.redimensionar`) re-codifica con
+  **`SaveFormat.JPEG`**;
+- el logo es **PNG-only por orden del founder** (S83-C34) — *«poder quitar el
+  fondo»*, o sea **la transparencia es el punto**;
+- `subir-logo.ts` **rechaza** cualquier otra cosa con `formato_no_png`.
+
+⇒ aplicar la pieza compartida ahí haría **dos daños de una**: mataría el alpha y
+**la subida rebotaría su propio archivo**. *Redimensionar un PNG con alpha
+necesita otra herramienta, no otra llamada.*
+
+**Y NO APRIETA, que es lo que la baja a 🟢:** el bucket `avatars` —donde vive el
+logo— tiene **mediana 76 kB y mayor 327 kB**. No hay nada que curar hoy; lo que
+hay es una puerta que no se puede usar el día que sí lo haya.
+
+> **Dueño: la sesión que necesite redimensionar preservando alpha.**
+> **☠️ DISPARO:** que un logo real supere ~500 kB, o que aparezca un segundo
+> consumidor de PNG con transparencia. **☠️ MUERTE:** existe un camino de resize
+> que conserva alpha y el logo lo usa. Origen: S94-PERF, censo de D-734.
+
+#### D-741 — 🟡 LAS FOTOS YA SUBIDAS SIGUEN PESANDO LO QUE PESABAN — el barrido que D-734 NO hizo
+
+D-734 curó **el productor**: desde su OTA, toda foto nueva de vitrina y de
+evidencia entra redimensionada a 1600. **Lo que ya está subido no se tocó**, por
+**freno 3 declarado** (la orden del founder fue explícita: *«Las fotos YA subidas
+no se tocan»*).
+
+**Lo que queda, medido:** `prestador-galeria` **17,9 MB** en 8 objetos (mediana
+474 kB, mayor 5,9 MB) · `grooming-archivos` **13,1 MB** en 27 · `cita-archivos`
+**7,1 MB** en 11. **≈38 MB** que se siguen bajando enteros cada vez que alguien
+los mira.
+
+**⚠️ EL BLOQUEANTE, y es de datos y no de código:** re-procesar significa
+**leer, transformar y sobrescribir fotos de negocios y atenciones REALES**. Un
+error ahí no se nota hasta que alguien abre una vitrina y ve una foto rota, y
+**no hay vuelta atrás**: el original se pisó. Cualquier barrido tiene que nacer
+con su copia de respaldo **y con la respuesta a qué pasa si a mitad de camino
+falla** — que es exactamente la clase de pregunta que D-731 enseñó a hacer antes
+y no después.
+
+**Y hay una salida más barata que conviene mirar primero:** Storage de Supabase
+tiene **transformación de imágenes**; si está disponible en el plan, servir la
+miniatura por parámetro **no toca un solo byte del original** y borra el
+problema del lado de quien baja, que es donde de verdad duele (ver L-227). *Un
+barrido destructivo es la última opción, no la primera.*
+
+> **Dueño: la sesión de performance con aparato, o la de operación.**
+> **☠️ DISPARO:** que la vitrina tenga suficientes fotos como para que la apertura
+> se sienta, o que el costo de egress aparezca en la factura. **☠️ MUERTE:** las
+> fotos viejas se sirven livianas —por transformación o por barrido con respaldo—
+> y el bucket lo demuestra. Origen: S94-PERF, D-734 §5.
+
+#### D-742 — 🟠 LOS BACKUPS NO CUBREN STORAGE, Y SON FÍSICOS: dos límites que hay que saber ANTES de necesitarlos
+
+**Verificado por el founder en el panel (10-ago):** hay **8 copias diarias
+consecutivas**, la más reciente del **10-ago**. La base está respaldada y eso
+está bien. Lo que sigue son sus **dos límites**, escritos ahora porque *un límite
+de backup que se descubre el día del incidente ya no es un límite: es una
+pérdida*.
+
+**① SON FÍSICAS, no lógicas.** Restaurar es **volver la base ENTERA a ese
+punto** — no se recupera una fila, ni una tabla, ni «lo de ayer de este
+prestador». Si mañana alguien borra 20 filas por error, la única herramienta
+disponible **deshace también todo lo bueno que pasó desde el backup**. *Para un
+borrado puntual, el backup no es la respuesta: es una decisión de tirar el día.*
+
+**② NO CUBREN STORAGE.** Los archivos viven fuera de Postgres: **los 91
+documentos de identidad, las fotos de las mascotas, las vitrinas, la evidencia
+de las atenciones y los clips**. Hoy **no hay respaldo de nada de eso**. Y el
+cruce con lo que esta casa ya sabe lo vuelve concreto: D-731 construyó una cola
+que **borra objetos de Storage de verdad** — o sea que ya existe un camino
+automático que quita archivos, **y ningún camino que los devuelva**.
+
+**Lo que NO se afirma acá:** que haga falta un backup de Storage *ya*. Eso
+depende del plazo de retención y del valor legal de cada bucket, que es
+exactamente la letra que traba D-732 y D-733. **Se declara el hecho, no la
+urgencia.**
+
+> **Dueño: la sesión de legales (D-405) para decidir QUÉ hay que poder restaurar
+> y por cuánto tiempo → la de operación para construirlo.**
+> **☠️ DISPARO: la misma firma que destraba D-732/D-733** — el día que se escriba
+> el plazo de retención hay que decir, en la misma frase, con qué se restaura.
+> **☠️ MUERTE:** existe una copia de los buckets con dueño, frecuencia y una
+> restauración probada de verdad —no supuesta—. Origen: S94-PERF, cierre.
