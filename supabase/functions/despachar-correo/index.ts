@@ -254,10 +254,48 @@ function plantillaTexto(d: Datos): string {
   return partes.join('\n');
 }
 
+/**
+ * 🔴 D-723 — EL TERCER DESPACHADOR. Copia literal del guard de
+ * `despachar-push` (D-713): misma forma, mismo secreto, mismos códigos.
+ *
+ * ── POR QUÉ HACÍA FALTA, medido el 9-ago ────────────────────────────────────
+ * Un `POST` con la **anon key —que es pública y viaja en el bundle**— devolvía
+ * **200 y PROCESABA LA COLA** (`"modo":"transporte_vivo"`). *Cualquiera podía
+ * disparar el despacho de correo de la casa.*
+ *
+ * ── POR QUÉ NINGUNA CONFIGURACIÓN DE SUPABASE LO CUBRÍA ─────────────────────
+ * Esta function tiene `verify_jwt: true`, y **eso da sensación de puerta
+ * cerrada** — pero L-714 ya lo midió: **la anon key ES un JWT válido**, así que
+ * `true` no frena a nadie. *Por eso el guard tiene que estar ADENTRO.*
+ *
+ * ── Y POR QUÉ SE ESCAPÓ DEL CENSO DE D-713 ──────────────────────────────────
+ * Sus dos hermanos tienen `verify_jwt: false` y se buscaron por esa propiedad.
+ * **Éste tiene `true`, así que no apareció.** *La familia se nombró por los que
+ * se encontraron, no por los que existían* — y el censo se hizo por la
+ * propiedad equivocada teniendo la lección escrita.
+ *
+ * **500 si no hay secreto configurado, jamás «pasar por las dudas»:** un guard
+ * que se degrada a abierto cuando le falta su llave no es un guard.
+ */
+function guardDespacho(req: Request): Response | null {
+  const esperado = Deno.env.get('DESPACHO_SECRET');
+  if (!esperado) {
+    return Response.json({ error: 'despacho_sin_secreto_configurado' }, { status: 500 });
+  }
+  const dado = req.headers.get('x-despacho-secret');
+  if (dado !== esperado) {
+    return Response.json({ error: 'despacho_no_autorizado' }, { status: 401 });
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return Response.json({ error: 'solo_post' }, { status: 405 });
   }
+
+  const rechazo = guardDespacho(req);
+  if (rechazo) return rechazo;
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,

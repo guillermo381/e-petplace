@@ -1,0 +1,22 @@
+[
+ {
+  "cuando": "2026-08-10 00:06:00.154199+00",
+  "mensaje": "1 row",
+  "status": "succeeded"
+ },
+ {
+  "cuando": "2026-08-10 00:05:00.097527+00",
+  "mensaje": "1 row",
+  "status": "succeeded"
+ },
+ {
+  "cuando": "2026-08-10 00:04:00.091243+00",
+  "mensaje": "1 row",
+  "status": "succeeded"
+ },
+ {
+  "cuando": "2026-08-10 00:03:00.086623+00",
+  "mensaje": "1 row",
+  "status": "succeeded"
+ }
+]

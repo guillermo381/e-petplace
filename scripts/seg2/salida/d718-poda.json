@@ -1,0 +1,50 @@
+[
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-B",
+  "accion": "error"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-C",
+  "accion": "error"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s86-A",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s86-B",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s86-C",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s87-B",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s87-C",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s87-D",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s90-B",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s90-D",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s91-B",
+  "accion": "podado"
+ },
+ {
+  "ruta": "/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s91-D",
+  "accion": "podado"
+ }
+]

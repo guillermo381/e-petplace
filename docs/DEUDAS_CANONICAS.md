@@ -11089,9 +11089,40 @@ verificado hoy dos veces.
 **⚠️ Y un efecto a declarar antes de tocar:** cualquier retome manual del correo
 (curl) va a necesitar el header, igual que pasó con WhatsApp.
 
-> **Dueño: A, con la palabra del founder** (tiene ventana de riesgo, como
-> D-713). **☠️ DISPARO: la próxima sesión que toque notificaciones — o antes, si
-> el founder lo pide: la puerta está abierta hoy.**
+> ### ✅ CURADA (9-ago) — mismo protocolo que sus dos hermanos, y el orden se respetó
+>
+> **① CENSO:** un solo llamador legítimo — el **job 6** del cron
+> (`despachar-notificaciones-tick`, cada minuto), que usaba `Authorization:
+> Bearer …` y **no** el header del secreto.
+>
+> **② PRIMERO EL CRON, DESPUÉS EL DEPLOY** (al revés dejaba una ventana con el
+> correo caído). El job 6 se reescribió con `x-despacho-secret`, **y el secreto
+> NO se transcribió**: se **leyó del job 8** —el hermano ya curado— y se
+> re-inyectó dentro de la misma sentencia. *Nunca pasó por la consola, ni por un
+> archivo, ni por este SQL* (R6). Verificado mirando que el header **esté**, no
+> cuál es.
+>
+> **③ EL GUARD, copia literal del de `despachar-push`** — incluido el **500 si
+> falta el secreto**: *un guard que se degrada a abierto cuando le falta su
+> llave no es un guard.* Desplegado con `--use-api` (sin Docker).
+>
+> **VERDE DOBLE:**
+> · **la puerta:** `POST` con la anon key pasó de **`200` + cola procesada** a
+>   **`401 despacho_no_autorizado`** — y los tres despachadores ahora responden
+>   idéntico;
+> · **el canal sigue vivo:** los **cuatro ticks siguientes al deploy**
+>   (`00:03`, `00:04`, `00:05`, `00:06`) salieron **`succeeded`**. *Que la puerta
+>   rebote al desconocido es la mitad; la otra es que el correo siga saliendo —
+>   un guard que cierra para todos, incluido el cron, sería peor que el agujero.*
+> · **y nada más se movió:** las otras 13 functions con el mismo status que antes.
+>
+> **⚠️ Y LA LECCIÓN QUE DEJA, que ya estaba escrita:** este despachador se
+> escapó del censo de D-713 porque tiene `verify_jwt: true` y sus hermanos
+> `false` — **se buscó por la propiedad equivocada**. L-714 ya había medido que
+> *la anon key ES un JWT válido*, así que `true` nunca protegió nada. *La
+> familia se nombró por los que se encontraron, no por los que existían.*
+
+> **Dueño: A (ejecutó).** **✅ CERRADA 9-ago-2026.**
 > **☠️ MUERTE:** `despachar-correo` devuelve `401 despacho_no_autorizado` con la
 > anon key, y el tick real del cron sigue en `succeeded` después de la cura.
 > Origen: S92-BIS, hallado en el baseline del borrado de `chat-ayuda`.
@@ -11132,8 +11163,55 @@ pierden y desde donde vuelven mal.*
 **Los 12 candidatos:** `e-petplace-B` · `e-petplace-C` · `s86-A` · `s86-B` ·
 `s86-C` · `s87-B` · `s87-C` · `s87-D` · `s90-B` · `s90-D` · `s91-B` · `s91-D`.
 
-> **Dueño: founder + A, en ventana propia.** **☠️ DISPARO: la ventana que el
-> founder abra.** **☠️ MUERTE:** `git worktree list` muestra solo el primario, y
+> ### ✅ EJECUTADA (9-ago) — con la red de seguridad primero, y frenó donde debía
+>
+> **① LA RED DE SEGURIDAD, ANTES DE BORRAR NADA.** `git branch --no-merged main`
+> dio **SIETE ramas**, y de cada una se midió **archivo por archivo si existe en
+> `main`**:
+>
+> ```
+> pista/s86-b · s87-b · s87-c · s87-d · s90-d · s91-b · s91-d
+> → 0 archivos SIN estar en main
+> ```
+>
+> **Nada que rescatar.** Lo que difiere existe en `main` con **otra versión, más
+> nueva** — *mergear esas ramas REVERTIRÍA trabajo*, que es exactamente por qué
+> L-217 manda rescatar por checkout selectivo y jamás por merge.
+>
+> **② LA PODA, árbol por árbol, verificando que cada uno estuviera limpio.**
+> **10 de 12 salieron directo. Dos frenaron** —`e-petplace-B` y `e-petplace-C`—
+> con *«Directory not empty»*, y **ahí se paró a mirar en vez de forzar**: tenían
+> `node_modules` **y cuatro PNG sueltos de S61**. *Un PNG suelto en un árbol que
+> nadie mira es exactamente la clase de cosa que esta sesión ya rescató siete
+> veces.* **Medido: los cuatro están versionados en `main`** ⇒ nada que
+> rescatar ⇒ recién entonces `--force`, que es lo que la ficha autoriza *«solo
+> si se verificó qué es»*.
+>
+> **③ VERDE: `git worktree list` muestra SOLO el primario.** Los 12
+> desregistrados. **Las ramas siguen vivas** — `worktree remove` saca el árbol,
+> no la rama, y borrarlas es otra decisión que esta cura no necesita.
+>
+> ### ✅ D-711 CUMPLIDA EN EL MISMO ACTO — medido antes y después
+>
+> | | antes | después |
+> |---|---|---|
+> | `.env` con **`service_role`** | **5** | **1** |
+> | `.env` con credencial demo | 16 | **0 fuera del primario** |
+>
+> **La única copia que queda es la legítima** (`e-petplace/supabase/dev/.env.local`),
+> la del árbol donde se trabaja. *Las cuatro copias de la llave maestra que
+> vivían en árboles que nadie miraba se fueron con ellos.*
+>
+> ### ⚠️ LO QUE QUEDA, Y NO SE TOCÓ POR DECISIÓN
+>
+> **Los directorios físicos de `e-petplace-B` y `e-petplace-C` siguen en disco**
+> —git los desregistró pero no pudo borrarlos—. Ya **no son worktrees**: son
+> carpetas sueltas con `node_modules`. **Borrarlas es `rm -rf`, que está fuera
+> de git y fuera de lo que el founder firmó**, así que se reporta en vez de
+> ejecutarse. *No guardan `service_role`* (medido: no estaban entre los 5).
+
+> **Dueño: A (ejecutó) → founder (decide sobre los 2 directorios huérfanos).**
+> **✅ CERRADA 9-ago-2026** en su parte de worktrees y credenciales. **☠️ MUERTE:** `git worktree list` muestra solo el primario, y
 > `service_role` vive en un solo archivo de disco.
 > Origen: S92-BIS (B2), firmado por el founder.
 

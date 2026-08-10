@@ -1,0 +1,44 @@
+[
+ {
+  "rama": "pista/s86-b",
+  "commits": 2,
+  "tocados": 3,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s87-b",
+  "commits": 1,
+  "tocados": 3,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s87-c",
+  "commits": 1,
+  "tocados": 1,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s87-d",
+  "commits": 1,
+  "tocados": 2,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s90-d",
+  "commits": 2,
+  "tocados": 4,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s91-b",
+  "commits": 1,
+  "tocados": 1,
+  "faltan": []
+ },
+ {
+  "rama": "pista/s91-d",
+  "commits": 1,
+  "tocados": 1,
+  "faltan": []
+ }
+]

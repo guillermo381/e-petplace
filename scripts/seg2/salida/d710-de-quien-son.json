@@ -1,0 +1,127 @@
+{
+ "filas": [
+  {
+   "bytes": "30647049",
+   "carpeta": "97d163e1-4b08-43cf-8c07-883799d9fdb1",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 22
+  },
+  {
+   "bytes": "11797944",
+   "carpeta": "78fdea95-7ce9-4fb2-bf16-0977d9012bdf",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "8789721",
+   "carpeta": "360c4143-8dc9-48ce-9315-427c57a7a83c",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 13
+  },
+  {
+   "bytes": "6130454",
+   "carpeta": "744e3ceb-3221-4ec1-89e2-0c24e9b9c419",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "2502851",
+   "carpeta": "75d0798a-ea90-4a97-a2f2-74f3234d892a",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 4
+  },
+  {
+   "bytes": "2256218",
+   "carpeta": "5c3f943a-8935-4518-bd50-e77687fadc58",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 1
+  },
+  {
+   "bytes": "2256218",
+   "carpeta": "c037731c-0e18-4244-8afd-f8d086387f5d",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 1
+  },
+  {
+   "bytes": "2256218",
+   "carpeta": "dd180dab-e153-4b6c-85fe-cc0fd3eb24d6",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 1
+  },
+  {
+   "bytes": "2196077",
+   "carpeta": "838a39a3-96a3-4201-ba8d-e254a0745b14",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 1
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "a8c59073-5431-4024-8ee9-4b0e57c88268",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "0dcfadc8-8235-4918-8c77-4267940722cb",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "2d1c3311-d286-4c56-b2df-6989aec62a75",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "45c6fca7-05a0-4326-99fa-6aa89573d462",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "0aa249ec-23a9-4cf3-8568-5bb9da8ae3be",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "fe4b9eb1-f423-47da-b5b7-ca898631b71f",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "835020",
+   "carpeta": "97ccbed8-e324-450e-9f41-fce4f7093564",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": false,
+   "n": 4
+  },
+  {
+   "bytes": "38612",
+   "carpeta": "c1cc97a8-b998-4cce-89b6-ab96f2f20e98",
+   "es_prestador_vivo": false,
+   "es_usuario_vivo": true,
+   "n": 4
+  }
+ ],
+ "vivos": 56,
+ "bytesVivos": 46739511,
+ "sinDuenno": 27,
+ "bytesSin": 27976991
+}

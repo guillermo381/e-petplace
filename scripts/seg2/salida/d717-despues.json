@@ -13,8 +13,8 @@
  },
  {
   "nombre": "despachar-correo",
-  "status": 200,
-  "cuerpo": "{\"modo\":\"transporte_vivo\",\"corrida\":{\"seco\":false,\"retenidas\":0,\"para_transporte\":0,\"retenidas_por_techo\":0,\"sombra_habr",
+  "status": 401,
+  "cuerpo": "{\"error\":\"despacho_no_autorizado\"}",
   "desaparecida": false
  },
  {
