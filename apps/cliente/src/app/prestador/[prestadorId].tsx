@@ -43,7 +43,6 @@ import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -59,12 +58,12 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { vozDeOficios } from '@/lib/voz-oficio';
-import { pedirReserva } from '@/lib/senal-reserva';
 import { urlGaleria } from '@/lib/url-galeria';
 import { FlechaVolver } from '@/components/flecha-volver';
 import { BarraAdiestramiento } from '@/components/reserva/barra-adiestramiento';
 import { BarraGrooming } from '@/components/reserva/barra-grooming';
 import { BarraVeterinaria } from '@/components/reserva/barra-veterinaria';
+import { BarraPaseo } from '@/components/reserva/barra-paseo';
 
 export default function PerfilPublicoPrestador() {
   const router = useRouter();
@@ -81,6 +80,8 @@ export default function PerfilPublicoPrestador() {
     mascotaId?: string;
     mascotaNombre?: string;
     comprable?: string;
+    duracion?: string;
+    plan?: string;
     tipoServicio?: string;
     modalidad?: string;
   }>();
@@ -230,21 +231,16 @@ export default function PerfilPublicoPrestador() {
               mascotaId={texto(params.mascotaId)}
               tipoServicio={texto(params.tipoServicio)}
             />
-          ) : (
-            /* Los oficios que todavía no migraron conservan el camino viejo,
-               a propósito: migrarlos a medias sería dejar una superficie que
-               promete reservar y no puede. Se van uno por uno, y cada uno se
-               lleva su rama de este condicional cuando llega. */
-            <Boton
-              variante="primario"
-              bloque
-              etiqueta={t('perfilPrestador.reservar')}
-              onPress={() => {
-                pedirReserva(ofertaId);
-                router.back();
-              }}
+          ) : texto(params.oficio) === 'paseo' ? (
+            <BarraPaseo
+              ofertaId={ofertaId}
+              fecha={texto(params.fecha)}
+              hora={texto(params.hora)}
+              duracion={Number(texto(params.duracion))}
+              modoPlan={texto(params.plan) === '1'}
+              mascotaIdParam={texto(params.mascotaId).length > 0 ? texto(params.mascotaId) : null}
             />
-          )}
+          ) : null}
         </View>
       ) : null}
     </View>

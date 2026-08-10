@@ -38,11 +38,42 @@ function archivosTsx(dir) {
   return out;
 }
 
+/**
+ * ⚠️ EL MISMO ÁRBOL, PERO TAMBIÉN `.ts` — y nace de un caso REAL, no de una
+ * previsión.
+ *
+ * Al extraer el flujo de reserva del paseo a `lib/reserva/paseo.ts` (D-730), el
+ * guard de tres estados que **R34 existe para vigilar** se fue con él. El lint
+ * siguió dando VERDE y su contador bajó de 5 a 4: *no porque el guard hubiera
+ * desaparecido, sino porque dejó de verlo.* El corpus recorría solo `.tsx`, y
+ * la lógica se había mudado a un archivo sin JSX.
+ *
+ * **Un lint que se apaga cuando el código cambia de extensión no protege el
+ * código: protege un directorio.** Y lo más incómodo es que su salida no dice
+ * «ya no miro»: dice un número más chico, que se lee como progreso.
+ *
+ * Se usa SOLO donde la regla vigila lógica y no píxeles (hoy R34), en vez de
+ * ensanchar el corpus entero: ensancharlo encendería de una vez todas las demás
+ * reglas sobre archivos que nunca miraron, y eso es decisión de mesa.
+ */
+function archivosCodigo(dir) {
+  const out = [];
+  for (const e of readdirSync(dir)) {
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) out.push(...archivosCodigo(p));
+    else if (p.endsWith('.ts') || p.endsWith('.tsx')) out.push(p);
+  }
+  return out;
+}
+
 const MINIMOS_CORPUS = { apps: 100, cliente: 45, ui: 38 };
 
 const leer = (fs) => fs.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 const apps = leer(RAICES.flatMap(archivosTsx));
 const ui = leer(RAICES_UI.flatMap(archivosTsx));
+/** El corpus de LÓGICA (ver `archivosCodigo`): incluye `.ts`, donde viven los
+ *  flujos extraídos. Hoy lo consume R34. */
+const appsCodigo = leer(RAICES.flatMap(archivosCodigo));
 
 /** El ancla del corpus, ejecutada (su porqué y su alcance, arriba). Corre
  *  ANTES que cualquier regla: si el corpus se derrumbó, el lint entero se
@@ -2170,7 +2201,7 @@ corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 corridas.push(['R32 (la esquina compartida: los 20dp de la lámina)', r32(apps)]);
 corridas.push(['R33 (la superficie de la huella se declara)', r33(apps)]);
-corridas.push(['R34 (una lista de tres estados no se decide por el largo)', r34(apps)]);
+corridas.push(['R34 (una lista de tres estados no se decide por el largo)', r34(appsCodigo)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
