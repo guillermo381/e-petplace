@@ -589,3 +589,45 @@ El gate son **cuatro reservas, una por oficio**, y en el paseo hay que llegar a
 las Hojas: elegir mascota con dos elegibles, la pregunta social sin responder, y
 el saldo de paquete si hay. *Hasta que eso corra, esto está construido y no
 verificado — y se dice así.*
+
+---
+
+## ⑰ EL GATE — las dos OTA publicadas y el veredicto del founder
+
+**Veredicto verbatim: *«funcionó, está bien y rápido»*.**
+
+| app | update | group | runtime | ancla |
+|---|---|---|---|---|
+| cliente | **`019fe9d2`** | `c19b106f` | 1.0.3 | `863fddc8`\* |
+| prestador | **`019fe9d3`** | `e3652562` | 1.0.4 | `863fddc8`\* |
+
+Las dos **leídas del OBJETO** con `update:view`, jamás del texto del publish.
+
+**Un solo bundle llevó las tres cosas de la jornada**: las dos curas de
+velocidad (la zona en una RPC, las fuentes por peso) y el arco entero de D-730.
+Por eso el «rápido» del veredicto es también **lo primero que el aparato dice
+sobre las curas de performance** — que hasta ese momento solo tenían números de
+escritorio.
+
+**Se registra VERDE por ausencia de falla anotada**, y se dice así: el founder
+dio un veredicto global, no un paso por paso. **No consta que las seis Hojas del
+paseo se hayan caminado una por una.** Rige la regla de la casa: toda falla
+futura entra como cura anotada y no reabre lo declarado.
+
+### ⚠️ Las dos salieron CON ASTERISCO, y por qué queda escrito acá
+
+El árbol tenía un archivo sin trackear al bundlear. **`update:view` NO expone el
+estado del árbol** (medido en S91): un publish sucio es **inauditable después**,
+así que si el asterisco no se escribe en el momento, no lo escribe nadie.
+
+**El residuo, identificado por medición y NO borrado por decisión del founder:**
+`packages/ui/src/contacto.astro` es de **`epetplace-web`** — ese repo es Astro,
+tiene el `src/paginas/Contacto.astro` que el import busca, y **su
+`src/pages/contacto.astro` ya existe byte-idéntico**. Una sesión de la landing
+escribió bien en la web y dejó una copia en el repo de al lado: *los dos caminos
+son `<repo>/src/…`, y se fue por la raíz vecina.* **Nada se perdió, y nada de él
+entró al bundle** — un `.astro` no es alcanzable desde el grafo de Metro.
+
+> **La nota que deja:** el asterisco no dice «algo malo entró». Dice **«no se
+> puede probar qué entró»** — y esa es exactamente la razón por la que se
+> declara en vez de encogerse de hombros.

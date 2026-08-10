@@ -12045,7 +12045,7 @@ pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
 
 ---
 
-#### D-730 — ✅ CURADA EN CÓDIGO (9-ago, S94-PERF) · 🟡 SIN GATE EN APARATO — EL PARPADEO DEL PREVIEW
+#### D-730 — ✅ CERRADA (9-ago, S94-PERF) · CURADA Y GATEADA EN DISPOSITIVO — EL PARPADEO DEL PREVIEW
 
 > ### ✅ EJECUTADA — LA OPCIÓN ①, ENTERA, EN LOS CUATRO OFICIOS
 >
@@ -12098,17 +12098,26 @@ pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
 > VERDE**. Curado con un corpus de LÓGICA (`archivosCodigo`) solo para las reglas
 > que vigilan lógica y no píxeles; R34 vuelve a 5. ⇒ **L-226**.
 >
-> ### 🟡 LO QUE FALTA, Y ES LA MITAD QUE NO PUEDO HACER YO
+> ### ✅ GATEADA EN DISPOSITIVO — veredicto del founder: *«funcionó, está bien y rápido»*
 >
-> **NO SE GATEÓ EN APARATO.** Los cuatro caminos de reserva cambiaron de forma,
-> el founder estaba ausente, y **el modo de falla de esto es silencioso**: no se
-> ve como un glitch, se ve como «no puedo reservar». Typecheck y `verify:diseno`
-> están verdes en los cuatro, pero **ninguno de los dos ve ciclo de vida**.
+> Era **la mitad que yo no podía hacer**, y la que decidía si esto estaba
+> construido o verificado: los cuatro caminos de reserva cambiaron de forma, y
+> **su modo de falla es silencioso** —no se ve como un glitch, se ve como «no
+> puedo reservar»—. Typecheck y `verify:diseno` estaban verdes en los cuatro,
+> pero **ninguno de los dos ve ciclo de vida**.
 >
-> **El gate son cuatro reservas, una por oficio**, y en el paseo hay que llegar a
-> las Hojas: elegir mascota con dos elegibles, la pregunta social sin responder,
-> y el saldo de paquete si hay. *Hasta que eso corra, esto está construido y no
-> verificado — y se dice así.*
+> **Corrió sobre las OTA de S94** (cliente `019fe9d2` · prestador `019fe9d3`,
+> ancla `863fddc8`), o sea con **las dos curas de velocidad y este arco en el
+> mismo bundle** — por eso el «rápido» del veredicto es también lo primero que
+> el aparato dice sobre ellas.
+>
+> **Se registra VERDE por AUSENCIA DE FALLA ANOTADA**, y se dice así en vez de
+> inflarlo: el founder dio un veredicto global, no un paso por paso, así que
+> **no consta que las seis Hojas del paseo se hayan caminado una por una**. Rige
+> la regla de la casa: *toda falla futura entra como cura anotada y no reabre lo
+> declarado.* **Los tres bordes que quedan sin constancia explícita** —elegir
+> mascota con dos elegibles, la pregunta social sin responder, el saldo de
+> paquete— **son los primeros a mirar si algo aparece.**
 
 #### D-730 (registro original) — 🟠 EL PARPADEO DEL PREVIEW: una pantalla que aparece y desaparece sin razón visible, en los CUATRO oficios
 
