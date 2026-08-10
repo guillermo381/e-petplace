@@ -101,19 +101,30 @@ function wrappersImportados(src) {
  */
 function funcionesLocales(src) {
   const mapa = new Map();
+  /* ⚠️ TERCERA CORRECCIÓN DEL INSTRUMENTO, y la peor de las tres porque
+     INFLABA en silencio. La versión anterior reconocía `const x = (` y después
+     buscaba el `{` con `indexOf` **sin límite**: para un `const x = (a ? b : c)`
+     —que no tiene cuerpo de llaves— el `indexOf` saltaba al PRÓXIMO bloque del
+     archivo, ajeno, y lo adoptaba como cuerpo de esa función. Resultado: la
+     cadena de RESERVA aparecía dentro del efecto de CARGA. *Un instrumento que
+     se come el bloque de al lado no mide de más por ruido: mide otra cosa.*
+     La cura es exigir la firma completa hasta su `=> {`, y que el `{` sea el
+     que la propia expresión regular encontró — no uno buscado después. */
   const patrones = [
-    /(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g,
-    /const\s+([A-Za-z_$][\w$]*)\s*=\s*useCallback\s*\(/g,
-    /const\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\(/g,
+    /(?:async\s+)?function\s+[A-Za-z_$][\w$]*\s*\([^)]*\)\s*(?::[^{;]*)?\{/g,
+    /const\s+([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*(?:useCallback\s*\(\s*)?(?:async\s*)?\([^)]*\)\s*(?::[^=>]+)?=>\s*\{/g,
   ];
+  // El nombre de la primera forma se recupera aparte (el grupo se perdió al
+  // exigir la firma entera).
+  const nombreDeFn = (txt) => txt.match(/function\s+([A-Za-z_$][\w$]*)/)?.[1] ?? null;
   for (const re of patrones) {
     let m;
     while ((m = re.exec(src)) !== null) {
-      const nombre = m[1];
-      if (mapa.has(nombre)) continue;
-      // Del `{` que sigue a la firma hasta su cierre, por conteo de llaves.
-      const desde = src.indexOf('{', re.lastIndex - 1);
-      if (desde === -1) continue;
+      const nombre = m[1] ?? nombreDeFn(m[0]);
+      if (nombre === null || mapa.has(nombre)) continue;
+      // `re.lastIndex - 1` ES el `{` de la firma: no se busca, ya se encontró.
+      const desde = re.lastIndex - 1;
+      if (src[desde] !== '{') continue;
       let prof = 0;
       let j = desde;
       for (; j < src.length; j++) {

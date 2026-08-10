@@ -444,3 +444,77 @@ Después, por orden de la tabla: **D-738** (la RPC de contexto, 622 ms) y
 **Lo que NO hereda esta sesión:** seguridad sigue cerrada. D-732 y D-733 siguen
 🔒 bloqueadas por la letra de retención y son de legales. La landing de S93 sigue
 intacta.
+
+---
+
+## ⑮ ADDENDUM — EL REBOTE DE D-730, MEDIDO (pedido del founder, cero cura)
+
+*«Medilo como fenómeno de performance: cuánto trabajo se hace de más en ese
+rebote. Si resulta que ese camino repite consultas que ya se hicieron, es dato
+para B2 y refuerza el costeo de D-730 con números en vez de con "se ve feo".
+Solo medir. No curar.»*
+
+**Repite. Y hay algo peor que la repetición.**
+
+### ① La ficha repite una consulta que la lista ya tenía en memoria
+
+La lista pide `obtenerPerfilesPublicos(ids)` con **todos** los negocios visibles
+para dibujar sus tarjetas. Al tocar uno, la ficha pide
+`obtenerPerfilesPublicos([prestadorId])` — **el mismo perfil, entero, otra vez**.
+
+| | p50 |
+|---|---|
+| la lista, los 6 ids de una | 161,1 ms |
+| **la ficha, el mismo perfil para uno solo** | **156,7 ms** |
+
+*Cuesta casi lo mismo pedir uno que los seis.* Son **156,7 ms para traer un dato
+que estaba a un prop de distancia**.
+
+### ② Al volver, la lista re-pide lo que ya tiene
+
+| oficio | viajes del rebote | ≈ red | qué re-pide |
+|---|---|---|---|
+| paseo | 2 | 306 ms | solo disponibilidad — **el hogar está guardado** (cura S92-BIS, solo acá) |
+| adiestramiento | 2 | 306 ms | disponibilidad |
+| grooming | 3 | 460 ms | perfil de mascota + disponibilidad |
+| **veterinaria** | **4** | **613 ms** | perfil + disponibilidad + vitrina |
+
+El «≈ red» es viajes × el peaje de 153,2 ms de B0. **Es una multiplicación y se
+dice**; se sostiene porque B1 probó que el costo es por petición, no por payload.
+
+### 🔴 ③ Lo que lo convierte de costo en desperdicio
+
+`router.back()` **no re-monta la lista** — la conserva con su fecha, su hora y su
+scroll, que es exactamente por lo que `senal-reserva.ts` eligió `back` y no
+`replace`. **Los datos que re-pide ya están en su estado.** Y la cadena de
+reserva navega al checkout **en el mismo foco**: cuando esas respuestas llegan,
+**la pantalla que las pidió ya no está a la vista**.
+
+> *No es trabajo de más: es trabajo para nadie.*
+
+### ④ El parpadeo no es el costo, es el síntoma
+
+El founder reporta entre medio segundo y dos segundos. **Los viajes explican
+306-613 ms**, o sea la mitad baja del rango. El resto es montaje y pintado, que
+**no se puede contar leyendo el repo** — es del árbol de React en el aparato, y
+un número de re-renders inventado desde una terminal sería *el «se ve feo» con
+decimales*. Va rojo (R5) y espera el teléfono.
+
+### ⑤ Lo que esta medición le regala a la cura ya firmada
+
+La opción ① —que la ficha reserve de verdad— **elimina los dos costos a la vez**:
+sin rebote no hay re-carga descartada, y si la ficha recibe el perfil por params
+(la lista ya lo tiene) tampoco lo re-pide. **La cura firmada no solo saca el
+parpadeo: saca de 2 a 4 viajes por reserva.**
+
+### ⑥ Y el instrumento se equivocó una tercera vez
+
+`b9-rebote.mjs` buscaba `useFocusEffect` **sin el paréntesis**, así que la línea
+de `import` contaba como un efecto y el contador se tragaba medio archivo,
+mezclando la cadena de reserva con la de carga — *justo lo que ese instrumento
+existía para separar*. Su propia salida lo desmentía: **decía «3 efectos de
+foco» en pantallas que tienen dos.** ⇒ **L-225 gana su tercer caso y su forma
+final: un instrumento nuevo imprime lo que contó, no solo el total.**
+
+*(`b1-censo-focos` sí buscaba con paréntesis desde el principio: sus números no
+se movieron al corregir esto, lo que de paso probó que el censo estaba sano.)*

@@ -11625,6 +11625,10 @@ defecto que se curó hoy en el cambio de clave.
 
   **La forma exigible:** **un instrumento nuevo se prueba contra un caso que uno ya conoce antes de creerle el primer número.** Acá el caso conocido estaba a mano y gratis: la propia ficha de D-728 decía «el HOY dispara mucho», y el censo dijo 1. *Esa contradicción era la prueba, y estuvo disponible desde la primera corrida.* Su hermana es **L-192**: los dos errores fallaban en silencio, con salida creíble y sin romper nada.
 
+  **③ EL TERCER CASO, en el instrumento del rebote de D-730, y es el que fija la forma.** `b9-rebote.mjs` buscaba `useFocusEffect` **sin el paréntesis**, así que **la línea de `import { router, useFocusEffect, useLocalSearchParams }` contaba como un efecto**; el contador de paréntesis arrancaba ahí y se tragaba medio archivo, metiendo la cadena de RESERVA adentro del efecto de CARGA — que era exactamente lo que ese instrumento existía para separar. Y el desmentido estaba impreso en su propia salida: **decía «3 efectos de foco» en pantallas que tienen dos.** *El instrumento publicó el número que lo contradecía y hubo que mirarlo dos veces para verlo.*
+
+  **⇒ La forma final, de las tres:** un instrumento nuevo **imprime lo que contó, no solo el total** — la lista de lo encontrado es lo que permite cazarlo contra el archivo. Los tres defectos daban totales creíbles; ninguno sobrevivió a comparar el detalle con la fuente. *Y `b1-censo-focos` buscaba `useFocusEffect(` con paréntesis desde el principio: por eso sus números no se movieron al corregir el tercero, lo que de paso probó que el resto del censo estaba sano.*
+
 - **L-224 — UN ASSET ENTRA AL BUNDLE POR LA FORMA DEL IMPORT, NO POR EL MAPA QUE LO DECLARA (S94-PERF).**
 
   **El caso:** `fonts.ts` declaraba **seis** fuentes y el `expo export` empaquetaba **treinta y cinco**. La causa no estaba en el mapa: el índice de cada familia de `@expo-google-fonts` hace un `require` de **todos** sus pesos, así que `import { DMSans_300Light } from '@expo-google-fonts/dm-sans'` arrastra el Thin, el Black y todas las itálicas al grafo de assets. Importar por subruta (`.../300Light`) lo corta: **2,37 MB menos en cada app**, con cero cambio visible.
@@ -12185,6 +12189,68 @@ delante**.
 > `faseEspecies` y `elegibles` detrás. **Mover las Hojas sin esa lógica es
 > exactamente el clon que hay que evitar**, y sería la segunda verdad que
 > `senal-reserva.ts` rechazó desde el principio.
+
+> ### 📏 ENMIENDA S94-PERF (9-ago) — EL REBOTE, COSTEADO CON NÚMEROS
+>
+> **Pedido del founder: medir el rebote como fenómeno de performance, NO
+> curarlo.** *Si repite consultas que ya se hicieron, es dato para B2 y costea
+> esta ficha con milisegundos en vez de con «se ve feo».* **Repite. Y hay algo
+> peor que la repetición.**
+>
+> **① LA FICHA REPITE UNA CONSULTA QUE LA LISTA YA TENÍA EN MEMORIA.** La lista
+> pide `obtenerPerfilesPublicos(ids)` con **todos** los negocios visibles, para
+> dibujar sus tarjetas (`disponibles.tsx`, efecto sobre `[disponibles]`). Al
+> tocar uno, la ficha pide `obtenerPerfilesPublicos([prestadorId])` — **el mismo
+> perfil, entero, otra vez**. Medido con token de cliente por el camino real:
+>
+> | | p50 |
+> |---|---|
+> | la lista, los 6 ids de una | 161,1 ms |
+> | **la ficha, el mismo perfil para uno solo** | **156,7 ms** |
+>
+> *Cuesta casi lo mismo pedir uno que los seis: el peaje es del viaje.* Son
+> **156,7 ms para traer un dato que estaba a un prop de distancia.**
+>
+> **② AL VOLVER, LA LISTA RE-PIDE LO QUE YA TIENE — y el número es por oficio:**
+>
+> | oficio | viajes del rebote | ≈ red | qué re-pide al volver |
+> |---|---|---|---|
+> | paseo | 2 | 306 ms | solo la disponibilidad — **el hogar está guardado** por `hogarCargadoRef` (cura de S92-BIS, aplicada **solo acá**) |
+> | adiestramiento | 2 | 306 ms | la disponibilidad |
+> | grooming | 3 | 460 ms | perfil de la mascota **+** la disponibilidad |
+> | **veterinaria** | **4** | **613 ms** | perfil de la mascota **+** disponibilidad **+** vitrina — el más caro |
+>
+> *(El «≈ red» es conteo de viajes × el peaje de 153,2 ms medido en B0. **Es una
+> multiplicación y se dice**; se sostiene porque B1 probó que el costo es por
+> petición y no por payload.)*
+>
+> **🔴 ③ Y ACÁ ESTÁ LO QUE CONVIERTE ESTO DE COSTO EN DESPERDICIO.**
+> `router.back()` **NO re-monta la lista** — la conserva con su fecha, su hora y
+> su scroll, que es exactamente por lo que `senal-reserva.ts` eligió `back` y no
+> `replace`. **O sea que los datos que re-pide YA ESTÁN en su estado.** Y la
+> cadena de reserva navega al checkout **en el mismo foco**, así que cuando esas
+> respuestas llegan **la pantalla que las pidió ya no está a la vista**. *No es
+> trabajo de más: es trabajo para nadie.*
+>
+> **④ EL PARPADEO NO ES EL COSTO, ES EL SÍNTOMA — y el reloj lo confirma.** El
+> founder reporta entre medio segundo y dos segundos. **Los viajes explican
+> 306-613 ms de eso**, o sea la mitad baja del rango. *El resto es montaje y
+> pintado, que no se puede contar leyendo el repo.*
+>
+> **⑤ LO QUE NO SE PUDO MEDIR, y por eso va rojo (R5):** **montajes y
+> re-renders**. Son del árbol de React en el aparato. *Un número de re-renders
+> inventado desde una terminal sería exactamente el «se ve feo» con decimales.*
+> Queda para la sesión propia, que va a tener el teléfono delante.
+>
+> **⑥ EL DATO QUE ESTA MEDICIÓN LE REGALA A LA CURA:** la opción ① ya firmada
+> —que la ficha reserve de verdad— **elimina los dos costos a la vez**: sin
+> rebote no hay re-carga descartada, y si la ficha recibe el perfil por params
+> (ya lo tiene la lista) tampoco lo re-pide. *La cura firmada no solo saca el
+> parpadeo: saca 2 a 4 viajes por reserva.*
+>
+> **Instrumentos:** `scripts/perf/b9-rebote.mjs` (qué se repite, leído del
+> objeto) y `scripts/perf/c1-rebote-cronometro.mjs` (cuánto cuesta, por camino
+> real).
 
 > **Dueño: founder (decidió) → A (ejecuta en sesión propia).**
 > **☠️ DISPARO: la sesión que el founder abra para esto.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN

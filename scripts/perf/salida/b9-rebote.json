@@ -1,0 +1,73 @@
+[
+ {
+  "rotulo": "ficha",
+  "efectos": 1,
+  "carga": [
+   "obtenerPerfilesPublicos"
+  ],
+  "reserva": [],
+  "repetido": []
+ },
+ {
+  "rotulo": "paseo",
+  "efectos": 2,
+  "carga": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "obtenerPaseadoresDisponibles",
+   "resolverUrlFoto"
+  ],
+  "reserva": [
+   "obtenerSaldoPaquete"
+  ],
+  "repetido": []
+ },
+ {
+  "rotulo": "grooming",
+  "efectos": 2,
+  "carga": [
+   "obtenerGroomersDisponibles",
+   "obtenerPerfilMascota"
+  ],
+  "reserva": [
+   "crearBloqueoAgenda",
+   "obtenerGroomersDisponibles"
+  ],
+  "repetido": [
+   "obtenerGroomersDisponibles"
+  ]
+ },
+ {
+  "rotulo": "adiestramiento",
+  "efectos": 2,
+  "carga": [
+   "obtenerAdiestradoresDisponibles"
+  ],
+  "reserva": [
+   "crearBloqueoAgenda",
+   "obtenerAdiestradoresDisponibles"
+  ],
+  "repetido": [
+   "obtenerAdiestradoresDisponibles"
+  ]
+ },
+ {
+  "rotulo": "veterinaria",
+  "efectos": 2,
+  "carga": [
+   "obtenerPerfilMascota",
+   "obtenerVeterinariosDisponibles",
+   "obtenerVitrinaNegocios"
+  ],
+  "reserva": [
+   "crearBloqueoAgenda",
+   "obtenerPersonasQueAtienden",
+   "obtenerVeterinariosDisponibles",
+   "obtenerVitrinaNegocios"
+  ],
+  "repetido": [
+   "obtenerVeterinariosDisponibles",
+   "obtenerVitrinaNegocios"
+  ]
+ }
+]

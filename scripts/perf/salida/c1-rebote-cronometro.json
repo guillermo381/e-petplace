@@ -1,0 +1,99 @@
+{
+ "ids": 6,
+ "lista": {
+  "rotulo": "la LISTA: perfiles públicos de todos los visibles, en UN viaje",
+  "veces": 12,
+  "calentar": 3,
+  "p50": 161.1,
+  "p95": 197.8,
+  "min": 154.4,
+  "max": 197.8,
+  "serie": [
+   160.1,
+   166.6,
+   197.8,
+   163.1,
+   164.1,
+   162.7,
+   161,
+   158.6,
+   162.7,
+   154.4,
+   157.4,
+   161.1
+  ]
+ },
+ "ficha": {
+  "rotulo": "la FICHA: el MISMO perfil, otra vez, para UNO solo",
+  "veces": 12,
+  "calentar": 3,
+  "p50": 156.7,
+  "p95": 178.7,
+  "min": 151.7,
+  "max": 178.7,
+  "serie": [
+   178.7,
+   171,
+   157.4,
+   165.7,
+   156.2,
+   156.1,
+   151.7,
+   153.9,
+   154.8,
+   161.1,
+   171.7,
+   156.7
+  ]
+ },
+ "filas": [
+  {
+   "oficio": "paseo",
+   "ficha": 1,
+   "recarga": 1,
+   "total": 2,
+   "ms": 306.4,
+   "quienes": [
+    "obtenerPaseadoresDisponibles"
+   ],
+   "nota": "el hogar NO se re-pide: lo guarda `hogarCargadoRef` (cura de S92-BIS, solo acá)"
+  },
+  {
+   "oficio": "grooming",
+   "ficha": 1,
+   "recarga": 2,
+   "total": 3,
+   "ms": 459.6,
+   "quienes": [
+    "obtenerPerfilMascota",
+    "obtenerGroomersDisponibles"
+   ],
+   "nota": "sin guard: re-pide todo"
+  },
+  {
+   "oficio": "adiestramiento",
+   "ficha": 1,
+   "recarga": 1,
+   "total": 2,
+   "ms": 306.4,
+   "quienes": [
+    "obtenerAdiestradoresDisponibles"
+   ],
+   "nota": "sin guard"
+  },
+  {
+   "oficio": "veterinaria",
+   "ficha": 1,
+   "recarga": 3,
+   "total": 4,
+   "ms": 612.8,
+   "quienes": [
+    "obtenerPerfilMascota",
+    "obtenerVeterinariosDisponibles",
+    "obtenerVitrinaNegocios"
+   ],
+   "nota": "sin guard: el más caro de los cuatro"
+  }
+ ],
+ "peaje": 153.2
+}
