@@ -822,3 +822,70 @@ pierde**. **1 edge function nueva** (`barrer-storage`, `--use-api`), **1 shared*
 (`_shared/despacho.ts` — el guard en un solo lugar; los tres despachadores en
 verde **no se tocaron**: reescribir código verde para unificarlo es riesgo sin
 beneficio). **1 job de cron.** Residuo de los ensayos: **0**.
+
+---
+
+## ⑳ EL CIERRE DE LA JORNADA — lo que queda firme, lo que queda bloqueado, y lo que no se hereda
+
+### Las tres decisiones del founder al cerrar
+
+**① LOS 56 NO SE TOCAN, Y ES BLOQUEANTE — no pendiente.** Su razón, verbatim:
+*«queda claro que a nadie le falta un documento y que la decisión depende de un
+plazo de retención que no tengo escrito»*. **La distinción no es de tono:** un
+pendiente se ejecuta cuando alguien tenga un rato; esto **no se puede ejecutar
+en absoluto** hasta que exista la letra. *Cualquier sesión que abra D-732 y
+decida borrar o conservar sin ese plazo está inventando el criterio.* Van a
+legales **D-732** (los 56) y **D-733** (el wizard que sube antes de registrar),
+por la misma llave: **la ventana de gracia del barredor no es un número técnico
+que se elige — es el plazo de retención con otro nombre.**
+
+**② D-728 ES EL PRIMER BLOQUE DE LA SESIÓN DE PERFORMANCE, Y ARRANCA
+RE-INSTRUMENTANDO.** La sonda del perfil se publicó, **el founder nunca llegó a
+leer su número**, y se retiró con el resto del instrumental. ⇒ la ficha **no
+avanzó a hecho**: sigue siendo hipótesis fuerte con evidencia parcial. *Un
+contador que nadie leyó no es un dato pendiente de lectura: es un dato que no
+existe* — L-141 en su forma más simple. Su sesión reinstala **el instrumento
+completo** (no solo el contador de focos: también el eslabón que tarda), sobre
+dos pantallas como mínimo, y **lee en el aparato antes de tocar una línea de
+cura**.
+
+**③ D-730 VA A SESIÓN PROPIA**, con sus tres puntos de arranque ya escritos en
+su ficha: el bloqueante previo, la corrección de la letra (**son cinco Hojas de
+flujo, no tres**) y **la unidad a extraer es el flujo, no las Hojas** — *mover
+las Hojas sin la lógica que decide abrirlas es exactamente el clon que hay que
+evitar.*
+
+### Lo que el founder ejecuta con su mano
+
+Los dos directorios físicos, que ya **no son worktrees** (git los desregistró) y
+**no guardan `service_role`** — verificado, la cuenta pasó de 5 a 1:
+
+```
+/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-B
+/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-C
+```
+
+### El brief de S93 queda INTACTO
+
+**La landing no hereda nada de hoy.** Ni D-732, ni D-733, ni D-728, ni D-730:
+las cuatro tienen dueño y disparo propios, y ninguno es S93. *Un brief que se
+llena con los restos de la sesión anterior deja de ser un norte y pasa a ser una
+bandeja de entrada.* Seguridad se declara cerrada y S93 abre limpia.
+
+### El saldo de la jornada, en una tabla
+
+| | |
+|---|---|
+| **Curadas hoy** | D-713 · D-714 · D-716 (perillas servidas) · D-717 · D-719 (a/b/c) · D-720 · D-721 · D-722 · D-723 · D-724 · **D-731** · D-718+D-711 · D-710 en su residuo · el P0 del paseo |
+| **Nacen y quedan** | D-725 · D-728 · D-729 · D-730 · **D-732** 🔒 · **D-733** 🔒 |
+| **Lecciones** | L-218 · L-219 · L-220 · L-221 · **L-222** |
+| **Migraciones** | 244 local = remoto, todas emparejadas |
+| **Letra** | `POLITICAS` v1.11 (**P23**) |
+
+**Y una cosa que conviene que quede dicha del método, porque se repitió tres
+veces hoy y las tres veces pagó:** *el diagnóstico que se corrige a sí mismo
+antes de curar vale más que el que acierta de una.* D-731 se atribuía un
+mecanismo que no era; el P0 del paseo cambió de causa tres veces; y la propia
+cura de D-731 tenía adentro el defecto que venía a curar. **Ninguna de las tres
+la encontró la revisión del código: las encontró medir el objeto y escribir un
+ensayo para fallar.**

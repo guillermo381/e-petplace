@@ -11811,9 +11811,26 @@ transversal y esta ficha pasa de hipótesis a hecho.**
 arrastre* — porque no toda pantalla puede cachear lo mismo: la disponibilidad
 de paseadores DEBE re-pedirse en cada foco, y el hogar no.
 
-> **Dueño: la sesión de performance del founder — este es su punto de partida,
-> y sale MEDIDO en vez de supuesto.**
-> **☠️ DISPARO: la lectura del contador de la sonda en el aparato.**
+**🔴 ENMIENDA DE CIERRE (founder, 9-ago): LA SONDA SE RETIRÓ SIN MEDIRSE.** El
+contador quedó publicado en el OTA pero **el founder nunca llegó a leerlo**, y
+al cerrar la jornada se retiró junto con el resto del instrumental. ⇒ **esta
+ficha NO avanzó a hecho: sigue siendo hipótesis fuerte con evidencia parcial**,
+exactamente donde estaba.
+
+**Y eso decide cómo arranca su sesión: D-728 es el PRIMER BLOQUE de la sesión de
+performance, y arranca RE-INSTRUMENTANDO** — no leyendo un número viejo. *Un
+contador que nadie leyó no es un dato pendiente de lectura: es un dato que no
+existe.* Se reinstala **con el instrumento completo** (no solo el contador de
+focos: también el eslabón que tarda), sobre **dos** pantallas como mínimo, y se
+lee en el aparato antes de tocar una línea de cura.
+
+*La razón por la que esto se declara en vez de guardarse el número «casi
+medido» es L-141 en su forma más simple: el objeto manda, y acá el objeto no
+llegó a existir.*
+
+> **Dueño: la sesión de performance del founder — este es su PRIMER BLOQUE, y
+> arranca re-instrumentando, no leyendo.**
+> **☠️ DISPARO: la apertura de esa sesión.**
 > **☠️ MUERTE:** o se prueba que el ciclo es solo del paseo (y la ficha se
 > cierra con su medición), o se decide pantalla por pantalla qué se re-pide al
 > recuperar el foco y qué no. Origen: S92-BIS, traza del founder en dispositivo.
@@ -12302,10 +12319,20 @@ razón, salvo que exista un plazo de retención escrito, **que hoy NO existe**
 abandono** (obligaciones fiscales o de verificación pueden exigir conservarlos).
 Sin esa letra, borrar es una decisión sin criterio y conservar también.
 
-> **Dueño: el founder** (la decisión) **+ la sesión de legales (D-405)** (la
-> letra del plazo). **☠️ DISPARO: la sesión de legales, o antes si el founder
-> decide.** **☠️ MUERTE:** cada uno de los 56 con destino ejecutado y su razón
-> escrita. Origen: S92-BIS.
+**🔒 DECISIÓN DEL FOUNDER (9-ago, cierre): LOS 56 NO SE TOCAN, Y ESTO ES
+BLOQUEANTE, NO PENDIENTE.** Verbatim en su razón: *queda claro que a nadie le
+falta un documento y que la decisión depende de un plazo de retención que no
+tengo escrito.*
+
+*La diferencia entre bloqueante y pendiente no es de tono: un pendiente se
+puede ejecutar cuando alguien tenga un rato, y esto **no se puede ejecutar en
+absoluto** hasta que exista la letra del plazo. Cualquier sesión que abra esta
+ficha y decida borrar o conservar sin esa letra está inventando el criterio.*
+
+> **🔴 BLOQUEADA por la letra de retención — dueño: la sesión de legales
+> (D-405), junto con D-733.** **☠️ DISPARO: la escritura del plazo de
+> retención; hasta entonces NO se ejecuta nada.** **☠️ MUERTE:** cada uno de
+> los 56 con destino ejecutado y su razón escrita. Origen: S92-BIS.
 
 ---
 
@@ -12334,8 +12361,18 @@ encola con `origen='barrido_huerfanos'` y `barrer-storage` lo ejecuta sin
 cambios. **Lo que falta es el productor y su ventana de gracia — y la letra del
 plazo, que es la misma que traba D-732.**
 
-> **Dueño: la sesión que toque el alta de prestador, o la de legales (D-405).**
-> **☠️ DISPARO: el primer alta de prestador real por el camino nuevo — o la
-> letra de retención, lo que llegue antes.** **☠️ MUERTE:** un objeto subido y
-> abandonado desaparece solo tras la ventana, verificado por par rojo/verde.
-> Origen: S92-BIS, midiendo el porqué de D-710 → D-731.
+**🔒 ESTADO AL CIERRE (founder, 9-ago):** *«queda como deuda: ahora que el
+barredor existe, la cura futura tiene dónde apoyarse»*. **Va a legales junto con
+D-732**, y por la misma razón: el barredor no puede correr sin saber **cuánto
+tiempo se guarda una subida abandonada**. La ventana de gracia no es un número
+técnico que se elige — *es el plazo de retención con otro nombre.*
+
+**Lo que sí queda resuelto y no hay que volver a decidir:** la infraestructura.
+La cola de D-731 es genérica, el barredor existe y su tick corre. **Lo que
+falta es el productor y su ventana**, y la ventana la fija la letra.
+
+> **🔴 BLOQUEADA por la misma letra que D-732 — dueño: la sesión de legales
+> (D-405), con la sesión que toque el alta de prestador como ejecutora.**
+> **☠️ DISPARO: la escritura del plazo de retención.** **☠️ MUERTE:** un objeto
+> subido y abandonado desaparece solo tras la ventana, verificado por par
+> rojo/verde. Origen: S92-BIS, midiendo el porqué de D-710 → D-731.
