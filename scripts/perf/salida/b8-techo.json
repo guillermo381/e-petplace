@@ -1,0 +1,23 @@
+{
+ "conexiones": {
+  "de_clientes": 6,
+  "en_uso": 14,
+  "maximo": 60
+ },
+ "trabajo": {
+  "llamadas": "3810822",
+  "seg_totales": "23565",
+  "ventana_seg": "9087827",
+  "ocupacion": 0.0025930291146607433
+ },
+ "appMedio": {
+  "llamadas": "188225",
+  "ms_medio": "8.91"
+ },
+ "estimacion": {
+  "PETICIONES_SESION": 60,
+  "SEGUNDOS_SESION": 180,
+  "msPorSesion": 534.6,
+  "concurrentes": 336.70033670033666
+ }
+}

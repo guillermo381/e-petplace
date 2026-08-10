@@ -11617,6 +11617,30 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-225 — UN CENSO QUE PREMIA CON UN CERO AL QUE ORDENÓ SU CÓDIGO NO ESTÁ MIDIENDO EL CÓDIGO: ESTÁ MIDIENDO EL ESTILO (S94-PERF).**
+
+  **El caso:** el censo de peticiones por foco se equivocó **dos veces antes de dar un número creíble, y las dos veces el número era verosímil**. ① Contaba `useCallback` como wrapper de la API: el regex `\{([\s\S]*?)\}` arranca en el PRIMER `import {` del archivo y el no-greedy se traga los imports de React hasta llegar al de `@epetplace/api`. Daba **11 peticiones donde había 9**. ② Y el grave: solo miraba los wrappers escritos DENTRO del `useFocusEffect`, cuando **el patrón dominante de la casa es `useFocusEffect(useCallback(() => { cargar() }))`**. `hogar/paseos` marcaba **0 peticiones por foco teniendo un `cargar()` entero adentro**, y el HOY del prestador marcaba 1 en vez de 28.
+
+  **Lo que enseña:** el segundo error es el que vale, porque **su sesgo no era aleatorio**: castigaba a las pantallas que inlinean todo y premiaba a las que extrajeron su función de carga. *Un instrumento con sesgo sistemático no produce ruido: produce un ranking invertido* — y un ranking invertido de «qué curar primero» es peor que no tener ninguno, porque se actúa sobre él.
+
+  **La forma exigible:** **un instrumento nuevo se prueba contra un caso que uno ya conoce antes de creerle el primer número.** Acá el caso conocido estaba a mano y gratis: la propia ficha de D-728 decía «el HOY dispara mucho», y el censo dijo 1. *Esa contradicción era la prueba, y estuvo disponible desde la primera corrida.* Su hermana es **L-192**: los dos errores fallaban en silencio, con salida creíble y sin romper nada.
+
+- **L-224 — UN ASSET ENTRA AL BUNDLE POR LA FORMA DEL IMPORT, NO POR EL MAPA QUE LO DECLARA (S94-PERF).**
+
+  **El caso:** `fonts.ts` declaraba **seis** fuentes y el `expo export` empaquetaba **treinta y cinco**. La causa no estaba en el mapa: el índice de cada familia de `@expo-google-fonts` hace un `require` de **todos** sus pesos, así que `import { DMSans_300Light } from '@expo-google-fonts/dm-sans'` arrastra el Thin, el Black y todas las itálicas al grafo de assets. Importar por subruta (`.../300Light`) lo corta: **2,37 MB menos en cada app**, con cero cambio visible.
+
+  **Lo que lo vuelve una lección y no una anécdota:** en ese mismo archivo vivía un comentario de S82-B que decía, textual, *«un asset que nadie usa igual pesa en el bundle»* — y por eso habían **sacado una itálica del mapa**. **El comentario era exactamente correcto, la intención era exactamente la buena, y no alcanzó**, porque el peso no entraba por el mapa que ese comentario cuidaba.
+
+  **La forma exigible:** *lo que un módulo declara y lo que un bundler empaqueta son dos afirmaciones distintas, y solo la segunda pesa.* Se verifica **midiendo el artefacto** (`expo export` y contar el `metadata.json`), jamás leyendo el código que lo declara. Es **L-141** —el objeto manda, la prosa decae— aplicada al grafo de dependencias.
+
+- **L-223 — EL COSTO DE UNA APP NO ESTÁ DONDE UNO LO BUSCA: BUSCAR LA CONSULTA LENTA ES EL REFLEJO CORRECTO Y PUEDE CONSUMIR LA SESIÓN ENTERA SIN MOVER UN MILISEGUNDO (S94-PERF).**
+
+  **El caso:** una sesión abierta para encontrar por qué la app se siente lenta. `pg_stat_statements` con 105 días de ventana: **ninguna consulta de la app aparece antes del 0,2 %** del tiempo acumulado. Cero tablas recorridas enteras. 100 % de aciertos de caché. Ocupación media: **0,3 % de un núcleo**. Y el reparto que lo cierra: **traer 105 filas costó MENOS que traer una** (149,9 contra 155,8 ms). *El costo no está en los datos, ni en las filas, ni en el trabajo del servidor: está en la petición* — un peaje fijo de ~150 ms que se paga entero cada vez, y que las pantallas multiplican encadenando hasta doce viajes.
+
+  **Lo que enseña:** en una app móvil contra una base chica, **la métrica que predice la lentitud percibida no es el tiempo de consulta: es la cantidad de idas y vueltas ENCADENADAS**. Y son números distintos: el HOY del prestador dispara 28 peticiones pero paga solo 12 esperas, porque tiene tres `Promise.all` bien puestos. *El paralelismo es gratis; el encadenamiento se paga entero.*
+
+  **La forma exigible:** antes de buscar consultas lentas, **medir si el costo es por fila o por petición** — una comparación de tres líneas (1 fila contra 100) que decide el resto de la sesión. Si es por petición, la pregunta deja de ser *«¿qué consulta optimizo?»* y pasa a ser *«¿qué viaje elimino?»*, y las curas cambian de naturaleza: no son índices, son **olas colapsadas** y **datos que viajan juntos**. Origen: S94-PERF, B0-B1.
+
 - **L-222 — UNA API QUE CONTESTA 200 A LO IMPOSIBLE CONVIERTE EL «ÉXITO» EN UN DATO SIN VALOR (S92-BIS).**
 
   **El caso:** la cura de D-731 pasó su camino feliz **10/10** y falló su ensayo de fallo **4/7**. El barredor marcaba `borrado` una intención que **jamás pudo ejecutar** — *la cura tenía adentro exactamente el defecto que vino a curar: reportar éxito sobre algo que no hizo.* La causa, medida contra la API real: `DELETE` y `list` sobre un bucket inexistente devuelven **`200 []` los dos**. Un bucket que no existe y una carpeta vacía son **indistinguibles desde afuera**.
@@ -11828,8 +11852,40 @@ lee en el aparato antes de tocar una línea de cura.
 medido» es L-141 en su forma más simple: el objeto manda, y acá el objeto no
 llegó a existir.*
 
-> **Dueño: la sesión de performance del founder — este es su PRIMER BLOQUE, y
-> arranca re-instrumentando, no leyendo.**
+**✅ ENMIENDA S94-PERF (9-ago) — RE-INSTRUMENTADA, Y EL COSTO PASA DE
+DESCONOCIDO A MEDIDO.** Fue el primer bloque de la sesión, como estaba ordenado.
+El founder estaba ausente, así que **se cambió el instrumento, no la pregunta**:
+lo que exige el aparato quedó rojo y lo que no, se midió.
+
+**Lo que NO se pudo hacer, y se dice antes de los números:** probar que el ciclo
+DISPARA. Eso es comportamiento del aparato — `Hoja` monta un `<Modal>` nativo
+(`Hoja.tsx:265`, verificado) y en RN-web no hay ventana aparte, así que una repro
+en el navegador **daría verde midiendo otra cosa**. No se hizo.
+
+**Lo que sí se midió — la EXPOSICIÓN y el COSTO.** Por cada pantalla se extrajo
+el cuerpo de su `useFocusEffect`, se siguieron las llamadas locales, y se contó
+qué wrappers dispara y en cuántas **olas encadenadas** (`scripts/perf/b1-censo-focos.mjs`):
+
+- **24 pantallas** combinan `useFocusEffect` + `Hoja` — **la ficha decía 8 porque
+  solo había mirado el cliente**; el prestador tiene el doble.
+- **43 más** con `useFocusEffect` sin Hoja propia: pagan el ciclo cuando un hijo
+  abre una.
+- **La peor es el HOY del prestador: 28 peticiones en 12 olas encadenadas ≈
+  1.838 ms de pura red, cada vez que recupera el foco.** Después: `historico`
+  (1.072 ms), `hogar/paseos` (919 ms), `(tabs)/_layout` (919 ms).
+
+**⇒ El estado de la ficha cambia a la mitad: el disparo sigue siendo hipótesis
+fuerte con evidencia parcial; el COSTO ya no es desconocido.** *Y es lo que
+faltaba para decidir: una pantalla de 1 petición puede recargarse tres veces sin
+que nadie lo note; una de 28 no.*
+
+**Lo que esto ordena para la cura, que ya no es «extenderla a las otras siete»:**
+las pantallas se atacan **por costo, no por lista** — y el HOY primero, donde
+además vive **D-738** (su prólogo serial de 622 ms), que se paga entero en cada
+foco.
+
+> **Dueño: la próxima pasada de performance, CON APARATO — le queda una sola
+> cosa: ver el disparo. Es un contador y una hoja que se abre.**
 > **☠️ DISPARO: la apertura de esa sesión.**
 > **☠️ MUERTE:** o se prueba que el ciclo es solo del paseo (y la ficha se
 > cierra con su medición), o se decide pantalla por pantalla qué se re-pide al
@@ -12376,3 +12432,157 @@ falta es el productor y su ventana**, y la ventana la fija la letra.
 > **☠️ DISPARO: la escritura del plazo de retención.** **☠️ MUERTE:** un objeto
 > subido y abandonado desaparece solo tras la ventana, verificado por par
 > rojo/verde. Origen: S92-BIS, midiendo el porqué de D-710 → D-731.
+
+---
+
+## Deudas S94-PERF (el loop de velocidad, 9 Ago 2026 — números verificados libres por grep)
+
+#### D-734 — 🟠 LA GALERÍA DEL PRESTADOR SUBE SIN REDIMENSIONAR — y es la pantalla más pública del producto
+
+**Medido en el bucket, no en el código:** `prestador-galeria` tiene 8 objetos y
+**17,9 MB**, con **mediana 474,4 kB** y **una foto de 5,9 MB**. Es el carrusel de
+la vitrina — o sea lo que ve un cliente cuando mira un negocio.
+
+**La causa, leída del objeto:** `apps/prestador/src/app/(tabs)/cuenta/perfil.tsx`
+llama `capturarDeGaleria({ calidad: 0.9 })` **sin `redimensionarA`** para las
+fotos, y `capturarDeGaleria({ calidad: 1 })` —sin resize ninguno— para el logo.
+
+**Y lo que lo vuelve un descuido y no una decisión: TODOS los demás caminos de
+subida de la casa sí redimensionan.** El avatar de mascota a 800, los documentos
+del prestador a 1600 con calidad 0.8, el carnet a su lado máximo. La comparación
+que da el número esperado: **los documentos, con 1600/0.8, tienen mediana de
+203,9 kB contra los 474,4 kB de la galería.**
+
+**POR QUÉ NO SE CURÓ HOY, y es la regla del founder aplicada a sí misma:** la
+cura es una línea (`redimensionarA: 1600` en las dos llamadas). Pero **R1 exige
+antes y después con el mismo instrumento**, y el «después» de una subida
+**necesita un aparato**: no se puede subir una foto desde esta máquina. Aplicarla
+igual sería exactamente el verde sin medir que **R5** prohíbe. *Una cura de una
+línea que no se puede verificar sigue siendo una cura sin verificar.*
+
+**Lo que NO cura, declarado:** los 17,9 MB que ya están subidos. Re-procesarlos
+es tocar datos reales de negocios vivos — otra conversación, con otra firma.
+
+> **Dueño: la sesión que tenga el aparato del founder disponible.**
+> **☠️ DISPARO: la próxima pasada de performance con teléfono.**
+> **☠️ MUERTE:** una foto subida por el camino real pesa ≤ 250 kB y el carrusel
+> se ve igual. Origen: S94-PERF, B2.
+
+#### D-735 — 🟢 0,93 MB DE `MaterialSymbols` EN LAS DOS APPS, SIN UN SOLO CONSUMIDOR
+
+Tras la cura de fuentes de S94, de los assets que quedan **0,93 MB son
+`MaterialSymbols_400Regular`**. **No lo pide nadie de esta casa**: el registry de
+glifos es SVG (`Icono.tsx`, 44 paths) y el censo dio **cero `SymbolView` y cero
+`expo-symbols`** en todo el monorepo. Entra por `expo-symbols`, dependencia
+transitiva.
+
+**Por qué no se saca hoy:** quitar una dependencia transitiva es cirugía de
+`package.json` con **build nativa nueva**, no un cambio de import. Y el tren de
+una build se toma cuando otra cosa lo obliga (precedente D-456), jamás por un
+megabyte.
+
+> **Dueño: la próxima build nativa.** **☠️ DISPARO:** cualquier sesión que ya
+> tenga que hornear una APK. **☠️ MUERTE:** el export no lista MaterialSymbols y
+> las dos apps siguen dibujando sus glifos. Origen: S94-PERF, B3.
+
+#### D-736 — ⚪ 284 ÍNDICES SIN UN SOLO ESCANEO (3,4 MB) — censados, NO borrados
+
+`pg_stat_user_indexes` da **284 índices con `idx_scan = 0`** sobre 105 días de
+ventana, **3,4 MB** en total. De esos, **153 no son únicos** — los únicos se
+conservan sin discusión: sostienen una regla, no una lectura.
+
+**Un índice sin escaneos cuesta escritura y espacio.** Y aun así **no se borra
+ninguno**, por **freno 1 declarado**: un índice que la ventana no vio usar puede
+servir a un camino estacional —un cierre mensual, un informe, una pantalla de
+admin que se abre una vez al trimestre— y borrarlo lo descubriría de la peor
+manera.
+
+**Y el contexto que lo baja a ⚪:** con **87,3 MB de base entera** y **100 % de
+aciertos de caché**, 3,4 MB de índices muertos no le cuestan un milisegundo a
+nadie hoy. *Esto es higiene con disparo de escala, no una cura de velocidad.*
+
+> **Dueño: la sesión que toque el esquema a escala.** **☠️ DISPARO:** que la base
+> pase de ~1 GB, o que una escritura empiece a aparecer en el podio de
+> `pg_stat_statements`. **☠️ MUERTE:** cada índice borrado con su censo de
+> consumidores hecho. Origen: S94-PERF, B1.
+
+#### D-737 — 🟠 EL BUNDLE PESA 7,2 MB DE BYTECODE Y 2.332 MÓDULOS — el arranque en frío
+
+Medido con `expo export --platform android`: **prestador 7,22 MB**, **cliente
+6,72 MB** de Hermes bytecode, **2.332 módulos**. Eso se carga y se ejecuta en
+**cada arranque**, y no lo mejora ningún índice ni ninguna cura de red.
+
+**Lo que NO se pudo medir, y por eso esta ficha no tiene el número que
+importa:** cuánto de la espera del arranque es ese bundle. **Exige el aparato
+real**, declarando modelo, red y si es build de desarrollo o de producción —
+*una build de desarrollo es varias veces más lenta y confundirla invalida la
+medición entera*.
+
+**La cura no es barata:** dividir el bundle (carga diferida por ruta) es trabajo
+estructural sobre expo-router. **No entra en una sesión de curas baratas** y se
+dice, en vez de dejarla flotando como «pendiente de optimizar».
+
+> **Dueño: la próxima pasada de performance, con aparato.** **☠️ DISPARO:** que
+> el tiempo hasta la primera pantalla útil, medido en el teléfono, resulte
+> dominado por el arranque de JS y no por la red. **☠️ MUERTE:** el arranque
+> medido baja, con su antes y su después en el mismo aparato. Origen: S94-PERF,
+> B3.
+
+#### D-738 — 🟠 EL PRÓLOGO SERIAL DEL HOY: CUATRO VIAJES ENCADENADOS PARA SABER QUIÉN SOY
+
+**621,8 ms medidos** con token real, por la misma puerta que la app. El HOY del
+prestador —la pantalla que más se abre del producto— resuelve su contexto así:
+
+    obtener_mi_prestador  →  (con el id)  obtener mi fila de empleado
+                          →  (con la fila) titular + chips, en paralelo
+                          →  (si no es titular) empleado_tiene_rol
+
+Cada paso **necesita el id del anterior**, así que no se pueden paralelizar desde
+el cliente: la cura es del servidor. Después de eso, el HOY hace muy bien lo
+grande —**tres `Promise.all`, uno con 17 wrappers**, que cuestan lo mismo que una
+sola petición—. *El paralelismo es gratis; el encadenamiento se paga entero.*
+
+**Medido, para dimensionar la cura:** una ola de 5 peticiones en paralelo cuesta
+**191,2 ms**; cuatro encadenadas cuestan **621,8 ms**.
+
+**La cura propuesta:** una RPC de contexto (`obtener_contexto_prestador`) que
+devuelva prestador + fila de empleado + rol resuelto en **un viaje**. Ahorro
+esperado ~430 ms por apertura del HOY, y se paga otra vez cada vez que la
+pantalla recupera el foco (ver D-728).
+
+**Por qué no se hizo hoy:** toca la pantalla más importante del prestador y
+**exige gate en el aparato**, que hoy no existe. Construir la RPC y no cablearla
+sería *motor sin puerta*, que esta casa nombra como defecto.
+
+> **Dueño: la próxima pasada de performance, con aparato.**
+> **☠️ DISPARO:** el gate del OTA de S94 en dispositivo. **☠️ MUERTE:** el HOY
+> abre con un prólogo de UN viaje, con su antes y después medidos. Origen:
+> S94-PERF, censo de focos + camino real.
+
+#### D-739 — ⚪ REALTIME SE LLEVA EL 60 % DEL TIEMPO DE LA BASE, Y TIENE DUEÑO
+
+`pg_stat_statements`, ventana de 105 días: el poller de WAL de Realtime suma
+**60,6 %** del tiempo de consulta acumulado (1.808.505 llamadas). El siguiente
+~25 % es introspección del panel de administración. **Las consultas de la app
+recién aparecen en el 0,2 %.**
+
+**Y acá está lo que evita que esto se lea como desperdicio.** El censo del
+monorepo dio **cero `.channel(`**: ninguna de las dos apps móviles usa Realtime.
+Pero **tres webs del legado sí**, y comparten este proyecto:
+
+- `e-petplace-prestadores` — campana y notificaciones (3 archivos)
+- `e-petplace-v2` — `MisPedidos`
+- `e-petplace-admin` — layout y mensajes
+
+Las **14 tablas publicadas en `supabase_realtime`** tienen consumidores vivos.
+**No se toca nada.** *Un 60 % que sirve a tres apps vivas no es desperdicio: es
+costo.*
+
+**Y su naturaleza, que decide su color:** es trabajo **de fondo**. Consume
+**margen de capacidad (B4)**, no **latencia percibida (B3)**. Con la ocupación
+media medida en **0,3 % de un núcleo**, hoy no aprieta a nadie.
+
+> **Dueño: la sesión que jubile el portal legado.** **☠️ DISPARO:** que el legado
+> se apague, o que la ocupación pase del 30 % de un núcleo. **☠️ MUERTE:** la
+> publicación queda con las tablas que alguien escucha de verdad, censadas
+> consumidor por consumidor. Origen: S94-PERF, B0.
