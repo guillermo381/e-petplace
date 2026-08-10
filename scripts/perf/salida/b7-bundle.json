@@ -1,0 +1,34 @@
+[
+ {
+  "rot": "prestador ANTES",
+  "assets": 64,
+  "ttf": 35,
+  "mbAssets": 4.12,
+  "mbBundle": 7.23,
+  "mbTotal": 11.36
+ },
+ {
+  "rot": "prestador DESPUES",
+  "assets": 36,
+  "ttf": 7,
+  "mbAssets": 1.77,
+  "mbBundle": 7.22,
+  "mbTotal": 8.99
+ },
+ {
+  "rot": "cliente ANTES",
+  "assets": 63,
+  "ttf": 35,
+  "mbAssets": 3.87,
+  "mbBundle": 6.74,
+  "mbTotal": 10.6
+ },
+ {
+  "rot": "cliente DESPUES",
+  "assets": 35,
+  "ttf": 7,
+  "mbAssets": 1.51,
+  "mbBundle": 6.72,
+  "mbTotal": 8.23
+ }
+]
