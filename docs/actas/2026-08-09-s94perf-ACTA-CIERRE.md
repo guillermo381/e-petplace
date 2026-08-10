@@ -524,3 +524,68 @@ final: un instrumento nuevo imprime lo que contó, no solo el total.**
 
 *(`b1-censo-focos` sí buscaba con paréntesis desde el principio: sus números no
 se movieron al corregir esto, lo que de paso probó que el censo estaba sano.)*
+
+---
+
+## ⑯ D-730 EJECUTADA — la ficha reserva de verdad en los cuatro oficios
+
+**Decisión del founder, en sesión: «Dale A y resolvemos».** Le di mi voto en
+contra —sesión propia, con aparato— y lo reafirmó. Se ejecutó entera.
+
+### Lo que se hizo
+
+El flujo de reserva salió de las cuatro listas y vive **una vez** en
+`lib/reserva/<oficio>`; la lista y la ficha son sus dos consumidores. **No hay
+clon**, que era la razón por la que `senal-reserva.ts` existía — y `senal-reserva`
+**murió entero**, con los cuatro efectos que lo consumían.
+
+**La condición de diseño se sostuvo:** la oferta entra **como argumento**. Los
+hooks no leen la lista, no la conocen, y no pueden tener una copia vieja de
+ella. *La puerta por la que el P0 entró tres veces está cerrada por
+construcción, no por cuidado.*
+
+**El bloqueante que la ficha exigía primero, resuelto:** ahora la lista le
+reenvía el contexto de la ventana — valores que **ya viajaban por su propia
+URL**. Y la oferta se **resuelve por el mismo lector** que usa la lista: una
+fuente de verdad, URL reconstruible, y la verdad de AHORA.
+
+**Efecto medido: de 3-5 viajes descartados por reserva a CERO.**
+
+### El hallazgo que la mudanza destapó
+
+**En la lista del paseo, `alElegir` tenía UN solo llamador**: el efecto que
+consumía el pedido que volvía de la ficha. Desde la anatomía Airbnb de S91-C la
+fila abre el perfil, no reserva.
+
+> *El flujo entero —seis Hojas, trece estados, 897 líneas— vivía en la lista
+> para servirle a la ficha, que era la que de verdad reservaba y no podía.*
+
+Con la ficha reservando, la lista deja de necesitarlo. **Pasa de 897 a 222
+líneas.** Dejarle el flujo habría dejado seis Hojas que ya no puede abrir nadie.
+
+### 🔴 Lo que esta tanda casi se lleva puesta
+
+El corpus de `verify:diseno` recorre **solo `.tsx`**. Al mudar el guard de tres
+estados del paseo a un `.ts`, **R34 —la regla que existe para vigilar
+exactamente ese guard— dejó de verlo**, y su contador bajó de 5 a 4 **dando
+VERDE**.
+
+> *Un lint que se apaga por un cambio de extensión no avisa que se apagó: dice
+> un número más chico, y un número más chico en un lint se lee como progreso.*
+
+Curado con un corpus de LÓGICA (`archivosCodigo`) solo para las reglas que
+vigilan lógica y no píxeles — ensancharlo entero encendería de una vez todas las
+demás reglas sobre archivos que nunca miraron, y eso es decisión de mesa. **R34
+vuelve a 5.** ⇒ **L-226**.
+
+### 🟡 Lo que falta, y es la mitad que no puedo hacer yo
+
+**NO SE GATEÓ EN APARATO.** Los cuatro caminos de reserva cambiaron de forma y
+**el modo de falla de esto es silencioso**: no se ve como un glitch, se ve como
+«no puedo reservar». Typecheck y `verify:diseno` están verdes en los cuatro,
+pero **ninguno de los dos ve ciclo de vida**.
+
+El gate son **cuatro reservas, una por oficio**, y en el paseo hay que llegar a
+las Hojas: elegir mascota con dos elegibles, la pregunta social sin responder, y
+el saldo de paquete si hay. *Hasta que eso corra, esto está construido y no
+verificado — y se dice así.*

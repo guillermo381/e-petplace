@@ -11617,6 +11617,16 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-226 — UN LINT CUYO CORPUS SE DEFINE POR EXTENSIÓN NO PROTEGE EL CÓDIGO: PROTEGE UN DIRECTORIO (S94-PERF).**
+
+  **El caso:** al extraer el flujo de reserva del paseo a `lib/reserva/paseo.ts` (D-730), el guard de tres estados que **R34 existe para vigilar** se mudó con él. `verify:diseno` siguió dando **VERDE** y su contador bajó de **5 a 4**. No porque el guard hubiera desaparecido: **porque el corpus recorría solo `.tsx`** y la lógica se había ido a un archivo sin JSX. *La regla nacida de un P0 dejó de mirar el código del P0, y lo hizo en silencio.*
+
+  **Lo que enseña, y es lo peligroso:** un lint que se apaga por un cambio de extensión **no avisa que se apagó** — su salida dice **un número más chico**, y un número más chico en un lint **se lee como progreso**. Es el modo de falla de L-192 aplicado al instrumento en vez de al código: falla en silencio, con salida creíble, sin romper nada. Y aparece **justo cuando más se lo necesita**: refactorizar es exactamente cuando el código cruza de archivo.
+
+  **La forma exigible, en dos:** ① **el corpus de una regla se define por lo que la regla vigila, no por la extensión del archivo** — las que miran lógica leen `.ts` y `.tsx`; las que miran píxeles pueden quedarse en `.tsx`, y eso se declara; ② **toda extracción verifica que sus guards sigan bajo su lint**, comparando el contador antes y después. *Acá el contador estaba impreso en la salida y bastó leerlo dos veces — pero solo porque se sabía qué número esperar.*
+
+  **Y lo que NO se hizo, con su razón:** no se ensanchó el corpus entero. Hacerlo encendería de una vez todas las demás reglas sobre archivos que nunca miraron, y **eso es decisión de mesa, no de una tanda** (mismo precedente que el filtro de R17 en `packages/ui/CLAUDE.md`). Origen: S94-PERF, D-730.
+
 - **L-225 — UN CENSO QUE PREMIA CON UN CERO AL QUE ORDENÓ SU CÓDIGO NO ESTÁ MIDIENDO EL CÓDIGO: ESTÁ MIDIENDO EL ESTILO (S94-PERF).**
 
   **El caso:** el censo de peticiones por foco se equivocó **dos veces antes de dar un número creíble, y las dos veces el número era verosímil**. ① Contaba `useCallback` como wrapper de la API: el regex `\{([\s\S]*?)\}` arranca en el PRIMER `import {` del archivo y el no-greedy se traga los imports de React hasta llegar al de `@epetplace/api`. Daba **11 peticiones donde había 9**. ② Y el grave: solo miraba los wrappers escritos DENTRO del `useFocusEffect`, cuando **el patrón dominante de la casa es `useFocusEffect(useCallback(() => { cargar() }))`**. `hogar/paseos` marcaba **0 peticiones por foco teniendo un `cargar()` entero adentro**, y el HOY del prestador marcaba 1 en vez de 28.
@@ -12035,7 +12045,72 @@ pérdida y la ② hace que, si vuelve a perderse por otra razón, se vea.
 
 ---
 
-#### D-730 — 🟠 EL PARPADEO DEL PREVIEW: una pantalla que aparece y desaparece sin razón visible, en los CUATRO oficios
+#### D-730 — ✅ CURADA EN CÓDIGO (9-ago, S94-PERF) · 🟡 SIN GATE EN APARATO — EL PARPADEO DEL PREVIEW
+
+> ### ✅ EJECUTADA — LA OPCIÓN ①, ENTERA, EN LOS CUATRO OFICIOS
+>
+> **Decisión del founder (9-ago): «Dale A y resolvemos», dentro de esta sesión.**
+> El flujo de reserva salió de las listas y vive **una vez** en
+> `lib/reserva/<oficio>`; la lista y la ficha son sus dos consumidores. **La
+> ficha reserva de verdad.** No hay clon y no hay segunda verdad.
+>
+> **LA CONDICIÓN DE DISEÑO, declarada antes de escribir y conservada:** la oferta
+> entra **como argumento**. Los hooks **no leen la lista**, no la conocen, y no
+> pueden tener una copia vieja de ella — *la puerta por la que el P0 de S92-BIS
+> entró tres veces está cerrada por construcción, no por cuidado*. El único con
+> estado propio de flujo es veterinaria (su Hoja), y el paseo posee el hogar
+> pero **lo lee siempre por el espejo vivo**.
+>
+> **EL BLOQUEANTE QUE ESTA FICHA EXIGÍA PRIMERO, resuelto:** la ficha recibía
+> `prestadorId` + `ofertaId` y nada más. Ahora la lista le reenvía el contexto
+> de la ventana (`contextoReserva` en `PreviewPrestador`) — valores que **ya
+> viajaban por su propia URL**. Y la oferta se **resuelve por el mismo lector**
+> que usa la lista: una sola fuente de verdad, URL reconstruible, y la verdad de
+> AHORA (si el slot se ocupó mientras el usuario miraba fotos, el botón lo sabe
+> antes de que lo toque — Ley 23). Mientras resuelve espera; si ya no está,
+> queda deshabilitado. **Cero copy nuevo:** no se inventó un cartel sin gate.
+>
+> **☠️ MURIÓ `senal-reserva.ts` ENTERO.** Sin rebote no hay pedido que dejar ni
+> que volver a buscar. Con él murieron los cuatro efectos que lo consumían.
+>
+> **📉 EL EFECTO MEDIDO:** de **3-5 viajes de red por reserva** (todos
+> descartados) a **cero**. El mismo perfil ya no viaja tres veces.
+>
+> ### 🔍 EL HALLAZGO QUE LA MUDANZA DESTAPÓ, y que ninguna medición previa vio
+>
+> **En la lista del paseo, `alElegir` tenía UN solo llamador**: el efecto que
+> consumía el pedido que volvía de la ficha. Desde la anatomía Airbnb de S91-C
+> la fila **abre el perfil, no reserva**. *O sea que el flujo entero —seis Hojas,
+> trece estados, 897 líneas— vivía en la lista para servirle a la ficha, que era
+> la que de verdad reservaba y no podía.*
+>
+> Con la ficha reservando, la lista **deja de necesitarlo**: le queda el hogar, y
+> no para reservar sino para decir «la ventana para {nombre}» en su encabezado.
+> **La pantalla pasa de 897 a 222 líneas.** Dejarle el flujo habría sido más
+> rápido y habría dejado **seis Hojas que ya no puede abrir nadie** — la clase de
+> código que sigue pareciendo vivo hasta que alguien lo toca.
+>
+> ### 🔴 Y LO QUE ESTA TANDA CASI SE LLEVA PUESTA, cazado antes de subir
+>
+> El corpus de `verify:diseno` recorre **solo `.tsx`**. Al mudar el guard de tres
+> estados del paseo a un `.ts`, **R34 —la regla que existe para vigilar
+> exactamente ese guard— dejó de verlo**, y su contador bajó de 5 a 4 **dando
+> VERDE**. Curado con un corpus de LÓGICA (`archivosCodigo`) solo para las reglas
+> que vigilan lógica y no píxeles; R34 vuelve a 5. ⇒ **L-226**.
+>
+> ### 🟡 LO QUE FALTA, Y ES LA MITAD QUE NO PUEDO HACER YO
+>
+> **NO SE GATEÓ EN APARATO.** Los cuatro caminos de reserva cambiaron de forma,
+> el founder estaba ausente, y **el modo de falla de esto es silencioso**: no se
+> ve como un glitch, se ve como «no puedo reservar». Typecheck y `verify:diseno`
+> están verdes en los cuatro, pero **ninguno de los dos ve ciclo de vida**.
+>
+> **El gate son cuatro reservas, una por oficio**, y en el paseo hay que llegar a
+> las Hojas: elegir mascota con dos elegibles, la pregunta social sin responder,
+> y el saldo de paquete si hay. *Hasta que eso corra, esto está construido y no
+> verificado — y se dice así.*
+
+#### D-730 (registro original) — 🟠 EL PARPADEO DEL PREVIEW: una pantalla que aparece y desaparece sin razón visible, en los CUATRO oficios
 
 **Reportado por el founder tras probar los cuatro (9-ago).** Al tocar
 **Reservar** en la vitrina del prestador, la app **vuelve a la lista y sigue
