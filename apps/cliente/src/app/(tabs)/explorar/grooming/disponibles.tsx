@@ -36,11 +36,9 @@ import {
   Tarjeta,
   spacing,
   typography,
-  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
-  crearBloqueoAgenda,
   obtenerGroomersDisponibles,
   obtenerPerfilMascota,
   type GroomerDisponible,
@@ -50,14 +48,12 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
-import { tomarPedido } from '@/lib/senal-reserva';
 import { PreviewPrestador } from '@/components/preview-prestador';
-import { vozServicio } from '@/lib/voz-servicio';
+import { useReservaGrooming } from '@/lib/reserva/grooming';
 
 export default function GroomingDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ fecha: string; hora: string; tipoServicio: string; mascotaId: string; modalidad?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
@@ -70,7 +66,6 @@ export default function GroomingDisponibles() {
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [disponibles, setDisponibles] = useState<GroomerDisponible[] | 'cargando' | 'error'>('cargando');
   const [tallaHoja, setTallaHoja] = useState(false);
-  const [creandoHold, setCreandoHold] = useState(false);
   /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
    *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
    *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
@@ -100,19 +95,14 @@ export default function GroomingDisponibles() {
     });
   }, [fecha, hora, tipoServicio, mascotaId, modalidad]);
 
-  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
-  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
-  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
-  // un solo flujo de reserva en toda la app.
-  useFocusEffect(
-    useCallback(() => {
-      const pedida = tomarPedido();
-      if (pedida === null || !Array.isArray(disponibles)) return;
-      const oferta = disponibles.find((g) => g.prestador_servicio_id === pedida);
-      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
-      // reserva a ciegas: la lista habla sola en su próximo refresh.
-      if (oferta !== undefined) void crearHold(oferta);
-    }, [disponibles]),
+  /* ⚡ D-730 · EL FLUJO YA NO VIVE ACÁ — vive en `lib/reserva/grooming` y esta
+     pantalla es UNO de sus dos consumidores; el otro es la ficha del prestador,
+     que desde hoy reserva de verdad.
+     ☠️ Y con eso murió el efecto que consumía `tomarPedido()`: ya no hay pedido
+     que volver a buscar, porque ya no hay vuelta. */
+  const { crearHold, creandoHold } = useReservaGrooming(
+    { fecha, hora, mascotaId, tipoServicio, modalidad },
+    cargarGroomers,
   );
 
   useFocusEffect(
@@ -132,52 +122,6 @@ export default function GroomingDisponibles() {
         vigente = false;
       };
     }, [mascotaId, cargarGroomers]),
-  );
-
-  // El hold nace acá: invisible al prestador hasta que el pago confirme.
-  // El precio/duración del snapshot los resuelve el SERVER por talla —
-  // idénticos a los pintados (assert T5 de la migración los cruza).
-  const crearHold = useCallback(
-    async (g: GroomerDisponible) => {
-      if (creandoHold) return;
-      setCreandoHold(true);
-      const r = await crearBloqueoAgenda({
-        prestador_id: g.prestador_id,
-        prestador_servicio_id: g.prestador_servicio_id,
-        mascota_id: mascotaId,
-        fecha,
-        hora,
-        modalidad,
-      });
-      setCreandoHold(false);
-      if (!r.ok) {
-        mostrar({ texto: r.mensaje, variante: 'error' });
-        if (r.codigo === 'slot_ocupado' || r.codigo === 'slot_en_pasado') cargarGroomers();
-        return;
-      }
-      router.push({
-        pathname: '/explorar/grooming/checkout',
-        params: {
-          citaId: r.data.cita_id,
-          expiraEn: r.data.expira_en,
-          precio: String(r.data.precio),
-          prestadorNombre: g.prestador_nombre,
-          servicioNombre: vozServicio(t, tipoServicio, g.servicio_nombre) ?? g.servicio_nombre,
-          fecha: r.data.fecha,
-          hora: r.data.hora,
-          duracion: String(r.data.duracion_minutos),
-          direccion: g.direccion ?? '',
-          ciudad: g.ciudad ?? '',
-          // S61-A6: la modalidad y EL DESGLOSE server-side viajan al
-          // checkout — se declaran, jamás se calculan allá.
-          modalidad,
-          precioBase: String(g.precio_base),
-          extraPelaje: String(g.extra_pelaje),
-          recargoDomicilio: String(g.recargo_domicilio),
-        },
-      });
-    },
-    [creandoHold, fecha, hora, mascotaId, tipoServicio, modalidad, t, cargarGroomers, mostrar],
   );
 
   const mascota = typeof perfil === 'object' ? perfil.mascota : null;
@@ -230,6 +174,9 @@ export default function GroomingDisponibles() {
                       : t('grooming.enSuLocal')}
                     precio={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
                     perfil={perfiles[g.prestador_id]}
+                    /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha
+                       pueda reservar en vez de pedirle a esta lista que lo haga. */
+                    contextoReserva={{ oficio: 'grooming', fecha, hora, mascotaId, tipoServicio, modalidad }}
                 />
               </View>
             ))}

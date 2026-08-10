@@ -62,16 +62,30 @@ import { vozDeOficios } from '@/lib/voz-oficio';
 import { pedirReserva } from '@/lib/senal-reserva';
 import { urlGaleria } from '@/lib/url-galeria';
 import { FlechaVolver } from '@/components/flecha-volver';
+import { BarraAdiestramiento } from '@/components/reserva/barra-adiestramiento';
+import { BarraGrooming } from '@/components/reserva/barra-grooming';
+import { BarraVeterinaria } from '@/components/reserva/barra-veterinaria';
 
 export default function PerfilPublicoPrestador() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const { prestadorId, ofertaId } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     prestadorId: string;
     ofertaId?: string;
+    /** ⚡ D-730 · el contexto de la ventana, reenviado por la lista. */
+    oficio?: string;
+    fecha?: string;
+    hora?: string;
+    mascotaId?: string;
+    mascotaNombre?: string;
+    comprable?: string;
+    tipoServicio?: string;
+    modalidad?: string;
   }>();
+  const { prestadorId, ofertaId } = params;
+  const texto = (v: string | string[] | undefined): string => (typeof v === 'string' ? v : '');
   /** S91-C · LA BARRA FIJA (firma founder, anatomía Airbnb). Solo se monta
    *  si esta pantalla se abrió DESDE una oferta: entrando por Explorar no
    *  hay nada que reservar y una barra que promete sin poder cumplir es la
@@ -158,10 +172,22 @@ export default function PerfilPublicoPrestador() {
       )}
 
       {/* LA BARRA FIJA — abajo de la PANTALLA, no al final del scroll
-          (letra del founder). El detalle NO reserva: PIDE y vuelve, y la
-          lista —única que sabe reservar— ejecuta su camino de siempre
-          (ver `lib/senal-reserva`). Clonar el flujo acá habría duplicado
-          el selector de mascota, el guard social y el saldo. */}
+          (letra del founder).
+
+          ⚡ D-730 · ACÁ SE RESERVA. Hasta hoy este botón dejaba un pedido en
+          `senal-reserva` y volvía a la lista, que reservaba por él: se veía
+          como un parpadeo y costaba, medido, 3 a 5 viajes de red por reserva,
+          de los cuales ninguno sobrevivía a la navegación al checkout.
+
+          Lo que hizo posible cambiarlo NO fue clonar el flujo —eso era la
+          segunda verdad que `senal-reserva` rechazó con razón— sino EXTRAERLO:
+          vive en `lib/reserva/<oficio>` y esta barra es su segundo consumidor.
+          La lista es el primero, y las dos ejecutan el mismo código.
+
+          La barra es de UN oficio por vez: cada hijo llama a su propio hook,
+          así que el despacho es por componente y no por condicional adentro de
+          un hook — llamar hooks condicionalmente sería ilegal y, peor, sería
+          invisible hasta que rompa. */}
       {estado === 'listo' && puedeReservar && ofertaId !== undefined ? (
         <View
           style={{
@@ -177,15 +203,48 @@ export default function PerfilPublicoPrestador() {
             borderTopColor: theme.bg.border,
           }}
         >
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={t('perfilPrestador.reservar')}
-            onPress={() => {
-              pedirReserva(ofertaId);
-              router.back();
-            }}
-          />
+          {texto(params.oficio) === 'adiestramiento' ? (
+            <BarraAdiestramiento
+              ofertaId={ofertaId}
+              fecha={texto(params.fecha)}
+              hora={texto(params.hora)}
+              mascotaId={texto(params.mascotaId)}
+              mascotaNombre={texto(params.mascotaNombre)}
+              comprable={texto(params.comprable) === 'programa' ? 'programa' : 'sesion'}
+            />
+          ) : texto(params.oficio) === 'grooming' ? (
+            <BarraGrooming
+              ofertaId={ofertaId}
+              fecha={texto(params.fecha)}
+              hora={texto(params.hora)}
+              mascotaId={texto(params.mascotaId)}
+              tipoServicio={texto(params.tipoServicio)}
+              modalidad={texto(params.modalidad) === 'domicilio' ? 'domicilio' : 'local'}
+            />
+          ) : texto(params.oficio) === 'veterinaria' ? (
+            <BarraVeterinaria
+              prestadorId={prestadorId}
+              ofertaId={ofertaId}
+              fecha={texto(params.fecha)}
+              hora={texto(params.hora)}
+              mascotaId={texto(params.mascotaId)}
+              tipoServicio={texto(params.tipoServicio)}
+            />
+          ) : (
+            /* Los oficios que todavía no migraron conservan el camino viejo,
+               a propósito: migrarlos a medias sería dejar una superficie que
+               promete reservar y no puede. Se van uno por uno, y cada uno se
+               lleva su rama de este condicional cuando llega. */
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={t('perfilPrestador.reservar')}
+              onPress={() => {
+                pedirReserva(ofertaId);
+                router.back();
+              }}
+            />
+          )}
         </View>
       ) : null}
     </View>

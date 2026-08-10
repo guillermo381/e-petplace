@@ -31,25 +31,21 @@ import {
   Tarjeta,
   spacing,
   typography,
-  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
-  crearBloqueoAgenda,
   obtenerAdiestradoresDisponibles,
   type OfertaAdiestrador,
   obtenerPerfilesPublicos,
   type PerfilPublico,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
-import { tomarPedido } from '@/lib/senal-reserva';
 import { PreviewPrestador } from '@/components/preview-prestador';
-import { vozServicio } from '@/lib/voz-servicio';
+import { useReservaAdiestramiento } from '@/lib/reserva/adiestramiento';
 
 export default function AdiestramientoDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
     fecha: string;
@@ -65,7 +61,6 @@ export default function AdiestramientoDisponibles() {
   const mascotaNombre = typeof params.mascotaNombre === 'string' ? params.mascotaNombre : '';
 
   const [disponibles, setDisponibles] = useState<OfertaAdiestrador[] | 'cargando' | 'error'>('cargando');
-  const [creandoHold, setCreandoHold] = useState(false);
   /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
    *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
    *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
@@ -95,19 +90,15 @@ export default function AdiestramientoDisponibles() {
     });
   }, [fecha, hora, mascotaId, comprable]);
 
-  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
-  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
-  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
-  // un solo flujo de reserva en toda la app.
-  useFocusEffect(
-    useCallback(() => {
-      const pedida = tomarPedido();
-      if (pedida === null || !Array.isArray(disponibles)) return;
-      const oferta = disponibles.find((o) => o.prestador_servicio_id === pedida);
-      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
-      // reserva a ciegas: la lista habla sola en su próximo refresh.
-      if (oferta !== undefined) void reservarSesion(oferta);
-    }, [disponibles]),
+  /* ⚡ D-730 · EL FLUJO YA NO VIVE ACÁ — vive en `lib/reserva/adiestramiento`
+     y esta pantalla es UNO de sus dos consumidores; el otro es la ficha del
+     prestador, que desde hoy **reserva de verdad** en vez de pedirle a esta
+     lista que reserve por ella.
+     ☠️ CON ESTO MURIÓ `tomarPedido()`: ya no hay pedido que volver a buscar,
+     porque ya no hay vuelta. El efecto de foco que lo consumía se fue entero. */
+  const { reservarSesion, elegirPrograma, creandoHold } = useReservaAdiestramiento(
+    { fecha, hora, mascotaId, mascotaNombre },
+    cargar,
   );
 
   useFocusEffect(
@@ -130,71 +121,6 @@ export default function AdiestramientoDisponibles() {
         return null;
     }
   };
-
-  // SESIÓN: el hold del chasis compartido (invisible al prestador hasta
-  // que el pago confirme) → checkout compartido con la voz del oficio.
-  const reservarSesion = useCallback(
-    async (o: OfertaAdiestrador) => {
-      if (creandoHold) return;
-      setCreandoHold(true);
-      const r = await crearBloqueoAgenda({
-        prestador_id: o.prestador_id,
-        prestador_servicio_id: o.prestador_servicio_id,
-        mascota_id: mascotaId,
-        fecha,
-        hora,
-      });
-      setCreandoHold(false);
-      if (!r.ok) {
-        mostrar({ texto: r.mensaje, variante: 'error' });
-        if (r.codigo === 'slot_ocupado' || r.codigo === 'slot_en_pasado') cargar();
-        return;
-      }
-      router.push({
-        pathname: '/explorar/adiestramiento/checkout',
-        params: {
-          citaId: r.data.cita_id,
-          expiraEn: r.data.expira_en,
-          precio: String(r.data.precio),
-          prestadorNombre: o.prestador_nombre,
-          servicioNombre: vozServicio(t, o.tipo_servicio, o.nombre) ?? o.nombre,
-          fecha: r.data.fecha,
-          hora: r.data.hora,
-          duracion: String(r.data.duracion_minutos),
-          direccion: o.direccion ?? '',
-          ciudad: o.ciudad ?? '',
-        },
-      });
-    },
-    [creandoHold, fecha, hora, mascotaId, t, cargar, mostrar],
-  );
-
-  // PROGRAMA: sin hold — el resumen §12.2 primero, la compra atómica allá.
-  const elegirPrograma = useCallback(
-    (o: OfertaAdiestrador) => {
-      if (o.programa_id === null || o.n_sesiones === null || o.vigencia_dias === null) return;
-      router.push({
-        pathname: '/explorar/adiestramiento/confirmar-programa',
-        params: {
-          prestadorId: o.prestador_id,
-          servicioId: o.prestador_servicio_id,
-          programaId: o.programa_id,
-          mascotaId,
-          mascotaNombre,
-          fecha,
-          hora,
-          programaNombre: o.nombre,
-          nivel: o.nivel ?? '',
-          nSesiones: String(o.n_sesiones),
-          vigenciaDias: String(o.vigencia_dias),
-          precio: String(o.precio),
-          duracion: String(o.duracion_minutos),
-          prestadorNombre: o.prestador_nombre,
-        },
-      });
-    },
-    [fecha, hora, mascotaId, mascotaNombre],
-  );
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -244,6 +170,9 @@ export default function AdiestramientoDisponibles() {
                         : t('adiestramiento.lugarPorConfirmar')}
                     precio={`$${o.precio.toFixed(2)} · ${o.duracion_minutos} min`}
                     perfil={perfiles[o.prestador_id]}
+                    /* ⚡ D-730 · la ventana viaja con el tap: sin esto la ficha
+                       no puede reservar, porque no sabe CUÁNDO ni PARA QUIÉN. */
+                    contextoReserva={{ oficio: 'adiestramiento', fecha, hora, mascotaId, mascotaNombre, comprable }}
                   />
                 ) : (
                   // FIRMA: el programa dice QUÉ es (nombre + nivel + N)

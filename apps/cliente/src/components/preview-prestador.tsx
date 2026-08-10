@@ -64,6 +64,7 @@ export function PreviewPrestador({
   precio,
   contexto,
   perfil,
+  contextoReserva,
 }: {
   prestadorId: string;
   /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
@@ -86,6 +87,21 @@ export function PreviewPrestador({
   contexto?: string | null;
   /** Enriquecimiento de la vista pública. `undefined` = todavía no llegó. */
   perfil?: PerfilPublico;
+  /** ⚡ D-730 · EL CONTEXTO DE LA VENTANA, para que la ficha RESERVE.
+   *
+   *  La ficha recibía `prestadorId` + `ofertaId` **y nada más**, o sea que no
+   *  tenía fecha, hora ni mascota — y sin eso no podía crear un hold por
+   *  ningún camino. Ése era el bloqueante que D-730 declaró que había que
+   *  resolver antes que cualquier extracción. Se resuelve acá porque **estos
+   *  valores ya viajan por la URL de la lista**: no hay que fabricarlos, hay
+   *  que reenviarlos.
+   *
+   *  Es un mapa abierto a propósito: cada oficio manda LO SUYO (el paseo
+   *  manda duración, el grooming modalidad, el adiestramiento comprable) y
+   *  este preview no interpreta ninguno. *Un tipo cerrado acá obligaría a
+   *  esta pieza compartida a conocer los cuatro oficios, que es exactamente
+   *  la generalización que quita en vez de sumar.* */
+  contextoReserva?: Record<string, string>;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -93,7 +109,11 @@ export function PreviewPrestador({
   const abrirPerfil = () =>
     router.push({
       pathname: '/prestador/[prestadorId]',
-      params: { prestadorId, ...(ofertaId !== undefined ? { ofertaId } : {}) },
+      params: {
+        prestadorId,
+        ...(ofertaId !== undefined ? { ofertaId } : {}),
+        ...(contextoReserva ?? {}),
+      },
     });
 
   const resenas = perfil?.total_resenas ?? 0;
