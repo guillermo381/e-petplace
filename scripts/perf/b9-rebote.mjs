@@ -35,13 +35,32 @@ const PANTALLAS = [
   ['veterinaria', '(tabs)/explorar/veterinaria/disponibles.tsx'],
 ];
 
-function bloques(src, palabra) {
+/**
+ * El bloque de argumentos de una llamada `nombre(...)`, por conteo de paréntesis.
+ *
+ * ⚠️ DOS DEFECTOS PROPIOS, y el segundo nació al curar el primero.
+ * ① Buscar `useFocusEffect` **sin** el paréntesis hacía que la línea de
+ *    `import { ..., useFocusEffect, ... }` contara como una llamada, y el
+ *    contador se tragaba medio archivo.
+ * ② Buscar `'useEffect('` **con** el paréntesis pegado tampoco sirve: el
+ *    conteo arranca DESPUÉS de ese paréntesis, así que en `useEffect(() => {`
+ *    el primer par que encuentra son **los paréntesis vacíos del arrow** y
+ *    cierra ahí, devolviendo `()`. Con `useFocusEffect(useCallback(...))`
+ *    funcionaba de casualidad, porque el primer paréntesis que veía era el de
+ *    `useCallback` y ése sí envolvía el cuerpo entero. *Un instrumento que
+ *    acierta por la forma que tenía el primer caso no acierta: coincide.*
+ *
+ * La forma correcta es la que no depende de ninguna de las dos: se busca el
+ * NOMBRE, se exige que lo siguiente sea `(`, y se cuenta **desde ese** paréntesis.
+ */
+function bloques(src, nombre) {
   const out = [];
-  let i = 0;
-  while ((i = src.indexOf(palabra, i)) !== -1) {
+  const re = new RegExp(`\\b${nombre}\\s*\\(`, 'g');
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    const abre = re.lastIndex - 1; // el `(` que la propia expresión encontró
     let prof = 0;
-    let j = i + palabra.length;
-    const inicio = j;
+    let j = abre;
     for (; j < src.length; j++) {
       if (src[j] === '(') prof++;
       else if (src[j] === ')') {
@@ -49,8 +68,8 @@ function bloques(src, palabra) {
         if (prof === 0) break;
       }
     }
-    out.push(src.slice(inicio, j + 1));
-    i = j + 1;
+    out.push(src.slice(abre, j + 1));
+    re.lastIndex = j + 1;
   }
   return out;
 }
@@ -120,15 +139,11 @@ linea('════════════════════════�
 for (const [rotulo, ruta] of PANTALLAS) {
   const src = readFileSync(join(APP, ruta), 'utf8');
   const locales = funcionesLocales(src);
-  /* ⚠️ CON EL PARÉNTESIS, y no es un detalle: sin él, la **línea de `import`**
-     (`import { router, useFocusEffect, useLocalSearchParams }`) cuenta como un
-     efecto, y el contador de paréntesis arranca ahí y se traga medio archivo —
-     metiendo la cadena de reserva adentro del efecto de carga. El síntoma
-     visible era «3 efectos de foco» en pantallas que tienen DOS: *el instrumento
-     decía un número que el archivo desmentía, y ese desmentido estaba a la
-     vista desde la primera corrida.* `b1-censo-focos` ya buscaba con paréntesis
-     y por eso sus números no se movieron al corregir esto. */
-  const efectos = bloques(src, 'useFocusEffect(');
+  /* El nombre a secas: `bloques()` ya exige el `(` y cuenta desde ahí (ver su
+     cabecera, donde viven los dos defectos que costó llegar a esta forma). El
+     síntoma del primero era visible en la propia salida — «3 efectos de foco»
+     en pantallas que tienen DOS — y estuvo impreso desde la primera corrida. */
+  const efectos = bloques(src, 'useFocusEffect');
   const ws = wrappers(src);
 
   const detalle = efectos.map((e) => {
@@ -137,7 +152,22 @@ for (const [rotulo, ruta] of PANTALLAS) {
     return { esReserva: /tomarPedido\s*\(/.test(e), llamados };
   });
 
-  const carga = [...new Set(detalle.filter((d) => !d.esReserva).flatMap((d) => d.llamados))];
+  /* ⚠️ TERCERA PASADA — LO QUE ESTE INSTRUMENTO NO VEÍA Y COSTABA UN VIAJE POR
+     OFICIO. Miraba solo `useFocusEffect`, y las cuatro listas re-piden los
+     perfiles públicos desde un `useEffect(..., [disponibles])`. Como el foco
+     vuelve a pedir la disponibilidad, `disponibles` cambia de identidad y **ese
+     efecto dispara también** — o sea que el rebote re-pide TODOS los perfiles
+     visibles, incluido el que la ficha acaba de pedir por su cuenta.
+     *El censo miraba la puerta por la que entró el síntoma y no la de al lado.*
+     Se cuentan aparte porque su disparo es distinto: no es el foco, es la
+     dependencia — pero el costo cae en el mismo rebote. */
+  const porDependencia = bloques(src, 'useEffect')
+    .filter((e) => /\[\s*disponibles\s*\]/.test(e))
+    .flatMap((e) => ws.filter((w) => new RegExp(`\\b${w}\\s*\\(`).test(e)));
+
+  const carga = [
+    ...new Set([...detalle.filter((d) => !d.esReserva).flatMap((d) => d.llamados), ...porDependencia]),
+  ];
   const reserva = [...new Set(detalle.filter((d) => d.esReserva).flatMap((d) => d.llamados))];
   // Lo que la reserva pide y la carga YA tenía: trabajo estrictamente repetido.
   const repetido = reserva.filter((w) => carga.includes(w));

@@ -474,10 +474,16 @@ que estaba a un prop de distancia**.
 
 | oficio | viajes del rebote | ≈ red | qué re-pide |
 |---|---|---|---|
-| paseo | 2 | 306 ms | solo disponibilidad — **el hogar está guardado** (cura S92-BIS, solo acá) |
-| adiestramiento | 2 | 306 ms | disponibilidad |
-| grooming | 3 | 460 ms | perfil de mascota + disponibilidad |
-| **veterinaria** | **4** | **613 ms** | perfil + disponibilidad + vitrina |
+| paseo | 3 | 460 ms | disponibilidad **+ los perfiles** — el hogar NO (cura S92-BIS, solo acá) |
+| adiestramiento | 3 | 460 ms | disponibilidad **+ los perfiles** |
+| grooming | 4 | 613 ms | perfil de mascota + disponibilidad **+ los perfiles** |
+| **veterinaria** | **5** | **766 ms** | perfil + disponibilidad + vitrina **+ los perfiles** |
+
+**🔴 Corrección de la primera corrida (+1 viaje por oficio).** El instrumento
+miraba solo `useFocusEffect`, y las cuatro listas re-piden los perfiles desde un
+`useEffect(..., [disponibles])` que dispara cuando el foco recarga la
+disponibilidad. **El mismo perfil viaja TRES veces en un solo rebote**: lo trajo
+la lista, lo volvió a traer la ficha, y lo trae de nuevo la lista al volver.
 
 El «≈ red» es viajes × el peaje de 153,2 ms de B0. **Es una multiplicación y se
 dice**; se sostiene porque B1 probó que el costo es por petición, no por payload.

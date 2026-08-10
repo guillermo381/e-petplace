@@ -12215,10 +12215,20 @@ delante**.
 >
 > | oficio | viajes del rebote | ≈ red | qué re-pide al volver |
 > |---|---|---|---|
-> | paseo | 2 | 306 ms | solo la disponibilidad — **el hogar está guardado** por `hogarCargadoRef` (cura de S92-BIS, aplicada **solo acá**) |
-> | adiestramiento | 2 | 306 ms | la disponibilidad |
-> | grooming | 3 | 460 ms | perfil de la mascota **+** la disponibilidad |
-> | **veterinaria** | **4** | **613 ms** | perfil de la mascota **+** disponibilidad **+** vitrina — el más caro |
+> | paseo | 3 | 460 ms | disponibilidad **+ los perfiles** — el hogar NO, está guardado por `hogarCargadoRef` (cura de S92-BIS, aplicada **solo acá**) |
+> | adiestramiento | 3 | 460 ms | disponibilidad **+ los perfiles** |
+> | grooming | 4 | 613 ms | perfil de la mascota + disponibilidad **+ los perfiles** |
+> | **veterinaria** | **5** | **766 ms** | perfil + disponibilidad + vitrina **+ los perfiles** — el más caro |
+>
+> **🔴 CORRECCIÓN DE LA PRIMERA CORRIDA (+1 viaje por oficio).** La tabla decía
+> 2/2/3/4 porque el instrumento **miraba solo `useFocusEffect`**, y las cuatro
+> listas re-piden los perfiles públicos desde un `useEffect(..., [disponibles])`.
+> Como el foco vuelve a pedir la disponibilidad, `disponibles` cambia de
+> identidad y **ese efecto dispara también**: el rebote re-pide **todos** los
+> perfiles visibles — incluido, otra vez, el que la ficha acababa de pedir por su
+> cuenta. *El censo miraba la puerta por la que entró el síntoma y no la de al
+> lado.* ⇒ **el mismo perfil viaja TRES veces en un solo rebote**: lo trajo la
+> lista, lo volvió a traer la ficha, y lo trae de nuevo la lista al volver.
 >
 > *(El «≈ red» es conteo de viajes × el peaje de 153,2 ms medido en B0. **Es una
 > multiplicación y se dice**; se sostiene porque B1 probó que el costo es por

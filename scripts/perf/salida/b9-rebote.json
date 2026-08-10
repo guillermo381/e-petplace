@@ -15,7 +15,8 @@
    "getEstadoOnboardingDueno",
    "obtenerMascotasDeFamilia",
    "obtenerPaseadoresDisponibles",
-   "resolverUrlFoto"
+   "resolverUrlFoto",
+   "obtenerPerfilesPublicos"
   ],
   "reserva": [
    "obtenerSaldoPaquete"
@@ -27,7 +28,8 @@
   "efectos": 2,
   "carga": [
    "obtenerGroomersDisponibles",
-   "obtenerPerfilMascota"
+   "obtenerPerfilMascota",
+   "obtenerPerfilesPublicos"
   ],
   "reserva": [
    "crearBloqueoAgenda",
@@ -41,7 +43,8 @@
   "rotulo": "adiestramiento",
   "efectos": 2,
   "carga": [
-   "obtenerAdiestradoresDisponibles"
+   "obtenerAdiestradoresDisponibles",
+   "obtenerPerfilesPublicos"
   ],
   "reserva": [
    "crearBloqueoAgenda",
@@ -57,7 +60,8 @@
   "carga": [
    "obtenerPerfilMascota",
    "obtenerVeterinariosDisponibles",
-   "obtenerVitrinaNegocios"
+   "obtenerVitrinaNegocios",
+   "obtenerPerfilesPublicos"
   ],
   "reserva": [
    "crearBloqueoAgenda",
