@@ -11617,6 +11617,16 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-222 — UNA API QUE CONTESTA 200 A LO IMPOSIBLE CONVIERTE EL «ÉXITO» EN UN DATO SIN VALOR (S92-BIS).**
+
+  **El caso:** la cura de D-731 pasó su camino feliz **10/10** y falló su ensayo de fallo **4/7**. El barredor marcaba `borrado` una intención que **jamás pudo ejecutar** — *la cura tenía adentro exactamente el defecto que vino a curar: reportar éxito sobre algo que no hizo.* La causa, medida contra la API real: `DELETE` y `list` sobre un bucket inexistente devuelven **`200 []` los dos**. Un bucket que no existe y una carpeta vacía son **indistinguibles desde afuera**.
+
+  **Lo que enseña:** *cuando la respuesta de éxito y la respuesta de imposible son el mismo byte, ninguna lectura más cuidadosa del código salva el caso — el dato no está en la respuesta.* Yo había escrito una rama entera para «distinguir si el objeto ya no estaba», y esa rama era **inverificable por construcción**. Leer con más cuidado una respuesta que no contiene la información es trabajo elegante sobre nada.
+
+  **La forma exigible:** ante una respuesta ambigua, la cura **no es interpretarla mejor: es volver inexpresable el estado malo**, aguas arriba, donde el sistema sí sabe. Acá fue una FK de `bucket` a `storage.buckets`: la intención imposible **rebota en el INSERT**, con el nombre del problema, en el momento — en vez de convertirse en un «borrado» silencioso quince minutos después. *Un constraint que hace imposible el error vale más que cualquier manejo del error.*
+
+  **Y su parte de método, que es la que la trajo:** el defecto **no lo encontró la revisión del código, lo encontró un ensayo escrito para fallar**. El camino feliz estaba perfecto y no sabía nada del camino malo. **Toda cura que declara «si falla, no se pierde» necesita su propio rojo** — si no, la afirmación es una intención, no una propiedad. Es **L-192** aplicada a una cura de seguridad recién escrita, por quien la escribió. Origen: S92-BIS (D-731).
+
 - **L-221 — TODAS LAS MEDICIONES ESTABAN BIEN; LA PREGUNTA ESTABA MAL (S92-BIS).**
 
   **El caso:** un modal que no se iba nunca. Se persiguió, en este orden y durante horas, **lentitud** (cronómetros por eslabón), **promesas colgadas** (sondas en cada `await`), **policies y RLS** (`EXPLAIN ANALYZE` con los claims reales del founder), **grants por columna** (13/13 verificados), **`is_admin()` volatile** (hallazgo real, descartado con números) y **bucles de foco** (traza del ciclo blur/focus). **Todas esas mediciones fueron correctas.** Ninguna estaba equivocada. Y ninguna encontró la causa, porque **la causa era que un cartel no se apagaba**: el estado del modal guardaba una COPIA de la fase en el instante del toque, el dato llegaba 262 ms después, y la copia seguía diciendo «cargando» para siempre.
@@ -12119,7 +12129,7 @@ sería decidir por el número equivocado*.
 | | docs | tamaño | qué se hizo |
 |---|---|---|---|
 | **sin dueño** (huella de datos ya borrados) | **27** | 26.7 MB | **BORRADOS** |
-| **con dueño vivo** | **56** | 44.6 MB | **CONSERVADOS** — ver D-731 |
+| **con dueño vivo** | **56** | 44.6 MB | **CONSERVADOS** — su destino es **D-732**; el mecanismo que los produjo es **D-733** |
 
 **Conteo antes/después, con el guard que importa:** el bucket pasó de **91 a 64**
 objetos · **sin dueño restantes: 0** ✅ · **con dueño vivo: 56, INTACTOS** ✅
@@ -12140,7 +12150,7 @@ lo recoge Supabase por su cuenta**. Para datos de identidad conviene saberlo: el
 objeto deja de ser alcanzable, **no se sobrescribe**.
 
 **Los 56 restantes NO son basura y por eso no se tocan:** pertenecen a personas
-reales y su causa quedó identificada — **nace D-731**, que vale mucho más que
+reales y su causa quedó identificada — **nace D-731** (curada el mismo día), que vale mucho más que
 los 44 MB.
 
 > **Dueño: A (ejecutó los 27) → la cura de la causa vive en D-731.**
@@ -12148,10 +12158,10 @@ los 44 MB.
 
 ---
 
-#### D-731 — 🔴 BORRAR UN PRESTADOR (O SU DOCUMENTO) DEJA SU CÉDULA EN STORAGE PARA SIEMPRE
+#### D-731 — ✅ CURADA (S92-BIS, 9 Ago 2026) · BORRAR UN PRESTADOR (O SU DOCUMENTO) DEJABA SU CÉDULA EN STORAGE PARA SIEMPRE
 
 **El founder lo nombró como hipótesis y la medición lo confirmó.** No es que
-sobren archivos viejos: **es un defecto que se repite solo, cada vez.**
+sobren archivos viejos: **era un defecto que se repetía solo, cada vez.**
 
 **LAS TRES PIEZAS, medidas el 9-ago:**
 
@@ -12166,11 +12176,27 @@ archivos quedan.** Y lo mismo si el prestador borra un documento por su policy.
 *La fila desaparece; la cédula, el RUC y el título profesional siguen en el
 bucket, sin nada que los referencie y sin nadie que sepa que están.*
 
-**Y no es teórico: así se produjeron los 56 huérfanos que quedan hoy** — de
-**personas reales**, no de sondas: `satorilatam@gmail.com` (22),
-`admin@e-petplace.com` (13), `dianavanessacharry@gmail.com` (4) y varias
-cuentas del founder. *Ninguno pertenece a las 64 sondas que S92 borró: el JOIN
-con `prestadores` dio CERO, y la carpeta resultó ser `user_id`.*
+**🔴 CORRECCIÓN DE ESTA MISMA FICHA — los 56 huérfanos NO los produjo este
+camino.** Esta ficha, al nacer, se los atribuyó. **Era falso, y lo destapó
+medir el mecanismo en vez de deducirlo del schema.** El productor real está
+escrito literal en el repo congelado
+(`e-petplace-prestadores/src/lib/documentos.ts:61`):
+
+> `// ─── Upload puro (sin INSERT a prestador_documentos) ───`
+> `Sube un archivo … SIN insertar a prestador_documentos. Útil para el wizard`
+> `donde prestador_id aún no existe.`
+
+**El wizard sube el archivo ANTES de que la fila pueda existir**; si se abandona
+o se reintenta, el objeto queda. La huella lo confirma: los 22 de una sola
+persona son **4 tipos distintos con hasta 12 versiones del mismo tipo** — *doce
+intentos, no un documento perdido*. Sus 4 filas vivas están completas.
+⇒ ese productor es **D-733** y su cura es un barredor, no un trigger: **la base
+no puede enterarse de una subida que nunca se registró.**
+
+*Lo que esta ficha describía sí existe y sí había que cerrarlo — pero **todavía
+no había disparado ni una vez**. Se curó antes de su primera víctima, que es
+donde conviene curar; y la atribución equivocada, de haber quedado, mandaba a
+la próxima sesión a arreglar el lugar que no era.*
 
 **POR QUÉ ES 🔴 Y NO HIGIENE:** son **documentos de identidad**. Un dato
 personal que el sistema cree haber borrado —porque su fila no está— y que en
@@ -12179,23 +12205,137 @@ encuentra) **y no está protegido por ninguna política de retención**, porque
 para el producto ya no existe. *El día que alguien ejerza su derecho a que se
 borren sus datos, el borrado va a reportar éxito y el archivo va a seguir ahí.*
 
-**LAS SALIDAS, sin ejecutar:**
-① **un trigger `AFTER DELETE` en `prestador_documentos`** que encole el borrado
-del objeto — la fila y el archivo mueren juntos, que es lo que el modelo ya
-promete; ② **barrido periódico** de huérfanos (cura el síntoma, no la causa, y
-deja la ventana abierta entre baja y barrido); ③ **quitar el CASCADE** y obligar
-a borrar el documento por una función que limpie las dos cosas.
-**Voto: ① — es donde el defecto nace, y es una sola pieza.**
+**LA CURA APLICADA (opción ① — donde el defecto nace), firmada por el founder:**
 
-⚠️ **Y una limitación que hay que saber antes de diseñar la cura:** Supabase
-**bloquea el DELETE directo sobre `storage.objects`** (`42501`, trigger
-`storage.protect_delete`) — *hay que ir por la Storage API*. Un trigger de
-Postgres no puede borrar el blob por sí solo: necesita encolar y que algo con
-credencial lo ejecute. **Eso define la forma de ① y conviene tenerlo en la mano
-al arrancar.**
+| pieza | qué hace |
+|---|---|
+| `storage_borrado_pendiente` | la cola. **Genérica** (`bucket` + `objeto`): D-733 y cualquier productor futuro alimentan la misma tabla y el mismo barredor |
+| `_encolar_borrado_de_storage()` + trigger `AFTER DELETE` | encola la intención. Cubre **las dos vías**: el borrado propio del prestador y el CASCADE desde `prestadores` |
+| `barrer-storage` (edge function) | el brazo con credencial. Mismo camino que los tres despachadores curados hoy: **cron + secreto compartido** (`x-despacho-secret`), guard adentro |
+| `v_storage_borrado_atascado` | lo que no se pudo borrar, **sin exponer el path** — saber que algo se atascó no exige saber de quién es |
 
-> **Dueño: la sesión que toque documentos de prestador, o la de legales
-> (D-405).** **☠️ DISPARO: la próxima baja de un prestador real — o antes, si se
-> encara la política de retención de datos.**
-> **☠️ MUERTE:** borrar un documento borra su archivo, verificado con un par
-> rojo/verde sobre un fixture. Origen: S92-BIS, midiendo el porqué de D-710.
+**EL LÍMITE DURO QUE DEFINIÓ LA FORMA:** Supabase bloquea el DELETE directo
+sobre `storage.objects` (`42501`, trigger `storage.protect_delete`) y, aun sin
+él, borrar la fila dejaría el blob vivo — *el huérfano al revés*. **Postgres no
+puede borrar el blob**: encola, y algo con credencial ejecuta.
+
+**VERDE DOBLE (las tres condiciones del founder):**
+- **10/10 · camino real** — objeto subido de verdad y verificado presente (R4),
+  fila borrada, intención encolada, barredor disparado por la misma puerta que
+  el cron, **objeto ausente del bucket**, y **la persona legítima con sus 26
+  objetos intactos**. Guard: la **anon key del bundle → `401
+  despacho_no_autorizado`**. Tres ticks REALES del cron `succeeded`.
+- **6/6 · el fallo no se pierde** — con su propio rojo, abajo.
+
+**🔴 EL ENSAYO DE FALLO ENCONTRÓ EL DEFECTO ADENTRO DE LA CURA, y es lo que más
+vale de esta ficha.** El camino feliz dio 10/10; el ensayo de fallo salió
+**4/7**: el barredor marcaba `borrado` una intención que jamás pudo ejecutar.
+*La cura tenía adentro el defecto que vino a curar: reportaba éxito sobre algo
+que no hizo.* La causa, **medida contra la API, no deducida**:
+
+```
+DELETE /storage/v1/object/<bucket-inexistente>   →  200 []
+POST   /storage/v1/object/list/<bucket-inexist>  →  200 []
+```
+
+**Las dos operaciones contestan con forma de éxito.** Un bucket que no existe y
+una carpeta vacía son indistinguibles desde afuera ⇒ **ninguna lectura más
+cuidadosa de la respuesta salvaba el caso: el dato no estaba en la respuesta.**
+La cura fue volver el estado malo **inexpresable** — FK de `bucket` a
+`storage.buckets`, con su discriminador (el INSERT imposible rebota). **6/6.**
+
+**DECLARADO SIN EJERCITAR:** las ramas `api_remove` / `api_list` de
+`marcarIntento` (API caída, credencial revocada, objeto que se niega a irse)
+**no se pueden forzar desde afuera**, justamente porque la API contesta 200 a lo
+imposible. *Se dice en vez de contarlas como verdes.*
+
+**Migraciones:** `20260809040000` (cola + trigger + vista) y `20260809050000`
+(FK de bucket). **Reversa escrita ANTES**, y su nota ① dice con todas las letras
+que **revertir REABRE el agujero** y que **lo ya encolado se pierde**.
+
+**Gemelo de letra: `POLITICAS` P23** — qué significa «borrado» para un documento
+de identidad (el archivo queda **inalcanzable, no se sobrescribe**).
+
+> **✅ CERRADA.** Su muerte era *«borrar un documento borra su archivo,
+> verificado con un par rojo/verde»* y está pagada por camino real.
+> Origen: S92-BIS, midiendo el porqué de D-710.
+> **Lo que NO cierra:** los 56 existentes (**D-732**) ni el productor legacy
+> (**D-733**).
+
+---
+
+#### D-732 — 🟠 LOS 56 DOCUMENTOS DE IDENTIDAD YA HUÉRFANOS: la decisión es del founder, uno por uno
+
+**Estado: censados, NO borrados.** D-731 cerró la canilla; esto es lo que ya
+estaba en el piso. **Es dato personal de gente real y no se borra por peso ni
+por conveniencia** (orden del founder).
+
+**La lista, agrupada por persona — sin un solo dato del documento:**
+
+| cuenta | docs | ¿es prestador? | estado |
+|---|---|---|---|
+| `satorilatam@gmail.com` | **22** | **SÍ — `activo`** | 4 tipos, hasta **12 versiones del mismo tipo**; sus 4 filas vivas están completas |
+| `admin@e-petplace.com` | 13 | no tiene fila en `prestadores` | — |
+| `guillo381@gmail.com` (founder) | 4 | no | — |
+| `guillo454@gmail.com` | 4 | no | — |
+| `guillo222@gmail.com` | 4 | no | — |
+| `dianavanessacharry@gmail.com` | 4 | no | — |
+| `guilermo99@gmail.com` | 4 | no | — |
+| `pruebaerror2@gmail.com` | 1 | no | — |
+
+**🔴 LA REGLA DEL FOUNDER NO APLICA COMO ESTABA ESCRITA, y conviene decirlo:**
+su criterio era *«si SÍ es prestador vigente → falta un documento que alguien
+necesita, y eso es un bug distinto»*. **Medido: a Satori no le falta ninguno.**
+Sus 22 huérfanos son **versiones anteriores** de los 4 documentos que sí tiene
+registrados — el wizard legacy subía un objeto nuevo por intento (D-733). *La
+premisa de la regla era que un huérfano implicaba una fila perdida; el
+mecanismo real no pierde filas.*
+
+⇒ **Los 56 se parten en dos, no en las dos categorías previstas:**
+① **versiones viejas de documentos que hoy están completos** (el caso de Satori,
+y probablemente el de las demás cuentas) — nada falta, sobra historia;
+② **subidas de cuentas que nunca llegaron a ser prestador** — dato retenido sin
+razón, salvo que exista un plazo de retención escrito, **que hoy NO existe**
+(P23 (d)).
+
+**Lo que falta para decidir:** el **plazo de retención tras una baja o un
+abandono** (obligaciones fiscales o de verificación pueden exigir conservarlos).
+Sin esa letra, borrar es una decisión sin criterio y conservar también.
+
+> **Dueño: el founder** (la decisión) **+ la sesión de legales (D-405)** (la
+> letra del plazo). **☠️ DISPARO: la sesión de legales, o antes si el founder
+> decide.** **☠️ MUERTE:** cada uno de los 56 con destino ejecutado y su razón
+> escrita. Origen: S92-BIS.
+
+---
+
+#### D-733 — 🟠 EL WIZARD LEGACY SUBE EL DOCUMENTO ANTES DE QUE EXISTA LA FILA: cada intento abandonado deja un documento de identidad huérfano
+
+**El productor real de los 56.** No es una hipótesis: está escrito, con esas
+palabras, en `e-petplace-prestadores/src/lib/documentos.ts:61-73` —
+*«Upload puro (sin INSERT a prestador_documentos) … Útil para el wizard donde
+prestador_id aún no existe»*. El registro llega recién en el `PasoFinal`
+(`insertar_documentos_batch`). **Entre la subida y ese paso hay una ventana, y
+todo lo que se abandone ahí queda para siempre.**
+
+**Y no es solo del repo congelado:** el monorepo tiene la misma ventana en forma
+angosta — `apps/prestador/src/lib/subir-documento.ts` sube primero y registra
+después; si el registro falla devuelve `storagePath` para reintentar, y **si la
+persona abandona ahí, el objeto queda**. *La ventana es más chica, no es cero.*
+
+**POR QUÉ NO LO CURA EL TRIGGER DE D-731:** el trigger reacciona a una fila que
+se borra. Acá **nunca hubo fila**. La base no puede enterarse de una subida que
+no se registró ⇒ la cura es un **barredor** que compare el bucket contra las
+filas y encole lo que sobre **pasada una ventana de gracia** (una subida de hace
+dos minutos puede estar a punto de registrarse; una de hace dos días, no).
+
+**La pieza ya existe:** la cola de D-731 nació genérica a propósito. El barredor
+encola con `origen='barrido_huerfanos'` y `barrer-storage` lo ejecuta sin
+cambios. **Lo que falta es el productor y su ventana de gracia — y la letra del
+plazo, que es la misma que traba D-732.**
+
+> **Dueño: la sesión que toque el alta de prestador, o la de legales (D-405).**
+> **☠️ DISPARO: el primer alta de prestador real por el camino nuevo — o la
+> letra de retención, lo que llegue antes.** **☠️ MUERTE:** un objeto subido y
+> abandonado desaparece solo tras la ventana, verificado por par rojo/verde.
+> Origen: S92-BIS, midiendo el porqué de D-710 → D-731.

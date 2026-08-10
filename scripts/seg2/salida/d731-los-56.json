@@ -1,0 +1,90 @@
+[
+ {
+  "email": "satorilatam@gmail.com",
+  "docs": 22,
+  "mb": 29.2,
+  "es_prestador": true,
+  "vigente": true,
+  "estado_prestador": "activo",
+  "docs_con_fila": 4,
+  "primero": "2026-05-04 19:32:24.392352+00",
+  "ultimo": "2026-05-10 08:54:32.498373+00"
+ },
+ {
+  "email": "admin@e-petplace.com",
+  "docs": 13,
+  "mb": 8.4,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-04 18:29:09.684894+00",
+  "ultimo": "2026-05-04 18:37:46.623389+00"
+ },
+ {
+  "email": "guillo381@gmail.com",
+  "docs": 4,
+  "mb": 2.4,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-04 20:18:54.278682+00",
+  "ultimo": "2026-05-04 20:19:25.480606+00"
+ },
+ {
+  "email": "guillo454@gmail.com",
+  "docs": 4,
+  "mb": 0.8,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-04 20:51:49.2538+00",
+  "ultimo": "2026-05-04 20:52:12.362167+00"
+ },
+ {
+  "email": "guillo222@gmail.com",
+  "docs": 4,
+  "mb": 0.8,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-04 21:57:33.82599+00",
+  "ultimo": "2026-05-04 21:57:46.9897+00"
+ },
+ {
+  "email": "dianavanessacharry@gmail.com",
+  "docs": 4,
+  "mb": 0,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-07 22:04:47.285382+00",
+  "ultimo": "2026-05-07 22:05:31.802876+00"
+ },
+ {
+  "email": "guilermo99@gmail.com",
+  "docs": 4,
+  "mb": 0.8,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-04 21:39:40.338531+00",
+  "ultimo": "2026-05-04 21:39:56.928483+00"
+ },
+ {
+  "email": "pruebaerror2@gmail.com",
+  "docs": 1,
+  "mb": 2.2,
+  "es_prestador": false,
+  "vigente": false,
+  "estado_prestador": null,
+  "docs_con_fila": 0,
+  "primero": "2026-05-09 19:00:07.83223+00",
+  "ultimo": "2026-05-09 19:00:07.83223+00"
+ }
+]

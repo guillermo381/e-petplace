@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.10
-> Última actualización: 24 Jul 2026 — Sesión 76. **P22 DECLARADA, sin letra (reagenda y cancelación de la cita clínica; custodia conserva P20).**
+> Versión: v1.11
+> Última actualización: 9 Ago 2026 — S92-BIS. **P23 FIRMADA: qué significa «borrado» para un documento de identidad — el archivo queda inalcanzable, no se sobrescribe, y esa diferencia se declara en vez de prometerse de más.**
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
@@ -706,6 +706,60 @@ RESERVADA a la letra de CUSTODIA** (nota de P21, verificada al cierre S70) — l
 mesa resolvió en S76 que custodia CONSERVA P20 (materia legal, su número puede
 estar citado afuera del repo) y la reagenda clínica toma **P22**.
 
+## P23 — Qué significa «borrado» para un documento de identidad (FIRMADA — founder S92-BIS, 9 Ago 2026)
+
+**Origen: orden del founder al cerrar D-731** — *«anotá lo que reportaste sobre
+el blob: borrar deja el objeto inalcanzable, no lo sobrescribe. Para datos de
+identidad esa distinción importa y debe estar escrita en la política de datos,
+no solo en un acta.»*
+
+**Alcance:** cédulas, RUC, títulos profesionales, registros y permisos — todo lo
+que vive en `prestador-documentos`, y por extensión cualquier archivo que
+acredite la identidad de una persona.
+
+### (a) La cadena completa, y por qué son dos actos y no uno
+
+Un documento vive en **dos lugares**: una fila que lo referencia y un archivo en
+Storage. **Borrar la fila no borra el archivo.** Hasta S92-BIS eso era el
+defecto D-731: toda baja dejaba el documento en el bucket para siempre. Desde la
+cura, borrar la fila **encola** el borrado del archivo y un barredor con
+credencial lo ejecuta. *Los dos actos ahora están atados, pero siguen siendo
+dos: quien toque este camino no puede asumir que uno arrastra al otro por
+magia.*
+
+### (b) Lo que el borrado hace, dicho sin adorno
+
+El archivo **deja de ser alcanzable**: desaparece de la API, de todo listado y
+de toda URL firmada. **No se sobrescribe.** La recuperación física del bloque en
+el almacenamiento del proveedor no está bajo control de e-PetPlace y no se
+promete.
+
+**Por qué esta distinción se escribe acá y no solo en un acta técnica:** el día
+que una persona ejerza su derecho a que se borren sus datos, la respuesta
+honesta es *«el documento ya no es accesible por ningún medio del producto»* —
+no *«el archivo fue destruido»*. **Prometer lo segundo sería una promesa que el
+sistema no puede cumplir**, y una política de datos que promete de más es peor
+que una que declara su límite.
+
+### (c) Lo que nunca es aceptable
+
+- **Reportar éxito sobre un borrado no confirmado.** Si el archivo no se pudo
+  quitar, la intención queda registrada, se reintenta y queda visible. *Un
+  borrado que falla en silencio deja a la persona creyendo que su documento no
+  existe cuando existe.*
+- **Dejar la fila sin el archivo.** Es el estado peor de los dos mundos: el dato
+  ya no se puede usar y **ninguna política de retención lo protege, porque para
+  el producto ya no existe**.
+- **Conservar documentos de quien no es prestador vigente** sin una razón
+  escrita. La retención sin razón declarada no es archivo: es acumulación.
+
+### (d) Lo que esta política NO resuelve todavía
+
+El plazo de retención de los documentos de un prestador que se da de baja
+(obligaciones fiscales o de verificación pueden exigir conservarlos un tiempo).
+**Hoy no hay plazo escrito**, y hasta que lo haya la decisión de borrar
+documentos existentes es del founder, caso por caso — ver **D-732**.
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
@@ -719,3 +773,4 @@ estar citado afuera del repo) y la reagenda clínica toma **P22**.
 - **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).
 - **v1.10 (24 Jul 2026 — S76)**: **P22 DECLARADA, sin letra** (reagenda y cancelación de la cita CLÍNICA — nace por `LETRA_RECEPCION_S76` §8, FIRMADA founder). Hermana de P18 (que cubre SOLO el paseo suelto); contraste financiero obligatorio al escribirse; lo que tendrá que resolver y el paseo no tiene: caso abierto, presupuesto atado, instrucciones de preparación. No se construye en S76. **Nota de numeración:** la letra fuente decía "P20"; la mesa resolvió que **custodia CONSERVA P20** (reserva S70, D-405 — materia legal, número citable afuera del repo) y la reagenda toma **P22** — el choque lo atrapó el freno de A contra el literal de POLITICAS (L-166 aplicada contra la mesa).
 - **v1.9 (19 Jul 2026 — S70/T3)**: **P21 FIRMADA (LA LETRA UBER)** — la cuenta es GLOBAL y el país es contexto de OPERACIÓN, jamás de identidad; el teléfono NO implica país (caso canónico: el founder en EC con línea CO); PROHIBIDO derivar el prefijo del `country_code` del perfil (el prefijo lo declara el usuario, con `+` o selector de país de la línea); fiscalidad y liquidación siguen por país de operación. **P20 queda RESERVADA a la custodia (D-405)** — verificado en el cierre. Gemelos: `DEFINICION_SOFTLAUNCH.md` §3.5 y **D-442** (forma canónica del teléfono, reescrita bajo esta letra).
+- **v1.11 (9 Ago 2026 — S92-BIS)**: **P23 FIRMADA** — qué significa «borrado» para un documento de identidad. Origen: orden del founder al cerrar **D-731** (la FK `ON DELETE CASCADE` + la policy de borrado propio + cero funciones que tocaran Storage dejaban cédulas, RUC y títulos en el bucket para siempre). La política dice las tres cosas que un acta técnica no alcanza a fijar: **(a)** el documento vive en dos lugares y borrar la fila no borra el archivo — desde la cura los dos actos están atados, pero siguen siendo dos; **(b)** el borrado deja el archivo **inalcanzable, no lo sobrescribe** ⇒ ante un derecho de supresión la respuesta honesta es *«ya no es accesible por ningún medio del producto»*, jamás *«fue destruido»* — **prometer lo segundo sería una promesa que el sistema no puede cumplir**; **(c)** nunca es aceptable reportar éxito sobre un borrado no confirmado, ni dejar la fila sin archivo (*el dato ya no se puede usar y ninguna retención lo protege, porque para el producto ya no existe*), ni conservar documentos de quien no es prestador vigente sin razón escrita. **Lo que P23 NO resuelve y queda declarado: el plazo de retención tras una baja** — hasta que exista, el borrado de documentos existentes lo decide el founder caso por caso (**D-732**).

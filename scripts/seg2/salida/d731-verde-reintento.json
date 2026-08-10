@@ -1,0 +1,32 @@
+[
+ {
+  "n": 1,
+  "ok": true,
+  "texto": "encolar contra un bucket inexistente REBOTA en el INSERT (antes se marcaba «borrado»)"
+ },
+ {
+  "n": 2,
+  "ok": true,
+  "texto": "en un bucket que EXISTE, la ausencia se resuelve honesta: estado=borrado · «el objeto ya no estaba en el bucket»"
+ },
+ {
+  "n": 3,
+  "ok": true,
+  "texto": "una fila con intentos>0 APARECE en la vista de atascados"
+ },
+ {
+  "n": 4,
+  "ok": true,
+  "texto": "al llegar al techo pasa a `fallido` y SIGUE VISIBLE — no se borra para tapar"
+ },
+ {
+  "n": 5,
+  "ok": true,
+  "texto": "la vista NO expone el path: saber que algo se atascó no exige saber de quién es"
+ },
+ {
+  "n": 6,
+  "ok": true,
+  "texto": "ni `anon` ni `authenticated` pueden leer la cola (medido por has_table_privilege, no por ACL)"
+ }
+]

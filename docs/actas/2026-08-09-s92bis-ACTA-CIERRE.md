@@ -720,3 +720,105 @@ Storage** ⇒ **cada baja deja la cédula en el bucket para siempre**. *Un dato
 personal que el sistema cree haber borrado y en realidad conserva: no se puede
 usar y no está protegido por ninguna retención, porque para el producto ya no
 existe.*
+
+---
+
+## ⑲ D-731 CURADA — LA FILA Y EL ARCHIVO SE VAN JUNTOS, Y EL ENSAYO DE FALLO ENCONTRÓ EL DEFECTO ADENTRO DE LA CURA
+
+Orden del founder: *«Curá hoy. Que ninguna baja futura deje un documento de
+identidad huérfano»*, con tres condiciones — verde doble, el patrón de los
+despachadores para el brazo con credencial, y **un fallo que no se pierda**.
+
+### ⓪ Lo primero: la ficha se equivocaba de mecanismo, y se corrigió antes de curar
+
+D-731 nació atribuyéndose los 56 huérfanos. **Era falso.** El productor real
+está escrito, con esas palabras, en el repo congelado
+(`e-petplace-prestadores/src/lib/documentos.ts:61`):
+
+> *«Upload puro (sin INSERT a prestador_documentos). Útil para el wizard donde
+> prestador_id aún no existe.»*
+
+El wizard sube el archivo **antes de que la fila pueda existir**; lo que se
+abandona ahí queda. La huella lo confirma sola: los 22 de Satori son **4 tipos
+con hasta 12 versiones del mismo tipo** — doce intentos, no un documento
+perdido. **Y eso tumba la regla con la que el founder pensaba decidir los 56**
+(*«si es prestador vigente, falta un documento»*): a Satori **no le falta
+ninguno**; sus 4 filas están completas. ⇒ nace **D-733**, y los 56 pasan a
+**D-732** con su lista servida.
+
+*El defecto que la ficha describía sí existía y sí había que cerrarlo — pero
+**nunca había disparado**. Se curó antes de su primera víctima.*
+
+### ① La cura, y el límite duro que le dio la forma
+
+**Postgres no puede borrar el blob.** El `DELETE` sobre `storage.objects` lo
+rebota `storage.protect_delete` (`42501`) y, aun sin ese trigger, borrar la fila
+dejaría el archivo vivo — *el huérfano al revés*. ⇒ el trigger **encola la
+intención**; `barrer-storage` la ejecuta con credencial, por **el mismo camino
+que los tres despachadores curados hoy**: cron cada 5 minutos + `x-despacho-secret`,
+guard adentro (nunca `verify_jwt`, que **la anon key satisface**).
+
+La cola nació **genérica** a propósito: D-733 alimenta la misma tabla y el mismo
+barredor sin construir nada nuevo.
+
+### ② 🔴 El ensayo de fallo salió 4/7 — y ese rojo vale más que los dos verdes
+
+El camino feliz dio **10/10**. El ensayo escrito para fallar dio **4/7**: el
+barredor marcaba `borrado` una intención que **jamás pudo ejecutar**. *La cura
+tenía adentro exactamente el defecto que vino a curar.*
+
+La causa, medida contra la API — no deducida:
+
+```
+DELETE /storage/v1/object/<bucket-inexistente>   →  200 []
+POST   /storage/v1/object/list/<bucket-inexist>  →  200 []
+```
+
+**Las dos contestan con forma de éxito.** Un bucket que no existe y una carpeta
+vacía son indistinguibles desde afuera ⇒ **ninguna lectura más cuidadosa de la
+respuesta salvaba el caso: el dato no estaba en la respuesta.** Yo había escrito
+una rama entera para distinguirlos, y era **inverificable por construcción**.
+
+**La cura no fue interpretar mejor: fue volver el estado malo inexpresable** —
+FK de `bucket` a `storage.buckets`, con su discriminador (el INSERT imposible
+rebota). Segunda migración, **6/6**. ⇒ **L-222**.
+
+### ③ El verde doble, con sus tres condiciones
+
+| condición del founder | medición |
+|---|---|
+| la fila se va **Y** el objeto se va | objeto subido de verdad y verificado presente (R4) → fila borrada → encolada → **ausente del bucket**. **10/10** |
+| el legítimo sigue viendo los suyos | **26 antes, 26 después** |
+| un fallo no se pierde: reintenta y queda visible | **6/6** — la intención imposible **rebota en el INSERT**; en un bucket real la ausencia se resuelve honesta; con intentos>0 aparece en la vista; al techo pasa a `fallido` **y sigue visible** |
+
+Y dos que no pidió pero valen: **la anon key del bundle → `401`**, y **tres
+ticks REALES del cron `succeeded`** — *que una función responda cuando la llamo
+yo no prueba que el reloj la esté llamando.*
+
+**Declarado sin ejercitar, en vez de contado como verde:** las ramas
+`api_remove` / `api_list` (API caída, credencial revocada, objeto que se niega a
+irse) **no se pueden forzar desde afuera**, justamente porque la API contesta
+200 a lo imposible.
+
+### ④ La letra, donde el founder pidió que viviera
+
+**`POLITICAS` P23 FIRMADA** — *qué significa «borrado» para un documento de
+identidad*. Su párrafo central, que es el que no podía quedarse en un acta
+técnica: el archivo **deja de ser alcanzable, no se sobrescribe** ⇒ ante un
+derecho de supresión la respuesta honesta es *«ya no es accesible por ningún
+medio del producto»*, **jamás «fue destruido»** — *prometer lo segundo sería una
+promesa que el sistema no puede cumplir.* Y lo que P23 **no** resuelve, dicho:
+**no hay plazo de retención escrito**, y sin esa letra borrar es una decisión
+sin criterio y conservar también.
+
+### ⑤ Operativo
+
+**2 migraciones** (`20260809040000` cola+trigger+vista · `20260809050000` FK de
+bucket), **las dos con cinturón y con discriminador** — no basta que el trigger
+exista: la migración **borra una fila de verdad adentro de la transacción** y
+exige que la intención aparezca. **Reversa escrita ANTES**, y su nota ① dice con
+todas las letras que **revertir REABRE el agujero** y que **lo ya encolado se
+pierde**. **1 edge function nueva** (`barrer-storage`, `--use-api`), **1 shared**
+(`_shared/despacho.ts` — el guard en un solo lugar; los tres despachadores en
+verde **no se tocaron**: reescribir código verde para unificarlo es riesgo sin
+beneficio). **1 job de cron.** Residuo de los ensayos: **0**.

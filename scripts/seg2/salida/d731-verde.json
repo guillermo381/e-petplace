@@ -1,0 +1,57 @@
+{
+ "resultados": [
+  {
+   "n": 1,
+   "ok": true,
+   "texto": "objeto de prueba subido al bucket (HTTP 200)"
+  },
+  {
+   "n": 2,
+   "ok": true,
+   "texto": "el objeto EXISTE antes de borrar (R4: un 404 no probaría nada)"
+  },
+  {
+   "n": 3,
+   "ok": true,
+   "texto": "fila creada apuntando a ese objeto"
+  },
+  {
+   "n": 4,
+   "ok": true,
+   "texto": "la fila se fue"
+  },
+  {
+   "n": 5,
+   "ok": true,
+   "texto": "la intención quedó ENCOLADA (sin la cura, acá había 0)"
+  },
+  {
+   "n": 6,
+   "ok": true,
+   "texto": "la cola resolvió: estado=borrado"
+  },
+  {
+   "n": 7,
+   "ok": true,
+   "texto": "EL OBJETO SE FUE DEL BUCKET — la fila y el archivo, juntos"
+  },
+  {
+   "n": 8,
+   "ok": true,
+   "texto": "la persona legítima sigue con sus 26 objetos (antes 26)"
+  },
+  {
+   "n": 9,
+   "ok": true,
+   "texto": "con la anon key del bundle → HTTP 401 {\"error\":\"despacho_no_autorizado\"}"
+  },
+  {
+   "n": 10,
+   "ok": true,
+   "texto": "tick(s) reales del cron: 00:50:00 succeeded · 00:45:00 succeeded · 00:40:00 succeeded"
+  }
+ ],
+ "satoriAntes": 26,
+ "satoriDespues": 26,
+ "bucketAntes": 64
+}
