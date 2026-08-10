@@ -1,0 +1,20 @@
+{
+ "duenos": [],
+ "caminos": [],
+ "policies": [
+  {
+   "policyname": "prestador_documentos_own",
+   "roles": "{authenticated}"
+  }
+ ],
+ "fks": [
+  {
+   "confdeltype": "c",
+   "conname": "prestador_documentos_prestador_id_fkey"
+  },
+  {
+   "confdeltype": "a",
+   "conname": "prestador_documentos_revisado_por_fkey"
+  }
+ ]
+}

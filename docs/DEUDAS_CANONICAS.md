@@ -12107,3 +12107,95 @@ delante**.
 > **☠️ DISPARO: la sesión que el founder abra para esto.** **☠️ MUERTE:** reservar desde la vitrina se siente como UN
 > gesto, sin pantallas intermedias visibles. Origen: S92-BIS, prueba del
 > founder en los cuatro oficios.
+
+---
+
+#### D-710 · ✅ EJECUTADA EN PARTE (9-ago) — 27 borrados, 56 conservados por decisión
+
+**Decisión del founder sobre datos, no sobre MB.** Antes de borrar se midió **de
+quién eran**, porque *decidir un borrado de documentos de identidad por su peso
+sería decidir por el número equivocado*.
+
+| | docs | tamaño | qué se hizo |
+|---|---|---|---|
+| **sin dueño** (huella de datos ya borrados) | **27** | 26.7 MB | **BORRADOS** |
+| **con dueño vivo** | **56** | 44.6 MB | **CONSERVADOS** — ver D-731 |
+
+**Conteo antes/después, con el guard que importa:** el bucket pasó de **91 a 64**
+objetos · **sin dueño restantes: 0** ✅ · **con dueño vivo: 56, INTACTOS** ✅
+*Un borrado que se lleva de más no se nota hasta que alguien lo busca, así que
+la verificación mide las dos cosas: que lo que debía irse se fue, y que lo que
+NO debía irse sigue.*
+
+⚠️ **EL PRIMER INTENTO FUE POR SQL Y SUPABASE LO FRENÓ, con razón:**
+`42501: Direct deletion from storage tables is not allowed. Use the Storage API
+instead.` — un trigger (`storage.protect_delete`) protege contra exactamente
+esto. *Un `DELETE` en `storage.objects` habría dejado el blob vivo y la
+referencia muerta: el huérfano al revés.* Se fue por la Storage API, con la
+llave leída en memoria y **jamás transcrita** (R6).
+
+**Se declara lo que el borrado NO hace:** quita la fila de `storage.objects`
+—lo que vuelve el objeto inexistente para la API y para todo listado—; **el blob
+lo recoge Supabase por su cuenta**. Para datos de identidad conviene saberlo: el
+objeto deja de ser alcanzable, **no se sobrescribe**.
+
+**Los 56 restantes NO son basura y por eso no se tocan:** pertenecen a personas
+reales y su causa quedó identificada — **nace D-731**, que vale mucho más que
+los 44 MB.
+
+> **Dueño: A (ejecutó los 27) → la cura de la causa vive en D-731.**
+> **✅ Su parte de residuo, CERRADA 9-ago-2026.**
+
+---
+
+#### D-731 — 🔴 BORRAR UN PRESTADOR (O SU DOCUMENTO) DEJA SU CÉDULA EN STORAGE PARA SIEMPRE
+
+**El founder lo nombró como hipótesis y la medición lo confirmó.** No es que
+sobren archivos viejos: **es un defecto que se repite solo, cada vez.**
+
+**LAS TRES PIEZAS, medidas el 9-ago:**
+
+| pieza | estado |
+|---|---|
+| FK `prestador_documentos_prestador_id_fkey` | **`ON DELETE 'c'` — CASCADE** |
+| policy `prestador_documentos_own` | permite al prestador **borrar su propia fila** |
+| funciones de `public` que limpien Storage al borrar | **NINGUNA** |
+
+⇒ **Se borra el prestador → sus filas de documentos se van en cascada → los
+archivos quedan.** Y lo mismo si el prestador borra un documento por su policy.
+*La fila desaparece; la cédula, el RUC y el título profesional siguen en el
+bucket, sin nada que los referencie y sin nadie que sepa que están.*
+
+**Y no es teórico: así se produjeron los 56 huérfanos que quedan hoy** — de
+**personas reales**, no de sondas: `satorilatam@gmail.com` (22),
+`admin@e-petplace.com` (13), `dianavanessacharry@gmail.com` (4) y varias
+cuentas del founder. *Ninguno pertenece a las 64 sondas que S92 borró: el JOIN
+con `prestadores` dio CERO, y la carpeta resultó ser `user_id`.*
+
+**POR QUÉ ES 🔴 Y NO HIGIENE:** son **documentos de identidad**. Un dato
+personal que el sistema cree haber borrado —porque su fila no está— y que en
+realidad conserva, es lo peor de los dos mundos: **no se puede usar** (nadie lo
+encuentra) **y no está protegido por ninguna política de retención**, porque
+para el producto ya no existe. *El día que alguien ejerza su derecho a que se
+borren sus datos, el borrado va a reportar éxito y el archivo va a seguir ahí.*
+
+**LAS SALIDAS, sin ejecutar:**
+① **un trigger `AFTER DELETE` en `prestador_documentos`** que encole el borrado
+del objeto — la fila y el archivo mueren juntos, que es lo que el modelo ya
+promete; ② **barrido periódico** de huérfanos (cura el síntoma, no la causa, y
+deja la ventana abierta entre baja y barrido); ③ **quitar el CASCADE** y obligar
+a borrar el documento por una función que limpie las dos cosas.
+**Voto: ① — es donde el defecto nace, y es una sola pieza.**
+
+⚠️ **Y una limitación que hay que saber antes de diseñar la cura:** Supabase
+**bloquea el DELETE directo sobre `storage.objects`** (`42501`, trigger
+`storage.protect_delete`) — *hay que ir por la Storage API*. Un trigger de
+Postgres no puede borrar el blob por sí solo: necesita encolar y que algo con
+credencial lo ejecute. **Eso define la forma de ① y conviene tenerlo en la mano
+al arrancar.**
+
+> **Dueño: la sesión que toque documentos de prestador, o la de legales
+> (D-405).** **☠️ DISPARO: la próxima baja de un prestador real — o antes, si se
+> encara la política de retención de datos.**
+> **☠️ MUERTE:** borrar un documento borra su archivo, verificado con un par
+> rojo/verde sobre un fixture. Origen: S92-BIS, midiendo el porqué de D-710.

@@ -660,3 +660,63 @@ oficios, que es exactamente por qué ellos reservan de una y el paseo no;
 duración**, que es lo que el hold necesita.
 
 Los tres puntos de arranque quedaron escritos en la ficha, en orden.
+
+---
+
+## ⑱ EL CIERRE DE LAS VENTANAS — D-723, D-718+D-711, D-710 (9-ago)
+
+**Orden del founder: no dejamos las ventanas nuevas.** Se ejecutaron las tres en
+la misma sesión.
+
+### D-723 ✅ — el tercer despachador, y la lección del censo
+
+Mismo protocolo que sus hermanos: **primero el cron, después el deploy** (al
+revés dejaba una ventana con el correo caído). El secreto **no se transcribió**:
+se leyó del job ya curado y se re-inyectó dentro de la misma sentencia (R6).
+**Verde doble:** la anon key pasó de **`200` + cola procesada** a **`401`**, y
+los **cuatro ticks siguientes al deploy** salieron `succeeded` — *que la puerta
+rebote al desconocido es la mitad; la otra es que el correo siga saliendo.*
+
+> **⚠️ LA LECCIÓN, que el founder pidió explícita: se escapó del censo anterior
+> porque se buscó por la propiedad equivocada.** D-713 buscó los despachadores
+> por `verify_jwt: false` —las puertas obviamente abiertas— y **éste tiene
+> `true`**, así que no apareció. **Y L-714 ya estaba escrita: la anon key ES un
+> JWT válido**, o sea que `true` nunca protegió nada.
+> ***Un censo que filtra por el atributo que no define el riesgo deja huecos que
+> parecen cubiertos*** — y es peor que no censar, porque el resultado se lee
+> como completo.
+
+### D-718 + D-711 ✅ — la poda, con la red de seguridad primero
+
+**7 ramas sin mergear, medidas archivo por archivo: 0 faltantes en `main`.** Lo
+que difiere existe con versión más nueva — *mergearlas revertiría trabajo*
+(L-217). **10 de 12 podados directo; dos frenaron** con «Directory not empty» y
+**ahí se paró a mirar en vez de forzar**: tenían `node_modules` **y cuatro PNG
+de S61**, que resultaron **versionados en `main`**. Recién entonces `--force`.
+
+**`git worktree list` muestra solo el primario.** Las ramas siguen vivas.
+**D-711 en el mismo acto:** `.env` con **`service_role` de 5 a 1** —la copia
+legítima— y credenciales demo **de 16 a 0 fuera del primario**.
+
+**Queda declarado:** los directorios físicos de `e-petplace-B` y `e-petplace-C`
+siguen en disco (git los desregistró y no pudo borrarlos). **Ya no son
+worktrees**; borrarlos es `rm -rf`, fuera de git, **y lo hace el founder**.
+
+### D-710 ✅ en su residuo — y el hallazgo que valía más
+
+**27 borrados, 91 → 64 objetos, y los 56 con dueño INTACTOS** (verificado en las
+dos direcciones). **Y antes de borrar se midió de quién eran**, que es lo que
+partió la decisión en dos: *decidir un borrado de documentos de identidad por su
+peso en MB sería decidir por el número equivocado.*
+
+**Los 56 restantes son de personas reales** —`satorilatam`,
+`admin@e-petplace.com`, `dianavanessacharry`, cuentas del founder— **y ninguno
+es de las 64 sondas**: el JOIN con `prestadores` dio **cero**, y la carpeta
+resultó ser `user_id`, no `prestador_id`.
+
+**⇒ NACE D-731 🔴, que es el verdadero hallazgo:** FK **`ON DELETE CASCADE`** +
+policy que deja al prestador borrar su fila + **ninguna función que limpie
+Storage** ⇒ **cada baja deja la cédula en el bucket para siempre**. *Un dato
+personal que el sistema cree haber borrado y en realidad conserva: no se puede
+usar y no está protegido por ninguna retención, porque para el producto ya no
+existe.*
