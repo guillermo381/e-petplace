@@ -264,8 +264,21 @@ export async function obtenerMiPrestador(): Promise<
 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   const data = Array.isArray(filas) && filas.length > 0 ? filas[0] : null;
+  /* ⚡ S94-PERF: la zona VIENE EN LA MISMA RPC — acá vivía un
+     `...(await leerZona(data.id))`, o sea un SEGUNDO viaje encadenado que no
+     podía empezar hasta que el primero devolviera el id.
+     Medido con token real por la misma puerta que la app: 316,1 ms los dos
+     viajes contra 157,7 ms el viaje único ⇒ **156 ms menos por llamada**. Y
+     este wrapper aparece en **28 de los efectos de foco** del monorepo, que lo
+     vuelve el viaje más repetido que existe: hasta ~4,4 s de red en un
+     recorrido completo de la app.
+     El dato es el MISMO (verificado valor contra valor, `b6-verde-zona.mjs`
+     4/4): la RPC hace `LEFT JOIN v_prestadores_publicos`, así que conserva el
+     ofuscado de S84 **y** su `WHERE estado='activo'` — un prestador no activo
+     sigue recibiendo NULL, como antes.
+     El brazo (2) de abajo SÍ conserva `leerZona`: lee la tabla, no la RPC. */
   if (data !== null) {
-    return { ok: true, data: { ...data, cohorte: estrecharCohorte(data.cohorte), ...(await leerZona(data.id)) } };
+    return { ok: true, data: { ...data, cohorte: estrecharCohorte(data.cohorte) } };
   }
 
   // (2) Vínculo activo. No es titular: ¿es empleado activo de alguien?

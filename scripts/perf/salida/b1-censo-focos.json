@@ -1,0 +1,1027 @@
+[
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/index",
+  "montaHoja": true,
+  "focos": 2,
+  "porFoco": 28,
+  "olas": 12,
+  "wrappers": [
+   "hayNovedades",
+   "obtenerBloqueosPrestador",
+   "obtenerCitasAdiestramientoDelDia",
+   "obtenerDiasCerrados",
+   "obtenerCitasGroomingDelDia",
+   "obtenerCitasPaseoDelDia",
+   "obtenerCitasVetDelDia",
+   "obtenerCitasPorCoordinar",
+   "empleadoTieneRol",
+   "obtenerEquipoNegocio",
+   "obtenerFranjasHorario",
+   "obtenerMascotasAtendidas",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPerfil",
+   "obtenerChipsEmpleado",
+   "obtenerMiEmpleadoId",
+   "obtenerMiPrestador",
+   "obtenerTitularId",
+   "obtenerMundoVeterinariaPropio",
+   "obtenerAtencionesAbiertas",
+   "obtenerPizarra",
+   "obtenerPlataDelDia",
+   "obtenerPresupuestosPrestador",
+   "obtenerSolicitudesMostrador",
+   "obtenerOfertaAdiestramientoPropia",
+   "obtenerOfertasGroomingPropias",
+   "obtenerOfertasPaseoPropias",
+   "resolverUrlsFotos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/index",
+  "montaHoja": false,
+  "focos": 2,
+  "porFoco": 12,
+  "olas": 3,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMiPerfil",
+   "leerTimelineHogar",
+   "obtenerEstadoHogar",
+   "obtenerMascotasDeFamilia",
+   "obtenerMisPlanesPaseo",
+   "obtenerCitasActivasHogar",
+   "obtenerPresupuestosFamilia",
+   "obtenerResumenServiciosHogar",
+   "obtenerSolicitudesPendientesDueno",
+   "hayNovedades",
+   "resolverUrlsFotos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/mascota/[mascotaId]",
+  "montaHoja": true,
+  "focos": 2,
+  "porFoco": 10,
+  "olas": 3,
+  "wrappers": [
+   "leerTimelineMascota",
+   "obtenerEstadoHogar",
+   "obtenerPaseosConTrack",
+   "obtenerPerfilMascota",
+   "resolverUrlFoto",
+   "obtenerRazasDeEspecie",
+   "obtenerCensoDelAcuario",
+   "obtenerSolicitudesPendientesDueno",
+   "obtenerPresupuestosFamilia",
+   "obtenerCitasActivasHogar"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/veterinaria/disponibles",
+  "montaHoja": true,
+  "focos": 2,
+  "porFoco": 7,
+  "olas": 2,
+  "wrappers": [
+   "crearBloqueoAgenda",
+   "obtenerPersonasQueAtienden",
+   "obtenerVeterinariosDisponibles",
+   "obtenerVitrinaNegocios",
+   "obtenerPerfilMascota",
+   "obtenerVeterinariosDisponibles",
+   "obtenerVitrinaNegocios"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/paseos",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 7,
+  "olas": 6,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "resolverUrlsFotos",
+   "obtenerCitasDePlan",
+   "obtenerMisCitasPaseo",
+   "obtenerMisPaquetesSalidas",
+   "obtenerMisPlanesPaseo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/cuenta/index",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 7,
+  "olas": 3,
+  "wrappers": [
+   "obtenerFranjasHorario",
+   "obtenerMiPosicionEnPrestador",
+   "obtenerMiPrestador",
+   "obtenerMundoVeterinariaPropio",
+   "obtenerOfertaAdiestramientoPropia",
+   "obtenerOfertasGroomingPropias",
+   "obtenerOfertasPaseoPropias"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/taller",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 7,
+  "olas": 6,
+  "wrappers": [
+   "obtenerComisionVigenteCita",
+   "obtenerFranjasDeServicios",
+   "obtenerFranjasHorario",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador",
+   "obtenerModoHorarios",
+   "obtenerOfertaAdiestramientoPropia"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "historico",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 7,
+  "olas": 7,
+  "wrappers": [
+   "obtenerCitasAdiestramientoDelDia",
+   "obtenerCitasGroomingDelDia",
+   "obtenerCitasPaseoDelDia",
+   "obtenerCitasVetDelDia",
+   "obtenerMiPrestador",
+   "obtenerNombresReservadorPorCita",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/cita/[citaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 7,
+  "olas": 7,
+  "wrappers": [
+   "obtenerCitaVetPorId",
+   "obtenerContactoReservaCita",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador",
+   "obtenerPresupuestosPrestador",
+   "puedoAtenderClinico",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/_layout",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 6,
+  "wrappers": [
+   "empleadoTieneRol",
+   "obtenerInvitacionPendiente",
+   "obtenerMiPrestador",
+   "obtenerNegocioEmpleadoActivo",
+   "obtenerSesion",
+   "registrarPrimerIngreso"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/cuenta/como-te-ven",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 3,
+  "wrappers": [
+   "listarFotosGaleria",
+   "obtenerMiPrestador",
+   "obtenerMundoVeterinariaPropio",
+   "obtenerOfertaAdiestramientoPropia",
+   "obtenerOfertasGroomingPropias",
+   "obtenerOfertasPaseoPropias"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/mascotas",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 4,
+  "wrappers": [
+   "obtenerDatosNegocio",
+   "obtenerEquipoNegocio",
+   "obtenerMascotasAtendidas",
+   "obtenerMiPosicionEnPrestador",
+   "obtenerMiPrestador",
+   "resolverUrlsFotos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/negocio",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 4,
+  "wrappers": [
+   "obtenerMiPrestador",
+   "obtenerMundoVeterinariaPropio",
+   "obtenerOfertaAdiestramientoPropia",
+   "obtenerOfertasGroomingPropias",
+   "obtenerOfertasPaseoPropias",
+   "obtenerResumenPendienteLiquidar"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/cita/[citaId]/cierre",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 6,
+  "wrappers": [
+   "obtenerAdiestramientoPorCita",
+   "obtenerCitaAdiestramientoPorId",
+   "obtenerClipsAdiestramiento",
+   "obtenerEstadoDuranteAdiestramiento",
+   "obtenerObjetivosAdiestramiento",
+   "resolverUrlsClips"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "cita/[citaId]/durante",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 4,
+  "wrappers": [
+   "obtenerIncidenciasPaseo",
+   "obtenerMiPrestador",
+   "obtenerNovedadesPaseo",
+   "obtenerPaseoPorCita",
+   "obtenerResumenCierrePaseo",
+   "obtenerTrackPaseo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "mascota/[mascotaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 2,
+  "wrappers": [
+   "obtenerDetalleMascotaPrestador",
+   "obtenerExpedienteModulado",
+   "obtenerFamiliaDeMascota",
+   "obtenerMiPrestador",
+   "obtenerUmbralesMomentoVital",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "paseo/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 6,
+  "olas": 3,
+  "wrappers": [
+   "obtenerBloqueosPrestador",
+   "obtenerFranjasHorario",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador",
+   "obtenerOfertasPaseoPropias",
+   "obtenerZonasDePrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/paseo/disponibles",
+  "montaHoja": true,
+  "focos": 2,
+  "porFoco": 5,
+  "olas": 5,
+  "wrappers": [
+   "obtenerSaldoPaquete",
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "obtenerPaseadoresDisponibles",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "paseo/[atencionId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 5,
+  "wrappers": [
+   "leerDetalleAtencion",
+   "leerDetalleAtencion",
+   "obtenerCatalogoNovedadesPaseo",
+   "obtenerPerfilMascota",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/cita/[citaId]/durante",
+  "montaHoja": true,
+  "focos": 2,
+  "porFoco": 5,
+  "olas": 6,
+  "wrappers": [
+   "obtenerEstadoDuranteAdiestramiento",
+   "obtenerAdiestramientoPorCita",
+   "obtenerCitaAdiestramientoPorId",
+   "obtenerCurriculumNivel",
+   "obtenerObjetivosAdiestramiento"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 3,
+  "wrappers": [
+   "obtenerBloqueosPrestador",
+   "obtenerFranjasHorario",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador",
+   "obtenerOfertaAdiestramientoPropia"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "grooming/cita/[citaId]/durante",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 4,
+  "wrappers": [
+   "obtenerEstadoDuranteGrooming",
+   "obtenerEstadosPelajeCatalogo",
+   "obtenerGroomingPorCita",
+   "obtenerIncidenciasGrooming",
+   "obtenerServiciosGroomingCatalogo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "grooming/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 3,
+  "wrappers": [
+   "obtenerBloqueosPrestador",
+   "obtenerFranjasHorario",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador",
+   "obtenerOfertasGroomingPropias"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "negocio/equipo",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 5,
+  "wrappers": [
+   "obtenerEquipoNegocio",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPosicionEnPrestador",
+   "obtenerMiPrestador",
+   "obtenerOficiosNegocio"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/certificado/[citaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 5,
+  "olas": 6,
+  "wrappers": [
+   "obtenerCertificadosMascota",
+   "obtenerMiFirmaClinica",
+   "obtenerMiPrestador",
+   "obtenerPerfilMascota",
+   "puedoAtenderClinico"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/grooming/disponibles",
+  "montaHoja": false,
+  "focos": 2,
+  "porFoco": 4,
+  "olas": 1,
+  "wrappers": [
+   "crearBloqueoAgenda",
+   "obtenerGroomersDisponibles",
+   "obtenerGroomersDisponibles",
+   "obtenerPerfilMascota"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/grooming/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 4,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "obtenerOfertaGroomingPublica",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/paseo/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 4,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "obtenerOfertaPaseo",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/adiestramiento",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 3,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "resolverUrlsFotos",
+   "obtenerMisAdiestramientos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/bitacora",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 3,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerBitacora",
+   "obtenerMascotasDeFamilia",
+   "obtenerVocabularioBitacora"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/grooming",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 2,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "obtenerMisGroomings",
+   "resolverUrlsFotos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/veterinaria",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 2,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMisConsultasVet",
+   "obtenerMascotasDeFamilia",
+   "resolverUrlsFotos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/cuenta/perfil",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 5,
+  "wrappers": [
+   "listarFotosGaleria",
+   "obtenerMiPosicionEnPrestador",
+   "obtenerMiPrestador",
+   "obtenerPaisesDelMundo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/cita/[citaId]/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 5,
+  "wrappers": [
+   "obtenerAdiestramientoPorCita",
+   "obtenerCitaAdiestramientoPorId",
+   "obtenerFichaAntesAdiestramiento",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "grooming/cita/[citaId]/cierre",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 4,
+  "wrappers": [
+   "obtenerEstadosPelajeCatalogo",
+   "obtenerGroomingPorCita",
+   "obtenerResumenCierreGrooming",
+   "obtenerServiciosGroomingCatalogo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "grooming/cita/[citaId]/index",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 5,
+  "wrappers": [
+   "obtenerCitaGroomingPorId",
+   "obtenerFichaAntesGrooming",
+   "obtenerGroomingPorCita",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "mostrador/autorizar",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 4,
+  "olas": 2,
+  "wrappers": [
+   "buscarClienteAltaAsistida",
+   "buscarClientePorTelefono",
+   "obtenerEspeciesActivas",
+   "obtenerMiPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/adiestramiento/disponibles",
+  "montaHoja": false,
+  "focos": 2,
+  "porFoco": 3,
+  "olas": 1,
+  "wrappers": [
+   "crearBloqueoAgenda",
+   "obtenerAdiestradoresDisponibles",
+   "obtenerAdiestradoresDisponibles"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/adiestramiento/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 4,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/veterinaria/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 4,
+  "wrappers": [
+   "getEstadoOnboardingDueno",
+   "obtenerMascotasDeFamilia",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "adiestramiento/antes/[mascotaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 4,
+  "wrappers": [
+   "obtenerBitacora",
+   "obtenerFichaAntesAdiestramiento",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "bienvenida-dia1",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 2,
+  "wrappers": [
+   "obtenerMiPerfil",
+   "obtenerMiPrestador",
+   "registrarPrimerIngreso"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "cita/[citaId]/cierre",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 4,
+  "wrappers": [
+   "obtenerPaseoPorCita",
+   "obtenerResumenCierrePaseo",
+   "obtenerTrackPaseo"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "cita/[citaId]/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 4,
+  "wrappers": [
+   "obtenerCitaPaseoPorId",
+   "obtenerPaseoPorCita",
+   "resolverUrlFoto"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "liquidaciones",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 2,
+  "wrappers": [
+   "obtenerDesglosePendienteLiquidar",
+   "obtenerMisLiquidaciones",
+   "obtenerMiCuentaComercial"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "pizarra",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 3,
+  "wrappers": [
+   "obtenerMiPrestador",
+   "obtenerPizarra",
+   "puedoAsignarCitas"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "sala-espera",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 3,
+  "wrappers": [
+   "obtenerDocumentosVerificacion",
+   "obtenerMiCuentaComercial",
+   "obtenerMiPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 3,
+  "olas": 3,
+  "wrappers": [
+   "obtenerDocumentosVerificacion",
+   "obtenerMiPrestador",
+   "obtenerMundoVeterinariaPropio"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "adiestramiento/[citaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerParteAdiestramiento",
+   "resolverUrlsClips"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "avisos",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 1,
+  "wrappers": [
+   "obtenerMisAvisos",
+   "registrarVisitaCampana"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "citas/[mascotaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerCitasActivasMascota",
+   "obtenerPresupuestosFamilia"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "avisos",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 1,
+  "wrappers": [
+   "obtenerMisAvisos",
+   "registrarVisitaCampana"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "grooming/dia",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 3,
+  "wrappers": [
+   "obtenerMiPrestador",
+   "obtenerResumenDiaGrooming"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "vacaciones",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerBloqueosPrestador",
+   "obtenerMiPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/coordinar/[citaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerEmpleadosCuenta",
+   "obtenerMiPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/movimiento",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerMiPrestador",
+   "obtenerPresupuestosPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/procedimientos",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerMiPrestador",
+   "obtenerMundoVeterinariaPropio"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "veterinaria/verificacion",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 2,
+  "olas": 2,
+  "wrappers": [
+   "obtenerDocumentosVerificacion",
+   "obtenerMiPrestador"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 0,
+  "wrappers": [
+   "obtenerServiciosPais"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/explorar/paseo/paquete",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 0,
+  "wrappers": [
+   "obtenerPaseadoresConPaquete"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "(tabs)/hogar/vacunas/[mascotaId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerPerfilMascota"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "autorizacion/[solicitudId]",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerSolicitudesPendientesDueno"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "parte/[eventoId]",
+  "montaHoja": true,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerParteConsulta"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "cliente",
+  "pantalla": "prestador/[prestadorId]",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerPerfilesPublicos"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "(tabs)/cuenta/seguridad",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerMiPerfil"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "invitacion",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 1,
+  "olas": 1,
+  "wrappers": [
+   "obtenerInvitacionPendiente"
+  ],
+  "sueltas": 0
+ },
+ {
+  "app": "prestador",
+  "pantalla": "cuenta-comercial/index",
+  "montaHoja": false,
+  "focos": 1,
+  "porFoco": 0,
+  "olas": 0,
+  "wrappers": [],
+  "sueltas": 0
+ }
+]

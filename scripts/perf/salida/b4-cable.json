@@ -1,0 +1,116 @@
+{
+ "buckets": [
+  {
+   "bucket": "prestador-documentos",
+   "bytes": "49369835",
+   "mayor": 3415585,
+   "mediana": 208755,
+   "objetos": 64,
+   "promedio": "771404",
+   "publico": false
+  },
+  {
+   "bucket": "prestador-galeria",
+   "bytes": "18796087",
+   "mayor": 6141635,
+   "mediana": 485785,
+   "objetos": 8,
+   "promedio": "2349511",
+   "publico": true
+  },
+  {
+   "bucket": "grooming-archivos",
+   "bytes": "13724137",
+   "mayor": 2193778,
+   "mediana": 451945,
+   "objetos": 27,
+   "promedio": "508301",
+   "publico": false
+  },
+  {
+   "bucket": "cita-archivos",
+   "bytes": "7412136",
+   "mayor": 1603461,
+   "mediana": 511608,
+   "objetos": 11,
+   "promedio": "673831",
+   "publico": false
+  },
+  {
+   "bucket": "adiestramiento-clips",
+   "bytes": "6911316",
+   "mayor": 6911316,
+   "mediana": 6911316,
+   "objetos": 1,
+   "promedio": "6911316",
+   "publico": false
+  },
+  {
+   "bucket": "avatars",
+   "bytes": "1506787",
+   "mayor": 335050,
+   "mediana": 77795,
+   "objetos": 12,
+   "promedio": "125566",
+   "publico": true
+  },
+  {
+   "bucket": "mascotas",
+   "bytes": "1435140",
+   "mayor": 245673,
+   "mediana": 64402,
+   "objetos": 14,
+   "promedio": "102510",
+   "publico": false
+  },
+  {
+   "bucket": "especies-razas",
+   "bytes": "796272",
+   "mayor": 14386,
+   "mediana": 7072,
+   "objetos": 111,
+   "promedio": "7174",
+   "publico": true
+  },
+  {
+   "bucket": "marca-publica",
+   "bytes": "4828",
+   "mayor": 4828,
+   "mediana": 4828,
+   "objetos": 1,
+   "promedio": "4828",
+   "publico": true
+  },
+  {
+   "bucket": "adopcion-fotos",
+   "bytes": "0",
+   "mayor": 0,
+   "mediana": 0,
+   "objetos": 0,
+   "promedio": "0",
+   "publico": true
+  },
+  {
+   "bucket": "productos-fotos",
+   "bytes": "0",
+   "mayor": 0,
+   "mediana": 0,
+   "objetos": 0,
+   "promedio": "0",
+   "publico": true
+  }
+ ],
+ "fotosMascota": {
+  "mayor": 245673,
+  "mediana": 64402,
+  "n": 14,
+  "p90": 212681,
+  "promedio": "102510",
+  "total": "1435140"
+ },
+ "fotosPesadas": 0,
+ "familiaMax": {
+  "con_foto": 2,
+  "mascotas": 6
+ }
+}

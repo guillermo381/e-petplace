@@ -15264,6 +15264,45 @@ export type Database = {
           },
         ]
       }
+      storage_borrado_pendiente: {
+        Row: {
+          bucket: string
+          encolado_en: string
+          estado: string
+          id: string
+          intentos: number
+          objeto: string
+          origen: string
+          resuelto_en: string | null
+          ultimo_error: string | null
+          ultimo_intento_en: string | null
+        }
+        Insert: {
+          bucket: string
+          encolado_en?: string
+          estado?: string
+          id?: string
+          intentos?: number
+          objeto: string
+          origen: string
+          resuelto_en?: string | null
+          ultimo_error?: string | null
+          ultimo_intento_en?: string | null
+        }
+        Update: {
+          bucket?: string
+          encolado_en?: string
+          estado?: string
+          id?: string
+          intentos?: number
+          objeto?: string
+          origen?: string
+          resuelto_en?: string | null
+          ultimo_error?: string | null
+          ultimo_intento_en?: string | null
+        }
+        Relationships: []
+      }
       suscripciones: {
         Row: {
           auto_renovar: boolean
@@ -17035,6 +17074,36 @@ export type Database = {
         }
         Relationships: []
       }
+      v_storage_borrado_atascado: {
+        Row: {
+          bucket: string | null
+          encolado_en: string | null
+          estado: string | null
+          intentos: number | null
+          origen: string | null
+          ultimo_error: string | null
+          ultimo_intento_en: string | null
+        }
+        Insert: {
+          bucket?: string | null
+          encolado_en?: string | null
+          estado?: string | null
+          intentos?: number | null
+          origen?: string | null
+          ultimo_error?: string | null
+          ultimo_intento_en?: string | null
+        }
+        Update: {
+          bucket?: string | null
+          encolado_en?: string | null
+          estado?: string | null
+          intentos?: number | null
+          origen?: string | null
+          ultimo_error?: string | null
+          ultimo_intento_en?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _adiestramiento_atencion_terminada: {
@@ -17843,6 +17912,7 @@ export type Database = {
         Args: { p_presupuesto_id: string; p_vence_en: string }
         Returns: undefined
       }
+      es_mi_prestador: { Args: { p_prestador_id: string }; Returns: boolean }
       escenario_d167_setup: { Args: never; Returns: Json }
       escenario_grooming_confirmado_persistente: { Args: never; Returns: Json }
       escenario_grooming_iniciado: { Args: never; Returns: Json }
@@ -18371,6 +18441,9 @@ export type Database = {
           telefono: string
           tipo: string
           whatsapp: string
+          zona_lat: number
+          zona_lon: number
+          zona_radio_m: number
         }[]
       }
       obtener_mis_atenciones_grooming: {
@@ -18653,6 +18726,7 @@ export type Database = {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
       }
+      prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
       puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {

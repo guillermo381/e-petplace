@@ -1,0 +1,2244 @@
+{
+ "seq": [
+  {
+   "filas": 147,
+   "filas_por_recorrido": "36",
+   "idx_scan": 90188,
+   "seq_scan": 212127,
+   "seq_tup_read": 7559174,
+   "tabla": "evento_cita_servicio"
+  },
+  {
+   "filas": 21,
+   "filas_por_recorrido": "17",
+   "idx_scan": 26627,
+   "seq_scan": 143897,
+   "seq_tup_read": 2420298,
+   "tabla": "prestador_empleados"
+  },
+  {
+   "filas": 72,
+   "filas_por_recorrido": "5",
+   "idx_scan": 124738,
+   "seq_scan": 455798,
+   "seq_tup_read": 2107689,
+   "tabla": "mascotas"
+  },
+  {
+   "filas": 7,
+   "filas_por_recorrido": "5",
+   "idx_scan": 343167,
+   "seq_scan": 213088,
+   "seq_tup_read": 1148344,
+   "tabla": "prestadores"
+  },
+  {
+   "filas": 137,
+   "filas_por_recorrido": "106",
+   "idx_scan": 812,
+   "seq_scan": 4782,
+   "seq_tup_read": 507200,
+   "tabla": "pedidos"
+  },
+  {
+   "filas": 30,
+   "filas_por_recorrido": "29",
+   "idx_scan": 40079,
+   "seq_scan": 8370,
+   "seq_tup_read": 242962,
+   "tabla": "tipos_servicio"
+  },
+  {
+   "filas": 150,
+   "filas_por_recorrido": "103",
+   "idx_scan": 16862,
+   "seq_scan": 2131,
+   "seq_tup_read": 220419,
+   "tabla": "profiles"
+  },
+  {
+   "filas": 39,
+   "filas_por_recorrido": "14",
+   "idx_scan": 16418,
+   "seq_scan": 14416,
+   "seq_tup_read": 197979,
+   "tabla": "evento_atencion"
+  },
+  {
+   "filas": 25,
+   "filas_por_recorrido": "18",
+   "idx_scan": 24257,
+   "seq_scan": 7964,
+   "seq_tup_read": 141947,
+   "tabla": "prestador_servicios"
+  },
+  {
+   "filas": 288,
+   "filas_por_recorrido": "57",
+   "idx_scan": 8466,
+   "seq_scan": 2324,
+   "seq_tup_read": 132454,
+   "tabla": "eventos_mascota"
+  },
+  {
+   "filas": 14,
+   "filas_por_recorrido": "14",
+   "idx_scan": 4210,
+   "seq_scan": 8321,
+   "seq_tup_read": 113314,
+   "tabla": "familia_miembro"
+  },
+  {
+   "filas": 7,
+   "filas_por_recorrido": "4",
+   "idx_scan": 4880,
+   "seq_scan": 21431,
+   "seq_tup_read": 79489,
+   "tabla": "cuentas_comerciales"
+  },
+  {
+   "filas": 105,
+   "filas_por_recorrido": "105",
+   "idx_scan": 268,
+   "seq_scan": 516,
+   "seq_tup_read": 53970,
+   "tabla": "cat_razas"
+  },
+  {
+   "filas": 80,
+   "filas_por_recorrido": "17",
+   "idx_scan": 4782,
+   "seq_scan": 3192,
+   "seq_tup_read": 53383,
+   "tabla": "familia"
+  },
+  {
+   "filas": 21,
+   "filas_por_recorrido": "19",
+   "idx_scan": 3947,
+   "seq_scan": 2561,
+   "seq_tup_read": 47720,
+   "tabla": "prestador_empleado_servicios"
+  }
+ ],
+ "indicesSinUso": [
+  {
+   "bytes": 40960,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_eventos_datos_gin",
+   "tabla": "eventos_mascota"
+  },
+  {
+   "bytes": 40960,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_pet_hash",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 32768,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mascotas_pet_hash_unique",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 24576,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_identidad_relevante_para_gin",
+   "tabla": "evento_identidad_personal"
+  },
+  {
+   "bytes": 24576,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_perfil_condiciones_gin",
+   "tabla": "mascota_perfil_vigente"
+  },
+  {
+   "bytes": 24576,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_perfil_alergias_gin",
+   "tabla": "mascota_perfil_vigente"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mascota_codueño_pkey",
+   "tabla": "mascota_codueño"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_atencion_cita_mascota_key",
+   "tabla": "evento_atencion"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_campanas_estado",
+   "tabla": "campanas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "unique_especie_idioma_clave",
+   "tabla": "cat_especies_vocabulario"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_familia_cuenta_comercial",
+   "tabla": "familia"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_familia_country",
+   "tabla": "familia"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_hito_narrativo_pkey",
+   "tabla": "evento_hito_narrativo"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_caso_clinico_abierto_pkey",
+   "tabla": "evento_caso_clinico_abierto"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_country",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mascotas_microchip_unique",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_estado_vida",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_pedidos_kushki_charge",
+   "tabla": "pedidos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_vacuna_aplicada_pkey",
+   "tabla": "evento_vacuna_aplicada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_vacuna_aplicada_country",
+   "tabla": "evento_vacuna_aplicada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_vacuna_aplicada_cita",
+   "tabla": "evento_vacuna_aplicada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_vacuna_aplicada_tipo",
+   "tabla": "evento_vacuna_aplicada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "uq_prestador_fotos_orden",
+   "tabla": "prestador_fotos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "wearable_devices_device_serial_key",
+   "tabla": "wearable_devices"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "wearable_telemetry_pkey",
+   "tabla": "wearable_telemetry"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_telemetry_synced",
+   "tabla": "wearable_telemetry"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mascota_visibilidad_config_pkey",
+   "tabla": "mascota_visibilidad_config"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_visibilidad_modo",
+   "tabla": "mascota_visibilidad_config"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "consentimientos_pkey",
+   "tabla": "consentimientos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_consentimientos_user_tipo",
+   "tabla": "consentimientos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_events_name_country",
+   "tabla": "analytics_events"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "country_config_pkey",
+   "tabla": "country_config"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_comisiones_pkey",
+   "tabla": "seller_comisiones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "accion_destructiva_pendiente_pkey",
+   "tabla": "accion_destructiva_pendiente"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_accion_destructiva_pendientes",
+   "tabla": "accion_destructiva_pendiente"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_accion_destructiva_expira",
+   "tabla": "accion_destructiva_pendiente"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_liquidaciones_seller",
+   "tabla": "seller_liquidaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_liquidaciones_estado",
+   "tabla": "seller_liquidaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_liquidaciones_periodo",
+   "tabla": "seller_liquidaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_caso_clinico_horizonte",
+   "tabla": "caso_clinico"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_reglas_asignacion_pkey",
+   "tabla": "seller_reglas_asignacion"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mensajes_admin_seller_pkey",
+   "tabla": "mensajes_admin_seller"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cupones_codigo_key",
+   "tabla": "cupones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cupones_codigo",
+   "tabla": "cupones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "campanas_pkey",
+   "tabla": "campanas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cat_especies_vocabulario_pkey",
+   "tabla": "cat_especies_vocabulario"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "envio_eventos_pkey",
+   "tabla": "envio_eventos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_envios_tracking",
+   "tabla": "envios"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "beta_users_email_key",
+   "tabla": "beta_users"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "beta_users_invite_code_key",
+   "tabla": "beta_users"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "zonas_cobertura_pkey",
+   "tabla": "zonas_cobertura"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "acuario_composicion_pkey",
+   "tabla": "acuario_composicion"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "admin_usuarios_roles_pkey",
+   "tabla": "admin_usuarios_roles"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "admin_usuarios_roles_user_id_rol_id_key",
+   "tabla": "admin_usuarios_roles"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_prestadores_cuenta_comercial",
+   "tabla": "prestadores"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_historia_clinica_registrada_cita_id_unique",
+   "tabla": "evento_historia_clinica_registrada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_hc_registrada_caso",
+   "tabla": "evento_historia_clinica_registrada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "prestador_resenas_pkey",
+   "tabla": "prestador_resenas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_identidad_subtipo",
+   "tabla": "evento_identidad_personal"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "productos_pkey",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "productos_categoria_idx",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_seller",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_seller_perfil",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_estado",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_stock_bajo",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "productos_vtex_product_id_key",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "suscripciones_servicio_pkey",
+   "tabla": "suscripciones_servicio"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "suscripciones_servicio_user_idx",
+   "tabla": "suscripciones_servicio"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "suscripciones_servicio_empleado_idx",
+   "tabla": "suscripciones_servicio"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_notif_no_enviada",
+   "tabla": "notificaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "documento_token_folio_key",
+   "tabla": "documento_token"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "puntos_usuario_pkey",
+   "tabla": "puntos_usuario"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_puntos_ranking",
+   "tabla": "puntos_usuario"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "transacciones_puntos_pkey",
+   "tabla": "transacciones_puntos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_adiestramiento_objetivos_pkey",
+   "tabla": "evento_adiestramiento_objetivos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cat_bancos_pkey",
+   "tabla": "cat_bancos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cat_paises_codigo_iso3_key",
+   "tabla": "cat_paises"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "test_data_registry_pkey",
+   "tabla": "test_data_registry"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_paseo_novedades_pkey",
+   "tabla": "evento_paseo_novedades"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_adiestramiento_notas_pkey",
+   "tabla": "evento_adiestramiento_notas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_criaderos_razas",
+   "tabla": "criaderos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "prestador_zonas_pkey",
+   "tabla": "prestador_zonas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "uq_prestador_zonas",
+   "tabla": "prestador_zonas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_prestador_zonas_ciudad",
+   "tabla": "prestador_zonas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "bonos_user_idx",
+   "tabla": "bonos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "bonos_activos_disponibles",
+   "tabla": "bonos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "bonos_empleado_idx",
+   "tabla": "bonos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "estadias_pkey",
+   "tabla": "estadias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "estadias_user_idx",
+   "tabla": "estadias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "estadias_empleado_idx",
+   "tabla": "estadias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "paseo_social_negativas_pkey",
+   "tabla": "paseo_social_negativas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_examen_diagnostico_country",
+   "tabla": "evento_examen_diagnostico"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_examen_caso",
+   "tabla": "evento_examen_diagnostico"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_medicacion_prescrita_country",
+   "tabla": "evento_medicacion_prescrita"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_medicacion_caso",
+   "tabla": "evento_medicacion_prescrita"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "empleado_invitaciones_token_key",
+   "tabla": "empleado_invitaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_archivo_adjunto_country",
+   "tabla": "evento_archivo_adjunto"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_archivo_adjunto_categoria",
+   "tabla": "evento_archivo_adjunto"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "prestador_servicio_tallas_pkey",
+   "tabla": "prestador_servicio_tallas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "prestador_recetas_frecuentes_pkey",
+   "tabla": "prestador_recetas_frecuentes"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_recetas_frec_prestador",
+   "tabla": "prestador_recetas_frecuentes"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_recetas_frec_prestador_activa",
+   "tabla": "prestador_recetas_frecuentes"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_recetas_frec_country",
+   "tabla": "prestador_recetas_frecuentes"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cuentas_comerciales_estado",
+   "tabla": "cuentas_comerciales"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cuentas_comerciales_country",
+   "tabla": "cuentas_comerciales"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_eventos_kushki_charge",
+   "tabla": "eventos_economicos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_eventos_fecha_devengo_country",
+   "tabla": "eventos_economicos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_fee_configs_vigencia",
+   "tabla": "fee_configs"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "fee_configs_historial_pkey",
+   "tabla": "fee_configs_historial"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_fee_configs_historial_fee_config",
+   "tabla": "fee_configs_historial"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "grooming_talla_discrepancias_pkey",
+   "tabla": "grooming_talla_discrepancias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_adiestramiento_clips_pkey",
+   "tabla": "evento_adiestramiento_clips"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "uq_adiestramiento_clip_orden",
+   "tabla": "evento_adiestramiento_clips"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "liquidaciones_numero_liquidacion_key",
+   "tabla": "liquidaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_liquidaciones_country_periodo",
+   "tabla": "liquidaciones"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cuenta_roles_pkey",
+   "tabla": "cuenta_roles"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cuenta_roles_tipo_actor_activo",
+   "tabla": "cuenta_roles"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cat_categorias_archivo_orden_display_key",
+   "tabla": "cat_categorias_archivo"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_servicios_aplicados_pkey",
+   "tabla": "evento_grooming_servicios_aplicados"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_zonas_trabajadas_pkey",
+   "tabla": "evento_grooming_zonas_trabajadas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_archivos_pkey",
+   "tabla": "evento_grooming_archivos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_estados_pelaje_pkey",
+   "tabla": "evento_grooming_estados_pelaje"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_notas_pkey",
+   "tabla": "evento_grooming_notas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_grooming_notas_atencion",
+   "tabla": "evento_grooming_notas"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_incidencias_pkey",
+   "tabla": "evento_grooming_incidencias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_grooming_incidencias_atencion",
+   "tabla": "evento_grooming_incidencias"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cat_ejes_jtbd_orden_display_key",
+   "tabla": "cat_ejes_jtbd"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_certificado_salud_prestador",
+   "tabla": "certificado_salud"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_atencion_log_pet_hash",
+   "tabla": "prestador_atencion_log"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_alergia_estado",
+   "tabla": "evento_alergia_diagnosticada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_acceso_mascota",
+   "tabla": "mascota_acceso_prestador"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_acceso_cuenta",
+   "tabla": "mascota_acceso_prestador"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_condicion_estado",
+   "tabla": "evento_condicion_cronica_diagnosticada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_condicion_diag_caso",
+   "tabla": "evento_condicion_cronica_diagnosticada"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_peso_medicion_pkey",
+   "tabla": "evento_peso_medicion"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_grooming_productos_consumidos_pkey",
+   "tabla": "evento_grooming_productos_consumidos"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_temperamento_rasgos_gin",
+   "tabla": "evento_temperamento_observacion"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_ebf_programa",
+   "tabla": "evento_bitacora_familia"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "prestador_especialidades_pkey",
+   "tabla": "prestador_especialidades"
+  },
+  {
+   "bytes": 16384,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "presupuesto_item_pkey",
+   "tabla": "presupuesto_item"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_tickets_estado",
+   "tabla": "tickets_soporte"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "ticket_mensajes_pkey",
+   "tabla": "ticket_mensajes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_tm_ticket",
+   "tabla": "ticket_mensajes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguro_planes_pkey",
+   "tabla": "seguro_planes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguro_polizas_pkey",
+   "tabla": "seguro_polizas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguro_polizas_numero_poliza_key",
+   "tabla": "seguro_polizas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_polizas_vencen",
+   "tabla": "seguro_polizas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "certificaciones_numero_certificado_key",
+   "tabla": "certificaciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cert_hash",
+   "tabla": "certificaciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguro_siniestros_pkey",
+   "tabla": "seguro_siniestros"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_siniestros_poliza",
+   "tabla": "seguro_siniestros"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_emergencia_solicitada_pkey",
+   "tabla": "evento_emergencia_solicitada"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "servicios_exequiales_pkey",
+   "tabla": "servicios_exequiales"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_exequiales_estado",
+   "tabla": "servicios_exequiales"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "posts_pkey",
+   "tabla": "posts"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_posts_feed",
+   "tabla": "posts"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_posts_stories",
+   "tabla": "posts"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_eventos_fecha",
+   "tabla": "eventos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_familiar_autorizado_mascota",
+   "tabla": "mascota_familiar_autorizado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_familiar_autorizado_familia",
+   "tabla": "mascota_familiar_autorizado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "unique_familiar_autorizado_vigente",
+   "tabla": "mascota_familiar_autorizado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_eventos_ciudad",
+   "tabla": "eventos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "mascota_familiar_autorizado_pkey",
+   "tabla": "mascota_familiar_autorizado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_inscripciones_codigo_entrada_key",
+   "tabla": "evento_inscripciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_microchip",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_criadero",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_refugio",
+   "tabla": "mascotas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_ei_evento",
+   "tabla": "evento_inscripciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_medicacion_admin_fecha",
+   "tabla": "evento_medicacion_administrada"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "post_comentarios_pkey",
+   "tabla": "post_comentarios"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_pc_post",
+   "tabla": "post_comentarios"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_emergencia_estado",
+   "tabla": "evento_emergencia_solicitada"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "likes_user_id_post_id_key",
+   "tabla": "likes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_likes_post",
+   "tabla": "likes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguidores_pkey",
+   "tabla": "seguidores"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seguidores_seguidor_id_seguido_id_key",
+   "tabla": "seguidores"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_temperamento_observacion_pkey",
+   "tabla": "evento_temperamento_observacion"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "wearable_zones_pkey",
+   "tabla": "wearable_zones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "wearable_alerts_pkey",
+   "tabla": "wearable_alerts"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "planes_nutricion_pkey",
+   "tabla": "planes_nutricion"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_presupuesto_caso",
+   "tabla": "presupuesto"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_lpf_ciudad",
+   "tabla": "lugares_pet_friendly"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_lpf_geo",
+   "tabla": "lugares_pet_friendly"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "daas_api_clients_api_key_key",
+   "tabla": "daas_api_clients"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "criadero_camadas_pkey",
+   "tabla": "criadero_camadas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "analytics_aggregated_pkey",
+   "tabla": "analytics_aggregated"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "analytics_aggregated_report_date_country_code_dimension_typ_key",
+   "tabla": "analytics_aggregated"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_aggregated_date_country",
+   "tabla": "analytics_aggregated"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_aggregated_dimension",
+   "tabla": "analytics_aggregated"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_camadas_criadero",
+   "tabla": "criadero_camadas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_camadas_raza",
+   "tabla": "criadero_camadas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "lugares_resenas_pkey",
+   "tabla": "lugares_resenas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_lr_lugar",
+   "tabla": "lugares_resenas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_caso_clinico_transferido_pkey",
+   "tabla": "evento_caso_clinico_transferido"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_nota_dueno_pkey",
+   "tabla": "evento_nota_dueno"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_criaderos_ciudad",
+   "tabla": "criaderos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_criaderos_estado",
+   "tabla": "criaderos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "liquidacion_pedidos_liquidacion_id_pedido_id_key",
+   "tabla": "liquidacion_pedidos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "criadero_cachorros_pkey",
+   "tabla": "criadero_cachorros"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_inventario_pkey",
+   "tabla": "seller_inventario"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_inventario_seller_id_producto_id_key",
+   "tabla": "seller_inventario"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_inventario_ciudad",
+   "tabla": "seller_inventario"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cachorros_camada",
+   "tabla": "criadero_cachorros"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "pedido_items_pkey",
+   "tabla": "pedido_items"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "caso_clinico_consultor_pkey",
+   "tabla": "caso_clinico_consultor"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_consultor_caso_vigente",
+   "tabla": "caso_clinico_consultor"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_consultor_clinica_vigente",
+   "tabla": "caso_clinico_consultor"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "pedidos_recurrentes_pkey",
+   "tabla": "pedidos_recurrentes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_recurrentes_proximo",
+   "tabla": "pedidos_recurrentes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_recurrentes_pausado",
+   "tabla": "pedidos_recurrentes"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cachorros_disponibles",
+   "tabla": "criadero_cachorros"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cd_criadero",
+   "tabla": "criadero_documentos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "lista_espera_user_id_camada_id_key",
+   "tabla": "lista_espera"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_le_camada",
+   "tabla": "lista_espera"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_le_producto",
+   "tabla": "lista_espera"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_cr_criadero",
+   "tabla": "criadero_resenas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "facturas_numero_factura_key",
+   "tabla": "facturas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "facturas_clave_acceso_key",
+   "tabla": "facturas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_facturas_estado",
+   "tabla": "facturas"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "loyalty_b2b_pkey",
+   "tabla": "loyalty_b2b"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "loyalty_b2b_codigo_socio_key",
+   "tabla": "loyalty_b2b"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_lb2b_nivel",
+   "tabla": "loyalty_b2b"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "notas_admin_usuario_pkey",
+   "tabla": "notas_admin_usuario"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_audit_fecha",
+   "tabla": "audit_log"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_perfil_seguro",
+   "tabla": "mascota_perfil_vigente"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_perfil_emergencia",
+   "tabla": "mascota_perfil_vigente"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_caso_clinico_cerrado_pkey",
+   "tabla": "evento_caso_clinico_cerrado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "productos_comerciales_pkey",
+   "tabla": "productos_comerciales"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "productos_comerciales_codigo_key",
+   "tabla": "productos_comerciales"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_donaciones_refugio",
+   "tabla": "donaciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_comerciales_country_activo",
+   "tabla": "productos_comerciales"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_profiles_codigo_referido",
+   "tabla": "profiles"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_nota_categoria",
+   "tabla": "evento_nota_dueno"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_microchip_id",
+   "tabla": "evento_microchip_asignado"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_alergia_diag_caso",
+   "tabla": "evento_alergia_diagnosticada"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_correccion_campo",
+   "tabla": "evento_correccion_dato_identidad"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_certificado_tipo",
+   "tabla": "evento_certificado_emitido"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_productos_vtex",
+   "tabla": "productos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_documentos_pkey",
+   "tabla": "seller_documentos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "refugios_pkey",
+   "tabla": "refugios"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_refugios_country_estado",
+   "tabla": "refugios"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_refugios_ubicacion",
+   "tabla": "refugios"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_perfil_codigo_afiliado_key",
+   "tabla": "seller_perfil"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "seller_perfil_vtex_seller_id_key",
+   "tabla": "seller_perfil"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_seller_perfil_vtex_sync",
+   "tabla": "seller_perfil"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "checkout_sesiones_pkey",
+   "tabla": "checkout_sesiones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_checkout_user",
+   "tabla": "checkout_sesiones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_checkout_expiradas",
+   "tabla": "checkout_sesiones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cita_telemedicina_detalle_pkey",
+   "tabla": "cita_telemedicina_detalle"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "cita_telemedicina_detalle_cita_id_unique",
+   "tabla": "cita_telemedicina_detalle"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_tm_programada",
+   "tabla": "cita_telemedicina_detalle"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascota_acceso_expira",
+   "tabla": "mascota_acceso_prestador"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "wishlist_pkey",
+   "tabla": "wishlist"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "resenas_productos_pkey",
+   "tabla": "resenas_productos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "metricas_negocio_pkey",
+   "tabla": "metricas_negocio"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "metricas_negocio_fecha_key",
+   "tabla": "metricas_negocio"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_metricas_fecha",
+   "tabla": "metricas_negocio"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "suscripciones_pkey",
+   "tabla": "suscripciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "suscripciones_user_id_key",
+   "tabla": "suscripciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_suscripciones_vencen",
+   "tabla": "suscripciones"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_hpp_suscripcion",
+   "tabla": "historial_pagos_prime"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_certificado_vigencia",
+   "tabla": "evento_certificado_emitido"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_evento_certificado_renovacion",
+   "tabla": "evento_certificado_emitido"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "evento_intervencion_permanente_pkey",
+   "tabla": "evento_intervencion_permanente"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_intervencion_caso",
+   "tabla": "evento_intervencion_permanente"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_ee_emergencia",
+   "tabla": "emergencia_eventos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "solicitudes_emergencia_pkey",
+   "tabla": "solicitudes_emergencia"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_emergencias_estado",
+   "tabla": "solicitudes_emergencia"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_emergencias_buscando",
+   "tabla": "solicitudes_emergencia"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "vtex_sync_log_pkey",
+   "tabla": "vtex_sync_log"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_vtex_log_estado",
+   "tabla": "vtex_sync_log"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_vtex_log_entidad",
+   "tabla": "vtex_sync_log"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_vtex_log_fallidos",
+   "tabla": "vtex_sync_log"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_solicitudes_adopcion_refugio",
+   "tabla": "solicitudes_adopcion"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "referidos_pkey",
+   "tabla": "referidos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "referidos_codigo_referido_key",
+   "tabla": "referidos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_referidos_codigo",
+   "tabla": "referidos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_referidos_calificados",
+   "tabla": "referidos"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "adopcion_seguimiento_pkey",
+   "tabla": "adopcion_seguimiento"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_seguimiento_pendientes",
+   "tabla": "adopcion_seguimiento"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_reportes_activos",
+   "tabla": "reportes_programados"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": false,
+   "idx_scan": 0,
+   "indice": "idx_mascotas_adopcion_refugio",
+   "tabla": "mascotas_adopcion"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "tickets_soporte_pkey",
+   "tabla": "tickets_soporte"
+  },
+  {
+   "bytes": 8192,
+   "es_unico": true,
+   "idx_scan": 0,
+   "indice": "tickets_soporte_numero_ticket_key",
+   "tabla": "tickets_soporte"
+  }
+ ],
+ "volatilidad": [
+  {
+   "policies": 241,
+   "proname": "is_admin",
+   "volatilidad": "VOLATILE"
+  },
+  {
+   "policies": 60,
+   "proname": "user_tiene_acceso_a_mascota",
+   "volatilidad": "STABLE"
+  },
+  {
+   "policies": 15,
+   "proname": "user_acceso_clinico_a_mascota",
+   "volatilidad": "STABLE"
+  },
+  {
+   "policies": 13,
+   "proname": "es_mi_prestador",
+   "volatilidad": "STABLE"
+  },
+  {
+   "policies": 5,
+   "proname": "prestador_activo",
+   "volatilidad": "STABLE"
+  },
+  {
+   "policies": 4,
+   "proname": "empleado_tiene_rol",
+   "volatilidad": "STABLE"
+  }
+ ],
+ "reparto": {
+  "soloTls": {
+   "rotulo": "HEAD a la raíz de PostgREST (sin consulta)",
+   "veces": 10,
+   "calentar": 3,
+   "p50": 70.5,
+   "p95": 138.2,
+   "min": 59.8,
+   "max": 138.2,
+   "serie": [
+    59.8,
+    60.7,
+    70.1,
+    71.7,
+    80.7,
+    80.8,
+    138.2,
+    72.9,
+    70.5,
+    62.7
+   ]
+  },
+  "trivial": {
+   "rotulo": "lectura de 1 fila de catálogo",
+   "veces": 10,
+   "calentar": 3,
+   "p50": 198.4,
+   "p95": 230.6,
+   "min": 176.3,
+   "max": 230.6,
+   "serie": [
+    215.1,
+    207.6,
+    176.3,
+    195.7,
+    183.2,
+    183.5,
+    228.2,
+    205.3,
+    230.6,
+    198.4
+   ]
+  },
+  "pesada": {
+   "rotulo": "lectura de 200 filas con 3 columnas",
+   "veces": 10,
+   "calentar": 3,
+   "p50": 184.7,
+   "p95": 217.3,
+   "min": 182.3,
+   "max": 217.3,
+   "serie": [
+    183.2,
+    217.3,
+    186.4,
+    204.4,
+    182.3,
+    201.5,
+    194.2,
+    184.7,
+    183.9,
+    184.6
+   ]
+  }
+ },
+ "conexiones": {
+  "activas": 1,
+  "en_uso": 17,
+  "max_conn": "60",
+  "ociosas": 8,
+  "porApp": [
+   {
+    "app": "",
+    "n": 7
+   },
+   {
+    "app": "postgrest",
+    "n": 6
+   },
+   {
+    "app": "mgmt-api",
+    "n": 1
+   },
+   {
+    "app": "postgres_exporter",
+    "n": 1
+   },
+   {
+    "app": "pg_cron scheduler",
+    "n": 1
+   },
+   {
+    "app": "pg_net 0.20.0",
+    "n": 1
+   }
+  ]
+ },
+ "cache": "100.00"
+}
