@@ -1,0 +1,38 @@
+[
+ {
+  "rotulo": "ANTES · peor caso real del bucket",
+  "kB": 6042,
+  "p50": 818.3,
+  "serie": [
+   1324,
+   1077,
+   818,
+   797,
+   725
+  ]
+ },
+ {
+  "rotulo": "ANTES · mediana medida del bucket",
+  "kB": 474,
+  "p50": 343.2,
+  "serie": [
+   414,
+   418,
+   343,
+   331,
+   333
+  ]
+ },
+ {
+  "rotulo": "DESPUÉS · la comparable ya subida a 1600 px",
+  "kB": 204,
+  "p50": 357.4,
+  "serie": [
+   318,
+   357,
+   468,
+   380,
+   338
+  ]
+ }
+]

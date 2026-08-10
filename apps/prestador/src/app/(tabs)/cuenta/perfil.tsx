@@ -393,7 +393,19 @@ export default function PerfilV2() {
 
   async function agregarFoto() {
     if (subiendoFoto || prestador === null) return;
-    const cap = await capturarDeGaleria({ calidad: 0.9 });
+    /* ⚡ D-734 — LA FOTO DE LA VITRINA SE REDIMENSIONA. Esta llamada pedía
+       `calidad` y **no pedía `redimensionarA`**, así que subía el original de la
+       galería del teléfono: mediana medida **474 kB** y una de **5,9 MB**, en la
+       pantalla más pública del producto.
+       ── POR QUÉ 1600 Y NO LOS 800 DEL AVATAR ──────────────────────────────
+       Porque acá la imagen se pinta **a sangre**: `FichaPrestador` usa
+       `RELACION_PORTADA = 4/3` con el ancho del contenedor, o sea ~1290 px
+       reales en un teléfono de 430 pt a DPR 3. Con 800 la portada quedaría
+       blanda — *una foto liviana que se ve mal no es una cura, es una regresión
+       con mejor número*. 1600 no es un número nuevo: es el que la casa ya usa
+       para el carnet y los documentos, que también tienen que aguantar
+       pantalla completa. La `calidad: 0.9` se conserva: es una vitrina. */
+    const cap = await capturarDeGaleria({ calidad: 0.9, redimensionarA: 1600 });
     if (cap.tipo === 'cancelada') return;
     if (cap.tipo === 'permiso_denegado') {
       mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
@@ -590,6 +602,18 @@ export default function PerfilV2() {
      Y EL LOGO NO ESPERA AL GUARDAR: subir la imagen ES el acto. */
   async function capturarLogo() {
     setHojaLogo(false);
+    /* ⚡ D-734 · EL LOGO ES LA EXCEPCIÓN, Y NO ES UN OLVIDO — SE MIDIÓ.
+       Sus hermanas de esta tanda (la galería, la evidencia) ganaron
+       `redimensionarA`. Acá **no se puede usar la pieza compartida**: el resize
+       de `capturaFoto` re-codifica a **JPEG** (`SaveFormat.JPEG`), y el logo es
+       **PNG-only por orden del founder** — *«poder quitar el fondo»*, o sea la
+       transparencia es el punto, y `subir-logo.ts` rechaza cualquier otra cosa
+       con `formato_no_png`. Aplicar el resize acá haría dos daños de una:
+       mataría el alpha y **la subida rebotaría su propio archivo**.
+       ⇒ redimensionar un PNG con alpha necesita otra herramienta, no otra
+       llamada. Queda censado como **D-740**, con su número medido: el bucket
+       `avatars` tiene mediana 76 kB y mayor 327 kB — o sea que **hoy no
+       aprieta**, y por eso es deuda y no urgencia. */
     const r = await capturarDeGaleria({ calidad: 1 });
     if (r.tipo === 'cancelada') return;
     if (r.tipo === 'permiso_denegado') {

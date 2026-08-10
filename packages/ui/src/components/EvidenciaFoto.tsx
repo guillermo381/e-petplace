@@ -96,6 +96,24 @@ export interface EvidenciaFotoCapturarProps {
 
 const LADO = 96 // mismo default que Thumbnail: conviven en la misma fila
 const CALIDAD = 0.7
+/**
+ * ⚡ D-734 — LA EVIDENCIA SE REDIMENSIONA, y hasta hoy no lo hacía.
+ *
+ * Este componente pedía `calidad` y **no pedía `redimensionarA`**, así que subía
+ * la foto ORIGINAL de la cámara. Medido en los buckets que alimenta:
+ * `grooming-archivos` mediana **441 kB** (mayor 2,1 MB) y `cita-archivos`
+ * mediana **500 kB** (mayor 1,5 MB) — contra **63 kB** de las fotos de mascota,
+ * que sí redimensionan. *El defecto que el founder vio en la vitrina no era de
+ * la vitrina: era de la clase.*
+ *
+ * ── POR QUÉ 1600 Y NO LOS 800 DEL AVATAR ──────────────────────────────────
+ * No es un número nuevo: es el que la casa ya usa donde la imagen tiene que
+ * aguantar pantalla completa (carnet, documentos del prestador). Una evidencia
+ * se abre en `VisorFoto` a pantalla entera, así que 800 la dejaría blanda — y
+ * *una foto liviana que no se puede mirar no es una cura: es una regresión con
+ * mejor número*. El avatar puede con 800 porque se dibuja a 28-64 px.
+ */
+const LADO_MAX = 1600
 
 export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: EvidenciaFotoCapturarProps) {
   const { theme } = useTheme()
@@ -112,7 +130,7 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
     if (lanzandoRef.current || deshabilitado) return
     lanzandoRef.current = true
     try {
-      const r = await capturarConCamara({ calidad: CALIDAD })
+      const r = await capturarConCamara({ calidad: CALIDAD, redimensionarA: LADO_MAX })
       if (r.tipo === 'permiso_denegado') {
         setPermisoDenegado(true)
         return
@@ -129,7 +147,7 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
     lanzandoRef.current = true
     setHojaAbierta(false)
     try {
-      const r = await capturarDeGaleria({ calidad: CALIDAD })
+      const r = await capturarDeGaleria({ calidad: CALIDAD, redimensionarA: LADO_MAX })
       if (r.tipo === 'foto') onFoto(r.foto.uri)
     } finally {
       lanzandoRef.current = false
