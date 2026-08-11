@@ -41,12 +41,25 @@ const FRENTE = [
 
 // Tablas del dominio de SERVICIOS. Ninguna FK puede cruzar contra FRENTE.
 //
-// ⚠️ La lista se amplió tras cazar un VERDE FLOJO: con la lista corta, el
-// invariante 2 pasaba porque no miraba las tablas que cruzan de verdad. Las
-// dos últimas se clasifican por MEDICIÓN, no por nombre: `servicios_exequiales`
-// tiene `prestador_id` y `tickets_soporte` tiene `cita_id` — las dos son del
-// dominio de servicios y las dos apuntan a `pedidos`.
-// Un invariante verde porque su lista es corta es peor que uno rojo.
+// ⚠️ HISTORIA DE ESTA LISTA — se deja escrita porque LA LISTA ES EL TEST, y un
+// test cuya lista cambia sin razón registrada deja de ser auditable.
+//
+//   · Primera corrida: VERDE FLOJO. La lista era corta y no miraba las tablas
+//     que cruzaban de verdad. Un invariante verde porque su lista es corta es
+//     peor que uno rojo: dice un número más chico, y eso se lee como progreso.
+//
+//   · Corregida POR MEDICIÓN DE COLUMNAS, no por nombre, aparecieron dos:
+//       – `servicios_exequiales`: prestador_id, fecha_servicio,
+//         direccion_recogida, certificado_url → SERVICIO cobrado por la tabla
+//         de pedidos de producto. Violación real. **Jubilada en la M1.**
+//       – `tickets_soporte`: ver abajo.
+//
+//   · 🔴 `tickets_soporte` SALE DE ESTA LISTA — firma del founder, 11-ago-2026,
+//     sobre la razón MEDIDA: **sin `prestador_id`; referencia ambos dominios
+//     porque es soporte, no ejecución de servicio.** Un ticket no produce un
+//     SKU ni comparte tabla con una cita: no es lo que §3.4 prohíbe.
+//     *No se sacó para que el juez se pusiera verde — se elevó primero y se
+//     sacó después de la firma.*
 const SERVICIOS = [
   'evento_cita_servicio', 'evento_atencion', 'prestadores', 'prestador_empleados',
   'prestador_servicios', 'prestador_horarios', 'tipos_servicio', 'bonos',
@@ -54,7 +67,6 @@ const SERVICIOS = [
   'eventos_mascota_paseo', 'eventos_mascota_adiestramiento',
   'evento_grooming_servicios_aplicados', 'evento_paseo_novedades',
   'prestador_programas', 'programas_contratados', 'prestador_especialidades',
-  'servicios_exequiales', 'tickets_soporte',
 ];
 
 // Tablas del EXPEDIENTE. El rol vendedor no puede tocarlas (invariante 4).
@@ -67,11 +79,26 @@ const EXPEDIENTE = [
 ];
 
 // Tablas que el esqueleto JUBILA. Invariante 10: no pueden seguir existiendo.
+//
+// 🔴 `cupones` y `cupon_usos` SALIERON DE ESTA LISTA — firma del founder,
+//    11-ago-2026, sobre el hallazgo de la medición: hay una campaña
+//    **«Lanzamiento de nuestra App»**, por WhatsApp, en estado **programada**,
+//    con el cupón **AMIGOS05 ACTIVO** al 5 % y cero usos. `MODELO_LOYALTY` §9
+//    declara que el motor de campañas YA OPERA y es el canal de entrega de los
+//    beneficios del programa. **No son de la despensa: apagarlas apagaba una
+//    campaña de lanzamiento que todavía no salió.**
+//
+// ⚠️ `seller_perfil` y `resenas_productos` SIGUEN EN LA LISTA y por eso el
+//    invariante 10 sigue rojo. Es correcto: hay que apagarlas, pero la M1 las
+//    frenó porque una vista que sirve a OTRO frente depende de ellas
+//    (`v_pitch_metrics` cuenta prestadores, mascotas y citas; `v_resenas_todas`
+//    une opiniones de productos con las de PRESTADORES). El rojo es el
+//    pendiente, no un defecto del test.
 const JUBILADAS = [
   'seller_inventario', 'seller_comisiones', 'seller_perfil', 'seller_documentos',
   'seller_reglas_asignacion', 'mensajes_admin_seller', 'pedidos_recurrentes',
   'resenas_productos', 'wishlist', 'lista_espera', 'planes_nutricion',
-  'cupones', 'cupon_usos', 'checkout_sesiones', 'vtex_sync_log',
+  'checkout_sesiones', 'vtex_sync_log',
   'seller_liquidaciones', 'liquidacion_pedidos',
 ];
 
