@@ -1,8 +1,9 @@
 /**
  * capturar-lead — LA PUERTA ÚNICA del sitio público.
  *
- * ⚠️ ESCRITA, NO DESPLEGADA. Espera la ventana coordinada con la pista de
- * la app (proyecto Supabase compartido) y la API key de Resend.
+ * ⚠️ DESPLEGADA Y VIVA desde el 10-ago-2026, con `--no-verify-jwt
+ * --use-api`. Su fuente es ésta: cualquier cambio se hace acá y se
+ * redespliega, jamás en el panel.
  *
  * ⚠️ SU FUENTE VIVE VERSIONADA. En esta casa ya hubo dos functions
  * desplegadas sin fuente en el repo (D-309, D-717); ésta nace con la suya.
@@ -32,9 +33,17 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
  * postee desde el navegador de un visitante, y para nada más. El freno
  * real del abuso es el rate limit por IP, que vive en la base.
  */
+/**
+ * ⚠️ NOMBRES EXACTOS, JAMÁS COMODINES. Un `*.vercel.app` dejaría que
+ * cualquier despliegue de cualquier cuenta consuma esta puerta y facture
+ * contra este proyecto — es D-558 del canon, y ya se pagó una vez.
+ * Por eso entra el host ESTABLE del proyecto y no las URLs por despliegue
+ * (`epetplace-<hash>-...vercel.app`), que son infinitas por diseño.
+ */
 const ORIGENES_PERMITIDOS = [
   'https://www.epetplace.com',
   'https://epetplace.com',
+  'https://epetplace-web.vercel.app',
   'http://localhost:4321',
   'http://127.0.0.1:4321',
   'http://192.168.1.64:4321',
@@ -84,7 +93,15 @@ const cuando = () =>
 const TIPOS = ['prestador', 'pet_parent', 'contacto']
 const OFICIOS = ['veterinaria', 'grooming', 'paseos', 'adiestramiento', 'otro']
 const ESPECIES = ['perro', 'gato', 'conejo', 'ave', 'pez', 'roedor', 'otra']
-const PAISES: Record<string, string> = { EC: '+593', CO: '+57' }
+/**
+ * El código del país y el largo NACIONAL de su número. El largo hace falta
+ * para no duplicar el prefijo cuando alguien pega el número entero — ver
+ * `aE164`.
+ */
+const PAISES: Record<string, { codigo: string; nacional: number }> = {
+  EC: { codigo: '593', nacional: 9 },
+  CO: { codigo: '57', nacional: 10 },
+}
 
 const cabeceras = (origen: string | null) => ({
   'Access-Control-Allow-Origin': ORIGENES_PERMITIDOS.includes(origen ?? '') ? origen! : ORIGENES_PERMITIDOS[0],
@@ -99,13 +116,30 @@ const rebote = (codigo: string, estado: number, origen: string | null) =>
 
 const limpio = (v: unknown, max = 300) => (typeof v === 'string' ? v.trim().slice(0, max) : null)
 
-/** El WhatsApp sale en E.164 ENTERO o no sale. */
+/**
+ * El WhatsApp sale en E.164 ENTERO o no sale.
+ *
+ * ⚠️ EL PREFIJO NO SE DUPLICA. El campo pide el número nacional y el país
+ * sale de un selector, pero la gente pega el número entero —con `+593` o
+ * sin el `+`— porque es como lo tiene guardado. Medido en la prueba de
+ * producción: `+593987654321` se guardaba como `+593593987654321`, y ese
+ * es JUSTO el número que el aviso convierte en enlace `wa.me`. Un aviso
+ * que existe para que el founder llame y trae un número que no existe no
+ * falla a medias: falla entero, y en silencio.
+ *
+ * El prefijo se saca solo cuando sacarlo deja un número nacional del largo
+ * correcto. Sin esa condición, un número nacional que empiece por los
+ * mismos dígitos quedaría mutilado.
+ */
 function aE164(pais: string | null, numero: string | null): string | null {
   if (!numero) return null
-  const prefijo = PAISES[pais ?? 'EC'] ?? PAISES.EC
-  const digitos = numero.replace(/\D/g, '').replace(/^0+/, '')
+  const p = PAISES[pais ?? 'EC'] ?? PAISES.EC
+  let digitos = numero.replace(/\D/g, '').replace(/^0+/, '')
+  if (digitos.startsWith(p.codigo) && digitos.length === p.codigo.length + p.nacional) {
+    digitos = digitos.slice(p.codigo.length)
+  }
   if (digitos.length < 7 || digitos.length > 12) return null
-  return `${prefijo}${digitos}`
+  return `+${p.codigo}${digitos}`
 }
 
 async function enviarCorreo(asunto: string, html: string, para: string) {
