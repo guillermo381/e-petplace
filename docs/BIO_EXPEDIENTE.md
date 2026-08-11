@@ -679,6 +679,23 @@ con cero importaciones en el prestador.
 > la puerta única para los tipos clínicos, `MODELO_VETERINARIA.md`
 > §13); E1/E2 la heredan al construirse.
 
+> **Costura S95 (D-753) — LA PROCEDENCIA GANA UN SEGUNDO EJE: CÓMO SE
+> CAPTURÓ.** Hoy `procedencia` responde **quién** aporta
+> (`declarado_por_familia` | `verificado_por_prestador`). Falta
+> responder **cómo se capturó el dato**: tecleado por una persona,
+> dictado a un asistente, o extraído por IA de una imagen o un audio.
+>
+> **Un evento asistido por IA no tiene el mismo peso probatorio que uno
+> tecleado, y el expediente no los puede confundir** — es el mismo
+> principio que ya separa familia de profesional.
+>
+> **Se deposita como costura, NO como función.** El dictado clínico
+> asistido ya existe en el flujo veterinario y hoy no lo declara; la
+> ingesta de catálogo por IA y la asistencia por voz
+> (`MODELO_DESPENSA` §14) llegarán después del soft launch. **Hoy es una
+> columna; con miles de eventos vivos es una migración con backfill.**
+> Su forma exacta la resuelve el censo de esquema, no esta letra.
+
 Estructura conceptual (DDL detallado pendiente):
 eventos_mascota
 ├── id (uuid PK)
@@ -740,6 +757,71 @@ Hay un tipo de registro que **no es evento del Bio-Expediente**: el hito narrati
 - `constancia_legal` (reporte generado a demanda regulatoria)
 - `atencion_grooming_registrada` (sub-evento de `cita_servicio`; tabla tipada
   `eventos_mascota_grooming`; agregado en S27)
+
+### E2bis — LA COMPRA COMO FUENTE DE EVENTO (enmienda S95, D-743)
+
+> **Origen:** `MODELO_DESPENSA` §7. **El tipo `producto_asignacion` YA
+> EXISTE y está activo en `cat_tipos_evento`** (censo S94-A). Esta
+> enmienda **NO funda un tipo nuevo**: le da su fuente, su procedencia y
+> sus límites. *La letra de S94 lo trató como frente nuevo y era
+> incorrecto.*
+
+**La despensa deposita eventos en el expediente. Condiciones, todas
+duras:**
+
+1. **Append-only**, como todo el expediente. Un pedido cancelado o
+   devuelto **no borra el evento**: deposita otro que lo corrige.
+2. **Procedencia obligatoria: `declarado_por_familia`.** Una compra la
+   aporta la familia, jamás un profesional. El expediente **sí**
+   distingue la fuente (A3.6, y el muro verificado/declarado de
+   `MODELO_PRESENCIA` §4): **un alimento comprado no tiene el peso de
+   una prescripción veterinaria, y ninguna pantalla los puede
+   confundir.**
+3. **NO alimenta el loyalty.** `MODELO_LOYALTY` §5 lo declara
+   anti-fuente y §7.4 lo pone entre los límites duros: *comprar mucho no
+   es cuidar mejor*. **Sin excepción — y se verifica por construcción
+   que ningún trigger conecte la compra con `transacciones_puntos`.**
+   *(La categoría `compras` del catálogo `logros` ya estaba muerta por
+   `MODELO_LOYALTY` §4: esta enmienda no la revive.)*
+4. **Eventos aportados por menores no acumulan** (P5).
+
+**QUÉ COMPRA ES DATO DE CUIDADO — la frontera, resolviendo el choque (c)
+del censo S94-A.**
+
+*El choque:* este documento decía que los sellers contribuyen TODO lo
+comprado; `MODELO_DESPENSA` §7.1 excluye juguetes, accesorios, camas e
+higiene. **Se resuelve a favor de la exclusión, y la razón es de
+modelo, no de alcance:**
+
+| Entra al expediente | No entra |
+|---|---|
+| Alimento (se cruza con la curva de peso, Eje 5) | Juguetes |
+| Suplementos | Accesorios |
+| Antiparasitarios y antipulgas (con su periodicidad) | Camas |
+| Dietas de prescripción | Higiene general |
+
+**El criterio, escrito para que no se re-discuta cada vez: entra lo que
+cambia el cuerpo o el riesgo sanitario de la mascota.** Una cama es
+compra; un antipulgas es cuidado. *Un expediente que registra todo lo
+comprado deja de ser un expediente clínico y se vuelve un historial de
+consumo — que es exactamente lo que P5 y `MODELO_LOYALTY` §7 impiden.*
+
+**PE7 QUEDA PAGADO.** El pendiente PE7 (*"catálogo de productos
+centralizado… sellers como dueños de SKUs específicos pero productos
+como entidades canónicas"*, S12) **es el modelo de datos que
+`MODELO_DESPENSA` §3.3 adopta**. Su casa es ese documento; acá queda la
+referencia. *Vale la pena registrarlo: la inspiración que se le atribuyó
+a VTEX ya estaba escrita en esta casa desde S12.*
+
+**LO QUE EL VENDEDOR NO VE — cláusula nueva y hoy necesaria.** Con la
+decisión de app única (`MODELO_DESPENSA` §8), vendedor y prestador
+conviven en la misma app. Por lo tanto:
+
+> **El rol `seller` no hereda ningún acceso del rol `prestador`.** Una
+> cuenta comercial con los dos roles ve el expediente **por su oficio y
+> por la matriz A3**, jamás por haber vendido algo. **Un vendedor puro
+> tiene cero acceso al expediente, sin excepción y sin configuración que
+> lo habilite.** Se cierra en las policies, no en la UI.
 
 ### E3 — Sub-eventos: `evento_padre_id`
 
