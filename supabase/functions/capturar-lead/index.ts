@@ -142,6 +142,15 @@ function aE164(pais: string | null, numero: string | null): string | null {
   return `+${p.codigo}${digitos}`
 }
 
+/**
+ * ⚠️ EL RESULTADO SE MIRA. Hasta el 10-ago-2026 los cuatro llamados hacían
+ * `await enviarCorreo(...)` y tiraban la respuesta: si Resend rechazaba,
+ * el lead se guardaba, la function devolvía `ok:true` y NADIE se enteraba
+ * — el founder vería una lista que crece sin recibir un solo aviso, que es
+ * el peor modo de falla posible para una puerta cuyo único trabajo es
+ * avisar. Una verificación cuyo modo de falla es el silencio no es una
+ * verificación.
+ */
 async function enviarCorreo(asunto: string, html: string, para: string) {
   const key = Deno.env.get('RESEND_API_KEY')
   if (!key) return { ok: false, motivo: 'sin_api_key' }
@@ -254,9 +263,18 @@ Deno.serve(async (req) => {
   // El link que hace que responder sea UN clic y no un copiar-pegar.
   const wa = whatsapp ? `https://wa.me/${whatsapp.replace('+', '')}` : null
 
+  /** Envuelve el envío para que ningún fallo pase callado. */
+  const enviados: string[] = []
+  const enviar = async (etiqueta: string, asunto: string, html: string, para: string) => {
+    const r = await enviarCorreo(asunto, html, para)
+    enviados.push(`${etiqueta}=${r.ok ? 'ok' : r.motivo}`)
+    if (!r.ok) console.error(`[capturar-lead] correo ${etiqueta} FALLÓ: ${r.motivo}`)
+  }
+
   try {
     if (tipo === 'prestador') {
-      await enviarCorreo(
+      await enviar(
+        'aviso',
         asuntoDe(tipo, negocio!, ciudad!),
         `<div style="font-family:system-ui,sans-serif;max-width:520px">
            <p style="margin:0 0 18px"><b>${esc(nombre)}</b> · ${esc(negocio)}<br>
@@ -282,8 +300,14 @@ Deno.serve(async (req) => {
           : `<h2>Quedaste en la lista, ${esc(nombre)}</h2>
              <p>Gracias por sumarte como familia fundadora. Estamos abriendo de a poco, ciudad por ciudad, y te escribimos apenas abramos en ${esc(ciudad)}.</p>
              <p>— e-PetPlace</p>`
-      await enviarCorreo(idioma === 'en' ? 'Welcome to e-PetPlace' : 'Bienvenida a e-PetPlace', bienvenida, email!)
-      await enviarCorreo(
+      await enviar(
+        'bienvenida',
+        idioma === 'en' ? 'Welcome to e-PetPlace' : 'Bienvenida a e-PetPlace',
+        bienvenida,
+        email!,
+      )
+      await enviar(
+        'aviso',
         asuntoDe(tipo, nombre!, ciudad!),
         `<div style="font-family:system-ui,sans-serif;max-width:520px">
            <p style="margin:0 0 18px"><b>${esc(nombre)}</b> · ${esc(ciudad)}<br>
@@ -296,7 +320,8 @@ Deno.serve(async (req) => {
     }
 
     if (tipo === 'contacto') {
-      await enviarCorreo(
+      await enviar(
+        'aviso',
         asuntoDe(tipo, nombre!, ciudad ?? '—'),
         `<div style="font-family:system-ui,sans-serif;max-width:520px">
            <p style="margin:0 0 18px"><b>${esc(nombre)}</b><br>
@@ -310,7 +335,18 @@ Deno.serve(async (req) => {
   } catch (e) {
     // Se registra y se sigue: el lead está guardado, que es lo que importa.
     console.error('[capturar-lead] correo', String(e))
+    enviados.push('excepcion')
   }
 
-  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: cabeceras(origen) })
+  console.log(`[capturar-lead] ${tipo} guardado · correos: ${enviados.join(' ') || 'ninguno'}`)
+
+  /**
+   * `correos` viaja en la respuesta para que una prueba de punta a punta
+   * pueda AFIRMAR que el aviso salió, en vez de suponerlo por el 200. No
+   * expone nada: son etiquetas de estado, no direcciones ni contenido.
+   */
+  return new Response(JSON.stringify({ ok: true, correos: enviados }), {
+    status: 200,
+    headers: cabeceras(origen),
+  })
 })
