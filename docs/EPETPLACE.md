@@ -92,6 +92,10 @@ Por eso, **el Bio-Expediente no es solo data — es el producto retención**.
 
 ## Tienda y productos (integración VTEX propia)
 
+> **➡️ PUNTERO (S94-C, 10-ago-2026): la letra madre de este frente es `MODELO_DESPENSA.md` v1.0.** Ahí viven las decisiones firmadas —**Forma B** (el vendedor factura, e-PetPlace cura la vitrina y cobra **10% sobre el total con IVA**), **una sola oferta por producto**, **USD/Ecuador**, el **cinturón servicios↔VTEX** y la **regla inversa del OMS** con su multa— más lo medido contra el ambiente real (S94-M1/M2).
+>
+> **Esta sección es ÍNDICE, no letra madre**, y se conserva como tal: donde diga algo distinto de `MODELO_DESPENSA`, **gana `MODELO_DESPENSA`**. En particular, la arquitectura descrita abajo (catálogo centralizado propio, tabla `productos` de PE7) **es anterior a S94 y no fue reconciliada** — su reconciliación es parte de **D-743**.
+
 La tienda de productos (alimento, accesorios, medicación de venta libre) usa **VTEX como infraestructura de fulfillment** (stock, pricing, checkout, logística). La integración con VTEX es **responsabilidad propia de e-PetPlace** desde S42: MediaLab fue descartado como constructor del portal-sellers por costo (3x) sin valor suficiente. La decisión VTEX-como-infraestructura se mantiene intacta; cambió el constructor del pegamento y de la UI del seller, no el plano.
 
 ### Arquitectura

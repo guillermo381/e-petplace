@@ -119,8 +119,16 @@ piloto asistido.
 
 ## 4. Decisiones abiertas (founder, arranque S49)
 
-- (a) **Tienda v1** — ✅ **CERRADA (founder S49): VTEX, post cierre del
-  portal prestadores.**
+- (a) **Tienda v1** — ✅ **CERRADA (founder S49): VTEX, ~~post cierre del
+  portal prestadores~~.** ☠️ **SECUENCIA OBSOLETA (S94-C, 10-ago-2026):**
+  por firma del founder en S94, **la despensa ENTRA AL SOFT LAUNCH de
+  octubre** — deja de esperar al portal prestadores. **Corte de alcance:
+  15 de septiembre de 2026.** La decisión "VTEX" sigue firme; lo que
+  cambió es *cuándo*. Su letra entera: **`MODELO_DESPENSA.md` v1.0**.
+  *Y la nota que el propio §3.5 exige: la despensa suma precondiciones
+  de operación al 1-oct que antes no estaban —pasarela afiliada, reglas
+  de pago, IVA ecuatoriano y feed de pedidos, las cuatro medidas en cero
+  (S94-M2).*
 - (b) **Reuniones con vets** — ✅ **OCURRIERON (founder, S72), SIN NOTAS.**
   Corrección S72-A: la letra vieja decía "agendándose" y era falso — las
   reuniones F0 se hicieron. Consecuencia: la base de `MODELO_VETERINARIA`

@@ -717,8 +717,10 @@ Default plataforma absorbe (comisión sobre precio lista).
 ### Decisión I — Una entidad fiscal = una cuenta comercial multi-rol
 Cualquier humano o empresa con un mismo RUC/DNI + país tiene una sola cuenta comercial.
 
-### Decisión J — Integración VTEX preparada en schema, sin compromiso operativo
+### Decisión J — Integración VTEX preparada en schema, ~~sin compromiso operativo~~
 `seller_perfil` tiene 8 columnas VTEX-específicas, todas nullable.
+
+> **☠️ LA COLETILLA «SIN COMPROMISO OPERATIVO» ES OBSOLETA (S94-B/C, 10-ago-2026).** Hay **fecha**: la despensa entra al soft launch de **octubre de 2026**, con corte de alcance el **15 de septiembre** (`MODELO_DESPENSA` §9.3, §10). **La decisión y sus 8 columnas siguen bien** — se marca la coletilla, no la decisión.
 
 ### Decisión K — Multi-sede para prestadores
 Un humano puede gestionar N sedes operativas de su misma cuenta_comercial.
@@ -943,6 +945,14 @@ Humano sin empresa con DNI como `identificacion_fiscal`. Crea cuenta_comercial `
 ### 8.10 Pedido VTEX con múltiples sellers
 VTEX webhook desglosa por vendor. e-PetPlace genera N eventos económicos. Liquidaciones separadas por cuenta_comercial.
 
+> **🔴 ACOTACIÓN S94-B (10 Ago 2026) — NO SE DEROGA, SE ACOTA.** Letra del founder: *lo decidido en S94 manda, PERO afecta solo a la DESPENSA — nada de esto toca servicios.*
+>
+> **§8.10 NO APLICA A LA DESPENSA v1.** Ahí rige la **Forma B** de `MODELO_DESPENSA` §2: hay **un solo vendedor** y **él factura al cliente final**. e-PetPlace **no cobra la venta ni la reparte** — cura la vitrina y cobra su comisión. No hay N eventos económicos por pedido ni liquidaciones a repartir, porque la plata no pasa por e-PetPlace.
+>
+> **Este párrafo sigue siendo la letra vigente del escenario multi-vendedor futuro** — el día que exista un segundo seller y e-PetPlace intermedie, §8.10 vuelve a regir tal cual está escrito. *Se acota su alcance, no su validez.*
+>
+> **La consecuencia financiera que hay que modelar y NO se modela acá:** con Forma B **la despensa no genera ingreso bruto por venta, genera comisión neta** — entra al P&L como **fee**, no como GMV con margen. Es línea propia del modelo ⇒ **D-750**.
+
 ### 8.11 Refugio que también opera como seller
 ONG con RUC único, cuenta con rol `refugio` activo + agrega rol `seller_productos` para vender merchandising. Una liquidación mensual única consolidando todo.
 
@@ -1040,7 +1050,7 @@ Todas las tablas operativas en 0 filas. fee_configs_historial preserva 12 entrad
 | 3.1.C | UI admin de liquidaciones consolidadas con desglose por rol y sede | Liquidaciones muestran detalle correcto |
 | 3.1.D | Portal-prestadores: vista de Liquidaciones con desglose | Prestador ve liquidaciones reales |
 | 3.1.E.1 | Endpoints REST para integración VTEX | Endpoints documentados y testeados con mocks |
-| 3.1.E.2 | Activación de integración con MediaLab | Tests conjuntos pasados, integración productiva |
+| 3.1.E.2 | ☠️ **OBSOLETA (S94-B, 10-ago-2026)** — ~~Activación de integración con MediaLab~~ | **MediaLab fue descartado como constructor en S42** (costo 3x sin valor suficiente); la integración VTEX es **responsabilidad propia** desde entonces. La fila se conserva tachada para que ningún censo futuro la redescubra como viva. Lo que rige: `MODELO_DESPENSA` |
 | 3.1.F | Construcción del portal de refugios | Refugios pueden operar end-to-end |
 | 3.1.G | Holdback + retenciones fiscales | Liquidaciones aprobadas calculan retención |
 | 3.1.H | Migración a Kushki Marketplace | Cuando Kushki firme |
@@ -1112,7 +1122,7 @@ nuestros (credencial + normalización E.164 en el motor, L-201). Detalle en
 - Matriz fiscal completa EC y CO (depende de contador).
 - Pricing exacto de productos comerciales.
 - ~~UX del flujo de cobro de cita en app.~~ **Resuelta v1-SIMULADA (S54):** momento-primero (CUÁNDO→QUIÉN) + hold 15 min + checkout mono-ítem con pago simulado declarado y camino triste digno. Lo que sigue sin resolver acá es el cobro REAL (Kushki) sobre ese mismo flujo.
-- Diseño de la integración VTEX con MediaLab (ver documento separado).
+- ~~Diseño de la integración VTEX con MediaLab (ver documento separado).~~ ☠️ **OBSOLETA (S94-B, 10-ago-2026):** MediaLab salió como constructor en **S42**. El diseño de la integración VTEX vive hoy en **`MODELO_DESPENSA` v1.0** (S94) y es responsabilidad propia. *Se tacha en vez de borrarse para que el próximo censo no la vuelva a encontrar viva.*
 - UI de gestión de sedes en portal-prestadores.
 
 ---

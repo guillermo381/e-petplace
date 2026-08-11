@@ -542,8 +542,14 @@ Combinación C1 + FK SET NULL bloquea cualquier borrado natural. Documentar el p
 Origen: D-107 S14. Prioridad: 🟢 MEDIA. Disparo: primer caso GDPR-like o primer error administrativo.
 
 #### D-126 — Integración VTEX con Bio-Expediente — diseño pendiente
-Tienda operada por MediaLab usando VTEX. Eventos de compra (`producto_asignacion`) deben fluir al Bio-Expediente vía webhook. Decisiones pendientes: (a) actor "vtex_integration" vs catálogo tipo evento, (b) `cuenta_comercial_id` del evento = seller, (c) RLS de INSERT requiere `service_role` o función SECURITY DEFINER, (d) handshake bidireccional refunds/cancellations.
-Origen: D-108 S14. Prioridad: 🟡 ALTA. Disparo: cuando MediaLab tenga draft de portal-sellers.
+~~Tienda operada por MediaLab usando VTEX.~~ Eventos de compra (`producto_asignacion`) deben fluir al Bio-Expediente vía webhook. Decisiones pendientes: (a) actor "vtex_integration" vs catálogo tipo evento, (b) `cuenta_comercial_id` del evento = seller, (c) RLS de INSERT requiere `service_role` o función SECURITY DEFINER, (d) handshake bidireccional refunds/cancellations.
+Origen: D-108 S14. Prioridad: 🟡 ALTA. ~~Disparo: cuando MediaLab tenga draft de portal-sellers.~~
+
+> **☠️ PREMISA Y DISPARO OBSOLETOS (S94-B, 10-ago-2026).** **La tienda NO la opera MediaLab:** salió como constructor en **S42** (`EPETPLACE` v1.4, `ESTRATEGIA` §8) y la integración es responsabilidad propia. **Su disparo tampoco existe** — esperaba un draft de MediaLab que nunca va a llegar.
+>
+> **Lo que NO caduca es su contenido: las cuatro decisiones (a)-(d) siguen abiertas y siguen siendo las correctas.** Y el censo de S94-A le agrega el dato que le faltaba: **`producto_asignacion` ya está ACTIVO en `cat_tipos_evento`** ⇒ la pregunta (a) ya tiene media respuesta medida.
+>
+> **Se cruza con D-743** (la enmienda a `BIO_EXPEDIENTE` que `MODELO_DESPENSA` §6.2 declara). **Nuevo disparo: el mismo que D-743** — antes de la primera línea de código de la despensa. *No se cierra acá porque su contenido sigue vivo; se le corrige la premisa para que el próximo censo no vuelva a perder una hora con MediaLab.*
 
 #### D-127 — Sección "Tienda y productos" en EPETPLACE.md ✅
 Documentar arquitectura tienda + sellers + VTEX + MediaLab. Acompaña D-126.
@@ -11076,7 +11082,7 @@ los que se encontraron, no por los que existían.**
 **Por qué se escapó, que es lo que enseña:** `despachar-correo` tiene
 `verify_jwt: true` y los otros dos `false`. Al censar el perímetro busqué los
 `verify_jwt: false` —las puertas obviamente abiertas— y **`verify_jwt: true` da
-sensación de puerta cerrada**. Pero L-714 ya lo había medido: *la anon key **es**
+sensación de puerta cerrada**. Pero D-714 ya lo había medido: *la anon key **es**
 un JWT válido*, así que `true` no frena a nadie. **La lección estaba escrita y
 el censo igual se hizo por la propiedad equivocada.**
 
@@ -11118,7 +11124,7 @@ verificado hoy dos veces.
 >
 > **⚠️ Y LA LECCIÓN QUE DEJA, que ya estaba escrita:** este despachador se
 > escapó del censo de D-713 porque tiene `verify_jwt: true` y sus hermanos
-> `false` — **se buscó por la propiedad equivocada**. L-714 ya había medido que
+> `false` — **se buscó por la propiedad equivocada**. D-714 ya había medido que
 > *la anon key ES un JWT válido*, así que `true` nunca protegió nada. *La
 > familia se nombró por los que se encontraron, no por los que existían.*
 
@@ -12905,3 +12911,212 @@ urgencia.**
 > el plazo de retención hay que decir, en la misma frase, con qué se restaura.
 > **☠️ MUERTE:** existe una copia de los buckets con dueño, frecuencia y una
 > restauración probada de verdad —no supuesta—. Origen: S94-PERF, cierre.
+
+---
+
+## Deudas S94-A (la mesa de la despensa — 10 Ago 2026)
+
+> Las cinco nacen del depósito de `docs/MODELO_DESPENSA.md` v1.0. **Ninguna es
+> de construcción de servicios**: la sesión que las paga toca documentación,
+> panel de VTEX o una conversación — jamás el motor.
+
+#### D-743 — 🟠 LA COMPRA COMO FUENTE DE EVENTO: la enmienda a BIO_EXPEDIENTE está DECLARADA y NO REDACTADA
+
+`MODELO_DESPENSA` §6.2 declara que **nace la compra como fuente de evento**,
+con cuatro condiciones: append-only · **procedencia declarada** (aportado por
+la familia, jamás por un profesional — el mismo muro verificado/declarado de
+`MODELO_PRESENCIA` §4) · **no alimenta el loyalty** (`MODELO_LOYALTY` §5, sin
+excepción) · eventos de menores no acumulan (P5).
+
+**La declaración existe; el texto en `BIO_EXPEDIENTE` no.** Y hay un matiz que
+la redacción tiene que resolver y la letra no vio: **el tipo de evento
+`producto_asignacion` YA EXISTE y está activo en `cat_tipos_evento`** (medido
+en el censo S94-A). O sea que §6.2 **no funda una fuente nueva: enmienda una
+que ya está viva**. Además `BIO_EXPEDIENTE` dice hoy *"Sellers contribuyen
+TODO lo comprado"* y `MODELO_DESPENSA` §6.1 dice que juguetes, accesorios,
+camas e higiene **NO entran**. Son dos letras que no coinciden.
+
+> **Dueño: la mesa que redacte la enmienda (founder + arquitecto).**
+> **☠️ DISPARO:** antes de que se escriba una línea de código de la despensa —
+> el evento no se construye contra una letra declarada. **☠️ MUERTE:**
+> `BIO_EXPEDIENTE` tiene el texto firmado, con la procedencia y el alcance
+> (qué compra entra y qué no) resueltos contra lo que ya vive.
+> Origen: S94-A, `MODELO_DESPENSA` §6.2 + censo.
+
+#### D-744 — 🟠 DEVOLUCIONES, RESPONSABILIDAD DE PRODUCTO Y PRIVACIDAD FRENTE A TERCEROS: dos capítulos de POLITICAS sin escribir
+
+`MODELO_DESPENSA` declara **dos** enmiendas a `POLITICAS_EPETPLACE`, y ninguna
+está redactada:
+
+**① §8 — devoluciones y responsabilidad de producto.** Con la distinción que
+la letra ya fijó: **responsable operativo = el vendedor · responsable de la
+experiencia = e-PetPlace**. En v1 la devolución **no se automatiza**: se
+maneja por atención humana, y por eso el criterio escrito es lo único que la
+sostiene.
+
+**② §6.4 — privacidad del expediente frente a terceros comerciales.** La letra
+es tajante: *el vendedor no ve NADA del expediente; ve el pedido*. Y agrega
+que **el expediente no es dato compartible con terceros comerciales bajo
+ninguna configuración** — es decir, no es una preferencia con perilla.
+
+*Un capítulo de devoluciones que no existe el día de la primera devolución no
+es una deuda: es una improvisación con un cliente enojado del otro lado.*
+
+> **Dueño: la sesión de legales (D-405), que ya tiene T&C y privacidad en su
+> alcance.**
+> **☠️ DISPARO:** el primer producto vendible en la vitrina. **☠️ MUERTE:**
+> `POLITICAS_EPETPLACE` tiene los dos capítulos con número de política propia.
+> Origen: S94-A, `MODELO_DESPENSA` §6.4 y §8.
+
+#### D-745 — 🟠 LA FICHA DEL PILOTO CON EL VENDEDOR REAL — no se puede escribir sin hablar con él
+
+Todo el modelo de la Forma B (§2) descansa en un vendedor que **factura, opera
+y absorbe los costos financieros**. Hoy no hay ficha de ese piloto: ni sus
+condiciones, ni su catálogo, ni su capacidad logística, ni si acepta la
+comisión.
+
+**Y hay un dato del censo que la vuelve urgente en vez de administrativa:**
+`seller_comisiones` tiene **dos filas activas con `take_rate_pct = 20.00`**
+(una global y una de categoría `Alimentos`, ambas `es_override`, creadas el
+2-may-2026) mientras `MODELO_DESPENSA` §1.4 firma **10%**. *La conversación
+con el vendedor no arranca de cero: arranca de un número que ya está escrito
+en la base y es el doble.*
+
+**Freno declarado:** esta ficha **no se puede completar desde el repo**.
+Exige una conversación. Nada de lo que dependa de ella se estima hasta
+tenerla.
+
+> **Dueño: el founder (la conversación) → la mesa (la ficha).**
+> **☠️ DISPARO: inmediato** — es insumo del corte de alcance del 15-sep (§9.3).
+> **☠️ MUERTE:** existe la ficha con condiciones, catálogo, logística y la
+> comisión acordada por escrito. Origen: S94-A, `MODELO_DESPENSA` §2 + censo.
+
+#### D-746 — 🟢 LIMPIAR LOS 4 OBJETOS DE FÁBRICA DE VTEX — DESPUÉS de la moneda, nunca antes
+
+El ambiente trae sembrados **cuatro objetos demo**: la categoría `Category`,
+la marca `Brand name`, el producto id 1 y su SKU id 1 (medidos en S94-M1 y
+M2). Se borran. **Los otros tres —almacén `1_1`, doca 1 y la transportadora
+`Transportadora estándar`— NO se borran: son infraestructura y se
+reconfiguran.** *Borrarlos dejaría la cuenta sin dónde despachar.*
+
+> **🔴 EL ORDEN ES EN PIEDRA (`MODELO_DESPENSA` §7.1): 1) la moneda · 2) la
+> limpieza · 3) el catálogo.** Invertirlo no rompe nada visible — simplemente
+> convierte en trabajo a rehacer todo lo que entre antes del cambio de moneda,
+> y **VTEX no publica** qué le pasa a los precios existentes cuando se cambia
+> la moneda de una política viva.
+
+> **Dueño: quien opere el panel de VTEX (founder u operación).**
+> **☠️ DISPARO:** la política comercial ya dice USD/Ecuador — **y no antes**.
+> **☠️ MUERTE:** los cuatro objetos no están y los tres de logística siguen.
+> Origen: S94-A, `MODELO_DESPENSA` §7.5 y §9.
+
+#### D-747 — 🟠 LAS 7 PREGUNTAS A VTEX — varias con impacto en plata, y ninguna bloquea construir
+
+`MODELO_DESPENSA` §11 deja siete preguntas abiertas. **No bloquean
+construcción; bloquean DECISIONES**, y tres de ellas tienen número:
+
+1. Qué se factura desde febrero si la cuenta **nunca estuvo en producción**
+   (2 facturas pagadas).
+2. **Cláusula 14.7 — "Powered by VTEX":** ¿debe aparecer en las apps nativas o
+   solo en el checkout? Incumplir = **+5% de facturación**, y **choca con la
+   tesis de `MODELO_PRESENCIA`**.
+3. ¿Existe un "Monto Terminación" definido? El Anexo lo menciona; el MSA no lo
+   define.
+4. ¿La política COL/COP pasa a Ecuador/USD editándola, sin ambiente ni cargo
+   adicional? *(Nota del depósito: `MODELO_DESPENSA` §7.1 ya lo afirma como
+   medido y documentado, y §11 lo lista como pregunta abierta. La tensión es
+   de la letra y la arbitra la mesa; acá se registra, no se resuelve.)*
+5. ¿Por qué se configuró para Colombia si el proyecto siempre fue Ecuador?
+   (buscar respaldo escrito en la negociación)
+6. Ratificar **por escrito** los montos de política adicional (USD 250) y
+   ambiente adicional (USD 500). **S94-M2 midió que esas cifras NO salen de la
+   documentación pública de VTEX** — solo del contrato.
+7. ¿Un producto entregado durante un servicio y cobrado fuera del OMS activa
+   la penalidad de 6.1.7.1 (**6× la última facturación mensual**)?
+
+> **Dueño: el founder (interlocución con VTEX).**
+> **☠️ DISPARO:** las 1, 2 y 6 antes del **15-sep** (entran al corte de
+> alcance). La 7 antes de habilitar cualquier cobro mixto servicio+producto.
+> **☠️ MUERTE:** las siete con respuesta escrita de VTEX archivada.
+> Origen: S94-A, `MODELO_DESPENSA` §11.
+
+---
+
+## Deudas S94-B (enmiendas de mesa al depósito — 10 Ago 2026)
+
+#### D-748 — 🔴 `take_rate_pct = 20.00` VIVO EN LA BASE contra el 10% firmado: es PLATA, no letra vieja
+
+**Medido en el censo S94-A, no leído:** la tabla `seller_comisiones` tiene
+**dos filas activas** con **`take_rate_pct = 20.00`** — una `tipo='global'` y
+otra `tipo='categoria'` sobre `Alimentos`, **ambas `es_override=true` y
+`activo=true`**, creadas el **2-may-2026**, apuntando al seller
+`8960f828-9249-43ab-8939-e85d164ba297`.
+
+`MODELO_DESPENSA` §1.4 firma **10%**, y §2.2bis (S94-B) lo precisa: **10%
+LIBRE**, con los costos de terceros por cuenta del seller.
+
+**Por qué es distinto de todos los demás choques del censo:** los otros son
+documentos que se contradicen. *Este es un número vivo, en una tabla de
+comisiones, al doble del firmado.* Un motor que lea esa tabla cobra 20%.
+
+**Nota de estado, para que no se subestime ni se exagere:** `seller_perfil`
+tiene **0 filas**, así que ese `seller_id` **no tiene perfil** — las dos filas
+apuntan a un vendedor que no existe como tal. **Eso no la vuelve inofensiva:
+la vuelve invisible**, que es peor. Nadie la va a encontrar hasta que alguien
+cree el seller del piloto y herede un 20% que nadie decidió.
+
+> **Dueño: la sesión que abra el motor de la despensa.**
+> **☠️ DISPARO: ANTES de la ficha del piloto (D-745)** — el vendedor real no
+> puede aterrizar sobre una configuración que dice el doble de lo firmado.
+> **☠️ MUERTE:** la tabla refleja el 10% firmado, o las dos filas están
+> desactivadas con su razón escrita. Origen: S94-A censo, S94-B ítem 5.
+
+#### D-749 — 🟠 LOS 137 PEDIDOS HUÉRFANOS DEL PROTOTIPO v2: limpiar o marcar, pero decidir
+
+`pedidos` tiene **137 filas** (1-feb → 2-may-2026) con **`pedido_items` en
+CERO** y **`vtex_order_id` en CERO**. Son cabeceras sin contenido y sin
+vínculo a VTEX: el residuo del prototipo de tienda de `e-petplace-v2` que
+`ESTRATEGIA_2026H2` §10 anotó en **S42** como contradicción de modelo y que
+**nadie resolvió en catorce sesiones**.
+
+*Un pedido sin ítems no es un pedido: es una fila que va a mentirle a la
+primera consulta que cuente pedidos.* Y la despensa v1 va a escribir en esa
+misma tabla —o al lado de ella—, así que el día que alguien mida "cuántos
+pedidos tenemos" el número va a salir inflado en 137, igual que las métricas
+de familias salieron infladas tres veces en S92.
+
+**Las dos vías, sin recomendación técnica porque la decisión es de producto:**
+limpiarlos (son de un prototipo archivado) o **marcarlos** con procedencia
+—como se hizo con las 64 sondas de S92, que se marcaron en vez de borrarse
+porque los CHECKs de procedencia lo pedían—.
+
+> **Dueño: el founder decide vía; la sesión que abra el motor la ejecuta.**
+> **☠️ DISPARO: antes del primer producto real** — después, distinguir lo
+> viejo de lo nuevo cuesta el triple. **☠️ MUERTE:** las 137 filas están
+> borradas, o marcadas de forma que ninguna métrica de negocio las cuente.
+> Origen: S94-A censo, S94-B ítem 5.
+
+#### D-750 — 🟠 LA DESPENSA ENTRA AL P&L COMO FEE, NO COMO GMV: falta modelarla en MODELO_FINANCIERO
+
+**Consecuencia directa de la Forma B** (`MODELO_DESPENSA` §2), registrada en
+la acotación de `MODELO_FINANCIERO` §8.10 (S94-B): **si el vendedor factura al
+cliente final, la despensa NO genera ingreso bruto por venta — genera comisión
+neta.**
+
+Entra al modelo como **fee**, jamás como GMV con margen. Y arrastra tres
+cosas que hoy no están escritas: **①** cómo se reconoce el ingreso (¿al
+pedido, a la entrega, a la liquidación?) · **②** que los **USD 500/mes de
+VTEX los absorbe e-PetPlace** (§2.3) mientras el ingreso es solo comisión —
+de ahí el punto de equilibrio de **~USD 50.000 de GMV mensual** que §2.3 ya
+declara · **③** que **los costos de terceros los paga el seller** (§2.2bis),
+así que **no son línea de costo nuestra** y no deben aparecer como tal.
+
+*Un frente que se modela como GMV cuando es fee infla el ingreso proyectado
+un orden de magnitud. No es un error contable: es un error de decisión.*
+
+> **Dueño: la mesa del financiero (founder + arquitecto).**
+> **☠️ DISPARO:** cuando la despensa tenga fecha firme de construcción, o
+> antes de cualquier proyección que la incluya. **☠️ MUERTE:**
+> `MODELO_FINANCIERO` tiene la línea de la despensa como fee, con
+> reconocimiento de ingreso y el tratamiento de los USD 500 escritos.
+> Origen: S94-B ítem 3.

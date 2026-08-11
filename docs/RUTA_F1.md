@@ -24,7 +24,7 @@
 
 ## Decisiones de S49 que anclan esta ruta
 
-- **Tienda v1 = VTEX**, post cierre del portal prestadores → A6.
+- **Tienda v1 = VTEX**, ~~post cierre del portal prestadores~~ → A6. ☠️ **La secuencia es OBSOLETA (S94-C):** la despensa entra al **soft launch de octubre de 2026**, corte de alcance **15-sep**. Ver A6 y `MODELO_DESPENSA` §10.
 - **Reuniones con vets = co-diseño F0 en curso** → alimentan A3.
 - **La experiencia de la superapp se diseña antes de construir la UI
   del dueño** → nace A0.
@@ -206,10 +206,14 @@ producto-que-sabe demuestra inteligencia antes de conversar.
 
 ## A6 — Tienda VTEX y cierre del soft launch
 
-JTBD-5 integrada al expediente (compra = evento nutricional), post
-portal prestadores. + "Próximamente honesto" definitivo. **Nota:** la
+JTBD-5 integrada al expediente (compra = evento nutricional), ~~post
+portal prestadores~~. + "Próximamente honesto" definitivo. **Nota:** la
 cadena pedidos→Kushki→envíos→devoluciones YA existe operada por el
 admin — esta etapa la conecta a la experiencia del dueño, no la crea.
+
+> **☠️ LA SECUENCIA ES OBSOLETA (S94-C, 10-ago-2026).** *"Post cierre del portal prestadores"* fue la decisión de S49 y **ya no rige**: por firma del founder en S94, **la despensa entra al soft launch de OCTUBRE de 2026**, con **corte de alcance el 15 de septiembre**. Deja de ser una etapa que espera a otra y pasa a ser **concurrente y con fecha**.
+>
+> **Lo que NO cambia es el contenido de A6** (JTBD-5 integrada al expediente, la compra como evento) — cambió *cuándo*, no *qué*. La letra entera del frente vive en **`MODELO_DESPENSA.md` v1.0**.
 
 ---
 
