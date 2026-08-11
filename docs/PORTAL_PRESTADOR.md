@@ -7,6 +7,30 @@
 
 > **NOTA S42 — Cambio de superficie:** este documento fue escrito asumiendo un portal web. Desde S42 la superficie primaria del prestador es una **app móvil (Expo/React Native)**, con vista web como target secundario del mismo codebase (React Native Web). Evidencia: los prestadores reales viven en el celular; el desktop es casi inaccesible en su jornada. **El alma descrita en este documento se ratifica intacta** — sobriedad, dignidad, sin rankings, momentos sensibles coreografiados — y ahora se le debe una piel que la entregue. Toda referencia a "portal" en este documento debe leerse como "app del prestador". Rumbo completo en `ESTRATEGIA_2026H2.md`.
 
+> **NOTA S95 (11-ago-2026) — LA APP CAMBIA DE NOMBRE Y DE ALCANCE.** La
+> app deja de ser "del prestador" y pasa a ser **`e-PetPlace Negocios`**:
+> una sola app para todo el que hace negocio en el ecosistema —
+> prestador de servicios y vendedor de productos, como roles sobre
+> `cuentas_comerciales`.
+>
+> **Por qué Negocios y no Care** (la alternativa que la mesa evaluó): la
+> app del cliente se llama e-PetPlace, y con "Care" un dueño que busca
+> en la tienda ve las dos y se baja la equivocada — *"Care" le suena a
+> cuidar a su mascota*. **El prestador no busca la app: se la decimos
+> nosotros** (§2.1–2.2, proceso de selección y momento fundacional). El
+> cliente sí busca. **El nombre optimiza contra la confusión del
+> cliente; el alma vive adentro.** Costo asumido: es más frío que la
+> sobriedad de este documento, y en inglés hay que localizar a
+> "Business".
+>
+> **El alma descrita en este documento se ratifica intacta**, como ya se
+> ratificó en S42. Lo que cambia es quién más entra por la misma puerta.
+>
+> 🔴 **REGLA DURA DEL RENOMBRE (D-752): cambia el nombre visible y la
+> ficha de tienda. JAMÁS el identificador del bundle** — si se toca, es
+> una app nueva y se pierden las instalaciones. **Se verifica en el repo
+> antes de tocar nada; no se asume.**
+
 ---
 
 ## Cómo usar este documento
@@ -35,12 +59,46 @@
 `PORTAL_PRESTADOR.md` es uno de cinco documentos de visión narrativa del ecosistema. Cada portal tiene su propio canal en e-PetPlace y eventualmente su propio documento maestro de visión. Hoy se redacta este primero por ser el más crítico para el flujo de Bio-Expediente. Los demás se redactan cuando tengan disparo operativo concreto:
 
 - **`PORTAL_PRESTADOR.md`** (este documento) — prestadores de servicios: vets, paseadores, groomers, hoteles, entrenadores. **En redacción S20.** Disparo: construcción inmediata de UI Bio-Expediente.
-- **`PORTAL_SELLER.md`** — prestadores de productos. ~~Base técnica definida (MediaLab + VTEX, ver `EPETPLACE.md` sección "Tienda y productos"). Visión narrativa por redactar. Disparo: cuando MediaLab esté listo para acordar contratos operativos y UX del seller.~~ ☠️ **ACTUALIZADA S94-B (10-ago-2026): MediaLab salió como constructor en S42** y su disparo ya no existe. **Base técnica y visión viven hoy en `MODELO_DESPENSA` v1.0** (S94), con **Forma B** firmada — el vendedor factura, e-PetPlace cura la vitrina. **Nuevo disparo: la ficha del piloto con el vendedor real (D-745).**
+- **`PORTAL_SELLER.md`** — prestadores de productos. ~~Base técnica
+  definida (MediaLab + VTEX).~~ ~~**ACTUALIZADA S94-B:** base técnica y
+  visión viven en `MODELO_DESPENSA` v1.0 con Forma B firmada; nuevo
+  disparo, la ficha del piloto (D-745).~~ ☠️ **ENMENDADA S95
+  (11-ago-2026) — EL DOCUMENTO SOBREVIVE; EL CANAL PROPIO, NO.** Firma
+  del founder: **una sola app de negocios, `e-PetPlace Negocios`**, con
+  el vendedor como **rol sobre `cuentas_comerciales`**, no como actor
+  con app propia. `PORTAL_SELLER.md` **sigue siendo un documento a
+  redactar** —el alma del vendedor merece su letra— pero **su superficie
+  es un MÓDULO dentro de `e-PetPlace Negocios`**. Base técnica en
+  `MODELO_DESPENSA` v2.0 §8. Disparo sin cambio: D-745.
 - **`PORTAL_REFUGIOS_CRIADEROS.md`** — prestadores de causa: refugios (foco F1) y criaderos certificados (foco F2+). Por redactar. **Scope F1 cerrado en S20:** básico, foco en apoyo a adopción y donación. Disparo: primer refugio piloto.
 - **`PORTAL_ADMIN.md`** — backoffice operativo. Base técnica construida en repo paralelo `portal-admin`. Visión narrativa por redactar. Disparo: cuando se expanda funcionalidad de admin o se sume equipo de operaciones.
 - **`APP_CLIENTE.md`** — la app del dueño de la mascota. Por redactar al final, cuando el ecosistema de portales esté establecido. Disparo: integración Kushki + v2 de la app cliente.
 
 **Principio de disciplina:** los portales hermanos son ambición declarada, no compromiso de redacción inmediata. Cada uno se redacta cuando tiene disparo real, no por completitud documental. Esto respeta el tiempo del founder solo y mantiene la calidad de cada documento. Los cinco son canales del mismo ecosistema — comparten alma, no estructura idéntica.
+
+> ### ⚠️ CHOQUE DECLARADO CONTRA LA LETRA DE S20 (S95, firmado)
+>
+> S20 dice *"cada portal tiene su propio canal en e-PetPlace"*. **La
+> decisión de S95 lo enmienda para el caso del vendedor**, y por regla
+> de la casa un choque contra letra firmada **se declara, jamás se
+> difiere en silencio.**
+>
+> **Lo que lo sostiene:** `MODELO_FINANCIERO` §8.11 ya trataba al seller
+> como **rol sobre la misma cuenta comercial** (el refugio que agrega
+> `seller_productos`), y esta misma sección S20 llama a los sellers
+> *"prestadores de productos"*. **El modelo de dominio nunca los trató
+> como actores separados: la letra de la superficie iba por detrás del
+> modelo, y acá se alinea.**
+>
+> **Alcance de la enmienda: EL VENDEDOR, y nadie más.** Los otros
+> portales hermanos (refugios/criaderos, admin, cliente) **no se tocan**
+> y su estatuto de S20 sigue vigente tal cual.
+>
+> **Lo que NO decide esta enmienda:** si refugios y criaderos también
+> deberían vivir como rol dentro de `e-PetPlace Negocios`. *Es la
+> pregunta obvia siguiente y se deja abierta a propósito: no tiene
+> disparo, y S20 fue explícito en que un portal se redacta cuando tiene
+> disparo real, no por completitud.*
 
 ---
 
