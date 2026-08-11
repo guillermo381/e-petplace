@@ -740,3 +740,152 @@ discriminador** — un cinturón que no puede salir rojo no es un cinturón.
 > el andamio que sostiene la decisión de S95.** El riesgo de esta tanda no es
 > técnico: **es que «la despensa» se convierta en «una plataforma de
 > e-commerce».**
+
+---
+---
+
+# LAS 17 QUE SE APAGAN — para firma del founder
+
+> **Esto no es una lista de tablas: es una lista de cosas que alguien podría
+> estar usando.** Se escribió porque hay una decisión que ninguna medición
+> reemplaza — **si alguna la sigue usando alguien**, y el portal de
+> administración vive en otro repositorio que desde acá no se puede mirar.
+>
+> **Y hay precedente fresco de que las listas fallan:** el chequeo del cinturón
+> salió en verde con una lista corta, y había dos cruces vivos.
+>
+> **Todo lo de abajo está medido el 11-ago-2026**
+> (`scripts/s95/medir-jubiladas.mjs` y `medir-vistas-jubiladas.mjs`, solo
+> lectura). *Ordenadas por riesgo, no por nombre.*
+
+## 🔴 LO PRIMERO: LA MEDICIÓN ME CORRIGIÓ DOS VECES
+
+**Entré con 17 y salgo con 15.** Dos tablas que yo había puesto en la lista **no
+se pueden apagar**, y lo descubrió esta medición y no el modelo:
+
+**① Hay una CAMPAÑA DE LANZAMIENTO PROGRAMADA, y la lista la rompía.**
+
+| | |
+|---|---|
+| Campaña | **«Lanzamiento de nuestra App»**, por WhatsApp, estado **programada** |
+| Cupón | **`AMIGOS05`** — 5 % de descuento, **activo**, aplica a todo, cero usos todavía |
+
+`MODELO_LOYALTY` §9 dice que el motor de campañas y cupones **ya opera** y que
+es el canal por donde se entregan los beneficios del programa de lealtad.
+**Apagar los cupones apagaba una campaña de lanzamiento que todavía no salió.**
+⇒ **`cupones` y `cupon_usos` SALEN de la lista.** No son de la despensa.
+
+**② Hay dos liquidaciones que dicen «pagado», con monto y con fecha.**
+
+| Nº | Período | Venta bruta | Comisión | Se transfirió | Estado |
+|---|---|---:|---:|---:|---|
+| LIQ-2026-004 | febrero | $1.250,00 | $175,00 | **$1.075,00** | **pagado** |
+| LIQ-2026-005 | marzo | $1.890,50 | $264,67 | **$1.625,83** | **pagado** |
+| LIQ-2026-003 | abril | $0,00 | $0,00 | $0,00 | calculado |
+
+> **Todo indica que son de prueba** —las tres se crearon el mismo día
+> (2-may-2026) a la misma hora exacta, con las fechas de pago fabricadas hacia
+> atrás—. **Pero dicen que alguien le transfirió $2.700 a un vendedor**, y eso
+> no se borra sin que vos lo digas.
+
+## GRUPO A · SE MARCAN COMO FUERA DE USO — la tabla queda, sin lectores
+
+*Estas cinco NO se borran. O tienen contenido que dice algo, o hay una pantalla
+de administración que las lee y se rompería. **Dejarlas ahí no cuesta nada:**
+sin filas y sin lectores, una tabla apagada no consume ni molesta. Apagar por
+prolijidad no es motivo.*
+
+| Nombre | Qué guardaba | Filas | Última escritura | Quién la usa hoy | Por qué se marca | Si me equivoco |
+|---|---|---:|---|---|---|---|
+| **`seller_liquidaciones`** | **La cuenta de cuánto se le pagó al vendedor cada mes**, y cuánto se quedó e-PetPlace | **3** | 2-may-2026 | Ningún código nuestro. **Una pantalla del administrador la lee** (`v_pedido_liquidacion`) | Todo indica prototipo, **pero dos filas dicen que se transfirió plata** | 🔴 **NO se puede deshacer.** El dato de una transferencia no vuelve. Y la pantalla del administrador deja de abrir |
+| **`resenas_productos`** | Las opiniones que la gente dejaba sobre los productos | 0 | — | Ningún código nuestro. **Pero una pantalla junta estas opiniones con las de los prestadores** (`v_resenas_todas`) | La despensa v1 no tiene opiniones | 🔴 **Se rompen también las opiniones de PRESTADORES**, que sí es un frente vivo. La pantalla une las dos y no distingue |
+| **`seller_perfil`** | La ficha del vendedor: su nombre, su despacho, sus datos | 0 | — | Solo dos comentarios en el código que aclaran que **no** se usa. **Una pantalla de métricas la lee** (`v_pitch_metrics`) | El vendedor pasa a ser un rol de la cuenta de negocio, no una ficha aparte | Se rompe la pantalla de métricas. **Sin filas, no se pierde nada** |
+| **`liquidacion_pedidos`** | Qué pedido entró en qué liquidación | 0 | — | Ninguno nuestro. **Misma pantalla del administrador** | Vía paralela a la contabilidad que ya existe | Se rompe la misma pantalla. **Sin filas, no se pierde nada** |
+| **`pedidos_recurrentes`** | Los pedidos que se repetían solos cada X días | 0 | — | Ninguno nuestro. **Una pantalla los lista** (`v_recurrentes_pendientes`) | La suscripción está **fuera** del alcance de octubre | Se rompe esa pantalla. **Sin filas, no se pierde nada.** Guardaba una forma de cobro guardada — hoy vacía |
+
+## GRUPO B · SE BORRAN — el dato se va
+
+*Estas diez están vacías o tienen contenido de prueba identificable, no las lee
+ninguna pantalla ni ningún código, y nada más depende de ellas.*
+
+| Nombre | Qué guardaba | Filas | Última escritura | Quién la usa hoy | Por qué se apaga | Si me equivoco |
+|---|---|---:|---|---|---|---|
+| **`seller_comisiones`** | **Cuánto se le cobraba de comisión al vendedor** | **2** | 2-may-2026 | **Nadie.** Cero código, cero pantallas, cero funciones | 🔴 Dicen **20 %** y la letra firma **10 %**. Y **ningún motor las lee**: el que manda es el otro archivo de comisiones. *Es la deuda D-748* | El número no vuelve, pero **está escrito acá y en la deuda**. Y el 10 % queda cargado donde el motor sí lee |
+| **`seller_reglas_asignacion`** | Con qué criterio se repartía un pedido entre varios vendedores | **1** | 2-may-2026 | Nadie | En octubre hay **un solo vendedor**: no hay nada que repartir | El criterio guardado (por cercanía, radio 100 km) queda escrito acá. **No vuelve solo** |
+| **`mensajes_admin_seller`** | Mensajes internos entre e-PetPlace y el vendedor | **1** (*«Hola Luis»*, sin leer) | 2-may-2026 | Nadie | El sistema de avisos del producto ya existe y es mejor | Se pierde ese mensaje. *Es una prueba de mayo que nadie leyó* |
+| **`servicios_exequiales`** | **Los servicios funerarios para mascotas** | 0 | — | Nadie | 🔴 **Firma tuya: «si exequiales abre cuando deba abrir, hoy se va».** Además, es la única tabla que cruza la línea entre servicios y productos (§6.2) | **Sin filas, no se pierde nada.** Ver la nota de abajo |
+| **`seller_documentos`** | Cédula, RUC y datos bancarios del vendedor | 0 | — | Un comentario que aclara que no se usa | El circuito de documentos del prestador ya resuelve esto, y mejor | Sin filas, no se pierde nada |
+| **`seller_inventario`** | El stock y el precio de cada producto del vendedor | 0 | — | Nadie | Se reemplaza por una versión que identifica al vendedor por su **cuenta de negocio** y no por su usuario | Sin filas, no se pierde nada |
+| **`checkout_sesiones`** | El carrito a medio llenar de alguien que no terminó de comprar | 0 | — | Nadie | Nunca se usó. El carrito de v1 vive en el teléfono | Sin filas, no se pierde nada |
+| **`wishlist`** | La lista de deseos | 0 | — | Nadie | Fuera del alcance de octubre | Sin filas, no se pierde nada |
+| **`lista_espera`** | Quién quería avisos de un producto agotado | 0 | — | Nadie | Fuera del alcance de octubre | Sin filas, no se pierde nada |
+| **`planes_nutricion`** | El plan de alimento armado para una mascota | 0 | — | Nadie | 🔴 **Es la idea buena de la despensa, mal implementada:** este plan se rehace bien sobre el expediente (§4.5) | Sin filas, no se pierde nada. *El concepto NO se pierde: se rehace mejor* |
+| **`vtex_sync_log`** | El registro de lo que se sincronizaba con VTEX | 0 | — | Nadie | Ya no hay VTEX | Sin filas, no se pierde nada |
+
+## 🕯️ LA NOTA QUE VA CON `servicios_exequiales` — y no es técnica
+
+> **Si el frente exequial vuelve, `MODELO_LOYALTY` §7.1 manda: el memorial apaga
+> TODO el motor de progreso — cero hitos, cero rachas, cero beneficios, cero
+> menciones. El apagado es estructural, no un filtro de pantalla.**
+>
+> **No se reconstruye como un producto más.** El silencio del motor es parte del
+> respeto.
+
+## 📋 LA CUENTA FINAL
+
+| | |
+|---|---|
+| Entraron a la lista | **17** |
+| **Salieron: `cupones` y `cupon_usos`** | Campaña de lanzamiento viva |
+| **Se marcan fuera de uso** (la tabla queda) | **5** |
+| **Se borran** (el dato se va) | **10**, y **`servicios_exequiales` entra por tu firma** |
+| Filas que desaparecerían del grupo B | **4** (2 comisiones, 1 regla, 1 mensaje) |
+
+**Sobre «se puede volver a prender»:** una tabla vacía que se borra **se puede
+recrear**; lo que no vuelve son las filas. Y hay que decirlo entero: **la copia
+de seguridad de la base es diaria y COMPLETA** — recuperar una fila borrada
+significa **volver la base entera a ayer**, y con ella todo lo bueno que pasó
+desde entonces (`D-742`). *Por eso las cuatro filas del grupo B están escritas
+acá una por una: éste es su respaldo.*
+
+## 🔴 LO QUE NO PUDE MEDIR — y qué pregunta lo cierra
+
+**① El portal de administración vive en otro repositorio y comparte esta misma
+base.** Desde acá se puede mirar solo el código de las dos apps del teléfono, y
+ahí el resultado es **cero usos de las 17**. *Pero «nadie lo usa en el
+monorepo» NO es «nadie lo usa».*
+
+> **La pregunta concreta:** en el portal de administración, ¿existe alguna
+> pantalla de **liquidaciones a vendedores**, de **opiniones de productos**, de
+> **pedidos recurrentes** o de **métricas de inversores**? Son las cuatro que
+> tienen pantalla del lado de la base *(las cuatro del grupo A)*. **Con un «no»
+> tuyo, el grupo A puede borrarse en vez de marcarse.**
+
+**② Las webs viejas** (`e-petplace-v2` y las del legado) también comparten esta
+base. Declaraste que están muertas; **la base no lo sabe.**
+
+> **La pregunta concreta:** ¿alguna sigue desplegada y accesible en internet,
+> aunque nadie la use? Si la respuesta es sí, **la puerta de escritura anónima
+> de pedidos** (§4.6) hay que cerrarla mirando primero qué hace esa web.
+
+**③ Las cuatro pantallas de métricas que leen los pedidos.** Medido: hay
+**cuatro** que calculan ventas totales, ventas del mes y tablero de logística
+sobre la tabla de pedidos.
+
+> **Consecuencia de tu decisión de borrar los 137: esos cuatro números cambian
+> el día del borrado** — bajan a cero. **No es un daño, es la verdad
+> apareciendo**, pero si alguien mira ese tablero la semana que viene y ve todo
+> en cero, va a pensar que se rompió algo.
+
+**④ Si las dos liquidaciones «pagadas» corresponden a transferencias reales.**
+La base no lo puede saber. **Es la misma pregunta que ya respondiste sobre los
+cargos de los pedidos** — y por eso están en el grupo A y no en el B.
+
+## ✍️ LO QUE NECESITO DE VOS, EN UNA LÍNEA CADA UNA
+
+1. **¿El portal de administración tiene pantalla de liquidaciones, opiniones de
+   productos, pedidos recurrentes o métricas?** Si no → el grupo A se borra.
+2. **Las dos liquidaciones de $1.075 y $1.625: ¿prototipo, como los pedidos?**
+   Si sí → `seller_liquidaciones` baja al grupo B.
+3. **Confirmá que `cupones` y `cupon_usos` quedan afuera** de todo esto — son
+   del motor de campañas, no de la despensa.
