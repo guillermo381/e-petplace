@@ -953,6 +953,33 @@ VTEX webhook desglosa por vendor. e-PetPlace genera N eventos económicos. Liqui
 >
 > **La consecuencia financiera que hay que modelar y NO se modela acá:** con Forma B **la despensa no genera ingreso bruto por venta, genera comisión neta** — entra al P&L como **fee**, no como GMV con margen. Es línea propia del modelo ⇒ **D-750**.
 
+> **➕ ENMIENDA S95 (11-ago-2026) — LA ACOTACIÓN DE S94-B SE MANTIENE;
+> UNA DE SUS PREMISAS CAMBIA.**
+>
+> S94-B acotó §8.10 porque en Forma B hay un solo vendedor y él factura:
+> **eso no cambió y sigue vigente.** Lo que cambió es que **el motor de
+> comercio dejó de ser VTEX** (`MODELO_DESPENSA` v2.0 §3). Consecuencias
+> sobre esta sección:
+>
+> - **Donde §8.10 dice "VTEX webhook desglosa por vendor", léase "el
+>   motor de pedidos propio desglosa por vendedor".** El escenario
+>   multi-vendedor futuro sigue siendo válido palabra por palabra: lo
+>   que cambia es qué sistema lo ejecuta.
+> - **Desaparece el take rate de 2,50% de la aritmética del vendedor.**
+>   Sobre una venta de USD 100 + IVA, el vendedor pasa de quedarse ~$78
+>   a **~$81 con crédito** y de ~$82 a **~$85 con débito**. La tabla
+>   completa vive en `MODELO_DESPENSA` §2.3 — **fuente única, no se
+>   duplica acá.**
+> - **La despensa deja de tener costo fijo de plataforma propio.** El
+>   punto de equilibrio de ~USD 50.000 de GMV mensual **deja de ser
+>   condición estructural del frente**; los USD 500/mes de VTEX pasan a
+>   ser costo heredado con vencimiento (`MODELO_DESPENSA` §13).
+>
+> **D-750 sigue viva y se simplifica: con Forma B la despensa entra al
+> P&L como FEE, no como GMV con margen** — y ahora el fee es limpio,
+> sin take rate de terceros restándose antes. **Es línea propia del
+> modelo y todavía no está modelada.**
+
 ### 8.11 Refugio que también opera como seller
 ONG con RUC único, cuenta con rol `refugio` activo + agrega rol `seller_productos` para vender merchandising. Una liquidación mensual única consolidando todo.
 
