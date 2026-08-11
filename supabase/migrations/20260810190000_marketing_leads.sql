@@ -1,12 +1,19 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- LEADS DEL SITIO PÚBLICO — schema propio, puerta única
 --
--- ⚠️ ESCRITA, NO APLICADA. Requiere ventana coordinada con la pista de la
--- app: el proyecto Supabase es COMPARTIDO (`zyltipqscdsdsxnjclhp`) y hay
--- trabajo de S92/S94 en vuelo sobre esa base.
+-- ✅ APLICADA el 10-ago-2026 en `zyltipqscdsdsxnjclhp`, con la ventana
+-- coordinada (el proyecto Supabase es COMPARTIDO con la app). Verificado
+-- por `migration list --linked`: local = remote.
 --
--- Su reversa está escrita ANTES de aplicar, en el archivo hermano
--- `20260810_leads_REVERSA.sql`, como manda la casa.
+-- La cabecera decía «ESCRITA, NO APLICADA» y siguió diciéndolo un día
+-- después de correr. Se corrige porque un comentario que miente al que lo
+-- lee en frío es deuda aunque no rompa nada: el próximo que abra este
+-- archivo tiene que poder confiar en su primera línea.
+--
+-- Su reversa se escribió ANTES de aplicar, en el archivo hermano
+-- `20260810_leads_REVERSA.sql`, como manda la casa. ⚠️ Y ahora que la
+-- tabla puede tener leads REALES, esa reversa dejó de ser gratis: los
+-- borra. Revertir es una decisión con costo, no un deshacer.
 --
 -- POR QUÉ SCHEMA PROPIO (decisión de mesa S93): la tabla queda fuera del
 -- radio de las policies de `public`. Un `GRANT` amplio sobre `public` —de
