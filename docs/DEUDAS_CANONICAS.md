@@ -11623,6 +11623,16 @@ defecto que se curó hoy en el cambio de clave.
 > recuperar en el cliente, que **no existe** — ver D-720 fila 3) es de la sesión
 > de login del founder. Origen: S92-BIS, al preparar la medición de D-719 (b).
 
+- **L-228 — UNA DECISIÓN DE COMPRA SE AUDITA CONTRA SUS RAZONES DE ENTRADA, NO CONTRA SU COSTO (S95).**
+
+  VTEX entró por cuatro razones: **no sabíamos construir · escalabilidad · seguridad · performance sin pagar el precio de escalar.** Auditadas una por una en S95, **las cuatro habían caducado o no aplicaban al caso** — y ninguna auditoría anterior las había mirado, **porque la conversación siempre fue sobre el gasto**.
+
+  **Comprar plataforma cuando no sabés construir es prudencia; conservarla cuando ya sabés es inercia.** El disparador correcto de la revisión no es el precio: **es preguntar si la razón por la que entró sigue siendo cierta.**
+
+  *Su caso más filoso es la cuarta razón, que estaba **invertida**: «performance sin pagar el precio de escalar» describía exactamente lo contrario de lo que el 2,50 % hace — no evita el precio de escalar, **es un precio que crece con el éxito, para siempre**. Una razón de entrada puede envejecer hasta significar su opuesto y nadie lo nota, porque nadie relee las razones: relee la factura.*
+
+- **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
+
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
 
   **El caso:** D-734 hacía lo obvio —redimensionar antes de subir— y la justificación obvia era «la subida va a ser más rápida». Se midió contra el Storage vivo, 5 tiros por caso, y **la justificación obvia se cayó**: 474 kB tardaron **343 ms** y 204 kB tardaron **357 ms** — *la más liviana salió más lenta*. Por debajo de ~500 kB **el peaje por petición domina** y el tamaño no se nota. Solo el caso monstruo (5,9 MB → 818 ms) mejoró de verdad, 2,3×.
@@ -12991,54 +13001,91 @@ tenerla.
 > **☠️ MUERTE:** existe la ficha con condiciones, catálogo, logística y la
 > comisión acordada por escrito. Origen: S94-A, `MODELO_DESPENSA` §2 + censo.
 
-#### D-746 — 🟢 LIMPIAR LOS 4 OBJETOS DE FÁBRICA DE VTEX — DESPUÉS de la moneda, nunca antes
+#### D-746 — ☠️ **MUERTA (S95, 11-ago-2026)** — ~~LIMPIAR LOS 4 OBJETOS DE FÁBRICA DE VTEX — DESPUÉS de la moneda, nunca antes~~
 
-El ambiente trae sembrados **cuatro objetos demo**: la categoría `Category`,
+> **☠️ MUERTA POR LA DECISIÓN DE S95.** Motivo, textual del acta: *"limpieza
+> de los 4 objetos de fábrica de VTEX — **sin objeto tras la decisión de S95
+> (motor propio)**"*. Con el motor de comercio propio (`MODELO_DESPENSA` v2.0
+> §3), **el ambiente de VTEX deja de ser el terreno donde se carga el
+> catálogo**: no hay nada que limpiar ahí porque no se va a construir ahí.
+>
+> **Muere entera, y también muere su orden en piedra** (moneda → limpieza →
+> catálogo): las tres etapas eran del camino VTEX. *El único resto de ese
+> camino que sigue vivo es contractual, no técnico, y vive en D-747 y D-751.*
+>
+> **El cuerpo original se conserva tachado abajo, no se borra** — regla de la
+> casa: la deuda se enmienda, no se borra.
+
+~~El ambiente trae sembrados **cuatro objetos demo**: la categoría `Category`,
 la marca `Brand name`, el producto id 1 y su SKU id 1 (medidos en S94-M1 y
 M2). Se borran. **Los otros tres —almacén `1_1`, doca 1 y la transportadora
 `Transportadora estándar`— NO se borran: son infraestructura y se
-reconfiguran.** *Borrarlos dejaría la cuenta sin dónde despachar.*
+reconfiguran.** *Borrarlos dejaría la cuenta sin dónde despachar.*~~
 
-> **🔴 EL ORDEN ES EN PIEDRA (`MODELO_DESPENSA` §7.1): 1) la moneda · 2) la
+> ~~**🔴 EL ORDEN ES EN PIEDRA (`MODELO_DESPENSA` §7.1): 1) la moneda · 2) la
 > limpieza · 3) el catálogo.** Invertirlo no rompe nada visible — simplemente
 > convierte en trabajo a rehacer todo lo que entre antes del cambio de moneda,
 > y **VTEX no publica** qué le pasa a los precios existentes cuando se cambia
-> la moneda de una política viva.
+> la moneda de una política viva.~~
 
-> **Dueño: quien opere el panel de VTEX (founder u operación).**
+> ~~**Dueño: quien opere el panel de VTEX (founder u operación).**
 > **☠️ DISPARO:** la política comercial ya dice USD/Ecuador — **y no antes**.
-> **☠️ MUERTE:** los cuatro objetos no están y los tres de logística siguen.
-> Origen: S94-A, `MODELO_DESPENSA` §7.5 y §9.
+> **☠️ MUERTE:** los cuatro objetos no están y los tres de logística siguen.~~
+> Origen: S94-A, `MODELO_DESPENSA` §7.5 y §9. **☠️ MUERTA en S95** por
+> `MODELO_DESPENSA` v2.0 §3.
 
-#### D-747 — 🟠 LAS 7 PREGUNTAS A VTEX — varias con impacto en plata, y ninguna bloquea construir
+#### D-747 — 🟠 ~~LAS 7 PREGUNTAS A VTEX~~ **ACOTADA A TRES (S95)** — las que quedan son contractuales, no de producto
+
+> **➖ ACOTADA EN S95 (11-ago-2026).** Con el motor de comercio propio
+> (`MODELO_DESPENSA` v2.0 §3), **cuatro de las siete dejan de tener objeto**:
+> preguntaban por un camino que ya no se va a recorrer. **Las que mueren se
+> tachan, no se borran.**
+>
+> **Quedan TRES, y las tres son del contrato que sigue corriendo**, no del
+> producto: la 1, la 3 y la nueva **D-751**. *Lo que cambió no es la relación
+> con VTEX —el contrato vive hasta ~27-feb-2027— sino que ya no condiciona lo
+> que construimos.*
 
 `MODELO_DESPENSA` §11 deja siete preguntas abiertas. **No bloquean
 construcción; bloquean DECISIONES**, y tres de ellas tienen número:
 
-1. Qué se factura desde febrero si la cuenta **nunca estuvo en producción**
-   (2 facturas pagadas).
-2. **Cláusula 14.7 — "Powered by VTEX":** ¿debe aparecer en las apps nativas o
+1. ✅ **VIGENTE.** Qué se factura desde febrero si la cuenta **nunca estuvo en
+   producción** (2 facturas pagadas).
+2. ~~**Cláusula 14.7 — "Powered by VTEX":** ¿debe aparecer en las apps nativas o
    solo en el checkout? Incumplir = **+5% de facturación**, y **choca con la
-   tesis de `MODELO_PRESENCIA`**.
-3. ¿Existe un "Monto Terminación" definido? El Anexo lo menciona; el MSA no lo
-   define.
-4. ¿La política COL/COP pasa a Ecuador/USD editándola, sin ambiente ni cargo
+   tesis de `MODELO_PRESENCIA`**.~~ ☠️ **MUERE (S95).** Sin front de VTEX en el
+   producto no hay dónde exhibir la marca. *Y con ella **muere el choque contra
+   `MODELO_PRESENCIA`**, que era lo que dejaba pantallas sin poder cerrarse.*
+3. ✅ **VIGENTE.** ¿Existe un "Monto Terminación" definido? El Anexo lo
+   menciona; el MSA no lo define. **Se cruza con D-756**: quien avise la no
+   renovación necesita saber si salir cuesta algo.
+4. ~~¿La política COL/COP pasa a Ecuador/USD editándola, sin ambiente ni cargo
    adicional? *(Nota del depósito: `MODELO_DESPENSA` §7.1 ya lo afirma como
    medido y documentado, y §11 lo lista como pregunta abierta. La tensión es
-   de la letra y la arbitra la mesa; acá se registra, no se resuelve.)*
-5. ¿Por qué se configuró para Colombia si el proyecto siempre fue Ecuador?
-   (buscar respaldo escrito en la negociación)
-6. Ratificar **por escrito** los montos de política adicional (USD 250) y
+   de la letra y la arbitra la mesa; acá se registra, no se resuelve.)*~~
+   ☠️ **MUERE (S95).** No se va a cargar catálogo en ese ambiente. *De paso
+   muere la tensión interna de la letra que S94-C había declarado.*
+5. ~~¿Por qué se configuró para Colombia si el proyecto siempre fue Ecuador?
+   (buscar respaldo escrito en la negociación)~~ ☠️ **MUERE (S95)** como
+   pregunta de producto. *Si el founder la quiere igual, es de negociación
+   contractual y viaja con la 1.*
+6. ~~Ratificar **por escrito** los montos de política adicional (USD 250) y
    ambiente adicional (USD 500). **S94-M2 midió que esas cifras NO salen de la
-   documentación pública de VTEX** — solo del contrato.
-7. ¿Un producto entregado durante un servicio y cobrado fuera del OMS activa
-   la penalidad de 6.1.7.1 (**6× la última facturación mensual**)?
+   documentación pública de VTEX** — solo del contrato.~~ ☠️ **MUERE (S95).**
+   No se va a contratar política ni ambiente adicional.
+7. ~~¿Un producto entregado durante un servicio y cobrado fuera del OMS activa
+   la penalidad de 6.1.7.1 (**6× la última facturación mensual**)?~~
+   ➡️ **ABSORBIDA POR D-751 (S95)**, que la hace más ancha y más grave: ya no
+   es el caso borde del producto entregado en una consulta — es **toda venta
+   de la despensa mientras el contrato esté vivo**.
 
 > **Dueño: el founder (interlocución con VTEX).**
-> **☠️ DISPARO:** las 1, 2 y 6 antes del **15-sep** (entran al corte de
-> alcance). La 7 antes de habilitar cualquier cobro mixto servicio+producto.
-> **☠️ MUERTE:** las siete con respuesta escrita de VTEX archivada.
-> Origen: S94-A, `MODELO_DESPENSA` §11.
+> **☠️ DISPARO (S95):** la **1 y la 3** entran al corte del **15-sep**; la
+> **D-751 bloquea la primera venta real** y es la única de las tres que frena
+> construcción-a-producción. ~~La 7 antes de habilitar cualquier cobro mixto~~
+> (absorbida). **☠️ MUERTE:** las **tres** con respuesta escrita de VTEX
+> archivada. Origen: S94-A, `MODELO_DESPENSA` §11. **Acotada en S95** por
+> `MODELO_DESPENSA` v2.0 §13.
 
 ---
 
@@ -13120,3 +13167,124 @@ un orden de magnitud. No es un error contable: es un error de decisión.*
 > `MODELO_FINANCIERO` tiene la línea de la despensa como fee, con
 > reconocimiento de ingreso y el tratamiento de los USD 500 escritos.
 > Origen: S94-B ítem 3.
+
+---
+
+## Deudas S95 (la despensa con motor propio — 11 Ago 2026)
+
+> Las seis nacen de `MODELO_DESPENSA` v2.0 y del acta
+> `docs/relevamientos/2026-08-11-s95-acta-de-enmiendas.md` §4.2. **Ninguna es
+> de construcción de esquema**: la sesión que las paga toca una conversación,
+> el panel de una tienda de apps, o una migración que todavía no está
+> autorizada (B0.5 manda).
+
+#### D-751 — 🔴 BLOQUEANTE · ¿VENDER FUERA DEL OMS DE VTEX CON EL CONTRATO VIVO ACTIVA 6.1.7.1?
+
+El MSA castiga cobrar producto fuera de su OMS con **6× la última facturación
+mensual más terminación unilateral** (cláusula 6.1.7.1). **El contrato corre
+hasta ~27-feb-2027, y la despensa con motor propio vende fuera del OMS desde
+el día uno.**
+
+*Es la única deuda de esta tanda que puede costar plata de verdad, y no la
+resuelve ninguna pista técnica: la resuelve una respuesta escrita.* **Absorbe
+la pregunta 7 de D-747 y la hace más ancha:** aquella preguntaba por el caso
+borde del producto entregado durante una consulta; ésta pregunta por **toda
+venta de la despensa**.
+
+> **Dueño: founder / asesoría legal.**
+> **☠️ DISPARO: ninguna venta real de la despensa ocurre antes de tener la
+> respuesta por escrito.** Construir sí; vender no. **☠️ MUERTE:** hay
+> respuesta escrita de VTEX archivada, o el contrato terminó.
+> Origen: S95, `MODELO_DESPENSA` v2.0 §13.
+
+#### D-752 — 🟡 RENOMBRE DE LA APP A `e-PetPlace Negocios` — y la línea que NO se toca
+
+Cambia el **nombre visible y la ficha de tienda**. 🔴 **JAMÁS el identificador
+del bundle**: si se toca, **es una app nueva y se pierden las instalaciones**.
+**Se verifica el identificador en el repo ANTES de tocar nada; no se asume.**
+
+*La ventana es barata hoy y se cierra sola:* con instalaciones reales, el
+renombre deja de ser una edición de metadatos y pasa a ser una conversación
+con cada persona que ya tiene la app.
+
+> **Dueño: la sesión que toque configuración de build.**
+> **☠️ DISPARO: antes de la primera instalación real.** **☠️ MUERTE:** la app
+> se llama `e-PetPlace Negocios` en las dos tiendas y el bundle identifier es
+> byte-idéntico al de antes, verificado. Origen: S95,
+> `MODELO_DESPENSA` v2.0 §8.5 · `PORTAL_PRESTADOR` Nota S95.
+
+#### D-753 — 🟢 EL EVENTO DECLARA CÓMO SE CAPTURÓ (tecleado / dictado / extraído por IA)
+
+`procedencia` hoy responde **QUIÉN** aporta (`declarado_por_familia` |
+`verificado_por_prestador`). **No responde CÓMO se capturó el dato.**
+
+Y ya hay un caso vivo que no lo declara: **el dictado clínico del flujo
+veterinario existe desde S70 y sedimenta eventos sin decir que los asistió una
+máquina.** Después llegan la ingesta de catálogo por IA y la asistencia por
+voz (`MODELO_DESPENSA` §14).
+
+*Un evento asistido por IA no tiene el mismo peso probatorio que uno tecleado,
+y un expediente append-only que viaja con la mascota no los puede confundir.*
+
+> **Dueño: la sesión que abra el motor de la despensa, o la primera que toque
+> `eventos_mascota`.**
+> **☠️ DISPARO: la primera migración que toque `eventos_mascota`** — **hoy es
+> una columna; con miles de eventos vivos es una migración con backfill.**
+> **☠️ MUERTE:** el evento declara su modo de captura y el dictado clínico lo
+> estampa. Origen: S95, `MODELO_DESPENSA` v2.0 §14 · costura depositada en
+> `BIO_EXPEDIENTE` E1.
+
+#### D-754 — 🔴 CRITERIO DE FLETE v1 — SIN DATO, y es el mayor costo escondido de S95
+
+Hay un **candidato escrito y no firmado** (`MODELO_DESPENSA` §11.2): tarifa
+plana o gratis sobre un mínimo, definida por el vendedor; el cálculo por zona
+y peso queda para v2.
+
+**No tiene dato de ningún tipo.** Depende enteramente de cómo entrega el
+vendedor real: si terceriza, si tiene moto propia, si cobra por zona, cuánto
+le cuesta hoy. *Es el mayor costo escondido de la decisión de S95 — y el único
+número del modelo que no sale de una calculadora sino de una llamada.*
+
+> **Dueño: el founder (la llamada) → la mesa (el criterio).**
+> **☠️ DISPARO: la llamada con el vendedor real (D-745).**
+> **☠️ MUERTE:** el criterio está firmado con su número, o se declara
+> explícitamente que v1 no cobra flete y quién lo absorbe.
+> Origen: S95, `MODELO_DESPENSA` v2.0 §11.2.
+
+#### D-755 — 🟡 EL PANEL OPERATIVO DEL VENDEDOR, COMO ÍTEM PROPIO DEL CORTE DEL 15-SEP
+
+**No estaba en el alcance v1 de S94.** Entra en S95 con nombre propio, y con
+la advertencia que lo justifica: *que siempre se haya querido hacer no lo hace
+gratis.*
+
+**Mínimo honesto para octubre:** una lista de pedidos con **dos botones**
+—preparado, despachado— **y el ajuste de stock**. Eso alcanza para un
+vendedor. **Todo lo demás es candidato de recorte.**
+
+*Existe como ficha separada por una razón: si vive difuso adentro de "la
+despensa", se recorta sin que nadie lo note y el vendedor real se queda sin
+poder operar el día del lanzamiento.*
+
+> **Dueño: la mesa del 15-sep (founder) → la pista que construya la despensa.**
+> **☠️ DISPARO: 15-sep-2026**, el corte de alcance. **☠️ MUERTE:** el panel
+> mínimo está construido y un vendedor real despachó un pedido con él.
+> Origen: S95, `MODELO_DESPENSA` v2.0 §8.6 y §11.3.
+
+#### D-756 — 🔴 AVISO DE NO RENOVACIÓN DE VTEX — fecha dura, y se pasa sola
+
+El MSA §10.1 pide **90 días** de preaviso y el Anexo dice **60**: **se toma el
+plazo largo.** Sin aviso, el contrato **renueva automáticamente por 12 meses
+el ~27-feb-2027**.
+
+*Es la única deuda del canon cuyo modo de falla es no hacer nada.* No hay
+pantalla que se rompa ni test que se ponga rojo: simplemente llega una fecha y
+el ecosistema queda comprado un año más.
+
+**Se cruza con D-747.3:** quien redacte el aviso necesita saber antes si
+existe un "Monto Terminación" definido.
+
+> **Dueño: el founder.**
+> **☠️ DISPARO: fin de noviembre de 2026** — y conviene tratarlo como fecha de
+> vencimiento, no de inicio. **☠️ MUERTE:** el aviso está enviado y acusado
+> por VTEX, o el founder decide renovar y lo declara.
+> Origen: S95, `MODELO_DESPENSA` v2.0 §13.
