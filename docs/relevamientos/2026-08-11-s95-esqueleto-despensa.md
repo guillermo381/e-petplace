@@ -504,6 +504,46 @@ Se escribe **antes** del esquema y arranca todo rojo.
 > frena y se eleva. **Jamás se ablanda el test, jamás se comenta, jamás se marca
 > como excepción** — es `L-192`: todo chequeo tiene que poder salir rojo.
 
+### 6.1 La línea base — **2 en verde, 9 en ROJO** (`scripts/s95/juez-despensa.mjs`)
+
+| # | | Por qué |
+|---|---|---|
+| 1 | ❌ | Faltan las 14 tablas nuevas · **7 policies `ALL`** vivas en el frente |
+| 2 | ❌ | **Dos FKs cruzan el cinturón** — ver §6.2 |
+| 3 | ✅ | Cero triggers y cero funciones conectan un pedido con el motor de puntos |
+| 4 | ✅ | Ninguna policy del expediente resuelve por vendedor; ningún helper por `seller_productos` |
+| 5 | ❌ | El pct vigente es **14**, la letra firma 10 · el parámetro `base` no existe |
+| 6 | ❌ | `producto_asignacion.tabla_tipada` sigue en NULL — **el detalle no tiene casa** |
+| 7 | ❌ | Faltan las tres append-only · **`envio_eventos` admite UPDATE y DELETE a `anon`** |
+| 8 | ❌ | **Siete tablas con montos huérfanos**, `pedidos` entre ellas |
+| 9 | ❌ | `pedido_descuentos.financiado_por` no existe |
+| 10 | ❌ | **Las 17 jubiladas siguen vivas, las 17** |
+| 11 | ❌ | Las dos policies de INSERT `{public}` y los cuatro grants de escritura de `anon` |
+
+**Los dos verdes son honestos y hay que leerlos con su límite:** miden que hoy
+*no hay* camino de la compra al loyalty ni del vendedor al expediente. **Eso se
+cumple por ausencia de productor, no por un guard** (el censo §6.8 lo dijo) —
+el valor del invariante es que **a partir de ahora el día que alguien lo cablee,
+el juez lo dice.**
+
+### 6.2 🔴 EL VERDE FLOJO QUE EL JUEZ CAZÓ EN SU PRIMERA CORRIDA
+
+**El invariante 2 salió VERDE en la primera pasada, y era falso.** Pasaba
+porque mi lista de tablas de servicios era corta: no incluía las dos que cruzan
+de verdad. *Un invariante verde porque su lista es corta es peor que uno rojo —
+dice un número más chico, y en un chequeo eso se lee como progreso.* Corregida
+la lista **por medición de columnas, no por nombre**, salieron dos cruces:
+
+| Cruce | Qué es | Veredicto |
+|---|---|---|
+| **`servicios_exequiales` → `pedidos`** | Tiene `prestador_id`, `fecha_servicio`, `direccion_recogida`, `certificado_url`. **Es un SERVICIO cobrado por la tabla de pedidos de producto.** | 🔴 **VIOLACIÓN REAL del cinturón.** 0 filas. Se jubila la tabla o se le quita la FK |
+| **`tickets_soporte` → `pedidos`** | Tiene `pedido_id` **y** `cita_id`, sin `prestador_id`. **Es soporte: ni pedido ni cita.** | ⚖️ **Probablemente NO es violación** — es transversal por naturaleza y no produce SKU |
+
+> **No toco la lista del juez para que se ponga verde.** El segundo caso es una
+> **decisión de clasificación, y la lista ES el test**: cambiarla sin decirlo
+> sería exactamente el ablandamiento que §6 prohíbe. **Va a §9 como pregunta
+> ⑦.**
+
 ---
 
 ## 7 · VEREDICTO POR OBJETO
@@ -559,6 +599,32 @@ en el orden de migración de §10.)*
 
 ## 9 · 🔴 LAS PREGUNTAS QUE NECESITAN FIRMA
 
+> ### ✅ CUATRO FIRMADAS POR EL FOUNDER (11-ago-2026)
+>
+> **① El ledger en Forma B: (c) FEE PURO CON LA CUENTA EN METADATA.**
+> `monto_bruto` = la comisión · cuenta comercial NULL · payout NULL ·
+> `metadata.cuenta_comercial_id` y `metadata.venta_total`.
+> **⇒ D-750 queda pagada en su mitad de esquema:** la despensa entra al P&L
+> como **fee**, y el ledger no puede decir otra cosa.
+> **Consecuencia declarada y NO construida:** la liquidación al vendedor deja
+> de existir y en su lugar hay una **cuenta por cobrar**. *Esta tanda deja el
+> evento honesto; la cobranza es trabajo de otra.*
+>
+> **② Los 137 pedidos, sus 5 envíos y sus 5 devoluciones SE BORRAN JUNTOS**,
+> en una transacción, respetando el orden de las doce FKs.
+>
+> **③ Las 20 tarifas de `zonas_cobertura` SE CONSERVAN, MARCADAS SIN
+> VERIFICAR.** *Es más dato del que D-754 dice tener, y la marca impide que
+> alguien las tome por firmadas.*
+>
+> **④ EL IMPUESTO ES CATÁLOGO DE TASAS POR PRODUCTO** (`cat_tasas_impuesto`),
+> no una constante ni la única tasa de `country_config`.
+>
+> **⑤ y ⑥ quedan tomadas por el arquitecto** (regla 3 — decisión técnica con
+> análisis claro), con su razón escrita abajo y reversibles si el founder las
+> corrige: la oferta es **por variante**, y **lo nuevo va en español mientras
+> lo enmendado conserva su nombre**.
+
 ### ① EL SIGNO DEL LEDGER EN FORMA B — la única que cambia el significado de una entidad
 
 En Forma B **la plata no pasa por e-PetPlace: el vendedor cobra y nos debe la
@@ -609,6 +675,23 @@ una migración con recálculo de facturas emitidas después.
 canónico, **vender 3 kg y 15 kg del mismo alimento sería imposible.**
 **Mi lectura: lo que se prohíbe son siete precios para la misma cosa, y la
 misma cosa es la presentación.**
+
+### ⑦ 🔴 LOS DOS CRUCES DEL CINTURÓN (hallazgo del juez, §6.2)
+
+**`servicios_exequiales` → `pedidos`.** Un servicio con prestador, fecha y
+dirección de recogida, cobrado por la tabla de pedidos de producto. **Es la
+violación exacta que §3.4 prohíbe**, viva desde antes de esta tanda. **0 filas.**
+**Mi voto: se jubila la tabla entera** — es un frente muerto (0 filas, cero
+consumidores en el monorepo) y la despensa no lo hereda. Si preferís
+conservarla, la alternativa es quitarle la FK y dejarla sin camino al pedido.
+
+**`tickets_soporte` → `pedidos`.** Tiene `pedido_id` **y** `cita_id`, y **no
+tiene `prestador_id`**: es soporte, ni pedido ni cita. **Mi lectura: no es
+violación del cinturón** — el cinturón prohíbe que un objeto de servicios
+produzca un SKU o comparta tabla con el pedido, y un ticket no hace ninguna de
+las dos. **Mi voto: sale de la lista de servicios del juez, con esta razón
+escrita.** *Lo elevo en vez de editarlo yo porque la lista ES el test: cambiarla
+en silencio para que se ponga verde es exactamente lo que §6 prohíbe.*
 
 ### ⑥ NOMBRES — ¿español en lo nuevo, aunque la base quede mixta?
 
