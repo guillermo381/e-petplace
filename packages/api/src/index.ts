@@ -1122,3 +1122,15 @@ export {
   type SeguimientoEnvio,
   type DetallePedido,
 } from './wrappers/despensa-seguimiento';
+
+export {
+  listarPedidosDelVendedor,
+  obtenerLineasParaEmpaque,
+  marcarPedidoEnPreparacion,
+  empacarPedido,
+  marcarPedidoDespachado,
+  listarSkusDelVendedor,
+  type PedidoDelVendedor,
+  type LoteDeItem,
+  type SkuDelVendedor,
+} from './wrappers/despensa-vendedor';
