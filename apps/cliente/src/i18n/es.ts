@@ -1512,6 +1512,8 @@ export const clienteEs = {
     promesaFallo: 'No pudimos calcular la ventana de entrega. Probá de nuevo.',
     promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
     saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    ventanaProxima: 'La más próxima',
+    sinLugarEseDia: 'Sin lugar ese día',
     programarFecha: 'Programar otra fecha',
     programarPlaceholder: 'Elegí un día',
     programarAyuda: 'Solo se prometen días con capacidad confirmada.',

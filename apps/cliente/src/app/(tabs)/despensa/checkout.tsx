@@ -61,12 +61,14 @@ import {
   Hoja,
   Interruptor,
   SelectorOpcion,
+  SelectorVentana,
   Separador,
   Texto,
   spacing,
   useAviso,
   useTheme,
   type CampoFechaValor,
+  type OpcionVentana,
 } from '@epetplace/ui';
 import {
   calcularPromesaDespensa,
@@ -113,6 +115,12 @@ export default function DespensaCheckout() {
   // ── La ventana de entrega ──────────────────────────────────────────────
   const [promesa, setPromesa] = useState<PromesaEntrega | 'cargando' | { fallo: string } | null>(null);
   const [fechaElegida, setFechaElegida] = useState<CampoFechaValor | undefined>(undefined);
+  /** Las opciones del SelectorVentana: la más próxima + los tres días
+   *  siguientes, en UNA ola paralela (L-223: olas, jamás cadenas). El día
+   *  lleno se DIBUJA con su porqué — no desaparece (Ley 23 al revés: la
+   *  puerta tampoco esconde lo que el usuario busca). */
+  const [ventanas, setVentanas] = useState<OpcionVentana[] | 'cargando' | null>(null);
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
 
   // ── El pedido del motor ────────────────────────────────────────────────
   const clave = useRef(nuevaClaveIdempotencia());
@@ -169,6 +177,72 @@ export default function DespensaCheckout() {
     new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   const diaLocal = (iso: string) =>
     new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  const diaCorto = (fecha: string) =>
+    new Date(`${fecha}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+
+  /** yyyy-mm-dd LOCAL a n días — jamás `toISOString` (corre el día
+   *  después de las 19:00 en UTC-5, hallazgo de harness S55). */
+  function fechaLocalMasDias(n: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // Las opciones de ventana: base ("la más próxima") + mañana..+3, todas
+  // en paralelo. Un día cuya promesa CORRE a otro día (saltos>0) está
+  // lleno: se dibuja sin_cupo con su motivo, jamás se esconde.
+  useEffect(() => {
+    if (metodo !== 'despacho' || cuentaComercialId === null) {
+      setVentanas(null);
+      return;
+    }
+    let vigente = true;
+    setVentanas('cargando');
+    const dias = [1, 2, 3].map(fechaLocalMasDias);
+    void Promise.all([
+      calcularPromesaDespensa({ cuenta_comercial_id: cuentaComercialId }),
+      ...dias.map((f) =>
+        calcularPromesaDespensa({ cuenta_comercial_id: cuentaComercialId, fecha_programada: f }),
+      ),
+    ]).then(([base, ...porDia]) => {
+      if (!vigente) return;
+      const opciones: OpcionVentana[] = [];
+      if (base.ok) {
+        opciones.push({
+          clave: 'proxima',
+          etiqueta: t('despensa.ventanaProxima'),
+          detalle: `${diaCorto(base.data.fecha)} · ${horaLocal(base.data.desde)}–${horaLocal(base.data.hasta)}`,
+          estado: 'elegible',
+        });
+      }
+      porDia.forEach((r, i) => {
+        const fecha = dias[i];
+        // El día que la base ya cubre no se repite.
+        if (base.ok && base.data.fecha === fecha) return;
+        if (r.ok && r.data.fecha === fecha) {
+          opciones.push({
+            clave: fecha,
+            etiqueta: diaCorto(fecha),
+            detalle: `${horaLocal(r.data.desde)}–${horaLocal(r.data.hasta)}`,
+            estado: 'elegible',
+          });
+        } else if ((r.ok && r.data.fecha !== fecha) || (!r.ok && r.codigo === 'sin_cupo_ese_dia')) {
+          opciones.push({
+            clave: fecha,
+            etiqueta: diaCorto(fecha),
+            estado: 'sin_cupo',
+            motivo: t('despensa.sinLugarEseDia'),
+          });
+        }
+        // Otros errores: el día no se dibuja — dibujarlo como lleno sería
+        // afirmar algo que no se midió (L-139).
+      });
+      setVentanas(opciones);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [metodo, cuentaComercialId, t]);
 
   /** Qué falta para poder ver el total — el apagado DICE (S73-B). */
   const falta: string | null = useMemo(() => {
@@ -475,20 +549,47 @@ export default function DespensaCheckout() {
                         ) : null}
                       </>
                     )}
-                    <CampoFecha
-                      label={t('despensa.programarFecha')}
-                      valor={fechaElegida}
-                      onChange={setFechaElegida}
-                      placeholder={t('despensa.programarPlaceholder')}
-                      ayuda={t('despensa.programarAyuda')}
-                      tituloHoja={t('despensa.programarFecha')}
-                    />
-                    {fechaElegida !== undefined ? (
-                      <Boton
-                        variante="secundario"
-                        etiqueta={t('despensa.quitarFecha')}
-                        onPress={() => setFechaElegida(undefined)}
+                    {/* Las opciones — el día lleno se DIBUJA con su porqué. */}
+                    {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
+                      <SelectorVentana
+                        opciones={ventanas}
+                        elegida={fechaElegida?.fecha ?? 'proxima'}
+                        onElegir={(clave) => {
+                          if (clave === 'proxima') {
+                            setFechaElegida(undefined);
+                          } else {
+                            setFechaElegida({ fecha: clave, precision: 'exacta' });
+                          }
+                          setMostrarCalendario(false);
+                        }}
+                        onProgramarOtra={() => setMostrarCalendario(true)}
+                        etiquetaProgramarOtra={t('despensa.programarFecha')}
                       />
+                    ) : null}
+                    {mostrarCalendario ||
+                    (fechaElegida !== undefined &&
+                      Array.isArray(ventanas) &&
+                      !ventanas.some((v) => v.clave === fechaElegida.fecha)) ? (
+                      <>
+                        <CampoFecha
+                          label={t('despensa.programarFecha')}
+                          valor={fechaElegida}
+                          onChange={setFechaElegida}
+                          placeholder={t('despensa.programarPlaceholder')}
+                          ayuda={t('despensa.programarAyuda')}
+                          tituloHoja={t('despensa.programarFecha')}
+                        />
+                        {fechaElegida !== undefined ? (
+                          <Boton
+                            variante="secundario"
+                            etiqueta={t('despensa.quitarFecha')}
+                            onPress={() => {
+                              setFechaElegida(undefined);
+                              setMostrarCalendario(false);
+                            }}
+                          />
+                        ) : null}
+                      </>
                     ) : null}
                   </View>
                 </>
