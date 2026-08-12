@@ -82,9 +82,26 @@ function parseCSV(texto) {
   return filas.filter((f) => f.some((x) => x.trim() !== ''))
 }
 
+// 🔴 SEPARADOR: PIPE **O** COMA, y el arreglo va acá y no en el CSV.
+//
+// El cargador nació esperando `|`. La primera planilla real llegó con comas
+// —`"pollo, arroz"`— y **una planilla real siempre va a traer comas, porque así
+// escribe la gente.** Arreglar el CSV habría funcionado una vez y roto la
+// siguiente.
+//
+// LO QUE ESTABA EN JUEGO NO ERA EL FORMATO: sin esto, `"pollo, arroz"` entraba
+// como **UN SOLO alérgeno** llamado literalmente «pollo, arroz». Ningún perro
+// tiene alergia a esa cadena, así que **la exclusión dura nunca habría
+// disparado** y el producto se le habría recomendado a un perro alérgico al
+// pollo. *No es un detalle de parseo: es la feature entera fallando en
+// silencio, que es el peor modo de falla de este frente.*
+//
+// El parser del CSV ya resuelve las comillas, así que `"pollo, arroz"` llega
+// como un campo con coma adentro: separar por coma acá es seguro y no rompe
+// nada de lo que ya funcionaba con pipes.
 const lista = (v) =>
   String(v || '')
-    .split('|')
+    .split(/[|,]/)
     .map((x) => x.trim())
     .filter(Boolean)
 
@@ -92,9 +109,17 @@ const lista = (v) =>
 const OBLIGATORIAS = [
   'familia', 'marca', 'producto', 'presentacion', 'codigo_variante',
   'codigo_impuesto', 'sku_vendedor', 'precio_venta',
-  'especies', 'tallas', 'momento_vital', 'alergenos',
+  // 🔴 `especies` SIGUE SIENDO OBLIGATORIA Y `tallas`/`momento_vital` NO, y la
+  //    diferencia no es de estilo: **la recomendación filtra por especie con
+  //    `contains`**, así que un producto sin especie declarada NUNCA matchea
+  //    con una mascota concreta y queda invisible. Vacío ahí es un producto
+  //    muerto. En talla y momento, en cambio, el vacío es el DEFAULT de la
+  //    columna y significa «aplica a cualquiera» (S95-J / S95-J2) — es un
+  //    valor con sentido, no un dato faltante.
+  'especies', 'alergenos',
 ]
 const OPCIONALES = [
+  'tallas', 'momento_vital',
   'descripcion', 'contenido_valor', 'contenido_unidad', 'peso_kg', 'gtin',
   'largo_cm', 'ancho_cm', 'alto_cm', 'stock', 'ingredientes', 'dieta_prescripcion',
 ]
