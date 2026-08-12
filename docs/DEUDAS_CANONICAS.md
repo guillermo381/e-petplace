@@ -13288,3 +13288,183 @@ existe un "Monto Terminación" definido.
 > vencimiento, no de inicio. **☠️ MUERTE:** el aviso está enviado y acusado
 > por VTEX, o el founder decide renovar y lo declara.
 > Origen: S95, `MODELO_DESPENSA` v2.0 §13.
+
+---
+
+## S95-F — LAS SEIS DEL RELEVAMIENTO DEL PORTAL ADMIN (11 Ago 2026)
+
+> **Todas nacen de una sola medición:** el portal admin habla con la
+> **misma base de producción** con credencial `anon`, y quedó congelado el
+> **10 de mayo de 2026** — antes de la reforma de esquema de S95. Fuente
+> única: `docs/relevamientos/2026-08-11-s95-relevamiento-portal-admin.md`.
+>
+> ⚠️ **`D-757` NO se usó: se encontró TOMADA** por artefactos de S95-C
+> (reversa M1, juez, migraciones `20260811120000` y `20260811150000`) **sin
+> ficha depositada en este archivo**. Su ficha la debe quien la usó. La
+> numeración de S95-F arranca en **D-758** para no pisarla.
+
+#### D-758 — 🟡 EL PORTAL ADMIN QUEDÓ DESALINEADO DEL MODELO DE EVENTOS
+
+Medido contra la base viva: **9 objetos que el portal consulta ya no
+existen** — `citas`, `vacunas`, `historia_clinica`, `v_bio_expediente`,
+`mensajes_admin_seller`, `seller_comisiones`, `seller_inventario`,
+`seller_liquidaciones`, `v_pedido_liquidacion`.
+
+**Estado: 5 pantallas rotas enteras** (Citas · Liquidaciones · Mensajes ·
+Sellers · MascotaDetalle) · **5 parciales** (Dashboard · UsuarioDetalle ·
+Financiero · Timeline · Notificaciones) · **1 rotura transversal
+silenciosa**: el badge del `Layout.tsx:143` cuenta sobre
+`mensajes_admin_seller` **y además abre una suscripción realtime a esa
+tabla inexistente en CADA carga de página**; el error se traga con
+`count ?? 0` y el badge muestra 0.
+
+> **🔴 LO QUE HAY QUE NO OLVIDAR: la rotura NO es del dominio de sellers,
+> es del NÚCLEO.** `citas`, `vacunas`, `historia_clinica` y
+> `v_bio_expediente` son el modelo viejo que el monorepo reemplazó por
+> `evento_cita_servicio`, `evento_vacuna_aplicada` y
+> `evento_historia_clinica_registrada`. *Se entró a este relevamiento
+> esperando encontrar consecuencias del borrado de tablas de prueba de
+> sellers, y lo que apareció fue una app entera escrita contra un modelo
+> derogado.*
+
+**Por qué es 🟡 y no 🔴:** está congelado desde el 10-may, **el único
+usuario es el founder**, y por lo tanto es una **molestia conocida, no un
+incidente**. Nadie externo lo ve.
+
+> **Dueño: la pista que reconstruya el portal.**
+> **☠️ DISPARO:** cuando el portal vuelva a ser necesario para operar —
+> o cuando entre un segundo usuario. **☠️ MUERTE:** las 28 pantallas
+> consultan objetos que existen, verificado por diff contra la base.
+> **Se cruza con D-763** (el diff fue por tabla, no por columna).
+> Origen: S95-F.
+
+#### D-759 — 🔴 EL 14 % VIVE EN DIEZ LUGARES, Y EL MODELO ES FEE, NO GMV
+
+El Dashboard y `/inversores` calculan **`revenue = GMV × 14 %`**. Está mal
+por **dos ejes**, y se arreglan distinto:
+
+- **La tasa** es **10 %**, no 14 % (firma S95), y es **parámetro con
+  vigencia en `fee_configs`, jamás constante**.
+- **La base** ya no es GMV con margen: **es FEE**. En Forma B el vendedor
+  cobra y **esa plata jamás pasa por e-PetPlace**. `GMV × tasa` **infla el
+  ingreso proyectado un orden de magnitud** — no es un redondeo, es otra
+  magnitud.
+
+**Los diez lugares, medidos:** `Financiero.tsx:16` (`const TAKE_RATE =
+0.14`) · `Financiero.tsx:254` · `Dashboard.tsx:391` y `:393` (literales de
+texto *"14% take rate"*) · `Dashboard.tsx:392` · `Liquidaciones.tsx:197`
+(`?? 14`) · `Sellers.tsx:414` y `:419` (`?? 14`) · `Sellers.tsx:820`
+(texto al usuario) · **`v_gmv_mensual`** y **`v_metricas_tiempo_real`**,
+las dos **con el `0.14` embebido en el SQL de la vista**.
+
+> **🔴 CAMBIAR `fee_configs` NO MUEVE NINGUNO DE LOS DIEZ.** La tabla de
+> configuración existe y estos tableros no la leen. **Y tres de los diez
+> son `?? 14`: se activan justo cuando la tabla de configuración no
+> responde** — el defecto se disfraza de valor por defecto.
+
+> **Dueño: la pista que toque tableros o P&L.**
+> **☠️ DISPARO: ANTES de mostrar `/inversores` o el Dashboard a cualquier
+> persona fuera de la casa.** *Es lo único del relevamiento que puede hacer
+> daño afuera: un número inflado un orden de magnitud en un pitch deck no
+> es un bug de tablero, es lo que se dijo en una reunión.*
+> **☠️ MUERTE:** cero ocurrencias de `0.14`/`14` como tasa en código y en
+> vistas, y el tablero de despensa reporta **fee**, no GMV.
+> **Se cruza con D-750** (la despensa entra al P&L como fee) y con
+> **D-748** (el `take_rate_pct = 20` vivo).
+> Origen: S95-F, `MODELO_FINANCIERO` §8.10 enmienda S95-F.
+
+#### D-760 — 🟡 `seller_perfil` NO SE PUEDE BORRAR TODAVÍA: sostiene el tablero de inversores
+
+Medido con `pg_get_viewdef`: **`v_pitch_metrics` cuenta
+`sellers_activos` desde `seller_perfil WHERE estado='activo'`**. Y
+`v_pitch_metrics` es la **única** fuente de `Inversores.tsx:148` — los 12
+KPIs del pitch deck.
+
+**La cadena tiene dos pisos y conviene tenerla escrita:** `v_pitch_metrics`
+se construye **sobre** `v_metricas_tiempo_real`, que es la fuente del
+Dashboard ⇒ **tocar la de abajo arrastra a la de arriba**.
+
+**El orden correcto: se desacopla la vista primero, el borrado después.**
+Borrar la tabla antes deja el pitch deck en error.
+
+> **Dueño: la pista que cierre el barrido de comercio.**
+> **☠️ DISPARO:** el próximo intento de borrar `seller_perfil` — que va a
+> rebotar. **☠️ MUERTE:** `v_pitch_metrics` no nombra `seller_perfil` y la
+> tabla está borrada, con `/inversores` verificado vivo.
+> Origen: S95-F.
+
+#### D-761 — 🟢 `resenas_productos` y `v_resenas_todas`: CERO consumidores en los seis repos
+
+Censados **1.725 archivos** en `e-petplace`, `e-petplace-admin`,
+`e-petplace-v2`, `epetplace-web`, `e-petplace-prestadores` y
+`e-petplace-sistema-pruebas`. **Ninguna pantalla, de ningún repo, hace
+`.from('v_resenas_todas')` ni `.from('resenas_productos')`** — solo
+aparecen en `database.types.ts` (tipos generados) y en los propios scripts
+de S95 que las nombran como bloqueante.
+
+*La vista está bloqueando un borrado sin que nadie la lea.*
+
+**Su forma medida, para reescribirla conservándola:** `UNION ALL` de dos
+ramas, **11 columnas** — `tipo` (`'producto'`/`'prestador'`) · `id` ·
+`user_id` · `autor_nombre` · `calificacion` · `comentario` · `es_visible` ·
+`created_at` · `entidad_nombre` · `entidad_id` · `referencia_id`. **No
+filtra por tipo: lo expone como columna** ⇒ dejarla con una sola rama
+conserva su contrato.
+
+**Hueco declarado:** se midieron **seis repos y la definición de la
+vista**. **No se censaron funciones de la base que pudieran leerla.**
+
+> **Dueño: la pista que cierre el barrido de comercio.**
+> **☠️ DISPARO: libre — se puede cerrar cuando se quiera.**
+> **☠️ MUERTE:** `resenas_productos` borrada y `v_resenas_todas` reescrita
+> o retirada, con el censo de funciones hecho.
+> Origen: S95-F.
+
+#### D-762 — 🟡 104 ESCRITURAS DIRECTAS CONTRA 1 SOLO RPC
+
+Medido en el portal admin: **104 escrituras directas** (INSERT/UPDATE/
+UPSERT/DELETE) sobre **36 tablas**, y **un solo RPC en toda la app**
+(`otorgar_puntos`, `Gamificacion.tsx:89`).
+
+**Lo que eso significa en concreto:** decidir el estado de un pedido,
+aprobar un documento de identidad, aprobar un reembolso con su monto,
+otorgar o revocar un rol, y fijar un take rate **son acciones que solo
+existen dentro de un `onClick` de React**. No hay función que las nombre.
+
+> ***Una acción que vive en una pantalla es una acción que ninguna
+> automatización futura puede ejecutar.*** Ningún asistente, ningún cron,
+> ningún otro cliente puede hacerlas — y ninguna deja rastro salvo el que
+> la propia tabla guarde.
+
+**Cruce con S95-D:** `PedidoDetalle.tsx:165/178/191` hace **UPDATE directo
+del estado del pedido** — que es **exactamente lo que la máquina de
+estados append-only de S95-D vino a impedir**.
+
+> **Dueño: la pista que reconstruya el portal.**
+> **☠️ DISPARO:** junto con D-758, sobre puerta única.
+> **☠️ MUERTE:** cero escrituras directas a tabla desde el portal; toda
+> acción pasa por función con gate y error tipado.
+> Origen: S95-F.
+
+#### D-763 — 🟡 EL DIFF DEL RELEVAMIENTO FUE POR TABLA, NO POR COLUMNA
+
+**Los veredictos "OK" del relevamiento son un TECHO, no un piso.** El diff
+comparó **nombres de tabla y de vista** contra `information_schema`. **No
+comparó columnas.**
+
+Y el hueco no es teórico: **`productos` perdió 8 columnas y `pedidos`
+perdió 6** en S95. Medido: la pantalla `Productos.tsx` escribe
+`seller_perfil_id`, `precio`, `stock` y `sku` — **ninguna de las cuatro
+existe hoy** —, y esa pantalla figura como **"OK"** en la tabla del
+relevamiento porque la tabla `productos` sí existe.
+
+> *Un objeto que existe no es un objeto que sirve. Medir presencia de tabla
+> y llamarlo compatibilidad es la misma clase de error que contar `is_admin`
+> por texto y llamarlo alcance* — las dos aparecieron en la misma jornada.
+
+> **Dueño: quien vaya a confiar en un "OK" del relevamiento.**
+> **☠️ DISPARO: antes de tocar cualquier pantalla marcada OK.**
+> **☠️ MUERTE:** re-medición columna por columna de las 15 pantallas
+> marcadas OK, contra `information_schema.columns`.
+> **Se cruza con D-758.**
+> Origen: S95-F.

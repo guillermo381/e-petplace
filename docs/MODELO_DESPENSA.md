@@ -304,10 +304,49 @@ caras:
 ingesta asistida por IA (foto de la bolsa → atributos extraídos) es
 posterior al 15 de septiembre** (§14). Se deja la costura, no la carne.
 
-**Ingesta v1 del catálogo inicial: la hace e-PetPlace por el portal
-admin, que ya existe.** Con un vendedor y tres familias, el catálogo
-inicial es carga nuestra, no tarea del vendedor. *Es coherente con §4.1:
-la curaduría es decisión de plataforma.*
+~~**Ingesta v1 del catálogo inicial: la hace e-PetPlace por el portal
+admin, que ya existe.**~~ ☠️ **DEROGADO (S95-F, 11-ago-2026) — LA
+PREMISA ERA FALSA Y SE MIDIÓ.**
+
+> **Lo que la medición encontró** (relevamiento completo en
+> `docs/relevamientos/2026-08-11-s95-relevamiento-portal-admin.md`): la
+> pantalla `Productos.tsx` del portal admin está construida sobre
+> `productos.seller_perfil_id`, `precio`, `stock` y `sku` — **columnas
+> que la migración M2 de S95-C eliminó**. El portal fue escrito para el
+> modelo que S95 derogó, **su último commit es del 10 de mayo de 2026**,
+> y de sus 28 pantallas hay **5 rotas enteras y 5 parciales**.
+>
+> *«El portal admin, que ya existe» era cierto como frase y falso como
+> premisa: existe, y no sirve para esto.*
+
+**ENMIENDA FIRMADA POR EL FOUNDER (11-ago-2026).** Tres partes, y el
+orden importa porque es el que se firmó:
+
+1. **El catálogo inicial v1 se carga por SCRIPT, no por pantalla.** Con
+   **un vendedor y tres familias** esto es un seed, no una interfaz.
+   *Construir UI sobre un modelo que todavía se mueve es fabricar
+   deuda* — y el portal admin es la prueba viva de esa factura.
+2. **La puerta del vendedor SIGUE VIVA y NO se reemplaza.** Él propone,
+   e-PetPlace publica (arriba, sin cambios). **Su costura ya está en el
+   esquema y está medida:** `vendedor_skus` nace en `propuesto`,
+   `ofertas` separa `propuesto_por` de `publicado_por`, y `origen_carga`
+   admite `asistido_por_ia`. **El script no es un atajo alrededor de la
+   puerta: es su primer usuario.**
+3. **La ingesta asistida por IA sigue siendo posterior al 15 de
+   septiembre** (§14). **Sin cambios.**
+
+> **🔴 EL MOTIVO QUE HACE MEJOR AL SCRIPT QUE A LA PANTALLA, y es lo que
+> no hay que perder:** si la carga inicial pasa por la **MISMA función**
+> que va a usar el vendedor, el camino queda **probado con datos reales
+> antes de que él lo toque**.
+>
+> **Estrenamos nosotros la puerta, no el primer vendedor.**
+
+**Consecuencia operativa:** el cargador vive en `tools/carga-catalogo/`
+y **no escribe una sola tabla directo** — llama a las dos funciones de
+catálogo. *Esto se decide el mismo día en que se midió que el portal
+admin acumuló **104 escrituras directas contra 1 solo RPC**: la deuda
+que no se repite es la que se acaba de medir.*
 
 ---
 

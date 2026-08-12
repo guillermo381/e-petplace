@@ -980,6 +980,54 @@ VTEX webhook desglosa por vendor. e-PetPlace genera N eventos económicos. Liqui
 > sin take rate de terceros restándose antes. **Es línea propia del
 > modelo y todavía no está modelada.**
 
+> **➕ ENMIENDA S95-F (11-ago-2026) — D-750 DEJA DE SER UNA ADVERTENCIA
+> Y PASA A SER UN DEFECTO MEDIDO, CON DIRECCIÓN Y LÍNEAS.**
+>
+> Las dos enmiendas de arriba **se mantienen enteras**: esto no deroga
+> nada, agrega lo que la medición encontró. D-750 decía *«hay que
+> modelarlo como fee»*. **Ahora se sabe que ya está modelado, y está
+> modelado mal, y hay tableros mostrándolo.**
+>
+> **Medido en S95-F** (relevamiento del portal admin,
+> `docs/relevamientos/2026-08-11-s95-relevamiento-portal-admin.md` §6.1):
+> el Dashboard y la pantalla `/inversores` calculan
+> **`revenue = GMV × 14 %`**, y el número vive en **diez lugares**.
+>
+> **Está mal por DOS EJES a la vez, y conviene no confundirlos porque se
+> arreglan distinto:**
+>
+> - **EJE 1 — LA TASA.** Es **10 %**, no 14 % (firma S95;
+>   `MODELO_DESPENSA` §1). Y el 10 % es **parámetro con vigencia en
+>   `fee_configs`, jamás constante** — esa es su letra desde S94.
+> - **EJE 2 — LA BASE, que es el error caro.** El modelo ya **no es GMV
+>   con margen: es FEE**. En Forma B **el vendedor cobra y esa plata
+>   jamás pasa por e-PetPlace**. Un tablero que muestra `GMV × tasa`
+>   **infla el ingreso proyectado un orden de magnitud** — no es un
+>   redondeo, es otra magnitud.
+>
+> **🔴 LO QUE HAY QUE SABER ANTES DE CREER QUE SE ARREGLA CAMBIANDO UN
+> PARÁMETRO:** de los diez lugares, **dos son vistas de la base con el
+> `0.14` embebido en el SQL** — `v_gmv_mensual`
+> (`sum(total) * 0.14 AS revenue`) y `v_metricas_tiempo_real`
+> (`gmv_mes_actual * 0.14 AS revenue_mes`). Los otros ocho son código de
+> pantalla: una constante (`Financiero.tsx:16`), literales de texto
+> (`Dashboard.tsx:391` y `:393`) y **tres `?? 14` que se activan justo
+> cuando la tabla de configuración no responde**.
+>
+> ⇒ **CAMBIAR `fee_configs` NO MUEVE NINGUNO DE LOS DIEZ.** La tabla de
+> configuración existe y estos tableros no la leen.
+>
+> **El disparo, y es el único ítem del relevamiento que puede hacer daño
+> fuera de la casa:** esto se corrige **ANTES de mostrarle `/inversores`
+> o el Dashboard a cualquier persona externa**. *Un número inflado un
+> orden de magnitud en un pitch deck no es un bug de tablero: es lo que
+> se dijo en una reunión.* ⇒ **D-759 🔴**.
+>
+> *(Cruce declarado: `v_metricas_tiempo_real` es además la raíz de
+> `v_pitch_metrics` — tocar una arrastra a la otra. Y `v_pitch_metrics`
+> depende de `seller_perfil`, que por eso **todavía no se puede
+> borrar** ⇒ **D-760**.)*
+
 ### 8.11 Refugio que también opera como seller
 ONG con RUC único, cuenta con rol `refugio` activo + agrega rol `seller_productos` para vender merchandising. Una liquidación mensual única consolidando todo.
 
