@@ -54,6 +54,9 @@ import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { FilaEntrega } from '../components/FilaEntrega'
 import { AvisoAlergia } from '../components/AvisoAlergia'
+import { CodigoAEscala } from '../components/CodigoAEscala'
+import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
+import { PinMovible } from '../components/PinMovible'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
@@ -110,6 +113,46 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
         {hex.toLowerCase()}
       </Text>
+    </View>
+  )
+}
+
+// S96-B: el buscador y el pin, VIVOS. El buscador solo se juzga
+// tipeando —sus tres estados dependen del texto— y el pin solo se juzga
+// moviéndose. Las predicciones son de mentira a propósito: lo que la
+// galería tiene que dejar ver es el COMPORTAMIENTO (cargando ≠ vacío),
+// no el catálogo de Places.
+function MuestraLugar() {
+  const [texto, setTexto] = useState('')
+  const [elegido, setElegido] = useState<string | null>(null)
+  const [punto, setPunto] = useState({ lat: -0.1807, lon: -78.4678 })
+  // «quito» devuelve resultados · «zzz» devuelve vacío · «...» carga.
+  const cargando = texto.trim().endsWith('...')
+  const hay = texto.trim().length > 0 && texto.toLowerCase().includes('quito')
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <BuscadorDeLugar
+        label="Dirección"
+        marcador="Buscá tu calle"
+        valor={texto}
+        onCambiarTexto={(t) => { setTexto(t); setElegido(null) }}
+        cargando={cargando}
+        predicciones={hay ? [
+          { id: 'a', principal: 'Av. Shyris N34-120', secundaria: 'Quito, Ecuador' },
+          { id: 'b', principal: 'Av. Shyris y Portugal', secundaria: 'Quito, Ecuador' },
+        ] : []}
+        onElegir={setElegido}
+        sinResultados="No encontramos esa dirección. Podés ponerla a mano en el mapa."
+      />
+      <Texto variante="apoyo">
+        {elegido === null ? 'probá: «quito» trae resultados · «zzz» no encuentra · terminar en «...» carga' : `elegiste: ${elegido}`}
+      </Texto>
+      <PinMovible
+        lat={punto.lat}
+        lon={punto.lon}
+        onMover={(lat, lon) => setPunto({ lat, lon })}
+        etiqueta="Mové el mapa para ajustar el punto de entrega"
+      />
     </View>
   )
 }
@@ -2880,6 +2923,26 @@ function GaleriaInterna() {
           <MuestraPieRevelar />
         </Seccion>
 
+        <Seccion titulo="BuscadorDeLugar + PinMovible (S96) — la dirección con Places y el punto a mano (§7)">
+          <MuestraLugar />
+        </Seccion>
+
+        <Seccion titulo="CodigoAEscala (S96) — el código que se lee a través de un mostrador">
+          {/* Los dos consumidores con los que nace, lado a lado: el de la
+              puerta (lo dice la familia) y el de reclamo (va en la
+              factura del vet). El tercero muestra que los separadores
+              son DEL DATO — la pieza no los inventa ni los quita. */}
+          <View style={{ gap: spacing[5] }}>
+            <CodigoAEscala etiqueta="Código de la puerta" codigo="4827" />
+            <CodigoAEscala
+              etiqueta="Código de reclamo"
+              codigo="87654321"
+              expira="Vence el 10 de noviembre"
+            />
+            <CodigoAEscala etiqueta="Con separadores del emisor" codigo="8765-4321" />
+          </View>
+        </Seccion>
+
         <Seccion titulo="PuertaDeOficio (S96) — el barrido al cambiar de oficio (§3)">
           <MuestraPuerta />
         </Seccion>
@@ -2891,24 +2954,45 @@ function GaleriaInterna() {
               ignorar el primero. Y el tercero muestra el paso explícito
               YA dado: el control desaparece, no se vuelve a pedir. */}
           <View style={{ gap: spacing[4] }}>
+            {/* LAS TRES RAMAS DE LA FIRMA, y la cuarta que NO se dibuja.
+                Montadas juntas porque la comparación ES la ley: el dueño
+                tiene que poder distinguir «le hace mal» de «no lo
+                verificamos» de «no lo tenemos». */}
             <AvisoAlergia
-              modo="contiene"
+              composicion="verificada"
+              contieneAlergeno
               mensaje="Thor es alérgico al pollo y este alimento lo contiene."
               onEntendido={() => {}}
               etiquetaEntendido="Entiendo, seguir igual"
             />
             <AvisoAlergia
-              modo="sinComposicion"
+              composicion="declarada_sin_verificar"
+              contieneAlergeno={false}
+              mensaje="No verificamos la lista de ingredientes de este producto."
+              detalle="Puede tener pollo sin declararlo. Thor es alérgico."
+            />
+            <AvisoAlergia
+              composicion="ausente"
+              contieneAlergeno={false}
               mensaje="No tenemos los ingredientes de este producto."
               detalle="No podemos avisarte si tiene algo que a Thor le haga mal."
             />
             <AvisoAlergia
-              modo="contiene"
+              composicion="verificada"
+              contieneAlergeno
               mensaje="Thor es alérgico al pollo y este alimento lo contiene."
               entendido
               onEntendido={() => {}}
               etiquetaEntendido="Entiendo, seguir igual"
               etiquetaYaEntendido="Lo tuviste en cuenta."
+            />
+            {/* EL ÚNICO SILENCIO LEGAL: verificada y sin el alérgeno.
+                Está montada y NO dibuja nada — el hueco de abajo es la
+                pieza haciendo su trabajo, no una muestra que falta. */}
+            <AvisoAlergia
+              composicion="verificada"
+              contieneAlergeno={false}
+              mensaje="(este no se dibuja: verificada y sin el alérgeno)"
             />
           </View>
         </Seccion>
