@@ -358,7 +358,34 @@ export { FilaEntrega, type FilaEntregaProps } from './components/FilaEntrega'
 // `productos` tiene `alergenos` e `ingredientes_activos` SIN marca de
 // verificación ⇒ hoy nadie puede derivar `verificada`. La forma está y
 // espera su dato — es el inverso del «motor sin puerta».
-export { AvisoAlergia, type AvisoAlergiaProps, type EstadoComposicion } from './components/AvisoAlergia'
+//
+// 🔴 REABIERTA EL MISMO DÍA POR DOS FIRMAS MÁS:
+//  · LA COMPOSICIÓN GANA UN CUARTO VALOR — `no_aplica` (seis arenas
+//    sanitarias del catálogo real). CALLA COMO `verificada`, PERO ES OTRO
+//    SILENCIO: una calla porque cotejamos y está bien, la otra porque NO
+//    HAY NADA QUE COTEJAR. Meterlo en `ausente` sería peor que no tenerlo
+//    — la app le pediría ingredientes a una bolsa de arena.
+//  · LA COINCIDENCIA DEJA DE SER BOOLEAN y pasa a `ninguna|exacta|
+//    imprecisa`. Un producto que declara `ave_no_especificada` tiene que
+//    advertirle al alérgico al pollo, y la voz NO es «contiene pollo»: es
+//    «contiene proteína de ave sin especificar, y podría ser pollo».
+//    ⇒ Unión y no dos booleans porque «no contiene pero es imprecisa»
+//      sería EXPRESABLE Y NO SIGNIFICA NADA. Mismo movimiento que
+//      `DestinoItem`: el hecho tiene tres valores, el tipo tiene tres.
+//    ⇒ El TONO NO BAJA en la imprecisa (mismo registro warning): bajarlo
+//      la volvería ignorable y el riesgo es el mismo — si esa proteína ES
+//      pollo, le hace igual de mal. Cambia la VOZ, no el matiz.
+//
+// DEFENSA EN PROFUNDIDAD, declarada: `no_aplica` CON coincidencia es
+// incoherente y A confirmó que la puerta lo rebota. Aun así la pieza no
+// asume dato limpio — si llegara, HABLA. Ante una incoherencia, el error
+// barato es advertir de más y el caro es callar.
+export {
+  AvisoAlergia,
+  type AvisoAlergiaProps,
+  type EstadoComposicion,
+  type CoincidenciaAlergeno,
+} from './components/AvisoAlergia'
 
 // CodigoAEscala — S96-B: el código que se lee A TRAVÉS DE UN MOSTRADOR.
 // Pedido de C con DOS consumidores ya nombrados (el código de reclamo del

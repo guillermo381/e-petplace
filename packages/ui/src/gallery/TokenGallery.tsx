@@ -2984,41 +2984,60 @@ function GaleriaInterna() {
                 Montadas juntas porque la comparación ES la ley: el dueño
                 tiene que poder distinguir «le hace mal» de «no lo
                 verificamos» de «no lo tenemos». */}
+            {/* LAS CUATRO VOCES, y los DOS SILENCIOS que no se dibujan.
+                Montadas juntas porque la comparación ES la ley: el dueño
+                tiene que poder distinguir «le hace mal» de «PODRÍA hacerle
+                mal» de «no lo verificamos» de «no lo tenemos». */}
             <AvisoAlergia
               composicion="verificada"
-              contieneAlergeno
+              coincidencia="exacta"
               mensaje="Thor es alérgico al pollo y este alimento lo contiene."
               onEntendido={() => {}}
               etiquetaEntendido="Entiendo, seguir igual"
             />
             <AvisoAlergia
               composicion="declarada_sin_verificar"
-              contieneAlergeno={false}
+              coincidencia="imprecisa"
+              mensaje="Este alimento contiene proteína de ave sin especificar, y podría ser pollo."
+              detalle="Thor es alérgico al pollo."
+              onEntendido={() => {}}
+              etiquetaEntendido="Entiendo, seguir igual"
+            />
+            <AvisoAlergia
+              composicion="declarada_sin_verificar"
+              coincidencia="ninguna"
               mensaje="No verificamos la lista de ingredientes de este producto."
               detalle="Puede tener pollo sin declararlo. Thor es alérgico."
             />
             <AvisoAlergia
               composicion="ausente"
-              contieneAlergeno={false}
+              coincidencia="ninguna"
               mensaje="No tenemos los ingredientes de este producto."
               detalle="No podemos avisarte si tiene algo que a Thor le haga mal."
             />
             <AvisoAlergia
               composicion="verificada"
-              contieneAlergeno
+              coincidencia="exacta"
               mensaje="Thor es alérgico al pollo y este alimento lo contiene."
               entendido
               onEntendido={() => {}}
               etiquetaEntendido="Entiendo, seguir igual"
               etiquetaYaEntendido="Lo tuviste en cuenta."
             />
-            {/* EL ÚNICO SILENCIO LEGAL: verificada y sin el alérgeno.
-                Está montada y NO dibuja nada — el hueco de abajo es la
-                pieza haciendo su trabajo, no una muestra que falta. */}
+            {/* LOS DOS SILENCIOS LEGALES, montados a propósito y sin
+                dibujar nada: `verificada` sin coincidencia (cotejamos y
+                está bien) y `no_aplica` (una arena sanitaria no tiene
+                ingredientes que cotejar). El hueco de abajo es la pieza
+                haciendo su trabajo, no dos muestras que faltan. */}
             <AvisoAlergia
               composicion="verificada"
-              contieneAlergeno={false}
-              mensaje="(este no se dibuja: verificada y sin el alérgeno)"
+              coincidencia="ninguna"
+              mensaje="(no se dibuja: cotejamos y está bien)"
+            />
+            <AvisoAlergia
+              composicion="no_aplica"
+              coincidencia="ninguna"
+              mensaje="(no se dibuja: una arena no tiene ingredientes)"
             />
           </View>
         </Seccion>
