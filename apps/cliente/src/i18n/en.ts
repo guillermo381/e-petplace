@@ -1364,6 +1364,7 @@ export const clienteEn = {
     recurrenciaDias: 'Every {{n}} days',
     recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
     recurrenciaActiva: 'The recurring purchase is set up.',
+    recurrenciaApagada: 'Done: the recurring purchase is off.',
 
     // S96 · the order ladder (§8.1 — five steps; "Preparing" deliberately
     // covers the seller's three internal steps)

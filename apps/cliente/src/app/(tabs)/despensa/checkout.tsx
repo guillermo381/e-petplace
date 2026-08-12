@@ -50,7 +50,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import {
   Boton,
   Campo,
@@ -71,6 +71,7 @@ import {
   type OpcionVentana,
 } from '@epetplace/ui';
 import {
+  alternarRecurrencia,
   calcularPromesaDespensa,
   cancelarPedidoDespensa,
   configurarRecurrencia,
@@ -101,6 +102,7 @@ export default function DespensaCheckout() {
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const items = useCarrito();
+  const navigation = useNavigation();
 
   const [fase, setFase] = useState<Fase>('armado');
   const [metodo, setMetodo] = useState<'despacho' | 'retiro'>('despacho');
@@ -336,10 +338,25 @@ export default function DespensaCheckout() {
   }
 
   /** §6.1 — la recurrencia se activa desde el éxito, con el mensaje
-   *  honesto VERBATIM de la letra y el cobro real esperando pasarela. */
+   *  honesto VERBATIM de la letra y el cobro real esperando pasarela.
+   *  Y SE APAGA EN UN TOQUE, desde donde se prendió (condición ② de la
+   *  letra) — el toggle que solo prendía era un defecto, no una versión. */
   async function alternarRec(encendido: boolean) {
     if (activandoRec) return;
-    if (!encendido || cuentaComercialId === null) return; // apagar sin id = no-op local
+    if (!encendido) {
+      if (recurrenciaId === null) return;
+      setActivandoRec(true);
+      const r = await alternarRecurrencia(recurrenciaId, false);
+      setActivandoRec(false);
+      if (!r.ok) {
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        return;
+      }
+      setRecurrenciaId(null);
+      mostrar({ texto: t('despensa.recurrenciaApagada'), variante: 'exito' });
+      return;
+    }
+    if (cuentaComercialId === null) return;
     setActivandoRec(true);
     const r = await configurarRecurrencia({
       cuenta_comercial_id: cuentaComercialId,
@@ -394,6 +411,22 @@ export default function DespensaCheckout() {
   }, [fase, items, receptor, telefono, direccion, metodo, instrucciones]);
 
   const dinero = (v: number | null) => (v !== null ? `$ ${v.toFixed(2)}` : null);
+
+  /** 🔴 EL BACK POR GESTO NO ESQUIVA LA CANCELACIÓN. El chevron del
+   *  encabezado pasa por `volverAEditar`, pero el gesto del sistema y el
+   *  botón físico de Android sacan la pantalla SIN pasar por ahí — y eso
+   *  dejaba el pedido `creado` huérfano (la clase exacta de los 137).
+   *  `beforeRemove` intercepta TODAS las salidas: con pedido vivo y sin
+   *  pagar, la salida se convierte en volver-a-editar (que cancela). */
+  useEffect(() => {
+    const sub = navigation.addListener('beforeRemove', (e) => {
+      if (pedido === null || fase === 'exito') return;
+      e.preventDefault();
+      void volverAEditar();
+    });
+    return sub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, pedido, fase, trabajando]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

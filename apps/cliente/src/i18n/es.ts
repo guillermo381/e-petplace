@@ -1556,6 +1556,7 @@ export const clienteEs = {
     recurrenciaDias: 'Cada {{n}} días',
     recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
+    recurrenciaApagada: 'Listo: la compra recurrente quedó apagada.',
 
     // S96 · la escalera del pedido (§8.1 — cinco pasos; "Preparando" tapa
     // los tres escalones internos del vendedor a propósito)
