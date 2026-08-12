@@ -74,6 +74,9 @@ const ui = leer(RAICES_UI.flatMap(archivosTsx));
 /** El corpus de LÓGICA (ver `archivosCodigo`): incluye `.ts`, donde viven los
  *  flujos extraídos. Hoy lo consume R34. */
 const appsCodigo = leer(RAICES.flatMap(archivosCodigo));
+/** S96-B · el corpus de R35: la galería es el único lugar de `ui` que se
+ *  compone como PANTALLA, y era el hueco de R2 (que solo mira `apps/`). */
+const galeria = leer(archivosTsx('packages/ui/src/gallery'));
 
 /** El ancla del corpus, ejecutada (su porqué y su alcance, arriba). Corre
  *  ANTES que cualquier regla: si el corpus se derrumbó, el lint entero se
@@ -209,6 +212,78 @@ function r2(archivos) {
     ? [`Ley 1: ${hexes} hex crudos (baseline ${BASELINE_HEX}) — subió:\n    ${porArchivo.join('\n    ')}`]
     : [];
   return { fallos, info: `${hexes}/${BASELINE_HEX}${hexes < BASELINE_HEX ? ' — BAJÓ: actualizar baseline' : ''}` };
+}
+
+/** R35 · EL COLOR APLICADO SALE DEL TEMA — LA LEY 1 EN `packages/ui`
+ *  (S96-B, D-781; adjudicación de mesa sobre el hallazgo de B).
+ *
+ *  EL HUECO QUE CIERRA, y lo encontró una cura propia: al montar la
+ *  muestra de `PuertaDeOficio` en la galería metí un hex crudo
+ *  (`#00000010`) y **R2 no lo cazó, porque su corpus es solo `apps/`**.
+ *  Lo curé antes de commitear, pero el agujero quedaba: **la Ley 1 no
+ *  dice "cero hex crudos en apps", dice CERO HEX CRUDOS**, y la galería
+ *  es el único lugar de `ui` que se compone como pantalla.
+ *
+ *  🔴 POR QUÉ NO ES "R2 CON EL CORPUS MÁS GRANDE", que era el pedido
+ *  literal — y es el hallazgo de esta regla: **ensanchar R2 tal cual
+ *  habría producido 29 rojos en la galería y ~27 eran FALSOS.** El regex
+ *  de R2 cuenta `#XXXXXX` en cualquier posición, y la galería de TOKENS
+ *  está llena de hex **dentro de strings de etiqueta** que documentan
+ *  valores medidos (`"tealDark #0A7268 — claro 5.51"`). Eso no es un
+ *  color aplicado: **es el trabajo de la galería**. `sinComentarios` no
+ *  los quita porque no son comentarios.
+ *
+ *  ⇒ La regla no ensancha un corpus: **afina la PREGUNTA**. Mira hex en
+ *  POSICIÓN DE VALOR DE ESTILO (`backgroundColor:`, `color:`, `fill:`…),
+ *  que es lo único que la Ley 1 prohíbe. Un hex MENCIONADO documenta; un
+ *  hex APLICADO se salta el tema.
+ *
+ *  LO QUE ENCONTRÓ AL MEDIRSE, antes de existir (por eso se mide antes
+ *  de curar): **los 6 stops de la rampa del logo duplicados en
+ *  `Isotipo.tsx`**, contra `DIRECCION_ARTE` §9bis.3 que declara
+ *  `gradients.logo` como su FUENTE ÚNICA. Verificados byte a byte contra
+ *  `palette` y deduplicados en el mismo commit — el render no cambió.
+ *  *Una copia de la rampa de marca diverge en silencio: el día que
+ *  alguien afine un stop, el isotipo se queda con el viejo.*
+ *
+ *  BASELINE 1, CON DUEÑO Y RAZÓN: `apps/prestador/src/components/
+ *  animated-icon.tsx` — `#208AEF` en un `splashOverlay`, residuo del
+ *  template de Expo. **Es territorio de C y no se cura desde acá** (§6
+ *  del método: se declara y se pide, no se clona ni se invade). El
+ *  ratchet solo baja.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. El
+ *  BASELINE sí muere: el día que C retire ese residuo, baja a 0 y esta
+ *  regla pasa a "DURA EN 0". */
+const BASELINE_R35 = { 'apps/prestador/src/components/animated-icon.tsx': 1 };
+const RE_R35 = /(backgroundColor|borderColor|borderTopColor|borderBottomColor|borderLeftColor|borderRightColor|shadowColor|tintColor|color|fill|stroke|stopColor)\s*:\s*'#[0-9A-Fa-f]{3,8}'/g;
+function r35(archivos) {
+  const fallos = [];
+  let total = 0;
+  const sumaBaseline = Object.values(BASELINE_R35).reduce((a, b) => a + b, 0);
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    let enArchivo = 0;
+    for (const m of limpio.matchAll(RE_R35)) {
+      enArchivo++;
+      total++;
+      if (enArchivo > (BASELINE_R35[path] ?? 0))
+        fallos.push(
+          `${path}:${lineaDe(limpio, m.index)} — COLOR APLICADO A MANO (${m[0].trim()}). Ley 1: todo color sale de \`@epetplace/ui\` (tokens o slots del tema). Un hex acá no resuelve por tema: se queda igual en oscuro y en memorial, que es la mitad del sistema apagada en silencio.`,
+        );
+    }
+  }
+  // ANCLA — escrita contra el modo de falla de ESTA regla: si el corpus
+  // de la galería deja de leerse (se renombra la carpeta, se mueve el
+  // archivo), R35 informaría "0 colores a mano" en VERDE sobre el único
+  // lugar de `ui` que se compone como pantalla — que es justo el lugar
+  // por el que nació. No basta con "algún archivo de ui".
+  const veGaleria = archivos.some((a) => a.path.includes('packages/ui/src/gallery/'));
+  fallos.push(...ancla('R35', veGaleria ? 1 : 0, 1, 'archivo(s) de packages/ui/src/gallery (el corpus que R2 no miraba)'));
+  return {
+    fallos,
+    info: `${total}/${sumaBaseline} color(es) aplicados a mano${sumaBaseline === 0 ? '' : ' (baseline: el splashOverlay del template de Expo, de C)'}${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
 }
 
 /** R3 · A6+§7 sobre Tarjeta — S82-B: GANA MODO DE FALLO (deja de ser
@@ -2173,6 +2248,7 @@ const corridas = [
   ['R10 (override-s82c atado a su casa)', r10(apps)],
   ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
   ['R14 (el solape no tapa el saludo)', r14(apps)],
+  ['R35 (Ley 1: el color aplicado sale del tema — ui+galería+apps)', r35([...apps, ...ui, ...galeria])],
 ];
 // R12 y R15 corren sobre el volcador vivo; si cayó, FALLAN FUERTE.
 const dump = volcadorReal();
