@@ -426,3 +426,38 @@ export {
 // Recibe la CAPA (ley 10), jamás un color: aceptar un hex sería la Ley 1
 // rota por la puerta de atrás.
 export { PuertaDeOficio, type PuertaDeOficioProps, type CapaDeOficio } from './components/PuertaDeOficio'
+
+// BuscadorDeLugar — S96-B: buscar una dirección y elegirla (§7). Pedido de
+// D con su contrato ya vivo (`buscarLugares` → PrediccionLugar). La pieza
+// NO busca: las llamadas y la sesión de Places son de la pantalla (tiene
+// costo por sesión y cierra en `resolverLugar`).
+//
+// TRES ESTADOS QUE NO SE CONFUNDEN (Ley 13): cargando · con resultados ·
+// BUSCÓ Y NO ENCONTRÓ. El tercero es el que importa — §7 dice que Places
+// falla en Quito más de lo que uno espera (urbanizaciones nuevas, casas
+// sin numeración), así que no es caso borde: es por donde va a entrar una
+// parte real de las direcciones. Por eso `sinResultados` lleva su voz Y su
+// salida: un vacío sin camino deja al usuario sin dirección y sin idea.
+// El orden del render respeta que CARGANDO no es SIN RESULTADOS — mandar a
+// poner el pin a mano a alguien cuya dirección sí existía es el error
+// clásico de la Ley 13 con consecuencia concreta.
+export { BuscadorDeLugar, type BuscadorDeLugarProps, type PrediccionDeLugar } from './components/BuscadorDeLugar'
+
+// PinMovible — S96-B: el punto se pone a mano, Y ES OBLIGATORIO (§7: «si
+// Places no encuentra la casa, el punto igual existe»).
+//
+// EL CHECK TIENE SU ESPEJO EN EL TIPO: A confirmó `chk_direccion_con_punto`
+// (lat/lon obligatorios), y acá `lat`/`lon`/`onMover` son REQUERIDOS sin
+// `null` posible — «dirección sin punto» no es expresable en la pieza,
+// igual que no lo es en la tabla. Sin punto todavía, la pantalla pasa el
+// centro de la ciudad como semilla.
+//
+// SE MUEVE EL MAPA, NO EL PIN — patrón de la industria para ajustar
+// ubicación, y la razón es física: arrastrando un marcador EL DEDO TAPA
+// EXACTAMENTE EL PUNTO que hay que colocar con precisión. Con el mapa
+// moviéndose debajo, el punto está siempre a la vista. Consecuencia: el
+// pin no es un `Marker`, es una capa encima — no puede desincronizarse del
+// centro porque ES el centro. Y `onMover` sale de `onRegionChangeComplete`,
+// jamás del evento continuo: un valor que tiembla mientras el dedo está
+// apoyado es re-renders que nadie pidió.
+export { PinMovible, type PinMovibleProps } from './components/PinMovible'

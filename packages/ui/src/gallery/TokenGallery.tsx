@@ -55,6 +55,8 @@ import { TarjetaPedido } from '../components/TarjetaPedido'
 import { FilaEntrega } from '../components/FilaEntrega'
 import { AvisoAlergia } from '../components/AvisoAlergia'
 import { CodigoAEscala } from '../components/CodigoAEscala'
+import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
+import { PinMovible } from '../components/PinMovible'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
@@ -111,6 +113,46 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
         {hex.toLowerCase()}
       </Text>
+    </View>
+  )
+}
+
+// S96-B: el buscador y el pin, VIVOS. El buscador solo se juzga
+// tipeando —sus tres estados dependen del texto— y el pin solo se juzga
+// moviéndose. Las predicciones son de mentira a propósito: lo que la
+// galería tiene que dejar ver es el COMPORTAMIENTO (cargando ≠ vacío),
+// no el catálogo de Places.
+function MuestraLugar() {
+  const [texto, setTexto] = useState('')
+  const [elegido, setElegido] = useState<string | null>(null)
+  const [punto, setPunto] = useState({ lat: -0.1807, lon: -78.4678 })
+  // «quito» devuelve resultados · «zzz» devuelve vacío · «...» carga.
+  const cargando = texto.trim().endsWith('...')
+  const hay = texto.trim().length > 0 && texto.toLowerCase().includes('quito')
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <BuscadorDeLugar
+        label="Dirección"
+        marcador="Buscá tu calle"
+        valor={texto}
+        onCambiarTexto={(t) => { setTexto(t); setElegido(null) }}
+        cargando={cargando}
+        predicciones={hay ? [
+          { id: 'a', principal: 'Av. Shyris N34-120', secundaria: 'Quito, Ecuador' },
+          { id: 'b', principal: 'Av. Shyris y Portugal', secundaria: 'Quito, Ecuador' },
+        ] : []}
+        onElegir={setElegido}
+        sinResultados="No encontramos esa dirección. Podés ponerla a mano en el mapa."
+      />
+      <Texto variante="apoyo">
+        {elegido === null ? 'probá: «quito» trae resultados · «zzz» no encuentra · terminar en «...» carga' : `elegiste: ${elegido}`}
+      </Texto>
+      <PinMovible
+        lat={punto.lat}
+        lon={punto.lon}
+        onMover={(lat, lon) => setPunto({ lat, lon })}
+        etiqueta="Mové el mapa para ajustar el punto de entrega"
+      />
     </View>
   )
 }
@@ -2879,6 +2921,10 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="BuscadorDeLugar + PinMovible (S96) — la dirección con Places y el punto a mano (§7)">
+          <MuestraLugar />
         </Seccion>
 
         <Seccion titulo="CodigoAEscala (S96) — el código que se lee a través de un mostrador">
