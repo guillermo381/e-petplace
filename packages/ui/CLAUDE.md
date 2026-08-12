@@ -7,14 +7,27 @@
 > leído del propio lint: `exportaciones=86 · en-galería=77 ·
 > exentas-declaradas=9 · pendientes=0`. WCAG **178/0**.
 >
-> - **`AvisoAlergia` pasa a TRES estados** (firma del founder):
->   `verificada · declarada_sin_verificar · ausente`, **verbatim del CHECK
->   que A metió en `productos.composicion_estado`** — los dos llegamos al
->   mismo vocabulario leyendo la misma firma, sin hablarnos. **Solo la
->   verificada puede callar.** La pieza dejó de recibir *qué mostrar* y
->   pasa a recibir los HECHOS: **montada con `declarada_sin_verificar`, la
->   pantalla no tiene prop para hacerla callar.** *Su límite: no puede
->   obligar a que la MONTEN — eso es regla de lint, no de prop.*
+> - **`AvisoAlergia` pasa a CUATRO estados de composición y TRES de
+>   coincidencia** (tres firmas del founder en un día, sobre la misma
+>   pieza): `verificada · declarada_sin_verificar · ausente · no_aplica`
+>   × `ninguna · exacta · imprecisa`, **verbatim del CHECK que A metió en
+>   `productos.composicion_estado`** — los dos llegamos al mismo
+>   vocabulario leyendo la misma firma, sin hablarnos.
+>   · **CALLAN DOS, y son SILENCIOS DISTINTOS:** `verificada` porque
+>     *cotejamos y está bien*, `no_aplica` porque **no hay nada que
+>     cotejar** (una arena sanitaria no tiene ingredientes). Meterlo en
+>     `ausente` sería peor que no tenerlo: *un dato faltante que no falta*.
+>   · **La coincidencia NO es un boolean**, porque *"no contiene pero es
+>     imprecisa"* sería expresable y no significa nada. Y **el tono de la
+>     imprecisa no baja** — si esa proteína ES pollo, le hace igual de mal.
+>   · La pieza dejó de recibir *qué mostrar* y recibe los HECHOS:
+>     **montada con `declarada_sin_verificar`, la pantalla no tiene prop
+>     para hacerla callar.** *Su límite: no puede obligar a que la MONTEN
+>     — eso es regla de lint, no de prop.*
+>   *(⏪ Esta entrada decía «pasa a TRES estados» y quedó falsa el mismo
+>   día. Se corrige acá con su línea vieja citada: la prosa derivada decae
+>   mientras el objeto no —L-141—, y una banda que contradice al tipo
+>   desinforma más que una ausente.)*
 > - **`CodigoAEscala`** (pedido de C, dos consumidores). **El desvío que C
 >   declaró no era suyo: era el hueco del sistema** — `Texto` no tiene
 >   escotilla de tamaño, así que para la escala había que salirse de la
@@ -38,8 +51,12 @@
 >   y ~27 falsos — la galería de tokens está llena de hex **en strings de
 >   etiqueta** que documentan valores medidos, y eso es su trabajo. La
 >   regla **afina la pregunta** (hex en posición de valor de estilo) en vez
->   de ensanchar el corpus. **Baseline 1 con dueño: un residuo de template
->   en `apps/prestador` — de C, no se cura desde acá.**
+>   de ensanchar el corpus. **Nació con baseline 1 y dueño declarado —un
+>   residuo de template en `apps/prestador`, de C— y C lo curó EL MISMO
+>   DÍA: hoy está DURA EN 0.** Re-medido sobre `main` y no sobre el aviso,
+>   y el rojo re-producido con el piso nuevo (un ratchet que cambia de
+>   baseline es otro guard). *La forma correcta de nacer de un ratchet:
+>   se declara y se pide, no se invade el territorio ajeno.*
 >
 > **Y lo que encontró R35 al MEDIRSE, antes de existir:** los 6 stops de la
 > rampa del logo **duplicados en `Isotipo.tsx`**, contra `DIRECCION_ARTE`
