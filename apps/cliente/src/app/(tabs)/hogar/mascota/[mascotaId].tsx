@@ -1552,6 +1552,30 @@ export default function PerfilDeMascota() {
         </View>
         ) : null}
 
+        {/* ── S96-D · LA PUERTA DE LA DESPENSA — la entrada PRINCIPAL del
+            frente de productos es el expediente ("el alimento de Thor",
+            jamás "Categoría: Alimentos" — LETRA_RECORRIDO §5.1 /
+            MODELO_DESPENSA §5.1: el tab da alcance, el expediente da
+            criterio). Misma familia que las otras puertas del perfil
+            (bitácora · Documentos): Tarjeta reposo + CeldaNavegacion.
+            No se monta en memorial/perdida: recomendarle alimento a una
+            mascota que ya no está es lo que el apagado estructural de
+            LOYALTY §7.1 existe para impedir. */}
+        {mascota.estado_vida === 'activa' ? (
+          <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="despensa"
+                titulo={t('perfil.suAlimento', { nombre: mascota.nombre })}
+                registro="tinta"
+                onPress={() =>
+                  router.push({ pathname: '/despensa', params: { mascotaId: mascota.id } })
+                }
+              />
+            </Tarjeta>
+          </View>
+        ) : null}
+
         {/* ── ⑥ SU HISTORIA — dentro de la ficha lleva UN SOLO EJE: el de
             SERVICIO con su glifo (el tramo temporal vive en la pantalla
             completa — contrato del contexto 2). Filas con columna de

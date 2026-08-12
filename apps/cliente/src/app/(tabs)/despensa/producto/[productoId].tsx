@@ -1,55 +1,60 @@
 /**
- * PRODUCTO — LA FICHA CON SU PORQUÉ (S95-I; `MODELO_DESPENSA` §5.2 punto 2:
- * *"foto, nombre, precio, presentación, y el porqué de la recomendación
- * («para perros de talla media, 3 a 7 años»)"*).
+ * PRODUCTO — LA FICHA QUE ADVIERTE Y VENDE (S96-D · D-B1/D-B2 ·
+ * `LETRA_RECORRIDO_DESPENSA_S96` §5.1/§5.4/§5.5 · `MODELO_DESPENSA` §4.1
+ * aclarada y §6 enmendada — sube sobre la ficha S95-I).
  *
- * TESIS (Ley 14): *este producto está acá por una razón, y la razón se lee.*
+ * TESIS (Ley 14): *la app conoce a tu mascota, y te lo demuestra acá.*
  *
- * FIRMA (Ley 15): EL PORQUÉ. Una tienda cualquiera describe el producto;
- * ésta explica por qué se lo está mostrando a ESTA mascota. Es la misma
- * tesis del foso que Descubrir, un piso más adentro.
+ * FIRMA (Ley 15): LA ADVERTENCIA QUE CONOCE A THOR. Una tienda cualquiera
+ * describe el producto; ésta —cuando hay alérgeno documentado— lo dice con
+ * nombre propio y deja decidir. Es §5.4 hecho pantalla: *esconder es
+ * invisible, y lo invisible no demuestra nada.*
  *
- * CHANEL (Ley 16), lo quitado:
- *  · la lista de `ingredientes_activos` cruda — es vocabulario de etiqueta,
- *    no criterio de cuidado, y competía con el porqué por la atención.
- *  · el bloque de alérgenos "no contiene X" — se leía como promesa de
- *    seguridad hecha por la app. Lo que la app puede afirmar honestamente
- *    es lo que EXCLUYÓ (y eso ya lo dijo Descubrir); lo que el producto
- *    declara contener es del fabricante.
- *  · el "desde $X" de la variante más barata en el techo — el precio vive
- *    en su presentación, y repetirlo arriba era el mismo dato dos veces.
+ * CHANEL (Ley 16), decisiones de esta pasada:
+ *  · La lista de ingredientes VUELVE (S95-I la había quitado): la letra
+ *    S96 pide "composición" en el detalle y el candado ① de §5.4 la
+ *    vuelve carga de honestidad — sin composición dicha, el silencio se
+ *    lee como "no tiene pollo". Se muestra como texto de fabricante
+ *    (voz declarada, jamás promesa de la app).
+ *  · Lo que NO volvió: el bloque "no contiene X" — afirmar ausencia
+ *    sigue siendo promesa que la app no puede hacer.
+ *  · CERO raciones (firma founder 12-ago): ni heredadas ni calculadas.
  *
- * ── 🔴 EL PORQUÉ SE **DESCRIBE**, NO SE **DECIDE** ──────────────────────
- * Este archivo NO vuelve a evaluar si el producto sirve. La exclusión ya
- * la hizo Postgres en `recomendarParaMascota`; acá se leen los atributos
- * DECLARADOS del producto (`especies_aplicables`, `tallas_aplicables`,
- * `momentos_aplicables`) y se los pone en voz de familia. Es texto
- * explicativo, no un filtro — si esta pantalla decidiera algo, sería
- * lógica clínica en la capa equivocada.
+ * ── §5.4 · LOS DOS CANDADOS, DONDE VIVEN ────────────────────────────────
+ *  ① Solo se advierte con composición declarada; sin ella se DICE "no
+ *    tenemos los ingredientes" — jamás silencio. El veredicto lo deriva
+ *    `lib/despensa/composicion.ts` (único punto: cuando el motor publique
+ *    `composicion_estado`, cambia allá y no acá).
+ *  ② La advertencia jamás se apaga por promoción — acá no hay motor de
+ *    beneficios montado, y si algún día lo hay, el veredicto no lo mira.
+ *  El paso explícito de entendimiento GATEA el agregar al carrito: sin
+ *  "Entiendo", el CTA queda apagado Y DICE POR QUÉ (regla del Confirmar
+ *  apagado, S73-B). ⚠️ El registro persistente del paso llega con la
+ *  tanda de A (`registrar_entendimiento_alergia`) — hoy viaja en el
+ *  estado del carrito, hueco declarado en el store.
  *
- * Por eso también: **entrar acá directo SIEMPRE muestra el producto**. La
- * ficha no esconde nada por su cuenta; quien decide qué se ofrece es el
- * motor, en la pantalla anterior.
+ * ── §5.5 · LA RECOMENDACIÓN DEL VET: LA APP CALLA ───────────────────────
+ * No hay lector de recomendación registrada (medido: cero tabla, cero
+ * wrapper). El candado dice: si no está registrada como dato, la app
+ * JAMÁS la menciona ni la fabrica. Por eso esta pantalla no tiene esa
+ * sección — nacerá con su dato, no antes.
  *
- * ── LEY 3 EN SU FORMA DURA: NINGÚN CÓDIGO DE MOTOR LLEGA AL OJO ─────────
- * `tallas_aplicables` y `momentos_aplicables` son arrays de texto SIN
- * CHECK en la tabla (medido) y el catálogo está en CERO, así que su
- * vocabulario real **no se pudo medir**. Se traducen contra los
- * diccionarios que la casa YA tiene (`grooming.tallaS/M/L` ·
- * `perfil.momentoM1..M5`) y **lo que no matchea NO SE PINTA**: antes una
- * línea de menos que un `M3` crudo en la cara de la familia.
- * Queda declarado para medirlo cuando exista la semilla.
+ * ESCALERA (§4b): peldaño 0 = la ficha sin mascota (composición y precio,
+ * cero promesa de criterio) · peldaño 1 = con mascota, el porqué dirigido
+ * y la advertencia si corresponde · peldaño 2 = expediente rico: el
+ * veredicto nombra SUS alérgenos documentados.
  *
- * ESCALERA (§4b): peldaño 0 = la ficha del producto tal cual · peldaño 1 =
- * con mascota en contexto, el porqué dirigido a ella · peldaño 2 = con el
- * expediente rico, el porqué nombra su talla y su momento vital.
+ * TESTS (§10): voz de familia · cero códigos de motor · error dice qué
+ * pasó · vacío con camino · cero dark patterns (sin urgencia, sin "quedan
+ * 2") · el precio que se muestra ES el precio (nulo honesto donde no hay).
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  AvisoAlergia,
   Boton,
   Celda,
   Encabezado,
@@ -57,16 +62,30 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Separador,
+  StepperCantidad,
   Texto,
+  VisorFoto,
+  radius,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
+  expandirAlergenosAVigilar,
   obtenerFichaProducto,
   obtenerPerfilMascota,
+  registrarEntendimientoAlergia,
+  type AlergenoVigilado,
   type FichaProducto,
+  type VarianteDeProducto,
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
+import { agregarAlCarrito, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import {
+  alergenosDeMascota,
+  cruzarConVigilados,
+  vozAlergeno,
+} from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
@@ -74,7 +93,9 @@ type Fase<T> = T | 'cargando' | 'error';
 export default function DespensaProducto() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
+  const carrito = useCarrito();
   const { productoId, mascotaId } = useLocalSearchParams<{
     productoId: string;
     mascotaId?: string;
@@ -82,6 +103,14 @@ export default function DespensaProducto() {
 
   const [ficha, setFicha] = useState<Fase<FichaProducto>>('cargando');
   const [nombreMascota, setNombreMascota] = useState<string | null>(null);
+  const [alergenosMascota, setAlergenosMascota] = useState<string[]>([]);
+  /** La lista EXPANDIDA por el motor (relaciones: ave ⊃ pollo). */
+  const [vigilados, setVigilados] = useState<AlergenoVigilado[]>([]);
+  const [varianteId, setVarianteId] = useState<string | null>(null);
+  const [cantidad, setCantidad] = useState(1);
+  const [entendido, setEntendido] = useState(false);
+  const [registrando, setRegistrando] = useState(false);
+  const [visor, setVisor] = useState<number | null>(null);
   const [reintento, setReintento] = useState(0);
 
   const idMascota =
@@ -98,35 +127,106 @@ export default function DespensaProducto() {
     };
   }, [productoId, reintento]);
 
-  // El nombre de la mascota, solo para que el porqué hable de ELLA. Si no
-  // llega, el porqué se dice igual en su forma general — jamás se bloquea
-  // la ficha por un dato de cortesía.
+  // La mascota en contexto: su nombre para el porqué, y sus alergias
+  // DOCUMENTADAS para el veredicto de §5.4. Si el perfil no llega, el
+  // porqué se dice en general y la advertencia no se puede componer — la
+  // ficha no se bloquea por un dato de cortesía, pero tampoco finge saber.
   useEffect(() => {
     if (idMascota === null) return;
     let vigente = true;
-    void obtenerPerfilMascota(idMascota).then((r) => {
-      // el nombre vive bajo `mascota` (IdentidadMascota), no en la raíz
-      // del perfil — medido contra el tipo, no supuesto.
-      if (vigente && r.ok) setNombreMascota(r.data.mascota.nombre);
-    });
+    void (async () => {
+      const r = await obtenerPerfilMascota(idMascota);
+      if (!vigente || !r.ok) return;
+      setNombreMascota(r.data.mascota.nombre);
+      const documentados =
+        r.data.alergias_estado === 'con_alergias'
+          ? alergenosDeMascota(r.data.alergias_detalle)
+          : [];
+      setAlergenosMascota(documentados);
+      if (documentados.length === 0) return;
+      // La EXPANSIÓN la hace el motor (relaciones como dato: ave ⊃ pollo).
+      // Si el viaje falla, la degradación es el cruce LITERAL (exacta) —
+      // advertir de menos por una relación no vista es preferible a no
+      // advertir por una red caída, y jamás se fabrica una imprecisa.
+      const exp = await expandirAlergenosAVigilar(documentados);
+      if (!vigente) return;
+      setVigilados(
+        exp.ok
+          ? exp.data
+          : documentados.map((a) => ({ declarado: a, origen: a, exacta: true })),
+      );
+    })();
     return () => {
       vigente = false;
     };
   }, [idMascota]);
 
-  /** EL PORQUÉ — frases construidas SOLO con atributos declarados del
-   *  producto. Cada una es verdadera por sí sola; las que no se pueden
-   *  afirmar no se escriben. */
+  /** Las presentaciones COMPRABLES (con oferta publicada). Las sin oferta
+   *  se listan aparte: existen y no se pueden comprar — decir eso es
+   *  mejor que esconderlas o que un "$ 0,00". */
+  const comprables = useMemo(
+    () =>
+      ficha !== 'cargando' && ficha !== 'error'
+        ? ficha.variantes.filter(
+            (
+              v,
+            ): v is VarianteDeProducto & {
+              oferta_id: string;
+              precio: number;
+              cuenta_comercial_id: string;
+              country_code: string;
+            } =>
+              v.oferta_id !== null &&
+              v.precio !== null &&
+              v.cuenta_comercial_id !== null &&
+              v.country_code !== null,
+          )
+        : [],
+    [ficha],
+  );
+
+  // Con UNA sola comprable se elige sola (Ley 23: la puerta no pregunta lo
+  // que ya sabe) — el precio queda visible en su fila igual.
+  useEffect(() => {
+    if (varianteId === null && comprables.length === 1) setVarianteId(comprables[0].variante_id);
+  }, [comprables, varianteId]);
+
+  const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
+
+  /** §5.4 — los HECHOS para AvisoAlergia v3: `composicion_estado` viene
+   *  del MOTOR (columna con cuatro literales; solo verificada y no_aplica
+   *  callan, y son dos silencios distintos) y la coincidencia sale del
+   *  cruce EXPANDIDO (exacta «contiene» · imprecisa «podría ser»). */
+  const cruce = useMemo(
+    () =>
+      ficha !== 'cargando' && ficha !== 'error'
+        ? cruzarConVigilados(ficha.alergenos, vigilados)
+        : { coincidencia: 'ninguna' as const, exactos: [], imprecisos: [] },
+    [ficha, vigilados],
+  );
+  const exigeEntendimiento = cruce.coincidencia !== 'ninguna';
+
+  /** El paso explícito QUEDA REGISTRADO (§5.4 — tabla append-only del
+   *  motor). Sin registro no hay entendido: el paso ES el registro. */
+  async function confirmarEntendimiento() {
+    if (registrando) return;
+    if (idMascota === null || ficha === 'cargando' || ficha === 'error') return;
+    setRegistrando(true);
+    const advertidos = [...cruce.exactos, ...cruce.imprecisos.map((i) => i.declarado)];
+    const r = await registrarEntendimientoAlergia(ficha.producto_id, idMascota, advertidos);
+    setRegistrando(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setEntendido(true);
+  }
+
+  /** El porqué — frases construidas SOLO con atributos declarados (S95-I,
+   *  sin cambios de criterio). */
   const porque = useMemo(() => {
     if (ficha === 'cargando' || ficha === 'error') return [];
     const frases: string[] = [];
-
-    /* Las SEIS especies activas, medidas contra `cat_especies` (no
-     * inventadas): perro · gato · conejo · ave · roedor · pez. La key se
-     * arma con un `switch` y NO por interpolación (`t(\`…${e}\`)`) — una
-     * key dinámica se escapa del tipado exigible del riel, que es
-     * justamente lo que impide que una traducción faltante llegue viva a
-     * la pantalla. Lo que no matchea no se pinta. */
     const especies = ficha.especies_aplicables
       .map((e) =>
         e === 'perro' ? t('despensa.especiePerro')
@@ -141,9 +241,6 @@ export default function DespensaProducto() {
     if (especies.length > 0) {
       frases.push(t('despensa.porqueEspecie', { lista: especies.join(', ') }));
     }
-
-    // Ley 3: `S|M|L` es vocabulario de motor — sale por el diccionario que
-    // el grooming ya tiene, y lo que no matchea no se pinta.
     const tallas = ficha.tallas_aplicables
       .map((x) =>
         x === 'S' ? t('grooming.tallaS') : x === 'M' ? t('grooming.tallaM') : x === 'L' ? t('grooming.tallaL') : '',
@@ -152,8 +249,6 @@ export default function DespensaProducto() {
     if (tallas.length > 0) {
       frases.push(t('despensa.porqueTalla', { lista: tallas.join(', ').toLowerCase() }));
     }
-
-    // Idem con M1..M5 — el vocabulario interno JAMÁS es visible.
     const momentos = ficha.momentos_aplicables
       .map((m) =>
         m === 'M1' ? t('perfil.momentoM1')
@@ -167,9 +262,62 @@ export default function DespensaProducto() {
     if (momentos.length > 0) {
       frases.push(t('despensa.porqueMomento', { lista: momentos.join(', ').toLowerCase() }));
     }
-
     return frases;
   }, [ficha, t]);
+
+  /** Por qué el CTA está apagado — el Confirmar apagado DICE QUÉ FALTA
+   *  (S73-B), jamás un botón muerto sin explicación. */
+  const faltaParaAgregar: string | null = useMemo(() => {
+    if (ficha === 'cargando' || ficha === 'error') return null;
+    if (comprables.length === 0) return null; // sin oferta no hay CTA
+    if (variante === null) return t('despensa.faltaPresentacion');
+    if (exigeEntendimiento && !entendido) return t('despensa.faltaEntendimiento');
+    return null;
+  }, [ficha, comprables, variante, exigeEntendimiento, entendido, t]);
+
+  function agregar() {
+    if (ficha === 'cargando' || ficha === 'error' || variante === null) return;
+    agregarAlCarrito(
+      {
+        oferta_id: variante.oferta_id,
+        producto_id: ficha.producto_id,
+        variante_id: variante.variante_id,
+        nombre: ficha.nombre,
+        marca: ficha.marca,
+        presentacion: variante.presentacion,
+        precio: variante.precio,
+        moneda: variante.moneda ?? 'USD',
+        foto_url: ficha.foto_url,
+        especies_aplicables: ficha.especies_aplicables,
+        alergenos: ficha.alergenos,
+        // El vendedor de la oferta — del motor, vía el trigger de A
+        // (cableo del merge 12-ago; el hueco murió).
+        cuentaComercialId: variante.cuenta_comercial_id,
+        country_code: variante.country_code,
+      },
+      cantidad,
+      idMascota !== null ? { tipo: 'mascota', mascotaId: idMascota } : null,
+      exigeEntendimiento && entendido,
+    );
+    setCantidad(1);
+    mostrar({
+      texto:
+        nombreMascota !== null
+          ? t('despensa.agregadoPara', { nombre: nombreMascota })
+          : t('despensa.agregado'),
+      variante: 'exito',
+    });
+  }
+
+  const fotos = useMemo(() => {
+    if (ficha === 'cargando' || ficha === 'error') return [];
+    // Portada + galería sin repetir la portada.
+    const todas = ficha.foto_url !== null ? [ficha.foto_url, ...ficha.fotos] : [...ficha.fotos];
+    return [...new Set(todas)];
+  }, [ficha]);
+
+  const unidades = unidadesEnCarrito(carrito);
+  const conCta = ficha !== 'cargando' && ficha !== 'error' && comprables.length > 0;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -183,14 +331,15 @@ export default function DespensaProducto() {
       <ScrollView
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + spacing[8],
+          // Deja aire para la barra fija del CTA cuando existe.
+          paddingBottom: insets.bottom + (conCta ? spacing[8] + 96 : spacing[8]),
           gap: spacing[5],
         }}
       >
         {ficha === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={200} />
+              <Esqueleto forma="bloque" ancho="100%" alto={240} />
               <Esqueleto forma="bloque" ancho="60%" alto={24} />
               <Esqueleto forma="bloque" ancho="100%" alto={72} />
             </View>
@@ -209,12 +358,39 @@ export default function DespensaProducto() {
           />
         ) : (
           <>
-            {/* 1 · LA FOTO (hoy el fallback digno — ver LienzoProducto) */}
-            <View style={{ paddingHorizontal: spacing[5], alignItems: 'center' }}>
-              <LienzoProducto lado={220} />
+            {/* 1 · LAS FOTOS — portada grande tocable + tira de miniaturas.
+                Sin foto: el fallback digno del lienzo (jamás una imagen
+                que finja ser el producto). */}
+            <View style={{ paddingHorizontal: spacing[5], alignItems: 'center', gap: spacing[3] }}>
+              {fotos.length > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('despensa.verFotos')}
+                  onPress={() => setVisor(0)}
+                >
+                  <LienzoProducto lado={240} fotoUrl={fotos[0]} />
+                </Pressable>
+              ) : (
+                <LienzoProducto lado={240} />
+              )}
+              {fotos.length > 1 ? (
+                <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                  {fotos.slice(1, 5).map((f, i) => (
+                    <Pressable
+                      key={f}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('despensa.verFotos')}
+                      onPress={() => setVisor(i + 1)}
+                      style={{ borderRadius: radius.suave, overflow: 'hidden' }}
+                    >
+                      <LienzoProducto lado={56} fotoUrl={f} />
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
             </View>
 
-            {/* 2 · QUÉ ES. A6 SIN CAJA: jerarquía y aire, cero marco. */}
+            {/* 2 · QUÉ ES — sin caja (A6): jerarquía y aire. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
               <Texto variante="titulo">{ficha.nombre}</Texto>
               {ficha.marca !== null ? <Texto variante="apoyo">{ficha.marca}</Texto> : null}
@@ -225,7 +401,56 @@ export default function DespensaProducto() {
               ) : null}
             </View>
 
-            {/* 3 · 🔴 EL PORQUÉ — la firma de la pantalla */}
+            {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
+                haya alérgeno documentado relevante: la pieza recibe los
+                HECHOS (composición del motor + coincidencia del cruce
+                expandido) y decide ella — los dos silencios legales
+                (verificada · no_aplica, sin cruce) los resuelve la pieza.
+                El paso explícito gatea el CTA en las DOS coincidencias:
+                si puede ser pollo, se decide sabiendo. */}
+            {alergenosMascota.length > 0 ? (
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <AvisoAlergia
+                  composicion={ficha.composicion_estado}
+                  coincidencia={cruce.coincidencia}
+                  mensaje={
+                    cruce.coincidencia === 'exacta'
+                      ? t('despensa.alergiaContiene', {
+                          nombre: nombreMascota ?? t('despensa.tuMascota'),
+                          lista: cruce.exactos.map(vozAlergeno).join(', '),
+                        })
+                      : cruce.coincidencia === 'imprecisa'
+                        ? t('despensa.alergiaImprecisa', {
+                            nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            lista: cruce.imprecisos
+                              .map((i) =>
+                                t('despensa.imprecisoPar', {
+                                  declarado: vozAlergeno(i.declarado),
+                                  origen: vozAlergeno(i.origen),
+                                }),
+                              )
+                              .join('; '),
+                          })
+                        : ficha.composicion_estado === 'ausente'
+                          ? t('despensa.alergiaSinComposicion', {
+                              nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            })
+                          : t('despensa.alergiaSinVerificar', {
+                              nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            })
+                  }
+                  detalle={exigeEntendimiento ? t('despensa.alergiaContieneDetalle') : undefined}
+                  entendido={exigeEntendimiento ? entendido : undefined}
+                  onEntendido={
+                    exigeEntendimiento ? () => void confirmarEntendimiento() : undefined
+                  }
+                  etiquetaEntendido={t('despensa.alergiaEntiendo')}
+                  etiquetaYaEntendido={t('despensa.alergiaEntendida')}
+                />
+              </View>
+            ) : null}
+
+            {/* 4 · EL PORQUÉ (S95-I, sin cambios de criterio) */}
             {porque.length > 0 ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
                 <Texto variante="seccion">
@@ -239,20 +464,49 @@ export default function DespensaProducto() {
                   </Texto>
                 ))}
                 {ficha.es_dieta_prescripcion ? (
-                  /* §6: la dieta de prescripción se DECLARA como lo que es.
-                     La indicación fina es del veterinario, jamás de la
-                     vitrina — y la pantalla lo dice en voz alta en lugar de
-                     dejar que parezca un alimento más. */
                   <Texto variante="apoyo">{t('despensa.porquePrescripcion')}</Texto>
                 ) : null}
               </View>
             ) : null}
 
-            {/* 4 · LAS PRESENTACIONES CON SU PRECIO.
-                🔴 NULO HONESTO: una variante sin oferta publicada EXISTE y no
-                se puede comprar. Se muestra diciendo eso — poner "$ 0,00"
-                sería mentira con formato de dato (E15/19.9), y esconderla
-                haría creer que la presentación no existe. */}
+            {/* 5 · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
+                mejor e-commerce; candado ① de §5.4: sin composición se DICE).
+                Todo en voz de "declarado por el fabricante" — la app
+                transporta, jamás avala. */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('despensa.composicion')}</Texto>
+              {/* El ESTADO manda (letra de A, 12-ago): solo `verificada` y
+                  `no_aplica` callan su condición; `declarada_sin_verificar`
+                  y `ausente` la DICEN. Y `no_aplica` jamás pide
+                  ingredientes: no es un dato que falte. */}
+              {ficha.composicion_estado === 'no_aplica' ? (
+                <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+              ) : ficha.composicion_estado === 'ausente' ||
+                (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0) ? (
+                <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
+              ) : (
+                <>
+                  {ficha.ingredientes_activos.length > 0 ? (
+                    <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                  ) : null}
+                  {ficha.alergenos.length > 0 ? (
+                    <Texto variante="apoyo">
+                      {t('despensa.composicionAlergenos', {
+                        lista: ficha.alergenos.map(vozAlergeno).join(', '),
+                      })}
+                    </Texto>
+                  ) : null}
+                  <Texto variante="apoyo">
+                    {ficha.composicion_estado === 'verificada'
+                      ? t('despensa.composicionVerificada')
+                      : t('despensa.composicionFuente')}
+                  </Texto>
+                </>
+              )}
+            </View>
+
+            {/* 6 · LAS PRESENTACIONES — elegir es comprar la correcta.
+                Las sin oferta se dicen (nulo honesto), jamás "$ 0,00". */}
             <View style={{ gap: spacing[2] }}>
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <Texto variante="seccion">{t('despensa.presentaciones')}</Texto>
@@ -267,34 +521,109 @@ export default function DespensaProducto() {
                 </View>
               ) : (
                 <View>
-                  {ficha.variantes.map((v, i) => (
-                    <View key={v.variante_id}>
-                      {i > 0 ? <Separador /> : null}
-                      <Celda
-                        titulo={v.presentacion}
-                        subtitulo={
-                          v.oferta_id === null ? t('despensa.varianteSinOferta') : undefined
-                        }
-                        metadataMono={
-                          v.precio !== null ? `$ ${v.precio.toFixed(2)}` : undefined
-                        }
-                      />
-                    </View>
-                  ))}
+                  {ficha.variantes.map((v, i) => {
+                    const comprable = v.oferta_id !== null && v.precio !== null;
+                    const elegida = v.variante_id === varianteId;
+                    return (
+                      <View key={v.variante_id}>
+                        {i > 0 ? <Separador /> : null}
+                        {comprable ? (
+                          <Celda
+                            interactiva
+                            accessibilityRole="radio"
+                            onPress={() => {
+                              setVarianteId(v.variante_id);
+                            }}
+                            titulo={v.presentacion}
+                            subtitulo={elegida ? t('despensa.presentacionElegida') : undefined}
+                            metadataMono={v.precio !== null ? `$ ${v.precio.toFixed(2)}` : undefined}
+                          />
+                        ) : (
+                          <Celda
+                            titulo={v.presentacion}
+                            subtitulo={t('despensa.varianteSinOferta')}
+                          />
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
               )}
             </View>
 
-            {/* 5 · EL LÍMITE DE LA TANDA, DICHO. No hay CTA de compra porque
-                el carrito no existe todavía (fuera de alcance, §5.2 puntos
-                3-6). Un botón "Agregar" que no agrega sería peor que su
-                ausencia — y un final mudo también, así que se dice. */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Texto variante="apoyo">{t('despensa.compraLlega')}</Texto>
-            </View>
+            {/* 7 · LA CANTIDAD */}
+            {comprables.length > 0 ? (
+              <View
+                style={{
+                  paddingHorizontal: spacing[5],
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Texto variante="cuerpo">{t('despensa.cantidad')}</Texto>
+                <StepperCantidad
+                  valor={cantidad}
+                  min={1}
+                  max={99}
+                  onCambio={setCantidad}
+                  etiqueta={t('despensa.cantidad')}
+                />
+              </View>
+            ) : null}
           </>
         )}
       </ScrollView>
+
+      {/* LA BARRA FIJA DEL CTA — el plano que separa (E13: sobrevive la
+          superficie que separa planos). El apagado DICE qué falta. */}
+      {conCta ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: spacing[5],
+            paddingTop: spacing[3],
+            paddingBottom: insets.bottom + spacing[3],
+            backgroundColor: theme.bg.base,
+            gap: spacing[2],
+          }}
+        >
+          {faltaParaAgregar !== null ? (
+            <Texto variante="apoyo">{faltaParaAgregar}</Texto>
+          ) : null}
+          <Boton
+            etiqueta={
+              variante !== null
+                ? t('despensa.agregarConPrecio', {
+                    precio: `$ ${(variante.precio * cantidad).toFixed(2)}`,
+                  })
+                : t('despensa.agregar')
+            }
+            bloque
+            deshabilitado={faltaParaAgregar !== null}
+            onPress={agregar}
+          />
+          {unidades > 0 ? (
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('despensa.verCarrito', { n: unidades })}
+              onPress={() => router.push('/despensa/carrito')}
+            />
+          ) : null}
+        </View>
+      ) : null}
+
+      <VisorFoto
+        visible={visor !== null}
+        onCerrar={() => setVisor(null)}
+        fotos={fotos}
+        indiceInicial={visor ?? 0}
+        etiqueta={t('despensa.fotosDelProducto')}
+      />
     </View>
   );
 }

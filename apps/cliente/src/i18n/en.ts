@@ -321,6 +321,8 @@ export const clienteEn = {
     descargarCarnet: 'Download the card',
     descargarHistoria: 'Download the medical record',
     documentos: 'Documents',
+    // S96-D · the pantry door from the record (§5.1)
+    suAlimento: "{{nombre}}'s food",
     // S91-C — mirror of es.ts.
     bitacora: 'Their logbook',
     bitacoraDetalle: 'What you see at home fills in their record.',
@@ -1033,6 +1035,13 @@ export const clienteEn = {
     guardada: 'Done — your address is saved.',
     // S79-A4 — Places resolution: location exists only if it was searched.
     ubicada: 'Pinned on the map.',
+    // S96-D — the movable point (§7): if Places can't find the house,
+    // the point still exists.
+    sinResultados: "We couldn't find that address. Type it anyway and place the point by hand on the map.",
+    puntoEtiqueta: 'Move the map to adjust the delivery point',
+    puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
+    ponerPunto: 'Place the point on the map',
+    faltaPunto: "The map point is missing: it's what finds your home when the address isn't enough.",
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
@@ -1217,7 +1226,213 @@ export const clienteEn = {
     varianteSinOferta: 'No published price yet',
     sinPresentaciones: 'No sizes loaded yet',
     sinPresentacionesDetalle: 'Once the seller loads their sizes, you’ll see them here with prices.',
-    compraLlega: 'Buying from the app is coming soon.',
+    presentacionElegida: 'Selected',
+
+    // S96 · search and filters (§5.1) — facets derive from loaded data.
+    buscarLabel: 'Search',
+    buscarPlaceholder: 'Name or brand',
+    limpiarBusqueda: 'Clear search',
+    busquedaVaciaTitulo: 'Nothing for "{{termino}}"',
+    busquedaVaciaDetalle: "We don't carry that product yet. The catalog is growing — worth checking back.",
+    familiaAlimento: 'Food',
+    familiaAntiparasitario: 'Parasite control',
+    familiaSuplemento: 'Supplements',
+    familiaDieta: 'Prescription diet',
+
+    // S96 · the allergy warning (§5.4) — names pet and allergen, never hides.
+    filaContiene: "Contains {{lista}}, and {{nombre}}'s record lists it as an allergy.",
+    alergiaContiene: '{{nombre}} is allergic to {{lista}} and this food contains it.',
+    alergiaContieneDetalle: "You can still buy it — it's your call. We just want you to decide knowing.",
+    alergiaSinComposicion: "We don't have this product's ingredients, so we can't confirm whether it's safe for {{nombre}}.",
+    alergiaSinVerificar:
+      "The composition was declared by the manufacturer and we haven't verified it yet. Given {{nombre}}'s allergies, check the label before feeding it.",
+    // The IMPRECISE match (vocabulary relations: poultry ⊃ chicken).
+    alergiaImprecisa: "This food contains {{lista}} — and {{nombre}}'s record lists that allergy.",
+    imprecisoPar: '{{declarado}} (could be {{origen}})',
+    alergiaEntiendo: 'I understand, show it anyway',
+    alergiaEntendida: 'You already took this into account',
+    tuMascota: 'your pet',
+
+    // S96 · composition (§0.5 · §5.4 lock ①: missing composition is SAID).
+    composicion: 'Composition',
+    composicionAusente: "We don't have this product's ingredients. The manufacturer didn't declare them.",
+    composicionAlergenos: 'Declared to contain: {{lista}}.',
+    composicionFuente: 'Declared by the manufacturer, not yet verified.',
+    composicionVerificada: 'Verified composition.',
+    composicionNoAplica: "This kind of product doesn't carry an ingredient list.",
+
+    // S96 · photos
+    verFotos: "See the product's photos",
+    fotosDelProducto: 'Product photos',
+
+    // S96 · the cart from the product page
+    cantidad: 'Quantity',
+    agregar: 'Add to cart',
+    agregarConPrecio: 'Add · {{precio}}',
+    agregado: 'Added to your cart.',
+    agregadoPara: 'Added to your cart for {{nombre}}.',
+    verCarrito: 'View cart · {{n}}',
+    faltaPresentacion: 'Pick a size to add it.',
+    faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
+
+    // S96 · the other doors
+    tusPedidos: 'Your orders',
+    tusPedidosDetalle: 'Follow what you ordered, newest first.',
+    reclamoEntrada: 'Bought at the store?',
+    reclamoEntradaDetalle: "Enter your invoice code and the purchase joins their record.",
+
+    // S96 · the cart (§6.3/§6.4/§5.2)
+    carritoTitulo: 'Your cart',
+    carritoVacioTitulo: 'Your cart is empty',
+    carritoVacioDetalle: "Anything you add from the pantry will show up here.",
+    carritoVacioIr: 'Back to the pantry',
+    cantidadDe: 'Quantity of {{nombre}}',
+    quitar: 'Remove',
+    paraQuien: 'Who is it for?',
+    donarEste: 'Donate this product',
+    donacionDetalle:
+      "e-PetPlace picks the shelter and the team coordinates the delivery. A donation never joins a record and never earns rewards: it's a gift, not a purchase with a prize.",
+    especieNoRegistrada:
+      "This product is for a species you haven't registered in your family yet. You can register them now or later — the purchase goes through either way.",
+    registrarla: 'Register a pet',
+    totalLoDiceElMotor: "You'll see the total with shipping and taxes before paying.",
+    continuar: 'Continue',
+    errorMascotasDestino:
+      "We couldn't load your pets to pick a destination. You can still buy and assign it later.",
+
+    // S96 · checkout (§6/§7)
+    checkoutTitulo: 'Your order',
+    metodoEntrega: 'How does it arrive?',
+    metodoDespacho: 'Home delivery',
+    metodoRetiro: 'Store pickup',
+    retiroDetalle:
+      "You pick it up at the seller's store. When it's ready, you'll have a code to show at the counter.",
+    aDonde: 'Where we deliver',
+    sinDireccion: "You haven't told us your address yet.",
+    agregarDireccion: 'Add my address',
+    cambiarDireccion: 'Change address',
+    receptorLabel: 'Who receives it',
+    telefonoLabel: 'Contact phone',
+    instruccionesLabel: 'Delivery instructions',
+    instruccionesAyuda:
+      'What the courier needs to know: "leave at the front desk", "hand to Carla". If nobody answers, this instruction decides.',
+    cuandoLlega: 'When it arrives',
+    sinVendedorDetalle:
+      "We can't calculate delivery for this order from the app yet. We're finishing that connection.",
+    promesaCargando: 'Calculating the next delivery window…',
+    sinCupoEseDia: "There's no delivery capacity that day. Pick another one.",
+    vendedorSinReparto: "This seller hasn't set up delivery yet.",
+    promesaFallo: "We couldn't calculate the delivery window. Please try again.",
+    promesaVentana: 'Arrives on {{dia}}, between {{desde}} and {{hasta}}.',
+    saltoPorCupo: 'The nearest day was full, so delivery moved to the next one with room.',
+    ventanaProxima: 'The earliest',
+    sinLugarEseDia: 'No room that day',
+    programarFecha: 'Schedule another date',
+    programarPlaceholder: 'Pick a day',
+    programarAyuda: 'We only promise days with confirmed capacity.',
+    quitarFecha: 'Back to the earliest delivery',
+    resumen: 'Your order total',
+    subtotal: 'Products',
+    impuesto: 'VAT',
+    envio: 'Shipping',
+    envioRetiro: 'Store pickup',
+    total: 'Total',
+    totalNoLlego: 'This order already existed. See the total in Your orders.',
+    pagoSimuladoTitulo: 'Simulated payment',
+    pagoSimuladoDetalle:
+      "There's no real payment method yet: nothing is charged, nothing is invoiced. This is a test purchase and it stays marked as one.",
+    pagoSimuladoRecordatorio: 'This order has a SIMULATED payment: nothing was charged.',
+    exitoTitulo: 'Done',
+    exitoCuerpo: 'Your order was created.',
+    exitoDetalle: "We'll let you know when the seller confirms it. You can follow it in Your orders.",
+    exitoRetiro: "When it's ready for pickup, you'll see the counter code in the order detail.",
+    verTotal: 'See the total',
+    pagarSimulado: 'Pay (simulated)',
+    volverAEditar: 'Back to editing',
+    verTusPedidos: 'See your orders',
+    faltaItems: 'Your cart is empty.',
+    faltaVendedor: "We can't create orders from the app yet: the offer's seller connection is missing.",
+    faltaCargando: 'Loading your address…',
+    faltaDireccion: 'Your delivery address is missing.',
+    faltaPunto: "Your address is missing its map point. Open it and adjust it — it's what finds your home.",
+    faltaReceptor: 'Tell us who receives it.',
+    faltaTelefono: 'A contact phone is missing.',
+    faltaPromesa: 'No delivery window available — check the date or try store pickup.',
+
+    // S96 · recurring purchase (§6.1 — the honest message mirrors the letter)
+    recurrenciaTitulo: 'Make it arrive on its own',
+    recurrenciaHonesta:
+      'This order will be charged automatically to your saved payment method. You can turn it off whenever you want.',
+    recurrenciaSinPasarela:
+      'Automatic charging turns on once the payment method exists. Until then, nothing is charged.',
+    recurrenciaCada: 'How often?',
+    recurrenciaDias: 'Every {{n}} days',
+    recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
+    recurrenciaActiva: 'The recurring purchase is set up.',
+    recurrenciaApagada: 'Done: the recurring purchase is off.',
+
+    // S96 · the order ladder (§8.1 — five steps; "Preparing" deliberately
+    // covers the seller's three internal steps)
+    pasoPagando: 'Paying',
+    pasoConfirmado: 'Confirmed',
+    pasoPreparando: 'Preparing',
+    pasoEnCamino: 'On the way',
+    pasoEntregado: 'Delivered',
+    desvioNoLlego: "The delivery couldn't be made",
+    desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
+    desvioCancelado: 'Canceled',
+
+    // S96 · Your orders
+    promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
+    pedidoDel: 'Order from {{dia}}',
+    verPedido: 'View order',
+    errorPedidosTitulo: "We couldn't load your orders",
+    sinPedidosTitulo: "You haven't ordered anything yet",
+    sinPedidosDetalle: "When you place your first order, you'll follow it from here.",
+
+    // S96 · order detail
+    pedidoTitulo: 'Your order',
+    errorPedidoTitulo: "We couldn't load this order",
+    codigoPuerta: 'Your delivery code',
+    codigoPuertaDetalle: "Tell it to whoever brings your order. It's what confirms it reached you.",
+    codigoMostrador: 'Your counter code',
+    codigoMostradorDetalle: 'Show it at the store when you pick up your order.',
+    quePediste: 'What you ordered',
+    lineaCantidad: '{{n}} u.',
+    lineaLote: 'Batch {{lote}}',
+    lineaDonacion: 'Donation',
+    lineaPara: 'For {{nombre}}',
+    instruccionDicha: 'Delivery instruction: {{texto}}',
+    cancelarPedido: 'Cancel the order',
+    cancelarDetalle:
+      "Nobody has started preparing it yet, so canceling costs nothing. Past that point, the button changes and we talk it through.",
+    cancelarConfirmar: 'Yes, cancel',
+    cancelarNo: 'No, keep it',
+    canceladoOk: 'The order was canceled.',
+    tengoUnProblema: 'I have a problem',
+    // ⚠️ The hours await founder confirmation at the strings gate.
+    problemaDetalle: "Takes you to the e-PetPlace team's WhatsApp. We answer from 9:00 to 20:00.",
+    problemaMensaje: 'Hi, I have a problem with my order {{numero}}.',
+    problemaFallback: "We couldn't open WhatsApp. Write to us at {{numero}}.",
+    paraQuienFue: 'Who was it for?',
+    atarConfirmar: 'Add to their record',
+    atadoOk: "Done: it's assigned. It joins their record on delivery.",
+    atadoConEvento: "Done: it's already part of their story.",
+
+    // S96 · the invoice code claim (§4 — the seller never picks the pet)
+    reclamoTitulo: 'Your invoice code',
+    reclamoIntro:
+      'If you bought at the store, your invoice has a code. Enter it, pick who it was for, and the purchase joins their record.',
+    reclamoCodigoLabel: 'Code',
+    reclamoCodigoPlaceholder: 'The code printed on your invoice',
+    reclamoFaltaCodigo: 'Enter the invoice code.',
+    reclamoFaltaMascota: 'Pick who the purchase was for.',
+    reclamoSinMascotasTitulo: "You haven't registered any pets yet",
+    reclamoSinMascotasDetalle: "The purchase joins a pet's record. Register them first — it takes a minute.",
+    reclamoCta: 'Add to the record',
+    reclamoListoTitulo: 'Already part of their story',
+    reclamoListoDetalle: "The purchase is now in {{nombre}}'s record.",
+    reclamoVolver: 'Back to the pantry',
 
     vacioTitulo: 'The pantry is still empty',
     vacioDetalle:

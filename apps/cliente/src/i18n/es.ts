@@ -401,6 +401,8 @@ export const clienteEs = {
     descargarCarnet: 'Descargar el carnet',
     descargarHistoria: 'Descargar la historia clínica',
     documentos: 'Documentos',
+    // S96-D · la puerta de la despensa desde el expediente (§5.1)
+    suAlimento: 'El alimento de {{nombre}}',
     // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
     // OBSERVAR, no de adiestrar: el Eje 6 es del dueño, no de un oficio.
     bitacora: 'Su bitácora',
@@ -1167,6 +1169,13 @@ export const clienteEs = {
     guardada: 'Listo — tu dirección quedó guardada.',
     // S79-A4 — la resolución Places: la ubicación existe solo si se buscó.
     ubicada: 'Ubicada en el mapa.',
+    // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
+    // encuentra la casa, el punto igual existe.
+    sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
+    puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
+    ponerPunto: 'Poner el punto en el mapa',
+    faltaPunto: 'Falta el punto en el mapa: es lo que encuentra tu casa cuando la dirección no alcanza.',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
@@ -1406,7 +1415,218 @@ export const clienteEs = {
     varianteSinOferta: 'Sin precio publicado por ahora',
     sinPresentaciones: 'Todavía no hay presentaciones cargadas',
     sinPresentacionesDetalle: 'Cuando el vendedor cargue sus tamaños, los vas a ver acá con su precio.',
-    compraLlega: 'Comprar desde la app llega pronto.',
+    presentacionElegida: 'Elegida',
+
+    // S96 · el buscador y los filtros (§5.1) — las facetas se derivan de
+    // lo cargado; estas voces solo nombran lo que el catálogo declara.
+    buscarLabel: 'Buscar',
+    buscarPlaceholder: 'Nombre o marca',
+    limpiarBusqueda: 'Limpiar la búsqueda',
+    busquedaVaciaTitulo: 'Nada con "{{termino}}"',
+    busquedaVaciaDetalle: 'Todavía no tenemos ese producto. El catálogo crece: vale la pena volver a mirar.',
+    familiaAlimento: 'Alimento',
+    familiaAntiparasitario: 'Antiparasitarios',
+    familiaSuplemento: 'Suplementos',
+    familiaDieta: 'Dieta de prescripción',
+
+    // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
+    // jamás esconde. El paso explícito gatea el agregar.
+    filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',
+    alergiaContiene: '{{nombre}} es alérgico a {{lista}} y este alimento lo contiene.',
+    alergiaContieneDetalle: 'Podés comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
+    alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
+    alergiaSinVerificar:
+      'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisá la etiqueta antes de dárselo.',
+    // La coincidencia IMPRECISA (relaciones del vocabulario: ave ⊃ pollo).
+    // Mismo registro que la exacta — cambia la palabra, no el matiz.
+    alergiaImprecisa: 'Este alimento contiene {{lista}} — y el expediente de {{nombre}} registra esa alergia.',
+    imprecisoPar: '{{declarado}} (podría ser {{origen}})',
+    alergiaEntiendo: 'Entiendo, quiero verlo igual',
+    alergiaEntendida: 'Ya lo tuviste en cuenta',
+    tuMascota: 'tu mascota',
+
+    // S96 · la composición (§0.5 — el detalle al nivel del mejor
+    // e-commerce; candado ① de §5.4: sin composición se dice).
+    composicion: 'Composición',
+    composicionAusente: 'No tenemos los ingredientes de este producto. El fabricante no los declaró.',
+    composicionAlergenos: 'Declara contener: {{lista}}.',
+    composicionFuente: 'Declarada por el fabricante, todavía sin verificar.',
+    composicionVerificada: 'Composición verificada.',
+    composicionNoAplica: 'Este tipo de producto no lleva lista de ingredientes.',
+
+    // S96 · las fotos
+    verFotos: 'Ver las fotos del producto',
+    fotosDelProducto: 'Fotos del producto',
+
+    // S96 · el carrito desde la ficha
+    cantidad: 'Cantidad',
+    agregar: 'Agregar al carrito',
+    agregarConPrecio: 'Agregar · {{precio}}',
+    agregado: 'Agregado al carrito.',
+    agregadoPara: 'Agregado al carrito para {{nombre}}.',
+    verCarrito: 'Ver carrito · {{n}}',
+    faltaPresentacion: 'Elegí una presentación para agregarlo.',
+    faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
+
+    // S96 · las otras puertas
+    tusPedidos: 'Tus pedidos',
+    tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
+    reclamoEntrada: '¿Compraste en el local?',
+    reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',
+
+    // S96 · el carrito (§6.3/§6.4/§5.2)
+    carritoTitulo: 'Tu carrito',
+    carritoVacioTitulo: 'Tu carrito está vacío',
+    carritoVacioDetalle: 'Lo que agregues desde la despensa lo vas a ver acá.',
+    carritoVacioIr: 'Volver a la despensa',
+    cantidadDe: 'Cantidad de {{nombre}}',
+    quitar: 'Quitar',
+    paraQuien: '¿Para quién es?',
+    donarEste: 'Donar este producto',
+    donacionDetalle:
+      'El refugio lo elige e-PetPlace y la entrega la coordina el equipo. Una donación no entra a ningún expediente ni suma beneficios: es un regalo, no una compra con premio.',
+    especieNoRegistrada:
+      'Este producto es para una especie que todavía no tenés registrada en tu familia. Podés registrarla ahora o después — la compra sigue igual.',
+    registrarla: 'Registrar una mascota',
+    totalLoDiceElMotor: 'El total con envío e impuestos lo vas a ver antes de pagar.',
+    continuar: 'Continuar',
+    errorMascotasDestino:
+      'No pudimos cargar tus mascotas para elegir el destino. Podés comprar igual y atarlo después.',
+
+    // S96 · el checkout (§6/§7)
+    checkoutTitulo: 'Tu pedido',
+    metodoEntrega: '¿Cómo te llega?',
+    metodoDespacho: 'Envío a domicilio',
+    metodoRetiro: 'Retiro en tienda',
+    retiroDetalle:
+      'Lo retirás en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
+    aDonde: 'A dónde te lo llevamos',
+    sinDireccion: 'Todavía no nos contaste tu dirección.',
+    agregarDireccion: 'Agregar mi dirección',
+    cambiarDireccion: 'Cambiar la dirección',
+    receptorLabel: 'Quién recibe',
+    telefonoLabel: 'Teléfono de contacto',
+    instruccionesLabel: 'Instrucciones de entrega',
+    instruccionesAyuda:
+      'Lo que el repartidor tiene que saber: "dejar en portería", "entregar a Carla". Si no hay nadie, esta instrucción decide.',
+    cuandoLlega: 'Cuándo te llega',
+    sinVendedorDetalle:
+      'Todavía no podemos calcular la entrega de este pedido desde la app. Estamos terminando esa conexión.',
+    promesaCargando: 'Calculando la próxima ventana de entrega…',
+    sinCupoEseDia: 'Ese día no hay capacidad de reparto. Elegí otro.',
+    vendedorSinReparto: 'Este vendedor todavía no tiene reparto configurado.',
+    promesaFallo: 'No pudimos calcular la ventana de entrega. Probá de nuevo.',
+    promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
+    saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    ventanaProxima: 'La más próxima',
+    sinLugarEseDia: 'Sin lugar ese día',
+    programarFecha: 'Programar otra fecha',
+    programarPlaceholder: 'Elegí un día',
+    programarAyuda: 'Solo se prometen días con capacidad confirmada.',
+    quitarFecha: 'Volver a la entrega más próxima',
+    resumen: 'El total de tu pedido',
+    subtotal: 'Productos',
+    impuesto: 'IVA',
+    envio: 'Envío',
+    envioRetiro: 'Retiro en tienda',
+    total: 'Total',
+    totalNoLlego: 'Este pedido ya estaba creado. El total lo ves en Tus pedidos.',
+    pagoSimuladoTitulo: 'Pago simulado',
+    pagoSimuladoDetalle:
+      'Todavía no hay medio de pago real: no se cobra nada, no se factura nada. Es una compra de prueba y queda marcada así.',
+    pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
+    exitoTitulo: 'Listo',
+    exitoCuerpo: 'Tu pedido quedó creado.',
+    exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Podés seguirlo en Tus pedidos.',
+    exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
+    verTotal: 'Ver el total',
+    pagarSimulado: 'Pagar (simulado)',
+    volverAEditar: 'Volver a editar',
+    verTusPedidos: 'Ver tus pedidos',
+    faltaItems: 'El carrito está vacío.',
+    faltaVendedor: 'Todavía no podemos crear pedidos desde la app: falta conectar el vendedor de la oferta.',
+    faltaCargando: 'Cargando tu dirección…',
+    faltaDireccion: 'Falta tu dirección de entrega.',
+    faltaPunto: 'A tu dirección le falta el punto en el mapa. Abrila y ajustalo — es lo que encuentra tu casa.',
+    faltaReceptor: 'Contanos quién recibe.',
+    faltaTelefono: 'Falta un teléfono de contacto.',
+    faltaPromesa: 'No hay ventana de entrega disponible — revisá la fecha o probá retiro en tienda.',
+
+    // S96 · la recurrencia (§6.1 — el mensaje honesto es VERBATIM de la letra)
+    recurrenciaTitulo: 'Que llegue solo',
+    recurrenciaHonesta:
+      'Este pedido se cargará automáticamente al medio de pago guardado. Lo podés desactivar cuando quieras.',
+    recurrenciaSinPasarela:
+      'El cobro automático se activa cuando esté el medio de pago. Hasta entonces, nada se cobra.',
+    recurrenciaCada: '¿Cada cuánto?',
+    recurrenciaDias: 'Cada {{n}} días',
+    recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
+    recurrenciaActiva: 'La compra recurrente quedó configurada.',
+    recurrenciaApagada: 'Listo: la compra recurrente quedó apagada.',
+
+    // S96 · la escalera del pedido (§8.1 — cinco pasos; "Preparando" tapa
+    // los tres escalones internos del vendedor a propósito)
+    pasoPagando: 'Pagando',
+    pasoConfirmado: 'Confirmado',
+    pasoPreparando: 'Preparando',
+    pasoEnCamino: 'En camino',
+    pasoEntregado: 'Entregado',
+    desvioNoLlego: 'La entrega no se pudo hacer',
+    desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
+    desvioCancelado: 'Cancelado',
+
+    // S96 · Tus pedidos
+    promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
+    pedidoDel: 'Pedido del {{dia}}',
+    verPedido: 'Ver el pedido',
+    errorPedidosTitulo: 'No pudimos cargar tus pedidos',
+    sinPedidosTitulo: 'Todavía no pediste nada',
+    sinPedidosDetalle: 'Cuando hagas tu primer pedido, lo vas a seguir desde acá.',
+
+    // S96 · el detalle del pedido
+    pedidoTitulo: 'Tu pedido',
+    errorPedidoTitulo: 'No pudimos cargar este pedido',
+    codigoPuerta: 'El código de tu entrega',
+    codigoPuertaDetalle: 'Decíselo a quien te lleve el pedido. Es lo que confirma que te llegó a vos.',
+    codigoMostrador: 'El código para el mostrador',
+    codigoMostradorDetalle: 'Mostralo en el local cuando retires tu pedido.',
+    quePediste: 'Qué pediste',
+    lineaCantidad: '{{n}} u.',
+    lineaLote: 'Lote {{lote}}',
+    lineaDonacion: 'Donación',
+    lineaPara: 'Para {{nombre}}',
+    instruccionDicha: 'Instrucción de entrega: {{texto}}',
+    cancelarPedido: 'Cancelar el pedido',
+    cancelarDetalle:
+      'Todavía nadie empezó a prepararlo, así que cancelar no cuesta nada. Después de este punto, el botón cambia y lo conversamos.',
+    cancelarConfirmar: 'Sí, cancelar',
+    cancelarNo: 'No, lo dejo',
+    canceladoOk: 'El pedido quedó cancelado.',
+    tengoUnProblema: 'Tengo un problema',
+    // ⚠️ El horario espera confirmación del founder en el gate de strings —
+    // es el único dato de la pantalla que no sale de un sistema.
+    problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 9:00 a 20:00.',
+    problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',
+    problemaFallback: 'No pudimos abrir WhatsApp. Escribinos al {{numero}}.',
+    paraQuienFue: '¿Para quién fue?',
+    atarConfirmar: 'Sumar a su expediente',
+    atadoOk: 'Listo: quedó atado. Entra a su expediente al entregarse.',
+    atadoConEvento: 'Listo: ya es parte de su historia.',
+
+    // S96 · el reclamo del código (§4 — el vendedor jamás elige la mascota)
+    reclamoTitulo: 'El código de tu factura',
+    reclamoIntro:
+      'Si compraste en el local, tu factura tiene un código. Ingresalo, elegí para quién fue, y la compra entra a su expediente.',
+    reclamoCodigoLabel: 'Código',
+    reclamoCodigoPlaceholder: 'El código impreso en tu factura',
+    reclamoFaltaCodigo: 'Ingresá el código de la factura.',
+    reclamoFaltaMascota: 'Elegí para quién fue la compra.',
+    reclamoSinMascotasTitulo: 'Todavía no registraste ninguna mascota',
+    reclamoSinMascotasDetalle: 'La compra entra al expediente de una mascota. Registrala primero — tarda un minuto.',
+    reclamoCta: 'Sumar al expediente',
+    reclamoListoTitulo: 'Ya es parte de su historia',
+    reclamoListoDetalle: 'La compra quedó en el expediente de {{nombre}}.',
+    reclamoVolver: 'Volver a la despensa',
 
     // Los vacíos — con camino, jamás finales mudos
     vacioTitulo: 'La despensa todavía está vacía',

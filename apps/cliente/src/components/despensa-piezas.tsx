@@ -31,6 +31,33 @@ import {
 } from '@epetplace/ui';
 
 /* ─────────────────────────────────────────────────────────────────────
+ * FILA DE MONTO (S96-D) — etiqueta a la izquierda, número en MONO a la
+ * derecha (Ley 3: la plata es dato de máquina). Dos consumidores: el
+ * resumen del checkout y los totales del detalle del pedido. Anatomía
+ * local: `FilaDato` de la casa es vertical y esta lectura exige la
+ * horizontal — el candidato "FilaDato compacta" sigue registrado desde
+ * S71; si se promueve, esto muere consumiéndolo. */
+export function FilaMonto({
+  etiqueta,
+  monto,
+  destacada = false,
+}: {
+  etiqueta: string;
+  /** YA formateado por la pantalla. null = la fila no se dibuja (jamás
+   *  un "$ 0,00" inventado). */
+  monto: string | null;
+  destacada?: boolean;
+}) {
+  if (monto === null) return null;
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Texto variante={destacada ? 'seccion' : 'cuerpo'}>{etiqueta}</Texto>
+      <Texto variante={destacada ? 'datoMd' : 'dato'}>{monto}</Texto>
+    </View>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────
  * LIENZO — la superficie de la foto del producto
  *
  * 🔴 HOY DIBUJA SIEMPRE EL FALLBACK, Y NO ES UN DEFECTO DE ESTA PIEZA:
