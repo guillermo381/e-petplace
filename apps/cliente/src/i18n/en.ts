@@ -1265,6 +1265,92 @@ export const clienteEn = {
     reclamoEntrada: 'Bought at the store?',
     reclamoEntradaDetalle: "Enter your invoice code and the purchase joins their record.",
 
+    // S96 · the cart (§6.3/§6.4/§5.2)
+    carritoTitulo: 'Your cart',
+    carritoVacioTitulo: 'Your cart is empty',
+    carritoVacioDetalle: "Anything you add from the pantry will show up here.",
+    carritoVacioIr: 'Back to the pantry',
+    cantidadDe: 'Quantity of {{nombre}}',
+    quitar: 'Remove',
+    paraQuien: 'Who is it for?',
+    donarEste: 'Donate this product',
+    donacionDetalle:
+      "e-PetPlace picks the shelter and the team coordinates the delivery. A donation never joins a record and never earns rewards: it's a gift, not a purchase with a prize.",
+    especieNoRegistrada:
+      "This product is for a species you haven't registered in your family yet. You can register them now or later — the purchase goes through either way.",
+    registrarla: 'Register a pet',
+    totalLoDiceElMotor: "You'll see the total with shipping and taxes before paying.",
+    continuar: 'Continue',
+    errorMascotasDestino:
+      "We couldn't load your pets to pick a destination. You can still buy and assign it later.",
+
+    // S96 · checkout (§6/§7)
+    checkoutTitulo: 'Your order',
+    metodoEntrega: 'How does it arrive?',
+    metodoDespacho: 'Home delivery',
+    metodoRetiro: 'Store pickup',
+    retiroDetalle:
+      "You pick it up at the seller's store. When it's ready, you'll have a code to show at the counter.",
+    aDonde: 'Where we deliver',
+    sinDireccion: "You haven't told us your address yet.",
+    agregarDireccion: 'Add my address',
+    cambiarDireccion: 'Change address',
+    receptorLabel: 'Who receives it',
+    telefonoLabel: 'Contact phone',
+    instruccionesLabel: 'Delivery instructions',
+    instruccionesAyuda:
+      'What the courier needs to know: "leave at the front desk", "hand to Carla". If nobody answers, this instruction decides.',
+    cuandoLlega: 'When it arrives',
+    sinVendedorDetalle:
+      "We can't calculate delivery for this order from the app yet. We're finishing that connection.",
+    promesaCargando: 'Calculating the next delivery window…',
+    sinCupoEseDia: "There's no delivery capacity that day. Pick another one.",
+    vendedorSinReparto: "This seller hasn't set up delivery yet.",
+    promesaFallo: "We couldn't calculate the delivery window. Please try again.",
+    promesaVentana: 'Arrives on {{dia}}, between {{desde}} and {{hasta}}.',
+    saltoPorCupo: 'The nearest day was full, so delivery moved to the next one with room.',
+    programarFecha: 'Schedule another date',
+    programarPlaceholder: 'Pick a day',
+    programarAyuda: 'We only promise days with confirmed capacity.',
+    quitarFecha: 'Back to the earliest delivery',
+    resumen: 'Your order total',
+    subtotal: 'Products',
+    impuesto: 'VAT',
+    envio: 'Shipping',
+    envioRetiro: 'Store pickup',
+    total: 'Total',
+    totalNoLlego: 'This order already existed. See the total in Your orders.',
+    pagoSimuladoTitulo: 'Simulated payment',
+    pagoSimuladoDetalle:
+      "There's no real payment method yet: nothing is charged, nothing is invoiced. This is a test purchase and it stays marked as one.",
+    pagoSimuladoRecordatorio: 'This order has a SIMULATED payment: nothing was charged.',
+    exitoTitulo: 'Done',
+    exitoCuerpo: 'Your order was created.',
+    exitoDetalle: "We'll let you know when the seller confirms it. You can follow it in Your orders.",
+    exitoRetiro: "When it's ready for pickup, you'll see the counter code in the order detail.",
+    verTotal: 'See the total',
+    pagarSimulado: 'Pay (simulated)',
+    volverAEditar: 'Back to editing',
+    verTusPedidos: 'See your orders',
+    faltaItems: 'Your cart is empty.',
+    faltaVendedor: "We can't create orders from the app yet: the offer's seller connection is missing.",
+    faltaCargando: 'Loading your address…',
+    faltaDireccion: 'Your delivery address is missing.',
+    faltaReceptor: 'Tell us who receives it.',
+    faltaTelefono: 'A contact phone is missing.',
+    faltaPromesa: 'No delivery window available — check the date or try store pickup.',
+
+    // S96 · recurring purchase (§6.1 — the honest message mirrors the letter)
+    recurrenciaTitulo: 'Make it arrive on its own',
+    recurrenciaHonesta:
+      'This order will be charged automatically to your saved payment method. You can turn it off whenever you want.',
+    recurrenciaSinPasarela:
+      'Automatic charging turns on once the payment method exists. Until then, nothing is charged.',
+    recurrenciaCada: 'How often?',
+    recurrenciaDias: 'Every {{n}} days',
+    recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
+    recurrenciaActiva: 'The recurring purchase is set up.',
+
     vacioTitulo: 'The pantry is still empty',
     vacioDetalle:
       'We’re building the catalog with products that genuinely suit your pet. When it’s ready, you’ll see it here.',

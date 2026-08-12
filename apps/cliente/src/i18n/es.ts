@@ -1457,6 +1457,92 @@ export const clienteEs = {
     reclamoEntrada: '¿Compraste en el local?',
     reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',
 
+    // S96 · el carrito (§6.3/§6.4/§5.2)
+    carritoTitulo: 'Tu carrito',
+    carritoVacioTitulo: 'Tu carrito está vacío',
+    carritoVacioDetalle: 'Lo que agregues desde la despensa lo vas a ver acá.',
+    carritoVacioIr: 'Volver a la despensa',
+    cantidadDe: 'Cantidad de {{nombre}}',
+    quitar: 'Quitar',
+    paraQuien: '¿Para quién es?',
+    donarEste: 'Donar este producto',
+    donacionDetalle:
+      'El refugio lo elige e-PetPlace y la entrega la coordina el equipo. Una donación no entra a ningún expediente ni suma beneficios: es un regalo, no una compra con premio.',
+    especieNoRegistrada:
+      'Este producto es para una especie que todavía no tenés registrada en tu familia. Podés registrarla ahora o después — la compra sigue igual.',
+    registrarla: 'Registrar una mascota',
+    totalLoDiceElMotor: 'El total con envío e impuestos lo vas a ver antes de pagar.',
+    continuar: 'Continuar',
+    errorMascotasDestino:
+      'No pudimos cargar tus mascotas para elegir el destino. Podés comprar igual y atarlo después.',
+
+    // S96 · el checkout (§6/§7)
+    checkoutTitulo: 'Tu pedido',
+    metodoEntrega: '¿Cómo te llega?',
+    metodoDespacho: 'Envío a domicilio',
+    metodoRetiro: 'Retiro en tienda',
+    retiroDetalle:
+      'Lo retirás en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
+    aDonde: 'A dónde te lo llevamos',
+    sinDireccion: 'Todavía no nos contaste tu dirección.',
+    agregarDireccion: 'Agregar mi dirección',
+    cambiarDireccion: 'Cambiar la dirección',
+    receptorLabel: 'Quién recibe',
+    telefonoLabel: 'Teléfono de contacto',
+    instruccionesLabel: 'Instrucciones de entrega',
+    instruccionesAyuda:
+      'Lo que el repartidor tiene que saber: "dejar en portería", "entregar a Carla". Si no hay nadie, esta instrucción decide.',
+    cuandoLlega: 'Cuándo te llega',
+    sinVendedorDetalle:
+      'Todavía no podemos calcular la entrega de este pedido desde la app. Estamos terminando esa conexión.',
+    promesaCargando: 'Calculando la próxima ventana de entrega…',
+    sinCupoEseDia: 'Ese día no hay capacidad de reparto. Elegí otro.',
+    vendedorSinReparto: 'Este vendedor todavía no tiene reparto configurado.',
+    promesaFallo: 'No pudimos calcular la ventana de entrega. Probá de nuevo.',
+    promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
+    saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    programarFecha: 'Programar otra fecha',
+    programarPlaceholder: 'Elegí un día',
+    programarAyuda: 'Solo se prometen días con capacidad confirmada.',
+    quitarFecha: 'Volver a la entrega más próxima',
+    resumen: 'El total de tu pedido',
+    subtotal: 'Productos',
+    impuesto: 'IVA',
+    envio: 'Envío',
+    envioRetiro: 'Retiro en tienda',
+    total: 'Total',
+    totalNoLlego: 'Este pedido ya estaba creado. El total lo ves en Tus pedidos.',
+    pagoSimuladoTitulo: 'Pago simulado',
+    pagoSimuladoDetalle:
+      'Todavía no hay medio de pago real: no se cobra nada, no se factura nada. Es una compra de prueba y queda marcada así.',
+    pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
+    exitoTitulo: 'Listo',
+    exitoCuerpo: 'Tu pedido quedó creado.',
+    exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Podés seguirlo en Tus pedidos.',
+    exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
+    verTotal: 'Ver el total',
+    pagarSimulado: 'Pagar (simulado)',
+    volverAEditar: 'Volver a editar',
+    verTusPedidos: 'Ver tus pedidos',
+    faltaItems: 'El carrito está vacío.',
+    faltaVendedor: 'Todavía no podemos crear pedidos desde la app: falta conectar el vendedor de la oferta.',
+    faltaCargando: 'Cargando tu dirección…',
+    faltaDireccion: 'Falta tu dirección de entrega.',
+    faltaReceptor: 'Contanos quién recibe.',
+    faltaTelefono: 'Falta un teléfono de contacto.',
+    faltaPromesa: 'No hay ventana de entrega disponible — revisá la fecha o probá retiro en tienda.',
+
+    // S96 · la recurrencia (§6.1 — el mensaje honesto es VERBATIM de la letra)
+    recurrenciaTitulo: 'Que llegue solo',
+    recurrenciaHonesta:
+      'Este pedido se cargará automáticamente al medio de pago guardado. Lo podés desactivar cuando quieras.',
+    recurrenciaSinPasarela:
+      'El cobro automático se activa cuando esté el medio de pago. Hasta entonces, nada se cobra.',
+    recurrenciaCada: '¿Cada cuánto?',
+    recurrenciaDias: 'Cada {{n}} días',
+    recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
+    recurrenciaActiva: 'La compra recurrente quedó configurada.',
+
     // Los vacíos — con camino, jamás finales mudos
     vacioTitulo: 'La despensa todavía está vacía',
     vacioDetalle:
