@@ -7,9 +7,10 @@
  *  · FIRMA: el CÓDIGO A ESCALA DE MOSTRADOR (decisión ③ del arranque:
  *    se muestra acá y el vendedor lo escribe en su factura). Pieza
  *    `CodigoAEscala` de B — mono legible a través de un mostrador.
- *  · CHANEL: sin totales en vivo mientras se arma (el precio de la
- *    oferta no está en el lector todavía — hueco declarado, tomado por
- *    A; un total inventado sería L-139) · sin buscador (seis productos).
+ *  · CHANEL: el precio POR ÍTEM viene del lector (`precio_publicado`,
+ *    ensanche de A tras el hueco que esta pantalla declaró; null honesto
+ *    = sin oferta publicada, y SE DICE) — pero el TOTAL sigue siendo del
+ *    MOTOR: acá no se suma un centavo · sin buscador (seis productos).
  *  · ESTADOS: armar (cargando/error/vacío/listo) · vendida (el código).
  *
  * 🔴 EL VENDEDOR JAMÁS ELIGE LA MASCOTA (§4): la venta se registra
@@ -196,7 +197,13 @@ export default function VentaMostrador() {
                 <View key={sku.sku_id}>
                   {i > 0 && <Separador />}
                   <Celda
-                    titulo={sku.sku_vendedor}
+                    titulo={sku.producto_nombre}
+                    subtitulo={sku.presentacion}
+                    metadataMono={
+                      sku.precio_publicado !== null
+                        ? monto(sku.precio_publicado, pantalla.contexto.moneda, idioma as IdiomaSoportado)
+                        : undefined
+                    }
                     fin={
                       <StepperCantidad
                         valor={seleccion[sku.sku_id] ?? 0}
@@ -290,8 +297,17 @@ export default function VentaMostrador() {
                 <View key={sku.sku_id}>
                   {i > 0 && <Separador />}
                   <Celda
-                    titulo={sku.sku_vendedor}
-                    metadataMono={t('ventas.stock.disponibles', { n: sku.stock_disponible })}
+                    titulo={sku.producto_nombre}
+                    subtitulo={
+                      sku.precio_publicado === null
+                        ? `${sku.presentacion} · ${t('ventas.mostrador.sinPrecio')}`
+                        : sku.presentacion
+                    }
+                    metadataMono={
+                      sku.precio_publicado !== null
+                        ? `${monto(sku.precio_publicado, pantalla.contexto.moneda, idioma as IdiomaSoportado)} · ${t('ventas.stock.disponibles', { n: sku.stock_disponible })}`
+                        : t('ventas.stock.disponibles', { n: sku.stock_disponible })
+                    }
                     interactiva
                     accessibilityRole="button"
                     onPress={() => {
