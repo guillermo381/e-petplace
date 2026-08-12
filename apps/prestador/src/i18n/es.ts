@@ -2964,6 +2964,7 @@ export const prestadorEs = {
       quitar: 'Quitar',
       cantidad: 'Cantidad',
       registrarCta: 'Registrar la venta',
+      sinPrecio: 'Sin oferta publicada',
       codigoTitulo: 'Código para la factura',
       codigoDetalle:
         'Escríbelo en tu factura. Con ese código la persona ata la compra a su mascota.',

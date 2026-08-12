@@ -17,10 +17,11 @@
  * de pedir un número con signo — nadie piensa en deltas con signo
  * mientras cuenta bolsas.
  *
- * ⚠️ DESVÍO DECLARADO (pedido a A, tomado por A en su tanda de hoy):
- * `SkuDelVendedor` todavía no trae el NOMBRE del producto — la fila
- * muestra el código de SKU del vendedor, que es SUYO y lo reconoce,
- * hasta que llegue `producto_nombre`. Se migra en el acto cuando exista.
+ * ✅ EL DESVÍO DEL NOMBRE SE PAGÓ: A ensanchó `SkuDelVendedor` con
+ * `producto_nombre`/`presentacion` (merge `f3029182`) y esta pantalla
+ * migró EN EL ACTO, como estaba declarado. El código de SKU queda como
+ * dato de máquina en la Hoja del ajuste — es la referencia del vendedor,
+ * no el título de la fila.
  */
 
 import { useCallback, useState } from 'react';
@@ -182,12 +183,15 @@ export default function StockVentas() {
               <View key={sku.sku_id}>
                 {i > 0 && <Separador />}
                 <Celda
-                  titulo={sku.sku_vendedor}
-                  subtitulo={
+                  titulo={sku.producto_nombre}
+                  subtitulo={[
+                    sku.presentacion,
                     sku.stock_reservado > 0
                       ? t('ventas.stock.reservadas', { n: sku.stock_reservado })
-                      : undefined
-                  }
+                      : null,
+                  ]
+                    .filter((s): s is string => s !== null && s.length > 0)
+                    .join(' · ')}
                   metadataMono={t('ventas.stock.disponibles', { n: sku.stock_disponible })}
                   fin={
                     <Boton

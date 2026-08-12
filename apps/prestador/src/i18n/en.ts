@@ -2455,6 +2455,7 @@ export const prestadorEn = {
       quitar: 'Remove',
       cantidad: 'Quantity',
       registrarCta: 'Record sale',
+      sinPrecio: 'No published offer',
       codigoTitulo: 'Code for the invoice',
       codigoDetalle:
         'Write it on your invoice. With that code the person ties the purchase to their pet.',
