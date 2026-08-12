@@ -1,0 +1,3 @@
+familia,marca,producto,presentacion,codigo_variante,codigo_impuesto,sku_vendedor,precio_venta,especies,tallas,momento_vital,alergenos,descripcion,contenido_valor,contenido_unidad,peso_kg,gtin,largo_cm,ancho_cm,alto_cm,stock,ingredientes,dieta_prescripcion
+alimento,Marca Ejemplo,Alimento adulto pollo,Bolsa 2 kg,ADU-POLLO-2K,EC_IVA_0,MEJ-ADU-2K,18.90,perro,pequeno|mediano,adulto,ninguno,Alimento seco para perro adulto,2,kg,2.1,7861234567890,30,20,10,25,pollo|arroz,no
+antiparasitario,Marca Ejemplo,Antipulgas mensual,Caja 3 pipetas,APM-3P,EC_IVA_15,MEJ-APM-3P,24.50,perro|gato,mediano|grande,adulto|senior,ninguno,Pipetas antipulgas de aplicacion mensual,3,unidad,0.05,7861234567891,12,8,3,40,fipronil,no
