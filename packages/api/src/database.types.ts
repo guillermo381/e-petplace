@@ -12249,6 +12249,7 @@ export type Database = {
           costo_envio: number
           country_code: string
           created_at: string | null
+          created_by_sistema: boolean
           cuenta_comercial_id: string
           descuento_monto: number | null
           entrega_ciudad: string | null
@@ -12293,6 +12294,7 @@ export type Database = {
           costo_envio?: number
           country_code?: string
           created_at?: string | null
+          created_by_sistema?: boolean
           cuenta_comercial_id: string
           descuento_monto?: number | null
           entrega_ciudad?: string | null
@@ -12337,6 +12339,7 @@ export type Database = {
           costo_envio?: number
           country_code?: string
           created_at?: string | null
+          created_by_sistema?: boolean
           cuenta_comercial_id?: string
           descuento_monto?: number | null
           entrega_ciudad?: string | null

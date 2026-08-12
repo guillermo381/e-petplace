@@ -13820,3 +13820,39 @@ problema que no existe.**
 
 ☠️ **Muere** cuando el cupo de un día **se llene de verdad**.
 
+#### D-780 — 🟡 `proponer_sku_vendedor` PISA `stock_disponible` SIN PASAR POR EL LEDGER
+
+**Origen:** S96-A, fase 1 (hallazgo ⑤ del acta
+`2026-08-12-s96-A-ACTA-MOTOR.md`), medido en el `functiondef` vivo.
+**Número verificado libre por grep antes de escribir** (la lección de
+`D-757`, tercera vez que se paga el peaje barato).
+
+**El defecto, literal:** el `ON CONFLICT (cuenta_comercial_id, variante_id)`
+de `proponer_sku_vendedor` (S95-F) hace
+`stock_disponible = EXCLUDED.stock_disponible` — **escribe la columna
+MATERIALIZADA directo**, sin fila en `inventario_movimientos`. Esa columna
+la mantiene `_trg_inventario_aplicar_movimiento` desde el ledger append-only;
+pisarla la descuadra contra su propia historia.
+
+**Por qué hoy es inofensivo:** el único camino que la ejercita es el
+cargador de catálogo en la CARGA INICIAL, con stock cero y sin ventas. El
+número que entra y el ledger vacío no se contradicen.
+
+**Por qué con ventas vivas es un descuadre:** re-correr el cargador con la
+columna `stock` sobre un catálogo que ya vendió **resetea el saldo al valor
+de la planilla** — las ventas reales desaparecen del número sin dejar
+rastro, y *nadie puede explicar la diferencia tres meses después* (la misma
+frase con la que `ajustar_stock_vendedor` exige motivo).
+
+**La cura, cuando dispare:** el upsert deja de escribir `stock_disponible`;
+la diferencia contra el objetivo entra por `ajustar_stock_vendedor` (o un
+movimiento `carga_inicial`) — por la puerta, con motivo, dejando que el
+trigger materialice. El cargador ya sabe hablar con funciones: es cambiar el
+destino de un dato, no la arquitectura.
+
+☠️ **Muere** con la primera migración que toque `proponer_sku_vendedor` — o
+ANTES de la primera re-corrida del cargador sobre un catálogo con ventas
+reales, lo que llegue primero. **Trampa declarada:** curarla solo en el
+cargador (mandando `stock: 0`) dejaría la puerta rota para el vendedor que
+proponga desde la app — la cura es de la FUNCIÓN, no del caller.
+
