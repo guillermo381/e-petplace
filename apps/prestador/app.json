@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "ePetPlace Pro",
+    "name": "e-PetPlace Negocios",
     "slug": "prestador",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "prestador",
@@ -14,7 +14,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
-        "backgroundColor": "#050508"
+        "backgroundColor": "#0A7268"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.epetplace.prestador"
@@ -45,9 +45,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0A7268",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 140
         }
       ],
       [
