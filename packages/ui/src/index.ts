@@ -276,3 +276,24 @@ export {
   type MatchingDeTexto,
   type ModoDeCoincidencia,
 } from './components/sugerencias'
+
+// EscaleraEstados — S96-B: DÓNDE ESTÁ Y CUÁNTO FALTA, sin abrir nada.
+// La pieza del recorrido de la despensa, y sirve a las DOS caras: la
+// escalera del panel del vendedor (`LETRA_PANEL_VENDEDOR_S96` §2.2) y el
+// seguimiento de la familia (`LETRA_RECORRIDO_DESPENSA_S96` §8.1).
+//
+// Entra al diccionario (Ley 19) con un trabajo que no estaba: "informar
+// el progreso de un proceso multi-paso". Dos decisiones declaradas en su
+// encabezado y que quien la consuma NO puede deshacer desde la pantalla:
+//   ① EL DESVÍO NO ES UN ESCALÓN — "no llegó" interrumpe el camino, no lo
+//     avanza; pintarlo como paso 5 de 5 afirma que el pedido llegó.
+//   ② CERO DICCIONARIO DE ESTADOS ADENTRO — las etiquetas son de cada
+//     casa (§6 del método: se comparte la FORMA, la VOZ no).
+export {
+  EscaleraEstados,
+  ALTO_BARRA_ESCALERA,
+  type EscaleraEstadosProps,
+  type PasoEscalera,
+  type PasoEstado,
+  type DesvioEscalera,
+} from './components/EscaleraEstados'

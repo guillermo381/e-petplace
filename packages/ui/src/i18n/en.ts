@@ -101,6 +101,13 @@ export const uiEn = {
     ver: 'See {{n}} more',
     ocultar: 'Hide',
   },
+  // S96-B — EscaleraEstados: only the a11y label lives here (FORM). The
+  // step NAME arrives as a prop: seller and family read the same fact in
+  // different voices, and an audience cannot be deduplicated.
+  escaleraEstados: {
+    progreso: 'Step {{n}} of {{total}}: {{etiqueta}}',
+    progresoSinPaso: 'Step {{n}} of {{total}}',
+  },
   // S63 — program STATE voice (Ley 3, founder-signed): the motor word
   // 'vencido' never reaches UI — "Ended" states the fact, no reproach.
   programaEstado: {

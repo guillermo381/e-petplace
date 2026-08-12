@@ -91,7 +91,13 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato' |
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
  *  colores de STATUS — 'danger' y 'success' resuelven contra
  *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success'
+/** S96-B — gana `warning`, por el MISMO motivo por el que ya tenía
+ *  'danger' y 'success': el sistema tiene `status.warningText` como
+ *  registro AA y `Texto` no podía decirlo, así que quien lo necesitaba
+ *  tenía que salirse de la pieza. Su primer consumidor es la banda de
+ *  desvío de `EscaleraEstados` (una entrega fallida no es un ERROR del
+ *  sistema —vuelve y se reagenda—: 'danger' habría gritado de más). */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning'
 
 export type TextoProps = {
   children: ReactNode
@@ -165,7 +171,13 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
   const receta = RECETA[variante]
   const c = color ?? receta.color
   const colorResuelto =
-    c === 'danger' ? theme.status.dangerText : c === 'success' ? theme.status.successText : theme.text[c]
+    c === 'danger'
+      ? theme.status.dangerText
+      : c === 'success'
+        ? theme.status.successText
+        : c === 'warning'
+          ? theme.status.warningText
+          : theme.text[c]
 
   return (
     <Text

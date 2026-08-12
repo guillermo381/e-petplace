@@ -117,6 +117,16 @@ export const uiEs = {
     ver: 'Ver {{n}} más',
     ocultar: 'Ocultar',
   },
+  // S96-B — EscaleraEstados. Acá vive SOLO el armado del label de
+  // accesibilidad, que es FORMA: el número lo pone el componente y el
+  // NOMBRE del paso llega por prop. El vendedor lee "Empacado" y la
+  // familia "Estamos preparando tu pedido" — mismo hecho, dos
+  // audiencias, y una audiencia no se deduplica (`METODO_TRES_PISTAS`
+  // §6). Por eso NO hay diccionario de estados en este namespace.
+  escaleraEstados: {
+    progreso: 'Paso {{n}} de {{total}}: {{etiqueta}}',
+    progresoSinPaso: 'Paso {{n}} de {{total}}',
+  },
   // S63 — la voz del ESTADO DEL PROGRAMA (Ley 3, FIRMADA por el
   // founder): "vencido" JAMÁS llega a UI — la familia no lee su
   // programa como falla ni deuda; "Finalizó" dice el hecho sin

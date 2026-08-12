@@ -50,6 +50,7 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { EscaleraEstados } from '../components/EscaleraEstados'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
 import { ChipEntidad } from '../components/ChipEntidad'
@@ -2817,6 +2818,87 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">
+          {/* Los CUATRO estados que el contrato distingue, montados
+              juntos porque la comparación ES el gate:
+              compacta (fila de lista) · completa (detalle) · el DESVÍO
+              de alerta (entrega fallida) · el desvío NEUTRO (cancelado).
+              La escalera de la izquierda usa la voz del NEGOCIO y la de
+              abajo la de la FAMILIA — el mismo hecho, dos audiencias:
+              es la decisión ② de la pieza, hecha visible. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">compacta · voz del negocio</Texto>
+              <EscaleraEstados
+                registro="compacta"
+                acento="oficio"
+                pasos={[
+                  { clave: 'preparado', etiqueta: 'Preparado', estado: 'hecho' },
+                  { clave: 'empacado', etiqueta: 'Empacado', estado: 'actual' },
+                  { clave: 'despachado', etiqueta: 'Despachado', estado: 'pendiente' },
+                  { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">compacta · voz de la familia</Texto>
+              <EscaleraEstados
+                registro="compacta"
+                pasos={[
+                  { clave: 'confirmado', etiqueta: 'Confirmado', estado: 'hecho' },
+                  { clave: 'preparando', etiqueta: 'Estamos preparando tu pedido', estado: 'actual' },
+                  { clave: 'en_camino', etiqueta: 'En camino', estado: 'pendiente' },
+                  { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">completa · el detalle, con dato de máquina</Texto>
+              <EscaleraEstados
+                acento="oficio"
+                pasos={[
+                  { clave: 'preparado', etiqueta: 'Preparado', estado: 'hecho', detalle: '09:12' },
+                  { clave: 'empacado', etiqueta: 'Empacado', estado: 'hecho', detalle: 'lote a-33 · 4.2 kg' },
+                  { clave: 'despachado', etiqueta: 'Despachado', estado: 'actual', detalle: '11:40' },
+                  { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">completa · desvío de ALERTA — el camino se cortó</Texto>
+              <EscaleraEstados
+                pasos={[
+                  { clave: 'confirmado', etiqueta: 'Confirmado', estado: 'hecho', detalle: '09:12' },
+                  { clave: 'preparando', etiqueta: 'Preparado', estado: 'hecho', detalle: '10:05' },
+                  { clave: 'en_camino', etiqueta: 'En camino', estado: 'hecho', detalle: '11:40' },
+                  { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+                ]}
+                desvio={{
+                  etiqueta: 'No había nadie en la dirección',
+                  detalle: 'Te escribimos para coordinar otro día.',
+                  tono: 'alerta',
+                }}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">completa · desvío NEUTRO — apagado no dice error</Texto>
+              <EscaleraEstados
+                pasos={[
+                  { clave: 'confirmado', etiqueta: 'Confirmado', estado: 'hecho', detalle: '09:12' },
+                  { clave: 'preparando', etiqueta: 'Preparando', estado: 'pendiente' },
+                  { clave: 'en_camino', etiqueta: 'En camino', estado: 'pendiente' },
+                  { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+                ]}
+                desvio={{ etiqueta: 'Cancelaste este pedido' }}
+              />
+            </View>
+          </View>
         </Seccion>
 
         <Seccion titulo="FilaCita (62) — una tarjeta = una cita, con su canto ADENTRO (S80, dominio)">
