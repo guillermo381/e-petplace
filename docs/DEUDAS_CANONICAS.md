@@ -1999,7 +1999,7 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 #### D-447 — Linter de higiene del design system
 🟡 MEDIA. Lo que hoy detecta un grep y ningún gate: recetas de texto inline y hex crudos en apps. **Conteos RE-MEDIDOS al depositar (los del dictado estaban desactualizados — se declaran los reales):** `fontSize:` inline en apps = **408** · `fontFamily:` inline = **398** · hex crudos de 6 dígitos = **17** · `fontSize: 34` = **1** (el dictado decía 209; ese número no corresponde a este patrón). **Los `insets` YA NO son deuda: verificado, quedan 2 `paddingBottom` numéricos y ambos son `paddingBottom: 0` de layout legítimo — B los pagó en B1/B5.** **`apps/prestador/src/components/themed-text.tsx` está MUERTO: 0 consumidores** (regla 37 — se borra, no se lintea). El linter es la red para que la migración a `Texto` (D-450) no se re-ensucie por detrás. **Disparo: después del congelamiento de `Texto`.** Origen: S71-A0 (deep research, Bloque 0).
 
-#### D-448 — `montoCorto` al riel — ENMENDADA S82 (re-medida, y el EJE ERA OTRO)
+#### D-448 — `montoCorto` al riel — ENMENDADA S82 (re-medida, y el EJE ERA OTRO) · **ENMENDADA S96 (ver la enmienda al pie de la sección S96): el censo gana la despensa y el disparo gana forma — los lectores ya exponen país**
 🟢 MEDIA. **42 formateos de monto** en el repo, **2 divergentes** entre sí. El formateo de plata vive artesanal por pantalla, igual que las fechas antes de `fechaCortaMono`. La cura es una función por idioma en el riel, no una variante de componente — por eso **`montoCorto` NO nace como variante de `Texto`** (decisión de mesa al congelar). **Disparo: P21 / la entrada de la PASARELA** — cuando el monto deje de ser simulado, la divergencia deja de ser cosmética. Origen: S71 (congelamiento de `Texto`).
 
 > **ENMIENDA S82-A r14 — DIAGNÓSTICO PEDIDO POR EL FOUNDER (medido, SIN construir). Dos correcciones a esta ficha, y la segunda cambia el diseño de la cura.**
@@ -13856,3 +13856,79 @@ reales, lo que llegue primero. **Trampa declarada:** curarla solo en el
 cargador (mandando `stock: 0`) dejaría la puerta rota para el vendedor que
 proponga desde la app — la cura es de la FUNCIÓN, no del caller.
 
+
+#### D-781 — 🟡 EL SPLASH DE `e-PetPlace Negocios` ERA EL TEMPLATE DE EXPO — CURADO EN RAMA, MUERE CON LA BUILD 1.0.5 GATEADA
+
+**Sesión:** S96 (12-ago-2026). **La midió C (baseline de R35, adjudicado por
+B); la ficha la deposita A** (el número ya viajaba en el commit `b327c96c`
+de B — R35 nació citándola).
+
+**Lo medido, con literal:** `apps/prestador/src/components/animated-icon.tsx`
+era el splash del TEMPLATE de Expo, VIVO — montado en `_layout.tsx:162`,
+pintaba **el logo de Expo sobre azul `#208AEF`** en cada arranque en frío de
+la app del prestador. Y no era solo el overlay JS: el splash NATIVO también
+era template (`expo-splash-screen` con `#208AEF` + `splash-icon.png` en
+`app.json`), más `expo-logo.png`/`react-logo.png`/`expo-badge*.png` en
+assets. `app.json` decía «ePetPlace Pro» (D-752).
+
+**Por qué C NO lo curó en su tanda de pantallas (decisión correcta):**
+re-pintar solo el overlay con tokens de la casa desencajaría contra el
+splash nativo — *dos pantallas de arranque distintas en medio segundo* — y
+tocar el plugin es CAMBIO NATIVO: viaja en tren de build (L-134), y el
+splash es momento de MARCA que gatea el founder.
+
+**La cura (C, tanda de marca `7664a7f3` en `pista/s96-c`, orden del
+founder):** splash nativo `#0A7268` + isotipo blanco · overlay del template
+MUERTO (`AnimatedIcon` y 6 assets, Ley 37) · `name` → «e-PetPlace Negocios»
+con bundle `com.epetplace.prestador` INTACTO verificado antes y después ·
+**bump 1.0.4 → 1.0.5 porque el splash nativo viaja en BUILD** — *el bump lo
+cazó C midiendo, no una revisión: sin él, el primer OTA de marca habría
+pintado teal sobre azul nativo en los APK 1.0.4 vivos — la costura exacta
+que la marca venía a cerrar.*
+
+**Vigilante:** R35 de `verify:diseno` (B) — baseline 1 con esta ficha como
+dueño; baja a 0 cuando el merge de `pista/s96-c` llegue a `main` (el
+compromiso B↔C, coordinado por A).
+
+☠️ **Muere** cuando la build 1.0.5 pase el gate en dispositivo del founder
+con el splash de la casa Y R35 quede duro en 0 sobre `main`.
+
+#### D-782 — 🔴 EL CLIENTE TIENE EL MISMO SPLASH DEL TEMPLATE — Y ES LA PRIMERA PANTALLA QUE VE UNA FAMILIA NUEVA
+
+**Sesión:** S96 (12-ago-2026). **La midió C** (fuera de su territorio, no
+tocada); **ficha por decisión de la mesa: nace AHORA, la cura ESPERA.**
+
+**Lo medido:** `apps/cliente/app.json` tiene el MISMO splash template,
+**byte-idéntico** al que D-781 acaba de matar en el prestador: `#208AEF` +
+`splash-icon.png` = el logo de Expo.
+
+**El peso real (letra de la mesa):** el cliente es una familia que abre la
+app **por primera vez** — lo primero que ve es el logo de Expo. Con la web
+pública viva y el soft launch en octubre, *eso no llega a producción*.
+
+**La cura, ya sabida porque D-781 la ensayó entera:** splash de la casa
+(nativo + overlay coherentes en el mismo acto — jamás a medias), limpieza de
+assets del template, y **bump de versión del cliente por la misma razón
+L-134** (el splash nativo viaja en build). El gate es del founder: momento
+de marca.
+
+**Por qué la cura espera (decisión de la mesa, 12-ago):** D está cerrando
+la tanda del recorrido de compra — *interrumpirla para pintar un splash le
+cambia el contexto por algo que no la bloquea.*
+
+☠️ **Muere** con la primera build del cliente que lleve el splash de la casa
+gateada en dispositivo — y su disparo es **cuando D cierre su tanda**, antes
+del soft launch sin excepción.
+
+#### D-448 — ENMIENDA S96 (12-ago): el censo gana la DESPENSA y el disparo gana forma
+
+**Acordado entre C y D en vara cruzada; deposita A.** El censo de D-448 gana
+los sitios del frente despensa (el checkout de D + las pantallas S95-I
+gateadas): siguen formateando `$ {v.toFixed(2)}` artesanal porque los
+lectores del catálogo no traían país. **Desde S96 lo traen**
+(`ProductoDeVitrina.country_code` ya existía; `VarianteDeProducto` ganó
+`country_code` en la tanda A del 12-ago) ⇒ **el disparo toma forma
+concreta: el frente despensa migra a `monto()` del riel en UN solo barrido**,
+ahora que los lectores exponen moneda/país. La regla de la ficha original
+sigue intacta: curar sin país era inventar la moneda — por eso el orden fue
+ensanchar lectores primero.

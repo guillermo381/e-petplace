@@ -1,6 +1,6 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.2 — S96 (12 Ago 2026). El recorrido completo.**
+> **Versión: v2.3 — S96 (12 Ago 2026). La composición con cuatro estados y el vocabulario con relaciones.**
 >
 > **Qué cambió respecto de v2.1, en una línea: el alcance v1 se ensancha
 > con el recorrido entero de los dos lados** — `LETRA_RECORRIDO_DESPENSA_S96`,
@@ -433,6 +433,60 @@ que no se repite es la que se acaba de medir.*
 
 ---
 
+### 4.3 🔴 LOS SEIS DEL LANZAMIENTO — POR SKU EXACTO, NO POR PROSA (S96, 12-ago)
+
+**El hueco que esta sección cierra:** el acta de S95 decía *"seis
+productos reales en la vitrina"* y no los listaba — vivían en prosa, y
+la prosa produjo su primer error el mismo día que alguien la necesitó
+(abajo). **Son los únicos productos que un cliente real va a ver en
+octubre**: un identificador ambiguo acá es el producto equivocado con
+la composición equivocada, y de ahí a la advertencia de alergia
+equivocada hay un paso.
+
+**Los seis, MEDIDOS de la base viva (12-ago-2026), no reconstruidos:**
+
+| # | Producto | Presentación | SKU | Precio | Alérgenos declarados | Estado composición |
+|---|---|---|---|---|---|---|
+| 1 | Pro Pac Ultimates — **Puppy Pollo y Arroz** | 2.3 kg | `PRUEBA-PP-001` | $29.00 | pollo · arroz | declarada_sin_verificar |
+| 2 | Pro Pac Ultimates — **Adulto Cordero y Arroz** | 12.7 kg | `PRUEBA-PP-002` | $94.50 | cordero · arroz | declarada_sin_verificar |
+| 3 | Pro Pac Ultimates — **Adulto Pescado y Papa** | 12.7 kg | `PRUEBA-PP-003` | $122.00 | pescado | declarada_sin_verificar |
+| 4 | Taste of the Wild — **Salmon Puppy Pacific Stream** | 2 kg | `PRUEBA-TW-001` | $34.00 | salmon | declarada_sin_verificar |
+| 5 | Taste of the Wild — **Bisonte y Venado Adulto High Prairie** 🔴 | 12.2 kg | `PRUEBA-TW-002` | $122.00 | bisonte · venado | declarada_sin_verificar |
+| 6 | Taste of the Wild — **Trucha y Salmon Canyon River Feline** (gato) | 2 kg | `PRUEBA-TW-003` | $34.00 | trucha · salmon | declarada_sin_verificar |
+
+**Dos correcciones que la medición le hace a la reconstrucción por
+prosa, y son la moraleja de la sección:** ① el *"Pro Pac Pollo-Arroz"*
+del cierre de S95 (el de la prueba de exclusión por alergia) **es el
+Puppy de 2.3 kg — no la adulta de 12,7 kg** que la reconstrucción
+había elegido entre nueve candidatas · ② la evidencia *"$122 en
+§2.3bis"* atribuida al Taste of the Wild **es ambigua: hay DOS
+productos a $122** (el TOW Bisonte y el Pro Pac Pescado y Papa). *La
+prosa reconstruye; la base se mide.*
+
+> 🔴 **EL QUE NO PUEDE SALIR: el #5 (Taste of the Wild Bisonte y
+> Venado) queda marcado NO CARGAR / NO VERIFICAR HASTA FOTO DE BOLSA
+> (firma founder, 12-ago).** Es el más caro de la vitrina, se vende
+> como proteína novel de bisonte y venado, **y la etiqueta
+> estadounidense arranca con búfalo de agua y trae grasa de pollo en
+> el octavo lugar**. El importador (Veterino S.A.S., Quito) no publica
+> ficha; lo que hay es traducción de la etiqueta de OTRO mercado — y
+> §6 (2ª enmienda) ya dice qué vale eso: una ficha que no es del país
+> no sostiene una verificación. Con `res` incluyendo búfalo de agua
+> (relaciones de §6, 3ª enmienda), **este producto es exactamente el
+> caso que el motor existe para cazar** — afirmarlo con la ficha de
+> otro país es el riesgo caro del lanzamiento. **El founder fotografía
+> la bolsa; hasta entonces su estado es `declarada_sin_verificar` y la
+> superficie lo DICE.** Sus alérgenos declarados hoy (bisonte ·
+> venado) son los de esa traducción: la lista está INCOMPLETA a
+> sabiendas, y por eso el estado que la acompaña importa más que la
+> lista.
+
+**Regla que queda:** todo cambio en la lista de los seis se hace ACÁ
+primero (letra) y en la base después — y siempre por SKU, jamás por
+nombre a secas.
+
+---
+
 ## 5. EL RECORRIDO DE LA FAMILIA
 
 ### 5.1 Dónde vive
@@ -509,6 +563,65 @@ de cuidado existe por la mascota, nunca para vender.
 > no nosotros* · ② **la advertencia jamás se apaga por una promoción**:
 > el motor de alertas manda sobre el de beneficios, siempre.
 
+> 🔴 **SEGUNDA ENMIENDA S96 (firma founder, 12-ago — el mismo día): LA
+> COMPOSICIÓN TIENE CUATRO ESTADOS, Y SOLO DOS PUEDEN CALLAR.**
+>
+> ~~El candado ① distinguía dos casos: con composición y sin ella~~ —
+> **cubría «sin composición» y NO cubría «con composición incompleta»,
+> y ese silencio se ve idéntico al silencio confiable.** La razón es
+> MEDIDA, no teórica: 133 productos del catálogo real tienen
+> composición presente y lista de alérgenos INCOMPLETA (Royal Canin
+> Medium Adulto lleva aceite de pescado y no declara pescado).
+>
+> **Los cuatro estados** (`productos.composicion_estado`, verbatim):
+> **`verificada`** — e-PetPlace cotejó la lista de alérgenos contra la
+> composición: **la única que puede callar como confiable** ·
+> **`declarada_sin_verificar`** — composición presente, nadie la
+> cotejó: la superficie DICE su condición · **`ausente`** — sin
+> composición: la app lo dice, jamás calla (el candado ① original) ·
+> **`no_aplica`** — la composición no es una categoría que aplique
+> (las arenas sanitarias): calla porque **no hay dato faltante**, que
+> es OTRO silencio que el de la verificada.
+>
+> **Y la verificación es CONTRA LA FICHA DEL PAÍS**
+> (`composicion_mercado`, hoy `EC`): el fabricante formula por planta
+> y por mercado — la ficha ecuatoriana del Royal Canin Hepatic declara
+> hígado de ave; la británica no. **Una ficha `global` JAMÁS sostiene
+> una verificación** (cae en `declarada_sin_verificar`), y si la
+> composición o el mercado CAMBIAN, la verificación **caduca sola**
+> (trigger, no disciplina). *Esto mata un supuesto no escrito: un SKU
+> no es un producto — sin el mercado, el día que entremos a Colombia
+> el mismo SKU puede traer otra fórmula y nadie sabría cuál rige.*
+>
+> **COROLARIO (misma firma): la advertencia se dispara por
+> COMPOSICIÓN, jamás por nombre.** Hay 10 productos
+> «hypoallergenic/sensitive» con alérgeno común adentro — *el nombre
+> no es una dieta de eliminación.*
+>
+> **TERCERA ENMIENDA S96 (firma founder, 12-ago): el vocabulario de
+> alérgenos es DATO y tiene RELACIONES.** Medido: 242 de 456 productos
+> del catálogo real declaraban un alérgeno que el motor no podía
+> sostener — *el motor de alergias estaba apagado en la práctica.*
+> `cat_alergenos` (23 entradas; ampliar = un INSERT, jamás una
+> migración) + `cat_alergeno_relaciones` con dos aristas: **`es_un`**
+> (bisonte ES res — advertencia EXACTA) y **`puede_ser`**
+> (`ave_no_especificada` podría ser pollo — advertencia IMPRECISA,
+> **y la imprecisión SE DICE**: *«contiene proteína de ave sin
+> especificar, y podría ser pollo»*, jamás «contiene pollo»).
+> **Lo que jamás se agrupa, protegido en el modelo:** pollo, pavo y
+> pato SEPARADOS (la dieta de eliminación usa pato o pavo para el
+> alérgico al pollo) · insectos aparte de moluscos_crustaceos pese a
+> la tropomiosina (la proteína de insecto existe como alternativa).
+> **`moluscos_crustaceos` es UNA entrada** (reactividad cruzada).
+> Y la lección de `ave_no_especificada`: 80 etiquetas dicen «proteínas
+> de ave» sin nombrar cuál — leerlas como pollo era **un alérgeno
+> inferido, lo que prohibimos, hecho por nosotros**; el casillero dice
+> lo que la etiqueta dice y nada más.
+>
+> El paso de entendimiento de §5.4 **tiene productor**: tabla
+> append-only `alergia_entendimientos` — el registro jamás se edita ni
+> se borra; la pantalla decide cuándo re-preguntar.
+
 ---
 
 ## 7. QUÉ VUELVE AL BIO-EXPEDIENTE
@@ -548,7 +661,13 @@ Condiciones:
 **Esto es el producto, no el catálogo:**
 
 - Avisar cuándo se está acabando el alimento, calculado por porción y
-  fecha de compra.
+  fecha de compra. **⚠️ GATEADO POR FIRMA (founder, 12-ago-2026): LAS
+  RACIONES NO SALEN EN v1 — ni heredadas ni calculadas.** Una ración
+  no es atributo de producto: es indicación de alimentación, y las
+  heredadas están cortas por casi la mitad. **Manda la etiqueta del
+  fabricante y el veterinario.** El campo puede existir en el modelo;
+  **ninguna superficie lo muestra** — y este aviso queda esperando una
+  ración confiable, no se calcula con una inventada.
 - Recordar el antipulgas por su periodicidad real.
 - Sugerir la presentación siguiente cuando el cachorro crece.
 
@@ -737,6 +856,9 @@ la búsqueda avanzada con filtros sigue en evaluación (§11.3).
 | **Producto contraindicado — RECOMENDADO** (S96) | **No debe llegar a ocurrir.** §6 lo excluye antes de sugerirlo. Si aparece en una recomendación, **es bug de severidad alta**, no caso de atención |
 | **Producto contraindicado — BUSCADO** (S96) | **Es legal y esperado.** La app **advierte y deja decidir**, con paso explícito de entendimiento registrado (§6, `LETRA_RECORRIDO_DESPENSA_S96` §5.4) |
 | **Producto sin composición declarada** (S96) | La app **lo dice**: *"no tenemos los ingredientes de este producto"*. **Jamás silencio** — el silencio se lee como ausencia de alérgeno |
+| **Producto con composición SIN VERIFICAR** (S96, 2ª enmienda) | La app **dice su condición** — solo la `verificada` (contra ficha del país) puede callar. *El silencio de una lista incompleta se ve idéntico al confiable, y por eso el estado existe* |
+| **Producto donde la composición NO APLICA** (S96, `no_aplica`) | La app **calla sin reclamar**: pedirle ingredientes a una bolsa de arena es un dato faltante que no falta |
+| **Producto genérico con relación de alérgeno** (S96) | `ave_no_especificada` ADVIERTE al alérgico a pollo, **con voz de imprecisión**: *"podría ser pollo"*, jamás *"contiene"* |
 | **El vet no registró recomendación** (S96) | La app **no la menciona.** Jamás fabrica una recomendación que nadie hizo |
 
 **Enmienda a `POLITICAS_EPETPLACE` (D-744):** nace el capítulo de
@@ -994,6 +1116,21 @@ función.
 
 ## Historial
 
+- **v2.3 (S96, 12 Ago 2026 — mismo día, cuatro firmas nuevas del founder,
+  todas salidas de VERIFICAR el catálogo real):** **§6 gana la segunda y
+  tercera enmienda** — la composición pasa a **CUATRO estados**
+  (`verificada` · `declarada_sin_verificar` · `ausente` · `no_aplica`;
+  solo la primera calla como confiable y la última calla porque no hay
+  dato faltante), la verificación es **contra la ficha del PAÍS**
+  (`composicion_mercado`; la global jamás sostiene, caso Royal Canin
+  Hepatic) y **el vocabulario de alérgenos se vuelve DATO con
+  RELACIONES** (23 entradas + `es_un`/`puede_ser`; la advertencia
+  imprecisa SE DICE; pollo/pavo/pato jamás se agrupan — medido: 242 de
+  456 productos declaraban alérgenos que el motor no sostenía).
+  **§7.3: las raciones NO salen en v1** (ni heredadas ni calculadas —
+  manda la etiqueta y el vet). **§10 gana tres filas** (sin verificar ·
+  no_aplica · relación imprecisa). El paso de entendimiento de §5.4
+  gana productor (`alergia_entendimientos`, append-only).
 - **v2.2 (S96, 12 Ago 2026):** el recorrido completo, de los dos lados.
   Fuente: `LETRA_RECORRIDO_DESPENSA_S96`, **diecisiete firmas del
   founder**. **§6 y §10: la alergia ADVIERTE, no esconde** —exclusión
