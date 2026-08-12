@@ -134,6 +134,49 @@ Sobre una venta de **USD 100 + IVA** (el cobro al cliente es **115**):
 > medida en la calculadora del procesador. **La fila del banco en débito
 > es HEREDADA, no re-medida en S95.** El total sí es aritmética directa.
 
+### 2.3bis 🔴 LA ARITMÉTICA DEL CATÁLOGO QUE EXISTE — enmienda S95-CIERRE
+
+> **§2.3 NO DESCRIBE NINGÚN PRODUCTO REAL, y hay que saberlo antes de usar sus
+> números en una conversación.** Su aritmética está construida sobre una venta
+> con **IVA 15 %**, y **los seis productos del catálogo v1 tributan
+> `EC_IVA_0`** — alimento para mascotas, tarifa cero en Ecuador.
+>
+> **§2.3 no se borra:** describe bien el día que entre un producto gravado (un
+> antiparasitario, un suplemento). Lo que faltaba era la versión de HOY.
+
+Sobre una venta de **USD 100 con IVA 0 %** (el cobro al cliente es **100**):
+
+| Concepto | Crédito corriente | Débito |
+|---|---:|---:|
+| Banco + procesador + 3DS ⚠️ | ~$6,38 | ~$2,92 |
+| **e-PetPlace 10 % s/100** | **$10,00** | **$10,00** |
+| **Fricción total** | **~$16,38 = 16,4 %** | **~$12,92 = 12,9 %** |
+| **El vendedor recibe** | **~$83,62** | **~$87,08** |
+| **Menos IVA al SRI** | ☠️ **$0,00** | ☠️ **$0,00** |
+| **Le queda** | **~$84** | **~$87** |
+
+> ⚠️ **HONESTIDAD DEL DESGLOSE:** la fila de banco + procesador está **derivada
+> por proporción** de la que §2.3 declaró medida en la calculadora del
+> procesador. **NO se re-midió en esta sesión.** Las dos filas de e-PetPlace y
+> de IVA sí son aritmética exacta.
+
+**LO QUE ESTE CUADRO ENSEÑA, Y NO SE VE EN §2.3:**
+
+> 🔴 **El 10 % sobre el TOTAL CON IVA hace que el impuesto encarezca la
+> comisión.** Sobre un producto de $100: con IVA 15 % el vendedor se queda con
+> **~$81**; con IVA 0 %, con **~$84**. **La diferencia no la produce el
+> producto: la produce dónde cae la base de la comisión.**
+>
+> No es un argumento para cambiar la base —está firmada, y sobre el total con
+> IVA es lo que hace la aritmética simple y auditable—, pero **sí es algo que
+> hay que poder decir en la conversación con el vendedor** cuando entre el
+> primer producto gravado y su margen baje $3 sin que él haya cambiado nada.
+
+**Y el número que va a la conversación de HOY:** sobre el producto real más
+caro del catálogo cargado —Taste of the Wild Bisonte y Venado, **$122**— la
+comisión es **$12,20** y el vendedor recibe **~$102**, sin nada que pagarle al
+SRI.
+
 ### 2.4 Lo que e-PetPlace absorbe — enmendado en S95
 
 **La despensa deja de tener costo fijo de plataforma propio.** Corre
