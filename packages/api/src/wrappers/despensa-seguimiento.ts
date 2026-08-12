@@ -57,6 +57,12 @@ export interface LineaDePedido {
    *  en un aviso a las familias correctas. */
   lote: string | null;
   fecha_vencimiento: string | null;
+  /** EL DESTINO del ítem (§4, S96). `null` = sin atar — la pantalla ofrece
+   *  «¿lo atás?» con `atarItemAMascota`, que es la regla general: la app
+   *  jamás adivina de quién es una compra. `pedido_item_destinos` es del
+   *  DUEÑO por RLS: si el que mira no es el dueño, esto viene `null` y no
+   *  significa "sin atar" — significa "no es tu compra". */
+  destino: { mascota_id: string | null; donacion: boolean } | null;
 }
 
 export interface SeguimientoEnvio {
@@ -87,6 +93,9 @@ export interface DetallePedido {
     ciudad: string | null;
     sector: string | null;
     referencias: string | null;
+    /** «Dejar en portería» — la instrucción que decide la entrega fallida
+     *  (§9.3). Viaja al crear y VUELVE al leer (pedido D, 12-ago). */
+    instrucciones: string | null;
   };
   subtotal: number;
   impuesto_total: number;
@@ -153,12 +162,12 @@ export async function obtenerDetallePedido(
     cliente.from('v_pedidos_narrativa').select('*').eq('pedido_id', pedidoId).maybeSingle(),
     cliente
       .from('pedidos')
-      .select('subtotal, impuesto_total, costo_envio, descuento_monto, entrega_nombre_receptor, entrega_telefono, entrega_direccion, entrega_ciudad, entrega_sector, entrega_referencias')
+      .select('subtotal, impuesto_total, costo_envio, descuento_monto, entrega_nombre_receptor, entrega_telefono, entrega_direccion, entrega_ciudad, entrega_sector, entrega_referencias, entrega_instrucciones')
       .eq('id', pedidoId)
       .maybeSingle(),
     cliente
       .from('pedido_items')
-      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento')
+      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento, pedido_item_destinos(mascota_id, es_donacion)')
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
@@ -188,6 +197,18 @@ export async function obtenerDetallePedido(
       impuesto_monto: typeof i.impuesto_monto === 'number' ? i.impuesto_monto : 0,
       lote: typeof i.lote === 'string' ? i.lote : null,
       fecha_vencimiento: typeof i.fecha_vencimiento === 'string' ? i.fecha_vencimiento : null,
+      // `pedido_item_destinos` es 1:1 (PK = pedido_item_id); PostgREST lo
+      // entrega como objeto o null según la FK — se aceptan las dos formas.
+      destino: (() => {
+        const d = Array.isArray(i.pedido_item_destinos)
+          ? i.pedido_item_destinos[0]
+          : i.pedido_item_destinos;
+        if (!esObjDespensa(d)) return null;
+        return {
+          mascota_id: typeof d.mascota_id === 'string' ? d.mascota_id : null,
+          donacion: d.es_donacion === true,
+        };
+      })(),
     });
   }
 
@@ -224,6 +245,7 @@ export async function obtenerDetallePedido(
         ciudad: s(c.entrega_ciudad),
         sector: s(c.entrega_sector),
         referencias: s(c.entrega_referencias),
+        instrucciones: s(c.entrega_instrucciones),
       },
       // Transportados del motor, no sumados acá.
       subtotal: n(c.subtotal),

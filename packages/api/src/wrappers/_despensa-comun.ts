@@ -104,6 +104,13 @@ export const CODIGOS_ERROR_DESPENSA = [
   'recurrencia_no_existe',
   'no_es_tu_recurrencia',
   'pasarela_no_afiliada',
+  // ── S96 · segunda tanda: composición (M11) y entendimiento (M13) ─────────
+  'composicion_estado_invalido',
+  'solo_epetplace_verifica',
+  'composicion_presente_no_puede_ser_ausente',
+  'no_podes_tocar_este_producto',
+  'producto_no_existe',
+  'alergenos_requeridos',
 ] as const;
 
 export type CodigoErrorDespensa = (typeof CODIGOS_ERROR_DESPENSA)[number];
@@ -184,6 +191,12 @@ export const MENSAJES_DESPENSA: Record<
   recurrencia_no_existe:        'No encontramos esa compra recurrente.',
   no_es_tu_recurrencia:         'Esa compra recurrente no es tuya.',
   pasarela_no_afiliada:         'El cobro automático se activa cuando esté el medio de pago.',
+  composicion_estado_invalido:  'Ese estado de composición no existe.',
+  solo_epetplace_verifica:      'Verificar una composición es trabajo del equipo de e-PetPlace.',
+  composicion_presente_no_puede_ser_ausente: 'Este producto tiene composición declarada: no se puede marcar como sin composición.',
+  no_podes_tocar_este_producto: 'Este producto no es de tu catálogo.',
+  producto_no_existe:           'No encontramos ese producto.',
+  alergenos_requeridos:         'Falta decir qué alérgenos se entendieron.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
 };

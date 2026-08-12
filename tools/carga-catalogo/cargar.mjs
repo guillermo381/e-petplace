@@ -126,7 +126,35 @@ const OPCIONALES = [
   // coma. LA PRIMERA ES LA PORTADA (adjuntar_fotos_producto, la forma que
   // decide D-767). El cargador NO sube archivos: referencia lo ya subido.
   'fotos',
+  // 🔴 S96 (firma founder 12-ago, 2ª tanda): el estado de la composición —
+  // verificada · declarada_sin_verificar · ausente. SOLO la verificada puede
+  // callar en la superficie. Vacío = se DERIVA: con `ingredientes` presente,
+  // 'declarada_sin_verificar'; sin ellos, 'ausente'. NADA cae en 'verificada'
+  // por omisión: verificar es un acto explícito de e-PetPlace, y este archivo
+  // lo AVISA fila por fila cuando alguien lo declara.
+  'composicion_estado',
+  // 🔴 S96 (firma founder 12-ago, 3ª tanda): DE QUÉ MERCADO es la ficha de
+  // composición — 'EC' hoy, o 'global' (ficha del fabricante). El fabricante
+  // formula por planta y por mercado (caso Royal Canin Hepatic: la ficha EC
+  // declara hígado de ave; la británica no). `verificada` SIN mercado real
+  // REBOTA — la global no sostiene una verificación.
+  'composicion_mercado',
 ]
+
+// `no_aplica` (4º estado, firma 12-ago): la composición no es una categoría
+// que aplique — las arenas sanitarias. SIEMPRE explícito, jamás derivado.
+const ESTADOS_COMPOSICION = ['verificada', 'declarada_sin_verificar', 'ausente', 'no_aplica']
+
+// S96: sinónimos de carga → el código canónico del vocabulario. moluscos y
+// crustáceos son UNA entrada por firma founder (reactividad cruzada —
+// partirlos crea el caso de declarar uno y callar el otro).
+const SINONIMOS_ALERGENO = {
+  moluscos: 'moluscos_crustaceos',
+  crustaceos: 'moluscos_crustaceos',
+  crustáceos: 'moluscos_crustaceos',
+  mariscos: 'moluscos_crustaceos',
+  salmón: 'salmon',
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔴 LOS DOS VOCABULARIOS CERRADOS (S95-J / S95-J2)
@@ -204,9 +232,18 @@ function main() {
   const impuestos = sql(
     `select codigo from cat_tasas_impuesto where activo order by codigo;`
   ).map((r) => r.codigo)
+  // S96 (firma 12-ago, 3ª tanda): el vocabulario de alérgenos es DATO —
+  // ampliar = un INSERT en cat_alergenos, y este archivo lo lee vivo.
+  const alergenosValidos = sql(
+    `select codigo from cat_alergenos where activo order by codigo;`
+  ).map((r) => r.codigo)
+  const mercados = sql(
+    `select country_code from country_config order by country_code;`
+  ).map((r) => r.country_code)
 
   console.log(`Familias vivas:  ${familias.join(' · ')}`)
-  console.log(`Códigos de tasa: ${impuestos.join(' · ')}\n`)
+  console.log(`Códigos de tasa: ${impuestos.join(' · ')}`)
+  console.log(`Alérgenos:       ${alergenosValidos.join(' · ')}\n`)
 
   // ── La cuenta tiene que ser vendedora ──────────────────────────────────
   //    En ENSAYO es un AVISO, no un freno: hoy la cuenta del vendedor todavía
@@ -290,6 +327,7 @@ function main() {
   }
 
   const resultados = []
+  const avisos = []  // S96: no frenan la carga — le hablan a quien cura
   const skusVistos = new Map()
   const variantesVistas = new Map()
 
@@ -347,6 +385,82 @@ function main() {
       motivos.push(`precio_venta "${f.precio_venta}" no es un número mayor a cero`)
     }
 
+    // ── S96 · el estado de composición (firma 12-ago) ──────────────────────
+    if (f.composicion_estado && !ESTADOS_COMPOSICION.includes(f.composicion_estado)) {
+      motivos.push(
+        `composicion_estado "${f.composicion_estado}" no existe. ` +
+        `Válidos: ${ESTADOS_COMPOSICION.join(' · ')} — y vacío se deriva solo`,
+      )
+    }
+    // La derivación DEFENSIVA: sin declaración explícita, con ingredientes es
+    // 'declarada_sin_verificar' y sin ellos 'ausente'. Jamás 'verificada'.
+    f._compoEstado = f.composicion_estado ||
+      (lista(f.ingredientes).length > 0 ? 'declarada_sin_verificar' : 'ausente')
+    if (f.composicion_estado === 'verificada') {
+      avisos.push(
+        `L${f._linea} declara composicion_estado=VERIFICADA (${f.marca} — ${f.producto}): ` +
+        `es una afirmación de e-PetPlace de que la lista de alérgenos se cotejó ` +
+        `contra la composición. Si nadie la cotejó, sacala: la verificada es la única que CALLA`,
+      )
+    }
+    if (['ausente', 'no_aplica'].includes(f.composicion_estado) && lista(f.ingredientes).length > 0) {
+      motivos.push(
+        `composicion_estado "${f.composicion_estado}" con ingredientes declarados: sería ` +
+        'negar una composición que está (la base también lo rebota). ' +
+        'Para "ausente", dejalo vacío y se deriva solo',
+      )
+    }
+    // COROLARIO de la misma firma: la advertencia se dispara por COMPOSICIÓN,
+    // jamás por nombre — y el nombre tampoco exime. Medido en el catálogo
+    // real: 10 productos "hypoallergenic/sensitive" llevan alérgeno común.
+    if (/hypo|allerg|hipoalerg|sensitive|sensible/i.test(f.producto || '') &&
+        f.alergenos && f.alergenos.toLowerCase() !== 'ninguno') {
+      avisos.push(
+        `L${f._linea} "${f.producto}": el nombre promete piel/estómago sensible y la ` +
+        `composición declara "${f.alergenos}". No es un error de carga — es el recordatorio ` +
+        `de que la advertencia sale de la COMPOSICIÓN y el nombre no es una dieta de eliminación`,
+      )
+    }
+
+    // ── S96 · 3ª tanda: el vocabulario de alérgenos y el mercado ───────────
+    // El alérgeno se valida contra `cat_alergenos` VIVO (la base lo rebota
+    // igual — acá se rebota HABLANDO y con el camino de ampliación escrito).
+    f._alergenos = f.alergenos && f.alergenos.toLowerCase() !== 'ninguno'
+      ? lista(f.alergenos).map((a) => {
+          const t = a.toLowerCase().trim()
+          return SINONIMOS_ALERGENO[t] ?? t
+        })
+      : []
+    const desconocidos = f._alergenos.filter((a) => !alergenosValidos.includes(a))
+    if (desconocidos.length > 0) {
+      motivos.push(
+        `alérgeno(s) ${desconocidos.map((x) => `"${x}"`).join(', ')} fuera del vocabulario. ` +
+        `Vigente: ${alergenosValidos.join(' · ')}. Ampliarlo es un INSERT en cat_alergenos ` +
+        `(con firma de curaduría), no una migración — pero se amplía ANTES de cargar, no callando`,
+      )
+    }
+    if (f.composicion_mercado &&
+        f.composicion_mercado !== 'global' && !mercados.includes(f.composicion_mercado)) {
+      motivos.push(
+        `composicion_mercado "${f.composicion_mercado}" no es un país configurado ` +
+        `(${mercados.join(' · ')}) ni "global"`,
+      )
+    }
+    // 🔴 LA REGLA DURA de la firma: verificada exige saber CONTRA QUÉ FICHA —
+    // y la ficha global del fabricante NO alcanza (caso Royal Canin Hepatic).
+    if (f.composicion_estado === 'verificada' && !f.composicion_mercado) {
+      motivos.push(
+        'composicion_estado "verificada" sin composicion_mercado: una verificación ' +
+        'sin ficha de mercado no afirma nada — declarar contra qué ficha se cotejó (hoy: EC)',
+      )
+    }
+    if (f.composicion_estado === 'verificada' && f.composicion_mercado === 'global') {
+      motivos.push(
+        'composicion_estado "verificada" contra ficha "global": el fabricante formula ' +
+        'por mercado — la global cae en declarada_sin_verificar, no en verificada',
+      )
+    }
+
     // Duplicados DENTRO del archivo: se cazan acá, no en la base.
     if (f.sku_vendedor) {
       if (skusVistos.has(f.sku_vendedor)) {
@@ -385,8 +499,8 @@ function main() {
         tallas_aplicables: f._tallas,
         momentos_aplicables: f._momentos,
         ingredientes_activos: lista(f.ingredientes),
-        // "ninguno" es la declaración explícita de ausencia ⇒ lista vacía.
-        alergenos: f.alergenos.toLowerCase() === 'ninguno' ? [] : lista(f.alergenos),
+        // Ya normalizados y validados contra cat_alergenos ("ninguno" ⇒ []).
+        alergenos: f._alergenos,
         es_dieta_prescripcion: ['si', 'sí', 'true', '1'].includes(String(f.dieta_prescripcion).toLowerCase()),
       },
       variante: {
@@ -410,19 +524,26 @@ function main() {
     })
 
     // Una fila → la fuente de la tanda. Las fotos van como jsonb o NULL; la
-    // primera es la portada (adjuntar_fotos_producto).
+    // primera es la portada (adjuntar_fotos_producto). El estado de
+    // composición viaja SOLO si el archivo lo declaró EXPLÍCITO: la
+    // derivación (con ingredientes → declarada_sin_verificar · sin →
+    // ausente · la verificada caduca si la composición cambia) ya la hace el
+    // trigger de la base — llamar a declarar con el derivado en cada
+    // re-corrida DEGRADARÍA una verificación viva de e-PetPlace.
     const valorFila = (r) => {
       const a = armar(r.f)
       const fotos = a.fotos.length ? `${jsonLit(a.fotos)}` : `NULL::jsonb`
+      const compo = r.f.composicion_estado ? lit(r.f.composicion_estado) : `NULL::text`
+      const mercado = r.f.composicion_mercado ? lit(r.f.composicion_mercado) : `NULL::text`
       return `(${r.f._linea}, ${jsonLit(a.producto)}, ${jsonLit(a.variante)}, ` +
-             `${jsonLit(a.sku)}, ${Number(r.f.precio_venta)}::numeric, ${fotos})`
+             `${jsonLit(a.sku)}, ${Number(r.f.precio_venta)}::numeric, ${fotos}, ${compo}, ${mercado})`
     }
 
     const consultaTanda = (grupo) =>
       `${claims}\n` +
-      `select t.linea, prop.r as propuesto, pub.r as publicado, fot.r as fotos\n` +
+      `select t.linea, prop.r as propuesto, pub.r as publicado, fot.r as fotos, dec.r as compo\n` +
       `from (values\n  ${grupo.map(valorFila).join(',\n  ')}\n` +
-      `) as t(linea, producto, variante, sku, precio, fotos)\n` +
+      `) as t(linea, producto, variante, sku, precio, fotos, compo, mercado)\n` +
       `cross join lateral (select proponer_sku_vendedor(${lit(cuenta)}, t.producto, t.variante, t.sku, 'epetplace') as r) prop\n` +
       `cross join lateral (select publicar_oferta_sku((prop.r->>'sku_id')::uuid, t.precio, 'EC') as r) pub\n` +
       // El producto_id sale del RETORNO de proponer, jamás de un subquery: un
@@ -431,7 +552,12 @@ function main() {
       `left join lateral (\n` +
       `  select case when t.fotos is not null then adjuntar_fotos_producto(\n` +
       `    (prop.r->>'producto_id')::uuid, t.fotos) end as r\n` +
-      `) fot on true;`
+      `) fot on true\n` +
+      `left join lateral (\n` +
+      `  select case when t.compo is not null or t.mercado is not null then\n` +
+      `    declarar_composicion_estado((prop.r->>'producto_id')::uuid, t.compo, t.mercado)\n` +
+      `  end as r\n` +
+      `) dec on true;`
 
     const asentar = (r, propuesto, publicado, fotos) => {
       r.estado = propuesto.creado.producto || propuesto.creado.variante || propuesto.creado.sku
@@ -467,6 +593,11 @@ function main() {
   }
 
   // ── Reporte ─────────────────────────────────────────────────────────────
+  if (avisos.length) {
+    console.log('─'.repeat(78))
+    console.log(`⚠️  ${avisos.length} aviso(s) — no frenan la carga, le hablan a quien cura:`)
+    for (const a of avisos) console.log(`   ${a}`)
+  }
   console.log('─'.repeat(78))
   for (const r of resultados) {
     const icono = { creado: '✅', actualizado: '🔄', rechazado: '🔴', pendiente: '·' }[r.estado]
@@ -478,6 +609,15 @@ function main() {
   console.log('─'.repeat(78))
 
   const cuenta_ = (e) => resultados.filter((r) => r.estado === e).length
+  // S96: la foto del estado de composición de lo válido — para que quien
+  // carga VEA cuánto catálogo va a decir su condición en la vitrina.
+  const porCompo = (e) => validos.filter((r) => r.f._compoEstado === e).length
+  console.log(
+    `composición → verificada ${porCompo('verificada')} · ` +
+    `declarada_sin_verificar ${porCompo('declarada_sin_verificar')} · ` +
+    `ausente ${porCompo('ausente')} · no_aplica ${porCompo('no_aplica')}` +
+    `   (callan la verificada y la no_aplica; las otras dos dicen su condición)`,
+  )
   if (aplicar) {
     console.log(`creados ${cuenta_('creado')} · actualizados ${cuenta_('actualizado')} · rechazados ${cuenta_('rechazado')}`)
   } else {

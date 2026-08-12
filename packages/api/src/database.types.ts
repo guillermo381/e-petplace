@@ -420,6 +420,62 @@ export type Database = {
           },
         ]
       }
+      alergia_entendimientos: {
+        Row: {
+          alergenos: string[]
+          id: string
+          mascota_id: string
+          producto_id: string
+          registrado_en: string
+          user_id: string
+        }
+        Insert: {
+          alergenos: string[]
+          id?: string
+          mascota_id: string
+          producto_id: string
+          registrado_en?: string
+          user_id: string
+        }
+        Update: {
+          alergenos?: string[]
+          id?: string
+          mascota_id?: string
+          producto_id?: string
+          registrado_en?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alergia_entendimientos_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alergia_entendimientos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alergia_entendimientos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alergia_entendimientos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_daas_eligible_users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       analytics_aggregated: {
         Row: {
           active_users: number | null
@@ -1072,6 +1128,66 @@ export type Database = {
             referencedColumns: ["cuenta_comercial_id"]
           },
         ]
+      }
+      cat_alergeno_relaciones: {
+        Row: {
+          alergeno_codigo: string
+          nota: string | null
+          relacionado_codigo: string
+          tipo: string
+        }
+        Insert: {
+          alergeno_codigo: string
+          nota?: string | null
+          relacionado_codigo: string
+          tipo: string
+        }
+        Update: {
+          alergeno_codigo?: string
+          nota?: string | null
+          relacionado_codigo?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_alergeno_relaciones_alergeno_codigo_fkey"
+            columns: ["alergeno_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_alergenos"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "cat_alergeno_relaciones_relacionado_codigo_fkey"
+            columns: ["relacionado_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_alergenos"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      cat_alergenos: {
+        Row: {
+          activo: boolean
+          codigo: string
+          created_at: string
+          nombre_es: string
+          nota: string | null
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          created_at?: string
+          nombre_es: string
+          nota?: string | null
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          created_at?: string
+          nombre_es?: string
+          nota?: string | null
+        }
+        Relationships: []
       }
       cat_bancos: {
         Row: {
@@ -11677,6 +11793,7 @@ export type Database = {
         Row: {
           country_code: string
           created_at: string
+          cuenta_comercial_id: string
           estado: string
           id: string
           moneda: string
@@ -11691,6 +11808,7 @@ export type Database = {
         Insert: {
           country_code?: string
           created_at?: string
+          cuenta_comercial_id: string
           estado?: string
           id?: string
           moneda?: string
@@ -11705,6 +11823,7 @@ export type Database = {
         Update: {
           country_code?: string
           created_at?: string
+          cuenta_comercial_id?: string
           estado?: string
           id?: string
           moneda?: string
@@ -11723,6 +11842,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "country_config"
             referencedColumns: ["country_code"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
           },
           {
             foreignKeyName: "ofertas_publicado_por_fkey"
@@ -14046,6 +14179,8 @@ export type Database = {
       productos: {
         Row: {
           alergenos: string[]
+          composicion_estado: string
+          composicion_mercado: string | null
           creado_por: string | null
           created_at: string
           descripcion: string | null
@@ -14066,6 +14201,8 @@ export type Database = {
         }
         Insert: {
           alergenos?: string[]
+          composicion_estado?: string
+          composicion_mercado?: string | null
           creado_por?: string | null
           created_at?: string
           descripcion?: string | null
@@ -14086,6 +14223,8 @@ export type Database = {
         }
         Update: {
           alergenos?: string[]
+          composicion_estado?: string
+          composicion_mercado?: string | null
           creado_por?: string | null
           created_at?: string
           descripcion?: string | null
@@ -19202,6 +19341,10 @@ export type Database = {
         }
         Returns: Json
       }
+      declarar_composicion_estado: {
+        Args: { p_estado?: string; p_mercado?: string; p_producto_id: string }
+        Returns: Json
+      }
       declarar_dia_cerrado: {
         Args: {
           p_cerrado: boolean
@@ -19364,6 +19507,14 @@ export type Database = {
       existe_invitacion_pendiente: {
         Args: { p_prestador_id: string }
         Returns: boolean
+      }
+      expandir_alergenos_a_vigilar: {
+        Args: { p_alergenos: string[] }
+        Returns: {
+          declarado: string
+          exacta: boolean
+          origen: string
+        }[]
       }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
       expirar_reservas_vencidas: { Args: never; Returns: Json }
@@ -20324,6 +20475,14 @@ export type Database = {
       }
       registrar_discrepancia_talla_grooming: {
         Args: { p_cita_id: string; p_talla_observada: string }
+        Returns: Json
+      }
+      registrar_entendimiento_alergia: {
+        Args: {
+          p_alergenos: string[]
+          p_mascota_id: string
+          p_producto_id: string
+        }
         Returns: Json
       }
       registrar_estado_pelaje_en_cierre: {
