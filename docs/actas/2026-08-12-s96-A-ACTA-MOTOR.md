@@ -157,7 +157,106 @@ toques a `packages/ui`, `apps/` ni a los docs vedados.**
 - **El gate en dispositivo** de todo lo de esta tanda es del founder o
   Karina, desde `e-PetPlace Negocios` — esta pista no lo declara.
 
+---
+
+# FASE 2 (mismo día) — LAS FIRMAS DE LA TARDE Y LA CONDUCCIÓN
+
+> Nueve migraciones más (M11 → M19, 281 → 290 local = remoto), todas con
+> reversa ANTES y cinturón por camino real — **siete de nueve verdes a la
+> primera**; las dos que rebotaron, por columna no medida (regla 22, las dos
+> curadas midiendo). Juez: **47 invariantes, 46 verdes · 1 rojo heredado**
+> (inv. 10 / D-760, sin cambio).
+
+## 9 · Las firmas del founder de la tarde, ejecutadas
+
+| Firma | Ejecución |
+|---|---|
+| **Tres → CUATRO estados de composición** (solo `verificada` calla; después `no_aplica` — el silencio de «no hay dato faltante», las seis arenas) | M11 + M17: columna con CHECK, backfill honesto de las 6 vivas a `declarada_sin_verificar`, trigger de coherencia (lo que llega con composición no entra callado; lo falsado baja solo), puerta `declarar_composicion_estado` |
+| **La verificación es contra la ficha del PAÍS** (caso Royal Canin Hepatic: la ficha EC declara hígado de ave, la británica no) | M14: `composicion_mercado` + CHECK «verificada exige mercado real» + la caducidad mira el mercado. *Mata el supuesto no escrito de que un SKU es un producto* |
+| **El vocabulario de alérgenos: 23 entradas CON RELACIONES como dato** (242/456 productos declaraban alérgenos que el motor no sostenía — el motor de alergias estaba apagado en la práctica) | M15 + M16: `cat_alergenos` (ampliar = INSERT, jamás migración — la forma se eligió MIDIENDO que viene una segunda tanda) + `cat_alergeno_relaciones` (`es_un` exacta · `puede_ser` imprecisa) + trigger de parejas prohibidas (pollo/pavo/pato jamás se agrupan — la dieta de eliminación vive) + `expandir_alergenos_a_vigilar` con `exacta: boolean` — **la imprecisión SE DICE** |
+| **Las raciones NO salen en v1** | Letra (§7.3 gateada) + contrato regla 11. Cero motor lo calculaba (medido) |
+| **Los seis del lanzamiento POR SKU** + **TOW no se carga hasta foto de bolsa** | `MODELO_DESPENSA` §4.3 — **los seis se MIDIERON de la base** (la prosa no los tenía) y la medición corrigió DOS identificaciones de la reconstrucción: el Pro Pac con pollo es el **Puppy 2.3 kg** (no la adulta 12,7 elegida entre nueve) y «$122» era ambiguo entre DOS productos |
+| **Ficha del splash del cliente AHORA, cura cuando D cierre** | D-782 depositada (número verificado libre) |
+
+## 10 · Lo que las pistas trajeron y el motor absorbió el mismo día
+
+- **El bloqueante de D** (el cliente no sabía a quién compraba): M12 —
+  `ofertas.cuenta_comercial_id` DERIVADA por trigger (ningún escritor la
+  puede errar), NOT NULL, y los lectores la exponen. El checkout dejó de ser
+  inconstructible.
+- **El productor del entendimiento de §5.4** (hueco medido por D): M13 —
+  `alergia_entendimientos` append-only POR ESTRUCTURA + M18 (el juez 45 cazó
+  el grant heredado del default privilege — L-140 en forma de tabla; la RLS
+  ya bloqueaba, el grant sobraba).
+- **La expiración de cabeceras sin pago** (hallazgo estructural de C en vara
+  cruzada, co-firmado por D): M19 — y al medirla apareció algo peor: **la
+  máquina ni tenía la transición `creado → cancelado_sistema`**. La garantía
+  anti-huérfanos vive en el MOTOR; el beforeRemove de D queda como cortesía.
+  *Un proceso muerto no ejecuta ningún beforeRemove.*
+- **Los dos huecos del panel de C**: `SkuDelVendedor` con nombre/marca/
+  presentación y `precio_publicado` (null honesto). Su aditivo
+  `despensa-panel-extra.ts` **FIRMADO COMO ADITIVO** tras revisión por
+  contenido — el precedente de contrato congelado que la mesa pidió
+  registrar.
+- **Los pedidos ②③ de D**: `country_code` en la ficha (enmienda D-448
+  depositada — el disparo ganó forma) e `instrucciones` de vuelta en el
+  detalle.
+
+## 11 · Conducción (lo que pasó por la mesa de A)
+
+- **Tres pushes de conducción** con verificación por contenido COMMIT POR
+  COMMIT y censo de consumidores antes de cada uno: `9ee6a179..16e6a5bd`
+  (6 de B — la corrección de B a D: eran seis, no dos) ·
+  `16e6a5bd..8df27b85` (SelectorVentana) · `8df27b85..48571f51`
+  (AvisoAlergia v3). Censo de AvisoAlergia en el ensanche: **cero
+  consumidores rotos** (solo el WIP declarado de D).
+- **La secuencia de la marca, firmada y en pie:** merge de `pista/s96-c` →
+  aviso a B con el hash (baja el baseline de R35 a 0) → **BUILD 1.0.5** →
+  gate en dispositivo sobre ese binario → recién ahí OTA. El rojo caso ② de
+  `verify-ota` entre merge y build es CORRECTO. **El bump 1.0.4 → 1.0.5 lo
+  cazó C midiendo** (el splash nativo viaja en build — L-134): sin él, el
+  primer OTA de marca habría pintado teal sobre azul nativo — *la costura
+  que la marca venía a cerrar.*
+- **La regla del baseline, para el canon:** B NO bajó R35 a 0 aunque C se lo
+  pidió — midió que el residuo seguía en `main` (el «0» de C era su
+  worktree). *Un baseline es un TECHO: bajarlo antes de que el piso baje
+  fabrica un rojo que no es de nadie. El contador se lee del árbol donde va
+  a correr, no del árbol donde se trabajó.*
+- **🎯 LA COINCIDENCIA TRIPLE SIN COORDINACIÓN — la medición que prueba que
+  la letra está bien escrita, tres veces en un día:** la unión de tres
+  estados de B salió idéntica al CHECK de A · el contrato de `FilaEntrega`
+  de B salió idéntico a `EntregaAsignada` de A (cero mascota, cero pedido) ·
+  y D llegó a «decir el porqué en vez de esconderlo» desde su checkout
+  mientras B lo hacía en el selector de ventana. **Tres capas distintas
+  leyendo la misma letra y sacando lo mismo, sin hablarse.**
+- **La vara cruzada M2 C→D funcionó:** C auditó la punta REAL de la rama de
+  D (`3e39e2f8` — un commit más que el anunciado) y devolvió ocho hallazgos
+  con literal, ninguno de arquitectura. *La partición C/D que se firmó como
+  choque contra el método se está pagando sola.*
+- **Candidata de lección (B, en Isotipo):** el JSDoc llamaba «tinta» a
+  `#1D1A2E` y `palette.tinta` es `#221E19` — sustituir por el token que
+  comparte el NOMBRE habría cambiado la marca sin que ningún gate lo viera.
+  *El nombre del token no es el token* (la clase L-166, en tokens).
+- **Worktree propio abierto** (`pista/s96-a`) — la orden de la mesa tras el
+  envenenamiento del hook de B por mi regeneración de tipos (D-769). Los
+  tipos ahora se regeneran AISLADOS.
+
+## 12 · Lo que queda abierto al cierre de la fase 2
+
+- **La elevación de la separación catálogo canónico / oferta — SERVIDA**
+  (`docs/relevamientos/2026-08-12-s96-a-elevacion-catalogo-canonico.md`):
+  tres opciones con costo; voto de A: separar AHORA (una tanda), antes de la
+  carga real. **Nada migró — espera firma.**
+- 🔴 La carga del catálogo espera la **recategorización de Cowork** sobre el
+  vocabulario ya firmado (las migraciones que la bloqueaban están APLICADAS).
+- La secuencia de la marca: **merge de C → build 1.0.5 → gate** (en curso al
+  escribir esto).
+- El rojo heredado (inv. 10 / D-760) · **D-776** hasta el primer barrido
+  real · el gate en dispositivo de TODO lo de S96 (founder o Karina).
+
 ## Historial
 
+- **v1.1 (12-ago-2026, tarde):** fase 2 — las firmas de la tarde (M11→M19),
+  la conducción y lo abierto.
 - **v1.0 (12-ago-2026):** depositada al cerrar la fase 1 (motor), antes de
   pasar a conducción. Escrita por la pista A — la única que escribe `docs/`.

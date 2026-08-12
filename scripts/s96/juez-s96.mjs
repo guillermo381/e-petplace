@@ -1239,6 +1239,151 @@ invariante(40, 'S96 · Direcciones: places_id + instrucciones + punto obligatori
   return { ok: detalle.length === 0, detalle };
 });
 
+// ── S96 · SEGUNDA Y TERCERA TANDA (firmas founder 12-ago): la composición
+//    con tres estados y mercado, el vendedor de la oferta, el entendimiento
+//    y el vocabulario de alérgenos ────────────────────────────────────────────
+
+invariante(41, '🔴 S96 · Composición: CUATRO estados, callan solo verificada y no_aplica, verificada exige mercado real', () => {
+  const detalle = [];
+  const chk = dbQuery(`SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE conname='chk_composicion_estado'`);
+  if (!chk.length) detalle.push('falta el CHECK del vocabulario de estados');
+  else for (const v of ['verificada', 'declarada_sin_verificar', 'ausente', 'no_aplica']) {
+    if (!chk[0].def.includes(`'${v}'`)) detalle.push(`el CHECK no contempla '${v}'`);
+  }
+  if (!dbQuery(`SELECT 1 FROM pg_constraint WHERE conname='chk_verificada_exige_mercado'`).length) {
+    detalle.push('verificada sin mercado es expresable — el caso Royal Canin Hepatic sigue abierto');
+  }
+  if (!dbQuery(`SELECT 1 FROM pg_constraint WHERE conname='chk_no_aplica_sin_composicion'`).length) {
+    detalle.push('no_aplica con ingredientes es expresable — negar una composición que está');
+  }
+  // El DATO, no solo la forma: nada con composición niega tenerla, nada
+  // verificada quedó sin ficha de país (la global no sostiene).
+  const incoherentes = dbQuery(`SELECT count(*) AS n FROM productos
+    WHERE (ingredientes_activos <> '{}' AND composicion_estado IN ('ausente','no_aplica'))
+       OR (composicion_estado = 'verificada'
+           AND (composicion_mercado IS NULL OR composicion_mercado = 'global'))`);
+  if (Number(incoherentes[0]?.n) !== 0) detalle.push(`${incoherentes[0].n} productos con estado incoherente`);
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(47, '🔴 S96 · Las RELACIONES de alérgenos son DATO: ave advierte imprecisa, la dieta de eliminación vive', () => {
+  const detalle = [];
+  if (!tablasQueExisten(['cat_alergeno_relaciones']).length) {
+    detalle.push('cat_alergeno_relaciones no existe — la relación vive en código o no vive');
+    return { ok: false, detalle };
+  }
+  // El caso de la firma, medido EJECUTANDO la expansión (no leyendo seeds):
+  const ave = dbQuery(`SELECT exacta FROM expandir_alergenos_a_vigilar(ARRAY['pollo'])
+    WHERE declarado='ave_no_especificada'`);
+  if (!ave.length) detalle.push('ave_no_especificada NO advierte al alérgico a pollo — el motor calla');
+  else if (ave[0].exacta === true || ave[0].exacta === 't') {
+    detalle.push('la advertencia de ave salió EXACTA — «contiene pollo» sería mentir');
+  }
+  const eliminacion = dbQuery(`SELECT count(*) AS n FROM expandir_alergenos_a_vigilar(ARRAY['pollo'])
+    WHERE declarado IN ('pavo','pato')`);
+  if (Number(eliminacion[0]?.n) !== 0) detalle.push('pavo/pato advierten al alérgico a pollo — la dieta de eliminación murió');
+  if (!dbQuery(`SELECT 1 FROM pg_trigger WHERE tgname='trg_alergeno_relacion_prohibida' AND NOT tgisinternal`).length) {
+    detalle.push('nada protege lo que jamás se agrupa (pollo/pavo/pato · insectos/moluscos)');
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(42, 'S96 · La verificación CADUCA si cambia la composición o el mercado (trigger, no disciplina)', () => {
+  const detalle = [];
+  if (!dbQuery(`SELECT 1 FROM pg_trigger WHERE tgname='trg_producto_composicion_estado' AND NOT tgisinternal`).length) {
+    detalle.push('el trigger de coherencia no existe');
+  }
+  const def = dbQuery(`SELECT pg_get_functiondef(p.oid) AS d FROM pg_proc p
+    JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='_trg_producto_composicion_estado'`);
+  const cuerpo = def[0]?.d ?? '';
+  // Se mide CÓDIGO (asignación y condición), no comentarios (L-170).
+  if (!/NEW\.composicion_estado := 'declarada_sin_verificar'/.test(cuerpo)) {
+    detalle.push('el trigger no baja la verificación caducada');
+  }
+  if (!/composicion_mercado IS DISTINCT FROM/.test(cuerpo)) {
+    detalle.push('la caducidad no mira el MERCADO — una verificación de otra ficha sobrevive');
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(43, 'S96 · La puerta del estado: UNA firma, verificar es de e-PetPlace, la global rebota hablando', () => {
+  const detalle = [];
+  const firmas = dbQuery(`SELECT count(*) AS n FROM pg_proc p JOIN pg_namespace ns ON ns.oid=p.pronamespace
+    WHERE ns.nspname='public' AND p.proname='declarar_composicion_estado'`);
+  if (Number(firmas[0]?.n) !== 1) detalle.push(`${firmas[0]?.n} firmas de declarar_composicion_estado (L-119: tiene que haber UNA)`);
+  const def = dbQuery(`SELECT pg_get_functiondef(p.oid) AS d FROM pg_proc p
+    JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='declarar_composicion_estado' LIMIT 1`);
+  const cuerpo = def[0]?.d ?? '';
+  if (!/RAISE EXCEPTION 'solo_epetplace_verifica/.test(cuerpo)) detalle.push('cualquiera puede verificar');
+  if (!/RAISE EXCEPTION 'verificada_exige_mercado/.test(cuerpo)) detalle.push('verificada sin mercado no rebota hablando');
+  const anon = dbQuery(`SELECT has_function_privilege('anon',
+    'public.declarar_composicion_estado(uuid,text,text)'::regprocedure, 'EXECUTE') AS p`);
+  if (anon[0]?.p === true || anon[0]?.p === 't') detalle.push('anon puede ejecutar la puerta (L-140)');
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(44, '🔴 S96 · La oferta DICE su vendedor: derivado por trigger, NOT NULL, legible por el cliente', () => {
+  const detalle = [];
+  const col = dbQuery(`SELECT is_nullable FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='ofertas' AND column_name='cuenta_comercial_id'`);
+  if (!col.length) detalle.push('la columna no existe — el checkout del cliente es inconstructible');
+  else if (col[0].is_nullable !== 'NO') detalle.push('la columna admite NULL');
+  if (!dbQuery(`SELECT 1 FROM pg_trigger WHERE tgname='trg_oferta_estampa_vendedor' AND NOT tgisinternal`).length) {
+    detalle.push('nadie deriva la cuenta del sku — un escritor la puede errar');
+  }
+  const div = dbQuery(`SELECT count(*) AS n FROM ofertas o JOIN vendedor_skus vs ON vs.id=o.sku_id
+    WHERE o.cuenta_comercial_id <> vs.cuenta_comercial_id`);
+  if (Number(div[0]?.n) !== 0) detalle.push(`${div[0].n} ofertas divergen de su sku`);
+  const sel = dbQuery(`SELECT pg_get_expr(polqual, polrelid) AS q FROM pg_policy
+    WHERE polrelid='public.ofertas'::regclass AND polname='ofertas_select'`);
+  if ((sel[0]?.q ?? '') !== 'true') detalle.push('ofertas_select dejó de ser pública — el cliente no puede leer a quién compra');
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(45, 'S96 · El entendimiento de alergia QUEDA registrado: append-only por estructura, del dueño', () => {
+  const detalle = [];
+  if (!tablasQueExisten(['alergia_entendimientos']).length) {
+    detalle.push('la tabla no existe — el paso de §5.4 sigue sin productor');
+    return { ok: false, detalle };
+  }
+  const rls = dbQuery(`SELECT relrowsecurity FROM pg_class WHERE oid='public.alergia_entendimientos'::regclass`);
+  if (rls[0]?.relrowsecurity !== true && rls[0]?.relrowsecurity !== 't') detalle.push('sin RLS');
+  const mal = dbQuery(`SELECT polcmd, count(*) AS n FROM pg_policy
+    WHERE polrelid='public.alergia_entendimientos'::regclass AND polcmd IN ('w','d')
+    GROUP BY polcmd`);
+  if (mal.length) detalle.push('existen policies de UPDATE/DELETE — el registro dejó de ser evidencia');
+  for (const priv of ['UPDATE', 'DELETE', 'INSERT']) {
+    const g = dbQuery(`SELECT has_table_privilege('authenticated', 'public.alergia_entendimientos', '${priv}') AS p`);
+    if (g[0]?.p === true || g[0]?.p === 't') detalle.push(`authenticated tiene ${priv} por grant — la puerta es la función`);
+  }
+  if (!dbQuery(`SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='registrar_entendimiento_alergia'`).length) {
+    detalle.push('la puerta registrar_entendimiento_alergia no existe');
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(46, '🔴 S96 · El vocabulario de alérgenos es DATO: cat_alergenos vivo, moluscos_crustaceos adentro, productos adentro del vocabulario', () => {
+  const detalle = [];
+  if (!tablasQueExisten(['cat_alergenos']).length) {
+    detalle.push('cat_alergenos no existe — ampliar el vocabulario vuelve a ser una migración');
+    return { ok: false, detalle };
+  }
+  const mc = dbQuery(`SELECT activo FROM cat_alergenos WHERE codigo='moluscos_crustaceos'`);
+  if (!mc.length || (mc[0].activo !== true && mc[0].activo !== 't')) {
+    detalle.push('moluscos_crustaceos no está (o no activo) — el húmedo de gato calla sobre lo que su etiqueta declara');
+  }
+  if (!dbQuery(`SELECT 1 FROM pg_trigger WHERE tgname='trg_producto_alergenos_vocabulario' AND NOT tgisinternal`).length) {
+    detalle.push('nada valida los alérgenos del producto contra el vocabulario');
+  }
+  const fuera = dbQuery(`SELECT count(*) AS n FROM (SELECT unnest(alergenos) AS a FROM productos) t
+    WHERE NOT EXISTS (SELECT 1 FROM cat_alergenos c WHERE c.codigo=t.a AND c.activo)`);
+  if (Number(fuera[0]?.n) !== 0) detalle.push(`${fuera[0].n} alérgenos vivos fuera del vocabulario`);
+  return { ok: detalle.length === 0, detalle };
+});
+
 // ── Veredicto ───────────────────────────────────────────────────────────────
 console.log('\n════════════════════════════════════════════════════════════════════');
 console.log('  EL JUEZ DE LA DESPENSA — S96');

@@ -154,3 +154,96 @@ es L-139, no un accidente: el vendedor se configura solo (§2.1).
 la primera es la portada), stock inicial, TANDAS de 20 filas por viaje con
 reintento fila-por-fila, idempotente, ensayo por defecto. Jamás escribe una
 tabla directo.
+
+---
+
+## 6 · ADDENDUM 12-ago (firmas founder POSTERIORES al congelado — agregan, no cambian)
+
+> Las firmas de arriba siguen congeladas e intactas. Esto es lo que la mesa
+> firmó DESPUÉS de publicado el contrato, construido por la pista A el mismo
+> día. Fuente de verdad: la base viva; letra: `MODELO_DESPENSA` v2.3 §4.3/§6/§7.3/§10.
+
+### La composición (M11 · M14 · M17)
+
+- **`productos.composicion_estado`** — CUATRO estados verbatim:
+  `'verificada' | 'declarada_sin_verificar' | 'ausente' | 'no_aplica'`
+  (= `ComposicionEstado` de `@epetplace/api` = `EstadoComposicion` de
+  `@epetplace/ui`). **Callan solo `verificada` y `no_aplica`** — y son dos
+  silencios distintos. Viaja en `ProductoDeVitrina`, `FichaProducto` y la
+  recomendación. La verificación **caduca sola** si cambia composición,
+  alérgenos o mercado (trigger).
+- **`productos.composicion_mercado`** — de qué mercado es la ficha (`'EC'` ·
+  `'global'` · `null`). **`verificada` exige país real** (la global no
+  sostiene — CHECK + rebote hablado `verificada_exige_mercado`). En
+  `FichaProducto.composicion_mercado`.
+- RPC **`declarar_composicion_estado(p_producto_id, p_estado DEFAULT NULL, p_mercado DEFAULT NULL)`**
+  — `verificada` SOLO admin; el resto admin o vendedor con SKU. Errores:
+  `composicion_estado_invalido` · `solo_epetplace_verifica` ·
+  `composicion_presente_no_puede_ser_ausente` · `verificada_exige_mercado` ·
+  `mercado_invalido`.
+
+### El vocabulario de alérgenos (M15 · M16)
+
+- **`cat_alergenos`** (23 entradas, ampliar = INSERT) +
+  **`cat_alergeno_relaciones`** (`es_un` = advertencia EXACTA · `puede_ser` =
+  advertencia IMPRECISA). Trigger sobre `productos.alergenos`: valida contra
+  el catálogo y NORMALIZA (minúsculas). Parejas prohibidas EN EL MODELO:
+  pollo/pavo/pato jamás se agrupan · insectos aparte de moluscos_crustaceos.
+- Wrapper **`expandirAlergenosAVigilar(alergenos)` → `AlergenoVigilado[]`**
+  (`{declarado, origen, exacta}`): la advertencia de búsqueda/ficha cruza
+  `declarado` contra `producto.alergenos` y arma la voz con `exacta` —
+  **false = «podría ser {origen}», jamás «contiene»; el tono NO baja.**
+- `recomendarParaMascota` excluye por el conjunto EXPANDIDO y su `criterio`
+  gana `alergenos_vigilados: AlergenoVigilado[]`.
+
+### El entendimiento de §5.4 (M13 · M18)
+
+- **`registrarEntendimientoAlergia(productoId, mascotaId, alergenos[])`** →
+  `{entendimiento_id}` — tabla append-only POR ESTRUCTURA (cero policies ni
+  grants de escritura; la puerta es la función, gated por
+  `_user_es_familia_de_mascota`). La pantalla decide cuándo re-preguntar;
+  lectura de los propios por RLS.
+
+### El vendedor de la oferta (M12) — desbloqueante del checkout
+
+- **`ofertas.cuenta_comercial_id` NOT NULL, DERIVADA por trigger del sku**
+  (ningún escritor la estampa ni la puede errar). `ProductoDeVitrina` la trae
+  como `cuenta_comercial_id: string` (no-null) y `VarianteDeProducto` como
+  `cuenta_comercial_id: string | null` (+ `country_code: string | null` para
+  el riel de moneda). Es el `p_cuenta_comercial_id` que exigen
+  `crearPedidoDespensa` / `calcularPromesaDespensa` / `configurarRecurrencia`.
+
+### La expiración de cabeceras (M19)
+
+- **`expirar_pedidos_sin_pago()`** (solo backend, cron horario
+  `expirar-pedidos-sin-pago`): `creado`/`esperando_pago` sin actividad por
+  `app_config.pedido_sin_pago_expira_horas` (24) → `cancelado_sistema` POR LA
+  MÁQUINA, liberando sus reservas por el ledger en el mismo acto. Nació la
+  transición `creado → cancelado_sistema` (actor sistema) que NO EXISTÍA.
+  **La guarda del cliente (beforeRemove de D) queda como cortesía: la
+  garantía vive en el motor.**
+
+### El detalle del pedido y el panel
+
+- `DetallePedido`: cada línea gana **`destino: {mascota_id, donacion} | null`**
+  (null = sin atar → ofrecer `atarItemAMascota`) y la entrega gana
+  **`instrucciones`** (vuelve al leer, no solo viaja al crear).
+- `SkuDelVendedor` gana **`producto_nombre` · `producto_marca` ·
+  `presentacion` · `precio_publicado: number | null`** (null honesto = sin
+  oferta publicada — la pantalla lo dice, no inventa precio).
+- El aditivo de C (`despensa-panel-extra.ts`, 76(c)) queda **FIRMADO COMO
+  ADITIVO** — revisado por contenido: lecturas bajo RLS medida, cero columnas
+  de mascota. Precedente de la casa para contrato congelado.
+
+### Reglas nuevas que las pantallas NO pueden romper
+
+8. **Solo `verificada` y `no_aplica` callan sobre la composición** — las
+   otras dos dicen su condición, en TODA superficie (juez 41).
+9. **La advertencia se dispara por COMPOSICIÓN, jamás por nombre** — hay 10
+   «hypoallergenic» con alérgeno común; el nombre no es una dieta de
+   eliminación.
+10. **La advertencia imprecisa SE DICE imprecisa y su tono NO baja**: si esa
+    proteína ES pollo, le hace igual de mal (juez 47).
+11. **Las RACIONES no se muestran en v1** — ni heredadas ni calculadas; manda
+    la etiqueta del fabricante y el veterinario. El campo puede existir;
+    ninguna superficie lo consume.
