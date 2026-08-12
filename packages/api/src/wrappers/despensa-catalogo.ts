@@ -62,6 +62,14 @@ export interface AlergenoVigilado {
   /** true = coincidencia o `es_un` (bisonte ES res) → «contiene».
    *  false = `puede_ser` (ave podría ser pollo) → «podría ser». */
   exacta: boolean;
+  /** La VOZ del catálogo (`cat_alergenos.nombre_es`) — «Proteína de ave sin
+   *  especificar», no «ave_no_especificada». El helper del cliente deja de
+   *  degradar guiones (pedido D, 12-ago). */
+  declarado_nombre: string;
+  /** La voz del origen. Si el alérgeno del EXPEDIENTE no está en el
+   *  vocabulario (texto libre del vet), conserva SU texto — no se le
+   *  inventa voz. */
+  origen_nombre: string;
 }
 
 export interface ProductoDeVitrina {
@@ -557,7 +565,13 @@ export async function recomendarParaMascota(
           typeof v.origen !== 'string' || typeof v.exacta !== 'boolean') {
         return falloDespensa('datos_inconsistentes');
       }
-      vigilados.push({ declarado: v.declarado, origen: v.origen, exacta: v.exacta });
+      vigilados.push({
+        declarado: v.declarado,
+        origen: v.origen,
+        exacta: v.exacta,
+        declarado_nombre: typeof v.declarado_nombre === 'string' ? v.declarado_nombre : v.declarado,
+        origen_nombre: typeof v.origen_nombre === 'string' ? v.origen_nombre : v.origen,
+      });
     }
     // ANTE LA DUDA NO SE OFRECE: si la expansión volvió vacía teniendo
     // alérgenos documentados, algo está roto — y roto acá significa
@@ -668,7 +682,42 @@ export async function expandirAlergenosAVigilar(
         typeof v.origen !== 'string' || typeof v.exacta !== 'boolean') {
       return falloDespensa('datos_inconsistentes');
     }
-    salida.push({ declarado: v.declarado, origen: v.origen, exacta: v.exacta });
+    salida.push({
+      declarado: v.declarado,
+      origen: v.origen,
+      exacta: v.exacta,
+      declarado_nombre: typeof v.declarado_nombre === 'string' ? v.declarado_nombre : v.declarado,
+      origen_nombre: typeof v.origen_nombre === 'string' ? v.origen_nombre : v.origen,
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+/**
+ * EL VOCABULARIO DE ALÉRGENOS CON SU VOZ — `cat_alergenos` vivo (código +
+ * `nombre_es`). Un fetch cacheable por la pantalla; sirve a la vitrina, la
+ * ficha y la advertencia por igual (pedido D, 12-ago: su `vozAlergeno` pasa
+ * de degradación a lector con esto).
+ */
+export async function listarAlergenos(): Promise<
+  ResultadoWrapper<{ codigo: string; nombre: string }[], CodigoErrorDespensa>
+> {
+  const { data, error } = await getClient()
+    .from('cat_alergenos')
+    .select('codigo, nombre_es')
+    .eq('activo', true)
+    .order('codigo');
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+  const salida: { codigo: string; nombre: string }[] = [];
+  for (const a of data) {
+    if (!esObjDespensa(a) || typeof a.codigo !== 'string') {
+      return falloDespensa('datos_inconsistentes');
+    }
+    salida.push({
+      codigo: a.codigo,
+      nombre: typeof a.nombre_es === 'string' ? a.nombre_es : a.codigo,
+    });
   }
   return { ok: true, data: salida };
 }

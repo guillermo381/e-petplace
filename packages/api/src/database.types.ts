@@ -19512,11 +19512,14 @@ export type Database = {
         Args: { p_alergenos: string[] }
         Returns: {
           declarado: string
+          declarado_nombre: string
           exacta: boolean
           origen: string
+          origen_nombre: string
         }[]
       }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
+      expirar_pedidos_sin_pago: { Args: never; Returns: Json }
       expirar_reservas_vencidas: { Args: never; Returns: Json }
       fijar_fecha_procedimiento: {
         Args: {
