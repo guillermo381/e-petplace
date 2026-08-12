@@ -4687,6 +4687,7 @@ export type Database = {
       envios: {
         Row: {
           bodega_id: string | null
+          codigo_verificacion: string | null
           costo_envio: number | null
           country_code: string
           created_at: string
@@ -4698,6 +4699,8 @@ export type Database = {
           entrega_hora_inicio: string | null
           entrega_programada: string | null
           entregado_en: string | null
+          entregado_por_documento: string | null
+          entregado_por_nombre: string | null
           estado: string
           id: string
           intentos_entrega: number
@@ -4716,10 +4719,12 @@ export type Database = {
           tracking_url: string | null
           transportista: string
           updated_at: string
+          verificado_en: string | null
           zona_cobertura_id: string | null
         }
         Insert: {
           bodega_id?: string | null
+          codigo_verificacion?: string | null
           costo_envio?: number | null
           country_code?: string
           created_at?: string
@@ -4731,6 +4736,8 @@ export type Database = {
           entrega_hora_inicio?: string | null
           entrega_programada?: string | null
           entregado_en?: string | null
+          entregado_por_documento?: string | null
+          entregado_por_nombre?: string | null
           estado?: string
           id?: string
           intentos_entrega?: number
@@ -4749,10 +4756,12 @@ export type Database = {
           tracking_url?: string | null
           transportista: string
           updated_at?: string
+          verificado_en?: string | null
           zona_cobertura_id?: string | null
         }
         Update: {
           bodega_id?: string | null
+          codigo_verificacion?: string | null
           costo_envio?: number | null
           country_code?: string
           created_at?: string
@@ -4764,6 +4773,8 @@ export type Database = {
           entrega_hora_inicio?: string | null
           entrega_programada?: string | null
           entregado_en?: string | null
+          entregado_por_documento?: string | null
+          entregado_por_nombre?: string | null
           estado?: string
           id?: string
           intentos_entrega?: number
@@ -4782,6 +4793,7 @@ export type Database = {
           tracking_url?: string | null
           transportista?: string
           updated_at?: string
+          verificado_en?: string | null
           zona_cobertura_id?: string | null
         }
         Relationships: [
@@ -18312,6 +18324,7 @@ export type Database = {
       convertir_horarios_a_por_servicio: { Args: never; Returns: Json }
       cotizar_envio_despensa: {
         Args: {
+          p_ciudad_destino?: string
           p_country_code?: string
           p_cuenta_comercial_id: string
           p_peso_fisico_kg?: number
@@ -18362,6 +18375,18 @@ export type Database = {
           p_modalidad?: string
           p_prestador_id: string
           p_servicio_id: string
+        }
+        Returns: Json
+      }
+      crear_bodega_vendedor: {
+        Args: {
+          p_ciudad: string
+          p_cuenta_comercial_id: string
+          p_direccion?: string
+          p_hora_corte?: string
+          p_horas_preparacion?: number
+          p_nombre: string
+          p_zona_horaria?: string
         }
         Returns: Json
       }
@@ -18553,6 +18578,17 @@ export type Database = {
       }
       declarar_talla_pelaje: {
         Args: { p_mascota_id: string; p_pelaje: string; p_talla: string }
+        Returns: Json
+      }
+      definir_regla_envio_vendedor: {
+        Args: {
+          p_ciudades_cubiertas?: string[]
+          p_cuenta_comercial_id: string
+          p_pagado_por?: string
+          p_parametros: Json
+          p_prioridad?: number
+          p_tipo: string
+        }
         Returns: Json
       }
       desactivar_rasgo_identidad_personal: {
@@ -19452,6 +19488,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      otorgar_rol_vendedor: {
+        Args: { p_cuenta_comercial_id: string; p_motivo?: string }
+        Returns: Json
+      }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
@@ -19874,6 +19914,7 @@ export type Database = {
       }
       test_sb1_transversales_genericas: { Args: never; Returns: Json }
       tomar_cita: { Args: { p_cita_id: string }; Returns: Json }
+      unaccent_simple: { Args: { p: string }; Returns: string }
       use_beta_invite: {
         Args: { p_beta_id: string; p_user_id: string }
         Returns: undefined

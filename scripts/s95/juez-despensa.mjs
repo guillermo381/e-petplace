@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// EL JUEZ DE LA DESPENSA — S95-C · S95-D · S95-E · S95-G (los 11 del esqueleto) + S95-D (los 7 del motor)
+// EL JUEZ DE LA DESPENSA — S95-C · S95-D · S95-E · S95-G · S95-G2 (los 11 del esqueleto) + S95-D (los 7 del motor)
 //
 // DIECIOCHO invariantes sacados de la letra (MODELO_DESPENSA v2.0,
 // BIO_EXPEDIENTE E2bis, MODELO_FINANCIERO §7-§8.10, MODELO_LOYALTY §3/§5/§7).
@@ -481,9 +481,14 @@ invariante(18, 'Ningún estado inactivo es alcanzable por el motor', () => {
   const lee = dbQuery(`
     SELECT (pg_get_functiondef(p.oid) ~ 'activo') mira
     FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-    WHERE n.nspname='public' AND p.proname='mover_estado_pedido'`)[0];
-  if (!lee) detalle.push('`mover_estado_pedido` no existe');
-  else if (!lee.mira) detalle.push('🔴 `mover_estado_pedido` no mira la bandera `activo`: los estados apagados son alcanzables y el catálogo es decorativo');
+    WHERE n.nspname='public' AND p.proname='_mover_estado_pedido'`)[0];
+  // 🔴 SE MIRA EL ANILLO INTERNO, y este cambio es del INSTRUMENTO, no del
+  //    test: desde S95-G la puerta pública `mover_estado_pedido` solo rechaza
+  //    el actor `sistema` y delega; la bandera `activo` la lee
+  //    `_mover_estado_pedido`. Apuntar a la pública daba ROJO contra código
+  //    correcto — un rojo por la razón equivocada.
+  if (!lee) detalle.push('`_mover_estado_pedido` no existe');
+  else if (!lee.mira) detalle.push('🔴 `_mover_estado_pedido` no mira la bandera `activo`: los estados apagados son alcanzables y el catálogo es decorativo');
 
   // Y todo estado apagado dice POR QUÉ.
   const sinMotivo = dbQuery(`
@@ -796,6 +801,94 @@ invariante(26, 'Los tipos generados están al día con la última migración', (
   const fnsPublicas = cuerposMotor().filter((f) => f.concedida && !f.proname.startsWith('_'));
   const fnFaltan = fnsPublicas.filter((f) => !tipos.includes(f.proname)).map((f) => f.proname);
   if (fnFaltan.length > 0) detalle.push(`funciones del motor sin tipos: ${fnFaltan.join(', ')}`);
+  return { ok: detalle.length === 0, detalle };
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S95-G2 · LOS DOS DEL ALTA DEL VENDEDOR (27 → 28)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── ㉗ Cero escrituras directas al alta del vendedor ─────────────────────────
+invariante(27, 'Cero escrituras directas a `cuenta_roles`, `reglas_envio` y `vendedor_bodegas`', () => {
+  const detalle = [];
+  // 🔴 SE MIDE POR ESTRUCTURA: la escritura directa no se prohíbe con una
+  //    convención, se vuelve IMPOSIBLE quitando la policy. Sin policy de
+  //    escritura, PostgREST no tiene por dónde entrar y la única vía queda
+  //    siendo la función DEFINER — que sí valida.
+  const abiertas = dbQuery(`
+    SELECT tablename, policyname, cmd FROM pg_policies
+    WHERE schemaname='public'
+      AND tablename IN ('reglas_envio','vendedor_bodegas')
+      AND cmd IN ('INSERT','UPDATE','DELETE','ALL')`);
+  for (const p of abiertas) {
+    detalle.push(`${p.tablename} tiene policy de ${p.cmd} (${p.policyname}): la función de alta es opcional`);
+  }
+  // `cuenta_roles` es distinta: su única policy de escritura es de ADMIN, que
+  // es exactamente quien otorga el rol. No se pide que no tenga ninguna —se
+  // pide que ninguna sea del vendedor.
+  const rolesNoAdmin = dbQuery(`
+    SELECT policyname, cmd, qual FROM pg_policies
+    WHERE schemaname='public' AND tablename='cuenta_roles'
+      AND cmd IN ('INSERT','UPDATE','DELETE','ALL')
+      AND coalesce(qual,'') !~ 'is_admin'
+      AND coalesce(with_check,'') !~ 'is_admin'`);
+  for (const p of rolesNoAdmin) {
+    detalle.push(`cuenta_roles tiene una policy de ${p.cmd} (${p.policyname}) que no gatea por admin`);
+  }
+  // Y la contraparte: las tres funciones tienen que EXISTIR. Si no, cerrar las
+  // policies habría dejado el alta sin ningún camino.
+  const fns = dbQuery(`
+    SELECT proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname IN
+      ('otorgar_rol_vendedor','definir_regla_envio_vendedor','crear_bodega_vendedor')`)
+    .map((r) => r.proname);
+  for (const f of ['otorgar_rol_vendedor', 'definir_regla_envio_vendedor', 'crear_bodega_vendedor']) {
+    if (!fns.includes(f)) detalle.push(`falta la función de alta \`${f}\`: se cerró la puerta sin abrir la otra`);
+  }
+  // La lectura NO se puede haber roto: sin ella el panel del vendedor queda ciego.
+  const lecturas = dbQuery(`
+    SELECT count(*) n FROM pg_policies WHERE schemaname='public'
+      AND tablename IN ('reglas_envio','vendedor_bodegas') AND cmd='SELECT'`)[0];
+  if (Number(lecturas.n) < 2) detalle.push('se cerró también la LECTURA: el vendedor no puede ver su regla ni su bodega');
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉘ El cotizador rechaza fuera de cobertura ───────────────────────────────
+invariante(28, 'El cotizador rechaza un destino fuera de cobertura, jamás con un costo inventado', () => {
+  const detalle = [];
+  // El cuerpo NO se trae entero: tiene `$$`, comillas y acentos, y pasarlo por
+  // el JSON del CLI rompía la consulta — el invariante salía «no se pudo medir»,
+  // que es un rojo que no dice nada. Se miden EXPRESIONES en el servidor.
+  const f = dbQuery(`
+    SELECT pg_get_function_identity_arguments(p.oid) args,
+           (pg_get_functiondef(p.oid) ~ 'p_ciudad_destino') recibe_destino,
+           (pg_get_functiondef(p.oid) ~ 'fuera_de_cobertura') rebota,
+           (position('fuera_de_cobertura' in pg_get_functiondef(p.oid))
+            < position('v_costo :=' in pg_get_functiondef(p.oid))) frontera_antes
+    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='cotizar_envio_despensa'`);
+
+  // 🔴 UNA SOLA VERDAD SOBRE EL FLETE: dos sobrecargas del cotizador serían
+  //    dos respuestas distintas al mismo precio según por cuál entre (L-119).
+  if (f.length !== 1) {
+    detalle.push(`hay ${f.length} versiones de \`cotizar_envio_despensa\`: dos verdades sobre el precio del flete`);
+    return { ok: false, detalle };
+  }
+  const c = f[0];
+  if (!/p_ciudad_destino/.test(c.args)) {
+    detalle.push('el cotizador no recibe el destino: no puede saber si entrega ahí');
+  }
+  if (!c.rebota) detalle.push('el cotizador no tiene el rebote `fuera_de_cobertura`');
+  // Y que la frontera se evalúe ANTES del precio: si el costo se calculara
+  // primero, un destino no cubierto llegaría con un número puesto.
+  if (c.rebota && !c.frontera_antes) {
+    detalle.push('la frontera se evalúa DESPUÉS de calcular el costo: un destino no cubierto llegaría con precio');
+  }
+  // El tipo que v1 usa tiene que estar encendido, o no hay flete que cotizar.
+  const flota = dbQuery(`SELECT activo FROM cat_tipos_regla_envio WHERE codigo='flota_propia'`)[0];
+  if (!flota) detalle.push('no existe el tipo `flota_propia`');
+  else if (!flota.activo) detalle.push('`flota_propia` está apagado y es el tipo que v1 usa (moto propia)');
   return { ok: detalle.length === 0, detalle };
 });
 

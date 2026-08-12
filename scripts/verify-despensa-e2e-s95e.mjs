@@ -392,17 +392,30 @@ ids = dbQuery(`
     } WHERE mascota_id = '${ctx.mascota}';
   `);
 
+  // 🔴 EL RESIDUO SE CUENTA POR PREFIJO PROPIO, NO GLOBALMENTE (S95-G2.5).
+  //    La versión anterior comparaba `count(*) FROM pedidos` contra su línea
+  //    base y daba ROJO cuando OTRA pista escribía en la misma ventana — pasó
+  //    de verdad: los pedidos de más eran las sondas de S95-G, y este gate los
+  //    reportó como residuo suyo. **Un check que acusa a su dueño de la basura
+  //    ajena deja de ser un check y pasa a ser ruido que la gente aprende a
+  //    ignorar.** Cada pista responde por lo que ella escribió.
   const fin = dbQuery(`
-    SELECT (SELECT count(*) FROM eventos_mascota) ev,
-           (SELECT count(*) FROM pedidos) ped,
+    SELECT (SELECT count(*) FROM pedidos WHERE clave_idempotencia LIKE '%${P}%') ped_propios,
            (SELECT count(*) FROM productos WHERE nombre LIKE '${P}%') prod,
            (SELECT count(*) FROM vendedor_skus WHERE sku_vendedor LIKE '${P}%') sku,
-           (SELECT count(*) FROM cuenta_roles WHERE metadata->>'fixture'='${P}') rol`)[0];
+           (SELECT count(*) FROM cuenta_roles WHERE metadata->>'fixture'='${P}') rol,
+           (SELECT count(*) FROM evento_producto_asignacion WHERE nombre_producto LIKE '${P}%') ev_propios,
+           (SELECT count(*) FROM eventos_mascota) ev_global`)[0];
   const limpio =
-    Number(fin.ev) === Number(base.ev) && Number(fin.ped) === Number(base.ped) &&
+    Number(fin.ped_propios) === 0 && Number(fin.ev_propios) === 0 &&
     Number(fin.prod) === 0 && Number(fin.sku) === 0 && Number(fin.rol) === 0;
-  check(limpio, '🔴 RESIDUO 0 — el expediente y los pedidos vuelven a su línea base',
-    `expediente ${base.ev}→${fin.ev} · pedidos ${base.ped}→${fin.ped} · fixtures ${fin.prod}/${fin.sku}/${fin.rol}`);
+  check(limpio, '🔴 RESIDUO 0 — este gate no dejó NADA suyo en la base',
+    `pedidos ${fin.ped_propios} · eventos ${fin.ev_propios} · fixtures ${fin.prod}/${fin.sku}/${fin.rol}`);
+  // El conteo global se REPORTA, no se juzga: con pistas en paralelo una
+  // diferencia acá es información, no un veredicto sobre este gate.
+  if (Number(fin.ev_global) !== Number(base.ev)) {
+    console.log(`   (dato) el expediente global pasó de ${base.ev} a ${fin.ev_global} — hay otra pista escribiendo.`);
+  }
 
   console.log(`\n${fallos === 0 ? '✅ GATE VERDE' : `❌ ${fallos} FALLO(S)`}\n`);
   process.exit(fallos === 0 ? 0 : 1);
