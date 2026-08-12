@@ -22,6 +22,7 @@ import {
   falloDespensaCodigo,
   esObjDespensa,
   type CodigoErrorDespensa,
+  type ObjDespensa,
 } from './_despensa-comun';
 
 // ── Tipos de salida ─────────────────────────────────────────────────────────
@@ -49,6 +50,11 @@ export interface ProductoDeVitrina {
    *  pueda DECIR por qué algo se excluyó, jamás para filtrar acá. */
   alergenos: string[];
   especies_aplicables: string[];
+  /** 🔴 LA PORTADA. `null` HONESTO cuando el producto no tiene foto: la
+   *  superficie dibuja su marcador, jamás una imagen rota ni un placeholder
+   *  que finja ser el producto. Un catálogo de alimento sin fotos no es una
+   *  vitrina — pero una foto inventada es peor. */
+  foto_url: string | null;
 }
 
 export interface VarianteDeProducto {
@@ -77,6 +83,11 @@ export interface FichaProducto {
   ingredientes_activos: string[];
   alergenos: string[];
   es_dieta_prescripcion: boolean;
+  /** La portada de la ficha. Mismo criterio que la vitrina. */
+  foto_url: string | null;
+  /** El resto de la galería, ya normalizada a URLs. Vacía es vacía: no se
+   *  rellena con la portada repetida. */
+  fotos: string[];
   variantes: VarianteDeProducto[];
 }
 
@@ -121,10 +132,48 @@ const SELECT_VITRINA = `
     id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, activo,
     productos!inner (
       id, nombre, marca, familia_codigo, estado, especies_aplicables,
-      alergenos, es_dieta_prescripcion
+      alergenos, es_dieta_prescripcion, imagen_url, imagenes
     )
   )
 `;
+
+/**
+ * 🔴 LA FOTO — y la forma de `imagenes` NO SE ADIVINÓ, se midió… hasta donde
+ * se podía. Lo medido: `imagen_url` es `text` nullable, e `imagenes` es
+ * `jsonb` con DEFAULT `'[]'` — o sea, un ARRAY. **Lo que no se pudo medir es
+ * la forma de sus ELEMENTOS**: hay cero filas en `productos` y la columna no
+ * tiene comentario que la declare.
+ *
+ * Ante eso, la opción honesta no es elegir una forma y rezar: es **aceptar las
+ * dos que el mundo usa** —`["https://…"]` y `[{"url":"https://…"}]`— y
+ * descartar en silencio lo que no sea ninguna. *Un catálogo que no muestra una
+ * foto porque el vendedor la cargó como objeto en vez de string es un defecto
+ * que se descubre mirando la vitrina vacía, no leyendo un error.*
+ *
+ * `imagen_url` MANDA cuando existe: es la portada declarada. `imagenes` es el
+ * resto de la galería, y su primer elemento sirve de portada solo si no hay
+ * `imagen_url`.
+ */
+function urlDeImagen(v: unknown): string | null {
+  if (typeof v === 'string' && v.trim().length > 0) return v;
+  if (esObjDespensa(v)) {
+    for (const clave of ['url', 'src', 'imagen_url']) {
+      const u = v[clave];
+      if (typeof u === 'string' && u.trim().length > 0) return u;
+    }
+  }
+  return null;
+}
+
+function fotosDeProducto(p: ObjDespensa): { portada: string | null; galeria: string[] } {
+  const galeria = (Array.isArray(p.imagenes) ? p.imagenes : [])
+    .map(urlDeImagen)
+    .filter((u): u is string => u !== null);
+  const declarada = typeof p.imagen_url === 'string' && p.imagen_url.trim().length > 0
+    ? p.imagen_url
+    : null;
+  return { portada: declarada ?? galeria[0] ?? null, galeria };
+}
 
 function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
   const salida: ProductoDeVitrina[] = [];
@@ -158,6 +207,7 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
       es_dieta_prescripcion: p.es_dieta_prescripcion === true,
       alergenos: textArray(p.alergenos),
       especies_aplicables: textArray(p.especies_aplicables),
+      foto_url: fotosDeProducto(p).portada,
     });
   }
   return salida;
@@ -209,7 +259,7 @@ export async function obtenerFichaProducto(
   const [prod, vars] = await Promise.all([
     cliente
       .from('productos')
-      .select('id, nombre, marca, familia_codigo, descripcion, especies_aplicables, tallas_aplicables, momentos_aplicables, ingredientes_activos, alergenos, es_dieta_prescripcion')
+      .select('id, nombre, marca, familia_codigo, descripcion, especies_aplicables, tallas_aplicables, momentos_aplicables, ingredientes_activos, alergenos, es_dieta_prescripcion, imagen_url, imagenes')
       .eq('id', productoId)
       .maybeSingle(),
     cliente
@@ -264,6 +314,8 @@ export async function obtenerFichaProducto(
       ingredientes_activos: textArray(p.ingredientes_activos),
       alergenos: textArray(p.alergenos),
       es_dieta_prescripcion: p.es_dieta_prescripcion === true,
+      foto_url: fotosDeProducto(p).portada,
+      fotos: fotosDeProducto(p).galeria,
       variantes,
     },
   };
