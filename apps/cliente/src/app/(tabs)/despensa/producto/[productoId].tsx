@@ -22,16 +22,17 @@
  *
  * ── §5.4 · LOS DOS CANDADOS, DONDE VIVEN ────────────────────────────────
  *  ① Solo se advierte con composición declarada; sin ella se DICE "no
- *    tenemos los ingredientes" — jamás silencio. El veredicto lo deriva
- *    `lib/despensa/composicion.ts` (único punto: cuando el motor publique
- *    `composicion_estado`, cambia allá y no acá).
+ *    tenemos los ingredientes" — jamás silencio. `composicion_estado` es
+ *    del MOTOR (cuatro literales; solo `verificada` y `no_aplica` callan)
+ *    y el cruce lo hace `lib/despensa/composicion.ts` sobre la lista
+ *    EXPANDIDA por relaciones (`expandirAlergenosAVigilar`).
  *  ② La advertencia jamás se apaga por promoción — acá no hay motor de
  *    beneficios montado, y si algún día lo hay, el veredicto no lo mira.
- *  El paso explícito de entendimiento GATEA el agregar al carrito: sin
- *  "Entiendo", el CTA queda apagado Y DICE POR QUÉ (regla del Confirmar
- *  apagado, S73-B). ⚠️ El registro persistente del paso llega con la
- *  tanda de A (`registrar_entendimiento_alergia`) — hoy viaja en el
- *  estado del carrito, hueco declarado en el store.
+ *  El paso explícito de entendimiento GATEA el agregar al carrito en las
+ *  DOS coincidencias (exacta e imprecisa), el CTA apagado DICE POR QUÉ
+ *  (S73-B), y **el paso ES el registro**: sin
+ *  `registrar_entendimiento_alergia` verde no hay entendido (§5.4
+ *  "queda registrado", cumplido de verdad desde el cableo del 12-ago).
  *
  * ── §5.5 · LA RECOMENDACIÓN DEL VET: LA APP CALLA ───────────────────────
  * No hay lector de recomendación registrada (medido: cero tabla, cero
@@ -72,6 +73,7 @@ import {
 } from '@epetplace/ui';
 import {
   expandirAlergenosAVigilar,
+  listarAlergenos,
   obtenerFichaProducto,
   obtenerPerfilMascota,
   registrarEntendimientoAlergia,
@@ -106,6 +108,10 @@ export default function DespensaProducto() {
   const [alergenosMascota, setAlergenosMascota] = useState<string[]>([]);
   /** La lista EXPANDIDA por el motor (relaciones: ave ⊃ pollo). */
   const [vigilados, setVigilados] = useState<AlergenoVigilado[]>([]);
+  /** La voz del catálogo de alérgenos (código → nombre_es) — para la
+   *  lista de composición; las voces del AVISO ya viajan en los
+   *  vigilados. */
+  const [vocesAlergenos, setVocesAlergenos] = useState<Map<string, string> | undefined>(undefined);
   const [varianteId, setVarianteId] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState(1);
   const [entendido, setEntendido] = useState(false);
@@ -121,6 +127,13 @@ export default function DespensaProducto() {
     setFicha('cargando');
     void obtenerFichaProducto(productoId).then((r) => {
       if (vigente) setFicha(r.ok ? r.data : 'error');
+    });
+    // La voz del catálogo, en la misma ola. Si falla, `vozAlergeno`
+    // degrada visible (guiones → espacios) — jamás bloquea la ficha.
+    void listarAlergenos().then((r) => {
+      if (vigente && r.ok) {
+        setVocesAlergenos(new Map(r.data.map((a) => [a.codigo, a.nombre])));
+      }
     });
     return () => {
       vigente = false;
@@ -220,7 +233,11 @@ export default function DespensaProducto() {
     if (registrando) return;
     if (idMascota === null || ficha === 'cargando' || ficha === 'error') return;
     setRegistrando(true);
-    const advertidos = [...cruce.exactos, ...cruce.imprecisos.map((i) => i.declarado)];
+    // Se registran CÓDIGOS del vocabulario (dato), jamás voces.
+    const advertidos = [
+      ...cruce.exactos.map((e) => e.codigo),
+      ...cruce.imprecisos.map((i) => i.codigo),
+    ];
     const r = await registrarEntendimientoAlergia(ficha.producto_id, idMascota, advertidos);
     setRegistrando(false);
     if (!r.ok) {
@@ -425,7 +442,9 @@ export default function DespensaProducto() {
                     cruce.coincidencia === 'exacta'
                       ? t('despensa.alergiaContiene', {
                           nombre: nombreMascota ?? t('despensa.tuMascota'),
-                          lista: cruce.exactos.map(vozAlergeno).join(', '),
+                          // Las voces del AVISO viajan en los vigilados
+                          // (cat_alergenos.nombre_es, del motor).
+                          lista: cruce.exactos.map((e) => e.nombre).join(', '),
                         })
                       : cruce.coincidencia === 'imprecisa'
                         ? t('despensa.alergiaImprecisa', {
@@ -433,8 +452,8 @@ export default function DespensaProducto() {
                             lista: cruce.imprecisos
                               .map((i) =>
                                 t('despensa.imprecisoPar', {
-                                  declarado: vozAlergeno(i.declarado),
-                                  origen: vozAlergeno(i.origen),
+                                  declarado: i.nombre,
+                                  origen: i.origenNombre,
                                 }),
                               )
                               .join('; '),
@@ -500,7 +519,9 @@ export default function DespensaProducto() {
                   {ficha.alergenos.length > 0 ? (
                     <Texto variante="apoyo">
                       {t('despensa.composicionAlergenos', {
-                        lista: ficha.alergenos.map(vozAlergeno).join(', '),
+                        lista: ficha.alergenos
+                          .map((c) => vozAlergeno(c, vocesAlergenos))
+                          .join(', '),
                       })}
                     </Texto>
                   ) : null}

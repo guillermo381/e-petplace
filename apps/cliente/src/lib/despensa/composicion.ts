@@ -61,31 +61,43 @@ export function alergenosQueCruzan(
 
 export interface CruceAlergia {
   coincidencia: 'ninguna' | 'exacta' | 'imprecisa';
-  /** Los declarados del producto que cruzaron EXACTO («contiene X»). */
-  exactos: string[];
+  /** Los declarados del producto que cruzaron EXACTO («contiene X»).
+   *  `codigo` para REGISTRAR (el entendimiento guarda vocabulario);
+   *  `nombre` para DECIR (la voz del catálogo, jamás el código). */
+  exactos: { codigo: string; nombre: string }[];
   /** Los cruces imprecisos: qué declara el producto y qué podría ser. */
-  imprecisos: { declarado: string; origen: string }[];
+  imprecisos: { codigo: string; nombre: string; origenNombre: string }[];
 }
 
 /**
  * El cruce EXPANDIDO: la lista de vigilados del motor contra lo que el
  * producto declara. Si hay exactos e imprecisos a la vez, la coincidencia
  * es `exacta` (la afirmación más directa preside) y los imprecisos viajan
- * igual para que la voz pueda nombrarlos en el detalle.
+ * igual para que la voz pueda nombrarlos en el detalle. Las VOCES vienen
+ * del motor (`declarado_nombre`/`origen_nombre` — `cat_alergenos.nombre_es`;
+ * el texto libre del vet conserva su texto, no se le inventa voz).
  */
 export function cruzarConVigilados(
   productoAlergenos: string[],
   vigilados: AlergenoVigilado[],
 ): CruceAlergia {
   const declarados = new Set(productoAlergenos.map((a) => a.trim().toLowerCase()));
-  const exactos: string[] = [];
-  const imprecisos: { declarado: string; origen: string }[] = [];
+  const exactos: { codigo: string; nombre: string }[] = [];
+  const imprecisos: { codigo: string; nombre: string; origenNombre: string }[] = [];
   for (const v of vigilados) {
     if (!declarados.has(v.declarado.trim().toLowerCase())) continue;
     if (v.exacta) {
-      if (!exactos.includes(v.declarado)) exactos.push(v.declarado);
-    } else if (!imprecisos.some((i) => i.declarado === v.declarado && i.origen === v.origen)) {
-      imprecisos.push({ declarado: v.declarado, origen: v.origen });
+      if (!exactos.some((e) => e.codigo === v.declarado)) {
+        exactos.push({ codigo: v.declarado, nombre: v.declarado_nombre });
+      }
+    } else if (
+      !imprecisos.some((i) => i.codigo === v.declarado && i.origenNombre === v.origen_nombre)
+    ) {
+      imprecisos.push({
+        codigo: v.declarado,
+        nombre: v.declarado_nombre,
+        origenNombre: v.origen_nombre,
+      });
     }
   }
   return {
@@ -95,11 +107,11 @@ export function cruzarConVigilados(
   };
 }
 
-/** El vocabulario de alérgenos es CATÁLOGO con códigos (`ave_no_especificada`)
- *  y todavía no tiene diccionario en el riel — un código con guiones bajos
- *  en la cara de la familia rompe la Ley 3. Degradación mínima declarada
- *  (guiones → espacios) HASTA que el catálogo gane su voz; anotado para el
- *  gate de strings. */
-export function vozAlergeno(codigo: string): string {
-  return codigo.replace(/_/g, ' ');
+/** La voz de un código del catálogo de alérgenos — LECTOR sobre el mapa
+ *  de `listarAlergenos()` (`cat_alergenos.nombre_es`, sembrada con las
+ *  23). El fallback guiones→espacios queda SOLO para el código que no
+ *  esté en el catálogo (o el mapa sin cargar): mejor una degradación
+ *  visible que un código con guiones bajos en la cara de la familia. */
+export function vozAlergeno(codigo: string, voces?: ReadonlyMap<string, string>): string {
+  return voces?.get(codigo) ?? codigo.replace(/_/g, ' ');
 }
