@@ -1,6 +1,42 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S91 — 53 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+**Estado: S96 — 59 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+
+> **S96-B · LAS SEIS PIEZAS DEL RECORRIDO DE LA DESPENSA.** Contador
+> RE-MEDIDO por el método auditable de siempre (L-141): `ls
+> src/components/*.tsx` = **62**, menos las 2 variantes `.web` y la infra
+> `capturaFoto` = **59** (decía 53). R17 leído del propio lint:
+> `exportaciones=82 · en-galería=73 · exentas-declaradas=9 ·
+> pendientes=0`. **WCAG 178 / 0 corrido en vivo — cero pares nuevos:**
+> las seis resuelven de slots ya medidos, y el único registro que se
+> estrenó (`warningText` en `Texto`) ya estaba en el gate por el tinte
+> `warning` de `Tarjeta`.
+>
+> **Las seis, y lo que cada una cierra por CONTRATO y no por disciplina:**
+>
+> | Pieza | Su ley hecha tipo |
+> |---|---|
+> | `EscaleraEstados` | **El desvío NO es un escalón** — "no llegó" interrumpe el camino, no lo avanza. Y **cero diccionario de estados adentro**: el vendedor lee «Empacado», la familia «Estamos preparando tu pedido» (§6 del método — una audiencia no se deduplica) |
+> | `TarjetaPedido` | **UNA pieza para las dos caras**, medido: misma anatomía, distinta voz. Slots NEUTROS (`titulo`, no `nombreContacto`) — un slot que nombra el dato de UNA casa es el primer paso de la bifurcación |
+> | `FilaEntrega` | **§9.2 hecha tipo**: sin prop de mascota, pedido, productos ni monto. Coincide con `EntregaAsignada` de A **sin que las capas se copiaran** — y esa coincidencia es la prueba de que la línea está bien puesta |
+> | `AvisoAlergia` | **Jamás silencio**: unión cerrada en DOS (`contiene` · `sinComposicion`). Una pantalla que no sabe **no puede callar** — el silencio se lee como «no tiene pollo». Y sin prop para apagarla por promoción |
+> | `SelectorDestinoItem` | **El espejo de `chk_destino_excluyente` en el TIPO**: unión discriminada, no dos campos. «Donación para Thor» **no compila** |
+> | `PuertaDeOficio` | 🔴 **Es SOLO el color.** La letra: *«si la puerta solo cambia colores, es una animación bonita sobre un agujero»*. Los permisos son del servidor — se escribe en el archivo porque su modo de falla es creer que sí los cambia |
+>
+> **Y una tensión que se disolvió al medirla, no al negociarla:** la letra
+> pide el barrido en *«menos de medio segundo»* y la Ley 6 manda *<300 ms
+> en UI*. `motion.marca` (340 ms, la física con la que abre el Coach desde
+> S53) cumple las dos: **340 no es UI chica, es gesto de MARCA**, y ese
+> registro ya estaba firmado con su token. *No había choque: había dos
+> reglas midiendo cosas distintas.*
+>
+> **⚠️ CANDIDATA DE REGLA, de una cura propia:** metí un hex crudo en la
+> muestra de galería de la puerta y **R2 no lo cazó porque su corpus es
+> solo `apps/`**. Lo curé antes de commitear, pero el hueco queda: la Ley
+> 1 no dice «en apps», dice **cero hex crudos**, y la galería es el único
+> lugar de `ui` donde se compone como pantalla. *Ensanchar R2 a
+> `src/gallery/` es de una tanda; encenderlo puede prender preexistentes
+> — se mide antes.*
 
 > **S91-B · NACE `ChipEntidad` — EL CHIP DE ENTIDAD, UNO SOLO EN TODA LA CASA (junta D-691).** Sube el **CHIP**, no el contenedor: `FiltroMascotas` es una hilera horizontal y el selector de raza del alta es una GRILLA, así que el seam correcto es la unidad — subir la hilera habría obligado a D a envolverla o clonarla. `FiltroMascotas` pasó a CONSUMIRLO (su copia murió, Ley 37 sobre los imports que quedaron muertos). **Contador re-medido: 52 → 53** (56 `.tsx` − 2 variantes `.web` − 1 infra), y R17 leído del propio lint: `exportaciones=76 · en-galería=67 · exentas-declaradas=9 · pendientes=0`.
 > - **(a) «Crece un punto» (orden del founder), con números de la CASA y no de un ojo:** `compacto` es el de hoy (alto 44 · avatar `xs` 28 · texto `sm` 13) y `general` sube cada pieza UN PASO en su propia escala (avatar `sm` 40 · texto `base` 15), con el alto DERIVADO de conservar el aire (44−28 = 16 ⇒ 40+16 = **56**). **El alto no se eligió: es el que mantiene la respiración del chip firmado.** `compacto` es el default a propósito — los consumidores vivos no se mueven; el founder pidió crecer *para el uso nuevo*.

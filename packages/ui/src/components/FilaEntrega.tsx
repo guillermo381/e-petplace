@@ -105,7 +105,17 @@ export function FilaEntrega({ direccion, referencia, instrucciones, onLlamar }: 
       )}
 
       {onLlamar === undefined ? null : (
-        <Boton variante="secundario" tamaño="lg" onPress={onLlamar} etiqueta={t('filaEntrega.llamar')} />
+        // `bloque` NO es cosmético: es la otra mitad de la vara de guantes.
+        // Cazado mirando la captura — el alto 56 estaba y el botón salía
+        // angosto igual, porque `Boton` ancla a `flex-start` por default.
+        // *Un target se toca en DOS ejes, y yo había medido uno.*
+        <Boton
+          variante="secundario"
+          tamaño="lg"
+          bloque
+          onPress={onLlamar}
+          etiqueta={t('filaEntrega.llamar')}
+        />
       )}
     </View>
   )
