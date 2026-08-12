@@ -1,10 +1,11 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S96 — 62 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+**Estado: S96 — 63 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
 
-> **S96-B · SEGUNDA TANDA — el ensanche firmado, tres piezas y una regla.**
-> Contador re-medido (L-141): **62** (65 `.tsx` − 2 `.web` − infra). R17:
-> `exportaciones=85 · en-galería=76 · pendientes=0`. WCAG **178/0**.
+> **S96-B · SEGUNDA TANDA — el ensanche firmado, cuatro piezas y una regla.**
+> Contador re-medido (L-141): **63** (66 `.tsx` − 2 `.web` − infra). R17
+> leído del propio lint: `exportaciones=86 · en-galería=77 ·
+> exentas-declaradas=9 · pendientes=0`. WCAG **178/0**.
 >
 > - **`AvisoAlergia` pasa a TRES estados** (firma del founder):
 >   `verificada · declarada_sin_verificar · ausente`, **verbatim del CHECK
@@ -25,6 +26,13 @@
 >   **requeridas sin `null`**. Y **se mueve el mapa, no el pin** —
 >   arrastrando un marcador el dedo tapa justo el punto que hay que
 >   colocar.
+> - **`SelectorVentana`** (§6.2, lo 2º de D). 🔴 **El día sin cupo se
+>   DIBUJA, no se esconde** — la Ley 23 dice que la puerta no ofrece lo
+>   que va a rechazar, y esconder el día lleno es su lectura equivocada:
+>   *el cliente está buscando el jueves*. Un jueves que desaparece se lee
+>   como «el jueves no existe». **Se muestra, no es tocable —la Ley 23
+>   intacta— y DICE POR QUÉ**, visible sin tap y en el label de a11y.
+>   Apagado sereno, jamás rojo: un día lleno no es falla de nadie.
 > - **R35 · el color aplicado sale del tema (D-781).** 🔴 **Ensanchar R2
 >   no servía, y lo dijo la medición:** habría dado 29 rojos en la galería
 >   y ~27 falsos — la galería de tokens está llena de hex **en strings de
