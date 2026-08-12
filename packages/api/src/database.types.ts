@@ -3898,6 +3898,7 @@ export type Database = {
       cuentas_comerciales: {
         Row: {
           activado_en: string | null
+          activado_por: string | null
           cerrado_en: string | null
           country_code: string
           created_at: string
@@ -3920,6 +3921,7 @@ export type Database = {
         }
         Insert: {
           activado_en?: string | null
+          activado_por?: string | null
           cerrado_en?: string | null
           country_code: string
           created_at?: string
@@ -3942,6 +3944,7 @@ export type Database = {
         }
         Update: {
           activado_en?: string | null
+          activado_por?: string | null
           cerrado_en?: string | null
           country_code?: string
           created_at?: string
@@ -3963,6 +3966,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cuentas_comerciales_activado_por_fkey"
+            columns: ["activado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuentas_comerciales_activado_por_fkey"
+            columns: ["activado_por"]
+            isOneToOne: false
+            referencedRelation: "v_daas_eligible_users"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "cuentas_comerciales_owner_profile_id_fkey"
             columns: ["owner_profile_id"]
