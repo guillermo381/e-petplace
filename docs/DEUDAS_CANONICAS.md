@@ -13301,9 +13301,32 @@ número del modelo que no sale de una calculadora sino de una llamada.*
 la advertencia que lo justifica: *que siempre se haya querido hacer no lo hace
 gratis.*
 
-**Mínimo honesto para octubre:** una lista de pedidos con **dos botones**
+~~**Mínimo honesto para octubre:** una lista de pedidos con **dos botones**
 —preparado, despachado— **y el ajuste de stock**. Eso alcanza para un
-vendedor. **Todo lo demás es candidato de recorte.**
+vendedor.~~ ☠️ **ENMENDADO S96.** **Todo lo demás es candidato de
+recorte.**
+
+> 🔴 **ENMIENDA S96 — SON CUATRO ESCALONES, NO DOS.** Mínimo honesto
+> para octubre: una lista de pedidos con **cuatro escalones —preparado ·
+> empacado · despachado · entregado— y el ajuste de stock**. Fuente:
+> `LETRA_PANEL_VENDEDOR_S96` §3, choque contra `MODELO_DESPENSA` v2.0
+> declarado en su §11 y firmado por el founder.
+>
+> **Las tres razones:** el **empaque** necesita el lote —*el día que un
+> fabricante retire uno, esa columna es la diferencia entre poder
+> avisarle a las familias y no poder*— · el **despacho** necesita la
+> factura del vendedor (en Ecuador la electrónica falla; **se registra,
+> no se emite**) · y **la entrega es el único acto que deposita en el
+> expediente**. *Sin el cuarto, ninguna compra llega jamás al
+> Bio-Expediente.*
+>
+> ⚠️ **Y el alcance del panel creció otra vez el mismo día**
+> (`LETRA_RECORRIDO_DESPENSA_S96`): **el vendedor marca los TRES
+> escalones del local; el cuarto lo marca el repartidor, que entra a v1
+> con pantalla mínima.** *La advertencia de esta ficha —«si vive difuso
+> adentro de la despensa, se recorta sin que nadie lo note»— se cobró
+> en el sentido contrario: no se recortó, creció dos veces en un día. La
+> ficha separada es lo que lo hizo visible.*
 
 *Existe como ficha separada por una razón: si vive difuso adentro de "la
 despensa", se recorta sin que nadie lo note y el vendedor real se queda sin
@@ -13609,4 +13632,191 @@ commits sin territorio declarado · un brief de una pista que llegó a otra.
 
 ☠️ **Muere** cuando cada pista abra en su propio worktree y el árbol de una no
 sea visible desde la otra.
+
+---
+
+## Deudas S96 — LA DESPENSA GANA SU LETRA DE RECORRIDO (D-770 → D-779)
+
+> **Sesión de SOLO DOCUMENTOS.** Cero código, cero migraciones, cero SQL.
+> Fuentes: `LETRA_PANEL_VENDEDOR_S96` (§12) y
+> `LETRA_RECORRIDO_DESPENSA_S96` (§13), las dos dictadas en mesa el
+> 12-ago-2026 · enmiendas en `MODELO_DESPENSA` v2.0 → **v2.2**.
+>
+> 🔴 **NOTA DE NUMERACIÓN, Y ES LA LECCIÓN OPERATIVA DE LA JORNADA.** La
+> primera letra dictó sus cuatro deudas como **D-757 a D-760** y **los
+> cuatro estaban TOMADOS**: `D-757` por artefactos vivos de S95-C (el
+> INSERT anónimo de `pedidos`, **con dos reversas SQL que lo nombran por
+> número**) y `D-758`/`D-759`/`D-760` por las fichas de S95-F. **Se midió
+> por grep, se frenó el depósito sin escribir una línea, y el founder
+> firmó el corrimiento a `D-770`–`D-773`.** La segunda letra nació con
+> una **advertencia de puerta** ordenando verificar antes de escribir:
+> se corrió, y **`D-774`–`D-779` estaban los seis libres.**
+>
+> *El costo de verificar es un grep; el costo de no verificar ya está
+> medido — `D-757` lleva una sesión entera tomada, sin ficha y sin
+> dueño.*
+
+#### D-770 — ☠️ NACIÓ Y MURIÓ EL MISMO DÍA: EL GPS DEL REPARTIDOR
+
+**Nació** en `LETRA_PANEL_VENDEDOR_S96` §12 como *"GPS del repartidor y mapa
+en vivo para la familia — v2"*, con su razón escrita: *lo caro no es el GPS,
+es convertir al repartidor en usuario con sesión, permisos y pantalla
+propia.* Su disparo de muerte era **«cuando el rol repartidor tenga entrada
+real»**.
+
+**Murió horas después**, cuando `LETRA_RECORRIDO_DESPENSA_S96` §9 le dio
+exactamente esa entrada: **el repartidor entra a v1 con pantalla mínima.**
+
+> *Su razón sigue siendo cierta — lo caro era la pantalla. Lo que cambió no
+> es el análisis: es que el founder decidió pagarla, porque el paso «vamos
+> hacia vos» **solo lo puede marcar quien está manejando**.*
+
+**Lo que NO murió con ella:** **el mapa en vivo para la familia sigue en v2.**
+Se declara para que nadie lea esta muerte como que entró todo.
+
+☠️ **MUERTA al nacer.** Se deposita igual, con su muerte escrita, porque un
+número usado en dos letras firmadas sin ficha es el lío de `D-757` repetido.
+
+#### D-771 — 🟢 CHAT Y WHATSAPP DENTRO DEL ENVÍO
+
+En v1 el canal es **la llamada**, y no por simplicidad: *es el único que no
+exige que nadie tenga la app abierta — nadie escribe arriba de una moto.*
+
+**La costura ya está escrita** (`LETRA_PANEL_VENDEDOR_S96` §6) y es una sola:
+**el mensaje pertenece al ENVÍO, no a la persona** — nace cuando el pedido se
+despacha y muere cuando se entrega. Así el canal ya sabe de qué pedido habla
+y cuándo dejar de existir.
+
+**Y el alcance es lo que protege la línea de privacidad:** un canal atado al
+envío **no es una puerta abierta a la relación con la familia**.
+
+☠️ **Muere** cuando se prenda cualquiera de los dos canales.
+
+#### D-772 — 🟡 LA PANTALLA «RECIBIR» DE LA APP DEL CLIENTE
+
+`MODELO_DESPENSA` §5.2 pone la confirmación de recepción en la app de la
+familia. **Esa pantalla no existe.**
+
+**Y el modo de falla que la vuelve insuficiente aunque exista:** *un pedido
+que se cierra solo si el dueño aprieta un botón es un pedido que no se cierra
+nunca* — el stock no se libera, el cupo no se recupera, el evento del
+expediente no nace.
+
+**Por eso la letra firmó al revés de como suena:** el vendedor —hoy el
+repartidor— **marca la entrega**; la confirmación de la familia, cuando
+exista, **es cortesía, jamás fuente de verdad**.
+
+☠️ **Muere** cuando la pantalla exista **como cortesía**, no como condición.
+
+#### D-773 — 🟡 EL PEDIDO EMPACADO SIN FACTURA: FALTA EL PROCEDIMIENTO HUMANO
+
+En Ecuador la factura electrónica falla. La letra ya decide lo técnico: **el
+pedido queda empacado y NO sale**, la pantalla lo dice sin rodeos, **no hay
+puerta de atrás**.
+
+**Lo que falta es qué hace el humano después** — y no es detalle: es el único
+caso feo del panel donde el sistema frena y el trabajo queda parado.
+
+☠️ **Muere** con el capítulo de `POLITICAS` que ya pide **D-744**.
+
+#### D-774 — 🟡 MÓDULO DE POSTVENTA
+
+Hoy el botón *tengo un problema* **manda a WhatsApp del founder**.
+
+**Con su condición firmada, que es lo que lo hace honesto mientras tanto:**
+**el botón dice a dónde va y en qué horario contestan.** *Prometer respuesta
+inmediata a las dos de la mañana es prometer lo que no se cumple.*
+
+☠️ **Muere** cuando exista el módulo.
+
+#### D-775 — 🟡 LAS DOS CALIFICACIONES — SE HEREDA EL CRITERIO DE KAXO
+
+**Son dos: la app · el pedido o el servicio.** Para todos los servicios, y
+entran **después** de cerrar el recorrido de la despensa.
+
+**Tres condiciones firmadas:**
+
+1. **El criterio se hereda de Kaxo**, que ya tiene reseñas doble ciego
+   construidas y verificadas. *Dos sistemas de reseñas distintos en la misma
+   casa es deuda desde el día uno.*
+2. **La calificación del prestador JAMÁS se vuelve ranking público.** El
+   portal tiene firmado que no hay rankings, y **un promedio de estrellas
+   visible es un ranking con otro nombre**.
+3. **La calificación de la app no se pide después de una entrega buena.**
+   *Cosechar la alegría para inflar la nota es el dark pattern clásico.*
+
+☠️ **Muere** al cerrar el recorrido de la despensa.
+
+#### D-776 — 🟡 EL BORRADO DE LA FOTO DE ENTREGA A LOS 90 DÍAS
+
+La foto de entrega **es la puerta de la casa de una familia**. Su letra de
+privacidad está firmada (`LETRA_RECORRIDO_DESPENSA_S96` §9.4): la ven el
+vendedor y el equipo de e-PetPlace, **jamás otro cliente**, **el expediente
+jamás la toca**, y **vive 90 días**.
+
+> 🔴 **No alcanza con escribirlo: necesita MECANISMO.** *Una retención que
+> vive solo en un documento es una retención que no ocurre.* La casa ya tiene
+> el precedente construido y probado — la cola de borrado con trigger y
+> barredor por cron de **D-731** — y ya tiene medido lo que pasa cuando falta:
+> **D-732** son 56 documentos de identidad huérfanos que nadie puede borrar
+> **porque el plazo de retención no está escrito**.
+
+**Cruce declarado:** el plazo de esta foto es una decisión de la misma
+naturaleza que la de D-732/D-733, y **acá sí está escrito** — lo que falta es
+el aparato.
+
+☠️ **Muere** cuando el borrado **corra solo y esté medido**, no cuando esté
+escrito.
+
+#### D-777 — 🟢 APADRINAR Y ADOPTAR
+
+**Apadrinar** —aportes económicos o en especie a una mascota concreta, **sin
+llevarla a casa**— es un concepto poco usado en la industria y tiene **peso
+comercial propio**. **Adoptar** conecta con el actor refugio de EL NORTE.
+
+**Se registra como CANDIDATO, no como compromiso.** v2.
+
+**Y el límite que ya rige y no se re-discute:** lo que entra a v1 es la
+**donación sin destino elegible** —el refugio lo elige e-PetPlace, la foto se
+manda a mano, el reparto lo coordina el founder y **no consume cupo**—, con
+sus dos límites heredados: **jamás entra a ningún expediente** (no hay
+mascota) y **jamás otorga beneficio comercial** (`MODELO_LOYALTY` §7.2).
+*Reconocer una donación con un descuento la convierte en compra. El
+agradecimiento es humano, no contable.*
+
+☠️ **Muere** si el founder lo firma para v2, o si se descarta con razón
+escrita.
+
+#### D-778 — 🔴 EL COBRO RECURRENTE NO SE PUEDE PROBAR SIN PASARELA
+
+La compra recurrente **entra a v1** (`MODELO_DESPENSA` §11.2 enmendada), con
+sus tres condiciones: **aviso ANTES del cobro** —2-3 días, con saltar, mover
+o cancelar, porque *el cobro sorpresa es la causa número uno de
+contracargos*— · **se apaga en un toque desde donde se prendió**, nunca por
+atención al cliente · **si el medio de pago falla, el pedido NO se crea a
+medias**.
+
+**El interruptor se construye. El primer cobro real es el mismo día que
+exista la pasarela.**
+
+> *Y es peor que un bloqueo simple: la recurrencia es lo único del alcance v1
+> cuyo camino feliz **no se puede ensayar** ni con pago simulado, porque lo
+> que hay que probar es justamente el cobro que ocurre solo, sin nadie
+> mirando.*
+
+**Cruce: D-764** (la pasarela). ☠️ **Muere** con la pasarela afiliada y un
+cobro recurrente real ejecutado.
+
+#### D-779 — 🟢 ASIGNACIÓN Y OPTIMIZACIÓN DE RUTAS, Y EL SEGUNDO REPARTIDOR
+
+Fuera de v1 por decisión, no por olvido. La pantalla del repartidor tiene
+**tres acciones y nada más**; rutas y optimización están explícitamente
+afuera.
+
+**Su disparo NO es una fecha: es un hecho medible.** El cupo del día es la
+suma de la capacidad de los recursos confirmados (`LETRA_PANEL_VENDEDOR_S96`
+§7.3), y **mientras un repartidor alcance, optimizar rutas es resolver un
+problema que no existe.**
+
+☠️ **Muere** cuando el cupo de un día **se llene de verdad**.
 

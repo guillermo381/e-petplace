@@ -1,8 +1,33 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.0 — S95 (11 Ago 2026). Sesión de MESA. Enmienda mayor.**
+> **Versión: v2.2 — S96 (12 Ago 2026). El recorrido completo.**
 >
-> **Qué cambió respecto de v1.0, en una línea: el motor de comercio deja
+> **Qué cambió respecto de v2.1, en una línea: el alcance v1 se ensancha
+> con el recorrido entero de los dos lados** — `LETRA_RECORRIDO_DESPENSA_S96`,
+> **diecisiete firmas del founder**. Los tres cambios que tocan letra
+> vigente: **① la alergia pasa de ESCONDER a ADVERTIR** —exclusión dura
+> en la recomendación, advertencia dura en la búsqueda (§6, §10)— · **②
+> la compra recurrente SALE de la lista de lo que no entra** (§11.2) ·
+> **③ §4.1 se ACLARA, no se enmienda: una oferta por producto no
+> significa catálogo chico** (§4.1). Suma al alcance el **repartidor con
+> pantalla —y con él el GPS y la foto de entrega—**, la **venta de
+> mostrador con código de reclamo**, el retiro en tienda, el catálogo
+> amplio con buscador, la fecha programada, la donación y las
+> direcciones con Places (§11.1). Nacen **D-774 a D-779**;
+> **`D-770` nace y muere el mismo día**.
+>
+> **Qué cambió en v2.1 respecto de v2.0, en una línea: el panel mínimo del
+> vendedor pasa de DOS botones a CUATRO escalones** —preparado ·
+> empacado · despachado · entregado— por firma del founder en la mesa de
+> S96. **Sin el cuarto, ninguna compra llega jamás al Bio-Expediente**,
+> que es la razón de existir de la despensa. Fuente:
+> `LETRA_PANEL_VENDEDOR_S96`, con su choque contra §8.6/§11.1 de la v2.0
+> declarado en su §11. Nacen D-770 a D-773. **Y en particular
+> **el criterio de flete de §11.2 SIGUE CANDIDATO, NO FIRMADO** (medido
+> al cerrar S96, con su tensión contra la letra de S96 declarada ahí
+> mismo) — **la v2.2 no lo mueve.**
+>
+> **Qué cambió en v2.0 respecto de v1.0, en una línea: el motor de comercio deja
 > de ser VTEX y pasa a ser propio.** VTEX queda como **fuente de
 > inspiración de modelo, no como dependencia de producto** (firma del
 > founder, S95). La v1.0 no se borra: se conserva su historial y se
@@ -321,6 +346,21 @@ condición— y aun así muestra siete opciones para que la familia elija,
 está admitiendo que no sabe. **La ventaja competitiva de §6 exige una
 sola oferta por producto. Son la misma decisión.**
 
+> ✅ **ACLARACIÓN S96 — NO ES ENMIENDA, Y POR ESO SE ESCRIBE ACÁ.**
+> *"Una oferta por producto" NO significa catálogo chico.* Esta sección
+> prohíbe **ofrecer el mismo producto cien veces con precios
+> distintos**; no prohíbe tener muchos productos. **v1 lleva catálogo
+> amplio, buscador, filtros por categoría y nombre, y detalle de
+> producto al nivel del mejor comercio electrónico**
+> (`LETRA_RECORRIDO_DESPENSA_S96` §5.1). *Se aclara porque la letra
+> vieja mezclaba las dos cosas, y una lectura estrecha de esta sección
+> habría recortado el catálogo creyendo que obedecía.*
+>
+> **Y lo que sí se agrega como regla nueva:** **sin mascota elegida se
+> muestra todo** —elegir la mascota es lo que **enciende** el criterio,
+> no un peaje para entrar— y **la primera compra no recomienda**,
+> porque no sabemos qué come Thor y no lo inventamos (L-139).
+
 ### 4.2 🔴 LA PUERTA DE CARGA — EL VENDEDOR PROPONE, e-PetPlace PUBLICA
 
 **Firma del founder, S95.** La puerta de carga vive **dentro de la
@@ -438,7 +478,7 @@ alergias documentadas.
 | Especie y raza | Filtrado duro: nada que no aplique |
 | Talla y curva de peso | Presentación y porción correctas |
 | Momento vital (M1–M5) | Cachorro / adulto / senior — la fórmula cambia |
-| Condiciones y alergias | 🔴 **Exclusión dura**: jamás recomendar algo contraindicado |
+| Condiciones y alergias | 🔴 **Exclusión dura EN LA RECOMENDACIÓN · ADVERTENCIA DURA EN LA BÚSQUEDA** (enmendado S96) |
 | Periodicidad de antiparasitarios | El recordatorio de §7.3 |
 
 **Límite ético, heredado de `MODELO_LOYALTY` §7.6 y P11:** *los
@@ -446,6 +486,28 @@ beneficios jamás distorsionan recomendaciones clínicas.* Acá se lee
 así: **la despensa jamás recomienda por margen.** Si hay dos productos
 válidos, manda el criterio de cuidado, no el que deja más. Y una alerta
 de cuidado existe por la mascota, nunca para vender.
+
+> 🔴 **ENMIENDA S96 — LA ALERGIA ADVIERTE, NO ESCONDE.** Fuente:
+> `LETRA_RECORRIDO_DESPENSA_S96` §5.4, firma del founder.
+>
+> **Exclusión dura en la RECOMENDACIÓN. Advertencia dura en la
+> BÚSQUEDA.** La app **jamás sugiere** pollo para Thor. Si el dueño lo
+> busca y lo encuentra, **se lo dice y lo deja decidir** —*"Thor es
+> alérgico al pollo y este alimento lo contiene"*— con un paso explícito
+> de entendimiento que **queda registrado**.
+>
+> **Por qué es mejor producto y no una relajación:** esconder es
+> invisible, y lo invisible no demuestra nada. *Un producto que
+> desaparece sin explicación deja al dueño sin entender; uno que
+> advierte es la app demostrando que conoce a Thor* — el diferencial
+> hecho pantalla en vez de hecho filtro.
+>
+> **Dos candados, ninguno opcional:** ① **solo se puede advertir si el
+> producto declara su composición** — sin ella la app dice *"no tenemos
+> los ingredientes de este producto"*, **jamás silencio**, porque *el
+> silencio se lee como «no tiene pollo» y esa lectura la hace el dueño,
+> no nosotros* · ② **la advertencia jamás se apaga por una promoción**:
+> el motor de alertas manda sobre el de beneficios, siempre.
 
 ---
 
@@ -596,8 +658,34 @@ producto y precio (§4.2).
 
 **El panel operativo del vendedor NO estaba en el alcance v1 de S94 y
 entra acá con nombre propio (D-755).** Que siempre se haya querido hacer
-no lo hace gratis. **Versión mínima honesta para octubre: una lista de
-pedidos con dos botones —preparado, despachado— y el ajuste de stock.**
+no lo hace gratis. ~~**Versión mínima honesta para octubre: una lista de
+pedidos con dos botones —preparado, despachado— y el ajuste de stock.**~~
+☠️ **ENMENDADA S96** — ver abajo.
+
+> 🔴 **ENMIENDA S96 — SON CUATRO ESCALONES, NO DOS.** Versión mínima
+> honesta para octubre: **una lista de pedidos con cuatro escalones
+> —preparado · empacado · despachado · entregado— y el ajuste de
+> stock.** Fuente: `LETRA_PANEL_VENDEDOR_S96` §3, con su choque contra
+> esta misma línea declarado en su §11 y firmado por el founder en esa
+> mesa.
+>
+> **Las tres razones, que son las que vuelven caro cada escalón que
+> falta:** el **empaque** necesita el lote —el día que un fabricante
+> retire uno, esa columna es la diferencia entre poder avisarle a las
+> familias y no poder— · el **despacho** necesita la factura del
+> vendedor, porque en Ecuador la factura electrónica falla y un pedido
+> empacado sin factura no puede salir · y **la entrega es el único acto
+> que deposita en el expediente**. Sin el cuarto, ninguna compra llega
+> jamás al Bio-Expediente, que es la razón de existir de la despensa
+> (§7).
+>
+> **Y el modo de falla que lo cierra:** §5.2 pone la confirmación de
+> recepción en la app de la familia — **esa pantalla no existe todavía**
+> (D-772), y aun cuando exista sería insuficiente sola: *un pedido que
+> se cierra solo si el dueño aprieta un botón es un pedido que no se
+> cierra nunca*. **El vendedor marca la entrega; la confirmación de la
+> familia es cortesía, no fuente de verdad.**
+
 Eso alcanza para un vendedor.
 
 ---
@@ -645,7 +733,11 @@ la búsqueda avanzada con filtros sigue en evaluación (§11.3).
 | **Entrega fallida** | Responsable operativo: el vendedor. **Cara visible ante la familia: e-PetPlace.** Atención humana en v1 |
 | **Producto equivocado** | Ídem. Se resuelve por atención, no por flujo automatizado |
 | **Devolución** | 🔴 **No automatizada en v1.** Atención humana con criterio escrito en `POLITICAS`. Automatizarla es v2 |
-| **Producto contraindicado** | **No debe llegar a ocurrir**: §6 lo excluye antes de mostrarlo. Si ocurre, es bug de severidad alta, no caso de atención |
+| **Producto contraindicado** | ~~**No debe llegar a ocurrir**: §6 lo excluye antes de mostrarlo. Si ocurre, es bug de severidad alta, no caso de atención~~ ☠️ **ENMENDADO S96 — ver abajo** |
+| **Producto contraindicado — RECOMENDADO** (S96) | **No debe llegar a ocurrir.** §6 lo excluye antes de sugerirlo. Si aparece en una recomendación, **es bug de severidad alta**, no caso de atención |
+| **Producto contraindicado — BUSCADO** (S96) | **Es legal y esperado.** La app **advierte y deja decidir**, con paso explícito de entendimiento registrado (§6, `LETRA_RECORRIDO_DESPENSA_S96` §5.4) |
+| **Producto sin composición declarada** (S96) | La app **lo dice**: *"no tenemos los ingredientes de este producto"*. **Jamás silencio** — el silencio se lee como ausencia de alérgeno |
+| **El vet no registró recomendación** (S96) | La app **no la menciona.** Jamás fabrica una recomendación que nadie hizo |
 
 **Enmienda a `POLITICAS_EPETPLACE` (D-744):** nace el capítulo de
 devoluciones y responsabilidad de producto, con la distinción
@@ -666,13 +758,53 @@ responsable operativo (vendedor) / responsable de la experiencia
 - La compra como evento del expediente (§7).
 - Pago corriente y débito.
 - **La puerta de carga como propuesta**, sin IA (§4.2).
-- **El panel mínimo del vendedor**: pedidos, dos botones, stock (§8.6).
+- **El panel mínimo del vendedor**: pedidos, **cuatro escalones
+  —preparado · empacado · despachado · entregado—**, stock (§8.6).
+  🔴 **ENMENDADO S96** (`LETRA_PANEL_VENDEDOR_S96` §3; choque contra la
+  v2.0 declarado en su §11). ~~Decía "dos botones".~~ **El cuarto
+  escalón no es alcance de más: es el único que deposita la compra en
+  el expediente.**
+
+> 🔴 **LO QUE SUMA `LETRA_RECORRIDO_DESPENSA_S96` AL ALCANCE v1**
+> (diecisiete firmas del founder en su §0):
+>
+> - **El repartidor con pantalla mínima**, y con él **el GPS** (heredado
+>   del paseo, ya construido y probado) **y la foto de entrega**.
+>   *El paso «vamos hacia vos» solo lo puede marcar quien está
+>   manejando.* ⇒ el vendedor marca los **tres** escalones del local; el
+>   **cuarto lo marca quien está en la puerta**.
+> - **La venta de mostrador**, con la regla que la hace posible sin
+>   romper §7.4: **el vendedor JAMÁS elige la mascota** — registra la
+>   venta contra nadie, su factura lleva un **código**, y **el cliente
+>   reclama la compra** y elige la mascota. **La factura es la
+>   invitación.**
+> - **Retiro en tienda** — el mismo pedido con otro modo de entrega.
+> - **Catálogo amplio con buscador y filtros** (§4.1 no lo impedía —
+>   ver la aclaración ahí).
+> - **Compra recurrente** (§11.2, arriba) · **programar fecha de
+>   entrega**, con cupo por cada día futuro · **donación sin destino
+>   elegible** · **direcciones validadas con Places** con referencia,
+>   instrucciones y punto en el mapa movible · **cinco avisos** ·
+>   **cancelar hasta «preparado»** · **la vista de facturación del
+>   vendedor** (la liquidación espera al motor de pagos).
+> - **Dos nombres, no uno: `Servicios` y `Venta de productos`.** *No es
+>   vocabulario: es el primer candado del cinturón de §3.4, y es
+>   gratis.*
 
 ### 11.2 Lo que NO entra — decidido, no en evaluación
 
 - **Diferido en cualquier forma.** Comisión bancaria de 5% a 15% según
   plazo y banco. Para tickets de USD 30–80 no se sostiene.
-- **Suscripción / plan recurrente.**
+- ~~**Suscripción / plan recurrente.**~~ ☠️ **SALE DE ESTA LISTA — S96.**
+  **La compra recurrente ENTRA a v1** con el interruptor que ya existe
+  en los planes de paseo y adiestramiento, cobro directo al medio de
+  pago guardado, y las tres condiciones de
+  `LETRA_RECORRIDO_DESPENSA_S96` §6.1: **aviso ANTES del cobro** (2-3
+  días, con saltar/mover/cancelar — *el cobro sorpresa es la causa
+  número uno de contracargos*) · **se apaga en un toque desde donde se
+  prendió**, nunca por atención al cliente · **si el medio de pago
+  falla, el pedido NO se crea a medias**. ⚠️ **El interruptor se
+  construye, pero el primer cobro real espera a la pasarela (D-778).**
 - **Segundo vendedor.**
 - **Carrito unificado con servicios** (§3.6).
 - **Devolución automatizada** (§10).
@@ -682,6 +814,22 @@ responsable operativo (vendedor) / responsable de la experiencia
   mínimo, definida por el vendedor. El cálculo por zona y peso es v2.**
   *Es el mayor costo escondido de la decisión de S95 y no tiene dato: se
   firma o se cae con la llamada al vendedor (D-745/D-754).*
+  > **ESTADO MEDIDO AL CERRAR S96: SIGUE CANDIDATO, NO FIRMADO.** Se
+  > verificó el literal de esta viñeta y el del hueco 3 de la puerta:
+  > los dos siguen diciendo *candidato*, y **`LETRA_PANEL_VENDEDOR_S96`
+  > no lo firma** — su §13 deja el vendedor real (D-745) como pendiente
+  > que ninguna pista resuelve. **D-754 sigue viva y 🔴.**
+  >
+  > ⚠️ **Tensión declarada, no resuelta:** la letra de S96 **sí decide
+  > algo del flete en v1** — su §7.2(4): *"El envío tiene precio propio
+  > y quién lo paga, separado del producto. **Hoy vale cero y lo paga el
+  > vendedor.** El día de la urgencia, el campo ya existe y solo cambia
+  > de valor"*. Eso es **más angosto** que el candidato de esta viñeta
+  > (que admite tarifa plana), y **es una decisión de esqueleto, no la
+  > firma del criterio comercial**. *Se declara acá en vez de
+  > absorberse: firmar el criterio con una frase escrita para otra cosa
+  > sería exactamente lo que el hueco 3 de la puerta existe para
+  > evitar.* **Lo arbitra el founder con el dato de la llamada.**
 
 ### 11.3 En EVALUACIÓN hasta el 15 de septiembre
 
@@ -795,7 +943,7 @@ función.
 
 ---
 
-## 15. DEUDA — ESTADO TRAS S95
+## 15. DEUDA — ESTADO TRAS S95, ACTUALIZADO EN S96
 
 | # | Qué | Estado |
 |---|---|---|
@@ -813,11 +961,72 @@ función.
 | **D-754** | Criterio de flete v1 | **NUEVA.** 🔴 Sin dato. Depende de D-745 |
 | **D-755** | Panel operativo del vendedor como ítem propio del corte 15-sep | **NUEVA.** No es "parte de la despensa" |
 | **D-756** | Aviso de no renovación de VTEX antes de fin de noviembre | **NUEVA.** Fecha dura |
+| ~~**D-770**~~ | ~~**GPS del repartidor y mapa en vivo para la familia**~~ | ☠️ **NACIÓ Y MURIÓ EL MISMO DÍA.** `LETRA_RECORRIDO_DESPENSA_S96` §9.5 mete el GPS en v1 con el repartidor. **El mapa en vivo para la familia sigue en v2** |
+| **D-771** | **Chat y WhatsApp dentro del envío.** La costura queda escrita en `LETRA_PANEL_VENDEDOR_S96` §6: **el mensaje pertenece al ENVÍO, no a la persona** | **NUEVA (S96).** ☠️ cuando se prenda cualquiera de los dos canales |
+| **D-772** | **La pantalla "Recibir" de la app del cliente** (§5.2). Hasta que exista, la entrega la marca solo el vendedor | **NUEVA (S96).** ☠️ cuando la confirmación de la familia exista como cortesía |
+| **D-773** | **El procedimiento escrito para el pedido empacado sin factura.** Hoy la pantalla lo frena; falta decir qué hace el humano después | **NUEVA (S96).** ☠️ con el capítulo de `POLITICAS` que ya pide D-744 |
+| **D-774** | **Módulo de postventa.** Hoy el botón *tengo un problema* manda a WhatsApp del founder | **NUEVA (S96).** ☠️ cuando exista el módulo |
+| **D-775** | **Las dos calificaciones** —la app y el pedido/servicio—, **heredando el criterio doble ciego de Kaxo**. Jamás ranking público; jamás pedirla justo después de una entrega buena | **NUEVA (S96).** ☠️ al cerrar el recorrido de la despensa |
+| **D-776** | **El borrado de la foto de entrega a los 90 días.** *No alcanza con escribirlo: necesita mecanismo* | **NUEVA (S96).** ☠️ cuando el borrado corra solo y esté medido |
+| **D-777** | **Apadrinar y adoptar** — aportes a una mascota concreta sin llevarla a casa | **NUEVA (S96).** v2. Candidato, no compromiso |
+| **D-778** | **El cobro recurrente no se puede probar sin pasarela.** El interruptor existe; el primer cobro real espera | **NUEVA (S96).** ☠️ con la pasarela afiliada. Cruce con D-764 |
+| **D-779** | **Asignación y optimización de rutas**, y el segundo repartidor | **NUEVA (S96).** ☠️ cuando el cupo de un día se llene de verdad |
+
+> **Nota de numeración (S96):** la mesa dictó estas cuatro como **D-757
+> a D-760** y **los cuatro números ya estaban tomados** — `D-757` por
+> los artefactos de S95-C, y `D-758`/`D-759`/`D-760` por las fichas de
+> S95-F. **El founder firmó el corrimiento a `D-770`–`D-773`**, el
+> primer bloque libre medido contra `D-769`. Su texto de origen vive en
+> `LETRA_PANEL_VENDEDOR_S96` §12.
+>
+> ✅ **Las fichas SÍ están depositadas en `DEUDAS_CANONICAS.md`**
+> (segunda tanda de S96) — **D-770 con su muerte escrita**. *Se deja
+> anotado que en la primera pasada no lo estaban, porque es exactamente
+> el modo de falla que produjo el lío de `D-757`: un número usado en
+> artefactos vivos sin ficha, que la sesión siguiente encuentra tomado y
+> sin dueño.*
+>
+> **`D-774` a `D-779` (S96, segunda letra) se verificaron LIBRES antes
+> de escribir** —cero ocurrencias en `docs/` y `CLAUDE.md`—, tal como
+> ordena la advertencia de puerta de `LETRA_RECORRIDO_DESPENSA_S96`.
 
 ---
 
 ## Historial
 
+- **v2.2 (S96, 12 Ago 2026):** el recorrido completo, de los dos lados.
+  Fuente: `LETRA_RECORRIDO_DESPENSA_S96`, **diecisiete firmas del
+  founder**. **§6 y §10: la alergia ADVIERTE, no esconde** —exclusión
+  dura en la recomendación, advertencia dura en la búsqueda, con dos
+  candados (sin composición se dice, jamás silencio · la advertencia
+  jamás se apaga por promoción)—. **§11.2: la compra recurrente sale de
+  la lista de lo que no entra**, con cobro al medio guardado y aviso
+  ANTES del cobro; su primer cobro real espera la pasarela (D-778).
+  **§4.1 se ACLARA y no se enmienda:** una oferta por producto no
+  significa catálogo chico. **§11.1 se ensancha:** repartidor con
+  pantalla —**el GPS y la foto de entrega entran a v1**—, venta de
+  mostrador **donde el vendedor jamás elige la mascota** (el cliente la
+  reclama con el código de la factura), retiro en tienda, catálogo
+  amplio con buscador, fecha programada con cupo por día futuro,
+  donación sin destino elegible, direcciones con Places, cinco avisos,
+  cancelar hasta «preparado», y **dos nombres —`Servicios` y `Venta de
+  productos`— como primer candado del cinturón de §3.4**. Nacen **D-774
+  a D-779** (verificados libres antes de escribir); **D-770 nace y muere
+  el mismo día**. La letra vieja **no se borra**: queda tachada con su
+  marca. **El criterio de flete NO se toca: sigue candidato.**
+- **v2.1 (S96, 12 Ago 2026):** enmienda del panel del vendedor.
+  **§8.6 y §11.1 pasan de DOS botones a CUATRO escalones** —preparado ·
+  empacado · despachado · entregado— por firma del founder
+  (`LETRA_PANEL_VENDEDOR_S96` §3, choque declarado en su §11). Las tres
+  razones: el lote para el retiro de producto · la factura del vendedor
+  porque en Ecuador la electrónica falla · y **la entrega como único
+  acto que deposita en el expediente**. La letra vieja **no se borra**:
+  queda tachada con su marca de enmienda. **§11.2 se re-mide y NO se
+  firma**: el criterio de flete sigue candidato, con la tensión contra
+  §7.2(4) de la letra de S96 declarada en su lugar. Nacen **D-770 a
+  D-773** — la mesa las dictó como D-757–D-760 y los cuatro números
+  estaban tomados; el corrimiento lo firmó el founder. **Cero cambios
+  en el resto del documento.**
 - **v2.0 (S95, 11 Ago 2026):** enmienda mayor. **El motor de comercio
   pasa a ser propio; VTEX queda como fuente de inspiración** (§3, firma
   del founder). Aritmética recalculada sin take rate: el vendedor pasa
