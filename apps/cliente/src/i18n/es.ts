@@ -1603,9 +1603,8 @@ export const clienteEs = {
     cancelarNo: 'No, lo dejo',
     canceladoOk: 'El pedido quedó cancelado.',
     tengoUnProblema: 'Tengo un problema',
-    // ⚠️ El horario espera confirmación del founder en el gate de strings —
-    // es el único dato de la pantalla que no sale de un sistema.
-    problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 9:00 a 20:00.',
+    // 🔏 Horario FIRMADO por el founder (12-ago-2026, vía A): 8:00–21:00.
+    problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 8:00 a 21:00.',
     problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',
     problemaFallback: 'No pudimos abrir WhatsApp. Escribinos al {{numero}}.',
     paraQuienFue: '¿Para quién fue?',

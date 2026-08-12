@@ -15,9 +15,8 @@
  *    problema": alguien ya trabajó y eso se conversa, no se deshace solo.
  *  · TENGO UN PROBLEMA (§8.4): va al WhatsApp del equipo hasta que exista
  *    postventa (D-774) — y el botón DICE a dónde va y en qué horario
- *    contestan. ⚠️ El horario (9:00–20:00) espera confirmación del founder
- *    en el gate de strings: es el único dato de esta pantalla que no sale
- *    de un sistema.
+ *    contestan. 🔏 El horario está FIRMADO por el founder (12-ago-2026):
+ *    8:00–21:00 — vive en el string del riel, no acá.
  *  · EL CÓDIGO DE LA PUERTA (§0.3 · regla 7 del contrato del motor): se
  *    LEE acá (`obtenerCodigoEntrega`), jamás viaja en una notificación
  *    (ley de la pantalla bloqueada). null = todavía no hay envío, y se
