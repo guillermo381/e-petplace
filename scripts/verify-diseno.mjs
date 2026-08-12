@@ -246,16 +246,28 @@ function r2(archivos) {
  *  *Una copia de la rampa de marca diverge en silencio: el día que
  *  alguien afine un stop, el isotipo se queda con el viejo.*
  *
- *  BASELINE 1, CON DUEÑO Y RAZÓN: `apps/prestador/src/components/
- *  animated-icon.tsx` — `#208AEF` en un `splashOverlay`, residuo del
- *  template de Expo. **Es territorio de C y no se cura desde acá** (§6
- *  del método: se declara y se pide, no se clona ni se invade). El
- *  ratchet solo baja.
+ *  ⏪ BASELINE 0 — Y MURIÓ EL MISMO DÍA QUE NACIÓ. Nació en 1 con dueño
+ *  declarado: `animated-icon.tsx` tenía `#208AEF` en un `splashOverlay`,
+ *  residuo del template de Expo, **territorio de C** — así que se declaró
+ *  y se pidió, no se curó desde acá (§6 del método). **C lo mató en su
+ *  tanda de marca** (el overlay pasó a `palette.tealDark` + `<Isotipo
+ *  variant="blanco">`) y con el merge `f3029182` el piso bajó en `main`.
  *
- *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. El
- *  BASELINE sí muere: el día que C retire ese residuo, baja a 0 y esta
- *  regla pasa a "DURA EN 0". */
-const BASELINE_R35 = { 'apps/prestador/src/components/animated-icon.tsx': 1 };
+ *  **RE-MEDIDO SOBRE `main` ANTES DE BAJARLO, y no sobre el aviso:** C
+ *  reportó "R35 bajó a 0" desde SU worktree cuando en `main` todavía daba
+ *  1/1 — la clase ④ de S88 (*ningún contador se toma de un reporte previo;
+ *  se lee del objeto en el turno en que se usa*), con el agravante de que
+ *  acá el "objeto" tiene DOS árboles. **No se bajó hasta medir 0 en el
+ *  árbol donde la regla corre**, porque un baseline es un TECHO: bajarlo
+ *  antes de que baje el piso pone la regla en ROJO contra `main` y le
+ *  frena el commit a todos, incluido quien hizo la cura.
+ *
+ *  *(Queda una mención de `#208AEF` en `main`: vive en el COMENTARIO que
+ *  documenta qué había antes. R35 no la cuenta y hace bien — `sinComentarios`
+ *  es L-170 mecanizada: un censo no lee prosa como código.)*
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. */
+const BASELINE_R35 = {};
 const RE_R35 = /(backgroundColor|borderColor|borderTopColor|borderBottomColor|borderLeftColor|borderRightColor|shadowColor|tintColor|color|fill|stroke|stopColor)\s*:\s*'#[0-9A-Fa-f]{3,8}'/g;
 function r35(archivos) {
   const fallos = [];
@@ -282,7 +294,7 @@ function r35(archivos) {
   fallos.push(...ancla('R35', veGaleria ? 1 : 0, 1, 'archivo(s) de packages/ui/src/gallery (el corpus que R2 no miraba)'));
   return {
     fallos,
-    info: `${total}/${sumaBaseline} color(es) aplicados a mano${sumaBaseline === 0 ? '' : ' (baseline: el splashOverlay del template de Expo, de C)'}${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+    info: `${total} color(es) aplicados a mano${sumaBaseline === 0 ? ' (DURA EN 0 desde S96-B: el residuo del template murió con la tanda de marca de C, el día que la regla nació)' : ` (baseline ${sumaBaseline})`}${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
   };
 }
 
