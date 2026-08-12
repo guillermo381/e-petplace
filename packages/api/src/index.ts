@@ -1097,3 +1097,19 @@ export {
   type NarrativaPedido,
   type CodigoErrorDespensa,
 } from './wrappers/_despensa-comun';
+
+export {
+  cotizarEnvioDespensa,
+  calcularPromesaEntrega,
+  nuevaClaveIdempotencia,
+  crearPedidoDespensa,
+  reservarStockPedido,
+  iniciarPagoPedido,
+  cancelarPedidoDespensa,
+  type CotizacionEnvio,
+  type InputCotizarEnvio,
+  type PromesaEntrega,
+  type ItemDeCompra,
+  type DatosDeEntrega,
+  type PedidoCreado,
+} from './wrappers/despensa-pedido';
