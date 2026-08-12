@@ -369,3 +369,27 @@ export {
   type DestinoItem,
   type MascotaDestino,
 } from './components/SelectorDestinoItem'
+
+// PuertaDeOficio — S96-B: el BARRIDO al cambiar de oficio (§3).
+//
+// 🔴 Y LO QUE **NO** HACE, escrito acá porque su modo de falla es creer
+// que sí: la letra dice «cruzar la puerta cambia PERMISOS, no decoración
+// — si la puerta solo cambia colores, es una animación bonita sobre un
+// agujero». ESTE COMPONENTE ES EL COLOR. El cambio de alcance vive en el
+// servidor (matriz acto/rol de BIO_EXPEDIENTE, cerrado en policies); esta
+// pieza es su acuse de recibo visual, y nada más. Un barrido sobre un
+// agujero se ve idéntico a uno sobre una puerta de verdad.
+//
+// 340ms por `motion.marca` — la física con la que abre el Coach desde
+// S53. Resuelve sola la tensión aparente letra-vs-Ley 6: la letra pide
+// «menos de medio segundo» y la Ley 6 manda <300ms EN UI; 340 no es UI
+// chica sino gesto de MARCA, registro que la casa ya tiene firmado con su
+// token. Cumple la letra sin inventar duración ni pedir excepción.
+//
+// No barre en memorial (Ley 6/8) ni con reduce motion — y en los dos
+// casos `onFin` se llama IGUAL: degradar el gesto no puede degradar el
+// contrato, o la pantalla que lo espera se cuelga.
+//
+// Recibe la CAPA (ley 10), jamás un color: aceptar un hex sería la Ley 1
+// rota por la puerta de atrás.
+export { PuertaDeOficio, type PuertaDeOficioProps, type CapaDeOficio } from './components/PuertaDeOficio'

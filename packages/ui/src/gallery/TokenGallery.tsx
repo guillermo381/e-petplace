@@ -54,6 +54,7 @@ import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { FilaEntrega } from '../components/FilaEntrega'
 import { AvisoAlergia } from '../components/AvisoAlergia'
+import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
@@ -109,6 +110,39 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
         {hex.toLowerCase()}
       </Text>
+    </View>
+  )
+}
+
+// S96-B: la puerta solo existe MOVIÉNDOSE — una captura estática de un
+// barrido es un rectángulo de color, así que la galería la monta con su
+// disparador. El recuadro la acota: en producción barre la pantalla
+// entera, y ocupar la galería con un flash a pantalla completa cada vez
+// que alguien scrollea sería el adorno que la Ley 16 quita.
+function MuestraPuerta() {
+  const [activo, setActivo] = useState(false)
+  const [capa, setCapa] = useState<CapaDeOficio>('consumo')
+  const { theme: t } = useTheme()
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View
+        style={{ height: 120, borderRadius: radius.suave, overflow: 'hidden', backgroundColor: t.bg.overlay }}
+      >
+        <PuertaDeOficio capa={capa} activo={activo} onFin={() => setActivo(false)} />
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        {(['consumo', 'cuidado', 'identidad', 'comunidad'] as const).map((c) => (
+          <Boton
+            key={c}
+            variante="compacto"
+            etiqueta={c}
+            onPress={() => {
+              setCapa(c)
+              setActivo(true)
+            }}
+          />
+        ))}
+      </View>
     </View>
   )
 }
@@ -2844,6 +2878,10 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="PuertaDeOficio (S96) — el barrido al cambiar de oficio (§3)">
+          <MuestraPuerta />
         </Seccion>
 
         <Seccion titulo="AvisoAlergia (S96) — la alergia ADVIERTE, no esconde (§5.4)">
