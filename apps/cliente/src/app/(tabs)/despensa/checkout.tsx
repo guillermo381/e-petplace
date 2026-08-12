@@ -177,6 +177,9 @@ export default function DespensaCheckout() {
     if (metodo === 'despacho') {
       if (direccion === 'cargando') return t('despensa.faltaCargando');
       if (direccion === null) return t('despensa.faltaDireccion');
+      // §7 — el punto es OBLIGATORIO para el despacho: sin él, el
+      // repartidor busca una casa que Places quizás nunca encontró.
+      if (direccion.lat === null || direccion.lon === null) return t('despensa.faltaPunto');
       if (receptor.trim() === '') return t('despensa.faltaReceptor');
       if (telefono.trim() === '') return t('despensa.faltaTelefono');
       if (promesa !== null && typeof promesa === 'object' && 'fallo' in promesa) {
@@ -638,6 +641,7 @@ export default function DespensaCheckout() {
       >
         <DireccionHogarForm
           inicial={direccion !== 'cargando' ? direccion : null}
+          exigirPunto
           onGuardada={(d) => {
             setDireccion(d);
             if (telefono === '' && d.telefono !== null) setTelefono(d.telefono);

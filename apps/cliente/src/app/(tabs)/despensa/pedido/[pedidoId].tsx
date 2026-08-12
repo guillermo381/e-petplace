@@ -44,6 +44,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
+  CodigoAEscala,
   Encabezado,
   EscaleraEstados,
   Esqueleto,
@@ -275,14 +276,14 @@ export default function DespensaPedido() {
                 muestra en el mostrador). Se LEE, jamás llega por push. */}
             {codigo !== null ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <Texto variante="seccion">
-                  {detalle.pedido.metodo_entrega === 'retiro'
-                    ? t('despensa.codigoMostrador')
-                    : t('despensa.codigoPuerta')}
-                </Texto>
-                <Texto variante="datoMd" seleccionable centrado>
-                  {codigo}
-                </Texto>
+                <CodigoAEscala
+                  codigo={codigo}
+                  etiqueta={
+                    detalle.pedido.metodo_entrega === 'retiro'
+                      ? t('despensa.codigoMostrador')
+                      : t('despensa.codigoPuerta')
+                  }
+                />
                 <Texto variante="apoyo">
                   {detalle.pedido.metodo_entrega === 'retiro'
                     ? t('despensa.codigoMostradorDetalle')

@@ -401,6 +401,8 @@ export const clienteEs = {
     descargarCarnet: 'Descargar el carnet',
     descargarHistoria: 'Descargar la historia clínica',
     documentos: 'Documentos',
+    // S96-D · la puerta de la despensa desde el expediente (§5.1)
+    suAlimento: 'El alimento de {{nombre}}',
     // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
     // OBSERVAR, no de adiestrar: el Eje 6 es del dueño, no de un oficio.
     bitacora: 'Su bitácora',
@@ -1167,6 +1169,13 @@ export const clienteEs = {
     guardada: 'Listo — tu dirección quedó guardada.',
     // S79-A4 — la resolución Places: la ubicación existe solo si se buscó.
     ubicada: 'Ubicada en el mapa.',
+    // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
+    // encuentra la casa, el punto igual existe.
+    sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
+    puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
+    ponerPunto: 'Poner el punto en el mapa',
+    faltaPunto: 'Falta el punto en el mapa: es lo que encuentra tu casa cuando la dirección no alcanza.',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
@@ -1426,6 +1435,8 @@ export const clienteEs = {
     alergiaContiene: '{{nombre}} es alérgico a {{lista}} y este alimento lo contiene.',
     alergiaContieneDetalle: 'Podés comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
     alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
+    alergiaSinVerificar:
+      'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisá la etiqueta antes de dárselo.',
     alergiaEntiendo: 'Entiendo, quiero verlo igual',
     alergiaEntendida: 'Ya lo tuviste en cuenta',
     tuMascota: 'tu mascota',
@@ -1528,6 +1539,7 @@ export const clienteEs = {
     faltaVendedor: 'Todavía no podemos crear pedidos desde la app: falta conectar el vendedor de la oferta.',
     faltaCargando: 'Cargando tu dirección…',
     faltaDireccion: 'Falta tu dirección de entrega.',
+    faltaPunto: 'A tu dirección le falta el punto en el mapa. Abrila y ajustalo — es lo que encuentra tu casa.',
     faltaReceptor: 'Contanos quién recibe.',
     faltaTelefono: 'Falta un teléfono de contacto.',
     faltaPromesa: 'No hay ventana de entrega disponible — revisá la fecha o probá retiro en tienda.',

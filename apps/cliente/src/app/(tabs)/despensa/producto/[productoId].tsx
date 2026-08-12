@@ -78,7 +78,11 @@ import {
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
 import { agregarAlCarrito, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
-import { alergenosDeMascota, veredictoAlergia } from '@/lib/despensa/composicion';
+import {
+  alergenosDeMascota,
+  alergenosQueCruzan,
+  estadoComposicion,
+} from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
@@ -160,21 +164,28 @@ export default function DespensaProducto() {
 
   const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
 
-  /** §5.4 — el veredicto. Lo deriva el helper (único punto de estados de
-   *  composición); esta pantalla solo le pone voz. */
-  const veredicto = useMemo(
+  /** §5.4 — los HECHOS para AvisoAlergia (contrato de tres estados de B:
+   *  la pieza recibe hechos y decide sola; solo `verificada` sin cruce
+   *  calla). El estado lo deriva el helper — único punto que cambia
+   *  cuando el wrapper exponga `composicion_estado` del motor. */
+  const estadoComp = useMemo(
     () =>
       ficha !== 'cargando' && ficha !== 'error'
-        ? veredictoAlergia({
-            productoAlergenos: ficha.alergenos,
-            ingredientesActivos: ficha.ingredientes_activos,
-            mascotaAlergenos: alergenosMascota,
+        ? estadoComposicion({
+            alergenos: ficha.alergenos,
+            ingredientes_activos: ficha.ingredientes_activos,
           })
         : null,
+    [ficha],
+  );
+  const cruzan = useMemo(
+    () =>
+      ficha !== 'cargando' && ficha !== 'error'
+        ? alergenosQueCruzan(ficha.alergenos, alergenosMascota)
+        : [],
     [ficha, alergenosMascota],
   );
-
-  const exigeEntendimiento = veredicto !== null && veredicto.tipo === 'contiene';
+  const exigeEntendimiento = cruzan.length > 0;
 
   /** El porqué — frases construidas SOLO con atributos declarados (S95-I,
    *  sin cambios de criterio). */
@@ -355,31 +366,37 @@ export default function DespensaProducto() {
               ) : null}
             </View>
 
-            {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta cuando hay
-                algo que decir; el paso explícito gatea el CTA. */}
-            {veredicto !== null ? (
+            {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
+                haya alérgeno documentado relevante (regla de B: la pieza
+                recibe los hechos y decide ella — esta pantalla no la
+                condiciona; el único silencio legal es composición
+                verificada sin cruce, y eso lo resuelve la pieza). El paso
+                explícito gatea el CTA solo cuando CONTIENE. */}
+            {alergenosMascota.length > 0 && estadoComp !== null ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
-                {veredicto.tipo === 'contiene' ? (
-                  <AvisoAlergia
-                    modo="contiene"
-                    mensaje={t('despensa.alergiaContiene', {
-                      nombre: nombreMascota ?? t('despensa.tuMascota'),
-                      lista: veredicto.alergenos.join(', '),
-                    })}
-                    detalle={t('despensa.alergiaContieneDetalle')}
-                    entendido={entendido}
-                    onEntendido={() => setEntendido(true)}
-                    etiquetaEntendido={t('despensa.alergiaEntiendo')}
-                    etiquetaYaEntendido={t('despensa.alergiaEntendida')}
-                  />
-                ) : (
-                  <AvisoAlergia
-                    modo="sinComposicion"
-                    mensaje={t('despensa.alergiaSinComposicion', {
-                      nombre: nombreMascota ?? t('despensa.tuMascota'),
-                    })}
-                  />
-                )}
+                <AvisoAlergia
+                  composicion={estadoComp}
+                  contieneAlergeno={cruzan.length > 0}
+                  mensaje={
+                    cruzan.length > 0
+                      ? t('despensa.alergiaContiene', {
+                          nombre: nombreMascota ?? t('despensa.tuMascota'),
+                          lista: cruzan.join(', '),
+                        })
+                      : estadoComp === 'ausente'
+                        ? t('despensa.alergiaSinComposicion', {
+                            nombre: nombreMascota ?? t('despensa.tuMascota'),
+                          })
+                        : t('despensa.alergiaSinVerificar', {
+                            nombre: nombreMascota ?? t('despensa.tuMascota'),
+                          })
+                  }
+                  detalle={cruzan.length > 0 ? t('despensa.alergiaContieneDetalle') : undefined}
+                  entendido={exigeEntendimiento ? entendido : undefined}
+                  onEntendido={exigeEntendimiento ? () => setEntendido(true) : undefined}
+                  etiquetaEntendido={t('despensa.alergiaEntiendo')}
+                  etiquetaYaEntendido={t('despensa.alergiaEntendida')}
+                />
               </View>
             ) : null}
 

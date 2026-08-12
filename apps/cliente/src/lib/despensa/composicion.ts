@@ -63,44 +63,9 @@ export function alergenosDeMascota(detalle: unknown[]): string[] {
   return salida;
 }
 
-/**
- * EL VEREDICTO — qué tiene que decir la pantalla sobre ESTE producto para
- * ESTA mascota. Discriminado para que la pantalla componga la voz (Ley 3:
- * la voz es del riel, este archivo decide, no redacta):
- *
- * · `contiene`         → el producto declara composición y CONTIENE un
- *                        alérgeno documentado. Advertencia dura + paso
- *                        explícito de entendimiento (§5.4).
- * · `sin_composicion`  → la mascota tiene alergias documentadas y el
- *                        producto NO declara composición. Candado ① de
- *                        §5.4: se dice, JAMÁS silencio — el silencio se
- *                        lee como "no tiene pollo" y esa lectura la haría
- *                        el dueño, no nosotros.
- * · `null`             → nada que advertir: la mascota no tiene alergias
- *                        documentadas, o la composición declarada no
- *                        cruza. (Con el AvisoAlergia de tres estados de
- *                        B, el caso "declarada sin verificar, sin cruce"
- *                        pasará a montarse igual y a hablar solo — este
- *                        veredicto ganará esa rama cuando el contrato
- *                        nuevo llegue a main.)
- */
-export type VeredictoAlergia =
-  | { tipo: 'contiene'; alergenos: string[] }
-  | { tipo: 'sin_composicion' }
-  | null;
-
-export function veredictoAlergia(input: {
-  productoAlergenos: string[];
-  ingredientesActivos: string[];
-  mascotaAlergenos: string[];
-}): VeredictoAlergia {
-  if (input.mascotaAlergenos.length === 0) return null;
-  const estado = estadoComposicion({
-    alergenos: input.productoAlergenos,
-    ingredientes_activos: input.ingredientesActivos,
-  });
-  if (estado === 'ausente') return { tipo: 'sin_composicion' };
-  const cruzan = alergenosQueCruzan(input.productoAlergenos, input.mascotaAlergenos);
-  if (cruzan.length > 0) return { tipo: 'contiene', alergenos: cruzan };
-  return null;
-}
+// NOTA DE CONSUMO (contrato AvisoAlergia v2 de B, S96): la pieza recibe
+// los HECHOS — `composicion` (este helper) + `contieneAlergeno`
+// (`alergenosQueCruzan`) — y decide sola qué decir y cuándo callar (solo
+// `verificada` sin cruce calla). La pantalla la monta SIEMPRE que haya
+// alérgeno documentado relevante, sin condicionarla. El veredicto
+// intermedio que vivía acá murió con ese contrato (regla 37).

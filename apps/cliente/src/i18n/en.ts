@@ -321,6 +321,8 @@ export const clienteEn = {
     descargarCarnet: 'Download the card',
     descargarHistoria: 'Download the medical record',
     documentos: 'Documents',
+    // S96-D · the pantry door from the record (§5.1)
+    suAlimento: "{{nombre}}'s food",
     // S91-C — mirror of es.ts.
     bitacora: 'Their logbook',
     bitacoraDetalle: 'What you see at home fills in their record.',
@@ -1033,6 +1035,13 @@ export const clienteEn = {
     guardada: 'Done — your address is saved.',
     // S79-A4 — Places resolution: location exists only if it was searched.
     ubicada: 'Pinned on the map.',
+    // S96-D — the movable point (§7): if Places can't find the house,
+    // the point still exists.
+    sinResultados: "We couldn't find that address. Type it anyway and place the point by hand on the map.",
+    puntoEtiqueta: 'Move the map to adjust the delivery point',
+    puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
+    ponerPunto: 'Place the point on the map',
+    faltaPunto: "The map point is missing: it's what finds your home when the address isn't enough.",
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
@@ -1235,6 +1244,8 @@ export const clienteEn = {
     alergiaContiene: '{{nombre}} is allergic to {{lista}} and this food contains it.',
     alergiaContieneDetalle: "You can still buy it — it's your call. We just want you to decide knowing.",
     alergiaSinComposicion: "We don't have this product's ingredients, so we can't confirm whether it's safe for {{nombre}}.",
+    alergiaSinVerificar:
+      "The composition was declared by the manufacturer and we haven't verified it yet. Given {{nombre}}'s allergies, check the label before feeding it.",
     alergiaEntiendo: 'I understand, show it anyway',
     alergiaEntendida: 'You already took this into account',
     tuMascota: 'your pet',
@@ -1336,6 +1347,7 @@ export const clienteEn = {
     faltaVendedor: "We can't create orders from the app yet: the offer's seller connection is missing.",
     faltaCargando: 'Loading your address…',
     faltaDireccion: 'Your delivery address is missing.',
+    faltaPunto: "Your address is missing its map point. Open it and adjust it — it's what finds your home.",
     faltaReceptor: 'Tell us who receives it.',
     faltaTelefono: 'A contact phone is missing.',
     faltaPromesa: 'No delivery window available — check the date or try store pickup.',
