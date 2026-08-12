@@ -51,6 +51,8 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { EscaleraEstados } from '../components/EscaleraEstados'
+import { TarjetaPedido } from '../components/TarjetaPedido'
+import { FilaEntrega } from '../components/FilaEntrega'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
 import { ChipEntidad } from '../components/ChipEntidad'
@@ -2818,6 +2820,64 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="TarjetaPedido (S96) — un pedido en una lista, de los DOS lados">
+          {/* Las dos caras juntas, que es como se juzga la decisión "una
+              pieza y no dos": misma anatomía, distinta voz y distinto
+              acento. Y la tercera muestra el caso que no tiene recorrido
+              (una compra de mostrador reclamada): sin pasos NO hay
+              escalera — un riel vacío afirmaría un camino que no existe. */}
+          <View style={{ gap: spacing[3] }}>
+            <TarjetaPedido
+              acento="oficio"
+              titulo="Karina Salazar"
+              detalle="hoy 14:00–18:00 · 3 productos"
+              monto="$ 48.90"
+              onPress={() => {}}
+              etiqueta="Pedido de Karina Salazar, empacado"
+              pasos={[
+                { clave: 'preparado', etiqueta: 'Preparado', estado: 'hecho' },
+                { clave: 'empacado', etiqueta: 'Empacado', estado: 'actual' },
+                { clave: 'despachado', etiqueta: 'Despachado', estado: 'pendiente' },
+                { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+              ]}
+            />
+            <TarjetaPedido
+              titulo="Veterinaria Aurora"
+              detalle="llega hoy entre 14:00 y 18:00"
+              monto="$ 48.90"
+              onPress={() => {}}
+              etiqueta="Tu pedido de Veterinaria Aurora, en camino"
+              pasos={[
+                { clave: 'confirmado', etiqueta: 'Confirmado', estado: 'hecho' },
+                { clave: 'preparando', etiqueta: 'Preparando', estado: 'hecho' },
+                { clave: 'en_camino', etiqueta: 'Vamos hacia vos', estado: 'actual' },
+                { clave: 'entregado', etiqueta: 'Entregado', estado: 'pendiente' },
+              ]}
+            />
+            <TarjetaPedido
+              titulo="Veterinaria Aurora"
+              detalle="compra en el mostrador · 2 productos"
+              monto="$ 21.40"
+              onPress={() => {}}
+              etiqueta="Compra en el mostrador de Veterinaria Aurora"
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="FilaEntrega (S96) — una parada del repartidor, legible al sol">
+          {/* Con instrucción y sin ella: la instrucción es el árbitro del
+              caso feo (§9.3) y por eso tiene superficie propia. */}
+          <View style={{ gap: spacing[6] }}>
+            <FilaEntrega
+              direccion="Av. Shyris N34-120 y Portugal"
+              referencia="Casa verde, portón negro, frente a la panadería"
+              instrucciones="Dejar en portería con Don Luis. Timbre 3B."
+              onLlamar={() => {}}
+            />
+            <FilaEntrega direccion="Calle Cuero y Caicedo 458" onLlamar={() => {}} />
+          </View>
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

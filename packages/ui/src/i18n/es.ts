@@ -117,6 +117,12 @@ export const uiEs = {
     ver: 'Ver {{n}} más',
     ocultar: 'Ocultar',
   },
+  // S96-B — FilaEntrega. Solo rótulos de FORMA: el contenido (dirección,
+  // referencia, instrucción) llega por prop desde el snapshot del envío.
+  filaEntrega: {
+    instrucciones: 'La familia pidió',
+    llamar: 'Llamar',
+  },
   // S96-B — EscaleraEstados. Acá vive SOLO el armado del label de
   // accesibilidad, que es FORMA: el número lo pone el componente y el
   // NOMBRE del paso llega por prop. El vendedor lee "Empacado" y la

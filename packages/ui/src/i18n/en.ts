@@ -101,6 +101,11 @@ export const uiEn = {
     ver: 'See {{n}} more',
     ocultar: 'Hide',
   },
+  // S96-B — FilaEntrega: form labels only; the content arrives as props.
+  filaEntrega: {
+    instrucciones: 'The family asked',
+    llamar: 'Call',
+  },
   // S96-B — EscaleraEstados: only the a11y label lives here (FORM). The
   // step NAME arrives as a prop: seller and family read the same fact in
   // different voices, and an audience cannot be deduplicated.

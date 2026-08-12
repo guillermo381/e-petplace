@@ -297,3 +297,34 @@ export {
   type PasoEstado,
   type DesvioEscalera,
 } from './components/EscaleraEstados'
+
+// TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
+// de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
+// "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).
+//
+// UNA PIEZA Y NO DOS, medido: la anatomía de las dos caras es la misma
+// (identidad · línea de datos · monto · escalera) y lo único que cambia es
+// QUÉ va en cada slot y con qué voz. Por eso los slots son NEUTROS —
+// `titulo`, no `nombreContacto`: un slot que nombra el dato de UNA de las
+// dos casas es el primer paso de la bifurcación, y la casa ya pagó ese
+// precio (los cuatro logs de oficio de S82 nacieron por copia).
+//
+// 🔴 NO TIENE PROP DE MASCOTA, Y ES EL PUNTO: `LETRA_PANEL_VENDEDOR` §4 y
+// `MODELO_DESPENSA` §7.4 prohíben la identidad de la mascota en el panel
+// sin excepción. Acá no es disciplina de la pantalla — es el contrato: el
+// estado malo es INEXPRESABLE (L-222).
+export { TarjetaPedido, type TarjetaPedidoProps } from './components/TarjetaPedido'
+
+// FilaEntrega — S96-B: UNA parada del repartidor (§9.1). Su vara no es la
+// del resto de la casa: se lee a pleno sol, arriba de una moto.
+//
+// 🔴 SU CONTRATO ES LA LEY §9.2 HECHA TIPO: no existe prop de mascota, de
+// pedido, de productos ni de monto — "el envío asignado a él y nada más".
+// Coincide exactamente con lo que A cerró del otro lado (`EntregaAsignada`
+// trae dirección, punto, referencia, instrucciones y teléfono; cero
+// mascota, cero pedido) SIN que las dos capas se hayan copiado, y esa
+// coincidencia es la prueba de que la línea está bien puesta.
+//
+// El botón usa `Boton tamaño="lg"` (alto 56) — la escala de la casa YA
+// tenía el tamaño de guantes: hacía falta recorrerla, no ensancharla.
+export { FilaEntrega, type FilaEntregaProps } from './components/FilaEntrega'
