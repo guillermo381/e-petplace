@@ -53,6 +53,8 @@ import { PieRevelar } from '../components/PieRevelar'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { FilaEntrega } from '../components/FilaEntrega'
+import { AvisoAlergia } from '../components/AvisoAlergia'
+import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
 import { ChipEntidad } from '../components/ChipEntidad'
@@ -108,6 +110,28 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
         {hex.toLowerCase()}
       </Text>
     </View>
+  )
+}
+
+// S96-B: muestra VIVA del selector de destino — la exclusión entre
+// mascota y donación solo se ve tocando, y es lo que la pieza garantiza
+// por TIPO (el espejo de `chk_destino_excluyente`). Arranca en `null`
+// a propósito: nada viene preseleccionado, porque preseleccionar sería
+// la app adivinando de quién es la compra (§4).
+function MuestraSelectorDestino() {
+  const [destino, setDestino] = useState<DestinoItem | null>(null)
+  return (
+    <SelectorDestinoItem
+      mascotas={[
+        { id: 'thor', nombre: 'Thor' },
+        { id: 'zeus', nombre: 'Zeus' },
+      ]}
+      destino={destino}
+      onCambiar={setDestino}
+      rotulo="¿Para quién es?"
+      etiquetaDonacion="Donar este producto"
+      detalleDonacion="Lo entregamos a un refugio. No suma a ningún expediente."
+    />
   )
 }
 
@@ -2820,6 +2844,39 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="AvisoAlergia (S96) — la alergia ADVIERTE, no esconde (§5.4)">
+          {/* Los DOS modos juntos, porque la comparación ES la ley: uno
+              dice "esto le hace mal a Thor" y el otro "no lo sabemos".
+              Que se vean distinto es el punto — igualarlos entrena a
+              ignorar el primero. Y el tercero muestra el paso explícito
+              YA dado: el control desaparece, no se vuelve a pedir. */}
+          <View style={{ gap: spacing[4] }}>
+            <AvisoAlergia
+              modo="contiene"
+              mensaje="Thor es alérgico al pollo y este alimento lo contiene."
+              onEntendido={() => {}}
+              etiquetaEntendido="Entiendo, seguir igual"
+            />
+            <AvisoAlergia
+              modo="sinComposicion"
+              mensaje="No tenemos los ingredientes de este producto."
+              detalle="No podemos avisarte si tiene algo que a Thor le haga mal."
+            />
+            <AvisoAlergia
+              modo="contiene"
+              mensaje="Thor es alérgico al pollo y este alimento lo contiene."
+              entendido
+              onEntendido={() => {}}
+              etiquetaEntendido="Entiendo, seguir igual"
+              etiquetaYaEntendido="Lo tuviste en cuenta."
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="SelectorDestinoItem (S96) — a quién va este producto (§6.3)">
+          <MuestraSelectorDestino />
         </Seccion>
 
         <Seccion titulo="TarjetaPedido (S96) — un pedido en una lista, de los DOS lados">

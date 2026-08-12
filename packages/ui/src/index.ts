@@ -328,3 +328,44 @@ export { TarjetaPedido, type TarjetaPedidoProps } from './components/TarjetaPedi
 // El botón usa `Boton tamaño="lg"` (alto 56) — la escala de la casa YA
 // tenía el tamaño de guantes: hacía falta recorrerla, no ensancharla.
 export { FilaEntrega, type FilaEntregaProps } from './components/FilaEntrega'
+
+// AvisoAlergia — S96-B: LA ALERGIA ADVIERTE, NO ESCONDE (§5.4, enmienda
+// firmada a MODELO_DESPENSA §6 y §10). Exclusión dura en la
+// RECOMENDACIÓN, advertencia dura en la BÚSQUEDA.
+//
+// LOS DOS CANDADOS DE LA LETRA, HECHOS TIPO:
+//  ① JAMÁS SILENCIO — `modo` es obligatorio y su unión está cerrada en
+//    DOS ('contiene' · 'sinComposicion'). No existe una tercera opción:
+//    una pantalla que no sabe NO PUEDE CALLAR, tiene que decir que no
+//    sabe. La letra dice por qué: «el silencio se lee como "no tiene
+//    pollo", y esa lectura la hace el dueño, no nosotros».
+//  ② NO SE APAGA POR UNA PROMOCIÓN — no hay prop para ocultarla ni para
+//    bajarle el tono. Quien la monte no tiene por dónde silenciarla.
+//
+// Los dos modos NO se pintan igual: uno dice «esto le hace mal a Thor» y
+// el otro «no lo sabemos». Igualarlos entrena a ignorar el primero.
+export { AvisoAlergia, type AvisoAlergiaProps, type ModoAvisoAlergia } from './components/AvisoAlergia'
+
+// SelectorDestinoItem — S96-B: a quién va este producto (§6.3).
+//
+// EL CHECK DEL MOTOR TIENE SU ESPEJO EN EL TIPO: `chk_destino_excluyente`
+// dice una mascota O donación, jamás las dos — y acá `destino` es una
+// UNIÓN DISCRIMINADA, no dos campos sueltos. Con `mascotaId` + `donacion`
+// separados, «donación para Thor» sería expresable y el rebote llegaría
+// del servidor; así NO COMPILA. Un guard protege el dato; el tipo protege
+// al que construye la pantalla (L-222).
+//
+// La donación se dibuja SEPARADA de las caras a propósito: §6.4 le pone
+// dos límites duros (jamás entra a un expediente, jamás otorga beneficio
+// comercial) y dos naturalezas no comparten hilera — el mismo candado
+// gratis que §1 usa para separar Servicios de Venta de productos.
+//
+// `destino: null` es LEGAL y nada viene preseleccionado: preseleccionar
+// sería la app adivinando de quién es la compra, que es justo lo que la
+// regla general de §4 prohíbe.
+export {
+  SelectorDestinoItem,
+  type SelectorDestinoItemProps,
+  type DestinoItem,
+  type MascotaDestino,
+} from './components/SelectorDestinoItem'
