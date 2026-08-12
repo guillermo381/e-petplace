@@ -1077,3 +1077,23 @@ export {
   type AtencionAbierta,
   type CodigoErrorAtencionesAbiertas,
 } from './wrappers/atencionesAbiertas';
+
+// ── LA DESPENSA (S95-E) ─────────────────────────────────────────────────────
+export {
+  listarProductosDespensa,
+  obtenerFichaProducto,
+  buscarProductosDespensa,
+  recomendarParaMascota,
+  type ProductoDeVitrina,
+  type VarianteDeProducto,
+  type FichaProducto,
+  type Recomendacion,
+  type FiltrosVitrina,
+} from './wrappers/despensa-catalogo';
+
+export {
+  NARRATIVAS_PEDIDO,
+  esNarrativa,
+  type NarrativaPedido,
+  type CodigoErrorDespensa,
+} from './wrappers/_despensa-comun';
