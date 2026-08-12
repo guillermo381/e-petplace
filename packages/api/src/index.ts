@@ -1088,6 +1088,8 @@ export {
   registrarEntendimientoAlergia,
   // S96 (4ª tanda): la advertencia por RELACIÓN, con su imprecisión tipada.
   expandirAlergenosAVigilar,
+  // S96 (pedido D): el vocabulario con su VOZ (cat_alergenos.nombre_es).
+  listarAlergenos,
   type AlergenoVigilado,
   type ProductoDeVitrina,
   type VarianteDeProducto,

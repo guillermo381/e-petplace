@@ -153,7 +153,15 @@ export default function DespensaProducto() {
       setVigilados(
         exp.ok
           ? exp.data
-          : documentados.map((a) => ({ declarado: a, origen: a, exacta: true })),
+          : // La degradación conserva el TEXTO de la mascota como voz — el
+            // mismo criterio del motor: al texto libre no se le inventa voz.
+            documentados.map((a) => ({
+              declarado: a,
+              origen: a,
+              exacta: true,
+              declarado_nombre: a,
+              origen_nombre: a,
+            })),
       );
     })();
     return () => {
