@@ -1,6 +1,45 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S96 — 59 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+**Estado: S96 — 62 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+
+> **S96-B · SEGUNDA TANDA — el ensanche firmado, tres piezas y una regla.**
+> Contador re-medido (L-141): **62** (65 `.tsx` − 2 `.web` − infra). R17:
+> `exportaciones=85 · en-galería=76 · pendientes=0`. WCAG **178/0**.
+>
+> - **`AvisoAlergia` pasa a TRES estados** (firma del founder):
+>   `verificada · declarada_sin_verificar · ausente`, **verbatim del CHECK
+>   que A metió en `productos.composicion_estado`** — los dos llegamos al
+>   mismo vocabulario leyendo la misma firma, sin hablarnos. **Solo la
+>   verificada puede callar.** La pieza dejó de recibir *qué mostrar* y
+>   pasa a recibir los HECHOS: **montada con `declarada_sin_verificar`, la
+>   pantalla no tiene prop para hacerla callar.** *Su límite: no puede
+>   obligar a que la MONTEN — eso es regla de lint, no de prop.*
+> - **`CodigoAEscala`** (pedido de C, dos consumidores). **El desvío que C
+>   declaró no era suyo: era el hueco del sistema** — `Texto` no tiene
+>   escotilla de tamaño, así que para la escala había que salirse de la
+>   Ley 3. Lleva **excepción declarada al matiz S53**: el mono se conserva
+>   porque este dato **se transcribe y se dicta**, y en sans se confunden
+>   0/O y 1/l/I.
+> - **`BuscadorDeLugar` + `PinMovible`** (§7, lo 1º de la lista de D). El
+>   CHECK `chk_direccion_con_punto` tiene su espejo en el tipo: lat/lon
+>   **requeridas sin `null`**. Y **se mueve el mapa, no el pin** —
+>   arrastrando un marcador el dedo tapa justo el punto que hay que
+>   colocar.
+> - **R35 · el color aplicado sale del tema (D-781).** 🔴 **Ensanchar R2
+>   no servía, y lo dijo la medición:** habría dado 29 rojos en la galería
+>   y ~27 falsos — la galería de tokens está llena de hex **en strings de
+>   etiqueta** que documentan valores medidos, y eso es su trabajo. La
+>   regla **afina la pregunta** (hex en posición de valor de estilo) en vez
+>   de ensanchar el corpus. **Baseline 1 con dueño: un residuo de template
+>   en `apps/prestador` — de C, no se cura desde acá.**
+>
+> **Y lo que encontró R35 al MEDIRSE, antes de existir:** los 6 stops de la
+> rampa del logo **duplicados en `Isotipo.tsx`**, contra `DIRECCION_ARTE`
+> §9bis.3 que declara `gradients.logo` su fuente única. Deduplicado tras
+> verificar byte a byte. ⚠️ **Con una trampa de nombre adentro:** el JSDoc
+> llama «tinta» a `#1D1A2E` y **`palette.tinta` es `#221E19`** — el token
+> correcto era `textLight0`. *Sustituir por el que comparte el NOMBRE
+> habría cambiado la marca sin que ningún gate lo viera.*
 
 > **S96-B · LAS SEIS PIEZAS DEL RECORRIDO DE LA DESPENSA.** Contador
 > RE-MEDIDO por el método auditable de siempre (L-141): `ls
