@@ -1543,6 +1543,69 @@ export const clienteEs = {
     recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
 
+    // S96 · la escalera del pedido (§8.1 — cinco pasos; "Preparando" tapa
+    // los tres escalones internos del vendedor a propósito)
+    pasoPagando: 'Pagando',
+    pasoConfirmado: 'Confirmado',
+    pasoPreparando: 'Preparando',
+    pasoEnCamino: 'En camino',
+    pasoEntregado: 'Entregado',
+    desvioNoLlego: 'La entrega no se pudo hacer',
+    desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
+    desvioCancelado: 'Cancelado',
+
+    // S96 · Tus pedidos
+    promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
+    pedidoDel: 'Pedido del {{dia}}',
+    verPedido: 'Ver el pedido',
+    errorPedidosTitulo: 'No pudimos cargar tus pedidos',
+    sinPedidosTitulo: 'Todavía no pediste nada',
+    sinPedidosDetalle: 'Cuando hagas tu primer pedido, lo vas a seguir desde acá.',
+
+    // S96 · el detalle del pedido
+    pedidoTitulo: 'Tu pedido',
+    errorPedidoTitulo: 'No pudimos cargar este pedido',
+    codigoPuerta: 'El código de tu entrega',
+    codigoPuertaDetalle: 'Decíselo a quien te lleve el pedido. Es lo que confirma que te llegó a vos.',
+    codigoMostrador: 'El código para el mostrador',
+    codigoMostradorDetalle: 'Mostralo en el local cuando retires tu pedido.',
+    quePediste: 'Qué pediste',
+    lineaCantidad: '{{n}} u.',
+    lineaLote: 'Lote {{lote}}',
+    lineaDonacion: 'Donación',
+    lineaPara: 'Para {{nombre}}',
+    cancelarPedido: 'Cancelar el pedido',
+    cancelarDetalle:
+      'Todavía nadie empezó a prepararlo, así que cancelar no cuesta nada. Después de este punto, el botón cambia y lo conversamos.',
+    cancelarConfirmar: 'Sí, cancelar',
+    cancelarNo: 'No, lo dejo',
+    canceladoOk: 'El pedido quedó cancelado.',
+    tengoUnProblema: 'Tengo un problema',
+    // ⚠️ El horario espera confirmación del founder en el gate de strings —
+    // es el único dato de la pantalla que no sale de un sistema.
+    problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 9:00 a 20:00.',
+    problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',
+    problemaFallback: 'No pudimos abrir WhatsApp. Escribinos al {{numero}}.',
+    paraQuienFue: '¿Para quién fue?',
+    atarConfirmar: 'Sumar a su expediente',
+    atadoOk: 'Listo: quedó atado. Entra a su expediente al entregarse.',
+    atadoConEvento: 'Listo: ya es parte de su historia.',
+
+    // S96 · el reclamo del código (§4 — el vendedor jamás elige la mascota)
+    reclamoTitulo: 'El código de tu factura',
+    reclamoIntro:
+      'Si compraste en el local, tu factura tiene un código. Ingresalo, elegí para quién fue, y la compra entra a su expediente.',
+    reclamoCodigoLabel: 'Código',
+    reclamoCodigoPlaceholder: 'El código impreso en tu factura',
+    reclamoFaltaCodigo: 'Ingresá el código de la factura.',
+    reclamoFaltaMascota: 'Elegí para quién fue la compra.',
+    reclamoSinMascotasTitulo: 'Todavía no registraste ninguna mascota',
+    reclamoSinMascotasDetalle: 'La compra entra al expediente de una mascota. Registrala primero — tarda un minuto.',
+    reclamoCta: 'Sumar al expediente',
+    reclamoListoTitulo: 'Ya es parte de su historia',
+    reclamoListoDetalle: 'La compra quedó en el expediente de {{nombre}}.',
+    reclamoVolver: 'Volver a la despensa',
+
     // Los vacíos — con camino, jamás finales mudos
     vacioTitulo: 'La despensa todavía está vacía',
     vacioDetalle:

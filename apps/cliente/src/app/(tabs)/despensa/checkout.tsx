@@ -82,6 +82,7 @@ import {
   type PromesaEntrega,
 } from '@epetplace/api';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
+import { FilaMonto } from '@/components/despensa-piezas';
 import { useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
 
@@ -644,28 +645,6 @@ export default function DespensaCheckout() {
           }}
         />
       </Hoja>
-    </View>
-  );
-}
-
-/** Fila de monto del resumen — etiqueta a la izquierda, número en mono a
- *  la derecha (Ley 3: la plata es dato de máquina). Anatomía local mínima;
- *  `FilaDato` de la casa es vertical y esta lectura exige la horizontal
- *  (el candidato "FilaDato compacta" sigue registrado desde S71). */
-function FilaMonto({
-  etiqueta,
-  monto,
-  destacada = false,
-}: {
-  etiqueta: string;
-  monto: string | null;
-  destacada?: boolean;
-}) {
-  if (monto === null) return null;
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Texto variante={destacada ? 'seccion' : 'cuerpo'}>{etiqueta}</Texto>
-      <Texto variante={destacada ? 'datoMd' : 'dato'}>{monto}</Texto>
     </View>
   );
 }

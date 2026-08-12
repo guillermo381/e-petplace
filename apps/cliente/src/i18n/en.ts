@@ -1351,6 +1351,68 @@ export const clienteEn = {
     recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
     recurrenciaActiva: 'The recurring purchase is set up.',
 
+    // S96 · the order ladder (§8.1 — five steps; "Preparing" deliberately
+    // covers the seller's three internal steps)
+    pasoPagando: 'Paying',
+    pasoConfirmado: 'Confirmed',
+    pasoPreparando: 'Preparing',
+    pasoEnCamino: 'On the way',
+    pasoEntregado: 'Delivered',
+    desvioNoLlego: "The delivery couldn't be made",
+    desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
+    desvioCancelado: 'Canceled',
+
+    // S96 · Your orders
+    promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
+    pedidoDel: 'Order from {{dia}}',
+    verPedido: 'View order',
+    errorPedidosTitulo: "We couldn't load your orders",
+    sinPedidosTitulo: "You haven't ordered anything yet",
+    sinPedidosDetalle: "When you place your first order, you'll follow it from here.",
+
+    // S96 · order detail
+    pedidoTitulo: 'Your order',
+    errorPedidoTitulo: "We couldn't load this order",
+    codigoPuerta: 'Your delivery code',
+    codigoPuertaDetalle: "Tell it to whoever brings your order. It's what confirms it reached you.",
+    codigoMostrador: 'Your counter code',
+    codigoMostradorDetalle: 'Show it at the store when you pick up your order.',
+    quePediste: 'What you ordered',
+    lineaCantidad: '{{n}} u.',
+    lineaLote: 'Batch {{lote}}',
+    lineaDonacion: 'Donation',
+    lineaPara: 'For {{nombre}}',
+    cancelarPedido: 'Cancel the order',
+    cancelarDetalle:
+      "Nobody has started preparing it yet, so canceling costs nothing. Past that point, the button changes and we talk it through.",
+    cancelarConfirmar: 'Yes, cancel',
+    cancelarNo: 'No, keep it',
+    canceladoOk: 'The order was canceled.',
+    tengoUnProblema: 'I have a problem',
+    // ⚠️ The hours await founder confirmation at the strings gate.
+    problemaDetalle: "Takes you to the e-PetPlace team's WhatsApp. We answer from 9:00 to 20:00.",
+    problemaMensaje: 'Hi, I have a problem with my order {{numero}}.',
+    problemaFallback: "We couldn't open WhatsApp. Write to us at {{numero}}.",
+    paraQuienFue: 'Who was it for?',
+    atarConfirmar: 'Add to their record',
+    atadoOk: "Done: it's assigned. It joins their record on delivery.",
+    atadoConEvento: "Done: it's already part of their story.",
+
+    // S96 · the invoice code claim (§4 — the seller never picks the pet)
+    reclamoTitulo: 'Your invoice code',
+    reclamoIntro:
+      'If you bought at the store, your invoice has a code. Enter it, pick who it was for, and the purchase joins their record.',
+    reclamoCodigoLabel: 'Code',
+    reclamoCodigoPlaceholder: 'The code printed on your invoice',
+    reclamoFaltaCodigo: 'Enter the invoice code.',
+    reclamoFaltaMascota: 'Pick who the purchase was for.',
+    reclamoSinMascotasTitulo: "You haven't registered any pets yet",
+    reclamoSinMascotasDetalle: "The purchase joins a pet's record. Register them first — it takes a minute.",
+    reclamoCta: 'Add to the record',
+    reclamoListoTitulo: 'Already part of their story',
+    reclamoListoDetalle: "The purchase is now in {{nombre}}'s record.",
+    reclamoVolver: 'Back to the pantry',
+
     vacioTitulo: 'The pantry is still empty',
     vacioDetalle:
       'We’re building the catalog with products that genuinely suit your pet. When it’s ready, you’ll see it here.',
