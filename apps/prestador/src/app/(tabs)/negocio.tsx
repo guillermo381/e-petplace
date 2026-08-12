@@ -28,6 +28,7 @@ import {
   CeldaNavegacion,
   Icono,
   MarcaDeAgua,
+  PuertaDeOficio,
   Separador,
   Tarjeta,
   Texto,
@@ -50,6 +51,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
@@ -124,15 +126,30 @@ export default function Negocio() {
   const [cargado, setCargado] = useState(false);
   const [fallos, setFallos] = useState<ReadonlySet<BloqueNegocio>>(new Set());
 
+  // ── S96-C · LA PUERTA DE OFICIO (LETRA_RECORRIDO §1 + §3) ───────────────
+  // Dos naturalezas, dos nombres: «Venta de productos» NO es un mundo de
+  // Servicios — es su propia sección, y solo existe para la cuenta que
+  // tiene la naturaleza de venta (rol `seller_productos` activo, leído por
+  // RLS vía el contexto cacheado). El barrido es SOLO color (el propio
+  // componente lo advierte): los permisos ya cambiaron en el servidor.
+  const [esVendedora, setEsVendedora] = useState(false);
+  const [puertaActiva, setPuertaActiva] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        const [rPendientes, rPrestador] = await Promise.all([
+        const [rPendientes, rPrestador, rVentas] = await Promise.all([
           obtenerResumenPendienteLiquidar(),
           obtenerMiPrestador(),
+          contextoVentas(),
         ]);
         if (!vigente) return;
+        // La puerta solo se dibuja con la naturaleza medida; si el contexto
+        // no se pudo leer, NO se dibuja — una puerta que no se sabe si
+        // corresponde es peor que su ausencia (y no es un fallo del tab:
+        // el resto de Negocio no depende de esto).
+        setEsVendedora(rVentas.ok && rVentas.data !== null && rVentas.data.esVendedora);
         const caidos = new Set<BloqueNegocio>();
         if (rPendientes.ok) setPendientes(rPendientes.data);
         else caidos.add('liquidaciones');
@@ -404,8 +421,46 @@ export default function Negocio() {
               único habitante, y un encabezado sin filas es un rótulo que
               promete una lista vacía. */}
 
+          {/* ── S96-C · VENTA DE PRODUCTOS — LA OTRA NATURALEZA ──────────
+              LETRA_RECORRIDO §1: «Servicios» y «Venta de productos» son
+              dos naturalezas, no dos categorías de lo mismo — por eso esta
+              tarjeta NO vive dentro de la lista de mundos de la oferta:
+              meterla ahí sería el primer paso hacia la tabla compartida
+              que MODELO_DESPENSA §3.4 prohíbe. Sin encabezado de sección:
+              una sección de un solo habitante es rótulo decorativo
+              (Ley 18). Solo existe con la naturaleza medida. */}
+          {esVendedora && (
+            <Tarjeta
+              interactiva
+              elevacion="reposo"
+              accessibilityRole="button"
+              etiqueta={t('ventas.entradaTitulo')}
+              onPress={() => setPuertaActiva(true)}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <Icono nombre="despensa" registro="aa" tamano={28} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Texto variante="seccion">{t('ventas.entradaTitulo')}</Texto>
+                  <Texto variante="apoyo">{t('ventas.entradaDetalle')}</Texto>
+                </View>
+              </View>
+            </Tarjeta>
+          )}
+
         </View>
       </ScrollView>
+
+      {/* el barrido del cruce — SOLO color; los permisos son del servidor.
+          `onFin` llega SIEMPRE (también en memorial/reduce-motion): el
+          contrato de la pieza garantiza que la navegación no se cuelga. */}
+      <PuertaDeOficio
+        capa="consumo"
+        activo={puertaActiva}
+        onFin={() => {
+          setPuertaActiva(false);
+          router.push('/ventas');
+        }}
+      />
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
       <VeloBarraEstadoOficio />

@@ -494,11 +494,21 @@ export interface SkuDelVendedor {
   sku_id: string;
   sku_vendedor: string;
   variante_id: string;
+  /** El producto con nombre — hueco medido por la pista C (S96): una pantalla
+   *  de stock o de mostrador que lista `sku_vendedor` pelado no le dice nada
+   *  a quien atiende. El catálogo canónico es de lectura pública. */
+  producto_nombre: string;
+  producto_marca: string | null;
+  presentacion: string;
   /** Materializado por trigger desde `inventario_movimientos`. El ledger es
    *  la verdad; esto es lectura rápida (patrón `mascota_perfil_vigente`). */
   stock_disponible: number;
   stock_reservado: number;
   estado: string;
+  /** El precio de la oferta PUBLICADA de este SKU. `null` HONESTO = sin
+   *  oferta publicada hoy — la pantalla lo dice, no se inventa un precio.
+   *  Es lo que el mostrador cobra (S96, hueco declarado por C). */
+  precio_publicado: number | null;
 }
 
 export async function listarSkusDelVendedor(
@@ -506,7 +516,11 @@ export async function listarSkusDelVendedor(
 ): Promise<ResultadoWrapper<SkuDelVendedor[], CodigoErrorDespensa>> {
   const { data, error } = await getClient()
     .from('vendedor_skus')
-    .select('id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado')
+    .select(
+      'id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado, ' +
+      'producto_variantes(presentacion, productos(nombre, marca)), ' +
+      'ofertas(precio, estado)',
+    )
     .eq('cuenta_comercial_id', cuentaComercialId)
     .eq('activo', true);
   if (error) return falloDespensa(error.message);
@@ -514,13 +528,27 @@ export async function listarSkusDelVendedor(
   const salida: SkuDelVendedor[] = [];
   for (const s of data) {
     if (!esObjDespensa(s) || typeof s.id !== 'string') return falloDespensa('datos_inconsistentes');
+    const variante = esObjDespensa(s.producto_variantes) ? s.producto_variantes : null;
+    const producto = variante !== null && esObjDespensa(variante.productos) ? variante.productos : null;
+    // El UNIQUE parcial `uq_oferta_publicada_por_variante` garantiza a lo sumo
+    // UNA publicada; acá además todas las ofertas del embed son de ESTE sku.
+    const publicada = (Array.isArray(s.ofertas) ? s.ofertas : []).find(
+      (o) => esObjDespensa(o) && o.estado === 'publicada',
+    );
     salida.push({
       sku_id: s.id,
       sku_vendedor: typeof s.sku_vendedor === 'string' ? s.sku_vendedor : '',
       variante_id: typeof s.variante_id === 'string' ? s.variante_id : '',
+      producto_nombre: producto !== null && typeof producto.nombre === 'string' ? producto.nombre : '',
+      producto_marca: producto !== null && typeof producto.marca === 'string' ? producto.marca : null,
+      presentacion: variante !== null && typeof variante.presentacion === 'string' ? variante.presentacion : '',
       stock_disponible: typeof s.stock_disponible === 'number' ? s.stock_disponible : 0,
       stock_reservado: typeof s.stock_reservado === 'number' ? s.stock_reservado : 0,
       estado: typeof s.estado === 'string' ? s.estado : '',
+      precio_publicado:
+        publicada !== undefined && esObjDespensa(publicada) && typeof publicada.precio === 'number'
+          ? publicada.precio
+          : null,
     });
   }
   return { ok: true, data: salida };

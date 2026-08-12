@@ -27,9 +27,51 @@ import {
 
 // ── Tipos de salida ─────────────────────────────────────────────────────────
 
+/**
+ * 🔴 FIRMA FOUNDER S96 (12-ago): la composición tiene CUATRO estados.
+ * `verificada` y `no_aplica` pueden callar — pero son DOS silencios distintos:
+ * «cotejamos y está bien» contra «acá no hay dato faltante» (la bolsa de
+ * arena a la que la app le pedía ingredientes). `declarada_sin_verificar` y
+ * `ausente` DICEN su condición en la superficie, siempre. Vocabulario
+ * VERBATIM del CHECK de `productos.composicion_estado` y de
+ * `EstadoComposicion` de `@epetplace/ui` (AvisoAlergia): cero mapeo.
+ */
+export type ComposicionEstado =
+  | 'verificada'
+  | 'declarada_sin_verificar'
+  | 'ausente'
+  | 'no_aplica';
+
+function composicionEstado(v: unknown): ComposicionEstado | null {
+  return v === 'verificada' || v === 'declarada_sin_verificar' ||
+         v === 'ausente' || v === 'no_aplica' ? v : null;
+}
+
+/**
+ * 🔴 S96 (4ª tanda): la advertencia dejó de ser coincidencia exacta — el
+ * vocabulario tiene RELACIONES como dato (`cat_alergeno_relaciones`). Un
+ * producto que declara `ave_no_especificada` ADVIERTE al alérgico a pollo,
+ * y la voz lo dice imprecisa: «podría ser pollo», jamás «contiene pollo».
+ * `exacta: false` ⟺ advertencia por relación `puede_ser`.
+ */
+export interface AlergenoVigilado {
+  /** El código que un PRODUCTO declararía y que tiene que advertir. */
+  declarado: string;
+  /** El alérgeno documentado de la mascota que lo origina. */
+  origen: string;
+  /** true = coincidencia o `es_un` (bisonte ES res) → «contiene».
+   *  false = `puede_ser` (ave podría ser pollo) → «podría ser». */
+  exacta: boolean;
+}
+
 export interface ProductoDeVitrina {
   /** `ofertas.id` — el identificador con el que se compra. */
   oferta_id: string;
+  /** 🔴 A QUIÉN LE COMPRÁS — el vendedor de la oferta publicada, derivado por
+   *  trigger del sku (S96, desbloqueante del checkout: sin esto la app no
+   *  podía crear el pedido). Es el `p_cuenta_comercial_id` que exigen
+   *  `crearPedidoDespensa` y `calcularPromesaDespensa`. */
+  cuenta_comercial_id: string;
   producto_id: string;
   variante_id: string;
   nombre: string;
@@ -49,6 +91,8 @@ export interface ProductoDeVitrina {
   /** Los alérgenos declarados del producto — viajan para que la superficie
    *  pueda DECIR por qué algo se excluyó, jamás para filtrar acá. */
   alergenos: string[];
+  /** Ver `ComposicionEstado`: solo `verificada` puede callar. */
+  composicion_estado: ComposicionEstado;
   especies_aplicables: string[];
   /** 🔴 LA PORTADA. `null` HONESTO cuando el producto no tiene foto: la
    *  superficie dibuja su marcador, jamás una imagen rota ni un placeholder
@@ -69,6 +113,11 @@ export interface VarianteDeProducto {
   oferta_id: string | null;
   precio: number | null;
   moneda: string | null;
+  /** El vendedor de la oferta publicada (null ⟺ sin oferta). */
+  cuenta_comercial_id: string | null;
+  /** El país de la oferta — lo que el riel de moneda (`monto()`) exige para
+   *  no formatear a mano (pedido D 12-ago; la clase D-448). null ⟺ sin oferta. */
+  country_code: string | null;
 }
 
 export interface FichaProducto {
@@ -82,6 +131,12 @@ export interface FichaProducto {
   momentos_aplicables: string[];
   ingredientes_activos: string[];
   alergenos: string[];
+  /** Ver `ComposicionEstado`: solo `verificada` puede callar. */
+  composicion_estado: ComposicionEstado;
+  /** DE QUÉ MERCADO es la ficha de composición (firma S96 3ª tanda): 'EC',
+   *  'global' (ficha del fabricante — jamás sostiene una verificación) o
+   *  `null` = fuente no declarada. El fabricante formula por mercado. */
+  composicion_mercado: string | null;
   es_dieta_prescripcion: boolean;
   /** La portada de la ficha. Mismo criterio que la vitrina. */
   foto_url: string | null;
@@ -101,6 +156,11 @@ export interface Recomendacion {
     talla: string | null;
     /** Los alérgenos documentados que se usaron para excluir. */
     alergenos_excluidos: string[];
+    /** S96: la expansión POR RELACIÓN con la que se excluyó de verdad —
+     *  incluye lo exacto (pollo, bisonte para el alérgico a res) y lo
+     *  imprecisa (`ave_no_especificada` para el alérgico a pollo). La
+     *  superficie explica el porqué con esto, con su voz por `exacta`. */
+    alergenos_vigilados: AlergenoVigilado[];
     /** true = la familia declaró "sin alergias conocidas" (S82). Distinto de
      *  "no sabemos": uno es un dato, el otro es un hueco. */
     sin_alergias_declarado: boolean;
@@ -157,12 +217,12 @@ function literalArrayPg(valores: string[]): string {
 }
 
 const SELECT_VITRINA = `
-  id, precio, moneda, country_code,
+  id, precio, moneda, country_code, cuenta_comercial_id,
   producto_variantes!inner (
     id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, activo,
     productos!inner (
       id, nombre, marca, familia_codigo, estado, especies_aplicables,
-      alergenos, es_dieta_prescripcion, imagen_url, imagenes
+      alergenos, composicion_estado, es_dieta_prescripcion, imagen_url, imagenes
     )
   )
 `;
@@ -220,8 +280,16 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
         typeof p.familia_codigo !== 'string') {
       return null;
     }
+    // Los dos son NOT NULL en la base (S96): si faltan, la forma está rota y
+    // se rechaza entero — un producto sin vendedor no se puede comprar, y un
+    // producto sin estado de composición no puede decir su condición.
+    const estadoCompo = composicionEstado(p.composicion_estado);
+    if (typeof fila.cuenta_comercial_id !== 'string' || estadoCompo === null) {
+      return null;
+    }
     salida.push({
       oferta_id: fila.id,
+      cuenta_comercial_id: fila.cuenta_comercial_id,
       producto_id: p.id,
       variante_id: v.id,
       nombre: p.nombre,
@@ -236,6 +304,7 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
       country_code: typeof fila.country_code === 'string' ? fila.country_code : 'EC',
       es_dieta_prescripcion: p.es_dieta_prescripcion === true,
       alergenos: textArray(p.alergenos),
+      composicion_estado: estadoCompo,
       especies_aplicables: textArray(p.especies_aplicables),
       foto_url: fotosDeProducto(p).portada,
     });
@@ -289,12 +358,12 @@ export async function obtenerFichaProducto(
   const [prod, vars] = await Promise.all([
     cliente
       .from('productos')
-      .select('id, nombre, marca, familia_codigo, descripcion, especies_aplicables, tallas_aplicables, momentos_aplicables, ingredientes_activos, alergenos, es_dieta_prescripcion, imagen_url, imagenes')
+      .select('id, nombre, marca, familia_codigo, descripcion, especies_aplicables, tallas_aplicables, momentos_aplicables, ingredientes_activos, alergenos, composicion_estado, composicion_mercado, es_dieta_prescripcion, imagen_url, imagenes')
       .eq('id', productoId)
       .maybeSingle(),
     cliente
       .from('producto_variantes')
-      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado)')
+      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code)')
       .eq('producto_id', productoId)
       .eq('activo', true),
   ]);
@@ -305,6 +374,8 @@ export async function obtenerFichaProducto(
   if (p === null || !esObjDespensa(p) || typeof p.nombre !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
+  const estadoCompoFicha = composicionEstado(p.composicion_estado);
+  if (estadoCompoFicha === null) return falloDespensa('datos_inconsistentes');
 
   const variantes: VarianteDeProducto[] = [];
   for (const v of vars.data ?? []) {
@@ -327,6 +398,12 @@ export async function obtenerFichaProducto(
       oferta_id: esObjDespensa(of) && typeof of.id === 'string' ? of.id : null,
       precio: esObjDespensa(of) ? numOrNull(of.precio) : null,
       moneda: esObjDespensa(of) && typeof of.moneda === 'string' ? of.moneda : null,
+      cuenta_comercial_id:
+        esObjDespensa(of) && typeof of.cuenta_comercial_id === 'string'
+          ? of.cuenta_comercial_id
+          : null,
+      country_code:
+        esObjDespensa(of) && typeof of.country_code === 'string' ? of.country_code : null,
     });
   }
 
@@ -343,6 +420,8 @@ export async function obtenerFichaProducto(
       momentos_aplicables: textArray(p.momentos_aplicables),
       ingredientes_activos: textArray(p.ingredientes_activos),
       alergenos: textArray(p.alergenos),
+      composicion_estado: estadoCompoFicha,
+      composicion_mercado: typeof p.composicion_mercado === 'string' ? p.composicion_mercado : null,
       es_dieta_prescripcion: p.es_dieta_prescripcion === true,
       foto_url: fotosDeProducto(p).portada,
       fotos: fotosDeProducto(p).galeria,
@@ -461,6 +540,32 @@ export async function recomendarParaMascota(
     : [];
   const tieneCronica = cronicas.length > 0;
 
+  // 🔴 S96: LA EXPANSIÓN POR RELACIÓN — la exclusión deja de ser coincidencia
+  // exacta. `ave_no_especificada` excluye para el alérgico a pollo (imprecisa,
+  // «podría ser»), `bisonte` excluye para el alérgico a res (exacta, es_un).
+  // La expansión la resuelve la base leyendo `cat_alergeno_relaciones`: si la
+  // relación viviera acá, mañana nadie sabría por qué advierte.
+  let vigilados: AlergenoVigilado[] = [];
+  if (alergenos.length > 0) {
+    const exp = await cliente.rpc('expandir_alergenos_a_vigilar', {
+      p_alergenos: alergenos,
+    });
+    if (exp.error) return falloDespensa(exp.error.message);
+    if (!Array.isArray(exp.data)) return falloDespensa('datos_inconsistentes');
+    for (const v of exp.data) {
+      if (!esObjDespensa(v) || typeof v.declarado !== 'string' ||
+          typeof v.origen !== 'string' || typeof v.exacta !== 'boolean') {
+        return falloDespensa('datos_inconsistentes');
+      }
+      vigilados.push({ declarado: v.declarado, origen: v.origen, exacta: v.exacta });
+    }
+    // ANTE LA DUDA NO SE OFRECE: si la expansión volvió vacía teniendo
+    // alérgenos documentados, algo está roto — y roto acá significa
+    // recomendar lo que manda al perro a urgencias. Se rechaza entero.
+    if (vigilados.length === 0) return falloDespensaCodigo('exclusion_no_verificable');
+  }
+  const codigosVigilados = [...new Set(vigilados.map((v) => v.declarado))];
+
   // ② La vitrina, con la exclusión PEGADA A LA CONSULTA
   let q = cliente
     .from('ofertas')
@@ -475,12 +580,13 @@ export async function recomendarParaMascota(
     // general (`listarProductosDespensa`) sí aparece.
     q = q.contains('producto_variantes.productos.especies_aplicables', [especie]);
   }
-  if (alergenos.length > 0) {
-    // 🔴 EL PREDICADO DURO: `alergenos` NO se solapa con lo documentado.
+  if (codigosVigilados.length > 0) {
+    // 🔴 EL PREDICADO DURO: `alergenos` NO se solapa con lo VIGILADO — que
+    // desde S96 es lo documentado MÁS su expansión por relación.
     q = q.not(
       'producto_variantes.productos.alergenos',
       'ov',
-      literalArrayPg(alergenos),
+      literalArrayPg(codigosVigilados),
     );
   }
   if (etapa !== null) {
@@ -506,7 +612,8 @@ export async function recomendarParaMascota(
   if (productos === null) return falloDespensa('datos_inconsistentes');
 
   // 🔴 LA VERIFICACIÓN FAIL-CLOSED (no es un filtro: no saca nada, rechaza todo)
-  const prohibidos = new Set(alergenos.map((a) => a.toLowerCase()));
+  //    — contra el conjunto VIGILADO entero, relaciones incluidas.
+  const prohibidos = new Set(codigosVigilados.map((a) => a.toLowerCase()));
   const cruza = productos.some((p) =>
     p.alergenos.some((a) => prohibidos.has(a.toLowerCase())),
   );
@@ -520,6 +627,7 @@ export async function recomendarParaMascota(
         especie,
         talla,
         alergenos_excluidos: alergenos,
+        alergenos_vigilados: vigilados,
         sin_alergias_declarado:
           perfil.data?.alergias_ninguna_declarada_en !== null &&
           perfil.data?.alergias_ninguna_declarada_en !== undefined,
@@ -529,4 +637,56 @@ export async function recomendarParaMascota(
       },
     },
   };
+}
+
+// ── E · El paso de entendimiento QUEDA REGISTRADO (§5.4, S96) ───────────────
+//
+// La advertencia de alergia deja decidir al dueño — y su decisión informada
+// se REGISTRA, append-only, en `alergia_entendimientos`. La pantalla decide
+// cuándo re-preguntar (puede leer los propios por RLS); acá solo se garantiza
+// que lo entendido quede escrito. El registro jamás se edita ni se borra.
+
+/**
+ * S96 (4ª tanda): la expansión por relación, expuesta para la ADVERTENCIA de
+ * búsqueda y ficha (la exclusión de la recomendación ya la usa por dentro).
+ * La pantalla cruza `declarado` contra `producto.alergenos` y arma la voz con
+ * `exacta`: true → «contiene {origen}» · false → «declara {declarado} y
+ * podría ser {origen}». La imprecisión SE DICE, jamás se disfraza de certeza.
+ */
+export async function expandirAlergenosAVigilar(
+  alergenos: string[],
+): Promise<ResultadoWrapper<AlergenoVigilado[], CodigoErrorDespensa>> {
+  if (alergenos.length === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient().rpc('expandir_alergenos_a_vigilar', {
+    p_alergenos: alergenos,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+  const salida: AlergenoVigilado[] = [];
+  for (const v of data) {
+    if (!esObjDespensa(v) || typeof v.declarado !== 'string' ||
+        typeof v.origen !== 'string' || typeof v.exacta !== 'boolean') {
+      return falloDespensa('datos_inconsistentes');
+    }
+    salida.push({ declarado: v.declarado, origen: v.origen, exacta: v.exacta });
+  }
+  return { ok: true, data: salida };
+}
+
+export async function registrarEntendimientoAlergia(
+  productoId: string,
+  mascotaId: string,
+  /** Los alérgenos que la advertencia mostró — los que el dueño entendió. */
+  alergenos: string[],
+): Promise<ResultadoWrapper<{ entendimiento_id: string }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('registrar_entendimiento_alergia', {
+    p_producto_id: productoId,
+    p_mascota_id: mascotaId,
+    p_alergenos: alergenos,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || typeof data.entendimiento_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return { ok: true, data: { entendimiento_id: data.entendimiento_id } };
 }

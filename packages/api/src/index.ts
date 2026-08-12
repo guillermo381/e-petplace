@@ -1084,11 +1084,18 @@ export {
   obtenerFichaProducto,
   buscarProductosDespensa,
   recomendarParaMascota,
+  // S96 (12-ago, 2ª tanda): el paso de entendimiento de §5.4, registrado.
+  registrarEntendimientoAlergia,
+  // S96 (4ª tanda): la advertencia por RELACIÓN, con su imprecisión tipada.
+  expandirAlergenosAVigilar,
+  type AlergenoVigilado,
   type ProductoDeVitrina,
   type VarianteDeProducto,
   type FichaProducto,
   type Recomendacion,
   type FiltrosVitrina,
+  // S96: vocabulario VERBATIM del CHECK y de EstadoComposicion de @epetplace/ui.
+  type ComposicionEstado,
 } from './wrappers/despensa-catalogo';
 
 export {
@@ -1164,3 +1171,19 @@ export {
   marcarEntregaFallida,
   type EntregaAsignada,
 } from './wrappers/despensa-repartidor';
+
+// ── HUNK ADITIVO DE LA PISTA C (S96) — lo que el panel necesitaba y el
+//    contrato no traía; cada hueco medido contra la fuente. A firma o muda
+//    (76(c): archivo nuevo + este hunk; el porqué vive en el archivo). ───────
+export {
+  obtenerEscalonPedido,
+  extrasPanelPedidos,
+  registrarFacturaPedido,
+  rolesActivosDeMiCuenta,
+  listarRecursosReparto,
+  listarTurnosEntrega,
+  ESCALONES_VIVOS,
+  type ExtraPanelPedido,
+  type RecursoReparto,
+  type TurnoEntrega,
+} from './wrappers/despensa-panel-extra';
