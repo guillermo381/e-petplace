@@ -116,10 +116,13 @@ apagaba (`3e39e2f8`).*
 - La sección Composición dice su condición por estado: `verificada` y
   `no_aplica` con su voz; `declarada_sin_verificar` y `ausente` LO DICEN.
   Cero raciones (firma founder).
-- ⚠️ **Voz de los códigos de alérgeno**: el catálogo nuevo trae códigos
-  (`ave_no_especificada`) sin diccionario en el riel — degradación mínima
-  declarada (`vozAlergeno`: guiones → espacios), **anotada para el gate de
-  strings** junto con el horario del WhatsApp.
+- ✅ **Voz de los códigos de alérgeno — CABLEADA el mismo día** (M20 de A,
+  pedida y entregada en horas): las voces del AVISO viajan en los
+  vigilados (`declarado_nombre`/`origen_nombre`) y la composición lee
+  `listarAlergenos()` (`cat_alergenos.nombre_es`, las 23 sembradas).
+  `vozAlergeno` pasó de degradación a LECTOR; el fallback guiones→espacios
+  queda solo para códigos fuera del catálogo. **El único dato del frente
+  que sigue esperando al founder es el horario del WhatsApp.**
 - El formateo de plata queda artesanal A PROPÓSITO (D-448 enmendada por
   A): el catálogo ya expone país, el seguimiento no — migrar la mitad
   partiría el formato del frente en dos. El barrido es UNO cuando el

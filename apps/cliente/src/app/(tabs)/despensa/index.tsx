@@ -67,6 +67,7 @@ import {
 import {
   getEstadoOnboardingDueno,
   buscarProductosDespensa,
+  listarAlergenos,
   listarProductosDespensa,
   mascotasElegibles,
   obtenerMascotasDeFamilia,
@@ -79,7 +80,7 @@ import {
 import { CriterioMascota, LienzoProducto } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
-import { alergenosQueCruzan } from '@/lib/despensa/composicion';
+import { alergenosQueCruzan, vozAlergeno } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -104,6 +105,9 @@ export default function DespensaDescubrir() {
    *  inexpresable, no el error genérico que nadie atrapa). */
   const [reco, setReco] = useState<Recomendacion | 'cargando' | { fallo: string } | null>(null);
   const [reintento, setReintento] = useState(0);
+  /** código → nombre_es del catálogo (la advertencia por fila habla la
+   *  voz de la casa, jamás un código con guiones). */
+  const [vocesAlergenos, setVocesAlergenos] = useState<Map<string, string> | undefined>(undefined);
 
   // ── S96 · el buscador y los filtros ──────────────────────────────────
   const [busqueda, setBusqueda] = useState('');
@@ -156,6 +160,12 @@ export default function DespensaDescubrir() {
     setVitrina('cargando');
     void listarProductosDespensa({ limite: 50 }).then((r) => {
       if (vigente) setVitrina(r.ok ? r.data : 'error');
+    });
+    // La voz del catálogo de alérgenos, para la advertencia por fila.
+    void listarAlergenos().then((r) => {
+      if (vigente && r.ok) {
+        setVocesAlergenos(new Map(r.data.map((a) => [a.codigo, a.nombre])));
+      }
     });
     return () => {
       vigente = false;
@@ -320,7 +330,7 @@ export default function DespensaDescubrir() {
             <Texto variante="apoyo" color="warning">
               {t('despensa.filaContiene', {
                 nombre: mascota?.nombre ?? '',
-                lista: cruzan.join(', '),
+                lista: cruzan.map((c) => vozAlergeno(c, vocesAlergenos)).join(', '),
               })}
             </Texto>
           </View>
