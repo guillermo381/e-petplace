@@ -11631,6 +11631,50 @@ defecto que se curó hoy en el cambio de clave.
 
   *Su caso más filoso es la cuarta razón, que estaba **invertida**: «performance sin pagar el precio de escalar» describía exactamente lo contrario de lo que el 2,50 % hace — no evita el precio de escalar, **es un precio que crece con el éxito, para siempre**. Una razón de entrada puede envejecer hasta significar su opuesto y nadie lo nota, porque nadie relee las razones: relee la factura.*
 
+- **L-229 — UN COMANDO ENCADENADO ESCONDE EL FALLO DEL PRIMER ESLABÓN (S95-J).**
+
+  **El caso, y es chico a propósito:** un `heredoc` que escribía la reversa de una migración **falló en silencio** dentro de un `cmd1 && cmd2`. El segundo eslabón —`db push`— corrió igual, **y la migración se aplicó con la reversa sin escribir**. La regla de la casa dice reversa ANTES; se incumplió sin que nadie lo viera, porque el output del comando encadenado solo mostraba el éxito del segundo.
+
+  **El daño concreto fue nulo** —la migración solo agregaba un CHECK sobre una tabla vacía—, y por eso vale como lección: *el orden existe para los casos en que el daño NO es nulo, y el mecanismo que lo rompió no avisa.*
+
+  **La cura es de forma, no de disciplina:** pasos separados, y **verificar el artefacto en disco antes de usarlo**. Un `&&` no es un error de estilo: es un lugar donde un fallo se vuelve invisible.
+
+- **L-230 — UNA COLUMNA QUE SOLO LA MITAD DE SUS ESCRITORES COMPLETA NO SE PUEDE CONSULTAR (S95-G3).**
+
+  Nació `cuentas_comerciales.activado_por` para que la activación de un vendedor dejara rastro. **Había DOS caminos de activación** —el nuevo y `activar_prestador`, que ya existía— y la tentación era llenar solo el nuevo.
+
+  **La primera pregunta que alguien le va a hacer a esa columna es «¿quién activó esta cuenta?», y la respuesta sería NULL la mitad de las veces sin forma de saber cuál mitad.** Una columna de auditoría con cobertura parcial es peor que ninguna: la vacía se sabe vacía; la parcial se cree completa.
+
+  **Corolario, que es la otra mitad de la lección:** las filas viejas quedaron en NULL **y no se rellenaron**. *Inventar un responsable en una columna de auditoría es peor que dejarla vacía* — NULL ahí significa «se activó antes de que existiera el rastro», y eso es la verdad.
+
+- **L-231 — UN LEDGER APPEND-ONLY NO SE CORRIGE BORRANDO FILAS (S95-K).**
+
+  **El caso:** un cinturón cargó 3 unidades de stock de prueba, la reserva consumió 1, y el desmontaje borró los movimientos. **El saldo materializado quedó en 2** y la migración abortó por su propio assert de residuo.
+
+  **Por qué:** el saldo lo mantiene un trigger `AFTER INSERT`. **El `DELETE` no lo despierta.** Borrar la historia deja el resumen mintiendo, y el resumen es lo que todo el mundo lee.
+
+  **Se compensa por la misma puerta** —un movimiento inverso a través de la función— y recién después se limpia el rastro del fixture. *Lo mismo pasó con `stock_reservado`, que quedó en 1 y se corrigió con un movimiento de liberación, no tocando el contador.*
+
+- **L-232 — ASUMIR UNA FIRMA CUESTA UNA CORRIDA (S95, seis veces en la jornada).**
+
+  Las seis, medidas: `notas` cuando la columna era `descripcion` · `transportista_codigo`/`guia` cuando eran `transportista`/`tracking_code` · `'ajuste_manual'` cuando el CHECK admitía `pedido|manual|expiracion|carga_inicial` · `crear_cuenta_comercial_inicial` tratada como `jsonb` cuando devuelve `TABLE(...)` · `oid` ambiguo con un `JOIN` · `cat_narrativas_pedido` sin la columna `orden` que sí tiene `cat_estados_pedido`.
+
+  **Es la regla 22 cobrando seis veces en un día**, y el patrón es siempre el mismo: **la firma se parece tanto a lo que uno espera que no se mide.** El costo por caso es una corrida abortada — barato — pero **el mismo descuido sobre un nombre que existe con otro significado no aborta: pasa, y escribe en la columna equivocada.**
+
+- **L-233 — UN AVISO QUE NO FRENA ES UNA BARRERA QUE NO EXISTE (S95, sobre D-584).**
+
+  El hook de territorio **avisó tres veces en la jornada sin frenar nada**, porque `TERRITORIO` no estaba declarado. La cuarta vez se declaró, **y frenó de verdad**: rechazó el commit por dos archivos fuera del territorio, que se declararon explícitos y recién entonces pasó.
+
+  **Con cuatro pistas trabajando en paralelo, la diferencia entre avisar y frenar es la diferencia entre una barrera y una decoración.** *Y lo que lo vuelve lección y no anécdota: durante esas tres veces el trabajo salió bien igual — por cuidado de quien commiteaba, no por mecanismo. Una barrera que funciona solo cuando la persona ya iba a hacer lo correcto no está funcionando.*
+
+- **L-234 — UNA SONDA QUE DEJA RESIDUO CONTAMINA LA MEDICIÓN AJENA (S95-G/H).**
+
+  Las sondas de una pista escribieron pedidos reales **mientras otra pista corría su gate E2E**. El gate dio ROJO en su check de residuo, y **el residuo no era suyo**.
+
+  **El defecto tenía dos mitades y las dos importan:** la sonda no revertía, **y el check contaba pedidos GLOBALMENTE en vez de contar los suyos por prefijo**. *Un check que acusa a su dueño de la basura ajena deja de ser un check y pasa a ser ruido que la gente aprende a ignorar.*
+
+  **Las dos curas:** toda sonda corre dentro de una transacción que se revierte —residuo cero **por mecanismo, no por prolijidad**— y todo check de residuo cuenta **lo suyo**, con el conteo global reportado como dato y no como veredicto.
+
 - **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
 
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
@@ -13468,3 +13512,101 @@ relevamiento porque la tabla `productos` sí existe.
 > marcadas OK, contra `information_schema.columns`.
 > **Se cruza con D-758.**
 > Origen: S95-F.
+
+
+## Deudas S95-CIERRE (la despensa llega a la vitrina — 12 Ago 2026)
+
+> Números verificados libres por grep al abrir: la más alta en uso era **D-763**.
+
+#### D-764 — 🔴 LA PASARELA DE PAGO — es lo ÚNICO que falta para comprar desde el teléfono
+
+Todo el camino de compra corre de punta a punta en la base y está probado con
+datos reales. **Entre «reservado» y «pagado» no hay nada que cobre de verdad:**
+hoy el paso lo hace el backend por función, sin proveedor elegido ni
+integración.
+
+**Lo que ya está listo para recibirla, y conviene saberlo antes de elegir:**
+`pagos_intentos` y `pagos_eventos` con idempotencia por clave · el dominio es
+**agnóstico del proveedor** (ningún nombre de pasarela aparece en el motor ni
+en los wrappers, verificado por el invariante 22) · `confirmar_pago_pedido`
+está **revocada de `authenticated`** y solo la alcanza el backend con la llave
+de servicio.
+
+**Lo que NO es código:** la afiliación bancaria es trámite. *Sigue siendo el
+ítem que más probablemente corra la fecha de octubre.*
+
+☠️ **Muere** cuando una familia complete una compra desde el teléfono con una
+tarjeta real.
+
+#### D-765 — 🟡 FOTOS Y STOCK REALES DEL VENDEDOR
+
+La vitrina tiene **seis productos sin una sola foto** y con **stock de prueba
+(20 por SKU, cargado por función y marcado como tal)**.
+
+**Las dos cosas son dato del vendedor**, no construcción: el catálogo que
+mandó no trae fotos ni inventario. **Un catálogo de alimento sin fotos no es
+una vitrina** — y el wrapper ya las transporta desde S95-J, así que el día que
+lleguen no hay que tocar código.
+
+☠️ **Muere** cuando el vendedor entregue fotos e inventario y se carguen por el
+mismo cargador.
+
+#### D-766 — 🟡 EL VENDEDOR REAL REEMPLAZA A LA CUENTA DE PRUEBAS
+
+La cuenta de hoy tiene **RUC `9999999999999`** y razón social
+`VENDEDOR DE PRUEBAS - NO ES UN COMERCIO REAL`. **Está diseñada para borrarse,
+no para renombrarse.**
+
+🔴 **Y hay un detalle que va a aparecer el día del alta real y conviene saberlo
+ahora:** «una persona, una cuenta comercial». `crear_cuenta_comercial_inicial`
+rechaza a quien ya tiene una — **el vendedor real necesita su propio perfil**,
+no el de alguien que ya es titular de otra cuenta.
+
+☠️ **Muere** cuando exista la cuenta del vendedor real con sus datos fiscales
+verdaderos y esta cuenta se borre.
+
+#### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
+
+Quedó en `[]` —el default— porque **nunca hubo una fila con foto**. El wrapper
+acepta las dos formas del mundo (`["url"]` y `[{"url":…}]`) **sin poder elegir
+cuál es la de esta casa**, y descarta en silencio lo que no sea ninguna.
+
+*No es un bug: es una decisión que se toma sola el día que alguien cargue la
+primera foto.* **Lo que hay que hacer entonces es MIRAR qué forma quedó y
+declararla en un `COMMENT` de la columna**, para que el próximo no tenga que
+adivinar.
+
+☠️ **Muere** con la primera carga real de fotos, escribiendo el comentario.
+
+#### D-768 — 🟡 64 MASCOTAS SIN FECHA DE NACIMIENTO — el filtro por etapa no se ejerce
+
+`recomendarParaMascota` filtra por etapa de vida desde S95-K, **pero Zeus no
+tiene fecha de nacimiento y 64 de las 72 mascotas de esta base tampoco.** Con
+etapa `desconocida` el filtro **no se aplica a propósito**: aplicarlo les
+vaciaría la vitrina, porque `desconocida` no matchea ni `cachorro` ni `adulto`.
+
+**Consecuencia medida:** un perro adulto ve alimento de cachorro, y eso **es lo
+correcto hoy** — mostrar de más con el criterio declarado es honesto; mostrar
+nada sin decir por qué, no. La respuesta trae `etapa_desconocida: true` para
+que la pantalla pueda **invitar a completar la fecha**.
+
+> *Recomendarle alimento de cachorro a un bulldog adulto es incumplir la
+> promesa en chico. Que hoy sea correcto no lo vuelve deseable: lo vuelve
+> urgente pedir la fecha.*
+
+☠️ **Muere** cuando el filtro se pueda ejercer por camino real sobre una
+mascota con fecha declarada.
+
+#### D-769 — 🟡 WORKTREES SEPARADOS POR PISTA (cruce con D-586 y D-411)
+
+Esta sesión corrió **hasta cuatro pistas sobre el MISMO árbol**. Salió bien, y
+la evidencia de que salió bien por cuidado y no por mecanismo está en **L-233**
+(el hook avisó tres veces sin frenar) y en **L-234** (las sondas de una pista
+ensuciaron la medición de otra).
+
+**Lo que se pagó en esta sesión, medido:** un gate E2E con rojo falso · tres
+commits sin territorio declarado · un brief de una pista que llegó a otra.
+
+☠️ **Muere** cuando cada pista abra en su propio worktree y el árbol de una no
+sea visible desde la otra.
+
