@@ -57,6 +57,7 @@ import { AvisoAlergia } from '../components/AvisoAlergia'
 import { CodigoAEscala } from '../components/CodigoAEscala'
 import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
 import { PinMovible } from '../components/PinMovible'
+import { SelectorVentana } from '../components/SelectorVentana'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
@@ -114,6 +115,27 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
         {hex.toLowerCase()}
       </Text>
     </View>
+  )
+}
+
+// S96-B: el selector de ventana, VIVO. Los tres casos que el contrato
+// distingue, y el tercero es el que la pieza existe para resolver: un día
+// LLENO que se ve, no se puede tocar, y dice por qué.
+function MuestraVentana() {
+  const [elegida, setElegida] = useState<string | null>(null)
+  return (
+    <SelectorVentana
+      rotulo="¿Cuándo te llega?"
+      elegida={elegida}
+      onElegir={setElegida}
+      opciones={[
+        { clave: 'hoy', etiqueta: 'Hoy, de 14:00 a 18:00', detalle: 'si confirmás antes de las 12:00', estado: 'elegible' },
+        { clave: 'mananaAm', etiqueta: 'Mañana, de 09:00 a 13:00', estado: 'elegible' },
+        { clave: 'jueves', etiqueta: 'Jueves, de 14:00 a 18:00', estado: 'sin_cupo', motivo: 'Sin lugar ese día' },
+      ]}
+      onProgramarOtra={() => {}}
+      etiquetaProgramarOtra="Programar otra fecha"
+    />
   )
 }
 
@@ -2921,6 +2943,10 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="SelectorVentana (S96) — cuándo llega, y por qué un día no se puede elegir (§6.2)">
+          <MuestraVentana />
         </Seccion>
 
         <Seccion titulo="BuscadorDeLugar + PinMovible (S96) — la dirección con Places y el punto a mano (§7)">

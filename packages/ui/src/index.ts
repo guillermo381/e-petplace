@@ -461,3 +461,37 @@ export { BuscadorDeLugar, type BuscadorDeLugarProps, type PrediccionDeLugar } fr
 // jamás del evento continuo: un valor que tiembla mientras el dedo está
 // apoyado es re-renders que nadie pidió.
 export { PinMovible, type PinMovibleProps } from './components/PinMovible'
+
+// SelectorVentana — S96-B: cuándo llega, y POR QUÉ un día no se puede
+// elegir (§6.2 + §7.1 de la letra del panel). Contrato confirmado por D.
+//
+// 🔴 EL DÍA SIN CUPO SE DIBUJA, NO SE ESCONDE — y es la decisión. La Ley
+// 23 dice que la puerta no ofrece lo que va a rechazar, y la lectura fácil
+// es esconder el día lleno. Es la equivocada acá: EL CLIENTE ESTÁ BUSCANDO
+// EL JUEVES. Un jueves que desaparece se lee como «el jueves no existe» y
+// deja a alguien sin entender por qué su día no está — el mismo daño que
+// un error disfrazado de vacío.
+//   ⇒ La puerta no OFRECE lo que va a rechazar, pero tampoco puede hacer
+//     DESAPARECER lo que el usuario vino a buscar. El día lleno se muestra,
+//     NO es tocable (la Ley 23 intacta: el servidor jamás lo recibe) y DICE
+//     POR QUÉ — que es lo único que convierte un «no» en información.
+//
+// `motivo` viaja VISIBLE, sin tap: un motivo detrás de un toque es un
+// motivo que nadie lee. Y va al `accessibilityLabel` — quien no ve la
+// pantalla también tiene que saber por qué no puede elegir ese día.
+//
+// APAGADO NO DICE ERROR (Ley 22): `sin_cupo` es apagado sereno, jamás
+// registro de peligro. Un día lleno no es una falla del cliente ni del
+// sistema — pintarlo en rojo convierte una agenda en un reproche.
+//
+// POR QUÉ NO ES `SelectorOpcion` ENSANCHADO: ese es el chip de VALOR y no
+// tiene «no elegible con su razón». La diferencia no es cosmética — una
+// opción que dice POR QUÉ necesita espacio para la razón, o sea otra
+// anatomía; meterla ahí obligaría a los chips de toda la casa a cargar un
+// `motivo` que ninguno usa.
+export {
+  SelectorVentana,
+  type SelectorVentanaProps,
+  type OpcionVentana,
+  type EstadoVentana,
+} from './components/SelectorVentana'
