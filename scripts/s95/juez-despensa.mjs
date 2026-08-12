@@ -1,8 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// EL JUEZ DE LA DESPENSA — S95-C
+// EL JUEZ DE LA DESPENSA — S95-C (los 11 del esqueleto) + S95-D (los 7 del motor)
 //
-// Once invariantes sacados de la letra (MODELO_DESPENSA v2.0, BIO_EXPEDIENTE
-// E2bis, MODELO_FINANCIERO §7-§8.10, MODELO_LOYALTY §5/§7).
+// DIECIOCHO invariantes sacados de la letra (MODELO_DESPENSA v2.0,
+// BIO_EXPEDIENTE E2bis, MODELO_FINANCIERO §7-§8.10, MODELO_LOYALTY §3/§5/§7).
+// Los 11 primeros vigilan el ESQUELETO; los 7 últimos vigilan que el MOTOR no
+// rompa lo que el esqueleto garantizaba.
 //
 // 🔴 SE ESCRIBIÓ ANTES DEL ESQUEMA Y ARRANCA TODO ROJO.
 //    Un juez escrito después es un juez escrito para aprobar lo que ya hiciste.
@@ -14,7 +16,7 @@
 //    juez no es un loop — es un agente convenciéndose a sí mismo.
 //
 // SOLO LECTURA. Uso: node scripts/s95/juez-despensa.mjs
-// Exit 0 = los once en verde. Exit 1 = hay rojo.
+// Exit 0 = los dieciocho en verde. Exit 1 = hay rojo.
 // ─────────────────────────────────────────────────────────────────────────────
 import { dbQuery } from '../lib-db.mjs';
 import { execSync } from 'node:child_process';
@@ -332,6 +334,168 @@ invariante(11, '🔴 `pedidos` sin INSERT anónimo (D-757)', () => {
   if (policies.length) detalle.push(`policies de escritura abiertas a public/anon: ${policies.map((p) => `${p.policyname} (${p.cmd})`).join(', ')}`);
   if (grants.length) detalle.push(`anon conserva grants de escritura: ${grants.map((g) => g.privilege_type).join(', ')}`);
   return { ok: !policies.length && !grants.length, detalle };
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOS SIETE DE S95-D — el motor. Los 11 de arriba vigilan el ESQUELETO; estos
+// vigilan que el MOTOR no rompa lo que el esqueleto garantizaba.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const FUNCIONES_MOTOR = [
+  'cotizar_envio_despensa', 'calcular_promesa_entrega', 'mover_estado_pedido',
+  'crear_pedido_despensa', 'reservar_stock_pedido', 'confirmar_pago_pedido',
+  'empacar_pedido', 'entregar_pedido', 'cancelar_pedido_despensa',
+  'registrar_senal_comercial', 'es_vendedor_de', 'resolver_comision_despensa',
+  'expirar_reservas_vencidas',
+];
+
+// ── ⑫ Ninguna transición ocurre fuera de la función ─────────────────────────
+invariante(12, 'Ninguna transición de estado ocurre fuera de `mover_estado_pedido`', () => {
+  // La app no puede escribir `pedidos.estado` a mano: sin UPDATE sobre pedidos
+  // para el cliente y el vendedor, la única vía es la función DEFINER.
+  const policies = dbQuery(`
+    SELECT policyname, roles::text, qual FROM pg_policies
+    WHERE schemaname='public' AND tablename='pedidos' AND cmd IN ('UPDATE','ALL')
+      AND COALESCE(qual,'') !~ 'is_admin'`);
+  const grantsEstados = dbQuery(`
+    SELECT grantee, privilege_type FROM information_schema.role_table_grants
+    WHERE table_schema='public' AND table_name='pedido_estados'
+      AND grantee IN ('anon','authenticated') AND privilege_type IN ('UPDATE','DELETE')`);
+  const detalle = [];
+  if (policies.length) detalle.push(`policies de UPDATE sobre pedidos sin gate de admin: ${policies.map((p) => p.policyname).join(', ')}`);
+  if (grantsEstados.length) detalle.push(`la historia de estados se puede mutar: ${grantsEstados.map((g) => `${g.grantee} ${g.privilege_type}`).join(', ')}`);
+  return { ok: !policies.length && !grantsEstados.length, detalle };
+});
+
+// ── ⑬ El evento al expediente solo se deposita desde entregado ──────────────
+invariante(13, '🔴 El evento al expediente solo se deposita al ENTREGAR', () => {
+  const escriben = dbQuery(`
+    SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public'
+      AND pg_get_functiondef(p.oid) ~ 'INSERT INTO evento_producto_asignacion'
+    ORDER BY 1`).map((r) => r.proname);
+
+  const detalle = [];
+  if (!escriben.length) detalle.push('nadie deposita el evento de compra: el puente al expediente no tiene productor');
+  const ajenas = escriben.filter((f) => f !== 'entregar_pedido');
+  if (ajenas.length) {
+    detalle.push(`🔴 depositan además de entregar_pedido: ${ajenas.join(', ')} — si una deposita al PAGAR y el pedido se cancela, queda un evento FALSO en un expediente append-only que viaja con la mascota`);
+  }
+  return { ok: escriben.length === 1 && escriben[0] === 'entregar_pedido', detalle };
+});
+
+// ── ⑭ El ledger comercial sin identidad de mascota ──────────────────────────
+invariante(14, 'El ledger comercial no tiene FK ni columna de identidad de mascota', () => {
+  const fks = dbQuery(`
+    SELECT tgt.relname FROM pg_constraint con
+    JOIN pg_class src ON src.oid=con.conrelid
+    JOIN pg_class tgt ON tgt.oid=con.confrelid
+    WHERE con.contype='f' AND src.relname='senales_comerciales'
+      AND tgt.relname IN ('mascotas','eventos_mascota','mascota_perfil_vigente',
+                          'evento_producto_asignacion','familia','familia_miembro')`).map((r) => r.relname);
+  const cols = dbQuery(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='senales_comerciales'
+      AND column_name IN ('mascota_id','pet_hash','familia_id')`).map((r) => r.column_name);
+  const detalle = [];
+  if (fks.length)  detalle.push(`FK al expediente: ${fks.join(', ')}`);
+  if (cols.length) detalle.push(`columnas de identidad: ${cols.join(', ')}`);
+  if (!dbQuery(`SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='senales_comerciales'`).length) {
+    detalle.push('la tabla no existe');
+  }
+  return { ok: !fks.length && !cols.length && detalle.length === 0, detalle };
+});
+
+// ── ⑮ Toda transición declara su actor autorizado ──────────────────────────
+invariante(15, 'Toda transición del catálogo declara su actor autorizado', () => {
+  const sinActor = dbQuery(`
+    SELECT count(*) n FROM cat_transiciones_pedido
+    WHERE actor IS NULL OR actor NOT IN ('cliente','vendedor','sistema','admin')`)[0];
+  // Y el discriminador de fondo: el cliente NO puede mover un pedido que ya se
+  // está preparando. Si pudiera, cancelaría algo que ya está en una caja.
+  const clienteTarde = dbQuery(`
+    SELECT desde, hasta FROM cat_transiciones_pedido
+    WHERE actor='cliente' AND desde IN ('liberado_preparacion','picking','empacado',
+      'documentado','esperando_courier','entregado_courier','en_transito','en_reparto','entregado')`);
+  const detalle = [];
+  if (Number(sinActor?.n) > 0) detalle.push(`${sinActor.n} transición(es) sin actor válido`);
+  if (clienteTarde.length) detalle.push(`el cliente puede mover un pedido ya en preparación: ${clienteTarde.map((t) => `${t.desde}→${t.hasta}`).join(', ')}`);
+  return { ok: Number(sinActor?.n) === 0 && !clienteTarde.length, detalle };
+});
+
+// ── ⑯ Cero estados internos expuestos ──────────────────────────────────────
+invariante(16, '🔴 Cero estados internos expuestos: la superficie emite las SIETE narrativas', () => {
+  const narrativas = dbQuery(`SELECT count(*) n FROM cat_narrativas_pedido`)[0];
+  const sinNarrativa = dbQuery(`
+    SELECT string_agg(codigo, ', ') c FROM cat_estados_pedido WHERE narrativa IS NULL`)[0];
+  // 🔴 SE MIDE POR LAS COLUMNAS QUE LA VISTA EXPONE, NO POR EL TEXTO DE SU
+  //    DEFINICIÓN. La primera versión buscaba `p.estado` en el `viewdef` y
+  //    salía ROJA por el JOIN —`ON e.codigo = p.estado`—, que no expone nada.
+  //    **Un rojo por la razón equivocada está tan roto como un verde por la
+  //    razón equivocada**: es el mismo error que el verde flojo del cinturón
+  //    en S95-C, medir por nombre en vez de por estructura, esta vez en
+  //    espejo. Lo que importa es qué SALE de la vista.
+  const vistaExpone = dbQuery(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='v_pedidos_narrativa'
+      AND column_name IN ('estado','estado_codigo','estado_interno')`)
+    .map((r) => r.column_name);
+  const columnaDoble = dbQuery(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='pedidos'
+      AND column_name IN ('narrativa','estado_narrativa')`).map((r) => r.column_name);
+
+  const detalle = [];
+  if (Number(narrativas?.n) !== 7) detalle.push(`hay ${narrativas?.n} narrativas y la letra firma 7`);
+  if (sinNarrativa?.c) detalle.push(`estados sin narrativa: ${sinNarrativa.c}`);
+  if (vistaExpone.length) detalle.push(`la vista de la familia EXPONE el estado crudo como columna: ${vistaExpone.join(', ')}`);
+  if (columnaDoble.length) detalle.push(`la narrativa está duplicada en columna: ${columnaDoble.join(', ')} — segunda fuente de verdad`);
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ⑰ Toda función del motor es DEFINER con search_path y sin anon ─────────
+invariante(17, 'Toda función del motor es DEFINER, con `search_path` fijo y sin `anon`', () => {
+  const fs = dbQuery(`
+    SELECT p.proname, p.prosecdef definer, (p.proconfig IS NOT NULL) tiene_path,
+           has_function_privilege('anon', p.oid, 'EXECUTE') anon
+    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname IN (${FUNCIONES_MOTOR.map((f) => `'${f}'`).join(',')})
+    ORDER BY 1`);
+  const detalle = [];
+  const faltan = FUNCIONES_MOTOR.filter((f) => !fs.some((x) => x.proname === f));
+  if (faltan.length) detalle.push(`faltan: ${faltan.join(', ')}`);
+  for (const f of fs) {
+    if (!f.definer)     detalle.push(`${f.proname}: NO es SECURITY DEFINER`);
+    if (!f.tiene_path)  detalle.push(`${f.proname}: sin \`search_path\` fijo`);
+    if (f.anon)         detalle.push(`${f.proname}: 🔴 ejecutable por anon (L-140)`);
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ⑱ Ningún estado inactivo es alcanzable ─────────────────────────────────
+invariante(18, 'Ningún estado inactivo es alcanzable por el motor', () => {
+  const detalle = [];
+  // El motor tiene que MIRAR la bandera. Si `mover_estado_pedido` no lee
+  // `activo`, un estado apagado se alcanza igual y el catálogo es decorativo.
+  const lee = dbQuery(`
+    SELECT (pg_get_functiondef(p.oid) ~ 'activo') mira
+    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='mover_estado_pedido'`)[0];
+  if (!lee) detalle.push('`mover_estado_pedido` no existe');
+  else if (!lee.mira) detalle.push('🔴 `mover_estado_pedido` no mira la bandera `activo`: los estados apagados son alcanzables y el catálogo es decorativo');
+
+  // Y todo estado apagado dice POR QUÉ.
+  const sinMotivo = dbQuery(`
+    SELECT string_agg(codigo, ', ') c FROM cat_estados_pedido
+    WHERE NOT activo AND motivo_inactivo IS NULL`)[0];
+  if (sinMotivo?.c) detalle.push(`estados apagados sin motivo: ${sinMotivo.c}`);
+
+  const tiposSinMotivo = dbQuery(`
+    SELECT string_agg(codigo, ', ') c FROM cat_tipos_regla_envio
+    WHERE NOT activo AND motivo_inactivo IS NULL`)[0];
+  if (tiposSinMotivo?.c) detalle.push(`tipos de regla apagados sin motivo: ${tiposSinMotivo.c}`);
+
+  return { ok: detalle.length === 0, detalle };
 });
 
 // ── Veredicto ───────────────────────────────────────────────────────────────
