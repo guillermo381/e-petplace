@@ -122,6 +122,10 @@ const OPCIONALES = [
   'tallas', 'momento_vital',
   'descripcion', 'contenido_valor', 'contenido_unidad', 'peso_kg', 'gtin',
   'largo_cm', 'ancho_cm', 'alto_cm', 'stock', 'ingredientes', 'dieta_prescripcion',
+  // S96 · fotos: paths del bucket `productos-fotos` o URLs, separadas por | o
+  // coma. LA PRIMERA ES LA PORTADA (adjuntar_fotos_producto, la forma que
+  // decide D-767). El cargador NO sube archivos: referencia lo ya subido.
+  'fotos',
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -238,23 +242,52 @@ function main() {
     adminId = r[0].id
   }
 
-  // ── Leer y validar ──────────────────────────────────────────────────────
-  const filas = parseCSV(readFileSync(archivo, 'utf8'))
-  if (!filas.length) { console.error('El archivo está vacío.'); process.exit(2) }
+  // ── Leer y validar — CSV o JSON, el mismo vocabulario ───────────────────
+  //    S96: el archivo puede ser `.json` (un array de objetos con las MISMAS
+  //    claves que las columnas del CSV). Un solo camino de validación para
+  //    los dos formatos: el formato es la cáscara, las reglas son una.
+  let filasDatos
+  if (archivo.toLowerCase().endsWith('.json')) {
+    let crudo
+    try { crudo = JSON.parse(readFileSync(archivo, 'utf8')) }
+    catch (e) { console.error(`🔴 El JSON no parsea: ${e.message}`); process.exit(2) }
+    if (!Array.isArray(crudo) || crudo.length === 0) {
+      console.error('🔴 El JSON tiene que ser un array de objetos, uno por producto.')
+      process.exit(2)
+    }
+    const clavesPrimera = Object.keys(crudo[0]).map((k) => k.toLowerCase())
+    const faltanJ = OBLIGATORIAS.filter((c) => !clavesPrimera.includes(c))
+    if (faltanJ.length) {
+      console.error(`🔴 Faltan claves obligatorias en el JSON: ${faltanJ.join(', ')}`)
+      process.exit(2)
+    }
+    filasDatos = crudo.map((o, i) => {
+      const f = { _linea: i + 1 }
+      for (const [k, v] of Object.entries(o)) {
+        // Los arrays JSON se aceptan nativos; todo lo demás viaja como texto,
+        // igual que en el CSV — un solo camino de validación.
+        f[k.toLowerCase()] = Array.isArray(v) ? v.join('|') : String(v ?? '').trim()
+      }
+      return f
+    })
+  } else {
+    const filas = parseCSV(readFileSync(archivo, 'utf8'))
+    if (!filas.length) { console.error('El archivo está vacío.'); process.exit(2) }
 
-  const cab = filas[0].map((h) => h.trim().toLowerCase())
-  const faltan = OBLIGATORIAS.filter((c) => !cab.includes(c))
-  if (faltan.length) {
-    console.error(`🔴 Faltan columnas obligatorias: ${faltan.join(', ')}`)
-    console.error(`   (La columna \`alergenos\` tiene que EXISTIR aunque el producto no tenga: se escribe "ninguno".)`)
-    process.exit(2)
+    const cab = filas[0].map((h) => h.trim().toLowerCase())
+    const faltan = OBLIGATORIAS.filter((c) => !cab.includes(c))
+    if (faltan.length) {
+      console.error(`🔴 Faltan columnas obligatorias: ${faltan.join(', ')}`)
+      console.error(`   (La columna \`alergenos\` tiene que EXISTIR aunque el producto no tenga: se escribe "ninguno".)`)
+      process.exit(2)
+    }
+
+    filasDatos = filas.slice(1).map((f, i) => {
+      const o = { _linea: i + 2 }
+      cab.forEach((h, j) => { o[h] = (f[j] ?? '').trim() })
+      return o
+    })
   }
-
-  const filasDatos = filas.slice(1).map((f, i) => {
-    const o = { _linea: i + 2 }
-    cab.forEach((h, j) => { o[h] = (f[j] ?? '').trim() })
-    return o
-  })
 
   const resultados = []
   const skusVistos = new Map()
@@ -333,12 +366,16 @@ function main() {
   const validos = resultados.filter((r) => r.estado === 'pendiente')
 
   // ── Ejecutar ────────────────────────────────────────────────────────────
+  //    S96 · EN GRANDE: las filas viajan en TANDAS de una sola ida a la base
+  //    (VALUES + LATERAL sobre las MISMAS funciones de la puerta — la tanda no
+  //    es un atajo alrededor de proponer/publicar: es N llamadas en un viaje).
+  //    Si una tanda rebota, se reintenta FILA POR FILA para aislar a la
+  //    culpable con su motivo — nunca se pierde una tanda entera en silencio.
   if (aplicar) {
     const claims = `select set_config('request.jwt.claims', json_build_object('sub', ${lit(adminId)}, 'role','authenticated')::text, false);`
 
-    for (const r of validos) {
-      const f = r.f
-      const producto = {
+    const armar = (f) => ({
+      producto: {
         familia_codigo: f.familia,
         nombre: f.producto,
         marca: f.marca,
@@ -351,8 +388,8 @@ function main() {
         // "ninguno" es la declaración explícita de ausencia ⇒ lista vacía.
         alergenos: f.alergenos.toLowerCase() === 'ninguno' ? [] : lista(f.alergenos),
         es_dieta_prescripcion: ['si', 'sí', 'true', '1'].includes(String(f.dieta_prescripcion).toLowerCase()),
-      }
-      const variante = {
+      },
+      variante: {
         codigo: f.codigo_variante,
         presentacion: f.presentacion,
         contenido_valor: f.contenido_valor || null,
@@ -363,28 +400,68 @@ function main() {
         largo_cm: f.largo_cm || null,
         ancho_cm: f.ancho_cm || null,
         alto_cm: f.alto_cm || null,
-      }
-      const sku = {
+      },
+      sku: {
         sku_vendedor: f.sku_vendedor,
         precio_propuesto: f.precio_venta,
         stock_disponible: f.stock || 0,
-      }
+      },
+      fotos: lista(f.fotos),
+    })
 
+    // Una fila → la fuente de la tanda. Las fotos van como jsonb o NULL; la
+    // primera es la portada (adjuntar_fotos_producto).
+    const valorFila = (r) => {
+      const a = armar(r.f)
+      const fotos = a.fotos.length ? `${jsonLit(a.fotos)}` : `NULL::jsonb`
+      return `(${r.f._linea}, ${jsonLit(a.producto)}, ${jsonLit(a.variante)}, ` +
+             `${jsonLit(a.sku)}, ${Number(r.f.precio_venta)}::numeric, ${fotos})`
+    }
+
+    const consultaTanda = (grupo) =>
+      `${claims}\n` +
+      `select t.linea, prop.r as propuesto, pub.r as publicado, fot.r as fotos\n` +
+      `from (values\n  ${grupo.map(valorFila).join(',\n  ')}\n` +
+      `) as t(linea, producto, variante, sku, precio, fotos)\n` +
+      `cross join lateral (select proponer_sku_vendedor(${lit(cuenta)}, t.producto, t.variante, t.sku, 'epetplace') as r) prop\n` +
+      `cross join lateral (select publicar_oferta_sku((prop.r->>'sku_id')::uuid, t.precio, 'EC') as r) pub\n` +
+      // El producto_id sale del RETORNO de proponer, jamás de un subquery: un
+      // subquery del statement no ve las filas que la función volátil acaba de
+      // insertar (snapshot de sentencia — lo cazó el ensayo de esta tanda).
+      `left join lateral (\n` +
+      `  select case when t.fotos is not null then adjuntar_fotos_producto(\n` +
+      `    (prop.r->>'producto_id')::uuid, t.fotos) end as r\n` +
+      `) fot on true;`
+
+    const asentar = (r, propuesto, publicado, fotos) => {
+      r.estado = propuesto.creado.producto || propuesto.creado.variante || propuesto.creado.sku
+        ? 'creado' : 'actualizado'
+      r.detalle = `sku ${String(propuesto.sku_id).slice(0, 8)} · oferta ${String(publicado.oferta_id).slice(0, 8)}`
+        + (publicado.sin_cambio ? ' (sin cambio)' : '')
+        + (fotos ? ` · ${fotos.fotos} foto(s)` : '')
+    }
+
+    const TANDA = 20
+    for (let i = 0; i < validos.length; i += TANDA) {
+      const grupo = validos.slice(i, i + TANDA)
       try {
-        const [p] = sql(
-          `${claims}\nselect proponer_sku_vendedor(${lit(cuenta)}, ${jsonLit(producto)}, ` +
-          `${jsonLit(variante)}, ${jsonLit(sku)}, 'epetplace') as r;`
-        )
-        const res = p.r
-        const [o] = sql(
-          `${claims}\nselect publicar_oferta_sku(${lit(res.sku_id)}, ${Number(f.precio_venta)}, 'EC') as r;`
-        )
-        r.estado = res.creado.producto || res.creado.variante || res.creado.sku ? 'creado' : 'actualizado'
-        r.detalle = `sku ${String(res.sku_id).slice(0, 8)} · oferta ${String(o.r.oferta_id).slice(0, 8)}`
-          + (o.r.sin_cambio ? ' (sin cambio)' : '')
-      } catch (e) {
-        r.estado = 'rechazado'
-        r.motivos = [`la base lo rechazó: ${e.message}`]
+        const filasR = sql(consultaTanda(grupo))
+        for (const fila of filasR) {
+          const r = grupo.find((x) => x.f._linea === fila.linea)
+          if (r) asentar(r, fila.propuesto, fila.publicado, fila.fotos)
+        }
+      } catch {
+        // La tanda rebotó: fila por fila, para que la culpable diga su motivo
+        // y las inocentes entren igual.
+        for (const r of grupo) {
+          try {
+            const [fila] = sql(consultaTanda([r]))
+            asentar(r, fila.propuesto, fila.publicado, fila.fotos)
+          } catch (e) {
+            r.estado = 'rechazado'
+            r.motivos = [`la base lo rechazó: ${e.message}`]
+          }
+        }
       }
     }
   }
