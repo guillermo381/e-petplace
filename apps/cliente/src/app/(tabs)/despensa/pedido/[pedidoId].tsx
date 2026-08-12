@@ -78,14 +78,6 @@ import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
 
-/** PUENTE DECLARADO: el destino por línea llega con la tanda de A. Esta
- *  intersección agrega la prop como OPCIONAL — compila hoy, y el guard de
- *  runtime la enciende cuando el wrapper la traiga. Se APRIETA al tipo
- *  real (y este alias muere) en el commit que cablee el merge de A. */
-type LineaConDestino = LineaDePedido & {
-  destino?: { mascota_id: string | null; donacion: boolean } | null;
-};
-
 export default function DespensaPedido() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -205,10 +197,10 @@ export default function DespensaPedido() {
     }
   }
 
-  /** El destino de una línea, SOLO si la fuente ya lo dice (puente). */
+  /** El destino de una línea — REAL desde el cableo del 12-ago (el
+   *  puente de runtime murió con el merge de A). */
   function destinoDe(linea: LineaDePedido) {
-    const l = linea as LineaConDestino;
-    return 'destino' in l ? (l.destino ?? null) : undefined;
+    return linea.destino;
   }
 
   return (
@@ -314,7 +306,7 @@ export default function DespensaPedido() {
                       subtitulo={[
                         t('despensa.lineaCantidad', { n: linea.cantidad }),
                         linea.lote !== null ? t('despensa.lineaLote', { lote: linea.lote }) : null,
-                        destino !== undefined && destino !== null
+                        destino !== null
                           ? destino.donacion
                             ? t('despensa.lineaDonacion')
                             : destino.mascota_id !== null && nombrePorId[destino.mascota_id]
@@ -326,8 +318,7 @@ export default function DespensaPedido() {
                         .join(' · ')}
                       metadataMono={`$ ${linea.subtotal.toFixed(2)}`}
                     />
-                    {/* §4 — el ítem sin destino se ata cuando el dueño quiera.
-                        Solo se ofrece cuando la FUENTE dice que no tiene. */}
+                    {/* §4 — el ítem sin destino se ata cuando el dueño quiera. */}
                     {destino === null && elegibles.length > 0 ? (
                       <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
                         <Boton
@@ -352,6 +343,13 @@ export default function DespensaPedido() {
                 <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
                 {detalle.entrega.referencias !== null ? (
                   <Texto variante="apoyo">{detalle.entrega.referencias}</Texto>
+                ) : null}
+                {/* La instrucción que decide la entrega fallida (§9.3) —
+                    de vuelta al leer desde el cableo del 12-ago. */}
+                {detalle.entrega.instrucciones !== null ? (
+                  <Texto variante="apoyo">
+                    {t('despensa.instruccionDicha', { texto: detalle.entrega.instrucciones })}
+                  </Texto>
                 ) : null}
               </View>
             ) : null}

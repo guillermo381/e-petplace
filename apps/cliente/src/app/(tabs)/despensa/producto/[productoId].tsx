@@ -71,8 +71,11 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  expandirAlergenosAVigilar,
   obtenerFichaProducto,
   obtenerPerfilMascota,
+  registrarEntendimientoAlergia,
+  type AlergenoVigilado,
   type FichaProducto,
   type VarianteDeProducto,
 } from '@epetplace/api';
@@ -80,8 +83,8 @@ import { LienzoProducto } from '@/components/despensa-piezas';
 import { agregarAlCarrito, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import {
   alergenosDeMascota,
-  alergenosQueCruzan,
-  estadoComposicion,
+  cruzarConVigilados,
+  vozAlergeno,
 } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 
@@ -101,9 +104,12 @@ export default function DespensaProducto() {
   const [ficha, setFicha] = useState<Fase<FichaProducto>>('cargando');
   const [nombreMascota, setNombreMascota] = useState<string | null>(null);
   const [alergenosMascota, setAlergenosMascota] = useState<string[]>([]);
+  /** La lista EXPANDIDA por el motor (relaciones: ave ⊃ pollo). */
+  const [vigilados, setVigilados] = useState<AlergenoVigilado[]>([]);
   const [varianteId, setVarianteId] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState(1);
   const [entendido, setEntendido] = useState(false);
+  const [registrando, setRegistrando] = useState(false);
   const [visor, setVisor] = useState<number | null>(null);
   const [reintento, setReintento] = useState(0);
 
@@ -128,15 +134,28 @@ export default function DespensaProducto() {
   useEffect(() => {
     if (idMascota === null) return;
     let vigente = true;
-    void obtenerPerfilMascota(idMascota).then((r) => {
+    void (async () => {
+      const r = await obtenerPerfilMascota(idMascota);
       if (!vigente || !r.ok) return;
       setNombreMascota(r.data.mascota.nombre);
-      setAlergenosMascota(
+      const documentados =
         r.data.alergias_estado === 'con_alergias'
           ? alergenosDeMascota(r.data.alergias_detalle)
-          : [],
+          : [];
+      setAlergenosMascota(documentados);
+      if (documentados.length === 0) return;
+      // La EXPANSIÓN la hace el motor (relaciones como dato: ave ⊃ pollo).
+      // Si el viaje falla, la degradación es el cruce LITERAL (exacta) —
+      // advertir de menos por una relación no vista es preferible a no
+      // advertir por una red caída, y jamás se fabrica una imprecisa.
+      const exp = await expandirAlergenosAVigilar(documentados);
+      if (!vigente) return;
+      setVigilados(
+        exp.ok
+          ? exp.data
+          : documentados.map((a) => ({ declarado: a, origen: a, exacta: true })),
       );
-    });
+    })();
     return () => {
       vigente = false;
     };
@@ -149,8 +168,18 @@ export default function DespensaProducto() {
     () =>
       ficha !== 'cargando' && ficha !== 'error'
         ? ficha.variantes.filter(
-            (v): v is VarianteDeProducto & { oferta_id: string; precio: number } =>
-              v.oferta_id !== null && v.precio !== null,
+            (
+              v,
+            ): v is VarianteDeProducto & {
+              oferta_id: string;
+              precio: number;
+              cuenta_comercial_id: string;
+              country_code: string;
+            } =>
+              v.oferta_id !== null &&
+              v.precio !== null &&
+              v.cuenta_comercial_id !== null &&
+              v.country_code !== null,
           )
         : [],
     [ficha],
@@ -164,28 +193,34 @@ export default function DespensaProducto() {
 
   const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
 
-  /** §5.4 — los HECHOS para AvisoAlergia (contrato de tres estados de B:
-   *  la pieza recibe hechos y decide sola; solo `verificada` sin cruce
-   *  calla). El estado lo deriva el helper — único punto que cambia
-   *  cuando el wrapper exponga `composicion_estado` del motor. */
-  const estadoComp = useMemo(
+  /** §5.4 — los HECHOS para AvisoAlergia v3: `composicion_estado` viene
+   *  del MOTOR (columna con cuatro literales; solo verificada y no_aplica
+   *  callan, y son dos silencios distintos) y la coincidencia sale del
+   *  cruce EXPANDIDO (exacta «contiene» · imprecisa «podría ser»). */
+  const cruce = useMemo(
     () =>
       ficha !== 'cargando' && ficha !== 'error'
-        ? estadoComposicion({
-            alergenos: ficha.alergenos,
-            ingredientes_activos: ficha.ingredientes_activos,
-          })
-        : null,
-    [ficha],
+        ? cruzarConVigilados(ficha.alergenos, vigilados)
+        : { coincidencia: 'ninguna' as const, exactos: [], imprecisos: [] },
+    [ficha, vigilados],
   );
-  const cruzan = useMemo(
-    () =>
-      ficha !== 'cargando' && ficha !== 'error'
-        ? alergenosQueCruzan(ficha.alergenos, alergenosMascota)
-        : [],
-    [ficha, alergenosMascota],
-  );
-  const exigeEntendimiento = cruzan.length > 0;
+  const exigeEntendimiento = cruce.coincidencia !== 'ninguna';
+
+  /** El paso explícito QUEDA REGISTRADO (§5.4 — tabla append-only del
+   *  motor). Sin registro no hay entendido: el paso ES el registro. */
+  async function confirmarEntendimiento() {
+    if (registrando) return;
+    if (idMascota === null || ficha === 'cargando' || ficha === 'error') return;
+    setRegistrando(true);
+    const advertidos = [...cruce.exactos, ...cruce.imprecisos.map((i) => i.declarado)];
+    const r = await registrarEntendimientoAlergia(ficha.producto_id, idMascota, advertidos);
+    setRegistrando(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setEntendido(true);
+  }
 
   /** El porqué — frases construidas SOLO con atributos declarados (S95-I,
    *  sin cambios de criterio). */
@@ -255,10 +290,10 @@ export default function DespensaProducto() {
         foto_url: ficha.foto_url,
         especies_aplicables: ficha.especies_aplicables,
         alergenos: ficha.alergenos,
-        // 🔴 Hueco declarado (store): el catálogo todavía no expone el
-        // vendedor de la oferta. Se aprieta a string cuando la tanda de A
-        // llegue a main (ofertas.cuenta_comercial_id, 12-ago).
-        cuentaComercialId: null,
+        // El vendedor de la oferta — del motor, vía el trigger de A
+        // (cableo del merge 12-ago; el hueco murió).
+        cuentaComercialId: variante.cuenta_comercial_id,
+        country_code: variante.country_code,
       },
       cantidad,
       idMascota !== null ? { tipo: 'mascota', mascotaId: idMascota } : null,
@@ -367,33 +402,48 @@ export default function DespensaProducto() {
             </View>
 
             {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
-                haya alérgeno documentado relevante (regla de B: la pieza
-                recibe los hechos y decide ella — esta pantalla no la
-                condiciona; el único silencio legal es composición
-                verificada sin cruce, y eso lo resuelve la pieza). El paso
-                explícito gatea el CTA solo cuando CONTIENE. */}
-            {alergenosMascota.length > 0 && estadoComp !== null ? (
+                haya alérgeno documentado relevante: la pieza recibe los
+                HECHOS (composición del motor + coincidencia del cruce
+                expandido) y decide ella — los dos silencios legales
+                (verificada · no_aplica, sin cruce) los resuelve la pieza.
+                El paso explícito gatea el CTA en las DOS coincidencias:
+                si puede ser pollo, se decide sabiendo. */}
+            {alergenosMascota.length > 0 ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <AvisoAlergia
-                  composicion={estadoComp}
-                  contieneAlergeno={cruzan.length > 0}
+                  composicion={ficha.composicion_estado}
+                  coincidencia={cruce.coincidencia}
                   mensaje={
-                    cruzan.length > 0
+                    cruce.coincidencia === 'exacta'
                       ? t('despensa.alergiaContiene', {
                           nombre: nombreMascota ?? t('despensa.tuMascota'),
-                          lista: cruzan.join(', '),
+                          lista: cruce.exactos.map(vozAlergeno).join(', '),
                         })
-                      : estadoComp === 'ausente'
-                        ? t('despensa.alergiaSinComposicion', {
+                      : cruce.coincidencia === 'imprecisa'
+                        ? t('despensa.alergiaImprecisa', {
                             nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            lista: cruce.imprecisos
+                              .map((i) =>
+                                t('despensa.imprecisoPar', {
+                                  declarado: vozAlergeno(i.declarado),
+                                  origen: vozAlergeno(i.origen),
+                                }),
+                              )
+                              .join('; '),
                           })
-                        : t('despensa.alergiaSinVerificar', {
-                            nombre: nombreMascota ?? t('despensa.tuMascota'),
-                          })
+                        : ficha.composicion_estado === 'ausente'
+                          ? t('despensa.alergiaSinComposicion', {
+                              nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            })
+                          : t('despensa.alergiaSinVerificar', {
+                              nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            })
                   }
-                  detalle={cruzan.length > 0 ? t('despensa.alergiaContieneDetalle') : undefined}
+                  detalle={exigeEntendimiento ? t('despensa.alergiaContieneDetalle') : undefined}
                   entendido={exigeEntendimiento ? entendido : undefined}
-                  onEntendido={exigeEntendimiento ? () => setEntendido(true) : undefined}
+                  onEntendido={
+                    exigeEntendimiento ? () => void confirmarEntendimiento() : undefined
+                  }
                   etiquetaEntendido={t('despensa.alergiaEntiendo')}
                   etiquetaYaEntendido={t('despensa.alergiaEntendida')}
                 />
@@ -425,7 +475,14 @@ export default function DespensaProducto() {
                 transporta, jamás avala. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               <Texto variante="seccion">{t('despensa.composicion')}</Texto>
-              {ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0 ? (
+              {/* El ESTADO manda (letra de A, 12-ago): solo `verificada` y
+                  `no_aplica` callan su condición; `declarada_sin_verificar`
+                  y `ausente` la DICEN. Y `no_aplica` jamás pide
+                  ingredientes: no es un dato que falte. */}
+              {ficha.composicion_estado === 'no_aplica' ? (
+                <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+              ) : ficha.composicion_estado === 'ausente' ||
+                (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0) ? (
                 <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
               ) : (
                 <>
@@ -434,10 +491,16 @@ export default function DespensaProducto() {
                   ) : null}
                   {ficha.alergenos.length > 0 ? (
                     <Texto variante="apoyo">
-                      {t('despensa.composicionAlergenos', { lista: ficha.alergenos.join(', ') })}
+                      {t('despensa.composicionAlergenos', {
+                        lista: ficha.alergenos.map(vozAlergeno).join(', '),
+                      })}
                     </Texto>
                   ) : null}
-                  <Texto variante="apoyo">{t('despensa.composicionFuente')}</Texto>
+                  <Texto variante="apoyo">
+                    {ficha.composicion_estado === 'verificada'
+                      ? t('despensa.composicionVerificada')
+                      : t('despensa.composicionFuente')}
+                  </Texto>
                 </>
               )}
             </View>

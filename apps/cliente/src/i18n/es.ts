@@ -1437,6 +1437,10 @@ export const clienteEs = {
     alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
     alergiaSinVerificar:
       'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisá la etiqueta antes de dárselo.',
+    // La coincidencia IMPRECISA (relaciones del vocabulario: ave ⊃ pollo).
+    // Mismo registro que la exacta — cambia la palabra, no el matiz.
+    alergiaImprecisa: 'Este alimento contiene {{lista}} — y el expediente de {{nombre}} registra esa alergia.',
+    imprecisoPar: '{{declarado}} (podría ser {{origen}})',
     alergiaEntiendo: 'Entiendo, quiero verlo igual',
     alergiaEntendida: 'Ya lo tuviste en cuenta',
     tuMascota: 'tu mascota',
@@ -1446,7 +1450,9 @@ export const clienteEs = {
     composicion: 'Composición',
     composicionAusente: 'No tenemos los ingredientes de este producto. El fabricante no los declaró.',
     composicionAlergenos: 'Declara contener: {{lista}}.',
-    composicionFuente: 'Declarada por el fabricante.',
+    composicionFuente: 'Declarada por el fabricante, todavía sin verificar.',
+    composicionVerificada: 'Composición verificada.',
+    composicionNoAplica: 'Este tipo de producto no lleva lista de ingredientes.',
 
     // S96 · las fotos
     verFotos: 'Ver las fotos del producto',
@@ -1589,6 +1595,7 @@ export const clienteEs = {
     lineaLote: 'Lote {{lote}}',
     lineaDonacion: 'Donación',
     lineaPara: 'Para {{nombre}}',
+    instruccionDicha: 'Instrucción de entrega: {{texto}}',
     cancelarPedido: 'Cancelar el pedido',
     cancelarDetalle:
       'Todavía nadie empezó a prepararlo, así que cancelar no cuesta nada. Después de este punto, el botón cambia y lo conversamos.',

@@ -28,11 +28,10 @@
  *   vive en este estado hasta que A publique la forma. Pedido enviado a A
  *   el 12-ago-2026.
  *
- * · `cuentaComercialId` nace NULABLE y es un hueco medido, no un olvido:
- *   la RLS de `vendedor_skus` (solo-vendedor) impide que el cliente sepa
- *   de qué vendedor es una oferta, y sin ese id `crear_pedido_despensa`
- *   no se puede llamar. Pedido bloqueante enviado a A el 12-ago-2026; el
- *   checkout lo declara mientras tanto.
+ * · `cuentaComercialId` es NO-NULO desde el cableo del 12-ago: nació
+ *   nulable porque la RLS de `vendedor_skus` impedía saber de qué
+ *   vendedor era una oferta; la tanda de A lo denormalizó en `ofertas`
+ *   por trigger (imposible de omitir) y el hueco murió el mismo día.
  */
 
 import { useSyncExternalStore } from 'react';
@@ -53,9 +52,11 @@ export interface ItemCarrito {
   foto_url: string | null;
   especies_aplicables: string[];
   alergenos: string[];
-  /** null = el catálogo todavía no expone el vendedor (hueco declarado
-   *  arriba). El checkout no puede crear pedido sin esto. */
-  cuentaComercialId: string | null;
+  /** El vendedor de la oferta publicada (ver cabecera: no-nulo por
+   *  construcción desde el trigger de A). */
+  cuentaComercialId: string;
+  /** El país de la oferta — lo que el riel de moneda exige (D-448). */
+  country_code: string;
   cantidad: number;
   /** null = sin destino, y es legal (§4). */
   destino: DestinoItem | null;

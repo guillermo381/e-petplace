@@ -29,14 +29,13 @@
  * pasarela (D-764): ningún cobro ocurre, ninguna liquidación nace, y la
  * pantalla lo dice con todas las letras — antes, durante y después.
  *
- * ── HUECOS DECLARADOS (con dueño y en vuelo) ────────────────────────────
- *  1. `cuentaComercialId` llega null del catálogo de hoy: sin él no se
- *     puede crear el pedido. La tanda de A (12-ago) lo trae en la oferta;
- *     esta pantalla ya lo consume del carrito y solo muestra su estado
- *     honesto mientras tanto.
- *  2. El punto del mapa movible (§7) llega con `PinMovible` de B.
- *  3. La recurrencia vive en la pantalla de éxito (§6.1) — el interruptor
- *     existe; el primer cobro real espera la pasarela (D-778) y SE DICE.
+ * ── HUECOS: DOS MURIERON EL MISMO DÍA, UNO QUEDA Y SE DICE ─────────────
+ *  ☠️ `cuentaComercialId` y el pin: cableados (tanda A + PinMovible de B,
+ *     12-ago). El único vivo: la recurrencia (§6.1) tiene interruptor y
+ *     el primer cobro real espera la pasarela (D-778) — SE DICE.
+ *  · El formateo de plata sigue artesanal A PROPÓSITO: es cura de FRENTE
+ *    (D-448 enmendada) — el catálogo ya expone país, el seguimiento no;
+ *    migrar solo esta pantalla partiría el formato del frente en dos.
  *
  * ESCALERA (§4b): peldaño 0 = retiro en tienda (sin dirección, código en
  * el mostrador) · peldaño 1 = despacho a la dirección del hogar con la
@@ -138,9 +137,9 @@ export default function DespensaCheckout() {
   const [recurrenciaId, setRecurrenciaId] = useState<string | null>(null);
   const [activandoRec, setActivandoRec] = useState(false);
 
-  /** El vendedor del pedido — del carrito. Hueco declarado #1: hoy puede
-   *  ser null; la tanda de A lo vuelve imposible. */
-  const cuentaComercialId = items.find((i) => i.cuentaComercialId !== null)?.cuentaComercialId ?? null;
+  /** El vendedor del pedido — del carrito (no-nulo por ítem desde el
+   *  cableo del 12-ago; null acá solo significa carrito vacío). */
+  const cuentaComercialId = items[0]?.cuentaComercialId ?? null;
 
   useEffect(() => {
     let vigente = true;

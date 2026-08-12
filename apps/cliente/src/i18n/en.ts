@@ -1246,6 +1246,9 @@ export const clienteEn = {
     alergiaSinComposicion: "We don't have this product's ingredients, so we can't confirm whether it's safe for {{nombre}}.",
     alergiaSinVerificar:
       "The composition was declared by the manufacturer and we haven't verified it yet. Given {{nombre}}'s allergies, check the label before feeding it.",
+    // The IMPRECISE match (vocabulary relations: poultry ⊃ chicken).
+    alergiaImprecisa: "This food contains {{lista}} — and {{nombre}}'s record lists that allergy.",
+    imprecisoPar: '{{declarado}} (could be {{origen}})',
     alergiaEntiendo: 'I understand, show it anyway',
     alergiaEntendida: 'You already took this into account',
     tuMascota: 'your pet',
@@ -1254,7 +1257,9 @@ export const clienteEn = {
     composicion: 'Composition',
     composicionAusente: "We don't have this product's ingredients. The manufacturer didn't declare them.",
     composicionAlergenos: 'Declared to contain: {{lista}}.',
-    composicionFuente: 'As declared by the manufacturer.',
+    composicionFuente: 'Declared by the manufacturer, not yet verified.',
+    composicionVerificada: 'Verified composition.',
+    composicionNoAplica: "This kind of product doesn't carry an ingredient list.",
 
     // S96 · photos
     verFotos: "See the product's photos",
@@ -1397,6 +1402,7 @@ export const clienteEn = {
     lineaLote: 'Batch {{lote}}',
     lineaDonacion: 'Donation',
     lineaPara: 'For {{nombre}}',
+    instruccionDicha: 'Delivery instruction: {{texto}}',
     cancelarPedido: 'Cancel the order',
     cancelarDetalle:
       "Nobody has started preparing it yet, so canceling costs nothing. Past that point, the button changes and we talk it through.",

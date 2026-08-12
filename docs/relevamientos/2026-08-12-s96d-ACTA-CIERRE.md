@@ -98,12 +98,32 @@ D-749). *Antes de la vara, la auto-auditoría ya había cazado dos: el back
 por gesto que dejaba huérfanos y el interruptor de recurrencia que no se
 apagaba (`3e39e2f8`).*
 
-## 5 · EL CABLEO PENDIENTE (un commit, cuando A publique su merge)
+## 5 · ✅ EL CABLEO — EJECUTADO (merge de A `f3029182` → commit final de D)
 
-`cuentaComercialId` del carrito se aprieta a `string` (hoy `| null` con
-estado honesto en el checkout) · destino por línea REAL (muere el tipo
-puente `LineaConDestino`) · `registrarEntendimientoAlergia` en el
-`onEntendido` (hoy el paso vive en el estado del carrito — hueco declarado
-en el store) · AvisoAlergia v3 (`coincidencia` exacta/imprecisa con voz
-propia para la imprecisa — misma dureza, otra palabra — y `no_aplica` que
-JAMÁS se mapea a `ausente`) · `composicion_estado` real en el helper.
+- `cuentaComercialId` APRETADO a `string` (+ `country_code` por ítem) —
+  el hueco del vendedor murió el mismo día que se midió.
+- Destino por línea REAL: murió el tipo puente `LineaConDestino`; el
+  detalle además muestra la **instrucción de entrega** (de vuelta al leer).
+- **El paso explícito ES el registro**: `onEntendido` llama
+  `registrarEntendimientoAlergia` y sin registro no hay entendido.
+- **AvisoAlergia v3**: `composicion_estado` del MOTOR (cuatro literales —
+  `no_aplica` jamás mapeado a `ausente`) + `coincidencia` del cruce
+  EXPANDIDO (`expandirAlergenosAVigilar`): exacta «contiene pollo» ·
+  imprecisa «contiene proteína de ave (podría ser pollo)» — **mismo
+  registro warning, cambia la palabra y no el matiz**, y el paso explícito
+  gatea el agregar en las DOS. Degradación declarada: si la expansión
+  falla, cruce literal (solo exactas) — jamás se fabrica una imprecisa.
+- La sección Composición dice su condición por estado: `verificada` y
+  `no_aplica` con su voz; `declarada_sin_verificar` y `ausente` LO DICEN.
+  Cero raciones (firma founder).
+- ⚠️ **Voz de los códigos de alérgeno**: el catálogo nuevo trae códigos
+  (`ave_no_especificada`) sin diccionario en el riel — degradación mínima
+  declarada (`vozAlergeno`: guiones → espacios), **anotada para el gate de
+  strings** junto con el horario del WhatsApp.
+- El formateo de plata queda artesanal A PROPÓSITO (D-448 enmendada por
+  A): el catálogo ya expone país, el seguimiento no — migrar la mitad
+  partiría el formato del frente en dos. El barrido es UNO cuando el
+  seguimiento exponga país.
+- Mi ①(b) co-firmado con C quedó APLICADO en el motor (M19: expiración
+  perezosa de `creado`, 24 h como parámetro) — el `beforeRemove` queda
+  como cortesía; la garantía vive en el motor.
