@@ -1164,3 +1164,19 @@ export {
   marcarEntregaFallida,
   type EntregaAsignada,
 } from './wrappers/despensa-repartidor';
+
+// ── HUNK ADITIVO DE LA PISTA C (S96) — lo que el panel necesitaba y el
+//    contrato no traía; cada hueco medido contra la fuente. A firma o muda
+//    (76(c): archivo nuevo + este hunk; el porqué vive en el archivo). ───────
+export {
+  obtenerEscalonPedido,
+  extrasPanelPedidos,
+  registrarFacturaPedido,
+  rolesActivosDeMiCuenta,
+  listarRecursosReparto,
+  listarTurnosEntrega,
+  ESCALONES_VIVOS,
+  type ExtraPanelPedido,
+  type RecursoReparto,
+  type TurnoEntrega,
+} from './wrappers/despensa-panel-extra';
