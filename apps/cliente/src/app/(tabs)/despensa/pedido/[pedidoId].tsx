@@ -70,6 +70,7 @@ import {
   type LineaDePedido,
   type MascotaResumen,
 } from '@epetplace/api';
+import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
@@ -87,7 +88,7 @@ type LineaConDestino = LineaDePedido & {
 
 export default function DespensaPedido() {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
@@ -138,10 +139,15 @@ export default function DespensaPedido() {
     cancelado: t('despensa.desvioCancelado'),
   };
 
+  // Las fechas hablan el idioma de la APP (vara de C ⑥). Los timestamps
+  // van por `fechaLargaHumana` (su rama >10 resuelve el día LOCAL — un
+  // slice de la parte UTC correría el día a la noche en UTC-5).
   const horaLocal = (iso: string) =>
-    new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  const diaHumano = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  const diaHumano = (iso: string) => fechaLargaHumana(iso, idioma);
 
   const elegibles = useMemo(
     () => mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], null),

@@ -33,6 +33,7 @@ import {
   Campo,
   Encabezado,
   EstadoVacio,
+  EvitaTeclado,
   SelectorOpcion,
   Texto,
   spacing,
@@ -136,6 +137,7 @@ export default function DespensaReclamo() {
         onAtras={() => router.back()}
       />
 
+      <EvitaTeclado>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -229,6 +231,7 @@ export default function DespensaReclamo() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

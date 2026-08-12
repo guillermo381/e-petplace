@@ -58,6 +58,7 @@ import {
   Celda,
   Encabezado,
   EstadoVacio,
+  EvitaTeclado,
   Hoja,
   Interruptor,
   SelectorOpcion,
@@ -84,6 +85,7 @@ import {
   type PedidoCreado,
   type PromesaEntrega,
 } from '@epetplace/api';
+import { fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
@@ -98,7 +100,7 @@ const CADENCIAS = [7, 15, 30, 60] as const;
 
 export default function DespensaCheckout() {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const items = useCarrito();
@@ -123,6 +125,8 @@ export default function DespensaCheckout() {
    *  puerta tampoco esconde lo que el usuario busca). */
   const [ventanas, setVentanas] = useState<OpcionVentana[] | 'cargando' | null>(null);
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  /** La altura REAL de la barra del CTA (cambia por fase). */
+  const [barAlto, setBarAlto] = useState(0);
 
   // ── El pedido del motor ────────────────────────────────────────────────
   const clave = useRef(nuevaClaveIdempotencia());
@@ -175,12 +179,19 @@ export default function DespensaCheckout() {
     };
   }, [metodo, cuentaComercialId, fechaElegida]);
 
+  // Las fechas hablan el idioma de la APP, no el del aparato (vara de C:
+  // teléfono en inglés + app en español pintaba "Wednesday" en un checkout
+  // en español). Día y día-de-semana salen del riel; la HORA no tiene
+  // helper en el riel todavía — locale explícito por idioma, mismo par
+  // que usa `fechas.ts` (es-EC / en-US).
   const horaLocal = (iso: string) =>
-    new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  const diaLocal = (iso: string) =>
-    new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  const diaLocal = (fecha: string) => fechaDiaSemanaHumana(fecha, idioma);
   const diaCorto = (fecha: string) =>
-    new Date(`${fecha}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+    `${diaSemanaCorto(fecha, idioma)} ${Number(fecha.slice(8, 10))}`;
 
   /** yyyy-mm-dd LOCAL a n días — jamás `toISOString` (corre el día
    *  después de las 19:00 en UTC-5, hallazgo de harness S55). */
@@ -358,14 +369,13 @@ export default function DespensaCheckout() {
     }
     if (cuentaComercialId === null) return;
     setActivandoRec(true);
+    // 🔴 SIEMPRE el ref (vara de C ②): en el éxito el carrito puede
+    // REPOBLARSE desde otra tab con esta pantalla montada, y el ternario
+    // que caía al carrito vivo configuraría la recurrencia con la compra
+    // NUEVA en vez de la hecha. Los refs se congelaron para esto.
     const r = await configurarRecurrencia({
       cuenta_comercial_id: cuentaComercialId,
-      items: items.length > 0 ? items.map((i) => ({
-        oferta_id: i.oferta_id,
-        cantidad: i.cantidad,
-        mascota_id: i.destino?.tipo === 'mascota' ? i.destino.mascotaId : undefined,
-        donacion: i.destino?.tipo === 'donacion' ? true : undefined,
-      })) : itemsCompradosRef.current,
+      items: itemsCompradosRef.current,
       entrega: entregaCompradaRef.current,
       frecuencia_dias: cadencia,
       metodo_entrega: metodo,
@@ -450,11 +460,15 @@ export default function DespensaCheckout() {
         />
       )}
 
+      <EvitaTeclado>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + spacing[8] + 96,
+          // La cola del scroll = la barra MEDIDA (vara de C ⑧: la barra
+          // tiene una altura en armado y otra en resumen — un número
+          // crudo mentía a medias) + aire.
+          paddingBottom: (barAlto > 0 ? barAlto : insets.bottom + spacing[8]) + spacing[6],
           gap: spacing[5],
         }}
       >
@@ -715,9 +729,11 @@ export default function DespensaCheckout() {
           </>
         ) : null}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* LA BARRA DEL CTA por fase — el apagado dice qué falta. */}
       <View
+        onLayout={(e) => setBarAlto(e.nativeEvent.layout.height)}
         style={{
           position: 'absolute',
           left: 0,

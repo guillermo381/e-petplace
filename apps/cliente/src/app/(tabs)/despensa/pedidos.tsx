@@ -39,6 +39,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
+import { fechaLargaHumana } from '@epetplace/i18n';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { useTraduccion } from '@/i18n';
 
@@ -46,7 +47,7 @@ type Fase<T> = T | 'cargando' | 'error';
 
 export default function DespensaPedidos() {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
@@ -76,10 +77,14 @@ export default function DespensaPedidos() {
     cancelado: t('despensa.desvioCancelado'),
   };
 
-  const diaHumano = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+  // Las fechas hablan el idioma de la APP (vara de C ⑥): el día por el
+  // riel; la hora con locale explícito — el mismo par de fechas.ts.
+  const diaHumano = (iso: string) => fechaLargaHumana(iso, idioma);
   const horaLocal = (iso: string) =>
-    new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   /** El detalle de la fila: la PROMESA cuando existe (es lo accionable —
    *  quedarse en casa o no), el retiro cuando es retiro. Sin promesa
