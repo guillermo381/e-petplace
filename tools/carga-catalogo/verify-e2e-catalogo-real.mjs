@@ -99,10 +99,20 @@ try {
 
   // ── ⑤ LA COTIZACIÓN, con la frontera de cobertura ────────────────────────
   const cot = await cotizarEnvioDespensa({
-    cuenta_comercial_id: CUENTA, subtotal: 122, peso_fisico_kg: 12.7, country_code: 'EC',
+    cuenta_comercial_id: CUENTA, subtotal: 122, peso_fisico_kg: 12.7,
+    country_code: 'EC', ciudad_destino: 'Quito',
   });
-  check(cot.ok && cot.data.costo === 0, '⑤ cotiza con moto propia · costo 0 al cliente',
+  check(cot.ok && cot.data.costo === 0 && cot.data.cobertura_declarada,
+    '⑤ cotiza a Quito con moto propia · costo 0 · cobertura verificada',
     cot.ok ? `${cot.data.tipo_regla}` : cot.codigo);
+  // 🔴 CONTRA-CASO: fuera de cobertura, y con su error propio — no «error».
+  const cotFuera = await cotizarEnvioDespensa({
+    cuenta_comercial_id: CUENTA, subtotal: 122, peso_fisico_kg: 12.7,
+    country_code: 'EC', ciudad_destino: 'Guayaquil',
+  });
+  check(!cotFuera.ok && cotFuera.codigo === 'fuera_de_cobertura',
+    '🔴 ⑤b Guayaquil rebota TIPADO, no como «error»',
+    cotFuera.ok ? 'cotizó' : `${cotFuera.codigo} · "${cotFuera.mensaje}"`);
 
   // ── ⑥ EL PEDIDO ──────────────────────────────────────────────────────────
   const oferta = rec2.ok ? rec2.data.productos.find((p) => p.nombre.includes('Bisonte')) : null;

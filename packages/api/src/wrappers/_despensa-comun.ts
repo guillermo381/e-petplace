@@ -57,6 +57,10 @@ export const CODIGOS_ERROR_DESPENSA = [
   // ── Del wrapper, no del motor. Ver `_despensa-catalogo` §exclusión.
   'exclusion_no_verificable',
   'mascota_sin_perfil',
+  // S95-K: el cotizador conoce el destino desde S95-G2 y estos dos códigos son
+  // suyos. Sin tiparlos, una familia en Guayaquil leía «error».
+  'fuera_de_cobertura',
+  'destino_no_declarado',
 ] as const;
 
 export type CodigoErrorDespensa = (typeof CODIGOS_ERROR_DESPENSA)[number];
@@ -90,6 +94,10 @@ export const MENSAJES_DESPENSA: Record<
   bodega_no_encontrada:         'No encontramos desde dónde sale este pedido.',
   exclusion_no_verificable:     'No pudimos revisar las alergias de tu mascota. Mejor no te mostramos nada.',
   mascota_sin_perfil:           'Todavía no sabemos lo suficiente de tu mascota.',
+  // 🔴 NO DICE «ERROR»: dice que el producto existe y que el problema es la
+  //    dirección. Son dos noticias distintas y solo una es accionable.
+  fuera_de_cobertura:           'Todavía no entregamos en esa ciudad.',
+  destino_no_declarado:         'Necesitamos saber a dónde lo enviamos.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
 };

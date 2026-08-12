@@ -42,6 +42,10 @@ export interface CotizacionEnvio {
    *  2 kg que ocupa una caja enorme se cobra por volumen. Lo decide el motor. */
   peso_facturable_kg: number;
   parametros_aplicados: unknown;
+  /** false = la regla del vendedor no declara ciudades, así que esta
+   *  cotización **no verificó cobertura**. Se dice, en vez de dejar creer
+   *  que sí. */
+  cobertura_declarada: boolean;
 }
 
 export interface InputCotizarEnvio {
@@ -52,6 +56,12 @@ export interface InputCotizarEnvio {
   peso_fisico_kg?: number;
   peso_volumetrico_kg?: number;
   country_code?: string;
+  /** 🔴 EL DESTINO. Sin esto, un vendedor que declara cobertura **no se puede
+   *  cotizar**: el motor devuelve `destino_no_declarado` y la app no puede
+   *  mostrar el envío. Este wrapper se escribió en S95-E, ANTES de que S95-G2
+   *  le agregara la ciudad al motor, y la desincronización la destapó el E2E
+   *  con catálogo real (S95-G4) — no una lectura del código. */
+  ciudad_destino?: string;
 }
 
 /**
@@ -74,15 +84,23 @@ export async function cotizarEnvioDespensa(
     p_peso_fisico_kg: input.peso_fisico_kg ?? 0,
     p_peso_volumetrico_kg: input.peso_volumetrico_kg ?? 0,
     p_country_code: input.country_code ?? 'EC',
+    p_ciudad_destino: input.ciudad_destino ?? undefined,
   });
 
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data)) return falloDespensa('datos_inconsistentes');
 
   if (data.ok !== true) {
+    // 🔴 LOS CUATRO CÓDIGOS DEL MOTOR, TIPADOS. Antes solo se reconocían dos y
+    //    los otros caían en `error_desconocido` — **una familia en Guayaquil
+    //    leía «error» en vez de «todavía no llegamos ahí»**, que es una
+    //    respuesta que no ayuda a nadie y que además esconde que el producto
+    //    existe y el problema es la dirección.
     const codigo = typeof data.error === 'string' ? data.error : 'error_desconocido';
     if (codigo === 'sin_regla_envio') return falloDespensaCodigo('sin_regla_envio');
     if (codigo === 'tipo_regla_sin_motor') return falloDespensaCodigo('tipo_regla_sin_motor');
+    if (codigo === 'fuera_de_cobertura') return falloDespensaCodigo('fuera_de_cobertura');
+    if (codigo === 'destino_no_declarado') return falloDespensaCodigo('destino_no_declarado');
     return falloDespensa(codigo);
   }
 
@@ -102,6 +120,7 @@ export async function cotizarEnvioDespensa(
       peso_facturable_kg:
         typeof data.peso_facturable_kg === 'number' ? data.peso_facturable_kg : 0,
       parametros_aplicados: data.parametros_aplicados,
+      cobertura_declarada: data.cobertura_declarada === true,
     },
   };
 }
@@ -308,11 +327,14 @@ export async function reservarStockPedido(
 export async function iniciarPagoPedido(
   pedidoId: string,
 ): Promise<ResultadoWrapper<{ estado: NarrativaPedido }, CodigoErrorDespensa>> {
-  const { data, error } = await getClient().rpc('mover_estado_pedido', {
+  // 🔴 S95-K: pasa por `iniciar_pago_pedido`, que **reserva el stock Y mueve
+  //    el estado en el mismo acto**. La versión anterior solo movía el estado,
+  //    y eso dejaba abierto el agujero que la sonda de K midió: se capturaba el
+  //    pago de un pedido sin stock reservado. *Primero se aparta la mercadería,
+  //    después se pide la tarjeta.*
+  const { data, error } = await getClient().rpc('iniciar_pago_pedido', {
     p_pedido_id: pedidoId,
-    p_hasta: 'esperando_pago',
-    p_actor: 'cliente',
-    p_motivo: undefined,
+    p_minutos_vigencia: 30,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');

@@ -18864,6 +18864,10 @@ export type Database = {
         Args: { p_cita_id: string; p_empleado_id?: string }
         Returns: Json
       }
+      iniciar_pago_pedido: {
+        Args: { p_minutos_vigencia?: number; p_pedido_id: string }
+        Returns: Json
+      }
       insertar_documentos_batch: {
         Args: { p_archivos: Json; p_prestador_id: string }
         Returns: {

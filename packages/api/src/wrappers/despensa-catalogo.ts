@@ -105,6 +105,14 @@ export interface Recomendacion {
      *  "no sabemos": uno es un dato, el otro es un hueco. */
     sin_alergias_declarado: boolean;
     tiene_condicion_cronica: boolean;
+    /** La etapa de vida contra la que se filtró: `cachorro` · `joven` ·
+     *  `adulto` · `senior`. */
+    etapa: string | null;
+    /** 🔴 true = la mascota NO tiene fecha de nacimiento, así que **no se
+     *  filtró por etapa** y la vitrina incluye alimento de cualquier edad.
+     *  La superficie puede invitar a completar la fecha: es la diferencia
+     *  entre recomendar y adivinar. */
+    etapa_desconocida: boolean;
   };
 }
 
@@ -112,6 +120,28 @@ export interface Recomendacion {
 
 function textArray(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+}
+
+/**
+ * La etapa de vida, ESPEJO de `calcular_etapa_vida()` de la base — mismos
+ * cortes, misma partición por especie, medidos ejecutando la función en S95-J2.
+ *
+ * 🔴 DEVUELVE `null` DONDE LA BASE DEVUELVE `'desconocida'`, y es a propósito:
+ * acá `null` significa «no filtres por etapa». La palabra `desconocida` no es
+ * un valor válido de `momentos_aplicables` (su CHECK no la admite), así que
+ * usarla como filtro no devolvería nada.
+ */
+function etapaDeVida(nacimiento: unknown, especie: string | null): string | null {
+  if (typeof nacimiento !== 'string' || nacimiento.length === 0) return null;
+  const anios = (Date.now() - new Date(nacimiento).getTime()) / (365.25 * 24 * 3600 * 1000);
+  if (Number.isNaN(anios)) return null;
+  const cortes: Record<string, [number, number, number]> =
+    { perro: [1, 3, 8], gato: [1, 3, 8], conejo: [0.5, 2, 6], ave: [1, 3, 10] };
+  const [c1, c2, c3] = cortes[especie ?? ''] ?? [0.5, 2, 5];
+  if (anios < c1) return 'cachorro';
+  if (anios < c2) return 'joven';
+  if (anios < c3) return 'adulto';
+  return 'senior';
 }
 
 function numOrNull(v: unknown): number | null {
@@ -382,7 +412,7 @@ export async function recomendarParaMascota(
 
   // ① El expediente
   const [masc, perfil] = await Promise.all([
-    cliente.from('mascotas').select('id, especie, talla').eq('id', mascotaId).maybeSingle(),
+    cliente.from('mascotas').select('id, especie, talla, fecha_nacimiento').eq('id', mascotaId).maybeSingle(),
     cliente
       .from('mascota_perfil_vigente')
       .select('alergias, condiciones_cronicas, alergias_ninguna_declarada_en')
@@ -395,6 +425,22 @@ export async function recomendarParaMascota(
 
   const especie = typeof masc.data.especie === 'string' ? masc.data.especie : null;
   const talla = typeof masc.data.talla === 'string' ? masc.data.talla : null;
+
+  // 🔴 LA ETAPA DE VIDA — y la regla que impide que este filtro vacíe la app.
+  //
+  // S95-K midió que la recomendación NO filtraba por etapa: un perro adulto
+  // veía alimento de cachorro. *Recomendarle comida de cachorro a un bulldog
+  // adulto es incumplir la promesa en chico, y en chico es como empieza.*
+  //
+  // PERO también midió lo otro, y sin eso la cura habría sido peor que el
+  // defecto: **Zeus no tiene fecha de nacimiento, y 64 de las 72 mascotas de
+  // esta base tampoco.** Filtrar a ciegas les habría dejado la vitrina VACÍA,
+  // porque `desconocida` no matchea ni `cachorro` ni `adulto`.
+  //
+  // ⇒ **Sin fecha, no se filtra por etapa** — y la respuesta lo DICE, para que
+  //   la pantalla pueda invitar a completarla. Mostrar de más con el criterio
+  //   declarado es honesto; mostrar nada sin decir por qué, no.
+  const etapa = etapaDeVida(masc.data.fecha_nacimiento, especie);
 
   // La forma del jsonb NO se adivinó: sale del cuerpo de
   // `_trg_alergia_propagar_perfil` — `[{alergeno, severidad, categoria,
@@ -437,6 +483,15 @@ export async function recomendarParaMascota(
       literalArrayPg(alergenos),
     );
   }
+  if (etapa !== null) {
+    // El producto declara para qué etapas sirve; el array VACÍO significa
+    // «cualquiera» (S95-J2) y por eso `overlaps` no alcanza: hay que dejar
+    // pasar también a los que no declaran nada.
+    q = q.or(
+      `momentos_aplicables.cs.{${etapa}},momentos_aplicables.eq.{}`,
+      { referencedTable: 'producto_variantes.productos' },
+    );
+  }
   if (!tieneCronica) {
     // §6: una dieta de prescripción no se ofrece a una mascota sana. Con
     // condición documentada sí entra — la indicación fina es del veterinario,
@@ -469,6 +524,8 @@ export async function recomendarParaMascota(
           perfil.data?.alergias_ninguna_declarada_en !== null &&
           perfil.data?.alergias_ninguna_declarada_en !== undefined,
         tiene_condicion_cronica: tieneCronica,
+        etapa,
+        etapa_desconocida: etapa === null,
       },
     },
   };
