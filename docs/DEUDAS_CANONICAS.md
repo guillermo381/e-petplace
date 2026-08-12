@@ -13856,6 +13856,15 @@ reales, lo que llegue primero. **Trampa declarada:** curarla solo en el
 cargador (mandando `stock: 0`) dejaría la puerta rota para el vendedor que
 proponga desde la app — la cura es de la FUNCIÓN, no del caller.
 
+**☠️ MUERTA (12-ago-2026, mismo día — M21 `20260813010000`):** su disparo
+sonó con la firma del founder de la SEPARACIÓN del catálogo canónico
+(elevación aprobada, Opción A). La cura fue de la FUNCIÓN, como la trampa
+exigía: el stock inicial entra por el ledger (`ingreso`/`carga_inicial`,
+trigger materializa) y el re-propose **no toca stock** — probado en el
+cinturón: re-proponer con `stock: 99` dejó el saldo en 3. La diferencia va
+por `ajustar_stock_vendedor`, por la puerta y con motivo. Vigila el juez
+(inv. 48).
+
 
 #### D-781 — 🟡 EL SPLASH DE `e-PetPlace Negocios` ERA EL TEMPLATE DE EXPO — CURADO EN RAMA, MUERE CON LA BUILD 1.0.5 GATEADA
 

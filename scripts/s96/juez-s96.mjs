@@ -649,7 +649,18 @@ invariante(20, 'Ningún estado interno sale de packages/api: solo las SIETE narr
   //    La profundidad se acumula sobre TODO el archivo, no por línea: las
   //    llamadas de este repo abarcan varias líneas y medir línea por línea
   //    daría falsos rojos en cada `.rpc(` multilínea.
+  // ⚖️ ENMIENDA S96 (12-ago, con su letra fuente — el instrumento se corrige,
+  //    el test no se ablanda): `despensa-panel-extra.ts` es el PANEL DEL
+  //    VENDEDOR (aditivo de C, FIRMADO por revisión de contenido). La regla
+  //    que este invariante protege es «el estado interno no llega a la
+  //    FAMILIA» — y `LETRA_PANEL_VENDEDOR_S96` §3 dice con todas las letras
+  //    que los escalones internos SON el vocabulario del que trabaja: la RLS
+  //    de `pedidos` ya se los deja leer, y las siete narrativas protegen a
+  //    la familia, no al vendedor. El archivo queda EXENTO con nombre; todo
+  //    lector de familia sigue midiéndose entero.
+  const EXENTOS_PANEL_VENDEDOR = ['despensa-panel-extra.ts'];
   for (const { archivo, texto } of fuenteDespensa) {
+    if (EXENTOS_PANEL_VENDEDOR.some((e) => archivo.endsWith(e))) continue;
     let profundidad = 0;
     for (const { n, s } of lineasDeCodigo(texto)) {
       let col = 0;
@@ -1381,6 +1392,28 @@ invariante(46, '🔴 S96 · El vocabulario de alérgenos es DATO: cat_alergenos 
   const fuera = dbQuery(`SELECT count(*) AS n FROM (SELECT unnest(alergenos) AS a FROM productos) t
     WHERE NOT EXISTS (SELECT 1 FROM cat_alergenos c WHERE c.codigo=t.a AND c.activo)`);
   if (Number(fuera[0]?.n) !== 0) detalle.push(`${fuera[0].n} alérgenos vivos fuera del vocabulario`);
+  return { ok: detalle.length === 0, detalle };
+});
+
+invariante(48, '🔴 S96 · El catálogo canónico es de e-PetPlace: el vendedor MAPEA, jamás escribe la ficha ni pisa stock', () => {
+  const detalle = [];
+  const canon = dbQuery(`SELECT pg_get_functiondef(p.oid) AS d FROM pg_proc p
+    JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='proponer_producto_canonico'`);
+  if (!canon.length) detalle.push('proponer_producto_canonico no existe — la separación no rige');
+  else if (!/RAISE EXCEPTION 'solo_epetplace_cura_el_catalogo/.test(canon[0].d)) {
+    detalle.push('la puerta del canónico no rebota al que no es e-PetPlace');
+  }
+  const prop = dbQuery(`SELECT pg_get_functiondef(p.oid) AS d FROM pg_proc p
+    JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname='proponer_sku_vendedor'`);
+  const cuerpo = prop[0]?.d ?? '';
+  // Se mide CÓDIGO (L-170): el INSERT y la asignación, no la prosa.
+  if (/INSERT INTO productos/.test(cuerpo)) detalle.push('la puerta del vendedor ESCRIBE productos — autoría, no mapeo');
+  if (/INSERT INTO producto_variantes/.test(cuerpo)) detalle.push('la puerta del vendedor ESCRIBE variantes');
+  if (/stock_disponible = EXCLUDED/.test(cuerpo)) detalle.push('el re-propose pisa stock sin ledger — D-780 resucitó');
+  if (!/RAISE EXCEPTION 'producto_no_canonico/.test(cuerpo)) detalle.push('un producto fuera del catálogo no rebota hablando');
+  if (!/INSERT INTO inventario_movimientos/.test(cuerpo)) detalle.push('el stock inicial no entra por el ledger');
   return { ok: detalle.length === 0, detalle };
 });
 

@@ -247,3 +247,24 @@ tabla directo.
 11. **Las RACIONES no se muestran en v1** — ni heredadas ni calculadas; manda
     la etiqueta del fabricante y el veterinario. El campo puede existir;
     ninguna superficie lo consume.
+
+### La separación del catálogo canónico (M21 — firma founder 12-ago, tarde)
+
+- **`proponer_producto_canonico(p_producto, p_variante)`** — SOLO e-PetPlace
+  (`solo_epetplace_cura_el_catalogo`). Único escritor de `productos` +
+  `producto_variantes`.
+- **`proponer_sku_vendedor` se ANGOSTÓ a MAPEO** (misma firma): resuelve el
+  canónico por coincidencia y rebota `producto_no_canonico` /
+  `variante_no_canonica` si no existe. **Jamás escribe la ficha** (composición
+  y alérgenos incluidos) **ni pisa stock**: el inicial entra por el ledger
+  (`ingreso`/`carga_inicial`) y las diferencias van por
+  `ajustar_stock_vendedor`. ☠️ D-780 muerta. Juez inv. 48 vigila.
+- El cargador corre las DOS puertas en orden (canónico → mapeo → publicar →
+  fotos → estado de composición).
+
+### La siembra del gate (12-ago) — todo por las puertas reales, marcado
+
+`supabase/dev/seed-gate-s96.sql`: 3 pedidos `liberado_preparacion`
+(`created_by_sistema`) — despacho con mascota atada · despacho con 2 ítems
+sin destino · retiro — + 1 repartidor activo («Repartidor de Pruebas») +
+1 venta de mostrador con su código de reclamo. Limpieza posterior POR ID.
