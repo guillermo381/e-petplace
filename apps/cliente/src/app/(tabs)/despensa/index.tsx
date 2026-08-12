@@ -1,61 +1,63 @@
 /**
- * DESCUBRIR — LA VITRINA QUE SABE A QUIÉN ALIMENTA (S95-I; `MODELO_DESPENSA`
- * §4 y §5.2 punto 1, `DISEÑO_EXPERIENCIA` §7).
+ * DESCUBRIR — LA VITRINA QUE SABE A QUIÉN ALIMENTA (S95-I, ensanchada en
+ * S96-D · D-B1/D-B2 · `LETRA_RECORRIDO_DESPENSA_S96` §5 · `MODELO_DESPENSA`
+ * §4.1 aclarada).
  *
  * TESIS (Ley 14): *la despensa ya sabe qué puede comer tu mascota.*
  *
- * FIRMA (Ley 15): `CriterioMascota` — la cara real de la mascota preside la
- * recomendación y la razón se DICE. No suma acento (Ley 5): es composición
- * y voz, no color.
+ * FIRMA (Ley 15): `CriterioMascota` — la cara real preside y la razón se
+ * DICE (S95-I, intacta). Lo nuevo de S96 no cambia la firma: la sirve —
+ * el buscador y los filtros son alcance, el criterio sigue siendo de la
+ * mascota.
  *
- * CHANEL (Ley 16), lo que se quitó de la primera pasada:
- *  · el CONTADOR de excluidos ("dejamos 3 afuera") — el wrapper devuelve lo
- *    que PASÓ, no lo que quedó afuera: contarlos era inventar un número.
- *  · el buscador — `buscarProductosDespensa` existe y esta tanda no lo
- *    monta: con el catálogo en CERO un buscador es una caja que no puede
- *    encontrar nada. Entra cuando haya catálogo que buscar.
- *  · la línea "perro · talla mediana" bajo "Para Thor" — el porqué fino es
- *    de la FICHA (§5.2 punto 2). Acá repetía sin decidir nada.
+ * LO QUE S96 AGREGA, con su letra:
+ *  · EL BUSCADOR (§5.1 — "acá no se inventa la rueda"): entra porque el
+ *    catálogo dejó de estar en cero (la razón por la que S95-I no lo
+ *    montó, declarada en su header, MURIÓ con los seis productos reales).
+ *  · FILTROS por familia y especie, DERIVADOS de lo cargado (facetas del
+ *    dato vivo, jamás una lista hardcodeada que prometa lo que no hay).
+ *  · SIN MASCOTA SE MUESTRA TODO (§5.2): seis especies. Elegir la mascota
+ *    ENCIENDE el criterio, no es peaje para entrar.
+ *  · 🔴 LA ADVERTENCIA EN LA BÚSQUEDA (§5.4): buscar puede traer lo que la
+ *    recomendación excluyó — acá NO se esconde: la fila lo dice ("Contiene
+ *    pollo") y la ficha exige el paso explícito. La exclusión dura sigue
+ *    siendo SOLO de la recomendación (el motor, jamás esta pantalla).
+ *  · Las puertas de "Tus pedidos" y del código del local (§8.1 · §4).
  *
- * ── LA PUERTA PRINCIPAL ES EL EXPEDIENTE (§5.1) ─────────────────────────
- * *"El alimento de Thor", no "Categoría: Alimentos".* Por eso la mascota
- * es el eje ⓪ y no un filtro al costado: el tab da ALCANCE, el expediente
- * da CRITERIO. Sin mascota elegida se ve la vitrina publicada (peldaño 0,
- * el mismo escalón que el "desde" del grooming) — visible, y sin fingir
- * que está personalizada.
+ * ── LA ENTRADA TIENE DOS PUERTAS (§5.1) ─────────────────────────────────
+ * El tab da ALCANCE, el expediente da CRITERIO. La entrada desde la
+ * mascota llega con `mascotaId` en la URL y preselecciona su eje.
  *
- * ── 🔴 DÓNDE **NO** OCURRE LA EXCLUSIÓN ─────────────────────────────────
- * Acá. Esta pantalla no mira un alérgeno para decidir si pinta una fila:
- * `recomendarParaMascota` pega los predicados a la consulta y Postgres los
- * resuelve con sus índices GIN, y además VERIFICA el resultado y falla
- * CERRADO (`exclusion_no_verificable`). Si esta pantalla filtrara en
- * memoria estaría poniendo lógica clínica en la capa equivocada — y de
- * paso taparía para siempre el defecto que esa verificación existe para
- * gritar. **Ese error se muestra como error, jamás como lista vacía.**
+ * ── DÓNDE **NO** OCURRE LA EXCLUSIÓN ────────────────────────────────────
+ * Acá (S95-I, sin cambios): `recomendarParaMascota` pega los predicados a
+ * la consulta y VERIFICA fail-closed. Esta pantalla jamás filtra por
+ * alérgeno en memoria — ni siquiera en la búsqueda: en la búsqueda
+ * ADVIERTE, que es lo contrario de filtrar.
  *
- * ESCALERA (§4b, declarada):
- *  · Peldaño 0 — sin mascota elegida (o sin catálogo): la vitrina
- *    publicada tal cual, sin criterio prometido.
- *  · Peldaño 1 — con mascota: la recomendación real del motor.
- *  · Peldaño 2 — con expediente rico (alergias documentadas, condición
- *    crónica): el criterio se DICE con sus palabras y la vitrina cambia.
+ * ESCALERA (§4b): peldaño 0 = sin mascota, todo publicado con buscador y
+ * filtros · peldaño 1 = con mascota, la recomendación del motor · peldaño
+ * 2 = expediente rico: el criterio se dice con sus palabras Y la búsqueda
+ * advierte con nombre propio.
  *
- * TESTS (§10): sirve a la mascota real · voz de familia · sin códigos de
- * motor · vacío con camino · error que dice qué pasó · cero dark patterns
- * (`MODELO_LOYALTY` §7.5: sin urgencia, sin FOMO, sin "quedan 2").
+ * TESTS (§10): voz de familia · cero códigos de motor (familias por
+ * diccionario; lo que no matchea no se pinta) · vacío con camino · error
+ * dice qué pasó · cero dark patterns (LOYALTY §7.5).
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
+  Campo,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FiltroPills,
   Icono,
   Separador,
   Texto,
@@ -64,6 +66,7 @@ import {
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  buscarProductosDespensa,
   listarProductosDespensa,
   mascotasElegibles,
   obtenerMascotasDeFamilia,
@@ -75,6 +78,8 @@ import {
 } from '@epetplace/api';
 import { CriterioMascota, LienzoProducto } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { alergenosQueCruzan } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -84,30 +89,28 @@ export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const carrito = useCarrito();
+  // La puerta desde la mascota (§5.1): su perfil llega con el eje puesto.
+  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
 
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [fotos, setFotos] = useState<Record<string, string>>({});
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  const [mascotaId, setMascotaId] = useState<string | null>(
+    typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null,
+  );
   const [vitrina, setVitrina] = useState<Fase<ProductoDeVitrina[]>>('cargando');
-  /** El fallo se guarda CON su código: `exclusion_no_verificable` tiene voz
-   *  propia y no puede caer en el error genérico (es la única feature que
-   *  justifica este frente fallando cerrada — merece decirlo).
-   *
-   *  ⚠️ NO USA `Fase<>` A PROPÓSITO. El `'error'` genérico de ese alias es
-   *  aquí un ESTADO IMPOSIBLE —todo fallo entra como `{fallo}` con su
-   *  código— y dejarlo expresable tenía consecuencia real: ninguna rama lo
-   *  atrapaba y el render caía al `.map()` de una lista vacía, o sea
-   *  **pintaba "no hay nada" ante un error**. Es la trampa de siempre (la
-   *  invisibilidad no tiene stack trace): no se cura leyendo con más
-   *  cuidado, se cura volviendo el estado malo INEXPRESABLE (L-222). */
+  /** Ver S95-I: el fallo de la recomendación viaja CON su código —
+   *  `exclusion_no_verificable` tiene voz propia (L-222: el estado malo
+   *  inexpresable, no el error genérico que nadie atrapa). */
   const [reco, setReco] = useState<Recomendacion | 'cargando' | { fallo: string } | null>(null);
   const [reintento, setReintento] = useState(0);
 
-  /* §7.1 de LOYALTY hecho frontera, no `if` de pantalla: memorial y perdida
-   * NO son elegibles. Recomendarle alimento a una mascota que murió es
-   * exactamente lo que el apagado estructural existe para impedir.
-   * `null` en el 2º argumento = la despensa no restringe especie — eso lo
-   * decide `especies_aplicables` de cada producto, en Postgres. */
+  // ── S96 · el buscador y los filtros ──────────────────────────────────
+  const [busqueda, setBusqueda] = useState('');
+  const [resultados, setResultados] = useState<Fase<ProductoDeVitrina[]> | null>(null);
+  const [familiaFiltro, setFamiliaFiltro] = useState<string | null>(null);
+  const [especieFiltro, setEspecieFiltro] = useState<string | null>(null);
+
   const elegibles = useMemo(
     () => mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], null),
     [mascotas],
@@ -147,9 +150,7 @@ export default function DespensaDescubrir() {
     }, []),
   );
 
-  // Peldaño 0 — la vitrina publicada. Se pide siempre: es lo que se ve sin
-  // mascota, y el fondo contra el que se entiende que la recomendación es
-  // un subconjunto elegido, no todo lo que hay.
+  // Peldaño 0 — la vitrina publicada (S95-I, sin cambios).
   useEffect(() => {
     let vigente = true;
     setVitrina('cargando');
@@ -161,14 +162,12 @@ export default function DespensaDescubrir() {
     };
   }, [reintento]);
 
-  // Con UNA sola elegible se elige sola (Ley 23, corolario S73: la puerta no
-  // pregunta lo que ya sabe) — pero se DICE: el bloque de criterio queda
-  // visible con su cara, jamás magia muda.
+  // Con UNA sola elegible se elige sola — y se DICE (S95-I).
   useEffect(() => {
     if (mascotaId === null && elegibles.length === 1) setMascotaId(elegibles[0].id);
   }, [elegibles, mascotaId]);
 
-  // Peldaño 1 — la recomendación. La exclusión la hace el MOTOR.
+  // Peldaño 1 — la recomendación (el motor excluye, no esta pantalla).
   useEffect(() => {
     if (mascota === null) {
       setReco(null);
@@ -185,13 +184,40 @@ export default function DespensaDescubrir() {
     };
   }, [mascota, reintento]);
 
-  /** El PORQUÉ, armado SOLO con lo que el expediente afirma.
-   *  Tres estados y son distintos entre sí:
-   *   · hay alérgenos documentados → se nombran (no se cuentan productos).
-   *   · la familia declaró "sin alergias conocidas" → es un DATO y se dice.
-   *   · no sabemos → `null`. **Un hueco no se rellena con una frase
-   *     amable**: decir "sin alergias" sin que nadie lo haya declarado
-   *     sería fabricar tranquilidad. */
+  // ── S96 · LA BÚSQUEDA. El `ilike` lo resuelve Postgres; término corto
+  //    no viaja. Los resultados NO excluyen por alergia: ADVIERTEN (§5.4).
+  useEffect(() => {
+    const termino = busqueda.trim();
+    if (termino.length < 2) {
+      setResultados(null);
+      return;
+    }
+    let vigente = true;
+    setResultados('cargando');
+    const timer = setTimeout(() => {
+      void buscarProductosDespensa(termino).then((r) => {
+        if (vigente) setResultados(r.ok ? r.data : 'error');
+      });
+    }, 350);
+    return () => {
+      vigente = false;
+      clearTimeout(timer);
+    };
+  }, [busqueda]);
+
+  /** Los alérgenos documentados de la mascota elegida — salen del criterio
+   *  que la recomendación ya trajo (dato del expediente, no un cálculo
+   *  nuevo). Sin reco cargada, la búsqueda no puede advertir POR FILA —
+   *  la ficha siempre puede (carga el perfil ella misma): la advertencia
+   *  dura nunca depende solo de esta lista. */
+  const alergenosMascota = useMemo(
+    () =>
+      reco !== null && reco !== 'cargando' && !('fallo' in reco)
+        ? reco.criterio.alergenos_excluidos
+        : [],
+    [reco],
+  );
+
   const razon = useMemo(() => {
     if (reco === null || reco === 'cargando' || 'fallo' in reco) return null;
     const c = reco.criterio;
@@ -208,26 +234,143 @@ export default function DespensaDescubrir() {
   const recomendados =
     reco !== null && reco !== 'cargando' && !('fallo' in reco) ? reco.productos : null;
 
+  /** La lista que el ojo ve AHORA: resultados de búsqueda > recomendación
+   *  > vitrina. Los filtros de faceta se aplican sobre ella. */
+  const buscando = resultados !== null;
+  const listaBase: Fase<ProductoDeVitrina[]> | null = buscando
+    ? resultados
+    : mascota !== null
+      ? null // con mascota y sin búsqueda, la lista es la recomendación (abajo)
+      : vitrina;
+
+  /** Facetas DERIVADAS de lo cargado — un filtro solo existe si hay datos
+   *  que parte (censo S82: si un eje no parte los datos, no se dibuja). */
+  function facetas(lista: ProductoDeVitrina[]) {
+    const familias = [...new Set(lista.map((p) => p.familia_codigo))];
+    const especies = [...new Set(lista.flatMap((p) => p.especies_aplicables))];
+    return { familias, especies };
+  }
+
+  /** Ley 3: el código de familia sale por diccionario; lo que no matchea
+   *  no se pinta como chip (antes un chip de menos que un código crudo). */
+  function etiquetaFamilia(codigo: string): string | null {
+    switch (codigo) {
+      case 'alimento':
+        return t('despensa.familiaAlimento');
+      case 'antiparasitario':
+        return t('despensa.familiaAntiparasitario');
+      case 'suplemento':
+        return t('despensa.familiaSuplemento');
+      case 'dieta_prescripcion':
+        return t('despensa.familiaDieta');
+      default:
+        return null;
+    }
+  }
+
+  function etiquetaEspecie(codigo: string): string | null {
+    switch (codigo) {
+      case 'perro':
+        return t('despensa.especiePerro');
+      case 'gato':
+        return t('despensa.especieGato');
+      case 'conejo':
+        return t('despensa.especieConejo');
+      case 'ave':
+        return t('despensa.especieAve');
+      case 'roedor':
+        return t('despensa.especieRoedor');
+      case 'pez':
+        return t('despensa.especiePez');
+      default:
+        return null;
+    }
+  }
+
+  function aplicarFacetas(lista: ProductoDeVitrina[]): ProductoDeVitrina[] {
+    return lista.filter(
+      (p) =>
+        (familiaFiltro === null || p.familia_codigo === familiaFiltro) &&
+        (especieFiltro === null || p.especies_aplicables.includes(especieFiltro)),
+    );
+  }
+
   function filaProducto(p: ProductoDeVitrina) {
+    // §5.4 — la advertencia EN LA FILA cuando la búsqueda trae lo que la
+    // recomendación habría excluido. Nombra el alérgeno; jamás esconde.
+    const cruzan = buscando && mascota !== null ? alergenosQueCruzan(p.alergenos, alergenosMascota) : [];
     return (
-      <Celda
-        key={p.oferta_id}
-        interactiva
-        accessibilityRole="button"
-        onPress={() =>
-          router.push({
-            pathname: '/despensa/producto/[productoId]',
-            // La mascota viaja para que la ficha pueda decir el PORQUÉ. Es
-            // contexto de explicación, jamás de permiso (patrón D-455: los
-            // ids son filtro, nunca llave).
-            params: { productoId: p.producto_id, mascotaId: mascota?.id ?? '' },
-          })
-        }
-        inicio={<LienzoProducto lado={56} />}
-        titulo={p.nombre}
-        subtitulo={[p.marca, p.presentacion].filter((x) => x !== null && x !== '').join(' · ')}
-        metadataMono={`$ ${p.precio.toFixed(2)}`}
-      />
+      <View key={p.oferta_id}>
+        <Celda
+          interactiva
+          accessibilityRole="button"
+          onPress={() =>
+            router.push({
+              pathname: '/despensa/producto/[productoId]',
+              params: { productoId: p.producto_id, mascotaId: mascota?.id ?? '' },
+            })
+          }
+          inicio={<LienzoProducto lado={56} fotoUrl={p.foto_url} />}
+          titulo={p.nombre}
+          subtitulo={[p.marca, p.presentacion].filter((x) => x !== null && x !== '').join(' · ')}
+          metadataMono={`$ ${p.precio.toFixed(2)}`}
+        />
+        {cruzan.length > 0 ? (
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+            <Texto variante="apoyo" color="warning">
+              {t('despensa.filaContiene', {
+                nombre: mascota?.nombre ?? '',
+                lista: cruzan.join(', '),
+              })}
+            </Texto>
+          </View>
+        ) : null}
+      </View>
+    );
+  }
+
+  function listaConFacetas(lista: ProductoDeVitrina[], vacio: React.ReactNode) {
+    const { familias, especies } = facetas(lista);
+    const filtradas = aplicarFacetas(lista);
+    const chipsFamilia = familias
+      .map((f) => ({ codigo: f, etiqueta: etiquetaFamilia(f), icono: null }))
+      .filter((x): x is { codigo: string; etiqueta: string; icono: null } => x.etiqueta !== null);
+    const chipsEspecie = especies
+      .map((e) => ({ codigo: e, etiqueta: etiquetaEspecie(e), icono: null }))
+      .filter((x): x is { codigo: string; etiqueta: string; icono: null } => x.etiqueta !== null);
+    return (
+      <View style={{ gap: spacing[3] }}>
+        {chipsFamilia.length > 1 ? (
+          <FiltroPills
+            opciones={chipsFamilia}
+            activo={familiaFiltro}
+            onCambio={setFamiliaFiltro}
+            onLimpiar={() => setFamiliaFiltro(null)}
+          />
+        ) : null}
+        {/* La especie solo parte datos cuando NO hay mascota elegida: con
+            mascota, su especie ya es el criterio del motor. */}
+        {mascota === null && chipsEspecie.length > 1 ? (
+          <FiltroPills
+            opciones={chipsEspecie}
+            activo={especieFiltro}
+            onCambio={setEspecieFiltro}
+            onLimpiar={() => setEspecieFiltro(null)}
+          />
+        ) : null}
+        {filtradas.length === 0 ? (
+          vacio
+        ) : (
+          <View>
+            {filtradas.map((p, i) => (
+              <View key={p.oferta_id}>
+                {i > 0 ? <Separador /> : null}
+                {filaProducto(p)}
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
     );
   }
 
@@ -249,17 +392,17 @@ export default function DespensaDescubrir() {
     />
   );
 
+  const unidades = unidadesEnCarrito(carrito);
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="portada" saludo={t('despensa.titulo')} isotipo="gradiente" />
 
       <ScrollView
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingTop: spacing[4],
-          // La ley chica de la cola de scroll (S70-B5): el inset, jamás un
-          // número mágico. Sin CTA fijo en esta pantalla, así que no suma
-          // altura de barra.
-          paddingBottom: insets.bottom + spacing[8],
+          paddingBottom: insets.bottom + (unidades > 0 ? spacing[8] + 72 : spacing[8]),
           gap: spacing[5],
         }}
       >
@@ -273,9 +416,7 @@ export default function DespensaDescubrir() {
           />
         ) : (
           <>
-            {/* ⓪ · LA PUERTA — el expediente. Con 2+ elegibles el eje se
-                muestra; con una sola ya quedó elegida y el criterio de
-                abajo la nombra con su cara. */}
+            {/* ⓪ · LA PUERTA — el expediente (S95-I, sin cambios) */}
             {elegibles.length > 1 ? (
               <FiltroMascotas
                 mascotas={elegibles.map((m) => ({
@@ -292,8 +433,19 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ① · EL CRITERIO — la firma */}
-            {mascota !== null ? (
+            {/* ⓪bis · EL BUSCADOR (S96 — §5.1) */}
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Campo
+                label={t('despensa.buscarLabel')}
+                value={busqueda}
+                onChangeText={setBusqueda}
+                placeholder={t('despensa.buscarPlaceholder')}
+                autoCapitalize="none"
+              />
+            </View>
+
+            {/* ① · EL CRITERIO — la firma (S95-I, sin cambios) */}
+            {mascota !== null && !buscando ? (
               <CriterioMascota
                 nombre={mascota.nombre}
                 fotoUrl={caraDeMascotaPorRuta({
@@ -306,16 +458,40 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ② · LO QUE SE PUEDE COMPRAR */}
-            {mascota !== null ? (
+            {/* ② · LO QUE SE VE — búsqueda > recomendación > vitrina */}
+            {buscando ? (
+              resultados === 'cargando' ? (
+                cargandoLista
+              ) : resultados === 'error' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('despensa.errorVitrinaTitulo')}
+                  descripcion={t('despensa.errorVitrinaDetalle')}
+                  accion={botonReintentar}
+                />
+              ) : (
+                listaConFacetas(
+                  resultados ?? [],
+                  /* La señal más valiosa del ecommerce es la búsqueda sin
+                     resultado — acá al menos se dice honesto y con camino. */
+                  <EstadoVacio
+                    registro="seccion"
+                    titulo={t('despensa.busquedaVaciaTitulo', { termino: busqueda.trim() })}
+                    descripcion={t('despensa.busquedaVaciaDetalle')}
+                    accion={
+                      <Boton
+                        variante="secundario"
+                        etiqueta={t('despensa.limpiarBusqueda')}
+                        onPress={() => setBusqueda('')}
+                      />
+                    }
+                  />,
+                )
+              )
+            ) : mascota !== null ? (
               reco === 'cargando' || reco === null ? (
                 cargandoLista
               ) : 'fallo' in reco ? (
-                /* 🔴 LA VERIFICACIÓN FALLÓ CERRADA. No es "no hay productos":
-                   es "no pudimos garantizar que sean seguros". Mostrarlo como
-                   vacío escondería para siempre el defecto que el wrapper
-                   grita a propósito — y peor, sugeriría que no hay nada
-                   cuando lo que hay es una duda sin resolver. */
                 <EstadoVacio
                   registro="seccion"
                   titulo={
@@ -331,11 +507,6 @@ export default function DespensaDescubrir() {
                   accion={botonReintentar}
                 />
               ) : recomendados !== null && recomendados.length === 0 ? (
-                /* Vacío CON CAMINO (Ley 17.5 / §6ter: cero finales mudos).
-                   Y honesto sobre la causa: puede no haber catálogo todavía,
-                   o puede que nada de lo publicado le sirva a ESTA mascota.
-                   La pantalla no sabe cuál de las dos es — así que dice lo
-                   que sí sabe y ofrece ver la vitrina entera. */
                 <EstadoVacio
                   registro="seccion"
                   icono={<Icono nombre="despensa" tamano={48} />}
@@ -350,17 +521,9 @@ export default function DespensaDescubrir() {
                   }
                 />
               ) : (
-                <View>
-                  {(recomendados ?? []).map((p, i) => (
-                    <View key={p.oferta_id}>
-                      {i > 0 ? <Separador /> : null}
-                      {filaProducto(p)}
-                    </View>
-                  ))}
-                </View>
+                listaConFacetas(recomendados ?? [], null)
               )
-            ) : /* Peldaño 0 — la vitrina publicada, sin criterio prometido */
-            vitrina === 'cargando' ? (
+            ) : vitrina === 'cargando' ? (
               cargandoLista
             ) : vitrina === 'error' ? (
               <EstadoVacio
@@ -370,33 +533,65 @@ export default function DespensaDescubrir() {
                 accion={botonReintentar}
               />
             ) : vitrina.length === 0 ? (
-              /* 🔴 EL VACÍO REAL DE HOY, y se dice tal cual: el catálogo
-                 está en CERO (medido: 0 productos, 0 variantes, 0 ofertas
-                 publicadas). Ni un producto de mentira para que la pantalla
-                 se vea llena — un catálogo fingido es peor que uno vacío. */
               <EstadoVacio
                 icono={<Icono nombre="despensa" tamano={48} />}
                 titulo={t('despensa.vacioTitulo')}
                 descripcion={t('despensa.vacioDetalle')}
               />
             ) : (
-              <View>
+              <View style={{ gap: spacing[3] }}>
                 {elegibles.length > 0 ? (
-                  <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}>
+                  <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">{t('despensa.elegiMascota')}</Texto>
                   </View>
                 ) : null}
-                {vitrina.map((p, i) => (
-                  <View key={p.oferta_id}>
-                    {i > 0 ? <Separador /> : null}
-                    {filaProducto(p)}
-                  </View>
-                ))}
+                {listaConFacetas(vitrina, null)}
               </View>
             )}
+
+            {/* ③ · LAS OTRAS PUERTAS — el pedido vivo y el código del local.
+                CeldaNavegacion: acción que LLEVA (E14, chevron ›). Sin
+                glifo: el registry no tiene glifos de pedido/factura y un
+                glifo repetido de despensa sería decoración (Ley 12). */}
+            <View>
+              <Separador />
+              <CeldaNavegacion
+                titulo={t('despensa.tusPedidos')}
+                detalle={t('despensa.tusPedidosDetalle')}
+                onPress={() => router.push('/despensa/pedidos')}
+              />
+              <Separador />
+              <CeldaNavegacion
+                titulo={t('despensa.reclamoEntrada')}
+                detalle={t('despensa.reclamoEntradaDetalle')}
+                onPress={() => router.push('/despensa/reclamo')}
+              />
+            </View>
           </>
         )}
       </ScrollView>
+
+      {/* LA BARRA DEL CARRITO — existe solo cuando hay algo adentro. */}
+      {unidades > 0 ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: spacing[5],
+            paddingTop: spacing[3],
+            paddingBottom: insets.bottom + spacing[3],
+            backgroundColor: theme.bg.base,
+          }}
+        >
+          <Boton
+            etiqueta={t('despensa.verCarrito', { n: unidades })}
+            bloque
+            onPress={() => router.push('/despensa/carrito')}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }

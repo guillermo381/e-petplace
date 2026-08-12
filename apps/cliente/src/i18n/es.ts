@@ -1406,7 +1406,56 @@ export const clienteEs = {
     varianteSinOferta: 'Sin precio publicado por ahora',
     sinPresentaciones: 'Todavía no hay presentaciones cargadas',
     sinPresentacionesDetalle: 'Cuando el vendedor cargue sus tamaños, los vas a ver acá con su precio.',
-    compraLlega: 'Comprar desde la app llega pronto.',
+    presentacionElegida: 'Elegida',
+
+    // S96 · el buscador y los filtros (§5.1) — las facetas se derivan de
+    // lo cargado; estas voces solo nombran lo que el catálogo declara.
+    buscarLabel: 'Buscar',
+    buscarPlaceholder: 'Nombre o marca',
+    limpiarBusqueda: 'Limpiar la búsqueda',
+    busquedaVaciaTitulo: 'Nada con "{{termino}}"',
+    busquedaVaciaDetalle: 'Todavía no tenemos ese producto. El catálogo crece: vale la pena volver a mirar.',
+    familiaAlimento: 'Alimento',
+    familiaAntiparasitario: 'Antiparasitarios',
+    familiaSuplemento: 'Suplementos',
+    familiaDieta: 'Dieta de prescripción',
+
+    // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
+    // jamás esconde. El paso explícito gatea el agregar.
+    filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',
+    alergiaContiene: '{{nombre}} es alérgico a {{lista}} y este alimento lo contiene.',
+    alergiaContieneDetalle: 'Podés comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
+    alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
+    alergiaEntiendo: 'Entiendo, quiero verlo igual',
+    alergiaEntendida: 'Ya lo tuviste en cuenta',
+    tuMascota: 'tu mascota',
+
+    // S96 · la composición (§0.5 — el detalle al nivel del mejor
+    // e-commerce; candado ① de §5.4: sin composición se dice).
+    composicion: 'Composición',
+    composicionAusente: 'No tenemos los ingredientes de este producto. El fabricante no los declaró.',
+    composicionAlergenos: 'Declara contener: {{lista}}.',
+    composicionFuente: 'Declarada por el fabricante.',
+
+    // S96 · las fotos
+    verFotos: 'Ver las fotos del producto',
+    fotosDelProducto: 'Fotos del producto',
+
+    // S96 · el carrito desde la ficha
+    cantidad: 'Cantidad',
+    agregar: 'Agregar al carrito',
+    agregarConPrecio: 'Agregar · {{precio}}',
+    agregado: 'Agregado al carrito.',
+    agregadoPara: 'Agregado al carrito para {{nombre}}.',
+    verCarrito: 'Ver carrito · {{n}}',
+    faltaPresentacion: 'Elegí una presentación para agregarlo.',
+    faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
+
+    // S96 · las otras puertas
+    tusPedidos: 'Tus pedidos',
+    tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
+    reclamoEntrada: '¿Compraste en el local?',
+    reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',
 
     // Los vacíos — con camino, jamás finales mudos
     vacioTitulo: 'La despensa todavía está vacía',

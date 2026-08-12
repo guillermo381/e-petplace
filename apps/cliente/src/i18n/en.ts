@@ -1217,7 +1217,53 @@ export const clienteEn = {
     varianteSinOferta: 'No published price yet',
     sinPresentaciones: 'No sizes loaded yet',
     sinPresentacionesDetalle: 'Once the seller loads their sizes, you’ll see them here with prices.',
-    compraLlega: 'Buying from the app is coming soon.',
+    presentacionElegida: 'Selected',
+
+    // S96 · search and filters (§5.1) — facets derive from loaded data.
+    buscarLabel: 'Search',
+    buscarPlaceholder: 'Name or brand',
+    limpiarBusqueda: 'Clear search',
+    busquedaVaciaTitulo: 'Nothing for "{{termino}}"',
+    busquedaVaciaDetalle: "We don't carry that product yet. The catalog is growing — worth checking back.",
+    familiaAlimento: 'Food',
+    familiaAntiparasitario: 'Parasite control',
+    familiaSuplemento: 'Supplements',
+    familiaDieta: 'Prescription diet',
+
+    // S96 · the allergy warning (§5.4) — names pet and allergen, never hides.
+    filaContiene: "Contains {{lista}}, and {{nombre}}'s record lists it as an allergy.",
+    alergiaContiene: '{{nombre}} is allergic to {{lista}} and this food contains it.',
+    alergiaContieneDetalle: "You can still buy it — it's your call. We just want you to decide knowing.",
+    alergiaSinComposicion: "We don't have this product's ingredients, so we can't confirm whether it's safe for {{nombre}}.",
+    alergiaEntiendo: 'I understand, show it anyway',
+    alergiaEntendida: 'You already took this into account',
+    tuMascota: 'your pet',
+
+    // S96 · composition (§0.5 · §5.4 lock ①: missing composition is SAID).
+    composicion: 'Composition',
+    composicionAusente: "We don't have this product's ingredients. The manufacturer didn't declare them.",
+    composicionAlergenos: 'Declared to contain: {{lista}}.',
+    composicionFuente: 'As declared by the manufacturer.',
+
+    // S96 · photos
+    verFotos: "See the product's photos",
+    fotosDelProducto: 'Product photos',
+
+    // S96 · the cart from the product page
+    cantidad: 'Quantity',
+    agregar: 'Add to cart',
+    agregarConPrecio: 'Add · {{precio}}',
+    agregado: 'Added to your cart.',
+    agregadoPara: 'Added to your cart for {{nombre}}.',
+    verCarrito: 'View cart · {{n}}',
+    faltaPresentacion: 'Pick a size to add it.',
+    faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
+
+    // S96 · the other doors
+    tusPedidos: 'Your orders',
+    tusPedidosDetalle: 'Follow what you ordered, newest first.',
+    reclamoEntrada: 'Bought at the store?',
+    reclamoEntradaDetalle: "Enter your invoice code and the purchase joins their record.",
 
     vacioTitulo: 'The pantry is still empty',
     vacioDetalle:
