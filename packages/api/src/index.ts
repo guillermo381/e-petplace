@@ -1100,12 +1100,19 @@ export {
 
 export {
   cotizarEnvioDespensa,
-  calcularPromesaEntrega,
+  // ☠️ S96: `calcularPromesaEntrega` (bodega) murió con su función; la promesa
+  // es por turno y cupo.
+  calcularPromesaDespensa,
   nuevaClaveIdempotencia,
   crearPedidoDespensa,
   reservarStockPedido,
   iniciarPagoPedido,
   cancelarPedidoDespensa,
+  obtenerCodigoEntrega,
+  atarItemAMascota,
+  reclamarCompraMostrador,
+  configurarRecurrencia,
+  alternarRecurrencia,
   type CotizacionEnvio,
   type InputCotizarEnvio,
   type PromesaEntrega,
@@ -1128,9 +1135,32 @@ export {
   obtenerLineasParaEmpaque,
   marcarPedidoEnPreparacion,
   empacarPedido,
-  marcarPedidoDespachado,
+  // ☠️ S96: `marcarPedidoDespachado` murió con `esperando_courier` — el
+  // despacho ASIGNA repartidor (decisión founder ①).
+  despacharPedido,
+  entregarRetiroEnMostrador,
   listarSkusDelVendedor,
+  ajustarStockVendedor,
+  listarRepartidores,
+  registrarRepartidor,
+  actualizarRepartidor,
+  definirRecursoReparto,
+  declararExcepcionRecurso,
+  definirTurnoEntrega,
+  cupoRepartoDelDia,
+  registrarVentaMostrador,
   type PedidoDelVendedor,
   type LoteDeItem,
   type SkuDelVendedor,
+  type Repartidor,
 } from './wrappers/despensa-vendedor';
+
+// ── EL REPARTIDOR (S96 · la pantalla mínima de tres acciones) ───────────────
+export {
+  misEntregasAsignadas,
+  marcarEnCaminoADestino,
+  subirFotoEntrega,
+  entregarConEvidencia,
+  marcarEntregaFallida,
+  type EntregaAsignada,
+} from './wrappers/despensa-repartidor';

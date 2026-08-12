@@ -126,46 +126,54 @@ export async function cotizarEnvioDespensa(
 }
 
 export interface PromesaEntrega {
+  /** El día (huso del vendedor) contra el que el pedido consume cupo. */
+  fecha: string;
   desde: string;
   hasta: string;
-  /** false = la bodega no declaró hora de corte. El motor NO la inventa y la
-   *  respuesta lo dice: la superficie puede ser honesta sobre su propia
-   *  incertidumbre en vez de prometer un día que no sabe. */
-  hora_corte_declarada: boolean;
-  /** true = el pedido entró después del corte y sale al día siguiente. Causa
-   *  número uno de promesas incumplidas en comercio. */
-  paso_el_corte: boolean;
-  horas_preparacion: number;
-  horas_transito: number;
+  /** El turno que la decidió (`manana` / `tarde` — dato del vendedor). */
+  turno: string;
+  /** true = la eligió el cliente (fecha programada, §6.2 de la letra). */
+  programada: boolean;
+  /** Cuántos días se corrió por cupo lleno. "El excedente no rompe nada: se
+   *  promete al turno siguiente" (LETRA_PANEL §7.3). */
+  saltos_por_cupo: number;
 }
 
-export async function calcularPromesaEntrega(
-  bodegaId: string,
-  horasTransito = 24,
-): Promise<ResultadoWrapper<PromesaEntrega, CodigoErrorDespensa>> {
-  const { data, error } = await getClient().rpc('calcular_promesa_entrega', {
-    p_bodega_id: bodegaId,
-    p_horas_transito: horasTransito,
+/**
+ * ☠️ S96: la promesa por BODEGA (`calcular_promesa_entrega`, hora de corte +
+ * horas de tránsito) MURIÓ — describía un courier. La promesa nueva es por
+ * TURNO y CUPO (LETRA_PANEL §7): pedido de la mañana → ventana de la tarde;
+ * pedido de la tarde → mañana siguiente; y el día lleno corre al siguiente.
+ */
+export async function calcularPromesaDespensa(input: {
+  cuenta_comercial_id: string;
+  /** yyyy-mm-dd, día futuro. El cupo de ese día decide (§6.2). */
+  fecha_programada?: string;
+  servicio_envio?: string;
+}): Promise<ResultadoWrapper<PromesaEntrega, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('calcular_promesa_despensa', {
+    p_cuenta_comercial_id: input.cuenta_comercial_id,
+    p_fecha_programada: input.fecha_programada ?? undefined,
+    p_servicio: input.servicio_envio ?? undefined,
   });
 
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data)) return falloDespensa('datos_inconsistentes');
   if (data.ok !== true) {
-    if (data.error === 'bodega_no_encontrada') return falloDespensaCodigo('bodega_no_encontrada');
     return falloDespensa(typeof data.error === 'string' ? data.error : 'error_desconocido');
   }
-  if (typeof data.desde !== 'string' || typeof data.hasta !== 'string') {
+  if (typeof data.desde !== 'string' || typeof data.hasta !== 'string' || typeof data.fecha !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
   return {
     ok: true,
     data: {
+      fecha: data.fecha,
       desde: data.desde,
       hasta: data.hasta,
-      hora_corte_declarada: data.hora_corte_declarada === true,
-      paso_el_corte: data.paso_el_corte === true,
-      horas_preparacion: typeof data.horas_preparacion === 'number' ? data.horas_preparacion : 0,
-      horas_transito: typeof data.horas_transito === 'number' ? data.horas_transito : 0,
+      turno: typeof data.turno === 'string' ? data.turno : '',
+      programada: data.programada === true,
+      saltos_por_cupo: typeof data.saltos_por_cupo === 'number' ? data.saltos_por_cupo : 0,
     },
   };
 }
@@ -210,6 +218,11 @@ export function nuevaClaveIdempotencia(): string {
 export interface ItemDeCompra {
   oferta_id: string;
   cantidad: number;
+  /** EL DESTINO (S96 · LETRA_RECORRIDO §6.3): la mascota que lo consume, o
+   *  donación — o ninguno (el alimento del ave no registrada se ata después
+   *  con `atarItemAMascota`). El motor rebota la mascota ajena AL COMPRAR. */
+  mascota_id?: string;
+  donacion?: boolean;
 }
 
 export interface DatosDeEntrega {
@@ -219,6 +232,12 @@ export interface DatosDeEntrega {
   ciudad: string;
   sector?: string;
   referencias?: string;
+  /** "Dejar en portería". Las lee el repartidor y deciden la entrega
+   *  fallida — se piden AL COMPRAR, no en la puerta (§9.3). */
+  instrucciones?: string;
+  /** El punto del mapa, movible a mano (§7). */
+  lat?: number;
+  lon?: number;
 }
 
 export interface PedidoCreado {
@@ -248,6 +267,14 @@ export async function crearPedidoDespensa(input: {
   /** El nonce de `nuevaClaveIdempotencia()`, creado al abrir el checkout. */
   clave_idempotencia: string;
   bodega_id?: string;
+  /** 'despacho' (default) o 'retiro' — el retiro entró a v1 (S96): mismo
+   *  pedido, otro modo de entrega, código en el mostrador. */
+  metodo_entrega?: 'despacho' | 'retiro';
+  /** yyyy-mm-dd futuro. El cupo de ese día decide, o el motor rebota
+   *  `sin_cupo_ese_dia` (§6.2). */
+  fecha_programada?: string;
+  /** 'estandar' (default). 'urgente' está modelado y APAGADO. */
+  servicio_envio?: string;
 }): Promise<ResultadoWrapper<PedidoCreado, CodigoErrorDespensa>> {
   const uid = await uidActual();
   if (uid === null) return falloDespensaCodigo('auth_requerido');
@@ -257,7 +284,12 @@ export async function crearPedidoDespensa(input: {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     // 🔴 El prefijo por uid: ver `nuevaClaveIdempotencia`.
     p_clave_idempotencia: `${uid}:${input.clave_idempotencia}`,
-    p_items: input.items.map((i) => ({ oferta_id: i.oferta_id, cantidad: i.cantidad })),
+    p_items: input.items.map((i) => ({
+      oferta_id: i.oferta_id,
+      cantidad: i.cantidad,
+      mascota_id: i.mascota_id ?? null,
+      donacion: i.donacion ?? false,
+    })),
     p_entrega: {
       nombre_receptor: input.entrega.nombre_receptor,
       telefono: input.entrega.telefono,
@@ -265,8 +297,14 @@ export async function crearPedidoDespensa(input: {
       ciudad: input.entrega.ciudad,
       sector: input.entrega.sector ?? null,
       referencias: input.entrega.referencias ?? null,
+      instrucciones: input.entrega.instrucciones ?? null,
+      lat: input.entrega.lat ?? null,
+      lon: input.entrega.lon ?? null,
     },
     p_bodega_id: input.bodega_id ?? undefined,
+    p_metodo_entrega: input.metodo_entrega ?? undefined,
+    p_fecha_programada: input.fecha_programada ?? undefined,
+    p_servicio_envio: input.servicio_envio ?? undefined,
   });
 
   if (error) return falloDespensa(error.message);
@@ -359,4 +397,155 @@ export async function cancelarPedidoDespensa(
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: { ok: true } };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S96 · EL CÓDIGO DE LA PUERTA, EL RECLAMO Y LA REGLA GENERAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * El código que la familia dice en la puerta (o muestra en el mostrador, si
+ * el pedido es de retiro). Se lee del envío del PROPIO pedido — la RLS de
+ * `envios` tiene el brazo del dueño. `null` = el pedido todavía no tiene
+ * envío (no se despachó / no se pagó): vacío honesto, jamás un código
+ * inventado (L-139).
+ */
+export async function obtenerCodigoEntrega(
+  pedidoId: string,
+): Promise<ResultadoWrapper<{ codigo: string | null; estado_envio: string | null }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient()
+    .from('envios')
+    .select('codigo_verificacion, estado')
+    .eq('pedido_id', pedidoId)
+    .maybeSingle();
+  if (error) return falloDespensa(error.message);
+  if (data === null) return { ok: true, data: { codigo: null, estado_envio: null } };
+  if (!esObjDespensa(data)) return falloDespensa('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      codigo: typeof data.codigo_verificacion === 'string' ? data.codigo_verificacion : null,
+      estado_envio: typeof data.estado === 'string' ? data.estado : null,
+    },
+  };
+}
+
+/**
+ * LA REGLA GENERAL DE LA LETRA (§4): la app nunca adivina de quién es una
+ * compra — ofrece atarla, y el dueño decide. Un ítem que quedó sin destino
+ * (el alimento del ave que no estaba registrada) se ata acá; si el pedido ya
+ * se entregó, el evento del expediente nace en el acto.
+ */
+export async function atarItemAMascota(
+  itemId: string,
+  mascotaId: string,
+): Promise<ResultadoWrapper<{ evento_depositado: boolean }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('atar_item_a_mascota', {
+    p_item_id: itemId,
+    p_mascota_id: mascotaId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { evento_depositado: data.evento_depositado === true } };
+}
+
+/**
+ * EL RECLAMO DE MOSTRADOR (§4): el cliente mete el código de la factura y la
+ * compra se ata a él y a la mascota que ÉL elija — recién ahí nace el evento.
+ * El vendedor jamás pudo elegirla: esa pantalla no existe.
+ */
+export async function reclamarCompraMostrador(
+  codigo: string,
+  mascotaId: string,
+): Promise<ResultadoWrapper<{ venta_id: string; eventos_expediente: number }, CodigoErrorDespensa>> {
+  if (codigo.trim().length === 0) return falloDespensaCodigo('codigo_invalido');
+  const { data, error } = await getClient().rpc('reclamar_compra_mostrador', {
+    p_codigo: codigo.trim(),
+    p_mascota_id: mascotaId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.venta_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      venta_id: data.venta_id,
+      eventos_expediente:
+        typeof data.eventos_expediente === 'number' ? data.eventos_expediente : 0,
+    },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S96 · LA COMPRA RECURRENTE — el interruptor (D-778: el primer cobro real
+// espera a la pasarela; el motor lo dice con `pasarela_no_afiliada`)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function configurarRecurrencia(input: {
+  cuenta_comercial_id: string;
+  items: ItemDeCompra[];
+  entrega: DatosDeEntrega;
+  /** Cada N días (7–90)… */
+  frecuencia_dias?: number;
+  /** …O un día fijo del mes (1–28). Exactamente uno de los dos. */
+  dia_del_mes?: number;
+  /** El aviso ANTES del cobro: 2 o 3 días (letra §6.1 ①). */
+  aviso_dias?: 2 | 3;
+  metodo_entrega?: 'despacho' | 'retiro';
+}): Promise<
+  ResultadoWrapper<{ recurrencia_id: string; proximo_pedido_fecha: string }, CodigoErrorDespensa>
+> {
+  if (input.items.length === 0) return falloDespensaCodigo('recurrencia_sin_items');
+  const { data, error } = await getClient().rpc('configurar_recurrencia', {
+    p_cuenta_comercial_id: input.cuenta_comercial_id,
+    p_items: input.items.map((i) => ({
+      oferta_id: i.oferta_id,
+      cantidad: i.cantidad,
+      mascota_id: i.mascota_id ?? null,
+      donacion: i.donacion ?? false,
+    })),
+    p_entrega: {
+      nombre_receptor: input.entrega.nombre_receptor,
+      telefono: input.entrega.telefono,
+      direccion: input.entrega.direccion,
+      ciudad: input.entrega.ciudad,
+      sector: input.entrega.sector ?? null,
+      referencias: input.entrega.referencias ?? null,
+      instrucciones: input.entrega.instrucciones ?? null,
+      lat: input.entrega.lat ?? null,
+      lon: input.entrega.lon ?? null,
+    },
+    p_frecuencia_dias: input.frecuencia_dias ?? undefined,
+    p_dia_del_mes: input.dia_del_mes ?? undefined,
+    p_aviso_dias: input.aviso_dias ?? undefined,
+    p_metodo_entrega: input.metodo_entrega ?? undefined,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.recurrencia_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      recurrencia_id: data.recurrencia_id,
+      proximo_pedido_fecha:
+        typeof data.proximo_pedido_fecha === 'string' ? data.proximo_pedido_fecha : '',
+    },
+  };
+}
+
+/** ② de la letra: SE APAGA EN UN TOQUE, desde donde se prendió. Nunca por
+ *  atención al cliente. */
+export async function alternarRecurrencia(
+  recurrenciaId: string,
+  activo: boolean,
+): Promise<ResultadoWrapper<{ activo: boolean }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('alternar_recurrencia', {
+    p_recurrencia_id: recurrenciaId,
+    p_activo: activo,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { activo: data.activo === true } };
 }
