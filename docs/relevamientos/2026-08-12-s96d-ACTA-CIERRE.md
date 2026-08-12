@@ -68,8 +68,9 @@ auto-auditoría — ninguno del camino feliz.*
    lleno visible), retiro, «Ver el total» → resumen del motor → pago
    SIMULADO → éxito con recurrencia (prender Y apagar).
 5. Tus pedidos → detalle → código → cancelar (antes de preparado) → «Tengo
-   un problema» (⚠️ **el horario 9:00–20:00 del WhatsApp lo puse yo y
-   espera SU confirmación** — único dato no medido de la pista).
+   un problema» (🔏 **horario FIRMADO por el founder: 8:00–21:00** — el
+   provisional 9:00–20:00 murió con la firma; el frente queda SIN datos
+   esperando palabra).
 6. Reclamo del código de mostrador (necesita una venta de C/juez).
 7. La puerta «El alimento de {nombre}» en el perfil.
 

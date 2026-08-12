@@ -1410,8 +1410,8 @@ export const clienteEn = {
     cancelarNo: 'No, keep it',
     canceladoOk: 'The order was canceled.',
     tengoUnProblema: 'I have a problem',
-    // ⚠️ The hours await founder confirmation at the strings gate.
-    problemaDetalle: "Takes you to the e-PetPlace team's WhatsApp. We answer from 9:00 to 20:00.",
+    // 🔏 Hours SIGNED by the founder (Aug 12 2026, via A): 8:00–21:00.
+    problemaDetalle: "Takes you to the e-PetPlace team's WhatsApp. We answer from 8:00 to 21:00.",
     problemaMensaje: 'Hi, I have a problem with my order {{numero}}.',
     problemaFallback: "We couldn't open WhatsApp. Write to us at {{numero}}.",
     paraQuienFue: 'Who was it for?',
