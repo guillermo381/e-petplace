@@ -333,18 +333,51 @@ export { FilaEntrega, type FilaEntregaProps } from './components/FilaEntrega'
 // firmada a MODELO_DESPENSA §6 y §10). Exclusión dura en la
 // RECOMENDACIÓN, advertencia dura en la BÚSQUEDA.
 //
-// LOS DOS CANDADOS DE LA LETRA, HECHOS TIPO:
-//  ① JAMÁS SILENCIO — `modo` es obligatorio y su unión está cerrada en
-//    DOS ('contiene' · 'sinComposicion'). No existe una tercera opción:
-//    una pantalla que no sabe NO PUEDE CALLAR, tiene que decir que no
-//    sabe. La letra dice por qué: «el silencio se lee como "no tiene
-//    pollo", y esa lectura la hace el dueño, no nosotros».
-//  ② NO SE APAGA POR UNA PROMOCIÓN — no hay prop para ocultarla ni para
-//    bajarle el tono. Quien la monte no tiene por dónde silenciarla.
+// 🔴 S96-B SEGUNDA TANDA — LA COMPOSICIÓN TIENE TRES ESTADOS (firma del
+// founder): verificada · declarada_sin_verificar · ausente. SOLO LA
+// VERIFICADA PUEDE CALLAR. Nació con una unión de DOS y era insuficiente:
+// medido sobre el catálogo real, 133 productos tienen composición presente
+// y lista INCOMPLETA (Royal Canin Medium Adulto lleva aceite de pescado y
+// no declara pescado) — y SU SILENCIO SE VE IDÉNTICO AL CONFIABLE.
 //
-// Los dos modos NO se pintan igual: uno dice «esto le hace mal a Thor» y
-// el otro «no lo sabemos». Igualarlos entrena a ignorar el primero.
-export { AvisoAlergia, type AvisoAlergiaProps, type ModoAvisoAlergia } from './components/AvisoAlergia'
+// EL CAMBIO DE FONDO: la pieza ya no recibe un `modo` que la pantalla
+// elige. Recibe los HECHOS (`composicion` + `contieneAlergeno`) y DERIVA
+// ella si habla. Montada con `declarada_sin_verificar`, la pantalla NO
+// TIENE FORMA DE HACERLA CALLAR — no existe la prop. Antes «qué se
+// muestra» era decisión de la pantalla; ahora es consecuencia del dato.
+//   ⚠️ SU LÍMITE: no puede obligar a que la MONTEN. Ese hueco no se cierra
+//   desde un componente — es candidato de regla de lint, no de prop.
+//
+// LOS TRES CANDADOS: ① jamás silencio fuera de `verificada` · ② no se apaga
+// por una promoción · ③ NO SE APAGA POR EL NOMBRE DEL PRODUCTO — medido:
+// 10 productos se llaman «hypoallergenic» o «sensitive» y traen un alérgeno
+// común adentro, así que la pieza NO TIENE PROP DE NOMBRE: no hay por dónde
+// pasarle el dato con el que alguien podría querer silenciarla.
+//
+// ⚠️ SU PRODUCTOR NO EXISTE TODAVÍA (medido por B y por D, coincidiendo):
+// `productos` tiene `alergenos` e `ingredientes_activos` SIN marca de
+// verificación ⇒ hoy nadie puede derivar `verificada`. La forma está y
+// espera su dato — es el inverso del «motor sin puerta».
+export { AvisoAlergia, type AvisoAlergiaProps, type EstadoComposicion } from './components/AvisoAlergia'
+
+// CodigoAEscala — S96-B: el código que se lee A TRAVÉS DE UN MOSTRADOR.
+// Pedido de C con DOS consumidores ya nombrados (el código de reclamo del
+// mostrador y el de la puerta que la familia dice al repartidor).
+//
+// POR QUÉ NO ALCANZABA `Texto`: `dato` es mono de 13 y `Texto` no tiene
+// escotilla de tamaño A PROPÓSITO. C lo estaba componiendo con `titulo`
+// —que es SANS, o sea la Ley 3 rota para conseguir el tamaño—. El desvío
+// no era de C: era el hueco del sistema, y C lo declaró en vez de taparlo.
+//
+// EXCEPCIÓN DECLARADA al matiz S53 (a escala display el dato viste sans):
+// acá NO aplica, y la razón es funcional. Este dato se TRANSCRIBE y se
+// DICTA: en sans se confunden 0/O y 1/l/I. La excepción display nació para
+// números que se LEEN de un vistazo; ésta es la familia que se COPIA.
+//
+// Su a11y es la mitad de la pieza: lee el código DÍGITO A DÍGITO — un
+// lector que dice «ochenta y siete millones» es inútil para alguien que
+// tiene que repetirlo en una puerta.
+export { CodigoAEscala, type CodigoAEscalaProps } from './components/CodigoAEscala'
 
 // SelectorDestinoItem — S96-B: a quién va este producto (§6.3).
 //
