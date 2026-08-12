@@ -41,6 +41,29 @@ export default function TabsLayout() {
         <Icono nombre="explorar" tinta={color} huella={colorHuella} activa={activa} />
       ),
     },
+    /* S95-I · LA DESPENSA TOMA EL TRONO (§3 de DISEÑO_EXPERIENCIA, ciclo
+     * del cuarto slot; `MODELO_DESPENSA` §5.1 lo ratifica: "§7 y su CICLO
+     * DEL TRONO RIGEN, no se enmiendan"). El slot no existía vacío: nace
+     * ahora porque nace la tienda (etapa A6), y cuando llegue Comunidad
+     * la Despensa le ENTREGA el trono — este array ES esa configuración,
+     * y entregarlo es borrar estas siete líneas.
+     *
+     * ⚠️ POSICIÓN: TERCERA VISUAL, cuarta del conjunto — Cuenta queda
+     * ÚLTIMA. No es lo que dice el pedido al pie de la letra ("4ª
+     * posición") y por eso se declara en vez de resolverse callado: la
+     * convención de la casa está MEDIDA en la otra app (Hoy · Mascotas ·
+     * Negocio · Cuenta) y en las tres tabs de ésta — la cuenta cierra la
+     * barra en las dos. Meter la Despensa después de Cuenta rompería esa
+     * gramática en la única barra que el dueño ve todos los días.
+     * Es una línea de diferencia: si el founder la quiere al final, se
+     * mueve en el gate. */
+    {
+      key: 'despensa',
+      etiqueta: t('tabs.despensa'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="despensa" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
     {
       key: 'cuenta',
       etiqueta: t('tabs.cuenta'),
@@ -88,6 +111,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="hogar" />
       <Tabs.Screen name="explorar" />
+      <Tabs.Screen name="despensa" />
       <Tabs.Screen name="cuenta" />
     </Tabs>
   );

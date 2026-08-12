@@ -12,6 +12,7 @@ export const clienteEn = {
   tabs: {
     hogar: 'Home',
     explorar: 'Explore',
+    despensa: 'Pantry',
     cuenta: 'Account',
   },
   // S61-A8 — the welcome, rewritten (founder letter; LOTE S61, GATE
@@ -1192,6 +1193,57 @@ export const clienteEn = {
     cancelar: 'Cancel',
   },
   // ── D-430 (S67): contextual appointment detail (LOTE S67 APPROVED by founder, Jul 18 2026) ──
+  // ── S95-I · THE PANTRY (string batch PENDING FOUNDER GATE) ───────────
+  despensa: {
+    titulo: 'Pantry',
+    tituloProducto: 'Product',
+
+    criterioPara: 'For {{nombre}}',
+    criterioSinAlergenos: "We left out anything with {{lista}}, because it's on their record.",
+    criterioSinAlergias: 'Their record says they have no known allergies.',
+    criterioCondicion: 'We included prescription diets because of their recorded condition.',
+    elegiMascota: 'Pick a pet and we’ll only show what they can eat.',
+    verTodo: 'See the whole pantry',
+
+    porqueTitulo: 'Why we’re showing you this',
+    porqueTituloMascota: 'Why we’re showing this for {{nombre}}',
+    porqueEspecie: "It's made for {{lista}}.",
+    porqueTalla: 'For {{lista}} size.',
+    porqueMomento: 'For this stage: {{lista}}.',
+    porquePrescripcion:
+      'This is a prescription diet. Their vet decides who takes it and for how long — not this screen.',
+
+    presentaciones: 'Sizes',
+    varianteSinOferta: 'No published price yet',
+    sinPresentaciones: 'No sizes loaded yet',
+    sinPresentacionesDetalle: 'Once the seller loads their sizes, you’ll see them here with prices.',
+    compraLlega: 'Buying from the app is coming soon.',
+
+    vacioTitulo: 'The pantry is still empty',
+    vacioDetalle:
+      'We’re building the catalog with products that genuinely suit your pet. When it’s ready, you’ll see it here.',
+    sinParaMascotaTitulo: 'Nothing for {{nombre}} yet',
+    sinParaMascotaDetalle:
+      'There may be no products loaded yet, or nothing published suits them. You can still see the whole pantry.',
+
+    errorMascotasTitulo: "We couldn't load your pets",
+    errorVitrinaTitulo: "We couldn't load the pantry",
+    errorVitrinaDetalle: 'It may be your connection. Please try again.',
+    errorRecoTitulo: "We couldn't build the recommendation",
+    errorRecoDetalle: 'Please try again in a moment.',
+    errorFichaTitulo: "We couldn't load this product",
+    errorFichaDetalle: 'It may be your connection. Please try again.',
+    exclusionRotaTitulo: 'We’d rather show you nothing',
+    exclusionRotaDetalle:
+      "We couldn't confirm these products are safe for {{nombre}}. Rather than risk it, we're not showing any.",
+
+    especiePerro: 'dogs',
+    especieGato: 'cats',
+    especieConejo: 'rabbits',
+    especieAve: 'birds',
+    especieRoedor: 'small rodents',
+    especiePez: 'fish',
+  },
   citasMascota: {
     titulo: "{{nombre}}'s appointment",
     tituloSinNombre: 'Their appointment',

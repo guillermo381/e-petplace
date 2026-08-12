@@ -11,6 +11,9 @@ export const clienteEs = {
   tabs: {
     hogar: 'Hogar',
     explorar: 'Explorar',
+    // S95-I · el cuarto slot (§3, el ciclo del trono). Le guarda el lugar
+    // a Comunidad: cuando ésta nazca, la Despensa le entrega el trono.
+    despensa: 'Despensa',
     cuenta: 'Cuenta',
   },
   // S61-A8 — la bienvenida reescrita (letra founder; LOTE S61, GATE
@@ -1371,6 +1374,71 @@ export const clienteEs = {
   // ── D-430 (S67): el detalle contextual de la cita de la mascota —
   // el CTA de la ficha aterriza acá, jamás en un hub (LOTE S67
   // APROBADO founder, 18 Jul 2026) ──
+  // ── S95-I · LA DESPENSA (lote de strings PENDIENTE DE GATE) ──────────
+  // Voz de familia, tuteo neutro (regla 27 / L-148). El vocabulario del
+  // motor —`M3`, `S|M|L`, los códigos de especie— JAMÁS aparece acá: se
+  // traduce contra los diccionarios que la casa ya tiene y lo que no
+  // matchea no se pinta (Ley 3).
+  despensa: {
+    titulo: 'Despensa',
+    tituloProducto: 'Producto',
+
+    // El criterio — la firma de Descubrir. NUNCA cuenta lo excluido: el
+    // motor devuelve lo que pasó, no lo que quedó afuera.
+    criterioPara: 'Para {{nombre}}',
+    criterioSinAlergenos: 'Dejamos fuera lo que lleva {{lista}}, porque su expediente lo registra.',
+    criterioSinAlergias: 'Su expediente dice que no tiene alergias conocidas.',
+    criterioCondicion: 'Incluimos dietas de prescripción por la condición que tiene registrada.',
+    elegiMascota: 'Elige una mascota y te mostramos solo lo que puede comer.',
+    verTodo: 'Ver toda la despensa',
+
+    // El porqué — la firma de la ficha
+    porqueTitulo: 'Por qué te lo mostramos',
+    porqueTituloMascota: 'Por qué se lo mostramos para {{nombre}}',
+    porqueEspecie: 'Está pensado para {{lista}}.',
+    porqueTalla: 'Para talla {{lista}}.',
+    porqueMomento: 'Para la etapa: {{lista}}.',
+    porquePrescripcion:
+      'Es una dieta de prescripción. Quién la indica y por cuánto tiempo lo decide su veterinario, no esta pantalla.',
+
+    // Las presentaciones
+    presentaciones: 'Presentaciones',
+    varianteSinOferta: 'Sin precio publicado por ahora',
+    sinPresentaciones: 'Todavía no hay presentaciones cargadas',
+    sinPresentacionesDetalle: 'Cuando el vendedor cargue sus tamaños, los vas a ver acá con su precio.',
+    compraLlega: 'Comprar desde la app llega pronto.',
+
+    // Los vacíos — con camino, jamás finales mudos
+    vacioTitulo: 'La despensa todavía está vacía',
+    vacioDetalle:
+      'Estamos armando el catálogo con productos que sirvan de verdad a tu mascota. Cuando esté, lo vas a ver acá.',
+    sinParaMascotaTitulo: 'Nada para {{nombre}} por ahora',
+    sinParaMascotaDetalle:
+      'Puede que todavía no haya productos cargados, o que lo publicado no sea para ella. Podés ver toda la despensa igual.',
+
+    // Los errores — dicen qué pasó y qué hacer (Ley 17.4)
+    errorMascotasTitulo: 'No pudimos cargar tus mascotas',
+    errorVitrinaTitulo: 'No pudimos cargar la despensa',
+    errorVitrinaDetalle: 'Puede ser la conexión. Probá de nuevo.',
+    errorRecoTitulo: 'No pudimos armar la recomendación',
+    errorRecoDetalle: 'Probá de nuevo en un momento.',
+    errorFichaTitulo: 'No pudimos cargar este producto',
+    errorFichaDetalle: 'Puede ser la conexión. Probá de nuevo.',
+    // 🔴 La verificación fail-closed del wrapper. NO es "no hay nada":
+    // es "no podemos garantizar que sea seguro", y se dice así.
+    exclusionRotaTitulo: 'Preferimos no mostrarte nada',
+    exclusionRotaDetalle:
+      'No pudimos comprobar que estos productos sean seguros para {{nombre}}. Antes que arriesgarnos, no te mostramos ninguno.',
+
+    // Las seis especies activas (medidas contra cat_especies), en plural:
+    // la frase es "Está pensado para perros".
+    especiePerro: 'perros',
+    especieGato: 'gatos',
+    especieConejo: 'conejos',
+    especieAve: 'aves',
+    especieRoedor: 'roedores',
+    especiePez: 'peces',
+  },
   citasMascota: {
     titulo: 'La cita de {{nombre}}',
     tituloSinNombre: 'Su cita',
