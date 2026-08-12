@@ -1113,3 +1113,12 @@ export {
   type DatosDeEntrega,
   type PedidoCreado,
 } from './wrappers/despensa-pedido';
+
+export {
+  listarMisPedidos,
+  obtenerDetallePedido,
+  type PedidoEnLista,
+  type LineaDePedido,
+  type SeguimientoEnvio,
+  type DetallePedido,
+} from './wrappers/despensa-seguimiento';
