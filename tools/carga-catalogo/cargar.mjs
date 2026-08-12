@@ -541,26 +541,32 @@ function main() {
 
     const consultaTanda = (grupo) =>
       `${claims}\n` +
-      `select t.linea, prop.r as propuesto, pub.r as publicado, fot.r as fotos, dec.r as compo\n` +
+      `select t.linea, canon.r as canonico, prop.r as propuesto, pub.r as publicado, fot.r as fotos, dec.r as compo\n` +
       `from (values\n  ${grupo.map(valorFila).join(',\n  ')}\n` +
       `) as t(linea, producto, variante, sku, precio, fotos, compo, mercado)\n` +
+      // S96 (firma founder): el canónico lo escribe e-PetPlace (este script
+      // corre como admin) y el SKU del vendedor es MAPEO sobre él — dos
+      // puertas, en este orden, jamás una que haga las dos cosas.
+      `cross join lateral (select proponer_producto_canonico(t.producto, t.variante) as r) canon\n` +
       `cross join lateral (select proponer_sku_vendedor(${lit(cuenta)}, t.producto, t.variante, t.sku, 'epetplace') as r) prop\n` +
       `cross join lateral (select publicar_oferta_sku((prop.r->>'sku_id')::uuid, t.precio, 'EC') as r) pub\n` +
-      // El producto_id sale del RETORNO de proponer, jamás de un subquery: un
-      // subquery del statement no ve las filas que la función volátil acaba de
-      // insertar (snapshot de sentencia — lo cazó el ensayo de esta tanda).
+      // El producto_id sale del RETORNO de la función, jamás de un subquery:
+      // un subquery del statement no ve las filas que la función volátil acaba
+      // de insertar (snapshot de sentencia — lo cazó el ensayo de esta tanda).
       `left join lateral (\n` +
       `  select case when t.fotos is not null then adjuntar_fotos_producto(\n` +
-      `    (prop.r->>'producto_id')::uuid, t.fotos) end as r\n` +
+      `    (canon.r->>'producto_id')::uuid, t.fotos) end as r\n` +
       `) fot on true\n` +
       `left join lateral (\n` +
       `  select case when t.compo is not null or t.mercado is not null then\n` +
-      `    declarar_composicion_estado((prop.r->>'producto_id')::uuid, t.compo, t.mercado)\n` +
+      `    declarar_composicion_estado((canon.r->>'producto_id')::uuid, t.compo, t.mercado)\n` +
       `  end as r\n` +
       `) dec on true;`
 
-    const asentar = (r, propuesto, publicado, fotos) => {
-      r.estado = propuesto.creado.producto || propuesto.creado.variante || propuesto.creado.sku
+    const asentar = (r, canonico, propuesto, publicado, fotos) => {
+      // S96: el "creado" del producto/variante vive en la puerta canónica;
+      // el del sku, en la del vendedor (mapeo).
+      r.estado = canonico.creado.producto || canonico.creado.variante || propuesto.creado.sku
         ? 'creado' : 'actualizado'
       r.detalle = `sku ${String(propuesto.sku_id).slice(0, 8)} · oferta ${String(publicado.oferta_id).slice(0, 8)}`
         + (publicado.sin_cambio ? ' (sin cambio)' : '')
@@ -574,7 +580,7 @@ function main() {
         const filasR = sql(consultaTanda(grupo))
         for (const fila of filasR) {
           const r = grupo.find((x) => x.f._linea === fila.linea)
-          if (r) asentar(r, fila.propuesto, fila.publicado, fila.fotos)
+          if (r) asentar(r, fila.canonico, fila.propuesto, fila.publicado, fila.fotos)
         }
       } catch {
         // La tanda rebotó: fila por fila, para que la culpable diga su motivo
@@ -582,7 +588,7 @@ function main() {
         for (const r of grupo) {
           try {
             const [fila] = sql(consultaTanda([r]))
-            asentar(r, fila.propuesto, fila.publicado, fila.fotos)
+            asentar(r, fila.canonico, fila.propuesto, fila.publicado, fila.fotos)
           } catch (e) {
             r.estado = 'rechazado'
             r.motivos = [`la base lo rechazó: ${e.message}`]
