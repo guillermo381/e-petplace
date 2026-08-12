@@ -17831,6 +17831,10 @@ export type Database = {
         Args: { p_cuenta_id: string }
         Returns: boolean
       }
+      _cuenta_es_vendedora: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: boolean
+      }
       _debe_logear_atencion: {
         Args: { p_prestador_id: string; p_tipo_evento: string }
         Returns: boolean
@@ -17909,6 +17913,15 @@ export type Database = {
         Args: { p_mascota_id: string; p_tipo_servicio: string }
         Returns: boolean
       }
+      _mover_estado_pedido: {
+        Args: {
+          p_actor: string
+          p_hasta: string
+          p_motivo?: string
+          p_pedido_id: string
+        }
+        Returns: Json
+      }
       _notificar_dueño_prestador: {
         Args: {
           p_datos?: Json
@@ -17928,6 +17941,7 @@ export type Database = {
         Args: { p_periodicidad_meses: number; p_ultima_aplicada: string }
         Returns: string
       }
+      _puede_operar_pedido: { Args: { p_pedido_id: string }; Returns: boolean }
       _resolver_fee_aplicable: {
         Args: {
           p_categoria_origen?: string
@@ -18122,6 +18136,10 @@ export type Database = {
       }
       agregar_zona_grooming: {
         Args: { p_grooming_id: string; p_nota?: string; p_zona_codigo: string }
+        Returns: Json
+      }
+      ajustar_stock_vendedor: {
+        Args: { p_cantidad: number; p_motivo: string; p_sku_id: string }
         Returns: Json
       }
       aplicar_reembolso: {
@@ -19441,6 +19459,20 @@ export type Database = {
       }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
+      proponer_sku_vendedor: {
+        Args: {
+          p_cuenta_comercial_id: string
+          p_origen_carga?: string
+          p_producto: Json
+          p_sku: Json
+          p_variante: Json
+        }
+        Returns: Json
+      }
+      publicar_oferta_sku: {
+        Args: { p_country_code?: string; p_precio: number; p_sku_id: string }
+        Returns: Json
+      }
       puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
@@ -19566,6 +19598,17 @@ export type Database = {
           p_grooming_id: string
           p_momento: string
           p_nota?: string
+        }
+        Returns: Json
+      }
+      registrar_factura_pedido: {
+        Args: {
+          p_archivo_url?: string
+          p_clave_acceso?: string
+          p_estado_sri?: string
+          p_numero: string
+          p_pedido_id: string
+          p_total?: number
         }
         Returns: Json
       }

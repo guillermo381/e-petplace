@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// EL JUEZ DE LA DESPENSA — S95-C · S95-D · S95-E (los 11 del esqueleto) + S95-D (los 7 del motor)
+// EL JUEZ DE LA DESPENSA — S95-C · S95-D · S95-E · S95-G (los 11 del esqueleto) + S95-D (los 7 del motor)
 //
 // DIECIOCHO invariantes sacados de la letra (MODELO_DESPENSA v2.0,
 // BIO_EXPEDIENTE E2bis, MODELO_FINANCIERO §7-§8.10, MODELO_LOYALTY §3/§5/§7).
@@ -655,6 +655,147 @@ invariante(22, 'Cero credenciales de pasarela y cero nombres de proveedor en los
   if (/confirmarPagoPedido|confirmar_pago_pedido/.test(indice)) {
     detalle.push('🔴 packages/api exporta la confirmación de pago: la anon key podría marcar pagado sin pagar');
   }
+  return { ok: detalle.length === 0, detalle };
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S95-G · LOS CUATRO DE LA AUTORIZACIÓN (23 → 26)
+//
+// Nacen de un agujero MEDIDO: cinco funciones del motor eran alcanzables desde
+// una sesión común y movían el pedido de otra persona. La lección no es
+// «faltaba un IF»: es que **la autorización se puso donde el actor viajaba
+// como parámetro y no donde estaba implícito**. Estos invariantes vigilan
+// justamente eso, y por estructura — no por nombre.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Las funciones del motor de la despensa, con su firma. Se listan porque el
+// juez tiene que saber QUÉ vigila; su comportamiento se mide, no se supone.
+const MOTOR = [
+  'cotizar_envio_despensa', 'calcular_promesa_entrega', 'mover_estado_pedido',
+  '_mover_estado_pedido', 'crear_pedido_despensa', 'reservar_stock_pedido',
+  'confirmar_pago_pedido', 'empacar_pedido', 'entregar_pedido',
+  'cancelar_pedido_despensa', 'registrar_senal_comercial',
+  'registrar_factura_pedido', 'ajustar_stock_vendedor',
+];
+
+const cuerposMotor = () =>
+  dbQuery(`
+    SELECT p.proname,
+           pg_get_function_identity_arguments(p.oid) args,
+           pg_get_functiondef(p.oid) def,
+           p.provolatile,
+           has_function_privilege('authenticated', p.oid, 'EXECUTE') concedida
+    FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname='public' AND p.proname IN (${lista(MOTOR)})
+    ORDER BY p.proname`);
+
+// ── ㉓ Toda función que ESCRIBE y es alcanzable, verifica a quien llama ──────
+invariante(23, 'Toda función del motor concedida a `authenticated` verifica al actor en su cuerpo', () => {
+  const detalle = [];
+  // 🔴 QUIÉN ENTRA AL EXAMEN, por ESTRUCTURA y no por una lista de excepciones:
+  //    ① tiene que ser alcanzable (`concedida`), y
+  //    ② tiene que poder ESCRIBIR — `provolatile = 'v'`. Una función STABLE no
+  //       muta nada, así que no hay nada que autorizar; el catálogo de precios
+  //       lo puede leer cualquiera con sesión.
+  //    ③ y tiene que tocar datos que pueden ser DE OTRO: `pedidos`,
+  //       `vendedor_skus`, `inventario_*` o `facturas`. Un log propio como
+  //       `senales_comerciales` no tiene dueño ajeno al que proteger.
+  const GATES = /(_puede_operar_pedido|es_vendedor_de|is_admin|user_tiene_acceso_a_mascota|42501)/;
+  const DATOS_AJENOS = /(pedidos|pedido_items|pedido_estados|vendedor_skus|inventario_|facturas)/;
+  for (const f of cuerposMotor()) {
+    if (!f.concedida) continue;
+    if (f.provolatile !== 'v') continue;
+    if (!DATOS_AJENOS.test(f.def)) continue;
+    if (!GATES.test(f.def)) {
+      detalle.push(`${f.proname}(${f.args}) escribe datos que pueden ser de otro y NO verifica a quien llama`);
+    }
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉔ Todo actor de la tabla de transiciones tiene su verificación ──────────
+invariante(24, 'Todo actor declarado en las transiciones tiene gate — un actor sin gate es una puerta', () => {
+  const detalle = [];
+  const actores = dbQuery(`SELECT DISTINCT actor FROM cat_transiciones_pedido WHERE activo`)
+    .map((r) => r.actor);
+  const fns = Object.fromEntries(cuerposMotor().map((f) => [f.proname, f]));
+  const interno = fns['_mover_estado_pedido'];
+  const publica = fns['mover_estado_pedido'];
+  if (!interno || !publica) return { ok: false, detalle: ['falta el anillo interno o la puerta pública'] };
+
+  for (const a of actores) {
+    // Un actor está cubierto de UNA de dos formas, y las dos son legítimas:
+    //   · el anillo interno lo VERIFICA (`p_actor = 'cliente' AND …`), o
+    //   · la puerta pública lo RECHAZA de plano (el caso de `sistema`).
+    const verificado = new RegExp(`p_actor = '${a}'`).test(interno.def);
+    const rechazado = new RegExp(`p_actor = '${a}'[\\s\\S]{0,200}RAISE EXCEPTION`).test(publica.def);
+    if (!verificado && !rechazado) {
+      detalle.push(`el actor '${a}' no tiene ni verificación ni rechazo: es una puerta`);
+    }
+  }
+  // Y el candado que sostiene todo: el anillo interno NO puede ser alcanzable.
+  if (interno.concedida) {
+    detalle.push('🔴 `_mover_estado_pedido` está concedida a authenticated: el anillo interno es alcanzable y el rechazo de `sistema` se puede saltear');
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉕ Ningún estado activo es inalcanzable ─────────────────────────────────
+invariante(25, 'Ningún estado activo del catálogo es inalcanzable — todo paso tiene quien lo emita', () => {
+  const detalle = [];
+  // Un estado puede quedar inalcanzable de dos formas distintas, y G.2 era la
+  // segunda —la que no se ve mirando la tabla—:
+  //   ① no tiene NINGUNA transición activa que entre en él, o
+  //   ② solo entra por el actor `sistema`… y NINGUNA función del motor lo
+  //      emite. `documentado` estaba así: la transición existía, el productor
+  //      no, y el botón «despachado» del vendedor nunca llegaba.
+  const estados = dbQuery(`
+    SELECT e.codigo,
+           (SELECT count(*) FROM cat_transiciones_pedido t
+             WHERE t.hasta = e.codigo AND t.activo) entradas,
+           (SELECT count(*) FROM cat_transiciones_pedido t
+             WHERE t.hasta = e.codigo AND t.activo AND t.actor <> 'sistema') entradas_humanas
+    FROM cat_estados_pedido e
+    WHERE e.activo AND e.codigo <> 'creado'
+    ORDER BY e.orden`);
+  const defs = cuerposMotor().map((f) => f.def).join('\n');
+
+  for (const e of estados) {
+    if (Number(e.entradas) === 0) {
+      detalle.push(`'${e.codigo}' está activo y ninguna transición activa entra en él`);
+      continue;
+    }
+    if (Number(e.entradas_humanas) > 0) continue;   // lo emite una persona
+    // Solo entra por `sistema`: alguna función del motor tiene que emitirlo.
+    if (!new RegExp(`'${e.codigo}'`).test(defs)) {
+      detalle.push(`'${e.codigo}' solo entra por el actor 'sistema' y NINGUNA función del motor lo emite: el flujo se corta ahí`);
+    }
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉖ Los tipos generados están al día ─────────────────────────────────────
+invariante(26, 'Los tipos generados están al día con la última migración', () => {
+  const detalle = [];
+  // 🔴 POR QUÉ ES UN INVARIANTE Y NO UNA TAREA: S95-E encontró que TRECE
+  //    migraciones se habían aplicado sin regenerar `database.types.ts`, y la
+  //    capa de wrappers estaba bloqueada sin que nadie lo supiera — el
+  //    typecheck fallaba por tablas que «no existían». Un desfase de tipos no
+  //    avisa: espera a la próxima persona que escriba una consulta.
+  const tipos = readFileSync('packages/api/src/database.types.ts', 'utf8');
+  const tablas = dbQuery(`
+    SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND c.relkind='r'`).map((r) => r.relname);
+  const faltan = tablas.filter((t) => !tipos.includes(`${t}: {`));
+  if (faltan.length > 0) {
+    detalle.push(`${faltan.length} tabla(s) sin tipos: ${faltan.slice(0, 8).join(', ')}${faltan.length > 8 ? '…' : ''}`);
+  }
+  // Las funciones del motor también viajan a los tipos: sin ellas, `.rpc()`
+  // no compila y el wrapper no se puede escribir.
+  const fnsPublicas = cuerposMotor().filter((f) => f.concedida && !f.proname.startsWith('_'));
+  const fnFaltan = fnsPublicas.filter((f) => !tipos.includes(f.proname)).map((f) => f.proname);
+  if (fnFaltan.length > 0) detalle.push(`funciones del motor sin tipos: ${fnFaltan.join(', ')}`);
   return { ok: detalle.length === 0, detalle };
 });
 
