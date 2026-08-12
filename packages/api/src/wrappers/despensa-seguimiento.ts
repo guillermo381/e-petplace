@@ -61,8 +61,17 @@ export interface LineaDePedido {
 
 export interface SeguimientoEnvio {
   envio_id: string;
-  transportista_codigo: string | null;
-  guia: string | null;
+  /** Los nombres salen MEDIDOS de la tabla, no supuestos: `transportista` y
+   *  `tracking_code` (la primera versión de este archivo decía
+   *  `transportista_codigo` y `guia`, y el gate E2E lo cazó). */
+  transportista: string | null;
+  tracking_code: string | null;
+  tracking_url: string | null;
+  /** 🔴 QUIÉN PAGÓ EL ENVÍO, en la fila del envío. Es la contrapartida de
+   *  `parametros.pagado_por` de la regla: «gratis» no es «nadie paga», y el
+   *  día que e-PetPlace subsidie uno, la diferencia tiene que ser legible en
+   *  la liquidación. */
+  pagado_por: string | null;
   /** Los eventos del courier, del más nuevo al más viejo. */
   eventos: { ocurrido_en: string; descripcion: string | null }[];
 }
@@ -153,7 +162,7 @@ export async function obtenerDetallePedido(
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
-      .select('id, transportista_codigo, guia, envio_eventos(ocurrido_en, descripcion)')
+      .select('id, transportista, tracking_code, tracking_url, pagado_por, envio_eventos(ocurrido_en, descripcion)')
       .eq('pedido_id', pedidoId)
       .maybeSingle(),
   ]);
@@ -187,9 +196,10 @@ export async function obtenerDetallePedido(
     const evs = Array.isArray(env.data.envio_eventos) ? env.data.envio_eventos : [];
     envio = {
       envio_id: env.data.id,
-      transportista_codigo:
-        typeof env.data.transportista_codigo === 'string' ? env.data.transportista_codigo : null,
-      guia: typeof env.data.guia === 'string' ? env.data.guia : null,
+      transportista: typeof env.data.transportista === 'string' ? env.data.transportista : null,
+      tracking_code: typeof env.data.tracking_code === 'string' ? env.data.tracking_code : null,
+      tracking_url: typeof env.data.tracking_url === 'string' ? env.data.tracking_url : null,
+      pagado_por: typeof env.data.pagado_por === 'string' ? env.data.pagado_por : null,
       eventos: evs
         .filter((e): e is { ocurrido_en: string; descripcion: string | null } =>
           esObjDespensa(e) && typeof e.ocurrido_en === 'string',

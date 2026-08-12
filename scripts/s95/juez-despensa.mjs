@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// EL JUEZ DE LA DESPENSA — S95-C (los 11 del esqueleto) + S95-D (los 7 del motor)
+// EL JUEZ DE LA DESPENSA — S95-C · S95-D · S95-E (los 11 del esqueleto) + S95-D (los 7 del motor)
 //
 // DIECIOCHO invariantes sacados de la letra (MODELO_DESPENSA v2.0,
 // BIO_EXPEDIENTE E2bis, MODELO_FINANCIERO §7-§8.10, MODELO_LOYALTY §3/§5/§7).
@@ -20,6 +20,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { dbQuery } from '../lib-db.mjs';
 import { execSync } from 'node:child_process';
+import { readFileSync, readdirSync } from 'node:fs';
 
 // ── Los dos dominios, declarados. El invariante 2 vive de esta separación ────
 
@@ -495,6 +496,165 @@ invariante(18, 'Ningún estado inactivo es alcanzable por el motor', () => {
     WHERE NOT activo AND motivo_inactivo IS NULL`)[0];
   if (tiposSinMotivo?.c) detalle.push(`tipos de regla apagados sin motivo: ${tiposSinMotivo.c}`);
 
+  return { ok: detalle.length === 0, detalle };
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S95-E · LOS CUATRO DE LA CAPA DE WRAPPERS (19 → 22)
+//
+// Los dieciocho de arriba miden la BASE. Estos miden el CÓDIGO de
+// `packages/api`, porque los defectos que esta capa puede introducir no se ven
+// desde Postgres: una escritura directa, un estado interno que se escapa, una
+// suma de plata, el nombre de una pasarela.
+//
+// 🔴 SE MIDE POR ESTRUCTURA, NO POR NOMBRE. En S95-C un verde salió flojo por
+//    clasificar por nombre de tabla, y en S95-D un rojo salió por la razón
+//    equivocada al buscar en el TEXTO de una vista en vez de sus columnas. Un
+//    rojo por el motivo equivocado está tan roto como un verde por el motivo
+//    equivocado.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DIR_WRAPPERS = 'packages/api/src/wrappers';
+const archivosDespensa = readdirSync(DIR_WRAPPERS)
+  .filter((f) => /^_?despensa-.*\.ts$/.test(f));
+const fuenteDespensa = archivosDespensa.map((f) => ({
+  archivo: f,
+  texto: readFileSync(`${DIR_WRAPPERS}/${f}`, 'utf8'),
+}));
+
+/** Las líneas de código de un archivo, SIN comentarios. Sin esto el juez
+ *  mide la prosa: este repo documenta el porqué adentro del código, así que
+ *  medir el texto crudo daría rojos por explicaciones. */
+const lineasDeCodigo = (texto) =>
+  texto
+    .split('\n')
+    .map((l, i) => ({ n: i + 1, s: l }))
+    .filter(({ s }) => {
+      const t = s.trim();
+      return t.length > 0 && !t.startsWith('//') && !t.startsWith('*') && !t.startsWith('/*');
+    });
+
+// ── ⑲ Cero escrituras directas: toda escritura pasa por RPC ─────────────────
+invariante(19, 'Cero escrituras directas a tablas desde los wrappers de la despensa', () => {
+  const detalle = [];
+  for (const { archivo, texto } of fuenteDespensa) {
+    for (const { n, s } of lineasDeCodigo(texto)) {
+      const m = s.match(/\.(insert|update|delete|upsert)\s*\(/);
+      if (m) detalle.push(`${archivo}:${n} escribe directo con .${m[1]}()`);
+    }
+  }
+  // ALCANCE DECLARADO, y el número del resto va como DATO, no como veredicto:
+  // los otros frentes (paseo, grooming, veterinaria, equipo…) tienen 46
+  // escrituras directas en 16 archivos. **No entran al veredicto porque no son
+  // territorio de esta tanda y esta tanda no puede curarlos**, pero se cuentan
+  // para que el número exista y nadie lo redescubra dentro de tres sesiones.
+  const otros = readdirSync(DIR_WRAPPERS)
+    .filter((f) => f.endsWith('.ts') && !/despensa/.test(f))
+    .reduce((acc, f) => {
+      const t = readFileSync(`${DIR_WRAPPERS}/${f}`, 'utf8');
+      return acc + lineasDeCodigo(t).filter(({ s }) => /\.(insert|update|delete|upsert)\s*\(/.test(s)).length;
+    }, 0);
+  console.error(`   (dato, fuera de veredicto) escrituras directas en el resto de packages/api: ${otros}`);
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ⑳ Ningún estado interno sale de la capa ─────────────────────────────────
+invariante(20, 'Ningún estado interno sale de packages/api: solo las SIETE narrativas', () => {
+  const detalle = [];
+  const internos = dbQuery(`SELECT codigo FROM cat_estados_pedido`).map((r) => r.codigo);
+  const narrativas = dbQuery(`SELECT codigo FROM cat_narrativas_pedido`).map((r) => r.codigo);
+  // Un código que además es narrativa (`entregado`, `cancelado`) no cuenta:
+  // ahí la palabra es la voz de la familia, no la fontanería.
+  const soloInternos = internos.filter((c) => !narrativas.includes(c));
+
+  // 🔴 LA DISTINCIÓN QUE HACE ÚTIL A ESTE TEST — Y QUE LA PRIMERA VERSIÓN NO
+  //    HACÍA: el invariante dice que ningún estado interno **SALE**. Un
+  //    literal como `'picking'` que viaja como ARGUMENTO hacia
+  //    `mover_estado_pedido` no sale: **entra**, y es exactamente cómo el
+  //    vendedor pide un movimiento. La primera versión medía «lo menciona» en
+  //    vez de «en qué dirección va», y salió roja contra dos líneas
+  //    perfectamente correctas. Es el mismo error del invariante 16 en S95-D:
+  //    un rojo por la razón equivocada está tan roto como un verde por la
+  //    razón equivocada.
+  //
+  //    LA SALIDA de esta capa son DOS posiciones, y son las que se miden:
+  //      ① lo que se devuelve  → cualquier línea con `return`
+  //      ② lo que se declara   → los bloques `export interface` / `export type`
+  // 🔴 LA REGLA, EN UNA LÍNEA: un literal de estado interno **adentro de los
+  //    paréntesis de una llamada ENTRA al motor; fuera de ellos, SALE.**
+  //
+  //    `return moverComoVendedor(pedidoId, 'picking')` → profundidad 1 → entra.
+  //    `return { estado: 'picking' }`                  → profundidad 0 → sale.
+  //    `interface X { estado: 'picking' }`             → profundidad 0 → sale.
+  //
+  //    La profundidad se acumula sobre TODO el archivo, no por línea: las
+  //    llamadas de este repo abarcan varias líneas y medir línea por línea
+  //    daría falsos rojos en cada `.rpc(` multilínea.
+  for (const { archivo, texto } of fuenteDespensa) {
+    let profundidad = 0;
+    for (const { n, s } of lineasDeCodigo(texto)) {
+      let col = 0;
+      for (const ch of s) {
+        if (ch === '(') profundidad++;
+        else if (ch === ')') profundidad = Math.max(0, profundidad - 1);
+        col++;
+        if (profundidad !== 0) continue;
+        for (const cod of soloInternos) {
+          const lit = `'${cod}'`;
+          if (s.startsWith(lit, col - 1) && s[col - 1] === "'") {
+            detalle.push(`${archivo}:${n} expone el estado interno '${cod}' fuera de una llamada`);
+          }
+        }
+      }
+    }
+  }
+  // Y la contraparte positiva: los tipos que viajan a la superficie tienen que
+  // estar tipados con `NarrativaPedido`, no con `string`.
+  const seguimiento = fuenteDespensa.find((f) => f.archivo === 'despensa-seguimiento.ts');
+  if (seguimiento && !/narrativa:\s*NarrativaPedido/.test(seguimiento.texto)) {
+    detalle.push('despensa-seguimiento.ts no tipa `narrativa` como NarrativaPedido');
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉑ Ningún wrapper calcula plata ──────────────────────────────────────────
+invariante(21, 'Ningún wrapper calcula plata: ni total, ni impuesto, ni flete', () => {
+  const detalle = [];
+  // Se busca aritmética SOBRE identificadores de dinero. `limite ?? 100` o un
+  // `slice(0,5)` no son plata; `precio * cantidad` sí.
+  const PLATA = /(precio|total|subtotal|impuesto|costo|monto|envio|descuento|iva|comision|tarifa)/i;
+  const ARIT = /[a-z_\].)]\s*[*/+-]\s*[a-z0-9_(]/i;
+  for (const { archivo, texto } of fuenteDespensa) {
+    for (const { n, s } of lineasDeCodigo(texto)) {
+      if (!PLATA.test(s) || !ARIT.test(s)) continue;
+      detalle.push(`${archivo}:${n} hace aritmética sobre plata → ${s.trim().slice(0, 90)}`);
+    }
+  }
+  return { ok: detalle.length === 0, detalle };
+});
+
+// ── ㉒ Ninguna credencial ni nombre de proveedor de pago ─────────────────────
+invariante(22, 'Cero credenciales de pasarela y cero nombres de proveedor en los wrappers', () => {
+  const detalle = [];
+  // Los proveedores que la casa nombró alguna vez + los de la plaza. Si mañana
+  // se elige uno, su nombre tiene que vivir en el BACKEND, no acá.
+  const PROVEEDORES =
+    /(kushki|nuvei|stripe|paypal|payphone|datafast|placetopay|mercadopago|culqi|dlocal|epayco|paymentez)/i;
+  const SECRETOS = /(secret|api[_-]?key|private[_-]?key|client[_-]?secret|sk_live|sk_test|pk_live|bearer\s+[A-Za-z0-9])/i;
+  for (const { archivo, texto } of fuenteDespensa) {
+    for (const { n, s } of lineasDeCodigo(texto)) {
+      if (PROVEEDORES.test(s)) detalle.push(`${archivo}:${n} nombra un proveedor de pago`);
+      if (SECRETOS.test(s)) detalle.push(`${archivo}:${n} parece traer una credencial`);
+    }
+  }
+  // Y la puerta que NO puede existir en esta capa: confirmar el pago es del
+  // backend. Si `confirmar_pago_pedido` se exportara desde acá, cualquiera con
+  // la anon key —que viaja en el bundle— declararía un pedido pagado.
+  const indice = readFileSync('packages/api/src/index.ts', 'utf8');
+  if (/confirmarPagoPedido|confirmar_pago_pedido/.test(indice)) {
+    detalle.push('🔴 packages/api exporta la confirmación de pago: la anon key podría marcar pagado sin pagar');
+  }
   return { ok: detalle.length === 0, detalle };
 });
 
