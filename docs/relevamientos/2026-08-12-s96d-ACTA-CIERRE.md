@@ -77,6 +77,27 @@ auto-auditoría — ninguno del camino feliz.*
 declara en vez de esconderse. La vara cruzada de C está pedida con la lista
 de los puntos flojos servida.
 
+## 4bis · LA VARA CRUZADA DE C — CORRIDA Y COBRADA (post-acta, `b6bc07c4`)
+
+C corrió la M2 sobre la punta real de la rama (no sobre mi anuncio) y
+trajo **ocho hallazgos con literal**. Cuatro CURADOS el mismo día:
+② la recurrencia del éxito usa SIEMPRE los refs congelados (el carrito
+puede repoblarse desde otra tab con el éxito montado) · ⑥ las fechas
+hablan el idioma de la APP por el riel, no el del aparato · ⑦
+`EvitaTeclado` en checkout y reclamo (clase D-498) · ⑧ la barra del CTA
+medida con `onLayout` (el 96 crudo mentía entre fases). Uno DECLARADO
+como cura de frente (⑤ el `toFixed` artesanal — toda la superficie
+despensa formatea igual desde S95-I y el riel de moneda exige un
+`country_code` que la ficha no expone: pedido a A enviado, cura en la
+pasada del cableo). Dos CONFIRMADOS como correctos contra el literal
+(el `beforeRemove` y la condición `estado_vida === 'activa'`). Y **uno
+estructural CO-FIRMADO como pedido a A**: la expiración perezosa de
+pedidos `creado` viejos — mi guard de cliente no cubre la muerte de
+proceso, y C midió que el motor no expira ese estado (la clase exacta de
+D-749). *Antes de la vara, la auto-auditoría ya había cazado dos: el back
+por gesto que dejaba huérfanos y el interruptor de recurrencia que no se
+apagaba (`3e39e2f8`).*
+
 ## 5 · EL CABLEO PENDIENTE (un commit, cuando A publique su merge)
 
 `cuentaComercialId` del carrito se aprieta a `string` (hoy `| null` con
