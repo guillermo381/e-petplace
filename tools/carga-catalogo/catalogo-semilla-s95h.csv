@@ -1,8 +1,7 @@
 familia,marca,producto,presentacion,codigo_variante,codigo_impuesto,sku_vendedor,precio_venta,especies,tallas,momento_vital,alergenos,descripcion,contenido_valor,contenido_unidad,peso_kg,gtin,largo_cm,ancho_cm,alto_cm,stock,ingredientes,dieta_prescripcion
-alimento,Pro Pac,Puppy Pollo y Arroz,,,EC_IVA_0,,,perro,pequeno|mediano|grande,cachorro,pollo|arroz,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,pollo|arroz,no
-alimento,Pro Pac,Puppy Cordero y Arroz,,,EC_IVA_0,,,perro,pequeno|mediano|grande,cachorro,cordero|arroz,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,cordero|arroz,no
-alimento,Pro Pac,Puppy Pescado y Papa,,,EC_IVA_0,,,perro,pequeno|mediano|grande,cachorro,pescado|papa,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,pescado|papa,no
-alimento,Taste of the Wild,Salmon ahumado sin grano,,,EC_IVA_0,,,perro,pequeno|mediano|grande,adulto,salmon,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,salmon,no
-alimento,Taste of the Wild,Bisonte y Venado sin grano,,,EC_IVA_0,,,perro,pequeno|mediano|grande,adulto,bisonte|venado,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,bisonte|venado,no
-alimento,Taste of the Wild,Trucha y Salmon sin grano felino,,,EC_IVA_0,,,gato,pequeno|mediano,adulto,trucha|salmon,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,trucha|salmon,no
-dieta_prescripcion,Royal Canin,Hypoallergenic Canine,,,EC_IVA_0,,,perro,pequeno|mediano|grande,adulto,ninguno,NO VERIFICADO CONTRA ENVASE — dieta hipoalergenica de proteina hidrolizada por diseno de linea. VER NOTA: es el unico cuya declaracion es una AUSENCIA y no una presencia,,kg,,,,,,,proteina hidrolizada,si
+alimento,Pro Pac,Puppy Pollo y Arroz,,,EC_IVA_0,,,perro,todas,cachorro,pollo|arroz,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,pollo|arroz,no
+alimento,Pro Pac,Puppy Cordero y Arroz,,,EC_IVA_0,,,perro,todas,cachorro,cordero|arroz,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,cordero|arroz,no
+alimento,Pro Pac,Puppy Pescado y Papa,,,EC_IVA_0,,,perro,todas,cachorro,pescado|papa,NO VERIFICADO CONTRA ENVASE — alergenos derivados del nombre del producto,,kg,,,,,,,pescado|papa,no
+alimento,Taste of the Wild,Salmon ahumado sin grano,,,EC_IVA_0,,,perro,todas,adulto,salmon,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,salmon,no
+alimento,Taste of the Wild,Bisonte y Venado sin grano,,,EC_IVA_0,,,perro,todas,adulto,bisonte|venado,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,bisonte|venado,no
+alimento,Taste of the Wild,Trucha y Salmon sin grano felino,,,EC_IVA_0,,,gato,todas,adulto,trucha|salmon,NO VERIFICADO CONTRA ENVASE — linea sin grano con proteina nombrada,,kg,,,,,,,trucha|salmon,no

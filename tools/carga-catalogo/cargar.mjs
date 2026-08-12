@@ -100,6 +100,51 @@ const OPCIONALES = [
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 🔴 LOS DOS VOCABULARIOS CERRADOS (S95-J / S95-J2)
+//
+// `productos.tallas_aplicables` y `productos.momentos_aplicables` tienen CHECK
+// en la base. **`proponer_sku_vendedor` los inserta SIN validar**, así que un
+// valor fuera del vocabulario llega hasta Postgres y rebota como
+// `check_violation` cruda — un error que menciona un constraint y no dice qué
+// hacer. *A un vendedor que carga su catálogo eso no le sirve de nada.*
+//
+// Se valida ACÁ, antes de viajar, con el mensaje que sí ayuda.
+const TALLAS_VALIDAS = ['S', 'M', 'L']
+const MOMENTOS_VALIDOS = ['cachorro', 'joven', 'adulto', 'senior']
+
+// El catálogo del vendedor dice «pequeño / mediano / grande»; la base dice
+// S/M/L. **Se traduce, no se rechaza**: es la misma talla con otro nombre, y
+// hacer que el vendedor reescriba su catálogo para hablar nuestro idioma sería
+// trasladarle a él un problema nuestro.
+const SINONIMOS_TALLA = {
+  pequeno: 'S', pequeño: 'S', chico: 'S', s: 'S',
+  mediano: 'M', medio: 'M', m: 'M',
+  grande: 'L', l: 'L', gigante: 'L',
+}
+
+// 🔴 «TODAS» NO ES UN VALOR: ES EL ARRAY VACÍO. El catálogo del vendedor
+// escribe «todas» para decir «sirve para cualquier talla», y en la base eso se
+// dice con la lista VACÍA —que además es el DEFAULT—. Meter la palabra «todas»
+// haría que el producto no matchee con NINGUNA mascota y quede invisible sin
+// que nadie sepa por qué.
+const SIGNIFICA_CUALQUIERA = ['todas', 'todos', 'cualquiera', 'todas las tallas', 'na', 'n/a']
+
+function normalizarVocabulario(valores, tabla, validos) {
+  if (valores.some((v) => SIGNIFICA_CUALQUIERA.includes(v.toLowerCase().trim()))) {
+    return { valores: [], invalidos: [] }   // «todas» → vacío
+  }
+  const salida = []
+  const invalidos = []
+  for (const v of valores) {
+    const clave = v.toLowerCase().trim()
+    const traducido = tabla[clave] ?? (validos.includes(v) ? v : null)
+    if (traducido === null) invalidos.push(v)
+    else if (!salida.includes(traducido)) salida.push(traducido)
+  }
+  return { valores: salida, invalidos }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 function main() {
   const args = process.argv.slice(2)
   const archivo = args.find((a) => !a.startsWith('--'))
@@ -217,6 +262,28 @@ function main() {
       if (f[c] && lista(f[c]).length === 0) motivos.push(`${c} no tiene valores`)
     }
 
+    // 🔴 LOS DOS VOCABULARIOS CERRADOS, validados ANTES de viajar.
+    const t = normalizarVocabulario(lista(f.tallas), SINONIMOS_TALLA, TALLAS_VALIDAS)
+    if (t.invalidos.length > 0) {
+      motivos.push(
+        `tallas ${t.invalidos.map((x) => `"${x}"`).join(', ')} no existe(n). ` +
+        `Válidas: ${TALLAS_VALIDAS.join(' · ')} (o pequeño/mediano/grande, que se traducen). ` +
+        `Para "sirve para cualquier talla", escribí "todas" o dejalo vacío`,
+      )
+    }
+    f._tallas = t.valores
+
+    const m = normalizarVocabulario(lista(f.momento_vital), {}, MOMENTOS_VALIDOS)
+    if (m.invalidos.length > 0) {
+      motivos.push(
+        `momento_vital ${m.invalidos.map((x) => `"${x}"`).join(', ')} no existe(n). ` +
+        `Válidos: ${MOMENTOS_VALIDOS.join(' · ')}. ` +
+        `Ojo: M1…M6 son del EXPEDIENTE, no del catálogo — un producto declara la ` +
+        `etapa de vida para la que sirve, no el momento del vínculo con la mascota`,
+      )
+    }
+    f._momentos = m.valores
+
     const precio = Number(f.precio_venta)
     if (f.precio_venta && (!Number.isFinite(precio) || precio <= 0)) {
       motivos.push(`precio_venta "${f.precio_venta}" no es un número mayor a cero`)
@@ -252,8 +319,9 @@ function main() {
         marca: f.marca,
         descripcion: f.descripcion || null,
         especies_aplicables: lista(f.especies),
-        tallas_aplicables: lista(f.tallas),
-        momentos_aplicables: lista(f.momento_vital),
+        // Ya normalizados y validados arriba: S/M/L y la etapa etaria.
+        tallas_aplicables: f._tallas,
+        momentos_aplicables: f._momentos,
         ingredientes_activos: lista(f.ingredientes),
         // "ninguno" es la declaración explícita de ausencia ⇒ lista vacía.
         alergenos: f.alergenos.toLowerCase() === 'ninguno' ? [] : lista(f.alergenos),
