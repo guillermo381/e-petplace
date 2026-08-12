@@ -463,23 +463,29 @@ había elegido entre nueve candidatas · ② la evidencia *"$122 en
 productos a $122** (el TOW Bisonte y el Pro Pac Pescado y Papa). *La
 prosa reconstruye; la base se mide.*
 
-> 🔴 **EL QUE NO PUEDE SALIR: el #5 (Taste of the Wild Bisonte y
-> Venado) queda marcado NO CARGAR / NO VERIFICAR HASTA FOTO DE BOLSA
-> (firma founder, 12-ago).** Es el más caro de la vitrina, se vende
-> como proteína novel de bisonte y venado, **y la etiqueta
-> estadounidense arranca con búfalo de agua y trae grasa de pollo en
-> el octavo lugar**. El importador (Veterino S.A.S., Quito) no publica
-> ficha; lo que hay es traducción de la etiqueta de OTRO mercado — y
-> §6 (2ª enmienda) ya dice qué vale eso: una ficha que no es del país
-> no sostiene una verificación. Con `res` incluyendo búfalo de agua
-> (relaciones de §6, 3ª enmienda), **este producto es exactamente el
-> caso que el motor existe para cazar** — afirmarlo con la ficha de
-> otro país es el riesgo caro del lanzamiento. **El founder fotografía
-> la bolsa; hasta entonces su estado es `declarada_sin_verificar` y la
-> superficie lo DICE.** Sus alérgenos declarados hoy (bisonte ·
-> venado) son los de esa traducción: la lista está INCOMPLETA a
-> sabiendas, y por eso el estado que la acompaña importa más que la
-> lista.
+> 🔴 **EL #5 (Taste of the Wild Bisonte y Venado) SALE DEL LANZAMIENTO
+> salvo confirmación del vendedor — SEGUNDA FIRMA (founder, 12-ago,
+> mismo día) que ENMIENDA a la primera, y el MOTIVO del freno cambió:**
+>
+> ~~«NO CARGAR hasta foto de bolsa» — el founder fotografía la bolsa~~ →
+> **el importador que la marca publica (Veterino S.A.S.) NO lo trae en
+> Ecuador: no hay bolsa que fotografiar ni ficha del país que pedir.
+> El freno ya no es «falta la foto» — es «NO HAY CAMINO DE
+> VERIFICACIÓN».** El producto sale de los seis salvo que el vendedor
+> confirme quién se lo trae (el founder lo pregunta en la reunión); su
+> lugar lo toma otro producto que el vendedor confirme.
+>
+> Lo que la primera firma midió sigue siendo cierto y es el porqué del
+> freno: se vende como proteína novel de bisonte y venado **y la
+> etiqueta estadounidense arranca con búfalo de agua y trae grasa de
+> pollo en el octavo lugar** — con `res` incluyendo búfalo de agua
+> (relaciones de §6, 3ª enmienda), es exactamente el caso que el motor
+> existe para cazar, y afirmarlo con la ficha de otro mercado es lo
+> que §6 (2ª enmienda) prohíbe. **Mientras la fila viva en la base, su
+> estado es `declarada_sin_verificar` y la superficie lo DICE** — sus
+> alérgenos (bisonte · venado) son los de una traducción incompleta a
+> sabiendas. El retiro de su oferta de la vitrina espera la palabra
+> del vendedor en la reunión, no se ejecuta por adelantado.
 
 **Regla que queda:** todo cambio en la lista de los seis se hace ACÁ
 primero (letra) y en la base después — y siempre por SKU, jamás por

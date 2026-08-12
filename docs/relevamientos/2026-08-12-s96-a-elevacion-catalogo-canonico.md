@@ -92,4 +92,19 @@ por el vocabulario de alérgenos de todos modos (ya resuelto en M15/M16 —
 falta la recategorización de Cowork): la ventana existe y es exactamente del
 tamaño de una tanda.
 
-— pista A, 12-ago-2026. **Espera firma del founder; nada de esto migró.**
+— pista A, 12-ago-2026. ~~**Espera firma del founder; nada de esto migró.**~~
+
+## 5 · ✅ FIRMADA Y EJECUTADA (mismo día)
+
+**Firma del founder (12-ago, tarde): «APROBADA la elevación con tu voto —
+se separan, y se separan ANTES de la carga. El catálogo es de e-PetPlace;
+del vendedor se prende disponibilidad. Sumar un vendedor pasa a ser mapeo,
+no autoría.»**
+
+Ejecutada como **Opción A** en M21 (`20260813010000_s96_firma_catalogo_canonico`):
+nace `proponer_producto_canonico` (solo e-PetPlace) · `proponer_sku_vendedor`
+se angosta a MAPEO con misma firma (rebote hablado `producto_no_canonico`) ·
+**D-780 muere** (stock por el ledger; el re-propose no pisa) · cargador en
+dos puertas · juez inv. 48. El cinturón probó EL caso de la firma: un
+vendedor re-proponiendo con otra composición y otro stock **no movió ni el
+canónico ni el saldo**.
