@@ -13588,6 +13588,14 @@ no el de alguien que ya es titular de otra cuenta.
 ☠️ **Muere** cuando exista la cuenta del vendedor real con sus datos fiscales
 verdaderos y esta cuenta se borre.
 
+**ADDENDUM (S96, 13-ago — la ficha quedó corta y se ensancha):** el gate del
+vendedor puro sembró una **SEGUNDA cuenta de pruebas**: **Tienda Pura**
+(`61a28501`, owner `vendedor.puro@e-petplace.com`), con 3 productos canónicos
+`DEMO-*`, regla de envío, recurso, repartidor `DEMO-REP-PURO-001` y pedidos
+marcados `created_by_sistema` (`supabase/dev/seed-gate-s96-pura.sql`). **El
+día del borrado son DOS cuentas, no una** — quien pague esta deuda contra la
+ficha original habría dejado media siembra viva.
+
 #### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
 
 Quedó en `[]` —el default— porque **nunca hubo una fila con foto**. El wrapper
@@ -14042,3 +14050,39 @@ no por mala suerte.)
 **Disparo:** la próxima tanda que toque el pie de Cuenta o el ciclo OTA —
 antes del soft launch, porque la verificación en dispositivo es EL gate de la
 casa y hoy exige cotejar ids a mano.
+
+**⚠️ ADDENDUM (13-ago, cierre — orden del founder): ESTA FICHA SE QUEDA
+CORTA.** El mismo incidente que la parió terminó probando que **el mecanismo
+de consulta puede fallar EN SILENCIO** (ver D-786): el pie honesto no alcanza
+si la consulta misma se cae y solo se entera quien aprieta un botón
+escondido. *El problema es más profundo que el indicador* — la cura de esta
+ficha se diseña JUNTO con el diagnóstico de D-786, no antes.
+
+#### D-786 — 🔴 HALLAZGO ABIERTO: EL TELÉFONO NO PUEDE CONSULTAR EL SERVIDOR DE UPDATES — Y BLOQUEA LA CAMINATA DEL GATE ENTERA
+
+**Lo medido, cada cosa del objeto (13-ago, incidente del OTA que no baja):**
+
+- **El lado servidor está VERDE en las cinco preguntas** (tabla en el hilo del
+  cierre): el binario `bcf6d7f2` apunta a Channel `preview` · el canal apunta
+  al branch cuya CABEZA es `967ad1ea` · runtime **1.0.5 = 1.0.5** exacto ·
+  `updates.url` horneada en el commit del build (`f3029182`), sin
+  `enabled:false` · política default ON_LOAD · update Active, sin rollback.
+- **El binario NO es estructuralmente incapaz:** el pie del dispositivo dice
+  `update 019ff8b6` = group `d8e0a653`, publicado 20:22 hora local — **un OTA
+  real bajado por el mecanismo normal.**
+- **Y sin embargo HOY no puede consultar:** el botón de buscar actualizaciones
+  del dispositivo responde que **no puede consultar si hay actualizaciones
+  nuevas** — tras cuatro reinicios limpios que no trajeron nada.
+
+**El diagnóstico previo («timing, dos reinicios y listo») fue FALSO y quedó
+corregido por orden del founder:** el dato del botón lo falsea — no es
+coincidencia de horarios, es que el teléfono no está alcanzando el servidor
+de updates. **NO SE DIAGNOSTICA EN ESTA FICHA a propósito** (la orden:
+escribir lo medido y no adivinar). Candidatos que la reapertura deberá medir
+— no afirmaciones: red del dispositivo hacia `u.expo.dev` · estado del
+servicio EAS Update en esa ventana · algo del binario que consulta distinto
+de lo que aplica.
+
+**Disparo: ES LO PRIMERO QUE SE TOCA AL REABRIR** — bloquea la caminata del
+gate entera (los dos últimos OTA del cierre, `3debd5c4` el GPS y `967ad1ea`
+el camino §0bis, están publicados y el founder no puede recibirlos).

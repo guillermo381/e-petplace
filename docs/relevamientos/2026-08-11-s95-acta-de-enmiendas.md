@@ -307,6 +307,12 @@ cambia una de sus premisas, no su conclusión.
   honesto para octubre: lista de pedidos con dos botones (preparado /
   despachado) + ajuste de stock. Todo lo demás es candidato de recorte.
   Origen: S95. Prioridad: 🟡 ALTA. Criterio de disparo: 15-sep-2026.
+  - *[Nota posterior, S96 13-ago — el acta no se reescribe; esta nota
+    existe para que quien la lea sepa qué la enmendó: el «dos botones»
+    fue ENMENDADO por `LETRA_PANEL_VENDEDOR_S96` a CUATRO escalones
+    (preparado · empacado · despachado · entregado). La letra vigente
+    vive en `MODELO_DESPENSA` §8.6/§11.1 y la ficha D-755 de
+    `DEUDAS_CANONICAS` ya está enmendada.]*
 
 - **D-756 — Aviso de no renovación de VTEX.** Descripción: el MSA §10.1
   pide 90 días y el Anexo dice 60; se toma el plazo largo. Sin aviso,
