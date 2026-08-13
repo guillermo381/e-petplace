@@ -80,6 +80,12 @@ export const prestadorEs = {
     confirmacionCierre: '¿Cierras tu sesión? Tu trabajo queda guardado.',
     cancelar: 'Cancelar',
     titulo: 'Sesión',
+    // S96-C (cura (b) del gate, letra founder: «un fallo que no dice nada
+    // es peor que un fallo que habla»): la rama de ERROR decía
+    // `sinSesion` — mentira para un rebote del servidor con la sesión
+    // viva (D-538/L-178: el fallo vestido de otra causa). El título nuevo
+    // no afirma nada sobre la sesión; el detalle específico sigue abajo.
+    falloTitulo: 'No pudimos entrar a tu cuenta',
   },
   // Login del prestador (S54-B, D-290) — email+contraseña por los
   // wrappers de auth existentes. S80-B1: el registro dejó de ser otro

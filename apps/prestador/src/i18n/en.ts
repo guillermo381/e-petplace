@@ -61,6 +61,7 @@ export const prestadorEn = {
     empleadoDetalle:
       "The business isn't active on e-PetPlace yet. Once it is, you'll come in right here.",
     reintentar: 'Try again',
+    falloTitulo: "We couldn't load your account",
     cerrarSesion: 'Sign out',
     confirmacionCierre: 'Signing out? Your work stays saved.',
     cancelar: 'Cancel',
