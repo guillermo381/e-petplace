@@ -54,6 +54,7 @@ import {
   typography,
   useAviso,
   useTheme,
+  PuertaDeOficio,
   type AvatarMascotaEspecie,
   type ColumnaTecho,
   type InsigniaEstado,
@@ -100,6 +101,8 @@ import {
 import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { TarjetaVentas } from '@/components/tarjeta-ventas';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
 import { duracionCorta, montoCorto } from '@/lib/formato-techo';
@@ -694,6 +697,26 @@ export default function Hoy() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
+  // ── S96-C · §0bis DE LA LÁMINA (firma de mesa): el no-gestor con
+  // naturaleza vendedora MEDIDA tiene camino visible a SU panel desde el
+  // arranque. Condición de la casa (S78-B/D-521): el predicado exige
+  // lectura EXITOSA — el default es false y SOLO una medición ok lo
+  // enciende; un fallo no se cachea como ausencia (contextoVentas no
+  // cachea fallos) y el próximo foco reintenta.
+  const [vendedoraMedida, setVendedoraMedida] = useState(false);
+  const [puertaVentas, setPuertaVentas] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void contextoVentas().then((r) => {
+        if (!vigente) return;
+        setVendedoraMedida(r.ok && r.data !== null && r.data.esVendedora);
+      });
+      return () => {
+        vigente = false;
+      };
+    }, []),
+  );
   /* S88-C · LA CAMPANA → S89-C · LA VISITA (letra founder, contrato v2
      de A `9f72a924`): la huella mide LO NUEVO desde la última visita a
      /avisos, no lo no-leído — el booleano es de `hayNovedades('prestador')`
@@ -1917,6 +1940,23 @@ export default function Hoy() {
           </View>
         )}
 
+        {/* ── S96-C · §0bis (firma de mesa) — LA ENTRADA A SU VENTA DE
+            PRODUCTOS para el NO-GESTOR con naturaleza vendedora MEDIDA.
+            Entre la Zona 1 y «Tu día»: el VIVO conserva su primacía
+            (Ley 7) y la tarjeta queda a la vista en el arranque. El
+            gestor NO la ve acá (su camino es Negocio — una puerta por
+            población, S84-C34); el puro no pasa por este tab. Es el
+            patrón vivo de composición por ROL del HOY (D-521) con una
+            población más. Choque declarado y registrado en el acta:
+            bloque nuevo en la pantalla más gateada, gate en la caminata. */}
+        {pantalla.estado === 'listo' && pantalla.rol !== 'gestor' && vendedoraMedida && (
+          <TarjetaVentas
+            etiqueta={t('ventas.entradaTitulo')}
+            detalle={t('ventas.entradaDetalle')}
+            onPress={() => setPuertaVentas(true)}
+          />
+        )}
+
         {/* ⭐ S85-C7 · TU DÍA — la rueda D3 y los chips, juntos.
             LA RUEDA ES DE B (`SelectorDia`, `0b229a6`) y se MONTA, no se
             re-dibuja: su escala, su opacidad y el acento del número viven
@@ -2385,6 +2425,16 @@ export default function Hoy() {
 
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
+      {/* S96-C: el barrido del cruce a ventas — SOLO color; los permisos
+          son del servidor (contrato de PuertaDeOficio). */}
+      <PuertaDeOficio
+        capa="consumo"
+        activo={puertaVentas}
+        onFin={() => {
+          setPuertaVentas(false);
+          router.push('/ventas');
+        }}
+      />
       <VeloBarraEstadoOficio />
     </View>
   );

@@ -53,6 +53,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import { contextoVentas } from '@/lib/cuenta-ventas';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
@@ -510,33 +511,6 @@ export default function Negocio() {
   );
 }
 
-/** S96-C: la tarjeta de entrada a «Venta de productos» — UNA sola pieza
- *  para sus dos casas (el tab del gestor y el muro del no-titular
- *  vendedor). Lo que se copia diverge; la voz llega por props. */
-function TarjetaVentas({
-  etiqueta,
-  detalle,
-  onPress,
-}: {
-  etiqueta: string;
-  detalle: string;
-  onPress: () => void;
-}) {
-  return (
-    <Tarjeta
-      interactiva
-      elevacion="reposo"
-      accessibilityRole="button"
-      etiqueta={etiqueta}
-      onPress={onPress}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        <Icono nombre="despensa" registro="aa" tamano={28} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Texto variante="seccion">{etiqueta}</Texto>
-          <Texto variante="apoyo">{detalle}</Texto>
-        </View>
-      </View>
-    </Tarjeta>
-  );
-}
+/* ☠️ S96-C: `TarjetaVentas` vivía acá y SE MUDÓ a
+   `@/components/tarjeta-ventas` al ganar su tercer consumidor (el HOY del
+   no-gestor, §0bis) — una mudanza que deja el origen puesto es una copia. */
