@@ -90,7 +90,22 @@ cómo *"la despensa"* se convierte en *"una plataforma"*.
 
 ## 2. LAS TRES PANTALLAS
 
-**Tres, y ninguna más: Hoy · El pedido · Stock.**
+~~**Tres, y ninguna más: Hoy · El pedido · Stock.**~~
+
+> 🔴 **ENMENDADA CONTRA EL OBJETO (13-ago-2026, orden de mesa — medido
+> por C y re-medido por A con segundo método).** El panel construido
+> tiene **más rutas que las tres de esta línea**: C midió **siete**; A
+> contó **ocho archivos de ruta** en `apps/prestador/src/app/ventas/`
+> (todos en `origin/main`): `index` (Hoy) · `pedido/[pedidoId]` ·
+> `stock` · `entregas` · `entrega/[envioId]` · `mostrador` ·
+> `facturacion` · `configuracion`. *La divergencia 7 vs 8 queda
+> declarada, no resuelta — dos métodos, dos números, y el que decida
+> que cuente de nuevo.* Lo que esta enmienda decide es lo que ya no se
+> puede leer: **«y ninguna más» era cierto el día de la letra y hoy es
+> falso** — el mostrador, las entregas del repartidor, la facturación y
+> la configuración (`MODELO_DESPENSA` §8.6bis) entraron después, cada
+> una con su firma. La tesis de las tres (el trabajo del día preside)
+> sigue viva en §2.1–§2.3; el CONTEO ya no es ley.
 
 ### 2.1 Hoy — la lista
 

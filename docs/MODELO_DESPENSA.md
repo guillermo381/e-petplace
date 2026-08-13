@@ -615,6 +615,38 @@ de cuidado existe por la mascota, nunca para vender.
 > COMPOSICIÓN, jamás por nombre.** Hay 10 productos
 > «hypoallergenic/sensitive» con alérgeno común adentro — *el nombre
 > no es una dieta de eliminación.*
+
+> 🔴 **CUARTA ENMIENDA (firma del founder, 13-ago — LAS CUATRO VOCES DEL
+> LADO CLIENTE).** Lo de arriba es el modelo; esto es lo que la FAMILIA
+> ve, con la ley madre arriba de todo:
+>
+> **LA APP NUNCA IMPIDE COMPRAR; ADVIERTE Y DEJA DECIDIR.**
+>
+> - **SILENCIO** — solo cuando la composición está **verificada y
+>   limpia** (el único silencio confiable, `verificada` de la segunda
+>   enmienda; `no_aplica` calla por la otra razón).
+> - **① CERTEZA** — la composición **nombra** el alérgeno de la mascota:
+>   la advertencia lo dice con certeza («lo contiene»).
+> - **② VACÍO** — composición ausente o incompleta, **con la redacción
+>   firmada:** *«No tenemos la composición completa de este alimento.
+>   Thor es alérgico al pollo — confirmalo con su veterinaria antes de
+>   comprar.»* **Los 80 productos que dicen «proteínas de ave» sin
+>   nombrar especie caen ACÁ, jamás en silencio.**
+> - **③ DIVERGENCIA** — el producto contradice la sugerencia nutricional
+>   de la veterinaria. Se resuelve **del lado de la familia y jamás
+>   viaja al panel del vendedor** (§7.4). **⚠️ GATEADA POR MEDICIÓN
+>   (13-ago): hoy es CONSTRUCCIÓN, no advertencia** — el único objeto
+>   consultable con esa forma es
+>   `mascota_perfil_vigente.plan_nutricional_actual`, que existe como
+>   columna y está **en 0 de 72 filas, sin productor vivo**. Prometer ③
+>   sin ese objeto sería una advertencia que jamás puede disparar; se
+>   enciende cuando la sugerencia exista como dato producido.
+>
+> **Y la firma que ordena el flujo (founder, 13-ago): la compra se ata a
+> una mascota o se marca donación, y esa elección va ANTES — se elige
+> junto con la mascota, jamás como salida de una advertencia.** *Una
+> advertencia que además pregunta de quién es la compra está usando el
+> susto como formulario.*
 >
 > **TERCERA ENMIENDA S96 (firma founder, 12-ago): el vocabulario de
 > alérgenos es DATO y tiene RELACIONES.** Medido: 242 de 456 productos

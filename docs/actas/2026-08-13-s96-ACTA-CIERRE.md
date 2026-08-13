@@ -208,6 +208,23 @@ familia que las cuatro «cosas que informaban sin informar» de S96 — **y la
 única defensa medida que tenemos contra ella es el cotejo por segundo
 método, no la revisión del propio código.**
 
+**LECCIÓN DE LA REAPERTURA, CON NOMBRE — EL DOMINIO INVENTADO ES UNA CUENTA
+IRRECUPERABLE POR DISEÑO (13-ago, orden de mesa; cuatro apariciones el mismo
+día):** una cuenta de prueba con dominio propio inventado
+(`@e-petplace.com`, `@epetplace.dev`) **no tiene recuperación por correo
+posible** — el buzón no existe. Y si además una pista le cambia la clave,
+**queda muerta sin aviso**: nadie puede entrar y nadie puede resetear. Las
+cuatro del día: la cuenta del RUC `9999999999999` (`nuevo_test2@…`) · Tienda
+Pura (`vendedor.puro@…`) · `+s88admin` (el caso inverso: dominio real, pero
+con brazo de plataforma que no sobrevive a un vendedor real) · y
+`demo-vet@epetplace.dev`, que **bloqueó el censo de D en vivo** — titular de
+Clínica Aurora, clave cambiada por una pista, cero camino de vuelta. **La
+regla: ninguna cuenta nueva nace con dominio inventado, y las que quedan del
+dominio viejo entran al mismo tratamiento** (renombre a
+`guillo381+<sufijo>@gmail.com`, tres lugares, clave unificada del keychain).
+Las cuatro quedaron tratadas el mismo día, con login verificado donde
+alguien estaba esperando.
+
 **SEGUNDO ADDENDUM DE LA REAPERTURA (13-ago, corrección de la mesa a su
 propia premisa):** una orden de mesa citó **D-513** («su motor no existe»)
 como razón vigente de que el toggle Administrador no se ofrece en la
