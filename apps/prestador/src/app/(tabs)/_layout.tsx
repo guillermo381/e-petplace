@@ -44,6 +44,7 @@ import { apiLista } from '@/lib/api';
 import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { useTraduccion } from '@/i18n';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 
 /* ☠️ S86-B · `@/components/iconos-tabs` MURIÓ — LA BARRA CONSUME EL
  * REGISTRY (D-645 / D-546, el pedido que su propia cabecera dejaba
@@ -70,6 +71,15 @@ type EstadoSesionRaiz =
   // ANTES de las tabs (precedente /invitacion, L-161). El puente
   // AsyncStorage murió consumiendo esa RPC.
   | { bienvenida_pendiente: true }
+  // 🔴 S96-C (orden del founder, tanda del gate): el VENDEDOR PURO —
+  // cero prestador, cero vínculo, cuenta comercial con rol
+  // `seller_productos` activo — tiene su casa en /ventas. Antes de esta
+  // rama caía en `sin_rol`, un callejón que además MENTÍA por omisión:
+  // le pedía una invitación de EMPLEADO a alguien ya dado de alta como
+  // vendedor (el estado exacto del vendedor real de octubre, D-766).
+  // Con AMBOS (prestador/vínculo Y cuenta seller) gana el camino de
+  // tabs: la puerta Negocio→«Venta de productos» ya lo lleva a ventas.
+  | { vendedor_puro: true }
   // S79-B (T3-B3): estado 'pendiente' → LA SALA DE ESPERA. La regla dura:
   // el pendiente NO entra al portal — y la carta §2.3 tampoco se le
   // muestra (primer_ingreso_en marca la fase 4, no la 1).
@@ -152,6 +162,16 @@ export default function TabsLayout() {
           // del re-login lo absorbe B3 (confirmado por A y mesa).
           const inv = await obtenerInvitacionPendiente();
           if (inv.ok && inv.data !== null) return { invitacion_pendiente: true };
+          // S96-C: ¿VENDEDOR PURO? Se pregunta ANTES de la sonda de
+          // empleado: un panel donde puede TRABAJAR HOY gana a una voz
+          // de espera (si además es empleado de un negocio no-activo, el
+          // día que el negocio active, `obtenerMiPrestador` resuelve y
+          // esta rama ni se toca). `contextoVentas` cachea: el costo por
+          // foco es cero después del primero.
+          const ventas = await contextoVentas();
+          if (ventas.ok && ventas.data !== null && ventas.data.esVendedora) {
+            return { vendedor_puro: true };
+          }
           // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
           // La sonda distingue la voz (cero motor — policy empleados_self).
           const neg = await obtenerNegocioEmpleadoActivo();
@@ -177,6 +197,7 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor} · ceremonia=${r.ceremonia}`
+              : 'vendedor_puro' in r ? 'vendedor puro → /ventas'
               : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
                   : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
@@ -205,6 +226,11 @@ export default function TabsLayout() {
         </EsqueletoGrupo>
       </View>
     );
+  }
+
+  if ('vendedor_puro' in sesion) {
+    // S96-C: la casa del vendedor puro es el panel de ventas.
+    return <Redirect href="/ventas" />;
   }
 
   if ('sala_espera' in sesion) {

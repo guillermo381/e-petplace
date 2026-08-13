@@ -46,6 +46,7 @@ import {
 } from '@epetplace/ui';
 import {
   actualizarRepartidor,
+  cerrarSesion,
   definirRecursoReparto,
   definirTurnoEntrega,
   listarRecursosReparto,
@@ -84,6 +85,7 @@ export default function ConfiguracionVentas() {
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
   const [guardando, setGuardando] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
 
   // hoja repartidor
   const [altaRepartidor, setAltaRepartidor] = useState(false);
@@ -399,6 +401,26 @@ export default function ConfiguracionVentas() {
               }}
             />
           </View>
+
+          {/* S96-C: para el VENDEDOR PURO (raíz → /ventas, sin tabs) esta
+              es su única superficie estable — sin esto no tiene forma de
+              cerrar sesión en ningún lado. Al salir, el guard raíz
+              re-evalúa y aterriza en la bienvenida; el caché del contexto
+              se invalida solo (escucha de auth en cuenta-ventas). */}
+          <Boton
+            variante="ghost"
+            bloque
+            cargando={cerrando}
+            etiqueta={t('sesion.cerrarSesion')}
+            onPress={() => {
+              if (cerrando) return;
+              setCerrando(true);
+              void cerrarSesion().then(() => {
+                setCerrando(false);
+                router.replace('/(tabs)');
+              });
+            }}
+          />
         </ScrollView>
       )}
 
