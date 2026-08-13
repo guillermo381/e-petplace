@@ -20,7 +20,7 @@
 | pista | territorio |
 |---|---|
 | **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
-| **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
+| **B** | `packages/ui` · los **tokens** · **el lint y los jueces** — **exclusivo** *(enmienda de mesa, 13-ago-2026: era una lista de dos archivos — `verify-diseno.mjs`, `verdicto.mjs` — y pasa a ser el CRITERIO que este documento ya argumentaba: **quien mantiene el guard es su dueño, o es el guard de nadie**. Una lista de archivos envejece; un criterio no — y el caso que la parió es `juez-s96.mjs`: B lo curó estando fuera de su lista, lo declaró en la puerta, y la mesa ratificó sin revert porque el problema era la letra, no la conducta)* |
 | **C** | `apps/prestador` · **`apps/cliente`** · **la superficie de los dos canales** |
 
 > **⚠️ ENMIENDA S91 (hallazgo de C, depositada por A — `docs/` es de A):**
@@ -522,6 +522,56 @@ exactamente lo que la función existía para evitar.* **Se verifica y se firma, 
 se revierte.**
 
 ---
+
+## 6bis · EL TELÉFONO NO ES TERRITORIO: ES ENTREGA *(firmada por la mesa, 13-ago-2026)*
+
+> **EL TELÉFONO NO ES TERRITORIO: ES ENTREGA.**
+>
+> **1 · LA ENTREGA ES UNA VENTANA, NO UN PASO.** El founder abre la entrega
+> declarándolo, y la entrega sigue abierta hasta que él la revoca. Adentro
+> de una entrega abierta la pista es autónoma: desbloquea, inicia y cierra
+> sesiones, navega y captura sin pedir autorización por paso. Lo que la
+> regla protege es que el aparato no esté en uso del founder, no la
+> frecuencia con que se pide permiso.
+> **2 ·** Cero captura fuera de la app objetivo. Si lo que aparece no es
+> e-PetPlace o e-PetPlace Negocios, se aborta la captura entera — no se
+> recorta.
+> **3 ·** Cero inyección de eventos (am start, taps) sin entrega declarada.
+> **4 · EL KEYGUARD NO CIERRA LA VENTANA.** Con entrega abierta la pista
+> desbloquea con el PIN que el founder deposite en el llavero. Si el PIN
+> falla o el aparato pide una credencial que la pista no tiene, ahí sí se
+> declara y se espera.
+>
+> Al devolver, la pista declara qué sesión dejó abierta.
+
+**El caso que la parió (13-ago):** una pista capturó la pantalla del
+teléfono personal del founder mientras él escribía un mensaje, y además le
+trajo la app al frente en medio de eso. La pista frenó, borró en el acto y
+declaró su interferencia — **el buen comportamiento contuvo el daño, pero no
+era el que tenía que prevenirlo.** Sin dispositivo dedicado, la regla es lo
+único que separa esto de repetirse.
+
+**Corrección de mesa registrada (13-ago):** la primera versión de esta
+sección ató la protección a la FRECUENCIA de la autorización («si el
+keyguard pide PIN, la ventana terminó») **y costó tres ventanas perdidas en
+una tarde**. La palabra del founder la corrigió: *«cuando lo entrego no lo
+toco»*. **El riesgo que el caso del 13-ago produjo fue USO SIMULTÁNEO, no
+autonomía — y contra eso protege la DURACIÓN de la entrega, no el permiso
+por paso.**
+
+## 6ter · LA REGLA DE CREDENCIALES *(firmada por la mesa, 13-ago-2026 — hermana de la lección del dominio inventado)*
+
+> **NINGUNA PISTA CAMBIA LA CLAVE DE UNA CUENTA QUE NO CREÓ ELLA. Si
+> necesita entrar y no puede, FRENA Y PIDE.**
+
+**El caso:** `demo-vet` — titular de Clínica Aurora, sostén de las cuatro
+pantallas de §11 de DIRECCION_ARTE — quedó **irrecuperable** porque una
+pista le cambió la clave y nadie registró cuál. Con el dominio inventado
+(`@epetplace.dev`) no había recuperación por correo posible: la cuenta quedó
+muerta sin aviso y **bloqueó el censo de D en vivo** hasta que la mesa
+ordenó renombre + reseteo unificado. *Las dos mitades del accidente son
+reglas distintas: el dominio inventado la hizo irrecuperable; la clave
+cambiada sin registro la hizo inaccesible. Esta regla cubre la segunda.*
 
 ## 7 · LO QUE ESTE MÉTODO NO CUBRE
 

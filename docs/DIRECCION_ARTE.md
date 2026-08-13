@@ -737,6 +737,18 @@ RECONSTRUYE**: nace cuando su literal llegue (protocolo D-434/D-435).
 
 ## Historial
 
+- **enmienda a §11.3 (mesa, 13-ago-2026 — medido por B, depositado por A):**
+  la premisa *«los glifos viajan sin consumidor»* era **falsa contra el
+  objeto** el día que se escribió (tres montajes preceden al depósito de §11;
+  el cuarto llegó en S90-D). **El gate de §11.3 se corre EN CONTEXTO, jamás
+  en galería** — dos de los montajes son pantallas clínicas. **Condición de
+  salida anotada: §11 deja de estar «publicado y no gateado» EN EL PRESTADOR
+  cuando el founder camine las cuatro: Cuenta › Tu perfil · Cuenta comercial
+  · Veterinaria › cita · Veterinaria › consulta.** El lado cliente se
+  enumera cuando abra esa mitad. Patrón depositado: una letra que manda un
+  procedimiento apoyada en una premisa de hecho se re-mide antes de
+  obedecerla (R7 aplicada a la ley).
+
 - **v1.5 (S85-A, 3 Ago 2026 — DOS firmas sobre §2):**
   **(a) LEY 4 ACOTADA, no derogada** (firma del founder sobre el gate de
   `019fcabf`; frontera transportada por B y C). Sigue rigiendo en la
@@ -884,6 +896,28 @@ ojo del founder.** *Se registran para que S85 sepa qué mirar, no como firmadas.
 > La celda no tiene ícono a propósito. **Se firman EN LA GALERÍA, comparando los
 > candidatos — no montados en pantalla.** *Si se los busca en la app, no
 > aparecen.*
+
+> **🔴 ENMIENDA DE MESA (13-ago-2026, medido por B con `merge-base
+> --is-ancestor`, depositado por A) — LA PREMISA DE ARRIBA ERA FALSA CONTRA
+> EL OBJETO, y lo era el día que se escribió:** los cuatro glifos SÍ tienen
+> consumidor — tres montajes (`a932ab38`, `940be655`, `a26f2ed9`) **preceden**
+> al depósito de §11 (`e2b9bb25`), y el cuarto llegó en S90-D. La letra vieja
+> queda arriba, tachada por esta nota y no borrada.
+>
+> **Resolución: el gate de §11.3 se corre EN CONTEXTO, jamás en galería.** El
+> porqué no es preferencia: dos de los montajes viven en **Veterinaria › cita**
+> y **Veterinaria › consulta** — *un glifo mal leído en pantalla clínica cuesta
+> más que uno mal leído en una vitrina.* Las cuatro pantallas del prestador
+> que entran a la caminata pendiente: **Cuenta › Tu perfil · Cuenta comercial ·
+> Veterinaria › cita · Veterinaria › consulta**. (Precisión de B para que nadie
+> cuente de más: hay cinco `superficie="muro"` en el prestador, pero §11.2
+> habla del BOTÓN y el botón tiene UNO — los otros cuatro son `LogoNegocio` ×2,
+> `Insignia distincion` y `Badge`. El lado cliente queda sin enumerar por
+> alcance: se enumera cuando abra la mitad del cliente.)
+>
+> **Y el patrón, que vale más que el caso:** *una letra que manda un
+> procedimiento apoyada en una premisa de HECHO se re-mide antes de
+> obedecerla* — es R7 aplicada a la ley, no a una orden de mesa.
 
 ### 11.4 ☠️ LA LÁMINA MUERE ENTERA — también para variantes de token
 

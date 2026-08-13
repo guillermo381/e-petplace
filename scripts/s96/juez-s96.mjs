@@ -114,6 +114,11 @@ const JUBILADAS = [
   'seller_liquidaciones', 'liquidacion_pedidos',
 ];
 
+// La ficha que declara POR QUÉ una jubilada sigue viva (invariante 10).
+// Una tabla que sobrevive SIN ficha que la nombre no es un pendiente: es un
+// hallazgo, y el detalle del invariante la separa de las que sí la tienen.
+const FICHA_DEL_BLOQUEO = { seller_perfil: 'D-760', resenas_productos: 'D-761' };
+
 // Tablas append-only del frente: NADIE tiene UPDATE (invariante 7).
 const APPEND_ONLY = ['pedido_estados', 'inventario_movimientos', 'pagos_eventos', 'envio_eventos'];
 
@@ -322,12 +327,61 @@ invariante(9, 'La línea de descuento declara QUIÉN la financia', () => {
 });
 
 // ── ⑩ Cero tablas nuevas que dupliquen una del censo ────────────────────────
-invariante(10, 'Cero duplicados: las 17 tablas jubiladas ya no existen', () => {
+//
+// ⚠️ ESTE INVARIANTE ESTÁ EN ROJO Y SE QUEDA EN ROJO. La cura de S97-B es del
+//    INSTRUMENTO, jamás del test: mientras sobreviva UNA jubilada devuelve
+//    `ok: false`, sin excepción, sin lista blanca y sin comentar. Lo que
+//    cambia es lo que el rojo DICE, porque decía dos cosas mal:
+//
+//    ① EL NÚMERO ESTABA CONGELADO. El título decía «las 17 tablas jubiladas»
+//       y la lista tiene 15 desde que el founder sacó `cupones`/`cupon_usos`
+//       (firma 11-ago-2026, arriba). Un título que promete 17 y mide 15 es un
+//       instrumento mintiendo sobre su propio alcance. El número se DERIVA de
+//       la lista: la prosa decae, el objeto no (L-141).
+//
+//    ② LA EXCUSA VIVÍA EN UN COMENTARIO. El detalle decía «siguen vivas 2 de
+//       15: seller_perfil, resenas_productos» y nada más — quien lo lee no
+//       puede saber si eso es el bloqueo documentado o una tabla que alguien
+//       volvió a crear. Ahora el bloqueo SE MIDE contra la fuente que la
+//       ficha cita (`information_schema.view_table_usage`: la misma pregunta
+//       que D-760 contestó a mano con `pg_get_viewdef` en S95-F) y se reporta
+//       tabla por tabla, con su ficha al lado.
+//
+//    ③ Y EL BLOQUEO PUEDE VENCER SIN QUE NADIE SE ENTERE. Si ninguna vista
+//       nombra ya a la tabla y la tabla sigue viva, el detalle lo dice: eso
+//       es la ☠️ MUERTE de D-760 cumplida a medias —la vista desacoplada, el
+//       borrado sin hacer— y es TRABAJO DESBLOQUEADO, no un pendiente más.
+//       Sin esta rama, el día que se desacople la vista el rojo se ve
+//       idéntico al de hoy.
+//
+//    Hueco declarado: se miden VISTAS. D-761 ya declara que no se censaron
+//    funciones de la base que pudieran leer estas tablas, y este instrumento
+//    NO cierra ese hueco — «sin bloqueo medido» significa «ninguna vista la
+//    nombra», jamás «nadie la usa».
+invariante(10, `Cero duplicados: las ${JUBILADAS.length} tablas jubiladas ya no existen`, () => {
   const vivas = tablasQueExisten(JUBILADAS);
-  return {
-    ok: vivas.length === 0,
-    detalle: vivas.length ? [`siguen vivas ${vivas.length} de ${JUBILADAS.length}: ${vivas.join(', ')}`] : [],
-  };
+  if (vivas.length === 0) return { ok: true, detalle: [] };
+
+  const dependen = dbQuery(`
+    SELECT u.table_name AS tabla, v.table_schema || '.' || v.table_name AS vista
+    FROM information_schema.view_table_usage u
+    JOIN information_schema.views v
+      ON v.table_schema = u.view_schema AND v.table_name = u.view_name
+    WHERE u.table_schema = 'public' AND u.table_name IN (${lista(vivas)})
+    ORDER BY 1, 2`);
+
+  const vistasDe = new Map();
+  for (const d of dependen) vistasDe.set(d.tabla, [...(vistasDe.get(d.tabla) ?? []), d.vista]);
+
+  const detalle = [`siguen vivas ${vivas.length} de ${JUBILADAS.length}`];
+  for (const t of vivas) {
+    const ficha = FICHA_DEL_BLOQUEO[t] ?? 'SIN FICHA';
+    const vistas = vistasDe.get(t);
+    detalle.push(vistas
+      ? `  · ${t} — BLOQUEADA (${ficha}) por ${vistas.join(', ')}: se desacopla la vista primero, se borra después`
+      : `  · ${t} — SIN BLOQUEO MEDIDO (${ficha}): ninguna vista la nombra ⇒ o se borra ya, o su ficha dejó de decir la verdad`);
+  }
+  return { ok: false, detalle };
 });
 
 // ── ⑪ pedidos sin INSERT anónimo (D-757) ────────────────────────────────────

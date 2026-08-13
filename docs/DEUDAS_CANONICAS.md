@@ -13588,6 +13588,29 @@ no el de alguien que ya es titular de otra cuenta.
 ☠️ **Muere** cuando exista la cuenta del vendedor real con sus datos fiscales
 verdaderos y esta cuenta se borre.
 
+**ADDENDUM (S96, 13-ago — la ficha quedó corta y se ensancha):** el gate del
+vendedor puro sembró una **SEGUNDA cuenta de pruebas**: **Tienda Pura**
+(`61a28501`, owner `vendedor.puro@e-petplace.com`), con 3 productos canónicos
+`DEMO-*`, regla de envío, recurso, repartidor `DEMO-REP-PURO-001` y pedidos
+marcados `created_by_sistema` (`supabase/dev/seed-gate-s96-pura.sql`). **El
+día del borrado son DOS cuentas, no una** — quien pague esta deuda contra la
+ficha original habría dejado media siembra viva.
+
+**SEGUNDO ADDENDUM (reapertura, 13-ago — orden de mesa, la siembra de
+cuentas de prueba vuelve a ensanchar el conteo):** ① el owner de Tienda Pura
+se RENOMBRÓ a `guillo381+vendedorpuro@gmail.com` (mismo usuario `eaad8d8d`,
+misma cuenta, mismas siembras — verificado: los tres lugares del correo
+actualizados y `61a28501` viva y `activa` después del cambio; el dominio
+`@e-petplace.com` no existe y esa cuenta sostiene un pendiente de la
+caminata) · ② la matriz de la siembra agrega **`duenodes`** (despensa con
+reparto a domicilio) como TERCERA cuenta vendedora de prueba y
+**`duenotodo`** (médicos + servicios + despensa) como CUARTO negocio con
+despensa. ⇒ **El día del borrado son TRES cuentas vendedoras de prueba
+(`9999999999999` —owner `nuevo_test2@e-petplace.com`, mismo dominio
+inventado— · Tienda Pura · `duenodes`) MÁS la despensa de `duenotodo`** —
+esta ficha es el censo; quien la pague barre contra esta lista, no contra la
+original.
+
 #### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
 
 Quedó en `[]` —el default— porque **nunca hubo una fila con foto**. El wrapper
@@ -13915,6 +13938,30 @@ compromiso B↔C, coordinado por A).
 ☠️ **Muere** cuando la build 1.0.5 pase el gate en dispositivo del founder
 con el splash de la casa Y R35 quede duro en 0 sobre `main`.
 
+**✅ LA PRIMERA MITAD DE LA MUERTE, PAGADA (13-ago-2026, reapertura):** el
+gate del founder CERRÓ — el splash de la casa visto en dispositivo sobre la
+build 1.0.5. **La ficha NO muere todavía:** la segunda mitad sigue abierta —
+medido el mismo día, `animated-icon.tsx` EXISTE en `origin/main` (el merge de
+`pista/s96-c` no llegó), así que R35 sigue en baseline 1 y no en 0. Queda
+viva solo por esa mitad.
+
+**🔴 CORRECCIÓN DE LA NOTA DE ARRIBA, el mismo día (13-ago, hipótesis de B
+re-medida por A contra el objeto) — la nota midió PRESENCIA, no CONTENIDO:**
+`animated-icon.tsx` existe en `origin/main` **porque fue CURADO EN SU LUGAR**,
+no porque el template siga vivo. Lo medido: ① `git merge-base --is-ancestor
+7664a7f3 origin/main` → ES ancestro (el merge de la cura SÍ llegó) · ② el
+contenido del archivo en `origin/main` es `AnimatedSplashOverlay`
+(`palette.tealDark` + `Isotipo`), y los hex `#208AEF`/`#0A7268` viven solo
+dentro del JSDoc que documenta lo que había — R35 no cuenta comentarios, a
+propósito · ③ el instrumento corrido: `BASELINE_R35 = {}` y la salida
+literal *«R35 … 0 color(es) aplicados a mano (DURA EN 0 desde S96-B)»*,
+`verify:diseno` VERDE. *Un archivo que existe no es un template que vive —
+misma clase de error que D-763 (medir presencia y llamarlo compatibilidad).*
+
+☠️ **MUERTA (13-ago-2026):** las dos mitades pagas — gate del founder en
+dispositivo (splash de la casa, build 1.0.5) Y R35 dura en 0 sobre `main`,
+medida con el instrumento y no con un grep de presencia.
+
 #### D-782 — 🔴 EL CLIENTE TIENE EL MISMO SPLASH DEL TEMPLATE — Y ES LA PRIMERA PANTALLA QUE VE UNA FAMILIA NUEVA
 
 **Sesión:** S96 (12-ago-2026). **La midió C** (fuera de su territorio, no
@@ -14008,3 +14055,187 @@ dashboard; si esa frontera se mueve, el costo deja de importar.
 
 ☠️ **Muere** cuando las dos apps corran sobre llaves nuevas y las legacy
 estén apagadas — verificado con la anon legacy rebotando contra la API.
+
+#### D-785 — 🔴 EL CICLO OTA ES INVISIBLE DESDE EL TELÉFONO: PUEDE FALLAR EN SILENCIO Y PUEDE FUNCIONAR EN SILENCIO, Y LAS DOS SE VEN IGUAL
+
+**⬆️ SUBE DE 🟡 A 🔴 (13-ago-2026, orden de mesa — hereda el valor de
+D-786, cerrada como incidente).** El caso completo que la prueba, medido de
+punta a punta: el 12-ago el botón dijo «no pudimos consultar» (el mecanismo
+**falló en silencio** — el `catch` único tragó el literal) y el founder
+reinició CUATRO veces mirando el pie; **en alguno de esos arranques el
+update YA ESTABA llegando y aplicándose** (el mecanismo **funcionó en
+silencio**: la reapertura midió el teléfono corriendo `019ff8db`, la cabeza,
+sin que nadie lo supiera) — **y las dos situaciones se ven IDÉNTICAS desde
+el teléfono**: un pie con un UUID que ningún humano puede cotejar
+(`019ff8b6` vs `019ff8db`, dos caracteres del final, mismo prefijo POR
+DISEÑO de UUIDv7). *El daño medido nunca fue el fallo — fue que el founder
+reinició cuatro veces con el update ya llegando y ningún indicador podía
+decírselo.* **El brazo ① deja de ser cosmético y pasa a ser lo único que
+separa esto de repetirse antes del soft launch** — y la verificación en
+dispositivo es EL gate de la casa.
+
+*(La letra original de la ficha, abajo, se conserva entera: describe la
+mitad del indicador. El párrafo de arriba es el caso que la completa.)*
+
+**Nace de una orden literal del founder (13-ago), en medio de un incidente
+real:** cuatro reinicios contra un canal medido SANO y ninguna forma de saber
+DESDE EL TELÉFONO si el update esperado llegó. El pie (L-160 enmendada S74)
+muestra `update {8 chars del updateId} · {canal}` — **prueba QUÉ corre, pero
+no dice si es lo ÚLTIMO**: para verificar hay que tener a mano el updateId
+esperado, que además es POR PLATAFORMA y distinto del group id que los
+reportes citan. *«Si el apuntador del pie no distingue al día de
+desactualizado, ese pie no sirve para verificar nada — que es exactamente el
+problema que estoy teniendo ahora.»*
+
+**Dos brazos de la cura (la forma la decide la tanda que la tome):**
+① el pie gana el veredicto — `Updates.checkForUpdateAsync()` al abrir Cuenta
+y una palabra honesta: *al día · hay una actualización · sin conexión* (jamás
+un check silencioso que pueda mentir por red caída) · ② los reportes de
+publish al founder citan EL updateId de android (lo que el pie muestra),
+no solo el group.
+
+**⚠️ EL BRAZO ① NO ES COSMÉTICO — orden del founder con el caso medido que
+lo prueba (13-ago, el mismo incidente):** los dos ids en juego eran
+`019ff8b6` y `019ff8db` — **difieren en dos caracteres del final. Un humano
+no puede distinguir eso de un vistazo**, y el founder reinició cuatro veces
+**con el número correcto en la pantalla sin poder saberlo**. *«La cura tiene
+que ser una PALABRA, no un código: 'al día' o 'hay una actualización'. Es la
+diferencia entre poder verificar y no poder.»* (Los updateIds son UUIDv7:
+mismo minuto ⇒ mismo prefijo — el formato GARANTIZA que dos updates cercanos
+se parezcan, así que el cotejo visual de ids está roto POR CONSTRUCCIÓN,
+no por mala suerte.)
+
+**Disparo:** la próxima tanda que toque el pie de Cuenta o el ciclo OTA —
+antes del soft launch, porque la verificación en dispositivo es EL gate de la
+casa y hoy exige cotejar ids a mano.
+
+**⚠️ ADDENDUM (13-ago, cierre — orden del founder): ESTA FICHA SE QUEDA
+CORTA.** El mismo incidente que la parió terminó probando que **el mecanismo
+de consulta puede fallar EN SILENCIO** (ver D-786): el pie honesto no alcanza
+si la consulta misma se cae y solo se entera quien aprieta un botón
+escondido. *El problema es más profundo que el indicador* — la cura de esta
+ficha se diseña JUNTO con el diagnóstico de D-786, no antes.
+
+#### D-786 — 🔴 HALLAZGO ABIERTO: EL TELÉFONO NO PUEDE CONSULTAR EL SERVIDOR DE UPDATES — Y BLOQUEA LA CAMINATA DEL GATE ENTERA
+
+**Lo medido, cada cosa del objeto (13-ago, incidente del OTA que no baja):**
+
+- **El lado servidor está VERDE en las cinco preguntas** (tabla en el hilo del
+  cierre): el binario `bcf6d7f2` apunta a Channel `preview` · el canal apunta
+  al branch cuya CABEZA es `967ad1ea` · runtime **1.0.5 = 1.0.5** exacto ·
+  `updates.url` horneada en el commit del build (`f3029182`), sin
+  `enabled:false` · política default ON_LOAD · update Active, sin rollback.
+- **El binario NO es estructuralmente incapaz:** el pie del dispositivo dice
+  `update 019ff8b6` = group `d8e0a653`, publicado 20:22 hora local — **un OTA
+  real bajado por el mecanismo normal.**
+- **Y sin embargo HOY no puede consultar:** el botón de buscar actualizaciones
+  del dispositivo responde que **no puede consultar si hay actualizaciones
+  nuevas** — tras cuatro reinicios limpios que no trajeron nada.
+
+**El diagnóstico previo («timing, dos reinicios y listo») fue FALSO y quedó
+corregido por orden del founder:** el dato del botón lo falsea — no es
+coincidencia de horarios, es que el teléfono no está alcanzando el servidor
+de updates. **NO SE DIAGNOSTICA EN ESTA FICHA a propósito** (la orden:
+escribir lo medido y no adivinar). Candidatos que la reapertura deberá medir
+— no afirmaciones: red del dispositivo hacia `u.expo.dev` · estado del
+servicio EAS Update en esa ventana · algo del binario que consulta distinto
+de lo que aplica.
+
+**Disparo: ES LO PRIMERO QUE SE TOCA AL REABRIR** — bloquea la caminata del
+gate entera (los dos últimos OTA del cierre, `3debd5c4` el GPS y `967ad1ea`
+el camino §0bis, están publicados y el founder no puede recibirlos).
+
+**⚡ MEDIDO EN LA REAPERTURA (13-ago, ~10:42, con el aparato autorizado por
+adb — cada cosa del objeto, no de la letra):**
+
+- **Paso ⓪ confirmado del binario instalado:** `com.epetplace.prestador`
+  versionName 1.0.5 (instalado 12-ago 18:50) · metadata del APK extraída con
+  aapt2: `EXPO_UPDATE_URL=https://u.expo.dev/83a4d295-…` ·
+  `expo-channel-name: preview` · `expo_runtime_version="1.0.5"` ·
+  `ENABLED=true` · `CHECK_ON_LAUNCH=ALWAYS`. La inferencia de la mesa
+  (prestador) era correcta.
+- **El chequeo automático del arranque en frío COMPLETÓ SIN ERROR** (logcat,
+  literal): `Check` 10:42:52.909 → `CheckCompleteUnavailable` 10:42:56.150 →
+  `"UpdatesController onBackgroundUpdateFinished: No update
+  available","code":"NoUpdatesAvailable"`.
+- **El servidor, preguntado DESDE LA RED DEL TELÉFONO como aparato**
+  (`/system/bin/curl` en el dispositivo, cabeceras
+  platform=android/runtime=1.0.5/channel=preview): **HTTP 200,
+  `expo-update-id: 019ff8db-870f-70e9-a21d-ac52963deed5`** — la cabeza.
+- **Y la clave: el teléfono YA CORRE ESA CABEZA.** Marcador runtime L-160 en
+  logcat, literal: `[update] id=019ff8db-870f-70e9-a21d-ac52963deed5 ·
+  embedded=false · canal=preview`. Verificado contra el objeto EAS:
+  `update:view 967ad1ea…` → android `019ff8db-870f-70e9-a21d-ac52963deed5`,
+  ancla `78b07d82`, dirty=None. **El OTA §0bis LLEGÓ y ESTÁ APLICADO** —
+  en algún arranque entre el incidente del 12-ago y esta medición el
+  mecanismo normal bajó y aplicó la cabeza (ON_LOAD: un arranque baja, el
+  siguiente aplica). El `NoUpdatesAvailable` de hoy es VERDAD.
+- **⇒ LA CAMINATA DEL GATE ESTÁ DESBLOQUEADA.** El contenido de `3debd5c4`
+  (GPS) viaja adentro del bundle de la cabeza (`78b07d82` es posterior a
+  `a61d0885`).
+
+**Lo que la medición DESCARTA y lo que deja abierto:** config, canal,
+runtime, URL y capacidad estructural quedan descartados como causa (nada de
+eso cambió entre el fallo y el verde). El error del botón del 12-ago («No
+pudimos consultar si hay una versión nueva» = estado `noSePudo`, un `catch`
+único que traga la excepción literal — `cuenta/index.tsx:209-222`) **no
+reprodujo hoy** y su causa puntual queda sin identificar: los candidatos
+siguen siendo transitorios (red del aparato en esa ventana · servicio EAS en
+esa ventana). **La lección estructural ya tiene dueño: es D-785** — el
+founder reinició cuatro veces sin poder distinguir `019ff8b6` de `019ff8db`
+en el pie, y el `catch` de la app uniforma toda falla en una sola voz sin
+dejar el literal en ningún lado.
+
+**🔒 CERRADA COMO INCIDENTE, NO COMO RESUELTA (13-ago-2026, orden de mesa).**
+Una ficha que bloqueó una sesión entera no se cierra con «no pasa más» — se
+cierra con lo que quedó medido y lo que quedó sin saber, cada cosa en su
+columna:
+
+- **La cadena medida, verde de punta a punta:** binario
+  `com.epetplace.prestador` 1.0.5 · URL `u.expo.dev/83a4d295-…` · canal
+  `preview` · runtime `1.0.5` · `ENABLED=true` · `CHECK_ON_LAUNCH=ALWAYS` ·
+  `NoUpdatesAvailable` en 3,2 s · HTTP 200 con `expo-update-id: 019ff8db-…`
+  desde la red del teléfono · marcador L-160 `embedded=false` corriendo la
+  cabeza.
+- **Descartados por medición:** config · canal · runtime · URL.
+- **Causa puntual: SIN IDENTIFICAR.** Candidatos transitorios (red del
+  aparato en esa ventana · servicio EAS en esa ventana), y se quedan como
+  candidatos: **esta ficha no escribe una causa probable a propósito** — una
+  ficha que adivina su propia causa es peor que una que declara no saberla,
+  porque la próxima sesión la lee como hecho.
+- **Pendiente que NO reabre la ficha:** el toque del founder sobre «Buscar
+  actualizaciones» (debe decir «Ya tienes la última versión» y el pie
+  terminar en `…8db`) — se registra cuando llegue, como confirmación del
+  mismo camino que falló. **✅ LLEGÓ (13-ago, por la mañana, registrado por
+  orden de mesa): el pie dijo la última versión.** El botón queda verificado
+  por el mismo camino que falló; la ficha no se reabre.
+- **El valor del incidente lo hereda D-785 (🔴):** el daño medido nunca fue
+  el fallo — fue que el founder reinició cuatro veces con el update ya
+  llegando y ningún indicador podía decírselo.
+
+#### D-787 — 🟡 EL BORDE DE UN EMPLEADO EN DOS NEGOCIOS: NECESITA LETRA ANTES QUE DATOS
+
+**Nace de una decisión de mesa (13-ago-2026), no de un bug.** La siembra de
+cuentas de prueba rebotó TRES veces contra el mismo borde: `+vet1` y
+`+vet2` son **titulares** de negocios activos («Paseos Shyris» · «Clínica
+Los Shyris», altas de S79) y `+vet3` es **empleado activo** de Los Shyris —
+sumarles una segunda membresía activa habría fabricado el estado que R1
+dejó abierto en S75 (*«el borde de los dos negocios de R1»*: `obtenerMiPrestador`
+resuelve por titularidad O vínculo activo, y con DOS vínculos activos nadie
+definió cuál gana ni cómo se elige).
+
+**La decisión que cierra la terna: el borde NO se prueba con cuentas de
+prueba.** Sembrar el estado antes de la letra sería datos decidiendo
+producto — la sesión que lo tome escribe primero QUÉ debe pasar (¿selector
+de negocio? ¿un vínculo activo a la vez? ¿la puerta rebota la segunda
+membresía?) y recién después fabrica el caso. `vet1`, `vet2` y `vet3`
+quedan **intactos**.
+
+**El dato que ya existe y conviene no olvidar:** `nuevo_test2` ya vive una
+variante del borde (miembro de Satori + owner de su propia cuenta
+vendedora — D-783 lo midió como «dos cuentas»), y `misCuentasComerciales`
+la resuelve por diseño. Lo sin letra es el caso **empleado-de-dos-prestadores**.
+
+☠️ **Muere** cuando la letra del multi-vínculo esté firmada y el resolver
+la implemente — o cuando la mesa firme que el estado es ilegal y una
+constraint lo vuelva inexpresable.
