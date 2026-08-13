@@ -6,6 +6,45 @@
 > una barra de tres tabs que nunca se había diseñado, y el código declaraba por
 > escrito que eso era imposible.
 > **C arranca su lote contra esta lámina.**
+> **⚠️ ENMENDADA POR INCOMPLETA — S96, 13-ago-2026 (firma de mesa): la venta
+> de productos propia gana camino. Ver §0bis, ANTES de leer el resto.**
+
+---
+
+## 0bis. ENMIENDA S96 (13-ago-2026, firma de mesa) — LA PROPIA VENTA DE PRODUCTOS NO ES GESTIÓN
+
+**El hecho que la disparó (verificado por el founder en el dispositivo):** con
+la cuenta del empleado-vendedor (`nuevo_test2`) **NO se llega a «Venta de
+productos» tocando** — la tarjeta existe detrás del muro de titularidad del
+tab Negocio, y esta lámina le quita ese tab al no-gestor. *La puerta existía y
+no había camino hasta ella.* Es el tercer hallazgo del gate de la misma clase:
+**un camino que nadie recorrió, sin síntoma hasta que alguien real lo pisa.**
+
+**LA DECISIÓN: esta lámina NO se rompe — se enmienda por incompleta.** Su
+tesis sigue en pie y es correcta: *el tab Negocio es del gestor, porque
+gestionar un negocio es del titular.* Pero se escribió cuando «negocio»
+significaba UNA sola cosa. Hoy hay dos naturalezas, y **la venta de productos
+del propio vendedor NO ES GESTIÓN DE NADIE MÁS: es suya.**
+
+**LA LETRA QUE SE AGREGA (verbatim de la firma):**
+
+> La entrada a la propia venta de productos NO pasa por el tab de gestión. Un
+> usuario con naturaleza vendedora medida tiene camino visible a SU panel de
+> ventas, sea o no gestor de algún negocio.
+
+**Y su límite, para que no se lea de más:** esto **NO abre el tab Negocio al
+no-gestor** · **NO muestra la gestión de un negocio ajeno** · **NO toca el
+muro de titularidad** — que sigue intacto y correcto. Abre UN camino a UNA
+cosa que es del usuario.
+
+**El mandato de construcción:** la FORMA la deciden A y C (C tiene esta lámina
+y la barra medidas); la mesa pide la PROPIEDAD, no el mecanismo — *el camino
+es VISIBLE Y TOCABLE desde el arranque, sin ruta directa*. **Antes de
+construir, C declara la forma elegida y su choque exacto contra esta lámina**,
+para que quede escrito qué se enmendó y qué no. Y el porqué de que no espere a
+la tanda de diseño: **es FUNCIÓN, no estética** — una veterinaria que además
+vende alimento es el canal de adquisición de `MODELO_DESPENSA` §4, y hoy esa
+persona no puede vender.
 
 ---
 
