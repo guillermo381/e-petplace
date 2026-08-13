@@ -1,6 +1,18 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.3 — S96 (12 Ago 2026). La composición con cuatro estados y el vocabulario con relaciones.**
+> **Versión: v2.4 — reapertura S96/S97 (13 Ago 2026). La configuración de la despensa entra a v1.**
+>
+> **Qué cambió respecto de v2.3, en una línea: nace §8.6bis — la pantalla de
+> configuración del vendedor ENTRA a v1 por firmas del founder del 13-ago**,
+> con su choque contra §8.6 declarado (la configuración nunca estuvo en el
+> alcance v1; el panel de S96 asume cobertura, cortes, método y repartidores
+> hoy sembrados a mano — el vendedor real de octubre no se puede dar de alta
+> sin esta pantalla). Firmas nuevas adentro: **cobertura por RADIO (default
+> 15 km · máx 50)** —enmienda la prosa de `LETRA_RECORRIDO_DESPENSA_S96`
+> §2.2, §2.3 intacta— · **estado `en revisión`→`activa` con chip y modal**
+> (la superficie de §2.1 del recorrido) · **único rol de empleado: REPARTIDOR,
+> como chip del equipo que ya existe** · y los dos guards 🔴: *activar una
+> familia NO publica* (la curaduría sigue por SKU) y *un equipo, un lugar*.
 >
 > **Qué cambió respecto de v2.1, en una línea: el alcance v1 se ensancha
 > con el recorrido entero de los dos lados** — `LETRA_RECORRIDO_DESPENSA_S96`,
@@ -779,7 +791,9 @@ prestador, y en inglés hay que localizar a "Business".
 ### 8.6 Qué hace el vendedor desde el teléfono (alcance v1)
 
 Ver pedidos · prepararlos · despacharlos · ajustar stock · **proponer**
-producto y precio (§4.2).
+producto y precio (§4.2) · **y CONFIGURAR su despensa (§8.6bis — enmienda
+firmada 13-ago-2026; la configuración nunca estuvo en esta lista y el
+choque está declarado ahí)**.
 
 **El panel operativo del vendedor NO estaba en el alcance v1 de S94 y
 entra acá con nombre propio (D-755).** Que siempre se haya querido hacer
@@ -812,6 +826,74 @@ pedidos con dos botones —preparado, despachado— y el ajuste de stock.**~~
 > familia es cortesía, no fuente de verdad.**
 
 Eso alcanza para un vendedor.
+
+### 8.6bis 🔴 LA CONFIGURACIÓN DE LA DESPENSA — ENTRA A v1 (firmas del founder, 13-ago-2026)
+
+**Choque declarado:** esto enmienda §8.6 — su alcance v1 era *ver pedidos ·
+prepararlos · despacharlos · ajustar stock · proponer producto y precio*, y
+**la configuración nunca estuvo en esa lista**. La letra vieja queda arriba,
+enmendada por puntero y no reescrita.
+
+**El motivo que la hace BLOQUEANTE y no mejora:** el panel que S96 construyó
+**asume** cobertura, cortes, método de reparto y repartidores — y hoy todo
+eso está **sembrado a mano**. *El vendedor real de octubre no se puede dar
+de alta sin esta pantalla.*
+
+**Los cuartos, en orden firmado:**
+
+**① QUÉ VENDO.** Se activan familias: **alimento · antiparasitarios y
+antipulgas · suplementos**. Sobre el **catálogo canónico de e-PetPlace**, el
+vendedor pone stock y propone precio; **el vínculo nace `propuesto`**.
+Camino secundario: proponer un producto que no está en el catálogo — misma
+puerta (§4.2).
+
+> 🔴 **GUARD QUE SE ESCRIBE AHORA O SE PIERDE: activar una familia NO
+> publica sus productos.** Activar **filtra lo que el vendedor VE**.
+> Adherirse a un SKU sigue pasando por la curaduría, **producto por
+> producto** (§4.1). *Si activar publica en bloque, la vitrina curada deja
+> de existir y con ella el foso entero.*
+
+**② CÓMO ENTREGO.** Envío a domicilio · retiro en tienda · las dos. **El
+que no entrega a domicilio no ve los campos de reparto.**
+
+**③ COBERTURA — FIRMA NUEVA: por RADIO, no por polígono ni por lista de
+sectores.** Radio en km desde la ubicación del negocio. **Default 15 km ·
+máximo 50 km.** (Enmienda la prosa de `LETRA_RECORRIDO_DESPENSA_S96` §2.2
+—«zona de cobertura»—; **§2.3 no se toca**: la cobertura sigue siendo del
+SERVICIO, no del negocio.)
+
+**④ CUÁNDO.** Horarios de atención y horarios de corte. **El porqué, que es
+lo que ordena el cuidado de esta pantalla:** *un corte mal cargado no rompe
+nada del lado del vendedor — rompe una promesa del lado de la FAMILIA*
+(`LETRA_RECORRIDO` §2.3: la app dice y no promete; una fecha de entrega
+calculada sobre un corte falso es exactamente la promesa que esa letra
+prohíbe).
+
+**⑤ QUIÉN — FIRMA: el único rol de empleado que se acepta hoy es
+REPARTIDOR.**
+
+> 🔴 **Y entra como chip del EQUIPO QUE YA EXISTE, no como padrón propio de
+> la despensa.** El repartidor es un rol dentro de `e-PetPlace Negocios`
+> (`LETRA_PANEL_VENDEDOR_S96` §5). *Si la despensa arma su propia lista de
+> empleados, una veterinaria que además reparte tiene la misma persona
+> cargada dos veces, con dos altas y dos bajas.* **Un equipo, un lugar.**
+
+**⑥ EL ESTADO — FIRMA NUEVA.** El negocio tiene estado **`en revisión` →
+`activa`**. Se muestra con un **chip chico arriba**, y el chip abre un
+**modal que explica qué significa**. Es la superficie de §2.1 de la letra
+del recorrido (*el vendedor propone, e-PetPlace publica*), que hasta hoy no
+tenía forma.
+
+**LA LEY DEL CONTADOR (firmada en S91, rige acá):** si la pantalla dice
+cuánto le falta al vendedor, es **narrativa más un paso, jamás checklist**,
+y **el número tiene que poder llegar a cero**. **Lo que depende de
+e-PetPlace NO entra al contador** — igual que «cita» quedó fuera. *Él llega
+a cero; después esperamos nosotros. Son dos cosas y se dicen distinto.*
+
+**LO QUE NO ENTRA A ESTA PANTALLA — explícito porque las tres se van a
+querer meter adentro:** el **catálogo y el precio** son la puerta de carga
+(§4.2 — otro acto y otro actor) · el **stock** es del panel · lo **fiscal y
+bancario** ya vive en Cuenta comercial. Ninguna de las tres se duplica acá.
 
 ---
 

@@ -102,8 +102,15 @@ construir un formulario de solicitud aparte.
 ### 2.2 Lo que se configura
 
 Datos de facturación (él es el vendedor de registro) · catálogo
-propuesto · método de reparto · repartidores · zona de cobertura ·
+propuesto · método de reparto · repartidores · ~~zona de cobertura~~ ·
 horarios de corte · capacidad por recurso de reparto.
+
+> **ENMIENDA (firma del founder, 13-ago-2026):** la cobertura se declara
+> **por RADIO, no por polígono ni por lista de sectores** — radio en km
+> desde la ubicación del negocio, **default 15 km · máximo 50 km**. La
+> letra completa de la pantalla de configuración vive en
+> `MODELO_DESPENSA` §8.6bis. **§2.3 (abajo) NO se toca:** la cobertura
+> sigue siendo del SERVICIO, no del negocio.
 
 **La vista de su facturación entra a v1. La liquidación —cuánto le toca,
 cuándo le llega— se difiere al motor de pagos** (firma del founder: no
@@ -545,6 +552,12 @@ reclamo · cálculo de flete por zona y peso.
 ---
 
 ## Historial
+
+- **enmienda a §2.2 (13-ago-2026, firma del founder, depositada por A):**
+  la cobertura pasa a declararse **por RADIO** (default 15 km · máx 50 km),
+  no por polígono ni lista de sectores. La letra completa de la pantalla de
+  configuración —que ENTRA a v1— vive en `MODELO_DESPENSA` §8.6bis. §2.3
+  intacta: la cobertura sigue siendo del servicio, no del negocio.
 
 - **v1.0 (S96, 12 Ago 2026):** dictada en mesa después del depósito de
   `LETRA_PANEL_VENDEDOR_S96`, a la que enmienda en cuatro puntos. Diecisiete
