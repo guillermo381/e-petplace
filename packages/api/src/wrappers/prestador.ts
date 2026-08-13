@@ -205,13 +205,10 @@ export type MiPrestador = Pick<
   zona_radio_m: number | null;
 };
 
-const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, clip_url, expone_personas, cohorte, cohorte_anio';
+// ☠️ S96: murieron `COLUMNAS_MI_PRESTADOR` y `leerZona` — vivían solo para
+// el brazo (2) del select directo, que estaba MUERTO desde S91 (grants por
+// columna) y se retiró con la M22. La RPC trae fila y zona en un viaje.
 
-/** Lee la zona de `v_prestadores_publicos` para UN id — la MISMA fuente que
- *  ve la familia. Si la fila no está en la vista (negocio no activo) o no
- *  tiene coordenadas, las tres vuelven null, que es la verdad y no un
- *  fallo: por eso esta función no devuelve error. */
 /** Estrecha `cohorte` de `string | null` (lo que Supabase genera, porque **no
  *  lee los CHECK**) a su unión real. **Se valida en RUNTIME y no con un cast**:
  *  un `as` daría por buena cualquier cadena, y el día que la DB gane un tercer
@@ -219,21 +216,6 @@ const COLUMNAS_MI_PRESTADOR =
  *  la unión cae a `null` — que es "no sé", no un emblema inventado* (L-197). */
 function estrecharCohorte(v: unknown): 'fundador' | 'pionero' | null {
   return v === 'fundador' || v === 'pionero' ? v : null;
-}
-
-async function leerZona(
-  prestadorId: string,
-): Promise<{ zona_lat: number | null; zona_lon: number | null; zona_radio_m: number | null }> {
-  const { data } = await getClient()
-    .from('v_prestadores_publicos')
-    .select('zona_lat, zona_lon, zona_radio_m')
-    .eq('id', prestadorId)
-    .maybeSingle();
-  return {
-    zona_lat: data?.zona_lat ?? null,
-    zona_lon: data?.zona_lon ?? null,
-    zona_radio_m: data?.zona_radio_m ?? null,
-  };
 }
 
 /**
@@ -276,42 +258,22 @@ export async function obtenerMiPrestador(): Promise<
      4/4): la RPC hace `LEFT JOIN v_prestadores_publicos`, así que conserva el
      ofuscado de S84 **y** su `WHERE estado='activo'` — un prestador no activo
      sigue recibiendo NULL, como antes.
-     El brazo (2) de abajo SÍ conserva `leerZona`: lee la tabla, no la RPC. */
+     S96: el brazo (2) murió con la M22 — la RPC cubre titular Y vínculo. */
   if (data !== null) {
     return { ok: true, data: { ...data, cohorte: estrecharCohorte(data.cohorte) } };
   }
 
-  // (2) Vínculo activo. No es titular: ¿es empleado activo de alguien?
-  const { data: vinculos, error: errorVinculo } = await getClient()
-    .from('prestador_empleados')
-    .select('prestador_id')
-    .eq('user_id', uid)
-    .eq('activo', true)
-    .order('created_at', { ascending: true })
-    .limit(1);
-
-  if (errorVinculo) {
-    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
-  }
-  const prestadorId = vinculos?.[0]?.prestador_id;
-  if (prestadorId === undefined) {
-    return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
-  }
-
-  const { data: fila, error: errorFila } = await getClient()
-    .from('prestadores')
-    .select(COLUMNAS_MI_PRESTADOR)
-    .eq('id', prestadorId)
-    .maybeSingle();
-
-  if (errorFila) {
-    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
-  }
-  // null acá = el vínculo existe pero la fila no es legible: el negocio
-  // no está 'activo' (el borde declarado arriba). `sin_prestador` es la
-  // voz honesta — no hay negocio que mostrarle todavía.
-  if (fila === null) return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
-  return { ok: true, data: { ...fila, cohorte: estrecharCohorte(fila.cohorte), ...(await leerZona(fila.id)) } };
+  // ☠️ S96 (12-ago, hallazgo BLOQUEANTE del gate): acá vivía el brazo (2) —
+  // resolver el vínculo activo leyendo `prestadores` DIRECTO con
+  // COLUMNAS_MI_PRESTADOR. **Estaba MUERTO desde S91**: la cirugía de
+  // grants por columna dejó `direccion`/`lat`/`email_contacto` sin grant y
+  // el select rebotaba 42501 (medido en web con la cuenta real:
+  // `403 permission denied for table prestadores`) — todo empleado raso
+  // caía a `error_desconocido` y la raíz quedaba en el loop de reintento.
+  // La RPC `obtener_mi_prestador` ganó el brazo del VÍNCULO ACTIVO en la
+  // FUENTE (M22, titularidad primero), así que la rama (1) de arriba cubre
+  // a los dos actores. Cero filas de la RPC = de verdad no hay negocio.
+  return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
 }
 
 // ── S60-B2 (hunk aditivo): edición ACOTADA del perfil de la entidad ─────────
