@@ -20,7 +20,7 @@
 | pista | territorio |
 |---|---|
 | **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
-| **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
+| **B** | `packages/ui` · los **tokens** · **el lint y los jueces** — **exclusivo** *(enmienda de mesa, 13-ago-2026: era una lista de dos archivos — `verify-diseno.mjs`, `verdicto.mjs` — y pasa a ser el CRITERIO que este documento ya argumentaba: **quien mantiene el guard es su dueño, o es el guard de nadie**. Una lista de archivos envejece; un criterio no — y el caso que la parió es `juez-s96.mjs`: B lo curó estando fuera de su lista, lo declaró en la puerta, y la mesa ratificó sin revert porque el problema era la letra, no la conducta)* |
 | **C** | `apps/prestador` · **`apps/cliente`** · **la superficie de los dos canales** |
 
 > **⚠️ ENMIENDA S91 (hallazgo de C, depositada por A — `docs/` es de A):**

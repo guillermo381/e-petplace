@@ -13596,6 +13596,21 @@ marcados `created_by_sistema` (`supabase/dev/seed-gate-s96-pura.sql`). **El
 día del borrado son DOS cuentas, no una** — quien pague esta deuda contra la
 ficha original habría dejado media siembra viva.
 
+**SEGUNDO ADDENDUM (reapertura, 13-ago — orden de mesa, la siembra de
+cuentas de prueba vuelve a ensanchar el conteo):** ① el owner de Tienda Pura
+se RENOMBRÓ a `guillo381+vendedorpuro@gmail.com` (mismo usuario `eaad8d8d`,
+misma cuenta, mismas siembras — verificado: los tres lugares del correo
+actualizados y `61a28501` viva y `activa` después del cambio; el dominio
+`@e-petplace.com` no existe y esa cuenta sostiene un pendiente de la
+caminata) · ② la matriz de la siembra agrega **`duenodes`** (despensa con
+reparto a domicilio) como TERCERA cuenta vendedora de prueba y
+**`duenotodo`** (médicos + servicios + despensa) como CUARTO negocio con
+despensa. ⇒ **El día del borrado son TRES cuentas vendedoras de prueba
+(`9999999999999` —owner `nuevo_test2@e-petplace.com`, mismo dominio
+inventado— · Tienda Pura · `duenodes`) MÁS la despensa de `duenotodo`** —
+esta ficha es el censo; quien la pague barre contra esta lista, no contra la
+original.
+
 #### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
 
 Quedó en `[]` —el default— porque **nunca hubo una fila con foto**. El wrapper
@@ -13923,6 +13938,30 @@ compromiso B↔C, coordinado por A).
 ☠️ **Muere** cuando la build 1.0.5 pase el gate en dispositivo del founder
 con el splash de la casa Y R35 quede duro en 0 sobre `main`.
 
+**✅ LA PRIMERA MITAD DE LA MUERTE, PAGADA (13-ago-2026, reapertura):** el
+gate del founder CERRÓ — el splash de la casa visto en dispositivo sobre la
+build 1.0.5. **La ficha NO muere todavía:** la segunda mitad sigue abierta —
+medido el mismo día, `animated-icon.tsx` EXISTE en `origin/main` (el merge de
+`pista/s96-c` no llegó), así que R35 sigue en baseline 1 y no en 0. Queda
+viva solo por esa mitad.
+
+**🔴 CORRECCIÓN DE LA NOTA DE ARRIBA, el mismo día (13-ago, hipótesis de B
+re-medida por A contra el objeto) — la nota midió PRESENCIA, no CONTENIDO:**
+`animated-icon.tsx` existe en `origin/main` **porque fue CURADO EN SU LUGAR**,
+no porque el template siga vivo. Lo medido: ① `git merge-base --is-ancestor
+7664a7f3 origin/main` → ES ancestro (el merge de la cura SÍ llegó) · ② el
+contenido del archivo en `origin/main` es `AnimatedSplashOverlay`
+(`palette.tealDark` + `Isotipo`), y los hex `#208AEF`/`#0A7268` viven solo
+dentro del JSDoc que documenta lo que había — R35 no cuenta comentarios, a
+propósito · ③ el instrumento corrido: `BASELINE_R35 = {}` y la salida
+literal *«R35 … 0 color(es) aplicados a mano (DURA EN 0 desde S96-B)»*,
+`verify:diseno` VERDE. *Un archivo que existe no es un template que vive —
+misma clase de error que D-763 (medir presencia y llamarlo compatibilidad).*
+
+☠️ **MUERTA (13-ago-2026):** las dos mitades pagas — gate del founder en
+dispositivo (splash de la casa, build 1.0.5) Y R35 dura en 0 sobre `main`,
+medida con el instrumento y no con un grep de presencia.
+
 #### D-782 — 🔴 EL CLIENTE TIENE EL MISMO SPLASH DEL TEMPLATE — Y ES LA PRIMERA PANTALLA QUE VE UNA FAMILIA NUEVA
 
 **Sesión:** S96 (12-ago-2026). **La midió C** (fuera de su territorio, no
@@ -14086,3 +14125,49 @@ de lo que aplica.
 **Disparo: ES LO PRIMERO QUE SE TOCA AL REABRIR** — bloquea la caminata del
 gate entera (los dos últimos OTA del cierre, `3debd5c4` el GPS y `967ad1ea`
 el camino §0bis, están publicados y el founder no puede recibirlos).
+
+**⚡ MEDIDO EN LA REAPERTURA (13-ago, ~10:42, con el aparato autorizado por
+adb — cada cosa del objeto, no de la letra):**
+
+- **Paso ⓪ confirmado del binario instalado:** `com.epetplace.prestador`
+  versionName 1.0.5 (instalado 12-ago 18:50) · metadata del APK extraída con
+  aapt2: `EXPO_UPDATE_URL=https://u.expo.dev/83a4d295-…` ·
+  `expo-channel-name: preview` · `expo_runtime_version="1.0.5"` ·
+  `ENABLED=true` · `CHECK_ON_LAUNCH=ALWAYS`. La inferencia de la mesa
+  (prestador) era correcta.
+- **El chequeo automático del arranque en frío COMPLETÓ SIN ERROR** (logcat,
+  literal): `Check` 10:42:52.909 → `CheckCompleteUnavailable` 10:42:56.150 →
+  `"UpdatesController onBackgroundUpdateFinished: No update
+  available","code":"NoUpdatesAvailable"`.
+- **El servidor, preguntado DESDE LA RED DEL TELÉFONO como aparato**
+  (`/system/bin/curl` en el dispositivo, cabeceras
+  platform=android/runtime=1.0.5/channel=preview): **HTTP 200,
+  `expo-update-id: 019ff8db-870f-70e9-a21d-ac52963deed5`** — la cabeza.
+- **Y la clave: el teléfono YA CORRE ESA CABEZA.** Marcador runtime L-160 en
+  logcat, literal: `[update] id=019ff8db-870f-70e9-a21d-ac52963deed5 ·
+  embedded=false · canal=preview`. Verificado contra el objeto EAS:
+  `update:view 967ad1ea…` → android `019ff8db-870f-70e9-a21d-ac52963deed5`,
+  ancla `78b07d82`, dirty=None. **El OTA §0bis LLEGÓ y ESTÁ APLICADO** —
+  en algún arranque entre el incidente del 12-ago y esta medición el
+  mecanismo normal bajó y aplicó la cabeza (ON_LOAD: un arranque baja, el
+  siguiente aplica). El `NoUpdatesAvailable` de hoy es VERDAD.
+- **⇒ LA CAMINATA DEL GATE ESTÁ DESBLOQUEADA.** El contenido de `3debd5c4`
+  (GPS) viaja adentro del bundle de la cabeza (`78b07d82` es posterior a
+  `a61d0885`).
+
+**Lo que la medición DESCARTA y lo que deja abierto:** config, canal,
+runtime, URL y capacidad estructural quedan descartados como causa (nada de
+eso cambió entre el fallo y el verde). El error del botón del 12-ago («No
+pudimos consultar si hay una versión nueva» = estado `noSePudo`, un `catch`
+único que traga la excepción literal — `cuenta/index.tsx:209-222`) **no
+reprodujo hoy** y su causa puntual queda sin identificar: los candidatos
+siguen siendo transitorios (red del aparato en esa ventana · servicio EAS en
+esa ventana). **La lección estructural ya tiene dueño: es D-785** — el
+founder reinició cuatro veces sin poder distinguir `019ff8b6` de `019ff8db`
+en el pie, y el `catch` de la app uniforma toda falla en una sola voz sin
+dejar el literal en ningún lado.
+
+**Para cerrar la ficha falta UNA cosa, del founder:** desbloquear el
+teléfono, abrir Cuenta y apretar «Buscar actualizaciones» — debe decir «Ya
+tienes la última versión» y el pie debe terminar en `…8db`. Con eso el botón
+queda verificado por el mismo camino que falló.

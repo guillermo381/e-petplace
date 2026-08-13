@@ -188,6 +188,17 @@ DÍA** (la expiración de cabeceras que pidió C · la voz de la expansión de
 alérgenos que pidió D — las dos entraron al motor la misma jornada, por la
 puerta del pedido autocontenido).
 
+**ADDENDUM DE LA REAPERTURA (13-ago, orden de mesa) — el huérfano que no
+existía:** dos pistas midieron el MISMO árbol sucio en momentos distintos y
+las dos concluyeron «no es mío». Las dos tenían razón sobre lo suyo: el
+`juez-s96.mjs` modificado era el trabajo vivo de B sobre D-760 (hoy
+commiteado en `49adb65a`) y el `DEUDAS_CANONICAS.md` sucio que B declaró
+ajeno era la nota de D-781 de A sin commitear. **Un árbol compartido fabrica
+huérfanos que no existen** — una orden llegó a nacer para «archivar y
+restaurar» un archivo que tenía dueño, y ejecutarla habría revertido una
+cura. **El único instrumento que lo desarma es la declaración en la puerta,
+que B hizo.** (Cruce con D-769: la evidencia de esa ficha sigue creciendo.)
+
 ---
 
 ## §4 · EL ESTADO REAL, SIN MAQUILLAR — qué está verificado y qué NO
