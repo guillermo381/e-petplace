@@ -162,7 +162,16 @@ export default function TabsLayout() {
           };
         }
         return { error: true, detalle: p.mensaje };
-      })().then((r) => {
+      })().catch((e: unknown): EstadoSesionRaiz => {
+        // S96-C (cura (b) del gate): la cadena NO tenía .catch — un throw
+        // inesperado (no un !ok: una excepción) dejaba 'verificando' PARA
+        // SIEMPRE: esqueleto eterno, la clase exacta del «fallo que no
+        // dice nada» que el founder vetó. Ahora degrada a la rama de
+        // error, que habla y reintenta. Forense antes de dibujar (L-138).
+        const detalle = e instanceof Error ? e.message : String(e);
+        console.error(`[sesion] raíz prestador: EXCEPCIÓN — ${detalle}`, e);
+        return { error: true, detalle };
+      }).then((r) => {
         // Forense L-138: el resultado del guard raíz queda LITERAL en
         // el log de Metro/logcat — el gate empieza confirmándolo.
         const voz =
@@ -284,21 +293,43 @@ export default function TabsLayout() {
   }
 
   if ('error' in sesion) {
-    // error de config/red — el detalle específico jamás se traga (regla 36)
+    // error de config/red/permisos — el detalle específico jamás se traga
+    // (regla 36). 🔴 S96-C (cura (b) del gate, D-538/L-178): acá decía
+    // `sinSesion` — MENTIRA para un 403 con la sesión viva (el gate del
+    // founder lo encontró: el vendedor puro veía «No hay sesión activa»
+    // con su sesión andando). El título nuevo no afirma la causa que no
+    // midió, el detalle dice la del servidor, y cerrar sesión es la
+    // salida de escape — un error sin salida es un callejón con voz.
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio
-          titulo={t('sesion.sinSesion')}
+          titulo={t('sesion.falloTitulo')}
           descripcion={sesion.detalle}
           accion={
-            <Boton
-              variante="secundario"
-              etiqueta={t('sesion.reintentar')}
-              onPress={() => {
-                setSesion('verificando');
-                setIntento((n) => n + 1);
-              }}
-            />
+            <View style={{ gap: spacing[3], alignItems: 'center' }}>
+              <Boton
+                variante="secundario"
+                etiqueta={t('sesion.reintentar')}
+                onPress={() => {
+                  setSesion('verificando');
+                  setIntento((n) => n + 1);
+                }}
+              />
+              <Boton
+                variante="ghost"
+                etiqueta={t('sesion.cerrarSesion')}
+                cargando={saliendo}
+                onPress={() => {
+                  if (saliendo) return;
+                  setSaliendo(true);
+                  void cerrarSesion().then(() => {
+                    setSaliendo(false);
+                    setSesion('verificando');
+                    setIntento((n) => n + 1);
+                  });
+                }}
+              />
+            </View>
           }
         />
       </View>
