@@ -268,3 +268,45 @@ tabla directo.
 (`created_by_sistema`) — despacho con mascota atada · despacho con 2 ítems
 sin destino · retiro — + 1 repartidor activo («Repartidor de Pruebas») +
 1 venta de mostrador con su código de reclamo. Limpieza posterior POR ID.
+
+## 7 · ADDENDUM 13-ago (las dos puertas posteriores al gate — agregan, no cambian)
+
+### El brazo del empleado (M22 — cura del hallazgo ① del gate)
+
+- **`obtener_mi_prestador()`** gana el brazo del **EMPLEADO ACTIVO** (muerto
+  desde S91): resuelve por titularidad **o** vínculo activo, `ORDER BY`
+  titularidad DESC. El brazo vive **en la RPC, jamás en
+  `user_gestiona_prestador`** (S92: 239 policies lo consumen). El wrapper
+  `obtenerMiPrestador` perdió su brazo (2) de select directo (42501 desde
+  S91) — ☠️ con lápida en el código.
+
+### El track del reparto (M23 — firma founder 13-ago, elevación §9.5)
+
+- **`envios.track_gps` (jsonb)** — puntos `{lat, lng, t}`, LA MISMA forma del
+  paseo (el filtro de dominio y el dibujo se heredan; `t` epoch ms en el
+  motor — la sesión del teléfono guarda ISO y convierte AL VIAJAR).
+- **`registrar_track_envio(p_envio_id, p_puntos)`** — DEFINER, gate
+  `_es_repartidor_del_pedido` + `is_admin`, **ventana ESTRICTA
+  `hacia_destino`** (fuera rebota `track_fuera_de_ventana`), APPEND con tope
+  10000, rango de grados en la fuente. **Contrato con la pantalla: el flush
+  final corre ANTES de `entregar_pedido`/`marcar_entrega_fallida`** — un
+  flush post-cierre se pierde a propósito.
+- Wrapper `registrarTrackEnvio` + tipo `PuntoTrackEnvio` (re-export firmado).
+  Códigos nuevos: `track_fuera_de_ventana` · `puntos_invalidos` ·
+  `track_excede_limite`.
+- **HONESTIDAD DE ALCANCE (hallazgo del propio cinturón):** el guard de rango
+  ataja grados imposibles, **NO la inversión lat/lng** — la lat invertida de
+  Quito (−78.48) cae dentro de [−90, 90]. Afirmar que «la invertida rebota»
+  era el instrumento sobre-prometiendo; se corrigió el instrumento, no el
+  motor.
+- La familia NO lee el track en v1 (mapa v2 POR LETRA): esta capa captura y
+  persiste.
+
+### La siembra de la cuenta PURA (13-ago — espejo del legado, por las puertas)
+
+`supabase/dev/seed-gate-s96-pura.sql`: cuenta **Tienda Pura** (`61a28501`,
+owner `vendedor.puro@e-petplace.com`) — regla de envío flota propia $0 ·
+recurso 15/día + 2 turnos · repartidor `DEMO-REP-PURO-001` · **3 canónicos
+`DEMO-*` por M21** (la arena estrena `no_aplica`) · 3 pedidos
+`liberado_preparacion` marcados · 1 mostrador con código. Limpieza POR ID;
+su borrado viaja JUNTO con el de D-766 (ver addendum de esa ficha).
