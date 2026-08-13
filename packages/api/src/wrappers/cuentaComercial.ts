@@ -411,3 +411,89 @@ export async function actualizarDatosBancarios(
   if (!fila.success) return rechazo(fila.mensaje ?? '');
   return { ok: true, data: true };
 }
+
+// ── S96 (firma founder 12-ago): EL SELECTOR DE CUENTA COMERCIAL ─────────────
+//
+// El hallazgo ① del gate: un usuario que opera DOS cuentas (empleado de una
+// veterinaria Y dueño de su despensa) quedaba atrapado en la primera — la
+// tarjeta de ventas vivía detrás del muro de titularidad de un negocio
+// AJENO, y no había forma de ver la lista. «La veterinaria que además vende
+// alimento es exactamente el canal de adquisición de MODELO_DESPENSA §4» —
+// el selector es FUNCIÓN, no diseño (firma).
+//
+// Este lector enumera TODAS las cuentas que la persona opera, por las dos
+// vías que ya existían por separado: propia (owner) y gestión (la RLS de
+// `prestadores` decide qué negocios gestiona — misma consulta que el brazo
+// D-660 de arriba, sin el `limit(1)`).
+
+export interface CuentaOperada {
+  id: string;
+  nombreComercial: string | null;
+  estado: string;
+  /** 'propia' = owner_profile_id · 'gestion' = llega por un prestador que
+   *  gestiona. Si una cuenta entra por las dos, gana 'propia'. */
+  via: 'propia' | 'gestion';
+  /** Roles activos (`tipo_actor` de cuenta_roles). ⚠️ La RLS de esa tabla es
+   *  owner-only: para las cuentas por GESTIÓN esta lista viene VACÍA, y
+   *  vacío significa «no medible desde acá», no «sin roles» — la pantalla
+   *  no decide naturalezas con una lista vacía de una cuenta gestionada. */
+  roles: string[];
+}
+
+export async function misCuentasComerciales(): Promise<
+  ResultadoWrapper<CuentaOperada[], CodigoErrorCuentaComercial>
+> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+
+  const COLS = 'id, estado, nombre_comercial';
+  const [propias, gestionadas] = await Promise.all([
+    getClient().from('cuentas_comerciales').select(COLS).eq('owner_profile_id', uid),
+    getClient()
+      .from('prestadores')
+      .select(`cuenta:cuentas_comerciales!inner(${COLS})`)
+      .not('cuenta_comercial_id', 'is', null),
+  ]);
+  if (propias.error || gestionadas.error) return errorGenerico('error_desconocido');
+
+  const porId = new Map<string, CuentaOperada>();
+  for (const filaGestion of gestionadas.data ?? []) {
+    const anidada = (filaGestion as { cuenta?: unknown }).cuenta;
+    const c = Array.isArray(anidada) ? anidada[0] : anidada;
+    if (c && typeof c === 'object' && typeof (c as { id?: unknown }).id === 'string') {
+      const fila = c as { id: string; estado: string; nombre_comercial: string | null };
+      porId.set(fila.id, {
+        id: fila.id,
+        nombreComercial: fila.nombre_comercial,
+        estado: fila.estado,
+        via: 'gestion',
+        roles: [],
+      });
+    }
+  }
+  for (const fila of propias.data ?? []) {
+    porId.set(fila.id, {
+      id: fila.id,
+      nombreComercial: fila.nombre_comercial,
+      estado: fila.estado,
+      via: 'propia',
+      roles: [],
+    });
+  }
+  if (porId.size === 0) return { ok: true, data: [] };
+
+  // Los roles, en UN viaje (S94-PERF). La RLS descarta sola lo que el user
+  // no puede leer — el wrapper no filtra en memoria lo que el server decide.
+  const roles = await getClient()
+    .from('cuenta_roles')
+    .select('cuenta_comercial_id, tipo_actor, estado')
+    .in('cuenta_comercial_id', [...porId.keys()])
+    .eq('estado', 'activo');
+  if (!roles.error) {
+    for (const r of roles.data ?? []) {
+      const cuenta = porId.get(r.cuenta_comercial_id as string);
+      if (cuenta && typeof r.tipo_actor === 'string') cuenta.roles.push(r.tipo_actor);
+    }
+  }
+  return { ok: true, data: [...porId.values()] };
+}

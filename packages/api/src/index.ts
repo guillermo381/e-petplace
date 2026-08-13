@@ -358,6 +358,9 @@ export { obtenerPaseosConTrack, type PaseoConTrack } from './wrappers/vitales';
 // Cuenta comercial — S54-B (wizard B2.3, §6.5) — archivo NUEVO de esta sesión
 export {
   obtenerMiCuentaComercial,
+  // S96 (firma founder): el selector de cuenta comercial — todas las que opera.
+  misCuentasComerciales,
+  type CuentaOperada,
   obtenerPaisesParaRegistro,
   obtenerBancosDePais,
   obtenerTiposDocumentoTitular,
