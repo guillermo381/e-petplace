@@ -67,6 +67,17 @@ despachar`):
 - `ser1` → chips paseo + grooming · `ser2` → chips adiestramiento + paseo.
 - `desrepartidor` → atado al repartidor `DEMO-REP-S97-001` de Despensa S97, **con un envío `en_reparto` asignado HOY** (pedido real de `+8` con Zeus, escalera completa, marcado `created_by_sistema`). **Ancla verificada por el camino de la app: login real + PostgREST con su JWT → 1 fila.** «Mis entregas de hoy» es caminable.
 
+**SEGUNDA TANDA (orden de mesa, mismo día): `vet3`/`vet4`.** Rebote medido:
+los dos correos **ya existían** (28-jul). `+vet3` tiene **vínculo activo en
+Clínica Los Shyris** (empleado, recepcion) — sumarlo fabricaría el mismo
+borde de R1 ⇒ **FRENADO, misma clase que vet1/vet2**. `+vet4` estaba
+**libre** (sin vínculos, sin familias) ⇒ **sembrado como miembro activo de
+Clinica S97 con 2 chips médicos** (consulta_general + vacunacion, por las
+puertas reales). **⚠️ Su clave NO se tocó** — la regla de credenciales
+(METODO §6ter) prohíbe cambiar la clave de una cuenta que la pista no creó:
+la unificación con la clave del keychain queda a decisión de mesa (hoy su
+clave es la que tenga desde el 28-jul).
+
 **🔴 FRENO EJECUTADO — `vet1`/`vet2` NO se sembraron.** El literal:
 `guillo381+vet1@gmail.com` y `+vet2` ya existen (27-jul) y **son TITULARES
 (`rol='dueño'`) de dos negocios ACTIVOS** — «Paseos Shyris» y «Clínica Los

@@ -523,6 +523,40 @@ se revierte.**
 
 ---
 
+## 6bis · EL TELÉFONO NO ES TERRITORIO: ES ENTREGA *(firmada por la mesa, 13-ago-2026)*
+
+> **EL TELÉFONO NO ES TERRITORIO: ES ENTREGA.**
+>
+> El teléfono se entrega o no se toca. Ningún turno empieza sin que el
+> founder declare explícitamente que lo soltó. Un turno asignado en la mesa
+> no es una entrega: ese dato envejece.
+> Cero captura fuera de la app objetivo. Si lo que aparece no es e-PetPlace
+> o e-PetPlace Negocios, se aborta la captura entera — no se recorta.
+> Cero inyección de eventos (am start, taps) sin entrega declarada.
+> Si el keyguard pide PIN, la ventana terminó. Se declara y se espera; no
+> se insiste.
+
+**El caso que la parió (13-ago):** una pista capturó la pantalla del
+teléfono personal del founder mientras él escribía un mensaje, y además le
+trajo la app al frente en medio de eso. La pista frenó, borró en el acto y
+declaró su interferencia — **el buen comportamiento contuvo el daño, pero no
+era el que tenía que prevenirlo.** Sin dispositivo dedicado, la regla es lo
+único que separa esto de repetirse.
+
+## 6ter · LA REGLA DE CREDENCIALES *(firmada por la mesa, 13-ago-2026 — hermana de la lección del dominio inventado)*
+
+> **NINGUNA PISTA CAMBIA LA CLAVE DE UNA CUENTA QUE NO CREÓ ELLA. Si
+> necesita entrar y no puede, FRENA Y PIDE.**
+
+**El caso:** `demo-vet` — titular de Clínica Aurora, sostén de las cuatro
+pantallas de §11 de DIRECCION_ARTE — quedó **irrecuperable** porque una
+pista le cambió la clave y nadie registró cuál. Con el dominio inventado
+(`@epetplace.dev`) no había recuperación por correo posible: la cuenta quedó
+muerta sin aviso y **bloqueó el censo de D en vivo** hasta que la mesa
+ordenó renombre + reseteo unificado. *Las dos mitades del accidente son
+reglas distintas: el dominio inventado la hizo irrecuperable; la clave
+cambiada sin registro la hizo inaccesible. Esta regla cubre la segunda.*
+
 ## 7 · LO QUE ESTE MÉTODO NO CUBRE
 
 - **El reparto de trabajo lo hace la mesa**, sesión por sesión. Este documento
