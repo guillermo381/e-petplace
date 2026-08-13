@@ -13677,6 +13677,19 @@ Se declara para que nadie lea esta muerte como que entró todo.
 ☠️ **MUERTA al nacer.** Se deposita igual, con su muerte escrita, porque un
 número usado en dos letras firmadas sin ficha es el lío de `D-757` repetido.
 
+**ADDENDUM (12-ago, noche — la muerte se COMPLETA):** §9.5 quedó firmado en
+v1 y era lo único de S96 sin construir; la firma del founder lo saca del
+limbo: **el GPS del repartidor SE CONSTRUYE en v1.** La elevación previa
+(orden explícita) está servida en
+`docs/relevamientos/2026-08-13-s96-a-elevacion-gps-repartidor.md`, con las
+tres respuestas medidas: se hereda ENTERA la captura de fondo del paseo
+(`track-gps-fondo.ts` + el plugin ya horneado en el binario 1.0.5 ⇒ **cero
+build nueva, la secuencia del gate no cambia**), lo que falta es cablear al
+ENVÍO (motor A: `envios.track_gps` + `registrar_track_envio` gated al
+asignado · pantalla C: arranca en «voy hacia acá», para al entregar), y el
+mapa de la familia SIGUE en v2 por letra. **Con esta firma, D-770 muere de
+verdad.**
+
 #### D-771 — 🟢 CHAT Y WHATSAPP DENTRO DEL ENVÍO
 
 En v1 el canal es **la llamada**, y no por simplicidad: *es el único que no
