@@ -2449,6 +2449,11 @@ export const prestadorEn = {
       motivoAyudaFallida: 'It stays recorded with the shipment.',
       confirmarFallidaCta: 'Mark as not delivered',
       exitoFallida: 'Recorded. The order goes back.',
+      fondoNotifTitulo: 'Delivery in progress',
+      fondoNotifCuerpo: 'e-PetPlace records the route while the delivery lasts.',
+      gpsSinPermiso: "No location permission: the route isn't being recorded.",
+      gpsAjustes: 'Location permission is blocked. Enable it in your phone Settings.',
+      gpsReintentar: 'Try again',
     },
     mostrador: {
       titulo: 'Counter sale',

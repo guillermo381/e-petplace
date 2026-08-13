@@ -1174,7 +1174,12 @@ export {
   subirFotoEntrega,
   entregarConEvidencia,
   marcarEntregaFallida,
+  // S96-C (precedente método §6: la omisión se agrega y SE DECLARA, no se
+  // clona): el wrapper del track existía y el re-export no — sin él, el
+  // cableo del GPS del reparto no compila. A verifica y firma o revierte.
+  registrarTrackEnvio,
   type EntregaAsignada,
+  type PuntoTrackEnvio,
 } from './wrappers/despensa-repartidor';
 
 // ── HUNK ADITIVO DE LA PISTA C (S96) — lo que el panel necesitaba y el

@@ -2967,6 +2967,14 @@ export const prestadorEs = {
       motivoAyudaFallida: 'Queda registrado con el envío.',
       confirmarFallidaCta: 'Marcar como no entregada',
       exitoFallida: 'Quedó registrado. El pedido vuelve.',
+      // S96-C · el GPS del reparto (elevación firmada — §9.5: heredado del
+      // paseo). La notificación es la voz honesta del servicio de fondo:
+      // decir «Paseo en curso» en una entrega sería mentir en la barra.
+      fondoNotifTitulo: 'Entrega en curso',
+      fondoNotifCuerpo: 'e-PetPlace registra el recorrido mientras dura la entrega.',
+      gpsSinPermiso: 'Sin permiso de ubicación: el recorrido no se está registrando.',
+      gpsAjustes: 'El permiso de ubicación está bloqueado. Actívalo en los Ajustes del teléfono.',
+      gpsReintentar: 'Probar de nuevo',
     },
     mostrador: {
       titulo: 'Venta de mostrador',

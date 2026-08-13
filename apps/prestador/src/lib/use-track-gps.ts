@@ -50,6 +50,7 @@ import {
   sesionDetenidaPorServer,
   suscribirTrack,
   terminarSesionTrack,
+  type DestinoTrack,
 } from './track-gps-fondo';
 import { useTraduccion } from '@/i18n';
 
@@ -108,8 +109,23 @@ export interface UseTrackGps {
   reintentarPermiso: () => void;
 }
 
-export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): UseTrackGps {
+/** S96-C: el hook sirve a DOS oficios. `destino` decide la puerta del
+ *  flush (paseo por default — cero cambio para los callers vivos) y
+ *  `notificacion` la voz del servicio de fondo: «Paseo en curso» para una
+ *  entrega sería mentir en la barra del sistema. Se leen UNA vez al
+ *  montar (ref): cambiar de destino a mitad de captura no es un caso. */
+export interface OpcionesTrackGps {
+  destino?: DestinoTrack;
+  notificacion?: { titulo: string; cuerpo: string };
+}
+
+export function useTrackGps(
+  eventoAtencionId: string,
+  puntosIniciales: number,
+  opciones?: OpcionesTrackGps,
+): UseTrackGps {
   const { t } = useTraduccion();
+  const opcionesRef = useRef(opciones);
   const [estado, setEstado] = useState<EstadoGps>('iniciando');
   const [puntosTotal, setPuntosTotal] = useState(puntosIniciales);
   const [puntosSesion, setPuntosSesion] = useState<PuntoGpsPaseo[]>([]);
@@ -161,8 +177,8 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
 
   const arrancarFondo = useCallback(async () => {
     await iniciarCapturaFondo(eventoAtencionId, {
-      titulo: tRef.current('cita.fondoNotificacionTitulo'),
-      cuerpo: tRef.current('cita.fondoNotificacionCuerpo'),
+      titulo: opcionesRef.current?.notificacion?.titulo ?? tRef.current('cita.fondoNotificacionTitulo'),
+      cuerpo: opcionesRef.current?.notificacion?.cuerpo ?? tRef.current('cita.fondoNotificacionCuerpo'),
     });
     setModo('fondo');
     setFondoPedible(false);
@@ -185,7 +201,11 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
        OTRO paseo perdía sesión y buffer en silencio — el mecanismo exacto
        de los "~2 puntos que coinciden con los ratos en que sacó el
        teléfono". Ahora cada paseo tiene su entrada en el mapa. */
-    iniciarSesionTrack(eventoAtencionId, puntosInicialesRef.current);
+    iniciarSesionTrack(
+      eventoAtencionId,
+      puntosInicialesRef.current,
+      opcionesRef.current?.destino ?? 'paseo',
+    );
     if (sesionDetenidaPorServer(eventoAtencionId)) {
       setEstado('inactivo');
       return;

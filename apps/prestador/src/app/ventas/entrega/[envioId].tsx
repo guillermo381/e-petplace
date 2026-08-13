@@ -27,7 +27,7 @@
  * expediente jamás la toca — la voz de la pantalla lo dice).
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -63,7 +63,16 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useTrackGps } from '@/lib/use-track-gps';
 import { horaCorta } from '@/lib/ventas-formato';
+
+/** Los controles que la captura le presta al cierre: el flush final corre
+ *  ANTES de entregar/fallar (contrato de ventana M23) y detener apaga
+ *  SOLO esta sesión. */
+interface ControlesTrack {
+  flushFinal: () => Promise<{ total: number; pendientes: number }>;
+  detener: () => Promise<void>;
+}
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -90,6 +99,14 @@ export default function DetalleEntrega() {
   const [fotoUri, setFotoUri] = useState<string | null>(null);
   const [codigo, setCodigo] = useState('');
   const [fotoFallo, setFotoFallo] = useState(false);
+
+  // el track del reparto (§9.5) — los controles llegan del hijo montado
+  // solo en `hacia_destino`; null = no hay captura corriendo (y el cierre
+  // no flushea nada, correcto: la ventana del motor tampoco lo aceptaría)
+  const controlesTrackRef = useRef<ControlesTrack | null>(null);
+  const alListoTrack = useCallback((c: ControlesTrack | null) => {
+    controlesTrackRef.current = c;
+  }, []);
 
   // hoja «no había nadie»
   const [fallando, setFallando] = useState(false);
@@ -168,12 +185,18 @@ export default function DetalleEntrega() {
       mostrar({ texto: subida.mensaje, variante: 'error' });
       return;
     }
+    // 🔴 EL FLUSH FINAL DEL TRACK, ANTES del cierre (contrato de ventana
+    // M23): con el envío entregado el motor rebota `track_fuera_de_ventana`
+    // y esos puntos se pierden a propósito. El track es best-effort: su
+    // fallo no frena la entrega.
+    await controlesTrackRef.current?.flushFinal().catch(() => {});
     const r = await entregarConEvidencia(pantalla.entrega.pedido_id, codigo, subida.data.path);
     setEnviando(false);
     if (!r.ok) {
       mostrar({ texto: r.mensaje, variante: 'error' });
       return;
     }
+    await controlesTrackRef.current?.detener().catch(() => {});
     setEntregando(false);
     mostrar({ texto: t('ventas.entregas.exitoEntregada'), variante: 'exito' });
     router.back();
@@ -182,12 +205,15 @@ export default function DetalleEntrega() {
   async function confirmarFallida() {
     if (enviando || pantalla.estado !== 'listo' || motivoFallida.trim().length === 0) return;
     setEnviando(true);
+    // El flush final también acá — la fallida cierra la ventana igual.
+    await controlesTrackRef.current?.flushFinal().catch(() => {});
     const r = await marcarEntregaFallida(pantalla.entrega.envio_id, motivoFallida);
     setEnviando(false);
     if (!r.ok) {
       mostrar({ texto: r.mensaje, variante: 'error' });
       return;
     }
+    await controlesTrackRef.current?.detener().catch(() => {});
     setFallando(false);
     mostrar({ texto: t('ventas.entregas.exitoFallida'), variante: 'exito' });
     router.back();
@@ -314,6 +340,14 @@ export default function DetalleEntrega() {
               </View>
             ) : (
               <Texto variante="apoyo">{t('ventas.entregas.enCamino')}</Texto>
+            )}
+            {/* §9.5 · el track del reparto — ARRANCA al marcar «voy hacia
+                acá» (el hijo se monta con `hacia_destino`) y PARA al
+                entregar o fallar (flush final + detener en los cierres).
+                Callado cuando funciona (la notificación del servicio ya
+                lo dice); habla solo cuando NO está registrando. */}
+            {entrega.estado === 'hacia_destino' && (
+              <CapturaTrackEnvio envioId={entrega.envio_id} alListo={alListoTrack} />
             )}
             <Boton
               variante={entrega.estado === 'hacia_destino' ? 'primario' : 'secundario'}
@@ -451,5 +485,63 @@ export default function DetalleEntrega() {
         </HojaScroll>
       </Hoja>
     </View>
+  );
+}
+
+/**
+ * S96-C · LA CAPTURA DEL RECORRIDO (§9.5) — monta el hook heredado del
+ * paseo con destino 'envio' y la voz de notificación de la entrega. Vive
+ * como hijo para que el hook exista SOLO en `hacia_destino` (los hooks no
+ * se condicionan; los componentes sí). Presta sus controles al padre
+ * (flush final + detener) y solo dibuja cuando hay un PROBLEMA: el estado
+ * sano no necesita chip — la notificación del servicio ya lo dice.
+ * Los estados finos del paseo (aproximado, sin señal) quedan callados en
+ * v1 — declarado, no olvidado: el vocabulario completo del chip es de la
+ * tanda de diseño.
+ */
+function CapturaTrackEnvio({
+  envioId,
+  alListo,
+}: {
+  envioId: string;
+  alListo: (c: ControlesTrack | null) => void;
+}) {
+  const { t } = useTraduccion();
+  const track = useTrackGps(envioId, 0, {
+    destino: 'envio',
+    notificacion: {
+      titulo: t('ventas.entregas.fondoNotifTitulo'),
+      cuerpo: t('ventas.entregas.fondoNotifCuerpo'),
+    },
+  });
+
+  useEffect(() => {
+    alListo({ flushFinal: track.flushFinal, detener: track.detenerTrack });
+    return () => alListo(null);
+  }, [alListo, track.flushFinal, track.detenerTrack]);
+
+  const problema =
+    track.estado === 'sin_permiso' ||
+    track.estado === 'sin_permiso_ajustes' ||
+    track.estado === 'no_disponible' ||
+    track.estado === 'error';
+  if (!problema) return null;
+
+  return (
+    <Tarjeta tinte="warning">
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          {track.estado === 'sin_permiso_ajustes'
+            ? t('ventas.entregas.gpsAjustes')
+            : t('ventas.entregas.gpsSinPermiso')}
+        </Texto>
+        <Boton
+          variante="ghost"
+          tamaño="sm"
+          etiqueta={t('ventas.entregas.gpsReintentar')}
+          onPress={track.reintentarPermiso}
+        />
+      </View>
+    </Tarjeta>
   );
 }

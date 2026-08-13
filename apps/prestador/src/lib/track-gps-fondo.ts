@@ -71,7 +71,7 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { registrarTrackPaseo, type PuntoGpsPaseo } from '@epetplace/api';
+import { registrarTrackEnvio, registrarTrackPaseo, type PuntoGpsPaseo } from '@epetplace/api';
 
 export const TAREA_TRACK_GPS = 'epetplace-track-paseo';
 const STORAGE_SESION = 'track-gps-sesion-activa';
@@ -87,8 +87,15 @@ export interface OyenteTrack {
   onServerDetuvo?: () => void;
 }
 
+/** S96-C: el DESTINO del flush. El módulo se hereda ENTERO para el reparto
+ *  (mismo buffer, throttle, fondo y hard-stop); lo único que cambia es a
+ *  qué puerta viaja el lote — y eso es un campo de la sesión, no una
+ *  copia del archivo (lo que se copia diverge). */
+export type DestinoTrack = 'paseo' | 'envio';
+
 interface SesionTrack {
   eventoAtencionId: string;
+  destino: DestinoTrack;
   buffer: PuntoGpsPaseo[];
   // S81 (D-578): la sesión conserva `t` — el filtro del dibujo lo necesita.
   puntosSesion: PuntoGpsPaseo[];
@@ -116,12 +123,22 @@ function sesionesActivas(): SesionTrack[] {
  *  reescribe ENTERA en cada cambio: una lista parcial reviviría media
  *  captura, que es peor que ninguna. */
 async function persistirSesiones(): Promise<void> {
-  const ids = sesionesActivas().map((s) => s.eventoAtencionId);
-  if (ids.length === 0) {
+  const activas = sesionesActivas();
+  if (activas.length === 0) {
     await AsyncStorage.removeItem(STORAGE_SESION).catch(() => {});
     return;
   }
-  await AsyncStorage.setItem(STORAGE_SESION, JSON.stringify({ ids })).catch(() => {});
+  // S96-C: el destino viaja CON el id — un restore headless que pierde el
+  // destino flushearía un envío contra la puerta del paseo, y el rebote
+  // no-tipado reinyectaría el buffer para siempre. `ids` conserva su
+  // semántica vieja (solo paseos) por compat con lo ya guardado.
+  await AsyncStorage.setItem(
+    STORAGE_SESION,
+    JSON.stringify({
+      ids: activas.filter((s) => s.destino === 'paseo').map((s) => s.eventoAtencionId),
+      envios: activas.filter((s) => s.destino === 'envio').map((s) => s.eventoAtencionId),
+    }),
+  ).catch(() => {});
 }
 
 /** Idempotente: el remontaje del Durante ADOPTA la sesión viva del mismo
@@ -130,7 +147,11 @@ async function persistirSesiones(): Promise<void> {
  *
  *  D-595: y ahora **NO TOCA a las otras**. Antes, un id distinto
  *  reasignaba la variable y el paseo anterior perdía sesión y buffer. */
-export function iniciarSesionTrack(eventoAtencionId: string, totalInicial: number): void {
+export function iniciarSesionTrack(
+  eventoAtencionId: string,
+  totalInicial: number,
+  destino: DestinoTrack = 'paseo',
+): void {
   const viva = sesiones.get(eventoAtencionId);
   if (viva) {
     viva.total = Math.max(viva.total, totalInicial);
@@ -138,6 +159,7 @@ export function iniciarSesionTrack(eventoAtencionId: string, totalInicial: numbe
   }
   sesiones.set(eventoAtencionId, {
     eventoAtencionId,
+    destino,
     buffer: [],
     puntosSesion: [],
     lastT: 0,
@@ -196,18 +218,38 @@ async function flushSesion(s: SesionTrack): Promise<void> {
   const lote = s.buffer.slice();
   s.buffer = [];
   try {
-    const r = await registrarTrackPaseo({
-      evento_atencion_id: s.eventoAtencionId,
-      puntos: lote,
-      append: true,
-    });
+    // S96-C: la bifurcación por DESTINO — misma máquina, otra puerta.
+    // El envío pide `t` en epoch ms (contrato de `registrar_track_envio`);
+    // la sesión lo guarda ISO como siempre y se convierte SOLO al viajar.
+    const r =
+      s.destino === 'envio'
+        ? await registrarTrackEnvio(
+            s.eventoAtencionId,
+            lote.map((p) => ({ lat: p.lat, lng: p.lng, t: Date.parse(p.t) })),
+          )
+        : await registrarTrackPaseo({
+            evento_atencion_id: s.eventoAtencionId,
+            puntos: lote,
+            append: true,
+          });
     if (r.ok) {
       s.lastFlushT = Date.now();
       s.total = r.data.puntos_total;
       oyentes.get(s.eventoAtencionId)?.onTotal?.(s.total);
       return;
     }
-    if (r.codigo === 'atencion_no_en_curso' || r.codigo === 'atencion_estado_invalido') {
+    // Hard-stop por destino: el server declaró la VENTANA cerrada.
+    // Paseo: la atención salió de curso. Envío: `track_fuera_de_ventana`
+    // (el pedido se entregó/falló — un flush tardío se pierde A PROPÓSITO:
+    // nadie fabrica recorrido con el pedido cerrado) o el envío dejó de
+    // ser operable para esta sesión.
+    if (
+      r.codigo === 'atencion_no_en_curso' ||
+      r.codigo === 'atencion_estado_invalido' ||
+      r.codigo === 'track_fuera_de_ventana' ||
+      r.codigo === 'no_sos_el_repartidor_asignado' ||
+      r.codigo === 'envio_no_existe'
+    ) {
       /* D-595 ②: el hard-stop es DE ESTA SESIÓN. Antes llamaba a
          `detenerCapturaFondo()` a secas y apagaba el servicio del SO —
          o sea que el server rebotando UNA atención dejaba mudas a las
@@ -332,15 +374,23 @@ export async function detenerCapturaFondo(): Promise<void> {
  *  descartarlo mataría el track de un paseo en curso durante la
  *  actualización. Se lee, se convierte, y la próxima escritura ya deja la
  *  forma nueva. */
-function leerIdsGuardados(crudo: string | null): string[] {
-  if (crudo === null) return [];
+function leerIdsGuardados(crudo: string | null): { paseos: string[]; envios: string[] } {
+  if (crudo === null) return { paseos: [], envios: [] };
   try {
-    const g = JSON.parse(crudo) as { ids?: unknown; eventoAtencionId?: unknown };
-    if (Array.isArray(g.ids)) return g.ids.filter((x): x is string => typeof x === 'string');
-    if (typeof g.eventoAtencionId === 'string') return [g.eventoAtencionId];
-    return [];
+    const g = JSON.parse(crudo) as { ids?: unknown; envios?: unknown; eventoAtencionId?: unknown };
+    const soloStrings = (v: unknown): string[] =>
+      Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+    if (Array.isArray(g.ids) || Array.isArray(g.envios)) {
+      // S96-C: `ids` conserva la semántica vieja (paseos); `envios` es nuevo
+      // — un guardado pre-S96 sin la clave restaura solo paseos, correcto.
+      return { paseos: soloStrings(g.ids), envios: soloStrings(g.envios) };
+    }
+    if (typeof g.eventoAtencionId === 'string') {
+      return { paseos: [g.eventoAtencionId], envios: [] };
+    }
+    return { paseos: [], envios: [] };
   } catch {
-    return [];
+    return { paseos: [], envios: [] };
   }
 }
 
@@ -355,14 +405,15 @@ TaskManager.defineTask(TAREA_TRACK_GPS, async ({ data, error }) => {
     // Proceso relanzado headless: el servicio siguió vivo sin la app.
     // D-595: se restauran TODAS las sesiones, no la última.
     const crudo = await AsyncStorage.getItem(STORAGE_SESION).catch(() => null);
-    const ids = leerIdsGuardados(crudo);
-    if (ids.length === 0) {
+    const { paseos, envios } = leerIdsGuardados(crudo);
+    if (paseos.length === 0 && envios.length === 0) {
       // Servicio huérfano (nadie lo reclama): se apaga solo.
       await detenerCapturaFondo();
       return;
     }
     // total 0 provisorio: el primer flush trae el total real del server.
-    for (const id of ids) iniciarSesionTrack(id, 0);
+    for (const id of paseos) iniciarSesionTrack(id, 0);
+    for (const id of envios) iniciarSesionTrack(id, 0, 'envio');
   }
   for (const l of locations) aceptarPunto(l.coords.latitude, l.coords.longitude);
 });
