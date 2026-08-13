@@ -26,6 +26,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   CeldaNavegacion,
+  Esqueleto,
+  EsqueletoGrupo,
   Icono,
   MarcaDeAgua,
   PuertaDeOficio,
@@ -132,7 +134,11 @@ export default function Negocio() {
   // tiene la naturaleza de venta (rol `seller_productos` activo, leído por
   // RLS vía el contexto cacheado). El barrido es SOLO color (el propio
   // componente lo advierte): los permisos ya cambiaron en el servidor.
-  const [esVendedora, setEsVendedora] = useState(false);
+  // TRES estados (hallazgo ① del gate): 'cargando' existe para que el
+  // muro de titularidad no flashee GateAjeno mientras la naturaleza llega.
+  const [naturalezaVentas, setNaturalezaVentas] = useState<'cargando' | 'vendedora' | 'no'>(
+    'cargando',
+  );
   const [puertaActiva, setPuertaActiva] = useState(false);
 
   useFocusEffect(
@@ -149,7 +155,9 @@ export default function Negocio() {
         // no se pudo leer, NO se dibuja — una puerta que no se sabe si
         // corresponde es peor que su ausencia (y no es un fallo del tab:
         // el resto de Negocio no depende de esto).
-        setEsVendedora(rVentas.ok && rVentas.data !== null && rVentas.data.esVendedora);
+        setNaturalezaVentas(
+          rVentas.ok && rVentas.data !== null && rVentas.data.esVendedora ? 'vendedora' : 'no',
+        );
         const caidos = new Set<BloqueNegocio>();
         if (rPendientes.ok) setPendientes(rPendientes.data);
         else caidos.add('liquidaciones');
@@ -273,7 +281,55 @@ export default function Negocio() {
      tab NO se ofrece en la barra —eso es §2, y ahí no hay nada que
      explicar—. Esto es la otra mitad: cuando alguien YA preguntó por una
      ruta concreta, se le contesta. */
-  if (gate === 'denegado') return <GateAjeno />;
+  if (gate === 'denegado') {
+    // 🔴 S96-C (hallazgo ① del gate del founder): el muro de titularidad
+    // es de LA GESTIÓN DEL NEGOCIO — no de la despensa del que llega. El
+    // empleado no-titular que además es VENDEDOR (nuevo_test2: empleado
+    // de Satori Y dueño de su cuenta seller) veía el muro de un negocio
+    // AJENO tapándole LO SUYO. Acá conviven las dos verdades: la gestión
+    // sigue siendo del titular (el muro de Satori, intacto — cero plata
+    // ajena en pantalla) y su venta de productos entra por su tarjeta.
+    // 'cargando' dibuja esqueleto para no flashear el rebote (Ley 13).
+    if (naturalezaVentas === 'cargando') {
+      return (
+        <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[10] }}>
+          <EsqueletoGrupo>
+            <View style={{ gap: spacing[4] }}>
+              <Esqueleto forma="linea" ancho="60%" />
+              <Esqueleto forma="bloque" ancho="100%" alto={88} />
+            </View>
+          </EsqueletoGrupo>
+        </View>
+      );
+    }
+    if (naturalezaVentas === 'vendedora') {
+      return (
+        <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+          <MarcaDeAgua />
+          <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="seccion">{t('ventas.negocioAjeno.titulo')}</Texto>
+              <Texto variante="apoyo">{t('ventas.negocioAjeno.detalle')}</Texto>
+            </View>
+            <TarjetaVentas
+              etiqueta={t('ventas.entradaTitulo')}
+              detalle={t('ventas.entradaDetalle')}
+              onPress={() => setPuertaActiva(true)}
+            />
+          </View>
+          <PuertaDeOficio
+            capa="consumo"
+            activo={puertaActiva}
+            onFin={() => {
+              setPuertaActiva(false);
+              router.push('/ventas');
+            }}
+          />
+        </View>
+      );
+    }
+    return <GateAjeno />;
+  }
   // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
   // jamás expulsión muda: la superficie habla y reintenta (el blanco del
   // gate del founder nacía acá).
@@ -429,22 +485,8 @@ export default function Negocio() {
               que MODELO_DESPENSA §3.4 prohíbe. Sin encabezado de sección:
               una sección de un solo habitante es rótulo decorativo
               (Ley 18). Solo existe con la naturaleza medida. */}
-          {esVendedora && (
-            <Tarjeta
-              interactiva
-              elevacion="reposo"
-              accessibilityRole="button"
-              etiqueta={t('ventas.entradaTitulo')}
-              onPress={() => setPuertaActiva(true)}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Icono nombre="despensa" registro="aa" tamano={28} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Texto variante="seccion">{t('ventas.entradaTitulo')}</Texto>
-                  <Texto variante="apoyo">{t('ventas.entradaDetalle')}</Texto>
-                </View>
-              </View>
-            </Tarjeta>
+          {naturalezaVentas === 'vendedora' && (
+            <TarjetaVentas etiqueta={t('ventas.entradaTitulo')} detalle={t('ventas.entradaDetalle')} onPress={() => setPuertaActiva(true)} />
           )}
 
         </View>
@@ -465,5 +507,36 @@ export default function Negocio() {
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
       <VeloBarraEstadoOficio />
     </View>
+  );
+}
+
+/** S96-C: la tarjeta de entrada a «Venta de productos» — UNA sola pieza
+ *  para sus dos casas (el tab del gestor y el muro del no-titular
+ *  vendedor). Lo que se copia diverge; la voz llega por props. */
+function TarjetaVentas({
+  etiqueta,
+  detalle,
+  onPress,
+}: {
+  etiqueta: string;
+  detalle: string;
+  onPress: () => void;
+}) {
+  return (
+    <Tarjeta
+      interactiva
+      elevacion="reposo"
+      accessibilityRole="button"
+      etiqueta={etiqueta}
+      onPress={onPress}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        <Icono nombre="despensa" registro="aa" tamano={28} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Texto variante="seccion">{etiqueta}</Texto>
+          <Texto variante="apoyo">{detalle}</Texto>
+        </View>
+      </View>
+    </Tarjeta>
   );
 }
