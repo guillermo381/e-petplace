@@ -13954,3 +13954,57 @@ concreta: el frente despensa migra a `monto()` del riel en UN solo barrido**,
 ahora que los lectores exponen moneda/país. La regla de la ficha original
 sigue intacta: curar sin país era inventar la moneda — por eso el orden fue
 ensanchar lectores primero.
+
+#### D-783 — 🟡 EL SELECTOR DE CUENTA COMERCIAL — FRENADO CON MEDICIÓN, NO CONSTRUIDO
+
+**Nace de un freno de C ratificado por el founder (13-ago), con el voto de A
+a favor.** La firma original decía "el selector es función"; la medición dijo
+que hoy **N cuentas vendedoras medibles ≤ 1 POR ESTRUCTURA**: una cuenta
+propia por usuario (`uq` de owner) · las gestionadas son **inmedibles** — la
+RLS de `cuenta_roles` es owner-only, así que sus roles no se pueden leer para
+decidir si el panel las va a aceptar · y el segundo vendedor está fuera de v1
+por letra. Construirlo hoy sería **un control muerto que ofrece cuentas cuyo
+panel las rechaza** — Ley 23 (*la puerta no ofrece lo que va a rechazar*) en
+su caso exacto, y el caso que lo probó es real: para `nuevo_test2` la lista
+daría DOS cuentas y la de Satori rebotaría al elegirla.
+
+**Lo que los hallazgos del gate ya cerraron SIN él:** el vendedor puro entra
+por la raíz (Redirect a /ventas) y el empleado-vendedor entra por el muro que
+habla (la tarjeta "Tus ventas de productos" convive con el muro de
+titularidad). Ninguno de los dos caminos necesita elegir entre N.
+
+**Disparo (verbatim de la firma):** *nace cuando exista la primera cuenta
+vendedora medible más allá de la propia — lector DEFINER + `elegirCuenta` +
+la Hoja, en tanda A+C.* El lector DEFINER de roles de cuentas gestionadas es
+parte del disparo, no se adelanta: construirlo hoy sería motor sin puerta
+sobre un caso inexistente.
+
+**Nota de método (firma del founder, al acta):** C frenó con Ley 23 en la
+mano y un caso medido, y A frenó su propia mitad (el lector) por la misma
+razón. *Frenar con medición no deja hueco: deja de construir a ciegas.*
+
+#### D-784 — 🔴 LA MIGRACIÓN DE LLAVES: PRECONDICIÓN DEL PRÓXIMO TREN DE BUILD
+
+**Nace del freno de la rotación, ratificado por el founder (13-ago).** La
+`service_role` expuesta (volcada al transcript LOCAL de la sesión por
+`supabase projects api-keys` — clase D-557/D-712) es **LEGACY**: derivada del
+JWT secret del proyecto. Rotarla = *Reset JWT secret* = **regenera también la
+anon horneada en los DOS APK vivos e invalida todas las sesiones** — las apps
+quedan muertas hasta una build nueva. Por eso NO se rotó hoy: la medición
+cambió el costo, y el founder ratificó el freno.
+
+**El camino firmado:** en el **PRÓXIMO TREN DE BUILD** (el que sea — splash
+del cliente D-782, el que venga primero) las dos apps migran a las llaves
+nuevas (`sb_publishable_` en los bundles, `sb_secret_` en los despachadores y
+functions que hoy usan la legacy) **y ahí se apagan las legacy** desde el
+dashboard. Esta ficha es la precondición escrita para que no se pierda entre
+tandas: **ninguna build nueva sale sin la migración de llaves adentro.**
+
+**🔴 CONDICIÓN QUE SE REVIERTE SOLA (firma verbatim del founder, vive en esta
+ficha y no en el acta):** *si ese transcript sale de la máquina por cualquier
+vía —se sube, se comparte, se sincroniza a una nube— el reset se hace EN EL
+ACTO aunque rompa lo que rompa.* La exposición real hoy es transcript local +
+dashboard; si esa frontera se mueve, el costo deja de importar.
+
+☠️ **Muere** cuando las dos apps corran sobre llaves nuevas y las legacy
+estén apagadas — verificado con la anon legacy rebotando contra la API.

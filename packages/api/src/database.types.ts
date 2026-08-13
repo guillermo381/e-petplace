@@ -4945,6 +4945,7 @@ export type Database = {
           repartidor_id: string | null
           salio_en: string | null
           telefono_receptor: string | null
+          track_gps: Json | null
           tracking_code: string | null
           tracking_url: string | null
           transportista: string
@@ -4992,6 +4993,7 @@ export type Database = {
           repartidor_id?: string | null
           salio_en?: string | null
           telefono_receptor?: string | null
+          track_gps?: Json | null
           tracking_code?: string | null
           tracking_url?: string | null
           transportista: string
@@ -5039,6 +5041,7 @@ export type Database = {
           repartidor_id?: string | null
           salio_en?: string | null
           telefono_receptor?: string | null
+          track_gps?: Json | null
           tracking_code?: string | null
           tracking_url?: string | null
           transportista?: string
@@ -20352,6 +20355,10 @@ export type Database = {
       }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
+      proponer_producto_canonico: {
+        Args: { p_producto: Json; p_variante: Json }
+        Returns: Json
+      }
       proponer_sku_vendedor: {
         Args: {
           p_cuenta_comercial_id: string
@@ -20605,6 +20612,10 @@ export type Database = {
           p_visitante_id?: string
         }
         Returns: string
+      }
+      registrar_track_envio: {
+        Args: { p_envio_id: string; p_puntos: Json }
+        Returns: Json
       }
       registrar_track_paseo: {
         Args: { p_append?: boolean; p_atencion_id: string; p_puntos: Json }
