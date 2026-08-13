@@ -1,0 +1,10 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260813020000_s96_rpc_mi_prestador_brazo_empleado.sql
+-- Deshace: el brazo del EMPLEADO en `obtener_mi_prestador` — re-aplicar el
+-- cuerpo de scripts/s96/functiondef-pre-m22.sql.
+-- ⚠️ Revertir DEJA A TODO EMPLEADO RASO SIN PODER ENTRAR A LA APP (el
+--    hallazgo bloqueante del gate del 12-ago vuelve tal cual): la RPC da 0
+--    filas para él y el fallback de tabla muere 42501 por los grants de
+--    columna de S91. No se corre sin decidir qué entra en su lugar.
+-- ═══════════════════════════════════════════════════════════════════════════
+-- → re-aplicar scripts/s96/functiondef-pre-m22.sql
