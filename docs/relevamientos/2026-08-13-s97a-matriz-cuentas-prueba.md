@@ -73,10 +73,30 @@ Clínica Los Shyris** (empleado, recepcion) — sumarlo fabricaría el mismo
 borde de R1 ⇒ **FRENADO, misma clase que vet1/vet2**. `+vet4` estaba
 **libre** (sin vínculos, sin familias) ⇒ **sembrado como miembro activo de
 Clinica S97 con 2 chips médicos** (consulta_general + vacunacion, por las
-puertas reales). **⚠️ Su clave NO se tocó** — la regla de credenciales
-(METODO §6ter) prohíbe cambiar la clave de una cuenta que la pista no creó:
-la unificación con la clave del keychain queda a decisión de mesa (hoy su
-clave es la que tenga desde el 28-jul).
+puertas reales). ~~Su clave NO se tocó — queda a decisión de mesa.~~
+**✅ CERRADO (autorización de mesa, mismo día, §6ter ejercida — se frenó y
+se pidió): clave unificada con la del keychain por Admin API, login real
+verificado.**
+
+**✅ LA TERNA DE vet1/vet2/vet3 SE CIERRA SIN NINGUNA (decisión de mesa,
+13-ago):** el borde de un empleado en dos negocios **no se prueba con
+cuentas de prueba** — es deuda de producto con ficha propia (**D-787**) y
+necesita letra antes que datos. Los tres quedan intactos.
+
+## Agenda sembrada en Clinica S97 (para las sesiones 2 y 3 de D)
+
+Handshake real (`crear_solicitud_autorizacion` tipo `atencion` →
+`responder_solicitud_autorizacion 'autorizar'` como `+8`) y mostrador real
+(`registrar_atencion_mostrador`), citas de HOY:
+
+| hora | mascota | servicio | estado |
+|---|---|---|---|
+| 08:00 | Thor | consulta_general $20 | **no_show** (`marcar_no_show_cita`) |
+| 09:00 | Thor | consulta_general $20 | **confirmada + llegada registrada** (`registrar_llegada`) |
+| 11:30 | Zeus | vacunacion $5 | **confirmada, con cobro presencial $5 efectivo** (`registrar_cobro_presencial`) |
+
+Tres horas distintas, tres estados distintos — la agenda de recepción tiene
+cuerpo, y el cobro le da plata del día al titular/admin (sesión 3).
 
 **🔴 FRENO EJECUTADO — `vet1`/`vet2` NO se sembraron.** El literal:
 `guillo381+vet1@gmail.com` y `+vet2` ya existen (27-jul) y **son TITULARES

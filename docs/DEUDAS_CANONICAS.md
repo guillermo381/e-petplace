@@ -14206,7 +14206,36 @@ columna:
 - **Pendiente que NO reabre la ficha:** el toque del founder sobre «Buscar
   actualizaciones» (debe decir «Ya tienes la última versión» y el pie
   terminar en `…8db`) — se registra cuando llegue, como confirmación del
-  mismo camino que falló.
+  mismo camino que falló. **✅ LLEGÓ (13-ago, por la mañana, registrado por
+  orden de mesa): el pie dijo la última versión.** El botón queda verificado
+  por el mismo camino que falló; la ficha no se reabre.
 - **El valor del incidente lo hereda D-785 (🔴):** el daño medido nunca fue
   el fallo — fue que el founder reinició cuatro veces con el update ya
   llegando y ningún indicador podía decírselo.
+
+#### D-787 — 🟡 EL BORDE DE UN EMPLEADO EN DOS NEGOCIOS: NECESITA LETRA ANTES QUE DATOS
+
+**Nace de una decisión de mesa (13-ago-2026), no de un bug.** La siembra de
+cuentas de prueba rebotó TRES veces contra el mismo borde: `+vet1` y
+`+vet2` son **titulares** de negocios activos («Paseos Shyris» · «Clínica
+Los Shyris», altas de S79) y `+vet3` es **empleado activo** de Los Shyris —
+sumarles una segunda membresía activa habría fabricado el estado que R1
+dejó abierto en S75 (*«el borde de los dos negocios de R1»*: `obtenerMiPrestador`
+resuelve por titularidad O vínculo activo, y con DOS vínculos activos nadie
+definió cuál gana ni cómo se elige).
+
+**La decisión que cierra la terna: el borde NO se prueba con cuentas de
+prueba.** Sembrar el estado antes de la letra sería datos decidiendo
+producto — la sesión que lo tome escribe primero QUÉ debe pasar (¿selector
+de negocio? ¿un vínculo activo a la vez? ¿la puerta rebota la segunda
+membresía?) y recién después fabrica el caso. `vet1`, `vet2` y `vet3`
+quedan **intactos**.
+
+**El dato que ya existe y conviene no olvidar:** `nuevo_test2` ya vive una
+variante del borde (miembro de Satori + owner de su propia cuenta
+vendedora — D-783 lo midió como «dos cuentas»), y `misCuentasComerciales`
+la resuelve por diseño. Lo sin letra es el caso **empleado-de-dos-prestadores**.
+
+☠️ **Muere** cuando la letra del multi-vínculo esté firmada y el resolver
+la implemente — o cuando la mesa firme que el estado es ilegal y una
+constraint lo vuelva inexpresable.

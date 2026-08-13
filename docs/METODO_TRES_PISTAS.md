@@ -527,14 +527,22 @@ se revierte.**
 
 > **EL TELÉFONO NO ES TERRITORIO: ES ENTREGA.**
 >
-> El teléfono se entrega o no se toca. Ningún turno empieza sin que el
-> founder declare explícitamente que lo soltó. Un turno asignado en la mesa
-> no es una entrega: ese dato envejece.
-> Cero captura fuera de la app objetivo. Si lo que aparece no es e-PetPlace
-> o e-PetPlace Negocios, se aborta la captura entera — no se recorta.
-> Cero inyección de eventos (am start, taps) sin entrega declarada.
-> Si el keyguard pide PIN, la ventana terminó. Se declara y se espera; no
-> se insiste.
+> **1 · LA ENTREGA ES UNA VENTANA, NO UN PASO.** El founder abre la entrega
+> declarándolo, y la entrega sigue abierta hasta que él la revoca. Adentro
+> de una entrega abierta la pista es autónoma: desbloquea, inicia y cierra
+> sesiones, navega y captura sin pedir autorización por paso. Lo que la
+> regla protege es que el aparato no esté en uso del founder, no la
+> frecuencia con que se pide permiso.
+> **2 ·** Cero captura fuera de la app objetivo. Si lo que aparece no es
+> e-PetPlace o e-PetPlace Negocios, se aborta la captura entera — no se
+> recorta.
+> **3 ·** Cero inyección de eventos (am start, taps) sin entrega declarada.
+> **4 · EL KEYGUARD NO CIERRA LA VENTANA.** Con entrega abierta la pista
+> desbloquea con el PIN que el founder deposite en el llavero. Si el PIN
+> falla o el aparato pide una credencial que la pista no tiene, ahí sí se
+> declara y se espera.
+>
+> Al devolver, la pista declara qué sesión dejó abierta.
 
 **El caso que la parió (13-ago):** una pista capturó la pantalla del
 teléfono personal del founder mientras él escribía un mensaje, y además le
@@ -542,6 +550,14 @@ trajo la app al frente en medio de eso. La pista frenó, borró en el acto y
 declaró su interferencia — **el buen comportamiento contuvo el daño, pero no
 era el que tenía que prevenirlo.** Sin dispositivo dedicado, la regla es lo
 único que separa esto de repetirse.
+
+**Corrección de mesa registrada (13-ago):** la primera versión de esta
+sección ató la protección a la FRECUENCIA de la autorización («si el
+keyguard pide PIN, la ventana terminó») **y costó tres ventanas perdidas en
+una tarde**. La palabra del founder la corrigió: *«cuando lo entrego no lo
+toco»*. **El riesgo que el caso del 13-ago produjo fue USO SIMULTÁNEO, no
+autonomía — y contra eso protege la DURACIÓN de la entrega, no el permiso
+por paso.**
 
 ## 6ter · LA REGLA DE CREDENCIALES *(firmada por la mesa, 13-ago-2026 — hermana de la lección del dominio inventado)*
 
