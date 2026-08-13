@@ -4,8 +4,8 @@
 import { chromium } from 'playwright-core';
 
 const BASE = 'http://localhost:8097';
-const EMAIL = 'nuevo_test2@e-petplace.com';
-const PASS = 'GateS96.negocios';
+const EMAIL = process.env.REPRO_EMAIL ?? 'nuevo_test2@e-petplace.com';
+const PASS = process.env.REPRO_PASS ?? 'GateS96.negocios';
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const page = await browser.newPage();

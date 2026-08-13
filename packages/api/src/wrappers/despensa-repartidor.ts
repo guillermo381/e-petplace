@@ -110,6 +110,45 @@ export async function marcarEnCaminoADestino(
   return { ok: true, data: { envio_id: envioId } };
 }
 
+/** Un punto del track del reparto — la MISMA forma que el track del paseo
+ *  ({lat, lng, t}): el filtro de dominio y el dibujo se heredan enteros. */
+export interface PuntoTrackEnvio {
+  lat: number;
+  lng: number;
+  /** Timestamp del punto (epoch ms) — la key es `t`, como en el paseo. */
+  t: number;
+}
+
+/**
+ * El track del reparto: APPEND del buffer de la captura de fondo
+ * (track-gps-fondo.ts, heredada del paseo) al envío asignado.
+ *
+ * CONTRATO DE VENTANA (motor S96-M23, estricto): el motor solo acepta con el
+ * envío en `hacia_destino` — fuera de ventana rebota `track_fuera_de_ventana`.
+ * ⇒ La pantalla hace el FLUSH FINAL **ANTES** de llamar `entregarConEvidencia`
+ * o `marcarEntregaFallida`; un flush después de entregar se pierde a propósito
+ * (nadie fabrica recorrido con el pedido cerrado).
+ *
+ * La familia NO lee este track en v1 — el mapa en vivo es v2 POR LETRA; esta
+ * capa captura y persiste para que ese día el dato ya exista.
+ */
+export async function registrarTrackEnvio(
+  envioId: string,
+  puntos: PuntoTrackEnvio[],
+): Promise<ResultadoWrapper<{ puntos_total: number }, CodigoErrorDespensa>> {
+  if (puntos.length === 0) return { ok: true, data: { puntos_total: 0 } };
+  const { data, error } = await getClient().rpc('registrar_track_envio', {
+    p_envio_id: envioId,
+    p_puntos: puntos.map((p) => ({ lat: p.lat, lng: p.lng, t: p.t })),
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return {
+    ok: true,
+    data: { puntos_total: typeof data.puntos_total === 'number' ? data.puntos_total : puntos.length },
+  };
+}
+
 /**
  * La foto de entrega sube al bucket PRIVADO `entregas`, carpeta del envío.
  * Su letra de privacidad (§9.4): la ven el vendedor y el equipo, jamás otro

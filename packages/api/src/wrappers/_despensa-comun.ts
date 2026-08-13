@@ -111,6 +111,10 @@ export const CODIGOS_ERROR_DESPENSA = [
   'no_podes_tocar_este_producto',
   'producto_no_existe',
   'alergenos_requeridos',
+  // ── S96 · el track del reparto (M23) ─────────────────────────────────────
+  'track_fuera_de_ventana',
+  'puntos_invalidos',
+  'track_excede_limite',
 ] as const;
 
 export type CodigoErrorDespensa = (typeof CODIGOS_ERROR_DESPENSA)[number];
@@ -197,6 +201,11 @@ export const MENSAJES_DESPENSA: Record<
   no_podes_tocar_este_producto: 'Este producto no es de tu catálogo.',
   producto_no_existe:           'No encontramos ese producto.',
   alergenos_requeridos:         'Falta decir qué alérgenos se entendieron.',
+  // S96 · track del reparto — el fuera-de-ventana NO es error del repartidor:
+  // el flush llegó con el envío ya cerrado y se descarta a propósito.
+  track_fuera_de_ventana:       'El recorrido solo se registra mientras vas hacia la casa.',
+  puntos_invalidos:             'El recorrido llegó con datos inválidos.',
+  track_excede_limite:          'El recorrido alcanzó su límite de puntos.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
 };
