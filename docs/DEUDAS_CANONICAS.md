@@ -14028,6 +14028,17 @@ un check silencioso que pueda mentir por red caída) · ② los reportes de
 publish al founder citan EL updateId de android (lo que el pie muestra),
 no solo el group.
 
+**⚠️ EL BRAZO ① NO ES COSMÉTICO — orden del founder con el caso medido que
+lo prueba (13-ago, el mismo incidente):** los dos ids en juego eran
+`019ff8b6` y `019ff8db` — **difieren en dos caracteres del final. Un humano
+no puede distinguir eso de un vistazo**, y el founder reinició cuatro veces
+**con el número correcto en la pantalla sin poder saberlo**. *«La cura tiene
+que ser una PALABRA, no un código: 'al día' o 'hay una actualización'. Es la
+diferencia entre poder verificar y no poder.»* (Los updateIds son UUIDv7:
+mismo minuto ⇒ mismo prefijo — el formato GARANTIZA que dos updates cercanos
+se parezcan, así que el cotejo visual de ids está roto POR CONSTRUCCIÓN,
+no por mala suerte.)
+
 **Disparo:** la próxima tanda que toque el pie de Cuenta o el ciclo OTA —
 antes del soft launch, porque la verificación en dispositivo es EL gate de la
 casa y hoy exige cotejar ids a mano.
