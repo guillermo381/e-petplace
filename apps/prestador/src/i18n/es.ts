@@ -2817,6 +2817,14 @@ export const prestadorEs = {
   ventas: {
     entradaTitulo: 'Venta de productos',
     entradaDetalle: 'Pedidos, stock y reparto',
+    // S96-C (hallazgo ① del gate del founder): el empleado NO-titular que
+    // además es VENDEDOR llegaba al muro de titularidad y el muro de un
+    // negocio AJENO le tapaba SU despensa. Las dos voces conviven: la
+    // gestión del negocio sigue siendo del titular, y lo suyo es suyo.
+    negocioAjeno: {
+      titulo: 'La gestión de este negocio es de su titular',
+      detalle: 'Tu venta de productos sí es tuya: entras por acá.',
+    },
     comunes: {
       reintentar: 'Reintentar',
       errorTitulo: 'No pudimos cargar esto',

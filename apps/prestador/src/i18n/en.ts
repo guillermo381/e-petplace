@@ -2310,6 +2310,10 @@ export const prestadorEn = {
   ventas: {
     entradaTitulo: 'Product sales',
     entradaDetalle: 'Orders, stock and delivery',
+    negocioAjeno: {
+      titulo: 'Managing this business belongs to its owner',
+      detalle: 'Your product sales are yours — enter here.',
+    },
     comunes: {
       reintentar: 'Try again',
       errorTitulo: "We couldn't load this",
