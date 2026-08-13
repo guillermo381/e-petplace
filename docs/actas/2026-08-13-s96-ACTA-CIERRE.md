@@ -199,6 +199,28 @@ restaurar» un archivo que tenía dueño, y ejecutarla habría revertido una
 cura. **El único instrumento que lo desarma es la declaración en la puerta,
 que B hizo.** (Cruce con D-769: la evidencia de esa ficha sigue creciendo.)
 
+**REGISTRO DE MÉTODO DE LA REAPERTURA (13-ago, orden de mesa):** B entregó
+su censo con **dos defectos propios declarados**, el primero de ellos un
+**subconteo silencioso que daba totales plausibles y falsos** (17/15/11/11
+contra 22/18/13/15 reales), **cazado por cotejo con método independiente
+antes de reportar**. Un instrumento que subcuenta en silencio es de la misma
+familia que las cuatro «cosas que informaban sin informar» de S96 — **y la
+única defensa medida que tenemos contra ella es el cotejo por segundo
+método, no la revisión del propio código.**
+
+**SEGUNDO ADDENDUM DE LA REAPERTURA (13-ago, corrección de la mesa a su
+propia premisa):** una orden de mesa citó **D-513** («su motor no existe»)
+como razón vigente de que el toggle Administrador no se ofrece en la
+pantalla de equipo. **Esa razón CADUCÓ el 5-ago-2026 con D-660** — el
+propio código lo declara (`equipo.tsx:1024-1029`): la razón vigente es de
+LETRA (S74: solo el TITULAR nombra administradores, con el aviso de §6) más
+una lámina que no existe. **Y el corolario, que es lo que vale registrar:
+hay motor administrativo CONSTRUIDO y no hay puerta para nombrarlo. Un motor
+sin puerta es tan mudo como una puerta sin motor — y no lo reporta ningún
+instrumento, porque nada está roto.** (Los flags de administrador de la
+siembra de prueba se ponen directo en base a propósito: sirven para medir en
+la caminata qué puede hacer un administrador que un miembro común no pueda.)
+
 ---
 
 ## §4 · EL ESTADO REAL, SIN MAQUILLAR — qué está verificado y qué NO

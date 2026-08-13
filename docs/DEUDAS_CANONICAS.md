@@ -14056,7 +14056,26 @@ dashboard; si esa frontera se mueve, el costo deja de importar.
 ☠️ **Muere** cuando las dos apps corran sobre llaves nuevas y las legacy
 estén apagadas — verificado con la anon legacy rebotando contra la API.
 
-#### D-785 — 🟡 EL PIE DE CUENTA NO DISTINGUE «AL DÍA» DE «DESACTUALIZADO»
+#### D-785 — 🔴 EL CICLO OTA ES INVISIBLE DESDE EL TELÉFONO: PUEDE FALLAR EN SILENCIO Y PUEDE FUNCIONAR EN SILENCIO, Y LAS DOS SE VEN IGUAL
+
+**⬆️ SUBE DE 🟡 A 🔴 (13-ago-2026, orden de mesa — hereda el valor de
+D-786, cerrada como incidente).** El caso completo que la prueba, medido de
+punta a punta: el 12-ago el botón dijo «no pudimos consultar» (el mecanismo
+**falló en silencio** — el `catch` único tragó el literal) y el founder
+reinició CUATRO veces mirando el pie; **en alguno de esos arranques el
+update YA ESTABA llegando y aplicándose** (el mecanismo **funcionó en
+silencio**: la reapertura midió el teléfono corriendo `019ff8db`, la cabeza,
+sin que nadie lo supiera) — **y las dos situaciones se ven IDÉNTICAS desde
+el teléfono**: un pie con un UUID que ningún humano puede cotejar
+(`019ff8b6` vs `019ff8db`, dos caracteres del final, mismo prefijo POR
+DISEÑO de UUIDv7). *El daño medido nunca fue el fallo — fue que el founder
+reinició cuatro veces con el update ya llegando y ningún indicador podía
+decírselo.* **El brazo ① deja de ser cosmético y pasa a ser lo único que
+separa esto de repetirse antes del soft launch** — y la verificación en
+dispositivo es EL gate de la casa.
+
+*(La letra original de la ficha, abajo, se conserva entera: describe la
+mitad del indicador. El párrafo de arriba es el caso que la completa.)*
 
 **Nace de una orden literal del founder (13-ago), en medio de un incidente
 real:** cuatro reinicios contra un canal medido SANO y ninguna forma de saber
@@ -14167,7 +14186,27 @@ founder reinició cuatro veces sin poder distinguir `019ff8b6` de `019ff8db`
 en el pie, y el `catch` de la app uniforma toda falla en una sola voz sin
 dejar el literal en ningún lado.
 
-**Para cerrar la ficha falta UNA cosa, del founder:** desbloquear el
-teléfono, abrir Cuenta y apretar «Buscar actualizaciones» — debe decir «Ya
-tienes la última versión» y el pie debe terminar en `…8db`. Con eso el botón
-queda verificado por el mismo camino que falló.
+**🔒 CERRADA COMO INCIDENTE, NO COMO RESUELTA (13-ago-2026, orden de mesa).**
+Una ficha que bloqueó una sesión entera no se cierra con «no pasa más» — se
+cierra con lo que quedó medido y lo que quedó sin saber, cada cosa en su
+columna:
+
+- **La cadena medida, verde de punta a punta:** binario
+  `com.epetplace.prestador` 1.0.5 · URL `u.expo.dev/83a4d295-…` · canal
+  `preview` · runtime `1.0.5` · `ENABLED=true` · `CHECK_ON_LAUNCH=ALWAYS` ·
+  `NoUpdatesAvailable` en 3,2 s · HTTP 200 con `expo-update-id: 019ff8db-…`
+  desde la red del teléfono · marcador L-160 `embedded=false` corriendo la
+  cabeza.
+- **Descartados por medición:** config · canal · runtime · URL.
+- **Causa puntual: SIN IDENTIFICAR.** Candidatos transitorios (red del
+  aparato en esa ventana · servicio EAS en esa ventana), y se quedan como
+  candidatos: **esta ficha no escribe una causa probable a propósito** — una
+  ficha que adivina su propia causa es peor que una que declara no saberla,
+  porque la próxima sesión la lee como hecho.
+- **Pendiente que NO reabre la ficha:** el toque del founder sobre «Buscar
+  actualizaciones» (debe decir «Ya tienes la última versión» y el pie
+  terminar en `…8db`) — se registra cuando llegue, como confirmación del
+  mismo camino que falló.
+- **El valor del incidente lo hereda D-785 (🔴):** el daño medido nunca fue
+  el fallo — fue que el founder reinició cuatro veces con el update ya
+  llegando y ningún indicador podía decírselo.
