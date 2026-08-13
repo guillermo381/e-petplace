@@ -2478,6 +2478,22 @@ export const prestadorEn = {
       titulo: 'Settings',
       detalle:
         'Complete your business at your own pace. e-PetPlace reviews it and makes it visible to customers.',
+      // ⑥ the status (§8.6bis) — "under review" → "active"
+      estado: {
+        enRevision: 'Under review',
+        activa: 'Active',
+        suspendida: 'Suspended',
+        cerrada: 'Closed',
+        queSignifica: 'What does this mean?',
+        modalTitulo: 'Your store status',
+        modalEnRevision:
+          'You propose, e-PetPlace publishes. Complete your setup at your own pace: once the team reviews it, your business becomes visible to families. Nothing else is needed from you for now.',
+        modalActiva:
+          'Your store is visible to families. Anything you propose from here on — products, prices — still goes through review before being published.',
+        modalSuspendida:
+          'Your business account is suspended and your store is not visible. The e-PetPlace team has the details.',
+        modalCerrada: 'This business account is closed.',
+      },
       facturacionTitulo: 'Billing details',
       facturacionDetalle: 'Your business account — you are the seller of record',
       repartidoresTitulo: 'Couriers',

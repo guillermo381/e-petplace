@@ -1,22 +1,50 @@
 /**
- * CONFIGURACIÓN DEL NEGOCIO DE VENTAS (S96-C · C-B6 · LETRA_RECORRIDO §2).
+ * LA CONFIGURACIÓN DE LA DESPENSA (S96-C reabierta · MODELO_DESPENSA
+ * §8.6bis, firmas del founder 13-ago-2026 · antes: LETRA_RECORRIDO §2).
  *
  * BOCETO M1:
  *  · TESIS: «Completás tu negocio a tu ritmo; e-PetPlace lo revisa y lo
  *    hace visible.» (§2.1 — las dos mitades: escalable Y curado.)
- *  · FIRMA: esta pantalla ES el expediente del vendedor cuando el equipo
- *    lo revisa (§2.1) — no hay formulario de solicitud aparte.
- *  · CHANEL: sin sección de cobertura (no existe lector ni escritor de
- *    cobertura por vendedor en el contrato — un formulario muerto sería
- *    peor que su ausencia; declarado en el reporte) · la LIQUIDACIÓN no
- *    aparece: se difiere al motor de pagos (firma founder) y la nota lo
- *    dice en la vista de facturación.
+ *  · FIRMA: LOS CUARTOS EN ORDEN FIRMADO — ① qué vendo · ② cómo entrego ·
+ *    ③ cobertura · ④ cuándo · ⑤ quién — con el ESTADO (⑥) como chip
+ *    chico arriba que abre su explicación.
+ *  · CHANEL: lo que vive en otra casa NO se duplica (§8.6bis: catálogo y
+ *    precio = puerta de carga · stock = panel · fiscal/bancario = Cuenta
+ *    comercial — acá solo punteros) · la LIQUIDACIÓN se difiere al motor
+ *    de pagos y la nota vive en la vista de facturación.
  *  · ESTADOS: cargando · error · listo (con vacíos honestos por sección).
+ *
+ * ⚠️ CUARTOS SIN ESQUEMA — NO SE MONTAN (precedente de esta misma
+ * cabecera: un formulario muerto es peor que su ausencia; pedido a A del
+ * 13-ago con los contratos exactos, `2026-08-13-s96c-pedido-a-A-…`):
+ *  · ① QUÉ VENDO (familias activables — el nombre de las tres lo pone la
+ *    carga del catálogo, jamás esta pantalla; guard de la letra: activar
+ *    NO publica, filtra lo que el vendedor ve).
+ *  · ② CÓMO ENTREGO (envío/retiro/las dos; sin envío no se ven los
+ *    campos de reparto).
+ *  · ③ COBERTURA por radio (default 15 · máx 50, CHECK en la fuente).
+ *  · ④ la mitad "horarios de atención" (los CORTES sí están montados).
+ *  · el CONTADOR (ley S91: narrativa más un paso, llega a cero, lo de
+ *    e-PetPlace no entra) — sin ①②③ cableados contaría aire.
+ *
+ * 🔴 CHOQUE DECLARADO (⑤ QUIÉN): la letra manda repartidor como chip del
+ * EQUIPO QUE YA EXISTE («un equipo, un lugar»); el alta de abajo es el
+ * padrón propio de S96. Se conserva VIVO hasta que la costura
+ * repartidor↔equipo de A exista (A-5 del pedido) — matar la única alta
+ * funcionando antes de su reemplazo deja al vendedor sin repartidores.
+ * El swap es de esta pantalla y está declarado, no diferido en silencio.
  *
  *  · Repartidores: alta con nombre y documento (decisión del arranque);
  *    idempotente por documento — repetir no duplica, y se dice.
  *  · Recursos: la capacidad es DEL RECURSO (§7.3) — la voz lo enseña.
  *  · Cortes horarios: parámetro, jamás número en el código (§7.1).
+ *  · Estado (⑥): el mapeo del enum vive en `estadoDespensa()` abajo —
+ *    `pendiente_validacion` = «En revisión» (§2.1: el vendedor propone,
+ *    e-PetPlace publica). INTERIM del chip: `Insignia estado` todavía no
+ *    tiene `onPress` (S85-B24 lo acotó a `distincion` — «una prop sin
+ *    consumidor decora»; el consumidor nació acá). Pedido a B en
+ *    `2026-08-13-s96c-pedido-a-B-…`; mientras llega, el «¿Qué significa?»
+ *    es un Boton sinCaja al lado del chip y muere con el ensanche.
  */
 
 import { useCallback, useState } from 'react';
@@ -35,6 +63,7 @@ import {
   EvitaTeclado,
   Hoja,
   HojaScroll,
+  Insignia,
   Interruptor,
   MarcaDeAgua,
   Separador,
@@ -75,6 +104,28 @@ type Pantalla =
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+/** ⑥ EL ESTADO — mapeo del enum vivo (`estado_cuenta_comercial_enum`:
+ *  pendiente_validacion · activa · suspendida · cerrada, medido en
+ *  `database.types.ts`) a la voz de la letra («en revisión» → «activa»,
+ *  §8.6bis ⑥). Un valor que el enum gane mañana cae al caso que NO afirma
+ *  visibilidad que nadie midió: en revisión. Suspendida/cerrada no se
+ *  disfrazan de revisión — cada una dice su verdad (Ley 13). */
+function estadoDespensa(estadoCuenta: string): {
+  insignia: 'info' | 'alDia' | 'atencion';
+  clave: 'enRevision' | 'activa' | 'suspendida' | 'cerrada';
+} {
+  switch (estadoCuenta) {
+    case 'activa':
+      return { insignia: 'alDia', clave: 'activa' };
+    case 'suspendida':
+      return { insignia: 'atencion', clave: 'suspendida' };
+    case 'cerrada':
+      return { insignia: 'atencion', clave: 'cerrada' };
+    default:
+      return { insignia: 'info', clave: 'enRevision' };
+  }
+}
+
 export default function ConfiguracionVentas() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -86,6 +137,9 @@ export default function ConfiguracionVentas() {
   const [intento, setIntento] = useState(0);
   const [guardando, setGuardando] = useState(false);
   const [cerrando, setCerrando] = useState(false);
+
+  // ⑥ la explicación del estado (el modal que el chip abre)
+  const [modalEstado, setModalEstado] = useState(false);
 
   // hoja repartidor
   const [altaRepartidor, setAltaRepartidor] = useState(false);
@@ -142,6 +196,32 @@ export default function ConfiguracionVentas() {
   );
 
   const recargar = () => setIntento((n) => n + 1);
+
+  /* ⑥ — las claves van LITERALES, jamás armadas por concatenación: el
+     diccionario tipado rompe con una key inexistente y un template lo
+     apagaría con un cast (misma regla que el techo del HOY). */
+  const estadoCfg =
+    pantalla.estado === 'listo' ? estadoDespensa(pantalla.contexto.estadoCuenta) : null;
+  const etiquetaEstado =
+    estadoCfg === null
+      ? ''
+      : estadoCfg.clave === 'activa'
+        ? t('ventas.config.estado.activa')
+        : estadoCfg.clave === 'suspendida'
+          ? t('ventas.config.estado.suspendida')
+          : estadoCfg.clave === 'cerrada'
+            ? t('ventas.config.estado.cerrada')
+            : t('ventas.config.estado.enRevision');
+  const modalEstadoVoz =
+    estadoCfg === null
+      ? ''
+      : estadoCfg.clave === 'activa'
+        ? t('ventas.config.estado.modalActiva')
+        : estadoCfg.clave === 'suspendida'
+          ? t('ventas.config.estado.modalSuspendida')
+          : estadoCfg.clave === 'cerrada'
+            ? t('ventas.config.estado.modalCerrada')
+            : t('ventas.config.estado.modalEnRevision');
 
   async function guardarRepartidor() {
     if (guardando || pantalla.estado !== 'listo') return;
@@ -278,26 +358,65 @@ export default function ConfiguracionVentas() {
             gap: spacing[5],
           }}
         >
-          <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+          {/* ── ⑥ EL ESTADO — el chip chico arriba, abre su explicación ── */}
+          {estadoCfg !== null && (
+            <View style={{ gap: spacing[2] }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+                <Insignia estado={estadoCfg.insignia} etiqueta={etiquetaEstado} tamaño="sm" />
+                {/* INTERIM (pedido B-1): cuando `Insignia estado` gane
+                    `onPress`, este label muere y el tap vive en el chip. */}
+                <Boton
+                  variante="sinCaja"
+                  etiqueta={t('ventas.config.estado.queSignifica')}
+                  onPress={() => setModalEstado(true)}
+                />
+              </View>
+              <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+            </View>
+          )}
 
-          {/* facturación — la cuenta comercial que ya existe, sin duplicar */}
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionTitulo')}
-              detalle={t('ventas.config.facturacionDetalle')}
-              onPress={() => router.push('/cuenta-comercial')}
-            />
-            <Separador />
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionVistaTitulo')}
-              detalle={t('ventas.config.facturacionVistaDetalle')}
-              onPress={() => router.push('/ventas/facturacion')}
-            />
-          </Tarjeta>
+          {/* ── ① QUÉ VENDO · ② CÓMO ENTREGO · ③ COBERTURA — NO SE MONTAN:
+              sin lector ni escritor, un formulario muerto es peor que su
+              ausencia (cabecera). Los contratos exactos viven en el pedido
+              a A del 13-ago; al llegar el esquema entran ACÁ, en este
+              orden, antes del ④. */}
 
-          {/* repartidores */}
+          {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
+              atención» espera esquema: pedido A-4) ── */}
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
+            <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
+            {pantalla.turnos.length > 0 && (
+              <Tarjeta relleno="ninguno">
+                {pantalla.turnos.map((tur, i) => (
+                  <View key={tur.turno_id}>
+                    {i > 0 && <Separador />}
+                    <Celda
+                      titulo={tur.codigo}
+                      subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
+                      metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+            )}
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('ventas.config.turnoNuevoCta')}
+              onPress={() => {
+                setTurCodigo('');
+                setTurCorte('');
+                setTurDesde('');
+                setTurHasta('');
+                setTurDiaSiguiente(false);
+                setAltaTurno(true);
+              }}
+            />
+          </View>
+
+          {/* ── ⑤ QUIÉN — repartidores (🔴 choque declarado en la cabecera:
+              padrón propio hasta la costura repartidor↔equipo de A) ── */}
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
             {pantalla.repartidores.length === 0 ? (
@@ -369,38 +488,23 @@ export default function ConfiguracionVentas() {
             />
           </View>
 
-          {/* cortes horarios */}
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
-            <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
-            {pantalla.turnos.length > 0 && (
-              <Tarjeta relleno="ninguno">
-                {pantalla.turnos.map((tur, i) => (
-                  <View key={tur.turno_id}>
-                    {i > 0 && <Separador />}
-                    <Celda
-                      titulo={tur.codigo}
-                      subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
-                      metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('ventas.config.turnoNuevoCta')}
-              onPress={() => {
-                setTurCodigo('');
-                setTurCorte('');
-                setTurDesde('');
-                setTurHasta('');
-                setTurDiaSiguiente(false);
-                setAltaTurno(true);
-              }}
+          {/* ── lo que vive en OTRA casa — punteros, jamás duplicación
+              (§8.6bis: lo fiscal y bancario ya vive en Cuenta comercial) ── */}
+          <Tarjeta relleno="ninguno">
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('ventas.config.facturacionTitulo')}
+              detalle={t('ventas.config.facturacionDetalle')}
+              onPress={() => router.push('/cuenta-comercial')}
             />
-          </View>
+            <Separador />
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('ventas.config.facturacionVistaTitulo')}
+              detalle={t('ventas.config.facturacionVistaDetalle')}
+              onPress={() => router.push('/ventas/facturacion')}
+            />
+          </Tarjeta>
 
           {/* S96-C: para el VENDEDOR PURO (raíz → /ventas, sin tabs) esta
               es su única superficie estable — sin esto no tiene forma de
@@ -423,6 +527,18 @@ export default function ConfiguracionVentas() {
           />
         </ScrollView>
       )}
+
+      {/* ── ⑥ el modal del estado — qué significa (§8.6bis) ── */}
+      <Hoja
+        visible={modalEstado}
+        onCerrar={() => setModalEstado(false)}
+        titulo={t('ventas.config.estado.modalTitulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{modalEstadoVoz}</Texto>
+        </View>
+      </Hoja>
 
       {/* ── hoja: repartidor nuevo ── */}
       <Hoja

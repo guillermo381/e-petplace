@@ -2999,6 +2999,23 @@ export const prestadorEs = {
       titulo: 'Configuración',
       detalle:
         'Completa tu negocio a tu ritmo. e-PetPlace lo revisa y lo hace visible ante los clientes.',
+      // ⑥ el estado (§8.6bis) — «en revisión» → «activa»; la voz del modal
+      // es §2.1 del recorrido: tú propones, e-PetPlace publica.
+      estado: {
+        enRevision: 'En revisión',
+        activa: 'Activa',
+        suspendida: 'Suspendida',
+        cerrada: 'Cerrada',
+        queSignifica: '¿Qué significa?',
+        modalTitulo: 'El estado de tu despensa',
+        modalEnRevision:
+          'Tú propones, e-PetPlace publica. Completa tu configuración a tu ritmo: cuando el equipo la revise, tu negocio pasa a estar visible ante las familias. No te pedimos nada más por ahora.',
+        modalActiva:
+          'Tu despensa está visible ante las familias. Lo que propongas de aquí en adelante —productos, precios— sigue pasando por revisión antes de publicarse.',
+        modalSuspendida:
+          'Tu cuenta comercial está suspendida y tu despensa no está visible. El equipo de e-PetPlace tiene el detalle.',
+        modalCerrada: 'Esta cuenta comercial está cerrada.',
+      },
       facturacionTitulo: 'Datos de facturación',
       facturacionDetalle: 'Tu cuenta comercial — tú eres el vendedor de registro',
       repartidoresTitulo: 'Repartidores',
