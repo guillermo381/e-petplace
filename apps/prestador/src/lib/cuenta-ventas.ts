@@ -16,6 +16,7 @@
  */
 
 import {
+  getClient,
   obtenerConfigMoneda,
   obtenerMiCuentaComercial,
   rolesActivosDeMiCuenta,
@@ -38,9 +39,24 @@ export function invalidarContextoVentas(): void {
   cache = undefined;
 }
 
+// 🔴 S96-C (cura de un hueco PROPIO, cazado al cablear al vendedor puro):
+// el header de este archivo decía «el logout reinicia el bundle» — FALSO
+// para el logout EN CALIENTE (cerrar sesión desde una pantalla no recarga
+// JS): el caché del usuario anterior le quedaba al siguiente. El espejo
+// se invalida con el estado de auth, no con la memoria de quién salió.
+let escuchandoAuth = false;
+function asegurarEscuchaAuth(): void {
+  if (escuchandoAuth) return;
+  escuchandoAuth = true;
+  getClient().auth.onAuthStateChange((evento) => {
+    if (evento === 'SIGNED_OUT' || evento === 'SIGNED_IN') cache = undefined;
+  });
+}
+
 export async function contextoVentas(): Promise<
   { ok: true; data: ContextoVentas | null } | { ok: false; mensaje: string }
 > {
+  asegurarEscuchaAuth();
   if (cache !== undefined) return { ok: true, data: cache };
 
   const cta = await obtenerMiCuentaComercial();

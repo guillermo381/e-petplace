@@ -257,12 +257,20 @@ export default function HoyVentas() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
-        titulo={t('ventas.hoy.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* S96-C: para el VENDEDOR PURO esta pantalla es la CASA (llega por
+          Redirect, sin pila) — un chevron de atrás que no va a ningún
+          lado es un control muerto. Con pila (la puerta desde Negocio),
+          vuelve como siempre. */}
+      {router.canGoBack() ? (
+        <Encabezado
+          variante="navegacion"
+          titulo={t('ventas.hoy.titulo')}
+          atras
+          onAtras={() => router.back()}
+        />
+      ) : (
+        <Encabezado variante="navegacion" titulo={t('ventas.hoy.titulo')} />
+      )}
 
       {pantalla.estado === 'cargando' && (
         <View style={{ padding: spacing[5], gap: spacing[4] }}>
