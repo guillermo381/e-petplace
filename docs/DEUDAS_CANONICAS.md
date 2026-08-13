@@ -14008,3 +14008,26 @@ dashboard; si esa frontera se mueve, el costo deja de importar.
 
 ☠️ **Muere** cuando las dos apps corran sobre llaves nuevas y las legacy
 estén apagadas — verificado con la anon legacy rebotando contra la API.
+
+#### D-785 — 🟡 EL PIE DE CUENTA NO DISTINGUE «AL DÍA» DE «DESACTUALIZADO»
+
+**Nace de una orden literal del founder (13-ago), en medio de un incidente
+real:** cuatro reinicios contra un canal medido SANO y ninguna forma de saber
+DESDE EL TELÉFONO si el update esperado llegó. El pie (L-160 enmendada S74)
+muestra `update {8 chars del updateId} · {canal}` — **prueba QUÉ corre, pero
+no dice si es lo ÚLTIMO**: para verificar hay que tener a mano el updateId
+esperado, que además es POR PLATAFORMA y distinto del group id que los
+reportes citan. *«Si el apuntador del pie no distingue al día de
+desactualizado, ese pie no sirve para verificar nada — que es exactamente el
+problema que estoy teniendo ahora.»*
+
+**Dos brazos de la cura (la forma la decide la tanda que la tome):**
+① el pie gana el veredicto — `Updates.checkForUpdateAsync()` al abrir Cuenta
+y una palabra honesta: *al día · hay una actualización · sin conexión* (jamás
+un check silencioso que pueda mentir por red caída) · ② los reportes de
+publish al founder citan EL updateId de android (lo que el pie muestra),
+no solo el group.
+
+**Disparo:** la próxima tanda que toque el pie de Cuenta o el ciclo OTA —
+antes del soft launch, porque la verificación en dispositivo es EL gate de la
+casa y hoy exige cotejar ids a mano.
