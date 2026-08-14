@@ -84,12 +84,10 @@ import {
   hayNovedades,
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
-  obtenerSolicitudesMostrador,
   obtenerJornadaRecepcion,
   listarPedidosDelVendedor,
   type PedidoDelVendedor,
   type CitaJornadaRecepcion,
-  type SolicitudMostrador,
   type PlataDelDia,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -201,7 +199,13 @@ type Pantalla =
       /** ⭐ S98-C · §3.1 — el contador del wizard, LA FRONTERA del HOY.
        *  `null` = no se pudo leer o el negocio no tiene cuenta comercial. */
       contadorAlta: number | null;
-      atencion: { coordinar: number; presupuestos: number | null; handshakes: number | null; abiertas: number | null; abiertaCitaId: string | null };
+      /* ☠️ S98-C: murió `handshakes` — la correspondencia de la puerta se
+         mudó ENTERA a `ATENDER` (§3.1bis). Su fila decía «1 autorización
+         esperando» y llevaba a `/mostrador`: es el MISMO eco que la banda,
+         contado. Dejarla habría hecho fallar el discriminador de la firma
+         —*un HOY con handshake vivo no muestra la solicitud*— por la
+         puerta de atrás. */
+      atencion: { coordinar: number; presupuestos: number | null; abiertas: number | null; abiertaCitaId: string | null };
       /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
        *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
        *  la frase. Viajan crudos y esperan su línea. */
@@ -927,7 +931,7 @@ export default function Hoy() {
      'error' = la jornada de puerta no se pudo leer (SE DICE, D-541) ·
      datos = las citas de HOY con llegada + las solicitudes con su reloj. */
   const [puertaDatos, setPuertaDatos] = useState<
-    { citas: CitaJornadaRecepcion[]; solicitudes: SolicitudMostrador[] } | 'error' | null
+    { citas: CitaJornadaRecepcion[] } | 'error' | null
   >(null);
   /* ☠️ S98-C: murió `marcandoLlegada` — era el candado anti-doble-toque
      del verbo «Llegó», y sin verbo no hay toque que trabar. (Su hermano
@@ -1025,7 +1029,7 @@ export default function Hoy() {
        midió (622 ms en cuatro viajes encadenados solo para resolver quién
        soy), y agregarle una espera serial habría sido pagar dos veces la
        deuda que esa ficha existe para no repetir. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas, rAlta] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rAbiertas, rAlta] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -1078,13 +1082,14 @@ export default function Hoy() {
       prestador.data.cuenta_comercial_id !== null
         ? obtenerPresupuestosPrestador(prestador.data.cuenta_comercial_id)
         : Promise.resolve(null),
-      /* ⚠️ EL PARÁMETRO ES `cuenta_comercial_id`, NO `prestador_id` (aviso
-         de A): con el id equivocado el lector devuelve VACÍO SIN ERROR —
-         un cero plausible que diría "no hay autorizaciones esperando"
-         cuando las hay. Familia de L-197: el fallo que no falla. */
-      prestador.data.cuenta_comercial_id !== null
-        ? obtenerSolicitudesMostrador(prestador.data.cuenta_comercial_id)
-        : Promise.resolve(null),
+      /* ☠️ S98-C · ACÁ SE LEÍAN LAS SOLICITUDES DEL MOSTRADOR, y el
+         lector se va CON su superficie: **una lectura sin lector no es
+         código de más, es una petición por cada foco de la pantalla más
+         cara del producto** (D-738). Vive ahora en `ATENDER`, que es
+         donde se pinta.
+         ⏪ Su aviso —que el parámetro es `cuenta_comercial_id` y no
+         `prestador_id`, porque con el id equivocado devuelve VACÍO SIN
+         ERROR— viajó con ella y sigue escrito allá. */
       /* ⚠️ LA CUARTA FUENTE, y la que hacía al bloque incompleto: atenciones
          SIN CERRAR. Una atención abierta de un día anterior no aparece en la
          jornada de hoy —hoy solo trae el día— así que sin esta fila el
@@ -1260,7 +1265,6 @@ export default function Hoy() {
            solicitud RESPONDIDA no necesita atención, y contarla infla el
            bloque con trabajo ya hecho: el prestador iría a mirar algo que
            ya está resuelto y dejaría de confiar en el número. */
-        handshakes: rSolic === null ? null : rSolic.ok ? rSolic.data.filter((s) => s.estado === 'pendiente').length : null,
         abiertas: rAbiertas.ok ? rAbiertas.data.length : null,
         /* La MÁS VIEJA — el lector ya ordena por antigüedad, así que es la
            [0]. La fila lleva ahí y no a un listado: *el prestador no quiere
@@ -1482,18 +1486,13 @@ export default function Hoy() {
     const cuentaId = pantalla.cuentaComercialId;
     let vigente = true;
     const leer = async () => {
-      const [rj, rs] = await Promise.all([
-        obtenerJornadaRecepcion(prestadorId, hoyLocal()),
-        cuentaId !== null
-          ? obtenerSolicitudesMostrador(cuentaId)
-          : Promise.resolve({ ok: true as const, data: [] as SolicitudMostrador[] }),
-      ]);
+      const rj = await obtenerJornadaRecepcion(prestadorId, hoyLocal());
       if (!vigente) return;
       if (!rj.ok) {
         setPuertaDatos('error');
         return;
       }
-      setPuertaDatos({ citas: rj.data, solicitudes: rs.ok ? rs.data : [] });
+      setPuertaDatos({ citas: rj.data });
     };
     void leer();
     const reloj = setInterval(() => void leer(), 60_000);
@@ -1743,16 +1742,11 @@ export default function Hoy() {
         onPress: () => router.push('/veterinaria/movimiento'),
       });
     }
-    if (a.handshakes !== null && a.handshakes > 0) {
-      atencionItems.push({
-        clave: 'handshakes',
-        icono: 'familia',
-        titulo: a.handshakes === 1 ? t('atencion.handshake1') : t('atencion.handshakeN', { n: a.handshakes }),
-        onPress: () => router.push('/mostrador'),
-      });
-    }
-    /* LO VIEJO PRIMERO ya viene del lector (ordena por antigüedad): la fila
-       no re-ordena nada, solo cuenta. */
+    /* ☠️ S98-C · ACÁ VIVÍA LA FILA «N autorizaciones esperando», y se
+       fue con el resto del eco de la puerta. Las otras tres fuentes de
+       este bloque —coordinar, presupuestos, atenciones sin cerrar— son
+       trabajo del NEGOCIO y se quedan: lo que se mudó es la
+       correspondencia del handshake, no el digesto. */
     if (a.abiertas !== null && a.abiertas > 0 && a.abiertaCitaId !== null) {
       atencionItems.push({
         clave: 'abiertas',
@@ -1963,10 +1957,10 @@ export default function Hoy() {
   /* ⏪ S97-D: murieron `puertaAdentro` y `puertaEsperando` — sus dos listas
      de tarjetas re-dibujaban citas que la línea ya mostraba. Su información
      vive ahora en `puertaPorCita`, como chip de la fila que le corresponde. */
-  const puertaSolicitudes = puerta
-    ? puerta.solicitudes.filter((s) => s.estado === 'pendiente' || (s.estado === 'expirada' && s.respondidaEn === null))
-    : [];
-  const puertaError = conPuerta && puertaDatos === 'error';
+  /* ☠️ S98-C · MURIÓ `puertaError`: su ÚNICA voz vivía en la banda que se
+     mudó. Y no deja un hueco de honestidad — lo que este lector alimenta
+     hoy es el chip «adentro» de una fila que igual se dibuja; el fallo de
+     las SOLICITUDES lo dice ahora `ATENDER`, que es donde viven. */
 
   /* ⭐ S97-D · LA PUERTA BAJA A LA FILA DE SU CITA.
      Estado por `citaId`: la fila lo pinta como chip y ofrece el verbo.
@@ -1990,13 +1984,12 @@ export default function Hoy() {
     }
   }
 
-  /* La banda queda SOLO con lo que NO es una cita del día: las solicitudes
-     de mostrador (un handshake pendiente con su reloj del server) y el
-     error de lectura, que sigue diciéndose (D-541). Un handshake no tiene
-     hora ni fila propia en la línea — no es algo que pase a las 11:30, es
-     algo que está esperando respuesta AHORA. */
-  const bandaVisible =
-    conPuerta && vistaEsHoy && (puertaError || puertaSolicitudes.length > 0);
+  /* ☠️ S98-C · MURIÓ `bandaVisible` — el eco de la puerta se mudó a
+     `ATENDER` (ver la lápida en el render). Su propio comentario decía la
+     razón sin sacar la conclusión: *«un handshake no tiene hora ni fila
+     propia en la línea — no es algo que pase a las 11:30, es algo que está
+     esperando respuesta AHORA»*. Eso no describe una banda del HOY:
+     describe por qué no pertenece al HOY. */
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -2312,50 +2305,28 @@ export default function Hoy() {
               <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
             )}
 
-            {/* ── ⭐ S88-C · EN LA PUERTA (firma founder) · ⭐ S97-D ACOTADA
-                A LO QUE NO ES UNA CITA DEL DÍA.
-                ⏪ Acá vivían DOS listas de tarjetas —adentro · esperando—
-                que re-dibujaban citas que la línea de abajo YA mostraba, y
-                un botón que abría una Hoja para marcar llegadas. Las tres
-                murieron: el estado de puerta es ahora el CHIP de la fila de
-                su cita y el verbo «Llegó» es SU acción. La firma de S88 se
-                cumple mejor —el verbo sigue al alcance del pulgar, y ahora
-                está junto a la persona que cruzó la puerta— sin pagar el
-                precio que nadie había medido: el mismo día contado dos
-                veces (§15b.0ter, el defecto que S86 curó).
-                QUEDA lo que NO tiene fila propia: las solicitudes de
-                mostrador con su reloj del server, y el error de lectura,
-                que se sigue diciendo (D-541). */}
-            {bandaVisible && (
-              <View style={{ gap: spacing[2] }}>
-                <Texto variante="seccion">{t('recepcion.puerta')}</Texto>
-                {puertaError ? (
-                  <Texto variante="apoyo" color="danger">{t('recepcion.puertaError')}</Texto>
-                ) : (
-                  <>
-                    {puertaSolicitudes.map((s) => (
-                      <Tarjeta key={s.solicitudId} tinte="warning" relleno="amplio">
-                        <View style={{ gap: spacing[1] }}>
-                          <Texto variante="seccion">
-                            {s.estado === 'expirada'
-                              ? t('recepcion.solicitudExpirada', { mascota: s.mascotaNombre ?? t('agenda.mascotaFallback') })
-                              : t('recepcion.solicitudPendiente', { mascota: s.mascotaNombre ?? t('agenda.mascotaFallback') })}
-                          </Texto>
-                          {s.estado === 'pendiente' ? (
-                            // el reloj lo dijo el SERVER; acá solo se viste
-                            <Texto variante="dato">
-                              {t('recepcion.solicitudReloj', { min: Math.max(1, Math.ceil(s.segundosRestantes / 60)) })}
-                            </Texto>
-                          ) : (
-                            <Texto variante="cuerpo">{t('recepcion.solicitudExpiradaCuerpo')}</Texto>
-                          )}
-                        </View>
-                      </Tarjeta>
-                    ))}
-                  </>
-                )}
-              </View>
-            )}
+            {/* ☠️ S98-C · MURIÓ «EN LA PUERTA» — EL ECO SE MUDÓ A `ATENDER`.
+                Firma del founder, literal: *«los mensajes de la puerta —que
+                la familia de XXXX no respondió— no deberían estar en HOY:
+                deberían estar en ATENDER»*.
+
+                **Y la razón es la misma que ordenó §3.1 entera:** el HOY es
+                el FEED DEL DÍA —lo que pasa a una hora— y un handshake sin
+                respuesta no pasa a ninguna hora: **está esperando ahora**.
+                No tiene fila en la línea porque no pertenece a la línea.
+                *Lo que la banda hacía acá era meter correspondencia en un
+                cronograma.*
+
+                ⏪ Antes de esto vivían acá DOS listas de tarjetas —adentro ·
+                esperando— y un botón que abría una Hoja para marcar
+                llegadas; las tres murieron en S97-D porque re-dibujaban
+                citas que la línea de abajo ya mostraba. Quedaban las
+                solicitudes, y hoy se van a la casa de la puerta.
+
+                ⚠️ LO QUE **NO** SE MUDÓ, y por eso este lector sigue vivo:
+                `obtenerJornadaRecepcion` alimenta el chip «adentro» de cada
+                fila (`puertaPorCita`), que SÍ es información del día. Se
+                mudó la correspondencia, no el estado de las citas. */}
           </View>
         )}
 
