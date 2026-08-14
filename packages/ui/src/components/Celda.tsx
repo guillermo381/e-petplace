@@ -96,8 +96,32 @@ export function Celda(props: CeldaProps) {
           El piso son 96: a `size.base` (16) entran ~9-10 caracteres, que
           cubre los nombres reales de la casa (Thor, Zeus, Aurora). No es
           un número de gusto — es el ancho por debajo del cual un nombre
-          deja de ser un nombre. */}
-      <View style={{ flex: 1, minWidth: 96, gap: spacing[0.5] }}>
+          deja de ser un nombre.
+
+          ⏪ SEGUNDA VUELTA — LA PRIMERA CURA ARREGLÓ EL TÍTULO Y ROMPIÓ
+          EL SUBTÍTULO, y el defecto nuevo era PEOR que el original:
+          «Vacunación» dejó de truncar y pasó a **SOLAPARSE** —el glifo
+          encima entre «Vacun» y «ción», el chip tapando el final—.
+          *Truncar avisa que falta texto; solaparse destruye el que hay y
+          finge que está.* Lo vio D en un recorte a 3×, porque **desde la
+          miniatura truncado y solapamiento se parecen y tienen curas
+          distintas.**
+
+          🔴 LO QUE FALTABA, y es el detalle de flexbox que volvía
+          DECORATIVO al `flexShrink` de la derecha: **el `min-width` por
+          defecto de un ítem flex es `auto`, no `0`** — o sea que un
+          contenedor NO encoge por debajo del ancho de su contenido por
+          más `flexShrink` que se le ponga. La derecha nunca cedió; el
+          `flexShrink: 1` que escribí no hizo nada. Con el piso de 96
+          acá y una derecha que no cede, la suma superaba el ancho y el
+          sobrante se dibujaba encima.
+
+          ⇒ La cura se completa con `minWidth: 0` en la derecha (abajo).
+          Y este bloque gana `overflow: 'hidden'` como CINTURÓN: aunque
+          algún día el reparto vuelva a fallar, el texto no puede
+          dibujarse fuera de su caja — el solapamiento queda
+          **inexpresable**, no solo corregido. */}
+      <View style={{ flex: 1, minWidth: 96, overflow: 'hidden', gap: spacing[0.5] }}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -129,7 +153,13 @@ export function Celda(props: CeldaProps) {
         // La otra mitad de la cura (el porqué completo, arriba): este
         // bloque CEDE. Sin `flexShrink` su ancho era intrínseco y el
         // sujeto pagaba la diferencia entero.
-        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1 }}>
+        //
+        // ⚠️ `minWidth: 0` NO ES ADORNO — es lo que hace que el
+        // `flexShrink` de al lado exista. El default de un ítem flex es
+        // `min-width: auto`, que le prohíbe encoger por debajo de su
+        // contenido: con eso puesto, `flexShrink: 1` es una declaración
+        // que no encoge nada. Fue el defecto de la primera vuelta.
+        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1, minWidth: 0 }}>
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text

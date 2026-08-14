@@ -14677,3 +14677,46 @@ compensa desde otra pantalla, porque esa otra pantalla tampoco existe.*
 (bucket privado o público con su decisión declarada · columna · wrapper), más
 el punto de captura en el paso ①. **Muere** cuando un vendedor real pueda
 subir su logo y verlo en su destape.
+
+---
+
+#### D-798 — ✅ CERRADA EN EL DÍA · `registrar_factura_pedido` PISABA EL DEFAULT CON UN NULL EXPLÍCITO
+
+**Nace y muere el 14-ago-2026. Lo encontró LA SIEMBRA**, llamando la puerta
+por el camino real con sus parámetros opcionales en NULL — *el caso normal del
+vendedor, no un borde*.
+
+**El defecto:** `facturas.estado` es **NOT NULL con `DEFAULT 'pendiente'`**, y
+`registrar_factura_pedido(..., p_estado_sri text DEFAULT NULL)` lo escribía
+**explícitamente** en el INSERT.
+
+> ### **Un NULL explícito PISA el default.**
+> El default de una columna rige **solo cuando la columna se OMITE**. Si
+> alguien la nombra con NULL, el default no participa — y la protección que
+> todos creen tener no existe.
+
+**Y el síntoma era el caro:** el llamador recibía un **`23502` crudo de
+Postgres** en vez de un rebote hablado. *Una puerta cuyo parámetro es
+**opcional en la firma** y **obligatorio en los hechos** miente sobre su
+propio contrato* — y lo hace con un error que no se le puede mostrar a nadie
+(Ley 13).
+
+**Cura:** `COALESCE(p_estado_sri, 'pendiente')`. **El valor no se inventó: es
+el que la propia columna ya había elegido como default.**
+
+**Por qué `pendiente` y no `autorizada`:** en Ecuador la factura electrónica
+falla seguido, y `MODELO_DESPENSA` §8.6bis lo firma — *la factura se
+**REGISTRA**, no se emite*. **Nacer `autorizada` sin que el SRI lo haya dicho
+sería afirmar un hecho ajeno**, que es la familia de defectos que esta casa
+lleva cazada todo el mes.
+
+**Nota de método, y es la razón por la que esta ficha existe aunque la deuda
+duró dos horas:** *ningún typecheck, lint ni juez podía ver esto.* La firma
+compilaba, la columna tenía su default, y las tres facturas vivas estaban
+todas en `autorizada` porque alguien siempre había pasado el estado a mano.
+**Lo destapó recorrer el camino con los valores que un usuario real deja
+vacíos** — que es exactamente para lo que sirve sembrar por puertas reales en
+vez de por `INSERT`.
+
+☠️ **CERRADA** — migración `20260814150000`, con cinturón que **declara si su
+brazo funcional queda sin sujeto** en vez de dar verde por ausencia.
