@@ -214,7 +214,35 @@ export default function Atender() {
                     gap evita que el redondeo empuje una tercera columna, y
                     `flexGrow` hace que la impar ocupe la fila entera en
                     vez de quedar a media pantalla. */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                {/* 🔴 `alignItems: 'flex-start'` — LA MITAD DE D-804 QUE ES MÍA.
+                    Con el default `stretch`, cada celda de la fila recibe un
+                    ALTO DEFINIDO (el de la fila), y un alto definido GANA
+                    sobre el `aspectRatio` de la pieza ⇒ la baldosa deja de
+                    ser cuadrada y se estira. Medido por A en dispositivo:
+                    **~800 px de alto, dos scrolls para dos celdas.**
+                    Con `flex-start` la celda no recibe alto y la proporción
+                    de la pieza vuelve a gobernar.
+
+                    **Esto NO repite ningún número de `Baldosa`:** no digo
+                    cuánto mide, digo que no se lo impongo.
+
+                    ⏪ Y UNA AUTOCORRECCIÓN: esta línea ya la había escrito
+                    hace unas horas y **la revertí diciendo que la hipótesis
+                    estaba "falsada"**. Era una sobre-generalización mía: en
+                    RN-web fue un NO-OP porque allá el colapso lo causaba
+                    otra cosa (`Entrada` en absoluto), y **de "no cambió nada
+                    en web" concluí "el mecanismo es falso"**. El mecanismo
+                    —el estirón del eje cruzado— nunca se midió en nativo, que
+                    es donde muerde. *Un no-op en la plataforma equivocada no
+                    falsa nada: solo dice que ahí no era.* */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'flex-start',
+                    gap: spacing[4],
+                  }}
+                >
                   {capacidad.oficios.map((o, i) => (
                     <View key={o.oficio} style={{ flexBasis: '47%', flexGrow: 1 }}>
                       <Baldosa
@@ -269,7 +297,14 @@ export default function Atender() {
             {capacidad.tienda && (
               <View style={{ gap: spacing[3] }}>
                 <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'flex-start',
+                    gap: spacing[4],
+                  }}
+                >
                   <View style={{ flexBasis: '47%', flexGrow: 1 }}>
                     <Baldosa
                       glifo="despensa"
