@@ -16332,3 +16332,77 @@ donde es simple y se reusa donde es compleja.*
 ☠️ **Muere** cuando `duenodes` entre y reciba la barra completa **con
 contenido propio en `HOY` y `DATOS`** — no con los cuartos vacíos, que sería
 cumplir la letra y romper la intención.
+
+---
+
+#### D-822 — 🔴 EL SILENCIO DE `e-PetPlace Negocios`: EL CANAL FUNCIONA, LO QUE FALTA SON MOTIVOS
+
+**Literal del founder (14-ago-2026):**
+
+> ***«No he visto ninguna notificación push de ePetPlace Negocios.»***
+
+**Censado por A con la secuencia de tres pasos. Y las dos primeras respuestas
+dan VERDE, que es lo que vuelve interesante a la tercera.**
+
+### (ii) y (iii) — el transporte hacia el prestador está SANO
+
+| pregunta | respuesta medida |
+|---|---|
+| ¿la app del prestador registra token? | **SÍ** — `demovet` tiene token activo, **usado hoy 21:05** |
+| ¿las dos apps se pisan el token? | **NO** — el `UNIQUE` es sobre **`token`**, no sobre `user_id` ⇒ **un token por instalación**, conviven |
+| ¿el push llegó a un prestador alguna vez? | **SÍ** — **6 entregadas + 2 leídas**, la última **13-ago 19:07** |
+
+**⇒ La hipótesis «el transporte no distingue app» es FALSA.** *El token de FCM
+YA codifica la instalación; la tabla no necesita una columna de app, y no
+tenerla no es el defecto.*
+
+### (i) LOS PRODUCTORES — acá está el hueco, y NO es «cero»
+
+**De los 19 tipos con audiencia `prestador`/`ambas`, solo CUATRO se
+encolaron alguna vez:**
+
+| tipo | veces |
+|---|---|
+| `cita_solicitada` | **23** |
+| `prestador_aprobado` | 3 |
+| `registro_completado_operador` / `_prestador` | 2 + 2 |
+| **los otros 15** | **CERO** |
+
+**Entre los quince mudos:** `cita_completada` · `cita_cancelada_cliente` ·
+`cita_calificada` · `documento_aprobado` · `documento_rechazado` ·
+`liquidacion_disponible` · `mensaje_nuevo`. **Vocabulario sin voz.**
+
+### 🔴 Y LO QUE EXPLICA LA FRASE DEL FOUNDER, que es lo que ninguna de las tres preguntas buscaba
+
+**El ÚNICO tipo que le llega a un prestador con token vivo es
+`cita_solicitada`** — o sea **una familia reservando por la app**.
+
+> **Ninguno de los actos que el founder caminó estos dos días tiene un tipo
+> que avise al negocio.** El mostrador · la tienda activándose · un pedido
+> nuevo · una solicitud que expiró · un envío. **No es que su productor esté
+> roto: NO EXISTE EL TIPO.** *El mundo nuevo de la app —el que esta sesión
+> entera construyó— es mudo hacia su propio dueño.*
+
+**⇒ Su frase es LITERALMENTE cierta y el motor no tiene la culpa:** no vio
+ninguna porque, salvo que alguien le reserve una cita, **el producto no tiene
+nada que decirle.**
+
+### Las dos mitades, con dueño distinto
+
+| mitad | qué es | de quién |
+|---|---|---|
+| **PRODUCTO** | **qué eventos merecen avisarle al negocio.** Los del mundo nuevo no tienen tipo, y decidir cuáles lo merecen **NO es decisión de motor** | **el founder firma la lista** |
+| **MOTOR** | los 15 tipos que existen y nadie encola — y los nuevos que la lista firme | **A** |
+
+⚠️ **Y un residuo medido que NO es el problema pero conviene no confundir:**
+hay **3 intenciones atascadas en `encolada`** desde el 13-ago (`prestador_
+aprobado` para `duenovet`/`duenoser`/`duenotodo`) **y las tres tienen
+`tokens_activos: 0`** — son cuentas que nunca abrieron la app. **La cola las
+va a soltar sola cuando alguien entre con esas cuentas, o vencerán.** *No es
+la causa del silencio: es su reflejo.* Las 5 `fallidas` tienen el mismo motivo
+declarado: **`sin_token_activo`**.
+
+☠️ **Muere** con ① la lista firmada de qué avisa al negocio · ② sus productores
+· ③ **el discriminador de cierre (§6bis-B puro): un evento real del mostrador
+→ la push sonando en `e-PetPlace Negocios`**, verificado en el aparato.
+**Territorio: el founder (①) + A (②) + el gate (③).**

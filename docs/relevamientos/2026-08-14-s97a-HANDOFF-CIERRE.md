@@ -195,9 +195,11 @@ S78/S90, con 3 citas vivas en ese estado). **Falta la pantalla y nada más.**
 **La mesa lo encargó y hay que ejecutarlo: se revisa con la punta de las tres
 olas.**
 
-⚠️ **SU LITERAL NO LLEGÓ A A, y se buscó por grep en `docs/` antes de decirlo:
-cero ocurrencias.** *Se anota como encargo con su texto FALTANTE — igual que
-D-811— porque un encargo resumido de memoria deja de ser el del founder.*
+✅ **SU LITERAL LLEGÓ (dictado del founder, 14-ago, durante su caminata del
+flujo vendedor):**
+
+> ***«La App la estoy sintiendo particularmente lenta. Tenlo presente para que
+> la sesión que te reciba la estafeta lo revise.»***
 
 **Lo que sí está declarado y sirve de punto de partida:** el frente de
 performance tiene su acta y su tesis medidas (S94-PERF: *no hay consultas que
