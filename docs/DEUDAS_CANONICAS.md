@@ -14122,7 +14122,35 @@ si la consulta misma se cae y solo se entera quien aprieta un botón
 escondido. *El problema es más profundo que el indicador* — la cura de esta
 ficha se diseña JUNTO con el diagnóstico de D-786, no antes.
 
-#### D-786 — 🔴 HALLAZGO ABIERTO: EL TELÉFONO NO PUEDE CONSULTAR EL SERVIDOR DE UPDATES — Y BLOQUEA LA CAMINATA DEL GATE ENTERA
+#### D-786 — ☠️ MUERTA · 🔴 HALLAZGO ABIERTO: EL TELÉFONO NO PUEDE CONSULTAR EL SERVIDOR DE UPDATES — Y BLOQUEA LA CAMINATA DEL GATE ENTERA
+### ☠️☠️ MUERTA — VERIFICADA DE PUNTA A PUNTA EN EL APARATO (S97-A, 14-ago-2026)
+
+**El botón «Buscar actualizaciones» del teléfono del founder CONSULTA, DESCARGA
+Y APLICA.** Caminado por A en el dispositivo, los cuatro eslabones:
+
+| Paso | Lo que se vio |
+|---|---|
+| ① antes | el pie decía `update 019fff02 · preview · 14/08 01:42` |
+| ② al tocar | **«Buscando…»** con su spinner — *consulta de verdad* |
+| ③ al terminar | **«Lista. Se aplica la próxima vez que abras la app.»** |
+| ④ tras reiniciar | el pie dice **`update 01a001d3 · preview · 14/08 14:50`** |
+
+**`01a001d3` es el update ID Android del OTA publicado en esta misma sesión**
+(group `536fd59c`, ancla `b10dd4ef`). *No es un update cualquiera que estaba
+en el aire: es el que acabábamos de subir.*
+
+> **Esto era el bloqueante que cerró S96 CODE-COMPLETE Y SIN GATE**, y el
+> primer ítem de la lista de reapertura del canon. **La caminata del founder
+> deja de estar bloqueada.**
+
+⚠️ **Qué NO se sabe, y se declara en vez de inventarse: por qué falló antes.**
+No se reprodujo la falla ni se identificó qué la curó — *entre medio hubo
+builds, OTAs y un cambio de red*. **Se cierra por comportamiento observado,
+no por causa entendida.** Si vuelve, **reabre con este registro como línea
+base**: ahora se sabe exactamente cómo se ve cuando funciona.
+
+---
+
 
 **Lo medido, cada cosa del objeto (13-ago, incidente del OTA que no baja):**
 
