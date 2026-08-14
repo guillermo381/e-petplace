@@ -15116,8 +15116,42 @@ baldosas, en dos scrolls).
 > que es el titular del Lote 2. *No es un detalle de acabado: la pantalla
 > insignia de la tanda no se puede leer de una sola vista.*
 
-☠️ **Muere** cuando la portada de `ATENDER` entre en una pantalla con sus dos
-baldosas, verificado en dispositivo.
+☠️ ✅ **CERRADA — 14-ago-2026, verificada por A EN DISPOSITIVO** (OTA
+`019fff02`, cuenta `demovet`, tres oficios con local).
+
+**La portada de `ATENDER` entra en UNA SOLA VISTA:** dos baldosas
+**cuadradas**, en **DOS COLUMNAS**, con su canto de categoría al borde y **la
+pizarra intacta debajo, sin montarse**. *Venía de dos pantallas y media.*
+
+**ERAN LAS DOS CAPAS, y cada una la curó su dueño:** **B (`7d42849c`)** subió
+el `aspectRatio` a la **raíz** —vivía en un HIJO y la raíz solo declaraba
+`width`; *su propia ley «la raíz es dueña de su espacio» estaba cumplida a
+medias: **el espacio son dos dimensiones***— · **C (`9442009a`)** sacó el alto
+impuesto por la celda y el `flexGrow`. **Las dos decisiones eran defendibles
+por separado; JUNTAS fabricaban el defecto.**
+
+**Y la segunda causa que solo B podía ver:** su patrón **entraba por 7 px**, y
+al disparar el wrap su propio `flexGrow` —puesto *«para que una baldosa impar
+ocupe la fila entera»*— **estiraba TODAS**: `380 × aspectRatio 1` apiladas ≈
+**los ~800 medidos**. *Una regla escrita para el caso impar, aplicada a todos
+cuando el redondeo la dispara.*
+
+> ### 🔴 LA FORMA FINAL, medida teniendo las DOS plataformas el mismo día
+>
+> **No fue «Android reparte distinto».** Fue **una pieza que no declaraba su
+> alto**, y cada plataforma resolvió esa ausencia a su manera — web hacia
+> **0**, Android hacia **el máximo**.
+>
+> ***La ausencia no tiene comportamiento portable; la declaración sí.***
+>
+> **⇒ Y eso convierte una advertencia impracticable en una lista corta:**
+> *«hay que probar en las dos plataformas»* no escala. **«Hay que probar en
+> las dos LO QUE NO ESTÁ DECLARADO»** sí.
+
+**La no-adjudicación se pagó**, con el literal de B: *«si lo hubieras
+adjudicado a C, yo no habría tocado la pieza y el defecto volvía en la
+siguiente grilla de la casa.»* *A midió el RENDER, y el render no distingue la
+capa.*
 
 ---
 
@@ -15166,5 +15200,23 @@ otros lo copien, y quien lo copie se lleva una columna donde quería dos.*
 satisfaga `2·pct·u + gap ≤ u` para el ancho más chico soportado — **o el
 ejemplo declara el gap en la cuenta**, que es lo que faltaba.
 
-☠️ **Muere** cuando el ejemplo de `Baldosa` entre en dos columnas en el
-teléfono más angosto que la casa soporta, **con su cuenta escrita al lado.**
+☠️ ✅ **CERRADA — 14-ago-2026 (`ba57f88a`, B), y la cura NO fue otro
+porcentaje.**
+
+> **Se saca el `gap` de la cuenta del wrap:** contenedor con
+> `marginHorizontal: -spacing[2]` y **sin `gap`** · celda `width: '50%'` +
+> `paddingHorizontal: spacing[2]`.
+>
+> **50 % + 50 % = 100 % exacto en cualquier ancho, y el aire vive ADENTRO de
+> la celda.** Verificado en los cuatro anchos medidos: `396=396 · 404=404 ·
+> 344=344 · 414=414`. **No hay margen que medir, no hay ancho que falle.**
+
+*«46 % habría sido un tercer margen con suerte»* — **se cerró por
+CONSTRUCCIÓN, no por margen de redondeo.**
+
+**Y el patrón lleva ahora su historia completa** (v1 `47%+flexGrow` · v2
+`48%`) **con la condición escrita al lado**, que era lo que faltaba: *ya se
+«arregló» dos veces en un día, y la segunda fue B arreglando la primera.* **Un
+`47 %` sin explicación iba a volver a parecer arbitrario en seis meses.**
+
+**Verificado en dispositivo junto con D-804: dos columnas, ningún wrap.**
