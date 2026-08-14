@@ -1003,6 +1003,90 @@ solo al contenido.
 20/26 peso 600 · título de pantalla 28/34 peso 700. Máximo tres tamaños por
 pantalla. Jerarquía por peso y tamaño de UNA familia.
 
+> ### ⚠️ ENMIENDA A N1 (firma de mesa, 14-ago-2026) — **LOS TAMAÑOS POR CORRIMIENTO DE TOKEN; LOS PESOS, CORREGIDOS CONTRA LA FUENTE**
+>
+> **① LOS TAMAÑOS SE MUEVEN CORRIENDO EL TOKEN, no escribiendo el número.**
+> Los cuatro pares de N1 son un DESTINO, y el camino es la escala de
+> `typography` — se llega corriendo su valor, jamás tipeando `16` en una
+> pantalla. *Un número correcto escrito a mano es indistinguible de uno
+> inventado: los dos se ven bien y solo uno se puede mover después.*
+> **Gate en el Lote 1.** (Su hermana mecánica es **R39**, que ya cuenta los
+> tamaños a mano por pantalla.)
+>
+> **② LOS PESOS: MANDA LA VOZ LIVIANA FIRMADA DE LA CASA.**
+>
+> **☠️ EL `700` DEL TÍTULO QUEDA DEROGADO — entró como IMPORT ERRÓNEO al
+> Norte.** *La casa no titula en bold.*
+>
+> 🔴 **Y hay que decir CUÁL import, porque confundirlos rompe cosas
+> (medido, S97-A):**
+> - **El import ERRÓNEO es el del NORTE**, que trajo un peso que contradice
+>   una decisión ya firmada de la casa.
+> - **NO es el import de `fonts.ts`.** `DMSans_700Bold` está cargado a
+>   propósito y su línea es legítima. **Quien lea esta derogación como
+>   permiso para sacarlo de `fonts.ts` está leyendo otra cosa.**
+>
+> **⚡ LA MEDICIÓN QUE CONVIERTE ESTO DE DOCTRINA EN HECHO:** `weight.bold`
+> / `'700'` tiene **CERO consumidores** en `packages/ui` y en las dos apps
+> — sus únicas cuatro apariciones son **su propia declaración**
+> (`fonts.ts` ×2, `typography.ts` ×2). ***La casa ya dejó de titular en bold
+> en la práctica; el Norte estaba importando un peso que nadie usa.*** La
+> voz liviana no es una preferencia que se impone: **es el estado medido**.
+>
+> **☠️ EL `600` NO SE CARGA — y su modo de falla es el peor de los dos.**
+> Medido: los pesos vivos son **DM Sans 300 · 400 · 500 · 700** (`fonts.ts`,
+> tras el corrimiento por peso de **S94-PERF**), y **`600` no aparece ni una
+> vez en todo el árbol.** *Un peso que no está cargado no lanza: React
+> Native cae al más cercano en silencio* — así que N1 tal cual está escrito
+> produciría títulos de sección que se ven distinto de lo que la letra dice,
+> **sin un solo error en ninguna consola**. Es la familia de «funciona mal
+> sin fallar» que esta casa lleva cazada todo el mes.
+>
+> ### ✅ N1 CERRADA — LO QUE B EJECUTÓ (14-ago-2026)
+>
+> **① LA ESCALA, POR CORRIMIENTO DE TOKEN — ejecutada: `13→14` · `15→16` ·
+> `18→20`, en 330 sitios.** No se tipeó un número: se corrió el valor del
+> token y los 330 consumidores lo heredaron. *Ésa era la prueba de que el
+> camino correcto era el token y no la pantalla — 330 ediciones a mano no las
+> hace nadie, y por eso se habrían hecho a medias.*
+>
+> **② LOS INTERLINEADOS VAN EXPLÍCITOS, con el porqué de B:** *los ratios no
+> existen en `leading`, y fabricarlos sería crear tokens huérfanos.* **Un
+> token que nace solo para expresar una relación que el sistema no tiene es
+> deuda con forma de prolijidad.**
+>
+> **③ 🔴 SECCIÓN QUEDA EN `700`, DEFINITIVO — y esto CORRIGE la enmienda de
+> arriba.** El `600` no se adopta, y el motivo es de PESO, no de gusto:
+> **55 KB** por un peso más, contra la ley de **S94-PERF** (*la fuente se
+> importa por peso; el bundle bajó 2,37 MB por esto mismo*). **Se reabre
+> SOLO por ojo en el lote, jamás por carga de peso** — *si algún día vuelve,
+> vuelve porque un título se ve mal, no porque sea cómodo tenerlo.*
+>
+> **④ TÍTULO DE PANTALLA: `light 300`, RATIFICADO.** **La voz humana de la
+> casa ganó sobre el import del Norte** — el `700` de N1 muere donde estaba
+> escrito (el título) y sobrevive donde sirve (la sección).
+>
+> > **⚠️ RECTIFICACIÓN HONESTA DE LA ENMIENDA DE ARRIBA:** decía *«el `700`
+> > del título queda derogado»* y decía bien; pero la ejecución de B mostró
+> > que **el `700` no muere: se MUDA** — sale del título y se queda en la
+> > sección, que es donde el peso hace trabajo. *La derogación era del LUGAR,
+> > no del valor.* Se corrige acá en vez de dejar la enmienda diciendo de
+> > menos.
+> >
+> > **Y lo que la medición de A sí sostiene sin cambio:** el `600` **no
+> > estaba cargado** y su modo de falla era silencioso. **B lo confirmó desde
+> > el otro lado** — cargarlo costaba 55 KB. *Las dos mediciones apuntaban al
+> > mismo veredicto por caminos distintos, que es la clase de coincidencia
+> > que da confianza.*
+>
+> **Nota de paso, con su costo declarado y NO ejecutada:** si el `700` no
+> tiene consumidores y el Norte deja de pedirlo, **`DMSans_700Bold` queda
+> como peso muerto en el bundle** — la misma clase que `MaterialSymbols`
+> (D-735). **No se saca acá:** sacarlo es una decisión con su propia
+> medición de bundle y su propio gate, y hacerlo de paso adentro de una
+> enmienda de letra es exactamente cómo se cuela un cambio que nadie
+> firmó. Queda anotado, no hecho.
+
 **N2 · EL RITMO.** Todo espaciado múltiplo de 8 (4 solo para pares íntimos
 icono-texto). Entre secciones: 32. Entre tarjetas: 16. Padding de tarjeta:
 16–20. Aire sobre título de sección: 24 mínimo.
@@ -1017,8 +1101,31 @@ valores de token). Nada fuera de escala.
 **N5 · UN ACENTO POR PANTALLA.** El color de acción aparece en el CTA y las
 huellas, y en nada más. Chips informativos en neutro salvo estado crítico.
 
-**N6 · EL MOVIMIENTO ES LEY.** Entrada escalonada 45/300 bezier de la casa
+**N6 · EL MOVIMIENTO ES LEY.** Entrada escalonada ~~45~~/300 bezier de la casa
 en toda pantalla nueva. `usePresionado` en todo lo tocable. Prueba L-c.
+
+> ### ✅ ENMIENDA A N6 (mesa, 14-ago-2026) — **RIGE EL `120`. D-795 CERRADA.**
+>
+> **Literal de la resolución:** *«rige el 120. Restaurar la enmienda firmada
+> y medida de S81 no requiere firma nueva — el 45 del Norte era arrastre del
+> header contradictorio que B curó.»*
+>
+> **N6 se lee `120/300`**, con `motion.stagger.slow`, el token de la casa.
+> **El `45` queda tachado, no borrado**, para que el arrastre quede visible.
+>
+> **Por qué esto NO necesitó una firma nueva, que es la parte que vale como
+> precedente:** *no había dos decisiones compitiendo — había una decisión y
+> un eco.* La enmienda de S81 está firmada **y medida** (*con 45, tres
+> bloques resolvían en ~390 ms y el escalonado no se percibía como orden de
+> lectura*); lo que el Norte trajo no era una decisión contraria, era el
+> comentario viejo de `Entrada` que decía `45` mientras la constante valía
+> `120`. **Restaurar no es decidir de nuevo: es sacar el eco.**
+>
+> **⇒ Y el corolario que la casa se lleva:** una letra nueva que contradice
+> una firmada **no siempre es una derogación** — a veces es la prosa vieja
+> volviendo por la puerta de atrás. **Distinguirlas se hace midiendo de
+> dónde salió el número**, no votando cuál gusta más. *Acá se pudo porque B
+> encontró la fuente exacta del eco.*
 
 **N7 · LA FOTO CARGA LA PROFUNDIDAD.** Avatares y logos 48–56 en filas,
 nunca 32. Sombras mínimas.
@@ -1034,6 +1141,42 @@ pasa y qué hacer.
 anima, lista cerrada: presión · entrada · navegación (Hoja sube, pantalla
 retrocede **−16%**) · cambio de tab (huella con **overshoot 280 ms**) ·
 cambio de estado · celebración. **Nada más se mueve.**
+
+> ### ⚠️ ENMIENDA A N10 (firma de mesa, 14-ago-2026) — **SON DOS CURVAS, CON EL REPARTO CERRADO**
+>
+> N10 dice *«un bezier»*. **Son DOS, y el reparto es cerrado — que es lo que
+> lo mantiene siendo un vocabulario y no una puerta abierta:**
+>
+> | curva | para qué | y para nada más |
+> |---|---|---|
+> | **bezier de la casa** `(.32,.72,0,1)` | **entradas y transiciones** | lo que aparece, lo que se va, lo que navega |
+> | **spring** | **solo gestos de REBOTE** | lo que responde al dedo y vuelve |
+>
+> **El porqué del corte, y no es estético:** una entrada es una **duración**
+> —empieza y termina cuando la letra dice— y un rebote es una **física** —
+> termina cuando la energía se acaba—. *Animar una entrada con spring le
+> quita a N10 su capacidad de decir «300 ms», porque un spring no tiene
+> duración que prometer.* **Por eso el reparto es cerrado: mezclarlos no
+> agrega una curva, le saca el sentido a las tres duraciones.**
+>
+> **Y el `120/300` de N6 vive del lado del bezier** — es una entrada, no un
+> gesto.
+>
+> **✅ EL OVERSHOOT DE LA HUELLA DE TAB — FIRMADO (14-ago), CON SU PROP
+> MUERTA.** Es el único habitante legítimo del lado spring que la casa tiene
+> hoy. Su hermana, el empuje −16%, queda del lado **bezier**: es una
+> transición de pantalla, no un rebote.
+>
+> **Y la condición de muerte se cumplió en el mismo acto: la prop murió.**
+> **El valor vive en LA PIEZA; el consumidor no lo re-decide.** *Una
+> primitiva que expone su curva como prop no tiene una curva: tiene una
+> sugerencia* — y N10 es un vocabulario CERRADO, así que dejar el valor
+> abierto habría derogado la ley que lo contiene. **Es la Ley 8 de la casa
+> aplicada al movimiento** (blancos de 44: *ley de la pieza; ningún
+> consumidor la re-decide*).
+>
+> **⇒ El reparto de dos curvas es exigible porque las dos viven adentro de
+> las piezas.** Si viviera en las pantallas, «cerrado» sería una intención.
 
 > ### ACLARACIÓN DE N10 — **LA BANDA DE 520 ES EL REGISTRO DE CADA GESTO, JAMÁS LA SUMA DE LA CEREMONIA**
 >
