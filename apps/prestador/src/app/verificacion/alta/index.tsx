@@ -54,7 +54,10 @@ import {
 } from '@epetplace/api';
 
 import { ProgresoAlta } from '@/components/alta/ProgresoAlta';
+import { PasoNegocio } from '@/components/alta/PasoNegocio';
 import { PasoOfreces } from '@/components/alta/PasoOfreces';
+import { PasoDocumentos } from '@/components/alta/PasoDocumentos';
+import { PasoEquipo } from '@/components/alta/PasoEquipo';
 import { useTraduccion } from '@/i18n';
 
 /** Los cuatro pasos de §4.1, en su orden firmado. **El vocabulario es el
@@ -251,19 +254,27 @@ export default function WizardAlta() {
       >
         <ProgresoAlta restantes={contexto.contador} />
 
-        {paso === 'oferta' ? (
+        {paso === 'negocio' ? (
+          <PasoNegocio
+            cuentaComercialId={contexto.cuentaComercialId}
+            nombreInicial={contexto.nombreNegocio}
+            alGuardar={() => void cargar()}
+          />
+        ) : paso === 'oferta' ? (
           <PasoOfreces
             prestadorId={contexto.prestadorId}
             cuentaComercialId={contexto.cuentaComercialId}
           />
+        ) : paso === 'documentos' ? (
+          <PasoDocumentos
+            cuentaComercialId={contexto.cuentaComercialId}
+            alSubir={() => void cargar()}
+          />
         ) : (
-          // Los pasos ①, ③ y ④ se montan sobre los huesos que ya existen
-          // (§4.0). Hasta que su composición entre, la pantalla lo DICE en
-          // vez de dibujar un hueco mudo (Ley 13).
-          <EstadoVacio
-            registro="seccion"
-            titulo={t(TITULO_PASO[paso])}
-            descripcion={t('alta.enConstruccion')}
+          <PasoEquipo
+            cuentaComercialId={contexto.cuentaComercialId}
+            prestadorId={contexto.prestadorId}
+            alSumar={() => void cargar()}
           />
         )}
       </ScrollView>

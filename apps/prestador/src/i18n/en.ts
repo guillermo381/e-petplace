@@ -2589,6 +2589,8 @@ export const prestadorEn = {
       logoCambiar: 'Change',
       logoQuitar: 'Remove',
       logoVacio: "Without a logo we'll use your initials.",
+      guardar: 'Save the name',
+      guardado: 'Name saved.',
     },
 
     paso2: {
@@ -2620,6 +2622,16 @@ export const prestadorEn = {
       rechazado: 'Needs to be uploaded again',
       vacioTitulo: "You haven't uploaded documents yet",
       vacioVoz: 'Upload the first one and we take it from there.',
+      tipoCedula: 'ID card',
+      tipoRuc: 'Tax ID',
+      tipoPermiso: 'Operating permit',
+      elegirArchivo: 'Choose file',
+      subiendo: 'Uploading…',
+      subidoExito: 'Document uploaded. We review it.',
+      reintentar: 'Try again',
+      errorLectura: "We couldn't read that file. Try another one.",
+      errorRed: 'Check your connection.',
+      permisoDenegado: 'We need permission to open the camera or your photos.',
     },
 
     paso4: {
@@ -2632,6 +2644,15 @@ export const prestadorEn = {
       repartidor: 'Delivery person',
       vacioTitulo: 'You still work on your own',
       vacioVoz: "Once you add someone they'll show up here.",
+      sumarCta: 'Add someone',
+      nombre: 'Name',
+      documento: 'ID number',
+      telefono: 'Phone',
+      guardar: 'Add to team',
+      guardado: "Done — they're part of your team now.",
+      equipoVacio: 'No one else on your team yet.',
+      recepcionNoAplica:
+        'The front-desk role shows up once you have a service you provide at your place.',
     },
 
     salteo: {

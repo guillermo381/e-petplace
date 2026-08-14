@@ -3120,6 +3120,8 @@ export const prestadorEs = {
       logoCambiar: 'Cambiar',
       logoQuitar: 'Quitar',
       logoVacio: 'Sin logo usamos tus iniciales.',
+      guardar: 'Guardar el nombre',
+      guardado: 'Nombre guardado.',
     },
 
     paso2: {
@@ -3155,6 +3157,16 @@ export const prestadorEs = {
       rechazado: 'Hay que subirlo de nuevo',
       vacioTitulo: 'Todavía no subiste documentos',
       vacioVoz: 'Sube el primero y nosotros nos encargamos del resto.',
+      tipoCedula: 'Cédula',
+      tipoRuc: 'RUC',
+      tipoPermiso: 'Permiso de funcionamiento',
+      elegirArchivo: 'Elegir archivo',
+      subiendo: 'Subiendo…',
+      subidoExito: 'Documento subido. Lo revisamos nosotros.',
+      reintentar: 'Reintentar',
+      errorLectura: 'No pudimos leer ese archivo. Probá con otro.',
+      errorRed: 'Revisá tu conexión.',
+      permisoDenegado: 'Necesitamos permiso para abrir la cámara o tus fotos.',
     },
 
     paso4: {
@@ -3167,6 +3179,15 @@ export const prestadorEs = {
       repartidor: 'Repartidor',
       vacioTitulo: 'Todavía trabajas solo',
       vacioVoz: 'Cuando sumes a alguien va a aparecer acá.',
+      sumarCta: 'Sumar a alguien',
+      nombre: 'Nombre',
+      documento: 'Documento',
+      telefono: 'Teléfono',
+      guardar: 'Sumar al equipo',
+      guardado: 'Listo, ya es parte de tu equipo.',
+      equipoVacio: 'Todavía no hay nadie más en tu equipo.',
+      recepcionNoAplica:
+        'El rol de recepción aparece cuando tengas algún servicio que atiendas en tu local.',
     },
 
     // Las líneas del salteo — nombran EL BENEFICIO y EL LUGAR, jamás

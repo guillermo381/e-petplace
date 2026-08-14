@@ -15,10 +15,16 @@ import { Platform } from 'react-native';
 import { leerBytes } from '@epetplace/ui';
 import {
   getClient,
+  registrarDocumentoCuenta,
   registrarDocumentoVerificacion,
+  type DocumentoCuenta,
   type DocumentoVerificacion,
   type TipoDocumentoVerificacion,
 } from '@epetplace/api';
+
+/** El vocabulario de tipos lo dicta el motor (`cuenta_comercial_documentos`),
+ *  jamás la pantalla. */
+export type TipoDocumentoCuenta = DocumentoCuenta['tipo'];
 
 const BUCKET = 'prestador-documentos';
 
@@ -91,4 +97,75 @@ export async function subirDocumentoVerificacion(input: {
     return { ok: false, storagePath: path, causa: 'servidor', mensaje: r.mensaje };
   }
   return { ok: true, documento: r.data };
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+ * LOS DOCUMENTOS DE LA CUENTA COMERCIAL (S97-C · paso ③ del wizard)
+ *
+ * Vive ACÁ y no en un archivo clon (L-175: se ensancha la casa, no se
+ * copia el pipeline) — comparte `leerBytes`, `esErrorDeRed` y la forma
+ * del huérfano recuperable.
+ *
+ * 🔴 LO QUE **NO** SE HEREDA, y es el motivo de medirlo en vez de
+ * copiarlo: **la carpeta raíz del path es el `cuenta_comercial_id`**, no
+ * el `auth.uid()`. Medido contra la policy viva
+ * `cuenta_documentos_operador`, que llavea por
+ * `_user_opera_cuenta_comercial((storage.foldername(name))[1], auth.uid())`
+ * — al revés del bucket del prestador. Copiar el path de arriba habría
+ * dado un rebote de permisos con el archivo ya subido.
+ * ══════════════════════════════════════════════════════════════════════ */
+
+const BUCKET_CUENTA = 'cuenta-documentos';
+
+export type ResultadoSubidaDocumentoCuenta =
+  | { ok: true; documentoId: string }
+  | { ok: false; causa: CausaSubidaDocumento; mensaje: string; storagePath?: string };
+
+export async function subirDocumentoCuenta(input: {
+  uri: string;
+  cuentaComercialId: string;
+  tipo: TipoDocumentoCuenta;
+  nombre: string;
+  /** reintento post-subida: salta el paso 1 (huérfano recuperable). */
+  storagePath?: string;
+}): Promise<ResultadoSubidaDocumentoCuenta> {
+  let path = input.storagePath;
+
+  if (!path) {
+    // La carpeta raíz ES la cuenta comercial (policy medida arriba).
+    path = `${input.cuentaComercialId}/${input.tipo}-${Date.now()}.jpg`;
+    let bytes: ArrayBuffer;
+    try {
+      bytes = await leerBytes(input.uri);
+    } catch (e) {
+      const lit = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      console.error(
+        `[subir-documento-cuenta] LECTURA falló (${Platform.OS}) · uri=${input.uri.slice(0, 80)} · ${lit}`,
+      );
+      return { ok: false, causa: 'lectura', mensaje: lit };
+    }
+    const { error } = await getClient()
+      .storage.from(BUCKET_CUENTA)
+      .upload(path, bytes, { contentType: 'image/jpeg', upsert: false });
+    if (error) {
+      console.error(`[subir-documento-cuenta] SUBIDA falló · bucket=${BUCKET_CUENTA} · ${error.message}`);
+      return {
+        ok: false,
+        causa: esErrorDeRed(error.message) ? 'red' : 'servidor',
+        mensaje: error.message,
+      };
+    }
+  }
+
+  const r = await registrarDocumentoCuenta({
+    cuenta_comercial_id: input.cuentaComercialId,
+    tipo: input.tipo,
+    nombre: input.nombre,
+    archivo_path: path,
+  });
+  if (!r.ok) {
+    console.error(`[subir-documento-cuenta] REGISTRO falló · ${r.mensaje}`);
+    return { ok: false, storagePath: path, causa: 'servidor', mensaje: r.mensaje };
+  }
+  return { ok: true, documentoId: r.data.documento_id };
 }
