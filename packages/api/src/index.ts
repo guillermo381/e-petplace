@@ -85,6 +85,13 @@ export {
 } from './wrappers/prestador';
 // S76-B2 (D-525): el gate de PRODUCTO de la superficie de atender.
 export { puedoAtenderClinico } from './wrappers/acceso-clinico';
+/* S97-A (D-806) · LA ESCALERA de la cara de una mascota — el ORDEN en que se
+   prueban los tres escalones. ⚠️ El RESOLVEDOR de URLs no está acá: vive en
+   `catalogos.ts` desde S91 (se midió antes de escribir, y ya existía).
+   Sube desde `apps/cliente/src/lib/cara-mascota.ts` porque **el prestador
+   necesita la misma cara**: su alta dibuja seis especies con una sola huella
+   mientras el cliente ya resolvía 111 imágenes. Cero assets nuevos. */
+export { caraDeMascota, caraDeMascotaPorRuta } from './wrappers/caraMascota';
 export {
   crearFamiliaConPrimeraMascota,
   agregarMascotaAFamilia,

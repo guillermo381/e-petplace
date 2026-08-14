@@ -15326,10 +15326,52 @@ registry. **Con la firma, las seis salen de un tirón con la regla ya fijada.**
 > ***Dibujar las seis antes de esa firma es arriesgar seis dibujos a una
 > decisión que el dibujante no tomó.***
 
-☠️ **Muere** con los seis glifos en el registry y su gate por ícono pasado.
-**Territorio: B** (el set y su proceso), **detrás de su cola actual.**
+### 🔴 ENMIENDA (S97-A) — LA CURA NO ERAN SEIS GLIFOS: ERAN SEIS FOTOS QUE YA EXISTÍAN
+
+**La ficha presupuestó dibujo, y el dibujo no hacía falta.** Adjudicación de
+mesa + medición de A:
+
+> El bucket **`especies-razas` es PÚBLICO y tiene 111 objetos desde S90-C:
+> 105 razas + **6 genéricos de especie**, origen-IA firmado (D-288). *El
+> selector ya tenía sus seis caras a dos carpetas de distancia.*
+
+**Y la pregunta de arte que esta ficha traía —si nace una segunda categoría de
+glifo, el sujeto en vez del oficio— SE DISUELVE, no se responde:** no hay glifo
+nuevo que dibujar, así que **§1 no tiene que cubrir nada**. *La mejor respuesta
+a una pregunta de diseño es la que prueba que la pregunta no había que
+hacerla.*
+
+**✅ EJECUTADO (S97-A):** la **ESCALERA** (`caraDeMascota` /
+`caraDeMascotaPorRuta`) sube a `packages/api`, y
+`apps/cliente/src/lib/cara-mascota.ts` pasa a re-export — **cumpliendo la
+promesa que ese archivo llevaba escrita desde S91-D** (*"cuando exista, el
+cuerpo se reemplaza por un re-export y nada más cambia"*). **Sus diez y pico de
+consumidores no cambiaron una línea.** Typechecks api/cliente/prestador verdes.
+
+> 🔴 **Y EL HALLAZGO DE MÉTODO, que casi cuesta un duplicado:** el pedido decía
+> *"el resolvedor nace en `packages/api`"*. **Medido: YA HABÍA NACIDO** —
+> `resolverUrlRaza`/`resolverUrlGenericaEspecie`/`resolverUrlRutaEspecies`
+> viven en `wrappers/catalogos.ts` **desde S91**, consolidados ahí cuando
+> tuvieron dos pretendientes. **Lo que nunca subió fue la ESCALERA** (el ORDEN
+> de los tres escalones), que es la parte que se puede equivocar.
+> *Lo cazó el typecheck al primer intento de crearlo — `Duplicate identifier`.*
+> ***Un pedido puede describir bien el hueco y equivocarse sobre qué falta.***
+
+> ⚠️ **DE PASO, DOS COMENTARIOS VIVOS QUE SE CONTRADECÍAN, resuelto midiendo:**
+> `cara-mascota.ts` decía que reptil *"es filtro de PANTALLA, no apagado
+> estructural"* y `catalogos.ts` decía lo contrario. **Medido:
+> `cat_especies.activo = false` ⇒ apagado ESTRUCTURALMENTE.** Gana
+> `catalogos.ts`. *Es la versión en prosa del defecto que D-805 pagó en
+> código: quien lee primero se lleva la versión equivocada — y ningún
+> instrumento mira comentarios.*
+
+☠️ **Muere** cuando el alta del prestador consuma la escalera y las seis
+especies muestren su cara **verificado en dispositivo**. **Lo que queda es
+CABLEADO, no dibujo** — territorio de C. **Cero assets nuevos, cero glifos,
+cero gate de ícono.**
+
 **Prioridad: NO bloquea el Lote 2** — la pantalla funciona y el rótulo dice la
-verdad; lo que se pierde es que el selector sea visual.
+verdad; lo que se gana es que el selector sea visual.
 
 ---
 
