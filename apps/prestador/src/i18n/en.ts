@@ -106,6 +106,10 @@ export const prestadorEn = {
     errorCarga: "We couldn't load your invitation.",
     reintentar: 'Try again',
   },
+  // ⭐ S97-D — Espejo de es.ts · LOTE S97-D, GATE PENDIENTE
+  linea: {
+    despachoTitulo: 'Order {{orden}}',
+  },
   agenda: {
     // S60-C2.2 — Espejo de es.ts · LOTE S60
     // S71-B1 — the day header. `saludo` ('Your day today') died with the

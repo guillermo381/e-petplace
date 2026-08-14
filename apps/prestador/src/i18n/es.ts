@@ -140,6 +140,17 @@ export const prestadorEs = {
     errorCarga: 'No pudimos cargar tu invitación.',
     reintentar: 'Probar de nuevo',
   },
+  /* ⭐ S97-D · LA LÍNEA DEL DÍA. Namespace propio y no `agenda` a
+     propósito: `agenda` es el vocabulario de las CITAS, y un despacho no
+     es una cita — meterlo ahí haría que la próxima persona que lea el
+     diccionario crea que la despensa vive adentro del motor de servicios,
+     que es justo lo que el cinturón §3.4 prohíbe. La frontera se cuida
+     también en el idioma. · LOTE S97-D, GATE PENDIENTE */
+  linea: {
+    // El sujeto de un despacho es el PEDIDO — el vendedor no ve mascota
+    // ni expediente por ninguna vía (MODELO_DESPENSA §7.4).
+    despachoTitulo: 'Pedido {{orden}}',
+  },
   agenda: {
     // S60-C2.2: la jornada ya no es solo paseos (grooming vivo) — la
     // voz genérica de la jornada, propuesta al gate · LOTE S60
