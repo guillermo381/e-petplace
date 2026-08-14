@@ -14798,3 +14798,50 @@ vez de por `INSERT`.
 
 ☠️ **CERRADA** — migración `20260814150000`, con cinturón que **declara si su
 brazo funcional queda sin sujeto** en vez de dar verde por ausencia.
+
+---
+
+#### D-799 — 🟡 EL WIZARD DICE «PUEDE SER LA CONEXIÓN» CUANDO LA CAUSA ES QUE LA CUENTA NO ES TUYA
+
+**Nace del intento de disparar el gate del Lote 1 (14-ago).** El wizard se
+abrió por deep link y mostró:
+
+> *«No pudimos cargar esto · **Puede ser la conexión.** Probá de nuevo.»*
+
+**Y no era la conexión.** Medido en el aparato y contra la base:
+
+- El teléfono corre el update correcto (`019ffe67`, `embedded=false`).
+- **Cero errores de JS** en `logcat` — nada falló.
+- La sesión viva es de **un EMPLEADO de «Clinica S97»**, no del dueño de
+  ninguna cuenta comercial: **la barra muestra TRES tabs** (Hoy · Datos ·
+  Cuenta), o sea `sesion.esGestor === false`.
+- **`obtenerMiCuentaComercial()` resuelve por `owner_profile_id`** ⇒ para un
+  empleado devuelve `null` ⇒ el wizard cae a `setContexto({ estado: 'error' })`
+  (`verificacion/alta/index.tsx:119`).
+
+**⇒ El código hace exactamente lo que debe. Lo que miente es la VOZ.**
+
+> **«Puede ser la conexión» es un diagnóstico, no un mensaje** — y es el
+> diagnóstico equivocado. La causa real es de **identidad**: *esta cuenta no
+> es tuya, o todavía no tenés una.*
+
+**Es la familia que S96 midió cuatro veces en un día** (*el título que mentía
+la causa*): la pantalla informa, se ve razonable, y **manda a la persona a
+revisar el wifi cuando lo que tiene que hacer es cambiar de sesión.** *Costó
+una vuelta de diagnóstico en el gate, con el founder esperando.*
+
+**Y el borde legítimo que la cura NO puede romper:** un **vendedor puro sin
+cuenta comercial todavía** puede llegar acá de verdad. Para él la voz no es un
+error: es *«todavía no tenés un negocio — creá uno»* con su camino. **Son
+TRES casos y hoy los tres se dicen igual:** fallo de red · cuenta ajena ·
+sin cuenta.
+
+**Cura (de C, su territorio):** el wrapper ya distingue —
+`obtenerMiCuentaComercial` devuelve `ok:true, data:null` para *«no tenés»* y
+`ok:false` para *«falló»*—, **así que la pantalla tiene el dato y lo colapsa
+en una sola voz.** Separar los tres es leer lo que ya llega.
+
+☠️ **Muere** cuando el wizard diga las tres causas distinto, con camino en la
+que lo tiene. **Disparo: antes de que el wizard entre a navegación** — hoy
+vive en `/verificacion/alta` y solo se alcanza por deep link, así que el único
+que lo pisa es quien lo dispara a propósito.
