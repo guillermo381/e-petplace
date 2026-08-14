@@ -16216,11 +16216,25 @@ no puede estar bien para nadie**: no solo le falta `ATENDER` al veterinario,
 > la letra ya no usa.*** Sincronizar la lista a mano lo arregla hoy y lo rompe
 > en la próxima capacidad que nazca.
 
+### ✅ EL CONTRA-CASO, MEDIDO — la ficha pasa de predicción a hecho
+
+**Caminado con `duenodes` (vendedor puro) en el mismo aparato, capturando su
+destape en frames:**
+
+> **Enumera `Hoy · Datos · Negocio · Cuenta` — IDÉNTICO al del veterinario.**
+
+**`Hoy` LE SOBRA, y no es teórico: su app abre en PEDIDOS.** Un vendedor puro
+no tiene agenda — la ceremonia le presenta un cuarto que su casa no tiene, y
+omite los que sí (Pedidos, Stock, Venta de mostrador).
+
+⇒ **Queda probado que no es «falta un ítem»: es una lista fija contra una casa
+compuesta.** Los dos negocios más distintos del producto reciben **exactamente
+la misma bienvenida**, y ninguna de las dos es correcta.
+
 ☠️ **Muere** cuando `tabsHabilitadas` salga **de la misma composición que arma
-la barra**, no de un literal. **Territorio: C** (la pantalla). ⚠️ **Y con su
-contra-caso: el destape de un vendedor puro (`duenodes`) NO debe enumerar
-`Hoy`** — ése es el discriminador que prueba que la cura es real y no una
-lista nueva escrita a mano.
+la barra**, no de un literal. **Territorio: C** (la pantalla). **El
+discriminador ya está medido y es el de arriba: si tras la cura el destape de
+`duenodes` sigue diciendo `Hoy`, la cura fue otra lista escrita a mano.**
 
 **Prioridad: alta pero no bloqueante del tren** — el destape corre y es bello;
 lo que dice está mal.
