@@ -59,6 +59,24 @@ tiene push token, lo que lo vuelve peor: el canal está vivo y nadie lo usa.
 ⚠️ **Residuo:** solicitud `d70658e0…` en `pendiente` — **expira sola a los 10'**
 (§7bis, perezosa). No se toca.
 
+### ✅ EL CIRCUITO CERRÓ (S97-A) — lo que queda es UNA parada con freno
+
+| Parada | Estado |
+|---|---|
+| el handshake completo + su expiración | ✅ y con **D-815 cerrada por push real** |
+| el alta del mostrador no-vet | ✅ registra |
+| el wizard con `demovet` (contador en cero) | ✅ «Ya está todo lo tuyo» |
+| **el wizard con `duenodes`** (vendedor puro) | ✅ contador **«Te faltan 2 pasos»** — la ley S91 discriminando |
+| el destape en frames (los dos negocios) | ✅ **D-801 cerrada**, **D-819 agravada** |
+| **`+vet2`** (paseo-only) | 🔴 **FRENO DE CREDENCIAL** |
+
+🔴 **`guillo381+vet2@gmail.com` EXISTE y es el paseo-only** (medido:
+`oficios: paseo`) **pero NO está en la matriz de clave compartida** —que lista
+`demovet · nuevotest2 · vendedorpuro · vet1`— y su clave no es ésa.
+**No se adivinó ni se reseteó** (§6ter: una pista no cambia la clave de una
+cuenta que no creó). *Se necesita su clave, o que alguien la agregue a la
+matriz.*
+
 ### 🔴 PENDIENTE, en orden
 1. **`+vet2` (paseo-only)** — perdió `ATENDER` **y** «Registrar atención».
    **Es consecuencia de firma, no bug.** *Lo que hay que mirar es cómo se VE
@@ -98,7 +116,10 @@ motor → A.
 - **Migraciones: 313 en disco = 313 local = 313 remoto**, cero deriva
   (medido parseando el JSON, no con un grep que devolvía 0).
 - **EL APARATO: `ANDROID_SERIAL=R5CY201ZDVL`**, entrega ABIERTA (§6bis-A).
-  🔴 **SESIÓN ACTUAL: `demovet`** (se entró desde `duenotodo` — declarado).
+  🔴 **SESIÓN ACTUAL: `demovet` / Clínica Aurora — RESTAURADA.** El circuito
+  pasó por `duenodes` y volvió; **el aparato queda como estaba** (declarado
+  antes y después, §6bis-A).
+  ✅ **Y el pie de Cuenta dice `update 01a001d3` — el OTA de esta sesión.**
   **Al cambiarla, declarar antes y después.**
   ⚙️ **`animator_duration_scale` quedó en `1.0`** (lo puso A; era `null`).
 - **Credenciales: el MAPA, jamás la clave.**
