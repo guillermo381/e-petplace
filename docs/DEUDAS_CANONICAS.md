@@ -13624,6 +13624,12 @@ adivinar.
 
 ☠️ **Muere** con la primera carga real de fotos, escribiendo el comentario.
 
+**⚡ LA PRIMERA MITAD OCURRIÓ (13-ago-2026, carga del catálogo maestro):**
+157 productos entraron con foto por `adjuntar_fotos_producto` y **la forma
+quedó decidida y MEDIDA: `["url", …]` — array de strings, la primera es la
+portada.** Falta la segunda mitad: el `COMMENT` en la columna, que viaja en
+la próxima migración de DB (un comentario no amerita migración propia).
+
 #### D-768 — 🟡 64 MASCOTAS SIN FECHA DE NACIMIENTO — el filtro por etapa no se ejerce
 
 `recomendarParaMascota` filtra por etapa de vida desde S95-K, **pero Zeus no

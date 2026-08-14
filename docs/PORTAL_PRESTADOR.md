@@ -3348,6 +3348,19 @@ técnico "un negocio no puede quedar sin titular" no hace falta en v1.
 proponía que el administrador también). **Hueco declarado: D-510**, la
 sucesión del titular.
 
+> **🔴 EL ESTATUTO DEL ADMINISTRADOR, FIRMADO (founder, 13-ago-2026 —
+> cierra el estatuto del cuarto bloque de la Hoja del miembro):**
+> **el toggle Administrador es del TITULAR y de nadie más**, y la
+> definición del rol queda en una frase: **el administrador es igual al
+> dueño SALVO que no puede nombrar administradores.**
+>
+> **Y el lugar del cuarto bloque, declarado por D en su censo:** en la
+> Hoja del miembro, **entre «Qué atiende» y «Desvincular»**, como
+> **segundo toggle hermano del de Prestador**, con **el aviso de §6**
+> antes de confirmar. **NO se construye hasta la DOBLE firma del
+> founder: la forma Y el string del aviso.** (El motor existe desde
+> D-660; lo que faltaba era exactamente esto — la letra del lugar.)
+
 **LA SECCIÓN EQUIPO:** **solo el administrador la ve**, y **se oculta por
 AUSENCIA, jamás por candado** (Ley 23). Hace **abrir · agregar · cambiar rol
 o permisos · eliminar**. Cuatro reglas de superficie: el **aceptado sin rol
