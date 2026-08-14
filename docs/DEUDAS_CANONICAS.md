@@ -15873,10 +15873,26 @@ el dispositivo (`demovet` → familia registrada → Zeus → «Pedir autorizaci
 `15:33:42.747374` las dos, o sea la misma transacción — con
 `clave_dedup = autoriz_mostrador_c5577845…` y el titular como destinatario.
 
-☠️ **Queda vivo SOLO lo de superficie:** que la voz siga siendo verdadera
-cuando el push tarde o el token esté viejo, y **el gate en dispositivo de que
-un teléfono real vibra por este camino** — lo único que A no puede firmar sola
-(L-153). **Territorio: superficie (voz) + el gate del founder.**
+### 🔴 PERO NO SE CIERRA — la promesa SIGUE sin cumplirse, y por otra causa
+
+**Al verificar esta cura hasta el final apareció D-816: el despachador de
+notificaciones NO TIENE QUIEN LO LLAME.** La intención nace perfecta, elige
+canal `push`, ningún gate la corta — **y se queda en `nacida` para siempre**,
+como las otras 34 que se apilan desde hace días.
+
+> **Esta ficha es la mitad de arriba de un caño cortado más abajo.** *Encolar
+> bien en una cola que nadie vacía no es avisar: es archivar.*
+
+⚠️ **Y la lección que deja para quien cure algo parecido:** *se siguió el aviso
+hasta el teléfono, no hasta la tabla siguiente.* Si hubiera parado en «la
+intención nació», habría declarado cerrada una promesa que **sigue siendo
+falsa** — con evidencia, timestamp y todo. **Verificar el eslabón siguiente no
+es celo: es la diferencia entre curar y creer que se curó.**
+
+☠️ **Muere** con **D-816 resuelta** (el caller y el 401 del correo) **más** la
+voz honesta mientras tanto, **y el gate en dispositivo de que un teléfono real
+vibra por este camino** — lo único que A no puede firmar sola (L-153).
+**Territorio: A (D-816) + superficie (voz) + el gate del founder.**
 
 ---
 
