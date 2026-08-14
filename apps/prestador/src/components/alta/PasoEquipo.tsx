@@ -24,14 +24,21 @@
  * esconder un rol por un error de red sería decidir permisos con
  * información que no tenemos. Si la lectura falla, no afirmamos nada.
  *
- * ── ⏳ EL CAMINO «DE TU EQUIPO» NO SE MONTA TODAVÍA, y se declara ──────
- * Medido: `MiembroEquipo` (el lector vivo) expone `empleadoId`, `nombre`,
- * `activo`, `roles` y `oficios` — **no expone `user_id`**. Y la
- * anti-duplicación firmada es JUSTAMENTE por `user_id`
- * (`registrarRepartidor` lo acepta). Montar el camino sin él crearía un
- * repartidor desligado de la persona: **exactamente la doble carga que la
- * firma existe para impedir.** Pedido a A cursado; el botón entra cuando
- * el lector traiga el dato — los cuartos sin esquema no se montan.
+ * ── ✅ LOS DOS CAMINOS, CABLEADOS (A entregó `MiembroEquipo.userId`) ────
+ * «De tu equipo» hereda **la persona** (`user_id` + nombre) · «nuevo» es
+ * alta completa. **La anti-duplicación va por `user_id`, jamás por nombre**
+ * — con el nombre, dos homónimos o una persona re-tipeada vuelven a ser
+ * dos altas, que es justo lo que §8.6bis ⑤ existe para impedir.
+ *
+ * ⚠️ **Lo que «de tu equipo» NO hereda, medido:** el DOCUMENTO.
+ * `MiembroEquipo` no lo trae y `registrarRepartidor` lo exige, así que el
+ * camino corto prellena identidad y **pide el documento igual**. Fingir
+ * que lo hereda sería inventarlo.
+ *
+ * ⚠️ **El invitado sin aceptar NO desaparece callado:** `userId === null`
+ * = todavía no tiene cuenta, así que no se puede elegir — y la pantalla
+ * lo DICE. Escondido en silencio, el titular lo ve en la ventana de
+ * equipo de al lado y lo busca acá sin entender por qué no está.
  */
 
 import { useCallback, useState } from 'react';
@@ -56,8 +63,10 @@ import {
 } from '@epetplace/ui';
 import {
   listarRepartidores,
+  obtenerEquipoNegocio,
   puedeOfrecerRolRecepcion,
   registrarRepartidor,
+  type MiembroEquipo,
   type Repartidor,
 } from '@epetplace/api';
 
@@ -69,6 +78,15 @@ type Pantalla =
   | {
       estado: 'listo';
       repartidores: Repartidor[];
+      /** Gente del equipo ELEGIBLE: con cuenta (`userId`) y no cargada ya
+       *  como repartidor. La anti-duplicación es por `user_id` — con el
+       *  nombre, dos homónimos vuelven a ser dos altas (§8.6bis ⑤). */
+      elegibles: MiembroEquipo[];
+      /** Invitados sin aceptar: NO se pueden elegir (no existen como
+       *  persona del sistema todavía) y la pantalla lo DICE — esconderlos
+       *  callado deja al titular buscando a alguien que ve en la ventana
+       *  de equipo de al lado. */
+      sinCuenta: number;
       /** `null` = NO SE PUDO LEER. No es `false`: un rol no se esconde
        *  por un error de red (ver cabecera). */
       ofreceRecepcion: boolean | null;
@@ -86,13 +104,16 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [alta, setAlta] = useState(false);
+  /** Cuando viene de «de tu equipo»: la persona ya elegida (su identidad
+   *  se hereda; el documento se pide igual). `null` = alta nueva. */
+  const [elegido, setElegido] = useState<MiembroEquipo | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [nombre, setNombre] = useState('');
   const [documento, setDocumento] = useState('');
   const [telefono, setTelefono] = useState('');
 
   const cargar = useCallback(async () => {
-    const [reps, recepcion] = await Promise.all([
+    const [reps, recepcion, equipo] = await Promise.all([
       listarRepartidores(cuentaComercialId),
       // El vendedor puro no tiene prestador: no hay a quién preguntarle,
       // y la respuesta correcta es `false` POR DATO (cero servicios), no
@@ -100,14 +121,22 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
       prestadorId === null
         ? Promise.resolve({ ok: true as const, data: false })
         : puedeOfrecerRolRecepcion(prestadorId),
+      obtenerEquipoNegocio(cuentaComercialId),
     ]);
     if (!reps.ok) {
       setPantalla({ estado: 'error' });
       return;
     }
+    // Ya cargados como repartidor — por `user_id`, jamás por nombre.
+    const yaRepartidores = new Set(
+      reps.data.map((r) => r.user_id).filter((u): u is string => u !== null),
+    );
+    const miembros = equipo.ok ? equipo.data.miembros.filter((m) => m.activo) : [];
     setPantalla({
       estado: 'listo',
       repartidores: reps.data,
+      elegibles: miembros.filter((m) => m.userId !== null && !yaRepartidores.has(m.userId)),
+      sinCuenta: miembros.filter((m) => m.userId === null).length,
       ofreceRecepcion: recepcion.ok ? recepcion.data : null,
     });
   }, [cuentaComercialId, prestadorId]);
@@ -130,6 +159,9 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
       nombre: n,
       documento: d,
       telefono: telefono.trim() === '' ? undefined : telefono.trim(),
+      // LA LLAVE de la anti-duplicación. Solo viaja si la persona vino
+      // del equipo: en el alta nueva todavía no hay a quién atarla.
+      user_id: elegido?.userId ?? undefined,
     });
     setGuardando(false);
 
@@ -138,6 +170,7 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
       return;
     }
     setAlta(false);
+    setElegido(null);
     setNombre('');
     setDocumento('');
     setTelefono('');
@@ -236,7 +269,10 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
       <Hoja
         visible={alta}
         onCerrar={() => {
-          if (!guardando) setAlta(false);
+          if (guardando) return;
+          setAlta(false);
+          setElegido(null);
+          setNombre('');
         }}
         titulo={t('alta.paso4.sumarCta')}
         altura="media"
@@ -244,13 +280,54 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
         <HojaScroll>
           <EvitaTeclado>
             <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-              <Texto variante="apoyo">{t('alta.paso4.nuevoVoz')}</Texto>
-              <Campo
-                label={t('alta.paso4.nombre')}
-                value={nombre}
-                onChangeText={setNombre}
-                deshabilitado={guardando}
-              />
+              {/* ── CAMINO ①: DE TU EQUIPO — hereda la persona ────────── */}
+              {elegido === null && pantalla.elegibles.length > 0 ? (
+                <View style={{ gap: spacing[3] }}>
+                  <Texto variante="seccion">{t('alta.paso4.deTuEquipo')}</Texto>
+                  <Texto variante="apoyo">{t('alta.paso4.deTuEquipoVoz')}</Texto>
+                  <Tarjeta elevacion="reposo" relleno="ninguno">
+                    <View>
+                      {pantalla.elegibles.map((m, i) => (
+                        <View key={m.empleadoId}>
+                          {i > 0 ? <Separador /> : null}
+                          <Celda
+                            titulo={m.nombre}
+                            interactiva
+                            accessibilityRole="button"
+                            onPress={() => {
+                              setElegido(m);
+                              setNombre(m.nombre);
+                            }}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  </Tarjeta>
+                </View>
+              ) : null}
+
+              {/* El invitado que no aceptó NO desaparece callado. */}
+              {elegido === null && pantalla.sinCuenta > 0 ? (
+                <Texto variante="apoyo">{t('alta.paso4.sinCuenta')}</Texto>
+              ) : null}
+
+              {/* ── CAMINO ②: ALGUIEN NUEVO — alta completa ───────────── */}
+              <Texto variante="seccion">
+                {elegido === null ? t('alta.paso4.nuevo') : elegido.nombre}
+              </Texto>
+              <Texto variante="apoyo">
+                {elegido === null ? t('alta.paso4.nuevoVoz') : t('alta.paso4.faltaDocumento')}
+              </Texto>
+              {/* El nombre heredado va FIJO: cambiarlo acá desataría la
+                  persona del repartidor sin decirlo. */}
+              {elegido === null ? (
+                <Campo
+                  label={t('alta.paso4.nombre')}
+                  value={nombre}
+                  onChangeText={setNombre}
+                  deshabilitado={guardando}
+                />
+              ) : null}
               <Campo
                 label={t('alta.paso4.documento')}
                 value={documento}

@@ -43,7 +43,12 @@ import {
   spacing,
   useAviso,
 } from '@epetplace/ui';
-import { listarDocumentosCuenta, type DocumentoCuenta } from '@epetplace/api';
+import {
+  listarDocumentosCuenta,
+  obtenerDocumentosVerificacion,
+  type DocumentoCuenta,
+  type DocumentoVerificacion,
+} from '@epetplace/api';
 
 import { subirDocumentoCuenta, type TipoDocumentoCuenta } from '@/lib/subir-documento';
 import { useTraduccion } from '@/i18n';
@@ -57,17 +62,55 @@ const CLAVE_TIPO = {
 
 const TIPOS: TipoDocumentoCuenta[] = ['cedula', 'ruc', 'permiso_funcionamiento'];
 
+/* ══════════════════════════════════════════════════════════════════════
+ * 🔴 LA LISTA ES COMPUESTA — Y LOS PREDICADOS SON LOS DEL MOTOR, LITERALES
+ *
+ * Adjudicación de mesa (S97): la pantalla lee LAS DOS tablas, con la misma
+ * derivación que usa el contador ⇒ **contador y pantalla no se pueden
+ * contradecir por construcción**, no por disciplina.
+ *
+ * El defecto que esto cura lo destapó una CAPTURA: el contador decía «te
+ * falta 1 paso» mientras el paso mostraba tres casillas vacías, porque el
+ * motor ya contaba los papeles del PRESTADOR y la pantalla solo miraba los
+ * de la CUENTA. Le pedía a un prestador viejo subir lo que ya entregó —
+ * la puerta preguntando lo que ya sabe (Ley 23, corolario S73).
+ *
+ * ⚠️ LOS DOS PREDICADOS NO SON EL MISMO, y copiar uno para los dos habría
+ * reintroducido la divergencia en silencio. Medidos en
+ * `20260814110000_s97a_onboarding_por_paso.sql`:
+ *   · CUENTA    → `estado IN ('pendiente','aprobado')`
+ *   · PRESTADOR → `estado <> 'rechazado'`
+ * Un `vencido` del prestador CUENTA como hecho; uno de la cuenta NO.
+ * ══════════════════════════════════════════════════════════════════════ */
+
+/** Espejo LITERAL del motor para los documentos de la CUENTA. */
+function cuentaHecho(d: DocumentoCuenta): boolean {
+  return d.estado === 'pendiente' || d.estado === 'aprobado';
+}
+/** Espejo LITERAL del motor para los documentos del PRESTADOR. */
+function prestadorHecho(d: DocumentoVerificacion): boolean {
+  return d.estado !== 'rechazado';
+}
+
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
-  | { estado: 'listo'; documentos: DocumentoCuenta[] };
+  | {
+      estado: 'listo';
+      documentos: DocumentoCuenta[];
+      /** Los del perfil profesional que YA cuentan — no se piden de nuevo. */
+      heredados: DocumentoVerificacion[];
+    };
 
 export interface PasoDocumentosProps {
   cuentaComercialId: string;
+  /** `null` = vendedor puro: no tiene fila de prestador, y por eso no
+   *  puede tener documentos heredados. No es un error (§8.6bis). */
+  prestadorId: string | null;
   alSubir: () => void;
 }
 
-export function PasoDocumentos({ cuentaComercialId, alSubir }: PasoDocumentosProps) {
+export function PasoDocumentos({ cuentaComercialId, prestadorId, alSubir }: PasoDocumentosProps) {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
 
@@ -76,13 +119,25 @@ export function PasoDocumentos({ cuentaComercialId, alSubir }: PasoDocumentosPro
   const [subiendo, setSubiendo] = useState(false);
 
   const cargar = useCallback(async () => {
-    const res = await listarDocumentosCuenta(cuentaComercialId);
-    if (!res.ok) {
+    const [cuenta, prestador] = await Promise.all([
+      listarDocumentosCuenta(cuentaComercialId),
+      prestadorId === null
+        ? Promise.resolve({ ok: true as const, data: [] as DocumentoVerificacion[] })
+        : obtenerDocumentosVerificacion(prestadorId),
+    ]);
+    if (!cuenta.ok) {
       setPantalla({ estado: 'error' });
       return;
     }
-    setPantalla({ estado: 'listo', documentos: res.data });
-  }, [cuentaComercialId]);
+    setPantalla({
+      estado: 'listo',
+      documentos: cuenta.data,
+      // Si la lectura del prestador falla NO se degrada a lista vacía:
+      // mostraría «no tenés nada» y volvería a pedir lo ya entregado —
+      // el defecto que este cableado vino a curar (L-139).
+      heredados: prestador.ok ? prestador.data.filter(prestadorHecho) : [],
+    });
+  }, [cuentaComercialId, prestadorId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -155,7 +210,10 @@ export function PasoDocumentos({ cuentaComercialId, alSubir }: PasoDocumentosPro
     );
   }
 
-  const porTipo = new Map(pantalla.documentos.map((d) => [d.tipo, d] as const));
+  const porTipo = new Map(
+    pantalla.documentos.filter(cuentaHecho).map((d) => [d.tipo, d] as const),
+  );
+  const hayHeredados = pantalla.heredados.length > 0;
 
   return (
     <View style={{ gap: spacing[8] }}>
@@ -213,6 +271,40 @@ export function PasoDocumentos({ cuentaComercialId, alSubir }: PasoDocumentosPro
           </View>
         </Tarjeta>
       </Entrada>
+
+      {/* Lo que YA contamos del perfil profesional. No se pide de nuevo:
+          la puerta no pregunta lo que ya sabe. */}
+      {hayHeredados ? (
+        <Entrada orden={2}>
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('alta.paso3.heredadosTitulo')}</Texto>
+            <Texto variante="apoyo">{t('alta.paso3.heredadosVoz')}</Texto>
+            <Tarjeta elevacion="reposo" relleno="ninguno">
+              <View>
+                {pantalla.heredados.map((d, i) => (
+                  <View key={d.id}>
+                    {i > 0 ? <Separador /> : null}
+                    <Celda
+                      titulo={d.nombre}
+                      fin={
+                        <Insignia
+                          estado={d.estado === 'aprobado' ? 'alDia' : 'info'}
+                          etiqueta={
+                            d.estado === 'aprobado'
+                              ? t('alta.paso3.aprobado')
+                              : t('alta.paso3.enRevision')
+                          }
+                          tamaño="sm"
+                        />
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+            </Tarjeta>
+          </View>
+        </Entrada>
+      ) : null}
 
       <Hoja
         visible={eligiendo !== null}

@@ -268,6 +268,7 @@ export default function WizardAlta() {
         ) : paso === 'documentos' ? (
           <PasoDocumentos
             cuentaComercialId={contexto.cuentaComercialId}
+            prestadorId={contexto.prestadorId}
             alSubir={() => void cargar()}
           />
         ) : (

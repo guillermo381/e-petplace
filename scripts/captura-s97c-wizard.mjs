@@ -71,5 +71,9 @@ await foto('paso3-tus-documentos');
 await page.getByText('Continuar', { exact: true }).first().click();
 await foto('paso4-tu-equipo');
 
+// ④bis — LOS DOS CAMINOS del repartidor (de tu equipo · alguien nuevo)
+await page.getByText('Sumar a alguien', { exact: true }).first().click();
+await foto('paso4-dos-caminos');
+
 console.log(`errores JS: ${errores.length === 0 ? 'ninguno' : errores.slice(0, 3).join(' | ')}`);
 await browser.close();

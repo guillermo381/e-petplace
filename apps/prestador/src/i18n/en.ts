@@ -2632,13 +2632,15 @@ export const prestadorEn = {
       errorLectura: "We couldn't read that file. Try another one.",
       errorRed: 'Check your connection.',
       permisoDenegado: 'We need permission to open the camera or your photos.',
+      heredadosTitulo: 'We already have these',
+      heredadosVoz: 'You gave us these with your professional profile. No need to upload them again.',
     },
 
     paso4: {
       titulo: 'Your team',
       bajada: 'Who works with you. Today you can add whoever delivers.',
       deTuEquipo: 'From your team',
-      deTuEquipoVoz: 'Already works with you: inherits their name and ID.',
+      deTuEquipoVoz: "Already works with you: we carry over who they are. We just need their ID number.",
       nuevo: 'Someone new',
       nuevoVoz: "Not on your team yet.",
       repartidor: 'Delivery person',
@@ -2651,6 +2653,8 @@ export const prestadorEn = {
       guardar: 'Add to team',
       guardado: "Done — they're part of your team now.",
       equipoVacio: 'No one else on your team yet.',
+      sinCuenta: "Someone on your team hasn't accepted the invitation yet — you'll be able to pick them once they do.",
+      faltaDocumento: 'We need their ID number so they can deliver.',
       recepcionNoAplica:
         'The front-desk role shows up once you have a service you provide at your place.',
     },

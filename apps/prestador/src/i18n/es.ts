@@ -3167,13 +3167,15 @@ export const prestadorEs = {
       errorLectura: 'No pudimos leer ese archivo. Probá con otro.',
       errorRed: 'Revisá tu conexión.',
       permisoDenegado: 'Necesitamos permiso para abrir la cámara o tus fotos.',
+      heredadosTitulo: 'Ya los tenemos',
+      heredadosVoz: 'Estos los entregaste con tu perfil profesional. No hace falta subirlos de nuevo.',
     },
 
     paso4: {
       titulo: 'Tu equipo',
       bajada: 'Quién trabaja contigo. Hoy puedes sumar a quien reparte.',
       deTuEquipo: 'De tu equipo',
-      deTuEquipoVoz: 'Ya trabaja contigo: hereda su nombre y su documento.',
+      deTuEquipoVoz: 'Ya trabaja contigo: heredamos quién es. Solo falta su documento.',
       nuevo: 'Alguien nuevo',
       nuevoVoz: 'Todavía no está en tu equipo.',
       repartidor: 'Repartidor',
@@ -3186,6 +3188,8 @@ export const prestadorEs = {
       guardar: 'Sumar al equipo',
       guardado: 'Listo, ya es parte de tu equipo.',
       equipoVacio: 'Todavía no hay nadie más en tu equipo.',
+      sinCuenta: 'Alguien de tu equipo todavía no aceptó la invitación — vas a poder elegirlo cuando entre.',
+      faltaDocumento: 'Nos falta su documento para que pueda repartir.',
       recepcionNoAplica:
         'El rol de recepción aparece cuando tengas algún servicio que atiendas en tu local.',
     },
