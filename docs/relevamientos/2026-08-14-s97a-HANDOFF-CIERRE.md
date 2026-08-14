@@ -84,9 +84,19 @@ motor → A.
 
 ## 2 · ESTADO OPERATIVO
 
-- **OTA vigente: `019fff02-0c2a-7be8-9779-fb3ea516a5eb`** · ancla
-  **`ba57f88a`** · runtime 1.0.5 · canal `preview` · `verify-ota` exit 0.
-  *Se verifica en el pie de Cuenta, no de memoria.*
+- 🚂 **EL TREN SALIÓ. OTA vigente del PRESTADOR:
+  `536fd59c-301f-4a5c-a923-aa0be33be4e9`** · ancla **`b10dd4ef`** ·
+  runtime 1.0.5 · canal `preview`.
+  **Verificado del OBJETO (`update:view --json`): `gitCommitHash` = el sha
+  declarado, `dirty: None`.**
+  ✅ **Publicado desde WORKTREE DETACHED sobre el sha** — la candidata de la
+  regla 82, **ejercida y entregando el ancla exacta**. Úsese siempre.
+- ⚠️ **EL CLIENTE NO SE PUBLICÓ, y es decisión declarada.** Sigue en
+  `3743c536` / runtime 1.0.3. Las piezas COMPARTIDAS que cambiaron para el
+  prestador (`Entrada` reimplementada, `Baldosa`) **le entrarían sin gate**.
+  *No está olvidado: está esperando su propio ojo.*
+- **Migraciones: 313 en disco = 313 local = 313 remoto**, cero deriva
+  (medido parseando el JSON, no con un grep que devolvía 0).
 - **EL APARATO: `ANDROID_SERIAL=R5CY201ZDVL`**, entrega ABIERTA (§6bis-A).
   🔴 **SESIÓN ACTUAL: `demovet`** (se entró desde `duenotodo` — declarado).
   **Al cambiarla, declarar antes y después.**
