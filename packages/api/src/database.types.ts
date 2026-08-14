@@ -4143,6 +4143,7 @@ export type Database = {
           metadata: Json
           modelo_comercial: Database["public"]["Enums"]["modelo_comercial_enum"]
           moneda: string
+          naturalezas_solicitadas: Database["public"]["Enums"]["tipo_actor_enum"][]
           nombre_comercial: string
           owner_profile_id: string
           razon_social: string
@@ -4166,6 +4167,7 @@ export type Database = {
           metadata?: Json
           modelo_comercial?: Database["public"]["Enums"]["modelo_comercial_enum"]
           moneda?: string
+          naturalezas_solicitadas?: Database["public"]["Enums"]["tipo_actor_enum"][]
           nombre_comercial: string
           owner_profile_id: string
           razon_social: string
@@ -4189,6 +4191,7 @@ export type Database = {
           metadata?: Json
           modelo_comercial?: Database["public"]["Enums"]["modelo_comercial_enum"]
           moneda?: string
+          naturalezas_solicitadas?: Database["public"]["Enums"]["tipo_actor_enum"][]
           nombre_comercial?: string
           owner_profile_id?: string
           razon_social?: string
@@ -20342,6 +20345,13 @@ export type Database = {
           titulo: string
         }[]
       }
+      obtener_naturalezas_de_cuenta: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: {
+          estado: string
+          tipo_actor: string
+        }[]
+      }
       obtener_nombres_negocio_por_presupuesto: {
         Args: { p_presupuesto_ids: string[] }
         Returns: {
@@ -20947,6 +20957,10 @@ export type Database = {
         Args: { p_accion: string; p_solicitud_id: string }
         Returns: Json
       }
+      retirar_naturaleza_solicitada: {
+        Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
+        Returns: Json
+      }
       revisar_documento_cuenta: {
         Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
@@ -21031,6 +21045,10 @@ export type Database = {
           p_empleado_id?: string
           p_session_id?: string
         }
+        Returns: Json
+      }
+      solicitar_naturaleza_comercial: {
+        Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
       terminar_atencion_adiestramiento: {
