@@ -17,8 +17,36 @@ export const prestadorEs = {
     // usa. Si algún día parece un resto, no lo es — es esta decisión.
     mascotas: 'Datos',
     negocio: 'Negocio',
+    // ⭐ S98-C — LA QUINTA TAB (`LA_CASA_DEL_PRESTADOR` §1.2, nombre
+    // FIRMADO por el founder el 13-ago). Su key es `atender` y su ruta
+    // también: acá el nombre visible y el archivo coinciden, a diferencia
+    // de `mascotas`/«Datos» — no hay historia que respetar.
+    atender: 'Atender',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE
     cuenta: 'Cuenta',
+  },
+  // ⭐ S98-C · LA PORTADA DE `ATENDER` (Lote 2) · GATE PENDIENTE
+  atender: {
+    titulo: 'Atender',
+    // Los dos rótulos son los NOMBRES FIRMADOS de las naturalezas (§1.2):
+    // posesivos, que es como habla el resto de la app del prestador.
+    tusServicios: 'Tus servicios',
+    tuTienda: 'Tu tienda',
+    oficioVeterinaria: 'Veterinaria',
+    oficioGrooming: 'Estética',
+    oficioPaseo: 'Paseo',
+    oficioAdiestramiento: 'Adiestramiento',
+    // El subtítulo dice QUÉ PASA al tocar, jamás describe la baldosa: la
+    // portada existe para elegir por dónde entra quien llegó.
+    oficioAccion: 'Registrar una atención',
+    ventaTitulo: 'Venta de productos',
+    ventaAccion: 'Registrar una venta del mostrador',
+    // N9 — el vacío habla: qué pasa y qué hacer.
+    vacioTitulo: 'Todavía no hay por dónde entrar',
+    vacioDetalle:
+      'Ningún servicio tuyo está marcado como «atiendo en mi local» y tu tienda no está activa. Prende la atención en local desde tu oferta y esta pantalla se abre sola.',
+    falloTitulo: 'No pudimos cargar tus puertas',
+    reintentar: 'Probar de nuevo',
   },
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {

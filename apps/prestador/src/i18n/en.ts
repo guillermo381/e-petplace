@@ -12,8 +12,30 @@ export const prestadorEn = {
     hoy: 'Today',
     mascotas: 'Data',
     negocio: 'Business',
+    // S98-C — la quinta tab. «Attend» es el verbo del mostrador en
+    // inglés de servicio (attend to someone), no «serve» ni «walk-in»:
+    // el ES dice ATENDER como ACTO, y el espejo dice el mismo acto.
+    atender: 'Attend',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     cuenta: 'Account',
+  },
+  // S98-C · LA PORTADA DE `ATENDER` (Lote 2) · Espejo de es.ts
+  atender: {
+    titulo: 'Attend',
+    tusServicios: 'Your services',
+    tuTienda: 'Your store',
+    oficioVeterinaria: 'Veterinary',
+    oficioGrooming: 'Grooming',
+    oficioPaseo: 'Walking',
+    oficioAdiestramiento: 'Training',
+    oficioAccion: 'Record a visit',
+    ventaTitulo: 'Product sales',
+    ventaAccion: 'Record a counter sale',
+    vacioTitulo: 'No door is open yet',
+    vacioDetalle:
+      'None of your services is marked as «I attend at my place» and your store is not active. Turn on in-store attention from your offer and this screen opens on its own.',
+    falloTitulo: 'We could not load your doors',
+    reintentar: 'Try again',
   },
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
