@@ -15068,3 +15068,53 @@ escrita.
 ☠️ **Muere** con el toggle ofrecido por oficio (②). Si por alguna razón el
 rebote tiene que seguir siendo alcanzable, muere con ① en su lugar.
 **Territorio: C.**
+
+---
+
+#### D-804 — 🔴 LA BALDOSA NO DECLARA SU ALTO: `ATENDER` OCUPA DOS PANTALLAS Y MEDIA PARA MOSTRAR DOS CELDAS
+
+**Medido por A caminando el Lote 2 en dispositivo (`019ffeef`, cuenta
+`duenotodo`, 14-ago).**
+
+**Las DOS baldosas de la portada de `ATENDER` —«Veterinaria» y «Venta de
+productos»— se dibujan con ~800 px de alto**, con el glifo arriba, el rótulo
+abajo y **un vacío enorme en el medio**. *No es un caso: es sistemático, las
+dos igual.*
+
+**Consecuencia medida:** la portada de `ATENDER` **exige dos scrolls
+completos** para mostrar **dos celdas** — y la pizarra queda enterrada entre
+ellas.
+
+### 🔴 Y ES EL MISMO EJE QUE LA DESVIACIÓN QUE C DECLARÓ, EN SU EXTREMO OPUESTO
+
+**C sacó el `orden` porque, envuelta en `Entrada`, la baldosa colapsaba a
+`h=0`.** Sin `Entrada`, **se estira sin techo.**
+
+> ***Los dos síntomas son la misma causa: la baldosa NO DECLARA SU ALTO.***
+> Cuando su contenedor le daba 0, medía 0; cuando le da todo, mide todo.
+> *Una pieza que hereda su alto del contexto no tiene alto: tiene la suerte
+> del contenedor donde caiga.*
+
+**Eso también explica por qué la cura de `Entrada` de B no lo resolvió** —y no
+tenía por qué: **curó el contenedor, y el defecto es de la pieza.**
+
+### Atribución NO adjudicada, con la medición para que la mesa decida
+
+*Se declara como hipótesis cruzada, jamás como orden* (método §⑤):
+
+- **si el alto es de la PIEZA** —`Baldosa` sin `aspectRatio` ni alto propio—
+  **es de B**;
+- **si es de la GRILLA** —el contenedor de C dándole `flex: 1`— **es de C**.
+
+**A no lo adjudica** porque no midió la pieza: midió **el render**, y el
+render no distingue cuál de las dos capas lo produce.
+
+**Capturas:** `/tmp/l2-atender.png` y `/tmp/l2-atender2.png` (las dos
+baldosas, en dos scrolls).
+
+> **Nota de gate:** esto **bloquea la caminata del founder sobre `ATENDER`**,
+> que es el titular del Lote 2. *No es un detalle de acabado: la pantalla
+> insignia de la tanda no se puede leer de una sola vista.*
+
+☠️ **Muere** cuando la portada de `ATENDER` entre en una pantalla con sus dos
+baldosas, verificado en dispositivo.
