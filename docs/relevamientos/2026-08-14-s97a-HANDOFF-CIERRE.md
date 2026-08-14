@@ -42,11 +42,25 @@ la FK lo rebotó: ya tiene su evento en `eventos_mascota`** — *el alta deposit
 en el expediente, o sea el Bio-Expediente haciendo su trabajo*. **No se
 fuerza:** precedente S92 — una sonda con historia **se marca, no se borra**.
 
+### ✅ EL HANDSHAKE, CAMINADO ENTERO — y destapó una 🔴
+
+`demovet` → buscar `guillo381+8@gmail.com` → **la búsqueda revela SOLO el
+nombre** (§7bis cumplida, sin conteos) → «¿A quién vas a atender?» con las seis
+mascotas → Thor → «Pedir autorización» → **la solicitud NACE** (`pendiente`) y
+la espera se pinta con la `EsperaDeMarca`.
+
+🔴 **PERO LA VOZ MIENTE: «Le llegó el pedido a su teléfono» — no le llegó
+nada.** Medido en el mismo minuto: **0 intenciones, 0 notificaciones, el tipo
+NO EXISTE en `cat_notificacion_tipos` y `crear_solicitud_autorizacion` no
+encola.** *No falló el envío: no hay maquinaria de envío* — y la familia SÍ
+tiene push token, lo que lo vuelve peor: el canal está vivo y nadie lo usa.
+**⇒ D-815 (🔴).** *El vet se queda parado esperando algo que nadie pidió.*
+
+⚠️ **Residuo:** solicitud `d70658e0…` en `pendiente` — **expira sola a los 10'**
+(§7bis, perezosa). No se toca.
+
 ### 🔴 PENDIENTE, en orden
-1. **El handshake con una familia REGISTRADA** (buscar por email → pedir
-   autorización → la voz del «todavía no»). ⚠️ **Entrar por la baldosa igual**
-   — por otro camino cae el vacío viejo con CTA al taller de veterinaria.
-2. **`+vet2` (paseo-only)** — perdió `ATENDER` **y** «Registrar atención».
+1. **`+vet2` (paseo-only)** — perdió `ATENDER` **y** «Registrar atención».
    **Es consecuencia de firma, no bug.** *Lo que hay que mirar es cómo se VE
    ese vacío:* **la ausencia de la TAB está firmada y no se explica**
    (`LAMINA_BARRA_DE_TRES` §2), **pero el BOTÓN que desapareció no está
