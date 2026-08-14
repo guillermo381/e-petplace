@@ -55,6 +55,7 @@ import {
   Hoja,
   Insignia,
   MarcaDeAgua,
+  Separador,
   Tarjeta,
   Texto,
   spacing,
@@ -305,6 +306,12 @@ export default function Negocio() {
   /** Voz de fallo del bloque, o `null` si ese bloque está sano (o cargando).
    *  Se consulta ANTES de la lógica de detalle de cada bloque: lo que no se
    *  pudo leer no se cuenta como "todavía no lo configuraste". */
+  /** ⭐ S98-C · UN SOLO PREDICADO DE «VENDE» EN ESTA PANTALLA — el mismo
+   *  que gobierna la sección «Tu tienda». La fila de facturación de ventas
+   *  no puede existir para quien no vende, y derivarla de otra fuente sería
+   *  reabrir D-821 en chiquito. */
+  const vendeProductos = tienda === 'activa';
+
   const fallo = (b: BloqueNegocio): string | null =>
     cargado && fallos.has(b) ? t('negocio.bloqueNoCargo') : null;
 
@@ -652,6 +659,29 @@ export default function Negocio() {
                 detalle={detalleLiquidaciones}
                 onPress={() => router.push('/liquidaciones')}
               />
+              {/* ⭐ S98-C · «TU FACTURACIÓN» LLEGA A SU CASA (firma del
+                  founder: *«deben ir donde corresponde, no es de acá»*).
+                  Vivía en la configuración de VENTAS, entre turnos y
+                  repartidores. **La facturación es del NEGOCIO, no del
+                  canal de venta** — su vecino natural son las
+                  liquidaciones, que es la otra cara de la misma plata.
+                  ⚠️ Y hereda el gate de este tab (`useGateGestor`), que es
+                  MÁS angosto que el de su casa vieja: allá alcanzaba con
+                  operar la cuenta comercial. *Una mudanza que ensancha la
+                  audiencia de una pantalla de plata no es una mudanza: es
+                  un permiso nuevo sin firma.* */}
+              {vendeProductos && (
+                <>
+                  <Separador />
+                  <CeldaNavegacion
+                    icono="fiscal"
+                    registro="aa"
+                    titulo={t('ventas.config.facturacionVistaTitulo')}
+                    detalle={t('ventas.config.facturacionVistaDetalle')}
+                    onPress={() => router.push('/ventas/facturacion')}
+                  />
+                </>
+              )}
               {/* ☠️ S86-C · «EL MOVIMIENTO» SE MUDÓ A CUENTA (firma de mesa):
                   es PLATA DE LA CUENTA COMERCIAL, no configuración del
                   oficio. ⏪ Su nota de S70-B2-v2 decía que migraba ACÁ por
