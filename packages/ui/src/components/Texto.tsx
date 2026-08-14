@@ -129,11 +129,36 @@ const RECETA: Record<
     header?: boolean
   }
 > = {
-  titulo:  { fontFamily: typography.family.sans.light,   fontSize: typography.size.xl, color: 'primary'   },
-  seccion: { fontFamily: typography.family.sans.medium,  fontSize: typography.size.md, color: 'primary',   header: true },
-  cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary' }, // D-482: base/15
+  /* ── N1 EJECUTADA (firma de mesa, 14-ago-2026) ──────────────────────
+     La escala se movió en el TOKEN (ver `typography.size`); acá entran
+     los INTERLINEADOS, que N1 pide explícitos y la casa no tenía:
+     cuerpo 16/**24** · secundario 14/**20** · sección 20/**26** ·
+     título 28/**34**.
 
-  apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: typography.size.sm * typography.leading.normal },
+     Van como número y no como `size * leading.x` porque **ninguno de los
+     cuatro sale limpio de los multiplicadores** (24/16 = 1.5 y 34/28 =
+     1.214 no existen en `leading`). Inventar tres ratios para que la
+     cuenta cierre sería fabricar tokens que nadie más va a usar: los
+     pares de N1 son la LETRA, y viven donde vive la receta.
+
+     🔴 EL PESO DEL TÍTULO NO CAMBIA, y es la única parte de N1 que la
+     mesa NO firmó: N1 pedía **700** y `titulo` sigue en **light 300**.
+     La regla de voz de `typography.ts` es vinculante —«voz humana = DM
+     Sans 300/400 en tamaños lg+»— y el título de pantalla ES la voz
+     humana de la casa. Poner 700 ahí no era un número: invertía el
+     registro. La mesa lo resolvió a favor de la voz liviana.
+
+     EL DE `seccion` SÍ: 500 → **700**, y NO al 600 que pedía la letra.
+     El 600 existe pero **no está cargado** (55 KB medidos, tres semanas
+     después de que S94-PERF sacara 2,37 MB de fuentes); el 700 ya viaja
+     en el bundle, cuesta CERO y contrasta más que el escalón más chico
+     de la familia. *Cuando un candidato obliga a agregar peso, la salida
+     barata suele ser un candidato mejor.* */
+  titulo:  { fontFamily: typography.family.sans.light,   fontSize: typography.size.xl, color: 'primary', leading: 34 },
+  seccion: { fontFamily: typography.family.sans.bold,    fontSize: typography.size.md, color: 'primary', header: true, leading: 26 },
+  cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary', leading: 24 }, // D-482: la prosa de la casa · N1: 16/24
+
+  apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: 20 },
   dato:    { fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: 'secondary', tabular: true },
   // S81 (pedido de C — "el precio mono-primary" de coordinar y los
   // cierres): el dato PROMINENTE — mono a md en primary. Sigue siendo

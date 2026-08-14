@@ -1185,7 +1185,7 @@ export default function Hogar() {
                     right: -70,
                     width: 290,
                     height: 290,
-                    borderRadius: 999,
+                    borderRadius: radius.full,
                     backgroundColor: 'rgba(255,255,255,0.075)',
                   }}
                 />
@@ -1295,7 +1295,7 @@ export default function Hogar() {
                                 bottom: -2,
                                 width: 26,
                                 height: 26,
-                                borderRadius: 999,
+                                borderRadius: radius.full,
                                 backgroundColor: bg,
                                 borderWidth: 4,
                                 borderColor: esMemorial ? theme.bg.card : theme.bg.base,
@@ -1335,7 +1335,7 @@ export default function Hogar() {
                   style={{
                     width: 72,
                     height: 72,
-                    borderRadius: 999,
+                    borderRadius: radius.full,
                     backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1386,7 +1386,7 @@ export default function Hogar() {
                 gradiente FIRMA, que es la familia del techo; la rampa
                 del isotipo NO — A5 la reserva a marca). Memorial: plano. */}
             {esMemorial ? (
-              <View style={{ width: 42, height: 42, borderRadius: 999, backgroundColor: theme.bg.overlay, alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: 42, height: 42, borderRadius: radius.full, backgroundColor: theme.bg.overlay, alignItems: 'center', justifyContent: 'center' }}>
                 <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.secondary} />
               </View>
             ) : (
@@ -1394,7 +1394,7 @@ export default function Hogar() {
                 colors={[theme.accent.gradient.colors[1], theme.accent.gradient.colors[2]] as [string, string]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={{ width: 42, height: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 42, height: 42, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' }}
               >
                 <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.onGradient} />
               </LinearGradient>

@@ -67,29 +67,36 @@ import { Badge, useEtiquetaBadge } from './Badge'
  *  su superficie ES el blanco, en vez de quedar dibujada adentro. */
 const DESTACADA_LADO = 44
 
-/** EL OVERSHOOT DE LA HUELLA (candidata §5.4, apagada por default — ver
- *  la prop `overshootHuella`). Envuelve el ícono y le da un rebote corto
- *  cuando la tab pasa a activa: la huella no solo aparece, LLEGA.
+/** EL OVERSHOOT DE LA HUELLA — **FIRMADO** (mesa 14-ago-2026). Envuelve
+ *  el ícono y le da un rebote corto cuando la tab pasa a activa: la
+ *  huella no solo aparece, LLEGA.
+ *
+ *  ⏪ NACIÓ COMO PROP DE GATE APAGADA (`overshootHuella`) porque
+ *  `DIRECCION_ARTE` §5.4 lo listaba como CANDIDATA SIN FIRMA mientras el
+ *  Norte lo daba por vocabulario cerrado — dos letras que se
+ *  contradicen. **La mesa firmó y la prop MURIÓ en el mismo acto**: el
+ *  valor vive en la pieza y el consumidor no re-decide (Ley 37, y era la
+ *  condición de muerte que la propia prop tenía escrita).
+ *
+ *  🔴 SU EXCEPCIÓN, que sobrevive a la firma y por eso queda escrita:
+ *  N10 declara «UN bezier (.32,.72,0,1)» y en la misma frase pide
+ *  overshoot. **Un overshoot con esa curva no hace overshoot** — termina
+ *  en 1 y no lo pasa. Usa `motion.easing.spring` [.34, 1.56, .64, 1],
+ *  que existe desde v3.1 para «confirmaciones táctiles»: no se inventó
+ *  una curva, se usó la que la casa ya tenía. *El defecto estaba en el
+ *  Norte, no en la pieza, y la mesa lo adoptó como ley mejor.*
  *
  *  Memorial y reduce-motion quedan QUIETOS por el mismo par que usan
  *  `PuertaDeOficio` y `Destape` — en memorial nada rebota (Ley 8), y esa
  *  regla no la puede saltear una candidata. */
-function HuellaDeTab({
-  activa,
-  overshoot,
-  children,
-}: {
-  activa: boolean
-  overshoot: boolean
-  children: ReactNode
-}) {
+function HuellaDeTab({ activa, children }: { activa: boolean; children: ReactNode }) {
   const { theme } = useTheme()
   const reduceMotion = useReducedMotion()
   const quieto = theme.mode === 'memorial' || reduceMotion
   const v = useSharedValue(activa ? 1 : 0)
 
   useEffect(() => {
-    if (!overshoot || quieto) {
+    if (quieto) {
       v.value = activa ? 1 : 0
       return
     }
@@ -99,10 +106,10 @@ function HuellaDeTab({
       // hacer overshoot (el choque declarado en la prop).
       easing: Easing.bezier(...motion.easing.spring.bezier),
     })
-  }, [activa, overshoot, quieto])
+  }, [activa, quieto])
 
   const estilo = useAnimatedStyle(() => ({
-    transform: [{ scale: overshoot && !quieto ? 1 + v.value * 0.06 : 1 }],
+    transform: [{ scale: quieto ? 1 : 1 + v.value * 0.06 }],
   }))
 
   return <Animated.View style={estilo}>{children}</Animated.View>
@@ -143,7 +150,6 @@ export function BarraTabs({
   onCambiar,
   estadoPorHuella = false,
   acento,
-  overshootHuella = false,
 }: {
   /** 2 a 5 tabs.
    *
@@ -177,33 +183,6 @@ export function BarraTabs({
    *  vive en el slot y esta prop se borra en ese mismo acto — la API de
    *  una lámina no sobrevive a su lámina (Ley 37). */
   acento?: string
-  /** PROP DE GATE — el overshoot de 280 ms de la huella al cambiar de
-   *  tab (N10, Norte de la mesa del 13-ago). **NACE APAGADA**, y el
-   *  porqué es de letra, no de prudencia:
-   *
-   *  `DIRECCION_ARTE` §5.4 lo lista EXPLÍCITAMENTE como **CANDIDATA SIN
-   *  FIRMA con gate propio** («el overshoot 280 ms de la huella de tab
-   *  (a la Ley 6/§2.6 — el CÓMO aparece)»). El Norte lo da por
-   *  vocabulario cerrado; la letra depositada dice que espera gate. Dos
-   *  letras que se contradicen no se resuelven eligiendo la que
-   *  conviene: la pieza se construye y **queda preparada-apagada**
-   *  (precedente D-456, el micrófono), para que encenderla sea UNA línea
-   *  el día que el founder la firme en dispositivo.
-   *
-   *  🔴 Y TRAE UN CHOQUE PROPIO, declarado: N10 dice «UN bezier
-   *  (.32,.72,0,1)» y en la misma frase pide overshoot. **Un overshoot
-   *  con esa curva no hace overshoot** — la curva de la casa termina en
-   *  1 y no lo pasa. Así que el gesto usa `motion.easing.spring`
-   *  ([0.34, 1.56, 0.64, 1]), que **ya existe en el token desde v3.1**:
-   *  no se inventa una curva, se usa la que la casa ya tiene para
-   *  «confirmaciones táctiles». Si el gate rechaza la excepción, muere
-   *  el gesto entero, no la curva.
-   *
-   *  ☠️ MUERTE: con el gate de §5.4. Si pasa, el valor deja de ser prop
-   *  y vive en la pieza; si falla, se retira con su token. En los dos
-   *  casos esta prop se borra — la API de una candidata no sobrevive a
-   *  su gate (Ley 37). */
-  overshootHuella?: boolean
 }) {
   const etiquetaBadge = useEtiquetaBadge()
   const { theme } = useTheme()
@@ -271,7 +250,7 @@ export function BarraTabs({
                 su segundo consumidor (la campana) — la barra pasa a
                 consumirla: misma geometría S43, misma pill, y la voz del
                 label ahora vive en el riel (antes: hardcodeada acá). */}
-            <HuellaDeTab activa={esActivo} overshoot={overshootHuella}>
+            <HuellaDeTab activa={esActivo}>
               {item.destacada === true ? (
                 /* EL DESTINO CENTRAL — superficie propia y un paso de
                    tamaño. Sin color: el acento de esta barra ya está
