@@ -64,7 +64,40 @@ export function Celda(props: CeldaProps) {
     <>
       {inicio ? <View>{inicio}</View> : null}
 
-      <View style={{ flex: 1, gap: spacing[0.5] }}>
+      {/* 🔴 EL SUJETO NO CEDE — cura de S97+-B, con su defecto medido.
+
+          LO QUE PASABA, visto en dispositivo por D (captura
+          `s97-d-lote/02-hoy-linea.png`): en el HOY del prestador el
+          nombre de la mascota truncaba a **`Z…`** —UNA letra— y el
+          subtítulo partía a media palabra (`Consult a …`).
+
+          EL MECANISMO, medido acá y no supuesto: este bloque tenía
+          `flex: 1`, que en RN es `flexBasis: 0` — **no reclama ancho
+          propio, toma lo que sobra**. Y el bloque de la derecha
+          (`metadataMono` + `fin`) no tenía `flexShrink`, así que su
+          ancho es intrínseco y **no cede jamás**. Con una fila cargada
+          —hora, avatar, glifo, dos chips, duración y chevron— la derecha
+          se servía primero y al sujeto le quedaban las sobras.
+
+          ⚠️ LA ATRIBUCIÓN, que importa porque hubo dos sospechosos: la
+          escala de N1 (13→14, 15→16) **agravó** esto, no lo causó. Pasar
+          de «Zeus» a «Z» es perder el 75% del nombre; un crecimiento del
+          ~7% en los chips no produce eso — lo produce que este bloque
+          absorbía TODA la compresión. **El defecto es estructural y vive
+          acá desde S43**; la escala solo lo hizo visible.
+
+          LA CURA, en dos mitades que solo funcionan juntas:
+          · `minWidth` acá — el sujeto tiene un piso y por debajo no baja.
+          · `flexShrink: 1` en la derecha (abajo) — alguien tiene que
+            ceder, y entre el nombre de la mascota y un chip de estado,
+            cede el chip. *El nombre es el sujeto de la fila; el resto es
+            metadata sobre él.*
+
+          El piso son 96: a `size.base` (16) entran ~9-10 caracteres, que
+          cubre los nombres reales de la casa (Thor, Zeus, Aurora). No es
+          un número de gusto — es el ancho por debajo del cual un nombre
+          deja de ser un nombre. */}
+      <View style={{ flex: 1, minWidth: 96, gap: spacing[0.5] }}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -93,7 +126,10 @@ export function Celda(props: CeldaProps) {
       </View>
 
       {metadataMono || fin ? (
-        <View style={{ alignItems: 'flex-end', gap: spacing[1] }}>
+        // La otra mitad de la cura (el porqué completo, arriba): este
+        // bloque CEDE. Sin `flexShrink` su ancho era intrínseco y el
+        // sujeto pagaba la diferencia entero.
+        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1 }}>
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text
