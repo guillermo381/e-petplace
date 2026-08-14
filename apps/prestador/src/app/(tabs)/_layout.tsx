@@ -29,6 +29,7 @@ import {
   spacing,
   useTheme,
   type BarraTabsItem,
+  type IconoNombre,
 } from '@epetplace/ui';
 import {
   cerrarSesion,
@@ -46,7 +47,12 @@ import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { useTraduccion } from '@/i18n';
 import { contextoVentas } from '@/lib/cuenta-ventas';
-import { hayCapacidad, resolverCapacidadAtender } from '@/lib/capacidad-atender';
+import { resolverCapacidadDeBarra } from '@/lib/barra-prestador-lectura';
+import {
+  KEY_ETIQUETA_TAB,
+  ordenTabsPrestador,
+  type ClaveTabPrestador,
+} from '@/lib/barra-prestador';
 
 /* ☠️ S86-B · `@/components/iconos-tabs` MURIÓ — LA BARRA CONSUME EL
  * REGISTRY (D-645 / D-546, el pedido que su propia cabecera dejaba
@@ -143,55 +149,14 @@ export default function TabsLayout() {
           // omisión. El titular lee su propia fila sea cual sea el
           // estado (RLS prestadores_public, brazo user_id).
           if (p.data.estado !== 'activo') return { sala_espera: true };
-          // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
-          // Falla de lectura = false (Ley 23: ante la duda, se cierra).
-          //
-          // ⭐ S98-C · LAS TRES PREGUNTAS DE LA BARRA VIAJAN EN UNA OLA.
-          // Antes esto era UNA espera; ahora son tres lecturas y **siguen
-          // siendo una espera**: ninguna depende de otra, así que
-          // encadenarlas habría sumado ~300 ms de red al arranque de cada
-          // foco — el peaje por PETICIÓN que D-738 midió en el prólogo del
-          // HOY (622 ms en cuatro viajes encadenados solo para resolver
-          // quién soy). *No es optimización prematura: es no repetir la
-          // deuda que ya está medida.*
-          //
-          // ⚠️ Y `empleadoTieneRol` NO se reemplaza por `gestiona` de
-          // `obtenerMiPosicionEnPrestador` aunque contesten parecido: son
-          // predicados distintos (`gestiona` incluye admin de plataforma) y
-          // cambiar el gate de NEGOCIO de paso, adentro de una tanda que
-          // vino a agregar una tab, es exactamente cómo se cuela un cambio
-          // de permisos que nadie firmó.
-          const [rol, posicion, capacidad] = await Promise.all([
-            empleadoTieneRol(p.data.id, ['dueño', 'administrador']),
-            obtenerMiPosicionEnPrestador(p.data.id),
-            resolverCapacidadAtender(p.data.id),
-          ]);
-          const esGestor = rol.ok ? rol.data : false;
-          /* EL Y — Y SUS DOS MITADES FALLAN DISTINTO, que es la parte
-             pensada y no un detalle:
-
-             · **el ROL cierra** (Ley 23, y el precedente de `esGestor` acá
-               arriba): no saber si alguien puede es no poder afirmar que
-               puede. Un permiso no se concede por un error de red.
-             · **la CAPACIDAD abre.** No saber si el negocio tiene local no
-               es un problema de permisos: es un dato que faltó. Y la
-               portada YA sabe decirlo —tiene su estado de error con
-               reintento—, mientras que una barra sin la tab no dice nada:
-               *el que no la ve no sabe que existe, y no tiene dónde
-               reintentar.*
-
-             ⚠️ **ESTO CAMBIÓ EN ESTA MISMA TANDA, y el porqué importa más
-             que la regla:** la capacidad TAMBIÉN cerraba, y el argumento
-             era que cerrar no dejaba a nadie sin camino porque el HOY
-             conservaba «Registrar atención». **§3.1 se llevó ese botón**
-             (todo lo de atender vive acá), así que el argumento que
-             sostenía el fail-closed desapareció con él — y dejarlo tal
-             cual habría sido conservar una decisión cuya razón ya no
-             existe. *La regla no se movió porque cambió de opinión: se
-             movió porque le sacaron el piso.* */
-          const montaAtender =
-            (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
-            (capacidad.ok ? hayCapacidad(capacidad.data) : true);
+          /* ⭐ S98-C (D-819) · LAS DOS PREGUNTAS DE LA BARRA SALIERON DE ACÁ.
+             Vivían inline —tres lecturas en una ola, más la asimetría de
+             sus fallos (el rol cierra, la capacidad abre)— y **el destape
+             del wizard necesitaba lo mismo**. Antes de copiarlas, se
+             mudaron: `lib/barra-prestador-lectura`, con su porqué entero.
+             *Dos copias no divergen algún día: divergen la primera vez que
+             alguien cura una sola.* */
+          const { esGestor, montaAtender } = await resolverCapacidadDeBarra(p.data.id);
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo
@@ -437,64 +402,43 @@ export default function TabsLayout() {
      `Hoy · Datos · Cuenta` es la casa del no-gestor, no el descarte de la
      del titular. La ausencia del tab NO se explica ni se insinúa (§2); lo
      que sí habla es la RUTA cuando alguien navega a ella (§3, GateAjeno). */
-  const items: BarraTabsItem[] = [
-    {
-      key: 'index',
-      etiqueta: t('tabs.hoy'),
-      icono: ({ color, activa, colorHuella }) => (
-        <Icono nombre="hoy" tinta={color} huella={colorHuella} activa={activa} />
-      ),
-    },
-    {
-      // La tab se llama «Datos» y su glifo es `datos` — la gráfica.
-      // (La ruta sigue siendo `mascotas`: el nombre de archivo no es
-      // el nombre del glifo, y renombrar rutas no es de esta tanda.)
-      key: 'mascotas',
-      etiqueta: t('tabs.mascotas'),
-      icono: ({ color, activa, colorHuella }) => (
-        <Icono nombre="datos" tinta={color} huella={colorHuella} activa={activa} />
-      ),
-    },
-    /* ⭐ S98-C · `ATENDER` — LA QUINTA TAB, AL CENTRO (§2, firma del
-       founder). Va acá, entre DATOS y NEGOCIO, y con las cinco barras de
-       la letra el orden cae solo: titular con local `Hoy·Datos·ATENDER·
-       Negocio·Cuenta` (centro exacto) · recepción `Hoy·Datos·ATENDER·
-       Cuenta`.
-       **Destacada por FORMA, no por coordenada** (contrato de B): gana
-       superficie y un paso de tamaño, jamás un acento propio — N5 manda
-       un acento por pantalla y en esta barra ya está tomado por la huella
-       de la tab activa, que es la que dice DÓNDE ESTOY. */
-    ...(sesion.montaAtender
-      ? [
-          {
-            key: 'atender',
-            etiqueta: t('tabs.atender'),
-            destacada: true,
-            icono: ({ color, activa, colorHuella }) => (
-              <Icono nombre="atender" tinta={color} huella={colorHuella} activa={activa} />
-            ),
-          } as BarraTabsItem,
-        ]
-      : []),
-    ...(sesion.esGestor
-      ? [
-          {
-            key: 'negocio',
-            etiqueta: t('tabs.negocio'),
-            icono: ({ color, activa, colorHuella }) => (
-              <Icono nombre="negocio" tinta={color} huella={colorHuella} activa={activa} />
-            ),
-          } as BarraTabsItem,
-        ]
-      : []),
-    {
-      key: 'cuenta',
-      etiqueta: t('tabs.cuenta'),
-      icono: ({ color, activa, colorHuella }) => (
-        <Icono nombre="cuenta" tinta={color} huella={colorHuella} activa={activa} />
-      ),
-    },
-  ];
+  /* ⭐ S98-C (D-819) · EL ORDEN Y LOS PREDICADOS YA NO VIVEN ACÁ — salieron
+     a `lib/barra-prestador` porque **el destape del wizard los necesitaba
+     y los había copiado a mano**: enumeraba `Hoy·Datos·Negocio·Cuenta`
+     fijo, sin `ATENDER` y prometiéndole `Hoy` a quien no lo tiene.
+     *La cura no fue sincronizar dos copias —eso deja la deuda viva— sino
+     dejar UNA: acá quedan los GLIFOS, que son de esta superficie y de
+     ninguna otra.*
+
+     Lo que la mudanza NO se llevó y sigue rigiendo:
+      · **`ATENDER` va entre DATOS y NEGOCIO**, y con las cinco barras de
+        la letra el centro cae solo (titular con local →
+        `Hoy·Datos·ATENDER·Negocio·Cuenta`).
+      · **Destacada por FORMA, no por coordenada** (contrato de B): gana
+        superficie y un paso de tamaño, jamás un acento propio — N5 manda
+        un acento por pantalla y acá ya lo tiene la huella de la tab
+        activa, que es la que dice DÓNDE ESTOY.
+      · La tab se llama «Datos» y su glifo es `datos`; la RUTA sigue
+        siendo `mascotas` — el nombre de archivo no es el del glifo. */
+  const GLIFO_TAB = {
+    index: 'hoy',
+    mascotas: 'datos',
+    atender: 'atender',
+    negocio: 'negocio',
+    cuenta: 'cuenta',
+  } as const satisfies Record<ClaveTabPrestador, IconoNombre>;
+
+  const items: BarraTabsItem[] = ordenTabsPrestador({
+    esGestor: sesion.esGestor,
+    montaAtender: sesion.montaAtender,
+  }).map((key) => ({
+    key,
+    etiqueta: t(KEY_ETIQUETA_TAB[key]),
+    ...(key === 'atender' ? { destacada: true } : null),
+    icono: ({ color, activa, colorHuella }) => (
+      <Icono nombre={GLIFO_TAB[key]} tinta={color} huella={colorHuella} activa={activa} />
+    ),
+  }));
 
   return (
     <Tabs

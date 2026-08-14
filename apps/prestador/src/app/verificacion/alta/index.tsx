@@ -58,6 +58,12 @@ import { PasoNegocio } from '@/components/alta/PasoNegocio';
 import { PasoOfreces } from '@/components/alta/PasoOfreces';
 import { PasoDocumentos } from '@/components/alta/PasoDocumentos';
 import { PasoEquipo } from '@/components/alta/PasoEquipo';
+import {
+  KEY_ETIQUETA_TAB,
+  ordenTabsPrestador,
+  type ClaveTabPrestador,
+} from '@/lib/barra-prestador';
+import { resolverCapacidadDeBarra } from '@/lib/barra-prestador-lectura';
 import { useTraduccion } from '@/i18n';
 
 /** Los cuatro pasos de §4.1, en su orden firmado. **El vocabulario es el
@@ -140,6 +146,11 @@ export default function WizardAlta() {
   const [guardandoSalto, setGuardandoSalto] = useState(false);
   const [destapando, setDestapando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  /** ⭐ S98-C (D-819) · Las tabs que esta persona va a tener DE VERDAD.
+   *  `null` = todavía no se resolvió. Se pide **al disparar el destape** y
+   *  no en cada `cargar()`: el wizard recarga en cada foco y en cada paso,
+   *  y esto se necesita UNA vez, al final. */
+  const [tabsDelDestape, setTabsDelDestape] = useState<ClaveTabPrestador[] | null>(null);
 
   const cargar = useCallback(async () => {
     const [cuenta, prestador] = await Promise.all([
@@ -225,6 +236,25 @@ export default function WizardAlta() {
     // para que el contador diga la verdad de la base y no la nuestra.
     void cargar();
     if (esUltimo) {
+      /* ⭐ S98-C (D-819) · La ceremonia nombra las tabs REALES, resueltas
+         con la misma fuente que la barra.
+
+         🔴 **EL VENDEDOR PURO NO ENUMERA NINGUNA, y no es un caso raro:**
+         §4.4 de la letra dice que su alta está ABSORBIDA por este wizard,
+         así que llega hasta acá — y **no tiene fila de prestador**, o sea
+         que no usa esta barra: su casa es `/ventas`. Prometerle `Hoy` en
+         la ceremonia que le enseña la app sería enseñarle mal justo lo
+         primero que va a buscar.
+         ⚠️ Su tira queda VACÍA, y se declara: no se inventa una pseudo-tab
+         «Ventas» porque **no existe en ninguna barra**, y poner en la
+         ceremonia algo que después no está sería el mismo defecto al
+         revés. Si la mesa quiere que la ceremonia le nombre su panel, es
+         una decisión de voz con su propia key. */
+      const prestadorIdDestape = contexto.estado === 'listo' ? contexto.prestadorId : null;
+      void (prestadorIdDestape === null
+        ? Promise.resolve([] as ClaveTabPrestador[])
+        : resolverCapacidadDeBarra(prestadorIdDestape).then(ordenTabsPrestador)
+      ).then(setTabsDelDestape);
       setDestapando(true);
       return;
     }
@@ -309,16 +339,31 @@ export default function WizardAlta() {
   // si cambia una duración o el reduce-motion colapsa la secuencia, el
   // aviso se mueve con ella. Dos relojes contando lo mismo se desfasan.
   if (destapando) {
+    /* ⭐ S98-C (D-819) · EL DESTAPE COMPONE, YA NO ENUMERA.
+       Acá vivía una lista escrita a mano —`Hoy·Datos·Negocio·Cuenta`,
+       fija— mientras la barra se compone por capacidad en CINCO casos
+       (§2 de la letra). Dos consecuencias medidas: **nunca nombraba
+       `ATENDER`**, la tab que nació en esta misma sesión, y **le prometía
+       `Hoy` y `Negocio` a quien no los tiene** — el vendedor puro ni
+       siquiera usa esta barra: su casa es `/ventas`.
+
+       *La ceremonia que le enseña la app a alguien es el peor lugar
+       posible para una lista desincronizada: es lo primero que ve, y es
+       exactamente lo que va a buscar después.*
+
+       La cura NO fue sincronizar dos copias —eso deja la deuda viva, solo
+       que dormida— sino **dejar una**: `lib/barra-prestador` es la fuente
+       y ésta es su segunda consumidora. `null` mientras resuelve; el
+       destape espera a tenerla en vez de mostrar una lista provisoria que
+       después cambie. */
     return (
       <Destape
         nombreNegocio={contexto.nombreNegocio}
         logo={null}
-        tabsHabilitadas={[
-          { key: 'index', etiqueta: t('tabs.hoy') },
-          { key: 'mascotas', etiqueta: t('tabs.mascotas') },
-          { key: 'negocio', etiqueta: t('tabs.negocio') },
-          { key: 'cuenta', etiqueta: t('tabs.cuenta') },
-        ]}
+        tabsHabilitadas={(tabsDelDestape ?? []).map((key) => ({
+          key,
+          etiqueta: t(KEY_ETIQUETA_TAB[key]),
+        }))}
         alTerminar={() => router.replace('/(tabs)')}
       />
     );
