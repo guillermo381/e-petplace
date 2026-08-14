@@ -188,7 +188,6 @@ function MuestraLugar() {
 function MuestraBarraPorCapacidad() {
   const { theme: t } = useTheme()
   const [activo, setActivo] = useState('index')
-  const [overshoot, setOvershoot] = useState(false)
   // LOS CUATRO PERFILES DE LA FIRMA (mesa 13-ago). La barra NO los
   // conoce: los compone quien la monta. Aca se listan para que el gate
   // los vea uno al lado del otro — que es lo unico que permite juzgar si
@@ -242,11 +241,11 @@ function MuestraBarraPorCapacidad() {
   ]
   return (
     <View style={{ gap: spacing[4] }}>
-      <Boton
-        variante="compacto"
-        etiqueta={overshoot ? 'Overshoot: ENCENDIDO (candidata §5.4)' : 'Overshoot: apagado (default)'}
-        onPress={() => setOvershoot((v) => !v)}
-      />
+      <Texto variante="apoyo">
+        El overshoot de la huella (280 ms, spring) esta FIRMADO y vive adentro de la
+        pieza: toca una tab y mira como LLEGA. Ya no hay toggle — la prop de gate
+        murio con la firma (Ley 37).
+      </Texto>
       {/* EL GATE DEL GLIFO — §6b: a 21px, junto a cinco del registry.
           A ese tamano la huella sobrevive o es ruido (Ley 9), y un glifo
           solo no dice nada: lo que se juzga es si `atender` se distingue
@@ -275,7 +274,6 @@ function MuestraBarraPorCapacidad() {
               activo={p.items.some((i) => i.key === activo) ? activo : p.items[0].key}
               onCambiar={setActivo}
               estadoPorHuella
-              overshootHuella={overshoot}
             />
           </View>
         </View>

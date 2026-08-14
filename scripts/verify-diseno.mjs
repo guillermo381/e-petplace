@@ -1675,7 +1675,7 @@ const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
    cada número está en el header de su regla, más abajo.
 
    LOS CUATRO SON EL NÚMERO MEDIDO DEL CORPUS VIVO al abrir la tanda, no
-   una cuota: 21 espaciados crudos · 20 radios crudos · 6 pantallas sobre
+   una cuota: 21 espaciados crudos · 20 radios crudos (hoy 7: las 13 pildoras murieron con la firma del 14-ago) · 6 pantallas sobre
    el presupuesto de separadores · 6 sobre el de tamaños. Solo bajan.
 
    ⚠️ LOS DOS PRIMEROS SE MIDIERON DOS VECES Y DIERON DISTINTO, y el que
@@ -1687,7 +1687,7 @@ const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
    de R2 (grep 7 · lint crudo 8 · despojando prosa 4), y por eso se
    escribe: la próxima regla se ahorra el paso. */
 const BASELINE_R36 = 21;
-const BASELINE_R37 = 20;
+const BASELINE_R37 = 7;
 const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;

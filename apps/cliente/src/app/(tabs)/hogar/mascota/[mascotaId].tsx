@@ -852,7 +852,7 @@ export default function PerfilDeMascota() {
                     right: -70,
                     width: 262,
                     height: 262,
-                    borderRadius: 999,
+                    borderRadius: radius.full,
                     backgroundColor: 'rgba(255,255,255,0.07)',
                   }}
                 />
@@ -865,7 +865,7 @@ export default function PerfilDeMascota() {
                   accessibilityRole="button"
                   accessibilityLabel={t('perfil.volver')}
                   onPress={() => router.back()}
-                  style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Svg width={20} height={20} viewBox="0 0 24 24">
                     <Path d="m14 5-7 7 7 7" stroke={sobreMarca} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -878,7 +878,7 @@ export default function PerfilDeMascota() {
                     onPress={() =>
                       router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
                     }
-                    style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {/* S86-B · del registry (D-645). Estaba dibujado a mano
                         ACÁ, en un archivo que ya importaba `Icono` — y le
@@ -892,7 +892,7 @@ export default function PerfilDeMascota() {
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.compartir')}
                     onPress={() => void Share.share({ message: t('perfil.compartirMensaje', { nombre: mascota.nombre }) })}
-                    style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {/* S86-B · del registry (D-645). ⚠️ Y ES EL CASO QUE
                         MIDE EL LÍMITE DEL VIGILANTE: acá los TRES paths del
@@ -924,7 +924,7 @@ export default function PerfilDeMascota() {
                       style={{
                         width: 200,
                         height: 200,
-                        borderRadius: 999,
+                        borderRadius: radius.full,
                         borderWidth: 8,
                         borderColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.2)',
                         backgroundColor: theme.bg.overlay,
@@ -958,7 +958,7 @@ export default function PerfilDeMascota() {
                         flexDirection: 'row',
                         alignItems: 'center',
                         gap: spacing[1.5],
-                        borderRadius: 999,
+                        borderRadius: radius.full,
                         backgroundColor: theme.bg.card,
                         paddingHorizontal: spacing[3],
                         paddingVertical: spacing[1.5],
