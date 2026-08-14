@@ -142,11 +142,20 @@ export function Baldosa({
          lleva estilo. Ahí no muerde porque el consumidor la envuelve en
          una columna que la estira. **Lo vi, entendí por qué no molestaba
          ahí, y construí la pieza nueva con el mismo hueco.** */
-      style={{ width: '100%' }}>
+      /* ⏪ D-804 — LA RAÍZ DECLARA LAS **DOS** DIMENSIONES. Antes tenía
+         solo el ancho y la proporción vivía en el hijo: el extremo opuesto
+         del colapso a 0 y **la misma causa**. Cuando el contenedor le daba
+         0 medía 0; cuando le daba todo, medía todo (~800 px en dispositivo,
+         dos scrolls por celda).
+         *Mi ley decía «la raíz es dueña de su espacio» y yo la había
+         cumplido a medias: el espacio son DOS dimensiones.* El hijo deja
+         de decidir geometría y solo compone adentro (`flex: 1`). */
+      style={{ width: '100%', aspectRatio: 1 }}>
       <Animated.View
         style={[
           {
-            aspectRatio: 1,
+            // La geometría la declara la RAÍZ (arriba): acá solo se compone.
+            flex: 1,
             backgroundColor: theme.bg.card,
             borderRadius: radius.lg,
             boxShadow: theme.elevacion.reposo,
@@ -223,18 +232,48 @@ export function Baldosa({
   return orden === undefined ? cuerpo : <Entrada orden={orden}>{cuerpo}</Entrada>
 }
 
-/** El envoltorio de la GRILLA no sube como pieza (ver el header: sube la
- *  unidad, no el contenedor). Se deja escrito el patrón para que las dos
- *  casas armen la misma grilla sin copiarse entre sí:
+/** EL PATRÓN DE LA GRILLA — no sube como pieza (ver el header: sube la
+ *  unidad, no el contenedor), pero se escribe acá para que las dos casas
+ *  armen la misma sin copiarse entre sí:
  *
  *    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
  *      {oficios.map((o, i) => (
- *        <View key={o.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+ *        <View key={o.key} style={{ width: '48%' }}>
  *          <Baldosa … orden={i} />
  *        </View>
  *      ))}
  *    </View>
  *
- *  El `47%` con `gap` deja las dos columnas sin que el redondeo las
- *  empuje a tres; `flexGrow: 1` hace que una baldosa impar ocupe la fila
- *  entera en vez de quedar a media pantalla. */
+ *  ⏪ DECÍA `flexBasis: '47%', flexGrow: 1` Y ERA FRÁGIL POR SIETE
+ *  PÍXELES. El defecto lo midió A en dispositivo (D-804): las baldosas
+ *  se dibujaban de **~800 px de alto**, «glifo arriba, rótulo abajo,
+ *  vacío enorme en el medio», y la portada exigía dos scrolls para
+ *  mostrar dos celdas.
+ *
+ *  LA ARITMÉTICA, con el ancho real de la portada (412 − 32 de padding =
+ *  380 útiles):
+ *
+ *      dos ítems a 47% .... 357 + gap 16 = 373   ← entra por 7 px
+ *      si algo se corre ... WRAP ⇒ cada una SOLA en su fila
+ *      y ahí `flexGrow: 1` la estira al 100% .... 380 × aspectRatio 1
+ *      ⇒ 380 de alto cada una · **760 apiladas** ≈ los ~800 medidos
+ *
+ *  🔴 Y LA DECISIÓN QUE LO CAUSÓ ES MÍA, ESCRITA EN ESTE MISMO ARCHIVO:
+ *  puse `flexGrow: 1` razonando que *«una baldosa impar ocupe la fila
+ *  entera en vez de quedar a media pantalla»*. **Esa regla, pensada para
+ *  el caso impar, se aplica a TODAS cuando el wrap se dispara por
+ *  redondeo** — y con 7 px de margen se dispara con cualquier padding,
+ *  scrollbar o diferencia de redondeo entre plataformas.
+ *
+ *  ⇒ `width: '48%'` es DETERMINISTA: no crece, no depende del sobrante,
+ *  y una baldosa impar queda a media pantalla — que en una grilla es lo
+ *  correcto y lo que el ojo espera. *Un patrón que se comporta distinto
+ *  según sobren 7 px no es un patrón: es una coincidencia documentada.*
+ *
+ *  ⚠️ ESTO ES EL EXTREMO OPUESTO DEL COLAPSO A 0 de `Entrada`, y A lo
+ *  nombró bien: cuando el contenedor le daba 0 medía 0, cuando le da todo
+ *  mide todo. **La pieza declara su PROPORCIÓN (`aspectRatio: 1`), y la
+ *  proporción sin un ancho acotado no acota nada** — el ancho es del
+ *  contenedor por diseño, así que el patrón es parte del contrato y no
+ *  una sugerencia. Por eso se corrige acá y no en la pantalla que lo
+ *  sufrió. */
