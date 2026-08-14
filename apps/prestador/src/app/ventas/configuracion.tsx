@@ -27,6 +27,22 @@
  *  · el CONTADOR (ley S91: narrativa más un paso, llega a cero, lo de
  *    e-PetPlace no entra) — sin ①②③ cableados contaría aire.
  *
+ * 🔴 LA LEY DEL CAMBIO (guard 4 de la orden de mesa del 13-ago): «al
+ * guardar un cambio con compromisos vivos, la app dice qué queda
+ * comprometido. No rechaza, no oculta.» Cableada donde hay dato HOY:
+ *  · CORTES: con pedidos vivos ya prometidos (`!es_terminal` y con
+ *    promesa), la Hoja del corte lo dice ANTES del CTA — conservan su
+ *    ventana; el corte nuevo rige para lo que entra desde ahora.
+ *  · RECURSOS: con entregas ya prometidas hoy (`cupoRepartoDelDia`
+ *    consumido > 0), la Hoja de capacidad lo dice igual.
+ *  · ⑤ repartidores: SIN dato — decir «qué queda comprometido» al apagar
+ *    un repartidor exige el lector de envíos vivos POR repartidor, que
+ *    no existe (va en el pedido a A). No se inventa la voz sin el dato.
+ * ⚠️ Divergencia declarada: la orden cita una «ley del cambio en la
+ * cabecera de §8.6bis» que NO está depositada en `MODELO_DESPENSA` (grep
+ * en cero sobre origin/main al construir). El literal de arriba es el de
+ * la ORDEN; cuando la letra aterrice, si difiere, gana la letra.
+ *
  * 🔴 CHOQUE DECLARADO (⑤ QUIÉN): la letra manda repartidor como chip del
  * EQUIPO QUE YA EXISTE («un equipo, un lugar»); el alta de abajo es el
  * padrón propio de S96. Se conserva VIVO hasta que la costura
@@ -76,8 +92,10 @@ import {
 import {
   actualizarRepartidor,
   cerrarSesion,
+  cupoRepartoDelDia,
   definirRecursoReparto,
   definirTurnoEntrega,
+  listarPedidosDelVendedor,
   listarRecursosReparto,
   listarRepartidores,
   listarTurnosEntrega,
@@ -89,7 +107,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
-import { horaDeSql } from '@/lib/ventas-formato';
+import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -100,6 +118,15 @@ type Pantalla =
       repartidores: Repartidor[];
       recursos: RecursoReparto[];
       turnos: TurnoEntrega[];
+      /** LEY DEL CAMBIO — pedidos vivos con ventana prometida: lo que un
+       *  corte nuevo NO mueve. Se lee junto con el resto (un fallo acá es
+       *  fallo de pantalla: la ley exige DECIR, y sin dato no se dice). */
+      comprometidos: number;
+      /** Entregas ya prometidas HOY (consumido del cupo) — lo que una
+       *  capacidad nueva no mueve. null = no se pudo leer (mismo trato
+       *  tolerante que la cifra del techo en la lista: la línea del guard
+       *  no se monta — ausencia, jamás un número inventado). */
+      cupoHoy: { capacidad: number; consumido: number } | null;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -171,13 +198,15 @@ export default function ConfiguracionVentas() {
           return;
         }
         const id = ctx.data.cuentaComercialId;
-        const [reps, recursos, turnos] = await Promise.all([
+        const [reps, recursos, turnos, pedidos, cupo] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
+          listarPedidosDelVendedor(id),
+          cupoRepartoDelDia(id, hoyLocalISO()),
         ]);
         if (!vigente) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok) {
+        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
@@ -187,6 +216,14 @@ export default function ConfiguracionVentas() {
           repartidores: reps.data,
           recursos: recursos.data,
           turnos: turnos.data,
+          // lo comprometido: vivo Y con ventana prometida (un retiro sin
+          // promesa no lo mueve ningún corte)
+          comprometidos: pedidos.data.filter(
+            (p) => !p.es_terminal && p.promesa_desde !== null,
+          ).length,
+          cupoHoy: cupo.ok
+            ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
+            : null,
         });
       })();
       return () => {
@@ -379,7 +416,14 @@ export default function ConfiguracionVentas() {
               sin lector ni escritor, un formulario muerto es peor que su
               ausencia (cabecera). Los contratos exactos viven en el pedido
               a A del 13-ago; al llegar el esquema entran ACÁ, en este
-              orden, antes del ④. */}
+              orden, antes del ④.
+              ⚠️ S97: la CARGA del catálogo ya corrió (442 productos) y los
+              códigos de familia están medidos por A —`alimento` ·
+              `antiparasitario` · `suplemento` (+ `dieta_prescripcion`
+              activa; ver 2026-08-13-s97a-esquema-catalogo-maestro.md)—.
+              Los nombres que esta pantalla pinte saldrán del LECTOR, jamás
+              de estas constantes: lo que falta sigue siendo la ACTIVACIÓN
+              por vendedor (A-1 del pedido), no el catálogo. */}
 
           {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
               atención» espera esquema: pedido A-4) ── */}
@@ -610,6 +654,19 @@ export default function ConfiguracionVentas() {
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
+              {/* LEY DEL CAMBIO: lo ya prometido hoy no se mueve — se dice
+                  ANTES de guardar, no se rechaza ni se oculta. */}
+              {pantalla.estado === 'listo' &&
+                pantalla.cupoHoy !== null &&
+                pantalla.cupoHoy.consumido > 0 && (
+                  <Texto variante="apoyo">
+                    {pantalla.cupoHoy.consumido === 1
+                      ? t('ventas.config.cambio.recursoEntrega1')
+                      : t('ventas.config.cambio.recursoEntregas', {
+                          n: pantalla.cupoHoy.consumido,
+                        })}
+                  </Texto>
+                )}
               <Boton
                 variante="primario"
                 bloque
@@ -669,6 +726,15 @@ export default function ConfiguracionVentas() {
                   registro="oficio"
                 />
               </View>
+              {/* LEY DEL CAMBIO: los pedidos ya prometidos conservan su
+                  ventana — se dice ANTES de guardar el corte. */}
+              {pantalla.estado === 'listo' && pantalla.comprometidos > 0 && (
+                <Texto variante="apoyo">
+                  {pantalla.comprometidos === 1
+                    ? t('ventas.config.cambio.cortePedido1')
+                    : t('ventas.config.cambio.cortePedidos', { n: pantalla.comprometidos })}
+                </Texto>
+              )}
               <Boton
                 variante="primario"
                 bloque

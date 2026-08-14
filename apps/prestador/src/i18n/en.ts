@@ -2494,6 +2494,18 @@ export const prestadorEn = {
           'Your business account is suspended and your store is not visible. The e-PetPlace team has the details.',
         modalCerrada: 'This business account is closed.',
       },
+      // the law of change (guard 4): with live commitments, saving SAYS
+      // what stays committed — no rejection, no silence.
+      cambio: {
+        cortePedido1:
+          'The order already promised keeps its window. This cutoff applies to whatever comes in from now on.',
+        cortePedidos:
+          'The {{n}} orders already promised keep their window. This cutoff applies to whatever comes in from now on.',
+        recursoEntrega1:
+          "Today's promised delivery stands. The new capacity applies to whatever is promised from now on.",
+        recursoEntregas:
+          "Today's {{n}} promised deliveries stand. The new capacity applies to whatever is promised from now on.",
+      },
       facturacionTitulo: 'Billing details',
       facturacionDetalle: 'Your business account — you are the seller of record',
       repartidoresTitulo: 'Couriers',

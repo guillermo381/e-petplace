@@ -3016,6 +3016,19 @@ export const prestadorEs = {
           'Tu cuenta comercial está suspendida y tu despensa no está visible. El equipo de e-PetPlace tiene el detalle.',
         modalCerrada: 'Esta cuenta comercial está cerrada.',
       },
+      // LA LEY DEL CAMBIO (guard 4, orden de mesa 13-ago): con compromisos
+      // vivos, al guardar se DICE qué queda comprometido — ni rechazo ni
+      // silencio. Singular/plural aparte (patrón del techo del HOY).
+      cambio: {
+        cortePedido1:
+          'El pedido ya prometido conserva su ventana. Este corte rige para lo que entre desde ahora.',
+        cortePedidos:
+          'Los {{n}} pedidos ya prometidos conservan su ventana. Este corte rige para lo que entre desde ahora.',
+        recursoEntrega1:
+          'La entrega ya prometida para hoy se mantiene. La capacidad nueva rige para lo que se prometa desde ahora.',
+        recursoEntregas:
+          'Las {{n}} entregas ya prometidas para hoy se mantienen. La capacidad nueva rige para lo que se prometa desde ahora.',
+      },
       facturacionTitulo: 'Datos de facturación',
       facturacionDetalle: 'Tu cuenta comercial — tú eres el vendedor de registro',
       repartidoresTitulo: 'Repartidores',
