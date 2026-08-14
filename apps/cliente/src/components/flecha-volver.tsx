@@ -20,7 +20,7 @@
 
 import { Pressable } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useTheme } from '@epetplace/ui';
+import { radius, useTheme } from '@epetplace/ui';
 
 export function FlechaVolver({ onPress, etiqueta }: { onPress: () => void; etiqueta: string }) {
   // TOKEN, no `#FFFFFF` (Ley 1 — el lint me lo cazó y tenía razón):
@@ -37,7 +37,7 @@ export function FlechaVolver({ onPress, etiqueta }: { onPress: () => void; etiqu
       style={{
         width: 38,
         height: 38,
-        borderRadius: 999,
+        borderRadius: radius.full,
         backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',

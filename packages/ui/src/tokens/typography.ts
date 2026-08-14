@@ -46,12 +46,34 @@ export const typography = {
     },
   },
 
-  // Escala v3.1 intacta (px — RN usa números directos)
+  /* ── LA ESCALA — N1 EJECUTADA POR VÍA A (firma de mesa, 14-ago-2026) ──
+     ⏪ Decía «Escala v3.1 intacta». Ya no lo está, y se dice acá.
+
+     LOS TRES QUE SE MOVIERON: `sm` 13→**14** · `base` 15→**16** ·
+     `md` 18→**20**. El Norte N1 pide cuerpo 16 · secundario 14 · título
+     de sección 20, y **ninguno de los tres existía en la escala**.
+
+     POR QUÉ SE MOVIÓ EL VALOR Y NO SE AGREGARON TOKENS NUEVOS, que era
+     la otra vía y se midió: agregar 14/16/20 al lado de 13/15/18 solo
+     alcanzaba a quien monta `Texto`. Los **330 usos directos** medidos
+     (`size.sm` 208 · `size.base` 92 · `size.md` 30) se quedaban en la
+     escala vieja, y dos pantallas vecinas dirían 13 y 14. *Hoy la casa
+     es consistente en el valor equivocado; la otra vía la dejaba
+     inconsistente, que es peor que no hacer nada.*
+
+     ⚠️ SU COSTO, declarado y no escondido: los 330 sitios cambiaron de
+     tamaño de una vez. El riesgo no es el tipo — es el LAYOUT: +1 y +2 px
+     mueven truncados, alturas de fila y saltos de línea en pantallas que
+     nadie va a volver a mirar una por una. **Esto necesita ojo en
+     dispositivo, y B no lo tiene.**
+
+     `xs` (11), `lg` (22), `xl` (28) y de ahí para arriba NO se tocan:
+     N1 no los nombra, y mover lo que la letra no pide es inventar. */
   size: {
     xs:    11,
-    sm:    13,
-    base:  15,
-    md:    18,
+    sm:    14,
+    base:  16,
+    md:    20,
     lg:    22,
     xl:    28,
     '2xl': 32,
