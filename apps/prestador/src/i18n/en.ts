@@ -574,6 +574,7 @@ export const prestadorEn = {
     eliminarVoz:
       "It will live here, done right. First we need to properly resolve what happens to your paid appointments, your active plans and your pending payouts — a business with commitments isn't deleted lightly.",
     entendido: 'Got it',
+    enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
     // S60-B2 — Espejo de es.ts · LOTE S60, GATE PENDIENTE
     negocioTitulo: 'Your business',
     nombreComercialLabel: 'Public name',
@@ -2551,6 +2552,103 @@ export const prestadorEn = {
     },
     facturacion: {
       titulo: 'Your billing',
+    },
+  },
+
+  // THE ONBOARDING WIZARD (S97-C) · S97 BATCH, GATE PENDING
+  // The counter law (S91): narrative plus one step, never a checklist,
+  // and the number must be able to reach ZERO. What depends on
+  // e-PetPlace stays OUT of the counter — hence `esperaNuestra` is a
+  // separate voice: he gets to zero, then we take over.
+  alta: {
+    encabezado: 'Your business',
+    contadorUno: '1 step to go.',
+    contadorVarios: '{{n}} steps to go.',
+    contadorCero: "Your part is done.",
+    esperaNuestra: "Now it's on us: we're reviewing what you uploaded.",
+    saltar: 'Skip for now',
+    continuar: 'Continue',
+    terminar: 'Open my house',
+    volver: 'Back',
+    errorTitulo: "We couldn't load this",
+    errorVoz: 'It might be the connection. Try again.',
+    reintentar: 'Try again',
+    entendido: 'Got it',
+    enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
+    oficioVeterinaria: 'Veterinary',
+    oficioGrooming: 'Grooming',
+    oficioPaseo: 'Walking',
+    oficioAdiestramiento: 'Training',
+
+    paso1: {
+      titulo: 'Your business',
+      bajada: 'The name families will find you by.',
+      nombre: 'Business name',
+      logoTitulo: 'Your logo',
+      logoAgregar: 'Add logo',
+      logoCambiar: 'Change',
+      logoQuitar: 'Remove',
+      logoVacio: "Without a logo we'll use your initials.",
+    },
+
+    paso2: {
+      titulo: 'What you offer',
+      bajada: 'Turn on what you already do today. The fine print comes later.',
+      servicios: 'Your services',
+      serviciosVacioTitulo: "You haven't added services yet",
+      serviciosVacioVoz: "Once you add your offer you'll be able to say where you provide each service.",
+      serviciosVacioCta: 'Go to my offer',
+      enMiLocal: 'At my place',
+      aDomicilio: 'I travel to them',
+      ultimaModalidad: 'A service needs at least one place where you provide it.',
+      tienda: 'Your store',
+      tiendaVoz: 'Sell food, parasite control and supplements to the families that already choose you.',
+      tiendaCta: 'I want to sell products',
+      tiendaPropuesta: "You asked to sell products. We're reviewing it.",
+      configuracionTitulo: 'Your offer in detail',
+      configuracionDetalle: 'Prices, hours and coverage',
+    },
+
+    paso3: {
+      titulo: 'Your documents',
+      bajada: 'We need them to verify your business is real. We review them.',
+      subir: 'Upload',
+      reemplazar: 'Replace',
+      subido: 'Uploaded',
+      enRevision: 'Under review',
+      aprobado: 'Approved',
+      rechazado: 'Needs to be uploaded again',
+      vacioTitulo: "You haven't uploaded documents yet",
+      vacioVoz: 'Upload the first one and we take it from there.',
+    },
+
+    paso4: {
+      titulo: 'Your team',
+      bajada: 'Who works with you. Today you can add whoever delivers.',
+      deTuEquipo: 'From your team',
+      deTuEquipoVoz: 'Already works with you: inherits their name and ID.',
+      nuevo: 'Someone new',
+      nuevoVoz: "Not on your team yet.",
+      repartidor: 'Delivery person',
+      vacioTitulo: 'You still work on your own',
+      vacioVoz: "Once you add someone they'll show up here.",
+    },
+
+    salteo: {
+      paso2:
+        'Setting up your services is what lets us bring you the clients your business needs — you can find it any time under Account › Your business.',
+      paso3:
+        "Without your documents we can't verify you, and unverified you don't show up to families — you can upload them any time under Account › Your business.",
+      paso4:
+        'Adding your team is what lets you share the work of the day — you can find it under Account › Your team.',
+    },
+
+    estado: {
+      enRevision: 'Under review',
+      activa: 'Active',
+      modalTitulo: 'What does "under review" mean?',
+      modalVoz:
+        'We look at every business before showing it to families. That\'s what makes being here mean something. We\'ll let you know as soon as it\'s done.',
     },
   },
 } as const satisfies Espejo<typeof prestadorEs>;
