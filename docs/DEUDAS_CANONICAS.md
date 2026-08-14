@@ -15889,10 +15889,47 @@ intención nació», habría declarado cerrada una promesa que **sigue siendo
 falsa** — con evidencia, timestamp y todo. **Verificar el eslabón siguiente no
 es celo: es la diferencia entre curar y creer que se curó.**
 
-☠️ **Muere** con **D-816 resuelta** (el caller y el 401 del correo) **más** la
-voz honesta mientras tanto, **y el gate en dispositivo de que un teléfono real
-vibra por este camino** — lo único que A no puede firmar sola (L-153).
-**Territorio: A (D-816) + superficie (voz) + el gate del founder.**
+### ✅ CERRADA POR CAMINO REAL (S97-A, 14-ago · §6bis-B)
+
+**El teléfono de la familia recibió esto:**
+
+> **«Clínica Aurora pide ver el expediente de Lolo»**
+> *«Clínica Aurora necesita tu OK para abrir el expediente de Lolo en esta
+> visita. Te están esperando en el mostrador: abre la app para aprobar o
+> rechazar.»*
+
+**El vet pidió desde la app del prestador; el push cayó en la del cliente, en
+el mismo aparato, con las dos sesiones vivas.** *Fue la primera notificación
+real después de once días de silencio* (ver D-816).
+
+### 🔴 Y LA ÚLTIMA MILLA COSTÓ DOS HUECOS MÁS, los dos míos
+
+**El push llegó ANTES de estar terminado, diciendo «Tienes una novedad en
+e-PetPlace · Abre la app para verla».** *Ese es el momento donde esto se
+declaraba cerrado y no lo estaba.*
+
+1. **El tipo nació sin su rama en `_voz_notificacion`** ⇒ la función devolvía
+   `{}` (que es correcto: *«sin voz firmada: NO INVENTA»*) y el transporte caía
+   a su genérico. Curado en `20260814230000` — **empalmando sobre la definición
+   VIVA**, no reescribiendo 30 ramas de memoria.
+2. **Y con la rama escrita seguía saliendo el genérico**, porque —medido en la
+   fuente— **`despachar-push` no resuelve la voz: lee `datos.titulo`** (su
+   línea 205) y **`registrar_intencion_notificacion` tampoco la llama**.
+   ⇒ **la hornea CADA PRODUCTOR**, y los nueve que ya tenían voz usan el mismo
+   idioma: `jsonb_build_object(...) || _voz_notificacion(...)`. Curado en
+   `20260814240000`.
+
+> ***Escribir la rama de voz y no llamarla es «motor sin puerta» en chiquito:
+> el texto existe, es correcto, y no lo lee nadie.*** Y su modo de falla es el
+> peor: **no falla** — manda el genérico y parece que funcionó.
+
+**Por qué importaba pelear la voz y no aceptar el genérico:** *«tienes una
+novedad» es una invitación a mirar cuando puedas, y del otro lado hay un
+profesional PARADO esperando.* Un aviso que no transmite que alguien espera se
+lee después — **y «después» es cuando el vet ya resolvió el problema de otra
+forma, que es exactamente el camino que este handshake existe para evitar.**
+
+☠️ **CERRADA.** **Territorio: A.**
 
 ---
 
