@@ -3318,6 +3318,21 @@ export const prestadorEs = {
       tiendaVoz: 'Vender alimento, antiparasitarios y suplementos a las familias que ya te eligen.',
       tiendaCta: 'Quiero vender productos',
       tiendaPropuesta: 'Nos pediste vender productos. Lo estamos revisando.',
+      /* ⭐ S98-C · LOS DOS TOGGLES DE LA SOLICITUD (firma del founder) —
+         las dos caras de §8.6ter declaradas como intención, antes de
+         tener la tienda. */
+      tiendaLocalPregunta: '¿Vendés en tu local?',
+      tiendaCanalPregunta: '¿Vendés a través de e-PetPlace?',
+      tiendaPidiendo: 'Enviando tu solicitud…',
+      tiendaLocalV2Titulo: 'Todavía no, pero viene',
+      tiendaLocalV2Voz:
+        'Cargar el inventario de tu local —lo que tenés en tus estantes— llega en la próxima versión. Por ahora podés pedir vender a través de e-PetPlace.',
+      tiendaLocalV2Cerrar: 'Entendido',
+      /* ④ · el aviso, NO el muro: la solicitud ya entró cuando esto sale. */
+      docsFaltanTitulo: 'Nos falta tu documentación',
+      docsFaltanVoz:
+        'Tu solicitud ya entró. Para activar la tienda y empezar a recibir pedidos necesitamos tus documentos — los subís en el paso «Tus documentos» de esta misma alta.',
+      docsFaltanCta: 'Entendido',
       /* ⭐ S98-C · DOS VOCES, PORQUE SON DOS CASAS. La vieja era UNA y su
          puerta llevaba SIEMPRE a la config del vendedor: un veterinario
          leía «precios, horarios y cobertura» —que describe su taller con

@@ -62,6 +62,7 @@ import {
   fijarModalidadServicio,
   obtenerNaturalezasDeCuenta,
   obtenerOficiosNegocio,
+  listarDocumentosCuenta,
   solicitarNaturalezaComercial,
   type EstadoNaturaleza,
   type OficioChip,
@@ -134,6 +135,14 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
   const [guardando, setGuardando] = useState<string | null>(null);
   const [pidiendoTienda, setPidiendoTienda] = useState(false);
   const [modalTienda, setModalTienda] = useState(false);
+  /** ⭐ S98-C · el modal de la cara LOCAL, que llega en V2 (firma). */
+  const [modalLocalV2, setModalLocalV2] = useState(false);
+  /** ⭐ S98-C (④) · el aviso de documentación. **La solicitud SIEMPRE
+   *  entra**: esto avisa qué falta y dónde, y el gate de documentos vive
+   *  en la APROBACIÓN (quien activa valida que estén), no en la puerta de
+   *  pedir. *Frenar la solicitud por documentos convertiría un aviso en un
+   *  muro, y el founder firmó lo contrario.* */
+  const [modalDocs, setModalDocs] = useState(false);
 
   const cargar = useCallback(async () => {
     // El vendedor puro NO tiene fila de prestador — y eso NO es un error:
@@ -224,6 +233,14 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
       return;
     }
     setPantalla((prev) => (prev.estado !== 'listo' ? prev : { ...prev, tienda: res.data.estado }));
+
+    /* ④ · EL AVISO DE DOCUMENTACIÓN — DESPUÉS de que la solicitud entró,
+       nunca antes. Se lee acá y no al montar para no pagar el viaje a
+       quien no va a pedir nada. Si la lectura falla NO se avisa: un modal
+       que dice «te faltan documentos» sobre una lectura caída manda a
+       alguien a subir lo que ya subió. */
+    const docs = await listarDocumentosCuenta(cuentaComercialId);
+    if (docs.ok && docs.data.length === 0) setModalDocs(true);
   }
 
   if (pantalla.estado === 'cargando') {
@@ -355,15 +372,39 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
                   <Texto variante="apoyo">{t('alta.paso2.tiendaPropuesta')}</Texto>
                 </View>
               ) : (
+                /* ⭐ S98-C · LOS DOS TOGGLES DE LA SOLICITUD (firma del
+                   founder): *«al pedir activar la tienda, dos preguntas:
+                   ¿vendés en tu local? y ¿vendés a través de ePetPlace?»*.
+
+                   **No son dos configuraciones: son la DECLARACIÓN DE
+                   INTENCIÓN de cada una de las dos caras** que §8.6ter ya
+                   firmó —el inventario del local y el catálogo de
+                   e-PetPlace—. Por eso viven en la solicitud y no en la
+                   configuración: se declaran ANTES de tener la tienda.
+
+                   ⚠️ **Solo el segundo tiene motor hoy.** El primero
+                   declara una cara que llega en V2, y **lo dice al
+                   tocarlo** en vez de guardar en silencio algo que nadie
+                   va a leer — misma excepción firmada que la baldosa del
+                   inventario en Negocio: *la puerta anuncia lo que viene.*
+                   *Un toggle que se prende y no hace nada es peor que uno
+                   que no está: promete estado.* */
                 <View style={{ gap: spacing[4] }}>
                   <Texto variante="cuerpo">{t('alta.paso2.tiendaVoz')}</Texto>
-                  <Boton
-                    variante="primario"
-                    bloque
-                    cargando={pidiendoTienda}
-                    etiqueta={t('alta.paso2.tiendaCta')}
-                    onPress={() => void pedirTienda()}
+
+                  <FilaModalidad
+                    etiqueta={t('alta.paso2.tiendaLocalPregunta')}
+                    encendido={false}
+                    onCambio={() => setModalLocalV2(true)}
                   />
+                  <FilaModalidad
+                    etiqueta={t('alta.paso2.tiendaCanalPregunta')}
+                    encendido={false}
+                    onCambio={() => void pedirTienda()}
+                  />
+                  {pidiendoTienda ? (
+                    <Texto variante="apoyo">{t('alta.paso2.tiendaPidiendo')}</Texto>
+                  ) : null}
                 </View>
               )}
             </View>
@@ -417,6 +458,51 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
           )}
         </Tarjeta>
       </Entrada>
+
+      {/* ⭐ S98-C · LA CARA LOCAL LLEGA EN V2 — misma excepción firmada que
+          la baldosa del inventario en Negocio: la puerta ANUNCIA lo que
+          viene en vez de callarlo. El toggle vuelve solo a apagado: no
+          guarda nada, y decirlo es más honesto que dejarlo prendido
+          fingiendo estado. */}
+      <Hoja
+        visible={modalLocalV2}
+        onCerrar={() => setModalLocalV2(false)}
+        titulo={t('alta.paso2.tiendaLocalV2Titulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{t('alta.paso2.tiendaLocalV2Voz')}</Texto>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('alta.paso2.tiendaLocalV2Cerrar')}
+            onPress={() => setModalLocalV2(false)}
+          />
+        </View>
+      </Hoja>
+
+      {/* ⭐ S98-C (④) · EL AVISO DE DOCUMENTACIÓN (firma del founder).
+          **La solicitud YA ENTRÓ** cuando esto aparece: el modal no frena
+          nada, dice qué falta y DÓNDE. El gate de documentos vive en la
+          aprobación —quien activa valida que estén—, y por eso acá no hay
+          un «no podés pedir»: *frenar la solicitud por documentos
+          convertiría un aviso en un muro.* */}
+      <Hoja
+        visible={modalDocs}
+        onCerrar={() => setModalDocs(false)}
+        titulo={t('alta.paso2.docsFaltanTitulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{t('alta.paso2.docsFaltanVoz')}</Texto>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('alta.paso2.docsFaltanCta')}
+            onPress={() => setModalDocs(false)}
+          />
+        </View>
+      </Hoja>
 
       <Hoja
         visible={modalTienda}
