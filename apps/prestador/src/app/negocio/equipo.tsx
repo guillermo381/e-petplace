@@ -69,6 +69,9 @@ import {
 } from '@epetplace/ui';
 import {
   actualizarExponePersonas,
+  asignarRolEmpleado,
+  quitarRolEmpleado,
+  type RolEquipo,
   asignarServiciosEmpleado,
   desvincularEmpleado,
   guardarMatriculaEmpleado,
@@ -81,6 +84,7 @@ import {
   obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
   obtenerOficiosNegocio,
+  puedeOfrecerRolRecepcion,
   quitarServiciosEmpleado,
   resolverUrlLogoNegocio,
   type ChipEmpleado,
@@ -155,11 +159,15 @@ export default function EquipoNegocioPantalla() {
   // RECEPCIÓN NO SE ESCRIBE DESDE LA PANTALLA (su fila la concede el RPC
   // de aceptación — migración A2bis, tanda de A); `profesional` es
   // DERIVADO (≥1 chip) y no se escribe. EL TOGGLE ADMINISTRADOR NO SE
-  // OFRECE — ⏪ S88-C: la razón DECÍA «su motor no existe (D-513 v2)» y
-  // CADUCÓ el 5-ago-2026 (D-660 le dio motor, gateado). Lo que falta hoy
-  // es la SUPERFICIE con su letra: LETRA_ROLES_EQUIPO S74 sigue firmada
-  // —solo el TITULAR nombra administradores, con el aviso de §6— y esa
-  // pantalla no existe. Sin lámina no se dibuja.
+  // OFRECE **AL INVITAR** — ⏪ S97-D: esta nota decía «esa pantalla no
+  // existe. Sin lámina no se dibuja», y quedó FALSA el día que la Hoja del
+  // miembro ganó su cuarto bloque. Se corrige en vez de dejarse: una prosa
+  // que niega algo construido manda a construirlo dos veces.
+  // Lo que rige HOY, y es distinto: el rol se da **sobre una persona que ya
+  // está en el equipo** (la Hoja del miembro), no en la invitación. El
+  // porqué es de letra: nombrar administradores exige el aviso de §6 ANTES
+  // del acto (S74), y una invitación es una promesa a futuro sobre alguien
+  // que todavía no aceptó — el aviso llegaría antes que la persona.
   // null en oficios = no legibles: el toggle
   // no se ofrece (ausencia ante la duda; el flujo de dos pasos queda).
   const [oficios, setOficios] = useState<OficioNegocio[] | null>(null);
@@ -170,6 +178,31 @@ export default function EquipoNegocioPantalla() {
   /** ⭐ S88-C (D-664): GESTIÓN dicha por el servidor — null = sin
    *  confirmar (la pantalla no llega a 'listo' sin él). */
   const [gestiona, setGestiona] = useState<boolean | null>(null);
+  /** ⭐ S97-D · TITULARIDAD dicha por el servidor, y es OTRA pregunta que
+   *  `gestiona`: el administrador GESTIONA (D-660) y **no nombra
+   *  administradores** — eso es del titular y solo del titular
+   *  (`LETRA_ROLES_EQUIPO_S74`, firma del founder; la mesa había propuesto
+   *  que el administrador también, y el founder lo bajó). Sin este dato el
+   *  bloque [4] tendría que deducir la titularidad, y deducir un permiso es
+   *  cómo nacen los gates decorativos. `null` = sin confirmar. */
+  const [esTitular, setEsTitular] = useState<boolean | null>(null);
+  /* ⭐ S97-D · ¿SE PUEDE OFRECER RECEPCIÓN EN ESTE EQUIPO?
+     (`LA_CASA_DEL_PRESTADOR` §2.3, firma founder 13-ago — Ley 23 aplicada al
+     alta de personas: la puerta no ofrece lo que no existe.)
+
+     ⚠️ LOS TRES ESTADOS NO SON DOS, y de eso depende que esto no mienta:
+     `true` = se ofrece · `false` = el server DIJO que no · **`null` = no se
+     pudo preguntar, y eso NO es un no**. Solo se esconde con `false`
+     explícito — la permisividad la declara el propio wrapper (D-792) y la
+     razón es L-139: un `false` fabricado por un fallo de red diría «este
+     negocio no atiende en su local», que es una afirmación sobre el negocio
+     que nadie hizo. Esconder un rol por un error de red es decidir permisos
+     con información que no tenemos. */
+  const [puedeRecepcion, setPuedeRecepcion] = useState<boolean | null>(null);
+  /** El segundo toque del toggle Administrador: `null` = nadie esperando ·
+   *  `'dar'` / `'quitar'` = el aviso está a la vista y falta confirmar
+   *  (§6: el aviso va ANTES del acto, jamás como resultado). */
+  const [confirmaAdmin, setConfirmaAdmin] = useState<'dar' | 'quitar' | null>(null);
 
   // ── S78-B: el estado de la Hoja del miembro ──
   const [chips, setChips] = useState<ChipEmpleado[] | null>(null);
@@ -226,15 +259,25 @@ export default function EquipoNegocioPantalla() {
        superficie y no la pierde. Se resuelve ANTES de 'listo': cero
        parpadeo entre solo-lectura y edición. Su fallo NO abre (Ley 23):
        cae a error con reintento, jamás a un rol adivinado. */
-    const [equipo, posicion] = await Promise.all([
+    /* ⭐ S97-D · el lector de §2.3 entra al MISMO Promise.all — cero
+       round-trip extra (la lección de D-531: una pantalla que abre con una
+       cascada en serie ya costó 579 ms una vez).
+       ⚠️ Y su fallo NO tumba la pantalla, a diferencia de los otros dos:
+       equipo y posición son la pantalla; esto solo decide si se NOMBRA un
+       rol. Caer a error por no poder responder una pregunta accesoria sería
+       apagar la gestión del equipo entera por un detalle de copy. */
+    const [equipo, posicion, recepcion] = await Promise.all([
       obtenerEquipoNegocio(cuenta.data.id),
       obtenerMiPosicionEnPrestador(prestador.data.id),
+      puedeOfrecerRolRecepcion(prestador.data.id),
     ]);
     if (!equipo.ok || !posicion.ok) {
       setPantalla({ estado: 'error', mensaje: t('equipo.errorCarga') });
       return;
     }
     setGestiona(posicion.data.gestiona);
+    setEsTitular(posicion.data.esTitular);
+    setPuedeRecepcion(recepcion.ok ? recepcion.data : null);
     setPantalla({ estado: 'listo', prestador: prestador.data, equipo: equipo.data });
 
   }, [t]);
@@ -411,6 +454,43 @@ export default function EquipoNegocioPantalla() {
       });
       return;
     }
+    await cargar();
+  }
+
+  /** ⭐ S97-D · DAR O QUITAR EL ROL ADMINISTRADOR.
+   *
+   *  El motor existe desde D-660 (5-ago-2026, gateado): 19 policies cuelgan
+   *  de `user_gestiona_prestador`, que ya resuelve titular OR administrador.
+   *  Lo único que faltaba era esta puerta.
+   *
+   *  ⚠️ EL SERVIDOR SIGUE SIENDO LA AUTORIDAD. Este handler no se llama sin
+   *  `esTitular`, pero eso es CORTESÍA (Ley 23: la puerta no ofrece lo que
+   *  va a rechazar), no la validación — la RLS de `empleado_roles` decide.
+   *  Un gate que solo vive en la pantalla es decorativo.
+   *
+   *  ⚠️ Y NO se optimiza el estado local: tras escribir se RECARGA. El rol
+   *  cambia lo que esa persona puede hacer en 19 policies — pintar el
+   *  toggle encendido sin confirmar que el server lo aceptó sería decirle
+   *  al titular que entregó un poder que quizá no entregó. */
+  async function alternarAdministrador(m: MiembroEquipo, encender: boolean) {
+    if (ocupado) return;
+    setOcupado(true);
+    setVozError(null);
+    const r = encender
+      ? await asignarRolEmpleado(m.empleadoId, 'administrador')
+      : await quitarRolEmpleado(m.empleadoId, 'administrador');
+    setOcupado(false);
+    setConfirmaAdmin(null);
+    if (!r.ok) {
+      setVozError(t('equipo.adminError'));
+      return;
+    }
+    // La Hoja lee de `miembro`, que es una FOTO de la lista: sin esto el
+    // toggle volvería a su posición vieja hasta cerrar y reabrir.
+    const roles: RolEquipo[] = encender
+      ? [...m.roles, 'administrador']
+      : m.roles.filter((x) => x !== 'administrador');
+    setMiembro({ ...m, roles });
     await cargar();
   }
 
@@ -952,14 +1032,97 @@ export default function EquipoNegocioPantalla() {
                   </View>
                 </View>
 
-                {/* ── [4] ⟨LUGAR RESERVADO — Administrador⟩ · NO SE DIBUJA.
-                    La reserva es de ORDEN, no de píxeles: entra acá sin
-                    reordenar nada. Cero placeholder, cero toggle apagado,
-                    cero "próximamente" — Ley 23.
-                    ⏪ S88-C: decía «cuando su motor llegue (D-513 v2)» —
-                    EL MOTOR LLEGÓ (D-660, 5-ago-2026, gateado). Lo que
-                    espera ahora es la SUPERFICIE con su letra (S74: solo
-                    el titular nombra, aviso §6) y su lámina. ── */}
+                {/* ── [4] ⭐ S97-D · ADMINISTRADOR — el cuarto bloque OCUPA
+                    su lugar reservado, sin reordenar nada (la reserva de
+                    S88-C era de ORDEN y se respeta al pie de la letra).
+
+                    HERMANO del toggle Prestador de la Hoja de invitar, y
+                    eso es deliberado: mismo trabajo (estado BINARIO) ⇒
+                    mismo control (`Interruptor`, Ley 22 SÓLIDO + diccionario
+                    19), mismo `registro="oficio"`. No se inventó una forma
+                    nueva para un trabajo que la casa ya resuelve.
+
+                    ⚠️ SOLO EL TITULAR (letra S74, firma del founder — la
+                    mesa proponía que el administrador también y el founder
+                    lo bajó). Para un gestor NO titular el bloque NO SE
+                    DIBUJA: Ley 23, la puerta no ofrece lo que va a
+                    rechazar. `esTitular === null` (sin confirmar) tampoco
+                    dibuja — ante la duda, ausencia; un permiso adivinado
+                    es peor que un permiso que falta.
+
+                    ⚠️ EL AVISO DE §6 ES UN PLACEHOLDER DECLARADO Y SE VE
+                    QUE LO ES. Su literal está FIRMADO por el founder en
+                    `LETRA_ROLES_EQUIPO_S74` §6 y **no viajó a esta pista**
+                    (L-142: lo que no llegó como texto no se reconstruye de
+                    memoria). Se eligió un placeholder que GRITA en vez de
+                    uno plausible a propósito: si esto llegara a un gate sin
+                    su firma, el founder lo ve en un segundo — un texto
+                    verosímil pero inventado no se descubre nunca (L-139).
+
+                    ⚠️ Y la nota de oficio de S74 que SÍ viajó y sí rige: el
+                    botón dice «dar el rol», JAMÁS «hacerla administradora»
+                    — el género no se resuelve desde un nombre. ── */}
+                {esTitular === true && (
+                  <>
+                    <Separador />
+                    <View style={{ gap: spacing[3] }}>
+                      <Texto variante="seccion">{t('equipo.adminTitulo')}</Texto>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: spacing[3],
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Texto variante="cuerpo">{t('equipo.adminToggle')}</Texto>
+                        </View>
+                        <Interruptor
+                          encendido={miembro.roles.includes('administrador')}
+                          onCambio={(v) => setConfirmaAdmin(v ? 'dar' : 'quitar')}
+                          etiqueta={t('equipo.adminToggle')}
+                          registro="oficio"
+                        />
+                      </View>
+                      <Texto variante="apoyo">{t('equipo.adminAyuda')}</Texto>
+
+                      {/* El aviso ANTES del acto (§6) — mismo patrón de dos
+                          toques que ya usan «quitar oficio clínico» y
+                          «desvincular»: el toggle ABRE la pregunta, el
+                          botón la ejecuta. Sin esto, entregar el gobierno
+                          del negocio costaría un toque accidental. */}
+                      {confirmaAdmin !== null && (
+                        <Tarjeta tinte="warning" relleno="amplio">
+                          <View style={{ gap: spacing[3] }}>
+                            <Texto variante="cuerpo">
+                              {confirmaAdmin === 'dar'
+                                ? t('equipo.adminAvisoPENDIENTE', { nombre: miembro.nombre })
+                                : t('equipo.adminQuitarAviso', { nombre: miembro.nombre })}
+                            </Texto>
+                            <Boton
+                              variante={confirmaAdmin === 'dar' ? 'primario' : 'destructivo'}
+                              bloque
+                              cargando={ocupado}
+                              etiqueta={
+                                confirmaAdmin === 'dar' ? t('equipo.adminDarCta') : t('equipo.adminQuitarCta')
+                              }
+                              onPress={() =>
+                                void alternarAdministrador(miembro, confirmaAdmin === 'dar')
+                              }
+                            />
+                            <Boton
+                              variante="compacto"
+                              bloque
+                              etiqueta={t('equipo.adminCancelar')}
+                              onPress={() => setConfirmaAdmin(null)}
+                            />
+                          </View>
+                        </Tarjeta>
+                      )}
+                    </View>
+                  </>
+                )}
 
                 <Separador />
 
@@ -1021,7 +1184,9 @@ export default function EquipoNegocioPantalla() {
               pregunta lo que ya sabe, pero LO DICE (corolario S73).
               Toggle Prestador → chips a grano de OFICIO (§6: la
               pantalla escribe oficio, el motor guarda las ofertas).
-              EL TOGGLE ADMINISTRADOR NO SE OFRECE — ⏪ S88-C: la razón
+              EL TOGGLE ADMINISTRADOR NO SE OFRECE **ACÁ** — ⏪ S97-D: ya
+              existe, pero en la Hoja del miembro (bloque [4]), sobre una
+              persona que YA aceptó. ⏪ S88-C: la razón
               vieja («su motor no existe», D-513 v2) CADUCÓ el 5-ago-2026
               con D-660. La vigente es de LETRA: nombrar administradores
               es del TITULAR con su aviso (S74 §6), y esa superficie no
@@ -1058,7 +1223,27 @@ export default function EquipoNegocioPantalla() {
                   }
                 />
               )}
-              <Texto variante="apoyo">{t('equipo.invitarPisoAyuda')}</Texto>
+              {/* ⭐ S97-D · §2.3 — LA REGLA CONDICIONAL DE RECEPCIÓN.
+                  Esta línea es LA que ofrece el rol («sin servicios
+                  activados, entra como recepción»), así que es LA que la
+                  regla apaga.
+
+                  ⚠️ EL PREDICADO VIVO NO ERA EL DE LA LETRA, y por eso esto
+                  no era un no-op: el bloque entero ya se gatea en
+                  `oficios.length > 0`, que apaga al VENDEDOR PURO por
+                  accidente —el caso que la letra nombra— pero deja pasar al
+                  negocio que tiene servicios y NINGUNO con atención en
+                  local. Ese es el hueco que el lector del server cierra.
+
+                  ⚠️ SOLO CON `false` EXPLÍCITO (ver el estado): con `null`
+                  la línea SE MUESTRA. La permisividad es la declarada en
+                  D-792 y no una omisión — hoy `atiende_local` es
+                  `DEFAULT true` en 32 de 33 filas vivas, así que este guard
+                  discrimina el borde que importa y es permisivo en el
+                  centro hasta que alguien toque el toggle del paso ②. */}
+              {puedeRecepcion !== false && (
+                <Texto variante="apoyo">{t('equipo.invitarPisoAyuda')}</Texto>
+              )}
             </View>
           )}
 

@@ -106,6 +106,10 @@ export const prestadorEn = {
     errorCarga: "We couldn't load your invitation.",
     reintentar: 'Try again',
   },
+  // ⭐ S97-D — Espejo de es.ts · LOTE S97-D, GATE PENDIENTE
+  linea: {
+    despachoTitulo: 'Order {{orden}}',
+  },
   agenda: {
     // S60-C2.2 — Espejo de es.ts · LOTE S60
     // S71-B1 — the day header. `saludo` ('Your day today') died with the
@@ -2084,6 +2088,19 @@ export const prestadorEn = {
     desvincularAviso:
       'Removing them takes away their access to the business. Everything they did stays in the record. Any appointments they have become business appointments, and that cannot be undone.',
     bajaDespegadas: '{{n}} upcoming appointments became business appointments.',
+    // ⭐ S97-D — Espejo de es.ts · LOTE S97-D, GATE PENDIENTE
+    adminTitulo: 'Business management',
+    adminToggle: 'Administrator',
+    adminAyuda: 'They can set up the business just like you. The one thing they cannot do is name other administrators.',
+    // 🔴 PLACEHOLDER — see the note in es.ts. The signed literal lives in
+    // LETRA_ROLES_EQUIPO_S74 §6 and never reached this track.
+    adminAvisoPENDIENTE:
+      '[SIGNED TEXT MISSING — LETRA_ROLES_EQUIPO_S74 §6] You are about to give {{nombre}} control of the business.',
+    adminDarCta: 'Give the role',
+    adminQuitarAviso: '{{nombre}} can no longer set up the business. They stay on your team and keep their services.',
+    adminQuitarCta: 'Remove the role',
+    adminCancelar: 'Not now',
+    adminError: "We couldn't change the role. Try again.",
     equipoDeUno: 'Your team is just you for now. Invite people when you need to.',
     invitarCta: 'Invite to your team',
     invitarTitulo: 'Invite to your team',

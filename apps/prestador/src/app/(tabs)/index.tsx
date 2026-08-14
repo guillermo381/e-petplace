@@ -86,6 +86,8 @@ import {
   obtenerSolicitudesMostrador,
   obtenerJornadaRecepcion,
   registrarLlegada,
+  listarPedidosDelVendedor,
+  type PedidoDelVendedor,
   type CitaJornadaRecepcion,
   type SolicitudMostrador,
   type PlataDelDia,
@@ -476,6 +478,52 @@ type ItemJornada =
   | { tipo: 'cita'; cita: CitaAgendaPaseo }
   | { tipo: 'salida'; clave: string; citas: CitaAgendaPaseo[] };
 
+/* ⭐ S97-D · EL DÍA ES UNO SOLO — el despacho es habitante de la línea,
+   no una lista aparte. §15b.0ter dice «el día, ABAJO y EN ORDEN», y un
+   pedido con promesa de entrega a las 14:00 es exactamente eso: algo
+   que pasa a las 14:00. La ÚNICA razón por la que vivía afuera es que
+   nació en otro frente (la despensa), y eso es historia del código, no
+   una verdad del día del prestador.
+   ⚠️ EL CINTURÓN §3.4 QUEDA INTACTO Y ESO NO ES UN DETALLE: citas y
+   pedidos conviven EN LA VISTA y jamás en una tabla — son dos lectores
+   distintos (`obtenerCitas*` sobre `evento_cita_servicio` ·
+   `listarPedidosDelVendedor` sobre `v_pedidos_narrativa`) que esta
+   pantalla ORDENA por hora. Unir en la vista es composición; unir en el
+   motor sería romper la frontera servicios↔productos. */
+type ItemLinea = ItemJornada | { tipo: 'despacho'; pedido: PedidoDelVendedor };
+
+/** La hora «HH:MM» de CUALQUIER habitante de la línea — la que la ordena
+ *  y la que se pinta en la columna izquierda. UNA función para las dos
+ *  cosas a propósito: si el orden y el dibujo salieran de dos lugares,
+ *  podrían discrepar y la línea diría una hora y estaría en otro lugar. */
+function horaDeItem(item: ItemLinea): string | null {
+  if (item.tipo === 'cita') return item.cita.hora?.slice(0, 5) ?? null;
+  if (item.tipo === 'salida') return item.citas[0]?.hora?.slice(0, 5) ?? null;
+  return horaLocalDeIso(item.pedido.promesa_desde);
+}
+
+/** La hora local «HH:MM» de un instante ISO. El despacho la trae como
+ *  timestamptz (la promesa de entrega); la cita la trae ya como hora
+ *  local. Se normalizan las dos a lo mismo para poder ORDENARLAS —
+ *  sin eso no hay línea de tiempo, hay dos listas pegadas. */
+function horaLocalDeIso(iso: string | null): string | null {
+  if (iso === null) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** El día local «YYYY-MM-DD» de un instante ISO — el mismo criterio con
+ *  el que `hoyLocal()` computa el día de las citas. Comparar contra el
+ *  ISO crudo del server compararía días UTC, y a partir de las 19:00 en
+ *  Guayaquil eso manda el pedido de esta tarde al día siguiente. */
+function diaLocalDeIso(iso: string | null): string | null {
+  if (iso === null) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function claveBloque(c: CitaAgendaPaseo): string | null {
   if (!c.fecha || !c.hora) return null;
   return `${c.fecha}|${c.hora}|${c.duracion_minutos ?? ''}`;
@@ -512,6 +560,7 @@ function FilaCita({
   oficio = 'paseo',
   acciones,
   sinHora = false,
+  puerta,
 }: {
   cita: CitaAgendaPaseo;
   enVivo: boolean;
@@ -520,6 +569,16 @@ function FilaCita({
   oficio?: OficioCita;
   /** B14 ①: las acciones de ESTA cita — viven adentro de SU tarjeta. */
   acciones?: React.ReactNode;
+  /** ⭐ S97-D · EL ESTADO DE PUERTA DE **ESTA** CITA, y por qué es prop y
+   *  no un bloque aparte: la llegada no es otra cosa que le pasa al día
+   *  — es algo que le pasó a ESTA cita. Cuando vivía en su propia banda,
+   *  la misma cita se dibujaba dos veces en la misma pantalla (arriba en
+   *  la banda, abajo en la línea), que es EXACTAMENTE el defecto que
+   *  §15b.0ter curó en S86 y que la banda de S88 reintrodujo sin verlo.
+   *  ⚠️ Y REEMPLAZA al chip de estado genérico, no se suma: «Llegó» dice
+   *  más que «Confirmada» sobre la misma cita, y dos chips donde alcanza
+   *  uno es Ley 16 (Chanel) y Ley 17.6 (cada elemento, UN trabajo). */
+  puerta?: { estado: 'llego' | 'adentro'; conNombre: string | null };
   /** ⭐ S86-C · en la LÍNEA DE TIEMPO la hora vive en la columna de la
    *  izquierda, así que la fila no la repite: su metadata queda solo con
    *  la duración. Repetirla sería decir dos veces lo mismo a dos
@@ -535,7 +594,22 @@ function FilaCita({
   const dur = cita.duracion_minutos;
 
   const ef = estadoEfectivo(cita);
-  const insignia = enVivo ? undefined : ef ? insignias[ef] : undefined;
+  /* ⭐ S97-D · la puerta GANA sobre el estado genérico cuando existe (ver
+     la prop). En vivo sigue sin chip: el `CitaEnVivo` que la envuelve ya
+     lo dice, y decirlo dos veces es el mismo pecado a otra escala. */
+  const chipPuerta: { estado: InsigniaEstado; etiqueta: string } | undefined =
+    puerta === undefined
+      ? undefined
+      : {
+          estado: 'info',
+          etiqueta:
+            puerta.estado === 'adentro'
+              ? puerta.conNombre !== null
+                ? t('recepcion.adentroCon', { nombre: puerta.conNombre })
+                : t('recepcion.adentro')
+              : t('recepcion.llego'),
+        };
+  const insignia = enVivo ? undefined : (chipPuerta ?? (ef ? insignias[ef] : undefined));
   // S72-B pieza 3: un procedimiento coordinado dice su descripción
   // («Ecografía +1»), no el genérico "Procedimiento" de su tipo. null en
   // los otros oficios → la etiqueta del tipo, como siempre.
@@ -550,6 +624,51 @@ function FilaCita({
   // M2 s80-b8 + auditoría s80-b12. La fila EN VIVO lleva canto como
   // todas (§9.2: el glow cuenta VIVOS; la tinta es estática).
   const nombre = cita.mascota?.nombre ?? t('agenda.mascotaFallback');
+
+  /* ⭐ S97-D · EL SEGUNDO PISO — la banda de estado (firma del founder).
+     Glifo del oficio + chips, en su propia línea y con el ancho entero
+     (~340px para ~160px de contenido: nada trunca).
+
+     ⚠️ VIAJA EN `acciones` Y VA PRIMERO, y eso importa: `FilaCitaUi` no
+     tiene slot de «segundo piso», así que la banda entra por el único que
+     rinde debajo del sujeto — pero ANTES del `<Separador />` con el que
+     abre `accionesDe`. Así el botón de acción conserva su TERCER nivel
+     tras la línea, que ya era su lugar por diseño (Ley 22c).
+     ⚠️ La banda NO lleva separador propio: es el mismo sujeto en otro
+     renglón, no una cosa distinta (N3 — la línea separa lo que de verdad
+     difiere). Lo que la separa es el AIRE, múltiplo de 8 (N2). */
+  const bandaEstado =
+    insignia || cita.origen === 'mostrador' ? (
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: spacing[2],
+          paddingHorizontal: spacing[4],
+          paddingBottom: spacing[3],
+        }}
+      >
+        <Icono
+          nombre={
+            oficio === 'grooming'
+              ? 'grooming'
+              : oficio === 'adiestramiento'
+                ? 'training'
+                : oficio === 'vet'
+                  ? 'veterinaria'
+                  : 'paseo'
+          }
+          registro="aa"
+          tamano={21}
+        />
+        {cita.origen === 'mostrador' && (
+          <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
+        )}
+        {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
+      </View>
+    ) : null;
+
   return (
     <FilaCitaUi
       // S82-B r38: la dirección se DECLARA (sin default). Acá el onPress
@@ -571,7 +690,16 @@ function FilaCita({
         fotoUrl,
         especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
       }}
-      acciones={acciones}
+      /* El segundo piso primero, las acciones después (ver `bandaEstado`):
+         sujeto · banda de estado · línea · acciones. */
+      acciones={
+        bandaEstado === null && acciones === undefined ? undefined : (
+          <>
+            {bandaEstado}
+            {acciones}
+          </>
+        )
+      }
       onPress={() =>
         router.push(
           oficio === 'grooming'
@@ -583,30 +711,53 @@ function FilaCita({
                 : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
         )
       }
-      // fin = slot de DATOS (Ley 3: la voz es de la pantalla):
-      // S61-B12 la marca de oficio b′ + S70-B1 el chip de origen + estado.
-      fin={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
-          <Icono
-            nombre={
-              oficio === 'grooming'
-                ? 'grooming'
-                : oficio === 'adiestramiento'
-                  ? 'training'
-                  : oficio === 'vet'
-                    ? 'veterinaria'
-                    : 'paseo'
-            }
-            registro="aa"
-            tamano={21}
-          />
-          {cita.origen === 'mostrador' && (
-            <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
-          )}
-          {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
-        </View>
-      }
+      /* ⭐ S97-D · LA FILA VA EN DOS PISOS (firma del founder tras cuatro
+         vueltas de flexbox que movieron el defecto de lugar sin cerrarlo).
+
+         ⏪ ACÁ VIVÍA `fin`: glifo + chip de origen + chip de estado, a la
+         DERECHA del sujeto. **Ese bloque era el problema, medido por B:**
+         ~160px de ancho intrínseco —una `Insignia` con texto adentro no
+         cede— peleando el mismo renglón contra el título. La aritmética no
+         cerraba: ~92 (avatar+gaps) + 96 (piso del texto) + ~160 = ~348
+         pedidos contra ~340 disponibles. **Con el total fuera de rango, la
+         pieza solo podía elegir QUIÉN se rompía**: truncado → solapamiento
+         → corte mudo → colisión, cuatro síntomas de una sola causa.
+
+         ⇒ `fin` queda VACÍO y el chevron —que lo pone `FilaCitaUi` después
+         del slot— se conserva. El sujeto se queda con el renglón entero.
+
+         **La ley detrás, y es la de la fila llevada a su conclusión: el
+         nombre preside ⇒ la forma más honesta de ceder es NO PELEAR EL
+         MISMO RENGLÓN.** Bajar los chips no los degrada: les da el ancho
+         que nunca tuvieron. */
     />
+  );
+}
+
+/* ⭐ S97-D · LA FILA DEL DESPACHO — hermana de la de cita, misma
+   gramática: glifo del oficio · sujeto · chip de estado en neutro · UNA
+   acción (la fila entera navega a su pedido, 19.7 `›`).
+   ⚠️ NO usa `FilaCitaUi`: esa pieza es de DOMINIO y su contrato pide
+   `mascota` — y un pedido NO TIENE MASCOTA, ni debe tenerla. El rol
+   vendedor no ve el expediente por ninguna vía (MODELO_DESPENSA §7.4),
+   así que meterle una cara prestada sería dibujar una relación que el
+   motor prohíbe. Se compone con la casa (`CeldaNavegacion` es celda de
+   navegación, Ley 19.1) en vez de forzar la pieza equivocada.
+   ⚠️ El nombre del producto tampoco viaja: el sujeto de un despacho es
+   el PEDIDO. Lo que se compró se ve adentro. */
+function FilaDespacho({ pedido }: { pedido: PedidoDelVendedor }) {
+  const router = useRouter();
+  const { t } = useTraduccion();
+  return (
+    <Tarjeta relleno="ninguno">
+      <CeldaNavegacion
+        icono="despensa"
+        registro="aa"
+        titulo={t('linea.despachoTitulo', { orden: pedido.numero_orden })}
+        detalle={pedido.narrativa_nombre}
+        onPress={() => router.push({ pathname: '/ventas/pedido/[pedidoId]', params: { pedidoId: pedido.pedido_id } })}
+      />
+    </Tarjeta>
   );
 }
 
@@ -769,9 +920,17 @@ export default function Hoy() {
   const [puertaDatos, setPuertaDatos] = useState<
     { citas: CitaJornadaRecepcion[]; solicitudes: SolicitudMostrador[] } | 'error' | null
   >(null);
-  /** La Hoja del verbo «Llegó» — lista de por-llegar de hoy. */
-  const [hojaLlegadas, setHojaLlegadas] = useState(false);
+  /* ⏪ S97-D: murió `hojaLlegadas` con su Hoja (Ley 37). `marcandoLlegada`
+     sobrevive: sigue siendo el candado anti-doble-toque del verbo, ahora
+     por FILA. */
   const [marcandoLlegada, setMarcandoLlegada] = useState<string | null>(null);
+  /* ⭐ S97-D · LOS DESPACHOS DEL DÍA. `null` = sin pedir / esta cuenta no
+     vende / no se pudo leer — y las tres se dibujan igual: la línea
+     simplemente no tiene filas de despacho. Es DELIBERADO y distinto del
+     criterio de la puerta: un despacho ausente no es una afirmación sobre
+     el día (no dice «no hay entregas»), es la ausencia de una fuente. La
+     puerta SÍ afirma —por eso ella dice su error (D-541) y esto no. */
+  const [despachos, setDespachos] = useState<PedidoDelVendedor[] | null>(null);
   const { mostrar: mostrarAviso } = useAviso();
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
@@ -1104,19 +1263,51 @@ export default function Hoy() {
      perdían dos cosas que nadie pidió perder.
      Se extrae en vez de copiarse en los dos lugares: dos JSX iguales se
      separan un día y nadie se entera. */
+  /* ⭐ S97-D · ESTA FUNCIÓN ES LA DUEÑA DE LA ZONA DE ACCIONES DE UNA CITA —
+     las dos que puede tener, con UNA sola línea.
+
+     El porqué no es de gusto: la primera versión emitía el verbo de la
+     puerta desde el sitio de llamada, con su propio `<Separador />`, y la
+     tarjeta terminaba con DOS líneas — una antes de «Llegó» y otra antes de
+     «Conocer». **`verify:diseno` lo cazó** (R38/N3: el HOY pasó de 3 a 4
+     separadores). La cura no fue borrar una línea al azar sino juntar lo
+     que siempre fue una sola cosa: N3 dice que la línea separa cosas
+     realmente distintas, y dos acciones de la MISMA cita no lo son.
+
+     ⚠️ El verbo se calcula acá adentro y no se pasa por prop: `porLlegarIds`
+     ya vive en el closure, y una prop lo habría dejado decidir a cada sitio
+     de llamada — que es cómo vuelven las dos líneas. */
   const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
     const m = c.mascota;
-    if (!m) return undefined;
+    const conVerbo = porLlegarIds.has(c.id);
+    if (!m && !conVerbo) return undefined;
     return (
       <>
         <Separador />
-        <CeldaNavegacion
-          icono="carnet"
-          registro="aa"
-          titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
-          detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
-          onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
-        />
+        {conVerbo && (
+          <View style={{ padding: spacing[3], alignItems: 'flex-start' }}>
+            <Boton
+              variante="compacto"
+              etiqueta={t('recepcion.llegoCta')}
+              cargando={marcandoLlegada === c.id}
+              onPress={() => void marcarLlegadaPuerta(c.id)}
+            />
+          </View>
+        )}
+        {/* Sin mascota legible NO se dibuja la navegación al expediente —
+            pero el verbo de arriba SÍ sobrevive: registrar una llegada no
+            necesita saber el nombre de la mascota, y perder la puerta por
+            un dato de identidad ilegible sería castigar a la recepción por
+            un problema que no es suyo. */}
+        {m !== null && m !== undefined && (
+          <CeldaNavegacion
+            icono="carnet"
+            registro="aa"
+            titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
+            detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
+            onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+          />
+        )}
       </>
     );
   };
@@ -1271,6 +1462,31 @@ export default function Hoy() {
     };
   }, [pantalla]);
 
+  /* ⭐ S97-D · LOS DESPACHOS DEL DÍA — efecto PROPIO, y ese es el punto.
+     No viaja con la puerta aunque comparta la cuenta comercial: la puerta
+     es de CITAS y late por minuto (su reloj es del server); un pedido no
+     envejece en 60 s. Colgarlo del reloj de la puerta habría multiplicado
+     por 60 los viajes de una fuente que no los necesita — y habría atado
+     su visibilidad al rol de puerta, que no tiene nada que ver con vender.
+     ⚠️ SE PIDE UNA VEZ POR CUENTA y se refresca con el pull-to-refresh de
+     la pantalla (`cargar`), como el resto del día. */
+  useEffect(() => {
+    if (pantalla.estado !== 'listo') return;
+    const cuentaId = pantalla.cuentaComercialId;
+    if (cuentaId === null) {
+      setDespachos(null);
+      return;
+    }
+    let vigente = true;
+    void listarPedidosDelVendedor(cuentaId).then((r) => {
+      if (!vigente) return;
+      setDespachos(r.ok ? r.data : null);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [pantalla]);
+
   /** El verbo «Llegó» (idempotente, solo hoy). El refresco es OPTIMISTA
    *  local: el server ya registró (ok), y el reloj por minuto re-sincroniza
    *  el literal en <60 s — el timestamp local solo alimenta el `!== null`. */
@@ -1370,6 +1586,35 @@ export default function Hoy() {
   // D-385: el resto se agrupa por salida (solo paseo; grooming/vet no agrupan).
   const restoItems = agruparSalidas(resto.filter((c) => !esAtendida(c)), sinAgruparIds);
   const atendidasItems = agruparSalidas(resto.filter(esAtendida), sinAgruparIds);
+
+  /* ═══ ⭐ S97-D · LA LÍNEA DEL DÍA ES UNA SOLA ══════════════════════════
+
+     Citas y despachos se ORDENAN JUNTOS por hora. §15b.0ter dice «el día,
+     ABAJO y EN ORDEN» — y un día que se cuenta en dos listas no está en
+     orden: está en dos órdenes que el lector tiene que reconciliar de
+     memoria, que es exactamente el trabajo que la línea existe para
+     ahorrarle.
+
+     ⚠️ EL CINTURÓN §3.4 NO SE TOCA (ver `ItemLinea`): dos lectores, dos
+     tablas, una vista. Unir en la vista es composición; unir en el motor
+     sería romper la frontera servicios↔productos, que desde S95 se
+     sostiene SOLO en nuestra disciplina de esquema.
+
+     ⚠️ El despacho SIN promesa de entrega NO entra: sin hora no tiene
+     lugar en una línea de tiempo, y ponerlo arriba o abajo sería inventarle
+     uno. Lo terminal tampoco — un pedido entregado no es trabajo del día
+     (su lugar es el panel, que es su casa; la línea es lo que HAY QUE HACER). */
+  const despachosDelDia: PedidoDelVendedor[] =
+    despachos === null || diaVista === null
+      ? []
+      : despachos.filter(
+          (p) => !p.es_terminal && diaLocalDeIso(p.promesa_desde) === diaVista,
+        );
+
+  const lineaItems: ItemLinea[] = [
+    ...restoItems,
+    ...despachosDelDia.map((p) => ({ tipo: 'despacho' as const, pedido: p })),
+  ].sort((a, b) => (horaDeItem(a) ?? '').localeCompare(horaDeItem(b) ?? ''));
   // S70-B2-v2: la bandeja "Por coordinar" (D-439) del negocio (vista Hoy).
   const porCoordinar = pantalla.estado === 'listo' ? pantalla.porCoordinar : [];
 
@@ -1692,21 +1937,45 @@ export default function Hoy() {
      puerta vacía. */
   const conPuerta = pantalla.estado === 'listo' && pantalla.rol !== 'profesional';
   const puerta = conPuerta && puertaDatos !== null && puertaDatos !== 'error' ? puertaDatos : null;
-  const puertaAdentro = puerta ? puerta.citas.filter((c) => c.estado === 'en_curso') : [];
-  const puertaEsperando = puerta ? puerta.citas.filter((c) => c.estado === 'confirmada' && c.llegadaEn !== null) : [];
+  /* ⏪ S97-D: murieron `puertaAdentro` y `puertaEsperando` — sus dos listas
+     de tarjetas re-dibujaban citas que la línea ya mostraba. Su información
+     vive ahora en `puertaPorCita`, como chip de la fila que le corresponde. */
   const puertaPorLlegar = puerta ? puerta.citas.filter((c) => c.estado === 'confirmada' && c.llegadaEn === null) : [];
   const puertaSolicitudes = puerta
     ? puerta.solicitudes.filter((s) => s.estado === 'pendiente' || (s.estado === 'expirada' && s.respondidaEn === null))
     : [];
   const puertaError = conPuerta && puertaDatos === 'error';
+
+  /* ⭐ S97-D · LA PUERTA BAJA A LA FILA DE SU CITA.
+     Estado por `citaId`: la fila lo pinta como chip y ofrece el verbo.
+     ⏪ Acá arriba vivían DOS listas de tarjetas (adentro · esperando) que
+     re-dibujaban citas que la línea de abajo YA mostraba — el mismo día
+     contado dos veces, a pocos centímetros, que es el defecto exacto que
+     §15b.0ter curó en S86 y que la banda de S88 reintrodujo sin verlo.
+     La FIRMA de S88 se conserva entera en lo que importaba: el verbo
+     «Llegó» sigue al alcance del pulgar cuando alguien cruza la puerta —
+     ahora en la fila de la persona que cruzó, que es donde el ojo la
+     busca. Lo que muere es la duplicación, no la función. */
+  const puertaPorCita = new Map<string, { estado: 'llego' | 'adentro'; conNombre: string | null }>();
+  if (puerta !== null && vistaEsHoy) {
+    for (const c of puerta.citas) {
+      if (c.estado === 'en_curso') {
+        puertaPorCita.set(c.citaId, { estado: 'adentro', conNombre: c.empleadoNombre });
+      } else if (c.estado === 'confirmada' && c.llegadaEn !== null) {
+        puertaPorCita.set(c.citaId, { estado: 'llego', conNombre: null });
+      }
+    }
+  }
+  /** Las que todavía no llegaron: su fila ofrece el verbo. */
+  const porLlegarIds = new Set(puertaPorLlegar.map((c) => c.citaId));
+
+  /* La banda queda SOLO con lo que NO es una cita del día: las solicitudes
+     de mostrador (un handshake pendiente con su reloj del server) y el
+     error de lectura, que sigue diciéndose (D-541). Un handshake no tiene
+     hora ni fila propia en la línea — no es algo que pase a las 11:30, es
+     algo que está esperando respuesta AHORA. */
   const bandaVisible =
-    conPuerta &&
-    vistaEsHoy &&
-    (puertaError ||
-      puertaAdentro.length > 0 ||
-      puertaEsperando.length > 0 ||
-      puertaSolicitudes.length > 0 ||
-      puertaPorLlegar.length > 0);
+    conPuerta && vistaEsHoy && (puertaError || puertaSolicitudes.length > 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -2027,10 +2296,20 @@ export default function Hoy() {
               <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
             )}
 
-            {/* ── ⭐ S88-C · EN LA PUERTA (firma founder) — arriba de la
-                lista, abajo de los filtros. Las dos caras de la puerta en
-                voz humana + las solicitudes con el reloj DEL SERVER + el
-                verbo «Llegó». El profesional no la ve; vacía no se pinta. */}
+            {/* ── ⭐ S88-C · EN LA PUERTA (firma founder) · ⭐ S97-D ACOTADA
+                A LO QUE NO ES UNA CITA DEL DÍA.
+                ⏪ Acá vivían DOS listas de tarjetas —adentro · esperando—
+                que re-dibujaban citas que la línea de abajo YA mostraba, y
+                un botón que abría una Hoja para marcar llegadas. Las tres
+                murieron: el estado de puerta es ahora el CHIP de la fila de
+                su cita y el verbo «Llegó» es SU acción. La firma de S88 se
+                cumple mejor —el verbo sigue al alcance del pulgar, y ahora
+                está junto a la persona que cruzó la puerta— sin pagar el
+                precio que nadie había medido: el mismo día contado dos
+                veces (§15b.0ter, el defecto que S86 curó).
+                QUEDA lo que NO tiene fila propia: las solicitudes de
+                mostrador con su reloj del server, y el error de lectura,
+                que se sigue diciendo (D-541). */}
             {bandaVisible && (
               <View style={{ gap: spacing[2] }}>
                 <Texto variante="seccion">{t('recepcion.puerta')}</Texto>
@@ -2038,34 +2317,6 @@ export default function Hoy() {
                   <Texto variante="apoyo" color="danger">{t('recepcion.puertaError')}</Texto>
                 ) : (
                   <>
-                    <View style={{ gap: spacing[2.5] }}>
-                      {[...puertaAdentro, ...puertaEsperando].map((c) => (
-                        <TarjetaEstado
-                          key={c.citaId}
-                          encendido
-                          etiqueta={`${c.mascotaNombre ?? t('agenda.mascotaFallback')} · ${
-                            c.estado === 'en_curso'
-                              ? c.empleadoNombre !== null
-                                ? t('recepcion.adentroCon', { nombre: c.empleadoNombre })
-                                : t('recepcion.adentro')
-                              : t('recepcion.llego')
-                          }`}
-                        >
-                          <AvatarMascota nombre={c.mascotaNombre ?? ''} tamano="sm" />
-                          <View style={{ flex: 1, gap: spacing[0.5] }}>
-                            <Texto variante="cuerpo">{c.mascotaNombre ?? t('agenda.mascotaFallback')}</Texto>
-                            <Texto variante="apoyo">
-                              {c.estado === 'en_curso'
-                                ? c.empleadoNombre !== null
-                                  ? t('recepcion.adentroCon', { nombre: c.empleadoNombre })
-                                  : t('recepcion.adentro')
-                                : t('recepcion.llego')}
-                            </Texto>
-                          </View>
-                          <Texto variante="dato">{(c.hora ?? '').slice(0, 5)}</Texto>
-                        </TarjetaEstado>
-                      ))}
-                    </View>
                     {puertaSolicitudes.map((s) => (
                       <Tarjeta key={s.solicitudId} tinte="warning" relleno="amplio">
                         <View style={{ gap: spacing[1] }}>
@@ -2085,13 +2336,6 @@ export default function Hoy() {
                         </View>
                       </Tarjeta>
                     ))}
-                    {puertaPorLlegar.length > 0 && (
-                      <Boton
-                        variante="secundario"
-                        etiqueta={t('recepcion.marcarLlegada', { n: puertaPorLlegar.length })}
-                        onPress={() => setHojaLlegadas(true)}
-                      />
-                    )}
                   </>
                 )}
               </View>
@@ -2134,20 +2378,29 @@ export default function Hoy() {
             era lo único que sostenía el bloque muerto y se muda con él,
             no se pierde.
             D-385 intacto: la salida grupal sigue siendo UNA fila. */}
-        {pantalla.estado === 'listo' && restoItems.length > 0 && (
+        {pantalla.estado === 'listo' && lineaItems.length > 0 && (
           <View style={{ gap: spacing[3] }}>
-            {restoItems.map((item) => {
-              const horaItem = item.tipo === 'cita' ? item.cita.hora : (item.citas[0]?.hora ?? null);
+            {lineaItems.map((item) => {
+              const horaItem = horaDeItem(item);
               return (
                 <View
-                  key={item.tipo === 'cita' ? item.cita.id : item.clave}
+                  key={
+                    item.tipo === 'cita'
+                      ? item.cita.id
+                      : item.tipo === 'salida'
+                        ? item.clave
+                        : `despacho-${item.pedido.pedido_id}`
+                  }
                   style={{ flexDirection: 'row', gap: spacing[2] }}
                 >
                   {/* La columna de la hora: ancho fijo para que TODAS las
                       filas del día queden alineadas — sin eso no hay línea
-                      de tiempo, hay una lista con la hora adelante. */}
+                      de tiempo, hay una lista con la hora adelante.
+                      ⭐ S97-D: «todas» ahora incluye los despachos, y ése
+                      es el punto — una entrega a las 14:00 se alinea con la
+                      cita de las 14:00 porque las dos pasan a las 14:00. */}
                   <View style={{ width: 46, paddingTop: spacing[3], alignItems: 'flex-end' }}>
-                    <Texto variante="dato">{horaItem ? horaItem.slice(0, 5) : '—'}</Texto>
+                    <Texto variante="dato">{horaItem ?? '—'}</Texto>
                   </View>
                   <View style={{ flex: 1 }}>
                     {item.tipo === 'cita' ? (
@@ -2156,16 +2409,22 @@ export default function Hoy() {
                         enVivo={false}
                         sinHora
                         oficio={oficioDe(item.cita)}
+                        puerta={puertaPorCita.get(item.cita.id)}
+                        /* ⭐ S97-D · el verbo de la puerta viaja ADENTRO de
+                           `accionesDe` — ver su porqué allá (una zona, una
+                           línea; R38/N3 lo cazó cuando estuvo acá). */
                         acciones={accionesDe(item.cita)}
                         fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined}
                       />
-                    ) : (
+                    ) : item.tipo === 'salida' ? (
                       <FilaSalida
                         citas={item.citas}
                         abierta={salidasAbiertas.has(item.clave)}
                         onToggle={() => toggleSalida(item.clave)}
                         urlsFotos={urlsFotos}
                       />
+                    ) : (
+                      <FilaDespacho pedido={item.pedido} />
                     )}
                   </View>
                 </View>
@@ -2381,37 +2640,14 @@ export default function Hoy() {
         </View>
       </ScrollView>
 
-      {/* ⭐ S88-C · LA HOJA DEL VERBO «LLEGÓ» — el por-llegar de HOY, donde
-          la persona espera. Marcar mueve la fila a la cara «esperando» de
-          la banda (optimista; el reloj re-sincroniza en <60 s). La Hoja
-          queda abierta a propósito: la puerta recibe de a varios. */}
-      <Hoja visible={hojaLlegadas} onCerrar={() => setHojaLlegadas(false)} titulo={t('recepcion.porLlegar')}>
-        <View style={{ gap: spacing[2.5] }}>
-          {puertaPorLlegar.length === 0 ? (
-            <Texto variante="apoyo">{t('recepcion.nadiePorLlegar')}</Texto>
-          ) : (
-            puertaPorLlegar.map((c) => (
-              <TarjetaEstado
-                key={c.citaId}
-                encendido={false}
-                etiqueta={`${c.mascotaNombre ?? t('agenda.mascotaFallback')} · ${(c.hora ?? '').slice(0, 5)}`}
-              >
-                <AvatarMascota nombre={c.mascotaNombre ?? ''} tamano="sm" />
-                <View style={{ flex: 1, gap: spacing[0.5] }}>
-                  <Texto variante="cuerpo">{c.mascotaNombre ?? t('agenda.mascotaFallback')}</Texto>
-                  <Texto variante="dato">{(c.hora ?? '').slice(0, 5)}</Texto>
-                </View>
-                <Boton
-                  variante="compacto"
-                  etiqueta={t('recepcion.llegoCta')}
-                  cargando={marcandoLlegada === c.citaId}
-                  onPress={() => void marcarLlegadaPuerta(c.citaId)}
-                />
-              </TarjetaEstado>
-            ))
-          )}
-        </View>
-      </Hoja>
+      {/* ⏪ S97-D · ACÁ VIVÍA LA HOJA DEL VERBO «LLEGÓ» (S88-C), y MURIÓ con
+          su puerta: el verbo ya no vive en un botón que abre una lista de
+          por-llegar — vive en la fila de cada cita, que es donde el ojo lo
+          busca. Ley 37: la Hoja quedó sin llamador, así que se va con él en
+          vez de sobrevivir como pantalla inalcanzable.
+          El COMPORTAMIENTO que la Hoja protegía se conserva y mejora: la
+          puerta recibe de a varios y marcar una no cierra nada (la línea
+          entera sigue a la vista; antes había que reabrir la Hoja). */}
 
       {/* ⭐ S90-B · D-680 — LA INVITACIÓN DE LA CASA ANTES DEL ÚNICO TIRO
           DEL SO. Va en HOY porque es la primera pantalla con sesión de
