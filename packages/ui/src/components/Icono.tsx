@@ -39,6 +39,9 @@ export type IconoNombre =
   | 'ia'
   // ── LOTE 3 (S58, D-361 — gate founder POR ÍCONO pendiente) ──
   | 'hogar' | 'explorar' | 'cuenta' | 'hoy' | 'negocio'
+  // S97+ — el destino central del prestador: la puerta abierta (ver su
+  // dibujante para el porqué del concepto y su recambio declarado).
+  | 'atender'
   | 'carnet' | 'familia' | 'preferencias' | 'pagos' | 'ayuda' | 'ubicacion'
   | 'training' | 'hotel' | 'guarderia' | 'seguros' | 'telemedicina'
   | 'vacaciones' | 'equipo'
@@ -454,6 +457,42 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   //    Y LA HUELLA ENTRA COMO EL DÍA MARCADO, que es lo que hace que el
   //    glifo cumpla la regla madre sin decorarse: en una agenda el día
   //    marcado es EL que importa, y acá el que importa es la mascota.
+  /* LA PUERTA ABIERTA — el destino central del prestador (S97+, pedido
+     de C, adjudicación de mesa 13-ago). Nombra **atender a quien llegó
+     por la puerta, sin turno**: el mostrador.
+
+     POR QUÉ LA PUERTA Y NO LA CAMPANA DE MOSTRADOR, que era el objeto
+     obvio: `campana` ya existe (avisos, S88) y **no se disputa** — un
+     glifo con dos significados es informar sin informar. Y la mesa
+     inclinó por la puerta con un argumento mejor que la legibilidad:
+     **el concepto ya vive en la letra de la casa** («la puerta cambia
+     permisos» · «quien está en la puerta» · «en la puerta · Thor ·
+     Llegó»). El glifo no inventa vocabulario: materializa el que ya se
+     habla.
+
+     DÓNDE ESTÁ LA MASCOTA (regla madre §1): **entrando por el vano**. La
+     hoja abierta deja el hueco a la derecha y la huella lo ocupa — no
+     está al costado como adorno, está en el lugar por el que se entra.
+
+     ⚠️ SU GATE ES A 21px Y NO ESTÁ DADO (Ley 9: a ese tamaño la huella
+     sobrevive o es ruido). El riesgo declarado de esta forma: la
+     diagonal de la hoja y la jamba izquierda pueden fundirse en una sola
+     mancha vertical. Si el founder lo ve así, el recambio ya está
+     elegido y es de forma, no de concepto: **el vano SIN hoja** (solo el
+     marco y la huella entrando), que pierde el gesto de «abierta» pero
+     gana aire. La puerta se conserva en los dos casos. */
+  atender: ({ tinta, huella }) => (
+    <>
+      {/* el marco: jambas + dintel, abierto abajo */}
+      <Path d="M5 21V5a1.6 1.6 0 0 1 1.6-1.6h10.8A1.6 1.6 0 0 1 19 5v16" {...trazo(tinta)} />
+      {/* el umbral — el piso que hace leer «puerta» y no «ventana» */}
+      <Path d="M3.2 21h17.6" {...trazo(tinta)} />
+      {/* la hoja abierta hacia adentro: la diagonal ES el «abierta» */}
+      <Path d="M5 21V7.8l6.4-2.1v15.3" {...trazo(tinta)} />
+      {/* la mascota entrando por el vano que la hoja dejó libre */}
+      <Huella color={huella} x={13.2} y={13.4} escala={0.42} />
+    </>
+  ),
   hoy: ({ tinta, huella }) => (
     <>
       <Path d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z" {...trazo(tinta)} />
@@ -1133,6 +1172,15 @@ export function Icono({
     explorar: comunidadAmplia,
     cuenta: identidad, carnet: identidad, seguros: identidad, telemedicina: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
+    // ATENDER va a CUIDADO y la elección es de taxonomía (Ley 10: se
+    // reparte por lo que la cosa ES, no por dónde aparece). Atender a
+    // quien llegó por la puerta es EL TRABAJO DEL DÍA — la misma capa
+    // que `hoy`, la jornada. NO va a `ocre` aunque una de sus dos
+    // puertas sea la venta de mostrador: ocre es la capa del CONSUMO, y
+    // pintar ahí la tab principal de la recepción de una clínica diría
+    // que su oficio es vender. La venta es UNA de sus puertas, no su
+    // naturaleza.
+    atender: cuidado,
     training: cuidado, hotel: cuidado, guarderia: cuidado, vacaciones: cuidado,
     negocio: ocre, pagos: ocre,
     // S84-B4 — CONTACTO va a COMUNIDAD, y la elección es de taxonomía,

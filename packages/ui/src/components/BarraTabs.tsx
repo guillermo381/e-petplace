@@ -43,9 +43,16 @@
  *   (los `key` de items = nombres de ruta de expo-router)
  */
 
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import Animated, {
+  cubicBezier,
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { typography } from '../tokens/typography'
@@ -54,6 +61,52 @@ import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 import { Badge, useEtiquetaBadge } from './Badge'
+
+/** El lado de la superficie de la tab destacada. 44 es el blanco de la
+ *  casa (N8, ley de la pieza) — la destacada no gana toque, gana PESO:
+ *  su superficie ES el blanco, en vez de quedar dibujada adentro. */
+const DESTACADA_LADO = 44
+
+/** EL OVERSHOOT DE LA HUELLA (candidata §5.4, apagada por default — ver
+ *  la prop `overshootHuella`). Envuelve el ícono y le da un rebote corto
+ *  cuando la tab pasa a activa: la huella no solo aparece, LLEGA.
+ *
+ *  Memorial y reduce-motion quedan QUIETOS por el mismo par que usan
+ *  `PuertaDeOficio` y `Destape` — en memorial nada rebota (Ley 8), y esa
+ *  regla no la puede saltear una candidata. */
+function HuellaDeTab({
+  activa,
+  overshoot,
+  children,
+}: {
+  activa: boolean
+  overshoot: boolean
+  children: ReactNode
+}) {
+  const { theme } = useTheme()
+  const reduceMotion = useReducedMotion()
+  const quieto = theme.mode === 'memorial' || reduceMotion
+  const v = useSharedValue(activa ? 1 : 0)
+
+  useEffect(() => {
+    if (!overshoot || quieto) {
+      v.value = activa ? 1 : 0
+      return
+    }
+    v.value = withTiming(activa ? 1 : 0, {
+      duration: motion.duration.overshootTab,
+      // La curva del rebote — la de la casa termina en 1 y no puede
+      // hacer overshoot (el choque declarado en la prop).
+      easing: Easing.bezier(...motion.easing.spring.bezier),
+    })
+  }, [activa, overshoot, quieto])
+
+  const estilo = useAnimatedStyle(() => ({
+    transform: [{ scale: overshoot && !quieto ? 1 + v.value * 0.06 : 1 }],
+  }))
+
+  return <Animated.View style={estilo}>{children}</Animated.View>
+}
 
 export type BarraTabsItem = {
   /** = nombre de ruta de expo-router. */
@@ -64,6 +117,24 @@ export type BarraTabsItem = {
   icono: (estado: { color: string; activa: boolean; colorHuella: string }) => ReactNode
   /** Contador entero — "3 pendientes" del prestador. */
   badge?: number
+  /** S97+-B · EL DESTINO CENTRAL (firma de arquitectura, mesa 13-ago):
+   *  Mostrador sube de chip a TAB, y la tab de atender es el destino
+   *  destacado de la barra del prestador.
+   *
+   *  LA PIEZA NO ELIGE CUÁL: la declara quien la monta, igual que
+   *  `badge`. La composición por capacidad —titular con local ve cuatro,
+   *  recepción tres, profesional puro dos, vendedor puro tres— es del
+   *  app, que es el único que sabe qué puede cada quien. Meter esa
+   *  decisión acá sería que `packages/ui` leyera roles.
+   *
+   *  SU FORMA, y por qué NO es un color: la destacada gana SUPERFICIE y
+   *  un paso de tamaño, jamás un acento propio. N5 manda un acento por
+   *  pantalla y en esta barra ya está tomado —la huella de la tab activa
+   *  ES `accent.active` desde §2.6—, así que pintar la central de color
+   *  pondría dos acentos peleando, y el que perdería es el que dice
+   *  DÓNDE ESTOY. *Destacar no es competir con el estado: es pesar más
+   *  en reposo.* */
+  destacada?: boolean
 }
 
 export function BarraTabs({
@@ -72,8 +143,16 @@ export function BarraTabs({
   onCambiar,
   estadoPorHuella = false,
   acento,
+  overshootHuella = false,
 }: {
-  /** 3 a 5 tabs. */
+  /** 2 a 5 tabs.
+   *
+   *  ⏪ S97+-B — DECÍA «3 a 5» y la composición por capacidad la dejó
+   *  falsa: el **profesional puro** ve DOS (Hoy · Cuenta). No es un caso
+   *  hipotético — es uno de los cuatro perfiles de la firma del 13-ago.
+   *  Se corrige acá, en el contrato, y no solo en la lámina: un rango
+   *  que excluye un perfil vivo es la clase de letra que alguien cita
+   *  para «arreglar» una barra que está bien. */
   items: BarraTabsItem[]
   activo: string
   onCambiar: (key: string) => void
@@ -98,10 +177,61 @@ export function BarraTabs({
    *  vive en el slot y esta prop se borra en ese mismo acto — la API de
    *  una lámina no sobrevive a su lámina (Ley 37). */
   acento?: string
+  /** PROP DE GATE — el overshoot de 280 ms de la huella al cambiar de
+   *  tab (N10, Norte de la mesa del 13-ago). **NACE APAGADA**, y el
+   *  porqué es de letra, no de prudencia:
+   *
+   *  `DIRECCION_ARTE` §5.4 lo lista EXPLÍCITAMENTE como **CANDIDATA SIN
+   *  FIRMA con gate propio** («el overshoot 280 ms de la huella de tab
+   *  (a la Ley 6/§2.6 — el CÓMO aparece)»). El Norte lo da por
+   *  vocabulario cerrado; la letra depositada dice que espera gate. Dos
+   *  letras que se contradicen no se resuelven eligiendo la que
+   *  conviene: la pieza se construye y **queda preparada-apagada**
+   *  (precedente D-456, el micrófono), para que encenderla sea UNA línea
+   *  el día que el founder la firme en dispositivo.
+   *
+   *  🔴 Y TRAE UN CHOQUE PROPIO, declarado: N10 dice «UN bezier
+   *  (.32,.72,0,1)» y en la misma frase pide overshoot. **Un overshoot
+   *  con esa curva no hace overshoot** — la curva de la casa termina en
+   *  1 y no lo pasa. Así que el gesto usa `motion.easing.spring`
+   *  ([0.34, 1.56, 0.64, 1]), que **ya existe en el token desde v3.1**:
+   *  no se inventa una curva, se usa la que la casa ya tiene para
+   *  «confirmaciones táctiles». Si el gate rechaza la excepción, muere
+   *  el gesto entero, no la curva.
+   *
+   *  ☠️ MUERTE: con el gate de §5.4. Si pasa, el valor deja de ser prop
+   *  y vive en la pieza; si falla, se retira con su token. En los dos
+   *  casos esta prop se borra — la API de una candidata no sobrevive a
+   *  su gate (Ley 37). */
+  overshootHuella?: boolean
 }) {
   const etiquetaBadge = useEtiquetaBadge()
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
+
+  /** LA INVARIANTE DE LA BARRA: **una sola destacada**. «Destino
+   *  central» en plural no significa nada — dos tabs pesando igual es
+   *  ninguna pesando.
+   *
+   *  Por qué un aviso de DEV y no un rebote: la barra es la navegación
+   *  raíz, y una barra que no monta deja la app sin piso. Un warning en
+   *  desarrollo llega a quien la compone, en el momento en que la
+   *  compone; un throw en producción castiga al usuario por un error de
+   *  quien la montó. *(Si algún día `destacada` pasa a ser prop de la
+   *  BARRA en vez del ítem, este estado se vuelve inexpresable y este
+   *  guard muere — que sería mejor. Hoy no se hace porque el consumidor
+   *  arma la lista con spreads condicionales por capacidad, y ahí la
+   *  marca viaja NATURALMENTE con el ítem que puede o no existir.)* */
+  if (__DEV__) {
+    const destacadas = items.filter((i) => i.destacada === true)
+    if (destacadas.length > 1) {
+      console.warn(
+        `[BarraTabs] ${destacadas.length} tabs marcadas como \`destacada\` (${destacadas
+          .map((d) => d.key)
+          .join(', ')}). El destino central es UNO: dos pesando igual es ninguna pesando. Se destacan todas — la pieza no elige por vos.`,
+      )
+    }
+  }
   const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
 
   return (
@@ -141,9 +271,31 @@ export function BarraTabs({
                 su segundo consumidor (la campana) — la barra pasa a
                 consumirla: misma geometría S43, misma pill, y la voz del
                 label ahora vive en el riel (antes: hardcodeada acá). */}
-            <Badge n={item.badge ?? 0}>
-              {item.icono({ color, activa: esActivo, colorHuella })}
-            </Badge>
+            <HuellaDeTab activa={esActivo} overshoot={overshootHuella}>
+              {item.destacada === true ? (
+                /* EL DESTINO CENTRAL — superficie propia y un paso de
+                   tamaño. Sin color: el acento de esta barra ya está
+                   tomado por la huella activa (N5). */
+                <View
+                  style={{
+                    width: DESTACADA_LADO,
+                    height: DESTACADA_LADO,
+                    borderRadius: radius.full,
+                    backgroundColor: theme.bg.overlay,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Badge n={item.badge ?? 0}>
+                    {item.icono({ color, activa: esActivo, colorHuella })}
+                  </Badge>
+                </View>
+              ) : (
+                <Badge n={item.badge ?? 0}>
+                  {item.icono({ color, activa: esActivo, colorHuella })}
+                </Badge>
+              )}
+            </HuellaDeTab>
             {/* el subrayado: opacity, jamás slide. Con estadoPorHuella
                 el pill muere — la huella del ícono ES el estado (§2.6). */}
             {estadoPorHuella ? null : (
