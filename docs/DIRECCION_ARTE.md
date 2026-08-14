@@ -860,6 +860,70 @@ material (D-506) y la sombra (D-507) siguen en su lámina.
 
 ---
 
+## §2.11 — LA CARA DE UNA MASCOTA: LA ESCALERA (S97, firmada por el founder)
+
+**Literal del founder, 14-ago-2026:**
+
+> ***«si no tiene acceso a la foto real de la mascota, le debería traer el
+> avatar de la raza.»***
+
+### La escalera, en orden y sin saltos
+
+| # | Qué se pinta | De dónde sale |
+|---|---|---|
+| ① | **la foto real** | `mascotas.foto_url` |
+| ② | **la cara de SU raza** | `cat_razas.ruta_imagen` (105 assets) |
+| ③ | **el genérico de su especie** | `<especie>/generico.webp` (6 assets) |
+| ④ | **la huella** | la pone `AvatarMascota` sola, con su `onError` |
+
+### 🔴 LA LEY
+
+> **NINGUNA PANTALLA PINTA HUELLA GENÉRICA TENIENDO RAZA CONOCIDA.**
+> La huella es el **último** escalón, no el atajo.
+
+**Por qué es ley y no preferencia:** *la huella genérica dice «no sé nada de
+esta mascota». Cuando SÍ sabemos la raza, decirlo es mentir hacia abajo* — y en
+un producto cuya tesis es que **conoce** a la mascota, la cara equivocada no se
+lee como un asset faltante: **se lee como que el producto no la conoce.**
+
+### La escalera vive en UN solo lugar
+
+`caraDeMascota` / `caraDeMascotaPorRuta` (`packages/api`). **Las pantallas
+reciben una URL y no deciden nada** — el día que la escalera gane un peldaño,
+lo gana para todas. *Que el Hogar y el perfil mostraran caras distintas de la
+misma mascota fue un defecto que el founder marcó dos veces (S91-D), y su causa
+era que la regla vivía adentro de una pantalla.*
+
+### ⚠️ Los dos bordes, que no son excepciones sino la ley bien leída
+
+1. **SIN SLUG NO SE ADIVINA.** `mascotas.raza` es texto libre (D-379: el
+   catálogo **sugiere**, jamás impone). La ruta se resuelve por **LOOKUP contra
+   `cat_razas`**, nunca slugificando lo tipeado: *«Pastor Alemán» a mano puede
+   dar `pastor-aleman` (existe) u `ovejero-aleman` (no), y **una URL que
+   acierta a veces muestra una cara equivocada, que es peor que ninguna**.*
+   Sin coincidencia en el catálogo, el escalón ③ **es la respuesta correcta**,
+   no una falla.
+2. **`reptil` no tiene genérico** (404 verificado) ⇒ cae al ④. **Y es
+   consistente:** está `activo=false` en `cat_especies`, o sea apagado
+   estructuralmente; ninguna superficie debería ofrecerlo.
+
+### 🔴 Y LA MITAD QUE VUELVE EXIGIBLE A LA LEY (S97-A, hecha)
+
+**Una ley que exige lo que el lector no entrega no es una ley: es un
+reproche.** Se midió que la pantalla del prestador pintaba la huella **no por
+elegirlo, sino porque el dato no llegaba** — su lector traía
+`id, nombre, especie, foto_url` y nada más.
+
+⇒ **`obtenerMascotasAtendidas` y `obtenerDetalleMascotaPrestador` llevan ahora
+`raza_ruta_imagen`** (lookup por lote en la lista, una consulta y solo si hay
+raza en el detalle, **después** del guard de acceso).
+
+**Regla que queda para el próximo lector:** *si una superficie tiene que
+obedecer esta ley, su lector trae la ruta. Si no la trae, el defecto es del
+lector y no de la pantalla.*
+
+---
+
 ## §11 · S84 — LO FIRMADO SOBRE PÍXELES ⚠️ **PUBLICADO, NO GATEADO**
 
 > **La pasada de gate de S84 NO SE HIZO.** Lo de abajo está **construido y

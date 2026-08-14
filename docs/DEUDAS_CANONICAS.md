@@ -15840,6 +15840,40 @@ nombrar; nadie escribió un gate que compare una frase con la realidad.*
 token está viejo, la frase sigue mintiendo en el borde.** La voz honesta
 sobrevive a las dos configuraciones.
 
-☠️ **Muere** con la voz corregida **y** —cuando llegue el aviso— verificado que
-un teléfono real vibra por este camino. **Territorio: superficie (voz) + A
-(motor).**
+### ✅ LA MITAD DE MOTOR, HECHA Y VERIFICADA POR EL CAMINO REAL (S97-A)
+
+**Dirección firmada: la promesa se vuelve VERDADERA, no se calla.** *El
+handshake ES el canal de adquisición del mostrador — una familia que autoriza
+desde su teléfono es una familia que entró al producto. Bajar la voz habría
+cerrado el defecto y cerrado la puerta con él.*
+
+`20260814220000_s97a_aviso_handshake.sql`:
+
+- **Nace el tipo `autorizacion_mostrador_solicitada`** en `cat_notificacion_
+  tipos`, audiencia `cliente`, categoría **`seguridad_cuenta`** —donde vive
+  `sistema`—, **NO `operacion`**. *No es un aviso operativo: es una decisión de
+  consentimiento sobre quién ve el expediente de tu mascota.* Agruparlo con lo
+  operativo lo volvería silenciable junto con recordatorios de cita, **y el
+  costo de silenciarlo lo paga un profesional parado en el mostrador.**
+- **`crear_solicitud_autorizacion` encola** por la puerta única
+  `registrar_intencion_notificacion` — *que ya tenía **13 productores vivos**;
+  faltaba el productor, no el canal.* **Firma intacta ⇒ L-119 no rige.**
+- **Destinatario:** `mascotas.user_id` (el titular, espejado por trigger) en la
+  rama `atencion`; `p_destino_user_id` en `alta_mascota`.
+- **El fantasma no rompe y no recibe:** `user_id` NULL ⇒ no hay a quién
+  avisarle, la solicitud se crea igual y la función **no falla**. *Silencio
+  honesto*, declarado igual que en el exemplar de `fijar_fecha_procedimiento`.
+- **Sin backfill:** las solicitudes viejas **no reciben aviso retroactivo** —
+  avisar hoy por algo que se pidió ayer y ya expiró sería un aviso falso, que
+  es exactamente lo que esta cura vino a curar.
+
+**✅ VERIFICADO POR EL CAMINO REAL, no por SQL:** se repitió el handshake desde
+el dispositivo (`demovet` → familia registrada → Zeus → «Pedir autorización») y
+**la intención nació con el MISMO timestamp que la solicitud** —
+`15:33:42.747374` las dos, o sea la misma transacción — con
+`clave_dedup = autoriz_mostrador_c5577845…` y el titular como destinatario.
+
+☠️ **Queda vivo SOLO lo de superficie:** que la voz siga siendo verdadera
+cuando el push tarde o el token esté viejo, y **el gate en dispositivo de que
+un teléfono real vibra por este camino** — lo único que A no puede firmar sola
+(L-153). **Territorio: superficie (voz) + el gate del founder.**
