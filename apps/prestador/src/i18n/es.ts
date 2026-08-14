@@ -1707,14 +1707,10 @@ export const prestadorEs = {
     personaFallback: 'Sin nombre',
     citasDelDia: '{{n}} hoy',
     porLlegar: 'Por llegar',
-    llego: 'Llegó',
     adentro: 'Adentro',
     adentroCon: 'Adentro con {{nombre}}',
     atendida: 'Atendida',
     noVino: 'No vino',
-    llegoCta: 'Llegó',
-    llegoError: 'No pudimos registrar la llegada. Prueba de nuevo.',
-    llegoNoActiva: 'Esta cita ya no está activa.',
     // ⭐ S88-C · LA BANDA «EN LA PUERTA» del HOY consolidado (firma
     // founder: las tres huérfanas del censo vuelven) · LOTE S88, GATE PENDIENTE
     marcarLlegada: 'Marcar llegada ({{n}} por llegar)',

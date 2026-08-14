@@ -85,7 +85,6 @@ import {
   obtenerPresupuestosPrestador,
   obtenerSolicitudesMostrador,
   obtenerJornadaRecepcion,
-  registrarLlegada,
   listarPedidosDelVendedor,
   type PedidoDelVendedor,
   type CitaJornadaRecepcion,
@@ -576,7 +575,9 @@ function FilaCita({
    *  ⚠️ Y REEMPLAZA al chip de estado genérico, no se suma: «Llegó» dice
    *  más que «Confirmada» sobre la misma cita, y dos chips donde alcanza
    *  uno es Ley 16 (Chanel) y Ley 17.6 (cada elemento, UN trabajo). */
-  puerta?: { estado: 'llego' | 'adentro'; conNombre: string | null };
+  /* ☠️ S98-C: el estado `'llego'` murió con su verbo (firma del founder).
+     Queda `'adentro'`, que tiene productor propio: iniciar la atención. */
+  puerta?: { estado: 'adentro'; conNombre: string | null };
   /** ⭐ S86-C · en la LÍNEA DE TIEMPO la hora vive en la columna de la
    *  izquierda, así que la fila no la repite: su metadata queda solo con
    *  la duración. Repetirla sería decir dos veces lo mismo a dos
@@ -600,12 +601,14 @@ function FilaCita({
       ? undefined
       : {
           estado: 'info',
+          /* ☠️ S98-C: la rama `'llego'` murió con su verbo. El tipo ya no
+             la admite, así que el chip solo puede decir «adentro» — y eso
+             es lo correcto: es el único estado de puerta que tiene
+             productor (iniciar la atención). */
           etiqueta:
-            puerta.estado === 'adentro'
-              ? puerta.conNombre !== null
-                ? t('recepcion.adentroCon', { nombre: puerta.conNombre })
-                : t('recepcion.adentro')
-              : t('recepcion.llego'),
+            puerta.conNombre !== null
+              ? t('recepcion.adentroCon', { nombre: puerta.conNombre })
+              : t('recepcion.adentro'),
         };
   const insignia = enVivo ? undefined : (chipPuerta ?? (ef ? insignias[ef] : undefined));
   // S72-B pieza 3: un procedimiento coordinado dice su descripción
@@ -918,10 +921,9 @@ export default function Hoy() {
   const [puertaDatos, setPuertaDatos] = useState<
     { citas: CitaJornadaRecepcion[]; solicitudes: SolicitudMostrador[] } | 'error' | null
   >(null);
-  /* ⏪ S97-D: murió `hojaLlegadas` con su Hoja (Ley 37). `marcandoLlegada`
-     sobrevive: sigue siendo el candado anti-doble-toque del verbo, ahora
-     por FILA. */
-  const [marcandoLlegada, setMarcandoLlegada] = useState<string | null>(null);
+  /* ☠️ S98-C: murió `marcandoLlegada` — era el candado anti-doble-toque
+     del verbo «Llegó», y sin verbo no hay toque que trabar. (Su hermano
+     `hojaLlegadas` ya había muerto en S97-D con su Hoja.) */
   /* ⭐ S97-D · LOS DESPACHOS DEL DÍA. `null` = sin pedir / esta cuenta no
      vende / no se pudo leer — y las tres se dibujan igual: la línea
      simplemente no tiene filas de despacho. Es DELIBERADO y distinto del
@@ -1309,28 +1311,28 @@ export default function Hoy() {
      ⚠️ El verbo se calcula acá adentro y no se pasa por prop: `porLlegarIds`
      ya vive en el closure, y una prop lo habría dejado decidir a cada sitio
      de llamada — que es cómo vuelven las dos líneas. */
+  /* ☠️ S98-C · EL VERBO «LLEGÓ» MURIÓ ENTERO — SIN BORDE (firma del
+     founder): **es una acción que no genera valor.** *La llegada ES el
+     acto de atender* — quien cruza la puerta se registra atendiéndolo, no
+     declarando dos veces que llegó.
+
+     Y con él muere su CHIP, que es la mitad que se podía olvidar: sin
+     productor, `llegada_en` no lo escribe nadie más desde el producto
+     (medido: `registrarLlegada` tenía UN llamador y era éste), así que un
+     chip «Llegó» habría quedado mostrando un estado que ya nadie puede
+     producir. *Un borde es exactamente eso: el pedazo que sobrevive a su
+     causa y que el próximo lee como si significara algo.*
+
+     ⚠️ LO QUE **NO** MUERE, y se dice para que nadie lo arrastre: el chip
+     **«adentro»** (cita `en_curso`) sigue vivo y con productor propio —
+     iniciar la atención. Lo que murió es el paso previo, no el estado de
+     estar siendo atendido. */
   const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
     const m = c.mascota;
-    const conVerbo = porLlegarIds.has(c.id);
-    if (!m && !conVerbo) return undefined;
+    if (!m) return undefined;
     return (
       <>
         <Separador />
-        {conVerbo && (
-          <View style={{ padding: spacing[3], alignItems: 'flex-start' }}>
-            <Boton
-              variante="compacto"
-              etiqueta={t('recepcion.llegoCta')}
-              cargando={marcandoLlegada === c.id}
-              onPress={() => void marcarLlegadaPuerta(c.id)}
-            />
-          </View>
-        )}
-        {/* Sin mascota legible NO se dibuja la navegación al expediente —
-            pero el verbo de arriba SÍ sobrevive: registrar una llegada no
-            necesita saber el nombre de la mascota, y perder la puerta por
-            un dato de identidad ilegible sería castigar a la recepción por
-            un problema que no es suyo. */}
         {m !== null && m !== undefined && (
           <CeldaNavegacion
             icono="carnet"
@@ -1518,27 +1520,9 @@ export default function Hoy() {
     };
   }, [pantalla]);
 
-  /** El verbo «Llegó» (idempotente, solo hoy). El refresco es OPTIMISTA
-   *  local: el server ya registró (ok), y el reloj por minuto re-sincroniza
-   *  el literal en <60 s — el timestamp local solo alimenta el `!== null`. */
-  async function marcarLlegadaPuerta(citaId: string) {
-    if (marcandoLlegada !== null) return;
-    setMarcandoLlegada(citaId);
-    const r = await registrarLlegada(citaId);
-    setMarcandoLlegada(null);
-    if (!r.ok) {
-      mostrarAviso({
-        variante: 'error',
-        texto: r.codigo === 'cita_no_activa' ? t('recepcion.llegoNoActiva') : t('recepcion.llegoError'),
-      });
-      return;
-    }
-    setPuertaDatos((p) =>
-      p === null || p === 'error'
-        ? p
-        : { ...p, citas: p.citas.map((c) => (c.citaId === citaId ? { ...c, llegadaEn: new Date().toISOString() } : c)) },
-    );
-  }
+  /* ☠️ S98-C · acá vivían `marcarLlegadaPuerta` y su refresco optimista.
+     Murieron con el verbo (firma del founder). */
+
   /** De días de la semana a FECHAS, que es lo que la rueda entiende. Se
    *  computa acá y no se guarda: el cierre es recurrente y una fecha
    *  guardada envejece sola. */
@@ -1971,7 +1955,6 @@ export default function Hoy() {
   /* ⏪ S97-D: murieron `puertaAdentro` y `puertaEsperando` — sus dos listas
      de tarjetas re-dibujaban citas que la línea ya mostraba. Su información
      vive ahora en `puertaPorCita`, como chip de la fila que le corresponde. */
-  const puertaPorLlegar = puerta ? puerta.citas.filter((c) => c.estado === 'confirmada' && c.llegadaEn === null) : [];
   const puertaSolicitudes = puerta
     ? puerta.solicitudes.filter((s) => s.estado === 'pendiente' || (s.estado === 'expirada' && s.respondidaEn === null))
     : [];
@@ -1987,18 +1970,17 @@ export default function Hoy() {
      «Llegó» sigue al alcance del pulgar cuando alguien cruza la puerta —
      ahora en la fila de la persona que cruzó, que es donde el ojo la
      busca. Lo que muere es la duplicación, no la función. */
-  const puertaPorCita = new Map<string, { estado: 'llego' | 'adentro'; conNombre: string | null }>();
+  const puertaPorCita = new Map<string, { estado: 'adentro'; conNombre: string | null }>();
   if (puerta !== null && vistaEsHoy) {
     for (const c of puerta.citas) {
       if (c.estado === 'en_curso') {
         puertaPorCita.set(c.citaId, { estado: 'adentro', conNombre: c.empleadoNombre });
-      } else if (c.estado === 'confirmada' && c.llegadaEn !== null) {
-        puertaPorCita.set(c.citaId, { estado: 'llego', conNombre: null });
       }
+      /* ☠️ S98-C: acá se estampaba `'llego'` para la cita con
+         `llegadaEn`. Murió con el verbo — sin productor, el chip habría
+         pintado un estado que ya nadie puede producir. */
     }
   }
-  /** Las que todavía no llegaron: su fila ofrece el verbo. */
-  const porLlegarIds = new Set(puertaPorLlegar.map((c) => c.citaId));
 
   /* La banda queda SOLO con lo que NO es una cita del día: las solicitudes
      de mostrador (un handshake pendiente con su reloj del server) y el
