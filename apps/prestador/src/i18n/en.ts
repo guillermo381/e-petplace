@@ -1848,6 +1848,7 @@ export const prestadorEn = {
     // S86-C ① · the two verbs — one REGISTERS a fact, the other RESERVES.
     // S86-C · an active trade that can't be registered here yet.
     oficioSinMenu: 'For now the counter only records veterinary visits. Your other services are coming.',
+    oficioSinMenuDetalle: 'You can still register the pet: it stays tied to the family email and its visit records as soon as we open this trade.',
     verboLabel: 'What are you doing?',
     verboAhora: 'See them now',
     verboAgendar: 'Schedule',

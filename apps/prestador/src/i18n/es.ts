@@ -2275,6 +2275,7 @@ export const prestadorEs = {
     /* ⭐ S86-C · el oficio activo que TODAVÍA no se puede registrar acá.
        Se dice como limitación nuestra, no como «no tenés servicios». */
     oficioSinMenu: 'Por ahora el mostrador solo registra atenciones de veterinaria. Tus otros servicios llegan pronto.',
+    oficioSinMenuDetalle: 'Podés dar de alta la mascota igual: queda asociada al correo de la familia y su atención se registra en cuanto abramos este oficio.',
     verboLabel: '¿Qué vas a hacer?',
     verboAhora: 'Atender ahora',
     verboAgendar: 'Agendar',

@@ -19,7 +19,7 @@
 
 import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
@@ -68,6 +68,13 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
 
 export default function Mostrador() {
   const router = useRouter();
+  /* ⭐ S98-C · EL OFICIO POR EL QUE SE ENTRÓ (desde la portada de
+     `ATENDER`). Acá no cambia nada de la búsqueda —la mascota es la misma
+     venga uno por la puerta que venga— y por eso **solo VIAJA**: su
+     consumo real está en la atención, donde decide si este oficio puede
+     registrarse. *Un parámetro que no se pasa es una pantalla que después
+     tiene que adivinar de dónde vino.* */
+  const { oficio = '' } = useLocalSearchParams<{ oficio?: string }>();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -106,7 +113,10 @@ export default function Mostrador() {
   }, [q, t]);
 
   function irANueva() {
-    router.push({ pathname: '/mostrador/nueva', params: q.trim().length > 0 ? { q: q.trim() } : {} });
+    router.push({
+      pathname: '/mostrador/nueva',
+      params: { ...(q.trim().length > 0 ? { q: q.trim() } : {}), ...(oficio ? { oficio } : {}) },
+    });
   }
 
   // La rama 'registrado' narrada a const (el narrowing por propiedad anidada
@@ -143,7 +153,7 @@ export default function Mostrador() {
                   onPress={() =>
                     router.push({
                       pathname: '/mostrador/atencion',
-                      params: { mascotaId: m.mascota_id, nombre: m.nombre },
+                      params: { mascotaId: m.mascota_id, nombre: m.nombre, ...(oficio ? { oficio } : {}) },
                     })
                   }
                   titulo={m.nombre}

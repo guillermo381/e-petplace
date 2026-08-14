@@ -167,15 +167,31 @@ export default function TabsLayout() {
             resolverCapacidadAtender(p.data.id),
           ]);
           const esGestor = rol.ok ? rol.data : false;
-          // EL Y, con su falla CERRADA y su porqué —que es lo que hace
-          // que cerrar no deje a nadie sin camino—: si la lectura falla,
-          // la tab no se monta, **y el mostrador NO queda inalcanzable**:
-          // su entrada vieja sigue viva en el HOY («Registrar atención»,
-          // S69). Cerrar acá cuesta un toque de más; abrir a ciegas
-          // ofrece una puerta que el servidor puede rechazar (Ley 23).
+          /* EL Y — Y SUS DOS MITADES FALLAN DISTINTO, que es la parte
+             pensada y no un detalle:
+
+             · **el ROL cierra** (Ley 23, y el precedente de `esGestor` acá
+               arriba): no saber si alguien puede es no poder afirmar que
+               puede. Un permiso no se concede por un error de red.
+             · **la CAPACIDAD abre.** No saber si el negocio tiene local no
+               es un problema de permisos: es un dato que faltó. Y la
+               portada YA sabe decirlo —tiene su estado de error con
+               reintento—, mientras que una barra sin la tab no dice nada:
+               *el que no la ve no sabe que existe, y no tiene dónde
+               reintentar.*
+
+             ⚠️ **ESTO CAMBIÓ EN ESTA MISMA TANDA, y el porqué importa más
+             que la regla:** la capacidad TAMBIÉN cerraba, y el argumento
+             era que cerrar no dejaba a nadie sin camino porque el HOY
+             conservaba «Registrar atención». **§3.1 se llevó ese botón**
+             (todo lo de atender vive acá), así que el argumento que
+             sostenía el fail-closed desapareció con él — y dejarlo tal
+             cual habría sido conservar una decisión cuya razón ya no
+             existe. *La regla no se movió porque cambió de opinión: se
+             movió porque le sacaron el piso.* */
           const montaAtender =
             (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
-            (capacidad.ok ? hayCapacidad(capacidad.data) : false);
+            (capacidad.ok ? hayCapacidad(capacidad.data) : true);
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo

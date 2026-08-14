@@ -89,9 +89,19 @@ async function foto(page, nombre) {
 {
   const { page } = await sesion('light');
   await foto(page, '02-portada-claro');
-  // La barra en su casa: HOY con la quinta tab montada y destacada.
+  // La barra en su casa: HOY con la quinta tab montada y destacada. Y de
+  // paso, la frontera de §3.1: el HOY sin «Registrar atención» y sin la
+  // entrada a la pizarra — las dos se mudaron a ATENDER.
   await page.goto('http://localhost:8081/', { waitUntil: 'networkidle', timeout: 180000 });
   await foto(page, '01-barra-con-atender');
+  const restos = [];
+  if ((await page.getByText('Registrar atención', { exact: false }).count()) > 0) restos.push('Registrar atención');
+  if ((await page.getByText('La pizarra', { exact: false }).count()) > 0) restos.push('pizarra');
+  console.log(
+    restos.length === 0
+      ? '✓ §3.1: el HOY ya no tiene ni la ventanilla ni la pizarra'
+      : `✗ §3.1: quedaron restos en el HOY — ${restos.join(' · ')}`,
+  );
 }
 
 // ── OSCURO ─────────────────────────────────────────────────────────────

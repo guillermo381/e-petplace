@@ -79,7 +79,7 @@ import {
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerAtencionesAbiertas,
-  obtenerPizarra,
+  obtenerEstadoOnboardingWizard,
   hayNovedades,
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
@@ -198,11 +198,9 @@ type Pantalla =
          `null` = no se pudo leer — distinto de 0, que es "no hay nada que
          atender". Colapsarlos diría "estás al día" por un fallo de red
          (L-197, y sobre trabajo pendiente eso cuesta plata). */
-      /* ⭐ S86-C · cuántas hay en la pizarra PARA MÍ. `null` = no se pudo
-       *  leer — distinto de 0 («no hay nada por tomar»), y por eso la
-       *  entrada no se monta en ninguno de los dos casos pero por razones
-       *  distintas (L-197). */
-      pizarra: number | null;
+      /** ⭐ S98-C · §3.1 — el contador del wizard, LA FRONTERA del HOY.
+       *  `null` = no se pudo leer o el negocio no tiene cuenta comercial. */
+      contadorAlta: number | null;
       atencion: { coordinar: number; presupuestos: number | null; handshakes: number | null; abiertas: number | null; abiertaCitaId: string | null };
       /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
        *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
@@ -1009,7 +1007,15 @@ export default function Hoy() {
     /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
        insertarlo en el medio corre todas las posiciones y el typecheck lo
        cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas, rPizarra] = await Promise.all([
+    /* ⭐ S98-C · §3.1 — EL CONTADOR DEL WIZARD ENTRA A ESTA OLA, y entra
+       ACÁ y no en una segunda: `prestador.data.cuenta_comercial_id` ya está
+       resuelto arriba (línea del `obtenerMiPrestador`), así que la lectura
+       NO depende de nada de esta tanda. **Cero olas nuevas** — que en esta
+       pantalla no es prolijidad: el prólogo del HOY es el caso que D-738
+       midió (622 ms en cuatro viajes encadenados solo para resolver quién
+       soy), y agregarle una espera serial habría sido pagar dos veces la
+       deuda que esa ficha existe para no repetir. */
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas, rAlta] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -1078,12 +1084,21 @@ export default function Hoy() {
          SUS pendientes. La regla no es "todo lo del negocio es del titular"
          — es que la PLATA lo es. */
       obtenerAtencionesAbiertas(prestador.data.id, 90),
-      /* S86-C · la pizarra del que mira. El RPC ya filtra por ESPECIALIDAD
-         y por equipo, así que quien no puede tomar nada recibe vacío — no
-         hace falta gatear acá. Su fallo NO tumba la jornada: sin dato, la
-         entrada no existe. Costo declarado: +1 viaje en el arranque del
-         HOY (familia D-497). */
-      obtenerPizarra(prestador.data.id),
+      /* ☠️ S98-C · ACÁ VIVÍA `obtenerPizarra(...)`, y se va CON su
+         superficie. La entrada se mudó a `ATENDER` (§3.1) y este lector
+         se quedó sin consumidor: **una lectura sin lector no es código de
+         más, es una petición por cada foco de la pantalla más cara del
+         producto** — justo el peaje que D-738 midió acá. *Mudar la
+         pantalla y dejar el fetch es la mitad de una mudanza.* */
+      /* §3.1 · LA MISMA CIFRA QUE GOBIERNA LA VOZ DEL WIZARD gobierna esta
+         composición — una sola verdad, dos superficies que la leen. Un
+         cómputo propio acá («¿le falta algo?») sería el defecto que §4.4
+         nombra: dos superficies contando el mismo hecho con dos criterios.
+         Sin cuenta comercial no hay contador que pedir, y eso no es un
+         fallo: es un negocio que todavía no llegó a tener cuenta. */
+      prestador.data.cuenta_comercial_id === null
+        ? Promise.resolve({ ok: true as const, data: { contador: null } })
+        : obtenerEstadoOnboardingWizard(prestador.data.cuenta_comercial_id),
     ]);
     /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
        ANTES del rebote de las citas: su fallo no cambia la jornada — solo
@@ -1205,7 +1220,9 @@ export default function Hoy() {
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
-      pizarra: rPizarra.ok ? rPizarra.data.length : null,
+      // `null` = no se pudo leer (o no hay cuenta). NO es cero: ver la
+      // regla de composición donde se consume.
+      contadorAlta: rAlta.ok ? (rAlta.data.contador ?? null) : null,
       atencion: {
         coordinar: porCoordinar.length,
         /* ⚠️ SOLO 'enviado' — y el 'vencido' YA viene resuelto perezoso por
@@ -1334,11 +1351,10 @@ export default function Hoy() {
   // S61-B5 (S63-B: tercer oficio): con ≥2 oficios activos nace el
   // filtro; con uno, el control no existe (cero UI muerta).
   const oficiosActivos = pantalla.estado === 'listo' ? pantalla.oficios : null;
-  /* S86-C · ¿tiene ALGÚN oficio activo? Es la condición de la ventanilla
-     (y la de su menú): sin oficios no hay nada que registrar. */
-  const conAlgunOficio =
-    oficiosActivos !== null &&
-    (oficiosActivos.paseo || oficiosActivos.grooming || oficiosActivos.adiestramiento || oficiosActivos.vet);
+  /* ☠️ S98-C · `conAlgunOficio` MURIÓ con el botón que gateaba: su único
+     consumidor era «Registrar atención», que se mudó a `ATENDER` (§3.1).
+     Una condición sin consumidor es letra muerta que el próximo lee como
+     si significara algo. */
   const conFiltro =
     oficiosActivos !== null &&
     [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento, oficiosActivos.vet].filter(Boolean)
@@ -2084,39 +2100,20 @@ export default function Hoy() {
           </View>
         )}
 
-        {/* ⭐ S86-C · LA ENTRADA A LA PIZARRA. Una pantalla sin puerta no
-            existe (L-161), y ésta es la del PRESTADOR EMPLEADO: su casa
-            es el HOY.
-            ⚠️ VA APARTE de «Necesita tu atención» a propósito: ese bloque
-            es lo que espera una respuesta TUYA, y una cita en la pizarra
-            **no es tuya todavía** — es una oportunidad del equipo.
-            Meterla ahí le cambiaría el significado al bloque.
-            ⚠️ Regla de existencia: sin nada por tomar NO se monta. Y con
-            `null` —no se pudo leer— tampoco: no se afirma que no hay. */}
-        {pantalla.estado === 'listo' && pantalla.pizarra !== null && (
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              icono="caso"
-              registro="aa"
-              titulo={t('pizarra.entrada')}
-              /* ⭐ S86-C (gate ④): la entrada se monta AUNQUE ESTÉ VACÍA.
-                 Medido: los 7 negocios tienen 0 citas sin tratante, así
-                 que gatear en `> 0` la volvía INALCANZABLE — el founder
-                 no podía ni ver que existe. El vacío se dice acá y la
-                 pantalla lo repite adentro (L-201: cero es un dato).
-                 ⚠️ `null` sigue sin montar: eso NO es cero, es «no se
-                 pudo leer» o «no sos del equipo». */
-              detalle={
-                pantalla.pizarra === 0
-                  ? t('pizarra.entradaVacia')
-                  : pantalla.pizarra === 1
-                    ? t('pizarra.entradaUna')
-                    : t('pizarra.entradaN', { n: pantalla.pizarra })
-              }
-              onPress={() => router.push('/pizarra')}
-            />
-          </Tarjeta>
-        )}
+        {/* ☠️ S98-C · §3.1 — ACÁ VIVÍA LA ENTRADA A LA PIZARRA, Y SE MUDÓ
+            A `ATENDER`. La letra es literal: *«la pizarra, y todo lo de
+            ATENDER o ASIGNAR, vive en ATENDER»*.
+
+            **No es una mudanza de acomodo: la pizarra es ASIGNAR.** Una
+            cita sin tratante es trabajo que alguien tiene que tomar — es
+            exactamente el verbo de la tab nueva, y su vecino natural son
+            las puertas del mostrador, no las citas de mi día.
+
+            Y el argumento de S86 que la trajo acá —*«una pantalla sin
+            puerta no existe (L-161), y ésta es la del prestador
+            EMPLEADO: su casa es el HOY»*— **sigue siendo cierto y ya no
+            aplica**: hoy el empleado de mostrador tiene `ATENDER`, que es
+            una casa mejor. *La razón no se derogó: se le movió el piso.* */}
 
         {/* ── S79-B (T2-B1/B3): EL MODO PREPARACIÓN — §2.4 primera y
             tercera presencia. La FIRMA preside (mudanza del bloque de
@@ -2124,7 +2121,30 @@ export default function Hoy() {
             da el camino. Regla de existencia: solo mientras el espacio NO
             es reservable (servicios+horarios); preparado el espacio, el
             bloque entero muere solo. ── */}
-        {pantalla.estado === 'listo' && pantalla.preparacion !== null && (
+        {/* ⭐ S98-C · §3.1 (firma del founder, 14-ago) — LA FRONTERA DEL HOY:
+            **mientras haya cosas POR CONFIGURAR, el HOY las muestra;
+            configurado el negocio, el HOY es SOLO EL DÍA.**
+
+            LA REGLA ES UNA SOLA Y SE LEE LITERAL: *desaparece cuando el
+            contador DICE cero*. Por eso el guard pregunta `!== 0` y no
+            `> 0` — `null` NO es cero: es «no se pudo leer» (o el negocio
+            todavía no tiene cuenta comercial). *Esconder la ayuda de
+            configuración por un fallo de red sería afirmar «ya está todo»
+            con información que no tenemos*, y encima justo al que recién
+            empieza. Ante la duda, el bloque se queda.
+
+            Y el discriminador NO se re-calcula acá: es EL CONTADOR DEL
+            WIZARD (§4.3). Un cómputo propio —«¿le falta algo?»— haría que
+            dos superficies contaran el mismo hecho con dos criterios, que
+            es el defecto que §4.4 nombra por su nombre.
+
+            ⏪ Antes el guard era solo `preparacion !== null`, o sea una
+            derivación PROPIA de esta pantalla (servicios+horarios). Se
+            conserva porque es el DATO que el módulo dibuja, no el que
+            decide si vive. */}
+        {pantalla.estado === 'listo' &&
+          pantalla.preparacion !== null &&
+          pantalla.contadorAlta !== 0 && (
           <View style={{ gap: spacing[4] }}>
             <FirmaPrestador
               cohorteAnio={pantalla.estado === 'listo' ? pantalla.cohorteAnio : null}
@@ -2268,30 +2288,21 @@ export default function Hoy() {
               etiquetaCerrado={t('agenda.diaCerrado')}
               onElegir={setDiaElegido}
             />
-            {/* ── M1 (S69-B): la entrada del MOSTRADOR. Boton primario =
-                accent.cta teal (cta="oficio" en la raíz). El walk-in
-                registra EN EL MOMENTO. Glifo en el CTA: diferido. ── */}
-            {/* ⭐ S86-C (firma del founder) · LA VENTANILLA NO ES CLÍNICA.
-                ⏪ Gateaba en `oficiosActivos?.vet` — por eso el founder, en
-                Paseos Andrés, no la encontraba. Abre con CUALQUIER oficio
-                activo; sin ninguno no se monta (puerta a pantalla vacía). */}
-            {/* ⭐ S88-C (LÁMINA_MOSTRADOR_ORDEN) — EL BOTÓN SUBE: fecha →
-                BOTÓN → filtros → lista. Vivía debajo de los filtros, y esa
-                posición decía una mentira de alcance: registrar parecía
-                algo que se hace SOBRE LO FILTRADO. No lo es — se registra
-                a quien está parado en el mostrador, y esa persona no está
-                en ninguna lista todavía. La fecha es su CONTEXTO (una
-                atención de ESTE día); los filtros acomodan lo que viene
-                abajo. Aplica a TODOS los roles: es composición de la
-                superficie, no regla de un actor. */}
-            {pantalla.estado === 'listo' && conAlgunOficio && (
-              <Boton
-                variante="primario"
-                bloque
-                etiqueta={t('mostrador.registrarAtencion')}
-                onPress={() => router.push('/mostrador')}
-              />
-            )}
+            {/* ☠️ S98-C · §3.1 — ACÁ VIVÍA «Registrar atención», Y SE MUDÓ
+                A `ATENDER`. La letra es literal: *«todo lo de ATENDER o
+                asignar vive en ATENDER»*, y este botón era, textualmente,
+                el verbo de la tab nueva parado en la pantalla vieja.
+
+                **No se perdió nada y además ganó precisión:** el botón
+                abría `/mostrador` sin decir para qué oficio, y la portada
+                de `ATENDER` entra por la puerta del oficio elegido.
+
+                ⚠️ Y LA COMPOSICIÓN DE S88 SE CONSERVA ENTERA: la fecha
+                sigue siendo el contexto y los filtros siguen acomodando lo
+                de abajo. Lo que se fue es el botón, no el orden — el
+                argumento de aquella lámina («registrar no se hace SOBRE lo
+                filtrado») queda mejor servido: ahora ni siquiera comparte
+                pantalla con los filtros. */}
             {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
               <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
             )}
