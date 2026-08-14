@@ -260,17 +260,50 @@ const r = await page.evaluate(({ ancla, tol, barrer, minPisos }) => {
      ⚠️ Y EL VECINDARIO SE ACOTA A LA FILA: acá la «segunda trampa» del
      encabezado (comparar contra un vecino de OTRA fila) deja de poder
      ocurrir por construcción — la raíz de la búsqueda es la fila misma. */
-  const filas = [...document.querySelectorAll('[role="button"]')].filter((f) => {
+  /* 🔴 LA FILA NO SE DESCUBRE POR `role="button"` — quinta trampa, medida en
+     S98-D contra el censo de B. La v1 buscaba `[role="button"]` y por eso
+     **no alcanzaba 2 de las 3 filas en riesgo del censo**: las de
+     `veterinaria/consulta` son `Celda` DE LECTURA (esa pantalla tiene dos
+     botones en total). *Una fila cargada no es una fila tocable* — y el
+     defecto de reparto no sabe nada de si algo es tocable.
+
+     LA DEFINICIÓN, estructural y sin depender del rol: una fila es el
+     elemento MÁS CHICO que contiene `minPisos` textos. El «más chico» es
+     todo el criterio — sin él, cada sección y cada pantalla calificarían
+     (contienen todos los textos de sus filas) y el barrido mediría
+     contenedores en vez de filas. */
+  const cargados = [...document.querySelectorAll('div,span,[role="button"]')].filter((f) => {
     const c = f.getBoundingClientRect();
     return c.height > 0 && c.width > 0 && pisosDe(f).length >= minPisos;
   });
+  const filas = cargados.filter((f) => !cargados.some((o) => o !== f && f.contains(o)));
+  /* 🔴 CADA FILA SE CENTRA ANTES DE MEDIRSE — cuarta trampa, medida en S98-D.
+     El barrido reportó COLISIÓN de «Ya atendidas · 1 del día» contra
+     «Negocio · Datos · Hoy · Cuenta»: **la barra de tabs**, que es
+     `position:absolute; bottom:0` sobre el área de scroll. La fila estaba
+     abajo del todo y pasaba por debajo de la barra.
+     *Eso no es un defecto de la fila: es dónde estaba la página.* Medir sin
+     centrar convierte al guard en una función de la posición del scroll —
+     la misma pantalla daría rojo o verde según cuánto se hubiera bajado, y
+     un guard que cambia de veredicto sin que cambie el código es ruido.
+     Centrar es además lo que hace un humano para juzgar una fila.
+     ⚠️ LO QUE ESTO **NO** MIDE, y no es de este guard: una fila que quede
+     PERMANENTEMENTE atrapada bajo la barra. Ésa es la pregunta del
+     `insets.bottom` —curada en 38 pantallas en S70-B5— y tiene su propio
+     dueño; mezclarla acá haría que este guard contestara dos preguntas. */
   return {
     modo: 'barrido',
     hallado: filas.length > 0,
-    filas: filas.map((f) => ({
-      fila: (f.textContent ?? '').trim().slice(0, 40),
-      pisos: pisosDe(f).map((p) => medir(p, document, tol)),
-    })),
+    filas: filas.map((f) => {
+      f.scrollIntoView({ block: 'center', inline: 'nearest' });
+      // Leer un rect fuerza el reflow: las medidas de abajo ya son del
+      // layout nuevo, no del anterior.
+      void f.getBoundingClientRect();
+      return {
+        fila: (f.textContent ?? '').trim().slice(0, 40),
+        pisos: pisosDe(f).map((p) => medir(p, document, tol)),
+      };
+    }),
   };
 }, { ancla: ANCLA, tol: TOLERANCIA, barrer: BARRER, minPisos: MIN_PISOS });
 
