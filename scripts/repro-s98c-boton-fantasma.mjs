@@ -54,7 +54,14 @@ await page.waitForTimeout(1500);
 await page.screenshot({ path: `${DIR}01-paso2${SUFIJO}.png` });
 
 const texto = await page.locator('body').innerText();
-const hayCta = texto.includes('Quiero vender productos');
+/* ⏪ S98-C: acá se buscaba el CTA «Quiero vender productos» — y **yo mismo
+   lo reemplacé por los dos toggles de la firma**, así que la heurística
+   quedó midiendo un texto muerto y declaró «vendedora aprobada» a una
+   cuenta sin tienda. *Un instrumento que asume la forma de la superficie
+   se rompe el día que la superficie cambia, y se rompe EN VERDE.* Ahora
+   busca la pregunta del toggle, que es lo que hoy significa «todavía no
+   la tiene». */
+const hayCta = texto.includes('¿Vendés a través de e-PetPlace?');
 const enRevision = /revisando|En revisión/i.test(texto);
 const esVendedora = !hayCta && !enRevision;
 

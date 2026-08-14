@@ -105,6 +105,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  obtenerMiPrestador,
   actualizarRepartidor,
   cerrarSesion,
   cupoRepartoDelDia,
@@ -130,6 +131,11 @@ type Pantalla =
   | {
       estado: 'listo';
       contexto: ContextoVentas;
+      /** ⭐ S98-C · `true` = esta persona NO tiene otra casa (vendedor
+       *  puro: sin fila de prestador ⇒ sin tabs). Solo para ella se dibuja
+       *  el puntero a sus datos fiscales — para el resto vive en Cuenta, y
+       *  dos puertas al mismo sitio envejecen distinto (S84-C34). */
+      sinOtraCasa: boolean;
       repartidores: Repartidor[];
       recursos: RecursoReparto[];
       turnos: TurnoEntrega[];
@@ -219,12 +225,17 @@ export default function ConfiguracionVentas() {
           return;
         }
         const id = ctx.data.cuentaComercialId;
-        const [reps, recursos, turnos, pedidos, cupo] = await Promise.all([
+        const [reps, recursos, turnos, pedidos, cupo, pres] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
           listarPedidosDelVendedor(id),
           cupoRepartoDelDia(id, hoyLocalISO()),
+          /* ⭐ S98-C · ¿esta persona tiene OTRA casa? El vendedor puro no
+             tiene fila de prestador y por eso no tiene tabs: para él, esta
+             pantalla es el único camino a sus datos fiscales. Viaja en la
+             misma ola — cero espera nueva. */
+          obtenerMiPrestador(),
         ]);
         if (!vigente) return;
         if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
@@ -234,6 +245,7 @@ export default function ConfiguracionVentas() {
         setPantalla({
           estado: 'listo',
           contexto: ctx.data,
+          sinOtraCasa: !pres.ok && pres.codigo === 'sin_prestador',
           repartidores: reps.data,
           recursos: recursos.data,
           turnos: turnos.data,
@@ -582,23 +594,34 @@ export default function ConfiguracionVentas() {
             />
           </View>
 
-          {/* ── lo que vive en OTRA casa — punteros, jamás duplicación
-              (§8.6bis: lo fiscal y bancario ya vive en Cuenta comercial) ── */}
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionTitulo')}
-              detalle={t('ventas.config.facturacionDetalle')}
-              onPress={() => router.push('/cuenta-comercial')}
-            />
-            <Separador />
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionVistaTitulo')}
-              detalle={t('ventas.config.facturacionVistaDetalle')}
-              onPress={() => router.push('/ventas/facturacion')}
-            />
-          </Tarjeta>
+          {/* ── ⭐ S98-C · LA FACTURACIÓN SE VA DE ACÁ (firma del founder:
+              *«deben ir donde corresponde, no es de acá»*) ──────────────
+
+              **☠️ «Tu facturación» se mudó a NEGOCIO**, a la sección Cobros,
+              que es donde ya vive la plata del negocio. *La facturación es
+              del NEGOCIO, no del canal de venta* — y por la frontera
+              firmada (DATOS consulta · NEGOCIO configura) su vecino natural
+              son las liquidaciones, no los turnos de reparto.
+
+              **«Datos de facturación» NO se muda: se GATEA.** Su destino
+              —`/cuenta-comercial`— **ya vive en Cuenta**, así que para
+              quien tiene tabs esto era una segunda puerta al mismo sitio,
+              exactamente lo que S84-C34 firmó que no se hace. Pero el
+              VENDEDOR PURO no tiene tabs (todavía: D-820), y sin este
+              puntero se queda **sin ningún camino a sus datos fiscales**.
+              ⇒ se dibuja solo para él, y **muere solo el día que D-820 le
+              dé su barra**. *Retirarlo hoy para todos habría cumplido la
+              firma dejando a alguien sin puerta.* */}
+          {pantalla.sinOtraCasa && (
+            <Tarjeta relleno="ninguno">
+              <CeldaNavegacion
+                registro="tinta"
+                titulo={t('ventas.config.facturacionTitulo')}
+                detalle={t('ventas.config.facturacionDetalle')}
+                onPress={() => router.push('/cuenta-comercial')}
+              />
+            </Tarjeta>
+          )}
 
           {/* S96-C: para el VENDEDOR PURO (raíz → /ventas, sin tabs) esta
               es su única superficie estable — sin esto no tiene forma de

@@ -2678,6 +2678,18 @@ export const prestadorEn = {
       tiendaVoz: 'Sell food, parasite control and supplements to the families that already choose you.',
       tiendaCta: 'I want to sell products',
       tiendaPropuesta: "You asked to sell products. We're reviewing it.",
+      // S98-C · Espejo de es.ts — los dos toggles y sus dos avisos.
+      tiendaLocalPregunta: 'Do you sell at your shop?',
+      tiendaCanalPregunta: 'Do you sell through e-PetPlace?',
+      tiendaPidiendo: 'Sending your request…',
+      tiendaLocalV2Titulo: 'Not yet, but coming',
+      tiendaLocalV2Voz:
+        'Loading your shop inventory —what sits on your shelves— is coming in the next version. For now you can ask to sell through e-PetPlace.',
+      tiendaLocalV2Cerrar: 'Got it',
+      docsFaltanTitulo: 'We still need your documents',
+      docsFaltanVoz:
+        'Your request is in. To activate the shop and start receiving orders we need your documents — upload them in the «Your documents» step of this same setup.',
+      docsFaltanCta: 'Got it',
       // S98-C · Espejo de es.ts — dos voces, dos casas.
       configuracionTitulo: 'Your offer in detail',
       configuracionDetalle: 'Prices, hours and coverage',

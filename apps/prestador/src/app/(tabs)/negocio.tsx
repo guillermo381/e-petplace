@@ -55,7 +55,7 @@ import {
   Hoja,
   Insignia,
   MarcaDeAgua,
-  PuertaDeOficio,
+  Separador,
   Tarjeta,
   Texto,
   spacing,
@@ -191,7 +191,6 @@ export default function Negocio() {
   const [naturalezaVentas, setNaturalezaVentas] = useState<'cargando' | 'vendedora' | 'no'>(
     'cargando',
   );
-  const [puertaActiva, setPuertaActiva] = useState(false);
 
   /* ⭐ S98-C · EL ESTADO DE «Tu tienda», con sus TRES valores y no dos.
      `contextoVentas` solo sabe si la naturaleza está ACTIVA — y la firma
@@ -307,6 +306,12 @@ export default function Negocio() {
   /** Voz de fallo del bloque, o `null` si ese bloque está sano (o cargando).
    *  Se consulta ANTES de la lógica de detalle de cada bloque: lo que no se
    *  pudo leer no se cuenta como "todavía no lo configuraste". */
+  /** ⭐ S98-C · UN SOLO PREDICADO DE «VENDE» EN ESTA PANTALLA — el mismo
+   *  que gobierna la sección «Tu tienda». La fila de facturación de ventas
+   *  no puede existir para quien no vende, y derivarla de otra fuente sería
+   *  reabrir D-821 en chiquito. */
+  const vendeProductos = tienda === 'activa';
+
   const fallo = (b: BloqueNegocio): string | null =>
     cargado && fallos.has(b) ? t('negocio.bloqueNoCargo') : null;
 
@@ -431,17 +436,11 @@ export default function Negocio() {
             <TarjetaVentas
               etiqueta={t('ventas.entradaTitulo')}
               detalle={t('ventas.entradaDetalle')}
-              onPress={() => setPuertaActiva(true)}
+              onPress={() => router.push('/ventas')}
             />
           </View>
-          <PuertaDeOficio
-            capa="consumo"
-            activo={puertaActiva}
-            onFin={() => {
-              setPuertaActiva(false);
-              router.push('/ventas');
-            }}
-          />
+          {/* ☠️ S98-C · el barrido murió acá también — su porqué medido vive
+              en la lápida gemela del HOY. */}
         </View>
       );
     }
@@ -561,7 +560,7 @@ export default function Negocio() {
                       titulo={t('negocio.tiendaVitrina')}
                       detalle={t('negocio.tiendaVitrinaDetalle')}
                       orden={0}
-                      onPress={() => setPuertaActiva(true)}
+                      onPress={() => router.push('/ventas')}
                     />
                   </View>
                   <View style={ESTILO_CELDA}>
@@ -660,6 +659,29 @@ export default function Negocio() {
                 detalle={detalleLiquidaciones}
                 onPress={() => router.push('/liquidaciones')}
               />
+              {/* ⭐ S98-C · «TU FACTURACIÓN» LLEGA A SU CASA (firma del
+                  founder: *«deben ir donde corresponde, no es de acá»*).
+                  Vivía en la configuración de VENTAS, entre turnos y
+                  repartidores. **La facturación es del NEGOCIO, no del
+                  canal de venta** — su vecino natural son las
+                  liquidaciones, que es la otra cara de la misma plata.
+                  ⚠️ Y hereda el gate de este tab (`useGateGestor`), que es
+                  MÁS angosto que el de su casa vieja: allá alcanzaba con
+                  operar la cuenta comercial. *Una mudanza que ensancha la
+                  audiencia de una pantalla de plata no es una mudanza: es
+                  un permiso nuevo sin firma.* */}
+              {vendeProductos && (
+                <>
+                  <Separador />
+                  <CeldaNavegacion
+                    icono="fiscal"
+                    registro="aa"
+                    titulo={t('ventas.config.facturacionVistaTitulo')}
+                    detalle={t('ventas.config.facturacionVistaDetalle')}
+                    onPress={() => router.push('/ventas/facturacion')}
+                  />
+                </>
+              )}
               {/* ☠️ S86-C · «EL MOVIMIENTO» SE MUDÓ A CUENTA (firma de mesa):
                   es PLATA DE LA CUENTA COMERCIAL, no configuración del
                   oficio. ⏪ Su nota de S70-B2-v2 decía que migraba ACÁ por
@@ -753,17 +775,15 @@ export default function Negocio() {
         </View>
       </Hoja>
 
-      {/* el barrido del cruce — SOLO color; los permisos son del servidor.
-          `onFin` llega SIEMPRE (también en memorial/reduce-motion): el
-          contrato de la pieza garantiza que la navegación no se cuelga. */}
-      <PuertaDeOficio
-        capa="consumo"
-        activo={puertaActiva}
-        onFin={() => {
-          setPuertaActiva(false);
-          router.push('/ventas');
-        }}
-      />
+      {/* ☠️ S98-C · MURIÓ EL BARRIDO DE LA PUERTA A VENTAS (firma del
+          founder): *«quedó un efecto de una línea marrón o café cuando le
+          doy clic… simplemente quitala, con la transición estamos bien»*.
+          El porqué medido —y la hipótesis que descarté, que era el canto
+          de la baldosa y habría chocado con la Ley 10— está entero en la
+          lápida gemela del HOY. **El canto en reposo queda.**
+          ⏪ Su nota decía que `onFin` llegaba SIEMPRE «para que la
+          navegación no se cuelgue»: era cierto y ya no hace falta —
+          sin barrido, la navegación no depende de ninguna animación. */}
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
       <VeloBarraEstadoOficio />
