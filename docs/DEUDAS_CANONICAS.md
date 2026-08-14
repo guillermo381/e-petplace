@@ -14286,3 +14286,40 @@ B) y las dos apps (territorio C), así que lo coordina la mesa como acto
 
 ☠️ **Muere** con el rename ejecutado en su ventana, typecheck verde en las
 cuatro patas y el índice de la skill actualizado por B.
+
+#### D-790 — 🔴 EL CANON MIENTE EN TRES LUGARES MEDIDOS HOY — Y LA PREGUNTA ES CÓMO SE DETECTA UNA LETRA SUPERADA SIN TROPEZAR CON ELLA
+
+**Nace de una orden de mesa con nombre pedido (13-ago-2026).** Los tres
+lugares, medidos el mismo día:
+
+1. **La plata del día en `CLAUDE.md`** — «SOLO el titular (y el admin);
+   ningún empleado» (S83), superada por §4ter (S88, el mostrador entero,
+   con el ensanche escrito EN el cuerpo del gate) y viva cinco días.
+   Enmendada hoy con los dos literales.
+2. **La razón del toggle Administrador** — «su motor no existe (D-513)»
+   caducó el 5-ago con D-660 y **seguía citada** (una orden de mesa de hoy
+   la usó como premisa; el propio código la tenía corregida en un
+   comentario que nadie leyó hasta obedecer).
+3. **`Insignia` «jamás interactiva»** — falsa desde S85, **en dos
+   archivos** (medido por B).
+
+**Los tres son la MISMA clase: letra firmada que el motor superó y que
+nadie retiró.** Y el dato que la vuelve cara: **ninguno lo detectó un
+instrumento** — ni typecheck, ni lint, ni juez, porque nada está roto: *la
+letra superada no tiene síntoma; solo tiene víctimas.* Los tres los
+encontró **alguien que fue a leer la fuente antes de obedecer** (R7
+aplicada a la ley — el patrón que DIRECCION_ARTE §11.3 depositó hoy por su
+propio caso, que sería el CUARTO de la lista).
+
+**LA PREGUNTA ABIERTA — a propósito sin solución inventada:** ¿cómo se
+detecta una letra superada **sin esperar a que alguien tropiece con
+ella**? Lo que se sabe medido: el costo de cada tropiezo es una orden mal
+premisada o un rojo falso a punto de «curarse»; la única defensa que hoy
+funciona es leer la fuente antes de obedecer, **y esa defensa no escala
+porque depende de que alguien dude a tiempo.** Es la deuda más cara de la
+sesión y **no se resuelve hoy** — la sesión que la tome trae propuesta de
+mecanismo, no otra pasada de disciplina.
+
+☠️ **Muere** cuando exista un mecanismo (instrumento, rito de cierre, o
+regla de mesa) que haya cazado al menos UNA letra superada antes de que
+alguien tropezara con ella — la prueba es el caso, no el diseño.
