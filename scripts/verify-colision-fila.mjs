@@ -143,8 +143,43 @@ const r = await page.evaluate(({ ancla, tol, barrer, minPisos }) => {
      ⇒ La trampa vieja NO se resuelve achicando el vecindario: se resuelve
      eligiendo bien el NODO ANCLA (que es lo que el barrido hace por
      construcción, piso por piso). */
+  /* 🔴 SEXTA TRAMPA · SE MIDE LA TINTA, NO LA CAJA CON PADDING (S98-D).
+     El barrido dio ROJO permanente sobre el chip «Todos» del filtro de
+     oficio: 22×18 px contra un glifo. Medido y después MIRADO a 3×, el
+     glifo es **la pata de selección**, que va montada sobre el borde
+     superior de la píldora **a propósito** (E6, S82: *la pata marca por
+     presencia y JAMÁS va adentro de la placa*). Solapa la caja del label
+     —que incluye su padding— y **no toca una sola letra**.
+     *Un guard que grita sobre una geometría firmada enseña a ignorarlo*, y
+     ésa es la única forma de fallar peor que no existir.
+     ⇒ El ancla deja de ser la caja del contenedor y pasa a ser la UNIÓN DE
+     LOS RECTS DE SUS NODOS DE TEXTO — la tinta. El defecto que parió este
+     guard (un glifo encima del subtítulo) sigue siendo rojo: ahí el glifo
+     se dibuja sobre las letras, no sobre el padding.
+     ⚠️ El DESBORDE sigue midiéndose sobre el elemento (`scrollWidth` vs
+     `clientWidth`): ésa es una pregunta sobre la caja, y ahí la caja es la
+     respuesta correcta. Son dos preguntas distintas y cada una usa su
+     geometría — que es la tesis entera de este archivo. */
+  const tintaDe = (el) => {
+    const textos = [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim());
+    if (textos.length === 0) return el.getBoundingClientRect();
+    let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+    for (const t of textos) {
+      const rg = document.createRange();
+      rg.selectNodeContents(t);
+      for (const q of rg.getClientRects()) {
+        if (q.width === 0 && q.height === 0) continue;
+        L = Math.min(L, q.left); T = Math.min(T, q.top);
+        R = Math.max(R, q.right); B = Math.max(B, q.bottom);
+      }
+    }
+    return L === Infinity
+      ? el.getBoundingClientRect()
+      : { left: L, top: T, right: R, bottom: B, width: R - L, height: B - T };
+  };
+
   const medir = (nodo, raiz, tol) => {
-  const ra = nodo.getBoundingClientRect();
+  const ra = tintaDe(nodo);
 
   /* ⚠️ LA INTERSECCIÓN SE MIDE EN LOS DOS EJES, y esto no es un detalle:
      la primera versión de este guard comparaba SOLO el eje X y reportaba el
