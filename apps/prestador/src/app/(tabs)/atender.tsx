@@ -192,40 +192,22 @@ export default function Atender() {
                     naturalezas (§1.2) — `Tus servicios` y `Tu tienda`. No
                     son vocabulario: son el primer candado del cinturón. */}
                 <Texto variante="seccion">{t('atender.tusServicios')}</Texto>
-                {/* 🔴 S98-C · `orden` NO SE PASA, Y ES UNA DESVIACIÓN
-                    DECLARADA DE N6 (entrada escalonada en toda pantalla
-                    nueva) — no un olvido.
+                {/* ✅ S98-C · `orden` DEVUELTO — N6 vuelve a esta portada.
+                    La desviación que vivía acá duró lo que tardó su causa
+                    en curarse: `Entrada` dejó las layout animations de
+                    Reanimated (`FadeInDown` → `useSharedValue` +
+                    `useAnimatedStyle`, B) y con eso **el envoltorio de
+                    movimiento dejó de tocar el layout de quien lo monta**.
+                    Verificado acá con captura: baldosas arriba, pizarra
+                    abajo, nada montado sobre nada.
 
-                    MEDIDO en el navegador (`getBoundingClientRect` +
-                    `getComputedStyle`, no deducido): con `orden`, la
-                    baldosa se envuelve en `Entrada`, cuyo `Animated.View`
-                    de Reanimated queda **`position: absolute`** en RN-web.
-                    Un hijo absoluto no aporta alto a su padre ⇒ **la celda
-                    de la grilla mide 0 y las baldosas se dibujan encima de
-                    la pizarra.** Medido en esta pantalla: celda `w=186
-                    h=0`, con el botón adentro en `186×186`.
-
-                    ⚠️ **EL LÍMITE: está medido en RN-WEB.** En nativo
-                    Reanimated no posiciona así y es probable que el
-                    teléfono lo resuelva bien — **no lo afirmo, no lo medí.**
-                    Se saca igual porque es la única forma de que la
-                    composición sea VERIFICABLE hoy: *shippear una pantalla
-                    cuya composición no puedo ver, confiando en que la
-                    plataforma que no medí la salve, es exactamente el
-                    verde sin medir que la casa prohíbe.*
-
-                    ☠️ CONDICIÓN DE MUERTE de esta desviación: cuando B
-                    resuelva la interacción `Entrada`×grilla, vuelve
-                    `orden={i}` — es UNA línea, y su ausencia está acá para
-                    que nadie la lea como decisión de diseño.
-
-                    ⏪ Y una corrección propia: antes de medir esto probé
-                    `alignItems: 'flex-start'` culpando al `stretch` de la
-                    fila. **Falsado por la medición** — no cambió nada,
-                    porque el problema nunca fue la altura circular sino un
-                    hijo absoluto. Se revirtió: *un parche que no se
-                    entiende no es inofensivo aunque no rompa — es una
-                    explicación falsa esperando que alguien la crea.* */}
+                    ⏪ Lo que vivió acá, para que la próxima no lo re-descubra:
+                    con las layout animations, `Entrada` dejaba su
+                    `Animated.View` en `position: absolute` en RN-web, un
+                    hijo absoluto no aporta alto, y la celda de la grilla
+                    medía `186×0` con la baldosa dibujada ENCIMA de la fila
+                    de abajo. *Lo destapó ponerle un vecino a la grilla: sin
+                    nada debajo, una altura cero es invisible.* */}
                 {/* LA GRILLA ES DE LA PANTALLA, LA BALDOSA ES DE LA PIEZA
                     (contrato de B): cuántas columnas entran depende del
                     ancho de ESTA superficie, no de la pieza. `47%` con el
@@ -233,12 +215,13 @@ export default function Atender() {
                     `flexGrow` hace que la impar ocupe la fila entera en
                     vez de quedar a media pantalla. */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
-                  {capacidad.oficios.map((o) => (
+                  {capacidad.oficios.map((o, i) => (
                     <View key={o.oficio} style={{ flexBasis: '47%', flexGrow: 1 }}>
                       <Baldosa
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
                         capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
+                        orden={i}
                         onPress={() =>
                           router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
                         }
@@ -292,6 +275,7 @@ export default function Atender() {
                       glifo="despensa"
                       titulo={t('atender.ventaTitulo')}
                       capa="consumo"
+                      orden={capacidad.oficios.length}
                       onPress={() => router.push('/ventas/mostrador')}
                     />
                   </View>
