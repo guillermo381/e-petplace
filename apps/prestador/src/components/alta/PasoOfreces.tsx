@@ -86,6 +86,40 @@ type Pantalla =
   | { estado: 'error' }
   | { estado: 'listo'; oficios: OficioNegocio[]; tienda: EstadoNaturaleza };
 
+/** La fila de una modalidad: rótulo a la izquierda, interruptor a la
+ *  derecha. Existe porque `Interruptor` no pinta su `etiqueta` (es su
+ *  `accessibilityLabel`) — el texto visible siempre fue del consumidor. */
+function FilaModalidad({
+  etiqueta,
+  encendido,
+  onCambio,
+}: {
+  etiqueta: string;
+  encendido: boolean;
+  onCambio: (v: boolean) => void;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing[3],
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <Texto variante="apoyo">{etiqueta}</Texto>
+      </View>
+      <Interruptor
+        encendido={encendido}
+        onCambio={onCambio}
+        etiqueta={etiqueta}
+        registro="oficio"
+      />
+    </View>
+  );
+}
+
 export interface PasoOfrecesProps {
   prestadorId: string | null;
   cuentaComercialId: string;
@@ -266,19 +300,24 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
                 <Tarjeta elevacion="reposo">
                   <View style={{ gap: spacing[4] }}>
                     {oficio.servicios.map((s) => (
-                      <View key={s.servicioId} style={{ gap: spacing[2] }}>
+                      <View key={s.servicioId} style={{ gap: spacing[3] }}>
                         <Texto variante="cuerpo">{s.nombre}</Texto>
-                        <Interruptor
+                        {/* 🔴 EL TEXTO VISIBLE ES DEL CONSUMIDOR — medido:
+                            `Interruptor` usa `etiqueta` SOLO como
+                            `accessibilityLabel`, no la pinta. Sin esta fila
+                            salían dos toggles idénticos sin decir cuál era
+                            cuál. Lo cazó la CAPTURA, no el typecheck: el
+                            código compilaba y la a11y estaba bien puesta —
+                            lo que faltaba solo se ve mirando. */}
+                        <FilaModalidad
+                          etiqueta={t('alta.paso2.enMiLocal')}
                           encendido={s.atiendeLocal}
                           onCambio={(v) => void alternar(s, 'local', v)}
-                          etiqueta={t('alta.paso2.enMiLocal')}
-                          registro="oficio"
                         />
-                        <Interruptor
+                        <FilaModalidad
+                          etiqueta={t('alta.paso2.aDomicilio')}
                           encendido={s.atiendeDomicilio}
                           onCambio={(v) => void alternar(s, 'domicilio', v)}
-                          etiqueta={t('alta.paso2.aDomicilio')}
-                          registro="oficio"
                         />
                       </View>
                     ))}
