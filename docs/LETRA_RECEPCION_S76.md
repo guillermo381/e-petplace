@@ -368,6 +368,75 @@ hasta el consultorio.
 
 ---
 
+## 7bis. EL VERBO ES DE UN ROL, NO DE UN LOCAL — ✅ **FIRMADA (founder, 14 Ago 2026)**
+
+> **Literal del founder:** *«(a) — el verbo es la herramienta de un rol, no de
+> un local.»*
+
+**Qué decide.** El verbo **«Llegó»** —el botón que REGISTRA la llegada— existe
+**solo en la pantalla de quien mira como recepción**. El gestor de una clínica
+CON recepción **no lo ve en su HOY**: él atiende, y **atender es la
+constancia**.
+
+**Y con ella queda firmada la regla que la contiene:** *la llegada se registra
+al atender; el verbo explícito solo se compone con recepción activa.*
+
+### Qué NO decide, y hay que leerlo o se rompe algo
+
+- **☠️ MUERE LA LECTURA (b).** Se consideró *«recepción activa = el negocio
+  TIENE recepción»* y **perdió**: bajo (b) el verbo dependería del local, y un
+  gestor que atiende SOLO —sin recepcionista— también lo perdería. **El verbo
+  sigue al ROL de quien mira, no al organigrama del negocio.** Queda tachada,
+  no borrada, para que nadie la re-proponga como novedad.
+- **🔴 NO TOCA EL PERMISO DEL MOTOR, y esto es lo que más fácil se «arregla»
+  mal.** §7 arriba dice que `registrar_llegada` está **gateada por
+  MEMBRESÍA**, y **sigue igual**. Esta firma angosta **la SUPERFICIE** (quién
+  ve el botón), jamás **la puerta** (quién puede escribir). *Alinear una con
+  otra «por coherencia» sería derogar §7 sin firma* — son dos preguntas
+  distintas y cada una tiene su respuesta.
+- **NO TOCA EL CHIP DE ESTADO.** El «Llegó» que dice que la mascota ya llegó
+  **es un hecho, no un verbo**, y se conserva entero — es exactamente el
+  *«regalo de producto»* de §7: *el HOY del profesional puede decir «llegó tu
+  10:30» sin push y sin Meta*. **Perderlo al condicionar el botón habría
+  matado el beneficio por el que §7 eligió un timestamp.**
+
+### ✅ SU SEGUNDA CONDICIÓN — CUMPLIDA (A, migración `20260814200000`)
+
+**El verbo no se retiraba hasta que existiera el escritor de `llegada_en` en
+el camino de atender.** No era prudencia: era una **medición**.
+
+> Medido al firmarse el borde (S98-D): de todas las funciones, **solo
+> `registrar_llegada` escribía `llegada_en`**. **Iniciar la atención NO
+> registraba la llegada** ⇒ retirar el verbo entonces **no habría sacado un
+> botón redundante: habría dejado a los negocios SIN recepción sin ninguna
+> forma de registrar que alguien llegó.**
+
+**Lo entregado, y su forma importa:** `trg_cita_llegada_al_atender`, BEFORE
+UPDATE sobre `evento_cita_servicio`, con la condición fina en el `WHEN`
+—entra a `en_curso` **y** `llegada_en IS NULL`—. **La regla vive en LA
+TRANSICIÓN, no en las cuatro puertas de iniciar** ⇒ *el quinto oficio que
+nazca la hereda gratis, sin que nadie se acuerde.* Idempotente por los dos
+brazos: la hora del mostrador **no se pisa** — la de la puerta gana. **Sin
+backfill a propósito:** estampar `now()` sobre citas ya atendidas sería una
+llegada inventada (L-139 en su forma más cara); rige hacia adelante.
+
+**Estado: ✅ ENCENDIDO.** El borde vive en una sola función
+(`hayRecepcionActiva`) y el interruptor en `VERBO_LLEGADA_SOLO_RECEPCION`.
+Verificado por camino real en sus dos estados: **el verbo desaparece para el
+gestor**, **el chip de estado sobrevive**, y la fila queda **limpia, sin
+separador huérfano** — cae al chip genérico de estado, que ya era su
+comportamiento cuando nadie había llegado.
+
+### 🔴 MOTOR Y BUNDLE VIAJAN JUNTOS — la costura, en los dos lados
+
+Con el verbo retirado, **revertir la migración deja `llegada_en` sin un solo
+escritor por el camino real y las llegadas dejan de existir EN SILENCIO.**
+*La reversa de cualquiera de los dos lados se declara en el otro* — y por eso
+está escrito acá, en la reversa de la migración y en el comentario del HOY:
+**ninguno de los dos se revierte solo.**
+
+---
+
 ## 8. LA REAGENDA — el pet parent primero, recepción por el teléfono
 
 **Dictado del founder (S76), con su duda declarada:**

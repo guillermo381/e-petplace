@@ -856,30 +856,46 @@ function FilaSalida({
  * 🔴 NO SE ENCIENDE, y las DOS razones son independientes — cualquiera de
  * las dos sola ya alcanza para dejarlo apagado:
  *
- * ① **EL BORDE NO ESTÁ FIRMADO.** «Recepción activa» admite dos lecturas y
- *    NO son la misma pantalla:
- *      (a) **quien mira es recepción** — se apoya en *«redundante para quien
- *          atiende»*: el gestor que atiende no lo ve;
- *      (b) **el negocio TIENE recepción** — el gestor de una clínica con
- *          recepcionista tampoco lo necesita, pero el gestor que atiende
- *          SOLO sí, y bajo (a) también lo perdería.
- *    Queda cableada **(a)**, la conservadora respecto de la firma, **y se
- *    declara que es una elección pendiente de su palabra, no una decisión.**
- *    El borde vive en UNA función: firmarlo cambia una línea.
+ * ① **EL BORDE — ✅ FIRMADO (founder, 14-ago-2026): LECTURA (a).**
+ *    Literal: *«(a) — el verbo es la herramienta de un rol, no de un
+ *    local.»* El verbo existe **solo en la pantalla de quien mira como
+ *    recepción**; el gestor de una clínica con recepción no lo ve en su
+ *    HOY — **él atiende, y atender es la constancia**.
+ *    ☠️ **Muere la lectura (b)** («el negocio TIENE recepción»): bajo (b) el
+ *    verbo dependería del local, y el gestor que atiende SOLO también lo
+ *    perdería. **El verbo sigue al ROL de quien mira, no al organigrama.**
+ *    ⚠️ **Esto angosta LA SUPERFICIE, jamás LA PUERTA:** `registrar_llegada`
+ *    sigue **gateada por MEMBRESÍA** (`LETRA_RECEPCION_S76` §7). *Alinear
+ *    una con otra «por coherencia» derogaría §7 sin firma.*
+ *    Depositada con su literal en `LETRA_RECEPCION_S76` **§7bis**.
  *
- * ② **LA MITAD DE MOTOR NO EXISTE — medido, no supuesto.** De todas las
- *    funciones de la base, **solo `registrar_llegada` escribe `llegada_en`**
- *    (`obtener_jornada_recepcion` apenas la lee). **Iniciar la atención NO
- *    registra la llegada.** Así que encender esto hoy no sacaría un verbo
- *    redundante: **dejaría a los negocios sin recepción SIN NINGUNA forma
- *    de registrar que alguien llegó** — la primera mitad de la regla del
- *    founder sostiene a la segunda, y todavía no está construida.
+ * ② **LA MITAD DE MOTOR — ✅ ENTREGADA (A, `20260814200000`).**
+ *    Hasta esa migración **solo `registrar_llegada` escribía `llegada_en`**:
+ *    iniciar la atención NO registraba la llegada, y encender esto habría
+ *    dejado a los negocios sin recepción **sin ninguna forma de registrar
+ *    que alguien llegó**. *La primera mitad de la regla sostiene a la
+ *    segunda.*
+ *    **Verificado ACÁ antes de encender, no aceptado de palabra:** existe
+ *    `trg_cita_llegada_al_atender` (BEFORE UPDATE, `tgenabled='O'`), con la
+ *    condición fina en el `WHEN` —entra a `en_curso` **y** `llegada_en IS
+ *    NULL`— y un cuerpo que estampa `now()`. **La regla vive en LA
+ *    TRANSICIÓN, no en las cuatro puertas de iniciar: el quinto oficio que
+ *    nazca la hereda gratis, sin que nadie se acuerde.**
  *
- * ⇒ Su condición de encendido son las DOS: la firma del borde **y** el
- *   escritor de `llegada_en` en el camino de atender. */
-const VERBO_LLEGADA_SOLO_RECEPCION = false;
+ * ⇒ Las DOS condiciones cumplidas ⇒ **ENCENDIDO**.
+ *
+ * 🔴 **MOTOR Y BUNDLE VIAJAN JUNTOS — la costura, declarada en los dos
+ *    lados** (la reversa de la migración la dice también): con este
+ *    interruptor en `true`, **revertir aquella migración deja `llegada_en`
+ *    sin un solo escritor por el camino real**, y las llegadas dejan de
+ *    existir **en silencio**. *Ninguno de los dos lados se revierte solo.* */
+const VERBO_LLEGADA_SOLO_RECEPCION = true;
 
-/** EL BORDE, en un solo lugar. Hoy la lectura (a). */
+/** EL BORDE, en un solo lugar y **YA FIRMADO**: lectura (a) — *el verbo es la
+ *  herramienta de un ROL, no de un local*. Vivía acá para que firmarlo
+ *  costara una línea; la firma llegó y no hubo que cambiarla. Sigue en una
+ *  función porque **el borde es la clase de cosa que se re-decide**, y
+ *  cuando se re-decida tiene que volver a costar una línea. */
 const hayRecepcionActiva = (rol: 'gestor' | 'recepcion' | 'profesional' | null): boolean =>
   rol === 'recepcion';
 
