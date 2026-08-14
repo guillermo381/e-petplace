@@ -16299,7 +16299,36 @@ dirección clara en spec completa es ponerle al founder palabras que no dijo.*
 al pie de la Configuración de la tienda (verificado). **Con `CUENTA` en su
 barra, vuelve a donde vive en todas las demás casas.**
 
+### 🔴 EL REPARTO PROPUESTO — y la costura importa más que la división
+
+**El problema no se parte por pantalla: se parte por CASCARÓN vs CONTENIDO.**
+
+| pieza | quién | por qué |
+|---|---|---|
+| **el CASCARÓN del `HOY`** — sus secciones, el orden, el digesto | **D** | el `HOY` es suyo: construyó la fila, el digesto y el verbo. *Y el día del dual, dos mundos tienen que caber en UN `HOY`: eso es composición, no contenido.* |
+| **el CONTENIDO del vendedor** — pedidos, stock | **C** | vive en `/ventas`, que C acaba de tocar (el botón fantasma, el ruteo por naturaleza). *Sabe qué lectores y qué piezas ya existen.* |
+| **`DATOS` de venta** | **C** + **A** | la superficie es de C; **los lectores que hoy no existen son de A** |
+| **los lectores** de pedidos/stock/venta que falten | **A** | motor |
+
+> ⚠️ **La costura que hay que cuidar, y es la única que puede salir cara:**
+> **el cascarón lo compone D y lo llena C.** Si cada uno construye su mitad
+> asumiendo la del otro, la ventana de pedidos nace dos veces —una en `/ventas`
+> y otra adentro del `HOY`— y **el día del dual hay que elegir cuál muere.**
+> *La pieza se acuerda ANTES de escribirla, no se descubre al mergear* (el
+> merge de hoy ya cobró esa lección con el verbo «Llegó»).
+
+### 🔴 EL ORDEN, y su razón: PURO PRIMERO, DUAL DESPUÉS
+
+**Las dos ventanas del `HOY` de `duenotodo` van DESPUÉS**, y no es
+secuenciación arbitraria:
+
+> ***La ventana de pedidos del dual ES la del vendedor puro, construida una
+> vez.***
+
+*Hacer el dual primero obligaría a inventar la ventana del vendedor adentro de
+un `HOY` que ya tiene otro mundo — y después extraerla. Al revés, se construye
+donde es simple y se reusa donde es compleja.*
+
 ☠️ **Muere** cuando `duenodes` entre y reciba la barra completa **con
 contenido propio en `HOY` y `DATOS`** — no con los cuartos vacíos, que sería
-cumplir la letra y romper la intención. **Territorio: C** (superficie) **+ A**
-(los lectores de pedidos/stock/venta que `HOY` y `DATOS` necesiten).
+cumplir la letra y romper la intención.
