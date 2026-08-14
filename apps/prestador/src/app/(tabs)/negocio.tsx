@@ -18,6 +18,28 @@
  * S57-B (letra P17): NEGOCIO QUEDA PURO OFICIO — la oferta y la plata.
  * El idioma y la salida de sesión se MUDARON a la tab Cuenta (mover =
  * mover, Ley 37: acá no queda ni el código).
+ *
+ * ═══ S98-C · LA RECONSTRUCCIÓN POR LAS DOS NATURALEZAS ════════════════
+ * Firma del founder, literal: *«en mi negocio aún faltan los cambios, a
+ * rectángulos y las dos categorías de servicios que hablamos desde el
+ * inicio»* (`LA_CASA_DEL_PRESTADOR` §6bis ⑤).
+ *
+ * ⇒ **Dos secciones con los NOMBRES FIRMADOS** (§1.2): «Tus servicios»
+ * arriba, «Tu tienda» debajo. *No es vocabulario: es el primer candado
+ * del cinturón de `MODELO_DESPENSA` §3.4* — la frontera que desde S95 se
+ * sostiene solo en nuestra disciplina, y nombrarlas distinto es la mitad
+ * gratis de esa disciplina.
+ *
+ * ⇒ **Los mundos pasan de fila a BALDOSA** (Acto II de B): *tarjetas para
+ * lo que se ELIGE, filas para lo que se LEE*. Cuatro mundos entre los que
+ * se salta no son una lista que se recorre.
+ *
+ * 🔴 **LA CONDICIÓN DE D, QUE NO ES OPCIONAL:** su cura de «Prepará tu
+ * espacio» hace deep link a `/<oficio>/taller?seccion=…` y **cuando el
+ * destino no es resoluble cae acá**, apoyándose en que **lo primero de
+ * esta pantalla sea la lista de mundos**. Con «Tus servicios» arriba se
+ * cumple. **Si algún día el orden cambia, se le avisa a D ANTES: el
+ * fallback es de SU fila y se mueve de un solo lado.**
  */
 
 import { useCallback, useState } from 'react';
@@ -25,13 +47,13 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
+  Baldosa,
   CeldaNavegacion,
   Esqueleto,
   EsqueletoGrupo,
-  Icono,
+  Insignia,
   MarcaDeAgua,
   PuertaDeOficio,
-  Separador,
   Tarjeta,
   Texto,
   spacing,
@@ -40,10 +62,12 @@ import {
 import {
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
+  obtenerNaturalezasDeCuenta,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
+  type EstadoNaturaleza,
   type MundoAdiestramientoPropio,
   type MundoVeterinariaPropio,
   type OfertaGroomingPropia,
@@ -68,6 +92,31 @@ function hoyLocalISO(): string {
 }
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
+
+/* ⭐ S98-C · LA GRILLA DE BALDOSAS — **el patrón del PIE de `Baldosa.tsx`
+   copiado tal cual, y ésa es toda la gracia.**
+
+   `width: '50%'` + padding adentro de la celda y **SIN `gap`**: es lo
+   único que cierra por construcción —`50 % + 50 % = 100 %` exacto en
+   cualquier ancho, sin nada que sumarle—. El `marginHorizontal` negativo
+   devuelve el padding de los bordes para que la grilla quede alineada con
+   el resto de la pantalla.
+
+   ⚠️ **NO se inventa un porcentaje acá.** El patrón ya se equivocó dos
+   veces en un día (47 % frágil por 7 px · 48 % que no entra en NINGÚN
+   teléfono, con la aritmética medida en cuatro anchos reales) y la cura
+   fue justamente **sacar el gap de la cuenta del wrap**. Un tercer
+   porcentaje inventado en esta pantalla sería la tercera vez. */
+const ESTILO_GRILLA = {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginHorizontal: -spacing[2],
+} as const;
+const ESTILO_CELDA = {
+  width: '50%',
+  paddingHorizontal: spacing[2],
+  paddingBottom: spacing[4],
+} as const;
 
 /** S77-B (D-541): los bloques que este tab lee, UNO POR LECTURA. Vocabulario
  *  CERRADO a propósito — el conjunto de fallos no acepta strings sueltos, así
@@ -142,6 +191,15 @@ export default function Negocio() {
   );
   const [puertaActiva, setPuertaActiva] = useState(false);
 
+  /* ⭐ S98-C · EL ESTADO DE «Tu tienda», con sus TRES valores y no dos.
+     `contextoVentas` solo sabe si la naturaleza está ACTIVA — y la firma
+     pide distinguir al que YA PIDIÓ («lo estamos revisando») del que
+     nunca pidió. El lector de los tres estados **ya existía**
+     (`obtenerNaturalezasDeCuenta`, el mismo que usa el paso ② del
+     wizard): se reusa, no se inventa uno paralelo.
+     `null` = no se pudo leer o esta persona no tiene cuenta comercial. */
+  const [tienda, setTienda] = useState<EstadoNaturaleza | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -162,14 +220,31 @@ export default function Negocio() {
         const caidos = new Set<BloqueNegocio>();
         if (rPendientes.ok) setPendientes(rPendientes.data);
         else caidos.add('liquidaciones');
-        if (rPrestador.ok) {
-          const [rOfertas, rGrooming, rAdiestramiento, rVeterinaria] = await Promise.all([
-            obtenerOfertasPaseoPropias(rPrestador.data.id),
-            obtenerOfertasGroomingPropias(rPrestador.data.id),
-            obtenerOfertaAdiestramientoPropia(rPrestador.data.id),
-            obtenerMundoVeterinariaPropio(rPrestador.data.id),
-          ]);
-          if (!vigente) return;
+
+        /* ⭐ S98-C · LA SEGUNDA OLA LLEVA LAS DOS NATURALEZAS JUNTAS, y la
+           de la tienda **NO cuelga del prestador**: el vendedor puro no
+           tiene fila de prestador —eso es el cinturón (§8.6bis), no un
+           error— y su sección de tienda tiene que poder hablar igual.
+           Colgarla del `if (rPrestador.ok)` la habría dejado muda justo
+           para quien es SOLO tienda. Un viaje más en la ola que ya existe,
+           cero esperas nuevas (D-738: lo caro es la petición encadenada). */
+        const cuentaId =
+          rVentas.ok && rVentas.data !== null ? rVentas.data.cuentaComercialId : null;
+        const [mundos, rNaturalezas] = await Promise.all([
+          rPrestador.ok
+            ? Promise.all([
+                obtenerOfertasPaseoPropias(rPrestador.data.id),
+                obtenerOfertasGroomingPropias(rPrestador.data.id),
+                obtenerOfertaAdiestramientoPropia(rPrestador.data.id),
+                obtenerMundoVeterinariaPropio(rPrestador.data.id),
+              ])
+            : Promise.resolve(null),
+          cuentaId === null ? Promise.resolve(null) : obtenerNaturalezasDeCuenta(cuentaId),
+        ]);
+        if (!vigente) return;
+
+        if (mundos !== null) {
+          const [rOfertas, rGrooming, rAdiestramiento, rVeterinaria] = mundos;
           if (rOfertas.ok) setOfertas(rOfertas.data);
           else caidos.add('paseo');
           if (rGrooming.ok) setOfertasGrooming(rGrooming.data);
@@ -187,6 +262,16 @@ export default function Negocio() {
           caidos.add('adiestramiento');
           caidos.add('veterinaria');
         }
+
+        /* Sin cuenta o con la lectura caída queda `null` — y `null` NO se
+           dibuja como «ninguna»: eso afirmaría «no pediste tienda» cuando
+           lo cierto es que no pudimos preguntar (Ley 13 / L-197). */
+        setTienda(
+          rNaturalezas !== null && rNaturalezas.ok
+            ? (rNaturalezas.data.find((n) => n.naturaleza === 'seller_productos')?.estado ??
+                'ninguna')
+            : null,
+        );
         setFallos(caidos);
         setCargado(true);
       })();
@@ -220,59 +305,67 @@ export default function Negocio() {
         : t('negocio.liquidacionesPendientes', { cantidad: pendientes.cantidad })
       : t('negocio.liquidacionesDetalle'));
 
-  // B1a: el detalle vivo del mundo Paseo — verdad de DB o invitación
-  const activas = ofertas?.filter((o) => o.activo) ?? [];
-  const desde = activas.length > 0 ? Math.min(...activas.map((o) => o.precio)) : null;
-  // S59-B5: detalle vivo del mundo Grooming — verdad de DB o invitación
-  const activasGrooming = ofertasGrooming?.filter((o) => o.activo) ?? [];
-  const preciosGrooming = activasGrooming.flatMap((o) =>
-    (['S', 'M', 'L'] as const).map((tl) => o.tallas[tl]?.precio).filter((v): v is number => v !== undefined),
-  );
-  const detalleMundoGrooming =
-    fallo('grooming') ??
-    (ofertasGrooming === null || activasGrooming.length === 0 || preciosGrooming.length === 0
-      ? t('negocio.mundoGroomingVacio')
-      : t('ofertaGrooming.serviciosDetalle', {
-          lista: activasGrooming
-            .map((o) => (o.tipoServicio === 'grooming' ? t('tallerGrooming.servicioBano') : t('tallerGrooming.servicioBanoCorte')))
-            .join(' · '),
-          precio: `$${Math.min(...preciosGrooming).toFixed(2)}`,
-        }));
+  /* ─────────────────────────────────────────────────────────────────────
+     ⭐ S98-C · EL DETALLE DE LA BALDOSA: **UN CONTEO, UNA LÍNEA.**
+     Y la razón NO es de gusto — está medida contra la pieza:
 
-  const detalleMundoPaseo =
-    fallo('paseo') ??
-    (ofertas === null || activas.length === 0
-      ? t('negocio.mundoPaseoVacio')
-      : activas.length === 1
-        ? t('ofertaPaseo.duracionesDetalleUna', { precio: `$${(desde as number).toFixed(2)}` })
-        : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: `$${(desde as number).toFixed(2)}` }));
+     `Baldosa` pinta su `detalle` con `numberOfLines={1}` sobre el ancho
+     útil de una celda de media pantalla: **~155 px** (206 de celda − 16
+     de padding de grilla − 32 del padding de la pieza − 3 del canto, con
+     los 412 px de un Android real). En `apoyo` (14 px) eso son ~22
+     caracteres.
 
-  // S63-B: detalle vivo del mundo Adiestramiento — verdad de DB o invitación
-  const ofertaAdiestramiento = mundoAdiestramiento?.oferta ?? null;
-  const programasActivos = mundoAdiestramiento?.programas.filter((p) => p.activo).length ?? 0;
-  const detalleMundoAdiestramiento =
-    fallo('adiestramiento') ??
-    (ofertaAdiestramiento === null || !ofertaAdiestramiento.activo || ofertaAdiestramiento.precio === null
-      ? t('negocio.mundoAdiestramientoVacio')
-      : t('negocio.mundoAdiestramientoDetalle', {
-          precio: `$${ofertaAdiestramiento.precio.toFixed(2)}`,
-          n: programasActivos,
-        }));
+     Las voces que estas filas traían fueron escritas para una FILA ANCHA
+     y ninguna entra:
+         «4 servicios activos · desde $25»  → 30 car.  ✗ trunca
+         «Ábrelo y arma tu oferta en el taller.» → 37 car. ✗ trunca
 
-  // S68-B: detalle vivo del mundo Veterinaria — verdad de DB o invitación
-  const serviciosVet = mundoVeterinaria?.servicios.filter((s) => s.activo) ?? [];
-  const detalleMundoVeterinaria =
-    fallo('veterinaria') ??
-    (mundoVeterinaria === null || serviciosVet.length === 0
-      ? t('negocio.mundoVeterinariaVacio')
-      : serviciosVet.length === 1
-        ? t('negocio.mundoVeterinariaDetalleUno', {
-            precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
-          })
-        : t('negocio.mundoVeterinariaDetalle', {
-            n: serviciosVet.length,
-            precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
-          }));
+     ⇒ Se acortan a lo que la pieza SÍ puede decir, que es además lo que
+     su contrato nombra (*«el conteo, el precio, el estado»*). **El precio
+     no sube a la baldosa**: con N servicios a precios distintos habría
+     que decir «desde», y «desde $25» sin el conteo dice menos que el
+     conteo solo. *El precio sigue vivo adentro del mundo, donde la
+     escalera del precio honesto (S61) ya lo gobierna.*
+
+     ⚠️ **ESTO ES UNA PÉRDIDA DE INFORMACIÓN EN LA PORTADA Y SE DECLARA**
+     — la fila mostraba conteo Y precio. No se puede tener las dos cosas
+     en una línea de 22 caracteres, y **truncar es peor que acortar**: un
+     «4 servicios activo…» no informa y encima se ve roto. Va a la lista
+     de diseño del reporte para que el founder lo mire con el ojo.
+     ───────────────────────────────────────────────────────────────────── */
+
+  /** El conteo de servicios ACTIVOS de cada mundo. `null` = todavía no se
+   *  leyó — que **no es cero**: durante la carga la baldosa no dice nada
+   *  en vez de afirmar «Sin configurar» sobre datos que no llegaron. */
+  const conteoDeMundo = (b: BloqueNegocio, n: number | null): string | undefined => {
+    if (fallos.has(b) && cargado) return t('negocio.baldosaNoCargo');
+    if (!cargado || n === null) return undefined;
+    return n === 0
+      ? t('negocio.baldosaSinConfigurar')
+      : n === 1
+        ? t('negocio.baldosaUno')
+        : t('negocio.baldosaN', { n });
+  };
+
+  // B1a paseo · S59-B5 grooming · S63-B adiestramiento · S68-B veterinaria.
+  // Cada oficio cuenta SUS filas activas de oferta — la unidad es la misma
+  // (`prestador_servicios`), por eso el sustantivo puede ser uno solo.
+  const nPaseo = ofertas === null ? null : ofertas.filter((o) => o.activo).length;
+  const nGrooming = ofertasGrooming === null ? null : ofertasGrooming.filter((o) => o.activo).length;
+  const nVeterinaria =
+    mundoVeterinaria === null ? null : mundoVeterinaria.servicios.filter((s) => s.activo).length;
+  /* Adiestramiento cuenta distinto y a propósito: su oferta es UNA (la
+     sesión), así que su conteo es 0 o 1. **Sus programas NO entran a la
+     baldosa** — son paquetes de esa misma sesión, y meterlos acá obligaría
+     a un segundo sustantivo en una línea que no tiene lugar para uno. */
+  const nAdiestramiento =
+    mundoAdiestramiento === null
+      ? null
+      : mundoAdiestramiento.oferta !== null &&
+          mundoAdiestramiento.oferta.activo &&
+          mundoAdiestramiento.oferta.precio !== null
+        ? 1
+        : 0;
 
   /* ⭐ S87-C (LÁMINA §3) — EL REBOTE MUDO MUERE. Acá decía
      `<Redirect href="/(tabs)" />`: al no-gestor que llegaba por deep link
@@ -352,45 +445,102 @@ export default function Negocio() {
         />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[4] }}>
-          {/* B1a — NEGOCIO COMO MUNDOS (§15b.5): cada mundo con sus dos
-              caras; el que no está en la app es puerta honesta por hito,
-              jamás decoración muerta */}
+          {/* ── ① «Tus servicios» — LA PRIMERA NATURALEZA (§1.2) ─────────
+              🔴 VA PRIMERA Y NO SE MUEVE SIN AVISARLE A D: el fallback de
+              «Prepará tu espacio» aterriza acá contando con que lo primero
+              sea la lista de mundos (ver el encabezado del archivo). */}
           <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('negocio.oferta')}</Texto>
+            {/* Los NOMBRES FIRMADOS de las dos naturalezas viven en UNA
+                sola key cada uno y se leen desde donde estén: son
+                vocabulario de plataforma, no voz de esta pantalla. *Una
+                segunda copia del mismo nombre es la mitad del cinturón
+                de §3.4 lista para divergir* — y ya hay una tercera en el
+                wizard (`alta.paso2.*`), reportada y no ampliada acá. */}
+            <Texto variante="seccion">{t('atender.tusServicios')}</Texto>
             {/* S81-C (composición): las cuatro tarjetas de mundo eran la
                 MISMA anatomía copiada 4× inline (paseo S54 → grooming
                 S59 → adiestramiento S63 → vet S68, cada gemela pegada a
                 mano). Una sola forma, datos por fila — el drift entre
-                gemelas ya no puede nacer. Cero cambio visual. Historia
-                de cada mundo: paseo S54 · grooming S59-B5 FASE 2 ·
-                adiestramiento S63/S65-B2 P1 (entra por su PORTADA) ·
-                veterinaria S68 (glifo del lote S53). */}
-            {(
-              [
-                { etiqueta: t('negocio.paseo'), icono: 'paseo', ruta: '/paseo', detalle: detalleMundoPaseo },
-                { etiqueta: t('negocio.mundoGrooming'), icono: 'grooming', ruta: '/grooming', detalle: detalleMundoGrooming },
-                { etiqueta: t('negocio.mundoAdiestramiento'), icono: 'training', ruta: '/adiestramiento', detalle: detalleMundoAdiestramiento },
-                { etiqueta: t('negocio.mundoVeterinaria'), icono: 'veterinaria', ruta: '/veterinaria', detalle: detalleMundoVeterinaria },
-              ] as const
-            ).map((mundo) => (
-              <Tarjeta
-                key={mundo.ruta}
-                interactiva
-                elevacion="reposo"
-                accessibilityRole="button"
-                etiqueta={mundo.etiqueta}
-                onPress={() => router.push(mundo.ruta)}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                  <Icono nombre={mundo.icono} registro="aa" tamano={28} />
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Texto variante="seccion">{mundo.etiqueta}</Texto>
-                    <Texto variante="apoyo">{mundo.detalle}</Texto>
-                  </View>
+                gemelas ya no puede nacer. Historia de cada mundo: paseo
+                S54 · grooming S59-B5 FASE 2 · adiestramiento S63/S65-B2 P1
+                (entra por su PORTADA) · veterinaria S68 (glifo del lote
+                S53).
+                ⭐ S98-C: la anatomía pasa de `Tarjeta` en fila a `Baldosa`
+                en grilla (firma del founder: *«a rectángulos»*). El canto
+                dice CATEGORÍA y el glifo dice SERVICIO (Ley 10) — la
+                veterinaria es la única de capa `identidad`; paseo,
+                grooming y adiestramiento comparten `cuidado`, y eso es
+                a propósito, no un descuido de la ley. */}
+            <View style={ESTILO_GRILLA}>
+              {(
+                [
+                  { etiqueta: t('negocio.paseo'), glifo: 'paseo', capa: 'cuidado', ruta: '/paseo', detalle: conteoDeMundo('paseo', nPaseo) },
+                  { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', detalle: conteoDeMundo('grooming', nGrooming) },
+                  { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', detalle: conteoDeMundo('adiestramiento', nAdiestramiento) },
+                  { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', detalle: conteoDeMundo('veterinaria', nVeterinaria) },
+                ] as const
+              ).map((mundo, i) => (
+                <View key={mundo.ruta} style={ESTILO_CELDA}>
+                  <Baldosa
+                    glifo={mundo.glifo}
+                    capa={mundo.capa}
+                    titulo={mundo.etiqueta}
+                    detalle={mundo.detalle}
+                    orden={i}
+                    onPress={() => router.push(mundo.ruta)}
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* ── ② «Tu tienda» — LA OTRA NATURALEZA ────────────────────────
+              `MODELO_DESPENSA` §3.4: «Venta de productos» NO es un mundo
+              de Servicios — por eso vive en su PROPIA sección y jamás
+              adentro de la grilla de arriba. *Meterla ahí sería el primer
+              paso hacia la tabla compartida que el cinturón prohíbe.*
+
+              🔴 **EL TERCER ESTADO NO SE DIBUJA, Y SE DECLARA:** la orden
+              nombró dos casos —activa → la entrada · «sin naturaleza» → el
+              chip «lo estamos revisando»— y el chip solo tiene sentido si
+              alguien PIDIÓ. Con `ninguna` (nunca pidió) esta sección **no
+              se monta**: ofrecer acá el «Quiero vender productos» sería
+              un SEGUNDO productor de `solicitar_naturaleza_comercial`
+              —hoy vive en el paso ② del wizard— y esta casa ya firmó que
+              *no es normal tenerlo en dos lugares* (S84-C34).
+              ⇒ Va al reporte como decisión del founder, no como hueco
+              tapado en silencio. */}
+          {tienda === 'activa' && (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
+              <View style={ESTILO_GRILLA}>
+                <View style={ESTILO_CELDA}>
+                  <Baldosa
+                    glifo="despensa"
+                    capa="consumo"
+                    titulo={t('ventas.entradaTitulo')}
+                    orden={0}
+                    onPress={() => setPuertaActiva(true)}
+                  />
+                </View>
+              </View>
+            </View>
+          )}
+          {tienda === 'solicitada' && (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
+              {/* NO es baldosa: no hay nada que elegir. Es información, y
+                  la información se LEE (Acto II). La voz se reusa del
+                  wizard —misma frase, un solo lugar— porque lo que se
+                  copia diverge. */}
+              <Tarjeta elevacion="reposo">
+                <View style={{ gap: spacing[2] }}>
+                  <Insignia estado="info" etiqueta={t('alta.estado.enRevision')} tamaño="sm" />
+                  <Texto variante="apoyo">{t('alta.paso2.tiendaPropuesta')}</Texto>
                 </View>
               </Tarjeta>
-            ))}
-          </View>
+            </View>
+          )}
 
           {/* cobros — los módulos vivos de S54 */}
           <View style={{ gap: spacing[3] }}>
@@ -409,7 +559,11 @@ export default function Negocio() {
                   YA ACTIVO sin ninguna forma de editar sus datos.
                   Las otras dos NO se tocan: son contextos, no duplicados
                   (cobrar · entrar). */}
-              <Separador />
+              {/* ☠️ S98-C · MURIÓ EL `<Separador />` QUE ABRÍA ESTA TARJETA:
+                  era el residuo de la celda de arriba —separaba de algo que
+                  ya no está—, así que dibujaba una línea sobre la nada.
+                  Ley 37 en su forma más chica: retirar una celda es
+                  retirar TAMBIÉN lo que la separaba. */}
               {/* S55-B (B1): la vista completa existe — la celda navega;
                   el peldaño 0 de la pantalla educa cuando el ledger está vacío */}
               <CeldaNavegacion
@@ -478,18 +632,19 @@ export default function Negocio() {
               único habitante, y un encabezado sin filas es un rótulo que
               promete una lista vacía. */}
 
-          {/* ── S96-C · VENTA DE PRODUCTOS — LA OTRA NATURALEZA ──────────
-              LETRA_RECORRIDO §1: «Servicios» y «Venta de productos» son
-              dos naturalezas, no dos categorías de lo mismo — por eso esta
-              tarjeta NO vive dentro de la lista de mundos de la oferta:
-              meterla ahí sería el primer paso hacia la tabla compartida
-              que MODELO_DESPENSA §3.4 prohíbe. Sin encabezado de sección:
-              una sección de un solo habitante es rótulo decorativo
-              (Ley 18). Solo existe con la naturaleza medida. */}
-          {naturalezaVentas === 'vendedora' && (
-            <TarjetaVentas etiqueta={t('ventas.entradaTitulo')} detalle={t('ventas.entradaDetalle')} onPress={() => setPuertaActiva(true)} />
-          )}
-
+          {/* ☠️ S98-C · ACÁ VIVÍA LA `TarjetaVentas` DE S96, y SE MUDÓ a la
+              sección «Tu tienda» de arriba (firma del founder: las dos
+              categorías, con sus nombres). **Se retira en el mismo commit
+              que la construye allá** — una mudanza que deja el origen
+              puesto es una COPIA, y dos puertas a `/ventas` en la misma
+              pantalla envejecen distinto.
+              ⏪ Su nota decía «sin encabezado de sección: una sección de un
+              solo habitante es rótulo decorativo (Ley 18)». Eso era cierto
+              cuando el rótulo no existía; hoy el nombre «Tu tienda» **está
+              firmado** y no es decoración: es el candado del cinturón.
+              ⚠️ `TarjetaVentas` NO muere — conserva sus otros dos
+              consumidores (el muro del no-titular vendedor de esta misma
+              pantalla, y el HOY del no-gestor). */}
         </View>
       </ScrollView>
 

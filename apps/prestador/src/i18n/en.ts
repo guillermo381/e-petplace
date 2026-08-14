@@ -26,7 +26,14 @@ export const prestadorEn = {
     tuTienda: 'Your store',
     // S98-C · Espejo de es.ts.
     bandaCitas: 'Appointments today',
+    // S98-C · Espejo de es.ts — los dos rótulos del dictado ② (D-808).
+    // S98-C · Espejo de es.ts — el subtítulo de la baldosa.
+    sinAgendaHoy: 'Nothing booked today',
+    unaCitaHoy: '1 appointment today',
+    nCitasHoy: '{{n}} appointments today',
+    bandaPrestados: 'Completed today',
     bandaAgendado: 'Booked today',
+    bandaCobrado: 'Collected today',
     bandaParcial: 'The total is partial: {{n}} today have no price yet.',
     bandaNoSePudo: 'We could not read today’s numbers.',
     oficioVeterinaria: 'Veterinary',
@@ -872,23 +879,20 @@ export const prestadorEn = {
     titulo: 'Your business',
     // S77-B — D-541 (espejo): mismo criterio que el castellano.
     bloqueNoCargo: "We couldn't load this right now.",
+    // S98-C · Espejo de es.ts — las cuatro voces cortas de la baldosa.
+    baldosaSinConfigurar: 'Not set up yet',
+    baldosaUno: '1 service',
+    baldosaN: '{{n}} services',
+    baldosaNoCargo: "Couldn't load",
     enPreparacion: 'In preparation',
-    oferta: 'Your offering',
+    // ☠️ S98-C · Espejo de es.ts: murieron las mismas ocho keys.
     // S58-B B1a · Espejo de es.ts
     paseo: 'Walks',
-    mundoPaseoVacio: 'Open it and build your offer in the workshop.',
     mundoGrooming: 'Grooming',
-    // S59-B5: the world OPENED — coming-soon died (Ley 37) · LOTE S59
-    mundoGroomingVacio: 'Open it and build your offer in the workshop.',
     // S63-B: the Training world
     mundoAdiestramiento: 'Training',
-    mundoAdiestramientoVacio: 'Set up your offer and your programs.',
-    mundoAdiestramientoDetalle: 'Session {{precio}} · {{n}} programs',
     // S68-B: the Veterinary world · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinary',
-    mundoVeterinariaVacio: 'Open your practice: services, prices and hours.',
-    mundoVeterinariaDetalleUno: '1 active service · from {{precio}}',
-    mundoVeterinariaDetalle: '{{n}} active services · from {{precio}}',
     // S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
     vacaciones: 'Time off',
     vacacionesDetalle: "Mark the days you're not walking.",

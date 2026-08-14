@@ -44,13 +44,23 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerMiPrestador, obtenerPizarra, obtenerPlataDelDia, type PlataDelDia } from '@epetplace/api';
+import {
+  obtenerCitasAdiestramientoDelDia,
+  obtenerCitasGroomingDelDia,
+  obtenerCitasPaseoDelDia,
+  obtenerCitasVetDelDia,
+  obtenerMiPrestador,
+  obtenerPizarra,
+  obtenerPlataDelDia,
+  type PlataDelDia,
+} from '@epetplace/api';
 import { montoCorto } from '@/lib/formato-techo';
 
 import {
   hayCapacidad,
   resolverCapacidadAtender,
   type CapacidadAtender,
+  type OficioAtender,
 } from '@/lib/capacidad-atender';
 import { PizarraHoja } from '@/components/atender/pizarra-hoja';
 import { hoyLocalISO } from '@/lib/ventas-formato';
@@ -79,32 +89,64 @@ const KEY_OFICIO = {
 } as const;
 
 /**
- * 🔴 LA CELDA DE LA GRILLA — y sus dos desvíos del patrón documentado,
- * los dos MEDIDOS antes de desviarme (D-804).
+ * ✅ S98-C · LA GRILLA CONVERGE AL PATRÓN DEL PIE DE `Baldosa.tsx`, y esta
+ * pantalla deja de tener el suyo.
  *
- * ① **SIN `flexGrow`.** El patrón lo traía razonando que *«una baldosa
- *    impar ocupe la fila entera en vez de quedar a media pantalla»* — y
- *    esa regla, con la pieza ya CUADRADA, produce el defecto que A midió
- *    en dispositivo: la impar crece a todo el ancho y su `aspectRatio: 1`
- *    la vuelve **un cuadrado de pantalla completa** (~380×380; dos
- *    apiladas ≈ los 800 px del reporte). *Lo que era una regla de relleno
- *    razonable para una tarjeta libre se vuelve un gigante cuando la
- *    pieza ata alto a ancho.*
+ * ⏪ ACÁ VIVÍAN DOS DESVÍOS MÍOS, los dos medidos y los dos correctos EN
+ * SU MOMENTO: sin `flexGrow` (con la pieza cuadrada, la impar crecía a
+ * ~380×380 — D-804) y con `47 %` en vez del `48 %` de entonces, que no
+ * entraba en ningún teléfono. **Los dos mueren porque su causa murió:**
+ * el patrón nuevo saca el `gap` de la cuenta del wrap, y sin gap
+ * `50 % + 50 % = 100 %` cierra EXACTO en cualquier ancho. *Un desvío que
+ * sobrevive a la razón que lo justificaba deja de ser una medición y pasa
+ * a ser una copia divergente.*
  *
- * ② **`47%` y NO el `48%` nuevo.** El patrón cambió a 48% para dejar de
- *    ser «frágil por siete píxeles», y la aritmética dice que el 48%
- *    **no entra en ninguno de los dos anchos reales** —el gap cuenta
- *    para la decisión de wrap—:
- *
- *      Android 412 (380 útiles): 2×182.4 + 16 = 380.8 > 380  ⇒ WRAP
- *      web     420 (388 útiles): 2×186.2 + 16 = 388.5 > 388  ⇒ WRAP
- *      con 47%:                  373.2 y 380.7               ⇒ ENTRA
- *
- *    Adoptarlo mandaría la portada a UNA columna en los dos aparatos.
- *    **Va como medición a B, no como parche mío a su patrón** — pero
- *    tampoco copio un número que ya medí que no entra.
+ * ⚠️ Y el `alignItems: 'flex-start'` de los contenedores se va con ellos:
+ * existía para que la fila no le impusiera un alto a la celda y le ganara
+ * al `aspectRatio` del hijo. Hoy **la raíz de la pieza declara sus dos
+ * dimensiones** (B, D-804), así que ya no hay nada que proteger.
  */
-const ESTILO_CELDA = { flexBasis: '47%' } as const;
+const ESTILO_GRILLA = {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginHorizontal: -spacing[2],
+} as const;
+const ESTILO_CELDA = {
+  width: '50%',
+  paddingHorizontal: spacing[2],
+  paddingBottom: spacing[4],
+} as const;
+
+/**
+ * ⭐ S98-C · EL SUBTÍTULO DE LA BALDOSA — firma del founder sobre el gate
+ * (§6bis ③): *«los rectángulos tienen mucho espacio en blanco… ¿subtítulo
+ * o así?»* → propuesta de mesa → **«me gusta»**.
+ *
+ * **LA REGLA FIRMADA: dice lo que PASA HOY, o no dice nada.** Un subtítulo
+ * descriptivo —«atendé a tus pacientes»— llena el hueco y no informa: es
+ * ruido con tipografía.
+ *
+ * ═══ LO QUE NO SE PUDO CUMPLIR AL PIE, Y SE DECLARA ═══════════════════
+ * Los ejemplos de la firma eran tres: «3 citas hoy» · **«2 en espera»** ·
+ * «sin agenda hoy». **El del medio ya no es computable, y por una decisión
+ * de la misma jornada:** el «Llegó» murió y `llegada_en` pasó a estamparlo
+ * el motor **en la transición a `en_curso`** (trigger de A). O sea que
+ * *llegó* y *se está atendiendo* pasaron a ser el mismo instante — no hay
+ * ventana de «llegó y espera» que contar. *Pintar «en espera» sobre citas
+ * `confirmada` diría que alguien está sentado en la sala cuando lo único
+ * cierto es que tiene turno.*
+ * ⇒ Se implementan los DOS literales que sí tienen dato, verbatim.
+ */
+const KEY_CITAS_DEL_DIA = {
+  veterinaria: obtenerCitasVetDelDia,
+  grooming: obtenerCitasGroomingDelDia,
+  paseo: obtenerCitasPaseoDelDia,
+  adiestramiento: obtenerCitasAdiestramientoDelDia,
+} as const;
+
+/** El orden es el de la tabla y no importa: se usa para recorrer, no para
+ *  pintar. Sale de las CLAVES para que el oficio nuevo entre solo. */
+const OFICIOS_ATENDER = Object.keys(KEY_CITAS_DEL_DIA) as OficioAtender[];
 
 type Pantalla =
   | { fase: 'cargando' }
@@ -114,6 +156,10 @@ type Pantalla =
   | {
       fase: 'listo';
       capacidad: CapacidadAtender;
+      /** Citas del día POR OFICIO. La clave falta cuando ese lector no
+       *  respondió — y entonces la baldosa CALLA en vez de decir «sin
+       *  agenda hoy», que sería afirmar un cero que nadie contó. */
+      citasPorOficio: Partial<Record<OficioAtender, number>>;
       pizarra: number | null;
       /** `null` = no se pudo leer. **NO se degrada a cero**: un cero con
        *  cara de dato diría «hoy no hay nada», y lo que pasó fue que no
@@ -141,17 +187,47 @@ export default function Atender() {
            lecturas y una sola espera. Su fallo NO tumba la portada —las
            puertas del mostrador no dependen de ella— y `null` NO se pinta
            como cero: la regla de S86 se muda entera con la superficie. */
-        const [c, pz, pl] = await Promise.all([
+        const hoy = hoyLocalISO();
+        /* 🔴 LOS CUATRO LECTORES DEL DÍA VIAJAN EN **ESTA** OLA, no en una
+           siguiente — y el costo está elegido, no heredado.
+
+           Para saber CUÁLES hacen falta habría que esperar la capacidad
+           primero, y eso es una ESPERA ENCADENADA: ~150 ms más para todos
+           (D-738 · L-223 — el peaje es la petición, y lo que se paga en
+           reloj es la CADENA, no la cantidad). Pedirlos a los cuatro en
+           paralelo cuesta el mismo reloj que pedir uno.
+           ⚠️ El precio declarado: un negocio de un solo oficio gasta tres
+           lecturas que no va a usar. **Es carga de servidor, no espera de
+           la persona** — y en una portada que se abre con alguien parado
+           enfrente, el reloj gana. */
+        /* Los cuatro van ANIDADOS y no aplanados con spread: sigue siendo
+           UNA sola ola —las cinco promesas se disparan juntas— y así el
+           arreglo conserva su tipo. Aplanado, TS pierde la tupla y `dias[i]`
+           degrada a `{}`: el typecheck lo cazó de una. */
+        const [c, pz, pl, dias] = await Promise.all([
           resolverCapacidadAtender(p.data.id),
           obtenerPizarra(p.data.id),
           // §4ter: el gate vive en el SERVIDOR. Acá no se recompone ningún
           // permiso — se pinta lo que la RPC contesta.
-          obtenerPlataDelDia(p.data.id, hoyLocalISO()),
+          obtenerPlataDelDia(p.data.id, hoy),
+          Promise.all(
+            OFICIOS_ATENDER.map((o) =>
+              KEY_CITAS_DEL_DIA[o]({ prestador_id: p.data.id, fecha: hoy }),
+            ),
+          ),
         ]);
+        const citasPorOficio: Partial<Record<OficioAtender, number>> = {};
+        OFICIOS_ATENDER.forEach((o, i) => {
+          const r = dias[i];
+          // Solo se anota lo que se LEYÓ. Un lector caído deja la clave
+          // ausente, y la baldosa calla (Ley 13 / L-197).
+          if (r !== undefined && r.ok) citasPorOficio[o] = r.data.length;
+        });
         return c.ok
           ? {
               fase: 'listo' as const,
               capacidad: c.data,
+              citasPorOficio,
               pizarra: pz.ok ? pz.data.length : null,
               plata: pl.ok ? pl.data : null,
             }
@@ -213,7 +289,20 @@ export default function Atender() {
     );
   }
 
-  const { capacidad, pizarra, plata } = pantalla;
+  const { capacidad, citasPorOficio, pizarra, plata } = pantalla;
+
+  /** El dato vivo de la baldosa, o `undefined` para que CALLE. Los dos
+   *  literales de la firma; el tercero («en espera») no tiene dato — su
+   *  porqué está arriba, en `KEY_CITAS_DEL_DIA`. */
+  const datoDelDia = (o: OficioAtender): string | undefined => {
+    const n = citasPorOficio[o];
+    if (n === undefined) return undefined;
+    return n === 0
+      ? t('atender.sinAgendaHoy')
+      : n === 1
+        ? t('atender.unaCitaHoy')
+        : t('atender.nCitasHoy', { n });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -232,32 +321,53 @@ export default function Atender() {
             plata del día y NADA MÁS — su gate vive en el SERVIDOR
             (`obtener_plata_del_dia`), acá no se recompone ningún permiso.
 
-            🔴 **LO QUE ESTA BANDA NO DICE, Y POR QUÉ — se declara para que
-            nadie lea otra cosa en estos números.** La orden pedía
-            *«servicios prestados hoy · cobrado hoy»* y **hoy no existe
-            lector honesto de ninguno de los dos** (medido, S98-C):
+            ✅ **S98-C · LOS DOS NÚMEROS PEDIDOS YA ENTRARON.** Esta banda
+            nació con DOS y no con cuatro, y el porqué queda escrito porque
+            es la parte que enseña: *no había lector honesto de ninguno de
+            los dos*. `cobro_presencial_registrado` tenía escritor y **cero
+            lectores**, y lo que sí existía contaba citas VIVAS —lo
+            AGENDADO— mientras el rótulo pedido decía «prestados». Rotular
+            «cobrado» aquel número habría sido un **verosímil-falso de
+            plata**: la clase de defecto más cara de la casa, porque nadie
+            audita un número que le parece razonable.
 
-             · **«cobrado hoy»** — `cobro_presencial_registrado` tiene
-               ESCRITOR y **cero lectores** en `packages/api` (2 filas
-               vivas). No hay de dónde leerlo.
-             · **«prestados hoy»** — lo que existe cuenta citas VIVAS del
-               día, que es lo agendado, no lo prestado.
+            **A los construyó (D-808) y acá se consumen tal cual**, con su
+            eje declarado: `prestadas` son las citas COMPLETADAS del día
+            (el hecho) y `cobrado` es el cobro presencial de las citas de
+            hoy — **el mismo eje que `total`, a propósito**, para que los
+            dos números de plata cierren entre sí. *Un tablero que no
+            cierra consigo mismo no se audita: se desconfía entero.*
 
-            Y el lector que sí existe **dice explícitamente que no es eso**:
-            *«PLATA = el valor AGENDADO del día. NO lo devengado, NO lo
-            cobrado. Contesta ¿cuánto vale mi jornada?, no ¿cuánto llevo
-            cobrado?»*. **Rotular «cobrado» este número sería un
-            verosímil-falso de PLATA** — la clase de defecto más cara de la
-            casa, porque nadie audita un número que parece razonable.
-
-            ⇒ **La banda muestra lo que hay, con el nombre de lo que es.**
-            Los dos números pedidos entran cuando A entregue sus lectores
-            (pedido cursado con contrato y su gate §4ter). */}
+            **Y la cláusula del founder es LEY, no adorno:** *«si está en 0
+            se muestra en 0»*. El cero de un rol que SÍ ve es un dato y se
+            dice; lo que jamás se pinta como cero es el `null`, que
+            significa «este rol no ve» o «no se pudo leer». */}
         {plata !== null && plata.visible && (
           <Tarjeta relleno="normal">
-            <View style={{ flexDirection: 'row', gap: spacing[6] }}>
-              <FilaDato etiqueta={t('atender.bandaCitas')} valor={String(plata.citas ?? 0)} mono />
-              <FilaDato etiqueta={t('atender.bandaAgendado')} valor={montoCorto(plata.total ?? 0)} mono />
+            {/* 2×2: arriba lo que PASÓ, abajo lo que VALE. Cada celda a
+                media caja para que las cuatro etiquetas quepan enteras —
+                en una sola fila, cuatro columnas truncan los rótulos. */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing[3] }}>
+              <View style={{ width: '50%' }}>
+                <FilaDato etiqueta={t('atender.bandaCitas')} valor={String(plata.citas ?? 0)} mono />
+              </View>
+              <View style={{ width: '50%' }}>
+                <FilaDato
+                  etiqueta={t('atender.bandaPrestados')}
+                  valor={String(plata.prestadas ?? 0)}
+                  mono
+                />
+              </View>
+              <View style={{ width: '50%' }}>
+                <FilaDato etiqueta={t('atender.bandaAgendado')} valor={montoCorto(plata.total ?? 0)} mono />
+              </View>
+              <View style={{ width: '50%' }}>
+                <FilaDato
+                  etiqueta={t('atender.bandaCobrado')}
+                  valor={montoCorto(plata.cobrado ?? 0)}
+                  mono
+                />
+              </View>
             </View>
             {/* El total DECLARA lo que le falta: con citas sin precio es
                 PARCIAL, y callarlo sería mentir por omisión con un número
@@ -294,40 +404,13 @@ export default function Atender() {
                     alto (`aspectRatio` subió a su raíz, B) **y** esta
                     captura se re-corrió con el testigo debajo (la pizarra),
                     que es lo único que hace visible una altura cero. */}
-                {/* 🔴 `alignItems: 'flex-start'` — LA MITAD DE D-804 QUE ES MÍA.
-                    Con el default `stretch`, cada celda de la fila recibe un
-                    ALTO DEFINIDO (el de la fila), y un alto definido GANA
-                    sobre el `aspectRatio` de la pieza ⇒ la baldosa deja de
-                    ser cuadrada y se estira. Medido por A en dispositivo:
-                    **~800 px de alto, dos scrolls para dos celdas.**
-                    Con `flex-start` la celda no recibe alto y la proporción
-                    de la pieza vuelve a gobernar.
-
-                    **Esto NO repite ningún número de `Baldosa`:** no digo
-                    cuánto mide, digo que no se lo impongo.
-
-                    ⏪ Y UNA AUTOCORRECCIÓN: esta línea ya la había escrito
-                    hace unas horas y **la revertí diciendo que la hipótesis
-                    estaba "falsada"**. Era una sobre-generalización mía: en
-                    RN-web fue un NO-OP porque allá el colapso lo causaba
-                    otra cosa (`Entrada` en absoluto), y **de "no cambió nada
-                    en web" concluí "el mecanismo es falso"**. El mecanismo
-                    —el estirón del eje cruzado— nunca se midió en nativo, que
-                    es donde muerde. *Un no-op en la plataforma equivocada no
-                    falsa nada: solo dice que ahí no era.* */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    alignItems: 'flex-start',
-                    gap: spacing[4],
-                  }}
-                >
+                <View style={ESTILO_GRILLA}>
                   {capacidad.oficios.map((o, i) => (
                     <View key={o.oficio} style={ESTILO_CELDA}>
                       <Baldosa
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
+                        detalle={datoDelDia(o.oficio)}
                         capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
                         orden={i}
                         onPress={() =>
@@ -377,14 +460,7 @@ export default function Atender() {
             {capacidad.tienda && (
               <View style={{ gap: spacing[3] }}>
                 <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    alignItems: 'flex-start',
-                    gap: spacing[4],
-                  }}
-                >
+                <View style={ESTILO_GRILLA}>
                   <View style={ESTILO_CELDA}>
                     <Baldosa
                       glifo="despensa"

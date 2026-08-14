@@ -36,7 +36,24 @@ export const prestadorEs = {
     // «agendado» y no «cobrado», porque el lector es del valor agendado y
     // rotularlo distinto sería un verosímil-falso de plata.
     bandaCitas: 'Citas de hoy',
+    /* ⭐ S98-C · LOS DOS RÓTULOS QUE EL FOUNDER PIDIÓ (dictado ② del gate),
+       vivos recién ahora porque recién ahora hay lector honesto (D-808).
+       **«Prestados» ≠ «Citas»** y la distinción es el punto: `citas`
+       cuenta lo AGENDADO del día y `prestadas` lo COMPLETADO. Medido en un
+       día real: 6 contra 1. *Llamar «prestados» a lo agendado miente en la
+       dirección optimista, que es la peor.* */
+    /* ⭐ S98-C · EL SUBTÍTULO DE LA BALDOSA (firma: «me gusta»). Los DOS
+       literales de la firma que tienen dato — el tercero, «2 en espera»,
+       no lo tiene: `llegada_en` pasó a estamparse al ATENDER, así que
+       «llegó» y «se está atendiendo» son el mismo instante.
+       Cortos por la misma medida que las del Negocio: una línea, ~22
+       caracteres. */
+    sinAgendaHoy: 'Sin agenda hoy',
+    unaCitaHoy: '1 cita hoy',
+    nCitasHoy: '{{n}} citas hoy',
+    bandaPrestados: 'Prestados hoy',
     bandaAgendado: 'Agendado hoy',
+    bandaCobrado: 'Cobrado hoy',
     bandaParcial: 'El total es parcial: {{n}} de hoy todavía no tienen precio.',
     bandaNoSePudo: 'No pudimos leer los números de hoy.',
     oficioVeterinaria: 'Veterinaria',
@@ -1180,24 +1197,36 @@ export const prestadorEs = {
     // y acá puede ser otra. NO promete acción porque no hay ninguna que
     // ofrecer todavía (Ley 17.4): el reintento por causa depende de D-538.
     bloqueNoCargo: 'No pudimos cargar esto ahora.',
+    /* ⭐ S98-C · LAS CUATRO VOCES DE LA BALDOSA — cortas POR MEDICIÓN, no
+       por estilo: `Baldosa` pinta su detalle con `numberOfLines={1}` sobre
+       ~155 px útiles ≈ **22 caracteres** en `apoyo`. Las voces de las
+       filas viejas (30-37 car.) truncaban. *Un «4 servicios activo…» no
+       informa y encima se ve roto.*
+       ⚠️ La del fallo es HERMANA de `bloqueNoCargo`, no la misma: aquélla
+       tiene 29 caracteres y no entra. Dice lo mismo con menos, y sigue
+       diciendo que no se pudo LEER — jamás que no haya nada configurado,
+       que es toda la deuda de D-541. */
+    baldosaSinConfigurar: 'Sin configurar',
+    baldosaUno: '1 servicio',
+    baldosaN: '{{n}} servicios',
+    baldosaNoCargo: 'No se pudo leer',
     enPreparacion: 'En preparación',
-    oferta: 'Tu oferta',
+    /* ☠️ S98-C · MURIERON OCHO KEYS DE ESTE BLOQUE (Ley 37), con censo en
+       TODO el repo antes de tocarlas: `oferta` (el rótulo «Tu oferta», que
+       la firma de las dos naturalezas reemplaza) y las SIETE voces de
+       detalle de los cuatro mundos —`mundo*Vacio`, `mundo*Detalle`,
+       `mundoVeterinariaDetalleUno`—, escritas para una FILA ANCHA y que
+       en la baldosa no entran en un renglón.
+       *Una key huérfana no rompe nada: solo espera a que alguien la lea y
+       crea que rige.* Los NOMBRES de los mundos SIGUEN VIVOS abajo — son
+       el título de cada baldosa. */
     // S58-B B1a (§15b.5): NEGOCIO COMO MUNDOS · LOTE S58, GATE PENDIENTE
     paseo: 'Paseo',
-    mundoPaseoVacio: 'Ábrelo y arma tu oferta en el taller.',
     mundoGrooming: 'Grooming',
-    // S59-B5: el mundo ABRIÓ — el coming-soon murió (Ley 37); el vacío
-    // invita al taller (mismo patrón que el mundo Paseo) · LOTE S59
-    mundoGroomingVacio: 'Ábrelo y arma tu oferta en el taller.',
     // S63-B: el mundo Adiestramiento
     mundoAdiestramiento: 'Adiestramiento',
-    mundoAdiestramientoVacio: 'Configura tu oferta y tus programas.',
-    mundoAdiestramientoDetalle: 'Sesión {{precio}} · {{n}} programas',
     // S68-B: el mundo Veterinaria · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinaria',
-    mundoVeterinariaVacio: 'Abre tu consultorio: servicios, precios y horarios.',
-    mundoVeterinariaDetalleUno: '1 servicio activo · desde {{precio}}',
-    mundoVeterinariaDetalle: '{{n}} servicios activos · desde {{precio}}',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
