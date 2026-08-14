@@ -152,7 +152,37 @@ export function Baldosa({
           <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO} />
         </View>
 
-        <Texto variante="seccion" numberOfLines={2}>
+        {/* 🔴 EL TÍTULO ES `cuerpo`, NO `seccion` — y la corrección cura
+            DOS defectos que resultaron ser el mismo cambio.
+
+            ① EL QUE REPORTÓ C, montándola en ATENDER: «Adiestramiento»
+            se partía a mitad de palabra. Medido con el ancho real —190 px
+            de baldosa − 32 de padding − 3 de canto = **155 útiles**—:
+
+                seccion md/18 MEDIUM (antes de N1) ..  ~131 px  ✓ entraba
+                seccion md/20 BOLD   (tras N1) .....  ~160 px  ✗ NO ENTRA
+                cuerpo base/16 REGULAR .............  ~116 px  ✓ entra
+
+            ⚠️ **Y LA CAUSA ES MÍA, DE N1**: la ejecuté moviendo `md`
+            18→20 **y** subiendo `seccion` de medium a **bold 700** — los
+            dos ejes ensanchan, y juntos empujaron la palabra fuera del
+            renglón. *La baldosa nació después de N1, así que no «se
+            rompió»: nació rota, y por eso ningún antes/después la
+            señalaba.*
+
+            ② EL QUE C NO PODÍA VER, y es de accesibilidad: `seccion`
+            trae **`accessibilityRole="header"` de fábrica** (S71, y está
+            bien que lo traiga). ⇒ **cada baldosa se anunciaba como
+            ENCABEZADO dentro de un `Pressable` con rol de botón.** Una
+            baldosa no encabeza nada: es un ítem que se elige. El rol
+            estaba mintiendo en las dos apps.
+
+            LA JERARQUÍA NO SE PIERDE: la carga el GLIFO de 48 (N7 — «la
+            foto carga la profundidad»), no el peso del texto. Contra
+            `apoyo` (14 secundario) el contraste sigue siendo claro.
+            *Si el gate dice que falta peso, la salida es una variante
+            nueva con su gate (Ley 11) — jamás un `style` inline acá.* */}
+        <Texto variante="cuerpo" numberOfLines={2}>
           {titulo}
         </Texto>
         {detalle !== undefined ? (

@@ -1116,3 +1116,44 @@ export async function retomarPasoOnboarding(
   const r = data as { estaba_salteado?: unknown } | null;
   return { ok: true, data: { estabaSalteado: r?.estaba_salteado === true } };
 }
+
+/**
+ * LAS MODALIDADES POR OFICIO — **la capacidad presencial, desde el CATÁLOGO**
+ * (S97-A, cierre del hallazgo de C).
+ *
+ * **Qué contesta:** *¿este OFICIO puede atenderse en el local del negocio?*
+ * Es capacidad **del oficio**, no elección del prestador — la elección es
+ * `atiendeLocal` en `ServicioDeOficio`, y **solo existe donde ésta es
+ * `true`**.
+ *
+ * 🔴 **POR QUÉ EXISTE, y es una historia corta que conviene no repetir:** la
+ * regla vivía **en DOS lugares** —un literal `'paseo'` adentro del trigger
+ * que la hace cumplir, y una tabla en la pantalla que decide si dibuja el
+ * toggle—. **C midió que podían divergir** y tenía razón: un negocio de solo
+ * paseos contestaba `true` al gate de recepción mientras `ATENDER` decía que
+ * no. *La cura de datos los hizo coincidir; nada impedía que volvieran a
+ * separarse.*
+ *
+ * **Ahora la regla vive en `tipos_servicio.admite_atencion_local` y los dos
+ * la leen.** El día que entre un oficio nuevo, su modalidad viene con él —
+ * antes había que acordarse de tocar un trigger y una constante de UI.
+ *
+ * **Úsalo para NO DIBUJAR el toggle** donde el oficio no lo admite: es mejor
+ * no ofrecerlo que rebotarlo (D-803).
+ */
+export async function obtenerModalidadesPorOficio(): R<Record<string, boolean>> {
+  const { data, error } = await getClient().rpc('obtener_modalidades_por_oficio');
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  const filas = (data ?? []) as { tipo_servicio?: unknown; admite_atencion_local?: unknown }[];
+  // Cero filas = el catálogo no respondió. NO se degrada a `{}`: un mapa
+  // vacío haría que la pantalla dibujara TODOS los toggles (el default de un
+  // lookup fallido es «no sé», y acá «no sé» se leería como «sí puede»).
+  if (filas.length === 0) {
+    return { ok: false, codigo: 'error_lectura', mensaje: 'El catálogo de oficios no respondió.' };
+  }
+  const mapa: Record<string, boolean> = {};
+  for (const f of filas) {
+    if (typeof f.tipo_servicio === 'string') mapa[f.tipo_servicio] = f.admite_atencion_local === true;
+  }
+  return { ok: true, data: mapa };
+}

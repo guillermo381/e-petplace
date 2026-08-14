@@ -3130,6 +3130,30 @@ function GaleriaInterna() {
               detalle). Que se vean iguales ES la prueba.
               La GRILLA la arma el consumidor — la pieza es UNA baldosa. */}
           <View style={{ gap: spacing[5] }}>
+            {/* 🔴 EL CASO QUE ESTA GALERIA NO CAZO, y C lo encontro
+                montandola de verdad: aca las baldosas eran MAS ANCHAS que
+                en la pantalla real, asi que «Adiestramiento» entraba y en
+                ATENDER se partia a mitad de palabra.
+                ⇒ **se fija el ancho REAL de la pantalla (190 px)** y se
+                monta la PALABRA REAL del oficio mas largo. *Una galeria
+                que da mas aire que la pantalla no prueba la pieza: prueba
+                una version comoda de la pieza.* */}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                🔴 EL ANCHO REAL — 190 px, dos columnas en un telefono de 420. Las palabras de
+                la casa, sin acortar.
+              </Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[4] }}>
+                {([
+                  { g: 'training', t: 'Adiestramiento', c: 'cuidado' },
+                  { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
+                ] as const).map((o) => (
+                  <View key={o.t} style={{ width: 190 }}>
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} onPress={() => {}} />
+                  </View>
+                ))}
+              </View>
+            </View>
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">ATENDER — cuatro oficios, sin detalle</Texto>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>

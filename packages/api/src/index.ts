@@ -989,6 +989,7 @@ export {
   // S97-A · la MODALIDAD del servicio (paso ② del wizard + la tab ATENDER +
   // el gate del rol recepción — una sola fuente, tres lectores)
   fijarModalidadServicio,
+  obtenerModalidadesPorOficio,
   type ServicioDeOficio,
   // S97-A · la regla condicional de recepción + el onboarding por paso
   puedeOfrecerRolRecepcion,
