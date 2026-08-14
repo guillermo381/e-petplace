@@ -122,6 +122,9 @@ export type DestapeProps = {
    propósito: una secuencia de gestos que esperan a que el anterior
    termine del todo se lee como una lista, no como una ceremonia. */
 const CURVA = Easing.bezier(...motion.marca.aperturaBezier) // (.32,.72,0,1)
+/** El alfa FIRMADO de la luz de la esquina (§9bis.2, 7 %). Se captura acá,
+ *  fuera del worklet, y se aplica DENTRO del estilo animado — ver D-801. */
+const ALFA_LUZ = opacity.luzDeEsquina
 const T = {
   isotipo: { at: 0, dur: motion.duration.estandar },   // ①  0 → 300
   rampa:   { at: 150, dur: motion.duration.grande },   // ②  150 → 670
@@ -230,8 +233,36 @@ export function Destape({ nombreNegocio, logo, tabsHabilitadas, alTerminar }: De
    *  El REGISTRO del color es POR CONTEXTO (enmienda S82): sale del
    *  token del tema, jamás de un literal. */
   const diametroLuz = width * 0.6
+  /* 🔴 D-801 — LA LUZ SE DIBUJABA A OPACIDAD PLENA, y el token del 7%
+     estaba puesto SIN HACER NADA.
+
+     EL MECANISMO, y es el mismo defecto que el `flexShrink` decorativo de
+     `Celda` un piso más abajo: el estilo base declaraba
+     `opacity: opacity.luzDeEsquina` (el **7% FIRMADO** de §9bis.2) y este
+     `useAnimatedStyle` **viene DESPUÉS en el array de estilos**, así que
+     su propia `opacity` lo PISA. La parábola del barrido
+     —`v·(1−v)·4`— tiene **máximo 1.0** en v=0.5 ⇒ en el pico la luz se
+     dibujaba al **100 %**.
+
+     *Tinta al 7 % es un velo; al 100 % es un agujero negro.* El adorno
+     más discreto que la casa permite se estaba comiendo la pantalla en el
+     medio de la celebración.
+
+     ⇒ El alfa firmado **entra al worklet multiplicando**, que es el único
+     lugar donde nadie lo puede pisar, y se retira del estilo base para
+     que haya UNA fuente. `ALFA_LUZ` se captura fuera del worklet (un
+     worklet no debe cerrar sobre el objeto de tokens).
+
+     ⚠️ VERIFICADO Y NO SUPUESTO — las otras tres NO tienen el defecto:
+     `sIsotipo`, `sRampa` y `sTarjeta` van de 0 a 1 y **eso es correcto**:
+     el isotipo, la rampa de marca y la tarjeta del negocio aparecen
+     PLENOS por diseño. La rampa en particular se enciende a full porque
+     es el momento de marca — ahí el 100 % es la intención, no un
+     descuido. La luz era la única con un alfa firmado que respetar. */
   const sLuz = useAnimatedStyle(() => ({
-    opacity: vLuz.value * (1 - vLuz.value) * 4, // barre: entra y se va
+    // barre (entra y se va) × el alfa firmado — el 7 % vive ACÁ, no en el
+    // estilo base, porque este objeto se aplica último y gana.
+    opacity: vLuz.value * (1 - vLuz.value) * 4 * ALFA_LUZ,
     transform: [{ translateX: quieto ? 0 : -vLuz.value * width * 0.25 }],
   }))
 
@@ -260,7 +291,8 @@ export function Destape({ nombreNegocio, logo, tabsHabilitadas, alTerminar }: De
             height: diametroLuz,
             borderRadius: radius.full,
             backgroundColor: theme.text.primary,
-            opacity: opacity.luzDeEsquina,
+            // el alfa NO va acá: lo aplica `sLuz` (D-801 — este objeto se
+            // pisaba con el estilo animado, que se aplica último).
           },
           sLuz,
         ]}
