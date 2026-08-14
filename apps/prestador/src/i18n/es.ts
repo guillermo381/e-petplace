@@ -3006,7 +3006,6 @@ export const prestadorEs = {
         activa: 'Activa',
         suspendida: 'Suspendida',
         cerrada: 'Cerrada',
-        queSignifica: '¿Qué significa?',
         modalTitulo: 'El estado de tu despensa',
         modalEnRevision:
           'Tú propones, e-PetPlace publica. Completa tu configuración a tu ritmo: cuando el equipo la revise, tu negocio pasa a estar visible ante las familias. No te pedimos nada más por ahora.',

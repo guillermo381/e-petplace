@@ -6,8 +6,9 @@ lo que ya está anotado como interim.
 
 ## VIVO — esto sí se juzga
 
-- **El estado arriba** («En revisión» / «Activa») con su explicación:
-  *tú propones, e-PetPlace publica*.
+- **El estado arriba** («En revisión» / «Activa») — **el chip mismo se
+  toca** y abre su explicación: *tú propones, e-PetPlace publica*.
+  (S97-B entregó el ensanche; el «¿Qué significa?» interim murió.)
 - **El orden de la pantalla**: estado → cortes (cuándo) → repartidores y
   capacidad (quién) → facturación al pie como puntero.
 - **Cortes horarios**: lista y alta (nombre, corte, ventana, día
@@ -23,13 +24,14 @@ lo que ya está anotado como interim.
 
 ## ANDAMIO DECLARADO — se mira, no se reporta como defecto
 
-1. **«¿Qué significa?» al lado del chip de estado**: interim. La letra
-   pide que el CHIP MISMO se toque; eso espera una pieza de B (pedida con
-   contrato). El label muere cuando llegue.
+1. ~~«¿Qué significa?» al lado del chip~~ ✅ **MUERTO** — el chip mismo
+   se toca (S97-B).
 2. **No hay sección de familias (qué vendo), ni método de entrega, ni
    radio de cobertura**: los tres esperan esquema de A (pedido con
    contratos exactos). No se montaron formularios muertos a propósito.
-   Firmado de mesa ya incorporado: serán CINCO familias del lector.
+   Firmado de mesa ya incorporado: serán CINCO familias del lector, y la
+   escala del radio (5–50 de a 5, default 15) ya está lista en código
+   para cuando el radio de la CUENTA tenga esquema (A-3).
 3. **El alta de repartidor es el padrón viejo** (nombre/documento libre).
    La letra manda «chip del equipo que ya existe» — el cambio espera la
    costura de A (ya firmado: cuelga de la cuenta comercial). Se dejó vivo
