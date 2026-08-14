@@ -3215,10 +3215,27 @@ export const prestadorEs = {
       turnoNuevoCta: 'Agregar corte',
       turnoEditarTitulo: 'Corregir el corte',
       turnoCodigoFijo: 'El nombre identifica este corte. Para otro, agrega uno nuevo.',
-      turnoCodigo: 'Nombre del turno (ej. manana)',
-      turnoCorte: 'Hora de corte (HH:MM)',
-      turnoDesde: 'Entrega desde (HH:MM)',
-      turnoHasta: 'Entrega hasta (HH:MM)',
+      turnoCodigo: 'Nombre del turno',
+      turnoCodigoPlaceholder: 'En la mañana',
+      turnoCorte: 'Hora de corte',
+      // Los tres placeholders son EJEMPLOS, no un valor repetido: juntos
+      // dibujan una ventana real (corta 14:00 → entrega 15:00-18:00). Tres
+      // «14:00» idénticos se leen como un default, y no lo son.
+      turnoHoraPlaceholder: '14:00',
+      turnoDesdePlaceholder: '15:00',
+      turnoHastaPlaceholder: '18:00',
+      // El grupo rotula; los dos campos van en UNA fila y por eso sus
+      // labels son cortos (firma del founder).
+      turnoFranja: 'Franja de entrega',
+      turnoDesde: 'Desde',
+      turnoHasta: 'Hasta',
+      // ⓘ de la hora de corte. El literal es del founder; viaja en TUTEO
+      // (L-148: la voz de producto no hereda el acento de la mesa — el
+      // dictado decía «te comprometés»).
+      turnoCorteInfoA11y: 'Qué significa la hora de corte',
+      turnoCorteInfoTitulo: 'La hora de corte',
+      turnoCorteInfoCuerpo:
+        'Todos los pedidos que recibas antes de esta hora te comprometes a entregarlos en la franja de entrega.',
       turnoDiaSiguiente: 'Se entrega al día siguiente',
       turnoGuardarCta: 'Guardar',
       turnoExito: 'Corte guardado.',

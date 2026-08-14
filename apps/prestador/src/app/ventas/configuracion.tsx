@@ -62,6 +62,38 @@
  * funcionando antes de su reemplazo deja al vendedor sin repartidores.
  * El swap es de esta pantalla y está declarado, no diferido en silencio.
  *
+ * 🔴 EL CORTE — LO QUE FALTA, DECLARADO ACÁ Y NO EN SILENCIO (S98-C).
+ * La firma del founder sobre este formulario pide **chips de días L·M·X·J·V·S·D
+ * con preselección L–V al CREAR** (al EDITAR se muestra lo que la fila tiene,
+ * jamás se le impone el default) **+ un toggle «Incluir festivos»**.
+ * **NO SE MONTAN, y la razón es medida, no de gusto:**
+ *  · `entrega_turnos` YA TIENE las dos columnas (`dias_semana smallint[]` NOT
+ *    NULL default L–D · `incluye_festivos` NOT NULL default false), aplicadas
+ *    por `20260815100000` y verificadas contra la base viva;
+ *  · **pero la PUERTA no las toma**: `definir_turno_entrega(…)` no tiene
+ *    `p_dias_semana` ni `p_incluye_festivos`, y `listarTurnosEntrega` no los
+ *    trae en su `select` — o sea que hoy los dos campos solo pueden valer su
+ *    default, y una Hoja reabierta no podría ni PRECARGAR lo que la fila tiene.
+ * ⇒ Montarlos sería estado local que se guarda y vuelve apagado: **un control
+ *   que promete estado y no lo tiene es peor que su ausencia** (mismo criterio
+ *   que la baldosa del inventario y el primer toggle de la solicitud).
+ * Contrato a A con las tres piezas exactas —RPC, wrapper y lector— en
+ * `docs/relevamientos/2026-08-14-s98c-pedido-a-A-corte-y-repartidor.md`.
+ * Lo que SÍ entró de la firma: el nombre con placeholder nativo · el ⓘ con
+ * modal en la hora de corte · la franja desde/hasta en UNA fila.
+ *
+ * ⚠️ EL REPARTIDOR NO SE TOCA EN ESTA VENTANA, y también es medición:
+ * su spec pide foto del documento, foto de la persona, tipo de documento,
+ * WhatsApp no opcional y **hasta dos vehículos (tipo + placa) DENTRO del
+ * repartidor** — y `repartidores` no tiene ninguna de esas columnas ni existe
+ * tabla de vehículos. **Y hay un choque que decide A, no esta pantalla:**
+ * `recursos_reparto` existe, está CABLEADA (`cupo_reparto_del_dia` la lee) y su
+ * semántica es CAPACIDAD del NEGOCIO, no identidad de un vehículo — montar
+ * «tipo + placa» encima le cambiaría el significado a la tabla que alimenta el
+ * cupo del día. El alta de hoy (nombre · documento · teléfono) **queda viva y
+ * sin tocar**: es la única que funciona, y matarla antes de su reemplazo deja
+ * al vendedor sin repartidores (el mismo criterio del choque ⑤ de abajo).
+ *
  *  · Repartidores: alta con nombre y documento (decisión del arranque);
  *    idempotente por documento — repetir no duplica, y se dice.
  *  · Recursos: la capacidad es DEL RECURSO (§7.3) — la voz lo enseña.
@@ -79,7 +111,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import Svg, { Path as SvgPath } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -152,6 +185,39 @@ type Pantalla =
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+/** El glifo ⓘ de un campo que necesita explicarse.
+ *
+ *  🔴 NO SE INVENTÓ, y el registry NO lo tiene: se midió que
+ *  `apps/cliente/.../mascota/[mascotaId].tsx` ya dibuja este mismo glifo con
+ *  trazo local 1.9, y su comentario declara la condición literal —«candidato
+ *  al registry por su puerta si se repite»—. **Ésta es la repetición**: la
+ *  condición que ese archivo escribió acaba de cumplirse, y el pedido de
+ *  promoción va a B (packages/ui es su territorio). Hasta entonces se copia
+ *  la geometría MEDIDA, no una nueva.
+ *
+ *  Y no se usa el glifo `ayuda` del registry a propósito: es un SALVAVIDAS
+ *  («ayuda que flota», su propio comentario) — eso dice *contactá soporte*,
+ *  no *qué significa este campo*. */
+function GlifoInfo({ color }: { color: string }) {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24">
+      <SvgPath
+        d="M12 3.4a8.6 8.6 0 110 17.2 8.6 8.6 0 010-17.2Z"
+        stroke={color}
+        strokeWidth={1.9}
+        fill="none"
+      />
+      <SvgPath
+        d="M12 11v5M12 7.7v.3"
+        stroke={color}
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
 /** ⑥ EL ESTADO — mapeo del enum vivo (`estado_cuenta_comercial_enum`:
  *  pendiente_validacion · activa · suspendida · cerrada, medido en
  *  `database.types.ts`) a la voz de la letra («en revisión» → «activa»,
@@ -208,6 +274,8 @@ export default function ConfiguracionVentas() {
   // reabrir.
   const [altaTurno, setAltaTurno] = useState(false);
   const [editandoTurno, setEditandoTurno] = useState(false);
+  // la explicación de la hora de corte (el ⓘ la abre)
+  const [modalCorte, setModalCorte] = useState(false);
   const [turCodigo, setTurCodigo] = useState('');
   const [turCorte, setTurCorte] = useState('');
   const [turDesde, setTurDesde] = useState('');
@@ -657,6 +725,22 @@ export default function ConfiguracionVentas() {
         </View>
       </Hoja>
 
+      {/* ── el modal del ⓘ de la hora de corte ──
+          Vive FUERA de la Hoja del corte a propósito: una Hoja adentro de otra
+          Hoja monta un `<Modal>` sobre otro y en Android el gesto de cierre
+          queda ambiguo. Acá la de arriba se apila y el corte conserva su
+          estado — lo tipeado no se pierde por leer qué significa. */}
+      <Hoja
+        visible={modalCorte}
+        onCerrar={() => setModalCorte(false)}
+        titulo={t('ventas.config.turnoCorteInfoTitulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{t('ventas.config.turnoCorteInfoCuerpo')}</Texto>
+        </View>
+      </Hoja>
+
       {/* ── hoja: repartidor nuevo ── */}
       <Hoja
         visible={altaRepartidor}
@@ -780,28 +864,58 @@ export default function ConfiguracionVentas() {
                 label={t('ventas.config.turnoCodigo')}
                 value={turCodigo}
                 onChangeText={setTurCodigo}
+                placeholder={t('ventas.config.turnoCodigoPlaceholder')}
                 ayuda={editandoTurno ? t('ventas.config.turnoCodigoFijo') : undefined}
                 deshabilitado={guardando || editandoTurno}
               />
+              {/* ⓘ EN EL CAMPO, no un párrafo permanente bajo él (patrón
+                  general firmado): el que ya sabe qué es un corte no lee una
+                  explicación cada vez que corrige la hora. Va en `iconoDer`
+                  —el slot que `Campo` ya expone y que el toggle de contraseña
+                  estrena con un `Pressable`— así que no nace anatomía nueva. */}
               <Campo
                 label={t('ventas.config.turnoCorte')}
                 value={turCorte}
                 onChangeText={setTurCorte}
-                ayuda="14:00"
+                placeholder={t('ventas.config.turnoHoraPlaceholder')}
                 deshabilitado={guardando}
+                iconoDer={
+                  <Pressable
+                    onPress={() => setModalCorte(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('ventas.config.turnoCorteInfoA11y')}
+                    hitSlop={12}
+                  >
+                    <GlifoInfo color={theme.text.secondary} />
+                  </Pressable>
+                }
               />
-              <Campo
-                label={t('ventas.config.turnoDesde')}
-                value={turDesde}
-                onChangeText={setTurDesde}
-                deshabilitado={guardando}
-              />
-              <Campo
-                label={t('ventas.config.turnoHasta')}
-                value={turHasta}
-                onChangeText={setTurHasta}
-                deshabilitado={guardando}
-              />
+              {/* La franja es UN dato con dos extremos: el grupo lo rotula y
+                  los campos se llaman Desde/Hasta — en una fila, dos labels
+                  largos envolverían (firma del founder). */}
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{t('ventas.config.turnoFranja')}</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label={t('ventas.config.turnoDesde')}
+                      value={turDesde}
+                      onChangeText={setTurDesde}
+                      placeholder={t('ventas.config.turnoDesdePlaceholder')}
+                      deshabilitado={guardando}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label={t('ventas.config.turnoHasta')}
+                      value={turHasta}
+                      onChangeText={setTurHasta}
+                      placeholder={t('ventas.config.turnoHastaPlaceholder')}
+                      deshabilitado={guardando}
+                    />
+                  </View>
+                </View>
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Texto variante="cuerpo">{t('ventas.config.turnoDiaSiguiente')}</Texto>
                 <Interruptor
