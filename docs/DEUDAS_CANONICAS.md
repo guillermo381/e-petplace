@@ -15118,3 +15118,53 @@ baldosas, en dos scrolls).
 
 ☠️ **Muere** cuando la portada de `ATENDER` entre en una pantalla con sus dos
 baldosas, verificado en dispositivo.
+
+---
+
+#### D-805 — 🔴 EL PATRÓN DOCUMENTADO DE LA GRILLA (`width: '48%'`) NO ENTRA EN NINGÚN TELÉFONO
+
+**Origen: medición de C, verificada y GENERALIZADA por A (14-ago).** C midió
+dos anchos concretos; A midió la condición.
+
+**El patrón que `Baldosa` documenta hoy** (`Baldosa.tsx:239-241`):
+`flexDirection: row · flexWrap: wrap · gap: spacing[4]` con `width: '48%'`.
+
+### La aritmética, en su forma general y no como tabla de casos
+
+Dos ítems entran sin envolver ⟺ `2·pct·u + gap ≤ u`, con `u` = ancho útil.
+
+| pct | condición | ⇒ |
+|---|---|---|
+| **48 %** | `16 ≤ 0.04·u` ⟺ **`u ≥ 400`** | 🔴 **falla en TODO teléfono** |
+| **47 %** | `16 ≤ 0.06·u` ⟺ **`u ≥ 267`** | ✅ entra en todos |
+
+**Medido en cuatro anchos reales — 48 % envuelve en los cuatro:**
+Android 412 (útil 380 · 380,8) · web 420 (388 · 388,48) · Android 360 (328 ·
+330,88) · iPhone 430 (398 · 398,08). *Los cuatro por menos de 3 px, y el de
+430 por **0,08**.*
+
+> ### 🔴 LA IRONÍA, QUE ES LA LECCIÓN Y NO UN CHISTE
+>
+> El patrón cambió a `48%` **precisamente porque `47%` era «frágil por siete
+> píxeles»** — y el reemplazo **no es más robusto: falla SIEMPRE en vez de
+> fallar A VECES.**
+>
+> ***Se cambió un margen chico por un margen negativo, buscando
+> determinismo — y se consiguió: determinísticamente envuelve.***
+
+**Por qué el error es fácil y no descuidado:** *el `gap` no se ve en el
+porcentaje.* `48 + 48 = 96 < 100` **invita a concluir que sobra 4 %** — y
+sobra, pero el `gap` se come 16 px, que en un contenedor de 380 son **4,2 %**.
+**El porcentaje y el gap están en unidades distintas, y la resta se hace en
+píxeles.**
+
+**Consecuencia hoy: NINGUNA en producción** — la grilla viva de C usa `47 %`.
+**El riesgo es de PROPAGACIÓN:** *es un patrón documentado en la pieza para que
+otros lo copien, y quien lo copie se lleva una columna donde quería dos.*
+
+**Cura (de B, su pieza):** el patrón documentado vuelve a un porcentaje que
+satisfaga `2·pct·u + gap ≤ u` para el ancho más chico soportado — **o el
+ejemplo declara el gap en la cuenta**, que es lo que faltaba.
+
+☠️ **Muere** cuando el ejemplo de `Baldosa` entre en dos columnas en el
+teléfono más angosto que la casa soporta, **con su cuenta escrita al lado.**
