@@ -198,6 +198,52 @@ con el domicilio del grooming. **No nace una columna nueva.**
 > alguien toque el toggle.** No se hace backfill: qué significa "local" para
 > un paseo es decisión de producto, no de migración. Ficha **D-792**.
 
+### 2.3bis 🔴 QUÉ HACE LA RECEPCIÓN — firma del founder, 14-ago-2026
+
+**Esta firma no agrega una tarea: reemplaza la que había.** Llegó cerrando el
+dictado ① del gate de `ATENDER` (§6bis), y su literal es:
+
+> *"No se necesita, es una acción que no genera ningún valor, en cambio la
+> pizarra sí: si hay citas para ese día asignadas al local y no a un
+> prestador, la recepción puede asignarlas."*
+
+**⇒ La recepción DISTRIBUYE. No registra llegadas.**
+
+| | Antes (S78) | Desde esta firma |
+|---|---|---|
+| Acto propio | marcar que la mascota llegó | **asignar a quién atiende** |
+| Qué produce | un timestamp | **una cita que deja de estar huérfana** |
+
+**Por qué la sustitución es correcta y no una preferencia:** *marcar «llegó»
+no cambia nada que alguien pueda hacer distinto* — la cita ya existía, con su
+hora y su persona; el timestamp solo describe. **Asignar sí:** la cita del
+local sin persona **no la puede atender nadie hasta que alguien decida quién**,
+y esa decisión es exactamente la del mostrador — *el único que ve la sala.*
+
+> **✅ MEDIDO (S97-A) — EL MOTOR DE LA PIZARRA YA ESTÁ VIVO, ENTERO.** No nace
+> ni una función. Las cuatro piezas existen y están cableadas entre sí:
+>
+> | Pieza | Qué hace | Nace en |
+> |---|---|---|
+> | `obtener_jornada_recepcion(prestador, fecha)` | el lector — **devuelve `empleado_id` NULLABLE** | S78 |
+> | `obtener_personas_para_asignar(cita)` | los candidatos | S90 |
+> | `asignar_cita_a_persona(cita, empleado)` | el acto | S90 |
+> | `empleado_puede_asignar_citas(prestador)` | el gate | S90 |
+>
+> **Y el estado que la pizarra muestra EXISTE en los datos: 3 citas vivas con
+> `empleado_id IS NULL` sobre 182.** *La pizarra no es una vista que haya que
+> inventar: es una lectura que ya devuelve lo que necesita y que nadie dibujó.*
+> **Falta la PANTALLA y nada más** ⇒ **D-810**, territorio de C.
+>
+> *Es la tercera vez en la jornada que medir antes de construir achica el
+> trabajo a la mitad* (las otras dos: el handshake del mostrador y la puerta
+> atómica del renombre).
+
+**Lo que muere y lo que NO se toca, con su frontera:** muere **el verbo en la
+pantalla**. **El dato `llegada_en` NO se borra** — son 182 citas de historia, y
+*destruir historia por una decisión de superficie es la clase de acto que no
+tiene reversa*. Queda **huérfano de superficie y declarado** ⇒ **D-807**.
+
 ---
 
 ## 3 · HOY ES UN FEED CRONOLÓGICO DEL DÍA
@@ -575,6 +621,75 @@ silencio — otro repo del legado comparte esta base (D-471). Ficha **D-794**.
 > madre**, y ésa sí es una: *`MODELO_DESPENSA` §5 — la app **NUNCA adivina**
 > de quién es una compra (ni una mascota): ofrece atarla, y el dueño
 > decide.*
+
+---
+
+## 6bis · EL GATE DE `ATENDER` EN DISPOSITIVO — los cinco dictados, verbatim
+
+**Fecha: 14-ago-2026. Veredicto global del founder sobre `ATENDER`: GUSTÓ.**
+Las baldosas quedaron **firmadas en dispositivo** (cierra D-804 y D-805).
+
+**Se depositan VERBATIM, y eso no es formalismo:** un dictado transcrito de
+memoria deja de ser del founder, **y una regla resumida es peor, porque su
+valor está justamente en la formulación exacta** (L-142 · regla 76b — cobrada
+hoy: estos cinco literales tardaron un ciclo entero en llegar, y hasta que
+llegaron **no se depositó nada**).
+
+### ① El «Llegó» — MUERE
+
+> *"En la pantalla hoy en la cita hay un botón llegó, pero es redundante, si le
+> doy atender es porque llegó, no me dice nada y es feo."*
+
+**Firma posterior, que lo cierra sin borde y redefine el rol** (desarrollada en
+**§2.3bis**):
+
+> *"No se necesita, es una acción que no genera ningún valor, en cambio la
+> pizarra sí: si hay citas para ese día asignadas al local y no a un prestador,
+> la recepción puede asignarlas."*
+
+⇒ **El verbo muere entero.** Fichas **D-807** (el dato huérfano) y **D-810**
+(la pizarra).
+
+### ② El dashboard de `ATENDER`
+
+> *"En la pantalla principal del atender me gusta, podríamos poner un dashboard
+> pequeño arriba con datos de los servicios prestados y valores, si está en 0 se
+> muestra en 0."*
+
+**La cláusula final es la ley, no el adorno:** *"si está en 0 se muestra en 0"*
+⇒ **el cero se muestra, jamás se esconde.** Es la misma letra que rige el
+Negocio desde S51 (**JAMÁS $0** era *no inventar métricas donde no hay
+negocio*; acá el founder firma la cara opuesta: **donde el negocio EXISTE, el
+cero es un dato y se dice**). Ficha **D-808**.
+
+### ③ La baldosa — el espacio en blanco
+
+> *"Los rectángulos de servicio realmente se ven muy bien, pero tienen mucho
+> espacio en blanco, no sé si poner un subtítulo o dejarlo así, piénsalo."*
+
+**Firma posterior sobre la propuesta de mesa** (subtítulo = **dato vivo del día
+o silencio, jamás descriptivo**):
+
+> *"Me gusta."*
+
+⇒ **La regla queda firmada: el subtítulo dice lo que PASA HOY, o no dice
+nada.** *Un subtítulo descriptivo —"atendé a tus pacientes"— llena el hueco y
+no informa: es ruido con tipografía.* Ficha **D-809**.
+
+### ④ La pizarra — su forma
+
+> *"La pizarra abre ventana nueva, no sé si se vería mejor un modal
+> desplegándose desde abajo de la pantalla."*
+
+⇒ **Firmado como Hoja.** *El gesto ya es N10* — la casa no estrena nada.
+
+### ⑤ El Negocio
+
+> *"Y en mi negocio, aún faltan los cambios, a rectángulos y las dos categorías
+> de servicios que hablamos desde el inicio."*
+
+⇒ **En construcción por C**, territorio ya coordinado con D. **No nace ficha:
+tiene dueño y está en vuelo.**
 
 ---
 

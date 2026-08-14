@@ -73,28 +73,46 @@ motor → A.
 
 ---
 
-## 3 · 🔴 FRENO ABIERTO — LO QUE NO LLEGÓ CON SU LITERAL
+## 3 · ✅ EL FRENO CERRÓ — los literales llegaron y están depositados
 
-**El gate del founder sobre `ATENDER` vino con «cuatro mejoras dictadas y una
-regla propuesta». SU TEXTO NUNCA LLEGÓ A A.** No se depositaron.
+**Los cinco dictados del gate de `ATENDER` viven VERBATIM en
+`LA_CASA_DEL_PRESTADOR` §6bis**, con las dos firmas posteriores adentro.
+**Veredicto global: GUSTÓ; las baldosas quedaron firmadas en dispositivo.**
 
-**Y la mesa anunció «dos firmas nuevas del founder que llegan abajo» — TAMPOCO
-LLEGARON.** *Se declara para que la sucesora las PIDA en vez de deducirlas.*
+| # | Dictado | Dónde vive | Ficha |
+|---|---|---|---|
+| ① | el «Llegó» **muere** | §6bis + **§2.3bis** (redefine el rol) | **D-807** · **D-810** |
+| ② | dashboard, *«si está en 0 se muestra en 0»* | §6bis | **D-808** |
+| ③ | la baldosa: dato vivo **o silencio** | §6bis | **D-809** |
+| ④ | la pizarra como **Hoja** | §6bis | (dentro de D-810) |
+| ⑤ | el Negocio a rectángulos | §6bis | sin ficha — **en vuelo por C** |
 
-> **Precedente que lo obliga (L-142 · regla 76b), cobrado hoy y en S73:** una
-> mejora transcrita de memoria deja de ser el dictado del founder; **una regla
-> resumida es peor, porque su valor está en la formulación exacta.**
+🔴 **① NO ERA UNA MEJORA DE PANTALLA: era firma que redefine la recepción.**
+*Antes marcaba llegadas; ahora DISTRIBUYE* — asigna las citas del local que no
+tienen persona. **Y su motor ya estaba entero** (§2.3bis: cuatro piezas de
+S78/S90, con 3 citas vivas en ese estado). **Falta la pantalla y nada más.**
 
-**Cuando lleguen:** las mejoras con dueño; **la regla con su ESTATUTO —
-propuesta hasta que el founder la firme, jamás ley por venir de la mesa**
-(regla 80).
+### 🔴 Lo que SIGUE sin literal — se PIDE, no se deduce
+
+**D-811** (el alta de mascota duplicada entre cliente y mostrador) llegó **sin
+el texto del founder**. La ficha está depositada con la clase del hallazgo —
+que es lo que más vale— **y su literal marcado como faltante.**
+
+> **L-142 · regla 76b, cobrada dos veces hoy:** una mejora transcrita de
+> memoria deja de ser el dictado del founder; **una regla resumida es peor,
+> porque su valor está en la formulación exacta.**
 
 ---
 
 ## 4 · LO QUE QUEDA VIVO Y NO ES DE A
 
-- **D-806** (los seis glifos de especie **no existen** en el registry) →
-  **B**, con el proceso de `DIRECCION_ARTE` §6b. **No bloquea el Lote 2.**
+- **D-806** (los glifos de especie **no existen**) → **B**, detrás de su cola.
+  **Dimensionada: son SEIS** (las activas en F1 por D-287), no diez; `otro` no
+  necesita glifo. 🔴 **Y tiene una pregunta de arte ANTES de dibujar: §1 no
+  cubre esta familia** —*la mascota no está presente en el concepto: la
+  mascota ES el concepto*— ⇒ **es si nace una segunda categoría de glifo, y
+  eso lo firma el founder.** Camino: hoja de contacto §6b con **dos variantes
+  del perro**, con y sin huella. **No bloquea el Lote 2.**
 - **D-802 hija:** el espejo `prestadores.nombre_comercial` **muere cuando
   `v_prestadores_publicos` lea el nombre desde la cuenta comercial**. Toca el
   frente del cliente — otro territorio, otro gate.

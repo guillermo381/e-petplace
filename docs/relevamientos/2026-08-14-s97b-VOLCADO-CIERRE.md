@@ -5,7 +5,7 @@ los jueces · **Norte:** la mesa del 13-ago.
 
 > **El teléfono no fue mío.** Nada de lo de abajo tiene gate en
 > dispositivo, y §6 explica por qué eso importa más de lo habitual en esta
-> tanda: **los cinco instrumentos dieron VERDE sobre cinco defectos
+> tanda: **los cinco instrumentos dieron VERDE sobre NUEVE defectos
 > reales.**
 
 ---
@@ -24,6 +24,16 @@ reduce-motion.
 **Los tokens** — N1 ejecutada (la escala se movió: `sm` 14 · `base` 16 ·
 `md` 20) · N10 tokenizado (`micro|estandar|grande`) ·
 `opacity.luzDeEsquina` · `motion.duration.overshootTab`.
+
+**LA SEGUNDA MITAD DE LA JORNADA — ocho commits más, y casi todos son
+defectos propios encontrados por otros:** el ritual del `Destape` a
+**~3000 ms** (firma en dispositivo) · **D-801** (la luz al 100 % con el
+token del 7 % puesto sin hacer nada) · el `overflow` de `Celda`
+**retirado** por adjudicación · **`Entrada` deja las layout animations**
+(colapsaba a altura 0 **cualquier** grilla) · **`Baldosa`**: el título a
+`cuerpo` (+ un `role="header"` que mentía), la raíz declarando sus **dos**
+dimensiones (**D-804**), y el patrón de grilla en **dos vueltas**
+(**D-805**).
 
 ---
 
@@ -103,7 +113,7 @@ hizo falta.
 | Qué | Estado | Dueño |
 |---|---|---|
 | **🔴 El gate en dispositivo de la escala** | **330 sitios cambiaron de tamaño y ningún instrumento lo ve.** El riesgo es de **layout, no de tipo** | founder · **Lote 1** |
-| **El `overflow` de `Celda`** | **ELEVADO, no retirado.** La condición de muerte se cumplió (guard de D: 28/59 · 23/50 · 5/10 + las 3 del censo), pero **la adjudicación de que quedaba fue de la mesa** y solo ella la declara cumplida. Evidencia de **RN-web, no dispositivo** | mesa |
+| ~~El `overflow` de `Celda`~~ | ☠️ **RETIRADO** por adjudicación de mesa: su condición de muerte se cumplió (guard de D: 28/59 · 23/50 · 5/10 + las 3 del censo, con discovery estructural). Viajó con sus dos declaraciones: **evidencia RN-web** y si Android reparte distinto vuelve **como vendaje fechado, jamás como default** | ✅ cerrado |
 | **El peor caso de `veterinaria/consulta`** | Verde **en el estado que existe hoy**: la variante con dos chips no se dibujó en el estado que D pudo montar. *Dato sobre qué cubre el verde, no pendiente de nadie* | — |
 | **El glifo `atender` a 21px** | Riesgo declarado (la diagonal puede fundirse con la jamba). **Recambio ya elegido: el vano sin hoja** | founder |
 | **El peso del título de `Baldosa`** | `cuerpo` (16). Si falta peso, la salida es **variante nueva con gate** (Ley 11), jamás un `style` inline | founder |
@@ -111,12 +121,13 @@ hizo falta.
 | **reduce-motion en 59 piezas** | **Solo 4 de 63 lo miran.** Barrerlas es tanda con censo propio | próxima B |
 | **`DIRECCION_ARTE` §5.4** | Lista el overshoot como candidata; **la mesa lo firmó el 14-ago**. Hay que enmendar la letra | A (su doc) |
 | **`packages/ui/CLAUDE.md`** | Contador 63 → **65** (`Destape`, `Baldosa`); glifos 44 → **45** | próxima B |
+| **D-806 · los glifos de especie** | **Dimensionada, NO empezada**: son **6** (perro·gato·conejo·ave·pez·roedor — las activas de F1), no 10; `otro` no lleva glifo. 🔴 **Espera una firma previa**: §1 pide «objeto del oficio + una huella» y acá **la mascota ES el concepto** — un perro con huella adentro es redundante. Es si nace una **segunda categoría de glifo** (el sujeto), y eso lo firma el founder | founder → B |
 
 ---
 
 ## §6 · LAS LECCIONES — y la primera es la que gobierna
 
-**① NINGÚN INSTRUMENTO ENCONTRÓ NINGUNO DE LOS CINCO DEFECTOS REALES.**
+**① NINGÚN INSTRUMENTO ENCONTRÓ NINGUNO DE LOS NUEVE DEFECTOS REALES.**
 
 | defecto | lo vio | los gates decían |
 |---|---|---|
@@ -125,6 +136,10 @@ hizo falta.
 | «Adiestramiento» partido | **C**, montándola | VERDE |
 | `role="header"` en cada baldosa | **investigando el de C** | VERDE |
 | mi galería probando piezas más anchas que la pantalla | **C**, midiendo su instrumento | VERDE |
+| el destape a opacidad plena (D-801) | **el founder** («una sombra que no alcanzo a detallar») | VERDE |
+| la grilla colapsando a altura 0 | **C**, poniéndole un vecino debajo | VERDE |
+| la baldosa a ~800 px (D-804) | **A**, caminando el lote | VERDE |
+| mi patrón `48%` que falla en todo teléfono (D-805) | **C**, midiendo antes de copiarlo | VERDE |
 
 *`tsc`, `verify:diseno` y WCAG no ven un truncado, un solapamiento, un
 corte mudo ni un rol de a11y mentido.* **El lint protege contra lo que ya
@@ -179,6 +194,64 @@ porque el destaque es **por FORMA y no por coordenada**.
 **⑩ UN GUARD QUE GRITA SOBRE UNA GEOMETRÍA FIRMADA ENSEÑA A IGNORARLO**
 (de D) — *la única forma de fallar peor que no existir.* Su guard reportó
 la pata de selección de E6, firmada en S82.
+
+**⑪ UN VALOR ESCRITO QUE OTRO PISA EN SILENCIO — TRES CASOS.** El
+`flexShrink: 1` que no encogía nada (`min-width: auto` lo anulaba) · el
+`overflow` que se comía la elipsis del `Text` · el alfa del 7 % de la luz,
+**pisado por el estilo animado que se aplica después** (D-801: la luz se
+dibujaba al **100 %**). *Los tres pasan typecheck, lint y WCAG sin una
+queja.* **Un token puesto no es un token aplicado.**
+
+**⑫ LO QUE DIVERGE ENTRE PLATAFORMAS ES LA GEOMETRÍA DELEGADA** (de A,
+corrigiendo mi propia advertencia). Yo decía *«el verde de una plataforma
+no viaja a la otra»*; él lo midió con su matiz: **tampoco viaja el rojo**.
+El mismo día, web y Android **divergieron** (D-804: 0 vs 800 px) **y
+coincidieron** (la fila, limpia en las dos).
+> ***La ausencia no tiene comportamiento portable; la declaración sí.***
+D-804 deja de ser «Android reparte distinto» y pasa a ser **una pieza que
+no declaraba su alto, y cada plataforma resolvió esa ausencia a su
+manera**. Convierte «probar en las dos» —que no escala— en **«probar en
+las dos lo que no está declarado»**, que es una lista corta.
+
+**⑬ UN PATRÓN DOCUMENTADO SE EJECUTA EN LA PANTALLA DEL QUE LO COPIE.**
+D-805: cambié `47%` a `48%` **precisamente porque el 47 era «frágil por
+siete píxeles»** — y **no volví a hacer la aritmética que yo mismo había
+escrito dos párrafos antes**. A la generalizó: `2·pct·u + gap ≤ u` ⇒ el
+48 % exige `u ≥ 400` y **falla en TODO teléfono** (iPhone 430 por 0,08 px).
+*Se cambió un margen chico por un margen negativo buscando determinismo, y
+se consiguió: determinísticamente envuelve.*
+· **La cura no fue un tercer porcentaje**: fue sacar el gap de la cuenta
+  (`width: '50%'` con el aire adentro de la celda) — **cierra por
+  construcción en cualquier ancho**.
+· Y su porqué, de A, va escrito en el patrón porque es lo único que impide
+  la tercera vuelta: ***el `gap` no se ve en el porcentaje*** — `48+48=96`
+  invita a concluir que sobra 4 %, y el gap se come 16 px que en 380 son
+  4,2 %. **Están en unidades distintas y la resta se hace en píxeles.**
+
+**⑭ DOS PATRONES EN EL MISMO ARCHIVO DIVERGEN LA PRIMERA VEZ QUE ALGUIEN
+CURA UNO.** D-805 no cerró al primer intento: el header de `Baldosa`
+llevaba **su propia copia** del patrón, congelada mientras el pie
+evolucionaba 47 → 48 → 50. **El archivo tenía dos patrones ejecutables
+contradiciéndose, y el de arriba —el que se lee primero— era el que no
+entra en ningún teléfono.** *No se sincronizan dos copias: se deja una.*
+
+**⑮ UN CONTADOR QUE NO DA CERO ES UNA PREGUNTA, NO UN RESIDUO.** Al curar
+D-805 mi propio grep devolvió `Baldosa.tsx: 1` y **lo dejé pasar sin
+preguntarme cuál era esa ocurrencia**. Era el patrón viejo del header.
+
+**⑯ UNA REGLA RAZONABLE SE VUELVE UN GIGANTE CUANDO LA PIEZA ATA ALTO A
+ANCHO** (de C). El `flexGrow: 1` estaba puesto para que *«una baldosa
+impar ocupe la fila entera»* — razonable. Con la pieza ya cuadrada, esa
+misma regla la vuelve **un cuadrado de pantalla completa**. *Los dos
+cambios eran defendibles por separado; juntos fabricaron el defecto.*
+
+**⑰ REVERTIR UNA CURA PROPIA CON UNA RAZÓN DISTINTA NO ES UN IDA Y
+VUELTA.** Curé la rama de reduce-motion del `Destape` para que durara lo
+mismo que la larga (*«quitar movimiento no es acortar el momento»*) — y
+con el ritual firmado en ~3000 ms **la mesa la revirtió a crossfade
+corto** con otro argumento: *el ritual es para quien puede disfrutarlo, no
+una imposición*. **Mi argumento era correcto contra 1630 y se vuelve falso
+contra 3000: no cambió la doctrina, cambió la magnitud.**
 
 ---
 
