@@ -31,7 +31,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -118,7 +118,24 @@ export default function WizardAlta() {
   const { mostrar } = useAviso();
 
   const [contexto, setContexto] = useState<Contexto>({ estado: 'cargando' });
-  const [indice, setIndice] = useState(0);
+
+  /* ⭐ S98-C · EL WIZARD ACEPTA EN QUÉ PASO ABRIR — y nace por una razón
+     concreta, no por completitud: la firma de «Tu tienda» pide que el
+     Negocio ofrezca la puerta de crecimiento **enrutando a la solicitud
+     que ya existe, jamás con un segundo productor** de
+     `solicitar_naturaleza_comercial`. Esa solicitud vive en el paso ②.
+     Sin esto, la única forma de honrar la firma era mandar a la persona
+     al paso ① a que buscara sola — o clonar el botón, que es lo prohibido.
+
+     Se lee UNA vez, al montar: el wizard sigue siendo dueño de su avance
+     y la URL no lo gobierna después. Un valor que no sea un paso conocido
+     cae al ① en silencio — un deep link mal escrito no es una pantalla
+     rota. */
+  const { paso: pasoPedido } = useLocalSearchParams<{ paso?: string }>();
+  const [indice, setIndice] = useState(() => {
+    const i = (PASOS as readonly string[]).indexOf(pasoPedido ?? '');
+    return i >= 0 ? i : 0;
+  });
   const [salteando, setSalteando] = useState<Paso | null>(null);
   const [guardandoSalto, setGuardandoSalto] = useState(false);
   const [destapando, setDestapando] = useState(false);

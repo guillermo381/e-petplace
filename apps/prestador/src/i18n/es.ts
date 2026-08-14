@@ -42,15 +42,48 @@ export const prestadorEs = {
        cuenta lo AGENDADO del día y `prestadas` lo COMPLETADO. Medido en un
        día real: 6 contra 1. *Llamar «prestados» a lo agendado miente en la
        dirección optimista, que es la peor.* */
-    /* ⭐ S98-C · EL SUBTÍTULO DE LA BALDOSA (firma: «me gusta»). Los DOS
-       literales de la firma que tienen dato — el tercero, «2 en espera»,
-       no lo tiene: `llegada_en` pasó a estamparse al ATENDER, así que
-       «llegó» y «se está atendiendo» son el mismo instante.
-       Cortos por la misma medida que las del Negocio: una línea, ~22
-       caracteres. */
-    sinAgendaHoy: 'Sin agenda hoy',
-    unaCitaHoy: '1 cita hoy',
-    nCitasHoy: '{{n}} citas hoy',
+    /* ⭐ S98-C · EL SUBTÍTULO DE LA BALDOSA, **CON APELLIDO** (segunda firma
+       del founder): *«no tienes paseos programados, o tienes una cita de
+       grooming, o de vet — para que siendo verdad las dos, sea más
+       claro»*. Cada baldosa nombra SU oficio, y con eso la banda (que
+       cuenta el negocio entero) y la baldosa (que cuenta su oficio) dejan
+       de leerse como contradicción **sin tocar ningún número** — §4ter
+       intacto, la claridad por el nombre. Ficha de A: D-814.
+
+       🔴 DOS DE LOS CUATRO NO USAN LA FORMA LITERAL, Y ESTÁ MEDIDO — no
+       estimado. `Baldosa` pinta su detalle en UNA línea sobre **151 px**
+       (medidos del nodo real; ~148 en un Android de 412), fuente
+       `DMSans 400 14px`. Con `measureText` sobre esa fuente exacta:
+
+           «Sin citas de vet hoy» ............ 126,4 px  ✓
+           «Sin paseos hoy» .................. 097,2 px  ✓   ← literal del founder
+           «Sin citas de grooming hoy» ....... 167,2 px  ✗ trunca
+           «Sin citas de adiestramiento hoy» . 204,3 px  ✗ trunca
+
+       ⇒ Vet y paseo van con la forma literal. Grooming y adiestramiento
+       van con **el sustantivo propio del oficio**, que es la otra forma
+       que el founder usó en la misma frase (*«no tienes PASEOS»*) y que
+       entra con margen: «baños» (90,3) y «sesiones» (107,2).
+       *Truncar la frase firmada la habría dejado en «Sin citas de
+       adiestramien…», que no informa y encima se ve rota.*
+
+       ⚠️ Y lo que «baños» cuesta, declarado: el oficio vende «Baño» y
+       «Baño y corte», así que el conteo es EXACTO —todo grooming incluye
+       baño— pero el nombre no anuncia el corte. Se acepta porque el
+       TÍTULO de la baldosa dice «Estética» cuatro píxeles arriba: el
+       apellido lo carga el par, no la línea sola. */
+    datoPaseoCero: 'Sin paseos hoy',
+    datoPaseoUno: '1 paseo hoy',
+    datoPaseoN: '{{n}} paseos hoy',
+    datoGroomingCero: 'Sin baños hoy',
+    datoGroomingUno: '1 baño hoy',
+    datoGroomingN: '{{n}} baños hoy',
+    datoVeterinariaCero: 'Sin citas de vet hoy',
+    datoVeterinariaUno: '1 cita de vet hoy',
+    datoVeterinariaN: '{{n}} citas de vet hoy',
+    datoAdiestramientoCero: 'Sin sesiones hoy',
+    datoAdiestramientoUno: '1 sesión hoy',
+    datoAdiestramientoN: '{{n}} sesiones hoy',
     bandaPrestados: 'Prestados hoy',
     bandaAgendado: 'Agendado hoy',
     bandaCobrado: 'Cobrado hoy',
@@ -1210,6 +1243,19 @@ export const prestadorEs = {
     baldosaUno: '1 servicio',
     baldosaN: '{{n}} servicios',
     baldosaNoCargo: 'No se pudo leer',
+    /* ⭐ S98-C · «Tu tienda» — LAS DOS VISTAS (firma del founder, 14-ago).
+       Los nombres tienen que DIFERENCIARLAS: una es el inventario del
+       local (suyo, no sale a ningún lado) y la otra es la vitrina que ve
+       el cliente. *Si los dos se llamaran «productos», la pantalla no
+       diría cuál es cuál — y ésa era justo la firma.* */
+    tiendaVitrina: 'Vender por e-PetPlace',
+    tiendaVitrinaDetalle: 'La vitrina del cliente',
+    tiendaLocal: 'Inventario de tu local',
+    tiendaLocalDetalle: 'Llega en la próxima versión',
+    tiendaV2Titulo: 'Todavía no, pero viene',
+    tiendaV2Voz:
+      'El inventario de tu local —lo que tenés en tus estantes, sin salir a la vitrina— llega en la próxima versión. Por ahora podés vender por e-PetPlace.',
+    tiendaV2Cerrar: 'Entendido',
     enPreparacion: 'En preparación',
     /* ☠️ S98-C · MURIERON OCHO KEYS DE ESTE BLOQUE (Ley 37), con censo en
        TODO el repo antes de tocarlas: `oferta` (el rótulo «Tu oferta», que

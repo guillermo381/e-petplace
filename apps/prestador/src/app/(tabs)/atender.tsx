@@ -148,6 +148,36 @@ const KEY_CITAS_DEL_DIA = {
  *  pintar. Sale de las CLAVES para que el oficio nuevo entre solo. */
 const OFICIOS_ATENDER = Object.keys(KEY_CITAS_DEL_DIA) as OficioAtender[];
 
+/** ⭐ EL APELLIDO DEL DATO VIVO, por oficio (segunda firma del founder).
+ *  POR TABLA y jamás por key armada a mano, por lo mismo que las otras dos
+ *  de este archivo: una key interpolada compila siempre y se rompe en
+ *  runtime cuando el vocabulario crece. **El oficio nuevo no puede entrar
+ *  sin contestar sus tres casos.** El porqué de cada forma —y de las dos
+ *  que NO usan la frase literal de la firma— vive en el diccionario, con
+ *  sus píxeles medidos al lado. */
+const KEY_DATO = {
+  veterinaria: {
+    cero: 'atender.datoVeterinariaCero',
+    uno: 'atender.datoVeterinariaUno',
+    n: 'atender.datoVeterinariaN',
+  },
+  grooming: {
+    cero: 'atender.datoGroomingCero',
+    uno: 'atender.datoGroomingUno',
+    n: 'atender.datoGroomingN',
+  },
+  paseo: {
+    cero: 'atender.datoPaseoCero',
+    uno: 'atender.datoPaseoUno',
+    n: 'atender.datoPaseoN',
+  },
+  adiestramiento: {
+    cero: 'atender.datoAdiestramientoCero',
+    uno: 'atender.datoAdiestramientoUno',
+    n: 'atender.datoAdiestramientoN',
+  },
+} as const;
+
 type Pantalla =
   | { fase: 'cargando' }
   // El error DICE su causa y ofrece reintentar (Ley 13 / regla 36): un
@@ -291,17 +321,15 @@ export default function Atender() {
 
   const { capacidad, citasPorOficio, pizarra, plata } = pantalla;
 
-  /** El dato vivo de la baldosa, o `undefined` para que CALLE. Los dos
-   *  literales de la firma; el tercero («en espera») no tiene dato — su
-   *  porqué está arriba, en `KEY_CITAS_DEL_DIA`. */
+  /** El dato vivo de la baldosa **con su apellido**, o `undefined` para
+   *  que CALLE. La voz de cada oficio sale de su fila de `KEY_DATO` — el
+   *  porqué de que dos no usen la forma literal de la firma vive en el
+   *  diccionario, con los píxeles medidos. */
   const datoDelDia = (o: OficioAtender): string | undefined => {
     const n = citasPorOficio[o];
     if (n === undefined) return undefined;
-    return n === 0
-      ? t('atender.sinAgendaHoy')
-      : n === 1
-        ? t('atender.unaCitaHoy')
-        : t('atender.nCitasHoy', { n });
+    const k = KEY_DATO[o];
+    return n === 0 ? t(k.cero) : n === 1 ? t(k.uno) : t(k.n, { n });
   };
 
   return (

@@ -48,9 +48,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Baldosa,
+  Boton,
   CeldaNavegacion,
   Esqueleto,
   EsqueletoGrupo,
+  Hoja,
   Insignia,
   MarcaDeAgua,
   PuertaDeOficio,
@@ -199,6 +201,22 @@ export default function Negocio() {
      wizard): se reusa, no se inventa uno paralelo.
      `null` = no se pudo leer o esta persona no tiene cuenta comercial. */
   const [tienda, setTienda] = useState<EstadoNaturaleza | null>(null);
+  /** La Hoja de «esto llega en V2» — ver su excepción firmada abajo. */
+  const [hojaV2, setHojaV2] = useState(false);
+
+  /* 🔴 S98-C · ESTA PERSONA NO TIENE FILA DE PRESTADOR — y eso NO es un
+     fallo: es el cinturón (§8.6bis). **El vendedor puro llega hasta acá**,
+     medido: `useGateGestor` FALLA ABIERTO (`if (!prestador.ok) →
+     'permitido'`), así que no lo ataja ningún muro.
+
+     Sin esta distinción, la sección «Tus servicios» le mostraba **cuatro
+     baldosas diciendo «No se pudo leer»** — un rótulo firmado sobre cuatro
+     falsos fallos, a alguien que simplemente no vende servicios. *Confundir
+     «no tiene» con «no se pudo» es la Ley 13 al revés: no disfraza el
+     error de vacío, disfraza el vacío de error.*
+     El wrapper ya distinguía los dos casos con su código `sin_prestador`;
+     lo que faltaba era leerlo. */
+  const [sinPrestador, setSinPrestador] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -253,6 +271,11 @@ export default function Negocio() {
           else caidos.add('adiestramiento');
           if (rVeterinaria.ok) setMundoVeterinaria(rVeterinaria.data);
           else caidos.add('veterinaria');
+        } else if (!rPrestador.ok && rPrestador.codigo === 'sin_prestador') {
+          // NO HAY NEGOCIO DE SERVICIOS, y eso es legal: la sección
+          // «Tus servicios» no se monta. Cero fallos anotados — no falló
+          // nada. (Ver el porqué arriba, en `sinPrestador`.)
+          setSinPrestador(true);
         } else {
           // EL CASCADEO, declarado: sin el prestador las CUATRO lecturas de
           // mundo ni siquiera se disparan. No es que los mundos estén
@@ -449,6 +472,7 @@ export default function Negocio() {
               🔴 VA PRIMERA Y NO SE MUEVE SIN AVISARLE A D: el fallback de
               «Prepará tu espacio» aterriza acá contando con que lo primero
               sea la lista de mundos (ver el encabezado del archivo). */}
+          {!sinPrestador && (
           <View style={{ gap: spacing[3] }}>
             {/* Los NOMBRES FIRMADOS de las dos naturalezas viven en UNA
                 sola key cada uno y se leen desde donde estén: son
@@ -493,6 +517,7 @@ export default function Negocio() {
               ))}
             </View>
           </View>
+          )}
 
           {/* ── ② «Tu tienda» — LA OTRA NATURALEZA ────────────────────────
               `MODELO_DESPENSA` §3.4: «Venta de productos» NO es un mundo
@@ -500,45 +525,107 @@ export default function Negocio() {
               adentro de la grilla de arriba. *Meterla ahí sería el primer
               paso hacia la tabla compartida que el cinturón prohíbe.*
 
-              🔴 **EL TERCER ESTADO NO SE DIBUJA, Y SE DECLARA:** la orden
-              nombró dos casos —activa → la entrada · «sin naturaleza» → el
-              chip «lo estamos revisando»— y el chip solo tiene sentido si
-              alguien PIDIÓ. Con `ninguna` (nunca pidió) esta sección **no
-              se monta**: ofrecer acá el «Quiero vender productos» sería
-              un SEGUNDO productor de `solicitar_naturaleza_comercial`
-              —hoy vive en el paso ② del wizard— y esta casa ya firmó que
-              *no es normal tenerlo en dos lugares* (S84-C34).
-              ⇒ Va al reporte como decisión del founder, no como hueco
-              tapado en silencio. */}
-          {tienda === 'activa' && (
+              ⭐ **LA SECCIÓN SIEMPRE SE MONTA** (firma del founder, 14-ago),
+              también para quien nunca pidió. Yo la había dejado sin dibujar
+              en ese caso por miedo a duplicar el productor de
+              `solicitar_naturaleza_comercial` — **el freno era correcto y
+              la firma lo respeta**: la puerta de crecimiento **ENRUTA** al
+              paso ② del wizard, donde el productor ya vive. *Se ofrece,
+              pero no se activa hasta que se aprueba: el foso de §4.2 queda
+              intacto (el vendedor propone, e-PetPlace publica).*
+
+              ⚠️ `null` es el ÚNICO caso sin sección, y no es el tercer
+              estado: significa «no se pudo leer» o «esta persona no tiene
+              cuenta comercial». Dibujar la puerta ahí sería ofrecerle una
+              tienda a quien no tiene negocio, o afirmar un estado que no
+              medimos (Ley 13 / L-197). */}
+          {tienda !== null && (
             <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-              <View style={ESTILO_GRILLA}>
-                <View style={ESTILO_CELDA}>
-                  <Baldosa
-                    glifo="despensa"
-                    capa="consumo"
-                    titulo={t('ventas.entradaTitulo')}
-                    orden={0}
-                    onPress={() => setPuertaActiva(true)}
-                  />
+
+              {/* ⭐ LA TIENDA ACTIVA TIENE **DOS VISTAS** — arquitectura
+                  nueva, literal del founder: *«agregar los productos de mi
+                  negocio»* (el inventario del local, que es SUYO y no sale
+                  a ningún lado) y *«vender productos a través de
+                  e-PetPlace»* (el catálogo y el inventario que ve el
+                  cliente — la despensa que ya existe). **El catálogo los
+                  debe diferenciar: uno es inventario local, el otro es la
+                  vitrina.** Son dos baldosas porque son dos elecciones, no
+                  dos vistas de la misma cosa. */}
+              {tienda === 'activa' && (
+                <View style={ESTILO_GRILLA}>
+                  <View style={ESTILO_CELDA}>
+                    <Baldosa
+                      glifo="despensa"
+                      capa="consumo"
+                      titulo={t('negocio.tiendaVitrina')}
+                      detalle={t('negocio.tiendaVitrinaDetalle')}
+                      orden={0}
+                      onPress={() => setPuertaActiva(true)}
+                    />
+                  </View>
+                  <View style={ESTILO_CELDA}>
+                    {/* 🔴 EXCEPCIÓN DELIBERADA A LA LEY 23 («la puerta no
+                        ofrece lo que va a rechazar»), **firmada por el
+                        founder y no un default**: *«la vista local es V2,
+                        pero se muestra — si alguien lo marca, modal
+                        informando que saldrá en V2»*.
+                        Acá la puerta **anuncia lo que viene** en vez de
+                        callarlo. La razón que la sostiene: el inventario
+                        local es la mitad que el vendedor ESPERA encontrar,
+                        y no verla se lee como que el producto no la piensa.
+                        *Una promesa fechada informa; una ausencia, no.*
+                        ⚠️ El glifo `negocio` es STAND-IN declarado — no hay
+                        glifo de inventario en el registry, y pedir uno se
+                        firma (L-175), no se improvisa. */}
+                    <Baldosa
+                      glifo="negocio"
+                      capa="consumo"
+                      titulo={t('negocio.tiendaLocal')}
+                      detalle={t('negocio.tiendaLocalDetalle')}
+                      orden={1}
+                      onPress={() => setHojaV2(true)}
+                    />
+                  </View>
                 </View>
-              </View>
-            </View>
-          )}
-          {tienda === 'solicitada' && (
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-              {/* NO es baldosa: no hay nada que elegir. Es información, y
-                  la información se LEE (Acto II). La voz se reusa del
-                  wizard —misma frase, un solo lugar— porque lo que se
-                  copia diverge. */}
-              <Tarjeta elevacion="reposo">
-                <View style={{ gap: spacing[2] }}>
-                  <Insignia estado="info" etiqueta={t('alta.estado.enRevision')} tamaño="sm" />
-                  <Texto variante="apoyo">{t('alta.paso2.tiendaPropuesta')}</Texto>
-                </View>
-              </Tarjeta>
+              )}
+
+              {/* PEDIDA Y NO APROBADA: no hay nada que elegir, así que NO
+                  es baldosa — es información, y la información se LEE
+                  (Acto II). La voz se reusa del wizard: misma frase, un
+                  solo lugar, porque lo que se copia diverge. */}
+              {tienda === 'solicitada' && (
+                <Tarjeta elevacion="reposo">
+                  <View style={{ gap: spacing[2] }}>
+                    <Insignia estado="info" etiqueta={t('alta.estado.enRevision')} tamaño="sm" />
+                    <Texto variante="apoyo">{t('alta.paso2.tiendaPropuesta')}</Texto>
+                  </View>
+                </Tarjeta>
+              )}
+
+              {/* LA PUERTA DE CRECIMIENTO. El botón **navega**, no pide:
+                  el único productor de la solicitud sigue siendo el paso ②
+                  del wizard. La voz y el CTA se reusan de allá por lo
+                  mismo — si el día de mañana cambia la promesa, cambia en
+                  un lugar. */}
+              {tienda === 'ninguna' && (
+                <Tarjeta elevacion="reposo">
+                  <View style={{ gap: spacing[4] }}>
+                    <Texto variante="cuerpo">{t('alta.paso2.tiendaVoz')}</Texto>
+                    <Boton
+                      variante="primario"
+                      bloque
+                      etiqueta={t('alta.paso2.tiendaCta')}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/verificacion/alta',
+                          params: { paso: 'oferta' },
+                        })
+                      }
+                    />
+                  </View>
+                </Tarjeta>
+              )}
             </View>
           )}
 
@@ -647,6 +734,24 @@ export default function Negocio() {
               pantalla, y el HOY del no-gestor). */}
         </View>
       </ScrollView>
+
+      {/* ⭐ S98-C · LA HOJA DE LA EXCEPCIÓN FIRMADA (①(iii) del founder).
+          Va FUERA del ScrollView: una Hoja no es contenido de la pantalla
+          — se levanta sobre ella y la deja debajo, a la vista.
+          **Dice QUÉ llega y CUÁNDO**, y no promete una fecha que no
+          tenemos: «la próxima versión» es lo que sabemos. *Un «muy pronto»
+          sin sujeto es humo; con sujeto es una hoja de ruta.* */}
+      <Hoja visible={hojaV2} onCerrar={() => setHojaV2(false)} titulo={t('negocio.tiendaV2Titulo')}>
+        <View style={{ gap: spacing[4] }}>
+          <Texto variante="cuerpo">{t('negocio.tiendaV2Voz')}</Texto>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('negocio.tiendaV2Cerrar')}
+            onPress={() => setHojaV2(false)}
+          />
+        </View>
+      </Hoja>
 
       {/* el barrido del cruce — SOLO color; los permisos son del servidor.
           `onFin` llega SIEMPRE (también en memorial/reduce-motion): el

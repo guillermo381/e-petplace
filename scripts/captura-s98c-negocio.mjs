@@ -79,6 +79,33 @@ if (oscuro.dentro) {
 }
 await oscuro.ctx.close();
 
+/* 🔴 EL DISCRIMINADOR DE LA PUERTA DE CRECIMIENTO (firma ①(i)).
+   La foto sola no prueba nada: un botón que no lleva a ningún lado se ve
+   igual que uno que lleva. Acá se TOCA y se verifica que aterriza en el
+   paso ② del wizard —donde vive el único productor de la solicitud— y no
+   en el ① ni en la nada. */
+const puerta = await abrir('light');
+if (puerta.dentro) {
+  const cta = puerta.page.getByText('Quiero vender productos', { exact: false }).first();
+  if ((await cta.count()) > 0) {
+    await cta.click();
+    await puerta.page.waitForTimeout(6000);
+    await puerta.page.screenshot({ path: `${DIR}03-puerta-crecimiento${SUFIJO}.png`, fullPage: true });
+    // El paso ② se reconoce por su bajada, que ningún otro paso repite.
+    const enPaso2 =
+      (await puerta.page.getByText('Prende lo que ya haces hoy', { exact: false }).count()) > 0;
+    console.log(
+      enPaso2
+        ? '✓ la puerta de crecimiento aterriza en el PASO ② (donde vive la solicitud)'
+        : '✗ la puerta NO llegó al paso ② — el deep link no rige',
+    );
+    if (!enPaso2) process.exitCode = 1;
+  } else {
+    console.log('· sin puerta de crecimiento en esta cuenta (tienda ≠ «ninguna»)');
+  }
+}
+await puerta.ctx.close();
+
 await browser.close();
 if (errores.length > 0) {
   console.error(`✗ ${errores.length} error(es) JS:`, errores);

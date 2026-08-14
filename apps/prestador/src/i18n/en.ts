@@ -27,10 +27,20 @@ export const prestadorEn = {
     // S98-C · Espejo de es.ts.
     bandaCitas: 'Appointments today',
     // S98-C · Espejo de es.ts — los dos rótulos del dictado ② (D-808).
-    // S98-C · Espejo de es.ts — el subtítulo de la baldosa.
-    sinAgendaHoy: 'Nothing booked today',
-    unaCitaHoy: '1 appointment today',
-    nCitasHoy: '{{n}} appointments today',
+    // S98-C · Espejo de es.ts — el subtítulo CON APELLIDO. Mismo criterio
+    // de ancho: en inglés las formas son más cortas y las cuatro entran.
+    datoPaseoCero: 'No walks today',
+    datoPaseoUno: '1 walk today',
+    datoPaseoN: '{{n}} walks today',
+    datoGroomingCero: 'No baths today',
+    datoGroomingUno: '1 bath today',
+    datoGroomingN: '{{n}} baths today',
+    datoVeterinariaCero: 'No vet visits today',
+    datoVeterinariaUno: '1 vet visit today',
+    datoVeterinariaN: '{{n}} vet visits today',
+    datoAdiestramientoCero: 'No sessions today',
+    datoAdiestramientoUno: '1 session today',
+    datoAdiestramientoN: '{{n}} sessions today',
     bandaPrestados: 'Completed today',
     bandaAgendado: 'Booked today',
     bandaCobrado: 'Collected today',
@@ -884,6 +894,15 @@ export const prestadorEn = {
     baldosaUno: '1 service',
     baldosaN: '{{n}} services',
     baldosaNoCargo: "Couldn't load",
+    // S98-C · Espejo de es.ts — las dos vistas de «Tu tienda».
+    tiendaVitrina: 'Sell on e-PetPlace',
+    tiendaVitrinaDetalle: 'What clients see',
+    tiendaLocal: 'Your shop inventory',
+    tiendaLocalDetalle: 'Coming in the next version',
+    tiendaV2Titulo: 'Not yet, but coming',
+    tiendaV2Voz:
+      "Your shop inventory —what's on your shelves, without going to the storefront— is coming in the next version. For now you can sell on e-PetPlace.",
+    tiendaV2Cerrar: 'Got it',
     enPreparacion: 'In preparation',
     // ☠️ S98-C · Espejo de es.ts: murieron las mismas ocho keys.
     // S58-B B1a · Espejo de es.ts
