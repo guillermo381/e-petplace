@@ -289,9 +289,30 @@ huella de siempre, así que la ficha no cambia para quien no la pase»*.
 
 ⇒ **El mostrador es, literalmente, «quien no la pasa».** Eso es lo que el
 founder vio y llamó *«no trae los ajustes»*: **la misma pieza, alimentada
-distinto.** Y de yapa cae al relleno de catálogo (`SelectorEspecie.tsx:95`,
-`rellenoCatalogo` se enciende justo cuando `fotoUrl === undefined`), que es
-el fondo tonal que hace que se vea *más viejo* además de sin cara.
+distinto.**
+
+> 🔴 **CORRECCIÓN A ESTE MISMO PÁRRAFO (aporte de B, y se deja escrita
+> porque protege una firma).** Acá decía que el relleno de catálogo hace
+> que el selector del mostrador *«se vea más viejo»*, y que **«el mismo
+> componente tiene dos épocas adentro»**. **Es falso y además es
+> peligroso.**
+>
+> `SelectorEspecie.tsx:95` apaga el relleno cuando hay cara **por gate del
+> founder de S91**, con su porqué escrito arriba: *«el tinte de catálogo
+> (7bis) existe para que una ficha SIN contenido no se lea como un hueco.
+> Con la foto adentro… el verde pasa a ser un velo sobre la imagen —
+> exactamente lo que el founder vio y llamó bug. **Sin foto, la regla de
+> 7bis sigue intacta.**»*
+>
+> ⇒ **La pieza no tiene dos épocas: tiene una regla con dos ramas, y las
+> dos están firmadas.** Sin `fotoUrl` **debe** rellenar. *La pieza está
+> haciendo lo correcto para el caso que recibe: le llega una ficha sin
+> contenido y la pinta como ficha sin contenido.*
+>
+> **Se corrige acá y no se borra** porque la frase original es del tipo que
+> alguien lee en seis meses y va a «arreglar» el relleno — rompiendo 7bis y
+> dos gates. *Una prosa mía que invita a curar algo firmado es el mismo
+> defecto que este censo vino a documentar, escrito por mí.*
 
 ### 7.3 · ⚠️ EL ASCENSO NO ES DE B — ES DE A, Y YA ESTÁ PEDIDO
 
