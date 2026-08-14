@@ -805,6 +805,7 @@ export const prestadorEs = {
     eliminarVoz:
       'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con tus citas ya pagadas, tus planes vivos y tu saldo por liquidar — un negocio con compromisos no se borra a la ligera.',
     entendido: 'Entendido',
+    enConstruccion: 'Este paso se monta sobre lo que ya existe: en cuanto entre su composición, va a aparecer acá.',
     // S60-B2 — la sección de la ENTIDAD en Tu perfil (P17 v1.1, visto
     // del arquitecto) · LOTE S60, GATE PENDIENTE. Reuso declarado:
     // ofertaPaseo.visibleTitulo/noVisibleTitulo (la voz 7.13 de las
@@ -3075,6 +3076,141 @@ export const prestadorEs = {
     },
     facturacion: {
       titulo: 'Tu facturación',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // EL WIZARD DE ALTA (S97-C) · LOTE S97, GATE PENDIENTE
+  //
+  // LA LEY DEL CONTADOR (S91, rige por §8.6bis): narrativa MÁS UN PASO,
+  // jamás checklist, y el número tiene que poder llegar a CERO. Lo que
+  // depende de e-PetPlace NO entra al contador — por eso `esperaNuestra`
+  // es una voz APARTE: él llega a cero, después esperamos nosotros.
+  // ═══════════════════════════════════════════════════════════════════════
+  alta: {
+    encabezado: 'Tu negocio',
+    contadorUno: 'Te falta 1 paso.',
+    contadorVarios: 'Te faltan {{n}} pasos.',
+    contadorCero: 'Ya está todo lo tuyo.',
+    esperaNuestra: 'Ahora nos toca a nosotros: estamos revisando lo que subiste.',
+    saltar: 'Saltar por ahora',
+    continuar: 'Continuar',
+    terminar: 'Abrir mi casa',
+    volver: 'Atrás',
+    errorTitulo: 'No pudimos cargar esto',
+    errorVoz: 'Puede ser la conexión. Probá de nuevo.',
+    reintentar: 'Reintentar',
+    entendido: 'Entendido',
+    enConstruccion: 'Este paso se monta sobre lo que ya existe: en cuanto entre su composición, va a aparecer acá.',
+    // Los nombres de oficio del paso ②. Van acá y no en otro bloque para
+    // que la key sea LITERAL en el consumidor (jamás armada por
+    // concatenación: el diccionario tipado rompe con una key inexistente
+    // y un template lo apagaría con un cast).
+    oficioVeterinaria: 'Veterinaria',
+    oficioGrooming: 'Estética',
+    oficioPaseo: 'Paseo',
+    oficioAdiestramiento: 'Adiestramiento',
+
+    paso1: {
+      titulo: 'Tu negocio',
+      bajada: 'El nombre con el que las familias te van a encontrar.',
+      nombre: 'Nombre del negocio',
+      logoTitulo: 'Tu logo',
+      logoAgregar: 'Agregar logo',
+      logoCambiar: 'Cambiar',
+      logoQuitar: 'Quitar',
+      logoVacio: 'Sin logo usamos tus iniciales.',
+      guardar: 'Guardar el nombre',
+      guardado: 'Nombre guardado.',
+    },
+
+    paso2: {
+      titulo: 'Qué ofreces',
+      bajada: 'Prende lo que ya haces hoy. El detalle fino lo configuras después.',
+      servicios: 'Tus servicios',
+      serviciosVacioTitulo: 'Todavía no cargaste servicios',
+      serviciosVacioVoz: 'Cuando cargues tu oferta vas a poder decir dónde atiendes cada servicio.',
+      serviciosVacioCta: 'Ir a mi oferta',
+      enMiLocal: 'Atiendo en mi local',
+      aDomicilio: 'Voy a domicilio',
+      // 🔴 LA LEY DE LA PUERTA APLICADA AL REVÉS (firmada S97): lo
+      // imposible NI SE OFRECE. El motor tiene
+      // `chk_ps_alguna_modalidad` — un servicio sin ninguna modalidad no
+      // existe. El último encendido queda apagado y DICE POR QUÉ.
+      ultimaModalidad: 'Un servicio necesita al menos un lugar donde lo atiendes.',
+      tienda: 'Tu tienda',
+      tiendaVoz: 'Vender alimento, antiparasitarios y suplementos a las familias que ya te eligen.',
+      tiendaCta: 'Quiero vender productos',
+      tiendaPropuesta: 'Nos pediste vender productos. Lo estamos revisando.',
+      configuracionTitulo: 'El detalle de tu oferta',
+      configuracionDetalle: 'Precios, horarios y cobertura',
+    },
+
+    paso3: {
+      titulo: 'Tus documentos',
+      bajada: 'Los necesitamos para verificar que tu negocio es real. Los revisamos nosotros.',
+      subir: 'Subir',
+      reemplazar: 'Reemplazar',
+      subido: 'Subido',
+      enRevision: 'En revisión',
+      aprobado: 'Aprobado',
+      rechazado: 'Hay que subirlo de nuevo',
+      vacioTitulo: 'Todavía no subiste documentos',
+      vacioVoz: 'Sube el primero y nosotros nos encargamos del resto.',
+      tipoCedula: 'Cédula',
+      tipoRuc: 'RUC',
+      tipoPermiso: 'Permiso de funcionamiento',
+      elegirArchivo: 'Elegir archivo',
+      subiendo: 'Subiendo…',
+      subidoExito: 'Documento subido. Lo revisamos nosotros.',
+      reintentar: 'Reintentar',
+      errorLectura: 'No pudimos leer ese archivo. Probá con otro.',
+      errorRed: 'Revisá tu conexión.',
+      permisoDenegado: 'Necesitamos permiso para abrir la cámara o tus fotos.',
+      heredadosTitulo: 'Ya los tenemos',
+      heredadosVoz: 'Estos los entregaste con tu perfil profesional. No hace falta subirlos de nuevo.',
+    },
+
+    paso4: {
+      titulo: 'Tu equipo',
+      bajada: 'Quién trabaja contigo. Hoy puedes sumar a quien reparte.',
+      deTuEquipo: 'De tu equipo',
+      deTuEquipoVoz: 'Ya trabaja contigo: heredamos quién es. Solo falta su documento.',
+      nuevo: 'Alguien nuevo',
+      nuevoVoz: 'Todavía no está en tu equipo.',
+      repartidor: 'Repartidor',
+      vacioTitulo: 'Todavía trabajas solo',
+      vacioVoz: 'Cuando sumes a alguien va a aparecer acá.',
+      sumarCta: 'Sumar a alguien',
+      nombre: 'Nombre',
+      documento: 'Documento',
+      telefono: 'Teléfono',
+      guardar: 'Sumar al equipo',
+      guardado: 'Listo, ya es parte de tu equipo.',
+      equipoVacio: 'Todavía no hay nadie más en tu equipo.',
+      sinCuenta: 'Alguien de tu equipo todavía no aceptó la invitación — vas a poder elegirlo cuando entre.',
+      faltaDocumento: 'Nos falta su documento para que pueda repartir.',
+      recepcionNoAplica:
+        'El rol de recepción aparece cuando tengas algún servicio que atiendas en tu local.',
+    },
+
+    // Las líneas del salteo — nombran EL BENEFICIO y EL LUGAR, jamás
+    // regañan (la idea, no el literal: el founder firmó el sentido).
+    salteo: {
+      paso2:
+        'La configuración de tus servicios es lo que nos deja traerte los clientes que tu negocio necesita — la encuentras cuando quieras en Cuenta › Tu negocio.',
+      paso3:
+        'Sin tus documentos no podemos verificarte, y sin verificar no apareces frente a las familias — los subes cuando quieras desde Cuenta › Tu negocio.',
+      paso4:
+        'Sumar a tu equipo es lo que te deja repartir el trabajo del día — lo tienes en Cuenta › Tu equipo.',
+    },
+
+    estado: {
+      enRevision: 'En revisión',
+      activa: 'Activa',
+      modalTitulo: '¿Qué significa «en revisión»?',
+      modalVoz:
+        'Miramos cada negocio antes de mostrarlo a las familias. Es lo que hace que estar acá signifique algo. Te avisamos apenas termine.',
     },
   },
 } as const;
