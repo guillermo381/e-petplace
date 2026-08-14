@@ -368,18 +368,53 @@ hasta el consultorio.
 
 ---
 
-## 7bis. EL VERBO ES DE UN ROL, NO DE UN LOCAL — ✅ **FIRMADA (founder, 14 Ago 2026)**
+## 7bis. EL VERBO ES DE UN ROL, NO DE UN LOCAL — 🔴 **SUPERADA EL MISMO DÍA por D-818**
 
-> **Literal del founder:** *«(a) — el verbo es la herramienta de un rol, no de
-> un local.»*
+> ### ⚠️ LEER ESTO ANTES QUE EL RESTO DE §7bis
+>
+> **Esta sección describe un botón que YA NO EXISTE.** El mismo 14-ago-2026,
+> **D-818 fue firmada por el founder: el verbo «Llegó» MUERE PARA TODOS** —
+> no solo para quien no es recepción. La composición condicional que esta
+> sección describe **se retiró entera** (merge `b10dd4ef`), con su
+> interruptor y su función de borde.
+>
+> **Se enmienda ACÁ, en su lugar, y no solo en una ficha.** *Dos letras
+> firmadas que se contradicen son peores que una equivocada: cualquiera cita
+> la que le conviene y está «en regla».* Precedente cobrado tres veces en
+> esta casa — el magenta (S83), la plata (S83) y la plata otra vez (S88).
+>
+> **🔴 Y lo que hace URGENTE esta marca, más que la contradicción: el «Estado:
+> ✅ ENCENDIDO» de más abajo nombra `VERBO_LLEGADA_SOLO_RECEPCION` y
+> `hayRecepcionActiva`, y los dos identificadores FUERON BORRADOS.** Una letra
+> firmada que apunta a código inexistente no se lee como vieja: se lee como un
+> bug, y el lector honesto lo «arregla» reponiendo lo que la firma nueva quitó.
+>
+> **QUÉ SOBREVIVE, y es la razón de conservar la sección entera en vez de
+> borrarla:**
+> - **el MOTOR, indispensable** — `trg_cita_llegada_al_atender` sigue vivo, y
+>   **matar el botón fue posible PORQUE el motor ya lo cubría**. Sin él, D-818
+>   habría dejado `llegada_en` sin un solo escritor por el camino real y las
+>   llegadas dejarían de existir **en silencio**;
+> - **el matiz superficie-vs-puerta** (D-807): `registrar_llegada` sigue
+>   gateada por **MEMBRESÍA**. Ninguna de las dos firmas tocó la puerta;
+> - **el razonamiento del rol-vs-organigrama**, para el día que esto se
+>   reabra.
+>
+> *Lo que cambió no fue el análisis: fue cuál de dos firmas del mismo día
+> rige.*
 
-**Qué decide.** El verbo **«Llegó»** —el botón que REGISTRA la llegada— existe
-**solo en la pantalla de quien mira como recepción**. El gestor de una clínica
-CON recepción **no lo ve en su HOY**: él atiende, y **atender es la
-constancia**.
+> **Literal del founder (el de esta sección, HOY SUPERADO por D-818):** *«(a)
+> — el verbo es la herramienta de un rol, no de un local.»*
 
-**Y con ella queda firmada la regla que la contiene:** *la llegada se registra
-al atender; el verbo explícito solo se compone con recepción activa.*
+~~**Qué decide.** El verbo **«Llegó»** —el botón que REGISTRA la llegada—
+existe **solo en la pantalla de quien mira como recepción**. El gestor de una
+clínica CON recepción **no lo ve en su HOY**: él atiende, y **atender es la
+constancia**.~~ ⇒ **D-818: no lo ve NADIE; el botón no existe.**
+
+**Y de la regla que la contenía, la mitad que SIGUE RIGIENDO:** *la llegada se
+registra al atender.* ~~*El verbo explícito solo se compone con recepción
+activa.*~~ — la segunda mitad murió con el verbo; **la primera es la que hoy
+sostiene todo el mecanismo**, y vive en el motor.
 
 ### Qué NO decide, y hay que leerlo o se rompe algo
 
@@ -420,20 +455,33 @@ brazos: la hora del mostrador **no se pisa** — la de la puerta gana. **Sin
 backfill a propósito:** estampar `now()` sobre citas ya atendidas sería una
 llegada inventada (L-139 en su forma más cara); rige hacia adelante.
 
-**Estado: ✅ ENCENDIDO.** El borde vive en una sola función
-(`hayRecepcionActiva`) y el interruptor en `VERBO_LLEGADA_SOLO_RECEPCION`.
-Verificado por camino real en sus dos estados: **el verbo desaparece para el
-gestor**, **el chip de estado sobrevive**, y la fila queda **limpia, sin
-separador huérfano** — cae al chip genérico de estado, que ya era su
-comportamiento cuando nadie había llegado.
+~~**Estado: ✅ ENCENDIDO.** El borde vive en una sola función
+(`hayRecepcionActiva`) y el interruptor en `VERBO_LLEGADA_SOLO_RECEPCION`.~~
+**☠️ RETIRADO POR D-818 (merge `b10dd4ef`): los dos identificadores YA NO
+EXISTEN.** No los busques ni los repongas — su ausencia es la firma, no un
+olvido.
 
-### 🔴 MOTOR Y BUNDLE VIAJAN JUNTOS — la costura, en los dos lados
+**Lo que de esa verificación SIGUE SIENDO VERDAD y por eso no se tacha:** se
+probó por camino real que **el chip de estado sobrevive** a la remoción del
+verbo y que la fila queda **limpia, sin separador huérfano** — cae al chip
+genérico de estado, que ya era su comportamiento cuando nadie había llegado.
+*Esa medición es la que hace que quitar el botón —para uno o para todos— no
+deje un hueco en la fila.*
 
-Con el verbo retirado, **revertir la migración deja `llegada_en` sin un solo
-escritor por el camino real y las llegadas dejan de existir EN SILENCIO.**
-*La reversa de cualquiera de los dos lados se declara en el otro* — y por eso
-está escrito acá, en la reversa de la migración y en el comentario del HOY:
-**ninguno de los dos se revierte solo.**
+### 🔴 EL MOTOR ES AHORA LA ÚNICA FUENTE — y esto SUBE de gravedad con D-818
+
+Con el verbo retirado **para todos**, **revertir la migración
+`20260814200000` deja `llegada_en` sin un solo escritor por el camino real, y
+las llegadas dejan de existir EN SILENCIO.**
+
+**⚠️ Esto era una costura de dos lados y D-818 lo volvió un punto único.**
+Mientras el botón existía —aunque fuera solo para recepción— había un camino
+manual de respaldo. **Ya no lo hay:** `trg_cita_llegada_al_atender` es lo
+único que estampa la llegada por el camino real.
+
+⇒ *La reversa se declara en los dos lados igual* (migración y letra), pero el
+que hay que cuidar es uno solo: **el trigger no se revierte sin devolver
+antes algún escritor.**
 
 ---
 
