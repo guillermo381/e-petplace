@@ -29,9 +29,13 @@
 **Lector** `listarFamiliasVendedor(cuentaComercialId)` →
 `{ codigo: string; nombre: string; activa: boolean }[]`
 — las familias **activables por el vendedor**, del catálogo canónico.
-**Cuáles son activables lo dice el catálogo/la carga, jamás la pantalla**
-(la letra nombra alimento · antiparasitarios y antipulgas · suplementos,
-pero C no hardcodea ni los códigos ni los nombres: los pone la carga).
+**Cuáles son activables lo dice el catálogo/la carga, jamás la pantalla.**
+
+> ✅ **FIRMA DE MESA (13-ago, 3ª vuelta): son CINCO, no tres** —
+> `dieta_prescripcion` es familia propia y `accesorio` entra al esquema
+> aunque no tenga carga v1. La pantalla de C monta lo que el lector
+> devuelva (cero constantes de código ni de conteo): si el lector trae
+> cinco, pinta cinco.
 
 **Escritor** `activarFamiliaVendedor(cuentaComercialId, familiaCodigo, activa)`
 → ok / rebote tipado (familia inexistente · no activable · sin rol).
@@ -92,13 +96,16 @@ alta funcionando antes de su reemplazo deja al vendedor sin repartidores.
    (ensanche de `obtenerEquipoNegocio` o lector propio de ventas — A
    decide).
 
-> 🔴 **LA PREGUNTA QUE C NO PUEDE RESPONDER Y BLOQUEA EL DISEÑO DEL
+> ~~🔴 **LA PREGUNTA QUE C NO PUEDE RESPONDER Y BLOQUEA EL DISEÑO DEL
 > CUARTO ⑤: ¿de qué equipo salen los chips para el VENDEDOR PURO sin
-> prestador?** `obtenerEquipoNegocio` es del prestador. `nuevo_test2` es
-> empleado de Satori Y dueño de su cuenta seller: ¿su equipo es el de
-> Satori (ajeno) o su cuenta seller funda equipo propio? «Un equipo, un
-> lugar» necesita decir CUÁL lugar cuando hay dos candidatos. Si es
-> letra y no esquema, que suba a la mesa.
+> prestador?**~~ ✅ **RESPONDIDA POR FIRMA DE MESA (13-ago, 3ª vuelta):
+> la configuración cuelga de la CUENTA COMERCIAL, no del prestador. Un
+> vendedor puro NO lleva fila de prestador — fabricarle una vacía
+> contamina el motor de servicios.** Consecuencia para el esquema de A-5:
+> la costura repartidor↔equipo ancla en `cuenta_comercial_id` (como ya lo
+> hace `obtenerEquipoNegocio`, que recibe la cuenta), y el equipo del
+> vendedor puro es el de SU cuenta — jamás una fila fantasma en
+> `prestadores`.
 
 ## A-6 · EL CONTADOR (sin pedido — se declara el cómputo)
 

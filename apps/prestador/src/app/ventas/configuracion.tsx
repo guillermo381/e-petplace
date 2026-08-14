@@ -417,13 +417,15 @@ export default function ConfiguracionVentas() {
               ausencia (cabecera). Los contratos exactos viven en el pedido
               a A del 13-ago; al llegar el esquema entran ACÁ, en este
               orden, antes del ④.
-              ⚠️ S97: la CARGA del catálogo ya corrió (442 productos) y los
-              códigos de familia están medidos por A —`alimento` ·
-              `antiparasitario` · `suplemento` (+ `dieta_prescripcion`
-              activa; ver 2026-08-13-s97a-esquema-catalogo-maestro.md)—.
-              Los nombres que esta pantalla pinte saldrán del LECTOR, jamás
-              de estas constantes: lo que falta sigue siendo la ACTIVACIÓN
-              por vendedor (A-1 del pedido), no el catálogo. */}
+              ⚠️ S97 + FIRMA DE MESA (13-ago, 3ª vuelta): son CINCO
+              familias, no tres — `dieta_prescripcion` firmada como familia
+              propia y `accesorio` en el esquema aunque sin carga v1. Este
+              punto de inserción NO asume cantidad: la sección se monta
+              sobre LO QUE EL LECTOR DEVUELVA (map, cero constantes de
+              código ni de conteo) — cinco hoy, N mañana, sin cambio de
+              código acá. La carga ya corrió (442 productos, códigos
+              medidos en 2026-08-13-s97a-esquema-catalogo-maestro.md); lo
+              que falta sigue siendo la ACTIVACIÓN por vendedor (A-1). */}
 
           {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
               atención» espera esquema: pedido A-4) ── */}
