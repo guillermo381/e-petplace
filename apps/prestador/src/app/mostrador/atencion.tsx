@@ -80,7 +80,26 @@ export default function AtencionMostrador() {
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
-  const { mascotaId = '', nombre = '' } = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
+  const { mascotaId = '', nombre = '', oficio = '' } = useLocalSearchParams<{
+    mascotaId?: string;
+    nombre?: string;
+    /** ⭐ S98-C · POR QUÉ PUERTA ENTRÓ (la baldosa de `ATENDER`). Vacío =
+     *  entró por un camino que no lo dice, y entonces esta pantalla se
+     *  comporta como siempre. */
+    oficio?: string;
+  }>();
+  /* 🔴 S98-C · EL DEFECTO QUE ESTE PARÁMETRO CURA, y no es cosmético:
+     el menú de esta pantalla es **solo de veterinaria** (lo dice su propia
+     carga: los cuatro lectores entran, pero solo el mundo vet arma
+     `servicios`). Para un negocio SIN vet eso caía en el vacío
+     `sinServicios`, **cuyo botón lleva al taller de VETERINARIA** — o sea
+     que a un groomer que venía a registrar una atención de estética el
+     producto le ofrecía activar servicios de un oficio que no ejerce.
+     *Un camino honesto que termina en la puerta equivocada es peor que un
+     camino que no existe: el primero se recorre entero antes de fallar.*
+     Con la puerta declarada, el vacío DICE la verdad de ese oficio y no
+     ofrece nada que no corresponda (L-197 + Ley 23). */
+  const oficioNoVet = oficio !== '' && oficio !== 'veterinaria';
 
   // S73-B (M2 de A sobre el boceto S72-B §2): LA MÁQUINA DE ESTADOS de la
   // carga — espejo de coordinar/[citaId] (copiar-al-vecino). `null` ya no
@@ -511,19 +530,30 @@ export default function AtencionMostrador() {
               }
             />
           ) : servicios !== null && servicios.length === 0 ? (
-            // El vacío termina en un CAMINO (17.5, M2 de A): el taller es
-            // donde se prenden los servicios.
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('atencionMostrador.sinServicios')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('atencionMostrador.sinServiciosCta')}
-                  onPress={() => router.push({ pathname: '/veterinaria/taller', params: { seccion: 'servicios' } })}
-                />
-              }
-            />
+            oficioNoVet ? (
+              /* El oficio ENTRÓ POR SU PUERTA y todavía no tiene menú acá:
+                 la limitación es NUESTRA y se dice como tal — sin ofrecer
+                 el taller de otro oficio, que era la puerta equivocada. */
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('atencionMostrador.oficioSinMenu')}
+                descripcion={t('atencionMostrador.oficioSinMenuDetalle')}
+              />
+            ) : (
+              // El vacío termina en un CAMINO (17.5, M2 de A): el taller es
+              // donde se prenden los servicios.
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('atencionMostrador.sinServicios')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('atencionMostrador.sinServiciosCta')}
+                    onPress={() => router.push({ pathname: '/veterinaria/taller', params: { seccion: 'servicios' } })}
+                  />
+                }
+              />
+            )
           ) : (
             <>
               {/* ⭐ ① LOS DOS VERBOS — arriba de todo porque cambian lo que

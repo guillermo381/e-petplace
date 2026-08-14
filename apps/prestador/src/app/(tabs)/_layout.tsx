@@ -34,6 +34,7 @@ import {
   cerrarSesion,
   empleadoTieneRol,
   obtenerInvitacionPendiente,
+  obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
   obtenerNegocioEmpleadoActivo,
   obtenerSesion,
@@ -45,6 +46,7 @@ import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { useTraduccion } from '@/i18n';
 import { contextoVentas } from '@/lib/cuenta-ventas';
+import { hayCapacidad, resolverCapacidadAtender } from '@/lib/capacidad-atender';
 
 /* ☠️ S86-B · `@/components/iconos-tabs` MURIÓ — LA BARRA CONSUME EL
  * REGISTRY (D-645 / D-546, el pedido que su propia cabecera dejaba
@@ -65,7 +67,17 @@ type EstadoSesionRaiz =
   // puerta (R1) resuelve por titularidad O VÍNCULO ACTIVO, y D-651 midió
   // CINCO personas activas no-titulares. `esGestor=false` es el camino
   // NORMAL de esta rama, no un caso teórico.
-  | { ok: true; esGestor: boolean; ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor' }
+  // ⭐ S98-C · `montaAtender` — LA QUINTA TAB, compuesta por CAPACIDAD
+  // (`LA_CASA_DEL_PRESTADOR` §2 y §2.1bis, firmas del founder 13-ago).
+  // Es un **Y**: rol (`esMostradorOGestion`, el predicado de §4ter que ya
+  // gobierna la plata del día — NO nace uno nuevo) **Y** capacidad (algún
+  // servicio con `atiende_local`, o la tienda activa).
+  | {
+      ok: true;
+      esGestor: boolean;
+      montaAtender: boolean;
+      ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor';
+    }
   // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
   // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
   // ANTES de las tabs (precedente /invitacion, L-161). El puente
@@ -133,8 +145,53 @@ export default function TabsLayout() {
           if (p.data.estado !== 'activo') return { sala_espera: true };
           // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
           // Falla de lectura = false (Ley 23: ante la duda, se cierra).
-          const rol = await empleadoTieneRol(p.data.id, ['dueño', 'administrador']);
+          //
+          // ⭐ S98-C · LAS TRES PREGUNTAS DE LA BARRA VIAJAN EN UNA OLA.
+          // Antes esto era UNA espera; ahora son tres lecturas y **siguen
+          // siendo una espera**: ninguna depende de otra, así que
+          // encadenarlas habría sumado ~300 ms de red al arranque de cada
+          // foco — el peaje por PETICIÓN que D-738 midió en el prólogo del
+          // HOY (622 ms en cuatro viajes encadenados solo para resolver
+          // quién soy). *No es optimización prematura: es no repetir la
+          // deuda que ya está medida.*
+          //
+          // ⚠️ Y `empleadoTieneRol` NO se reemplaza por `gestiona` de
+          // `obtenerMiPosicionEnPrestador` aunque contesten parecido: son
+          // predicados distintos (`gestiona` incluye admin de plataforma) y
+          // cambiar el gate de NEGOCIO de paso, adentro de una tanda que
+          // vino a agregar una tab, es exactamente cómo se cuela un cambio
+          // de permisos que nadie firmó.
+          const [rol, posicion, capacidad] = await Promise.all([
+            empleadoTieneRol(p.data.id, ['dueño', 'administrador']),
+            obtenerMiPosicionEnPrestador(p.data.id),
+            resolverCapacidadAtender(p.data.id),
+          ]);
           const esGestor = rol.ok ? rol.data : false;
+          /* EL Y — Y SUS DOS MITADES FALLAN DISTINTO, que es la parte
+             pensada y no un detalle:
+
+             · **el ROL cierra** (Ley 23, y el precedente de `esGestor` acá
+               arriba): no saber si alguien puede es no poder afirmar que
+               puede. Un permiso no se concede por un error de red.
+             · **la CAPACIDAD abre.** No saber si el negocio tiene local no
+               es un problema de permisos: es un dato que faltó. Y la
+               portada YA sabe decirlo —tiene su estado de error con
+               reintento—, mientras que una barra sin la tab no dice nada:
+               *el que no la ve no sabe que existe, y no tiene dónde
+               reintentar.*
+
+             ⚠️ **ESTO CAMBIÓ EN ESTA MISMA TANDA, y el porqué importa más
+             que la regla:** la capacidad TAMBIÉN cerraba, y el argumento
+             era que cerrar no dejaba a nadie sin camino porque el HOY
+             conservaba «Registrar atención». **§3.1 se llevó ese botón**
+             (todo lo de atender vive acá), así que el argumento que
+             sostenía el fail-closed desapareció con él — y dejarlo tal
+             cual habría sido conservar una decisión cuya razón ya no
+             existe. *La regla no se movió porque cambió de opinión: se
+             movió porque le sacaron el piso.* */
+          const montaAtender =
+            (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
+            (capacidad.ok ? hayCapacidad(capacidad.data) : true);
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo
@@ -147,11 +204,12 @@ export default function TabsLayout() {
               ceremoniaResueltaPara = s.data.user_id;
               if (ingreso.data.esPrimerIngreso) return { bienvenida_pendiente: true };
             }
-            return { ok: true, esGestor, ceremonia: 'consultada' as const };
+            return { ok: true, esGestor, montaAtender, ceremonia: 'consultada' as const };
           }
           return {
             ok: true,
             esGestor,
+            montaAtender,
             ceremonia: esGestor ? ('resuelta-para-este-usuario' as const) : ('no-gestor' as const),
           };
         }
@@ -196,7 +254,7 @@ export default function TabsLayout() {
         // el log de Metro/logcat — el gate empieza confirmándolo.
         const voz =
           typeof r === 'string' ? r
-            : 'ok' in r ? `ok — gestor=${r.esGestor} · ceremonia=${r.ceremonia}`
+            : 'ok' in r ? `ok — gestor=${r.esGestor} · atender=${r.montaAtender} · ceremonia=${r.ceremonia}`
               : 'vendedor_puro' in r ? 'vendedor puro → /ventas'
               : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
@@ -397,6 +455,27 @@ export default function TabsLayout() {
         <Icono nombre="datos" tinta={color} huella={colorHuella} activa={activa} />
       ),
     },
+    /* ⭐ S98-C · `ATENDER` — LA QUINTA TAB, AL CENTRO (§2, firma del
+       founder). Va acá, entre DATOS y NEGOCIO, y con las cinco barras de
+       la letra el orden cae solo: titular con local `Hoy·Datos·ATENDER·
+       Negocio·Cuenta` (centro exacto) · recepción `Hoy·Datos·ATENDER·
+       Cuenta`.
+       **Destacada por FORMA, no por coordenada** (contrato de B): gana
+       superficie y un paso de tamaño, jamás un acento propio — N5 manda
+       un acento por pantalla y en esta barra ya está tomado por la huella
+       de la tab activa, que es la que dice DÓNDE ESTOY. */
+    ...(sesion.montaAtender
+      ? [
+          {
+            key: 'atender',
+            etiqueta: t('tabs.atender'),
+            destacada: true,
+            icono: ({ color, activa, colorHuella }) => (
+              <Icono nombre="atender" tinta={color} huella={colorHuella} activa={activa} />
+            ),
+          } as BarraTabsItem,
+        ]
+      : []),
     ...(sesion.esGestor
       ? [
           {
@@ -449,6 +528,13 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="mascotas" />
+      {/* S98-C: la pantalla se declara SIEMPRE aunque la barra no la
+          monte — un `Tabs.Screen` condicional deja la ruta inexistente y
+          un `router.push('/atender')` de cualquier pantalla se caería sin
+          decir por qué. Quién la VE lo decide `items`; que EXISTA es del
+          navegador. (Mismo trato que `negocio`, que ya era condicional en
+          la barra y fijo acá desde S75.) */}
+      <Tabs.Screen name="atender" />
       <Tabs.Screen name="negocio" />
       {/* D-402: al salir del tab, su stack vuelve a la raíz — la próxima
           entrada jamás encuentra pegada una pantalla interna. */}

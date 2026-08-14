@@ -17,8 +17,32 @@ export const prestadorEs = {
     // usa. Si algún día parece un resto, no lo es — es esta decisión.
     mascotas: 'Datos',
     negocio: 'Negocio',
+    // ⭐ S98-C — LA QUINTA TAB (`LA_CASA_DEL_PRESTADOR` §1.2, nombre
+    // FIRMADO por el founder el 13-ago). Su key es `atender` y su ruta
+    // también: acá el nombre visible y el archivo coinciden, a diferencia
+    // de `mascotas`/«Datos» — no hay historia que respetar.
+    atender: 'Atender',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE
     cuenta: 'Cuenta',
+  },
+  // ⭐ S98-C · LA PORTADA DE `ATENDER` (Lote 2) · GATE PENDIENTE
+  atender: {
+    titulo: 'Atender',
+    // Los dos rótulos son los NOMBRES FIRMADOS de las naturalezas (§1.2):
+    // posesivos, que es como habla el resto de la app del prestador.
+    tusServicios: 'Tus servicios',
+    tuTienda: 'Tu tienda',
+    oficioVeterinaria: 'Veterinaria',
+    oficioGrooming: 'Estética',
+    oficioPaseo: 'Paseo',
+    oficioAdiestramiento: 'Adiestramiento',
+    ventaTitulo: 'Venta de productos',
+    // N9 — el vacío habla: qué pasa y qué hacer.
+    vacioTitulo: 'Todavía no hay por dónde entrar',
+    vacioDetalle:
+      'Ningún servicio tuyo está marcado como «atiendo en mi local» y tu tienda no está activa. Prende la atención en local desde tu oferta y esta pantalla se abre sola.',
+    falloTitulo: 'No pudimos cargar tus puertas',
+    reintentar: 'Probar de nuevo',
   },
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
@@ -2251,6 +2275,7 @@ export const prestadorEs = {
     /* ⭐ S86-C · el oficio activo que TODAVÍA no se puede registrar acá.
        Se dice como limitación nuestra, no como «no tenés servicios». */
     oficioSinMenu: 'Por ahora el mostrador solo registra atenciones de veterinaria. Tus otros servicios llegan pronto.',
+    oficioSinMenuDetalle: 'Podés dar de alta la mascota igual: queda asociada al correo de la familia y su atención se registra en cuanto abramos este oficio.',
     verboLabel: '¿Qué vas a hacer?',
     verboAhora: 'Atender ahora',
     verboAgendar: 'Agendar',
@@ -3129,9 +3154,24 @@ export const prestadorEs = {
     continuar: 'Continuar',
     terminar: 'Abrir mi casa',
     volver: 'Atrás',
+    // ⭐ S98-C · D-799 — TRES CAUSAS, TRES VOCES. Acá había UNA sola
+    // («puede ser la conexión») para tres cosas distintas, y el wrapper
+    // SIEMPRE las distinguió: *la pantalla colapsaba lo que el motor ya
+    // sabía separar.* Decirle «revisá tu conexión» a alguien cuya sesión
+    // caducó lo manda a mirar el WiFi por un problema de identidad.
+    // ① la conexión (o el servidor) — la única donde reintentar sirve
     errorTitulo: 'No pudimos cargar esto',
     errorVoz: 'Puede ser la conexión. Probá de nuevo.',
     reintentar: 'Reintentar',
+    // ② la sesión: no es un fallo, es que ya no hay quién pregunte
+    sinSesionTitulo: 'Tu sesión se cerró',
+    sinSesionVoz: 'Entrá de nuevo con tu correo y seguimos donde estabas.',
+    sinSesionAccion: 'Entrar',
+    // ③ sin negocio: ESTADO LEGÍTIMO, jamás un error — el wizard abre la
+    // casa de un negocio que ya existe, y acá todavía no existe.
+    sinNegocioTitulo: 'Todavía no tenés un negocio',
+    sinNegocioVoz: 'Creá el tuyo y volvemos acá para abrirle la casa.',
+    sinNegocioAccion: 'Crear mi negocio',
     entendido: 'Entendido',
     enConstruccion: 'Este paso se monta sobre lo que ya existe: en cuanto entre su composición, va a aparecer acá.',
     // Los nombres de oficio del paso ②. Van acá y no en otro bloque para
@@ -3152,8 +3192,15 @@ export const prestadorEs = {
       logoCambiar: 'Cambiar',
       logoQuitar: 'Quitar',
       logoVacio: 'Sin logo usamos tus iniciales.',
-      guardar: 'Guardar el nombre',
-      guardado: 'Nombre guardado.',
+      // ☠️ S98-C: `guardar` y `guardado` MURIERON con el botón (firma del
+      // 14-ago: un paso, un botón). El «guardado» tampoco vuelve como
+      // toast: la confirmación de que se guardó es que el wizard AVANZA
+      // — decirlo dos veces es ruido, no cortesía.
+      // ⭐ LAS TRES VOCES DEL RECHAZO, en el campo y jamás en un toast.
+      // Cada una dice QUÉ campo y POR QUÉ, no «revisá los datos».
+      errorVacio: 'Escribí el nombre de tu negocio.',
+      errorCorto: 'Con una sola letra no alcanza — escribí el nombre completo.',
+      errorSinLetras: 'Un nombre lleva letras: agregá al menos una.',
     },
 
     paso2: {
@@ -3224,6 +3271,12 @@ export const prestadorEs = {
       faltaDocumento: 'Nos falta su documento para que pueda repartir.',
       recepcionNoAplica:
         'El rol de recepción aparece cuando tengas algún servicio que atiendas en tu local.',
+      // ⭐ S98-C · LAS VOCES DEL RECHAZO, en el campo y jamás en un toast.
+      errorNombreVacio: 'Escribí el nombre de la persona.',
+      errorNombreCorto: 'Con una sola letra no alcanza — escribí su nombre.',
+      errorNombreSinLetras: 'Un nombre lleva letras: agregá al menos una.',
+      errorDocumentoVacio: 'Falta el documento de la persona.',
+      errorDocumentoCorto: 'Ese documento quedó a medias — revisá los dígitos.',
     },
 
     // Las líneas del salteo — nombran EL BENEFICIO y EL LUGAR, jamás

@@ -41,7 +41,7 @@
  * equipo de al lado y lo busca acá sin entender por qué no está.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -70,6 +70,7 @@ import {
   type Repartidor,
 } from '@epetplace/api';
 
+import { rechazoDeDocumento, rechazoDeNombre } from '@/lib/validacion-alta';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -96,9 +97,35 @@ export interface PasoEquipoProps {
   cuentaComercialId: string;
   prestadorId: string | null;
   alSumar: () => void;
+  /** ⭐ S98-C · el paso registra su confirmación y el pie la ejecuta.
+   *
+   *  **Acá el botón de adentro NO muere, y se declara por qué:** «sumar a
+   *  tu equipo» no es el guardado del PASO — es AGREGAR UNA PERSONA a una
+   *  lista, y se toca N veces. Matarlo dejaría el paso con capacidad para
+   *  un solo repartidor. Lo que sí cura la firma es el modo de falla real:
+   *  **Continuar ya no descarta en silencio una persona a medio tipear**
+   *  — la valida y la guarda antes de avanzar. */
+  registrarConfirmacion: (fn: (() => Promise<boolean>) | null) => void;
 }
 
-export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEquipoProps) {
+/** LA VOZ de cada rechazo — la regla es compartida, las frases son de
+ *  este campo (Ley 3). Claves LITERALES, jamás concatenadas. */
+const VOZ_NOMBRE = {
+  vacio: 'alta.paso4.errorNombreVacio',
+  corto: 'alta.paso4.errorNombreCorto',
+  sinLetras: 'alta.paso4.errorNombreSinLetras',
+} as const;
+const VOZ_DOCUMENTO = {
+  vacio: 'alta.paso4.errorDocumentoVacio',
+  corto: 'alta.paso4.errorDocumentoCorto',
+} as const;
+
+export function PasoEquipo({
+  cuentaComercialId,
+  prestadorId,
+  alSumar,
+  registrarConfirmacion,
+}: PasoEquipoProps) {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
 
@@ -111,6 +138,10 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
   const [nombre, setNombre] = useState('');
   const [documento, setDocumento] = useState('');
   const [telefono, setTelefono] = useState('');
+  /** ⭐ S98-C · la voz del rechazo vive EN EL CAMPO (firma del 14-ago).
+   *  `Campo` ya tiene el slot de altura reservada y su `liveRegion`. */
+  const [errorNombre, setErrorNombre] = useState<string | null>(null);
+  const [errorDocumento, setErrorDocumento] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     const [reps, recepcion, equipo] = await Promise.all([
@@ -147,11 +178,25 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
     }, [cargar]),
   );
 
-  async function guardar() {
-    if (guardando) return;
+  /** ⭐ S98-C · devuelve SI SE PUDO — el pie del wizard lo necesita para
+   *  decidir si avanza. Antes no devolvía nada y Continuar avanzaba igual,
+   *  descartando en silencio a la persona a medio tipear. */
+  async function guardar(): Promise<boolean> {
+    if (guardando) return false;
     const n = nombre.trim();
     const d = documento.trim();
-    if (n.length === 0 || d.length === 0) return;
+
+    // LA COHERENCIA, con la MISMA regla del paso ① (`lib/validacion-alta`)
+    // y la voz de ESTE campo. El nombre solo se valida en el alta nueva:
+    // cuando la persona viene «de tu equipo» su nombre se hereda y ni
+    // siquiera se dibuja el campo.
+    const malN = elegido === null ? rechazoDeNombre(n) : null;
+    const malD = rechazoDeDocumento(d);
+    setErrorNombre(malN === null ? null : t(VOZ_NOMBRE[malN]));
+    setErrorDocumento(malD === null ? null : t(VOZ_DOCUMENTO[malD]));
+    // Se marcan LOS DOS antes de salir: validar de a uno obliga a
+    // descubrir los errores en fila, uno por toque.
+    if (malN !== null || malD !== null) return false;
 
     setGuardando(true);
     const res = await registrarRepartidor({
@@ -167,7 +212,7 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
 
     if (!res.ok) {
       mostrar({ texto: res.mensaje, variante: 'error' });
-      return;
+      return false;
     }
     setAlta(false);
     setElegido(null);
@@ -177,7 +222,29 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
     mostrar({ texto: t('alta.paso4.guardado'), variante: 'exito' });
     void cargar();
     alSumar();
+    return true;
   }
+
+  /* LA CONFIRMACIÓN DEL PASO — y su regla, que es la parte pensada:
+     **una persona a medio tipear se guarda; un formulario intacto no
+     frena a nadie.** Sin la segunda mitad, abrir el alta por curiosidad y
+     cerrarla dejaría el wizard trabado pidiendo campos que nadie quiso
+     llenar (Ley 23 al revés: la puerta rechazando lo que ella misma
+     ofreció como opcional). */
+  const hayAlgoTipeado =
+    nombre.trim().length > 0 || documento.trim().length > 0 || telefono.trim().length > 0;
+  const confirmar = useCallback(async (): Promise<boolean> => {
+    if (!alta || !hayAlgoTipeado) return true;
+    return guardar();
+    // `guardar` se re-crea por render y depende de todo el formulario: se
+    // listan sus insumos reales en vez de la función.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alta, hayAlgoTipeado, nombre, documento, telefono, elegido, guardando]);
+
+  useEffect(() => {
+    registrarConfirmacion(confirmar);
+    return () => registrarConfirmacion(null);
+  }, [confirmar, registrarConfirmacion]);
 
   if (pantalla.estado === 'cargando') {
     return (
@@ -324,14 +391,22 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
                 <Campo
                   label={t('alta.paso4.nombre')}
                   value={nombre}
-                  onChangeText={setNombre}
+                  onChangeText={(v) => {
+                    setNombre(v);
+                    if (errorNombre !== null) setErrorNombre(null);
+                  }}
+                  error={errorNombre ?? undefined}
                   deshabilitado={guardando}
                 />
               ) : null}
               <Campo
                 label={t('alta.paso4.documento')}
                 value={documento}
-                onChangeText={setDocumento}
+                onChangeText={(v) => {
+                  setDocumento(v);
+                  if (errorDocumento !== null) setErrorDocumento(null);
+                }}
+                error={errorDocumento ?? undefined}
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
@@ -346,7 +421,11 @@ export function PasoEquipo({ cuentaComercialId, prestadorId, alSumar }: PasoEqui
                 variante="primario"
                 bloque
                 cargando={guardando}
-                deshabilitado={nombre.trim().length === 0 || documento.trim().length === 0}
+                /* ⭐ S98-C: el botón YA NO SE DESHABILITA por campos vacíos.
+                   Un botón apagado no dice QUÉ falta — la persona se queda
+                   mirando un control muerto (el defecto que S79-B ya curó
+                   en el Confirmar del vet). Ahora se toca siempre y la voz
+                   aparece en el campo que la causó. */
                 etiqueta={t('alta.paso4.guardar')}
                 onPress={() => void guardar()}
               />

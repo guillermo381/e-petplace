@@ -12,8 +12,28 @@ export const prestadorEn = {
     hoy: 'Today',
     mascotas: 'Data',
     negocio: 'Business',
+    // S98-C — la quinta tab. «Attend» es el verbo del mostrador en
+    // inglés de servicio (attend to someone), no «serve» ni «walk-in»:
+    // el ES dice ATENDER como ACTO, y el espejo dice el mismo acto.
+    atender: 'Attend',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     cuenta: 'Account',
+  },
+  // S98-C · LA PORTADA DE `ATENDER` (Lote 2) · Espejo de es.ts
+  atender: {
+    titulo: 'Attend',
+    tusServicios: 'Your services',
+    tuTienda: 'Your store',
+    oficioVeterinaria: 'Veterinary',
+    oficioGrooming: 'Grooming',
+    oficioPaseo: 'Walking',
+    oficioAdiestramiento: 'Training',
+    ventaTitulo: 'Product sales',
+    vacioTitulo: 'No door is open yet',
+    vacioDetalle:
+      'None of your services is marked as «I attend at my place» and your store is not active. Turn on in-store attention from your offer and this screen opens on its own.',
+    falloTitulo: 'We could not load your doors',
+    reintentar: 'Try again',
   },
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
@@ -1828,6 +1848,7 @@ export const prestadorEn = {
     // S86-C ① · the two verbs — one REGISTERS a fact, the other RESERVES.
     // S86-C · an active trade that can't be registered here yet.
     oficioSinMenu: 'For now the counter only records veterinary visits. Your other services are coming.',
+    oficioSinMenuDetalle: 'You can still register the pet: it stays tied to the family email and its visit records as soon as we open this trade.',
     verboLabel: 'What are you doing?',
     verboAhora: 'See them now',
     verboAgendar: 'Schedule',
@@ -2587,9 +2608,16 @@ export const prestadorEn = {
     continuar: 'Continue',
     terminar: 'Open my house',
     volver: 'Back',
+    // S98-C · D-799 — three causes, three voices. Espejo de es.ts.
     errorTitulo: "We couldn't load this",
     errorVoz: 'It might be the connection. Try again.',
     reintentar: 'Try again',
+    sinSesionTitulo: 'Your session ended',
+    sinSesionVoz: 'Sign in again with your email and we pick up where you were.',
+    sinSesionAccion: 'Sign in',
+    sinNegocioTitulo: "You don't have a business yet",
+    sinNegocioVoz: 'Create yours and we come back here to open its house.',
+    sinNegocioAccion: 'Create my business',
     entendido: 'Got it',
     enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
     oficioVeterinaria: 'Veterinary',
@@ -2606,8 +2634,10 @@ export const prestadorEn = {
       logoCambiar: 'Change',
       logoQuitar: 'Remove',
       logoVacio: "Without a logo we'll use your initials.",
-      guardar: 'Save the name',
-      guardado: 'Name saved.',
+      // S98-C · Espejo de es.ts: las tres voces del rechazo, en el campo.
+      errorVacio: 'Write your business name.',
+      errorCorto: 'One letter is not enough — write the full name.',
+      errorSinLetras: 'A name has letters: add at least one.',
     },
 
     paso2: {
@@ -2674,6 +2704,12 @@ export const prestadorEn = {
       faltaDocumento: 'We need their ID number so they can deliver.',
       recepcionNoAplica:
         'The front-desk role shows up once you have a service you provide at your place.',
+      // S98-C · Espejo de es.ts.
+      errorNombreVacio: "Write the person's name.",
+      errorNombreCorto: 'One letter is not enough — write their name.',
+      errorNombreSinLetras: 'A name has letters: add at least one.',
+      errorDocumentoVacio: "The person's ID is missing.",
+      errorDocumentoCorto: 'That ID looks unfinished — check the digits.',
     },
 
     salteo: {
