@@ -112,3 +112,54 @@ sus roles `administrador`+`recepcion` en su negocio. **El porqué:** una
 cuenta de prueba con `is_admin()` tiene lectura sobre las cuentas
 comerciales de TODOS los vendedores — **no sobrevive a la entrada de un
 vendedor real en octubre.**
+
+---
+
+## 🔴 CURAS DE LA MATRIZ (S97-A, 14-ago-2026 — pedido del founder)
+
+> ***El nombre de una cuenta de prueba es prosa que no puede mentir sobre su
+> contenido.*** Misma ley que rigió todo el día para comentarios, fichas y
+> letra: **una etiqueta que describe mal lo que hay adentro no es un detalle
+> cosmético — es una afirmación falsa que alguien va a creer.**
+
+### ① `vet2` — se llamaba clínica y solo paseaba
+
+**Medido antes de curar:** `guillo381+vet2@gmail.com` = prestador propio
+**«Clínica Los Shyris»**, con **un solo oficio activo: `paseo`**.
+
+> **Literal del founder: «vet no puede ser paseo».**
+
+| | antes | después |
+|---|---|---|
+| oficios activos | `paseo` | **`consulta_general` · `vacunacion`** |
+| clave | **desconocida** (rebotaba el login) | **la compartida** ✅ |
+
+⚠️ **El paseo se DESACTIVÓ, no se borró:** tenía **4 citas y 5 franjas vivas**
+— *borrarlo sería destruir historia para arreglar una etiqueta.*
+
+⚠️ **Y una discrepancia que se DECLARA en vez de curarse a ciegas:** esta
+matriz dice que `vet1`/`vet2` son *«miembros de `duenovet` con chips
+médicos»*, y lo medido es que **`vet2` tiene prestador PROPIO**. *Pueden
+convivir las dos cosas (miembro de uno y titular de otro), así que no se toca
+sin medir la membresía — se anota para que el próximo no herede la duda.*
+
+### ② Nace `paseo1` — el discriminador paseo-only, con nombre honesto
+
+**`guillo381+paseo1@gmail.com`** · clave compartida · «PASEOS DE PRUEBA S97 -
+NO REAL» · `tipo: paseador` · oficio **`paseo`** · **`atiende_local = false`**.
+
+**Reemplaza a `vet2` como el caso paseo-only**, que la **capacidad presencial
+usa como discriminador** — el caso sigue haciendo falta; lo que sobraba era
+que lo encarnara una cuenta llamada «vet».
+
+**Se creó respetando los cinco guards del modelo, no esquivándolos** — y cada
+uno enseñó algo: `prestadores.tipo` sigue NOT NULL (el eje muerto de D-487) ·
+`whatsapp` y `cuenta_comercial_id` obligatorios · `chk_estado_consistente`
+exige `activado_en` para nacer activa · **`chk_ps_alguna_modalidad`** (guard
+propio de S97) exige al menos una modalidad ⇒ el paseo entra
+**`atiende_domicilio = true`**, que es su firma.
+
+> **Nota de método:** los cinco aparecieron **de a uno**, por prueba y error,
+> hasta que se midió el contrato completo de una sola consulta.
+> ***Descubrir un contrato a fuerza de errores es pagarlo en intentos; leerlo
+> cuesta una consulta.***
