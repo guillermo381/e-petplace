@@ -14845,3 +14845,36 @@ en una sola voz.** Separar los tres es leer lo que ya llega.
 que lo tiene. **Disparo: antes de que el wizard entre a navegación** — hoy
 vive en `/verificacion/alta` y solo se alcanza por deep link, así que el único
 que lo pisa es quien lo dispara a propósito.
+
+---
+
+#### D-800 — 🎨 EL ÍCONO DE LA APP: VERDE MÁS OSCURO PARA QUE EL ISOTIPO DESTAQUE
+
+**Firma del founder, 14-ago-2026**, sobre el ícono en la grilla de apps del
+teléfono.
+
+> **El fondo del ícono va a un VERDE MÁS OSCURO, para que el isotipo
+> destaque.**
+
+**Es ASSET NATIVO, y eso decide su tren:** el ícono de launcher **no viaja por
+OTA**. Se hornea en el binario ⇒ **entra en la PRÓXIMA BUILD**, junto a
+**D-784** (la migración a llaves publicables, que ya es precondición del
+próximo build).
+
+*No es una espera: es que las dos comparten el único vehículo que las puede
+llevar.* **Agruparlas evita un build para cada una** — y un build de más es
+media hora de calendario que no compra nada.
+
+**Lo que la firma decide y lo que no:** decide **la dirección** (más oscuro,
+para contraste con el isotipo). **No decide el hex** — se elige mirando el
+ícono en la grilla, entre las otras apps del teléfono, que es el único
+contexto donde ese contraste significa algo. *Un ícono no se firma en una
+lámina: se firma en el cajón donde va a vivir.*
+
+**Fuente del verde, cuando se elija:** sale de la paleta de marca
+(`packages/ui/src/tokens/palette.ts`), **jamás de un hex tipeado en el
+`app.json`** — el mismo criterio con que los seis stops de la rampa viven en
+`gradients.logo`.
+
+☠️ **Muere** con la próxima build nativa llevando el ícono nuevo, y el founder
+mirándolo en su grilla.
