@@ -505,6 +505,76 @@ nombre a secas.
 
 ---
 
+### 4.4 🔴 LA LEY DE DISPONIBILIDAD (firma del founder, 13-ago-2026)
+
+> **LA VITRINA MUESTRA LO QUE ALGUIEN PUEDE VENDER.**
+> Un producto del maestro sin oferta viva de ningún vendedor **NO aparece
+> en navegación ni en categorías**. Aparece **solo en búsqueda exacta**,
+> declarado como no disponible, **con la opción de avisar cuando llegue**.
+
+**El porqué:** con un vendedor y 527 productos, mostrar todo convierte la
+tienda en un cementerio de «sin stock», y «temporalmente» sería una promesa
+incumplible 450 veces — contra §2.3 de la letra del recorrido: *la app dice
+y no promete*.
+
+**Y el beneficio: cada búsqueda sin resultado es DEMANDA MEDIDA.** *«Quince
+familias buscaron esta cama y no la teníamos»* es el mejor argumento
+comercial para que un vendedor amplíe surtido. **Se registra desde el día
+uno** (tabla `busquedas_sin_resultado`, append-only, puerta
+`registrar_busqueda_sin_resultado`).
+
+**Estado medido al depositar (13-ago):** la primera mitad YA es el
+comportamiento del motor — `listarProductosDespensa` y
+`buscarProductosDespensa` parten de `ofertas` con `estado='publicada'`. Lo
+que falta construir es la segunda: la búsqueda exacta que encuentra el
+no-disponible, lo DICE, ofrece el aviso y registra la demanda.
+
+**El motor de disponibilidad nace completo aunque la pausa no (misma
+firma):** un producto es COMPRABLE si existe una **oferta activa, con
+stock, de un vendedor activo**. La pausa de v2 es *apagar ofertas* — si el
+motor nace bien, la pausa después cuesta casi nada; si nace atado a stock,
+se reconstruye entero.
+
+### 4.5 EL TRONCO Y LAS FICHAS POR FAMILIA (enmienda de mesa, 13-ago-2026)
+
+**El maestro es TRONCO COMÚN más ATRIBUTOS POR FAMILIA.** Tronco: nombre,
+marca, familia, presentación, especie, fotos, descripción. Cada familia
+declara sus propios atributos — alimento y suplementos traen composición y
+alérgenos; accesorios traen medidas, material y talla. *Una sola tabla ancha
+con la mitad de las columnas vacías es lo que hay que evitar: no se puede
+distinguir «no aplica» de «falta el dato».* (Esquema vivo:
+`producto_ficha_nutricional` · `producto_ficha_dosificacion` ·
+`producto_ficha_accesorio`, 1:1 con el tronco, escritas solo por la puerta
+`declarar_ficha_producto`.)
+
+> 🔴 **LA FAMILIA DECLARA SI ES INGERIBLE, y ese campo GOBIERNA el motor de
+> alergias** (`cat_familias_producto.ingerible`): el motor **solo corre
+> sobre productos ingeribles**. *Una advertencia de alergia sobre una cama
+> mata la advertencia entera — la familia aprende a ignorarla justo antes
+> de la que importa.*
+
+**Las familias de v1 son CINCO en el esquema (firma del founder, 13-ago):**
+**alimento · antiparasitarios y antipulgas · suplementos · dieta de
+prescripción · accesorios (nueva)**. Ingeribles las cuatro primeras;
+accesorios no.
+
+**`dieta_prescripcion` es FAMILIA PROPIA, no subtipo de alimento (firma del
+founder, 13-ago):** ingerible, con composición y alérgenos, igual que
+alimento. **Venta libre en v1.** Y el porqué depositado entero, **porque es
+lo que protege la decisión de ser revertida por comodidad:**
+
+> *La dieta de prescripción es el único producto del catálogo con relación
+> directa al expediente clínico — se vende porque una veterinaria la
+> indicó. Meterla dentro de «alimento» cierra ese camino y reabrirlo
+> después es migración. El enlace con la indicación clínica de la mascota
+> queda declarado como **v2**, con su valor escrito: «la veterinaria de
+> Thor le indicó esta dieta» es un argumento de compra que solo puede
+> construir quien tiene el expediente.*
+
+**Y la carga se ajusta a la firma:** los productos que entraron con
+`dieta_rx` del archivo viven en su familia propia, no absorbidos por
+alimento.
+
 ## 5. EL RECORRIDO DE LA FAMILIA
 
 ### 5.1 Dónde vive
@@ -860,6 +930,37 @@ pedidos con dos botones —preparado, despachado— y el ajuste de stock.**~~
 Eso alcanza para un vendedor.
 
 ### 8.6bis 🔴 LA CONFIGURACIÓN DE LA DESPENSA — ENTRA A v1 (firmas del founder, 13-ago-2026)
+
+> 🔴 **LA LEY DEL CAMBIO — cabecera de esta sección (firma del founder,
+> 13-ago; depositada VERBATIM del literal que C construyó):**
+>
+> **UN CAMBIO RIGE PARA LO NUEVO. LO COMPROMETIDO SE CUMPLE.**
+> Ningún cambio de configuración se rechaza por tener compromisos vivos.
+> Al guardar, la app declara qué queda comprometido y hasta cuándo. Un
+> vendedor que deja de enviar los sábados atiende igual el pedido de
+> sábado que ya entró.
+>
+> La baja de un repartidor con entregas asignadas se acepta y surte efecto
+> cuando termina sus entregas. No se bloquea ni se cancela: queda
+> pendiente y se cumple sola. Reasignar entregas a otro repartidor es v2.
+>
+> **El porqué:** el vendedor tiene que poder cambiar de opinión sin romper
+> una promesa hecha a una familia. Rechazar el cambio lo deja preso;
+> aplicarlo en el acto deja a alguien esperando en la puerta. **Se acepta,
+> se cumple lo comprometido, y se dice.**
+
+> **EL MARCO DE LOS TRES TIEMPOS, con su hallazgo declarado:** **ANTES** es
+> la configuración (esta sección — se construye ahora) · **DURANTE** es el
+> panel de S96, ya construido y **pendiente del ojo del founder** ·
+> **DESPUÉS** —postventa, resultados, liquidación y cobro del vendedor—
+> **no tiene letra y queda como arco abierto (D-788)**: *el vendedor real
+> de octubre va a preguntar cuándo cobra, y hoy no hay respuesta.*
+
+> **⚠️ DE QUÉ CUELGA (firma de mesa, 13-ago): la configuración cuelga de la
+> CUENTA COMERCIAL, no del prestador.** Un vendedor puro no es prestador y
+> no lleva fila de prestador — *fabricarle una vacía contamina el motor de
+> servicios con negocios que no prestan servicios, y ese cinturón (§3.4) es
+> lo único que sostiene la frontera desde que salimos de VTEX.*
 
 **Choque declarado:** esto enmienda §8.6 — su alcance v1 era *ver pedidos ·
 prepararlos · despacharlos · ajustar stock · proponer producto y precio*, y
