@@ -60,6 +60,7 @@ import { PinMovible } from '../components/PinMovible'
 import { SelectorVentana } from '../components/SelectorVentana'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
 import { Destape } from '../components/Destape'
+import { Baldosa } from '../components/Baldosa'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
@@ -3119,6 +3120,47 @@ function GaleriaInterna() {
               expira="Vence el 10 de noviembre"
             />
             <CodigoAEscala etiqueta="Con separadores del emisor" codigo="8765-4321" />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Baldosa (S97+) — lo que se ELIGE (Acto II: tarjetas para elegir, filas para leer)">
+          {/* LOS DOS CONSUMIDORES JUNTOS, porque la condicion de la mesa
+              fue que el segundo no la deforme: arriba ATENDER (glifo +
+              nombre, sin detalle) y abajo los servicios de Negocio (con
+              detalle). Que se vean iguales ES la prueba.
+              La GRILLA la arma el consumidor — la pieza es UNA baldosa. */}
+          <View style={{ gap: spacing[5] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">ATENDER — cuatro oficios, sin detalle</Texto>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                {([
+                  { g: 'veterinaria', t: 'Veterinaria', c: 'identidad' },
+                  { g: 'grooming', t: 'Grooming', c: 'cuidado' },
+                  { g: 'paseo', t: 'Paseo', c: 'cuidado' },
+                  { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
+                ] as const).map((o, i) => (
+                  <View key={o.g} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                NEGOCIO — los mismos, CON detalle: el titulo cae a la misma altura en los dos
+              </Texto>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                {([
+                  { g: 'veterinaria', t: 'Consulta general', c: 'identidad', d: '$25 · 30 min' },
+                  { g: 'grooming', t: 'Bano y corte', c: 'cuidado', d: 'desde $18' },
+                  { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
+                ] as const).map((o) => (
+                  <View key={o.t} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
         </Seccion>
 

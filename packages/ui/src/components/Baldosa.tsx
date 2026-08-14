@@ -1,0 +1,184 @@
+/**
+ * Baldosa — LA PIEZA DE LO QUE SE ELIGE (S97+-B, Acto II).
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ * LA DIRECCIÓN DE FORMA QUE LA ORDENA (firma del founder):
+ *   **tarjetas para lo que se ELIGE · filas para lo que se LEE.**
+ * Su instinto literal: *«rectángulos en dos columnas»* en vez del botón
+ * tradicional.
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * La `Celda`/`FilaCita` sirve a una lista que se recorre con el ojo: es
+ * densa, horizontal, y su trabajo es que muchas cosas quepan y se
+ * comparen. Una elección es lo contrario — pocas opciones, cada una con
+ * peso propio, y el ojo saltando entre ellas en vez de barriéndolas.
+ * *Una fila con un chevron dice «hay más adentro»; una baldosa dice
+ * «elegí una».*
+ *
+ * LA PIEZA ES **UNA** BALDOSA, NO LA GRILLA. Quien la monta arma las dos
+ * columnas —con `gap: spacing[4]` y `flexBasis: '48%'`, o el
+ * `flexDirection: 'row'` con `flexWrap` que le sirva— porque **cuántas
+ * columnas entran es del ancho de SU pantalla**, no de la pieza. Es la
+ * misma línea que separa `ChipEntidad` de su hilera (S91): sube la
+ * UNIDAD, no el contenedor.
+ *
+ * LO QUE LA MESA FIJÓ, y dónde vive cada cosa:
+ *  · **canto de su categoría (Ley 10)** — el canto dice CATEGORÍA y el
+ *    glifo dice SERVICIO. Va **a la IZQUIERDA, como en `FilaCita`**: la
+ *    posición del canto es vocabulario, no composición. Si en la fila
+ *    vive a la izquierda y en la baldosa arriba, el sistema deja de
+ *    poder leerse de un vistazo — *un mismo significante que cambia de
+ *    lugar según la pieza obliga a re-aprenderlo en cada pantalla.*
+ *  · **el glifo con presencia (N7)** — 48, no 32. La baldosa se elige de
+ *    un vistazo y el glifo es lo que se ve primero.
+ *  · **`usePresionado`** (la receta única de la casa) y **entrada
+ *    escalonada (N6)** vía `orden`.
+ *  · **radio de la escala única (N4)** — `radius.lg`, el registro de las
+ *    superficies que contienen. No un valor propio.
+ *
+ * MI FORMA, y su porqué:
+ *  · **`aspectRatio: 1`** — cuadrada. Con dos columnas en un teléfono da
+ *    ~160×160: un blanco enorme, imposible de errar con el pulgar, y el
+ *    mismo alto para todas sin importar el largo del nombre. *Un alto
+ *    que depende del texto hace que dos baldosas vecinas no se alineen,
+ *    y una grilla desalineada se lee como un error.*
+ *  · **el contenido se ancla ABAJO** (`justifyContent: 'flex-end'`) con
+ *    el glifo arriba: así el título de todas las baldosas cae a la misma
+ *    altura aunque una tenga detalle y otra no.
+ *  · **el canto respira**: la baldosa recorta (`overflow: 'hidden'`) para
+ *    que el canto siga la curva del radio en vez de cortarla — el
+ *    precedente exacto de `FilaCita`.
+ *
+ * PENSADA PARA SUS DOS CONSUMIDORES desde el primer día (condición de la
+ * mesa: *que el segundo no la deforme*):
+ *  ① las tarjetas de oficio de **ATENDER** — glifo + nombre del oficio.
+ *  ② los servicios del tab **Negocio**, que el founder señaló como
+ *     monótonos — mismo glifo + nombre + `detalle` (el precio, el conteo).
+ * Por eso `detalle` es OPCIONAL y no hay ningún slot libre: si el segundo
+ * consumidor necesitara meterle nodos propios, la baldosa se volvería un
+ * contenedor y dejaría de garantizar que dos baldosas se vean iguales.
+ */
+
+import { Pressable, View } from 'react-native'
+import Animated from 'react-native-reanimated'
+
+import { radius } from '../tokens/radius'
+import { spacing } from '../tokens/spacing'
+import { useTheme } from '../ThemeProvider'
+import { usePresionado } from './usePresionado'
+import { Icono, type IconoNombre } from './Icono'
+import { Texto } from './Texto'
+import { Entrada } from './Entrada'
+import type { CapaDeOficio } from './PuertaDeOficio'
+
+/** El canto: mismo ancho que `FilaCita`. La coherencia es el punto. */
+const ANCHO_CANTO = 3
+/** N7 — el glifo con presencia. 48, no 32: es lo primero que se ve. */
+const LADO_GLIFO = 48
+
+export type BaldosaProps = {
+  /** El nombre de lo que se elige. Una línea; dos si el nombre es largo. */
+  titulo: string
+  /** Segunda línea opcional — el conteo, el precio, el estado. */
+  detalle?: string
+  /** Glifo del registry (Ley 12: el glifo dice SERVICIO). */
+  glifo: IconoNombre
+  /** Categoría (Ley 10: el canto dice CATEGORÍA). */
+  capa: CapaDeOficio
+  onPress: () => void
+  /** Posición en el ORDEN DE LECTURA (N6). Sin `orden`, no entra
+   *  escalonada — el consumidor que no quiera la entrada simplemente no
+   *  la pide. Los NÚMEROS del escalonado siguen siendo de `Entrada`,
+   *  jamás de acá (la condición de mesa sobre §5). */
+  orden?: number
+  /** Voz de a11y cuando el título solo no alcanza ("Veterinaria, 3
+   *  servicios activos"). Default: el título. */
+  etiquetaA11y?: string
+}
+
+export function Baldosa({
+  titulo,
+  detalle,
+  glifo,
+  capa,
+  onPress,
+  orden,
+  etiquetaA11y,
+}: BaldosaProps) {
+  const { theme } = useTheme()
+  // 0.99 — la escala de las superficies que contienen (el precedente
+  // de `TarjetaEstado` y `SelectorOpcion`); 0.97 es de botones sueltos.
+  const { handlers, estiloPresionado } = usePresionado(0.99)
+
+  const cuerpo = (
+    <Pressable
+      onPress={onPress}
+      {...handlers}
+      accessibilityRole="button"
+      accessibilityLabel={etiquetaA11y ?? (detalle ? `${titulo}, ${detalle}` : titulo)}
+    >
+      <Animated.View
+        style={[
+          {
+            aspectRatio: 1,
+            backgroundColor: theme.bg.card,
+            borderRadius: radius.lg,
+            boxShadow: theme.elevacion.reposo,
+            // EL CANTO — categoría (Ley 10), a la izquierda como en la
+            // fila. `overflow: 'hidden'` para que siga la curva del radio
+            // en vez de cortarla (precedente FilaCita).
+            borderLeftWidth: ANCHO_CANTO,
+            // ⚠️ `consumo` NO existe en `theme.capa` — se resuelve por
+            // `accent.warm` (el ocre). La fórmula se COPIA de
+            // `PuertaDeOficio`, que es la pieza que ya la resolvió: mi
+            // primer intento mapeó `consumo → comunidadAmplia` (violeta)
+            // por vecindad en la lista de slots, que es exactamente la
+            // clase de error que pintó de otra capa una pieza entera en
+            // S91. Un vocabulario de cuatro no cae 1:1 sobre slots de
+            // cuatro solo porque coincida el número.
+            borderLeftColor: capa === 'consumo' ? theme.accent.warm : theme.capa[capa],
+            overflow: 'hidden',
+            padding: spacing[4],
+            justifyContent: 'flex-end',
+            gap: spacing[2],
+          },
+          estiloPresionado,
+        ]}
+      >
+        {/* El glifo arriba, empujado por el `justifyContent: flex-end`
+            del padre: el texto queda anclado abajo y todas las baldosas
+            alinean su título a la misma altura, tengan detalle o no. */}
+        <View style={{ position: 'absolute', top: spacing[4], left: spacing[4] }}>
+          <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO} />
+        </View>
+
+        <Texto variante="seccion" numberOfLines={2}>
+          {titulo}
+        </Texto>
+        {detalle !== undefined ? (
+          <Texto variante="apoyo" numberOfLines={1}>
+            {detalle}
+          </Texto>
+        ) : null}
+      </Animated.View>
+    </Pressable>
+  )
+
+  return orden === undefined ? cuerpo : <Entrada orden={orden}>{cuerpo}</Entrada>
+}
+
+/** El envoltorio de la GRILLA no sube como pieza (ver el header: sube la
+ *  unidad, no el contenedor). Se deja escrito el patrón para que las dos
+ *  casas armen la misma grilla sin copiarse entre sí:
+ *
+ *    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+ *      {oficios.map((o, i) => (
+ *        <View key={o.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+ *          <Baldosa … orden={i} />
+ *        </View>
+ *      ))}
+ *    </View>
+ *
+ *  El `47%` con `gap` deja las dos columnas sin que el redondeo las
+ *  empuje a tres; `flexGrow: 1` hace que una baldosa impar ocupe la fila
+ *  entera en vez de quedar a media pantalla. */
