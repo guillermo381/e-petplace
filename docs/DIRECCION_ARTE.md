@@ -1221,6 +1221,17 @@ cambio de estado · celebración. **Nada más se mueve.**
 > **Y su contracara, firmada en el mismo acto:** con `reduce-motion` o en
 > **memorial**, la ceremonia degrada a **crossfade corto (~300 ms)** — *el
 > ritual es para quien puede disfrutarlo, no una imposición.*
+>
+> > **La razón de B, y conviene leerla porque la doctrina NO cambió — cambió
+> > la MAGNITUD:** el crossfade de ~300 ms ya existía y ya era correcto.
+> > *Contra una ceremonia de 1630 ms la degradación era discutible —300 contra
+> > 1630 **colapsaba el momento** y podía leerse como perderse algo—.* **Con
+> > 3000, deja de ser discutible: tres segundos de espectáculo a quien pidió
+> > MENOS animación es exactamente el espectáculo que pidió no ver.**
+> >
+> > ⇒ **Subir la ceremonia FORTALECIÓ su degradación en vez de tensionarla.**
+> > *Una ley que se vuelve más clara cuando su caso crece es una ley bien
+> > escrita; si se hubiera vuelto más incómoda, la sospechosa sería la ley.*
 
 > ### ACLARACIÓN DE N10 — **LA BANDA DE 520 ES EL REGISTRO DE CADA GESTO, JAMÁS LA SUMA DE LA CEREMONIA**
 >

@@ -116,7 +116,33 @@ export function Baldosa({
       {...handlers}
       accessibilityRole="button"
       accessibilityLabel={etiquetaA11y ?? (detalle ? `${titulo}, ${detalle}` : titulo)}
-    >
+      /* 🔴 LA RAÍZ DECLARA SU ANCHO — sin esto la grilla COLAPSA A ALTURA
+         CERO y las baldosas se dibujan encima de lo que sigue.
+
+         EL MECANISMO, medido por C en el navegador (`getBoundingClientRect`
+         + `getComputedStyle`): el `aspectRatio: 1` vive en el
+         `Animated.View` de adentro, y este `Pressable` no llevaba estilo.
+         Un `Pressable` sin estilo **no estira al ancho de su contenedor**,
+         así que el `aspectRatio` resolvía contra ancho 0 ⇒ **alto 0** ⇒ el
+         contenedor de la grilla no reservaba espacio.
+
+         ⚠️ MEDIDO EN RN-WEB. En nativo Yoga puede resolverlo distinto y es
+         posible que el teléfono lo perdone — no se afirma. **Pero lo que
+         es cierto en las dos plataformas es el defecto de construcción:
+         una pieza que delega su altura a un hijo y cuya raíz no declara
+         nada es frágil aunque hoy una plataforma la salve.**
+
+         ⚖️ LA LEY QUE FIJA LA MESA, y vale para toda pieza de la casa:
+         **la raíz de una pieza es DUEÑA DE SU ESPACIO.** Delegar la
+         geometría a un hijo deja a la pieza a merced de cómo la envuelvan
+         — y quien la envuelve no puede saberlo sin leerle las tripas.
+
+         🔴 Y ES UN DEFECTO QUE YO YA HABÍA VISTO: al leer el árbol de
+         `Celda` para el caso de «Z…» anoté que su `Pressable` tampoco
+         lleva estilo. Ahí no muerde porque el consumidor la envuelve en
+         una columna que la estira. **Lo vi, entendí por qué no molestaba
+         ahí, y construí la pieza nueva con el mismo hueco.** */
+      style={{ width: '100%' }}>
       <Animated.View
         style={[
           {

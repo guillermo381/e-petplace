@@ -637,6 +637,63 @@ gate no interrumpe una prueba: la invalida sin que el que camina se entere.*
 
 ---
 
+## 6bis-B · **EL GATE LO CORRE CODE ANTES QUE EL FOUNDER** *(firma del founder, 14-ago-2026)*
+
+> ### **El founder NO camina primero. Primero camina Code, en el dispositivo.**
+
+**Habilitado por §6bis-A** (la entrega abierta, las credenciales en el
+keychain, la matriz en `docs/`). *Sin acceso al aparato esta regla no se podía
+escribir; con acceso, no escribirla sería desperdiciarlo.*
+
+### El porqué, que es de ECONOMÍA DE OJO y no de desconfianza
+
+> ***El ojo del founder es el único instrumento que la casa no puede
+> reemplazar. Gastarlo en un `Z...` truncado, en una sesión equivocada o en un
+> toggle que rebota es gastarlo en lo que Code podía haber encontrado solo.***
+
+**Medido en esta misma sesión, y por eso la regla nace acá:** el founder
+abrió el wizard y se encontró con **«puede ser la conexión»** (D-799: sesión
+de empleado) — *una vuelta entera de su atención en un defecto que una
+caminata de Code destapa en tres minutos*. Y cuando Code lo caminó, encontró
+**tres hallazgos más** (D-801 · D-802 · D-803) **antes** de que él los pisara.
+
+**⇒ El founder camina sobre un lote YA BARRIDO, para que su ojo se gaste en lo
+único que solo él ve: la forma, el ritmo, el producto.**
+
+### ① EL CIRCUITO DE CODE, antes de convocar al founder
+
+| qué | con quién | qué ejercita |
+|---|---|---|
+| **el wizard entero** | **`duenodes`** (vendedor puro) | las tres voces de D-799 **y el alta que antes no podía completar** |
+| **`ATENDER`** | **`demovet`** | las baldosas y el flujo **hasta el cobro** |
+| **el HOY** | **`duenovet`** | la frontera §3.1 — *contador en cero ⇒ solo el día* |
+| **la fila de despacho** | **`duenotodo`** | el pedido vivo sembrado |
+| **el destape** | cualquiera | **3 s con la luz al 7 %**, en FRAMES |
+| **el barrido de colisión** | — | **en Android REAL** |
+
+> 🔴 **EL ÚLTIMO ES EL QUE MÁS VALE, y hay que decir por qué:** todo el verde
+> de la fila es **RN-web**, y el propio guard lo declara —*«mide RN-web, no el
+> dispositivo; el reparto flex de Android puede diferir»* (**L-153**)—.
+> **Es la evidencia que falta**, y la que decide si el `overflow` retirado
+> aguanta en el aparato.
+
+**Base: el guion industrializado de D** (`captura-s97d-lote.mjs`), que ya
+lleva el paso de 3× adentro *porque un patrón que se re-improvisa no es un
+patrón*.
+
+### ② LOS HALLAZGOS SE REPORTAN CON FICHA Y CAPTURA, y con su DUEÑO
+
+**De pieza → B · de pantalla → C/D · de motor → A.** *Un hallazgo sin dueño
+vuelve a la mesa; un hallazgo con dueño y captura se cura sin una reunión.*
+
+### ③ LO QUE ESTA REGLA **NO** CAMBIA
+
+**L-153 sigue intacta: el gate del founder en dispositivo sigue siendo la
+única firma que vale.** *Code barre; el founder firma.* **Lo que cambia es
+qué encuentra cuando llega** — no quién decide.
+
+---
+
 ## 6ter · LA REGLA DE CREDENCIALES *(firmada por la mesa, 13-ago-2026 — hermana de la lección del dominio inventado)*
 
 > **NINGUNA PISTA CAMBIA LA CLAVE DE UNA CUENTA QUE NO CREÓ ELLA. Si
