@@ -109,6 +109,27 @@ radio con ubicación · ≥1 corte · (si envío) ≥1 repartidor y ≥1 recurso
 contador S91: él llega a cero; después esperamos nosotros). Narrativa más
 un paso, jamás checklist.
 
+## ADDENDUM 13-ago (2ª vuelta) · La ley del cambio — lo que le falta de dato
+
+La orden de mesa trae el guard 4 verbatim: *«al guardar un cambio con
+compromisos vivos, la app dice qué queda comprometido. No rechaza, no
+oculta.»* C lo cableó donde el dato existe: **cortes** (pedidos vivos con
+promesa, de `listarPedidosDelVendedor`) y **recursos** (consumido de
+`cupoRepartoDelDia`). Faltan dos cosas:
+
+1. **⚠️ La letra no está depositada:** la orden la cita como «ley del
+   cambio en la cabecera de §8.6bis» y `MODELO_DESPENSA` en origin/main
+   no la tiene (grep en cero al construir). C construyó contra el literal
+   de la orden y lo declaró en la cabecera de la pantalla — cuando el
+   depósito llegue, si difiere, gana la letra. **Quien tenga el depósito
+   pendiente (¿A?): que aterrice.**
+2. **A-8 · Lector de envíos vivos POR repartidor** —
+   `enviosVivosDeRepartidor(repartidorId)` → `number` (o el conteo por
+   repartidor en el lector de la lista). Sin esto, apagar un repartidor
+   no puede DECIR qué queda comprometido (sus envíos de hoy siguen
+   suyos hasta reasignarse), y la ley exige decirlo. Hoy ese toggle
+   guarda sin voz — declarado en la cabecera de la pantalla.
+
 ## El orden en que C los consume (por si A entrega por tandas)
 
 **A-5 (la costura y su pregunta) y A-1 (familias) primero** — son los dos
