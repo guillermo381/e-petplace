@@ -15446,6 +15446,21 @@ camino de atender estampa `llegada_en` **si no estaba**.
 > ficha: es una hipótesis con número de deuda*** — y una hipótesis depositada
 > se lee después como hecho.
 
+### 🔴 LA TRAMPA QUE VIENE DESPUÉS — la nombró D al encender, y es de A
+
+**`LETRA_RECEPCION_S76` §7 dice que `registrar_llegada` está gateada por
+MEMBRESÍA. SIGUE IGUAL, y tiene que seguir igual.**
+
+> **La firma del founder angostó LA SUPERFICIE —quién ve el botón—, jamás LA
+> PUERTA —quién puede escribir—.** Son dos cosas distintas y solo una se
+> firmó.
+
+⚠️ **Quien venga a «alinear» el gate del RPC con el rol de recepción por
+coherencia estaría DEROGANDO §7 SIN FIRMA.** *Y lo haría con la mejor
+intención: alinear dos números que parecen desalineados es exactamente lo que
+una pasada de prolijidad hace bien en el 90 % de los casos.* Acá el desalineo
+**es la letra**.
+
 ☠️ **Muere** cuando la puerta `registrar_llegada` quede revocada de
 `authenticated` **con su censo de llamadores en cero declarado** — jamás
 antes, y **sin tocar la columna**. **Disparo:** la próxima migración que toque
