@@ -1186,7 +1186,22 @@ export default function Hoy() {
           const equipoR = await obtenerEquipoNegocio(prestador.data.cuenta_comercial_id);
           if (equipoR.ok) equipoOk = equipoR.data.miembros.filter((m) => m.activo).length >= 2;
         }
-        preparacion = { serviciosOk, preciosOk, horariosOk, equipoOk };
+        /* ⭐ S98-D · LOS OFICIOS QUE EL NEGOCIO TIENE — de las CUATRO
+           lecturas de mundo que este loader YA hizo arriba: cero viaje
+           nuevo. El criterio es TENER FILA DE OFERTA, no tenerla activa:
+           quien ve este módulo es justamente el que todavía no activó
+           nada, y resolver por `activo` lo dejaría siempre en cero.
+           Es lo que le permite a cada acción aterrizar en su sección
+           exacta en vez del tab entero (el hallazgo del founder). */
+        const oficiosConOferta = [
+          ...(ofVet.ok && ofVet.data.servicios.length > 0 ? (['veterinaria'] as const) : []),
+          ...(ofGrooming.ok && ofGrooming.data.length > 0 ? (['grooming'] as const) : []),
+          ...(ofPaseo.ok && ofPaseo.data.length > 0 ? (['paseo'] as const) : []),
+          ...(ofAdiestramiento.ok && ofAdiestramiento.data.oferta !== null
+            ? (['adiestramiento'] as const)
+            : []),
+        ];
+        preparacion = { serviciosOk, preciosOk, horariosOk, equipoOk, oficiosConOferta };
       }
     }
     setPantalla({
