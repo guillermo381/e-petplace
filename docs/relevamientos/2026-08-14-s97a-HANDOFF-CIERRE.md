@@ -13,6 +13,10 @@ que el founder.** *No es desconfianza: es economía de ojo.* El founder ya
 gastó una vuelta hoy en un defecto que Code destapa en tres minutos (D-799).
 
 ### Hecho y verde ✅
+- **EL ALTA DEL MOSTRADOR NO-VET, CAMINADA ENTERA** (Estética → «Registrar
+  mascota nueva» → Registrar). **✅ REGISTRA: la mascota nace.** Contesta la
+  pregunta que la mesa tenía abierta —*«el mostrador solo registra
+  veterinaria»*—: **para el ALTA, no.**
 - **El barrido de colisión en ANDROID REAL** — dos filas recortadas del
   aparato, **cero colisión**, el título **elide con elipsis real**. *Era la
   evidencia que faltaba: todo el verde de la fila era RN-web.*
@@ -20,13 +24,28 @@ gastó una vuelta hoy en un defecto que Code destapa en tres minutos (D-799).
   vista.** Cierra D-804 + D-805, **y el founder ya la firmó**.
 - **El mostrador no-vet ENTRANDO POR LA BALDOSA** — el camino existe.
 
+### 🔴 EL ÍTEM 1 SE CORRIGE A SÍ MISMO — medido
+
+**«El alta hasta la voz del *todavía no*» MEZCLABA DOS CAMINOS.** Caminado:
+el alta crea el fantasma y **vuelve a la búsqueda**; huella medida = **1
+mascota, 0 perfiles, 0 solicitudes**. **No hay handshake al dar de alta —
+y es correcto: a un fantasma no hay a quién preguntarle nada.**
+
+⇒ **`handshakePie` («La familia todavía no respondió») es del OTRO camino:**
+buscar una familia **ya registrada** y pedirle autorización.
+**Ese es el que falta caminar.**
+
+⚠️ **Residuo declarado y DEJADO a propósito:** mascota `SondaS97A`
+(`eda482ab-e226-4f3a-8266-03a46c6889c4`, familia
+`0b154fea-f60c-44d9-864f-79b0192d5f16`, Clínica Aurora). **Se intentó borrar y
+la FK lo rebotó: ya tiene su evento en `eventos_mascota`** — *el alta deposita
+en el expediente, o sea el Bio-Expediente haciendo su trabajo*. **No se
+fuerza:** precedente S92 — una sonda con historia **se marca, no se borra**.
+
 ### 🔴 PENDIENTE, en orden
-1. **El alta del mostrador no-vet hasta la voz del «todavía no».** ⚠️ **HAY
-   QUE ENTRAR POR LA BALDOSA** (con `oficio` en la URL) — por otro camino cae
-   el vacío viejo con CTA al taller de veterinaria, *y fotografiarías el
-   defecto que esta tanda curó en vez de la voz nueva* (precisión de C).
-   **Voto de C ya sobre la mesa:** la baldosa se queda; falta la última
-   estación, no el camino.
+1. **El handshake con una familia REGISTRADA** (buscar por email → pedir
+   autorización → la voz del «todavía no»). ⚠️ **Entrar por la baldosa igual**
+   — por otro camino cae el vacío viejo con CTA al taller de veterinaria.
 2. **`+vet2` (paseo-only)** — perdió `ATENDER` **y** «Registrar atención».
    **Es consecuencia de firma, no bug.** *Lo que hay que mirar es cómo se VE
    ese vacío:* **la ausencia de la TAB está firmada y no se explica**
@@ -162,7 +181,23 @@ que es lo que más vale— **y su literal marcado como faltante.**
    RLS lo filtró a 0 filas».** **Medir el VALOR.**
 7. **No redirigir la salida de `gen:types`** (L-192 en primera persona) ni
    leer el exit de un `| head`/`| tail` (L-191).
-8. **El CLI `db query`: un archivo = UNA transacción**, y hay que correrlo
+8. **`adb exec-out screencap` devuelve 0 BYTES de vez en cuando.** Un PNG
+   vacío se lee como pantalla negra ⇒ **verificar tamaño antes de concluir**.
+   *Reportar «la pantalla está en negro» por una captura vacía es un hallazgo
+   inventado.*
+9. **`adb shell input text` CORTA EN EL PRIMER ESPACIO** («Sonda S97A» entró
+   como «Sonda»). Sin espacios, o `%s`.
+10. **Un campo a `y<250` puede estar tapado por el encabezado**: el tap no
+   falla, entra en otro lado. Scrollear al tope antes de tipear.
+11. **NO SE NAVEGA A CIEGAS EN EL APARATO.** Un swipe desde abajo abrió la
+   bandeja del sistema y terminé capturando Ajustes de USB — **fuera de
+   nuestras apps, que §6bis-A prohíbe**. Se entra por `am start` con deep
+   link. *(Las capturas ajenas se borraron.)*
+12. **Los nombres de tabla NO se adivinan:** `familias`→**`familia`**,
+   `eventos`→ es la de COMUNIDAD, la del expediente es **`eventos_mascota`**,
+   `solicitudes_mostrador`→**`solicitud_autorizacion_mostrador`**. *Tres
+   abortos seguidos por suponer un plural.*
+13. **El CLI `db query`: un archivo = UNA transacción**, y hay que correrlo
    **desde la raíz del repo** (si no: `Cannot find project ref`).
 
 ---

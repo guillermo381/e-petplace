@@ -15679,3 +15679,54 @@ antes de esa decisión rompería 3 filas vivas o dejaría el CHECK contradiciend
 a la FK, que es cambiar dos listas por tres.*
 **Territorio: A.** **Disparo:** el próximo arco que toque el catálogo de
 servicios.
+
+---
+
+#### D-813 — 🟡 LA BALDOSA ELEGIDA DEL SELECTOR DE ESPECIE TIENE BORDE TEAL Y RELLENO MAGENTA
+
+**Medido por A en dispositivo (S97-A, `demovet`, alta del mostrador entrando
+por la baldosa de Estética), muestreando el píxel — no de ojo:**
+
+| Mitad de la señal | Color real | ¿Resuelve por casa? |
+|---|---|---|
+| **Borde** | `#0A7268` = `palette.tealDark` | ✅ **sí** |
+| **Relleno** | `#F1E5F1` (tinte magenta) | 🔴 **NO — fijo** |
+
+**Las dos mitades de la misma señal están en desacuerdo**, y en la app donde
+`§15b.1` firmó que *«el magenta vive SOLO en la marca»*.
+
+### La causa, en dos líneas de la misma pieza
+
+`packages/ui/src/components/SelectorEspecie.tsx:111-119`
+
+```ts
+const fondo = conCapa ? theme.capaBg.comunidad : …   // ← FIJO (capa MARCA/AFECTO)
+const borde = conCapa ? acentoEleccion         : …   // ← accent.control (por casa)
+```
+
+**`accent.control` está bien resuelto** —`themes/index.ts:137` le da `tealDark`
+al prestador— **y el borde lo obedece. El relleno no lo consulta.**
+
+### 🔴 POR QUÉ ESTO NO SE PODÍA VER ANTES, y es la parte que vale
+
+**La pieza nació para el CLIENTE, donde los dos tokens COINCIDEN** —
+`accent.control` = magentaDark **y** `capaBg.comunidad` = tinte magenta. Con una
+sola casa, *el acoplamiento es invisible: la pieza se ve perfecta y el defecto
+no existe todavía*.
+
+> ***Una pieza correcta en una casa puede estar rota en la segunda, y el día
+> que llega la segunda nada avisa*** — no hay error, no hay warning, y el
+> typecheck ve dos strings de color igual de válidos.
+
+**Y el comentario de la propia pieza lo cuenta sin saberlo:** dice que la tile
+se pintaba verde y se cambió porque *«hoy es la ÚNICA superficie de la app
+donde elegir algo no se ve magenta, y el founder lo leyó como bug dos veces»*.
+**Esa frase está escrita desde el cliente y era correcta ahí.** En el prestador,
+verse magenta es exactamente lo que no debe pasar. *La cura de S91 fue justa
+para su casa y se volvió defecto al mudarse.*
+
+☠️ **Muere** cuando el relleno salga del mismo lugar que el borde (un tinte
+derivado del acento por casa, no una capa fija) **y las dos casas se vean en
+dispositivo** — el cliente no puede regresionar. **Territorio: B** (la pieza).
+**Prioridad: no bloquea** — la selección se lee igual de clara; lo que falla es
+de qué color se lee.
