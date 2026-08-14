@@ -841,6 +841,48 @@ function FilaSalida({
   );
 }
 
+/* ⭐ S98-D · EL VERBO DE LLEGADA — COMPOSICIÓN CONDICIONAL, **APAGADA**.
+ *
+ * FIRMA DEL FOUNDER: el «Llegó» de la fila del HOY es **redundante para
+ * quien atiende**. La regla propuesta: *la llegada se registra al atender;
+ * el verbo explícito solo se compone con RECEPCIÓN ACTIVA.*
+ *
+ * ⚠️ QUÉ ES «EL VERBO» Y QUÉ NO, porque en esta pantalla hay DOS «Llegó»:
+ *   · **el verbo** = `recepcion.llegoCta`, el botón que REGISTRA la llegada
+ *     (`conVerbo` en `accionesDe`). **Es este, y es el que se condiciona.**
+ *   · **el estado** = `recepcion.llego`, el chip que dice que la mascota ya
+ *     llegó. **No se toca**: no es un verbo, es lo que pasó.
+ *
+ * 🔴 NO SE ENCIENDE, y las DOS razones son independientes — cualquiera de
+ * las dos sola ya alcanza para dejarlo apagado:
+ *
+ * ① **EL BORDE NO ESTÁ FIRMADO.** «Recepción activa» admite dos lecturas y
+ *    NO son la misma pantalla:
+ *      (a) **quien mira es recepción** — se apoya en *«redundante para quien
+ *          atiende»*: el gestor que atiende no lo ve;
+ *      (b) **el negocio TIENE recepción** — el gestor de una clínica con
+ *          recepcionista tampoco lo necesita, pero el gestor que atiende
+ *          SOLO sí, y bajo (a) también lo perdería.
+ *    Queda cableada **(a)**, la conservadora respecto de la firma, **y se
+ *    declara que es una elección pendiente de su palabra, no una decisión.**
+ *    El borde vive en UNA función: firmarlo cambia una línea.
+ *
+ * ② **LA MITAD DE MOTOR NO EXISTE — medido, no supuesto.** De todas las
+ *    funciones de la base, **solo `registrar_llegada` escribe `llegada_en`**
+ *    (`obtener_jornada_recepcion` apenas la lee). **Iniciar la atención NO
+ *    registra la llegada.** Así que encender esto hoy no sacaría un verbo
+ *    redundante: **dejaría a los negocios sin recepción SIN NINGUNA forma
+ *    de registrar que alguien llegó** — la primera mitad de la regla del
+ *    founder sostiene a la segunda, y todavía no está construida.
+ *
+ * ⇒ Su condición de encendido son las DOS: la firma del borde **y** el
+ *   escritor de `llegada_en` en el camino de atender. */
+const VERBO_LLEGADA_SOLO_RECEPCION = false;
+
+/** EL BORDE, en un solo lugar. Hoy la lectura (a). */
+const hayRecepcionActiva = (rol: 'gestor' | 'recepcion' | 'profesional' | null): boolean =>
+  rol === 'recepcion';
+
 export default function Hoy() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -1294,7 +1336,14 @@ export default function Hoy() {
      de llamada — que es cómo vuelven las dos líneas. */
   const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
     const m = c.mascota;
-    const conVerbo = porLlegarIds.has(c.id);
+    /* ⭐ S98-D · la composición condicional del verbo, APAGADA por
+       `VERBO_LLEGADA_SOLO_RECEPCION` (sus dos condiciones de encendido
+       están escritas en la constante). Con el interruptor en `false` esto
+       es EXACTAMENTE lo de antes — el `||` corta antes de mirar el rol. */
+    const conVerbo =
+      porLlegarIds.has(c.id) &&
+      (!VERBO_LLEGADA_SOLO_RECEPCION ||
+        hayRecepcionActiva(pantalla.estado === 'listo' ? pantalla.rol : null));
     if (!m && !conVerbo) return undefined;
     return (
       <>
