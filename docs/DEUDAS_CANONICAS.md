@@ -14506,10 +14506,31 @@ uno por uno, cuando cada dueño pasa por su wizard y **dice** lo que hace. Una
 migración lo corrige de golpe **y se lleva por delante a los que estaban
 bien** — sin traza, sin error, y sin nadie que pueda saber a quiénes.
 
-☠️ **Muere** cuando la mesa firme qué significa la modalidad para paseo y
-adiestramiento, **o** cuando el paso ② del wizard haya pasado por los negocios
-vivos y los valores dejen de ser el default. **Disparo:** el primer negocio
-real que camine el wizard.
+☠️ ✅ **CERRADA — 14-ago-2026, firma del founder: EL PASEO ES SIEMPRE A
+DOMICILIO. No existe paseo en local.**
+
+**El criterio que faltaba llegó, y con él la cura de datos que esta ficha
+había FRENADO.** *La ficha no frenaba por miedo al `UPDATE`: frenaba por
+falta de criterio* — su literal era *«qué significa "local" para un paseo es
+decisión de producto, no de migración»*. **Con la firma, los 9
+`atiende_local = true` de paseo dejan de ser un default permisivo y pasan a
+ser un DATO FALSO** — y un dato falso se corrige.
+
+**Las tres consecuencias, aplicadas juntas** (migración `20260814160000`):
+① los 9 paseos a `atiende_local = false` **y `atiende_domicilio = true`** en
+el mismo acto —el CHECK `chk_ps_alguna_modalidad` lo exige, *y además es la
+firma misma*— · ② **un guard vuelve el estado INEXPRESABLE para ese oficio**
+(`trg_ps_paseo_sin_local`, rebote hablado): *curar los datos sin cerrar la
+puerta es curar hasta el próximo `INSERT`* · ③ **el toggle se ofrece POR
+OFICIO** y **el paseo NO cuenta para la capacidad presencial de `ATENDER`**
+(depositado en `LA_CASA_DEL_PRESTADOR` §2.1bis; pedido de superficie a C).
+
+**Cinturón con discriminador:** 0 paseos con local · todos a domicilio · **el
+estado falso REBOTA** al intentar reponerlo · y **22 filas de otros oficios
+intactas** — el contra-caso que prueba que el guard no se pasó de alcance.
+
+**76(g) RIGE y se declaró: esta migración TOCA DATOS.** *Es la única de la
+sesión que lo hace.*
 
 ---
 
