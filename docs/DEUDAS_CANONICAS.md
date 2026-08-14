@@ -15220,3 +15220,55 @@ CONSTRUCCIÓN, no por margen de redondeo.**
 `47 %` sin explicación iba a volver a parecer arbitrario en seis meses.**
 
 **Verificado en dispositivo junto con D-804: dos columnas, ningún wrap.**
+
+---
+
+#### D-806 — 🟡 LAS SEIS ESPECIES DEL ALTA COMPARTEN UN SOLO GLIFO, PORQUE LOS GLIFOS DE ESPECIE NO EXISTEN
+
+**Medido por A caminando el Lote 2 en dispositivo (`019fff02`, `demovet`,
+entrando al mostrador por la baldosa de Estética → «Registrar mascota
+nueva»).**
+
+**Perro · Gato · Conejo · Ave · Roedor · Pez se dibujan con LA MISMA HUELLA
+GENÉRICA.** *Seis opciones, un ícono.*
+
+### 🔴 Y no es un glifo mal puesto: es una AUSENCIA en el set
+
+**Medido contra el registry** (`packages/ui/src/components/Icono.tsx`, **48
+claves**): **CERO glifos de especie.** No hay `perro`, `gato`, `conejo`,
+`ave`, `roedor` ni `pez`.
+
+> **El selector no está eligiendo mal el ícono: está usando el único que
+> tiene.** *La huella genérica no es un fallback perezoso — es el fondo del
+> pozo.*
+
+**Y eso cambia quién lo cura y cuánto cuesta:** no es una línea en una
+pantalla. **Es trabajo de ARTE con el proceso completo de `DIRECCION_ARTE`
+§6b** — hoja de contacto, metáforas ocupadas censadas, 2-3 variantes con su
+riesgo, montaje a **21 px** junto a cinco del registry, y **gate POR ÍCONO**.
+
+**⚠️ No confundir con la galería de S90:** aquella cargó **111 objetos de
+especies-razas** que son **FOTOS** (bucket, origen-IA firmado). *Fotos y
+glifos son dos cosas distintas y viven en dos lugares distintos* — tener las
+primeras no da las segundas.
+
+### El costo real, que es de producto y no de prolijidad
+
+**El selector de especie es visual A PROPÓSITO** — nació en S45 como grid de
+3×2 para que **se elija mirando, no leyendo**. **Con seis íconos idénticos, el
+grid se degrada a una lista de texto con adornos:** *la persona lee los seis
+rótulos igual que en un desplegable, y el espacio que ocupa la grilla deja de
+comprarse nada.*
+
+**Y es una de las primeras pantallas que ve un cliente nuevo por mostrador**
+— el alta asistida es el momento en que el negocio da de alta a una familia
+que todavía no existe en el ecosistema.
+
+**Alcance medido: la especie se elige en DOS caminos** — el alta asistida del
+mostrador (acá) y el onboarding del dueño en `apps/cliente` (S45). **Los seis
+glifos sirven a los dos.**
+
+☠️ **Muere** con los seis glifos en el registry y su gate por ícono pasado.
+**Territorio: B** (el set y su proceso). **Prioridad: NO bloquea el Lote 2** —
+la pantalla funciona y el rótulo dice la verdad; lo que se pierde es que el
+selector sea visual.
