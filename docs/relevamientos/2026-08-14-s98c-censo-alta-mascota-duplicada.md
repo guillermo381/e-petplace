@@ -238,3 +238,85 @@ mostrador —el correo como identidad, el modo asistido, el handshake—
   guard de especie. **No se auditó campo por campo.** Lo que sí se puede
   afirmar: **cualquier cura que toque solo `nueva.tsx` deja esta cuarta
   puerta atrás**, y sería el mismo error que produjo este censo.
+
+---
+
+## 7 · ADDENDUM D-806 — LAS CARAS DE ESPECIE, Y LA CURA ES MÁS CHICA DE LO QUE LA ORDEN SUPONÍA
+
+**La pregunta de la mesa:** *¿de dónde saca el selector del cliente sus
+visuales de especie?* — con la sospecha de que fuera la galería de
+especies/razas o un componente propio del cliente.
+
+### 7.1 · La fuente, con ruta y línea
+
+**`apps/cliente/src/lib/cara-mascota.ts`** (126 líneas) → bucket público
+**`especies-razas`**, sembrado en S90-C: **111 objetos** (105 razas + 6
+genéricos), origen-IA firmado, ficha D-288.
+
+**La sospecha era correcta: es la galería.** Y su fallback tiene tres
+escalones declarados (`cara-mascota.ts:15-23`):
+
+```
+①  <especie>/<slug>.webp     ← con el slug que la sugerencia eligió
+②  <especie>/generico.webp   ← hay especie pero no slug
+③  la huella genérica        ← YA la pone AvatarMascota (onError)
+```
+
+El consumo vive en `PasoEspecie.tsx:183-194`: mapea cada opción y le
+agrega `fotoUrl: urlGenericaDeEspecie(o.codigo)`.
+
+### 7.2 · 🔴 LA PIEZA NO NECESITA ASCENSO — YA ESTÁ ARRIBA Y YA SABE
+
+`packages/ui/src/components/SelectorEspecie.tsx:43-50`:
+
+```ts
+export interface SelectorEspecieOpcion {
+  codigo: AvatarMascotaEspecie
+  nombre: string
+  /** S91 (gate founder) — LA CARA DE LA ESPECIE. Ausente = la huella de
+   *  siempre, así que la ficha no cambia para quien no la pase. */
+  fotoUrl?: string
+}
+```
+
+**El selector compartido YA acepta la cara desde S91.** Y su propio
+comentario **predijo este defecto con todas las letras**: *«ausente = la
+huella de siempre, así que la ficha no cambia para quien no la pase»*.
+
+**Medido: ninguna de las dos pantallas del mostrador le pasa `fotoUrl`**
+(cero ocurrencias en `nueva.tsx`; las dos de `autorizar.tsx` son
+`AvatarMascota` de mascotas existentes, no del selector).
+
+⇒ **El mostrador es, literalmente, «quien no la pasa».** Eso es lo que el
+founder vio y llamó *«no trae los ajustes»*: **la misma pieza, alimentada
+distinto.** Y de yapa cae al relleno de catálogo (`SelectorEspecie.tsx:95`,
+`rellenoCatalogo` se enciende justo cuando `fotoUrl === undefined`), que es
+el fondo tonal que hace que se vea *más viejo* además de sin cara.
+
+### 7.3 · ⚠️ EL ASCENSO NO ES DE B — ES DE A, Y YA ESTÁ PEDIDO
+
+**La orden decía que el ascenso a `@epetplace/ui` era de B. Medido, no
+hace falta ningún ascenso de pieza:** lo que falta no es un componente,
+es **poder resolver la URL desde el prestador**.
+
+Y el propio archivo del cliente declara el camino, sin que yo lo proponga
+(`cara-mascota.ts:34-42`):
+
+> *«⚠️ PUENTE DECLARADO — ESTE ARCHIVO ESTÁ DE PASO. La casa resuelve URLs
+> de bucket público en `packages/api` (`resolverUrlLogoPrestador` /
+> `resolverUrlGaleriaPrestador`). **D pidió su gemela (`resolverUrlRaza`)**.
+> Cuando exista, el cuerpo de las dos funciones de acá se reemplaza por un
+> re-export y nada más cambia.»*
+
+⇒ **La cura de D-806 es de DATO y de una línea por pantalla**, y su única
+precondición es `resolverUrlRaza` en `packages/api` — **territorio de A, ya
+pedida por D**. Copiar `urlGenericaDeEspecie` al prestador sería fabricar
+el cuarto clon del día en el archivo que este censo escribió para no
+hacerlo.
+
+### 7.4 · Lo que esto le hace al plan de etapas
+
+**D-806 entra ENTERA en la etapa 1** (la de dato) y **no necesita la
+etapa 2**: no hay pieza que unificar — hay una pieza bien hecha que un
+consumidor no está alimentando. *La lección es más útil que la cura:
+compartir el componente no alcanzó; lo que divergió fue lo que se le pasa.*
