@@ -2531,6 +2531,27 @@ export const prestadorEs = {
     desvincularAviso:
       'Al darla de baja pierde el acceso al negocio. Lo que hizo queda en el expediente. Si tiene citas agendadas pasan a ser citas del negocio, y eso no se deshace.',
     bajaDespegadas: '{{n}} citas futuras pasaron a ser del negocio.',
+    /* ⭐ S97-D · EL CUARTO BLOQUE — ADMINISTRADOR · LOTE S97-D, GATE PENDIENTE
+       Voz: TUTEO (L-148). El verbo del botón es «dar el rol» y NO
+       «hacerla administradora» — nota de oficio FIRMADA en S74: el género
+       no se resuelve desde un nombre. */
+    adminTitulo: 'Gestión del negocio',
+    adminToggle: 'Administrador',
+    adminAyuda: 'Puede configurar el negocio igual que tú. Lo único que no puede es nombrar a otros administradores.',
+    /* 🔴 PLACEHOLDER DECLARADO — SU LITERAL ESTÁ FIRMADO Y NO VIAJÓ.
+       El texto real vive en `LETRA_ROLES_EQUIPO_S74` §6 y esta pista NO lo
+       recibió (L-142: lo que no llegó como texto no se reconstruye de
+       memoria). Se eligió a propósito un placeholder que SE VE que lo es,
+       en vez de uno verosímil: un aviso plausible pero inventado sobre
+       entregar el gobierno del negocio no lo caza nadie en un gate (L-139).
+       Al reemplazarlo, renombrar la key a `adminAviso` y borrar esta nota. */
+    adminAvisoPENDIENTE:
+      '[FALTA EL TEXTO FIRMADO — LETRA_ROLES_EQUIPO_S74 §6] Vas a darle a {{nombre}} el control del negocio.',
+    adminDarCta: 'Dar el rol',
+    adminQuitarAviso: '{{nombre}} deja de poder configurar el negocio. Sigue en tu equipo y conserva sus oficios.',
+    adminQuitarCta: 'Quitar el rol',
+    adminCancelar: 'Ahora no',
+    adminError: 'No pudimos cambiar el rol. Prueba de nuevo.',
     equipoDeUno: 'Tu equipo es tuyo por ahora. Invita cuando lo necesites.',
     invitarCta: 'Invitar a tu equipo',
     invitarTitulo: 'Invitar a tu equipo',
