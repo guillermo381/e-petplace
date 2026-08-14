@@ -6,6 +6,24 @@
 
 export const opacity = {
   disabled: 0.45,
+
+  /** LA LUZ DE LA ESQUINA — **7% FIRMADO** (`DIRECCION_ARTE` §9bis.2,
+   *  A4, firma del founder 26-jul-2026): círculo desbordando por la
+   *  esquina superior derecha, diámetro ~60% del ancho, centro fuera del
+   *  lienzo. *«Es el ÚNICO adorno permitido en un techo.»*
+   *
+   *  NACE COMO TOKEN AHORA, y no antes, porque hasta hoy el alfa vivía
+   *  tecleado en cada techo que la montaba. Lo pide su propia letra: la
+   *  ENMIENDA S82 de §9bis.2 dice que **el valor sale del token del
+   *  tema, jamás de un literal** — y esa enmienda se escribió para el
+   *  COLOR (blanco sobre techo oscuro, tinta sobre claro), dejando el
+   *  alfa suelto. Un adorno firmado cuyo número se re-teclea es el
+   *  mismo hueco que N10 tenía con las duraciones.
+   *
+   *  ⚠️ EL ALFA ES EL FIRMADO Y NO SE MODULA: lo que cambia por contexto
+   *  es el REGISTRO del color (`text.primary` del tema resuelve las dos
+   *  caras), nunca el 7%. */
+  luzDeEsquina: 0.07,
   /** LA MARCA DE AGUA del fondo — **0.045 FIRMADO (founder, 2-ago-2026,
    *  S84-B6)**, un solo valor para las DOS casas.
    *

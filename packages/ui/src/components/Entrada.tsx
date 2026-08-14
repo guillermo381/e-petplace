@@ -1,7 +1,16 @@
 /**
  * Entrada — EL PORTADOR de §5 LA ENTRADA (S81-B; la firmada del
- * REGISTRO S80: 45 ms de escalón · 300 ms · translateY desde 15 ·
+ * REGISTRO S80: **120 ms** de escalón · 300 ms · translateY desde 15 ·
  * la física de la casa).
+ *
+ * ⏪ S97+-B — ESTE HEADER DECÍA «45 ms de escalón» Y LA CONSTANTE DE
+ * ABAJO DICE 120 DESDE S81. La enmienda del founder (45 → 120, con su
+ * porqué medido) se aplicó en el código y no en la primera línea del
+ * archivo, así que **la pieza se contradecía a sí misma**: quien leyera
+ * el header —que es lo que se lee— se llevaba el número derogado. Y no
+ * se quedó adentro: el 45 volvió a viajar en un contrato de pedido de
+ * S97. *La prosa derivada decae mientras el objeto no (L-141), y acá el
+ * objeto y su rótulo vivían en el mismo archivo.*
  *
  * LA CONDICIÓN DE LA MESA (patrón FilaCita): la pantalla declara QUE
  * entra y su ORDEN DE LECTURA — **JAMÁS los números**. Duración,
@@ -32,7 +41,17 @@ import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
 // Los números de la ley — PRIVADOS a propósito (la condición de la mesa).
-const DURACION = 300 // techo de Ley 6 — NO SE TOCA
+/** ⏪ S97+-B · el 300 DEJA DE SER UN LITERAL ACÁ y pasa a salir del token
+ *  (`motion.duration.estandar`). MISMO VALOR, cero cambio visual: lo que
+ *  cambia es que deja de haber dos lugares donde vive el mismo número.
+ *  El porqué: N10 (Norte, 13-ago) declara el vocabulario del movimiento
+ *  CERRADO en tres duraciones, y el 300 —que esta pieza llamaba «techo
+ *  de Ley 6: INTOCABLE»— era una ley escrita en una constante local. Un
+ *  vocabulario cerrado cuyos valores no son tokens lo vuelve a teclear
+ *  cada pieza. La condición de la mesa se mantiene INTACTA: el número
+ *  sigue siendo PRIVADO para el consumidor (`Entrada` no expone
+ *  `duracion` ni `delay`); lo único que cambia es de dónde lo lee. */
+const DURACION = motion.duration.estandar // techo de Ley 6 — NO SE TOCA
 const DESDE_Y = 15
 const CURVA = Easing.bezier(...motion.easing.easeOut.bezier)
 /** ESCALÓN 120 — FIRMADO (S81, orden de mesa "sin gate"): §5 pasa de

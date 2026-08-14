@@ -62,6 +62,10 @@ export { Texto, type TextoProps, type TextoVariante, type TextoColor } from './c
 export { FilaDato, type FilaDatoProps } from './components/FilaDato'
 export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
+// Destape — S97+-B: la ceremonia de cierre del wizard de alta (pedido de C,
+// contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
+// que sale del ultimo gesto REAL y no de un temporizador paralelo.
+export { Destape, type DestapeProps, type DestapeTab } from './components/Destape'
 // S84-B7 — la vitrina del negocio, UNA sola vez (cliente + espejo).
 // S84-B16 — la ZONA (círculo sin pin, no interactivo). Variante .web.
 export { MapaZona, type MapaZonaProps } from './components/MapaZona'

@@ -59,6 +59,7 @@ import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
 import { PinMovible } from '../components/PinMovible'
 import { SelectorVentana } from '../components/SelectorVentana'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
+import { Destape } from '../components/Destape'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
@@ -184,6 +185,61 @@ function MuestraLugar() {
 // disparador. El recuadro la acota: en producción barre la pantalla
 // entera, y ocupar la galería con un flash a pantalla completa cada vez
 // que alguien scrollea sería el adorno que la Ley 16 quita.
+function MuestraDestape() {
+  const [corriendo, setCorriendo] = useState(false)
+  const [conLogo, setConLogo] = useState(false)
+  const [fin, setFin] = useState<string | null>(null)
+  const { theme: t } = useTheme()
+  // LAS TABS DE LA MUESTRA son la composicion por capacidad del titular
+  // con local (la barra mas larga): si el destape se lee bien con cuatro,
+  // se lee con las de tres.
+  const TABS = [
+    { key: 'index', etiqueta: 'Hoy' },
+    { key: 'atender', etiqueta: 'Atender' },
+    { key: 'negocio', etiqueta: 'Negocio' },
+    { key: 'cuenta', etiqueta: 'Cuenta' },
+  ]
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View style={{ height: 380, borderRadius: radius.suave, overflow: 'hidden', backgroundColor: t.bg.overlay }}>
+        {corriendo ? (
+          <Destape
+            key={String(conLogo)}
+            nombreNegocio="Clinica Aurora"
+            logo={conLogo ? { uri: 'https://placehold.co/200x200/png' } : null}
+            tabsHabilitadas={TABS}
+            alTerminar={() => {
+              setFin('alTerminar disparado — del ultimo gesto, no de un temporizador')
+              setCorriendo(false)
+            }}
+          />
+        ) : null}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        <Boton
+          variante="compacto"
+          etiqueta="Destapar (monograma)"
+          onPress={() => {
+            setConLogo(false)
+            setFin(null)
+            setCorriendo(true)
+          }}
+        />
+        <Boton
+          variante="compacto"
+          etiqueta="Destapar (con logo)"
+          onPress={() => {
+            setConLogo(true)
+            setFin(null)
+            setCorriendo(true)
+          }}
+        />
+      </View>
+      {fin != null ? <Texto variante="apoyo">{fin}</Texto> : null}
+    </View>
+  )
+}
+
 function MuestraPuerta() {
   const [activo, setActivo] = useState(false)
   const [capa, setCapa] = useState<CapaDeOficio>('consumo')
@@ -2967,6 +3023,17 @@ function GaleriaInterna() {
             />
             <CodigoAEscala etiqueta="Con separadores del emisor" codigo="8765-4321" />
           </View>
+        </Seccion>
+
+        <Seccion titulo="Destape (S97+) — la ceremonia de cierre del wizard de alta">
+          {/* LA UNICA CASA DONDE LA RAMPA DE 6 STOPS ES LEGAL EN EL
+              PRESTADOR (§9bis.3, solo-marca). Fuera del destape sigue
+              prohibida — por eso la muestra vive aca y no como token
+              suelto de una paleta.
+              El boton de fin NO es adorno: prueba que `alTerminar` sale
+              del ULTIMO GESTO REAL y no de un temporizador paralelo, que
+              es la firma de mesa que gobierna esta pieza. */}
+          <MuestraDestape />
         </Seccion>
 
         <Seccion titulo="PuertaDeOficio (S96) — el barrido al cambiar de oficio (§3)">
