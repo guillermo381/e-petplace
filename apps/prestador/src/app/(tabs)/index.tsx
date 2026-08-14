@@ -624,6 +624,51 @@ function FilaCita({
   // M2 s80-b8 + auditoría s80-b12. La fila EN VIVO lleva canto como
   // todas (§9.2: el glow cuenta VIVOS; la tinta es estática).
   const nombre = cita.mascota?.nombre ?? t('agenda.mascotaFallback');
+
+  /* ⭐ S97-D · EL SEGUNDO PISO — la banda de estado (firma del founder).
+     Glifo del oficio + chips, en su propia línea y con el ancho entero
+     (~340px para ~160px de contenido: nada trunca).
+
+     ⚠️ VIAJA EN `acciones` Y VA PRIMERO, y eso importa: `FilaCitaUi` no
+     tiene slot de «segundo piso», así que la banda entra por el único que
+     rinde debajo del sujeto — pero ANTES del `<Separador />` con el que
+     abre `accionesDe`. Así el botón de acción conserva su TERCER nivel
+     tras la línea, que ya era su lugar por diseño (Ley 22c).
+     ⚠️ La banda NO lleva separador propio: es el mismo sujeto en otro
+     renglón, no una cosa distinta (N3 — la línea separa lo que de verdad
+     difiere). Lo que la separa es el AIRE, múltiplo de 8 (N2). */
+  const bandaEstado =
+    insignia || cita.origen === 'mostrador' ? (
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: spacing[2],
+          paddingHorizontal: spacing[4],
+          paddingBottom: spacing[3],
+        }}
+      >
+        <Icono
+          nombre={
+            oficio === 'grooming'
+              ? 'grooming'
+              : oficio === 'adiestramiento'
+                ? 'training'
+                : oficio === 'vet'
+                  ? 'veterinaria'
+                  : 'paseo'
+          }
+          registro="aa"
+          tamano={21}
+        />
+        {cita.origen === 'mostrador' && (
+          <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
+        )}
+        {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
+      </View>
+    ) : null;
+
   return (
     <FilaCitaUi
       // S82-B r38: la dirección se DECLARA (sin default). Acá el onPress
@@ -645,7 +690,16 @@ function FilaCita({
         fotoUrl,
         especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
       }}
-      acciones={acciones}
+      /* El segundo piso primero, las acciones después (ver `bandaEstado`):
+         sujeto · banda de estado · línea · acciones. */
+      acciones={
+        bandaEstado === null && acciones === undefined ? undefined : (
+          <>
+            {bandaEstado}
+            {acciones}
+          </>
+        )
+      }
       onPress={() =>
         router.push(
           oficio === 'grooming'
@@ -657,29 +711,25 @@ function FilaCita({
                 : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
         )
       }
-      // fin = slot de DATOS (Ley 3: la voz es de la pantalla):
-      // S61-B12 la marca de oficio b′ + S70-B1 el chip de origen + estado.
-      fin={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
-          <Icono
-            nombre={
-              oficio === 'grooming'
-                ? 'grooming'
-                : oficio === 'adiestramiento'
-                  ? 'training'
-                  : oficio === 'vet'
-                    ? 'veterinaria'
-                    : 'paseo'
-            }
-            registro="aa"
-            tamano={21}
-          />
-          {cita.origen === 'mostrador' && (
-            <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
-          )}
-          {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
-        </View>
-      }
+      /* ⭐ S97-D · LA FILA VA EN DOS PISOS (firma del founder tras cuatro
+         vueltas de flexbox que movieron el defecto de lugar sin cerrarlo).
+
+         ⏪ ACÁ VIVÍA `fin`: glifo + chip de origen + chip de estado, a la
+         DERECHA del sujeto. **Ese bloque era el problema, medido por B:**
+         ~160px de ancho intrínseco —una `Insignia` con texto adentro no
+         cede— peleando el mismo renglón contra el título. La aritmética no
+         cerraba: ~92 (avatar+gaps) + 96 (piso del texto) + ~160 = ~348
+         pedidos contra ~340 disponibles. **Con el total fuera de rango, la
+         pieza solo podía elegir QUIÉN se rompía**: truncado → solapamiento
+         → corte mudo → colisión, cuatro síntomas de una sola causa.
+
+         ⇒ `fin` queda VACÍO y el chevron —que lo pone `FilaCitaUi` después
+         del slot— se conserva. El sujeto se queda con el renglón entero.
+
+         **La ley detrás, y es la de la fila llevada a su conclusión: el
+         nombre preside ⇒ la forma más honesta de ceder es NO PELEAR EL
+         MISMO RENGLÓN.** Bajar los chips no los degrada: les da el ancho
+         que nunca tuvieron. */
     />
   );
 }
