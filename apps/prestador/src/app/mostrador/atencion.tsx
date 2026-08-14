@@ -38,6 +38,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  caraDeMascotaPorRuta,
   MEDIOS_COBRO,
   obtenerCatalogoVacunas,
   obtenerCatalogoVeterinaria,
@@ -125,6 +126,16 @@ export default function AtencionMostrador() {
   // mascota/[mascotaId] + resolverUrlFoto), jamás foto por params.
   const [fotoFirmada, setFotoFirmada] = useState<string | null>(null);
   const [nombreMascota, setNombreMascota] = useState<string | null>(null);
+  /* ⭐ S98-C · LA ESPECIE, para la cara (D-806). El lector del detalle YA la
+     traía —`obtenerDetalleMascotaPrestador` la selecciona desde siempre—;
+     esta pantalla era la única que la descartaba al llegar. *No hubo que
+     pedirle nada a nadie: había que dejar de tirar el dato.* */
+  const [especieMascota, setEspecieMascota] = useState<string | null>(null);
+  /* La RUTA de su raza — A la sumó al detalle DESPUÉS del guard de acceso
+     (ese orden importa: la cara no se resuelve antes de saber si esta
+     persona puede ver la mascota). Con ella la cara sube de genérico de
+     especie a la de su raza. */
+  const [rutaRaza, setRutaRaza] = useState<string | null>(null);
   const [servicioCodigo, setServicioCodigo] = useState<string | undefined>(undefined);
   const [precio, setPrecio] = useState('');
   const [fase, setFase] = useState<'atencion' | 'cobro'>('atencion');
@@ -242,6 +253,8 @@ export default function AtencionMostrador() {
       // ofrecer la elección», y ninguno se disfraza de «no hay nadie».
       setPersonas(gente !== null && gente.ok ? gente.data.filter((g) => g.activo) : null);
       setNombreMascota(detalle.data.mascota.nombre);
+      setEspecieMascota(detalle.data.mascota.especie);
+      setRutaRaza(detalle.data.mascota.raza_ruta_imagen);
       // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
       // firma falla, la huella digna de AvatarMascota es la cara válida.
       if (detalle.data.mascota.foto_url !== null) {
@@ -501,7 +514,18 @@ export default function AtencionMostrador() {
         {/* S73-B ítem 10 (b): a quién se atiende, con su CARA — presente en
             las dos fases (atención y cobro). Foto → huella digna fallback. */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-          <AvatarMascota nombre={mascota} fotoUrl={fotoFirmada ?? undefined} tamano="md" />
+          {/* S98-C · D-806 — porqué en `components/atender/pizarra-hoja`. */}
+          <AvatarMascota
+            nombre={mascota}
+            fotoUrl={
+              caraDeMascotaPorRuta({
+                especie: especieMascota,
+                rutaImagen: rutaRaza,
+                fotoUri: fotoFirmada ?? undefined,
+              }) ?? undefined
+            }
+            tamano="md"
+          />
           <Texto variante="titulo">{mascota}</Texto>
         </View>
         {fase === 'atencion' ? (

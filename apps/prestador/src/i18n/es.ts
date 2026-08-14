@@ -32,6 +32,78 @@ export const prestadorEs = {
     // posesivos, que es como habla el resto de la app del prestador.
     tusServicios: 'Tus servicios',
     tuTienda: 'Tu tienda',
+    // ⭐ S98-C · LA BANDA DEL DÍA. Los rótulos dicen QUÉ ES cada número:
+    // «agendado» y no «cobrado», porque el lector es del valor agendado y
+    // rotularlo distinto sería un verosímil-falso de plata.
+    bandaCitas: 'Citas de hoy',
+    /* ⭐ S98-C · LOS DOS RÓTULOS QUE EL FOUNDER PIDIÓ (dictado ② del gate),
+       vivos recién ahora porque recién ahora hay lector honesto (D-808).
+       **«Prestados» ≠ «Citas»** y la distinción es el punto: `citas`
+       cuenta lo AGENDADO del día y `prestadas` lo COMPLETADO. Medido en un
+       día real: 6 contra 1. *Llamar «prestados» a lo agendado miente en la
+       dirección optimista, que es la peor.* */
+    /* ⭐ S98-C · EL SUBTÍTULO DE LA BALDOSA, **CON APELLIDO** (segunda firma
+       del founder): *«no tienes paseos programados, o tienes una cita de
+       grooming, o de vet — para que siendo verdad las dos, sea más
+       claro»*. Cada baldosa nombra SU oficio, y con eso la banda (que
+       cuenta el negocio entero) y la baldosa (que cuenta su oficio) dejan
+       de leerse como contradicción **sin tocar ningún número** — §4ter
+       intacto, la claridad por el nombre. Ficha de A: D-814.
+
+       🔴 NINGUNO USA LA FORMA LITERAL DE LA FIRMA, Y ESTÁ MEDIDO — no
+       estimado, y **medido DOS VECES porque la primera me quedó corta**.
+
+       `Baldosa` pinta su detalle en UNA línea. El ancho útil se leyó del
+       nodo vivo con la fuente computada (`DMSans 400 14px`):
+
+           viewport 420 → **151 px**
+           viewport 360 → **121 px**   ← el teléfono angosto de la casa
+
+       ⚠️ **Y la relación NO es lineal**: los paddings de página, celda y
+       pieza son FIJOS, así que al angostar se comen una fracción cada vez
+       mayor. Mi primera pasada extrapoló «≈148 px en 412» y con esa regla
+       habría aprobado TRES voces que truncan. *Un presupuesto de ancho se
+       mide en el caso duro, no se proyecta desde el cómodo.*
+
+       Contra los 121 px reales:
+
+           «Sin paseos hoy» .................. 097,2  ✓   ← literal del founder
+           «Sin baños hoy» ................... 090,3  ✓
+           «Sin sesiones hoy» ................ 107,2  ✓
+           «Sin consultas hoy» ............... 113,2  ✓
+           «Sin citas de vet hoy» ............ 126,4  ✗ trunca
+           «Sin citas de grooming hoy» ....... 167,2  ✗ trunca
+           «Sin citas de adiestramiento hoy» . 204,3  ✗ trunca
+
+       ⇒ Los cuatro van con **el sustantivo propio del oficio**, que es la
+       otra forma que el founder usó en la misma frase (*«no tienes
+       PASEOS»*) y la única que entra en los cuatro. *Truncar la frase
+       firmada la habría dejado en «Sin citas de adiestramien…», que no
+       informa y encima se ve rota.*
+
+       ⚠️ Lo que el sustantivo cuesta, declarado: «baños» no anuncia el
+       corte y «consultas» no anuncia vacunación ni urgencia — los dos
+       conteos son EXACTOS (todo grooming incluye baño; el conteo es de
+       citas, no de consultas), pero el nombre nombra el acto típico. Se
+       acepta porque el TÍTULO de la baldosa dice el oficio cuatro píxeles
+       arriba: **el apellido lo carga el par, no la línea sola.** */
+    datoPaseoCero: 'Sin paseos hoy',
+    datoPaseoUno: '1 paseo hoy',
+    datoPaseoN: '{{n}} paseos hoy',
+    datoGroomingCero: 'Sin baños hoy',
+    datoGroomingUno: '1 baño hoy',
+    datoGroomingN: '{{n}} baños hoy',
+    datoVeterinariaCero: 'Sin consultas hoy',
+    datoVeterinariaUno: '1 consulta hoy',
+    datoVeterinariaN: '{{n}} consultas hoy',
+    datoAdiestramientoCero: 'Sin sesiones hoy',
+    datoAdiestramientoUno: '1 sesión hoy',
+    datoAdiestramientoN: '{{n}} sesiones hoy',
+    bandaPrestados: 'Prestados hoy',
+    bandaAgendado: 'Agendado hoy',
+    bandaCobrado: 'Cobrado hoy',
+    bandaParcial: 'El total es parcial: {{n}} de hoy todavía no tienen precio.',
+    bandaNoSePudo: 'No pudimos leer los números de hoy.',
     oficioVeterinaria: 'Veterinaria',
     oficioGrooming: 'Estética',
     oficioPaseo: 'Paseo',
@@ -1173,24 +1245,53 @@ export const prestadorEs = {
     // y acá puede ser otra. NO promete acción porque no hay ninguna que
     // ofrecer todavía (Ley 17.4): el reintento por causa depende de D-538.
     bloqueNoCargo: 'No pudimos cargar esto ahora.',
+    /* ⭐ S98-C · LAS CUATRO VOCES DE LA BALDOSA — cortas POR MEDICIÓN, no
+       por estilo: `Baldosa` pinta su detalle con `numberOfLines={1}` sobre
+       ~155 px útiles ≈ **22 caracteres** en `apoyo`. Las voces de las
+       filas viejas (30-37 car.) truncaban. *Un «4 servicios activo…» no
+       informa y encima se ve roto.*
+       ⚠️ La del fallo es HERMANA de `bloqueNoCargo`, no la misma: aquélla
+       tiene 29 caracteres y no entra. Dice lo mismo con menos, y sigue
+       diciendo que no se pudo LEER — jamás que no haya nada configurado,
+       que es toda la deuda de D-541. */
+    baldosaSinConfigurar: 'Sin configurar',
+    baldosaUno: '1 servicio',
+    baldosaN: '{{n}} servicios',
+    baldosaNoCargo: 'No se pudo leer',
+    /* ⭐ S98-C · «Tu tienda» — LAS DOS VISTAS (firma del founder, 14-ago).
+       Los nombres tienen que DIFERENCIARLAS: una es el inventario del
+       local (suyo, no sale a ningún lado) y la otra es la vitrina que ve
+       el cliente. *Si los dos se llamaran «productos», la pantalla no
+       diría cuál es cuál — y ésa era justo la firma.* */
+    tiendaVitrina: 'Vender por e-PetPlace',
+    /* ⏪ Estos dos detalles nacieron ESCRITOS A OJO y la captura los cazó:
+       «La vitrina del cliente» (130,2) y «Llega en la próxima versión»
+       (174,4) truncan contra los 121 px del teléfono angosto. La versión
+       larga de la segunda vive en la Hoja, que es donde hay lugar. */
+    tiendaVitrinaDetalle: 'La vitrina',
+    tiendaLocal: 'Inventario de tu local',
+    tiendaLocalDetalle: 'Muy pronto',
+    tiendaV2Titulo: 'Todavía no, pero viene',
+    tiendaV2Voz:
+      'El inventario de tu local —lo que tenés en tus estantes, sin salir a la vitrina— llega en la próxima versión. Por ahora podés vender por e-PetPlace.',
+    tiendaV2Cerrar: 'Entendido',
     enPreparacion: 'En preparación',
-    oferta: 'Tu oferta',
+    /* ☠️ S98-C · MURIERON OCHO KEYS DE ESTE BLOQUE (Ley 37), con censo en
+       TODO el repo antes de tocarlas: `oferta` (el rótulo «Tu oferta», que
+       la firma de las dos naturalezas reemplaza) y las SIETE voces de
+       detalle de los cuatro mundos —`mundo*Vacio`, `mundo*Detalle`,
+       `mundoVeterinariaDetalleUno`—, escritas para una FILA ANCHA y que
+       en la baldosa no entran en un renglón.
+       *Una key huérfana no rompe nada: solo espera a que alguien la lea y
+       crea que rige.* Los NOMBRES de los mundos SIGUEN VIVOS abajo — son
+       el título de cada baldosa. */
     // S58-B B1a (§15b.5): NEGOCIO COMO MUNDOS · LOTE S58, GATE PENDIENTE
     paseo: 'Paseo',
-    mundoPaseoVacio: 'Ábrelo y arma tu oferta en el taller.',
     mundoGrooming: 'Grooming',
-    // S59-B5: el mundo ABRIÓ — el coming-soon murió (Ley 37); el vacío
-    // invita al taller (mismo patrón que el mundo Paseo) · LOTE S59
-    mundoGroomingVacio: 'Ábrelo y arma tu oferta en el taller.',
     // S63-B: el mundo Adiestramiento
     mundoAdiestramiento: 'Adiestramiento',
-    mundoAdiestramientoVacio: 'Configura tu oferta y tus programas.',
-    mundoAdiestramientoDetalle: 'Sesión {{precio}} · {{n}} programas',
     // S68-B: el mundo Veterinaria · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinaria',
-    mundoVeterinariaVacio: 'Abre tu consultorio: servicios, precios y horarios.',
-    mundoVeterinariaDetalleUno: '1 servicio activo · desde {{precio}}',
-    mundoVeterinariaDetalle: '{{n}} servicios activos · desde {{precio}}',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
@@ -1700,14 +1801,10 @@ export const prestadorEs = {
     personaFallback: 'Sin nombre',
     citasDelDia: '{{n}} hoy',
     porLlegar: 'Por llegar',
-    llego: 'Llegó',
     adentro: 'Adentro',
     adentroCon: 'Adentro con {{nombre}}',
     atendida: 'Atendida',
     noVino: 'No vino',
-    llegoCta: 'Llegó',
-    llegoError: 'No pudimos registrar la llegada. Prueba de nuevo.',
-    llegoNoActiva: 'Esta cita ya no está activa.',
     // ⭐ S88-C · LA BANDA «EN LA PUERTA» del HOY consolidado (firma
     // founder: las tres huérfanas del censo vuelven) · LOTE S88, GATE PENDIENTE
     marcarLlegada: 'Marcar llegada ({{n}} por llegar)',

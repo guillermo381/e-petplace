@@ -24,6 +24,28 @@ export const prestadorEn = {
     titulo: 'Attend',
     tusServicios: 'Your services',
     tuTienda: 'Your store',
+    // S98-C · Espejo de es.ts.
+    bandaCitas: 'Appointments today',
+    // S98-C · Espejo de es.ts — los dos rótulos del dictado ② (D-808).
+    // S98-C · Espejo de es.ts — el subtítulo CON APELLIDO. Mismo criterio
+    // de ancho: en inglés las formas son más cortas y las cuatro entran.
+    datoPaseoCero: 'No walks today',
+    datoPaseoUno: '1 walk today',
+    datoPaseoN: '{{n}} walks today',
+    datoGroomingCero: 'No baths today',
+    datoGroomingUno: '1 bath today',
+    datoGroomingN: '{{n}} baths today',
+    datoVeterinariaCero: 'No consults today',
+    datoVeterinariaUno: '1 consult today',
+    datoVeterinariaN: '{{n}} consults today',
+    datoAdiestramientoCero: 'No sessions today',
+    datoAdiestramientoUno: '1 session today',
+    datoAdiestramientoN: '{{n}} sessions today',
+    bandaPrestados: 'Completed today',
+    bandaAgendado: 'Booked today',
+    bandaCobrado: 'Collected today',
+    bandaParcial: 'The total is partial: {{n}} today have no price yet.',
+    bandaNoSePudo: 'We could not read today’s numbers.',
     oficioVeterinaria: 'Veterinary',
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
@@ -867,23 +889,29 @@ export const prestadorEn = {
     titulo: 'Your business',
     // S77-B — D-541 (espejo): mismo criterio que el castellano.
     bloqueNoCargo: "We couldn't load this right now.",
+    // S98-C · Espejo de es.ts — las cuatro voces cortas de la baldosa.
+    baldosaSinConfigurar: 'Not set up yet',
+    baldosaUno: '1 service',
+    baldosaN: '{{n}} services',
+    baldosaNoCargo: "Couldn't load",
+    // S98-C · Espejo de es.ts — las dos vistas de «Tu tienda».
+    tiendaVitrina: 'Sell on e-PetPlace',
+    tiendaVitrinaDetalle: 'Storefront',
+    tiendaLocal: 'Your shop inventory',
+    tiendaLocalDetalle: 'Coming soon',
+    tiendaV2Titulo: 'Not yet, but coming',
+    tiendaV2Voz:
+      "Your shop inventory —what's on your shelves, without going to the storefront— is coming in the next version. For now you can sell on e-PetPlace.",
+    tiendaV2Cerrar: 'Got it',
     enPreparacion: 'In preparation',
-    oferta: 'Your offering',
+    // ☠️ S98-C · Espejo de es.ts: murieron las mismas ocho keys.
     // S58-B B1a · Espejo de es.ts
     paseo: 'Walks',
-    mundoPaseoVacio: 'Open it and build your offer in the workshop.',
     mundoGrooming: 'Grooming',
-    // S59-B5: the world OPENED — coming-soon died (Ley 37) · LOTE S59
-    mundoGroomingVacio: 'Open it and build your offer in the workshop.',
     // S63-B: the Training world
     mundoAdiestramiento: 'Training',
-    mundoAdiestramientoVacio: 'Set up your offer and your programs.',
-    mundoAdiestramientoDetalle: 'Session {{precio}} · {{n}} programs',
     // S68-B: the Veterinary world · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinary',
-    mundoVeterinariaVacio: 'Open your practice: services, prices and hours.',
-    mundoVeterinariaDetalleUno: '1 active service · from {{precio}}',
-    mundoVeterinariaDetalle: '{{n}} active services · from {{precio}}',
     // S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
     vacaciones: 'Time off',
     vacacionesDetalle: "Mark the days you're not walking.",
@@ -1311,14 +1339,10 @@ export const prestadorEn = {
     personaFallback: 'No name',
     citasDelDia: '{{n}} today',
     porLlegar: 'Due to arrive',
-    llego: 'Arrived',
     adentro: 'Inside',
     adentroCon: 'Inside with {{nombre}}',
     atendida: 'Seen',
     noVino: 'Did not come',
-    llegoCta: 'Arrived',
-    llegoError: 'We could not register the arrival. Try again.',
-    llegoNoActiva: 'This appointment is no longer active.',
     // S88-C · the AT THE DOOR band on the consolidated Today · LOTE S88
     marcarLlegada: 'Mark arrival ({{n}} expected)',
     nadiePorLlegar: 'No one else expected today.',

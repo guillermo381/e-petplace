@@ -1686,7 +1686,11 @@ const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
    el ratchet arrancaría con margen regalado. Es exactamente la historia
    de R2 (grep 7 · lint crudo 8 · despojando prosa 4), y por eso se
    escribe: la próxima regla se ahorra el paso. */
-const BASELINE_R36 = 21;
+// ⏬ S98-C: 21 → 20. El trinquete lo APRIETA quien lo baja, si no se
+// oxida: la reconstrucción del Negocio en baldosas se llevó un `gap: 2`
+// inline de la anatomía vieja de los mundos. El propio lint lo pidió
+// («BAJÓ: actualizar baseline»). Declarado a B, dueña del instrumento.
+const BASELINE_R36 = 20;
 const BASELINE_R37 = 3;
 const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;

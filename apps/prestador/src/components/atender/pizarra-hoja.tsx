@@ -1,13 +1,38 @@
 /**
- * ⭐ S86-C · LA PIZARRA — las citas de tu especialidad SIN tratante
- * (lámina firmada del 4-ago). Superficie del PRESTADOR EMPLEADO.
+ * ⭐ S98-C · LA PIZARRA, AHORA HOJA SOBRE `ATENDER` (firma del founder,
+ * opción (a)). **Consultar no es navegar.**
  *
- * QUÉ ES: lo que el mostrador mandó a la pizarra a propósito (el chip de
- * `mostrador/atencion.tsx`) más lo que nació sin tratante.
- * `obtener_pizarra` ya filtra por ESPECIALIDAD con el predicado extraído
- * en S78 — acá no se inventa ningún filtro.
+ * ⏪ VIVÍA EN `/pizarra` COMO PANTALLA (S86-C) y la ruta MURIÓ con esta
+ * mudanza — no queda una segunda superficie para lo mismo (Ley 37). Su
+ * única entrada era la portada de `ATENDER`, medido antes de borrarla.
  *
- * ═══ LA DECISIÓN QUE GOBIERNA ESTA PANTALLA ══════════════════════════
+ * ═══ POR QUÉ HOJA Y NO PANTALLA ══════════════════════════════════════
+ * La pizarra se CONSULTA: mirar qué hay sin dueño y volver a lo que uno
+ * estaba haciendo. Una pantalla te saca del lugar y te obliga a volver;
+ * una Hoja se levanta sobre la portada y la deja debajo, a la vista.
+ * *Navegar es para ir a otro lado; acá no se va a ningún lado.*
+ *
+ * ═══ 🔴 LA ASIGNACIÓN ES INLINE, Y LA HOJA INTERNA MURIÓ ═════════════
+ * Hasta S88 elegir persona abría **una segunda Hoja sobre la primera**.
+ * Con la pizarra ya siendo Hoja, eso sería **una Hoja sobre otra Hoja** —
+ * un `Modal` dentro de un `Modal`, con dos gestos de cierre encimados y
+ * un swipe que nadie sabe cuál de las dos se lleva.
+ *
+ * **La selección pasa ADENTRO de la fila**: al tocar «Asignar», la fila
+ * se expande con su selector y su confirmar. Y el cambio se lleva algo
+ * mejor que un problema técnico: *ahora la persona se elige VIENDO la
+ * cita*, en vez de en una superficie aparte que tenía que repetirle el
+ * contexto arriba. **Muere también esa línea de contexto duplicada** — la
+ * fila que la abre ya dice el día, la hora, el servicio y la mascota.
+ *
+ * ═══ LOS DOS FLUJOS SON SECUENCIALES, POR DISEÑO (firma) ═════════════
+ * Si en medio de una asignación entra un walk-in, el camino es **cerrar
+ * la Hoja, hacer el alta, y volver a abrirla**. No se soporta tenerlas
+ * las dos al mismo tiempo, y no es una limitación: *el mostrador atiende
+ * a UNA persona por vez, y una superficie que finge dos manos le miente
+ * a quien tiene una.*
+ *
+ * ═══ LA DECISIÓN QUE GOBIERNA ESTA SUPERFICIE ══════════════════════════
  * **«Tomar te la asigna al instante. Si alguien la tomó primero, la
  * pizarra te lo dice — nunca te la saca en silencio.»**
  *
@@ -27,20 +52,17 @@
  * no se pinta nunca.
  */
 
-import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCallback, useEffect, useState } from 'react';
+import { View } from 'react-native';
 import {
   AvatarMascota,
   Boton,
   Celda,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
-  MarcaDeAgua,
+  HojaScroll,
   Separador,
   SelectorOpcion,
   Tarjeta,
@@ -51,6 +73,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   asignarCitaAPersona,
   obtenerMiPrestador,
   obtenerPersonasParaAsignar,
@@ -81,12 +104,14 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-export default function Pizarra() {
-  const router = useRouter();
-  const { theme } = useTheme();
+export interface PizarraHojaProps {
+  visible: boolean;
+  onCerrar: () => void;
+}
+
+export function PizarraHoja({ visible, onCerrar }: PizarraHojaProps) {
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
-  const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [resultados, setResultados] = useState<Map<string, Resultado>>(new Map());
   const [tomando, setTomando] = useState<string | null>(null);
@@ -110,8 +135,13 @@ export default function Pizarra() {
   const [personaElegida, setPersonaElegida] = useState<string | undefined>(undefined);
   const [confirmando, setConfirmando] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
+  /* ⏪ Era `useFocusEffect`: una Hoja no gana ni pierde FOCO de
+     navegación — la pantalla de abajo lo conserva. Se lee AL ABRIR, que
+     es el momento en que este contenido pasa a existir para quien mira.
+     Y se relee en cada apertura a propósito: entre una y otra alguien del
+     equipo pudo haber tomado una cita. */
+  useEffect(() => {
+      if (!visible) return;
       let vigente = true;
       void (async () => {
         const pr = await obtenerMiPrestador();
@@ -140,8 +170,7 @@ export default function Pizarra() {
       return () => {
         vigente = false;
       };
-    }, []),
-  );
+  }, [visible]);
 
   /** El día en voz: hoy · mañana · el día corto. La pizarra mezcla
    *  fechas y sin esto todas las filas se leen igual. */
@@ -259,17 +288,9 @@ export default function Pizarra() {
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
-        titulo={t('pizarra.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}
-      >
+    <Hoja visible={visible} onCerrar={onCerrar} titulo={t('pizarra.titulo')} altura="media">
+      <HojaScroll>
+        <View style={{ gap: spacing[4] }}>
         <Texto variante="apoyo">{t('pizarra.subtitulo')}</Texto>
 
         {pantalla.estado === 'cargando' && (
@@ -326,6 +347,26 @@ export default function Pizarra() {
                       <AvatarMascota
                         nombre={c.mascotaNombre}
                         especie={esEspecie(c.mascotaEspecie) ? c.mascotaEspecie : undefined}
+                        /* ⭐ S98-C · LA CARA (D-806). Sin esto la pizarra
+                           dibuja la huella genérica para TODAS — el defecto
+                           que el founder vio navegando.
+                           🔴 `especie` sola NO alcanza y hay que saberlo:
+                           `AvatarMascota` la declara pero **no la usa en el
+                           render** —es reserva de D-288 desde S44—, así que
+                           las pantallas venían pasándola creyendo que hacía
+                           algo. Lo que sí pinta es `fotoUrl`, y por eso la
+                           cara se resuelve ACÁ AFUERA y se le entrega ya
+                           hecha: *la pieza no aprende de buckets.*
+                           `razaSlug: null` es DELIBERADO — ningún lector
+                           del prestador trae el slug del catálogo, y una
+                           URL armada de un texto libre acierta a veces y
+                           el resto muestra la cara de otra raza. Con null
+                           va el genérico de la especie, que siempre es
+                           cierto. Y si el objeto no existiera, el `onError`
+                           de la pieza devuelve la huella. */
+                        fotoUrl={
+                          caraDeMascota({ especie: c.mascotaEspecie, razaSlug: null }) ?? undefined
+                        }
                         tamano="sm"
                       />
                     }
@@ -341,12 +382,17 @@ export default function Pizarra() {
                       ) : puedoAsignar ? (
                         /* ⭐ S88-C: quien RUTEA no toma — recepción no tiene
                            chips y «Tomar» le rebotaría seguro (Ley 23). El
-                           verbo se pinta por el espejo del motor. */
+                           verbo se pinta por el espejo del motor.
+                           ⭐ S98-C: abre la asignación ADENTRO de esta fila.
+                           El botón se apaga mientras SU propia fila está
+                           abierta —no mientras hay otra abierta—: abrir la
+                           de al lado cierra ésta, que es lo que uno espera
+                           de un acordeón. */
                         <Boton
                           variante="secundario"
                           tamaño="sm"
                           etiqueta={t('pizarra.asignar')}
-                          deshabilitado={asignando !== null}
+                          deshabilitado={asignando?.citaId === c.citaId}
                           onPress={() => abrirAsignar(c)}
                         />
                       ) : (
@@ -361,74 +407,64 @@ export default function Pizarra() {
                       )
                     }
                   />
+                  {/* ⭐ S98-C · LA ASIGNACIÓN, INLINE — acá vivía la
+                      apertura de una segunda Hoja (S88-C), y con la
+                      pizarra ya siendo Hoja habría sido un `Modal` dentro
+                      de otro. **Y la mudanza mejora lo que hacía:** la
+                      persona se elige VIENDO la cita —la fila de arriba
+                      dice día, hora, servicio y mascota—, así que muere
+                      también la línea de contexto que la Hoja tenía que
+                      repetir. */}
+                  {asignando?.citaId === c.citaId && (
+                    <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[4], gap: spacing[3] }}>
+                      {personas === null ? (
+                        <EsqueletoGrupo>
+                          <View style={{ gap: spacing[2] }}>
+                            <Esqueleto forma="linea" ancho="70%" />
+                            <Esqueleto forma="linea" ancho="55%" />
+                          </View>
+                        </EsqueletoGrupo>
+                      ) : personas === 'error' ? (
+                        /* La lectura caída SE DICE, jamás se disfraza de
+                           «no hay nadie» (L-197). */
+                        <Texto variante="apoyo" color="danger">{t('pizarra.asignarSinPersonas')}</Texto>
+                      ) : personas.length === 0 ? (
+                        <Texto variante="apoyo">{t('pizarra.asignarNadie')}</Texto>
+                      ) : (
+                        <SelectorOpcion
+                          etiqueta={t('pizarra.asignarQuien')}
+                          disposicion="columnas"
+                          acento="oficio"
+                          opciones={personas.map((p) => ({
+                            codigo: p.empleadoId,
+                            /* `tieneJornada` INFORMA, no filtra (contrato
+                               del lector): una cita ya pactada puede
+                               rutearse a quien no cargó horario — se dice
+                               para que quien reparte decida sabiendo. */
+                            etiqueta: `${p.nombre ?? t('recepcion.personaFallback')}${
+                              p.tieneJornada ? '' : ` · ${t('pizarra.sinJornada')}`
+                            }`,
+                          }))}
+                          seleccionada={personaElegida}
+                          onSelect={setPersonaElegida}
+                        />
+                      )}
+                      <Boton
+                        etiqueta={t('pizarra.asignarConfirmar')}
+                        bloque
+                        cargando={confirmando}
+                        deshabilitado={personaElegida === undefined}
+                        onPress={() => void confirmarAsignar()}
+                      />
+                    </View>
+                  )}
                 </View>
               );
             })}
           </Tarjeta>
         )}
-      </ScrollView>
-
-      {/* ⭐ S88-C · LA HOJA DEL VERBO — elegir quién atiende la huérfana.
-          El día y el servicio de la cita presiden (contexto, no adorno);
-          la lectura caída de personas SE DICE, jamás se disfraza de «no
-          hay nadie» (L-197). */}
-      <Hoja visible={asignando !== null} onCerrar={() => setAsignando(null)} titulo={t('pizarra.asignarQuien')}>
-        {asignando !== null && (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="apoyo">
-              {`${diaEnVoz(asignando.fecha)} ${asignando.hora.slice(0, 5)} · ${
-                asignando.servicioVoz ?? t('pizarra.servicioSinVoz')
-              } · ${asignando.mascotaNombre}`}
-            </Texto>
-            {personas === null ? (
-              <EsqueletoGrupo>
-                <View style={{ gap: spacing[2] }}>
-                  <Esqueleto forma="linea" ancho="70%" />
-                  <Esqueleto forma="linea" ancho="55%" />
-                </View>
-              </EsqueletoGrupo>
-            ) : personas === 'error' ? (
-              <Texto variante="apoyo" color="danger">{t('pizarra.asignarSinPersonas')}</Texto>
-            ) : personas.length === 0 ? (
-              <Texto variante="apoyo">{t('pizarra.asignarNadie')}</Texto>
-            ) : (
-              /* ⏪ S88-C (5-ago): decía `disposicion="tira"` — la tira trunca cada
-                 chip a UNA línea (`numberOfLines=1` en toda disposición no-columna)
-                 y «Prueba Profesional S87 · no schedule» moría en «· no»: el
-                 sufijo `sinJornada` es EL dato que informa la decisión de quien
-                 reparte, y truncado la Hoja informaba a medias justo ahí.
-                 `columnas` ENVUELVE (flexWrap + sin tope de líneas) — el criterio
-                 firmado de los canales de preferencias: lo que se corta es
-                 información, no adorno. De paso muere la tira que no desplazaba
-                 dentro de la Hoja (el gesto del sheet se la comía). */
-              <SelectorOpcion
-                etiqueta={t('pizarra.asignarQuien')}
-                disposicion="columnas"
-                acento="oficio"
-                opciones={personas.map((p) => ({
-                  codigo: p.empleadoId,
-                  /* `tieneJornada` INFORMA, no filtra (contrato del lector):
-                     una cita ya pactada puede rutearse a quien no cargó
-                     horario — se dice para que quien reparte decida
-                     sabiendo. El nombre null cae al fallback digno. */
-                  etiqueta: `${p.nombre ?? t('recepcion.personaFallback')}${
-                    p.tieneJornada ? '' : ` · ${t('pizarra.sinJornada')}`
-                  }`,
-                }))}
-                seleccionada={personaElegida}
-                onSelect={setPersonaElegida}
-              />
-            )}
-            <Boton
-              etiqueta={t('pizarra.asignarConfirmar')}
-              bloque
-              cargando={confirmando}
-              deshabilitado={personaElegida === undefined}
-              onPress={() => void confirmarAsignar()}
-            />
-          </View>
-        )}
-      </Hoja>
-    </View>
+        </View>
+      </HojaScroll>
+    </Hoja>
   );
 }

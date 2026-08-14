@@ -38,6 +38,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   buscarClienteAltaAsistida,
   buscarClientePorTelefono,
   buscarMascotasAccesibles,
@@ -159,9 +160,13 @@ export default function Mostrador() {
                   titulo={m.nombre}
                   subtitulo={t('mostrador.origenClinica')}
                   inicio={
+                    /* S98-C · la cara por especie (D-806) — el porqué entero,
+                       incluido que `especie` es letra muerta en el render de
+                       la pieza, vive en `components/atender/pizarra-hoja`. */
                     <AvatarMascota
                       nombre={m.nombre}
                       especie={esEspecie(m.especie) ? m.especie : undefined}
+                      fotoUrl={caraDeMascota({ especie: m.especie, razaSlug: null }) ?? undefined}
                       tamano="sm"
                     />
                   }

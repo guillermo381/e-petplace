@@ -82,6 +82,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascotaPorRuta,
   obtenerDatosNegocio,
   obtenerEquipoNegocio,
   obtenerMascotasAtendidas,
@@ -555,7 +556,22 @@ export default function Mascotas() {
                   inicio={
                     <AvatarMascota
                       nombre={m.nombre}
-                      fotoUrl={m.foto_url ? urlsFotos.get(m.foto_url) : undefined}
+                      /* ⭐ S98-C · D-806 — y acá se sube UN ESCALÓN sobre el
+                         resto: A ensanchó este lector con `raza_ruta_imagen`
+                         (lookup por lote contra `cat_razas`), así que esta
+                         lista muestra **la cara de SU raza**, no la genérica
+                         de su especie. Por eso usa `…PorRuta`: entra por el
+                         PATH que el catálogo ya resolvió, no por un slug
+                         armado de texto libre — que es lo que A advirtió que
+                         acierta a veces y el resto miente.
+                         Sin ruta, la escalera cae sola al genérico. */
+                      fotoUrl={
+                        caraDeMascotaPorRuta({
+                          especie: m.especie,
+                          rutaImagen: m.raza_ruta_imagen,
+                          fotoUri: m.foto_url ? urlsFotos.get(m.foto_url) : undefined,
+                        }) ?? undefined
+                      }
                       especie={esEspecie(m.especie) ? m.especie : undefined}
                       tamano="sm"
                     />

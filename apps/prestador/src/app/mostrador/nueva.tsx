@@ -39,6 +39,7 @@ import {
   type SelectorEspecieOpcion,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   buscarClienteAltaAsistida,
   buscarClientePorTelefono,
   crearAltaAsistidaMostrador,
@@ -96,8 +97,29 @@ export default function AltaMostrador() {
         setErrorCatalogo(esp.mensaje);
         return;
       }
+      /* ⭐ S98-C · D-806 — **ACÁ ESTABA EL BLANCO ORIGINAL DE LA FICHA.**
+         Estas opciones nacían con `codigo` y `nombre` y nada más, así que
+         el selector caía a su fallback y **las seis especies se dibujaban
+         con la MISMA huella** — el defecto que A confirmó con el ojo
+         caminando el alta en dispositivo.
+
+         Y la cura no eran seis glifos nuevos: **las seis fotos ya existían**
+         en el bucket `especies-razas` desde S90-C, a dos carpetas de
+         distancia. El propio `SelectorEspecieOpcion.fotoUrl` lo predijo en
+         su comentario de S91 (*«ausente = la huella de siempre, así que la
+         ficha no cambia para quien no la pase»*): el mostrador era, justo,
+         quien no la pasaba.
+
+         `razaSlug: null` — acá se elige una ESPECIE, no una raza; no hay
+         slug que pasar y no se inventa ninguno. */
       const validas: SelectorEspecieOpcion[] = [];
-      for (const e of esp.data) if (esEspecieUi(e.codigo)) validas.push({ codigo: e.codigo, nombre: e.nombre });
+      for (const e of esp.data)
+        if (esEspecieUi(e.codigo))
+          validas.push({
+            codigo: e.codigo,
+            nombre: e.nombre,
+            fotoUrl: caraDeMascota({ especie: e.codigo, razaSlug: null }) ?? undefined,
+          });
       setOpciones(validas);
     })();
     return () => {

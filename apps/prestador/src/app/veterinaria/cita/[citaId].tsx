@@ -41,6 +41,7 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerCitaVetPorId,
   obtenerContactoReservaCita,
   obtenerMiCuentaComercial,
@@ -214,7 +215,14 @@ export default function DetalleCitaVet() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                   <AvatarMascota
                     nombre={nombre}
-                    fotoUrl={pantalla.fotoUrl}
+                    /* S98-C · D-806 — porqué en `atender/pizarra-hoja`. */
+                    fotoUrl={
+                      caraDeMascota({
+                        especie: cita.mascota?.especie,
+                        razaSlug: null,
+                        fotoUri: pantalla.fotoUrl,
+                      }) ?? undefined
+                    }
                     especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
                     tamano="lg"
                   />
