@@ -3318,8 +3318,14 @@ export const prestadorEs = {
       tiendaVoz: 'Vender alimento, antiparasitarios y suplementos a las familias que ya te eligen.',
       tiendaCta: 'Quiero vender productos',
       tiendaPropuesta: 'Nos pediste vender productos. Lo estamos revisando.',
+      /* ⭐ S98-C · DOS VOCES, PORQUE SON DOS CASAS. La vieja era UNA y su
+         puerta llevaba SIEMPRE a la config del vendedor: un veterinario
+         leía «precios, horarios y cobertura» —que describe su taller con
+         precisión— y aterrizaba en turnos de reparto. */
       configuracionTitulo: 'El detalle de tu oferta',
       configuracionDetalle: 'Precios, horarios y cobertura',
+      configuracionTiendaTitulo: 'El detalle de tu tienda',
+      configuracionTiendaDetalle: 'Turnos, reparto y facturación',
     },
 
     paso3: {

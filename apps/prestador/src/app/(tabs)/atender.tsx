@@ -52,7 +52,9 @@ import {
   obtenerMiPrestador,
   obtenerPizarra,
   obtenerPlataDelDia,
+  obtenerSolicitudesMostrador,
   type PlataDelDia,
+  type SolicitudMostrador,
 } from '@epetplace/api';
 import { montoCorto } from '@/lib/formato-techo';
 
@@ -191,6 +193,12 @@ type Pantalla =
        *  agenda hoy», que sería afirmar un cero que nadie contó. */
       citasPorOficio: Partial<Record<OficioAtender, number>>;
       pizarra: number | null;
+      /** ⭐ S98-C · EL ECO DE LA PUERTA (§3.1bis, firma del founder).
+       *  Las solicitudes de mostrador que todavía esperan respuesta.
+       *  `null` = **no se pudo leer**, y se dice: un handshake sin
+       *  respuesta que desaparece en silencio es peor que uno que avisa
+       *  que no pudo consultarse (D-541 / Ley 13). */
+      puerta: SolicitudMostrador[] | null;
       /** `null` = no se pudo leer. **NO se degrada a cero**: un cero con
        *  cara de dato diría «hoy no hay nada», y lo que pasó fue que no
        *  pudimos preguntar (L-197, y el propio contrato del lector). */
@@ -234,9 +242,17 @@ export default function Atender() {
            UNA sola ola —las cinco promesas se disparan juntas— y así el
            arreglo conserva su tipo. Aplanado, TS pierde la tupla y `dias[i]`
            degrada a `{}`: el typecheck lo cazó de una. */
-        const [c, pz, pl, dias] = await Promise.all([
+        const [c, pz, sol, pl, dias] = await Promise.all([
           resolverCapacidadAtender(p.data.id),
           obtenerPizarra(p.data.id),
+          /* ⭐ S98-C · EL ECO DE LA PUERTA. Su lector vivía en el HOY y se
+             mudó con él: cada pantalla lee lo suyo y dice su propio fallo,
+             en vez de que un lector alimente a dos y una sola sepa hablar
+             cuando falla. `cuenta_comercial_id` puede ser null (negocio sin
+             cuenta): eso NO es un fallo — es que no hay puerta que oír. */
+          p.data.cuenta_comercial_id !== null
+            ? obtenerSolicitudesMostrador(p.data.cuenta_comercial_id)
+            : Promise.resolve({ ok: true as const, data: [] as SolicitudMostrador[] }),
           // §4ter: el gate vive en el SERVIDOR. Acá no se recompone ningún
           // permiso — se pinta lo que la RPC contesta.
           obtenerPlataDelDia(p.data.id, hoy),
@@ -259,6 +275,17 @@ export default function Atender() {
               capacidad: c.data,
               citasPorOficio,
               pizarra: pz.ok ? pz.data.length : null,
+              /* Solo lo que TODAVÍA espera: pendiente, o expirada que
+                 nadie respondió. Una solicitud ya respondida no necesita
+                 atención y contarla infla el eco (la misma regla que el
+                 HOY tenía escrita, y se muda con ella). */
+              puerta: sol.ok
+                ? sol.data.filter(
+                    (x) =>
+                      x.estado === 'pendiente' ||
+                      (x.estado === 'expirada' && x.respondidaEn === null),
+                  )
+                : null,
               plata: pl.ok ? pl.data : null,
             }
           : { fase: 'error' as const, detalle: c.mensaje };
@@ -319,7 +346,7 @@ export default function Atender() {
     );
   }
 
-  const { capacidad, citasPorOficio, pizarra, plata } = pantalla;
+  const { capacidad, citasPorOficio, pizarra, plata, puerta } = pantalla;
 
   /** El dato vivo de la baldosa **con su apellido**, o `undefined` para
    *  que CALLE. La voz de cada oficio sale de su fila de `KEY_DATO` — el
@@ -483,6 +510,65 @@ export default function Atender() {
                   onPress={() => setPizarraAbierta(true)}
                 />
               </Tarjeta>
+            )}
+
+            {/* ── ⭐ S98-C · EL ECO DE LA PUERTA (§3.1bis) ─────────────────
+                Firma del founder, literal: *«los mensajes de la puerta —que
+                la familia de XXXX no respondió— no deberían estar en HOY:
+                deberían estar en ATENDER»*.
+
+                **VA ACÁ, debajo de la pizarra, y la composición tiene su
+                razón:** las dos son trabajo pendiente del EQUIPO —una cita
+                que nadie tomó, una familia que no contestó— mientras que
+                las baldosas de arriba son el acto primario, por dónde entra
+                quien está parado enfrente. *Poner el eco antes habría
+                empujado hacia abajo lo único que alguien necesita tocar con
+                una persona esperando.*
+
+                **NO va adentro de la pizarra-Hoja**, aunque comparta forma:
+                la pizarra es *trabajo que alguien TOMA* y esto es
+                *correspondencia que espera respuesta ajena* — meterlas
+                juntas obligaría a un solo verbo para dos cosas que se hacen
+                distinto. Y no es fila-con-Hoja porque su contenido ya es
+                corto: una Hoja para dos líneas es una puerta de más.
+
+                Se monta SOLO si hay algo — el caso normal es que no haya, y
+                una sección vacía en la portada del mostrador es ruido. */}
+            {puerta !== null && puerta.length > 0 && (
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="seccion">{t('recepcion.puerta')}</Texto>
+                {puerta.map((s) => (
+                  <Tarjeta key={s.solicitudId} tinte="warning" relleno="amplio">
+                    <View style={{ gap: spacing[1] }}>
+                      <Texto variante="seccion">
+                        {s.estado === 'expirada'
+                          ? t('recepcion.solicitudExpirada', {
+                              mascota: s.mascotaNombre ?? t('agenda.mascotaFallback'),
+                            })
+                          : t('recepcion.solicitudPendiente', {
+                              mascota: s.mascotaNombre ?? t('agenda.mascotaFallback'),
+                            })}
+                      </Texto>
+                      {s.estado === 'pendiente' ? (
+                        // el reloj lo dijo el SERVER (§7bis); acá solo se viste
+                        <Texto variante="dato">
+                          {t('recepcion.solicitudReloj', {
+                            min: Math.max(1, Math.ceil(s.segundosRestantes / 60)),
+                          })}
+                        </Texto>
+                      ) : (
+                        <Texto variante="cuerpo">{t('recepcion.solicitudExpiradaCuerpo')}</Texto>
+                      )}
+                    </View>
+                  </Tarjeta>
+                ))}
+              </View>
+            )}
+            {/* El fallo DICE que es fallo: un handshake sin respuesta que
+                desaparece en silencio es peor que uno que avisa que no se
+                pudo consultar (D-541). */}
+            {puerta === null && (
+              <Texto variante="apoyo" color="danger">{t('recepcion.puertaError')}</Texto>
             )}
 
             {capacidad.tienda && (

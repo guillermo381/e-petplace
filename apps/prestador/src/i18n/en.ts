@@ -2678,8 +2678,11 @@ export const prestadorEn = {
       tiendaVoz: 'Sell food, parasite control and supplements to the families that already choose you.',
       tiendaCta: 'I want to sell products',
       tiendaPropuesta: "You asked to sell products. We're reviewing it.",
+      // S98-C · Espejo de es.ts — dos voces, dos casas.
       configuracionTitulo: 'Your offer in detail',
       configuracionDetalle: 'Prices, hours and coverage',
+      configuracionTiendaTitulo: 'Your shop in detail',
+      configuracionTiendaDetalle: 'Slots, delivery and invoicing',
     },
 
     paso3: {

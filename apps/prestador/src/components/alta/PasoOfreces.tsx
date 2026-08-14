@@ -371,15 +371,50 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
         </View>
       </Entrada>
 
-      {/* ── el enlace amable del §4.0bis: el paso que SÍ se completó ── */}
+      {/* ── el enlace amable del §4.0bis: el paso que SÍ se completó ──
+          🔴 S98-C · **RESUELVE POR NATURALEZA, y antes no lo hacía.**
+
+          Reporte del founder: pidió «Quiero vender productos» y «se
+          habilitó un botón de entrar a configurar que mostraba también
+          servicios de salud». **Medido: el botón no se habilitaba — estaba
+          SIEMPRE**, incondicional, y llevaba a `/ventas/configuracion`, que
+          es la config del VENDEDOR (turnos · reparto · recursos ·
+          facturación). Lo que sí desapareció al reentrar fue el CTA
+          «Quiero vender productos», y desapareció BIEN: la naturaleza había
+          pasado a `solicitada`.
+
+          Reproducido con `duenovet` —una cuenta sin tienda y que nunca la
+          pidió—: el enlace aparecía igual. *No era un estado transitorio:
+          era de AUDIENCIA.*
+
+          Y el diagnóstico fino, que es lo que ordena la cura: **la voz
+          decía servicios y la puerta llevaba a la tienda.** «Precios,
+          horarios y cobertura» describe con precisión el taller de un
+          oficio; describe mal la config de una despensa. Los dos lados
+          existen y cada uno tiene su casa, así que el enlace no se apaga:
+          **se rutea**.
+
+          ⚠️ Y con la tienda `solicitada` va al lado de SERVICIOS, no al de
+          la tienda — la firma del founder es literal: *«se ofrece, pero no
+          se activa hasta que se aprueba»* (Ley 23: la puerta no ofrece lo
+          que va a rechazar). */}
       <Entrada orden={4}>
         <Tarjeta elevacion="reposo" relleno="ninguno">
-          <CeldaNavegacion
-            registro="tinta"
-            titulo={t('alta.paso2.configuracionTitulo')}
-            detalle={t('alta.paso2.configuracionDetalle')}
-            onPress={() => router.push('/ventas/configuracion')}
-          />
+          {pantalla.tienda === 'activa' ? (
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('alta.paso2.configuracionTiendaTitulo')}
+              detalle={t('alta.paso2.configuracionTiendaDetalle')}
+              onPress={() => router.push('/ventas/configuracion')}
+            />
+          ) : (
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('alta.paso2.configuracionTitulo')}
+              detalle={t('alta.paso2.configuracionDetalle')}
+              onPress={() => router.push('/(tabs)/negocio')}
+            />
+          )}
         </Tarjeta>
       </Entrada>
 

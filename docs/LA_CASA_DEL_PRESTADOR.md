@@ -371,6 +371,40 @@ lo VIVO; el día abajo y en orden** · **el label del día SIEMPRE se monta**
 (un bloque que aparece y desaparece hace saltar el layout) · **un cero medido
 no se dibuja como ausencia** (L-201).
 
+### 3.1bis 🔴 EL ECO DE LA PUERTA ES DE LA PUERTA — firma del founder, 14-ago-2026
+
+> *«Los mensajes de la puerta — que la familia de XXXX no respondió — no
+> deberían estar en HOY: deberían estar en ATENDER.»*
+
+⇒ **Toda la correspondencia del handshake de mostrador —pendiente, expirada,
+resuelta— vive en `ATENDER`. El HOY queda solo con el día: citas y
+despachos.**
+
+**Y la razón es la misma que ordenó §3.1 entera, aplicada un escalón más
+adentro.** El HOY es el feed del día: cosas que pasan **a una hora**. Un
+handshake sin respuesta **no pasa a ninguna hora — está esperando ahora**, y
+por eso nunca tuvo fila en la línea. *Lo que la banda hacía era meter
+correspondencia en un cronograma.*
+
+**⚠️ EL ALCANCE ES LA CORRESPONDENCIA ENTERA, NO SOLO LAS TARJETAS — y esto
+se escribe porque la mitad de la deuda estaba escondida.** El eco vivía en
+**DOS lugares** del HOY: la banda «En la puerta» (las tarjetas con el nombre
+de la mascota y su reloj) **y una fila del digesto «Lo que te espera»** que
+decía *«N autorizaciones esperando»* y llevaba a `/mostrador`. Es el mismo
+eco, contado. **Mudar solo las tarjetas habría dejado el discriminador de
+esta firma fallando por la puerta de atrás:** un HOY con handshake vivo
+habría seguido mostrándolo.
+
+**Lo que NO se muda, y hay que saberlo para no vaciar de más:**
+- **el chip «adentro» de cada fila** — eso es el estado de una cita del día,
+  no correspondencia. Su lector (`obtener_jornada_recepcion`) se queda.
+- **las otras tres fuentes de «Lo que te espera»** —citas por coordinar,
+  presupuestos sin respuesta, atenciones sin cerrar— son trabajo del negocio
+  y siguen en el HOY. Se mudó la correspondencia, no el digesto.
+
+**El discriminador de esta firma:** *un HOY con un handshake vivo no muestra
+la solicitud por ningún camino; `ATENDER` sí.*
+
 ---
 
 ## 4 · EL WIZARD DE ALTA — CUATRO PASOS, TODOS SALTEABLES
