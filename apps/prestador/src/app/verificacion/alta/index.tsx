@@ -29,7 +29,7 @@
  * entra a la navegación del producto hasta la firma en dispositivo.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -85,7 +85,19 @@ const SALTEO = {
 
 type Contexto =
   | { estado: 'cargando' }
+  /* ⭐ S98-C · D-799 — TRES CAUSAS, TRES ESTADOS. Acá había UNO
+     (`'error'`) con la voz «puede ser la conexión», y **el wrapper
+     siempre supo distinguirlas**: `sin_sesion` · un fallo real ·
+     `data === null`, que ni siquiera es un error (es el peldaño 0
+     declarado en el JSDoc de `obtenerMiCuentaComercial`).
+     *Colapsarlas mandaba a mirar el WiFi a alguien cuya sesión caducó, y
+     le decía «no pudimos cargar» a quien simplemente todavía no tiene un
+     negocio.* Y las tres tienen SALIDAS distintas —reintentar, entrar,
+     crear el negocio—: una sola voz obliga a una sola salida, y ésa es la
+     parte que no se arregla escribiendo mejor el texto. */
   | { estado: 'error' }
+  | { estado: 'sin_sesion' }
+  | { estado: 'sin_negocio' }
   | {
       estado: 'listo';
       cuentaComercialId: string;
@@ -110,14 +122,21 @@ export default function WizardAlta() {
   const [salteando, setSalteando] = useState<Paso | null>(null);
   const [guardandoSalto, setGuardandoSalto] = useState(false);
   const [destapando, setDestapando] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
 
   const cargar = useCallback(async () => {
     const [cuenta, prestador] = await Promise.all([
       obtenerMiCuentaComercial(),
       obtenerMiPrestador(),
     ]);
-    if (!cuenta.ok || cuenta.data === null) {
-      setContexto({ estado: 'error' });
+    if (!cuenta.ok) {
+      setContexto({ estado: cuenta.codigo === 'sin_sesion' ? 'sin_sesion' : 'error' });
+      return;
+    }
+    if (cuenta.data === null) {
+      // NO es un error: es el peldaño 0. El wizard abre la casa de un
+      // negocio que ya existe — si no existe, el camino es crearlo.
+      setContexto({ estado: 'sin_negocio' });
       return;
     }
     const onboarding = await obtenerEstadoOnboardingWizard(cuenta.data.id);
@@ -144,6 +163,45 @@ export default function WizardAlta() {
 
   const paso = PASOS[indice] ?? 'negocio';
   const esUltimo = indice === PASOS.length - 1;
+
+  /* ⭐ S98-C · ☠️ «GUARDAR» MUERE — CONTINUAR VALIDA Y GUARDA (firma de la
+     mesa, 14-ago). **UN PASO, UN BOTÓN.**
+
+     El defecto que cura: el paso ① tenía su «Guardar» Y el «Continuar» del
+     pie. *Dos botones para un solo acto no son dos caminos: son la
+     pregunta «¿cuál de los dos guarda?» hecha pantalla* — y el que
+     adivinaba mal perdía lo tipeado, porque Continuar avanzaba sin
+     guardar nada.
+
+     CÓMO, sin que el contenedor sepa de campos ajenos: cada paso REGISTRA
+     su confirmación —validar, guardar, y decir si se puede avanzar—, y el
+     pie la ejecuta. El contenedor no valida nada suyo (no conoce los
+     campos de nadie) y ningún paso navega (no conoce el orden). *Cada uno
+     sabe una sola cosa, que es lo que hace que el próximo paso no tenga
+     que tocar este archivo.*
+
+     Un paso SIN confirmación registrada avanza directo — y eso no es un
+     hueco: los pasos ② y ③ guardan EN EL ACTO (el toggle escribe al
+     tocarlo, el documento sube al elegirlo), así que no tienen nada
+     pendiente que confirmar. */
+  const confirmarPaso = useRef<(() => Promise<boolean>) | null>(null);
+  const registrarConfirmacion = useCallback((fn: (() => Promise<boolean>) | null) => {
+    confirmarPaso.current = fn;
+  }, []);
+
+  async function alContinuar() {
+    if (confirmando) return;
+    const fn = confirmarPaso.current;
+    if (fn !== null) {
+      setConfirmando(true);
+      const ok = await fn();
+      setConfirmando(false);
+      // Si no validó o no guardó, NO se avanza: la voz ya la dijo el paso
+      // en su campo. Avanzar igual sería perder lo tipeado en silencio.
+      if (!ok) return;
+    }
+    avanzar();
+  }
 
   function avanzar() {
     // La completitud NO se marca acá: se DERIVA en el motor. Recargamos
@@ -192,19 +250,37 @@ export default function WizardAlta() {
     );
   }
 
-  if (contexto.estado === 'error') {
+  if (contexto.estado === 'error' || contexto.estado === 'sin_sesion' || contexto.estado === 'sin_negocio') {
+    // Cada causa con SU voz y SU salida (D-799). El reintento solo
+    // aparece donde sirve: volver a preguntar no crea un negocio ni
+    // devuelve una sesión.
+    const voz =
+      contexto.estado === 'sin_sesion'
+        ? {
+            titulo: t('alta.sinSesionTitulo'),
+            detalle: t('alta.sinSesionVoz'),
+            etiqueta: t('alta.sinSesionAccion'),
+            ir: () => router.replace('/login'),
+          }
+        : contexto.estado === 'sin_negocio'
+          ? {
+              titulo: t('alta.sinNegocioTitulo'),
+              detalle: t('alta.sinNegocioVoz'),
+              etiqueta: t('alta.sinNegocioAccion'),
+              ir: () => router.push('/cuenta-comercial/nueva'),
+            }
+          : {
+              titulo: t('alta.errorTitulo'),
+              detalle: t('alta.errorVoz'),
+              etiqueta: t('alta.reintentar'),
+              ir: () => void cargar(),
+            };
     return (
       <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
         <EstadoVacio
-          titulo={t('alta.errorTitulo')}
-          descripcion={t('alta.errorVoz')}
-          accion={
-            <Boton
-              variante="compacto"
-              etiqueta={t('alta.reintentar')}
-              onPress={() => void cargar()}
-            />
-          }
+          titulo={voz.titulo}
+          descripcion={voz.detalle}
+          accion={<Boton variante="compacto" etiqueta={voz.etiqueta} onPress={voz.ir} />}
         />
       </View>
     );
@@ -259,6 +335,7 @@ export default function WizardAlta() {
             cuentaComercialId={contexto.cuentaComercialId}
             nombreInicial={contexto.nombreNegocio}
             alGuardar={() => void cargar()}
+            registrarConfirmacion={registrarConfirmacion}
           />
         ) : paso === 'oferta' ? (
           <PasoOfreces
@@ -276,6 +353,7 @@ export default function WizardAlta() {
             cuentaComercialId={contexto.cuentaComercialId}
             prestadorId={contexto.prestadorId}
             alSumar={() => void cargar()}
+            registrarConfirmacion={registrarConfirmacion}
           />
         )}
       </ScrollView>
@@ -291,8 +369,9 @@ export default function WizardAlta() {
         <Boton
           variante="primario"
           bloque
+          cargando={confirmando}
           etiqueta={esUltimo ? t('alta.terminar') : t('alta.continuar')}
-          onPress={avanzar}
+          onPress={() => void alContinuar()}
         />
         {paso === 'negocio' ? null : (
           <Boton variante="ghost" bloque etiqueta={t('alta.saltar')} onPress={pedirSalto} />

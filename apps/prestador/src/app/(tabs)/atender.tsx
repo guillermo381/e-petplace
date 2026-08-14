@@ -29,6 +29,7 @@ import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Baldosa,
   Boton,
   Encabezado,
   Esqueleto,
@@ -41,13 +42,22 @@ import {
 } from '@epetplace/ui';
 import { obtenerMiPrestador } from '@epetplace/api';
 
-import { BaldosaAtender } from '@/components/atender/baldosa';
 import {
   hayCapacidad,
   resolverCapacidadAtender,
   type CapacidadAtender,
 } from '@/lib/capacidad-atender';
 import { useTraduccion } from '@/i18n';
+
+/** El glifo de cada puerta. `training` es el nombre del registry para
+ *  adiestramiento (S67). Tabla y no interpolación, por lo mismo que las
+ *  keys: el oficio nuevo tiene que OBLIGAR a contestar. */
+const GLIFO_OFICIO = {
+  veterinaria: 'veterinaria',
+  grooming: 'grooming',
+  paseo: 'paseo',
+  adiestramiento: 'training',
+} as const;
 
 /** La voz de cada oficio, POR TABLA y jamás por key armada a mano: una
  *  key interpolada (`atender.oficio_${x}`) compila siempre y se rompe en
@@ -175,27 +185,44 @@ export default function Atender() {
                     naturalezas (§1.2) — `Tus servicios` y `Tu tienda`. No
                     son vocabulario: son el primer candado del cinturón. */}
                 <Texto variante="seccion">{t('atender.tusServicios')}</Texto>
-                {capacidad.oficios.map((o) => (
-                  <BaldosaAtender
-                    key={o.oficio}
-                    puerta={{ clase: 'oficio', oficio: o.oficio }}
-                    titulo={t(KEY_OFICIO[o.oficio])}
-                    subtitulo={t('atender.oficioAccion')}
-                    onPress={() => router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })}
-                  />
-                ))}
+                {/* LA GRILLA ES DE LA PANTALLA, LA BALDOSA ES DE LA PIEZA
+                    (contrato de B): cuántas columnas entran depende del
+                    ancho de ESTA superficie, no de la pieza. `47%` con el
+                    gap evita que el redondeo empuje una tercera columna, y
+                    `flexGrow` hace que la impar ocupe la fila entera en
+                    vez de quedar a media pantalla. */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                  {capacidad.oficios.map((o, i) => (
+                    <View key={o.oficio} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <Baldosa
+                        glifo={GLIFO_OFICIO[o.oficio]}
+                        titulo={t(KEY_OFICIO[o.oficio])}
+                        capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
+                        orden={i}
+                        onPress={() =>
+                          router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
+                        }
+                      />
+                    </View>
+                  ))}
+                </View>
               </View>
             )}
 
             {capacidad.tienda && (
               <View style={{ gap: spacing[3] }}>
                 <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-                <BaldosaAtender
-                  puerta={{ clase: 'tienda' }}
-                  titulo={t('atender.ventaTitulo')}
-                  subtitulo={t('atender.ventaAccion')}
-                  onPress={() => router.push('/ventas/mostrador')}
-                />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+                  <View style={{ flexBasis: '47%', flexGrow: 1 }}>
+                    <Baldosa
+                      glifo="despensa"
+                      titulo={t('atender.ventaTitulo')}
+                      capa="consumo"
+                      orden={capacidad.oficios.length}
+                      onPress={() => router.push('/ventas/mostrador')}
+                    />
+                  </View>
+                </View>
               </View>
             )}
           </>

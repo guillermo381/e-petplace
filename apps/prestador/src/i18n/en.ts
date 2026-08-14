@@ -28,9 +28,7 @@ export const prestadorEn = {
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
     oficioAdiestramiento: 'Training',
-    oficioAccion: 'Record a visit',
     ventaTitulo: 'Product sales',
-    ventaAccion: 'Record a counter sale',
     vacioTitulo: 'No door is open yet',
     vacioDetalle:
       'None of your services is marked as «I attend at my place» and your store is not active. Turn on in-store attention from your offer and this screen opens on its own.',
@@ -2609,9 +2607,16 @@ export const prestadorEn = {
     continuar: 'Continue',
     terminar: 'Open my house',
     volver: 'Back',
+    // S98-C · D-799 — three causes, three voices. Espejo de es.ts.
     errorTitulo: "We couldn't load this",
     errorVoz: 'It might be the connection. Try again.',
     reintentar: 'Try again',
+    sinSesionTitulo: 'Your session ended',
+    sinSesionVoz: 'Sign in again with your email and we pick up where you were.',
+    sinSesionAccion: 'Sign in',
+    sinNegocioTitulo: "You don't have a business yet",
+    sinNegocioVoz: 'Create yours and we come back here to open its house.',
+    sinNegocioAccion: 'Create my business',
     entendido: 'Got it',
     enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
     oficioVeterinaria: 'Veterinary',
@@ -2628,8 +2633,10 @@ export const prestadorEn = {
       logoCambiar: 'Change',
       logoQuitar: 'Remove',
       logoVacio: "Without a logo we'll use your initials.",
-      guardar: 'Save the name',
-      guardado: 'Name saved.',
+      // S98-C · Espejo de es.ts: las tres voces del rechazo, en el campo.
+      errorVacio: 'Write your business name.',
+      errorCorto: 'One letter is not enough — write the full name.',
+      errorSinLetras: 'A name has letters: add at least one.',
     },
 
     paso2: {
@@ -2696,6 +2703,12 @@ export const prestadorEn = {
       faltaDocumento: 'We need their ID number so they can deliver.',
       recepcionNoAplica:
         'The front-desk role shows up once you have a service you provide at your place.',
+      // S98-C · Espejo de es.ts.
+      errorNombreVacio: "Write the person's name.",
+      errorNombreCorto: 'One letter is not enough — write their name.',
+      errorNombreSinLetras: 'A name has letters: add at least one.',
+      errorDocumentoVacio: "The person's ID is missing.",
+      errorDocumentoCorto: 'That ID looks unfinished — check the digits.',
     },
 
     salteo: {
