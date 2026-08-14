@@ -71,7 +71,13 @@ export type CodigoErrorEquipo =
   | 'error_lectura'
   | 'error_escritura'
   | 'sin_sesion'
-  | 'estado_no_confirmado';
+  | 'estado_no_confirmado'
+  // S97-A · la modalidad del servicio. Los dos son TIPADOS a propósito: la
+  // pantalla del paso ② tiene que poder decir POR QUÉ no se apagan las dos
+  // (`chk_ps_alguna_modalidad`), y un `error_escritura` genérico no es una
+  // razón que se le pueda mostrar a nadie.
+  | 'sin_modalidad'
+  | 'servicio_no_alcanzable';
 
 type R<T> = Promise<ResultadoWrapper<T, CodigoErrorEquipo>>;
 
@@ -384,11 +390,33 @@ export async function invitarEmpleado(
 /** Los cuatro oficios del chip (§6: grano de OFICIO en pantalla). */
 export type OficioChip = 'veterinaria' | 'grooming' | 'paseo' | 'adiestramiento';
 
+/** UN servicio del negocio con su MODALIDAD (S97-A, pedido de C para el paso
+ *  ② del wizard: «atiendo este servicio en mi local»).
+ *  `atiendeLocal` es además el motor de dos cosas más, y por eso vive acá y
+ *  no en una pieza propia: compone la tab **ATENDER** y gatea la oferta del
+ *  rol **recepción** (`LA_CASA_DEL_PRESTADOR` §2.3). Una sola fuente. */
+export interface ServicioDeOficio {
+  servicioId: string;
+  /** El código del catálogo — sirve para rutear al taller del oficio. */
+  tipoServicio: string;
+  /** `nombre_custom` si el negocio lo puso; si no, el del catálogo. */
+  nombre: string;
+  atiendeLocal: boolean;
+  atiendeDomicilio: boolean;
+}
+
 export interface OficioNegocio {
   oficio: OficioChip;
   /** Las ofertas ACTIVAS de ese oficio — lo que la tabla guarda cuando
-   *  la pantalla escribe el oficio (§6: el motor es grano de OFERTA). */
+   *  la pantalla escribe el oficio (§6: el motor es grano de OFERTA).
+   *  SE CONSERVA: tiene consumidores vivos y el ensanche de S97 es
+   *  ADITIVO (L-175 — se ensancha, jamás se copia). */
   servicioIds: string[];
+  /** S97-A · lo mismo, con nombre y modalidad. Sale del MISMO viaje: el
+   *  select pasó de dos columnas a cinco. Componerlo desde los cuatro
+   *  lectores por oficio habrían sido cuatro viajes — el peaje de ~150 ms
+   *  por petición que D-497 midió, pagado cuatro veces por una pantalla. */
+  servicios: ServicioDeOficio[];
 }
 
 /** Los oficios que el negocio TIENE (ofertas activas, legibles por
@@ -401,7 +429,8 @@ export async function obtenerOficiosNegocio(prestadorId: string): R<OficioNegoci
   const cliente = getClient();
   const ofertas = await cliente
     .from('prestador_servicios')
-    .select('id, tipo_servicio')
+    // S97-A: +3 columnas, MISMO viaje (pedido de C, paso ② del wizard).
+    .select('id, tipo_servicio, nombre_custom, atiende_local, atiende_domicilio')
     .eq('prestador_id', prestadorId)
     .eq('activo', true);
   if (ofertas.error) {
@@ -412,31 +441,123 @@ export async function obtenerOficiosNegocio(prestadorId: string): R<OficioNegoci
   const slugs = [...new Set(filas.map((f) => f.tipo_servicio))];
   const tipos = await cliente
     .from('tipos_servicio')
-    .select('codigo, categoria, es_medico')
+    // S97-A: +`nombre` para el fallback del rótulo (nombre_custom ?? catálogo).
+    .select('codigo, nombre, categoria, es_medico')
     .in('codigo', slugs);
   if (tipos.error) {
     return { ok: false, codigo: 'error_lectura', mensaje: tipos.error.message };
   }
   const oficioDe = new Map<string, OficioChip>();
+  const nombreDe = new Map<string, string>();
   for (const t of tipos.data ?? []) {
+    nombreDe.set(t.codigo, t.nombre);
     if (t.es_medico === true) oficioDe.set(t.codigo, 'veterinaria');
     else if (t.categoria === 'paseo' || t.categoria === 'grooming' || t.categoria === 'adiestramiento') {
       oficioDe.set(t.codigo, t.categoria);
     }
   }
-  const porOficio = new Map<OficioChip, string[]>();
+  const porOficio = new Map<OficioChip, ServicioDeOficio[]>();
   for (const f of filas) {
     const oficio = oficioDe.get(f.tipo_servicio);
     if (oficio === undefined) continue; // hospedaje/otro: fuera del v1
-    porOficio.set(oficio, [...(porOficio.get(oficio) ?? []), f.id]);
+    porOficio.set(oficio, [
+      ...(porOficio.get(oficio) ?? []),
+      {
+        servicioId: f.id,
+        tipoServicio: f.tipo_servicio,
+        // El fallback JAMÁS es el código: un slug en pantalla es motor
+        // asomándose. Si el catálogo no tiene nombre, el código es lo único
+        // que queda y se declara ahí mismo, no se inventa.
+        nombre: f.nombre_custom ?? nombreDe.get(f.tipo_servicio) ?? f.tipo_servicio,
+        // El CHECK `chk_ps_alguna_modalidad` garantiza que al menos una es
+        // true, así que el `=== true` no esconde un tercer estado: la columna
+        // es NOT NULL en la fuente.
+        atiendeLocal: f.atiende_local === true,
+        atiendeDomicilio: f.atiende_domicilio === true,
+      },
+    ]);
   }
   const ORDEN: OficioChip[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
   return {
     ok: true,
     data: ORDEN.filter((o) => porOficio.has(o)).map((o) => ({
       oficio: o,
-      servicioIds: porOficio.get(o) ?? [],
+      servicioIds: (porOficio.get(o) ?? []).map((s) => s.servicioId),
+      servicios: porOficio.get(o) ?? [],
     })),
+  };
+}
+
+/**
+ * FIJAR LA MODALIDAD DE UN SERVICIO (S97-A · pedido de C, adjudicado por la
+ * mesa 14-ago) — «atiendo en mi local» / «voy a domicilio».
+ *
+ * **Por qué genérico y no cuatro por oficio:** las dos columnas viven en
+ * `prestador_servicios`, que es **una tabla común a los cuatro oficios**.
+ * Ramificar la escritura en cuatro escritores para tocar dos columnas de una
+ * sola tabla es el dato en cuatro caminos — y el día que la regla cambie hay
+ * que acordarse de los cuatro. *La lectura ya es una sola
+ * (`obtenerOficiosNegocio`); la escritura también.*
+ *
+ * **EL REBOTE ES TIPADO Y NO NEGOCIABLE.** `chk_ps_alguna_modalidad` exige
+ * `atiende_local OR atiende_domicilio`: apagar las dos **no es libre**. La
+ * pantalla tiene que poder decir POR QUÉ, y un error de Postgres crudo no es
+ * una razón que se le pueda mostrar a nadie (Ley 13 — el fallo dice que es
+ * fallo, y dice cuál).
+ *
+ * El pre-check local existe para dar la voz ANTES del viaje; el CHECK de la
+ * fuente sigue siendo la verdad y su rebote también se traduce — *un guard de
+ * cliente que reemplaza al de la fuente es un guard que se saltea con otra
+ * pantalla* (regla del principio de la puerta, Ley 23).
+ */
+export async function fijarModalidadServicio(
+  servicioId: string,
+  modalidad: { atiendeLocal: boolean; atiendeDomicilio: boolean },
+): R<{ servicioId: string; atiendeLocal: boolean; atiendeDomicilio: boolean }> {
+  if (!modalidad.atiendeLocal && !modalidad.atiendeDomicilio) {
+    return {
+      ok: false,
+      codigo: 'sin_modalidad',
+      mensaje: 'Un servicio tiene que atenderse en algún lado: en tu local, a domicilio, o los dos.',
+    };
+  }
+  const { data, error } = await getClient()
+    .from('prestador_servicios')
+    .update({ atiende_local: modalidad.atiendeLocal, atiende_domicilio: modalidad.atiendeDomicilio })
+    .eq('id', servicioId)
+    .select('id, atiende_local, atiende_domicilio')
+    .maybeSingle();
+
+  if (error) {
+    // 23514 = check_violation. Si la fuente rebota por el CHECK, la voz es la
+    // MISMA que la del pre-check: dos caminos, un solo mensaje para el
+    // usuario (si difirieran, el mismo problema tendría dos explicaciones).
+    if (error.code === '23514' || /chk_ps_alguna_modalidad/.test(error.message)) {
+      return {
+        ok: false,
+        codigo: 'sin_modalidad',
+        mensaje: 'Un servicio tiene que atenderse en algún lado: en tu local, a domicilio, o los dos.',
+      };
+    }
+    return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  }
+  // Cero filas = la RLS no dejó (no es tuyo) o el id no existe. NO se degrada
+  // a `ok` con los valores que pedimos: eso reportaría un guardado que no
+  // ocurrió — el defecto exacto de L-139.
+  if (data === null) {
+    return {
+      ok: false,
+      codigo: 'servicio_no_alcanzable',
+      mensaje: 'No pudimos guardar ese servicio. Puede que ya no exista o no sea de este negocio.',
+    };
+  }
+  return {
+    ok: true,
+    data: {
+      servicioId: data.id,
+      atiendeLocal: data.atiende_local === true,
+      atiendeDomicilio: data.atiende_domicilio === true,
+    },
   };
 }
 
