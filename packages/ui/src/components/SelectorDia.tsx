@@ -60,6 +60,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import { Texto } from './Texto'
 import { typography } from '../tokens/typography'
+import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
 export type DiaOpcion = { iso: string; dia: string; numero: string }
@@ -228,7 +229,7 @@ function ItemRueda({
           backgroundColor: superficie,
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 2,
+          gap: spacing[0.5],
           boxShadow: sombra,
         }}
       >

@@ -4071,6 +4071,42 @@ export type Database = {
           },
         ]
       }
+      cuenta_onboarding_salto: {
+        Row: {
+          cuenta_comercial_id: string
+          paso: string
+          salteado_en: string
+          salteado_por: string | null
+        }
+        Insert: {
+          cuenta_comercial_id: string
+          paso: string
+          salteado_en?: string
+          salteado_por?: string | null
+        }
+        Update: {
+          cuenta_comercial_id?: string
+          paso?: string
+          salteado_en?: string
+          salteado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuenta_onboarding_salto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuenta_onboarding_salto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+        ]
+      }
       cuenta_roles: {
         Row: {
           activado_en: string
@@ -20043,6 +20079,10 @@ export type Database = {
         }
         Returns: Json
       }
+      negocio_atiende_en_local: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
+      }
       normalizar_telefono: {
         Args: { p_country_code: string; p_texto: string }
         Returns: string
@@ -20192,6 +20232,15 @@ export type Database = {
           activo: boolean
           empleado_id: string
           nombre: string
+        }[]
+      }
+      obtener_estado_onboarding_wizard: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: {
+          cuenta_al_contador: boolean
+          estado: string
+          orden: number
+          paso: string
         }[]
       }
       obtener_expediente_modulado: {
@@ -20636,6 +20685,10 @@ export type Database = {
         Returns: Json
       }
       puede_encender_vitrina: { Args: never; Returns: boolean }
+      puede_ofrecer_rol_recepcion: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
+      }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
@@ -20961,6 +21014,10 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
+      retomar_paso_onboarding: {
+        Args: { p_cuenta_comercial_id: string; p_paso: string }
+        Returns: Json
+      }
       revisar_documento_cuenta: {
         Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
@@ -20971,6 +21028,10 @@ export type Database = {
       }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
+        Returns: Json
+      }
+      saltar_paso_onboarding: {
+        Args: { p_cuenta_comercial_id: string; p_paso: string }
         Returns: Json
       }
       sedimentar_nota_clinica: {

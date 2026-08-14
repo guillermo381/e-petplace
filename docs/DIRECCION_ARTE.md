@@ -987,3 +987,139 @@ llegó»:** la tarjeta reservaba el alto de una foto que estaba en camino, así
 que **el estado «cargando» se dibujaba idéntico al estado «no hay»**. *Un
 espacio que promete algo que no llega miente* — Ley 23 aplicada al TIEMPO, no
 solo al contenido.
+
+---
+
+## 13. EL NORTE DE DISEÑO (firma del founder, 13-ago-2026 — depósito VERBATIM)
+
+> **Estatuto:** FIRMADA. Depositada por S97-A el 14-ago-2026, **verbatim**.
+> Es la vara transversal contra la que **cada pista se auto-gatea**, con
+> captura obligatoria por pantalla (ver la enmienda a la regla 80 en
+> `CONTRATO_TRABAJO`: **el gate del founder pasa a ser por LOTE**).
+> Su hermana mecánica: **`verify:diseno` R36–R39** (N2 · N4 · N3 · N1),
+> construidas por B en esta misma sesión — *el Norte no vive solo en prosa.*
+
+**N1 · LA ESCALA.** Cuerpo 16/24 · secundario 14/20 · título de sección
+20/26 peso 600 · título de pantalla 28/34 peso 700. Máximo tres tamaños por
+pantalla. Jerarquía por peso y tamaño de UNA familia.
+
+**N2 · EL RITMO.** Todo espaciado múltiplo de 8 (4 solo para pares íntimos
+icono-texto). Entre secciones: 32. Entre tarjetas: 16. Padding de tarjeta:
+16–20. Aire sobre título de sección: 24 mínimo.
+
+**N3 · LA MUERTE DEL SEPARADOR.** La línea se reserva para listas densas de
+datos. Entre secciones separa el espacio + el título. Máximo 3 separadores
+por pantalla.
+
+**N4 · EL RADIO ÚNICO.** Una sola escala de radios (tarjeta/control/píldora,
+valores de token). Nada fuera de escala.
+
+**N5 · UN ACENTO POR PANTALLA.** El color de acción aparece en el CTA y las
+huellas, y en nada más. Chips informativos en neutro salvo estado crítico.
+
+**N6 · EL MOVIMIENTO ES LEY.** Entrada escalonada 45/300 bezier de la casa
+en toda pantalla nueva. `usePresionado` en todo lo tocable. Prueba L-c.
+
+**N7 · LA FOTO CARGA LA PROFUNDIDAD.** Avatares y logos 48–56 en filas,
+nunca 32. Sombras mínimas.
+
+**N8 · BLANCOS DE 44.** Ley de la pieza; ningún consumidor la re-decide.
+
+**N9 · EL VACÍO HABLA.** Todo estado vacío usa `EstadoVacio` con voz: qué
+pasa y qué hacer.
+
+**N10 · EL VOCABULARIO DEL MOVIMIENTO ES CERRADO.** Un bezier
+(`.32,.72,0,1`), tres duraciones: **150 micro** (chips, crossfade de estado)
+· **300 estándar** (entradas, Hojas) · **520 grande** (el destape). Qué se
+anima, lista cerrada: presión · entrada · navegación (Hoja sube, pantalla
+retrocede **−16%**) · cambio de tab (huella con **overshoot 280 ms**) ·
+cambio de estado · celebración. **Nada más se mueve.**
+
+> ### ACLARACIÓN DE N10 — **LA BANDA DE 520 ES EL REGISTRO DE CADA GESTO, JAMÁS LA SUMA DE LA CEREMONIA**
+>
+> Las tres duraciones (150 · 300 · 520) miden **un gesto**. **520 es el techo
+> de un movimiento grande, no el presupuesto de una secuencia entera.**
+>
+> **El caso que lo obliga a estar escrito: el destape mide ~1620 ms totales**
+> (cinco actos encadenados — isotipo · rampa · tarjeta · tabs escalonadas ·
+> luz), **declarado en el código y PENDIENTE DE FIRMA del founder en el Lote
+> 1.** *Leer 520 como techo de la ceremonia haría ilegal el único momento
+> para el que la banda se escribió* — y al revés, no escribir esto dejaría a
+> cualquiera justificando una secuencia de siete segundos «porque cada paso
+> respeta N10». **El registro acota el gesto; la duración total de una
+> ceremonia se firma en dispositivo, una por una.**
+
+> **NOTA DE N10 (va con la firma):** el **empuje −16%** y el **overshoot
+> 280 ms** eran **CANDIDATAS SIN FIRMA desde S80** (§5.4 de este mismo
+> documento las dejó esperando gate propio: *"Dos CANDIDATAS sin firma
+> esperan gate propio: el empuje de pantalla −16% (a §5.2) y el overshoot
+> 280 ms de la huella de tab (a la Ley 6/§2.6)"*). **Este Norte es su gate
+> de entrada**, y **se firman con el ojo del founder en el Lote 1.**
+> *Entrar a un vocabulario cerrado no es lo mismo que estar firmadas: el
+> Norte las admite, el dispositivo las confirma.*
+
+**REGLA DE ORO: ante la duda, quitá antes que agregar.**
+
+---
+
+### 13.1 🔴 CHOQUE DECLARADO CONTRA LETRA FIRMADA — N6 y el escalón 45
+
+**No se resuelve acá. Se declara, que es lo que la casa exige** (precedente
+S63: *el choque SE DECLARA, jamás se difiere callado*).
+
+**N6 dice `45/300`. §5.4 de este documento dice, literal:**
+
+> *"**Entrada de contenido:** escalón **120 ms** entre elementos *(ENMIENDA
+> FIRMADA S81 — founder: el 45 de S80 pasó a 120, `motion.stagger.slow`, el
+> token de la casa; **el porqué medido en el lazo regla 80 de B: con 45,
+> tres bloques resolvían en ~390 ms y el escalonado no se PERCIBÍA como
+> orden de lectura**)*"*
+
+**⇒ El `45` del Norte no es un valor nuevo: es el valor ANTERIOR a una
+enmienda firmada Y MEDIDA.** Las dos letras son del founder; la de S81 tiene
+una medición atrás.
+
+**Lo que S97-A hace y lo que NO hace:**
+
+- **Deposita el Norte verbatim** — la orden fue depositar, no editar. El
+  `45` queda escrito tal como se firmó.
+- **NO cambia `motion.stagger`** en `packages/ui`. Hoy el token vale lo que
+  S81 firmó, y **cambiarlo por esta línea sería resolver un choque de dos
+  firmas sin mesa** — con el agravante de que tocaría toda pantalla de las
+  dos apps a la vez.
+- **NO escribe `120` adentro del Norte.** Corregir una letra firmada al
+  depositarla es peor que dejar el choque a la vista.
+
+**A la mesa, con las dos salidas ya servidas:** ① **el `45` es intencional**
+y el Norte deroga la enmienda S81 (entonces se mide de nuevo el efecto que
+S81 midió, porque la razón de aquella enmienda no desaparece por decreto) ·
+② **el `45` es arrastre** de la lámina S80 y el Norte quiso decir *"el
+escalonado de la casa"*, en cuyo caso el número vigente es **120** y N6 se
+enmienda con una línea. **Ficha D-795.**
+
+*Y el dato que hace barato esperar: **ninguna pantalla nueva se bloquea** —
+las dos lecturas mandan usar el token de la casa, y el token existe. Lo que
+cambia es cuánto vale, no de dónde sale.*
+
+> ### 🔴 EVIDENCIA QUE LLEGÓ DESPUÉS Y INCLINA LA BALANZA HACIA ② (aporte de B, 14-ago)
+>
+> **B midió `Entrada` en `packages/ui` y encontró el mismo `45` — en el
+> comentario del header, con la CONSTANTE en `120` desde S81.**
+>
+> ⇒ **El `45` estaba vivo en la prosa de la casa mientras el código ya valía
+> 120.** *El Norte no inventó el número: lo heredó de un comentario que
+> nadie había corregido cuando se firmó la enmienda.* Eso hace de la salida
+> ② —arrastre, no derogación— la lectura probable; **la firma sigue siendo
+> del founder**, pero la mesa ya no elige a ciegas.
+>
+> **Y es la misma familia que cazó el día entero: SEIS letras
+> contradictorias en una jornada**, las seis encontradas **leyendo la
+> fuente**, ninguna por un typecheck ni un lint. *Una constante y su
+> comentario divergiendo no rompe nada — y por eso sobrevive: el código
+> sigue funcionando y la prosa sigue mintiendo, cada uno en su carril.*
+> **Es exactamente D-790** (*cómo se detecta una letra superada sin tropezar
+> con ella*), y esta es su sexta muestra del día.
+>
+> **La cura de B (el header a 120) NO cierra D-795:** curar el comentario
+> quita la fuente del error, **no decide qué dice el Norte**. Las dos cosas
+> son distintas y solo la segunda necesita firma.

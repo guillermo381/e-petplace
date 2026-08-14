@@ -133,6 +133,35 @@ los de la despensa, que viven en su propio panel.
 **⇒ La barra por capacidad no es una feature: es la superficie poniéndose al
 día con un motor que ya decide así.**
 
+### 2.1bis 🔴 CÓMO SE COMPONE `ATENDER` — DOS FUENTES, y se escribe para que nadie la invente
+
+> **`ATENDER` lee DOS fuentes, una por naturaleza. La tab se monta si
+> cualquiera de las dos aporta algo.**
+
+| fuente | qué aporta a `ATENDER` | de dónde sale |
+|---|---|---|
+| **`Tus servicios`** | atención de mostrador · alta asistida de mascota | **oficios con `atiende_local = true`** en `prestador_servicios` |
+| **`Tu tienda`** | venta de mostrador con su código de reclamo | **la cuenta comercial `activa`** con rol `seller_productos` |
+
+**Y por eso los cinco casos de la barra caen solos, sin una sola regla
+especial:**
+
+- **titular con local y tienda** → las dos mitades ⇒ `ATENDER` completa.
+- **recepción** → la mitad de servicios (su gate es
+  `empleado_es_mostrador_o_gestion`, ya vivo).
+- **vendedor puro** → **solo la mitad de tienda**. No tiene `prestador_servicios`
+  y **no debe crear mascotas**: `LETRA_RECORRIDO_DESPENSA_S96` §7.4 firma que
+  **el vendedor jamás elige la mascota** — su camino es el código de reclamo, y
+  el cliente elige. *Su `ATENDER` es una sola cosa, y está bien que lo sea.*
+- **profesional puro** → ninguna de las dos ⇒ **sin `ATENDER`**.
+
+> **⚠️ LAS DOS MITADES NO SE FUSIONAN EN UNA CONSULTA.** Son dos lectores
+> sobre dos dominios, y `MODELO_DESPENSA` §3.4 es la razón: *pedido de
+> producto y cita de servicio no comparten tabla*. **`ATENDER` compone en
+> VISTA lo que el esquema mantiene separado** — igual que el feed del HOY
+> (§3). *El cinturón no prohíbe que dos cosas se vean juntas: prohíbe que se
+> guarden juntas.*
+
 ### 2.2 El repartidor sale de la barra, y por qué
 
 `LETRA_RECORRIDO_DESPENSA_S96` §5 ya firmó que el repartidor **ve el envío
