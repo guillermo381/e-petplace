@@ -14899,3 +14899,111 @@ lámina: se firma en el cajón donde va a vivir.*
 
 ☠️ **Muere** con la próxima build nativa llevando el ícono nuevo, y el founder
 mirándolo en su grilla.
+
+---
+
+#### D-801 — 🔴 LA LUZ DE LA ESQUINA SE DIBUJA COMO UN DISCO NEGRO OPACO EN EL DESTAPE
+
+**Medido caminando el destape en dispositivo (A, 14-ago, `019ffe67`).** El
+quinto acto —**la luz de la esquina**, A4— se ve como **un disco NEGRO SÓLIDO
+que invade el cuarto superior derecho de la pantalla**, sobre el fondo claro
+del destape.
+
+**La letra que incumple, literal (`DIRECCION_ARTE` §9bis.2 + enmienda S82):**
+
+> *«Círculo de blanco al **7 %** … **el valor sale del token del tema
+> (`text.primary` + opacity), JAMÁS de un literal** … sobre techo OSCURO la
+> luz es BLANCA, sobre techo CLARO es TINTA.»*
+
+**⇒ El registro está bien elegido (tinta sobre claro) y la OPACIDAD se
+perdió.** *Tinta al 7 % es un velo que casi no se ve; tinta al 100 % es un
+agujero negro.* **No es que la luz esté de más: está sin su alfa.**
+
+**Y es exactamente el modo de falla que la enmienda S82 previó:** su nota al
+gate decía *«si la inversión TAMPOCO se lee, A4 necesita alcance fino»* —
+**pero acá el problema no es que no se lea: es que se lee DEMASIADO.** La
+enmienda contempló el caso débil y no el fuerte.
+
+**Por qué ningún instrumento lo vio:** `verify:diseno` no mide opacidad, WCAG
+no evalúa un adorno decorativo, y el typecheck ve un número válido. **Lo
+encontró mirar** — cuarta vez en la sesión que la captura hace lo que los
+cinco gates no.
+
+☠️ **Muere** con la luz al alfa firmado en el destape, verificada en
+dispositivo. **Territorio: B** (la pieza `Destape` y el token del velo).
+
+---
+
+#### D-802 — 🔴 DOS NOMBRES COMERCIALES PARA EL MISMO NEGOCIO, Y EL WIZARD EDITA EL QUE LAS FAMILIAS NO VEN
+
+**Medido en el aparato y contra la base (A, 14-ago), sobre `duenotodo`:**
+
+| dónde vive | valor |
+|---|---|
+| `cuentas_comerciales.nombre_comercial` | **«Dueño todos los servicios (borrable)»** ← lo que el **wizard** edita y el **destape** muestra |
+| `cuentas_comerciales.razon_social` | «TODO EN UNO DE PRUEBAS S97 - NO REAL» |
+| `prestadores.nombre_comercial` | **«Todo S97 (borrable)»** ← lo que el **HOY** muestra |
+
+> ### 🔴 Y LO QUE LO VUELVE GRAVE NO ES LA DUPLICACIÓN: ES LA PROMESA.
+>
+> El paso ① del wizard dice, literal: ***«El nombre con el que las familias
+> te van a encontrar.»***
+>
+> **Las familias encuentran al PRESTADOR** — `v_prestadores_publicos` lee
+> `prestadores.nombre_comercial`. **El campo que el wizard ofrece escribe la
+> otra tabla.**
+
+**⇒ El prestador puede corregir ahí el nombre que ve en su vitrina y la
+vitrina no cambia** — y la pantalla le prometió que sí. *Es un caso puro de
+Ley 13 con el agravante de que no falla: guarda bien, en el lugar
+equivocado.*
+
+**Y el mismo negocio se llama distinto en dos pantallas de la misma app:**
+«Dueño todos los servicios» en el wizard y el destape, «Todo S97» en el HOY.
+*Un usuario no tiene forma de saber cuál es su nombre.*
+
+**Lo que la ficha NO decide, porque es de mesa:** cuál de los dos es **el**
+nombre. Hay dos salidas y son distintas — ① el wizard apunta a
+`prestadores.nombre_comercial` (y entonces el vendedor puro, que no tiene fila
+de prestador, necesita otra respuesta) · ② los dos se unifican, y entonces hay
+que decir cuál gana y qué pasa con el que se pierde.
+
+**Nota de autoría:** la puerta `actualizar_nombre_cuenta_comercial` es **de A**
+(S97-A) y hace lo que dice — *escribe el nombre de la cuenta*. **El defecto no
+es de la puerta: es de a qué puerta apunta la promesa de la pantalla.**
+
+☠️ **Muere** con la firma de mesa sobre cuál es el nombre, y la pantalla
+apuntando ahí.
+
+---
+
+#### D-803 — 🟡 EL REBOTE DEL GUARD SALE CRUDO, CON SU CÓDIGO TIPADO A LA VISTA
+
+**Medido en el aparato (A, 14-ago):** al tocar «Atiendo en mi local» en un
+paseo —el estado que la firma del founder volvió ilegal— el motor **rebota
+correctamente y el toggle NO se prende** ✅, y la pantalla muestra:
+
+```
+paseo_no_atiende_en_local: el paseo es SIEMPRE a domicilio — no existe
+paseo en loc…
+```
+
+**Con el código de error tipado adelante, y truncado al final.**
+
+**Las dos mitades, separadas a propósito:**
+- ✅ **El guard funciona y la firma rige de verdad** — se verificó tocando, no
+  leyendo.
+- 🔴 **`paseo_no_atiende_en_local` es vocabulario del MOTOR.** *Es para el
+  programa, no para el prestador* (Ley 3 — el motor no se asoma). **El mensaje
+  del `RAISE` está escrito para un log; la pantalla lo muestra tal cual.**
+
+**La cura tiene DOS caminos y el mejor no es traducir:**
+① la pantalla traduce el código a voz de producto —lo que A ya hizo con
+`sin_modalidad` en el wrapper—; **② el toggle NO SE OFRECE para paseo**, que
+es **la firma del founder que C todavía no aplicó**. *Con ② este rebote no
+ocurre nunca* — y una voz que nadie va a leer es mejor que una voz bien
+escrita.
+
+☠️ **Muere** con el toggle ofrecido por oficio (②). Si por alguna razón el
+rebote tiene que seguir siendo alcanzable, muere con ① en su lugar.
+**Territorio: C.**
