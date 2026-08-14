@@ -15330,3 +15330,173 @@ registry. **Con la firma, las seis salen de un tirón con la regla ya fijada.**
 **Territorio: B** (el set y su proceso), **detrás de su cola actual.**
 **Prioridad: NO bloquea el Lote 2** — la pantalla funciona y el rótulo dice la
 verdad; lo que se pierde es que el selector sea visual.
+
+---
+
+#### D-807 — 🟢 `llegada_en` QUEDA SIN SUPERFICIE: EL DATO SOBREVIVE A SU VERBO
+
+**Origen: firma del founder en el gate de `ATENDER` (14-ago-2026), dictado ①
+de `LA_CASA_DEL_PRESTADOR` §6bis, verbatim:**
+
+> *"En la pantalla hoy en la cita hay un botón llegó, pero es redundante, si le
+> doy atender es porque llegó, no me dice nada y es feo."*
+
+**El verbo muere de la pantalla.** Lo que queda vivo debajo, medido:
+
+| Artefacto | Estado tras la firma |
+|---|---|
+| `evento_cita_servicio.llegada_en` | **182 citas de historia** — se CONSERVA |
+| `registrar_llegada(cita)` | puerta viva, **cero llamadores de superficie** |
+| `obtener_jornada_recepcion` → `llegada_en` | sigue devolviéndolo |
+
+🔴 **Y la frontera es lo importante de esta ficha: NO se borra el dato.**
+*Destruir historia por una decisión de superficie es la clase de acto que no
+tiene reversa* — y el argumento que lo cierra es que **el dato y el botón no
+son lo mismo**: el founder midió que el BOTÓN no aporta (*"si le doy atender es
+porque llegó"*), no que la hora de llegada sea falsa.
+
+> **La trampa que esta ficha existe para evitar:** que una sesión futura lea
+> «el llegó murió» y limpie la columna por prolijidad. **La columna no está de
+> más: está sin lector.** Son dos estados distintos y solo uno se cura
+> borrando.
+
+☠️ **Muere** cuando la puerta `registrar_llegada` quede revocada de
+`authenticated` **con su censo de llamadores en cero declarado** — jamás
+antes, y **sin tocar la columna**. **Disparo:** la próxima migración que toque
+el motor de recepción. **Territorio: A.**
+
+---
+
+#### D-808 — 🟡 LA BANDA DEL DÍA DE `ATENDER` NO TIENE SUS DOS LECTORES
+
+**Origen: dictado ② del founder** (`LA_CASA_DEL_PRESTADOR` §6bis), verbatim:
+
+> *"En la pantalla principal del atender me gusta, podríamos poner un dashboard
+> pequeño arriba con datos de los servicios prestados y valores, si está en 0 se
+> muestra en 0."*
+
+**🔴 LA CLÁUSULA FINAL ES LA LEY, NO EL ADORNO: «si está en 0 se muestra en
+0».** El cero **se muestra**. Es la cara opuesta —y compatible— de la letra de
+S51 (*JAMÁS $0* en el Negocio): **aquella prohibía inventar métricas donde no
+hay negocio; ésta ordena decir la verdad donde el negocio SÍ existe.** Un cero
+escondido se lee como «no cargó», y esa lectura la hace el prestador.
+
+**Los dos lectores que faltan (pedido de C, con su contrato):**
+
+| # | Lector | Estado medido |
+|---|---|---|
+| ① | **cobrado hoy** — sobre `cobro_presencial_registrado` | **escritor sí, lectores CERO**, 2 filas vivas |
+| ② | **prestados hoy** — lo atendido/completado del día | el lector actual cuenta **citas vivas**, que es lo AGENDADO |
+
+> **La distinción de ② es la que hace útil al número:** *lo agendado es una
+> promesa; lo atendido es un hecho.* Un tablero que suma promesas y las llama
+> «prestados» miente en la dirección optimista, que es la peor —**nadie va a
+> auditar un número que le gusta**.
+
+🔴 **GATE INNEGOCIABLE — RIGE §4ter (S88) y se escribe acá para que ninguna
+sesión lo re-litigue:** es **la plata DEL DÍA y nada más**; la audiencia es
+**el mostrador entero** (`empleado_es_mostrador_o_gestion`) — **el profesional
+puro queda afuera con `visible:false`, que NO es un error: es la modulación, y
+la superficie la DICE**. El gate vive **en el servidor** (molde
+`obtener_plata_del_dia`): *una autorización que decide el cliente es
+decorativa.* **Recepción no alcanza Cobros ni Liquidaciones.**
+
+**Mientras no existan, C muestra lo honesto que ya montó** — la banda no
+espera al motor para ser verdadera.
+
+☠️ **Muere** con los dos lectores vivos, gateados por §4ter y con su
+contra-caso (un profesional puro **no recibe ni la clave**). **Territorio: A**
+(motor) **+ C** (banda).
+
+---
+
+#### D-809 — 🟢 EL SUBTÍTULO DE LA BALDOSA: DATO VIVO DEL DÍA O SILENCIO
+
+**Origen: dictado ③ del founder** (`LA_CASA_DEL_PRESTADOR` §6bis), verbatim:
+
+> *"Los rectángulos de servicio realmente se ven muy bien, pero tienen mucho
+> espacio en blanco, no sé si poner un subtítulo o dejarlo así, piénsalo."*
+
+**Firma posterior sobre la propuesta de mesa** (subtítulo = dato vivo del día o
+silencio, **jamás descriptivo**): > *"Me gusta."*
+
+**⇒ LA REGLA QUEDA FIRMADA: el subtítulo dice lo que PASA HOY, o no dice
+nada.** *Un subtítulo descriptivo —«atendé a tus pacientes»— llena el hueco sin
+informar: es ruido con tipografía.* Y el silencio no es un estado degradado:
+**una baldosa sin nada que contar hoy es una baldosa honesta.**
+
+> ⚠️ **La costura con D-808, declarada para que no se construya dos veces:**
+> el dato vivo de la baldosa **sale del mismo lector por oficio** que alimenta
+> la banda. **Si nacen separados, nacen divergiendo** — la baldosa diría un
+> número y la banda otro, en la misma pantalla.
+
+☠️ **Muere** con el subtítulo cableado al dato vivo y su caso de silencio
+verificado **en dispositivo**. **Territorio: B** (la pieza) **+ A** (el dato).
+
+---
+
+#### D-810 — 🟡 LA PIZARRA NO EXISTE COMO PANTALLA, Y SU MOTOR ESTÁ ENTERO
+
+**Origen: la firma del founder que cierra el dictado ①**
+(`LA_CASA_DEL_PRESTADOR` §2.3bis), verbatim:
+
+> *"...en cambio la pizarra sí: si hay citas para ese día asignadas al local y
+> no a un prestador, la recepción puede asignarlas."*
+
+**✅ MEDIDO POR A (S97-A): NO NACE NI UNA FUNCIÓN.** Las cuatro piezas existen
+y están cableadas entre sí:
+
+| Pieza | Qué hace | Nace en |
+|---|---|---|
+| `obtener_jornada_recepcion(prestador, fecha)` | el lector — **`empleado_id` NULLABLE** | S78 |
+| `obtener_personas_para_asignar(cita)` | los candidatos | S90 |
+| `asignar_cita_a_persona(cita, empleado)` | el acto | S90 |
+| `empleado_puede_asignar_citas(prestador)` | el gate | S90 |
+
+**Y el estado que la pizarra muestra EXISTE en los datos: 3 citas vivas con
+`empleado_id IS NULL` sobre 182.**
+
+> *La pizarra no es una vista que haya que inventar: es una lectura que ya
+> devuelve lo que necesita y que nadie dibujó.* **Es la tercera vez en la
+> jornada que medir antes de construir achica el trabajo a la mitad** — las
+> otras dos: el handshake del mostrador y la puerta atómica del renombre.
+
+**Su forma está firmada (dictado ④): HOJA, no ventana nueva.** *El gesto ya es
+N10 — la casa no estrena nada.*
+
+☠️ **Muere** con la pizarra dibujada, la asignación corriendo por la puerta
+real y su gate verificado en dispositivo. **Territorio: C.**
+
+---
+
+#### D-811 — 🟡 EL ALTA DE MASCOTA ESTÁ DUPLICADA ENTRE EL CLIENTE Y EL MOSTRADOR
+
+**Origen: EL OJO DEL FOUNDER comparando dos superficies con memoria de las
+dos.** ⚠️ **El literal del founder NO llegó a A y NO se transcribe de memoria**
+(L-142 · regla 76b) — **se pide, y esta ficha se enmienda cuando llegue.** Lo
+que sí está declarado: **el alta de mascota del cliente y la del mostrador son
+dos construcciones distintas del mismo acto.**
+
+**🔴 Y LA CLASE ES LO QUE VALE MÁS QUE EL CASO:**
+
+> ***Ningún instrumento ve una duplicación así, porque cada copia, sola, está
+> «bien».*** Un typecheck compila las dos. Un lint aprueba las dos. Un juez
+> mide cada pantalla contra su propia letra y da verde dos veces. **El defecto
+> no vive en ninguna de las dos: vive ENTRE ellas** — y para verlo hay que
+> tener las dos en la cabeza al mismo tiempo, que es exactamente lo que un
+> instrumento no hace y un usuario con memoria sí.
+
+**Es la hermana estructural de la lección de la jornada** (*«un gate mide lo
+que alguien ya supo nombrar»*): acá el gate ni siquiera falla — **acierta dos
+veces sobre un problema que no está en su unidad de medida.**
+
+⚠️ **NO se cura sin medir primero, y el orden importa:** dos altas que hoy
+divergen pueden divergir **a propósito** (el mostrador crea contra un fantasma;
+el cliente contra su familia real — §7bis de `MODELO_VETERINARIA`). **Primero
+el censo de qué hace cada una, después la decisión de si son una o dos.**
+*Unificar dos caminos que el modelo separó a propósito sería peor que la
+duplicación.*
+
+☠️ **Muere** con el censo hecho y la decisión firmada (una puerta, o dos con
+su porqué escrito). **Disparo: el próximo arco que toque cualquiera de las dos
+altas.** **Territorio: A** (censo y motor) **+ el founder** (la firma).
