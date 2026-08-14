@@ -3156,14 +3156,14 @@ function GaleriaInterna() {
             </View>
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">ATENDER — cuatro oficios, sin detalle</Texto>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing[2] }}>
                 {([
                   { g: 'veterinaria', t: 'Veterinaria', c: 'identidad' },
                   { g: 'grooming', t: 'Grooming', c: 'cuidado' },
                   { g: 'paseo', t: 'Paseo', c: 'cuidado' },
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o, i) => (
-                  <View key={o.g} style={{ width: '48%' }}>
+                  <View key={o.g} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
                     <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
                   </View>
                 ))}
@@ -3179,13 +3179,13 @@ function GaleriaInterna() {
               <Texto variante="apoyo">
                 NEGOCIO — los mismos, CON detalle: el titulo cae a la misma altura en los dos
               </Texto>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing[2] }}>
                 {([
                   { g: 'veterinaria', t: 'Consulta general', c: 'identidad', d: '$25 · 30 min' },
                   { g: 'grooming', t: 'Bano y corte', c: 'cuidado', d: 'desde $18' },
                   { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
                 ] as const).map((o) => (
-                  <View key={o.t} style={{ width: '48%' }}>
+                  <View key={o.t} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
                     <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
                   </View>
                 ))}

@@ -233,47 +233,55 @@ export function Baldosa({
 }
 
 /** EL PATRÓN DE LA GRILLA — no sube como pieza (ver el header: sube la
- *  unidad, no el contenedor), pero se escribe acá para que las dos casas
- *  armen la misma sin copiarse entre sí:
+ *  unidad, no el contenedor), pero se escribe acá porque **es parte del
+ *  contrato**: la pieza ata su alto a su ancho, así que quien le da mal
+ *  el ancho le rompe las dos dimensiones.
  *
- *    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
- *      {oficios.map((o, i) => (
- *        <View key={o.key} style={{ width: '48%' }}>
- *          <Baldosa … orden={i} />
- *        </View>
- *      ))}
- *    </View>
+ *      <View style={{ flexDirection: 'row', flexWrap: 'wrap',
+ *                     marginHorizontal: -spacing[2] }}>
+ *        {oficios.map((o, i) => (
+ *          <View key={o.key} style={{ width: '50%',
+ *                                     paddingHorizontal: spacing[2],
+ *                                     paddingBottom: spacing[4] }}>
+ *            <Baldosa … orden={i} />
+ *          </View>
+ *        ))}
+ *      </View>
  *
- *  ⏪ DECÍA `flexBasis: '47%', flexGrow: 1` Y ERA FRÁGIL POR SIETE
- *  PÍXELES. El defecto lo midió A en dispositivo (D-804): las baldosas
- *  se dibujaban de **~800 px de alto**, «glifo arriba, rótulo abajo,
- *  vacío enorme en el medio», y la portada exigía dos scrolls para
- *  mostrar dos celdas.
+ *  🔴 **SIN `gap`. EL AIRE VIVE ADENTRO DE LA CELDA**, y eso es lo único
+ *  que cierra por construcción: `50% + 50% = 100%` EXACTO en cualquier
+ *  ancho, sin nada que sumarle. El `marginHorizontal` negativo del
+ *  contenedor devuelve el padding de los bordes para que la grilla quede
+ *  alineada con el resto de la pantalla.
  *
- *  LA ARITMÉTICA, con el ancho real de la portada (412 − 32 de padding =
- *  380 útiles):
+ *  ⏪ ESTE PATRÓN SE EQUIVOCÓ DOS VECES Y LA SEGUNDA FUE PEOR. Va con su
+ *  historia porque **un número sin su porqué se vuelve a «arreglar» en
+ *  seis meses** (y ya pasó dos veces en un día):
  *
- *      dos ítems a 47% .... 357 + gap 16 = 373   ← entra por 7 px
- *      si algo se corre ... WRAP ⇒ cada una SOLA en su fila
- *      y ahí `flexGrow: 1` la estira al 100% .... 380 × aspectRatio 1
- *      ⇒ 380 de alto cada una · **760 apiladas** ≈ los ~800 medidos
+ *    · v1 `flexBasis: 47%` + `flexGrow: 1` — entraba por **7 px**, y
+ *      cuando el redondeo lo hacía envolver, el `flexGrow` estiraba cada
+ *      baldosa al 100 % ⇒ cuadrados de 380×380, **~800 px apilados**
+ *      (D-804, medido por A en dispositivo).
+ *    · v2 `width: '48%'` — puesto para dejar de ser «frágil por 7 px».
+ *      **Falla SIEMPRE en vez de a veces**: A generalizó la condición y
+ *      es implacable —
  *
- *  🔴 Y LA DECISIÓN QUE LO CAUSÓ ES MÍA, ESCRITA EN ESTE MISMO ARCHIVO:
- *  puse `flexGrow: 1` razonando que *«una baldosa impar ocupe la fila
- *  entera en vez de quedar a media pantalla»*. **Esa regla, pensada para
- *  el caso impar, se aplica a TODAS cuando el wrap se dispara por
- *  redondeo** — y con 7 px de margen se dispara con cualquier padding,
- *  scrollbar o diferencia de redondeo entre plataformas.
+ *          dos ítems entran ⟺ 2·pct·u + gap ≤ u
+ *          48 % ⟺ u ≥ 400  ⇒ 🔴 NINGÚN teléfono
+ *          47 % ⟺ u ≥ 267  ⇒ entra en todos
  *
- *  ⇒ `width: '48%'` es DETERMINISTA: no crece, no depende del sobrante,
- *  y una baldosa impar queda a media pantalla — que en una grilla es lo
- *  correcto y lo que el ojo espera. *Un patrón que se comporta distinto
- *  según sobren 7 px no es un patrón: es una coincidencia documentada.*
+ *      Medido en cuatro anchos reales, los cuatro envuelven con 48 %:
+ *      Android 412 (380,8 sobre 380) · web 420 (388,5 sobre 388) ·
+ *      Android 360 (330,9 sobre 328) · **iPhone 430 (398,08 sobre 398,
+ *      por 0,08 px)**.
  *
- *  ⚠️ ESTO ES EL EXTREMO OPUESTO DEL COLAPSO A 0 de `Entrada`, y A lo
- *  nombró bien: cuando el contenedor le daba 0 medía 0, cuando le da todo
- *  mide todo. **La pieza declara su PROPORCIÓN (`aspectRatio: 1`), y la
- *  proporción sin un ancho acotado no acota nada** — el ancho es del
- *  contenedor por diseño, así que el patrón es parte del contrato y no
- *  una sugerencia. Por eso se corrige acá y no en la pantalla que lo
- *  sufrió. */
+ *  ⚠️ **POR QUÉ EL ERROR ES FÁCIL Y NO DESCUIDADO** — la frase de A, que
+ *  es lo que de verdad protege este patrón: ***el `gap` no se ve en el
+ *  porcentaje.*** `48 + 48 = 96 < 100` invita a concluir que sobra 4 % —
+ *  y sobra, pero el gap se come 16 px, que en 380 son **4,2 %**. *El
+ *  porcentaje y el gap están en unidades distintas y la resta se hace en
+ *  píxeles.*
+ *
+ *  ⇒ Por eso la cura no es un tercer porcentaje con más margen: es
+ *  **sacar el gap de la cuenta del wrap**. Un patrón que depende de
+ *  cuánto sobra no es determinista — es una coincidencia con suerte. */
