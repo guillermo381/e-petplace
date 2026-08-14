@@ -340,6 +340,33 @@ prestador y no lleva fila de prestador — fabricarle una vacía contamina el
 motor de servicios con negocios que no prestan servicios.* **Es el cinturón
 otra vez, del lado del alta.**
 
+> ### ✅ LA RESOLUCIÓN DEL PASO ③ — **DOS TABLAS, UNA VERDAD, COMPUESTAS EN VISTA**
+> *(firma de mesa, 14-ago; confirmación del founder en el **Lote 1**.)*
+>
+> **El hecho que la obliga:** los papeles de un negocio viven hoy en **dos
+> tablas** — `cuenta_comercial_documentos` (los de la CUENTA, nacidos en
+> S97-A) y `prestador_documentos` (los del oficio, desde S79). **Un prestador
+> con tienda tiene de las dos; un vendedor puro solo de la primera.**
+>
+> **La lista del wizard COMPONE LAS DOS EN VISTA.** No se fusionan tablas, no
+> nace una tercera, y ninguna se copia.
+>
+> **🔴 Y la mitad que lo vuelve exigible: la lista lee la MISMA derivación
+> que el contador.** El paso ③ está `completo` cuando existe al menos un
+> documento no rechazado **en cualquiera de las dos**
+> (`obtener_estado_onboarding_wizard`, brazo ③) — *y la lista muestra
+> exactamente ese conjunto*. **Si la lista y el contador leyeran distinto, el
+> prestador vería papeles cargados y un número que le dice que le faltan.**
+> Es el modo de falla más caro de esta pantalla: *no que falte un dato, sino
+> que dos superficies cuenten el mismo hecho con dos criterios* — el defecto
+> que `§15b.0ter` curó en el HOY y que S88 reintrodujo sin querer.
+>
+> **Es el patrón de la casa, tercera aplicación en esta letra:** el **HOY**
+> compone citas+llegadas+despachos en vista (§3) · **`ATENDER`** compone sus
+> dos naturalezas en vista (§2.1bis) · **el paso ③** compone sus dos tablas de
+> documentos en vista. ***Una verdad, dos fuentes, compuestas al leer — jamás
+> guardadas juntas.***
+
 ---
 
 ## 5 · EL DESTAPE — la ceremonia del cierre del wizard

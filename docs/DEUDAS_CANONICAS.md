@@ -14632,3 +14632,48 @@ fue el CUERPO de la función, no su nombre ni su ficha.** El nombre
 `otorgar_rol_vendedor` no dice «admin-only»; el nombre
 `crear_cuenta_comercial_inicial` no dice «no registra naturaleza». **Las dos
 respuestas estaban en el cuerpo, y el cuerpo se lee en tres minutos.**
+
+---
+
+#### D-797 — 🟡 LA CUENTA COMERCIAL NO TIENE LOGO: NI BUCKET, NI COLUMNA, NI WRAPPER
+
+**Nace del freno de C sobre el paso ① del wizard (14-ago), y C hizo bien en
+frenar:** *no se monta un selector que no guarda.* **Los cuartos sin esquema
+no se montan** — el precedente de la casa se sostuvo por segunda vez en la
+misma sesión (la primera fue el radio, D-791).
+
+**Medido — no existe NADA de las tres patas:**
+
+| pata | estado |
+|---|---|
+| **bucket** de Storage para el logo de la cuenta | **no existe** |
+| **columna** en `cuentas_comerciales` | **no existe** (la tabla tiene `nombre_comercial`, `razon_social`, `metadata` — ningún `logo_url`) |
+| **wrapper** de subida | **no existe** |
+
+*Lo que sí existe es `LogoNegocio` (componente 40, S74) — la PIEZA que lo
+pintaría. La superficie está lista y el motor no.*
+
+**🔴 NO BLOQUEA EL LOTE 1, y hay que decir por qué no:** **el destape cae al
+monograma POR DISEÑO.** La escalera de portada de `DIRECCION_ARTE` §12.3
+(*imagen → poster → **logo centrado** → **monograma***) tiene su último
+peldaño escrito precisamente para esto, y *el monograma es digno* — no es un
+estado de error ni un hueco. **La ceremonia del destape (§5) funciona entera
+sin logo.**
+
+> **Pero antes de octubre esto se cobra, y se cobra en el peor lugar.** El
+> destape es **el momento emocional del producto** — el instante en que el
+> vendedor ve su negocio existir por primera vez. **Va a querer destaparlo
+> con SU logo.** *Un monograma es digno como fallback permanente para quien
+> no tiene logo; es pobre como única opción para quien sí lo tiene y no
+> encuentra dónde ponerlo.*
+
+**Y el matiz que lo separa del logo del PRESTADOR:** el prestador ya tiene
+logo por su perfil público. **El vendedor puro no tiene perfil público** —
+decisión declarada en S97-A (*v1 no lo exige, §2.1*) — así que **para él el
+wizard es el único lugar donde su logo podría entrar.** *La ausencia no se
+compensa desde otra pantalla, porque esa otra pantalla tampoco existe.*
+
+☠️ **Disparo: ANTES DEL ALTA DEL VENDEDOR REAL.** Las tres patas juntas
+(bucket privado o público con su decisión declarada · columna · wrapper), más
+el punto de captura en el paso ①. **Muere** cuando un vendedor real pueda
+subir su logo y verlo en su destape.
