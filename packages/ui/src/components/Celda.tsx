@@ -64,99 +64,59 @@ export function Celda(props: CeldaProps) {
     <>
       {inicio ? <View>{inicio}</View> : null}
 
-      {/* 🔴 EL SUJETO NO CEDE — cura de S97+-B, con su defecto medido.
+      {/* 🔴 EL SUJETO NO CEDE — cura de S97+-B. Cuatro vueltas, y el
+          comentario se reescribe entero porque quedó contradiciéndose a
+          sí mismo: un comentario que discute con su propio código es el
+          defecto que esta tanda vino a cazar.
 
-          LO QUE PASABA, visto en dispositivo por D (captura
-          `s97-d-lote/02-hoy-linea.png`): en el HOY del prestador el
-          nombre de la mascota truncaba a **`Z…`** —UNA letra— y el
-          subtítulo partía a media palabra (`Consult a …`).
+          EL DEFECTO ORIGINAL (D, en dispositivo): el nombre de la mascota
+          truncaba a **`Z…`** —UNA letra— en el HOY del prestador.
 
-          EL MECANISMO, medido acá y no supuesto: este bloque tenía
-          `flex: 1`, que en RN es `flexBasis: 0` — **no reclama ancho
-          propio, toma lo que sobra**. Y el bloque de la derecha
-          (`metadataMono` + `fin`) no tenía `flexShrink`, así que su
-          ancho es intrínseco y **no cede jamás**. Con una fila cargada
-          —hora, avatar, glifo, dos chips, duración y chevron— la derecha
-          se servía primero y al sujeto le quedaban las sobras.
+          EL REPARTO, medido: este bloque tenía `flex: 1` = `flexBasis: 0`
+          —no reclama ancho propio, toma lo que sobra— y el bloque derecho
+          no tenía `flexShrink`, así que su ancho era intrínseco y **no
+          cedía jamás**. El sujeto pagaba toda la compresión.
 
-          ⚠️ LA ATRIBUCIÓN, que importa porque hubo dos sospechosos: la
-          escala de N1 (13→14, 15→16) **agravó** esto, no lo causó. Pasar
-          de «Zeus» a «Z» es perder el 75% del nombre; un crecimiento del
-          ~7% en los chips no produce eso — lo produce que este bloque
-          absorbía TODA la compresión. **El defecto es estructural y vive
-          acá desde S43**; la escala solo lo hizo visible.
+          ⚠️ ATRIBUCIÓN: la escala de N1 (13→14, 15→16) lo **agravó**, no
+          lo causó. Pasar de «Zeus» a «Z» es perder el 75%; un ~7% de
+          crecimiento no produce eso. **El defecto vive acá desde S43.**
 
-          LA CURA, en dos mitades que solo funcionan juntas:
-          · `minWidth` acá — el sujeto tiene un piso y por debajo no baja.
-          · `flexShrink: 1` en la derecha (abajo) — alguien tiene que
-            ceder, y entre el nombre de la mascota y un chip de estado,
-            cede el chip. *El nombre es el sujeto de la fila; el resto es
-            metadata sobre él.*
+          LA ARITMÉTICA QUE ORDENA TODO, y que solo apareció al leer el
+          árbol completo (orden de la mesa tras cuatro parches):
+              avatar + gaps + padding ....  ~92 px
+              este bloque (piso) .........   96 px
+              la derecha (glifo + 2 chips)  ~160 px  ← NO comprimible
+              ───────────────────────────────────────
+              pedido ~348 · disponible ~340 (412 − hora 46 − gaps)
 
-          EL PISO SON 128, y se calibró DOS VECES.
+          **No caben, y ningún elemento es comprimible de verdad**: una
+          `Insignia` con texto adentro tiene ancho intrínseco. Por eso
+          cada ajuste movía el defecto de lugar en vez de cerrarlo —
+          truncado → solapamiento → corte mudo → colisión.
 
-          ⏪ Nació en **96**, dimensionado contra el TÍTULO: a `size.base`
-          entran ~9-10 caracteres y eso cubre Thor, Zeus, Aurora. El
-          error fue olvidar que **el subtítulo hereda el mismo piso** —
-          están en la misma columna, no pueden tener anchos distintos— y
-          ahí 96 no alcanza: «Vacunación» no entra y cortaba a mitad de
-          palabra. *El piso de una columna lo fija el renglón más
-          exigente, no el más importante.*
+          EL PISO SON 96 y se calibró TRES VECES, la última **bajándolo**:
+          subió a 128 para que entrara «Vacunación» y eso empujó 32 px más
+          contra una derecha que no puede ceder. *El piso de una columna
+          lo fija el renglón más exigente — pero si el total no entra,
+          subirlo solo cambia quién se rompe.* Con 96 el título entra
+          holgado (~9-10 caracteres: Thor, Zeus, Aurora) y el subtítulo
+          **elide con su elipsis**, que es su lugar en la ley.
 
-          128 a `size.sm` (14) da ~16-18 caracteres por línea y, con
-          `numberOfLines={2}`, ~32-36 en total: entran «Vacunación» y
-          «Consulta general» enteros. Para el título a 16 son ~12-14
-          caracteres, holgado para los nombres reales.
+          LAS TRES PIEZAS VIVAS, y por qué cada una:
+          · `minWidth: 96` acá — el título tiene piso.
+          · `minWidth: 0` en la derecha — sin eso su `flexShrink` es
+            DECORATIVO (el default de un ítem flex es `min-width: auto`,
+            que le prohíbe encoger por debajo de su contenido).
+          · `overflow: 'hidden'` en la derecha — piso de seguridad contra
+            la colisión medida (glifo 21 px DENTRO del texto). Va ahí y
+            **no acá**: en el texto silenciaba la elipsis del `Text`, que
+            es información. *Recortar un adorno es feo; recortar un aviso
+            es mentir.*
 
-          ⚠️ SU PRECIO, declarado: subir el piso empuja a la derecha, y
-          con el `minWidth: 0` de abajo la derecha ahora **sí cede** ⇒ los
-          chips pueden empezar a truncar. **Es su lugar en la ley** (el
-          orden de sacrificio que fijó la mesa: chips → el subtítulo
-          envuelve o elide → el título jamás), y el dato que autoriza el
-          cobro es de D: midió los chips **enteros y holgados**, o sea que
-          había margen para pedirles.
-
-          ⏪ SEGUNDA VUELTA — LA PRIMERA CURA ARREGLÓ EL TÍTULO Y ROMPIÓ
-          EL SUBTÍTULO, y el defecto nuevo era PEOR que el original:
-          «Vacunación» dejó de truncar y pasó a **SOLAPARSE** —el glifo
-          encima entre «Vacun» y «ción», el chip tapando el final—.
-          *Truncar avisa que falta texto; solaparse destruye el que hay y
-          finge que está.* Lo vio D en un recorte a 3×, porque **desde la
-          miniatura truncado y solapamiento se parecen y tienen curas
-          distintas.**
-
-          🔴 LO QUE FALTABA, y es el detalle de flexbox que volvía
-          DECORATIVO al `flexShrink` de la derecha: **el `min-width` por
-          defecto de un ítem flex es `auto`, no `0`** — o sea que un
-          contenedor NO encoge por debajo del ancho de su contenido por
-          más `flexShrink` que se le ponga. La derecha nunca cedió; el
-          `flexShrink: 1` que escribí no hizo nada. Con el piso de 96
-          acá y una derecha que no cede, la suma superaba el ancho y el
-          sobrante se dibujaba encima.
-
-          ⇒ La cura se completa con `minWidth: 0` en la derecha (abajo).
-
-          ⏪ TERCERA VUELTA — **EL CINTURÓN SE COMÍA LA ELIPSIS Y SE
-          RETIRA.** La vuelta anterior le puso a este bloque un
-          `overflow: 'hidden'` «por si el reparto vuelve a fallar». El
-          reparto no volvió a fallar (D midió el DOM: caja 96 · texto 96 ·
-          **no desborda**), pero el recorte quedó **MUDO**: el subtítulo
-          cortaba seco a mitad de palabra, sin elipsis y pegado al glifo.
-
-          EL RAZONAMIENTO QUE LO SEÑALA, y no depende de mirar píxeles
-          —que es lo que falló tres veces en esta ronda, dos de D y una
-          mía—: **`ellipsizeMode="tail"` está declarado en el subtítulo.**
-          Si el `<Text>` hubiera truncado, habría puesto elipsis. No hay
-          elipsis ⇒ **no truncó el `Text`** ⇒ el corte lo hizo el
-          `overflow`, un piso más arriba, donde no hay nada que sepa
-          escribir «…».
-
-          *Un cinturón que tapa el aviso del cinturón de abajo no protege:
-          silencia.* El `Text` ya sabía ceder bien —dos líneas y elipsis—
-          y se le quitó la voz. Se retira, y la defensa contra el
-          solapamiento queda donde de verdad estaba: en el `minWidth: 0`
-          de la derecha, que es lo que hace que alguien ceda. */}
-      <View style={{ flex: 1, minWidth: 128, gap: spacing[0.5] }}>
+          🔴 LO QUE ESTO **NO** RESUELVE, elevado a la mesa: la fila lleva
+          más contenido del que entra. Es decisión de ANATOMÍA —que los
+          chips bajen a su propia línea— y no otro ajuste de flexbox. */}
+      <View style={{ flex: 1, minWidth: 96, gap: spacing[0.5] }}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -194,7 +154,42 @@ export function Celda(props: CeldaProps) {
         // `min-width: auto`, que le prohíbe encoger por debajo de su
         // contenido: con eso puesto, `flexShrink: 1` es una declaración
         // que no encoge nada. Fue el defecto de la primera vuelta.
-        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1, minWidth: 0 }}>
+        //
+        // ⏪ CUARTA VUELTA — `overflow: 'hidden'` ACÁ, y es el opuesto
+        // exacto del que se retiró del texto. D midió la colisión: el
+        // glifo cae 21 px DENTRO del texto y el chip empieza 66 px ANTES
+        // de que el texto termine — las dos columnas ocupando el mismo
+        // espacio.
+        //
+        // EL MECANISMO, y sale de la cura anterior: `minWidth: 0` dejó
+        // que este View ENCOJA, pero **sus hijos no encogen** (un chip
+        // con texto adentro tiene ancho intrínseco). Así que el View se
+        // achica y su contenido se sale — y con `alignItems: 'flex-end'`
+        // se sale hacia la IZQUIERDA, que es donde vive el texto.
+        // *Antes no cedía y empujaba; ahora cede y INVADE.*
+        //
+        // POR QUÉ ACÁ SÍ Y EN EL TEXTO NO — la distinción que la vuelta
+        // anterior enseñó: un `overflow` es legítimo **donde no tapa un
+        // aviso**. En el texto silenciaba la elipsis del `Text`, que es
+        // información. Acá no hay nada que decir: un chip recortado se ve
+        // recortado. *Recortar un adorno es feo; recortar un aviso es
+        // mentir.*
+        //
+        // ⚠️ ES UN PISO DE SEGURIDAD, NO LA SOLUCIÓN: garantiza que
+        // NADA se superponga, y el precio es que un chip puede quedar
+        // cortado por su izquierda. Feo y honesto. La causa de fondo
+        // —que esta fila lleva más contenido del que entra— está elevada
+        // a la mesa: es decisión de ANATOMÍA (que los chips bajen a su
+        // propia línea), no otro ajuste de flexbox.
+        <View
+          style={{
+            alignItems: 'flex-end',
+            gap: spacing[1],
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+          }}
+        >
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text
