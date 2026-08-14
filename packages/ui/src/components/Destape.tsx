@@ -363,12 +363,49 @@ function TabsDelDestape({ tabs, abierto }: { tabs: DestapeTab[]; abierto: { valu
   const { theme } = useTheme()
   const sPuerta = useAnimatedStyle(() => ({ opacity: abierto.value }))
   return (
-    <Animated.View style={[{ flexDirection: 'row', gap: spacing[4] }, sPuerta]}>
+    <Animated.View
+      style={[
+        {
+          flexDirection: 'row',
+          /* 🔴 ENVUELVE Y SE CENTRA — con las CINCO tabs reales la tira
+             se desbordaba: «Hoy» cortada contra el borde izquierdo y
+             «Cuenta» contra el derecho.
+
+             MEDIDO con las etiquetas reales a `apoyo` (14 px):
+                 chips + gaps = 428 px  vs ~380 útiles  ⇒ 48 px de más
+
+             POR QUÉ ENVOLVER Y NO SOLO COMPRIMIR, que era la salida
+             obvia: comprimir el paso da 316 px y entra **por 64 px de
+             margen** — y **las etiquetas las pone el consumidor**
+             (`etiqueta` es prop, y viaja por el riel de idioma). Un
+             margen que hoy sobra se lo come una traducción más larga, y
+             el defecto vuelve sin que nadie toque esta pieza. *Es el
+             mismo margen que ya me mordió dos veces hoy: 7 px en el
+             patrón de grilla y 0,8 px en su reemplazo.*
+
+             ⇒ `flexWrap` + `justifyContent: 'center'` cierra por
+             construcción: **sea cual sea el ancho o el largo de las
+             etiquetas, la tira no puede desbordar.** Y el paso se
+             comprime IGUAL, para que con cinco normalmente entre en una
+             línea — pero **sin depender de que entre**.
+
+             LOS DOS FRENOS DE LA MESA, cumplidos: el ORDEN DE LECTURA se
+             conserva (el escalonado lo pone `Entrada` por índice, y
+             envolver no lo reordena), y **la ceremonia sigue siendo
+             ceremonia** — dos líneas centradas de tabs materializándose
+             es tan ceremonial como una. */
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: spacing[2],
+        },
+        sPuerta,
+      ]}
+    >
       {tabs.map((t, i) => (
         <Entrada key={t.key} orden={i}>
           <View
             style={{
-              paddingHorizontal: spacing[4],
+              paddingHorizontal: spacing[3],
               paddingVertical: spacing[2],
               borderRadius: radius.suave,
               backgroundColor: theme.bg.overlay,
