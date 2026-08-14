@@ -4936,9 +4936,11 @@ export type Database = {
           created_at: string
           cuenta_comercial_id: string
           dia_offset: number
+          dias_semana: number[]
           entrega_desde: string
           entrega_hasta: string
           id: string
+          incluye_festivos: boolean
           orden: number
           zona_horaria: string
         }
@@ -4949,9 +4951,11 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id: string
           dia_offset?: number
+          dias_semana?: number[]
           entrega_desde: string
           entrega_hasta: string
           id?: string
+          incluye_festivos?: boolean
           orden: number
           zona_horaria?: string
         }
@@ -4962,9 +4966,11 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id?: string
           dia_offset?: number
+          dias_semana?: number[]
           entrega_desde?: string
           entrega_hasta?: string
           id?: string
+          incluye_festivos?: boolean
           orden?: number
           zona_horaria?: string
         }
@@ -18880,6 +18886,7 @@ export type Database = {
         Args: { p_item_id: string; p_mascota_id: string; p_uid: string }
         Returns: string
       }
+      _dias_sin_repetidos: { Args: { p_dias: number[] }; Returns: boolean }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
       _empleado_matricula_ok: {
         Args: { p_empleado_id: string; p_tipo_servicio: string }
