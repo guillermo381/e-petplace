@@ -1020,11 +1020,76 @@ prohíbe).
 **⑤ QUIÉN — FIRMA: el único rol de empleado que se acepta hoy es
 REPARTIDOR.**
 
-> 🔴 **Y entra como chip del EQUIPO QUE YA EXISTE, no como padrón propio de
+> ~~🔴 **Y entra como chip del EQUIPO QUE YA EXISTE, no como padrón propio de
 > la despensa.** El repartidor es un rol dentro de `e-PetPlace Negocios`
 > (`LETRA_PANEL_VENDEDOR_S96` §5). *Si la despensa arma su propia lista de
 > empleados, una veterinaria que además reparte tiene la misma persona
-> cargada dos veces, con dos altas y dos bajas.* **Un equipo, un lugar.**
+> cargada dos veces, con dos altas y dos bajas.* **Un equipo, un lugar.**~~
+>
+> ☠️ **ENMENDADA — firma de mesa del 14-ago-2026. La letra vieja queda arriba
+> tachada y no borrada, y su razón sobrevive entera (ver abajo).**
+
+> ### 🔴 ENMIENDA A ⑤ — **MANDA LA CABECERA: EL REPARTIDOR CUELGA DE LA CUENTA COMERCIAL**
+>
+> **⚠️ DEPÓSITO POR CONTENIDO, NO VERBATIM — declarado (S97-A).** La orden de
+> mesa pidió depositar «la enmienda de arriba verbatim»; **el literal no llegó
+> a A** (llegaron sus cinco puntos enumerados, no su texto). *Se deposita lo
+> que sí llegó, con la prosa de A, y se dice — la casa prohíbe presumir
+> contenido de un literal ausente (L-142/L-149, regla 76b).* **Si existe un
+> texto original, reemplaza a éste sin discusión.**
+>
+> **EL CHOQUE, con los dos literales del mismo día:** la **cabecera de esta
+> misma §8.6bis** firma que *«la configuración cuelga de la CUENTA COMERCIAL,
+> no del prestador — un vendedor puro no es prestador y no lleva fila de
+> prestador»*; **⑤ mandaba el repartidor al equipo del prestador.** *Dos
+> firmas de mesa del mismo día, en la misma sección, tirando para lados
+> opuestos.*
+>
+> **GANA LA CABECERA.** Y la medición la respalda: **`repartidores` ya existe
+> colgada de `cuenta_comercial_id`, con 3 filas vivas y las 3 con `user_id`**
+> — la tabla no se inventa acá, se **RATIFICA**.
+>
+> **La razón es la del cinturón (§3.4), no una preferencia:** un vendedor puro
+> **no tiene fila en `prestadores`**. Colgar su repartidor del equipo del
+> prestador obligaría a fabricarle una fila vacía — *exactamente lo que la
+> cabecera prohíbe, y exactamente lo que contamina el motor de servicios con
+> negocios que no prestan servicios.*
+>
+> #### La razón de la letra vieja NO muere: se cumple de otro modo
+>
+> ⑤ protegía algo real —*«una veterinaria que además reparte tiene la misma
+> persona cargada dos veces»*— y esa protección **se conserva**:
+>
+> - **La anti-duplicación es por `user_id`, no por tabla.** La misma persona
+>   es la misma persona porque es el mismo usuario, la cargue quien la cargue.
+> - **La puerta es «elegí del equipo»:** al dar de alta un repartidor, si el
+>   negocio tiene equipo, se ofrece elegir a alguien que ya está adentro en
+>   vez de tipearlo de nuevo. *Una persona, un alta.*
+> - **Las bajas cruzadas se avisan.** Dar de baja a alguien en un lado dice
+>   qué queda vivo en el otro — no lo apaga solo ni lo deja huérfano en
+>   silencio (ley del cambio de esta misma sección: *se acepta, se cumple lo
+>   comprometido, y se dice*).
+>
+> **⇒ La letra vieja protegía A LA PERSONA, no a la tabla.** *Confundir las
+> dos cosas es lo que hizo que la protección viajara pegada a un lugar de
+> almacenamiento que el cinturón no permite.* La persona sigue protegida; el
+> lugar cambia.
+>
+> #### Lo que NO cambia
+>
+> **`RolEquipo` NO gana `'repartidor'`.** Los roles del equipo son los de
+> `PORTAL_PRESTADOR` §14bis, y el repartidor **no es un rol de equipo**: es
+> una fila de `repartidores` con su `user_id`. *Meterlo al enum de roles lo
+> volvería visible en la pantalla de equipo del prestador, que es justo donde
+> no vive.*
+>
+> #### Crédito y nota de método
+>
+> **El choque lo cazó C, midiendo antes de cablear.** *Dos firmas de mesa del
+> mismo día contradiciéndose no las separa ningún typecheck, ningún lint y
+> ningún juez: las dos son prosa, las dos son válidas, y la contradicción solo
+> aparece cuando alguien intenta construir las dos a la vez.* Es la familia de
+> **D-790**.
 
 **⑥ EL ESTADO — FIRMA NUEVA.** El negocio tiene estado **`en revisión` →
 `activa`**. Se muestra con un **chip chico arriba**, y el chip abre un
