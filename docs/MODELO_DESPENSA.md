@@ -1,6 +1,14 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.4 — reapertura S96/S97 (13 Ago 2026). La configuración de la despensa entra a v1.**
+> **Versión: v2.5 — S97 (14 Ago 2026). Las DOS CARAS de la despensa del negocio.**
+> **Qué cambió respecto de v2.4, en una línea: nace §8.6ter — inventario local
+> (del negocio, para su mostrador) y catálogo e-PetPlace (la vitrina del
+> cliente) son DOS cosas y el catálogo las diferencia; el inventario local es
+> V2 con superficie anunciada en V1, y queda declarada la LEY DE ESQUEMA que
+> prohíbe fusionarlos: cuando V2 llegue, la distinción tiene que estar
+> disponible, no ser una migración.**
+>
+> **Versión previa: v2.4 — reapertura S96/S97 (13 Ago 2026). La configuración de la despensa entra a v1.**
 >
 > **Qué cambió respecto de v2.3, en una línea: nace §8.6bis — la pantalla de
 > configuración del vendedor ENTRA a v1 por firmas del founder del 13-ago**,
@@ -1107,6 +1115,59 @@ a cero; después esperamos nosotros. Son dos cosas y se dicen distinto.*
 querer meter adentro:** el **catálogo y el precio** son la puerta de carga
 (§4.2 — otro acto y otro actor) · el **stock** es del panel · lo **fiscal y
 bancario** ya vive en Cuenta comercial. Ninguna de las tres se duplica acá.
+
+---
+
+### 8.6ter 🔴 LAS DOS CARAS DE LA DESPENSA DEL NEGOCIO (firma del founder, 14-ago-2026)
+
+**La despensa de un negocio son DOS cosas distintas y hasta hoy la letra las
+trataba como una.** Literal del founder:
+
+> ***«el catálogo los debe diferenciar.»***
+
+| | **Inventario local** | **Catálogo e-PetPlace** |
+|---|---|---|
+| De quién es | **del negocio** | de e-PetPlace |
+| Para qué sirve | **su mostrador** | **la vitrina del cliente** |
+| Quién lo carga | el vendedor, para sí | el vendedor **propone**, e-PetPlace **publica** (§4.2) |
+| Quién lo ve | solo él | las familias |
+
+**Por qué la distinción es real y no administrativa:** una clínica tiene
+frascos, gasas y alimento que vende en el mostrador **y que no quiere ni debe
+publicar**. *Meter eso en la vitrina curada la destruye —§4.1 existe justamente
+para que la vitrina sea criterio y no depósito— y no meterlo en ningún lado
+deja al negocio sin poder llevar su propio stock.* **Son dos necesidades
+legítimas y opuestas.**
+
+#### El alcance, firmado
+
+- **El inventario local es V2.**
+- **Su SUPERFICIE se anuncia en V1** — el modal firmado. *La despensa dice que
+  existe y todavía no; no se calla su existencia* (misma disciplina que el
+  «próximamente honesto» de la casa: **anunciar no es prometer una fecha**).
+
+#### 🔴 LA LEY DE ESQUEMA — declarada HOY, hacia adelante
+
+> **NADA DE LO QUE SE CONSTRUYA HOY PUEDE FUSIONAR LOS DOS INVENTARIOS.**
+> Cuando V2 llegue, **la distinción tiene que estar DISPONIBLE, no ser una
+> migración.**
+
+**No se diseña el esquema hoy. Se deja la ley que lo protege**, y la diferencia
+entre las dos cosas es todo:
+
+- *Una tabla que hoy guarda «los productos del negocio» sin distinguir para
+  quién son **no está incompleta: está mal**.* El día de V2 no se agrega una
+  columna — **se descubre que hay filas de dos naturalezas mezcladas y ya no
+  se sabe cuál era cuál.**
+- **El costo de la ley es cero hoy** (ninguna tabla nueva, ninguna columna) **y
+  el de no tenerla es un backfill sobre datos ambiguos** — el mismo modo de
+  falla que D-812 acaba de medir con `tipo_servicio`, y que S94 pagó con los
+  137 pedidos huérfanos.
+
+⚠️ **Cómo se cobra esta ley, para que no quede como buena intención:** toda
+migración que cree o toque tablas de productos del negocio **declara a cuál de
+las dos caras pertenece la fila**. Si no puede declararlo, **es la señal de que
+la fusión ya ocurrió** y hay que frenar ahí, no después.
 
 ---
 
