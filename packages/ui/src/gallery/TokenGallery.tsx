@@ -3163,7 +3163,7 @@ function GaleriaInterna() {
                   { g: 'paseo', t: 'Paseo', c: 'cuidado' },
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o, i) => (
-                  <View key={o.g} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                  <View key={o.g} style={{ width: '48%' }}>
                     <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
                   </View>
                 ))}
@@ -3185,7 +3185,7 @@ function GaleriaInterna() {
                   { g: 'grooming', t: 'Bano y corte', c: 'cuidado', d: 'desde $18' },
                   { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
                 ] as const).map((o) => (
-                  <View key={o.t} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                  <View key={o.t} style={{ width: '48%' }}>
                     <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
                   </View>
                 ))}
