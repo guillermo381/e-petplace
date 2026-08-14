@@ -16003,3 +16003,57 @@ del 401, el daño medido, y las tres razones por las que **nada dio la alarma**:
 ☠️ **CERRADA en su motor.** Queda **D-817**, el guard que vuelve visible esta
 clase, y el gate en dispositivo de D-815 (que un teléfono real suene), que es
 lo único que A no puede firmar sola (L-153). **Territorio: A.**
+
+---
+
+#### D-817 — ✅ EL GUARD DE LA COLA: LA EDAD, NO EL TAMAÑO
+
+**Nace de D-816, que fue un defecto de SILENCIO PERFECTO:** durante días el
+producto encoló avisos con normalidad, el cron dijo `succeeded` cada minuto, el
+transporte de push devolvió `200`, ninguna pantalla se rompió — **y nadie
+recibió nada.** *No había ningún rojo que mirar, porque el defecto no producía
+errores: producía ausencia.*
+
+**`scripts/verify-cola-notificaciones.mjs`** — solo SELECT, jamás despacha.
+
+### 🔴 POR QUÉ MIDE EDAD Y NO CANTIDAD — es la decisión de la ficha
+
+**Lo único que cambiaba desde el primer minuto del defecto era que la cola
+empezaba a ENVEJECER.** Un pipeline sano vacía `nacida` en el tick siguiente;
+uno roto la deja crecer.
+
+> **Un pico de volumen es normal** —mil avisos legítimos a la vez dan una cola
+> grande y sana— **pero una intención de hace media hora es anómala con la cola
+> en 1 o en mil.**
+> ***El tamaño mide el tráfico; la edad mide si el caño está tapado.***
+
+Umbral por defecto **15 min**: el cron corre cada minuto, así que quince ticks
+perdidos ya no son un hipo.
+
+### El rojo dice QUÉ, no CUÁNTO
+
+No devuelve un número y se calla: nombra el defecto y **lista dónde mirar en el
+orden en que D-816 se resolvió**, con su advertencia adentro —*`cron.job_run_
+details` no alcanza: `net.http_post` es asíncrono y su `succeeded` solo dice
+que el pedido salió*—. *Un número sin nombre manda a buscar; un nombre manda a
+arreglar.*
+
+### ✅ PROBADO EN ROJO ANTES DE CONFIARLE NADA
+
+| Brazo | Cómo se ejercitó | Resultado |
+|---|---|---|
+| cola vacía → verde | estado real | **exit 0** ✅ |
+| cola vieja → **rojo** | sonda `nacida` con `created_at` de hace 90 min | **exit 1** ✅ |
+| cola fresca → verde | sonda re-fechada a 2 min | ⚠️ **NO SE EJERCITÓ** |
+
+⚠️ **El tercer brazo no corrió, y se declara en vez de darse por bueno: el
+despachador consumió la sonda antes de que el guard la viera** (movimiento un
+tick después de ponerla). *Su fracaso es, en sí mismo, evidencia de que la cura
+de D-816 funciona* — pero **la rama «cola fresca» queda sin verde propio**, y
+quien la necesite tendrá que congelar el cron para ejercitarla.
+
+**Residuo 0 verificado** tras retirar la sonda.
+
+☠️ **Muere** cuando corra sola —cron o CI— en vez de a mano. *Hoy es un
+instrumento que hay que acordarse de usar, que es exactamente la clase de
+defensa que no defiende el día que nadie se acuerda.* **Territorio: A.**
