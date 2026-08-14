@@ -74,6 +74,34 @@ const KEY_OFICIO = {
   adiestramiento: 'atender.oficioAdiestramiento',
 } as const;
 
+/**
+ * 🔴 LA CELDA DE LA GRILLA — y sus dos desvíos del patrón documentado,
+ * los dos MEDIDOS antes de desviarme (D-804).
+ *
+ * ① **SIN `flexGrow`.** El patrón lo traía razonando que *«una baldosa
+ *    impar ocupe la fila entera en vez de quedar a media pantalla»* — y
+ *    esa regla, con la pieza ya CUADRADA, produce el defecto que A midió
+ *    en dispositivo: la impar crece a todo el ancho y su `aspectRatio: 1`
+ *    la vuelve **un cuadrado de pantalla completa** (~380×380; dos
+ *    apiladas ≈ los 800 px del reporte). *Lo que era una regla de relleno
+ *    razonable para una tarjeta libre se vuelve un gigante cuando la
+ *    pieza ata alto a ancho.*
+ *
+ * ② **`47%` y NO el `48%` nuevo.** El patrón cambió a 48% para dejar de
+ *    ser «frágil por siete píxeles», y la aritmética dice que el 48%
+ *    **no entra en ninguno de los dos anchos reales** —el gap cuenta
+ *    para la decisión de wrap—:
+ *
+ *      Android 412 (380 útiles): 2×182.4 + 16 = 380.8 > 380  ⇒ WRAP
+ *      web     420 (388 útiles): 2×186.2 + 16 = 388.5 > 388  ⇒ WRAP
+ *      con 47%:                  373.2 y 380.7               ⇒ ENTRA
+ *
+ *    Adoptarlo mandaría la portada a UNA columna en los dos aparatos.
+ *    **Va como medición a B, no como parche mío a su patrón** — pero
+ *    tampoco copio un número que ya medí que no entra.
+ */
+const ESTILO_CELDA = { flexBasis: '47%' } as const;
+
 type Pantalla =
   | { fase: 'cargando' }
   // El error DICE su causa y ofrece reintentar (Ley 13 / regla 36): un
@@ -192,53 +220,47 @@ export default function Atender() {
                     naturalezas (§1.2) — `Tus servicios` y `Tu tienda`. No
                     son vocabulario: son el primer candado del cinturón. */}
                 <Texto variante="seccion">{t('atender.tusServicios')}</Texto>
-                {/* 🔴 S98-C · `orden` NO SE PASA, Y ES UNA DESVIACIÓN
-                    DECLARADA DE N6 (entrada escalonada en toda pantalla
-                    nueva) — no un olvido.
+                {/* ✅ S98-C · `orden` DEVUELTO — con las DOS condiciones
+                    cumplidas y verificadas, no con una: la pieza declara su
+                    alto (`aspectRatio` subió a su raíz, B) **y** esta
+                    captura se re-corrió con el testigo debajo (la pizarra),
+                    que es lo único que hace visible una altura cero. */}
+                {/* 🔴 `alignItems: 'flex-start'` — LA MITAD DE D-804 QUE ES MÍA.
+                    Con el default `stretch`, cada celda de la fila recibe un
+                    ALTO DEFINIDO (el de la fila), y un alto definido GANA
+                    sobre el `aspectRatio` de la pieza ⇒ la baldosa deja de
+                    ser cuadrada y se estira. Medido por A en dispositivo:
+                    **~800 px de alto, dos scrolls para dos celdas.**
+                    Con `flex-start` la celda no recibe alto y la proporción
+                    de la pieza vuelve a gobernar.
 
-                    MEDIDO en el navegador (`getBoundingClientRect` +
-                    `getComputedStyle`, no deducido): con `orden`, la
-                    baldosa se envuelve en `Entrada`, cuyo `Animated.View`
-                    de Reanimated queda **`position: absolute`** en RN-web.
-                    Un hijo absoluto no aporta alto a su padre ⇒ **la celda
-                    de la grilla mide 0 y las baldosas se dibujan encima de
-                    la pizarra.** Medido en esta pantalla: celda `w=186
-                    h=0`, con el botón adentro en `186×186`.
+                    **Esto NO repite ningún número de `Baldosa`:** no digo
+                    cuánto mide, digo que no se lo impongo.
 
-                    ⚠️ **EL LÍMITE: está medido en RN-WEB.** En nativo
-                    Reanimated no posiciona así y es probable que el
-                    teléfono lo resuelva bien — **no lo afirmo, no lo medí.**
-                    Se saca igual porque es la única forma de que la
-                    composición sea VERIFICABLE hoy: *shippear una pantalla
-                    cuya composición no puedo ver, confiando en que la
-                    plataforma que no medí la salve, es exactamente el
-                    verde sin medir que la casa prohíbe.*
-
-                    ☠️ CONDICIÓN DE MUERTE de esta desviación: cuando B
-                    resuelva la interacción `Entrada`×grilla, vuelve
-                    `orden={i}` — es UNA línea, y su ausencia está acá para
-                    que nadie la lea como decisión de diseño.
-
-                    ⏪ Y una corrección propia: antes de medir esto probé
-                    `alignItems: 'flex-start'` culpando al `stretch` de la
-                    fila. **Falsado por la medición** — no cambió nada,
-                    porque el problema nunca fue la altura circular sino un
-                    hijo absoluto. Se revirtió: *un parche que no se
-                    entiende no es inofensivo aunque no rompa — es una
-                    explicación falsa esperando que alguien la crea.* */}
-                {/* LA GRILLA ES DE LA PANTALLA, LA BALDOSA ES DE LA PIEZA
-                    (contrato de B): cuántas columnas entran depende del
-                    ancho de ESTA superficie, no de la pieza. `47%` con el
-                    gap evita que el redondeo empuje una tercera columna, y
-                    `flexGrow` hace que la impar ocupe la fila entera en
-                    vez de quedar a media pantalla. */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
-                  {capacidad.oficios.map((o) => (
-                    <View key={o.oficio} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                    ⏪ Y UNA AUTOCORRECCIÓN: esta línea ya la había escrito
+                    hace unas horas y **la revertí diciendo que la hipótesis
+                    estaba "falsada"**. Era una sobre-generalización mía: en
+                    RN-web fue un NO-OP porque allá el colapso lo causaba
+                    otra cosa (`Entrada` en absoluto), y **de "no cambió nada
+                    en web" concluí "el mecanismo es falso"**. El mecanismo
+                    —el estirón del eje cruzado— nunca se midió en nativo, que
+                    es donde muerde. *Un no-op en la plataforma equivocada no
+                    falsa nada: solo dice que ahí no era.* */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'flex-start',
+                    gap: spacing[4],
+                  }}
+                >
+                  {capacidad.oficios.map((o, i) => (
+                    <View key={o.oficio} style={ESTILO_CELDA}>
                       <Baldosa
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
                         capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
+                        orden={i}
                         onPress={() =>
                           router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
                         }
@@ -286,12 +308,20 @@ export default function Atender() {
             {capacidad.tienda && (
               <View style={{ gap: spacing[3] }}>
                 <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
-                  <View style={{ flexBasis: '47%', flexGrow: 1 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'flex-start',
+                    gap: spacing[4],
+                  }}
+                >
+                  <View style={ESTILO_CELDA}>
                     <Baldosa
                       glifo="despensa"
                       titulo={t('atender.ventaTitulo')}
                       capa="consumo"
+                      orden={capacidad.oficios.length}
                       onPress={() => router.push('/ventas/mostrador')}
                     />
                   </View>
