@@ -14972,8 +14972,49 @@ que decir cuál gana y qué pasa con el que se pierde.
 (S97-A) y hace lo que dice — *escribe el nombre de la cuenta*. **El defecto no
 es de la puerta: es de a qué puerta apunta la promesa de la pantalla.**
 
-☠️ **Muere** con la firma de mesa sobre cuál es el nombre, y la pantalla
-apuntando ahí.
+☠️ ✅ **CERRADA — 14-ago-2026, firma del founder: UN NOMBRE, UNA PUERTA.**
+Gana la **CUENTA COMERCIAL** como fuente —*la única fila que todo negocio
+tiene, incluido el vendedor puro*— y `prestadores.nombre_comercial` queda como
+**espejo declarado**.
+
+**Depositado:** `LA_CASA_DEL_PRESTADOR` §4.3bis, con el porqué que la firma le
+dio: *dos nombres para un negocio es «informar sin informar» **en su forma más
+cara: la que le pasa al cliente final**.*
+
+**Motor (migración `20260814180000`):** nace `renombrar_negocio(cuenta,
+nombre)` — escribe la cuenta siempre y el prestador si existe, **atómica** ·
+las dos puertas viejas **DELEGAN** (no se dropean: tienen consumidores) · un
+**trigger cierra la escritura directa** al espejo (patrón D-526) ·
+**reconciliación de 1 fila** con la cuenta como fuente.
+
+**⚡ LA MEDICIÓN QUE ACHICÓ EL TRABAJO A LA MITAD:** *la puerta atómica YA
+EXISTÍA* — `actualizar_nombre_comercial` escribía las dos tablas desde antes.
+**Lo que faltaba no era la atomicidad: era el SUJETO.** Resolvía por
+PRESTADOR (`IF v_prestador IS NULL THEN RAISE 'no_es_titular'`), así que **el
+vendedor puro no podía renombrar su propio negocio.** *No se construyó una
+puerta nueva: se le cambió de qué cuelga.*
+
+**🔴 Y EL CINTURÓN CAZÓ DOS DEFECTOS PROPIOS ANTES DE APLICAR:**
+① **el primer test preguntaba lo equivocado** — comprobaba «¿no hubo
+excepción?», y un `UPDATE` que la RLS filtra a 0 filas **no lanza**: *«no hubo
+excepción» era indistinguible de «escribió»*. Se corrigió el instrumento, no
+el test — ahora mide **el VALOR**. · ② con el test bueno, **rojo real: el
+guard era `SECURITY DEFINER`**, y adentro de un DEFINER `current_user` es el
+DUEÑO de la función, jamás el rol de la sesión ⇒ **la condición nunca era
+cierta y el trigger era decorativo.** El precedente que sí funciona
+(`_prestadores_protege_columnas`, D-389) es INVOKER **por esta misma razón**,
+y leerlo fue lo que lo resolvió. *Dos guards escritos y compilando, ninguno
+vigilando — la clase que la sesión persiguió todo el día, cometida dos veces
+en la misma migración y cazada las dos por el cinturón.*
+
+**La voz del paso ① quedó verdadera sin tocarla.** *No se curó la frase: se
+curó el mundo que la frase describía* — que es exactamente lo que C protegió
+al dejar esta ficha quieta en vez de reescribir el texto.
+
+**🕐 QUEDA VIVA SU HIJA:** el espejo `prestadores.nombre_comercial` **muere el
+día que `v_prestadores_publicos` lea el nombre desde la cuenta comercial**.
+Ese cambio toca el frente del cliente —otro territorio, otro gate— y está
+escrito en §4.3bis para que nadie lo re-derive.
 
 ---
 
