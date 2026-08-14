@@ -29,6 +29,34 @@ export interface PlataDelDia {
    *  superficie tiene que decirlo. *Un NULL no vale 0: eso sería mentir por
    *  omisión con un número redondo* (L-197). */
   sinPrecio: number | null;
+
+  /* ── LA BANDA DEL DÍA (S97-A, D-808) ──────────────────────────────────────
+     Dictado ② del founder, verbatim: *"un dashboard pequeño arriba con datos
+     de los servicios prestados y valores, **si está en 0 se muestra en 0**"*.
+     La cláusula final es LEY: el cero se muestra, jamás se esconde.
+     ⚠️ `null` acá sigue significando **"este rol no ve"**, jamás cero. */
+
+  /** 🔴 **EL HECHO: citas `completada` del día.** Es lo que el founder pidió
+   *  por "servicios prestados".
+   *  **NO confundir con `citas`**, que cuenta lo AGENDADO (`_estados_cita_
+   *  contables()` = confirmada + en_curso + completada) — medido: en un día
+   *  real, `citas`=6 y `prestadas`=1.
+   *  *Un tablero que suma promesas y las llama "prestados" miente en la
+   *  dirección optimista, que es la peor: nadie audita un número que le
+   *  gusta.* */
+  prestadas: number | null;
+  /** Citas `en_curso`. Está pasando — ni promesa ni hecho todavía. */
+  enCurso: number | null;
+  /** Citas `confirmada`. La promesa del día. */
+  agendadas: number | null;
+  /** **Cobro presencial del día, eje = fecha de la CITA** (el mismo que
+   *  `total`, a propósito).
+   *  🔴 NO es "plata que entró hoy": un cobro registrado hoy sobre una cita de
+   *  ayer NO entra acá. *Se eligió así porque el eje del registro haría que
+   *  este número y `total` nunca cerraran entre sí, y **un tablero que no
+   *  cierra consigo mismo no se audita: se desconfía entero**.* El arqueo de
+   *  caja es otro lector con otro nombre, el día que exista. */
+  cobrado: number | null;
 }
 
 /**
@@ -69,20 +97,49 @@ export async function obtenerPlataDelDia(
      degrada a `visible:false`**: eso le diría al prestador "tu rol no ve esto"
      cuando la verdad es "no pude leer". Dos hechos distintos no comparten
      representación (L-197). */
-  const d = data as { visible?: unknown; total?: unknown; citas?: unknown; sinPrecio?: unknown } | null;
+  const d = data as {
+    visible?: unknown;
+    total?: unknown;
+    citas?: unknown;
+    sinPrecio?: unknown;
+    prestadas?: unknown;
+    enCurso?: unknown;
+    agendadas?: unknown;
+    cobrado?: unknown;
+  } | null;
   if (d === null || typeof d.visible !== 'boolean') {
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   }
   if (!d.visible) {
-    return { ok: true, data: { visible: false, total: null, citas: null, sinPrecio: null } };
+    return {
+      ok: true,
+      data: {
+        visible: false,
+        total: null,
+        citas: null,
+        sinPrecio: null,
+        prestadas: null,
+        enCurso: null,
+        agendadas: null,
+        cobrado: null,
+      },
+    };
   }
+  /* `?? 0` es correcto acá y solo acá: llegamos con `visible=true`, o sea el
+     servidor CONTÓ. Un cero de un rol que sí ve es un cero de verdad — y el
+     founder firmó que se muestra ("si está en 0 se muestra en 0"). */
+  const num = (v: unknown) => (typeof v === 'number' ? v : Number(v ?? 0));
   return {
     ok: true,
     data: {
       visible: true,
-      total: typeof d.total === 'number' ? d.total : Number(d.total ?? 0),
-      citas: typeof d.citas === 'number' ? d.citas : 0,
-      sinPrecio: typeof d.sinPrecio === 'number' ? d.sinPrecio : 0,
+      total: num(d.total),
+      citas: num(d.citas),
+      sinPrecio: num(d.sinPrecio),
+      prestadas: num(d.prestadas),
+      enCurso: num(d.enCurso),
+      agendadas: num(d.agendadas),
+      cobrado: num(d.cobrado),
     },
   };
 }

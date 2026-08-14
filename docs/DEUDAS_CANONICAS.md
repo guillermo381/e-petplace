@@ -15360,6 +15360,50 @@ porque llegó"*), no que la hora de llegada sea falsa.
 > más: está sin lector.** Son dos estados distintos y solo uno se cura
 > borrando.
 
+### 🔴 ENMIENDA EN EL MISMO DÍA — LA FICHA SE EQUIVOCÓ Y SE CORRIGE ENTERA
+
+**Esta ficha nació diciendo que `llegada_en` quedaba «huérfano de superficie».
+Es FALSO, y lo probó D midiendo lo que yo no medí:** `registrar_llegada` era el
+**único escritor**, así que apagar el botón no dejaba un dato huérfano —
+**dejaba un dato que DEJA DE ESCRIBIRSE.**
+
+**La relectura correcta del dictado, que es de donde salió el error:**
+
+> El founder **no dijo que la llegada no importe.** Dijo *"si le doy atender es
+> porque llegó"* — o sea que **atender la IMPLICA**. Son cosas distintas y la
+> diferencia es todo el dato.
+
+⚠️ **Y el modo de falla que se esquivó por un pelo:** *un dato que deja de
+escribirse no da error. Da un histórico que se corta un martes y nadie sabe por
+qué* — meses después, cuando alguien pregunte cuánto esperan las familias, la
+respuesta va a ser un hueco sin causa.
+
+**✅ CURADO EL MISMO DÍA — `20260814200000_s97a_llegada_al_atender.sql`:** el
+camino de atender estampa `llegada_en` **si no estaba**.
+
+- **La forma NO son cuatro parches.** Medido: hay **cuatro** puertas de iniciar
+  y **las cuatro pasan la cita a `en_curso`** ⇒ la regla vive en **LA
+  TRANSICIÓN** (`BEFORE UPDATE`, con el `WHEN` haciendo el trabajo fino).
+  *El quinto oficio que nazca mañana lo hereda gratis — y con cuatro copias
+  habría nacido sin la regla y sin síntoma.*
+- **Idempotente, con su porqué:** si el mostrador ya la marcó, **no se pisa**.
+  *Quien vio entrar a la mascota sabe la hora mejor que el reloj del momento en
+  que el profesional apretó atender: sobrescribirla sería reemplazar una
+  observación por una inferencia.*
+- **Verificado por los DOS brazos** (un fixture que solo probara «estampa»
+  daría verde con un trigger que pisa siempre, **que es el defecto exacto que
+  la idempotencia existe para evitar**). Teardown explícito, **residuo 0
+  medido**.
+- **Sin backfill, a propósito:** las citas ya atendidas **no reciben una
+  llegada inventada**. *Estampar `now()` sobre historia sería L-139 en su forma
+  más cara: verosímil y falso.*
+
+> **La lección, que es de método y no del caso:** yo escribí «queda huérfano»
+> **desde el dictado, sin censar los escritores**. El censo costaba una
+> consulta. ***Una ficha que describe una consecuencia sin medirla no es una
+> ficha: es una hipótesis con número de deuda*** — y una hipótesis depositada
+> se lee después como hecho.
+
 ☠️ **Muere** cuando la puerta `registrar_llegada` quede revocada de
 `authenticated` **con su censo de llamadores en cero declarado** — jamás
 antes, y **sin tocar la columna**. **Disparo:** la próxima migración que toque
