@@ -414,7 +414,13 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    **120 FIRMADO S81**) es la única pieza firmada y este registro es su
    fuente única. Dos
    CANDIDATAS sin firma esperan gate propio: el empuje de pantalla
-   −16% (a §5.2 — la pantalla que retrocede) y el overshoot 280 ms de
+   −16% (a §5.2 — la pantalla que retrocede) y ~~el overshoot 280 ms de~~
+   **[☠️ ENMENDADO 14-ago-2026: EL OVERSHOOT DE LA HUELLA DE TAB QUEDÓ
+   FIRMADO por la mesa y ya vive en `BarraTabs` SIN prop de gate — nació
+   como `overshootHuella` apagada y la prop murió al firmarse, que es su
+   condición de muerte cumplida: el valor vive en la pieza y el consumidor
+   no lo re-decide (Ley 8 aplicada al movimiento). **Sigue candidato SOLO
+   el empuje −16%.**]** ~~el overshoot 280 ms de
    la huella de tab (a la Ley 6/§2.6 — el CÓMO aparece). La
    reconciliación entera: `DIRECTIVA_CRAFT_CLIENTE` §0bis.*
 
@@ -1177,6 +1183,44 @@ cambio de estado · celebración. **Nada más se mueve.**
 >
 > **⇒ El reparto de dos curvas es exigible porque las dos viven adentro de
 > las piezas.** Si viviera en las pantallas, «cerrado» sería una intención.
+
+> ### ✅ ENMIENDA A N10 POR FIRMA EN DISPOSITIVO (14-ago-2026) — **NACE LA ESCALA DE LA CEREMONIA**
+>
+> **El founder vio el destape correr y firmó ~3000 ms**, con su literal:
+>
+> > ***«Es un ritual de única vez — hay que disfrutarlo.»***
+>
+> **🔴 Y LA DISTINCIÓN QUE HAY QUE LEER ENTERA, PORQUE SIN ELLA LA LEY SALE
+> MAL ESCRITA:**
+>
+> > **N10 NO pasa de tres duraciones a cuatro.** El **vocabulario del GESTO
+> > sigue cerrado en tres** —150 micro · 300 estándar · **520 grande**—.
+> > Lo que dura ~3000 es **la CEREMONIA**: la suma de cinco gestos **más sus
+> > pausas.**
+>
+> **Son DOS ESCALAS: la del gesto y la del momento**, y el vocabulario cerrado
+> de N10 gobierna **la primera**. *Si la ley dijera «grande = 3000», alguien
+> escribiría `withTiming(3000)` en un solo gesto — **y tendría razón según la
+> letra**.*
+>
+> **CÓMO SE CONSTRUYE, y es la mitad exigible de la enmienda (forma de B,
+> verificada contra el objeto):** los ~3000 se logran **ABRIENDO LAS PAUSAS
+> ENTRE ACTOS, jamás estirando los gestos.** Medido en `Destape`: los `dur:`
+> siguen siendo `estandar` y `grande`; **lo que creció son los `at:`**
+> (`0 · 400 · 1050 · 1500 · 2480`).
+>
+> *Escalar las duraciones ×1,85 habría dado 555 y 962 ms — números fuera del
+> vocabulario, y además **un fade de casi un segundo no se lee como
+> ceremonia: se lee como lentitud**.*
+>
+> > ***Lo que hace un ritual no es que cada cosa tarde más: es que haya un
+> > beat entre una cosa y la siguiente.***
+>
+> **Único caso vivo: `Destape`.**
+>
+> **Y su contracara, firmada en el mismo acto:** con `reduce-motion` o en
+> **memorial**, la ceremonia degrada a **crossfade corto (~300 ms)** — *el
+> ritual es para quien puede disfrutarlo, no una imposición.*
 
 > ### ACLARACIÓN DE N10 — **LA BANDA DE 520 ES EL REGISTRO DE CADA GESTO, JAMÁS LA SUMA DE LA CEREMONIA**
 >

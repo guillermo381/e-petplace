@@ -14929,8 +14929,28 @@ no evalúa un adorno decorativo, y el typecheck ve un número válido. **Lo
 encontró mirar** — cuarta vez en la sesión que la captura hace lo que los
 cinco gates no.
 
-☠️ **Muere** con la luz al alfa firmado en el destape, verificada en
-dispositivo. **Territorio: B** (la pieza `Destape` y el token del velo).
+☠️ ✅ **CERRADA — 14-ago-2026 (`884e063e`, B).**
+
+**LA CAUSA, y es la de la jornada otra vez:** *el token del 7 % **estaba
+puesto y no hacía nada**.* El estilo animado se aplica **después** en el
+array y lo pisaba; la parábola del barrido llega a `1.0` ⇒ **tinta opaca**.
+
+> **Un valor firmado, escrito en el lugar correcto, anulado por el orden de
+> aplicación.** No es que faltara el alfa: es que **el alfa estaba y perdía**.
+> Es la tercera forma del día de «escrito y sin efecto» —el `flexShrink`
+> decorativo, mi guard `SECURITY DEFINER`, y ahora este token—, y **las tres
+> compilaban**.
+
+**Corresponde con el reporte del founder al caminarlo:** *«arriba pasa una
+sombra que no alcanzo a detallar»*. *No pudo detallarla porque no era una
+sombra: era el adorno entero a opacidad plena.*
+
+**Y B verificó la RAMPA por el mismo defecto, con resultado distinto y lo
+declaró:** `sIsotipo`, `sRampa` y `sTarjeta` van de 0 a 1 **y eso es
+correcto** — aparecen plenos por diseño, y la rampa en particular se enciende
+a full **porque ES el momento de marca**. **La luz era la única con un alfa
+firmado que respetar.** *Buscar el mismo defecto en las piezas vecinas y
+declarar que ahí NO estaba vale tanto como la cura.*
 
 ---
 
