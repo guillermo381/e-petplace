@@ -573,6 +573,20 @@ ordenó renombre + reseteo unificado. *Las dos mitades del accidente son
 reglas distintas: el dominio inventado la hizo irrecuperable; la clave
 cambiada sin registro la hizo inaccesible. Esta regla cubre la segunda.*
 
+## 6quater · NINGUNA ORDEN DE CONSTRUCCIÓN CITA LETRA QUE NO ESTÉ EN ORIGIN *(firmada por la mesa, 13-ago-2026)*
+
+> **La mesa verifica que la letra citada esté depositada en origin ANTES de
+> mandar a construir.** Una orden que cita letra sin depositar le pide a la
+> pista construir contra un literal que solo existe en un mensaje — y un
+> mensaje no es fuente: no se puede releer desde otra pista, no sobrevive a
+> una compactación, y nadie lo enmienda con historial.
+
+**El caso:** se mandó construir la ley del cambio (§8.6bis de
+`MODELO_DESPENSA`) con la letra sin depositar — C construyó contra el
+literal de su orden y el depósito llegó después. **Funcionó por suerte, no
+por diseño:** si el depósito hubiera diferido de lo construido, gana la
+letra y C reconstruye.
+
 ## 7 · LO QUE ESTE MÉTODO NO CUBRE
 
 - **El reparto de trabajo lo hace la mesa**, sesión por sesión. Este documento

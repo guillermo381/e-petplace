@@ -14245,3 +14245,26 @@ la resuelve por diseño. Lo sin letra es el caso **empleado-de-dos-prestadores**
 ☠️ **Muere** cuando la letra del multi-vínculo esté firmada y el resolver
 la implemente — o cuando la mesa firme que el estado es ilegal y una
 constraint lo vuelva inexpresable.
+
+#### D-788 — 🔴 EL «DESPUÉS» DEL VENDEDOR NO TIENE LETRA: EL VENDEDOR REAL DE OCTUBRE VA A PREGUNTAR CUÁNDO COBRA, Y HOY NO HAY RESPUESTA
+
+**Nace del marco de los tres tiempos (orden de mesa, 13-ago-2026 —
+`MODELO_DESPENSA` §8.6bis):** **ANTES** es la configuración (§8.6bis, se
+construye ahora) · **DURANTE** es el panel de S96, construido y pendiente
+del ojo del founder · **DESPUÉS** —postventa, resultados, **liquidación y
+cobro del vendedor**— **no tiene letra**.
+
+**Lo que ya existe y no alcanza:** el ledger registra FEE (S95) · la vista
+de facturación del vendedor entró a v1 (`LETRA_RECORRIDO` §2.2) · **la
+liquidación —cuánto le toca, cuándo le llega— quedó diferida al motor de
+pagos por firma del founder** (*no se decide sin pasarela*, cruce con
+D-764). Esta ficha existe para que ese diferimiento no se lea como «ya
+está»: *diferir la decisión difirió también la LETRA, y la pregunta del
+vendedor no espera a la pasarela.*
+
+**Disparo:** antes de la primera venta real — la letra del DESPUÉS
+(postventa · resultados · liquidación · cobro) se escribe en mesa con
+`MODELO_FINANCIERO` como contraste obligatorio.
+
+☠️ **Muere** cuando el DESPUÉS tenga letra firmada y el vendedor real tenga
+la respuesta a «cuándo cobro» escrita en su superficie.
