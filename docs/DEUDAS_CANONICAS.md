@@ -15601,3 +15601,81 @@ duplicación.*
 ☠️ **Muere** con el censo hecho y la decisión firmada (una puerta, o dos con
 su porqué escrito). **Disparo: el próximo arco que toque cualquiera de las dos
 altas.** **Territorio: A** (censo y motor) **+ el founder** (la firma).
+
+---
+
+#### D-812 — 🟡 EL VOCABULARIO DE `tipo_servicio` VIVE EN DOS LISTAS, Y DIVERGIERON EN LAS DOS DIRECCIONES
+
+**Medido por A (S97-A) caminando `ATENDER` en dispositivo.** Salió de una
+pregunta chica —*«¿por qué `demovet` muestra dos baldosas?»*— que resultó
+correcta (11 servicios agrupan en 2 oficios) y destapó otra cosa al lado.
+
+**Hay DOS listas del mismo vocabulario y ninguna manda:**
+
+| Fuente | Qué es | Cuántos |
+|---|---|---|
+| `prestador_servicios_tipo_servicio_check` | un CHECK con la lista **escrita adentro** | 26 |
+| `tipos_servicio` | el CATÁLOGO, con sus atributos | 30 |
+
+**🔴 Y no es que una sea subconjunto de la otra — divergen en AMBAS
+direcciones:**
+
+- **El CHECK admite `'otro'`, que NO está en el catálogo** ⇒ **3 filas activas
+  vivas** (Clínica Aurora) cuyo `tipo_servicio` **no tiene fila de catálogo**.
+- **El catálogo tiene 5 códigos que el CHECK prohíbe:** `hotel_dia`,
+  `hotel_noche`, `paseo_30min`, `paseo_60min`, **`procedimiento`**.
+
+**Consecuencia medida, y es la que importa:** todo lector que haga JOIN por
+`codigo` **descarta esas 3 filas en silencio** — no hay error, no hay
+warning, simplemente no están. *Un servicio activo que no aparece en una
+lectura no se lee como «falta»: se lee como que el negocio no lo ofrece.*
+
+**Y no hay FK que lo impida.** Se verificó: `prestador_servicios.tipo_servicio`
+es `text` con CHECK, sin referencia al catálogo.
+
+### 🔴 EL COBRO PROPIO, declarado — el guard mentía sobre su red
+
+`_trg_ps_paseo_sin_local` (mío, `20260814170000`) traía escrito:
+
+> *"Un tipo que no está en el catálogo NO se bloquea acá: **esa es otra
+> validación y tiene su propia FK**."*
+
+**Esa FK no existe.** Escribí la justificación desde lo que suponía del modelo,
+no desde el objeto — **el mismo error que dos horas antes deposité como lección
+en D-807**, en la misma jornada y en mi propia mano.
+
+> ***Un comentario que afirma un mecanismo inexistente es peor que ninguno: le
+> dice a la próxima sesión que no hace falta construirlo.*** Un comentario
+> ausente deja una pregunta abierta; uno falso la cierra mal.
+
+**✅ CORREGIDO EN SESIÓN** (`20260814210000`): el comentario dice lo medido y
+apunta a esta ficha. **El COMPORTAMIENTO no cambió y es el correcto** — un
+guard de MODALIDAD no debe bloquear por EXISTENCIA: eso sería hacerle decir
+algo que no vino a decir.
+
+### La clase, que es la tercera de la jornada
+
+**Tres veces hoy, en tres materiales distintos:**
+
+| Dónde | Qué divergía |
+|---|---|
+| **D-805** | dos patrones **ejecutables** de grilla en el mismo archivo |
+| `reptil` | dos **comentarios** vivos afirmando lo contrario |
+| **acá** | dos **listas** del mismo vocabulario |
+
+> ***Cuando una verdad se escribe en dos lugares, la pregunta no es si van a
+> divergir: es cuándo, y cuál va a leer primero el que llegue.*** Y ningún
+> instrumento de esta casa mira los tres materiales — el typecheck ve código,
+> el juez ve reglas, y nadie mira comentarios ni compara un CHECK contra una
+> tabla.
+
+☠️ **Muere** con **una sola fuente**: FK de `prestador_servicios.tipo_servicio`
+a `tipos_servicio.codigo`, y el CHECK retirado.
+⚠️ **NO se hace hoy y el orden importa:** primero hay que decidir qué pasa con
+`'otro'` (¿entra al catálogo, o esas 3 filas se re-tipifican?) y con los 5
+códigos que el CHECK prohíbe — **`procedimiento` es el delicado**, porque
+existe a propósito y NO es una oferta (`reservable=false`, S72). *Poner la FK
+antes de esa decisión rompería 3 filas vivas o dejaría el CHECK contradiciendo
+a la FK, que es cambiar dos listas por tres.*
+**Territorio: A.** **Disparo:** el próximo arco que toque el catálogo de
+servicios.
