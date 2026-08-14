@@ -55,7 +55,6 @@ import {
   Hoja,
   Insignia,
   MarcaDeAgua,
-  PuertaDeOficio,
   Tarjeta,
   Texto,
   spacing,
@@ -191,7 +190,6 @@ export default function Negocio() {
   const [naturalezaVentas, setNaturalezaVentas] = useState<'cargando' | 'vendedora' | 'no'>(
     'cargando',
   );
-  const [puertaActiva, setPuertaActiva] = useState(false);
 
   /* ⭐ S98-C · EL ESTADO DE «Tu tienda», con sus TRES valores y no dos.
      `contextoVentas` solo sabe si la naturaleza está ACTIVA — y la firma
@@ -431,17 +429,11 @@ export default function Negocio() {
             <TarjetaVentas
               etiqueta={t('ventas.entradaTitulo')}
               detalle={t('ventas.entradaDetalle')}
-              onPress={() => setPuertaActiva(true)}
+              onPress={() => router.push('/ventas')}
             />
           </View>
-          <PuertaDeOficio
-            capa="consumo"
-            activo={puertaActiva}
-            onFin={() => {
-              setPuertaActiva(false);
-              router.push('/ventas');
-            }}
-          />
+          {/* ☠️ S98-C · el barrido murió acá también — su porqué medido vive
+              en la lápida gemela del HOY. */}
         </View>
       );
     }
@@ -561,7 +553,7 @@ export default function Negocio() {
                       titulo={t('negocio.tiendaVitrina')}
                       detalle={t('negocio.tiendaVitrinaDetalle')}
                       orden={0}
-                      onPress={() => setPuertaActiva(true)}
+                      onPress={() => router.push('/ventas')}
                     />
                   </View>
                   <View style={ESTILO_CELDA}>
@@ -753,17 +745,15 @@ export default function Negocio() {
         </View>
       </Hoja>
 
-      {/* el barrido del cruce — SOLO color; los permisos son del servidor.
-          `onFin` llega SIEMPRE (también en memorial/reduce-motion): el
-          contrato de la pieza garantiza que la navegación no se cuelga. */}
-      <PuertaDeOficio
-        capa="consumo"
-        activo={puertaActiva}
-        onFin={() => {
-          setPuertaActiva(false);
-          router.push('/ventas');
-        }}
-      />
+      {/* ☠️ S98-C · MURIÓ EL BARRIDO DE LA PUERTA A VENTAS (firma del
+          founder): *«quedó un efecto de una línea marrón o café cuando le
+          doy clic… simplemente quitala, con la transición estamos bien»*.
+          El porqué medido —y la hipótesis que descarté, que era el canto
+          de la baldosa y habría chocado con la Ley 10— está entero en la
+          lápida gemela del HOY. **El canto en reposo queda.**
+          ⏪ Su nota decía que `onFin` llegaba SIEMPRE «para que la
+          navegación no se cuelgue»: era cierto y ya no hace falta —
+          sin barrido, la navegación no depende de ninguna animación. */}
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
       <VeloBarraEstadoOficio />

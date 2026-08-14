@@ -54,7 +54,6 @@ import {
   typography,
   useAviso,
   useTheme,
-  PuertaDeOficio,
   type AvatarMascotaEspecie,
   type ColumnaTecho,
   type InsigniaEstado,
@@ -868,7 +867,6 @@ export default function Hoy() {
   // enciende; un fallo no se cachea como ausencia (contextoVentas no
   // cachea fallos) y el próximo foco reintenta.
   const [vendedoraMedida, setVendedoraMedida] = useState(false);
-  const [puertaVentas, setPuertaVentas] = useState(false);
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -2240,7 +2238,7 @@ export default function Hoy() {
           <TarjetaVentas
             etiqueta={t('ventas.entradaTitulo')}
             detalle={t('ventas.entradaDetalle')}
-            onPress={() => setPuertaVentas(true)}
+            onPress={() => router.push('/ventas')}
           />
         )}
 
@@ -2648,16 +2646,23 @@ export default function Hoy() {
 
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
-      {/* S96-C: el barrido del cruce a ventas — SOLO color; los permisos
-          son del servidor (contrato de PuertaDeOficio). */}
-      <PuertaDeOficio
-        capa="consumo"
-        activo={puertaVentas}
-        onFin={() => {
-          setPuertaVentas(false);
-          router.push('/ventas');
-        }}
-      />
+      {/* ☠️ S98-C · MURIÓ EL BARRIDO DE LA PUERTA A VENTAS (firma del
+          founder, literal): *«quedó un efecto de una línea marrón o café
+          cuando le doy clic… simplemente quitala, con la transición
+          estamos bien»*.
+
+          **Medido antes de tocar, porque mi primera hipótesis era otra:**
+          pensé en el canto ocre de la baldosa de tienda — y eso habría
+          chocado con la Ley 10, que dice que el canto ES la categoría.
+          **No era.** El marrón aparece SOLO al hacer clic, y el único
+          marrón de ese instante es `PuertaDeOficio` barriendo la pantalla
+          con `accent.warm`, el token de la capa `consumo`.
+          *No es una ley que se rompe: es un gesto que sobra.* El canto en
+          reposo queda intacto, y con él la Ley 10.
+
+          ⚠️ **La PIEZA no muere** — sigue viva en la galería de
+          `packages/ui` y es de B. Lo que se retira es su MONTAJE acá (y en
+          `negocio`, sus otros dos). */}
       <VeloBarraEstadoOficio />
     </View>
   );
