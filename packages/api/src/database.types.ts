@@ -885,6 +885,33 @@ export type Database = {
           },
         ]
       }
+      busquedas_sin_resultado: {
+        Row: {
+          country_code: string
+          created_at: string
+          familia_filtro: string | null
+          id: string
+          termino: string
+          user_id: string | null
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          familia_filtro?: string | null
+          id?: string
+          termino: string
+          user_id?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          familia_filtro?: string | null
+          id?: string
+          termino?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       campanas: {
         Row: {
           canal: string
@@ -1704,6 +1731,7 @@ export type Database = {
           descripcion: string | null
           eje_jtbd: string | null
           entra_al_expediente: boolean
+          ingerible: boolean
           nombre: string
           orden_display: number | null
           reemplazado_por: string | null
@@ -1718,6 +1746,7 @@ export type Database = {
           descripcion?: string | null
           eje_jtbd?: string | null
           entra_al_expediente: boolean
+          ingerible?: boolean
           nombre: string
           orden_display?: number | null
           reemplazado_por?: string | null
@@ -1732,6 +1761,7 @@ export type Database = {
           descripcion?: string | null
           eje_jtbd?: string | null
           entra_al_expediente?: boolean
+          ingerible?: boolean
           nombre?: string
           orden_display?: number | null
           reemplazado_por?: string | null
@@ -14110,6 +14140,153 @@ export type Database = {
           },
         ]
       }
+      producto_ficha_accesorio: {
+        Row: {
+          created_at: string
+          fuente: string | null
+          material: string | null
+          medidas: Json | null
+          producto_id: string
+          talla: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fuente?: string | null
+          material?: string | null
+          medidas?: Json | null
+          producto_id: string
+          talla?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fuente?: string | null
+          material?: string | null
+          medidas?: Json | null
+          producto_id?: string
+          talla?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_ficha_accesorio_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producto_ficha_dosificacion: {
+        Row: {
+          concentracion: string | null
+          contraindicaciones: string | null
+          created_at: string
+          edad_minima: string | null
+          espectro: string | null
+          fuente: string | null
+          periodicidad_dias: number | null
+          principio_activo: string | null
+          producto_id: string
+          rango_peso_animal_kg: string | null
+          registro_agrocalidad: string | null
+          requiere_receta: boolean | null
+          updated_at: string
+          via_administracion: string | null
+        }
+        Insert: {
+          concentracion?: string | null
+          contraindicaciones?: string | null
+          created_at?: string
+          edad_minima?: string | null
+          espectro?: string | null
+          fuente?: string | null
+          periodicidad_dias?: number | null
+          principio_activo?: string | null
+          producto_id: string
+          rango_peso_animal_kg?: string | null
+          registro_agrocalidad?: string | null
+          requiere_receta?: boolean | null
+          updated_at?: string
+          via_administracion?: string | null
+        }
+        Update: {
+          concentracion?: string | null
+          contraindicaciones?: string | null
+          created_at?: string
+          edad_minima?: string | null
+          espectro?: string | null
+          fuente?: string | null
+          periodicidad_dias?: number | null
+          principio_activo?: string | null
+          producto_id?: string
+          rango_peso_animal_kg?: string | null
+          registro_agrocalidad?: string | null
+          requiere_receta?: boolean | null
+          updated_at?: string
+          via_administracion?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_ficha_dosificacion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producto_ficha_nutricional: {
+        Row: {
+          cenizas_pct: number | null
+          created_at: string
+          fibra_pct: number | null
+          fuente: string | null
+          grasa_pct: number | null
+          humedad_pct: number | null
+          kcal_por_kg: number | null
+          producto_id: string
+          proteina_pct: number | null
+          racion: Json | null
+          updated_at: string
+        }
+        Insert: {
+          cenizas_pct?: number | null
+          created_at?: string
+          fibra_pct?: number | null
+          fuente?: string | null
+          grasa_pct?: number | null
+          humedad_pct?: number | null
+          kcal_por_kg?: number | null
+          producto_id: string
+          proteina_pct?: number | null
+          racion?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          cenizas_pct?: number | null
+          created_at?: string
+          fibra_pct?: number | null
+          fuente?: string | null
+          grasa_pct?: number | null
+          humedad_pct?: number | null
+          kcal_por_kg?: number | null
+          producto_id?: string
+          proteina_pct?: number | null
+          racion?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_ficha_nutricional_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       producto_variantes: {
         Row: {
           activo: boolean
@@ -14201,6 +14378,7 @@ export type Database = {
           origen_carga: string
           tallas_aplicables: string[]
           updated_at: string | null
+          vendible: boolean
         }
         Insert: {
           alergenos?: string[]
@@ -14223,6 +14401,7 @@ export type Database = {
           origen_carga?: string
           tallas_aplicables?: string[]
           updated_at?: string | null
+          vendible?: boolean
         }
         Update: {
           alergenos?: string[]
@@ -14245,6 +14424,7 @@ export type Database = {
           origen_carga?: string
           tallas_aplicables?: string[]
           updated_at?: string | null
+          vendible?: boolean
         }
         Relationships: [
           {
@@ -19366,6 +19546,10 @@ export type Database = {
         }
         Returns: Json
       }
+      declarar_ficha_producto: {
+        Args: { p_ficha: Json; p_producto_id: string }
+        Returns: Json
+      }
       declarar_foto_mascota: {
         Args: {
           p_cx: number
@@ -20457,6 +20641,14 @@ export type Database = {
       registrar_bitacora_familia: {
         Args: { p_chips?: Json; p_mascota_id: string; p_texto?: string }
         Returns: Json
+      }
+      registrar_busqueda_sin_resultado: {
+        Args: {
+          p_country_code?: string
+          p_familia_filtro?: string
+          p_termino: string
+        }
+        Returns: undefined
       }
       registrar_clip_adiestramiento: {
         Args: {
