@@ -89,6 +89,12 @@ async function foto(page, nombre) {
 {
   const { page } = await sesion('light');
   await foto(page, '02-portada-claro');
+  // ⭐ S98-C · LA PIZARRA COMO HOJA: se abre SOBRE la portada. El
+  // discriminador es que la portada siga viéndose debajo — si fuera
+  // navegación, no estaría.
+  await page.getByText('La pizarra', { exact: false }).first().click();
+  await foto(page, '05-pizarra-hoja');
+
   // La barra en su casa: HOY con la quinta tab montada y destacada. Y de
   // paso, la frontera de §3.1: el HOY sin «Registrar atención» y sin la
   // entrada a la pizarra — las dos se mudaron a ATENDER.

@@ -52,6 +52,7 @@ import {
   resolverCapacidadAtender,
   type CapacidadAtender,
 } from '@/lib/capacidad-atender';
+import { PizarraHoja } from '@/components/atender/pizarra-hoja';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { useTraduccion } from '@/i18n';
 
@@ -127,6 +128,8 @@ export default function Atender() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ fase: 'cargando' });
   const [intento, setIntento] = useState(0);
+  /** ⭐ S98-C · la pizarra se CONSULTA sobre esta portada, no se navega. */
+  const [pizarraAbierta, setPizarraAbierta] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -366,7 +369,7 @@ export default function Atender() {
                         ? t('pizarra.entradaUna')
                         : t('pizarra.entradaN', { n: pizarra })
                   }
-                  onPress={() => router.push('/pizarra')}
+                  onPress={() => setPizarraAbierta(true)}
                 />
               </Tarjeta>
             )}
@@ -397,6 +400,19 @@ export default function Atender() {
           </>
         )}
       </ScrollView>
+
+      {/* ⭐ S98-C · LA PIZARRA SUBE SOBRE LA PORTADA (firma (a)). Se monta
+          FUERA del ScrollView: una Hoja no es contenido de la pantalla —
+          se levanta sobre ella y la deja debajo, a la vista. */}
+      <PizarraHoja
+        visible={pizarraAbierta}
+        onCerrar={() => {
+          setPizarraAbierta(false);
+          // Al cerrar se recarga la portada: la pizarra pudo cambiar el
+          // conteo (alguien tomó o asignó una cita ahí adentro).
+          setIntento((n) => n + 1);
+        }}
+      />
     </View>
   );
 }
