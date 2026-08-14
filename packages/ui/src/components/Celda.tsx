@@ -64,7 +64,7 @@ export function Celda(props: CeldaProps) {
     <>
       {inicio ? <View>{inicio}</View> : null}
 
-      <View style={{ flex: 1, gap: 2 }}>
+      <View style={{ flex: 1, gap: spacing[0.5] }}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"

@@ -264,7 +264,7 @@ export function BarraTabs({
               height: 56,
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 2,
+              gap: spacing[0.5],
             }}
           >
             {/* S88-B: la anatomía del badge SUBIÓ a pieza (`Badge`) al ganar
