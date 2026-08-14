@@ -192,28 +192,26 @@ export default function Atender() {
                     naturalezas (§1.2) — `Tus servicios` y `Tu tienda`. No
                     son vocabulario: son el primer candado del cinturón. */}
                 <Texto variante="seccion">{t('atender.tusServicios')}</Texto>
-                {/* ✅ S98-C · `orden` DEVUELTO — N6 vuelve a esta portada.
-                    La desviación que vivía acá duró lo que tardó su causa
-                    en curarse: `Entrada` dejó las layout animations de
-                    Reanimated (`FadeInDown` → `useSharedValue` +
-                    `useAnimatedStyle`, B) y con eso **el envoltorio de
-                    movimiento dejó de tocar el layout de quien lo monta**.
-                    Verificado acá con captura: baldosas arriba, pizarra
-                    abajo, nada montado sobre nada.
+                {/* 🔴 S98-C · `orden` EN ESPERA — y esta vez NO es una
+                    desviación con condición de muerte: es un commit RETENIDO.
 
-                    ⏪ Lo que vivió acá, para que la próxima no lo re-descubra:
-                    con las layout animations, `Entrada` dejaba su
-                    `Animated.View` en `position: absolute` en RN-web, un
-                    hijo absoluto no aporta alto, y la celda de la grilla
-                    medía `186×0` con la baldosa dibujada ENCIMA de la fila
-                    de abajo. *Lo destapó ponerle un vecino a la grilla: sin
-                    nada debajo, una altura cero es invisible.* */}
-                {/* LA GRILLA ES DE LA PANTALLA, LA BALDOSA ES DE LA PIEZA
-                    (contrato de B): cuántas columnas entran depende del
-                    ancho de ESTA superficie, no de la pieza. `47%` con el
-                    gap evita que el redondeo empuje una tercera columna, y
-                    `flexGrow` hace que la impar ocupe la fila entera en
-                    vez de quedar a media pantalla. */}
+                    Lo devolví (`2bb4f8e3`) creyendo que la causa del
+                    colapso había desaparecido por construcción con la cura
+                    de `Entrada`. **Era la causa del CONTENEDOR.** D-804
+                    midió la otra, y sigue viva: **la pieza no declara su
+                    alto** —su raíz lleva `width` y nada más; el
+                    `aspectRatio` vive en un hijo— así que hereda el alto de
+                    donde caiga: 0 con un contenedor que no le da nada, ~800
+                    con uno que le da todo.
+
+                    ⇒ **Devolver el escalonado sobre una pieza sin alto
+                    propio es reabrir el colapso, no cerrarlo.**
+
+                    ☠️ VUELVE cuando la pieza declare su alto (B) **y** yo
+                    re-corra la captura con `orden` puesto Y EL TESTIGO
+                    DEBAJO — el vecino es lo que hace visible una altura
+                    cero, y sin él la foto no prueba nada. *La verificación
+                    es parte de la condición, no un paso posterior.* */}
                 {/* 🔴 `alignItems: 'flex-start'` — LA MITAD DE D-804 QUE ES MÍA.
                     Con el default `stretch`, cada celda de la fila recibe un
                     ALTO DEFINIDO (el de la fila), y un alto definido GANA
@@ -243,13 +241,12 @@ export default function Atender() {
                     gap: spacing[4],
                   }}
                 >
-                  {capacidad.oficios.map((o, i) => (
+                  {capacidad.oficios.map((o) => (
                     <View key={o.oficio} style={{ flexBasis: '47%', flexGrow: 1 }}>
                       <Baldosa
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
                         capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
-                        orden={i}
                         onPress={() =>
                           router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
                         }
@@ -310,7 +307,6 @@ export default function Atender() {
                       glifo="despensa"
                       titulo={t('atender.ventaTitulo')}
                       capa="consumo"
-                      orden={capacidad.oficios.length}
                       onPress={() => router.push('/ventas/mostrador')}
                     />
                   </View>
