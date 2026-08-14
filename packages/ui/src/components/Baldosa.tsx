@@ -15,12 +15,20 @@
  * *Una fila con un chevron dice «hay más adentro»; una baldosa dice
  * «elegí una».*
  *
- * LA PIEZA ES **UNA** BALDOSA, NO LA GRILLA. Quien la monta arma las dos
- * columnas —con `gap: spacing[4]` y `flexBasis: '48%'`, o el
- * `flexDirection: 'row'` con `flexWrap` que le sirva— porque **cuántas
- * columnas entran es del ancho de SU pantalla**, no de la pieza. Es la
- * misma línea que separa `ChipEntidad` de su hilera (S91): sube la
- * UNIDAD, no el contenedor.
+ * LA PIEZA ES **UNA** BALDOSA, NO LA GRILLA — sube la UNIDAD, no el
+ * contenedor (la misma línea que separa `ChipEntidad` de su hilera, S91).
+ *
+ * ⚠️ **EL PATRÓN DE GRILLA VIVE AL PIE DE ESTE ARCHIVO, UNA SOLA VEZ, Y
+ * NO SE REPITE ACÁ.** Esta línea llevaba su propia copia —`gap` +
+ * `flexBasis: '48%'`— y **quedó congelada mientras el patrón real
+ * evolucionaba 47 → 48 → 50**: el archivo terminó con DOS patrones
+ * ejecutables que se contradecían, y el de arriba —**el que se lee
+ * primero**— era justo el que A midió que **no entra en ningún
+ * teléfono**. C lo leyó de acá y reportó el defecto que yo creía curado.
+ *
+ * *No se sincronizan dos copias: se deja UNA.* Un patrón repetido en el
+ * mismo archivo no diverge algún día — diverge la primera vez que alguien
+ * cura el otro.
  *
  * LO QUE LA MESA FIJÓ, y dónde vive cada cosa:
  *  · **canto de su categoría (Ley 10)** — el canto dice CATEGORÍA y el
