@@ -35,8 +35,15 @@
  *   <Entrada orden={2}><Cta/></Entrada>
  */
 
-import type { ReactNode } from 'react'
-import Animated, { Easing, FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated'
+import { useEffect, type ReactNode } from 'react'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated'
 
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
@@ -96,13 +103,52 @@ export function Entrada({ orden = 0, children }: EntradaProps) {
   const reduceMotion = useReducedMotion()
   const quieto = theme.mode === 'memorial' || reduceMotion
 
-  const entering =
-    quieto
-      ? FadeIn.duration(DURACION).delay(orden * ESCALON).easing(CURVA)
-      : FadeInDown.duration(DURACION)
-          .delay(orden * ESCALON)
-          .easing(CURVA)
-          .withInitialValues({ opacity: 0, transform: [{ translateY: DESDE_Y }] })
+  /* 🔴 S97+-B · SE DEJAN LAS *LAYOUT ANIMATIONS* Y LA ENTRADA PASA A UN
+     ESTILO ANIMADO. Mismo gesto, mismos números, mismo escalón — lo que
+     cambia es que **deja de tocar el layout**.
 
-  return <Animated.View entering={entering}>{children}</Animated.View>
+     EL DEFECTO, medido por C en el navegador: `FadeIn`/`FadeInDown` de
+     Reanimated dejan el `Animated.View` en **`position: absolute`** en
+     RN-web, y **un hijo absoluto no aporta alto a su padre**. En una
+     GRILLA eso colapsa la celda a **altura 0** y las baldosas se dibujan
+     encima de lo que sigue:
+
+         d0  DIV     186×0                  ← la celda de la grilla
+         d1  DIV     186×186  ABSOLUTE      ← `Entrada`
+         d2  BUTTON  186×186
+
+     ⇒ ALCANZA A CUALQUIER CONTENEDOR QUE NECESITE EL ALTO DE SUS HIJOS,
+     no solo a `Baldosa`. Por eso se cura acá, en el portador, y no en la
+     pantalla que lo sufrió.
+
+     POR QUÉ ESTA CURA Y NO UN AJUSTE: **no depende de que yo confirme el
+     mecanismo exacto de Reanimated en web.** Un `useAnimatedStyle` no es
+     una layout animation: no posiciona, no mide, no reordena — solo pinta
+     `opacity` y `transform`. *La categoría entera del defecto desaparece
+     por construcción, en vez de esquivarse con un contra-valor.*
+
+     LO QUE NO CAMBIA, y es la condición de la mesa: duración, escalón,
+     desplazamiento y curva siguen siendo PRIVADOS acá; el consumidor
+     sigue declarando solo QUE entra y su orden de lectura. El gesto se
+     ve igual.
+
+     ⚠️ El síntoma lo midió C en RN-web; en nativo Reanimated puede no
+     posicionar así y el teléfono probablemente lo perdonaba. **No se
+     afirma** — se cura igual, porque una entrada que altera el layout de
+     quien la monta es frágil aunque una plataforma la salve. */
+  const v = useSharedValue(0)
+  useEffect(() => {
+    v.value = withDelay(orden * ESCALON, withTiming(1, { duration: DURACION, easing: CURVA }))
+    // Entrada de MONTAJE: corre una vez, como la layout animation que
+    // reemplaza.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const estilo = useAnimatedStyle(() => ({
+    opacity: v.value,
+    // Memorial y reduce-motion: fade puro, sin desplazamiento (Ley 8).
+    transform: [{ translateY: quieto ? 0 : (1 - v.value) * DESDE_Y }],
+  }))
+
+  return <Animated.View style={estilo}>{children}</Animated.View>
 }
