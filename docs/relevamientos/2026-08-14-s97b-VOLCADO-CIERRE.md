@@ -253,6 +253,26 @@ corto** con otro argumento: *el ritual es para quien puede disfrutarlo, no
 una imposición*. **Mi argumento era correcto contra 1630 y se vuelve falso
 contra 3000: no cambió la doctrina, cambió la magnitud.**
 
+**⑱ UN RANGO DECLARADO SIN UN CONSUMIDOR EN SU TOPE ES UNA PROMESA SIN
+PROBAR** (de A, sobre el desborde de la tira del `Destape`). El contrato
+de la pieza decía **«3 a 5»** y con cinco **no entraba** — pero el defecto
+no apareció hasta que C curó la ceremonia para que **compusiera** en vez
+de enumerar cuatro tabs a mano (D-819).
+
+> *La cura no introdujo el defecto: hizo ALCANZABLE un caso que el
+> contrato decía soportar y que nadie había ejercido.*
+
+⇒ Es distinto de las otras diecisiete: **no era algo que no supiéramos
+nombrar** —estaba escrito en la pieza, en su propia primera línea— sino
+**una promesa que ningún consumidor había cobrado**. Y su cura tuvo que
+ser por construcción (`flexWrap` + centrado) y no por margen, porque **las
+etiquetas las pone el consumidor y viajan por el riel de idioma**: un
+margen que hoy sobra se lo come una traducción. *Tercer margen rechazado
+en el día, después de los 7 px y los 0,8.*
+
+**La pregunta que deja para toda pieza con rango declarado:** ¿existe hoy
+un consumidor en el TOPE? Si no, el tope es prosa.
+
 ---
 
 ## §7 · PARA LA PRÓXIMA B
