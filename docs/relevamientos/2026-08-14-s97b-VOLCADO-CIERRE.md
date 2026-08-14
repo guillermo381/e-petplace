@@ -1,118 +1,100 @@
 # S97+-B · VOLCADO DE CIERRE — packages/ui, los tokens, el lint y los jueces
 
 **Fecha:** 14-ago-2026 · **Territorio:** `packages/ui` · tokens · el lint y
-los jueces (criterio, no lista de archivos) · **Norte:** la mesa del 13-ago.
+los jueces · **Norte:** la mesa del 13-ago.
 
 > **El teléfono no fue mío.** Nada de lo de abajo tiene gate en
-> dispositivo. Lo que sigue está **medido**, no visto — y el ítem ① de §5
-> es exactamente lo que ningún instrumento puede ver.
+> dispositivo, y §6 explica por qué eso importa más de lo habitual en esta
+> tanda: **los cinco instrumentos dieron VERDE sobre cinco defectos
+> reales.**
 
 ---
 
-## §1 · LO ENTREGADO — cinco commits, todos en `origin/main`
+## §1 · LO ENTREGADO
 
-| Commit | Qué |
-|---|---|
-| `11ef479b` | **El juez se cura antes de extenderse** — R35 corría sin estar en `REGLAS` + el tercer guard estructural + las cuatro reglas del Norte |
-| `dea60fa1` | **`Destape`** — la ceremonia de cierre del wizard (pedido de C) + N10 y la luz de la esquina tokenizadas |
-| `55e218ad` | **`BarraTabs` gana el destino central** + nace el glifo `atender` (la puerta abierta) |
-| `6e26eda1` | **N1 elevada con números** (después ejecutada) + los `gap: 2` de `ui` a token |
-| `b365705f` | **N1 ejecutada por vía A** — la escala se mueve en el token (330 sitios) · el overshoot se firma y su prop muere · las 13 píldoras a `radius.full` |
+**El juez** — R35 curado + tercer guard estructural + **cinco reglas
+nuevas** (R36 ritmo · R37 radios · R38 separadores · R39 escala · R40
+placeholder). Auto-prueba: **26 → 32 reglas**.
 
-**Verificado por CONTENIDO** (regla 84 ②), no por el OK del push:
-`git show origin/main:packages/ui/src/tokens/typography.ts` →
-`sm: 14 · base: 16 · md: 20`.
+**Las piezas** — `Destape` (la ceremonia del wizard) · `Baldosa` (lo que
+se elige) · `BarraTabs` con el destino central · el glifo `atender` (la
+puerta abierta) · `Celda` con su reparto curado · `Entrada` respetando
+reduce-motion.
+
+**Los tokens** — N1 ejecutada (la escala se movió: `sm` 14 · `base` 16 ·
+`md` 20) · N10 tokenizado (`micro|estandar|grande`) ·
+`opacity.luzDeEsquina` · `motion.duration.overshootTab`.
 
 ---
 
-## §2 · EL HALLAZGO DE LA TANDA, Y ES DEFECTO PROPIO
+## §2 · EL HALLAZGO DEL JUEZ, Y ES DEFECTO PROPIO
 
 **`R35` corría sin estar en `REGLAS`.** La escribí yo en S96-B así, y
-sobrevivió dos sesiones. Los TRES guards estructurales iteran sobre
-`REGLAS` ⇒ era **invisible para los tres**: sin fixture, sin auto-prueba.
-Su *«DURA EN 0»* se reportó en S96 y otra vez en S97 leyendo una regla
-**de la que nadie había comprobado jamás que supiera decir que no.**
+sobrevivió dos sesiones. Los TRES guards estructurales iteran `REGLAS` ⇒
+era **invisible para los tres**. Su *«DURA EN 0»* se reportó en S96 y en
+S97 leyendo una regla **de la que nadie había comprobado jamás que
+supiera decir que no.**
 
-> Es L-192 en su forma más incómoda: **el guard escrito para impedir que
-> una regla escape en silencio tenía él mismo la puerta abierta, porque
+> L-192 en su forma más incómoda: **el guard escrito para impedir que una
+> regla escape en silencio tenía él mismo la puerta abierta, porque
 > vigilaba EL REGISTRO en vez de vigilar LO QUE CORRE.**
 
-**La cura no fue registrar R35: fue el TERCER GUARD** (`corridas →
-REGLAS`). El triángulo *regla · fixture · corrida* solo se cierra
-recorriéndolo en los dos sentidos. **Auto-prueba: 26 → 31 reglas.**
+La cura no fue registrar R35: fue el **tercer guard** (`corridas →
+REGLAS`). El triángulo *regla · fixture · corrida* solo cierra
+recorriéndolo en los dos sentidos.
 
 ---
 
-## §3 · LOS TRES CHOQUES CONTRA LETRA FIRMADA — declarados, no resueltos en silencio
+## §3 · LOS CHOQUES CONTRA LETRA FIRMADA — declarados, no resueltos en silencio
 
-*(Precedente S63 y la enmienda A4 de §9bis.2: el choque SE DECLARA.)*
-
-### ① EL ESCALÓN 45 ESTÁ DEROGADO — y el error estaba en casa
-
-El contrato de C y el Norte N6 decían *«escalonadas 45/300»*. §5.4
-registra la enmienda **FIRMADA en S81**: pasó a **120**
-(`motion.stagger.slow`), con su porqué medido — *«con 45, tres bloques
-resolvían en ~390 ms y el escalonado no se PERCIBÍA como orden de
-lectura»*.
-
-**La causa de que el 45 volviera a viajar no era del contrato: el header
-de `Entrada` DECÍA 45 mientras su constante decía 120.** La pieza se
-contradecía a sí misma, y lo que se lee es el header. Curado.
-
-> *Un número derogado que sobrevive en una prosa derivada no se queda
-> quieto: se propaga al siguiente contrato que lo cite.* (L-141)
-
-### ② «DURACIÓN TOTAL 520» NO ERA EJECUTABLE — y lo dijo un número de la casa
-
-Cinco fases + N tabs en medio segundo son **~104 ms por fase**. Y no fue
-opinión: **la casa YA había medido ese umbral** en la misma enmienda S81
-(390 ms para TRES bloques ya era demasiado rápido). Si 390/3 no alcanza,
-520/5+N tampoco. Total real **~1620 ms**, declarado para que la mesa
-firme o corte.
-
-### ③ N10 SE CONTRADICE A SÍ MISMO — y el defecto era del Norte
-
-N10 dice *«UN bezier (.32,.72,0,1)»* y en la misma frase pide
-**overshoot**. **Un overshoot con esa curva no hace overshoot** — termina
-en 1 y no lo pasa. Se usó `motion.easing.spring` [.34, 1.56, .64, 1], que
-**ya existía desde v3.1**: no se inventó una curva.
-
-**La mesa lo adoptó como ley mejor.** El reparto quedó: *el bezier de la
-casa gobierna entradas y transiciones; el spring gobierna lo que
-confirma.*
+1. **El escalón 45 está derogado** (§5.4, enmienda firmada S81 → **120**).
+   Viajaba en el contrato de C porque **el header de `Entrada` decía 45
+   mientras su constante decía 120**: la pieza se contradecía a sí misma.
+2. **«Duración total 520» no era ejecutable**: cinco fases en medio
+   segundo son ~104 ms cada una, y **la casa ya había medido ese umbral**
+   (390 ms para tres bloques ya era demasiado rápido). Total real ~1620.
+3. **N10 se contradice solo**: pide *«UN bezier»* y pide **overshoot** —
+   que con esa curva no existe. Se usó `motion.easing.spring`, que ya
+   estaba desde v3.1. **El defecto era del Norte**, y la mesa lo adoptó
+   como ley mejor.
+4. **El peso 700 del título** invertía la regla de voz firmada. La mesa lo
+   rechazó: `titulo` sigue en light 300.
 
 ---
 
-## §4 · LAS CUATRO REGLAS DEL NORTE — lo que hace posible que C y D corran sin gate por pieza
+## §4 · EL ARCO DE `Celda` — SEIS VUELTAS, Y CADA UNA CON SU LECCIÓN
 
-Ratchet, con **su brazo de ancla probado aparte** y **discriminador
-corrido contra el código real** (los cuatro pisos bajados un punto: las
-cuatro salieron rojas nombrando archivos reales, coincidiendo con el
-censo independiente por grep).
+El defecto: el nombre de la mascota truncaba a **`Z…`** —UNA letra— en el
+HOY. Lo vio D en dispositivo; **ningún instrumento lo veía.**
 
-| Regla | Qué mide | Piso |
+| vuelta | qué | la lección |
 |---|---|---|
-| **R36** | N2 · el espaciado sale del token | 21 |
-| **R37** | N4 · una sola escala de radios | 20 → **7** |
-| **R38** | N3 · 3 separadores por pantalla | 6 |
-| **R39** | N1 · 3 tamaños a mano por pantalla | 6 |
+| 1ª | `minWidth` en el sujeto | el `flexShrink` que escribí **era decorativo** |
+| 2ª | `minWidth: 0` en la derecha | el default de un ítem flex es `min-width: auto`: **sin eso, `flexShrink` no encoge nada** |
+| 3ª | se retira el `overflow` del texto | **el cinturón se comía la elipsis** — `ellipsizeMode` estaba declarado, así que si no hay «…» **no truncó el `Text`** |
+| 4ª | el piso **baja** de 128 a 96 | leer el árbol entero: **no caben** (~348 pedidos vs ~340) |
+| 5ª | se retira el `overflow` | doctrina correcta, **alcance equivocado** |
+| 6ª | vuelve, por adjudicación | **por ALCANCE**: el guard miraba 2 filas, el atributo protege 157 montajes |
 
-**🔴 R36 NO mide «múltiplo de 8» literal, y es su decisión de diseño:**
-mecanizarlo así **pondría en rojo la escala firmada** (`spacing` tiene
-4·6·10·12·20·28). Mide que nadie re-decida el ritmo a mano — los números
-del Norte YA son tokens (32 = `spacing[8]` · 24 = `spacing[6]` · 16 =
-`spacing[4]`). *El múltiplo de 8 gobierna la composición, que es juicio de
-gate; el crudo es lo mecanizable.*
+**LA ARITMÉTICA QUE ORDENÓ TODO**, y solo apareció al leer el árbol
+completo tras cuatro parches:
 
-**Lo que R37 encontró al medirse, antes de existir: 13 píldoras escritas
-`borderRadius: 999` cuando `radius.full` es 9999.** Clampean igual — **por
-eso nadie lo vio nunca**. El defecto no era visual: era que la píldora de
-la casa dejó de tener un solo dueño. Curadas (cero cambio visual).
+```
+avatar + gaps + padding ....  ~92 px
+bloque de texto (piso) .....   96 px
+la derecha (glifo + 2 chips)  ~160 px  ← NO comprimible
+────────────────────────────────────
+pedido ~348   ·   disponible ~340
+```
 
-**Y los pisos se fijan con el número de LA HERRAMIENTA QUE LOS EXIGE:** el
-grep sobre `apps`+`packages` dijo 36/21 y el lint (solo `apps`, despojando
-comentarios) dice 21/20. El baseline es el segundo, o el ratchet arrancaría
-con margen regalado. Misma historia que R2.
+**No caben, y ningún elemento es comprimible de verdad** (una `Insignia`
+con texto tiene ancho intrínseco). *Por eso cada vuelta movía el defecto
+de lugar en vez de cerrarlo* — truncado → solapamiento → corte mudo →
+colisión: **cuatro síntomas de una causa**.
+
+**La cura final no fue de flexbox: fue de ANATOMÍA** (D bajó los chips a
+su propia línea). El sujeto pasó de 96 a **189 px**, sin elipsis porque no
+hizo falta.
 
 ---
 
@@ -120,74 +102,99 @@ con margen regalado. Misma historia que R2.
 
 | Qué | Estado | Dueño |
 |---|---|---|
-| **🔴 El gate en dispositivo de la escala** | **330 sitios cambiaron de tamaño y NINGÚN instrumento lo ve.** El riesgo es de **layout, no de tipo**: `verify:diseno`, `tsc` y WCAG dan **verde con truncados rotos** | founder · **encabeza el Lote 1** |
-| **El glifo `atender` a 21px** | Riesgo declarado: la diagonal de la hoja puede fundirse con la jamba. **Recambio YA elegido: el vano sin hoja** — la puerta se conserva en los dos casos | founder · Lote 1 |
-| **Los 7 radios fuera de toda escala** | `36` · `5` ×4 (el mismo patrón en los cuatro oficios) · `2` ×2. **Cambian el dibujo** ⇒ gate, no reemplazo | founder + C/D |
-| **`SelectorDia:227` → `borderRadius: 22`** | **NO se tocó a propósito.** Llegó verbatim de la lámina FIRMADA de la rueda D3 (S85). *Cambiar la forma de una pieza firmada por prolijidad de lint es lo que esta casa prohíbe.* Visible en el ratchet | mesa |
-| **`DIRECCION_ARTE` §5.4** | Lista el overshoot como **candidata sin firma** y la mesa lo FIRMÓ el 14-ago. La letra hay que enmendarla | A (su doc) |
-| **`packages/ui/CLAUDE.md`** | Contador 63 → **64** (`Destape`); glifos 44 → **45** (`atender`), re-medidos por las dos vías con el mismo conjunto | próxima B |
+| **🔴 El gate en dispositivo de la escala** | **330 sitios cambiaron de tamaño y ningún instrumento lo ve.** El riesgo es de **layout, no de tipo** | founder · **Lote 1** |
+| **El `overflow` de `Celda`** | **ELEVADO, no retirado.** La condición de muerte se cumplió (guard de D: 28/59 · 23/50 · 5/10 + las 3 del censo), pero **la adjudicación de que quedaba fue de la mesa** y solo ella la declara cumplida. Evidencia de **RN-web, no dispositivo** | mesa |
+| **El peor caso de `veterinaria/consulta`** | Verde **en el estado que existe hoy**: la variante con dos chips no se dibujó en el estado que D pudo montar. *Dato sobre qué cubre el verde, no pendiente de nadie* | — |
+| **El glifo `atender` a 21px** | Riesgo declarado (la diagonal puede fundirse con la jamba). **Recambio ya elegido: el vano sin hoja** | founder |
+| **El peso del título de `Baldosa`** | `cuerpo` (16). Si falta peso, la salida es **variante nueva con gate** (Ley 11), jamás un `style` inline | founder |
+| **2 radios de 9×9** | Los únicos que quedan a firma. *De los «7», 4 eran círculos y 1 es el squircle FIRMADO de S53* | founder |
+| **reduce-motion en 59 piezas** | **Solo 4 de 63 lo miran.** Barrerlas es tanda con censo propio | próxima B |
+| **`DIRECCION_ARTE` §5.4** | Lista el overshoot como candidata; **la mesa lo firmó el 14-ago**. Hay que enmendar la letra | A (su doc) |
+| **`packages/ui/CLAUDE.md`** | Contador 63 → **65** (`Destape`, `Baldosa`); glifos 44 → **45** | próxima B |
 
 ---
 
-## §6 · LAS LECCIONES DE MÉTODO — las cuatro que esta tanda deja
+## §6 · LAS LECCIONES — y la primera es la que gobierna
 
-**① VER TUS COMMITS VIEJOS EN `origin` NO VALIDA EL NUEVO.** Trabajé una
-tanda entera creyendo que estaba entregada porque el `fetch` mostró mis
-commits **anteriores** en `origin/main` — puestos ahí por otra mano. El
-último quedó **commiteado y solo local**, y lo cazó **C** yendo a
-mergearlo, midiendo contra el objeto.
+**① NINGÚN INSTRUMENTO ENCONTRÓ NINGUNO DE LOS CINCO DEFECTOS REALES.**
 
-> No fue *«un push que dijo OK sin llegar»* (el caso que el canon ya
-> registra): **fue un push que NUNCA OCURRIÓ.** Lo que valida es el
-> ancestro del commit que tenés en la mano, jamás la presencia de los
-> viejos. Y el cierre lo confirma en espejo: **el `git push` final imprimió
-> «Everything up-to-date»** —no movió nada, el founder había llegado
-> primero— y *eso el OK del comando tampoco lo dice; lo dijo el contenido
-> del ref.*
+| defecto | lo vio | los gates decían |
+|---|---|---|
+| `Z…` en el HOY | **D**, en dispositivo | VERDE |
+| el destape «pasó rápido» | **el founder** | VERDE |
+| «Adiestramiento» partido | **C**, montándola | VERDE |
+| `role="header"` en cada baldosa | **investigando el de C** | VERDE |
+| mi galería probando piezas más anchas que la pantalla | **C**, midiendo su instrumento | VERDE |
 
-**② UN VERDE MEDIDO DURANTE UN INSTALL NO ES UN VERDE.** D corrió
-`pnpm install` desde su worktree y **recreó el `node_modules` del
-primario**, donde yo medía. Mi `verify:contrast` falló en esa ventana con
-`runDepsStatusCheck` — lo esquivé corriendo el binario directo **sin
-entender por qué**. Cuando D lo declaró, el síntoma tuvo nombre. Los tres
-gates se re-corrieron con el árbol estable. *(Caso concreto de D-769:
-compartir `node_modules` entre worktrees hace que un install de una pista
-sea un acto sobre otra.)*
+*`tsc`, `verify:diseno` y WCAG no ven un truncado, un solapamiento, un
+corte mudo ni un rol de a11y mentido.* **El lint protege contra lo que ya
+sabemos nombrar; lo que no sabíamos nombrar lo trajo un ojo.**
 
-**③ EL DISEÑO CORRECTO SE PRUEBA CUANDO LA PREMISA CAMBIA.** La
+**② VER TUS COMMITS VIEJOS EN `origin` NO VALIDA EL NUEVO.** Trabajé una
+tanda entera creyéndola entregada porque el `fetch` mostró mis commits
+**anteriores** en `origin/main`. El último quedó solo local y **lo cazó C**
+yendo a mergearlo. Y el cierre lo confirmó en espejo: el `git push` final
+imprimió *«Everything up-to-date»* —no movió nada— y **eso el OK del
+comando tampoco lo dice; lo dijo el contenido del ref.**
+
+**③ UN VERDE MEDIDO DURANTE UN INSTALL NO ES UN VERDE.** D recreó el
+`node_modules` del primario desde su worktree; mi `verify:contrast` falló
+en esa ventana y lo esquivé **sin entender por qué**. Los tres gates se
+re-corrieron con el árbol estable. (D-769 en concreto.)
+
+**④ TODAS LAS MEDICIONES BIEN, LA PREGUNTA MAL** (L-221) — **cuatro veces
+en la jornada, dos de D, dos mías**: el «solapamiento» que era recorte · el
+DOM que preguntaba *«¿desborda?»* en vez de *«¿colisiona?»* · mi cálculo de
+32 px entre chips **asumiendo sin medir** que el solape era con el vecino ·
+y mi `echo "$?"` leyendo el exit de `head` en vez del de `tsc` (**L-191, y
+D la cobró el mismo día por su lado**).
+
+**⑤ UNA CURA PUEDE APLICARSE EN SILENCIO.** El `flexShrink: 1` que escribí
+**no encogía nada**: el atributo estaba, el typecheck lo aceptaba, y no
+movía un píxel. *No era una verificación que fallara en silencio: era una
+CURA que se aplicaba en silencio.*
+
+**⑥ UN RECORTE ESCONDE EL SÍNTOMA.** El `overflow` tapó la colisión
+durante tres vueltas: se veía un corte y **nadie podía saber que dos
+columnas se superponían**. *Un recorte no arregla: pospone, y cobra
+intereses en diagnóstico.*
+
+**⑦ LA PROSA DERIVADA DECAE AUNQUE VIVA EN EL MISMO ARCHIVO** — **cinco
+veces**: el header de `Entrada` con el 45 · el piso que decía 96
+explicando 128 · la lápida del `overflow` que decía «no existe» dos veces
+seguidas (una por retiro, otra por reversión) · el header del `Destape`
+diciendo «crossfade». **Todas escritas por mí, algunas ese mismo día.**
+
+**⑧ EL ANCHO DE UN INSTRUMENTO DECIDE QUÉ SE PUEDE ENCONTRAR** (de C,
+midiendo el suyo): capturó a 420 px porque era el viewport **heredado, no
+elegido**. *Tuvo suerte de que fuera angosto* — a 600, mi baldosa pasaba
+sus tres fotos. Mi galería tenía el mismo defecto y montaba `Celda` a
+ancho de viewport cuando en producción vive a ~340.
+
+**⑨ EL DISEÑO CORRECTO SE PRUEBA CUANDO LA PREMISA CAMBIA.** La
 composición de la barra cambió **dos veces** mientras construía (4-o-5 →
-3-4-o-5, con ATENDER como **tercero de cuatro** en recepción). **Cero
-líneas tocadas**, porque el destaque es **por FORMA y no por coordenada**.
-Anclado a la posición, el segundo rebote lo rompía.
+3-4-o-5, con ATENDER de tercero de cuatro). **Cero líneas tocadas**,
+porque el destaque es **por FORMA y no por coordenada**.
 
-**④ UN ROJO AJENO SE AÍSLA ANTES DE DECLARARLO.** El hook falló por
-`packages/api` (WIP de A). Se corrieron los dos `tsc` **por separado**
-antes de tocar `SALTAR_GATE`, y el motivo se escribió con el error
-literal. Al cerrar, se **re-midió**: `api = 0` tras el commit de A ⇒ el
-último commit pasó **sin escotilla**.
+**⑩ UN GUARD QUE GRITA SOBRE UNA GEOMETRÍA FIRMADA ENSEÑA A IGNORARLO**
+(de D) — *la única forma de fallar peor que no existir.* Su guard reportó
+la pata de selección de E6, firmada en S82.
 
 ---
 
 ## §7 · PARA LA PRÓXIMA B
 
-1. **Lo primero es el gate en dispositivo de la escala.** No es una
-   formalidad: es el único instrumento que puede ver lo que se rompió, y
-   los tres que tenemos dan verde igual.
-2. **`packages/ui/CLAUDE.md` está desactualizado** — contador de
-   componentes y de glifos. Re-medir al tocarlo (L-141, y este contador ya
-   se atrasó cinco veces).
-3. **Los frenos que siguen vigentes:** `usePresionado` es enmienda con
-   gate propio. `BarraTabs/estadoPorHuella` ya no lo es —esta tanda la
-   abrió con firma—, pero la prop `acento` **sigue esperando su lámina de
-   tres candidatos**, y su condición de muerte está escrita.
-4. **Lo que esta tanda NO tocó:** `DIRECCION_ARTE` §9bis.4 (A1 y A3 siguen
-   **candidatas y no rigen** — construir contra ellas es fabricar deuda
-   auditable).
+1. **El gate en dispositivo encabeza.** No es formalidad: §6 ① lo dice con
+   cinco casos.
+2. **Los contadores de `packages/ui/CLAUDE.md` están viejos** (63→65,
+   44→45). Re-medir al tocarlos — ya se atrasaron cinco veces.
+3. **La deuda de reduce-motion**: 59 piezas sin censar.
+4. **Lo que NO rige:** `DIRECCION_ARTE` §9bis.4 (A1 y A3 siguen
+   candidatas). Construir contra ellas es fabricar deuda auditable.
 
 ---
 
 **Medido al cierre:** `tsc` ui/cliente/prestador **en 0** · `verify:diseno`
-**VERDE (31 auto-pruebas**, eran 26) · **WCAG 178 / 0** corrido con la
-escala y el peso nuevos —el gate que más podía moverse no se movió— ·
-`R17` sin pendientes · los cinco commits **en `origin/main`, verificados
-por contenido**.
+**VERDE, 32 auto-pruebas** · **WCAG 178 / 0** con la escala y el peso
+nuevos · `R17` sin pendientes · todo en `origin/main` **verificado por
+contenido**.
