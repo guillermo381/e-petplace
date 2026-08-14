@@ -4008,6 +4008,69 @@ export type Database = {
           },
         ]
       }
+      cuenta_comercial_documentos: {
+        Row: {
+          archivo_url: string
+          created_at: string
+          cuenta_comercial_id: string
+          estado: string
+          fecha_emision: string | null
+          fecha_vencimiento: string | null
+          id: string
+          nombre: string
+          notas_revision: string | null
+          pais_emisor: string | null
+          revisado_en: string | null
+          revisado_por: string | null
+          tipo: string
+        }
+        Insert: {
+          archivo_url: string
+          created_at?: string
+          cuenta_comercial_id: string
+          estado?: string
+          fecha_emision?: string | null
+          fecha_vencimiento?: string | null
+          id?: string
+          nombre: string
+          notas_revision?: string | null
+          pais_emisor?: string | null
+          revisado_en?: string | null
+          revisado_por?: string | null
+          tipo: string
+        }
+        Update: {
+          archivo_url?: string
+          created_at?: string
+          cuenta_comercial_id?: string
+          estado?: string
+          fecha_emision?: string | null
+          fecha_vencimiento?: string | null
+          id?: string
+          nombre?: string
+          notas_revision?: string | null
+          pais_emisor?: string | null
+          revisado_en?: string | null
+          revisado_por?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuenta_comercial_documentos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuenta_comercial_documentos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+        ]
+      }
       cuenta_roles: {
         Row: {
           activado_en: string
@@ -19013,6 +19076,10 @@ export type Database = {
         }[]
       }
       actualizar_nombre_comercial: { Args: { p_nombre: string }; Returns: Json }
+      actualizar_nombre_cuenta_comercial: {
+        Args: { p_cuenta_comercial_id: string; p_nombre_comercial: string }
+        Returns: Json
+      }
       actualizar_raza_mascota: {
         Args: { p_mascota_id: string; p_raza: string }
         Returns: Json
@@ -20878,6 +20945,10 @@ export type Database = {
       }
       responder_solicitud_autorizacion: {
         Args: { p_accion: string; p_solicitud_id: string }
+        Returns: Json
+      }
+      revisar_documento_cuenta: {
+        Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
       }
       revisar_documento_prestador: {

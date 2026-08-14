@@ -497,3 +497,108 @@ export async function misCuentasComerciales(): Promise<
   }
   return { ok: true, data: [...porId.values()] };
 }
+
+// ── EL ALTA DEL VENDEDOR PURO (S97-A · 13-ago) ──────────────────────────────
+// La configuración cuelga de la CUENTA COMERCIAL (firma de mesa): los
+// documentos y el nombre se completan sin fila de prestador. Espejos del
+// contrato del prestador, colgados de la cuenta.
+
+/** Un documento de la cuenta comercial (RUC, cédula, permiso). */
+export interface DocumentoCuenta {
+  id: string;
+  tipo: 'cedula' | 'ruc' | 'permiso_funcionamiento';
+  nombre: string;
+  /** PATH dentro del bucket privado `cuenta-documentos` (jamás URL). */
+  archivo_url: string;
+  estado: 'pendiente' | 'aprobado' | 'rechazado' | 'vencido';
+  notas_revision: string | null;
+  created_at: string;
+}
+
+const TIPOS_DOC_CUENTA = ['cedula', 'ruc', 'permiso_funcionamiento'] as const;
+const ESTADOS_DOC_CUENTA = ['pendiente', 'aprobado', 'rechazado', 'vencido'] as const;
+
+/** Los documentos de la cuenta — la RLS decide qué filas existen para esta
+ *  sesión (operador de la cuenta o admin). */
+export async function listarDocumentosCuenta(
+  cuentaComercialId: string,
+): Promise<ResultadoWrapper<DocumentoCuenta[], CodigoErrorCuentaComercial>> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient()
+    .from('cuenta_comercial_documentos')
+    .select('id, tipo, nombre, archivo_url, estado, notas_revision, created_at')
+    .eq('cuenta_comercial_id', cuentaComercialId)
+    .order('created_at', { ascending: false });
+  if (error) return errorGenerico('error_desconocido');
+  const salida: DocumentoCuenta[] = [];
+  for (const f of data ?? []) {
+    const tipo = TIPOS_DOC_CUENTA.find((t) => t === f.tipo);
+    const estado = ESTADOS_DOC_CUENTA.find((e) => e === f.estado);
+    if (!tipo || !estado || typeof f.id !== 'string') {
+      return errorGenerico('error_desconocido');
+    }
+    salida.push({
+      id: f.id,
+      tipo,
+      nombre: typeof f.nombre === 'string' ? f.nombre : '',
+      archivo_url: typeof f.archivo_url === 'string' ? f.archivo_url : '',
+      estado,
+      notas_revision: typeof f.notas_revision === 'string' ? f.notas_revision : null,
+      created_at: typeof f.created_at === 'string' ? f.created_at : '',
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+/** Registra la FILA del documento (el archivo ya subido al bucket
+ *  `cuenta-documentos` bajo la carpeta `<cuentaId>/…` — la policy del
+ *  bucket la llavea por operador). Nace `pendiente`: el veredicto es de
+ *  e-PetPlace (`revisar_documento_cuenta`, admin). */
+export async function registrarDocumentoCuenta(input: {
+  cuenta_comercial_id: string;
+  tipo: DocumentoCuenta['tipo'];
+  nombre: string;
+  archivo_path: string;
+  pais_emisor?: string;
+}): Promise<ResultadoWrapper<{ documento_id: string }, CodigoErrorCuentaComercial>> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient()
+    .from('cuenta_comercial_documentos')
+    .insert({
+      cuenta_comercial_id: input.cuenta_comercial_id,
+      tipo: input.tipo,
+      nombre: input.nombre,
+      archivo_url: input.archivo_path,
+      pais_emisor: input.pais_emisor ?? null,
+    })
+    .select('id')
+    .single();
+  if (error) return { ok: false, codigo: 'rechazado_por_servidor', mensaje: error.message };
+  if (!data || typeof data.id !== 'string') {
+    return errorGenerico('error_desconocido');
+  }
+  return { ok: true, data: { documento_id: data.id } };
+}
+
+/** El nombre comercial se CORRIGE (D-791 hermana: nada queda mal para
+ *  siempre). Puerta DEFINER gateada por owner — un operador no-titular
+ *  rebota `solo_el_titular_corrige_el_nombre`. */
+export async function actualizarNombreCuentaComercial(
+  cuentaComercialId: string,
+  nombreComercial: string,
+): Promise<ResultadoWrapper<{ nombre_comercial: string }, CodigoErrorCuentaComercial>> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient().rpc('actualizar_nombre_cuenta_comercial', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_nombre_comercial: nombreComercial,
+  });
+  if (error) return { ok: false, codigo: 'rechazado_por_servidor', mensaje: error.message };
+  const r = data as { ok?: unknown; nombre_comercial?: unknown } | null;
+  if (!r || r.ok !== true || typeof r.nombre_comercial !== 'string') {
+    return errorGenerico('error_desconocido');
+  }
+  return { ok: true, data: { nombre_comercial: r.nombre_comercial } };
+}

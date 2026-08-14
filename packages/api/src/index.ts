@@ -360,6 +360,10 @@ export {
   obtenerMiCuentaComercial,
   // S96 (firma founder): el selector de cuenta comercial — todas las que opera.
   misCuentasComerciales,
+  listarDocumentosCuenta,
+  registrarDocumentoCuenta,
+  actualizarNombreCuentaComercial,
+  type DocumentoCuenta,
   type CuentaOperada,
   obtenerPaisesParaRegistro,
   obtenerBancosDePais,
