@@ -850,6 +850,30 @@ function FilaSalida({
   );
 }
 
+/* ☠️ S98-D · EL VERBO DE LLEGADA — SU COMPOSICIÓN CONDICIONAL SE RETIRA.
+ *
+ * D construyó el verbo como herramienta de un ROL —`hayRecepcionActiva`, con
+ * su interruptor `VERBO_LLEGADA_SOLO_RECEPCION`— sobre la **lectura (a)** de
+ * una firma del founder. **La mesa firmó después la otra: el verbo MUERE PARA
+ * TODOS** (D-818), y por eso el bloque entero sale.
+ *
+ * ⚠️ **NO SE RETIRA POR ESTAR MAL, y la diferencia importa:** el arco de D era
+ * correcto contra la lectura que tenía. *Lo que cambió no es el código: es
+ * cuál de dos firmas del mismo día rige.* **La doctrina sobrevive completa en
+ * `LETRA_RECEPCION_S76` §7bis** — que es donde tenía que estar, porque un
+ * borde que se re-decide vive en la letra, no en una constante.
+ *
+ * 🔴 **LO QUE **NO** SE RETIRA Y ES LO IMPORTANTE:** la mitad de MOTOR sigue
+ * viva y es indispensable — `trg_cita_llegada_al_atender`
+ * (`20260814200000`) estampa `llegada_en` al pasar a `en_curso`, idempotente.
+ * *Sin ella, matar el verbo dejaría a `llegada_en` sin un solo escritor por
+ * el camino real y las llegadas dejarían de existir en silencio.*
+ * **Matar el botón fue posible PORQUE el motor ya lo cubría.**
+ *
+ * ⚠️ Y el borde que sigue vigente, para que nadie lo «alinee por coherencia»:
+ * `registrar_llegada` sigue **gateada por MEMBRESÍA** (§7). La firma angostó
+ * LA SUPERFICIE, jamás LA PUERTA (ficha D-807). */
+
 export default function Hoy() {
   const router = useRouter();
   const { theme } = useTheme();
