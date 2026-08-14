@@ -38,7 +38,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  caraDeMascota,
+  caraDeMascotaPorRuta,
   MEDIOS_COBRO,
   obtenerCatalogoVacunas,
   obtenerCatalogoVeterinaria,
@@ -131,6 +131,11 @@ export default function AtencionMostrador() {
      esta pantalla era la única que la descartaba al llegar. *No hubo que
      pedirle nada a nadie: había que dejar de tirar el dato.* */
   const [especieMascota, setEspecieMascota] = useState<string | null>(null);
+  /* La RUTA de su raza — A la sumó al detalle DESPUÉS del guard de acceso
+     (ese orden importa: la cara no se resuelve antes de saber si esta
+     persona puede ver la mascota). Con ella la cara sube de genérico de
+     especie a la de su raza. */
+  const [rutaRaza, setRutaRaza] = useState<string | null>(null);
   const [servicioCodigo, setServicioCodigo] = useState<string | undefined>(undefined);
   const [precio, setPrecio] = useState('');
   const [fase, setFase] = useState<'atencion' | 'cobro'>('atencion');
@@ -249,6 +254,7 @@ export default function AtencionMostrador() {
       setPersonas(gente !== null && gente.ok ? gente.data.filter((g) => g.activo) : null);
       setNombreMascota(detalle.data.mascota.nombre);
       setEspecieMascota(detalle.data.mascota.especie);
+      setRutaRaza(detalle.data.mascota.raza_ruta_imagen);
       // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
       // firma falla, la huella digna de AvatarMascota es la cara válida.
       if (detalle.data.mascota.foto_url !== null) {
@@ -512,9 +518,9 @@ export default function AtencionMostrador() {
           <AvatarMascota
             nombre={mascota}
             fotoUrl={
-              caraDeMascota({
+              caraDeMascotaPorRuta({
                 especie: especieMascota,
-                razaSlug: null,
+                rutaImagen: rutaRaza,
                 fotoUri: fotoFirmada ?? undefined,
               }) ?? undefined
             }

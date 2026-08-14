@@ -50,37 +50,52 @@ export const prestadorEs = {
        de leerse como contradicción **sin tocar ningún número** — §4ter
        intacto, la claridad por el nombre. Ficha de A: D-814.
 
-       🔴 DOS DE LOS CUATRO NO USAN LA FORMA LITERAL, Y ESTÁ MEDIDO — no
-       estimado. `Baldosa` pinta su detalle en UNA línea sobre **151 px**
-       (medidos del nodo real; ~148 en un Android de 412), fuente
-       `DMSans 400 14px`. Con `measureText` sobre esa fuente exacta:
+       🔴 NINGUNO USA LA FORMA LITERAL DE LA FIRMA, Y ESTÁ MEDIDO — no
+       estimado, y **medido DOS VECES porque la primera me quedó corta**.
 
-           «Sin citas de vet hoy» ............ 126,4 px  ✓
-           «Sin paseos hoy» .................. 097,2 px  ✓   ← literal del founder
-           «Sin citas de grooming hoy» ....... 167,2 px  ✗ trunca
-           «Sin citas de adiestramiento hoy» . 204,3 px  ✗ trunca
+       `Baldosa` pinta su detalle en UNA línea. El ancho útil se leyó del
+       nodo vivo con la fuente computada (`DMSans 400 14px`):
 
-       ⇒ Vet y paseo van con la forma literal. Grooming y adiestramiento
-       van con **el sustantivo propio del oficio**, que es la otra forma
-       que el founder usó en la misma frase (*«no tienes PASEOS»*) y que
-       entra con margen: «baños» (90,3) y «sesiones» (107,2).
-       *Truncar la frase firmada la habría dejado en «Sin citas de
-       adiestramien…», que no informa y encima se ve rota.*
+           viewport 420 → **151 px**
+           viewport 360 → **121 px**   ← el teléfono angosto de la casa
 
-       ⚠️ Y lo que «baños» cuesta, declarado: el oficio vende «Baño» y
-       «Baño y corte», así que el conteo es EXACTO —todo grooming incluye
-       baño— pero el nombre no anuncia el corte. Se acepta porque el
-       TÍTULO de la baldosa dice «Estética» cuatro píxeles arriba: el
-       apellido lo carga el par, no la línea sola. */
+       ⚠️ **Y la relación NO es lineal**: los paddings de página, celda y
+       pieza son FIJOS, así que al angostar se comen una fracción cada vez
+       mayor. Mi primera pasada extrapoló «≈148 px en 412» y con esa regla
+       habría aprobado TRES voces que truncan. *Un presupuesto de ancho se
+       mide en el caso duro, no se proyecta desde el cómodo.*
+
+       Contra los 121 px reales:
+
+           «Sin paseos hoy» .................. 097,2  ✓   ← literal del founder
+           «Sin baños hoy» ................... 090,3  ✓
+           «Sin sesiones hoy» ................ 107,2  ✓
+           «Sin consultas hoy» ............... 113,2  ✓
+           «Sin citas de vet hoy» ............ 126,4  ✗ trunca
+           «Sin citas de grooming hoy» ....... 167,2  ✗ trunca
+           «Sin citas de adiestramiento hoy» . 204,3  ✗ trunca
+
+       ⇒ Los cuatro van con **el sustantivo propio del oficio**, que es la
+       otra forma que el founder usó en la misma frase (*«no tienes
+       PASEOS»*) y la única que entra en los cuatro. *Truncar la frase
+       firmada la habría dejado en «Sin citas de adiestramien…», que no
+       informa y encima se ve rota.*
+
+       ⚠️ Lo que el sustantivo cuesta, declarado: «baños» no anuncia el
+       corte y «consultas» no anuncia vacunación ni urgencia — los dos
+       conteos son EXACTOS (todo grooming incluye baño; el conteo es de
+       citas, no de consultas), pero el nombre nombra el acto típico. Se
+       acepta porque el TÍTULO de la baldosa dice el oficio cuatro píxeles
+       arriba: **el apellido lo carga el par, no la línea sola.** */
     datoPaseoCero: 'Sin paseos hoy',
     datoPaseoUno: '1 paseo hoy',
     datoPaseoN: '{{n}} paseos hoy',
     datoGroomingCero: 'Sin baños hoy',
     datoGroomingUno: '1 baño hoy',
     datoGroomingN: '{{n}} baños hoy',
-    datoVeterinariaCero: 'Sin citas de vet hoy',
-    datoVeterinariaUno: '1 cita de vet hoy',
-    datoVeterinariaN: '{{n}} citas de vet hoy',
+    datoVeterinariaCero: 'Sin consultas hoy',
+    datoVeterinariaUno: '1 consulta hoy',
+    datoVeterinariaN: '{{n}} consultas hoy',
     datoAdiestramientoCero: 'Sin sesiones hoy',
     datoAdiestramientoUno: '1 sesión hoy',
     datoAdiestramientoN: '{{n}} sesiones hoy',
@@ -1249,9 +1264,13 @@ export const prestadorEs = {
        el cliente. *Si los dos se llamaran «productos», la pantalla no
        diría cuál es cuál — y ésa era justo la firma.* */
     tiendaVitrina: 'Vender por e-PetPlace',
-    tiendaVitrinaDetalle: 'La vitrina del cliente',
+    /* ⏪ Estos dos detalles nacieron ESCRITOS A OJO y la captura los cazó:
+       «La vitrina del cliente» (130,2) y «Llega en la próxima versión»
+       (174,4) truncan contra los 121 px del teléfono angosto. La versión
+       larga de la segunda vive en la Hoja, que es donde hay lugar. */
+    tiendaVitrinaDetalle: 'La vitrina',
     tiendaLocal: 'Inventario de tu local',
-    tiendaLocalDetalle: 'Llega en la próxima versión',
+    tiendaLocalDetalle: 'Muy pronto',
     tiendaV2Titulo: 'Todavía no, pero viene',
     tiendaV2Voz:
       'El inventario de tu local —lo que tenés en tus estantes, sin salir a la vitrina— llega en la próxima versión. Por ahora podés vender por e-PetPlace.',

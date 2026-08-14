@@ -49,10 +49,36 @@ const CANDIDATAS = [
   '12 citas de vet hoy',
   'Sin citas de aseo hoy',
   '12 citas de aseo hoy',
+  // — las dos de «Tu tienda» (S98-C): la segunda TRUNCÓ en la captura y
+  //   me obligó a medir lo que había escrito a ojo —
+  'La vitrina del cliente',
+  'Llega en la próxima versión',
+  'Muy pronto',
+  'Todavía no',
+  'En la próxima versión',
+  'Lo que ven los clientes',
+  // — la ronda de 360 px: lo que sobrevive al teléfono más angosto —
+  '1 consulta hoy',
+  '12 consultas hoy',
+  'Sin consultas hoy',
+  'La vitrina',
+  'Lo que ve el cliente',
+  '1 paseo hoy',
+  '1 baño hoy',
+  '1 sesión hoy',
+  'Sin configurar',
+  'No se pudo leer',
+  '12 servicios',
 ];
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const ctx = await browser.newContext({ locale: 'es-EC', viewport: { width: 420, height: 900 } });
+/* 🔴 EL ANCHO SE PARAMETRIZA, y no es un lujo: toda la aritmética de esta
+   sesión se hizo sobre 420 px, y **el teléfono más angosto que la casa
+   contempla es de 360** (A lo midió en su tabla de wrap). Una voz que entra
+   en 420 y no en 360 es un truncado que ninguna captura mía iba a mostrar.
+   `ANCHO=360 node …` para el caso duro. */
+const ANCHO = Number(process.env.ANCHO ?? 420);
+const ctx = await browser.newContext({ locale: 'es-EC', viewport: { width: ANCHO, height: 900 } });
 const page = await ctx.newPage();
 
 await page.goto('http://localhost:8081/login', { waitUntil: 'networkidle', timeout: 180000 });
@@ -63,7 +89,11 @@ await page.waitForTimeout(9000);
 await page.goto('http://localhost:8081/atender', { waitUntil: 'networkidle', timeout: 180000 });
 await page.waitForTimeout(6000);
 
-const nodo = page.getByText('Sin agenda hoy').first();
+/* El ancla es cualquier detalle de baldosa REAL — se mide el nodo vivo, no
+   uno fabricado. ⏪ Decía «Sin agenda hoy» y esa voz MURIÓ al ponerle
+   apellido al dato: el instrumento abortó en vez de medir sobre la nada,
+   que es exactamente lo que su guard existe para hacer. */
+const nodo = page.getByText(/Sin baños hoy|Sin sesiones hoy|Sin citas de vet hoy|Sin paseos hoy/).first();
 if ((await nodo.count()) === 0) {
   console.error('✗ ABORTA: no encontré el detalle de la baldosa — ¿abrió la sesión?');
   await browser.close();
@@ -88,7 +118,7 @@ const medida = await nodo.evaluate((el, candidatas) => {
 }, CANDIDATAS);
 
 console.log(`\nfuente computada : ${medida.font}`);
-console.log(`ancho ÚTIL medido: ${medida.util.toFixed(1)} px  (viewport 420)\n`);
+console.log(`ancho ÚTIL medido: ${medida.util.toFixed(1)} px  (viewport ${ANCHO})\n`);
 console.log('candidata                                px      veredicto');
 console.log('─'.repeat(66));
 for (const a of medida.anchos) {
@@ -97,9 +127,15 @@ for (const a of medida.anchos) {
     `${a.texto.padEnd(38)} ${a.px.toFixed(1).padStart(6)}   ${entra ? '✓ entra' : '✗ TRUNCA'}`,
   );
 }
-console.log(
-  `\n⚠️ Medido en viewport 420. Un Android de 412 da la celda más angosta:` +
-    ` el margen de seguridad se toma sobre ${(medida.util * (380 / 388)).toFixed(1)} px.`,
-);
+/* ⏪ ACÁ VIVÍA UNA EXTRAPOLACIÓN MÍA Y ESTABA MAL: decía que en un Android
+   de 412 el margen se tomaba sobre `útil × 380/388` ≈ 148 px. **La relación
+   NO es lineal** — los paddings de la página, de la celda y de la pieza son
+   FIJOS, así que al angostar la pantalla se comen una fracción cada vez
+   mayor del ancho. Medido de verdad: 420 → 151 px útiles · **360 → 121**.
+   Con mi regla habría dado ~130 y habría aprobado tres voces que truncan.
+   ⇒ El instrumento no estima: se corre con `ANCHO=360`, que es el caso duro. */
+console.log(`\n⚠️ Ancho útil medido en ${ANCHO}: ${medida.util.toFixed(1)} px. NO se extrapola a
+   otros anchos — los paddings son fijos y la relación no es lineal.
+   El caso duro de la casa es 360 (útil ≈ 121): correr \`ANCHO=360\`.`);
 
 await browser.close();

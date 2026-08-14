@@ -58,7 +58,12 @@ async function abrir(tema) {
 
 const claro = await abrir('light');
 if (!claro.dentro) {
-  console.error('✗ ABORTA: la sesión NO abrió — no se saca ninguna foto.');
+  /* El aborto DEJA EVIDENCIA. Sin esto, «no abrió la sesión» es una
+     hipótesis: puede ser la clave, puede ser que esta cuenta caiga en otra
+     pantalla (un muro, una sala de espera). La foto y el texto lo dicen. */
+  await claro.page.screenshot({ path: `${DIR}00-aborto${SUFIJO}.png` });
+  const visto = (await claro.page.locator('body').innerText()).slice(0, 300).replace(/\n+/g, ' · ');
+  console.error(`✗ ABORTA: no encontré «Tu negocio». La pantalla dice: ${visto}`);
   await browser.close();
   process.exit(1);
 }
@@ -70,6 +75,25 @@ const textos = await claro.page
   .locator('text=/Tus servicios|Tu tienda|Sin configurar|servicios?$|No se pudo leer|Cobros/')
   .allInnerTexts();
 console.log('  visible:', JSON.stringify(textos.slice(0, 16)));
+
+/* ── LA HOJA DE V2 — la excepción FIRMADA a la Ley 23 ────────────────────
+   Es la única superficie del paquete que el founder firmó sin ver. Una foto
+   de la baldosa cerrada no la muestra: hay que TOCARLA. */
+const local = claro.page.getByText('Inventario de tu local', { exact: false }).first();
+if ((await local.count()) > 0) {
+  await local.click();
+  await claro.page.waitForTimeout(2500);
+  await claro.page.screenshot({ path: `${DIR}04-hoja-v2${SUFIJO}.png` });
+  const dice = (await claro.page.getByText('próxima versión', { exact: false }).count()) > 0;
+  console.log(
+    dice
+      ? `✓ 04-hoja-v2${SUFIJO}.png — la Hoja ANUNCIA lo que viene`
+      : `✗ 04-hoja-v2${SUFIJO}.png — la Hoja no dijo cuándo llega`,
+  );
+  if (!dice) process.exitCode = 1;
+} else {
+  console.log('· sin baldosa de inventario local (tienda ≠ «activa» en esta cuenta)');
+}
 await claro.ctx.close();
 
 const oscuro = await abrir('dark');
