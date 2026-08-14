@@ -38,10 +38,14 @@
  *  · ⑤ repartidores: SIN dato — decir «qué queda comprometido» al apagar
  *    un repartidor exige el lector de envíos vivos POR repartidor, que
  *    no existe (va en el pedido a A). No se inventa la voz sin el dato.
- * ⚠️ Divergencia declarada: la orden cita una «ley del cambio en la
- * cabecera de §8.6bis» que NO está depositada en `MODELO_DESPENSA` (grep
- * en cero sobre origin/main al construir). El literal de arriba es el de
- * la ORDEN; cuando la letra aterrice, si difiere, gana la letra.
+ * ✅ La letra ATERRIZÓ (13-ago, cabecera de §8.6bis — depositada verbatim
+ * del literal de C) y AGREGA dos cosas que esta pantalla aún NO cumple,
+ * declaradas en el inventario pre-gate:
+ *  · «declara qué queda comprometido Y HASTA CUÁNDO» — la voz dice la
+ *    ventana que se conserva, no una fecha explícita (fino post-gate);
+ *  · la baja del repartidor «queda pendiente y se cumple sola» — es
+ *    comportamiento del MOTOR y no existe (A-5/A-8); hoy el toggle apaga
+ *    sin voz ni diferimiento.
  *
  * 🔴 CHOQUE DECLARADO (⑤ QUIÉN): la letra manda repartidor como chip del
  * EQUIPO QUE YA EXISTE («un equipo, un lugar»); el alta de abajo es el
