@@ -3045,6 +3045,9 @@ export const prestadorEs = {
       recursosDetalle:
         'La capacidad es del recurso: si la moto lleva 20, el día son 20. Se suma otro recurso, no se rompe el cupo.',
       recursoNuevoCta: 'Agregar recurso',
+      // D-791: reabrir lo registrado en el mismo formulario (upsert medido)
+      recursoEditarTitulo: 'Corregir el recurso',
+      recursoNombreFijo: 'El nombre identifica este recurso. Para otro, agrega uno nuevo.',
       recursoNombre: 'Nombre (ej. Moto)',
       recursoCapacidad: 'Entregas por día',
       recursoGuardarCta: 'Guardar',
@@ -3055,6 +3058,8 @@ export const prestadorEs = {
       turnosDetalle:
         'El corte decide la promesa: lo que entra antes del corte se entrega en su ventana.',
       turnoNuevoCta: 'Agregar corte',
+      turnoEditarTitulo: 'Corregir el corte',
+      turnoCodigoFijo: 'El nombre identifica este corte. Para otro, agrega uno nuevo.',
       turnoCodigo: 'Nombre del turno (ej. manana)',
       turnoCorte: 'Hora de corte (HH:MM)',
       turnoDesde: 'Entrega desde (HH:MM)',
