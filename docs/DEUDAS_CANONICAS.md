@@ -16094,3 +16094,57 @@ quien la necesite tendrá que congelar el cron para ejercitarla.
 ☠️ **Muere** cuando corra sola —cron o CI— en vez de a mano. *Hoy es un
 instrumento que hay que acordarse de usar, que es exactamente la clase de
 defensa que no defiende el día que nadie se acuerda.* **Territorio: A.**
+
+---
+
+#### D-818 — 🔴 FRENO DEL TREN: EL VERBO «LLEGÓ» TIENE DOS FIRMAS DEL FOUNDER QUE SE CONTRADICEN
+
+**El merge de `pista/s98-d` está ABORTADO y declarado. `pista/s98-c` quedó
+mergeada, verde y en origin (`8960e505`).** Esto lo arbitra el founder.
+
+### Las dos lecturas, con su literal y su implementación
+
+| | **C** (`bbf61980`, mergeada) | **D** (`b6b5b099`, abortada) |
+|---|---|---|
+| Firma citada | *«No se necesita, es una acción que no genera ningún valor; en cambio la pizarra sí»* | **lectura (a)** — *«el verbo es la herramienta de un ROL, no de un local»* |
+| Qué hizo | **mató el verbo entero** y su chip | lo dejó vivo **solo para `recepcion`** (`VERBO_LLEGADA_SOLO_RECEPCION = true`) |
+| Estado | en `main` | en su rama |
+
+**Las dos son citas del founder del mismo día sobre el mismo botón.** *No es
+que una pista se equivocó: es que la mesa emitió dos lecturas y cada una
+implementó la suya, bien.*
+
+### 🔴 Y GIT RESOLVIÓ LA MITAD EN SILENCIO — es lo que vuelve peligroso al merge
+
+**El conflicto marcado fue UNA línea** (el guard `if (!m …) return undefined`).
+**Pero el JSX del botón NO conflictuó: git tomó la remoción de C sin
+preguntar**, porque D no tocó esas líneas exactas.
+
+⇒ **El merge «resuelto» habría quedado así: el guard de D dejando pasar citas
+sin mascota hacia un botón que ya no existe** — es decir, **un `<Separador />`
+huérfano**, exactamente el residuo que D declaró haber evitado en su propio
+lado.
+
+> ***Un merge de tres vías resuelve por LÍNEAS y la contradicción vivía entre
+> DOS lugares del mismo archivo.*** El marcador de conflicto señala dónde el
+> texto chocó, **no dónde chocó el significado** — y acá señaló la mitad
+> inofensiva.
+
+**Por eso no se resolvió tomando un lado:** tomar el de C neutraliza el arco de
+D (su constante, su lector de rol y su `porLlegarIds` quedan como código
+muerto, y la lectura (a) del founder **no queda implementada**); tomar el de D
+sin restituir su JSX deja el separador huérfano.
+
+### Lo que hay que decidir, en una línea
+
+> **¿El verbo «Llegó» muere para todos, o sobrevive como herramienta del rol
+> `recepcion`?**
+
+**Si muere:** el merge de D se rehace **sin** su bloque de verbo, y su motor
+—el trigger que estampa `llegada_en` al atender— **queda igual de necesario**
+(ese no está en discusión: lo firmó la misma mesa y ya está en `main`).
+**Si sobrevive:** el merge restituye el `<Boton>` de D **y** la baldosa de C
+convive con él.
+
+☠️ **Muere con la firma.** **Territorio: el founder** (la decisión) **+ A** (el
+merge que resulte).
