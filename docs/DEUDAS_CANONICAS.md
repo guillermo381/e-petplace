@@ -15877,3 +15877,76 @@ el dispositivo (`demovet` → familia registrada → Zeus → «Pedir autorizaci
 cuando el push tarde o el token esté viejo, y **el gate en dispositivo de que
 un teléfono real vibra por este camino** — lo único que A no puede firmar sola
 (L-153). **Territorio: superficie (voz) + el gate del founder.**
+
+---
+
+#### D-816 — 🔴 EL DESPACHADOR DE NOTIFICACIONES NO TIENE QUIÉN LO LLAME: LA COLA SE APILA Y NADIE RECIBE NADA
+
+**Encontrado por A (S97-A) verificando su propia cura de D-815 — no se dio por
+cerrada sin seguir el aviso hasta el teléfono.** *La intención nacía perfecta y
+ahí se quedaba.*
+
+### Lo medido, en orden
+
+| Medición | Resultado |
+|---|---|
+| `despachar_notificaciones(boolean)` existe | ✅ con kill switch, techo y vigencia (S88, lote 2 pieza 4) |
+| Llamadores en **el repo** | 🔴 **su migración, su reversa y FIXTURES. Nada más.** |
+| Llamadores en **la base** (otra función/trigger) | 🔴 **CERO** |
+| Llamadores en **cron** (11 jobs censados) | 🔴 **NINGUNO** |
+| Intenciones en `nacida` | 🔴 **34**, apilándose a diario (16 solo el 13-ago) |
+| Última fila de `notificaciones` | 🔴 **2026-08-03** — once días |
+| Última intención `entregada` | 🔴 **2026-08-09** |
+
+**⇒ `despachar_notificaciones` es MOTOR SIN PUERTA.** Se construyó con sus
+guards, se probó con fixtures **y nunca se cableó**.
+
+### 🔴 Y la segunda rotura, independiente de la primera
+
+**`despachar-notificaciones-tick` devuelve 401 en TODOS sus ticks:**
+`{"code":"UNAUTHORIZED_NO_AUTH_HEADER","message":"Missing authorization
+header"}` — **361 respuestas 401** en la ventana retenida.
+
+**El discriminador es exacto y está en el propio cron:**
+
+| job | manda `Authorization` | manda `x-despacho-secret` | resultado |
+|---|---|---|---|
+| `despachar-push-tick` | **sí** | sí | **200** |
+| `despachar-notificaciones-tick` | **no** | sí | **401** |
+
+*El secreto compartido de D-713 se agregó; el `Authorization` que la plataforma
+exige ANTES del cuerpo, no.* **El guard propio nunca llega a correr: rebota en
+la puerta de afuera.**
+
+### Por qué NADA de esto dio la alarma — y es la parte que hay que no olvidar
+
+1. **El cron dice `succeeded` todos los minutos.** `net.http_post` es
+   **asíncrono**: `succeeded` significa *«el pedido salió»*, jamás *«el otro
+   lado lo aceptó»*. **El 401 vive en `net._http_response`, que nadie mira.**
+2. **`despachar-push` devuelve `200` con `{"entregadas":0}`** — un verde
+   perfecto **de un transporte que no tiene nada que transportar**, porque el
+   paso anterior nunca movió las intenciones.
+3. **Ninguna pantalla se rompe.** El producto encola con normalidad; lo que
+   falta ocurre **afuera**, en un teléfono que no suena.
+
+> ***Un pipeline roto en el medio no produce errores: produce silencio.*** Y el
+> silencio es indistinguible del «no había nada que avisar».
+
+### 🔴 EL ALCANCE, que es lo que lo vuelve P0
+
+**No es del handshake: es de TODAS las notificaciones.** Los 13 productores
+vivos encolan bien — `confirmar_cita_pagada`, `notificar_recordatorios_cita`,
+`documento_aprobado`, `liquidacion_disponible`, `pedido_en_camino`,
+`cerrar_y_renovar_planes`… **todos escriben en una cola que nadie vacía.**
+
+⚠️ **Y lo que esto le hace a D-815:** mi cura **produce la intención correcta y
+la promesa sigue sin cumplirse**. *No se declara cerrada.* **Es la mitad de
+arriba de un caño cortado más abajo.**
+
+☠️ **Muere** con: ① un caller real de `despachar_notificaciones` (cron propio,
+como el de push) · ② el `Authorization` en el cron de correo · ③ **la cola
+acumulada resuelta con criterio** —*no se despacha a ciegas: hay avisos de hace
+once días cuya vigencia ya venció, y el propio despachador los descarta por
+`vigencia_horas`; pero eso hay que verificarlo antes de encender, no después*—
+y ④ **verificado en un teléfono real**, que es lo único que cierra esto
+(L-153). **Territorio: A.**
