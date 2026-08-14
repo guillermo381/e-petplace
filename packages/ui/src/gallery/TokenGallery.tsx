@@ -4052,6 +4052,54 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* Celda — B3.4 */}
+        <Seccion titulo="🔴 Celda A SU ANCHO REAL — la anatomía que rompió con «Z…» (S97+)">
+          {/* ESTA MUESTRA EXISTE PORQUE LA GALERIA NO CAZO EL PEOR
+              DEFECTO DE LA JORNADA. El nombre de la mascota truncaba a
+              «Z…» —UNA letra— en el HOY del prestador, y aca la `Celda`
+              se veia perfecta: se montaba **a ancho de viewport**, cuando
+              en produccion vive con la columna de la hora al lado
+              (`width: 46` + gap) ⇒ ~340 px, no 420.
+
+              La leccion es de C, midiendo su propio instrumento: *el
+              ancho de la captura es un parametro que DECIDE QUE SE PUEDE
+              ENCONTRAR* — y el que no se elige midiendo, se hereda.
+
+              ⇒ Se monta el ancho REAL y la anatomia CARGADA: la derecha
+              con `metadataMono` + un `fin` de dos chips y un glifo, que
+              es contenido de ancho intrinseco y NO cede. Los dos casos
+              medidos del censo estan aca: el del HOY (1 chip + 1 glifo) y
+              el de `veterinaria/consulta` (2 chips + 1 glifo), que es
+              **mas cargado que el que rompio y no lo miro nadie.** */}
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="apoyo">
+              340 px — el ancho que deja la columna de la hora en el HOY. Los nombres tienen que
+              leerse enteros.
+            </Texto>
+            {([
+              { t: 'Zeus', s: 'Vacunación', chips: 1 },
+              { t: 'Thor', s: 'Consulta general', chips: 2 },
+            ] as const).map((c) => (
+              <View key={c.t} style={{ width: 340, borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md }}>
+                <Celda
+                  interactiva
+                  onPress={() => {}}
+                  accessibilityRole="button"
+                  titulo={c.t}
+                  subtitulo={c.s}
+                  metadataMono="15 min"
+                  fin={
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
+                      <Icono nombre="veterinaria" registro="aa" tamano={21} />
+                      <Insignia estado="info" etiqueta="Mostrador" tamaño="sm" />
+                      {c.chips > 1 ? <Insignia estado="alDia" etiqueta="Confirmada" tamaño="sm" /> : null}
+                    </View>
+                  }
+                />
+              </View>
+            ))}
+          </View>
+        </Seccion>
+
         <Seccion titulo="Celda — la fila de lista (el pressed resalta, no escala)">
           <View style={{ gap: spacing[4] }}>
             <Tarjeta relleno="ninguno">

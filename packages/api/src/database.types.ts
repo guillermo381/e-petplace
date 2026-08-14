@@ -20973,6 +20973,10 @@ export type Database = {
         Returns: Json
       }
       registrar_visita_campana: { Args: { p_app: string }; Returns: Json }
+      renombrar_negocio: {
+        Args: { p_cuenta_comercial_id: string; p_nombre: string }
+        Returns: Json
+      }
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined

@@ -107,11 +107,10 @@ export function Celda(props: CeldaProps) {
           · `minWidth: 0` en la derecha — sin eso su `flexShrink` es
             DECORATIVO (el default de un ítem flex es `min-width: auto`,
             que le prohíbe encoger por debajo de su contenido).
-          · `overflow: 'hidden'` **solo en la derecha** — piso de
-            seguridad contra la colisión. En el texto NO va: allá
-            silenciaba la elipsis del `Text`. *Recortar un adorno es feo;
-            recortar un aviso es mentir.* Su riesgo y su condición de
-            muerte están escritos en su propio sitio, abajo.
+          · ☠️ el `overflow: 'hidden'` **ya no existe en ninguno de los
+            dos bloques** (retirado el 14-ago, adjudicación de mesa). Su
+            lápida y las dos declaraciones que viajan con el retiro están
+            abajo, en el sitio donde vivía.
 
           🔴 LO QUE ESTO **NO** RESUELVE, elevado a la mesa: la fila lleva
           más contenido del que entra. Es decisión de ANATOMÍA —que los
@@ -156,41 +155,32 @@ export function Celda(props: CeldaProps) {
         // la clase de error que ningún gate ve — el atributo está
         // escrito, el typecheck lo acepta, y no mueve un píxel.
         //
-        // `overflow: 'hidden'` — PISO DE SEGURIDAD contra la colisión que
-        // D midió (glifo 21 px DENTRO del texto · chip −66 px). Garantiza
-        // que la derecha no pueda dibujarse encima del sujeto.
+        // ☠️ ACÁ VIVIÓ UN `overflow: 'hidden'` Y SE RETIRÓ — adjudicación
+        // de mesa del 14-ago, con su condición de muerte CUMPLIDA y
+        // medida por D: el guard de geometría pasó de mirar DOS filas a
+        // **28/59 en el HOY · 23/50 en la otra cuenta · 5/10 en
+        // `veterinaria/consulta`**, con las 3 anatomías del censo
+        // cubiertas y discovery estructural (la fila ya no se descubre
+        // por `role="button"`: es «el elemento más chico que contiene N
+        // textos» — una fila cargada no es una fila tocable).
         //
-        // ⏪ SE RETIRÓ EN LA QUINTA VUELTA Y VUELVE EN LA SEXTA, y la
-        // adjudicación final es POR ALCANCE — el argumento que decidió no
-        // es cuál defensa es más elegante, es **a cuántos alcanza cada
-        // una**: el guard de geometría mira DOS filas; este atributo
-        // protege **157 montajes de `Celda` en 71 archivos**. Retirarlo
-        // hoy dejaba 155 con la superposición otra vez expresable a
-        // cambio de nada.
+        // LA DOCTRINA QUE LO ORDENA: *preferimos un defecto que el guard
+        // NOMBRA a uno que un recorte ESCONDE.* Y no es teoría — este
+        // mismo `overflow` tapó la colisión durante tres vueltas: se veía
+        // un corte y nadie podía saber que dos columnas se superponían.
         //
-        // Va ACÁ y no en el bloque de texto: allá silenciaba la elipsis
-        // del `Text`, que es información. *Recortar un adorno es feo;
-        // recortar un aviso es mentir.*
+        // ⚠️ LAS DOS DECLARACIONES QUE VIAJAN CON EL RETIRO:
+        //  · **la evidencia es de RN-web, no de dispositivo** (L-153). El
+        //    gate del founder decide si Android reparte igual.
+        //  · el **peor caso de `veterinaria/consulta` sigue sin verificar
+        //    CARGADO**: rindió 2 pisos, o sea que la variante de dos chips
+        //    no se dibujó en el estado que se pudo montar. Es un dato
+        //    sobre qué cubre el verde, no un pendiente de nadie.
         //
-        // ⚠️ SU RIESGO, ESCRITO PORQUE ES REAL Y YA COBRÓ: un recorte
-        // ESCONDE el síntoma. El `overflow` anterior tapó esta misma
-        // colisión durante tres vueltas — se veía un corte y nadie podía
-        // saber que dos columnas se superponían.
-        //   ☠️ DEUDA CON DISPARO: si aparece un reporte de «un chip se ve
-        //   cortado», la causa es ésta y la cura NO es ajustar el reparto
-        //   — es la de D: **bajar los chips a su propia línea**. Y muere
-        //   el día que el guard de geometría se generalice a las filas
-        //   cargadas: ahí el recorte pasa a ser redundante y se retira
-        //   sin dejar a nadie sin defensa.
-        <View
-          style={{
-            alignItems: 'flex-end',
-            gap: spacing[1],
-            flexShrink: 1,
-            minWidth: 0,
-            overflow: 'hidden',
-          }}
-        >
+        // ↩️ SI ANDROID REPARTE DISTINTO, el `overflow` vuelve **como
+        // vendaje explícito y fechado, jamás como default** — con su
+        // ficha, no metido de nuevo al pasar.
+        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1, minWidth: 0 }}>
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text

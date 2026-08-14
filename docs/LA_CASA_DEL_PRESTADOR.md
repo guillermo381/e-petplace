@@ -357,6 +357,65 @@ puede bajar.
 §8.6bis para la configuración de la despensa. Acá rige para el wizard entero
 — es la misma ley, un solo sujeto más.)*
 
+### 4.3bis 🔴 UN NOMBRE, UNA PUERTA (firma del founder, 14-ago-2026 — cierra D-802)
+
+> ### **Un negocio tiene UN nombre.**
+>
+> **La fuente conceptual es la CUENTA COMERCIAL** — *la única fila que TODO
+> negocio tiene, incluido el vendedor puro, que jamás tendrá fila de
+> prestador.* **`prestadores.nombre_comercial` es ESPEJO DECLARADO, no una
+> segunda verdad.**
+
+**El porqué, y es la razón más cara de todas las que la sesión midió:**
+
+> ***Dos nombres para un negocio es «informar sin informar» en su forma más
+> cara: la que le pasa al CLIENTE FINAL.***
+
+*Las otras muestras del día se quedaban adentro de la casa — un contador que
+no bajaba, un guard que no vigilaba, una letra vieja que confundía a una
+pista. **Ésta sale por la vitrina.** El prestador corrige su nombre, ve el
+cambio guardado, y la familia sigue encontrando el otro.*
+
+**LA PUERTA ÚNICA: `renombrar_negocio(cuenta, nombre)`.** Escribe la cuenta
+**siempre** y el prestador **si existe**, en la misma transacción — *las dos
+filas o ninguna*. Su ausencia de prestador **no es un error: es el vendedor
+puro**.
+
+**Y las escrituras por fuera están CERRADAS**, con el patrón del gobierno del
+vínculo (D-526): un trigger rebota el cambio directo de
+`prestadores.nombre_comercial` desde una sesión de persona. **Las dos puertas
+viejas DELEGAN** —`actualizar_nombre_comercial` y
+`actualizar_nombre_cuenta_comercial`— y no se dropean porque tienen
+consumidores vivos: *una firma que desaparece rompe distinto que una que
+redirige.*
+
+> **⇒ La divergencia queda INEXPRESABLE, no curada-hasta-el-próximo-`UPDATE`**
+> — la misma doctrina con la que se cerró el paseo en esta tanda.
+
+**El dato, medido ANTES de tocarlo y declarado:** **10 negocios con prestador,
+1 divergía** («Dueño todos los servicios (borrable)» ≠ «Todo S97 (borrable)»),
+**0 cuentas sin nombre** ⇒ la reconciliación tocó **una fila** y la fuente
+estaba completa: nadie se quedó sin nombre.
+
+**Y la voz del paso ① ya es verdadera sin tocarla:** *«el nombre con el que
+las familias te van a encontrar»* — **ahora el campo escribe exactamente
+ahí.** *No se curó la frase: se curó el mundo que la frase describía* — que
+es lo que C protegió al dejar D-802 quieta en vez de reescribir el texto.
+
+> #### 🕐 LA DEUDA DEL ESPEJO, con su condición de muerte escrita
+>
+> **`prestadores.nombre_comercial` sigue existiendo como espejo**, y eso es
+> deuda declarada, no diseño final.
+>
+> ☠️ **MUERE el día que `v_prestadores_publicos` lea el nombre desde la
+> CUENTA COMERCIAL.** Ahí el espejo deja de tener lectores y la columna puede
+> jubilarse.
+>
+> **Ese cambio de vista NO es de hoy** —toca el frente del cliente, que es
+> otro territorio y otro gate— **y queda escrito acá para que nadie lo
+> re-derive.** *Una deuda sin condición de muerte escrita es una decisión que
+> la próxima sesión toma de nuevo desde cero.*
+
 ### 4.4 El paso ③ es el alta del vendedor puro — absorbida, no duplicada
 
 **El alta del vendedor puro deja de ser un arco propio y pasa a ser el paso
