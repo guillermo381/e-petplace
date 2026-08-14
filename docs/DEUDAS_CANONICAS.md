@@ -15896,73 +15896,110 @@ vibra por este camino** — lo único que A no puede firmar sola (L-153).
 
 ---
 
-#### D-816 — 🔴 EL DESPACHADOR DE NOTIFICACIONES NO TIENE QUIÉN LO LLAME: LA COLA SE APILA Y NADIE RECIBE NADA
+#### D-816 — ✅ TODAS LAS NOTIFICACIONES ESTUVIERON MUERTAS POR UN HEADER QUE FALTABA
 
 **Encontrado por A (S97-A) verificando su propia cura de D-815 — no se dio por
 cerrada sin seguir el aviso hasta el teléfono.** *La intención nacía perfecta y
 ahí se quedaba.*
 
-### Lo medido, en orden
+### 🔴 LA CAUSA, UNA SOLA
 
-| Medición | Resultado |
-|---|---|
-| `despachar_notificaciones(boolean)` existe | ✅ con kill switch, techo y vigencia (S88, lote 2 pieza 4) |
-| Llamadores en **el repo** | 🔴 **su migración, su reversa y FIXTURES. Nada más.** |
-| Llamadores en **la base** (otra función/trigger) | 🔴 **CERO** |
-| Llamadores en **cron** (11 jobs censados) | 🔴 **NINGUNO** |
-| Intenciones en `nacida` | 🔴 **34**, apilándose a diario (16 solo el 13-ago) |
-| Última fila de `notificaciones` | 🔴 **2026-08-03** — once días |
-| Última intención `entregada` | 🔴 **2026-08-09** |
-
-**⇒ `despachar_notificaciones` es MOTOR SIN PUERTA.** Se construyó con sus
-guards, se probó con fixtures **y nunca se cableó**.
-
-### 🔴 Y la segunda rotura, independiente de la primera
-
-**`despachar-notificaciones-tick` devuelve 401 en TODOS sus ticks:**
+**`despachar-notificaciones-tick` devolvía 401 en TODOS sus ticks:**
 `{"code":"UNAUTHORIZED_NO_AUTH_HEADER","message":"Missing authorization
 header"}` — **361 respuestas 401** en la ventana retenida.
 
-**El discriminador es exacto y está en el propio cron:**
+**El discriminador estaba en el propio cron, y es de una línea:**
 
-| job | manda `Authorization` | manda `x-despacho-secret` | resultado |
+| job | `Authorization` | `x-despacho-secret` | resultado |
 |---|---|---|---|
 | `despachar-push-tick` | **sí** | sí | **200** |
 | `despachar-notificaciones-tick` | **no** | sí | **401** |
 
 *El secreto compartido de D-713 se agregó; el `Authorization` que la plataforma
-exige ANTES del cuerpo, no.* **El guard propio nunca llega a correr: rebota en
-la puerta de afuera.**
+exige ANTES del cuerpo, no.* **El guard propio nunca llegaba a correr: rebotaba
+en la puerta de afuera.**
 
-### Por qué NADA de esto dio la alarma — y es la parte que hay que no olvidar
+### 🔴 POR QUÉ UN HEADER MATÓ EL SISTEMA ENTERO
+
+**`despachar-correo` NO es «el transporte de email»: es EL ORQUESTADOR.** En su
+línea 306 llama `supabase.rpc('despachar_notificaciones', { p_seco: false })` —
+*la DB decide*— y recién después entrega los correos. **`despachar-push` solo
+entrega lo que ya quedó marcado** (su propio comentario lo dice: *«por qué esta
+función NO llama a `despachar_notificaciones`»*).
+
+⇒ **Con el orquestador rebotando, nada pasaba de `nacida`, y el push corría
+cada minuto sobre una cola vacía devolviendo `200 · entregadas: 0`.**
+
+*Un solo header caído dejó sin avisos a los 13 productores del sistema —
+citas, pagos, recordatorios, documentos, liquidaciones, pedidos.*
+
+### El daño medido, antes de curar
+
+| Medición | Resultado |
+|---|---|
+| Intenciones en `nacida` | **34**, apilándose a diario (16 solo el 13-ago) |
+| Última fila de `notificaciones` | **2026-08-03** |
+| Última intención `entregada` | **2026-08-09** |
+
+### ✅ CURADO Y VERIFICADO (S97-A)
+
+**① El header.** Se copió el `Authorization` **del job sano, dentro de SQL**,
+sin que ningún valor pasara por la salida de nadie. Guard: aborta si no lo
+lee, e **idempotente** (si ya lo tenía, no toca).
+
+**② La cola vieja se limpió SOLA, que era la condición para encender.** Al
+primer tick sano:
+
+| estado | antes | después |
+|---|---|---|
+| `nacida` | 34 | **0** |
+| `descartada` | — | **21** |
+| `entregada` | 62 | **71** |
+
+**Las 21 murieron por `vigencia_horas`, exactamente como tenía que pasar** —
+*un aviso de hace once días entregado hoy es peor que uno perdido: una cita
+que ya pasó, una autorización que ya se resolvió en persona.* **Nadie recibió
+el eco de la semana muerta, y no hizo falta migración: el despachador ya traía
+esa defensa.**
+
+**③ Verificado contra `net._http_response`, jamás contra el `succeeded` del
+cron** — cero 401 en los ticks siguientes.
+
+### 🔴 EL ERROR PROPIO, DECLARADO: ESTA FICHA NACIÓ CON UNA CAUSA FALSA
+
+**La primera versión decía que `despachar_notificaciones` era MOTOR SIN PUERTA
+—«nadie lo llama»— y era FALSO.** El caller existió siempre, en la línea 306
+del edge function.
+
+**Por qué lo perdí, medido:** mi censo fue
+`grep -rn ... | grep -v ... | head -8`. **El resultado real tenía 13 líneas y
+el caller estaba en la 12.** El `head -8` era por brevedad **y cambió la
+conclusión en silencio**.
+
+> ***Un `head` puesto para no llenar la pantalla es un filtro con opinión sobre
+> qué es importante, y su opinión es «lo que salió primero».*** Es pariente de
+> L-191 —el exit code que se lee del pipe y no del comando—: **en las dos, la
+> herramienta de comodidad se interpone entre la medición y la conclusión, y
+> no avisa.**
+>
+> **La regla que deja: un censo que sostiene una afirmación se corre COMPLETO,
+> o se reporta su total.** *Si el resultado no entra en la pantalla, el número
+> que entra es `wc -l`, no las primeras ocho líneas.*
+
+**Lo que sobrevive de la ficha original y sigue siendo cierto:** el diagnóstico
+del 401, el daño medido, y las tres razones por las que **nada dio la alarma**:
 
 1. **El cron dice `succeeded` todos los minutos.** `net.http_post` es
    **asíncrono**: `succeeded` significa *«el pedido salió»*, jamás *«el otro
    lado lo aceptó»*. **El 401 vive en `net._http_response`, que nadie mira.**
 2. **`despachar-push` devuelve `200` con `{"entregadas":0}`** — un verde
-   perfecto **de un transporte que no tiene nada que transportar**, porque el
-   paso anterior nunca movió las intenciones.
+   perfecto **de un transporte que no tiene nada que transportar**.
 3. **Ninguna pantalla se rompe.** El producto encola con normalidad; lo que
    falta ocurre **afuera**, en un teléfono que no suena.
 
 > ***Un pipeline roto en el medio no produce errores: produce silencio.*** Y el
 > silencio es indistinguible del «no había nada que avisar».
 
-### 🔴 EL ALCANCE, que es lo que lo vuelve P0
-
-**No es del handshake: es de TODAS las notificaciones.** Los 13 productores
-vivos encolan bien — `confirmar_cita_pagada`, `notificar_recordatorios_cita`,
-`documento_aprobado`, `liquidacion_disponible`, `pedido_en_camino`,
-`cerrar_y_renovar_planes`… **todos escriben en una cola que nadie vacía.**
-
-⚠️ **Y lo que esto le hace a D-815:** mi cura **produce la intención correcta y
-la promesa sigue sin cumplirse**. *No se declara cerrada.* **Es la mitad de
-arriba de un caño cortado más abajo.**
-
-☠️ **Muere** con: ① un caller real de `despachar_notificaciones` (cron propio,
-como el de push) · ② el `Authorization` en el cron de correo · ③ **la cola
-acumulada resuelta con criterio** —*no se despacha a ciegas: hay avisos de hace
-once días cuya vigencia ya venció, y el propio despachador los descarta por
-`vigencia_horas`; pero eso hay que verificarlo antes de encender, no después*—
-y ④ **verificado en un teléfono real**, que es lo único que cierra esto
-(L-153). **Territorio: A.**
+☠️ **CERRADA en su motor.** Queda **D-817**, el guard que vuelve visible esta
+clase, y el gate en dispositivo de D-815 (que un teléfono real suene), que es
+lo único que A no puede firmar sola (L-153). **Territorio: A.**
