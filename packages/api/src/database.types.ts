@@ -17033,6 +17033,7 @@ export type Database = {
       tipos_servicio: {
         Row: {
           activo: boolean
+          admite_atencion_local: boolean
           categoria: string
           codigo: string
           concurrencia: string
@@ -17055,6 +17056,7 @@ export type Database = {
         }
         Insert: {
           activo?: boolean
+          admite_atencion_local?: boolean
           categoria: string
           codigo: string
           concurrencia?: string
@@ -17077,6 +17079,7 @@ export type Database = {
         }
         Update: {
           activo?: boolean
+          admite_atencion_local?: boolean
           categoria?: string
           codigo?: string
           concurrencia?: string
@@ -20393,6 +20396,13 @@ export type Database = {
           tiene_destino: boolean
           tipo: string
           titulo: string
+        }[]
+      }
+      obtener_modalidades_por_oficio: {
+        Args: never
+        Returns: {
+          admite_atencion_local: boolean
+          tipo_servicio: string
         }[]
       }
       obtener_naturalezas_de_cuenta: {
