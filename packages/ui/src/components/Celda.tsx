@@ -107,13 +107,11 @@ export function Celda(props: CeldaProps) {
           · `minWidth: 0` en la derecha — sin eso su `flexShrink` es
             DECORATIVO (el default de un ítem flex es `min-width: auto`,
             que le prohíbe encoger por debajo de su contenido).
-          · ☠️ **el `overflow: 'hidden'` NO existe más, en ningún lado.**
-            Vivió dos vueltas: en el texto (donde silenciaba la elipsis) y
-            en la derecha (donde tapaba la colisión). *Un recorte no
-            arregla: pospone.* Lo reemplaza el guard de geometría
-            (`verify-colision-fila.mjs`), que mide la colisión en vez de
-            esperar que un píxel la delate — **el guard es la defensa, el
-            recorte era el vendaje**.
+          · `overflow: 'hidden'` **solo en la derecha** — piso de
+            seguridad contra la colisión. En el texto NO va: allá
+            silenciaba la elipsis del `Text`. *Recortar un adorno es feo;
+            recortar un aviso es mentir.* Su riesgo y su condición de
+            muerte están escritos en su propio sitio, abajo.
 
           🔴 LO QUE ESTO **NO** RESUELVE, elevado a la mesa: la fila lleva
           más contenido del que entra. Es decisión de ANATOMÍA —que los
@@ -158,11 +156,41 @@ export function Celda(props: CeldaProps) {
         // la clase de error que ningún gate ve — el atributo está
         // escrito, el typecheck lo acepta, y no mueve un píxel.
         //
-        // ☠️ ACÁ VIVIÓ UN `overflow: 'hidden'` Y SE RETIRÓ (firma de
-        // mesa, quinta vuelta). Su lápida está arriba con las otras dos
-        // piezas: el recorte era el vendaje, el guard de geometría es la
-        // defensa. Si algo vuelve a no caber, queremos verlo.
-        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1, minWidth: 0 }}>
+        // `overflow: 'hidden'` — PISO DE SEGURIDAD contra la colisión que
+        // D midió (glifo 21 px DENTRO del texto · chip −66 px). Garantiza
+        // que la derecha no pueda dibujarse encima del sujeto.
+        //
+        // ⏪ SE RETIRÓ EN LA QUINTA VUELTA Y VUELVE EN LA SEXTA, y la
+        // adjudicación final es POR ALCANCE — el argumento que decidió no
+        // es cuál defensa es más elegante, es **a cuántos alcanza cada
+        // una**: el guard de geometría mira DOS filas; este atributo
+        // protege **157 montajes de `Celda` en 71 archivos**. Retirarlo
+        // hoy dejaba 155 con la superposición otra vez expresable a
+        // cambio de nada.
+        //
+        // Va ACÁ y no en el bloque de texto: allá silenciaba la elipsis
+        // del `Text`, que es información. *Recortar un adorno es feo;
+        // recortar un aviso es mentir.*
+        //
+        // ⚠️ SU RIESGO, ESCRITO PORQUE ES REAL Y YA COBRÓ: un recorte
+        // ESCONDE el síntoma. El `overflow` anterior tapó esta misma
+        // colisión durante tres vueltas — se veía un corte y nadie podía
+        // saber que dos columnas se superponían.
+        //   ☠️ DEUDA CON DISPARO: si aparece un reporte de «un chip se ve
+        //   cortado», la causa es ésta y la cura NO es ajustar el reparto
+        //   — es la de D: **bajar los chips a su propia línea**. Y muere
+        //   el día que el guard de geometría se generalice a las filas
+        //   cargadas: ahí el recorte pasa a ser redundante y se retira
+        //   sin dejar a nadie sin defensa.
+        <View
+          style={{
+            alignItems: 'flex-end',
+            gap: spacing[1],
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+          }}
+        >
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text
