@@ -48,19 +48,23 @@
  *   rápido para percibirse como orden. Si 390/3 no alcanza, 520/5+N
  *   tampoco.
  *
- *   ⇒ Se lee «520» como lo que N10 dice que es: **el registro GRANDE de
- *   la celebración**, la banda en la que viven sus gestos — no la suma
- *   de las partes. Cada fase usa el vocabulario cerrado (300 estándar ·
- *   520 grande) y el total sale de la suma con solape: **~1620 ms** para
- *   la barra de 4 tabs (el número exacto lo derivan `finTabs()` e `inicioLuz()` abajo).
- *   Queda declarado para que la mesa lo firme o lo corte; lo que NO se
- *   hace es entregar medio segundo diciendo que se cumplió el contrato.
+ *   ⇒ Se leyó «520» como lo que N10 dice que es: **el registro GRANDE de
+ *   un GESTO**, no la suma de las partes. Cada fase usa el vocabulario
+ *   cerrado (300 estándar · 520 grande) y el total sale de la suma.
  *
- * REDUCE-MOTION Y MEMORIAL: nada se mueve, **y el momento dura lo
- * mismo**. No es un crossfade express — es la misma coreografía sin
- * desplazamientos. El founder reportó que el destape «pasó demasiado
- * rápido» y la medición le dio la razón: esa rama duraba 300 ms contra
- * 1630 de la larga. *Quitar movimiento no es acortar el momento.*
+ *   ✅ **RESUELTO POR FIRMA EN DISPOSITIVO (14-ago): ~3000 ms.** El
+ *   founder lo vio y dictó: *«es un ritual de única vez — hay que
+ *   disfrutarlo.»* Se declaró ~1620 en vez de entregar medio segundo
+ *   diciendo que se cumplía el contrato, y la firma subió el número.
+ *   **El GESTO grande sigue en 520; lo que dura ~3000 es la CEREMONIA.**
+ *
+ * REDUCE-MOTION Y MEMORIAL: **crossfade corto** (~300 ms), nada se
+ * mueve, no se salta contenido. Con el ritual firmado en ~3000 ms, el
+ * criterio es de la mesa y es de respeto: *el ritual es para quien puede
+ * disfrutarlo, no una imposición* — tres segundos de ceremonia a quien
+ * pidió menos animación es hacerle esperar un espectáculo que pidió no
+ * ver. (El detalle de por qué esto revierte una cura anterior, y con qué
+ * argumento distinto, vive en la rama misma.)
  *
  * UN SOLO RELOJ (orden de mesa, y es lo que hace correcto a `alTerminar`):
  * no hay temporizador paralelo. Los offsets viven en UNA tabla, cada
@@ -125,12 +129,38 @@ const CURVA = Easing.bezier(...motion.marca.aperturaBezier) // (.32,.72,0,1)
 /** El alfa FIRMADO de la luz de la esquina (§9bis.2, 7 %). Se captura acá,
  *  fuera del worklet, y se aplica DENTRO del estilo animado — ver D-801. */
 const ALFA_LUZ = opacity.luzDeEsquina
+/* ⏪ EL RITUAL DURA ~3000 ms — FIRMA DEL FOUNDER EN DISPOSITIVO
+   (14-ago). Su literal: **«es un ritual de única vez — hay que
+   disfrutarlo.»** Venía de ~1620.
+
+   🔴 CÓMO SE ESTIRÓ, y es la decisión de forma: **se abren las PAUSAS, no
+   los GESTOS.** Cada acto sigue durando lo que N10 declara (300 estándar ·
+   520 grande) y lo que crece es el silencio entre uno y otro.
+
+   Escalar las duraciones × 1,85 habría dado gestos de 555 y 962 ms —
+   números que **no existen en el vocabulario cerrado** y que además
+   arrastran el gesto: un fade de casi un segundo no se lee como
+   ceremonia, se lee como lentitud. *Lo que hace un ritual no es que cada
+   cosa tarde más: es que haya un beat entre una cosa y la siguiente.*
+
+   El freno de la mesa se cumple por construcción: el ORDEN DE LECTURA se
+   conserva —más lento jamás rompe la percepción de secuencia (S81), más
+   rápido sí—, y los `at` solo crecen.
+
+       ①  isotipo   0 →  300      ·  pausa 100
+       ②  rampa   400 →  920      ·  pausa 130
+       ③  tarjeta 1050 → 1350     ·  pausa 150
+       ④  tabs    1500 → 2160     ·  pausa 320   (4 tabs; el escalón es de `Entrada`)
+       ⑤  luz     2480 → 3000
+
+   Con 5 tabs el acto ④ cierra en 2280 y la luz sigue siendo el último
+   gesto — `inicioLuz()` lo garantiza y no se supone. */
 const T = {
-  isotipo: { at: 0, dur: motion.duration.estandar },   // ①  0 → 300
-  rampa:   { at: 150, dur: motion.duration.grande },   // ②  150 → 670
-  tarjeta: { at: 500, dur: motion.duration.estandar }, // ③  500 → 800
-  tabs:    { at: 750 },                                // ④  el escalón lo pone `Entrada` (120, firmado)
-  luz:     { at: 1100, dur: motion.duration.grande },  // ⑤  1100 → 1620
+  isotipo: { at: 0, dur: motion.duration.estandar },    // ①     0 →  300
+  rampa:   { at: 400, dur: motion.duration.grande },    // ②   400 →  920
+  tarjeta: { at: 1050, dur: motion.duration.estandar }, // ③  1050 → 1350
+  tabs:    { at: 1500 },                                // ④  el escalón lo pone `Entrada` (120, firmado)
+  luz:     { at: 2480, dur: motion.duration.grande },   // ⑤  2480 → 3000
 } as const
 
 /** El fin de la materialización de tabs, derivado y no supuesto: la
@@ -170,37 +200,33 @@ export function Destape({ nombreNegocio, logo, tabsHabilitadas, alTerminar }: De
     const luzAt = inicioLuz(tabsHabilitadas.length)
 
     if (quieto) {
-      /* 🔴 REDUCE-MOTION QUITA EL MOVIMIENTO, NO EL TIEMPO DE LECTURA.
+      /* ⏪ CROSSFADE CORTO — Y ESTO REVIERTE MI PROPIA CURA ANTERIOR, con
+         una razón DISTINTA, no con la misma dada vuelta. Se escribe así
+         porque un cambio que parece un ida y vuelta merece decir cuál de
+         los dos argumentos ganó y por qué.
 
-         ⏪ ESTA RAMA ESTABA MAL Y EL FOUNDER LO VIO PRIMERO: en el gate
-         del lote reportó que el destape **«pasó demasiado rápido»** y no
-         alcanzó a verlo. Medido acá: la rama larga dura **1630 ms** con
-         cuatro tabs y esta duraba **300** — *la celebración se colapsaba
-         5×*.
+         MI ARGUMENTO ERA: *«reduce-motion quita el movimiento, no el
+         tiempo de lectura»* — y con la rama larga en 1630 ms era bueno:
+         300 ms colapsaba el momento 5×, que fue lo que el founder reportó
+         como «pasó demasiado rápido».
 
-         EL DEFECTO ERA CONCEPTUAL, no de código: escribí «crossfade
-         único» y con eso **confundí SIN MOVIMIENTO con RÁPIDO**. Son dos
-         cosas distintas: quien pide menos movimiento pide que las cosas
-         no se desplacen, **no que el contenido desaparezca antes de poder
-         leerlo** — y acá el contenido es el nombre del negocio que la
-         persona acaba de dar de alta. Reducirle el momento a 300 ms es
-         quitarle justo lo que la pieza existe para darle.
+         EL DE LA MESA GANA CON LA FIRMA DE LOS 3000: **el ritual es para
+         quien puede disfrutarlo, no una imposición.** Tres segundos de
+         ceremonia a alguien que pidió menos animación no es respetarle la
+         lectura: es hacerle esperar un espectáculo que pidió no ver.
+         *Mi argumento era correcto contra 1630 y se vuelve falso contra
+         3000* — no cambió la doctrina, cambió la magnitud.
 
-         ⇒ ESTA RAMA CONSERVA LA MISMA COREOGRAFÍA TEMPORAL —los mismos
-         `withDelay` de la tabla, el mismo orden, el mismo total— y lo
-         único que cambia es QUE NADA SE MUEVE: los estilos de abajo ya
-         resuelven `quieto` sin `translateY` ni `scale`, así que cada
-         elemento **aparece** en su turno en vez de entrar.
-
-         Y el aviso sigue saliendo del ÚLTIMO gesto real de ESTA rama
-         (la luz), no de un reloj aparte: un solo reloj por rama, que es
-         la firma de mesa. */
+         Lo que NO se toca: nada se mueve (sin `translateY` ni `scale`,
+         los estilos ya resuelven `quieto`), no se salta contenido, y el
+         aviso sale del último gesto REAL de ESTA rama — un solo reloj por
+         rama, la firma de mesa intacta. */
       const aparecer = motion.duration.estandar
-      vIsotipo.value = withDelay(T.isotipo.at, withTiming(1, { duration: aparecer, easing: CURVA }))
-      vRampa.value = withDelay(T.rampa.at, withTiming(1, { duration: aparecer, easing: CURVA }))
-      vTarjeta.value = withDelay(T.tarjeta.at, withTiming(1, { duration: aparecer, easing: CURVA }))
-      vTabs.value = withDelay(T.tabs.at, withTiming(1, { duration: 0 }))
-      vLuz.value = withDelay(luzAt, withTiming(1, { duration: aparecer, easing: CURVA }, avisar))
+      vIsotipo.value = withTiming(1, { duration: aparecer, easing: CURVA })
+      vRampa.value = withTiming(1, { duration: aparecer, easing: CURVA })
+      vTarjeta.value = withTiming(1, { duration: aparecer, easing: CURVA })
+      vTabs.value = withTiming(1, { duration: 0 })
+      vLuz.value = withTiming(1, { duration: aparecer, easing: CURVA }, avisar)
       return
     }
 
