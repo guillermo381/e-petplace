@@ -37,6 +37,7 @@
 
 import {
   getClient,
+  obtenerModalidadesPorOficio,
   obtenerOficiosNegocio,
   type OficioChip,
   type ServicioDeOficio,
@@ -63,59 +64,6 @@ export interface CapacidadAtender {
   /** La mitad `Tu tienda`: cuenta comercial con rol `seller_productos`. */
   tienda: boolean;
 }
-
-/**
- * 🔴 ¿ESTE OFICIO OFRECE ATENCIÓN EN LOCAL? — FIRMA DEL FOUNDER (14-ago):
- * **EL PASEO ES SIEMPRE A DOMICILIO. NO EXISTE PASEO EN LOCAL.**
- *
- * A un paseo nadie llega y espera — el paseador va a buscar al perro, o la
- * familia lo deja y se va; **no hay mostrador donde atender a alguien que
- * está parado enfrente.** Por eso el paseo no compone `ATENDER`.
- *
- * ═══ ESTO ES UN ESPEJO, NO UNA SEGUNDA VERDAD ══════════════════════════
- * **El motor ya lo cumple, y por las dos vías** (A, migración
- * `20260814160000`): los **9 paseos vivos** pasaron a `atiende_local =
- * false · atiende_domicilio = true`, y **`trg_ps_paseo_sin_local` vuelve
- * el estado INEXPRESABLE** —un intento de prender local en un paseo
- * rebota `paseo_no_atiende_en_local`—, con contra-caso medido: **22 filas
- * de otros oficios intactas**. Con eso, `atiende_local` sola ya excluye
- * los paseos y este filtro **no puede cambiar ningún resultado**.
- *
- * **Se conserva igual, y con el patrón declarado de la casa** (precedente
- * `puedeEncenderVitrina`, S78: *el espejo EXACTO del predicado del
- * servidor, con su no-divergencia declarada*), por dos razones:
- *  · **tiene un segundo consumidor que el dato no cubre — el paso ② del
- *    wizard**, que decide si DIBUJA el toggle «atiendo en mi local». Ahí
- *    la regla tiene que existir del lado de la pantalla: *es mejor no
- *    ofrecerlo que rebotarlo* (Ley 23, y palabra de A).
- *  · la divergencia peligrosa —esconder un oficio que el motor sí
- *    permite— **es imposible por construcción**: el trigger no deja nacer
- *    el caso que la haría visible.
- *
- * ☠️ **D-792 CERRADA** con esta firma: la ficha no frenaba por miedo al
- * `UPDATE`, frenaba por falta de criterio. *El `DEFAULT true` que barrió
- * los cuatro oficios no era una decisión: era una columna que nació para
- * el domicilio del grooming y nadie volvió a mirar.*
- *
- * Es una TABLA y no un `if` por el mismo motivo que `REGLA_OFICIO`
- * (S86-C): el `Record` completo no compila incompleto, así que el oficio
- * que nazca mañana **obliga** a contestar. Con un `if` caería en el `else`
- * y contestaría solo — la clase de defecto que funciona y contesta mal.
- */
-/* ✅ Y LO QUE LA MIGRACIÓN DE A CERRÓ DE PASO, sin que fuera su objetivo:
-   el gate del rol **recepción** (`puede_ofrecer_rol_recepcion`, §2.3)
-   cuenta servicios con `atiende_local`. Antes de `20260814160000` un
-   negocio de SOLO PASEOS lo contestaba `true` —ofrecía recepción para un
-   mostrador que no existe— y `ATENDER` le decía que no: dos criterios,
-   dos respuestas. **Con los 9 paseos en `false`, los dos coinciden por
-   dato.** Se escribe acá porque era una divergencia real y su cierre no
-   fue explícito: si alguien vuelve a mover esa columna, vuelven a ser dos. */
-const TIENE_PRESENCIAL: Record<OficioAtender, boolean> = {
-  veterinaria: true,
-  grooming: true,
-  adiestramiento: true,
-  paseo: false,
-};
 
 /** ¿Aporta algo alguna de las dos mitades? */
 export function hayCapacidad(c: CapacidadAtender): boolean {
@@ -164,13 +112,47 @@ export async function resolverCapacidadAtender(
   // Las dos mitades viajan JUNTAS: son dominios distintos (el cinturón) y
   // por eso son dos lectores, pero no hay ninguna razón para que sean dos
   // esperas — nada de la segunda depende de la primera.
-  const [ofic, ventas] = await Promise.all([obtenerOficiosNegocio(prestadorId), contextoVentas()]);
+  const [ofic, ventas, modalidades] = await Promise.all([
+    obtenerOficiosNegocio(prestadorId),
+    contextoVentas(),
+    obtenerModalidadesPorOficio(),
+  ]);
   if (!ofic.ok) return { ok: false, mensaje: ofic.mensaje };
   if (!ventas.ok) return { ok: false, mensaje: ventas.mensaje };
+  // El catálogo que no responde NO se degrada a «todos admiten local»: eso
+  // dibujaría puertas que el motor rebota. Su propio wrapper ya rebota en
+  // vez de devolver `{}` por la misma razón — acá se respeta, no se
+  // absorbe (Ley 13: el fallo se dice).
+  if (!modalidades.ok) return { ok: false, mensaje: modalidades.mensaje };
 
+  /* ☠️ ACÁ VIVÍA `TIENE_PRESENCIAL`, una tabla con `paseo: false` escrito a
+     mano. **MURIÓ, y no por prolijidad: la regla se mudó al CATÁLOGO**
+     (`tipos_servicio.admite_atencion_local`, A · `20260814170000`).
+
+     La historia completa, porque es la lección y no el changelog: la firma
+     del paseo se cumplía en TRES lugares —los datos, un trigger que
+     nombraba `'paseo'` en su cuerpo, y esta constante de UI— y **ninguno de
+     los tres era la fuente**. Yo declaré la mía «espejo con no-divergencia
+     garantizada» y estaba equivocado en la mitad que importaba: lo que
+     garantizaba la coincidencia era el DATO de una migración, no una
+     construcción — *si alguien volvía a mover la columna, volvían a ser
+     dos*. Al ir a verificarlo, A encontró el literal en su propio trigger.
+
+     ⇒ **Ahora los tres leen una sola columna, y el oficio que nazca mañana
+     trae su modalidad con él** — antes había que acordarse de tocar un
+     trigger y una constante de pantalla que vivían a dos repos de
+     distancia. */
+  const admiteLocal = modalidades.data;
   const oficios: OficioConLocal[] = ofic.data
-    .filter((o) => TIENE_PRESENCIAL[o.oficio])
-    .map((o) => ({ oficio: o.oficio, servicios: o.servicios.filter((s) => s.atiendeLocal) }))
+    .map((o) => ({
+      oficio: o.oficio,
+      // POR SERVICIO y no por oficio, que es más fino que lo que la tabla
+      // muerta podía decir: un negocio puede tener dos ofertas del mismo
+      // oficio y atender en local solo una. Las dos condiciones son
+      // distintas y las dos hacen falta — el CATÁLOGO dice si el oficio
+      // PUEDE tener mostrador; la OFERTA dice si este negocio lo usa.
+      servicios: o.servicios.filter((s) => s.atiendeLocal && admiteLocal[s.tipoServicio] === true),
+    }))
     .filter((o) => o.servicios.length > 0);
 
   const capacidad: CapacidadAtender = {
