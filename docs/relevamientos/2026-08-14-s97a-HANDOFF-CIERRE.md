@@ -81,14 +81,26 @@ motor → A.
   `security find-generic-password -a siembra -s epetplace-siembra-s97 -w` ·
   `-a pin -s epetplace-dispositivo-s97 -w`. Matriz:
   `docs/relevamientos/2026-08-13-s97a-matriz-cuentas-prueba.md`.
-- **Cuentas útiles, medidas:** `demovet` **3 oficios con local** (el único que
-  discrimina dos columnas) · `duenotodo` **1 oficio** (no sirve para columnas)
+- **Cuentas útiles, medidas:** `demovet` = Clínica Aurora, **11 servicios que
+  agrupan en DOS oficios** (veterinaria + estética) ⇒ **dos baldosas es
+  CORRECTO** *(la versión previa de esta línea decía «3 oficios» y era
+  imprecisa: contaba servicios, no oficios)* · `duenotodo` **1 oficio** (no sirve para columnas)
   · `duenodes` vendedor puro · `+vet2` paseo-only.
 - **Residuo declarado y DEJADO a propósito:** cita hoy 16:30 (Thor · Consulta
   General · con llegada) en `duenotodo` — es la fila cargada del gate.
-- **Migraciones de A hoy:** `20260814100000` … `20260814180000` (8), todas con
-  reversa ANTES en `scripts/s97/`, cinturón con discriminador y 76(g)
-  declarada.
+- **Migraciones de A hoy:** `20260814100000` … **`20260814210000`** (11),
+  todas con reversa ANTES en `scripts/s97/`, cinturón con discriminador y
+  76(g) declarada. Las tres del cierre: **`190000`** la banda del día ·
+  **`200000`** la llegada al atender · **`210000`** la corrección del
+  comentario que afirmaba una FK inexistente (D-812).
+- ⚠️ **`packages/api` y `packages/domain` quedaron SIN `node_modules`**: tenían
+  **symlinks autorreferentes** (`node_modules -> node_modules`) que hacían
+  ELOOP y **rompían `pnpm install` del repo entero**. Los quité; `pnpm install`
+  ahora pide purgar y **NO lo hice: es piso compartido con dos pistas
+  trabajando**. Las otras cinco están intactas, así que nadie más está
+  bloqueado, y `tsc` corre por el binario raíz
+  (`../../node_modules/.bin/tsc --noEmit -p tsconfig.json`). **Recuperación
+  cuando haya TTY o acuerdo: `CI=true pnpm install`.**
 
 ---
 
@@ -125,13 +137,18 @@ que es lo que más vale— **y su literal marcado como faltante.**
 
 ## 4 · LO QUE QUEDA VIVO Y NO ES DE A
 
-- **D-806** (los glifos de especie **no existen**) → **B**, detrás de su cola.
-  **Dimensionada: son SEIS** (las activas en F1 por D-287), no diez; `otro` no
-  necesita glifo. 🔴 **Y tiene una pregunta de arte ANTES de dibujar: §1 no
-  cubre esta familia** —*la mascota no está presente en el concepto: la
-  mascota ES el concepto*— ⇒ **es si nace una segunda categoría de glifo, y
-  eso lo firma el founder.** Camino: hoja de contacto §6b con **dos variantes
-  del perro**, con y sin huella. **No bloquea el Lote 2.**
+- **D-806 ✅ CAMBIÓ DE FORMA Y SU MITAD DE MOTOR ESTÁ HECHA (A).** *No eran
+  seis glifos: eran seis fotos que ya existían* — el bucket `especies-razas`
+  tiene sus **6 genéricos de especie** desde S90-C. **La pregunta de arte se
+  DISUELVE: no hay nada que dibujar.** La **ESCALERA** subió a `packages/api`
+  (`caraDeMascota` / `caraDeMascotaPorRuta`) y `cara-mascota.ts` del cliente
+  pasó a re-export, **sin tocar a sus 10+ consumidores**. 🔴 **Confirmado con
+  el ojo en dispositivo: las seis especies muestran LA MISMA huella.**
+  ⇒ **Queda el CABLEADO en el alta — territorio C, cero assets, cero gate de
+  ícono.**
+- **D-813** (la baldosa elegida: **borde teal, relleno magenta** — medido al
+  píxel) → **B**. *La pieza nació para el cliente, donde los dos tokens
+  coinciden, y ahí el acoplamiento es invisible.*
 - **D-802 hija:** el espejo `prestadores.nombre_comercial` **muere cuando
   `v_prestadores_publicos` lea el nombre desde la cuenta comercial**. Toca el
   frente del cliente — otro territorio, otro gate.
