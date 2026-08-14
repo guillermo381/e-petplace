@@ -15772,3 +15772,74 @@ el arreglo vive ahí y no en el motor.*
 **Territorio: C** (voz). **Prioridad: baja — no bloquea nada.** ⚠️ **Pero si el
 founder lo ve en un gate va a preguntar, y la respuesta tiene que estar lista:
 los dos números son correctos.**
+
+---
+
+#### D-815 — 🔴 «LE LLEGÓ EL PEDIDO A SU TELÉFONO» — NO LE LLEGÓ NADA, Y NO HAY QUIÉN SE LO MANDE
+
+**Medido por A caminando el handshake completo en dispositivo (S97-A,
+`demovet` → buscar `guillo381+8@gmail.com` → Thor → «Pedir autorización»).**
+
+**La pantalla de espera dice, literal:**
+
+> *«Esperando a la familia de Guillermo Prueba 8»*
+> ***«Le llegó el pedido a su teléfono. En cuanto autorice, seguimos.»***
+
+**Lo medido en el mismo minuto:**
+
+| Hecho | Estado |
+|---|---|
+| La solicitud nace | ✅ `d70658e0…`, `pendiente`, 15:20:45 |
+| La familia **tiene** push token | ✅ 1 |
+| Intenciones de notificación encoladas | 🔴 **0** |
+| Notificaciones encoladas | 🔴 **0** |
+| Tipo de notificación para autorización en `cat_notificacion_tipos` | 🔴 **NO EXISTE** |
+| `crear_solicitud_autorizacion` encola algo | 🔴 **NO** (medido sobre el cuerpo) |
+
+**⇒ No es que el envío falló. NO HAY MAQUINARIA DE ENVÍO.** La afirmación de la
+pantalla es categóricamente falsa, y **el push token de la familia lo vuelve
+peor, no mejor**: el canal existe y está vivo — lo único que falta es que
+alguien lo use, así que nada rompe y nada avisa.
+
+### 🔴 Por qué esto es 🔴 y no cosmético
+
+**El vet se queda parado en el mostrador esperando una autorización que nadie
+pidió.** La pantalla lo invita explícitamente a esperar —*«en cuanto autorice,
+seguimos»*— y la familia **no tiene forma de enterarse** salvo abrir la app por
+su cuenta (el poll + badge del Hogar, S70). *Si no la abre, no pasa nada,
+nunca.*
+
+> ***Una espera falsa es peor que un error:*** un error manda a buscar otro
+> camino; **una espera convence de no buscar ninguno**. Y el costo lo paga
+> delante del cliente, que está mirando.
+
+### La clase
+
+**L-139 en la voz, y en el peor lugar: la voz afirma un HECHO DEL MUNDO —que
+un teléfono ajeno recibió algo— que el producto no puede saber ni provocar.**
+*Ningún instrumento lo ve: la pantalla renderiza, el flujo «funciona», la
+solicitud nace de verdad y no hay un solo error en ningún log.* **Solo aparece
+caminándolo y yendo a preguntarle a la base si lo que la pantalla afirma
+ocurrió.**
+
+Y es hermana de la lección de la jornada: *un gate mide lo que alguien ya supo
+nombrar; nadie escribió un gate que compare una frase con la realidad.*
+
+### Las dos mitades de la cura, y son de dueños distintos
+
+1. **LA VOZ, ya (barato, territorio de superficie):** que diga lo que ES —*la
+   familia lo ve al abrir su app*—. **No promete un teléfono que no suena.**
+   *Esta mitad no espera a la otra: hoy la voz miente y bajarla a la verdad no
+   cuesta motor.*
+2. **EL AVISO (territorio A + notificaciones):** tipo nuevo en
+   `cat_notificacion_tipos` + `crear_solicitud_autorizacion` encolando su
+   intención. **El transporte push YA ESTÁ VIVO** desde S90 (canal probado,
+   cron propio) — *falta el productor, no el canal.*
+
+⚠️ **Y el orden importa: si se construye ② sin corregir ① y el push tarda o el
+token está viejo, la frase sigue mintiendo en el borde.** La voz honesta
+sobrevive a las dos configuraciones.
+
+☠️ **Muere** con la voz corregida **y** —cuando llegue el aviso— verificado que
+un teléfono real vibra por este camino. **Territorio: superficie (voz) + A
+(motor).**
