@@ -56,6 +56,12 @@
  *   Queda declarado para que la mesa lo firme o lo corte; lo que NO se
  *   hace es entregar medio segundo diciendo que se cumplió el contrato.
  *
+ * REDUCE-MOTION Y MEMORIAL: nada se mueve, **y el momento dura lo
+ * mismo**. No es un crossfade express — es la misma coreografía sin
+ * desplazamientos. El founder reportó que el destape «pasó demasiado
+ * rápido» y la medición le dio la razón: esa rama duraba 300 ms contra
+ * 1630 de la larga. *Quitar movimiento no es acortar el momento.*
+ *
  * UN SOLO RELOJ (orden de mesa, y es lo que hace correcto a `alTerminar`):
  * no hay temporizador paralelo. Los offsets viven en UNA tabla, cada
  * gesto sale de ella, y **el aviso de fin lo dispara el callback del
@@ -158,21 +164,43 @@ export function Destape({ nombreNegocio, logo, tabsHabilitadas, alTerminar }: De
       if (fin === true) runOnJS(alTerminar)()
     }
 
+    const luzAt = inicioLuz(tabsHabilitadas.length)
+
     if (quieto) {
-      /* CROSSFADE ÚNICO — degrada, jamás se salta contenido (contrato §5).
-         Un solo gesto ⇒ un solo reloj ⇒ el aviso sale de su callback,
-         igual que en la secuencia larga. Por eso el temporizador de 520
-         habría sido incorrecto acá: esta rama NO dura 520. */
-      const t = withTiming(1, { duration: motion.duration.estandar, easing: CURVA })
-      vIsotipo.value = t
-      vRampa.value = withTiming(1, { duration: motion.duration.estandar, easing: CURVA })
-      vTarjeta.value = withTiming(1, { duration: motion.duration.estandar, easing: CURVA })
-      vTabs.value = withTiming(1, { duration: motion.duration.estandar, easing: CURVA })
-      vLuz.value = withTiming(1, { duration: motion.duration.estandar, easing: CURVA }, avisar)
+      /* 🔴 REDUCE-MOTION QUITA EL MOVIMIENTO, NO EL TIEMPO DE LECTURA.
+
+         ⏪ ESTA RAMA ESTABA MAL Y EL FOUNDER LO VIO PRIMERO: en el gate
+         del lote reportó que el destape **«pasó demasiado rápido»** y no
+         alcanzó a verlo. Medido acá: la rama larga dura **1630 ms** con
+         cuatro tabs y esta duraba **300** — *la celebración se colapsaba
+         5×*.
+
+         EL DEFECTO ERA CONCEPTUAL, no de código: escribí «crossfade
+         único» y con eso **confundí SIN MOVIMIENTO con RÁPIDO**. Son dos
+         cosas distintas: quien pide menos movimiento pide que las cosas
+         no se desplacen, **no que el contenido desaparezca antes de poder
+         leerlo** — y acá el contenido es el nombre del negocio que la
+         persona acaba de dar de alta. Reducirle el momento a 300 ms es
+         quitarle justo lo que la pieza existe para darle.
+
+         ⇒ ESTA RAMA CONSERVA LA MISMA COREOGRAFÍA TEMPORAL —los mismos
+         `withDelay` de la tabla, el mismo orden, el mismo total— y lo
+         único que cambia es QUE NADA SE MUEVE: los estilos de abajo ya
+         resuelven `quieto` sin `translateY` ni `scale`, así que cada
+         elemento **aparece** en su turno en vez de entrar.
+
+         Y el aviso sigue saliendo del ÚLTIMO gesto real de ESTA rama
+         (la luz), no de un reloj aparte: un solo reloj por rama, que es
+         la firma de mesa. */
+      const aparecer = motion.duration.estandar
+      vIsotipo.value = withDelay(T.isotipo.at, withTiming(1, { duration: aparecer, easing: CURVA }))
+      vRampa.value = withDelay(T.rampa.at, withTiming(1, { duration: aparecer, easing: CURVA }))
+      vTarjeta.value = withDelay(T.tarjeta.at, withTiming(1, { duration: aparecer, easing: CURVA }))
+      vTabs.value = withDelay(T.tabs.at, withTiming(1, { duration: 0 }))
+      vLuz.value = withDelay(luzAt, withTiming(1, { duration: aparecer, easing: CURVA }, avisar))
       return
     }
 
-    const luzAt = inicioLuz(tabsHabilitadas.length)
     vIsotipo.value = withDelay(T.isotipo.at, withTiming(1, { duration: T.isotipo.dur, easing: CURVA }))
     vRampa.value = withDelay(T.rampa.at, withTiming(1, { duration: T.rampa.dur, easing: CURVA }))
     vTarjeta.value = withDelay(T.tarjeta.at, withTiming(1, { duration: T.tarjeta.dur, easing: CURVA }))

@@ -24,9 +24,10 @@
  * monta por decoración. `orden` es posición en la LECTURA (0 = lo
  * primero que el ojo debe encontrar), no un slot libre.
  *
- * Memorial degrada (Ley 8: nada se mueve, solo fades): fade puro, sin
- * desplazamiento, mismo tempo. Ley 6 intacta: 300 ms ≤ el techo de UI,
- * curva easeOut de la casa (entradas), jamás rebote.
+ * Memorial **y reduce-motion** degradan (Ley 8: nada se mueve, solo
+ * fades): fade puro, sin desplazamiento, MISMO tempo y mismo escalón.
+ * Ley 6 intacta: 300 ms ≤ el techo de UI, curva easeOut de la casa
+ * (entradas), jamás rebote.
  *
  * Uso:
  *   <Entrada><Titulo/></Entrada>
@@ -35,7 +36,7 @@
  */
 
 import type { ReactNode } from 'react'
-import Animated, { Easing, FadeIn, FadeInDown } from 'react-native-reanimated'
+import Animated, { Easing, FadeIn, FadeInDown, useReducedMotion } from 'react-native-reanimated'
 
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
@@ -70,9 +71,33 @@ export interface EntradaProps {
 
 export function Entrada({ orden = 0, children }: EntradaProps) {
   const { theme } = useTheme()
+  /** 🔴 S97+-B · REDUCE-MOTION ENTRA AL MISMO BRAZO QUE MEMORIAL, y el
+   *  hallazgo es de CLASE: esta pieza —el portador de §5, la entrada de
+   *  TODA la casa— miraba solo `memorial`. Quien pide menos movimiento en
+   *  su teléfono **seguía viendo `FadeInDown` en cada pantalla**: el
+   *  desplazamiento que pidió no ver.
+   *
+   *  Se cura acá porque acá está el hueco entero: **`Entrada` es UN
+   *  portador con N consumidores**, así que una línea cubre todas las
+   *  entradas de las dos apps. *Ese fue el argumento para que los números
+   *  vivieran privados adentro, y hoy paga en la dirección contraria.*
+   *
+   *  Y COMPARTE BRAZO CON MEMORIAL A PROPÓSITO, no por ahorro: los dos
+   *  piden lo mismo —que nada se desplace— y la casa ya tiene esa receta
+   *  escrita y firmada (fade puro, MISMO tempo, mismo escalón). *Reducir
+   *  movimiento no es acortar el momento: es quitarle el viaje, no el
+   *  tiempo.* El escalonado se conserva entero, que es lo que sostiene el
+   *  orden de lectura (L-c).
+   *
+   *  ⚠️ CENSADO Y NO CURADO ENTERO: de las 63 piezas de `ui`, **solo
+   *  TRES miran `useReducedMotion`** (`Destape`, `BarraTabs`,
+   *  `PuertaDeOficio`) — ahora cuatro. Barrer las demás es una tanda con
+   *  su propio censo, no un renglón de ésta; queda declarado. */
+  const reduceMotion = useReducedMotion()
+  const quieto = theme.mode === 'memorial' || reduceMotion
 
   const entering =
-    theme.mode === 'memorial'
+    quieto
       ? FadeIn.duration(DURACION).delay(orden * ESCALON).easing(CURVA)
       : FadeInDown.duration(DURACION)
           .delay(orden * ESCALON)
