@@ -14286,3 +14286,73 @@ B) y las dos apps (territorio C), así que lo coordina la mesa como acto
 
 ☠️ **Muere** con el rename ejecutado en su ventana, typecheck verde en las
 cuatro patas y el índice de la skill actualizado por B.
+
+#### D-790 — 🔴 EL CANON MIENTE EN TRES LUGARES MEDIDOS HOY — Y LA PREGUNTA ES CÓMO SE DETECTA UNA LETRA SUPERADA SIN TROPEZAR CON ELLA
+
+**Nace de una orden de mesa con nombre pedido (13-ago-2026).** Los tres
+lugares, medidos el mismo día:
+
+1. **La plata del día en `CLAUDE.md`** — «SOLO el titular (y el admin);
+   ningún empleado» (S83), superada por §4ter (S88, el mostrador entero,
+   con el ensanche escrito EN el cuerpo del gate) y viva cinco días.
+   Enmendada hoy con los dos literales.
+2. **La razón del toggle Administrador** — «su motor no existe (D-513)»
+   caducó el 5-ago con D-660 y **seguía citada** (una orden de mesa de hoy
+   la usó como premisa; el propio código la tenía corregida en un
+   comentario que nadie leyó hasta obedecer).
+3. **`Insignia` «jamás interactiva»** — falsa desde S85, **en dos
+   archivos** (medido por B).
+
+**Los tres son la MISMA clase: letra firmada que el motor superó y que
+nadie retiró.** Y el dato que la vuelve cara: **ninguno lo detectó un
+instrumento** — ni typecheck, ni lint, ni juez, porque nada está roto: *la
+letra superada no tiene síntoma; solo tiene víctimas.* Los tres los
+encontró **alguien que fue a leer la fuente antes de obedecer** (R7
+aplicada a la ley — el patrón que DIRECCION_ARTE §11.3 depositó hoy por su
+propio caso, que sería el CUARTO de la lista).
+
+**LA PREGUNTA ABIERTA — a propósito sin solución inventada:** ¿cómo se
+detecta una letra superada **sin esperar a que alguien tropiece con
+ella**? Lo que se sabe medido: el costo de cada tropiezo es una orden mal
+premisada o un rojo falso a punto de «curarse»; la única defensa que hoy
+funciona es leer la fuente antes de obedecer, **y esa defensa no escala
+porque depende de que alguien dude a tiempo.** Es la deuda más cara de la
+sesión y **no se resuelve hoy** — la sesión que la tome trae propuesta de
+mecanismo, no otra pasada de disciplina.
+
+☠️ **Muere** cuando exista un mecanismo (instrumento, rito de cierre, o
+regla de mesa) que haya cazado al menos UNA letra superada antes de que
+alguien tropezara con ella — la prueba es el caso, no el diseño.
+
+#### D-791 — 🔴 LA CONFIGURACIÓN SOLO AGREGA: LO REGISTRADO NO SE PUEDE EDITAR — Y LA LEY DEL CAMBIO PRESUPONE QUE EL CAMBIO EXISTE
+
+**Nace del gate del founder (13-ago-2026, hallazgo de FUNCIÓN — el diseño
+va al Acto II).** Medido en la caminata: **cortes, capacidad y recursos se
+CREAN y no se corrigen** — las puertas del reparto (`definir_turno_entrega`
+· `definir_recurso_reparto` · `definir_regla_envio_vendedor` ·
+`registrar_repartidor`, con `actualizar_repartidor` como única excepción)
+no tienen camino de edición/corrección expuesto al vendedor. **Choca con la
+ley del cambio depositada HOY** (`MODELO_DESPENSA` §8.6bis): *«un cambio
+rige para lo nuevo, lo comprometido se cumple» presupone que el cambio
+EXISTE* — y la línea del compromiso que C cableó («al guardar, la app
+declara qué queda comprometido») **está cableada sobre una acción
+imposible**: no hay guardar-el-cambio que declarar.
+
+**La cura es de MOTOR primero:** cada `definir_*` gana su camino de
+corrección (o se mide que ya upsertea y lo que falta es la puerta en
+pantalla) **con la ley del cambio adentro** — el cambio rige para lo nuevo,
+lo comprometido conserva su ventana, y la respuesta DICE ambas cosas.
+
+**Nota de C, medida (13-ago) — el radio (A-3) es parte de esta familia:**
+`radio_cobertura_km` vive SOLO en `prestadores` y `duenodes` tiene cero
+filas ahí. *Montar el slider hoy sería un formulario muerto o colgarlo del
+prestador, contra la firma de mesa (la configuración cuelga de la CUENTA
+COMERCIAL).* **C hizo bien en no montarlo** — la escala quedó lista y el
+montaje es un drop-in cuando A-3 (radio en la cuenta comercial) aterrice.
+
+**Disparo: ARRIBA DE TODO en la cola de A** (orden de mesa post-gate):
+antes que el alta del puro, que A-3, A-1, A-2, A-5 y A-8.
+
+☠️ **Muere** cuando cortes, capacidad, recursos y regla de envío tengan
+camino de corrección por puerta real, con la declaración del compromiso en
+la respuesta, y el founder lo camine.

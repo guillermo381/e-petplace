@@ -575,6 +575,21 @@ lo que protege la decisión de ser revertida por comodidad:**
 `dieta_rx` del archivo viven en su familia propia, no absorbidos por
 alimento.
 
+> **🔴 LAS DOS FIRMAS DE LA CARGA (mesa, 13-ago — respuestas a los frenos
+> elevados por A):**
+>
+> **⑴ EL ESTADO QUE CALLA SE GANA, NO SE HEREDA.** Nada entra `verificada`
+> hasta que **el founder lo verifique contra el ENVASE**. Todo lo que trae
+> composición entra `declarada_sin_verificar`; lo que no la trae,
+> `ausente`. Cuando el founder verifique un producto, ese producto sube.
+> (El freno que lo parió: la regla «118/309/100» no era derivable del
+> archivo por ninguna medición — y no se inventó.)
+>
+> **⑵ `vendible` ES PUERTA COMERCIAL, NO CÓMPUTO.** Un producto se marca
+> no-vendible **cuando alguien lo decide**, no cuando una fórmula lo
+> estima con supuestos — el margen depende de precios que el vendedor real
+> todavía no puso. Todo en `true` hoy es lo correcto.
+
 ## 5. EL RECORRIDO DE LA FAMILIA
 
 ### 5.1 Dónde vive
