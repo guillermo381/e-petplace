@@ -17,6 +17,20 @@ export interface MascotaAtendida {
   nombre: string;
   especie: string | null;
   foto_url: string | null;
+  /** El path de la cara de SU raza (`cat_razas.ruta_imagen`), o `null`.
+   *
+   *  **S97-A · D-806bis — firma del founder:** *«si no tiene acceso a la foto
+   *  real de la mascota, le debería traer el avatar de la raza.»*
+   *
+   *  🔴 **Viaja porque sin él la ley no se puede obedecer:** la pantalla del
+   *  prestador pintaba la huella genérica **no por elegirlo, sino porque el
+   *  dato no llegaba**. *Una ley que exige lo que el lector no entrega no es
+   *  una ley: es un reproche.*
+   *
+   *  Se resuelve por **LOOKUP contra `cat_razas`, jamás slugificando el texto
+   *  tipeado** (D-379: el catálogo SUGIERE, `mascotas.raza` es texto libre).
+   *  Consúmase con `caraDeMascotaPorRuta`, que pone la escalera completa. */
+  raza_ruta_imagen: string | null;
   atenciones_total: number;
   ultima_atencion: string | null;
 }
@@ -47,9 +61,27 @@ export async function obtenerMascotasAtendidas(
 
   const mascotas = await getClient()
     .from('mascotas')
-    .select('id, nombre, especie, foto_url')
+    .select('id, nombre, especie, foto_url, raza')
     .in('id', ids);
   if (mascotas.error) return { ok: false, codigo: 'error_mascotas', mensaje: MENSAJE_ERROR };
+
+  /* D-806bis · la cara de la raza, por LOOKUP y POR LOTE.
+     Molde exacto del lector del Hogar (`onboarding.ts`) — misma clave
+     `especie|nombre`, misma consulta única. Se copia la forma a propósito:
+     *dos lookups distintos del mismo dato divergen, y el día que uno se
+     arregle el otro sigue mostrando la cara vieja.*
+     Si el lookup falla, `raza_ruta_imagen` queda en `null` y la escalera cae
+     sola al genérico — **el fallo NO degrada la lista**, que es lo que la
+     pantalla vino a buscar. */
+  const declaradas = [...new Set(mascotas.data.map((m) => m.raza).filter((r): r is string => !!r))];
+  const rutaPorRaza = new Map<string, string>();
+  if (declaradas.length > 0) {
+    const { data: razas } = await getClient()
+      .from('cat_razas')
+      .select('especie, nombre, ruta_imagen')
+      .in('nombre', declaradas);
+    for (const r of razas ?? []) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+  }
 
   const lista: MascotaAtendida[] = mascotas.data.map((m) => {
     const agg = porMascota.get(m.id);
@@ -58,6 +90,7 @@ export async function obtenerMascotasAtendidas(
       nombre: m.nombre,
       especie: m.especie,
       foto_url: m.foto_url,
+      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${m.raza ?? ''}`) ?? null,
       atenciones_total: agg?.total ?? 0,
       ultima_atencion: agg?.ultima ?? null,
     };
@@ -76,6 +109,10 @@ export interface DetalleMascotaPrestador {
     fecha_nacimiento: string | null;
     microchip: string | null;
     foto_url: string | null;
+    /** D-806bis · el path de la cara de SU raza, o `null`.
+     *  Sin foto real, esto es lo que la pantalla tiene que pintar antes de
+     *  caer a la huella. Se resuelve por LOOKUP contra `cat_razas`. */
+    raza_ruta_imagen: string | null;
   };
   /** Señales de cuidado REALES del expediente (perfil vigente). */
   tiene_condicion_cronica: boolean;
@@ -107,6 +144,20 @@ export async function obtenerDetalleMascotaPrestador(
   // RLS: sin acceso vigente la fila no existe para este user.
   if (mascota.data === null) return { ok: false, codigo: 'sin_acceso', mensaje: MENSAJE_ERROR };
 
+  /* D-806bis · la cara de la raza. UNA consulta, y solo si hay raza declarada.
+     Va DESPUÉS del guard de acceso a propósito: **no se consulta el catálogo
+     por una mascota que este prestador no puede ver.** */
+  let rutaRaza: string | null = null;
+  if (mascota.data.raza) {
+    const { data: r } = await cliente
+      .from('cat_razas')
+      .select('ruta_imagen')
+      .eq('especie', mascota.data.especie ?? '')
+      .eq('nombre', mascota.data.raza)
+      .maybeSingle();
+    rutaRaza = r?.ruta_imagen ?? null;
+  }
+
   const [perfil, vacunas, atenciones] = await Promise.all([
     cliente
       .from('mascota_perfil_vigente')
@@ -133,7 +184,7 @@ export async function obtenerDetalleMascotaPrestador(
   return {
     ok: true,
     data: {
-      mascota: mascota.data,
+      mascota: { ...mascota.data, raza_ruta_imagen: rutaRaza },
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,
       tiene_alergias: Array.isArray(alergias) && alergias.length > 0,
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,

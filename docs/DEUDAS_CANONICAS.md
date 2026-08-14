@@ -15446,6 +15446,21 @@ camino de atender estampa `llegada_en` **si no estaba**.
 > ficha: es una hipótesis con número de deuda*** — y una hipótesis depositada
 > se lee después como hecho.
 
+### 🔴 LA TRAMPA QUE VIENE DESPUÉS — la nombró D al encender, y es de A
+
+**`LETRA_RECEPCION_S76` §7 dice que `registrar_llegada` está gateada por
+MEMBRESÍA. SIGUE IGUAL, y tiene que seguir igual.**
+
+> **La firma del founder angostó LA SUPERFICIE —quién ve el botón—, jamás LA
+> PUERTA —quién puede escribir—.** Son dos cosas distintas y solo una se
+> firmó.
+
+⚠️ **Quien venga a «alinear» el gate del RPC con el rol de recepción por
+coherencia estaría DEROGANDO §7 SIN FIRMA.** *Y lo haría con la mejor
+intención: alinear dos números que parecen desalineados es exactamente lo que
+una pasada de prolijidad hace bien en el 90 % de los casos.* Acá el desalineo
+**es la letra**.
+
 ☠️ **Muere** cuando la puerta `registrar_llegada` quede revocada de
 `authenticated` **con su censo de llamadores en cero declarado** — jamás
 antes, y **sin tocar la columna**. **Disparo:** la próxima migración que toque
@@ -15586,3 +15601,459 @@ duplicación.*
 ☠️ **Muere** con el censo hecho y la decisión firmada (una puerta, o dos con
 su porqué escrito). **Disparo: el próximo arco que toque cualquiera de las dos
 altas.** **Territorio: A** (censo y motor) **+ el founder** (la firma).
+
+---
+
+#### D-812 — 🟡 EL VOCABULARIO DE `tipo_servicio` VIVE EN DOS LISTAS, Y DIVERGIERON EN LAS DOS DIRECCIONES
+
+**Medido por A (S97-A) caminando `ATENDER` en dispositivo.** Salió de una
+pregunta chica —*«¿por qué `demovet` muestra dos baldosas?»*— que resultó
+correcta (11 servicios agrupan en 2 oficios) y destapó otra cosa al lado.
+
+**Hay DOS listas del mismo vocabulario y ninguna manda:**
+
+| Fuente | Qué es | Cuántos |
+|---|---|---|
+| `prestador_servicios_tipo_servicio_check` | un CHECK con la lista **escrita adentro** | 26 |
+| `tipos_servicio` | el CATÁLOGO, con sus atributos | 30 |
+
+**🔴 Y no es que una sea subconjunto de la otra — divergen en AMBAS
+direcciones:**
+
+- **El CHECK admite `'otro'`, que NO está en el catálogo** ⇒ **3 filas activas
+  vivas** (Clínica Aurora) cuyo `tipo_servicio` **no tiene fila de catálogo**.
+- **El catálogo tiene 5 códigos que el CHECK prohíbe:** `hotel_dia`,
+  `hotel_noche`, `paseo_30min`, `paseo_60min`, **`procedimiento`**.
+
+**Consecuencia medida, y es la que importa:** todo lector que haga JOIN por
+`codigo` **descarta esas 3 filas en silencio** — no hay error, no hay
+warning, simplemente no están. *Un servicio activo que no aparece en una
+lectura no se lee como «falta»: se lee como que el negocio no lo ofrece.*
+
+**Y no hay FK que lo impida.** Se verificó: `prestador_servicios.tipo_servicio`
+es `text` con CHECK, sin referencia al catálogo.
+
+### 🔴 EL COBRO PROPIO, declarado — el guard mentía sobre su red
+
+`_trg_ps_paseo_sin_local` (mío, `20260814170000`) traía escrito:
+
+> *"Un tipo que no está en el catálogo NO se bloquea acá: **esa es otra
+> validación y tiene su propia FK**."*
+
+**Esa FK no existe.** Escribí la justificación desde lo que suponía del modelo,
+no desde el objeto — **el mismo error que dos horas antes deposité como lección
+en D-807**, en la misma jornada y en mi propia mano.
+
+> ***Un comentario que afirma un mecanismo inexistente es peor que ninguno: le
+> dice a la próxima sesión que no hace falta construirlo.*** Un comentario
+> ausente deja una pregunta abierta; uno falso la cierra mal.
+
+**✅ CORREGIDO EN SESIÓN** (`20260814210000`): el comentario dice lo medido y
+apunta a esta ficha. **El COMPORTAMIENTO no cambió y es el correcto** — un
+guard de MODALIDAD no debe bloquear por EXISTENCIA: eso sería hacerle decir
+algo que no vino a decir.
+
+### La clase, que es la tercera de la jornada
+
+**Tres veces hoy, en tres materiales distintos:**
+
+| Dónde | Qué divergía |
+|---|---|
+| **D-805** | dos patrones **ejecutables** de grilla en el mismo archivo |
+| `reptil` | dos **comentarios** vivos afirmando lo contrario |
+| **acá** | dos **listas** del mismo vocabulario |
+
+> ***Cuando una verdad se escribe en dos lugares, la pregunta no es si van a
+> divergir: es cuándo, y cuál va a leer primero el que llegue.*** Y ningún
+> instrumento de esta casa mira los tres materiales — el typecheck ve código,
+> el juez ve reglas, y nadie mira comentarios ni compara un CHECK contra una
+> tabla.
+
+☠️ **Muere** con **una sola fuente**: FK de `prestador_servicios.tipo_servicio`
+a `tipos_servicio.codigo`, y el CHECK retirado.
+⚠️ **NO se hace hoy y el orden importa:** primero hay que decidir qué pasa con
+`'otro'` (¿entra al catálogo, o esas 3 filas se re-tipifican?) y con los 5
+códigos que el CHECK prohíbe — **`procedimiento` es el delicado**, porque
+existe a propósito y NO es una oferta (`reservable=false`, S72). *Poner la FK
+antes de esa decisión rompería 3 filas vivas o dejaría el CHECK contradiciendo
+a la FK, que es cambiar dos listas por tres.*
+**Territorio: A.** **Disparo:** el próximo arco que toque el catálogo de
+servicios.
+
+---
+
+#### D-813 — 🟡 LA BALDOSA ELEGIDA DEL SELECTOR DE ESPECIE TIENE BORDE TEAL Y RELLENO MAGENTA
+
+**Medido por A en dispositivo (S97-A, `demovet`, alta del mostrador entrando
+por la baldosa de Estética), muestreando el píxel — no de ojo:**
+
+| Mitad de la señal | Color real | ¿Resuelve por casa? |
+|---|---|---|
+| **Borde** | `#0A7268` = `palette.tealDark` | ✅ **sí** |
+| **Relleno** | `#F1E5F1` (tinte magenta) | 🔴 **NO — fijo** |
+
+**Las dos mitades de la misma señal están en desacuerdo**, y en la app donde
+`§15b.1` firmó que *«el magenta vive SOLO en la marca»*.
+
+### La causa, en dos líneas de la misma pieza
+
+`packages/ui/src/components/SelectorEspecie.tsx:111-119`
+
+```ts
+const fondo = conCapa ? theme.capaBg.comunidad : …   // ← FIJO (capa MARCA/AFECTO)
+const borde = conCapa ? acentoEleccion         : …   // ← accent.control (por casa)
+```
+
+**`accent.control` está bien resuelto** —`themes/index.ts:137` le da `tealDark`
+al prestador— **y el borde lo obedece. El relleno no lo consulta.**
+
+### 🔴 POR QUÉ ESTO NO SE PODÍA VER ANTES, y es la parte que vale
+
+**La pieza nació para el CLIENTE, donde los dos tokens COINCIDEN** —
+`accent.control` = magentaDark **y** `capaBg.comunidad` = tinte magenta. Con una
+sola casa, *el acoplamiento es invisible: la pieza se ve perfecta y el defecto
+no existe todavía*.
+
+> ***Una pieza correcta en una casa puede estar rota en la segunda, y el día
+> que llega la segunda nada avisa*** — no hay error, no hay warning, y el
+> typecheck ve dos strings de color igual de válidos.
+
+**Y el comentario de la propia pieza lo cuenta sin saberlo:** dice que la tile
+se pintaba verde y se cambió porque *«hoy es la ÚNICA superficie de la app
+donde elegir algo no se ve magenta, y el founder lo leyó como bug dos veces»*.
+**Esa frase está escrita desde el cliente y era correcta ahí.** En el prestador,
+verse magenta es exactamente lo que no debe pasar. *La cura de S91 fue justa
+para su casa y se volvió defecto al mudarse.*
+
+☠️ **Muere** cuando el relleno salga del mismo lugar que el borde (un tinte
+derivado del acento por casa, no una capa fija) **y las dos casas se vean en
+dispositivo** — el cliente no puede regresionar. **Territorio: B** (la pieza).
+**Prioridad: no bloquea** — la selección se lee igual de clara; lo que falla es
+de qué color se lee.
+
+---
+
+#### D-814 — 🟢 «CITAS DE HOY 1» ARRIBA Y «SIN AGENDA HOY» EN LAS DOS BALDOSAS
+
+**Medido por C en la cuenta demo, y verificado contra la base antes de
+reportarlo: NO ES DEFECTO.** La única cita de hoy es un **paseo**, y el paseo
+**no tiene baldosa** porque no atiende en local (firma del founder, S97).
+
+> **La banda cuenta EL NEGOCIO. La baldosa cuenta SU OFICIO.**
+> **Las dos dicen la verdad, y juntas se leen como una contradicción.**
+
+### Por qué esto es una deuda y no una curiosidad
+
+*Nadie que mire esa pantalla tiene forma de saber que los dos números miden
+cosas distintas* — están a cuatro centímetros, los dos hablan de hoy, y **nada
+declara que sus alcances difieren**. El lector honesto concluye que uno de los
+dos está roto.
+
+**Y va a repetirse:** ocurre **cada vez que un negocio tenga al menos un oficio
+sin baldosa** (hoy: paseo, urgencia a domicilio, telemedicina). *No es el caso
+raro de una cuenta demo: es la configuración normal de una clínica que además
+pasea.*
+
+### Lo que NO se hace, con su razón
+
+🔴 **NO se cambia el alcance de la banda.** Es de `obtener_plata_del_dia`, que
+responde por el **negocio** bajo el gate §4ter. Angostarla al oficio **rompería
+la letra firmada** — y además dejaría al titular sin la única lectura del día
+completo. *El número está bien; lo que falta es que diga de qué es.*
+
+### La salida barata, que es de VOZ y no de motor
+
+**Que el rótulo cargue el alcance.** Un rótulo que dice de qué habla disuelve
+la contradicción **sin tocar el gate ni el lector** — y es reversible en una
+key. *La forma exacta la firma quien manda en la voz; acá solo se declara que
+el arreglo vive ahí y no en el motor.*
+
+☠️ **Muere** cuando los dos alcances se distingan leyendo, sin explicación.
+**Territorio: C** (voz). **Prioridad: baja — no bloquea nada.** ⚠️ **Pero si el
+founder lo ve en un gate va a preguntar, y la respuesta tiene que estar lista:
+los dos números son correctos.**
+
+---
+
+#### D-815 — 🔴 «LE LLEGÓ EL PEDIDO A SU TELÉFONO» — NO LE LLEGÓ NADA, Y NO HAY QUIÉN SE LO MANDE
+
+**Medido por A caminando el handshake completo en dispositivo (S97-A,
+`demovet` → buscar `guillo381+8@gmail.com` → Thor → «Pedir autorización»).**
+
+**La pantalla de espera dice, literal:**
+
+> *«Esperando a la familia de Guillermo Prueba 8»*
+> ***«Le llegó el pedido a su teléfono. En cuanto autorice, seguimos.»***
+
+**Lo medido en el mismo minuto:**
+
+| Hecho | Estado |
+|---|---|
+| La solicitud nace | ✅ `d70658e0…`, `pendiente`, 15:20:45 |
+| La familia **tiene** push token | ✅ 1 |
+| Intenciones de notificación encoladas | 🔴 **0** |
+| Notificaciones encoladas | 🔴 **0** |
+| Tipo de notificación para autorización en `cat_notificacion_tipos` | 🔴 **NO EXISTE** |
+| `crear_solicitud_autorizacion` encola algo | 🔴 **NO** (medido sobre el cuerpo) |
+
+**⇒ No es que el envío falló. NO HAY MAQUINARIA DE ENVÍO.** La afirmación de la
+pantalla es categóricamente falsa, y **el push token de la familia lo vuelve
+peor, no mejor**: el canal existe y está vivo — lo único que falta es que
+alguien lo use, así que nada rompe y nada avisa.
+
+### 🔴 Por qué esto es 🔴 y no cosmético
+
+**El vet se queda parado en el mostrador esperando una autorización que nadie
+pidió.** La pantalla lo invita explícitamente a esperar —*«en cuanto autorice,
+seguimos»*— y la familia **no tiene forma de enterarse** salvo abrir la app por
+su cuenta (el poll + badge del Hogar, S70). *Si no la abre, no pasa nada,
+nunca.*
+
+> ***Una espera falsa es peor que un error:*** un error manda a buscar otro
+> camino; **una espera convence de no buscar ninguno**. Y el costo lo paga
+> delante del cliente, que está mirando.
+
+### La clase
+
+**L-139 en la voz, y en el peor lugar: la voz afirma un HECHO DEL MUNDO —que
+un teléfono ajeno recibió algo— que el producto no puede saber ni provocar.**
+*Ningún instrumento lo ve: la pantalla renderiza, el flujo «funciona», la
+solicitud nace de verdad y no hay un solo error en ningún log.* **Solo aparece
+caminándolo y yendo a preguntarle a la base si lo que la pantalla afirma
+ocurrió.**
+
+Y es hermana de la lección de la jornada: *un gate mide lo que alguien ya supo
+nombrar; nadie escribió un gate que compare una frase con la realidad.*
+
+### Las dos mitades de la cura, y son de dueños distintos
+
+1. **LA VOZ, ya (barato, territorio de superficie):** que diga lo que ES —*la
+   familia lo ve al abrir su app*—. **No promete un teléfono que no suena.**
+   *Esta mitad no espera a la otra: hoy la voz miente y bajarla a la verdad no
+   cuesta motor.*
+2. **EL AVISO (territorio A + notificaciones):** tipo nuevo en
+   `cat_notificacion_tipos` + `crear_solicitud_autorizacion` encolando su
+   intención. **El transporte push YA ESTÁ VIVO** desde S90 (canal probado,
+   cron propio) — *falta el productor, no el canal.*
+
+⚠️ **Y el orden importa: si se construye ② sin corregir ① y el push tarda o el
+token está viejo, la frase sigue mintiendo en el borde.** La voz honesta
+sobrevive a las dos configuraciones.
+
+### ✅ LA MITAD DE MOTOR, HECHA Y VERIFICADA POR EL CAMINO REAL (S97-A)
+
+**Dirección firmada: la promesa se vuelve VERDADERA, no se calla.** *El
+handshake ES el canal de adquisición del mostrador — una familia que autoriza
+desde su teléfono es una familia que entró al producto. Bajar la voz habría
+cerrado el defecto y cerrado la puerta con él.*
+
+`20260814220000_s97a_aviso_handshake.sql`:
+
+- **Nace el tipo `autorizacion_mostrador_solicitada`** en `cat_notificacion_
+  tipos`, audiencia `cliente`, categoría **`seguridad_cuenta`** —donde vive
+  `sistema`—, **NO `operacion`**. *No es un aviso operativo: es una decisión de
+  consentimiento sobre quién ve el expediente de tu mascota.* Agruparlo con lo
+  operativo lo volvería silenciable junto con recordatorios de cita, **y el
+  costo de silenciarlo lo paga un profesional parado en el mostrador.**
+- **`crear_solicitud_autorizacion` encola** por la puerta única
+  `registrar_intencion_notificacion` — *que ya tenía **13 productores vivos**;
+  faltaba el productor, no el canal.* **Firma intacta ⇒ L-119 no rige.**
+- **Destinatario:** `mascotas.user_id` (el titular, espejado por trigger) en la
+  rama `atencion`; `p_destino_user_id` en `alta_mascota`.
+- **El fantasma no rompe y no recibe:** `user_id` NULL ⇒ no hay a quién
+  avisarle, la solicitud se crea igual y la función **no falla**. *Silencio
+  honesto*, declarado igual que en el exemplar de `fijar_fecha_procedimiento`.
+- **Sin backfill:** las solicitudes viejas **no reciben aviso retroactivo** —
+  avisar hoy por algo que se pidió ayer y ya expiró sería un aviso falso, que
+  es exactamente lo que esta cura vino a curar.
+
+**✅ VERIFICADO POR EL CAMINO REAL, no por SQL:** se repitió el handshake desde
+el dispositivo (`demovet` → familia registrada → Zeus → «Pedir autorización») y
+**la intención nació con el MISMO timestamp que la solicitud** —
+`15:33:42.747374` las dos, o sea la misma transacción — con
+`clave_dedup = autoriz_mostrador_c5577845…` y el titular como destinatario.
+
+### 🔴 PERO NO SE CIERRA — la promesa SIGUE sin cumplirse, y por otra causa
+
+**Al verificar esta cura hasta el final apareció D-816: el despachador de
+notificaciones NO TIENE QUIEN LO LLAME.** La intención nace perfecta, elige
+canal `push`, ningún gate la corta — **y se queda en `nacida` para siempre**,
+como las otras 34 que se apilan desde hace días.
+
+> **Esta ficha es la mitad de arriba de un caño cortado más abajo.** *Encolar
+> bien en una cola que nadie vacía no es avisar: es archivar.*
+
+⚠️ **Y la lección que deja para quien cure algo parecido:** *se siguió el aviso
+hasta el teléfono, no hasta la tabla siguiente.* Si hubiera parado en «la
+intención nació», habría declarado cerrada una promesa que **sigue siendo
+falsa** — con evidencia, timestamp y todo. **Verificar el eslabón siguiente no
+es celo: es la diferencia entre curar y creer que se curó.**
+
+☠️ **Muere** con **D-816 resuelta** (el caller y el 401 del correo) **más** la
+voz honesta mientras tanto, **y el gate en dispositivo de que un teléfono real
+vibra por este camino** — lo único que A no puede firmar sola (L-153).
+**Territorio: A (D-816) + superficie (voz) + el gate del founder.**
+
+---
+
+#### D-816 — ✅ TODAS LAS NOTIFICACIONES ESTUVIERON MUERTAS POR UN HEADER QUE FALTABA
+
+**Encontrado por A (S97-A) verificando su propia cura de D-815 — no se dio por
+cerrada sin seguir el aviso hasta el teléfono.** *La intención nacía perfecta y
+ahí se quedaba.*
+
+### 🔴 LA CAUSA, UNA SOLA
+
+**`despachar-notificaciones-tick` devolvía 401 en TODOS sus ticks:**
+`{"code":"UNAUTHORIZED_NO_AUTH_HEADER","message":"Missing authorization
+header"}` — **361 respuestas 401** en la ventana retenida.
+
+**El discriminador estaba en el propio cron, y es de una línea:**
+
+| job | `Authorization` | `x-despacho-secret` | resultado |
+|---|---|---|---|
+| `despachar-push-tick` | **sí** | sí | **200** |
+| `despachar-notificaciones-tick` | **no** | sí | **401** |
+
+*El secreto compartido de D-713 se agregó; el `Authorization` que la plataforma
+exige ANTES del cuerpo, no.* **El guard propio nunca llegaba a correr: rebotaba
+en la puerta de afuera.**
+
+### 🔴 POR QUÉ UN HEADER MATÓ EL SISTEMA ENTERO
+
+**`despachar-correo` NO es «el transporte de email»: es EL ORQUESTADOR.** En su
+línea 306 llama `supabase.rpc('despachar_notificaciones', { p_seco: false })` —
+*la DB decide*— y recién después entrega los correos. **`despachar-push` solo
+entrega lo que ya quedó marcado** (su propio comentario lo dice: *«por qué esta
+función NO llama a `despachar_notificaciones`»*).
+
+⇒ **Con el orquestador rebotando, nada pasaba de `nacida`, y el push corría
+cada minuto sobre una cola vacía devolviendo `200 · entregadas: 0`.**
+
+*Un solo header caído dejó sin avisos a los 13 productores del sistema —
+citas, pagos, recordatorios, documentos, liquidaciones, pedidos.*
+
+### El daño medido, antes de curar
+
+| Medición | Resultado |
+|---|---|
+| Intenciones en `nacida` | **34**, apilándose a diario (16 solo el 13-ago) |
+| Última fila de `notificaciones` | **2026-08-03** |
+| Última intención `entregada` | **2026-08-09** |
+
+### ✅ CURADO Y VERIFICADO (S97-A)
+
+**① El header.** Se copió el `Authorization` **del job sano, dentro de SQL**,
+sin que ningún valor pasara por la salida de nadie. Guard: aborta si no lo
+lee, e **idempotente** (si ya lo tenía, no toca).
+
+**② La cola vieja se limpió SOLA, que era la condición para encender.** Al
+primer tick sano:
+
+| estado | antes | después |
+|---|---|---|
+| `nacida` | 34 | **0** |
+| `descartada` | — | **21** |
+| `entregada` | 62 | **71** |
+
+**Las 21 murieron por `vigencia_horas`, exactamente como tenía que pasar** —
+*un aviso de hace once días entregado hoy es peor que uno perdido: una cita
+que ya pasó, una autorización que ya se resolvió en persona.* **Nadie recibió
+el eco de la semana muerta, y no hizo falta migración: el despachador ya traía
+esa defensa.**
+
+**③ Verificado contra `net._http_response`, jamás contra el `succeeded` del
+cron** — cero 401 en los ticks siguientes.
+
+### 🔴 EL ERROR PROPIO, DECLARADO: ESTA FICHA NACIÓ CON UNA CAUSA FALSA
+
+**La primera versión decía que `despachar_notificaciones` era MOTOR SIN PUERTA
+—«nadie lo llama»— y era FALSO.** El caller existió siempre, en la línea 306
+del edge function.
+
+**Por qué lo perdí, medido:** mi censo fue
+`grep -rn ... | grep -v ... | head -8`. **El resultado real tenía 13 líneas y
+el caller estaba en la 12.** El `head -8` era por brevedad **y cambió la
+conclusión en silencio**.
+
+> ***Un `head` puesto para no llenar la pantalla es un filtro con opinión sobre
+> qué es importante, y su opinión es «lo que salió primero».*** Es pariente de
+> L-191 —el exit code que se lee del pipe y no del comando—: **en las dos, la
+> herramienta de comodidad se interpone entre la medición y la conclusión, y
+> no avisa.**
+>
+> **La regla que deja: un censo que sostiene una afirmación se corre COMPLETO,
+> o se reporta su total.** *Si el resultado no entra en la pantalla, el número
+> que entra es `wc -l`, no las primeras ocho líneas.*
+
+**Lo que sobrevive de la ficha original y sigue siendo cierto:** el diagnóstico
+del 401, el daño medido, y las tres razones por las que **nada dio la alarma**:
+
+1. **El cron dice `succeeded` todos los minutos.** `net.http_post` es
+   **asíncrono**: `succeeded` significa *«el pedido salió»*, jamás *«el otro
+   lado lo aceptó»*. **El 401 vive en `net._http_response`, que nadie mira.**
+2. **`despachar-push` devuelve `200` con `{"entregadas":0}`** — un verde
+   perfecto **de un transporte que no tiene nada que transportar**.
+3. **Ninguna pantalla se rompe.** El producto encola con normalidad; lo que
+   falta ocurre **afuera**, en un teléfono que no suena.
+
+> ***Un pipeline roto en el medio no produce errores: produce silencio.*** Y el
+> silencio es indistinguible del «no había nada que avisar».
+
+☠️ **CERRADA en su motor.** Queda **D-817**, el guard que vuelve visible esta
+clase, y el gate en dispositivo de D-815 (que un teléfono real suene), que es
+lo único que A no puede firmar sola (L-153). **Territorio: A.**
+
+---
+
+#### D-817 — ✅ EL GUARD DE LA COLA: LA EDAD, NO EL TAMAÑO
+
+**Nace de D-816, que fue un defecto de SILENCIO PERFECTO:** durante días el
+producto encoló avisos con normalidad, el cron dijo `succeeded` cada minuto, el
+transporte de push devolvió `200`, ninguna pantalla se rompió — **y nadie
+recibió nada.** *No había ningún rojo que mirar, porque el defecto no producía
+errores: producía ausencia.*
+
+**`scripts/verify-cola-notificaciones.mjs`** — solo SELECT, jamás despacha.
+
+### 🔴 POR QUÉ MIDE EDAD Y NO CANTIDAD — es la decisión de la ficha
+
+**Lo único que cambiaba desde el primer minuto del defecto era que la cola
+empezaba a ENVEJECER.** Un pipeline sano vacía `nacida` en el tick siguiente;
+uno roto la deja crecer.
+
+> **Un pico de volumen es normal** —mil avisos legítimos a la vez dan una cola
+> grande y sana— **pero una intención de hace media hora es anómala con la cola
+> en 1 o en mil.**
+> ***El tamaño mide el tráfico; la edad mide si el caño está tapado.***
+
+Umbral por defecto **15 min**: el cron corre cada minuto, así que quince ticks
+perdidos ya no son un hipo.
+
+### El rojo dice QUÉ, no CUÁNTO
+
+No devuelve un número y se calla: nombra el defecto y **lista dónde mirar en el
+orden en que D-816 se resolvió**, con su advertencia adentro —*`cron.job_run_
+details` no alcanza: `net.http_post` es asíncrono y su `succeeded` solo dice
+que el pedido salió*—. *Un número sin nombre manda a buscar; un nombre manda a
+arreglar.*
+
+### ✅ PROBADO EN ROJO ANTES DE CONFIARLE NADA
+
+| Brazo | Cómo se ejercitó | Resultado |
+|---|---|---|
+| cola vacía → verde | estado real | **exit 0** ✅ |
+| cola vieja → **rojo** | sonda `nacida` con `created_at` de hace 90 min | **exit 1** ✅ |
+| cola fresca → verde | sonda re-fechada a 2 min | ⚠️ **NO SE EJERCITÓ** |
+
+⚠️ **El tercer brazo no corrió, y se declara en vez de darse por bueno: el
+despachador consumió la sonda antes de que el guard la viera** (movimiento un
+tick después de ponerla). *Su fracaso es, en sí mismo, evidencia de que la cura
+de D-816 funciona* — pero **la rama «cola fresca» queda sin verde propio**, y
+quien la necesite tendrá que congelar el cron para ejercitarla.
+
+**Residuo 0 verificado** tras retirar la sonda.
+
+☠️ **Muere** cuando corra sola —cron o CI— en vez de a mano. *Hoy es un
+instrumento que hay que acordarse de usar, que es exactamente la clase de
+defensa que no defiende el día que nadie se acuerda.* **Territorio: A.**
