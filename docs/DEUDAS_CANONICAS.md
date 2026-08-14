@@ -14398,6 +14398,36 @@ prolijidad dejaría a un paseador que sí recibe perros en su casa sin poder
 ofrecer recepción, **y nadie lo descubriría**: no hay síntoma cuando un rol no
 se ofrece (la mitad cara de los frenos, S84).
 
+### 🔴 EL GUARD DE LA CURA (firma de mesa, 14-ago) — **NEGOCIO POR NEGOCIO, JAMÁS POR MIGRACIÓN MASIVA**
+
+> **La presunción del default se convierte en DECLARACIÓN por el paso ② del
+> wizard, negocio por negocio.**
+
+**Y la prohibición explícita, con su razón:** **jamás por migración masiva.**
+Un `UPDATE` que apagara `atiende_local` en los oficios donde «parece no
+aplicar» **apagaría locales REALES para «limpiar» el dato** — el paseador que
+sí recibe perros en su casa, el adiestrador con su galpón. *Nadie los
+reportaría: no hay síntoma cuando un rol deja de ofrecerse.*
+
+**⚠️ EL MATIZ DE C, que agrava el diagnóstico:** el default no es solo
+permisivo — **en paseo es SEMÁNTICAMENTE VACÍO.** Las 9 filas de paseo con
+`atiende_local = true` no dicen «este paseador recibe gente»: **no dicen
+nada**, porque la pregunta no aplica al oficio tal como está formulada. *Un
+`true` permisivo es un dato flojo; un `true` sin significado es un dato que
+NO EXISTE con cara de dato.*
+
+⇒ **Y de ahí sale una pregunta que esta ficha marca y NO resuelve: ¿el toggle
+se ofrece POR OFICIO?** Puede que «atiendo en mi local» simplemente no tenga
+que aparecer en el taller de paseo. **Se marca para el LOTE 1** —se decide
+mirando el taller en el teléfono— **y no se resuelve por migración**, que es
+la misma prohibición del guard de abajo por otra puerta.
+
+**El dato equivocado que se sabe equivocado es más barato que el dato
+"limpio" que borró casos verdaderos.** Un default permisivo se corrige solo,
+uno por uno, cuando cada dueño pasa por su wizard y **dice** lo que hace. Una
+migración lo corrige de golpe **y se lleva por delante a los que estaban
+bien** — sin traza, sin error, y sin nadie que pueda saber a quiénes.
+
 ☠️ **Muere** cuando la mesa firme qué significa la modalidad para paseo y
 adiestramiento, **o** cuando el paso ② del wizard haya pasado por los negocios
 vivos y los valores dejen de ser el default. **Disparo:** el primer negocio
@@ -14503,7 +14533,27 @@ letra contradictoria cazada en la jornada**, y las seis se encontraron
 comentario divergiendo no rompe nada, y por eso sobrevive.* **Es D-790 en su
 sexta muestra.**
 
-☠️ **Muere** con la firma del founder sobre una de las dos salidas.
+☠️ ✅ **CERRADA — 14-ago-2026, resolución de mesa. GANA LA SALIDA ②: RIGE EL `120`.**
+
+**Literal:** *«rige el 120. Restaurar la enmienda firmada y medida de S81 no
+requiere firma nueva — el 45 del Norte era arrastre del header contradictorio
+que B curó.»*
+
+**Depositado:** `DIRECCION_ARTE` §13, enmienda a N6 — se lee `120/300`, con el
+`45` **tachado y no borrado** para que el arrastre quede visible.
+
+**Y el precedente que deja, que vale más que el número:** *no había dos
+decisiones compitiendo — había una decisión y un ECO.* La de S81 estaba
+firmada **y medida**; lo que el Norte trajo era el comentario viejo de
+`Entrada` volviendo por la puerta de atrás. **Restaurar no es decidir de
+nuevo: es sacar el eco** — y por eso no hizo falta una firma nueva.
+
+⇒ **Corolario al método:** una letra nueva que contradice una firmada **no
+siempre es una derogación**. Distinguir las dos cosas se hace **midiendo de
+dónde salió el número**, jamás votando cuál gusta más. *Acá se pudo porque B
+encontró la fuente exacta del eco* — sin esa medición, esto se habría resuelto
+por opinión, y la opinión habría tenido 50% de chance de tirar abajo una
+medición real.
 
 ---
 
@@ -14582,3 +14632,48 @@ fue el CUERPO de la función, no su nombre ni su ficha.** El nombre
 `otorgar_rol_vendedor` no dice «admin-only»; el nombre
 `crear_cuenta_comercial_inicial` no dice «no registra naturaleza». **Las dos
 respuestas estaban en el cuerpo, y el cuerpo se lee en tres minutos.**
+
+---
+
+#### D-797 — 🟡 LA CUENTA COMERCIAL NO TIENE LOGO: NI BUCKET, NI COLUMNA, NI WRAPPER
+
+**Nace del freno de C sobre el paso ① del wizard (14-ago), y C hizo bien en
+frenar:** *no se monta un selector que no guarda.* **Los cuartos sin esquema
+no se montan** — el precedente de la casa se sostuvo por segunda vez en la
+misma sesión (la primera fue el radio, D-791).
+
+**Medido — no existe NADA de las tres patas:**
+
+| pata | estado |
+|---|---|
+| **bucket** de Storage para el logo de la cuenta | **no existe** |
+| **columna** en `cuentas_comerciales` | **no existe** (la tabla tiene `nombre_comercial`, `razon_social`, `metadata` — ningún `logo_url`) |
+| **wrapper** de subida | **no existe** |
+
+*Lo que sí existe es `LogoNegocio` (componente 40, S74) — la PIEZA que lo
+pintaría. La superficie está lista y el motor no.*
+
+**🔴 NO BLOQUEA EL LOTE 1, y hay que decir por qué no:** **el destape cae al
+monograma POR DISEÑO.** La escalera de portada de `DIRECCION_ARTE` §12.3
+(*imagen → poster → **logo centrado** → **monograma***) tiene su último
+peldaño escrito precisamente para esto, y *el monograma es digno* — no es un
+estado de error ni un hueco. **La ceremonia del destape (§5) funciona entera
+sin logo.**
+
+> **Pero antes de octubre esto se cobra, y se cobra en el peor lugar.** El
+> destape es **el momento emocional del producto** — el instante en que el
+> vendedor ve su negocio existir por primera vez. **Va a querer destaparlo
+> con SU logo.** *Un monograma es digno como fallback permanente para quien
+> no tiene logo; es pobre como única opción para quien sí lo tiene y no
+> encuentra dónde ponerlo.*
+
+**Y el matiz que lo separa del logo del PRESTADOR:** el prestador ya tiene
+logo por su perfil público. **El vendedor puro no tiene perfil público** —
+decisión declarada en S97-A (*v1 no lo exige, §2.1*) — así que **para él el
+wizard es el único lugar donde su logo podría entrar.** *La ausencia no se
+compensa desde otra pantalla, porque esa otra pantalla tampoco existe.*
+
+☠️ **Disparo: ANTES DEL ALTA DEL VENDEDOR REAL.** Las tres patas juntas
+(bucket privado o público con su decisión declarada · columna · wrapper), más
+el punto de captura en el paso ①. **Muere** cuando un vendedor real pueda
+subir su logo y verlo en su destape.

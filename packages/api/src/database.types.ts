@@ -20232,6 +20232,7 @@ export type Database = {
           activo: boolean
           empleado_id: string
           nombre: string
+          user_id: string
         }[]
       }
       obtener_estado_onboarding_wizard: {

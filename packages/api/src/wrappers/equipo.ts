@@ -36,6 +36,19 @@ export interface MiembroEquipo {
   empleadoId: string;
   nombre: string;
   activo: boolean;
+  /** S97-A · LA PERSONA detrás del miembro — la LLAVE de la
+   *  anti-duplicación de `MODELO_DESPENSA` §8.6bis ⑤ (*la misma persona es
+   *  la misma persona porque es el mismo usuario, la cargue quien la
+   *  cargue*). Es lo que deja al paso ④ del wizard atar un repartidor a
+   *  alguien que YA está adentro en vez de re-tipearlo.
+   *
+   *  **`null` es un DATO, no un error:** un invitado que todavía no aceptó
+   *  no tiene cuenta, y a esa persona **no se la puede elegir del equipo**
+   *  porque todavía no existe como usuario del sistema. Quien consuma esto
+   *  filtra por `userId !== null` y lo DICE en pantalla — esconderlo sin
+   *  decirlo dejaría al titular buscando a alguien que ve en la lista de al
+   *  lado. */
+  userId: string | null;
   roles: RolEquipo[];
   /** S78-A (D-547): los OFICIOS de esta persona, distintos y ya resueltos —
    *  para que el subtítulo de la lista NO tenga que pedirlos por fila.
@@ -182,6 +195,7 @@ export async function obtenerEquipoNegocio(cuentaComercialId: string): R<EquipoN
         empleadoId: f.empleado_id,
         nombre: f.nombre,
         activo: f.activo,
+        userId: f.user_id ?? null,
         roles: porEmpleado.get(f.empleado_id) ?? [],
         oficios: [...(oficiosDe.get(f.empleado_id) ?? [])],
         tieneChipMedico: medicoPorEmpleado.get(f.empleado_id) === true,
