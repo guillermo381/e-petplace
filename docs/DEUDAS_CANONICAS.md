@@ -15730,3 +15730,45 @@ derivado del acento por casa, no una capa fija) **y las dos casas se vean en
 dispositivo** — el cliente no puede regresionar. **Territorio: B** (la pieza).
 **Prioridad: no bloquea** — la selección se lee igual de clara; lo que falla es
 de qué color se lee.
+
+---
+
+#### D-814 — 🟢 «CITAS DE HOY 1» ARRIBA Y «SIN AGENDA HOY» EN LAS DOS BALDOSAS
+
+**Medido por C en la cuenta demo, y verificado contra la base antes de
+reportarlo: NO ES DEFECTO.** La única cita de hoy es un **paseo**, y el paseo
+**no tiene baldosa** porque no atiende en local (firma del founder, S97).
+
+> **La banda cuenta EL NEGOCIO. La baldosa cuenta SU OFICIO.**
+> **Las dos dicen la verdad, y juntas se leen como una contradicción.**
+
+### Por qué esto es una deuda y no una curiosidad
+
+*Nadie que mire esa pantalla tiene forma de saber que los dos números miden
+cosas distintas* — están a cuatro centímetros, los dos hablan de hoy, y **nada
+declara que sus alcances difieren**. El lector honesto concluye que uno de los
+dos está roto.
+
+**Y va a repetirse:** ocurre **cada vez que un negocio tenga al menos un oficio
+sin baldosa** (hoy: paseo, urgencia a domicilio, telemedicina). *No es el caso
+raro de una cuenta demo: es la configuración normal de una clínica que además
+pasea.*
+
+### Lo que NO se hace, con su razón
+
+🔴 **NO se cambia el alcance de la banda.** Es de `obtener_plata_del_dia`, que
+responde por el **negocio** bajo el gate §4ter. Angostarla al oficio **rompería
+la letra firmada** — y además dejaría al titular sin la única lectura del día
+completo. *El número está bien; lo que falta es que diga de qué es.*
+
+### La salida barata, que es de VOZ y no de motor
+
+**Que el rótulo cargue el alcance.** Un rótulo que dice de qué habla disuelve
+la contradicción **sin tocar el gate ni el lector** — y es reversible en una
+key. *La forma exacta la firma quien manda en la voz; acá solo se declara que
+el arreglo vive ahí y no en el motor.*
+
+☠️ **Muere** cuando los dos alcances se distingan leyendo, sin explicación.
+**Territorio: C** (voz). **Prioridad: baja — no bloquea nada.** ⚠️ **Pero si el
+founder lo ve en un gate va a preguntar, y la respuesta tiene que estar lista:
+los dos números son correctos.**
