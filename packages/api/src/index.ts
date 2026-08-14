@@ -990,6 +990,13 @@ export {
   // el gate del rol recepción — una sola fuente, tres lectores)
   fijarModalidadServicio,
   type ServicioDeOficio,
+  // S97-A · la regla condicional de recepción + el onboarding por paso
+  puedeOfrecerRolRecepcion,
+  obtenerEstadoOnboardingWizard,
+  saltarPasoOnboarding,
+  retomarPasoOnboarding,
+  type PasoOnboarding,
+  type EstadoPasoOnboarding,
   // S77-A: la edición del chip para quien YA está adentro (LETRA §4/§10.2)
   obtenerChipsEmpleado,
   quitarServiciosEmpleado,

@@ -980,3 +980,125 @@ export async function aceptarInvitacionEquipo(
   }
   return { ok: true, data: null };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S97-A · LA REGLA CONDICIONAL DE RECEPCIÓN + EL ONBOARDING POR PASO
+// (`LA_CASA_DEL_PRESTADOR` §2.3 y §4; firmas del founder 13-ago)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * ¿SE PUEDE OFRECER EL ROL «RECEPCIÓN» EN EL EQUIPO DE ESTE NEGOCIO?
+ *
+ * Firma del founder: **sin ningún servicio con atención en local activa, el
+ * rol recepción NO se ofrece.** Ley 23 — la puerta no ofrece lo que no
+ * existe. El caso que la vuelve necesaria y no teórica es el **vendedor
+ * puro**: cero servicios ⇒ `false`.
+ *
+ * ⚠️ **Su permisividad está declarada (D-792)** y conviene saberla al
+ * consumirlo: `atiende_local` nació `DEFAULT true` para el domicilio del
+ * grooming y barrió los cuatro oficios, así que hoy **discrimina el borde que
+ * importa** (negocio sin servicios) y **es permisivo en el centro** hasta que
+ * alguien toque el toggle del paso ②.
+ *
+ * El fallo NO se degrada a `false` (L-139): un `false` con cara de dato diría
+ * «este negocio no atiende en su local», y lo que pasó fue que no pudimos
+ * preguntar. Esconder el rol por un error de red es tomar una decisión de
+ * permisos con información que no tenemos.
+ */
+export async function puedeOfrecerRolRecepcion(prestadorId: string): R<boolean> {
+  const { data, error } = await getClient().rpc('puede_ofrecer_rol_recepcion', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  return { ok: true, data: data === true };
+}
+
+/** Los cuatro pasos del wizard, en el orden firmado. */
+export type PasoOnboarding = 'negocio' | 'oferta' | 'documentos' | 'equipo';
+
+export interface EstadoPasoOnboarding {
+  paso: PasoOnboarding;
+  orden: number;
+  /** `completo` se DERIVA de la base · `salteado` es lo único guardado ·
+   *  `pendiente` es el resto. */
+  estado: 'completo' | 'salteado' | 'pendiente';
+  /** LA LEY DEL CONTADOR (S91): solo lo `pendiente` suma. `completo` y
+   *  `salteado` son los dos una respuesta del prestador, y el número tiene
+   *  que poder llegar a cero **sin que nosotros hagamos nada**. */
+  cuentaAlContador: boolean;
+}
+
+/**
+ * EL ESTADO DEL WIZARD, PASO POR PASO — lo que alimenta el contador y la voz
+ * del «retomá acá».
+ *
+ * **La decisión de diseño que conviene conocer al consumirlo: solo el SALTO
+ * se guarda; la completitud se DERIVA.** «Completó documentos» ya está
+ * escrito en la base —hay papeles o no los hay—; guardarlo otra vez sería el
+ * dato en dos lugares, y llegaría el día en que la marca dijera «completo»
+ * con la tabla vacía. *Un estado derivado no se puede desincronizar porque no
+ * existe hasta que se lee.*
+ *
+ * **Y el borde que hace honesto el contador:** un documento en revisión
+ * CUENTA COMO HECHO. Él ya hizo lo suyo; revisar es nuestro. Si la revisión
+ * sumara, el contador nunca llegaría a cero por causas ajenas al prestador —
+ * exactamente lo que la ley S91 prohíbe.
+ *
+ * Devuelve SIEMPRE los cuatro. Cero filas = la cuenta no es alcanzable desde
+ * esta sesión, y se reporta como error: una lista vacía y «todo pendiente» se
+ * leerían igual, y solo la segunda es un dato (L-139).
+ */
+export async function obtenerEstadoOnboardingWizard(
+  cuentaComercialId: string,
+): R<{ pasos: EstadoPasoOnboarding[]; contador: number }> {
+  const { data, error } = await getClient().rpc('obtener_estado_onboarding_wizard', {
+    p_cuenta_comercial_id: cuentaComercialId,
+  });
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  const filas = (data ?? []) as {
+    paso?: unknown;
+    orden?: unknown;
+    estado?: unknown;
+    cuenta_al_contador?: unknown;
+  }[];
+  if (filas.length === 0) {
+    return { ok: false, codigo: 'error_lectura', mensaje: 'La cuenta no es alcanzable desde esta sesión.' };
+  }
+  const pasos = filas.map((f) => ({
+    paso: f.paso as PasoOnboarding,
+    orden: Number(f.orden),
+    estado: f.estado as EstadoPasoOnboarding['estado'],
+    cuentaAlContador: f.cuenta_al_contador === true,
+  }));
+  return { ok: true, data: { pasos, contador: pasos.filter((p) => p.cuentaAlContador).length } };
+}
+
+/** Saltar un paso. **Es una respuesta, no una omisión** — y por eso baja el
+ *  contador: el prestador ya decidió. Idempotente. */
+export async function saltarPasoOnboarding(
+  cuentaComercialId: string,
+  paso: PasoOnboarding,
+): R<null> {
+  const { error } = await getClient().rpc('saltar_paso_onboarding', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_paso: paso,
+  });
+  if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  return { ok: true, data: null };
+}
+
+/** El camino de vuelta (D-791 en general: la configuración jamás solo agrega).
+ *  Retomar devuelve el paso a `pendiente` y **sube** el contador — que es
+ *  correcto: volvió a ser trabajo suyo. */
+export async function retomarPasoOnboarding(
+  cuentaComercialId: string,
+  paso: PasoOnboarding,
+): R<{ estabaSalteado: boolean }> {
+  const { data, error } = await getClient().rpc('retomar_paso_onboarding', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_paso: paso,
+  });
+  if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  const r = data as { estaba_salteado?: unknown } | null;
+  return { ok: true, data: { estabaSalteado: r?.estaba_salteado === true } };
+}
