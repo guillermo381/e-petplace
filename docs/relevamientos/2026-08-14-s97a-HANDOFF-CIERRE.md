@@ -118,6 +118,28 @@ motor → A.
 
 ---
 
+## 2bis · 🔴 INCIDENTE DE SEGURIDAD DECLARADO (S97-A, 14-ago)
+
+**Al leer `cron.job.command` para diagnosticar D-816, A imprimió en claro el
+`x-despacho-secret`** (el secreto compartido de D-713) en la salida de su
+terminal. **El anon key que va al lado es público —viaja en el bundle—; el
+secreto de despacho NO.**
+
+- **No se escribió en ningún archivo ni commit.** Se declara acá porque *si no
+  queda escrito ahora no lo escribe nadie*.
+- ⚠️ **RECOMENDADO: rotar `x-despacho-secret`** y actualizar los tres crons que
+  lo mandan (`despachar-notificaciones-tick`, `despachar-push-tick`,
+  `barrer-storage-tick`).
+- **La cura del 401 se hizo copiando el header DENTRO de SQL**, sin que ningún
+  valor volviera a pasar por la salida — así se toca ese comando de ahora en
+  más.
+
+> **Precedente exacto: D-712** — *los artefactos de una auditoría de seguridad
+> son un vector nuevo.* Es la segunda vez que esta casa lo paga con la misma
+> forma: **mirar un secreto para diagnosticar es exponerlo.**
+
+---
+
 ## 3 · ✅ EL FRENO CERRÓ — los literales llegaron y están depositados
 
 **Los cinco dictados del gate de `ATENDER` viven VERBATIM en
@@ -170,6 +192,26 @@ que es lo que más vale— **y su literal marcado como faltante.**
   superficie ofreciéndolo). **La mesa no lo adjudicó: espera la captura.**
 - **D-788** (el DESPUÉS del vendedor: cuándo cobra — sin letra) · **D-792**
   cerrada · **D-799** curada por C · **D-801/D-803/D-804/D-805** cerradas.
+
+### 🔴 LO DE NOTIFICACIONES (S97-A, cerrado el mismo día que se encontró)
+
+- **D-816 ✅ CURADA — todas las notificaciones estuvieron muertas por un header
+  que faltaba.** El cron de `despachar-correo` mandaba el secreto y **no
+  `Authorization`** ⇒ **401 en todos sus ticks**. Y ese edge **no es el
+  transporte de email: es EL ORQUESTADOR** (llama `despachar_notificaciones`).
+  Con él caído nada salía de `nacida` y el push corría sobre una cola vacía
+  devolviendo `200 · entregadas: 0`. **Al primer tick sano la cola se vació
+  sola: 34 → 0, con 21 descartadas por vigencia.**
+  ⚠️ **La ficha nació con una causa FALSA** (*«motor sin puerta»*): mi censo
+  fue `grep … | head -8` sobre un resultado de **13 líneas con el caller en la
+  12**. *Un `head` puesto por brevedad es un filtro con opinión.*
+- **D-817 ✅ el guard** — `scripts/verify-cola-notificaciones.mjs`, mide **la
+  EDAD de la `nacida` más vieja, no el tamaño**. Probado **en rojo** (sonda de
+  90 min → exit 1), residuo 0. **Su tercer brazo NO se ejercitó** y está
+  declarado.
+- **D-815 SIGUE ABIERTA a propósito.** El motor encola bien y **el cierre es un
+  handshake real desde el aparato con la push llegando** — §6bis-B puro, y lo
+  único que A no puede firmar sola (L-153).
 
 ---
 
