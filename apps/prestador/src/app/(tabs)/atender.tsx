@@ -32,6 +32,7 @@ import {
   Baldosa,
   Boton,
   CeldaNavegacion,
+  FilaDato,
   Encabezado,
   Separador,
   Tarjeta,
@@ -43,13 +44,15 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerMiPrestador, obtenerPizarra } from '@epetplace/api';
+import { obtenerMiPrestador, obtenerPizarra, obtenerPlataDelDia, type PlataDelDia } from '@epetplace/api';
+import { montoCorto } from '@/lib/formato-techo';
 
 import {
   hayCapacidad,
   resolverCapacidadAtender,
   type CapacidadAtender,
 } from '@/lib/capacidad-atender';
+import { hoyLocalISO } from '@/lib/ventas-formato';
 import { useTraduccion } from '@/i18n';
 
 /** El glifo de cada puerta. `training` es el nombre del registry para
@@ -107,7 +110,15 @@ type Pantalla =
   // El error DICE su causa y ofrece reintentar (Ley 13 / regla 36): un
   // fallo de lectura jamás se disfraza de «este negocio no atiende».
   | { fase: 'error'; detalle: string }
-  | { fase: 'listo'; capacidad: CapacidadAtender; pizarra: number | null };
+  | {
+      fase: 'listo';
+      capacidad: CapacidadAtender;
+      pizarra: number | null;
+      /** `null` = no se pudo leer. **NO se degrada a cero**: un cero con
+       *  cara de dato diría «hoy no hay nada», y lo que pasó fue que no
+       *  pudimos preguntar (L-197, y el propio contrato del lector). */
+      plata: PlataDelDia | null;
+    };
 
 export default function Atender() {
   const router = useRouter();
@@ -127,9 +138,20 @@ export default function Atender() {
            lecturas y una sola espera. Su fallo NO tumba la portada —las
            puertas del mostrador no dependen de ella— y `null` NO se pinta
            como cero: la regla de S86 se muda entera con la superficie. */
-        const [c, pz] = await Promise.all([resolverCapacidadAtender(p.data.id), obtenerPizarra(p.data.id)]);
+        const [c, pz, pl] = await Promise.all([
+          resolverCapacidadAtender(p.data.id),
+          obtenerPizarra(p.data.id),
+          // §4ter: el gate vive en el SERVIDOR. Acá no se recompone ningún
+          // permiso — se pinta lo que la RPC contesta.
+          obtenerPlataDelDia(p.data.id, hoyLocalISO()),
+        ]);
         return c.ok
-          ? { fase: 'listo' as const, capacidad: c.data, pizarra: pz.ok ? pz.data.length : null }
+          ? {
+              fase: 'listo' as const,
+              capacidad: c.data,
+              pizarra: pz.ok ? pz.data.length : null,
+              plata: pl.ok ? pl.data : null,
+            }
           : { fase: 'error' as const, detalle: c.mensaje };
       })()
         .catch((e: unknown) => ({
@@ -188,7 +210,7 @@ export default function Atender() {
     );
   }
 
-  const { capacidad, pizarra } = pantalla;
+  const { capacidad, pizarra, plata } = pantalla;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -201,6 +223,50 @@ export default function Atender() {
         }}
       >
         <Encabezado variante="portada" saludo={t('atender.titulo')} />
+
+        {/* ⭐ S98-C · LA BANDA DEL DÍA (orden de la mesa, gate del founder).
+            Compacta, arriba de las baldosas, y **legal por §4ter**: la
+            plata del día y NADA MÁS — su gate vive en el SERVIDOR
+            (`obtener_plata_del_dia`), acá no se recompone ningún permiso.
+
+            🔴 **LO QUE ESTA BANDA NO DICE, Y POR QUÉ — se declara para que
+            nadie lea otra cosa en estos números.** La orden pedía
+            *«servicios prestados hoy · cobrado hoy»* y **hoy no existe
+            lector honesto de ninguno de los dos** (medido, S98-C):
+
+             · **«cobrado hoy»** — `cobro_presencial_registrado` tiene
+               ESCRITOR y **cero lectores** en `packages/api` (2 filas
+               vivas). No hay de dónde leerlo.
+             · **«prestados hoy»** — lo que existe cuenta citas VIVAS del
+               día, que es lo agendado, no lo prestado.
+
+            Y el lector que sí existe **dice explícitamente que no es eso**:
+            *«PLATA = el valor AGENDADO del día. NO lo devengado, NO lo
+            cobrado. Contesta ¿cuánto vale mi jornada?, no ¿cuánto llevo
+            cobrado?»*. **Rotular «cobrado» este número sería un
+            verosímil-falso de PLATA** — la clase de defecto más cara de la
+            casa, porque nadie audita un número que parece razonable.
+
+            ⇒ **La banda muestra lo que hay, con el nombre de lo que es.**
+            Los dos números pedidos entran cuando A entregue sus lectores
+            (pedido cursado con contrato y su gate §4ter). */}
+        {plata !== null && plata.visible && (
+          <Tarjeta relleno="normal">
+            <View style={{ flexDirection: 'row', gap: spacing[6] }}>
+              <FilaDato etiqueta={t('atender.bandaCitas')} valor={String(plata.citas ?? 0)} mono />
+              <FilaDato etiqueta={t('atender.bandaAgendado')} valor={montoCorto(plata.total ?? 0)} mono />
+            </View>
+            {/* El total DECLARA lo que le falta: con citas sin precio es
+                PARCIAL, y callarlo sería mentir por omisión con un número
+                redondo (contrato del lector, L-197). */}
+            {(plata.sinPrecio ?? 0) > 0 && (
+              <Texto variante="apoyo">{t('atender.bandaParcial', { n: plata.sinPrecio ?? 0 })}</Texto>
+            )}
+          </Tarjeta>
+        )}
+        {/* El fallo de lectura DICE que es fallo — jamás un cero, que se
+            leería como «hoy no hubo nada» (Ley 13). */}
+        {plata === null && <Texto variante="apoyo">{t('atender.bandaNoSePudo')}</Texto>}
 
         {/* N9 — EL VACÍO HABLA. Se llega acá con la capacidad leída y en
             cero: la tab no se monta sin capacidad, así que este estado es

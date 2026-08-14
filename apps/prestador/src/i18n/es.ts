@@ -32,6 +32,13 @@ export const prestadorEs = {
     // posesivos, que es como habla el resto de la app del prestador.
     tusServicios: 'Tus servicios',
     tuTienda: 'Tu tienda',
+    // ⭐ S98-C · LA BANDA DEL DÍA. Los rótulos dicen QUÉ ES cada número:
+    // «agendado» y no «cobrado», porque el lector es del valor agendado y
+    // rotularlo distinto sería un verosímil-falso de plata.
+    bandaCitas: 'Citas de hoy',
+    bandaAgendado: 'Agendado hoy',
+    bandaParcial: 'El total es parcial: {{n}} de hoy todavía no tienen precio.',
+    bandaNoSePudo: 'No pudimos leer los números de hoy.',
     oficioVeterinaria: 'Veterinaria',
     oficioGrooming: 'Estética',
     oficioPaseo: 'Paseo',

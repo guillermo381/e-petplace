@@ -24,6 +24,11 @@ export const prestadorEn = {
     titulo: 'Attend',
     tusServicios: 'Your services',
     tuTienda: 'Your store',
+    // S98-C · Espejo de es.ts.
+    bandaCitas: 'Appointments today',
+    bandaAgendado: 'Booked today',
+    bandaParcial: 'The total is partial: {{n}} today have no price yet.',
+    bandaNoSePudo: 'We could not read today’s numbers.',
     oficioVeterinaria: 'Veterinary',
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
