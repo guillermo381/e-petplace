@@ -14353,6 +14353,20 @@ montaje es un drop-in cuando A-3 (radio en la cuenta comercial) aterrice.
 **Disparo: ARRIBA DE TODO en la cola de A** (orden de mesa post-gate):
 antes que el alta del puro, que A-3, A-1, A-2, A-5 y A-8.
 
+**⚡ LA MEDICIÓN QUE LA ACHICA (A, mismo día):** dos de las cuatro puertas
+**ya upsertean** (`definir_turno_entrega` y `definir_recurso_reparto`
+tienen ON CONFLICT), `definir_regla_envio_vendedor` tiene rama UPDATE y
+`actualizar_repartidor` existe. **La cura gruesa es de C** (reabrir lo
+existente en el mismo formulario); lo de A es verificar las llaves de
+conflicto por puerta y completar las dos que faltan.
+
+**NOTA DE MESA (13-ago, va con la ficha):** la línea del compromiso que C
+cableó está montada sobre una edición que el motor no ofrece todavía. **No
+es error de nadie — es la voz esperando al motor, que es el orden
+correcto.** *Cuando la edición exista, esa línea se ejercita por primera
+vez y hay que GATEARLA.*
+
 ☠️ **Muere** cuando cortes, capacidad, recursos y regla de envío tengan
 camino de corrección por puerta real, con la declaración del compromiso en
-la respuesta, y el founder lo camine.
+la respuesta, y el founder lo camine — **incluida la primera ejercitación
+real de la línea del compromiso.**
