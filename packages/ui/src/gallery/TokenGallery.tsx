@@ -3169,6 +3169,12 @@ function GaleriaInterna() {
                 ))}
               </View>
             </View>
+            {/* 🔴 EL VECINO DE ABAJO NO ES ADORNO — es lo que destapa el
+                colapso a altura 0. Mi galeria monto la grilla como ULTIMO
+                elemento y por eso no lo cazo: **sin nada debajo, una
+                altura 0 es invisible.** Lo encontro C poniendole un
+                vecino en la portada real.
+                ⇒ toda grilla de esta galeria lleva una fila DEBAJO. */}
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">
                 NEGOCIO — los mismos, CON detalle: el titulo cae a la misma altura en los dos
@@ -3185,6 +3191,13 @@ function GaleriaInterna() {
                 ))}
               </View>
             </View>
+            {/* EL TESTIGO: si la grilla de arriba colapsa a altura 0, esta
+                fila se le monta encima y se ve al instante. Es el control
+                que faltaba. */}
+            <Celda
+              titulo="Si ves esta fila ENCIMA de las baldosas, la grilla colapso a altura 0"
+              subtitulo="testigo de layout — no borrar"
+            />
           </View>
         </Seccion>
 
