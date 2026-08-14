@@ -1,6 +1,55 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S96 — 63 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+**Estado: S97+ — 65 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+
+> **S97+-B · DOS PIEZAS NUEVAS Y EL JUEZ CON SEIS REGLAS MÁS.**
+> Contador re-medido por el método auditable de siempre (L-141): `ls
+> src/components/*.tsx` = **69**, menos **3** variantes `.web` y la infra
+> `capturaFoto` = **65** (decía 63). R17 leído del propio lint:
+> `exportaciones=88 · en-galería=79 · exentas-declaradas=9 ·
+> pendientes=0`. Glifos **45** (era 44, +`atender`), medidos por las DOS
+> vías con el mismo conjunto. WCAG **178 / 0**.
+>
+> - **`Destape`** — la ceremonia de cierre del wizard de alta (pedido de
+>   C, contrato de mesa). **Un solo reloj:** `alTerminar` sale del último
+>   `withTiming` real de la rama que corre, jamás de un temporizador
+>   paralelo. Ritual de **~3000 ms** por firma en dispositivo
+>   (*«es un ritual de única vez — hay que disfrutarlo»*), estirado
+>   **abriendo las pausas, no los gestos**: cada acto sigue durando lo que
+>   N10 declara.
+> - **`Baldosa`** — la pieza de lo que se ELIGE (Acto II: *tarjetas para
+>   elegir, filas para leer*). Sube la UNIDAD, no la grilla. **Su patrón
+>   de grilla es parte del contrato** —la pieza ata alto a ancho— y vive
+>   al pie de su archivo **UNA sola vez**: `width: '50%'` con el aire
+>   ADENTRO de la celda, sin `gap`, porque *el gap no se ve en el
+>   porcentaje y la resta se hace en píxeles*.
+> - **`BarraTabs`** gana el **destino central** (`destacada` en el ítem,
+>   por FORMA y no por coordenada — soporta 2 a 5 tabs) y el overshoot de
+>   la huella, firmado.
+> - **`Entrada` deja las layout animations** — `FadeIn*` la dejaban en
+>   `position: absolute` en RN-web y **colapsaba a altura 0 cualquier
+>   contenedor que necesite el alto de sus hijos**. Mismo gesto, mismos
+>   números, pero **deja de tocar el layout**. Y respeta `reduce-motion`,
+>   que solo miraba `memorial`.
+> - **`Celda`** — el reparto del ancho curado en seis vueltas (el nombre
+>   de la mascota truncaba a **`Z…`**). Lo que quedó vivo: `minWidth: 96`
+>   en el sujeto · `minWidth: 0` + `flexShrink: 1` en la derecha —**sin
+>   ese `minWidth: 0` el `flexShrink` no encoge nada**, el default de un
+>   ítem flex es `min-width: auto`.
+>
+> **⚖️ LA LEY QUE DEJA ESTA TANDA, y vale para toda pieza:** ***la raíz de
+> una pieza es DUEÑA DE SU ESPACIO*** — y el espacio son **las dos**
+> dimensiones. Delegar la geometría a un hijo deja a la pieza a merced de
+> cómo la envuelvan, y **cada plataforma resuelve esa ausencia a su
+> manera**: la misma `Baldosa` colapsaba a 0 en web y se estiraba a 800 px
+> en Android. *La ausencia no tiene comportamiento portable; la
+> declaración sí.*
+>
+> **El juez** (`verify:diseno`): **26 → 32 auto-pruebas**. Nacen R36
+> (ritmo) · R37 (radios) · R38 (separadores) · R39 (escala) · R40
+> (placeholders sin firma), y **R35 entra al corral** — corría sin estar
+> en `REGLAS`, invisible para los tres guards estructurales. Nace el
+> **tercer guard**: `corridas → REGLAS`.
 
 > **S96-B · SEGUNDA TANDA — el ensanche firmado, cuatro piezas y una regla.**
 > Contador re-medido (L-141): **63** (66 `.tsx` − 2 `.web` − infra). R17
