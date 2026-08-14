@@ -59,6 +59,7 @@ import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
 import { PinMovible } from '../components/PinMovible'
 import { SelectorVentana } from '../components/SelectorVentana'
 import { PuertaDeOficio, type CapaDeOficio } from '../components/PuertaDeOficio'
+import { Destape } from '../components/Destape'
 import { SelectorDestinoItem, type DestinoItem } from '../components/SelectorDestinoItem'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
@@ -184,6 +185,160 @@ function MuestraLugar() {
 // disparador. El recuadro la acota: en producción barre la pantalla
 // entera, y ocupar la galería con un flash a pantalla completa cada vez
 // que alguien scrollea sería el adorno que la Ley 16 quita.
+function MuestraBarraPorCapacidad() {
+  const { theme: t } = useTheme()
+  const [activo, setActivo] = useState('index')
+  const [overshoot, setOvershoot] = useState(false)
+  // LOS CUATRO PERFILES DE LA FIRMA (mesa 13-ago). La barra NO los
+  // conoce: los compone quien la monta. Aca se listan para que el gate
+  // los vea uno al lado del otro — que es lo unico que permite juzgar si
+  // el destino central se lee igual con 5, con 4 y con 2 tabs.
+  const G = (n: string) => ({ color, activa, colorHuella }: { color: string; activa: boolean; colorHuella: string }) => (
+    <Icono nombre={n as IconoNombre} tinta={color} huella={colorHuella} activa={activa} />
+  )
+  // LA TABLA FIRMADA de `docs/LA_CASA_DEL_PRESTADOR.md` §2, verbatim en
+  // sus cinco filas. Se monta ENTERA porque el gate del destino central
+  // no se puede juzgar en un caso: hay que ver que ATENDER pese igual
+  // cuando cae al centro geometrico (5 y 3) y cuando NO cae (recepcion,
+  // donde es el tercero de cuatro). El repartidor no tiene fila porque
+  // §2.2 le niega la barra entera — una barra compartida es la promesa
+  // de que hay mas de un lugar donde ir.
+  const PERFILES: Array<{ rotulo: string; items: BarraTabsItem[] }> = [
+    {
+      rotulo: 'titular / administrador con local — CINCO (ATENDER cae al centro geometrico)',
+      items: [
+        { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
+        { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true, badge: 3 },
+        { key: 'negocio', etiqueta: 'Negocio', icono: G('negocio') },
+        { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
+      ],
+    },
+    {
+      rotulo: 'recepcion — CUATRO · 🔴 EL CASO QUE MANDA: ATENDER es el TERCERO DE CUATRO, NO el centro. Si el destaque dependiera de la posicion, esta fila lo rompe.',
+      items: [
+        { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
+        { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true },
+        { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
+      ],
+    },
+    {
+      rotulo: 'vendedor puro — TRES (sin DATOS; ATENDER vuelve al centro)',
+      items: [
+        { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true },
+        { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
+      ],
+    },
+    {
+      rotulo: 'profesional puro — TRES, SIN destino central (no hay mostrador que atender: el mismo gate que le pone visible:false a la plata del dia)',
+      items: [
+        { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
+        { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
+        { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
+      ],
+    },
+  ]
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <Boton
+        variante="compacto"
+        etiqueta={overshoot ? 'Overshoot: ENCENDIDO (candidata §5.4)' : 'Overshoot: apagado (default)'}
+        onPress={() => setOvershoot((v) => !v)}
+      />
+      {/* EL GATE DEL GLIFO — §6b: a 21px, junto a cinco del registry.
+          A ese tamano la huella sobrevive o es ruido (Ley 9), y un glifo
+          solo no dice nada: lo que se juzga es si `atender` se distingue
+          de sus vecinos de un vistazo, que es como se ve en la barra. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          El glifo a 21px entre sus vecinos — atender · hoy · datos · negocio · cuenta · campana
+        </Texto>
+        <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+          {(['atender', 'hoy', 'datos', 'negocio', 'cuenta', 'campana'] as IconoNombre[]).map((n) => (
+            <Icono key={n} nombre={n} tamano={21} />
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+          {(['atender', 'hoy', 'datos', 'negocio', 'cuenta', 'campana'] as IconoNombre[]).map((n) => (
+            <Icono key={n} nombre={n} tamano={44} />
+          ))}
+        </View>
+      </View>
+      {PERFILES.map((p) => (
+        <View key={p.rotulo} style={{ gap: spacing[2] }}>
+          <Texto variante="apoyo">{p.rotulo}</Texto>
+          <View style={{ borderWidth: 1, borderColor: t.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+            <BarraTabs
+              items={p.items}
+              activo={p.items.some((i) => i.key === activo) ? activo : p.items[0].key}
+              onCambiar={setActivo}
+              estadoPorHuella
+              overshootHuella={overshoot}
+            />
+          </View>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function MuestraDestape() {
+  const [corriendo, setCorriendo] = useState(false)
+  const [conLogo, setConLogo] = useState(false)
+  const [fin, setFin] = useState<string | null>(null)
+  const { theme: t } = useTheme()
+  // LAS TABS DE LA MUESTRA son la composicion por capacidad del titular
+  // con local (la barra mas larga): si el destape se lee bien con cuatro,
+  // se lee con las de tres.
+  const TABS = [
+    { key: 'index', etiqueta: 'Hoy' },
+    { key: 'atender', etiqueta: 'Atender' },
+    { key: 'negocio', etiqueta: 'Negocio' },
+    { key: 'cuenta', etiqueta: 'Cuenta' },
+  ]
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View style={{ height: 380, borderRadius: radius.suave, overflow: 'hidden', backgroundColor: t.bg.overlay }}>
+        {corriendo ? (
+          <Destape
+            key={String(conLogo)}
+            nombreNegocio="Clinica Aurora"
+            logo={conLogo ? { uri: 'https://placehold.co/200x200/png' } : null}
+            tabsHabilitadas={TABS}
+            alTerminar={() => {
+              setFin('alTerminar disparado — del ultimo gesto, no de un temporizador')
+              setCorriendo(false)
+            }}
+          />
+        ) : null}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        <Boton
+          variante="compacto"
+          etiqueta="Destapar (monograma)"
+          onPress={() => {
+            setConLogo(false)
+            setFin(null)
+            setCorriendo(true)
+          }}
+        />
+        <Boton
+          variante="compacto"
+          etiqueta="Destapar (con logo)"
+          onPress={() => {
+            setConLogo(true)
+            setFin(null)
+            setCorriendo(true)
+          }}
+        />
+      </View>
+      {fin != null ? <Texto variante="apoyo">{fin}</Texto> : null}
+    </View>
+  )
+}
+
 function MuestraPuerta() {
   const [activo, setActivo] = useState(false)
   const [capa, setCapa] = useState<CapaDeOficio>('consumo')
@@ -2969,6 +3124,17 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="Destape (S97+) — la ceremonia de cierre del wizard de alta">
+          {/* LA UNICA CASA DONDE LA RAMPA DE 6 STOPS ES LEGAL EN EL
+              PRESTADOR (§9bis.3, solo-marca). Fuera del destape sigue
+              prohibida — por eso la muestra vive aca y no como token
+              suelto de una paleta.
+              El boton de fin NO es adorno: prueba que `alTerminar` sale
+              del ULTIMO GESTO REAL y no de un temporizador paralelo, que
+              es la firma de mesa que gobierna esta pieza. */}
+          <MuestraDestape />
+        </Seccion>
+
         <Seccion titulo="PuertaDeOficio (S96) — el barrido al cambiar de oficio (§3)">
           <MuestraPuerta />
         </Seccion>
@@ -4365,6 +4531,17 @@ function GaleriaInterna() {
         {/* BarraTabs — B3.7 */}
         <Seccion titulo="Badge (S88) — el contador de novedades sobre un ícono (extraído de BarraTabs; la campana es su 2º consumidor)">
           <EjemploBadge />
+        </Seccion>
+
+        <Seccion titulo="BarraTabs (S97+) — el destino CENTRAL y la composicion por capacidad">
+          {/* LOS CINCO CASOS JUNTOS, porque la comparacion ES la ley: la
+              barra tiene que leerse igual con 5, con 3 y con 2, y el
+              centro de una de 4 cae ENTRE dos items. La pieza no elige
+              cual destacar ni cuantas tabs hay — las compone quien sabe
+              que puede cada quien.
+              El toggle enciende la CANDIDATA §5.4 (overshoot 280 ms), que
+              nace apagada: su gate es del founder, en dispositivo. */}
+          <MuestraBarraPorCapacidad />
         </Seccion>
 
         <Seccion titulo="Barra de tabs — conmutá de verdad (el subrayado aparece, no se desliza)">

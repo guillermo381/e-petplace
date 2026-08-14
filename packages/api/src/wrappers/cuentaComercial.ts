@@ -602,3 +602,123 @@ export async function actualizarNombreCuentaComercial(
   }
   return { ok: true, data: { nombre_comercial: r.nombre_comercial } };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S97-A · LA NATURALEZA SE SOLICITA — el paso ② del wizard PROPONE, jamás
+// otorga (firma de mesa 14-ago; hallazgo de C, medido por A).
+//
+// EL PORQUÉ, con el literal que lo decide: `otorgar_rol_vendedor` es
+// ADMIN-ONLY y lleva el foso escrito en su propio cuerpo — *«Si el titular
+// pudiera dárselo, cualquiera con una cuenta comercial se auto-habilitaría a
+// vender sin que nadie revise — y §4.2 dice lo contrario: el vendedor
+// PROPONE, e-PetPlace PUBLICA.»* ⇒ el dueño no puede prender «Tu tienda», y
+// eso NO es un grant faltante: es la vitrina curada.
+//
+// LO QUE LA MEDICIÓN CONTESTÓ (y por eso esto NO duplica el alta): el canal
+// de revisión YA existe —la cuenta nace `pendiente_validacion`, con su chip—
+// pero **el alta no registra QUÉ naturaleza se quiere**
+// (`crear_cuenta_comercial_inicial` no tiene un solo parámetro de naturaleza),
+// y para las **6 cuentas activas medidas con solo servicios** el camino del
+// alta está cerrado: crearía una SEGUNDA cuenta. Lo que faltaba era la
+// declaración, no el canal.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Las dos naturalezas de cara al prestador: `Tus servicios` y `Tu tienda`
+ *  (`LA_CASA_DEL_PRESTADOR` §1.2). El vocabulario es el del motor —
+ *  regla 22: el label se mide, no se adivina; `vendedor` NO existe. */
+export type NaturalezaComercial = 'prestador_servicios' | 'seller_productos';
+
+/** Tres estados y sólo tres. `solicitada` es el que la ley del contador
+ *  (S91) manda dejar FUERA del número: *él llega a cero, después esperamos
+ *  nosotros* — una naturaleza solicitada ya no es trabajo suyo. */
+export type EstadoNaturaleza = 'activa' | 'solicitada' | 'ninguna';
+
+export interface NaturalezaDeCuenta {
+  naturaleza: NaturalezaComercial;
+  estado: EstadoNaturaleza;
+}
+
+/** El dueño PIDE una naturaleza. **No la habilita** — ningún lector de
+ *  permisos mira la solicitud, y el cinturón de la migración lo prueba
+ *  (`es_vendedor_de` sigue en false después de proponer).
+ *  Pedir lo que ya se tiene NO rebota: devuelve `estado:'activa'` con
+ *  `yaLaTiene`, para que la pantalla no tenga que saber el estado antes de
+ *  preguntar. */
+export async function solicitarNaturalezaComercial(
+  cuentaComercialId: string,
+  naturaleza: NaturalezaComercial,
+): Promise<
+  ResultadoWrapper<
+    { estado: 'activa' | 'solicitada'; yaLaTiene: boolean; yaEstabaPedida: boolean },
+    CodigoErrorCuentaComercial
+  >
+> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient().rpc('solicitar_naturaleza_comercial', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_tipo_actor: naturaleza,
+  });
+  if (error) return { ok: false, codigo: 'rechazado_por_servidor', mensaje: error.message };
+  const r = data as { ok?: unknown; estado?: unknown; ya_la_tiene?: unknown; ya_estaba_pedida?: unknown } | null;
+  if (!r || r.ok !== true || (r.estado !== 'activa' && r.estado !== 'solicitada')) {
+    return errorGenerico('error_desconocido');
+  }
+  return {
+    ok: true,
+    data: {
+      estado: r.estado,
+      yaLaTiene: r.ya_la_tiene === true,
+      yaEstabaPedida: r.ya_estaba_pedida === true,
+    },
+  };
+}
+
+/** El camino de corrección — D-791 en su forma general: **la configuración
+ *  jamás solo agrega.** Retirar la solicitud NO revoca un rol ya otorgado
+ *  (son dos hechos y el segundo no vive ahí); la respuesta lo dice para que
+ *  la pantalla no prometa una baja que no ocurrió. */
+export async function retirarNaturalezaSolicitada(
+  cuentaComercialId: string,
+  naturaleza: NaturalezaComercial,
+): Promise<ResultadoWrapper<{ estabaSolicitada: boolean }, CodigoErrorCuentaComercial>> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient().rpc('retirar_naturaleza_solicitada', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_tipo_actor: naturaleza,
+  });
+  if (error) return { ok: false, codigo: 'rechazado_por_servidor', mensaje: error.message };
+  const r = data as { ok?: unknown; estaba_solicitada?: unknown } | null;
+  if (!r || r.ok !== true) return errorGenerico('error_desconocido');
+  return { ok: true, data: { estabaSolicitada: r.estaba_solicitada === true } };
+}
+
+/** El lector que compone el paso ② del wizard **y el contador**. Devuelve las
+ *  DOS naturalezas siempre, cada una con su estado — jamás una lista corta:
+ *  una naturaleza ausente de la respuesta y una en `ninguna` se leerían
+ *  igual, y sólo la segunda es un dato. */
+export async function obtenerNaturalezasDeCuenta(
+  cuentaComercialId: string,
+): Promise<ResultadoWrapper<NaturalezaDeCuenta[], CodigoErrorCuentaComercial>> {
+  const uid = await uidActual();
+  if (!uid) return errorGenerico('sin_sesion');
+  const { data, error } = await getClient().rpc('obtener_naturalezas_de_cuenta', {
+    p_cuenta_comercial_id: cuentaComercialId,
+  });
+  if (error) return { ok: false, codigo: 'rechazado_por_servidor', mensaje: error.message };
+  const filas = (data ?? []) as { tipo_actor?: unknown; estado?: unknown }[];
+  // Cero filas = la RLS del lector no concedió (ni dueño, ni operador, ni
+  // admin). NO se degrada a "las dos en ninguna": eso pintaría un negocio
+  // vacío donde lo que hubo fue una puerta cerrada (L-139).
+  if (filas.length === 0) {
+    return { ok: false, codigo: 'rechazado_por_servidor', mensaje: 'La cuenta no es alcanzable desde esta sesión.' };
+  }
+  return {
+    ok: true,
+    data: filas.map((f) => ({
+      naturaleza: f.tipo_actor as NaturalezaComercial,
+      estado: f.estado as EstadoNaturaleza,
+    })),
+  };
+}

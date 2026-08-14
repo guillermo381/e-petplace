@@ -12,6 +12,43 @@ export const motion = {
     normal:   250,
     slow:     400,
     verySlow: 600,
+
+    /* ── N10 · EL VOCABULARIO CERRADO DEL MOVIMIENTO (Norte, mesa
+       13-ago-2026) ──────────────────────────────────────────────────
+       «Un bezier, tres duraciones: 150 micro · 300 estándar · 520
+       grande. Qué se anima es lista cerrada. Nada más se mueve.»
+
+       🔴 POR QUÉ SE AGREGAN EN VEZ DE MAPEARSE A LOS DE ARRIBA: de las
+       tres del Norte, **solo 150 existía** (`fast`). El 300 vivía como
+       número PRIVADO dentro de `Entrada` —con un comentario que lo
+       llama «techo de Ley 6: INTOCABLE», o sea una ley escrita en una
+       constante local— y el **520 no existía en ninguna parte**. Un
+       vocabulario declarado CERRADO cuyos valores no son tokens no es
+       un vocabulario: es una convención que cada pieza vuelve a
+       teclear, y la primera que teclee 500 en vez de 520 no rompe
+       ningún gate.
+
+       Los cinco de arriba NO se tocan y NO se deprecan en esta tanda:
+       `normal` (250) tiene consumidores vivos y re-apuntarlos a 300 es
+       un cambio VISIBLE en toda la casa — enmienda con gate, no línea
+       de token. Lo que nace acá es el vocabulario del Norte con su
+       nombre, para que lo NUEVO tenga de dónde salir. */
+    micro:    150,  // chips, crossfade de estado
+    estandar: 300,  // entradas, Hojas — el techo de Ley 6
+    grande:   520,  // la celebración (el destape). Único registro «grande».
+
+    /** EL CUARTO VALOR, y se rotula así porque N10 dice «TRES
+     *  duraciones»: el overshoot de la huella de tab pide **280**, que
+     *  no es ninguna de las tres. Se deposita con su nombre en vez de
+     *  quedar tecleado en la barra, pero **no se cuela al vocabulario
+     *  cerrado**: vive rotulado como excepción de UNA candidata.
+     *
+     *  ☠️ MUERTE: con el gate de `DIRECCION_ARTE` §5.4, que lista el
+     *  overshoot como CANDIDATA SIN FIRMA. Si el founder lo firma, el
+     *  280 entra al vocabulario con su registro; si lo rechaza, este
+     *  token se retira junto con la prop `overshootHuella` de
+     *  `BarraTabs`. Un token de candidata no sobrevive a su gate. */
+    overshootTab: 280,
   },
 
   easing: {

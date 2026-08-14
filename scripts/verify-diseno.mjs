@@ -200,7 +200,7 @@ function r1(archivos) {
  *  ESTE LINT y SIN comentarios (la historia del número: grep -c dijo 7
  *  —contaba líneas—, el lint crudo dijo 8, y despojar prosa dijo 4:
  *  el contador lo mide la herramienta que lo exige, L-141+L-170). Solo baja. */
-const BASELINE_HEX = 4;
+const BASELINE_HEX = 1;
 function r2(archivos) {
   let hexes = 0;
   const porArchivo = [];
@@ -1659,11 +1659,82 @@ const FIXTURE_R30 = [
   { path: 'apps/cliente/src/(fixture)/GlifoCopiado.tsx', src: `<Path d="${PATHS_R30[0]}" />` },
 ];
 
+/** Corpus de relleno para los fixtures de las reglas que anclan contra
+ *  `MINIMOS_CORPUS.apps` (las cuatro del Norte). Archivos vacíos: no
+ *  aportan violaciones, solo altura de corpus — su único trabajo es que
+ *  el ancla no se encienda y el rojo medido sea el del brazo real. */
+const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
+  path: `(fixture-relleno-${i})`,
+  src: '',
+}));
+
+/* ── LOS PISOS DE LAS CUATRO DEL NORTE ──────────────────────────────────
+   Viven acá, y no pegados a su función como los demás baselines, por una
+   razón mecánica: sus FIXTURES los leen, y los fixtures se evalúan antes
+   que el cuerpo de las reglas. Un `const` no se hoistea. El porqué de
+   cada número está en el header de su regla, más abajo.
+
+   LOS CUATRO SON EL NÚMERO MEDIDO DEL CORPUS VIVO al abrir la tanda, no
+   una cuota: 21 espaciados crudos · 20 radios crudos · 6 pantallas sobre
+   el presupuesto de separadores · 6 sobre el de tamaños. Solo bajan.
+
+   ⚠️ LOS DOS PRIMEROS SE MIDIERON DOS VECES Y DIERON DISTINTO, y el que
+   vale es el segundo: un `grep` sobre `apps` + `packages` dijo **36** y
+   **21**; este lint, que corre solo sobre `apps` y despoja comentarios
+   (L-170), dice **21** y **20**. No hay contradicción — miden corpus
+   distintos —, pero **el piso lo fija la herramienta que lo exige**, o
+   el ratchet arrancaría con margen regalado. Es exactamente la historia
+   de R2 (grep 7 · lint crudo 8 · despojando prosa 4), y por eso se
+   escribe: la próxima regla se ahorra el paso. */
+const BASELINE_R36 = 21;
+const BASELINE_R37 = 20;
+const BASELINE_R38 = 6;
+const BASELINE_R39 = 6;
+const PRESUPUESTO_SEPARADORES = 3;
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
   R1: [{ path: '(fixture)', src: '<SelectorOpcion naturaleza="foo" />\n<SelectorOpcion entidad naturaleza="existe" />' }],
   R2: [{ path: '(fixture)', src: Array(BASELINE_HEX + 1).fill("color: '#ABC123'").join('\n') }],
+  /* R35 · SU FIXTURE LLEGA UNA SESIÓN TARDE, y el porqué es el hallazgo
+     de S97+-B: **la regla corría sin estar en `REGLAS`**, así que los
+     TRES guards estructurales —que iteran `REGLAS`— no podían verla.
+     Nació en S96-B, se reportó "DURA EN 0" en S96 y otra vez en S97, y
+     en las dos el número salía de una regla **de la que nadie había
+     comprobado que pudiera salir roja**. El caso limpio de L-192: no
+     falló el guard, falló que el objeto vigilado nunca entró al corral.
+
+     EL FIXTURE TRAE LA GALERÍA A PROPÓSITO. R35 tiene ancla (exige ver
+     al menos un archivo de `packages/ui/src/gallery/`), así que un
+     fixture sin ese path saldría rojo **por el ancla y no por la
+     regla** — verde-por-la-razón-equivocada dado vuelta: un ROJO por la
+     razón equivocada, que está igual de roto. El brazo del ancla tiene
+     su propio rojo abajo, en EXTRAS_BRAZOS. */
+  R35: [{ path: 'packages/ui/src/gallery/(fixture).tsx', src: "style={{ backgroundColor: '#00000010' }}" }],
+  /* LAS CUATRO DEL NORTE · sus fixtures traen CORPUS DE RELLENO, y no es
+     un truco: las cuatro anclan contra `MINIMOS_CORPUS.apps`, así que un
+     fixture de un solo archivo saldría rojo POR EL ANCLA y dejaría el
+     brazo real sin probar — el mismo error que R35 tenía y que esta
+     tanda vino a cerrar. El relleno hace pasar el ancla para que el rojo
+     que se mide sea el de la regla. El ancla tiene su rojo aparte, en
+     EXTRAS_BRAZOS. */
+  R36: [...RELLENO_APPS, { path: '(fixture)', src: Array(BASELINE_R36 + 1).fill('paddingTop: 13').join('\n') }],
+  R37: [...RELLENO_APPS, { path: '(fixture)', src: Array(BASELINE_R37 + 1).fill('borderRadius: 999').join('\n') }],
+  R38: [
+    ...RELLENO_APPS,
+    ...Array.from({ length: BASELINE_R38 + 1 }, (_, i) => ({
+      path: `(fixture-sep-${i})`,
+      src: Array(PRESUPUESTO_SEPARADORES + 1).fill('<Separador />').join('\n'),
+    })),
+  ],
+  R39: [
+    ...RELLENO_APPS,
+    ...Array.from({ length: BASELINE_R39 + 1 }, (_, i) => ({
+      path: `(fixture-size-${i})`,
+      src: 'size.xs\nsize.sm\nsize.base\nsize.md',
+    })),
+  ],
   R3: [{ path: '(fixture)', src: '<Tarjeta elevacion="flotante">' }],
   R4: [{ path: '(fixture)', src: "style={{ shadowColor: '#000000', shadowOpacity: 0.5 }}\nstyle={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}" }],
   R5: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.accent.cta }}\n<ThemeProvider cta="oficio">' }],
@@ -2099,7 +2170,181 @@ function r34(archivos) {
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34 };
+/* ═══════════════════════════════════════════════════════════════════════
+   LAS CUATRO REGLAS DEL NORTE (S97+-B — mesa del 13-ago)
+
+   POR QUÉ EXISTEN, y es la razón por la que se escriben ANTES de tocar
+   una pantalla: el Norte tiene diez artículos y **cuatro son medibles
+   por máquina** (el ritmo · el radio · el separador · la escala). Los
+   otros seis son juicio. Mecanizar los cuatro es lo que permite que C y
+   D construyan sin pedir gate por pieza: lo que un lint puede verificar
+   va masivo y el founder NO lo mira (la regla de la mesa, S81).
+
+   LOS CUATRO SON RATCHET, JAMÁS DUROS EN 0, y eso es una decisión con
+   número: el corpus vivo tiene 36 espaciados crudos, 21 radios crudos,
+   6 pantallas sobre el presupuesto de separadores y 6 sobre el de
+   tamaños. Nacer en 0 pondría el hook en rojo para las tres pistas en
+   pleno ciclo — y un guard que le frena el commit a todo el mundo se
+   desarma el mismo día. Nacen en su número MEDIDO: lo viejo queda
+   VISIBLE en cada corrida y **lo nuevo no puede entrar**.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/** R36 · N2 · EL RITMO — el espaciado sale del TOKEN.
+ *
+ *  🔴 LO QUE ESTA REGLA **NO** MIDE, y es el hallazgo que la formó: el
+ *  Norte dice *«todo espaciado múltiplo de 8 (4 solo para pares
+ *  íntimos)»*, y **mecanizar eso literal pondría en rojo la escala
+ *  firmada de la casa**: `spacing` tiene 4·6·10·12·20·28, todos legales
+ *  y usadísimos desde v3.1. Un lint que exige múltiplos de 8 declara
+ *  ilegal medio sistema de tokens.
+ *
+ *  ⇒ La regla mide lo que el Norte de verdad quiere y el token ya
+ *  habilita: **que nadie re-decida el ritmo a mano.** Los números del
+ *  Norte (32 entre secciones · 16 entre tarjetas · 16-20 de padding ·
+ *  24 sobre el título) son EXACTAMENTE `spacing[8]`, `spacing[4]`,
+ *  `spacing[4|5]` y `spacing[6]` — cumplir N2 y salir del token son la
+ *  misma acción. El múltiplo de 8 gobierna la COMPOSICIÓN, que es
+ *  juicio de gate; el crudo es lo mecanizable.
+ *
+ *  Se reporta APARTE el crudo que ni siquiera coincide con un valor de
+ *  la escala: ése no es "el token escrito a mano", es un número
+ *  inventado, y son dos defectos distintos. */
+const VALORES_SPACING = new Set([0, 1, 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64, 80, 96, 112, 128]);
+const RE_ESPACIADO = /\b(padding|margin|gap|rowGap|columnGap)(?:Top|Bottom|Left|Right|Horizontal|Vertical|Start|End)?\s*:\s*(\d+)\b/g;
+function r36(archivos) {
+  const fallos = [];
+  let crudos = 0, fueraDeEscala = 0;
+  const porArchivo = [];
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    let enArchivo = 0;
+    for (const m of limpio.matchAll(RE_ESPACIADO)) {
+      const v = Number(m[2]);
+      crudos++; enArchivo++;
+      if (!VALORES_SPACING.has(v)) fueraDeEscala++;
+    }
+    if (enArchivo > 0) porArchivo.push(`${path}: ${enArchivo}`);
+  }
+  if (crudos > BASELINE_R36)
+    fallos.push(
+      `N2 (el ritmo): ${crudos} espaciado(s) con número crudo (baseline ${BASELINE_R36}) — el ritmo sale de \`spacing\`, jamás de un número por pantalla. Los valores del Norte YA son tokens: 32=spacing[8] · 24=spacing[6] · 16=spacing[4] · 20=spacing[5]:\n    ${porArchivo.join('\n    ')}`,
+    );
+  fallos.push(...ancla('R36', archivos.length, MINIMOS_CORPUS.apps, 'archivo(s) de apps'));
+  return {
+    fallos,
+    info: `${crudos}/${BASELINE_R36} crudos · ${fueraDeEscala} fuera de la escala de \`spacing\`${crudos < BASELINE_R36 ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
+
+/** R37 · N4 · EL RADIO ÚNICO — una sola escala, la de `radius`.
+ *
+ *  LO QUE ENCONTRÓ AL MEDIRSE, antes de existir (por eso se mide antes
+ *  de curar): **13 píldoras escritas `borderRadius: 999`** cuando el
+ *  token de la casa es `radius.full` = **9999**. Las dos clampean igual
+ *  y por eso nadie lo vio nunca — *el defecto no es visual, es que la
+ *  píldora de la casa dejó de tener un solo dueño*. Y **8 valores que
+ *  no existen en ninguna escala**: 2 · 5 · 22 · 36.
+ *
+ *  Los dos se cuentan APARTE a propósito. La píldora a mano es un token
+ *  re-tecleado (cura mecánica, cero cambio visual); el 22 y el 36 son
+ *  geometría inventada, y ésos SÍ cambian el dibujo al curarse ⇒ su
+ *  cura es de gate, no de reemplazo. Un número que mezcla las dos
+ *  esconde justo cuál se puede pagar barato. */
+const VALORES_RADIUS = new Set([0, 4, 8, 10, 12, 16, 20, 24, 9999]);
+const RE_RADIO = /\bborderRadius(?:TopLeft|TopRight|BottomLeft|BottomRight)?\s*:\s*(\d+)\b/g;
+function r37(archivos) {
+  const fallos = [];
+  let crudos = 0, pildoraAMano = 0, inventados = 0;
+  const porArchivo = [];
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    let enArchivo = 0;
+    for (const m of limpio.matchAll(RE_RADIO)) {
+      const v = Number(m[1]);
+      crudos++; enArchivo++;
+      if (v >= 100) pildoraAMano++;
+      else if (!VALORES_RADIUS.has(v)) inventados++;
+    }
+    if (enArchivo > 0) porArchivo.push(`${path}: ${enArchivo}`);
+  }
+  if (crudos > BASELINE_R37)
+    fallos.push(
+      `N4 (el radio único): ${crudos} borderRadius con número crudo (baseline ${BASELINE_R37}) — la casa tiene UNA escala de radios (\`radius\`): 4·8·10·12·16·20·24·full. La píldora es \`radius.full\` (9999), jamás un 999 tecleado:\n    ${porArchivo.join('\n    ')}`,
+    );
+  fallos.push(...ancla('R37', archivos.length, MINIMOS_CORPUS.apps, 'archivo(s) de apps'));
+  return {
+    fallos,
+    info: `${crudos}/${BASELINE_R37} crudos · ${pildoraAMano} píldora(s) a mano (radius.full es 9999) · ${inventados} fuera de toda escala${crudos < BASELINE_R37 ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
+
+/** R38 · N3 · LA MUERTE DEL SEPARADOR — presupuesto de 3 por pantalla.
+ *
+ *  «Entre secciones separa el espacio + el título» (N3). La línea se
+ *  reserva para listas densas de datos, y el Norte le pone número:
+ *  **máximo 3 por pantalla**. Ese techo es lo mecanizable de N3 — que
+ *  la línea sea "de lista densa" es juicio, y el juicio es de gate.
+ *
+ *  ⚠️ EL CORPUS EXCLUYE LA GALERÍA A PROPÓSITO: `TokenGallery` monta
+ *  **16** separadores y está bien que lo haga — su trabajo es exhibir
+ *  piezas en fila, no componer una pantalla de producto. Meterla al
+ *  corpus daría un rojo permanente sobre el único archivo cuyo oficio
+ *  es tener muchos de todo. (Es el mismo criterio con el que R35 mira
+ *  la galería para el color y no para la composición.) */
+function r38(archivos) {
+  const fallos = [];
+  const excedidas = [];
+  for (const { path, src } of archivos) {
+    const n = (sinComentarios(src).match(/<Separador\b/g) ?? []).length;
+    if (n > PRESUPUESTO_SEPARADORES) excedidas.push(`${path}: ${n}`);
+  }
+  if (excedidas.length > BASELINE_R38)
+    fallos.push(
+      `N3 (la muerte del separador): ${excedidas.length} pantalla(s) sobre el presupuesto de ${PRESUPUESTO_SEPARADORES} (baseline ${BASELINE_R38}) — entre secciones separan el ESPACIO y el TÍTULO, no la línea:\n    ${excedidas.join('\n    ')}`,
+    );
+  fallos.push(...ancla('R38', archivos.length, MINIMOS_CORPUS.apps, 'archivo(s) de apps'));
+  return {
+    fallos,
+    info: `${excedidas.length}/${BASELINE_R38} pantalla(s) sobre el presupuesto de ${PRESUPUESTO_SEPARADORES}${excedidas.length < BASELINE_R38 ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
+
+/** R39 · N1 · LA ESCALA — máximo tres tamaños tipográficos por pantalla.
+ *
+ *  QUÉ MIDE EXACTAMENTE, y la distinción es el corazón de la regla:
+ *  cuenta los `typography.size.*` **distintos** que una pantalla escribe
+ *  A MANO. Una pantalla que compone con `<Texto variante="…">` da CERO
+ *  y no aparece nunca — y eso es correcto, no un hueco: `Texto` ES el
+ *  portador de la jerarquía (S71), y su receta ya está firmada adentro.
+ *  Lo que N1 combate no es tener cuatro tamaños: es que la jerarquía se
+ *  **re-decida en cada pantalla**, que es literalmente el problema por
+ *  el que `Texto` nació.
+ *
+ *  ⇒ Un archivo que sube en esta regla tiene una cura ya construida:
+ *  montar `Texto`. Por eso el rojo es accionable y no una queja. */
+const PRESUPUESTO_TAMANOS = 3;
+const RE_SIZE = /\btypography\.size\.(\w+)\b|\btypography\.size\['([^']+)'\]|\bsize\.(xs|sm|base|md|lg|xl|hero|display)\b|\bsize\['(2xl|3xl|4xl)'\]/g;
+function r39(archivos) {
+  const fallos = [];
+  const excedidas = [];
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    const usados = new Set();
+    for (const m of limpio.matchAll(RE_SIZE)) usados.add(m[1] ?? m[2] ?? m[3] ?? m[4]);
+    if (usados.size > PRESUPUESTO_TAMANOS) excedidas.push(`${path}: ${usados.size} (${[...usados].join(', ')})`);
+  }
+  if (excedidas.length > BASELINE_R39)
+    fallos.push(
+      `N1 (la escala): ${excedidas.length} pantalla(s) escriben más de ${PRESUPUESTO_TAMANOS} tamaños a mano (baseline ${BASELINE_R39}) — la jerarquía la porta \`Texto\`, no la pantalla:\n    ${excedidas.join('\n    ')}`,
+    );
+  fallos.push(...ancla('R39', archivos.length, MINIMOS_CORPUS.apps, 'archivo(s) de apps'));
+  return {
+    fallos,
+    info: `${excedidas.length}/${BASELINE_R39} pantalla(s) sobre el presupuesto de ${PRESUPUESTO_TAMANOS} tamaños a mano${excedidas.length < BASELINE_R39 ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2204,6 +2449,22 @@ const EXTRAS_BRAZOS = [
   //    el registry lleno a propósito, así que este brazo no se enciende
   //    ahí: sin esta línea, el guard nacería decorativo (el caso de R16).
   ['R30·sin el registry (el SET vacío no verifica nada)', r30, [{ path: 'apps/cliente/src/(fixture)/X.tsx', src: '<Path d="M4.4 5.2h15.2a1.5 1.5 0 0 1 1.5 1.5v9.8Z" />' }]],
+  /* ── R35: EL ANCLA, que es su guard de fuente y el brazo que faltaba.
+     Sin un archivo de `packages/ui/src/gallery/` en el corpus, R35
+     informaría "0 colores a mano" en VERDE sobre el único lugar de `ui`
+     que se compone como pantalla — que es el lugar POR EL QUE nació. Su
+     fixture principal trae la galería a propósito, así que este brazo no
+     se enciende ahí: sin esta línea el guard nacería decorativo. */
+  ['R35·sin la galería en el corpus (el ancla)', r35, [{ path: 'packages/ui/src/components/X.tsx', src: '' }]],
+  /* ── LAS CUATRO DEL NORTE: sus anclas. Los fixtures principales traen
+     RELLENO_APPS justamente para que el ancla NO se encienda y se pruebe
+     el brazo real; estos cuatro prueban el ancla misma, con corpus corto
+     y sin violación. Sin ellos, cuatro guards de fuente vivirían sin que
+     nadie hubiera comprobado que suenan (el caso de R16 en S83). */
+  ['R36·ancla (corpus de apps derrumbado)', r36, [{ path: '(fixture)', src: '' }]],
+  ['R37·ancla (corpus de apps derrumbado)', r37, [{ path: '(fixture)', src: '' }]],
+  ['R38·ancla (corpus de apps derrumbado)', r38, [{ path: '(fixture)', src: '' }]],
+  ['R39·ancla (corpus de apps derrumbado)', r39, [{ path: '(fixture)', src: '' }]],
 ];
 for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
@@ -2290,6 +2551,11 @@ corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 corridas.push(['R32 (la esquina compartida: los 20dp de la lámina)', r32(apps)]);
 corridas.push(['R33 (la superficie de la huella se declara)', r33(apps)]);
 corridas.push(['R34 (una lista de tres estados no se decide por el largo)', r34(appsCodigo)]);
+// ── LAS CUATRO DEL NORTE (mesa 13-ago) ──
+corridas.push(['R36 (N2 el ritmo: el espaciado sale del token)', r36(apps)]);
+corridas.push(['R37 (N4 el radio único: una sola escala)', r37(apps)]);
+corridas.push(['R38 (N3 la muerte del separador: 3 por pantalla)', r38(apps)]);
+corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
@@ -2301,6 +2567,41 @@ const enCorridas = new Set(corridas.map(([n]) => n.match(/^R\d+/)?.[0]));
 for (const nombre of Object.keys(REGLAS)) {
   if (!enCorridas.has(nombre)) {
     console.error(`ESTRUCTURA ✗ ${nombre} tiene regla y fixture pero NO CORRE contra el código real (L-192)`);
+    estructuraRota++;
+  }
+}
+
+/** TERCER GUARD ESTRUCTURAL (S97+-B) — LA DIRECCIÓN QUE FALTABA, y la
+ *  encontró un defecto REAL de esta misma casa, no una previsión.
+ *
+ *  EL CASO: **R35 corría en `corridas` sin estar en `REGLAS`.** Nació en
+ *  S96-B así y sobrevivió dos sesiones. Los otros dos guards preguntan
+ *  «¿toda regla REGISTRADA está probada?» y «¿toda regla REGISTRADA
+ *  corre?» — los dos iteran `REGLAS`, así que **una regla que corre sin
+ *  registrarse es invisible para los tres**: no tiene fixture, nadie
+ *  comprobó jamás que pueda salir roja, y su número igual se imprime
+ *  cada corrida con cara de medición. En S96 y en S97 se reportó «R35
+ *  DURA EN 0» leyendo una regla de la que nadie había verificado que
+ *  supiera decir que no.
+ *
+ *  ⇒ Es L-192 en su forma más incómoda: **el guard escrito para impedir
+ *  que una regla escape en silencio tenía él mismo la puerta abierta**,
+ *  porque vigilaba el registro en vez de vigilar lo que corre. El
+ *  triángulo (regla · fixture · corrida) solo se cierra si se recorre en
+ *  los dos sentidos.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: ninguna — muere con el lint. */
+for (const [etiqueta] of corridas) {
+  const nombre = etiqueta.match(/^R\d+/)?.[0];
+  if (nombre === undefined) {
+    console.error(`ESTRUCTURA ✗ una corrida no declara su regla en la etiqueta: "${etiqueta}"`);
+    estructuraRota++;
+    continue;
+  }
+  if (!(nombre in REGLAS)) {
+    console.error(
+      `ESTRUCTURA ✗ ${nombre} CORRE contra el código real pero NO está en REGLAS — escapó de la auto-prueba y de los otros dos guards, que iteran REGLAS (L-192). Su número se imprime cada corrida sin que nadie haya comprobado que la regla pueda salir roja.`,
+    );
     estructuraRota++;
   }
 }

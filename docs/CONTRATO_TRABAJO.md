@@ -496,6 +496,47 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 **El porqué, con la letra del founder:** *las idas y vueltas de la traducción HTML→RN cuestan más que el resultado.* Una lámina que se aprueba hay que traducirla, y la traducción **vuelve a abrir todas las decisiones que la lámina creía cerradas** — con el agravante medido de que el CSS de la lámina **tienta a portarse como fuente** (S82: tres portes literales, `#EEECE8` entre ellos).
 
+> ### ENMIENDA S97 (founder, 13-ago-2026) — **EL GATE PASA A SER POR LOTE, NO POR PANTALLA**
+>
+> > **La firma del founder se reserva para TRES cosas: ① enmiendas de ley
+> > del canon · ② dinero · ③ el LOTE en dispositivo.**
+> >
+> > **Las pistas se AUTO-GATEAN contra el Norte** (`DIRECCION_ARTE` §13),
+> > **con captura obligatoria por pantalla.**
+>
+> **Qué cambia, exactamente:** el paso 3 de la regla 80 (*"OTA y MIRAR en el
+> teléfono"*) deja de ser **por pantalla** y pasa a ser **por lote**. Los
+> pasos 1 (vara), 2 (aplicar) y 4 (subir a la ley cuando queda) **no
+> cambian**.
+>
+> **Qué NO cambia, y es lo que impide leer esto como un relajamiento:**
+> **L-153 sigue rigiendo — el gate en dispositivo sigue siendo la única
+> firma que vale.** Lo que se mueve es su GRANULARIDAD, no su autoridad.
+> *Un lote gateado es un gate; una pantalla sin gate dentro de un lote
+> gateado sigue estando gateada.*
+>
+> **Y la mitad que hace posible la otra:** la vara deja de ser una línea que
+> cada pista escribe para su pantalla y pasa a ser **una ley transversal
+> escrita y medible** — **EL NORTE, N1 a N10**, con **`verify:diseno`
+> R36–R39 mecanizando N1/N2/N3/N4**. *El gate por lote solo es honesto si
+> entre lote y lote hay una vara que corre sola: sin el Norte esto sería
+> mirar menos; con el Norte es mirar donde el instrumento no llega.*
+>
+> **La captura obligatoria por pantalla es la contrapartida, no un
+> trámite:** es lo que deja al founder auditar el lote sin caminar cada
+> pantalla, y lo que deja a la pista probar que se auto-gateó. **Sin
+> captura, la pantalla no entró al lote.**
+>
+> ⚠️ **PUNTERO CORREGIDO, declarado (S97-A):** la orden de mesa nombró esta
+> enmienda como *"enmienda a **R5 del método**"*. **Se midió y no resuelve:**
+> `METODO_TRES_PISTAS` no tiene ninguna R5, y las dos R5 vivas del canon son
+> otras cosas — la **R5 de reporte** (*"lo que no se pudo medir, se dice"*,
+> `MODELO_DESPENSA` §63 y cuatro fichas) y la **R5 del lint** (una de las
+> 34 reglas de `verify:diseno`). **La regla que dice «gate por pantalla» es
+> ÉSTA, la 80**, y por eso la enmienda se deposita acá. *Se declara en vez
+> de corregirse en silencio: una enmienda depositada bajo un número que no
+> existe es una enmienda que la próxima sesión no encuentra.*
+
 **Y el argumento de la casa que lo respalda — es una vara que SUBE, no que baja.** `DIRECTIVA_CRAFT_CLIENTE` §10 dice que las láminas son **CRITERIO, no evidencia**, y su razón es exacta: *"nada de esto se vio en un teléfono real"*. **Una pantalla real montada con piezas de `packages/ui` SÍ es evidencia** — corre en el dispositivo, usa los tokens vivos, respeta los temas y hereda el comportamiento de las primitivas. Cambiar lámina por UI real **no relaja el estándar: lo endurece**, porque lo que se firma pasa a ser lo que existe.
 
 **LO QUE LA LÁMINA PROTEGÍA Y HAY QUE PRESERVAR — las tres cláusulas no son opcionales:**

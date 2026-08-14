@@ -382,6 +382,13 @@ export {
   type InputCrearCuentaComercial,
   type InputDatosBancarios,
   type CodigoErrorCuentaComercial,
+  // S97-A · la naturaleza se SOLICITA (el paso ② del wizard propone, jamás otorga)
+  solicitarNaturalezaComercial,
+  retirarNaturalezaSolicitada,
+  obtenerNaturalezasDeCuenta,
+  type NaturalezaComercial,
+  type EstadoNaturaleza,
+  type NaturalezaDeCuenta,
 } from './wrappers/cuentaComercial';
 
 // Ledger propio, solo lectura — S54-B (peldaño de liquidaciones en Negocio)
@@ -979,6 +986,17 @@ export {
   // S76-B4: los chips al invitar (B0 APTO + decisión founder)
   obtenerOficiosNegocio,
   asignarServiciosEmpleado,
+  // S97-A · la MODALIDAD del servicio (paso ② del wizard + la tab ATENDER +
+  // el gate del rol recepción — una sola fuente, tres lectores)
+  fijarModalidadServicio,
+  type ServicioDeOficio,
+  // S97-A · la regla condicional de recepción + el onboarding por paso
+  puedeOfrecerRolRecepcion,
+  obtenerEstadoOnboardingWizard,
+  saltarPasoOnboarding,
+  retomarPasoOnboarding,
+  type PasoOnboarding,
+  type EstadoPasoOnboarding,
   // S77-A: la edición del chip para quien YA está adentro (LETRA §4/§10.2)
   obtenerChipsEmpleado,
   quitarServiciosEmpleado,

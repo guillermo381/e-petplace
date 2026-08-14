@@ -14370,3 +14370,215 @@ vez y hay que GATEARLA.*
 camino de corrección por puerta real, con la declaración del compromiso en
 la respuesta, y el founder lo camine — **incluida la primera ejercitación
 real de la línea del compromiso.**
+
+---
+
+#### D-792 — 🟡 `atiende_local` DICE `true` EN 32 DE 33 FILAS PORQUE ASÍ NACIÓ, NO PORQUE ALGUIEN LO DECIDIERA
+
+**Nace de la firma de `LA_CASA_DEL_PRESTADOR` §2.3 (14-ago), midiendo su
+propio motor.** La regla condicional de recepción se computa sobre
+`prestador_servicios.atiende_local` — **la columna ya existía** (S61, nació
+para el domicilio del grooming) y es `NOT NULL DEFAULT true`.
+
+**Medido:** vale `true` en **32 de 33 filas vivas**, **incluidos 9 paseos**,
+donde *«atiendo en mi local»* no significa nada — un paseo empieza en la casa
+de la familia. La única `false` es `urgencia_domicilio`, puesta a mano.
+*El default barrió los cuatro oficios cuando la columna nació para uno.*
+
+**La consecuencia, dicha honesta y no maquillada:** el guard **discrimina hoy
+exactamente el caso que importa** —negocio SIN servicios (vendedor puro) ⇒ sin
+recepción, que es la firma— **y es permisivo para todo prestador con al menos
+un servicio**, hasta que alguien toque el toggle. **No es inerte: es
+permisivo, que no es lo mismo** — un guard inerte no decide nada, éste decide
+bien el borde y de más en el centro.
+
+**Por qué NO se hace backfill:** *qué significa «local» para un paseo es
+decisión de producto, no de migración.* Apagarlo en los 9 paseos por
+prolijidad dejaría a un paseador que sí recibe perros en su casa sin poder
+ofrecer recepción, **y nadie lo descubriría**: no hay síntoma cuando un rol no
+se ofrece (la mitad cara de los frenos, S84).
+
+☠️ **Muere** cuando la mesa firme qué significa la modalidad para paseo y
+adiestramiento, **o** cuando el paso ② del wizard haya pasado por los negocios
+vivos y los valores dejen de ser el default. **Disparo:** el primer negocio
+real que camine el wizard.
+
+---
+
+#### D-793 — 🎬 EL DESTAPE NO SE PUEDE GATEAR EN PROSA: FALTA EL VIDEO DEMO
+
+**Nace con la firma del destape** (`LA_CASA_DEL_PRESTADOR` §5, founder
+13-ago): cinco actos encadenados —isotipo · rampa de 6 stops · tarjeta del
+negocio · tabs escalonadas · luz de la esquina—, **~1620 ms totales**
+declarados en el código.
+
+**El problema es de instrumento, no de construcción:** *una ceremonia de cinco
+actos descrita en prosa no se puede firmar.* El founder no puede aprobar un
+**ritmo** que no vio correr — y el ritmo es todo lo que el destape es. Ni la
+letra, ni un boceto, ni una captura fija lo muestran: **una secuencia se juzga
+en el tiempo o no se juzga.**
+
+**Y hay una decisión concreta esperándolo:** los ~1620 ms **exceden la banda
+de 520 de N10**, y eso es legal —520 mide un GESTO, no la suma de una
+ceremonia (aclaración depositada en `DIRECCION_ARTE` §13)— **pero el total sí
+necesita firma.** Sin video, esa firma no tiene sobre qué darse.
+
+☠️ **Muere** con el video demo del destape corriendo en dispositivo y el
+veredicto del founder sobre el ritmo. **Disparo: ANTES del Lote 1** — el
+destape es una de sus pantallas.
+
+---
+
+#### D-794 — ⚠️ `crear_mascota_walkin` CREA MASCOTAS QUE NADIE PUEDE RECLAMAR JAMÁS
+
+**Nace de verificar la firma de la mascota del mostrador**
+(`LA_CASA_DEL_PRESTADOR` §6, founder 13-ago): *«el prestador crea datos
+básicos asociados al CORREO del cliente»*.
+
+**Medido:** `crear_mascota_walkin(...)` **no pide correo ni teléfono**. Crea
+una familia `virtual_prestador` y una mascota con `user_id NULL` — **sin
+ninguna llave por la cual encontrarla después.** El camino hermano
+(`crear_alta_asistida_pendiente`) sí exige contacto y por eso su mascota **se
+reclama sola al activar la cuenta**; ésta no se reclama nunca.
+
+**Es una trampa DORMIDA, no un daño en curso, y las dos mitades importan:**
+**cero llamadores en todo el repo** (aparece solo en `database.types.ts`, que
+es generado) y **cero familias `virtual_prestador` vivas**. *Nunca corrió.*
+**Pero es alcanzable por `authenticated`** — la primera pantalla que la llame
+por parecerle el nombre correcto empieza a fabricar huérfanos sin síntoma.
+
+**La firma de hoy la vuelve ilegal:** la mascota del mostrador se asocia a un
+contacto, **o no se crea**.
+
+**Cura, con el patrón de la casa (D-705) y no con un DROP:** REVOKE de
+`authenticated` + **lápida en el `COMMENT`** que nombre a su reemplazo. *No se
+dropea en silencio: otro repo del legado comparte esta base (D-471), y una
+función que desaparece rompe distinto que una que rebota.*
+
+☠️ **Muere** con el REVOKE aplicado y la lápida puesta.
+
+---
+
+#### D-795 — 🔴 EL NORTE DICE `45` Y LA CASA FIRMÓ `120` EN S81, CON MEDICIÓN
+
+**Dos firmas del founder se contradicen en un número de movimiento, y ninguna
+es vieja.**
+
+- **N6 del Norte (13-ago):** *«Entrada escalonada **45**/300 bezier de la
+  casa en toda pantalla nueva.»*
+- **`DIRECCION_ARTE` §5.4 (S81):** *«escalón **120 ms** entre elementos
+  (ENMIENDA FIRMADA S81 — el 45 de S80 pasó a 120, `motion.stagger.slow`); **el
+  porqué medido en el lazo regla 80 de B: con 45, tres bloques resolvían en
+  ~390 ms y el escalonado no se PERCIBÍA como orden de lectura**.»*
+
+**⇒ El `45` del Norte no es un valor nuevo: es el valor ANTERIOR a una
+enmienda firmada Y MEDIDA.**
+
+**Lo que S97-A hizo y lo que NO:** depositó el Norte **verbatim** (la orden
+fue depositar, no editar) · **no tocó `motion.stagger`** —cambiarlo por esta
+línea sería resolver un choque de dos firmas sin mesa, y tocaría toda pantalla
+de las dos apps a la vez— · **no escribió `120` adentro del Norte**, porque
+corregir una letra firmada al depositarla es peor que dejar el choque a la
+vista.
+
+**🔴 EVIDENCIA QUE INCLINA LA BALANZA (B, mismo día):** el **header de
+`Entrada`** en `packages/ui` **decía `45` con la constante en `120` desde
+S81**. ⇒ **el `45` estaba vivo en la prosa de la casa mientras el código ya
+valía 120**, así que **arrastre** es la lectura probable y **derogación** la
+improbable. *B curó el comentario — y eso quita la FUENTE del error, no decide
+qué dice el Norte.* **Son dos cosas y solo la segunda necesita firma.**
+
+**Las dos salidas, servidas:** ① el `45` es intencional y el Norte deroga la
+enmienda S81 — entonces se vuelve a medir lo que S81 midió, porque su razón no
+desaparece por decreto · ② el `45` es arrastre y el número vigente es **120**;
+N6 se enmienda con una línea.
+
+**Lo que hace barato esperar:** **ninguna pantalla nueva se bloquea** — las
+dos lecturas mandan usar el token de la casa, y el token existe. *Cambia
+cuánto vale, no de dónde sale.*
+
+**Y su parentesco, que es lo que la vuelve más que un typo:** es la **sexta
+letra contradictoria cazada en la jornada**, y las seis se encontraron
+**leyendo la fuente** — ninguna por typecheck ni por lint. *Una constante y su
+comentario divergiendo no rompe nada, y por eso sobrevive.* **Es D-790 en su
+sexta muestra.**
+
+☠️ **Muere** con la firma del founder sobre una de las dos salidas.
+
+---
+
+#### D-796 — 🟡 UNA NATURALEZA RECHAZADA VUELVE A `ninguna`, Y `ninguna` ES LO MISMO QUE «NUNCA LA PIDIÓ»
+
+**Nace de la firma de mesa del 14-ago sobre la puerta de propuesta de
+naturaleza** (migración `20260814100000`, `LA_CASA_DEL_PRESTADOR` §4).
+
+**El hueco, medido en el diseño que se acaba de aplicar:**
+`obtener_naturalezas_de_cuenta` devuelve **tres estados y solo tres** —
+`activa` · `solicitada` · `ninguna`— porque `naturalezas_solicitadas` guarda
+**solo lo pendiente**. Esa elección es la que hace que el contador de la ley
+S91 llegue a cero solo, **y tiene un costo**: cuando e-PetPlace **rechaza**
+una naturaleza, la solicitud se retira y la cuenta vuelve a `ninguna`.
+
+> **`ninguna` significa dos cosas incompatibles: «nunca lo pidió» y «lo pidió
+> y le dijimos que no».**
+
+**Es informar sin informar** — la familia de defectos que S96 midió cuatro
+veces en un día: *la pantalla en blanco, el título que mentía la causa, el
+apuntador incotejeable, el push que dijo «OK» sin llegar a main*. Todos
+devolvían algo creíble. **Un vendedor rechazado que ve el toggle apagado va a
+volver a pedirlo, y nadie le va a decir nunca por qué no pasa nada.**
+
+**🔴 SE DIFIERE POR FIRMA DE MESA, y la condición está escrita para que no se
+herede en silencio.** Hoy el otorgamiento es **una conversación directa
+founder ↔ vendedor único**: si se rechaza, el founder lo dice por el mismo
+canal por el que se habló. *El silencio del sistema está tapado por una
+persona.*
+
+☠️ **Disparo — cuando el otorgamiento deje de ser conversación directa
+founder ↔ vendedor único.** Ese día el tapón humano desaparece y el silencio
+queda desnudo. **La cura entonces:** un cuarto estado `rechazada` con
+**motivo**, que **NO entra al contador** (sigue siendo espera nuestra, no
+trabajo suyo) y que la pantalla dice con voz de persona, jamás como un toggle
+apagado.
+
+**Esta ficha existe para registrar que el silencio es DEUDA CONOCIDA, no
+diseño.** *La diferencia entre las dos es exactamente esta ficha:* sin ella,
+la próxima sesión mira los tres estados, los encuentra coherentes, y concluye
+que alguien decidió que un rechazo no se cuenta.
+
+---
+
+### NOTA DE MÉTODO S97 — **MEDIR ANTES DE CABLEAR PAGÓ DOS VECES EL MISMO DÍA, Y LAS DOS FUERON CRUCES DE PISTA**
+
+Se registra acá, con crédito cruzado, porque **ninguna de las dos la habría
+encontrado una pista sola** — y ése es el dato, no la anécdota.
+
+**① EL FRENO DE C (hallazgo suyo, verificado por A).** C tenía firmado
+construir el paso ② del wizard. **Antes de cablear midió el motor** y encontró
+que `otorgar_rol_vendedor` es **admin-only con el foso escrito en su propio
+cuerpo** (*«si el titular pudiera dárselo, cualquiera con una cuenta comercial
+se auto-habilitaría a vender sin que nadie revise»*). **Frenó y elevó con el
+literal en vez de pedir un grant.** *Sin ese freno, el paso ② se habría
+cableado contra nada — o peor, alguien habría "arreglado" el permiso y roto la
+vitrina curada creyendo que curaba un bug.*
+
+**② LA MEDICIÓN QUE LA MESA ORDENÓ ANTES DE CONSTRUIR** (*«medí si la
+propuesta ya existe con otro nombre»*) **contestó mitad y mitad, y la mitad
+que falló destapó algo que nadie había visto: SEIS CUENTAS ACTIVAS con solo
+servicios y sin ninguna puerta para sumar la naturaleza.** No estaban en
+ningún backlog. **Aparecieron porque el fixture del cinturón se escribió para
+ABORTAR si el caso que cura no existe** — y al buscarlo, el caso estaba vivo
+seis veces.
+
+**⇒ Las dos mitades del método funcionaron en el mismo día y en direcciones
+opuestas:** el freno de C **impidió construir de más** (una puerta que habría
+roto el foso), y la orden de medir de la mesa **impidió construir de más otra
+vez** (una tabla paralela donde alcanzaba una columna) **mientras destapaba
+trabajo real que faltaba**. *Medir no siempre achica: achicó el cómo y agrandó
+el porqué.*
+
+**Y lo que lo vuelve regla y no suerte:** en los dos casos **lo que se leyó
+fue el CUERPO de la función, no su nombre ni su ficha.** El nombre
+`otorgar_rol_vendedor` no dice «admin-only»; el nombre
+`crear_cuenta_comercial_inicial` no dice «no registra naturaleza». **Las dos
+respuestas estaban en el cuerpo, y el cuerpo se lee en tres minutos.**

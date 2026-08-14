@@ -103,7 +103,7 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
       >
         {icono ? <Icono nombre={icono} registro={registro} /> : null}
 
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: spacing[0.5] }}>
           <Text
             numberOfLines={1}
             ellipsizeMode="tail"
