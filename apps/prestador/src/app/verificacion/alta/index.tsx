@@ -29,7 +29,7 @@
  * entra a la navegación del producto hasta la firma en dispositivo.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,21 +43,30 @@ import {
   Hoja,
   Texto,
   spacing,
+  useAviso,
 } from '@epetplace/ui';
-import { obtenerMiCuentaComercial, obtenerMiPrestador } from '@epetplace/api';
+import {
+  obtenerEstadoOnboardingWizard,
+  obtenerMiCuentaComercial,
+  obtenerMiPrestador,
+  saltarPasoOnboarding,
+  type PasoOnboarding,
+} from '@epetplace/api';
 
 import { ProgresoAlta } from '@/components/alta/ProgresoAlta';
 import { PasoOfreces } from '@/components/alta/PasoOfreces';
 import { useTraduccion } from '@/i18n';
 
-/** Los cuatro pasos de §4.1, en su orden firmado. */
-const PASOS = ['negocio', 'ofreces', 'documentos', 'equipo'] as const;
-type Paso = (typeof PASOS)[number];
+/** Los cuatro pasos de §4.1, en su orden firmado. **El vocabulario es el
+ *  del MOTOR** (`PasoOnboarding` de A): un paso que la pantalla llamara
+ *  distinto que la base sería un mapeo más que se puede desincronizar. */
+const PASOS = ['negocio', 'oferta', 'documentos', 'equipo'] as const satisfies readonly PasoOnboarding[];
+type Paso = PasoOnboarding;
 
 /** Claves LITERALES por paso — jamás armadas por concatenación. */
 const TITULO_PASO = {
   negocio: 'alta.paso1.titulo',
-  ofreces: 'alta.paso2.titulo',
+  oferta: 'alta.paso2.titulo',
   documentos: 'alta.paso3.titulo',
   equipo: 'alta.paso4.titulo',
 } as const satisfies Record<Paso, string>;
@@ -66,7 +75,7 @@ const TITULO_PASO = {
  *  no figura: es el único que no se saltea (sin nombre el destape no
  *  tiene qué mostrar y la casa no tiene título). */
 const SALTEO = {
-  ofreces: 'alta.salteo.paso2',
+  oferta: 'alta.salteo.paso2',
   documentos: 'alta.salteo.paso3',
   equipo: 'alta.salteo.paso4',
 } as const;
@@ -79,17 +88,24 @@ type Contexto =
       cuentaComercialId: string;
       prestadorId: string | null;
       nombreNegocio: string;
+      /** EL CONTADOR VIENE DEL MOTOR (A, S97). No se calcula acá: la
+       *  completitud se DERIVA de la base y solo el SALTO se guarda, así
+       *  que no hay marca que pueda desincronizarse. Y la ley S91 ya vive
+       *  adentro — un documento EN REVISIÓN cuenta como hecho (él ya hizo
+       *  lo suyo); uno rechazado vuelve a sumar. */
+      contador: number;
     };
 
 export default function WizardAlta() {
   const { t } = useTraduccion();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
 
   const [contexto, setContexto] = useState<Contexto>({ estado: 'cargando' });
   const [indice, setIndice] = useState(0);
-  const [completados, setCompletados] = useState<Set<Paso>>(new Set());
   const [salteando, setSalteando] = useState<Paso | null>(null);
+  const [guardandoSalto, setGuardandoSalto] = useState(false);
   const [destapando, setDestapando] = useState(false);
 
   const cargar = useCallback(async () => {
@@ -101,6 +117,11 @@ export default function WizardAlta() {
       setContexto({ estado: 'error' });
       return;
     }
+    const onboarding = await obtenerEstadoOnboardingWizard(cuenta.data.id);
+    if (!onboarding.ok) {
+      setContexto({ estado: 'error' });
+      return;
+    }
     setContexto({
       estado: 'listo',
       cuentaComercialId: cuenta.data.id,
@@ -108,6 +129,7 @@ export default function WizardAlta() {
       // es el cinturón de §8.6bis. `null` es un valor legal acá.
       prestadorId: prestador.ok && prestador.data !== null ? prestador.data.id : null,
       nombreNegocio: cuenta.data.nombreComercial ?? '',
+      contador: onboarding.data.contador,
     });
   }, []);
 
@@ -120,16 +142,10 @@ export default function WizardAlta() {
   const paso = PASOS[indice] ?? 'negocio';
   const esUltimo = indice === PASOS.length - 1;
 
-  /** LA LEY DEL CONTADOR (S91 · §4.3): cuenta lo que falta DE SU PARTE, y
-   *  llega a cero. Lo que depende de e-PetPlace no entra — eso se dice en
-   *  la otra voz de `ProgresoAlta`. */
-  const restantes = useMemo(() => PASOS.length - completados.size, [completados]);
-
-  function avanzar(completo: boolean) {
-    const actual = PASOS[indice];
-    if (actual !== undefined && completo) {
-      setCompletados((prev) => new Set(prev).add(actual));
-    }
+  function avanzar() {
+    // La completitud NO se marca acá: se DERIVA en el motor. Recargamos
+    // para que el contador diga la verdad de la base y no la nuestra.
+    void cargar();
     if (esUltimo) {
       setDestapando(true);
       return;
@@ -141,6 +157,22 @@ export default function WizardAlta() {
     const actual = PASOS[indice];
     if (actual === undefined || actual === 'negocio') return;
     setSalteando(actual);
+  }
+
+  /** El salto SÍ se guarda (es lo único que se guarda). Si el guardado
+   *  falla NO avanzamos en silencio: un salto que la base no registró
+   *  volvería a pedirse y el contador diría otra cosa que la pantalla. */
+  async function confirmarSalto(paso: Exclude<Paso, 'negocio'>) {
+    if (contexto.estado !== 'listo') return;
+    setGuardandoSalto(true);
+    const res = await saltarPasoOnboarding(contexto.cuentaComercialId, paso);
+    setGuardandoSalto(false);
+    if (!res.ok) {
+      mostrar({ texto: res.mensaje, variante: 'error' });
+      return;
+    }
+    setSalteando(null);
+    avanzar();
   }
 
   if (contexto.estado === 'cargando') {
@@ -217,9 +249,9 @@ export default function WizardAlta() {
           paddingBottom: insets.bottom + spacing[8] + 96,
         }}
       >
-        <ProgresoAlta restantes={restantes} />
+        <ProgresoAlta restantes={contexto.contador} />
 
-        {paso === 'ofreces' ? (
+        {paso === 'oferta' ? (
           <PasoOfreces
             prestadorId={contexto.prestadorId}
             cuentaComercialId={contexto.cuentaComercialId}
@@ -248,7 +280,7 @@ export default function WizardAlta() {
           variante="primario"
           bloque
           etiqueta={esUltimo ? t('alta.terminar') : t('alta.continuar')}
-          onPress={() => avanzar(true)}
+          onPress={avanzar}
         />
         {paso === 'negocio' ? null : (
           <Boton variante="ghost" bloque etiqueta={t('alta.saltar')} onPress={pedirSalto} />
@@ -269,10 +301,10 @@ export default function WizardAlta() {
           <Boton
             variante="primario"
             bloque
+            cargando={guardandoSalto}
             etiqueta={t('alta.entendido')}
             onPress={() => {
-              setSalteando(null);
-              avanzar(false);
+              if (salteando !== null && salteando !== 'negocio') void confirmarSalto(salteando);
             }}
           />
         </View>
