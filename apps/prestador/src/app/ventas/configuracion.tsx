@@ -1,22 +1,66 @@
 /**
- * CONFIGURACIÓN DEL NEGOCIO DE VENTAS (S96-C · C-B6 · LETRA_RECORRIDO §2).
+ * LA CONFIGURACIÓN DE LA DESPENSA (S96-C reabierta · MODELO_DESPENSA
+ * §8.6bis, firmas del founder 13-ago-2026 · antes: LETRA_RECORRIDO §2).
  *
  * BOCETO M1:
  *  · TESIS: «Completás tu negocio a tu ritmo; e-PetPlace lo revisa y lo
  *    hace visible.» (§2.1 — las dos mitades: escalable Y curado.)
- *  · FIRMA: esta pantalla ES el expediente del vendedor cuando el equipo
- *    lo revisa (§2.1) — no hay formulario de solicitud aparte.
- *  · CHANEL: sin sección de cobertura (no existe lector ni escritor de
- *    cobertura por vendedor en el contrato — un formulario muerto sería
- *    peor que su ausencia; declarado en el reporte) · la LIQUIDACIÓN no
- *    aparece: se difiere al motor de pagos (firma founder) y la nota lo
- *    dice en la vista de facturación.
+ *  · FIRMA: LOS CUARTOS EN ORDEN FIRMADO — ① qué vendo · ② cómo entrego ·
+ *    ③ cobertura · ④ cuándo · ⑤ quién — con el ESTADO (⑥) como chip
+ *    chico arriba que abre su explicación.
+ *  · CHANEL: lo que vive en otra casa NO se duplica (§8.6bis: catálogo y
+ *    precio = puerta de carga · stock = panel · fiscal/bancario = Cuenta
+ *    comercial — acá solo punteros) · la LIQUIDACIÓN se difiere al motor
+ *    de pagos y la nota vive en la vista de facturación.
  *  · ESTADOS: cargando · error · listo (con vacíos honestos por sección).
+ *
+ * ⚠️ CUARTOS SIN ESQUEMA — NO SE MONTAN (precedente de esta misma
+ * cabecera: un formulario muerto es peor que su ausencia; pedido a A del
+ * 13-ago con los contratos exactos, `2026-08-13-s96c-pedido-a-A-…`):
+ *  · ① QUÉ VENDO (familias activables — el nombre de las tres lo pone la
+ *    carga del catálogo, jamás esta pantalla; guard de la letra: activar
+ *    NO publica, filtra lo que el vendedor ve).
+ *  · ② CÓMO ENTREGO (envío/retiro/las dos; sin envío no se ven los
+ *    campos de reparto).
+ *  · ③ COBERTURA por radio (default 15 · máx 50, CHECK en la fuente).
+ *  · ④ la mitad "horarios de atención" (los CORTES sí están montados).
+ *  · el CONTADOR (ley S91: narrativa más un paso, llega a cero, lo de
+ *    e-PetPlace no entra) — sin ①②③ cableados contaría aire.
+ *
+ * 🔴 LA LEY DEL CAMBIO (guard 4 de la orden de mesa del 13-ago): «al
+ * guardar un cambio con compromisos vivos, la app dice qué queda
+ * comprometido. No rechaza, no oculta.» Cableada donde hay dato HOY:
+ *  · CORTES: con pedidos vivos ya prometidos (`!es_terminal` y con
+ *    promesa), la Hoja del corte lo dice ANTES del CTA — conservan su
+ *    ventana; el corte nuevo rige para lo que entra desde ahora.
+ *  · RECURSOS: con entregas ya prometidas hoy (`cupoRepartoDelDia`
+ *    consumido > 0), la Hoja de capacidad lo dice igual.
+ *  · ⑤ repartidores: SIN dato — decir «qué queda comprometido» al apagar
+ *    un repartidor exige el lector de envíos vivos POR repartidor, que
+ *    no existe (va en el pedido a A). No se inventa la voz sin el dato.
+ * ⚠️ Divergencia declarada: la orden cita una «ley del cambio en la
+ * cabecera de §8.6bis» que NO está depositada en `MODELO_DESPENSA` (grep
+ * en cero sobre origin/main al construir). El literal de arriba es el de
+ * la ORDEN; cuando la letra aterrice, si difiere, gana la letra.
+ *
+ * 🔴 CHOQUE DECLARADO (⑤ QUIÉN): la letra manda repartidor como chip del
+ * EQUIPO QUE YA EXISTE («un equipo, un lugar»); el alta de abajo es el
+ * padrón propio de S96. Se conserva VIVO hasta que la costura
+ * repartidor↔equipo de A exista (A-5 del pedido) — matar la única alta
+ * funcionando antes de su reemplazo deja al vendedor sin repartidores.
+ * El swap es de esta pantalla y está declarado, no diferido en silencio.
  *
  *  · Repartidores: alta con nombre y documento (decisión del arranque);
  *    idempotente por documento — repetir no duplica, y se dice.
  *  · Recursos: la capacidad es DEL RECURSO (§7.3) — la voz lo enseña.
  *  · Cortes horarios: parámetro, jamás número en el código (§7.1).
+ *  · Estado (⑥): el mapeo del enum vive en `estadoDespensa()` abajo —
+ *    `pendiente_validacion` = «En revisión» (§2.1: el vendedor propone,
+ *    e-PetPlace publica). INTERIM del chip: `Insignia estado` todavía no
+ *    tiene `onPress` (S85-B24 lo acotó a `distincion` — «una prop sin
+ *    consumidor decora»; el consumidor nació acá). Pedido a B en
+ *    `2026-08-13-s96c-pedido-a-B-…`; mientras llega, el «¿Qué significa?»
+ *    es un Boton sinCaja al lado del chip y muere con el ensanche.
  */
 
 import { useCallback, useState } from 'react';
@@ -35,6 +79,7 @@ import {
   EvitaTeclado,
   Hoja,
   HojaScroll,
+  Insignia,
   Interruptor,
   MarcaDeAgua,
   Separador,
@@ -47,8 +92,10 @@ import {
 import {
   actualizarRepartidor,
   cerrarSesion,
+  cupoRepartoDelDia,
   definirRecursoReparto,
   definirTurnoEntrega,
+  listarPedidosDelVendedor,
   listarRecursosReparto,
   listarRepartidores,
   listarTurnosEntrega,
@@ -60,7 +107,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
-import { horaDeSql } from '@/lib/ventas-formato';
+import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -71,9 +118,40 @@ type Pantalla =
       repartidores: Repartidor[];
       recursos: RecursoReparto[];
       turnos: TurnoEntrega[];
+      /** LEY DEL CAMBIO — pedidos vivos con ventana prometida: lo que un
+       *  corte nuevo NO mueve. Se lee junto con el resto (un fallo acá es
+       *  fallo de pantalla: la ley exige DECIR, y sin dato no se dice). */
+      comprometidos: number;
+      /** Entregas ya prometidas HOY (consumido del cupo) — lo que una
+       *  capacidad nueva no mueve. null = no se pudo leer (mismo trato
+       *  tolerante que la cifra del techo en la lista: la línea del guard
+       *  no se monta — ausencia, jamás un número inventado). */
+      cupoHoy: { capacidad: number; consumido: number } | null;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** ⑥ EL ESTADO — mapeo del enum vivo (`estado_cuenta_comercial_enum`:
+ *  pendiente_validacion · activa · suspendida · cerrada, medido en
+ *  `database.types.ts`) a la voz de la letra («en revisión» → «activa»,
+ *  §8.6bis ⑥). Un valor que el enum gane mañana cae al caso que NO afirma
+ *  visibilidad que nadie midió: en revisión. Suspendida/cerrada no se
+ *  disfrazan de revisión — cada una dice su verdad (Ley 13). */
+function estadoDespensa(estadoCuenta: string): {
+  insignia: 'info' | 'alDia' | 'atencion';
+  clave: 'enRevision' | 'activa' | 'suspendida' | 'cerrada';
+} {
+  switch (estadoCuenta) {
+    case 'activa':
+      return { insignia: 'alDia', clave: 'activa' };
+    case 'suspendida':
+      return { insignia: 'atencion', clave: 'suspendida' };
+    case 'cerrada':
+      return { insignia: 'atencion', clave: 'cerrada' };
+    default:
+      return { insignia: 'info', clave: 'enRevision' };
+  }
+}
 
 export default function ConfiguracionVentas() {
   const router = useRouter();
@@ -86,6 +164,9 @@ export default function ConfiguracionVentas() {
   const [intento, setIntento] = useState(0);
   const [guardando, setGuardando] = useState(false);
   const [cerrando, setCerrando] = useState(false);
+
+  // ⑥ la explicación del estado (el modal que el chip abre)
+  const [modalEstado, setModalEstado] = useState(false);
 
   // hoja repartidor
   const [altaRepartidor, setAltaRepartidor] = useState(false);
@@ -117,13 +198,15 @@ export default function ConfiguracionVentas() {
           return;
         }
         const id = ctx.data.cuentaComercialId;
-        const [reps, recursos, turnos] = await Promise.all([
+        const [reps, recursos, turnos, pedidos, cupo] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
+          listarPedidosDelVendedor(id),
+          cupoRepartoDelDia(id, hoyLocalISO()),
         ]);
         if (!vigente) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok) {
+        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
@@ -133,6 +216,14 @@ export default function ConfiguracionVentas() {
           repartidores: reps.data,
           recursos: recursos.data,
           turnos: turnos.data,
+          // lo comprometido: vivo Y con ventana prometida (un retiro sin
+          // promesa no lo mueve ningún corte)
+          comprometidos: pedidos.data.filter(
+            (p) => !p.es_terminal && p.promesa_desde !== null,
+          ).length,
+          cupoHoy: cupo.ok
+            ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
+            : null,
         });
       })();
       return () => {
@@ -142,6 +233,32 @@ export default function ConfiguracionVentas() {
   );
 
   const recargar = () => setIntento((n) => n + 1);
+
+  /* ⑥ — las claves van LITERALES, jamás armadas por concatenación: el
+     diccionario tipado rompe con una key inexistente y un template lo
+     apagaría con un cast (misma regla que el techo del HOY). */
+  const estadoCfg =
+    pantalla.estado === 'listo' ? estadoDespensa(pantalla.contexto.estadoCuenta) : null;
+  const etiquetaEstado =
+    estadoCfg === null
+      ? ''
+      : estadoCfg.clave === 'activa'
+        ? t('ventas.config.estado.activa')
+        : estadoCfg.clave === 'suspendida'
+          ? t('ventas.config.estado.suspendida')
+          : estadoCfg.clave === 'cerrada'
+            ? t('ventas.config.estado.cerrada')
+            : t('ventas.config.estado.enRevision');
+  const modalEstadoVoz =
+    estadoCfg === null
+      ? ''
+      : estadoCfg.clave === 'activa'
+        ? t('ventas.config.estado.modalActiva')
+        : estadoCfg.clave === 'suspendida'
+          ? t('ventas.config.estado.modalSuspendida')
+          : estadoCfg.clave === 'cerrada'
+            ? t('ventas.config.estado.modalCerrada')
+            : t('ventas.config.estado.modalEnRevision');
 
   async function guardarRepartidor() {
     if (guardando || pantalla.estado !== 'listo') return;
@@ -278,26 +395,74 @@ export default function ConfiguracionVentas() {
             gap: spacing[5],
           }}
         >
-          <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+          {/* ── ⑥ EL ESTADO — el chip chico arriba, abre su explicación ── */}
+          {estadoCfg !== null && (
+            <View style={{ gap: spacing[2] }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+                <Insignia estado={estadoCfg.insignia} etiqueta={etiquetaEstado} tamaño="sm" />
+                {/* INTERIM (pedido B-1): cuando `Insignia estado` gane
+                    `onPress`, este label muere y el tap vive en el chip. */}
+                <Boton
+                  variante="sinCaja"
+                  etiqueta={t('ventas.config.estado.queSignifica')}
+                  onPress={() => setModalEstado(true)}
+                />
+              </View>
+              <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+            </View>
+          )}
 
-          {/* facturación — la cuenta comercial que ya existe, sin duplicar */}
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionTitulo')}
-              detalle={t('ventas.config.facturacionDetalle')}
-              onPress={() => router.push('/cuenta-comercial')}
-            />
-            <Separador />
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.config.facturacionVistaTitulo')}
-              detalle={t('ventas.config.facturacionVistaDetalle')}
-              onPress={() => router.push('/ventas/facturacion')}
-            />
-          </Tarjeta>
+          {/* ── ① QUÉ VENDO · ② CÓMO ENTREGO · ③ COBERTURA — NO SE MONTAN:
+              sin lector ni escritor, un formulario muerto es peor que su
+              ausencia (cabecera). Los contratos exactos viven en el pedido
+              a A del 13-ago; al llegar el esquema entran ACÁ, en este
+              orden, antes del ④.
+              ⚠️ S97 + FIRMA DE MESA (13-ago, 3ª vuelta): son CINCO
+              familias, no tres — `dieta_prescripcion` firmada como familia
+              propia y `accesorio` en el esquema aunque sin carga v1. Este
+              punto de inserción NO asume cantidad: la sección se monta
+              sobre LO QUE EL LECTOR DEVUELVA (map, cero constantes de
+              código ni de conteo) — cinco hoy, N mañana, sin cambio de
+              código acá. La carga ya corrió (442 productos, códigos
+              medidos en 2026-08-13-s97a-esquema-catalogo-maestro.md); lo
+              que falta sigue siendo la ACTIVACIÓN por vendedor (A-1). */}
 
-          {/* repartidores */}
+          {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
+              atención» espera esquema: pedido A-4) ── */}
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
+            <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
+            {pantalla.turnos.length > 0 && (
+              <Tarjeta relleno="ninguno">
+                {pantalla.turnos.map((tur, i) => (
+                  <View key={tur.turno_id}>
+                    {i > 0 && <Separador />}
+                    <Celda
+                      titulo={tur.codigo}
+                      subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
+                      metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+            )}
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('ventas.config.turnoNuevoCta')}
+              onPress={() => {
+                setTurCodigo('');
+                setTurCorte('');
+                setTurDesde('');
+                setTurHasta('');
+                setTurDiaSiguiente(false);
+                setAltaTurno(true);
+              }}
+            />
+          </View>
+
+          {/* ── ⑤ QUIÉN — repartidores (🔴 choque declarado en la cabecera:
+              padrón propio hasta la costura repartidor↔equipo de A) ── */}
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
             {pantalla.repartidores.length === 0 ? (
@@ -369,38 +534,23 @@ export default function ConfiguracionVentas() {
             />
           </View>
 
-          {/* cortes horarios */}
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
-            <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
-            {pantalla.turnos.length > 0 && (
-              <Tarjeta relleno="ninguno">
-                {pantalla.turnos.map((tur, i) => (
-                  <View key={tur.turno_id}>
-                    {i > 0 && <Separador />}
-                    <Celda
-                      titulo={tur.codigo}
-                      subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
-                      metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('ventas.config.turnoNuevoCta')}
-              onPress={() => {
-                setTurCodigo('');
-                setTurCorte('');
-                setTurDesde('');
-                setTurHasta('');
-                setTurDiaSiguiente(false);
-                setAltaTurno(true);
-              }}
+          {/* ── lo que vive en OTRA casa — punteros, jamás duplicación
+              (§8.6bis: lo fiscal y bancario ya vive en Cuenta comercial) ── */}
+          <Tarjeta relleno="ninguno">
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('ventas.config.facturacionTitulo')}
+              detalle={t('ventas.config.facturacionDetalle')}
+              onPress={() => router.push('/cuenta-comercial')}
             />
-          </View>
+            <Separador />
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('ventas.config.facturacionVistaTitulo')}
+              detalle={t('ventas.config.facturacionVistaDetalle')}
+              onPress={() => router.push('/ventas/facturacion')}
+            />
+          </Tarjeta>
 
           {/* S96-C: para el VENDEDOR PURO (raíz → /ventas, sin tabs) esta
               es su única superficie estable — sin esto no tiene forma de
@@ -423,6 +573,18 @@ export default function ConfiguracionVentas() {
           />
         </ScrollView>
       )}
+
+      {/* ── ⑥ el modal del estado — qué significa (§8.6bis) ── */}
+      <Hoja
+        visible={modalEstado}
+        onCerrar={() => setModalEstado(false)}
+        titulo={t('ventas.config.estado.modalTitulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{modalEstadoVoz}</Texto>
+        </View>
+      </Hoja>
 
       {/* ── hoja: repartidor nuevo ── */}
       <Hoja
@@ -494,6 +656,19 @@ export default function ConfiguracionVentas() {
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
+              {/* LEY DEL CAMBIO: lo ya prometido hoy no se mueve — se dice
+                  ANTES de guardar, no se rechaza ni se oculta. */}
+              {pantalla.estado === 'listo' &&
+                pantalla.cupoHoy !== null &&
+                pantalla.cupoHoy.consumido > 0 && (
+                  <Texto variante="apoyo">
+                    {pantalla.cupoHoy.consumido === 1
+                      ? t('ventas.config.cambio.recursoEntrega1')
+                      : t('ventas.config.cambio.recursoEntregas', {
+                          n: pantalla.cupoHoy.consumido,
+                        })}
+                  </Texto>
+                )}
               <Boton
                 variante="primario"
                 bloque
@@ -553,6 +728,15 @@ export default function ConfiguracionVentas() {
                   registro="oficio"
                 />
               </View>
+              {/* LEY DEL CAMBIO: los pedidos ya prometidos conservan su
+                  ventana — se dice ANTES de guardar el corte. */}
+              {pantalla.estado === 'listo' && pantalla.comprometidos > 0 && (
+                <Texto variante="apoyo">
+                  {pantalla.comprometidos === 1
+                    ? t('ventas.config.cambio.cortePedido1')
+                    : t('ventas.config.cambio.cortePedidos', { n: pantalla.comprometidos })}
+                </Texto>
+              )}
               <Boton
                 variante="primario"
                 bloque
