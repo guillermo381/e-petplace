@@ -166,5 +166,64 @@ for (const [sujeto, slug] of [['Thor', '0900'], ['Zeus', '1130']]) {
   console.log(`✓ 06-zoom-fila-${slug}.png`);
 }
 
+/* ═══ ④ LA MEDICIÓN DEL DOM — y ésta es la lección cara de S97-D.
+
+   El recorte a 3× **no alcanzó**: con él a la vista leí «se solapa» cuando
+   el DOM decía «recorta limpio», y mandé a curar algo que ya funcionaba.
+   **Más resolución no convierte un píxel en un hecho.** Lo que separó los
+   dos defectos fue preguntarle al DOM si el texto DESBORDA su caja.
+
+   Por eso esto corre SIEMPRE y su salida va al reporte junto a las
+   imágenes: la captura muestra CÓMO se ve, la medición dice QUÉ ES. Las
+   dos, o el veredicto vuelve a ser una opinión sobre una imagen. */
+const medicion = await zoom.evaluate(() => {
+  const porTexto = (t, cerca) =>
+    [...document.querySelectorAll('div,span')].find(
+      (e) => e.textContent?.trim() === t && (!cerca || cerca(e)),
+    );
+  const sub = porTexto('Vacunación');
+  if (!sub) return { error: 'no se halló el subtítulo de la fila de 11:30' };
+  const rs = sub.getBoundingClientRect();
+
+  /* ⚠️ «MISMA FILA» SE MIDE, NO SE ASUME. Una versión anterior de esta sonda
+     tomaba el PRIMER «Mostrador» del DOM y lo comparaba con el subtítulo de
+     OTRA fila — dos cajas que nunca se iban a tocar. Un vecino de la fila
+     equivocada da un verde perfecto y falso. */
+  const mismaFila = (e) => {
+    const r = e.getBoundingClientRect();
+    return r.height > 0 && Math.abs((r.top + r.bottom) / 2 - (rs.top + rs.bottom) / 2) < 40;
+  };
+  const glifo = [...document.querySelectorAll('svg')]
+    .filter(mismaFila)
+    .map((e) => e.getBoundingClientRect())
+    .sort((a, b) => a.left - b.left)[0];
+  const chip = porTexto('Mostrador', mismaFila);
+  const rc = chip?.getBoundingClientRect();
+
+  return {
+    /* ① ¿el texto se sale de SU caja? — lo que preguntaba la sonda vieja. */
+    desborde: {
+      ancho: Math.round(rs.width),
+      anchoDelTexto: Math.round(sub.scrollWidth),
+      desborda: sub.scrollWidth > sub.clientWidth + 1,
+      elipsis: (sub.textContent ?? '').includes('…'),
+      texto: (sub.textContent ?? '').trim(),
+    },
+    /* ② ¿su caja CHOCA con la del vecino? — LA PREGUNTA QUE FALTABA, y la
+       que decide. Desborde y colisión producen PÍXELES IDÉNTICOS: en S97-D
+       el subtítulo medía `desborda:false` (verde) con el glifo dibujado
+       enteramente encima. Un instrumento que solo mide ① da verde con la
+       pantalla rota. Negativo en `aire*` = superposición. */
+    colision: {
+      solapeConGlifoPx: glifo
+        ? Math.round(Math.min(rs.right, glifo.right) - Math.max(rs.left, glifo.left))
+        : null,
+      aireHastaElChipPx: rc ? Math.round(rc.left - rs.right) : null,
+    },
+  };
+});
+console.log('── MEDICIÓN DEL DOM (la que manda sobre el píxel) ──');
+console.log(JSON.stringify(medicion, null, 1));
+
 console.log(`errores JS: ${errores.length === 0 ? 'ninguno' : errores.slice(0, 3).join(' | ')}`);
 await browser.close();
