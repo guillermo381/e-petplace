@@ -2522,6 +2522,8 @@ export const prestadorEn = {
       recursosDetalle:
         "Capacity belongs to the resource: if the bike carries 20, the day is 20. You add another resource — you don't break the cap.",
       recursoNuevoCta: 'Add resource',
+      recursoEditarTitulo: 'Fix the resource',
+      recursoNombreFijo: 'The name identifies this resource. For another one, add a new one.',
       recursoNombre: 'Name (e.g. Bike)',
       recursoCapacidad: 'Deliveries per day',
       recursoGuardarCta: 'Save',
@@ -2532,6 +2534,8 @@ export const prestadorEn = {
       turnosDetalle:
         'The cutoff decides the promise: what comes in before the cutoff is delivered in its window.',
       turnoNuevoCta: 'Add cutoff',
+      turnoEditarTitulo: 'Fix the cutoff',
+      turnoCodigoFijo: 'The name identifies this cutoff. For another one, add a new one.',
       turnoCodigo: 'Shift name (e.g. morning)',
       turnoCorte: 'Cutoff time (HH:MM)',
       turnoDesde: 'Delivery from (HH:MM)',

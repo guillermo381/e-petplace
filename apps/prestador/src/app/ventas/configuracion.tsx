@@ -27,6 +27,14 @@
  *  · el CONTADOR (ley S91: narrativa más un paso, llega a cero, lo de
  *    e-PetPlace no entra) — sin ①②③ cableados contaría aire.
  *
+ * ✅ D-791 (superficie): CORTES y RECURSOS se REABREN en el mismo
+ * formulario que los creó — tap en la fila → Hoja precargada → la misma
+ * puerta (upsert MEDIDO en el motor: turno por (cuenta, codigo) ·
+ * recurso por (cuenta, nombre)). La LLAVE del upsert va fija al reabrir
+ * y la ayuda dice por qué: editable, cambiarla crearía OTRO en silencio.
+ * Repartidor y regla de envío NO reabren (sus puertas no upsertean —
+ * mitad de motor de D-791, cola de A).
+ *
  * 🔴 LA LEY DEL CAMBIO (guard 4 de la orden de mesa del 13-ago): «al
  * guardar un cambio con compromisos vivos, la app dice qué queda
  * comprometido. No rechaza, no oculta.» Cableada donde hay dato HOY:
@@ -181,13 +189,19 @@ export default function ConfiguracionVentas() {
   const [repDocumento, setRepDocumento] = useState('');
   const [repTelefono, setRepTelefono] = useState('');
 
-  // hoja recurso
+  // hoja recurso — `editandoRecurso` = la fila se REABRIÓ (D-791): mismo
+  // formulario, misma puerta (upsert por (cuenta, nombre) — MEDIDO en el
+  // motor); el NOMBRE es la llave del upsert y va fijo al reabrir:
+  // editable, cambiarlo crearía OTRO recurso en silencio.
   const [altaRecurso, setAltaRecurso] = useState(false);
+  const [editandoRecurso, setEditandoRecurso] = useState(false);
   const [recNombre, setRecNombre] = useState('');
   const [recCapacidad, setRecCapacidad] = useState('');
 
-  // hoja turno
+  // hoja turno — ídem: upsert por (cuenta, codigo), el CÓDIGO fijo al
+  // reabrir.
   const [altaTurno, setAltaTurno] = useState(false);
+  const [editandoTurno, setEditandoTurno] = useState(false);
   const [turCodigo, setTurCodigo] = useState('');
   const [turCorte, setTurCorte] = useState('');
   const [turDesde, setTurDesde] = useState('');
@@ -446,10 +460,23 @@ export default function ConfiguracionVentas() {
                 {pantalla.turnos.map((tur, i) => (
                   <View key={tur.turno_id}>
                     {i > 0 && <Separador />}
+                    {/* D-791: la fila REABRE el mismo formulario que la
+                        creó — la puerta upsertea por (cuenta, codigo). */}
                     <Celda
                       titulo={tur.codigo}
                       subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
                       metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
+                      interactiva
+                      accessibilityRole="button"
+                      onPress={() => {
+                        setTurCodigo(tur.codigo);
+                        setTurCorte(horaDeSql(tur.corte));
+                        setTurDesde(horaDeSql(tur.entrega_desde));
+                        setTurHasta(horaDeSql(tur.entrega_hasta));
+                        setTurDiaSiguiente(tur.dia_offset === 1);
+                        setEditandoTurno(true);
+                        setAltaTurno(true);
+                      }}
                     />
                   </View>
                 ))}
@@ -465,6 +492,7 @@ export default function ConfiguracionVentas() {
                 setTurDesde('');
                 setTurHasta('');
                 setTurDiaSiguiente(false);
+                setEditandoTurno(false);
                 setAltaTurno(true);
               }}
             />
@@ -522,10 +550,20 @@ export default function ConfiguracionVentas() {
                 {pantalla.recursos.map((rec, i) => (
                   <View key={rec.recurso_id}>
                     {i > 0 && <Separador />}
+                    {/* D-791: la fila REABRE el mismo formulario — la
+                        puerta upsertea por (cuenta, nombre). */}
                     <Celda
                       titulo={rec.nombre}
                       subtitulo={rec.activo ? undefined : t('ventas.config.repartidorInactivo')}
                       metadataMono={t('ventas.config.capacidadPorDia', { n: rec.capacidad_por_dia })}
+                      interactiva
+                      accessibilityRole="button"
+                      onPress={() => {
+                        setRecNombre(rec.nombre);
+                        setRecCapacidad(String(rec.capacidad_por_dia));
+                        setEditandoRecurso(true);
+                        setAltaRecurso(true);
+                      }}
                     />
                   </View>
                 ))}
@@ -538,6 +576,7 @@ export default function ConfiguracionVentas() {
               onPress={() => {
                 setRecNombre('');
                 setRecCapacidad('');
+                setEditandoRecurso(false);
                 setAltaRecurso(true);
               }}
             />
@@ -646,17 +685,24 @@ export default function ConfiguracionVentas() {
         onCerrar={() => {
           if (!guardando) setAltaRecurso(false);
         }}
-        titulo={t('ventas.config.recursoNuevoCta')}
+        titulo={
+          editandoRecurso
+            ? t('ventas.config.recursoEditarTitulo')
+            : t('ventas.config.recursoNuevoCta')
+        }
         altura="media"
       >
         <HojaScroll>
           <EvitaTeclado>
             <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+              {/* el NOMBRE es la llave del upsert: fijo al reabrir —
+                  editable crearía OTRO recurso en silencio (D-791) */}
               <Campo
                 label={t('ventas.config.recursoNombre')}
                 value={recNombre}
                 onChangeText={setRecNombre}
-                deshabilitado={guardando}
+                ayuda={editandoRecurso ? t('ventas.config.recursoNombreFijo') : undefined}
+                deshabilitado={guardando || editandoRecurso}
               />
               <Campo
                 label={t('ventas.config.recursoCapacidad')}
@@ -697,17 +743,22 @@ export default function ConfiguracionVentas() {
         onCerrar={() => {
           if (!guardando) setAltaTurno(false);
         }}
-        titulo={t('ventas.config.turnoNuevoCta')}
+        titulo={
+          editandoTurno ? t('ventas.config.turnoEditarTitulo') : t('ventas.config.turnoNuevoCta')
+        }
         altura="media"
       >
         <HojaScroll>
           <EvitaTeclado>
             <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+              {/* el CÓDIGO es la llave del upsert: fijo al reabrir —
+                  editable crearía OTRO corte en silencio (D-791) */}
               <Campo
                 label={t('ventas.config.turnoCodigo')}
                 value={turCodigo}
                 onChangeText={setTurCodigo}
-                deshabilitado={guardando}
+                ayuda={editandoTurno ? t('ventas.config.turnoCodigoFijo') : undefined}
+                deshabilitado={guardando || editandoTurno}
               />
               <Campo
                 label={t('ventas.config.turnoCorte')}
