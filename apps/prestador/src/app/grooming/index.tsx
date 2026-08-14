@@ -34,8 +34,7 @@ import {
   Texto,
   spacing,
   typography,
-  useTheme,
-} from '@epetplace/ui';
+  useTheme,  radius,} from '@epetplace/ui';
 import {
   SERVICIOS_GROOMING,
   TALLAS_GROOMING,
@@ -270,7 +269,7 @@ export default function OfertaGrooming() {
                   style={{
                     width: 10,
                     height: 10,
-                    borderRadius: 5,
+                    borderRadius: radius.full,
                     marginTop: 5,
                     backgroundColor: visible ? theme.status.success : theme.status.warning,
                   }}

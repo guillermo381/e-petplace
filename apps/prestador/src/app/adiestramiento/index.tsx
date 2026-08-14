@@ -35,8 +35,7 @@ import {
   Texto,
   spacing,
   typography,
-  useTheme,
-} from '@epetplace/ui';
+  useTheme,  radius,} from '@epetplace/ui';
 import {
   obtenerBloqueosPrestador,
   obtenerFranjasHorario,
@@ -231,7 +230,7 @@ export default function OfertaAdiestramiento() {
                   style={{
                     width: 10,
                     height: 10,
-                    borderRadius: 5,
+                    borderRadius: radius.full,
                     marginTop: 5,
                     backgroundColor: visible ? theme.status.success : theme.status.warning,
                   }}

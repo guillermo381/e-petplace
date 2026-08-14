@@ -1687,7 +1687,7 @@ const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
    de R2 (grep 7 · lint crudo 8 · despojando prosa 4), y por eso se
    escribe: la próxima regla se ahorra el paso. */
 const BASELINE_R36 = 21;
-const BASELINE_R37 = 7;
+const BASELINE_R37 = 3;
 const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;
@@ -2274,7 +2274,18 @@ function r37(archivos) {
   fallos.push(...ancla('R37', archivos.length, MINIMOS_CORPUS.apps, 'archivo(s) de apps'));
   return {
     fallos,
-    info: `${crudos}/${BASELINE_R37} crudos · ${pildoraAMano} píldora(s) a mano (radius.full es 9999) · ${inventados} fuera de toda escala${crudos < BASELINE_R37 ? ' — BAJÓ: actualizar baseline' : ''}`,
+    // LOS 3 QUE QUEDAN ESTÁN IDENTIFICADOS UNO POR UNO — se nombran acá
+    // para que nadie los vuelva a auditar desde cero cada vez que lea el
+    // reporte: **1 es LETRA FIRMADA y 2 son decisión del founder.**
+    //  · `hogar/index:1259` → 36 en un 112×112 con `borderCurve:
+    //    continuous` = **el SQUIRCLE 32% firmado en S53** (36/112 =
+    //    32,1%). NO es un desvío: es la ley aplicada, y por eso no se
+    //    "cura". Vive acá porque el ratchet cuenta números crudos, no
+    //    intenciones.
+    //  · `mascotas:426` y `:480` → 2 en un 9×9. La escala salta de 0 a 4
+    //    y en un cuadrado de 9px esa diferencia SE VE ⇒ decisión del
+    //    founder, no reemplazo mecánico.
+    info: `${crudos}/${BASELINE_R37} crudos · ${pildoraAMano} píldora(s) a mano (radius.full es 9999) · ${inventados} fuera de toda escala${crudos < BASELINE_R37 ? ' — BAJÓ: actualizar baseline' : ''} · los 3 del piso: 1 squircle FIRMADO (S53) + 2 esquinas de 9px a firma`,
   };
 }
 
