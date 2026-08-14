@@ -38,10 +38,14 @@
  *  · ⑤ repartidores: SIN dato — decir «qué queda comprometido» al apagar
  *    un repartidor exige el lector de envíos vivos POR repartidor, que
  *    no existe (va en el pedido a A). No se inventa la voz sin el dato.
- * ⚠️ Divergencia declarada: la orden cita una «ley del cambio en la
- * cabecera de §8.6bis» que NO está depositada en `MODELO_DESPENSA` (grep
- * en cero sobre origin/main al construir). El literal de arriba es el de
- * la ORDEN; cuando la letra aterrice, si difiere, gana la letra.
+ * ✅ La letra ATERRIZÓ (13-ago, cabecera de §8.6bis — depositada verbatim
+ * del literal de C) y AGREGA dos cosas que esta pantalla aún NO cumple,
+ * declaradas en el inventario pre-gate:
+ *  · «declara qué queda comprometido Y HASTA CUÁNDO» — la voz dice la
+ *    ventana que se conserva, no una fecha explícita (fino post-gate);
+ *  · la baja del repartidor «queda pendiente y se cumple sola» — es
+ *    comportamiento del MOTOR y no existe (A-5/A-8); hoy el toggle apaga
+ *    sin voz ni diferimiento.
  *
  * 🔴 CHOQUE DECLARADO (⑤ QUIÉN): la letra manda repartidor como chip del
  * EQUIPO QUE YA EXISTE («un equipo, un lugar»); el alta de abajo es el
@@ -56,11 +60,14 @@
  *  · Cortes horarios: parámetro, jamás número en el código (§7.1).
  *  · Estado (⑥): el mapeo del enum vive en `estadoDespensa()` abajo —
  *    `pendiente_validacion` = «En revisión» (§2.1: el vendedor propone,
- *    e-PetPlace publica). INTERIM del chip: `Insignia estado` todavía no
- *    tiene `onPress` (S85-B24 lo acotó a `distincion` — «una prop sin
- *    consumidor decora»; el consumidor nació acá). Pedido a B en
- *    `2026-08-13-s96c-pedido-a-B-…`; mientras llega, el «¿Qué significa?»
- *    es un Boton sinCaja al lado del chip y muere con el ensanche.
+ *    e-PetPlace publica). ✅ EL CHIP MISMO abre la explicación (S97-B:
+ *    `onPress` en la familia estado); el interim del «¿Qué significa?»
+ *    murió con el ensanche, como estaba declarado.
+ *  · Radio (③): la ESCALA firmada (5–50 de a 5, default 15, índice 2)
+ *    vive lista en `lib/escala-radio.ts` para `SliderPrecio`
+ *    `registro="aa"`. El cuarto NO se monta: el radio de la CUENTA no
+ *    tiene esquema (A-3) — montarlo sería un formulario muerto para la
+ *    propia cuenta del gate (vendedor puro, 0 filas de prestador).
  */
 
 import { useCallback, useState } from 'react';
@@ -395,16 +402,18 @@ export default function ConfiguracionVentas() {
             gap: spacing[5],
           }}
         >
-          {/* ── ⑥ EL ESTADO — el chip chico arriba, abre su explicación ── */}
+          {/* ── ⑥ EL ESTADO — el chip chico arriba; EL CHIP MISMO abre su
+              explicación (S97-B: `onPress` en la familia estado — el
+              blanco táctil y el rol viven en la pieza, no se re-deciden
+              acá). El interim del «¿Qué significa?» murió con el
+              ensanche, como estaba declarado. */}
           {estadoCfg !== null && (
             <View style={{ gap: spacing[2] }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
-                <Insignia estado={estadoCfg.insignia} etiqueta={etiquetaEstado} tamaño="sm" />
-                {/* INTERIM (pedido B-1): cuando `Insignia estado` gane
-                    `onPress`, este label muere y el tap vive en el chip. */}
-                <Boton
-                  variante="sinCaja"
-                  etiqueta={t('ventas.config.estado.queSignifica')}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Insignia
+                  estado={estadoCfg.insignia}
+                  etiqueta={etiquetaEstado}
+                  tamaño="sm"
                   onPress={() => setModalEstado(true)}
                 />
               </View>

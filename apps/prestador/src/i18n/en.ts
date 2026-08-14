@@ -2484,7 +2484,6 @@ export const prestadorEn = {
         activa: 'Active',
         suspendida: 'Suspended',
         cerrada: 'Closed',
-        queSignifica: 'What does this mean?',
         modalTitulo: 'Your store status',
         modalEnRevision:
           'You propose, e-PetPlace publishes. Complete your setup at your own pace: once the team reviews it, your business becomes visible to families. Nothing else is needed from you for now.',
