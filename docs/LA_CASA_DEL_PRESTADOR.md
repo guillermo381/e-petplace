@@ -76,22 +76,85 @@ de qué lado de la línea está cada cosa.
 
 ## 2 · LA BARRA SE COMPONE POR CAPACIDAD
 
-> **La barra no es una constante: es el resultado de qué puede hacer quien
-> entró.** El motor ya compone así — esta letra lo dice para que la barra
-> deje de ser la única superficie que no lo hace.
+### 2.0 🔴 CORRECCIÓN DE DIRECCIÓN (firma del founder, 14-ago-2026)
+
+> ***«Todos los dueños ven casi lo mismo; lo que determina mostrar más o menos
+> son los servicios que presta.»***
+
+**⇒ LA BARRA ES UNA SOLA PARA TODO DUEÑO:**
+
+> `HOY` · `DATOS` · (`ATENDER` **por capacidad**) · `NEGOCIO` · `CUENTA`
+
+**Lo que se compone por capacidad es el CONTENIDO de cada cuarto, JAMÁS la
+existencia de la barra.** *La casa es la misma; lo que cambia es qué hay
+adentro de cada habitación.*
+
+| quién entra | qué recibe |
+|---|---|
+| **todo DUEÑO** (titular / administrador) | **la barra completa.** `ATENDER` aparece **según capacidad** |
+| **empleados** | **menos tabs** — y **NUNCA `NEGOCIO` ni `CUENTA`** |
+| **repartidor** | **pantalla única**: mapa · llamar · siguiente · entregado con foto |
+
+### 🔴 EL VENDEDOR PURO DEJA DE SER «EL CASO SIN BARRA»
+
+**Es un DUEÑO y tiene la casa entera.** Lo que cambia es el contenido:
+
+- **su `HOY`** = **pedidos + stock**
+- **sus `DATOS`** = los de **venta**
+
+> **Esto DEROGA la fila «vendedor puro → `HOY` · `ATENDER` · `CUENTA` (3)» de
+> la tabla de abajo**, y con ella la explicación de por qué no llevaba
+> `DATOS`. *Ese razonamiento —«sus números viven en su propio panel»— partía
+> de tratarlo como un actor aparte; la firma dice que es un dueño más.*
+
+⚠️ **MEDIDO EN DISPOSITIVO (S97-A, `duenodes`): hoy NO TIENE BARRA EN
+ABSOLUTO** — su app es una sola pantalla (`Pedidos`) con cuatro filas.
+**Con esta firma, eso pasa de «diseño» a DEFECTO con dirección.** Ficha
+**D-819**, que ya lo tenía medido.
+
+### ⚠️ ESTATUTO: DIRECCIÓN FIRMADA, DETALLE ABIERTO
+
+**El founder habló de memoria y la dirección es la que rige.** **Las specs
+finas de cada cuarto del vendedor NO están firmadas** — *se derivan al
+construir, y lo ambiguo se eleva en vez de resolverse solo.*
+
+> *Se marca así a propósito: una dirección clara con detalle abierto es
+> honesta; convertirla en spec completa por inercia sería ponerle al founder
+> palabras que no dijo.*
+
+---
+
+### 2.0bis La tabla previa — ⏪ SUPERADA EN SUS FILAS DE DUEÑO, conservada
+
+> **La letra de abajo es de la firma del 13-ago.** **Sus filas de EMPLEADO y
+> de REPARTIDOR siguen rigiendo**; **su fila de VENDEDOR PURO queda derogada
+> por §2.0**, y la de titular/administrador se lee como **la barra única**.
+> *No se borra: el día que alguien pregunte por qué el vendedor no llevaba
+> `DATOS`, la respuesta y su corrección están las dos acá.*
 
 | quién entra | su barra | n |
 |---|---|---|
 | **titular / administrador** con local | `HOY` · `DATOS` · **`ATENDER`** · `NEGOCIO` · `CUENTA` | 5 |
 | **recepción** | `HOY` · `DATOS` · **`ATENDER`** · `CUENTA` | 4 |
 | **profesional puro** (chips, sin gestión) | `HOY` · `DATOS` · `CUENTA` — **como hoy** | 3 |
-| **vendedor puro** | `HOY` · **`ATENDER`** · `CUENTA` | 3 |
+| ⏪ ~~**vendedor puro** → `HOY` · `ATENDER` · `CUENTA` (3)~~ | **DEROGADA — ver §2.0** | — |
 | **repartidor** | **su pantalla propia, sin barra compartida** | — |
 
 **`ATENDER` es la QUINTA tab, y va al CENTRO.** `DATOS` **se mantiene** en
-las tres barras de quien tiene servicios; **solo el vendedor puro no la
-lleva**, porque `DATOS` es *"el negocio en números"* y hoy sus números son
-los de la despensa, que viven en su propio panel.
+las barras de quien tiene servicios.
+
+> ⏪ **La frase que seguía queda DEROGADA por §2.0** y se conserva para que su
+> razonamiento sea auditable:
+> ~~*«solo el vendedor puro no la lleva, porque `DATOS` es "el negocio en
+> números" y hoy sus números son los de la despensa, que viven en su propio
+> panel»*~~.
+>
+> **Por qué era un error de dirección y no un detalle:** el razonamiento era
+> correcto **dentro de una premisa equivocada** —que el vendedor es un actor
+> aparte con su propio panel—. **La firma dice que es un dueño más**, y
+> entonces sus números no «viven en otro lado»: **son el contenido de SU
+> `DATOS`.** *La casa no le presta un cuarto: el cuarto es suyo y se amuebla
+> distinto.*
 
 > ### ⚠️ ESTO ENMIENDA `DISEÑO_EXPERIENCIA` §15b.0 · LA CONSOLIDACIÓN DE TABS — y se marca, no se pisa
 >

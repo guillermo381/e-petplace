@@ -16231,6 +16231,30 @@ filas (Stock · Venta de mostrador · Mis entregas de hoy · Configuración) y
 ⇒ **La ceremonia le anuncia cuatro cuartos y NINGUNO de los cuatro existe en su
 casa.** No es que sobre uno: **sobran todos**, y faltan todos los suyos.
 
+### 🔴 ENMIENDA POR FIRMA (14-ago, §2.0 de `LA_CASA_DEL_PRESTADOR`) — LA CULPA CAMBIA DE LADO
+
+> ***«Todos los dueños ven casi lo mismo; lo que determina mostrar más o menos
+> son los servicios que presta.»***
+
+**El vendedor puro es UN DUEÑO Y LE CORRESPONDE LA BARRA ENTERA.** Su `HOY` es
+pedidos+stock y sus `DATOS` son de venta.
+
+⇒ **El destape NO estaba mintiendo sobre su casa: la casa estaba mal.**
+*Enumerar `HOY · DATOS · NEGOCIO · CUENTA` era casi correcto — lo que faltaba
+era `ATENDER`, y lo que estaba roto era que esa barra no se le dibujaba.*
+
+**Se parte en dos, y cada mitad tiene dueño distinto:**
+
+| | qué falta | de quién |
+|---|---|---|
+| **D-819** (esta ficha) | el destape se compone **de un literal** y le falta `ATENDER` | **C** |
+| **D-820** | **el vendedor puro no recibe la barra** que la firma le da | nace abajo |
+
+*Y la lección de método vale más que el reparto:* **medí bien y adjudiqué
+sobre una premisa que la firma cambió doce horas después.** El dato —«no tiene
+barra»— era correcto; **la conclusión —«la lista fija no puede estar bien para
+nadie»— dependía de que la barra por capacidad fuera la ley, y dejó de serlo.**
+
 ⇒ **Queda probado que no es «falta un ítem»: es una lista fija contra una casa
 compuesta.** Los dos negocios más distintos del producto reciben **exactamente
 la misma bienvenida**, y ninguna de las dos es correcta.
@@ -16242,3 +16266,40 @@ discriminador ya está medido y es el de arriba: si tras la cura el destape de
 
 **Prioridad: alta pero no bloqueante del tren** — el destape corre y es bello;
 lo que dice está mal.
+
+
+---
+
+#### D-820 — 🔴 EL VENDEDOR PURO NO RECIBE LA BARRA QUE LA FIRMA LE DA
+
+**Medido en dispositivo (S97-A, `duenodes`): su app es UNA PANTALLA
+(`Pedidos`) con cuatro filas — Stock · Venta de mostrador · Mis entregas de
+hoy · Configuración — y CERO tabs.**
+
+**Y desde la firma del 14-ago (`LA_CASA_DEL_PRESTADOR` §2.0) eso es un
+DEFECTO, no un diseño:**
+
+> ***«Todos los dueños ven casi lo mismo; lo que determina mostrar más o menos
+> son los servicios que presta.»***
+
+**El vendedor puro es un DUEÑO.** Le corresponde `HOY` · `DATOS` ·
+(`ATENDER` por capacidad) · `NEGOCIO` · `CUENTA`, con **su** contenido:
+
+| cuarto | qué lleva para él |
+|---|---|
+| `HOY` | **pedidos + stock** |
+| `DATOS` | los números **de venta** |
+
+⚠️ **ESTATUTO: dirección firmada, DETALLE ABIERTO.** El founder habló de
+memoria. **Las specs finas de cada cuarto NO están firmadas** — se derivan al
+construir **elevando lo ambiguo**, jamás rellenando por inercia. *Convertir una
+dirección clara en spec completa es ponerle al founder palabras que no dijo.*
+
+**Consecuencia colateral que cierra sola:** hoy su única salida de sesión está
+al pie de la Configuración de la tienda (verificado). **Con `CUENTA` en su
+barra, vuelve a donde vive en todas las demás casas.**
+
+☠️ **Muere** cuando `duenodes` entre y reciba la barra completa **con
+contenido propio en `HOY` y `DATOS`** — no con los cuartos vacíos, que sería
+cumplir la letra y romper la intención. **Territorio: C** (superficie) **+ A**
+(los lectores de pedidos/stock/venta que `HOY` y `DATOS` necesiten).
