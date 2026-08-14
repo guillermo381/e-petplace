@@ -44,6 +44,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerDetalleMascotaPrestador,
   obtenerExpedienteModulado,
   obtenerFamiliaDeMascota,
@@ -244,7 +245,13 @@ export default function DetalleMascota() {
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
           <AvatarMascota
             nombre={mascota.nombre}
-            fotoUrl={fotoFirmada}
+            /* S98-C · D-806 — la foto real GANA; sin ella, la cara de su
+               especie en vez de la huella. Porqué completo en
+               `components/atender/pizarra-hoja`. */
+            fotoUrl={
+              caraDeMascota({ especie: mascota.especie, razaSlug: null, fotoUri: fotoFirmada }) ??
+              undefined
+            }
             especie={esEspecie(mascota.especie) ? mascota.especie : undefined}
             tamano="lg"
           />

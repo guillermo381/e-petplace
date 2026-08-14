@@ -82,6 +82,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerDatosNegocio,
   obtenerEquipoNegocio,
   obtenerMascotasAtendidas,
@@ -555,7 +556,14 @@ export default function Mascotas() {
                   inicio={
                     <AvatarMascota
                       nombre={m.nombre}
-                      fotoUrl={m.foto_url ? urlsFotos.get(m.foto_url) : undefined}
+                      /* S98-C · D-806 — porqué en `atender/pizarra-hoja`. */
+                      fotoUrl={
+                        caraDeMascota({
+                          especie: m.especie,
+                          razaSlug: null,
+                          fotoUri: m.foto_url ? urlsFotos.get(m.foto_url) : undefined,
+                        }) ?? undefined
+                      }
                       especie={esEspecie(m.especie) ? m.especie : undefined}
                       tamano="sm"
                     />

@@ -60,6 +60,7 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerBloqueosPrestador,
   obtenerCitasAdiestramientoDelDia,
   obtenerDiasCerrados,
@@ -811,7 +812,14 @@ function FilaSalida({
               <View key={c.id} style={{ marginLeft: i === 0 ? 0 : -spacing[2] }}>
                 <AvatarMascota
                   nombre={c.mascota?.nombre ?? t('agenda.mascotaFallback')}
-                  fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
+                  /* S98-C · D-806 — porqué en `atender/pizarra-hoja`. */
+                  fotoUrl={
+                    caraDeMascota({
+                      especie: c.mascota?.especie,
+                      razaSlug: null,
+                      fotoUri: c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined,
+                    }) ?? undefined
+                  }
                   especie={c.mascota && esEspecie(c.mascota.especie) ? c.mascota.especie : undefined}
                   tamano="xs"
                 />

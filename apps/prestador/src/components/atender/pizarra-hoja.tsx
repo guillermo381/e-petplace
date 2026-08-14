@@ -73,6 +73,7 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   asignarCitaAPersona,
   obtenerMiPrestador,
   obtenerPersonasParaAsignar,
@@ -346,6 +347,26 @@ export function PizarraHoja({ visible, onCerrar }: PizarraHojaProps) {
                       <AvatarMascota
                         nombre={c.mascotaNombre}
                         especie={esEspecie(c.mascotaEspecie) ? c.mascotaEspecie : undefined}
+                        /* ⭐ S98-C · LA CARA (D-806). Sin esto la pizarra
+                           dibuja la huella genérica para TODAS — el defecto
+                           que el founder vio navegando.
+                           🔴 `especie` sola NO alcanza y hay que saberlo:
+                           `AvatarMascota` la declara pero **no la usa en el
+                           render** —es reserva de D-288 desde S44—, así que
+                           las pantallas venían pasándola creyendo que hacía
+                           algo. Lo que sí pinta es `fotoUrl`, y por eso la
+                           cara se resuelve ACÁ AFUERA y se le entrega ya
+                           hecha: *la pieza no aprende de buckets.*
+                           `razaSlug: null` es DELIBERADO — ningún lector
+                           del prestador trae el slug del catálogo, y una
+                           URL armada de un texto libre acierta a veces y
+                           el resto muestra la cara de otra raza. Con null
+                           va el genérico de la especie, que siempre es
+                           cierto. Y si el objeto no existiera, el `onError`
+                           de la pieza devuelve la huella. */
+                        fotoUrl={
+                          caraDeMascota({ especie: c.mascotaEspecie, razaSlug: null }) ?? undefined
+                        }
                         tamano="sm"
                       />
                     }
