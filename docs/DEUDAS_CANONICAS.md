@@ -14268,3 +14268,21 @@ vendedor no espera a la pasarela.*
 
 ☠️ **Muere** cuando el DESPUÉS tenga letra firmada y el vendedor real tenga
 la respuesta a «cuándo cobro» escrita en su superficie.
+
+#### D-789 — 🟡 `SliderPrecio` MIENTE SU NOMBRE — misma familia que `documentosSobre` y el JSDoc de «tinta»
+
+**Nace de una orden de mesa (13-ago-2026) con el costo medido por B: 13
+montajes en 14 archivos, 7 de ellos en `apps/`.** El componente se llama
+`SliderPrecio` y sus consumidores lo montan para cosas que no son precio —
+el nombre describe su primer uso, no su contrato. *Misma clase que
+`documentosSobre` y el JSDoc de «tinta»: un nombre que miente no rompe
+ningún build; enseña mal a cada consumidor nuevo.*
+
+**La condición de ejecución, escrita en la ficha porque es lo que la vuelve
+segura:** el rename **se ejecuta en una VENTANA donde ninguna pista toque
+esos 14 archivos** — es un cambio que atraviesa `packages/ui` (territorio
+B) y las dos apps (territorio C), así que lo coordina la mesa como acto
+único, no lo arranca una pista sola.
+
+☠️ **Muere** con el rename ejecutado en su ventana, typecheck verde en las
+cuatro patas y el índice de la skill actualizado por B.

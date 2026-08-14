@@ -85,7 +85,33 @@ const CAPA_A_KEY = {
 } as const
 
 export type InsigniaProps =
-  | { estado: InsigniaEstado; capa?: never; soloPunto?: never; etiqueta: string; tamaño?: InsigniaTamaño }
+  | {
+      estado: InsigniaEstado
+      capa?: never
+      soloPunto?: never
+      etiqueta: string
+      tamaño?: InsigniaTamaño
+      /** S97-B · SEGUNDA FAMILIA TOCABLE — y NO es una excepción nueva: es
+       *  la MISMA de S85-B24 aplicada donde su propio criterio ya la
+       *  admitía.
+       *
+       *  Lo que la cabecera prohíbe en mayúsculas —«jamás Pressable»— es
+       *  un badge que dispara una ACCIÓN: ahí el badge es un botón mal
+       *  vestido y le corresponde ser `Boton`. El criterio de la ley NUNCA
+       *  fue la familia, fue QUÉ HACE EL TOQUE. `distincion` entró porque
+       *  el emblema no acciona: abre su propia explicación. El chip de
+       *  estado entra por lo mismo — el usuario no cambia nada del sistema
+       *  tocándolo, se entera de por qué está así.
+       *
+       *  ⚠️ LO QUE SIGUE PROHIBIDO, escrito acá porque es donde alguien va
+       *  a venir a buscarlo: filtrar, navegar a otra parte, reintentar,
+       *  cambiar el estado. Si el toque hace ALGO, no es esta prop — es
+       *  `Boton`. Una explicación no tiene efecto secundario.
+       *
+       *  Sin `onPress` sigue siendo un `View` con `role="text"`: no nace un
+       *  control donde no hay a dónde ir. */
+      onPress?: () => void
+    }
   | { capa: InsigniaCapa; estado?: never; soloPunto?: boolean; etiqueta: string; tamaño?: InsigniaTamaño }
   | {
       distincion: InsigniaDistincion
@@ -217,6 +243,22 @@ function Escarapela({ color, lado }: { color: string; lado: number }) {
   )
 }
 
+/** EL BLANCO TÁCTIL DE LA PIEZA, UNO SOLO PARA LAS DOS FAMILIAS TOCABLES.
+ *
+ *  La pastilla mide 22-26 de alto y un blanco de ese tamaño es de los que se
+ *  fallan. El target de 44 lo pone LA PIEZA, jamás el consumidor: envolverla
+ *  desde afuera deja el área táctil y el foco fuera, y el que se olvide
+ *  entrega 22px como blanco.
+ *
+ *  `hitSlop` en vez de crecer, porque la insignia no puede engordar sin romper
+ *  la fila que comparte con el nombre.
+ *
+ *  ⬆️ EXTRAÍDO EN S97-B al ganar su segundo usuario. Vivía inline en
+ *  `distincion`; copiarlo a `estado` habría dejado dos blancos táctiles que
+ *  divergen la primera vez que alguien afine uno. Nadie clona adentro de la
+ *  pieza tampoco. */
+const BLANCO_TACTIL = { top: 10, bottom: 10, left: 8, right: 8 } as const
+
 export function Insignia(props: InsigniaProps) {
   const { tamaño = 'md' } = props
   const { theme } = useTheme()
@@ -251,11 +293,7 @@ export function Insignia(props: InsigniaProps) {
           ? {
               onPress: alTocar,
               accessibilityRole: 'button' as const,
-              /* El target de 44 lo pone la PIEZA: la pastilla mide 22-26
-                 de alto y un blanco de ese tamaño es de los que se fallan.
-                 `hitSlop` en vez de crecer — la insignia no puede engordar
-                 sin romper la fila que comparte con el nombre. */
-              hitSlop: { top: 10, bottom: 10, left: 8, right: 8 },
+              hitSlop: BLANCO_TACTIL,
             }
           : { accessibilityRole: 'text' as const })}
         accessibilityLabel={etiqueta}
@@ -339,9 +377,16 @@ export function Insignia(props: InsigniaProps) {
   }
 
   const s = ESTADO_A_STATUS[(props as { estado: InsigniaEstado }).estado]
+  // S97-B — misma anatomía que `distincion`: el contenedor CAMBIA solo cuando
+  // hay destino. Sin `onPress` no nace un control, y el rol sigue siendo
+  // `text` — un lector de pantalla no anuncia un botón que no hace nada.
+  const alTocarEstado = (props as { onPress?: () => void }).onPress
+  const ContenedorEstado = alTocarEstado ? Pressable : View
   return (
-    <View
-      accessibilityRole="text"
+    <ContenedorEstado
+      {...(alTocarEstado
+        ? { onPress: alTocarEstado, accessibilityRole: 'button' as const, hitSlop: BLANCO_TACTIL }
+        : { accessibilityRole: 'text' as const })}
       accessibilityLabel={etiqueta}
       style={{
         justifyContent: 'center',
@@ -357,6 +402,6 @@ export function Insignia(props: InsigniaProps) {
       <Text style={{ fontFamily: typography.family.sans.medium, fontSize: t.fontSize, color: theme.status[`${s}Text`] }}>
         {etiqueta}
       </Text>
-    </View>
+    </ContenedorEstado>
   )
 }
