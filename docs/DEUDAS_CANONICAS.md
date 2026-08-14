@@ -14506,10 +14506,31 @@ uno por uno, cuando cada dueño pasa por su wizard y **dice** lo que hace. Una
 migración lo corrige de golpe **y se lleva por delante a los que estaban
 bien** — sin traza, sin error, y sin nadie que pueda saber a quiénes.
 
-☠️ **Muere** cuando la mesa firme qué significa la modalidad para paseo y
-adiestramiento, **o** cuando el paso ② del wizard haya pasado por los negocios
-vivos y los valores dejen de ser el default. **Disparo:** el primer negocio
-real que camine el wizard.
+☠️ ✅ **CERRADA — 14-ago-2026, firma del founder: EL PASEO ES SIEMPRE A
+DOMICILIO. No existe paseo en local.**
+
+**El criterio que faltaba llegó, y con él la cura de datos que esta ficha
+había FRENADO.** *La ficha no frenaba por miedo al `UPDATE`: frenaba por
+falta de criterio* — su literal era *«qué significa "local" para un paseo es
+decisión de producto, no de migración»*. **Con la firma, los 9
+`atiende_local = true` de paseo dejan de ser un default permisivo y pasan a
+ser un DATO FALSO** — y un dato falso se corrige.
+
+**Las tres consecuencias, aplicadas juntas** (migración `20260814160000`):
+① los 9 paseos a `atiende_local = false` **y `atiende_domicilio = true`** en
+el mismo acto —el CHECK `chk_ps_alguna_modalidad` lo exige, *y además es la
+firma misma*— · ② **un guard vuelve el estado INEXPRESABLE para ese oficio**
+(`trg_ps_paseo_sin_local`, rebote hablado): *curar los datos sin cerrar la
+puerta es curar hasta el próximo `INSERT`* · ③ **el toggle se ofrece POR
+OFICIO** y **el paseo NO cuenta para la capacidad presencial de `ATENDER`**
+(depositado en `LA_CASA_DEL_PRESTADOR` §2.1bis; pedido de superficie a C).
+
+**Cinturón con discriminador:** 0 paseos con local · todos a domicilio · **el
+estado falso REBOTA** al intentar reponerlo · y **22 filas de otros oficios
+intactas** — el contra-caso que prueba que el guard no se pasó de alcance.
+
+**76(g) RIGE y se declaró: esta migración TOCA DATOS.** *Es la única de la
+sesión que lo hace.*
 
 ---
 
@@ -14798,3 +14819,191 @@ vez de por `INSERT`.
 
 ☠️ **CERRADA** — migración `20260814150000`, con cinturón que **declara si su
 brazo funcional queda sin sujeto** en vez de dar verde por ausencia.
+
+---
+
+#### D-799 — 🟡 EL WIZARD DICE «PUEDE SER LA CONEXIÓN» CUANDO LA CAUSA ES QUE LA CUENTA NO ES TUYA
+
+**Nace del intento de disparar el gate del Lote 1 (14-ago).** El wizard se
+abrió por deep link y mostró:
+
+> *«No pudimos cargar esto · **Puede ser la conexión.** Probá de nuevo.»*
+
+**Y no era la conexión.** Medido en el aparato y contra la base:
+
+- El teléfono corre el update correcto (`019ffe67`, `embedded=false`).
+- **Cero errores de JS** en `logcat` — nada falló.
+- La sesión viva es de **un EMPLEADO de «Clinica S97»**, no del dueño de
+  ninguna cuenta comercial: **la barra muestra TRES tabs** (Hoy · Datos ·
+  Cuenta), o sea `sesion.esGestor === false`.
+- **`obtenerMiCuentaComercial()` resuelve por `owner_profile_id`** ⇒ para un
+  empleado devuelve `null` ⇒ el wizard cae a `setContexto({ estado: 'error' })`
+  (`verificacion/alta/index.tsx:119`).
+
+**⇒ El código hace exactamente lo que debe. Lo que miente es la VOZ.**
+
+> **«Puede ser la conexión» es un diagnóstico, no un mensaje** — y es el
+> diagnóstico equivocado. La causa real es de **identidad**: *esta cuenta no
+> es tuya, o todavía no tenés una.*
+
+**Es la familia que S96 midió cuatro veces en un día** (*el título que mentía
+la causa*): la pantalla informa, se ve razonable, y **manda a la persona a
+revisar el wifi cuando lo que tiene que hacer es cambiar de sesión.** *Costó
+una vuelta de diagnóstico en el gate, con el founder esperando.*
+
+**Y el borde legítimo que la cura NO puede romper:** un **vendedor puro sin
+cuenta comercial todavía** puede llegar acá de verdad. Para él la voz no es un
+error: es *«todavía no tenés un negocio — creá uno»* con su camino. **Son
+TRES casos y hoy los tres se dicen igual:** fallo de red · cuenta ajena ·
+sin cuenta.
+
+**Cura (de C, su territorio):** el wrapper ya distingue —
+`obtenerMiCuentaComercial` devuelve `ok:true, data:null` para *«no tenés»* y
+`ok:false` para *«falló»*—, **así que la pantalla tiene el dato y lo colapsa
+en una sola voz.** Separar los tres es leer lo que ya llega.
+
+☠️ **Muere** cuando el wizard diga las tres causas distinto, con camino en la
+que lo tiene. **Disparo: antes de que el wizard entre a navegación** — hoy
+vive en `/verificacion/alta` y solo se alcanza por deep link, así que el único
+que lo pisa es quien lo dispara a propósito.
+
+---
+
+#### D-800 — 🎨 EL ÍCONO DE LA APP: VERDE MÁS OSCURO PARA QUE EL ISOTIPO DESTAQUE
+
+**Firma del founder, 14-ago-2026**, sobre el ícono en la grilla de apps del
+teléfono.
+
+> **El fondo del ícono va a un VERDE MÁS OSCURO, para que el isotipo
+> destaque.**
+
+**Es ASSET NATIVO, y eso decide su tren:** el ícono de launcher **no viaja por
+OTA**. Se hornea en el binario ⇒ **entra en la PRÓXIMA BUILD**, junto a
+**D-784** (la migración a llaves publicables, que ya es precondición del
+próximo build).
+
+*No es una espera: es que las dos comparten el único vehículo que las puede
+llevar.* **Agruparlas evita un build para cada una** — y un build de más es
+media hora de calendario que no compra nada.
+
+**Lo que la firma decide y lo que no:** decide **la dirección** (más oscuro,
+para contraste con el isotipo). **No decide el hex** — se elige mirando el
+ícono en la grilla, entre las otras apps del teléfono, que es el único
+contexto donde ese contraste significa algo. *Un ícono no se firma en una
+lámina: se firma en el cajón donde va a vivir.*
+
+**Fuente del verde, cuando se elija:** sale de la paleta de marca
+(`packages/ui/src/tokens/palette.ts`), **jamás de un hex tipeado en el
+`app.json`** — el mismo criterio con que los seis stops de la rampa viven en
+`gradients.logo`.
+
+☠️ **Muere** con la próxima build nativa llevando el ícono nuevo, y el founder
+mirándolo en su grilla.
+
+---
+
+#### D-801 — 🔴 LA LUZ DE LA ESQUINA SE DIBUJA COMO UN DISCO NEGRO OPACO EN EL DESTAPE
+
+**Medido caminando el destape en dispositivo (A, 14-ago, `019ffe67`).** El
+quinto acto —**la luz de la esquina**, A4— se ve como **un disco NEGRO SÓLIDO
+que invade el cuarto superior derecho de la pantalla**, sobre el fondo claro
+del destape.
+
+**La letra que incumple, literal (`DIRECCION_ARTE` §9bis.2 + enmienda S82):**
+
+> *«Círculo de blanco al **7 %** … **el valor sale del token del tema
+> (`text.primary` + opacity), JAMÁS de un literal** … sobre techo OSCURO la
+> luz es BLANCA, sobre techo CLARO es TINTA.»*
+
+**⇒ El registro está bien elegido (tinta sobre claro) y la OPACIDAD se
+perdió.** *Tinta al 7 % es un velo que casi no se ve; tinta al 100 % es un
+agujero negro.* **No es que la luz esté de más: está sin su alfa.**
+
+**Y es exactamente el modo de falla que la enmienda S82 previó:** su nota al
+gate decía *«si la inversión TAMPOCO se lee, A4 necesita alcance fino»* —
+**pero acá el problema no es que no se lea: es que se lee DEMASIADO.** La
+enmienda contempló el caso débil y no el fuerte.
+
+**Por qué ningún instrumento lo vio:** `verify:diseno` no mide opacidad, WCAG
+no evalúa un adorno decorativo, y el typecheck ve un número válido. **Lo
+encontró mirar** — cuarta vez en la sesión que la captura hace lo que los
+cinco gates no.
+
+☠️ **Muere** con la luz al alfa firmado en el destape, verificada en
+dispositivo. **Territorio: B** (la pieza `Destape` y el token del velo).
+
+---
+
+#### D-802 — 🔴 DOS NOMBRES COMERCIALES PARA EL MISMO NEGOCIO, Y EL WIZARD EDITA EL QUE LAS FAMILIAS NO VEN
+
+**Medido en el aparato y contra la base (A, 14-ago), sobre `duenotodo`:**
+
+| dónde vive | valor |
+|---|---|
+| `cuentas_comerciales.nombre_comercial` | **«Dueño todos los servicios (borrable)»** ← lo que el **wizard** edita y el **destape** muestra |
+| `cuentas_comerciales.razon_social` | «TODO EN UNO DE PRUEBAS S97 - NO REAL» |
+| `prestadores.nombre_comercial` | **«Todo S97 (borrable)»** ← lo que el **HOY** muestra |
+
+> ### 🔴 Y LO QUE LO VUELVE GRAVE NO ES LA DUPLICACIÓN: ES LA PROMESA.
+>
+> El paso ① del wizard dice, literal: ***«El nombre con el que las familias
+> te van a encontrar.»***
+>
+> **Las familias encuentran al PRESTADOR** — `v_prestadores_publicos` lee
+> `prestadores.nombre_comercial`. **El campo que el wizard ofrece escribe la
+> otra tabla.**
+
+**⇒ El prestador puede corregir ahí el nombre que ve en su vitrina y la
+vitrina no cambia** — y la pantalla le prometió que sí. *Es un caso puro de
+Ley 13 con el agravante de que no falla: guarda bien, en el lugar
+equivocado.*
+
+**Y el mismo negocio se llama distinto en dos pantallas de la misma app:**
+«Dueño todos los servicios» en el wizard y el destape, «Todo S97» en el HOY.
+*Un usuario no tiene forma de saber cuál es su nombre.*
+
+**Lo que la ficha NO decide, porque es de mesa:** cuál de los dos es **el**
+nombre. Hay dos salidas y son distintas — ① el wizard apunta a
+`prestadores.nombre_comercial` (y entonces el vendedor puro, que no tiene fila
+de prestador, necesita otra respuesta) · ② los dos se unifican, y entonces hay
+que decir cuál gana y qué pasa con el que se pierde.
+
+**Nota de autoría:** la puerta `actualizar_nombre_cuenta_comercial` es **de A**
+(S97-A) y hace lo que dice — *escribe el nombre de la cuenta*. **El defecto no
+es de la puerta: es de a qué puerta apunta la promesa de la pantalla.**
+
+☠️ **Muere** con la firma de mesa sobre cuál es el nombre, y la pantalla
+apuntando ahí.
+
+---
+
+#### D-803 — 🟡 EL REBOTE DEL GUARD SALE CRUDO, CON SU CÓDIGO TIPADO A LA VISTA
+
+**Medido en el aparato (A, 14-ago):** al tocar «Atiendo en mi local» en un
+paseo —el estado que la firma del founder volvió ilegal— el motor **rebota
+correctamente y el toggle NO se prende** ✅, y la pantalla muestra:
+
+```
+paseo_no_atiende_en_local: el paseo es SIEMPRE a domicilio — no existe
+paseo en loc…
+```
+
+**Con el código de error tipado adelante, y truncado al final.**
+
+**Las dos mitades, separadas a propósito:**
+- ✅ **El guard funciona y la firma rige de verdad** — se verificó tocando, no
+  leyendo.
+- 🔴 **`paseo_no_atiende_en_local` es vocabulario del MOTOR.** *Es para el
+  programa, no para el prestador* (Ley 3 — el motor no se asoma). **El mensaje
+  del `RAISE` está escrito para un log; la pantalla lo muestra tal cual.**
+
+**La cura tiene DOS caminos y el mejor no es traducir:**
+① la pantalla traduce el código a voz de producto —lo que A ya hizo con
+`sin_modalidad` en el wrapper—; **② el toggle NO SE OFRECE para paseo**, que
+es **la firma del founder que C todavía no aplicó**. *Con ② este rebote no
+ocurre nunca* — y una voz que nadie va a leer es mejor que una voz bien
+escrita.
+
+☠️ **Muere** con el toggle ofrecido por oficio (②). Si por alguna razón el
+rebote tiene que seguir siendo alcanzable, muere con ① en su lugar.
+**Territorio: C.**

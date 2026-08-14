@@ -33,8 +33,7 @@ import {
   Texto,
   spacing,
   typography,
-  useTheme,
-} from '@epetplace/ui';
+  useTheme,  radius,} from '@epetplace/ui';
 import {
   BLOQUES_PASEO,
   obtenerBloqueosPrestador,
@@ -247,7 +246,7 @@ export default function OfertaPaseo() {
                   style={{
                     width: 10,
                     height: 10,
-                    borderRadius: 5,
+                    borderRadius: radius.full,
                     marginTop: 5,
                     backgroundColor: visible ? theme.status.success : theme.status.warning,
                   }}

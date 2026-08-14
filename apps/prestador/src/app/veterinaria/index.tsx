@@ -35,8 +35,7 @@ import {
   Texto,
   spacing,
   typography,
-  useTheme,
-} from '@epetplace/ui';
+  useTheme,  radius,} from '@epetplace/ui';
 import {
   MENU_VETERINARIA,
   obtenerDocumentosVerificacion,
@@ -237,7 +236,7 @@ export default function PortadaVeterinaria() {
                   style={{
                     width: 10,
                     height: 10,
-                    borderRadius: 5,
+                    borderRadius: radius.full,
                     marginTop: 5,
                     backgroundColor: verificado ? theme.status.success : theme.status.warning,
                   }}

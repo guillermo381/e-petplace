@@ -66,6 +66,9 @@ export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
 // que sale del ultimo gesto REAL y no de un temporizador paralelo.
 export { Destape, type DestapeProps, type DestapeTab } from './components/Destape'
+// Baldosa — S97+-B: la pieza de lo que se ELIGE (Acto II). Tarjetas para
+// elegir, filas para leer. Sube la UNIDAD, no la grilla.
+export { Baldosa, type BaldosaProps } from './components/Baldosa'
 // S84-B7 — la vitrina del negocio, UNA sola vez (cliente + espejo).
 // S84-B16 — la ZONA (círculo sin pin, no interactivo). Variante .web.
 export { MapaZona, type MapaZonaProps } from './components/MapaZona'

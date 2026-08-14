@@ -559,6 +559,84 @@ toco»*. **El riesgo que el caso del 13-ago produjo fue USO SIMULTÁNEO, no
 autonomía — y contra eso protege la DURACIÓN de la entrega, no el permiso
 por paso.**
 
+## 6bis-A · LA ENTREGA QUEDA ABIERTA A LAS PISTAS *(autorización del founder, 14-ago-2026)*
+
+> **El founder autoriza acceso completo de las pistas al dispositivo para
+> pruebas.** §6bis sigue rigiendo entero — esto lo ENSANCHA, no lo reemplaza.
+
+### ① EL MAPA DE CREDENCIALES — se enseña el mapa, JAMÁS las claves
+
+> 🔴 **LA CLAVE NUNCA SE PEGA EN UN CHAT, UN REPORTE NI EL REPO. Se lee del
+> keychain EN EL MOMENTO en que se usa.**
+
+**Los dos secretos, por su dirección (verificado que existen, 14-ago):**
+
+```
+security find-generic-password -a siembra -s epetplace-siembra-s97 -w
+      → la clave ÚNICA de las 13 cuentas de prueba
+
+security find-generic-password -a pin     -s epetplace-dispositivo-s97 -w
+      → el PIN del aparato
+```
+
+**La matriz de correos y roles:**
+`docs/relevamientos/2026-08-13-s97a-matriz-cuentas-prueba.md`
+**Todas son `guillo381+<sufijo>@gmail.com`:**
+
+| sufijo | qué es |
+|---|---|
+| `duenovet` | clínica **con agenda sembrada** |
+| `duenoser` | servicios |
+| `duenodes` | **vendedor puro** con oferta y pedido |
+| `duenotodo` | **prestador + vendedor**, con pedido vivo |
+| `vet3` · `vet4` | chips médicos |
+| `vetrece` · `serrece` | recepción |
+| `vetadmin` · `seradmin` | flag directo en base |
+| `desrepartidor` | **con envío asignado** |
+| `vendedorpuro` | Tienda Pura |
+| `demovet` | Aurora |
+
+**Por qué el mapa y no la clave, y no es ceremonia:** §6ter ya prohíbe que una
+pista cambie la clave de una cuenta que no creó; **esto cierra la otra mitad**
+— que la clave circule. *Una credencial pegada en un reporte queda en el
+transcript para siempre, y el transcript se archiva.* **Precedente medido:
+D-712** — una auditoría de seguridad commiteó un token de sesión propio. *Los
+artefactos de una prueba son un vector nuevo.*
+
+### ② LAS REGLAS DE LA ENTREGA ABIERTA
+
+**🔴 LA PRIMERA, y es de AHORA:** el founder está usando el aparato **para el
+gate del wizard**. **Nadie dispara eventos ni cambia sesión hasta que él
+declare terminada su caminata.** *Una pista que cambia de sesión a mitad del
+gate no interrumpe una prueba: la invalida sin que el que camina se entere.*
+
+**Después, para toda pista que tome la entrega:**
+
+1. **VERIFICAR IDENTIDAD ANTES DE CENSAR** — `Cuenta › Seguridad`. *Un censo
+   hecho como la persona equivocada produce un reporte perfectamente
+   coherente y perfectamente falso* (medido hoy: el wizard «falló» durante una
+   vuelta entera porque la sesión era de un empleado — **D-799**).
+2. **CERO CAPTURA FUERA DE NUESTRAS APPS.** El aparato es del founder y tiene
+   su vida adentro.
+3. **EL CAMBIO DE SESIÓN SE DECLARA ANTES Y DESPUÉS** — *quién estaba, quién
+   queda*. **El founder puede retomar en cualquier momento y tiene que saber
+   como quién.** *Devolver un teléfono con otra sesión que la que tenía es
+   devolverlo roto de una manera que no se ve.*
+
+### ③ EL ENCARGO QUE DA SENTIDO AL ACCESO — lo que solo tiene verde de RN-web
+
+**Cuando el founder termine su caminata:**
+
+| qué correr | por qué |
+|---|---|
+| **la fila de DOS PISOS del HOY** | **el único verde que podría no viajar**: `verify-colision-fila.mjs` mide **RN-web, no el dispositivo**, y *el reparto flex de Android puede diferir* (L-153, declarado en el propio guard) |
+| **la fila de DESPACHO** con `duenotodo` | tiene el pedido vivo sembrado (`P-20260814-355fa6`, `documentado`) — la puerta con población |
+| **el WIZARD ENTERO con `duenodes`** | el **vendedor puro** · y **de paso ejercita D-799**: su voz de *«sin cuenta»* es **el caso real**, no el hipotético |
+
+**El encargo va también a D fresca**, que heredó el guion industrializado.
+
+---
+
 ## 6ter · LA REGLA DE CREDENCIALES *(firmada por la mesa, 13-ago-2026 — hermana de la lección del dominio inventado)*
 
 > **NINGUNA PISTA CAMBIA LA CLAVE DE UNA CUENTA QUE NO CREÓ ELLA. Si

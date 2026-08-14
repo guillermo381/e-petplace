@@ -140,7 +140,7 @@ día con un motor que ya decide así.**
 
 | fuente | qué aporta a `ATENDER` | de dónde sale |
 |---|---|---|
-| **`Tus servicios`** | atención de mostrador · alta asistida de mascota | **oficios con `atiende_local = true`** en `prestador_servicios` |
+| **`Tus servicios`** | atención de mostrador · alta asistida de mascota | **oficios con `atiende_local = true`** en `prestador_servicios` — **el PASEO queda FUERA de esa fuente por firma: es siempre a domicilio** (§2.3) |
 | **`Tu tienda`** | venta de mostrador con su código de reclamo | **la cuenta comercial `activa`** con rol `seller_productos` |
 
 **Y por eso los cinco casos de la barra caen solos, sin una sola regla
@@ -206,6 +206,38 @@ con el domicilio del grooming. **No nace una columna nueva.**
 
 **En VISTA, jamás en tabla.** El feed es una composición de lectura: las
 tres fuentes se leen por separado y se ordenan por hora **en el lector**.
+
+### 3.1 🔴 LA FRONTERA EXACTA DEL HOY (firma del founder, 14-ago-2026)
+
+> ### **Mientras haya cosas POR CONFIGURAR, el HOY las muestra.**
+> ### **Configurado el negocio, el HOY es SOLO EL DÍA.**
+
+**Y lo que sale con esa frontera:** *la pizarra, y todo lo de **atender** o
+**asignar**, vive en `ATENDER`.*
+
+**Es la letra original con su borde puesto.** La firma que abrió este arco
+decía *«dejamos de mezclarlo con tu día»* — **correcta, y sin decir dónde
+empezaba «tu día»**. Esta firma lo dice: **el HOY es un ESTADO TRANSITORIO
+mientras el negocio se termina de armar, y su forma definitiva es el día y
+nada más.**
+
+**Por qué la frontera es temporal y no de contenido, que es lo que la hace
+aplicable:** *no hay una lista de «cosas que sí» y «cosas que no» — hay un
+antes y un después.* **El mismo bloque de configuración es correcto el día 1
+y es ruido el día 30**, y el discriminador ya existe y es el contador del
+wizard (§4.3): **mientras el contador sea > 0, el HOY muestra lo que falta;
+en cero, desaparece.**
+
+> **⇒ Y eso cierra el círculo con la ley del contador:** *él llega a cero, y
+> cuando llega, el HOY deja de hablarle de configuración.* **La misma cifra
+> gobierna la voz del wizard y la composición del HOY** — una sola verdad,
+> dos superficies que la leen (§4.0bis otra vez).
+
+**Lo que esto protege, y era el riesgo real:** `DISEÑO_EXPERIENCIA` §15b.0
+marcó **`HOY` como ✅ «CERRADA — no crece más»**, y §2 de esta letra usó esa
+cláusula para justificar `ATENDER`. **Sin esta frontera, el bloque de
+configuración habría sido la excepción por la que HOY vuelve a crecer** — y
+las excepciones no se piden permiso, se acumulan.
 
 > 🔴 **EL CINTURÓN QUEDA INTACTO, Y SE DECLARA ACÁ PORQUE ESTA ES
 > EXACTAMENTE LA PANTALLA QUE LO TIENTA.**
