@@ -121,5 +121,50 @@ for (const caso of CASOS) {
   }
 }
 
+/* ═══ ③ EL RECORTE A 3× — el paso que la mesa canonizó como patrón del gate
+   visual (S97-D), y por eso vive ACÁ y no en un script temporal.
+
+   POR QUÉ EXISTE, con su caso: la fila de 11:30 se veía "cortada" en la
+   captura de ancho completo, y **desde esa miniatura no se puede distinguir
+   TRUNCADO de SOLAPAMIENTO** — dos defectos que se parecen y tienen curas
+   distintas. Reportar el equivocado manda a curar anchos cuando lo que se
+   pisa son capas. El recorte a densidad 3× fue lo que los separó.
+
+   ⚠️ Se corre SIEMPRE, no solo cuando algo se ve mal: la evidencia de que
+   una fila está BIEN también necesita esta resolución — si no, un verde
+   sale de una miniatura, que es de donde salió el diagnóstico equivocado. */
+const ctxZoom = await browser.newContext({
+  locale: 'es-EC',
+  viewport: { width: 420, height: 1400 },
+  deviceScaleFactor: 3,
+});
+const zoom = await ctxZoom.newPage();
+await zoom.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 240000 });
+await zoom.getByPlaceholder('ej: ana@correo.com').fill(EMAIL);
+await zoom.locator('input[type="password"]').fill(PASS);
+await zoom.getByText('Entrar', { exact: true }).click();
+await zoom.waitForTimeout(9000);
+await zoom.goto('http://localhost:8082/', { waitUntil: 'networkidle', timeout: 240000 });
+await zoom.waitForTimeout(6000);
+
+// Las dos filas del discriminador: la de subtítulo que ENVUELVE (09:00) y la
+// de subtítulo de UNA línea larga (11:30). La comparación entre ambas es la
+// pista, así que se capturan las dos — una sola no dice nada.
+for (const [sujeto, slug] of [['Thor', '0900'], ['Zeus', '1130']]) {
+  const fila = zoom.getByText(sujeto, { exact: true }).first();
+  if ((await fila.count()) === 0) {
+    console.log(`⚠️ no se halló la fila de ${sujeto} para el recorte`);
+    continue;
+  }
+  await fila.scrollIntoViewIfNeeded();
+  await zoom.waitForTimeout(800);
+  const caja = await fila.boundingBox();
+  await zoom.screenshot({
+    path: `${DIR}06-zoom-fila-${slug}.png`,
+    clip: { x: 0, y: Math.max(0, caja.y - 70), width: 420, height: 190 },
+  });
+  console.log(`✓ 06-zoom-fila-${slug}.png`);
+}
+
 console.log(`errores JS: ${errores.length === 0 ? 'ninguno' : errores.slice(0, 3).join(' | ')}`);
 await browser.close();
