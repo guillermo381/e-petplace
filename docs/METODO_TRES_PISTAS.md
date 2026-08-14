@@ -616,8 +616,34 @@ gate no interrumpe una prueba: la invalida sin que el que camina se entere.*
    hecho como la persona equivocada produce un reporte perfectamente
    coherente y perfectamente falso* (medido hoy: el wizard «falló» durante una
    vuelta entera porque la sesión era de un empleado — **D-799**).
-2. **CERO CAPTURA FUERA DE NUESTRAS APPS.** El aparato es del founder y tiene
-   su vida adentro.
+2. 🔴 **EL ALCANCE SE ACOTA ANTES DE CORRER, JAMÁS DESPUÉS** *(regla dura,
+   enmendada 14-ago tras dos cruces medidos en una sola jornada)*.
+
+   **La versión anterior decía «cero captura fuera de nuestras apps» y no
+   alcanzó** — decía **QUÉ** pero no **CUÁNDO**, y las dos faltas de S97-A
+   salieron del mismo hueco: *moverse en el aparato sin acotar el alcance
+   antes*.
+
+   | Acto | Cómo se hace | Cómo NO |
+   |---|---|---|
+   | Inspeccionar notificaciones | `adb shell dumpsys notification --pkg com.epetplace.<app>` **o** un `grep` por el literal exacto que se busca | `dumpsys notification` a secas y filtrar la salida después |
+   | Navegar | `am start` con **deep link** de nuestra app | swipes o taps a ciegas |
+   | Capturar pantalla | solo con nuestra app en foreground, **verificado antes** | capturar y mirar después qué salió |
+
+   **Los dos cruces, con su literal, para que la regla tenga cara:**
+   ① un swipe desde el borde abrió la bandeja del sistema y se capturó
+   **Ajustes de USB**; ② un `dumpsys notification` sin `--pkg` volcó **la
+   bandeja personal completa del founder** — banco, mensajes, nombres de
+   terceros.
+
+   > ***Un filtro aplicado a la salida llega tarde: para filtrar hay que haber
+   > leído.*** El daño de una inspección demasiado ancha **ya ocurrió cuando
+   > la ves** — y en un transcript, además, queda.
+
+   **Si una navegación te saca de nuestras apps: se ABORTA, se borra lo
+   capturado y se DECLARA.** *No se sigue «con cuidado»: se vuelve a entrar
+   por deep link.* **Y lo que se haya visto no se usa, no se cita y no se
+   resume** — ni siquiera para decir que no era relevante.
 3. **EL CAMBIO DE SESIÓN SE DECLARA ANTES Y DESPUÉS** — *quién estaba, quién
    queda*. **El founder puede retomar en cualquier momento y tiene que saber
    como quién.** *Devolver un teléfono con otra sesión que la que tenía es
