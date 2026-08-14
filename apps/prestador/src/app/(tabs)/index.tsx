@@ -1213,19 +1213,51 @@ export default function Hoy() {
      perdían dos cosas que nadie pidió perder.
      Se extrae en vez de copiarse en los dos lugares: dos JSX iguales se
      separan un día y nadie se entera. */
+  /* ⭐ S97-D · ESTA FUNCIÓN ES LA DUEÑA DE LA ZONA DE ACCIONES DE UNA CITA —
+     las dos que puede tener, con UNA sola línea.
+
+     El porqué no es de gusto: la primera versión emitía el verbo de la
+     puerta desde el sitio de llamada, con su propio `<Separador />`, y la
+     tarjeta terminaba con DOS líneas — una antes de «Llegó» y otra antes de
+     «Conocer». **`verify:diseno` lo cazó** (R38/N3: el HOY pasó de 3 a 4
+     separadores). La cura no fue borrar una línea al azar sino juntar lo
+     que siempre fue una sola cosa: N3 dice que la línea separa cosas
+     realmente distintas, y dos acciones de la MISMA cita no lo son.
+
+     ⚠️ El verbo se calcula acá adentro y no se pasa por prop: `porLlegarIds`
+     ya vive en el closure, y una prop lo habría dejado decidir a cada sitio
+     de llamada — que es cómo vuelven las dos líneas. */
   const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
     const m = c.mascota;
-    if (!m) return undefined;
+    const conVerbo = porLlegarIds.has(c.id);
+    if (!m && !conVerbo) return undefined;
     return (
       <>
         <Separador />
-        <CeldaNavegacion
-          icono="carnet"
-          registro="aa"
-          titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
-          detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
-          onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
-        />
+        {conVerbo && (
+          <View style={{ padding: spacing[3], alignItems: 'flex-start' }}>
+            <Boton
+              variante="compacto"
+              etiqueta={t('recepcion.llegoCta')}
+              cargando={marcandoLlegada === c.id}
+              onPress={() => void marcarLlegadaPuerta(c.id)}
+            />
+          </View>
+        )}
+        {/* Sin mascota legible NO se dibuja la navegación al expediente —
+            pero el verbo de arriba SÍ sobrevive: registrar una llegada no
+            necesita saber el nombre de la mascota, y perder la puerta por
+            un dato de identidad ilegible sería castigar a la recepción por
+            un problema que no es suyo. */}
+        {m !== null && m !== undefined && (
+          <CeldaNavegacion
+            icono="carnet"
+            registro="aa"
+            titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
+            detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
+            onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+          />
+        )}
       </>
     );
   };
@@ -2328,30 +2360,10 @@ export default function Hoy() {
                         sinHora
                         oficio={oficioDe(item.cita)}
                         puerta={puertaPorCita.get(item.cita.id)}
-                        acciones={
-                          <>
-                            {/* ⭐ S97-D · EL VERBO DE LA PUERTA, en la fila de
-                                quien la cruza. Comando con CONSECUENCIA
-                                (registra un hecho en el server) ⇒ viste de
-                                botón por Ley 22c — no baja a label, que es
-                                para lo que navega o revela. Va PRIMERO: es
-                                lo del momento; «Conocer» es contexto. */}
-                            {porLlegarIds.has(item.cita.id) && (
-                              <>
-                                <Separador />
-                                <View style={{ padding: spacing[3], alignItems: 'flex-start' }}>
-                                  <Boton
-                                    variante="compacto"
-                                    etiqueta={t('recepcion.llegoCta')}
-                                    cargando={marcandoLlegada === item.cita.id}
-                                    onPress={() => void marcarLlegadaPuerta(item.cita.id)}
-                                  />
-                                </View>
-                              </>
-                            )}
-                            {accionesDe(item.cita)}
-                          </>
-                        }
+                        /* ⭐ S97-D · el verbo de la puerta viaja ADENTRO de
+                           `accionesDe` — ver su porqué allá (una zona, una
+                           línea; R38/N3 lo cazó cuando estuvo acá). */
+                        acciones={accionesDe(item.cita)}
                         fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined}
                       />
                     ) : item.tipo === 'salida' ? (
