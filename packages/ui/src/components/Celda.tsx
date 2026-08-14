@@ -107,11 +107,13 @@ export function Celda(props: CeldaProps) {
           · `minWidth: 0` en la derecha — sin eso su `flexShrink` es
             DECORATIVO (el default de un ítem flex es `min-width: auto`,
             que le prohíbe encoger por debajo de su contenido).
-          · `overflow: 'hidden'` en la derecha — piso de seguridad contra
-            la colisión medida (glifo 21 px DENTRO del texto). Va ahí y
-            **no acá**: en el texto silenciaba la elipsis del `Text`, que
-            es información. *Recortar un adorno es feo; recortar un aviso
-            es mentir.*
+          · ☠️ **el `overflow: 'hidden'` NO existe más, en ningún lado.**
+            Vivió dos vueltas: en el texto (donde silenciaba la elipsis) y
+            en la derecha (donde tapaba la colisión). *Un recorte no
+            arregla: pospone.* Lo reemplaza el guard de geometría
+            (`verify-colision-fila.mjs`), que mide la colisión en vez de
+            esperar que un píxel la delate — **el guard es la defensa, el
+            recorte era el vendaje**.
 
           🔴 LO QUE ESTO **NO** RESUELVE, elevado a la mesa: la fila lleva
           más contenido del que entra. Es decisión de ANATOMÍA —que los
@@ -145,51 +147,22 @@ export function Celda(props: CeldaProps) {
       </View>
 
       {metadataMono || fin ? (
-        // La otra mitad de la cura (el porqué completo, arriba): este
-        // bloque CEDE. Sin `flexShrink` su ancho era intrínseco y el
-        // sujeto pagaba la diferencia entero.
+        // LA OTRA MITAD DEL REPARTO (el porqué completo, arriba): este
+        // bloque CEDE.
         //
         // ⚠️ `minWidth: 0` NO ES ADORNO — es lo que hace que el
-        // `flexShrink` de al lado exista. El default de un ítem flex es
+        // `flexShrink` de al lado EXISTA. El default de un ítem flex es
         // `min-width: auto`, que le prohíbe encoger por debajo de su
         // contenido: con eso puesto, `flexShrink: 1` es una declaración
-        // que no encoge nada. Fue el defecto de la primera vuelta.
+        // que no encoge nada. Fue el defecto de la primera vuelta, y es
+        // la clase de error que ningún gate ve — el atributo está
+        // escrito, el typecheck lo acepta, y no mueve un píxel.
         //
-        // ⏪ CUARTA VUELTA — `overflow: 'hidden'` ACÁ, y es el opuesto
-        // exacto del que se retiró del texto. D midió la colisión: el
-        // glifo cae 21 px DENTRO del texto y el chip empieza 66 px ANTES
-        // de que el texto termine — las dos columnas ocupando el mismo
-        // espacio.
-        //
-        // EL MECANISMO, y sale de la cura anterior: `minWidth: 0` dejó
-        // que este View ENCOJA, pero **sus hijos no encogen** (un chip
-        // con texto adentro tiene ancho intrínseco). Así que el View se
-        // achica y su contenido se sale — y con `alignItems: 'flex-end'`
-        // se sale hacia la IZQUIERDA, que es donde vive el texto.
-        // *Antes no cedía y empujaba; ahora cede y INVADE.*
-        //
-        // POR QUÉ ACÁ SÍ Y EN EL TEXTO NO — la distinción que la vuelta
-        // anterior enseñó: un `overflow` es legítimo **donde no tapa un
-        // aviso**. En el texto silenciaba la elipsis del `Text`, que es
-        // información. Acá no hay nada que decir: un chip recortado se ve
-        // recortado. *Recortar un adorno es feo; recortar un aviso es
-        // mentir.*
-        //
-        // ⚠️ ES UN PISO DE SEGURIDAD, NO LA SOLUCIÓN: garantiza que
-        // NADA se superponga, y el precio es que un chip puede quedar
-        // cortado por su izquierda. Feo y honesto. La causa de fondo
-        // —que esta fila lleva más contenido del que entra— está elevada
-        // a la mesa: es decisión de ANATOMÍA (que los chips bajen a su
-        // propia línea), no otro ajuste de flexbox.
-        <View
-          style={{
-            alignItems: 'flex-end',
-            gap: spacing[1],
-            flexShrink: 1,
-            minWidth: 0,
-            overflow: 'hidden',
-          }}
-        >
+        // ☠️ ACÁ VIVIÓ UN `overflow: 'hidden'` Y SE RETIRÓ (firma de
+        // mesa, quinta vuelta). Su lápida está arriba con las otras dos
+        // piezas: el recorte era el vendaje, el guard de geometría es la
+        // defensa. Si algo vuelve a no caber, queremos verlo.
+        <View style={{ alignItems: 'flex-end', gap: spacing[1], flexShrink: 1, minWidth: 0 }}>
           {metadataMono ? (
             // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
             <Text
