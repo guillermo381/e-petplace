@@ -1719,6 +1719,18 @@ const FIXTURES = {
      tanda vino a cerrar. El relleno hace pasar el ancla para que el rojo
      que se mide sea el de la regla. El ancla tiene su rojo aparte, en
      EXTRAS_BRAZOS. */
+  /* R40 · el fixture enciende el brazo ① (contador). Trae los CUATRO
+     diccionarios para que el ancla no se encienda y el rojo medido sea
+     el de la regla — la misma disciplina que R35 y las del Norte. El
+     brazo ② (paridad es↔en) tiene su rojo aparte en EXTRAS_BRAZOS:
+     ningún fixture único puede encender los dos, porque el que agrega
+     claves de más las agrega EN LOS DOS idiomas. */
+  R40: [
+    { path: 'apps/cliente/src/i18n/es.ts', src: '    unoPENDIENTE:\n    dosPENDIENTE:' },
+    { path: 'apps/cliente/src/i18n/en.ts', src: '    unoPENDIENTE:\n    dosPENDIENTE:' },
+    { path: 'apps/prestador/src/i18n/es.ts', src: '' },
+    { path: 'apps/prestador/src/i18n/en.ts', src: '' },
+  ],
   R36: [...RELLENO_APPS, { path: '(fixture)', src: Array(BASELINE_R36 + 1).fill('paddingTop: 13').join('\n') }],
   R37: [...RELLENO_APPS, { path: '(fixture)', src: Array(BASELINE_R37 + 1).fill('borderRadius: 999').join('\n') }],
   R38: [
@@ -2355,7 +2367,78 @@ function r39(archivos) {
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39 };
+/** R40 · EL PLACEHOLDER NO SE EMBARCA EN SILENCIO (pedido de D, S97+).
+ *
+ *  EL CASO: `equipo.adminAvisoPENDIENTE` — el aviso §6 del toggle
+ *  Administrador espera la SEGUNDA FIRMA del founder y su literal no lo
+ *  escribe ninguna pista. D midió que **nada lo frenaba**: ni este lint
+ *  ni ningún hook. Su frase, que es el porqué entero de la regla:
+ *
+ *    *«Un placeholder que puede embarcarse en silencio no está listo
+ *     para recibir la firma: está listo para escaparse.»*
+ *
+ *  POR QUÉ VIVE ACÁ Y NO EN EL GUARD DE D, que era la pregunta abierta
+ *  de su pedido: **`verify:diseno` ya vigila diccionarios de i18n** —R11
+ *  mira `vozCardM*` contra el vocabulario de score de LOYALTY §3—, así
+ *  que el corpus y el precedente ya existen. Meterla en otro instrumento
+ *  sería un segundo lugar donde mirar lo mismo.
+ *
+ *  LOS DOS BRAZOS, y el segundo es el que D pidió con más razón:
+ *   ① el CONTADOR solo-baja — si aparece otro placeholder sin
+ *      declararlo, rojo.
+ *   ② la PARIDAD es↔en por app — *«un idioma que recibe la firma y el
+ *      otro no es la falla real»*. Ese es el modo de falla que un
+ *      contador global no ve: dos archivos, uno curado y otro no, suman
+ *      lo mismo que dos sin curar.
+ *
+ *  ☠️ MUERE SOLA: cuando llegue el literal firmado, la clave se renombra
+ *  a `adminAviso`, el contador baja a 0 y esta regla se retira ENTERA
+ *  (Ley 37). No es un guard permanente: es la correa de UN placeholder. */
+const BASELINE_R40 = 1;
+const RE_PENDIENTE = /^\s*([A-Za-z0-9_]*PENDIENTE)\s*:/gm;
+function r40(dics) {
+  const fallos = [];
+  const porApp = new Map();
+  for (const { path, src } of dics) {
+    const app = path.includes('/cliente/') ? 'cliente' : 'prestador';
+    const idioma = /\/en\.ts$/.test(path) ? 'en' : 'es';
+    const claves = new Set([...sinComentarios(src).matchAll(RE_PENDIENTE)].map((m) => m[1]));
+    if (!porApp.has(app)) porApp.set(app, {});
+    porApp.get(app)[idioma] = claves;
+  }
+  const todas = new Set();
+  for (const [app, { es, en }] of porApp) {
+    // ② PARIDAD — el brazo que un contador global no puede ver.
+    const soloEs = [...(es ?? [])].filter((k) => !(en ?? new Set()).has(k));
+    const soloEn = [...(en ?? [])].filter((k) => !(es ?? new Set()).has(k));
+    for (const k of soloEs)
+      fallos.push(`R40: \`${k}\` está en ${app}/es.ts y NO en en.ts — un idioma recibió la firma y el otro no. El placeholder se retira de LOS DOS o de ninguno.`);
+    for (const k of soloEn)
+      fallos.push(`R40: \`${k}\` está en ${app}/en.ts y NO en es.ts — mismo caso, del otro lado.`);
+    for (const k of [...(es ?? []), ...(en ?? [])]) todas.add(`${app}.${k}`);
+  }
+  // ① CONTADOR solo-baja (claves DISTINTAS, no ocurrencias: una clave en
+  //    dos idiomas es UN placeholder, no dos).
+  if (todas.size > BASELINE_R40)
+    fallos.push(
+      `R40: ${todas.size} placeholder(s) *PENDIENTE (baseline ${BASELINE_R40}) — un texto sin firma que puede embarcarse en silencio no está esperando la firma, se está escapando:\n    ${[...todas].join('\n    ')}`,
+    );
+  // ANCLA: sin los cuatro diccionarios la regla informaría "0
+  // placeholders" en VERDE habiendo leído nada.
+  fallos.push(...ancla('R40', dics.length, 4, 'diccionario(s) es/en de las dos apps'));
+  return {
+    fallos,
+    info: `${todas.size}/${BASELINE_R40} placeholder(s) sin firma${todas.size < BASELINE_R40 ? ' — BAJÓ: la firma llegó, retirar la regla (Ley 37)' : ''} · paridad es↔en verificada en ${porApp.size} app(s)`,
+  };
+}
+const DICS_R40 = [
+  'apps/cliente/src/i18n/es.ts',
+  'apps/cliente/src/i18n/en.ts',
+  'apps/prestador/src/i18n/es.ts',
+  'apps/prestador/src/i18n/en.ts',
+].map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2476,6 +2559,19 @@ const EXTRAS_BRAZOS = [
   ['R37·ancla (corpus de apps derrumbado)', r37, [{ path: '(fixture)', src: '' }]],
   ['R38·ancla (corpus de apps derrumbado)', r38, [{ path: '(fixture)', src: '' }]],
   ['R39·ancla (corpus de apps derrumbado)', r39, [{ path: '(fixture)', src: '' }]],
+  /* ── R40: LA PARIDAD (brazo ②) — el modo de falla que un contador
+     global NO ve: un idioma recibe la firma y el otro no. Con UNA clave
+     en `es` y ninguna en `en`, el contador da 1 (= baseline, verde) y
+     solo la paridad puede ponerlo rojo. Por eso va aparte. */
+  ['R40·paridad es↔en (un idioma curado y el otro no)', r40, [
+    { path: 'apps/prestador/src/i18n/es.ts', src: '    adminAvisoPENDIENTE:' },
+    { path: 'apps/prestador/src/i18n/en.ts', src: '' },
+    { path: 'apps/cliente/src/i18n/es.ts', src: '' },
+    { path: 'apps/cliente/src/i18n/en.ts', src: '' },
+  ]],
+  // ── R40: el ancla (guard de fuente) — sin los cuatro diccionarios
+  //    informaría "0 placeholders" habiendo leído nada.
+  ['R40·ancla (los diccionarios no se leyeron)', r40, [{ path: 'apps/cliente/src/i18n/es.ts', src: '' }]],
 ];
 for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
@@ -2567,6 +2663,7 @@ corridas.push(['R36 (N2 el ritmo: el espaciado sale del token)', r36(apps)]);
 corridas.push(['R37 (N4 el radio único: una sola escala)', r37(apps)]);
 corridas.push(['R38 (N3 la muerte del separador: 3 por pantalla)', r38(apps)]);
 corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)]);
+corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(DICS_R40)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
