@@ -93,10 +93,28 @@ export function Celda(props: CeldaProps) {
             cede el chip. *El nombre es el sujeto de la fila; el resto es
             metadata sobre él.*
 
-          El piso son 96: a `size.base` (16) entran ~9-10 caracteres, que
-          cubre los nombres reales de la casa (Thor, Zeus, Aurora). No es
-          un número de gusto — es el ancho por debajo del cual un nombre
-          deja de ser un nombre.
+          EL PISO SON 128, y se calibró DOS VECES.
+
+          ⏪ Nació en **96**, dimensionado contra el TÍTULO: a `size.base`
+          entran ~9-10 caracteres y eso cubre Thor, Zeus, Aurora. El
+          error fue olvidar que **el subtítulo hereda el mismo piso** —
+          están en la misma columna, no pueden tener anchos distintos— y
+          ahí 96 no alcanza: «Vacunación» no entra y cortaba a mitad de
+          palabra. *El piso de una columna lo fija el renglón más
+          exigente, no el más importante.*
+
+          128 a `size.sm` (14) da ~16-18 caracteres por línea y, con
+          `numberOfLines={2}`, ~32-36 en total: entran «Vacunación» y
+          «Consulta general» enteros. Para el título a 16 son ~12-14
+          caracteres, holgado para los nombres reales.
+
+          ⚠️ SU PRECIO, declarado: subir el piso empuja a la derecha, y
+          con el `minWidth: 0` de abajo la derecha ahora **sí cede** ⇒ los
+          chips pueden empezar a truncar. **Es su lugar en la ley** (el
+          orden de sacrificio que fijó la mesa: chips → el subtítulo
+          envuelve o elide → el título jamás), y el dato que autoriza el
+          cobro es de D: midió los chips **enteros y holgados**, o sea que
+          había margen para pedirles.
 
           ⏪ SEGUNDA VUELTA — LA PRIMERA CURA ARREGLÓ EL TÍTULO Y ROMPIÓ
           EL SUBTÍTULO, y el defecto nuevo era PEOR que el original:
@@ -117,11 +135,28 @@ export function Celda(props: CeldaProps) {
           sobrante se dibujaba encima.
 
           ⇒ La cura se completa con `minWidth: 0` en la derecha (abajo).
-          Y este bloque gana `overflow: 'hidden'` como CINTURÓN: aunque
-          algún día el reparto vuelva a fallar, el texto no puede
-          dibujarse fuera de su caja — el solapamiento queda
-          **inexpresable**, no solo corregido. */}
-      <View style={{ flex: 1, minWidth: 96, overflow: 'hidden', gap: spacing[0.5] }}>
+
+          ⏪ TERCERA VUELTA — **EL CINTURÓN SE COMÍA LA ELIPSIS Y SE
+          RETIRA.** La vuelta anterior le puso a este bloque un
+          `overflow: 'hidden'` «por si el reparto vuelve a fallar». El
+          reparto no volvió a fallar (D midió el DOM: caja 96 · texto 96 ·
+          **no desborda**), pero el recorte quedó **MUDO**: el subtítulo
+          cortaba seco a mitad de palabra, sin elipsis y pegado al glifo.
+
+          EL RAZONAMIENTO QUE LO SEÑALA, y no depende de mirar píxeles
+          —que es lo que falló tres veces en esta ronda, dos de D y una
+          mía—: **`ellipsizeMode="tail"` está declarado en el subtítulo.**
+          Si el `<Text>` hubiera truncado, habría puesto elipsis. No hay
+          elipsis ⇒ **no truncó el `Text`** ⇒ el corte lo hizo el
+          `overflow`, un piso más arriba, donde no hay nada que sepa
+          escribir «…».
+
+          *Un cinturón que tapa el aviso del cinturón de abajo no protege:
+          silencia.* El `Text` ya sabía ceder bien —dos líneas y elipsis—
+          y se le quitó la voz. Se retira, y la defensa contra el
+          solapamiento queda donde de verdad estaba: en el `minWidth: 0`
+          de la derecha, que es lo que hace que alguien ceda. */}
+      <View style={{ flex: 1, minWidth: 128, gap: spacing[0.5] }}>
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
