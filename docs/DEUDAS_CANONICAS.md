@@ -16148,3 +16148,51 @@ convive con él.
 
 ☠️ **Muere con la firma.** **Territorio: el founder** (la decisión) **+ A** (el
 merge que resulte).
+
+---
+
+#### D-819 — 🔴 EL DESTAPE PRESENTA UNA CASA DE CUATRO CUARTOS Y LA CASA TIENE CINCO
+
+**Medido por A en dispositivo (S97-A), capturando la ceremonia en 14 frames
+con `demovet`.** *No se leyó en el código: se vio.*
+
+| | |
+|---|---|
+| Lo que enumera el destape | **Hoy · Datos · Negocio · Cuenta** (4) |
+| Lo que tiene la barra real | **Hoy · Datos · Atender · Negocio · Cuenta** (5) |
+
+**Falta `ATENDER` — la tab que esta sesión entera hizo CENTRAL** (§1 de
+`LA_CASA_DEL_PRESTADOR`: el mostrador sube de chip a tab).
+
+> **Es la primera pantalla que ve un prestador nuevo, y su trabajo es
+> presentar la casa.** *Una ceremonia de bienvenida que omite el cuarto
+> principal no es un dato faltante: es una promesa mal hecha en el momento en
+> que más se mira.*
+
+### 🔴 LA CLASE ES PEOR QUE EL ÍTEM FALTANTE
+
+`Destape` **está bien**: recibe `tabsHabilitadas` como prop. **El defecto está
+en el llamador**, que le pasa **una lista escrita a mano, inline**
+(`verificacion/alta/index.tsx:316`):
+
+```
+{ key: 'index', … } { key: 'mascotas', … } { key: 'negocio', … } { key: 'cuenta', … }
+```
+
+**Y la barra NO es una lista fija: se COMPONE POR CAPACIDAD** (§2 de la letra —
+cinco casos, según lo que el negocio puede hacer). ⇒ **una lista escrita a mano
+no puede estar bien para nadie**: no solo le falta `ATENDER` al veterinario,
+**le sobra `Hoy` a un vendedor puro**, que no tiene agenda.
+
+> ***El destape no está desactualizado: está construido contra un modelo que
+> la letra ya no usa.*** Sincronizar la lista a mano lo arregla hoy y lo rompe
+> en la próxima capacidad que nazca.
+
+☠️ **Muere** cuando `tabsHabilitadas` salga **de la misma composición que arma
+la barra**, no de un literal. **Territorio: C** (la pantalla). ⚠️ **Y con su
+contra-caso: el destape de un vendedor puro (`duenodes`) NO debe enumerar
+`Hoy`** — ése es el discriminador que prueba que la cura es real y no una
+lista nueva escrita a mano.
+
+**Prioridad: alta pero no bloqueante del tren** — el destape corre y es bello;
+lo que dice está mal.
