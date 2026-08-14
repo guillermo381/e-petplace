@@ -296,6 +296,11 @@ export async function actualizarRepartidor(input: {
   nombre?: string;
   telefono?: string;
   user_id?: string;
+  /** D-791 (S97): la IDENTIDAD también se corrige — un documento mal
+   *  tipeado no queda mal para siempre. El motor rebota `documento_en_uso`
+   *  si colisiona con otro repartidor de la misma casa: corregir jamás
+   *  fusiona dos personas en silencio. */
+  documento?: string;
 }): Promise<ResultadoWrapper<{ repartidor_id: string }, CodigoErrorDespensa>> {
   const { data, error } = await getClient().rpc('actualizar_repartidor', {
     p_repartidor_id: input.repartidor_id,
@@ -303,10 +308,50 @@ export async function actualizarRepartidor(input: {
     p_nombre: input.nombre ?? undefined,
     p_telefono: input.telefono ?? undefined,
     p_user_id: input.user_id ?? undefined,
+    p_documento: input.documento ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: { repartidor_id: input.repartidor_id } };
+}
+
+/** D-791 · el LECTOR del prefill de la regla de envío — `definir_regla_envio_vendedor`
+ *  YA corrige por re-invocación (desactiva la activa e inserta: «redefinir no
+ *  apila»); lo que faltaba era poder LEER la vigente para reabrirla en el
+ *  mismo formulario. La RLS (`reglas_envio_select`, es_vendedor_de) decide
+ *  qué filas existen para esta sesión. `null` = sin regla definida, honesto. */
+export interface ReglaEnvioActiva {
+  id: string;
+  tipo: string;
+  parametros: Record<string, unknown>;
+  prioridad: number;
+}
+
+export async function obtenerReglaEnvioActiva(
+  cuentaComercialId: string,
+): Promise<ResultadoWrapper<ReglaEnvioActiva | null, CodigoErrorDespensa>> {
+  const { data, error } = await getClient()
+    .from('reglas_envio')
+    .select('id, tipo, parametros, prioridad')
+    .eq('cuenta_comercial_id', cuentaComercialId)
+    .eq('activo', true)
+    .order('prioridad', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) return falloDespensa(error.message);
+  if (data === null) return { ok: true, data: null };
+  if (!esObjDespensa(data) || typeof data.id !== 'string' || typeof data.tipo !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      id: data.id,
+      tipo: data.tipo,
+      parametros: esObjDespensa(data.parametros) ? (data.parametros as Record<string, unknown>) : {},
+      prioridad: typeof data.prioridad === 'number' ? data.prioridad : 100,
+    },
+  };
 }
 
 // ── EL CUPO Y LOS TURNOS (S96-M3) ───────────────────────────────────────────

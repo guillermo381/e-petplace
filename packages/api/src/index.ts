@@ -1156,6 +1156,8 @@ export {
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,
+  obtenerReglaEnvioActiva,
+  type ReglaEnvioActiva,
   definirRecursoReparto,
   declararExcepcionRecurso,
   definirTurnoEntrega,

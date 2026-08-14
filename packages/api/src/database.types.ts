@@ -19020,6 +19020,7 @@ export type Database = {
       actualizar_repartidor: {
         Args: {
           p_activo?: boolean
+          p_documento?: string
           p_nombre?: string
           p_repartidor_id: string
           p_telefono?: string
