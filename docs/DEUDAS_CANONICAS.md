@@ -14324,6 +14324,84 @@ mecanismo, no otra pasada de disciplina.
 regla de mesa) que haya cazado al menos UNA letra superada antes de que
 alguien tropezara con ella — la prueba es el caso, no el diseño.
 
+
+---
+
+### 🔴 D-790 · EL CASO DEFINITIVO (14-ago-2026) — **«EL PUSH ES DEL FOUNDER» VIVIÓ DIECISIETE SESIONES DEROGADO, Y HOY FRENÓ A TRES PISTAS Y CONFUNDIÓ A LA MESA**
+
+> **Si D-790 alguna vez se resuelve, se resuelve por este caso.** Es la
+> evidencia más fuerte que la ficha va a tener, y lo que la hace fuerte no es
+> el tamaño del error — es que **no hubo error de nadie.**
+
+**LOS HECHOS, medidos:**
+
+- **La letra vieja:** *«CERO push — el push es del founder»* · *«el push lo
+  ejecuta el founder»*. **Literal, en veinte actas**, de S79 hacia atrás.
+- **Su derogación:** `CONTRATO_TRABAJO:473` — **regla 79 (S80, decisión
+  founder)**: *«EL PUSH ES DE LA SESIÓN A. La disciplina "CERO push — el push
+  es del founder" queda ENMENDADA»*. Fechada en el historial `v1.14`.
+- **La distancia: DIECISIETE SESIONES.**
+
+**LOS CUATRO ACTORES QUE LA CITARON HOY, cada uno de buena fe:**
+
+| actor | qué hizo |
+|---|---|
+| **C** | **frenó** un push propio citándola, y **escaló al founder** en vez de ejecutar |
+| **B** | **no ejecutó** su propio push cuando C se lo pidió, por la misma razón |
+| **A** | la dio por vigente al pedirle a C que empujara — *en vez de medirla, teniendo el archivo a mano* |
+| **la mesa** | la sostuvo como premisa al ordenar la secuencia |
+
+⇒ **Cuatro actores, una premisa, cero mediciones — hasta que una la corrigió.**
+
+### 🔴 POR QUÉ ESTE CASO ES LA PRUEBA, Y NO SOLO UN EJEMPLO MÁS
+
+> ***El problema no es letra MAL ESCRITA. Es letra VERDADERA DE OTRO TIEMPO,
+> sin marca de vencimiento.***
+
+**Ninguna de las veinte actas miente.** Cada una **describe su momento con
+exactitud** — cuando se escribieron, el push efectivamente era del founder.
+*Un lector que las audite una por una no va a encontrar un solo error que
+corregir.* **Y precisamente por eso la letra sobrevive: es inatacable en su
+propio contexto.**
+
+**La asimetría que lo vuelve estructural:**
+
+| | la letra vieja | su enmienda |
+|---|---|---|
+| **rastro** | **veinte actas**, repetida en cada cierre | **una línea**, en un archivo |
+| **cómo se encuentra** | tropezando con ella en cualquier lado | **buscándola a propósito** |
+| **cómo se lee** | **perfecta** | perfecta |
+
+> ***Una letra superada no se detecta leyendo, porque se lee perfecta.***
+> (Formulación de C, y es la mejor que tiene la ficha.)
+
+### La agravante que ninguna de las otras muestras tenía
+
+**Las cinco muestras anteriores de D-790 eran de CONTENIDO** —un número, un
+nombre, un puntero—. **Ésta es de GOBIERNO:** la letra superada **no describía
+un dato, describía quién tiene derecho a actuar.** *Su efecto no fue un valor
+equivocado en una pantalla: fue una cadena de tres frenos y una escalación
+sobre un permiso que ya existía.*
+
+**Y el costo real fue barato — eso también es dato:** una vuelta de mensajes.
+**Lo caro habría sido lo contrario:** si la regla vieja hubiera seguido
+rigiendo y alguien la hubiera ignorado por apuro, el costo era un incidente de
+gobierno. *Por eso el freno de C fue correcto aunque su premisa no lo fuera, y
+por eso la ficha no propone «verificar menos».*
+
+### Lo que este caso le pide a la cura de D-790
+
+**No sirve auditar el canon buscando frases falsas: no hay ninguna.** Lo que
+haría falta es que **una enmienda deje marca EN EL LUGAR DE LO QUE ENMIENDA**,
+o que la letra vieja pueda decir *«esto describía S79»*. **Hoy la enmienda vive
+en un solo archivo y su sujeto vive en veinte** — y el que tiene apuro va a
+tropezar con los veinte antes que con el uno.
+
+*La ficha sigue ABIERTA y sigue sin solución propuesta: registrar bien el
+problema es lo único que S97 podía hacer con honestidad.* **Lo que sí queda
+firme es el criterio de detección, medido dos veces hoy por la misma pista:**
+**lo que hay que buscar no es la regla — es su ENMIENDA.**
+
 #### D-791 — 🔴 LA CONFIGURACIÓN SOLO AGREGA: LO REGISTRADO NO SE PUEDE EDITAR — Y LA LEY DEL CAMBIO PRESUPONE QUE EL CAMBIO EXISTE
 
 **Nace del gate del founder (13-ago-2026, hallazgo de FUNCIÓN — el diseño
