@@ -15221,6 +15221,30 @@ CONSTRUCCIÓN, no por margen de redondeo.**
 
 **Verificado en dispositivo junto con D-804: dos columnas, ningún wrap.**
 
+> ### 🔴 ADDENDUM — LA PRIMERA CURA NO CERRÓ, Y EL PORQUÉ ES LA LECCIÓN
+>
+> **B reportó D-805 cerrada y NO lo estaba. C midió `48%` vivo y tenía
+> razón.** *La cura entró en el PIE del archivo y el HEADER llevaba su propia
+> copia del patrón.*
+>
+> **El archivo tenía DOS PATRONES EJECUTABLES CONTRADICIÉNDOSE:** el del
+> header —congelado desde que nació la pieza— y el del pie, que evolucionó
+> **47 → 48 → 50**. **C leyó de arriba**, o sea leyó exactamente el que A
+> midió que **no entra en ningún teléfono**.
+>
+> **La cura no fue sincronizarlos: fue que HAYA UNO.** El header apunta al
+> pie (`b009b094`). *Dos copias sincronizadas se desincronizan; una sola no
+> puede.*
+>
+> **⚠️ Y la señal que estuvo delante, declarada por B:** su propio grep de
+> verificación devolvió **`Baldosa.tsx: 1`** para `48%` **y lo dejó pasar.**
+>
+> > ***Un contador que no da cero es una pregunta, no un residuo.***
+>
+> **Verificado por A tras la cura:** las dos menciones de `48%` que quedan son
+> **prosa del bloque ⏪ de historia**; el patrón ejecutable es uno solo
+> (`width: '50%'`).
+
 ---
 
 #### D-806 — 🟡 LAS SEIS ESPECIES DEL ALTA COMPARTEN UN SOLO GLIFO, PORQUE LOS GLIFOS DE ESPECIE NO EXISTEN
@@ -15268,7 +15292,41 @@ que todavía no existe en el ecosistema.
 mostrador (acá) y el onboarding del dueño en `apps/cliente` (S45). **Los seis
 glifos sirven a los dos.**
 
+### DIMENSIONADA POR B, del objeto y no estimada (14-ago)
+
+- **`AvatarMascotaEspecie` declara DIEZ valores** — perro · gato · conejo ·
+  ave · roedor · cobaya · pez · hurón · reptil · otro.
+- **El registry tiene CERO glifos de animal** (45 glifos).
+- Sin foto, **las diez pintan `HuellaGenerica`** — la misma huella.
+
+> **⇒ El alcance son SEIS glifos, no diez:** las **activas en F1** por
+> **D-287** (S45) — perro · gato · conejo · ave · pez · roedor, que es
+> exactamente el grid 3×2. **Tres quedan en reserva** (cobaya · hurón ·
+> reptil, hoy desactivadas) **y `otro` NO necesita glifo**: *la huella
+> genérica es la respuesta honesta para «otro».*
+
+### 🔴 LA PREGUNTA DE ARTE QUE HAY QUE RESOLVER **ANTES** DE DIBUJAR
+
+**La regla madre §1 dice: objeto del oficio en trazo + UNA huella rellena** —
+*«en cada ícono, la mascota está presente»*.
+
+> **Acá la mascota NO está presente en el concepto: la mascota ES el
+> concepto.** *Un perro con una huella adentro es redundante, y la huella
+> dejaría de significar lo que significa en los otros 45.*
+
+**⇒ §1 NO CUBRE ESTA FAMILIA**, y no es un detalle de ejecución: **es si nace
+una SEGUNDA CATEGORÍA de glifo —el SUJETO, no el oficio— con su propia
+regla.** *Eso lo firma el founder.*
+
+**Camino propuesto por B, y es el correcto:** llevar la pregunta a la hoja de
+contacto de §6b **con dos variantes de UNA sola especie** —el perro, la más
+usada—, **una con huella y otra sin**, montadas a 21 px junto a cinco del
+registry. **Con la firma, las seis salen de un tirón con la regla ya fijada.**
+
+> ***Dibujar las seis antes de esa firma es arriesgar seis dibujos a una
+> decisión que el dibujante no tomó.***
+
 ☠️ **Muere** con los seis glifos en el registry y su gate por ícono pasado.
-**Territorio: B** (el set y su proceso). **Prioridad: NO bloquea el Lote 2** —
-la pantalla funciona y el rótulo dice la verdad; lo que se pierde es que el
-selector sea visual.
+**Territorio: B** (el set y su proceso), **detrás de su cola actual.**
+**Prioridad: NO bloquea el Lote 2** — la pantalla funciona y el rótulo dice la
+verdad; lo que se pierde es que el selector sea visual.

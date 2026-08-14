@@ -93,8 +93,13 @@ propuesta hasta que el founder la firme, jamás ley por venir de la mesa**
 
 ## 4 · LO QUE QUEDA VIVO Y NO ES DE A
 
-- **D-806** (los seis glifos de especie **no existen** en el registry) →
-  **B**, con el proceso de `DIRECCION_ARTE` §6b. **No bloquea el Lote 2.**
+- **D-806** (los glifos de especie **no existen**) → **B**, detrás de su cola.
+  **Dimensionada: son SEIS** (las activas en F1 por D-287), no diez; `otro` no
+  necesita glifo. 🔴 **Y tiene una pregunta de arte ANTES de dibujar: §1 no
+  cubre esta familia** —*la mascota no está presente en el concepto: la
+  mascota ES el concepto*— ⇒ **es si nace una segunda categoría de glifo, y
+  eso lo firma el founder.** Camino: hoja de contacto §6b con **dos variantes
+  del perro**, con y sin huella. **No bloquea el Lote 2.**
 - **D-802 hija:** el espejo `prestadores.nombre_comercial` **muere cuando
   `v_prestadores_publicos` lea el nombre desde la cuenta comercial**. Toca el
   frente del cliente — otro territorio, otro gate.
