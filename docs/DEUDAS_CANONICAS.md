@@ -16223,9 +16223,13 @@ destape en frames:**
 
 > **Enumera `Hoy · Datos · Negocio · Cuenta` — IDÉNTICO al del veterinario.**
 
-**`Hoy` LE SOBRA, y no es teórico: su app abre en PEDIDOS.** Un vendedor puro
-no tiene agenda — la ceremonia le presenta un cuarto que su casa no tiene, y
-omite los que sí (Pedidos, Stock, Venta de mostrador).
+**Y es MUCHO peor que «le sobra Hoy»: el vendedor puro NO TIENE BARRA.**
+Medido en el aparato — su app entera es **una pantalla, `Pedidos`**, con cuatro
+filas (Stock · Venta de mostrador · Mis entregas de hoy · Configuración) y
+**CERO tabs**.
+
+⇒ **La ceremonia le anuncia cuatro cuartos y NINGUNO de los cuatro existe en su
+casa.** No es que sobre uno: **sobran todos**, y faltan todos los suyos.
 
 ⇒ **Queda probado que no es «falta un ítem»: es una lista fija contra una casa
 compuesta.** Los dos negocios más distintos del producto reciben **exactamente
