@@ -190,6 +190,21 @@ secreto de despacho NO.**
 tienen persona. **Y su motor ya estaba entero** (§2.3bis: cuatro piezas de
 S78/S90, con 3 citas vivas en ese estado). **Falta la pantalla y nada más.**
 
+### 🔴 EL ENCARGO DE LA LENTITUD — PARA QUIEN RECIBA LA ESTAFETA
+
+**La mesa lo encargó y hay que ejecutarlo: se revisa con la punta de las tres
+olas.**
+
+⚠️ **SU LITERAL NO LLEGÓ A A, y se buscó por grep en `docs/` antes de decirlo:
+cero ocurrencias.** *Se anota como encargo con su texto FALTANTE — igual que
+D-811— porque un encargo resumido de memoria deja de ser el del founder.*
+
+**Lo que sí está declarado y sirve de punto de partida:** el frente de
+performance tiene su acta y su tesis medidas (S94-PERF: *no hay consultas que
+optimizar, hay viajes que eliminar*), y **D-728** —las pantallas que recargan
+solas al abrir una hoja— sigue siendo *«la punta de la lentitud general»*, con
+esas palabras, en `DEUDAS_CANONICAS`.
+
 ### 🔴 Lo que SIGUE sin literal — se PIDE, no se deduce
 
 **D-811** (el alta de mascota duplicada entre cliente y mostrador) llegó **sin

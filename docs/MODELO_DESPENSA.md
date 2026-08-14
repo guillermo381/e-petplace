@@ -1,6 +1,15 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.5 — S97 (14 Ago 2026). Las DOS CARAS de la despensa del negocio.**
+> **Versión: v2.6 — S97 (14 Ago 2026). El ARCO DE STOCK, dirección firmada.**
+> **Qué cambió respecto de v2.5: nace §8.6quater — la vista de Stock del
+> vendedor es EL ESPEJO de lo que ve el cliente (y la misma vista servirá al
+> mostrador el día de la venta en local) · la carga entra por DOS vías, una a
+> una o por archivo PDF/Excel que la IA lee · los productos fuera del catálogo
+> habilitan carga completa de detalles y fotos, que es CAMINO DE PROPUESTA y
+> NO deroga M21 · y el toggle de venta en local vive en esa misma superficie.
+> Estatuto: dirección firmada con detalle abierto.**
+>
+> **Versión previa: v2.5 — S97 (14 Ago 2026). Las DOS CARAS de la despensa del negocio.**
 > **Qué cambió respecto de v2.4, en una línea: nace §8.6ter — inventario local
 > (del negocio, para su mostrador) y catálogo e-PetPlace (la vitrina del
 > cliente) son DOS cosas y el catálogo las diferencia; el inventario local es
@@ -1168,6 +1177,78 @@ entre las dos cosas es todo:
 migración que cree o toque tablas de productos del negocio **declara a cuál de
 las dos caras pertenece la fila**. Si no puede declararlo, **es la señal de que
 la fusión ya ocurrió** y hay que frenar ahí, no después.
+
+---
+
+### 8.6quater 🔴 EL ARCO DE STOCK (dirección firmada del founder, 14-ago-2026)
+
+> **ESTATUTO: DIRECCIÓN FIRMADA, DETALLE ABIERTO.** Es **arco grande y de la
+> próxima etapa**. Lo de abajo son los literales del founder y su costura con
+> la letra vigente — **las specs finas se derivan al construir, elevando lo
+> ambiguo.** *Convertir una dirección en spec completa por inercia sería
+> ponerle al founder palabras que no dijo.*
+
+#### ① EL ESPEJO DEL CLIENTE — y es de DOBLE PROPÓSITO
+
+> ***«[la vista de Stock] debe tener espejo de cómo lo verá el cliente»***
+> ***«cuando lleguen a ventas en local, es lo que mostraremos al dar clic en
+> despensa»***
+
+**El vendedor no ve una tabla de inventario: ve SU VITRINA como la ve la
+familia.** Y esa misma vista **es la del mostrador** el día que llegue la
+venta en local — *no se construye una vitrina para el cliente y otra para el
+local: es una, y por eso el vendedor la reconoce.*
+
+> **Encaja con §8.6ter sin contradecirla, y conviene ver cómo:** aquella letra
+> separa **inventario local** (del negocio) de **catálogo e-PetPlace** (la
+> vitrina del cliente). **Este espejo es de la CARA PÚBLICA** — lo que el
+> cliente ve. *El inventario local sigue siendo V2 y sigue sin fusionarse:
+> la ley de esquema de §8.6ter rige entera.*
+
+**Por qué el espejo y no una tabla, en una línea:** *un vendedor que administra
+su stock en una grilla de filas no sabe cómo se ve su negocio; uno que lo
+administra sobre su propia vitrina no puede no saberlo.*
+
+#### ② LA CARGA, POR DOS VÍAS
+
+| vía | qué es |
+|---|---|
+| **uno a uno** | el camino que ya existe (`proponer_sku_vendedor`) |
+| **por archivo** | **PDF o Excel**, que **la IA lee y organiza** |
+
+**La segunda es la que cambia la escala:** un vendedor real no carga cien
+productos a mano. ⚠️ **Y toca la puerta que §14 ya protegía** — *la ingesta
+asistida por IA está prevista como posterior al 15-sep; esta dirección le da
+forma, no adelanta su fecha.*
+
+#### ③ 🔴 PRODUCTOS FUERA DEL CATÁLOGO — la costura con M21, que es lo delicado
+
+> **Si el archivo trae productos que NO están en el catálogo canónico, se
+> habilita la carga completa de detalles y fotos.**
+
+⚠️ **Esto NO deroga M21 y hay que leerlo con cuidado**, porque es exactamente
+donde la letra se puede romper sin querer:
+
+> **`M21` (S96): el catálogo canónico es de e-PetPlace; el vendedor MAPEA.**
+> La puerta lo hace cumplir hoy — se verificó en vivo (S97-A): intentar
+> proponer un producto inventado rebota **`producto_no_canonico`** con el
+> mensaje *«sumar un vendedor es MAPEO, no autoría»*.
+
+**⇒ Lo que esta dirección habilita es el CAMINO DE PROPUESTA de un producto
+nuevo, no la autoría directa.** El vendedor **aporta el material** —detalles,
+fotos— y **e-PetPlace sigue siendo quien lo incorpora al canon**, por la misma
+ley de §4.2 (*el vendedor propone, e-PetPlace publica*).
+
+> *Sin esta aclaración, «se habilita la carga completa» se lee como «el
+> vendedor crea productos canónicos» — y eso mata la vitrina curada, que es el
+> foso entero.* **La dirección resuelve un problema real (un archivo con
+> productos que el catálogo no tiene no puede simplemente fallar) sin tocar
+> quién es el autor.**
+
+#### ④ EL TOGGLE DE VENTA EN LOCAL VIVE ACÁ
+
+**En la misma superficie de Stock.** *Donde se administra la vitrina se decide
+si esa vitrina también atiende por la puerta.*
 
 ---
 
