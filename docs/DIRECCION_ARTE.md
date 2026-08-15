@@ -1,6 +1,6 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.6 — S85 (3-4 Ago 2026).** Enmienda v1.6: nacen **6bis LA INSIGNIA DE COHORTE** (tercera familia `distincion`; eje TIEMPO y no mérito; el «N» no se muestra), **6ter EL GLOW** (solo la tarjeta EN CURSO — aplicar la Ley 7 donde ya significa «en vivo», no enmendarla) y **6quater EL PAPEL AL 5%** *con su verificador dentro de la firma*. Previa v1.5 — S85 (3 Ago 2026). Enmienda v1.5, **DOS firmas sobre
+> **Versión: v1.7 — S98 (14 Ago 2026).** Enmienda v1.7, **UNA firma del founder depositada por pedido de B** (`a9d6dda9`: *«📮 la letra es de A»*): la **Ley 9 gana su ALCANCE** — nace la categoría **«glifo de control»**, nombrada desde S79 y con gate pendiente desde entonces, con su literal *«en un glifo de control no hay mascota, hay interfaz; la huella se reserva para donde significa»*; la exención es de la **regla madre §1**, no de la Ley 9, que les sigue rigiendo a 21px. Habitantes: `ia` —excepción suelta desde S53, ahora con casa— y el `ⓘ`. **§6b gana su paso 6**: si es control se DECLARA en el pedido, no se descubre en el gate. ⚠️ **NO se depositó la reclasificación del par del avatar a 3:1**: B la sirvió a la mesa a propósito y **no hay firma del founder en el repo** — depositarla sería firmar por él. Previa v1.6 — S85 (3-4 Ago 2026). Enmienda v1.6: nacen **6bis LA INSIGNIA DE COHORTE** (tercera familia `distincion`; eje TIEMPO y no mérito; el «N» no se muestra), **6ter EL GLOW** (solo la tarjeta EN CURSO — aplicar la Ley 7 donde ya significa «en vivo», no enmendarla) y **6quater EL PAPEL AL 5%** *con su verificador dentro de la firma*. Previa v1.5 — S85 (3 Ago 2026). Enmienda v1.5, **DOS firmas sobre
 > §2, ninguna deroga nada**: **(a) la ley 4 SE ACOTA** — sigue rigiendo en
 > la iconografía de CONTENIDO (humanos = manos u objetos) y **se
 > excepciona donde el humano es SUJETO y no objeto**, hoy la tab Cuenta
@@ -272,6 +272,37 @@ punto decorativo.**
    simplificarse. La huella es lo que hace al glifo NUESTRO (regla
    madre §1) — un glifo cuya huella muere a 21px es un glifo genérico
    con decoración invisible, y ahí el ruido cuesta más que el ícono.
+
+   **🔴 SU ALCANCE, FIRMADO POR EL FOUNDER (S98, gate del ⓘ) — hay UNA
+   categoría exenta, y la exención es de la REGLA MADRE §1, no de esta
+   ley.** Literal de la firma:
+
+   > **«En un glifo de control no hay mascota, hay interfaz; la huella se
+   > reserva para donde significa.»**
+
+   Con esto cierra **«glifo de control»**, una categoría nombrada desde
+   S79 y con gate pendiente desde entonces. *La huella no se omite por
+   falta de lugar: se omite porque en un control no hay nada de la
+   mascota que señalar, y ponerla ahí la gastaría en un sitio donde no
+   dice nada.* Un acento que aparece en todas partes deja de acentuar.
+
+   **La regla ASCIENDE y reemplaza al argumento con el que se llegó.** El
+   de B era geométrico —*«en el ⓘ el centro lo ocupan la barra y el
+   punto»*— y explicaba ESE dibujo; la firma da la razón general, que
+   vale para el próximo control **aunque su centro esté libre**.
+   *Un argumento que solo explica el caso que tenés adelante no evita el
+   caso siguiente.* La geometría se conserva escrita porque sigue siendo
+   cierta y explica por qué el ⓘ fue el primero en pedirlo.
+
+   **Habitantes:** `ia` —que era una excepción suelta desde S53 y ahora
+   tiene casa— y el `ⓘ`. **Ley 9 les sigue rigiendo en todo lo demás:**
+   se gatean a 21px igual, y su criterio de muerte pasa a ser la
+   legibilidad del OBJETO, que es lo único que llevan.
+
+   ⚠️ **Y la frontera es de SIGNIFICADO, no de forma:** el eje es si el
+   glifo nombra algo de la mascota o una operación de la interfaz. Un
+   glifo de servicio dibujado con geometría simple **no** entra por
+   parecerse; uno de control **no** sale por tener el centro libre.
 10. **LA TAXONOMÍA DE CAPAS Y LA LEY DEL REPARTO (S80, FIRMADA por el
     founder — un solo acto con el cierre de D-573):**
 
@@ -472,6 +503,10 @@ Todo glifo nuevo llega al gate founder con:
    oscuro. El glifo se juzga EN VECINDAD — un glifo que solo funciona
    solo, no funciona.
 5. **Gate founder POR ÍCONO** (nunca por lote): la firma es de a uno.
+6. **DECLARAR SI ES GLIFO DE CONTROL** (firma S98, ver Ley 9): si lo es,
+   **va sin huella** y se dice en el pedido, no se descubre en el gate.
+   *Llegar al gate con la huella puesta obliga a rehacer el dibujo por
+   una decisión que se podía tomar antes de levantar el lápiz.*
 
 **El criterio de muerte es el de la Ley 9 afilada:** a 21px la huella
 sobrevive o el glifo no entra. **Y la regla de economía:** un glifo que
