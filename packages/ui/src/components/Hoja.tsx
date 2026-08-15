@@ -54,6 +54,7 @@ import Animated, {
   Easing,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -153,6 +154,25 @@ export function Hoja({
   const [montada, setMontada] = useState(visible)
 
   const esMemorial = theme.mode === 'memorial'
+  /** 🔴 S98-B · REDUCE-MOTION — la Hoja entra al brazo QUIETO de memorial.
+   *  Es la pieza de más TRÁFICO del censo: toda hoja de las dos apps pasa
+   *  por acá, así que una línea cubre decenas de superficies (el mismo
+   *  argumento que hizo valiosa la cura de `Entrada`).
+   *
+   *  QUÉ APAGA, exactamente: el `withSpring` — el REBOTE. Es la parte
+   *  vestibularmente cara del gesto y la rama de memorial ya tiene escrita
+   *  su alternativa firmada (`withTiming` easeOut, «nada rebota»), así que
+   *  esto no inventa un comportamiento: reusa uno que ya pasó por gate.
+   *
+   *  ⚠️ LO QUE **NO** HACE, declarado en vez de omitido: la hoja SIGUE
+   *  DESLIZANDO. Cambiar el deslizamiento por un fundido es lo que hacen
+   *  iOS y Android con la preferencia activada, y probablemente sea lo
+   *  correcto — pero toca la anatomía de apertura Y de cierre de la pieza
+   *  (el `onCerrar` cuelga del callback del deslizamiento), es un cambio
+   *  de arte que pide firma, y **no lo puede gatear RN-web**. Queda en la
+   *  cola con este porqué escrito, no absorbido en silencio. */
+  const reduceMotion = useReducedMotion()
+  const sinRebote = esMemorial || reduceMotion
   const altoHoja =
     altura === 'media' ? altoVentana * 0.5 : altura === 'completa' ? altoVentana * 0.9 : undefined
   const altoMax = altura === 'contenido' ? altoVentana * 0.6 : undefined
@@ -166,11 +186,14 @@ export function Hoja({
   const animarEntrada = () => {
     // scrim efectivo: palette.scrim ya trae .52 de alpha — el preset
     // marca apunta a .4 en pantalla (§5.2), el default queda como estaba.
-    const esMarca = apertura === 'marca' && !esMemorial
+    // La apertura CEREMONIAL tampoco corre con la preferencia activada:
+    // es la más larga y la más gestual de las tres, o sea la que más pide
+    // apagarse. Con `sinRebote` cae al slide sereno, igual que memorial.
+    const esMarca = apertura === 'marca' && !sinRebote
     backdrop.value = withTiming(esMarca ? motion.marca.scrimEfectivo / 0.52 : 1, {
       duration: esMarca ? motion.marca.aperturaMs : motion.duration.normal,
     })
-    translateY.value = esMemorial
+    translateY.value = sinRebote
       ? withTiming(0, {
           duration: motion.duration.normal,
           easing: Easing.bezier(...motion.easing.easeOut.bezier),
@@ -242,14 +265,30 @@ export function Hoja({
           if (pasaUmbral) {
             scheduleOnRN(cerrarAnimado)
           } else {
-            translateY.value = withSpring(0, {
-              duration: motion.duration.normal,
-              dampingRatio: 0.85,
-            })
+            // 🔴 S98-B — ESTE REBOTE NO HONRABA MEMORIAL, y el archivo lo
+            // decía en su propia primera pantalla: *«En memorial NADA
+            // rebota (regla B1)»*. La entrada sí lo cumplía; el
+            // SNAP-BACK del arrastre —cuando soltás sin pasar el umbral y
+            // la hoja vuelve a su sitio— corría `withSpring` sin mirar
+            // nada. **La huella estaba a la vista: `esMemorial` figuraba
+            // en las dependencias de este `useMemo` y el cuerpo no lo
+            // consumía** — una dependencia sin consumidor es una
+            // intención que no llegó al cuerpo.
+            // *Una regla escrita en el header y desobedecida 260 líneas
+            // más abajo, en el mismo archivo.*
+            translateY.value = sinRebote
+              ? withTiming(0, {
+                  duration: motion.duration.normal,
+                  easing: Easing.bezier(...motion.easing.easeOut.bezier),
+                })
+              : withSpring(0, {
+                  duration: motion.duration.normal,
+                  dampingRatio: 0.85,
+                })
           }
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nativeScroll, esMemorial],
+    [nativeScroll, sinRebote],
   )
 
   const alScroll = useAnimatedScrollHandler((e) => {

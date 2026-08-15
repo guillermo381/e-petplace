@@ -19,6 +19,7 @@ import Svg from 'react-native-svg'
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -35,10 +36,34 @@ export function EsperaDeMarca({ tamano = 64 }: { tamano?: number }) {
   const esMemorial = theme.mode === 'memorial'
   const color = esMemorial ? theme.text.secondary : theme.capa.comunidad
 
+  /** 🔴 S98-B · REDUCE-MOTION — ÉSTA ERA LA PIEZA DE MÁS VALOR DE TODO EL
+   *  CENSO, y por una razón que se puede medir: **es el único `withRepeat`
+   *  de la casa.** Todo lo demás que se mueve arranca, llega y termina;
+   *  esto respira SIN PARAR mientras dura la espera — que además son las
+   *  esperas LARGAS (>2s por espec), o sea justo cuando el usuario no
+   *  puede mirar a otro lado porque está esperando. *El movimiento
+   *  continuo y no solicitado es exactamente lo que la preferencia del
+   *  sistema pide apagar.*
+   *
+   *  ⚠️ SON DOS VARIABLES Y NO UNA, y ésa es la parte delicada:
+   *  `esMemorial` gobierna el COLOR (tinta secundaria — §2.8) y `quieta`
+   *  gobierna el MOVIMIENTO. Colgar reduce-motion de `esMemorial` habría
+   *  sido más corto y habría pintado la huella en gris a quien solo pidió
+   *  menos movimiento: *reducir movimiento no es entrar en duelo.* La
+   *  marca conserva su magenta; lo único que se apaga es el gesto.
+   *
+   *  ⚠️ EL HOOK SE LLAMA SUELTO Y RECIÉN DESPUÉS SE COMBINA — no
+   *  `esMemorial || useReducedMotion()`, que es más corto y es una
+   *  llamada CONDICIONAL a un hook: en memorial el hook no correría y el
+   *  orden de hooks cambiaría entre renders. Es el patrón exacto de
+   *  `Entrada`, y queda escrito porque la forma corta se ve bien. */
+  const reduceMotion = useReducedMotion()
+  const quieta = esMemorial || reduceMotion
+
   const fase = useSharedValue(0)
 
   useEffect(() => {
-    if (esMemorial) return // memorial: quieta — nada respira
+    if (quieta) return // memorial y reduce-motion: quieta — nada respira
     fase.value = withRepeat(
       withTiming(1, { duration: CICLO_MS, easing: Easing.bezier(...motion.easing.easeInOut.bezier) }),
       -1,
@@ -47,11 +72,14 @@ export function EsperaDeMarca({ tamano = 64 }: { tamano?: number }) {
     return () => {
       fase.value = 0
     }
-  }, [esMemorial, fase])
+  }, [quieta, fase])
 
+  // Quieta = la huella ENTERA y opaca, no un fotograma a media respiración:
+  // la pieza sigue diciendo «esperá», que es su trabajo. La voz honesta que
+  // la acompaña (espec) es la que carga el sentido, y ésa no se mueve nunca.
   const estilo = useAnimatedStyle(() => ({
-    opacity: esMemorial ? 1 : 0.75 + fase.value * 0.25,
-    transform: [{ scale: esMemorial ? 1 : 0.96 + fase.value * 0.09 }],
+    opacity: quieta ? 1 : 0.75 + fase.value * 0.25,
+    transform: [{ scale: quieta ? 1 : 0.96 + fase.value * 0.09 }],
   }))
 
   return (

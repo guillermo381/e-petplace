@@ -51,6 +51,35 @@
 > en `REGLAS`, invisible para los tres guards estructurales. Nace el
 > **tercer guard**: `corridas → REGLAS`.
 
+> **S98-B · D-813 Y EL LOTE DE REDUCE-MOTION.** Nace **`accent.controlBg`**
+> — el tinte de la elección, hermano de `accent.control`: el borde
+> resolvía por casa y el relleno tecleaba `capaBg.comunidad`, que no, así
+> que **el prestador elegía con borde teal y relleno magenta**. Vivía
+> invisible porque la pieza nació en el cliente, *donde las dos familias
+> coinciden* — y la galería era cómplice: sus tres paneles eran los tres
+> del cliente. **Una galería prueba las combinaciones que monta; la que no
+> monta no dice nada.**
+>
+> **Reduce-motion: 4 → 8 piezas.** El censo dio **nueve** que animan, y el
+> lote se ordenó por lo que MUEVE de verdad: `EsperaDeMarca` (el único
+> `withRepeat` de la casa) · `Hoja` (la de más tráfico) · `Aviso` (el
+> único que irrumpe sin que lo pidan) · `SelectorDia` (se le quita el
+> viaje, no el destino: la rueda salta en vez de deslizarse). `VisorFoto`
+> queda exenta **por medición** — cero `transform`, y un fundido puro ya
+> es aquello a lo que la preferencia degrada.
+>
+> **El juez: 32 → 33 auto-pruebas.** Nace **R41** (lo que se mueve de
+> verdad mira `useReducedMotion`) con el criterio del fundido puro
+> mecanizado, y **R27 gana su cuarto slot** (`controlBg` por ausencia).
+> **WCAG 178 → 192/0**: el gate medía `capaBg.comunidad`, el token del que
+> la pieza se fue — verde por la razón equivocada.
+>
+> **⚠️ Dos huecos declarados y no tapados:** `verify-contrast` recorre
+> solo LIGHT/DARK/MEMORIAL —las casas de oficio no pasan por los pares de
+> componente, que es la misma clase que D-813— y la `Hoja` sigue
+> DESLIZANDO con la preferencia activa (cambiarlo por un fundido toca su
+> anatomía de apertura y cierre: pide firma, y RN-web no lo gatea).
+
 > **S96-B · SEGUNDA TANDA — el ensanche firmado, cuatro piezas y una regla.**
 > Contador re-medido (L-141): **63** (66 `.tsx` − 2 `.web` − infra). R17
 > leído del propio lint: `exportaciones=86 · en-galería=77 ·

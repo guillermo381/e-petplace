@@ -52,6 +52,7 @@ import Animated, {
   interpolateColor,
   runOnJS,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withTiming,
   type SharedValue,
@@ -100,11 +101,29 @@ function RuedaDias({
   // sigan al dedo, no al estado de React)
   const indiceVivo = useSharedValue(indice)
 
+  /** 🔴 S98-B · REDUCE-MOTION — acá la cura NO es «no te muevas», y ésa
+   *  es la parte que hay que leer antes de tocar: **el desplazamiento de
+   *  esta rueda es FUNCIONAL** —centra el día elegido—, así que apagarlo
+   *  no reduce movimiento: rompe la pieza.
+   *
+   *  Lo que se apaga es el VIAJE, no el destino: con la preferencia
+   *  activada la rueda **salta** a su lugar en vez de deslizarse hasta
+   *  él. Mismo estado final, mismo centrado, cero recorrido — que es
+   *  exactamente lo que la preferencia pide y lo que hacen las ruedas
+   *  nativas. *La distinción es la misma de `Entrada`: quitarle el viaje,
+   *  no el momento.*
+   *
+   *  El arrastre con el dedo NO se toca: eso es manipulación directa —el
+   *  contenido sigue al dedo— y no es animación autónoma. Lo que sí cae
+   *  bajo la preferencia es el IMÁN del final, que se mueve solo. */
+  const reduceMotion = useReducedMotion()
+  const durSnap = reduceMotion ? 0 : D3.duracion
+
   useEffect(() => {
     if (ancho === 0) return
     indiceVivo.value = indice
-    desplaz.value = withTiming(centro(indice), { duration: D3.duracion, easing: CURVA_D3 })
-  }, [indice, ancho])
+    desplaz.value = withTiming(centro(indice), { duration: durSnap, easing: CURVA_D3 })
+  }, [indice, ancho, durSnap])
 
   // el día CERRADO se elige igual — y es a propósito. Ver la nota de
   // `cerrados` en SelectorDia: un día apagado y mudo es el bug que esto
@@ -129,8 +148,10 @@ function RuedaDias({
       const crudo = (ancho / 2 - D3.item / 2 - desplaz.value) / D3.paso
       const i = Math.min(Math.max(Math.round(crudo), 0), dias.length - 1)
       indiceVivo.value = i
+      // EL IMÁN: se mueve SOLO después de que soltás, así que entra bajo
+      // la preferencia (a diferencia del arrastre, que sigue al dedo).
       desplaz.value = withTiming(ancho / 2 - D3.item / 2 - i * D3.paso, {
-        duration: D3.duracion,
+        duration: durSnap,
         easing: CURVA_D3,
       })
       runOnJS(elegirPorIndice)(i)
