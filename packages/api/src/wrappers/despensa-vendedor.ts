@@ -410,6 +410,17 @@ export async function definirTurnoEntrega(input: {
   entrega_hasta: string;  // 'HH:MM'
   dia_offset?: 0 | 1;
   orden?: number;
+  /** Días en que rige el corte. **0=domingo … 6=sábado** (la convención de la
+   *  casa, medida contra `EXTRACT(DOW)`).
+   *
+   *  🔴 **OMITIRLO NO LOS APAGA: LOS DEJA COMO ESTÁN.** La puerta upsertea
+   *  por `(cuenta, código)`, así que si esto viajara con un default, *cada
+   *  corrección de HORA borraría el «sábados no» del vendedor sin que él se
+   *  entere*. `undefined` ⇒ `NULL` ⇒ la RPC hace `COALESCE` contra la fila.
+   *  **Al CREAR, ausente = L–D** (el default de la columna). */
+  dias_semana?: number[];
+  /** Mismo contrato: omitirlo NO lo apaga, lo conserva. Ausente al crear = `false`. */
+  incluye_festivos?: boolean;
 }): Promise<ResultadoWrapper<{ turno_id: string }, CodigoErrorDespensa>> {
   const { data, error } = await getClient().rpc('definir_turno_entrega', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
@@ -419,6 +430,8 @@ export async function definirTurnoEntrega(input: {
     p_entrega_hasta: input.entrega_hasta,
     p_dia_offset: input.dia_offset ?? undefined,
     p_orden: input.orden ?? undefined,
+    p_dias_semana: input.dias_semana ?? undefined,
+    p_incluye_festivos: input.incluye_festivos ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true || typeof data.turno_id !== 'string') {

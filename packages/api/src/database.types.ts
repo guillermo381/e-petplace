@@ -19712,8 +19712,10 @@ export type Database = {
           p_corte: string
           p_cuenta_comercial_id: string
           p_dia_offset?: number
+          p_dias_semana?: number[]
           p_entrega_desde: string
           p_entrega_hasta: string
+          p_incluye_festivos?: boolean
           p_orden?: number
           p_zona_horaria?: string
         }
