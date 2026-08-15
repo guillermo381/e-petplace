@@ -54,3 +54,33 @@ export const nombreDePais = (paises: PaisDelMundo[], iso: string): string =>
  *  para que los consumidores no repitan el `.find` con otro criterio. */
 export const paisDe = (paises: PaisDelMundo[], iso: string): PaisDelMundo | undefined =>
   paises.find((p) => p.codigo === iso);
+
+/** COMPONE el E.164 que se guarda: el prefijo del país elegido + lo tipeado.
+ *
+ *  🔴 POR QUÉ VIVE ACÁ Y NO EN UNA PANTALLA (S98-C): esta regla ya existía
+ *  **privada** dentro de `(tabs)/cuenta/perfil.tsx`, y el día que una segunda
+ *  pantalla necesitó guardar un teléfono el costo se hizo visible — el alta de
+ *  repartidor mandaba lo tipeado CRUDO y `repartidores_telefono_check`
+ *  (`^\+[1-9][0-9]{6,14}$`) lo rebotaba. **Medido con rojo reproducido:**
+ *  `0988888888` → RECHAZADO · `+593988888888` → ENTRA (in-txn, ROLLBACK,
+ *  residuo 0). *Es el mismo defecto que S70-B3 curó en el mostrador, en otra
+ *  tabla: el `+` no es cosmético, es lo que la fuente exige.*
+ *
+ *  ⚠️ DEUDA DECLARADA, no escondida: `perfil.tsx` **conserva su copia privada**
+ *  —ese archivo no es territorio de esta pista— así que hoy la regla vive en
+ *  dos lugares. El cuerpo se extrajo **verbatim**, así que no divergen hoy;
+ *  divergirían el día que alguien toque una sola. **Disparo de la migración:
+ *  el próximo arco que toque `perfil.tsx`** — importa de acá y borra la suya.
+ *
+ *  Vacío devuelve vacío: el teléfono es OPCIONAL y un prefijo suelto no es un
+ *  teléfono (guardar «+593» sería inventar un número que nadie dio). */
+export const componerE164 = (paises: PaisDelMundo[], valor: string, iso: string): string => {
+  const crudo = valor.trim().replace(/[\s-]/g, '');
+  if (crudo.length === 0) return '';
+  if (crudo.startsWith('+')) return crudo; // ya vino entero: no se toca
+  /* D-633: `prefijo` es NULLABLE en el catálogo. Un país sin prefijo declarado
+     no puede componer un E.164 ⇒ se devuelve lo crudo en vez de concatenar
+     `null` (que produciría la cadena "null593…"). */
+  const pais = paisDe(paises, iso);
+  return pais?.prefijo == null ? crudo : `${pais.prefijo}${crudo}`;
+};

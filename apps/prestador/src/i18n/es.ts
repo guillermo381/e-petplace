@@ -3190,6 +3190,12 @@ export const prestadorEs = {
       repartidorNombre: 'Nombre',
       repartidorDocumento: 'Documento',
       repartidorTelefono: 'Teléfono — opcional',
+      // SIN indicativo: ya está a la izquierda, en el selector.
+      repartidorTelefonoPlaceholder: '99 123 4567',
+      repartidorTelefonoAyuda: 'Se guarda con el indicativo del país que elijas.',
+      repartidorPaisTitulo: 'País del número',
+      repartidorPaisElegido: 'Elegido',
+      repartidorPaisSinFormato: 'No validamos la forma de este número',
       repartidorGuardarCta: 'Guardar',
       repartidorInactivo: 'Inactivo',
       repartidorActivar: 'Activo',

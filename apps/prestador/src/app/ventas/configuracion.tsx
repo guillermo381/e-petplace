@@ -148,14 +148,18 @@ import {
   listarRecursosReparto,
   listarRepartidores,
   listarTurnosEntrega,
+  obtenerPaisesDelMundo,
   registrarRepartidor,
+  type PaisDelMundo,
   type RecursoReparto,
   type Repartidor,
   type TurnoEntrega,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { ControlTelefono } from '@/components/perfil-piezas';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
+import { PAIS_DEFAULT, bandera, componerE164, paisDe } from '@/lib/paises';
 import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
@@ -260,6 +264,15 @@ export default function ConfiguracionVentas() {
   const [repNombre, setRepNombre] = useState('');
   const [repDocumento, setRepDocumento] = useState('');
   const [repTelefono, setRepTelefono] = useState('');
+  /* 🔴 EL PAÍS DEL TELÉFONO — el indicativo NO se deduce: se ELIGE (P21,
+     «proponer no es deducir»). Arranca en el default del selector, que es
+     una preselección visible y cambiable, jamás un país escrito a espaldas
+     del vendedor. La lista es ASÍNCRONA desde D-633 y viaja en la MISMA ola
+     que el resto — cero espera nueva (la lentitud de esta casa son olas
+     encadenadas, no consultas caras). */
+  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
+  const [repPaisIso, setRepPaisIso] = useState(PAIS_DEFAULT);
+  const [eligiendoPais, setEligiendoPais] = useState(false);
 
   // hoja recurso — `editandoRecurso` = la fila se REABRIÓ (D-791): mismo
   // formulario, misma puerta (upsert por (cuenta, nombre) — MEDIDO en el
@@ -293,7 +306,10 @@ export default function ConfiguracionVentas() {
           return;
         }
         const id = ctx.data.cuentaComercialId;
-        const [reps, recursos, turnos, pedidos, cupo, pres] = await Promise.all([
+        /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
+           Sacar o intercalar en el medio desalinea el destructuring en
+           silencio — ya costó una corrida en esta misma pista. */
+        const [reps, recursos, turnos, pedidos, cupo, pres, rPaises] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
@@ -304,12 +320,23 @@ export default function ConfiguracionVentas() {
              pantalla es el único camino a sus datos fiscales. Viaja en la
              misma ola — cero espera nueva. */
           obtenerMiPrestador(),
+          /* El catálogo de indicativos (D-633: la lista NO se copia, se
+             carga). Va en esta ola y no en una propia. */
+          obtenerPaisesDelMundo(),
         ]);
         if (!vigente) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
+        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok || !rPaises.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
+        /* Entra al GATE junto con los demás, y es a propósito: sin
+           indicativos el alta de repartidor compondría un teléfono sin `+`
+           que la fuente rebota (`repartidores_telefono_check`) con un
+           mensaje de Postgres. Prefiero un error honesto de pantalla antes
+           que un formulario que acepta y revienta al guardar. Y el costo
+           real es bajo: viajan en la MISMA ola, así que si esto falla solo,
+           es un problema de `cat_paises`, no de red. */
+        setPaises(rPaises.data);
         setPantalla({
           estado: 'listo',
           contexto: ctx.data,
@@ -361,15 +388,73 @@ export default function ConfiguracionVentas() {
             ? t('ventas.config.estado.modalCerrada')
             : t('ventas.config.estado.modalEnRevision');
 
+  /* 🔴 LA VALIDACIÓN QUE MI PROPIA CURA NECESITABA — y la encontró el
+     instrumento, no el razonamiento (S98-C).
+     Componer el indicativo NO alcanza: tipeando `0988777666` —como se escribe
+     un celular en Ecuador— salía **`+5930988777666`**, con el `0` de tránsito
+     adentro. Trece dígitos: **el CHECK lo ACEPTA** (`^\+[1-9][0-9]{6,14}$`) y
+     la fila nace con un número que no existe. *Eso es peor que el defecto que
+     vine a curar: el original fallaba fuerte, éste guarda mal en silencio.*
+     Y la cura NO es sacar el `0` a mano: el prefijo de tránsito no es
+     universal —Italia lo CONSERVA en su E.164— así que una regla propia
+     corrompería otros países. Se valida contra el `formato` que declara el
+     CATÁLOGO, que es el mismo criterio que ya usa el perfil. Los países que
+     no declaran formato NO validan **y lo dicen**: callarse se leería como
+     «está bien». */
+  function estadoTelefonoRep(): { ok: boolean; voz: string } | null {
+    const crudo = repTelefono.replace(/[\s-]/g, '');
+    if (crudo.length === 0) return null; // opcional: vacío no es un error
+    const pais = paisDe(paises, repPaisIso);
+    if (pais?.prefijo == null) return null;
+    const e164 = componerE164(paises, repTelefono, repPaisIso);
+    if (pais.formato === null) {
+      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
+    }
+    if (new RegExp(pais.formato).test(e164)) {
+      return { ok: true, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
+    }
+    // El error DIRIGE: cuántos dígitos van, sacados del formato REAL del país.
+    const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
+    const min = rango?.[1];
+    const max = rango?.[2];
+    const cuantos =
+      min === undefined
+        ? t('perfilNegocio.telDigitosSinDato')
+        : max === undefined
+          ? t('perfilNegocio.telDigitos', { min })
+          : t('perfilNegocio.telDigitosRango', { min, max });
+    return {
+      ok: false,
+      voz: t('perfilNegocio.telLargoMal', {
+        pais: pais.nombre,
+        cuantos,
+        pre: pais.prefijo,
+        van: crudo.length,
+      }),
+    };
+  }
+
   async function guardarRepartidor() {
     if (guardando || pantalla.estado !== 'listo') return;
     if (repNombre.trim().length === 0 || repDocumento.trim().length === 0) return;
+    // Un teléfono que no cumple el formato de su país NO se manda: la puerta
+    // no ofrece lo que va a rechazar (Ley 23), y acá la fuente NO lo rechaza
+    // —lo acepta mal—, así que el guard tiene que estar de este lado.
+    if (estadoTelefonoRep()?.ok === false) return;
     setGuardando(true);
+    /* 🔴 LA CURA (S98-C, rojo reproducido antes): acá se mandaba
+       `repTelefono.trim()` CRUDO. `repartidores_telefono_check` exige
+       `^\+[1-9][0-9]{6,14}$`, y `registrar_repartidor` NO normaliza —lo
+       inserta tal cual (medido en su cuerpo)—, así que un vendedor que
+       tipeaba `0988888888`, que es como se escribe un celular en Ecuador,
+       recibía el texto de un CHECK de Postgres. Ahora el número se COMPONE
+       con el indicativo del país elegido. */
+    const telefonoE164 = componerE164(paises, repTelefono, repPaisIso);
     const r = await registrarRepartidor({
       cuenta_comercial_id: pantalla.contexto.cuentaComercialId,
       nombre: repNombre.trim(),
       documento: repDocumento.trim(),
-      telefono: repTelefono.trim().length > 0 ? repTelefono.trim() : undefined,
+      telefono: telefonoE164.length > 0 ? telefonoE164 : undefined,
     });
     setGuardando(false);
     if (!r.ok) {
@@ -766,23 +851,81 @@ export default function ConfiguracionVentas() {
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
-              <Campo
+              {/* El teléfono con su indicativo — pieza de la casa, no una
+                  caja nueva: `ControlTelefono` ya resuelve el par
+                  selector+campo con UN solo pie, porque lo que se valida es
+                  el E.164 que forman JUNTOS. El placeholder va SIN prefijo:
+                  el indicativo está a la izquierda y repetirlo enseñaría a
+                  escribirlo dos veces. */}
+              <ControlTelefono
                 label={t('ventas.config.repartidorTelefono')}
-                value={repTelefono}
-                onChangeText={setRepTelefono}
-                keyboardType="phone-pad"
-                deshabilitado={guardando}
+                placeholder={t('ventas.config.repartidorTelefonoPlaceholder')}
+                valor={repTelefono}
+                onCambio={setRepTelefono}
+                bandera={bandera(repPaisIso)}
+                prefijo={paisDe(paises, repPaisIso)?.prefijo ?? ''}
+                onElegirPais={() => setEligiendoPais(true)}
+                /* La voz EN VIVO muestra el E.164 que se va a guardar — el
+                   vendedor VE `+593988777666` antes de tocar Guardar, que es
+                   justo lo que habría destapado el `0` de más sin necesidad
+                   de un instrumento. Sin nada tipeado, la ayuda genérica. */
+                ayuda={estadoTelefonoRep()?.voz ?? t('ventas.config.repartidorTelefonoAyuda')}
+                error={
+                  estadoTelefonoRep()?.ok === false ? estadoTelefonoRep()?.voz : undefined
+                }
               />
               <Boton
                 variante="primario"
                 bloque
                 cargando={guardando}
-                deshabilitado={repNombre.trim().length === 0 || repDocumento.trim().length === 0}
+                deshabilitado={
+                  repNombre.trim().length === 0 ||
+                  repDocumento.trim().length === 0 ||
+                  estadoTelefonoRep()?.ok === false
+                }
                 etiqueta={t('ventas.config.repartidorGuardarCta')}
                 onPress={() => void guardarRepartidor()}
               />
             </View>
           </EvitaTeclado>
+        </HojaScroll>
+      </Hoja>
+
+      {/* ── el país del teléfono del repartidor ──
+          Misma anatomía que la del perfil: bandera + nombre + indicativo en
+          mono, y la elegida se DICE. Los países sin `formato_telefono`
+          declarado no se apagan —se aceptan igual— pero su subtítulo avisa
+          que nadie va a validar la forma: el dato honesto ocupa el lugar
+          donde un «todavía no» mentiría. */}
+      <Hoja
+        visible={eligiendoPais}
+        onCerrar={() => setEligiendoPais(false)}
+        titulo={t('ventas.config.repartidorPaisTitulo')}
+      >
+        <HojaScroll>
+          {paises.map((p, i) => (
+            <View key={p.codigo}>
+              {i > 0 ? <Separador /> : null}
+              <Celda
+                titulo={`${bandera(p.codigo)}  ${p.nombre}`}
+                subtitulo={
+                  p.formato === null ? t('ventas.config.repartidorPaisSinFormato') : undefined
+                }
+                metadataMono={p.prefijo ?? undefined}
+                interactiva
+                accessibilityRole="button"
+                onPress={() => {
+                  setRepPaisIso(p.codigo);
+                  setEligiendoPais(false);
+                }}
+                fin={
+                  p.codigo === repPaisIso ? (
+                    <Texto variante="dato">{t('ventas.config.repartidorPaisElegido')}</Texto>
+                  ) : undefined
+                }
+              />
+            </View>
+          ))}
         </HojaScroll>
       </Hoja>
 
