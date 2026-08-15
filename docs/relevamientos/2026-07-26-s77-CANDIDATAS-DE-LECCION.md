@@ -677,3 +677,53 @@ funcionó y aun así llevó a la conclusión equivocada.**
 mensaje dice literalmente lo que compara — *"N filas NO alcanzadas cambiaron"*.
 
 **⚠️ SIN FIRMA (regla 80).**
+
+---
+
+### 22 · Contra un defecto INTERMITENTE, una corrida verde es una moneda al aire con forma de test
+
+**Origen (S98-C, medido con sonda, no razonado):** A reportó que la lista no se
+refrescaba tras un alta. La sonda mostró que `recargar()` **sí disparaba** y que
+el efecto **a veces corría y a veces no**: en dos corridas idénticas el mismo
+alta refrescó una vez y la otra no.
+
+**La causa:** la carga vivía dentro de un `useFocusEffect` y los altas la
+disparaban bumpeando una dep, pero guardar cierra la Hoja —un `Modal` NATIVO— y
+ese desmontaje mueve el foco; un efecto acoplado al foco a veces observa el
+cambio y a veces se lo traga. Familia D-728.
+
+**La lección no es la causa: es lo que la causa hace con los instrumentos.**
+Un test de una sola vuelta contra esto **acierta la mitad de las veces, y sus
+dos respuestas se leen idénticas** — un verde no distingue «curado» de «tuve
+suerte». ⇒ **todo instrumento contra un defecto que se observó intermitente
+corre N vueltas y exige las N**, y el número va escrito con su porqué.
+
+**Costo evitado, concreto:** el diagnóstico natural —*«falta el refresco»*—
+habría llevado a agregar un refresco **que ya existía**, y esa cura habría dado
+**verde en la primera prueba**. El defecto se habría cerrado creyéndolo curado.
+
+**Su gemela de método, del mismo intercambio:** *el defecto era COMPARTIDO y
+precedía al alta nueva* — se descubrió probando **la otra alta de la misma
+pantalla** (el recurso, que no necesita cámara). Antes de atribuir un defecto al
+código que uno acaba de escribir, **conviene probar el hermano que uno no
+tocó**: si también falla, la causa es de más arriba.
+
+**⚠️ SIN FIRMA (regla 80).**
+
+---
+
+### 23 · La coordenada de un tocable se recalcula DESPUÉS de cerrar el teclado, no antes
+
+**Origen (S98, hallazgo de A en el aparato, declarado por él como propio):** al
+cerrar el teclado con «Done» el layout se corre y el botón sube. Tocar donde
+estaba «Guardar» **antes** de cerrarlo le pega al aire.
+
+**No es un defecto**: es la Hoja respirando bien con el teclado. Pero para un
+E2E en dispositivo es una trampa silenciosa — **el toque no falla, acierta en el
+lugar equivocado**, y desde afuera se ve igual que «el botón no hizo nada».
+
+**Su hermana ya conocida:** `keyevent 111` (ESC) **descarta el modal entero**, no
+solo el teclado. El que sirve para bajar el teclado es el **Done** del propio
+teclado.
+
+**⚠️ SIN FIRMA (regla 80).** Vale para quien monte el primer E2E en dispositivo.
