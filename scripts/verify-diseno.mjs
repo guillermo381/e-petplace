@@ -1134,6 +1134,7 @@ function r27(fuentes) {
   return { fallos, info: fallos.length === 0 ? 'estado, elección y PATA del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
 }
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
+const FUENTES_R43 = { palette: readFileSync('packages/ui/src/tokens/palette.ts', 'utf8') };
 
 
 /** R29 · `sinPie` NO VIAJA SOLO (S83-B1). La enmienda de la letra de
@@ -1772,6 +1773,19 @@ const FIXTURES = {
      sacar del baseline» se encendería también y el rojo medido no sería
      el de la regla; sin la canónica, se encendería el ANCLA. Lo único
      que tiene que salir rojo es la puerta nueva. */
+  /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
+     (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
+     piso. Lo que tiene que salir rojo es la casa floja. */
+  R43: {
+    palette: [
+      "  papelTapiz: '#FAF2F5',",
+      "  tapizDark: '#0D050D',",
+      "  memorialDark0: '#0A0E0A',",
+      "  campoBordeL: '#E3E0EF',", // 1.18 contra el tapiz — LA FLOJA
+      "  campoBordeD: '#62627A',",
+      "  campoBordeM: '#5A695A',",
+    ].join('\n'),
+  },
   R42: [
     { path: 'packages/ui/src/components/HojaCaptura.tsx', src: 'capturarConCamara(); capturarDeGaleria()' },
     ...[...BASELINE_R42].map((path) => ({ path, src: 'capturarConCamara(); capturarDeGaleria()' })),
@@ -2629,7 +2643,89 @@ function r42(archivos) {
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/** R43 · N11 · EL CONTORNO DEL CAMPO TIENE PISO, Y ES UN NÚMERO (S99-B).
+ *
+ *  N11 firmada: *«contorno visible **≥3:1** contra el fondo»*. Es la
+ *  primera ley del Norte cuyo cumplimiento es **un número del tema**, así
+ *  que se mecaniza sola — y hacía falta, porque **ninguno de los bordes
+ *  que la casa ya tenía llegaba**: `border.default` **1.18** en claro y
+ *  **1.28** en oscuro · `border.presente` **1.62** / **1.64**. *No es que
+ *  estuvieran mal: separaban, y N11 pide contener.*
+ *
+ *  🔴 Y VIGILA ALGO QUE UN OJO NO VE: el día que alguien afine
+ *  `campoBordeL` «un poquito más suave» porque le parece fuerte, el campo
+ *  sigue **viéndose** — solo deja de cumplir. **Un piso que solo vive en
+ *  una prosa se afloja sin que nada avise.**
+ *
+ *  QUÉ MIRA, y por qué contra `bg.base` y no contra el interior: la letra
+ *  dice **«contra el fondo»**, y el fondo de la región de un formulario
+ *  es la pantalla, no el relleno de la propia caja. Medir contra el
+ *  interior daría números más altos y más cómodos — que es exactamente
+ *  por qué no se mide así.
+ *
+ *  ⚠️ TIENE ANCLA: si los nombres de los tokens cambian y el regex deja
+ *  de encontrarlos, la regla no mediría NADA y su verde significaría «no
+ *  miré» (L-192). Exige encontrar los tres. */
+const PISO_R43 = 3
+/** Los pares (borde, fondo) de las tres casas. Los hex se LEEN de
+ *  `palette.ts`; acá vive solo qué token va contra qué token. */
+const PARES_R43 = [
+  { casa: 'light', borde: 'campoBordeL', fondo: 'papelTapiz' },
+  { casa: 'dark', borde: 'campoBordeD', fondo: 'tapizDark' },
+  { casa: 'memorial', borde: 'campoBordeM', fondo: 'memorialDark0' },
+]
+function r43(fuentes) {
+  const fallos = []
+  /** Corpus PROPIO (patrón R27): `palette.ts` es `.ts` y el corpus de
+   *  `ui` recorre solo `.tsx` — pedirlo por la lista lo dejaba fuera y
+   *  la regla salía «sin corpus». Se pasa la fuente, como los temas. */
+  const src = sinComentarios(fuentes.palette ?? '')
+  const hexDe = (token) => {
+    const m = src.match(new RegExp(`\\b${token}:\\s*'(#[0-9A-Fa-f]{6})'`))
+    return m === null ? null : m[1]
+  }
+  const canal = (v) => {
+    const s = v / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  }
+  const lum = (h) => {
+    const x = h.replace('#', '')
+    return (
+      0.2126 * canal(parseInt(x.slice(0, 2), 16)) +
+      0.7152 * canal(parseInt(x.slice(2, 4), 16)) +
+      0.0722 * canal(parseInt(x.slice(4, 6), 16))
+    )
+  }
+  const ratio = (a, b) => {
+    const [p, q] = [lum(a), lum(b)].sort((m, n) => n - m)
+    return (p + 0.05) / (q + 0.05)
+  }
+
+  let medidos = 0
+  const detalle = []
+  for (const par of PARES_R43) {
+    const borde = hexDe(par.borde)
+    const fondo = hexDe(par.fondo)
+    if (borde === null || fondo === null) {
+      fallos.push(
+        `R43: no se pudo leer ${borde === null ? par.borde : par.fondo} de palette.ts — token renombrado o movido. La regla dejaría de medir su casa en silencio, que es peor que un rojo.`,
+      )
+      continue
+    }
+    medidos++
+    const v = ratio(borde, fondo)
+    detalle.push(`${par.casa} ${v.toFixed(2)}`)
+    if (v < PISO_R43)
+      fallos.push(
+        `R43: el contorno del campo en ${par.casa} da ${v.toFixed(2)}:1 contra el fondo — N11 pide ≥${PISO_R43}:1. La ley está firmada (DIRECCION_DISENO_S99 §N11) y su piso no se ablanda: si el borde se ve fuerte, la conversación es con la mesa, no con este número.`,
+      )
+  }
+  // ANCLA: las tres casas o la regla no está mirando lo que dice mirar.
+  fallos.push(...ancla('R43', medidos, 3, 'casa(s) con su par (contorno, fondo) medido'))
+  return { fallos, info: `${detalle.join(' · ')} — piso ${PISO_R43}:1 (N11)` }
+}
+
+const REGLAS = { R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2876,6 +2972,7 @@ corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)])
 corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(DICS_R40)]);
 corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
+corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

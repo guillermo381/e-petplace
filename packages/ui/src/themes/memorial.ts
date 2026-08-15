@@ -160,6 +160,13 @@ export const memorialTheme = {
      *  consumidor hoy (en memorial separa el halo, como en dark) — y acá
      *  además rige la Ley 8: memorial no gana señales, las degrada. */
     presente: 'rgba(143,166,142,.30)',
+    /** S99-B · N11 — el contorno del CAMPO. **SÓLIDO y no alfa**, y la
+     *  razón es medible: un alfa se compone sobre el INTERIOR del campo,
+     *  así que su contraste contra el FONDO —que es lo que la ley mide—
+     *  dependería de dónde se monte. `.30` sobre el interior da 1.49
+     *  contra el fondo; este sólido da **3.34:1**. *Memorial degrada
+     *  señales, no las pierde: un campo que no se ve no es sobriedad.* */
+    campo:    palette.campoBordeM,
     subtle:  'rgba(232,220,200,.06)',
     accent:  'rgba(143,166,142,.28)',
     brand:   'rgba(201,160,160,.30)',

@@ -262,6 +262,10 @@ export const lightTheme = {
      *  de la que ESPERA. En oscuro el mismo rol se cumpliría con un valor
      *  MÁS CLARO. */
     presente: palette.light5,
+    /** S99-B · N11 — el contorno del CAMPO. Rol propio: `default` y
+     *  `presente` separan (1.18 y 1.62 contra el fondo); éste CONTIENE,
+     *  y su piso lo fija la ley: ≥3:1. Acá **3.34:1**. */
+    campo:    palette.campoBordeL,
     subtle:  'rgba(0,0,0,.05)',
     accent:  palette.tealBorderL,
     brand:   palette.pinkBorderL,

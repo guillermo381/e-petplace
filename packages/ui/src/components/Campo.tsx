@@ -17,8 +17,9 @@
  * ═══════════════════════════════════════════════════════════════════
  *
  * Consecuencias de diseño:
- *   · Label SIEMPRE visible arriba (nada de placeholder-como-label;
- *     el placeholder es solo formato, ej: "ej: Zeus").
+ *   · Label SIEMPRE visible y ADENTRO de la caja (S99-B · N11 — antes
+ *     iba arriba y afuera; nunca fue placeholder-como-label, y sigue sin
+ *     serlo: el placeholder es solo formato, ej: "ej: Zeus").
  *   · Borde 1.5px SIEMPRE — el foco/error cambia COLOR, no grosor.
  *   · El slot de ayuda/error tiene altura reservada: el mensaje no
  *     empuja el layout al aparecer (error reemplaza a ayuda).
@@ -38,16 +39,25 @@ import {
 } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
+import { estiloDeCaja } from './caja-de-campo'
 import { typography } from '../tokens/typography'
-import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 
-const BORDE = 1.5
-const ALTO = 48                                  // md — target táctil
+/** ⏪ S99-B · `BORDE` y el fondo salen ahora de `caja-de-campo.ts` — la
+ *  anatomía vivía copiada en tres piezas (ver su cabecera). Acá quedan
+ *  solo las medidas propias de ESTE campo. */
+/** La línea de entrada: el alto del texto que se tipea. */
+const ALTO_LINEA = Math.round(typography.size.base * typography.leading.normal)   // 24
+/** El alto de la caja es DERIVADO, no elegido (N11 · la etiqueta entró
+ *  adentro): aire + etiqueta + línea + aire = 6 + 16 + 24 + 6 + los dos
+ *  bordes = **62**. Se calcula para que quien mueva la escala de N1 no
+ *  tenga que acordarse de mover también este número. */
+const ALTO_ETIQUETA = Math.round(typography.size.xs * typography.leading.normal)  // 16
+const ALTO = Math.round(ALTO_LINEA + ALTO_ETIQUETA + spacing[1.5] * 2 + 1.5 * 2)  // 62
 const LINEA_MENSAJE = typography.size.sm * typography.leading.normal  // slot reservado
 
 /** El alto EXACTO que el pie reserva: 13 × 1.6 + 4 = **24.8 px**. Es el
@@ -139,16 +149,15 @@ export interface CampoProps
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
   deshabilitado?: boolean
-  /** FIRMADA S81 (el arbitraje ⚖️ se contestó por orden de mesa, sin
-   *  gate: A6 ALCANZA a Campo — el borde de reposo era caja, no
-   *  affordance): DEFAULT true — reposo SIN borde, la affordance la da
-   *  el RELLENO (bg.overlay, §7). El borde INFORMATIVO queda: foco
-   *  (accent.active) y error (danger) siguen pintando — semántico,
-   *  sobrevive a A6 (patrón del borde de tinte de Tarjeta). Grosor
-   *  intacto (transparent en reposo: cero layout shift). `sinCaja=
-   *  {false}` queda para la excepción DECLARADA con dueño (patrón del
-   *  flip de Tarjeta). */
-  sinCaja?: boolean
+  /** ☠️ S99-B — `sinCaja` MURIÓ, DEROGADA POR N11 y con su choque
+   *  declarado en `caja-de-campo.ts`. Era `true` POR DEFAULT: borde
+   *  transparente en reposo y el relleno como única señal —medido, el
+   *  interior quedaba a **1.07:1** contra el fondo en claro—. N11 dice
+   *  literal *«el relleno gris sólido muere… se contornea lo que se
+   *  fija»*. **Costo de la derogación: CERO consumidores** (los
+   *  `sinCaja` del árbol son todos de `Boton`, otra prop de otra pieza).
+   *  Se deja escrito y no borrado: la próxima sesión que lea la firma de
+   *  S81 tiene que encontrar acá por qué ya no rige. */
   /** S83-B1 — NO reserva el pie: lo monta el CONTROL COMPUESTO que lo
    *  contiene, con `PieDeCampo`, para todos sus hijos a la vez.
    *
@@ -177,7 +186,6 @@ export function Campo({
   ayuda,
   error,
   deshabilitado = false,
-  sinCaja = true,
   sinPie = false,
   secure = false,
   multilinea,
@@ -190,55 +198,54 @@ export function Campo({
   const [enfocado, setEnfocado] = useState(false)
   const [oculto, setOculto] = useState(true)
 
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
-  // registro gráfico: el borde de error es coral puro; el texto del mensaje es dangerText AA
-  const colorBorde = error
-    ? theme.status.danger
-    : enfocado
-      ? accentActive  // el campo enfocado ES el elemento activo de la vista
-      : sinCaja
-        ? 'transparent' // CANDIDATA A6: el reposo sin caja — foco/error siguen
-        : theme.bg.border
-
+  // El color del contorno y el interior salen de la anatomía compartida
+  // (`caja-de-campo.ts`): tres piezas, una definición.
   const altoCampo = multilinea
-    ? multilinea * Math.round(typography.size.base * typography.leading.normal) + spacing[3] * 2
+    ? multilinea * ALTO_LINEA + ALTO_ETIQUETA + spacing[2] * 2 + 1.5 * 2
     : ALTO
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-          marginBottom: spacing[1.5],
-        }}
-      >
-        {label}
-      </Text>
-
+      {/* ── S99-B · N11: LA ETIQUETA ENTRA A LA CAJA ──────────────────
+          Estaba AFUERA, arriba. N11 la pide *«adentro de los límites de
+          la caja»*, y no es capricho de estilo: una etiqueta afuera deja
+          al campo vacío siendo un rectángulo sin identidad —hay que
+          mirar arriba para saber qué es—, y adentro **el campo se
+          explica solo**. La caja crece de 48 a 62 para alojarla; el alto
+          es DERIVADO (etiqueta + línea de entrada + los dos aires), no
+          un número elegido.
+          ⚠️ El label NO se anima ni flota: la regla rectora de esta
+          pieza sigue siendo que nada se mueve mientras alguien tipea. */}
       <Animated.View
         style={{
-          flexDirection: 'row',
-          alignItems: multilinea ? 'flex-start' : 'center',
+          ...estiloDeCaja(theme, { error: !!error, enfocado }),
+          justifyContent: 'center',
           height: altoCampo,
-          borderRadius: radius.md,
-          borderWidth: BORDE,               // SIEMPRE 1.5 — el estado cambia color, no grosor
-          borderColor: colorBorde,
-          backgroundColor: sinCaja
-            ? theme.bg.overlay // CANDIDATA A6: la affordance es el relleno
-            : theme.mode === 'light'
-              ? theme.bg.card
-              : theme.bg.elevated,
           paddingHorizontal: spacing[3],
-          gap: spacing[2],
-          // única animación permitida: color del borde
-          transitionProperty: 'borderColor',
-          transitionDuration: motion.duration.fast,
+          paddingVertical: multilinea ? spacing[2] : spacing[1.5],
           transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
         }}
       >
-        {iconoIzq ? <View style={multilinea ? { paddingTop: spacing[3] } : null}>{iconoIzq}</View> : null}
+        <Text
+          numberOfLines={1}
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.xs,
+            color: theme.text.secondary,
+          }}
+        >
+          {label}
+        </Text>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: multilinea ? 'flex-start' : 'center',
+            flex: multilinea ? 1 : undefined,
+            gap: spacing[2],
+          }}
+        >
+        {iconoIzq ? <View style={multilinea ? { paddingTop: spacing[1] } : null}>{iconoIzq}</View> : null}
 
         <TextInput
           {...inputProps}
@@ -262,8 +269,10 @@ export function Campo({
             fontFamily: typography.family.sans.regular,
             fontSize: typography.size.base,
             color: theme.text.primary,
-            height: '100%',
-            paddingVertical: multilinea ? spacing[3] : 0,
+            // N11: el alto del input lo da la LÍNEA, no la caja — la caja
+            // ahora aloja también la etiqueta y su alto es del contenedor.
+            height: multilinea ? '100%' : ALTO_LINEA,
+            paddingVertical: 0,
             textAlignVertical: multilinea ? 'top' : 'center',
           }}
         />
@@ -280,8 +289,9 @@ export function Campo({
             </Text>
           </Pressable>
         ) : iconoDer ? (
-          <View style={multilinea ? { paddingTop: spacing[3] } : null}>{iconoDer}</View>
+          <View style={multilinea ? { paddingTop: spacing[1] } : null}>{iconoDer}</View>
         ) : null}
+        </View>
       </Animated.View>
 
       {sinPie ? null : <PieDeCampo ayuda={ayuda} error={error} />}
