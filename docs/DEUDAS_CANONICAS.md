@@ -16414,13 +16414,48 @@ declarado: **`sin_token_activo`**.
 **Censado por C (hallazgo de D), y VERIFICADO por A contra `pg_constraint`.
 Es más ancho de lo que el reporte original decía: son SEIS, no tres.**
 
-| convención | tablas |
+### 🔴 EL NÚMERO REAL ES 9 CONTRA 4 — y son COLUMNAS, no tablas
+
+**Corrección de C, re-verificada por A contando por `conkey → pg_attribute`:**
+
+| convención | columnas |
 |---|---|
-| 🔴 **PROHÍBEN el `+`** (`telefono !~ '^\+'`) | `cliente_pendiente_registro` · `criaderos` · `direcciones_guardadas` · `refugios` · **`seller_perfil`** · `solicitudes_adopcion` |
-| ✅ **EXIGEN el `+`** (`~ '^\+[1-9][0-9]{6,14}$'`) | `prestadores` · `repartidores` |
+| 🔴 **PROHÍBEN el `+`** (`!~ '^\+'`) — **9** | `cliente_pendiente_registro.telefono` · **`criaderos.telefono` + `.whatsapp`** · `direcciones_guardadas.telefono` · **`refugios.telefono` + `.whatsapp`** · **`seller_perfil.telefono` + `.whatsapp`** · `solicitudes_adopcion.telefono` |
+| ✅ **EXIGEN el `+`** (`~ '^\+[1-9][0-9]{6,14}$'`) — **4** | `prestadores.telefono` + `.whatsapp` · `repartidores.telefono` · **`marketing.leads.whatsapp`** |
+
+**Dos cosas que solo aparecen contando por COLUMNA:**
+① **`whatsapp` es una segunda columna con el mismo CHECK** — **TRES tablas
+tienen dos direcciones que verificar** (`criaderos`, `refugios`,
+`seller_perfil`), no una como se creía.
+② **Una vive FUERA de `public`**: `marketing.leads.whatsapp`, y además exige
+el `+`.
 
 *(`cat_paises.prefijo_telefono` exige `+` pero es otra cosa: el catálogo de
 prefijos, no un teléfono de persona.)*
+
+### 🔴 LA LECCIÓN DE CENSO, que vale más que el número
+
+**Tres métodos, tres respuestas, y cada uno era mejor que el anterior:**
+
+| quién | filtró por | contó |
+|---|---|---|
+| **D** | el **NOMBRE** del constraint | **3** |
+| **C** | el **TEXTO** de la definición | **6** |
+| **A** (re-verificando) | la **COLUMNA** (`conkey`) | **9 + 4** |
+
+**Los tres filtros fallaron por la MISMA razón: filtraban por un PROXY de la
+cosa en vez de por la cosa.** Un constraint puede no llamarse «telefono»; su
+texto puede no decir «telefono» —**un CHECK sobre `whatsapp` no lo dice en
+ninguna parte**—; **pero la columna que restringe siempre está en `conkey`.**
+
+> ***Un censo se hace por la relación que define el hecho, no por el nombre
+> ni por el texto que suelen acompañarlo.*** Los dos primeros métodos son más
+> fáciles de escribir y por eso son los que uno escribe.
+
+⚠️ **Y el patrón se repitió tres veces en una jornada:** el `head -8` que
+recortó un censo de 13 líneas (D-816) · los dos clasificadores que leyeron
+mal `!~` contra `~` · y estos tres filtros. **Las tres veces el instrumento
+fue más rápido que leer, y las tres veces estuvo mal.**
 
 ### 🔴 EL ENCUADRE, que es lo que vuelve útil al censo
 
