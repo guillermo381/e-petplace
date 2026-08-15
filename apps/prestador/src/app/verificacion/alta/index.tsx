@@ -64,6 +64,7 @@ import {
   type ClaveTabPrestador,
 } from '@/lib/barra-prestador';
 import { resolverCapacidadDeBarra } from '@/lib/barra-prestador-lectura';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { useTraduccion } from '@/i18n';
 
 /** Los cuatro pasos de §4.1, en su orden firmado. **El vocabulario es el
@@ -269,11 +270,19 @@ export default function WizardAlta() {
          propia, mezclarlos habría mandado al que todavía carga por el
          camino del vendedor. */
       const idDestape = contexto.estado === 'listo' ? contexto.prestadorId : null;
-      const quienDestapa =
-        idDestape !== null
-          ? ({ tipo: 'prestador', prestadorId: idDestape } as const)
-          : ({ tipo: 'vendedorPuro' } as const);
-      void resolverCapacidadDeBarra(quienDestapa)
+      void (idDestape !== null
+        ? resolverCapacidadDeBarra({ tipo: 'prestador', prestadorId: idDestape })
+        : // El vendedor puro NO tiene el contexto a mano en esta pantalla —
+          // el guard raíz sí, y por eso allá viaja gratis. Acá se resuelve
+          // UNA vez, explícito: el costo se ve en el sitio que lo paga en
+          // vez de esconderse adentro de la lectura de barra.
+          contextoVentas().then((r) =>
+            resolverCapacidadDeBarra({
+              tipo: 'vendedorPuro',
+              contexto: r.ok ? r.data : null,
+            }),
+          )
+      )
         .then(ordenTabsPrestador)
         .then(setTabsDelDestape);
       setDestapando(true);

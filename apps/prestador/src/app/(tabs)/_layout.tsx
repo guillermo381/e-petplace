@@ -227,6 +227,13 @@ export default function TabsLayout() {
                que no existe; su literal en el forense lo dice. */
             const { esGestor, montaAtender } = await resolverCapacidadDeBarra({
               tipo: 'vendedorPuro',
+              // ⚠️ EL CONTEXTO YA RESUELTO VIAJA — no se vuelve a pedir. Es la
+              // misma lectura de tres líneas arriba (la que dijo que era
+              // vendedora): pedirla de nuevo son DOS peticiones encadenadas
+              // en el arranque, y la deduplicación en vuelo de
+              // `contextoVentas` no las salva porque es secuencial, no
+              // simultánea. Medido con `verify-s99d-olas-vendedor-puro`.
+              contexto: ventas.data,
             });
             return { ok: true, esGestor, montaAtender, ceremonia: 'vendedor-puro' as const };
           }

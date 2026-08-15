@@ -186,27 +186,30 @@ function esTiendaActiva(ctx: ContextoVentas | null): boolean {
 }
 
 /**
- * LA CAPACIDAD DEL VENDEDOR PURO (S99-D · L1 · D-820).
+ * LA CAPACIDAD DEL VENDEDOR PURO (S99-D · L1 · D-820) — **PURA, sin leer.**
  *
  * El vendedor puro **no tiene fila en `prestadores`** —medido en la base:
  * `duenodes` y `vendedorpuro`, cero filas—, así que `resolverCapacidadAtender`
  * no es llamable para él: sus dos primeras lecturas piden `prestadorId`.
+ * **Su capacidad es una sola pregunta**, y `oficios` es `[]` **por
+ * construcción y no por lectura vacía**: no tiene negocio de servicios que
+ * consultar.
  *
- * **Su capacidad es una sola pregunta**, y por eso esta función es corta y
- * no un caso especial adentro de la otra: `oficios` es `[]` **por
- * construcción y no por lectura vacía** —no tiene negocio de servicios que
- * consultar—, y la tienda la contesta `contextoVentas`, que nunca necesitó
- * prestador.
+ * 🔴 **RECIBE EL CONTEXTO, NO LO PIDE — y eso lo corrigió mi propio
+ * instrumento, no el razonamiento.** La primera versión hacía su
+ * `await contextoVentas()` adentro. `verify-s99d-olas-vendedor-puro` contó
+ * la entrada real: **11 peticiones**, con `cuentas_comerciales × 3` y
+ * `cuenta_roles × 3` — y **dos de esas eran mías**: el guard raíz ya había
+ * resuelto el contexto tres líneas antes, así que mi llamada llegaba
+ * DESPUÉS y la deduplicación en vuelo de `contextoVentas` no podía
+ * ayudarla (deduplica lo simultáneo, no lo secuencial).
  *
- * ⚠️ **CERO CACHÉ ACÁ, y es deliberado (D-821):** `esVendedora` y
- * `estadoCuenta` los otorga e-PetPlace desde afuera, y *lo que otorga un
- * tercero no se cachea*. `contextoVentas` ya deduplica EN VUELO, que es lo
- * que evita el viaje repetido sin guardar un veredicto viejo.
+ * *Le agregué dos viajes encadenados al arranque de la única población que
+ * este lote existe para servir* — que es exactamente la enfermedad que
+ * D-738 midió en este mismo guard. Con el contexto como PARÁMETRO la
+ * función deja de leer, y **pedirlo dos veces se vuelve inexpresable**: el
+ * que llama ya lo tiene o lo consigue una vez.
  */
-export async function resolverCapacidadVendedorPuro(): Promise<
-  { ok: true; data: CapacidadAtender } | { ok: false; mensaje: string }
-> {
-  const ventas = await contextoVentas();
-  if (!ventas.ok) return { ok: false, mensaje: ventas.mensaje };
-  return { ok: true, data: { oficios: [], tienda: esTiendaActiva(ventas.data) } };
+export function capacidadVendedorPuro(ctx: ContextoVentas | null): CapacidadAtender {
+  return { oficios: [], tienda: esTiendaActiva(ctx) };
 }

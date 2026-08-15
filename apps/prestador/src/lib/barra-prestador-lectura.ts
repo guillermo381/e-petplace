@@ -14,10 +14,11 @@
 import { empleadoTieneRol, obtenerMiPosicionEnPrestador } from '@epetplace/api';
 
 import {
+  capacidadVendedorPuro,
   hayCapacidad,
   resolverCapacidadAtender,
-  resolverCapacidadVendedorPuro,
 } from './capacidad-atender';
+import type { ContextoVentas } from './cuenta-ventas';
 import type { CapacidadDeBarra } from './barra-prestador';
 
 /**
@@ -32,7 +33,15 @@ import type { CapacidadDeBarra } from './barra-prestador';
  */
 export type QuienEntra =
   | { tipo: 'prestador'; prestadorId: string }
-  | { tipo: 'vendedorPuro' };
+  /* 🔴 El vendedor puro trae SU CONTEXTO, y por eso el tipo lo exige.
+     Medido: el guard raíz ya resolvió `contextoVentas()` tres líneas antes
+     de llegar acá —es cómo supo que era vendedor—, así que una lectura
+     propia acá son **dos peticiones encadenadas de más** en el arranque de
+     la única población que este lote sirve (la deduplicación en vuelo de
+     `contextoVentas` no alcanza: deduplica lo simultáneo, no lo
+     secuencial). Pedirlo por tipo hace que el desperdicio no se pueda
+     escribir. */
+  | { tipo: 'vendedorPuro'; contexto: ContextoVentas | null };
 
 /**
  * LAS DOS PREGUNTAS, EN UNA SOLA OLA — y **la asimetría de sus fallos es
@@ -57,7 +66,7 @@ export type QuienEntra =
 export async function resolverCapacidadDeBarra(
   quien: QuienEntra,
 ): Promise<CapacidadDeBarra> {
-  if (quien.tipo === 'vendedorPuro') return capacidadVendedorPuro();
+  if (quien.tipo === 'vendedorPuro') return barraVendedorPuro(quien.contexto);
   const { prestadorId } = quien;
   const [rol, posicion, capacidad] = await Promise.all([
     empleadoTieneRol(prestadorId, ['dueño', 'administrador']),
@@ -92,15 +101,16 @@ export async function resolverCapacidadDeBarra(
  * fiscales»*— no tendría a dónde morir. *La barra completa no le regala un
  * cuarto: le devuelve el que su puntero venía supliendo.*
  *
- * **La asimetría de los fallos se conserva y por eso no se re-explica acá:**
- * la capacidad ABRE (el fallo de lectura no le esconde la tab; la portada de
- * `ATENDER` sabe decir que no pudo leer, una barra sin la tab no dice nada).
+ * **NO LEE NADA, y eso es la cura de una regresión mía** (ver el porqué
+ * medido en `capacidadVendedorPuro`): el contexto llega por el tipo, así que
+ * esta rama no paga un solo viaje. **La asimetría de los fallos se conserva
+ * igual, un piso más arriba:** un `contexto` en `null` puede ser «no tiene
+ * cuenta» o «no se pudo leer», y las dos caen en `montaAtender: false` — la
+ * CAPACIDAD abre por su fallo *en el brazo del prestador*, donde hay una
+ * lectura que puede fallar; acá no hay lectura, y quien la hizo (el guard)
+ * ya decidió que sin contexto legible esta persona ni siquiera es vendedora.
  * El brazo del ROL no aparece porque no hay rol que preguntar.
  */
-async function capacidadVendedorPuro(): Promise<CapacidadDeBarra> {
-  const capacidad = await resolverCapacidadVendedorPuro();
-  return {
-    esGestor: true,
-    montaAtender: capacidad.ok ? hayCapacidad(capacidad.data) : true,
-  };
+function barraVendedorPuro(contexto: ContextoVentas | null): CapacidadDeBarra {
+  return { esGestor: true, montaAtender: hayCapacidad(capacidadVendedorPuro(contexto)) };
 }
