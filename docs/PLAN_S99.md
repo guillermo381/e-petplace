@@ -100,6 +100,24 @@ transversales toda la sesión.**
 >   espejadas; el HOY queda con citas. Lápidas en `LA_CASA` §3.1 (hecha) y en
 >   el comentario de `lineaItems` (la pone D al abrir L4).
 
+> ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
+> por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,
+> y OCTUBRE ES FIJO)
+>
+> - **INDISPENSABLE para el soft launch: L1 · L2 · L3 · L5a · L5b.** *Sin
+>   vitrina y sin carga, un vendedor no puede vender — y sin eso no hay soft
+>   launch, hay demo.*
+> - **DESEABLE: L4, el dual.** Solo afecta a `duenotodo`, minoría en el
+>   arranque.
+> - **PUEDE ESPERAR a v1.1: L6, la moto tipo Rappi.** *Es lo más lindo de la
+>   sesión y por eso se dice explícito: la familia puede vivir un mes con
+>   estados y avisos honestos; un vendedor no puede vivir un día sin
+>   vitrina.*
+> - **Consecuencia operativa para D** *(el dictado de mesa llegó CORTADO en
+>   esta frase — se deposita la lectura que la prioridad implica, declarada
+>   como lectura y no como literal)*: si L4 y su cola de L5b compiten por su
+>   tiempo, **gana lo indispensable — D sirve a L5b antes que al dual.**
+
 ---
 
 ## §3 · LO QUE EL DOBLE CHECK DE MESA AGREGÓ (y su porqué)

@@ -11700,6 +11700,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **La cura fue la misma las cuatro veces: verificar QUIÉN/QUÉ responde antes de leer la respuesta** (`lsof`+`ps` para un puerto · el default vivo para una rama · la identidad para una sesión · el conjunto ampliado para un net). **Las cuatro pistas la llevan en su arranque de acá en adelante** (orden de mesa, 15-ago-2026; adjudicaciones en `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`).
 
+- **L-236 — EL NET MIDE EL SÍNTOMA, NO EL DEFECTO (S99 — depositada por orden de mesa, 15-ago-2026).**
+
+  **Hermana de L-235, no la misma:** L-235 es el instrumento respondiendo sobre otro OBJETO; **L-236 es el instrumento respondiendo sobre el objeto correcto con la PREGUNTA equivocada.** El literal de B, que es el que vale: **«el defecto no es contener ‹revisá› — es que NADA diga qué falló ANTES.»** El net de R44 capturaba la palabra (el síntoma) y sobre-contaba dos voces que CUMPLEN la ley; recalibrado al defecto (¿algo nombra la falla antes?), 16/16 contra los casos reales.
+
+  **Con su simetría entera:** *subcontar bendice lo que nunca se contó · sobre-contar sella como deuda lo que ya cumple — y las dos terminan en un lint verde que miente.*
+
+  **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
+
 - **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
 
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
@@ -16684,3 +16692,37 @@ de `23514` mejor escrito.**
 
 ☠️ **Muere** cuando el contador de sitios-que-pintan-`r.mensaje` llegue a
 cero — lote a lote, jamás en barrida.
+
+#### D-827 — 🟡 CÓDIGOS TIPADOS POR CONSTRAINT: el fallback `datos_invalidos` de `23514` gana número (dueño A)
+
+**Nace por orden de mesa (15-ago-2026), y su razón es L-217 en carne:** el
+compromiso de A —códigos tipados por constraint, puerta por puerta— vivía en
+dos partes de Loop y una cabecera de lint, **sin número**: *cuando estas
+sesiones cierren, tres líneas del baseline de R44 van a estar bloqueadas por
+una promesa que nadie va a poder encontrar.* Ahora la promesa tiene ficha.
+
+**El defecto:** los orquestadores del pedido capturan `error.code = '23514'`
+(violación de CHECK) y lo degradan a UN solo código, `datos_invalidos`
+(`veterinaria-presupuesto.ts:101` como espécimen) ⇒ **la pantalla no puede
+decir QUÉ falló** aunque N12.4 se lo exija — la voz buena es estructuralmente
+imposible desde el wrapper.
+
+**La cura, con la mitad que protege ESCRITA:**
+- **Criterio de disparo: cada puerta que el L1 de C toque**, con **el
+  constraint exacto y el literal del rebote que la pantalla quiere poder
+  dar** — C pide, A entrega como enmienda chica de esa puerta.
+- **Ley 23 va PRIMERO** (la pantalla valida antes de mandar; la genérica
+  queda como último recurso honesto) — el código tipado cubre lo que la
+  validación no puede saber (constraints que solo el servidor conoce).
+- 🔴 **JAMÁS un mapeo genérico de `23514` mejor escrito** — *la mitad que
+  protege es esa*: sin ella el acuerdo se cumple en la forma y se pierde en
+  el fondo (literal de C, ratificado por mesa).
+
+**Costura con R44 (orden de mesa a B, ya relevada):** las tres líneas
+BLOQUEADAS del baseline de R44 apuntan a ESTA ficha por número — el día que
+una puerta gane su código, la línea baja sola **y el lector sabe por qué
+estaba parada**.
+
+☠️ **Muere** cuando las puertas que las pantallas consumen devuelvan código
+por constraint donde la voz lo necesita, y el tramo BLOQUEADO del baseline
+de R44 llegue a cero.
