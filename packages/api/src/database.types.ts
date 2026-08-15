@@ -15342,6 +15342,44 @@ export type Database = {
           },
         ]
       }
+      repartidor_vehiculos: {
+        Row: {
+          created_at: string
+          id: string
+          orden: number
+          placa: string
+          repartidor_id: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          orden?: number
+          placa: string
+          repartidor_id: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          orden?: number
+          placa?: string
+          repartidor_id?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repartidor_vehiculos_repartidor_id_fkey"
+            columns: ["repartidor_id"]
+            isOneToOne: false
+            referencedRelation: "repartidores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       repartidores: {
         Row: {
           activo: boolean
@@ -15349,11 +15387,15 @@ export type Database = {
           created_at: string
           cuenta_comercial_id: string
           documento: string
+          documento_foto_path: string | null
+          foto_path: string | null
           id: string
           nombre: string
           telefono: string | null
+          tipo_documento: string | null
           updated_at: string
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
           activo?: boolean
@@ -15361,11 +15403,15 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id: string
           documento: string
+          documento_foto_path?: string | null
+          foto_path?: string | null
           id?: string
           nombre: string
           telefono?: string | null
+          tipo_documento?: string | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
           activo?: boolean
@@ -15373,13 +15419,24 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id?: string
           documento?: string
+          documento_foto_path?: string | null
+          foto_path?: string | null
           id?: string
           nombre?: string
           telefono?: string | null
+          tipo_documento?: string | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_repartidores_tipo_documento"
+            columns: ["country_code", "tipo_documento"]
+            isOneToOne: false
+            referencedRelation: "cat_tipos_documento_titular"
+            referencedColumns: ["country_code", "codigo"]
+          },
           {
             foreignKeyName: "repartidores_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
@@ -19045,6 +19102,15 @@ export type Database = {
         Args: { p_cuenta_id: string; p_uid: string }
         Returns: boolean
       }
+      _valida_identidad_repartidor: {
+        Args: {
+          p_documento: string
+          p_pais: string
+          p_tipo_documento: string
+          p_whatsapp: string
+        }
+        Returns: undefined
+      }
       _validar_ownership_cuenta_comercial: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
@@ -19137,10 +19203,14 @@ export type Database = {
         Args: {
           p_activo?: boolean
           p_documento?: string
+          p_documento_foto_path?: string
+          p_foto_path?: string
           p_nombre?: string
           p_repartidor_id: string
           p_telefono?: string
+          p_tipo_documento?: string
           p_user_id?: string
+          p_whatsapp?: string
         }
         Returns: Json
       }
@@ -19243,6 +19313,7 @@ export type Database = {
         Returns: Json
       }
       avisar_recurrencias_proximas: { Args: never; Returns: Json }
+      barrer_solicitudes_expiradas: { Args: never; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       buscar_cliente_por_telefono: {
         Args: { p_country_code?: string; p_telefono: string }
@@ -19736,6 +19807,10 @@ export type Database = {
       }
       ejecutar_recurrencias_vencidas: { Args: never; Returns: Json }
       elegir_modo_horarios: { Args: { p_modo: string }; Returns: string }
+      eliminar_vehiculo_repartidor: {
+        Args: { p_vehiculo_id: string }
+        Returns: Json
+      }
       email_exists: { Args: { check_email: string }; Returns: boolean }
       email_status_para_invitacion: {
         Args: { p_email: string }
@@ -20941,9 +21016,13 @@ export type Database = {
         Args: {
           p_cuenta_comercial_id: string
           p_documento: string
+          p_documento_foto_path?: string
+          p_foto_path?: string
           p_nombre: string
           p_telefono?: string
+          p_tipo_documento?: string
           p_user_id?: string
+          p_whatsapp?: string
         }
         Returns: Json
       }
@@ -20975,6 +21054,10 @@ export type Database = {
       }
       registrar_vacunas_de_carnet: {
         Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
+        Returns: Json
+      }
+      registrar_vehiculo_repartidor: {
+        Args: { p_placa: string; p_repartidor_id: string; p_tipo: string }
         Returns: Json
       }
       registrar_venta_mostrador: {

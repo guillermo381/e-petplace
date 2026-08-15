@@ -1186,6 +1186,8 @@ export {
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,
+  registrarVehiculoRepartidor,
+  eliminarVehiculoRepartidor,
   obtenerReglaEnvioActiva,
   type ReglaEnvioActiva,
   definirRecursoReparto,
@@ -1197,6 +1199,7 @@ export {
   type LoteDeItem,
   type SkuDelVendedor,
   type Repartidor,
+  type VehiculoRepartidor,
 } from './wrappers/despensa-vendedor';
 
 // ── EL REPARTIDOR (S96 · la pantalla mínima de tres acciones) ───────────────

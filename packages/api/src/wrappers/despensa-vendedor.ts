@@ -228,23 +228,58 @@ export async function entregarRetiroEnMostrador(
 
 // ── EL EQUIPO DE REPARTO ────────────────────────────────────────────────────
 
+/** Un vehículo del repartidor. **Hasta DOS** — el techo no lo vigila la
+ *  pantalla: `UNIQUE(repartidor_id, orden)` con `orden ∈ {1,2}` lo vuelve
+ *  inexpresable en la fuente. */
+export interface VehiculoRepartidor {
+  vehiculo_id: string;
+  tipo: 'moto' | 'carro';
+  /** Guardada en MAYÚSCULAS, con el guion tal como se tipeó: Ecuador tiene
+   *  formatos vivos con y sin él, y deformar lo que la persona leyó de la
+   *  placa la deja sin poder comparar. */
+  placa: string;
+}
+
 export interface Repartidor {
   repartidor_id: string;
   nombre: string;
   documento: string;
+  /** Código de `cat_tipos_documento_titular` (`CEDULA` · `RUC` · `PASAPORTE`).
+   *  `null` en los repartidores anteriores a S98 — y eso no es un error de
+   *  dato: es un dato que todavía nadie declaró. */
+  tipo_documento: string | null;
   telefono: string | null;
+  /** E.164 con `+`, la MISMA convención que `telefono` en esta tabla.
+   *  🔴 D-823: en la casa hay 9 columnas que prohíben el `+` y 4 que lo
+   *  exigen — **la convención es POR TABLA**, y `repartidores` está del lado
+   *  que lo exige. La superficie compone el E.164 con su selector de país;
+   *  el motor **valida y rebota, jamás deduce el país** (P21). */
+  whatsapp: string | null;
+  /** PATH del bucket privado `cuenta-documentos`, **jamás URL**: una URL
+   *  firmada guardada vence y la foto se pierde sin error (S47). */
+  documento_foto_path: string | null;
+  foto_path: string | null;
   /** null = todavía no tiene cuenta: el vendedor opera por él y el cuarto
    *  escalón lo marca desde su propio teléfono. */
   user_id: string | null;
   activo: boolean;
+  vehiculos: VehiculoRepartidor[];
 }
 
 export async function listarRepartidores(
   cuentaComercialId: string,
 ): Promise<ResultadoWrapper<Repartidor[], CodigoErrorDespensa>> {
+  /* Los vehículos viajan EN LA MISMA consulta por embed. El repartidor sin su
+     vehículo no sirve para el trabajo que la pantalla tiene que hacer —
+     «¿en qué sale?» es parte de quién es—, y traerlos aparte serían N+1
+     viajes para pintar una lista de tres filas. */
   const { data, error } = await getClient()
     .from('repartidores')
-    .select('id, nombre, documento, telefono, user_id, activo')
+    .select(
+      'id, nombre, documento, tipo_documento, telefono, whatsapp, ' +
+        'documento_foto_path, foto_path, user_id, activo, ' +
+        'repartidor_vehiculos(id, tipo, placa, orden)',
+    )
     .eq('cuenta_comercial_id', cuentaComercialId)
     .order('nombre');
   if (error) return falloDespensa(error.message);
@@ -252,16 +287,87 @@ export async function listarRepartidores(
   const salida: Repartidor[] = [];
   for (const r of data) {
     if (!esObjDespensa(r) || typeof r.id !== 'string') return falloDespensa('datos_inconsistentes');
+
+    /* Angostado verificando (regla 34): un vehículo con tipo fuera del
+       vocabulario se DESCARTA en vez de viajar como string suelto. El CHECK
+       de la fuente ya lo impide, así que si aparece uno es que el CHECK
+       cambió — y en ese caso la pantalla no debe pintarlo a ciegas. */
+    const crudos = Array.isArray(r.repartidor_vehiculos) ? r.repartidor_vehiculos : [];
+    /* `orden` se carga solo para ordenar y se descarta: es cómo la puerta
+       administra el techo de 2, no algo que la pantalla deba conocer ni
+       mucho menos mandar de vuelta. */
+    const conOrden: (VehiculoRepartidor & { orden: number })[] = [];
+    for (const v of crudos) {
+      if (!esObjDespensa(v) || typeof v.id !== 'string') continue;
+      if (v.tipo !== 'moto' && v.tipo !== 'carro') continue;
+      conOrden.push({
+        vehiculo_id: v.id,
+        tipo: v.tipo,
+        placa: typeof v.placa === 'string' ? v.placa : '',
+        orden: typeof v.orden === 'number' ? v.orden : 0,
+      });
+    }
+    /* Sin este orden el primero y el segundo se intercambian entre cargas
+       y la lista «se mueve sola» a los ojos del vendedor. */
+    conOrden.sort((a, b) => a.orden - b.orden);
+    const vehiculos: VehiculoRepartidor[] = conOrden.map(({ orden: _orden, ...v }) => v);
+
     salida.push({
       repartidor_id: r.id,
       nombre: typeof r.nombre === 'string' ? r.nombre : '',
       documento: typeof r.documento === 'string' ? r.documento : '',
+      tipo_documento: typeof r.tipo_documento === 'string' ? r.tipo_documento : null,
       telefono: typeof r.telefono === 'string' ? r.telefono : null,
+      whatsapp: typeof r.whatsapp === 'string' ? r.whatsapp : null,
+      documento_foto_path:
+        typeof r.documento_foto_path === 'string' ? r.documento_foto_path : null,
+      foto_path: typeof r.foto_path === 'string' ? r.foto_path : null,
       user_id: typeof r.user_id === 'string' ? r.user_id : null,
       activo: r.activo === true,
+      vehiculos,
     });
   }
   return { ok: true, data: salida };
+}
+
+/** Registra un vehículo del repartidor. **Idempotente por (repartidor, placa)**:
+ *  repetir la misma placa devuelve el mismo vehículo con `ya_existia` y **no
+ *  consume el segundo hueco**.
+ *
+ *  El `orden` NO se pasa: lo asigna la puerta tomando el primer hueco libre.
+ *  *Un parámetro de posición que el llamador administra es uno que va a
+ *  administrar mal, y acá administrarlo mal se ve como «se me borró la moto».*
+ *
+ *  Rebota `vehiculo_tope_alcanzado` con dos ya registrados. */
+export async function registrarVehiculoRepartidor(input: {
+  repartidor_id: string;
+  tipo: 'moto' | 'carro';
+  placa: string;
+}): Promise<ResultadoWrapper<{ vehiculo_id: string; ya_existia: boolean }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('registrar_vehiculo_repartidor', {
+    p_repartidor_id: input.repartidor_id,
+    p_tipo: input.tipo,
+    p_placa: input.placa,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.vehiculo_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: { vehiculo_id: data.vehiculo_id, ya_existia: data.ya_existia === true },
+  };
+}
+
+export async function eliminarVehiculoRepartidor(
+  vehiculoId: string,
+): Promise<ResultadoWrapper<{ ok: true }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('eliminar_vehiculo_repartidor', {
+    p_vehiculo_id: vehiculoId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { ok: true } };
 }
 
 /** Idempotente por (cuenta, documento): registrar dos veces devuelve el
@@ -272,6 +378,24 @@ export async function registrarRepartidor(input: {
   documento: string;
   telefono?: string;
   user_id?: string;
+  /** Código de `cat_tipos_documento_titular`: `CEDULA` · `RUC` · `PASAPORTE`.
+   *
+   *  🔴 **Declararlo activa la validación del número contra la máscara del
+   *  catálogo** (`CEDULA` ⇒ 10 dígitos · `RUC` ⇒ 13 · `PASAPORTE` ⇒ 6-12
+   *  alfanuméricos). Un número que no cumple rebota
+   *  `documento_no_coincide_con_tipo`. *El tipo dejó de ser una etiqueta:
+   *  es una regla.* Omitirlo no valida nada — que es lo que mantiene legales
+   *  a los repartidores anteriores a S98. */
+  tipo_documento?: 'CEDULA' | 'RUC' | 'PASAPORTE';
+  /** PATH del bucket privado `cuenta-documentos`, bajo `<cuenta_comercial_id>/`.
+   *  **Jamás una URL firmada**: el motor la rebota por CHECK. */
+  documento_foto_path?: string;
+  foto_path?: string;
+  /** **E.164 con `+`** — la pantalla lo compone con su selector de país.
+   *  El motor **valida y rebota `whatsapp_invalido`; no normaliza**, porque
+   *  normalizar exigiría DEDUCIR el país de un número sin prefijo y P21 lo
+   *  prohíbe. *El que tiene el dato compone; el que no lo tiene valida.* */
+  whatsapp?: string;
 }): Promise<ResultadoWrapper<{ repartidor_id: string; ya_existia: boolean }, CodigoErrorDespensa>> {
   const { data, error } = await getClient().rpc('registrar_repartidor', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
@@ -279,6 +403,10 @@ export async function registrarRepartidor(input: {
     p_documento: input.documento,
     p_telefono: input.telefono ?? undefined,
     p_user_id: input.user_id ?? undefined,
+    p_tipo_documento: input.tipo_documento ?? undefined,
+    p_documento_foto_path: input.documento_foto_path ?? undefined,
+    p_foto_path: input.foto_path ?? undefined,
+    p_whatsapp: input.whatsapp ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true || typeof data.repartidor_id !== 'string') {
@@ -301,6 +429,20 @@ export async function actualizarRepartidor(input: {
    *  si colisiona con otro repartidor de la misma casa: corregir jamás
    *  fusiona dos personas en silencio. */
   documento?: string;
+  /** 🔴 En los CUATRO campos de identidad, **ausente = NO TOCA**, jamás
+   *  «poné el default». Es el mismo contrato que la puerta de los cortes, y
+   *  por el mismo modo de falla medido: *si un campo ausente vaciara, corregir
+   *  el nombre le borraría la foto del documento al repartidor y nadie se
+   *  enteraría hasta necesitarla.*
+   *
+   *  Cambiar SOLO el tipo valida contra el documento **ya guardado** — poner
+   *  `CEDULA` sobre un número de 4 dígitos rebota, en vez de dejar una fila
+   *  internamente falsa. */
+  tipo_documento?: 'CEDULA' | 'RUC' | 'PASAPORTE';
+  documento_foto_path?: string;
+  foto_path?: string;
+  /** E.164 con `+`. Rebota `whatsapp_invalido`; no normaliza (P21). */
+  whatsapp?: string;
 }): Promise<ResultadoWrapper<{ repartidor_id: string }, CodigoErrorDespensa>> {
   const { data, error } = await getClient().rpc('actualizar_repartidor', {
     p_repartidor_id: input.repartidor_id,
@@ -309,6 +451,10 @@ export async function actualizarRepartidor(input: {
     p_telefono: input.telefono ?? undefined,
     p_user_id: input.user_id ?? undefined,
     p_documento: input.documento ?? undefined,
+    p_tipo_documento: input.tipo_documento ?? undefined,
+    p_documento_foto_path: input.documento_foto_path ?? undefined,
+    p_foto_path: input.foto_path ?? undefined,
+    p_whatsapp: input.whatsapp ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');

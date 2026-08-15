@@ -1,0 +1,61 @@
+-- ⏸️ PENDIENTE — ESCRITA, **NO APLICADA**, Y A PROPÓSITO FUERA DE `migrations/`
+--
+-- ═══ POR QUÉ VIVE ACÁ Y NO EN `supabase/migrations/` ═══════════════════════
+-- Un archivo en `migrations/` que no está aplicado **es drift** — y el drift
+-- en cero es exactamente lo que se verifica al cerrar cada tanda. *Un
+-- pendiente disfrazado de migración envenena el instrumento que lo detectaría.*
+-- Cuando se aplique, se MUEVE a `migrations/` con su timestamp y se registra.
+--
+-- ═══ 🔴 SU DISPARO, ESCRITO PARA QUE NO DEPENDA DE QUE ALGUIEN SE ACUERDE ══
+--
+-- > **Se aplica en la MISMA ventana en que se mergea la pantalla nueva del
+-- > alta de repartidor de C** — la que manda `p_foto_path` y `p_whatsapp`.
+--
+-- **NO antes.** Se midió que `registrar_repartidor` tiene DOS llamadores vivos
+-- en `main` (`ventas/configuracion.tsx` y `alta/PasoEquipo.tsx`) que hoy mandan
+-- solo `nombre · documento · teléfono`. Una migración pega en la base viva al
+-- instante y un OTA tarda: aplicar esto antes **deja al vendedor sin poder dar
+-- de alta a ningún repartidor**, en el bundle que ya está publicado.
+--
+-- **NO después, tampoco.** Mientras no exista, la obligatoriedad vive solo en
+-- la pantalla — y una regla que solo vive en la pantalla la esquiva cualquier
+-- otra escritura, que es literalmente lo que C pidió evitar.
+--
+-- ═══ CÓMO VERIFICAR QUE YA SE PUEDE APLICAR (dos preguntas, las dos medibles)
+--   ① ¿`main` tiene la pantalla nueva?
+--        grep -rn "p_foto_path\|foto_path" apps/prestador/src/app/ventas/configuracion.tsx \
+--                                          apps/prestador/src/components/alta/PasoEquipo.tsx
+--      Si los DOS llamadores mandan foto y whatsapp ⇒ ①  ✅
+--   ② ¿el OTA con esa pantalla está publicado?
+--        eas update:view <id> --json  (desde apps/prestador/)
+--      Si el bundle vivo NO la tiene, ⑴ es verdad en el repo y falsa en la
+--      mano del founder. **Manda ②.**
+
+BEGIN;
+
+-- El guard va DENTRO de `registrar_repartidor`, justo después del de
+-- `documento_requerido`. Se aplica por empalme sobre la definición VIVA
+-- (jamás sobre una copia de este archivo, que para entonces estará vieja).
+--
+--   IF p_foto_path IS NULL OR length(btrim(p_foto_path)) = 0 THEN
+--     RAISE EXCEPTION 'foto_requerida' USING ERRCODE = '22023';
+--   END IF;
+--   IF p_whatsapp IS NULL OR length(btrim(p_whatsapp)) = 0 THEN
+--     RAISE EXCEPTION 'whatsapp_requerido' USING ERRCODE = '22023';
+--   END IF;
+--
+-- ⚠️ **`actualizar_repartidor` NO lleva el guard**, y es deliberado: las 4
+-- filas previas a S98 nacieron sin foto ni WhatsApp, y exigirlos al ACTUALIZAR
+-- volvería **incorregible** a un repartidor viejo — no se le podría ni apagar
+-- el `activo` sin antes completarle una foto que quizás nadie tiene.
+-- *Un guard que impide arreglar lo que ya está mal no protege: atrapa.*
+
+-- ── El cinturón que esta migración va a necesitar cuando se aplique ────────
+-- ① rojo: un alta sin foto rebota `foto_requerida`
+-- ② rojo: un alta sin whatsapp rebota `whatsapp_requerido`
+-- ③ verde: el alta completa sigue entrando
+-- ④ 🔴 verde de control, EL QUE IMPORTA: `actualizar_repartidor` sobre uno de
+--    los 4 viejos (sin foto) SIGUE funcionando — si este brazo se pone rojo,
+--    el guard se filtró donde no iba y hay 4 repartidores incorregibles.
+
+ROLLBACK; -- este archivo NO se aplica tal cual: es la letra del pendiente.
