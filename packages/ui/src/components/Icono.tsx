@@ -39,6 +39,9 @@ export type IconoNombre =
   | 'ia'
   // ── LOTE 3 (S58, D-361 — gate founder POR ÍCONO pendiente) ──
   | 'hogar' | 'explorar' | 'cuenta' | 'hoy' | 'negocio'
+  // S98 — el ⓘ de «qué significa este campo». NO es `ayuda` (el
+  // salvavidas): ver su dibujante para el criterio y su gate pendiente.
+  | 'info'
   // S97+ — el destino central del prestador: la puerta abierta (ver su
   // dibujante para el porqué del concepto y su recambio declarado).
   | 'atender'
@@ -565,6 +568,46 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // El salvavidas — ayuda que flota, con la huella a salvo adentro.
+  /* ⓘ INFO — QUÉ SIGNIFICA ESTE CAMPO (S98, pedido de C con dos
+     consumidores medidos).
+
+     🔴 POR QUÉ ES UN GLIFO NUEVO Y NO UN ALIAS DE `ayuda`, que era la
+     salida barata: `ayuda` es **el salvavidas** —círculo + cuatro rayos,
+     con su huella al centro— y su propio comentario lo dice. **Un
+     salvavidas dice CONTACTÁ SOPORTE; un ⓘ dice QUÉ SIGNIFICA ESTE
+     CAMPO.** Son dos trabajos y **pueden convivir en una pantalla**: la
+     ayuda del producto vive en Cuenta, la explicación de un campo vive
+     pegada al campo. Resolverlo con un alias significaría que el día que
+     estén juntas, el mismo dibujo pide auxilio y define una palabra —
+     *un glifo con dos significados es informar sin informar* (el mismo
+     criterio con el que la campana no se disputó para `atender`).
+
+     LA PUERTA YA ESTABA ESCRITA Y SE DISPARÓ: el ⓘ vivía local en
+     `hogar/mascota/[mascotaId]` con su propia condición —«candidato al
+     registry por su puerta **si se repite**»— y C lo necesitó para la
+     hora de corte en `ventas/configuracion`. **Copió la geometría MEDIDA
+     en vez de dibujar una segunda**, así que no hay dos formas que
+     reconciliar: el trazo de acá es el del precedente.
+
+     ⚠️ SIN HUELLA, y el argumento es GEOMÉTRICO, no estético: en `ayuda`
+     la huella va en `x 9.3 · y 9.5` —**el centro exacto**— y en el ⓘ ese
+     centro lo ocupan la barra y el punto. Ponerla ahí es colisión
+     literal, y a 18-21 px eso es ruido, no presencia (Ley 9).
+     **Hay precedente firmado de glifo sin huella:** `ia` (excepción S53),
+     por una razón de la misma familia — su marca ES el dibujo.
+
+     🔴 SU GATE NO ESTÁ DADO Y NO LO DOY YO: la categoría **«glifo de
+     control»** está NOMBRADA desde S79 con su gate pendiente, y este ⓘ
+     es justamente uno. **Las dos variantes —con y sin huella— están
+     montadas en la galería** para el gate POR ÍCONO del founder (§6b, a
+     21 px junto a cinco del registry). Con su firma, la categoría que
+     S79 dejó nombrada queda cerrada de paso. */
+  info: ({ tinta }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.6} {...trazo(tinta)} />
+      <Path d="M12 11v5M12 7.7v.3" {...trazo(tinta)} />
+    </>
+  ),
   ayuda: ({ tinta, huella }) => (
     <>
       <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
@@ -1172,6 +1215,10 @@ export function Icono({
     explorar: comunidadAmplia,
     cuenta: identidad, carnet: identidad, seguros: identidad, telemedicina: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
+    // INFO comparte capa con `ayuda` PROVISIONALMENTE: los dos explican.
+    // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este
+    // es su primer habitante y su capa la define esa firma, no esta línea.
+    info: cuidado,
     // ATENDER va a CUIDADO y la elección es de taxonomía (Ley 10: se
     // reparte por lo que la cosa ES, no por dónde aparece). Atender a
     // quien llegó por la puerta es EL TRABAJO DEL DÍA — la misma capa

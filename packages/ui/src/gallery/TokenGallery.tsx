@@ -3123,6 +3123,50 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="ⓘ info (S98) — HOJA DE CONTACTO §6b · gate POR ÍCONO pendiente">
+          {/* LAS DOS VARIANTES JUNTAS, que es lo que el gate necesita —
+              la duda no es de gusto, es GEOMETRICA: en `ayuda` la huella
+              va al CENTRO (x 9.3 · y 9.5) y en el ⓘ ese centro lo ocupan
+              la barra y el punto.
+              A · SIN HUELLA — riesgo: rompe la regla madre §1. Piso: `ia`
+                  ya es excepcion FIRMADA (S53) por una razon hermana.
+              B · CON HUELLA al pie — riesgo: a 21px compite con el punto
+                  y se lee como ruido (Ley 9), y desplazarla del centro le
+                  quita al ⓘ su forma reconocible.
+              Y AL LADO, `ayuda`: si las dos se confunden a 21px, el glifo
+              nuevo no resuelve nada. */}
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              A 21 px — la fila del gate. `info` (A, sin huella) · `info` con huella simulada (B) ·
+              `ayuda` · y cinco del registry
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+              <Icono nombre="info" tamano={21} />
+              <View>
+                <Icono nombre="info" tamano={21} />
+                <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                  <Svg width={9} height={9} viewBox="0 0 24 24">
+                    <Huella color={theme.capa.cuidado} escala={0.9} />
+                  </Svg>
+                </View>
+              </View>
+              <Icono nombre="ayuda" tamano={21} />
+              {(['hoy', 'cuenta', 'negocio', 'atender', 'preferencias'] as IconoNombre[]).map((n) => (
+                <Icono key={n} nombre={n} tamano={21} />
+              ))}
+            </View>
+            <Texto variante="apoyo">A 44 px — el mismo orden</Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+              <Icono nombre="info" tamano={44} />
+              <Icono nombre="ayuda" tamano={44} />
+            </View>
+            <Texto variante="apoyo">
+              🔴 La pregunta del gate: ¿el ⓘ y el salvavidas se distinguen a 21 px? Si no, sobra
+              uno. Y: ¿la categoría «glifo de control» (S79) lleva huella?
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="Baldosa (S97+) — lo que se ELIGE (Acto II: tarjetas para elegir, filas para leer)">
           {/* LOS DOS CONSUMIDORES JUNTOS, porque la condicion de la mesa
               fue que el segundo no la deforme: arriba ATENDER (glifo +
