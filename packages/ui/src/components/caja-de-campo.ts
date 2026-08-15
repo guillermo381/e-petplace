@@ -28,7 +28,12 @@
  *
  * 🔴 **Y ESO ERA UNA DECISIÓN FIRMADA (S81), así que el choque se
  * DECLARA y no se resuelve callado** (precedente: el magenta S83, la
- * plata S83 y S88). Las dos letras citan la **19.8** y la leen al revés:
+ * plata S83 y S88).
+ *
+ * ⚠️ **LA 19.8 NO MUERE — N11 ES LA 19.8 BIEN APLICADA** (precisión de A
+ * al registrar esto para el acta, y vale escribirla acá porque «las dos
+ * la leen al revés» se puede leer como que la ley quedó en disputa: no
+ * quedó. Lo que muere es **la lectura** de S81, no la ley que citaba):
  *   · **S81:** *«A6 ALCANZA a Campo — el borde de reposo era caja, no
  *     affordance; la affordance la da el RELLENO»*.
  *   · **N11 (S99, firma del founder):** *«☠️ el relleno gris sólido

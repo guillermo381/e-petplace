@@ -6,7 +6,7 @@
  */
 
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Circle, Path } from 'react-native-svg'
 
 import { useState } from 'react'
 
@@ -1619,6 +1619,99 @@ function EjemploSelectorAvatar() {
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
       <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
       <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+    </View>
+  )
+}
+
+/** ── S99-B · HOJA DE CONTACTO DEL GLIFO `moto` (§6b) ────────────────
+ *  CANDIDATAS. **Viven acá y NO en el registry**, y es a propósito: un
+ *  glifo entra a `IconoNombre` cuando pasa su gate POR ÍCONO, no antes —
+ *  si entrara ahora, R17 lo exigiría y el set crecería sin firma.
+ *  El estudio completo (familia en números, metáforas ocupadas, riesgo
+ *  por variante y la decisión de la huella) vive en
+ *  `docs/laminas/2026-08-15-s99b-HOJA-DE-CONTACTO-moto.md`.
+ *
+ *  🔴 LAS TRES VAN SIN HUELLA, y la razón NO es la de `info`: no son
+ *  interfaz. Es que **en el par de pines la huella ES el discriminador**
+ *  —la de paseo lleva la cara de la mascota— y ponerla en las dos anula
+ *  la única diferencia que el pin existe para mostrar. */
+const TRAZO_HOJA = 1.9
+const trazoHoja = (color: string) => ({
+  stroke: color,
+  strokeWidth: TRAZO_HOJA,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none' as const,
+})
+
+/** A · la moto de perfil — 4 elementos (el TECHO de la banda 2-4). */
+function MotoA({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Circle cx={5.6} cy={16.8} r={3.6} {...trazoHoja(color)} />
+      <Circle cx={18.4} cy={16.8} r={3.6} {...trazoHoja(color)} />
+      <Path d="M5.6 16.8h5.2l3.6-5.2h4" {...trazoHoja(color)} />
+      <Path d="M13.4 11.6 15.8 16.8M16.2 8.2h2.6" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** B · el casco — 3 elementos. La más limpia y la más riesgosa. */
+function MotoB({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M3.6 14.4a8.4 8.4 0 0 1 16.8 0v2.2H3.6Z" {...trazoHoja(color)} />
+      <Path d="M8.4 8.6h9.2a5 5 0 0 1 1.6 3.4H8.4Z" {...trazoHoja(color)} />
+      <Path d="M3.6 16.6h16.8" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** C · las dos ruedas y el manubrio — 3 elementos. Mi voto. */
+function MotoC({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Circle cx={6} cy={17} r={3.8} {...trazoHoja(color)} />
+      <Circle cx={18} cy={17} r={3.8} {...trazoHoja(color)} />
+      <Path d="M6 17l4.6-6.4h5.2L18 17" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** El montaje de §6b.4: 21 y 44 px, junto a CINCO del registry elegidos
+ *  por vecindad real — `paseo`/`despensa` son los oficios que rodean la
+ *  entrega; `ubicacion`/`training`/`prime` son las colisiones mapeadas
+ *  (el pin de gota y los dos círculos). */
+function HojaDeContactoMoto() {
+  const { theme } = useTheme()
+  const vecinos: IconoNombre[] = ['paseo', 'despensa', 'ubicacion', 'training', 'prime']
+  const fila = (tamano: number) => (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{tamano} px — las tres candidatas, y después los cinco vecinos</Texto>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4], flexWrap: 'wrap' }}>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoA tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">A</Texto>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoB tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">B</Texto>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoC tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">C</Texto>
+        </View>
+        <View style={{ width: spacing[3] }} />
+        {vecinos.map((n) => (
+          <Icono key={n} nombre={n} tamano={tamano} />
+        ))}
+      </View>
+    </View>
+  )
+  return (
+    <View style={{ gap: spacing[5] }}>
+      {fila(21)}
+      {fila(44)}
     </View>
   )
 }
@@ -4768,6 +4861,29 @@ function GaleriaInterna() {
             Sin contador y sin estado deshabilitado, las dos por decisión: un badge en 0 se lee como ausencia del
             LUGAR, y apagar la puerta dejaría a alguien sin llegar a su ventana justo el día que no tiene trabajo
             (Ley 23 — un día vacío no rechaza nada). Si se monta o no es del consumidor: es composición por capacidad.
+          </Texto>
+        </Seccion>
+
+        {/* Hoja de contacto del glifo `moto` — S99-B · §6b, CANDIDATAS */}
+        <Seccion titulo="Hoja de contacto · el glifo `moto` (CANDIDATAS — gate POR ÍCONO del founder)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — un glifo se juzga EN VECINDAD: las tres, y después cinco del registry">
+                <HojaDeContactoMoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="oscuro — mismo montaje">
+                <HojaDeContactoMoto />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            A · la moto de perfil (4 elementos, el techo de la banda — la más inequívoca y la que puede empastarse a
+            21 px) · B · el casco (la más limpia, pero dice la PERSONA y roza la prohibición de figuras humanas) ·
+            C · las dos ruedas y el manubrio (voto de B: la que sigue funcionando en el único tamaño donde este
+            glifo va a existir; riesgo declarado: puede leerse como bicicleta). Estudio completo en
+            docs/laminas/2026-08-15-s99b-HOJA-DE-CONTACTO-moto.md
           </Texto>
         </Seccion>
 
