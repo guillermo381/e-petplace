@@ -115,6 +115,29 @@ export const CODIGOS_ERROR_DESPENSA = [
   'track_fuera_de_ventana',
   'puntos_invalidos',
   'track_excede_limite',
+  // ── S98 · la IDENTIDAD del repartidor y su vehículo ───────────────────────
+  // 🔴 EL CENSO SE CORRIÓ CONTRA EL OBJETO, NO CONTRA LA MEMORIA: se
+  // extrajeron los `RAISE EXCEPTION` de las CINCO puertas vivas con
+  // `pg_get_functiondef` y salieron **NUEVE** códigos sin tipar, no los tres
+  // que se habían visto al chocar con ellos.
+  //
+  // > ***Y el más viejo no es de S98: `documento_en_uso` es de S97.*** Lleva
+  // > una sesión entera devolviendo el genérico cada vez que alguien corrige
+  // > el documento de un repartidor a uno que ya existe —justo el caso donde
+  // > la persona necesita entender que hay OTRA ficha con ese número, porque
+  // > si no lo entiende va a insistir.
+  //
+  // *Los códigos que se descubren chocando son los que el camino feliz pisa;
+  //  los que faltan son los de los caminos que nadie recorrió todavía.*
+  'documento_en_uso',
+  'telefono_invalido',
+  'whatsapp_invalido',
+  'tipo_documento_invalido',
+  'documento_no_coincide_con_tipo',
+  'tipo_vehiculo_invalido',
+  'placa_requerida',
+  'vehiculo_tope_alcanzado',
+  'vehiculo_no_existe',
 ] as const;
 
 export type CodigoErrorDespensa = (typeof CODIGOS_ERROR_DESPENSA)[number];
@@ -206,6 +229,20 @@ export const MENSAJES_DESPENSA: Record<
   track_fuera_de_ventana:       'El recorrido solo se registra mientras vas hacia la casa.',
   puntos_invalidos:             'El recorrido llegó con datos inválidos.',
   track_excede_limite:          'El recorrido alcanzó su límite de puntos.',
+  // ── S98 · la identidad del repartidor ────────────────────────────────────
+  // Dice QUÉ pasó y QUÉ hacer. La del documento repetido nombra que hay OTRA
+  // ficha, porque sin eso la persona corrige el número una y otra vez.
+  documento_en_uso:             'Otro repartidor de tu equipo ya tiene ese documento.',
+  telefono_invalido:            'El teléfono necesita su código de país.',
+  whatsapp_invalido:            'El WhatsApp necesita su código de país.',
+  tipo_documento_invalido:      'Ese tipo de documento no está disponible.',
+  // No nombra el largo esperado a propósito: depende del tipo elegido, y una
+  // voz que dijera «diez dígitos» mentiría para RUC y pasaporte.
+  documento_no_coincide_con_tipo:'El número no coincide con el tipo de documento que elegiste.',
+  tipo_vehiculo_invalido:       'El vehículo tiene que ser moto o carro.',
+  placa_requerida:              'Falta la placa del vehículo.',
+  vehiculo_tope_alcanzado:      'Cada repartidor puede tener hasta dos vehículos.',
+  vehiculo_no_existe:           'Ese vehículo ya no está.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
 };

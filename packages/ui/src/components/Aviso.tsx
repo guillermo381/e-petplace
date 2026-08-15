@@ -27,7 +27,7 @@ import {
   type ReactNode,
 } from 'react'
 import { AccessibilityInfo, Pressable, Text, View } from 'react-native'
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated'
+import Animated, { FadeIn, FadeInDown, FadeOut, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { typography } from '../tokens/typography'
@@ -149,9 +149,18 @@ function PieAviso({
         ? { fondo: theme.status.dangerBg, borde: theme.status.dangerBorder, texto: theme.status.dangerText }
         : { fondo: 'transparent', borde: theme.border.subtle, texto: theme.text.primary }
 
-  // memorial: solo fade — nada desliza
+  /** 🔴 S98-B · REDUCE-MOTION comparte el brazo de memorial: fade puro,
+   *  sin desplazamiento, MISMA duración.
+   *
+   *  Por qué el Aviso entra al lote aunque su gesto sea chico: **aparece
+   *  sin que el usuario lo pida.** Todo lo demás que se mueve en la casa
+   *  responde a un toque; esto irrumpe. *Un desplazamiento no solicitado
+   *  es justo lo que la preferencia del sistema viene a apagar*, y acá el
+   *  reemplazo ya estaba escrito y firmado por Ley 8 — solo le faltaba
+   *  este segundo disparador. */
+  const reduceMotion = useReducedMotion()
   const entrada =
-    theme.mode === 'memorial'
+    theme.mode === 'memorial' || reduceMotion
       ? FadeIn.duration(motion.duration.fast)
       : FadeInDown.duration(motion.duration.fast)
 

@@ -54,6 +54,7 @@ import Animated, {
   Easing,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -153,12 +154,48 @@ export function Hoja({
   const [montada, setMontada] = useState(visible)
 
   const esMemorial = theme.mode === 'memorial'
+  /** 🔴 S98-B · REDUCE-MOTION — la Hoja entra al brazo QUIETO de memorial.
+   *  Es la pieza de más TRÁFICO del censo: toda hoja de las dos apps pasa
+   *  por acá, así que una línea cubre decenas de superficies (el mismo
+   *  argumento que hizo valiosa la cura de `Entrada`).
+   *
+   *  QUÉ APAGA, exactamente: el `withSpring` — el REBOTE. Es la parte
+   *  vestibularmente cara del gesto y la rama de memorial ya tiene escrita
+   *  su alternativa firmada (`withTiming` easeOut, «nada rebota»), así que
+   *  esto no inventa un comportamiento: reusa uno que ya pasó por gate.
+   *
+   *  ⚠️ LO QUE **NO** HACE, declarado en vez de omitido: la hoja SIGUE
+   *  DESLIZANDO. Cambiar el deslizamiento por un fundido es lo que hacen
+   *  iOS y Android con la preferencia activada, y probablemente sea lo
+   *  correcto — pero toca la anatomía de apertura Y de cierre de la pieza
+   *  (el `onCerrar` cuelga del callback del deslizamiento), es un cambio
+   *  de arte que pide firma, y **no lo puede gatear RN-web**. Queda en la
+   *  cola con este porqué escrito, no absorbido en silencio. */
+  const reduceMotion = useReducedMotion()
+  const sinRebote = esMemorial || reduceMotion
+  /** 🔴 S98-B · FIRMA DEL FOUNDER — CON REDUCE-MOTION LA HOJA **FUNDE**.
+   *  Es la firma del destape aplicada a la pieza más frecuente de la
+   *  casa: *quien pidió menos movimiento no ve deslizar*. Con la
+   *  preferencia activada no hay viaje — la hoja aparece y desaparece por
+   *  opacidad, que es lo que hacen iOS y Android con esa preferencia.
+   *
+   *  ⚠️ `funde` NO es `sinRebote`, y la diferencia importa: **memorial
+   *  SIGUE DESLIZANDO.** Su receta está firmada desde B1 —«slide+fade
+   *  suave easeOut»— y lo que memorial pide es SERENIDAD, no ausencia de
+   *  movimiento. Reduce-motion pide otra cosa. Colgar las dos del mismo
+   *  booleano habría cambiado memorial sin firma. */
+  const funde = reduceMotion
   const altoHoja =
     altura === 'media' ? altoVentana * 0.5 : altura === 'completa' ? altoVentana * 0.9 : undefined
   const altoMax = altura === 'contenido' ? altoVentana * 0.6 : undefined
 
   const translateY = useSharedValue(altoVentana)
   const backdrop = useSharedValue(0)
+  /** La opacidad de la HOJA (no del scrim, que ya tenía la suya). Solo se
+   *  anima en el camino `funde`; en los otros dos queda en 1 y el estilo
+   *  la aplica igual — un valor constante no cuesta nada y evita una rama
+   *  en el `useAnimatedStyle`. */
+  const opacidadHoja = useSharedValue(1)
   const scrollY = useSharedValue(0)
   const altoReal = useSharedValue(altoVentana)
 
@@ -166,11 +203,25 @@ export function Hoja({
   const animarEntrada = () => {
     // scrim efectivo: palette.scrim ya trae .52 de alpha — el preset
     // marca apunta a .4 en pantalla (§5.2), el default queda como estaba.
-    const esMarca = apertura === 'marca' && !esMemorial
+    // La apertura CEREMONIAL tampoco corre con la preferencia activada:
+    // es la más larga y la más gestual de las tres, o sea la que más pide
+    // apagarse. Con `sinRebote` cae al slide sereno, igual que memorial.
+    const esMarca = apertura === 'marca' && !sinRebote
     backdrop.value = withTiming(esMarca ? motion.marca.scrimEfectivo / 0.52 : 1, {
       duration: esMarca ? motion.marca.aperturaMs : motion.duration.normal,
     })
-    translateY.value = esMemorial
+    // 🔴 EL CAMINO QUE FUNDE: la hoja YA ESTÁ en su sitio y lo único que
+    // corre es la opacidad. `translateY` se planta en 0 sin animar — no
+    // «se anima a 0 muy rápido»: no viaja.
+    if (funde) {
+      translateY.value = 0
+      opacidadHoja.value = withTiming(1, {
+        duration: motion.duration.normal,
+        easing: Easing.bezier(...motion.easing.easeOut.bezier),
+      })
+      return
+    }
+    translateY.value = sinRebote
       ? withTiming(0, {
           duration: motion.duration.normal,
           easing: Easing.bezier(...motion.easing.easeOut.bezier),
@@ -185,15 +236,38 @@ export function Hoja({
 
   const cerrarAnimado = () => {
     backdrop.value = withTiming(0, { duration: motion.duration.fast })
+    /** 🔴 EL PUNTO DELICADO DE ESTA FIRMA, y por eso va escrito: **el
+     *  cierre FUNCIONAL colgaba del callback del deslizamiento.** Ese
+     *  callback es el que desmonta la hoja (`setMontada(false)`) y avisa
+     *  al consumidor (`onCerrar`) — o sea que si el gesto cambia y el
+     *  callback se queda en la animación vieja, la hoja **se vuelve
+     *  invisible pero nunca se cierra**: el Modal sigue montado, el back
+     *  de Android lo sigue consumiendo y el consumidor nunca se entera.
+     *  Un modo de falla mudo: no lanza, no se ve, y deja la app trabada.
+     *
+     *  Por eso el remate viaja CON el gesto, y se declara UNA sola vez
+     *  para que no puedan divergir. */
+    const remate = (fin?: boolean) => {
+      if (fin) {
+        scheduleOnRN(setMontada, false)
+        scheduleOnRN(onCerrar)
+      }
+    }
+    if (funde) {
+      // La hoja se apaga donde está (si venía de un arrastre, ahí mismo).
+      // `translateY` NO se anima: animarlo sería devolverle el viaje que
+      // la preferencia pidió sacar.
+      opacidadHoja.value = withTiming(
+        0,
+        { duration: motion.duration.normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
+        remate,
+      )
+      return
+    }
     translateY.value = withTiming(
       altoReal.value,
       { duration: motion.duration.normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
-      (fin) => {
-        if (fin) {
-          scheduleOnRN(setMontada, false)
-          scheduleOnRN(onCerrar)
-        }
-      },
+      remate,
     )
   }
 
@@ -201,6 +275,10 @@ export function Hoja({
     if (visible) {
       setMontada(true)
       translateY.value = altoVentana
+      // El reset de la opacidad viaja con el de la posición: sin él, la
+      // segunda apertura del camino `funde` arrancaría desde el 0 que
+      // dejó el cierre anterior y la hoja no aparecería nunca.
+      opacidadHoja.value = funde ? 0 : 1
       requestAnimationFrame(animarEntrada)
       if (titulo) AccessibilityInfo.announceForAccessibility(titulo)
     } else if (montada) {
@@ -242,21 +320,52 @@ export function Hoja({
           if (pasaUmbral) {
             scheduleOnRN(cerrarAnimado)
           } else {
-            translateY.value = withSpring(0, {
-              duration: motion.duration.normal,
-              dampingRatio: 0.85,
-            })
+            // 🔴 S98-B — ESTE REBOTE NO HONRABA MEMORIAL, y el archivo lo
+            // decía en su propia primera pantalla: *«En memorial NADA
+            // rebota (regla B1)»*. La entrada sí lo cumplía; el
+            // SNAP-BACK del arrastre —cuando soltás sin pasar el umbral y
+            // la hoja vuelve a su sitio— corría `withSpring` sin mirar
+            // nada. **La huella estaba a la vista: `esMemorial` figuraba
+            // en las dependencias de este `useMemo` y el cuerpo no lo
+            // consumía** — una dependencia sin consumidor es una
+            // intención que no llegó al cuerpo.
+            // *Una regla escrita en el header y desobedecida 260 líneas
+            // más abajo, en el mismo archivo.*
+            //
+            // ⚠️ ESTE RETORNO **NO** ENTRA AL CAMINO `funde`, y la
+            // distinción no es de comodidad: el imán de `SelectorDia` sí
+            // se volvió instantáneo con la preferencia, y acá no. La
+            // diferencia es a DÓNDE lleva cada uno. El imán de la rueda
+            // viaja a un ítem al que el usuario NO llegó —recorrido
+            // autónomo—; esto devuelve la hoja a donde ella ya estaba,
+            // deshaciendo el arrastre del propio usuario. *Completar un
+            // gesto que alguien empezó con el dedo es manipulación
+            // directa; un salto seco acá se leería como una falla del
+            // arrastre, no como serenidad.* Lo que sí rige es
+            // `sinRebote`: vuelve sereno, sin rebotar.
+            translateY.value = sinRebote
+              ? withTiming(0, {
+                  duration: motion.duration.normal,
+                  easing: Easing.bezier(...motion.easing.easeOut.bezier),
+                })
+              : withSpring(0, {
+                  duration: motion.duration.normal,
+                  dampingRatio: 0.85,
+                })
           }
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nativeScroll, esMemorial],
+    [nativeScroll, sinRebote],
   )
 
   const alScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y
   })
 
-  const estiloHoja = useAnimatedStyle(() => ({ transform: [{ translateY: translateY.value }] }))
+  const estiloHoja = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacidadHoja.value,
+  }))
   const estiloBackdrop = useAnimatedStyle(() => ({ opacity: backdrop.value }))
 
   if (!montada) return null

@@ -1745,6 +1745,22 @@ const FIXTURES = {
      brazo ② (paridad es↔en) tiene su rojo aparte en EXTRAS_BRAZOS:
      ningún fixture único puede encender los dos, porque el que agrega
      claves de más las agrega EN LOS DOS idiomas. */
+  /* R41 · el fixture trae SEIS piezas para que el ANCLA no sea lo que lo
+     pone rojo (mínimo 6): cinco sanas —una por cada forma de estar
+     cubierta, incluido el FUNDIDO PURO que se exime por medición— y UNA
+     con `withSpring` sin el hook. Lo que tiene que salir rojo es la
+     pieza descubierta, y una prueba que pasa por el motivo equivocado no
+     prueba la regla que dice probar. */
+  R41: [
+    { path: 'packages/ui/src/components/Sana1.tsx', src: 'useReducedMotion(); withSpring(0)' },
+    { path: 'packages/ui/src/components/Sana2.tsx', src: 'useReducedMotion(); withRepeat(x)' },
+    { path: 'packages/ui/src/components/Sana3.tsx', src: 'useReducedMotion(); FadeInDown.duration(1)' },
+    { path: 'packages/ui/src/components/Sana4.tsx', src: 'useReducedMotion(); withTiming(1); transform: [{ scale: 1 }]' },
+    // el fundido puro: MUEVE nada — `withTiming` sobre opacity, cero
+    // transform. NO debe exigir el hook (es el caso VisorFoto).
+    { path: 'packages/ui/src/components/Fundido.tsx', src: 'withTiming(1); opacity: v.value' },
+    { path: 'packages/ui/src/components/Descubierta.tsx', src: 'withSpring(0, { dampingRatio: 0.85 })' },
+  ],
   R40: [
     { path: 'apps/cliente/src/i18n/es.ts', src: '    unoPENDIENTE:\n    dosPENDIENTE:' },
     { path: 'apps/cliente/src/i18n/en.ts', src: '    unoPENDIENTE:\n    dosPENDIENTE:' },
@@ -2458,7 +2474,70 @@ const DICS_R40 = [
   'apps/prestador/src/i18n/en.ts',
 ].map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40 };
+/** R41 · LO QUE SE MUEVE DE VERDAD MIRA `useReducedMotion` (S98-B).
+ *
+ *  EL PORQUÉ, y no es una regla de accesibilidad genérica: quien activa
+ *  «reducir movimiento» en su teléfono lo hace porque el movimiento le
+ *  produce un síntoma —mareo, náusea—, no porque le guste menos. Y esta
+ *  casa lo cumplía en **4 de 63 piezas**: el portador de la entrada de
+ *  toda la app lo ignoraba hasta la sesión pasada, y **la única
+ *  animación en LOOP de la casa** hasta ésta.
+ *
+ *  🔴 QUÉ CUENTA COMO «MOVERSE DE VERDAD», que es la parte fina — porque
+ *  una regla que exigiera el hook a TODO lo animado sería ruido y se
+ *  terminaría silenciando:
+ *   · `withRepeat`/`withDecay`/`withSpring` → SIEMPRE. Loop, inercia y
+ *     rebote son movimiento autónomo por definición.
+ *   · las entradas con DESPLAZAMIENTO (`FadeInDown`, `SlideIn`, `ZoomIn`,
+ *     `BounceIn`, `FlipIn`) → SIEMPRE.
+ *   · `withTiming` → **solo si el archivo también toca `transform`**. Un
+ *     `withTiming` sobre `opacity` es un FUNDIDO, y **un fundido puro ya
+ *     es aquello a lo que la preferencia degrada**: exigirle el hook
+ *     sería pedirle que se proteja de sí mismo.
+ *
+ *  ⚡ ESA ÚLTIMA CLÁUSULA NO ES TEÓRICA: es `VisorFoto`, medida —CERO
+ *  `transform` en todo el archivo, solo `opacity`—. Su header declaraba
+ *  «SOLO FADES» desde S45 y era cierto. *La regla mecaniza el criterio
+ *  con el que se lo eximió, en vez de dejarlo como excepción recordada.*
+ *
+ *  ⚠️ LO QUE **NO** VIGILA, declarado: el gesto de PRESIÓN
+ *  (`usePresionado`, las `transitionProperty` de RN-web). Eso es
+ *  manipulación directa —el elemento responde al dedo mientras el dedo
+ *  está ahí—, no animación autónoma, y entra en la exención de siempre.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: si algún día el hook se resuelve una sola vez
+ *  arriba y baja por contexto (como `theme`), esta regla pierde objeto y
+ *  la retira quien haga ese cambio. */
+const MUEVE_SIEMPRE = /withRepeat|withDecay|withSpring|FadeInDown|FadeInUp|FadeInLeft|FadeInRight|SlideIn[A-Za-z]*|ZoomIn[A-Za-z]*|BounceIn[A-Za-z]*|FlipIn[A-Za-z]*/;
+const BASELINE_R41 = 0;
+function r41(archivos) {
+  const fallos = [];
+  let mueven = 0;
+  for (const { path, src } of archivos) {
+    const desplaza = /withTiming/.test(src) && /transform|translateX|translateY|scale:|rotate/.test(src);
+    if (!MUEVE_SIEMPRE.test(src) && !desplaza) continue;
+    mueven++;
+    if (/useReducedMotion/.test(src)) continue;
+    fallos.push(
+      `R41: ${path} MUEVE y no mira \`useReducedMotion\` — quien pide menos movimiento lo pide por un síntoma, no por gusto. La receta de la casa está escrita y firmada: se comparte brazo con memorial (fade puro, MISMO tempo y mismo escalón — reducir movimiento es quitarle el VIAJE, no el momento). Y el hook se llama SUELTO y se combina después: \`memorial || useReducedMotion()\` es una llamada condicional a un hook.`,
+    );
+  }
+  if (fallos.length > BASELINE_R41)
+    fallos.push(`R41: ${fallos.length} pieza(s) sobre el baseline ${BASELINE_R41}.`);
+  // ANCLA: si el corpus se rompe o los nombres de las APIs cambian, la
+  // regla no encontraría NADA que mueva y su verde significaría «no miré»
+  // en vez de «está todo cubierto» (L-192).
+  fallos.push(...ancla('R41', mueven, 6, 'pieza(s) de `ui` que se mueven de verdad'));
+  return {
+    fallos,
+    info:
+      fallos.length === 0
+        ? `${mueven} pieza(s) mueven · ${mueven} declaran el hook · los fundidos puros quedan exentos POR MEDICIÓN (VisorFoto: 0 transform)`
+        : `${fallos.length} fallo(s)`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2703,6 +2782,7 @@ corridas.push(['R37 (N4 el radio único: una sola escala)', r37(apps)]);
 corridas.push(['R38 (N3 la muerte del separador: 3 por pantalla)', r38(apps)]);
 corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)]);
 corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(DICS_R40)]);
+corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
