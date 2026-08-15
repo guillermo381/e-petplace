@@ -16406,3 +16406,70 @@ declarado: **`sin_token_activo`**.
 · ③ **el discriminador de cierre (§6bis-B puro): un evento real del mostrador
 → la push sonando en `e-PetPlace Negocios`**, verificado en el aparato.
 **Territorio: el founder (①) + A (②) + el gate (③).**
+
+---
+
+#### D-823 — 🟡 LA CASA NO TIENE UNA CONVENCIÓN DE TELÉFONO: LA TIENE POR TABLA, Y SE CONTRADICEN
+
+**Censado por C (hallazgo de D), y VERIFICADO por A contra `pg_constraint`.
+Es más ancho de lo que el reporte original decía: son SEIS, no tres.**
+
+| convención | tablas |
+|---|---|
+| 🔴 **PROHÍBEN el `+`** (`telefono !~ '^\+'`) | `cliente_pendiente_registro` · `criaderos` · `direcciones_guardadas` · `refugios` · **`seller_perfil`** · `solicitudes_adopcion` |
+| ✅ **EXIGEN el `+`** (`~ '^\+[1-9][0-9]{6,14}$'`) | `prestadores` · `repartidores` |
+
+*(`cat_paises.prefijo_telefono` exige `+` pero es otra cosa: el catálogo de
+prefijos, no un teléfono de persona.)*
+
+### 🔴 EL ENCUADRE, que es lo que vuelve útil al censo
+
+**No es descuido de quien las escribió: es LA CONVENCIÓN VIEJA SOBREVIVIENDO A
+SU PROPIA DEROGACIÓN.**
+
+> **La regla 28 murió en S84** con la firma del founder: *«el teléfono se
+> guarda **E.164 ENTERO, con su `+`**»* — y **se derogó por INCOMPLETA, no por
+> equivocada**: funcionaba mientras el país viviera en otro lado.
+
+**Las seis nunca se migraron.** ⇒ *la mayoría de la casa sigue hablando el
+idioma que se dio de baja hace trece sesiones*, y las dos que obedecen la
+firma nueva son las minoritarias.
+
+### ✅ MEDIDO: HOY NO HAY DEFECTO VIVO — por eso esto es ADVERTENCIA, no incendio
+
+Los dos consumidores existentes de `componerE164` **escriben justo a las dos
+que exigen el `+`**. Nada está roto.
+
+⚠️ **Pero el riesgo lo creó la promoción del helper a `lib/paises.ts`** (lo
+declara C de sí misma): **su salida quedó a un import de distancia de seis
+tablas que la rechazan.** *Un helper compartido no sabe a qué tabla va a
+parar; el que lo importa tiene que mirar el CHECK del destino.* Esa frontera
+vive en la ficha del helper, no en la cabeza de nadie.
+
+### La unificación es DEUDA CON LETRA PREVIA — no se cura de paso
+
+**Antes de tocar una sola tabla hay que firmar cuál gana**, y el backfill va
+sobre **datos vivos**: números guardados sin `+` no se convierten solos —
+*agregarles un prefijo exige saber de qué país es cada uno, y eso es
+exactamente lo que la regla 28 no tenía y por lo que murió.*
+
+> **P21 lo prohíbe explícitamente:** *proponer no es deducir* — **está
+> prohibido DERIVAR el país del `country_code` del perfil.**
+> ⇒ *Un backfill que «completa» los seis a E.164 estaría inventando el país
+> de cada número, que es el defecto que la letra vino a impedir.*
+
+☠️ **Muere** con ① la firma de cuál convención rige · ② el backfill diseñado
+**con su fuente de país declarada, no deducida** · ③ los CHECKs alineados.
+**Territorio: A** — y **`seller_perfil` y `direcciones_guardadas` son el
+frente cuando se tome.**
+
+### Nota de método, propia
+
+**El censo se verificó a ojo sobre el literal después de que DOS
+clasificadores automáticos que escribí lo leyeran mal.** `!~` y `~` se
+diferencian en **un carácter**, y ninguno de los dos lo vio: el primero contó
+el `+` de los cuantificadores de regex; el segundo clasificó las nueve como
+«exigen».
+
+> ***Automatizar la lectura de un literal corto puede costar más que leerlo.***
+> Nueve filas entraban en una pantalla.
