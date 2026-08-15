@@ -2617,6 +2617,10 @@ export const prestadorEn = {
       turnoCorteInfoTitulo: 'The cutoff time',
       turnoCorteInfoCuerpo:
         'Every order you receive before this time, you commit to delivering within the delivery window.',
+      turnoDias: 'Days it applies',
+      dia: { lun: 'M', mar: 'T', mie: 'W', jue: 'T', vie: 'F', sab: 'S', dom: 'S' },
+      turnoSinDias: 'Pick at least one day. To turn the cutoff off, use its switch.',
+      turnoFestivos: 'Include holidays',
       turnoDiaSiguiente: 'Delivered the next day',
       turnoGuardarCta: 'Save',
       turnoExito: 'Cutoff saved.',
