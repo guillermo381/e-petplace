@@ -1724,21 +1724,51 @@ const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;
 /** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
- *  Las diez con nombre: 2 de `ui` con razón propia + 8 de `apps` que
- *  `HojaCaptura` viene a absorber. SOLO-BAJA. */
+ *
+ *  ⏬ S99-B · PARTICIÓN POR DUEÑO Y CURABILIDAD (orden de mesa, aplicada
+ *  HACIA ATRÁS). El baseline decía *«2 de ui + 8 de apps»* y eso es
+ *  origen, no estado: **un número parado no dice si nadie lo tocó o si
+ *  nadie PUEDE tocarlo.**
+ *
+ *  🔴 Y AL APLICARLA APARECIÓ UNA TERCERA CLASE QUE LA ORDEN NO PREVIÓ,
+ *  porque el objeto la tenía: **hay una entrada que NO ES DEUDA y jamás
+ *  va a bajar** — `EvidenciaFoto` no es una puerta a mano esperando
+ *  migrar: es **otra interacción** (cámara DIRECTA, la galería detrás de
+ *  un mantenido). *Contarla como deuda miente en el otro sentido: promete
+ *  un 0 que sería un error alcanzar.*
+ *
+ *  ⇒ Las tres clases, y el criterio para leer el número:
+ *   · **CURABLE** — baja cuando su lote toque el archivo.
+ *   · **BLOQUEADA** — no se cura escribiendo mejor; espera una firma.
+ *   · **LEGÍTIMA** — cumple otra ley y **se queda**. El piso real de esta
+ *     regla NO es 0: es 1. */
 const CASA_PUERTA_FOTO = 'packages/ui/src/components/HojaCaptura.tsx';
-const BASELINE_R42 = new Set([
-  'packages/ui/src/components/SelectorAvatar.tsx',
-  'packages/ui/src/components/EvidenciaFoto.tsx',
-  'apps/cliente/src/app/carnet.tsx',
-  'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx',
-  'apps/cliente/src/components/HojaFotoMascota.tsx',
-  'apps/prestador/src/app/ventas/configuracion.tsx',
-  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx',
-  'apps/prestador/src/app/veterinaria/verificacion.tsx',
-  'apps/prestador/src/components/seccion-documentos.tsx',
-  'apps/prestador/src/components/alta/PasoDocumentos.tsx',
-]);
+/** clase → por qué está parada. La clave ES la ruta; el valor es la
+ *  razón que el lector necesita para no pedirle a la persona equivocada
+ *  que la cure. */
+const BASELINE_R42_CLASES = {
+  // ── LEGÍTIMA · NO baja nunca, y está bien ────────────────────────
+  'packages/ui/src/components/EvidenciaFoto.tsx':
+    'LEGÍTIMA (no es deuda) · no es un menú: la cámara es DIRECTA y la galería vive detrás de un mantenido. Otra interacción, otra pieza. El piso de R42 es 1, no 0.',
+  // ── BLOQUEADA · no se cura escribiendo mejor ─────────────────────
+  'packages/ui/src/components/SelectorAvatar.tsx':
+    'BLOQUEADA · dueño B · su hoja tiene TRES Celda y la tercera («Por ahora no») es decisión FIRMADA en S45. Absorberla es un GATE DE FORMA del founder, no un refactor — y no viaja escondido adentro de otra tanda.',
+  // ── CURABLES · bajan cuando su lote toque el archivo ─────────────
+  'apps/cliente/src/app/carnet.tsx': 'CURABLE · dueño del lote del cliente',
+  'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx': 'CURABLE · dueño del lote del cliente',
+  'apps/cliente/src/components/HojaFotoMascota.tsx':
+    'CURABLE · dueño del lote del cliente. ⚠️ Su propia cabecera ya lo pedía desde S82: «cuando SelectorAvatar gane el encuadre de la casa, esta Hoja muere absorbida» — la deuda estaba declarada por su autor antes de que existiera la pieza.',
+  'apps/prestador/src/app/ventas/configuracion.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx':
+    'CURABLE · dueño del lote del prestador. Nota: su captura de LOGO no migra (D-740, PNG con alpha) — migra la de avatar.',
+  'apps/prestador/src/app/veterinaria/verificacion.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/components/seccion-documentos.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/components/alta/PasoDocumentos.tsx': 'CURABLE · dueño del lote del prestador (C lo tomó en L1: `FotoDelRepartidor` es su hermana de clase)',
+};
+const BASELINE_R42 = new Set(Object.keys(BASELINE_R42_CLASES));
+/** El piso REAL: las que no son deuda. R42 no puede llegar a 0 y decirlo
+ *  es la mitad del trabajo de la partición. */
+const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('LEGÍTIMA')).length;
 
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
@@ -2658,14 +2688,18 @@ function r42(archivos) {
   }
   if (baselineVivo < BASELINE_R42.size)
     fallos.push(
-      `R42: el baseline declara ${BASELINE_R42.size} puerta(s) a mano y quedan ${baselineVivo} — BAJÓ: sacar de BASELINE_R42 la(s) que migraron. Un baseline que sobra deja de ser una lista de deuda y pasa a ser un permiso.`,
+      `R42: el baseline declara ${BASELINE_R42.size} puerta(s) a mano y quedan ${baselineVivo} — BAJÓ: sacar de BASELINE_R42_CLASES la(s) que migraron (con su clase). Un baseline que sobra deja de ser una lista de deuda y pasa a ser un permiso.`,
     );
   // ANCLA: si la pieza pierde su llamada a las dos funciones (renombre,
   // refactor), esta regla vigila un fantasma y todo pasa en verde (L-192).
   fallos.push(...ancla('R42', casa, 1, `puerta canónica viva (${CASA_PUERTA_FOTO})`));
   return {
     fallos,
-    info: `${puertas} puerta(s) a mano · baseline ${BASELINE_R42.size} (2 de \`ui\` con razón propia + 8 de \`apps\` que la pieza absorbe; solo-baja)`,
+    info:
+      `${puertas} puerta(s) a mano · baseline ${BASELINE_R42.size} = ` +
+      `${Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('CURABLE')).length} CURABLES · ` +
+      `${Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('BLOQUEADA')).length} BLOQUEADA (gate de forma) · ` +
+      `${PISO_R42} LEGÍTIMA (no es deuda — el piso de esta regla es ${PISO_R42}, jamás 0). Solo-baja`,
   };
 }
 
@@ -2691,7 +2725,27 @@ function r42(archivos) {
  *
  *  ⚠️ TIENE ANCLA: si los nombres de los tokens cambian y el regex deja
  *  de encontrarlos, la regla no mediría NADA y su verde significaría «no
- *  miré» (L-192). Exige encontrar los tres. */
+ *  miré» (L-192). Exige encontrar los tres.
+ *
+ *  ── ⏬ S99-B · LA PARTICIÓN POR DUEÑO Y CURABILIDAD **NO APLICA ACÁ**,
+ *  y se declara en vez de fabricarse ────────────────────────────────
+ *  La orden de mesa la mandó hacia atrás sobre R42 **y R43**. En R42
+ *  aplicó y encontró tres clases. **Acá no hay nada que partir, y decirlo
+ *  es más honesto que inventar una tabla vacía:**
+ *
+ *  R42 y R44 llevan **un baseline: una lista de cosas PARADAS**, y ahí la
+ *  mentira latente es real (*un número parado no dice si nadie lo tocó o
+ *  si nadie PUEDE tocarlo*). **R43 no tiene baseline.** Sus tres números
+ *  —3.34 · 3.40 · 3.34— **no son deuda parada: son la medición de que las
+ *  tres casas CUMPLEN.** No hay entrada pendiente, no hay dueño ajeno, no
+ *  hay nada bloqueado: si alguno bajara del piso, la regla se pone roja
+ *  ese mismo día en vez de estacionarse en una lista.
+ *
+ *  ⇒ *Marcar como deuda un número que mide cumplimiento sería la misma
+ *  clase de error que la orden viene a curar, al revés: una tabla de
+ *  dueños sobre algo que nadie debe.* Precedente de la casa (S94-A):
+ *  **cuatro de ocho choques del censo no eran letra obsoleta, y marcarlos
+ *  habría sido peor que dejarlos.** */
 const PISO_R43 = 3
 /** Los pares (borde, fondo) de las tres casas. Los hex se LEEN de
  *  `palette.ts`; acá vive solo qué token va contra qué token. */
