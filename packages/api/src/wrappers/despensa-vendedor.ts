@@ -16,6 +16,7 @@
 // Acá no hay un `switch` de estados ni un `if` que autorice a nadie.
 
 import { getClient } from '../client';
+import type { Json } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
 import {
   falloDespensa,
@@ -76,6 +77,80 @@ export async function listarPedidosDelVendedor(
     });
   }
   return { ok: true, data: salida };
+}
+
+export interface PedidoDelVendedorConDia extends PedidoDelVendedor {
+  /** El día del pedido = `entrega_fecha_objetivo` ('yyyy-mm-dd'), LA MISMA
+   *  columna que consume `cupo_reparto_del_dia` — una sola verdad del día.
+   *  `null` = pedido sin día prometido todavía. */
+  dia: string | null;
+}
+
+/** S99-L4 · Los pedidos de MI cuenta POR VENTANA DE FECHAS — el espejo de
+ *  `obtenerCitas*DelDia({fecha, fecha_hasta})` para el dual del HOY.
+ *
+ *  Filtra EN EL SERVIDOR por `entrega_fecha_objetivo` (jamás en memoria por
+ *  date-part de la promesa: la promesa es la VENTANA horaria; el día es la
+ *  columna que el cupo ya usa). Sin techo por cantidad dentro del rango — un
+ *  `limit` por cantidad hace que un día lleno se lea como día vacío.
+ *
+ *  🔴 LO SIN FECHA PRESIDE, NO DESAPARECE (precedente D-439/S71: la cita
+ *  aprobada sin fecha era invisible por un `.gte`). Un pedido VIVO sin
+ *  `entrega_fecha_objetivo` no pertenece a ningún día — viaja SIEMPRE en
+ *  `sinFecha`, en el mismo viaje. Los terminales sin fecha no viajan: son
+ *  historia sin día y viven en el panel. */
+export async function listarPedidosDelVendedorEnRango(
+  cuentaComercialId: string,
+  fechaDesde: string, // 'yyyy-mm-dd'
+  fechaHasta: string, // 'yyyy-mm-dd'
+): Promise<
+  ResultadoWrapper<
+    { delRango: PedidoDelVendedorConDia[]; sinFecha: PedidoDelVendedorConDia[] },
+    CodigoErrorDespensa
+  >
+> {
+  const esFecha = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (!esFecha(fechaDesde) || !esFecha(fechaHasta)) {
+    return falloDespensa('datos_inconsistentes');
+  }
+  const { data, error } = await getClient()
+    .from('v_pedidos_narrativa')
+    .select(
+      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo',
+    )
+    .eq('cuenta_comercial_id', cuentaComercialId)
+    .or(
+      `and(entrega_fecha_objetivo.gte.${fechaDesde},entrega_fecha_objetivo.lte.${fechaHasta}),and(entrega_fecha_objetivo.is.null,es_terminal.eq.false)`,
+    )
+    .order('entrega_fecha_objetivo', { ascending: true, nullsFirst: true })
+    .order('promesa_entrega_desde', { ascending: true });
+
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+  const delRango: PedidoDelVendedorConDia[] = [];
+  const sinFecha: PedidoDelVendedorConDia[] = [];
+  for (const f of data) {
+    if (!esObjDespensa(f) || typeof f.pedido_id !== 'string' || !esNarrativa(f.narrativa)) {
+      return falloDespensa('datos_inconsistentes');
+    }
+    const fila: PedidoDelVendedorConDia = {
+      pedido_id: f.pedido_id,
+      numero_orden: typeof f.numero_orden === 'string' ? f.numero_orden : '',
+      total: typeof f.total === 'number' ? f.total : 0,
+      moneda: typeof f.moneda === 'string' ? f.moneda : 'USD',
+      narrativa: f.narrativa,
+      narrativa_nombre: typeof f.narrativa_nombre === 'string' ? f.narrativa_nombre : '',
+      es_terminal: f.es_terminal === true,
+      promesa_desde:
+        typeof f.promesa_entrega_desde === 'string' ? f.promesa_entrega_desde : null,
+      promesa_hasta:
+        typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
+      creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      dia: typeof f.entrega_fecha_objetivo === 'string' ? f.entrega_fecha_objetivo : null,
+    };
+    (fila.dia === null ? sinFecha : delRango).push(fila);
+  }
+  return { ok: true, data: { delRango, sinFecha } };
 }
 
 /** Las líneas a empacar, con su lote si ya se registró. Sin esto el vendedor
@@ -511,7 +586,20 @@ export async function definirRecursoReparto(input: {
   /** Convención de la casa (regla 32): 0=Domingo … 6=Sábado. */
   dias_operacion?: number[];
   activo?: boolean;
-}): Promise<ResultadoWrapper<{ recurso_id: string }, CodigoErrorDespensa>> {
+}): Promise<
+  ResultadoWrapper<
+    {
+      recurso_id: string;
+      /** D-791 · la ley del cambio: la puerta DICE si creó o corrigió. */
+      accion: 'creado' | 'actualizado';
+      /** Días (hoy..+13) donde lo YA prometido excede la capacidad nueva.
+       *  Lo comprometido SE CUMPLE igual — esto avisa, no cancela. */
+      diasSobrecomprometidos: Array<{ fecha: string; capacidad: number; comprometido: number }>;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
   const { data, error } = await getClient().rpc('definir_recurso_reparto', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     p_nombre: input.nombre,
@@ -523,7 +611,28 @@ export async function definirRecursoReparto(input: {
   if (!esObjDespensa(data) || data.ok !== true || typeof data.recurso_id !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
-  return { ok: true, data: { recurso_id: data.recurso_id } };
+  const sobre: Array<{ fecha: string; capacidad: number; comprometido: number }> = [];
+  if (Array.isArray(data.dias_sobrecomprometidos)) {
+    for (const d of data.dias_sobrecomprometidos) {
+      if (
+        esObjDespensa(d) &&
+        typeof d.fecha === 'string' &&
+        typeof d.capacidad === 'number' &&
+        typeof d.comprometido === 'number'
+      ) {
+        sobre.push({ fecha: d.fecha, capacidad: d.capacidad, comprometido: d.comprometido });
+      }
+    }
+  }
+  return {
+    ok: true,
+    data: {
+      recurso_id: data.recurso_id,
+      accion: data.accion === 'actualizado' ? 'actualizado' : 'creado',
+      diasSobrecomprometidos: sobre,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
 }
 
 /** "El segundo repartidor no puede venir el domingo": la excepción GANA al
@@ -567,7 +676,20 @@ export async function definirTurnoEntrega(input: {
   dias_semana?: number[];
   /** Mismo contrato: omitirlo NO lo apaga, lo conserva. Ausente al crear = `false`. */
   incluye_festivos?: boolean;
-}): Promise<ResultadoWrapper<{ turno_id: string }, CodigoErrorDespensa>> {
+}): Promise<
+  ResultadoWrapper<
+    {
+      turno_id: string;
+      /** D-791 · la ley del cambio: la puerta DICE si creó o corrigió. */
+      accion: 'creado' | 'actualizado';
+      /** Pedidos vivos cuya promesa congelada nombra este turno — el cambio
+       *  no los toca, y el número existe para DECIRLO en pantalla. */
+      comprometidos: number;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
   const { data, error } = await getClient().rpc('definir_turno_entrega', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     p_codigo: input.codigo,
@@ -583,7 +705,65 @@ export async function definirTurnoEntrega(input: {
   if (!esObjDespensa(data) || data.ok !== true || typeof data.turno_id !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
-  return { ok: true, data: { turno_id: data.turno_id } };
+  return {
+    ok: true,
+    data: {
+      turno_id: data.turno_id,
+      accion: data.accion === 'actualizado' ? 'actualizado' : 'creado',
+      comprometidos: typeof data.comprometidos === 'number' ? data.comprometidos : 0,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
+}
+
+/** D-791 · el ESCRITOR de la regla de envío — la puerta existía en el motor
+ *  desde S95-G2 y ningún wrapper la llamaba (motor sin puerta). Redefinir NO
+ *  apila: el motor archiva la vigente y crea la nueva, y la respuesta DICE
+ *  qué hizo y cuántos pedidos vivos conservan su cotización congelada. */
+export async function definirReglaEnvioVendedor(input: {
+  cuenta_comercial_id: string;
+  /** Código de `cat_tipos_regla_envio` (vivos hoy: `flota_propia` ·
+   *  `gratis_sobre_umbral` · `plana`). Un tipo apagado rebota hablado. */
+  tipo: string;
+  parametros: { [key: string]: Json | undefined };
+  pagado_por?: 'vendedor' | 'cliente' | 'plataforma';
+  ciudades_cubiertas?: string[];
+  prioridad?: number;
+}): Promise<
+  ResultadoWrapper<
+    {
+      regla_id: string;
+      accion: 'creada' | 'reemplazada';
+      reglasArchivadas: number;
+      /** Pedidos vivos con cotización congelada — la regla nueva no los alcanza. */
+      comprometidos: number;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
+  const { data, error } = await getClient().rpc('definir_regla_envio_vendedor', {
+    p_cuenta_comercial_id: input.cuenta_comercial_id,
+    p_tipo: input.tipo,
+    p_parametros: input.parametros,
+    p_pagado_por: input.pagado_por ?? undefined,
+    p_ciudades_cubiertas: input.ciudades_cubiertas ?? undefined,
+    p_prioridad: input.prioridad ?? undefined,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.regla_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      regla_id: data.regla_id,
+      accion: data.accion === 'reemplazada' ? 'reemplazada' : 'creada',
+      reglasArchivadas: typeof data.reglas_archivadas === 'number' ? data.reglas_archivadas : 0,
+      comprometidos: typeof data.comprometidos === 'number' ? data.comprometidos : 0,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
 }
 
 /** La cifra honesta del techo del día: cuántos van sobre cuántos caben

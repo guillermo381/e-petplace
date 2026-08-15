@@ -57,8 +57,11 @@
    Declarados como destino, no construidos.~~ ☠️ **ENMENDADA el mismo
    día** (`LETRA_RECORRIDO_DESPENSA_S96` §9.5): **el GPS ENTRA A v1**
    con el repartidor. *No es construcción nueva — el rastreo en segundo
-   plano ya está construido y probado para el paseo.* **El mapa en vivo
-   para la familia sigue en v2.**
+   plano ya está construido y probado para el paseo.* ~~**El mapa en vivo
+   para la familia sigue en v2.**~~ ⏪ **ENMENDADA (S99, firma del founder
+   14-ago-2026 — `PLAN_S99.md` §4.1): el mapa en vivo para la familia ENTRA
+   A v1** como herencia del paseo (patrón EN VIVO + `registrarTrackEnvio`
+   ya vivo); es el lote L6 de S99. La letra vieja queda tachada, no borrada.
 7. **El cupo del día no se rompe: se suma otro repartidor.** Y el cupo
    es parámetro, jamás número escrito en el código.
 8. **La fecha se corre antes que la funcionalidad.** El 15 de
@@ -331,7 +334,8 @@ confirmados para ese día.**
 
 ## 9. FUERA DE ALCANCE — DECLARADO
 
-Postventa · el mapa en vivo desde el teléfono de la familia · chat y
+Postventa · ~~el mapa en vivo desde el teléfono de la familia~~ *(⏪ salió
+de esta lista por firma S99 — `PLAN_S99.md` §4.1, lote L6)* · chat y
 WhatsApp · asignación y optimización de rutas · validación de identidad
 del repartidor · devolución automatizada · courier · segundo vendedor ·
 reconstrucción del portal admin.
@@ -373,7 +377,7 @@ criterio de flete.
 
 | # | Qué | Disparo / muerte |
 |---|---|---|
-| ~~**D-770**~~ | ~~**GPS del repartidor y mapa en vivo para la familia.** Se hereda del rastreo del paseo, ya construido y probado. Lo caro no es el GPS: es convertir al repartidor en usuario con sesión, permisos y pantalla propia~~ | ☠️ **NACE MUERTA.** `LETRA_RECORRIDO_DESPENSA_S96` §9 le dio al repartidor la entrada real que era su disparo, el mismo día. *Su razón —«lo caro es convertirlo en usuario con pantalla»— sigue siendo cierta: lo que cambió es que el founder decidió pagarla.* **El mapa en vivo para la familia sigue en v2** |
+| ~~**D-770**~~ | ~~**GPS del repartidor y mapa en vivo para la familia.** Se hereda del rastreo del paseo, ya construido y probado. Lo caro no es el GPS: es convertir al repartidor en usuario con sesión, permisos y pantalla propia~~ | ☠️ **NACE MUERTA.** `LETRA_RECORRIDO_DESPENSA_S96` §9 le dio al repartidor la entrada real que era su disparo, el mismo día. *Su razón —«lo caro es convertirlo en usuario con pantalla»— sigue siendo cierta: lo que cambió es que el founder decidió pagarla.* ~~**El mapa en vivo para la familia sigue en v2**~~ ⏪ enmendada S99: entra a v1 (`PLAN_S99.md` §4.1) |
 | **D-771** | **Chat y WhatsApp dentro del envío.** La costura queda escrita en §6 | ☠️ cuando se prenda cualquiera de los dos canales |
 | **D-772** | **La pantalla "Recibir" de la app del cliente.** Hasta que exista, la entrega la marca solo el vendedor | ☠️ cuando la confirmación de la familia exista como cortesía |
 | **D-773** | **El procedimiento escrito para el pedido empacado sin factura.** Hoy la pantalla lo frena; falta decir qué hace el humano después | ☠️ con el capítulo de `POLITICAS` que ya pide D-744 |
