@@ -32,7 +32,7 @@ funcionar justo cuando no.
 |---|---|
 | A (motor · docs · merges) | [`2026-08-16-s98a-HANDOFF-CIERRE.md`](2026-08-16-s98a-HANDOFF-CIERRE.md) |
 | B (`packages/ui` · jueces) | [`2026-08-15-s98b-HANDOFF-CIERRE.md`](2026-08-15-s98b-HANDOFF-CIERRE.md) |
-| C (prestador · ventas) | [`2026-08-14-s98c-HANDOFF-CIERRE-2.md`](2026-08-14-s98c-HANDOFF-CIERRE-2.md) |
+| C (prestador · ventas) | [`2026-08-16-s98c-HANDOFF-FINAL.md`](2026-08-16-s98c-HANDOFF-FINAL.md) — cierra por trabajo terminado, no por ventana |
 | D (HOY · roles · guard) | [`2026-08-14-s98-d-HANDOFF-CIERRE.md`](2026-08-14-s98-d-HANDOFF-CIERRE.md) |
 
 **En una línea:** la reorganización del prestador completa (ATENDER · wizard ·
