@@ -2469,6 +2469,21 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 >
 > **Origen de la enmienda:** S86 — C lo nombró al construir la Pizarra, A lo midió. *El wrapper nuevo de esa misma sesión (`pizarra.ts`) nace con el mismo defecto **a propósito y declarado**: cambiar la voz de UN wrapper mientras los otros ~40 siguen en voseo produciría dos acentos adentro de `packages/api`, que es peor que uno consistente y equivocado.*
 
+> **➕ ENMIENDA S99 (adjudicación de mesa, 15-ago-2026) — EVIDENCIA NUEVA DE C, Y LA FRONTERA CON R44 DECLARADA.**
+>
+> C midió cinco voces de error de `packages/api` hard-codeadas en español y
+> **alcanzables en pantalla** (`veterinaria-presupuesto.ts:97` ·
+> `veterinaria-nota-clinica.ts:194` · `handshake-mostrador.ts:72` ·
+> `vacunas.ts:198` · `_despensa-comun.ts:237`): **con la app en inglés se
+> ven en español** — el caso concreto que esta ficha describía en abstracto.
+>
+> **Y la mesa separó las enfermedades para que no se curen mal:** *«una voz
+> puede ser específica y estar igual en el idioma equivocado»* — la voz
+> GENÉRICA la vigila **R44** (N12.4) · el IDIOMA es ESTA deuda, y **R44 no
+> la vigila ni debe** · la FRONTERA (que la pantalla muestre `r.mensaje`
+> crudo) pasó a deuda propia: **D-826**, que es la resolución del abanico de
+> tres opciones que la enmienda S86 de arriba dejó servido a la mesa.
+
 ---
 
 #### D-654 — 🔴 EL MOSTRADOR ES VETERINARIO POR CONSTRUCCIÓN: el camino de paseos llega entero hasta la puerta y la puerta no abre
@@ -16640,3 +16655,32 @@ del contador es el de R44** (baseline solo-baja con dueño por pieza).
 
 ☠️ **Muere** cuando el contador llegue a cero — once curvas migradas cada
 una con su toque y su gate de lote.
+
+#### D-826 — 🔴 EL MOTOR ESCRIBE LA COPIA QUE LA PANTALLA MUESTRA CRUDA (violación de capa, no problema de redacción)
+
+**Nace por adjudicación de mesa (15-ago-2026), con la medición de C:**
+**34 archivos de `apps/prestador` renderizan `r.mensaje` directo** — el texto
+que lee una persona lo decide el MOTOR, no la pantalla. *Que el motor decida
+la copia es violación de capa: mientras esa frontera exista, curar las once
+voces de R44 deja el camino abierto para la número doce.*
+
+**La adjudicación, literal:** *«Registrala con la medición de C, dueño A,
+criterio de disparo: cada lote que toque esa frontera traduce en la pantalla
+en vez de mostrar el mensaje del motor. No abre frente hoy.»*
+
+**Genealogía, para que nadie la re-derive:** es la RESOLUCIÓN del abanico
+que la enmienda S86 de **D-539** dejó a la mesa (lint anti-`.mensaje`-en-JSX
+· renombre a `mensajeDev` · capa de idioma) — la mesa eligió el camino
+incremental por lote, no la barrida. Sus hermanas, cada una con su
+enfermedad: **R44** vigila la voz genérica (N12.4) · **D-539** el idioma ·
+**ésta** la frontera. *Separadas o se curan mal.*
+
+**El patrón de la cura, por lote:** la pantalla mapea el **`codigo`** del
+wrapper a su diccionario i18n y jamás pinta `r.mensaje` (la disciplina que C
+ya practica desde S86, hecha criterio exigible de lote). Donde el código no
+alcance para la voz buena, rige el acuerdo A↔C ratificado por mesa: **Ley 23
+primero · código tipado por constraint a demanda · jamás un mapeo genérico
+de `23514` mejor escrito.**
+
+☠️ **Muere** cuando el contador de sitios-que-pintan-`r.mensaje` llegue a
+cero — lote a lote, jamás en barrida.

@@ -83,3 +83,51 @@ mediciones):
 
 → *Aterrizó:* `DEUDAS_CANONICAS` · Lecciones del monorepo · **L-235**. Las
 cuatro pistas la llevan en su arranque de acá en adelante.
+
+---
+
+## ADDENDUM · La adjudicación del cruce R44 (15-ago, segunda tanda de mesa)
+
+**«El cruce R44 tenía TRES enfermedades en la misma línea. Se separan o se
+curan mal»** — adjudicado:
+
+① **LA VOZ GENÉRICA → R44 ENSANCHA a `packages/api`** (adjudicado por mesa,
+no a criterio de B — *un baseline que excluye donde vive el peor caso
+bendice a los peores con el lint en verde*). Deuda con DOS dueños: las del
+prestador son de C, las de `packages/api` de A. Solo-baja, cura al tocar
+cada puerta.
+
+> ⚠️ **RECONCILIACIÓN DE DATO, declarada y no aplicada en silencio (L-166 /
+> la fuente corrige a la mesa):** la adjudicación decía *baseline 6→11*
+> sobre el censo de C (5 en api). **B re-midió la fuente ANTES de que la
+> adjudicación llegara y DOS de las cinco CUMPLEN N12.4** (nombran la falla
+> antes: `vacunas.ts:198` · `_despensa-comun.ts:237`) — meterlas al baseline
+> las sellaría como deuda cumpliendo, el daño espejo del que la adjudicación
+> persigue. **El estado vivo es baseline 9 = 6 (C, curables escribiendo) + 3
+> (A, BLOQUEADAS por códigos tipados — bajan solas puerta a puerta)**, con
+> el net anclado al discriminador «¿algo nombra la falla ANTES?» calibrado
+> 16/16. **La INTENCIÓN de la adjudicación se cumple entera** (el corpus
+> mira toda la casa y las tres peores están adentro); si la mesa quiere las
+> dos que cumplen adentro igual, es una palabra y B las suma.
+
+② **EL IDIOMA → es D-539, no R44.** Evidencia de C depositada como enmienda
+S99 en la ficha; enfermedad SEPARADA declarada (*una voz puede ser
+específica y estar igual en el idioma equivocado*). R44 no la vigila y no
+debe.
+
+③ 🔴 **D-826 — NUEVA: EL MOTOR ESCRIBE LA COPIA QUE LA PANTALLA MUESTRA
+CRUDA.** 34 archivos renderizan `r.mensaje` directo — violación de capa.
+Dueño A · disparo: cada lote que toque esa frontera traduce en la pantalla ·
+no abre frente hoy. Ficha depositada con su genealogía (resuelve el abanico
+de la enmienda S86 de D-539).
+
+**Y el acuerdo A↔C queda RATIFICADO con su segunda mitad intacta:** Ley 23
+primero · código tipado por constraint a demanda · **nada de mapeo genérico
+de `23514` mejor escrito** — *sin esa segunda mitad el acuerdo se cumple en
+la forma y se pierde en el fondo* (C).
+
+**Numeración confirmada por mesa:** L-235 · D-825 · D-826 — coincide con lo
+depositado (verificado por grep antes de escribir).
+
+**Y el dato operativo que destraba a las cuatro pistas: EL FOUNDER ABRIÓ EL
+APARATO.** Los gates en dispositivo dejan de estar bloqueados.
