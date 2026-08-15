@@ -16402,10 +16402,49 @@ va a soltar sola cuando alguien entre con esas cuentas, o vencerán.** *No es
 la causa del silencio: es su reflejo.* Las 5 `fallidas` tienen el mismo motivo
 declarado: **`sin_token_activo`**.
 
-☠️ **Muere** con ① la lista firmada de qué avisa al negocio · ② sus productores
-· ③ **el discriminador de cierre (§6bis-B puro): un evento real del mostrador
-→ la push sonando en `e-PetPlace Negocios`**, verificado en el aparato.
-**Territorio: el founder (①) + A (②) + el gate (③).**
+### ✅ CERRADA POR CAMINO REAL (S97-A) — la push llegó a Negocios
+
+> **`pkg=com.epetplace.prestador`** · **«Documento aprobado»**
+> *«Aprobamos tu [DEMO S68] Título profesional. Un paso menos para terminar de
+> configurarte.»*
+
+**Los cinco productores del founder, vivos** — cuatro colgados del ACTO en su
+misma transacción, y el quinto (el barrido) convirtiendo la expiración en acto.
+
+### 🔴 Y EL DISCRIMINADOR ENCONTRÓ UNA SEGUNDA CAPA QUE ESTA FICHA NO TENÍA
+
+**El productor encoló bien, con su voz correcta, y la intención quedó parada
+en `encolada` con `despacho: "sombra_habria_salido"`.**
+
+> **Medido: 16 de los 22 tipos con audiencia prestador estaban `en_sombra`** —
+> entre ellos `documento_aprobado`, `documento_rechazado` y
+> `cita_cancelada_cliente`, **tres de los cinco firmados**.
+
+⇒ ***Aunque los 15 tipos mudos del censo hubieran tenido productor, la mayoría
+no habría salido igual.*** La ficha decía «faltan motivos» y le faltaba esto:
+**hay motivos que existen, tienen voz, y están apagados por diseño.**
+
+**Se sacaron de sombra EXACTAMENTE los tres firmados** (`20260815140000`, con
+cinturón que aborta si se encendieron de más). *Los otros 13 no se tocan: la
+sombra es un mecanismo deliberado, y sacar uno es decidir que ese aviso ya
+puede llegarle a una persona. Encender los 16 «ya que estamos» sería prender
+trece avisos que nadie pidió sobre teléfonos reales.*
+
+### La otra brecha, medida y explicada (no es defecto)
+
+**El primer disparo salió `entregada` y el teléfono no mostró nada.** Causa:
+**la app estaba en PRIMER PLANO** — un push a una app abierta lo maneja la
+app, no el sistema. *Y se verificó que sí había llegado:* `push_tokens.
+last_used_at` saltó al minuto exacto del despacho. Con la app al fondo, el
+banner apareció.
+
+> ***«Entregada» y «se vio» son dos hechos distintos, y el segundo depende de
+> dónde estaba mirando la persona.*** Conviene saberlo antes de diagnosticar
+> un silencio que no existe.
+
+☠️ **CERRADA.** Queda **D-824** con los 13 tipos en sombra y los 15 sin
+productor — *no es lo mismo que estaba abierto acá: es el mapa de lo que
+todavía no habla, con dueño y disparo propios.*
 
 ---
 
@@ -16508,3 +16547,29 @@ el `+` de los cuantificadores de regex; el segundo clasificó las nueve como
 
 > ***Automatizar la lectura de un literal corto puede costar más que leerlo.***
 > Nueve filas entraban en una pantalla.
+
+
+---
+
+#### D-824 — 🟢 EL MAPA DE LO QUE TODAVÍA NO LE HABLA AL NEGOCIO
+
+**Sale del cierre de D-822, y es lo que queda cuando la primera ola ya suena.**
+
+| estado | cuántos | qué son |
+|---|---|---|
+| **en sombra** | **13** | existen, tienen catálogo, y **no envían por diseño** |
+| **sin productor** | **15** | tienen vocabulario y **nadie los encola** |
+
+**Los dos conjuntos se cruzan**, y esa es la trampa de leerlos como una lista:
+*un tipo puede estar mudo por las dos razones a la vez, y curar una lo deja
+mudo igual.* **Antes de tocar cualquiera hay que preguntar las DOS cosas.**
+
+**Lo que ya tiene destino declarado por el founder, y no entra acá:**
+`liquidacion_disponible` (segunda ola, con Cobros) · `mensaje_nuevo` (cuando
+exista mensajería) · `cita_completada` (**fuera a propósito**: quien atendió ya
+lo sabe).
+
+☠️ **Muere** tipo por tipo, cada uno con su firma — **jamás en bloque.**
+*Encenderlos todos sería exactamente lo contrario de la firma que abrió
+D-822: «el canal nace útil, no ruidoso».* **Territorio: el founder (qué
+merece avisar) + A (los productores).**
