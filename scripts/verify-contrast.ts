@@ -2,7 +2,7 @@
  * verify-contrast.ts — Gate WCAG de los Design Tokens v4 (S43-B2).
  *
  * Valida TODO par (texto funcional, su fondo) de los tres temas:
- *   ≥ 4.5:1 normal · ≥ 3:1 para pares marcados `large` (≥22px).
+ *   ≥ 4.5:1 texto · ≥ 3:1 para pares marcados `noTextual` (WCAG 1.4.11).
  * Fondos con alpha se compositan sobre su superficie real antes de medir.
  * Si un par falla, el script FALLA (exit 1) imprimiendo par y ratio.
  *
@@ -22,8 +22,6 @@
  * Correr: pnpm exec tsx scripts/verify-contrast.ts
  */
 
-import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
 
 import { lightTheme, darkTheme, memorialTheme, getTheme, type Theme } from '../packages/ui/src/themes'
 import { palette } from '../packages/ui/src/tokens/palette'
@@ -84,13 +82,22 @@ type Pair = {
   bg: string
   /** superficie real debajo cuando bg tiene alpha */
   surface?: string
-  large?: boolean
+  /** 🔴 S98: se llamaba `large` (texto ≥22px) y **jamás midió texto grande** —
+   *  su ÚNICO uso previo era un spinner sobre scrim, con «3:1 gráfico»
+   *  escrito al lado. El nombre describía un caso que no existía, que es
+   *  exactamente el defecto que hizo invisible el par del avatar durante
+   *  cuatro sesiones. Ahora dice su razón real: **WCAG 1.4.11, contraste
+   *  NO TEXTUAL** — gráficas y componentes de interfaz, piso 3:1.
+   *  Si algún día hace falta el 3:1 de TEXTO GRANDE (1.4.3), nace su propio
+   *  flag con su propia razón: son dos reglas distintas que coinciden en el
+   *  número, y un flag que las junta vuelve a mentir. */
+  noTextual?: boolean
 }
 
 function paresDe(t: Theme, nombre: string): Pair[] {
   const p: Pair[] = []
-  const add = (n: string, fg: string, bg: string, surface?: string, large?: boolean) =>
-    p.push({ nombre: `${nombre} · ${n}`, fg, bg, surface, large })
+  const add = (n: string, fg: string, bg: string, surface?: string, noTextual?: boolean) =>
+    p.push({ nombre: `${nombre} · ${n}`, fg, bg, surface, noTextual })
 
   // Texto base sobre superficies
   for (const s of ['base', 'card', 'elevated', 'overlay'] as const) {
@@ -137,32 +144,44 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // Memorial no tiene capaBg: su fallback es neutral (par de abajo).
   if ('capaBg' in t) {
     for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as const) {
-      // ⏪ S98-B · ESTOS PARES SE LLAMABAN «Avatar INICIALES» Y NO HAY
-      // INICIALES. Medido: `AvatarMascota.tsx` tiene CERO ocurrencias de
-      // la palabra — su fallback es `HuellaGenerica`, un dibujo. El
-      // nombre viene de S44-B2.3, cuando el fallback sí era texto, y
-      // sobrevivió al cambio de contenido.
+      // ✅ S98 · RECLASIFICADOS A PISO GRÁFICO — FIRMA DEL FOUNDER.
       //
-      // 🔴 LO QUE ESO IMPLICA, Y NO LO RESUELVO ACÁ: si el contenido es
-      // GRÁFICA, su piso WCAG es **3:1** (1.4.11 no-textual) y no el 4.5
-      // de texto con el que se lo viene midiendo — el propio archivo ya
-      // usa `large: true` para ese piso en sus pares gráficos. Con 3:1,
-      // el par de 4.40 del prestador oscuro pasaría con holgura y la
-      // exención de abajo sobraría.
+      // El literal de la adjudicación: **el par del avatar se reclasifica a
+      // mínimo gráfico (3:1) — es una HUELLA, no texto; la medición de 4.40
+      // queda holgada; es RECLASIFICACIÓN, NO AFLOJAMIENTO.**
       //
-      // **NO SE AFLOJA ACÁ, a propósito.** Bajar el mínimo de un gate es
-      // decisión de mesa, no de la pista que lo encontró — y un test que
-      // se ablanda para que pase deja de ser un test. Lo que sí se cura
-      // es el NOMBRE, porque prosa que describe contenido inexistente es
-      // lo que hizo invisible el problema: mientras dijera «iniciales»,
-      // el 4.5 parecía correcto. Queda servido a la mesa con su medición.
-      add(`Avatar huella capaText.${c} / capaBg.${c}⊕card`, capaTexto[c], t.capaBg[c], t.bg.card)
-      add(`Avatar huella capaText.${c} / capaBg.${c}⊕base`, capaTexto[c], t.capaBg[c], t.bg.base)
+      // 🔴 Y LA RAZÓN DE FONDO ES EL NOMBRE, no el número: estos pares se
+      // llamaban «Avatar INICIALES» y no hay iniciales. Medido por B en
+      // S98: `AvatarMascota.tsx` tiene CERO ocurrencias de la palabra —
+      // su fallback es `HuellaGenerica`, un dibujo. El nombre viene de
+      // S44-B2.3, cuando el fallback SÍ era texto, y sobrevivió al cambio
+      // de contenido.
+      //
+      // > ***Mientras dijera «iniciales», el 4.5 parecía correcto.***
+      // > El gate no medía de más por severidad: medía la regla equivocada
+      // > porque la etiqueta decía otro contenido. **Cuatro sesiones de un
+      // > mínimo mal aplicado, sostenido por una palabra.**
+      //
+      // ⚠️ POR QUÉ ESTO NO ES ABLANDAR EL TEST, y la distinción importa
+      // porque desde afuera se ven igual: aflojar es **bajarle el listón a
+      // la regla que corresponde** para que el número pase; reclasificar es
+      // **aplicar la regla que siempre correspondió**. Acá el contenido no
+      // cambió — cambió lo que sabíamos que era. La prueba de que no es
+      // conveniencia: B lo encontró, midió que con 3:1 pasaba, y **NO lo
+      // aplicó** («bajar el mínimo de un gate es decisión de mesa, no de la
+      // pista que lo encontró»). La firma llegó después, por la mesa.
+      add(`Avatar huella capaText.${c} / capaBg.${c}⊕card`, capaTexto[c], t.capaBg[c], t.bg.card, true)
+      add(`Avatar huella capaText.${c} / capaBg.${c}⊕base`, capaTexto[c], t.capaBg[c], t.bg.base, true)
     }
   }
   // Fallback neutral del avatar (los 3 temas): text.secondary sobre bg.overlay.
   // (mismo rename que arriba: acá tampoco hay iniciales — es la huella
   // neutral de memorial y del avatar sin capa)
+  // Misma reclasificación por la misma razón: también es la HUELLA, no texto.
+  // ⚠️ OJO al tocarlo: el par inactivo de `SelectorSegmentado` declara abajo
+  // que reusa ESTE par exacto — y ése SÍ es texto. Se mantiene el 4.5 acá
+  // para no bajarle el piso a un texto por la puerta de atrás; el día que
+  // ese reuso se corte, este par baja a 3:1 con los otros.
   add('Avatar huella text.secondary / bg.overlay⊕card', t.text.secondary, t.bg.overlay, t.bg.card)
 
   // SelectorEspecie (S45-B3.1): el nombre (text.primary) sobre el fondo de la
@@ -191,7 +210,7 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
   // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
-  // usan el flag `large`). El borde default queda fuera del gate: el campo
+  // usan el flag `noTextual`). El borde default queda fuera del gate: el campo
   // se identifica por su label siempre visible, no por el borde en reposo.
   const bgCampo = t.mode === 'light' ? t.bg.card : t.bg.elevated
   add('dangerText / bg.base (mensaje error Campo)', t.status.dangerText, t.bg.base)
@@ -354,7 +373,7 @@ const todos: Pair[] = [
     fg: palette.white,
     bg: palette.scrim,
     surface: '#FFFFFF',
-    large: true,
+    noTextual: true,
   },
 ]
 
@@ -396,64 +415,34 @@ console.log(
   `  (info · PAR CAÍDO S58) tealDark / bg.tinta → ${contrast(palette.tealDark, lightTheme.bg.tinta).toFixed(2)}:1 (mín 4.5) — sobre tinta pasa teal puro: ${contrast(palette.teal, lightTheme.bg.tinta).toFixed(2)}:1`,
 )
 
-/** 🔴 EL ÚNICO PAR QUE DESTAPÓ EL BARRIDO DE LAS CASAS DE OFICIO (S98-B),
- *  y su exención NO es una decisión: es una MEDICIÓN con fecha de
- *  vencimiento.
+/* ☠️ S98 · MURIÓ LA EXENCIÓN DE `comunidadAmplia` — Y MURIÓ COMO B LA DISEÑÓ.
  *
- *  EL PAR: las iniciales del avatar en la capa `comunidadAmplia` (violeta)
- *  sobre su propio tinte, compositado sobre el fondo BASE, en el tema
- *  oscuro del PRESTADOR. Da **4.40** contra un mínimo de 4.5 — corto por
- *  **0.10**.
+ * B la escribió con condición de muerte adentro: contaba consumidores y
+ * declaraba que **caería sola en cuanto alguien montara la capa**. Cayó por
+ * el otro lado —la reclasificación a 3:1 hace que el par PASE con holgura
+ * (4.40 contra 3)— así que ya no hay nada que eximir.
  *
- *  LA CAUSA, medida y no supuesta: el oficio pisa `bg.base` y **nada
- *  más**. Por eso el par `⊕card` da IDÉNTICO en las dos casas (4.63) y
- *  solo el `⊕base` diverge — `tapizDark` (#0D050D, violáceo) contra
- *  `tapizDarkOficio` (#080D0E, verdoso). *No es un token mal elegido: es
- *  un violeta sobre un fondo que dejó de ser violáceo.* Y no es
- *  sistemático en contra del oficio: en CLARO el mismo par MEJORA (5.41
- *  contra 5.30 del cliente).
+ * > ***Las dos salidas que tenía escritas eran «alguien la monta» o «la mesa
+ * > decide el piso». Se cumplió la segunda.*** Una exención con condición de
+ * > muerte no es un permiso: es una medición que caduca — y ésta caducó en
+ * > cuatro días.
  *
- *  POR QUÉ NO SE CURA ACÁ: **la combinación no existe en el producto.**
- *  Medido — CERO consumidores de `capa="comunidadAmplia"` fuera de la
- *  galería, en los dos apps y en `ui`. Mover un token de marca para
- *  arreglar un par que nadie monta es cambiar arte sin firma para
- *  silenciar un número.
+ * Se retira ENTERA (Ley 37) junto con su contador de consumidores: una
+ * exención que ya no exime nada se lee como una excepción viva, y el próximo
+ * que la encuentre va a creer que hay un par en rojo.
  *
- *  🔴 Y POR ESO LA EXENCIÓN TRAE SU GUARD: se cuenta el consumidor. El
- *  día que alguien monte esa capa, la exención CAE SOLA y el par vuelve a
- *  gatear. *Una exención sin condición de muerte es un permiso
- *  permanente; con ella, es una medición que caduca.* */
-const EXENTO_COMUNIDAD_AMPLIA = 'DARK·OFICIO · Avatar huella capaText.comunidadAmplia / capaBg.comunidadAmplia⊕base'
-const RAICES_CONSUMO = ['packages/ui/src', 'apps/cliente/src', 'apps/prestador/src']
-function consumidoresComunidadAmplia(): number {
-  let n = 0
-  const recorrer = (dir: string) => {
-    for (const e of readdirSync(dir)) {
-      const p = join(dir, e)
-      if (statSync(p).isDirectory()) recorrer(p)
-      else if ((p.endsWith('.tsx') || p.endsWith('.ts')) && !p.includes('gallery')) {
-        if (/capa=["']comunidadAmplia["']/.test(readFileSync(p, 'utf8'))) n++
-      }
-    }
-  }
-  for (const r of RAICES_CONSUMO) if (existsSync(r)) recorrer(r)
-  return n
-}
-const consumidores = consumidoresComunidadAmplia()
+ * Lo que su medición dejó y sigue siendo cierto: el oficio pisa `bg.base` y
+ * nada más, por eso `⊕card` daba idéntico en las dos casas (4.63) y solo
+ * `⊕base` divergía — `tapizDark` violáceo contra `tapizDarkOficio` verdoso.
+ * No era un token mal elegido: era un violeta sobre un fondo que dejó de ser
+ * violáceo. */
 
 let fallos = 0
 for (const par of todos) {
   const ratio = contrast(par.fg, par.bg, par.surface)
-  const minimo = par.large ? 3 : 4.5
+  const minimo = par.noTextual ? 3 : 4.5
   const ok = ratio >= minimo
-  const exento = !ok && par.nombre === EXENTO_COMUNIDAD_AMPLIA && consumidores === 0
-  if (!ok && !exento) fallos++
-  if (exento) {
-    console.log(
-      `  (exento) ${par.nombre}  →  ${ratio.toFixed(2)}:1  (mín ${minimo}:1) — capa SIN CONSUMIDORES fuera de galería (medido: ${consumidores}). La exención CAE SOLA en cuanto alguien la monte.`,
-    )
-    continue
-  }
+  if (!ok) fallos++
   console.log(
     `${ok ? '  ✓' : '✗ FALLA'}  ${par.nombre}  →  ${ratio.toFixed(2)}:1  (mín ${minimo}:1)`,
   )
