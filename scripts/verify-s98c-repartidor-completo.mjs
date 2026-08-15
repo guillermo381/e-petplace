@@ -1,5 +1,24 @@
 /**
- * verify-s98c-repartidor-completo.mjs — EL ALTA COMPLETA, POR CAMINO REAL.
+ * verify-s98c-repartidor-completo.mjs — EL GUARD DE OBLIGATORIEDAD.
+ *
+ * ⏪ ESTE INSTRUMENTO CAMBIÓ DE PREGUNTA, y se dice en vez de dejar el título
+ * viejo sobre un cuerpo nuevo. Verificaba el ALTA COMPLETA de punta a punta
+ * —y lo hizo: CEDULA · +593988777111 · +593988777222 · carro en su tabla—
+ * hasta que la foto de la persona pasó a ser OBLIGATORIA (firma del founder,
+ * guard coordinado con A).
+ *
+ * 🔴 **Con la foto obligatoria, el camino feliz DEJA DE SER ALCANZABLE desde
+ * acá:** subirla exige la cámara o el selector del sistema, que este arnés no
+ * maneja. *No se afloja el guard para que el test pase* —eso sería mover la
+ * vara para que la medición cierre— y **tampoco se deja el verde viejo, que
+ * ahora mediría un camino que ya no existe.**
+ *
+ * ⇒ Lo que mide HOY: **que el guard FRENE.** Con todo lo demás completo y sin
+ * foto, el CTA tiene que quedar apagado, la pantalla tiene que DECIR qué
+ * falta, y **no puede nacer ninguna fila**.
+ *
+ * ⇒ Lo que queda debiendo y tiene dueño: **el camino feliz con foto real lo
+ * camina A en el aparato** — declarado, no omitido.
  *
  * Lo ya probado NO se re-prueba acá: el teléfono tiene su propio instrumento.
  * **Esto mide lo que nació hoy y nadie vio persistir:** tipo de documento,
@@ -96,7 +115,10 @@ await page.getByText('Agregar vehículo', { exact: false }).click();
 await page.waitForTimeout(800);
 await page.getByText('Carro', { exact: true }).click();
 await page.getByLabel('Placa', { exact: false }).first().fill(PLACA);
-await page.waitForTimeout(400);
+await page.waitForTimeout(600);
+
+// ── LA VOZ: el CTA apagado tiene que decir QUÉ falta, no callarse.
+const dice = (await page.getByText('Falta la foto de la persona', { exact: false }).count()) > 0;
 /* ⚠️ POR ROL, no por texto: en RN-web el \`getByText\` clickea el NODO DE
    TEXTO, y con el formulario más alto ese click puede no llegar al Pressable
    padre — el botón recibe FOCO y no PRESS, que desde afuera se ve idéntico a
@@ -105,19 +127,14 @@ const cta = page.getByRole('button', { name: 'Guardar', exact: true }).last();
 /* El CTA se comprueba APAGADO/ENCENDIDO antes de tocarlo: si estuviera
    deshabilitado, el click no haría nada y el rojo de abajo culparía al
    guardado en vez de a la validación. */
-if ((await cta.isDisabled().catch(() => false)) === true) {
-  await abortar('el CTA quedó deshabilitado con datos válidos');
-}
-await cta.click();
-await page.waitForTimeout(8000);
+// EL GUARD: sin foto, apagado. Se COMPRUEBA en vez de clickear —clickear un
+// botón que debe estar apagado mide el click, no el guard.
+const apagado = await cta.isDisabled().catch(() => false);
 
-const fila =
-  sql(
-    `SELECT r.tipo_documento AS tipodoc, r.telefono AS tel, r.whatsapp AS wa,
-            (SELECT count(*)::int FROM repartidor_vehiculos v WHERE v.repartidor_id = r.id) AS nveh,
-            (SELECT v.tipo || ':' || v.placa FROM repartidor_vehiculos v WHERE v.repartidor_id = r.id LIMIT 1) AS veh
-       FROM repartidores r WHERE r.documento = '${DOC}';`,
-  )[0] ?? null;
+// Y el discriminador que cierra: NINGUNA fila pudo nacer.
+const nacidas = sql(
+  `SELECT count(*)::int AS n FROM repartidores WHERE documento = '${DOC}';`,
+)[0].n;
 
 limpiar();
 const residuoRep = sql(
@@ -128,22 +145,17 @@ const residuoVeh = sql(
 )[0].n;
 await browser.close();
 
-const okDoc = fila?.tipodoc === 'CEDULA';
-const okTel = fila?.tel === '+593988777111';
-const okWa = fila?.wa === '+593988777222';
-const okVeh = fila?.nveh === 1 && fila?.veh === `carro:${PLACA}`;
-
-console.log('── verify-s98c-repartidor-completo ──');
-console.log(`tipo de documento ...: ${okDoc ? 'VERDE' : 'ROJO'} (${fila?.tipodoc})`);
-console.log(`teléfono E.164 ......: ${okTel ? 'VERDE' : 'ROJO'} (${fila?.tel})`);
-console.log(`whatsapp E.164 ......: ${okWa ? 'VERDE' : 'ROJO'} (${fila?.wa})`);
-console.log(`vehículo (otra tabla): ${okVeh ? 'VERDE' : 'ROJO'} (${fila?.nveh} · ${fila?.veh})`);
+console.log('── verify-s98c-repartidor-completo · EL GUARD ──');
+console.log(`el CTA queda APAGADO sin foto ..: ${apagado ? 'VERDE' : 'ROJO'}`);
+console.log(`la pantalla DICE qué falta .....: ${dice ? 'VERDE' : 'ROJO'}`);
+console.log(`filas nacidas ..................: ${nacidas} (debe ser 0)`);
 console.log(`residuo repartidores=${residuoRep} vehiculos=${residuoVeh} (ambos 0)`);
 console.log(`errores JS: ${errores.length}`);
 for (const e of errores) console.log('  ' + e);
+console.log('⚠️ el camino feliz con foto real NO se mide acá: lo camina A en el aparato.');
 
-if (!okDoc || !okTel || !okWa || !okVeh || residuoRep !== 0 || residuoVeh !== 0) {
+if (!apagado || !dice || nacidas !== 0 || residuoRep !== 0 || residuoVeh !== 0) {
   console.error('ROJO');
   process.exit(1);
 }
-console.log('VERDE — identidad, los dos números en E.164 y el vehículo en su tabla.');
+console.log('VERDE — el guard frena, lo dice, y nada nace.');

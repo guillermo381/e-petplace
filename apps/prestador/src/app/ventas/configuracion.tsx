@@ -535,23 +535,20 @@ export default function ConfiguracionVentas() {
     };
   }
 
-  /* 🔴 HUECO DECLARADO — LA VOZ DE LOS REBOTES DEL ALTA NO SE PUEDE ESCRIBIR
-     TODAVÍA, Y NO ES POR FALTA DE GANAS (S98-C).
-     Escribí el mapa de voces para los tres rebotes nuevos del motor
-     (`documento_no_coincide_con_tipo` · `whatsapp_invalido` ·
-     `vehiculo_tope_alcanzado`) **y lo BORRÉ al medir que jamás dispararía**:
-     los tres están documentados en el JSDoc del wrapper pero **NO están en la
-     unión `CodigoErrorDespensa`**, y `falloDespensa` normaliza todo lo que no
-     reconoce a `error_desconocido` reemplazando el mensaje por el genérico.
-     ⇒ un mapa que compara contra códigos que nunca llegan es decoración con
-     forma de cura. *Dejarlo habría sido peor que no tenerlo: se lee como
-     resuelto.* Pedido a A: sumar los tres a la unión y a `MENSAJES_DESPENSA`.
-     Hasta entonces el vendedor ve el mensaje genérico —honesto pero mudo— y
-     el peor caso es el del documento: eligió «Cédula», su número no tiene
-     diez dígitos, y la pantalla podría explicárselo en una línea.
-     ⚠️ Lo destapó un instrumento cuyo TEST estaba mal (documento inventado
-     con tipo declarado): el motor rebotó correctamente y el rebote mostró que
-     acá no había voz. */
+  /* ✅ EL HUECO DE LA VOZ, CERRADO POR A (`dc6a0c46`) — y NO se cura de este
+     lado, que es la parte que importa.
+     Había escrito acá un mapa de voces y lo borré al medir que no podía
+     disparar: los códigos no estaban en la unión. A los sumó —y el censo
+     contra el objeto encontró **NUEVE**, no los tres que mi camino feliz
+     pisó; el más viejo, `documento_en_uso`, llevaba una sesión entera
+     devolviendo el genérico— con sus mensajes en `MENSAJES_DESPENSA`.
+     ⇒ `r.mensaje` YA habla («Otro repartidor de tu equipo ya tiene ese
+     documento», «El número no coincide con el tipo…»). **Agregar un mapa acá
+     sería una SEGUNDA voz para lo mismo**, y el día que las dos divergieran
+     nadie sabría cuál rige. La pantalla muestra la del wrapper y punto.
+     ⚠️ Lo único que queda debiendo es de otra deuda y no de este arco:
+     `packages/api` no tiene capa de idioma (D-539), así que estos mensajes
+     salen en español también en inglés. */
 
   async function guardarRepartidor() {
     if (guardando || pantalla.estado !== 'listo') return;
@@ -560,6 +557,15 @@ export default function ConfiguracionVentas() {
     // no ofrece lo que va a rechazar (Ley 23), y acá la fuente NO lo rechaza
     // —lo acepta mal—, así que el guard tiene que estar de este lado.
     if (estadoTelefonoRep()?.ok === false) return;
+    /* 🔴 LOS DOS OBLIGATORIOS (firma: «foto del repartidor, obligatoria» ·
+       «WhatsApp no opcional»). El guard vive TAMBIÉN en la puerta de A —acá
+       es para que el vendedor no llegue a tocar Guardar y rebote—, y el orden
+       de encendido se coordinó: **primero la pantalla exige, después el OTA
+       se APLICA en el aparato, y recién entonces la puerta rebota**. Al revés,
+       un bundle viejo sin estos campos chocaría contra un motor que ya los
+       pide (la corrección de A: lo que tiene que dejar de llamar a la forma
+       vieja no es el repo, es el BUNDLE). */
+    if (repFotoUri === null || repWhatsapp.trim().length === 0) return;
     setGuardando(true);
     /* 🔴 LA CURA (S98-C, rojo reproducido antes): acá se mandaba
        `repTelefono.trim()` CRUDO. `repartidores_telefono_check` exige
@@ -1178,6 +1184,22 @@ export default function ConfiguracionVentas() {
                   deshabilitado={guardando}
                 />
               )}
+              {/* EL CTA APAGADO DICE QUÉ FALTA, SIEMPRE (precedente S73). Un
+                  botón gris sin explicación manda a adivinar, y acá hay dos
+                  campos nuevos que el vendedor no sabe que son obligatorios:
+                  la foto vive lejos del botón y el WhatsApp parece opcional
+                  porque el teléfono de arriba lo es. */}
+              {(repFotoUri === null || repWhatsapp.trim().length === 0) &&
+                repNombre.trim().length > 0 &&
+                repDocumento.trim().length > 0 && (
+                  <Texto variante="apoyo">
+                    {repFotoUri === null && repWhatsapp.trim().length === 0
+                      ? t('ventas.config.repartidorFaltanDos')
+                      : repFotoUri === null
+                        ? t('ventas.config.repartidorFaltaFoto')
+                        : t('ventas.config.repartidorFaltaWhatsapp')}
+                  </Texto>
+                )}
               <Boton
                 variante="primario"
                 bloque
@@ -1185,6 +1207,8 @@ export default function ConfiguracionVentas() {
                 deshabilitado={
                   repNombre.trim().length === 0 ||
                   repDocumento.trim().length === 0 ||
+                  repFotoUri === null ||
+                  repWhatsapp.trim().length === 0 ||
                   estadoTelefonoRep()?.ok === false
                 }
                 etiqueta={t('ventas.config.repartidorGuardarCta')}
