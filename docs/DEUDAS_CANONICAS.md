@@ -11675,6 +11675,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **Las dos curas:** toda sonda corre dentro de una transacción que se revierte —residuo cero **por mecanismo, no por prolijidad**— y todo check de residuo cuenta **lo suyo**, con el conteo global reportado como dato y no como veredicto.
 
+- **L-235 — EL INSTRUMENTO RESPONDIÓ SOBRE OTRA COSA (S99 — ratificada por mesa sobre CUATRO casos medidos en UN día).**
+
+  > **Antes de concluir de un verde o un rojo, se verifica sobre qué objeto respondió el instrumento.**
+
+  Los cuatro casos del día, cada uno con instrumento sano y respuesta creíble **sobre otro objeto**: ① D midió contra un **Metro huérfano** de una sesión cerrada que servía la app vieja (D-769 enmendada) · ② B midió el contraste de una **rama que no se ejecuta** (el default elegía la otra) · ③ A corrió su E2E contra la **cuenta mal emparejada** (0 filas perfectamente creíbles) · ④ el **baseline de R44 costó tres mediciones** y las dos primeras dieron de menos.
+
+  **Su variante cara, y es la mitad que hay que memorizar:** *un baseline mal medido no protege de menos, protege de MÁS — un rojo mal hecho se investiga; un verde mal medido bendice para siempre.* Y la frase de C, del mismo día: **«un rojo torpe puede auditar al auditor.»**
+
+  **La cura fue la misma las cuatro veces: verificar QUIÉN/QUÉ responde antes de leer la respuesta** (`lsof`+`ps` para un puerto · el default vivo para una rama · la identidad para una sesión · el conjunto ampliado para un net). **Las cuatro pistas la llevan en su arranque de acá en adelante** (orden de mesa, 15-ago-2026; adjudicaciones en `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`).
+
 - **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
 
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
@@ -16599,3 +16609,34 @@ lo sabe).
 *Encenderlos todos sería exactamente lo contrario de la firma que abrió
 D-822: «el canal nace útil, no ruidoso».* **Territorio: el founder (qué
 merece avisar) + A (los productores).**
+
+---
+
+## Deudas S99 — LOS DOS HOY, EL REPARTIDOR Y EL NIVEL QUE LA APP MERECE (D-825 →)
+
+> Numeración verificada por grep ANTES de depositar (D-825 libre en docs/,
+> apps/, packages/ y scripts/). Adjudicaciones de la sesión:
+> `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`.
+
+#### D-825 — 🟡 ONCE PIEZAS ANIMAN CON `easeOut` Y LA LETRA N10 DICE EL BEZIER DE LA CASA
+
+**Nace de la adjudicación de mesa del 15-ago-2026 (ítem 10), sobre el censo
+de B.** N10 (enmendada 14-ago) cierra el vocabulario en DOS curvas con
+reparto cerrado: **bezier de la casa `(.32,.72,0,1)` para entradas y
+transiciones · spring SOLO para gestos de rebote**. Once piezas vivas animan
+con `easeOut` — letra ANTERIOR al vocabulario cerrado, no desvío nuevo.
+
+**La adjudicación, literal:** *«gana la letra N10. Deuda solo-baja con
+número propio, se cura al tocar cada pieza (patrón R44). Cero frente nuevo
+esta sesión. Las piezas nuevas usan la letra, como ya hizo B.»*
+
+**La cura, pieza por pieza y jamás en barrida:** al TOCAR cada pieza por
+cualquier otro motivo, su curva pasa al token de la casa **en el mismo
+commit**, y el contador baja. Una barrida de once curvas sin gate visual
+sería re-timing masivo sin ojo — exactamente lo que la regla 80 prohíbe.
+
+**El censo es de B (su parte S99-B tiene la lista de las once); el patrón
+del contador es el de R44** (baseline solo-baja con dueño por pieza).
+
+☠️ **Muere** cuando el contador llegue a cero — once curvas migradas cada
+una con su toque y su gate de lote.
