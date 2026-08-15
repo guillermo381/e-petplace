@@ -6,30 +6,65 @@
 -- pendiente disfrazado de migración envenena el instrumento que lo detectaría.*
 -- Cuando se aplique, se MUEVE a `migrations/` con su timestamp y se registra.
 --
--- ═══ 🔴 SU DISPARO, ESCRITO PARA QUE NO DEPENDA DE QUE ALGUIEN SE ACUERDE ══
+-- ═══ 🔴 SU DISPARO — CORREGIDO, Y LA CORRECCIÓN ES LA PARTE IMPORTANTE ═════
 --
--- > **Se aplica en la MISMA ventana en que se mergea la pantalla nueva del
--- > alta de repartidor de C** — la que manda `p_foto_path` y `p_whatsapp`.
+-- **La primera versión de este archivo decía que el disparo era el MERGE de la
+-- pantalla de C. Es FALSO, y se corrige acá en vez de dejarlo convivir.**
 --
--- **NO antes.** Se midió que `registrar_repartidor` tiene DOS llamadores vivos
--- en `main` (`ventas/configuracion.tsx` y `alta/PasoEquipo.tsx`) que hoy mandan
--- solo `nombre · documento · teléfono`. Una migración pega en la base viva al
--- instante y un OTA tarda: aplicar esto antes **deja al vendedor sin poder dar
--- de alta a ningún repartidor**, en el bundle que ya está publicado.
+-- > ***Lo que tiene que dejar de poder llamar a la forma vieja no es el REPO:
+-- > es el BUNDLE.*** Un merge no cambia lo que corre en el teléfono. Entre el
+-- > merge y el publish, el aparato del founder sigue ejecutando el alta vieja
+-- > —la que manda solo `nombre · documento · teléfono`— y el guard la rebotaría
+-- > igual que si no se hubiera mergeado nada.
 --
--- **NO después, tampoco.** Mientras no exista, la obligatoriedad vive solo en
--- la pantalla — y una regla que solo vive en la pantalla la esquiva cualquier
--- otra escritura, que es literalmente lo que C pidió evitar.
+-- **EL ORDEN QUE RIGE, en cuatro pasos y en este orden:**
+--   ① C exige los dos campos en su CTA (commit)
+--   ② A mergea
+--   ③ **A PUBLICA el OTA y lo CONFIRMA APLICADO en el aparato** (§6bis-B)
+--   ④ **recién entonces** A aplica este guard
+--
+-- El paso ③ no es ceremonia: es el único que mueve el bundle. Saltarlo deja la
+-- ventana abierta con otro nombre.
+--
+-- ⚠️ Y queda una ventana residual que se declara en vez de taparse: entre ③ y
+-- ④ un dispositivo que todavía no bajó el OTA sigue con la forma vieja. Con un
+-- solo aparato es controlable —se confirma en pantalla y se sigue—; **el día
+-- que haya vendedores reales, este guard se aplica con el OTA ya asentado**,
+-- no el mismo minuto.
 --
 -- ═══ CÓMO VERIFICAR QUE YA SE PUEDE APLICAR (dos preguntas, las dos medibles)
 --   ① ¿`main` tiene la pantalla nueva?
---        grep -rn "p_foto_path\|foto_path" apps/prestador/src/app/ventas/configuracion.tsx \
---                                          apps/prestador/src/components/alta/PasoEquipo.tsx
+--        grep -rn "foto_path" apps/prestador/src/app/ventas/configuracion.tsx \
+--                             apps/prestador/src/components/alta/PasoEquipo.tsx
 --      Si los DOS llamadores mandan foto y whatsapp ⇒ ①  ✅
---   ② ¿el OTA con esa pantalla está publicado?
---        eas update:view <id> --json  (desde apps/prestador/)
---      Si el bundle vivo NO la tiene, ⑴ es verdad en el repo y falsa en la
---      mano del founder. **Manda ②.**
+--   ② ¿el OTA con esa pantalla está APLICADO en el aparato?
+--        Cuenta › el pie: el `updateId` en PANTALLA contra el group publicado.
+--      *No alcanza con que el publish haya salido: L-138 — el gate empieza
+--       confirmando qué está corriendo, no qué se subió.* **Manda ②.**
+--
+-- ═══ QUÉ QUEDA OBLIGATORIO — decidido contra el literal, no por gusto ═══════
+-- La spec del founder marca **DOS** con esas palabras: *«foto del repartidor,
+-- **obligatoria**»* y *«WhatsApp **no opcional**»*. ⇒ `foto_path` y `whatsapp`.
+--
+-- **`tipo_documento` NO, y la razón es un modo de falla real:** declararlo
+-- **activa la validación contra la máscara del catálogo**. Si además fuera
+-- obligatorio, una persona con un documento que no encaja en ninguna de las
+-- tres máscaras —formato viejo, documento extranjero— quedaría **imposible de
+-- registrar**. Opcional, valida cuando se declara; obligatorio, bloquea a
+-- quien vino a trabajar. *La calidad del dato no puede costar un repartidor.*
+--
+-- **`documento_foto_path` NO:** el literal no lo marca, y su función es
+-- pre-llenar por extracción — un MEDIO, no un fin. Exigir dos fotos duplica la
+-- fricción del mostrador sin ganancia declarada.
+--
+-- ⇒ Si el founder quiere cualquiera de los dos obligatorio, es una línea más
+--   acá y el mismo tren. Se declara para que sea una decisión y no un olvido.
+--
+-- ═══ NOT NULL: **NO**, y está MEDIDO ═══════════════════════════════════════
+-- `repartidores` tiene **4 filas vivas (3 activas)** y las **4 tienen los
+-- CUATRO campos nuevos en NULL**. Un `NOT NULL` exige backfill, y **la foto de
+-- una persona no se puede backfillear**: no existe. ⇒ la obligatoriedad vive
+-- en la puerta, que es donde C la pidió.
 
 BEGIN;
 
