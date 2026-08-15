@@ -581,6 +581,23 @@ Monorepo pnpm workspaces + Turborepo del rumbo S42: reforma móvil-first con amb
 - **Deudas D-NNN y lecciones L-NNN:** las nuevas viven en `docs/DEUDAS_CANONICAS.md` de ESTE repo (deudas por sesión + sección "Lecciones del monorepo"). El histórico L-001–L-130 y D-001–D-282 vive en el repo viejo congelado. La numeración continúa, no se reinicia. **La más alta al cierre de S96: `D-786` · la lección más alta: `L-234`** *(re-medidas por grep al cerrar S96 — la línea venía diciendo `D-742`/`L-227` desde S94-PERF y ya había envejecido dos sesiones. Esta línea decía `D-645` desde S85 y volvió a envejecer nueve sesiones — es la tercera vez que se registra el mismo atraso, y la conclusión no cambia: **el siguiente número libre se verifica por grep, jamás de memoria ni de esta línea**, que es derivada y por eso decae mientras el objeto no).*
 - **Candidatas de lección SIN FIRMA:** `docs/relevamientos/2026-07-26-s77-CANDIDATAS-DE-LECCION.md` — **CATORCE al cierre de S82** (contadas: `### 1` … `### 14`, sin huecos). **NINGUNA rige**: una candidata es un texto que espera la firma del founder, no una ley. *El acta y el censo de S82 dicen "13" — la divergencia está declarada dentro del propio archivo y la arbitra el founder; el acta no se toca porque está firmada.*
 
+## Compactación de contexto (rige para TODA pista, manual Y automática — depositada por orden de mesa, S99, 15-ago-2026)
+
+Cuando el contexto de una sesión se compacta —porque alguien lo pidió o porque el largo lo disparó solo—, **se conserva el ESTADO, no la historia**. Este es el único lugar de la casa que no se resume, por eso la instrucción vive acá.
+
+**ANTES de compactar (o al saber que la compactación viene), la pista deposita su estado EN EL REPO** — lo que vive solo en la conversación muere con ella:
+1. **El parte del Loop (`docs/loop/S99-⟨pista⟩.md` o el de la sesión vigente) es LA fuente del handoff**: cola viva en orden con el próximo paso ejecutable, compromisos abiertos pista por pista (qué debo · qué me deben), frenos y supuestos vivos. La sucesora abre LEYENDO su parte, no reconstruyendo de memoria.
+2. **Cerrado se verifica contra el objeto, jamás se declara**: commit por pathspec → merge a main con verificación por contenido → push → `git merge-base --is-ancestor HEAD origin/main` VERDE → **y la rama de la pista en origin POR SHA** (`git ls-remote origin pista/⟨rama⟩` imprime un sha que coincide con `git rev-parse` local — jamás por código de salida, L-239). *Si algo de eso da rojo, no está cerrado: está a medio camino, y los semáforos habituales prenden igual (L-217; el lote de C de S99 vivió solo en un disco con una medición irreproducible adentro).*
+
+**Lo que el resumen de compactación DEBE conservar** (y lo que una sesión post-compactación debe re-verificar antes de usar):
+- **Identidad y territorio**: qué pista soy, worktree y rama, qué archivos son míos (76h) y cuáles no.
+- **La cola viva y el próximo paso** — no el relato de cómo se llegó.
+- **Numeración viva (D-NNN · L-NNN · R-NN) SOLO como puntero**: el número libre se re-verifica **por grep contra `DEUDAS_CANONICAS.md`** antes de depositar, jamás se toma del resumen (la línea resumida decae; el objeto no — L-141).
+- **Las reglas de seguridad, verbatim**: las claves se leen del **keychain AL MOMENTO** (`security find-generic-password …`), jamás quedan en chat, reporte, resumen ni repo; `service_role` jamás en el árbol; L-140 en toda función nueva.
+- **El estado del canal entre sesiones** (si está caído, TODO viaja por repo) y los compromisos con las otras pistas.
+
+**Lo que el resumen NO es**: no es fuente de datos vivos (L-166 — todo dato vivo se relee del objeto al usarlo), no es un acta (las actas se firman, los resúmenes se pierden), y no autoriza nada (una aprobación citada en un resumen se re-verifica contra el literal firmado). **Un resumen es un mapa de dónde retomar — todo lo que afirme sobre el mundo se re-mide antes de actuar.**
+
 ## Skills del proyecto — cuándo y cuál manda
 
 | Skill | Dispara en | Autoridad |

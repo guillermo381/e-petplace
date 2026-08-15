@@ -11708,6 +11708,22 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-239 — HAY COMANDOS CUYO ÉXITO NO RESPONDE LA PREGUNTA (S99 — depositada por orden de mesa, 15-ago-2026, con el repro de C).**
+
+  **El repro, literal de C y medido en vivo ANTES de su push:** `git ls-remote --heads origin <ref>` devuelve **EXIT 0 con salida VACÍA cuando el ref NO existe**. La orden de mesa decía *«leé el EXIT»* — y ese exit habría **CONFIRMADO que la rama estaba justo cuando no estaba**. **El error de la orden fue de MESA, no de C** — se declara porque *una ley que nace corrigiendo a quien la dictó vale más que una que nadie tuvo que corregir*.
+
+  **La ley:** el discriminador **no es el código de salida: es que la salida traiga el DATO, y que el dato sea el esperado.** Es **L-191 subiendo un piso**: no alcanza con leer el exit del comando en vez del pipe — hay comandos cuyo exit responde *«corrí sin error»* y no la pregunta que uno estaba haciendo.
+
+  **La instrucción corregida en el canon:** una rama en origin se verifica **por SHA contra el local** (`git ls-remote origin <ref>` debe imprimir un sha, y ese sha debe coincidir con `git rev-parse <ref>` local — o ser su descendiente declarado), **jamás por código de salida**. La próxima pista que reciba la instrucción vieja aplica ésta.
+
+- **L-238 — UNA AUSENCIA VALE LO QUE VALE EL UNIVERSO DONDE SE BUSCÓ (S99 — depositada por orden de mesa, 15-ago-2026; el atrape es de D).**
+
+  **El caso:** D concluyó *«la pieza no existe»* habiendo buscado en la worktree de S98 y en origin — **dos lugares razonables, ninguno el correcto** (la tanda de C vivía solo en el disco de su worktree de S99, sin push — el canal caído se lo impidió). Lo cazó D **buscando en todos los objetos de git y en todo el disco**. Lo que dolía era el C4: una medición **NO reproducible** (costó la ventana del aparato del founder, y el teléfono ya volvió a reposo).
+
+  **Hermana de L-235** (*el instrumento respondió sobre otra cosa*) **y su forma más traicionera: un cero se siente concluyente.** Un dato equivocado se puede cotejar; una ausencia no tiene contra qué — solo tiene el universo donde se buscó, y ese universo casi nunca se declara.
+
+  **Corolario EXIGIBLE: quien reporte una ausencia DECLARA el universo donde buscó.** *«No existe»* a secas no es una medición; *«no existe en ⟨estos lugares⟩»* sí — y deja a la vista qué lugares faltaron. **Una ausencia sin universo declarado no es una medición.**
+
 - **L-237 — LA OMISIÓN SIN DUEÑO ES UNA INVISIBILIDAD CON FECHA DE NACIMIENTO FUTURA (S99 — depositada por orden de mesa, 15-ago-2026).**
 
   **Literal:** *«cada superficie excluye por una razón localmente buena, y nadie es dueño de la suma. No se ve como un bug: cada pantalla está bien, y el objeto no está en ningún lado.»*
