@@ -1831,6 +1831,17 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R45 · TRES casos, y los dos legítimos son el peso de la prueba
+     (L-236): monta · declara · y la que hace ninguna de las dos, que es
+     el único rojo. Trae además la frontera para que el ANCLA no sea lo
+     que lo pinta. */
+  R45: [
+    { path: 'packages/api/src/wrappers/despensa-vendedor.ts', src: 'export async function listarPedidosDelVendedorEnRango(' },
+    { path: 'packages/api/src/index.ts', src: '  listarPedidosDelVendedorEnRango,' },
+    { path: 'apps/prestador/src/app/monta.tsx', src: 'listarPedidosDelVendedorEnRango(x)\nconst { delRango, sinFecha } = r.data' },
+    { path: 'apps/prestador/src/app/declara.tsx', src: '/* Los `sinFecha` NO se montan acá: un vivo sin día no es pasado.\n   Los monta la ventana del presente. */\nlistarPedidosDelVendedorEnRango(x)' },
+    { path: 'apps/prestador/src/app/muda.tsx', src: 'listarPedidosDelVendedorEnRango(x)' },
+  ],
   /* R44 · el fixture trae los SEIS diccionarios (si no, el ancla es lo
      que lo pone rojo) con las 6 del baseline repartidas + UNA séptima.
      Lo que tiene que salir rojo es la voz nueva. */
@@ -2909,7 +2920,94 @@ function r44(archivos) {
   }
 }
 
-const REGLAS = { R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R45 · D-828 · EL LECTOR DE RANGO NO SE CONSUME EN SILENCIO (S99-B).
+ *
+ *  LA LEY QUE MECANIZA, dictada por mesa y ya viva en el JSDoc del
+ *  wrapper: *«toda superficie que migre a `listarPedidosDelVendedorEnRango`
+ *  declara qué hace con `sinFecha` ANTES de mergear — montarlos
+ *  PRESIDIENDO o nombrar quién los monta. **Nunca ninguna de las dos.**»*
+ *
+ *  🔴 POR QUÉ EXISTE, con su cicatriz: es **S72** repetida antes de
+ *  ocurrir. La cita aprobada sin fecha (`por_coordinar`) no pasaba el
+ *  `.gte('fecha', hoy)` de su lector ⇒ **el dueño aprobaba y su
+ *  procedimiento no existía en NINGUNA superficie suya**. El motor estaba
+ *  sano; la falla era **invisibilidad**, y su lección quedó escrita:
+ *  *«la invisibilidad no tiene stack trace»*. La forma es la misma: cada
+ *  superficie excluye por una razón localmente buena y **nadie es dueño
+ *  de la suma**. Ninguna pantalla se ve mal — el pedido no está en
+ *  ninguna.
+ *
+ *  ── 🔴 LA INVERSIÓN QUE ESTA REGLA NECESITA, Y ES DELIBERADA ────────
+ *  **El consumo se mide SIN comentarios; la declaración se mide CON
+ *  ellos.** Es al revés de la disciplina de la casa (L-170: *un censo
+ *  lee los comentarios como código si se lo permitís*), y acá tiene que
+ *  ser así por construcción:
+ *   · si midiera el consumo con comentarios, **este mismo archivo y el
+ *     JSDoc del wrapper saldrían rojos** por nombrar la función;
+ *   · si midiera la declaración sin comentarios, **la salida legítima
+ *     sería inexpresable** — declarar quién los monta ES prosa.
+ *  *Una regla que mira el mismo texto de dos maneras tiene que decir por
+ *  qué, o la próxima sesión la "arregla".*
+ *
+ *  ── EL NET, Y POR QUÉ NO ES UNA EXENCIÓN POR PATH ──────────────────
+ *  La forma obvia era eximir al histórico por su ruta. **No se hizo, y
+ *  el argumento es de D:** un path *«deja pasar en silencio a la segunda
+ *  consumición que alguien agregue en ese mismo archivo»*, y choca con la
+ *  ley de la casa —*una exención sin condición de muerte es un permiso
+ *  permanente*—. **La declaración ES la exención**: vive en el archivo,
+ *  se lee al abrirlo y no hay lista que se oxide.
+ *  ⚠️ **Su hueco residual, declarado y no tapado:** si alguien agrega una
+ *  SEGUNDA consumición con otro propósito al mismo archivo, hereda la
+ *  declaración vieja. **Estáticamente no lo puedo distinguir** — lo digo
+ *  en vez de fingir que el net lo cubre.
+ *
+ *  ── BASELINE 0, Y SE PUEDE PORQUE NO HAY CONSUMIDORES ──────────────
+ *  Medido al nacer: **CERO superficies consumen el lector** (solo su
+ *  definición y el re-export del índice, los dos exentos por ser la
+ *  frontera). La regla nace **antes que su primer consumidor**, que es la
+ *  única vez que un ratchet arranca sin deuda.
+ *
+ *  ⚠️ Y POR ESO SU FIXTURE CARGA EL PESO ENTERO (L-236, corolario):
+ *  **no había una legítima real que eximir**, así que las dos legítimas
+ *  del fixture son sintéticas y a propósito — una que MONTA y otra que
+ *  DECLARA. *Una regla nacida sin contra-caso no sabe discriminar; solo
+ *  sabe disparar.* */
+const LECTOR_RANGO = 'listarPedidosDelVendedorEnRango'
+/** La frontera que lo DEFINE y el índice que lo re-exporta no son
+ *  superficies: no montan nada. */
+const EXENTOS_R45 = [/wrappers\/despensa-vendedor\.ts$/, /packages\/api\/src\/index\.ts$/]
+const BASELINE_R45 = 0
+function r45(archivos) {
+  const fallos = []
+  let consumidores = 0
+  let frontera = 0
+  for (const { path, src } of archivos) {
+    if (EXENTOS_R45.some((r) => r.test(path))) {
+      if (sinComentarios(src).includes(LECTOR_RANGO)) frontera++
+      continue
+    }
+    // el CONSUMO, sin comentarios (ver la inversión, arriba)
+    if (!sinComentarios(src).includes(LECTOR_RANGO)) continue
+    consumidores++
+    // la DECLARACIÓN, sobre el fuente CRUDO: montarlos o nombrar a quién
+    if (/sinFecha/.test(src)) continue
+    fallos.push(
+      `R45: ${path} consume ${LECTOR_RANGO} y NO dice una palabra de \`sinFecha\` (D-828). Los pedidos VIVOS sin día viajan en ese campo, y una superficie que los recibe y los ignora los vuelve invisibles sin que ninguna pantalla se vea mal — es S72 otra vez. Salidas: montarlos PRESIDIENDO la ventana, o declarar en el archivo QUIÉN los monta. Nunca ninguna de las dos.`,
+    )
+  }
+  if (fallos.length > BASELINE_R45)
+    fallos.push(`R45: ${fallos.length} superficie(s) sobre el baseline ${BASELINE_R45}.`)
+  // ANCLA: si la frontera se renombra, la regla no encontraría consumo en
+  // ningún lado y su verde diría «no miré» (L-192).
+  fallos.push(...ancla('R45', frontera, 2, 'archivo(s) de frontera que nombran el lector'))
+  return {
+    fallos,
+    info: `${consumidores} superficie(s) consumen el lector · ${consumidores === 0 ? 'la regla nació ANTES que su primer consumidor' : 'todas declaran qué hacen con `sinFecha`'} · baseline ${BASELINE_R45}`,
+  }
+}
+
+const REGLAS = { R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3158,6 +3256,7 @@ corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
 corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
 corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
+corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
