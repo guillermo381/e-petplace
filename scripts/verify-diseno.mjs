@@ -1135,6 +1135,16 @@ function r27(fuentes) {
 }
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 const FUENTES_R43 = { palette: readFileSync('packages/ui/src/tokens/palette.ts', 'utf8') };
+/** R44 · los SEIS diccionarios de la casa (las dos apps + `ui`). El
+ *  corpus `DICCIONARIOS` de arriba trae solo los del cliente y N12.4
+ *  dice «en toda la casa», así que R44 arma el suyo — y su ancla exige
+ *  los seis: si uno se cae del corpus, la regla dejaría de mirar esa
+ *  casa en silencio. */
+const DICCIONARIOS_R44 = [
+  'apps/cliente/src/i18n/es.ts', 'apps/cliente/src/i18n/en.ts',
+  'apps/prestador/src/i18n/es.ts', 'apps/prestador/src/i18n/en.ts',
+  'packages/ui/src/i18n/es.ts', 'packages/ui/src/i18n/en.ts',
+].map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 
 
 /** R29 · `sinPie` NO VIAJA SOLO (S83-B1). La enmienda de la letra de
@@ -1776,6 +1786,17 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R44 · el fixture trae los SEIS diccionarios (si no, el ancla es lo
+     que lo pone rojo) con las 6 del baseline repartidas + UNA séptima.
+     Lo que tiene que salir rojo es la voz nueva. */
+  R44: [
+    { path: 'apps/prestador/src/i18n/es.ts', src: Array(3).fill("      x: 'Revisa los datos y probá de nuevo.'").join('\n') },
+    { path: 'apps/prestador/src/i18n/en.ts', src: Array(3).fill("      x: 'Check the details and try again.'").join('\n') },
+    { path: 'apps/cliente/src/i18n/es.ts', src: "      y: 'Algo salió mal.'" },
+    { path: 'apps/cliente/src/i18n/en.ts', src: '' },
+    { path: 'packages/ui/src/i18n/es.ts', src: '' },
+    { path: 'packages/ui/src/i18n/en.ts', src: '' },
+  ],
   R43: {
     palette: [
       "  papelTapiz: '#FAF2F5',",
@@ -2725,7 +2746,67 @@ function r43(fuentes) {
   return { fallos, info: `${detalle.join(' · ')} — piso ${PISO_R43}:1 (N11)` }
 }
 
-const REGLAS = { R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/** R44 · N12.4 · EL ERROR QUE NO DICE QUÉ ESTÁ MAL (S99-B).
+ *
+ *  N12.4 firmada: *«El error dice QUÉ está mal y CÓMO se arregla, con un
+ *  ejemplo real. **"Campo inválido" está prohibido en toda la casa.**»*
+ *
+ *  QUÉ VIGILA: la voz que manda a *revisar* sin decir qué revisar. No es
+ *  una regla de estilo — **es la diferencia entre un error que se puede
+ *  arreglar y uno que solo se puede volver a intentar.**
+ *
+ *  🔴 Y NO ES HIPOTÉTICA: la casa ya la cobró antes de que existiera la
+ *  ley. S75 registró que un rebote real iba a decir *«Revisá los datos»*
+ *  hasta que su código entrara al diccionario de voces — o sea que este
+ *  defecto ya se había visto de frente, y sin ley detrás no había con qué
+ *  frenarlo.
+ *
+ *  BASELINE NOMINAL SOLO-BAJA, CON DUEÑO DECLARADO: **6, los seis en
+ *  `apps/prestador` (3 `es` + 3 `en`), que NO es mi territorio.** Nacen
+ *  declarados y pedidos, jamás curados por mí — el precedente es R35 en
+ *  S96-B, que nació con baseline 1 y dueño y lo curó su dueño el mismo
+ *  día. *La forma correcta de nacer de un ratchet: se declara y se pide,
+ *  no se invade el territorio ajeno.* **DE ACÁ NO SE SUBE.**
+ *
+ *  ⚠️ EL NET ME COSTÓ TRES MEDICIONES, y queda escrito porque el número
+ *  importaba: la primera dio **3** (`revisá?` no matchea «revisa» — la
+ *  tilde opcional no cubre la vocal sin tilde), la segunda **4** («check
+ *  the NOTE details» tiene una palabra en el medio), y la tercera, **6**.
+ *  *Un baseline mal medido no protege de menos: protege de más, porque
+ *  deja pasar como preexistente lo que nunca contó.* */
+const BASELINE_R44 = 6
+const VOZ_SIN_QUÉ =
+  /: *'[^']*(revis[aá] (los |la |el )?[a-zá-ú]* ?datos|check the [a-z ]*details?|datos inv[aá]lidos|invalid data|campo (inv[aá]lido|requerido)|invalid field|algo sali[oó] mal|something went wrong)[^']*'/i
+function r44(archivos) {
+  const fallos = []
+  let total = 0
+  let dics = 0
+  for (const { path, src } of archivos) {
+    if (!/\/i18n\/(es|en)\.ts$/.test(path)) continue
+    dics++
+    for (const linea of src.split('\n')) {
+      if (!VOZ_SIN_QUÉ.test(linea)) continue
+      total++
+      if (total > BASELINE_R44)
+        fallos.push(
+          `R44: ${path} — VOZ DE ERROR QUE NO DICE QUÉ (N12.4): ${linea.trim()}. La ley pide QUÉ está mal y CÓMO se arregla, con un ejemplo real. «Revisá los datos» deja a la persona con lo único que ya sabía: que algo falló.`,
+        )
+    }
+  }
+  if (total < BASELINE_R44)
+    fallos.push(
+      `R44: quedan ${total} voces genéricas y el baseline declara ${BASELINE_R44} — BAJÓ: actualizar el baseline. Un baseline que sobra deja de ser deuda y pasa a ser permiso.`,
+    )
+  // ANCLA: si el corpus de diccionarios se rompe, la regla no vería
+  // ninguna voz y su verde diría «no miré» (L-192). Son SEIS archivos.
+  fallos.push(...ancla('R44', dics, 6, 'diccionario(s) es/en en el corpus'))
+  return {
+    fallos,
+    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} (las seis de \`apps/prestador\`, dueño declarado; solo-baja)`,
+  }
+}
+
+const REGLAS = { R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2973,6 +3054,7 @@ corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(D
 corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
 corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
+corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(DICCIONARIOS_R44)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
