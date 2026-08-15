@@ -64,12 +64,16 @@ import {
 import {
   listarRepartidores,
   obtenerEquipoNegocio,
+  obtenerPaisesDelMundo,
   puedeOfrecerRolRecepcion,
   registrarRepartidor,
   type MiembroEquipo,
+  type PaisDelMundo,
   type Repartidor,
 } from '@epetplace/api';
 
+import { ControlTelefono } from '@/components/perfil-piezas';
+import { PAIS_DEFAULT, bandera, componerE164, paisDe } from '@/lib/paises';
 import { rechazoDeDocumento, rechazoDeNombre } from '@/lib/validacion-alta';
 import { useTraduccion } from '@/i18n';
 
@@ -140,11 +144,55 @@ export function PasoEquipo({
   const [telefono, setTelefono] = useState('');
   /** ⭐ S98-C · la voz del rechazo vive EN EL CAMPO (firma del 14-ago).
    *  `Campo` ya tiene el slot de altura reservada y su `liveRegion`. */
+  /* 🔴 EL TELÉFONO SE COMPONE, NO SE MANDA CRUDO (S98-C). Este paso llama al
+     MISMO `registrarRepartidor` que la configuración, y `repartidores` exige
+     E.164 con `+` (`repartidores_telefono_check`) mientras la RPC NO
+     normaliza: mandando lo tipeado, un vendedor que escribe `0988888888`
+     —como se escribe un celular acá— recibía el texto de un CHECK de
+     Postgres. **El defecto tenía DOS puertas y esta era la segunda**: la curé
+     en configuración y esta apareció barriendo, no leyendo. */
+  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
+  const [paisIso, setPaisIso] = useState(PAIS_DEFAULT);
+  const [eligiendoPais, setEligiendoPais] = useState(false);
   const [errorNombre, setErrorNombre] = useState<string | null>(null);
   const [errorDocumento, setErrorDocumento] = useState<string | null>(null);
 
+  /* La misma validación que la configuración, y por la misma razón medida:
+     componer el indicativo NO alcanza. `+593` + `0988777666` da
+     `+5930988777666` — trece dígitos que **el CHECK ACEPTA**, o sea una fila
+     con un número que no existe: peor que el rebote, porque falla callado.
+     Y el `0` de tránsito NO se saca a mano (Italia lo CONSERVA en su E.164):
+     se valida contra el `formato` que declara el catálogo. */
+  function estadoTel(): { ok: boolean; voz: string } | null {
+    const crudo = telefono.replace(/[\s-]/g, '');
+    if (crudo.length === 0) return null; // opcional
+    const pais = paisDe(paises, paisIso);
+    if (pais?.prefijo == null) return null;
+    const e164 = componerE164(paises, telefono, paisIso);
+    if (pais.formato === null) {
+      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
+    }
+    if (new RegExp(pais.formato).test(e164)) {
+      return { ok: true, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
+    }
+    const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
+    const min = rango?.[1];
+    const max = rango?.[2];
+    const cuantos =
+      min === undefined
+        ? t('perfilNegocio.telDigitosSinDato')
+        : max === undefined
+          ? t('perfilNegocio.telDigitos', { min })
+          : t('perfilNegocio.telDigitosRango', { min, max });
+    return {
+      ok: false,
+      voz: t('perfilNegocio.telLargoMal', { pais: pais.nombre, cuantos, pre: pais.prefijo, van: crudo.length }),
+    };
+  }
+
   const cargar = useCallback(async () => {
-    const [reps, recepcion, equipo] = await Promise.all([
+    // ⚠️ POSICIONAL: lo nuevo va AL FINAL, nombre incluido.
+    const [reps, recepcion, equipo, rPaises] = await Promise.all([
       listarRepartidores(cuentaComercialId),
       // El vendedor puro no tiene prestador: no hay a quién preguntarle,
       // y la respuesta correcta es `false` POR DATO (cero servicios), no
@@ -153,7 +201,10 @@ export function PasoEquipo({
         ? Promise.resolve({ ok: true as const, data: false })
         : puedeOfrecerRolRecepcion(prestadorId),
       obtenerEquipoNegocio(cuentaComercialId),
+      // El catálogo de indicativos, en la MISMA ola: cero espera nueva.
+      obtenerPaisesDelMundo(),
     ]);
+    if (rPaises.ok) setPaises(rPaises.data);
     if (!reps.ok) {
       setPantalla({ estado: 'error' });
       return;
@@ -197,13 +248,17 @@ export function PasoEquipo({
     // Se marcan LOS DOS antes de salir: validar de a uno obliga a
     // descubrir los errores en fila, uno por toque.
     if (malN !== null || malD !== null) return false;
+    // Un teléfono que no cumple el formato de su país NO habilita: la fuente
+    // lo aceptaría MAL (trece dígitos pasan el CHECK), así que el guard vive
+    // de este lado.
+    if (estadoTel()?.ok === false) return false;
 
     setGuardando(true);
     const res = await registrarRepartidor({
       cuenta_comercial_id: cuentaComercialId,
       nombre: n,
       documento: d,
-      telefono: telefono.trim() === '' ? undefined : telefono.trim(),
+      telefono: componerE164(paises, telefono, paisIso) || undefined,
       // LA LLAVE de la anti-duplicación. Solo viaja si la persona vino
       // del equipo: en el alta nueva todavía no hay a quién atarla.
       user_id: elegido?.userId ?? undefined,
@@ -410,12 +465,16 @@ export function PasoEquipo({
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
-              <Campo
+              <ControlTelefono
                 label={t('alta.paso4.telefono')}
-                value={telefono}
-                onChangeText={setTelefono}
-                keyboardType="phone-pad"
-                deshabilitado={guardando}
+                placeholder={t('ventas.config.repartidorTelefonoPlaceholder')}
+                valor={telefono}
+                onCambio={setTelefono}
+                bandera={bandera(paisIso)}
+                prefijo={paisDe(paises, paisIso)?.prefijo ?? ''}
+                onElegirPais={() => setEligiendoPais(true)}
+                ayuda={estadoTel()?.voz ?? t('ventas.config.repartidorTelefonoAyuda')}
+                error={estadoTel()?.ok === false ? estadoTel()?.voz : undefined}
               />
               <Boton
                 variante="primario"
@@ -431,6 +490,37 @@ export function PasoEquipo({
               />
             </View>
           </EvitaTeclado>
+        </HojaScroll>
+      </Hoja>
+    <Hoja
+        visible={eligiendoPais}
+        onCerrar={() => setEligiendoPais(false)}
+        titulo={t('ventas.config.repartidorPaisTitulo')}
+      >
+        <HojaScroll>
+          {paises.map((pais, i) => (
+            <View key={pais.codigo}>
+              {i > 0 ? <Separador /> : null}
+              <Celda
+                titulo={`${bandera(pais.codigo)}  ${pais.nombre}`}
+                subtitulo={
+                  pais.formato === null ? t('ventas.config.repartidorPaisSinFormato') : undefined
+                }
+                metadataMono={pais.prefijo ?? undefined}
+                interactiva
+                accessibilityRole="button"
+                onPress={() => {
+                  setPaisIso(pais.codigo);
+                  setEligiendoPais(false);
+                }}
+                fin={
+                  pais.codigo === paisIso ? (
+                    <Texto variante="dato">{t('ventas.config.repartidorPaisElegido')}</Texto>
+                  ) : undefined
+                }
+              />
+            </View>
+          ))}
         </HojaScroll>
       </Hoja>
     </View>

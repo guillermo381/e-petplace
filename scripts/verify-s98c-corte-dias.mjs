@@ -93,11 +93,15 @@ await page.getByPlaceholder('18:00').fill('20:00');
 
 // De L–V a solo fin de semana: se apagan los cinco y se prenden S y D.
 for (const d of ['L', 'M', 'X', 'J', 'V']) {
-  await page.getByRole('checkbox', { name: d, exact: true }).click();
+  // El nombre accesible es «L, opción 1 de 7» — MEDIDO en el DOM, no
+  // supuesto: un `exact: 'L'` no matchea y el brazo muere por timeout.
+  await page.getByRole('checkbox', { name: new RegExp('^' + d + ',') }).click();
   await page.waitForTimeout(120);
 }
 for (const d of ['S', 'D']) {
-  await page.getByRole('checkbox', { name: d, exact: true }).click();
+  // El nombre accesible es «L, opción 1 de 7» — MEDIDO en el DOM, no
+  // supuesto: un `exact: 'L'` no matchea y el brazo muere por timeout.
+  await page.getByRole('checkbox', { name: new RegExp('^' + d + ',') }).click();
   await page.waitForTimeout(120);
 }
 await page.getByText('Guardar', { exact: true }).last().click();

@@ -1,16 +1,19 @@
 /**
  * captura-s98c-corte.mjs — EL FORMULARIO «AGREGAR CORTE» (S98-C).
  *
- * Firma del founder, campo por campo: nombre con placeholder nativo gris
- * («En la mañana») · hora de corte con ⓘ que abre modal · franja de entrega
- * con desde y hasta en UNA fila.
+ * Firma del founder COMPLETA, campo por campo: nombre con placeholder nativo
+ * gris («En la mañana») · hora de corte con ⓘ que abre modal · franja de
+ * entrega con desde y hasta en UNA fila · **chips de días + toggle de
+ * festivos** (llegaron con la puerta de A, `20260815110000`).
  *
- * 🔴 LO QUE ESTA FOTO **NO** MUESTRA, y se dice para que nadie lo lea como
- * omisión: **los chips de días y el toggle de festivos NO están montados.**
- * La tabla ya tiene las columnas (`dias_semana` · `incluye_festivos`) pero
- * `definir_turno_entrega` no las toma — montarlos sería un control que se
- * guarda y vuelve apagado. Contrato a A enviado; el hueco vive declarado en
- * la cabecera de `ventas/configuracion.tsx`.
+ * ⏪ Esta cabecera decía que los chips NO estaban montados, y era cierto
+ * cuando se escribió. **Se corrige acá porque un instrumento cuyo comentario
+ * miente es peor que uno sin comentario:** el que lo lea después no tiene cómo
+ * saber cuál de las dos cosas envejeció, si la foto o el texto.
+ *
+ * El estado de los chips NO se lee del DOM: RN-web no emite `aria-checked`
+ * (medido). Lo que prueba que persisten es `verify-s98c-corte-dias.mjs`,
+ * contra la fila.
  *
  * 🔴 EL GUARD QUE NO SE NEGOCIA (heredado de mis instrumentos previos):
  * **si la sesión no abrió, ABORTA en vez de sacar la foto.** Un script que
@@ -93,6 +96,13 @@ await page.screenshot({ path: `${DIR}01-hoja-corte-vacia.png` });
 await campoNombre.fill('En la mañana');
 await page.waitForTimeout(600);
 await page.screenshot({ path: `${DIR}02-hoja-corte-escrita.png` });
+
+// Los chips viven bajo el pliegue en 420x900: sin este scroll, la foto del
+// gate no muestra justo lo que se construyo (el founder mira la captura, no
+// el codigo).
+await page.getByRole('checkbox', { name: /^D,/ }).scrollIntoViewIfNeeded();
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${DIR}02b-hoja-corte-dias.png` });
 
 // El ⓘ abre su modal — y el corte NO pierde lo tipeado.
 await page.getByLabel('Qué significa la hora de corte').click();
