@@ -62,6 +62,38 @@
  * funcionando antes de su reemplazo deja al vendedor sin repartidores.
  * El swap es de esta pantalla y está declarado, no diferido en silencio.
  *
+ * 🔴 EL CORTE — LO QUE FALTA, DECLARADO ACÁ Y NO EN SILENCIO (S98-C).
+ * La firma del founder sobre este formulario pide **chips de días L·M·X·J·V·S·D
+ * con preselección L–V al CREAR** (al EDITAR se muestra lo que la fila tiene,
+ * jamás se le impone el default) **+ un toggle «Incluir festivos»**.
+ * **NO SE MONTAN, y la razón es medida, no de gusto:**
+ *  · `entrega_turnos` YA TIENE las dos columnas (`dias_semana smallint[]` NOT
+ *    NULL default L–D · `incluye_festivos` NOT NULL default false), aplicadas
+ *    por `20260815100000` y verificadas contra la base viva;
+ *  · **pero la PUERTA no las toma**: `definir_turno_entrega(…)` no tiene
+ *    `p_dias_semana` ni `p_incluye_festivos`, y `listarTurnosEntrega` no los
+ *    trae en su `select` — o sea que hoy los dos campos solo pueden valer su
+ *    default, y una Hoja reabierta no podría ni PRECARGAR lo que la fila tiene.
+ * ⇒ Montarlos sería estado local que se guarda y vuelve apagado: **un control
+ *   que promete estado y no lo tiene es peor que su ausencia** (mismo criterio
+ *   que la baldosa del inventario y el primer toggle de la solicitud).
+ * Contrato a A con las tres piezas exactas —RPC, wrapper y lector— en
+ * `docs/relevamientos/2026-08-14-s98c-pedido-a-A-corte-y-repartidor.md`.
+ * Lo que SÍ entró de la firma: el nombre con placeholder nativo · el ⓘ con
+ * modal en la hora de corte · la franja desde/hasta en UNA fila.
+ *
+ * ⚠️ EL REPARTIDOR NO SE TOCA EN ESTA VENTANA, y también es medición:
+ * su spec pide foto del documento, foto de la persona, tipo de documento,
+ * WhatsApp no opcional y **hasta dos vehículos (tipo + placa) DENTRO del
+ * repartidor** — y `repartidores` no tiene ninguna de esas columnas ni existe
+ * tabla de vehículos. **Y hay un choque que decide A, no esta pantalla:**
+ * `recursos_reparto` existe, está CABLEADA (`cupo_reparto_del_dia` la lee) y su
+ * semántica es CAPACIDAD del NEGOCIO, no identidad de un vehículo — montar
+ * «tipo + placa» encima le cambiaría el significado a la tabla que alimenta el
+ * cupo del día. El alta de hoy (nombre · documento · teléfono) **queda viva y
+ * sin tocar**: es la única que funciona, y matarla antes de su reemplazo deja
+ * al vendedor sin repartidores (el mismo criterio del choque ⑤ de abajo).
+ *
  *  · Repartidores: alta con nombre y documento (decisión del arranque);
  *    idempotente por documento — repetir no duplica, y se dice.
  *  · Recursos: la capacidad es DEL RECURSO (§7.3) — la voz lo enseña.
@@ -79,7 +111,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import Svg, { Path as SvgPath } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -115,14 +148,18 @@ import {
   listarRecursosReparto,
   listarRepartidores,
   listarTurnosEntrega,
+  obtenerPaisesDelMundo,
   registrarRepartidor,
+  type PaisDelMundo,
   type RecursoReparto,
   type Repartidor,
   type TurnoEntrega,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { ControlTelefono } from '@/components/perfil-piezas';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
+import { PAIS_DEFAULT, bandera, componerE164, paisDe } from '@/lib/paises';
 import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
@@ -151,6 +188,39 @@ type Pantalla =
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** El glifo ⓘ de un campo que necesita explicarse.
+ *
+ *  🔴 NO SE INVENTÓ, y el registry NO lo tiene: se midió que
+ *  `apps/cliente/.../mascota/[mascotaId].tsx` ya dibuja este mismo glifo con
+ *  trazo local 1.9, y su comentario declara la condición literal —«candidato
+ *  al registry por su puerta si se repite»—. **Ésta es la repetición**: la
+ *  condición que ese archivo escribió acaba de cumplirse, y el pedido de
+ *  promoción va a B (packages/ui es su territorio). Hasta entonces se copia
+ *  la geometría MEDIDA, no una nueva.
+ *
+ *  Y no se usa el glifo `ayuda` del registry a propósito: es un SALVAVIDAS
+ *  («ayuda que flota», su propio comentario) — eso dice *contactá soporte*,
+ *  no *qué significa este campo*. */
+function GlifoInfo({ color }: { color: string }) {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24">
+      <SvgPath
+        d="M12 3.4a8.6 8.6 0 110 17.2 8.6 8.6 0 010-17.2Z"
+        stroke={color}
+        strokeWidth={1.9}
+        fill="none"
+      />
+      <SvgPath
+        d="M12 11v5M12 7.7v.3"
+        stroke={color}
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
 
 /** ⑥ EL ESTADO — mapeo del enum vivo (`estado_cuenta_comercial_enum`:
  *  pendiente_validacion · activa · suspendida · cerrada, medido en
@@ -194,6 +264,15 @@ export default function ConfiguracionVentas() {
   const [repNombre, setRepNombre] = useState('');
   const [repDocumento, setRepDocumento] = useState('');
   const [repTelefono, setRepTelefono] = useState('');
+  /* 🔴 EL PAÍS DEL TELÉFONO — el indicativo NO se deduce: se ELIGE (P21,
+     «proponer no es deducir»). Arranca en el default del selector, que es
+     una preselección visible y cambiable, jamás un país escrito a espaldas
+     del vendedor. La lista es ASÍNCRONA desde D-633 y viaja en la MISMA ola
+     que el resto — cero espera nueva (la lentitud de esta casa son olas
+     encadenadas, no consultas caras). */
+  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
+  const [repPaisIso, setRepPaisIso] = useState(PAIS_DEFAULT);
+  const [eligiendoPais, setEligiendoPais] = useState(false);
 
   // hoja recurso — `editandoRecurso` = la fila se REABRIÓ (D-791): mismo
   // formulario, misma puerta (upsert por (cuenta, nombre) — MEDIDO en el
@@ -208,6 +287,8 @@ export default function ConfiguracionVentas() {
   // reabrir.
   const [altaTurno, setAltaTurno] = useState(false);
   const [editandoTurno, setEditandoTurno] = useState(false);
+  // la explicación de la hora de corte (el ⓘ la abre)
+  const [modalCorte, setModalCorte] = useState(false);
   const [turCodigo, setTurCodigo] = useState('');
   const [turCorte, setTurCorte] = useState('');
   const [turDesde, setTurDesde] = useState('');
@@ -225,7 +306,10 @@ export default function ConfiguracionVentas() {
           return;
         }
         const id = ctx.data.cuentaComercialId;
-        const [reps, recursos, turnos, pedidos, cupo, pres] = await Promise.all([
+        /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
+           Sacar o intercalar en el medio desalinea el destructuring en
+           silencio — ya costó una corrida en esta misma pista. */
+        const [reps, recursos, turnos, pedidos, cupo, pres, rPaises] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
@@ -236,12 +320,23 @@ export default function ConfiguracionVentas() {
              pantalla es el único camino a sus datos fiscales. Viaja en la
              misma ola — cero espera nueva. */
           obtenerMiPrestador(),
+          /* El catálogo de indicativos (D-633: la lista NO se copia, se
+             carga). Va en esta ola y no en una propia. */
+          obtenerPaisesDelMundo(),
         ]);
         if (!vigente) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
+        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok || !rPaises.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
+        /* Entra al GATE junto con los demás, y es a propósito: sin
+           indicativos el alta de repartidor compondría un teléfono sin `+`
+           que la fuente rebota (`repartidores_telefono_check`) con un
+           mensaje de Postgres. Prefiero un error honesto de pantalla antes
+           que un formulario que acepta y revienta al guardar. Y el costo
+           real es bajo: viajan en la MISMA ola, así que si esto falla solo,
+           es un problema de `cat_paises`, no de red. */
+        setPaises(rPaises.data);
         setPantalla({
           estado: 'listo',
           contexto: ctx.data,
@@ -293,15 +388,73 @@ export default function ConfiguracionVentas() {
             ? t('ventas.config.estado.modalCerrada')
             : t('ventas.config.estado.modalEnRevision');
 
+  /* 🔴 LA VALIDACIÓN QUE MI PROPIA CURA NECESITABA — y la encontró el
+     instrumento, no el razonamiento (S98-C).
+     Componer el indicativo NO alcanza: tipeando `0988777666` —como se escribe
+     un celular en Ecuador— salía **`+5930988777666`**, con el `0` de tránsito
+     adentro. Trece dígitos: **el CHECK lo ACEPTA** (`^\+[1-9][0-9]{6,14}$`) y
+     la fila nace con un número que no existe. *Eso es peor que el defecto que
+     vine a curar: el original fallaba fuerte, éste guarda mal en silencio.*
+     Y la cura NO es sacar el `0` a mano: el prefijo de tránsito no es
+     universal —Italia lo CONSERVA en su E.164— así que una regla propia
+     corrompería otros países. Se valida contra el `formato` que declara el
+     CATÁLOGO, que es el mismo criterio que ya usa el perfil. Los países que
+     no declaran formato NO validan **y lo dicen**: callarse se leería como
+     «está bien». */
+  function estadoTelefonoRep(): { ok: boolean; voz: string } | null {
+    const crudo = repTelefono.replace(/[\s-]/g, '');
+    if (crudo.length === 0) return null; // opcional: vacío no es un error
+    const pais = paisDe(paises, repPaisIso);
+    if (pais?.prefijo == null) return null;
+    const e164 = componerE164(paises, repTelefono, repPaisIso);
+    if (pais.formato === null) {
+      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
+    }
+    if (new RegExp(pais.formato).test(e164)) {
+      return { ok: true, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
+    }
+    // El error DIRIGE: cuántos dígitos van, sacados del formato REAL del país.
+    const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
+    const min = rango?.[1];
+    const max = rango?.[2];
+    const cuantos =
+      min === undefined
+        ? t('perfilNegocio.telDigitosSinDato')
+        : max === undefined
+          ? t('perfilNegocio.telDigitos', { min })
+          : t('perfilNegocio.telDigitosRango', { min, max });
+    return {
+      ok: false,
+      voz: t('perfilNegocio.telLargoMal', {
+        pais: pais.nombre,
+        cuantos,
+        pre: pais.prefijo,
+        van: crudo.length,
+      }),
+    };
+  }
+
   async function guardarRepartidor() {
     if (guardando || pantalla.estado !== 'listo') return;
     if (repNombre.trim().length === 0 || repDocumento.trim().length === 0) return;
+    // Un teléfono que no cumple el formato de su país NO se manda: la puerta
+    // no ofrece lo que va a rechazar (Ley 23), y acá la fuente NO lo rechaza
+    // —lo acepta mal—, así que el guard tiene que estar de este lado.
+    if (estadoTelefonoRep()?.ok === false) return;
     setGuardando(true);
+    /* 🔴 LA CURA (S98-C, rojo reproducido antes): acá se mandaba
+       `repTelefono.trim()` CRUDO. `repartidores_telefono_check` exige
+       `^\+[1-9][0-9]{6,14}$`, y `registrar_repartidor` NO normaliza —lo
+       inserta tal cual (medido en su cuerpo)—, así que un vendedor que
+       tipeaba `0988888888`, que es como se escribe un celular en Ecuador,
+       recibía el texto de un CHECK de Postgres. Ahora el número se COMPONE
+       con el indicativo del país elegido. */
+    const telefonoE164 = componerE164(paises, repTelefono, repPaisIso);
     const r = await registrarRepartidor({
       cuenta_comercial_id: pantalla.contexto.cuentaComercialId,
       nombre: repNombre.trim(),
       documento: repDocumento.trim(),
-      telefono: repTelefono.trim().length > 0 ? repTelefono.trim() : undefined,
+      telefono: telefonoE164.length > 0 ? telefonoE164 : undefined,
     });
     setGuardando(false);
     if (!r.ok) {
@@ -657,6 +810,22 @@ export default function ConfiguracionVentas() {
         </View>
       </Hoja>
 
+      {/* ── el modal del ⓘ de la hora de corte ──
+          Vive FUERA de la Hoja del corte a propósito: una Hoja adentro de otra
+          Hoja monta un `<Modal>` sobre otro y en Android el gesto de cierre
+          queda ambiguo. Acá la de arriba se apila y el corte conserva su
+          estado — lo tipeado no se pierde por leer qué significa. */}
+      <Hoja
+        visible={modalCorte}
+        onCerrar={() => setModalCorte(false)}
+        titulo={t('ventas.config.turnoCorteInfoTitulo')}
+        altura="media"
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{t('ventas.config.turnoCorteInfoCuerpo')}</Texto>
+        </View>
+      </Hoja>
+
       {/* ── hoja: repartidor nuevo ── */}
       <Hoja
         visible={altaRepartidor}
@@ -682,23 +851,81 @@ export default function ConfiguracionVentas() {
                 keyboardType="number-pad"
                 deshabilitado={guardando}
               />
-              <Campo
+              {/* El teléfono con su indicativo — pieza de la casa, no una
+                  caja nueva: `ControlTelefono` ya resuelve el par
+                  selector+campo con UN solo pie, porque lo que se valida es
+                  el E.164 que forman JUNTOS. El placeholder va SIN prefijo:
+                  el indicativo está a la izquierda y repetirlo enseñaría a
+                  escribirlo dos veces. */}
+              <ControlTelefono
                 label={t('ventas.config.repartidorTelefono')}
-                value={repTelefono}
-                onChangeText={setRepTelefono}
-                keyboardType="phone-pad"
-                deshabilitado={guardando}
+                placeholder={t('ventas.config.repartidorTelefonoPlaceholder')}
+                valor={repTelefono}
+                onCambio={setRepTelefono}
+                bandera={bandera(repPaisIso)}
+                prefijo={paisDe(paises, repPaisIso)?.prefijo ?? ''}
+                onElegirPais={() => setEligiendoPais(true)}
+                /* La voz EN VIVO muestra el E.164 que se va a guardar — el
+                   vendedor VE `+593988777666` antes de tocar Guardar, que es
+                   justo lo que habría destapado el `0` de más sin necesidad
+                   de un instrumento. Sin nada tipeado, la ayuda genérica. */
+                ayuda={estadoTelefonoRep()?.voz ?? t('ventas.config.repartidorTelefonoAyuda')}
+                error={
+                  estadoTelefonoRep()?.ok === false ? estadoTelefonoRep()?.voz : undefined
+                }
               />
               <Boton
                 variante="primario"
                 bloque
                 cargando={guardando}
-                deshabilitado={repNombre.trim().length === 0 || repDocumento.trim().length === 0}
+                deshabilitado={
+                  repNombre.trim().length === 0 ||
+                  repDocumento.trim().length === 0 ||
+                  estadoTelefonoRep()?.ok === false
+                }
                 etiqueta={t('ventas.config.repartidorGuardarCta')}
                 onPress={() => void guardarRepartidor()}
               />
             </View>
           </EvitaTeclado>
+        </HojaScroll>
+      </Hoja>
+
+      {/* ── el país del teléfono del repartidor ──
+          Misma anatomía que la del perfil: bandera + nombre + indicativo en
+          mono, y la elegida se DICE. Los países sin `formato_telefono`
+          declarado no se apagan —se aceptan igual— pero su subtítulo avisa
+          que nadie va a validar la forma: el dato honesto ocupa el lugar
+          donde un «todavía no» mentiría. */}
+      <Hoja
+        visible={eligiendoPais}
+        onCerrar={() => setEligiendoPais(false)}
+        titulo={t('ventas.config.repartidorPaisTitulo')}
+      >
+        <HojaScroll>
+          {paises.map((p, i) => (
+            <View key={p.codigo}>
+              {i > 0 ? <Separador /> : null}
+              <Celda
+                titulo={`${bandera(p.codigo)}  ${p.nombre}`}
+                subtitulo={
+                  p.formato === null ? t('ventas.config.repartidorPaisSinFormato') : undefined
+                }
+                metadataMono={p.prefijo ?? undefined}
+                interactiva
+                accessibilityRole="button"
+                onPress={() => {
+                  setRepPaisIso(p.codigo);
+                  setEligiendoPais(false);
+                }}
+                fin={
+                  p.codigo === repPaisIso ? (
+                    <Texto variante="dato">{t('ventas.config.repartidorPaisElegido')}</Texto>
+                  ) : undefined
+                }
+              />
+            </View>
+          ))}
         </HojaScroll>
       </Hoja>
 
@@ -780,28 +1007,58 @@ export default function ConfiguracionVentas() {
                 label={t('ventas.config.turnoCodigo')}
                 value={turCodigo}
                 onChangeText={setTurCodigo}
+                placeholder={t('ventas.config.turnoCodigoPlaceholder')}
                 ayuda={editandoTurno ? t('ventas.config.turnoCodigoFijo') : undefined}
                 deshabilitado={guardando || editandoTurno}
               />
+              {/* ⓘ EN EL CAMPO, no un párrafo permanente bajo él (patrón
+                  general firmado): el que ya sabe qué es un corte no lee una
+                  explicación cada vez que corrige la hora. Va en `iconoDer`
+                  —el slot que `Campo` ya expone y que el toggle de contraseña
+                  estrena con un `Pressable`— así que no nace anatomía nueva. */}
               <Campo
                 label={t('ventas.config.turnoCorte')}
                 value={turCorte}
                 onChangeText={setTurCorte}
-                ayuda="14:00"
+                placeholder={t('ventas.config.turnoHoraPlaceholder')}
                 deshabilitado={guardando}
+                iconoDer={
+                  <Pressable
+                    onPress={() => setModalCorte(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('ventas.config.turnoCorteInfoA11y')}
+                    hitSlop={12}
+                  >
+                    <GlifoInfo color={theme.text.secondary} />
+                  </Pressable>
+                }
               />
-              <Campo
-                label={t('ventas.config.turnoDesde')}
-                value={turDesde}
-                onChangeText={setTurDesde}
-                deshabilitado={guardando}
-              />
-              <Campo
-                label={t('ventas.config.turnoHasta')}
-                value={turHasta}
-                onChangeText={setTurHasta}
-                deshabilitado={guardando}
-              />
+              {/* La franja es UN dato con dos extremos: el grupo lo rotula y
+                  los campos se llaman Desde/Hasta — en una fila, dos labels
+                  largos envolverían (firma del founder). */}
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{t('ventas.config.turnoFranja')}</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label={t('ventas.config.turnoDesde')}
+                      value={turDesde}
+                      onChangeText={setTurDesde}
+                      placeholder={t('ventas.config.turnoDesdePlaceholder')}
+                      deshabilitado={guardando}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label={t('ventas.config.turnoHasta')}
+                      value={turHasta}
+                      onChangeText={setTurHasta}
+                      placeholder={t('ventas.config.turnoHastaPlaceholder')}
+                      deshabilitado={guardando}
+                    />
+                  </View>
+                </View>
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Texto variante="cuerpo">{t('ventas.config.turnoDiaSiguiente')}</Texto>
                 <Interruptor
