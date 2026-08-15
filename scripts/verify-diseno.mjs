@@ -2993,7 +2993,7 @@ function r45(archivos) {
     // la DECLARACIÓN, sobre el fuente CRUDO: montarlos o nombrar a quién
     if (/sinFecha/.test(src)) continue
     fallos.push(
-      `R45: ${path} consume ${LECTOR_RANGO} y NO dice una palabra de \`sinFecha\` (D-828). Los pedidos VIVOS sin día viajan en ese campo, y una superficie que los recibe y los ignora los vuelve invisibles sin que ninguna pantalla se vea mal — es S72 otra vez. Salidas: montarlos PRESIDIENDO la ventana, o declarar en el archivo QUIÉN los monta. Nunca ninguna de las dos.`,
+      `R45: ${path} consume ${LECTOR_RANGO} y NO dice una palabra de \`sinFecha\` (D-828). Los pedidos VIVOS sin día viajan en ese campo, y una superficie que los recibe y los ignora los vuelve invisibles sin que ninguna pantalla se vea mal — es S72 otra vez. DOS SALIDAS, nunca ninguna de las dos: (a) montarlos PRESIDIENDO la ventana · (b) declarar en el archivo QUIÉN los monta. ⚙️ LA CONDICIÓN MECÁNICA, para que no la adivines: al lint le alcanza con que el archivo MENCIONE \`sinFecha\` — un comentario sirve. Ej: «Los \`sinFecha\` no se montan acá: un vivo sin día no es pasado. Los monta ⟨la ventana del presente⟩.» La segunda frase no la puede juzgar un lint y es la que L-237 hace exigible: una omisión que no nombra a su dueño es un olvido que todavía no se nota.`,
     )
   }
   if (fallos.length > BASELINE_R45)
