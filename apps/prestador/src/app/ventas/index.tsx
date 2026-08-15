@@ -22,7 +22,7 @@
  * Viajes (S94-PERF): contexto (cacheado) → [pedidos ‖ cupo] → extras.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,19 +33,12 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  FilaDato,
   MarcaDeAgua,
   Separador,
   Tarjeta,
-  TarjetaPedido,
-  Texto,
-  opacity,
   spacing,
   useTheme,
-  type DesvioEscalera,
-  type PasoEscalera,
 } from '@epetplace/ui';
-import { fechaCortaMono, monto, type IdiomaSoportado } from '@epetplace/i18n';
 import {
   cupoRepartoDelDia,
   extrasPanelPedidos,
@@ -56,9 +49,9 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
-import { derivarEscalera, type ClaveEscalon } from '@/lib/escalera-pedido';
-import { fechaLocalISO, horaCorta, hoyLocalISO } from '@/lib/ventas-formato';
+import { hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -73,30 +66,6 @@ type Pantalla =
       /** La persona además reparte: se le muestra su entrada (§9.1). */
       tieneEntregas: boolean;
     };
-
-/** El orden del trabajo — la firma de la pantalla. Menor = más arriba. */
-function prioridad(estadoInterno: string | undefined, narrativa: string): number {
-  switch (estadoInterno) {
-    case 'entrega_fallida':
-      return 0; // algo salió mal y alguien tiene que hacer algo
-    case 'pago_capturado':
-    case 'stock_reservado':
-    case 'vendedor_notificado':
-    case 'liberado_preparacion':
-      return 1; // por preparar — preside (§2.1)
-    case 'picking':
-      return 2;
-    case 'empacado':
-      return 3;
-    case 'documentado':
-      return 4;
-    case 'en_reparto':
-    case 'hacia_destino':
-      return 5;
-    default:
-      return narrativa === 'pagando' ? 6 : 7;
-  }
-}
 
 export default function HoyVentas() {
   const router = useRouter();
@@ -148,111 +117,6 @@ export default function HoyVentas() {
       };
     }, [intento]),
   );
-
-  const vozEscalon: Record<ClaveEscalon, string> = useMemo(
-    () => ({
-      preparado: t('ventas.escalones.preparado'),
-      empacado: t('ventas.escalones.empacado'),
-      facturado: t('ventas.escalones.facturado'),
-      despachado: t('ventas.escalones.despachado'),
-      entregado: t('ventas.escalones.entregado'),
-      retirado: t('ventas.escalones.retirado'),
-    }),
-    [t],
-  );
-
-  const vozVentana = useCallback(
-    (p: PedidoDelVendedor, extra: ExtraPanelPedido | undefined): string => {
-      if (extra?.metodo_entrega === 'retiro') return t('ventas.hoy.retiro');
-      if (p.promesa_desde === null || p.promesa_hasta === null) {
-        return t('ventas.ventana.sinVentana');
-      }
-      const desde = horaCorta(p.promesa_desde);
-      const hasta = horaCorta(p.promesa_hasta);
-      if (fechaLocalISO(p.promesa_desde) === hoyLocalISO()) {
-        return t('ventas.ventana.hoyDesdeHasta', { desde, hasta });
-      }
-      return t('ventas.ventana.fechaDesdeHasta', {
-        fecha: fechaCortaMono(fechaLocalISO(p.promesa_desde), idioma as IdiomaSoportado),
-        desde,
-        hasta,
-      });
-    },
-    [t, idioma],
-  );
-
-  function filaDe(p: PedidoDelVendedor, dimmed: boolean) {
-    if (pantalla.estado !== 'listo') return null;
-    const extra: ExtraPanelPedido | undefined = pantalla.extras[p.pedido_id];
-    const escalera = extra ? derivarEscalera(extra.estado, extra.metodo_entrega) : null;
-
-    const itemsVoz =
-      extra === undefined
-        ? undefined
-        : extra.items_cantidad === 1
-          ? t('ventas.hoy.unProducto')
-          : t('ventas.hoy.productos', { n: extra.items_cantidad });
-
-    const detalle = dimmed
-      ? p.narrativa_nombre
-      : [vozVentana(p, extra), itemsVoz].filter((s) => s !== undefined).join(' · ');
-
-    const pasos: PasoEscalera[] =
-      dimmed || escalera === null
-        ? []
-        : escalera.pasos.map((paso) => ({
-            clave: paso.clave,
-            etiqueta: vozEscalon[paso.clave],
-            estado: paso.estado,
-          }));
-
-    const desvio: DesvioEscalera | undefined =
-      escalera?.desvio === 'noLlego'
-        ? {
-            etiqueta: t('ventas.desvios.noLlego'),
-            detalle: t('ventas.desvios.noLlegoDetalle'),
-            tono: 'alerta',
-          }
-        : escalera?.desvio === 'cancelado'
-          ? { etiqueta: t('ventas.desvios.cancelado'), tono: 'neutro' }
-          : undefined;
-
-    const tarjeta = (
-      <TarjetaPedido
-        titulo={
-          extra?.nombre_receptor ?? t('ventas.hoy.pedidoSinNombre', { numero: p.numero_orden })
-        }
-        detalle={detalle}
-        monto={monto(p.total, pantalla.contexto.moneda, idioma as IdiomaSoportado)}
-        pasos={pasos}
-        desvio={desvio}
-        acento="oficio"
-        etiqueta={t('ventas.hoy.verPedido', { numero: p.numero_orden })}
-        onPress={() => router.push(`/ventas/pedido/${p.pedido_id}`)}
-      />
-    );
-    // Lo entregado se APAGA y baja (§2.1) — atenuación por token, no color nuevo.
-    return (
-      <View key={p.pedido_id} style={dimmed ? { opacity: opacity.disabled } : undefined}>
-        {tarjeta}
-      </View>
-    );
-  }
-
-  const { activos, terminados } = useMemo(() => {
-    if (pantalla.estado !== 'listo') return { activos: [], terminados: [] };
-    const activos = pantalla.pedidos.filter((p) => !p.es_terminal);
-    const terminados = pantalla.pedidos.filter((p) => p.es_terminal);
-    activos.sort((a, b) => {
-      const pa = prioridad(pantalla.extras[a.pedido_id]?.estado, a.narrativa);
-      const pb = prioridad(pantalla.extras[b.pedido_id]?.estado, b.narrativa);
-      if (pa !== pb) return pa - pb;
-      const ta = a.promesa_desde ?? a.creado_en;
-      const tb = b.promesa_desde ?? b.creado_en;
-      return ta < tb ? -1 : 1;
-    });
-    return { activos, terminados };
-  }, [pantalla]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -320,38 +184,20 @@ export default function HoyVentas() {
             gap: spacing[4],
           }}
         >
-          {/* la cifra honesta del techo (§7.3) — capacidad 0 se DICE */}
-          {pantalla.cupo !== null &&
-            (pantalla.cupo.capacidad > 0 ? (
-              <FilaDato
-                etiqueta={t('ventas.hoy.titulo')}
-                valor={t('ventas.hoy.cupo', {
-                  consumido: pantalla.cupo.consumido,
-                  capacidad: pantalla.cupo.capacidad,
-                })}
-                mono
-              />
-            ) : (
-              <Texto variante="apoyo">{t('ventas.hoy.cupoCero')}</Texto>
-            ))}
-
-          {activos.length === 0 && terminados.length === 0 ? (
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('ventas.hoy.vacioTitulo')}
-              descripcion={t('ventas.hoy.vacioDetalle')}
-            />
-          ) : (
-            <View style={{ gap: spacing[3] }}>
-              {activos.map((p) => filaDe(p, false))}
-              {terminados.length > 0 && (
-                <View style={{ gap: spacing[3], marginTop: spacing[3] }}>
-                  <Texto variante="seccion">{t('ventas.hoy.terminadosTitulo')}</Texto>
-                  {terminados.map((p) => filaDe(p, true))}
-                </View>
-              )}
-            </View>
-          )}
+          {/* ⭐ S99-C · LA LISTA ES PIEZA (`components/ventana-pedidos`).
+              Esta ruta la monta SIN `dia` porque su lector es el que NO
+              filtra por fecha: sus `pedidos` ya traen todo, incluidos los
+              que no tienen entrega comprometida. El día que esta pantalla
+              migre al lector por rango, el tipo de la pieza va a exigir
+              `sinFecha` — y no compila hasta que alguien decida dónde van
+              (D-828). *La invisibilidad no tiene stack trace.* */}
+          <VentanaPedidos
+            pedidos={pantalla.pedidos}
+            extras={pantalla.extras}
+            cupo={pantalla.cupo}
+            moneda={pantalla.contexto.moneda}
+            onAbrir={(id) => router.push(`/ventas/pedido/${id}`)}
+          />
 
           {/* el resto del módulo — grupo de celdas al pie (el trabajo preside) */}
           <Tarjeta relleno="ninguno">

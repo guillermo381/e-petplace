@@ -766,6 +766,9 @@ export const prestadorEn = {
     titulo: 'Data',
     vacio: 'The lives you care for will live here',
     vacioDetalle: 'With your first closed visit, the pet joins your history with their record.',
+    sinPrestadorTitulo: 'Your business sells products',
+    sinPrestadorDetalle:
+      'This is where the pets you care for live, so it is empty. Yours are your orders and your stock.',
     unaAtencion: '1 visit',
     atenciones: '{{n}} visits',
     error: "We couldn't load the pets",
@@ -2415,6 +2418,9 @@ export const prestadorEn = {
       retiro: 'Store pickup',
       verPedido: 'View order {{numero}}',
       terminadosTitulo: 'Done',
+      sinFechaTitulo: 'No delivery day',
+      sinFechaDetalle: 'They are waiting for you to set a date.',
+      vacioDia: 'No orders scheduled for this day.',
     },
     ventana: {
       hoyDesdeHasta: 'Today, {{desde}}–{{hasta}}',

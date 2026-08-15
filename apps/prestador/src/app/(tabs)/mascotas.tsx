@@ -109,6 +109,14 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
+  /* ⭐ S99-C · L1 — SIN NEGOCIO DE SERVICIOS NO ES UN ERROR: es el vendedor
+     puro. Con la barra puesta (D-820) entra a este cuarto alguien que no
+     tiene fila de prestador, y hasta hoy se lo recibía con el error
+     genérico — **un dato que falta disfrazado de permiso denegado**
+     (L-178). El precedente está a dos archivos: `negocio.tsx` ya
+     distingue `sin_prestador` desde S96 y monta su sección honesta.
+     *Nadie lo pensó mal acá: nadie había entrado todavía.* */
+  | { estado: 'sinPrestador' }
   | { estado: 'listo'; mascotas: MascotaAtendida[] };
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
@@ -201,7 +209,11 @@ export default function Mascotas() {
         const prestador = await obtenerMiPrestador();
         if (!vigente) return;
         if (!prestador.ok) {
-          setPantalla({ estado: 'error' });
+          // `sin_prestador` NO es un fallo de lectura: es un negocio de
+          // productos. Se dice, no se rebota (ver el tipo `Pantalla`).
+          setPantalla({
+            estado: prestador.codigo === 'sin_prestador' ? 'sinPrestador' : 'error',
+          });
           return;
         }
         /* El equipo va EN PARALELO con las vidas: son dos preguntas
@@ -521,6 +533,18 @@ export default function Mascotas() {
             titulo={t('mascotas.error')}
             descripcion={t('mascotas.errorDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('agenda.reintentar')} onPress={() => setPantalla({ estado: 'cargando' })} />}
+          />
+        )}
+
+        {/* ⭐ S99-C · el vendedor puro: se le dice la VERDAD y dónde SÍ
+            viven sus números. **No se le inventa el cuarto de venta acá**
+            —§2.0 lo deja explícitamente abierto («las specs finas de cada
+            cuarto del vendedor NO están firmadas»)— y prometer una
+            pantalla que no existe sería el mismo defecto con mejor voz. */}
+        {pantalla.estado === 'sinPrestador' && (
+          <EstadoVacio
+            titulo={t('mascotas.sinPrestadorTitulo')}
+            descripcion={t('mascotas.sinPrestadorDetalle')}
           />
         )}
 
