@@ -26,11 +26,20 @@
  * jamás el path suelto — que es el defecto que este archivo cierra.
  */
 
-/** ⌄ y ⌃ despliegan en el lugar · › lleva a otro lado (E14). */
-export type DireccionChevron = 'derecha' | 'abajo' | 'arriba'
+/** ⌄ y ⌃ despliegan en el lugar · › ‹ llevan a otro lado (E14).
+ *
+ *  ➕ S99-B · `izquierda` ENSANCHA la tabla, no la copia — que es lo que
+ *  este archivo existe para que pase (L-175). Nace para la puerta
+ *  hermana de las dos ventanas del HOY: **el espejo tiene que ser el
+ *  MISMO trazo reflejado**, y si el de vuelta se dibujara aparte, el día
+ *  que alguien afine el chevron afinaría medio espejo. Su `d` es el
+ *  reflejo exacto de `derecha` sobre el eje vertical del viewBox de 24
+ *  (x → 24−x), no un trazo nuevo a ojo. */
+export type DireccionChevron = 'derecha' | 'izquierda' | 'abajo' | 'arriba'
 
 export const CHEVRON: Record<DireccionChevron, string> = {
   derecha: 'M9 18l6-6-6-6',
+  izquierda: 'M15 18l-6-6 6-6',
   abajo: 'M6 9l6 6 6-6',
   arriba: 'M6 15l6-6 6 6',
 }

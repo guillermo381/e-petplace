@@ -193,4 +193,17 @@ export const uiEs = {
     evidencia: 'Evidencia',
     evidenciaSubiendo: 'Evidencia, subiendo',
   },
+  /** S99-B · `HojaCaptura` — la puerta única de la foto.
+   *
+   *  ⚠️ LOS DOS LITERALES SON **VERBATIM** de `fotoEncuadre.camara` y
+   *  `fotoEncuadre.galeria` del cliente — la voz del ALTA DE MASCOTA, que
+   *  es la superficie que el founder señaló. **No es voz nueva y por eso
+   *  no abre lote de gate: es la misma frase cambiando de casa.**
+   *  (La casa tenía tres redacciones para esto: 'Sacar una foto' ·
+   *  'Tomar foto' · 'Take a photo'/'Pick from the gallery'. Gana la
+   *  firmada; las otras mueren cuando su sitio migre.) */
+  captura: {
+    camara: 'Sacar una foto',
+    galeria: 'Elegir de la galería',
+  },
 } as const;

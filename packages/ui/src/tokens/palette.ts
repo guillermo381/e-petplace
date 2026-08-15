@@ -286,6 +286,25 @@ export const palette = {
    *  es jerarquía entre dos límites, no encerrar. */
   light5: '#C4BFD8',  // borde de lo PRESENTE (ver border.presente)
 
+  /** ── S99-B · EL CONTORNO DEL CAMPO DE ESCRITURA (N11) ──────────────
+   *  N11 pide **contorno visible ≥3:1 contra el fondo**, y NINGÚN borde
+   *  de la casa lo cumple — medido contra `bg.base` de cada tema:
+   *  `border.default` **1.18** (claro) / **1.28** (oscuro) ·
+   *  `border.presente` **1.62** / **1.64**. *No es que estuvieran mal:
+   *  se diseñaron como hairlines que SEPARAN, y N11 pide un contorno que
+   *  CONTIENE.* Dos roles distintos ⇒ valor propio, no un token
+   *  reciclado — mismo criterio con el que nació `border.presente`
+   *  (nombrado por ROL) y `accent.controlBg` en S98.
+   *
+   *  LOS TRES ATERRIZAN EN ~3.3-3.4 A PROPÓSITO: el campo se lee
+   *  igual de contenido en las tres casas. **Y con margen sobre el 3
+   *  deliberadamente** — esta casa ya se quemó con un par «al filo por
+   *  redondeo» (la nota de `dark1`), y un piso que se aprueba por el
+   *  tercer decimal no es un piso. */
+  campoBordeL: '#88829A',  // claro    → 3.34:1 sobre papelTapiz #FAF2F5
+  campoBordeD: '#62627A',  // oscuro   → 3.40:1 sobre tapizDark  #0D050D
+  campoBordeM: '#5A695A',  // memorial → 3.34:1 sobre bosque nocturno #0A0E0A (verde sereno)
+
   // ── Tinta (S58, depósito prestador) — superficie del TECHO del
   // prestador (dosis baja: el techo es tinta, no gradiente). Pariente
   // de la tinta cálida de las sombras (31,27,22), un paso más arriba. ──

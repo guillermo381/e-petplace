@@ -40,6 +40,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { estiloDeCaja } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
@@ -49,8 +50,16 @@ import { Hoja, HojaScroll } from './Hoja'
 import { Boton } from './Boton'
 
 // Misma receta visual que Campo (borde constante, alto táctil, slot).
-const BORDE = 1.5
-const ALTO = 48
+/** ⏪ S99-B · `BORDE` sale de `caja-de-campo.ts` (Ley 37).
+ *  EL ALTO SIGUE A `Campo` y **eso es la ley, no una coincidencia**:
+ *  N11 dice *«dos estilos de campo jamás conviven en la misma región»*,
+ *  y una fecha 14 px más baja que el campo de al lado son dos estilos.
+ *  El número es el mismo derivado de `Campo` (aire + etiqueta + línea +
+ *  aire + los dos bordes), calculado acá para que no haya un 62 tecleado
+ *  en dos archivos. */
+const ALTO_LINEA_CF = Math.round(typography.size.base * typography.leading.normal)
+const ALTO_ETIQUETA_CF = Math.round(typography.size.xs * typography.leading.normal)
+const ALTO = Math.round(ALTO_LINEA_CF + ALTO_ETIQUETA_CF + spacing[1.5] * 2 + 1.5 * 2)
 const ALTO_LISTA = 200 // 5 filas de 40 — las listas scrollean adentro
 const ALTO_FILA = 40   // FIJO: el centrado al abrir se calcula por índice
 
@@ -254,8 +263,6 @@ export function CampoFecha({
     setAbierta(false)
   }
 
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
-  const colorBorde = error ? theme.status.danger : abierta ? accentActive : theme.bg.border
   const texto = valor
     ? formatear(valor, idioma, { aproximada: t('campoFecha.aproximada'), estimada: t('campoFecha.estimada') })
     : placeholder
@@ -267,17 +274,6 @@ export function CampoFecha({
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-          marginBottom: spacing[1.5],
-        }}
-      >
-        {label}
-      </Text>
-
       <Pressable
         onPress={abrir}
         disabled={deshabilitado}
@@ -290,19 +286,30 @@ export function CampoFecha({
       >
         <Animated.View
           style={{
+            /* S99-B · N11 — la anatomía sale de `caja-de-campo.ts`, la
+               MISMA que `Campo` y `CampoCodigo`. Su comentario decía
+               «receta Campo» y era literal: la copia. */
+            ...estiloDeCaja(theme, { error: !!error, enfocado: abierta }),
             justifyContent: 'center',
             height: ALTO,
-            borderRadius: radius.md,
-            borderWidth: BORDE, // constante — el estado cambia color, no grosor
-            borderColor: colorBorde,
-            backgroundColor: theme.mode === 'light' ? theme.bg.card : theme.bg.elevated,
             paddingHorizontal: spacing[3],
-            // única animación permitida: color del borde (receta Campo)
-            transitionProperty: 'borderColor',
-            transitionDuration: motion.duration.fast,
+            paddingVertical: spacing[1.5],
             transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
           }}
         >
+          {/* N11 · la etiqueta ADENTRO de la caja — estaba arriba y
+              afuera. Va acá y no en su propio bloque porque este campo
+              es un Pressable: la etiqueta forma parte del control. */}
+          <Text
+            numberOfLines={1}
+            style={{
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.xs,
+              color: theme.text.secondary,
+            }}
+          >
+            {label}
+          </Text>
           <Text
             numberOfLines={1}
             style={{
