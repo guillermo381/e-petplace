@@ -38,7 +38,11 @@ const mapeo = new Map(); // estado -> Set<accion>
 {
   let pendientes = [];
   for (const l of cuerpo.split('\n')) {
-    const c = l.match(/^\s*case '([a-z_]+)':/);
+    // [a-zA-Z0-9_]: los códigos del catálogo son minúsculas HOY, pero un label
+    // con mayúscula quedaba invisible para R2 (lo midió C renombrando a
+    // `picking_APAGADO`: R2 calló y solo R1/R3 gritaron). El parser ve TODO
+    // label; que el código sea inválido lo dice R2 contra el catálogo.
+    const c = l.match(/^\s*case '([a-zA-Z0-9_]+)':/);
     if (c) {
       pendientes.push(c[1]);
       continue;
