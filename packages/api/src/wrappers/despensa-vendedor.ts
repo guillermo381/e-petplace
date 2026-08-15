@@ -98,7 +98,15 @@ export interface PedidoDelVendedorConDia extends PedidoDelVendedor {
  *  aprobada sin fecha era invisible por un `.gte`). Un pedido VIVO sin
  *  `entrega_fecha_objetivo` no pertenece a ningún día — viaja SIEMPRE en
  *  `sinFecha`, en el mismo viaje. Los terminales sin fecha no viajan: son
- *  historia sin día y viven en el panel. */
+ *  historia sin día y viven en el panel.
+ *
+ *  🔴 D-828 · SI ESTÁS MIGRANDO UNA SUPERFICIE DEL PRESENTE A ESTE LECTOR:
+ *  declarás qué hacés con `sinFecha` ANTES de mergear — los montás
+ *  PRESIDIENDO la ventana (adjudicación de mesa 15-ago: presidir es lo
+ *  único que sobrevive al cambio de fecha; adentro del día parpadean con
+ *  cada cruce del selector) o nombrás quién los monta. Nunca ninguna de las
+ *  dos. La única exclusión legítima conocida es el HISTÓRICO (un vivo sin
+ *  día no es pasado — y lo declara). */
 export async function listarPedidosDelVendedorEnRango(
   cuentaComercialId: string,
   fechaDesde: string, // 'yyyy-mm-dd'

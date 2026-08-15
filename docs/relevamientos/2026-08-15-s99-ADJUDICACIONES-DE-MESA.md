@@ -134,3 +134,40 @@ depositado (verificado por grep antes de escribir).
 
 **Y el dato operativo que destraba a las cuatro pistas: EL FOUNDER ABRIÓ EL
 APARATO.** Los gates en dispositivo dejan de estar bloqueados.
+
+---
+
+## ADDENDUM 2 · El hallazgo `sinFecha` (B → D → C) y el C4 — cuarta tanda de mesa (15-ago)
+
+- **Nace L-237** — *la omisión sin dueño es una invisibilidad con fecha de
+  nacimiento futura*, con el corolario exigible de B (*toda omisión
+  declarada NOMBRA a su dueño*). **Las tres pistas cerraron un defecto ANTES
+  de fabricarlo — la primera vez que la casa caza uno en tiempo futuro, y
+  por eso la ley vale más que la cura.**
+- **Adjudicación de producto: los `sinFecha` PRESIDEN la ventana del
+  presente, no se mezclan en el día.** Las tres razones, y la que decide:
+  encaja con la firma vigente (el orden es por trabajo pendiente, y un
+  pedido vivo sin fecha comprometida ES trabajo esperando decisión) ·
+  precedente literal («Ponte al día» / «Por coordinar»: lo sin tiempo
+  preside y no colapsa) · **presidir es lo único que sobrevive al cambio de
+  fecha** — adentro del día, cada cruce del selector los borra y los trae:
+  *invisibilidad INTERMITENTE, peor que la total porque nadie la puede
+  reproducir*. C los monta presidiendo en `ventana-pedidos`; el histórico de
+  D no cambia y declara su porqué.
+- **D-828** — la migración al lector por rango, dueño A, con el criterio de
+  mesa literal (*declara qué hace con `sinFecha` ANTES de mergear:
+  montarlos o nombrar quién los monta, nunca ninguna de las dos*), el
+  refuerzo en el JSDoc del wrapper, y **el instrumento pedido a B** (un lint
+  que grite cuando una superficie consuma `…EnRango` sin tocar `sinFecha` —
+  nacido con su vara L-236: el histórico de D como la legítima que no debe
+  atrapar).
+- **Al acta (no duplicado en fichas):** el C4 de C cazó la QUINTA muestra de
+  L-235 el mismo día que la ley nació, y contra su propio número — el
+  aparato corría el OTA de S98, el baseline es el ANTES pre-S99 y no el
+  post-N11 que el pedido daba por sentado. *Archivarlo mal habría anclado
+  toda comparación futura a una premisa falsa.* **Una ley que su autor
+  aplica contra su propio número el día que la escribe es una ley que
+  agarró.**
+
+**Numeración de esta tanda, verificada por grep antes de depositar:**
+L-237 · D-828 — libres al escribir.
