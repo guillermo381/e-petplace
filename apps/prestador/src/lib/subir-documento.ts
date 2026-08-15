@@ -169,3 +169,48 @@ export async function subirDocumentoCuenta(input: {
   }
   return { ok: true, documentoId: r.data.documento_id };
 }
+
+/** SUBE UNA IMAGEN AL BUCKET DE LA CUENTA Y DEVUELVE SU PATH — sin registrar
+ *  nada (S98-C).
+ *
+ *  🔴 POR QUÉ NACE, y por qué no es un clon: `subirDocumentoCuenta` hace DOS
+ *  cosas —sube Y registra fila en `cuenta_documentos`— y las fotos del
+ *  repartidor necesitan solo la primera: su path va a una COLUMNA de
+ *  `repartidores`, no a una fila de documentos. Ensanchar aquella con un flag
+ *  «no registres» la volvería dos funciones disfrazadas de una.
+ *  **Lo que se comparte es lo que importa** —bucket y convención de carpeta—
+ *  y por eso vive acá y no en otro archivo: la carpeta raíz es el
+ *  `cuenta_comercial_id`, medido contra la policy `cuenta_documentos_operador`.
+ *  *Copiar la convención del bucket del prestador daría un rebote de permisos
+ *  con el archivo ya subido.*
+ *
+ *  Devuelve el PATH, jamás una URL: `repartidores` tiene un CHECK que rechaza
+ *  `^https?://` en esas columnas, así que guardar una URL es inexpresable. */
+export async function subirImagenDeCuenta(input: {
+  uri: string;
+  cuentaComercialId: string;
+  /** Prefijo del archivo — dice QUÉ es sin abrirlo. */
+  prefijo: string;
+}): Promise<{ ok: true; path: string } | { ok: false; causa: CausaSubidaDocumento; mensaje: string }> {
+  const path = `${input.cuentaComercialId}/${input.prefijo}-${Date.now()}.jpg`;
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await leerBytes(input.uri);
+  } catch (e) {
+    const lit = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error(`[subir-imagen-cuenta] LECTURA falló (${Platform.OS}) · ${lit}`);
+    return { ok: false, causa: 'lectura', mensaje: lit };
+  }
+  const { error } = await getClient()
+    .storage.from(BUCKET_CUENTA)
+    .upload(path, bytes, { contentType: 'image/jpeg', upsert: false });
+  if (error) {
+    console.error(`[subir-imagen-cuenta] SUBIDA falló · bucket=${BUCKET_CUENTA} · ${error.message}`);
+    return {
+      ok: false,
+      causa: esErrorDeRed(error.message) ? 'red' : 'servidor',
+      mensaje: error.message,
+    };
+  }
+  return { ok: true, path };
+}

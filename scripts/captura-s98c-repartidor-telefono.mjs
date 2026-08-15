@@ -17,11 +17,19 @@ await p.waitForTimeout(6000);
 await p.getByText('Registrar repartidor',{exact:false}).first().click();
 await p.waitForTimeout(2500);
 await p.screenshot({ path: DIR+'05-repartidor-telefono.png' });
-await p.getByPlaceholder('99 123 4567').fill('0988777666');
+await p.getByPlaceholder('99 123 4567').first().fill('0988777666');
 await p.waitForTimeout(900);
 await p.screenshot({ path: DIR+'06-repartidor-telefono-frena.png' });
-await p.getByPlaceholder('99 123 4567').fill('988777666');
+await p.getByPlaceholder('99 123 4567').first().fill('988777666');
 await p.waitForTimeout(900);
 await p.screenshot({ path: DIR+'07-repartidor-telefono-ok.png' });
+
+// S98-C · el formulario COMPLETO: se baja hasta los vehiculos.
+await p.getByText('Agregar vehículo', { exact: false }).scrollIntoViewIfNeeded();
+await p.waitForTimeout(600);
+await p.screenshot({ path: DIR+'09-repartidor-completo.png' });
+await p.getByText('Agregar vehículo', { exact: false }).click();
+await p.waitForTimeout(900);
+await p.screenshot({ path: DIR+'10-repartidor-vehiculo.png' });
 await b.close();
 console.log('capturas listas');
