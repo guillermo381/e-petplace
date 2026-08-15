@@ -754,15 +754,34 @@ export default function Mascotas() {
                 detalle={t('mascotas.resenasDetalle')}
                 onPress={() => router.push('/negocio/resenas')}
               />
-              <Separador />
-              {/* Glifo 'caso' — propio del registry, no stand-in. */}
-              <CeldaNavegacion
-                icono="caso"
-                registro="aa"
-                titulo={t('mascotas.casosHeredados')}
-                detalle={t('mascotas.casosHeredadosDetalle')}
-                onPress={() => router.push('/negocio/casos-heredados')}
-              />
+              {/* ⭐ S99-C · «CASOS QUE TE CONFÍEN» NO SE LE MUESTRA AL
+                  VENDEDOR PURO (adjudicación de mesa). Y el criterio no es
+                  de spec fina, es de la casa:
+
+                  **un estado vacío que PUEDE llenarse es honesto; uno que
+                  no puede llenarse NUNCA es una mentira.**
+
+                  A un negocio de productos **nadie le va a derivar un caso
+                  clínico jamás** — la celda prometía un futuro inexistente.
+
+                  🔴 Y LA VECINA SE QUEDA, con su razón MEDIDA y no supuesta:
+                  «Reseñas» **sí puede llenarse** — `resenas_productos` existe
+                  en el esquema (verificado: 11 columnas). *El mismo criterio
+                  que saca una deja la otra: lo que decide no es «este cuarto
+                  es de servicios», es si el vacío tiene futuro.* */}
+              {pantalla.estado !== 'sinPrestador' && (
+                <>
+                  <Separador />
+                  {/* Glifo 'caso' — propio del registry, no stand-in. */}
+                  <CeldaNavegacion
+                    icono="caso"
+                    registro="aa"
+                    titulo={t('mascotas.casosHeredados')}
+                    detalle={t('mascotas.casosHeredadosDetalle')}
+                    onPress={() => router.push('/negocio/casos-heredados')}
+                  />
+                </>
+              )}
             </Tarjeta>
           </View>
         )}
