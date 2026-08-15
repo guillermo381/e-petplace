@@ -16,6 +16,7 @@
 // Acá no hay un `switch` de estados ni un `if` que autorice a nadie.
 
 import { getClient } from '../client';
+import type { Json } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
 import {
   falloDespensa,
@@ -511,7 +512,20 @@ export async function definirRecursoReparto(input: {
   /** Convención de la casa (regla 32): 0=Domingo … 6=Sábado. */
   dias_operacion?: number[];
   activo?: boolean;
-}): Promise<ResultadoWrapper<{ recurso_id: string }, CodigoErrorDespensa>> {
+}): Promise<
+  ResultadoWrapper<
+    {
+      recurso_id: string;
+      /** D-791 · la ley del cambio: la puerta DICE si creó o corrigió. */
+      accion: 'creado' | 'actualizado';
+      /** Días (hoy..+13) donde lo YA prometido excede la capacidad nueva.
+       *  Lo comprometido SE CUMPLE igual — esto avisa, no cancela. */
+      diasSobrecomprometidos: Array<{ fecha: string; capacidad: number; comprometido: number }>;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
   const { data, error } = await getClient().rpc('definir_recurso_reparto', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     p_nombre: input.nombre,
@@ -523,7 +537,28 @@ export async function definirRecursoReparto(input: {
   if (!esObjDespensa(data) || data.ok !== true || typeof data.recurso_id !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
-  return { ok: true, data: { recurso_id: data.recurso_id } };
+  const sobre: Array<{ fecha: string; capacidad: number; comprometido: number }> = [];
+  if (Array.isArray(data.dias_sobrecomprometidos)) {
+    for (const d of data.dias_sobrecomprometidos) {
+      if (
+        esObjDespensa(d) &&
+        typeof d.fecha === 'string' &&
+        typeof d.capacidad === 'number' &&
+        typeof d.comprometido === 'number'
+      ) {
+        sobre.push({ fecha: d.fecha, capacidad: d.capacidad, comprometido: d.comprometido });
+      }
+    }
+  }
+  return {
+    ok: true,
+    data: {
+      recurso_id: data.recurso_id,
+      accion: data.accion === 'actualizado' ? 'actualizado' : 'creado',
+      diasSobrecomprometidos: sobre,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
 }
 
 /** "El segundo repartidor no puede venir el domingo": la excepción GANA al
@@ -567,7 +602,20 @@ export async function definirTurnoEntrega(input: {
   dias_semana?: number[];
   /** Mismo contrato: omitirlo NO lo apaga, lo conserva. Ausente al crear = `false`. */
   incluye_festivos?: boolean;
-}): Promise<ResultadoWrapper<{ turno_id: string }, CodigoErrorDespensa>> {
+}): Promise<
+  ResultadoWrapper<
+    {
+      turno_id: string;
+      /** D-791 · la ley del cambio: la puerta DICE si creó o corrigió. */
+      accion: 'creado' | 'actualizado';
+      /** Pedidos vivos cuya promesa congelada nombra este turno — el cambio
+       *  no los toca, y el número existe para DECIRLO en pantalla. */
+      comprometidos: number;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
   const { data, error } = await getClient().rpc('definir_turno_entrega', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     p_codigo: input.codigo,
@@ -583,7 +631,65 @@ export async function definirTurnoEntrega(input: {
   if (!esObjDespensa(data) || data.ok !== true || typeof data.turno_id !== 'string') {
     return falloDespensa('datos_inconsistentes');
   }
-  return { ok: true, data: { turno_id: data.turno_id } };
+  return {
+    ok: true,
+    data: {
+      turno_id: data.turno_id,
+      accion: data.accion === 'actualizado' ? 'actualizado' : 'creado',
+      comprometidos: typeof data.comprometidos === 'number' ? data.comprometidos : 0,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
+}
+
+/** D-791 · el ESCRITOR de la regla de envío — la puerta existía en el motor
+ *  desde S95-G2 y ningún wrapper la llamaba (motor sin puerta). Redefinir NO
+ *  apila: el motor archiva la vigente y crea la nueva, y la respuesta DICE
+ *  qué hizo y cuántos pedidos vivos conservan su cotización congelada. */
+export async function definirReglaEnvioVendedor(input: {
+  cuenta_comercial_id: string;
+  /** Código de `cat_tipos_regla_envio` (vivos hoy: `flota_propia` ·
+   *  `gratis_sobre_umbral` · `plana`). Un tipo apagado rebota hablado. */
+  tipo: string;
+  parametros: { [key: string]: Json | undefined };
+  pagado_por?: 'vendedor' | 'cliente' | 'plataforma';
+  ciudades_cubiertas?: string[];
+  prioridad?: number;
+}): Promise<
+  ResultadoWrapper<
+    {
+      regla_id: string;
+      accion: 'creada' | 'reemplazada';
+      reglasArchivadas: number;
+      /** Pedidos vivos con cotización congelada — la regla nueva no los alcanza. */
+      comprometidos: number;
+      nota: string;
+    },
+    CodigoErrorDespensa
+  >
+> {
+  const { data, error } = await getClient().rpc('definir_regla_envio_vendedor', {
+    p_cuenta_comercial_id: input.cuenta_comercial_id,
+    p_tipo: input.tipo,
+    p_parametros: input.parametros,
+    p_pagado_por: input.pagado_por ?? undefined,
+    p_ciudades_cubiertas: input.ciudades_cubiertas ?? undefined,
+    p_prioridad: input.prioridad ?? undefined,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.regla_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      regla_id: data.regla_id,
+      accion: data.accion === 'reemplazada' ? 'reemplazada' : 'creada',
+      reglasArchivadas: typeof data.reglas_archivadas === 'number' ? data.reglas_archivadas : 0,
+      comprometidos: typeof data.comprometidos === 'number' ? data.comprometidos : 0,
+      nota: typeof data.nota === 'string' ? data.nota : '',
+    },
+  };
 }
 
 /** La cifra honesta del techo del día: cuántos van sobre cuántos caben
