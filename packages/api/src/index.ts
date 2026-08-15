@@ -1190,6 +1190,12 @@ export {
   eliminarVehiculoRepartidor,
   obtenerReglaEnvioActiva,
   type ReglaEnvioActiva,
+  // S99-A · D-791 + L4: el escritor de la regla y el lector por rango — el
+  // barrel es de nombres explícitos, y un wrapper sin re-export es una puerta
+  // que no abre (precedente S96-C, cobrado de nuevo acá por C).
+  definirReglaEnvioVendedor,
+  listarPedidosDelVendedorEnRango,
+  type PedidoDelVendedorConDia,
   definirRecursoReparto,
   declararExcepcionRecurso,
   definirTurnoEntrega,
