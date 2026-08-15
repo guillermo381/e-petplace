@@ -16796,3 +16796,65 @@ que un header solo no alcanza; por eso son ficha + JSDoc + lint.
 ☠️ **Muere** cuando las cuatro superficies del presente hayan migrado (o
 declarado que no migran) cumpliendo el criterio, con el lint de B vigilando
 a las que vengan.
+
+#### D-829 — 🔴 LA PUERTA ASIMÉTRICA: el vendedor no puede solicitar servicios (hallazgo del founder EN EL GATE, 15-ago-2026 — dueño A; la regla de producto ya está FIRMADA, lo que falta es el camino)
+
+**La firma del founder, verbatim:** *«si yo quiero por ejemplo pasear,
+debería estar ahí y adjuntar como si fuera un prestador que pudiera hacerlo.
+No se activa, igual que todos, nace sin activar el servicio hasta que se
+valide — igual como el groomer puede activar servicio de ventas y entra en
+revisión, el de despensa también debería poder solicitar la activación de
+esos servicios.»* Contradice §2.0: si la capacidad decide qué se muestra,
+tiene que existir una puerta para ADQUIRIR capacidad, **y es de doble mano
+o no es puerta.**
+
+**EL CENSO, medido del objeto (15-ago, sobre `7e6dc899` + DB viva):**
+
+1. **La maquinaria de SOLICITUD ya es simétrica POR TIPO** — no hay que
+   inventarla: `solicitar_naturaleza_comercial(p_cuenta_comercial_id,
+   p_tipo_actor)` acepta las DOS naturalezas (`prestador_servicios` ·
+   `seller_productos`), escribe en `cuenta_roles` (estado `solicitada`,
+   que ningún lector de permisos mira — el cinturón de S97 lo prueba:
+   `es_vendedor_de` sigue false tras proponer), con
+   `retirar_naturaleza_solicitada` como camino de corrección y
+   `obtener_naturalezas_de_cuenta` devolviendo SIEMPRE las dos. Wrappers
+   vivos en `cuentaComercial.ts`. **Cero migración para la mitad de pedir.**
+2. **La asimetría real es de SUPERFICIE:** `solicitarNaturalezaComercial`
+   tiene **UN solo caller — `PasoOfreces.tsx`, el paso ② del wizard del
+   ALTA**. El groomer pasa por ese wizard y por eso puede pedir ventas;
+   **el vendedor puro NUNCA lo recorre** (su alta fue por función/cargador,
+   S95-F) ⇒ *la puerta existe, pero vive en un camino que una de las dos
+   poblaciones no pisa jamás.*
+3. **Y la segunda mitad es de OTORGAMIENTO, y es la cara:** para ventas
+   existe `otorgar_rol_vendedor(cc, motivo)` (ADMIN-only, con el foso de
+   §4.2 escrito en su cuerpo). **Para servicios NO existe el gemelo** — la
+   activación pasa por la maquinaria del alta de prestador (`prestadores` +
+   geo + radio + `activar_prestador`, S79; credencial médica si vet, §14.2
+   con matrícula desde el corte 15-ago) — **exige MÁS que ventas y hoy es
+   acto del founder.** Eso NO es un defecto de esta deuda: es el proceso
+   vivo, y v1 puede usarlo tal cual.
+4. **Granularidad:** la solicitud es por NATURALEZA (gruesa), no por
+   oficio — y eso ALCANZA para la letra del founder: pedir
+   `prestador_servicios` → revisión → al activarse, los oficios se
+   configuran como cualquier prestador (ofertas + chips; vet con su
+   verificación). No se inventa un eje nuevo por servicio.
+
+**LA PROPUESTA (censo servido — NO construida, por orden de mesa):**
+superficie en **NEGOCIO** de la casa del vendedor puro (el cascarón de
+D-820 ya le da la tab): una celda **«Ofrecer servicios»** que llama al
+wrapper existente con `'prestador_servicios'` + el chip de estado
+`solicitada` (la ley del contador S91 ya lo excluye del número). **Costo
+del lado solicitud: BAJO — RPC, wrapper y patrón de chip EXISTEN; es una
+pantalla.** El costo real es hacer VISIBLE la solicitud al equipo que
+valida (hoy el ciclo admin la ve en `cuenta_roles`) y el otorgamiento
+sigue por el camino vivo del alta.
+
+**IMPACTO DE PRIORIDAD, declarado por orden de mesa:** hoy un veterinario
+puede vender producto y una despensa NO puede ofrecer paseo — **es el lado
+del mercado que más rápido crece: un local de barrio que ya tiene al
+cliente adentro.**
+
+☠️ **Muere** cuando una cuenta seller-only pueda solicitar
+`prestador_servicios` desde su casa, la solicitud sea visible a quien
+valida, y el camino esté caminado por el founder (nace sin activar, igual
+que todos).
