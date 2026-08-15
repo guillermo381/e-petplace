@@ -73,7 +73,37 @@ export const paisDe = (paises: PaisDelMundo[], iso: string): PaisDelMundo | unde
  *  el próximo arco que toque `perfil.tsx`** — importa de acá y borra la suya.
  *
  *  Vacío devuelve vacío: el teléfono es OPCIONAL y un prefijo suelto no es un
- *  teléfono (guardar «+593» sería inventar un número que nadie dio). */
+ *  teléfono (guardar «+593» sería inventar un número que nadie dio).
+ *
+ *  ═══════════════════════════════════════════════════════════════════════
+ *  🔴 LA FRONTERA DE ESTE HELPER — SU SALIDA NO SIRVE PARA TODA TABLA
+ *  ═══════════════════════════════════════════════════════════════════════
+ *  Esto devuelve E.164 **CON el `+`**, y **la casa NO tiene una sola
+ *  convención de teléfono: la tiene POR TABLA, y se contradicen.** Medido
+ *  contra `pg_constraint` (hallazgo de D en S98, verificado acá y **más ancho
+ *  de lo reportado — son SEIS las que lo prohíben, no tres**):
+ *
+ *    EXIGEN el `+`  (`~ '^\+[1-9][0-9]{6,14}$'`)
+ *      · prestadores          · repartidores
+ *
+ *    PROHÍBEN el `+`  (`!~ '^\+'`)
+ *      · seller_perfil        · direcciones_guardadas
+ *      · cliente_pendiente_registro · criaderos
+ *      · refugios             · solicitudes_adopcion
+ *
+ *  ⇒ **Escribir esta salida en cualquiera de las seis REBOTA**, con el mismo
+ *  texto de CHECK crudo que la cura del repartidor vino a sacar. *No es un
+ *  descuido de quien las escribió: son la convención VIEJA sobreviviendo a su
+ *  derogación* — la regla 28 se derogó en S84 (`CONTRATO` v1.26) con la firma
+ *  *«el teléfono se guarda E.164 ENTERO, con su `+`»*, y estas seis nunca se
+ *  migraron.
+ *
+ *  **Hoy no hay defecto vivo y por eso esto es una advertencia y no una ficha
+ *  de deuda mía:** los dos consumidores existentes —`repartidores` acá y
+ *  `prestadores` en el perfil— escriben justo a las dos que EXIGEN el `+`.
+ *  El riesgo es del PRÓXIMO: al promover esto a helper compartido, su salida
+ *  quedó a un import de distancia de seis tablas que la rechazan.
+ *  **Antes de usarlo, mirá el CHECK de la tabla destino.** */
 export const componerE164 = (paises: PaisDelMundo[], valor: string, iso: string): string => {
   const crudo = valor.trim().replace(/[\s-]/g, '');
   if (crudo.length === 0) return '';
