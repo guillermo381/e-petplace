@@ -18598,6 +18598,7 @@ export type Database = {
         Row: {
           created_at: string | null
           cuenta_comercial_id: string | null
+          entrega_fecha_objetivo: string | null
           es_terminal: boolean | null
           metodo_entrega: string | null
           moneda: string | null

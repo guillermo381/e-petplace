@@ -79,6 +79,80 @@ export async function listarPedidosDelVendedor(
   return { ok: true, data: salida };
 }
 
+export interface PedidoDelVendedorConDia extends PedidoDelVendedor {
+  /** El día del pedido = `entrega_fecha_objetivo` ('yyyy-mm-dd'), LA MISMA
+   *  columna que consume `cupo_reparto_del_dia` — una sola verdad del día.
+   *  `null` = pedido sin día prometido todavía. */
+  dia: string | null;
+}
+
+/** S99-L4 · Los pedidos de MI cuenta POR VENTANA DE FECHAS — el espejo de
+ *  `obtenerCitas*DelDia({fecha, fecha_hasta})` para el dual del HOY.
+ *
+ *  Filtra EN EL SERVIDOR por `entrega_fecha_objetivo` (jamás en memoria por
+ *  date-part de la promesa: la promesa es la VENTANA horaria; el día es la
+ *  columna que el cupo ya usa). Sin techo por cantidad dentro del rango — un
+ *  `limit` por cantidad hace que un día lleno se lea como día vacío.
+ *
+ *  🔴 LO SIN FECHA PRESIDE, NO DESAPARECE (precedente D-439/S71: la cita
+ *  aprobada sin fecha era invisible por un `.gte`). Un pedido VIVO sin
+ *  `entrega_fecha_objetivo` no pertenece a ningún día — viaja SIEMPRE en
+ *  `sinFecha`, en el mismo viaje. Los terminales sin fecha no viajan: son
+ *  historia sin día y viven en el panel. */
+export async function listarPedidosDelVendedorEnRango(
+  cuentaComercialId: string,
+  fechaDesde: string, // 'yyyy-mm-dd'
+  fechaHasta: string, // 'yyyy-mm-dd'
+): Promise<
+  ResultadoWrapper<
+    { delRango: PedidoDelVendedorConDia[]; sinFecha: PedidoDelVendedorConDia[] },
+    CodigoErrorDespensa
+  >
+> {
+  const esFecha = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (!esFecha(fechaDesde) || !esFecha(fechaHasta)) {
+    return falloDespensa('datos_inconsistentes');
+  }
+  const { data, error } = await getClient()
+    .from('v_pedidos_narrativa')
+    .select(
+      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo',
+    )
+    .eq('cuenta_comercial_id', cuentaComercialId)
+    .or(
+      `and(entrega_fecha_objetivo.gte.${fechaDesde},entrega_fecha_objetivo.lte.${fechaHasta}),and(entrega_fecha_objetivo.is.null,es_terminal.eq.false)`,
+    )
+    .order('entrega_fecha_objetivo', { ascending: true, nullsFirst: true })
+    .order('promesa_entrega_desde', { ascending: true });
+
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+  const delRango: PedidoDelVendedorConDia[] = [];
+  const sinFecha: PedidoDelVendedorConDia[] = [];
+  for (const f of data) {
+    if (!esObjDespensa(f) || typeof f.pedido_id !== 'string' || !esNarrativa(f.narrativa)) {
+      return falloDespensa('datos_inconsistentes');
+    }
+    const fila: PedidoDelVendedorConDia = {
+      pedido_id: f.pedido_id,
+      numero_orden: typeof f.numero_orden === 'string' ? f.numero_orden : '',
+      total: typeof f.total === 'number' ? f.total : 0,
+      moneda: typeof f.moneda === 'string' ? f.moneda : 'USD',
+      narrativa: f.narrativa,
+      narrativa_nombre: typeof f.narrativa_nombre === 'string' ? f.narrativa_nombre : '',
+      es_terminal: f.es_terminal === true,
+      promesa_desde:
+        typeof f.promesa_entrega_desde === 'string' ? f.promesa_entrega_desde : null,
+      promesa_hasta:
+        typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
+      creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      dia: typeof f.entrega_fecha_objetivo === 'string' ? f.entrega_fecha_objetivo : null,
+    };
+    (fila.dia === null ? sinFecha : delRango).push(fila);
+  }
+  return { ok: true, data: { delRango, sinFecha } };
+}
+
 /** Las líneas a empacar, con su lote si ya se registró. Sin esto el vendedor
  *  no sabe qué `item_id` mandar a `empacarPedido`. */
 export async function obtenerLineasParaEmpaque(
