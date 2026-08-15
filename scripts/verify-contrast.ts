@@ -94,6 +94,13 @@ type Pair = {
   noTextual?: boolean
 }
 
+/** El interior del campo, tal como lo resuelve `caja-de-campo.ts` — se
+ *  espeja acá en vez de importarse porque este script no monta React, y
+ *  un espejo de UNA línea con su fuente nombrada es más barato que
+ *  arrastrar el módulo. Si la fuente cambia, R43 sigue midiendo el borde
+ *  y este par se corrige junto con ella. */
+const INTERIOR_CAMPO = (t: Theme): string => (t.mode === 'light' ? t.bg.card : t.bg.overlay)
+
 function paresDe(t: Theme, nombre: string): Pair[] {
   const p: Pair[] = []
   const add = (n: string, fg: string, bg: string, surface?: string, noTextual?: boolean) =>
@@ -108,6 +115,24 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   }
   // Narrativa cálida (bg.warm puede ser alpha → composita sobre card)
   add('text.warm / bg.warm', t.text.warm, t.bg.warm, t.bg.card)
+
+  /** S99-B · N11 — EL CONTORNO DEL CAMPO, con su piso GRÁFICO (3:1).
+   *
+   *  Entra al gate porque **es el único elemento del formulario que dice
+   *  «acá se escribe»**: desde N11 el relleno dejó de hacer ese trabajo
+   *  (`sinCaja` derogada), así que si el contorno se afloja, el campo no
+   *  queda feo — **queda invisible**.
+   *
+   *  Se mide contra `bg.base` y no contra el interior de la caja porque
+   *  la ley dice «contra el fondo», y medir contra el interior daría
+   *  números más cómodos. **`noTextual`: es un límite gráfico, no texto.**
+   *  Su hermana mecánica es R43 en `verify:diseno`, que vigila el mismo
+   *  piso del lado del token — dos guards, dos puertas. */
+  add('border.campo / bg.base (N11 ≥3:1)', t.border.campo, t.bg.base, undefined, true)
+  /** Y la etiqueta que N11 metió ADENTRO de la caja: su fondo ya no es la
+   *  pantalla, es el interior del campo. El par cambió de vecino, así que
+   *  se mide en su vecino nuevo. */
+  add('text.secondary / interior del campo (etiqueta N11 adentro)', t.text.secondary, INTERIOR_CAMPO(t))
 
   // Acentos usados como texto (links, labels) sobre base y card
   add('accent.primary / bg.base', t.accent.primary, t.bg.base)
@@ -210,9 +235,23 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
   // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
-  // usan el flag `noTextual`). El borde default queda fuera del gate: el campo
-  // se identifica por su label siempre visible, no por el borde en reposo.
-  const bgCampo = t.mode === 'light' ? t.bg.card : t.bg.elevated
+  // usan el flag `noTextual`).
+  //
+  // ⏪ S99-B · DOS CORRECCIONES DE ESTE BLOQUE, y las dos las destapó N11:
+  //
+  // ① SU PROPIA RAZÓN CADUCÓ. Decía: *«el borde default queda fuera del
+  //    gate: el campo se identifica por su label siempre visible, no por
+  //    el borde en reposo»*. Era cierto con la anatomía vieja — el label
+  //    iba ARRIBA y afuera. **N11 lo metió adentro de la caja, así que hoy
+  //    el contorno ES la identificación**, y por eso entra al gate (su par
+  //    vive arriba, junto a los de texto). *Una exención sobrevive a la
+  //    razón que la justificaba y sigue sonando sensata.*
+  //
+  // ② MEDÍA EL FONDO EQUIVOCADO EN OSCURO: `bg.elevated`, y el interior
+  //    real del campo es `bg.overlay`. Misma clase que el par del avatar
+  //    en S98 —el gate midiendo un token del que la pieza ya se había
+  //    ido—. Ahora sale del MISMO espejo que el par de arriba.
+  const bgCampo = INTERIOR_CAMPO(t)
   add('dangerText / bg.base (mensaje error Campo)', t.status.dangerText, t.bg.base)
   add('borde error Campo (danger gráfico 3:1) / bgCampo', t.status.danger, bgCampo, undefined, true)
   add(

@@ -55,15 +55,21 @@ import { Pressable, Text, TextInput, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
-import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { estiloDeCaja } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { PieDeCampo } from './Campo'
 
-const BORDE = 1.5
-const ALTO_CAJA = 48 // md — target táctil, mismo alto que Campo
+/** ⏪ S99-B · `BORDE` murió acá: sale de `caja-de-campo.ts` (Ley 37 —
+ *  su razón se cumplió cuando la anatomía se extrajo).
+ *  ⚠️ EL ALTO **NO** SIGUE A `Campo`, y ahora es a propósito: `Campo`
+ *  creció a 62 porque su etiqueta entró a la caja, y acá la etiqueta
+ *  NO entra —una caja de UN dígito no tiene lugar para un rótulo, y
+ *  ponerlo repetiría el mismo texto seis veces—. El label de esta pieza
+ *  se queda arriba, con su razón escrita, y por eso su caja conserva 48. */
+const ALTO_CAJA = 48 // md — target táctil
 
 export interface CampoCodigoProps {
   /** Cuántos dígitos. OBLIGATORIA sin default — la pieza no sabe cuánto
@@ -96,7 +102,6 @@ export function CampoCodigo({
   const inputRef = useRef<TextInput>(null)
   const [enfocado, setEnfocado] = useState(false)
 
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
 
   // La caja ACTIVA es la del próximo dígito a tipear; con el código
   // completo, la última (el cursor no puede pasar del final).
@@ -106,12 +111,6 @@ export function CampoCodigo({
     // Sanear SIEMPRE: solo dígitos, cortado a largo. Cubre tipeo, pegado
     // ("código: 1234-5678" → "12345678") y autofill por igual.
     onCambio(crudo.replace(/\D/g, '').slice(0, largo))
-  }
-
-  const bordeDe = (i: number): string => {
-    if (error) return theme.status.danger // error gana — todas las cajas
-    if (enfocado && i === indiceActivo) return accentActive
-    return theme.border.default
   }
 
   return (
@@ -151,13 +150,12 @@ export function CampoCodigo({
                 height: ALTO_CAJA,
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: radius.md,
-                borderWidth: BORDE, // SIEMPRE 1.5 — el estado cambia color, no grosor
-                borderColor: bordeDe(i),
-                backgroundColor: theme.mode === 'light' ? theme.bg.card : theme.bg.elevated,
-                // única animación permitida: color del borde (receta Campo)
-                transitionProperty: 'borderColor',
-                transitionDuration: motion.duration.fast,
+                /* S99-B · N11 — la anatomía sale de `caja-de-campo.ts`, la
+                   MISMA que `Campo` y `CampoFecha`. Estaba copiada byte a
+                   byte (su propio comentario decía «receta Campo»), y N11
+                   lo vuelve exigible: *dos estilos de campo jamás conviven*
+                   — dejar esta caja atrás fabricaría el segundo estilo. */
+                ...estiloDeCaja(theme, { error: !!error, enfocado: enfocado && i === indiceActivo }),
                 transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
               }}
             >

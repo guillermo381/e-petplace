@@ -159,4 +159,9 @@ export const uiEn = {
     evidencia: 'Evidence',
     evidenciaSubiendo: 'Evidence, uploading',
   },
+  /** S99-B · `HojaCaptura` — verbatim de `fotoEncuadre` del cliente. */
+  captura: {
+    camara: 'Take a photo',
+    galeria: 'Choose from the gallery',
+  },
 } as const satisfies Espejo<typeof uiEs>;
