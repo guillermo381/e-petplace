@@ -234,20 +234,19 @@ function vozCardDe(momento: MomentoVital, nombre: string, t: TraductorPerfil): s
   }
 }
 
-/** El glifo ⓘ de la procedencia (trazo local 1.9 — precedente de los
- *  motivos de guijarro de esta misma pantalla; candidato al registry
- *  por su puerta si se repite). */
-function GlifoInfo({ color }: { color: string }) {
-  return (
-    <Svg width={15} height={15} viewBox="0 0 24 24">
-      <Path
-        d="M12 3.4a8.6 8.6 0 110 17.2 8.6 8.6 0 010-17.2Z"
-        stroke={color} strokeWidth={1.9} fill="none"
-      />
-      <Path d="M12 11v5M12 7.7v.3" stroke={color} strokeWidth={1.9} strokeLinecap="round" fill="none" />
-    </Svg>
-  );
-}
+/* ☠️ `GlifoInfo` MURIÓ ACÁ Y SUBIÓ AL REGISTRY como `info` (S98-B).
+ * Su propio JSDoc declaraba la condición —«candidato al registry por su
+ * puerta si se repite»— y C la disparó al necesitarlo para la hora de
+ * corte en `ventas/configuracion`. **El trazo del registry es ÉSTE**:
+ * se copió la geometría medida, no se dibujó una segunda.
+ *
+ * ⚠️ Y AL MUDARLO SE MIDIÓ QUE YA ESTABA MUERTO: la función existía y
+ * **ningún JSX la montaba** (una sola ocurrencia en el archivo: su propia
+ * definición). El dibujo que fundó el precedente llevaba quién sabe
+ * cuánto sin pintarse — lo destapó el guard R30 al comparar contra el
+ * registry recién poblado. *Un glifo local que nadie monta no da síntoma:
+ * lo encuentra el día que su gemelo nace.* (Ley 37.)
+ */
 
 // S91 · P1 — la voz de la edad y del origen vive en `lib/voz-mascota`:
 // dos pantallas que escriben la misma regla divergen (letra de mesa, 8-ago;

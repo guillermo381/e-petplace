@@ -211,6 +211,16 @@ export interface TurnoEntrega {
   entrega_hasta: string;
   /** 0 = mismo día · 1 = día siguiente. */
   dia_offset: number;
+  /** Días en que RIGE el corte. **0=domingo … 6=sábado**, la convención de la
+   *  casa (medida contra `EXTRACT(DOW)`, no supuesta).
+   *
+   *  🔴 **Viaja porque sin él la Hoja no PRECARGA al reabrir** — y sin
+   *  precarga, editar la hora de un corte le mostraría al vendedor días que
+   *  no son los suyos. *La firma distingue CREAR de EDITAR, y esa distinción
+   *  necesita el dato.* */
+  dias_semana: number[];
+  /** Si el corte rige también en feriado. */
+  incluye_festivos: boolean;
   activo: boolean;
 }
 
@@ -219,7 +229,7 @@ export async function listarTurnosEntrega(
 ): Promise<ResultadoWrapper<TurnoEntrega[], CodigoErrorDespensa>> {
   const { data, error } = await getClient()
     .from('entrega_turnos')
-    .select('id, codigo, corte, entrega_desde, entrega_hasta, dia_offset, activo')
+    .select('id, codigo, corte, entrega_desde, entrega_hasta, dia_offset, dias_semana, incluye_festivos, activo')
     .eq('cuenta_comercial_id', cuentaComercialId)
     .order('orden');
   if (error) return falloDespensa(error.message);
@@ -234,6 +244,16 @@ export async function listarTurnosEntrega(
       entrega_desde: typeof t.entrega_desde === 'string' ? t.entrega_desde : '',
       entrega_hasta: typeof t.entrega_hasta === 'string' ? t.entrega_hasta : '',
       dia_offset: typeof t.dia_offset === 'number' ? t.dia_offset : 0,
+      /* Angostado verificando (regla 34): lo que no es un array de números
+         cae al set completo — **el mismo valor que la columna tiene por
+         default**, así que un dato ilegible degrada al estado que la tabla
+         ya garantizaba, no a un vacío que la pantalla leería como «ningún
+         día». *Un fallback que apaga todos los días sería peor que el dato
+         crudo.* */
+      dias_semana: Array.isArray(t.dias_semana) && t.dias_semana.every((d) => typeof d === 'number')
+        ? (t.dias_semana as number[])
+        : [0, 1, 2, 3, 4, 5, 6],
+      incluye_festivos: t.incluye_festivos === true,
       activo: t.activo === true,
     });
   }
