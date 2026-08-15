@@ -2957,6 +2957,16 @@ export const prestadorEs = {
     titulo: 'Tu histórico',
     entrada: 'Tu histórico',
     entradaDetalle: 'Las atenciones y citas que ya pasaron',
+    // ⭐ S99-D · L4 — las dos naturalezas del archivo. Se nombran con los
+    // DOS NOMBRES firmados de la casa (`LETRA_RECORRIDO` §1: «Servicios» y
+    // «Venta de productos»), en la voz del que trabaja y en plural corto —
+    // son etiquetas de segmento, no títulos.
+    natCitas: 'Servicios',
+    natPedidos: 'Pedidos',
+    natEtiqueta: 'Qué histórico estás mirando',
+    // El pedido se nombra por su número: en un archivo, el número de orden
+    // es lo único que la persona puede cotejar con su factura.
+    pedidoNumero: 'Pedido {{numero}}',
     verMas: 'Ver {{n}} días más',
     vacioTitulo: 'Nada por acá todavía',
     vacioDetalle: 'No hay atenciones desde el {{fecha}}. Puedes seguir mirando hacia atrás.',
