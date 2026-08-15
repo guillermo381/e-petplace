@@ -82,6 +82,42 @@ sin espejo es cargar a ciegas) → L6 (arranca cuando D cierre L4; la
 herencia del paseo lo abarata). **Carril R y Carril Diseño corren
 transversales toda la sesión.**
 
+> ### ⚠️ ADJUDICACIONES DE MESA (15-ago-2026) QUE ENMIENDAN LOTES — el
+> detalle en `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`
+>
+> - **L5a SE PARTE (ítem 7):** la mitad DETERMINISTA (XLSX/CSV parseado, cero
+>   IA) **arranca en L5a — §14 de `MODELO_DESPENSA` no le aplica porque no es
+>   IA**; la mitad IA (PDF/foto + mapeo al canon) **espera su fecha:
+>   POST-15-SEP**, escrita acá para que nadie la adelante por inercia. La
+>   primera tanda de IA firmada es OTRA: cablear `extract-documento` al alta
+>   del repartidor (L2), que ya existe.
+> - **L5b GANA UN CONTRATO (ítem 8):** el espejo DICE la diferencia
+>   `propuesto` vs `publicada` — en «Administrar» el SKU propuesto aparece
+>   con su estado y su porqué; en «Ver como cliente» NO está y el espejo lo
+>   explica ahí mismo. **Parte del contrato del espejo (N17+N18), no
+>   agregado**: *un vendedor jamás cree que publicó algo que no publicó.*
+> - **L4 DESTRABADO (ítem 1):** el dual gana — HERMANAS con puertas
+>   espejadas; el HOY queda con citas. Lápidas en `LA_CASA` §3.1 (hecha) y en
+>   el comentario de `lineaItems` (la pone D al abrir L4).
+
+> ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
+> por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,
+> y OCTUBRE ES FIJO)
+>
+> - **INDISPENSABLE para el soft launch: L1 · L2 · L3 · L5a · L5b.** *Sin
+>   vitrina y sin carga, un vendedor no puede vender — y sin eso no hay soft
+>   launch, hay demo.*
+> - **DESEABLE: L4, el dual.** Solo afecta a `duenotodo`, minoría en el
+>   arranque.
+> - **PUEDE ESPERAR a v1.1: L6, la moto tipo Rappi.** *Es lo más lindo de la
+>   sesión y por eso se dice explícito: la familia puede vivir un mes con
+>   estados y avisos honestos; un vendedor no puede vivir un día sin
+>   vitrina.*
+> - **Consecuencia operativa para D** *(el dictado de mesa llegó CORTADO en
+>   esta frase — se deposita la lectura que la prioridad implica, declarada
+>   como lectura y no como literal)*: si L4 y su cola de L5b compiten por su
+>   tiempo, **gana lo indispensable — D sirve a L5b antes que al dual.**
+
 ---
 
 ## §3 · LO QUE EL DOBLE CHECK DE MESA AGREGÓ (y su porqué)

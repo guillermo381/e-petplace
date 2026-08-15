@@ -311,10 +311,24 @@ tiene reversa*. Queda **huérfano de superficie y declarado** ⇒ **D-807**.
 
 ## 3 · HOY ES UN FEED CRONOLÓGICO DEL DÍA
 
-> **Citas, llegadas y despachos conviven ordenados por hora.**
+> ~~**Citas, llegadas y despachos conviven ordenados por hora.**~~
+>
+> ⏪ **ENMENDADA POR ADJUDICACIÓN DE MESA (15-ago-2026, S99 — hoja única del
+> founder, ítem 1): GANA LA FIRMA NUEVA DEL DUAL. El HOY se queda con
+> CITAS; los despachos viven en su VENTANA HERMANA con puertas espejadas**
+> (`PLAN_S99` L4). El argumento de S97-D que sostenía la fusión —*«un día en
+> dos listas está en dos órdenes que el lector reconcilia de memoria»*—
+> **queda RESPONDIDO, no ignorado: con el selector de fecha compartido es UN
+> día en DOS VENTANAS**, y la puerta espejada conserva el día al cruzar. La
+> letra vieja se tacha y no se borra; su gemela vive en el comentario de
+> `lineaItems` (`(tabs)/index.tsx`) y **la lápida de código la pone D al
+> abrir L4**. Adjudicación entera:
+> `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`.
 
 **En VISTA, jamás en tabla.** El feed es una composición de lectura: las
-tres fuentes se leen por separado y se ordenan por hora **en el lector**.
+fuentes se leen por separado y se ordenan por hora **en el lector** — la
+regla sobrevive a la enmienda (rige para la ventana de citas y para la
+ventana hermana de pedidos, cada una con su día).
 
 ### 3.1 🔴 LA FRONTERA EXACTA DEL HOY (firma del founder, 14-ago-2026)
 
