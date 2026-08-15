@@ -1135,6 +1135,17 @@ function r27(fuentes) {
 }
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 const FUENTES_R43 = { palette: readFileSync('packages/ui/src/tokens/palette.ts', 'utf8') };
+/** R44 · los SEIS diccionarios de la casa (las dos apps + `ui`). El
+ *  corpus `DICCIONARIOS` de arriba trae solo los del cliente y N12.4
+ *  dice «en toda la casa», así que R44 arma el suyo — y su ancla exige
+ *  los seis: si uno se cae del corpus, la regla dejaría de mirar esa
+ *  casa en silencio. */
+const CORPUS_R44 = [
+  'apps/cliente/src/i18n/es.ts', 'apps/cliente/src/i18n/en.ts',
+  'apps/prestador/src/i18n/es.ts', 'apps/prestador/src/i18n/en.ts',
+  'packages/ui/src/i18n/es.ts', 'packages/ui/src/i18n/en.ts',
+  ...archivosCodigo('packages/api/src'),
+].map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 
 
 /** R29 · `sinPie` NO VIAJA SOLO (S83-B1). La enmienda de la letra de
@@ -1776,6 +1787,21 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R44 · el fixture trae los SEIS diccionarios (si no, el ancla es lo
+     que lo pone rojo) con las 6 del baseline repartidas + UNA séptima.
+     Lo que tiene que salir rojo es la voz nueva. */
+  /* R44 · el fixture trae 40 archivos (el ancla) con las 9 del baseline
+     repartidas + UNA décima. Lo rojo tiene que ser la voz nueva. Y trae
+     además DOS legítimas —con oración previa que nombra la falla— para
+     que el fixture pruebe que el net DISCRIMINA, no solo que dispara. */
+  R44: [
+    { path: 'apps/prestador/src/i18n/es.ts', src: Array(3).fill("      x: 'Revisa los datos de la nota.'").join('\n') },
+    { path: 'apps/prestador/src/i18n/en.ts', src: Array(3).fill("      x: 'Check the details and try again.'").join('\n') },
+    { path: 'packages/api/src/wrappers/a.ts', src: Array(3).fill("  datos_invalidos: 'Revisá los datos.',").join('\n') },
+    { path: 'packages/api/src/wrappers/legitimas.ts', src: "  a: 'Una de las vacunas del carnet no es válida. Revisá los datos e intentá de nuevo.',\n  b: 'No pudimos guardar la foto. Revisa tu conexión y prueba de nuevo.',"  },
+    { path: 'apps/cliente/src/i18n/es.ts', src: "      y: 'Algo salió mal.'" },
+    ...Array.from({ length: 35 }, (_, i) => ({ path: `(relleno-${i}).ts`, src: '' })),
+  ],
   R43: {
     palette: [
       "  papelTapiz: '#FAF2F5',",
@@ -2725,7 +2751,97 @@ function r43(fuentes) {
   return { fallos, info: `${detalle.join(' · ')} — piso ${PISO_R43}:1 (N11)` }
 }
 
-const REGLAS = { R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/** R44 · N12.4 · EL ERROR QUE NO DICE QUÉ ESTÁ MAL (S99-B).
+ *
+ *  N12.4 firmada: *«El error dice QUÉ está mal y CÓMO se arregla, con un
+ *  ejemplo real. **"Campo inválido" está prohibido en toda la casa.**»*
+ *
+ *  QUÉ VIGILA: la voz que manda a *revisar* sin decir qué revisar. No es
+ *  una regla de estilo — **es la diferencia entre un error que se puede
+ *  arreglar y uno que solo se puede volver a intentar.**
+ *
+ *  🔴 Y NO ES HIPOTÉTICA: la casa ya la cobró antes de que existiera la
+ *  ley. S75 registró que un rebote real iba a decir *«Revisá los datos»*
+ *  hasta que su código entrara al diccionario de voces — o sea que este
+ *  defecto ya se había visto de frente, y sin ley detrás no había con qué
+ *  frenarlo.
+ *
+ *  BASELINE NOMINAL SOLO-BAJA, CON DUEÑO DECLARADO: **6, los seis en
+ *  `apps/prestador` (3 `es` + 3 `en`), que NO es mi territorio.** Nacen
+ *  declarados y pedidos, jamás curados por mí — el precedente es R35 en
+ *  S96-B, que nació con baseline 1 y dueño y lo curó su dueño el mismo
+ *  día. *La forma correcta de nacer de un ratchet: se declara y se pide,
+ *  no se invade el territorio ajeno.* **DE ACÁ NO SE SUBE.**
+ *
+ *  ⚠️ EL NET ME COSTÓ TRES MEDICIONES, y queda escrito porque el número
+ *  importaba: la primera dio **3** (`revisá?` no matchea «revisa» — la
+ *  tilde opcional no cubre la vocal sin tilde), la segunda **4** («check
+ *  the NOTE details» tiene una palabra en el medio), y la tercera, **6**.
+ *  *Un baseline mal medido no protege de menos: protege de más, porque
+ *  deja pasar como preexistente lo que nunca contó.* */
+/** ⏪ ENSANCHADA EN LA MISMA SESIÓN, por el cruce de C — y las DOS
+ *  mitades del cruce importan, con su literal:
+ *  *«su regla encontró en mi territorio una deuda con dueño; mi medición
+ *  encontró que su regla mira la mitad del problema.»*
+ *
+ *  🔴 **EL CORPUS ERA LA MITAD.** N12.4 dice *«en toda la casa»* y R44
+ *  nació mirando SOLO los seis diccionarios. La misma voz vive también
+ *  en `packages/api`, **hard-codeada en español en un paquete sin capa
+ *  de idioma** (D-539) y mostrada directo por 34 archivos del prestador
+ *  (`r.mensaje`) ⇒ **en inglés se ven en español.** *Una regla cuyo
+ *  nombre promete «toda la casa» y cuyo corpus es la mitad está verde
+ *  porque no mira, que es el modo de falla que L-192 persigue.*
+ *
+ *  ⚠️ Y AL ENSANCHAR, EL NET VIEJO SOBRE-CAPTURABA — el cruce se sirvió
+ *  con **cinco** de `packages/api` y **son TRES**. Los otros dos
+ *  (`vacunas.ts:198` · `_despensa-comun.ts:237`) **cumplen N12.4**:
+ *  *«Una de las vacunas del carnet no es válida…»* y *«El recorrido
+ *  llegó con datos inválidos»* **NOMBRAN LA FALLA**. Blanquearlos en un
+ *  baseline los habría bendecido para siempre — el mismo daño que el
+ *  subconteo, del otro lado.
+ *
+ *  ⇒ **EL DISCRIMINADOR, que es lo que esta regla aprendió:** el defecto
+ *  no es contener «revisá» — es que **NADA diga qué falló ANTES**. Por
+ *  eso el net ancla al arranque de la frase (`^[^.!?]*`): si hay una
+ *  oración previa que nombra la falla, el mensaje cumple. Calibrado
+ *  contra los **16 casos reales** de las dos casas, 16/16. */
+const BASELINE_R44 = 9
+const VOZ_SIN_QUÉ =
+  /^[^.!?]*(revis[aá] los datos|check the [a-z ]*details?|campo (inv[aá]lido|requerido)|invalid field|algo sali[oó] mal|something went wrong)/i
+function r44(archivos) {
+  const fallos = []
+  let total = 0
+  let dics = 0
+  for (const { path, src } of archivos) {
+    dics++
+    for (const linea of src.split('\n')) {
+      /* El net mira el VALOR de la cadena, no la línea entera: una línea
+         puede traer clave, comentario y comilla, y anclar al arranque de
+         la LÍNEA haría que cualquier prefijo desactive el `^`. */
+      for (const m of linea.matchAll(/'([^']{6,})'/g)) {
+        if (!VOZ_SIN_QUÉ.test(m[1])) continue
+        total++
+        if (total > BASELINE_R44)
+          fallos.push(
+            `R44: ${path} — VOZ DE ERROR QUE NO DICE QUÉ (N12.4): «${m[1]}». La ley pide QUÉ está mal y CÓMO se arregla, con un ejemplo real. «Revisá los datos» deja a la persona con lo único que ya sabía: que algo falló.`,
+          )
+      }
+    }
+  }
+  if (total < BASELINE_R44)
+    fallos.push(
+      `R44: quedan ${total} voces genéricas y el baseline declara ${BASELINE_R44} — BAJÓ: actualizar el baseline. Un baseline que sobra deja de ser deuda y pasa a ser permiso.`,
+    )
+  // ANCLA: si el corpus de diccionarios se rompe, la regla no vería
+  // ninguna voz y su verde diría «no miré» (L-192). Son SEIS archivos.
+  fallos.push(...ancla('R44', dics, 40, 'archivo(s) del corpus (6 diccionarios + los wrappers de api)'))
+  return {
+    fallos,
+    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} = 6 diccionarios de \`apps/prestador\` (dueño C, CURABLES escribiendo mejor) + 3 de \`packages/api\` (dueño A, BLOQUEADAS: \`datos_invalidos\` es el fallback de CUALQUIER CHECK — la voz buena exige códigos tipados por constraint, no una frase mejor). Solo-baja`,
+  }
+}
+
+const REGLAS = { R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2973,6 +3089,7 @@ corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(D
 corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
 corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
+corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

@@ -2469,6 +2469,21 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 >
 > **Origen de la enmienda:** S86 — C lo nombró al construir la Pizarra, A lo midió. *El wrapper nuevo de esa misma sesión (`pizarra.ts`) nace con el mismo defecto **a propósito y declarado**: cambiar la voz de UN wrapper mientras los otros ~40 siguen en voseo produciría dos acentos adentro de `packages/api`, que es peor que uno consistente y equivocado.*
 
+> **➕ ENMIENDA S99 (adjudicación de mesa, 15-ago-2026) — EVIDENCIA NUEVA DE C, Y LA FRONTERA CON R44 DECLARADA.**
+>
+> C midió cinco voces de error de `packages/api` hard-codeadas en español y
+> **alcanzables en pantalla** (`veterinaria-presupuesto.ts:97` ·
+> `veterinaria-nota-clinica.ts:194` · `handshake-mostrador.ts:72` ·
+> `vacunas.ts:198` · `_despensa-comun.ts:237`): **con la app en inglés se
+> ven en español** — el caso concreto que esta ficha describía en abstracto.
+>
+> **Y la mesa separó las enfermedades para que no se curen mal:** *«una voz
+> puede ser específica y estar igual en el idioma equivocado»* — la voz
+> GENÉRICA la vigila **R44** (N12.4) · el IDIOMA es ESTA deuda, y **R44 no
+> la vigila ni debe** · la FRONTERA (que la pantalla muestre `r.mensaje`
+> crudo) pasó a deuda propia: **D-826**, que es la resolución del abanico de
+> tres opciones que la enmienda S86 de arriba dejó servido a la mesa.
+
 ---
 
 #### D-654 — 🔴 EL MOSTRADOR ES VETERINARIO POR CONSTRUCCIÓN: el camino de paseos llega entero hasta la puerta y la puerta no abre
@@ -11675,6 +11690,24 @@ defecto que se curó hoy en el cambio de clave.
 
   **Las dos curas:** toda sonda corre dentro de una transacción que se revierte —residuo cero **por mecanismo, no por prolijidad**— y todo check de residuo cuenta **lo suyo**, con el conteo global reportado como dato y no como veredicto.
 
+- **L-235 — EL INSTRUMENTO RESPONDIÓ SOBRE OTRA COSA (S99 — ratificada por mesa sobre CUATRO casos medidos en UN día).**
+
+  > **Antes de concluir de un verde o un rojo, se verifica sobre qué objeto respondió el instrumento.**
+
+  Los cuatro casos del día, cada uno con instrumento sano y respuesta creíble **sobre otro objeto**: ① D midió contra un **Metro huérfano** de una sesión cerrada que servía la app vieja (D-769 enmendada) · ② B midió el contraste de una **rama que no se ejecuta** (el default elegía la otra) · ③ A corrió su E2E contra la **cuenta mal emparejada** (0 filas perfectamente creíbles) · ④ el **baseline de R44 costó tres mediciones** y las dos primeras dieron de menos.
+
+  **Su variante cara, y es la mitad que hay que memorizar:** *un baseline mal medido no protege de menos, protege de MÁS — un rojo mal hecho se investiga; un verde mal medido bendice para siempre.* Y la frase de C, del mismo día: **«un rojo torpe puede auditar al auditor.»**
+
+  **La cura fue la misma las cuatro veces: verificar QUIÉN/QUÉ responde antes de leer la respuesta** (`lsof`+`ps` para un puerto · el default vivo para una rama · la identidad para una sesión · el conjunto ampliado para un net). **Las cuatro pistas la llevan en su arranque de acá en adelante** (orden de mesa, 15-ago-2026; adjudicaciones en `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`).
+
+- **L-236 — EL NET MIDE EL SÍNTOMA, NO EL DEFECTO (S99 — depositada por orden de mesa, 15-ago-2026).**
+
+  **Hermana de L-235, no la misma:** L-235 es el instrumento respondiendo sobre otro OBJETO; **L-236 es el instrumento respondiendo sobre el objeto correcto con la PREGUNTA equivocada.** El literal de B, que es el que vale: **«el defecto no es contener ‹revisá› — es que NADA diga qué falló ANTES.»** El net de R44 capturaba la palabra (el síntoma) y sobre-contaba dos voces que CUMPLEN la ley; recalibrado al defecto (¿algo nombra la falla antes?), 16/16 contra los casos reales.
+
+  **Con su simetría entera:** *subcontar bendice lo que nunca se contó · sobre-contar sella como deuda lo que ya cumple — y las dos terminan en un lint verde que miente.*
+
+  **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
+
 - **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
 
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
@@ -16599,3 +16632,97 @@ lo sabe).
 *Encenderlos todos sería exactamente lo contrario de la firma que abrió
 D-822: «el canal nace útil, no ruidoso».* **Territorio: el founder (qué
 merece avisar) + A (los productores).**
+
+---
+
+## Deudas S99 — LOS DOS HOY, EL REPARTIDOR Y EL NIVEL QUE LA APP MERECE (D-825 →)
+
+> Numeración verificada por grep ANTES de depositar (D-825 libre en docs/,
+> apps/, packages/ y scripts/). Adjudicaciones de la sesión:
+> `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`.
+
+#### D-825 — 🟡 ONCE PIEZAS ANIMAN CON `easeOut` Y LA LETRA N10 DICE EL BEZIER DE LA CASA
+
+**Nace de la adjudicación de mesa del 15-ago-2026 (ítem 10), sobre el censo
+de B.** N10 (enmendada 14-ago) cierra el vocabulario en DOS curvas con
+reparto cerrado: **bezier de la casa `(.32,.72,0,1)` para entradas y
+transiciones · spring SOLO para gestos de rebote**. Once piezas vivas animan
+con `easeOut` — letra ANTERIOR al vocabulario cerrado, no desvío nuevo.
+
+**La adjudicación, literal:** *«gana la letra N10. Deuda solo-baja con
+número propio, se cura al tocar cada pieza (patrón R44). Cero frente nuevo
+esta sesión. Las piezas nuevas usan la letra, como ya hizo B.»*
+
+**La cura, pieza por pieza y jamás en barrida:** al TOCAR cada pieza por
+cualquier otro motivo, su curva pasa al token de la casa **en el mismo
+commit**, y el contador baja. Una barrida de once curvas sin gate visual
+sería re-timing masivo sin ojo — exactamente lo que la regla 80 prohíbe.
+
+**El censo es de B (su parte S99-B tiene la lista de las once); el patrón
+del contador es el de R44** (baseline solo-baja con dueño por pieza).
+
+☠️ **Muere** cuando el contador llegue a cero — once curvas migradas cada
+una con su toque y su gate de lote.
+
+#### D-826 — 🔴 EL MOTOR ESCRIBE LA COPIA QUE LA PANTALLA MUESTRA CRUDA (violación de capa, no problema de redacción)
+
+**Nace por adjudicación de mesa (15-ago-2026), con la medición de C:**
+**34 archivos de `apps/prestador` renderizan `r.mensaje` directo** — el texto
+que lee una persona lo decide el MOTOR, no la pantalla. *Que el motor decida
+la copia es violación de capa: mientras esa frontera exista, curar las once
+voces de R44 deja el camino abierto para la número doce.*
+
+**La adjudicación, literal:** *«Registrala con la medición de C, dueño A,
+criterio de disparo: cada lote que toque esa frontera traduce en la pantalla
+en vez de mostrar el mensaje del motor. No abre frente hoy.»*
+
+**Genealogía, para que nadie la re-derive:** es la RESOLUCIÓN del abanico
+que la enmienda S86 de **D-539** dejó a la mesa (lint anti-`.mensaje`-en-JSX
+· renombre a `mensajeDev` · capa de idioma) — la mesa eligió el camino
+incremental por lote, no la barrida. Sus hermanas, cada una con su
+enfermedad: **R44** vigila la voz genérica (N12.4) · **D-539** el idioma ·
+**ésta** la frontera. *Separadas o se curan mal.*
+
+**El patrón de la cura, por lote:** la pantalla mapea el **`codigo`** del
+wrapper a su diccionario i18n y jamás pinta `r.mensaje` (la disciplina que C
+ya practica desde S86, hecha criterio exigible de lote). Donde el código no
+alcance para la voz buena, rige el acuerdo A↔C ratificado por mesa: **Ley 23
+primero · código tipado por constraint a demanda · jamás un mapeo genérico
+de `23514` mejor escrito.**
+
+☠️ **Muere** cuando el contador de sitios-que-pintan-`r.mensaje` llegue a
+cero — lote a lote, jamás en barrida.
+
+#### D-827 — 🟡 CÓDIGOS TIPADOS POR CONSTRAINT: el fallback `datos_invalidos` de `23514` gana número (dueño A)
+
+**Nace por orden de mesa (15-ago-2026), y su razón es L-217 en carne:** el
+compromiso de A —códigos tipados por constraint, puerta por puerta— vivía en
+dos partes de Loop y una cabecera de lint, **sin número**: *cuando estas
+sesiones cierren, tres líneas del baseline de R44 van a estar bloqueadas por
+una promesa que nadie va a poder encontrar.* Ahora la promesa tiene ficha.
+
+**El defecto:** los orquestadores del pedido capturan `error.code = '23514'`
+(violación de CHECK) y lo degradan a UN solo código, `datos_invalidos`
+(`veterinaria-presupuesto.ts:101` como espécimen) ⇒ **la pantalla no puede
+decir QUÉ falló** aunque N12.4 se lo exija — la voz buena es estructuralmente
+imposible desde el wrapper.
+
+**La cura, con la mitad que protege ESCRITA:**
+- **Criterio de disparo: cada puerta que el L1 de C toque**, con **el
+  constraint exacto y el literal del rebote que la pantalla quiere poder
+  dar** — C pide, A entrega como enmienda chica de esa puerta.
+- **Ley 23 va PRIMERO** (la pantalla valida antes de mandar; la genérica
+  queda como último recurso honesto) — el código tipado cubre lo que la
+  validación no puede saber (constraints que solo el servidor conoce).
+- 🔴 **JAMÁS un mapeo genérico de `23514` mejor escrito** — *la mitad que
+  protege es esa*: sin ella el acuerdo se cumple en la forma y se pierde en
+  el fondo (literal de C, ratificado por mesa).
+
+**Costura con R44 (orden de mesa a B, ya relevada):** las tres líneas
+BLOQUEADAS del baseline de R44 apuntan a ESTA ficha por número — el día que
+una puerta gane su código, la línea baja sola **y el lector sabe por qué
+estaba parada**.
+
+☠️ **Muere** cuando las puertas que las pantallas consumen devuelvan código
+por constraint donde la voz lo necesita, y el tramo BLOQUEADO del baseline
+de R44 llegue a cero.
