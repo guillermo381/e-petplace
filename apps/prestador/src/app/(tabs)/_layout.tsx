@@ -82,22 +82,28 @@ type EstadoSesionRaiz =
       ok: true;
       esGestor: boolean;
       montaAtender: boolean;
-      ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor';
+      // ⭐ S99-D: `'vendedor-puro'` NO es un cuarto valor decorativo — es el
+      // único que dice «la ceremonia no se preguntó porque no hay sujeto».
+      // Reusar `'no-gestor'` habría afirmado algo falso (él SÍ es gestor) y
+      // el forense habría mentido justo donde se lo lee para diagnosticar.
+      ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor' | 'vendedor-puro';
     }
   // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
   // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
   // ANTES de las tabs (precedente /invitacion, L-161). El puente
   // AsyncStorage murió consumiendo esa RPC.
   | { bienvenida_pendiente: true }
-  // 🔴 S96-C (orden del founder, tanda del gate): el VENDEDOR PURO —
-  // cero prestador, cero vínculo, cuenta comercial con rol
-  // `seller_productos` activo — tiene su casa en /ventas. Antes de esta
-  // rama caía en `sin_rol`, un callejón que además MENTÍA por omisión:
-  // le pedía una invitación de EMPLEADO a alguien ya dado de alta como
-  // vendedor (el estado exacto del vendedor real de octubre, D-766).
-  // Con AMBOS (prestador/vínculo Y cuenta seller) gana el camino de
-  // tabs: la puerta Negocio→«Venta de productos» ya lo lleva a ventas.
-  | { vendedor_puro: true }
+  /* ☠️ S99-D · L1 · D-820 — MURIÓ EL ESTADO `vendedor_puro`.
+     Lo escribió S96-C por orden del founder en la tanda del gate, y **hizo
+     su trabajo**: sacó al vendedor puro del callejón `sin_rol`, que le pedía
+     una invitación de EMPLEADO a alguien ya dado de alta como vendedor (el
+     estado exacto del vendedor real de octubre, D-766). Su propia ficha
+     D-819 dejó medido el límite: *«hoy NO TIENE BARRA EN ABSOLUTO»*.
+     **La firma del 14-ago (§2.0) lo convirtió de diseño en defecto**, y hoy
+     el vendedor puro cae en `ok` como cualquier dueño — con su barra
+     compuesta por capacidad, que es lo que la letra pide.
+     *No se pierde nada de aquella rama: la pregunta que hacía sigue viva
+     tres líneas más arriba; lo que cambió es la respuesta.* */
   // S79-B (T3-B3): estado 'pendiente' → LA SALA DE ESPERA. La regla dura:
   // el pendiente NO entra al portal — y la carta §2.3 tampoco se le
   // muestra (primer_ingreso_en marca la fase 4, no la 1).
@@ -156,7 +162,10 @@ export default function TabsLayout() {
              mudaron: `lib/barra-prestador-lectura`, con su porqué entero.
              *Dos copias no divergen algún día: divergen la primera vez que
              alguien cura una sola.* */
-          const { esGestor, montaAtender } = await resolverCapacidadDeBarra(p.data.id);
+          const { esGestor, montaAtender } = await resolverCapacidadDeBarra({
+            tipo: 'prestador',
+            prestadorId: p.data.id,
+          });
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo
@@ -189,11 +198,44 @@ export default function TabsLayout() {
           // empleado: un panel donde puede TRABAJAR HOY gana a una voz
           // de espera (si además es empleado de un negocio no-activo, el
           // día que el negocio active, `obtenerMiPrestador` resuelve y
-          // esta rama ni se toca). `contextoVentas` cachea: el costo por
-          // foco es cero después del primero.
+          // esta rama ni se toca). `contextoVentas` **deduplica en vuelo**
+          // (S98-C): tres consumidores simultáneos comparten un viaje.
           const ventas = await contextoVentas();
           if (ventas.ok && ventas.data !== null && ventas.data.esVendedora) {
-            return { vendedor_puro: true };
+            /* ⭐ S99-D · L1 · D-820 — EL VENDEDOR PURO ENTRA A LA CASA.
+               `LA_CASA_DEL_PRESTADOR` §2.0 (firma del founder, 14-ago):
+               *«el vendedor puro deja de ser el caso sin barra: es un DUEÑO
+               y tiene la casa entera»*.
+
+               ☠️ ACÁ DEVOLVÍA `{ vendedor_puro: true }`, que abajo se
+               resolvía en `<Redirect href="/ventas" />`. **La redirección
+               muere; la RUTA `/ventas` NO** — y esa mitad es la que hay que
+               no perder de vista: `/ventas` sigue siendo la casa de una
+               población que NO tiene barra propia, el **empleado-vendedor
+               no-gestor** de §0bis, que entra por su puerta del HOY
+               (`(tabs)/index.tsx`). *Matar la ruta con el Redirect le
+               sacaría el piso al mismo actor al que S96 ya se lo sacó una
+               vez* — medición de C, costura 1 de `PLAN_S99` §5.
+               Su condición de muerte, acordada con C y escrita en los dos
+               partes: la ruta muere cuando ① la pieza de la ventana de
+               pedidos esté montada en el HOY del dual (L4) **y** ② las tres
+               puertas vivas tengan destino nuevo POR POBLACIÓN.
+
+               ⚠️ La ceremonia del primer ingreso NO se le pregunta: estampa
+               sobre el TITULAR ACTIVO de un prestador y él no tiene fila.
+               Llamarla sería pedirle al motor un veredicto sobre un sujeto
+               que no existe; su literal en el forense lo dice. */
+            const { esGestor, montaAtender } = await resolverCapacidadDeBarra({
+              tipo: 'vendedorPuro',
+              // ⚠️ EL CONTEXTO YA RESUELTO VIAJA — no se vuelve a pedir. Es la
+              // misma lectura de tres líneas arriba (la que dijo que era
+              // vendedora): pedirla de nuevo son DOS peticiones encadenadas
+              // en el arranque, y la deduplicación en vuelo de
+              // `contextoVentas` no las salva porque es secuencial, no
+              // simultánea. Medido con `verify-s99d-olas-vendedor-puro`.
+              contexto: ventas.data,
+            });
+            return { ok: true, esGestor, montaAtender, ceremonia: 'vendedor-puro' as const };
           }
           // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
           // La sonda distingue la voz (cero motor — policy empleados_self).
@@ -220,7 +262,6 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor} · atender=${r.montaAtender} · ceremonia=${r.ceremonia}`
-              : 'vendedor_puro' in r ? 'vendedor puro → /ventas'
               : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
                   : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
@@ -251,10 +292,16 @@ export default function TabsLayout() {
     );
   }
 
-  if ('vendedor_puro' in sesion) {
-    // S96-C: la casa del vendedor puro es el panel de ventas.
-    return <Redirect href="/ventas" />;
-  }
+  /* ☠️ S99-D · L1 · D-820 — MURIÓ EL `<Redirect href="/ventas" />`.
+     Era la única línea que le negaba la casa al vendedor puro: entraba, y
+     antes de ver una tab lo mandaban a una pantalla suelta.
+     **⚠️ LA RUTA `/ventas` NO MUERE CON ÉL, y la distinción es la costura 1
+     de `PLAN_S99` §5:** sigue siendo la casa de una población que no tiene
+     barra propia —el empleado-vendedor no-gestor de §0bis, que entra por su
+     puerta del HOY—. Su condición de muerte, acordada con C y escrita en
+     los dos partes: la ruta muere cuando ① la pieza de la ventana de
+     pedidos esté montada en el HOY del dual (L4) **y** ② las tres puertas
+     vivas tengan destino nuevo POR POBLACIÓN. */
 
   if ('sala_espera' in sesion) {
     // S79-B (T3-B3): el pendiente NO entra al portal.

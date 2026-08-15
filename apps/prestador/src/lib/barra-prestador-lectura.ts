@@ -13,8 +13,35 @@
 
 import { empleadoTieneRol, obtenerMiPosicionEnPrestador } from '@epetplace/api';
 
-import { hayCapacidad, resolverCapacidadAtender } from './capacidad-atender';
+import {
+  capacidadVendedorPuro,
+  hayCapacidad,
+  resolverCapacidadAtender,
+} from './capacidad-atender';
+import type { ContextoVentas } from './cuenta-ventas';
 import type { CapacidadDeBarra } from './barra-prestador';
+
+/**
+ * QUIÉN ESTÁ ENTRANDO — y por qué es una unión y no un `prestadorId | null`.
+ *
+ * S99-D (L1 · D-820): desde que el vendedor puro entra a la casa de tabs hay
+ * **dos naturalezas** que componen barra, y una de ellas **no tiene
+ * `prestador_id`**. Un `string | null` habría dejado el caso legible como
+ * «prestador cuyo id no pudimos leer», que es otra cosa y con otra cura.
+ * *La unión hace inexpresable el estado equivocado* — el precedente de la
+ * casa (un estado malo no se documenta: se vuelve imposible, L-222).
+ */
+export type QuienEntra =
+  | { tipo: 'prestador'; prestadorId: string }
+  /* 🔴 El vendedor puro trae SU CONTEXTO, y por eso el tipo lo exige.
+     Medido: el guard raíz ya resolvió `contextoVentas()` tres líneas antes
+     de llegar acá —es cómo supo que era vendedor—, así que una lectura
+     propia acá son **dos peticiones encadenadas de más** en el arranque de
+     la única población que este lote sirve (la deduplicación en vuelo de
+     `contextoVentas` no alcanza: deduplica lo simultáneo, no lo
+     secuencial). Pedirlo por tipo hace que el desperdicio no se pueda
+     escribir. */
+  | { tipo: 'vendedorPuro'; contexto: ContextoVentas | null };
 
 /**
  * LAS DOS PREGUNTAS, EN UNA SOLA OLA — y **la asimetría de sus fallos es
@@ -36,7 +63,11 @@ import type { CapacidadDeBarra } from './barra-prestador';
  * sumaría ~300 ms al arranque de cada foco (D-738 · L-223 — el peaje es la
  * PETICIÓN, y lo que se paga en reloj es la CADENA).
  */
-export async function resolverCapacidadDeBarra(prestadorId: string): Promise<CapacidadDeBarra> {
+export async function resolverCapacidadDeBarra(
+  quien: QuienEntra,
+): Promise<CapacidadDeBarra> {
+  if (quien.tipo === 'vendedorPuro') return barraVendedorPuro(quien.contexto);
+  const { prestadorId } = quien;
   const [rol, posicion, capacidad] = await Promise.all([
     empleadoTieneRol(prestadorId, ['dueño', 'administrador']),
     obtenerMiPosicionEnPrestador(prestadorId),
@@ -48,4 +79,38 @@ export async function resolverCapacidadDeBarra(prestadorId: string): Promise<Cap
       (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
       (capacidad.ok ? hayCapacidad(capacidad.data) : true),
   };
+}
+
+/**
+ * EL VENDEDOR PURO (S99-D · L1 · D-820) — **una sola pregunta, no tres.**
+ *
+ * `LA_CASA_DEL_PRESTADOR` §2.0 (firma del founder, 14-ago): *«el vendedor
+ * puro deja de ser el caso sin barra: es un DUEÑO y tiene la casa entera»*.
+ *
+ * **`esGestor: true` sin preguntar, y el porqué está medido:** las otras dos
+ * lecturas resuelven *«¿esta persona manda en el negocio de otro?»*, y acá
+ * **no hay negocio de otro**: la cuenta comercial es suya (`owner_profile_id`
+ * es su perfil — así llegó a esta rama). Preguntarle a `empleadoTieneRol`
+ * por un `prestador_id` que no existe no es una pregunta más estricta: es
+ * una pregunta sin sujeto.
+ *
+ * ⚠️ **Y NEGOCIO no es un tab de más para él: es donde vive su plata.**
+ * Ahí están su facturación y su liquidación; sin `NEGOCIO`, el puntero
+ * «Datos de facturación» de `ventas/configuracion.tsx` —que hoy se le dibuja
+ * SOLO a él porque *«sin él se queda sin ningún camino a sus datos
+ * fiscales»*— no tendría a dónde morir. *La barra completa no le regala un
+ * cuarto: le devuelve el que su puntero venía supliendo.*
+ *
+ * **NO LEE NADA, y eso es la cura de una regresión mía** (ver el porqué
+ * medido en `capacidadVendedorPuro`): el contexto llega por el tipo, así que
+ * esta rama no paga un solo viaje. **La asimetría de los fallos se conserva
+ * igual, un piso más arriba:** un `contexto` en `null` puede ser «no tiene
+ * cuenta» o «no se pudo leer», y las dos caen en `montaAtender: false` — la
+ * CAPACIDAD abre por su fallo *en el brazo del prestador*, donde hay una
+ * lectura que puede fallar; acá no hay lectura, y quien la hizo (el guard)
+ * ya decidió que sin contexto legible esta persona ni siquiera es vendedora.
+ * El brazo del ROL no aparece porque no hay rol que preguntar.
+ */
+function barraVendedorPuro(contexto: ContextoVentas | null): CapacidadDeBarra {
+  return { esGestor: true, montaAtender: hayCapacidad(capacidadVendedorPuro(contexto)) };
 }

@@ -64,6 +64,7 @@ import {
   type ClaveTabPrestador,
 } from '@/lib/barra-prestador';
 import { resolverCapacidadDeBarra } from '@/lib/barra-prestador-lectura';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { useTraduccion } from '@/i18n';
 
 /** Los cuatro pasos de §4.1, en su orden firmado. **El vocabulario es el
@@ -239,22 +240,51 @@ export default function WizardAlta() {
       /* ⭐ S98-C (D-819) · La ceremonia nombra las tabs REALES, resueltas
          con la misma fuente que la barra.
 
-         🔴 **EL VENDEDOR PURO NO ENUMERA NINGUNA, y no es un caso raro:**
-         §4.4 de la letra dice que su alta está ABSORBIDA por este wizard,
-         así que llega hasta acá — y **no tiene fila de prestador**, o sea
-         que no usa esta barra: su casa es `/ventas`. Prometerle `Hoy` en
-         la ceremonia que le enseña la app sería enseñarle mal justo lo
-         primero que va a buscar.
-         ⚠️ Su tira queda VACÍA, y se declara: no se inventa una pseudo-tab
-         «Ventas» porque **no existe en ninguna barra**, y poner en la
-         ceremonia algo que después no está sería el mismo defecto al
-         revés. Si la mesa quiere que la ceremonia le nombre su panel, es
-         una decisión de voz con su propia key. */
-      const prestadorIdDestape = contexto.estado === 'listo' ? contexto.prestadorId : null;
-      void (prestadorIdDestape === null
-        ? Promise.resolve([] as ClaveTabPrestador[])
-        : resolverCapacidadDeBarra(prestadorIdDestape).then(ordenTabsPrestador)
-      ).then(setTabsDelDestape);
+         ⏪ S99-D · L1 · D-820 — **LA PREMISA DE ESTE BLOQUE CADUCÓ, Y SE
+         CORRIGE ACÁ EN VEZ DE DEJARLA.** Decía, literal: *«EL VENDEDOR PURO
+         NO ENUMERA NINGUNA… no tiene fila de prestador, o sea que no usa
+         esta barra: su casa es `/ventas`»*, y por eso su tira quedaba
+         VACÍA. **Era cierto el 14-ago a la mañana y dejó de serlo esa misma
+         tarde**, con la firma de §2.0: el vendedor puro es un dueño y tiene
+         la casa entera. Su razonamiento seguía siendo impecable —no
+         prometerle `Hoy` a quien no lo tiene— pero la premisa cambió por un
+         acto en OTRO archivo, y **ningún typecheck, lint ni gate podía
+         verlo: un comentario no es un guard** (L-193 en su forma limpia).
+
+         **Hoy enumera las suyas, y por la MISMA composición que arma su
+         barra** — que es textualmente el discriminador de cierre de L1 en
+         `PLAN_S99` §2: *«el destape sale de la misma composición que la
+         arma, no de una lista a mano»*. La tira vacía habría pasado de
+         honesta a mentira el día que la barra apareciera.
+
+         ⚠️ Lo que NO cambia y sigue siendo la razón de este bloque: la
+         ceremonia jamás nombra una tab que después no está. Antes eso se
+         cumplía con el silencio; ahora se cumple con la verdad. */
+      /* ⚠️ EL DISCRIMINADOR ES EL `prestadorId`, NO EL ESTADO — y lo cazó el
+         typecheck al estrechar el tipo, que es para lo que la unión existe
+         (L-222: el estado equivocado se vuelve inexpresable, no se
+         documenta). `contexto.prestadorId` es `string | null` INCLUSO con
+         `estado === 'listo'`: el vendedor puro llega hasta acá listo y sin
+         fila. La guarda vieja los mezclaba en un solo `null` porque los dos
+         caían en la misma tira vacía; ahora que cada uno tiene salida
+         propia, mezclarlos habría mandado al que todavía carga por el
+         camino del vendedor. */
+      const idDestape = contexto.estado === 'listo' ? contexto.prestadorId : null;
+      void (idDestape !== null
+        ? resolverCapacidadDeBarra({ tipo: 'prestador', prestadorId: idDestape })
+        : // El vendedor puro NO tiene el contexto a mano en esta pantalla —
+          // el guard raíz sí, y por eso allá viaja gratis. Acá se resuelve
+          // UNA vez, explícito: el costo se ve en el sitio que lo paga en
+          // vez de esconderse adentro de la lectura de barra.
+          contextoVentas().then((r) =>
+            resolverCapacidadDeBarra({
+              tipo: 'vendedorPuro',
+              contexto: r.ok ? r.data : null,
+            }),
+          )
+      )
+        .then(ordenTabsPrestador)
+        .then(setTabsDelDestape);
       setDestapando(true);
       return;
     }

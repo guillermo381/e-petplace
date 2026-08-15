@@ -43,7 +43,7 @@ import {
   type ServicioDeOficio,
 } from '@epetplace/api';
 
-import { contextoVentas } from './cuenta-ventas';
+import { contextoVentas, type ContextoVentas } from './cuenta-ventas';
 
 /** Los cuatro oficios que pueden atender por la puerta. Es el mismo eje
  *  de `OficioChip` (`es_medico ⇒ veterinaria`; si no, la categoría) — se
@@ -157,15 +157,59 @@ export async function resolverCapacidadAtender(
 
   const capacidad: CapacidadAtender = {
     oficios,
-    // La cuenta tiene que estar ACTIVA además de tener el rol: una cuenta
-    // en revisión no puede cobrar, y una puerta de venta que no cobra es
-    // una promesa (Ley 23 — la puerta no ofrece lo que va a rechazar).
-    // ⚠️ LISTA BLANCA, no lista negra (precedente D-560, la sala de
-    // espera): el enum medido es `pendiente_validacion · activa ·
-    // suspendida · cerrada`, y el quinto valor que nazca mañana cae
-    // AFUERA por default en vez de colarse por omisión.
-    tienda: ventas.data !== null && ventas.data.esVendedora && ventas.data.estadoCuenta === 'activa',
+    tienda: esTiendaActiva(ventas.data),
   };
   cache = { prestadorId, capacidad };
   return { ok: true, data: capacidad };
+}
+
+/**
+ * LA MITAD `Tu tienda`, AISLADA — y aislada a propósito, no por prolijidad.
+ *
+ * Es la ÚNICA mitad que el VENDEDOR PURO puede tener (§2.1bis: *«vendedor
+ * puro → solo la mitad de tienda»*), y él no tiene `prestador_id` con qué
+ * llamar a la función de arriba. **Sin extraerla, la rama del vendedor puro
+ * habría copiado este predicado** — y un predicado copiado no diverge algún
+ * día: diverge la primera vez que alguien cura una sola copia (D-819, la
+ * lección que partió esta misma familia de archivos).
+ *
+ * La cuenta tiene que estar ACTIVA además de tener el rol: una cuenta en
+ * revisión no puede cobrar, y una puerta de venta que no cobra es una
+ * promesa (Ley 23 — la puerta no ofrece lo que va a rechazar).
+ * ⚠️ LISTA BLANCA, no lista negra (precedente D-560, la sala de espera): el
+ * enum medido es `pendiente_validacion · activa · suspendida · cerrada`, y
+ * el quinto valor que nazca mañana cae AFUERA por default en vez de colarse
+ * por omisión.
+ */
+function esTiendaActiva(ctx: ContextoVentas | null): boolean {
+  return ctx !== null && ctx.esVendedora && ctx.estadoCuenta === 'activa';
+}
+
+/**
+ * LA CAPACIDAD DEL VENDEDOR PURO (S99-D · L1 · D-820) — **PURA, sin leer.**
+ *
+ * El vendedor puro **no tiene fila en `prestadores`** —medido en la base:
+ * `duenodes` y `vendedorpuro`, cero filas—, así que `resolverCapacidadAtender`
+ * no es llamable para él: sus dos primeras lecturas piden `prestadorId`.
+ * **Su capacidad es una sola pregunta**, y `oficios` es `[]` **por
+ * construcción y no por lectura vacía**: no tiene negocio de servicios que
+ * consultar.
+ *
+ * 🔴 **RECIBE EL CONTEXTO, NO LO PIDE — y eso lo corrigió mi propio
+ * instrumento, no el razonamiento.** La primera versión hacía su
+ * `await contextoVentas()` adentro. `verify-s99d-olas-vendedor-puro` contó
+ * la entrada real: **11 peticiones**, con `cuentas_comerciales × 3` y
+ * `cuenta_roles × 3` — y **dos de esas eran mías**: el guard raíz ya había
+ * resuelto el contexto tres líneas antes, así que mi llamada llegaba
+ * DESPUÉS y la deduplicación en vuelo de `contextoVentas` no podía
+ * ayudarla (deduplica lo simultáneo, no lo secuencial).
+ *
+ * *Le agregué dos viajes encadenados al arranque de la única población que
+ * este lote existe para servir* — que es exactamente la enfermedad que
+ * D-738 midió en este mismo guard. Con el contexto como PARÁMETRO la
+ * función deja de leer, y **pedirlo dos veces se vuelve inexpresable**: el
+ * que llama ya lo tiene o lo consigue una vez.
+ */
+export function capacidadVendedorPuro(ctx: ContextoVentas | null): CapacidadAtender {
+  return { oficios: [], tienda: esTiendaActiva(ctx) };
 }

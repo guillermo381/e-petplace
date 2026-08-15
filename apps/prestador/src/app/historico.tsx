@@ -112,8 +112,10 @@ import {
   Hoja,
   Icono,
   MarcaDeAgua,
+  SelectorSegmentado,
   Separador,
   Tarjeta,
+  TarjetaPedido,
   Texto,
   spacing,
   sugerir,
@@ -124,6 +126,7 @@ import {
   type OpcionFiltro,
 } from '@epetplace/ui';
 import {
+  listarPedidosDelVendedorEnRango,
   obtenerCitasAdiestramientoDelDia,
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
@@ -133,10 +136,18 @@ import {
   resolverUrlFoto,
   resolverUrlGenericaEspecie,
   type CitaAgendaPaseo,
+  type PedidoDelVendedorConDia,
 } from '@epetplace/api';
-import { fechaCortaMono, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
+import {
+  fechaCortaMono,
+  fechaDiaSemanaHumana,
+  monto,
+  MONEDA_FALLBACK,
+  type IdiomaSoportado,
+} from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { useTraduccion } from '@/i18n';
 
 const PASO_DIAS = 30;
@@ -162,10 +173,46 @@ function primeroDelMes(iso: string): string {
 type Oficio = FilaCitaOficio;
 type CitaConOficio = { cita: CitaAgendaPaseo; oficio: Oficio; fotoUrl?: string };
 type AtajoRango = 'mes' | 'd30' | 'd90' | 'aMedida';
-type Estado =
-  | { fase: 'cargando' }
-  | { fase: 'error' }
-  | { fase: 'listo'; citas: CitaConOficio[] };
+
+/* ⭐ S99-D · L4 — LA SEGUNDA NATURALEZA.
+ *
+ * `PLAN_S99` L4 pide «histórico en Cuenta» para el dual, y la firma del
+ * 15-ago hizo hermanas a citas y pedidos. **Acá esa ley se aplica al
+ * PASADO:** dos «Tu histórico» separados en Cuenta serían las dos casas que
+ * la firma acaba de matar — y `duenotodo` vería dos entradas con el mismo
+ * nombre.
+ *
+ * ⚠️ **QUÉ SE COMPARTE Y QUÉ NO — medido antes de escribir, y es lo que
+ * hace que esto no sea un injerto:** la maquinaria de RANGO (`desde` ·
+ * `hasta` · `atajo` · `verMasAtras`) **no menciona mascota, oficio ni cita
+ * en ninguna línea**: solo produce `(d, h)` y llama al traedor. **La única
+ * costura por naturaleza es `traer`.** Por eso *lo compartido es el
+ * COMPORTAMIENTO —el rango ES la consulta, la continuidad ensancha— y lo
+ * distinto es el VOCABULARIO* (Toque 1 de B, con esa condición puesta por
+ * él y verificada por mí antes de tocar una línea).
+ *
+ * ⚠️ **Y la premisa load-bearing de esta pantalla se re-verificó para el
+ * mundo nuevo:** su cabecera avisa que si un lector gana `.limit()`, el
+ * particionado en memoria deja de ser honesto. Medido contra el objeto:
+ * `listarPedidosDelVendedorEnRango` **no tiene `.limit()`** — el conjunto de
+ * la ventana llega completo y «particionar no puede decir *no hay*
+ * habiendo» también vale acá.
+ */
+type Naturaleza = 'citas' | 'pedidos';
+
+/** Lo que la persona PUEDE mirar hacia atrás. Se resuelve UNA vez por foco.
+ *  `prestadorId` presente = tiene pasado de citas · `ventas` con cuenta
+ *  vendedora = tiene pasado de pedidos. */
+type Capacidad = { prestadorId: string | null; ventas: ContextoVentas | null };
+
+/* Los datos de la ventana, DISCRIMINADOS por naturaleza. Un solo `Estado`
+   con dos formas y no dos estados paralelos: así el compilador obliga a
+   contestar «¿cuál de las dos?» en cada consumidor, en vez de dejar que
+   alguien lea `citas` cuando la ventana traía pedidos. */
+type Datos =
+  | { tipo: 'citas'; citas: CitaConOficio[] }
+  | { tipo: 'pedidos'; pedidos: PedidoDelVendedorConDia[] };
+type Estado = { fase: 'cargando' } | { fase: 'error' } | { fase: 'listo'; datos: Datos };
 
 function esEspecie(v: string | null | undefined): v is AvatarMascotaEspecie {
   return v !== null && v !== undefined;
@@ -216,12 +263,52 @@ export default function Historico() {
    *  que las lista todas deja de ser un menú y pasa a ser una pared. */
   const [busqueda, setBusqueda] = useState('');
 
-  const traer = useCallback(async (d: string, h: string) => {
-    const sesion = await verificarSesion();
-    if (!sesion.ok) return null;
-    const pr = await obtenerMiPrestador();
-    if (!pr.ok) return null;
-    const rango = { prestador_id: pr.data.id, fecha: d, fecha_hasta: h };
+  /* ⭐ S99-D · QUIÉN MIRA, RESUELTO UNA VEZ POR FOCO — y no es prolijidad:
+     es la cura de un viaje que esta pantalla venía pagando. `traer` hacía
+     su propio `obtenerMiPrestador()` en CADA consulta, o sea también en
+     cada «ver más» y en cada cambio de rango. Resolverlo acá lo deja en
+     uno por foco **y** es lo que permite preguntar por la otra naturaleza
+     en la MISMA ola: las dos lecturas son independientes (D-738 · L-223 —
+     lo que se paga en reloj es la cadena, no la cantidad). */
+  const [capacidad, setCapacidad] = useState<Capacidad | null>(null);
+  /** `null` = todavía no se sabe cuál mostrar. NO se arranca en `'citas'`:
+   *  eso le pintaría al vendedor puro una naturaleza que no tiene y después
+   *  se la cambiaría de abajo del dedo. */
+  const [naturaleza, setNaturaleza] = useState<Naturaleza | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vivo = true;
+      void (async () => {
+        const sesion = await verificarSesion();
+        if (!sesion.ok || !vivo) return;
+        // Las dos van JUNTAS: ninguna depende de la otra.
+        const [pr, ctx] = await Promise.all([obtenerMiPrestador(), contextoVentas()]);
+        if (!vivo) return;
+        const cap: Capacidad = {
+          prestadorId: pr.ok ? pr.data.id : null,
+          ventas: ctx.ok ? ctx.data : null,
+        };
+        setCapacidad(cap);
+        // La naturaleza inicial es la que la persona TIENE; si tiene las
+        // dos, gana citas (es la que esta pantalla ya servía). Y no se
+        // pisa una elección hecha: el `?? ` respeta lo que el dedo eligió.
+        setNaturaleza((n) => n ?? (cap.prestadorId !== null ? 'citas' : 'pedidos'));
+      })();
+      return () => {
+        vivo = false;
+      };
+    }, []),
+  );
+
+  const tienePedidos =
+    capacidad?.ventas != null &&
+    capacidad.ventas.esVendedora &&
+    capacidad.ventas.estadoCuenta === 'activa';
+  const tieneCitas = capacidad?.prestadorId != null;
+
+  const traerCitas = useCallback(async (prestadorId: string, d: string, h: string) => {
+    const rango = { prestador_id: prestadorId, fecha: d, fecha_hasta: h };
     const [paseo, grooming, vet, adiestramiento] = await Promise.all([
       obtenerCitasPaseoDelDia(rango),
       obtenerCitasGroomingDelDia(rango),
@@ -270,11 +357,52 @@ export default function Historico() {
     return m;
   }, []);
 
+  /** EL TRAEDOR DE PEDIDOS — el espejo de `traerCitas`, y termina donde el
+   *  otro: devuelve una lista y no sabe nada del rango.
+   *
+   *  🔴 **`sinFecha` NO SE MONTA, y es omisión DECIDIDA con dueño (D-828).**
+   *  El lector devuelve `{ delRango, sinFecha }` y los segundos son pedidos
+   *  VIVOS sin fecha de entrega comprometida. **Un pedido vivo no es
+   *  pasado:** meterlo en un archivo lo pintaría como algo que ya ocurrió.
+   *  Su casa es la ventana del PRESENTE, y ahí **PRESIDEN** por adjudicación
+   *  de mesa (C los monta en `ventana-pedidos`) — con la razón que decidió
+   *  el caso: *presidir es lo único que sobrevive al cambio de fecha;
+   *  adentro del día parpadearían con cada cruce del selector.*
+   *  ⚠️ La ficha existe porque **una omisión sin dueño es indistinguible de
+   *  un olvido seis semanas después** (L-237). Esta exclusión está citada
+   *  ahí como la legítima. */
+  const traerPedidos = useCallback(async (cuentaId: string, d: string, h: string) => {
+    const r = await listarPedidosDelVendedorEnRango(cuentaId, d, h);
+    if (!r.ok) return null;
+    // MÁS RECIENTE PRIMERO: un archivo se lee hacia atrás — el mismo
+    // criterio que las citas, y el opuesto al del panel del presente, que
+    // ordena por lo que falta hacer. *Dos superficies, dos verdades sobre
+    // el mismo objeto, y las dos correctas.*
+    return [...r.data.delRango].sort((x, y) => (y.dia ?? '').localeCompare(x.dia ?? ''));
+  }, []);
+
   const consultar = useCallback(
     (d: string, h: string) => {
+      if (capacidad === null || naturaleza === null) return;
       setEstado({ fase: 'cargando' });
-      void traer(d, h).then((r) => {
-        setEstado(r === null ? { fase: 'error' } : { fase: 'listo', citas: r });
+      if (naturaleza === 'pedidos') {
+        const cuentaId = capacidad.ventas?.cuentaComercialId ?? null;
+        if (cuentaId === null) {
+          setEstado({ fase: 'error' });
+          return;
+        }
+        void traerPedidos(cuentaId, d, h).then((r) => {
+          setEstado(r === null ? { fase: 'error' } : { fase: 'listo', datos: { tipo: 'pedidos', pedidos: r } });
+        });
+        return;
+      }
+      const prestadorId = capacidad.prestadorId;
+      if (prestadorId === null) {
+        setEstado({ fase: 'error' });
+        return;
+      }
+      void traerCitas(prestadorId, d, h).then((r) => {
+        setEstado(r === null ? { fase: 'error' } : { fase: 'listo', datos: { tipo: 'citas', citas: r } });
         if (r === null) {
           setNombresPorCita(new Map());
           return;
@@ -282,7 +410,7 @@ export default function Historico() {
         void traerNombres(r).then(setNombresPorCita);
       });
     },
-    [traer, traerNombres],
+    [capacidad, naturaleza, traerCitas, traerPedidos, traerNombres],
   );
 
   useFocusEffect(
@@ -306,23 +434,54 @@ export default function Historico() {
     setHasta(h);
   };
 
+  /* LA CONTINUIDAD — compartida por las dos naturalezas, y ése es el punto:
+     *lo que se comparte es el comportamiento.* Solo cambia a QUIÉN se le
+     pide el tramo nuevo. */
   const verMasAtras = async () => {
-    if (pidiendo) return;
+    if (pidiendo || capacidad === null || naturaleza === null) return;
     setPidiendo(true);
     const d = sumarDias(desde, -PASO_DIAS);
-    const r = await traer(d, hasta);
+
+    if (naturaleza === 'pedidos') {
+      const cuentaId = capacidad.ventas?.cuentaComercialId ?? null;
+      const r = cuentaId === null ? null : await traerPedidos(cuentaId, d, hasta);
+      setPidiendo(false);
+      if (r !== null) {
+        setDesde(d);
+        setAtajo('aMedida');
+        setEstado({ fase: 'listo', datos: { tipo: 'pedidos', pedidos: r } });
+      }
+      return;
+    }
+
+    const prestadorId = capacidad.prestadorId;
+    const r = prestadorId === null ? null : await traerCitas(prestadorId, d, hasta);
     setPidiendo(false);
     if (r !== null) {
       setDesde(d);
       setAtajo('aMedida');
-      setEstado({ fase: 'listo', citas: r });
+      setEstado({ fase: 'listo', datos: { tipo: 'citas', citas: r } });
       // La ventana creció: los nombres la siguen o el chip de persona
       // quedaría hablando de un conjunto que ya no es el que se ve.
       void traerNombres(r).then(setNombresPorCita);
     }
   };
 
-  const todas = estado.fase === 'listo' ? estado.citas : [];
+  /** CAMBIAR DE NATURALEZA re-consulta con LA MISMA VENTANA — el rango no se
+   *  toca. Es el eco de la firma del dual: *un día en dos ventanas*, acá
+   *  aplicado al período. Si al cruzar se reseteara el rango, la persona
+   *  perdería el lugar donde estaba parada, que es justo lo que la firma
+   *  del selector compartido existe para que no pase. */
+  const cambiarNaturaleza = (n: Naturaleza) => {
+    if (n === naturaleza) return;
+    setNaturaleza(n);
+    limpiarTodo();
+  };
+
+  const todas =
+    estado.fase === 'listo' && estado.datos.tipo === 'citas' ? estado.datos.citas : [];
+  const pedidos =
+    estado.fase === 'listo' && estado.datos.tipo === 'pedidos' ? estado.datos.pedidos : [];
 
   // LOS CHIPS SALEN DE LO QUE HAY, Y CRUZADO: las mascotas se derivan de lo
   // que sobrevive al filtro de oficio y viceversa — así ninguna opción
@@ -508,12 +667,50 @@ export default function Historico() {
   // ANIDADOS (Y, jamás O) — los tres ejes a la vez.
   const visibles = useMemo(() => todas.filter((j) => pasa(j, {})), [todas, pasa]);
 
-  const hayFiltro = oficio !== null || servicio !== null || especie !== null || sujetoId !== null;
+  /* ── LOS PEDIDOS: SU PROPIO EJE, Y ES UNO SOLO ────────────────────────
+     **El vendedor JAMÁS ve la mascota** (`MODELO_DESPENSA` §7.4; el wrapper
+     lo dice literal: *«en este archivo no hay una sola lectura de
+     `mascotas`… y no puede haberla»*) ⇒ **mascota · especie · oficio · el
+     tipeo de nombres NO CRUZAN.** No es que no se hayan puesto: no pueden
+     existir de este lado.
+
+     Lo que sí enumera dentro de una ventana es la **narrativa** (siete, y
+     el vendedor las conoce por su nombre) ⇒ por la regla firmada
+     —*enumerable → chips · sin techo → tipeo*— le tocan CHIPS. Y salen de
+     LO QUE HAY, igual que del otro lado: ninguna opción ofrecida da cero. */
+  const [narrativa, setNarrativa] = useState<string | null>(null);
+
+  const opcionesNarrativa = useMemo(() => {
+    const vistos = new Map<string, string>();
+    for (const p of pedidos) {
+      if (!vistos.has(p.narrativa)) vistos.set(p.narrativa, p.narrativa_nombre || p.narrativa);
+    }
+    return [...vistos.entries()].map<OpcionFiltro<string>>(([codigo, etiqueta]) => ({
+      codigo,
+      etiqueta,
+      icono: null,
+      capa: null,
+    }));
+  }, [pedidos]);
+
+  const pedidosVisibles = useMemo(
+    () => pedidos.filter((p) => narrativa === null || p.narrativa === narrativa),
+    [pedidos, narrativa],
+  );
+
+  /** CUÁNTAS FILAS SE VEN — la misma pregunta para las dos naturalezas, y
+   *  por eso el renglón de estado del techo no se duplica. */
+  const cuantasVisibles = naturaleza === 'pedidos' ? pedidosVisibles.length : visibles.length;
+
+  const hayFiltro =
+    naturaleza === 'pedidos'
+      ? narrativa !== null
+      : oficio !== null || servicio !== null || especie !== null || sujetoId !== null;
   const limpiarTodo = () => {
     setOficio(null);
     setServicio(null);
     setEspecie(null);
-    setSujetoId(null);
+    setNarrativa(null);
     setBusqueda('');
   };
 
@@ -527,6 +724,25 @@ export default function Historico() {
         return acc;
       }, []),
     [visibles],
+  );
+
+  /** El agrupado por día del otro mundo — MISMA forma, otra llave: el día
+   *  del pedido es `entrega_fecha_objetivo` (la decisión de A: el motor ya
+   *  contaba el cupo por esa columna, así que hay UNA sola verdad de «qué
+   *  día es este pedido» y no dos candidatas). */
+  const pedidosPorFecha = useMemo(
+    () =>
+      pedidosVisibles.reduce<Array<{ fecha: string; items: PedidoDelVendedorConDia[] }>>(
+        (acc, p) => {
+          const f = p.dia ?? '';
+          const ultimo = acc[acc.length - 1];
+          if (ultimo && ultimo.fecha === f) ultimo.items.push(p);
+          else acc.push({ fecha: f, items: [p] });
+          return acc;
+        },
+        [],
+      ),
+    [pedidosVisibles],
   );
 
   const rutaDe = (j: CitaConOficio) =>
@@ -559,7 +775,63 @@ export default function Historico() {
           la pantalla, no contenido. Cada uno es una fila de chips con el
           selector de la casa (pata + acento pisando al elegido). ── */}
       <View style={{ gap: spacing[1] }}>
+        {/* ⭐ S99-D · EL CRUCE ENTRE NATURALEZAS — `SelectorSegmentado`, que
+            es el control canónico de VISTAS EXCLUSIVAS **dentro de una
+            pantalla** (Ley 19.3; su propia cabecera nombra este caso).
+
+            🔴 **NO `PuertaHermana`, y la razón es de construcción antes que
+            de significado** (Toque 1 de B): en esa pieza `direccion` deriva
+            el chevron, el orden **y el borde en el que se apoya** — *la
+            puerta se apoya en el borde AL QUE LLEVA*. Adentro de UNA
+            pantalla su dirección apuntaría a nada: **no queda raro, no se
+            puede montar sin mentir.** La puerta es para cruzar entre dos
+            pantallas hermanas del presente; esto es una sola pantalla con
+            dos vistas.
+
+            ⚠️ **CON UNA SOLA NATURALEZA NO SE MONTA** — y la preocupación
+            de S86 (el bloque que aparece y desaparece hace saltar el
+            layout) **no aplica acá, con su discriminador**: aquello era un
+            control que iba y venía en la MISMA pantalla bajo los MISMOS
+            ojos al cambiar el ESTADO. Tener una o dos naturalezas es una
+            propiedad de la PERSONA, fija toda la sesión: un control ausente
+            para toda una clase de persona no salta — no es parte de su
+            pantalla. Y montarlo con una mitad deshabilitada sería peor
+            (D-574: prometer una capacidad que no está). */}
+        {tieneCitas && tienePedidos && naturaleza !== null ? (
+          <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[1] }}>
+            <SelectorSegmentado
+              segmentos={[
+                { codigo: 'citas', etiqueta: t('historico.natCitas') },
+                { codigo: 'pedidos', etiqueta: t('historico.natPedidos') },
+              ]}
+              activo={naturaleza}
+              etiqueta={t('historico.natEtiqueta')}
+              // El control habla `string` (es genérico); el estrechamiento
+              // vive acá, en el dueño del vocabulario. Un `as Naturaleza`
+              // habría compilado igual y habría dejado pasar cualquier
+              // código nuevo del control sin que nadie se entere.
+              onCambio={(c) => cambiarNaturaleza(c === 'pedidos' ? 'pedidos' : 'citas')}
+            />
+          </View>
+        ) : null}
+        {/* EL RANGO ES COMPARTIDO — es la firma de la pantalla, no de una
+            naturaleza. Cruzar CONSERVA la ventana (el eco del selector
+            compartido del dual: un período en dos vistas). */}
         <FiltroPills opciones={ATAJOS} activo={atajo} onCambio={aplicarRango} />
+        {naturaleza === 'pedidos' ? (
+          /* El único eje del otro mundo. `> 1` por la misma razón que sus
+             hermanos: ofrecer un filtro con una sola opción es ofrecer un
+             control que no puede cambiar nada. */
+          opcionesNarrativa.length > 1 ? (
+            <FiltroPills
+              opciones={opcionesNarrativa}
+              activo={narrativa}
+              onCambio={setNarrativa}
+              onLimpiar={() => setNarrativa(null)}
+            />
+          ) : null
+        ) : (
+          <>
         {opcionesOficio.length > 1 ? (
           <FiltroPills
             opciones={opcionesOficio}
@@ -615,6 +887,8 @@ export default function Historico() {
             </Texto>
           </View>
         ) : null}
+          </>
+        )}
       </View>
 
       <ScrollView
@@ -632,7 +906,7 @@ export default function Historico() {
           <View style={{ gap: spacing[2] }}>
             <Texto variante="dato" color="tertiary">
               {t('historico.estado', {
-                n: visibles.length,
+                n: cuantasVisibles,
                 desde: fechaCortaMono(desde, lang),
                 hasta: fechaCortaMono(hasta, lang),
               })}
@@ -668,7 +942,7 @@ export default function Historico() {
               />
             }
           />
-        ) : visibles.length === 0 ? (
+        ) : cuantasVisibles === 0 ? (
           // CERO RESULTADOS HABLA, y dice QUÉ SOLTAR (letra del founder):
           // con filtros puestos el camino es soltarlos; sin filtros, el
           // camino es mirar más atrás. Nunca un vacío mudo.
@@ -698,6 +972,48 @@ export default function Historico() {
               )
             }
           />
+        ) : naturaleza === 'pedidos' ? (
+          /* ⭐ EL ARCHIVO DE PEDIDOS — misma anatomía, otra voz.
+             Se monta `TarjetaPedido` (la pieza de B, la misma que el panel
+             del presente) **sin `pasos`**: la escalera cuenta dónde está
+             algo que todavía se mueve, y acá **ya terminó** — su propio
+             boceto dice que los terminados no llevan escalera. *Un pedido
+             cerrado no tiene nada que contar sobre su avance.* */
+          <>
+            {pedidosPorFecha.map((grupo) => (
+              <View key={grupo.fecha || 'sin-dia'} style={{ gap: spacing[2] }}>
+                <Texto variante="seccion">
+                  {grupo.fecha ? fechaDiaSemanaHumana(grupo.fecha, lang) : ''}
+                </Texto>
+                <View style={{ gap: spacing[3] }}>
+                  {grupo.items.map((p) => (
+                    <TarjetaPedido
+                      key={p.pedido_id}
+                      titulo={t('historico.pedidoNumero', { numero: p.numero_orden })}
+                      detalle={p.narrativa_nombre}
+                      // La moneda sale del contexto de la cuenta, que en
+                      // esta naturaleza existe por construcción (sin él no
+                      // se habría consultado). El fallback DECLARADO del
+                      // riel cubre el borde que el tipo no puede cerrar —
+                      // no es un hardcode nuestro.
+                      monto={monto(p.total, capacidad?.ventas?.moneda ?? MONEDA_FALLBACK, lang)}
+                      pasos={[]}
+                      acento="oficio"
+                      etiqueta={t('ventas.hoy.verPedido', { numero: p.numero_orden })}
+                      onPress={() => router.push(`/ventas/pedido/${p.pedido_id}`)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))}
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('historico.verMas', { n: PASO_DIAS })}
+              cargando={pidiendo}
+              onPress={() => void verMasAtras()}
+            />
+          </>
         ) : (
           <>
             {porFecha.map((grupo) => (
