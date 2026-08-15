@@ -4296,6 +4296,40 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        {/* 🔴 S98-B · EL ÚNICO PAR QUE DESTAPÓ EL BARRIDO DE LAS CASAS DE
+            OFICIO — montado para que se pueda MIRAR, no solo leer su
+            número. Las iniciales de la capa `comunidadAmplia` sobre su
+            tinte, en el fondo BASE del prestador oscuro: **4.40 contra un
+            mínimo de 4.5**, corto por 0.10.
+            La causa está medida: el oficio pisa `bg.base` y nada más —
+            por eso el mismo par sobre TARJETA da idéntico en las dos
+            casas (4.63) y solo el de fondo diverge (`tapizDark` violáceo
+            contra `tapizDarkOficio` verdoso). No es un token mal elegido:
+            es un violeta sobre un fondo que dejó de ser violáceo.
+            EXENTO POR MEDICIÓN, no por decisión: la capa tiene CERO
+            consumidores fuera de esta galería, y la exención de
+            `verify-contrast` cae sola el día que alguien la monte. */}
+        <Seccion titulo="🔴 D-813bis · el par de 4.40 del prestador oscuro (exento por medición)">
+          <View style={{ gap: spacing[3] }}>
+            <ThemeProvider defaultMode="dark" cta="oficio">
+              <PanelTema etiqueta="PRESTADOR oscuro — capa comunidadAmplia sobre bg.base: 4.40:1 (mín 4.5)">
+                <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+                  <AvatarMascota nombre="Violeta" capa="comunidadAmplia" tamano="md" />
+                  <AvatarMascota nombre="Nube" capa="comunidadAmplia" tamano="lg" />
+                </View>
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="cliente oscuro — el MISMO par: 4.83:1. La diferencia es el tapiz, no el token">
+                <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+                  <AvatarMascota nombre="Violeta" capa="comunidadAmplia" tamano="md" />
+                  <AvatarMascota nombre="Nube" capa="comunidadAmplia" tamano="lg" />
+                </View>
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
         {/* AvatarMascota — S44-B2.3: foto + fallbacks, los 3 temas */}
         <Seccion titulo="AvatarMascota — la cara de la mascota (no porta estado)">
           <View style={{ gap: spacing[4] }}>

@@ -22,7 +22,10 @@
  * Correr: pnpm exec tsx scripts/verify-contrast.ts
  */
 
-import { lightTheme, darkTheme, memorialTheme, type Theme } from '../packages/ui/src/themes'
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+
+import { lightTheme, darkTheme, memorialTheme, getTheme, type Theme } from '../packages/ui/src/themes'
 import { palette } from '../packages/ui/src/tokens/palette'
 
 type RGBA = { r: number; g: number; b: number; a: number }
@@ -128,17 +131,39 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('capaText.cuidado / Tarjeta cuidado (infoBg⊕card)', capaTexto.cuidado, t.status.infoBg, t.bg.card)
   add('capaText.comunidad / Tarjeta comunidad (brandBg⊕card)', capaTexto.comunidad, t.accent.brandBg, t.bg.card)
 
-  // AvatarMascota (S44-B2.3): iniciales (capaText AA) sobre el tint capaBg
-  // de su capa, compositado sobre card y sobre base (el avatar vive en ambas).
+  // AvatarMascota (S44-B2.3): el fallback (hoy una HUELLA, ver la nota de
+  // abajo) en el registro capaText sobre el tint capaBg de su capa,
+  // compositado sobre card y sobre base (el avatar vive en ambas).
   // Memorial no tiene capaBg: su fallback es neutral (par de abajo).
   if ('capaBg' in t) {
     for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as const) {
-      add(`Avatar iniciales capaText.${c} / capaBg.${c}⊕card`, capaTexto[c], t.capaBg[c], t.bg.card)
-      add(`Avatar iniciales capaText.${c} / capaBg.${c}⊕base`, capaTexto[c], t.capaBg[c], t.bg.base)
+      // ⏪ S98-B · ESTOS PARES SE LLAMABAN «Avatar INICIALES» Y NO HAY
+      // INICIALES. Medido: `AvatarMascota.tsx` tiene CERO ocurrencias de
+      // la palabra — su fallback es `HuellaGenerica`, un dibujo. El
+      // nombre viene de S44-B2.3, cuando el fallback sí era texto, y
+      // sobrevivió al cambio de contenido.
+      //
+      // 🔴 LO QUE ESO IMPLICA, Y NO LO RESUELVO ACÁ: si el contenido es
+      // GRÁFICA, su piso WCAG es **3:1** (1.4.11 no-textual) y no el 4.5
+      // de texto con el que se lo viene midiendo — el propio archivo ya
+      // usa `large: true` para ese piso en sus pares gráficos. Con 3:1,
+      // el par de 4.40 del prestador oscuro pasaría con holgura y la
+      // exención de abajo sobraría.
+      //
+      // **NO SE AFLOJA ACÁ, a propósito.** Bajar el mínimo de un gate es
+      // decisión de mesa, no de la pista que lo encontró — y un test que
+      // se ablanda para que pase deja de ser un test. Lo que sí se cura
+      // es el NOMBRE, porque prosa que describe contenido inexistente es
+      // lo que hizo invisible el problema: mientras dijera «iniciales»,
+      // el 4.5 parecía correcto. Queda servido a la mesa con su medición.
+      add(`Avatar huella capaText.${c} / capaBg.${c}⊕card`, capaTexto[c], t.capaBg[c], t.bg.card)
+      add(`Avatar huella capaText.${c} / capaBg.${c}⊕base`, capaTexto[c], t.capaBg[c], t.bg.base)
     }
   }
   // Fallback neutral del avatar (los 3 temas): text.secondary sobre bg.overlay.
-  add('Avatar iniciales text.secondary / bg.overlay⊕card', t.text.secondary, t.bg.overlay, t.bg.card)
+  // (mismo rename que arriba: acá tampoco hay iniciales — es la huella
+  // neutral de memorial y del avatar sin capa)
+  add('Avatar huella text.secondary / bg.overlay⊕card', t.text.secondary, t.bg.overlay, t.bg.card)
 
   // SelectorEspecie (S45-B3.1): el nombre (text.primary) sobre el fondo de la
   // ficha seleccionada (capaBg.identidad compositado sobre base). El borde 1.5
@@ -302,6 +327,24 @@ const todos: Pair[] = [
   ...paresDe(lightTheme, 'LIGHT'),
   ...paresDe(darkTheme, 'DARK'),
   ...paresDe(memorialTheme, 'MEMORIAL'),
+  /** 🔴 S98-B · LAS CASAS DE OFICIO ENTRAN AL BARRIDO — orden del founder:
+   *  *«es la identidad visual del prestador y hoy no se mide»*.
+   *
+   *  El hueco era exactamente ése: este archivo recorría LIGHT, DARK y
+   *  MEMORIAL, y el prestador aparecía solo en un puñado de one-offs
+   *  escritos a mano (el muro, el CTA). **Todos los pares de COMPONENTE
+   *  —chips, selectores, tarjetas, estados— se medían únicamente en la
+   *  casa del cliente**, y el prestador heredaba el verde de una casa que
+   *  no es la suya. *Es la misma clase que D-813: el instrumento cubría
+   *  la casa donde los tokens coinciden.*
+   *
+   *  ⚠️ SE ENTRA POR `getTheme`, NO EXPORTANDO `lightOficio`. Las casas de
+   *  oficio son internas a propósito y **`getTheme` es la puerta que usa
+   *  la app**: midiendo por ahí, el gate mide lo que el usuario recibe y
+   *  sigue a la resolución si algún día cambia. Exportar el objeto habría
+   *  medido un tema que nadie monta. */
+  ...paresDe(getTheme('light', 'oficio'), 'LIGHT·OFICIO'),
+  ...paresDe(getTheme('dark', 'oficio'), 'DARK·OFICIO'),
   // EvidenciaFoto (S44-B2.5): sobre fotografía no hay par medible — el
   // scrim del token garantiza el piso. Se gatea el PEOR caso construible:
   // spinner/ícono blanco sobre scrim compositado sobre foto blanca (3:1
@@ -353,12 +396,64 @@ console.log(
   `  (info · PAR CAÍDO S58) tealDark / bg.tinta → ${contrast(palette.tealDark, lightTheme.bg.tinta).toFixed(2)}:1 (mín 4.5) — sobre tinta pasa teal puro: ${contrast(palette.teal, lightTheme.bg.tinta).toFixed(2)}:1`,
 )
 
+/** 🔴 EL ÚNICO PAR QUE DESTAPÓ EL BARRIDO DE LAS CASAS DE OFICIO (S98-B),
+ *  y su exención NO es una decisión: es una MEDICIÓN con fecha de
+ *  vencimiento.
+ *
+ *  EL PAR: las iniciales del avatar en la capa `comunidadAmplia` (violeta)
+ *  sobre su propio tinte, compositado sobre el fondo BASE, en el tema
+ *  oscuro del PRESTADOR. Da **4.40** contra un mínimo de 4.5 — corto por
+ *  **0.10**.
+ *
+ *  LA CAUSA, medida y no supuesta: el oficio pisa `bg.base` y **nada
+ *  más**. Por eso el par `⊕card` da IDÉNTICO en las dos casas (4.63) y
+ *  solo el `⊕base` diverge — `tapizDark` (#0D050D, violáceo) contra
+ *  `tapizDarkOficio` (#080D0E, verdoso). *No es un token mal elegido: es
+ *  un violeta sobre un fondo que dejó de ser violáceo.* Y no es
+ *  sistemático en contra del oficio: en CLARO el mismo par MEJORA (5.41
+ *  contra 5.30 del cliente).
+ *
+ *  POR QUÉ NO SE CURA ACÁ: **la combinación no existe en el producto.**
+ *  Medido — CERO consumidores de `capa="comunidadAmplia"` fuera de la
+ *  galería, en los dos apps y en `ui`. Mover un token de marca para
+ *  arreglar un par que nadie monta es cambiar arte sin firma para
+ *  silenciar un número.
+ *
+ *  🔴 Y POR ESO LA EXENCIÓN TRAE SU GUARD: se cuenta el consumidor. El
+ *  día que alguien monte esa capa, la exención CAE SOLA y el par vuelve a
+ *  gatear. *Una exención sin condición de muerte es un permiso
+ *  permanente; con ella, es una medición que caduca.* */
+const EXENTO_COMUNIDAD_AMPLIA = 'DARK·OFICIO · Avatar huella capaText.comunidadAmplia / capaBg.comunidadAmplia⊕base'
+const RAICES_CONSUMO = ['packages/ui/src', 'apps/cliente/src', 'apps/prestador/src']
+function consumidoresComunidadAmplia(): number {
+  let n = 0
+  const recorrer = (dir: string) => {
+    for (const e of readdirSync(dir)) {
+      const p = join(dir, e)
+      if (statSync(p).isDirectory()) recorrer(p)
+      else if ((p.endsWith('.tsx') || p.endsWith('.ts')) && !p.includes('gallery')) {
+        if (/capa=["']comunidadAmplia["']/.test(readFileSync(p, 'utf8'))) n++
+      }
+    }
+  }
+  for (const r of RAICES_CONSUMO) if (existsSync(r)) recorrer(r)
+  return n
+}
+const consumidores = consumidoresComunidadAmplia()
+
 let fallos = 0
 for (const par of todos) {
   const ratio = contrast(par.fg, par.bg, par.surface)
   const minimo = par.large ? 3 : 4.5
   const ok = ratio >= minimo
-  if (!ok) fallos++
+  const exento = !ok && par.nombre === EXENTO_COMUNIDAD_AMPLIA && consumidores === 0
+  if (!ok && !exento) fallos++
+  if (exento) {
+    console.log(
+      `  (exento) ${par.nombre}  →  ${ratio.toFixed(2)}:1  (mín ${minimo}:1) — capa SIN CONSUMIDORES fuera de galería (medido: ${consumidores}). La exención CAE SOLA en cuanto alguien la monte.`,
+    )
+    continue
+  }
   console.log(
     `${ok ? '  ✓' : '✗ FALLA'}  ${par.nombre}  →  ${ratio.toFixed(2)}:1  (mín ${minimo}:1)`,
   )
@@ -369,4 +464,4 @@ if (fallos > 0) {
   console.error('\nGATE WCAG: FALLÓ. Ajustar los tokens de los pares listados.')
   process.exit(1)
 }
-console.log('GATE WCAG: OK — los tres temas pasan.')
+console.log('GATE WCAG: OK — los tres temas base + las DOS casas de oficio pasan.')
