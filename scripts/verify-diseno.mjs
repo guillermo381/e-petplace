@@ -1711,6 +1711,22 @@ const BASELINE_R37 = 3;
 const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;
+/** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
+ *  Las diez con nombre: 2 de `ui` con razón propia + 8 de `apps` que
+ *  `HojaCaptura` viene a absorber. SOLO-BAJA. */
+const CASA_PUERTA_FOTO = 'packages/ui/src/components/HojaCaptura.tsx';
+const BASELINE_R42 = new Set([
+  'packages/ui/src/components/SelectorAvatar.tsx',
+  'packages/ui/src/components/EvidenciaFoto.tsx',
+  'apps/cliente/src/app/carnet.tsx',
+  'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx',
+  'apps/cliente/src/components/HojaFotoMascota.tsx',
+  'apps/prestador/src/app/ventas/configuracion.tsx',
+  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx',
+  'apps/prestador/src/app/veterinaria/verificacion.tsx',
+  'apps/prestador/src/components/seccion-documentos.tsx',
+  'apps/prestador/src/components/alta/PasoDocumentos.tsx',
+]);
 
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
@@ -1751,6 +1767,16 @@ const FIXTURES = {
      con `withSpring` sin el hook. Lo que tiene que salir rojo es la
      pieza descubierta, y una prueba que pasa por el motivo equivocado no
      prueba la regla que dice probar. */
+  /* R42 · el fixture trae LAS DIEZ del baseline (como stubs) + la pieza
+     canónica + UNA puerta nueva a mano. Sin las diez, el brazo «BAJÓ:
+     sacar del baseline» se encendería también y el rojo medido no sería
+     el de la regla; sin la canónica, se encendería el ANCLA. Lo único
+     que tiene que salir rojo es la puerta nueva. */
+  R42: [
+    { path: 'packages/ui/src/components/HojaCaptura.tsx', src: 'capturarConCamara(); capturarDeGaleria()' },
+    ...[...BASELINE_R42].map((path) => ({ path, src: 'capturarConCamara(); capturarDeGaleria()' })),
+    { path: 'apps/prestador/src/app/puerta-nueva.tsx', src: 'capturarConCamara(o); capturarDeGaleria(o)' },
+  ],
   R41: [
     { path: 'packages/ui/src/components/Sana1.tsx', src: 'useReducedMotion(); withSpring(0)' },
     { path: 'packages/ui/src/components/Sana2.tsx', src: 'useReducedMotion(); withRepeat(x)' },
@@ -2537,7 +2563,73 @@ function r41(archivos) {
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41 };
+/** R42 · LA PUERTA DE LA FOTO NO SE RE-DIBUJA (S99-B — `HojaCaptura`
+ *  mecanizada el día que nació, misma disciplina que R25 y R30).
+ *
+ *  EL DEFECTO QUE VIGILA, con su número medido y no estimado: el PICKER
+ *  nunca se duplicó —`capturaFoto` es una sola implementación—, pero la
+ *  PUERTA («Tomar foto / Elegir de la galería») estaba escrita a mano en
+ *  **diez lugares**. Y lo que la vuelve defecto en vez de prolijidad:
+ *
+ *   ⚠️ **EL CERROJO CONTRA EL DOBLE TAP VIVÍA EN 2 DE LOS 10 — y los 2
+ *      eran los que ya eran pieza.** Los ocho de `apps/` lanzan DOS
+ *      pickers si el dedo llega dos veces antes del próximo render.
+ *
+ *  *Un sitio que copia una anatomía copia lo que se VE; el cerrojo no se
+ *  ve.* Por eso la cura no es revisar ocho archivos: es que el noveno no
+ *  pueda nacer.
+ *
+ *  QUÉ MIRA, y por qué ESTE net: importar **las dos** funciones de
+ *  captura en el mismo archivo es la huella dactilar de estar armando el
+ *  menú de dos opciones — nadie necesita cámara Y galería juntas para
+ *  otra cosa. Pedir "un `<Hoja>` con dos `<Boton>`" daría los mismos
+ *  archivos con más ruido y con falsos donde la hoja tiene otra forma.
+ *
+ *  BASELINE NOMINAL SOLO-BAJA, con las diez y su razón. Las dos de `ui`
+ *  NO son deuda de la misma clase que las ocho de `apps`:
+ *   · `SelectorAvatar` — su hoja tiene TRES `Celda` y la tercera («Por
+ *     ahora no») es decisión FIRMADA en S45. Absorberla es un gate de
+ *     forma, no un refactor, y no viaja escondido.
+ *   · `EvidenciaFoto` — no es un menú: la cámara es DIRECTA y la galería
+ *     vive detrás de un mantenido. Otra interacción, otra pieza.
+ *  Las ocho de `apps` bajan una por una cuando su lote las toque; **de
+ *  cada baja hay que bajar también este baseline.** DE ACÁ NO SE SUBE:
+ *  una puerta nueva a mano es roja el primer día. */
+/* `CASA_PUERTA_FOTO` y `BASELINE_R42` viven ARRIBA, con los demás
+   baselines: `FIXTURES` es un literal que se evalúa al cargar el módulo
+   y su fixture de R42 los consume — declararlos acá los dejaba en la
+   zona muerta del `const` (medido: `ReferenceError` en la primera
+   corrida). El baseline se lee junto a su regla igual, por el puntero. */
+function r42(archivos) {
+  const fallos = [];
+  let puertas = 0;
+  let casa = 0;
+  let baselineVivo = 0;
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    if (!/capturarConCamara/.test(limpio) || !/capturarDeGaleria/.test(limpio)) continue;
+    if (path.endsWith('HojaCaptura.tsx')) { casa++; continue; }
+    if (path.endsWith('capturaFoto.tsx')) continue; // la frontera las DEFINE
+    puertas++;
+    if (BASELINE_R42.has(path)) { baselineVivo++; continue; }
+    fallos.push(
+      `R42: ${path} — LA PUERTA DE LA FOTO RE-DIBUJADA. La hoja de «Tomar foto / Elegir de la galería» es UNA pieza: <HojaCaptura> de @epetplace/ui. Trae el CERROJO sincrónico contra el doble tap, que ocho de las diez copias a mano no tienen (dos toques = dos pickers). Las opciones de captura pasan derecho (recorteCuadrado/calidad/redimensionarA): la puerta no re-decide lo que cada dominio ya midió, y la voz del permiso denegado la dice la PANTALLA, no la pieza.`,
+    );
+  }
+  if (baselineVivo < BASELINE_R42.size)
+    fallos.push(
+      `R42: el baseline declara ${BASELINE_R42.size} puerta(s) a mano y quedan ${baselineVivo} — BAJÓ: sacar de BASELINE_R42 la(s) que migraron. Un baseline que sobra deja de ser una lista de deuda y pasa a ser un permiso.`,
+    );
+  // ANCLA: si la pieza pierde su llamada a las dos funciones (renombre,
+  // refactor), esta regla vigila un fantasma y todo pasa en verde (L-192).
+  fallos.push(...ancla('R42', casa, 1, `puerta canónica viva (${CASA_PUERTA_FOTO})`));
+  return {
+    fallos,
+    info: `${puertas} puerta(s) a mano · baseline ${BASELINE_R42.size} (2 de \`ui\` con razón propia + 8 de \`apps\` que la pieza absorbe; solo-baja)`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -2783,6 +2875,7 @@ corridas.push(['R38 (N3 la muerte del separador: 3 por pantalla)', r38(apps)]);
 corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)]);
 corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(DICS_R40)]);
 corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
+corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

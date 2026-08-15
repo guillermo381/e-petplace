@@ -31,6 +31,8 @@ import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
+import { HojaCaptura } from '../components/HojaCaptura'
+import { PinEnMapa } from '../components/PinEnMapa'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
@@ -1616,6 +1618,62 @@ function EjemploSelectorAvatar() {
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
       <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
       <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+    </View>
+  )
+}
+
+/** S99-B — el pin que dice QUIÉN se está moviendo. Se monta sobre una
+ *  caja neutra (el mapa no vive en la galería) y con un botón que lo
+ *  MUEVE: la pieza es la interpolación, y una muestra quieta mostraría
+ *  el dibujo sin mostrar la pieza. */
+function EjemploPinEnMapa() {
+  const { theme } = useTheme()
+  const [lejos, setLejos] = useState(false)
+  return (
+    <View style={{ gap: spacing[3], alignItems: 'center' }}>
+      <View
+        style={{
+          width: 260,
+          height: 140,
+          borderRadius: radius.md,
+          backgroundColor: theme.bg.overlay,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <PinEnMapa nombre="Zeus" especie="perro" x={lejos ? 70 : -70} y={lejos ? -32 : 28} />
+      </View>
+      <Boton
+        variante="secundario"
+        tamaño="sm"
+        etiqueta="Llegó una lectura nueva"
+        onPress={() => setLejos((v) => !v)}
+      />
+      <Texto variante="dato">
+        interpola con el bezier de la casa · 300 ms · con reduce-motion o en memorial SALTA
+      </Texto>
+    </View>
+  )
+}
+
+/** S99-B — la puerta de la foto. Se mira ABIERTA; los dos botones abren
+ *  el picker del sistema, así que la verificación es de FORMA, no de
+ *  toque (ver la nota de la sección). */
+function EjemploHojaCaptura() {
+  const [abierta, setAbierta] = useState(false)
+  const [ultimo, setUltimo] = useState<string>('—')
+  return (
+    <View style={{ gap: spacing[3], alignItems: 'center' }}>
+      <Boton variante="secundario" tamaño="sm" etiqueta="Abrir la hoja" onPress={() => setAbierta(true)} />
+      <Texto variante="dato">último resultado: {ultimo}</Texto>
+      <HojaCaptura
+        visible={abierta}
+        titulo="Su foto"
+        onCerrar={() => setAbierta(false)}
+        onFoto={(f) => setUltimo(`foto ${f.width}×${f.height}`)}
+        onPermisoDenegado={() => setUltimo('permiso denegado (lo DICE la pantalla, no la pieza)')}
+        opciones={{ redimensionarA: 800 }}
+      />
     </View>
   )
 }
@@ -4657,6 +4715,57 @@ function GaleriaInterna() {
               </PanelTema>
             </ThemeProvider>
           </View>
+        </Seccion>
+
+        {/* HojaCaptura — S99-B: la puerta única de «¿de dónde sale esta foto?» */}
+        <Seccion titulo="HojaCaptura — la puerta única de la foto (dos acciones, y son todas)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — dos Boton secundario bloque + la X. NO hay tercera fila: la Hoja ya sale por X, swipe y back">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — misma anatomía">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — la Hoja degrada sola (fades suaves, nada rebota)">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            ⚠️ Los dos botones abren el picker DEL SISTEMA al tocarse. La anatomía se mira con la hoja abierta;
+            tocar dispara permisos. (Misma clase que la exención de EvidenciaFoto.Capturar en R17 — acá la pieza SÍ
+            se monta porque su forma se ve sin tocarla.)
+          </Texto>
+        </Seccion>
+
+        {/* PinEnMapa — S99-B · N14: quién se está moviendo, en el mapa */}
+        <Seccion titulo="PinEnMapa — quién se está moviendo (el punto de la casa, que crece para sostener una cara)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — anillo blanco + elevacion.reposo; la cara sale de la escalera §2.11">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — el anillo blanco NO cambia: separa del mapa, que no tiene tema">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — SALTA, no viaja (misma degradación que reduce-motion)">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            🔴 La variante `moto` NO está: el registry tiene 46 glifos y ninguno es moto/repartidor/entrega.
+            Dibujar uno acá saltearía §6b (hoja de contacto + gate POR ÍCONO del founder).
+          </Texto>
         </Seccion>
 
         {/* Cronometro — S44-B2.4: voz de máquina en display, sin baile */}
