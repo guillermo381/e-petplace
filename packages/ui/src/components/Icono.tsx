@@ -596,12 +596,30 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      **Hay precedente firmado de glifo sin huella:** `ia` (excepción S53),
      por una razón de la misma familia — su marca ES el dibujo.
 
-     🔴 SU GATE NO ESTÁ DADO Y NO LO DOY YO: la categoría **«glifo de
-     control»** está NOMBRADA desde S79 con su gate pendiente, y este ⓘ
-     es justamente uno. **Las dos variantes —con y sin huella— están
-     montadas en la galería** para el gate POR ÍCONO del founder (§6b, a
-     21 px junto a cinco del registry). Con su firma, la categoría que
-     S79 dejó nombrada queda cerrada de paso. */
+     ✅ **GATE DADO — FIRMA DEL FOUNDER (S98): EL ⓘ VA SIN HUELLA**, y con
+     él cierra la categoría **«glifo de control»** que S79 dejó nombrada
+     y sin gate. La regla que firmó, verbatim:
+
+       ***«en un glifo de control no hay mascota, hay interfaz; la huella
+       se reserva para donde significa.»***
+
+     ⚡ ESO ASCIENDE EL ARGUMENTO DE ACÁ Y LO REEMPLAZA. Lo de abajo era
+     geométrico —«en el ⓘ el centro lo ocupan la barra y el punto»— y
+     servía para ESTE dibujo; la firma da la razón GENERAL, que vale para
+     el próximo glifo de control aunque su centro esté libre. *Un
+     argumento que solo explica el caso que tenés adelante no evita el
+     caso siguiente.* La geometría queda escrita porque sigue siendo
+     cierta y porque explica por qué éste fue el primero en pedirlo.
+
+     ⚠️ DÓNDE QUEDA LA FRONTERA, que es lo que hay que no perder: la
+     huella marca lo que TIENE MASCOTA ADENTRO —oficios, entidades,
+     lugares del expediente—. Un control es andamiaje: informa, abre,
+     configura. **`ia` deja de ser una excepción suelta de S53 y pasa a
+     ser el primer habitante de esta categoría**, junto con este ⓘ.
+
+     📮 LA LETRA ES DE A: `DIRECCION_ARTE` §6b / Ley 9 tienen que recibir
+     la regla firmada. Acá vive el CÓDIGO y su porqué; la ley canónica no
+     es territorio de esta pista. */
   info: ({ tinta }) => (
     <>
       <Circle cx={12} cy={12} r={8.6} {...trazo(tinta)} />

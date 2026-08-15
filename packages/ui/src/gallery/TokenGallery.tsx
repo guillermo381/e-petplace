@@ -3123,33 +3123,37 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="ⓘ info (S98) — HOJA DE CONTACTO §6b · gate POR ÍCONO pendiente">
-          {/* LAS DOS VARIANTES JUNTAS, que es lo que el gate necesita —
-              la duda no es de gusto, es GEOMETRICA: en `ayuda` la huella
-              va al CENTRO (x 9.3 · y 9.5) y en el ⓘ ese centro lo ocupan
-              la barra y el punto.
-              A · SIN HUELLA — riesgo: rompe la regla madre §1. Piso: `ia`
-                  ya es excepcion FIRMADA (S53) por una razon hermana.
-              B · CON HUELLA al pie — riesgo: a 21px compite con el punto
-                  y se lee como ruido (Ley 9), y desplazarla del centro le
-                  quita al ⓘ su forma reconocible.
-              Y AL LADO, `ayuda`: si las dos se confunden a 21px, el glifo
-              nuevo no resuelve nada. */}
+        <Seccion titulo="ⓘ info (S98) — FIRMADO: sin huella · cierra «glifo de control» (S79)">
+          {/* ✅ GATE DADO (S98). Acá vivían las DOS variantes —A sin huella
+              y B con una huella SIMULADA al pie— porque el gate necesitaba
+              verlas juntas. El founder firmó A, así que **B SALE DEL
+              CÓDIGO** (Ley 37: lo que sale de la UI sale del código). Un
+              candidato rechazado que se queda montado deja de ser una
+              pregunta y pasa a ser ruido que el próximo lee como opción
+              viva.
+
+              LA REGLA FIRMADA, que es lo que sobrevive al caso:
+              *«en un glifo de control no hay mascota, hay interfaz; la
+              huella se reserva para donde significa.»*
+              ⇒ `ia` deja de ser una excepción suelta de S53 y pasa a ser
+              el primer habitante de la categoría, con este ⓘ.
+
+              ⚠️ LO QUE LA MEDICIÓN DEL GATE DEJÓ ESCRITO, y por eso no se
+              pierde: B se mostraba a **23 px** —su huella era un overlay
+              en `bottom/right: -2`— mientras los otros ocho estaban a 21.
+              O sea que se juzgó con dos píxeles MÁS de aire de los que
+              iba a tener. La firma la rechazó igual.
+
+              QUEDA la comparación que sigue siendo útil de mirar: el ⓘ
+              contra el salvavidas (`ayuda`) a 21 px — son dos trabajos
+              distintos y **pueden convivir en una pantalla**. */}
           <View style={{ gap: spacing[4] }}>
             <Texto variante="apoyo">
-              A 21 px — la fila del gate. `info` (A, sin huella) · `info` con huella simulada (B) ·
-              `ayuda` · y cinco del registry
+              A 21 px — `info` (FIRMADO, sin huella) · `ayuda` (el salvavidas, CON huella al centro)
+              · y cinco del registry
             </Texto>
             <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
               <Icono nombre="info" tamano={21} />
-              <View>
-                <Icono nombre="info" tamano={21} />
-                <View style={{ position: 'absolute', bottom: -2, right: -2 }}>
-                  <Svg width={9} height={9} viewBox="0 0 24 24">
-                    <Huella color={theme.capa.cuidado} escala={0.9} />
-                  </Svg>
-                </View>
-              </View>
               <Icono nombre="ayuda" tamano={21} />
               {(['hoy', 'cuenta', 'negocio', 'atender', 'preferencias'] as IconoNombre[]).map((n) => (
                 <Icono key={n} nombre={n} tamano={21} />
@@ -3161,8 +3165,9 @@ function GaleriaInterna() {
               <Icono nombre="ayuda" tamano={44} />
             </View>
             <Texto variante="apoyo">
-              🔴 La pregunta del gate: ¿el ⓘ y el salvavidas se distinguen a 21 px? Si no, sobra
-              uno. Y: ¿la categoría «glifo de control» (S79) lleva huella?
+              ✅ FIRMADO (S98): el ⓘ va sin huella — «en un glifo de control no hay mascota, hay
+              interfaz». Cierra la categoría «glifo de control» que S79 dejó nombrada. Sus dos
+              habitantes hoy: `info` e `ia`.
             </Texto>
           </View>
         </Seccion>

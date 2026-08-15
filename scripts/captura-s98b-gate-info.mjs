@@ -33,7 +33,7 @@ const DIR = new URL('./capturas/s98-b-gate-info/', import.meta.url).pathname;
 mkdirSync(DIR, { recursive: true });
 
 const BASE = process.env.BASE ?? 'http://localhost:8083';
-const TITULO = 'HOJA DE CONTACTO §6b';
+const TITULO = 'cierra «glifo de control»';
 /** Alto del recorte, en px CSS: el título + las dos filas (21 y 44) + los
  *  tres apoyos, incluida la pregunta del gate. Se verifica MIRANDO la
  *  captura, no calculándolo — si la pregunta queda cortada, sube. */
