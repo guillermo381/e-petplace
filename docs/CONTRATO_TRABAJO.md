@@ -428,6 +428,37 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 ---
 
+### Enmienda Sesión 97 — El `SALTAR_GATE` declara UN rojo con NOMBRE (regla 87)
+
+> **Un `SALTAR_GATE` declara UN rojo, con su nombre. Si el aviso trae OTRO
+> rojo que el declarado, el salto NO lo cubre.**
+>
+> **Se lee el aviso ENTERO antes de saltar.**
+
+**Origen: incidente propio de A en S97, declarado por ella misma.** Commiteó
+con `SALTAR_GATE="el rojo conocido de router.d.ts"` — un motivo cierto y
+verificado— **y el mismo aviso traía `verify:diseno ROJO`, que no era ése.**
+Un glifo re-dibujado entró a `main` con el juez en rojo, y el rojo estuvo a la
+vista, en la misma línea que se leyó para escribir el motivo.
+
+**Por qué la regla es necesaria y no es celo:** el `SALTAR_GATE` está bien
+diseñado — **obliga a escribir un motivo**, y eso solo ya frena el salto
+automático. Pero **escribir un motivo cierto se siente como haber mirado**, y
+no es lo mismo: *uno mira lo que ya sabe que va a encontrar y deja de leer.*
+
+> ***Es la diferencia entre una excepción documentada y una costumbre de
+> saltar.*** La primera nombra un rojo concreto y se agota en él. La segunda
+> usa un rojo conocido como llave para todos los demás.
+
+**Lo exigible, en una línea:** el motivo del `SALTAR_GATE` tiene que
+**enumerar los rojos que el aviso mostró** y decir de cada uno por qué no
+frena. Si aparece uno que no estaba en el motivo, **el commit se rehace**.
+
+*Hermana de L-191 y del `head -8` de S97: en las tres, una herramienta de
+comodidad se interpuso entre la medición y la conclusión, y no avisó.*
+
+---
+
 ## Reglas de oro
 
 - **Si tengo dudas, paro.** No avanzo asumiendo.
@@ -442,6 +473,8 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 ---
 
 ## Historial de versiones
+
+- **v1.27 (14 Ago 2026 — S97):** regla 87 — EL `SALTAR_GATE` DECLARA UN ROJO CON NOMBRE, nacida del incidente propio de A: declaró el rojo conocido de `router.d.ts` y pasó al lado de `verify:diseno ROJO` que el mismo aviso traía. *Escribir un motivo cierto se siente como haber mirado.* El motivo enumera los rojos que el aviso mostró; si aparece uno que no estaba, el commit se rehace.
 
 - **v1.30 (5 Ago 2026 — S88):** **regla 87 — UN APARATO CONECTADO NO ES UN APARATO LIBRE.** *(Propuesta por la pista D, firmada por la mesa. Es la forma de la regla 85 —el worktree por pista— aplicada al HARDWARE: el aislamiento del árbol no sirve de nada si las cuatro pistas comparten un teléfono.)*
 
