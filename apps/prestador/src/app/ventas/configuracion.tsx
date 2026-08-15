@@ -396,12 +396,25 @@ export default function ConfiguracionVentas() {
   const [turDias, setTurDias] = useState<number[]>(L_A_V);
   const [turFestivos, setTurFestivos] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      let vigente = true;
-      void (async () => {
+  /* 🔴 LA CARGA ES UNA FUNCIÓN, NO SOLO UN EFECTO (S98-C).
+     Antes vivía únicamente adentro del `useFocusEffect` y los altas la
+     disparaban bumpeando `intento`. **Medido: eso es una CARRERA.** Al
+     guardar se cierra la Hoja —que es un `Modal` nativo— y ese desmontaje
+     mueve el foco de la pantalla; el efecto está acoplado al foco, así que a
+     veces observaba el cambio de `intento` y a veces se lo tragaba. En dos
+     corridas idénticas el mismo alta refrescó una vez y la otra no (la
+     sonda: `recargar()` disparó a +257 ms y el efecto no volvió a correr en
+     12 s). *Un refresco que funciona a veces es peor que uno que no funciona:
+     el que no funciona se arregla, el intermitente se discute.*
+     ⇒ ahora los altas llaman `cargar()` DIRECTO y no le piden permiso al
+     foco. El `useFocusEffect` queda para lo que sí es suyo: volver a la
+     pantalla. Y `intento` sobrevive solo para el botón de reintentar. */
+  const cargar = useCallback(
+    async (vigenteRef?: { actual: boolean }) => {
+      const vigente = () => vigenteRef?.actual !== false;
+      {
         const ctx = await contextoVentas();
-        if (!vigente) return;
+        if (!vigente()) return;
         if (!ctx.ok || ctx.data === null) {
           setPantalla({ estado: 'error' });
           return;
@@ -425,7 +438,7 @@ export default function ConfiguracionVentas() {
              carga). Va en esta ola y no en una propia. */
           obtenerPaisesDelMundo(),
         ]);
-        if (!vigente) return;
+        if (!vigente()) return;
         if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok || !rPaises.ok) {
           setPantalla({ estado: 'error' });
           return;
@@ -454,13 +467,27 @@ export default function ConfiguracionVentas() {
             ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
             : null,
         });
-      })();
-      return () => {
-        vigente = false;
-      };
-    }, [intento]),
+      }
+    },
+    // `intento` NO va acá: la carga no depende de él, lo lee el efecto.
+    [],
   );
 
+  /* El foco sigue recargando —volver a la pantalla trae lo de afuera— y el
+     `intento` del botón de reintentar también. Lo que ya NO pasa por acá son
+     los altas: ésos llaman `cargar()` y no dependen de que el foco coopere. */
+  useFocusEffect(
+    useCallback(() => {
+      const ref = { actual: true };
+      void cargar(ref);
+      return () => {
+        ref.actual = false;
+      };
+    }, [cargar, intento]),
+  );
+
+  /** Reintento desde el estado de error. Los altas NO lo usan: llaman
+   *  `cargar()` directo (ver la nota de la carrera arriba). */
   const recargar = () => setIntento((n) => n + 1);
 
   /* ⑥ — las claves van LITERALES, jamás armadas por concatenación: el
@@ -664,7 +691,7 @@ export default function ConfiguracionVentas() {
     setRepFotoDocUri(null);
     setRepFotoUri(null);
     setRepVehiculos([]);
-    recargar();
+    await cargar();
   }
 
   async function alternarRepartidor(rep: Repartidor, encendido: boolean) {
@@ -696,7 +723,7 @@ export default function ConfiguracionVentas() {
     }
     mostrar({ texto: t('ventas.config.recursoExito'), variante: 'exito' });
     setAltaRecurso(false);
-    recargar();
+    await cargar();
   }
 
   async function guardarTurno() {
@@ -736,7 +763,7 @@ export default function ConfiguracionVentas() {
     }
     mostrar({ texto: t('ventas.config.turnoExito'), variante: 'exito' });
     setAltaTurno(false);
-    recargar();
+    await cargar();
   }
 
   return (
