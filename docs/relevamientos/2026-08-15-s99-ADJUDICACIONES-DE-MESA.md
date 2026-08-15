@@ -97,18 +97,21 @@ bendice a los peores con el lint en verde*). Deuda con DOS dueños: las del
 prestador son de C, las de `packages/api` de A. Solo-baja, cura al tocar
 cada puerta.
 
-> ⚠️ **RECONCILIACIÓN DE DATO, declarada y no aplicada en silencio (L-166 /
-> la fuente corrige a la mesa):** la adjudicación decía *baseline 6→11*
-> sobre el censo de C (5 en api). **B re-midió la fuente ANTES de que la
-> adjudicación llegara y DOS de las cinco CUMPLEN N12.4** (nombran la falla
-> antes: `vacunas.ts:198` · `_despensa-comun.ts:237`) — meterlas al baseline
-> las sellaría como deuda cumpliendo, el daño espejo del que la adjudicación
-> persigue. **El estado vivo es baseline 9 = 6 (C, curables escribiendo) + 3
-> (A, BLOQUEADAS por códigos tipados — bajan solas puerta a puerta)**, con
-> el net anclado al discriminador «¿algo nombra la falla ANTES?» calibrado
-> 16/16. **La INTENCIÓN de la adjudicación se cumple entera** (el corpus
-> mira toda la casa y las tres peores están adentro); si la mesa quiere las
-> dos que cumplen adentro igual, es una palabra y B las suma.
+> ✅ **RECONCILIACIÓN CERRADA POR PALABRA DE MESA (15-ago, tercera tanda):
+> LAS DOS QUE CUMPLEN NO ENTRAN.** El baseline de R44 es **9 = 6 (C,
+> curables) + 3 (A, bloqueadas → D-827)**, y es **el número correcto, no una
+> desviación tolerada de la adjudicación**.
+>
+> **La razón, escrita para que nadie la reabra:** la mesa dictó *6→11* sobre
+> el CENSO de C; **B midió el OBJETO** y encontró que 2 de esas 5 ya cumplen
+> N12.4 (`vacunas.ts:198` · `_despensa-comun.ts:237` — nombran la falla
+> antes). **Gana la fuente sobre la directiva — regla vieja de la casa, y
+> acá aplica a una directiva de mesa como aplicaría a cualquier otra.**
+> Meterlas adentro las sellaría como deuda para siempre, y el mes que viene
+> alguien reescribiría un mensaje que ya estaba bien: *es L-236 con sello de
+> mesa encima, que es su peor forma — no un lint verde que miente, sino uno
+> que miente con autoridad.* El net queda anclado al discriminador «¿algo
+> nombra la falla ANTES?», calibrado 16/16.
 
 ② **EL IDIOMA → es D-539, no R44.** Evidencia de C depositada como enmienda
 S99 en la ficha; enfermedad SEPARADA declarada (*una voz puede ser
