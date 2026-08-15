@@ -191,8 +191,26 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   if (t.mode === 'light' && 'control' in t.accent) {
     add('accent.control (magentaDark) porta blanco', palette.white, t.accent.control)
   }
+  // 🔴 S98-B (D-813) · ESTE PAR MEDÍA `capaBg.comunidad` Y ESO ERA VERDE
+  // POR LA RAZÓN EQUIVOCADA. El tinte de la elección salió de la capa y
+  // pasó a `accent.controlBg`, que resuelve por casa; medir la capa era
+  // gatear un valor que la pieza ya no pinta.
+  //
+  // ⚠️ Y EL HUECO GRANDE QUEDA DECLARADO, no tapado: este archivo recorre
+  // **solo LIGHT/DARK/MEMORIAL** (la línea del `for` de abajo) — las dos
+  // casas de OFICIO nunca pasan por los pares de componente, así que el
+  // tinte del PRESTADOR sigue sin medirse aquí. *Es la misma clase que el
+  // defecto que esta línea cura: el instrumento cubría la casa donde los
+  // tokens coinciden.* Barrer las dos casas enteras es tanda propia —
+  // puede destapar pares ajenos— y va a la cola con este porqué escrito.
   if ('capaBg' in t) {
-    add('SelectorOpcion control: text.primary / capaBg.comunidad⊕card', t.text.primary, t.capaBg.comunidad, t.bg.card)
+    const tinteEleccion = 'controlBg' in t.accent ? (t.accent as { controlBg: string }).controlBg : t.capaBg.comunidad
+    add('SelectorOpcion control: text.primary / accent.controlBg⊕card', t.text.primary, tinteEleccion, t.bg.card)
+    // El MISMO tinte lo pinta ahora la ficha ELEGIDA de SelectorEspecie
+    // (D-813): antes su selección no tenía par propio — se medía el
+    // relleno de REPOSO (`capaBg.identidad`, arriba) y nadie medía el de
+    // la elección. Un estado sin par es un estado sin gate.
+    add('SelectorEspecie ELEGIDA: text.primary / accent.controlBg⊕base', t.text.primary, tinteEleccion, t.bg.base)
   }
 
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
@@ -200,7 +218,15 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // tres registros de SelectorOpcion: control · oficio · capa (moribundo).
   const superficieChip = t.mode === 'light' ? t.bg.card : t.bg.elevated
   if ('capaBg' in t && 'control' in t.accent) {
-    add('Ley22 tonal control: accent.control / capaBg.comunidad⊕chip', t.accent.control, t.capaBg.comunidad, superficieChip)
+    // S98-B (D-813): el tonal de control mide su tinte NUEVO, por lo mismo
+    // que el par de arriba — el borde y el relleno son la misma señal y
+    // tienen que medirse contra la superficie que de verdad se pinta.
+    add(
+      'Ley22 tonal control: accent.control / accent.controlBg⊕chip',
+      t.accent.control,
+      'controlBg' in t.accent ? (t.accent as { controlBg: string }).controlBg : t.capaBg.comunidad,
+      superficieChip,
+    )
     add('Ley22 tonal oficio: accent.primary / accent.primaryBg⊕chip', t.accent.primary, t.accent.primaryBg, superficieChip)
     add('Ley22 tonal capa: capaText.identidad / capaBg.identidad⊕chip', capaTexto.identidad, t.capaBg.identidad, superficieChip)
   }
@@ -228,6 +254,20 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('muro oficio NOCHE: texto papel / tealDarkNoche', palette.light0, palette.tealDarkNoche)
   add('muro oficio NOCHE: textDark0 / tealDarkNoche', palette.textDark0, palette.tealDarkNoche)
   add('muro oficio NOCHE: teal puro / tealDarkNoche', palette.teal, palette.tealDarkNoche, undefined, 3)
+
+  // 🔴 S98-B (D-813) — LA ELECCIÓN DEL PRESTADOR, que hasta hoy NO SE
+  // MEDÍA EN NINGUNA PARTE. Va como one-off por la misma razón que sus
+  // vecinos de arriba: el bucle de pares de componente recorre solo
+  // LIGHT/DARK/MEMORIAL y las casas de oficio quedan afuera.
+  // *No se puede mover un token de casa y dejar sin gate justo la casa
+  // donde cambió* — sería el mismo verde por la razón equivocada que esta
+  // cura vino a sacar, un piso más arriba.
+  // Los pares: el NOMBRE de la ficha y el BORDE, cada uno contra el tinte
+  // compositado sobre la superficie real de su tema.
+  add('elección oficio (light): textLight0 / tealAlpha16⊕papelTapizOficio', palette.textLight0, palette.tealAlpha16, palette.papelTapizOficio)
+  add('elección oficio (light): borde tealDark / tealAlpha16⊕papelTapizOficio', palette.tealDark, palette.tealAlpha16, palette.papelTapizOficio, 3)
+  add('elección oficio (dark): textDark0 / tealAlpha15⊕dark1', palette.textDark0, palette.tealAlpha15, palette.dark1)
+  add('elección oficio (dark): borde teal / tealAlpha15⊕dark1', palette.teal, palette.tealAlpha15, palette.dark1, 3)
 
   // Gradiente firma v2 (B3.1c) — REGLA DE PEOR PUNTO: onGradient contra cada
   // stop con location ≤ 0.7 DEBE pasar 4.5. La COLA (location 1, teal) queda

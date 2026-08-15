@@ -1097,9 +1097,25 @@ function r27(fuentes) {
   // medición: tealDark rinde 3.37 en oscuro, margen 0.37). La regla se
   // ENSANCHA a los dos slots en vez de nacer una R28 gemela — dos reglas
   // para la misma física es la copia que L-175 prohíbe, un piso arriba.
+  // 🔴 S98-B — CUARTO SLOT: `controlBg`, el TINTE de la elección (D-813).
+  // Entra por la MISMA física y por eso ensancha la regla en vez de nacer
+  // una gemela (L-175): los temas de oficio se arman por spread, así que
+  // un slot que no se pisa se HEREDA MAGENTA en silencio y ni el tsc ni
+  // el ojo lo ven —el campo existe igual—.
+  //
+  // ⚠️ Y ÉSTE ERA EL CASO REAL, no el hipotético: `control` estaba pisado
+  // desde S83 y el tinte NO, así que el prestador elegía con **borde teal
+  // y relleno magenta**. Vivió invisible porque la pieza nació en el
+  // CLIENTE, donde las dos familias coinciden. *Un guard que vigila el
+  // borde y no su relleno vigila media señal.*
+  //
+  // Los valores esperados son los TINTES de cuidado que la casa ya tiene
+  // medidos (no colores nuevos): `tealAlpha16` en claro · `tealAlpha15`
+  // en oscuro — cada tema con su alfa, igual que sus hermanos tienen cada
+  // uno su registro.
   const ESPERADO = {
-    lightOficio: { control: 'tealDark', active: 'tealDark', marcaEleccion: 'tealDark' },
-    darkOficio: { control: 'teal', active: 'teal', marcaEleccion: 'teal' },
+    lightOficio: { control: 'tealDark', controlBg: 'tealAlpha16', active: 'tealDark', marcaEleccion: 'tealDark' },
+    darkOficio: { control: 'teal', controlBg: 'tealAlpha15', active: 'teal', marcaEleccion: 'teal' },
   };
   for (const [casa, slots] of Object.entries(ESPERADO)) {
     const bloque = new RegExp(`const ${casa}[\\s\\S]*?\\n\\}`).exec(temas)?.[0] ?? '';
@@ -2596,6 +2612,25 @@ const EXTRAS_R27 = [
       'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, active: palette.teal },\n}',
   }],
   ['R27·guard de fuente (themes ausente)', { temas: '' }],
+  // 🔴 S98-B (D-813) · EL BRAZO DEL TINTE, CON TODO LO DEMÁS SANO — que es
+  // la única forma de probar que el slot nuevo se vigila de verdad. Las
+  // dos casas pisan `control`, `active` y `marcaEleccion` correctamente y
+  // NINGUNA pisa `controlBg`: es EXACTAMENTE el estado que vivió en
+  // producción hasta hoy, y con el que la regla vieja daba VERDE.
+  // *Si este brazo no sale rojo, el cuarto slot es decorativo.*
+  ['R27·brazo controlBg (todo lo demás sano — el estado que vivió en producción)', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },\n}',
+  }],
+  // Y su hermano: el slot PISADO pero con el registro del OTRO tema. Un
+  // guard que solo mirara presencia dejaría pasar el tinte claro en el
+  // tema oscuro, que es un alfa distinto por medición, no por gusto.
+  ['R27·brazo controlBg con el alfa cruzado', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, controlBg: palette.tealAlpha15, active: palette.tealDark, marcaEleccion: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, controlBg: palette.tealAlpha16, active: palette.teal, marcaEleccion: palette.teal },\n}',
+  }],
 ];
 for (const [nombre, fx] of EXTRAS_R27) {
   if (r27(fx).fallos.length === 0) {

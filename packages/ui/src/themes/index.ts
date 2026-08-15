@@ -134,7 +134,13 @@ const lightOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark },
+  // 🔴 S98-B · `controlBg` ENTRA A LA LISTA DE PISADOS (cura de D-813): el
+  // spread trae el tinte MAGENTA del cliente, y sin esta línea el
+  // prestador elegía con borde teal y relleno magenta — medido al píxel
+  // en dispositivo. `tealAlpha16` es el tinte de cuidado que la casa ya
+  // usa y ya tiene gate WCAG; no es un color nuevo, es el que
+  // corresponde. Lo vigila R27 por AUSENCIA, igual que sus tres hermanos.
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -176,7 +182,9 @@ const darkOficio: Theme = {
   // 1.34 ✗, en tinta da 11.01 ✓. El CLARO no se toca: ahí tealDark rinde
   // 5.51 y el puro REPRUEBA (1.46) — por eso son dos registros y no un
   // color. Reversa: `cta: palette.tealDark, ctaTexto: palette.textDark0`.
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal },
+  // 🔴 S98-B · `controlBg` pisado también acá (D-813). `tealAlpha15` es el
+  // tinte de cuidado del tema oscuro — su par, no un valor nuevo.
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

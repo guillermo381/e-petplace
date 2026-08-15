@@ -89,6 +89,19 @@ export const darkTheme = {
     // S58 — acento de controles del cliente en dark: violetText (gateado
     // S44 — cero pares nuevos por firma).
     control:       palette.violetText,
+    /** 🔴 EL TINTE DE LA ELECCIÓN — SLOT NUEVO (S98-B, cura de D-813).
+     *  MISMO VALOR que hoy (`capaBg.comunidad` en dark es `pinkAlpha09`):
+     *  cero cambio visual en el cliente. El porqué entero vive en
+     *  `light.ts`, en su hermano.
+     *
+     *  ⚠️ DE PASO, MEDIDO Y DECLARADO: en dark el `control` es
+     *  `violetText` y el tinte es PINK, así que el desacople también
+     *  existía acá — solo que dentro de la misma familia cálida, y por
+     *  eso nunca dio síntoma. *Que un defecto no se vea no es lo mismo
+     *  que no estar.* Se conserva el valor porque cambiarlo sería un
+     *  cambio de arte sin firma, no una cura; lo que sí queda es que
+     *  ahora se puede mover en UN lugar. */
+    controlBg:     palette.pinkAlpha09,
     /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
      *  quiero comunicar con la pata es: este es el seleccionado").
      *  Es marca de SELECCIÓN, no de marca: por eso en el prestador toma

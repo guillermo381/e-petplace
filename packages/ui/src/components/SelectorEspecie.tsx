@@ -108,11 +108,44 @@ function Ficha({
   // Memorial degrada solo, como siempre: sin `capaBg` no hay tinte y la
   // señal vuelve al borde sereno (Ley 8 intacta).
   const acentoEleccion = 'control' in theme.accent ? theme.accent.control : theme.capa.identidad
+  /** El TINTE de la elección — el hermano de `acentoEleccion`, resuelto
+   *  con el mismo guard por la misma razón (D-813).
+   *
+   *  ⚠️ EL FALLBACK ES `fondoReposo` Y NO LA CAPA, y esto lo corrigió el
+   *  TIPO: la primera versión caía a `theme.capaBg.comunidad` —o sea, al
+   *  acoplamiento que esta cura viene a sacar, conservado como «piso»— y
+   *  `tsc` lo rebotó porque memorial no tiene `capaBg`. *El compilador
+   *  señaló el único tema que podía alcanzar esa rama y de paso mostró
+   *  que la rama no debía existir.*
+   *
+   *  Este camino es INALCANZABLE hoy: el consumidor solo usa el valor
+   *  bajo `conCapa`, que ya exige `'capaBg' in theme`, y los cuatro temas
+   *  no-memorial portan `controlBg` (R27 lo vigila por ausencia). Es piso
+   *  de tipo, no camino vivo — y si algún día se alcanza, cae en la
+   *  superficie de reposo, que es honesto: sin slot no hay tinte. */
+  const tinteEleccion =
+    'controlBg' in theme.accent ? (theme.accent as { controlBg: string }).controlBg : fondoReposo
   const fondo = conCapa
-    ? // el tinte de la capa MARCA/AFECTO — el mismo que `SelectorOpcion`
-      // usa para `acento="control"`, así los dos selectores del alta se
-      // marcan igual (era el pedido: misma gramática en los dos pasos).
-      theme.capaBg.comunidad
+    ? // 🔴 S98-B (D-813) · EL RELLENO SALE DEL MISMO SLOT QUE EL BORDE.
+      //
+      // Acá decía `theme.capaBg.comunidad`, y su comentario declaraba la
+      // premisa que lo hacía parecer correcto: *«el mismo que
+      // `SelectorOpcion` usa para acento="control"»*. **La premisa era
+      // CIERTA** —`SelectorOpcion:238` teclea exactamente eso— y aun así
+      // el resultado estaba mal: las dos piezas copiaban el mismo
+      // acoplamiento. *Un error consistente entre dos piezas se lee como
+      // sistema.*
+      //
+      // El defecto: el borde leía `accent.control` (resuelve por casa) y
+      // el relleno una CAPA fija. Los temas de oficio se arman por spread
+      // y pisan `accent`, jamás `capaBg` ⇒ en el prestador salía **borde
+      // teal con relleno magenta**, en la app donde §15b.1 firmó que el
+      // magenta vive solo en la marca.
+      //
+      // Ahora las dos mitades de la señal salen de la MISMA familia y
+      // ninguna pantalla puede desalinearlas. El cliente no cambia un
+      // píxel: el slot nace con el valor que tenía.
+      tinteEleccion
     : rellenoCatalogo
       ? theme.capaBg.identidad
       : fondoReposo

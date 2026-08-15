@@ -110,6 +110,30 @@ export const lightTheme = {
     // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
     // usa: su oficio es tealDark (§15b).
     control:       palette.magentaDark,
+    /** 🔴 EL TINTE DE LA ELECCIÓN — SLOT NUEVO (S98-B, cura de D-813).
+     *  MISMO VALOR que hoy: `capaBg.comunidad` es `pinkAlpha08`, así que
+     *  el cliente NO cambia un píxel. Lo que cambia es de dónde sale.
+     *
+     *  EL DEFECTO QUE CIERRA, medido: la elección se pintaba con DOS
+     *  familias — el BORDE leía `accent.control` (que resuelve por casa)
+     *  y el RELLENO tecleaba `capaBg.comunidad` (que NO resuelve por
+     *  casa, porque los temas de oficio se arman por spread y pisan
+     *  `accent`, jamás `capaBg`). En el prestador eso daba **borde teal
+     *  con relleno magenta**, en la app donde §15b.1 firmó que el
+     *  magenta vive SOLO en la marca.
+     *
+     *  🔴 Y POR QUÉ NO SE VEÍA: la pieza nació en el CLIENTE, donde las
+     *  dos familias COINCIDEN. *Un acoplamiento entre dos valores que
+     *  casualmente son iguales no tiene síntoma hasta que alguien los
+     *  monta donde difieren* — la misma familia que D-806.
+     *
+     *  Memorial NO porta el slot y degrada como sus hermanos (Ley 8): el
+     *  guard de las piezas es `'controlBg' in theme.accent`, que pregunta
+     *  lo que de verdad importa —¿este tema tiñe la elección?— en vez del
+     *  proxy `'capaBg' in theme`. Lo vigila **R27**, junto a `control`,
+     *  `active` y `marcaEleccion`: son la misma física y por eso los
+     *  cubre UNA regla. */
+    controlBg:     palette.pinkAlpha08,
     /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
      *  quiero comunicar con la pata es: este es el seleccionado").
      *  Es marca de SELECCIÓN, no de marca: por eso en el prestador toma

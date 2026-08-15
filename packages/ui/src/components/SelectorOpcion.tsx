@@ -232,10 +232,22 @@ function Chip({
   // S81 — la clase ELEGIDOR (ver JSDoc de `solitario`): reposo relleno
   // overlay sin borde; elegido = superficie apoyada + texto en acento.
   const esSolitario = solitario === true && !entidad
+  // 🔴 S98-B (D-813) · el brazo `control` leía `theme.capaBg.comunidad` —
+  // una CAPA fija— mientras su borde leía `accent.control`, que resuelve
+  // por casa. Como los temas de oficio se arman por spread y pisan
+  // `accent` y jamás `capaBg`, el prestador elegía con **borde teal y
+  // relleno magenta** (medido al píxel en dispositivo).
+  //
+  // ⚡ Y LO QUE VUELVE ESTO ENSEÑABLE: la forma correcta ya estaba UNA
+  // LÍNEA MÁS ABAJO — el brazo `oficio` lee `accent.primaryBg`, un slot
+  // que sí resuelve por casa. *El defecto no era falta de patrón: era una
+  // rama que no lo siguió, con la referencia a la vista.*
   const tinteAcento = !('capaBg' in theme)
     ? fondoReposo
     : acento === 'control'
-      ? theme.capaBg.comunidad
+      ? 'controlBg' in theme.accent
+        ? (theme.accent as { controlBg: string }).controlBg
+        : theme.capaBg.comunidad
       : acento === 'oficio'
         ? theme.accent.primaryBg
         : theme.capaBg.identidad

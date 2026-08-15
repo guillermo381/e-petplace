@@ -4315,13 +4315,43 @@ function GaleriaInterna() {
         {/* SelectorEspecie — S45-B3.1: las 6 familias F1, selección única */}
         <Seccion titulo="SelectorEspecie — grid 3×2, selección única (tocá una ficha)">
           <View style={{ gap: spacing[4] }}>
+            {/* ⏪ S98-B · LA ETIQUETA DE ESTE PANEL DECÍA «borde 1.5
+                capa.identidad + tint capaBg», que es el comportamiento de
+                S45 — DEROGADO dos veces desde entonces (S91 movió la
+                elección a `accent.control`, y D-813 mueve el tinte a
+                `accent.controlBg`). *La prosa derivada decae mientras el
+                objeto no, y acá decaía adentro del instrumento que
+                verifica.* */}
             <ThemeProvider defaultMode="light">
-              <PanelTema etiqueta="claro — seleccionada: borde 1.5 capa.identidad + tint capaBg (no consume accent.active)">
+              <PanelTema etiqueta="cliente claro — elegida: borde accent.control (magentaDark) + tinte accent.controlBg">
                 <EjemploSelectorEspecie />
               </PanelTema>
             </ThemeProvider>
             <ThemeProvider defaultMode="dark">
-              <PanelTema etiqueta="dark — mismos registros, tints del tema">
+              <PanelTema etiqueta="cliente dark — mismos slots, registros del tema">
+                <EjemploSelectorEspecie />
+              </PanelTema>
+            </ThemeProvider>
+            {/* 🔴 S98-B (D-813) · LA CASA QUE FALTABA, Y SU AUSENCIA ERA LA
+                CAUSA DE QUE EL DEFECTO NO TUVIERA SÍNTOMA.
+                Esta pieza tenía tres paneles —claro, dark, memorial— y los
+                tres del CLIENTE, la única casa donde `accent.control` y el
+                tinte COINCIDEN. El prestador elegía con **borde teal y
+                relleno magenta** y ninguna galería lo mostraba: no porque
+                el espécimen estuviera mal montado, sino porque el
+                espécimen de esa casa NO EXISTÍA.
+                ⇒ *Una galería prueba las combinaciones que monta. La que
+                no monta no da verde ni rojo: no dice nada.*
+                Lo que hay que mirar acá: el borde y el relleno tienen que
+                ser de LA MISMA familia. Si se ven de dos colores, D-813
+                volvió. */}
+            <ThemeProvider defaultMode="light" cta="oficio">
+              <PanelTema etiqueta="🔴 PRESTADOR claro (D-813) — borde y tinte, LA MISMA familia: tealDark + tealAlpha16">
+                <EjemploSelectorEspecie />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark" cta="oficio">
+              <PanelTema etiqueta="🔴 PRESTADOR dark (D-813) — teal puro + tealAlpha15">
                 <EjemploSelectorEspecie />
               </PanelTema>
             </ThemeProvider>
