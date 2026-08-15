@@ -1726,7 +1726,21 @@ const PRESUPUESTO_SEPARADORES = 3;
 /** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
  *
  *  ⏬ S99-B · PARTICIÓN POR DUEÑO Y CURABILIDAD (orden de mesa, aplicada
- *  HACIA ATRÁS). El baseline decía *«2 de ui + 8 de apps»* y eso es
+ *  HACIA ATRÁS).
+ *
+ *  **✅ VERIFICADO QUE APLICA, y se declara el lado afirmativo igual que
+ *  el negativo** (conducta ratificada por mesa: *«una orden de mesa
+ *  ejecutada sin verificar si aplica es una orden mal ejecutada, aunque
+ *  el resultado se vea prolijo»* — y el declarar es la mitad exigible,
+ *  **en cualquiera de los dos sentidos**). El criterio y su resultado:
+ *
+ *  > ¿Tiene esta regla un número PARADO que se pueda confundir entre
+ *  > «nadie lo tocó» y «nadie PUEDE tocarlo»? **R42: SÍ** — su baseline
+ *  > es una lista de diez archivos esperando, y ninguno decía de quién
+ *  > era ni si se podía. *(Su hermana R43 dio **NO** y también está
+ *  > declarado, en su propia cabecera.)*
+ *
+ *  El baseline decía *«2 de ui + 8 de apps»* y eso es
  *  origen, no estado: **un número parado no dice si nadie lo tocó o si
  *  nadie PUEDE tocarlo.**
  *
