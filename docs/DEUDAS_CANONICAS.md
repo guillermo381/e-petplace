@@ -11708,6 +11708,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-237 — LA OMISIÓN SIN DUEÑO ES UNA INVISIBILIDAD CON FECHA DE NACIMIENTO FUTURA (S99 — depositada por orden de mesa, 15-ago-2026).**
+
+  **Literal:** *«cada superficie excluye por una razón localmente buena, y nadie es dueño de la suma. No se ve como un bug: cada pantalla está bien, y el objeto no está en ningún lado.»*
+
+  **Corolario EXIGIBLE, de B: toda omisión declarada NOMBRA A SU DUEÑO.** *«No lo monta nadie AÚN, y es de ⟨quién⟩»* es una omisión; sin esa línea es un olvido que todavía no se nota. **La diferencia entre las dos es exactamente esa línea.**
+
+  **Genealogía:** S72 (la cita `por_coordinar` fuera del `.gte('fecha', hoy)` — motor sano, falla de VISIBILIDAD) · D-439 (*«notificación al dueño SIEMPRE» incluye visibilidad*) · *«la invisibilidad no tiene stack trace»*.
+
+  **Y la mitad que hace a esta jornada distinta:** *el defecto NO EXISTE todavía* — D midió que el lector viejo no filtra por fecha, así que hoy el pedido sin día aparece en las cuatro superficies. **Las tres pistas cerraron un defecto ANTES de fabricarlo — la primera vez que la casa caza uno en tiempo futuro, y por eso la ley vale más que la cura.** Su ficha operativa: **D-828**.
+
 - **L-714 — NO EXISTE. Es un typo de D-714** (la deuda de la anon key como JWT válido, S92-BIS). Curado **en este archivo** en S94-B; **quedan dos ocurrencias vivas a propósito**: `CLAUDE.md` —dentro del texto que reporta el propio typo— y `docs/actas/2026-08-09-s92bis-ACTA-CIERRE.md`, que es **acta firmada y no se edita**. Se declara acá para que ningún grep lo confunda con una lección. *Mismo patrón que A7 vacía: un número sin letra no se reconstruye — se declara vacío.*
 
 - **L-227 — UNA CURA DE TAMAÑO NO SE JUZGA POR QUIEN SUBE: POR QUIEN BAJA, QUE SON MUCHOS Y REPETIDOS (S94-PERF).**
@@ -16726,3 +16736,47 @@ estaba parada**.
 ☠️ **Muere** cuando las puertas que las pantallas consumen devuelvan código
 por constraint donde la voz lo necesita, y el tramo BLOQUEADO del baseline
 de R44 llegue a cero.
+
+#### D-828 — 🟢 LA MIGRACIÓN AL LECTOR POR RANGO: toda superficie declara qué hace con `sinFecha` ANTES de mergear (dueño A)
+
+**Nace por adjudicación de mesa (15-ago-2026), del cruce B→D→C — y su valor
+es el DISPARO, no el síntoma: el defecto NO EXISTE todavía.**
+`listarPedidosDelVendedorEnRango` devuelve `{ delRango, sinFecha }` para que
+el pedido vivo sin `entrega_fecha_objetivo` jamás desaparezca de una ventana
+(precedente D-439/S71). **B midió que `sinFecha` no lo consume NADIE; D
+midió por qué hoy eso no es invisibilidad:**
+
+```
+listarPedidosDelVendedor        (SIN rango) → /ventas/index · facturacion · configuracion · (tabs)/index
+listarPedidosDelVendedorEnRango (rango)     → solo el histórico de D (consume delRango y DECLARA por qué no monta sinFecha: un vivo sin día no es pasado)
+```
+
+El lector viejo no filtra por fecha ⇒ el pedido sin día aparece hoy en las
+cuatro superficies del presente. **La pieza `ventana-pedidos` de C es la
+PRIMERA que migra; las otras tres van a tener la misma bifurcación — sin
+ficha, la ley (L-237) se cumple una vez y se pierde tres.**
+
+**🔔 EL CRITERIO DE DISPARO (mesa, literal):** *«toda superficie que migre
+al lector por rango declara qué hace con `sinFecha` ANTES de mergear —
+montarlos o nombrar quién los monta. Nunca ninguna de las dos.»*
+
+**Y la adjudicación de producto que lo acompaña:** **los `sinFecha` PRESIDEN
+la ventana del presente, no se mezclan en el día** — porque presidir es lo
+único que sobrevive al cambio de fecha: *adentro del día, cada cruce del
+selector los borra y los trae — un objeto que parpadea según qué día mirás
+es invisibilidad INTERMITENTE, peor que la total porque nadie la puede
+reproducir.* C los monta presidiendo en `ventana-pedidos`; el histórico de
+D no cambia y sigue declarando su porqué.
+
+**El instrumento (pedido a B, con su propia vara L-236):** que algo GRITE
+cuando una superficie consuma `…EnRango` sin tocar `sinFecha` — es la clase
+de cosa que ningún ojo ve y un lint sí; nace con el histórico de D como la
+legítima obvia que NO debe atrapar.
+
+**Refuerzo en el objeto:** la obligación vive TAMBIÉN en el JSDoc del
+wrapper (el único lugar que el futuro migrador lee sí o sí) — L-218 ya midió
+que un header solo no alcanza; por eso son ficha + JSDoc + lint.
+
+☠️ **Muere** cuando las cuatro superficies del presente hayan migrado (o
+declarado que no migran) cumpliendo el criterio, con el lint de B vigilando
+a las que vengan.

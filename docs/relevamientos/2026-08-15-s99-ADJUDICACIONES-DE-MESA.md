@@ -97,18 +97,21 @@ bendice a los peores con el lint en verde*). Deuda con DOS dueños: las del
 prestador son de C, las de `packages/api` de A. Solo-baja, cura al tocar
 cada puerta.
 
-> ⚠️ **RECONCILIACIÓN DE DATO, declarada y no aplicada en silencio (L-166 /
-> la fuente corrige a la mesa):** la adjudicación decía *baseline 6→11*
-> sobre el censo de C (5 en api). **B re-midió la fuente ANTES de que la
-> adjudicación llegara y DOS de las cinco CUMPLEN N12.4** (nombran la falla
-> antes: `vacunas.ts:198` · `_despensa-comun.ts:237`) — meterlas al baseline
-> las sellaría como deuda cumpliendo, el daño espejo del que la adjudicación
-> persigue. **El estado vivo es baseline 9 = 6 (C, curables escribiendo) + 3
-> (A, BLOQUEADAS por códigos tipados — bajan solas puerta a puerta)**, con
-> el net anclado al discriminador «¿algo nombra la falla ANTES?» calibrado
-> 16/16. **La INTENCIÓN de la adjudicación se cumple entera** (el corpus
-> mira toda la casa y las tres peores están adentro); si la mesa quiere las
-> dos que cumplen adentro igual, es una palabra y B las suma.
+> ✅ **RECONCILIACIÓN CERRADA POR PALABRA DE MESA (15-ago, tercera tanda):
+> LAS DOS QUE CUMPLEN NO ENTRAN.** El baseline de R44 es **9 = 6 (C,
+> curables) + 3 (A, bloqueadas → D-827)**, y es **el número correcto, no una
+> desviación tolerada de la adjudicación**.
+>
+> **La razón, escrita para que nadie la reabra:** la mesa dictó *6→11* sobre
+> el CENSO de C; **B midió el OBJETO** y encontró que 2 de esas 5 ya cumplen
+> N12.4 (`vacunas.ts:198` · `_despensa-comun.ts:237` — nombran la falla
+> antes). **Gana la fuente sobre la directiva — regla vieja de la casa, y
+> acá aplica a una directiva de mesa como aplicaría a cualquier otra.**
+> Meterlas adentro las sellaría como deuda para siempre, y el mes que viene
+> alguien reescribiría un mensaje que ya estaba bien: *es L-236 con sello de
+> mesa encima, que es su peor forma — no un lint verde que miente, sino uno
+> que miente con autoridad.* El net queda anclado al discriminador «¿algo
+> nombra la falla ANTES?», calibrado 16/16.
 
 ② **EL IDIOMA → es D-539, no R44.** Evidencia de C depositada como enmienda
 S99 en la ficha; enfermedad SEPARADA declarada (*una voz puede ser
@@ -131,3 +134,40 @@ depositado (verificado por grep antes de escribir).
 
 **Y el dato operativo que destraba a las cuatro pistas: EL FOUNDER ABRIÓ EL
 APARATO.** Los gates en dispositivo dejan de estar bloqueados.
+
+---
+
+## ADDENDUM 2 · El hallazgo `sinFecha` (B → D → C) y el C4 — cuarta tanda de mesa (15-ago)
+
+- **Nace L-237** — *la omisión sin dueño es una invisibilidad con fecha de
+  nacimiento futura*, con el corolario exigible de B (*toda omisión
+  declarada NOMBRA a su dueño*). **Las tres pistas cerraron un defecto ANTES
+  de fabricarlo — la primera vez que la casa caza uno en tiempo futuro, y
+  por eso la ley vale más que la cura.**
+- **Adjudicación de producto: los `sinFecha` PRESIDEN la ventana del
+  presente, no se mezclan en el día.** Las tres razones, y la que decide:
+  encaja con la firma vigente (el orden es por trabajo pendiente, y un
+  pedido vivo sin fecha comprometida ES trabajo esperando decisión) ·
+  precedente literal («Ponte al día» / «Por coordinar»: lo sin tiempo
+  preside y no colapsa) · **presidir es lo único que sobrevive al cambio de
+  fecha** — adentro del día, cada cruce del selector los borra y los trae:
+  *invisibilidad INTERMITENTE, peor que la total porque nadie la puede
+  reproducir*. C los monta presidiendo en `ventana-pedidos`; el histórico de
+  D no cambia y declara su porqué.
+- **D-828** — la migración al lector por rango, dueño A, con el criterio de
+  mesa literal (*declara qué hace con `sinFecha` ANTES de mergear:
+  montarlos o nombrar quién los monta, nunca ninguna de las dos*), el
+  refuerzo en el JSDoc del wrapper, y **el instrumento pedido a B** (un lint
+  que grite cuando una superficie consuma `…EnRango` sin tocar `sinFecha` —
+  nacido con su vara L-236: el histórico de D como la legítima que no debe
+  atrapar).
+- **Al acta (no duplicado en fichas):** el C4 de C cazó la QUINTA muestra de
+  L-235 el mismo día que la ley nació, y contra su propio número — el
+  aparato corría el OTA de S98, el baseline es el ANTES pre-S99 y no el
+  post-N11 que el pedido daba por sentado. *Archivarlo mal habría anclado
+  toda comparación futura a una premisa falsa.* **Una ley que su autor
+  aplica contra su propio número el día que la escribe es una ley que
+  agarró.**
+
+**Numeración de esta tanda, verificada por grep antes de depositar:**
+L-237 · D-828 — libres al escribir.
