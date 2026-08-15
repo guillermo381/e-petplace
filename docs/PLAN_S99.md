@@ -82,6 +82,24 @@ sin espejo es cargar a ciegas) → L6 (arranca cuando D cierre L4; la
 herencia del paseo lo abarata). **Carril R y Carril Diseño corren
 transversales toda la sesión.**
 
+> ### ⚠️ ADJUDICACIONES DE MESA (15-ago-2026) QUE ENMIENDAN LOTES — el
+> detalle en `docs/relevamientos/2026-08-15-s99-ADJUDICACIONES-DE-MESA.md`
+>
+> - **L5a SE PARTE (ítem 7):** la mitad DETERMINISTA (XLSX/CSV parseado, cero
+>   IA) **arranca en L5a — §14 de `MODELO_DESPENSA` no le aplica porque no es
+>   IA**; la mitad IA (PDF/foto + mapeo al canon) **espera su fecha:
+>   POST-15-SEP**, escrita acá para que nadie la adelante por inercia. La
+>   primera tanda de IA firmada es OTRA: cablear `extract-documento` al alta
+>   del repartidor (L2), que ya existe.
+> - **L5b GANA UN CONTRATO (ítem 8):** el espejo DICE la diferencia
+>   `propuesto` vs `publicada` — en «Administrar» el SKU propuesto aparece
+>   con su estado y su porqué; en «Ver como cliente» NO está y el espejo lo
+>   explica ahí mismo. **Parte del contrato del espejo (N17+N18), no
+>   agregado**: *un vendedor jamás cree que publicó algo que no publicó.*
+> - **L4 DESTRABADO (ítem 1):** el dual gana — HERMANAS con puertas
+>   espejadas; el HOY queda con citas. Lápidas en `LA_CASA` §3.1 (hecha) y en
+>   el comentario de `lineaItems` (la pone D al abrir L4).
+
 ---
 
 ## §3 · LO QUE EL DOBLE CHECK DE MESA AGREGÓ (y su porqué)
