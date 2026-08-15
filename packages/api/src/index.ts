@@ -1186,6 +1186,9 @@ export {
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,
+  // S99 (adj. #2) · el reclamo por correo: el acto de un toque y su lector.
+  aceptarVinculoRepartidor,
+  misVinculosRepartidorPendientes,
   registrarVehiculoRepartidor,
   eliminarVehiculoRepartidor,
   obtenerReglaEnvioActiva,

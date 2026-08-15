@@ -479,7 +479,19 @@ export async function registrarRepartidor(input: {
    *  normalizar exigiría DEDUCIR el país de un número sin prefijo y P21 lo
    *  prohíbe. *El que tiene el dato compone; el que no lo tiene valida.* */
   whatsapp?: string;
-}): Promise<ResultadoWrapper<{ repartidor_id: string; ya_existia: boolean }, CodigoErrorDespensa>> {
+  /** S99 (adj. #2) · LA LLAVE DE RECLAMO: la persona crea su cuenta con este
+   *  correo y ACEPTA el vínculo al primer ingreso — jamás una cuenta
+   *  paralela, jamás auto-atado. Se normaliza a minúsculas en el motor.
+   *  🔴 Hoy OPCIONAL en la puerta (compatible con el bundle vivo, D-662);
+   *  la pantalla de L2 lo EXIGE, y recién con su OTA aplicado el motor
+   *  enciende `correo_requerido` (orden S98: pantalla → merge → OTA → guard). */
+  correo?: string;
+}): Promise<
+  ResultadoWrapper<
+    { repartidor_id: string; ya_existia: boolean; pendienteDeReclamo: boolean },
+    CodigoErrorDespensa
+  >
+> {
   const { data, error } = await getClient().rpc('registrar_repartidor', {
     p_cuenta_comercial_id: input.cuenta_comercial_id,
     p_nombre: input.nombre,
@@ -490,6 +502,7 @@ export async function registrarRepartidor(input: {
     p_documento_foto_path: input.documento_foto_path ?? undefined,
     p_foto_path: input.foto_path ?? undefined,
     p_whatsapp: input.whatsapp ?? undefined,
+    p_correo: input.correo ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true || typeof data.repartidor_id !== 'string') {
@@ -497,7 +510,11 @@ export async function registrarRepartidor(input: {
   }
   return {
     ok: true,
-    data: { repartidor_id: data.repartidor_id, ya_existia: data.ya_existia === true },
+    data: {
+      repartidor_id: data.repartidor_id,
+      ya_existia: data.ya_existia === true,
+      pendienteDeReclamo: data.pendiente_de_reclamo === true,
+    },
   };
 }
 
@@ -526,6 +543,9 @@ export async function actualizarRepartidor(input: {
   foto_path?: string;
   /** E.164 con `+`. Rebota `whatsapp_invalido`; no normaliza (P21). */
   whatsapp?: string;
+  /** S99 · la llave de reclamo se CORRIGE (ausente = no toca). Cambiarla con
+   *  el vínculo ya aceptado no des-reclama: la llave ya hizo su trabajo. */
+  correo?: string;
 }): Promise<ResultadoWrapper<{ repartidor_id: string }, CodigoErrorDespensa>> {
   const { data, error } = await getClient().rpc('actualizar_repartidor', {
     p_repartidor_id: input.repartidor_id,
@@ -538,10 +558,57 @@ export async function actualizarRepartidor(input: {
     p_documento_foto_path: input.documento_foto_path ?? undefined,
     p_foto_path: input.foto_path ?? undefined,
     p_whatsapp: input.whatsapp ?? undefined,
+    p_correo: input.correo ?? undefined,
   });
   if (error) return falloDespensa(error.message);
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: { repartidor_id: input.repartidor_id } };
+}
+
+/** S99 (adj. #2) · EL ACTO DE UN TOQUE: la persona logueada reclama TODOS los
+ *  vínculos de repartidor registrados con SU correo. Sin parámetros a
+ *  propósito — el correo sale del profile de la sesión, así que nadie puede
+ *  reclamar el vínculo de otro por construcción. Idempotente: sin pendientes
+ *  devuelve `aceptados: 0` y NO es error (la pantalla decide la voz —
+ *  «ya estabas vinculado» ≠ «nadie te registró»). */
+export async function aceptarVinculoRepartidor(): Promise<
+  ResultadoWrapper<{ aceptados: number; cuentas: string[] }, CodigoErrorDespensa>
+> {
+  const { data, error } = await getClient().rpc('aceptar_vinculo_repartidor');
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  const cuentas = Array.isArray(data.cuentas)
+    ? data.cuentas.filter((c): c is string => typeof c === 'string')
+    : [];
+  return {
+    ok: true,
+    data: { aceptados: typeof data.aceptados === 'number' ? data.aceptados : 0, cuentas },
+  };
+}
+
+/** S99 (adj. #2) · ¿Quién me registró como repartidor? El lector de la
+ *  pantalla de aceptación del primer ingreso (C). Vacío = nadie, honesto. */
+export async function misVinculosRepartidorPendientes(): Promise<
+  ResultadoWrapper<
+    { repartidor_id: string; negocio: string; nombre_registrado: string }[],
+    CodigoErrorDespensa
+  >
+> {
+  const { data, error } = await getClient().rpc('mis_vinculos_repartidor_pendientes');
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+  const salida: { repartidor_id: string; negocio: string; nombre_registrado: string }[] = [];
+  for (const f of data) {
+    if (!esObjDespensa(f) || typeof f.repartidor_id !== 'string') {
+      return falloDespensa('datos_inconsistentes');
+    }
+    salida.push({
+      repartidor_id: f.repartidor_id,
+      negocio: typeof f.negocio === 'string' ? f.negocio : '',
+      nombre_registrado: typeof f.nombre_registrado === 'string' ? f.nombre_registrado : '',
+    });
+  }
+  return { ok: true, data: salida };
 }
 
 /** D-791 · el LECTOR del prefill de la regla de envío — `definir_regla_envio_vendedor`
