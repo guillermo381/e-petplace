@@ -33,6 +33,7 @@ import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
 import { HojaCaptura } from '../components/HojaCaptura'
 import { PinEnMapa } from '../components/PinEnMapa'
+import { PuertaHermana } from '../components/PuertaHermana'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
@@ -4740,6 +4741,33 @@ function GaleriaInterna() {
             ⚠️ Los dos botones abren el picker DEL SISTEMA al tocarse. La anatomía se mira con la hoja abierta;
             tocar dispara permisos. (Misma clase que la exención de EvidenciaFoto.Capturar en R17 — acá la pieza SÍ
             se monta porque su forma se ve sin tocarla.)
+          </Texto>
+        </Seccion>
+
+        {/* PuertaHermana — S99-B: el espejo entre las dos ventanas del HOY */}
+        <Seccion titulo="PuertaHermana — la puerta entre dos ventanas hermanas (el espejo ES la pieza)">
+          <View style={{ gap: spacing[4] }}>
+            {(['light', 'dark', 'memorial'] as const).map((modo) => (
+              <ThemeProvider key={modo} defaultMode={modo}>
+                <PanelTema
+                  etiqueta={
+                    modo === 'light'
+                      ? 'claro — las DOS montadas juntas: la de ida se apoya a la derecha, la de vuelta a la izquierda'
+                      : `${modo} — mismo trazo, mismo alto, mismo aire`
+                  }
+                >
+                  <View style={{ gap: spacing[2] }}>
+                    <PuertaHermana etiqueta="Tus pedidos de hoy" direccion="derecha" onPress={() => {}} />
+                    <PuertaHermana etiqueta="Tus citas de hoy" direccion="izquierda" onPress={() => {}} />
+                  </View>
+                </PanelTema>
+              </ThemeProvider>
+            ))}
+          </View>
+          <Texto variante="dato">
+            Sin contador y sin estado deshabilitado, las dos por decisión: un badge en 0 se lee como ausencia del
+            LUGAR, y apagar la puerta dejaría a alguien sin llegar a su ventana justo el día que no tiene trabajo
+            (Ley 23 — un día vacío no rechaza nada). Si se monta o no es del consumidor: es composición por capacidad.
           </Texto>
         </Seccion>
 
