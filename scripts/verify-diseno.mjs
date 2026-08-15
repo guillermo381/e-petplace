@@ -1724,21 +1724,65 @@ const BASELINE_R38 = 6;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;
 /** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
- *  Las diez con nombre: 2 de `ui` con razón propia + 8 de `apps` que
- *  `HojaCaptura` viene a absorber. SOLO-BAJA. */
+ *
+ *  ⏬ S99-B · PARTICIÓN POR DUEÑO Y CURABILIDAD (orden de mesa, aplicada
+ *  HACIA ATRÁS).
+ *
+ *  **✅ VERIFICADO QUE APLICA, y se declara el lado afirmativo igual que
+ *  el negativo** (conducta ratificada por mesa: *«una orden de mesa
+ *  ejecutada sin verificar si aplica es una orden mal ejecutada, aunque
+ *  el resultado se vea prolijo»* — y el declarar es la mitad exigible,
+ *  **en cualquiera de los dos sentidos**). El criterio y su resultado:
+ *
+ *  > ¿Tiene esta regla un número PARADO que se pueda confundir entre
+ *  > «nadie lo tocó» y «nadie PUEDE tocarlo»? **R42: SÍ** — su baseline
+ *  > es una lista de diez archivos esperando, y ninguno decía de quién
+ *  > era ni si se podía. *(Su hermana R43 dio **NO** y también está
+ *  > declarado, en su propia cabecera.)*
+ *
+ *  El baseline decía *«2 de ui + 8 de apps»* y eso es
+ *  origen, no estado: **un número parado no dice si nadie lo tocó o si
+ *  nadie PUEDE tocarlo.**
+ *
+ *  🔴 Y AL APLICARLA APARECIÓ UNA TERCERA CLASE QUE LA ORDEN NO PREVIÓ,
+ *  porque el objeto la tenía: **hay una entrada que NO ES DEUDA y jamás
+ *  va a bajar** — `EvidenciaFoto` no es una puerta a mano esperando
+ *  migrar: es **otra interacción** (cámara DIRECTA, la galería detrás de
+ *  un mantenido). *Contarla como deuda miente en el otro sentido: promete
+ *  un 0 que sería un error alcanzar.*
+ *
+ *  ⇒ Las tres clases, y el criterio para leer el número:
+ *   · **CURABLE** — baja cuando su lote toque el archivo.
+ *   · **BLOQUEADA** — no se cura escribiendo mejor; espera una firma.
+ *   · **LEGÍTIMA** — cumple otra ley y **se queda**. El piso real de esta
+ *     regla NO es 0: es 1. */
 const CASA_PUERTA_FOTO = 'packages/ui/src/components/HojaCaptura.tsx';
-const BASELINE_R42 = new Set([
-  'packages/ui/src/components/SelectorAvatar.tsx',
-  'packages/ui/src/components/EvidenciaFoto.tsx',
-  'apps/cliente/src/app/carnet.tsx',
-  'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx',
-  'apps/cliente/src/components/HojaFotoMascota.tsx',
-  'apps/prestador/src/app/ventas/configuracion.tsx',
-  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx',
-  'apps/prestador/src/app/veterinaria/verificacion.tsx',
-  'apps/prestador/src/components/seccion-documentos.tsx',
-  'apps/prestador/src/components/alta/PasoDocumentos.tsx',
-]);
+/** clase → por qué está parada. La clave ES la ruta; el valor es la
+ *  razón que el lector necesita para no pedirle a la persona equivocada
+ *  que la cure. */
+const BASELINE_R42_CLASES = {
+  // ── LEGÍTIMA · NO baja nunca, y está bien ────────────────────────
+  'packages/ui/src/components/EvidenciaFoto.tsx':
+    'LEGÍTIMA (no es deuda) · no es un menú: la cámara es DIRECTA y la galería vive detrás de un mantenido. Otra interacción, otra pieza. El piso de R42 es 1, no 0.',
+  // ── BLOQUEADA · no se cura escribiendo mejor ─────────────────────
+  'packages/ui/src/components/SelectorAvatar.tsx':
+    'BLOQUEADA · dueño B · su hoja tiene TRES Celda y la tercera («Por ahora no») es decisión FIRMADA en S45. Absorberla es un GATE DE FORMA del founder, no un refactor — y no viaja escondido adentro de otra tanda.',
+  // ── CURABLES · bajan cuando su lote toque el archivo ─────────────
+  'apps/cliente/src/app/carnet.tsx': 'CURABLE · dueño del lote del cliente',
+  'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx': 'CURABLE · dueño del lote del cliente',
+  'apps/cliente/src/components/HojaFotoMascota.tsx':
+    'CURABLE · dueño del lote del cliente. ⚠️ Su propia cabecera ya lo pedía desde S82: «cuando SelectorAvatar gane el encuadre de la casa, esta Hoja muere absorbida» — la deuda estaba declarada por su autor antes de que existiera la pieza.',
+  'apps/prestador/src/app/ventas/configuracion.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx':
+    'CURABLE · dueño del lote del prestador. Nota: su captura de LOGO no migra (D-740, PNG con alpha) — migra la de avatar.',
+  'apps/prestador/src/app/veterinaria/verificacion.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/components/seccion-documentos.tsx': 'CURABLE · dueño del lote del prestador',
+  'apps/prestador/src/components/alta/PasoDocumentos.tsx': 'CURABLE · dueño del lote del prestador (C lo tomó en L1: `FotoDelRepartidor` es su hermana de clase)',
+};
+const BASELINE_R42 = new Set(Object.keys(BASELINE_R42_CLASES));
+/** El piso REAL: las que no son deuda. R42 no puede llegar a 0 y decirlo
+ *  es la mitad del trabajo de la partición. */
+const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('LEGÍTIMA')).length;
 
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
@@ -1787,6 +1831,17 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R45 · TRES casos, y los dos legítimos son el peso de la prueba
+     (L-236): monta · declara · y la que hace ninguna de las dos, que es
+     el único rojo. Trae además la frontera para que el ANCLA no sea lo
+     que lo pinta. */
+  R45: [
+    { path: 'packages/api/src/wrappers/despensa-vendedor.ts', src: 'export async function listarPedidosDelVendedorEnRango(' },
+    { path: 'packages/api/src/index.ts', src: '  listarPedidosDelVendedorEnRango,' },
+    { path: 'apps/prestador/src/app/monta.tsx', src: 'listarPedidosDelVendedorEnRango(x)\nconst { delRango, sinFecha } = r.data' },
+    { path: 'apps/prestador/src/app/declara.tsx', src: '/* Los `sinFecha` NO se montan acá: un vivo sin día no es pasado.\n   Los monta la ventana del presente. */\nlistarPedidosDelVendedorEnRango(x)' },
+    { path: 'apps/prestador/src/app/muda.tsx', src: 'listarPedidosDelVendedorEnRango(x)' },
+  ],
   /* R44 · el fixture trae los SEIS diccionarios (si no, el ancla es lo
      que lo pone rojo) con las 6 del baseline repartidas + UNA séptima.
      Lo que tiene que salir rojo es la voz nueva. */
@@ -2658,14 +2713,18 @@ function r42(archivos) {
   }
   if (baselineVivo < BASELINE_R42.size)
     fallos.push(
-      `R42: el baseline declara ${BASELINE_R42.size} puerta(s) a mano y quedan ${baselineVivo} — BAJÓ: sacar de BASELINE_R42 la(s) que migraron. Un baseline que sobra deja de ser una lista de deuda y pasa a ser un permiso.`,
+      `R42: el baseline declara ${BASELINE_R42.size} puerta(s) a mano y quedan ${baselineVivo} — BAJÓ: sacar de BASELINE_R42_CLASES la(s) que migraron (con su clase). Un baseline que sobra deja de ser una lista de deuda y pasa a ser un permiso.`,
     );
   // ANCLA: si la pieza pierde su llamada a las dos funciones (renombre,
   // refactor), esta regla vigila un fantasma y todo pasa en verde (L-192).
   fallos.push(...ancla('R42', casa, 1, `puerta canónica viva (${CASA_PUERTA_FOTO})`));
   return {
     fallos,
-    info: `${puertas} puerta(s) a mano · baseline ${BASELINE_R42.size} (2 de \`ui\` con razón propia + 8 de \`apps\` que la pieza absorbe; solo-baja)`,
+    info:
+      `${puertas} puerta(s) a mano · baseline ${BASELINE_R42.size} = ` +
+      `${Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('CURABLE')).length} CURABLES · ` +
+      `${Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('BLOQUEADA')).length} BLOQUEADA (gate de forma) · ` +
+      `${PISO_R42} LEGÍTIMA (no es deuda — el piso de esta regla es ${PISO_R42}, jamás 0). Solo-baja`,
   };
 }
 
@@ -2691,7 +2750,27 @@ function r42(archivos) {
  *
  *  ⚠️ TIENE ANCLA: si los nombres de los tokens cambian y el regex deja
  *  de encontrarlos, la regla no mediría NADA y su verde significaría «no
- *  miré» (L-192). Exige encontrar los tres. */
+ *  miré» (L-192). Exige encontrar los tres.
+ *
+ *  ── ⏬ S99-B · LA PARTICIÓN POR DUEÑO Y CURABILIDAD **NO APLICA ACÁ**,
+ *  y se declara en vez de fabricarse ────────────────────────────────
+ *  La orden de mesa la mandó hacia atrás sobre R42 **y R43**. En R42
+ *  aplicó y encontró tres clases. **Acá no hay nada que partir, y decirlo
+ *  es más honesto que inventar una tabla vacía:**
+ *
+ *  R42 y R44 llevan **un baseline: una lista de cosas PARADAS**, y ahí la
+ *  mentira latente es real (*un número parado no dice si nadie lo tocó o
+ *  si nadie PUEDE tocarlo*). **R43 no tiene baseline.** Sus tres números
+ *  —3.34 · 3.40 · 3.34— **no son deuda parada: son la medición de que las
+ *  tres casas CUMPLEN.** No hay entrada pendiente, no hay dueño ajeno, no
+ *  hay nada bloqueado: si alguno bajara del piso, la regla se pone roja
+ *  ese mismo día en vez de estacionarse en una lista.
+ *
+ *  ⇒ *Marcar como deuda un número que mide cumplimiento sería la misma
+ *  clase de error que la orden viene a curar, al revés: una tabla de
+ *  dueños sobre algo que nadie debe.* Precedente de la casa (S94-A):
+ *  **cuatro de ocho choques del censo no eran letra obsoleta, y marcarlos
+ *  habría sido peor que dejarlos.** */
 const PISO_R43 = 3
 /** Los pares (borde, fondo) de las tres casas. Los hex se LEEN de
  *  `palette.ts`; acá vive solo qué token va contra qué token. */
@@ -2841,7 +2920,94 @@ function r44(archivos) {
   }
 }
 
-const REGLAS = { R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R45 · D-828 · EL LECTOR DE RANGO NO SE CONSUME EN SILENCIO (S99-B).
+ *
+ *  LA LEY QUE MECANIZA, dictada por mesa y ya viva en el JSDoc del
+ *  wrapper: *«toda superficie que migre a `listarPedidosDelVendedorEnRango`
+ *  declara qué hace con `sinFecha` ANTES de mergear — montarlos
+ *  PRESIDIENDO o nombrar quién los monta. **Nunca ninguna de las dos.**»*
+ *
+ *  🔴 POR QUÉ EXISTE, con su cicatriz: es **S72** repetida antes de
+ *  ocurrir. La cita aprobada sin fecha (`por_coordinar`) no pasaba el
+ *  `.gte('fecha', hoy)` de su lector ⇒ **el dueño aprobaba y su
+ *  procedimiento no existía en NINGUNA superficie suya**. El motor estaba
+ *  sano; la falla era **invisibilidad**, y su lección quedó escrita:
+ *  *«la invisibilidad no tiene stack trace»*. La forma es la misma: cada
+ *  superficie excluye por una razón localmente buena y **nadie es dueño
+ *  de la suma**. Ninguna pantalla se ve mal — el pedido no está en
+ *  ninguna.
+ *
+ *  ── 🔴 LA INVERSIÓN QUE ESTA REGLA NECESITA, Y ES DELIBERADA ────────
+ *  **El consumo se mide SIN comentarios; la declaración se mide CON
+ *  ellos.** Es al revés de la disciplina de la casa (L-170: *un censo
+ *  lee los comentarios como código si se lo permitís*), y acá tiene que
+ *  ser así por construcción:
+ *   · si midiera el consumo con comentarios, **este mismo archivo y el
+ *     JSDoc del wrapper saldrían rojos** por nombrar la función;
+ *   · si midiera la declaración sin comentarios, **la salida legítima
+ *     sería inexpresable** — declarar quién los monta ES prosa.
+ *  *Una regla que mira el mismo texto de dos maneras tiene que decir por
+ *  qué, o la próxima sesión la "arregla".*
+ *
+ *  ── EL NET, Y POR QUÉ NO ES UNA EXENCIÓN POR PATH ──────────────────
+ *  La forma obvia era eximir al histórico por su ruta. **No se hizo, y
+ *  el argumento es de D:** un path *«deja pasar en silencio a la segunda
+ *  consumición que alguien agregue en ese mismo archivo»*, y choca con la
+ *  ley de la casa —*una exención sin condición de muerte es un permiso
+ *  permanente*—. **La declaración ES la exención**: vive en el archivo,
+ *  se lee al abrirlo y no hay lista que se oxide.
+ *  ⚠️ **Su hueco residual, declarado y no tapado:** si alguien agrega una
+ *  SEGUNDA consumición con otro propósito al mismo archivo, hereda la
+ *  declaración vieja. **Estáticamente no lo puedo distinguir** — lo digo
+ *  en vez de fingir que el net lo cubre.
+ *
+ *  ── BASELINE 0, Y SE PUEDE PORQUE NO HAY CONSUMIDORES ──────────────
+ *  Medido al nacer: **CERO superficies consumen el lector** (solo su
+ *  definición y el re-export del índice, los dos exentos por ser la
+ *  frontera). La regla nace **antes que su primer consumidor**, que es la
+ *  única vez que un ratchet arranca sin deuda.
+ *
+ *  ⚠️ Y POR ESO SU FIXTURE CARGA EL PESO ENTERO (L-236, corolario):
+ *  **no había una legítima real que eximir**, así que las dos legítimas
+ *  del fixture son sintéticas y a propósito — una que MONTA y otra que
+ *  DECLARA. *Una regla nacida sin contra-caso no sabe discriminar; solo
+ *  sabe disparar.* */
+const LECTOR_RANGO = 'listarPedidosDelVendedorEnRango'
+/** La frontera que lo DEFINE y el índice que lo re-exporta no son
+ *  superficies: no montan nada. */
+const EXENTOS_R45 = [/wrappers\/despensa-vendedor\.ts$/, /packages\/api\/src\/index\.ts$/]
+const BASELINE_R45 = 0
+function r45(archivos) {
+  const fallos = []
+  let consumidores = 0
+  let frontera = 0
+  for (const { path, src } of archivos) {
+    if (EXENTOS_R45.some((r) => r.test(path))) {
+      if (sinComentarios(src).includes(LECTOR_RANGO)) frontera++
+      continue
+    }
+    // el CONSUMO, sin comentarios (ver la inversión, arriba)
+    if (!sinComentarios(src).includes(LECTOR_RANGO)) continue
+    consumidores++
+    // la DECLARACIÓN, sobre el fuente CRUDO: montarlos o nombrar a quién
+    if (/sinFecha/.test(src)) continue
+    fallos.push(
+      `R45: ${path} consume ${LECTOR_RANGO} y NO dice una palabra de \`sinFecha\` (D-828). Los pedidos VIVOS sin día viajan en ese campo, y una superficie que los recibe y los ignora los vuelve invisibles sin que ninguna pantalla se vea mal — es S72 otra vez. DOS SALIDAS, nunca ninguna de las dos: (a) montarlos PRESIDIENDO la ventana · (b) declarar en el archivo QUIÉN los monta. ⚙️ LA CONDICIÓN MECÁNICA, para que no la adivines: al lint le alcanza con que el archivo MENCIONE \`sinFecha\` — un comentario sirve. Ej: «Los \`sinFecha\` no se montan acá: un vivo sin día no es pasado. Los monta ⟨la ventana del presente⟩.» La segunda frase no la puede juzgar un lint y es la que L-237 hace exigible: una omisión que no nombra a su dueño es un olvido que todavía no se nota.`,
+    )
+  }
+  if (fallos.length > BASELINE_R45)
+    fallos.push(`R45: ${fallos.length} superficie(s) sobre el baseline ${BASELINE_R45}.`)
+  // ANCLA: si la frontera se renombra, la regla no encontraría consumo en
+  // ningún lado y su verde diría «no miré» (L-192).
+  fallos.push(...ancla('R45', frontera, 2, 'archivo(s) de frontera que nombran el lector'))
+  return {
+    fallos,
+    info: `${consumidores} superficie(s) consumen el lector · ${consumidores === 0 ? 'la regla nació ANTES que su primer consumidor' : 'todas declaran qué hacen con `sinFecha`'} · baseline ${BASELINE_R45}`,
+  }
+}
+
+const REGLAS = { R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3090,6 +3256,7 @@ corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);
 corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
 corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
+corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
