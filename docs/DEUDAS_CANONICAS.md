@@ -13662,6 +13662,32 @@ commits sin territorio declarado · un brief de una pista que llegó a otra.
 ☠️ **Muere** cuando cada pista abra en su propio worktree y el árbol de una no
 sea visible desde la otra.
 
+> ### ⚠️ ENMIENDA S99 (15-ago-2026, hallazgo de PISTA D, depositado por A) — **EL EJE QUE FALTABA: EL CHOQUE NO ES SOLO ENTRE PISTAS SIMULTÁNEAS, ES CON EL PASADO**
+>
+> El corolario conocido —*«el worktree por pista no alcanza si las
+> dependencias y los puertos siguen siendo uno»*— siempre se leyó como roce
+> entre pistas VIVAS. **D midió el otro caso:** arrancó Metro en `:8082` (su
+> puerto por convención), **el comando no falló ni avisó**, y el puerto lo
+> tenía **el Metro de la worktree de su predecesora (S97-D), vivo desde las
+> 02:04 de una sesión cerrada**. `curl` 200, login funcional, app normal —
+> **y era la app vieja, sin el cascarón nuevo**. El primer par discriminador
+> dio un ROJO *perfectamente creíble que describía con exactitud el estado
+> que la cura venía a curar*.
+>
+> **Medido en el momento: `:8081` → worktree s97-c · `:8082` → s97-d ·
+> `:8083` → el primario — los TRES de sesiones previas.**
+>
+> ⇒ **Una convención de puertos por pista no protege de la pista anterior.**
+> Las dos reglas operativas que D estrenó y esta enmienda vuelve exigibles:
+> ① **antes de medir contra un puerto se verifica QUIÉN lo sirve**
+> (`lsof -nP -iTCP:<puerto> -sTCP:LISTEN` + `ps` sobre el pid — el cwd del
+> proceso tiene que ser TU worktree), *jamás* se confía en que `expo start`
+> falle si el puerto está tomado · ② **el cierre de pista MATA su Metro** —
+> un dev server huérfano es un espécimen viejo sirviendo respuestas creíbles.
+>
+> *No nace número nuevo: es el corolario de ESTA ficha ganando su segundo
+> eje.* El literal entero vive en el parte de D (`docs/loop/S99-D.md`).
+
 ---
 
 ## Deudas S96 — LA DESPENSA GANA SU LETRA DE RECORRIDO (D-770 → D-779)
