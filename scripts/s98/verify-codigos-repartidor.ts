@@ -4,6 +4,7 @@ const casos = [
   'whatsapp_invalido', 'telefono_invalido', 'tipo_documento_invalido',
   'documento_no_coincide_con_tipo', 'tipo_vehiculo_invalido', 'placa_requerida',
   'vehiculo_tope_alcanzado', 'vehiculo_no_existe',
+  'foto_persona_requerida', 'whatsapp_requerido',
 ];
 let malos = 0;
 for (const c of casos) {
@@ -17,4 +18,4 @@ for (const c of casos) {
 const basura = normalizarCodigoDespensa('esto no es un codigo de nada');
 console.log(basura === 'error_desconocido' ? 'OK  contra-caso: la basura cae al generico' : 'MAL contra-caso: la basura devolvio ' + basura);
 if (malos > 0 || basura !== 'error_desconocido') { console.log('ROJO'); process.exit(1); }
-console.log('VERDE: los 9 disparan y la basura no');
+console.log('VERDE: los 11 disparan y la basura no');

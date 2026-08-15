@@ -138,6 +138,13 @@ export const CODIGOS_ERROR_DESPENSA = [
   'placa_requerida',
   'vehiculo_tope_alcanzado',
   'vehiculo_no_existe',
+  // ── S98 · el guard de obligatoriedad (paso ④ del tren) ───────────────────
+  // 🔴 `foto_persona_requerida` NO reusa el `foto_requerida` que ya existe
+  // arriba: ése es de la ENTREGA y su voz habla de la puerta del cliente.
+  // *Un código con dos significados es peor que dos códigos — el primero que
+  // se escribe gana la voz, y el segundo hereda una frase de otra cosa.*
+  'foto_persona_requerida',
+  'whatsapp_requerido',
 ] as const;
 
 export type CodigoErrorDespensa = (typeof CODIGOS_ERROR_DESPENSA)[number];
@@ -243,6 +250,11 @@ export const MENSAJES_DESPENSA: Record<
   placa_requerida:              'Falta la placa del vehículo.',
   vehiculo_tope_alcanzado:      'Cada repartidor puede tener hasta dos vehículos.',
   vehiculo_no_existe:           'Ese vehículo ya no está.',
+  // Dicen POR QUÉ hace falta, no solo que falta: son dos campos que no se ven
+  // obligatorios —la foto vive lejos del botón, el WhatsApp parece opcional
+  // porque el teléfono de arriba lo es— y un «falta X» a secas manda a adivinar.
+  foto_persona_requerida:       'Falta la foto de la persona: es obligatoria para registrarla.',
+  whatsapp_requerido:           'Falta el WhatsApp: es por donde se le escribe cuando un pedido no llega.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
 };
