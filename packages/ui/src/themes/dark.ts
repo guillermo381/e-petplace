@@ -210,6 +210,8 @@ export const darkTheme = {
      *  tiene consumidor y es deliberado — acá la gramática ESTÁ/ESPERA
      *  la separa el HALO (E11). Ver la nota de `palette.dark5`. */
     presente: palette.dark5,
+    /** S99-B · N11 — el contorno del CAMPO. **3.40:1** contra `bg.base`. */
+    campo:    palette.campoBordeD,
     subtle:  'rgba(255,255,255,.05)',
     accent:  palette.tealBorder,
     brand:   palette.pinkBorder,

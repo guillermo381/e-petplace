@@ -97,6 +97,13 @@ export { Encabezado, type EncabezadoProps } from './components/Encabezado'
 export { HeroMarca, type HeroMarcaProps, type HeroMarcaVariante } from './components/HeroMarca'
 export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
 export { Hoja, HojaScroll, type HojaProps, type HojaAltura, type HojaScrollProps } from './components/Hoja'
+export { HojaCaptura, type HojaCapturaProps } from './components/HojaCaptura'
+export { PinEnMapa, LADO_PIN, type PinEnMapaProps } from './components/PinEnMapa'
+export {
+  PuertaHermana,
+  ALTO_PUERTA_HERMANA,
+  type PuertaHermanaProps,
+} from './components/PuertaHermana'
 export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {

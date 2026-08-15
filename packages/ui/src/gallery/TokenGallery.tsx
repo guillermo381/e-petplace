@@ -6,7 +6,7 @@
  */
 
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Circle, Path } from 'react-native-svg'
 
 import { useState } from 'react'
 
@@ -31,6 +31,9 @@ import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
+import { HojaCaptura } from '../components/HojaCaptura'
+import { PinEnMapa } from '../components/PinEnMapa'
+import { PuertaHermana } from '../components/PuertaHermana'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
@@ -1616,6 +1619,155 @@ function EjemploSelectorAvatar() {
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
       <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
       <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+    </View>
+  )
+}
+
+/** ── S99-B · HOJA DE CONTACTO DEL GLIFO `moto` (§6b) ────────────────
+ *  CANDIDATAS. **Viven acá y NO en el registry**, y es a propósito: un
+ *  glifo entra a `IconoNombre` cuando pasa su gate POR ÍCONO, no antes —
+ *  si entrara ahora, R17 lo exigiría y el set crecería sin firma.
+ *  El estudio completo (familia en números, metáforas ocupadas, riesgo
+ *  por variante y la decisión de la huella) vive en
+ *  `docs/laminas/2026-08-15-s99b-HOJA-DE-CONTACTO-moto.md`.
+ *
+ *  🔴 LAS TRES VAN SIN HUELLA, y la razón NO es la de `info`: no son
+ *  interfaz. Es que **en el par de pines la huella ES el discriminador**
+ *  —la de paseo lleva la cara de la mascota— y ponerla en las dos anula
+ *  la única diferencia que el pin existe para mostrar. */
+const TRAZO_HOJA = 1.9
+const trazoHoja = (color: string) => ({
+  stroke: color,
+  strokeWidth: TRAZO_HOJA,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none' as const,
+})
+
+/** A · la moto de perfil — 4 elementos (el TECHO de la banda 2-4). */
+function MotoA({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Circle cx={5.6} cy={16.8} r={3.6} {...trazoHoja(color)} />
+      <Circle cx={18.4} cy={16.8} r={3.6} {...trazoHoja(color)} />
+      <Path d="M5.6 16.8h5.2l3.6-5.2h4" {...trazoHoja(color)} />
+      <Path d="M13.4 11.6 15.8 16.8M16.2 8.2h2.6" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** B · el casco — 3 elementos. La más limpia y la más riesgosa. */
+function MotoB({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M3.6 14.4a8.4 8.4 0 0 1 16.8 0v2.2H3.6Z" {...trazoHoja(color)} />
+      <Path d="M8.4 8.6h9.2a5 5 0 0 1 1.6 3.4H8.4Z" {...trazoHoja(color)} />
+      <Path d="M3.6 16.6h16.8" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** C · las dos ruedas y el manubrio — 3 elementos. Mi voto. */
+function MotoC({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Circle cx={6} cy={17} r={3.8} {...trazoHoja(color)} />
+      <Circle cx={18} cy={17} r={3.8} {...trazoHoja(color)} />
+      <Path d="M6 17l4.6-6.4h5.2L18 17" {...trazoHoja(color)} />
+    </Svg>
+  )
+}
+
+/** El montaje de §6b.4: 21 y 44 px, junto a CINCO del registry elegidos
+ *  por vecindad real — `paseo`/`despensa` son los oficios que rodean la
+ *  entrega; `ubicacion`/`training`/`prime` son las colisiones mapeadas
+ *  (el pin de gota y los dos círculos). */
+function HojaDeContactoMoto() {
+  const { theme } = useTheme()
+  const vecinos: IconoNombre[] = ['paseo', 'despensa', 'ubicacion', 'training', 'prime']
+  const fila = (tamano: number) => (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{tamano} px — las tres candidatas, y después los cinco vecinos</Texto>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4], flexWrap: 'wrap' }}>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoA tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">A</Texto>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoB tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">B</Texto>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[1] }}>
+          <MotoC tamano={tamano} color={theme.text.primary} />
+          <Texto variante="dato">C</Texto>
+        </View>
+        <View style={{ width: spacing[3] }} />
+        {vecinos.map((n) => (
+          <Icono key={n} nombre={n} tamano={tamano} />
+        ))}
+      </View>
+    </View>
+  )
+  return (
+    <View style={{ gap: spacing[5] }}>
+      {fila(21)}
+      {fila(44)}
+    </View>
+  )
+}
+
+/** S99-B — el pin que dice QUIÉN se está moviendo. Se monta sobre una
+ *  caja neutra (el mapa no vive en la galería) y con un botón que lo
+ *  MUEVE: la pieza es la interpolación, y una muestra quieta mostraría
+ *  el dibujo sin mostrar la pieza. */
+function EjemploPinEnMapa() {
+  const { theme } = useTheme()
+  const [lejos, setLejos] = useState(false)
+  return (
+    <View style={{ gap: spacing[3], alignItems: 'center' }}>
+      <View
+        style={{
+          width: 260,
+          height: 140,
+          borderRadius: radius.md,
+          backgroundColor: theme.bg.overlay,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <PinEnMapa nombre="Zeus" especie="perro" x={lejos ? 70 : -70} y={lejos ? -32 : 28} />
+      </View>
+      <Boton
+        variante="secundario"
+        tamaño="sm"
+        etiqueta="Llegó una lectura nueva"
+        onPress={() => setLejos((v) => !v)}
+      />
+      <Texto variante="dato">
+        interpola con el bezier de la casa · 300 ms · con reduce-motion o en memorial SALTA
+      </Texto>
+    </View>
+  )
+}
+
+/** S99-B — la puerta de la foto. Se mira ABIERTA; los dos botones abren
+ *  el picker del sistema, así que la verificación es de FORMA, no de
+ *  toque (ver la nota de la sección). */
+function EjemploHojaCaptura() {
+  const [abierta, setAbierta] = useState(false)
+  const [ultimo, setUltimo] = useState<string>('—')
+  return (
+    <View style={{ gap: spacing[3], alignItems: 'center' }}>
+      <Boton variante="secundario" tamaño="sm" etiqueta="Abrir la hoja" onPress={() => setAbierta(true)} />
+      <Texto variante="dato">último resultado: {ultimo}</Texto>
+      <HojaCaptura
+        visible={abierta}
+        titulo="Su foto"
+        onCerrar={() => setAbierta(false)}
+        onFoto={(f) => setUltimo(`foto ${f.width}×${f.height}`)}
+        onPermisoDenegado={() => setUltimo('permiso denegado (lo DICE la pantalla, no la pieza)')}
+        opciones={{ redimensionarA: 800 }}
+      />
     </View>
   )
 }
@@ -4657,6 +4809,107 @@ function GaleriaInterna() {
               </PanelTema>
             </ThemeProvider>
           </View>
+        </Seccion>
+
+        {/* HojaCaptura — S99-B: la puerta única de «¿de dónde sale esta foto?» */}
+        <Seccion titulo="HojaCaptura — la puerta única de la foto (dos acciones, y son todas)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — dos Boton secundario bloque + la X. NO hay tercera fila: la Hoja ya sale por X, swipe y back">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — misma anatomía">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — la Hoja degrada sola (fades suaves, nada rebota)">
+                <EjemploHojaCaptura />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            ⚠️ Los dos botones abren el picker DEL SISTEMA al tocarse. La anatomía se mira con la hoja abierta;
+            tocar dispara permisos. (Misma clase que la exención de EvidenciaFoto.Capturar en R17 — acá la pieza SÍ
+            se monta porque su forma se ve sin tocarla.)
+          </Texto>
+        </Seccion>
+
+        {/* PuertaHermana — S99-B: el espejo entre las dos ventanas del HOY */}
+        <Seccion titulo="PuertaHermana — la puerta entre dos ventanas hermanas (el espejo ES la pieza)">
+          <View style={{ gap: spacing[4] }}>
+            {(['light', 'dark', 'memorial'] as const).map((modo) => (
+              <ThemeProvider key={modo} defaultMode={modo}>
+                <PanelTema
+                  etiqueta={
+                    modo === 'light'
+                      ? 'claro — las DOS montadas juntas: la de ida se apoya a la derecha, la de vuelta a la izquierda'
+                      : `${modo} — mismo trazo, mismo alto, mismo aire`
+                  }
+                >
+                  <View style={{ gap: spacing[2] }}>
+                    <PuertaHermana etiqueta="Tus pedidos de hoy" direccion="derecha" onPress={() => {}} />
+                    <PuertaHermana etiqueta="Tus citas de hoy" direccion="izquierda" onPress={() => {}} />
+                  </View>
+                </PanelTema>
+              </ThemeProvider>
+            ))}
+          </View>
+          <Texto variante="dato">
+            Sin contador y sin estado deshabilitado, las dos por decisión: un badge en 0 se lee como ausencia del
+            LUGAR, y apagar la puerta dejaría a alguien sin llegar a su ventana justo el día que no tiene trabajo
+            (Ley 23 — un día vacío no rechaza nada). Si se monta o no es del consumidor: es composición por capacidad.
+          </Texto>
+        </Seccion>
+
+        {/* Hoja de contacto del glifo `moto` — S99-B · §6b, CANDIDATAS */}
+        <Seccion titulo="Hoja de contacto · el glifo `moto` (CANDIDATAS — gate POR ÍCONO del founder)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — un glifo se juzga EN VECINDAD: las tres, y después cinco del registry">
+                <HojaDeContactoMoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="oscuro — mismo montaje">
+                <HojaDeContactoMoto />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            A · la moto de perfil (4 elementos, el techo de la banda — la más inequívoca y la que puede empastarse a
+            21 px) · B · el casco (la más limpia, pero dice la PERSONA y roza la prohibición de figuras humanas) ·
+            C · las dos ruedas y el manubrio (voto de B: la que sigue funcionando en el único tamaño donde este
+            glifo va a existir; riesgo declarado: puede leerse como bicicleta). Estudio completo en
+            docs/laminas/2026-08-15-s99b-HOJA-DE-CONTACTO-moto.md
+          </Texto>
+        </Seccion>
+
+        {/* PinEnMapa — S99-B · N14: quién se está moviendo, en el mapa */}
+        <Seccion titulo="PinEnMapa — quién se está moviendo (el punto de la casa, que crece para sostener una cara)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — anillo blanco + elevacion.reposo; la cara sale de la escalera §2.11">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — el anillo blanco NO cambia: separa del mapa, que no tiene tema">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — SALTA, no viaja (misma degradación que reduce-motion)">
+                <EjemploPinEnMapa />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            🔴 La variante `moto` NO está: el registry tiene 46 glifos y ninguno es moto/repartidor/entrega.
+            Dibujar uno acá saltearía §6b (hoja de contacto + gate POR ÍCONO del founder).
+          </Texto>
         </Seccion>
 
         {/* Cronometro — S44-B2.4: voz de máquina en display, sin baile */}
