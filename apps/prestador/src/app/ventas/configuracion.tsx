@@ -62,25 +62,33 @@
  * funcionando antes de su reemplazo deja al vendedor sin repartidores.
  * El swap es de esta pantalla y está declarado, no diferido en silencio.
  *
- * 🔴 EL CORTE — LO QUE FALTA, DECLARADO ACÁ Y NO EN SILENCIO (S98-C).
- * La firma del founder sobre este formulario pide **chips de días L·M·X·J·V·S·D
- * con preselección L–V al CREAR** (al EDITAR se muestra lo que la fila tiene,
- * jamás se le impone el default) **+ un toggle «Incluir festivos»**.
- * **NO SE MONTAN, y la razón es medida, no de gusto:**
- *  · `entrega_turnos` YA TIENE las dos columnas (`dias_semana smallint[]` NOT
- *    NULL default L–D · `incluye_festivos` NOT NULL default false), aplicadas
- *    por `20260815100000` y verificadas contra la base viva;
- *  · **pero la PUERTA no las toma**: `definir_turno_entrega(…)` no tiene
- *    `p_dias_semana` ni `p_incluye_festivos`, y `listarTurnosEntrega` no los
- *    trae en su `select` — o sea que hoy los dos campos solo pueden valer su
- *    default, y una Hoja reabierta no podría ni PRECARGAR lo que la fila tiene.
- * ⇒ Montarlos sería estado local que se guarda y vuelve apagado: **un control
- *   que promete estado y no lo tiene es peor que su ausencia** (mismo criterio
- *   que la baldosa del inventario y el primer toggle de la solicitud).
- * Contrato a A con las tres piezas exactas —RPC, wrapper y lector— en
- * `docs/relevamientos/2026-08-14-s98c-pedido-a-A-corte-y-repartidor.md`.
- * Lo que SÍ entró de la firma: el nombre con placeholder nativo · el ⓘ con
- * modal en la hora de corte · la franja desde/hasta en UNA fila.
+ * ✅ EL CORTE, COMPLETO (S98-C) — la firma del founder entera, campo por campo:
+ * nombre con placeholder nativo · hora de corte con **ⓘ que abre modal**
+ * (patrón general firmado: los campos que necesiten explicación llevan su ⓘ,
+ * **no párrafos permanentes** — el que ya sabe qué es un corte no lo relee cada
+ * vez que corrige la hora) · franja desde/hasta en UNA fila · **chips de días
+ * L·M·X·J·V·S·D + toggle de festivos**.
+ *
+ * ⏪ ESTOS DOS ÚLTIMOS NACIERON BLOQUEADOS Y EL PORQUÉ SE CONSERVA, porque es
+ * la regla y no la anécdota: `entrega_turnos` tenía las columnas desde
+ * `20260815100000`, **pero la PUERTA no las tomaba** — `definir_turno_entrega`
+ * sin sus parámetros y el lector sin los campos en su `select`. Con eso, los
+ * dos campos solo podían valer su default y una Hoja reabierta ni siquiera
+ * podía PRECARGAR lo que la fila tenía. *Montarlos ahí habría sido estado
+ * local que se guarda y vuelve apagado: un control que promete estado y no lo
+ * tiene es peor que su ausencia.* Llegó la puerta (`20260815110000`,
+ * verificada contra `pg_proc`: una sola sobrecarga, sin duplicados) y se
+ * montaron.
+ *
+ * 🔴 LAS DOS REGLAS DE LOS DÍAS, que no son de pantalla sino de operación:
+ *  · **0=domingo … 6=sábado** — la convención NO se re-deriva acá: salió de
+ *    `EXTRACT(DOW)` medido, y la casa ya la usa en `prestador_horarios`. La
+ *    otra elección da una tabla que valida perfecto y entrega los pedidos un
+ *    día corrido: no falla, **acierta seis de siete veces**.
+ *  · **el default L–V es SOLO del ALTA.** Al EDITAR se precarga lo que la fila
+ *    TIENE (las vivas quedaron L–D por el backfill honesto de A): imponerle
+ *    L–V a quien hoy entrega sábados sería cambiarle la operación sin
+ *    preguntarle — justo lo que ese backfill existió para evitar.
  *
  * ⚠️ EL REPARTIDOR NO SE TOCA EN ESTA VENTANA, y también es medición:
  * su spec pide foto del documento, foto de la persona, tipo de documento,
@@ -112,7 +120,6 @@
 
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import Svg, { Path as SvgPath } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -127,9 +134,11 @@ import {
   EvitaTeclado,
   Hoja,
   HojaScroll,
+  Icono,
   Insignia,
   Interruptor,
   MarcaDeAgua,
+  SelectorOpcion,
   Separador,
   Tarjeta,
   Texto,
@@ -189,38 +198,31 @@ type Pantalla =
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-/** El glifo ⓘ de un campo que necesita explicarse.
- *
- *  🔴 NO SE INVENTÓ, y el registry NO lo tiene: se midió que
- *  `apps/cliente/.../mascota/[mascotaId].tsx` ya dibuja este mismo glifo con
- *  trazo local 1.9, y su comentario declara la condición literal —«candidato
- *  al registry por su puerta si se repite»—. **Ésta es la repetición**: la
- *  condición que ese archivo escribió acaba de cumplirse, y el pedido de
- *  promoción va a B (packages/ui es su territorio). Hasta entonces se copia
- *  la geometría MEDIDA, no una nueva.
- *
- *  Y no se usa el glifo `ayuda` del registry a propósito: es un SALVAVIDAS
- *  («ayuda que flota», su propio comentario) — eso dice *contactá soporte*,
- *  no *qué significa este campo*. */
-function GlifoInfo({ color }: { color: string }) {
-  return (
-    <Svg width={18} height={18} viewBox="0 0 24 24">
-      <SvgPath
-        d="M12 3.4a8.6 8.6 0 110 17.2 8.6 8.6 0 010-17.2Z"
-        stroke={color}
-        strokeWidth={1.9}
-        fill="none"
-      />
-      <SvgPath
-        d="M12 11v5M12 7.7v.3"
-        stroke={color}
-        strokeWidth={1.9}
-        strokeLinecap="round"
-        fill="none"
-      />
-    </Svg>
-  );
-}
+/** Los días de la semana del corte, en el ORDEN EN QUE SE LEEN (L→D), que no
+ *  es el orden del código (0=domingo). El valor es el de la convención de la
+ *  casa —medida contra `EXTRACT(DOW)`, no inventada—; la posición es la de un
+ *  calendario. Separarlos es a propósito: si la tira se ordenara por el
+ *  número, el domingo abriría la semana. */
+const DIAS_SEMANA: { codigo: string; valor: number }[] = [
+  { codigo: 'lun', valor: 1 },
+  { codigo: 'mar', valor: 2 },
+  { codigo: 'mie', valor: 3 },
+  { codigo: 'jue', valor: 4 },
+  { codigo: 'vie', valor: 5 },
+  { codigo: 'sab', valor: 6 },
+  { codigo: 'dom', valor: 0 },
+];
+/** El default del ALTA (firma del founder). Jamás el de la edición. */
+const L_A_V = [1, 2, 3, 4, 5];
+
+/* ☠️ S98-C · MURIÓ `GlifoInfo` LOCAL — el glifo vive en el registry como
+   `info` (B lo promovió a pedido mío, y conservó el razonamiento en su
+   comentario: el `ayuda` es un salvavidas, éste no).
+   🔴 Y EL DUPLICADO NO LO CREÓ NINGUNA DE LAS DOS PISTAS: yo dibujé inline
+   PORQUE el glifo no existía, y B lo promovió PORQUE se lo pedí. Cada mitad
+   era correcta sola — **el re-dibujo nació EN EL MERGE**, el instante en que
+   las dos llegaron a la misma rama. Es exactamente el caso que R30 existe
+   para cazar, y lo cazó: puso `main` en rojo antes de que nadie lo viera. */
 
 /** ⑥ EL ESTADO — mapeo del enum vivo (`estado_cuenta_comercial_enum`:
  *  pendiente_validacion · activa · suspendida · cerrada, medido en
@@ -294,6 +296,17 @@ export default function ConfiguracionVentas() {
   const [turDesde, setTurDesde] = useState('');
   const [turHasta, setTurHasta] = useState('');
   const [turDiaSiguiente, setTurDiaSiguiente] = useState(false);
+  /* Los días del corte. 0=domingo … 6=sábado — la convención NO se re-deriva:
+     salió de `EXTRACT(DOW)` medido por A, y la casa ya la usa en
+     `prestador_horarios.dia_semana`. Elegir la otra da una tabla que valida
+     perfecto y entrega los pedidos un día corrido: no falla, acierta seis de
+     siete veces.
+     🔴 EL DEFAULT L–V ES SOLO DEL ALTA. Al EDITAR se muestra lo que la fila
+     TIENE (las vivas quedaron L–D por el backfill honesto de A): imponerle
+     L–V a quien hoy entrega sábados sería cambiarle la operación sin
+     preguntarle, que es justo lo que ese backfill evitó. */
+  const [turDias, setTurDias] = useState<number[]>(L_A_V);
+  const [turFestivos, setTurFestivos] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -509,7 +522,10 @@ export default function ConfiguracionVentas() {
       turCodigo.trim().length === 0 ||
       !HORA_RE.test(turCorte) ||
       !HORA_RE.test(turDesde) ||
-      !HORA_RE.test(turHasta)
+      !HORA_RE.test(turHasta) ||
+      // Un corte sin días no es un corte apagado: es uno que no se puede
+      // evaluar. La fuente lo rechaza igual; frenarlo acá evita el rebote.
+      turDias.length === 0
     ) {
       return;
     }
@@ -521,6 +537,14 @@ export default function ConfiguracionVentas() {
       entrega_desde: turDesde,
       entrega_hasta: turHasta,
       dia_offset: turDiaSiguiente ? 1 : 0,
+      /* Se mandan SIEMPRE, y es a propósito. La puerta de A trata `NULL`
+         como «no lo toques» (semántica que pedí en el contrato y que adoptó
+         literal), así que omitirlos sería correcto para una corrección de
+         hora — pero acá la pantalla SÍ tiene los días a la vista y el
+         vendedor los pudo cambiar en la misma Hoja. Mandar lo que se ve es
+         lo único que no puede desincronizarse de lo que se muestra. */
+      dias_semana: turDias,
+      incluye_festivos: turFestivos,
     });
     setGuardando(false);
     if (!r.ok) {
@@ -639,6 +663,11 @@ export default function ConfiguracionVentas() {
                         setTurDesde(horaDeSql(tur.entrega_desde));
                         setTurHasta(horaDeSql(tur.entrega_hasta));
                         setTurDiaSiguiente(tur.dia_offset === 1);
+                        /* EDITAR muestra LO QUE LA FILA TIENE — nunca el
+                           default del alta. Sin esta línea, abrir un corte
+                           L–D para corregirle la hora se lo dejaría en L–V. */
+                        setTurDias(tur.dias_semana);
+                        setTurFestivos(tur.incluye_festivos);
                         setEditandoTurno(true);
                         setAltaTurno(true);
                       }}
@@ -657,6 +686,11 @@ export default function ConfiguracionVentas() {
                 setTurDesde('');
                 setTurHasta('');
                 setTurDiaSiguiente(false);
+                // CREAR arranca en L–V (firma del founder) — y se RESETEA
+                // acá: sin esto, abrir el alta después de editar un corte
+                // L–D heredaría sus días como si fueran el default.
+                setTurDias(L_A_V);
+                setTurFestivos(false);
                 setEditandoTurno(false);
                 setAltaTurno(true);
               }}
@@ -1029,7 +1063,7 @@ export default function ConfiguracionVentas() {
                     accessibilityLabel={t('ventas.config.turnoCorteInfoA11y')}
                     hitSlop={12}
                   >
-                    <GlifoInfo color={theme.text.secondary} />
+                    <Icono nombre="info" tamano={18} registro="tinta" tinta={theme.text.secondary} />
                   </Pressable>
                 }
               />
@@ -1059,6 +1093,46 @@ export default function ConfiguracionVentas() {
                   </View>
                 </View>
               </View>
+              {/* LOS DÍAS — tira de 7, selección múltiple. La pieza ya existe
+                  y nació para esto: `SelectorOpcion multiple` se construyó en
+                  S56 para los siete chips L·M·X·J·V·S·D del plan de paseo.
+                  Cero componente nuevo. */}
+              <SelectorOpcion
+                etiqueta={t('ventas.config.turnoDias')}
+                disposicion="tira"
+                acento="oficio"
+                multiple
+                seleccionadas={turDias.map(String)}
+                opciones={DIAS_SEMANA.map((d) => ({
+                  codigo: String(d.valor),
+                  etiqueta: t(`ventas.config.dia.${d.codigo}` as 'ventas.config.dia.lun'),
+                }))}
+                onSelect={(codigo) => {
+                  const v = Number(codigo);
+                  setTurDias((prev) =>
+                    prev.includes(v) ? prev.filter((d) => d !== v) : [...prev, v],
+                  );
+                }}
+              />
+              {/* Sin días el corte no se puede EVALUAR — y la fuente lo
+                  rechaza (CHECK de A: entre 1 y 7). Se dice acá en vez de
+                  dejar que rebote: apagar un corte es `activo=false`, no
+                  dejarlo sin días. */}
+              {turDias.length === 0 && (
+                <Texto variante="apoyo">{t('ventas.config.turnoSinDias')}</Texto>
+              )}
+              {/* Los festivos NO son un día de la semana — por eso viven
+                  aparte y no adentro de la tira (misma razón por la que A los
+                  puso en su propia columna). */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Texto variante="cuerpo">{t('ventas.config.turnoFestivos')}</Texto>
+                <Interruptor
+                  encendido={turFestivos}
+                  onCambio={setTurFestivos}
+                  etiqueta={t('ventas.config.turnoFestivos')}
+                  registro="oficio"
+                />
+              </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Texto variante="cuerpo">{t('ventas.config.turnoDiaSiguiente')}</Texto>
                 <Interruptor
@@ -1085,7 +1159,8 @@ export default function ConfiguracionVentas() {
                   turCodigo.trim().length === 0 ||
                   !HORA_RE.test(turCorte) ||
                   !HORA_RE.test(turDesde) ||
-                  !HORA_RE.test(turHasta)
+                  !HORA_RE.test(turHasta) ||
+                  turDias.length === 0
                 }
                 etiqueta={t('ventas.config.turnoGuardarCta')}
                 onPress={() => void guardarTurno()}

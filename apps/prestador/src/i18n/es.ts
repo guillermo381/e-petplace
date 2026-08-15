@@ -3242,6 +3242,12 @@ export const prestadorEs = {
       turnoCorteInfoTitulo: 'La hora de corte',
       turnoCorteInfoCuerpo:
         'Todos los pedidos que recibas antes de esta hora te comprometes a entregarlos en la franja de entrega.',
+      turnoDias: 'Días en que rige',
+      // Iniciales de la tira. X para miércoles (la convención de la casa en
+      // los chips L-D del plan de paseo — M sola sería ambigua con martes).
+      dia: { lun: 'L', mar: 'M', mie: 'X', jue: 'J', vie: 'V', sab: 'S', dom: 'D' },
+      turnoSinDias: 'Elegí al menos un día. Para apagar el corte, usá su interruptor.',
+      turnoFestivos: 'Incluir festivos',
       turnoDiaSiguiente: 'Se entrega al día siguiente',
       turnoGuardarCta: 'Guardar',
       turnoExito: 'Corte guardado.',
