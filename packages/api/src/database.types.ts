@@ -18612,6 +18612,7 @@ export type Database = {
           narrativa_nombre: string | null
           narrativa_orden: number | null
           numero_orden: string | null
+          pago_confirmado_en: string | null
           pedido_id: string | null
           promesa_entrega_desde: string | null
           promesa_entrega_hasta: string | null
