@@ -15,8 +15,11 @@ import { empleadoTieneRol, obtenerMiPosicionEnPrestador } from '@epetplace/api';
 
 import {
   capacidadVendedorPuro,
+  escalonDeAtender,
   hayCapacidad,
   resolverCapacidadAtender,
+  type CapacidadAtender,
+  type OficioAtender,
 } from './capacidad-atender';
 import type { ContextoVentas } from './cuenta-ventas';
 import type { CapacidadDeBarra } from './barra-prestador';
@@ -78,6 +81,12 @@ export async function resolverCapacidadDeBarra(
     montaAtender:
       (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
       (capacidad.ok ? hayCapacidad(capacidad.data) : true),
+    /* Con la capacidad REAL en la mano (ésta la trae entera, con sus
+       servicios). Si la lectura falló, `varias`: el escalón `una` promete un
+       destino concreto y **prometerlo sobre una lectura que no volvió sería
+       mandar a alguien a una pantalla que quizá no le toca**. `varias` cae en
+       las baldosas, que es la superficie que sabe decir lo que hay. */
+    escalonAtender: capacidad.ok ? escalonDeAtender(capacidad.data) : { escalon: 'varias' },
   };
 }
 
@@ -112,7 +121,12 @@ export async function resolverCapacidadDeBarra(
  * El brazo del ROL no aparece porque no hay rol que preguntar.
  */
 function barraVendedorPuro(contexto: ContextoVentas | null): CapacidadDeBarra {
-  return { esGestor: true, montaAtender: hayCapacidad(capacidadVendedorPuro(contexto)) };
+  const cap = capacidadVendedorPuro(contexto);
+  return {
+    esGestor: true,
+    montaAtender: hayCapacidad(cap),
+    escalonAtender: escalonDeAtender(cap),
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -167,7 +181,34 @@ export function capacidadDesdeContexto(ctx: ContextoArranque): CapacidadDeBarra 
     return {
       esGestor: ctx.esGestor,
       montaAtender: ctx.esMostradorOGestion && (ctx.hayOficioLocal || ctx.esVendedora),
+      escalonAtender: escalonDeAtender(capacidadParaContar(ctx)),
     };
   }
   return barraVendedorPuro(contextoVentasDesdeArranque(ctx));
+}
+
+/**
+ * La capacidad **solo para CONTAR Y NOMBRAR** — no es la capacidad entera y
+ * por eso tiene nombre propio.
+ *
+ * `escalonDeAtender` lee exactamente dos cosas: **cuántas puertas hay** y
+ * **cuál es la única cuando hay una**. El contexto de arranque trae eso en un
+ * viaje (`oficiosLocales` en LISTA + la perilla `ventaMostradorActiva`), pero
+ * **no trae los servicios de cada oficio** — ésos viven en la lectura gorda
+ * de `resolverCapacidadAtender`, que las baldosas sí necesitan.
+ *
+ * ⚠️ Por eso `servicios: []` va vacío **a propósito y con nombre**: no es un
+ * dato que falte, es un dato que este camino no usa. *Un objeto a medias sin
+ * nombre es una trampa; con nombre es un contrato.* Si algún día alguien
+ * necesita los servicios acá, el error va a ser una lista vacía visible — no
+ * un número mal contado, que es el que no se ve.
+ *
+ * 🔴 Y NO se re-implementa la regla de los tres escalones: se le PASA la
+ * forma que su función pide. La regla vive en un solo lugar (L-175).
+ */
+function capacidadParaContar(ctx: ContextoArranque): CapacidadAtender {
+  return {
+    oficios: ctx.oficiosLocales.map((o) => ({ oficio: o as OficioAtender, servicios: [] })),
+    tienda: ctx.esVendedora && ctx.ventaMostradorActiva,
+  };
 }

@@ -18,7 +18,7 @@
 
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Redirect, Tabs, useFocusEffect } from 'expo-router';
+import { Redirect, Tabs, useFocusEffect, useRouter } from 'expo-router';
 import {
   BarraTabs,
   Boton,
@@ -48,6 +48,7 @@ import { BienvenidaPrestador } from '@/components/bienvenida';
 import { ReclamoVinculo } from '@/components/reclamo-vinculo';
 import { useTraduccion } from '@/i18n';
 import { capacidadDesdeContexto } from '@/lib/barra-prestador-lectura';
+import type { EscalonAtender } from '@/lib/capacidad-atender';
 import {
   KEY_ETIQUETA_TAB,
   ordenTabsPrestador,
@@ -82,6 +83,9 @@ type EstadoSesionRaiz =
       ok: true;
       esGestor: boolean;
       montaAtender: boolean;
+      /* 🔴 S99-D · L-251 — el escalón viaja hasta acá porque **el destino de
+         una tab es de la barra**, y la barra se arma en este archivo. */
+      escalonAtender: EscalonAtender;
       // ⭐ S99-D: `'vendedor-puro'` NO es un cuarto valor decorativo — es el
       // único que dice «la ceremonia no se preguntó porque no hay sujeto».
       // Reusar `'no-gestor'` habría afirmado algo falso (él SÍ es gestor) y
@@ -135,6 +139,7 @@ type EstadoSesionRaiz =
 let ceremoniaResueltaPara: string | null = null;
 
 export default function TabsLayout() {
+  const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const [sesion, setSesion] = useState<EstadoSesionRaiz>('verificando');
@@ -190,7 +195,7 @@ export default function TabsLayout() {
              mudaron: `lib/barra-prestador-lectura`, con su porqué entero.
              *Dos copias no divergen algún día: divergen la primera vez que
              alguien cura una sola.* */
-          const { esGestor, montaAtender } = capacidadDesdeContexto(c);
+          const { esGestor, montaAtender, escalonAtender } = capacidadDesdeContexto(c);
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo
@@ -203,12 +208,13 @@ export default function TabsLayout() {
               ceremoniaResueltaPara = s.data.user_id;
               if (ingreso.data.esPrimerIngreso) return { bienvenida_pendiente: true };
             }
-            return { ok: true, esGestor, montaAtender, ceremonia: 'consultada' as const };
+            return { ok: true, esGestor, montaAtender, escalonAtender, ceremonia: 'consultada' as const };
           }
           return {
             ok: true,
             esGestor,
             montaAtender,
+            escalonAtender,
             ceremonia: esGestor ? ('resuelta-para-este-usuario' as const) : ('no-gestor' as const),
           };
         }
@@ -255,8 +261,14 @@ export default function TabsLayout() {
                que no existe; su literal en el forense lo dice. */
             /* El contexto ya resuelto VIAJA (la ley de D, un piso más
                arriba): la composición es pura sobre el MISMO objeto. */
-            const { esGestor, montaAtender } = capacidadDesdeContexto(c);
-            return { ok: true, esGestor, montaAtender, ceremonia: 'vendedor-puro' as const };
+            const { esGestor, montaAtender, escalonAtender } = capacidadDesdeContexto(c);
+            return {
+              ok: true,
+              esGestor,
+              montaAtender,
+              escalonAtender,
+              ceremonia: 'vendedor-puro' as const,
+            };
           }
           /* 🔴 S99-D · Gate 2 ④ — EL REPARTIDOR ENTRA A LO SUYO.
              **El rojo que cierra:** el Gate 2 midió que un repartidor real
@@ -588,6 +600,7 @@ export default function TabsLayout() {
   const items: BarraTabsItem[] = ordenTabsPrestador({
     esGestor: sesion.esGestor,
     montaAtender: sesion.montaAtender,
+    escalonAtender: sesion.escalonAtender,
   }).map((key) => ({
     key,
     etiqueta: t(KEY_ETIQUETA_TAB[key]),
@@ -611,6 +624,27 @@ export default function TabsLayout() {
           // resuelve popToTopOnBlur (abajo). En el prestador el único
           // tab con stack anidado es Cuenta (relevamiento S62-B).
           onCambiar={(key) => {
+            /* 🔴 S99-D · L-251 — EL ESCALÓN «UNA»: LA BARRA APUNTA AL
+               DESTINO, y por eso se resuelve ACÁ y no adentro de la tab.
+               *Un menú de una opción no es un menú: es un peaje* — con una
+               sola capacidad, ATENDER lleva directo a esa puerta.
+
+               ⚠️ **EL FRENO QUE C MIDIÓ ANTES DE QUE YO ESCRIBIERA MAL:** la
+               forma fácil era un `Redirect` adentro de la tab. Con eso, el
+               atrás del destino vuelve a la tab **y la tab redirige otra
+               vez** — el back queda en una RATONERA. Primo de L-249 y del
+               encierro de D-836 que acabo de curar. *La tab no rebota: la
+               barra apunta.*
+
+               Va ANTES del re-toque a la raíz a propósito: con escalón
+               `una` la tab `atender` **nunca se monta**, así que no tiene
+               raíz a la que volver ni stack que popear. */
+            if (key === 'atender' && sesion.escalonAtender.escalon === 'una') {
+              const d = sesion.escalonAtender.destino;
+              if (d.ruta === '/ventas/mostrador') router.push('/ventas/mostrador');
+              else router.push({ pathname: '/mostrador', params: { oficio: d.oficio } });
+              return;
+            }
             const activa = state.routes[state.index];
             if (activa.name === key) {
               const hijo = activa.state;
