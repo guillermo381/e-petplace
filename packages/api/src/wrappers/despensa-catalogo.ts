@@ -105,6 +105,11 @@ export interface ProductoDeVitrina {
   /** Ver `ComposicionEstado`: solo `verificada` puede callar. */
   composicion_estado: ComposicionEstado;
   especies_aplicables: string[];
+  /** S99 (freno de C, mesa 18-ago): el eje etario COMPLETO — sin él el
+   *  segundo eje de N20 contaba y no podía FILTRAR (pintarlo tocable era
+   *  una puerta que rebota, Ley 23). Vacío = «todas las edades» (el
+   *  comodín adjudicado: aparece en TODOS los filtros de momento). */
+  momentos_aplicables: string[];
   /** 🔴 LA PORTADA. `null` HONESTO cuando el producto no tiene foto: la
    *  superficie dibuja su marcador, jamás una imagen rota ni un placeholder
    *  que finja ser el producto. Un catálogo de alimento sin fotos no es una
@@ -233,6 +238,7 @@ const SELECT_VITRINA = `
     id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, activo,
     productos!inner (
       id, nombre, marca, familia_codigo, estado, especies_aplicables,
+      momentos_aplicables,
       alergenos, composicion_estado, es_dieta_prescripcion, imagen_url, imagenes
     )
   )
@@ -320,6 +326,7 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
       alergenos: textArray(p.alergenos),
       composicion_estado: estadoCompo,
       especies_aplicables: textArray(p.especies_aplicables),
+      momentos_aplicables: textArray(p.momentos_aplicables),
       foto_url: fotosDeProducto(p).portada,
     });
   }

@@ -149,6 +149,9 @@ export function contextoVentasDesdeArranque(ctx: ContextoArranque): ContextoVent
     estadoCuenta: ctx.cuentaComercial.estado,
     esVendedora: ctx.esVendedora,
     moneda: ctx.moneda ?? { codigo: 'USD', simbolo: '$', decimales: 2 },
+    // Freno de C (18-ago): la vitrina filtra por PAÍS, no lo adivina.
+    // 'EC' solo como degradación propia (L-247) — el dato normal viene.
+    countryCode: ctx.cuentaComercial.countryCode || 'EC',
   };
 }
 

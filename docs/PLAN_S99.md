@@ -156,9 +156,21 @@ transversales toda la sesión.**
 >   razón de C, verbatim de mesa: *sería el espejo prometiendo algo que la
 >   familia no ve, EN LA DIRECCIÓN QUE NADIE REVISA — un espejo que
 >   miente hacia adentro es peor que uno que no existe, porque el
->   vendedor confía en él.* Mientras el $/kg no viva en la ficha del
->   cliente, el espejo tiene un **hueco declarado y correcto** (pedido a
->   D registrado en el Loop de A).
+>   vendedor confía en él.* ~~Mientras el $/kg no viva en la ficha del
+>   cliente, el espejo tiene un hueco declarado y correcto~~ **(18-ago: el
+>   hueco CERRÓ — D montó el $/kg en la ficha de la familia, mergeado a
+>   main; el cómputo compartido vive en `packages/i18n/moneda`).**
+> - **⚖️ LA TERCERA LEY DEL ESPEJO (mesa, 18-ago — decisión de C,
+>   depositada junto a las dos de arriba): LOS DOS MODOS LISTAN CONJUNTOS
+>   DISTINTOS, Y ESO ES EL ESPEJO TRABAJANDO.** «Ver como cliente» lista
+>   lo PUBLICADO, con el MISMO lector de la familia; «Administrar» lista
+>   TODOS sus SKUs, incluidos los que no llegan a la vitrina — *porque ahí
+>   vive el trabajo: un producto sin precio o rechazado es justo el que
+>   más necesita que él lo vea.* La razón que cierra la ley: **si las dos
+>   caras listaran lo mismo, el espejo sería un adorno — LA DIFERENCIA
+>   ENTRE LAS DOS ES LA INFORMACIÓN.** Y en modo cliente la pantalla dice
+>   cuántos de los suyos faltan (al pie, con su número); con cero
+>   ausentes no dibuja nada.
 > - **🔴 N20 ENMENDADA (mesa, 17-ago — hallazgo de B sobre las
 >   cardinalidades medidas): LA ESPECIE ES UN FILTRO, JAMÁS UNA CARPETA.**
 >   La letra decía «especie → necesidad» y esa flecha se lee como
