@@ -86,6 +86,7 @@ import { EvidenciaFoto, EvidenciaFotoThumbnail, type EvidenciaFotoEstado } from 
 import { BarrasSemana } from '../components/BarrasSemana'
 import { CantoMarca } from '../components/CantoMarca'
 import { Entrada } from '../components/Entrada'
+import { Fundido } from '../components/Fundido'
 import { EntradaDeCruce } from '../components/EntradaDeCruce'
 import { registrarCruce } from '../components/cruce'
 import { EvitaTeclado } from '../components/EvitaTeclado'
@@ -1004,6 +1005,7 @@ function Decision({ n, asunto, decide, children }: { n: string; asunto: string; 
 /** Las piezas que el founder rechazó y siguen vivas en el código. */
 
 function PiezasFaltantes() {
+  const [modoFundido, setModoFundido] = useState('administrar')
   const { theme } = useTheme()
   const [remonte, setRemonte] = useState(0)
   const [hojaScrollAbierta, setHojaScrollAbierta] = useState(false)
@@ -1039,6 +1041,37 @@ function PiezasFaltantes() {
         </View>
       </View>
 
+
+      {/* Fundido — la TERCERA de la familia de entradas, y la que no tiene
+          eje: nada viajó, la misma superficie pasó a decir otra cosa. Se
+          muestra con el gesto REAL que la pidió (un interruptor de modo),
+          porque fuera de un cambio de estado la pieza no significa nada. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          Fundido — 150 ms · CERO desplazamiento · reemplaza al `key` del consumidor. No anima al montar
+        </Texto>
+        <SelectorSegmentado
+          etiqueta="Modo de la ficha"
+          segmentos={[
+            { codigo: 'administrar', etiqueta: 'Administrar' },
+            { codigo: 'cliente', etiqueta: 'Ver como cliente' },
+          ]}
+          activo={modoFundido}
+          onCambio={setModoFundido}
+        />
+        <View style={{ minHeight: 72 }}>
+          <Fundido clave={modoFundido}>
+            <Tarjeta>
+              <Texto variante="seccion">
+                {modoFundido === 'administrar' ? 'Pro Pac Adulto · $48,90 ›' : 'Pro Pac Adulto · $48,90'}
+              </Texto>
+              <Texto variante="apoyo">
+                {modoFundido === 'administrar' ? '12 en stock · tocá para ajustar' : '12 disponibles'}
+              </Texto>
+            </Tarjeta>
+          </Fundido>
+        </View>
+      </View>
 
       <View style={{ gap: spacing[2] }}>
         <Texto variante="dato">EvidenciaFoto.Thumbnail — los tres estados; la foto JAMÁS desaparece por error</Texto>
