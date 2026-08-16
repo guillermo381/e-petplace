@@ -2436,6 +2436,13 @@ export const prestadorEn = {
     noSePudoCargar: "We couldn't load this profile.",
     reintentar: 'Try again',
   },
+  /* S99-C · el reclamo del vínculo (espejo es↔en). */
+  reclamoVinculo: {
+    titulo: '{{negocio}} registered you as a courier',
+    detalle: 'They registered you as {{nombre}}. Accept and go to your deliveries.',
+    detalleVarios: '{{n}} businesses are waiting for you. Accept and go to your deliveries.',
+    aceptar: 'Accept and continue',
+  },
   ventas: {
     entradaTitulo: 'Product sales',
     entradaDetalle: 'Orders, stock and delivery',

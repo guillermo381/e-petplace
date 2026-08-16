@@ -3060,6 +3060,17 @@ export const prestadorEs = {
     noSePudoCargar: 'No pudimos cargar esta ficha.',
     reintentar: 'Reintentar',
   },
+  /* 🔴 S99-C · EL RECLAMO DEL VÍNCULO. La voz dice QUIÉN lo registró —
+     no «tenés una invitación»: el nombre del negocio es lo que le
+     permite reconocer que es suyo. Y jamás le pide que avise a nadie:
+     el vendedor ya lo registró, que es justo lo que el gate encontró
+     que la app no sabía. */
+  reclamoVinculo: {
+    titulo: '{{negocio}} te registró como repartidor',
+    detalle: 'Te registraron como {{nombre}}. Aceptá y entrás a tus entregas.',
+    detalleVarios: 'Tenés {{n}} negocios esperándote. Aceptá y entrás a tus entregas.',
+    aceptar: 'Aceptar y entrar',
+  },
   ventas: {
     entradaTitulo: 'Venta de productos',
     entradaDetalle: 'Pedidos, stock y reparto',
