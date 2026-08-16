@@ -28,14 +28,11 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   MarcaDeAgua,
-  Separador,
-  Tarjeta,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -49,6 +46,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { hoyLocalISO } from '@/lib/ventas-formato';
@@ -199,37 +197,15 @@ export default function HoyVentas() {
             onAbrir={(id) => router.push(`/ventas/pedido/${id}`)}
           />
 
-          {/* el resto del módulo — grupo de celdas al pie (el trabajo preside) */}
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.hoy.stock')}
-              onPress={() => router.push('/ventas/stock')}
-            />
-            <Separador />
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.hoy.mostrador')}
-              onPress={() => router.push('/ventas/mostrador')}
-            />
-            {pantalla.tieneEntregas && (
-              <>
-                <Separador />
-                <CeldaNavegacion
-                  registro="tinta"
-                  titulo={t('ventas.hoy.entregas')}
-                  detalle={t('ventas.hoy.entregasDetalle')}
-                  onPress={() => router.push('/ventas/entregas')}
-                />
-              </>
-            )}
-            <Separador />
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.hoy.configuracion')}
-              onPress={() => router.push('/ventas/configuracion')}
-            />
-          </Tarjeta>
+          {/* el resto del módulo — grupo de celdas al pie (el trabajo preside).
+              S99-C: la pieza es COMPARTIDA con el HOY del vendedor puro. Vivía
+              duplicada en los dos archivos y esa copia es la que hace que una
+              pantalla nueva del módulo se agregue en uno y se olvide en el
+              otro. */}
+          <CeldasModuloVentas
+            tieneEntregas={pantalla.tieneEntregas}
+            onIr={(ruta) => router.push(ruta)}
+          />
         </ScrollView>
       )}
     </View>

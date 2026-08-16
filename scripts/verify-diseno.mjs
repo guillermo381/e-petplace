@@ -2884,7 +2884,16 @@ function r43(fuentes) {
  *  eso el net ancla al arranque de la frase (`^[^.!?]*`): si hay una
  *  oración previa que nombra la falla, el mensaje cumple. Calibrado
  *  contra los **16 casos reales** de las dos casas, 16/16. */
-const BASELINE_R44 = 9
+/* S99-C (15-ago) · 9 → 3. Las SEIS de `apps/prestador` se reescribieron.
+   La cura NO fue inventarles un QUÉ: `datos_invalidos` es el fallback de
+   CUALQUIER CHECK, así que nombrar un campo habría sido verosímil y falso
+   (L-139) — y mandar a mirar el lugar equivocado es peor que no decir.
+   Lo que se escribió es lo que SÍ se sabe con verdad: que rechazó el
+   SERVIDOR (no la red ni la sesión) y que **reenviar lo mismo va a fallar
+   otra vez** — que es justo lo que «intenta de nuevo» prometía en falso.
+   Las 3 de `packages/api` siguen bloqueadas (dueño A): su cura de raíz es
+   D-827, códigos tipados por constraint. */
+const BASELINE_R44 = 3
 const VOZ_SIN_QUÉ =
   /^[^.!?]*(revis[aá] los datos|check the [a-z ]*details?|campo (inv[aá]lido|requerido)|invalid field|algo sali[oó] mal|something went wrong)/i
 function r44(archivos) {
@@ -2916,7 +2925,7 @@ function r44(archivos) {
   fallos.push(...ancla('R44', dics, 40, 'archivo(s) del corpus (6 diccionarios + los wrappers de api)'))
   return {
     fallos,
-    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} = 6 diccionarios de \`apps/prestador\` (dueño C, CURABLES escribiendo mejor) + 3 de \`packages/api\` (dueño A, BLOQUEADAS: \`datos_invalidos\` es el fallback de CUALQUIER CHECK — la voz buena exige códigos tipados por constraint, no una frase mejor). Solo-baja`,
+    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} = las 3 de \`packages/api\` (dueño A, BLOQUEADAS: \`datos_invalidos\` es el fallback de CUALQUIER CHECK — la voz buena exige códigos tipados por constraint, no una frase mejor: D-827). Las 6 de \`apps/prestador\` se curaron en S99-C. Solo-baja`,
   }
 }
 

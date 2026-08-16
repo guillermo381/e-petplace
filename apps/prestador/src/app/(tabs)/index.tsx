@@ -88,6 +88,7 @@ import {
   listarPedidosDelVendedor,
   cupoRepartoDelDia,
   extrasPanelPedidos,
+  misEntregasAsignadas,
   type ExtraPanelPedido,
   type PedidoDelVendedor,
   type CitaJornadaRecepcion,
@@ -106,6 +107,7 @@ import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epe
 import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
+import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -141,6 +143,8 @@ type Pantalla =
       pedidos: PedidoDelVendedor[];
       extras: Record<string, ExtraPanelPedido>;
       cupo: { capacidad: number; consumido: number } | null;
+      /** Además reparte: se le ofrece su entrada (§9.1). */
+      tieneEntregas: boolean;
     }
   /* ⏪ S88-C (LÁMINA_HOME_POR_ROL) — ACÁ VIVÍA `estado: 'recepcion'`, el
      desvío a `AgendaRecepcion` (S78-B, D-521). MUERE POR FIRMA: recepción
@@ -1026,11 +1030,14 @@ export default function Hoy() {
         const ctx = await contextoVentas();
         if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
           const cuentaId = ctx.data.cuentaComercialId;
-          /* Una sola ola: las dos lecturas son independientes y encadenarlas
-             sumaría un viaje a la primera pantalla (L-224 · N16). */
-          const [ped, cupo] = await Promise.all([
+          /* Una sola ola: las TRES lecturas son independientes y encadenarlas
+             sumaría viajes a la primera pantalla (L-224 · N16).
+             `misEntregasAsignadas` entra en ESTA ola —no en una segunda—
+             justamente para que la celda de reparto no cueste un viaje. */
+          const [ped, cupo, entregas] = await Promise.all([
             listarPedidosDelVendedor(cuentaId),
             cupoRepartoDelDia(cuentaId, hoyLocalISO()),
+            misEntregasAsignadas(),
           ]);
           const extras = ped.ok
             ? await extrasPanelPedidos(ped.data.map((p) => p.pedido_id))
@@ -1044,6 +1051,11 @@ export default function Hoy() {
             cupo: cupo.ok
               ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
               : null,
+            /* La celda de reparto se ofrece SOLO si hay envío asignado
+               (Ley 23). Un fallo de lectura NO la enciende: `ok &&` — la
+               ausencia por duda es ausencia (patrón del chip de recepción,
+               S78-B). */
+            tieneEntregas: entregas.ok && entregas.data.length > 0,
           });
           return;
         }
@@ -2092,13 +2104,24 @@ export default function Hoy() {
             moneda={pantalla.moneda}
             onAbrir={(id) => router.push(`/ventas/pedido/${id}`)}
           />
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              registro="tinta"
-              titulo={t('ventas.hoy.stock')}
-              onPress={() => router.push('/ventas/stock')}
-            />
-          </Tarjeta>
+          {/* 🔴 S99-C · LA TAB ES LA ÚNICA ENTRADA DEL VENDEDOR PURO
+              (adjudicación de mesa, 15-ago — cerrando la duplicación que
+              la caminata hizo visible: su HOY y la raíz `/ventas` mostraban
+              la MISMA ventana de pedidos con dos títulos).
+
+              Por eso el grupo de celdas es el MISMO que el de la raíz, no
+              un subconjunto: si la tab es la única puerta, todo lo que
+              vivía detrás de la otra tiene que entrar por acá o queda
+              INALCANZABLE. Mostrador tenía además su camino por ATENDER;
+              **Mis entregas y Configuración no tenían ninguno**.
+
+              La raíz `/ventas` NO muere: queda para el empleado-vendedor
+              no-gestor (§0bis), que es la condición que su lápida ya
+              declaraba — y esa población no tiene tab Negocio. */}
+          <CeldasModuloVentas
+            tieneEntregas={pantalla.tieneEntregas}
+            onIr={(ruta) => router.push(ruta)}
+          />
         </ScrollView>
       </View>
     );
