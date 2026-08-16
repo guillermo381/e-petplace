@@ -99,6 +99,36 @@ transversales toda la sesión.**
 > - **L4 DESTRABADO (ítem 1):** el dual gana — HERMANAS con puertas
 >   espejadas; el HOY queda con citas. Lápidas en `LA_CASA` §3.1 (hecha) y en
 >   el comentario de `lineaItems` (la pone D al abrir L4).
+> - **⚖️ ADJUDICACIÓN (a) — N20 Y EL BUSCADOR CORREN SOBRE LO COMPRABLE,
+>   JAMÁS SOBRE EL CANÓNICO (mesa, 17-ago-2026 — escrita ACÁ porque es
+>   exactamente donde alguien la va a reabrir).** Las tres razones, y la
+>   tercera decide: ① la vitrina YA parte de `ofertas` con `!inner` — el
+>   canónico sin oferta es invisible POR CONSTRUCCIÓN, y (b) exigiría
+>   deshacerlo, no agregarle algo · ② M21: las 309 fotos que faltan son
+>   trabajo de e-PetPlace — mostrar el canónico incompleto sería exponer
+>   nuestra deuda como si fuera la tienda de otro · ③ **una vitrina que
+>   muestra lo que no se puede comprar MIENTE DOS VECES** — le promete al
+>   cliente algo que nadie vende y le muestra al vendedor un catálogo que
+>   no es su tienda; *la ley de la casa es que el producto no dice nada
+>   antes que decir algo falso*. **La firma S96 «catálogo amplio con
+>   buscador» se cumple con lo comprable CRECIENDO, no con el canónico
+>   visible. EL CANÓNICO ES EL INVENTARIO DE LO QUE UN VENDEDOR PUEDE
+>   PROPONER, no la vitrina de la familia** — quien quiera reabrir esto,
+>   reabre la adjudicación entera, no una lectura de la firma.
+> - **🔴 EL DATO DE NEGOCIO QUE EL FOUNDER TIENE QUE VER ESCRITO (mesa,
+>   17-ago — registrado, NO resuelto): OCTUBRE ABRE CON SEIS PRODUCTOS
+>   COMPRABLES.** Los seis de `MODELO_DESPENSA` §4.3, completos los seis
+>   (foto · momento · composición · oferta — medidos uno por uno,
+>   17-ago). Es honesto y funciona — pero **la vitrina no está limitada
+>   por el software: está limitada por el catálogo CON OFERTA.** Este
+>   número decide si el soft launch necesita más vendedores o más
+>   productos por vendedor, y esa decisión no es de esta sesión.
+> - **L5a, REENCUADRADA (mesa, 17-ago):** mantiene su lugar DESPUÉS de
+>   L5b, pero su nombre real ya no es «la carga por archivo»: **es lo que
+>   hace que la vitrina EXISTA más allá de seis.** Cada SKU que un
+>   vendedor real proponga mapea a un canónico hoy incompleto (222/470
+>   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
+>   canónica (M21) es trabajo de e-PetPlace, no suyo.
 
 > ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
 > por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,

@@ -13735,6 +13735,23 @@ inventado— · Tienda Pura · `duenodes`) MÁS la despensa de `duenotodo`** —
 esta ficha es el censo; quien la pague barre contra esta lista, no contra la
 original.
 
+**TERCER ADDENDUM (S99, 17-ago — orden de mesa: los PRODUCTOS fixture
+entran al censo del borrado):** la medición de completitud de lo comprable
+halló **6 productos-fixture con SKU activo y oferta PUBLICADA** que
+sobrevivirían al barrido si solo se borran las cuentas «por nombre»:
+**«Snack de Ave (prueba del gate)»** (cuenta de `duenodes` — muere con
+ella, se lista para que nadie lo cuente entre los seis de §4.3) ·
+**«Croquetas Demo Senior Cordero S97»** (DESPENSA DE PRUEBAS S97) ·
+**«Arena Sanitaria Demo» · «Croquetas Demo Adulto Res» · «Croquetas Demo
+Cachorro Pollo»** (Tienda Pura) · **«Aceite de Salmon Brilliant»** (SKU
+sembrado en **Clínica Aurora** para el Gate 2 del repartidor — ⚠️ Aurora
+NO está en la lista de cuentas borrables: su SKU fixture hay que quitarlo
+APARTE, o queda un producto falso en la cuenta del gate). *La razón de mesa,
+verbatim: un fixture que sobrevive al lanzamiento es un producto falso en
+una tienda real.* Quien pague la deuda barre cuentas Y estos SKUs/ofertas —
+los productos canónicos `DEMO-*` mueren con sus cuentas; el Aceite de
+Aurora, a mano.
+
 #### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
 
 Quedó en `[]` —el default— porque **nunca hubo una fila con foto**. El wrapper

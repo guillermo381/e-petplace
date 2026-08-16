@@ -444,6 +444,46 @@ export async function obtenerFichaProducto(
   };
 }
 
+// ── B2 · S99-L5b (N20) — los conteos por eje, SOBRE LO COMPRABLE ────────────
+
+export interface ConteosVitrina {
+  por_especie: { especie: string; productos: number }[];
+  /** momento null = comprables SIN momento declarado (el bucket «todas las
+   *  edades» — la forma la decide la receta de B, el número viaja acá). */
+  por_especie_momento: { especie: string; momento: string | null; productos: number }[];
+}
+
+/** Ley 23 hecha lector: el segundo toque de N20 no ofrece lo que va a
+ *  rechazar — un eje con cero comprables no se pinta. Corre sobre LO
+ *  COMPRABLE por adjudicación (a) de mesa (17-ago, `PLAN_S99`): oferta
+ *  publicada × variante activa × producto activo — jamás el canónico.
+ *  UN viaje, dos granularidades (el total por especie NO es la suma de
+ *  los pares: multi-momento cuenta una vez por par y una en el total). */
+export async function conteosVitrinaPorEje(): Promise<
+  ResultadoWrapper<ConteosVitrina, CodigoErrorDespensa>
+> {
+  const { data, error } = await getClient().rpc('conteos_vitrina_por_eje');
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  const leerFila = (v: unknown): { especie: string; momento: string | null; productos: number } | null => {
+    if (!esObjDespensa(v) || typeof v.especie !== 'string' || typeof v.productos !== 'number') return null;
+    return {
+      especie: v.especie,
+      momento: typeof v.momento === 'string' ? v.momento : null,
+      productos: v.productos,
+    };
+  };
+  // L-247: degradación propia — un motor viejo sin las claves devuelve [].
+  const porEspecie = (Array.isArray(data.por_especie) ? data.por_especie : [])
+    .map(leerFila)
+    .filter((f): f is NonNullable<typeof f> => f !== null)
+    .map(({ especie, productos }) => ({ especie, productos }));
+  const porPar = (Array.isArray(data.por_especie_momento) ? data.por_especie_momento : [])
+    .map(leerFila)
+    .filter((f): f is NonNullable<typeof f> => f !== null);
+  return { ok: true, data: { por_especie: porEspecie, por_especie_momento: porPar } };
+}
+
 // ── C · Búsqueda propia ─────────────────────────────────────────────────────
 
 /** Busca por nombre o marca dentro de lo PUBLICADO. El `ilike` lo resuelve

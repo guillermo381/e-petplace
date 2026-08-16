@@ -19463,6 +19463,7 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: number
       }
+      conteos_vitrina_por_eje: { Args: never; Returns: Json }
       contratar_plan_paseo: {
         Args: {
           p_auto_renovar?: boolean
