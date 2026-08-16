@@ -1716,6 +1716,154 @@ function HojaDeContactoMoto() {
   )
 }
 
+/** ── S99-B · SEGUNDA HOJA DE CONTACTO DEL `moto` — EL BRIEF CORREGIDO ──
+ *  🔴 LA PRIMERA TANDA FALLÓ SU GATE, y el diagnóstico no es del dibujo:
+ *  **el brief estaba mal.** Las tres se pensaron como glifo de la casa
+ *  —trazo 1.9, objeto de interfaz— y su destino es otro: **vivir DENTRO
+ *  DE UN PIN, a 21 px, sobre un mapa con calles y colores debajo.** A ese
+ *  tamaño y sobre fondo con textura **el trazo desaparece y solo
+ *  sobrevive la MASA.**
+ *
+ *  ⚠️ MI ERROR, CONCRETO: hice el estudio de familia por los números de
+ *  la casa (grilla 24 · trazo 1.9 · densidad 2-4) **sin preguntarme si
+ *  esa familia aplicaba** — §6b.1 pide declarar el desvío, y yo declaré
+ *  uno (la densidad de A) sin ver que el desvío era el marco entero. Y
+ *  §6b.4 dice *«el glifo se juzga EN VECINDAD»*: monté la vecindad del
+ *  REGISTRY cuando **el vecino real de este glifo es el MAPA**.
+ *
+ *  ⚠️ Y EL RIESGO QUE ASIGNÉ MAL: puse «puede leerse como bicicleta» en
+ *  la candidata C, y el founder lo leyó en **A**. ⇒ *no era un riesgo de
+ *  UNA candidata: era del ENFOQUE* — un dos-ruedas en línea se lee como
+ *  bicicleta sea cual sea el trazo.
+ *
+ *  EL DISCRIMINADOR moto/bici, dictado por mesa: **la MASA del motor y la
+ *  rueda gruesa**, jamás el detalle — a 21 px el detalle no existe.
+ *  **Sin huella, ya firmado.**
+ *
+ *  ⚠️ ESTE MONTAJE CLONA LA ANATOMÍA DE `PinEnMapa` (anillo + sombra) a
+ *  propósito y se declara: la pieza todavía NO tiene la variante `moto`
+ *  —meterla antes del gate pondría un glifo sin firma en el registry— y
+ *  **una masa juzgada fuera de su anillo no es la que se va a ver.** */
+/** ⚠️ HEX CRUDOS, DECLARADOS — y se declara porque **R35 no los cazó y
+ *  eso es mío, no de la regla**: la regla busca el hex *en posición de
+ *  valor de estilo*, y acá viven en un objeto y llegan por variable
+ *  (`backgroundColor: fondo`). **La esquivé por indirección sin querer.**
+ *
+ *  ¿Son legítimos? Sí, y por una razón que el tema no puede cubrir:
+ *  **no son colores de la casa — son MUESTRAS DEL MUNDO.** El asfalto de
+ *  un mapa no le pertenece a ningún tema nuestro, y meterlos como token
+ *  sería fabricar paleta para simular algo ajeno. *Pero un verde que pasa
+ *  por indirección es indistinguible de uno que se coló*, así que la
+ *  razón vive acá y no en la cabeza de quien lo escribió. */
+const TONOS_MAPA = [
+  { n: 'asfalto', c: '#DAD7D2' },
+  { n: 'parque', c: '#BFDDB0' },
+  { n: 'agua', c: '#A9CCE8' },
+  { n: 'mapa oscuro', c: '#3A3F45' },
+]
+
+/** D · SCOOTER DE REPARTO — masa + caja. La que más dice «reparto». */
+function MotoD({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={color} />
+      <Path d="M2.6 12.4h9l3.2-4.2h3.6v2.5h-2.3l-2.7 3.5h3.5c1.9 0 3.5 1.2 4.1 2.9H4.4c-.5-1.6-1.9-2.7-3.6-2.9Z" fill={color} />
+      <Circle cx={5.8} cy={17.6} r={3.4} fill={color} />
+      <Circle cx={18.2} cy={17.6} r={3.4} fill={color} />
+    </Svg>
+  )
+}
+
+/** E · LA MOTO SOLA — misma masa, sin caja. El vehículo puro. */
+function MotoE({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M3.2 11.4h8.2l3.4-4.4h3.8v2.6h-2.5l-2.9 3.8h3.7c2 0 3.7 1.3 4.3 3.1H4.9C4.4 14.7 4 12.9 3.2 11.4Z" fill={color} />
+      <Circle cx={5.8} cy={17.4} r={3.6} fill={color} />
+      <Circle cx={18.2} cy={17.4} r={3.6} fill={color} />
+    </Svg>
+  )
+}
+
+/** F · LA MASA MÍNIMA — lo único que sobrevive a 21 px, sin un detalle. */
+function MotoF({ tamano, color }: { tamano: number; color: string }) {
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M4 12.2h8l3.6-4.6h3.8v2.8h-2.6l-3 3.8h4.6v3H4Z" fill={color} />
+      <Circle cx={6.4} cy={17.8} r={3.2} fill={color} />
+      <Circle cx={17.6} cy={17.8} r={3.2} fill={color} />
+    </Svg>
+  )
+}
+
+/** El pin de verdad: anillo blanco + sombra, con la masa adentro. */
+function PinDeContacto({
+  Dibujo,
+  lado,
+  fondo,
+}: {
+  Dibujo: (p: { tamano: number; color: string }) => React.JSX.Element
+  lado: number
+  fondo: string
+}) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ alignItems: 'center', backgroundColor: fondo, padding: spacing[2], borderRadius: radius.sm }}>
+      <View
+        style={{
+          padding: 2.5,
+          backgroundColor: palette.white,
+          borderRadius: radius.full,
+          boxShadow: theme.elevacion.reposo,
+        }}
+      >
+        <View
+          style={{
+            width: lado,
+            height: lado,
+            borderRadius: radius.full,
+            backgroundColor: theme.capa.cuidado,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Dibujo tamano={Math.round(lado * 0.68)} color={palette.white} />
+        </View>
+      </View>
+    </View>
+  )
+}
+
+function HojaDeContactoMotoV2() {
+  const fila = (lado: number, etiqueta: string) => (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{etiqueta}</Texto>
+      {(
+        [
+          ['D · con caja', MotoD],
+          ['E · moto sola', MotoE],
+          ['F · masa mínima', MotoF],
+        ] as const
+      ).map(([nombre, Dibujo]) => (
+        <View key={nombre} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
+          <View style={{ width: 108 }}>
+            <Texto variante="dato">{nombre}</Texto>
+          </View>
+          {TONOS_MAPA.map((t) => (
+            <PinDeContacto key={t.n} Dibujo={Dibujo} lado={lado} fondo={t.c} />
+          ))}
+        </View>
+      ))}
+    </View>
+  )
+  return (
+    <View style={{ gap: spacing[5] }}>
+      {fila(21, '21 px — EL TAMAÑO QUE DECIDE. Sobre los cuatro tonos de mapa, jamás sobre lienzo blanco')}
+      {fila(44, '44 px — para ver qué se pierde al bajar')}
+    </View>
+  )
+}
+
 /** S99-B — el pin que dice QUIÉN se está moviendo. Se monta sobre una
  *  caja neutra (el mapa no vive en la galería) y con un botón que lo
  *  MUEVE: la pieza es la interpolación, y una muestra quieta mostraría
@@ -4864,7 +5012,29 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        {/* Hoja de contacto del glifo `moto` — S99-B · §6b, CANDIDATAS */}
+        {/* 2ª hoja de contacto del `moto` — S99-B, EL BRIEF CORREGIDO */}
+        <Seccion titulo="Hoja de contacto · `moto` v2 — MASA, dentro del pin, sobre tonos de mapa (la 1ª falló su gate)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — el juicio es a 21 px SOBRE FONDO DE MAPA; el lienzo blanco fue el error de la 1ª tanda">
+                <HojaDeContactoMotoV2 />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — el anillo blanco NO cambia: el mapa no tiene tema">
+                <HojaDeContactoMotoV2 />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            🔴 El brief de la 1ª tanda estaba mal: se dibujaron como glifos de la casa (trazo 1.9) y su destino es vivir
+            DENTRO DE UN PIN a 21 px sobre un mapa — a ese tamaño y sobre textura el trazo desaparece y solo sobrevive
+            la MASA. Discriminador moto/bici: la masa del motor y la rueda gruesa, jamás el detalle. Sin huella (firmado).
+            Estudio en docs/laminas/2026-08-15-s99b-HOJA-DE-CONTACTO-moto.md §v2.
+          </Texto>
+        </Seccion>
+
+        {/* Hoja de contacto del glifo `moto` (1ª tanda — FALLÓ su gate) */}
         <Seccion titulo="Hoja de contacto · el glifo `moto` (CANDIDATAS — gate POR ÍCONO del founder)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">

@@ -2,7 +2,88 @@
 
 **Estándar:** `DIRECCION_ARTE` §6b (proceso firmado S71) · **Gate: POR
 ÍCONO, del founder** (§6b.5 — nunca por lote).
-**Estado:** CANDIDATAS. **Ninguna está en el registry** y es a propósito:
+> # 🔴 v2 · EL GATE FALLÓ Y EL BRIEF ESTABA MAL (15-ago)
+>
+> **Firma del founder, verbatim:** *«no me gusta ninguno de los tres,
+> copiemos el como los pone Rappi, algo que se vea bien en el mapa. Si me
+> toca escoger sería el A, aunque parece más una bicicleta que una
+> moto.»*
+>
+> **EL DIAGNÓSTICO NO ES DEL DIBUJO: ES DEL BRIEF.** Las tres se pensaron
+> como **glifo de la casa** —trazo 1.9, objeto de interfaz— y su destino
+> es otro: **vivir DENTRO DE UN PIN, a 21 px, sobre un mapa con calles y
+> colores debajo.** A ese tamaño y sobre fondo con textura **el trazo
+> desaparece y solo sobrevive la MASA.** El marcador de repartidor de la
+> referencia no es un ícono de línea: es una **silueta RELLENA de alto
+> contraste dentro de un pin**.
+>
+> **⚠️ MI ERROR, CONCRETO, porque §6b me daba la herramienta y no la usé:**
+> hice el estudio de familia por los números de la casa **sin preguntarme
+> si esa familia aplicaba**. §6b.1 pide declarar el desvío — declaré uno
+> (la densidad de A) y **no vi que el desvío era el marco entero**. Y
+> §6b.4 dice *«el glifo se juzga EN VECINDAD»*: **monté la vecindad del
+> REGISTRY cuando el vecino real de este glifo es el MAPA.**
+>
+> **⚠️ Y ASIGNÉ MAL EL RIESGO:** puse *«puede leerse como bicicleta»* en la
+> candidata **C**, y el founder lo leyó en **A**. ⇒ *no era riesgo de UNA
+> candidata: era del ENFOQUE.* **Un dos-ruedas en línea se lee como
+> bicicleta sea cual sea el trazo** — por eso el discriminador que la mesa
+> dictó no es de detalle: **es la MASA del motor y la rueda gruesa.**
+>
+> ## 🔴 EL CHOQUE CONTRA LEY FIRMADA, DECLARADO
+> La regla madre (Ley 12 · b′) dice **«objeto del oficio en TRAZO + UNA
+> huella rellena»**. Un pin-moto de silueta la contradice. Dos salidas:
+> **(a)** el pin de mapa es **CLASE APARTE** del registry, con su propia
+> física, y la regla de trazo no le aplica **porque el mapa no es
+> interfaz: es mundo** · **(b)** la regla se enmienda para admitir relleno
+> sobre fondo no-controlado.
+>
+> **MI VOTO: (a), y con un argumento que no es de criterio sino MEDIDO —
+> la clase (a) no hay que inventarla: el mapa YA la tenía sin escribir.**
+> Las dos marcas que la casa dibuja sobre un mapa **ya son MASA, no
+> trazo**: el marcador vivo de `MapaRecorrido` es `backgroundColor` +
+> anillo blanco, y el punto de `PinMovible` es `backgroundColor` + anillo.
+> **Ninguna de las dos es un glifo de trazo.** *(a) no abre una puerta:
+> pone por escrito la que el mapa venía usando.*
+>
+> **Y por qué (b) es peor, que es la mitad que decide:** *«fondo
+> no-controlado»* **no es una condición acotada** — toda foto, todo
+> gradiente, todo póster de video lo son. Enmendar la regla madre con esa
+> condición **deja entrar el relleno por una puerta que después nadie
+> puede cerrar.** (a) está acotada por construcción: **el pin vive en UNA
+> pieza, y las piezas se cuentan.** *(Es la tercera vez que la casa elige
+> la razón angosta sobre estirar una viva: `no_aplica` como cuarto estado,
+> y la huella-discriminador de esta misma sesión.)*
+>
+> ## LAS TRES NUEVAS, con su riesgo
+> **D · scooter con caja** — la que más dice **reparto**, no solo
+> vehículo. Riesgo: la caja es masa extra arriba; a 21 px puede engordar
+> la silueta y perder la lectura de «moto».
+> **E · la moto sola** — el vehículo puro, silueta más limpia. Riesgo: sin
+> la caja dice **«alguien en moto»**, no **«tu pedido en camino»**.
+> **F · la masa mínima** — lo único que sobrevive sin un detalle. Riesgo:
+> puede leerse como **mancha** antes que como moto; es la apuesta a que
+> la silueta sola alcance.
+> **Mi voto: D**, y cambio de criterio respecto de la v1 con su razón —
+> *en la v1 voté por lo que sobrevivía al tamaño; acá las tres sobreviven
+> porque son masa, así que gana la que dice más: la caja es lo único que
+> distingue «un repartidor» de «una moto».*
+>
+> ## EL MONTAJE, corregido
+> **21 y 44 px · DENTRO del anillo del pin · sobre CUATRO tonos de mapa**
+> (asfalto · parque · agua · mapa oscuro), **jamás sobre lienzo blanco** —
+> que fue el error de la v1. ⚠️ El montaje **clona la anatomía de
+> `PinEnMapa`** a propósito y se declara: la pieza no tiene la variante
+> todavía —meterla antes del gate pondría un glifo sin firma en el
+> registry— y **una masa juzgada fuera de su anillo no es la que se va a
+> ver.**
+>
+> ---
+
+**Estado:** ⏪ **LAS TRES DE ABAJO (A · B · C) FALLARON SU GATE.** Se
+conservan enteras porque su estudio sigue siendo válido como método y
+porque el error del brief solo se entiende viendo contra qué se dibujó.
+**Estado original:** CANDIDATAS. **Ninguna está en el registry** y es a propósito:
 un glifo entra a `IconoNombre` cuando pasa su gate, no antes — si entrara
 ahora, R17 lo exigiría en la galería y el set crecería sin firma.
 
