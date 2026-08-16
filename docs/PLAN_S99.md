@@ -163,6 +163,39 @@ transversales toda la sesión.**
    paralela creada por el server — la cuenta la crea la persona y el motor
    la encuentra. El camino de alta del repartidor se propone sobre lo que
    A mida del auth real (Loop), no se inventa.
+4. **L2 GANA LA SPEC DEL FOUNDER, medida en pantalla y no imaginada
+   (15-ago, gate):** **UN SOLO campo de contacto — WhatsApp, OBLIGATORIO,
+   con selector de indicativo de país. Muere el campo de teléfono
+   convencional y muere la palabra «opcional»** — *si es el único canal,
+   no es opcional* (la pantalla de hoy muestra los dos y contradice la
+   firma del 14-ago). **La foto usa `HojaCaptura`** (la pieza de B — es
+   REEMPLAZAR, no construir; el censo de B dio el motivo duro: 8 de 10
+   puertas de foto sin cerrojo contra el doble toque, y la del repartidor
+   es una). **La ficha completa:** foto · nombre · documento · WhatsApp
+   con indicativo · correo-llave · vehículos (**máx 2 POR CONSTRUCCIÓN,
+   jamás escrito en pantalla**) · viajes DERIVADOS.
+5. **LA COLA DEL PEDIDO SE REORDENA (firma del founder, 15-ago):**
+   ① **«no entra a la cola ningún pedido que no esté cien por ciento
+   confirmado que ya está el pago»** ⇒ la banda ③ ESPERANDO **SE RETIRA**
+   — lo que espera pago está AFUERA de la cola, no en una tercera banda.
+   Quedan DOS: **URGENTE** (exprés pagado) · **FIFO por HORA DE
+   CONFIRMACIÓN DEL PAGO** — no por hora de creación, y la distinción va
+   escrita. **El dato del FIFO, MEDIDO:** `pedidos.pagado_en` NO sirve
+   (heredada y BLOQUEADA por dos vistas de métricas, 0/14 poblada, su
+   COMMENT lo dice: *«NO es la fuente de verdad del pago»*) — **la fuente
+   es `pagos_intentos` (M5): el `cerrado_en` del intento aprobado.** Los
+   `sinFecha` siguen presidiendo (adjudicación firmada). ② **El vendedor
+   REORDENA con techo** (firma: *«podría reorganizarlo… siempre que cumpla
+   la política de entregas y que se entregue dentro del horario»*) ⇒ el
+   orden es SUGERENCIA FUERTE con LÍMITE DURO: si mover un pedido saca a
+   otro de su ventana comprometida, el sistema NO lo permite y dice por
+   qué — Ley 23: no se ofrece el movimiento que se va a rechazar.
+   ③ **SON DOS COLAS, NO UNA** (frontera de mesa → **D-830**): FIFO ordena
+   el TRABAJO DEL LOCAL, la RUTA ordena la SALIDA — criterios opuestos,
+   corte en el despacho. ④ **La ruta del repartidor es ARCO PROPIO
+   (→ D-831)** — firma: *«típicamente sale con unos diez a quince pedidos
+   por ruta»*; alcance v1: zona + cercanía + el dedo del repartidor,
+   optimizador NO entra a octubre.
 
 ## §5 · TERRITORIO Y COSTURAS
 
