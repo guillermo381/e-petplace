@@ -11708,6 +11708,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-241 — CUANDO MONTAR CUESTA MENOS QUE ENSAYAR, SE MONTA (S99 — LEY del founder, 16-ago-2026, dictada con el reloj a la vista).**
+
+  **El literal que la funda:** *«necesitaría ver cómo se ve en el mapa — o literalmente pongámoslo, y si hay que cambiarlo lo cambiamos, porque creo que estamos tardando más poniéndolo en la galería y después acomodándolo, y estamos llenando la galería de cosas que no estamos utilizando.»*
+
+  **La ley:** poner la pieza EN SU LUGAR y corregirla ahí sale más barato que una lámina, un gate, un acomode y otra lámina. **La lámina se justifica cuando montar es CARO o IRREVERSIBLE** — el pin sobre un mapa no es ninguna de las dos. Su hermana de causa: *la pieza se gatea DONDE VIVE* (segunda muestra: el ícono anterior falló porque se juzgaba la lámina y el destino era el mapa — L-235 en diseño), y el costo medido de ignorarla: **la galería acumula lo que nunca se usó** (D-833).
+
+  **Lo que NO deroga, dicho explícito:** el toque 1 de B —la receta de forma ANTES de escribir— sigue siendo PRECONDICIÓN. **Lo que cambia es dónde se VERIFICA la forma, no si se piensa antes.**
+
 - **L-240 — UN GUARD QUE SOLO VALE DESPUÉS DEL CAMBIO NO PROTEGE EL CAMBIO (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
 
   **El caso (R46):** la regla vigila que toda superficie que le pide a un repartidor su WhatsApp componga al menos UN `ControlTelefono` — **cierto HOY** (lo aporta el campo de teléfono) · **cierto CUANDO el teléfono muera** (lo aporta el WhatsApp) · **FALSO exactamente en el estado que hay que impedir** (el borrado que se lleva el selector sin que nadie lo mude). *El guard da verde a los dos lados del cambio y solo el estado intermedio —el que la regla existe para atrapar— lo pone rojo… si alguien lo comete y lo corre.*
@@ -16967,6 +16975,11 @@ donde algo vivo se borra por parecer muerto:
 
 **Discriminador de cierre: cada baja nombra el literal que la descartó.
 Sin literal, no se borra.**
+
+**⏩ ENMIENDA 16-ago:** la mitad *«lo que espera firma va PRIMERO»* **salió
+de esta deuda por FIRMA del founder** (el dictado que parió L-241) — es
+orden ejecutable YA, dueña B, y no espera a la limpieza. Esta ficha queda
+con la limpieza y su guarda.
 
 ☠️ **Muere** cuando la galería quede con solo lo vivo y lo que espera
 firma, cada baja con su literal nombrado, y la lámina que espere gate
