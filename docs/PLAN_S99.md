@@ -296,6 +296,13 @@ base: censos A4 + C4. **Cada cierre de lote reporta su número.**
 
 ## §9 · FUERA DE ALCANCE DECLARADO (para que nadie lo dé por caído)
 
+- **✒️ EL ARCO V3 — FLOTA PROPIA + INTEGRACIÓN LOGÍSTICA (firma del
+  founder en el Gate 2, 16-ago; DESTINO declarado, no deuda de sesión):**
+  *«el vendedor es responsable de agregar el dato del repartidor. En V3,
+  cuando tengamos flota propia, se hará desde nuestro admin o vía API con
+  un proveedor logístico.»* Ratifica el diseño de L2 entero (el correo
+  como garantía del vendedor, el alta por el negocio) — **y se registra
+  para que L2 no se construya de forma que lo impida.**
 - **WhatsApp/Meta** (plantillas + OTP futuro): sesión propia, por firma.
 - **`LETRA_SEDIMENTACION_S80`**: sigue PROPUESTA esperando la firma de sus
   tres opciones (a/b/c). No entra a S99.
