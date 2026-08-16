@@ -3729,38 +3729,52 @@ function GaleriaInterna() {
               />
             </View>
 
-            {/* S99-B · LAS SIETE NARRATIVAS CON ÍCONO ADENTRO — la forma
-                que reemplaza a las cuatro barras. Y con `cuandoLlega`:
-                los nodos dicen DÓNDE ESTÁ, la ventana dice CUÁNTO FALTA.
-                Los glifos son SLOT del consumidor: acá se montan puntos
-                de demo para probar la FORMA sin inventar siete dibujos
-                que nadie firmó. */}
+            {/* 🔴 S99-B · EL GATE DE LOS CUATRO GLIFOS DE NODO — Y SE
+                MONTAN **DONDE VIVEN**, a 12 px adentro de la escalera
+                real, jamás sueltos en grande. *Es lo que la moto costó
+                DOS veces en esta misma sesión: un glifo aprobado en una
+                lámina limpia se cae cuando llega a su tamaño.*
+
+                ⏪ Acá había SIETE pasos con puntos de demo, y su rótulo
+                decía «las siete narrativas». **Las dos cosas eran
+                falsas**: `pagado`, `empacado` y `despachado` son estados
+                INTERNOS —no narrativas— y de las 7 narrativas solo
+                CUATRO son escalones (`pagando` es antes de que exista
+                promesa; `no_llego` y `cancelado` son DESVÍO, que
+                sustituye la escalera). La demo enseñaba un camino de
+                siete que el producto no tiene. */}
             <View style={{ gap: spacing[2] }}>
               <Texto variante="dato">
-                S99-B · compacta con NODOS + ícono adentro + ventana prometida (7 narrativas)
+                S99-B · GATE POR ÍCONO — los cuatro nodos a 12 px, en su casa. Vertical · cuadrado · horizontal · diagonal
               </Texto>
               <EscaleraEstados
                 registro="compacta"
                 cuandoLlega="Llega entre 14:00 y 16:00"
                 pasos={(
                   [
-                    ['confirmado', 'Confirmado', 'hecho'],
-                    ['pagado', 'Pagado', 'hecho'],
-                    ['preparando', 'Preparando', 'hecho'],
-                    ['empacado', 'Empacado', 'actual'],
-                    ['despachado', 'Despachado', 'pendiente'],
-                    ['en_camino', 'En camino', 'pendiente'],
-                    ['entregado', 'Entregado', 'pendiente'],
+                    ['confirmado', 'Confirmado', 'hecho', 'nodoConfirmado'],
+                    ['preparando', 'Preparando', 'hecho', 'nodoPreparando'],
+                    ['en_camino', 'En camino', 'actual', 'nodoEnCamino'],
+                    ['entregado', 'Entregado', 'pendiente', 'nodoEntregado'],
                   ] as const
-                ).map(([clave, etiqueta, estado]) => ({
+                ).map(([clave, etiqueta, estado, glifo]) => ({
                   clave,
                   etiqueta,
                   estado,
                   icono: ({ color }: { color: string }) => (
-                    <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: color }} />
+                    <Icono nombre={glifo} tamano={12} tinta={color} />
                   ),
                 }))}
               />
+              {/* El mismo set a 21 px — la vara de la Ley 9 — para poder
+                  decir si una silueta que funciona chica se sostiene
+                  grande. NO es donde se juzga: es el control. */}
+              <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+                <Texto variante="apoyo">control a 21:</Texto>
+                {(['nodoConfirmado', 'nodoPreparando', 'nodoEnCamino', 'nodoEntregado'] as const).map((g) => (
+                  <Icono key={g} nombre={g} tamano={21} />
+                ))}
+              </View>
             </View>
 
             <View style={{ gap: spacing[2] }}>

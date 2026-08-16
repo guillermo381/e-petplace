@@ -53,6 +53,14 @@ export type IconoNombre =
   // ── LOTE S71-B2 (proceso enmendado DIRECCION_ARTE: la sesión autora,
   //    hoja de contacto de 3 variantes, firma founder POR ícono) ──
   | 'caso' | 'presupuesto'
+  /* ── LOS CUATRO NODOS DEL SEGUIMIENTO (S99-B · §6b, GATE POR ÍCONO
+   *    PENDIENTE) ──────────────────────────────────────────────────
+   *  Son **GLIFOS DE CONTROL**: sin huella, por la Ley 9 en su alcance
+   *  S98 (*«en un glifo de control no hay mascota, hay interfaz»*).
+   *  Su nombre sigue a la NARRATIVA y no a la forma, porque la frontera
+   *  de la escalera son las 7 narrativas: si mañana cambia el vocabulario
+   *  del motor, se ve en el nombre del glifo. */
+  | 'nodoConfirmado' | 'nodoPreparando' | 'nodoEnCamino' | 'nodoEntregado'
   // ── LOS DOS PRIMEROS GLIFOS DE CONTROL (S82-B r7, importados del
   //    archivo de referencia que el founder entregó: `ficha-mascota`).
   //    GATE POR ÍCONO A 21px PENDIENTE (§2.9) · su LETRA NO SE ESCRIBE
@@ -625,6 +633,98 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Circle cx={12} cy={12} r={8.6} {...trazo(tinta)} />
       <Path d="M12 11v5M12 7.7v.3" {...trazo(tinta)} />
     </>
+  ),
+
+  /* ══ LOS CUATRO NODOS DEL SEGUIMIENTO (S99-B) ══════════════════════
+   *
+   * 🔴 **VAN EN MASA Y NO EN TRAZO, y no es un gusto: es el tamaño.**
+   * El nodo mide 20 y sostiene un glifo de **12** ⇒ el `viewBox` de 24
+   * se escala a la mitad y **`TRAZO` 1.9 llega como 0.95 efectivo**.
+   * A esa fineza un contorno no dibuja: susurra. *Es el mismo argumento
+   * de §6ter con otra causa — allá el trazo moría por el FONDO, acá
+   * muere por el TAMAÑO— y por eso la conclusión coincide: sobrevive la
+   * silueta rellena.*
+   *
+   * **Precedente en la casa, no invención:** `ia` ya es masa pura (tres
+   * chispas rellenas, sin un solo trazo). No nace una física nueva; se
+   * usa la que ya existía.
+   *
+   * ── LA REGLA DE DIBUJO QUE LOS ORDENA ─────────────────────────────
+   * **A 12 px no sobrevive el detalle interior: sobrevive la
+   * ORIENTACIÓN.** Por eso los cuatro se separan por eje antes que por
+   * contenido — **vertical · cuadrado · horizontal · diagonal**— que es
+   * lo primero que el ojo resuelve cuando la figura es chica:
+   *
+   *   confirmado  la bolsa    ▮ vertical
+   *   preparando  la caja     ■ cuadrada
+   *   en camino   la flecha   ▶ horizontal
+   *   entregado   el visto    ✓ diagonal
+   *
+   * ⚠️ **EL VISTO SE RESERVA PARA `entregado`, y es decisión.** Era el
+   * candidato obvio para «confirmado» —el riesgo que la receta ya había
+   * declarado— y se le niega: **`entregado` es el único de los cuatro
+   * que COMPLETA algo**, y un visto en el primer nodo diría que el
+   * camino terminó cuando recién empieza.
+   *
+   * ⚠️ **Y `en_camino` NO PUEDE SER UNA MOTO** (§6ter): la moto es marca
+   * de MAPA, otra clase, y repetirla acá haría que el mismo objeto
+   * significara dos cosas en la misma pantalla — el mapa la usa para
+   * decir DÓNDE, y acá diría EN QUÉ ETAPA.
+   *
+   * **GATE POR ÍCONO PENDIENTE (§2.9), y se juzgan DONDE VIVEN:** la
+   * galería los monta **adentro de una `EscaleraEstados` real, a 12 px**,
+   * jamás sueltos en grande. *Es lo que la moto costó dos veces en esta
+   * misma sesión.* Y por L-255: si el founder firma una silueta, lo que
+   * cambia después es el TRATAMIENTO, jamás la silueta. */
+
+  // LA BOLSA — el pedido existe. Cuerpo en masa; el asa es el ÚNICO
+  // trazo del set y va más gruesa que `TRAZO` a propósito: a 12 px con
+  // 1.9 el asa desaparecía y la bolsa se leía como un balde.
+  nodoConfirmado: ({ tinta }) => (
+    <>
+      <Path
+        d="M6.2 8.6h11.6a1.6 1.6 0 0 1 1.59 1.75l-.86 9.2A2.1 2.1 0 0 1 16.44 21.4H7.56a2.1 2.1 0 0 1-2.09-1.85l-.86-9.2A1.6 1.6 0 0 1 6.2 8.6Z"
+        fill={tinta}
+      />
+      <Path
+        d="M8.9 8.6V7.2a3.1 3.1 0 0 1 6.2 0v1.4"
+        stroke={tinta}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        fill="none"
+      />
+    </>
+  ),
+
+  // LA CAJA ABIERTA — se está armando. La V de las solapas es lo que la
+  // separa de la bolsa a 12 px: sin ellas las dos siluetas convergen.
+  nodoPreparando: ({ tinta }) => (
+    <>
+      <Path
+        d="M5.1 11.2h13.8v7.9a2.1 2.1 0 0 1-2.1 2.1H7.2a2.1 2.1 0 0 1-2.1-2.1Z"
+        fill={tinta}
+      />
+      <Path d="M5.1 11.2 9.5 5.9 12 11.2Z" fill={tinta} />
+      <Path d="M18.9 11.2 14.5 5.9 12 11.2Z" fill={tinta} />
+    </>
+  ),
+
+  // LA FLECHA — el movimiento. Cola rectangular ancha para que a 12 px
+  // la punta no se coma el cuerpo y quede leyéndose como un triángulo.
+  nodoEnCamino: ({ tinta }) => (
+    <Path
+      d="M13.1 5.2 20.4 12l-7.3 6.8v-4.2H3.6V9.4h9.5Z"
+      fill={tinta}
+    />
+  ),
+
+  // EL VISTO — lo único que se completa. Polígono grueso: un check de
+  // trazo a 12 px es exactamente el caso que esta nota vino a evitar.
+  nodoEntregado: ({ tinta }) => (
+    <Path
+      d="M9.7 18.6 3.9 12.8l2.5-2.5 3.3 3.3 7.9-7.9 2.5 2.5Z"
+      fill={tinta}
+    />
   ),
   ayuda: ({ tinta, huella }) => (
     <>
@@ -1237,6 +1337,13 @@ export function Icono({
     // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este
     // es su primer habitante y su capa la define esa firma, no esta línea.
     info: cuidado,
+    /* Los cuatro nodos siguen a `info`: son CONTROL, y el control de
+     * esta casa vive en `cuidado`. **En la escalera este mapa casi no
+     * se usa** —el slot `icono` recibe el color del nodo y se pasa por
+     * `tinta`—, pero se declara igual: un glifo sin entrada acá no
+     * compila, y dejarlo resuelto evita que el próximo que lo monte
+     * fuera de la escalera herede un color por descarte. */
+    nodoConfirmado: cuidado, nodoPreparando: cuidado, nodoEnCamino: cuidado, nodoEntregado: cuidado,
     // ATENDER va a CUIDADO y la elección es de taxonomía (Ley 10: se
     // reparte por lo que la cosa ES, no por dónde aparece). Atender a
     // quien llegó por la puerta es EL TRABAJO DEL DÍA — la misma capa
