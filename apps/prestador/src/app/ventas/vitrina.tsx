@@ -567,7 +567,14 @@ function CaraAdministrar({
             foto: s.foto_portada,
             nombre: s.producto_nombre,
             marca: s.producto_marca,
-            linea: s.presentacion,
+            /* 🔴 EL STOCK SUBE A LA FILA, y es lo que hace que matar
+               `/ventas/stock` NO pierda nada. Esa pantalla daba una cosa
+               que la ficha no da: **cuánto tengo de TODO, de un vistazo**.
+               Si el ajuste se mudaba a la ficha sin traer el número acá,
+               la consolidación habría cambiado una lista de más por una
+               ceguera. *Mudar un acto no autoriza a perder la vista de
+               conjunto que lo hacía útil.* */
+            linea: `${s.presentacion} · ${t('ventas.stock.disponibles', { n: s.stock_disponible })}`,
             alerta: mias > 0 ? t('ventas.vitrina.leFaltan', { n: mias }) : null,
             alPulsar: () => alAbrir(s.producto_id),
           };

@@ -40,7 +40,14 @@ import { useTraduccion } from "@/i18n";
  *  cuela como string — se agrega acá y el consumidor la ve. */
 export type RutaModuloVentas =
   | "/ventas/vitrina"
-  | "/ventas/stock"
+  /* ☠️ `/ventas/stock` MURIÓ (② de S99-C). Era una SEGUNDA LISTA de los
+     mismos productos con otras columnas, y obligaba al vendedor a elegir
+     dónde mirar su producto antes de poder tocarlo. **El ajuste vive en la
+     ficha** —donde vive el producto, igual que la capacidad vive en la
+     ficha del repartidor— y **el número de stock subió a la fila de
+     Administrar**, que es lo único que esa pantalla daba y la ficha no:
+     cuánto hay de TODO de un vistazo. *No se recortó una función: se le
+     dio su casa.* */
   | "/ventas/mostrador"
   | "/ventas/entregas"
   | "/ventas/configuracion";
@@ -77,12 +84,6 @@ export function CeldasModuloVentas({
       <View style={{ gap: spacing[3] }}>
         <Texto variante="seccion">{t("ventas.hoy.grupoTrabajo")}</Texto>
         <Tarjeta relleno="ninguno">
-          <CeldaNavegacion
-            registro="tinta"
-            titulo={t("ventas.hoy.stock")}
-            onPress={() => onIr("/ventas/stock")}
-          />
-          <Separador />
           <CeldaNavegacion
             registro="tinta"
             titulo={t("ventas.hoy.mostrador")}

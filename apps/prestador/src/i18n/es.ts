@@ -3252,7 +3252,6 @@ export const prestadorEs = {
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
       configuracion: 'Configuración',
-      stock: 'Stock',
       mostrador: 'Venta de mostrador',
       entregas: 'Mis entregas de hoy',
       entregasDetalle: 'Lo que llevas tú',
@@ -3325,10 +3324,6 @@ export const prestadorEs = {
       exitoEntregado: 'Entregado.',
     },
     stock: {
-      titulo: 'Stock',
-      vacioTitulo: 'Sin productos con stock',
-      vacioDetalle:
-        'Cuando tu catálogo tenga productos publicados, el inventario se maneja acá.',
       disponibles: '{{n}} disponibles',
       reservadas: '{{n}} reservadas',
       ajustarCta: 'Ajustar',

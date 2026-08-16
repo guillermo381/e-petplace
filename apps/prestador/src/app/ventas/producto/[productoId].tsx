@@ -74,6 +74,7 @@ import { monto, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { InterruptorEspejo, modoDesdeParam, type ModoEspejo } from '@/components/interruptor-espejo';
+import { HojaAjusteStock } from '@/components/hoja-ajuste-stock';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { precioPorKg } from '@/lib/precio-por-kg';
 
@@ -101,6 +102,8 @@ export default function FichaProductoEspejo() {
   const [modo, setModo] = useState<ModoEspejo>(modoDesdeParam(params.modo));
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
+  /** El SKU que se está ajustando. `null` = la Hoja no está montada. */
+  const [ajustando, setAjustando] = useState<SkuDelVendedor | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -257,12 +260,32 @@ export default function FichaProductoEspejo() {
               {/* ⑤ PARA QUIÉN SIRVE — EL DIFERENCIAL */}
               <ParaQuienSirve ficha={pantalla.ficha} />
 
-              {/* ⑥ DISPONIBILIDAD */}
-              <Disponibilidad sku={pantalla.sku} modo={modo} />
+              {/* ⑥ DISPONIBILIDAD — y en Administrar, el AJUSTE.
+                  ② de la cola: `/ventas/stock` murió y su acto vive acá,
+                  donde vive el producto. */}
+              <Disponibilidad
+                sku={pantalla.sku}
+                modo={modo}
+                alAjustar={() => setAjustando(pantalla.sku)}
+              />
             </View>
           </ScrollView>
         </View>
       )}
+
+      {/* LA HOJA DEL AJUSTE — vive fuera del `key={modo}` a propósito: si
+          viviera adentro, cambiar de modo con la Hoja abierta la
+          desmontaría y se perdería lo tipeado. *El modo cambia CÓMO se
+          mira; no puede cancelar un acto en curso.* Al guardar se re-lee,
+          porque el stock que muestra la ficha lo trae el mismo lector. */}
+      <HojaAjusteStock
+        sku={ajustando}
+        onCerrar={() => setAjustando(null)}
+        onGuardado={() => {
+          setAjustando(null);
+          setIntento((n) => n + 1);
+        }}
+      />
     </View>
   );
 }
@@ -472,7 +495,15 @@ function unir(items: string[], y: string): string {
 /* ─────────────────────────────────────────────────────────────────────────
    ⑥ DISPONIBILIDAD — el vacío HABLA y el producto JAMÁS desaparece (N9).
    ───────────────────────────────────────────────────────────────────────── */
-function Disponibilidad({ sku, modo }: { sku: SkuDelVendedor | null; modo: ModoEspejo }) {
+function Disponibilidad({
+  sku,
+  modo,
+  alAjustar,
+}: {
+  sku: SkuDelVendedor | null;
+  modo: ModoEspejo;
+  alAjustar: () => void;
+}) {
   const { t } = useTraduccion();
 
   if (sku === null) {
@@ -502,6 +533,30 @@ function Disponibilidad({ sku, modo }: { sku: SkuDelVendedor | null; modo: ModoE
         <Texto variante="apoyo" color="tertiary">
           {t('ventas.producto.sinStockSeSigueViendo')}
         </Texto>
+      )}
+      {/* LO RESERVADO — la otra mitad que la lista muerta mostraba y que
+          había que traer: **explica por qué «disponible» es menos de lo
+          que hay en el depósito**. Sin esto, un vendedor que cuenta 10
+          bolsas y lee «7 disponibles» concluye que el número está roto.
+          Con cero reservas no se dibuja: un cero acá no informa nada. */}
+      {modo === 'administrar' && sku.stock_reservado > 0 && (
+        <Texto variante="apoyo" color="tertiary">
+          {t('ventas.stock.reservadas', { n: sku.stock_reservado })}
+        </Texto>
+      )}
+      {/* EL AJUSTE — solo en Administrar, y **debajo del número**: se toca
+          después de leer cuánto hay, que es el orden en que se cuenta. En
+          «Ver como cliente» no se dibuja, y no por permisos: **la familia
+          no ajusta stock, así que el espejo no puede mostrarlo** (N17). */}
+      {modo === 'administrar' && (
+        <View style={{ alignSelf: 'flex-start', paddingTop: spacing[1] }}>
+          <Boton
+            variante="secundario"
+            tamaño="sm"
+            etiqueta={t('ventas.stock.ajustarCta')}
+            onPress={alAjustar}
+          />
+        </View>
       )}
     </View>
   );

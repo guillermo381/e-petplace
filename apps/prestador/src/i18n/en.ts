@@ -2571,7 +2571,6 @@ export const prestadorEn = {
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
       cupoCero: 'No delivery capacity confirmed for today',
       configuracion: 'Settings',
-      stock: 'Stock',
       mostrador: 'Counter sale',
       entregas: 'My deliveries today',
       entregasDetalle: 'What you deliver yourself',
@@ -2638,9 +2637,6 @@ export const prestadorEn = {
       exitoEntregado: 'Delivered.',
     },
     stock: {
-      titulo: 'Stock',
-      vacioTitulo: 'No products with stock',
-      vacioDetalle: 'When your catalog has published products, inventory is managed here.',
       disponibles: '{{n}} available',
       reservadas: '{{n}} reserved',
       ajustarCta: 'Adjust',
