@@ -1011,6 +1011,10 @@ export interface SkuDelVendedor {
   sku_id: string;
   sku_vendedor: string;
   variante_id: string;
+  /** S99-L5b (pedido de C, mesa 17-ago): LA PUERTA DE LA FICHA — desde
+   *  «Administrar» el vendedor abre `obtenerFichaProducto(producto_id)`.
+   *  Sin esto el espejo listaba sin poder entrar a ningún producto. */
+  producto_id: string;
   /** El producto con nombre — hueco medido por la pista C (S96): una pantalla
    *  de stock o de mostrador que lista `sku_vendedor` pelado no le dice nada
    *  a quien atiende. El catálogo canónico es de lectura pública. */
@@ -1054,7 +1058,7 @@ export async function listarSkusDelVendedor(
     .from('vendedor_skus')
     .select(
       'id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado, motivo_rechazo, ' +
-      'producto_variantes(presentacion, productos(nombre, marca, composicion_estado, momentos_aplicables, imagen_url, imagenes)), ' +
+      'producto_variantes(presentacion, productos(id, nombre, marca, composicion_estado, momentos_aplicables, imagen_url, imagenes)), ' +
       'ofertas(precio, estado)',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
@@ -1074,6 +1078,7 @@ export async function listarSkusDelVendedor(
       sku_id: s.id,
       sku_vendedor: typeof s.sku_vendedor === 'string' ? s.sku_vendedor : '',
       variante_id: typeof s.variante_id === 'string' ? s.variante_id : '',
+      producto_id: producto !== null && typeof producto.id === 'string' ? producto.id : '',
       producto_nombre: producto !== null && typeof producto.nombre === 'string' ? producto.nombre : '',
       producto_marca: producto !== null && typeof producto.marca === 'string' ? producto.marca : null,
       presentacion: variante !== null && typeof variante.presentacion === 'string' ? variante.presentacion : '',
