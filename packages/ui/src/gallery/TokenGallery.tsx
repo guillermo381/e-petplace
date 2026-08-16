@@ -1088,6 +1088,10 @@ function PiezasFaltantes() {
   const { theme } = useTheme()
   const [remonte, setRemonte] = useState(0)
   const [hojaScrollAbierta, setHojaScrollAbierta] = useState(false)
+  // S99-B · el pie fijo, en sus DOS estados: con desborde (el filete
+  // aparece) y sin desborde (no hay nada tapado ⇒ no hay filete).
+  const [hojaPieLarga, setHojaPieLarga] = useState(false)
+  const [hojaPieCorta, setHojaPieCorta] = useState(false)
   return (
     <View style={{ gap: spacing[5] }}>
 
@@ -1146,6 +1150,47 @@ function PiezasFaltantes() {
               ))}
             </View>
           </HojaScroll>
+        </Hoja>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          Hoja · pie fijo (S99-B) — el compromiso vive FUERA del scroll: el contenido corre por debajo y el CTA
+          no se va nunca. El filete aparece SOLO cuando hay algo tapado arriba (medido, no permanente)
+        </Texto>
+        <Boton variante="compacto" etiqueta="Con desborde — el filete aparece" onPress={() => setHojaPieLarga(true)} />
+        <Boton variante="compacto" etiqueta="Sin desborde — no hay filete" onPress={() => setHojaPieCorta(true)} />
+        <Hoja
+          visible={hojaPieLarga}
+          onCerrar={() => setHojaPieLarga(false)}
+          titulo="Ajustar stock"
+          conCerrar
+          pie={
+            <View style={{ gap: spacing[2] }}>
+              {/* La UNA línea de voz que el pie admite: el CTA apagado
+                  DICE qué falta, y adentro del scroll esa frase quedaría
+                  fuera de vista justo cuando el botón gris se ve (S73). */}
+              <Texto variante="apoyo">Falta el motivo del ajuste.</Texto>
+              <Boton variante="primario" bloque deshabilitado etiqueta="Guardar el ajuste" onPress={() => {}} />
+            </View>
+          }
+        >
+          <View style={{ gap: spacing[2], paddingBottom: spacing[4] }}>
+            {Array.from({ length: 14 }, (_, i) => (
+              <Texto key={i} variante="cuerpo">{`fila ${i + 1} — scrolleá: el pie no se mueve`}</Texto>
+            ))}
+          </View>
+        </Hoja>
+        <Hoja
+          visible={hojaPieCorta}
+          onCerrar={() => setHojaPieCorta(false)}
+          titulo="Confirmar"
+          conCerrar
+          pie={<Boton variante="primario" bloque etiqueta="Confirmar" onPress={() => setHojaPieCorta(false)} />}
+        >
+          <View style={{ paddingBottom: spacing[2] }}>
+            <Texto variante="cuerpo">Nada tapado arriba ⇒ el filete no se dibuja: separaría de nada.</Texto>
+          </View>
         </Hoja>
       </View>
 
@@ -4479,6 +4524,23 @@ function GaleriaInterna() {
                 subtitulo="Hora arriba, estado abajo — la fila de la agenda"
                 metadataMono="17:30 · 30 min"
                 fin={<Insignia estado="info" etiqueta="Confirmada" tamaño="sm" />}
+              />
+              <Separador indentacion={spacing[3]} />
+              {/* S99-B · EL PAR QUE PRUEBA LA PERILLA: el MISMO nombre de
+                  producto con y sin `tituloEntero`. Montado en par a
+                  propósito — el defecto es la comparación, y una sola de
+                  las dos filas no lo muestra. */}
+              <Celda
+                titulo="Pro Pac Ultimates Adulto Pollo y Arroz 15 kg"
+                subtitulo="SIN tituloEntero — el nombre se corta justo donde se decide"
+                metadataMono="$ 62,40"
+              />
+              <Separador indentacion={spacing[3]} />
+              <Celda
+                tituloEntero
+                titulo="Pro Pac Ultimates Adulto Pollo y Arroz 15 kg"
+                subtitulo="CON tituloEntero — la fila crece; ALTURA_MIN siempre fue un mínimo"
+                metadataMono="$ 62,40"
               />
               <Separador indentacion={spacing[3]} />
               <Celda densidad="compacta" titulo="Compacta (mín 48)" metadataMono="#8f3a" />
