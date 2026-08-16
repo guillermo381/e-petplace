@@ -20305,6 +20305,7 @@ export type Database = {
           telefono_codigo_pais: string
         }[]
       }
+      obtener_contexto_arranque: { Args: never; Returns: Json }
       obtener_datos_negocio: {
         Args: { p_hasta?: string; p_prestador_id: string }
         Returns: Json
