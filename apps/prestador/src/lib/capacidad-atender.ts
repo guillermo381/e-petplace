@@ -213,3 +213,46 @@ function esTiendaActiva(ctx: ContextoVentas | null): boolean {
 export function capacidadVendedorPuro(ctx: ContextoVentas | null): CapacidadAtender {
   return { oficios: [], tienda: esTiendaActiva(ctx) };
 }
+
+// ── L-251 · LOS TRES ESCALONES DE `ATENDER` ────────────────────────────────
+
+/**
+ * **CERO capacidades → NO HAY TAB · UNA → LA PANTALLA DIRECTA · DOS O MÁS →
+ * LAS BALDOSAS.** *Un menú de una opción no es un menú: es un peaje.*
+ *
+ * La cuenta es de PUERTAS REALES, no de naturalezas: cada oficio que atiende
+ * en su local es una, y la tienda es otra. Un negocio con veterinaria y
+ * tienda tiene DOS y ve baldosas; uno que solo vende, UNA y entra directo.
+ *
+ * ⚠️ **Y ACÁ VA EL FRENO MEDIDO, porque la forma obvia es una trampa:** el
+ * escalón `una` **NO se monta con un `<Redirect>` dentro de la pantalla de
+ * la tab.** Si la tab redirige en cada foco, el «atrás» del destino vuelve a
+ * la tab, que vuelve a redirigir — **el back queda en una ratonera y la
+ * persona no puede salir**. El destino tiene que decidirlo **la BARRA** (a
+ * qué apunta la tab), que es territorio del cascarón. *Esta función da la
+ * DECISIÓN; el montaje es de quien tiene la barra.*
+ */
+export type EscalonAtender =
+  | { escalon: 'ninguna' }
+  | { escalon: 'una'; destino: DestinoAtender }
+  | { escalon: 'varias' };
+
+/** El destino del escalón `una` — ruta y, si aplica, su oficio. */
+export type DestinoAtender =
+  | { ruta: '/ventas/mostrador' }
+  | { ruta: '/mostrador'; oficio: OficioAtender };
+
+export function escalonDeAtender(c: CapacidadAtender): EscalonAtender {
+  const puertas = c.oficios.length + (c.tienda ? 1 : 0);
+  if (puertas === 0) return { escalon: 'ninguna' };
+  if (puertas > 1) return { escalon: 'varias' };
+  // Exactamente una: o es la tienda, o es el único oficio con local.
+  if (c.tienda) return { escalon: 'una', destino: { ruta: '/ventas/mostrador' } };
+  const unico = c.oficios[0];
+  /* Defensivo y honesto: `puertas === 1` sin tienda implica un oficio, pero
+     si el arreglo llegara vacío por una lectura a medias, **no se inventa un
+     destino** — se cae a `ninguna`, que es el estado que la superficie sabe
+     decir. */
+  if (unico === undefined) return { escalon: 'ninguna' };
+  return { escalon: 'una', destino: { ruta: '/mostrador', oficio: unico.oficio } };
+}
