@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-253 — CUANDO DOS PANTALLAS COMPARTEN EL DOM, «LO QUE DICE LA PANTALLA» DEJA DE SER «LO QUE DICE EL DOCUMENTO» (S99 — el caso es de D, en la cura de D-836; depositada por orden de mesa, 18-ago-2026).**
+
+  **El caso, medido:** al mudar `/pedidos` adentro del navegador de tabs, las pantallas quedan APILADAS — los dos títulos ocupan la misma caja y `body.innerText` trae los dos — así que su assert podía leer el techo del HOY y dar verde SIN que la hermana cruzara nada. Curado leyendo solo la pantalla ACTIVA (**excluyendo `aria-hidden`, que lo marca el PROPIO navegador — jamás una heurística propia**) y clickeando `.last()`.
+
+  **Qué aporta que L-243 y L-235 no cubren:** no es que el instrumento respondiera sobre otro objeto, ni que midiera el síntoma — es que **EL OBJETO CONTENÍA DOS COSAS Y EL INSTRUMENTO NO LAS SEPARABA.**
+
+  **Y el autodiagnóstico de D va CON la ley porque es el corolario: «MEDÍ LO QUE CONSTRUÍ, NO LO QUE LA PERSONA HACE CON ESO».** Su guard probaba que el día cruzara y que las puertas estuvieran — jamás que LA CASA SIGUIERA PUESTA. Segunda vez en la sesión con el mismo patrón. **COROLARIO EXIGIBLE: todo guard de navegación mide también QUÉ QUEDA ALREDEDOR, no solo que el destino llegó — y con DOS anclas, porque con una sola podría ser un rótulo cualquiera.**
+
 - **L-252 — EL HUECO SE RECORTA, NO SE PINTA: TODA PIEZA QUE DEPENDA DEL COLOR DEL FONDO SE RECORTA (S99 — resuelta por B en la barra líquida, ratificada por mesa 18-ago-2026).**
 
   **El caso:** el disco de la barra líquida se separa de la barra por un hueco DEL COLOR DEL FONDO. Pintar ese hueco (copiar el color del fondo adentro de la pieza) funciona… **justo en la pantalla donde se lo probó** — y diverge sin avisar con el tema, el memorial o cualquier capa nueva: la mancha con forma de media luna no se degrada, aparece. **El modo de falla es el peor porque el verde local es perfecto.**
@@ -17245,6 +17253,18 @@ HERMANAS con puertas espejadas presuponen que la barra sigue ahí).
 ☠️ **Muere** cuando la ventana de pedidos conserve los cuatro tabs (o
 declare por letra por qué no) y el founder navegue ida-y-vuelta sin
 «devolverse al de citas».
+
+**✅ CERRADA (18-ago noche, cura de D — merge `45dbaeaa`):** el defecto
+era de FORMA — `/pedidos` montada como ruta empujada del stack raíz,
+copiando `/ventas`, y esa forma le saca la barra. La cura es **el molde
+que la casa ya tenía** (declarada en el navegador de tabs, ausente de
+`items`), la ruta sigue siendo `/pedidos` y cero enlaces cambiados.
+Verde en las tres poblaciones, sin regresión en la lápida ni en el
+repartidor. **Su lectura al acta:** peor que el encierro del repartidor —
+aquélla era una pantalla-única sin salida; **ésta era UN CUARTO QUE
+PERDIÓ EL PASILLO, y el pasillo que él mismo acababa de construir.** De
+la cura nació L-253 (el DOM apilado) y la transición quedó sin dueño
+(a B, con la causa — ver Loop de A).
 
 #### D-837 — 🔴 LA CAPACIDAD DE REPARTO VIVE DENTRO DE CADA REPARTIDOR (dictado del founder 18-ago; motor A + superficie C; disparo: TRAS la caminata de C por configuración)
 
