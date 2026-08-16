@@ -3214,6 +3214,9 @@ export const prestadorEs = {
       ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
       /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
       catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
+      /* Con el conteo del servidor el aviso deja de ser indicio. */
+      catalogoCortadoExacto: 'Hay {{hay}} productos en el catálogo y estás viendo {{ves}}.',
+      viendo: 'Viendo {{n}} de {{de}}',
       leFaltan: 'Le faltan {{n}}',
       /* Rótulos de FILA — el nombre de la razón, no su instrucción.
          Su versión con camino vive en `ventas.producto.razon_*`. */

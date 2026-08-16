@@ -168,6 +168,7 @@ import {
   conteosVitrinaPorEje,
   listarProductosDespensa,
   listarSkusDelVendedor,
+  contarProductosDespensa,
   type ConteosVitrina,
   type ProductoDeVitrina,
   type Repartidor,
@@ -228,6 +229,17 @@ type Pantalla =
        *  filtro con números inventados). Degradar el FILTRO es honesto;
        *  degradar la lista sería esconder catálogo. */
       conteos: ConteosVitrina | null;
+      /** CUÁNTOS HAY DE VERDAD en el catálogo comprable, contado por el
+       *  SERVIDOR con los mismos filtros base que la lista.
+       *  🔴 **Su trabajo hoy no es adornar: es volver EXACTA la frase del
+       *  techo.** Sin él, «¿corté el catálogo?» se responde por indicio
+       *  —«me llegaron justo `TECHO_CATALOGO` filas, capaz hay más»—; con
+       *  él se responde con el número. *Un aviso de truncado que dice
+       *  «puede haber más» y uno que dice «hay 700 y ves 600» no informan
+       *  lo mismo: el primero se ignora, el segundo se actúa.*
+       *  `null` = el conteo no llegó ⇒ se vuelve al indicio y se dice
+       *  igual. **Un conteo que no llegó NO es cero** (L-247). */
+      totalCatalogo: number | null;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -407,7 +419,7 @@ export default function TuTienda() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, turnos, pedidos, cupo, pres, arranque, vit, skus, conteos] =
+        const [reps, turnos, pedidos, cupo, pres, arranque, vit, skus, conteos, total] =
           await Promise.all([
           listarRepartidores(id),
           listarTurnosEntrega(id),
@@ -431,6 +443,12 @@ export default function TuTienda() {
             listarProductosDespensa({ limite: TECHO_CATALOGO }),
             listarSkusDelVendedor(id),
             conteosVitrinaPorEje(),
+            /* EL CONTADOR VIAJA CON LOS MISMOS FILTROS BASE QUE LA LISTA —
+               si contara otra cosa, el denominador sería de otro conjunto y
+               la frase mentiría con números reales, que es la peor forma de
+               mentir. **Sin `limite` a propósito:** cuenta el catálogo
+               entero, que es justo contra lo que hay que comparar el techo. */
+            contarProductosDespensa({}),
           ]);
         if (!vigente()) return;
         if (!reps.ok || !turnos.ok || !pedidos.ok || !vit.ok || !skus.ok) {
@@ -458,6 +476,7 @@ export default function TuTienda() {
           vitrina: vit.data,
           skus: skus.data,
           conteos: conteos.ok ? conteos.data : null,
+          totalCatalogo: total.ok ? total.data : null,
         });
       }
     },
@@ -1142,14 +1161,62 @@ export default function TuTienda() {
 
           {/* ═══ ③ LAS FILAS ═══ */}
           <View style={{ gap: spacing[4] }}>
-            {/* EL CORTE SE DICE. Si el lector devolvió exactamente el techo,
-                hay catálogo que esta pantalla NO está mostrando — y
-                **callarlo es la falla, no cortarlo**. */}
-            {modo === 'cliente' && pantalla.vitrina.length >= TECHO_CATALOGO && (
-              <Texto variante="apoyo" color="warning">
-                {t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
-              </Texto>
-            )}
+            {(() => {
+              /* ── CUÁNTAS ESTÁS VIENDO — y de cuántas ────────────────────
+                 🔴 **EL DENOMINADOR ES EL DEL CONJUNTO FILTRADO, no el del
+                 catálogo**, y hoy se puede porque **todo está en memoria**:
+                 la lista trae el catálogo entero y la ventana solo corta el
+                 array. Poner el total del catálogo al lado de una lista
+                 filtrada por «perro» diría «30 de 563» sobre 266 — *un
+                 número real en el lugar equivocado miente peor que un
+                 número inventado, porque nadie lo duda*.
+                 ⚠️ **Y esto cambia el día que la lista se pagine**: ahí el
+                 cliente deja de tener el conjunto y el denominador tiene
+                 que venir del servidor CON LOS MISMOS FILTROS. Es
+                 exactamente por eso que el filtro por estado —y el de
+                 especie, y la búsqueda— tienen que ser del servidor. */
+              const visibles =
+                modo === 'cliente'
+                  ? filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
+                      coincide(p.nombre, p.marca),
+                    ).length
+                  : pantalla.skus.filter((s2) =>
+                      coincide(s2.producto_nombre, s2.producto_marca),
+                    ).length;
+              const mostradas = Math.min(ventana, visibles);
+              /* EL TECHO, AHORA EXACTO. Antes esto era un indicio —«me
+                 llegaron justo `TECHO_CATALOGO` filas, capaz hay más»—; con
+                 el contador del servidor es un hecho con su número. *Un
+                 aviso que dice «puede haber más» se ignora; uno que dice
+                 «hay 700 y ves 600» se actúa.* Si el conteo no llegó se
+                 vuelve al indicio **y se dice igual**: callar el corte es
+                 la falla, no cortarlo. */
+              const cargadas = pantalla.vitrina.length;
+              const cortado =
+                modo === 'cliente' &&
+                (pantalla.totalCatalogo !== null
+                  ? pantalla.totalCatalogo > cargadas
+                  : cargadas >= TECHO_CATALOGO);
+              return (
+                <View style={{ gap: spacing[1] }}>
+                  {visibles > 0 && (
+                    <Texto variante="apoyo" color="tertiary">
+                      {t('ventas.vitrina.viendo', { n: mostradas, de: visibles })}
+                    </Texto>
+                  )}
+                  {cortado && (
+                    <Texto variante="apoyo" color="warning">
+                      {pantalla.totalCatalogo !== null
+                        ? t('ventas.vitrina.catalogoCortadoExacto', {
+                            hay: pantalla.totalCatalogo,
+                            ves: cargadas,
+                          })
+                        : t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
+                    </Texto>
+                  )}
+                </View>
+              );
+            })()}
             {modo === 'cliente' ? (
               <CaraCliente
                 productos={filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
