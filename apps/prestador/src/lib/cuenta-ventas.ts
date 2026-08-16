@@ -32,6 +32,10 @@ export interface ContextoVentas {
   /** La cuenta tiene el rol `seller_productos` ACTIVO. */
   esVendedora: boolean;
   moneda: ConfigMoneda;
+  /** S99 (freno de C, mesa 18-ago): el PAÍS de la cuenta — la vitrina
+   *  FILTRA por país en vez de adivinarlo (P21: proponer no es deducir).
+   *  'EC' como degradación propia si el dato no vino (L-247). */
+  countryCode: string;
 }
 
 // undefined = nunca cargado · null = la persona NO tiene cuenta comercial
@@ -145,6 +149,7 @@ async function resolverContexto(): Promise<
     cuentaComercialId: cta.data.id,
     nombreComercial: cta.data.nombreComercial,
     estadoCuenta: cta.data.estado,
+    countryCode: cta.data.countryCode || 'EC',
     esVendedora: roles.data.includes('seller_productos'),
     // La config de moneda que no se pudo leer degrada al fallback DECLARADO
     // del riel (USD/$/2) — no es un hardcode nuestro: es la única moneda

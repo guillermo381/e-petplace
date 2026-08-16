@@ -1199,6 +1199,11 @@ export {
   // «motor sin puerta» fue exactamente un wrapper sin barrel.
   razonesDeAlcance,
   ajustarStockVendedor,
+  // S99 · los dos lectores de C (mesa 17-ago) + la carga determinista L5a
+  // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
+  viajesPorRepartidor,
+  proponerSkusVendedorLote,
+  configurarVentaMostrador,
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,
@@ -1224,6 +1229,8 @@ export {
   type LoteDeItem,
   type SkuDelVendedor,
   type RazonAlcance,
+  type FilaLoteSku,
+  type ResultadoFilaLote,
   type Repartidor,
   type VehiculoRepartidor,
 } from './wrappers/despensa-vendedor';

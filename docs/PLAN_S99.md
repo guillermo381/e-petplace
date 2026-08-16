@@ -129,6 +129,26 @@ transversales toda la sesión.**
 >   vendedor real proponga mapea a un canónico hoy incompleto (222/470
 >   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
 >   canónica (M21) es trabajo de e-PetPlace, no suyo.
+> - **⚖️ LA RECETA 7 DEL ESPEJO, RATIFICADA ENTERA CON SU HALLAZGO (mesa,
+>   18-ago — el hallazgo es de B leyendo el contador de C): LA FORMA
+>   DISTINGUE LO MISMO QUE EL CONTADOR, o el contador pierde
+>   credibilidad.** Los cinco estados del SKU no son cinco de la misma
+>   clase: **VEREDICTO de e-PetPlace** (en revisión · rechazado — lo
+>   resuelve la casa, ningún paso del vendedor, JAMÁS cuenta) contra
+>   **HUECO del vendedor** (sin precio · precio sin publicar — lo
+>   resuelve él, un paso, cuenta). *Si el contador distingue y la forma
+>   no, el vendedor ve cinco cosas parejas y un contador que solo cuenta
+>   dos — y la incoherencia se lee como contador roto.* **Las tres
+>   decisiones que van con ella:** el quinto estado —publicado— **NO SE
+>   DIBUJA** (*el premio por estar publicado es que la app deje de hablar
+>   del tema*) · **`motivo_rechazo` va LITERAL** (parafrasear un rechazo
+>   es reescribir lo que decidió otro y le saca al vendedor la única
+>   información con la que puede arreglarlo) · y es **el ÚNICO danger de
+>   la ficha** (el rojo sigue significando «esto está mal y es tuyo»).
+>   **Y a N17 se suma, junto a la ley de C:** en modo cliente la línea
+>   del no-publicado va **AL PIE y con su número, JAMÁS una tarjeta
+>   fantasma** — una familia nunca vería un placeholder, y el espejo deja
+>   de ser espejo en el momento en que inventa una casilla.
 > - **⚖️ N17 GANA SU LEY (mesa, 17-ago — decisión de C, ratificada y
 >   elevada): EL ESPEJO JAMÁS MUESTRA EN «VER COMO CLIENTE» ALGO QUE LA
 >   FAMILIA NO VE.** El caso que la parió: el $/kg NO entra a ese modo
@@ -136,9 +156,21 @@ transversales toda la sesión.**
 >   razón de C, verbatim de mesa: *sería el espejo prometiendo algo que la
 >   familia no ve, EN LA DIRECCIÓN QUE NADIE REVISA — un espejo que
 >   miente hacia adentro es peor que uno que no existe, porque el
->   vendedor confía en él.* Mientras el $/kg no viva en la ficha del
->   cliente, el espejo tiene un **hueco declarado y correcto** (pedido a
->   D registrado en el Loop de A).
+>   vendedor confía en él.* ~~Mientras el $/kg no viva en la ficha del
+>   cliente, el espejo tiene un hueco declarado y correcto~~ **(18-ago: el
+>   hueco CERRÓ — D montó el $/kg en la ficha de la familia, mergeado a
+>   main; el cómputo compartido vive en `packages/i18n/moneda`).**
+> - **⚖️ LA TERCERA LEY DEL ESPEJO (mesa, 18-ago — decisión de C,
+>   depositada junto a las dos de arriba): LOS DOS MODOS LISTAN CONJUNTOS
+>   DISTINTOS, Y ESO ES EL ESPEJO TRABAJANDO.** «Ver como cliente» lista
+>   lo PUBLICADO, con el MISMO lector de la familia; «Administrar» lista
+>   TODOS sus SKUs, incluidos los que no llegan a la vitrina — *porque ahí
+>   vive el trabajo: un producto sin precio o rechazado es justo el que
+>   más necesita que él lo vea.* La razón que cierra la ley: **si las dos
+>   caras listaran lo mismo, el espejo sería un adorno — LA DIFERENCIA
+>   ENTRE LAS DOS ES LA INFORMACIÓN.** Y en modo cliente la pantalla dice
+>   cuántos de los suyos faltan (al pie, con su número); con cero
+>   ausentes no dibuja nada.
 > - **🔴 N20 ENMENDADA (mesa, 17-ago — hallazgo de B sobre las
 >   cardinalidades medidas): LA ESPECIE ES UN FILTRO, JAMÁS UNA CARPETA.**
 >   La letra decía «especie → necesidad» y esa flecha se lee como
@@ -154,6 +186,116 @@ transversales toda la sesión.**
 >   de `conteosVitrinaPorEje`, así que sus casos borde quedaron decididos
 >   HOY, con el gate al escribirla y no al dispararse.
 
+> ### 🔴 DICTADO DEL FOUNDER (18-ago) — EL MÓDULO DE VENTA ENTERO, RE-COMPUESTO. Y REORDENA LOS LOTES.
+>
+> - **① 🔴 SE PIERDEN LOS TABS EN PEDIDOS** — verbatim: *«de la parte de
+>   pedidos se pierden los cuatro tabs, toca devolverse al de citas para
+>   poder navegar.»* Es un ENCIERRO (clase L-249) y ni siquiera es
+>   pantalla-única: una ventana de la casa que perdió la casa. **D-836,
+>   territorio D, ALTA** — rompe la navegación del dual recién firmado.
+> - **② EL MÓDULO DE VENTA ESTÁ MAL COMPUESTO:** los pedidos van al HOY
+>   (el techo «Pedidos» miente) · venta de mostrador deja de ser pantalla
+>   y pasa a ser INTERRUPTOR (④) · stock deja de ser configuración y pasa
+>   a ser el inventario vivo (⑤).
+> - **③ CONFIGURACIÓN MUESTRA EL ESTADO DEL NEGOCIO, no da acceso a
+>   formularios** — verbatim: *«todavía falta organizar la pantalla para
+>   que se vea cómo está.»* Cortes: el ACTUAL con lápiz («agregar» solo
+>   sin ninguno) · repartidores: la ficha con lápiz · **🔴 la capacidad de
+>   reparto VIVE DENTRO de cada repartidor** («Moto Demo — 98 a 20 por
+>   día» es capacidad DE UN REPARTIDOR, no recurso suelto; muere «agregar
+>   recurso» — **D-837**: `recursos_reparto` NO conoce al repartidor,
+>   medido — hay motor) · cerrar sesión NO va ahí · el toggle ④ vive acá.
+>   **ORDEN LITERAL: Code ENTRA a esa pantalla, la camina y trae los
+>   hallazgos ANTES de mejorarla.** Es de C, con la gramática de
+>   configuración de B como toque 1.
+> - **④ 🔴 ATENDER SE COMPONE POR CAPACIDAD — LOS TRES ESCALONES** (y
+>   cierra el 🟡 del Gate 1 por composición, no por diseño): **CERO
+>   capacidades → NO HAY TAB · UNA → LA PANTALLA DIRECTA con su nombre en
+>   el techo · DOS+ → las baldosas.** Verbatim: *«si solo tengo venta de
+>   productos, ya me muestra la vitrina, para que no tengamos que hacer
+>   un clic innecesario. Solo me muestra las opciones cuando tengo más de
+>   una.»* **La ley que la funda: UN MENÚ DE UNA OPCIÓN NO ES UN MENÚ: ES
+>   UN PEAJE (L-251).** El toggle es POR SERVICIO, jamás global
+>   (`prestador_servicios.atiende_local`, ya vivo) + **la perilla de
+>   PRODUCTOS nació (18-ago, motor A):**
+>   `cuentas_comerciales.venta_mostrador_activa` + `configurar_venta_
+>   mostrador` + el contexto de arranque con `oficios_locales` (LA LISTA
+>   — los escalones cuentan y nombran) y `venta_mostrador_activa` fresca.
+>   Backfill honesto: las 2 cuentas que YA vendían por retiro nacen
+>   prendidas. **La composición de ATENDER es de C.**
+> - **⑤ 🔴 STOCK ES PANTALLA PROPIA, Y ES DONDE VIVE EL ESPEJO — L5a Y
+>   L5b DEJAN DE SER DOS LOTES SECUENCIALES: SON UNA PANTALLA CON SUS
+>   ACCIONES.** Verbatim: *«cuando le demos clic nos debe salir como un
+>   reporte del stock actual, y ahí es donde vemos el espejo… clic en ver
+>   lista y vea la lista, y clic en ícono y le muestre con ícono, tal
+>   cual como muestra Mac.»* **El espejo NO es pantalla nueva: se ANCLA
+>   en Stock** (el interruptor Administrar ⇄ Ver como cliente firmado, tal
+>   cual). Nace la conmutación **lista ⇄ íconos** (forma nueva → receta
+>   de B antes de que C escriba; compatible con su «sin paginación, sin
+>   cargar más, sin encabezados» — no lo reabre). **Desde Stock salen las
+>   acciones:** agregar producto · modificar inventario · **cargar por
+>   archivo (Excel — ES L5a y su motor YA ESTÁ:** por-fila con índice y
+>   causa, techo 500, M21 verificada por resultado**)** · **cargar por
+>   FACTURA EN PDF LEÍDA CON IA** — verbatim: *«antes de actualizar, le
+>   mostramos las actualizaciones que vamos a hacer para que él confirme
+>   si es correcto o no»* ⇒ **la confirmación previa es N13 literal (la
+>   extracción PROPONE, la persona FIRMA)**, y el PDF es caso NUEVO del
+>   arco de IA: **al Excel determinista §14 NO le aplica; al PDF SÍ —
+>   POST-15-SEP sin cambio.**
+>   **✒️ FIRMA DEL FOUNDER (18-ago, confirmación): EL PDF-FACTURA QUEDA EN
+>   SEPTIEMBRE, SIN CAMBIO — la fecha de §14 rige tal cual. La
+>   consecuencia para OCTUBRE, escrita para que nadie la dé por caída ni
+>   por incluida: la carga por EXCEL DETERMINISTA SÍ llega al lanzamiento
+>   (motor entregado; sin §14 porque no es IA) · la lectura de facturas
+>   en PDF NO llega.**
+>
+> ### 🔴 DICTADO DEL FOUNDER (18-ago, con referencia visual — dos capturas de Rappi): EL SEGUIMIENTO DEL PEDIDO. B forma · D montaje · A censo.
+>
+> **FIRMA VERBATIM:** *«todavía no he visto cómo se ve la moto en el mapa,
+> pero te muestro cómo la pone Rappi. No solo la moto, sino el destino, y
+> también cómo arriba pone el seguimiento del pedido. Si notás, nosotros
+> tenemos cuatro líneas verdes; Rappi sí llena como con los círculos cada
+> una de las etapas, y le va diciendo al cliente más o menos dónde está,
+> cuánto tiempo llega y en qué estado está. Creo que es mucho más amigable
+> el que tiene Rappi que el que nosotros diseñamos. Utilizalo como ejemplo
+> para hacer algo lo más parecido posible, CUIDANDO NUESTRA ESENCIA.»*
+>
+> **Lo que la mesa lee de las capturas (para trabajar sobre lo que hace
+> que funcione, no sobre la descripción):**
+> - **① 🔴 LA ESCALERA ES DE NODOS, NO DE BARRAS** — círculos unidos por
+>   una línea que se RELLENA, y **un círculo puede llevar un ícono
+>   adentro** (preparando · empacado · en moto · en casa): cada etapa dice
+>   QUÉ ES sin texto; nuestras cuatro líneas solo dicen «cuántos van». Es
+>   ENMIENDA a la escalera existente, no pieza nueva — y **los nodos son
+>   las NARRATIVAS (la firma 29→7), jamás los estados internos.**
+> - **② EL DESTINO TAMBIÉN ES UN PIN** — la casa del cliente en el mapa;
+>   sin dos puntos la distancia no se lee. Variante nueva de `PinEnMapa`
+>   (clase «marca de mapa»), física ya escrita: **L-242 aplica igual que a
+>   la moto** (el destino lo dibujamos nosotros — sin anillo).
+> - **③ LA VENTANA EN RANGO, JAMÁS AL MINUTO** («11:40 PM – 12:05 AM») —
+>   coincide con lo firmado (cero ETA al minuto en v1) y es más honesto.
+>   **CENSO DE A (18-ago): el rango TIENE DATO Y YA VIAJA** —
+>   `promesa_entrega_desde/hasta` poblados en 9 de 11 pedidos vivos
+>   (`calcular_promesa_entrega` los puebla al checkout), y **el lector de
+>   seguimiento del CLIENTE ya los expone** (`promesa_desde/hasta`). Cero
+>   motor nuevo: la receta se escribe sobre dato real. Los 2 sin rango
+>   son la degradación honesta (la forma dice el estado sin ventana, no
+>   inventa una).
+>
+> **LO QUE NO SE COPIA (escrito para que nadie lo traiga con la
+> referencia):** el pin de MARCA del comercio sobre el mapa (publicidad —
+> nuestra ley lo prohíbe) · **🔴 el pin de «entrega de otro pedido»: DATO
+> DE OTRA PERSONA EN LA PANTALLA DE ALGUIEN — no entra por ninguna razón
+> de producto. Queda como DECISIÓN, no como omisión.** · el bloque de
+> ayuda con punto rojo permanente y las tarjetas apiladas (nuestra Hoja
+> inferior resuelve eso con una superficie).
+>
+> **Reparto:** B escribe la receta (escalera de nodos con íconos + pin de
+> destino + composición mapa/hoja/escalera) **y por L-241 se verifica
+> DONDE VIVE — sobre `LienzoMapa` con tiles reales, jamás en lámina** · D
+> monta · el censo de A está arriba, cerrado. **La vara del founder al
+> frente: el mecanismo se toma; la publicidad y el dato ajeno se dejan.**
+>
 > ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
 > por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,
 > y OCTUBRE ES FIJO)

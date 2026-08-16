@@ -71,6 +71,7 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
+import { precioPorKg, MONEDA_FALLBACK, type IdiomaSoportado } from '@epetplace/i18n';
 import {
   expandirAlergenosAVigilar,
   listarAlergenos,
@@ -94,7 +95,7 @@ type Fase<T> = T | 'cargando' | 'error';
 
 export default function DespensaProducto() {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const carrito = useCarrito();
@@ -566,6 +567,54 @@ export default function DespensaProducto() {
                             titulo={v.presentacion}
                             subtitulo={elegida ? t('despensa.presentacionElegida') : undefined}
                             metadataMono={v.precio !== null ? `$ ${v.precio.toFixed(2)}` : undefined}
+                            /* ⭐ S99-D · EL PRECIO POR KILO — el escalón que
+                               nadie pone (receta de B, firma de la mesa).
+                               `metadataMono` y `fin` CONVIVEN apilados en la
+                               zona fin (mono arriba, nodo abajo) — o sea que
+                               «debajo del precio» no hay que construirlo: la
+                               pieza ya lo hace, y por eso no nace nada nuevo.
+
+                               🔴 **VA POR PRESENTACIÓN Y NO UNA VEZ EN LA
+                               FICHA**, y es lo único que interpreté de la
+                               receta: con varias presentaciones un $/kg
+                               suelto no diría de cuál es — y comparar
+                               presentaciones **es justo el trabajo para el
+                               que sirve**. Un número ambiguo en el lugar
+                               donde se decide sería peor que no ponerlo.
+
+                               El registro es el mensaje (Ley 3): mono porque
+                               **lo derivó una máquina**, y esa diferencia
+                               tipográfica es la que lo hace leer como
+                               cálculo. Sin peso declarado NO SE DIBUJA —
+                               el nulo lo decide el helper y acá solo se
+                               respeta (inventar el peso mataría el valor del
+                               dato: que sea cierto).
+
+                               ⚠️ `MONEDA_FALLBACK` NO es una elección mía:
+                               es lo que ESTA pantalla ya asume dos líneas
+                               más arriba (`$ ${'{'}precio.toFixed(2){'}'}`, hardcodeado).
+                               Formatear el $/kg con el riel de moneda y el
+                               precio a mano habría puesto **dos formatos de
+                               plata a un centímetro**. Los dos se mueven
+                               juntos el día que esta ficha adopte D-448 —
+                               declarado, no arreglado de costado. */
+                            fin={
+                              v.precio !== null
+                                ? (() => {
+                                    const porKg = precioPorKg(
+                                      v.precio,
+                                      v.peso_kg,
+                                      MONEDA_FALLBACK,
+                                      idioma as IdiomaSoportado,
+                                    );
+                                    return porKg === null ? undefined : (
+                                      <Texto variante="dato" color="secondary">
+                                        {porKg}
+                                      </Texto>
+                                    );
+                                  })()
+                                : undefined
+                            }
                           />
                         ) : (
                           <Celda

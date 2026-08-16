@@ -4188,6 +4188,7 @@ export type Database = {
           suspension_motivo: string | null
           tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at: string
+          venta_mostrador_activa: boolean
         }
         Insert: {
           activado_en?: string | null
@@ -4212,6 +4213,7 @@ export type Database = {
           suspension_motivo?: string | null
           tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at?: string
+          venta_mostrador_activa?: boolean
         }
         Update: {
           activado_en?: string | null
@@ -4236,6 +4238,7 @@ export type Database = {
           suspension_motivo?: string | null
           tipo_fiscal?: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at?: string
+          venta_mostrador_activa?: boolean
         }
         Relationships: [
           {
@@ -19444,6 +19447,10 @@ export type Database = {
         Args: { p_auto_renovar: boolean; p_suscripcion_id: string }
         Returns: Json
       }
+      configurar_venta_mostrador: {
+        Args: { p_activa: boolean; p_cuenta_comercial_id: string }
+        Returns: Json
+      }
       confirmar_cita_pagada: { Args: { p_cita_id: string }; Returns: Json }
       confirmar_cita_servicio: {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
@@ -20793,6 +20800,14 @@ export type Database = {
         }
         Returns: Json
       }
+      proponer_skus_vendedor_lote: {
+        Args: {
+          p_cuenta_comercial_id: string
+          p_filas: Json
+          p_origen_carga?: string
+        }
+        Returns: Json
+      }
       publicar_oferta_sku: {
         Args: { p_country_code?: string; p_precio: number; p_sku_id: string }
         Returns: Json
@@ -21357,6 +21372,10 @@ export type Database = {
           negocio: string
           nombre: string
         }[]
+      }
+      viajes_por_repartidor: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: Json
       }
       volver_pedido_al_orden: { Args: { p_pedido_id: string }; Returns: Json }
       wizard_crear_cuenta_y_rol: {

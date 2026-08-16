@@ -598,6 +598,46 @@ nadie podía cerrar.
 **La clase (a) se acota sola, y por construcción: la marca de mapa vive
 en UNA pieza (`PinEnMapa`), y las piezas se cuentan.**
 
+### 🔴 ENMIENDA 18-ago (S99, firma del founder sobre la galería): LA LEY ESTABA Y LE FALTABA SU FÍSICA — SE DIBUJA COMO OBJETO DEL MUNDO, NO COMO SÍMBOLO SOBRE EL MUNDO
+
+**El verbatim que la parió:** *«se ve mal, se ve como algo puesto encima,
+no como algo que hace parte del mapa. La diferencia con el de Rappi es
+que el mapa y el ícono se INTEGRAN… No solo la moto, sino la casita que
+muestra el destino: también la muestra integrada. Se ve como si fuera
+parte de, no como algo pegado encima.»*
+
+**El diagnóstico, y es un choque contra esta misma sección:** «el mapa es
+MUNDO» estaba firmado — y la pieza seguía siendo **un glifo de interfaz
+puesto sobre el mundo**. Un símbolo plano dentro de un círculo es
+correcto como ÍCONO, y exactamente por eso se ve pegado. **La física que
+faltaba, leída de las capturas (el mecanismo, no la descripción):**
+
+- **SOMBRA EN EL SUELO** — una mancha suave debajo dice «esto está parado
+  ahí». Sin ella, cualquier objeto flota. Lo primero y lo más barato.
+- **PERSPECTIVA COMPARTIDA** — el mapa es cenital y un glifo de frente
+  mete DOS perspectivas en la misma imagen; el ojo lo detecta aunque no
+  sepa nombrarlo. La referencia va en tres cuartos, con la inclinación de
+  sus edificios.
+- **EL COLOR PERTENECE AL TERRENO** — color de marca con la saturación
+  del mapa, jamás un color de interfaz que grita.
+- **EL DESTINO ES UN EDIFICIO, NO UN MARCADOR** — la casita es un objeto
+  del mundo, no un pin señalando un lugar.
+
+**Consecuencia (orden a B):** la variante `moto` NO se ajusta — **se
+RE-DIBUJA como objeto del mundo, y con ella nace el destino**. La
+candidata D queda FIRMADA como silueta ganadora; su TRATAMIENTO cambia
+(deja de ser glifo-en-círculo). Y por L-241 se juzga DONDE VIVE — sobre
+`LienzoMapa` con tiles reales, **los dos objetos juntos**, porque el
+juicio es la comparación. *(La galería hizo su trabajo: el rechazo ahí
+fue más barato que en producción.)*
+
+**Registro para el acta (el eje que repite):** es la SEGUNDA falla de
+este ícono y las dos por el mismo eje — la primera se juzgaba en el
+LUGAR equivocado (lámina vs mapa); la segunda se dibujó con la GRAMÁTICA
+equivocada (símbolo vs objeto). El brief corregido decía *«se dibuja PARA
+el pin sobre fondo de mapa»* — le faltaba la mitad que esta enmienda
+nombra.
+
 > *Tercera vez que la casa elige la razón angosta antes que estirar una
 > viva: `no_aplica` como cuarto estado de composición (S96) · la
 > huella-discriminador (S99) · y esta.*
