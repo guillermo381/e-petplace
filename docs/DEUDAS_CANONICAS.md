@@ -11711,6 +11711,66 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-264 — UNA PREMISA ESCRITA EN UN COMENTARIO CADUCA SIN QUE NADA AVISE (S99 — el caso es de C; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** la cabecera de la Hoja de «Agregar producto» decía *«sin buscador (seis productos)»*. **Era verdad y era honesta cuando se escribió.** Con 532 SKUs la premisa murió **y NADA falló**: ni typecheck, ni lint, ni guard. Solo el ojo del founder.
+
+  **Es la mitad que le faltaba a L-245:** aquella dice que *una ley escrita en un comentario no rige nada*; ésta agrega que **un comentario tampoco SE ENTERA de que dejó de ser cierto.** Un comentario no tiene disparo, no tiene dueño y no tiene fecha de vencimiento — **describe un mundo y sobrevive a ese mundo.**
+
+  **⇒ COROLARIO EXIGIBLE: toda decisión tomada CONTRA UNA CARDINALIDAD declara el NÚMERO.** *«Seis productos» era comprobable; «pocos productos» no lo habría sido.* El número convierte una premisa muerta en algo que el próximo lector puede REFUTAR con un `count(*)`.
+
+- **L-263 — UN TOKEN QUE DICE SER LO QUE YA NO ES ENGAÑA A QUIEN LO ELIGE BIEN (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** B eligió `bg.tinta` razonando *«es el mismo token con el que TechoOficio pinta su muro»* — y el techo pinta con `useMuroOficio()` → `tealDark`, mientras `bg.tinta` es `#221E19`, negro cálido. **Literalmente lo que el founder vio.** El slot se llama a sí mismo *«el techo del prestador»* en los tres temas y la galería repetía el rótulo: **desde S61-B12 eso es falso.**
+
+  **Es L-245 en su forma más cara:** la mentira **no era una premisa, era una IDENTIDAD**. Una premisa vencida engaña a quien la lee de pasada; **un nombre vencido engaña a quien razona bien** — B hizo exactamente lo correcto (buscar el token que ya usa el techo) y el nombre la mandó al lugar equivocado.
+
+  **⇒ El corolario: cuando un slot cambia de consumidor, su NOMBRE es parte del cambio.** Un rename sin lápida es deuda (L-250); **un nombre que sobrevive a su significado es una trampa cebada.**
+
+- **L-262 — UNA PALABRA MAL ELEGIDA EN UN PEDIDO MANDA A CONSTRUIR LO QUE NO HACÍA FALTA (S99 — autocrítica de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** el pedido decía «fila COMPACTA». B midió y la fila que Stock necesita **ya existía**: 56 px sale de su anatomía (miniatura 40 + padding 16) y es **exactamente `ALTURA_MIN.normal` de `Celda`**. Su literal: *«la fila que Stock necesita no es una fila nueva: es la que la casa ya tiene»* — y su autocrítica, que es la lección: *«mi palabra COMPACTA fue la que confundió — mandó a buscar una densidad más apretada, y lo que Stock necesita no es apretar: es la fila NORMAL con su miniatura, que es lo que vuelve encontrable un catálogo de 399.»*
+
+  **⇒ El nombre del pedido DIRIGE LA BÚSQUEDA antes de que nadie mida.** Quien redacta un pedido elige, sin querer, dónde va a buscar el que lo ejecuta. **Un pedido nombra el PROBLEMA («el catálogo de 399 no es encontrable»), jamás la solución presunta («fila compacta»)** — porque la solución presunta se vuelve el corpus de la búsqueda.
+
+- **L-261 — UNA REGLA QUE RESUELVE EL CASO ANCHO PUEDE HACER CREER QUE EL ANGOSTO SE FUE CON ELLA (S99 — el caso es de D; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** la firma del carrito adelanta la voz de *«producto ya no disponible»* al RETOMAR — que es exactamente lo contrario del defecto que D había medido (la segunda familia lo descubría AL PAGAR, después de elegir, con un «algo salió mal»). **Parece que cierra D-827.** No la cierra: **la carrera del último minuto —dos familias yendo por la última bolsa en el mismo instante— sigue existiendo** y sigue necesitando la voz tipada del trigger.
+
+  **⇒ Cuando una regla nueva cubre el caso frecuente, se declara EXPLÍCITAMENTE qué caso NO cubre** — o la deuda del caso raro se cierra por parecido y reaparece el día que un cliente real la pise. *El caso ancho es el que se ve; el angosto es el que muerde.*
+
+- **L-260 — TERRITORIO PROPIO SE MIDE EN EL WORKTREE; TERRITORIO AJENO, CONTRA `origin/main` (S99 — el caso y el literal son de B; ENMIENDA a la regla del turno anterior, 16-ago-2026).**
+
+  **La regla que esto enmienda decía** *«los números de línea de otra pista se re-buscan por grep»* — **y es INSUFICIENTE**, porque el grep en el árbol propio **reproduce el error con apariencia de medición**. El literal de B: *«UN GREP EN TU PROPIO WORKTREE MIDE TU RAMA, NO EL PRODUCTO. Con cuatro pistas en paralelo mi árbol es una foto vieja del territorio ajeno — y no avisa: devuelve un número de línea, un fragmento de código y toda la apariencia de una medición.»*
+
+  **El caso:** B grepeó `configuracion.tsx:921` y el grep le devolvió **el código viejo adentro** — la fila del repartidor «sin `onPress`». Contra `origin/main` la fila **ya era tocable y ya navegaba** (`:771`/`:773`). Medido: `git merge-base --is-ancestor origin/main HEAD` → **NO**.
+
+  **Su ubicación exacta, y por eso es peligrosa: es L-217 DEL OTRO LADO DEL ESPEJO.** Allá *«en origin»* no es *«en el canon»*; **acá lo que ESTÁ en el canon NO ESTÁ EN MI ÁRBOL, y leerlo igual da un FALSO NEGATIVO** — la clase más cara, porque **un falso negativo manda a construir lo que ya existe.**
+
+  **⇒ La regla correcta es contra qué OBJETO se mide, no cómo se busca.** Y su corolario, que ya rige: **quien cita una línea de territorio ajeno cita también el LITERAL que hay en ella**, para que el lector pueda re-encontrarla cuando el número ya no sirva.
+
+- **L-259 — TODO GUARD DE ORDEN SE PRUEBA INVIRTIENDO EL CRITERIO, JAMÁS SOLO CON EL CASO FELIZ (S99 — el caso es de D; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** D invirtió el comparador **a propósito** y el guard del FIFO salió ROJO **nombrando el par exacto con sus horas**. Su razón: *«dos elementos en el orden correcto pueden serlo por casualidad — una moneda acierta la mitad de las veces.»*
+
+  **Es L-236 aplicada al ordenamiento:** un verde con dos elementos **no prueba nada**. Y su segunda mitad, que es de VOZ: *«un guard que falla sin decir cuál pasó a cuál obliga a re-medir para entenderlo»* ⇒ **un guard de orden que se rompe nombra el par**, no el conteo.
+
+- **L-258 — TODA FUNCIÓN QUE DEPENDE DE UN RELOJ DECLARA SU RELOJ AL NACER; SI EL RELOJ NO EXISTE, LA FUNCIÓN NO ESTÁ TERMINADA (S99 — nace del censo de D sobre `expirar_reservas_vencidas`; depositada por orden de mesa, 16-ago-2026).**
+
+  **La clase CAMBIA DE FORMA, y por eso es lección nueva y no otra muestra:** hasta hoy *«motor sin puerta»* era **una función sin llamadores EN EL CÓDIGO**. Ésta tiene un llamador, y ese llamador **debía ser EL TIEMPO** — *y el tiempo no llama solo.* El literal de D: **«una función que no corre NO FALLA, y por eso nadie se entera.»** Precedente exacto: `vencer_paquetes_salidas` (S80), que vivió sin cron sin que nada se rompiera.
+
+  **Y la ENMIENDA que la propia sesión le agregó al depositarla —porque medir cambió la cura—:** encender el reloj de `expirar_reservas_vencidas` **tal como estaba escrito habría liberado mercadería VENDIDA** (filtraba solo por `expira_en`, sin mirar el estado del pedido; las 13 reservas vivas eran las 13 de pedidos PAGADOS). ⇒ **el reloj no es lo último que falta: es lo último que se enciende.** Primero el gate que lo vuelve seguro por construcción, después el reloj. *Una función a la que le falta su reloj puede estar ADEMÁS mal, y el reloj la vuelve peligrosa en vez de completa.*
+
+  **Y la muestra hermana, que la ensancha fuera del motor:** `entradaDetalleVenta` existía **en los dos idiomas con CERO consumidores** — una VOZ sin puerta. ⇒ la clase ya no es solo de motor: **es de todo lo que se construye sin construir el camino hacia ello.**
+
+- **L-257 — UN CINTURÓN PRUEBA LO QUE APUNTA, Y UNA DECISIÓN PUEDE VIVIR EN DOS LUGARES (S99 — el caso es MÍO, A; depositada 16-ago-2026).**
+
+  **El caso, y es propio:** la firma del founder abrió la competencia entre vendedores. Mi migración movió el UNIQUE de `(variante)` a `(cuenta_comercial_id, variante)` y **su cinturón probó exactamente eso: que el ÍNDICE deja insertar dos ofertas.** Verde legítimo. **Pero `publicar_oferta_sku` tenía el gate viejo EN SU CUERPO** y seguía rechazando la segunda oferta — *la competencia estaba firmada, el índice movido, y la puerta seguía diciendo que no.*
+
+  **No lo vio ningún typecheck ni ningún cinturón, y no podían verlo:** el mío medía lo que yo había apuntado. **Apareció al intentar SEMBRAR el segundo vendedor** ⇒ es la familia de *«los hallazgos los encontró caminar, no medir»* (S96), esta vez adentro de una tanda de motor.
+
+  **⇒ Antes de dar por implementada una decisión, se censa DÓNDE VIVE:** índice, gate en el cuerpo, RLS, wrapper, superficie. **Un cinturón que cubre una de las cinco da verde y deja la decisión a medias.** Y el detalle que lo vuelve barato de encontrar la próxima vez: **el comentario del gate nombraba por su nombre el índice que esa misma migración había borrado** — L-264 cobrándose en el territorio de quien la deposita.
+
 - **L-256 — UN CAMPO CUYO NOMBRE PROMETE UNA CAUSA Y CUENTA OTRA ES PEOR QUE UN CAMPO SIN NOMBRE (S99 — el rojo lo encontró C midiendo; la causa la midió A; depositada por orden de mesa, 18-ago-2026).**
 
   **El caso:** `saltos_por_cupo` sonaba a «se llenó el cupo» y cuenta **días salteados por CUALQUIER causa**. C midió con sesión real: dos vendedores prometían el 17 con `saltos_por_cupo: 1` **y el cupo VACÍO** (capacidad 15/20, consumido 0). **La causa medida —y descarta la hipótesis más probable de la mesa, que era un borde UTC/local—: era DOMINGO** (`dow 0`, hora local correcta `11:51 sun`) **y `dias_operacion = [1..6]`** ⇒ cupo del domingo = **capacidad 0, consumido 0**. *No hay escasez: el vendedor no reparte los domingos.*
@@ -17231,7 +17291,7 @@ callejón por el camino normal y el forense decide gratis: línea sin
 veredicto = la cadena cuelga · sin línea = el efecto no corre). La
 condición de muerte NO cambia — cambia quién trae el rojo.
 
-#### D-838 — 🔴 LA SIEMBRA MASIVA DE LA VITRINA SE ELIMINA ANTES DE LA OFERTA REAL (orden del founder 18-ago; la deuda se escribió ANTES de sembrar — es la condición, no un trámite)
+#### D-838 — 🔴 LA SIEMBRA MASIVA DE LA VITRINA SE ELIMINA ANTES DE LA OFERTA REAL (⚠️ ENSANCHADA S99: ver la nota al pie de esta ficha) (orden del founder 18-ago; la deuda se escribió ANTES de sembrar — es la condición, no un trámite)
 
 **El verbatim que la ordena:** *«todavía tenemos que cargar el stock real
 del cliente, pero para las pruebas necesito que me pongas la mayor
@@ -17284,6 +17344,27 @@ lo impide) · **stock distinto por vendedor entrando por el LEDGER**
 así que el borrado tiene que contemplar sus movimientos). *Nota del
 founder al ordenarla: «igual yo lo tengo superpresente, que antes del
 lanzamiento tenemos que borrar eso».*
+
+> **⚠️ ENSANCHE S99 (16-ago) — LA SIEMBRA CRECIÓ TRES VECES Y LO QUE HAY QUE
+> BORRAR CRECIÓ CON ELLA.** Se declara acá y no en una ficha nueva porque **es
+> la misma deuda**: mismo dueño, mismo disparo, misma marca contable.
+> 1. **Inventario con reparto** en los 525 SKUs que estaban en cero: **361
+>    holgado (20–60) · 84 escaso (2–3, para agotar en vivo) · 87 en cero A
+>    PROPÓSITO** (sin reparto el filtro no se puede probar). **Entró por el
+>    LEDGER** (`ajustar_stock_vendedor` con motivo `SIEMBRA-S99`), así que
+>    **el borrado tiene que contemplar `inventario_movimientos`, no solo el
+>    saldo** — y el saldo se recompone con `reconciliar_inventario_sku`.
+> 2. **LA COMPETENCIA, que antes no existía en NINGUNA variante** (medido: 0):
+>    **24 SKUs nuevos de un segundo vendedor** (`SIEMBRA-S99-COMP-###`) con sus
+>    ofertas publicadas — 18 con los dos con stock y precio distinto, 3 donde
+>    el segundo tiene y el primero se agotó **a propósito**, 3 al revés.
+> 3. **El segundo pedido pagado** (`SIEMBRA-S99-FIFO-2`) del turno anterior.
+>
+> **Y el orden del borrado, que NO es libre:** ofertas → SKUs → movimientos de
+> inventario → recomposición del saldo. *Borrar el SKU sin su ledger deja
+> movimientos huérfanos apuntando a nada, y el juez
+> `verificar_coherencia_inventario()` los va a encontrar — que es exactamente
+> para lo que se construyó.*
 
 #### D-836 — 🔴 SE PIERDEN LOS TABS EN PEDIDOS (dictado del founder 18-ago; dueño: D, ALTA)
 
@@ -17348,6 +17429,28 @@ intento del cinturón cayó ahí**). Lector: `Repartidor.capacidad` en
 `listarRepartidores` (embed por la FK, L-247) + wrapper
 `configurarCapacidadRepartidor`. **La ficha del repartidor de C ya puede
 decir la verdad del modelo.**
+
+#### D-840 — 🟡 LA VITRINA YA TIENE LA SEÑAL Y TODAVÍA NO LA DICE (nace con `hay_stock`, S99-A — dueño: superficie del cliente; disparo: la próxima tanda que toque la vitrina)
+
+**Qué está hecho y qué no:** el motor expone `ofertas.hay_stock` (booleano, derivado por trigger, neto de reservas) y el lector `listarProductosDespensa` ya lo trae en `ProductoDeVitrina`. **Cero superficie lo consume.** *Es motor con puerta y sin pantalla — la mitad barata está hecha y la que decide la experiencia no.*
+
+**La letra que ya rige y con la que se construye** (`MODELO_DESPENSA` §8.6quinquies): **MOSTRAR Y DECIR, NO OCULTAR** — la doctrina de la alergia aplicada palabra por palabra: *un producto que se esfuma se lee como «no existe»*.
+
+**⚠️ Y EL CHOQUE, RESUELTO POR SUJETO — se escribe acá para que nadie lea una firma como derogación de la otra:** el founder firmó que **el producto que NADIE vende** no aparece en filtros ni navegación (solo si se lo tipea por nombre); la doctrina de arriba habla del **vendedor que no lo tiene**. **Son sujetos distintos y las dos rigen.** Con competencia el caso es visible: el mismo producto puede estar agotado en un vendedor y disponible en otro — **esconderlo sería esconder una venta que sí existe.**
+
+**Y la frontera que NO se cruza (declarada por D):** la vitrina dice **QUÉ HAY AHORA**; el carrito dice **QUÉ PASÓ CON LO QUE ELEGISTE**. Leen la misma señal y **ninguna reemplaza a la otra, ni a la voz del último minuto** (D-827).
+
+☠️ **Muere** cuando la vitrina distinga comprable de agotado con voz propia, y el agotado siga siendo alcanzable.
+
+#### D-841 — 🟢 `expira_en` DE UNA RESERVA PAGADA ES UNA FECHA QUE YA NO SIGNIFICA NADA (S99-A, hallazgo de la tanda del inventario)
+
+**Medido:** tras el pago, la reserva queda `vigente` hasta que la ENTREGA escribe su `consumo` — y su `expira_en` (30 minutos desde que se inició el pago) **queda en el pasado para siempre**. Hoy 12 de 13 reservas vivas están así.
+
+**Por qué es 🟢 y no roja:** **ya nadie la lee peligrosamente** — `expirar_reservas_vencidas` ganó el gate por estado del pedido, así que el único consumidor del campo lo ignora en cuanto el pedido está pagado. *La deuda no es un riesgo: es un dato que miente sin consecuencia, y esos son los que un día alguien lee de nuevo.*
+
+**Las dos curas posibles, sin elegir:** (a) al confirmar el pago, `expira_en := NULL` — el campo dice «esta reserva ya no tiene reloj» · (b) dejarlo y documentarlo en la columna. **Se decide al tocar el motor de reservas, no antes.**
+
+☠️ **Muere** cuando el campo, leído solo, no pueda inducir a nadie a creer que esa reserva está vencida.
 
 #### D-839 — 🟡 `accent.controlLleno` NO SE PISA POR CASA: el prestador elige en MAGENTA (misma clase que D-813, hoy DORMANTE)
 
