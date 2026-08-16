@@ -3089,6 +3089,15 @@ export const prestadorEs = {
     detalleVarios: 'Tenés {{n}} negocios esperándote. Aceptá y entrás a tus entregas.',
     aceptar: 'Aceptar y entrar',
   },
+  /* EL INTERRUPTOR DEL ESPEJO (N17 · receta B §2). Dos modos, una
+     superficie. La voz vive acá y no en cada pantalla porque la montan DOS
+     —el techo de la vitrina y la ficha—: dos copias serían dos nombres
+     para el mismo modo. */
+  espejo: {
+    administrar: 'Administrar',
+    verComoCliente: 'Ver como cliente',
+    etiquetaGrupo: 'Cómo estás mirando tu vitrina',
+  },
   ventas: {
     entradaTitulo: 'Venta de productos',
     entradaDetalle: 'Pedidos, stock y reparto',
@@ -3101,12 +3110,83 @@ export const prestadorEs = {
       detalle: 'Tu venta de productos sí es tuya: entras por acá.',
     },
     comunes: {
+      /* El conector de listas viaja por el riel: `Intl.ListFormat` no está
+         garantizado en Hermes, y armar «a, b y c» a mano en cada pantalla
+         es cómo terminan dos superficies diciendo «y» y «and» en el mismo
+         idioma. */
+      y: 'y',
       reintentar: 'Reintentar',
       errorTitulo: 'No pudimos cargar esto',
       errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
       sinCuentaTitulo: 'Tu negocio todavía no vende productos',
       sinCuentaDetalle:
         'La venta de productos se activa con tu cuenta comercial. Cuando tu negocio la tenga, este es el lugar.',
+    },
+    /* ── LA FICHA DE PRODUCTO DEL ESPEJO (S99-C · N19 + receta B §1) ──
+       La voz de esta ficha es la de la FAMILIA, no la del inventario: es la
+       misma pantalla que ve el dueño, y por eso no dice «SKU», «variante»
+       ni «oferta» en ninguna parte visible. */
+    producto: {
+      titulo: 'El producto',
+      noExisteTitulo: 'Este producto ya no está en el catálogo',
+      noExisteDetalle: 'Puede que e-PetPlace lo haya retirado. Si lo vendías, escribinos.',
+      sinFoto: 'Todavía sin foto',
+      // Se DICE cuántas hay en vez de fingir un carrusel que no es pieza.
+      masFotos: '{{n}} fotos más',
+      sinPresentaciones: 'Este producto todavía no tiene presentaciones cargadas.',
+      // NULO HONESTO: la variante existe y hoy no se puede comprar.
+      sinPrecio: 'Sin precio publicado',
+      // El cálculo que nadie pone. Va en mono porque ES un cálculo.
+      porKg: '{{monto}} / kg',
+      composicionTitulo: 'Composición y alérgenos',
+      composicionSinDeclarar:
+        'Este producto todavía no declara su composición. Las familias con una mascota alérgica van a ver un aviso.',
+      alergenos: 'Contiene: {{lista}}',
+      /* EL LÍMITE DEL ESPEJO, DICHO. La familia ve el nombre de SU mascota
+         en la advertencia; el vendedor no puede verlo —§7.4— y callarlo
+         haría que crea que ese aviso no existe. */
+      limiteEspejoAlergia:
+        'Si la familia tiene una mascota con alergia declarada, acá va a ver una advertencia con su nombre. Vos no la ves: sus mascotas no son tuyas.',
+      paraQuienTitulo: 'Para quién sirve',
+      paraQuien: 'Para {{especies}}, en la etapa {{momentos}}.',
+      // Sin momento NO es «todas las edades»: es que nadie lo declaró.
+      paraQuienSinMomento: 'Para {{especies}}. Todavía no dice para qué edad.',
+      paraQuienSinEspecie: 'Todavía no dice para qué especie sirve.',
+      especie_perro: 'perros',
+      especie_gato: 'gatos',
+      especie_ave: 'aves',
+      especie_pez: 'peces',
+      especie_conejo: 'conejos',
+      especie_roedor: 'roedores',
+      especie_reptil: 'reptiles',
+      momento_cachorro: 'cachorro',
+      momento_adulto: 'adulta',
+      momento_senior: 'mayor',
+      disponibilidadTitulo: 'Disponibilidad',
+      hayStock: '{{n}} disponibles',
+      sinStock: 'Sin stock',
+      // Medido: la vitrina NO lo esconde. Que él lo sepa evita que crea
+      // que dejó de venderse solo.
+      sinStockSeSigueViendo: 'Se sigue viendo en la vitrina, y la compra rebota al reservar.',
+      noLoOfreces: 'Vos no vendés este producto.',
+      // ── El borde propuesto / publicada, con su porqué ──
+      estadoPublicada: 'Publicado: las familias lo ven',
+      estadoEnRevision: 'En revisión de e-PetPlace',
+      estadoRechazado: 'Rechazado',
+      estadoSinOferta: 'Todavía no le pusiste precio',
+      estadoNoPublicada: 'Con precio propuesto, sin publicar',
+      // ── La completitud que gana alcance (N18) ──
+      alcanceCompleto: 'No le falta nada tuyo',
+      alcanceFaltan: 'Le faltan {{n}} cosas tuyas para llegar más lejos',
+      alcanceNuestro: 'Esto es nuestro, no tuyo:',
+      razon_sku_rechazado: 'Corregilo según el motivo y volvé a proponerlo.',
+      razon_sin_stock: 'Sin stock: se ve, pero la compra rebota.',
+      razon_sin_precio_propuesto: 'Todavía no tiene precio propuesto.',
+      razon_sku_en_revision: 'Lo estamos revisando.',
+      razon_oferta_no_publicada: 'Tiene precio y todavía no lo publicamos.',
+      razon_composicion_ausente: 'Nos falta cargar su composición.',
+      razon_sin_momento_etario: 'Nos falta decir para qué edad sirve.',
+      razon_sin_foto: 'Nos falta su foto.',
     },
     escalones: {
       preparado: 'Preparado',

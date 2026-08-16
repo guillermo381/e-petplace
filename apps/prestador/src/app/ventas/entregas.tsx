@@ -33,7 +33,7 @@ import {
   useTheme,
   spacing,
 } from '@epetplace/ui';
-import { misEntregasAsignadas, type EntregaAsignada } from '@epetplace/api';
+import { cerrarSesion, misEntregasAsignadas, type EntregaAsignada } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { horaCorta } from '@/lib/ventas-formato';
@@ -51,6 +51,18 @@ export default function EntregasRepartidor() {
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
+  const [saliendo, setSaliendo] = useState(false);
+
+  /* 🔴 S99-C · ESTA PANTALLA TIENE DOS ENTRADAS Y SOLO UNA TIENE VUELTA.
+     El vendedor entra desde su panel —y ahí la flecha lleva a algún lado—;
+     el REPARTIDOR aterriza acá como su raíz, porque el resolvedor lo manda
+     directo. Medido en el aparato (16-ago): con él la flecha estaba
+     dibujada y **no hacía nada**, y como tampoco hay barra de tabs
+     **quedaba encerrado sin poder cerrar sesión** —ni el deep link lo
+     sacaba, porque el resolvedor lo devuelve acá, que es correcto—.
+     `canGoBack()` es el discriminador honesto: pregunta por la HISTORIA,
+     no adivina el rol. */
+  const puedeVolver = router.canGoBack();
 
   useFocusEffect(
     useCallback(() => {
@@ -73,12 +85,21 @@ export default function EntregasRepartidor() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
-        titulo={t('ventas.entregas.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* DOS ENCABEZADOS Y NO UN SPREAD CONDICIONAL: el tipo de la pieza es
+          una unión discriminada —`atras` exige `onAtras`— y tiene razón,
+          porque **una flecha sin acción es exactamente lo que este hallazgo
+          encontró**. Escribir las dos ramas es más largo y es honesto; el
+          spread solo le habría escondido la pregunta al compilador. */}
+      {puedeVolver ? (
+        <Encabezado
+          variante="navegacion"
+          titulo={t('ventas.entregas.titulo')}
+          atras
+          onAtras={() => router.back()}
+        />
+      ) : (
+        <Encabezado variante="navegacion" titulo={t('ventas.entregas.titulo')} />
+      )}
 
       {pantalla.estado === 'cargando' && (
         <View style={{ padding: spacing[5] }}>
@@ -151,6 +172,31 @@ export default function EntregasRepartidor() {
             ))}
           </Tarjeta>
         </ScrollView>
+      )}
+
+      {/* LA SALIDA — solo para quien aterrizó acá SIN vuelta (el
+          repartidor). Un teléfono se comparte, y una app sin cerrar sesión
+          es una cuenta que no se puede soltar. Va al PIE y en secundario:
+          es una salida, no la acción de la pantalla. */}
+      {!puedeVolver && pantalla.estado !== 'cargando' && (
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: insets.bottom + spacing[4] }}>
+          <Boton
+            variante="secundario"
+            etiqueta={t('sesion.cerrarSesion')}
+            bloque
+            cargando={saliendo}
+            onPress={() => {
+              if (saliendo) return;
+              setSaliendo(true);
+              void cerrarSesion().then(() => {
+                /* Se navega a la raíz y el resolvedor decide — no se
+                   fabrica acá una ruta de login: quien resuelve la sesión
+                   es el cascarón, siempre. */
+                router.replace('/');
+              });
+            }}
+          />
+        </View>
       )}
     </View>
   );
