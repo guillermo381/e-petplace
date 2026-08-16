@@ -447,9 +447,19 @@ export async function obtenerFichaProducto(
 // ── B2 · S99-L5b (N20) — los conteos por eje, SOBRE LO COMPRABLE ────────────
 
 export interface ConteosVitrina {
+  /** ⚖️ N20 ENMENDADA (mesa 17-ago): la especie es un FILTRO, jamás una
+   *  carpeta — un producto multi-especie cuenta en CADA una (por eso la
+   *  suma puede superar el total: 11+3=14 sobre 13 fue la prueba). Nada
+   *  de tabs excluyentes sobre estos números. */
   por_especie: { especie: string; productos: number }[];
-  /** momento null = comprables SIN momento declarado (el bucket «todas las
-   *  edades» — la forma la decide la receta de B, el número viaja acá). */
+  /** momento null = comprables SIN momento declarado. ⚖️ ADJUDICADO (mesa
+   *  17-ago, con L-248): el NULL significa TODAS LAS EDADES — el producto
+   *  aparece en TODOS los filtros de momento, jamás en un bucket propio.
+   *  Quien encienda el eje por umbral suma los NULL a cada momento; si
+   *  los deja afuera, el día que el umbral dispare solos van a
+   *  desaparecer en silencio (el caso exacto que L-248 existe para
+   *  impedir). Y el criterio del umbral: un filtro que no REPARTE no es
+   *  un filtro — volumen no basta. */
   por_especie_momento: { especie: string; momento: string | null; productos: number }[];
 }
 

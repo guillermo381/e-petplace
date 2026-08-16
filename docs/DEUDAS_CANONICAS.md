@@ -11711,6 +11711,24 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-249 — TODA PANTALLA-ÚNICA (SIN BARRA, SIN PILA) DECLARA SU SALIDA AL NACER (S99 — hallazgo del aparato en el cierre de L2; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso, medido en aparato:** el repartidor aterrizó en «Mis entregas de hoy» — correcto por letra (§2.0: sin barra, sin cuartos del negocio; el deep link lo devuelve porque el resolvedor manda) — **y quedó ENCERRADO**: flecha de atrás dibujada y sin efecto, sin tabs, y sin forma de cerrar sesión. **El costo lo prueba: para salir hubo que borrar los datos de la app — y era la única vía JUSTAMENTE porque la app no ofrecía salida.**
+
+  **La clase, no el caso: es la hermana de «motor sin puerta» vista desde el otro lado** — allá construimos la capacidad sin el camino hacia ella; **acá construimos el destino sin el camino de vuelta.** Ningún typecheck, lint ni cinturón lo ve, porque todos miden lo que la pantalla TIENE, no lo que le falta alrededor.
+
+  **COROLARIO EXIGIBLE:** una pantalla que es raíz de su población (el usuario no puede navegar fuera de ella) nace con su salida DECLARADA — como mínimo cerrar sesión; lo demás lo decide su letra. «La salida se agrega después» no existe: después no hay nadie mirando (L-248, misma raíz).
+
+  **Y el registro que vale doble (al acta): el TIPO defendió en el compilador lo que el aparato encontró en la pantalla** — la unión discriminada de `Encabezado` exige `atras`+`onAtras` JUNTOS o ninguno, y frenó el atajo de C de dibujar una flecha muerta. *Las curas cierran por construcción — y acá se vio dos veces en la misma pantalla: el tipo impidió fingir la salida, y la ley nueva exige tenerla.*
+
+- **L-248 — UNA AUTOMATIZACIÓN OBLIGA A DECIDIR SUS CASOS ANTES: NO VA A HABER NADIE PRESENTE CUANDO DISPARE (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso:** el eje «necesidad» de N20 no se muestra hoy (con 11 y 3 comprables, un filtro que no reduce nada le pide a la familia una decisión para ahorrarle un scroll que no existe) — pero **se ENCIENDE SOLO por umbral** derivado de `conteosVitrinaPorEje`. Si el comodín del momento NULL no se decidía HOY, el día que el umbral disparara —sin nadie mirando— los productos «todas las edades» desaparecerían en silencio de todos los filtros, **y el síntoma sería «faltan productos», que nadie atribuiría a una navegación autoencendida tres semanas antes.**
+
+  **COROLARIO EXIGIBLE: toda regla que se dispara sola declara, AL NACER, qué pasa con sus casos borde — y su gate es al escribirla, jamás al dispararse.**
+
+  **Y la segunda condición del umbral de B queda como CRITERIO de la casa: un filtro que no REPARTE no es un filtro, es un adorno con estado** — 30 productos donde 27 son «adulto» cumple el volumen y no ayuda a nadie. *(El comodín, adjudicado con la ley: momento NULL = el producto aparece en TODOS los momentos, jamás bucket propio — es lo que el dato significa: un alimento para todas las edades ES para un cachorro; y con 2 productos un chip propio sería el menú que N20 prohíbe, sacándoselos a los buckets reales.)*
+
 - **L-247 — UNA GARANTÍA QUE SOLO VIVE EN EL PRODUCTOR NO ES UNA GARANTÍA: ES UNA CONVENCIÓN (S99 — ley de D, «de las grandes»; depositada por orden de mesa, 17-ago-2026).**
 
   **El caso:** el wrapper de `repartidorDe` es fail-closed POR DISEÑO (un bundle viejo lee `[]` y degrada al callejón) — y D escribió `c.repartidorDe[0]` directo: con un bundle cuyo wrapper no tenía el campo, eso LANZA, y el guard raíz cayó en «No pudimos entrar a tu cuenta». Su `?? []` es la mitad que faltaba **del lado del CONSUMIDOR**.
@@ -17139,4 +17157,17 @@ corre (①/②). **La cura NO se escribe antes del rojo discriminado**
 aparato repite los DOS botones** (aceptar re-resuelve a la pantalla del
 repartidor; cerrar sesión aterriza en la bienvenida) — con línea
 `[sesion]` nueva visible en cada uno.
+
+**ENMIENDA (17-ago noche, decisión de A con la mesa delegando): 🔴 → 🟡,
+BAJA de prioridad — EL TERRENO SE CURÓ SOLO.** Con la rama del repartidor
+viva, Diego ya no cae al callejón (aceptar ocurre una vez y ocurrió — C
+correctamente NO fabricó una repro que exigiera desatar producción). Lo
+medido que queda: **el forense de arranque vive y en camino feliz
+resuelve en ~0,5 s — cuando corre, no cuelga.** NO se siembra una cuenta
+sin rol para discriminar: residuo permanente de auth (la clase que S92
+purgó a 64) por información de baja urgencia. **La discriminación queda
+atada al primer sin-rol REAL** (un recién-registrado de octubre cae al
+callejón por el camino normal y el forense decide gratis: línea sin
+veredicto = la cadena cuelga · sin línea = el efecto no corre). La
+condición de muerte NO cambia — cambia quién trae el rojo.
 
