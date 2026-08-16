@@ -25,14 +25,32 @@
  * especie → huella. **Esta pieza no elige qué mostrar: elige DÓNDE.**
  * Sin foto no hay hueco: la huella digna ya es el último peldaño.
  *
- * ── 🔴 LA VARIANTE `moto` NO ESTÁ ACÁ, Y ES FRENO, NO OLVIDO ────────
- * **Medido: el registry de `Icono` tiene 46 glifos y NINGUNO es moto,
- * repartidor ni entrega.** Dibujar uno acá saltearía §6b —la hoja de
- * contacto: 2-3 variantes, montaje a 21 px y 44 px junto a cinco del
- * registry, y **gate POR ÍCONO del founder**—, que es exactamente el
- * proceso que la casa escribió para que un glifo no nazca en el medio de
- * otra tarea. *La mitad que falta se declara, no se improvisa con lo que
- * había.* La hoja de contacto es el próximo paso y va con su gate.
+ * ── ⏪ ACÁ DECÍA QUE `moto` ERA UN FRENO. Su condición se cumplió, y
+ * ── DESPUÉS LA PIEZA FALLÓ SU GATE POR OTRA COSA ────────────────────
+ * El freno original (*«el registry no tiene moto; dibujarla acá
+ * saltearía §6b»*) se levantó con la firma de la candidata D. **Pero la
+ * pieza se rechazó igual, y por un eje distinto** — verbatim del
+ * founder: *«se ve como algo puesto encima, no como algo que hace parte
+ * del mapa. La diferencia con Rappi es que el mapa y el ícono se
+ * INTEGRAN.»*
+ *
+ * 🔴 **EL DIAGNÓSTICO NO ERA EL DIBUJO: ERA LA GRAMÁTICA.** §6ter ya
+ * decía *«el mapa no es interfaz, es MUNDO»* — y esta pieza seguía
+ * montando **un glifo de interfaz sobre el mundo**. *Un símbolo plano
+ * dentro de un círculo es correcto como ícono, y exactamente por eso se
+ * veía pegado.*
+ *
+ * ⇒ `moto` **se RE-DIBUJÓ como objeto del mundo** (silueta D intacta,
+ * tratamiento nuevo) **y nació `destino` con ella**: los dos objetos del
+ * par tienen que pertenecer al mismo mundo, así que no se pueden aprobar
+ * de a uno. Las cuatro físicas están en `SombraDeSuelo`, `ObjetoMoto` y
+ * `ObjetoDestino`, cada una con su porqué.
+ *
+ * **Registro del eje que repite:** son DOS fallas del mismo ícono —la
+ * primera se juzgó en el LUGAR equivocado (lámina vs mapa), la segunda
+ * se dibujó con la GRAMÁTICA equivocada (símbolo vs objeto)—. *El brief
+ * corregido decía «se dibuja PARA el pin sobre fondo de mapa»: le
+ * faltaba la mitad que dice CÓMO.*
  *
  * ── EL MOVIMIENTO: INTERPOLACIÓN, Y POR QUÉ NO SPRING ───────────────
  * Entre dos lecturas de GPS el pin **interpola**, con el bezier de la
@@ -63,7 +81,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import Svg, { Circle, Path } from 'react-native-svg'
+import Svg, { Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
 
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 import { motion } from '../tokens/motion'
@@ -112,6 +130,9 @@ const ANILLO = 2.5
  *  sin tapar la calle de abajo. Un `md` (64) sobre un mapa de teléfono
  *  come el contexto que el mapa existe para dar. */
 const LADO_CARA = 40
+/** El lado de los objetos del mundo (moto · destino). Mismo blanco que
+ *  la cara, para que el par no compita en tamaño con el pin de paseo. */
+const LADO_OBJETO = 44
 
 export interface PinEnMapaProps {
   /** ⏪ ACÁ DECÍA «NO HAY PROP `variante`, Y ES DECISIÓN» — el freno
@@ -128,7 +149,7 @@ export interface PinEnMapaProps {
    *  la pondría bajo R30 como glifo de interfaz e invitaría a montarla a
    *  21 px en una fila junto a una huella — exactamente la confusión que
    *  §6ter existe para impedir. **Vive acá, con su clase.** */
-  variante?: 'mascota' | 'moto'
+  variante?: 'mascota' | 'moto' | 'destino'
   nombre: string
   fotoUrl?: string | number | null
   especie?: AvatarMascotaEspecie
@@ -140,21 +161,100 @@ export interface PinEnMapaProps {
   y: number
 }
 
-/** LA MOTO — variante D, «con caja», FIRMADA por el founder (S99-B).
- *  MASA, jamás trazo: a 21 px sobre tiles reales lo único que sobrevive
- *  es el bloque de tinta (`DIRECCION_ARTE` §6ter). La caja de reparto es
- *  lo que la hace decir «reparto» y no «bicicleta» — el riesgo que el
- *  primer gate encontró. */
-function GlifoMoto({ lado, color }: { lado: number; color: string }) {
+/** LA SOMBRA EN EL SUELO — la física más barata y la que más trabaja
+ *  (§6ter): *«una mancha suave debajo dice: esto está parado ahí. Sin
+ *  ella, cualquier objeto flota.»*
+ *
+ *  Elipse (no círculo) porque el suelo se ve en escorzo, y con
+ *  `RadialGradient` porque **una sombra de borde duro es un objeto
+ *  más**: lo que la vuelve sombra es que se DESVANECE. Va a `.28` de
+ *  negro traslúcido — deja pasar el tile, y por eso el objeto parece
+ *  apoyado EN el mapa en vez de pegado ENCIMA. */
+function SombraDeSuelo({ id, cx, cy, rx }: { id: string; cx: number; cy: number; rx: number }) {
   return (
-    <Svg width={lado} height={lado} viewBox="0 0 24 24">
-      <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={color} />
+    <>
+      <Defs>
+        <RadialGradient id={id}>
+          <Stop offset="0%" stopColor={palette.mapaSombra} stopOpacity={1} />
+          <Stop offset="70%" stopColor={palette.mapaSombra} stopOpacity={0.55} />
+          <Stop offset="100%" stopColor={palette.mapaSombra} stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+      <Ellipse cx={cx} cy={cy} rx={rx} ry={rx * 0.34} fill={`url(#${id})`} />
+    </>
+  )
+}
+
+/** LA MOTO — silueta D FIRMADA, **re-dibujada como OBJETO DEL MUNDO**
+ *  (§6ter, enmienda del 18-ago tras el segundo rechazo).
+ *
+ *  🔴 QUÉ CAMBIÓ, y no es el dibujo: **el TRATAMIENTO.** Antes era el
+ *  símbolo correcto puesto sobre el mundo —*«un símbolo plano dentro de
+ *  un círculo es correcto como ÍCONO, y exactamente por eso se ve
+ *  pegado»*—. Las cuatro físicas, aplicadas:
+ *
+ *  ① **SOMBRA EN EL SUELO** — abajo, y es lo que lo para en el piso.
+ *  ② **PERSPECTIVA COMPARTIDA** — el mapa es CENITAL. El perfil puro
+ *     metía dos perspectivas en la misma imagen. Se inclina a **tres
+ *     cuartos**: la rueda trasera más baja y grande (cerca), la
+ *     delantera más alta y chica (lejos), y la caja mostrando su TAPA —
+ *     *una tapa visible es la firma de que se lo mira desde arriba*.
+ *  ③ **EL COLOR PERTENECE AL TERRENO** — `mapaMoto`, nuestro magenta
+ *     llevado a la banda de saturación del mapa (ver el token).
+ *  ④ **SIN ANILLO** — medido en la tanda anterior: la silueta gana
+ *     9.85-11.54 sobre los tres tonos reales; el disco blanco era lo
+ *     que no se veía (1.44-1.68) **y lo que la volvía un sticker**. */
+function ObjetoMoto({ lado }: { lado: number }) {
+  return (
+    <Svg width={lado} height={lado} viewBox="0 0 32 32">
+      <SombraDeSuelo id="sombraMoto" cx={16} cy={26.5} rx={11} />
+      {/* la caja de reparto — con su TAPA a la vista (perspectiva ②).
+          Es lo que dice «reparto» y no «bicicleta», el riesgo que el
+          primer gate encontró. */}
+      <Path d="M5.2 13.4l4.6-2.1 6.4 1.5-4.4 2.3Z" fill={palette.mapaEdificioTecho} />
+      <Path d="M5.2 13.4l4.4 1.7v5.1l-4.4-1.9Z" fill={palette.mapaMoto} />
+      <Path d="M9.6 15.1l6.6-2.3v4.9l-6.6 2.5Z" fill={palette.mapaMoto} opacity={0.82} />
+      {/* el cuerpo, en diagonal: la trasera abajo-izquierda (cerca), la
+          delantera arriba-derecha (lejos) */}
       <Path
-        d="M2.6 12.4h9l3.2-4.2h3.6v2.5h-2.3l-2.7 3.5h3.5c1.9 0 3.5 1.2 4.1 2.9H4.4c-.5-1.6-1.9-2.7-3.6-2.9Z"
-        fill={color}
+        d="M9.4 20.4l7.2-2.8 4.9-3.1 3.1 1.1-4.2 3.3-6.6 3.6Z"
+        fill={palette.mapaMoto}
       />
-      <Circle cx={5.8} cy={17.6} r={3.4} fill={color} />
-      <Circle cx={18.2} cy={17.6} r={3.4} fill={color} />
+      {/* ruedas: elipses, no círculos — un círculo perfecto se lee de
+          frente y rompería la perspectiva que el resto sostiene */}
+      <Ellipse cx={11.2} cy={22.4} rx={3.6} ry={2.4} fill={palette.mapaMoto} />
+      <Ellipse cx={23.2} cy={17.6} rx={2.9} ry={1.9} fill={palette.mapaMoto} />
+    </Svg>
+  )
+}
+
+/** EL DESTINO — **un EDIFICIO, no un marcador** (§6ter, literal: *«la
+ *  casita es un objeto del mundo, no un pin señalando un lugar»*).
+ *
+ *  Nace con la moto porque **el juicio es la comparación**: dos objetos
+ *  que tienen que pertenecer al mismo mundo no se pueden aprobar de a
+ *  uno.
+ *
+ *  **Es NEUTRO, y es decisión:** un edificio de marca volvería a ser un
+ *  marcador con forma de casa. Sus dos tonos son del terreno (sat ~0.10)
+ *  y su volumen sale del par —1.73 entre cuerpo y techo—, no de un
+ *  contorno.
+ *  **Lo único de marca es la PUERTA**, en `mapaMoto`: dice *este es el
+ *  tuyo* sin convertir la casa en un logo, **y ata visualmente los dos
+ *  objetos del par** — el que va y el lugar al que va. */
+function ObjetoDestino({ lado }: { lado: number }) {
+  return (
+    <Svg width={lado} height={lado} viewBox="0 0 32 32">
+      <SombraDeSuelo id="sombraDestino" cx={16} cy={26.5} rx={10} />
+      {/* techo en tres cuartos: dos aguas, la cumbrera corrida a la
+          derecha — el mismo ángulo que la caja de la moto */}
+      <Path d="M16 5.4l9.6 6.2-4.3 2.1L16 9.9Z" fill={palette.mapaEdificioTecho} />
+      <Path d="M16 5.4L6.4 11.6l4.3 2.1L16 9.9Z" fill={palette.mapaEdificioTecho} opacity={0.78} />
+      {/* las dos caras del cuerpo: la que mira y la que se va */}
+      <Path d="M10.7 13.7L16 9.9v11.9l-5.3 2.4Z" fill={palette.mapaEdificio} />
+      <Path d="M21.3 13.7L16 9.9v11.9l5.3 2.4Z" fill={palette.mapaEdificio} opacity={0.74} />
+      {/* la puerta — lo único de marca */}
+      <Path d="M13.2 17.9l2.2-1.1v5.1l-2.2 1Z" fill={palette.mapaMoto} />
     </Svg>
   )
 }
@@ -195,22 +295,19 @@ export function PinEnMapa({ variante = 'mascota', nombre, fotoUrl, especie, x, y
     transform: [{ translateX: px.value }, { translateY: py.value }],
   }))
 
-  if (variante === 'moto') {
+  if (variante === 'moto' || variante === 'destino') {
     return (
       <Animated.View
         pointerEvents="none"
         accessibilityLabel={nombre}
         style={[{ position: 'absolute' }, estilo]}
       >
-        {/* SIN ANILLO — la medición está en la cabecera de `ANILLO`: la
-            silueta gana 9.85–11.54 contra los tres tonos que el mapa de
-            la casa realmente pinta, y el disco blanco es lo que NO se ve
-            (1.44–1.68). La sombra del tema queda: separa por profundidad
-            sin tapar nada, y es la que le da al glifo el apoyo sobre el
-            mapa que el disco daba de más. */}
-        <View style={{ boxShadow: theme.elevacion.reposo, borderRadius: radius.full }}>
-          <GlifoMoto lado={LADO_CARA} color={theme.text.primary} />
-        </View>
+        {/* ⛔ NI ANILLO NI `boxShadow`, y las dos ausencias son la pieza:
+            el anillo lo volvía sticker (medido) y un `boxShadow` es
+            sombra de TARJETA —cae detrás del rectángulo del contenedor—
+            mientras que un objeto del mundo proyecta sobre el SUELO, en
+            elipse y debajo. La sombra vive DENTRO del SVG. */}
+        {variante === 'moto' ? <ObjetoMoto lado={LADO_OBJETO} /> : <ObjetoDestino lado={LADO_OBJETO} />}
       </Animated.View>
     )
   }

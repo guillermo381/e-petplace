@@ -414,6 +414,38 @@ const todos: Pair[] = [
     surface: '#FFFFFF',
     noTextual: true,
   },
+  /* MARCA DE MAPA (S99-B · `DIRECCION_ARTE` §6ter) — los objetos del
+   * mundo contra los TRES tonos que el mapa de la casa realmente pinta.
+   *
+   * 🔴 POR QUÉ ENTRAN ACÁ Y NO POR TEMA: **el mapa no tiene tema**
+   * (medido: cero `customMapStyle` en la casa), así que estos pares son
+   * globales — y son la mitad medible de *«el color pertenece al
+   * terreno»*. La otra mitad (la saturación, banda 0.10–0.58) vive en el
+   * token con su número: un gate de contraste no la puede ver.
+   *
+   * ⚠️ Los tonos son CONSTANTES DE REFERENCIA, no tokens: son muestras
+   * del mundo, no colores nuestros. Por eso se escriben acá, con su
+   * nombre, en vez de fingir que la casa los eligió. */
+  ...(
+    [
+      ['asfalto', '#DAD7D2'],
+      ['parque', '#BFDDB0'],
+      ['agua', '#A9CCE8'],
+    ] as const
+  ).flatMap(([tono, hex]) =>
+    (
+      [
+        ['moto', palette.mapaMoto],
+        ['edificio cuerpo', palette.mapaEdificio],
+        ['edificio techo', palette.mapaEdificioTecho],
+      ] as const
+    ).map(([obj, fg]) => ({
+      nombre: `GLOBAL · marca de mapa: ${obj} / tile ${tono}`,
+      fg,
+      bg: hex,
+      noTextual: true,
+    })),
+  ),
 ]
 
 // Informativa (no gatea): tab inactivo de BarraTabs — decisión B3.7
