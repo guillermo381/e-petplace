@@ -2768,6 +2768,11 @@ export const prestadorEn = {
       repartidorPaisSinFormato: 'We don’t validate the shape of this number',
       repartidorGuardarCta: 'Save',
       repartidorInactivo: 'Inactive',
+    repartidorSinReclamar: "Hasn't claimed access yet — they need to sign in with their email",
+    localTitulo: 'Your store',
+    localEtiqueta: 'I serve at my store',
+    localDetalle:
+      'With this on, your counter sales show up in Attend. Off, they do not.',
       repartidorActivar: 'Active',
       repartidorExito: 'Courier saved.',
       repartidorYaExistia: 'That document was already registered.',

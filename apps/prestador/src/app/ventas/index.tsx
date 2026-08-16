@@ -37,10 +37,12 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  cerrarSesion,
   cupoRepartoDelDia,
   extrasPanelPedidos,
   listarPedidosDelVendedor,
   misEntregasAsignadas,
+  obtenerMiPrestador,
   type ExtraPanelPedido,
   type PedidoDelVendedor,
 } from '@epetplace/api';
@@ -64,6 +66,9 @@ type Pantalla =
       cupo: { capacidad: number; consumido: number } | null;
       /** La persona además reparte: se le muestra su entrada (§9.1). */
       tieneEntregas: boolean;
+      /** Sin fila de prestador ⇒ vendedor puro ⇒ **sin tabs**: ésta es su
+       *  única superficie estable, y por eso su salida vive acá. */
+      sinOtraCasa: boolean;
     };
 
 export default function HoyVentas() {
@@ -73,6 +78,7 @@ export default function HoyVentas() {
   const insets = useSafeAreaInsets();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
+  const [saliendo, setSaliendo] = useState(false);
   const [intento, setIntento] = useState(0);
 
   useFocusEffect(
@@ -90,10 +96,15 @@ export default function HoyVentas() {
           return;
         }
         const cuentaId = ctx.data.cuentaComercialId;
-        const [pedidos, cupo, entregas] = await Promise.all([
+        const [pedidos, cupo, entregas, pres] = await Promise.all([
           listarPedidosDelVendedor(cuentaId),
           cupoRepartoDelDia(cuentaId, hoyLocalISO()),
           misEntregasAsignadas(),
+          /* ¿Tiene OTRA casa? El vendedor puro no tiene fila de prestador
+             —y por eso no tiene tabs—, así que ésta es su ÚNICA superficie
+             estable y acá vive su salida. Viaja en la MISMA ola: cero
+             espera nueva. */
+          obtenerMiPrestador(),
         ]);
         if (!vigente) return;
         if (!pedidos.ok) {
@@ -109,6 +120,7 @@ export default function HoyVentas() {
           extras: extras.ok ? extras.data : {},
           cupo: cupo.ok ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido } : null,
           tieneEntregas: entregas.ok && entregas.data.length > 0,
+          sinOtraCasa: !pres.ok && pres.codigo === 'sin_prestador',
         });
       })();
       return () => {
@@ -212,6 +224,28 @@ export default function HoyVentas() {
               hay algo que ofrecer: no compite con el trabajo del día, y con
               la naturaleza ya activa no se dibuja. */}
           <CeldaOfrecerServicios cuentaComercialId={pantalla.contexto.cuentaComercialId} />
+
+          {/* ⭐ S99-C · LA SALIDA, MUDADA DESDE CONFIGURACIÓN (orden del
+              founder: ahí no va). **Se mudó, no se borró** — el vendedor
+              puro no tiene tabs, así que quitarla sin darle otra puerta
+              habría repetido la ratonera que L-249 acaba de costar con el
+              repartidor. Quien tiene tabs ya tiene la suya en Cuenta, y
+              por eso acá va SOLO para quien no las tiene. */}
+          {pantalla.sinOtraCasa && (
+            <Boton
+              variante="secundario"
+              bloque
+              cargando={saliendo}
+              etiqueta={t('sesion.cerrarSesion')}
+              onPress={() => {
+                if (saliendo) return;
+                setSaliendo(true);
+                void cerrarSesion().then(() => {
+                  router.replace('/');
+                });
+              }}
+            />
+          )}
         </ScrollView>
       )}
     </View>

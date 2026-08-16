@@ -3454,6 +3454,11 @@ export const prestadorEs = {
       repartidorPaisSinFormato: 'No validamos la forma de este número',
       repartidorGuardarCta: 'Guardar',
       repartidorInactivo: 'Inactivo',
+    repartidorSinReclamar: 'Todavía no reclamó su acceso — tiene que entrar a la app con su correo',
+    localTitulo: 'Tu local',
+    localEtiqueta: 'Atiendo en mi local',
+    localDetalle:
+      'Con esto prendido, tu venta de mostrador aparece en Atender. Apagado, no aparece.',
       repartidorActivar: 'Activo',
       repartidorExito: 'Repartidor guardado.',
       repartidorYaExistia: 'Ese documento ya estaba registrado.',
