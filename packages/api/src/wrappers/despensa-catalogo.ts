@@ -145,6 +145,14 @@ export interface VarianteDeProducto {
   /** El país de la oferta — lo que el riel de moneda (`monto()`) exige para
    *  no formatear a mano (pedido D 12-ago; la clase D-448). null ⟺ sin oferta. */
   country_code: string | null;
+  /** 🔴 ¿SE PUEDE COMPRAR **ESTA PRESENTACIÓN**? (pedido de D, S99). En la
+   *  vitrina alcanza saber que el producto existe; **en la ficha la familia
+   *  se COMPROMETE**, y elige presentación: que la de 15 kg esté agotada y
+   *  la de 3 kg no es la diferencia entre una compra y un rebote al pagar.
+   *  Derivado en `ofertas` por trigger, neto de reservas.
+   *  **`false` cuando no hay oferta** — sin oferta no se puede comprar, y ahí
+   *  el nulo honesto de los otros campos ya dice el porqué. */
+  hay_stock: boolean;
 }
 
 export interface FichaProducto {
@@ -420,7 +428,17 @@ export async function listarProductosDespensa(
   }
   if (filtros.country_code !== undefined) q = q.eq('country_code', filtros.country_code);
 
-  const { data, error } = await q.limit(filtros.limite ?? 100);
+  // 🔴 ORDEN ESTABLE — la misma clase que costó 7 eventos del expediente
+  // (L-271), y del lado de la FAMILIA es peor: sin orden, **un producto
+  // puede aparecer y desaparecer entre dos aperturas sin que haya cambiado
+  // nada**, y quien lo mira le echa la culpa al catálogo.
+  // Desempate por `id` porque `created_at` empata a lo bestia acá: **548 de
+  // 563 ofertas comparten instante** (nacieron en lote). Cualquier criterio
+  // visible que la superficie pida se antepone; el desempate no se toca.
+  const { data, error } = await q
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
+    .limit(filtros.limite ?? 100);
   if (error) return falloDespensa(error.message);
   if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
   const productos = mapearVitrina(data);
@@ -442,7 +460,7 @@ export async function obtenerFichaProducto(
       .maybeSingle(),
     cliente
       .from('producto_variantes')
-      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code)')
+      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code, hay_stock)')
       .eq('producto_id', productoId)
       .eq('activo', true),
   ]);
@@ -475,6 +493,10 @@ export async function obtenerFichaProducto(
       contenido_unidad: typeof v.contenido_unidad === 'string' ? v.contenido_unidad : null,
       peso_kg: numOrNull(v.peso_kg),
       oferta_id: esObjDespensa(of) && typeof of.id === 'string' ? of.id : null,
+      // FAIL-CLOSED (L-247): sin `true` explícito, NO comprable. Sin oferta
+      // tampoco — prometer una presentación que va a rebotar al pagar es
+      // peor que decir que no está.
+      hay_stock: esObjDespensa(of) && of.hay_stock === true,
       precio: esObjDespensa(of) ? numOrNull(of.precio) : null,
       moneda: esObjDespensa(of) && typeof of.moneda === 'string' ? of.moneda : null,
       cuenta_comercial_id:

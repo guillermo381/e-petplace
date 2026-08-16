@@ -1301,6 +1301,121 @@ export async function listarSkusDelVendedor(
   return { ok: true, data: salida };
 }
 
+// ── S99 · LA LISTA LARGA — paginación por cursor sobre `v_skus_vendedor` ────
+
+export interface PaginaSkus {
+  items: SkuDelVendedor[];
+  /** CUÁNTOS HAY DE VERDAD bajo los mismos filtros. Sin esto, la superficie
+   *  no puede decir «30 de 722» y una lista truncada se ve completa (L-268). */
+  total: number;
+  /** Cursor OPACO de la página siguiente (`nombre|id`). **`null` significa
+   *  QUE NO HAY MÁS**, y eso es un dato positivo: la superficie lo DICE.
+   *  ⚠️ *«El final se dice, si no el vendedor no distingue terminó de
+   *  falló»* — y el otro lado de esa moneda ya lo da el tipo de retorno:
+   *  **un fallo llega como `{ ok: false, codigo }`, jamás como una página
+   *  vacía.** La superficie no puede colapsar los dos en «no hay más». */
+  siguiente_cursor: string | null;
+}
+
+/**
+ * LOS SKU DEL VENDEDOR, DE A PÁGINAS.
+ *
+ * **CURSOR Y NO OFFSET — decisión de B, con su razón: *«offset asume una
+ * lista quieta, y acá el que la lee es el que la mueve»*.** El vendedor
+ * publica, despublica y ajusta stock MIENTRAS recorre; con 722 filas son ~24
+ * páginas, así que **la ventana para que la lista se mueva no es el borde: es
+ * el caso normal**. Y el defecto que produce el offset es silencioso —*nadie
+ * ve un error: ve un producto repetido, o no ve uno que existe, y le echa la
+ * culpa al catálogo*.
+ *
+ * **ORDEN: `producto_nombre ASC, id ASC`** — el nombre porque es como el
+ * vendedor busca; el `id` porque **medido, 80 de 532 SKU comparten nombre**
+ * (variantes del mismo producto): sin desempate el cursor salta filas.
+ * *Un orden que empata no ordena* (L-271).
+ *
+ * Lee `v_skus_vendedor` y no la tabla **porque PostgREST no ordena las filas
+ * de arriba por una columna embebida —lo acepta y lo ignora, medido— y el
+ * nombre vive dos embeds abajo.** La vista es `security_invoker`: la RLS
+ * sigue decidiendo.
+ */
+export async function listarSkusDelVendedorPagina(
+  cuentaComercialId: string,
+  opciones?: { limite?: number; cursor?: string; estado?: string },
+): Promise<ResultadoWrapper<PaginaSkus, CodigoErrorDespensa>> {
+  const limite = opciones?.limite ?? 30;
+
+  // EL TOTAL, con LOS MISMOS filtros que la página — un total de otro conjunto
+  // es el mismo defecto con el número al revés.
+  let qc = getClient()
+    .from('v_skus_vendedor')
+    .select('id', { count: 'exact', head: true })
+    .eq('cuenta_comercial_id', cuentaComercialId);
+  if (opciones?.estado !== undefined) qc = qc.eq('estado', opciones.estado);
+  const { count, error: errorConteo } = await qc;
+  if (errorConteo) return falloDespensa(errorConteo.message);
+  // FAIL-CLOSED (L-247): un conteo que no llegó NO es cero.
+  if (typeof count !== 'number') return falloDespensa('datos_inconsistentes');
+
+  let q = getClient()
+    .from('v_skus_vendedor')
+    .select('*')
+    .eq('cuenta_comercial_id', cuentaComercialId)
+    .order('producto_nombre', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(limite);
+  if (opciones?.estado !== undefined) q = q.eq('estado', opciones.estado);
+  if (opciones?.cursor !== undefined) {
+    const corte = opciones.cursor.indexOf('|');
+    if (corte !== -1) {
+      const n = opciones.cursor.slice(0, corte);
+      const i = opciones.cursor.slice(corte + 1);
+      q = q.or(`producto_nombre.gt.${n},and(producto_nombre.eq.${n},id.gt.${i})`);
+    }
+  }
+
+  const { data, error } = await q;
+  if (error) return falloDespensa(error.message);
+  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
+
+  const items: SkuDelVendedor[] = [];
+  for (const f of data) {
+    if (!esObjDespensa(f) || typeof f.id !== 'string') return falloDespensa('datos_inconsistentes');
+    items.push({
+      sku_id: f.id,
+      sku_vendedor: typeof f.sku_vendedor === 'string' ? f.sku_vendedor : '',
+      variante_id: typeof f.variante_id === 'string' ? f.variante_id : '',
+      producto_id: typeof f.producto_id === 'string' ? f.producto_id : '',
+      producto_nombre: typeof f.producto_nombre === 'string' ? f.producto_nombre : '',
+      producto_marca: typeof f.producto_marca === 'string' ? f.producto_marca : null,
+      presentacion: typeof f.presentacion === 'string' ? f.presentacion : '',
+      stock_disponible: typeof f.stock_disponible === 'number' ? f.stock_disponible : 0,
+      stock_reservado: typeof f.stock_reservado === 'number' ? f.stock_reservado : 0,
+      estado: typeof f.estado === 'string' ? f.estado : '',
+      motivo_rechazo: typeof f.motivo_rechazo === 'string' ? f.motivo_rechazo : null,
+      precio_publicado: typeof f.oferta_precio === 'number' ? f.oferta_precio : null,
+      oferta_estado: typeof f.oferta_estado === 'string' ? f.oferta_estado : null,
+      composicion_estado: composicionEstado(f.composicion_estado),
+      momentos_aplicables: Array.isArray(f.momentos_aplicables)
+        ? f.momentos_aplicables.filter((m): m is string => typeof m === 'string')
+        : [],
+      foto_portada: fotosDeProducto(f).portada,
+    });
+  }
+
+  const ultimo = data[data.length - 1];
+  return {
+    ok: true,
+    data: {
+      items,
+      total: count,
+      siguiente_cursor:
+        data.length === limite && esObjDespensa(ultimo)
+          ? `${String(ultimo.producto_nombre)}|${String(ultimo.id)}`
+          : null,
+    },
+  };
+}
+
 // ── S99-L5b · N18 — LA COMPLETITUD QUE GANA ALCANCE (mitad vendedor) ────────
 
 /** Una razón por la que un SKU no alcanza todo lo que podría. `dueno` decide

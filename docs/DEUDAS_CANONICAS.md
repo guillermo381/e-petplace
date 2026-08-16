@@ -11740,6 +11740,23 @@ defecto que se curó hoy en el cambio de clave.
 
   ⇒ **Corolario duro: el defecto NO desaparece en producción. La siembra solo lo hizo grande y visible.**
 
+  > **⚖️ EL COROLARIO EXIGIBLE, en su forma final (mesa, 16-ago): TODA CLAVE
+  > DE ORDEN QUE NO SEA ÚNICA NECESITA DESEMPATE — y en esta casa las marcas
+  > de tiempo NUNCA son únicas por construcción, porque `now()` no avanza
+  > dentro de una transacción.** *No es «puede haber empates»: es que los
+  > hay siempre que un acto escriba más de una fila, y esta casa escribe así
+  > a propósito.*
+
+  **🔴 Y UNA TRAMPA DE HERRAMIENTA MEDIDA AL CURAR ESTO, que vale por sí sola:
+  PostgREST ACEPTA `order` por una columna EMBEBIDA y NO ORDENA las filas de
+  arriba — sin error.** Probado el 16-ago: pedir la vitrina ordenada por
+  `productos.nombre` devolvió *Broadline · Advantix · CORDERO · GASTRO*.
+  *Es la familia L-235 en una herramienta ajena: el instrumento contesta que
+  sí y hace otra cosa.* ⇒ **ordenar por una columna que vive en un embed
+  exige una VISTA que la aplane** (`v_skus_vendedor`, S99) — y quien escriba
+  `referencedTable` en un `order` tiene que verificar el RESULTADO, no la
+  ausencia de error.
+
   ### 🔴 Y LA MORDIDA QUE EL CENSO ENCONTRÓ VIVA — EL BIO-EXPEDIENTE PERDÍA EVENTOS
 
   De los ~20 lectores que ordenan por fecha, **uno pagina de verdad: el timeline.** Y ordenaba por `fecha_evento` sin desempate **cortando con `.lt(fecha_evento, cursor)` ESTRICTO** ⇒ **los eventos que compartían la fecha del corte no se repetían: DESAPARECÍAN.**
