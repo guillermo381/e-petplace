@@ -1186,7 +1186,14 @@ export {
   // despacho ASIGNA repartidor (decisión founder ①).
   despacharPedido,
   entregarRetiroEnMostrador,
+  // S99-L3 · «Poner primero» — el reorden del panel (ratificado por mesa).
+  ponerPedidoPrimero,
+  volverPedidoAlOrden,
   listarSkusDelVendedor,
+  // S99-L5b (N18): el evaluador de alcance — puro, por-SKU, una fuente con
+  // el cliente. El re-export va ACÁ Y AHORA: la segunda muestra de
+  // «motor sin puerta» fue exactamente un wrapper sin barrel.
+  razonesDeAlcance,
   ajustarStockVendedor,
   listarRepartidores,
   registrarRepartidor,
@@ -1212,6 +1219,7 @@ export {
   type PedidoDelVendedor,
   type LoteDeItem,
   type SkuDelVendedor,
+  type RazonAlcance,
   type Repartidor,
   type VehiculoRepartidor,
 } from './wrappers/despensa-vendedor';

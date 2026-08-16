@@ -137,7 +137,12 @@ import type { ContextoArranque } from '@epetplace/api';
  *  `contextoVentas()` — y con la moneda cayendo al fallback DECLARADO del
  *  riel, byte-idéntico a `resolverContexto`). */
 export function contextoVentasDesdeArranque(ctx: ContextoArranque): ContextoVentas | null {
-  if (ctx.cuentaComercial === null) return null;
+  /* L-247 (la ley de D): `== null` y no `===` — el chequeo estricto dejaba
+     pasar `undefined` (bundle con wrapper viejo sin el campo) y la línea
+     siguiente hacía `.id` sobre nada: la misma clase que el `[0]` del
+     repartidor. El consumidor degrada POR SU CUENTA, aunque el productor
+     ya degrade. */
+  if (ctx.cuentaComercial == null) return null;
   return {
     cuentaComercialId: ctx.cuentaComercial.id,
     nombreComercial: ctx.cuentaComercial.nombreComercial,

@@ -11711,6 +11711,30 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-247 — UNA GARANTÍA QUE SOLO VIVE EN EL PRODUCTOR NO ES UNA GARANTÍA: ES UNA CONVENCIÓN (S99 — ley de D, «de las grandes»; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso:** el wrapper de `repartidorDe` es fail-closed POR DISEÑO (un bundle viejo lee `[]` y degrada al callejón) — y D escribió `c.repartidorDe[0]` directo: con un bundle cuyo wrapper no tenía el campo, eso LANZA, y el guard raíz cayó en «No pudimos entrar a tu cuenta». Su `?? []` es la mitad que faltaba **del lado del CONSUMIDOR**.
+
+  **Las dos mitades que la vuelven exigible:** ① **un ERROR DURO es PEOR CALLEJÓN que el callejón** — el callejón anterior al menos decía qué hacer · ② **lo encontró el FORENSE, no el typecheck** — TS creía el tipo y el bundle tenía otra cosa. *Es la clase entera de esta sesión en una línea, y afecta a TODO campo aditivo que viaje por OTA sobre un bundle que puede ser viejo.*
+
+  **COROLARIO EXIGIBLE: todo consumidor de un campo aditivo degrada por su cuenta, aunque el productor ya degrade.** El tipo de TS describe el contrato NUEVO; el bundle puede ejecutar el viejo — la única defensa que viaja con el consumidor es la suya.
+
+  **La auditoría ordenada al depositar (17-ago, sobre los campos aditivos de la sesión):** `repartidorDe` → D ya degrada (`?? []`) ✓ · `moneda` → `?? fallback` en la barra ✓ · los booleanos (`haVendido` · `esVendedora` · `esGestor` · `esMostradorOGestion` · `hayOficioLocal`) → `undefined` es falsy: degradan por forma ✓ · **`ctx.cuentaComercial === null` en `barra-prestador-lectura` era EL AGUJERO** — el chequeo estricto deja pasar `undefined` y la línea siguiente hace `.id`: la misma clase que el `[0]` de D, curada en el mismo depósito (`== null`) · `pago_confirmado_en` → cero consumidores en apps todavía; **la nota entra al contrato de las bandas de C: su lectura nace con `?? null`**.
+
+- **L-246 — «DEPENDE DEL CENSO» NO ES LO MISMO QUE «DEPENDE DE UN NÚMERO DEL CENSO» (S99 — ley de método, de la auto-corrección de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **La distinción:** el censo decide el **CONTENIDO**; la ley decide la **FORMA** — y la forma se escribe sin esperar. **El caso:** B tenía tres recetas «bloqueadas por cardinalidad» y solo UNA lo estaba de verdad — la navegación N20, donde seis especies y cuatro necesidades **no se componen como doce y quince**: ahí la cardinalidad SÍ es la forma. Las otras dos (completitud, grilla) tenían su anatomía escribible desde el primer día; esperaban un número que solo iba a llenar celdas.
+
+  **COROLARIO EXIGIBLE: antes de declarar una pieza «bloqueada por el censo», nombrar QUÉ número la bloquea y POR QUÉ ese número cambia la forma y no solo el contenido.** Si no se puede nombrar, no está bloqueada — la próxima pista no se frena sola.
+
+- **L-245 — UNA LEY ESCRITA EN UN COMENTARIO NO RIGE NADA (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso, literal:** el bloque de acento de `Boton` declara que *«el contorno transparente como acción está muerto desde la 19.7»* — y la variante siguió VIVA **cuarenta líneas más abajo, en el mismo archivo, con 39 usos**. La ley estaba escrita exactamente donde debía estar escrita, y no se cumplía igual.
+
+  **COROLARIO EXIGIBLE: una ley que se puede desobedecer sin que nada falle vive en el LINT o no vive.** (Es L-192 dicha para las leyes: una regla cuyo modo de falla es el silencio no es una regla.)
+
+  **Y SU COROLARIO DE JUBILACIÓN:** la variante NO se borró el día del hallazgo, y eso es lo correcto — 39 sitios en territorio de C y D habrían roto el typecheck a mitad de sesión. **Se jubila CON LÁPIDA y se congela con ratchet solo-baja (R47); se borra cuando llega a CERO** — precedente `precio_plan` (S79). *Congelar primero, borrar en cero.* Y la nota que completa a R47: **nació como MITAD honesta del ratchet a propósito** — «un sólido por superficie» no se puede contar porque el default es sólido y los 48 sin variante no aparecen en ningún grep: *un contador ingenuo bendeciría como preexistente lo que nunca contó. Media regla honesta vale más que una entera que miente.*
+
 - **L-244 — EL DEFAULT DE UNA PIEZA ES UNA DECISIÓN QUE NADIE TOMA (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
 
   **El caso:** el default de `Boton` es `primario` (sólido) ⇒ **48 botones son el escalón más fuerte de la casa sin que nadie lo haya elegido.** La pieza EMPUJA; no es descuido de quien la usa. Y el síntoma que lo destapó es el diagnóstico que faltaba: **la escala se usaba como PALETA, no como ESCALERA** — 184 secundarios contra 146 primarios con 19.7 rigiendo, y 7 pantallas con 4–7 sólidos. *Cada pantalla elegía un botón como quien elige un color — por eso el defecto volvía sesión tras sesión sin que nadie fuera descuidado.*

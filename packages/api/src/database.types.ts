@@ -12553,6 +12553,7 @@ export type Database = {
           kushki_status: string | null
           metodo_entrega: string
           moneda: string
+          movido_al_frente_en: string | null
           notas_admin: string | null
           numero_orden: string | null
           pagado_en: string | null
@@ -12598,6 +12599,7 @@ export type Database = {
           kushki_status?: string | null
           metodo_entrega?: string
           moneda?: string
+          movido_al_frente_en?: string | null
           notas_admin?: string | null
           numero_orden?: string | null
           pagado_en?: string | null
@@ -12643,6 +12645,7 @@ export type Database = {
           kushki_status?: string | null
           metodo_entrega?: string
           moneda?: string
+          movido_al_frente_en?: string | null
           notas_admin?: string | null
           numero_orden?: string | null
           pagado_en?: string | null
@@ -18608,6 +18611,7 @@ export type Database = {
           es_terminal: boolean | null
           metodo_entrega: string | null
           moneda: string | null
+          movido_al_frente_en: string | null
           narrativa: string | null
           narrativa_nombre: string | null
           narrativa_orden: number | null
@@ -20767,6 +20771,7 @@ export type Database = {
         Returns: Json
       }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
+      poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
@@ -21352,6 +21357,7 @@ export type Database = {
           nombre: string
         }[]
       }
+      volver_pedido_al_orden: { Args: { p_pedido_id: string }; Returns: Json }
       wizard_crear_cuenta_y_rol: {
         Args: {
           p_acepta_emergencias?: boolean
