@@ -29,7 +29,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -109,6 +109,7 @@ import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import type { ContextoVentas } from '@/lib/cuenta-ventas';
 import { contextoVentasDesdeArranque } from '@/lib/barra-prestador-lectura';
+import { useDiaEnVista } from '@/lib/dia-en-vista';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
@@ -927,22 +928,16 @@ export default function Hoy() {
      `null` = todavía no se eligió ⇒ manda el día base. Se resuelve a
      `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
      llega DESPUÉS del fetch y el estado nacería con un valor viejo. */
-  const [diaElegido, setDiaElegido] = useState<string | null>(null);
-  /* 🔴 S99-D · L4 — EL DÍA QUE VUELVE DE LA VENTANA HERMANA.
-     La puerta de regreso navega acá CON su día, y el HOY lo adopta. Sin
-     esto el cruce sería de ida nomás: el vendedor movería la rueda del lado
-     pedidos, volvería, y encontraría otro día — o sea **dos días en dos
-     ventanas**, que es exactamente lo que la firma («es UN día en DOS
-     ventanas») responde. *El selector compartido no es que las dos tengan
-     rueda: es que las dos muestren el mismo día.*
-     Se lee como EFECTO y no como valor inicial porque la pantalla ya está
-     montada cuando el param llega — el HOY es un tab, no se re-monta. */
-  const paramDia = useLocalSearchParams<{ dia?: string }>().dia;
-  useEffect(() => {
-    if (typeof paramDia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(paramDia)) {
-      setDiaElegido(paramDia);
-    }
-  }, [paramDia]);
+  /* 🔴 S99-D · L4 — EL DÍA ES COMPARTIDO CON LA VENTANA HERMANA.
+     ⏪ Acá vivía `useState<string | null>(null)` y, brevemente, un efecto que
+     adoptaba el día desde un param de ruta. **Las dos cosas murieron con la
+     corrección del founder sobre la transición:** el param obligaba a que la
+     vuelta fuera un `navigate` (los `back` no llevan params), y un `navigate`
+     no es un POP ⇒ la pila animaba el regreso como una ida. Con el día en un
+     contexto **no hay nada que transportar**, la vuelta es `back()` y la
+     dirección se deriva del gesto. La semántica del `null` no cambió: nadie
+     eligió todavía ⇒ manda el día base. Ver `@/lib/dia-en-vista`. */
+  const { dia: diaElegido, elegir: setDiaElegido } = useDiaEnVista();
   /** Los días que el negocio declaró cerrados — la rueda los apaga y la
    *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
    *  decisión firmada dentro de la pieza). */
@@ -2376,39 +2371,13 @@ export default function Hoy() {
           />
         )}
 
-        {/* ⭐ S99-D · L4 — LA PUERTA A LA VENTANA HERMANA (adjudicación #1).
-            Es del DUAL GESTOR y de nadie más, y las tres exclusiones tienen
-            razón propia: el **vendedor puro** no llega acá (su HOY es la
-            ventana, retorno temprano) · el **no-gestor con tienda** ya tiene
-            su `TarjetaVentas` de arriba (§0bis: una puerta por población) ·
-            y quien **no vende** no ve un lugar que no existe para él.
-
-            ⚠️ **LLEVA EL DÍA EN VISTA**, y eso es la firma, no un detalle:
-            *es UN día en DOS ventanas*. Sin el param, cruzar aterrizaría en
-            hoy y el gesto que responde al argumento de S97-D se rompería en
-            su primer uso.
-
-            ⚠️ **No cuesta un viaje:** `vendedoraMedida` ya se paga en cada
-            foco desde S96-C. Yo mismo razoné que esta puerta tenía que
-            esperar la RPC de contexto de A **y fui a medirlo antes de
-            escribirlo: era falso** (§13.3 del parte). Lo que sí sale de esa
-            medición es un pedido para el lote #0 — ese `contextoVentas()`
-            corre para TODOS y deduplica en vuelo sin cachear. */}
-        {pantalla.estado === 'listo' && pantalla.rol === 'gestor' && vendedoraMedida && (
-          <PuertaHermana
-            etiqueta={t('pedidosDia.puertaPedidos')}
-            direccion="derecha"
-            /* sinVer=0 TRANSICIONAL (cura de combinación, A 15-ago): la pieza
-               de B lo exige por tipo y su regla de existencia hace que 0 no
-               dibuje nada — puerta limpia, que es la verdad mientras el
-               lector de no-vistos (ventanas_vistas, motor de A — propuesta
-               en el Loop de A) no exista. Cuando exista, D lo cablea. */
-            sinVer={0}
-            onPress={() =>
-              router.push({ pathname: '/pedidos', params: { dia: diaVista ?? hoy ?? '' } })
-            }
-          />
-        )}
+        {/* ☠️ S99-D · ACÁ VIVÍA LA PUERTA HERMANA COMO BLOQUE PROPIO, y el
+            founder lo cazó caminando: *«al tener dos escalones diferentes
+            queda un espacio inutilizado de la pantalla, que da un espacio en
+            blanco encima del label de Tu día»*. **La pieza no cambió —
+            cambió su ANCLA:** sube a la fila del label «Tu día», abajo.
+            *Dos elementos que pertenecen al mismo escalón dibujados en dos
+            escalones no es una separación: es un hueco.* */}
 
         {/* ⭐ S85-C7 · TU DÍA — la rueda D3 y los chips, juntos.
             LA RUEDA ES DE B (`SelectorDia`, `0b229a6`) y se MONTA, no se
@@ -2430,7 +2399,50 @@ export default function Hoy() {
             declarada para el gate. */}
         {pantalla.estado === 'listo' && desde !== null && (
           <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('agenda.tuDia')}</Texto>
+            {/* ⭐ S99-D · EL LABEL Y LA PUERTA COMPARTEN ESCALÓN (dictado del
+                founder, 16-ago). `space-between` con `alignItems:'center'`:
+                el label ancla a la izquierda y la puerta a la derecha, en la
+                MISMA línea de base. En la ventana hermana esta fila está
+                ESPEJADA —puerta a la izquierda, label a la derecha— y eso
+                también es del dictado: *«el label de Tu día podés ponerlo al
+                costado contrario de la pantalla»*, para que la puerta de
+                vuelta no le robe el lugar.
+
+                LA PUERTA ES DEL DUAL GESTOR Y DE NADIE MÁS, con razón por
+                exclusión: el **vendedor puro** no llega acá (su HOY es la
+                ventana, retorno temprano) · el **no-gestor con tienda** ya
+                tiene su `TarjetaVentas` arriba (§0bis: una puerta por
+                población) · quien **no vende** no ve un lugar que no existe
+                para él. Y no cuesta un viaje: `vendedoraMedida` ya se paga
+                en cada foco desde S96-C (§13.3 del parte).
+
+                ⚠️ **YA NO LLEVA EL DÍA EN LA URL:** el día vive en
+                `useDiaEnVista`, compartido por las dos ventanas. Eso es lo
+                que permite que la vuelta sea un `back()` —un POP de verdad—
+                y que la transición de regreso se sienta como regreso. */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: spacing[3],
+              }}
+            >
+              <Texto variante="seccion">{t('agenda.tuDia')}</Texto>
+              {pantalla.estado === 'listo' && pantalla.rol === 'gestor' && vendedoraMedida && (
+                <PuertaHermana
+                  etiqueta={t('pedidosDia.puertaPedidos')}
+                  direccion="derecha"
+                  /* sinVer=0 TRANSICIONAL (cura de combinación, A 15-ago): la
+                     pieza de B lo exige por tipo y su regla de existencia hace
+                     que 0 no dibuje nada — puerta limpia, que es la verdad
+                     mientras el lector de no-vistos (`ventanas_vistas`, motor
+                     de A) no exista. Cuando exista, D lo cablea. */
+                  sinVer={0}
+                  onPress={() => router.push('/pedidos')}
+                />
+              )}
+            </View>
             {diaVistaBloqueado && (
               <View style={{ flexDirection: 'row' }}>
                 <Insignia estado="info" etiqueta={t('agenda.diaBloqueado')} tamaño="sm" />
