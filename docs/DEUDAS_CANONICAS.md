@@ -11711,6 +11711,44 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-271 — LA PAGINACIÓN SIN ORDEN ESTABLE NO ES PAGINACIÓN: ES UNA LOTERÍA QUE SE VE PROLIJA (S99 — hallazgo de A al escribir el pedido de los 722; elevada a ley por la mesa, 16-ago-2026).**
+
+  **El hecho:** un lector sin `ORDER BY` deja que Postgres devuelva el orden que quiera, **y que lo cambie entre corridas**. Sin techo no se nota. **Con páginas, la página 2 repite y saltea filas de la 1** — y la lista se ve impecable las dos veces.
+
+  **Es hermana de L-268 y PEOR DE DETECTAR:** *una lista truncada al menos es consistente entre corridas —siempre miente lo mismo—; ésta cambia sola, así que dos personas mirando lo mismo ven distinto y ninguna tiene con qué probarlo.*
+
+  **🔴 Y NO ES TEÓRICO — el peor caso estaba vivo:** en `listarSkusDelVendedor`, de **532 SKU activos de una cuenta, 525 comparten el MISMO `created_at`** (nacieron en una sola transacción). *Ordenar por fecha ahí no ordena nada: deja 524 filas empatadas al azar.*
+
+  **⇒ LA REGLA, en dos mitades, y la segunda es la que se olvida:** ① **todo lector paginable ordena** · ② **el orden termina en una clave ÚNICA.** *Cualquier criterio humano —nombre, precio, stock, estado— empata; el desempate por PK es lo que convierte un criterio en un orden.*
+
+  **Y el discriminador que lo prueba sin muestrear:** se verifica que la clave de orden sea única sobre el conjunto (`count(*) - count(DISTINCT (clave))` = **0**), porque **una clave única ES un orden total** — no hace falta correr la paginación dos veces y esperar que coincida. *Medido: `(created_at, id)` → 0 repetidos · `created_at` solo → 524 empates.* **La misma consulta mide la cura y el tamaño del agujero.**
+
+- **L-270 — UN BLOQUEO DECLARADO ENVEJECE IGUAL QUE UN DATO (S99 — autocrítica de C; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** C construyó la capacidad en la fila del repartidor, y **al bajar `main` apareció la lámina de B que su propio parte decía estar esperando** — con la ley contraria (**el bloque es la SECCIÓN, no el ítem**) y citando su propia medición. **No las dejó convivir: rige la de B.** Su literal: *«dejé de medir porque tenía una analogía cómoda.»*
+
+  **⇒ Es la ley del worktree (L-260) con una segunda mitad:** no alcanza con medir el territorio ajeno contra `origin/main` **una vez**. **Un «estoy bloqueado esperando X» también caduca** — y caduca en silencio, porque lo que llega es justamente lo que uno dejó de mirar. *Nadie avisa que te destrabaron: el destrabe llega como un commit más.*
+
+  **Corolario exigible: un bloqueo declarado se RE-VERIFICA contra `origin/main` antes de construir el rodeo** — el rodeo es lo caro, no la espera.
+
+- **L-269 — UNA CONSECUENCIA PREVISTA QUE SE EMBARCA SIGUE SIENDO UNA CONSECUENCIA EMBARCADA (S99 — el caso y la enmienda son de D; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** D **había anticipado** en su propio parte que al curar D-836 la ventana hermana perdería su animación, y lo sirvió como *«pregunta abierta para B»*. **Funcionaba, y dejó de funcionar.** Su literal: *«cuando lo previsto es la pérdida de algo que YA ANDABA, la declaración tiene que venir con un freno o con su cura, NO SOLA.»*
+
+  **⇒ ES ENMIENDA AL LOOP, y por eso importa:** el Loop premia declarar en vez de frenar — y esta lección le pone el borde. **Declarar alcanza para un hueco; NO alcanza para una REGRESIÓN.** *Un hueco es algo que todavía no existe; una regresión es algo que la persona ya tenía y hoy no tiene — y eso no se compensa con una nota en un parte que el usuario no lee.*
+
+  **Y su cura, al acta porque es la forma correcta:** `usePantallaEnfocada()` nace **en un solo lugar** — *«si una ventana calculara su foco distinto de la otra, animaría de un lado y del otro no, y eso se leería como defecto de la animación siendo discrepancia de la señal.»*
+
+- **L-268 — UNA LISTA COMPLETA Y UNA TRUNCADA SE VEN IGUAL (S99 — el hallazgo es de C, medido con la vitrina llena; la cura del lector es de A; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** `listarProductosDespensa` cortaba en `limite ?? 100` y la pantalla la llamaba con `{}` ⇒ **la vitrina mostraba 100 de 563 productos comprables y NO LO DECÍA.** No rompe, no lanza, no deja traza: **dibuja una lista creíble que es un sexto del catálogo.**
+
+  **Lo que lo vuelve notable, y va al acta: NINGÚN GUARD LO CAZA.** No es un tipo, no es un permiso, no es un estado imposible — **es un número por defecto.** *Lo cazó la siembra que pidió el founder: con seis productos era literalmente invisible.* ⇒ **el volumen no era solo para juzgar diseño: destapó un defecto de motor.**
+
+  **COROLARIO EXIGIBLE, en dos mitades:** ① **todo lector con techo por defecto lo declara EN SU LLAMADA** —un default silencioso en un lector de listas es un recorte invisible— · ② **toda superficie que llega al techo LO DICE**, y para poder decirlo necesita el total.
+
+  **Y el censo que la lección obliga a hacer (A, contra la base real):** de los lectores de lista de `packages/api`, **el de la vitrina era el único que CHOCABA su techo** (cap 100 · 563 filas). Los demás no llegan (pedidos: cap 50 · máximo real 9) o **paginan de verdad con cursor** (timeline). **🔴 Pero apareció el defecto INVERSO y nadie lo había nombrado: `listarSkusDelVendedor` NO TIENE TECHO y trae 722 filas** — *y es justo el lector sobre el que se está construyendo la consolidación de Stock.* **Ponerle un techo sin señal CREARÍA el defecto que esta lección cura**, así que su cura es paginación con total, no un número.
+
 - **L-267 — UN RESIDUO DE PRUEBA NO SOLO ENSUCIA LOS DATOS: ENSUCIA EL DIAGNÓSTICO — Y EL PRIMERO QUE SE EQUIVOCA LEYÉNDOLO ES QUIEN LO DEJÓ (S99 — caso propio, A; depositada por orden de mesa, 16-ago-2026).**
 
   **Es L-234 con su segunda mitad puesta.** Aquella dice que *una sonda que deja residuo contamina la medición ajena*; **ésta agrega que la primera medición contaminada suele ser la PROPIA**, y por una razón simple: **quien dejó el residuo es el que más rápido va a volver a medir esa zona.**

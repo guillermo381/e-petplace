@@ -1119,6 +1119,7 @@ export {
 // ── LA DESPENSA (S95-E) ─────────────────────────────────────────────────────
 export {
   listarProductosDespensa,
+  contarProductosDespensa,
   obtenerFichaProducto,
   buscarProductosDespensa,
   // S99-L5b (N20, adjudicación (a)): los conteos por eje sobre LO COMPRABLE
