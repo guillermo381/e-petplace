@@ -29,7 +29,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -38,6 +38,7 @@ import {
   CeldaNavegacion,
   Encabezado,
   CitaEnVivo,
+  PuertaHermana,
   SelectorDia,
   Esqueleto,
   EsqueletoGrupo,
@@ -106,6 +107,7 @@ import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epe
 import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
+import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -334,17 +336,11 @@ const novedadesZona3: NovedadZona3 = null;
 const DIAS_ATRAS = 3;
 const DIAS_ADELANTE = 6;
 
-// Fecha local del dispositivo, YYYY-MM-DD (en-CA da ese formato).
-function hoyLocal(): string {
-  return new Intl.DateTimeFormat('en-CA').format(new Date());
-}
-
-// Suma días en fecha LOCAL por partes literales (jamás Date(iso) directo
-// ni toISOString — D-312 / hallazgo S55: corren el día en UTC-5).
-function sumarDias(iso: string, dias: number): string {
-  const [a, m, d] = iso.split('-').map(Number);
-  return new Intl.DateTimeFormat('en-CA').format(new Date(a ?? 0, (m ?? 1) - 1, (d ?? 1) + dias));
-}
+/* ⭐ S99-D · `hoyLocal` y `sumarDias` SE MUDARON a `@/lib/dia-local` —
+   la ventana hermana de pedidos necesita la MISMA rueda, y dos ventanas
+   que hablan del mismo día no pueden tener dos aritméticas de fecha.
+   La trampa que las justifica (jamás `new Date(iso)` ni `toISOString`:
+   corren el día en UTC−5, D-312) viaja con ellas, escrita allá. */
 
 // ¿El día cae dentro de algún bloqueo? (rango INCLUSIVE ambos extremos,
 // granularidad día — la semántica de prestador_bloqueos, S56 D-341).
@@ -931,6 +927,21 @@ export default function Hoy() {
      `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
      llega DESPUÉS del fetch y el estado nacería con un valor viejo. */
   const [diaElegido, setDiaElegido] = useState<string | null>(null);
+  /* 🔴 S99-D · L4 — EL DÍA QUE VUELVE DE LA VENTANA HERMANA.
+     La puerta de regreso navega acá CON su día, y el HOY lo adopta. Sin
+     esto el cruce sería de ida nomás: el vendedor movería la rueda del lado
+     pedidos, volvería, y encontraría otro día — o sea **dos días en dos
+     ventanas**, que es exactamente lo que la firma («es UN día en DOS
+     ventanas») responde. *El selector compartido no es que las dos tengan
+     rueda: es que las dos muestren el mismo día.*
+     Se lee como EFECTO y no como valor inicial porque la pantalla ya está
+     montada cuando el param llega — el HOY es un tab, no se re-monta. */
+  const paramDia = useLocalSearchParams<{ dia?: string }>().dia;
+  useEffect(() => {
+    if (typeof paramDia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(paramDia)) {
+      setDiaElegido(paramDia);
+    }
+  }, [paramDia]);
   /** Los días que el negocio declaró cerrados — la rueda los apaga y la
    *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
    *  decisión firmada dentro de la pieza). */
@@ -2319,6 +2330,34 @@ export default function Hoy() {
             etiqueta={t('ventas.entradaTitulo')}
             detalle={t('ventas.entradaDetalle')}
             onPress={() => router.push('/ventas')}
+          />
+        )}
+
+        {/* ⭐ S99-D · L4 — LA PUERTA A LA VENTANA HERMANA (adjudicación #1).
+            Es del DUAL GESTOR y de nadie más, y las tres exclusiones tienen
+            razón propia: el **vendedor puro** no llega acá (su HOY es la
+            ventana, retorno temprano) · el **no-gestor con tienda** ya tiene
+            su `TarjetaVentas` de arriba (§0bis: una puerta por población) ·
+            y quien **no vende** no ve un lugar que no existe para él.
+
+            ⚠️ **LLEVA EL DÍA EN VISTA**, y eso es la firma, no un detalle:
+            *es UN día en DOS ventanas*. Sin el param, cruzar aterrizaría en
+            hoy y el gesto que responde al argumento de S97-D se rompería en
+            su primer uso.
+
+            ⚠️ **No cuesta un viaje:** `vendedoraMedida` ya se paga en cada
+            foco desde S96-C. Yo mismo razoné que esta puerta tenía que
+            esperar la RPC de contexto de A **y fui a medirlo antes de
+            escribirlo: era falso** (§13.3 del parte). Lo que sí sale de esa
+            medición es un pedido para el lote #0 — ese `contextoVentas()`
+            corre para TODOS y deduplica en vuelo sin cachear. */}
+        {pantalla.estado === 'listo' && pantalla.rol === 'gestor' && vendedoraMedida && (
+          <PuertaHermana
+            etiqueta={t('pedidosDia.puertaPedidos')}
+            direccion="derecha"
+            onPress={() =>
+              router.push({ pathname: '/pedidos', params: { dia: diaVista ?? hoy ?? '' } })
+            }
           />
         )}
 

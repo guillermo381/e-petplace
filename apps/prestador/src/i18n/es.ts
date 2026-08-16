@@ -2933,6 +2933,19 @@ export const prestadorEs = {
   // hallazgo de gate: no había CERO caminos a una cita de más de 3 días
   // atrás (el HOY lee hoy-3..hoy+6 y el historial del expediente no es
   // tapeable). Voz de ARCHIVO, no de agenda: acá no se acciona, se vuelve.
+  /* S99-D · L4 — LA VENTANA HERMANA. La voz nombra el DÍA, no el panel:
+     «Tus pedidos» a secas se confundiría con `/ventas`, que es el trabajo
+     entero sin día. Y la puerta dice a DÓNDE lleva, jamás «Volver» — un
+     «volver» describe el gesto y esconde el destino, y acá el destino es
+     la mitad de la firma (Ley 22c: navegar nombra el lugar). */
+  pedidosDia: {
+    titulo: 'Pedidos del día',
+    puertaCitas: 'Tus citas del día',
+    puertaPedidos: 'Tus pedidos del día',
+    sinTiendaTitulo: 'Todavía no vendés productos',
+    sinTiendaDetalle: 'Cuando tu tienda esté activa, tus pedidos del día viven acá.',
+    errorTitulo: 'No pudimos traer tus pedidos',
+  },
   historico: {
     especie_perro: 'Perros',
     especie_gato: 'Gatos',
