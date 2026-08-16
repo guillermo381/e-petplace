@@ -647,6 +647,43 @@ function EjemploFichaVacuna() {
 // el prestador el focus va en verde (arbitra D-598 a favor de §15b.1).
 // Lo que queda abierto es CUÁL verde, y la medición dice que ninguno solo
 // sirve en los dos temas. Las tres candidatas sobre el CAMPO REAL y la
+/** S99-B · EL GATE DE LA BARRA — LAS DOS POBLACIONES JUNTAS.
+ *
+ *  El founder firmó las DOS ramas por adelantado (*«si la huella dentro
+ *  del disco se ve mal, en ese caso quitaríamos la huella»*), así que
+ *  acá no se adivina: **se montan las dos y el ojo elige.**
+ *
+ *  🔴 **Y SE MONTAN SOBRE FONDO CON CONTENIDO, no sobre el panel
+ *  limpio**, porque lo que hay que ver es EL HUECO: la barra dejó de
+ *  pintar su caja para que entre valle y disco pase lo que haya debajo.
+ *  *Sobre un fondo plano el hueco se ve igual que si estuviera pintado —
+ *  y ése era exactamente el modo de falla que la advertencia ③ nombró:
+ *  funciona justo en la pantalla donde se lo probó.* */
+function GateDeLaBarra({ conHuella }: { conHuella: boolean }) {
+  const { theme } = useTheme()
+  const [tab, setTab] = useState('a')
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{conHuella ? 'CON huella adentro del disco' : 'SIN huella — el disco solo'}</Texto>
+      {/* franjas: el hueco tiene que dejarlas pasar */}
+      <View style={{ justifyContent: 'flex-end', height: 150, overflow: 'hidden', borderRadius: radius.md }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <View
+              key={i}
+              style={{
+                height: 15,
+                backgroundColor: i % 2 === 0 ? theme.bg.overlay : theme.bg.card,
+              }}
+            />
+          ))}
+        </View>
+        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} huellaEnDisco={conHuella} />
+      </View>
+    </View>
+  )
+}
+
 // BARRA REAL, en los dos temas del prestador.
 function VerdeDelEstado({ acento, etiqueta }: { acento?: string; etiqueta: string }) {
   const [tab, setTab] = useState('a')
@@ -2506,6 +2543,35 @@ function GaleriaInterna() {
             firmar lo exige — **la pieza se gatea DONDE VIVE**, y un pin
             vive sobre un mapa. En web esto NO se puede juzgar y el
             lienzo lo dice: hay que mirarlo en el teléfono. ═══ */}
+        <Seccion titulo="⭐ GATE S99 — LA BARRA CON VALLE Y DISCO · qué decide: si la HUELLA entra adentro del disco o si el disco queda solo. Las dos ramas están firmadas por adelantado — mirá cuál se lee mejor, no cuál te gusta">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — las dos, sobre franjas: mirá que el HUECO entre valle y disco las deje pasar">
+                <View style={{ gap: spacing[5] }}>
+                  <GateDeLaBarra conHuella />
+                  <GateDeLaBarra conHuella={false} />
+                </View>
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — el hueco no se pinta, se DEJA: por eso funciona en los tres temas sin saber de ninguno">
+                <View style={{ gap: spacing[5] }}>
+                  <GateDeLaBarra conHuella />
+                  <GateDeLaBarra conHuella={false} />
+                </View>
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+          <Texto variante="dato">
+            EL CRITERIO, para que no sea gusto: la huella entra si A ESE TAMAÑO SE LEE COMO HUELLA. Una huella que a
+            24 px se vuelve una mancha no es identidad, es ruido — y ahí la propia condicional del founder ya la mata.
+            Tocá los tabs: valle y disco viajan juntos y el valle se deforma hacia el lado del que viene (un vector
+            que se deforma, no un botón que salta). ATENDER ya no está destacada: el disco es el único énfasis, y su
+            razón es que con L-251 ATENDER puede no existir — un tab que a veces no está no puede ser el centro
+            permanente.
+          </Texto>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S99 — LA MOTO Y SU DESTINO, RE-DIBUJADOS COMO OBJETOS DEL MUNDO · qué decide: si ahora PERTENECEN al mapa. Segundo intento: el primero se rechazó por verse pegado encima">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
