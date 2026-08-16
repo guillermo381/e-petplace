@@ -45,6 +45,7 @@ import {
 import { apiLista } from '@/lib/api';
 import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
+import { ReclamoVinculo } from '@/components/reclamo-vinculo';
 import { useTraduccion } from '@/i18n';
 import { capacidadDesdeContexto } from '@/lib/barra-prestador-lectura';
 import {
@@ -356,6 +357,33 @@ export default function TabsLayout() {
     const recienRegistrado = negocio === null && esRegistroReciente(sesion.email);
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
+        {/* 🔴 S99-D · L2 — EL RECLAMO DEL VÍNCULO, MONTADO ACÁ Y NO EN OTRO
+            LADO: éste es EL callejón que la pieza vino a abrir. El Gate 2 lo
+            midió en vivo — el repartidor creó su cuenta con el correo con el
+            que YA lo habían invitado, y esta misma pantalla le dijo *«avisale
+            a quien administra el negocio que te invite»*, con un solo botón:
+            cerrar sesión. **Estaba invitado.** El motor tenía la puerta desde
+            S99-A con CERO consumidores; lo único que faltaba era llamarla, y
+            el lugar de la llamada es el cascarón (territorio D).
+
+            **Va ARRIBA del `EstadoVacio` a propósito:** si hay vínculo que
+            reclamar, eso es lo que la persona vino a hacer — la voz de
+            «nadie te registró» pasa a ser el pie, no el titular.
+
+            ⚠️ **Montarla no cambia nada para quien no tiene pendientes:** la
+            pieza devuelve `null`. Y si su lector FALLA tampoco dibuja —jamás
+            un «no hay nada» falso, que mandaría a la persona a pedirle al
+            vendedor algo que el vendedor ya hizo (contrato de C).
+
+            `alAceptar` re-resuelve la sesión con el MISMO mecanismo que ya usa
+            el cierre de sesión de abajo — no nace un camino nuevo: la persona
+            entra a lo suyo sin reiniciar la app. */}
+        <ReclamoVinculo
+          alAceptar={() => {
+            setSesion('verificando');
+            setIntento((n) => n + 1);
+          }}
+        />
         <EstadoVacio
           titulo={
             negocio !== null
