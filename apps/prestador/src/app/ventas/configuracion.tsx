@@ -143,8 +143,6 @@ import {
   Separador,
   Tarjeta,
   Texto,
-  capturarConCamara,
-  capturarDeGaleria,
   spacing,
   useAviso,
   useTheme,
@@ -160,20 +158,13 @@ import {
   listarRecursosReparto,
   listarRepartidores,
   listarTurnosEntrega,
-  obtenerPaisesDelMundo,
-  registrarRepartidor,
-  registrarVehiculoRepartidor,
-  type PaisDelMundo,
   type RecursoReparto,
   type Repartidor,
   type TurnoEntrega,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { ControlTelefono } from '@/components/perfil-piezas';
-import { subirImagenDeCuenta } from '@/lib/subir-documento';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
-import { PAIS_DEFAULT, bandera, componerE164, paisDe } from '@/lib/paises';
 import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
 type Pantalla =
@@ -252,72 +243,11 @@ function estadoDespensa(estadoCuenta: string): {
 }
 
 
-/** UNA FOTO DEL REPARTIDOR — captura, miniatura y reemplazo.
- *
- *  Resize a **1600**, que es el número que la casa ya usa para carnet y
- *  documentos: con 800 una cédula queda blanda, *y una foto liviana que no se
- *  lee no es una cura sino una regresión con mejor número* (L-227).
- *
- *  La foto se ELIGE acá y se SUBE al guardar, no al elegir: subir en el
- *  momento dejaría huérfanos en el bucket cada vez que alguien abre el
- *  formulario y se arrepiente. */
-function FotoDelRepartidor({
-  etiqueta,
-  uri,
-  onElegir,
-  deshabilitado,
-  marcarSubiendo,
-  alFallar,
-}: {
-  etiqueta: string;
-  uri: string | null;
-  onElegir: (uri: string) => void;
-  deshabilitado: boolean;
-  marcarSubiendo: (v: boolean) => void;
-  alFallar: () => void;
-}) {
-  const { t } = useTraduccion();
-  async function elegir(fuente: 'camara' | 'galeria') {
-    marcarSubiendo(true);
-    const r =
-      fuente === 'camara'
-        ? await capturarConCamara({ redimensionarA: 1600, calidad: 0.8 })
-        : await capturarDeGaleria({ redimensionarA: 1600, calidad: 0.8 });
-    marcarSubiendo(false);
-    // `cancelada` NO es un fallo: el que se arrepiente no recibe un error.
-    // El permiso denegado SÍ habla — es lo único que el vendedor puede ir a
-    // arreglar. (Las tres ramas MEDIDAS en `ResultadoCaptura`, no supuestas:
-    // 'foto' | 'cancelada' | 'permiso_denegado'.)
-    if (r.tipo === 'foto') onElegir(r.foto.uri);
-    else if (r.tipo === 'permiso_denegado') alFallar();
-  }
-  return (
-    <View style={{ gap: spacing[2] }}>
-      <Texto variante="apoyo">{etiqueta}</Texto>
-      {uri !== null && (
-        <Image
-          source={{ uri }}
-          style={{ width: 96, height: 96, borderRadius: radius.md }}
-          accessibilityLabel={etiqueta}
-        />
-      )}
-      <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-        <Boton
-          variante="compacto"
-          etiqueta={uri === null ? t('ventas.config.fotoTomar') : t('ventas.config.fotoCambiar')}
-          onPress={() => void elegir('camara')}
-          deshabilitado={deshabilitado}
-        />
-        <Boton
-          variante="compacto"
-          etiqueta={t('ventas.config.fotoGaleria')}
-          onPress={() => void elegir('galeria')}
-          deshabilitado={deshabilitado}
-        />
-      </View>
-    </View>
-  );
-}
+/* ☠️ S99-C · L2 — ACÁ VIVÍA `FotoDelRepartidor`: dos botones inline sin
+   cerrojo contra el doble tap (R42). **Murió con la Hoja que la usaba.**
+   Su reemplazo es `HojaCaptura` en la ficha — la pieza de la casa, con su
+   cerrojo sincrónico. */
+
 
 export default function ConfiguracionVentas() {
   const router = useRouter();
@@ -333,36 +263,21 @@ export default function ConfiguracionVentas() {
 
   // ⑥ la explicación del estado (el modal que el chip abre)
   const [modalEstado, setModalEstado] = useState(false);
-
-  // hoja repartidor
-  const [altaRepartidor, setAltaRepartidor] = useState(false);
-  const [repNombre, setRepNombre] = useState('');
-  const [repDocumento, setRepDocumento] = useState('');
-  const [repTelefono, setRepTelefono] = useState('');
   /* ⑤ EL REPARTIDOR COMPLETO (S98-C, motor de A en `20260816100000`).
      Las fotos viajan como PATH del bucket privado `cuenta-documentos` —
      nunca URL: la fuente tiene un CHECK que rechaza `^https?://`, así que
      guardar una URL donde va un path es inexpresable. */
-  const [repWhatsapp, setRepWhatsapp] = useState('');
-  const [repTipoDoc, setRepTipoDoc] = useState<'CEDULA' | 'PASAPORTE' | 'RUC' | null>(null);
-  const [repFotoDocUri, setRepFotoDocUri] = useState<string | null>(null);
-  const [repFotoUri, setRepFotoUri] = useState<string | null>(null);
   /* Los vehículos viven DENTRO del repartidor (firma del founder) y el techo
      de 2 es de la FUENTE, no de esta pantalla: `orden ∈ {1,2}` + UNIQUE por
      repartidor lo vuelven inexpresable. Acá se ofrecen dos y nada más
      —la puerta no ofrece lo que va a rechazar (Ley 23)—, pero si esta
      pantalla se equivocara, la tabla no la dejaría pasar. */
-  const [repVehiculos, setRepVehiculos] = useState<{ tipo: 'moto' | 'carro'; placa: string }[]>([]);
-  const [subiendo, setSubiendo] = useState(false);
   /* 🔴 EL PAÍS DEL TELÉFONO — el indicativo NO se deduce: se ELIGE (P21,
      «proponer no es deducir»). Arranca en el default del selector, que es
      una preselección visible y cambiable, jamás un país escrito a espaldas
      del vendedor. La lista es ASÍNCRONA desde D-633 y viaja en la MISMA ola
      que el resto — cero espera nueva (la lentitud de esta casa son olas
      encadenadas, no consultas caras). */
-  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
-  const [repPaisIso, setRepPaisIso] = useState(PAIS_DEFAULT);
-  const [eligiendoPais, setEligiendoPais] = useState(false);
 
   // hoja recurso — `editandoRecurso` = la fila se REABRIÓ (D-791): mismo
   // formulario, misma puerta (upsert por (cuenta, nombre) — MEDIDO en el
@@ -423,7 +338,7 @@ export default function ConfiguracionVentas() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, recursos, turnos, pedidos, cupo, pres, rPaises] = await Promise.all([
+        const [reps, recursos, turnos, pedidos, cupo, pres] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
@@ -434,23 +349,12 @@ export default function ConfiguracionVentas() {
              pantalla es el único camino a sus datos fiscales. Viaja en la
              misma ola — cero espera nueva. */
           obtenerMiPrestador(),
-          /* El catálogo de indicativos (D-633: la lista NO se copia, se
-             carga). Va en esta ola y no en una propia. */
-          obtenerPaisesDelMundo(),
         ]);
         if (!vigente()) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok || !rPaises.ok) {
+        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
-        /* Entra al GATE junto con los demás, y es a propósito: sin
-           indicativos el alta de repartidor compondría un teléfono sin `+`
-           que la fuente rebota (`repartidores_telefono_check`) con un
-           mensaje de Postgres. Prefiero un error honesto de pantalla antes
-           que un formulario que acepta y revienta al guardar. Y el costo
-           real es bajo: viajan en la MISMA ola, así que si esto falla solo,
-           es un problema de `cat_paises`, no de red. */
-        setPaises(rPaises.data);
         setPantalla({
           estado: 'listo',
           contexto: ctx.data,
@@ -516,51 +420,11 @@ export default function ConfiguracionVentas() {
             ? t('ventas.config.estado.modalCerrada')
             : t('ventas.config.estado.modalEnRevision');
 
-  /* 🔴 LA VALIDACIÓN QUE MI PROPIA CURA NECESITABA — y la encontró el
-     instrumento, no el razonamiento (S98-C).
-     Componer el indicativo NO alcanza: tipeando `0988777666` —como se escribe
-     un celular en Ecuador— salía **`+5930988777666`**, con el `0` de tránsito
-     adentro. Trece dígitos: **el CHECK lo ACEPTA** (`^\+[1-9][0-9]{6,14}$`) y
-     la fila nace con un número que no existe. *Eso es peor que el defecto que
-     vine a curar: el original fallaba fuerte, éste guarda mal en silencio.*
-     Y la cura NO es sacar el `0` a mano: el prefijo de tránsito no es
-     universal —Italia lo CONSERVA en su E.164— así que una regla propia
-     corrompería otros países. Se valida contra el `formato` que declara el
-     CATÁLOGO, que es el mismo criterio que ya usa el perfil. Los países que
-     no declaran formato NO validan **y lo dicen**: callarse se leería como
-     «está bien». */
-  function estadoTelefonoRep(): { ok: boolean; voz: string } | null {
-    const crudo = repTelefono.replace(/[\s-]/g, '');
-    if (crudo.length === 0) return null; // opcional: vacío no es un error
-    const pais = paisDe(paises, repPaisIso);
-    if (pais?.prefijo == null) return null;
-    const e164 = componerE164(paises, repTelefono, repPaisIso);
-    if (pais.formato === null) {
-      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
-    }
-    if (new RegExp(pais.formato).test(e164)) {
-      return { ok: true, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
-    }
-    // El error DIRIGE: cuántos dígitos van, sacados del formato REAL del país.
-    const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
-    const min = rango?.[1];
-    const max = rango?.[2];
-    const cuantos =
-      min === undefined
-        ? t('perfilNegocio.telDigitosSinDato')
-        : max === undefined
-          ? t('perfilNegocio.telDigitos', { min })
-          : t('perfilNegocio.telDigitosRango', { min, max });
-    return {
-      ok: false,
-      voz: t('perfilNegocio.telLargoMal', {
-        pais: pais.nombre,
-        cuantos,
-        pre: pais.prefijo,
-        van: crudo.length,
-      }),
-    };
-  }
+  /* ☠️ S99-C · L2 — ACÁ VIVÍAN `estadoTelefonoRep` y `guardarRepartidor`,
+     las dos del alta que se mudó a su pantalla. **Murieron con su Hoja**:
+     un guard que sobrevive a su razón es basura que nadie se anima a
+     tocar. La validación del E.164 vive ahora en la ficha, con el selector
+     que R46 vigila. */
 
   /* ✅ EL HUECO DE LA VOZ, CERRADO POR A (`dc6a0c46`) — y NO se cura de este
      lado, que es la parte que importa.
@@ -577,122 +441,6 @@ export default function ConfiguracionVentas() {
      `packages/api` no tiene capa de idioma (D-539), así que estos mensajes
      salen en español también en inglés. */
 
-  async function guardarRepartidor() {
-    if (guardando || pantalla.estado !== 'listo') return;
-    if (repNombre.trim().length === 0 || repDocumento.trim().length === 0) return;
-    // Un teléfono que no cumple el formato de su país NO se manda: la puerta
-    // no ofrece lo que va a rechazar (Ley 23), y acá la fuente NO lo rechaza
-    // —lo acepta mal—, así que el guard tiene que estar de este lado.
-    if (estadoTelefonoRep()?.ok === false) return;
-    /* 🔴 LOS DOS OBLIGATORIOS (firma: «foto del repartidor, obligatoria» ·
-       «WhatsApp no opcional»). El guard vive TAMBIÉN en la puerta de A —acá
-       es para que el vendedor no llegue a tocar Guardar y rebote—, y el orden
-       de encendido se coordinó: **primero la pantalla exige, después el OTA
-       se APLICA en el aparato, y recién entonces la puerta rebota**. Al revés,
-       un bundle viejo sin estos campos chocaría contra un motor que ya los
-       pide (la corrección de A: lo que tiene que dejar de llamar a la forma
-       vieja no es el repo, es el BUNDLE). */
-    if (repFotoUri === null || repWhatsapp.trim().length === 0) return;
-    setGuardando(true);
-    /* 🔴 LA CURA (S98-C, rojo reproducido antes): acá se mandaba
-       `repTelefono.trim()` CRUDO. `repartidores_telefono_check` exige
-       `^\+[1-9][0-9]{6,14}$`, y `registrar_repartidor` NO normaliza —lo
-       inserta tal cual (medido en su cuerpo)—, así que un vendedor que
-       tipeaba `0988888888`, que es como se escribe un celular en Ecuador,
-       recibía el texto de un CHECK de Postgres. Ahora el número se COMPONE
-       con el indicativo del país elegido. */
-    const telefonoE164 = componerE164(paises, repTelefono, repPaisIso);
-    const whatsappE164 = componerE164(paises, repWhatsapp, repPaisIso);
-    const cuentaId = pantalla.contexto.cuentaComercialId;
-
-    /* LAS FOTOS PRIMERO, y el orden importa: si una subida falla, NO se
-       registra al repartidor. Al revés dejaría una persona a medias que hay
-       que completar con un camino de edición que hoy no existe.
-       El resize a 1600 no es adorno: es el número que la casa ya usa para
-       carnet y documentos, y el que hace que una cédula se lea. */
-    let docPath: string | undefined;
-    let fotoPath: string | undefined;
-    if (repFotoDocUri !== null) {
-      const sub = await subirImagenDeCuenta({
-        uri: repFotoDocUri,
-        cuentaComercialId: cuentaId,
-        prefijo: 'repartidor-doc',
-      });
-      if (!sub.ok) {
-        setGuardando(false);
-        mostrar({ texto: t('ventas.config.repartidorFotoFallo'), variante: 'error' });
-        return;
-      }
-      docPath = sub.path;
-    }
-    if (repFotoUri !== null) {
-      const sub = await subirImagenDeCuenta({
-        uri: repFotoUri,
-        cuentaComercialId: cuentaId,
-        prefijo: 'repartidor-persona',
-      });
-      if (!sub.ok) {
-        setGuardando(false);
-        mostrar({ texto: t('ventas.config.repartidorFotoFallo'), variante: 'error' });
-        return;
-      }
-      fotoPath = sub.path;
-    }
-
-    const r = await registrarRepartidor({
-      cuenta_comercial_id: cuentaId,
-      nombre: repNombre.trim(),
-      documento: repDocumento.trim(),
-      telefono: telefonoE164.length > 0 ? telefonoE164 : undefined,
-      whatsapp: whatsappE164.length > 0 ? whatsappE164 : undefined,
-      tipo_documento: repTipoDoc ?? undefined,
-      documento_foto_path: docPath,
-      foto_path: fotoPath,
-    });
-    setGuardando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
-    }
-
-    /* LOS VEHÍCULOS, después — el repartidor ya existe y su id es la llave.
-       Un vehículo que rebota NO tumba el alta: la persona quedó registrada y
-       eso es lo que el vendedor necesita. Se dice cuál falló en vez de
-       fingir que entró (Ley 13). */
-    for (const v of repVehiculos) {
-      if (v.placa.trim().length === 0) continue;
-      const rv = await registrarVehiculoRepartidor({
-        repartidor_id: r.data.repartidor_id,
-        tipo: v.tipo,
-        placa: v.placa.trim(),
-      });
-      if (!rv.ok) {
-        mostrar({
-          texto: t('ventas.config.repartidorVehiculoFallo', { placa: v.placa.trim() }),
-          variante: 'error',
-        });
-      }
-    }
-    mostrar({
-      texto: r.data.ya_existia
-        ? t('ventas.config.repartidorYaExistia')
-        : t('ventas.config.repartidorExito'),
-      variante: 'exito',
-    });
-    setAltaRepartidor(false);
-    // El formulario se vacía SIEMPRE tras un alta: sin esto, el siguiente
-    // repartidor heredaría la foto y los vehículos del anterior — y una foto
-    // heredada es peor que ninguna, porque parece deliberada.
-    setRepNombre('');
-    setRepDocumento('');
-    setRepTelefono('');
-    setRepWhatsapp('');
-    setRepTipoDoc(null);
-    setRepFotoDocUri(null);
-    setRepFotoUri(null);
-    setRepVehiculos([]);
-    await cargar();
-  }
 
   async function alternarRepartidor(rep: Repartidor, encendido: boolean) {
     if (guardando) return;
@@ -930,6 +678,7 @@ export default function ConfiguracionVentas() {
                         entrar y salir para apagar a alguien. */}
                     <Celda
                       titulo={rep.nombre}
+                    tituloEntero
                       subtitulo={rep.activo ? undefined : t('ventas.config.repartidorInactivo')}
                       metadataMono={rep.documento}
                       interactiva
@@ -1102,37 +851,12 @@ export default function ConfiguracionVentas() {
           declarado no se apagan —se aceptan igual— pero su subtítulo avisa
           que nadie va a validar la forma: el dato honesto ocupa el lugar
           donde un «todavía no» mentiría. */}
-      <Hoja
-        visible={eligiendoPais}
-        onCerrar={() => setEligiendoPais(false)}
-        titulo={t('ventas.config.repartidorPaisTitulo')}
-      >
-        <HojaScroll>
-          {paises.map((p, i) => (
-            <View key={p.codigo}>
-              {i > 0 ? <Separador /> : null}
-              <Celda
-                titulo={`${bandera(p.codigo)}  ${p.nombre}`}
-                subtitulo={
-                  p.formato === null ? t('ventas.config.repartidorPaisSinFormato') : undefined
-                }
-                metadataMono={p.prefijo ?? undefined}
-                interactiva
-                accessibilityRole="button"
-                onPress={() => {
-                  setRepPaisIso(p.codigo);
-                  setEligiendoPais(false);
-                }}
-                fin={
-                  p.codigo === repPaisIso ? (
-                    <Texto variante="dato">{t('ventas.config.repartidorPaisElegido')}</Texto>
-                  ) : undefined
-                }
-              />
-            </View>
-          ))}
-        </HojaScroll>
-      </Hoja>
+      {/* ☠️ S99-C · L2 — ACÁ VIVÍA LA HOJA DEL PAÍS DEL TELÉFONO. Murió con
+          su dueño: era el selector del `ControlTelefono` del teléfono
+          convencional, y **nadie llamaba ya a abrirla** — el único
+          `setEligiendoPais(true)` vivía adentro de la Hoja de alta que se
+          fue. Su reemplazo VIVE, en la ficha (`/ventas/repartidor/[id]`),
+          al lado del WhatsApp: el selector se MUDÓ, no se borró (R46). */}
 
       {/* ── hoja: recurso nuevo ── */}
       <Hoja
