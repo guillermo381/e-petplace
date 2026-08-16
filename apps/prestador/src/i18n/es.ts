@@ -2945,6 +2945,14 @@ export const prestadorEs = {
     sinTiendaTitulo: 'Todavía no vendés productos',
     sinTiendaDetalle: 'Cuando tu tienda esté activa, tus pedidos del día viven acá.',
     errorTitulo: 'No pudimos traer tus pedidos',
+    /* ④ EL TECHO — las magnitudes del vendedor. El singular tiene su propia
+       clave (jamás «1 pedidos»): la casa lo hace así en todo el techo. */
+    techoPedidos: 'pedidos',
+    techoPedido1: 'pedido',
+    techoValor: 'del día',
+    techoValorOtro: 'del {{dia}}',
+    techoEntregados: 'entregados',
+    techoEntregado1: 'entregado',
   },
   historico: {
     especie_perro: 'Perros',
