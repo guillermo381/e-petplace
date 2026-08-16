@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-248 — UNA AUTOMATIZACIÓN OBLIGA A DECIDIR SUS CASOS ANTES: NO VA A HABER NADIE PRESENTE CUANDO DISPARE (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso:** el eje «necesidad» de N20 no se muestra hoy (con 11 y 3 comprables, un filtro que no reduce nada le pide a la familia una decisión para ahorrarle un scroll que no existe) — pero **se ENCIENDE SOLO por umbral** derivado de `conteosVitrinaPorEje`. Si el comodín del momento NULL no se decidía HOY, el día que el umbral disparara —sin nadie mirando— los productos «todas las edades» desaparecerían en silencio de todos los filtros, **y el síntoma sería «faltan productos», que nadie atribuiría a una navegación autoencendida tres semanas antes.**
+
+  **COROLARIO EXIGIBLE: toda regla que se dispara sola declara, AL NACER, qué pasa con sus casos borde — y su gate es al escribirla, jamás al dispararse.**
+
+  **Y la segunda condición del umbral de B queda como CRITERIO de la casa: un filtro que no REPARTE no es un filtro, es un adorno con estado** — 30 productos donde 27 son «adulto» cumple el volumen y no ayuda a nadie. *(El comodín, adjudicado con la ley: momento NULL = el producto aparece en TODOS los momentos, jamás bucket propio — es lo que el dato significa: un alimento para todas las edades ES para un cachorro; y con 2 productos un chip propio sería el menú que N20 prohíbe, sacándoselos a los buckets reales.)*
+
 - **L-247 — UNA GARANTÍA QUE SOLO VIVE EN EL PRODUCTOR NO ES UNA GARANTÍA: ES UNA CONVENCIÓN (S99 — ley de D, «de las grandes»; depositada por orden de mesa, 17-ago-2026).**
 
   **El caso:** el wrapper de `repartidorDe` es fail-closed POR DISEÑO (un bundle viejo lee `[]` y degrada al callejón) — y D escribió `c.repartidorDe[0]` directo: con un bundle cuyo wrapper no tenía el campo, eso LANZA, y el guard raíz cayó en «No pudimos entrar a tu cuenta». Su `?? []` es la mitad que faltaba **del lado del CONSUMIDOR**.

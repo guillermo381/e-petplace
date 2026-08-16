@@ -129,6 +129,20 @@ transversales toda la sesión.**
 >   vendedor real proponga mapea a un canónico hoy incompleto (222/470
 >   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
 >   canónica (M21) es trabajo de e-PetPlace, no suyo.
+> - **🔴 N20 ENMENDADA (mesa, 17-ago — hallazgo de B sobre las
+>   cardinalidades medidas): LA ESPECIE ES UN FILTRO, JAMÁS UNA CARPETA.**
+>   La letra decía «especie → necesidad» y esa flecha se lee como
+>   jerarquía; **la letra que rige: DOS EJES, DOS FILTROS, cero
+>   carpetas** — nada de tabs excluyentes ni secciones donde un producto
+>   pertenece a un lado. *La prueba la dio el dato antes que el diseño:
+>   11 perro + 3 gato = 14 sobre 13 comprables — al menos un producto
+>   vive en LAS DOS especies, y una navegación que lo obligue a elegir
+>   casa lo esconde de la mitad de las familias.* **Y el comodín,
+>   adjudicado AL NACER la regla del umbral (L-248): momento NULL =
+>   aparece en TODOS los momentos, jamás bucket propio** — el eje
+>   «necesidad» no se muestra hoy y se enciende solo por umbral derivado
+>   de `conteosVitrinaPorEje`, así que sus casos borde quedaron decididos
+>   HOY, con el gate al escribirla y no al dispararse.
 
 > ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
 > por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,
