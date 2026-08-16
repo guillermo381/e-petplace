@@ -3690,8 +3690,42 @@ function GaleriaInterna() {
               />
             </View>
 
+            {/* S99-B · LAS SIETE NARRATIVAS CON ÍCONO ADENTRO — la forma
+                que reemplaza a las cuatro barras. Y con `cuandoLlega`:
+                los nodos dicen DÓNDE ESTÁ, la ventana dice CUÁNTO FALTA.
+                Los glifos son SLOT del consumidor: acá se montan puntos
+                de demo para probar la FORMA sin inventar siete dibujos
+                que nadie firmó. */}
             <View style={{ gap: spacing[2] }}>
-              <Texto variante="apoyo">compacta · voz de la familia</Texto>
+              <Texto variante="dato">
+                S99-B · compacta con NODOS + ícono adentro + ventana prometida (7 narrativas)
+              </Texto>
+              <EscaleraEstados
+                registro="compacta"
+                cuandoLlega="Llega entre 14:00 y 16:00"
+                pasos={(
+                  [
+                    ['confirmado', 'Confirmado', 'hecho'],
+                    ['pagado', 'Pagado', 'hecho'],
+                    ['preparando', 'Preparando', 'hecho'],
+                    ['empacado', 'Empacado', 'actual'],
+                    ['despachado', 'Despachado', 'pendiente'],
+                    ['en_camino', 'En camino', 'pendiente'],
+                    ['entregado', 'Entregado', 'pendiente'],
+                  ] as const
+                ).map(([clave, etiqueta, estado]) => ({
+                  clave,
+                  etiqueta,
+                  estado,
+                  icono: ({ color }: { color: string }) => (
+                    <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: color }} />
+                  ),
+                }))}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">compacta · voz de la familia · SIN ícono (el nodo degrada a punto)</Texto>
               <EscaleraEstados
                 registro="compacta"
                 pasos={[

@@ -115,6 +115,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
 import { CHEVRON } from './chevron'
+import { registrarCruce } from './cruce'
 import { motion } from '../tokens/motion'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
@@ -191,7 +192,19 @@ export function PuertaHermana({ etiqueta, direccion, sinVer, onPress }: PuertaHe
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        /* 🔴 LA DIRECCIÓN VIAJA CON EL GESTO, no con la pila (ley de mesa
+           S99). La puerta es lo único que el dedo toca para cruzar y es
+           la única que SABE hacia dónde apunta — la ventana que llega no
+           puede saberlo porque depende del sustrato, y el sustrato ya
+           cambió dos veces en esta sesión (navigate-con-params, y después
+           el navegador de tabs).
+           Se escribe ACÁ y no en el consumidor a propósito: si dependiera
+           de que cada pantalla se acuerde, la tercera puerta que alguien
+           monte vuelve a perderla. */
+        registrarCruce(direccion)
+        onPress()
+      }}
       onPressIn={() => setPresionada(true)}
       onPressOut={() => setPresionada(false)}
       accessibilityRole="button"
