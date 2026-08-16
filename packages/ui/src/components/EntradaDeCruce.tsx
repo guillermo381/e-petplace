@@ -136,3 +136,25 @@ export function EntradaDeCruce({ activo, children }: EntradaDeCruceProps) {
 
   return <Animated.View style={[{ flex: 1 }, estilo]}>{children}</Animated.View>
 }
+
+/* ── ✅ LA PREGUNTA DE D, CONTESTADA POR MEDICIÓN (S99, mesa) ───────────
+ * D frenó bien antes de montar: **`useIsFocused()` pasa a `true` al volver
+ * de CUALQUIER tab**, no solo de la hermana ⇒ el HOY se animaría al volver
+ * de Cuenta, y como a la hermana solo se llega por su puerta, **el par
+ * quedaría asimétrico**. Sus salidas: (a) montarla solo en la hermana, o
+ * (b) pasarle de dónde viene.
+ *
+ * **No hace falta ninguna de las dos: el caso ya está cubierto acá arriba.**
+ * `tomarCruce()` se llama **DESPUÉS** del guard del flanco, y su `null`
+ * corta antes de animar. Volver de Cuenta = nadie tocó una puerta =
+ * `ultimoCruce` es `null` = **no se mueve nada**.
+ *
+ * 🔴 **Y lo que lo salva no es que el flanco sea preciso: es que el dato
+ * del gesto se CONSUME.** Aunque `activo` parpadeara por cualquier razón
+ * —un re-render, un cambio de layout—, `tomarCruce()` devolvería `null`
+ * igual. *La regla se escribió por otro motivo («un dato de gesto que
+ * sobrevive a su gesto empieza a mentir») y terminó cubriendo un caso que
+ * su autora no había nombrado: es lo que pasa cuando la regla es la
+ * correcta y no un parche del caso que se tenía a la vista.*
+ *
+ * ⇒ **se monta en LAS DOS ventanas, simétrico, sin prop de más.** */
