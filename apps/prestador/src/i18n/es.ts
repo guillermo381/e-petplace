@@ -1082,6 +1082,12 @@ export const prestadorEs = {
     // §2.6: vacío = en preparación, jamás fracasado (voz aprobada S51):
     vacio: 'Las vidas que cuides van a vivir acá',
     vacioDetalle: 'Con tu primera atención cerrada, la mascota entra a tu historial con su expediente.',
+    /* S99-C · el vendedor puro. Dice QUÉ pasa y DÓNDE está lo suyo — no
+       «no tienes acceso», que sería un permiso denegado inventado sobre
+       un negocio que simplemente no presta servicios (N12.4 · L-178). */
+    sinPrestadorTitulo: 'Tu negocio es de productos',
+    sinPrestadorDetalle:
+      'Acá viven las mascotas que atiendes, y por eso está vacío. Lo tuyo son tus pedidos y tu stock.',
     unaAtencion: '1 atención',
     atenciones: '{{n}} atenciones',
     error: 'No pudimos cargar las mascotas',
@@ -2957,6 +2963,16 @@ export const prestadorEs = {
     titulo: 'Tu histórico',
     entrada: 'Tu histórico',
     entradaDetalle: 'Las atenciones y citas que ya pasaron',
+    // ⭐ S99-D · L4 — las dos naturalezas del archivo. Se nombran con los
+    // DOS NOMBRES firmados de la casa (`LETRA_RECORRIDO` §1: «Servicios» y
+    // «Venta de productos»), en la voz del que trabaja y en plural corto —
+    // son etiquetas de segmento, no títulos.
+    natCitas: 'Servicios',
+    natPedidos: 'Pedidos',
+    natEtiqueta: 'Qué histórico estás mirando',
+    // El pedido se nombra por su número: en un archivo, el número de orden
+    // es lo único que la persona puede cotejar con su factura.
+    pedidoNumero: 'Pedido {{numero}}',
     verMas: 'Ver {{n}} días más',
     vacioTitulo: 'Nada por acá todavía',
     vacioDetalle: 'No hay atenciones desde el {{fecha}}. Puedes seguir mirando hacia atrás.',
@@ -3019,6 +3035,12 @@ export const prestadorEs = {
       retiro: 'Retiro en tienda',
       verPedido: 'Ver el pedido {{numero}}',
       terminadosTitulo: 'Terminados',
+      /* S99-C · los pedidos VIVOS sin fecha de entrega comprometida. La voz
+         dice QUÉ falta y QUIÉN lo resuelve — no «sin fecha» a secas, que
+         describe el dato y no el trabajo (N12.4). */
+      sinFechaTitulo: 'Sin día de entrega',
+      sinFechaDetalle: 'Están esperando que les pongas fecha.',
+      vacioDia: 'No hay pedidos con entrega para este día.',
     },
     ventana: {
       hoyDesdeHasta: 'Hoy, {{desde}}–{{hasta}}',

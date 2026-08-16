@@ -163,6 +163,59 @@ transversales toda la sesión.**
    paralela creada por el server — la cuenta la crea la persona y el motor
    la encuentra. El camino de alta del repartidor se propone sobre lo que
    A mida del auth real (Loop), no se inventa.
+4. **L2 GANA LA SPEC DEL FOUNDER, medida en pantalla y no imaginada
+   (15-ago, gate):** **UN SOLO campo de contacto — WhatsApp, OBLIGATORIO,
+   con selector de indicativo de país. Muere el campo de teléfono
+   convencional y muere la palabra «opcional»** — *si es el único canal,
+   no es opcional* (la pantalla de hoy muestra los dos y contradice la
+   firma del 14-ago). **La foto usa `HojaCaptura`** (la pieza de B — es
+   REEMPLAZAR, no construir; el censo de B dio el motivo duro: 8 de 10
+   puertas de foto sin cerrojo contra el doble toque, y la del repartidor
+   es una). **La ficha completa:** foto · nombre · documento · WhatsApp
+   con indicativo · correo-llave · vehículos (**máx 2 POR CONSTRUCCIÓN,
+   jamás escrito en pantalla**) · viajes DERIVADOS.
+   **Y LA FIRMA QUE CIERRA EL ÚLTIMO PUNTO ABIERTO DE L2 (founder, 15-ago,
+   verbatim):** *«hoy en conversación con el vendedor, me debe garantizar
+   que el repartidor tenga un correo con el que se pueda loguear. Ese no
+   va a ser un problema de V1, y en V2 vamos con OTP por WhatsApp.»*
+   ⇒ **EL CORREO ES GARANTÍA DEL VENDEDOR, no problema del sistema** —
+   quien da de alta a un repartidor responde por que tenga con qué entrar.
+   **Cambia el diseño de la pantalla: el alta NO necesita camino de escape
+   ni ayuda para crear correo — el campo es obligatorio y punto. MENOS
+   superficie, no más.** Y la voz del alta lo pide **sin disculparse**:
+   como un dato que el vendedor ya tiene, jamás como un requisito que hay
+   que justificar. ⇒ **OTP POR WHATSAPP = ARCO FUTURO v2, no deuda de
+   esta sesión** — nadie lo espera para octubre; su dependencia tiene
+   nombre: las plantillas de Meta siguen rebotando como marketing y
+   WhatsApp se retoma en sesión propia (§0quater de NOTIFICACIONES). La
+   nota de arquitectura que lo vuelve barato ya rige (enmienda 2 de esta
+   §4): **la identidad de registro es el TELÉFONO (el WhatsApp con
+   indicativo, obligatorio); el correo es solo la LLAVE** — cuando OTP
+   entre, se cambia la puerta y no la persona.
+   ⇒ **L2 QUEDA SIN NINGUNA DECISIÓN DE PRODUCTO ABIERTA. El Gate 2 mira
+   ejecución, no decisiones.**
+5. **LA COLA DEL PEDIDO SE REORDENA (firma del founder, 15-ago):**
+   ① **«no entra a la cola ningún pedido que no esté cien por ciento
+   confirmado que ya está el pago»** ⇒ la banda ③ ESPERANDO **SE RETIRA**
+   — lo que espera pago está AFUERA de la cola, no en una tercera banda.
+   Quedan DOS: **URGENTE** (exprés pagado) · **FIFO por HORA DE
+   CONFIRMACIÓN DEL PAGO** — no por hora de creación, y la distinción va
+   escrita. **El dato del FIFO, MEDIDO:** `pedidos.pagado_en` NO sirve
+   (heredada y BLOQUEADA por dos vistas de métricas, 0/14 poblada, su
+   COMMENT lo dice: *«NO es la fuente de verdad del pago»*) — **la fuente
+   es `pagos_intentos` (M5): el `cerrado_en` del intento aprobado.** Los
+   `sinFecha` siguen presidiendo (adjudicación firmada). ② **El vendedor
+   REORDENA con techo** (firma: *«podría reorganizarlo… siempre que cumpla
+   la política de entregas y que se entregue dentro del horario»*) ⇒ el
+   orden es SUGERENCIA FUERTE con LÍMITE DURO: si mover un pedido saca a
+   otro de su ventana comprometida, el sistema NO lo permite y dice por
+   qué — Ley 23: no se ofrece el movimiento que se va a rechazar.
+   ③ **SON DOS COLAS, NO UNA** (frontera de mesa → **D-830**): FIFO ordena
+   el TRABAJO DEL LOCAL, la RUTA ordena la SALIDA — criterios opuestos,
+   corte en el despacho. ④ **La ruta del repartidor es ARCO PROPIO
+   (→ D-831)** — firma: *«típicamente sale con unos diez a quince pedidos
+   por ruta»*; alcance v1: zona + cercanía + el dedo del repartidor,
+   optimizador NO entra a octubre.
 
 ## §5 · TERRITORIO Y COSTURAS
 

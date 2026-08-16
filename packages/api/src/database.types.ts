@@ -15383,6 +15383,7 @@ export type Database = {
       repartidores: {
         Row: {
           activo: boolean
+          correo: string | null
           country_code: string
           created_at: string
           cuenta_comercial_id: string
@@ -15395,10 +15396,12 @@ export type Database = {
           tipo_documento: string | null
           updated_at: string
           user_id: string | null
+          vinculo_aceptado_en: string | null
           whatsapp: string | null
         }
         Insert: {
           activo?: boolean
+          correo?: string | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id: string
@@ -15411,10 +15414,12 @@ export type Database = {
           tipo_documento?: string | null
           updated_at?: string
           user_id?: string | null
+          vinculo_aceptado_en?: string | null
           whatsapp?: string | null
         }
         Update: {
           activo?: boolean
+          correo?: string | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id?: string
@@ -15427,6 +15432,7 @@ export type Database = {
           tipo_documento?: string | null
           updated_at?: string
           user_id?: string | null
+          vinculo_aceptado_en?: string | null
           whatsapp?: string | null
         }
         Relationships: [
@@ -19159,6 +19165,7 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: Json
       }
+      aceptar_vinculo_repartidor: { Args: never; Returns: Json }
       activar_prestador: {
         Args: { p_motivo?: string; p_prestador_id: string; p_veredicto: string }
         Returns: Json
@@ -19203,6 +19210,7 @@ export type Database = {
       actualizar_repartidor: {
         Args: {
           p_activo?: boolean
+          p_correo?: string
           p_documento?: string
           p_documento_foto_path?: string
           p_foto_path?: string
@@ -20158,6 +20166,7 @@ export type Database = {
           pais_emisor: string
         }[]
       }
+      mis_vinculos_repartidor_pendientes: { Args: never; Returns: Json }
       mover_estado_pedido: {
         Args: {
           p_actor: string
@@ -21015,6 +21024,7 @@ export type Database = {
       }
       registrar_repartidor: {
         Args: {
+          p_correo?: string
           p_cuenta_comercial_id: string
           p_documento: string
           p_documento_foto_path?: string

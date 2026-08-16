@@ -36,6 +36,7 @@ import {
   Celda,
   FilaCita as FilaCitaUi,
   CeldaNavegacion,
+  Encabezado,
   CitaEnVivo,
   SelectorDia,
   Esqueleto,
@@ -85,6 +86,9 @@ import {
   obtenerPresupuestosPrestador,
   obtenerJornadaRecepcion,
   listarPedidosDelVendedor,
+  cupoRepartoDelDia,
+  extrasPanelPedidos,
+  type ExtraPanelPedido,
   type PedidoDelVendedor,
   type CitaJornadaRecepcion,
   type PlataDelDia,
@@ -101,7 +105,9 @@ import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epe
 
 import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
-import { contextoVentas } from '@/lib/cuenta-ventas';
+import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
+import { VentanaPedidos } from '@/components/ventana-pedidos';
+import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
 import { duracionCorta, montoCorto } from '@/lib/formato-techo';
@@ -118,6 +124,24 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
+  /* 🔴 S99-C · EL HOY DEL VENDEDOR PURO — hallazgo de la caminata en
+     aparato, y era LO PRIMERO que veía: con la barra puesta (D-820) entra
+     alguien sin fila de `prestadores` y esta pantalla lo recibía con una
+     tarjeta ROJA — *«Tu usuario no tiene un prestador asociado»* + un
+     «Reintentar» que no podía arreglar nada, **porque no había nada roto**.
+     Es L-178 en el peor lugar posible: el primer cuarto que se abre.
+     *Mis dos cuartos honestos no alcanzaban: el founder no llegaba a
+     verlos porque se trababa antes.*
+     §2.0 dice qué es su HOY: **pedidos + stock**. Acá van los pedidos, con
+     la MISMA pieza que su panel — una lista, no dos. */
+  | {
+      estado: 'vendedorPuro';
+      cuentaComercialId: string;
+      moneda: ContextoVentas['moneda'];
+      pedidos: PedidoDelVendedor[];
+      extras: Record<string, ExtraPanelPedido>;
+      cupo: { capacidad: number; consumido: number } | null;
+    }
   /* ⏪ S88-C (LÁMINA_HOME_POR_ROL) — ACÁ VIVÍA `estado: 'recepcion'`, el
      desvío a `AgendaRecepcion` (S78-B, D-521). MUERE POR FIRMA: recepción
      ve LA CONSOLIDADA con su verbo («ver completo y poder poco no es una
@@ -995,6 +1019,35 @@ export default function Hoy() {
     }
     const prestador = await obtenerMiPrestador();
     if (!prestador.ok) {
+      /* 🔴 `sin_prestador` NO es un fallo: es el vendedor puro (ver el tipo
+         `Pantalla`). Se le arma SU HOY —sus pedidos— en vez de una tarjeta
+         roja. Si tampoco es vendedora, ahí sí es error y se dice. */
+      if (prestador.codigo === 'sin_prestador') {
+        const ctx = await contextoVentas();
+        if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
+          const cuentaId = ctx.data.cuentaComercialId;
+          /* Una sola ola: las dos lecturas son independientes y encadenarlas
+             sumaría un viaje a la primera pantalla (L-224 · N16). */
+          const [ped, cupo] = await Promise.all([
+            listarPedidosDelVendedor(cuentaId),
+            cupoRepartoDelDia(cuentaId, hoyLocalISO()),
+          ]);
+          const extras = ped.ok
+            ? await extrasPanelPedidos(ped.data.map((p) => p.pedido_id))
+            : { ok: false as const };
+          setPantalla({
+            estado: 'vendedorPuro',
+            cuentaComercialId: cuentaId,
+            moneda: ctx.data.moneda,
+            pedidos: ped.ok ? ped.data : [],
+            extras: extras.ok ? extras.data : {},
+            cupo: cupo.ok
+              ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
+              : null,
+          });
+          return;
+        }
+      }
       setPantalla({ estado: 'error', mensaje: prestador.mensaje });
       return;
     }
@@ -2012,6 +2065,44 @@ export default function Hoy() {
      propia en la línea — no es algo que pase a las 11:30, es algo que está
      esperando respuesta AHORA»*. Eso no describe una banda del HOY:
      describe por qué no pertenece al HOY. */
+
+  /* 🔴 S99-C · EL HOY DEL VENDEDOR PURO — retorno temprano, como `atender`.
+     Su día son SUS PEDIDOS, con la misma pieza que su panel: **una lista,
+     no dos** (si divergieran, el día que alguien cure una la otra queda
+     mintiendo). El stock vive a un toque, en su puerta de siempre. */
+  if (pantalla.estado === 'vendedorPuro') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <MarcaDeAgua />
+        <ScrollView
+          contentContainerStyle={{
+            padding: spacing[4],
+            paddingBottom: insets.bottom + spacing[8],
+            gap: spacing[4],
+          }}
+          refreshControl={
+            <RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />
+          }
+        >
+          <Encabezado variante="portada" saludo={t('ventas.hoy.titulo')} />
+          <VentanaPedidos
+            pedidos={pantalla.pedidos}
+            extras={pantalla.extras}
+            cupo={pantalla.cupo}
+            moneda={pantalla.moneda}
+            onAbrir={(id) => router.push(`/ventas/pedido/${id}`)}
+          />
+          <Tarjeta relleno="ninguno">
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t('ventas.hoy.stock')}
+              onPress={() => router.push('/ventas/stock')}
+            />
+          </Tarjeta>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

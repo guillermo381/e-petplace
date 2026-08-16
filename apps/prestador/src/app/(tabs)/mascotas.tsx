@@ -109,6 +109,14 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
+  /* ⭐ S99-C · L1 — SIN NEGOCIO DE SERVICIOS NO ES UN ERROR: es el vendedor
+     puro. Con la barra puesta (D-820) entra a este cuarto alguien que no
+     tiene fila de prestador, y hasta hoy se lo recibía con el error
+     genérico — **un dato que falta disfrazado de permiso denegado**
+     (L-178). El precedente está a dos archivos: `negocio.tsx` ya
+     distingue `sin_prestador` desde S96 y monta su sección honesta.
+     *Nadie lo pensó mal acá: nadie había entrado todavía.* */
+  | { estado: 'sinPrestador' }
   | { estado: 'listo'; mascotas: MascotaAtendida[] };
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
@@ -201,7 +209,11 @@ export default function Mascotas() {
         const prestador = await obtenerMiPrestador();
         if (!vigente) return;
         if (!prestador.ok) {
-          setPantalla({ estado: 'error' });
+          // `sin_prestador` NO es un fallo de lectura: es un negocio de
+          // productos. Se dice, no se rebota (ver el tipo `Pantalla`).
+          setPantalla({
+            estado: prestador.codigo === 'sin_prestador' ? 'sinPrestador' : 'error',
+          });
           return;
         }
         /* El equipo va EN PARALELO con las vidas: son dos preguntas
@@ -524,6 +536,18 @@ export default function Mascotas() {
           />
         )}
 
+        {/* ⭐ S99-C · el vendedor puro: se le dice la VERDAD y dónde SÍ
+            viven sus números. **No se le inventa el cuarto de venta acá**
+            —§2.0 lo deja explícitamente abierto («las specs finas de cada
+            cuarto del vendedor NO están firmadas»)— y prometer una
+            pantalla que no existe sería el mismo defecto con mejor voz. */}
+        {pantalla.estado === 'sinPrestador' && (
+          <EstadoVacio
+            titulo={t('mascotas.sinPrestadorTitulo')}
+            descripcion={t('mascotas.sinPrestadorDetalle')}
+          />
+        )}
+
         {pantalla.estado === 'listo' && pantalla.mascotas.length === 0 && (
           // §2.6: en preparación, jamás fracasado
           <EstadoVacio titulo={t('mascotas.vacio')} descripcion={t('mascotas.vacioDetalle')} />
@@ -730,15 +754,34 @@ export default function Mascotas() {
                 detalle={t('mascotas.resenasDetalle')}
                 onPress={() => router.push('/negocio/resenas')}
               />
-              <Separador />
-              {/* Glifo 'caso' — propio del registry, no stand-in. */}
-              <CeldaNavegacion
-                icono="caso"
-                registro="aa"
-                titulo={t('mascotas.casosHeredados')}
-                detalle={t('mascotas.casosHeredadosDetalle')}
-                onPress={() => router.push('/negocio/casos-heredados')}
-              />
+              {/* ⭐ S99-C · «CASOS QUE TE CONFÍEN» NO SE LE MUESTRA AL
+                  VENDEDOR PURO (adjudicación de mesa). Y el criterio no es
+                  de spec fina, es de la casa:
+
+                  **un estado vacío que PUEDE llenarse es honesto; uno que
+                  no puede llenarse NUNCA es una mentira.**
+
+                  A un negocio de productos **nadie le va a derivar un caso
+                  clínico jamás** — la celda prometía un futuro inexistente.
+
+                  🔴 Y LA VECINA SE QUEDA, con su razón MEDIDA y no supuesta:
+                  «Reseñas» **sí puede llenarse** — `resenas_productos` existe
+                  en el esquema (verificado: 11 columnas). *El mismo criterio
+                  que saca una deja la otra: lo que decide no es «este cuarto
+                  es de servicios», es si el vacío tiene futuro.* */}
+              {pantalla.estado !== 'sinPrestador' && (
+                <>
+                  <Separador />
+                  {/* Glifo 'caso' — propio del registry, no stand-in. */}
+                  <CeldaNavegacion
+                    icono="caso"
+                    registro="aa"
+                    titulo={t('mascotas.casosHeredados')}
+                    detalle={t('mascotas.casosHeredadosDetalle')}
+                    onPress={() => router.push('/negocio/casos-heredados')}
+                  />
+                </>
+              )}
             </Tarjeta>
           </View>
         )}
