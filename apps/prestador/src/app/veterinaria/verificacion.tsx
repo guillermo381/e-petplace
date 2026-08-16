@@ -20,19 +20,15 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Hoja,
+  HojaCaptura,
   Insignia,
   MarcaDeAgua,
-  Separador,
   Tarjeta,
   Texto,
-  capturarConCamara,
-  capturarDeGaleria,
   radius,
   spacing,
   typography,
@@ -145,21 +141,20 @@ export default function VerificacionVeterinaria() {
     }
   };
 
-  async function capturar(camara: boolean) {
+  /* 🔴 S99-C · R42 — LA PUERTA DEJA DE ESTAR RE-DIBUJADA (y acá SÍ
+     cambia la forma, con su firma detrás). La hoja tenía dos `Celda
+     interactiva`; la anatomía canónica son dos `Boton bloque`, y el
+     porqué está firmado en la pieza: **Ley 22c — un comando con
+     consecuencias viste de botón**. Abrir la cámara es un comando; una
+     `Celda` es fila de lista, y una lista promete que tocar te LLEVA.
+     *No es un gate de forma nuevo: es aplicar una ley que ya existía.*
+     Lo que gana de paso es el cerrojo contra el doble tap. */
+  async function capturar(uri: string) {
     const tipo = hojaTipo;
     if (tipo === null || pantalla.estado !== 'listo') return;
-    setHojaTipo(null);
-    const r = camara
-      ? await capturarConCamara({ redimensionarA: 1600, calidad: 0.8 })
-      : await capturarDeGaleria({ redimensionarA: 1600, calidad: 0.8 });
-    if (r.tipo === 'cancelada') return;
-    if (r.tipo === 'permiso_denegado') {
-      mostrar({ variante: 'error', texto: t('verificacionVet.permisoCamara') });
-      return;
-    }
     setSubiendo(tipo);
     const sub = await subirDocumentoVerificacion({
-      uri: r.foto.uri,
+      uri,
       prestadorId: pantalla.prestadorId,
       tipo,
       nombre: vozTipo(tipo),
@@ -328,28 +323,16 @@ export default function VerificacionVeterinaria() {
       )}
 
       {/* Hoja: cámara / galería PARES (patrón SelectorAvatar) */}
-      <Hoja
+      <HojaCaptura
         visible={hojaTipo !== null}
-        onCerrar={() => setHojaTipo(null)}
         titulo={hojaTipo !== null ? vozTipo(hojaTipo) : ''}
-        altura="contenido"
-      >
-        <View style={{ paddingBottom: insets.bottom }}>
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('verificacionVet.tomarFoto')}
-            onPress={() => void capturar(true)}
-          />
-          <Separador />
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('verificacionVet.elegirGaleria')}
-            onPress={() => void capturar(false)}
-          />
-        </View>
-      </Hoja>
+        onCerrar={() => setHojaTipo(null)}
+        onFoto={(foto) => void capturar(foto.uri)}
+        onPermisoDenegado={() =>
+          mostrar({ variante: 'error', texto: t('verificacionVet.permisoCamara') })
+        }
+        opciones={{ redimensionarA: 1600, calidad: 0.8 }}
+      />
     </View>
   );
 }

@@ -1795,7 +1795,7 @@ export const prestadorEn = {
       destinoRequerido: 'The recipient client is missing.',
       payloadAltaInvalido: 'Pet details are missing (name and species).',
       solicitudDuplicada: 'There is already a pending request for this pet.',
-      datosInvalidos: 'Check the details and try again.',
+      datosInvalidos: 'The server rejected this information. Sending it again as-is will fail: change what you entered and try again.',
     },
     estructurar: {
       entradaInvalida: "We couldn't read the dictation. Check the text and try again.",
@@ -1820,7 +1820,7 @@ export const prestadorEn = {
       alergiaSinSeveridad: 'An allergy has no severity.',
       condicionRequerida: 'The case needs a condition.',
       noEsTratante: 'You are not the treating clinic for this case.',
-      datosInvalidos: 'Check the note details.',
+      datosInvalidos: 'The server rejected the note. Saving it again as-is will fail: fix what you entered and save again.',
     },
     presupuesto: {
       accesoDenegado: "You don't have permission for this action.",
@@ -1844,7 +1844,7 @@ export const prestadorEn = {
       slotInvalido: 'Choose a date, a time and a professional.',
       slotEnPasado: 'The scheduled date must be in the future.',
       slotOcupado: 'That time is already taken for that person.',
-      datosInvalidos: 'Check the estimate details.',
+      datosInvalidos: 'The server rejected the estimate. Saving it again as-is will fail: fix the items or the amount and save again.',
     },
     citaVet: {
       citaNoEncontrada: 'The visit does not exist or is no longer accessible.',

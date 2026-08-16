@@ -2288,7 +2288,7 @@ export const prestadorEs = {
       destinoRequerido: 'Falta el cliente destinatario.',
       payloadAltaInvalido: 'Faltan datos de la mascota (nombre y especie).',
       solicitudDuplicada: 'Ya hay una solicitud pendiente para esta mascota.',
-      datosInvalidos: 'Revisa los datos e intenta de nuevo.',
+      datosInvalidos: 'El servidor no aceptó estos datos. Reenviarlos igual va a fallar: cambia lo que cargaste y vuelve a intentar.',
     },
     // Tajada 2: el Durante clínico, el presupuesto y el taller.
     estructurar: {
@@ -2315,7 +2315,7 @@ export const prestadorEs = {
       alergiaSinSeveridad: 'Una alergia no tiene severidad.',
       condicionRequerida: 'El caso necesita una condición.',
       noEsTratante: 'No eres la clínica tratante de este caso.',
-      datosInvalidos: 'Revisa los datos de la nota.',
+      datosInvalidos: 'El servidor no aceptó la nota. Reenviarla igual va a fallar: corrige lo que cargaste y vuelve a guardar.',
     },
     presupuesto: {
       accesoDenegado: 'No tienes permiso para esta acción.',
@@ -2339,7 +2339,7 @@ export const prestadorEs = {
       slotInvalido: 'Elige fecha, hora y profesional.',
       slotEnPasado: 'La fecha coordinada tiene que ser futura.',
       slotOcupado: 'Ese horario ya está ocupado para esa persona.',
-      datosInvalidos: 'Revisa los datos del presupuesto.',
+      datosInvalidos: 'El servidor no aceptó el presupuesto. Reenviarlo igual va a fallar: corrige los ítems o el monto y vuelve a guardar.',
     },
     citaVet: {
       citaNoEncontrada: 'La cita no existe o ya no es accesible.',

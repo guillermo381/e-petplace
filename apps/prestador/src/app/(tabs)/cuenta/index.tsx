@@ -67,6 +67,7 @@ import {
   useBarraEstadoClara,
   useMuroOficio,
 } from '@/components/techo-oficio';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { vozOficio } from '@/lib/voz-oficio';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { useTraduccion } from '@/i18n';
@@ -258,6 +259,30 @@ export default function Cuenta() {
         const prestador = await obtenerMiPrestador();
         if (!vigente) return;
         if (!prestador.ok) {
+          /* 🔴 S99-C · EL CUARTO CUARTO HONESTO (caminata en aparato, 15-ago).
+             `sin_prestador` NO es un fallo para el VENDEDOR PURO: su negocio
+             es de productos y no tiene fila en `prestadores`. El techo decía
+             «No pudimos cargar tu negocio» — un error donde hay un ESTADO, que
+             es exactamente L-178 (un dato faltante jamás se disfraza de fallo).
+             Es la misma cura que HOY, ATENDER y DATOS ya llevan; faltaba acá
+             porque este techo se lee al final del recorrido y nadie lo caminó.
+             El contexto de ventas está CACHEADO (lo cargó el HOY), así que el
+             viaje es gratis en la práctica. Sin logo, sin ciudad, sin cohorte:
+             la cuenta comercial no tiene esas cosas y no se inventan (L-139). */
+          if (prestador.codigo === 'sin_prestador') {
+            const ctx = await contextoVentas();
+            if (!vigente) return;
+            if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
+              setFallo(null);
+              setIdentidad({
+                nombre: ctx.data.nombreComercial,
+                ciudad: null,
+                logoPath: null,
+                cohorteAnio: null,
+              });
+              return;
+            }
+          }
           setFallo({
             reintentable:
               prestador.codigo !== 'sin_prestador' && prestador.codigo !== 'sin_sesion',

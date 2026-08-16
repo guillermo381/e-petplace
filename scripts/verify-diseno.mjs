@@ -1773,11 +1773,31 @@ const BASELINE_R42_CLASES = {
   'apps/cliente/src/components/HojaFotoMascota.tsx':
     'CURABLE · dueño del lote del cliente. ⚠️ Su propia cabecera ya lo pedía desde S82: «cuando SelectorAvatar gane el encuadre de la casa, esta Hoja muere absorbida» — la deuda estaba declarada por su autor antes de que existiera la pieza.',
   'apps/prestador/src/app/ventas/configuracion.tsx': 'CURABLE · dueño del lote del prestador',
-  'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx':
-    'CURABLE · dueño del lote del prestador. Nota: su captura de LOGO no migra (D-740, PNG con alpha) — migra la de avatar.',
-  'apps/prestador/src/app/veterinaria/verificacion.tsx': 'CURABLE · dueño del lote del prestador',
-  'apps/prestador/src/components/seccion-documentos.tsx': 'CURABLE · dueño del lote del prestador',
-  'apps/prestador/src/components/alta/PasoDocumentos.tsx': 'CURABLE · dueño del lote del prestador (C lo tomó en L1: `FotoDelRepartidor` es su hermana de clase)',
+  /* ☠️ S99-C · SALE, y NO por migración: era un FALSO POSITIVO del
+     instrumento. R42 mira la PRESENCIA de los dos identificadores, y acá
+     `capturarConCamara` estaba **importado y jamás llamado** — cero
+     llamadas medidas. La pantalla nunca tuvo puerta de dos ramas: la del
+     logo ofrece SOLO galería, y su «Tomar foto» ya había muerto por Ley
+     23 con su razón escrita (la cámara entrega JPEG y el logo es PNG-only
+     — esa puerta habría rebotado siempre). La cura fue retirar el import
+     muerto. *El baseline decía «migra la de avatar» y esa captura de
+     avatar no existe en este archivo: la nota describía algo que no
+     estaba.* La de LOGO sigue sin migrar y sigue teniendo razón (D-740). */
+  /* ☠️ S99-C · MIGRADA (15-ago). Su hoja tenía dos `Celda interactiva` y
+     acá SÍ cambió la forma — con firma detrás, no por gusto: la anatomía
+     canónica es `Boton` porque abrir la cámara es un COMANDO (Ley 22c), y
+     una `Celda` promete que tocar te lleva. No es un gate de forma nuevo:
+     es aplicar una ley ya firmada. Distinto de `SelectorAvatar`, que sigue
+     BLOQUEADA porque su tercera fila es una decisión firmada en S45 —
+     ahí hay una firma específica que proteger; acá no había ninguna. */
+  /* ☠️ S99-C · MIGRADA (15-ago). Anatomía ya canónica ⇒ cura sin cambio
+     de forma: ganó el cerrojo. Su otra `Hoja` (la de país emisor) no es
+     una puerta de foto y queda intacta. */
+  /* ☠️ S99-C · MIGRADA (15-ago). Su anatomía YA era la canónica —una
+     `Hoja` con dos `Boton bloque`—, así que la migración no cambió la
+     forma: le dio el CERROJO, que es lo que no se ve y lo que faltaba.
+     Es el precedente de las tres que quedan del prestador: donde la
+     anatomía ya coincide, migrar es cura y no gate de forma. */
 };
 const BASELINE_R42 = new Set(Object.keys(BASELINE_R42_CLASES));
 /** El piso REAL: las que no son deuda. R42 no puede llegar a 0 y decirlo
@@ -1831,6 +1851,16 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R46 · TRES casos, y las dos legítimas son el peso de la prueba
+     (L-236): la que COMPONE el selector · la que MUESTRA y lo declara ·
+     y la que pide el WhatsApp sin selector y sin declarar, que es el
+     único rojo. Los dos primeros alcanzan además para que el ANCLA no
+     sea lo que lo pinta. */
+  R46: [
+    { path: 'apps/prestador/src/app/ventas/compone.tsx', src: 'repartidorWhatsapp\n<ControlTelefono label={x} />' },
+    { path: 'apps/prestador/src/app/ventas/muestra.tsx', src: '/* El WhatsApp del repartidor acá no se captura: solo se muestra\n   para poder llamarlo. */\nrepartidorWhatsapp' },
+    { path: 'apps/prestador/src/app/ventas/pela.tsx', src: 'repartidorWhatsapp\n<Campo label={x} />' },
+  ],
   /* R45 · TRES casos, y los dos legítimos son el peso de la prueba
      (L-236): monta · declara · y la que hace ninguna de las dos, que es
      el único rojo. Trae además la frontera para que el ANCLA no sea lo
@@ -2884,7 +2914,16 @@ function r43(fuentes) {
  *  eso el net ancla al arranque de la frase (`^[^.!?]*`): si hay una
  *  oración previa que nombra la falla, el mensaje cumple. Calibrado
  *  contra los **16 casos reales** de las dos casas, 16/16. */
-const BASELINE_R44 = 9
+/* S99-C (15-ago) · 9 → 3. Las SEIS de `apps/prestador` se reescribieron.
+   La cura NO fue inventarles un QUÉ: `datos_invalidos` es el fallback de
+   CUALQUIER CHECK, así que nombrar un campo habría sido verosímil y falso
+   (L-139) — y mandar a mirar el lugar equivocado es peor que no decir.
+   Lo que se escribió es lo que SÍ se sabe con verdad: que rechazó el
+   SERVIDOR (no la red ni la sesión) y que **reenviar lo mismo va a fallar
+   otra vez** — que es justo lo que «intenta de nuevo» prometía en falso.
+   Las 3 de `packages/api` siguen bloqueadas (dueño A): su cura de raíz es
+   D-827, códigos tipados por constraint. */
+const BASELINE_R44 = 3
 const VOZ_SIN_QUÉ =
   /^[^.!?]*(revis[aá] los datos|check the [a-z ]*details?|campo (inv[aá]lido|requerido)|invalid field|algo sali[oó] mal|something went wrong)/i
 function r44(archivos) {
@@ -2916,10 +2955,86 @@ function r44(archivos) {
   fallos.push(...ancla('R44', dics, 40, 'archivo(s) del corpus (6 diccionarios + los wrappers de api)'))
   return {
     fallos,
-    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} = 6 diccionarios de \`apps/prestador\` (dueño C, CURABLES escribiendo mejor) + 3 de \`packages/api\` (dueño A, BLOQUEADAS: \`datos_invalidos\` es el fallback de CUALQUIER CHECK — la voz buena exige códigos tipados por constraint, no una frase mejor). Solo-baja`,
+    info: `${total} voz/voces genérica(s) · baseline ${BASELINE_R44} = las 3 de \`packages/api\` (dueño A, BLOQUEADAS: \`datos_invalidos\` es el fallback de CUALQUIER CHECK — la voz buena exige códigos tipados por constraint, no una frase mejor: D-827). Las 6 de \`apps/prestador\` se curaron en S99-C. Solo-baja`,
   }
 }
 
+
+/** R46 · EL SELECTOR DE INDICATIVO NO SE VA CON EL CAMPO QUE MUERE (S99-B).
+ *
+ *  LA LEY, dictada por mesa sobre un hallazgo de la Dirección de Diseño:
+ *  *«al borrar el teléfono convencional, el selector de indicativo SE
+ *  MUDA a WhatsApp, no se va con él.»*
+ *
+ *  🔴 POR QUÉ EXISTE, y por qué un comentario no alcanzaba: L2 manda
+ *  *«muere el teléfono convencional; queda SOLO WhatsApp, obligatorio,
+ *  con selector de indicativo de país»*. **Medido sobre la pantalla
+ *  viva:** el teléfono usa `ControlTelefono` —el par selector+campo con
+ *  UN pie, porque lo que se valida es el E.164 que forman JUNTOS— y el
+ *  WhatsApp es un `Campo` desnudo. **O sea: el campo que MUERE es el
+ *  único que hoy tiene el selector, y el que SOBREVIVE no lo tiene.**
+ *
+ *  ⚠️ **Y el modo de falla es que todo se ve bien:** un borrado prolijo
+ *  deja exactamente la pantalla que la firma prohíbe —un WhatsApp
+ *  obligatorio sin indicativo, componiendo un E.164 que la fuente rebota
+ *  (`repartidores_telefono_check`)— y **el diff se lee como una resta**.
+ *  Nadie revisa por qué algo NO se hizo. *Es la familia de S84: un dato
+ *  viejo que dice «sí» se descubre al chocar; uno que dice «no se puede»
+ *  no se descubre nunca.*
+ *
+ *  ── EL INVARIANTE, que vale ANTES y DESPUÉS del lote ───────────────
+ *  **Toda superficie que le pide a un repartidor su WhatsApp compone al
+ *  menos UN `ControlTelefono`.** Verdadero hoy (lo aporta el teléfono),
+ *  verdadero cuando el teléfono muera (lo aporta el WhatsApp), y **falso
+ *  exactamente en el estado que hay que impedir**. *Un guard que solo
+ *  vale después del cambio no protege el cambio.*
+ *
+ *  ── LA EXENCIÓN ES LA DECLARACIÓN, jamás una lista de paths ─────────
+ *  Mismo criterio que R45 (argumento de D): un path *«deja pasar en
+ *  silencio a la segunda consumición que alguien agregue en ese mismo
+ *  archivo»*. Una pantalla que **muestra o linkea** el WhatsApp del
+ *  repartidor —en vez de capturarlo— lo dice en una línea y queda verde.
+ *  ⚠️ Hueco residual declarado: si un archivo captura Y muestra, hereda
+ *  la declaración. Estáticamente no lo distingo; lo digo en vez de
+ *  fingir que el net lo cubre.
+ *
+ *  ── BASELINE 0, MEDIDO ─────────────────────────────────────────────
+ *  Hoy **UN solo archivo** del árbol nombra repartidor y WhatsApp
+ *  (`ventas/configuracion.tsx`) y trae 3 `ControlTelefono` ⇒ nace **dura
+ *  en 0**, sin deuda. Su fixture carga las DOS legítimas (compone ·
+ *  declara) además del rojo: *una regla nacida sin contra-caso no sabe
+ *  discriminar; solo sabe disparar* (L-236). */
+const BASELINE_R46 = 0
+function r46(archivos) {
+  const fallos = []
+  let candidatos = 0
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src)
+    // Captura sospechada: la pantalla habla de un repartidor Y de su
+    // WhatsApp. Se mide SIN comentarios para que esta misma regla, o un
+    // JSDoc que la cite, no se cuenten como pantalla (L-170).
+    if (!/epartidor/i.test(limpio) || !/whats\s*app/i.test(limpio)) continue
+    candidatos++
+    if (/ControlTelefono/.test(limpio)) continue
+    // La salida honesta: declarar que acá no se captura (sobre el fuente
+    // CRUDO — declarar ES prosa, igual que en R45).
+    if (/no se captura|solo se muestra|solo lo muestra|no pide el whatsapp/i.test(src)) continue
+    fallos.push(
+      `R46: ${path} le pide a un repartidor su WhatsApp y NO compone \`ControlTelefono\`. L2 mata el teléfono convencional, y **ése es el único campo que hoy trae el selector de indicativo**: al borrarlo, el selector SE MUDA al WhatsApp — no se va con él. Sin selector, el E.164 sale sin \`+\` y la fuente lo rebota (\`repartidores_telefono_check\`), pero la pantalla se ve perfecta y el diff se lee como una resta. DOS SALIDAS: (a) componer el WhatsApp con \`ControlTelefono\` —el par selector+campo con UN pie, porque lo que se valida es el E.164 que forman JUNTOS— · (b) si esta pantalla MUESTRA el WhatsApp en vez de pedirlo, decirlo en una línea. ⚙️ CONDICIÓN MECÁNICA de (b): al lint le alcanza con la frase «no se captura» (o «solo se muestra») en un comentario.`,
+    )
+  }
+  if (fallos.length > BASELINE_R46)
+    fallos.push(`R46: ${fallos.length} superficie(s) sobre el baseline ${BASELINE_R46}.`)
+  // ANCLA: si el vocabulario cambia (la ficha se muda de archivo y de
+  // palabras), esta regla dejaría de encontrar pantallas y su verde
+  // diría «no miré». Que se ponga roja y alguien la re-ancle es el
+  // comportamiento correcto, no un defecto (L-226).
+  fallos.push(...ancla('R46', candidatos, 1, 'pantalla(s) que piden el WhatsApp del repartidor'))
+  return {
+    fallos,
+    info: `${candidatos} pantalla(s) piden el WhatsApp del repartidor · todas con selector de indicativo · baseline ${BASELINE_R46} (DURA EN 0 desde S99-B)`,
+  }
+}
 
 /** R45 · D-828 · EL LECTOR DE RANGO NO SE CONSUME EN SILENCIO (S99-B).
  *
@@ -3007,7 +3122,7 @@ function r45(archivos) {
   }
 }
 
-const REGLAS = { R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3257,6 +3372,7 @@ corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui
 corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)]);
 corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
 corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
+corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)', r46(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
