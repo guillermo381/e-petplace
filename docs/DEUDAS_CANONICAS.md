@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-254 — UN UMBRAL QUE MIDE TAMAÑO NO MIDE UTILIDAD (S99 — el caso es de C con volumen real; depositada por orden de mesa, 18-ago-2026).**
+
+  **El caso, con número:** el umbral del segundo eje de N20 se encendió solo (perro 232, gato 109 — las dos condiciones cruzadas) **y el filtro es inútil igual**: el comodín es MAYORÍA (121/232 en perro, 65/109 en gato), así que filtrar «cachorro» devuelve **149 de 232 — el 64 % del catálogo**. Tres buckets con ≥3 y **ninguno REPARTE**. *Pasa la LETRA de la segunda condición y falla su ESPÍRITU — es exactamente el «adorno con estado» que esa condición existe para evitar.*
+
+  **COROLARIO EXIGIBLE: un umbral de utilidad mide DISCRIMINACIÓN, no tamaño** (p. ej.: ningún bucket sobre X % del total). *Un conjunto grande puede no repartirse — el número que importa no es cuántos hay, sino cuánto SEPARA.*
+
+  **Y la interacción que lo vuelve sutil, escrita para que nadie «arregle» lo que está bien: el comodín es mayoría PORQUE la decisión firmada es correcta** (momento NULL aparece en TODOS los momentos — un alimento para todas las edades ES para un cachorro). **No es un error del comodín: son DOS DECISIONES CORRECTAS QUE SE ESTORBAN, y eso lo resuelve el UMBRAL, jamás el comodín.**
+
+  **Nota de método que la acompaña (al acta):** L-248 decía *«el día que la automatización dispare, nadie va a estar mirando»* — **disparó CON alguien mirando**, porque el founder pidió volumen antes de juzgar. *La ley se probó por accidente y en el momento correcto.*
+
 - **L-253 — CUANDO DOS PANTALLAS COMPARTEN EL DOM, «LO QUE DICE LA PANTALLA» DEJA DE SER «LO QUE DICE EL DOCUMENTO» (S99 — el caso es de D, en la cura de D-836; depositada por orden de mesa, 18-ago-2026).**
 
   **El caso, medido:** al mudar `/pedidos` adentro del navegador de tabs, las pantallas quedan APILADAS — los dos títulos ocupan la misma caja y `body.innerText` trae los dos — así que su assert podía leer el techo del HOY y dar verde SIN que la hermana cruzara nada. Curado leyendo solo la pantalla ACTIVA (**excluyendo `aria-hidden`, que lo marca el PROPIO navegador — jamás una heurística propia**) y clickeando `.last()`.
@@ -17240,6 +17250,20 @@ MISMAS puertas del vendedor real (`proponer_sku_vendedor` en bucle +
 ☠️ **Muere ANTES del primer vendedor real con oferta publicada:** DELETE
 por la marca + el conteo del punto 2 en CERO, medido en el acta que la
 cierre.
+
+**EXTENSIÓN (18-ago noche, dictado ④ del Gate 3): LA SIEMBRA MULTI-
+VENDEDOR entra a esta misma deuda** (`supabase/dev/seed-siembra-
+multiseller-s99.sql`) — **misma marca** (`SIEMBRA-S99-%`, ahora con
+sufijos por cuenta y `-ESP-` para los del choque), **mismo cierre por
+conteo-cero**, misma condición de muerte. Lo sembrado: 4 cuentas
+vendedoras más publicando en la vitrina (**cinco vendedores en total**) ·
+**96 SKUs del CHOQUE** (mismo producto que otro ya publicó — con precio
+y stock propios y sin oferta, porque `uq_oferta_publicada_por_variante`
+lo impide) · **stock distinto por vendedor entrando por el LEDGER**
+(`ajustar_stock_vendedor` con motivo — jamás UPDATE a la materializada,
+así que el borrado tiene que contemplar sus movimientos). *Nota del
+founder al ordenarla: «igual yo lo tengo superpresente, que antes del
+lanzamiento tenemos que borrar eso».*
 
 #### D-836 — 🔴 SE PIERDEN LOS TABS EN PEDIDOS (dictado del founder 18-ago; dueño: D, ALTA)
 

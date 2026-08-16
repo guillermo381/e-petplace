@@ -179,7 +179,11 @@ transversales toda la sesión.**
 >   pertenece a un lado. *La prueba la dio el dato antes que el diseño:
 >   11 perro + 3 gato = 14 sobre 13 comprables — al menos un producto
 >   vive en LAS DOS especies, y una navegación que lo obligue a elegir
->   casa lo esconde de la mitad de las familias.* **Y el comodín,
+>   casa lo esconde de la mitad de las familias.* **✅ CONFIRMADA CON 44
+>   CASOS (C, con volumen real, 18-ago): 232+109+43+22+21+16 = 443 sobre
+>   399 comprables ⇒ al menos 44 productos viven en DOS especies. La ley
+>   ya no depende del cruce que la descubrió: se sostiene sola.** **Y el
+>   comodín,
 >   adjudicado AL NACER la regla del umbral (L-248): momento NULL =
 >   aparece en TODOS los momentos, jamás bucket propio** — el eje
 >   «necesidad» no se muestra hoy y se enciende solo por umbral derivado
