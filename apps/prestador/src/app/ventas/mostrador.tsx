@@ -10,7 +10,14 @@
  *  · CHANEL: el precio POR ÍTEM viene del lector (`precio_publicado`,
  *    ensanche de A tras el hueco que esta pantalla declaró; null honesto
  *    = sin oferta publicada, y SE DICE) — pero el TOTAL sigue siendo del
- *    MOTOR: acá no se suma un centavo · sin buscador (seis productos).
+ *    MOTOR: acá no se suma un centavo.
+ *
+ * ⚠️ **ESTA CABECERA DECÍA «sin buscador (seis productos)» Y ESA PREMISA
+ * MURIÓ.** Con la siembra del 16-ago el vendedor de pruebas pasó a **532
+ * SKUs** y el founder lo encontró de frente: *«me sale una lista desde una
+ * pantalla desplegable con todos los productos»*. **No estaba mal razonada:
+ * estaba bien razonada sobre una cardinalidad que ya no existe** — y por eso
+ * la línea se ENMIENDA acá, donde se lee, en vez de borrarse.
  *  · ESTADOS: armar (cargando/error/vacío/listo) · vendida (el código).
  *
  * 🔴 EL VENDEDOR JAMÁS ELIGE LA MASCOTA (§4): la venta se registra
@@ -25,6 +32,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Campo,
   Celda,
   CodigoAEscala,
   Encabezado,
@@ -76,6 +84,10 @@ export default function VentaMostrador() {
   const [intento, setIntento] = useState(0);
   const [seleccion, setSeleccion] = useState<Record<string, number>>({});
   const [eligiendo, setEligiendo] = useState(false);
+  /* El buscador de la Hoja: MISMO criterio que el de la vitrina (nombre y
+     marca), porque es el MISMO objeto. Si el mostrador buscara distinto, el
+     vendedor encontraría un producto en una pantalla y no en la otra. */
+  const [buscaSku, setBuscaSku] = useState('');
   const [registrando, setRegistrando] = useState(false);
 
   useFocusEffect(
@@ -292,9 +304,27 @@ export default function VentaMostrador() {
         altura="media"
       >
         <HojaScroll>
-          <View style={{ paddingBottom: spacing[2] }}>
+          <View style={{ paddingBottom: spacing[2], gap: spacing[3] }}>
+            {/* EL BUSCADOR — nace con la cardinalidad real. Un desplegable
+                de cientos sin dónde escribir obliga a recorrerlos, y el
+                mostrador es justo donde hay alguien esperando enfrente. */}
+            <Campo
+              label={t('ventas.vitrina.buscar')}
+              value={buscaSku}
+              onChangeText={setBuscaSku}
+              autoCapitalize="none"
+            />
             {pantalla.estado === 'listo' &&
-              pantalla.skus.map((sku, i) => (
+              pantalla.skus
+                .filter((sku) => {
+                  const q = buscaSku.trim().toLowerCase();
+                  if (q.length === 0) return true;
+                  return (
+                    sku.producto_nombre.toLowerCase().includes(q) ||
+                    (sku.producto_marca ?? '').toLowerCase().includes(q)
+                  );
+                })
+                .map((sku, i) => (
                 <View key={sku.sku_id}>
                   {i > 0 && <Separador />}
                   <Celda

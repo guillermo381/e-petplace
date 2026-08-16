@@ -38,19 +38,23 @@
  * bucket propio— tal como su JSDoc lo cableó.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, type NativeScrollEvent, type NativeSyntheticEvent, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
+  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   MarcaDeAgua,
   SelectorOpcion,
+  SelectorSegmentado,
+  Separador,
+  Tarjeta,
   Texto,
   radius,
   spacing,
@@ -66,6 +70,8 @@ import {
   type SkuDelVendedor,
 } from '@epetplace/api';
 import { monto, type IdiomaSoportado } from '@epetplace/i18n';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useTraduccion } from '@/i18n';
 import { InterruptorEspejo, type ModoEspejo } from '@/components/interruptor-espejo';
@@ -97,6 +103,16 @@ const TODAS = '__todas__';
  *  adivino.* */
 const TAM_VENTANA = 40;
 
+/** LISTA ⇄ ÍCONOS (receta B §A2). **El default es LISTA y es decisión:**
+ *  Stock es donde el vendedor TRABAJA, y la ley de la casa ya lo dice —
+ *  *tarjetas para elegir, filas para leer*. La grilla sirve para
+ *  reconocer por la foto; la fila, para operar. */
+type VistaProductos = 'lista' | 'iconos';
+/** **La elección SE RECUERDA**, y en el DISPOSITIVO: es de la vista, no
+ *  de la cuenta. *Un modo que vuelve al default cada vez que entrás no es
+ *  un modo: es una preferencia que la app ignora.* */
+const LLAVE_VISTA = 'vitrina.vista';
+
 export default function Vitrina() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -113,6 +129,12 @@ export default function Vitrina() {
      motor** — sus SKUs ya viajan enteros y filtrar 37 en memoria es gratis.
      ⇒ **cero motor nuevo.** */
   const [busca, setBusca] = useState('');
+  const [vista, setVista] = useState<VistaProductos>('lista');
+  useEffect(() => {
+    void AsyncStorage.getItem(LLAVE_VISTA).then((v) => {
+      if (v === 'iconos' || v === 'lista') setVista(v);
+    });
+  }, []);
   /* LA VENTANA — 399 filas de una revientan N16 (dato de B, re-medido con
      el volumen). **Carga al llegar al final, JAMÁS un botón**: un «cargar
      más» le pide al pulgar que confirme lo que ya pidió con el scroll. */
@@ -233,6 +255,25 @@ export default function Vitrina() {
               peor que su ausencia* (Ley 23: la puerta no ofrece lo que va
               a rechazar). **Pedido a A**: `especies_aplicables` en el SKU
               del vendedor, y con eso el filtro entra también acá. */}
+          {/* CÓMO SE MIRA — segundo control del techo, y responde OTRA
+              pregunta que el de arriba: aquél dice QUÉ miro (mi trabajo o
+              lo que ve la familia), éste CÓMO lo miro. Por eso conviven:
+              no son dos formas de lo mismo. */}
+          <SelectorSegmentado
+            segmentos={[
+              { codigo: 'lista', etiqueta: t('ventas.vitrina.vistaLista') },
+              { codigo: 'iconos', etiqueta: t('ventas.vitrina.vistaIconos') },
+            ]}
+            activo={vista}
+            onCambio={(c) => {
+              const v: VistaProductos = c === 'iconos' ? 'iconos' : 'lista';
+              setVista(v);
+              void AsyncStorage.setItem(LLAVE_VISTA, v);
+            }}
+            etiqueta={t('ventas.vitrina.vistaGrupo')}
+            proposito="vista"
+          />
+
           {/* EL BUSCADOR — vive en el techo con el interruptor porque
               filtra lo que está abajo, y **al escribir se vuelve a la
               primera ventana**: sin eso, buscar con 200 filas ya cargadas
@@ -311,6 +352,7 @@ export default function Vitrina() {
                 coincide(p.nombre, p.marca),
               )}
               ventana={ventana}
+              vista={vista}
               ausentes={ausentes.length}
               moneda={pantalla.contexto}
               idioma={idioma as IdiomaSoportado}
@@ -320,6 +362,7 @@ export default function Vitrina() {
             <CaraAdministrar
               skus={pantalla.skus.filter((s2) => coincide(s2.producto_nombre, s2.producto_marca))}
               ventana={ventana}
+              vista={vista}
               alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=administrar`)}
             />
           )}
@@ -374,6 +417,7 @@ function FiltroEspecie({
 function CaraCliente({
   productos,
   ventana,
+  vista,
   ausentes,
   moneda,
   idioma,
@@ -381,6 +425,7 @@ function CaraCliente({
 }: {
   productos: ProductoDeVitrina[];
   ventana: number;
+  vista: VistaProductos;
   ausentes: number;
   moneda: ContextoVentas;
   idioma: IdiomaSoportado;
@@ -406,16 +451,17 @@ function CaraCliente({
           descripcion={t('ventas.vitrina.vacioClienteDetalle')}
         />
       ) : (
-        productos.slice(0, ventana).map((p) => (
-          <TarjetaProducto
-            key={p.oferta_id}
-            foto={p.foto_url}
-            nombre={p.nombre}
-            marca={p.marca}
-            linea={`${p.presentacion} · ${monto(p.precio, moneda.moneda, idioma)}`}
-            onPress={() => alAbrir(p.producto_id)}
-          />
-        ))
+        <Filas
+          vista={vista}
+          items={productos.slice(0, ventana).map((p) => ({
+            clave: p.oferta_id,
+            foto: p.foto_url,
+            nombre: p.nombre,
+            marca: p.marca,
+            linea: `${p.presentacion} · ${monto(p.precio, moneda.moneda, idioma)}`,
+            alPulsar: () => alAbrir(p.producto_id),
+          }))}
+        />
       )}
     </View>
   );
@@ -427,10 +473,12 @@ function CaraCliente({
 function CaraAdministrar({
   skus,
   ventana,
+  vista,
   alAbrir,
 }: {
   skus: SkuDelVendedor[];
   ventana: number;
+  vista: VistaProductos;
   alAbrir: (productoId: string) => void;
 }) {
   const { t } = useTraduccion();
@@ -446,23 +494,85 @@ function CaraAdministrar({
 
   return (
     <View style={{ gap: spacing[4] }}>
-      {skus.slice(0, ventana).map((s) => {
-        /* El contador es SOLO lo suyo — la ley vive en el wrapper y acá se
-           LEE. Cero huecos NO DIBUJA NADA. */
-        const mias = razonesDeAlcance(s).filter((r) => r.dueno === 'vendedor').length;
-        return (
-          <TarjetaProducto
-            key={s.sku_id}
-            foto={s.foto_portada}
-            nombre={s.producto_nombre}
-            marca={s.producto_marca}
-            linea={s.presentacion}
-            alcance={mias > 0 ? t('ventas.vitrina.leFaltan', { n: mias }) : null}
-            onPress={() => alAbrir(s.producto_id)}
-          />
-        );
-      })}
+      <Filas
+        vista={vista}
+        items={skus.slice(0, ventana).map((s) => {
+          /* El contador es SOLO lo suyo — la ley vive en el wrapper y acá
+             se LEE. Cero huecos NO DIBUJA NADA. */
+          const mias = razonesDeAlcance(s).filter((r) => r.dueno === 'vendedor').length;
+          return {
+            clave: s.sku_id,
+            foto: s.foto_portada,
+            nombre: s.producto_nombre,
+            marca: s.producto_marca,
+            linea: s.presentacion,
+            alerta: mias > 0 ? t('ventas.vitrina.leFaltan', { n: mias }) : null,
+            alPulsar: () => alAbrir(s.producto_id),
+          };
+        })}
+      />
     </View>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LOS DOS MODOS DE VER — una sola entrada de datos, dos formas (receta §A2).
+   *Tarjetas para elegir, filas para leer.* Que las dos caras del espejo
+   pasen por acá es lo que garantiza que cambiar de modo no cambie QUÉ se
+   ve, solo CÓMO — si cada cara tuviera su renderer, el espejo se rompería
+   en el detalle más chico.
+   ───────────────────────────────────────────────────────────────────────── */
+interface ItemProducto {
+  clave: string;
+  foto: string | null;
+  nombre: string;
+  marca: string | null;
+  linea: string;
+  alerta?: string | null;
+  alPulsar: () => void;
+}
+
+function Filas({ vista, items }: { vista: VistaProductos; items: ItemProducto[] }) {
+  if (vista === 'iconos') {
+    return (
+      <View style={{ gap: spacing[4] }}>
+        {items.map((it) => (
+          <TarjetaProducto
+            key={it.clave}
+            foto={it.foto}
+            nombre={it.nombre}
+            marca={it.marca}
+            linea={it.linea}
+            alcance={it.alerta ?? null}
+            onPress={it.alPulsar}
+          />
+        ))}
+      </View>
+    );
+  }
+  /* LISTA — la de OPERAR. `tituloEntero` porque **el nombre es el criterio
+     de elección y no se trunca**; el precio y el estado van en la línea de
+     datos, que es donde el ojo los busca cuando trabaja. */
+  return (
+    <Tarjeta relleno="ninguno">
+      {items.map((it, i) => (
+        <View key={it.clave}>
+          {i > 0 && <Separador />}
+          <Celda
+            titulo={it.nombre}
+            tituloEntero
+            subtitulo={
+              [it.marca, it.alerta ?? null].filter((x): x is string => x !== null).join(' · ') ||
+              undefined
+            }
+            metadataMono={it.linea}
+            interactiva
+            accessibilityRole="button"
+            onPress={it.alPulsar}
+          />
+        </View>
+      ))}
+    </Tarjeta>
   );
 }
 
