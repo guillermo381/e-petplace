@@ -42,7 +42,10 @@ export type ComposicionEstado =
   | 'ausente'
   | 'no_aplica';
 
-function composicionEstado(v: unknown): ComposicionEstado | null {
+/** EXPORTADA desde S99-L5b (N18): el lado vendedor estrecha con EL MISMO
+ *  guard que el cliente — un valor desconocido no se inventa en ninguna
+ *  de las dos caras. */
+export function composicionEstado(v: unknown): ComposicionEstado | null {
   return v === 'verificada' || v === 'declarada_sin_verificar' ||
          v === 'ausente' || v === 'no_aplica' ? v : null;
 }
@@ -263,7 +266,10 @@ function urlDeImagen(v: unknown): string | null {
   return null;
 }
 
-function fotosDeProducto(p: ObjDespensa): { portada: string | null; galeria: string[] } {
+/** EXPORTADA desde S99-L5b (N18): la completitud del VENDEDOR deriva su
+ *  razón `sin_foto` de ESTA misma función — una fuente, jamás un cómputo
+ *  paralelo. Si la regla de portada cambia acá, cambia para los dos lados. */
+export function fotosDeProducto(p: ObjDespensa): { portada: string | null; galeria: string[] } {
   const galeria = (Array.isArray(p.imagenes) ? p.imagenes : [])
     .map(urlDeImagen)
     .filter((u): u is string => u !== null);
