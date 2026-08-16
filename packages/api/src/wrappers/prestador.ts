@@ -803,3 +803,122 @@ export async function obtenerPerfilesPublicos(
     })),
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S99-A · LOTE #0 — EL CONTEXTO DE ARRANQUE EN UN VIAJE (D-738, cura reina).
+//
+// Reemplaza la cadena de identidad del arranque (obtenerMiPrestador →
+// contextoVentas → roles+moneda ≈ 3 olas + la sonda del HOY = 4 esperas,
+// ~620 ms medidos por d0) por UNA RPC que COMPONE los gates existentes —
+// obtener_mi_prestador · empleado_tiene_rol · obtener_mi_posicion_en_prestador
+// — sin re-derivar un solo predicado. La composición por capacidad (§2.0,
+// adjudicación 15-ago) se alimenta de acá: una fuente, N consumidores
+// (barra · HOY · la ventana hermana de L4).
+// ═══════════════════════════════════════════════════════════════════════════
+
+import type { ConfigMonedaPais } from './paisConfig';
+
+export interface CuentaComercialDeContexto {
+  id: string;
+  estado: string;
+  nombreComercial: string;
+  countryCode: string;
+}
+
+export interface ContextoArranque {
+  /** La MISMA fila que `obtenerMiPrestador` (titularidad o vínculo), o null. */
+  prestador: MiPrestador | null;
+  /** `empleado_tiene_rol(['dueño','administrador'])` — false sin prestador. */
+  esGestor: boolean;
+  /** La mitad "posición" de montaAtender (jsonb de posición del motor). */
+  esMostradorOGestion: boolean;
+  /** La mitad "capacidad de local": oferta activa con atiende_local en un
+   *  oficio cuya modalidad admite atención local. */
+  hayOficioLocal: boolean;
+  cuentaComercial: CuentaComercialDeContexto | null;
+  /** El veredicto SIEMPRE FRESCO (D-821): rol seller_productos activo. */
+  esVendedora: boolean;
+  /** La config ENTERA (D-448) del país de la cuenta, o null sin cuenta. */
+  moneda: ConfigMonedaPais | null;
+}
+
+export async function obtenerContextoArranque(): Promise<
+  ResultadoWrapper<ContextoArranque, CodigoErrorPrestador>
+> {
+  const uid = await uidActual();
+  if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
+
+  const { data, error } = await getClient().rpc('obtener_contexto_arranque');
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+
+  // Guard de shape contra el retorno REAL (L-124): jsonb con ok:true.
+  const r = data as {
+    ok?: unknown;
+    prestador?: Record<string, unknown> | null;
+    es_gestor?: unknown;
+    posicion?: { es_mostrador_o_gestion?: unknown } | null;
+    hay_oficio_local?: unknown;
+    cuenta_comercial?: {
+      id?: unknown;
+      estado?: unknown;
+      nombre_comercial?: unknown;
+      country_code?: unknown;
+    } | null;
+    es_vendedora?: unknown;
+    moneda?: {
+      currency_code?: unknown;
+      currency_symbol?: unknown;
+      currency_decimals?: unknown;
+    } | null;
+  } | null;
+  if (!r || r.ok !== true) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+
+  // El prestador llega como la MISMA fila del RETURNS TABLE de
+  // obtener_mi_prestador (to_jsonb del row) — mismo estrechado de cohorte
+  // que el wrapper original, para que los dos caminos digan lo mismo.
+  const p = r.prestador ?? null;
+  const prestador: MiPrestador | null =
+    p && typeof p.id === 'string'
+      ? ({
+          ...(p as unknown as MiPrestador),
+          cohorte: estrecharCohorte((p as { cohorte?: unknown }).cohorte as string | null),
+        } as MiPrestador)
+      : null;
+
+  const cc = r.cuenta_comercial ?? null;
+  const cuentaComercial: CuentaComercialDeContexto | null =
+    cc && typeof cc.id === 'string'
+      ? {
+          id: cc.id,
+          estado: typeof cc.estado === 'string' ? cc.estado : '',
+          nombreComercial: typeof cc.nombre_comercial === 'string' ? cc.nombre_comercial : '',
+          countryCode: typeof cc.country_code === 'string' ? cc.country_code : '',
+        }
+      : null;
+
+  const m = r.moneda ?? null;
+  const moneda: ConfigMonedaPais | null =
+    m &&
+    typeof m.currency_code === 'string' &&
+    typeof m.currency_symbol === 'string' &&
+    typeof m.currency_decimals === 'number'
+      ? { codigo: m.currency_code, simbolo: m.currency_symbol, decimales: m.currency_decimals }
+      : null;
+
+  return {
+    ok: true,
+    data: {
+      prestador,
+      esGestor: r.es_gestor === true,
+      esMostradorOGestion: r.posicion?.es_mostrador_o_gestion === true,
+      hayOficioLocal: r.hay_oficio_local === true,
+      cuentaComercial,
+      esVendedora: r.es_vendedora === true,
+      moneda,
+    },
+  };
+}
