@@ -16858,3 +16858,53 @@ cliente adentro.**
 `prestador_servicios` desde su casa, la solicitud sea visible a quien
 valida, y el camino esté caminado por el founder (nace sin activar, igual
 que todos).
+
+#### D-830 — 🔴 LA FRONTERA DE LAS DOS COLAS: FIFO ordena el TRABAJO, la RUTA ordena la SALIDA (frontera de mesa, 15-ago-2026 — se deposita ANTES de que alguien la mezcle)
+
+**La frontera, con número propio por orden de mesa:**
+- **FIFO ordena EL TRABAJO DEL LOCAL** — qué preparo primero (por hora de
+  confirmación del pago: `pagos_intentos.cerrado_en` del intento aprobado,
+  medido — jamás `pedidos.pagado_en`, que es heredada, bloqueada y 0/14).
+- **LA RUTA ordena LA SALIDA** — en qué orden entrego.
+
+**Son criterios OPUESTOS** (FIFO dice *«el que llegó primero»*, la ruta
+dice *«el que queda de paso»*) y **el corte entre ellas es el momento del
+DESPACHO.** Un pedido puede prepararse tercero y entregarse primero porque
+queda de paso, **y eso NO viola FIFO — FIFO se cumplió adentro del local.**
+
+**El riesgo que esta ficha existe para evitar:** si se mezclan, se
+construye UNA cola que no puede satisfacer NINGUNO de los dos criterios —
+y el defecto no daría rojo en ningún instrumento: cada pantalla se vería
+razonable y el conjunto estaría mal.
+
+☠️ **Muere** cuando las dos colas existan construidas con el corte en el
+despacho y ningún lector cruce los criterios.
+
+#### D-831 — 🟡 EL ARCO DE LA RUTA DEL REPARTIDOR + EL MANIFIESTO DE SALIDA (firma founder 15-ago; alcance v1 declarado — cruza L2 y L6)
+
+**La firma, verbatim:** *«un repartidor no lleva un único pedido;
+típicamente sale con unos diez a quince pedidos por ruta.»*
+
+**EL CENSO, medido del objeto (universo declarado — L-238):**
+`information_schema.tables` de `public` con `%manifiesto%`/`%ruta%`/
+`%salida%` → **CERO tablas**; columnas de `envios` → tiene `repartidor_id`
+por envío, `salio_en`, `hacia_destino_en`, promesa y ventana, `track_gps` —
+**pero NINGÚN orden de parada ni agrupador: cada envío viaja SOLO.** La
+«ruta» de hoy es implícita (repartidor + día) y no tiene entidad: no hay
+sobre qué ordenar paradas ni qué mostrarle al repartidor como manifiesto.
+
+**VOTO DE MESA, servido con su costo:** ordenar 10–15 paradas con ventanas
+horarias por mejor ruta es un problema CARO de resolver bien y **NO entra
+a octubre como cosa propia.** Lo que entra y cubre el grueso del valor:
+**agrupar por zona · ordenar por cercanía al punto de salida · y DEJAR QUE
+EL REPARTIDOR REORDENE CON EL DEDO** — conoce el tráfico y las calles
+mejor que cualquier algoritmo nuestro en v1.
+
+**El alcance v1:** el manifiesto de salida como ENTIDAD (los envíos de una
+salida, con orden editable por el repartidor) + la pantalla que lo lista.
+El optimizador queda declarado FUERA. La frontera con el FIFO del local es
+**D-830** y no se cruza.
+
+☠️ **Muere** cuando un repartidor real salga con N pedidos, los vea como
+UNA salida ordenada, y pueda reordenarlos con el dedo sin romper ninguna
+ventana comprometida.
