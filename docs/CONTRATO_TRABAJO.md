@@ -459,23 +459,44 @@ publicar cualquier cosa.*
 
 ---
 
-### ⚠️ COLISIÓN DE NUMERACIÓN DECLARADA — HAY DOS REGLAS 87 (medido S99, NO resuelta acá)
+### ⚠️ LAS DOS REGLAS 87 — ADJUDICADO: NINGUNA SE MUEVE, SE DESAMBIGUAN POR NOMBRE (mesa S99, 16-ago-2026)
 
-**El literal:** el changelog tiene **`v1.27 (S97)` → regla 87 = el
-`SALTAR_GATE` declara un rojo con nombre** y **`v1.30 (S88)` → regla 87 = un
-aparato conectado no es un aparato libre.** **Son dos reglas distintas con el
-mismo número, y las dos ya viajaron** (están citadas en actas y partes).
+**El hecho medido:** el contrato tiene **dos reglas 87 distintas**, las dos
+nacidas en sesiones distintas y **las dos ya viajadas** en prompts, partes y
+fichas:
 
-**Por qué se declara en vez de renumerarse:** con `D-832` —la colisión gemela
-de esta misma sesión— se corrió **la que todavía no había viajado**. **Acá
-las dos viajaron**, así que mover cualquiera invalida citas vivas. *Dos
-reglas con el mismo número es peor que un hueco, porque las dos parecen
-legítimas — pero renumerar a ciegas rompe lo que ya se citó.* **Lo arbitra la
-mesa; entretanto, quien cite la 87 dice cuál de las dos.**
+| Cita canónica | Qué dice | Nació |
+|---|---|---|
+| **regla 87 · SALTAR_GATE** | un `SALTAR_GATE` declara UN rojo, con su nombre; si el aviso trae otro, el salto no lo cubre | v1.27 · S97 |
+| **regla 87 · aparato conectado** | un aparato conectado no es un aparato libre (la 85 aplicada al HARDWARE) | v1.30 · S88 |
+
+**Adjudicación de mesa: NINGUNA SE RENUMERA.** *Renumerar cualquiera de las
+dos invalida citas que están vivas en partes y en fichas* — y una cita rota
+es peor que un número compartido, porque **la cita rota no avisa**.
+**Se desambiguan por NOMBRE: `regla 87 · SALTAR_GATE` y `regla 87 · aparato
+conectado`.**
+
+> **⚖️ LA LEY QUE SALE, y ya regía un piso más abajo: EL NÚMERO ES UN
+> PUNTERO, NO UN IDENTIFICADOR.** Quien cita una regla **cita también su
+> nombre**, igual que quien cita una línea de código ajeno cita su literal
+> (L-260). *Si el número solo no alcanza para ENCONTRARLA, el número solo no
+> alcanza para CITARLA.*
+
+> **🔴 Y LA REGLA OPERATIVA QUE EVITA LA PRÓXIMA: ninguna regla del contrato
+> nace sin verificar por grep que su número esté libre** — **la misma
+> disciplina que ya rige para las `L-` y las `D-`.** *El canon la tenía y el
+> contrato no; por eso el canon acumuló un `D-757` tomado y una colisión de
+> `D-832`, y el contrato acumuló ésta.* **Que el contrato tenga la misma
+> higiene que el canon.**
+
+*(Precedente inmediato del mismo día: la colisión de `D-832` se resolvió al
+revés —corriendo la ficha— **porque ahí una de las dos NO había viajado**.
+Los dos criterios conviven y no se contradicen: **se mueve lo que todavía no
+fue citado; se desambigua lo que ya circula.**)*
 
 ---
 
-### Enmienda Sesión 97 — El `SALTAR_GATE` declara UN rojo con NOMBRE (regla 87)
+### Enmienda Sesión 97 — El `SALTAR_GATE` declara UN rojo con NOMBRE (**regla 87 · SALTAR_GATE**)
 
 > **Un `SALTAR_GATE` declara UN rojo, con su nombre. Si el aviso trae OTRO
 > rojo que el declarado, el salto NO lo cubre.**
@@ -523,7 +544,7 @@ comodidad se interpuso entre la medición y la conclusión, y no avisó.*
 
 - **v1.27 (14 Ago 2026 — S97):** regla 87 — EL `SALTAR_GATE` DECLARA UN ROJO CON NOMBRE, nacida del incidente propio de A: declaró el rojo conocido de `router.d.ts` y pasó al lado de `verify:diseno ROJO` que el mismo aviso traía. *Escribir un motivo cierto se siente como haber mirado.* El motivo enumera los rojos que el aviso mostró; si aparece uno que no estaba, el commit se rehace.
 
-- **v1.30 (5 Ago 2026 — S88):** **regla 87 — UN APARATO CONECTADO NO ES UN APARATO LIBRE.** *(Propuesta por la pista D, firmada por la mesa. Es la forma de la regla 85 —el worktree por pista— aplicada al HARDWARE: el aislamiento del árbol no sirve de nada si las cuatro pistas comparten un teléfono.)*
+- **v1.30 (5 Ago 2026 — S88):** **regla 87 · aparato conectado — UN APARATO CONECTADO NO ES UN APARATO LIBRE.** *(Propuesta por la pista D, firmada por la mesa. Es la forma de la regla 85 —el worktree por pista— aplicada al HARDWARE: el aislamiento del árbol no sirve de nada si las cuatro pistas comparten un teléfono.)*
 
   **Cada pista FIJA su `ANDROID_SERIAL` y no dispara intents, taps ni instalaciones a un serial que no declaró como suyo.** Antes del primer intent se verifica **quién tiene ese aparato**, igual que antes de un commit se verifica el territorio.
 
