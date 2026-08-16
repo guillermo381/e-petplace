@@ -3207,6 +3207,11 @@ export const prestadorEs = {
       /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
       catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
       leFaltan: 'Le faltan {{n}}',
+      /* Rótulos de FILA — el nombre de la razón, no su instrucción.
+         Su versión con camino vive en `ventas.producto.razon_*`. */
+      falta_sku_rechazado: 'Rechazado',
+      falta_sin_precio_propuesto: 'Sin precio',
+      falta_sin_stock: 'Sin stock',
       vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
       vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',
       vacioAdminTitulo: 'Todavía no propusiste productos',
