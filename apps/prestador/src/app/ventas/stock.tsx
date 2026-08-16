@@ -184,6 +184,7 @@ export default function StockVentas() {
                 {i > 0 && <Separador />}
                 <Celda
                   titulo={sku.producto_nombre}
+                  tituloEntero
                   subtitulo={[
                     sku.presentacion,
                     sku.stock_reservado > 0
@@ -216,6 +217,28 @@ export default function StockVentas() {
         }}
         titulo={t('ventas.stock.ajusteTitulo')}
         altura="media"
+        /* 🔴 S99-C · EL CTA VIVE EN EL PIE, FUERA DEL SCROLL (pieza de B,
+           pedido de C con medición). La caminata en aparato lo midió: la
+           Hoja abría mostrando dos campos y una frase, y **«Guardar el
+           ajuste» quedaba fuera de pantalla** — había que scrollear para
+           ver la acción de la Hoja. Ahora el contenido corre por debajo y
+           el compromiso no se mueve. La línea de la ayuda sube con él
+           porque el CTA apagado tiene que decir QUÉ FALTA a la vista
+           (precedente S73): un botón gris cuya razón no se ve manda a
+           adivinar. */
+        pie={
+          <>
+            <Texto variante="apoyo">{t('ventas.stock.motivoAyuda')}</Texto>
+            <Boton
+              variante="primario"
+              bloque
+              cargando={guardando}
+              deshabilitado={!listoParaGuardar}
+              etiqueta={t('ventas.stock.guardarCta')}
+              onPress={() => void guardar()}
+            />
+          </>
+        }
       >
         <HojaScroll>
           <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
@@ -241,16 +264,7 @@ export default function StockVentas() {
               label={t('ventas.stock.motivo')}
               value={motivo}
               onChangeText={setMotivo}
-              ayuda={t('ventas.stock.motivoAyuda')}
               deshabilitado={guardando}
-            />
-            <Boton
-              variante="primario"
-              bloque
-              cargando={guardando}
-              deshabilitado={!listoParaGuardar}
-              etiqueta={t('ventas.stock.guardarCta')}
-              onPress={() => void guardar()}
             />
           </View>
         </HojaScroll>
