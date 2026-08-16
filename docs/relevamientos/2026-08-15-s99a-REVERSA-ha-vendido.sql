@@ -1,0 +1,4 @@
+-- REVERSA de 20260817150000_s99a_ha_vendido_en_contexto.sql
+-- Escrita ANTES. Deshace: re-crear obtener_contexto_arranque() SIN la clave
+-- 'ha_vendido' (el cuerpo previo vive en 20260817140000 — re-aplicar ese
+-- CREATE OR REPLACE). No toca datos: la clave es DERIVADA (EXISTS), no columna.

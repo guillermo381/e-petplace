@@ -838,6 +838,9 @@ export interface ContextoArranque {
   cuentaComercial: CuentaComercialDeContexto | null;
   /** El veredicto SIEMPRE FRESCO (D-821): rol seller_productos activo. */
   esVendedora: boolean;
+  /** El discriminador del vacío (letra 15-ago): ¿alguna vez ENTREGÓ un
+   *  pedido? false → voz de arranque · true → voz de serenidad. */
+  haVendido: boolean;
   /** La config ENTERA (D-448) del país de la cuenta, o null sin cuenta. */
   moneda: ConfigMonedaPais | null;
 }
@@ -867,6 +870,7 @@ export async function obtenerContextoArranque(): Promise<
       country_code?: unknown;
     } | null;
     es_vendedora?: unknown;
+    ha_vendido?: unknown;
     moneda?: {
       currency_code?: unknown;
       currency_symbol?: unknown;
@@ -918,6 +922,7 @@ export async function obtenerContextoArranque(): Promise<
       hayOficioLocal: r.hay_oficio_local === true,
       cuentaComercial,
       esVendedora: r.es_vendedora === true,
+      haVendido: r.ha_vendido === true,
       moneda,
     },
   };
