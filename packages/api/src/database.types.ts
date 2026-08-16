@@ -10298,6 +10298,50 @@ export type Database = {
           },
         ]
       }
+      inventario_reconciliaciones: {
+        Row: {
+          antes_disponible: number
+          antes_reservado: number
+          creada_en: string
+          despues_disponible: number
+          despues_reservado: number
+          id: string
+          motivo: string
+          reconciliada_por: string | null
+          sku_id: string
+        }
+        Insert: {
+          antes_disponible: number
+          antes_reservado: number
+          creada_en?: string
+          despues_disponible: number
+          despues_reservado: number
+          id?: string
+          motivo: string
+          reconciliada_por?: string | null
+          sku_id: string
+        }
+        Update: {
+          antes_disponible?: number
+          antes_reservado?: number
+          creada_en?: string
+          despues_disponible?: number
+          despues_reservado?: number
+          id?: string
+          motivo?: string
+          reconciliada_por?: string | null
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventario_reconciliaciones_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "vendedor_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventario_reservas: {
         Row: {
           cantidad: number
@@ -20880,6 +20924,10 @@ export type Database = {
         Args: { p_codigo: string; p_mascota_id: string }
         Returns: Json
       }
+      reconciliar_inventario_sku: {
+        Args: { p_motivo: string; p_sku_id: string }
+        Returns: Json
+      }
       registrar_aprobacion_presencial: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -21364,6 +21412,7 @@ export type Database = {
       }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }
+      verificar_coherencia_inventario: { Args: never; Returns: Json }
       verificar_coherencia_tablas_tipadas: {
         Args: never
         Returns: {

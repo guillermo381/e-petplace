@@ -278,7 +278,14 @@ export function normalizarCodigoDespensa(
   // `auth_requerido`, el resto del monorepo dice `auth_required`.
   if (raw === 'auth_required') return 'auth_requerido';
   if (raw.startsWith('no_access_to_mascota')) return 'sin_acceso_a_mascota';
-  // El CHECK del stock no es un RAISE nuestro: llega como texto de constraint.
+  // 🔴 D-827 EN SU PUERTA MÁS CARA (S99-A): el motor AHORA LO DICE. El trigger
+  // del saldo rebota `stock_insuficiente: quedan N y el movimiento pide M`
+  // ANTES de chocar contra el CHECK — así la última pantalla de una compra
+  // puede decir «ya no queda» en vez de «algo salió mal».
+  if (raw.startsWith('stock_insuficiente')) return 'sin_stock';
+  if (raw.startsWith('reserva_insuficiente')) return 'sin_stock';
+  // Y el CHECK queda de RED, no de camino: si algún día un escritor nuevo
+  // saltea el trigger, el texto de constraint sigue teniendo traducción.
   if (raw.includes('stock_disponible')) return 'sin_stock';
   for (const codigo of CODIGOS_ERROR_DESPENSA) {
     if (raw.startsWith(codigo)) return codigo;
