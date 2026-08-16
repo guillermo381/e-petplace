@@ -3207,6 +3207,11 @@ export const prestadorEs = {
       /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
       catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
       leFaltan: 'Le faltan {{n}}',
+      /* Rótulos de FILA — el nombre de la razón, no su instrucción.
+         Su versión con camino vive en `ventas.producto.razon_*`. */
+      falta_sku_rechazado: 'Rechazado',
+      falta_sin_precio_propuesto: 'Sin precio',
+      falta_sin_stock: 'Sin stock',
       vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
       vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',
       vacioAdminTitulo: 'Todavía no propusiste productos',
@@ -3469,6 +3474,15 @@ export const prestadorEs = {
       repartidorGuardarCta: 'Guardar',
       repartidorInactivo: 'Inactivo',
     repartidorSinReclamar: 'Todavía no reclamó su acceso — tiene que entrar a la app con su correo',
+    /* ④ · el estado se ve SIN entrar. Un hecho, sin consecuencia
+       insinuada: si además bloquea el despacho, no está medido. */
+    /* ESTADO DE SECCIÓN (gramática de bloque §3): hechos de CONJUNTO que
+       hay que contar para saber. La capacidad por persona vive en su
+       ficha — acá va la SUMA, que es la que contesta «¿cuánto aguanto
+       hoy?». */
+    repartidoresEstado: '{{n}} · {{activos}} activos',
+    repartidoresCupoTotal: '{{n}} entregas por día',
+    repartidoresSinCupoTotal: 'sin cupo declarado',
     localTitulo: 'Tu local',
     localEtiqueta: 'Atiendo en mi local',
     localDetalle:
