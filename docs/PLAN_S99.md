@@ -118,6 +118,28 @@ transversales toda la sesión.**
 >   como lectura y no como literal)*: si L4 y su cola de L5b compiten por su
 >   tiempo, **gana lo indispensable — D sirve a L5b antes que al dual.**
 
+> ### ✒️ LA PARTICIÓN DEL LOTE #0 — FIRMADA POR EL FOUNDER (16-ago-2026;
+> no se reabre ni se trata como pendiente urgente)
+>
+> - **#0a — RPC cableada + composición por capacidad:** cura la REGRESIÓN,
+>   sigue INDISPENSABLE y va primero (dueño A).
+> - **#0b — la cola de ~9 olas seriales (~1,4 s):** es **DEUDA PREEXISTENTE
+>   que la medición destapó de paso** — existía antes de S99. **Se cura
+>   DESPUÉS de L5b, no antes.** El censo y la cura servida viven en el Loop
+>   de A.
+> - **LA RAZÓN, escrita para que nadie la reabra:** *un vendedor sin
+>   vitrina no vende; uno con un HOY de ~2,3 s vende igual que hoy. Curar
+>   1,4 s de deuda vieja antes que construir la vitrina es elegir velocidad
+>   sobre negocio.*
+> - **⚠️ EL DISCRIMINADOR DE CIERRE SE PARTE con el lote, para que nadie lo
+>   declare mal:** **#0a cierra volviendo el HOY a su estado previo o
+>   mejor, medido EN APARATO con C.** El **<2 s en frío pasa a ser el
+>   discriminador de #0b**, no de #0a. Los tres instrumentos (censo de
+>   olas · aparato de C · el dedo del founder) siguen teniendo que
+>   coincidir EN AMBOS.
+> - **LA COLA DE LA SESIÓN QUEDA: #0a → L2 → L3 → L5a → L5b → #0b.**
+>   L4 entregada · L6 a v1.1.
+
 ---
 
 ## §3 · LO QUE EL DOBLE CHECK DE MESA AGREGÓ (y su porqué)
