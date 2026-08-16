@@ -17054,3 +17054,48 @@ S99.**
 nombre qué domina la franja, y la cura que salga tenga ese diagnóstico
 atrás.
 
+#### D-835 — 🔴 EL GUARD RAÍZ NO RE-RESUELVE: aceptar y cerrar sesión dejan el esqueleto PARA SIEMPRE (Gate 2, medición de C — 17-ago-2026; dueño: A, ALTO)
+
+**El rojo, medido en aparato real (C, Gate 2 — dos botones distintos):**
+en el callejón `sin_rol` del prestador, **«Aceptar» (el reclamo del
+vínculo) y «Cerrar sesión» dejan la pantalla en ESQUELETO para siempre**
+— cero líneas nuevas de `[sesion]` en el forense — **aunque la acción SÍ
+ocurre** (al reiniciar la app, el estado es el correcto: sin sesión, o el
+vínculo sellado). Si llega a octubre, cada repartidor nuevo cree que la
+app se colgó justo en el momento en que funcionó.
+
+**Por qué es «la puerta de al lado» de una clase ya curada:** el propio
+archivo (`(tabs)/_layout.tsx`, cura (b) de S96-C) declara curado el
+esqueleto-eterno **por la puerta de la EXCEPCIÓN** (el `.catch` que
+faltaba). Esto entra por la vecina: los dos botones SÍ llaman al
+mecanismo de re-resolución (`setSesion('verificando')` +
+`setIntento(n+1)`), y el `useFocusEffect(useCallback(…, [intento]))` del
+guard **no re-dispara pese al cambio de dep** — el esqueleto se pinta y
+nadie vuelve a preguntar.
+
+**Dueño: A** — el mecanismo (`intento` + `useFocusEffect`) vive en el
+guard raíz que A reescribió en el lote #0a; el síntoma es del MECANISMO,
+no de las piezas que lo llaman (el reclamo de C/D hace su parte bien:
+llama al mismo camino que el cierre de sesión).
+
+**Primer paso (repro barata, sin aparato):** el camino «cerrar sesión» es
+reproducible en RN-web con el forense `[sesion]` en la consola — login →
+caer en `sin_rol` → tocar cerrar sesión → medir si `[sesion]` re-emite.
+Hipótesis a discriminar: ① `useFocusEffect` de un LAYOUT (no screen) no
+re-corre al cambiar la identidad del callback estando ya enfocado · ②
+algo en el orden de los dos `set` (batching) deja el efecto viejo como
+vigente · **③ el efecto SÍ re-corre y la CADENA CUELGA** — el log de
+veredicto vive al FINAL del `.then`, así que un `getSession()` que
+deadlockea tras `signOut()` (candidato conocido: `navigator.locks` de
+auth-js) produce el MISMO cero de líneas. **El instrumento que las
+separa ya está commiteado (17-ago): el forense de ARRANQUE del efecto**
+(`[sesion] raíz prestador: resolviendo… (intento N)`) — una pasada de
+aparato o web decide: línea-sin-veredicto = cuelga (③); sin línea = no
+corre (①/②). **La cura NO se escribe antes del rojo discriminado**
+(L-192: el modo de falla es el silencio — exactamente esta clase).
+
+☠️ **Muere** cuando: rojo reproducido → cura aplicada → **el gate en
+aparato repite los DOS botones** (aceptar re-resuelve a la pantalla del
+repartidor; cerrar sesión aterriza en la bienvenida) — con línea
+`[sesion]` nueva visible en cada uno.
+

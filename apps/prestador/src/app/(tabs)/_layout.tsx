@@ -138,6 +138,16 @@ export default function TabsLayout() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+      /* 🔬 D-835 — FORENSE DE ARRANQUE (L-192: el modo de falla de esta
+         cadena es el SILENCIO). El Gate 2 midió «cero líneas [sesion]» tras
+         aceptar/cerrar sesión, y ese cero tiene DOS lecturas: el efecto no
+         re-disparó, O re-disparó y la cadena COLGÓ (el log de veredicto
+         vive al FINAL del .then — un `getSession()` que deadlockea tras
+         `signOut()` produce el mismo silencio). Esta línea discrimina en
+         una sola pasada: si aparece sin veredicto después, la cadena
+         cuelga; si no aparece, el efecto no corre. No es la cura — es el
+         instrumento que decide cuál escribir. */
+      console.log(`[sesion] raíz prestador: resolviendo… (intento ${intento})`);
       void (async (): Promise<EstadoSesionRaiz> => {
         if (!apiLista) {
           return { error: true, detalle: 'Faltan EXPO_PUBLIC_SUPABASE_URL / ANON_KEY en .env.local.' };
