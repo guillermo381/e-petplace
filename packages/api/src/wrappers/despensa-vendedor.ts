@@ -396,6 +396,12 @@ export interface Repartidor {
    *  que lo exige. La superficie compone el E.164 con su selector de país;
    *  el motor **valida y rebota, jamás deduce el país** (P21). */
   whatsapp: string | null;
+  /** S99 (pedido de C, mesa 17-ago): el correo del vínculo — SIN él la
+   *  pantalla de edición no puede pre-llenar, y como `actualizar_repartidor`
+   *  pisa lo que recibe, mandar vacío lo BORRARÍA: el lector que no trae el
+   *  campo convierte la edición en un borrado silencioso. null honesto =
+   *  registrado sin correo (los anteriores a S98). */
+  correo: string | null;
   /** PATH del bucket privado `cuenta-documentos`, **jamás URL**: una URL
    *  firmada guardada vence y la foto se pierde sin error (S47). */
   documento_foto_path: string | null;
@@ -417,7 +423,7 @@ export async function listarRepartidores(
   const { data, error } = await getClient()
     .from('repartidores')
     .select(
-      'id, nombre, documento, tipo_documento, telefono, whatsapp, ' +
+      'id, nombre, documento, tipo_documento, telefono, whatsapp, correo, ' +
         'documento_foto_path, foto_path, user_id, activo, ' +
         'repartidor_vehiculos(id, tipo, placa, orden)',
     )
@@ -460,6 +466,7 @@ export async function listarRepartidores(
       tipo_documento: typeof r.tipo_documento === 'string' ? r.tipo_documento : null,
       telefono: typeof r.telefono === 'string' ? r.telefono : null,
       whatsapp: typeof r.whatsapp === 'string' ? r.whatsapp : null,
+      correo: typeof r.correo === 'string' ? r.correo : null,
       documento_foto_path:
         typeof r.documento_foto_path === 'string' ? r.documento_foto_path : null,
       foto_path: typeof r.foto_path === 'string' ? r.foto_path : null,
@@ -469,6 +476,107 @@ export async function listarRepartidores(
     });
   }
   return { ok: true, data: salida };
+}
+
+/** S99 (pedido de C) · Los VIAJES por repartidor de una cuenta — el ⑤ de la
+ *  ficha del repartidor. El HECHO, no el vocabulario: «entregó» =
+ *  `entregado_en IS NOT NULL` (el vocabulario de estado puede crecer sin
+ *  romper el conteo). Un repartidor sin envíos viene con ceros REALES del
+ *  motor — jamás un cero fijo de la pantalla, que mentiría idéntico para
+ *  quien nunca salió y para quien entregó cuarenta. */
+export async function viajesPorRepartidor(
+  cuentaComercialId: string,
+): Promise<
+  ResultadoWrapper<{ repartidor_id: string; entregados: number; en_curso: number }[], CodigoErrorDespensa>
+> {
+  const { data, error } = await getClient().rpc('viajes_por_repartidor', {
+    p_cuenta_comercial_id: cuentaComercialId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  // L-247: degradación propia — motor viejo sin la clave devuelve [].
+  const filas = (Array.isArray(data.viajes) ? data.viajes : []).flatMap((v) => {
+    const o = v as { repartidor_id?: unknown; entregados?: unknown; en_curso?: unknown };
+    return typeof o.repartidor_id === 'string'
+      ? [{
+          repartidor_id: o.repartidor_id,
+          entregados: typeof o.entregados === 'number' ? o.entregados : 0,
+          en_curso: typeof o.en_curso === 'number' ? o.en_curso : 0,
+        }]
+      : [];
+  });
+  return { ok: true, data: filas };
+}
+
+/** S99-L5a · LA CARGA DETERMINISTA (el reencuadre de mesa: lo que hace que
+ *  la vitrina exista más allá de seis). Cada fila entra por la MISMA puerta
+ *  1 a 1 (`proponer_sku_vendedor` — M21 intacta: el canónico se RESUELVE,
+ *  jamás se crea; el SKU nace `propuesto` y e-PetPlace publica).
+ *
+ *  POR-FILA, jamás todo-o-nada: una fila mala no mata 49 buenas — cada una
+ *  responde con su índice, y **lo que no entra SE DICE** (el criterio de la
+ *  mitad determinista). Techo 500 que rebota HABLANDO, jamás trunca.
+ *  §14 de MODELO_DESPENSA no aplica acá: no hay IA — el parseo del archivo
+ *  (CSV/XLSX → filas) es de la pantalla; este wrapper recibe filas ya
+ *  estructuradas. */
+export interface FilaLoteSku {
+  producto: { familia_codigo: string; nombre: string; marca?: string | null };
+  variante: { codigo: string };
+  sku: {
+    sku_vendedor: string;
+    precio_propuesto?: number;
+    country_code?: string;
+    /** Solo se aplica al SKU NUEVO (entra por el ledger); el re-propose
+     *  jamás toca stock — la diferencia va por `ajustarStockVendedor`. */
+    stock_disponible?: number;
+  };
+}
+
+export interface ResultadoFilaLote {
+  indice: number;
+  ok: boolean;
+  /** El error del motor, con su causa (`campo_requerido: …` ·
+   *  `producto_no_canonico: …` · `variante_no_canonica: …` ·
+   *  `sku_vendedor_duplicado: …`). La pantalla lo muestra POR LÍNEA del
+   *  archivo — lo que no entró se dice, jamás desaparece. */
+  error?: string;
+}
+
+export async function proponerSkusVendedorLote(
+  cuentaComercialId: string,
+  filas: FilaLoteSku[],
+): Promise<
+  ResultadoWrapper<
+    { propuestos: number; rechazados: number; resultados: ResultadoFilaLote[] },
+    CodigoErrorDespensa
+  >
+> {
+  const { data, error } = await getClient().rpc('proponer_skus_vendedor_lote', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_filas: filas as unknown as Json,
+    p_origen_carga: 'vendedor',
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  const resultados: ResultadoFilaLote[] = (Array.isArray(data.resultados) ? data.resultados : [])
+    .flatMap((v) => {
+      const o = v as { indice?: unknown; ok?: unknown; error?: unknown };
+      return typeof o.indice === 'number'
+        ? [{
+            indice: o.indice,
+            ok: o.ok === true,
+            ...(typeof o.error === 'string' ? { error: o.error } : {}),
+          }]
+        : [];
+    });
+  return {
+    ok: true,
+    data: {
+      propuestos: typeof data.propuestos === 'number' ? data.propuestos : 0,
+      rechazados: typeof data.rechazados === 'number' ? data.rechazados : 0,
+      resultados,
+    },
+  };
 }
 
 /** Registra un vehículo del repartidor. **Idempotente por (repartidor, placa)**:
@@ -1029,7 +1137,11 @@ export interface SkuDelVendedor {
   /** S99-L5b (voz del borde N17+N18): el PORQUÉ de un rechazo — el CHECK de
    *  la tabla garantiza que `rechazado` ⇒ motivo NOT NULL; en cualquier otro
    *  estado es null. *Un vendedor jamás cree que publicó algo que no
-   *  publicó* — y tampoco adivina por qué se lo rebotaron. */
+   *  publicó* — y tampoco adivina por qué se lo rebotaron.
+   *  ⚖️ RECETA 7 (mesa 18-ago): la superficie lo muestra LITERAL —
+   *  parafrasear un rechazo es reescribir lo que decidió otro y le saca al
+   *  vendedor la única información con la que puede arreglarlo. Es el
+   *  ÚNICO danger de la ficha. */
   motivo_rechazo: string | null;
   /** El precio de la oferta PUBLICADA de este SKU. `null` HONESTO = sin
    *  oferta publicada hoy — la pantalla lo dice, no se inventa un precio.

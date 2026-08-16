@@ -34,6 +34,9 @@ export const CODIGOS_ERROR_DESPENSA = [
   // ninguna cola — la ventana ni ofrece el comando (AUSENTE, Ley 23);
   // este rebote es el respaldo del motor, no una pantalla esperada.
   'pedido_terminal',
+  // proponer_skus_vendedor_lote (S99-L5a): la carga determinista.
+  'lote_invalido',
+  'lote_demasiado_grande',
   // crear_pedido_despensa
   'clave_idempotencia_requerida',
   'pedido_sin_items',
@@ -167,6 +170,8 @@ export const MENSAJES_DESPENSA: Record<
   no_sos_el_vendedor:           'No sos el vendedor de este pedido.',
   no_sos_admin:                 'No tenés permiso para hacer esto.',
   pedido_terminal:              'Este pedido ya está cerrado — no hay cola donde ordenarlo.',
+  lote_invalido:                'El archivo no tiene filas que cargar.',
+  lote_demasiado_grande:        'El archivo supera las 500 filas. Partilo y cargalo en tandas.',
   clave_idempotencia_requerida: 'Falta la clave de la compra. Volvé a intentar.',
   pedido_sin_items:             'El pedido no tiene productos.',
   oferta_no_publicada:          'Uno de los productos ya no está disponible.',
