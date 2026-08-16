@@ -58,7 +58,11 @@ export const lightTheme = {
      *  FECHA (D-583): si al soft launch (1-oct-2026) sigue en cero,
      *  MUERE — y su primer consumidor, cuando llegue, entra por gate. */
     warm:     palette.cream,    // narrativa cálida (hogar/familia) — SIN consumidores
-    tinta:    palette.tinta,    // S58: el techo del prestador (constante en los 3 temas)
+    tinta:    palette.tinta,    // ⏪ S99-B: **ya NO es «el techo del prestador»** — el techo
+                            // ganó el muro tealDark en S61-B12 y este rótulo quedó cuatro
+                            // sesiones vencido. Costó caro: la barra de tabs se pintó de
+                            // NEGRO en el gate 3 por elegir el token LEYENDO su comentario.
+                            // Hoy es tinta y nada más. Su techo vive en `useMuroOficio`.
   },
 
   text: {
@@ -161,6 +165,31 @@ export const lightTheme = {
     // temas (ya medido en el gate). Memorial NO porta el slot: degrada.
     controlLleno: palette.magentaDark,
     sobreControlLleno: '#FFFFFF',
+
+    /** ⭐ S99-B · EL ACTIVO EN SU REGISTRO **RELLENO** — el disco de la
+     *  barra de tabs (firma del founder sobre el gate 3).
+     *
+     *  🔴 **POR QUÉ UN SLOT NUEVO Y NO `accent.active`, medido:** `active`
+     *  es acento **GRÁFICO** (borde de foco, huella — mínimo 3:1 no
+     *  textual) y en el prestador resuelve a **teal PURO en oscuro**;
+     *  como RELLENO que carga un ícono, el papel encima de ese teal
+     *  reprueba. **Son dos registros de la misma idea** —Ley 2 y §15b.2
+     *  aplicadas al estado activo—, y por eso son dos slots y no un
+     *  color con excepciones.
+     *
+     *  ⚠️ **Y por qué tampoco `accent.cta`, aunque hoy COINCIDA en hexa
+     *  con el verde del techo en el prestador:** un CTA y un marcador de
+     *  navegación pueden divergir, y nadie debería descubrir esa
+     *  divergencia porque *la barra de tabs cambió de color el día que
+     *  alguien retocó un botón*. Valores iguales hoy, jobs distintos
+     *  siempre.
+     *
+     *  EN EL CLIENTE (este tema) el activo es su MAGENTA de identidad, no
+     *  el oro del CTA: **el oro decide, el magenta dice dónde estás.**
+     *  `magentaDark` porta papel 8.25 (medido S58) y sobre la barra
+     *  blanca (`bg.card` #FFFFFF) separa 9.2. */
+    activoLleno:      palette.magentaDark,
+    sobreActivoLleno: palette.light0,
 
     warm:          palette.terracottaDark,
     warmBg:        palette.terracottaAlphaL,

@@ -414,21 +414,50 @@ const todos: Pair[] = [
     surface: '#FFFFFF',
     noTextual: true,
   },
-  /* LA BARRA DE TABS SOBRE SU TECHO OSCURO (S99-B · firma del founder:
-   * *«el círculo que marca el seleccionado, en el COLOR OSCURO del
-   * header»*). La barra pasó a `bg.tinta`, así que su texto sigue la
-   * regla del muro (§15b.2): papel PLENO el activo, atenuado el resto.
-   * Es texto de 11px ⇒ piso 4.5. */
-  {
-    nombre: 'GLOBAL · BarraTabs activo: papel pleno / techo tinta',
-    fg: palette.light0,
-    bg: palette.tinta,
-  },
-  {
-    nombre: 'GLOBAL · BarraTabs inactivo: papel atenuado / techo tinta',
-    fg: palette.papelAtenuado,
-    bg: palette.tinta,
-  },
+  /* LA BARRA DE TABS — SUS DOS SUPERFICIES (S99-B, gate 3 del founder).
+   *
+   * ⏪ Acá había dos pares `papel / techo tinta`. **Se caen con la pieza**:
+   * la barra dejó de ser un techo oscuro y pasó a `bg.card` (blanco en
+   * claro), y el activo dejó de vivir sobre la barra para vivir sobre el
+   * DISCO. *Medir papel-sobre-tinta habría seguido dando verde midiendo
+   * una anatomía que ya no existe* — el verde por la razón equivocada que
+   * esta casa persigue.
+   *
+   * **Lo que se mide ahora, y por qué son estos pares:**
+   * · el CONTENIDO del disco contra el disco — texto de 11 px ⇒ piso 4.5;
+   * · el DISCO contra la barra — es el marcador de «dónde estoy», o sea
+   *   GRÁFICA ⇒ piso 3. *Sin este segundo par, un disco del color de la
+   *   barra pasaría el gate: su texto estaría perfecto y el marcador
+   *   sería invisible.*
+   *
+   * Los cinco temas entran por `getTheme`, la misma puerta que la app —
+   * incluidas las dos casas de oficio, que es donde el founder mira. */
+  ...(
+    [
+      ['LIGHT', getTheme('light')],
+      ['DARK', getTheme('dark')],
+      ['MEMORIAL', getTheme('memorial')],
+      ['LIGHT·OFICIO', getTheme('light', 'oficio')],
+      ['DARK·OFICIO', getTheme('dark', 'oficio')],
+    ] as const
+  ).flatMap(([casa, t]) => [
+    {
+      nombre: `${casa} · BarraTabs contenido del disco / disco activo`,
+      fg: t.accent.sobreActivoLleno,
+      bg: t.accent.activoLleno,
+    },
+    {
+      nombre: `${casa} · BarraTabs disco activo / barra (marcador, gráfica)`,
+      fg: t.accent.activoLleno,
+      bg: t.bg.card,
+      noTextual: true,
+    },
+    {
+      nombre: `${casa} · BarraTabs inactivo: secundario / barra`,
+      fg: t.text.secondary,
+      bg: t.bg.card,
+    },
+  ]),
   /* MARCA DE MAPA (S99-B · `DIRECCION_ARTE` §6ter) — los objetos del
    * mundo contra los TRES tonos que el mapa de la casa realmente pinta.
    *

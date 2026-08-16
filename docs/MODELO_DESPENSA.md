@@ -1,6 +1,15 @@
 # MODELO_DESPENSA — El frente de productos
 
-> **Versión: v2.6 — S97 (14 Ago 2026). El ARCO DE STOCK, dirección firmada.**
+> **Versión: v2.7 — S99 (16 Ago 2026). UN SOLO INVENTARIO, DOS BOCAS — ley del
+> modelo, firmada.**
+> **Qué cambió respecto de v2.6: nace §8.6quinquies — el inventario es UNO y lo
+> consumen dos bocas; la reserva vence y el carrito no; el barrendero de
+> reservas NO puede mirar solo el reloj (después del pago la reserva deja de
+> tener reloj, y barrer por `expira_en` libera mercadería VENDIDA); y la
+> vitrina recibe `hay_stock` BOOLEANO, jamás un número. Con el choque
+> agotado-vs-alergia resuelto POR SUJETO.**
+>
+> **Versión previa: v2.6 — S97 (14 Ago 2026). El ARCO DE STOCK, dirección firmada.**
 > **Qué cambió respecto de v2.5: nace §8.6quater — la vista de Stock del
 > vendedor es EL ESPEJO de lo que ve el cliente (y la misma vista servirá al
 > mostrador el día de la venta en local) · la carga entra por DOS vías, una a
@@ -1179,6 +1188,81 @@ las dos caras pertenece la fila**. Si no puede declararlo, **es la señal de que
 la fusión ya ocurrió** y hay que frenar ahí, no después.
 
 ---
+
+### 8.6quinquies 🔴 UN SOLO INVENTARIO, DOS BOCAS (LEY DEL MODELO — firma del founder, 16-ago-2026)
+
+> **VERBATIM:** *«tanto si vendo desde el local como si vendo a través de
+> e-PetPlace me tiene que afectar el inventario. El seller que vende a través
+> de e-PetPlace y en mostrador tiene un ÚNICO inventario.»*
+
+**No hay «stock de mostrador» y «stock de vitrina»: hay STOCK, y dos bocas que
+lo consumen.** Y la consecuencia dura, con las palabras del founder: *si el
+vendedor tiene diez bolsas y vende tres en el mostrador, la vitrina dice siete
+inmediatamente* — si no, alguien compra por la app algo que ya se vendió por la
+puerta, **y el que queda mal es el vendedor.**
+
+**ESTADO MEDIDO CONTRA LA BASE (S99-A, 16-ago) — los cuatro puntos:**
+
+1. **La misma tabla, sí.** Las dos bocas escriben `inventario_movimientos` y el
+   saldo lo mueve **un trigger, jamás un UPDATE**: `venta_directa` sale del
+   disponible (en el mostrador nunca hubo reserva), `reserva` lo aparta.
+   Ninguna función pisa el saldo — **el único escritor es el trigger.**
+2. **La carrera entre las dos bocas: CERRADA.** La reserva **descuenta del
+   disponible**, y el mostrador lee y chequea ese mismo disponible ⇒ **no puede
+   vender lo que un pedido ya apartó.** La concurrencia la ordena el lock del
+   propio UPDATE, y los `CHECK >= 0` son el invariante. **La sobreventa es
+   inexpresable.**
+3. **La reserva que no se paga: SUELTA.** El carrito abandonado ya lo cubría
+   `expirar_pedidos_sin_pago` (cron horario, corriendo). Lo que faltaba era el
+   reloj de la reserva de quien **empezó a pagar y no terminó** — hoy existe,
+   cada 5 minutos, **y con un gate que solo alcanza pedidos sin pagar** (ver
+   abajo).
+4. **El ledger:** toda entrada y salida lleva motivo o referencia. **Corregir un
+   saldo es RECONCILIARLO desde el ledger, jamás escribirle un número.**
+
+**🔴 LA TRAMPA QUE ESTA LEY DEJA ESCRITA, porque casi se paga cara:** el
+barrendero de reservas vencidas **no puede mirar solo el reloj**. Después del
+pago la reserva **deja de tener reloj** —su compromiso ya no es del carrito,
+es de la venta, y se cierra al ENTREGAR—, así que un barrido por `expira_en`
+liberaría **mercadería vendida** y el mostrador podría venderla otra vez.
+*Medido el día de la firma: las 13 reservas vivas eran las 13 de pedidos
+PAGADOS, 12 de ellas con su reloj pasado.* **El gate por estado del pedido es
+parte de la ley, no un detalle de implementación.**
+
+**LA LEY HERMANA (misma firma, mismo día): EL CARRITO ES UNA INTENCIÓN Y DURA
+LO QUE LA PERSONA QUIERA; LA RESERVA ES UN COMPROMISO Y TIENE VENCIMIENTO.**
+*«Un pedido que esté en el carrito por X tiempo se le elimina la reserva… si el
+cliente quiere retomar, tiene que volver a validar contra stock, y si no lo
+tienen, le dice PRODUCTO YA NO DISPONIBLE.»* **El plazo no fue una decisión
+nueva: son 30 minutos, en el esquema desde S95.** Y la arquitectura ya la
+cumplía — el carrito vive en el cliente y no aparta nada; la revalidación es la
+puerta de pago, que rebota `sin_stock` **hablando**. *Lo que faltaba era el
+reloj: sin él la regla no regía.*
+
+**Y LA CONSECUENCIA QUE SE DECLARA PARA QUE NO SORPRENDA:** con la reserva
+vencida, **el producto sigue en la vitrina mientras está en el carrito de
+otro.** Eso es correcto y es el punto de la regla —*el estante no se bloquea
+por una intención*—, pero significa que dos personas pueden tener el mismo
+producto en el carrito y **la segunda que pague se lo lleva**. La voz de *«ya
+no disponible»* es lo que lo vuelve honesto, y **no reemplaza a la voz del
+último minuto** (la carrera real de dos familias en el mismo instante).
+
+**LA SEÑAL QUE LA FAMILIA SÍ PUEDE LEER (`hay_stock`, booleano):** la familia
+**no puede leer el inventario del negocio** —y está bien—, así que la vitrina
+recibe una señal **derivada** en la fuente que ya lee. **Booleano y jamás
+número:** la familia necesita *«¿puedo comprar esto?»*, no el inventario ajeno,
+y *«quedan 3»* es táctica de escasez **y** fuga de dato de negocio —la simetría
+de §7.4 escrita al revés—. **La vitrina dice QUÉ HAY AHORA; el carrito dice QUÉ
+PASÓ CON LO QUE ELEGISTE.** Leen la misma señal y ninguna reemplaza a la otra.
+
+**⚠️ EL CHOQUE DECLARADO Y RESUELTO POR SUJETO, para que nadie lea una firma
+como derogación de la otra:** el founder firmó que **el producto que NADIE
+vende** no aparece en filtros ni navegación (solo si se lo tipea por nombre);
+la doctrina de la alergia (§6/§10) dice **mostrar y decir, no ocultar**. *Las
+dos conviven porque hablan de sujetos distintos:* la primera es del **producto
+sin ningún vendedor**; la segunda, del **vendedor que no lo tiene** — y ahí el
+producto **se muestra y se dice**, porque esconderlo deja al dueño sin entender
+y, con competencia, **puede haber otro vendedor que sí lo tenga.**
 
 ### 8.6quater 🔴 EL ARCO DE STOCK (dirección firmada del founder, 14-ago-2026)
 

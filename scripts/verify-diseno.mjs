@@ -1113,9 +1113,18 @@ function r27(fuentes) {
   // medidos (no colores nuevos): `tealAlpha16` en claro · `tealAlpha15`
   // en oscuro — cada tema con su alfa, igual que sus hermanos tienen cada
   // uno su registro.
+  // ⭐ S99-B · ENTRA EL QUINTO SLOT: `activoLleno` (el disco de la barra
+  // de tabs). Entra por la MISMA puerta que sus cuatro hermanos y por la
+  // misma razón: si la casa de oficio no lo pisa, el prestador hereda el
+  // magenta del cliente — que es literalmente D-813 otra vez.
+  // **Su registro se da vuelta y por eso el esperado no es el mismo hex
+  // en los dos temas:** es un RELLENO que carga contenido, así que en
+  // claro va el `tealDark` del muro y en oscuro el `teal` puro (§15b.2:
+  // sobre superficie oscura manda el hex puro; el par del techo nocturno
+  // se hundiría contra la barra oscura, 1.4).
   const ESPERADO = {
-    lightOficio: { control: 'tealDark', controlBg: 'tealAlpha16', active: 'tealDark', marcaEleccion: 'tealDark' },
-    darkOficio: { control: 'teal', controlBg: 'tealAlpha15', active: 'teal', marcaEleccion: 'teal' },
+    lightOficio: { control: 'tealDark', controlBg: 'tealAlpha16', active: 'tealDark', marcaEleccion: 'tealDark', activoLleno: 'tealDark' },
+    darkOficio: { control: 'teal', controlBg: 'tealAlpha15', active: 'teal', marcaEleccion: 'teal', activoLleno: 'teal' },
   };
   for (const [casa, slots] of Object.entries(ESPERADO)) {
     const bloque = new RegExp(`const ${casa}[\\s\\S]*?\\n\\}`).exec(temas)?.[0] ?? '';
@@ -3400,16 +3409,35 @@ const EXTRAS_R27 = [
   // *Si este brazo no sale rojo, el cuarto slot es decorativo.*
   ['R27·brazo controlBg (todo lo demás sano — el estado que vivió en producción)', {
     temas:
-      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark },\n}\n' +
-      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },\n}',
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark, activoLleno: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal, activoLleno: palette.teal },\n}',
   }],
   // Y su hermano: el slot PISADO pero con el registro del OTRO tema. Un
   // guard que solo mirara presencia dejaría pasar el tinte claro en el
   // tema oscuro, que es un alfa distinto por medición, no por gusto.
   ['R27·brazo controlBg con el alfa cruzado', {
     temas:
-      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, controlBg: palette.tealAlpha15, active: palette.tealDark, marcaEleccion: palette.tealDark },\n}\n' +
-      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, controlBg: palette.tealAlpha16, active: palette.teal, marcaEleccion: palette.teal },\n}',
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, controlBg: palette.tealAlpha15, active: palette.tealDark, marcaEleccion: palette.tealDark, activoLleno: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, controlBg: palette.tealAlpha16, active: palette.teal, marcaEleccion: palette.teal, activoLleno: palette.teal },\n}',
+  }],
+  /* ── S99-B · EL BRAZO DEL QUINTO SLOT, `activoLleno` ────────────────
+     Mismo molde que los dos de D-813 y por la misma razón: **las dos
+     casas sanas en TODO salvo el slot que se prueba**, para que el rojo
+     no pueda venir de otro lado. *Un rojo que puede venir de cinco
+     lugares no prueba ninguno de los cinco.* */
+  ['R27·brazo activoLleno (lightOficio no lo pisa, todo lo demás sano)', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, activoLleno: palette.teal },\n}',
+  }],
+  // Y su hermano, el registro DADO VUELTA: el disco es RELLENO, así que
+  // en oscuro va el puro. Un guard que solo mirara presencia dejaría
+  // pasar el verde del muro nocturno, que contra la barra oscura se
+  // hunde (1.4) — el marcador existiría y no se vería.
+  ['R27·brazo activoLleno con el registro cruzado (darkOficio en tealDark)', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, activoLleno: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, activoLleno: palette.tealDark },\n}',
   }],
 ];
 for (const [nombre, fx] of EXTRAS_R27) {
@@ -3426,6 +3454,7 @@ for (const [nombre, fx] of EXTRAS_R16) {
     decorativas++;
   }
 }
+
 
 if (decorativas > 0) {
   console.error(`\nverify:diseno — ${decorativas} regla(s) decorativa(s): el lint se declara inválido`);

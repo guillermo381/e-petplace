@@ -86,6 +86,49 @@ medir su alcance sería exactamente lo que la casa no hace.*
 
 ---
 
+### 🔴 ⏪ EL CENSO SE CORRIÓ, Y **LA ENMIENDA SE CAE** (S99-B)
+
+**A midió 110 montajes / 84 con `titulo=` ⇒ «~26 sitios donde el techo
+puede mentir».** Al bajar el censo a la variante correcta, el número
+real es **otro y mucho más chico**, y con él se cae la enmienda entera:
+
+| medición | número |
+|---|---|
+| montan `variante="navegacion"` | **100** — y ahí `titulo` **ya es requerido por el tipo** |
+| montan `variante="portada"` | **7** |
+| portadas que **ya pasan el nombre de la pantalla** | **7 de 7** |
+
+**Los siete, con su literal:** `explorar.titulo` · `cuenta.titulo` ·
+`despensa.titulo` · `alta.paso1Titulo` · `atender.titulo` (×4) ·
+`mascotas.titulo` · `ventas.hoy.titulo`.
+
+> ⇒ **`Encabezado` NO tiene el hueco que le atribuí.** El slot existe y
+> los siete consumidores lo usan bien. *Lo único cierto de mi §3 es que
+> el slot se LLAMA `saludo` —nació en S52 para «Buenas tardes,
+> Guillermo»— y hoy ninguno de los siete lo usa así: **el nombre miente
+> sobre su trabajo, pero el trabajo se está haciendo.***
+
+### Y ENTONCES, ¿DÓNDE VIVE EL DEFECTO QUE EL FOUNDER VIO? EN UN STRING
+
+Medido en el diccionario, no deducido:
+- **`ventas.config.titulo` = `'Configuración'`** ✅ — y `configuracion.tsx:774`
+  lo monta. **Esa pantalla dice bien su nombre.**
+- **`ventas.hoy.titulo` = `'Pedidos'`**, y es lo que monta el techo de la
+  tab HOY (`(tabs)/index.tsx:2087`).
+
+⇒ El founder entra a vender, cae en **HOY**, y el techo dice **«Pedidos»**
+mientras el cuerpo le muestra lo que tiene que configurar. **No es que
+falte el nombre de la pantalla: es que la pantalla muestra un contenido
+que no es el que su nombre anuncia.**
+
+> ***Estuve a punto de cambiar una pieza que montan 107 pantallas para
+> curar un defecto que vive en una tab y su string.*** La enmienda queda
+> **RETIRADA**; el arreglo es de composición y es de C, con el literal
+> arriba. *Tercera vez en esta tanda que medir primero evitó la cura
+> equivocada — y la más cara de las tres.*
+
+---
+
 ## §4 · Y EL TERCER HALLAZGO DEL GATE, que es de aire
 
 > *«Administrar y Ver como cliente están MUY PEGADOS arriba de Vitrina,

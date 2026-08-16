@@ -3,12 +3,16 @@
  * Wrapper visual del sistema para el tabBar custom de expo-router Tabs.
  *
  * ═══════════════════════════════════════════════════════════════════
- * EL GESTO: el subrayado accent.active (pill 3×18) bajo el icono activo
- * es EL elemento activo de la vista raíz — las pantallas bajo tabs no
- * deben usar otro accent.active compitiendo.
+ * EL GESTO (S99-B): un DISCO relleno que VIAJA bajo el tab activo, con
+ * el borde superior de la barra hundiendo un valle a su paso. Es EL
+ * elemento activo de la vista raíz — las pantallas bajo tabs no deben
+ * usar otro marcador compitiendo.
  *
- * El subrayado aparece/desaparece con OPACITY (fast) — NO se desliza
- * entre tabs: el slide pelea con los gestos de swipe y se rompe feo.
+ * ⏪ Acá decía «el subrayado accent.active (pill 3×18)… aparece con
+ * OPACITY, NO se desliza». **El subrayado murió con el disco** y esta
+ * cabecera siguió describiéndolo. Se corrige porque la letra vencida de
+ * un token es exactamente lo que hizo que esta pieza saliera negra en el
+ * gate anterior — ver la nota de `colorBarra`.
  * ═══════════════════════════════════════════════════════════════════
  *
  * INTEGRACIÓN CON EXPO-ROUTER (S44 la enchufa sin pensar):
@@ -57,7 +61,6 @@ import Animated, {
 import Svg, { Circle, Path } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -97,14 +100,33 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  QUE SE DEFORMA.** Su borde superior hunde un valle bajo el tab
  *  activo, y sobre el valle flota un disco del mismo color.
  *
- *  🔴 **EL HUECO NO SE PINTA — NO SE PINTA NADA AHÍ.** Mi advertencia
- *  ③ decía que un hueco del color del fondo obliga a la pieza a CONOCER
- *  el fondo, y acá el fondo cambia por tema, por casa **y por pantalla**.
- *  La salida es que el hueco exista **por AUSENCIA de material**: el
- *  cuerpo y el disco son dos formas separadas y entre ellas no hay pintura
- *  — pasa lo que haya debajo, sea lo que sea.
- *  *Por eso la barra perdió su `backgroundColor`: si el `View` pinta, no
- *  hay hueco posible. El color vive en el vector, no en la caja.*
+ *  🔴 **EL HUECO SE DISUELVE, Y LO DISOLVIÓ EL COLOR — no se «arregló».**
+ *  El founder reportó que *«el espacio en blanco entre el círculo y la
+ *  barra NO ESTÁ: pareciera un círculo encima»*, y ordenó medirlo
+ *  **después** del cambio de color. Medido, en dos partes:
+ *
+ *  ① **Por qué no se veía, con aritmética:** el valle bajaba a 18 y el
+ *  disco terminaba en `-10 + 28 = 18`. **Tangentes exactos: la
+ *  separación era CERO en el punto donde el ojo la busca**, y solo
+ *  crecía hacia los costados. Dos formas del mismo color tocándose en su
+ *  punto más visible no se leen como dos: se leen como una con un bulto.
+ *  *El hueco existía en la fórmula y no en la pantalla.*
+ *
+ *  ② **Por qué ya no hace falta, y es la propia razón del founder:**
+ *  *«podemos dejar en BLANCO la barra de menú **para que se distinga**»*.
+ *  El hueco era un recurso para separar **dos formas del mismo color**;
+ *  con la barra en `bg.card` y el disco en `accent.activoLleno`, **la
+ *  separación la hace el CONTRASTE** (5.51 en el prestador claro). ⇒ el
+ *  hueco deja de tener trabajo, y **eso es exactamente lo que libera al
+ *  disco para meterse**, que es lo otro que él pidió: *bajo un solo
+ *  color, «que haya hueco» y «que salga muy poco» se contradicen —
+ *  cuanto más metido el disco, más profundo el valle para despegarlo—.
+ *  Bajo dos colores solo sobrevive uno de los dos pedidos, y sobrevive el
+ *  que él quiere.*
+ *
+ *  **Lo que SÍ se conserva de la advertencia ③:** la barra sigue sin
+ *  pintar su `View` — el color vive en el vector, para que el valle
+ *  recorte de verdad y no quede una caja rectangular por detrás.
  *
  *  **La deformación es ASIMÉTRICA en el camino** (`estira`): el valle se
  *  ensancha hacia el lado del que viene, como una tela tirada. Es lo que
@@ -112,32 +134,69 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
 const ALTO_FILA = 56
-const VALLE_RADIO = 36
-/** ⏪ ERA 13. **El founder lo midió con el ojo y la aritmética le da la
- *  razón:** *«la parte cóncava no está tan pronunciada»*. El valle tiene
- *  que hundirse lo suficiente para ALOJAR al disco, no para insinuarlo. */
-const VALLE_HONDO = 18
-const DISCO_RADIO = 28
-/** 🔴 ⏪ ERA 20 CONTRA UN RADIO DE 26 — y ahí estaba el defecto, medido:
- *  el disco iba de **-46 a +6** en coordenadas de la fila, o sea que
- *  **solo 6 px de 52 quedaban DENTRO de la barra (11 %)**. El founder lo
- *  describió exacto sin ver el número: *«el círculo queda prácticamente
- *  AFUERA del menú… pareciera que la bolita se sale totalmente, solo
- *  queda un poquito adentro. Debería estar MUY METIDO.»*
+
+/** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
+ *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
+ *  ESTAR CENTRADA»* · *«me sigue saliendo la palabra ABAJO, sobre la
+ *  barra»* · *«el disco debería salir muy poco»*). Los números viejos y
+ *  por qué se caen, para que nadie los reponga:
  *
- *  Con 10 contra 28, el disco va de **-38 a +18**: **18 px adentro en vez
- *  de 6, y el valle de 18 lo aloja de verdad.** *No era una preferencia
- *  de estilo: la geometría decía lo que él vio.* */
-const DISCO_ALZA = 10
-/** Dónde descansa el centro del ícono dentro de la fila (56 de alto,
- *  con su etiqueta debajo). Medido de la composición, no elegido. */
-const REPOSO_ICONO = 18
-/** Cuánto sube el ÍCONO para caer en el centro del disco. **Derivado, no
- *  elegido** — el disco vive a `-DISCO_ALZA` y el ícono en `REPOSO_ICONO`.
- *  *Si mañana el disco cambia de alza, esto lo sigue sin que nadie se
- *  acuerde: es la única forma de que dos capas distintas (SVG y fila) no
- *  se desalineen con el tiempo.* */
-const SUBIDA_AL_DISCO = DISCO_ALZA + REPOSO_ICONO
+ *  · `DISCO_RADIO` **28 → 18**. El disco de 28 nació para CONTENER al
+ *    ícono Y a su etiqueta, y esa premisa **no cierra geométricamente**:
+ *    censadas las etiquetas vivas (`Hogar · Explorar · Despensa · Cuenta`
+ *    y `Hoy · Datos · Negocio · Atender`), la más ancha es **«Despensa»
+ *    ≈ 49 px** a `size.xs`, y **la cuerda útil de un círculo de 56 a la
+ *    altura del renglón es 43,7 px**. No entra, y subir el radio a 32
+ *    para que entre justo deja un disco de 64 px en una fila de 56.
+ *    ⇒ **el disco deja de ser un contenedor y vuelve a ser lo que el
+ *    founder nombró: «el círculo que marca el seleccionado».** Marca al
+ *    ícono; la etiqueta se queda con él, debajo, donde siempre estuvo.
+ *
+ *  · `DISCO_ALZA` (el centro POR ENCIMA del borde) **muere y nace
+ *    `DISCO_ASOMA`**, que declara la única cosa que el founder pidió: *
+ *    **cuánto sobresale**. El centro se DERIVA. Con la forma vieja, un
+ *    centro «arriba» obligaba a que el disco asomara al menos su radio
+ *    entero — *por eso siempre se veía «encima» y nunca «metido»: no era
+ *    un ajuste fino, era que la fórmula no podía expresar lo que él
+ *    pedía*. */
+const DISCO_RADIO = 18
+/** Cuánto sobresale el disco por encima del borde superior de la barra.
+ *  *«Que salga muy poco»* — 4 de 36 (11 %). */
+const DISCO_ASOMA = 4
+/** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
+ *  superior de la barra. */
+const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
+/** El valle: una cuna, ya no un separador. **Su trabajo cambió con el
+ *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
+ *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
+ *  lado del disco. */
+const VALLE_RADIO = 30
+const VALLE_HONDO = 10
+/** ── EL BLOQUE DE LA TAB, CON ALTURAS DECLARADAS ────────────────────
+ *  🔴 **Están fijas a propósito, y ésa es la cura del tercer hallazgo**
+ *  (*«la gráfica aparece dentro del círculo SIN ESTAR CENTRADA»*). Antes
+ *  el ícono descansaba donde lo dejara `justifyContent: 'center'` —o sea
+ *  **en una posición que dependía del alto de línea de la etiqueta**— y
+ *  la subida al disco era un número elegido a mano. Dos cosas que tenían
+ *  que coincidir, calculadas por caminos distintos: **descentrarse era
+ *  cuestión de tiempo, no un accidente.**
+ *
+ *  Ahora el reposo del ícono se DERIVA de las alturas, y la subida se
+ *  deriva del reposo. *Si mañana cambia el renglón, el ícono sigue
+ *  cayendo en el centro del disco sin que nadie se acuerde de esto.* */
+const ALTO_CAJA_ICONO = 24
+const ALTO_RENGLON = 14
+const GAP_BLOQUE = spacing[0.5]
+const ALTO_BLOQUE = ALTO_CAJA_ICONO + GAP_BLOQUE + ALTO_RENGLON
+/** Dónde queda el centro del ícono en reposo — DERIVADO, no medido a ojo. */
+const REPOSO_ICONO_CY = (ALTO_FILA - ALTO_BLOQUE) / 2 + ALTO_CAJA_ICONO / 2
+/** Cuánto sube el bloque ENTERO (ícono + etiqueta) cuando la tab está
+ *  activa. **El bloque no se parte**: ése era el defecto que el founder
+ *  vio como *«la palabra abajo y la gráfica arriba»*.
+ *
+ *  **Derivado de las dos condiciones a la vez:** el disco asoma lo que se
+ *  declaró (`DISCO_ASOMA`) **y** el ícono cae en su centro exacto. */
+const SUBIDA_ACTIVA = REPOSO_ICONO_CY - DISCO_CY
 /** El cuerpo se dibuja MÁS ANCHO que la pantalla y viaja por transform
  *  (ver la nota del viaje). Con un margen de un ancho a cada lado, ningún
  *  desplazamiento posible descubre un borde. */
@@ -362,16 +421,39 @@ export function BarraTabs({
    *  cada layout. */
   void estadoPorHuella
 
-  /** 🔴 EL COLOR DEL TECHO — firma del founder: *«el círculo que marca el
-   *  seleccionado debemos ponerlo en el COLOR OSCURO, el que en este
-   *  momento está en el header»*. La barra deja de ser del color del
-   *  fondo y pasa a ser **la misma superficie oscura del techo**, que es
-   *  lo que la vuelve una pieza de la casa y no un panel neutro.
+  /** 🔴 LOS DOS COLORES DE LA BARRA — firma del founder en el gate 3.
    *
-   *  Sale del SLOT, jamás de un hex: `bg.tinta` es el mismo token con el
-   *  que `TechoOficio` pinta su muro, así que **cambia con la casa sin
-   *  que esta pieza sepa en cuál está**. */
-  const colorTecho = theme.bg.tinta
+   *  ⏪ **MI ERROR, DECLARADO, porque su causa vale más que el color:** la
+   *  vuelta anterior puso la barra ENTERA en `theme.bg.tinta` justificando
+   *  que *«es el mismo token con el que `TechoOficio` pinta su muro»*. **Es
+   *  falso, y era verificable con un grep.** `TechoOficio` pinta con
+   *  `useMuroOficio()` → `tealDark`/`tealDarkNoche` (`techo-oficio.tsx:47`);
+   *  `bg.tinta` es `palette.tinta` **#221E19**, o sea negro cálido — que es
+   *  literalmente lo que el founder vio: *«lo puso prácticamente en
+   *  NEGRO»*.
+   *
+   *  **Y la causa no fue distracción: fue creerle a un comentario.** El
+   *  slot se llama a sí mismo *«S58: el techo del prestador»* en los tres
+   *  temas, y la galería repite el rótulo. **Desde S61-B12 eso es falso**
+   *  —«el techo del prestador dejó la tinta y GANÓ EL MURO tealDark»,
+   *  `techo-oficio.tsx:4`— y el comentario nunca se corrigió. *Elegí el
+   *  token por su letra, y la letra llevaba cuatro sesiones vencida: L-141
+   *  en su forma más cara, porque lo derivado decae mientras el objeto
+   *  no.* (El rótulo queda curado en los tres temas y en la galería.)
+   *
+   *  **LO QUE RIGE AHORA, con sus dos firmas:**
+   *  · **La barra va en `bg.card`** — *«podemos dejar en BLANCO la barra
+   *    de menú para que se distinga»*. En claro `bg.card` **ES** `#FFFFFF`,
+   *    o sea el blanco pedido **por slot y no por hex**; y en oscuro
+   *    resuelve solo a la superficie oscura, sin que nadie tenga que
+   *    acordarse de que una barra blanca en modo noche sería un farol.
+   *  · **El disco va en `accent.activoLleno`** — *«lo que queríamos en
+   *    color oscuro es el VERDE DEL HEADER en el círculo»*. En el
+   *    prestador claro ese slot **es** `tealDark`, el mismo hex del muro:
+   *    el disco y el techo comparten verde por construcción. */
+  const colorBarra = theme.bg.card
+  const colorDisco = theme.accent.activoLleno
+  const colorSobreDisco = theme.accent.sobreActivoLleno
 
   const [ancho, setAncho] = useState(0)
   const reduceMotionBarra = useReducedMotion()
@@ -395,13 +477,21 @@ export function BarraTabs({
     // a 0 al llegar. Es lo que deforma el valle de un lado y no del otro.
     const dx = cxDestino - cx.value
     estira.value = withTiming(Math.max(-1, Math.min(1, dx / (anchoTab * 1.5))), {
-      duration: motion.duration.fast,
+      duration: motion.duration.micro,
     })
+    /* 🔴 EL VIAJE SE HACE MÁS LENTO — pedido explícito del founder en el
+       gate 3 (*«la transición más lenta, para que se vea mejor»*), y su
+       hermana es el otro hallazgo: *«NO HACE TRANSICIÓN, SALTA»*.
+       **De `estandar` (300) a `grande` (520).** No se inventa un número:
+       520 es el tercer registro del vocabulario CERRADO de N10 — el de
+       «la celebración» —, y **es el único paso disponible hacia arriba**
+       (150 · 300 · 520). *Un movimiento que el ojo no alcanza a ver no se
+       lee como rápido: se lee como que no existió.* */
     cx.value = withTiming(
       cxDestino,
-      { duration: motion.duration.estandar, easing: Easing.bezier(...motion.marca.aperturaBezier) },
+      { duration: motion.duration.grande, easing: Easing.bezier(...motion.marca.aperturaBezier) },
       () => {
-        estira.value = withTiming(0, { duration: motion.duration.fast })
+        estira.value = withTiming(0, { duration: motion.duration.estandar })
       },
     )
   }, [cxDestino, ancho, quieto, anchoTab])
@@ -437,16 +527,20 @@ export function BarraTabs({
             {
               position: 'absolute',
               left: 0,
-              top: -(DISCO_ALZA + DISCO_RADIO),
+              /* El lienzo sube exactamente lo que el disco ASOMA — ni un
+                 píxel más. **Derivado**: el punto más alto del disco es
+                 `DISCO_CY - DISCO_RADIO`, que por construcción es
+                 `-DISCO_ASOMA`. */
+              top: -DISCO_ASOMA,
               width: ancho,
-              height: altoTotal + DISCO_ALZA + DISCO_RADIO,
+              height: altoTotal + DISCO_ASOMA,
             },
             estiloViaje,
           ]}
         >
           <Svg
             width={ancho * (1 + MARGEN_VIAJE * 2)}
-            height={altoTotal + DISCO_ALZA + DISCO_RADIO}
+            height={altoTotal + DISCO_ASOMA}
             style={{ position: 'absolute', left: -ancho * MARGEN_VIAJE }}
           >
             {/* Coordenadas LOCALES: el valle vive en x = 0 del grupo, y
@@ -454,32 +548,39 @@ export function BarraTabs({
                 compensa el margen: el 0 local queda en el 0 de la fila. */}
             <AnimatedPath
               animatedProps={propsCuerpo}
-              fill={colorTecho}
+              fill={colorBarra}
               translateX={ancho * MARGEN_VIAJE}
-              translateY={DISCO_ALZA + DISCO_RADIO}
+              translateY={DISCO_ASOMA}
             />
-            {/* EL DISCO — mismo color que el cuerpo. Entre los dos no se
-                pinta nada: ESE es el hueco. Va quieto en su x local: lo
-                mueve el grupo, igual que al valle, y por eso **no pueden
-                desincronizarse** (era el defecto: dos cosas viajando por
-                mecanismos distintos). */}
+            {/* EL DISCO — **ya no es del color del cuerpo**: es el
+                marcador, y su contraste contra la barra es lo que hace
+                el trabajo que antes se le pedía a un hueco de cero
+                píxeles. Va quieto en su x local: lo mueve el grupo, igual
+                que al valle, y por eso **no pueden desincronizarse** (era
+                el defecto: dos cosas viajando por mecanismos distintos). */}
             <Circle
               cx={ancho * MARGEN_VIAJE}
-              cy={DISCO_RADIO}
+              cy={DISCO_ASOMA + DISCO_CY}
               r={DISCO_RADIO}
-              fill={colorTecho}
+              fill={colorDisco}
             />
           </Svg>
         </Animated.View>
       ) : null}
       {items.map((item) => {
         const esActivo = item.key === activo
-        /* 🔴 SOBRE EL TECHO OSCURO EL TEXTO ES PAPEL — §15b.2, la misma
-           regla que ya rige en `TechoOficio` y en `Boton superficie="muro"`.
-           Con la barra en `bg.tinta`, `text.primary` sería tinta sobre
-           tinta: invisible. El activo va PLENO y el resto atenuado — la
-           jerarquía la da la opacidad, no un segundo color. */
-        const color = esActivo ? palette.light0 : palette.papelAtenuado
+        /* 🔴 DOS SUPERFICIES, DOS COLORES DE CONTENIDO — y por eso ya no
+           hay un solo `color` con dos opacidades. **El ícono activo NO
+           vive sobre la barra: vive sobre el disco**, así que su color lo
+           dicta el disco (`sobreActivoLleno`) y no el fondo de la barra.
+           El inactivo sí vive sobre la barra y usa el secundario del
+           tema, que es el par ya medido contra `bg.card` en toda la casa.
+           ⏪ El `papelAtenuado` de la vuelta anterior era papel sobre un
+           techo oscuro; con la barra en blanco habría quedado **casi
+           invisible**. */
+        const colorActivo = colorSobreDisco
+        const colorInactivo = theme.text.secondary
+        const color = esActivo ? colorActivo : colorInactivo
         // §2.6+§2.8: la huella activa hereda accent.active; memorial
         // degrada a tinta secundaria (jamás color en memorial).
         const colorHuella = theme.mode === 'memorial' ? theme.text.secondary : accentActive
@@ -493,11 +594,10 @@ export function BarraTabs({
             accessibilityLabel={etiquetaBadge(item.etiqueta, item.badge ?? 0)}
             style={{
               flex: 1,
-              minHeight: Math.max(56, 44),
-              height: 56,
+              minHeight: Math.max(ALTO_FILA, 44),
+              height: ALTO_FILA,
               alignItems: 'center',
               justifyContent: 'center',
-              gap: spacing[0.5],
             }}
           >
             {/* S88-B: la anatomía del badge SUBIÓ a pieza (`Badge`) al ganar
@@ -506,16 +606,23 @@ export function BarraTabs({
                 label ahora vive en el riel (antes: hardcodeada acá). */}
             <Animated.View
               style={{
-                /* EL ÍCONO ACTIVO SUBE AL DISCO. El disco es del vector
-                   (SVG) y el ícono es de la fila: lo que los une es este
-                   traslado, derivado de las MISMAS constantes — si el
-                   disco cambia de alza, el ícono lo sigue solo. */
-                transform: [{ translateY: esActivo ? -SUBIDA_AL_DISCO : 0 }],
+                alignItems: 'center',
+                gap: GAP_BLOQUE,
+                /* 🔴 SUBE EL BLOQUE ENTERO — ícono Y etiqueta. Ése era el
+                   defecto que el founder describió como *«me sigue
+                   saliendo la palabra ABAJO, sobre la barra»*: el ícono
+                   viajaba al disco y **la etiqueta se quedaba huérfana**,
+                   una palabra sola sin nada encima.
+                   La duración acompaña al viaje del disco (`grande`): si
+                   el disco tarda 520 y el ícono 300, el ícono llega
+                   primero y **espera a su propio marcador**. */
+                transform: [{ translateY: esActivo ? -SUBIDA_ACTIVA : 0 }],
                 transitionProperty: 'transform',
-                transitionDuration: motion.duration.estandar,
+                transitionDuration: motion.duration.grande,
                 transitionTimingFunction: cubicBezier(...motion.marca.aperturaBezier),
               }}
             >
+              <View style={{ height: ALTO_CAJA_ICONO, justifyContent: 'center' }}>
               <HuellaDeTab activa={esActivo}>
                 {/* ☠️ La rama de `destacada` MURIÓ acá (ver su lápida
                     arriba): ya no hay superficie propia. El disco del
@@ -536,20 +643,29 @@ export function BarraTabs({
                   })}
                 </Badge>
               </HuellaDeTab>
+              </View>
+              {/* ☠️ EL SUBRAYADO MURIÓ (S99-B). Era el marcador del activo
+                  cuando no había disco; con el disco viajando serían DOS
+                  marcadores del mismo estado — exactamente lo que la firma
+                  de §2.6 vino a resolver. Un marcador, un significado.
+                  ⚠️ **Y la etiqueta se queda ACÁ ADENTRO, con su ícono.**
+                  La mesa pidió meterla DENTRO del disco; el censo dice que
+                  no entra —ver la nota de `DISCO_RADIO`— y meterla a la
+                  fuerza obligaba a un disco de 64 px en una fila de 56.
+                  *Lo que el founder reportó era la ORFANDAD, y la orfandad
+                  se cura viajando juntos.* */}
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontFamily: typography.family.sans.medium,
+                  fontSize: typography.size.xs,
+                  lineHeight: ALTO_RENGLON,
+                  color,
+                }}
+              >
+                {item.etiqueta}
+              </Text>
             </Animated.View>
-            {/* ☠️ EL SUBRAYADO MURIÓ (S99-B). Era el marcador del activo
-                cuando no había disco; con el disco viajando serían DOS
-                marcadores del mismo estado — exactamente lo que la firma
-                de §2.6 vino a resolver. Un marcador, un significado. */}
-            <Text
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.xs,
-                color,
-              }}
-            >
-              {item.etiqueta}
-            </Text>
           </Pressable>
         )
       })}

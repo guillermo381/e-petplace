@@ -431,15 +431,50 @@ export const palette = {
    * ⇒ **`mapaMoto` es nuestro magenta LLEVADO a la banda** (magentaDark
    * + 35 % tinta): **sat 0.54 — adentro— y 6.61 de contraste contra el
    * peor tono.** Sigue siendo nuestro; deja de gritar.
-   * *No se eligió un color bonito: se calculó el que entra en el mundo.* */
-  /** El texto ATENUADO sobre el techo oscuro de `BarraTabs` (S99-B).
-   *  **Sólido y no alpha, a propósito:** un alpha se compone contra lo
-   *  que haya detrás, y detrás de esta barra hay contenido que cambia por
-   *  pantalla — el mismo argumento por el que su hueco no se pinta.
-   *  Medido: **6.44 contra tinta**, holgado sobre el piso de texto. */
-  papelAtenuado: '#A4A19E',
+   * *No se eligió un color bonito: se calculó el que entra en el mundo.*
+   *
+   * ── 🔴 ⏪ ENMIENDA S99-B · EL DEFECTO ESTABA EN EL OTRO EJE ─────────
+   * Veredicto del founder en el gate 3: *«hay que ponerle el MAGENTA de
+   * e-PetPlace… para que no quede simplemente como un pin negro dentro
+   * del mapa»*. La mesa ofreció dos salidas —o el magenta pedido YA es
+   * éste y no se percibe, o hay que **subir la saturación** saliendo de
+   * la banda—. **Medido, la respuesta es una tercera y no hace falta
+   * tocar la banda:**
+   *
+   * | | hue | sat | **luz** |
+   * |---|---|---|---|
+   * | `mapaMoto` viejo `#681F4C` | 323 | 0.54 | **0.26** |
+   * | `magentaDark` (nuestra marca) | 321 | 0.64 | 0.34 |
+   * | `pink` puro | 319 | 1.00 | 0.50 |
+   *
+   * **El tono SIEMPRE fue nuestro magenta (323° contra 321° y 319°): lo
+   * que faltaba era LUZ.** A 0.26 sobre un terreno que vive entre 0.83 y
+   * 1.00, el ojo no extrae croma de una silueta de 24 px — la lee como
+   * negra. *El founder describió exactamente eso.*
+   *
+   * **Y la causa es mía, con nombre:** la banda restringe **saturación**,
+   * y yo la cumplí **mezclando con tinta**, que baja las dos cosas. Pagué
+   * la restricción en el eje equivocado — *y la luz es justamente el eje
+   * del que depende que un tono se lea como tono.*
+   *
+   * ⇒ **La cura NO sube la saturación: la deja donde está (0.54, dentro
+   * de la banda, sin mover un número de la regla) y sube la LUZ a 0.40.**
+   * Medido contra el terreno: **4.58 contra el asfalto blanco, 5.04
+   * contra el parque, 4.58 contra el agua** — el piso gráfico de 3:1
+   * queda holgado por los tres lados.
+   *
+   * ✅ **Y LA BANDA SE RE-VERIFICÓ, con el resultado invertido de lo que
+   * yo mismo sospechaba.** Iba a declarar que 0.10→0.58 se citaba sin su
+   * muestra y era irreproducible — **es falso**: la muestra vive en
+   * `scripts/verify-contrast.ts` (`asfalto #DAD7D2` · `parque #BFDDB0` ·
+   * `agua #A9CCE8`) y da **exactamente 0.10 · 0.40 · 0.58**. *Estaba
+   * registrada, pero en el gate y no acá — por eso este puntero.*
+   *
+   * **El nuevo valor contra esa misma muestra: sat 0.54 (igual que
+   * antes), y contraste 4.72 · 4.58 · 4.03.** Nada de la regla se movió;
+   * solo la luz. */
 
-  mapaMoto: '#681F4C',
+  mapaMoto: '#9D2F75',
   /** El destino es un EDIFICIO, no un marcador (§6ter) ⇒ sus tonos son
    *  neutros cálidos del terreno (sat ~0.10), no marca. Dos planos
    *  porque un volumen necesita dos: cuerpo 3.68 · techo 6.34 contra el

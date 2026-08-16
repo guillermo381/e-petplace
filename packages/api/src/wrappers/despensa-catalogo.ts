@@ -95,6 +95,17 @@ export interface ProductoDeVitrina {
   peso_kg: number | null;
   /** Precio de la oferta publicada. El wrapper lo TRANSPORTA. */
   precio: number;
+  /** 🔴 ¿SE PUEDE COMPRAR AHORA? — booleano y jamás número, por firma del
+   *  founder (S99): la familia necesita *«¿puedo comprar esto?»*, no el
+   *  inventario ajeno; *«quedan 3»* es táctica de escasez **y** fuga de dato
+   *  de negocio (§7.4 al revés). Derivado en `ofertas` por trigger desde
+   *  `vendedor_skus.stock_disponible > 0`, que **ya es neto de reservas** —
+   *  la familia no puede leer `vendedor_skus` y está bien: el inventario es
+   *  del negocio.
+   *  ⚠️ La vitrina dice QUÉ HAY AHORA; el carrito dice QUÉ PASÓ CON LO QUE
+   *  ELEGISTE. Leen la misma señal y ninguna reemplaza a la otra — ni a la
+   *  voz del último minuto (D-827). */
+  hay_stock: boolean;
   moneda: string;
   country_code: string;
   /** §6: una dieta de prescripción no se ofrece sin condición documentada. */
@@ -233,7 +244,7 @@ function literalArrayPg(valores: string[]): string {
 }
 
 const SELECT_VITRINA = `
-  id, precio, moneda, country_code, cuenta_comercial_id,
+  id, precio, moneda, country_code, cuenta_comercial_id, hay_stock,
   producto_variantes!inner (
     id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, activo,
     productos!inner (
@@ -320,6 +331,10 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
       contenido_unidad: typeof v.contenido_unidad === 'string' ? v.contenido_unidad : null,
       peso_kg: numOrNull(v.peso_kg),
       precio: fila.precio,
+      // FAIL-CLOSED DE SIGNIFICADO (L-247): lo que no llegue como `true`
+      // explícito se lee como NO comprable. Prometer una compra que va a
+      // rebotar al pagar es peor que no ofrecerla.
+      hay_stock: fila.hay_stock === true,
       moneda: typeof fila.moneda === 'string' ? fila.moneda : 'USD',
       country_code: typeof fila.country_code === 'string' ? fila.country_code : 'EC',
       es_dieta_prescripcion: p.es_dieta_prescripcion === true,
