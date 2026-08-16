@@ -414,6 +414,21 @@ const todos: Pair[] = [
     surface: '#FFFFFF',
     noTextual: true,
   },
+  /* LA BARRA DE TABS SOBRE SU TECHO OSCURO (S99-B · firma del founder:
+   * *«el círculo que marca el seleccionado, en el COLOR OSCURO del
+   * header»*). La barra pasó a `bg.tinta`, así que su texto sigue la
+   * regla del muro (§15b.2): papel PLENO el activo, atenuado el resto.
+   * Es texto de 11px ⇒ piso 4.5. */
+  {
+    nombre: 'GLOBAL · BarraTabs activo: papel pleno / techo tinta',
+    fg: palette.light0,
+    bg: palette.tinta,
+  },
+  {
+    nombre: 'GLOBAL · BarraTabs inactivo: papel atenuado / techo tinta',
+    fg: palette.papelAtenuado,
+    bg: palette.tinta,
+  },
   /* MARCA DE MAPA (S99-B · `DIRECCION_ARTE` §6ter) — los objetos del
    * mundo contra los TRES tonos que el mapa de la casa realmente pinta.
    *

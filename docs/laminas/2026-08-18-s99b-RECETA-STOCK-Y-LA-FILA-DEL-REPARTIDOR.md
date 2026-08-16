@@ -136,11 +136,18 @@ documento es dato administrativo, no identidad de trabajo.
 misma regla de la descripción del presupuesto (§10ter): *una fila muestra
 el primero y cuenta el resto; el detalle es de la ficha.*
 
-**⚠️ Lo que NO decido:** si el WhatsApp entra al subtítulo en vez del
-vehículo. Los dos sirven para reconocer y **la fila tiene lugar para
-uno**; el vehículo gana en mi lectura porque **es lo que el vendedor ve
-salir por la puerta**, pero es una llamada de producto y va con su
-pregunta al gate.
+### ✅ FIRMADA (founder, 18-ago) — **NOMBRE · VEHÍCULO · PLACA**
+
+⏪ Dejé la pregunta abierta a propósito y **la firma llegó con la misma
+razón que yo había dado**: *es lo que el vendedor ve llegar por la
+puerta*.
+
+- **El WhatsApp queda a UN TOQUE, en la ficha** — no se pierde, cambia de
+  piso.
+- **El documento se muda a la ficha**, como ya estaba definido.
+
+*Las dos cosas que salen de la fila salen al MISMO lugar, y ese lugar es
+el que existe para verificarlas.*
 
 ---
 
