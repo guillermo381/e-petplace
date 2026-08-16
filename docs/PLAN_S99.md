@@ -137,8 +137,20 @@ transversales toda la sesión.**
 >   discriminador de #0b**, no de #0a. Los tres instrumentos (censo de
 >   olas · aparato de C · el dedo del founder) siguen teniendo que
 >   coincidir EN AMBOS.
-> - **LA COLA DE LA SESIÓN QUEDA: #0a → L2 → L3 → L5a → L5b → #0b.**
->   L4 entregada · L6 a v1.1.
+> - ~~**LA COLA DE LA SESIÓN QUEDA: #0a → L2 → L3 → L5a → L5b → #0b.**
+>   L4 entregada · L6 a v1.1.~~
+>
+> **⏩ ENMENDADO POR FIRMA (16-ago noche): #0b MUERE COMO LOTE — no se
+> posterga, se DISUELVE dentro de la investigación aplazada (D-834), que
+> el founder congeló a sesión propia** (*«aplacemos la investigación,
+> concentrémonos en cerrar todo el flujo de despensa»*). La discriminación
+> completa vive en D-834: red, olas y bundle MUERTOS por medición; queda
+> dispositivo/arranque; el estado previo TAMBIÉN fallaba N16. **LA COLA
+> QUEDA LIMPIA Y CON UNA SOLA DIRECCIÓN — CERRAR EL FLUJO DE DESPENSA
+> ENTERO: L3 (el durante del vendedor) → L5a (la carga) → L5b (la vitrina
+> y su espejo, con el exprés y la puerta de servicios adentro).**
+> **🔒 NADIE TOCA RENDIMIENTO hasta la sesión propia — rige para las
+> CUATRO pistas.**
 
 ---
 

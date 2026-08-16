@@ -16998,3 +16998,48 @@ con la limpieza y su guarda.
 ☠️ **Muere** cuando la galería quede con solo lo vivo y lo que espera
 firma, cada baja con su literal nombrado, y la lámina que espere gate
 ARRIBA.
+
+#### D-834 — 🧊 INVESTIGACIÓN APLAZADA: LOS TIEMPOS DE ARRANQUE (firma del founder 16-ago-2026 — CONGELADA, no abandonada; sesión propia futura)
+
+**LA FIRMA, verbatim:** *«aplacemos la investigación, concentrémonos en
+cerrar todo el flujo de despensa y luego hacemos una sesión exclusiva para
+ver los temas de tiempos.»* **Y #0b NO se posterga: se DISUELVE dentro de
+esta ficha** (su censo y su cura servida viven en el Loop de S99-A).
+
+**⚠️ LA ADVERTENCIA, AL FRENTE: hasta la medición de abajo, NINGUNA CURA
+DE CÓDIGO TIENE DIAGNÓSTICO QUE LA RESPALDE. Nadie optimiza sin saber qué
+domina.**
+
+**MUERTOS POR MEDICIÓN (S99, 16-ago — la sesión futura NO los repite):**
+- **LA RED:** RTT del aparato **39 ms avg / mdev 33** · escritorio
+  **52–96 ms en el mismo minuto** — varía en decenas de ms, no en
+  segundos.
+- **LAS OLAS:** 17→14 medidas del código **Y el tiempo empeoró** — los dos
+  ciertos ⇒ la causa no vive ahí; **ni #0a ni #0b arreglan el dedo.**
+- **EL BUNDLE:** S98 `d4613ce9` = **8.029.019 bytes** · S99 `5ee961a5` =
+  **8.113.986** = **+1,06 %** — y es Hermes bytecode: en frío no hay
+  parseo de JS.
+- **EL INSTRUMENTO:** explica **0,3–0,5 s** de ráfaga, no la franja
+  entera (y su muestra más fina: el primer frame de 2 MB era la pantalla
+  ANTERIOR).
+
+**LO VIVO:** la dispersión de **~1 s entre corridas consecutivas del
+MISMO bundle**. Huele a scheduler / térmico / GC. **Sospechoso restante:
+dispositivo/arranque.**
+
+**LOS DOS PASOS SIGUIENTES, en orden de COSTO:**
+1. **EL SEGUNDO APARATO** — el discriminador más barato: si da números
+   estables, el problema es del teléfono del founder y la investigación
+   muere ahí; si da la misma franja, es nuestro.
+2. **P4 — la traza Perfetto del arranque** (cara, se pide aparte, SOLO si
+   ① no discrimina).
+
+**EL DATO QUE REENCUADRA TODO** (para que la sesión futura no busque una
+regresión donde hay un problema viejo): **el estado previo era 2,0–2,5 s
+Y TAMBIÉN FALLABA N16. El «se siente lento» del founder existía ANTES de
+S99.**
+
+☠️ **Muere** cuando la sesión propia corra el paso ① (y ② si hace falta),
+nombre qué domina la franja, y la cura que salga tenga ese diagnóstico
+atrás.
+
