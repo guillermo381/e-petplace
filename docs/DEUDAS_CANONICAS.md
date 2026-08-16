@@ -11752,7 +11752,11 @@ defecto que se curó hoy en el cambio de clave.
   arriba — sin error.** Probado el 16-ago: pedir la vitrina ordenada por
   `productos.nombre` devolvió *Broadline · Advantix · CORDERO · GASTRO*.
   *Es la familia L-235 en una herramienta ajena: el instrumento contesta que
-  sí y hace otra cosa.* ⇒ **ordenar por una columna que vive en un embed
+  sí y hace otra cosa.* **Y LO QUE VUELVE CREÍBLE LA TRAMPA ES LA ASIMETRÍA,
+  también medida: el FILTRO por esa MISMA columna embebida SÍ funciona** (se
+  buscó «advantix»: 5 resultados, los 5 coinciden). ⇒ *uno prueba el filtro,
+  anda, y da por bueno el `order` — el instrumento contestó bien una pregunta
+  VECINA.* ⇒ **ordenar por una columna que vive en un embed
   exige una VISTA que la aplane** (`v_skus_vendedor`, S99) — y quien escriba
   `referencedTable` en un `order` tiene que verificar el RESULTADO, no la
   ausencia de error.
@@ -17473,6 +17477,14 @@ lanzamiento tenemos que borrar eso».*
 >    ofertas publicadas — 18 con los dos con stock y precio distinto, 3 donde
 >    el segundo tiene y el primero se agotó **a propósito**, 3 al revés.
 > 3. **El segundo pedido pagado** (`SIEMBRA-S99-FIFO-2`) del turno anterior.
+> 3b. **DOS pedidos pagados EN EL MISMO INSTANTE** (`SIEMBRA-S99-EMPATE-1/2`),
+>    para que el guard del FIFO de D pueda probar el caso de empate. **El
+>    empate se fabricó por construcción, no por suerte: los dos pagos ocurren
+>    en UNA transacción y `now()` no avanza dentro de ella.** *El mismo
+>    mecanismo que produjo el defecto fabrica su caso de prueba.* Resultado en
+>    la cuenta: **4 pagados vivos · 3 instantes · 1 empate** — o sea que el
+>    conjunto sirve para las DOS mitades del guard (discriminar con horas
+>    distintas, y no quedar al azar cuando empatan).
 >
 > 4. **🔴 UNA OFERTA PUBLICADA POR UN CINTURÓN, declarada porque la encontré
 >    midiendo otra cosa:** el brazo discriminador de
