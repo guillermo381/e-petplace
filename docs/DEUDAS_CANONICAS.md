@@ -2284,7 +2284,10 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 #### D-483 — La ANCHA: la caja del `compacto` muere en todas sus formas, al tocarse 🟡
 🟡 MEDIA. **La enmienda 19.7 S73 se firmó ANGOSTA** (el label gana forma nombrada; `ghost` muere como acción de fila; `compacto` sobrevive en 22c y 19.6). La ANCHA — el contorno transparente del `Boton compacto` muere como forma de la acción secundaria en TODAS sus apariciones, `PieRevelar` se reconstruye sobre la anatomía nueva y 22c se enmienda (la acción con consecuencias sube a sólido o baja a label, sin tercer peso intermedio) — queda como deuda con **mecánica D-318: migra AL TOCARSE** — cada pantalla que pase por craft convierte sus compactos; cero barrida grande (~50 sitios vivos entre las dos apps censados en S73-A, no entran en una sesión). **Precondición: la firma en dispositivo de la lámina 19.7** (sin anatomía sellada no hay destino al que migrar). Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §3).
 
-#### D-484 — El par primario+ghost de las Hojas de decisión (entrada nueva del diccionario) 🟡
+#### D-484 — El par primario+ghost de las Hojas de decisión ✅ PAGADA (S99-B, 16-ago-2026)
+
+**RESOLUCIÓN (B, ratificada por mesa): primario + SECUNDARIO, jamás primario + ghost.** El secundario tiene contorno y cumple 22c; **19.7 prohíbe el contorno transparente como acción de FILA, y el pie de una Hoja no es una fila** — B la cerró leyendo la letra ENTERA: la prohibición nunca había llegado hasta ahí. *(Ficha original abajo, como registro.)*
+
 🟡 MEDIA. **El patrón más repetido de los que caen bajo "los botones sin fondo" del gate S72 — y NO es 19.7** (no es acción de fila): la decisión binaria en Hoja vive hoy como `primario` + `ghost` apilados. Censo S73-A: "Rechazar" del presupuesto clínico (`citas/[mascotaId].tsx:416`, `ghost bloque` — *rechazar un presupuesto* es acción con consecuencias vestida de label, **ya ilegal por 22c hoy**) · "Rechazar" de la autorización (`autorizacion/[solicitudId].tsx:133`) · los "cancelar" de las Hojas de Cuenta en AMBAS apps (`cuenta/index.tsx:112` cliente · `cuenta/index.tsx:307` prestador). Cura: se propone como **ENTRADA NUEVA del diccionario** (la decisión binaria en Hoja) con su propio boceto M1 y gate founder — jamás cura silenciosa por pantalla, porque el par es un PATRÓN y necesita una sola verdad. **Disparo: el próximo boceto que contenga una Hoja de decisión, o la pasada de craft de cualquiera de las superficies censadas.** Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §6; censo del literal de A).
 
 ### Deudas de la tanda 3 de B (S73-B, D-486 → D-490)
@@ -11707,6 +11710,14 @@ defecto que se curó hoy en el cambio de clave.
   **Con su simetría entera:** *subcontar bendice lo que nunca se contó · sobre-contar sella como deuda lo que ya cumple — y las dos terminan en un lint verde que miente.*
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
+
+- **L-244 — EL DEFAULT DE UNA PIEZA ES UNA DECISIÓN QUE NADIE TOMA (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
+
+  **El caso:** el default de `Boton` es `primario` (sólido) ⇒ **48 botones son el escalón más fuerte de la casa sin que nadie lo haya elegido.** La pieza EMPUJA; no es descuido de quien la usa. Y el síntoma que lo destapó es el diagnóstico que faltaba: **la escala se usaba como PALETA, no como ESCALERA** — 184 secundarios contra 146 primarios con 19.7 rigiendo, y 7 pantallas con 4–7 sólidos. *Cada pantalla elegía un botón como quien elige un color — por eso el defecto volvía sesión tras sesión sin que nadie fuera descuidado.*
+
+  **COROLARIO EXIGIBLE: el default de toda pieza es el uso MÁS FRECUENTE y MENOS FUERTE, jamás el más enfático.** Y cuando una pieza tiene ESCALA, su default es el escalón bajo — quien quiere subir, LO DECLARA.
+
+  **La auditoría ordenada al depositar (16-ago, contra `packages/ui`):** los defaults de las piezas con parámetro son `reposo` · `capa` · `control` · `cuerpo` · `pantalla` · `completa` — **`Boton` era la ÚNICA pieza de la casa con default enfático sobre una escala** (el `alto` de `HeroMarca` es la forma normal de una pieza de un-uso-por-pantalla, no una escala). El caso era singular; la ley evita el próximo.
 
 - **L-243 — UN GUARD PUEDE ESTAR EN VERDE SOBRE EXACTAMENTE EL DEFECTO QUE EL DEDO ENCUENTRA EN TRES SEGUNDOS (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de D).**
 
