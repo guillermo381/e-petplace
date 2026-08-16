@@ -308,7 +308,20 @@ export default function CuentaComercial() {
             icono="mes"
             registro="aa"
             titulo={t('historico.entrada')}
-            detalle={t('historico.entradaDetalle')}
+            /* 🔴 S99-C (pedido de D) — LA VOZ DEL VENDEDOR ES OTRA. Acá
+               decía «las atenciones y citas que ya pasaron» **y esta
+               pantalla lista PEDIDOS**: el vendedor no tiene citas ni
+               atiende a nadie, así que la frase le describía un trabajo
+               que no es el suyo.
+               **La clave correcta YA EXISTÍA en los dos idiomas
+               (`entradaDetalleVenta`) y no la consumía nadie** — una voz
+               sin puerta, la misma clase que el motor sin puerta. Se
+               estrena acá.
+               ⚠️ Y la de arriba NO se tocó: en la Cuenta del PRESTADOR la
+               frase es verdad —él sí tiene atenciones y citas—, así que
+               «arreglarla» ahí habría roto una voz correcta para curar
+               otra pantalla. */
+            detalle={t('historico.entradaDetalleVenta')}
             onPress={() => router.push('/historico')}
           />
         </Tarjeta>
