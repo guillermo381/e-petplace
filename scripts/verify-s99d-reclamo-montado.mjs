@@ -31,6 +31,19 @@
  * cambiar NADA para quien no tiene vínculo** — y eso hay que probarlo, no
  * suponerlo, porque el montaje toca el guard raíz por el que entran todos.
  *
+ * ── 🔴 ENMIENDA 16-ago: EL BRAZO POSITIVO SE QUEDÓ SIN SUJETO ──────────
+ * Diego —el único pendiente vivo del ecosistema— **aceptó**. Su vínculo está
+ * sellado y el reclamo ya no le aparece, que es lo correcto. *No lo consumió
+ * un script: lo consumió la persona, que es exactamente como tenía que
+ * pasar* — y por eso el guard **no falla por eso: lo DECLARA**. Un rojo
+ * permanente sobre algo que funcionó bien es ruido, y el ruido se ignora.
+ *
+ * **Para re-gatear el brazo positivo hay que SEMBRAR un pendiente nuevo,
+ * jamás desatar a Diego** (desatarlo sería romper producción para que un
+ * test tenga sujeto). Los tres brazos negativos siguen corriendo y siguen
+ * siendo la mitad que importa del montaje: que no le cambie la pantalla a
+ * nadie más.
+ *
  * ⚠️ RN-web (L-153). El gate del toque «aceptar» es del aparato.
  *
  * Uso:  node scripts/verify-s99d-reclamo-montado.mjs [--puerto 8082]
@@ -95,10 +108,23 @@ for (const caso of CASOS) {
     );
 
     if (!ok && caso.ve) {
-      const enCallejon = /cerrar sesión/i.test(cuerpo);
-      fallos.push(
-        `repartidor1: el reclamo NO se montó${enCallejon ? ' — sigue en el callejón cortés' : ''}`,
-      );
+      /* ¿Es «no se montó» o «ya no hay nada que reclamar»? Se distingue por
+         DÓNDE cayó: si el resolvedor lo mandó a su pantalla, su vínculo está
+         sellado y el reclamo cumplió — no hay defecto, hay ausencia de
+         sujeto. Confundir las dos habría dejado un rojo eterno sobre un
+         camino sano. */
+      if (page.url().includes('/ventas/entregas')) {
+        console.log(
+          `   ⚠️  SIN SUJETO: ${caso.cuenta} YA aceptó (entra a su pantalla). El brazo
+` +
+            `      positivo se re-gatea SEMBRANDO un pendiente nuevo — jamás desatándolo.`,
+        );
+      } else {
+        const enCallejon = /cerrar sesión/i.test(cuerpo);
+        fallos.push(
+          `repartidor1: el reclamo NO se montó${enCallejon ? ' — sigue en el callejón cortés' : ''}`,
+        );
+      }
     }
     if (!ok && !caso.ve) {
       fallos.push(`${caso.cuenta}: le apareció un reclamo que no le corresponde`);

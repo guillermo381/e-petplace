@@ -108,6 +108,12 @@ type EstadoSesionRaiz =
   // el pendiente NO entra al portal — y la carta §2.3 tampoco se le
   // muestra (primer_ingreso_en marca la fase 4, no la 1).
   | { sala_espera: true }
+  /* ⭐ S99-D · Gate 2 ④ — EL REPARTIDOR CON VÍNCULO SELLADO. Lleva el
+     nombre de la casa aunque hoy solo se use en el forense: si mañana la
+     rama tiene que hablar (N>1, o un aviso), el dato ya está — y sobre
+     todo, **el log dice DE QUÉ CASA es** el que entró, que es la mitad que
+     un booleano no puede decir cuando algo sale mal. */
+  | { repartidor: true; negocio: string; casas: number }
   // negocioEmpleado: si el user es EMPLEADO ACTIVO esperando la puerta,
   // el nombre de su negocio (voz honesta); null = user sin negocio alguno.
   | { sin_rol: true; email: string; negocioEmpleado: string | null }
@@ -252,6 +258,57 @@ export default function TabsLayout() {
             const { esGestor, montaAtender } = capacidadDesdeContexto(c);
             return { ok: true, esGestor, montaAtender, ceremonia: 'vendedor-puro' as const };
           }
+          /* 🔴 S99-D · Gate 2 ④ — EL REPARTIDOR ENTRA A LO SUYO.
+             **El rojo que cierra:** el Gate 2 midió que un repartidor real
+             ACEPTA su vínculo —queda sellado en la base— y este resolvedor
+             seguía diciéndole «sin rol prestador». Y el callejón se había
+             vuelto MUDO: como ya no hay pendiente, el reclamo que montamos
+             tres líneas más arriba tampoco se dibuja. **La pantalla existe
+             desde S96 y no la alcanzaba nadie** — cuarta muestra de *motor
+             sin puerta* en esta sesión.
+
+             **VA ACÁ Y NO DESPUÉS, por la regla de la casa que S96 ya
+             escribió para el vendedor puro:** *un panel donde puede
+             TRABAJAR HOY gana a una voz de espera.* Si además fuera empleado
+             de un negocio no-activo, el día que ese negocio active
+             `obtener_contexto_arranque` resuelve arriba y esta rama ni se
+             toca.
+
+             **CERO VIAJE NUEVO:** `repartidorDe` viene en el contexto que ya
+             se pidió (lector de A, vínculos SELLADOS — `user_id` +
+             `vinculo_aceptado_en` + `activo`). Y **dice QUIÉN ES, no qué
+             tiene**: derivarlo de `misEntregasAsignadas` habría confundido
+             «no es repartidor» con «hoy no le tocó nada» (L-218, medición de
+             C — su vacío significa dos cosas).
+
+             ⚠️ **REDIRECT Y NO BARRA, y la diferencia con el vendedor puro
+             es de LETRA, no de tamaño:** §2.0 le da la casa entera a un
+             DUEÑO, y el repartidor no lo es — es alguien del vendedor con
+             **tres acciones y nada más**, que ve *su envío y NADA más*
+             (`LETRA_RECORRIDO` §9). Darle la barra sería ofrecerle cuartos
+             que su propia letra le cierra.
+
+             ⚠️ **N>1 SE DECLARA, NO SE RESUELVE A CIEGAS (L-244):** hoy es
+             imposible tener vínculo sellado en dos casas, así que un selector
+             sería una pantalla para un caso que no existe. Se toma la
+             primera y **el forense dice cuántas vinieron**: el día que haya
+             dos, el log lo grita antes de que alguien lo note por el lado
+             equivocado. */
+          /* 🔴 `?? []` Y NO ACCESO DIRECTO, y lo aprendí rompiendo el
+             cascarón entero: con un bundle donde el campo todavía no existe,
+             `c.repartidorDe[0]` lanza y el guard raíz cae en «No pudimos
+             entrar a tu cuenta» — **un error duro es peor callejón que el
+             callejón**, porque el anterior al menos decía qué hacer.
+             El wrapper de A ya es fail-closed por diseño (*«un bundle viejo
+             lee [] y degrada al callejón, jamás crashea»*); esta línea es la
+             mitad que faltaba para que esa promesa se cumpla del lado del
+             consumidor. *Una garantía que solo vive en el productor no es una
+             garantía: es una convención.* */
+          const casas = c.repartidorDe ?? [];
+          const casa = casas[0];
+          if (casa !== undefined) {
+            return { repartidor: true, negocio: casa.negocio, casas: casas.length };
+          }
           // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
           // La sonda distingue la voz (cero motor — policy empleados_self).
           const neg = await obtenerNegocioEmpleadoActivo();
@@ -277,6 +334,11 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor} · atender=${r.montaAtender} · ceremonia=${r.ceremonia}`
+              /* El CONTADOR va en el forense a propósito: es la forma en que
+                 «N>1 se declara» deja de ser una promesa del comentario. Con
+                 dos casas el log lo dice en el arranque, antes de que alguien
+                 lo descubra por el lado equivocado. */
+              : 'repartidor' in r ? `repartidor de ${r.negocio}${r.casas > 1 ? ` (⚠️ ${r.casas} casas — N>1 declarado, se tomó la primera)` : ''} → /ventas/entregas`
               : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
                   : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
@@ -317,6 +379,12 @@ export default function TabsLayout() {
      los dos partes: la ruta muere cuando ① la pieza de la ventana de
      pedidos esté montada en el HOY del dual (L4) **y** ② las tres puertas
      vivas tengan destino nuevo POR POBLACIÓN. */
+
+  /* ⭐ S99-D · Gate 2 ④ — su pantalla, y solo su pantalla. Sin barra: ver
+     la razón de letra en la rama del resolvedor. */
+  if ('repartidor' in sesion) {
+    return <Redirect href="/ventas/entregas" />;
+  }
 
   if ('sala_espera' in sesion) {
     // S79-B (T3-B3): el pendiente NO entra al portal.
