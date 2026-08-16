@@ -3339,6 +3339,19 @@ export const prestadorEs = {
       exitoDespachado: 'Despachado.',
       exitoEntregado: 'Entregado.',
     },
+    /* EL PRECIO — un control con DOS resultados. La voz cambia ANTES de
+       confirmar: el vendedor no descubre el resultado al apretar. */
+    precio: {
+      titulo: 'Cambiar el precio',
+      campo: 'Precio',
+      referencia: 'Precio de referencia: {{monto}}',
+      rango: 'Podés moverte entre {{min}} y {{max}} sin pedir permiso.',
+      avisoFuera: 'Ese precio queda fuera del rango: se guarda como propuesta y lo revisamos.',
+      sinReferencia: 'Todavía no calibramos este producto, así que cualquier cambio pasa por aprobación.',
+      guardarCta: 'Guardar el precio',
+      proponerCta: 'Proponer este precio',
+      exito: 'Precio actualizado.',
+    },
     stock: {
       disponibles: '{{n}} disponibles',
       reservadas: '{{n}} reservadas',

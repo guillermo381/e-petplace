@@ -2644,6 +2644,17 @@ export const prestadorEn = {
       exitoDespachado: 'Dispatched.',
       exitoEntregado: 'Delivered.',
     },
+    precio: {
+      titulo: 'Change the price',
+      campo: 'Price',
+      referencia: 'Reference price: {{monto}}',
+      rango: 'You can move between {{min}} and {{max}} without asking.',
+      avisoFuera: "That price is outside the range: it's saved as a proposal and we'll review it.",
+      sinReferencia: "We haven't calibrated this product yet, so any change goes through approval.",
+      guardarCta: 'Save the price',
+      proponerCta: 'Propose this price',
+      exito: 'Price updated.',
+    },
     stock: {
       disponibles: '{{n}} available',
       reservadas: '{{n}} reserved',

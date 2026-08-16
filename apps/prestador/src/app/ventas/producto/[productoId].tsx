@@ -91,6 +91,7 @@ import { useTraduccion } from '@/i18n';
 import { InterruptorEspejo, modoDesdeParam, type ModoEspejo } from '@/components/interruptor-espejo';
 import { HojaAjusteStock } from '@/components/hoja-ajuste-stock';
 import { DatoAdministrable } from '@/components/dato-administrable';
+import { HojaPrecio } from '@/components/hoja-precio';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { precioPorKg } from '@/lib/precio-por-kg';
 
@@ -105,6 +106,12 @@ type Pantalla =
       /** El SKU de ESTE vendedor para este producto. `null` = el producto
        *  existe en el catálogo y él no lo ofrece — caso legítimo, no error. */
       sku: SkuDelVendedor | null;
+      /** Los SKUs POR VARIANTE. La capa de administración usa uno solo,
+       *  pero **el precio se edita por presentación** —un producto puede
+       *  tener hasta cuatro— y la banda es de la variante, no del
+       *  producto. *Un solo SKU acá haría que la bolsa de 3 kg heredara la
+       *  banda de la de 15.* */
+      skuPorVariante: Record<string, SkuDelVendedor>;
     };
 
 export default function FichaProductoEspejo() {
@@ -120,6 +127,8 @@ export default function FichaProductoEspejo() {
   const [intento, setIntento] = useState(0);
   /** El SKU que se está ajustando. `null` = la Hoja no está montada. */
   const [ajustando, setAjustando] = useState<SkuDelVendedor | null>(null);
+  /** La oferta cuyo precio se está cambiando. `null` = la Hoja no está. */
+  const [editandoPrecio, setEditandoPrecio] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -159,10 +168,16 @@ export default function FichaProductoEspejo() {
            SKUs falla, la capa de administración NO se inventa: el modo
            cliente sigue siendo verdad y administrar lo dice. */
         const variantes = new Set(rFicha.data.variantes.map((v) => v.variante_id));
-        const sku = rSkus.ok
-          ? (rSkus.data.find((s) => variantes.has(s.variante_id)) ?? null)
-          : null;
-        setPantalla({ estado: 'listo', contexto: ctxData, ficha: rFicha.data, sku });
+        const mios = rSkus.ok ? rSkus.data.filter((s) => variantes.has(s.variante_id)) : [];
+        const skuPorVariante: Record<string, SkuDelVendedor> = {};
+        for (const m of mios) skuPorVariante[m.variante_id] = m;
+        setPantalla({
+          estado: 'listo',
+          contexto: ctxData,
+          ficha: rFicha.data,
+          sku: mios[0] ?? null,
+          skuPorVariante,
+        });
       })();
       return () => {
         vigente = false;
@@ -268,6 +283,8 @@ export default function FichaProductoEspejo() {
                 ficha={pantalla.ficha}
                 modo={modo}
                 plata={plataDe(pantalla.contexto)}
+                skuPorVariante={pantalla.skuPorVariante}
+                alEditarPrecio={(ofertaId) => setEditandoPrecio(ofertaId)}
               />
 
               {/* ④ COMPOSICIÓN Y ALÉRGENOS */}
@@ -294,6 +311,28 @@ export default function FichaProductoEspejo() {
           desmontaría y se perdería lo tipeado. *El modo cambia CÓMO se
           mira; no puede cancelar un acto en curso.* Al guardar se re-lee,
           porque el stock que muestra la ficha lo trae el mismo lector. */}
+      {/* LA HOJA DEL PRECIO — al pie, fuera del scroll, como sus hermanas.
+          El SKU de la variante editada es de donde salen la referencia y la
+          banda: **la banda es de la presentación, no del producto**. */}
+      <HojaPrecio
+        ofertaId={editandoPrecio}
+        sku={
+          pantalla.estado === 'listo' && editandoPrecio !== null
+            ? (pantalla.ficha.variantes
+                .filter((v) => v.oferta_id === editandoPrecio)
+                .map((v) => pantalla.skuPorVariante[v.variante_id] ?? null)[0] ?? null)
+            : null
+        }
+        plata={
+          pantalla.estado === 'listo' ? plataDe(pantalla.contexto) : (n: number) => String(n)
+        }
+        onCerrar={() => setEditandoPrecio(null)}
+        onGuardado={() => {
+          setEditandoPrecio(null);
+          setIntento((n) => n + 1);
+        }}
+      />
+
       <HojaAjusteStock
         sku={ajustando}
         onCerrar={() => setAjustando(null)}
@@ -363,10 +402,14 @@ function Presentaciones({
   ficha,
   modo,
   plata,
+  skuPorVariante,
+  alEditarPrecio,
 }: {
   ficha: FichaProducto;
   modo: ModoEspejo;
   plata: (v: number) => string;
+  skuPorVariante: Record<string, SkuDelVendedor>;
+  alEditarPrecio: (ofertaId: string) => void;
 }) {
   const { t } = useTraduccion();
   return (
@@ -382,7 +425,14 @@ function Presentaciones({
       </View>
 
       {ficha.variantes.map((v) => (
-        <FilaPresentacion key={v.variante_id} v={v} modo={modo} plata={plata} />
+        <FilaPresentacion
+          key={v.variante_id}
+          v={v}
+          modo={modo}
+          plata={plata}
+          sku={skuPorVariante[v.variante_id] ?? null}
+          alEditarPrecio={alEditarPrecio}
+        />
       ))}
 
       {ficha.variantes.length === 0 && (
@@ -398,10 +448,14 @@ function FilaPresentacion({
   v,
   modo,
   plata,
+  sku,
+  alEditarPrecio,
 }: {
   v: VarianteDeProducto;
   modo: ModoEspejo;
   plata: (n: number) => string;
+  sku: SkuDelVendedor | null;
+  alEditarPrecio: (ofertaId: string) => void;
 }) {
   const { t } = useTraduccion();
   const porKg = precioPorKg(v.precio, v.peso_kg);
@@ -427,7 +481,19 @@ function FilaPresentacion({
           **la propuesta pendiente vive EN LA FICHA, sobre el precio** —
           *un cambio que se acepta y desaparece se lee como que se perdió, y
           la segunda vez el vendedor deja de pedir.* */}
-      <DatoAdministrable modo={modo}>
+      {/* ✅ EL PRECIO SE ENCIENDE — el freno se pagó el mismo día. El motor
+          llegó completo (`actualizar_precio_oferta` con su banda y sus dos
+          rebotes hablados), así que el control entra por donde el dato ya
+          estaba envuelto: **sin tocar la anatomía**.
+          ⚠️ **Solo con oferta publicada**: sin `oferta_id` no hay qué
+          mover, y ofrecerlo igual sería una puerta que rebota (Ley 23).
+          El caso «propuse y no está publicada» no es editable acá y su
+          voz vive en la capa de arriba, que es donde ese estado vive. */}
+      <DatoAdministrable
+        modo={modo}
+        onEditar={v.oferta_id === null ? undefined : () => alEditarPrecio(v.oferta_id as string)}
+        etiqueta={t('ventas.precio.titulo')}
+      >
         {v.precio === null ? (
           /* NULO HONESTO: la variante existe y hoy no se puede comprar.
              Decir $0 sería mentir; esconderla, esconder catálogo. */
