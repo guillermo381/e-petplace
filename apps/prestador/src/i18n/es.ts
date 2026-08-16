@@ -3476,8 +3476,13 @@ export const prestadorEs = {
     repartidorSinReclamar: 'Todavía no reclamó su acceso — tiene que entrar a la app con su correo',
     /* ④ · el estado se ve SIN entrar. Un hecho, sin consecuencia
        insinuada: si además bloquea el despacho, no está medido. */
-    repartidorCupo: '{{n}} entregas por día',
-    repartidorSinCupo: 'Sin cupo declarado',
+    /* ESTADO DE SECCIÓN (gramática de bloque §3): hechos de CONJUNTO que
+       hay que contar para saber. La capacidad por persona vive en su
+       ficha — acá va la SUMA, que es la que contesta «¿cuánto aguanto
+       hoy?». */
+    repartidoresEstado: '{{n}} · {{activos}} activos',
+    repartidoresCupoTotal: '{{n}} entregas por día',
+    repartidoresSinCupoTotal: 'sin cupo declarado',
     localTitulo: 'Tu local',
     localEtiqueta: 'Atiendo en mi local',
     localDetalle:

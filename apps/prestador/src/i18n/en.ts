@@ -2776,8 +2776,9 @@ export const prestadorEn = {
       repartidorGuardarCta: 'Save',
       repartidorInactivo: 'Inactive',
     repartidorSinReclamar: "Hasn't claimed access yet — they need to sign in with their email",
-    repartidorCupo: '{{n}} deliveries per day',
-    repartidorSinCupo: 'No daily capacity set',
+    repartidoresEstado: '{{n}} · {{activos}} active',
+    repartidoresCupoTotal: '{{n}} deliveries per day',
+    repartidoresSinCupoTotal: 'no capacity set',
     localTitulo: 'Your store',
     localEtiqueta: 'I serve at my store',
     localDetalle:
