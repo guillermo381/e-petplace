@@ -1700,14 +1700,24 @@ function EjemploSelectorAvatar() {
 function EnsayoDelAnillo() {
   return (
     <View style={{ gap: spacing[3] }}>
-      <LienzoMapa alto={220}>
-        <PinEnMapa variante="moto" nombre="Sin anillo — la propuesta" x={-56} y={0} />
-        <PinConAnilloDePrueba x={56} y={0} />
+      <LienzoMapa alto={240}>
+        {/* LOS DOS OBJETOS JUNTOS — orden de §6ter: «el juicio es la
+            comparación». Dos objetos que tienen que pertenecer al mismo
+            mundo no se pueden aprobar de a uno. */}
+        <PinEnMapa variante="moto" nombre="El repartidor" x={-52} y={14} />
+        <PinEnMapa variante="destino" nombre="Tu casa" x={54} y={-24} />
       </LienzoMapa>
       <Texto variante="dato">
-        izquierda SIN anillo (lo firmado) · derecha CON el anillo que viste. Movelo por la calle, el parque y el
-        agua: los tres tonos que este mapa realmente pinta.
+        La moto y su destino, sobre tiles reales. Lo que se mira: ¿están PARADOS en el mapa o pegados encima?
+        La sombra los apoya · las ruedas y el techo comparten la perspectiva cenital · el color entra en la banda
+        de saturación del terreno (0.10–0.58) en vez de gritar.
       </Texto>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">El «antes» — el glifo dentro del círculo que se rechazó:</Texto>
+        <LienzoMapa alto={140}>
+          <PinConAnilloDePrueba x={0} y={0} />
+        </LienzoMapa>
+      </View>
     </View>
   )
 }
@@ -2496,7 +2506,7 @@ function GaleriaInterna() {
             firmar lo exige — **la pieza se gatea DONDE VIVE**, y un pin
             vive sobre un mapa. En web esto NO se puede juzgar y el
             lienzo lo dice: hay que mirarlo en el teléfono. ═══ */}
-        <Seccion titulo="⭐ GATE S99 — EL ANILLO DEL PIN DE MOTO, SOBRE MAPA REAL · qué decide: si el disco blanco muere. Lo medido va abajo y NO decide solo: el ojo dice si sin anillo la moto se lee mientras se mueve">
+        <Seccion titulo="⭐ GATE S99 — LA MOTO Y SU DESTINO, RE-DIBUJADOS COMO OBJETOS DEL MUNDO · qué decide: si ahora PERTENECEN al mapa. Segundo intento: el primero se rechazó por verse pegado encima">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
               <PanelTema etiqueta="claro — los dos pines en el MISMO mapa: el juicio es la comparación">
