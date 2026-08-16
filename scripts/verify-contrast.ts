@@ -479,7 +479,10 @@ const todos: Pair[] = [
   ).flatMap(([tono, hex]) =>
     (
       [
-        ['moto', palette.mapaMoto],
+        ['moto (cajón)', palette.mapaMoto],
+        // S99-B · el cuerpo un paso más claro: su piso es el AGUA (3.06),
+        // y es lo que fija 0.48 como techo de luz — a 0.52 cae a 2.67.
+        ['moto (cuerpo claro)', palette.mapaMotoClara],
         ['edificio cuerpo', palette.mapaEdificio],
         ['edificio techo', palette.mapaEdificioTecho],
       ] as const

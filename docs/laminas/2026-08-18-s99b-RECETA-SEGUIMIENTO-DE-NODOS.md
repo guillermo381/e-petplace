@@ -75,6 +75,46 @@ hace que cada etapa diga qué es *sin texto*. *Construir el mecanismo y
 esperar el arte es el orden correcto; el revés sería arte sin dónde
 montarse.*
 
+### ✅ ⏪ LOS CUATRO YA ESTÁN DIBUJADOS (S99-B) — el slot dejó de estar vacío
+
+`nodoConfirmado` · `nodoPreparando` · `nodoEnCamino` · `nodoEntregado`,
+en el registry, **sin huella** (control) y **GATE POR ÍCONO PENDIENTE**.
+R30 pasó a vigilar **64 paths** (eran 57).
+
+**🔴 VAN EN MASA Y NO EN TRAZO, y el número lo decide:** el nodo mide 20
+y sostiene 12 ⇒ el `viewBox` de 24 se escala a la mitad y **`TRAZO` 1.9
+llega como 0.95 efectivo**. A esa fineza un contorno no dibuja: susurra.
+*Es §6ter con otra causa —allá el trazo moría por el FONDO, acá muere por
+el TAMAÑO— y por eso la conclusión coincide.* **Precedente y no
+invención:** `ia` ya es masa pura.
+
+**La regla que los ordena: a 12 px no sobrevive el detalle interior,
+sobrevive la ORIENTACIÓN.** Por eso se separan por eje antes que por
+contenido — **bolsa ▮ vertical · caja ■ cuadrada · flecha ▶ horizontal ·
+visto ✓ diagonal**.
+
+**Dos decisiones dentro del set:**
+- **el visto se RESERVA para `entregado`** — era el candidato obvio de
+  «confirmado» (el riesgo que esta receta ya había declarado) y se le
+  niega: *`entregado` es el único de los cuatro que COMPLETA algo, y un
+  visto en el primer nodo diría que el camino terminó cuando recién
+  empieza*;
+- **`en_camino` no es una moto** (§6ter): el mapa la usa para decir
+  DÓNDE, y acá diría EN QUÉ ETAPA — *el mismo objeto significando dos
+  cosas en la misma pantalla.*
+
+**Y se montan DONDE VIVEN:** la galería los pone **adentro de una
+`EscaleraEstados` real a 12 px**, con una fila de control a 21 que **no
+es donde se juzga**. *Es lo que la moto costó dos veces en esta misma
+sesión: un glifo aprobado en lámina limpia se cae al llegar a su tamaño.*
+Y por **L-255**: firmada una silueta, lo que cambia después es el
+TRATAMIENTO, jamás la silueta.
+
+**⏪ De paso, la demo de la galería mentía y quedó curada:** montaba
+SIETE pasos rotulados «las siete narrativas», con `pagado`, `empacado` y
+`despachado` —que son **estados internos**— adentro. *Enseñaba un camino
+de siete que el producto no tiene.*
+
 ---
 
 ## §3 · EL RANGO — Y LA PIEZA YA LLEGÓ ANTES QUE ESTA RECETA

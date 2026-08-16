@@ -7,14 +7,6 @@
  * una de las dos**. Es la hermana de `ventana-pedidos`, por el mismo
  * motivo y con la misma forma.
  *
- * Y tiene un segundo efecto medido: N3 pone techo de 3 separadores por
- * PANTALLA, y el HOY del prestador es la pantalla más cargada de la app.
- * Con el grupo inline se pasaba del techo — no por descuido de
- * composición, sino porque una lista densa de accesos es exactamente el
- * caso que N3 exceptúa, montada dentro de una pantalla que ya tenía lo
- * suyo. **Al extraerla, cada archivo vuelve a responder por lo que
- * compone él.** *La regla no se esquivó: se le dio la razón.*
- *
  * CONTRATO — sin fetch adentro (patrón de `ventana-pedidos`): quien la
  * monta trae el dato. `tieneEntregas` es del llamador porque su lector
  * (`misEntregasAsignadas`) viaja en la ola de carga de cada pantalla, y
@@ -23,34 +15,34 @@
  * LA CELDA DE REPARTO SE OFRECE SOLO SI HAY ENVÍO (Ley 23: la puerta no
  * ofrece lo que va a rechazar). Su ausencia por duda es ausencia: el
  * llamador resuelve `ok && length > 0`, jamás «no pude leer» = «sí hay».
+ *
+ * ── ☠️ S99-C · DE CINCO CELDAS A DOS, POR FIRMA DEL FOUNDER (16-ago) ─────
+ * · **«Tu vitrina» + «Configuración» → «TU TIENDA»**, una sola pantalla con
+ *   dos secciones. *La razón es suya y queda escrita para que no se
+ *   re-discuta: la vitrina es donde el vendedor trabaja TODOS LOS DÍAS,
+ *   configuración es donde entra de vez en cuando — y **NEGOCIO y
+ *   Configuración empezarían a decir lo mismo**.*
+ * · **«Venta de mostrador» SALE**: ya vive en ATENDER como capacidad, y su
+ *   perilla («Atiendo en mi local») vive dentro de Tu tienda. *Una función
+ *   con dos puertas envejece por la que nadie mira.*
+ * · **☠️ `/ventas/stock` murió antes** (② de S99-C): era una segunda lista
+ *   de los mismos productos; el ajuste vive en la ficha y el número, en la
+ *   fila de Administrar.
+ *
+ * ⇒ **queda una lista de dos**, y el agrupamiento con título que N3 había
+ * pedido al quinto ítem **se retira porque su causa desapareció**: con dos
+ * celdas un encabezado de grupo es un rótulo para nadie. *Una jerarquía
+ * que sobrevive a las cosas que ordenaba es ruido con buena intención.*
  */
 
 import { View } from "react-native";
-import {
-  CeldaNavegacion,
-  Separador,
-  Tarjeta,
-  Texto,
-  spacing,
-} from "@epetplace/ui";
+import { CeldaNavegacion, Separador, Tarjeta, spacing } from "@epetplace/ui";
 
 import { useTraduccion } from "@/i18n";
 
 /** Las pantallas del módulo. Tipado cerrado: una ruta nueva no se
  *  cuela como string — se agrega acá y el consumidor la ve. */
-export type RutaModuloVentas =
-  | "/ventas/vitrina"
-  /* ☠️ `/ventas/stock` MURIÓ (② de S99-C). Era una SEGUNDA LISTA de los
-     mismos productos con otras columnas, y obligaba al vendedor a elegir
-     dónde mirar su producto antes de poder tocarlo. **El ajuste vive en la
-     ficha** —donde vive el producto, igual que la capacidad vive en la
-     ficha del repartidor— y **el número de stock subió a la fila de
-     Administrar**, que es lo único que esa pantalla daba y la ficha no:
-     cuánto hay de TODO de un vistazo. *No se recortó una función: se le
-     dio su casa.* */
-  | "/ventas/mostrador"
-  | "/ventas/entregas"
-  | "/ventas/configuracion";
+export type RutaModuloVentas = "/ventas/tienda" | "/ventas/entregas";
 
 export interface CeldasModuloVentasProps {
   /** La persona además reparte y tiene envío asignado hoy (§9.1). */
@@ -65,49 +57,26 @@ export function CeldasModuloVentas({
   const { t } = useTraduccion();
 
   return (
-    /* 🔴 DOS GRUPOS Y NO UNA LISTA DE CINCO — lo pidió N3 al quinto ítem, y
-       al obedecerla la pantalla mejoró: con cinco celdas seguidas el menú
-       no dice qué es qué. **La vitrina es LA CARA** (lo que la familia ve)
-       y el resto es **el trabajo de adentro**; separarlos con aire y título
-       es lo que la regla manda, y de paso vuelve el menú legible.
-       *El trinquete no pedía menos líneas: pedía jerarquía.* */
     <View style={{ gap: spacing[5] }}>
       <Tarjeta relleno="ninguno">
         <CeldaNavegacion
           registro="tinta"
-          titulo={t("ventas.hoy.vitrina")}
+          titulo={t("ventas.tienda.titulo")}
           detalle={t("ventas.hoy.vitrinaDetalle")}
-          onPress={() => onIr("/ventas/vitrina")}
+          onPress={() => onIr("/ventas/tienda")}
         />
+        {tieneEntregas && (
+          <>
+            <Separador />
+            <CeldaNavegacion
+              registro="tinta"
+              titulo={t("ventas.hoy.entregas")}
+              detalle={t("ventas.hoy.entregasDetalle")}
+              onPress={() => onIr("/ventas/entregas")}
+            />
+          </>
+        )}
       </Tarjeta>
-
-      <View style={{ gap: spacing[3] }}>
-        <Texto variante="seccion">{t("ventas.hoy.grupoTrabajo")}</Texto>
-        <Tarjeta relleno="ninguno">
-          <CeldaNavegacion
-            registro="tinta"
-            titulo={t("ventas.hoy.mostrador")}
-            onPress={() => onIr("/ventas/mostrador")}
-          />
-          {tieneEntregas && (
-            <>
-              <Separador />
-              <CeldaNavegacion
-                registro="tinta"
-                titulo={t("ventas.hoy.entregas")}
-                detalle={t("ventas.hoy.entregasDetalle")}
-                onPress={() => onIr("/ventas/entregas")}
-              />
-            </>
-          )}
-          <Separador />
-          <CeldaNavegacion
-            registro="tinta"
-            titulo={t("ventas.hoy.configuracion")}
-            onPress={() => onIr("/ventas/configuracion")}
-          />
-        </Tarjeta>
-      </View>
     </View>
   );
 }

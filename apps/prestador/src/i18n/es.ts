@@ -3193,6 +3193,14 @@ export const prestadorEs = {
     },
     /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
        misma pantalla, y su voz también. */
+    /* «TU TIENDA» — una sola pantalla, dos secciones (firma del founder
+       16-ago). El nombre del techo es del NEGOCIO del vendedor, no del
+       módulo: él no entra a «configuración», entra a su tienda. */
+    tienda: {
+      titulo: 'Tu tienda',
+      vitrinaTitulo: 'Tu vitrina',
+      localTitulo: 'Tu local',
+    },
     vitrina: {
       vistaLista: 'Lista',
       vistaIconos: 'Íconos',
@@ -3206,6 +3214,9 @@ export const prestadorEs = {
       ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
       /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
       catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
+      /* Con el conteo del servidor el aviso deja de ser indicio. */
+      catalogoCortadoExacto: 'Hay {{hay}} productos en el catálogo y estás viendo {{ves}}.',
+      viendo: 'Viendo {{n}} de {{de}}',
       leFaltan: 'Le faltan {{n}}',
       /* Rótulos de FILA — el nombre de la razón, no su instrucción.
          Su versión con camino vive en `ventas.producto.razon_*`. */
@@ -3240,8 +3251,6 @@ export const prestadorEs = {
       cancelado: 'Cancelado',
     },
     hoy: {
-      grupoTrabajo: 'Tu trabajo del día',
-      vitrina: 'Tu vitrina',
       vitrinaDetalle: 'Lo que ven las familias',
       /* 🔴 S99-C · GRAMÁTICA DEL TECHO §1 — «el techo dice DÓNDE ESTÁS
          antes de decir QUÉ HAY». Esta clave decía **«Pedidos»** y es el
@@ -3256,8 +3265,6 @@ export const prestadorEs = {
       titulo: 'Venta de productos',
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
-      configuracion: 'Configuración',
-      mostrador: 'Venta de mostrador',
       entregas: 'Mis entregas de hoy',
       entregasDetalle: 'Lo que llevas tú',
       vacioTitulo: 'Todavía no hay pedidos',
@@ -3403,7 +3410,6 @@ export const prestadorEs = {
       exito: 'Venta registrada.',
     },
     config: {
-      titulo: 'Configuración',
       detalle:
         'Completa tu negocio a tu ritmo. e-PetPlace lo revisa y lo hace visible ante los clientes.',
       // ⑥ el estado (§8.6bis) — «en revisión» → «activa»; la voz del modal

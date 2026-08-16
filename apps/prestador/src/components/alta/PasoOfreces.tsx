@@ -446,7 +446,7 @@ export function PasoOfreces({ prestadorId, cuentaComercialId }: PasoOfrecesProps
               registro="tinta"
               titulo={t('alta.paso2.configuracionTiendaTitulo')}
               detalle={t('alta.paso2.configuracionTiendaDetalle')}
-              onPress={() => router.push('/ventas/configuracion')}
+              onPress={() => router.push('/ventas/tienda')}
             />
           ) : (
             <CeldaNavegacion

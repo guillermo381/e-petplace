@@ -81,10 +81,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import Svg, { Circle, Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
+import Svg, { G, Circle, Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
 
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 import { motion } from '../tokens/motion'
+import { ISOTIPO_PATH, ISOTIPO_VB_W } from '../brand/Isotipo'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
@@ -220,13 +221,34 @@ function ObjetoMoto({ lado }: { lado: number }) {
       <SombraDeSuelo id="sombraMoto" cx={12} cy={21} rx={9.5} />
       {/* SILUETA D, VERBATIM de la candidata firmada — la caja de reparto
           es lo que la hace decir «reparto» y no «bicicleta». */}
+      {/* EL CAJÓN — se queda en `mapaMoto`, el tono más oscuro del par, y
+          por eso preside: es lo que hace decir «reparto». */}
       <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={palette.mapaMoto} />
+      {/* 🔴 EL ISOTIPO ADENTRO DEL CAJÓN — firma del founder («y quedaría
+          perfecto»). El path viene EXPORTADO de la marca, jamás copiado.
+          Va en papel: 6.2 contra el cajón, holgado sobre el piso gráfico.
+
+          ⚠️ **SU TAMAÑO, MEDIDO Y DECLARADO PARA QUE EL OJO JUZGUE
+          SABIÉNDOLO:** el cajón renderiza a 15,4 × 10,3 px y el isotipo
+          adentro queda en **11,7 × 8,1** (35 × 24 a DPR 3). *Es el mismo
+          borde donde vive el debate de los glifos de nodo: a 8 px de alto
+          una marca con dos patas y su calado puede leerse como una
+          mancha.* **No lo decido yo** — si en el aparato no se reconoce,
+          la palanca es agrandar el cajón, no simplificar la marca. */}
+      <G
+        transform={`translate(3.6 6.9) scale(${6.4 / ISOTIPO_VB_W})`}
+      >
+        <Path d={ISOTIPO_PATH} fill={palette.light0} />
+      </G>
+      {/* EL CUERPO Y LAS RUEDAS — un paso más CLAROS que el cajón. El
+          volumen sale de dos LUCES del mismo tono; dos tonos distintos
+          habrían vuelto al objeto un dibujo de dos colores. */}
       <Path
         d="M2.6 12.4h9l3.2-4.2h3.6v2.5h-2.3l-2.7 3.5h3.5c1.9 0 3.5 1.2 4.1 2.9H4.4c-.5-1.6-1.9-2.7-3.6-2.9Z"
-        fill={palette.mapaMoto}
+        fill={palette.mapaMotoClara}
       />
-      <Circle cx={5.8} cy={17.6} r={3.4} fill={palette.mapaMoto} />
-      <Circle cx={18.2} cy={17.6} r={3.4} fill={palette.mapaMoto} />
+      <Circle cx={5.8} cy={17.6} r={3.4} fill={palette.mapaMotoClara} />
+      <Circle cx={18.2} cy={17.6} r={3.4} fill={palette.mapaMotoClara} />
     </Svg>
   )
 }

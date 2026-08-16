@@ -2527,6 +2527,11 @@ export const prestadorEn = {
       razon_sin_momento_etario: 'We still need to say what age it is for.',
       razon_sin_foto: 'We still need its photo.',
     },
+    tienda: {
+      titulo: 'Your store',
+      vitrinaTitulo: 'Your shelf',
+      localTitulo: 'Your shop',
+    },
     vitrina: {
       vistaLista: 'List',
       vistaIconos: 'Icons',
@@ -2537,6 +2542,8 @@ export const prestadorEn = {
       filtroEspecie: 'Filter by species',
       ausentes: "{{n}} of your products aren't shown here because they aren't published yet.",
       catalogoCortado: "You're seeing the first {{n}} products in the catalogue. There may be more.",
+      catalogoCortadoExacto: 'There are {{hay}} products in the catalogue and you are seeing {{ves}}.',
+      viendo: 'Showing {{n}} of {{de}}',
       leFaltan: '{{n}} missing',
       falta_sku_rechazado: 'Rejected',
       falta_sin_precio_propuesto: 'No price',
@@ -2567,14 +2574,10 @@ export const prestadorEn = {
       cancelado: 'Cancelled',
     },
     hoy: {
-      grupoTrabajo: 'Your work today',
-      vitrina: 'Your storefront',
       vitrinaDetalle: 'What families see',
       titulo: 'Product sales',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
       cupoCero: 'No delivery capacity confirmed for today',
-      configuracion: 'Settings',
-      mostrador: 'Counter sale',
       entregas: 'My deliveries today',
       entregasDetalle: 'What you deliver yourself',
       vacioTitulo: 'No orders yet',
@@ -2708,7 +2711,6 @@ export const prestadorEn = {
       exito: 'Sale recorded.',
     },
     config: {
-      titulo: 'Settings',
       detalle:
         'Complete your business at your own pace. e-PetPlace reviews it and makes it visible to customers.',
       // ⑥ the status (§8.6bis) — "under review" → "active"

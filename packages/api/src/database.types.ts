@@ -461,6 +461,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "alergia_entendimientos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "alergia_entendimientos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
             foreignKeyName: "alergia_entendimientos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -4415,6 +4429,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "productos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupones_aplica_producto_id_fkey"
+            columns: ["aplica_producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "cupones_aplica_producto_id_fkey"
+            columns: ["aplica_producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
           },
           {
             foreignKeyName: "cupones_creado_por_fkey"
@@ -8796,11 +8824,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "evento_producto_asignacion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "evento_producto_asignacion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
             foreignKeyName: "evento_producto_asignacion_variante_id_fkey"
             columns: ["variante_id"]
             isOneToOne: false
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_producto_asignacion_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
           },
           {
             foreignKeyName: "evento_producto_asignacion_venta_mostrador_item_id_fkey"
@@ -10293,6 +10342,13 @@ export type Database = {
             foreignKeyName: "inventario_movimientos_sku_id_fkey"
             columns: ["sku_id"]
             isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventario_movimientos_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
             referencedRelation: "vendedor_skus"
             referencedColumns: ["id"]
           },
@@ -10333,6 +10389,13 @@ export type Database = {
           sku_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "inventario_reconciliaciones_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inventario_reconciliaciones_sku_id_fkey"
             columns: ["sku_id"]
@@ -10394,6 +10457,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_pedidos_narrativa"
             referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "inventario_reservas_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "inventario_reservas_sku_id_fkey"
@@ -12066,6 +12136,13 @@ export type Database = {
             foreignKeyName: "ofertas_sku_id_fkey"
             columns: ["sku_id"]
             isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
             referencedRelation: "vendedor_skus"
             referencedColumns: ["id"]
           },
@@ -12075,6 +12152,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
           },
         ]
       }
@@ -12531,6 +12615,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pedido_items_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["oferta_id"]
+          },
+          {
+            foreignKeyName: "pedido_items_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["oferta_id"]
+          },
+          {
             foreignKeyName: "pedido_items_pedido_id_fkey"
             columns: ["pedido_id"]
             isOneToOne: false
@@ -12559,11 +12657,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pedido_items_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "pedido_items_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
             foreignKeyName: "pedido_items_variante_id_fkey"
             columns: ["variante_id"]
             isOneToOne: false
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_items_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
           },
         ]
       }
@@ -14337,6 +14456,20 @@ export type Database = {
             referencedRelation: "productos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "producto_ficha_accesorio_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "producto_ficha_accesorio_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
         ]
       }
       producto_ficha_dosificacion: {
@@ -14396,6 +14529,20 @@ export type Database = {
             referencedRelation: "productos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "producto_ficha_dosificacion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "producto_ficha_dosificacion_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
         ]
       }
       producto_ficha_nutricional: {
@@ -14445,6 +14592,20 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "productos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producto_ficha_nutricional_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "producto_ficha_nutricional_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: true
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
           },
         ]
       }
@@ -14514,6 +14675,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "productos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producto_variantes_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "producto_variantes_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
           },
         ]
       }
@@ -15670,6 +15845,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "resenas_productos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "resenas_productos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
             foreignKeyName: "resenas_productos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -16316,6 +16505,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "senales_comerciales_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "senales_comerciales_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
             foreignKeyName: "senales_comerciales_senal_fkey"
             columns: ["senal"]
             isOneToOne: false
@@ -16342,6 +16545,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "senales_comerciales_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
           },
         ]
       }
@@ -17635,6 +17845,13 @@ export type Database = {
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendedor_skus_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
+          },
         ]
       }
       venta_mostrador_items: {
@@ -17689,6 +17906,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "venta_mostrador_items_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "venta_mostrador_items_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["producto_id"]
+          },
+          {
+            foreignKeyName: "venta_mostrador_items_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "venta_mostrador_items_sku_id_fkey"
             columns: ["sku_id"]
             isOneToOne: false
@@ -17701,6 +17939,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "producto_variantes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venta_mostrador_items_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
           },
           {
             foreignKeyName: "venta_mostrador_items_venta_id_fkey"
@@ -18527,6 +18772,13 @@ export type Database = {
             foreignKeyName: "inventario_reservas_sku_id_fkey"
             columns: ["sku_id"]
             isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventario_reservas_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
             referencedRelation: "vendedor_skus"
             referencedColumns: ["id"]
           },
@@ -18879,6 +19131,64 @@ export type Database = {
         }
         Relationships: []
       }
+      v_skus_vendedor: {
+        Row: {
+          composicion_estado: string | null
+          created_at: string | null
+          cuenta_comercial_id: string | null
+          especies_aplicables: string[] | null
+          estado: string | null
+          hay_stock: boolean | null
+          id: string | null
+          imagen_url: string | null
+          imagenes: Json | null
+          momentos_aplicables: string[] | null
+          motivo_rechazo: string | null
+          oferta_estado: string | null
+          oferta_id: string | null
+          oferta_precio: number | null
+          precio_propuesto: number | null
+          presentacion: string | null
+          producto_id: string | null
+          producto_marca: string | null
+          producto_nombre: string | null
+          razones: string[] | null
+          sku_vendedor: string | null
+          stock_disponible: number | null
+          stock_reservado: number | null
+          variante_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "vendedor_skus_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "producto_variantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendedor_skus_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["variante_id"]
+          },
+        ]
+      }
       v_storage_borrado_atascado: {
         Row: {
           bucket: string | null
@@ -18908,6 +19218,62 @@ export type Database = {
           ultimo_intento_en?: string | null
         }
         Relationships: []
+      }
+      v_vitrina_publicada: {
+        Row: {
+          alergenos: string[] | null
+          composicion_estado: string | null
+          contenido_unidad: string | null
+          contenido_valor: number | null
+          country_code: string | null
+          cuenta_comercial_id: string | null
+          es_dieta_prescripcion: boolean | null
+          especies_aplicables: string[] | null
+          familia_codigo: string | null
+          hay_stock: boolean | null
+          imagen_url: string | null
+          imagenes: Json | null
+          marca: string | null
+          momentos_aplicables: string[] | null
+          moneda: string | null
+          nombre: string | null
+          oferta_id: string | null
+          peso_kg: number | null
+          precio: number | null
+          presentacion: string | null
+          producto_id: string | null
+          variante_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ofertas_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "country_config"
+            referencedColumns: ["country_code"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "productos_familia_codigo_fkey"
+            columns: ["familia_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_familias_producto"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
     }
     Functions: {

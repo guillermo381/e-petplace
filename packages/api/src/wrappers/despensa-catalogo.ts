@@ -145,6 +145,14 @@ export interface VarianteDeProducto {
   /** El país de la oferta — lo que el riel de moneda (`monto()`) exige para
    *  no formatear a mano (pedido D 12-ago; la clase D-448). null ⟺ sin oferta. */
   country_code: string | null;
+  /** 🔴 ¿SE PUEDE COMPRAR **ESTA PRESENTACIÓN**? (pedido de D, S99). En la
+   *  vitrina alcanza saber que el producto existe; **en la ficha la familia
+   *  se COMPROMETE**, y elige presentación: que la de 15 kg esté agotada y
+   *  la de 3 kg no es la diferencia entre una compra y un rebote al pagar.
+   *  Derivado en `ofertas` por trigger, neto de reservas.
+   *  **`false` cuando no hay oferta** — sin oferta no se puede comprar, y ahí
+   *  el nulo honesto de los otros campos ya dice el porqué. */
+  hay_stock: boolean;
 }
 
 export interface FichaProducto {
@@ -296,6 +304,47 @@ export function fotosDeProducto(p: ObjDespensa): { portada: string | null; galer
   return { portada: declarada ?? galeria[0] ?? null, galeria };
 }
 
+/** Mapea las filas APLANADAS de `v_vitrina_publicada`. Existe junto al de
+ *  embeds porque la vitrina y el buscador leen la VISTA —única forma de que
+ *  el espejo ordene por nombre— y la recomendación sigue leyendo `ofertas`
+ *  con sus índices GIN de exclusión. *Dos formas de fila, un solo tipo de
+ *  salida: si algún día la recomendación también migra, éste se queda solo.* */
+function mapearVitrinaPlana(filas: unknown[]): ProductoDeVitrina[] | null {
+  const salida: ProductoDeVitrina[] = [];
+  for (const f of filas) {
+    if (!esObjDespensa(f) || typeof f.oferta_id !== 'string' || typeof f.precio !== 'number') return null;
+    const estadoCompo = composicionEstado(f.composicion_estado);
+    if (typeof f.cuenta_comercial_id !== 'string' || estadoCompo === null) return null;
+    if (typeof f.producto_id !== 'string' || typeof f.variante_id !== 'string') return null;
+    if (typeof f.nombre !== 'string' || typeof f.familia_codigo !== 'string') return null;
+    if (typeof f.presentacion !== 'string') return null;
+    salida.push({
+      oferta_id: f.oferta_id,
+      cuenta_comercial_id: f.cuenta_comercial_id,
+      producto_id: f.producto_id,
+      variante_id: f.variante_id,
+      nombre: f.nombre,
+      marca: typeof f.marca === 'string' ? f.marca : null,
+      familia_codigo: f.familia_codigo,
+      presentacion: f.presentacion,
+      contenido_valor: numOrNull(f.contenido_valor),
+      contenido_unidad: typeof f.contenido_unidad === 'string' ? f.contenido_unidad : null,
+      peso_kg: numOrNull(f.peso_kg),
+      precio: f.precio,
+      hay_stock: f.hay_stock === true,
+      moneda: typeof f.moneda === 'string' ? f.moneda : 'USD',
+      country_code: typeof f.country_code === 'string' ? f.country_code : 'EC',
+      es_dieta_prescripcion: f.es_dieta_prescripcion === true,
+      alergenos: textArray(f.alergenos),
+      composicion_estado: estadoCompo,
+      especies_aplicables: textArray(f.especies_aplicables),
+      momentos_aplicables: textArray(f.momentos_aplicables),
+      foto_url: fotosDeProducto(f).portada,
+    });
+  }
+  return salida;
+}
+
 function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
   const salida: ProductoDeVitrina[] = [];
   for (const fila of filas) {
@@ -353,8 +402,67 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
 export interface FiltrosVitrina {
   familia_codigo?: string;
   country_code?: string;
-  /** Tope de filas. Sin tope una vitrina crece sin techo (D-497). */
+  /** 🔴 TECHO DE FILAS — y su default **NO es inocente** (S99, hallazgo de C
+   *  con la vitrina llena): sin pasarlo, este lector corta en **100**, y una
+   *  lista completa y una truncada **se ven igual**. Con 563 comprables
+   *  mostraba un sexto del catálogo y no lo decía.
+   *  ⇒ **la superficie lo pasa EXPLÍCITO**, y para poder decir «100 de 563»
+   *  usa `contarProductosDespensa` con los MISMOS filtros. */
   limite?: number;
+  /** Especie del producto. 🔴 VA AL SERVIDOR (firma de C): con una página de
+   *  30 sobre 563, filtrar en memoria devolvería «no hay» sobre un producto
+   *  que SÍ existe. */
+  especie?: string;
+  /** Búsqueda por nombre o marca — mismo motivo que `especie`. */
+  texto?: string;
+}
+
+/**
+ * CUÁNTOS HAY DE VERDAD — el compañero obligado de `listarProductosDespensa`.
+ *
+ * 🔴 POR QUÉ NACE UNA FUNCIÓN Y NO UN CAMPO EN LA LISTA: cambiar la forma del
+ * retorno rompería a sus consumidores en caliente, y **este número tiene que
+ * poder pedirse SIN traer las filas** (es un `head` de PostgREST: cuenta en el
+ * servidor y no baja ni una fila al teléfono).
+ *
+ * ⚠️ Y LA CONDICIÓN QUE LO VUELVE ÚTIL EN VEZ DE ENGAÑOSO: **cuenta con los
+ * MISMOS filtros que la lista.** Un total global contra una lista filtrada
+ * diría «12 de 563» sobre un conjunto que nunca tuvo 563 — *sería el mismo
+ * defecto con el número al revés.* Por eso comparte `FiltrosVitrina` y repite
+ * los tres `eq` de la lista; el día que la lista gane un filtro, este cuenta
+ * mal hasta que lo gane también, **y por eso viven pegados en el archivo.**
+ */
+export async function contarProductosDespensa(
+  filtros: FiltrosVitrina = {},
+): Promise<ResultadoWrapper<number, CodigoErrorDespensa>> {
+  let q = getClient().from('v_vitrina_publicada').select('oferta_id', { count: 'exact', head: true });
+  q = aplicarFiltrosVitrina(q, filtros);
+  const { count, error } = await q;
+  if (error) return falloDespensa(error.message);
+  // FAIL-CLOSED DE SIGNIFICADO (L-247): un conteo que no llegó NO es cero.
+  // Decir «0 de 0» sobre una vitrina llena es peor que no decir nada.
+  if (typeof count !== 'number') return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: count };
+}
+
+/** Los filtros de la vitrina, en UN solo lugar: el conteo y la lista tienen
+ *  que aplicar EXACTAMENTE los mismos, o el total habla de otro conjunto —
+ *  *un número real en el lugar equivocado miente peor que uno inventado,
+ *  porque nadie lo duda* (C, S99). */
+function aplicarFiltrosVitrina<T extends {
+  eq: (c: string, v: string) => T;
+  contains: (c: string, v: string[]) => T;
+  or: (f: string) => T;
+}>(q: T, f: FiltrosVitrina): T {
+  let r = q;
+  if (f.familia_codigo !== undefined) r = r.eq('familia_codigo', f.familia_codigo);
+  if (f.country_code !== undefined) r = r.eq('country_code', f.country_code);
+  if (f.especie !== undefined) r = r.contains('especies_aplicables', [f.especie]);
+  if (f.texto !== undefined && f.texto.trim().length > 0) {
+    const t = f.texto.trim().replace(/[,()]/g, ' ');
+    r = r.or(`nombre.ilike.*${t}*,marca.ilike.*${t}*`);
+  }
+  return r;
 }
 
 /**
@@ -365,22 +473,24 @@ export interface FiltrosVitrina {
 export async function listarProductosDespensa(
   filtros: FiltrosVitrina = {},
 ): Promise<ResultadoWrapper<ProductoDeVitrina[], CodigoErrorDespensa>> {
-  let q = getClient()
-    .from('ofertas')
-    .select(SELECT_VITRINA)
-    .eq('estado', 'publicada')
-    .eq('producto_variantes.activo', true)
-    .eq('producto_variantes.productos.estado', 'activo');
+  let q = getClient().from('v_vitrina_publicada').select('*');
+  q = aplicarFiltrosVitrina(q, filtros);
 
-  if (filtros.familia_codigo !== undefined) {
-    q = q.eq('producto_variantes.productos.familia_codigo', filtros.familia_codigo);
-  }
-  if (filtros.country_code !== undefined) q = q.eq('country_code', filtros.country_code);
-
-  const { data, error } = await q.limit(filtros.limite ?? 100);
+  // 🔴 EL ORDEN DEL ESPEJO — `nombre ASC, oferta_id ASC`, EL MISMO que el
+  // lado vendedor. Hallazgo de C: las dos caras ordenaban distinto (el
+  // vendedor por fecha, la vitrina **no ordenaba en absoluto**) y no se veía
+  // porque el orden es invisible hasta que alguien pagina. Su lectura, que
+  // es ley: *cambiar de modo cambia CÓMO se ve, jamás QUÉ se ve — y una
+  // lista en otro orden es otro QUÉ.*
+  // Lee la VISTA porque **PostgREST acepta el `order` por columna embebida y
+  // lo ignora** (medido): sin aplanar, este orden no existiría.
+  const { data, error } = await q
+    .order('nombre', { ascending: true })
+    .order('oferta_id', { ascending: true })
+    .limit(filtros.limite ?? 100);
   if (error) return falloDespensa(error.message);
   if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
-  const productos = mapearVitrina(data);
+  const productos = mapearVitrinaPlana(data);
   if (productos === null) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: productos };
 }
@@ -399,7 +509,7 @@ export async function obtenerFichaProducto(
       .maybeSingle(),
     cliente
       .from('producto_variantes')
-      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code)')
+      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code, hay_stock)')
       .eq('producto_id', productoId)
       .eq('activo', true),
   ]);
@@ -432,6 +542,10 @@ export async function obtenerFichaProducto(
       contenido_unidad: typeof v.contenido_unidad === 'string' ? v.contenido_unidad : null,
       peso_kg: numOrNull(v.peso_kg),
       oferta_id: esObjDespensa(of) && typeof of.id === 'string' ? of.id : null,
+      // FAIL-CLOSED (L-247): sin `true` explícito, NO comprable. Sin oferta
+      // tampoco — prometer una presentación que va a rebotar al pagar es
+      // peor que decir que no está.
+      hay_stock: esObjDespensa(of) && of.hay_stock === true,
       precio: esObjDespensa(of) ? numOrNull(of.precio) : null,
       moneda: esObjDespensa(of) && typeof of.moneda === 'string' ? of.moneda : null,
       cuenta_comercial_id:
@@ -618,20 +732,24 @@ export async function buscarProductosDespensa(
   if (t.length === 0) return { ok: true, data: [] };
   const patron = `%${t.replace(/[%_]/g, (c) => `\\${c}`)}%`;
 
+  // La VISTA, por lo mismo que la lista: el buscador es la otra puerta a la
+  // misma vitrina y **tiene que devolver el mismo orden** — si busca y
+  // ordena distinto, cambiar de puerta cambia el QUÉ.
+  // (El filtro por columna embebida SÍ funciona en PostgREST —medido: 5 de 5
+  // coincidencias—; es el ORDER el que se acepta y se ignora. Esa asimetría
+  // es lo que vuelve creíble la trampa: uno prueba el filtro, anda, y da por
+  // bueno el resto.)
   const { data, error } = await getClient()
-    .from('ofertas')
-    .select(SELECT_VITRINA)
-    .eq('estado', 'publicada')
-    .eq('producto_variantes.activo', true)
-    .eq('producto_variantes.productos.estado', 'activo')
-    .or(`nombre.ilike.${patron},marca.ilike.${patron}`, {
-      referencedTable: 'producto_variantes.productos',
-    })
+    .from('v_vitrina_publicada')
+    .select('*')
+    .or(`nombre.ilike.${patron},marca.ilike.${patron}`)
+    .order('nombre', { ascending: true })
+    .order('oferta_id', { ascending: true })
     .limit(limite);
 
   if (error) return falloDespensa(error.message);
   if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
-  const productos = mapearVitrina(data);
+  const productos = mapearVitrinaPlana(data);
   if (productos === null) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: productos };
 }

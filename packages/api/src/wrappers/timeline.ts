@@ -66,7 +66,10 @@ export interface ItemTimeline {
 
 export interface PaginaTimeline {
   items: ItemTimeline[];
-  /** fecha_evento del último item — pasarlo como cursor de la página siguiente; null = no hay más. */
+  /** Cursor OPACO de la página siguiente (`fecha_evento|id`); null = no hay
+   *  más. ⚠️ NO se parsea del lado del consumidor: se guarda y se devuelve.
+   *  Lleva el `id` porque la fecha sola perdía los eventos que la comparten
+   *  (S99 — hasta 6 por mascota, medido). */
   siguiente_cursor: string | null;
 }
 
@@ -92,9 +95,47 @@ async function _timeline(
     .in('mascota_id', mascotaIds)
     .eq('soft_delete', false)
     .neq('tipo', 'cita_servicio')
+    // 🔴 ORDEN CON DESEMPATE ÚNICO — y acá no es higiene: sin él el
+    // expediente PIERDE EVENTOS. Ver el bloque del cursor, abajo.
     .order('fecha_evento', { ascending: false })
+    .order('id', { ascending: false })
     .limit(limite);
-  if (opciones?.cursor !== undefined) q = q.lt('fecha_evento', opciones.cursor);
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔴 EL CURSOR ES COMPUESTO (S99) — LA CURA DE UNA PÉRDIDA SILENCIOSA
+  //
+  // ANTES: el cursor era `fecha_evento` a secas y el corte pedía
+  // `fecha_evento < cursor` **estricto**. Con dos eventos en la MISMA fecha,
+  // si el corte de página caía entre ellos, **los que compartían esa fecha
+  // NO se repetían: DESAPARECÍAN del timeline para siempre.**
+  //
+  // Y no era teórico. Medido contra la base (S99): **hasta SEIS eventos de
+  // una misma mascota comparten `fecha_evento` exacta**, y hay 13 empates
+  // vivos. La causa es estructural y del producto, no de datos de prueba:
+  //   · los eventos de FECHA SOLA se anclan a medianoche UTC (S48) ⇒ **todas
+  //     las vacunas de un mismo carnet caen en el mismo instante**;
+  //   · una nota clínica sedimenta **un evento por medicamento en UNA
+  //     transacción**, y `now()` es constante dentro de la transacción ⇒
+  //     todos nacen con la misma marca.
+  //
+  // AHORA: paginación por clave (`fecha_evento`, `id`), que **es única** ⇒
+  // orden total ⇒ ningún evento se salta ni se repite. El cursor sigue
+  // siendo OPACO para quien lo consume (se guarda y se devuelve, nunca se
+  // parsea — verificado en las dos pantallas del cliente).
+  // ═══════════════════════════════════════════════════════════════════════
+  if (opciones?.cursor !== undefined) {
+    const corte = opciones.cursor.indexOf('|');
+    if (corte === -1) {
+      // Cursor viejo (sin `id`): se honra con el comportamiento anterior en
+      // vez de romper. No puede llegar desde un bundle al día —el cursor
+      // nace y muere en la misma sesión—, pero un cursor persistido no
+      // debería tirar la pantalla abajo.
+      q = q.lt('fecha_evento', opciones.cursor);
+    } else {
+      const f = opciones.cursor.slice(0, corte);
+      const i = opciones.cursor.slice(corte + 1);
+      q = q.or(`fecha_evento.lt.${f},and(fecha_evento.eq.${f},id.lt.${i})`);
+    }
+  }
 
   const { data: eventos, error } = await q;
   if (error) return fallo('error_desconocido');
@@ -169,7 +210,13 @@ async function _timeline(
     ok: true,
     data: {
       items,
-      siguiente_cursor: eventos.length === limite ? eventos[eventos.length - 1].fecha_evento : null,
+      // El cursor lleva la CLAVE COMPLETA (fecha + id): con solo la fecha,
+      // los eventos que la comparten quedaban del otro lado del corte y se
+      // perdían. Es opaco para quien lo recibe.
+      siguiente_cursor:
+        eventos.length === limite
+          ? `${eventos[eventos.length - 1].fecha_evento}|${eventos[eventos.length - 1].id}`
+          : null,
     },
   };
 }

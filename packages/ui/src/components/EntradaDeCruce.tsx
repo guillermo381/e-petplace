@@ -84,7 +84,25 @@ const DURACION = motion.duration.estandar
  *  navegador ya la cambió—. *Un barrido a medias se lee como un salto;
  *  un desplazamiento corto con su fundido se lee como dirección.* */
 const DESDE_X = spacing[8]
-const CURVA = Easing.bezier(...motion.easing.easeOut.bezier)
+/** 🔴 EL BEZIER DE LA CASA, no `easeOut` — y es una cura de D-825 sobre
+ *  mi propia pieza. **Nació con `easeOut` copiando a `Entrada`, y con eso
+ *  la deuda pasó de ONCE piezas a DOCE: escribí una instancia nueva de
+ *  justo lo que se me pidió bajar.**
+ *
+ *  N10 (enmendada 14-ago) cierra el vocabulario en DOS curvas con reparto
+ *  cerrado: **el bezier de la casa `(.32,.72,0,1)` para entradas y
+ *  transiciones**, spring solo para gestos de rebote. Un cruce es una
+ *  transición ⇒ le toca el de la casa. **Y de paso queda compartiendo
+ *  curva con el viaje del disco de `BarraTabs`**, que es lo correcto: las
+ *  dos cosas se mueven en el mismo gesto de navegación.
+ *
+ *  ⚠️ **Y por qué NO curo de paso las otras once**, aunque toqué varias
+ *  esta sesión: son piezas VIVAS que el founder ya vio. *Una pieza NUEVA
+ *  nace con la letra vigente; una pieza viva cambia de curva con un ojo
+ *  que lo mire.* Cambiarle la apertura a `Hoja` o el foco a `Campo` de
+ *  callado sería mover algo aprobado sin gate — y la deuda dice
+ *  literalmente «se cura al tocar cada pieza», no «al pasar cerca». */
+const CURVA = Easing.bezier(...motion.marca.aperturaBezier)
 
 export interface EntradaDeCruceProps {
   /** ¿Es ésta la ventana que se está viendo? El app lo contesta con

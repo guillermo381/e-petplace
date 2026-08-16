@@ -1119,6 +1119,7 @@ export {
 // ── LA DESPENSA (S95-E) ─────────────────────────────────────────────────────
 export {
   listarProductosDespensa,
+  contarProductosDespensa,
   obtenerFichaProducto,
   buscarProductosDespensa,
   // S99-L5b (N20, adjudicación (a)): los conteos por eje sobre LO COMPRABLE
@@ -1197,6 +1198,7 @@ export {
   ponerPedidoPrimero,
   volverPedidoAlOrden,
   listarSkusDelVendedor,
+  listarSkusDelVendedorPagina,
   // S99-L5b (N18): el evaluador de alcance — puro, por-SKU, una fuente con
   // el cliente. El re-export va ACÁ Y AHORA: la segunda muestra de
   // «motor sin puerta» fue exactamente un wrapper sin barrel.
