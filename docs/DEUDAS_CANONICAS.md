@@ -11711,6 +11711,21 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-272 — UN FIXTURE QUE ENTRA POR LA PUERTA PRUEBA DOS COSAS: LA SUYA Y LA DE LA PUERTA (S99 — lectura de D; cuatro cobros propios de A la confirman; depositada por orden de mesa, 16-ago-2026).**
+
+  **LAS CUATRO CORRECCIONES QUE EL MOTOR LE HIZO A LA SIEMBRA, entre dos actos y sin que ninguna se esquivara:**
+
+  | # | El gate | Lo que enseñó |
+  |---|---|---|
+  | ① | `oferta_no_publicada` | el contrato pide **`oferta_id`, no `sku_id`** — leído del CUERPO, porque la firma decía `p_items jsonb` y no alcanzaba (regla 40) |
+  | ② | `confirmacion_de_pago_no_es_del_cliente` | *«ese camino es del webhook de la pasarela, no de una sesión de persona»* — el claim tenía que estar LIMPIO |
+  | ③ | `pago_sin_reserva` | **la reserva va ANTES del pago**: confirmarlo dejaría el pedido listo para preparar sin mercadería apartada |
+  | ④ | `permission denied for function _mover_estado_pedido` | **la máquina de estados NO es una puerta pública** — `authenticated` no la ejecuta, y está bien |
+
+  **⇒ La lectura de D, que es la lección: *un fixture que entra por la puerta prueba dos cosas: la suya y la de la puerta.*** Y su consecuencia, que da vuelta cómo se leen esos rebotes: **cuatro gates cobraron y ninguno se esquivó — eso es EVIDENCIA ACUMULADA de que el motor está bien cerrado, no una molestia de la siembra.** *Cada rebote es un test que nadie escribió y que se corrió gratis; sembrar por INSERT directo no habría probado ninguno de los cuatro — y tampoco los habría necesitado, que es exactamente el problema.*
+
+  **Y LA SEGUNDA MITAD, del método: EL CASO DE PRUEBA SE FABRICA POR CONSTRUCCIÓN, NO POR SUERTE.** Para darle a D dos pagos en el MISMO instante no se corrió rápido cruzando los dedos: los dos pagos ocurren **en una sola transacción**, y **`now()` no avanza dentro de una transacción** (L-122a) ⇒ **el empate es una certeza, no una probabilidad.** *La misma propiedad que produjo el defecto de toda la jornada (L-271) es la que fabrica su caso de prueba* — y el fixture verifica **el empate**, no el conteo, porque *dos pagos con instantes distintos son justo el caso que el guard ya probaba.*
+
 - **L-271 — LA PAGINACIÓN SIN ORDEN ESTABLE NO ES PAGINACIÓN: ES UNA LOTERÍA QUE SE VE PROLIJA (S99 — hallazgo de A al escribir el pedido de los 722; elevada a ley por la mesa, 16-ago-2026).**
 
   **El hecho:** un lector sin `ORDER BY` deja que Postgres devuelva el orden que quiera, **y que lo cambie entre corridas**. Sin techo no se nota. **Con páginas, la página 2 repite y saltea filas de la 1** — y la lista se ve impecable las dos veces.
