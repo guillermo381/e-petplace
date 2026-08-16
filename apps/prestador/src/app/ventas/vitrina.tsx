@@ -95,13 +95,58 @@ type Pantalla =
 
 const TODAS = '__todas__';
 
-/** 🔴 EL TAMAÑO SE MIDE EN APARATO SOBRE LA FILA REAL, y este número es
- *  PROVISIONAL Y DECLARADO: con la tarjeta de hoy entra **≈1 por
- *  pantalla**, así que 40 son 40 pantallas. Se fija cuando la fila
- *  compacta de la receta de B esté montada — medir ahora sería medir la
- *  forma que se va a reemplazar. *El trato: B no lo inventa, yo no lo
- *  adivino.* */
-const TAM_VENTANA = 40;
+/** 🔴 EL TECHO DEL CATÁLOGO — y esto NO es una constante de estilo: cura un
+ *  defecto SILENCIOSO que apareció al ir a medir otra cosa.
+ *
+ *  **`listarProductosDespensa` corta en `limite ?? 100`** (medido en su
+ *  cuerpo) y esta pantalla lo llamaba con `{}`. Contra la base viva, hoy
+ *  hay **563 ofertas comprables** —publicada + variante activa + producto
+ *  activo—: **la vitrina mostraba 100 y callaba las otras 463.**
+ *
+ *  *Es el modo de falla que esta casa persigue: no rompe, no lanza, no
+ *  deja traza — dibuja una lista creíble que es un sexto del catálogo.*
+ *  Ni el typecheck ni un lint pueden verlo: el `?? 100` es un default
+ *  correcto para un lector genérico y equivocado para ESTA pantalla, que
+ *  es la única cuyo trabajo es mostrarlo TODO.
+ *
+ *  ⚠️ **El techo no desaparece: se declara.** Si el lector devuelve
+ *  exactamente `TECHO_CATALOGO`, puede haber más y **la pantalla lo
+ *  dice** — un corte que se anuncia es un límite; uno que calla es una
+ *  mentira. **Pedido a A (su territorio): paginación server-side por
+ *  rango + `ORDER BY` estable** — hoy la consulta no ordena, así que
+ *  «los primeros N» no son un conjunto reproducible entre dos cargas. */
+const TECHO_CATALOGO = 600;
+
+/** 🔴 EL TAMAÑO DE LA VENTANA — **30, MEDIDO**, y baja de 40 con su razón.
+ *
+ *  **La geometría, contada sobre la fila real** (`Celda` normal +
+ *  `tituloEntero` + subtítulo, sus propios tokens): título 16×1.3 = 20,8 ·
+ *  subtítulo 14×1.3 = 18,2 · gap 2 · padding vertical 8×2 ⇒ **≈57 dp con
+ *  título de una línea y ≈78 dp con dos** (`ALTURA_MIN` 56 es piso, no
+ *  altura). **El techo de esta pantalla mide ≈306 dp** —Encabezado 56 +
+ *  dos `SelectorSegmentado` de 48 + `Campo` ≈88 + gaps— y el aparato del
+ *  founder tiene 832 dp de alto (1080×2340 @ densidad 450) ⇒ **≈487 dp
+ *  útiles en Administrar, ≈427 en cliente** (ahí entra además el filtro).
+ *  **⇒ 6 a 8 filas por pantalla, no 12**: la estimación previa suponía
+ *  ~660 dp útiles, y **la mitad que le faltaba es que el techo son TRES
+ *  controles**. Con eso, 30 son **4-5 pantallas** de scroll.
+ *
+ *  **Y lo que decide entre 30 y 40 no es el scroll: es el montaje.** La
+ *  ventana **no pide nada al servidor** —el catálogo entero llega en la
+ *  ola inicial y `slice(0, ventana)` corta un array que ya está en
+ *  memoria—, así que agrandarla **no ahorra un solo viaje**: solo monta
+ *  más. Y el modo caro no es LISTA (que monta **cero** imágenes) sino
+ *  **ÍCONOS: una foto a sangre 4:3 por ítem**. *La ventana es una sola
+ *  para los dos modos —que encoja al cambiar de vista tiraría filas que
+ *  el vendedor ya recorrió—, así que se dimensiona por el modo pesado.*
+ *
+ *  ⚠️ Lo que queda ROJO y se declara: **el tiempo de pintado (N16, <1 s)
+ *  NO está medido en aparato**. Expo Go colgó en «Bundling 31 %» con
+ *  Metro idle, y el binario del founder no lleva esta rama; publicar un
+ *  OTA para medir es acto de mesa (regla 82). *Un número de pintado
+ *  sacado de una build de desarrollo sería varias veces más lento e
+ *  invalidaría el bloque entero* (L-193). */
+const TAM_VENTANA = 30;
 
 /** LISTA ⇄ ÍCONOS (receta B §A2). **El default es LISTA y es decisión:**
  *  Stock es donde el vendedor TRABAJA, y la ley de la casa ya lo dice —
@@ -167,7 +212,13 @@ export default function Vitrina() {
              todas las ofertas vivas son EC. *Pedido a A: el país en el
              contexto, para que el filtro viaje SERVER-SIDE y no se resuelva
              a mano acá.* */
-          listarProductosDespensa({}),
+          /* 🔴 EL TECHO VIAJA EXPLÍCITO — con `{}` el lector caía en su
+             `?? 100` y esta pantalla mostraba 100 de 563 sin decirlo.
+             *El default del lector no está mal: está pensado para quien
+             pide una tajada. El error era de esta pantalla, que es la
+             única que tiene que mostrarlo todo, dejándolo elegir por
+             ella.* */
+          listarProductosDespensa({ limite: TECHO_CATALOGO }),
           listarSkusDelVendedor(ctxData.cuentaComercialId),
           conteosVitrinaPorEje(),
         ]);
@@ -346,6 +397,17 @@ export default function Vitrina() {
             gap: spacing[4],
           }}
         >
+          {/* 🔴 EL CORTE SE DICE. Si el lector devolvió exactamente el
+              techo, hay catálogo que esta pantalla NO está mostrando —
+              y **callarlo es la falla, no cortarlo**: una lista completa
+              y una truncada se ven igual. *El día que el catálogo pase
+              de 600, esta línea aparece sola en vez de que el vendedor
+              descubra el hueco buscando un producto que sí publicó.* */}
+          {modo === 'cliente' && pantalla.vitrina.length >= TECHO_CATALOGO && (
+            <Texto variante="apoyo" color="warning">
+              {t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
+            </Texto>
+          )}
           {modo === 'cliente' ? (
             <CaraCliente
               productos={filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
@@ -505,7 +567,14 @@ function CaraAdministrar({
             foto: s.foto_portada,
             nombre: s.producto_nombre,
             marca: s.producto_marca,
-            linea: s.presentacion,
+            /* 🔴 EL STOCK SUBE A LA FILA, y es lo que hace que matar
+               `/ventas/stock` NO pierda nada. Esa pantalla daba una cosa
+               que la ficha no da: **cuánto tengo de TODO, de un vistazo**.
+               Si el ajuste se mudaba a la ficha sin traer el número acá,
+               la consolidación habría cambiado una lista de más por una
+               ceguera. *Mudar un acto no autoriza a perder la vista de
+               conjunto que lo hacía útil.* */
+            linea: `${s.presentacion} · ${t('ventas.stock.disponibles', { n: s.stock_disponible })}`,
             alerta: mias > 0 ? t('ventas.vitrina.leFaltan', { n: mias }) : null,
             alPulsar: () => alAbrir(s.producto_id),
           };

@@ -3204,6 +3204,8 @@ export const prestadorEs = {
       /* El único caso en que el espejo habla en modo cliente: sin esta
          frase, «no está» se leería como «se perdió». */
       ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
+      /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
+      catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
       leFaltan: 'Le faltan {{n}}',
       vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
       vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',
@@ -3250,7 +3252,6 @@ export const prestadorEs = {
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
       configuracion: 'Configuración',
-      stock: 'Stock',
       mostrador: 'Venta de mostrador',
       entregas: 'Mis entregas de hoy',
       entregasDetalle: 'Lo que llevas tú',
@@ -3323,10 +3324,6 @@ export const prestadorEs = {
       exitoEntregado: 'Entregado.',
     },
     stock: {
-      titulo: 'Stock',
-      vacioTitulo: 'Sin productos con stock',
-      vacioDetalle:
-        'Cuando tu catálogo tenga productos publicados, el inventario se maneja acá.',
       disponibles: '{{n}} disponibles',
       reservadas: '{{n}} reservadas',
       ajustarCta: 'Ajustar',
