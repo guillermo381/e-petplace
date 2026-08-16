@@ -3194,6 +3194,9 @@ export const prestadorEs = {
     /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
        misma pantalla, y su voz también. */
     vitrina: {
+      vistaLista: 'Lista',
+      vistaIconos: 'Íconos',
+      vistaGrupo: 'Cómo ver tus productos',
       buscar: 'Buscar un producto',
       titulo: 'Tu vitrina',
       todas: 'Todas',
@@ -3233,7 +3236,17 @@ export const prestadorEs = {
       grupoTrabajo: 'Tu trabajo del día',
       vitrina: 'Tu vitrina',
       vitrinaDetalle: 'Lo que ven las familias',
-      titulo: 'Pedidos',
+      /* 🔴 S99-C · GRAMÁTICA DEL TECHO §1 — «el techo dice DÓNDE ESTÁS
+         antes de decir QUÉ HAY». Esta clave decía **«Pedidos»** y es el
+         techo de la RAÍZ de venta, que además de pedidos tiene vitrina,
+         stock, mostrador y configuración: *la pantalla se llamaba como una
+         de sus partes.* El founder lo encontró entrando a vender —«la
+         primera pantalla arriba sigue llamándose Pedidos»—.
+         El nombre NO se inventa: es el FIRMADO de la naturaleza
+         («Venta de productos», §1.2), el mismo que dice la celda que trae
+         acá — se toca una puerta y se aterriza en un lugar que se llama
+         igual. El titular del contenido sigue vivo abajo (②). */
+      titulo: 'Venta de productos',
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
       configuracion: 'Configuración',

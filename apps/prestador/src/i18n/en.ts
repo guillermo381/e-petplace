@@ -2528,6 +2528,9 @@ export const prestadorEn = {
       razon_sin_foto: 'We still need its photo.',
     },
     vitrina: {
+      vistaLista: 'List',
+      vistaIconos: 'Icons',
+      vistaGrupo: 'How to view your products',
       buscar: 'Search a product',
       titulo: 'Your storefront',
       todas: 'All',
@@ -2563,7 +2566,7 @@ export const prestadorEn = {
       grupoTrabajo: 'Your work today',
       vitrina: 'Your storefront',
       vitrinaDetalle: 'What families see',
-      titulo: 'Orders',
+      titulo: 'Product sales',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
       cupoCero: 'No delivery capacity confirmed for today',
       configuracion: 'Settings',
