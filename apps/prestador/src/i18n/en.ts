@@ -68,6 +68,9 @@ export const prestadorEn = {
     titular: 'The art of caring, with the tools you deserve.',
     subtitulo: 'Welcome to the curated group of founding providers.',
     ingresar: 'Sign in',
+    // S99-C — la puerta que faltaba (ver el porqué en `es.ts`). Espeja a
+    // `login.crearCuenta` en su propio idioma.
+    registradoPorNegocio: 'A business registered you? Create your account',
     solicitarAcceso: 'New provider? Request access',
     selloIdentidad: 'Verified identity',
     selloPagos: 'Protected payments',

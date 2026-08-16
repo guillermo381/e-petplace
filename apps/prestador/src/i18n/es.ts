@@ -126,6 +126,16 @@ export const prestadorEs = {
     titular: 'El arte de cuidar, con las herramientas que mereces.',
     subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
     ingresar: 'Ingresar',
+    // 🔴 S99-C — LA PUERTA QUE FALTABA, y salió de caminar el Gate 2: esta
+    // pantalla ofrecía DOS caminos y los dos eran del prestador. Un
+    // repartidor al que su negocio acaba de registrar tenía que tocar
+    // «Ingresar» —una puerta que todavía no le sirve— para recién ahí
+    // encontrar «Crear tu cuenta». *La app le pedía adivinar dónde estaba
+    // su camino.* Va PRIMERA de las dos etiquetas a propósito: quien fue
+    // registrado llega con una cita; el prestador nuevo viene a tocar la
+    // puerta. La voz espeja `login.crearCuenta` (infinitivo, tuteo neutro)
+    // — no nace una voz nueva para decir lo mismo.
+    registradoPorNegocio: '¿Te registró un negocio? Crear tu cuenta',
     solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
     selloIdentidad: 'Identidad verificada',
     selloPagos: 'Pagos protegidos',

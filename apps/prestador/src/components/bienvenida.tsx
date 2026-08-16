@@ -12,6 +12,20 @@
  * para 'identidad verificada'; poner solo el de pagos rompía la
  * simetría — texto terciario sereno). Dosis §15b: CTA en TINTA (jamás
  * verde sólido), cero gradiente, un solo acento (el teal del lockup).
+ *
+ * ── 🔴 S99-C · LA TERCERA PUERTA, hallazgo de caminar el Gate 2 ───────
+ * Esta pantalla ofrecía dos caminos y **los dos eran del prestador**. Un
+ * repartidor recién registrado por su negocio —que llega porque alguien
+ * le dijo «entrá con este correo»— tenía que tocar **«Ingresar»**, una
+ * puerta que todavía no le sirve, para recién ahí descubrir «Crear tu
+ * cuenta» escondida abajo del formulario. *La pantalla le pedía adivinar.*
+ *
+ * **Lo que NO se tocó, y se declara:** el titular es **letra founder
+ * firmada** (S61-B13 · S87-C) y el subtítulo habla del grupo curado de
+ * prestadores fundadores. **La puerta era lo que faltaba, no el saludo**
+ * — y reescribir copy pendiente de gate para arreglar un camino ausente
+ * habría sido curar el síntoma en el lugar equivocado. *Si al founder le
+ * suena excluyente el subtítulo, es firma suya, no cura mía.*
  */
 
 import { Text, View } from 'react-native';
@@ -76,6 +90,11 @@ export function BienvenidaPrestador() {
         </Text>
       </View>
 
+      {/* LAS TRES PUERTAS — un solo sólido, el resto etiquetas (19.7).
+          Las dos etiquetas NAVEGAN, así que llevan chevron: *información
+          despliega, acción lleva* (E14). Iba sin él en la que ya existía;
+          se le pone a las dos, porque dos hermanas donde una tiene flecha
+          y la otra no se lee como que una está rota. */}
       <View style={{ gap: spacing[2] }}>
         <Boton
           variante="primario"
@@ -85,8 +104,16 @@ export function BienvenidaPrestador() {
         />
         <Boton
           variante="ghost"
+          etiqueta={t('bienvenida.registradoPorNegocio')}
+          bloque
+          chevron
+          onPress={() => router.push('/registro')}
+        />
+        <Boton
+          variante="ghost"
           etiqueta={t('bienvenida.solicitarAcceso')}
           bloque
+          chevron
           onPress={() => router.push('/solicitar-acceso')}
         />
       </View>
