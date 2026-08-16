@@ -12047,6 +12047,61 @@ export type Database = {
           },
         ]
       }
+      oferta_precio_historial: {
+        Row: {
+          cambiado_por: string | null
+          creado_en: string
+          dentro_de_banda: boolean
+          id: string
+          oferta_id: string
+          precio_anterior: number
+          precio_nuevo: number
+          referencia: number | null
+        }
+        Insert: {
+          cambiado_por?: string | null
+          creado_en?: string
+          dentro_de_banda: boolean
+          id?: string
+          oferta_id: string
+          precio_anterior: number
+          precio_nuevo: number
+          referencia?: number | null
+        }
+        Update: {
+          cambiado_por?: string | null
+          creado_en?: string
+          dentro_de_banda?: boolean
+          id?: string
+          oferta_id?: string
+          precio_anterior?: number
+          precio_nuevo?: number
+          referencia?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oferta_precio_historial_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "ofertas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oferta_precio_historial_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "v_skus_vendedor"
+            referencedColumns: ["oferta_id"]
+          },
+          {
+            foreignKeyName: "oferta_precio_historial_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "v_vitrina_publicada"
+            referencedColumns: ["oferta_id"]
+          },
+        ]
+      }
       ofertas: {
         Row: {
           country_code: string
@@ -14623,6 +14678,7 @@ export type Database = {
           impuesto_codigo: string
           largo_cm: number | null
           peso_kg: number | null
+          precio_referencia: number | null
           presentacion: string
           producto_id: string
           updated_at: string
@@ -14640,6 +14696,7 @@ export type Database = {
           impuesto_codigo: string
           largo_cm?: number | null
           peso_kg?: number | null
+          precio_referencia?: number | null
           presentacion: string
           producto_id: string
           updated_at?: string
@@ -14657,6 +14714,7 @@ export type Database = {
           impuesto_codigo?: string
           largo_cm?: number | null
           peso_kg?: number | null
+          precio_referencia?: number | null
           presentacion?: string
           producto_id?: string
           updated_at?: string
@@ -19133,6 +19191,8 @@ export type Database = {
       }
       v_skus_vendedor: {
         Row: {
+          banda_max: number | null
+          banda_min: number | null
           composicion_estado: string | null
           created_at: string | null
           cuenta_comercial_id: string | null
@@ -19148,6 +19208,7 @@ export type Database = {
           oferta_id: string | null
           oferta_precio: number | null
           precio_propuesto: number | null
+          precio_referencia: number | null
           presentacion: string | null
           producto_id: string | null
           producto_marca: string | null
@@ -19632,6 +19693,10 @@ export type Database = {
       actualizar_nombre_comercial: { Args: { p_nombre: string }; Returns: Json }
       actualizar_nombre_cuenta_comercial: {
         Args: { p_cuenta_comercial_id: string; p_nombre_comercial: string }
+        Returns: Json
+      }
+      actualizar_precio_oferta: {
+        Args: { p_oferta_id: string; p_precio: number }
         Returns: Json
       }
       actualizar_raza_mascota: {

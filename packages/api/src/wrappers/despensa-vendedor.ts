@@ -1232,6 +1232,14 @@ export interface SkuDelVendedor {
   momentos_aplicables: string[];
   /** La MISMA portada que dibuja la vitrina (`fotosDeProducto`). */
   foto_portada: string | null;
+  /** El precio de referencia de e-PetPlace para esta presentación, y la banda
+   *  en la que el vendedor se mueve SIN pedir permiso. **`null` en los tres
+   *  ⟺ el equipo todavía no cargó la referencia** ⇒ fail-closed: todo cambio
+   *  va a aprobación. **Y la superficie LO DICE** — *es la trampa exacta de
+   *  `AvisoAlergia`: el silencio se lee como permiso.* */
+  precio_referencia: number | null;
+  banda_min: number | null;
+  banda_max: number | null;
   /** 🔴 LAS RAZONES POR LAS QUE NO ALCANZA TODO LO QUE PODRÍA — **las emite
    *  el SERVIDOR** (`v_skus_vendedor.razones`), no las deriva esta capa.
    *  Firma de C, ratificada por mesa: *filtrar por razón en SQL y derivarla
@@ -1255,6 +1263,49 @@ export async function listarSkusDelVendedor(
   // quien necesite más ya tiene el lector paginado con su total.
   const r = await listarSkusDelVendedorPagina(cuentaComercialId, { limite: 1000 });
   return r.ok ? { ok: true, data: r.data.items } : r;
+}
+
+/**
+ * EL VENDEDOR MUEVE EL PRECIO DE SU PROPIA MERCADERÍA — dentro de la banda.
+ *
+ * **Decisión de mesa (S99), delegada por el founder y reversible por su
+ * palabra:** e-PetPlace fija una referencia por presentación; el vendedor se
+ * mueve **libre dentro de ±15 %**; fuera, propone y e-PetPlace aprueba.
+ * *La firma ⑩ de S95 protege la CURADURÍA —qué entra a la vitrina—, no el
+ * precio de lo ya curado; pero un precio sin límite deja de proteger que la
+ * familia no pague de más, y eso también es curaduría.*
+ *
+ * **El argumento que la funda: un vendedor que no puede BAJAR el precio de su
+ * mercadería no puede liquidar lo que se le está por vencer.**
+ *
+ * Los dos rebotes hablan y son de la pantalla:
+ * · `sin_referencia_de_precio` — el equipo no cargó la referencia; **la
+ *   propuesta QUEDA GUARDADA** y el vendedor no pierde su trabajo.
+ * · `fuera_de_banda` — **el mensaje trae la referencia y los dos extremos**:
+ *   *un rechazo que no dice la banda obliga a adivinar por tanteo.*
+ */
+export async function actualizarPrecioOferta(
+  ofertaId: string,
+  precio: number,
+): Promise<ResultadoWrapper<{ precio: number; referencia: number; banda_min: number; banda_max: number }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('actualizar_precio_oferta', {
+    p_oferta_id: ofertaId,
+    p_precio: precio,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  if (typeof data.precio !== 'number' || typeof data.referencia !== 'number') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      precio: data.precio,
+      referencia: data.referencia,
+      banda_min: typeof data.banda_min === 'number' ? data.banda_min : data.referencia,
+      banda_max: typeof data.banda_max === 'number' ? data.banda_max : data.referencia,
+    },
+  };
 }
 
 // ── S99 · LA LISTA LARGA — paginación por cursor sobre `v_skus_vendedor` ────
@@ -1390,6 +1441,9 @@ export async function listarSkusDelVendedorPagina(
         ? f.momentos_aplicables.filter((m): m is string => typeof m === 'string')
         : [],
       foto_portada: fotosDeProducto(f).portada,
+      precio_referencia: typeof f.precio_referencia === 'number' ? f.precio_referencia : null,
+      banda_min: typeof f.banda_min === 'number' ? f.banda_min : null,
+      banda_max: typeof f.banda_max === 'number' ? f.banda_max : null,
       razones: Array.isArray(f.razones)
         ? f.razones.filter((r): r is string => typeof r === 'string')
         : [],
