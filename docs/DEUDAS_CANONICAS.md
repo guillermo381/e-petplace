@@ -11708,6 +11708,12 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-242 — EL ANILLO SIGUE AL CONTENIDO INCONTROLABLE (S99 — regla con nombre, adjudicada por mesa 16-ago-2026 ratificando lo que B ejecutó; vale para TODA marca de mapa futura).**
+
+  **La regla:** un halo/anillo alrededor de una marca de mapa **hace falta donde el contenido es INCONTROLABLE** (la cara de una mascota es una FOTO y puede ser del color del asfalto) **y es innecesario donde el color lo elegimos nosotros** (la silueta tinta de la moto: contraste medido 11.54 / 11.19 / 9.85 contra asfalto, parque y agua — más de 3× el piso en los tres; el que desaparecía era EL ANILLO BLANCO: 1.44 / 1.48 / 1.68). **Que el anillo muera en la moto y siga en la mascota NO es inconsistencia: es la MISMA regla aplicada dos veces.**
+
+  **Condición de revivir, escrita EN LA PIEZA (no acá):** el día que un mapa se pinte oscuro. Hoy no existe — cero `customMapStyle` en la casa, el mapa siempre es claro.
+
 - **L-241 — CUANDO MONTAR CUESTA MENOS QUE ENSAYAR, SE MONTA (S99 — LEY del founder, 16-ago-2026, dictada con el reloj a la vista).**
 
   **El literal que la funda:** *«necesitaría ver cómo se ve en el mapa — o literalmente pongámoslo, y si hay que cambiarlo lo cambiamos, porque creo que estamos tardando más poniéndolo en la galería y después acomodándolo, y estamos llenando la galería de cosas que no estamos utilizando.»*
