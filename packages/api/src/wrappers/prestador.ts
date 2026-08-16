@@ -843,6 +843,14 @@ export interface ContextoArranque {
   haVendido: boolean;
   /** La config ENTERA (D-448) del país de la cuenta, o null sin cuenta. */
   moneda: ConfigMonedaPais | null;
+  /** S99 Gate 2 ④ — EL LECTOR DE IDENTIDAD del repartidor: las casas donde
+   *  este usuario tiene vínculo SELLADO (aceptó el reclamo; `activo`). Dice
+   *  QUIÉN ES — jamás derivarlo de `misEntregasAsignadas`, que devuelve
+   *  vacío tanto para «no es repartidor» como para «hoy sin entregas»
+   *  (L-218, medición de C). `[]` = no es repartidor en ninguna casa.
+   *  El pendiente-sin-aceptar NO aparece acá: vive en
+   *  `misVinculosRepartidorPendientes` (el reclamo). */
+  repartidorDe: { repartidor_id: string; cuenta_comercial_id: string; negocio: string }[];
 }
 
 export async function obtenerContextoArranque(): Promise<
@@ -876,6 +884,7 @@ export async function obtenerContextoArranque(): Promise<
       currency_symbol?: unknown;
       currency_decimals?: unknown;
     } | null;
+    repartidor_de?: unknown;
   } | null;
   if (!r || r.ok !== true) {
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
@@ -924,6 +933,26 @@ export async function obtenerContextoArranque(): Promise<
       esVendedora: r.es_vendedora === true,
       haVendido: r.ha_vendido === true,
       moneda,
+      // Fail-closed: un bundle contra el motor viejo (campo ausente) lee []
+      // — el repartidor degrada al callejón, jamás a un crash ni a un rol falso.
+      repartidorDe: Array.isArray(r.repartidor_de)
+        ? (r.repartidor_de as unknown[]).flatMap((v) => {
+            const o = v as {
+              repartidor_id?: unknown;
+              cuenta_comercial_id?: unknown;
+              negocio?: unknown;
+            };
+            return typeof o.repartidor_id === 'string' &&
+              typeof o.cuenta_comercial_id === 'string' &&
+              typeof o.negocio === 'string'
+              ? [{
+                  repartidor_id: o.repartidor_id,
+                  cuenta_comercial_id: o.cuenta_comercial_id,
+                  negocio: o.negocio,
+                }]
+              : [];
+          })
+        : [],
     },
   };
 }
