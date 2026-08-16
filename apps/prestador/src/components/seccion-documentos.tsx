@@ -46,11 +46,10 @@ import {
   Boton,
   Celda,
   Hoja,
+  HojaCaptura,
   Insignia,
   Separador,
   Texto,
-  capturarConCamara,
-  capturarDeGaleria,
   spacing,
   useAviso,
 } from '@epetplace/ui';
@@ -275,20 +274,15 @@ function FilaDocumento({
   const vigente = mios[0] ?? null;
   const nombre = nombreDe(pais);
 
-  async function capturar(camara: boolean) {
+  /* 🔴 S99-C · R42 — LA PUERTA DEJA DE ESTAR RE-DIBUJADA. Su anatomía YA
+     era la canónica (dos `Boton bloque`), así que migrar no cambió la
+     forma: le dio el CERROJO sincrónico contra el doble tap, que es lo
+     que no se ve y lo que faltaba. Es cura, no swap. */
+  async function capturar(uri: string) {
     if (pais === null) return;
-    setHojaCaptura(false);
-    const r = camara
-      ? await capturarConCamara({ redimensionarA: 1600, calidad: 0.8 })
-      : await capturarDeGaleria({ redimensionarA: 1600, calidad: 0.8 });
-    if (r.tipo === 'cancelada') return;
-    if (r.tipo === 'permiso_denegado') {
-      mostrar({ variante: 'error', texto: t('documentos.permisoCamara') });
-      return;
-    }
     setSubiendo(true);
     const sub = await subirDocumentoVerificacion({
-      uri: r.foto.uri,
+      uri,
       prestadorId,
       tipo,
       nombre,
@@ -408,22 +402,16 @@ function FilaDocumento({
         </View>
       </Hoja>
 
-      <Hoja
+      <HojaCaptura
         visible={hojaCaptura}
-        onCerrar={() => setHojaCaptura(false)}
         titulo={t('documentos.capturaHojaTitulo')}
-        altura="contenido"
-      >
-        <View style={{ gap: spacing[2] }}>
-          <Boton etiqueta={t('documentos.camara')} bloque onPress={() => void capturar(true)} />
-          <Boton
-            variante="secundario"
-            etiqueta={t('documentos.galeria')}
-            bloque
-            onPress={() => void capturar(false)}
-          />
-        </View>
-      </Hoja>
+        onCerrar={() => setHojaCaptura(false)}
+        onFoto={(foto) => void capturar(foto.uri)}
+        onPermisoDenegado={() =>
+          mostrar({ variante: 'error', texto: t('documentos.permisoCamara') })
+        }
+        opciones={{ redimensionarA: 1600, calidad: 0.8 }}
+      />
     </View>
   );
 }

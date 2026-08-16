@@ -65,7 +65,6 @@ import {
   MarcaDeAgua,
   Separador,
   Texto,
-  capturarConCamara,
   capturarDeGaleria,
   capturarVideoDeGaleria,
   radius,

@@ -553,16 +553,33 @@ export default function Negocio() {
                   dos vistas de la misma cosa. */}
               {tienda === 'activa' && (
                 <View style={ESTILO_GRILLA}>
-                  <View style={ESTILO_CELDA}>
-                    <Baldosa
-                      glifo="despensa"
-                      capa="consumo"
-                      titulo={t('negocio.tiendaVitrina')}
-                      detalle={t('negocio.tiendaVitrinaDetalle')}
-                      orden={0}
-                      onPress={() => router.push('/ventas')}
-                    />
-                  </View>
+                  {/* 🔴 S99-C · LA PUERTA NO SE OFRECE AL VENDEDOR PURO
+                      (adjudicación de mesa, 15-ago). Para quien NO tiene
+                      negocio de servicios, `/ventas` es **la misma ventana
+                      de pedidos que su HOY ya le muestra** — la caminata en
+                      aparato lo hizo visible: dos pantallas, el mismo
+                      pedido, el mismo «0 de 15 entregas hoy», dos títulos.
+                      Su entrada es LA TAB, y su HOY ya lleva las cuatro
+                      celdas del módulo desde este mismo lote.
+
+                      Para el prestador que ADEMÁS vende, la baldosa
+                      SE QUEDA y es su única entrada: su HOY es la jornada
+                      de citas, no el panel. Por eso el gate es
+                      `!sinPrestador` y no un apagado a secas — *cerrarla
+                      para todos habría dejado sin panel justo a quien no
+                      tiene otro camino.* */}
+                  {!sinPrestador && (
+                    <View style={ESTILO_CELDA}>
+                      <Baldosa
+                        glifo="despensa"
+                        capa="consumo"
+                        titulo={t('negocio.tiendaVitrina')}
+                        detalle={t('negocio.tiendaVitrinaDetalle')}
+                        orden={0}
+                        onPress={() => router.push('/ventas')}
+                      />
+                    </View>
+                  )}
                   <View style={ESTILO_CELDA}>
                     {/* 🔴 EXCEPCIÓN DELIBERADA A LA LEY 23 («la puerta no
                         ofrece lo que va a rechazar»), **firmada por el
