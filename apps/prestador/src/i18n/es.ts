@@ -3204,6 +3204,8 @@ export const prestadorEs = {
       /* El único caso en que el espejo habla en modo cliente: sin esta
          frase, «no está» se leería como «se perdió». */
       ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
+      /* Un corte que se anuncia es un límite; uno que calla es una mentira. */
+      catalogoCortado: 'Estás viendo los primeros {{n}} productos del catálogo. Puede haber más.',
       leFaltan: 'Le faltan {{n}}',
       vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
       vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',

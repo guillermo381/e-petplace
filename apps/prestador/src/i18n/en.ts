@@ -2536,6 +2536,7 @@ export const prestadorEn = {
       todas: 'All',
       filtroEspecie: 'Filter by species',
       ausentes: "{{n}} of your products aren't shown here because they aren't published yet.",
+      catalogoCortado: "You're seeing the first {{n}} products in the catalogue. There may be more.",
       leFaltan: '{{n}} missing',
       vacioClienteTitulo: 'Your storefront is empty for families',
       vacioClienteDetalle: 'When we publish your products, families will see them here.',
