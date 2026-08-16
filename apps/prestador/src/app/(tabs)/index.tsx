@@ -2355,6 +2355,12 @@ export default function Hoy() {
           <PuertaHermana
             etiqueta={t('pedidosDia.puertaPedidos')}
             direccion="derecha"
+            /* sinVer=0 TRANSICIONAL (cura de combinación, A 15-ago): la pieza
+               de B lo exige por tipo y su regla de existencia hace que 0 no
+               dibuje nada — puerta limpia, que es la verdad mientras el
+               lector de no-vistos (ventanas_vistas, motor de A — propuesta
+               en el Loop de A) no exista. Cuando exista, D lo cablea. */
+            sinVer={0}
             onPress={() =>
               router.push({ pathname: '/pedidos', params: { dia: diaVista ?? hoy ?? '' } })
             }
