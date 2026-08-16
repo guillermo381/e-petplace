@@ -36,7 +36,7 @@ import {
   empleadoTieneRol,
   obtenerInvitacionPendiente,
   obtenerMiPosicionEnPrestador,
-  obtenerMiPrestador,
+  obtenerContextoArranque,
   obtenerNegocioEmpleadoActivo,
   obtenerSesion,
   registrarPrimerIngreso,
@@ -46,8 +46,7 @@ import { apiLista } from '@/lib/api';
 import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { useTraduccion } from '@/i18n';
-import { contextoVentas } from '@/lib/cuenta-ventas';
-import { resolverCapacidadDeBarra } from '@/lib/barra-prestador-lectura';
+import { capacidadDesdeContexto } from '@/lib/barra-prestador-lectura';
 import {
   KEY_ETIQUETA_TAB,
   ordenTabsPrestador,
@@ -145,8 +144,20 @@ export default function TabsLayout() {
         const s = await obtenerSesion();
         if (!s.ok) return { error: true, detalle: s.mensaje };
         if (s.data === null) return { sin_sesion: true };
-        const p = await obtenerMiPrestador();
-        if (p.ok) {
+        /* ⭐ S99-A · LOTE #0a — EL PRÓLOGO EN UN VIAJE (D-738, la cura reina).
+           Acá vivía la cadena: `obtenerMiPrestador()` (1 viaje) → y según la
+           rama, la ola de tres de `resolverCapacidadDeBarra` O el
+           `contextoVentas()` de dos peticiones encadenadas. La RPC
+           `obtener_contexto_arranque` COMPONE los mismos gates en el motor
+           (cero predicado nuevo — los llama, no los copia) y la composición
+           de barra pasa a ser PURA (`capacidadDesdeContexto`, cero red). */
+        const ctx = await obtenerContextoArranque();
+        if (!ctx.ok) {
+          if (ctx.codigo === 'sin_sesion') return { sin_sesion: true };
+          return { error: true, detalle: ctx.mensaje };
+        }
+        const c = ctx.data;
+        if (c.prestador !== null) {
           // S79-B (T3-B3; T4-B3 · D-560): LISTA BLANCA — al portal entra
           // SOLO 'activo'; TODO lo demás (pendiente, en_revision,
           // suspendido, rechazado, y el sexto estado que nazca mañana)
@@ -154,7 +165,7 @@ export default function TabsLayout() {
           // vieja ('pendiente' solo) dejaba colar tres estados por
           // omisión. El titular lee su propia fila sea cual sea el
           // estado (RLS prestadores_public, brazo user_id).
-          if (p.data.estado !== 'activo') return { sala_espera: true };
+          if (c.prestador.estado !== 'activo') return { sala_espera: true };
           /* ⭐ S98-C (D-819) · LAS DOS PREGUNTAS DE LA BARRA SALIERON DE ACÁ.
              Vivían inline —tres lecturas en una ola, más la asimetría de
              sus fallos (el rol cierra, la capacidad abre)— y **el destape
@@ -162,10 +173,7 @@ export default function TabsLayout() {
              mudaron: `lib/barra-prestador-lectura`, con su porqué entero.
              *Dos copias no divergen algún día: divergen la primera vez que
              alguien cura una sola.* */
-          const { esGestor, montaAtender } = await resolverCapacidadDeBarra({
-            tipo: 'prestador',
-            prestadorId: p.data.id,
-          });
+          const { esGestor, montaAtender } = capacidadDesdeContexto(c);
           // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
           // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
           // (era por dispositivo: en una tablet de clínica el segundo
@@ -187,7 +195,7 @@ export default function TabsLayout() {
             ceremonia: esGestor ? ('resuelta-para-este-usuario' as const) : ('no-gestor' as const),
           };
         }
-        if (p.codigo === 'sin_prestador') {
+        {
           // S75-B1: ¿handshake pendiente? (invitación INACTIVA) → el raíz
           // lo intercepta ANTES de la voz "sin negocio" (que para el
           // invitado es mentira). La sonda mira solo inactivas; el roce
@@ -200,8 +208,11 @@ export default function TabsLayout() {
           // día que el negocio active, `obtenerMiPrestador` resuelve y
           // esta rama ni se toca). `contextoVentas` **deduplica en vuelo**
           // (S98-C): tres consumidores simultáneos comparten un viaje.
-          const ventas = await contextoVentas();
-          if (ventas.ok && ventas.data !== null && ventas.data.esVendedora) {
+          /* ⭐ #0a: la pregunta «¿vendedora?» YA VINO en el contexto — el
+             `contextoVentas()` que vivía acá (dos peticiones encadenadas)
+             murió con la RPC. La sonda vieja no convive (adjudicación de
+             mesa: cero convivencia). */
+          if (c.esVendedora) {
             /* ⭐ S99-D · L1 · D-820 — EL VENDEDOR PURO ENTRA A LA CASA.
                `LA_CASA_DEL_PRESTADOR` §2.0 (firma del founder, 14-ago):
                *«el vendedor puro deja de ser el caso sin barra: es un DUEÑO
@@ -225,16 +236,9 @@ export default function TabsLayout() {
                sobre el TITULAR ACTIVO de un prestador y él no tiene fila.
                Llamarla sería pedirle al motor un veredicto sobre un sujeto
                que no existe; su literal en el forense lo dice. */
-            const { esGestor, montaAtender } = await resolverCapacidadDeBarra({
-              tipo: 'vendedorPuro',
-              // ⚠️ EL CONTEXTO YA RESUELTO VIAJA — no se vuelve a pedir. Es la
-              // misma lectura de tres líneas arriba (la que dijo que era
-              // vendedora): pedirla de nuevo son DOS peticiones encadenadas
-              // en el arranque, y la deduplicación en vuelo de
-              // `contextoVentas` no las salva porque es secuencial, no
-              // simultánea. Medido con `verify-s99d-olas-vendedor-puro`.
-              contexto: ventas.data,
-            });
+            /* El contexto ya resuelto VIAJA (la ley de D, un piso más
+               arriba): la composición es pura sobre el MISMO objeto. */
+            const { esGestor, montaAtender } = capacidadDesdeContexto(c);
             return { ok: true, esGestor, montaAtender, ceremonia: 'vendedor-puro' as const };
           }
           // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
@@ -246,7 +250,7 @@ export default function TabsLayout() {
             negocioEmpleado: neg.ok ? neg.data : null,
           };
         }
-        return { error: true, detalle: p.mensaje };
+
       })().catch((e: unknown): EstadoSesionRaiz => {
         // S96-C (cura (b) del gate): la cadena NO tenía .catch — un throw
         // inesperado (no un !ok: una excepción) dejaba 'verificando' PARA

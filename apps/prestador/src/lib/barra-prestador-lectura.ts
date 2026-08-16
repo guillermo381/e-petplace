@@ -114,3 +114,52 @@ export async function resolverCapacidadDeBarra(
 function barraVendedorPuro(contexto: ContextoVentas | null): CapacidadDeBarra {
   return { esGestor: true, montaAtender: hayCapacidad(capacidadVendedorPuro(contexto)) };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * S99-A · LOTE #0a — LA COMPOSICIÓN POR CAPACIDAD, DESDE EL CONTEXTO ÚNICO.
+ *
+ * ENSANCHE, no lectura paralela (L-175, y el §12.5 de D lo pidió con estas
+ * palabras): `obtener_contexto_arranque()` trae en UN viaje lo que
+ * `resolverCapacidadDeBarra` resolvía en una ola de tres — y estas dos
+ * funciones son PURAS: componen sobre el contexto ya leído, cero red.
+ * Una fuente, N consumidores (el guard raíz · el HOY · la ventana de L4).
+ *
+ * `resolverCapacidadDeBarra` (arriba) SIGUE VIVA para quien todavía no
+ * migró (el destape del wizard) — muere cuando su último caller consuma
+ * el contexto. No se borra antes: dos caminos declarados le ganan a uno
+ * roto.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+import type { ContextoArranque } from '@epetplace/api';
+
+/** El adaptador al shape que `capacidadVendedorPuro` y las pantallas de
+ *  ventas ya hablan. `null` = sin cuenta comercial (la misma semántica que
+ *  `contextoVentas()` — y con la moneda cayendo al fallback DECLARADO del
+ *  riel, byte-idéntico a `resolverContexto`). */
+export function contextoVentasDesdeArranque(ctx: ContextoArranque): ContextoVentas | null {
+  if (ctx.cuentaComercial === null) return null;
+  return {
+    cuentaComercialId: ctx.cuentaComercial.id,
+    nombreComercial: ctx.cuentaComercial.nombreComercial,
+    estadoCuenta: ctx.cuentaComercial.estado,
+    esVendedora: ctx.esVendedora,
+    moneda: ctx.moneda ?? { codigo: 'USD', simbolo: '$', decimales: 2 },
+  };
+}
+
+/** LA COMPOSICIÓN: qué barra le toca a quien entra, leída del contexto.
+ *  · prestador → las dos preguntas de siempre, ya contestadas por el motor
+ *    (rol gestor · posición de mostrador × capacidad de local o tienda).
+ *  · sin prestador y vendedora → la barra del vendedor puro (§2.0).
+ *  El brazo DUAL no existe como brazo (enmienda de D, aceptada 16-ago):
+ *  un prestador que además vende ES un prestador acá — su puerta a pedidos
+ *  la monta el HOY con `ctx.esVendedora`, no esta composición. */
+export function capacidadDesdeContexto(ctx: ContextoArranque): CapacidadDeBarra {
+  if (ctx.prestador !== null) {
+    return {
+      esGestor: ctx.esGestor,
+      montaAtender: ctx.esMostradorOGestion && (ctx.hayOficioLocal || ctx.esVendedora),
+    };
+  }
+  return barraVendedorPuro(contextoVentasDesdeArranque(ctx));
+}
