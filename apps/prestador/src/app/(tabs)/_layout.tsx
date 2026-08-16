@@ -640,6 +640,19 @@ export default function TabsLayout() {
       {/* D-402: al salir del tab, su stack vuelve a la raíz — la próxima
           entrada jamás encuentra pegada una pantalla interna. */}
       <Tabs.Screen name="cuenta" options={{ popToTopOnBlur: true }} />
+      {/* 🔴 S99-D · D-836 — LA VENTANA HERMANA VIVE ADENTRO DEL NAVEGADOR.
+          Firma del founder caminando: *«de la parte de pedidos se pierden
+          los cuatro tabs, toca devolverse al de citas para poder navegar»*.
+          **Yo la había montado como ruta EMPUJADA del stack raíz** (como
+          `/ventas`), y esa forma le saca la barra: la persona quedaba en una
+          ventana de la casa **sin la casa**. Es clase L-249 y peor que el
+          encierro del repartidor — aquélla era una pantalla-única sin
+          salida; ésta es un cuarto que perdió el pasillo.
+          El molde es el de `gallery`, que la casa ya tenía: **declarada acá
+          y AUSENTE de `items`** — existe, se alcanza por su ruta, y la barra
+          no la nombra. La ruta sigue siendo `/pedidos` (el grupo `(tabs)` no
+          agrega segmento), así que **ningún enlace cambia**. */}
+      <Tabs.Screen name="pedidos" />
       {/* galería de tokens: fuera de la barra, viva por URL (/gallery) */}
       <Tabs.Screen name="gallery" />
     </Tabs>
