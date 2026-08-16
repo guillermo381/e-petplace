@@ -129,6 +129,16 @@ transversales toda la sesión.**
 >   vendedor real proponga mapea a un canónico hoy incompleto (222/470
 >   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
 >   canónica (M21) es trabajo de e-PetPlace, no suyo.
+> - **⚖️ N17 GANA SU LEY (mesa, 17-ago — decisión de C, ratificada y
+>   elevada): EL ESPEJO JAMÁS MUESTRA EN «VER COMO CLIENTE» ALGO QUE LA
+>   FAMILIA NO VE.** El caso que la parió: el $/kg NO entra a ese modo
+>   hasta que esté montado en la ficha de la familia (`apps/cliente`). La
+>   razón de C, verbatim de mesa: *sería el espejo prometiendo algo que la
+>   familia no ve, EN LA DIRECCIÓN QUE NADIE REVISA — un espejo que
+>   miente hacia adentro es peor que uno que no existe, porque el
+>   vendedor confía en él.* Mientras el $/kg no viva en la ficha del
+>   cliente, el espejo tiene un **hueco declarado y correcto** (pedido a
+>   D registrado en el Loop de A).
 > - **🔴 N20 ENMENDADA (mesa, 17-ago — hallazgo de B sobre las
 >   cardinalidades medidas): LA ESPECIE ES UN FILTRO, JAMÁS UNA CARPETA.**
 >   La letra decía «especie → necesidad» y esa flecha se lee como
