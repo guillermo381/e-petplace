@@ -106,6 +106,7 @@ import {
   obtenerPaisesDelMundo,
   listarRepartidores,
   registrarRepartidor,
+  configurarCapacidadRepartidor,
   registrarVehiculoRepartidor,
   type PaisDelMundo,
   type Repartidor,
@@ -180,6 +181,15 @@ export default function FichaRepartidor() {
 
   // ── los vehículos ────────────────────────────────────────────────────
   const [vehiculos, setVehiculos] = useState<VehiculoBorrador[]>([]);
+  /* ⭐ S99-C · D-837 PAGADA POR A — LA CAPACIDAD VIVE ADENTRO DE LA
+     PERSONA. El founder lo dijo mirando la pantalla: «Moto Demo — 20 por
+     día» **es capacidad de un repartidor, no un recurso suelto**. Hasta
+     que A le puso `repartidor_id` a `recursos_reparto`, la configuración
+     describía con fidelidad un modelo equivocado. `''` = sin declarar, y
+     **sin declarar NO se manda nada**: un cero silencioso apagaría a la
+     persona del cupo del día. */
+  const [capacidad, setCapacidad] = useState('');
+  const [capacidadInicial, setCapacidadInicial] = useState('');
 
   const [guardando, setGuardando] = useState(false);
 
@@ -237,6 +247,12 @@ export default function FichaRepartidor() {
           ? guardadoWa.slice(prefijoPais.length)
           : guardadoWa,
       );
+      /* La capacidad declarada, o vacío si no la tiene. Se guarda también
+         el valor INICIAL: sin él no se puede saber si cambió, y guardar el
+         nombre reescribiría su capacidad en cada pasada. */
+      const capGuardada = yo.capacidad === null ? '' : String(yo.capacidad.capacidad_por_dia);
+      setCapacidad(capGuardada);
+      setCapacidadInicial(capGuardada);
       setVehiculos(
         yo.vehiculos.map((v) => ({
           id: v.vehiculo_id,
@@ -410,6 +426,26 @@ export default function FichaRepartidor() {
         placa,
       });
       if (!rv.ok) mostrar({ texto: rv.mensaje, variante: 'error' });
+    }
+
+    /* LA CAPACIDAD, SOLO SI CAMBIÓ (D-837). Tres cuidados, y los tres
+       tienen su porqué:
+       · **vacío = sin declarar** ⇒ no se manda: mandar 0 la sacaría del
+         cupo del día sin que nadie lo haya pedido.
+       · **solo si cambió** ⇒ guardar el nombre no reescribe su capacidad
+         (y con ella el recurso adoptado, que es dato de otro).
+       · **si rebota, se dice y NO tumba lo guardado** — mismo criterio que
+         los vehículos: la persona ya está bien guardada. */
+    const capNueva = capacidad.trim();
+    if (capNueva.length > 0 && capNueva !== capacidadInicial.trim()) {
+      const n = Number(capNueva);
+      if (Number.isFinite(n) && n > 0) {
+        const rc = await configurarCapacidadRepartidor({
+          repartidor_id: repartidorId,
+          capacidad_por_dia: n,
+        });
+        if (!rc.ok) mostrar({ texto: rc.mensaje, variante: 'error' });
+      }
     }
 
     setGuardando(false);
@@ -729,6 +765,30 @@ export default function FichaRepartidor() {
               />
             )}
           </View>
+
+          {/* ⭐ CUÁNTO LLEVA POR DÍA — la capacidad, ACÁ ADENTRO (D-837).
+              *«Moto Demo — 20 por día» es capacidad de un repartidor, no un
+              recurso suelto* (founder, mirando la pantalla). Por eso muere
+              «agregar recurso»: no había recursos que agregar, había
+              personas a las que preguntarles cuánto llevan.
+              **Solo en edición:** en el alta la persona todavía no existe y
+              su capacidad no tiene a quién colgarse — se declara al
+              guardar, y su campo aparece cuando hay dónde ponerla.
+              **Vacío = sin declarar, y no se manda nada**: un cero
+              silencioso la borraría del cupo del día. */}
+          {!esNuevo && (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('fichaRepartidor.capacidadTitulo')}</Texto>
+              <Campo
+                label={t('fichaRepartidor.capacidadLabel')}
+                value={capacidad}
+                onChangeText={(v) => setCapacidad(v.replace(/[^0-9]/g, ''))}
+                keyboardType="number-pad"
+                ayuda={t('fichaRepartidor.capacidadAyuda')}
+                deshabilitado={guardando}
+              />
+            </View>
+          )}
 
           {/* EL CTA APAGADO DICE QUÉ FALTA, SIEMPRE (precedente S73): un
               botón gris sin explicación manda a adivinar. */}
