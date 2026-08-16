@@ -3194,6 +3194,7 @@ export const prestadorEs = {
     /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
        misma pantalla, y su voz también. */
     vitrina: {
+      buscar: 'Buscar un producto',
       titulo: 'Tu vitrina',
       todas: 'Todas',
       filtroEspecie: 'Filtrar por especie',

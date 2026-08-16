@@ -2528,6 +2528,7 @@ export const prestadorEn = {
       razon_sin_foto: 'We still need its photo.',
     },
     vitrina: {
+      buscar: 'Search a product',
       titulo: 'Your storefront',
       todas: 'All',
       filtroEspecie: 'Filter by species',

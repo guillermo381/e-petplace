@@ -38,12 +38,13 @@
  * bucket propio— tal como su JSDoc lo cableó.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Image, type NativeScrollEvent, type NativeSyntheticEvent, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Campo,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -88,6 +89,14 @@ type Pantalla =
 
 const TODAS = '__todas__';
 
+/** 🔴 EL TAMAÑO SE MIDE EN APARATO SOBRE LA FILA REAL, y este número es
+ *  PROVISIONAL Y DECLARADO: con la tarjeta de hoy entra **≈1 por
+ *  pantalla**, así que 40 son 40 pantallas. Se fija cuando la fila
+ *  compacta de la receta de B esté montada — medir ahora sería medir la
+ *  forma que se va a reemplazar. *El trato: B no lo inventa, yo no lo
+ *  adivino.* */
+const TAM_VENTANA = 40;
+
 export default function Vitrina() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -96,6 +105,19 @@ export default function Vitrina() {
 
   const [modo, setModo] = useState<ModoEspejo>('administrar');
   const [especie, setEspecie] = useState<string>(TODAS);
+  /* EL BUSCADOR — el founder lo pidió con 399 en pantalla: *«que si voy
+     escribiendo el nombre del producto, me vaya filtrando los que están»*.
+     **Censo antes de construir (y por eso costó poco):** para la cara
+     cliente el motor YA lo tenía (`buscarProductosDespensa`, ilike sobre
+     nombre y marca, solo publicadas); para Administrar **no hacía falta
+     motor** — sus SKUs ya viajan enteros y filtrar 37 en memoria es gratis.
+     ⇒ **cero motor nuevo.** */
+  const [busca, setBusca] = useState('');
+  /* LA VENTANA — 399 filas de una revientan N16 (dato de B, re-medido con
+     el volumen). **Carga al llegar al final, JAMÁS un botón**: un «cargar
+     más» le pide al pulgar que confirme lo que ya pidió con el scroll. */
+  const [ventana, setVentana] = useState(TAM_VENTANA);
+  const cargando = useRef(false);
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
 
@@ -149,6 +171,21 @@ export default function Vitrina() {
     }, [intento]),
   );
 
+  /* EL FILTRO DE TEXTO — **una sola implementación para las dos caras**:
+     normaliza y compara sobre nombre y marca. Si cada cara buscara distinto,
+     el vendedor encontraría un producto en un modo y no en el otro, y el
+     espejo dejaría de serlo justo donde más se nota. */
+  const coincide = useCallback(
+    (nombre: string, marca: string | null) => {
+      const q = busca.trim().toLowerCase();
+      if (q.length === 0) return true;
+      return (
+        nombre.toLowerCase().includes(q) || (marca ?? '').toLowerCase().includes(q)
+      );
+    },
+    [busca],
+  );
+
   /* Los SKUs de este vendedor que NO llegaron a la vitrina — la diferencia
      entre las dos caras, que es la información del espejo. */
   const ausentes = useMemo(() => {
@@ -156,6 +193,20 @@ export default function Vitrina() {
     const publicadas = new Set(pantalla.vitrina.map((p) => p.variante_id));
     return pantalla.skus.filter((s) => !publicadas.has(s.variante_id));
   }, [pantalla]);
+
+  /* Carga al llegar al final. El `ref` es el cerrojo: sin él, dos eventos
+     de scroll seguidos suman DOS tandas y la ventana salta de 40 a 120 sin
+     que nadie haya bajado tanto. */
+  const alLlegarAlFinal = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    const faltan = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    if (faltan > 600 || cargando.current) return;
+    cargando.current = true;
+    setVentana((v) => v + TAM_VENTANA);
+    setTimeout(() => {
+      cargando.current = false;
+    }, 300);
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -182,6 +233,19 @@ export default function Vitrina() {
               peor que su ausencia* (Ley 23: la puerta no ofrece lo que va
               a rechazar). **Pedido a A**: `especies_aplicables` en el SKU
               del vendedor, y con eso el filtro entra también acá. */}
+          {/* EL BUSCADOR — vive en el techo con el interruptor porque
+              filtra lo que está abajo, y **al escribir se vuelve a la
+              primera ventana**: sin eso, buscar con 200 filas ya cargadas
+              dejaría el resultado enterrado bajo el scroll viejo. */}
+          <Campo
+            label={t('ventas.vitrina.buscar')}
+            value={busca}
+            onChangeText={(v) => {
+              setBusca(v);
+              setVentana(TAM_VENTANA);
+            }}
+            autoCapitalize="none"
+          />
           {modo === 'cliente' && pantalla.conteos !== null && (
             <FiltroEspecie
               conteos={pantalla.conteos}
@@ -233,6 +297,8 @@ export default function Vitrina() {
 
       {pantalla.estado === 'listo' && (
         <ScrollView
+          onScroll={alLlegarAlFinal}
+          scrollEventThrottle={200}
           contentContainerStyle={{
             paddingHorizontal: spacing[5],
             paddingBottom: insets.bottom + spacing[8],
@@ -241,7 +307,10 @@ export default function Vitrina() {
         >
           {modo === 'cliente' ? (
             <CaraCliente
-              productos={filtrarPorEspecie(pantalla.vitrina, especie)}
+              productos={filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
+                coincide(p.nombre, p.marca),
+              )}
+              ventana={ventana}
               ausentes={ausentes.length}
               moneda={pantalla.contexto}
               idioma={idioma as IdiomaSoportado}
@@ -249,7 +318,8 @@ export default function Vitrina() {
             />
           ) : (
             <CaraAdministrar
-              skus={pantalla.skus}
+              skus={pantalla.skus.filter((s2) => coincide(s2.producto_nombre, s2.producto_marca))}
+              ventana={ventana}
               alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=administrar`)}
             />
           )}
@@ -303,12 +373,14 @@ function FiltroEspecie({
    ───────────────────────────────────────────────────────────────────────── */
 function CaraCliente({
   productos,
+  ventana,
   ausentes,
   moneda,
   idioma,
   alAbrir,
 }: {
   productos: ProductoDeVitrina[];
+  ventana: number;
   ausentes: number;
   moneda: ContextoVentas;
   idioma: IdiomaSoportado;
@@ -334,7 +406,7 @@ function CaraCliente({
           descripcion={t('ventas.vitrina.vacioClienteDetalle')}
         />
       ) : (
-        productos.map((p) => (
+        productos.slice(0, ventana).map((p) => (
           <TarjetaProducto
             key={p.oferta_id}
             foto={p.foto_url}
@@ -354,9 +426,11 @@ function CaraCliente({
    ───────────────────────────────────────────────────────────────────────── */
 function CaraAdministrar({
   skus,
+  ventana,
   alAbrir,
 }: {
   skus: SkuDelVendedor[];
+  ventana: number;
   alAbrir: (productoId: string) => void;
 }) {
   const { t } = useTraduccion();
@@ -372,7 +446,7 @@ function CaraAdministrar({
 
   return (
     <View style={{ gap: spacing[4] }}>
-      {skus.map((s) => {
+      {skus.slice(0, ventana).map((s) => {
         /* El contador es SOLO lo suyo — la ley vive en el wrapper y acá se
            LEE. Cero huecos NO DIBUJA NADA. */
         const mias = razonesDeAlcance(s).filter((r) => r.dueno === 'vendedor').length;
