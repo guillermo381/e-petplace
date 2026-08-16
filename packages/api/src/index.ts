@@ -1203,6 +1203,7 @@ export {
   // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
   viajesPorRepartidor,
   proponerSkusVendedorLote,
+  configurarVentaMostrador,
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,

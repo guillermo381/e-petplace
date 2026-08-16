@@ -478,6 +478,25 @@ export async function listarRepartidores(
   return { ok: true, data: salida };
 }
 
+/** S99 (dictado founder ④) · «Atiendo en mi local» para VENTA DE PRODUCTOS
+ *  — la perilla de la cuenta. Prendida, la baldosa de mostrador se compone
+ *  en ATENDER; apagada, NO existe (jamás en gris). El contexto de arranque
+ *  la lee FRESCA en el mismo viaje (`ventaMostradorActiva`). Para
+ *  SERVICIOS el toggle es POR SERVICIO (`prestador_servicios.atiende_local`),
+ *  nunca éste. */
+export async function configurarVentaMostrador(
+  cuentaComercialId: string,
+  activa: boolean,
+): Promise<ResultadoWrapper<{ ventaMostradorActiva: boolean }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('configurar_venta_mostrador', {
+    p_cuenta_comercial_id: cuentaComercialId,
+    p_activa: activa,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { ventaMostradorActiva: data.venta_mostrador_activa === true } };
+}
+
 /** S99 (pedido de C) · Los VIAJES por repartidor de una cuenta — el ⑤ de la
  *  ficha del repartidor. El HECHO, no el vocabulario: «entregó» =
  *  `entregado_en IS NOT NULL` (el vocabulario de estado puede crecer sin
