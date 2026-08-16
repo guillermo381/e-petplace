@@ -139,6 +139,10 @@ export const uiEn = {
     pendientes: '{{etiqueta}}, {{n}} pending',
     sinLeer: '{{etiqueta}}, unread notices',
   },
+  // S99-B — PuertaHermana (see es.ts for why it carries its own voice)
+  puertaHermana: {
+    sinVer: '{{etiqueta}}, {{n}} unseen',
+  },
   sliderPrecio: {
     editarHint: 'Tap the value to type it',
   },

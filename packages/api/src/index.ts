@@ -55,6 +55,11 @@ export {
 } from './wrappers/atencion';
 export {
   obtenerMiPrestador,
+  // S99-A · lote #0 (D-738): el contexto de arranque EN UN VIAJE — la
+  // fuente de la composición por capacidad (barra · HOY · ventana de L4).
+  obtenerContextoArranque,
+  type ContextoArranque,
+  type CuentaComercialDeContexto,
   actualizarPerfilPrestador,
   actualizarExponePersonas,
   resolverUrlLogoNegocio,

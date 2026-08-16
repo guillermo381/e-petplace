@@ -34,6 +34,42 @@ que funciona.** Operativamente, tres reglas exigibles:
 3. **Ante la duda, quitá antes que agregar** (regla de oro de N1–N10,
    vigente acá con la misma fuerza).
 
+### §0.1 · LA ENMIENDA DEL FOUNDER (15-ago-2026 — letra, no arenga; rige a las CUATRO pistas desde su arranque)
+
+**FIRMA VERBATIM:** *«no es poner piezas por poner, cada cosa que hagamos
+debe tener un sentido, así seamos un poco más lentos creando, busquemos
+crear las cosas bien. Deben pensar en CÓMO hacemos, no solo que funcione:
+que sea elegante, que sea eficiente, que sea seguro y que se vea
+espectacular, luxury.»*
+
+**LAS CINCO VARAS, EN ESTE ORDEN — el orden ES la firma, ninguna se salta
+y la primera no basta:**
+
+**FUNCIONA · SEGURO · EFICIENTE · ELEGANTE · ESPECTACULAR**
+
+**La línea que la vuelve exigible y no aspiracional: EL FOUNDER AUTORIZA IR
+MÁS LENTO.** Una pista que entrega tarde algo bien hecho está cumpliendo;
+una que entrega a tiempo algo que «hace por hacer» no. *Eso desarma la
+excusa de octubre antes de que alguien la use.*
+
+**Por qué ahora:** el lote #0 es motor y no se ve; lo que sigue —L2 (la
+ficha del repartidor) y L5b (la vitrina y su espejo)— son PANTALLAS
+NUEVAS, y ahí se decide si el producto se ve como producto o como
+software. B ya midió que la clase del «diseño sin cariño» escaló de pieza
+a pantalla en tres muestras (el componente de foto · las dos formas del
+pedido · la configuración entera). **Va a escalar otra vez si nadie la
+frena antes de que se escriba.**
+
+**CONSECUENCIAS OPERATIVAS (los dientes):**
+1. **El toque 1 de B —la receta de forma ANTES de escribir— es
+   PRECONDICIÓN de toda pantalla nueva de L2 y L5b.** Ninguna se escribe
+   sin ella.
+2. El rojo de B conserva su guarda (§1) **y gana un motivo legítimo
+   nuevo: «funciona y no tiene intención de forma» ES un rojo nombrable**,
+   con esta firma detrás.
+3. **La pregunta del gate del founder queda FIJA para toda pantalla
+   nueva: «¿artesano, u obrero?».**
+
 ## §1 · LA DIRECCIÓN DE DISEÑO (B) — dos toques por lote, poder de rojo
 
 - **Toque 1 — antes de escribir:** B entrega la *receta de forma* del lote

@@ -29,7 +29,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -38,6 +38,7 @@ import {
   CeldaNavegacion,
   Encabezado,
   CitaEnVivo,
+  PuertaHermana,
   SelectorDia,
   Esqueleto,
   EsqueletoGrupo,
@@ -108,6 +109,7 @@ import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
+import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -338,17 +340,11 @@ const novedadesZona3: NovedadZona3 = null;
 const DIAS_ATRAS = 3;
 const DIAS_ADELANTE = 6;
 
-// Fecha local del dispositivo, YYYY-MM-DD (en-CA da ese formato).
-function hoyLocal(): string {
-  return new Intl.DateTimeFormat('en-CA').format(new Date());
-}
-
-// Suma días en fecha LOCAL por partes literales (jamás Date(iso) directo
-// ni toISOString — D-312 / hallazgo S55: corren el día en UTC-5).
-function sumarDias(iso: string, dias: number): string {
-  const [a, m, d] = iso.split('-').map(Number);
-  return new Intl.DateTimeFormat('en-CA').format(new Date(a ?? 0, (m ?? 1) - 1, (d ?? 1) + dias));
-}
+/* ⭐ S99-D · `hoyLocal` y `sumarDias` SE MUDARON a `@/lib/dia-local` —
+   la ventana hermana de pedidos necesita la MISMA rueda, y dos ventanas
+   que hablan del mismo día no pueden tener dos aritméticas de fecha.
+   La trampa que las justifica (jamás `new Date(iso)` ni `toISOString`:
+   corren el día en UTC−5, D-312) viaja con ellas, escrita allá. */
 
 // ¿El día cae dentro de algún bloqueo? (rango INCLUSIVE ambos extremos,
 // granularidad día — la semántica de prestador_bloqueos, S56 D-341).
@@ -507,50 +503,44 @@ type ItemJornada =
   | { tipo: 'cita'; cita: CitaAgendaPaseo }
   | { tipo: 'salida'; clave: string; citas: CitaAgendaPaseo[] };
 
-/* ⭐ S97-D · EL DÍA ES UNO SOLO — el despacho es habitante de la línea,
-   no una lista aparte. §15b.0ter dice «el día, ABAJO y EN ORDEN», y un
-   pedido con promesa de entrega a las 14:00 es exactamente eso: algo
-   que pasa a las 14:00. La ÚNICA razón por la que vivía afuera es que
-   nació en otro frente (la despensa), y eso es historia del código, no
-   una verdad del día del prestador.
-   ⚠️ EL CINTURÓN §3.4 QUEDA INTACTO Y ESO NO ES UN DETALLE: citas y
-   pedidos conviven EN LA VISTA y jamás en una tabla — son dos lectores
-   distintos (`obtenerCitas*` sobre `evento_cita_servicio` ·
-   `listarPedidosDelVendedor` sobre `v_pedidos_narrativa`) que esta
-   pantalla ORDENA por hora. Unir en la vista es composición; unir en el
-   motor sería romper la frontera servicios↔productos. */
-type ItemLinea = ItemJornada | { tipo: 'despacho'; pedido: PedidoDelVendedor };
+/* ☠️ S99-D · L4 — ACÁ VIVÍA LA LÍNEA FUSIONADA DE S97-D, Y SU RAZÓN SE
+   CONSERVA TACHADA PORQUE NO ERA MALA:
 
-/** La hora «HH:MM» de CUALQUIER habitante de la línea — la que la ordena
+   > *«El día es UNO SOLO — el despacho es habitante de la línea, no una
+   > lista aparte. §15b.0ter dice "el día, ABAJO y EN ORDEN", y un día que
+   > se cuenta en dos listas no está en orden: está en DOS ÓRDENES que el
+   > lector tiene que reconciliar de memoria.»*
+
+   **La firma del 15-ago la responde en vez de ignorarla** (adjudicación
+   de mesa #1): citas y pedidos son VENTANAS HERMANAS con puertas espejo,
+   y el argumento del «doble orden» lo cierra **el selector de fecha
+   compartido — es UN día en DOS ventanas**. El HOY se queda con citas.
+
+   ⚠️ **Y la medición de la mudanza encontró algo que la fusión escondía:**
+   el efecto que alimentaba esta línea pedía `listarPedidosDelVendedor`
+   **para TODO prestador con cuenta comercial** —que son todos, porque es
+   por donde cobra—, no solo para el que vende productos. O sea que **un
+   veterinario que jamás vendió una bolsa de alimento pagaba esa petición
+   en cada foco de su HOY** para recibir una lista vacía. *No era el costo
+   del dual: era el costo de todos.* Se va con esta lápida (D-738 · L-223).
+
+   El cinturón §3.4 no cambia y nunca fue el problema: unir en la VISTA
+   era composición legítima; lo que cambió es la letra de la vista. */
+type ItemLinea = ItemJornada;
+
+/** La hora «HH:MM» de cualquier habitante de la línea — la que la ordena
  *  y la que se pinta en la columna izquierda. UNA función para las dos
  *  cosas a propósito: si el orden y el dibujo salieran de dos lugares,
- *  podrían discrepar y la línea diría una hora y estaría en otro lugar. */
+ *  podrían discrepar y la línea diría una hora y estaría en otro lugar.
+ *  ☠️ S99-D: su tercer brazo (el despacho, vía `horaLocalDeIso`) murió con
+ *  la línea fusionada; con él murieron `horaLocalDeIso` y `diaLocalDeIso`,
+ *  que existían solo para normalizar el timestamptz de la promesa de
+ *  entrega contra la hora local de la cita. Esa normalización revive
+ *  ADENTRO de la ventana hermana, que es donde ahora vive el día del
+ *  pedido (`ventas-formato.ts` ya la tiene: `fechaLocalISO`/`horaCorta`). */
 function horaDeItem(item: ItemLinea): string | null {
   if (item.tipo === 'cita') return item.cita.hora?.slice(0, 5) ?? null;
-  if (item.tipo === 'salida') return item.citas[0]?.hora?.slice(0, 5) ?? null;
-  return horaLocalDeIso(item.pedido.promesa_desde);
-}
-
-/** La hora local «HH:MM» de un instante ISO. El despacho la trae como
- *  timestamptz (la promesa de entrega); la cita la trae ya como hora
- *  local. Se normalizan las dos a lo mismo para poder ORDENARLAS —
- *  sin eso no hay línea de tiempo, hay dos listas pegadas. */
-function horaLocalDeIso(iso: string | null): string | null {
-  if (iso === null) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
-/** El día local «YYYY-MM-DD» de un instante ISO — el mismo criterio con
- *  el que `hoyLocal()` computa el día de las citas. Comparar contra el
- *  ISO crudo del server compararía días UTC, y a partir de las 19:00 en
- *  Guayaquil eso manda el pedido de esta tarde al día siguiente. */
-function diaLocalDeIso(iso: string | null): string | null {
-  if (iso === null) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return item.citas[0]?.hora?.slice(0, 5) ?? null;
 }
 
 function claveBloque(c: CitaAgendaPaseo): string | null {
@@ -767,32 +757,17 @@ function FilaCita({
   );
 }
 
-/* ⭐ S97-D · LA FILA DEL DESPACHO — hermana de la de cita, misma
-   gramática: glifo del oficio · sujeto · chip de estado en neutro · UNA
-   acción (la fila entera navega a su pedido, 19.7 `›`).
-   ⚠️ NO usa `FilaCitaUi`: esa pieza es de DOMINIO y su contrato pide
-   `mascota` — y un pedido NO TIENE MASCOTA, ni debe tenerla. El rol
-   vendedor no ve el expediente por ninguna vía (MODELO_DESPENSA §7.4),
-   así que meterle una cara prestada sería dibujar una relación que el
-   motor prohíbe. Se compone con la casa (`CeldaNavegacion` es celda de
-   navegación, Ley 19.1) en vez de forzar la pieza equivocada.
-   ⚠️ El nombre del producto tampoco viaja: el sujeto de un despacho es
-   el PEDIDO. Lo que se compró se ve adentro. */
-function FilaDespacho({ pedido }: { pedido: PedidoDelVendedor }) {
-  const router = useRouter();
-  const { t } = useTraduccion();
-  return (
-    <Tarjeta relleno="ninguno">
-      <CeldaNavegacion
-        icono="despensa"
-        registro="aa"
-        titulo={t('linea.despachoTitulo', { orden: pedido.numero_orden })}
-        detalle={pedido.narrativa_nombre}
-        onPress={() => router.push({ pathname: '/ventas/pedido/[pedidoId]', params: { pedidoId: pedido.pedido_id } })}
-      />
-    </Tarjeta>
-  );
-}
+/* ☠️ S99-D · L4 — ACÁ VIVÍA `FilaDespacho`, la fila del pedido dentro de
+   la línea del día. Muere con la línea fusionada (firma del 15-ago).
+   **Lo que NO muere con ella es lo que aprendió, y por eso se conserva
+   escrito:** no usaba `FilaCitaUi` porque esa pieza es de DOMINIO y su
+   contrato pide `mascota` — *y un pedido NO TIENE MASCOTA, ni debe
+   tenerla* (`MODELO_DESPENSA` §7.4: el rol vendedor no ve el expediente
+   por ninguna vía). Meterle una cara prestada habría dibujado una
+   relación que el motor prohíbe.
+   Su reemplazo ya existe y respeta lo mismo: `TarjetaPedido` dentro de
+   `VentanaPedidos` (pieza de C, S99), cuyo sujeto también es el PEDIDO.
+   *La pieza se muda; la prohibición viaja con ella.* */
 
 // D-385: la fila de UNA salida — pila de caras + nombres + estado
 // agregado; tap = expandir a sus citas (la pantalla es dueña del set
@@ -956,6 +931,21 @@ export default function Hoy() {
      `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
      llega DESPUÉS del fetch y el estado nacería con un valor viejo. */
   const [diaElegido, setDiaElegido] = useState<string | null>(null);
+  /* 🔴 S99-D · L4 — EL DÍA QUE VUELVE DE LA VENTANA HERMANA.
+     La puerta de regreso navega acá CON su día, y el HOY lo adopta. Sin
+     esto el cruce sería de ida nomás: el vendedor movería la rueda del lado
+     pedidos, volvería, y encontraría otro día — o sea **dos días en dos
+     ventanas**, que es exactamente lo que la firma («es UN día en DOS
+     ventanas») responde. *El selector compartido no es que las dos tengan
+     rueda: es que las dos muestren el mismo día.*
+     Se lee como EFECTO y no como valor inicial porque la pantalla ya está
+     montada cuando el param llega — el HOY es un tab, no se re-monta. */
+  const paramDia = useLocalSearchParams<{ dia?: string }>().dia;
+  useEffect(() => {
+    if (typeof paramDia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(paramDia)) {
+      setDiaElegido(paramDia);
+    }
+  }, [paramDia]);
   /** Los días que el negocio declaró cerrados — la rueda los apaga y la
    *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
    *  decisión firmada dentro de la pieza). */
@@ -992,7 +982,8 @@ export default function Hoy() {
      criterio de la puerta: un despacho ausente no es una afirmación sobre
      el día (no dice «no hay entregas»), es la ausencia de una fuente. La
      puerta SÍ afirma —por eso ella dice su error (D-541) y esto no. */
-  const [despachos, setDespachos] = useState<PedidoDelVendedor[] | null>(null);
+  /* ☠️ S99-D: acá vivía `despachos` — el estado de los pedidos del día que
+     alimentaba la línea fusionada. Ver su lápida en `ItemLinea`. */
   const { mostrar: mostrarAviso } = useAviso();
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
@@ -1589,30 +1580,17 @@ export default function Hoy() {
     };
   }, [pantalla]);
 
-  /* ⭐ S97-D · LOS DESPACHOS DEL DÍA — efecto PROPIO, y ese es el punto.
-     No viaja con la puerta aunque comparta la cuenta comercial: la puerta
-     es de CITAS y late por minuto (su reloj es del server); un pedido no
-     envejece en 60 s. Colgarlo del reloj de la puerta habría multiplicado
-     por 60 los viajes de una fuente que no los necesita — y habría atado
-     su visibilidad al rol de puerta, que no tiene nada que ver con vender.
-     ⚠️ SE PIDE UNA VEZ POR CUENTA y se refresca con el pull-to-refresh de
-     la pantalla (`cargar`), como el resto del día. */
-  useEffect(() => {
-    if (pantalla.estado !== 'listo') return;
-    const cuentaId = pantalla.cuentaComercialId;
-    if (cuentaId === null) {
-      setDespachos(null);
-      return;
-    }
-    let vigente = true;
-    void listarPedidosDelVendedor(cuentaId).then((r) => {
-      if (!vigente) return;
-      setDespachos(r.ok ? r.data : null);
-    });
-    return () => {
-      vigente = false;
-    };
-  }, [pantalla]);
+  /* ☠️ S99-D · L4 — ACÁ VIVÍA EL EFECTO QUE TRAÍA LOS DESPACHOS DEL DÍA.
+     Muere con la línea fusionada, y **es el regalo medido al lote #0**: era
+     una petición por foco del HOY, la pantalla que D-738 nombra como la más
+     cara del prestador. Su comentario original decía con razón por qué NO
+     viajaba con la puerta (un pedido no envejece en 60 s); lo que nadie
+     había medido es a quién le cobraba: `cuentaComercialId` lo tiene TODO
+     prestador —es por donde cobra—, así que el veterinario que no vende
+     productos también pagaba el viaje para recibir `[]`.
+     El lector vive ahora en la ventana hermana, **por RANGO y no por día**
+     (`listarPedidosDelVendedorEnRango`), que es lo que hace barato el gesto
+     de cruzar conservando la fecha. */
 
   /* ☠️ S98-C · acá vivían `marcarLlegadaPuerta` y su refresco optimista.
      Murieron con el verbo (firma del founder). */
@@ -1713,17 +1691,15 @@ export default function Hoy() {
      lugar en una línea de tiempo, y ponerlo arriba o abajo sería inventarle
      uno. Lo terminal tampoco — un pedido entregado no es trabajo del día
      (su lugar es el panel, que es su casa; la línea es lo que HAY QUE HACER). */
-  const despachosDelDia: PedidoDelVendedor[] =
-    despachos === null || diaVista === null
-      ? []
-      : despachos.filter(
-          (p) => !p.es_terminal && diaLocalDeIso(p.promesa_desde) === diaVista,
-        );
-
-  const lineaItems: ItemLinea[] = [
-    ...restoItems,
-    ...despachosDelDia.map((p) => ({ tipo: 'despacho' as const, pedido: p })),
-  ].sort((a, b) => (horaDeItem(a) ?? '').localeCompare(horaDeItem(b) ?? ''));
+  /* ☠️ S99-D · L4 — acá se filtraban los despachos del día y se mezclaban
+     con las citas. La regla que aplicaban NO se pierde, se muda: el
+     despacho SIN promesa de entrega no entraba a la línea (sin hora no
+     tiene lugar en una línea de tiempo) — y en la ventana hermana esos
+     mismos pedidos **PRESIDEN** en vez de desaparecer, que es la mitad que
+     acá no se podía pagar. Es la cura de D-828 hecha forma. */
+  const lineaItems: ItemLinea[] = [...restoItems].sort((a, b) =>
+    (horaDeItem(a) ?? '').localeCompare(horaDeItem(b) ?? ''),
+  );
   // S70-B2-v2: la bandeja "Por coordinar" (D-439) del negocio (vista Hoy).
   const porCoordinar = pantalla.estado === 'listo' ? pantalla.porCoordinar : [];
 
@@ -2380,6 +2356,40 @@ export default function Hoy() {
           />
         )}
 
+        {/* ⭐ S99-D · L4 — LA PUERTA A LA VENTANA HERMANA (adjudicación #1).
+            Es del DUAL GESTOR y de nadie más, y las tres exclusiones tienen
+            razón propia: el **vendedor puro** no llega acá (su HOY es la
+            ventana, retorno temprano) · el **no-gestor con tienda** ya tiene
+            su `TarjetaVentas` de arriba (§0bis: una puerta por población) ·
+            y quien **no vende** no ve un lugar que no existe para él.
+
+            ⚠️ **LLEVA EL DÍA EN VISTA**, y eso es la firma, no un detalle:
+            *es UN día en DOS ventanas*. Sin el param, cruzar aterrizaría en
+            hoy y el gesto que responde al argumento de S97-D se rompería en
+            su primer uso.
+
+            ⚠️ **No cuesta un viaje:** `vendedoraMedida` ya se paga en cada
+            foco desde S96-C. Yo mismo razoné que esta puerta tenía que
+            esperar la RPC de contexto de A **y fui a medirlo antes de
+            escribirlo: era falso** (§13.3 del parte). Lo que sí sale de esa
+            medición es un pedido para el lote #0 — ese `contextoVentas()`
+            corre para TODOS y deduplica en vuelo sin cachear. */}
+        {pantalla.estado === 'listo' && pantalla.rol === 'gestor' && vendedoraMedida && (
+          <PuertaHermana
+            etiqueta={t('pedidosDia.puertaPedidos')}
+            direccion="derecha"
+            /* sinVer=0 TRANSICIONAL (cura de combinación, A 15-ago): la pieza
+               de B lo exige por tipo y su regla de existencia hace que 0 no
+               dibuje nada — puerta limpia, que es la verdad mientras el
+               lector de no-vistos (ventanas_vistas, motor de A — propuesta
+               en el Loop de A) no exista. Cuando exista, D lo cablea. */
+            sinVer={0}
+            onPress={() =>
+              router.push({ pathname: '/pedidos', params: { dia: diaVista ?? hoy ?? '' } })
+            }
+          />
+        )}
+
         {/* ⭐ S85-C7 · TU DÍA — la rueda D3 y los chips, juntos.
             LA RUEDA ES DE B (`SelectorDia`, `0b229a6`) y se MONTA, no se
             re-dibuja: su escala, su opacidad y el acento del número viven
@@ -2507,21 +2517,14 @@ export default function Hoy() {
               const horaItem = horaDeItem(item);
               return (
                 <View
-                  key={
-                    item.tipo === 'cita'
-                      ? item.cita.id
-                      : item.tipo === 'salida'
-                        ? item.clave
-                        : `despacho-${item.pedido.pedido_id}`
-                  }
+                  key={item.tipo === 'cita' ? item.cita.id : item.clave}
                   style={{ flexDirection: 'row', gap: spacing[2] }}
                 >
                   {/* La columna de la hora: ancho fijo para que TODAS las
                       filas del día queden alineadas — sin eso no hay línea
                       de tiempo, hay una lista con la hora adelante.
-                      ⭐ S97-D: «todas» ahora incluye los despachos, y ése
-                      es el punto — una entrega a las 14:00 se alinea con la
-                      cita de las 14:00 porque las dos pasan a las 14:00. */}
+                      ☠️ S99-D: «todas» volvió a ser «todas las citas» — los
+                      despachos se mudaron a la ventana hermana. */}
                   <View style={{ width: 46, paddingTop: spacing[3], alignItems: 'flex-end' }}>
                     <Texto variante="dato">{horaItem ?? '—'}</Texto>
                   </View>
@@ -2539,15 +2542,13 @@ export default function Hoy() {
                         acciones={accionesDe(item.cita)}
                         fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined}
                       />
-                    ) : item.tipo === 'salida' ? (
+                    ) : (
                       <FilaSalida
                         citas={item.citas}
                         abierta={salidasAbiertas.has(item.clave)}
                         onToggle={() => toggleSalida(item.clave)}
                         urlsFotos={urlsFotos}
                       />
-                    ) : (
-                      <FilaDespacho pedido={item.pedido} />
                     )}
                   </View>
                 </View>

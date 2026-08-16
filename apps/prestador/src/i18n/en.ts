@@ -2335,6 +2335,14 @@ export const prestadorEn = {
     fallo: "We couldn't check whether this visit has a prescription.",
     reintentar: 'Try again',
   },
+  pedidosDia: {
+    titulo: "Today's orders",
+    puertaCitas: "Your day's appointments",
+    puertaPedidos: "Your day's orders",
+    sinTiendaTitulo: "You don't sell products yet",
+    sinTiendaDetalle: 'Once your store is active, your daily orders live here.',
+    errorTitulo: "We couldn't load your orders",
+  },
   historico: {
     especie_perro: 'Dogs',
     especie_gato: 'Cats',
@@ -2365,6 +2373,7 @@ export const prestadorEn = {
     titulo: 'Your history',
     entrada: 'Your history',
     entradaDetalle: 'Past visits and appointments',
+    entradaDetalleVenta: 'Past orders',
     natCitas: 'Services',
     natPedidos: 'Orders',
     natEtiqueta: 'Which history you are viewing',

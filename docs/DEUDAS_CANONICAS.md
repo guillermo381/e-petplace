@@ -11708,6 +11708,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-240 — UN GUARD QUE SOLO VALE DESPUÉS DEL CAMBIO NO PROTEGE EL CAMBIO (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
+
+  **El caso (R46):** la regla vigila que toda superficie que le pide a un repartidor su WhatsApp componga al menos UN `ControlTelefono` — **cierto HOY** (lo aporta el campo de teléfono) · **cierto CUANDO el teléfono muera** (lo aporta el WhatsApp) · **FALSO exactamente en el estado que hay que impedir** (el borrado que se lleva el selector sin que nadie lo mude). *El guard da verde a los dos lados del cambio y solo el estado intermedio —el que la regla existe para atrapar— lo pone rojo… si alguien lo comete y lo corre.*
+
+  **El porqué, que es el que se olvida:** el defecto se manifiesta como **UNA RESTA PROLIJA, y nadie revisa por qué algo NO se hizo.** Un diff de borrado se lee como una resta y no como una pérdida — es la hermana de S84 (*«un dato que dice "no se puede" no se descubre nunca»*) en su forma de código.
+
+  **La forma exigible:** al escribir un guard para proteger UNA TRANSICIÓN, se verifica que dé ROJO en el estado intermedio prohibido — no solo verde en los dos estados legales. Un guard que pasa antes y pasa después no ha probado nada sobre el medio.
+
 - **L-239 — HAY COMANDOS CUYO ÉXITO NO RESPONDE LA PREGUNTA (S99 — depositada por orden de mesa, 15-ago-2026, con el repro de C).**
 
   **El repro, literal de C y medido en vivo ANTES de su push:** `git ls-remote --heads origin <ref>` devuelve **EXIT 0 con salida VACÍA cuando el ref NO existe**. La orden de mesa decía *«leé el EXIT»* — y ese exit habría **CONFIRMADO que la rama estaba justo cuando no estaba**. **El error de la orden fue de MESA, no de C** — se declara porque *una ley que nace corrigiendo a quien la dictó vale más que una que nadie tuvo que corregir*.
@@ -16796,3 +16804,140 @@ que un header solo no alcanza; por eso son ficha + JSDoc + lint.
 ☠️ **Muere** cuando las cuatro superficies del presente hayan migrado (o
 declarado que no migran) cumpliendo el criterio, con el lint de B vigilando
 a las que vengan.
+
+#### D-829 — 🔴 LA PUERTA ASIMÉTRICA: el vendedor no puede solicitar servicios (hallazgo del founder EN EL GATE, 15-ago-2026 — dueño A; la regla de producto ya está FIRMADA, lo que falta es el camino)
+
+**La firma del founder, verbatim:** *«si yo quiero por ejemplo pasear,
+debería estar ahí y adjuntar como si fuera un prestador que pudiera hacerlo.
+No se activa, igual que todos, nace sin activar el servicio hasta que se
+valide — igual como el groomer puede activar servicio de ventas y entra en
+revisión, el de despensa también debería poder solicitar la activación de
+esos servicios.»* Contradice §2.0: si la capacidad decide qué se muestra,
+tiene que existir una puerta para ADQUIRIR capacidad, **y es de doble mano
+o no es puerta.**
+
+**EL CENSO, medido del objeto (15-ago, sobre `7e6dc899` + DB viva):**
+
+1. **La maquinaria de SOLICITUD ya es simétrica POR TIPO** — no hay que
+   inventarla: `solicitar_naturaleza_comercial(p_cuenta_comercial_id,
+   p_tipo_actor)` acepta las DOS naturalezas (`prestador_servicios` ·
+   `seller_productos`), escribe en `cuenta_roles` (estado `solicitada`,
+   que ningún lector de permisos mira — el cinturón de S97 lo prueba:
+   `es_vendedor_de` sigue false tras proponer), con
+   `retirar_naturaleza_solicitada` como camino de corrección y
+   `obtener_naturalezas_de_cuenta` devolviendo SIEMPRE las dos. Wrappers
+   vivos en `cuentaComercial.ts`. **Cero migración para la mitad de pedir.**
+2. **La asimetría real es de SUPERFICIE:** `solicitarNaturalezaComercial`
+   tiene **UN solo caller — `PasoOfreces.tsx`, el paso ② del wizard del
+   ALTA**. El groomer pasa por ese wizard y por eso puede pedir ventas;
+   **el vendedor puro NUNCA lo recorre** (su alta fue por función/cargador,
+   S95-F) ⇒ *la puerta existe, pero vive en un camino que una de las dos
+   poblaciones no pisa jamás.*
+3. **Y la segunda mitad es de OTORGAMIENTO, y es la cara:** para ventas
+   existe `otorgar_rol_vendedor(cc, motivo)` (ADMIN-only, con el foso de
+   §4.2 escrito en su cuerpo). **Para servicios NO existe el gemelo** — la
+   activación pasa por la maquinaria del alta de prestador (`prestadores` +
+   geo + radio + `activar_prestador`, S79; credencial médica si vet, §14.2
+   con matrícula desde el corte 15-ago) — **exige MÁS que ventas y hoy es
+   acto del founder.** Eso NO es un defecto de esta deuda: es el proceso
+   vivo, y v1 puede usarlo tal cual.
+4. **Granularidad:** la solicitud es por NATURALEZA (gruesa), no por
+   oficio — y eso ALCANZA para la letra del founder: pedir
+   `prestador_servicios` → revisión → al activarse, los oficios se
+   configuran como cualquier prestador (ofertas + chips; vet con su
+   verificación). No se inventa un eje nuevo por servicio.
+
+**LA PROPUESTA (censo servido — NO construida, por orden de mesa):**
+superficie en **NEGOCIO** de la casa del vendedor puro (el cascarón de
+D-820 ya le da la tab): una celda **«Ofrecer servicios»** que llama al
+wrapper existente con `'prestador_servicios'` + el chip de estado
+`solicitada` (la ley del contador S91 ya lo excluye del número). **Costo
+del lado solicitud: BAJO — RPC, wrapper y patrón de chip EXISTEN; es una
+pantalla.** El costo real es hacer VISIBLE la solicitud al equipo que
+valida (hoy el ciclo admin la ve en `cuenta_roles`) y el otorgamiento
+sigue por el camino vivo del alta.
+
+**IMPACTO DE PRIORIDAD, declarado por orden de mesa:** hoy un veterinario
+puede vender producto y una despensa NO puede ofrecer paseo — **es el lado
+del mercado que más rápido crece: un local de barrio que ya tiene al
+cliente adentro.**
+
+☠️ **Muere** cuando una cuenta seller-only pueda solicitar
+`prestador_servicios` desde su casa, la solicitud sea visible a quien
+valida, y el camino esté caminado por el founder (nace sin activar, igual
+que todos).
+
+#### D-830 — 🔴 LA FRONTERA DE LAS DOS COLAS: FIFO ordena el TRABAJO, la RUTA ordena la SALIDA (frontera de mesa, 15-ago-2026 — se deposita ANTES de que alguien la mezcle)
+
+**La frontera, con número propio por orden de mesa:**
+- **FIFO ordena EL TRABAJO DEL LOCAL** — qué preparo primero (por hora de
+  confirmación del pago: `pagos_intentos.cerrado_en` del intento aprobado,
+  medido — jamás `pedidos.pagado_en`, que es heredada, bloqueada y 0/14).
+- **LA RUTA ordena LA SALIDA** — en qué orden entrego.
+
+**Son criterios OPUESTOS** (FIFO dice *«el que llegó primero»*, la ruta
+dice *«el que queda de paso»*) y **el corte entre ellas es el momento del
+DESPACHO.** Un pedido puede prepararse tercero y entregarse primero porque
+queda de paso, **y eso NO viola FIFO — FIFO se cumplió adentro del local.**
+
+**El riesgo que esta ficha existe para evitar:** si se mezclan, se
+construye UNA cola que no puede satisfacer NINGUNO de los dos criterios —
+y el defecto no daría rojo en ningún instrumento: cada pantalla se vería
+razonable y el conjunto estaría mal.
+
+☠️ **Muere** cuando las dos colas existan construidas con el corte en el
+despacho y ningún lector cruce los criterios.
+
+#### D-831 — 🟡 EL ARCO DE LA RUTA DEL REPARTIDOR + EL MANIFIESTO DE SALIDA (firma founder 15-ago; alcance v1 declarado — cruza L2 y L6)
+
+**La firma, verbatim:** *«un repartidor no lleva un único pedido;
+típicamente sale con unos diez a quince pedidos por ruta.»*
+
+**EL CENSO, medido del objeto (universo declarado — L-238):**
+`information_schema.tables` de `public` con `%manifiesto%`/`%ruta%`/
+`%salida%` → **CERO tablas**; columnas de `envios` → tiene `repartidor_id`
+por envío, `salio_en`, `hacia_destino_en`, promesa y ventana, `track_gps` —
+**pero NINGÚN orden de parada ni agrupador: cada envío viaja SOLO.** La
+«ruta» de hoy es implícita (repartidor + día) y no tiene entidad: no hay
+sobre qué ordenar paradas ni qué mostrarle al repartidor como manifiesto.
+
+**VOTO DE MESA, servido con su costo:** ordenar 10–15 paradas con ventanas
+horarias por mejor ruta es un problema CARO de resolver bien y **NO entra
+a octubre como cosa propia.** Lo que entra y cubre el grueso del valor:
+**agrupar por zona · ordenar por cercanía al punto de salida · y DEJAR QUE
+EL REPARTIDOR REORDENE CON EL DEDO** — conoce el tráfico y las calles
+mejor que cualquier algoritmo nuestro en v1.
+
+**El alcance v1:** el manifiesto de salida como ENTIDAD (los envíos de una
+salida, con orden editable por el repartidor) + la pantalla que lo lista.
+El optimizador queda declarado FUERA. La frontera con el FIFO del local es
+**D-830** y no se cruza.
+
+☠️ **Muere** cuando un repartidor real salga con N pedidos, los vea como
+UNA salida ordenada, y pueda reordenarlos con el dedo sin romper ninguna
+ventana comprometida.
+
+#### D-832 — 🔴 LA AUTO-PRUEBA VERIFICA QUE UNA REGLA SALGA ROJA, NO POR QUÉ (hueco del MECANISMO — dueño B; nace del atrape de B sobre su propia R46, 16-ago-2026)
+
+**El hallazgo, con el literal de B:** discriminó su propio rojo POR
+MUTACIÓN (sacó el caso malo del fixture y la regla quedó verde) y descubrió
+que **el rojo venía del CASO y no del ancla** — *«un rojo por la razón
+equivocada está tan roto como un verde por la razón equivocada — y acá el
+mecanismo de la casa no lo hubiera notado.»*
+
+**Por qué es DEUDA DEL MECANISMO y no nota de R46:** la auto-prueba de
+`verify:diseno` enciende cada regla y verifica que PUEDE dar rojo — pero
+no discrimina CONTRA QUÉ dio rojo. **Afecta a las 38 auto-pruebas**, no a
+una. Es **la séptima muestra de la familia L-235 y la primera EN EL
+AUDITOR DEL AUDITOR** — el instrumento que existe para que los
+instrumentos no mientan tenía el mismo hueco que vino a cerrar.
+
+**Criterio de disparo (exigible):** ① **toda regla NUEVA discrimina su
+rojo por mutación antes de nacer** (quitar el caso malo → verde; el ancla
+sola no basta) · ② **las existentes se auditan AL TOCARLAS** — no hay
+barrido masivo: la deuda se paga regla a regla, con la mutación como
+prueba.
+
+☠️ **Muere** cuando la disciplina de mutación esté escrita en el header de
+la auto-prueba (el lugar que todo autor de regla lee) y las reglas tocadas
+desde hoy la traigan corrida.
