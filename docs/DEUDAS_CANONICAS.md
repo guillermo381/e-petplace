@@ -11723,6 +11723,31 @@ defecto que se curó hoy en el cambio de clave.
 
   **Y el discriminador que lo prueba sin muestrear:** se verifica que la clave de orden sea única sobre el conjunto (`count(*) - count(DISTINCT (clave))` = **0**), porque **una clave única ES un orden total** — no hace falta correr la paginación dos veces y esperar que coincida. *Medido: `(created_at, id)` → 0 repetidos · `created_at` solo → 524 empates.* **La misma consulta mide la cura y el tamaño del agujero.**
 
+  ---
+
+  ### 🔴 SEGUNDA CARA (censo de mesa, mismo día): NO ES UN ARTEFACTO DE SIEMBRA — ES CÓMO ESCRIBE EL PRODUCTO
+
+  **La mesa pidió censar «qué más ordena por fecha sobre datos sembrados en lote», con la hipótesis de que *una siembra en lote fabrica empates que el dato real no tendría*. EL CENSO LA CORRIGIÓ, y para peor:**
+
+  | conjunto | filas | empates | ¿es siembra? |
+  |---|---|---|---|
+  | `ofertas.created_at` | 563 | **548** | sí (mía) |
+  | `eventos_mascota.created_at` | 325 | **88** | **NO** |
+  | `prestador_empleados.created_at` | 31 | 13 | no |
+  | `pedidos.created_at` | 15 | 5 | mixto |
+
+  **`eventos_mascota` no lo sembró nadie en lote: son eventos reales acumulados en meses.** ⇒ **el empate no viene de la siembra, viene de cómo escribe el producto**, y por una razón estructural que la casa ya tenía escrita: **`now()` es constante dentro de una transacción** (L-122a). Cada acto que escribe VARIAS filas de una nace con la marca idéntica —**la constelación de la nota clínica (un evento por medicamento), el carnet entero de vacunas, un lote de propuestas**— y encima los eventos de **fecha sola se anclan a medianoche UTC** (S48), así que **todas las vacunas de un mismo día empatan por diseño.**
+
+  ⇒ **Corolario duro: el defecto NO desaparece en producción. La siembra solo lo hizo grande y visible.**
+
+  ### 🔴 Y LA MORDIDA QUE EL CENSO ENCONTRÓ VIVA — EL BIO-EXPEDIENTE PERDÍA EVENTOS
+
+  De los ~20 lectores que ordenan por fecha, **uno pagina de verdad: el timeline.** Y ordenaba por `fecha_evento` sin desempate **cortando con `.lt(fecha_evento, cursor)` ESTRICTO** ⇒ **los eventos que compartían la fecha del corte no se repetían: DESAPARECÍAN.**
+
+  **Medido, no razonado: hasta SEIS eventos de una misma mascota comparten `fecha_evento` exacta**, y el discriminador lo cuantificó sobre dos mascotas reales — **el cursor viejo alcanzaba 55 de 62 eventos: perdía 7 (11 %).** *En el Bio-Expediente, que es el producto.*
+
+  **Curado con clave compuesta `(fecha_evento, id)`** —cursor opaco, consumidores intactos— y con instrumento permanente: `scripts/verify-timeline-paginacion-s99.mjs`, **que trae su propio discriminador adentro** (simula el cursor viejo sobre los mismos datos, porque *un verde de paginación no significa nada si el código roto también pasa*).
+
 - **L-270 — UN BLOQUEO DECLARADO ENVEJECE IGUAL QUE UN DATO (S99 — autocrítica de C; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** C construyó la capacidad en la fila del repartidor, y **al bajar `main` apareció la lámina de B que su propio parte decía estar esperando** — con la ley contraria (**el bloque es la SECCIÓN, no el ítem**) y citando su propia medición. **No las dejó convivir: rige la de B.** Su literal: *«dejé de medir porque tenía una analogía cómoda.»*
