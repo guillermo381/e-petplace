@@ -294,7 +294,14 @@ export default function FichaRepartidor() {
   /** QUÉ FALTA — en el orden en que se lee la pantalla, para que el aviso
    *  apunte a lo primero que hay que arreglar y no a lo último. */
   const loQueFalta = useMemo((): string | null => {
-    if (fotoAMostrar === null) return t('fichaRepartidor.faltaFoto');
+    /* 🔴 LA FOTO SE EXIGE EN EL ALTA Y NO EN LA EDICIÓN — hallazgo de la
+       caminata, y la asimetría es la MISMA del correo. Es la cara que ve
+       la familia, así que un repartidor NUEVO no nace sin ella. Pero
+       exigirla al EDITAR bloquea a los que ya existen sin foto: no se
+       podría corregir un documento mal tipeado sin subir una foto primero
+       — **justo lo que D-791 vino a curar**. *Una ficha que no deja
+       corregir es la que teníamos.* */
+    if (esNuevo && fotoAMostrar === null) return t('fichaRepartidor.faltaFoto');
     if (nombre.trim().length === 0) return t('fichaRepartidor.faltaNombre');
     if (whatsapp.trim().length === 0) return t('fichaRepartidor.faltaWhatsapp');
     /* EL CORREO SE EXIGE EN EL ALTA Y NO EN LA EDICIÓN, y la asimetría
