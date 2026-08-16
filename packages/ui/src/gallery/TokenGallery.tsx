@@ -1391,7 +1391,7 @@ function GateS82() {
         </View>
         <ThemeProvider defaultMode="dark">
           <PanelGateTema etiqueta="oscuro — sin tinte (firmado) · y sinCaja con su presencia nueva">
-            <Boton variante="sinCaja" etiqueta="Ya tengo cuenta" bloque onPress={() => {}} />
+            <Boton variante="apoyada" etiqueta="Ya tengo cuenta" bloque onPress={() => {}} />
           </PanelGateTema>
         </ThemeProvider>
       </Decision>

@@ -97,18 +97,41 @@ import { useTheme } from '../ThemeProvider'
  * no es una opción: es una trampa esperando a que alguien la use para
  * gritar.*
  *
- * ⚠️ **`sinCaja` MIENTE EN SU NOMBRE, y lo dice este mismo archivo:**
- * *«`sinCaja` NO ES SIN CAJA: tiene `accent.sinCaja`, un slot propio que
- * S82-B r12 le dio JUSTAMENTE para darle presencia de superficie»*.
- * **Con 5 usos, renombrarla es barato HOY y no lo va a ser después** —
- * pero **es enmienda de vocabulario firmado (S82) y va a la mesa, no la
- * decido acá.** *Un nombre que contradice a su dibujo es la clase de
- * dato que esta casa caza —el glifo `documentosSobre` se renombró por
- * exactamente esto— y el costo de arreglarlo crece con cada consumidor
- * nuevo.* **Candidata servida: `apoyada`** (dice lo que hace: se apoya
- * con elevación en vez de rellenar).
+ * ☠️ **`sinCaja` → `apoyada` (RENOMBRADA, adjudicación de mesa S99).**
+ * El nombre mentía y lo confesaba este mismo archivo: *«`sinCaja` NO ES
+ * SIN CAJA: tiene `accent.sinCaja`, un slot propio que S82-B r12 le dio
+ * JUSTAMENTE para darle presencia de superficie»*. **`apoyada` dice lo
+ * que hace:** se apoya con elevación en vez de rellenar.
+ *
+ * **El viejo sigue aceptado como ALIAS** (5 usos vivos en territorio de
+ * C y D) y **congelado por `R48`, solo-baja**. Mismo patrón que
+ * `compacto`: se renombra en la pieza, nadie queda bloqueado, y el alias
+ * muere cuando el contador llegue a 0.
+ *
+ * 🔴 **Y LA TRAMPA QUE ESTE RENAME TENÍA, MEDIDA — no es la que se
+ * suponía.** El aviso era *«un rename por grep se lleva también el
+ * `sinCaja` de `Campo`, que es otra semántica»*. **Medido: la prop de
+ * `Campo` ya está MUERTA** (la derogó N11 en esta misma sesión) ⇒ **no
+ * hay API que romper.** Lo que un grep ciego habría roto es otra cosa y
+ * peor: **sus LÁPIDAS.** `Campo.tsx` dice hoy *«`sinCaja` MURIÓ,
+ * DEROGADA POR N11»* — renombrar a ciegas lo convertiría en *«`apoyada`
+ * MURIÓ»*, **que es falso**: `apoyada` está viva y es esta variante.
+ * *Un rename mecánico no rompe solo código: reescribe el registro de lo
+ * que murió, y ese registro es lo único que impide revivirlo.*
  * ═══════════════════════════════════════════════════════════════════ */
-export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja' | 'acento'
+export type BotonVariante =
+  | 'primario'
+  | 'marca'
+  | 'secundario'
+  | 'ghost'
+  | 'destructivo'
+  | 'compacto'
+  | 'apoyada'
+  /** ☠️ ALIAS DEPRECADO de `apoyada` — ver la lápida del rename arriba.
+   *  Sigue aceptado porque hay 5 usos vivos en territorio de C y D;
+   *  congelado por `R48` (solo-baja) y muere en 0. */
+  | 'sinCaja'
+  | 'acento'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
@@ -249,8 +272,15 @@ export function Boton({
   // En memorial el gradiente firma es transparent (B2): marca degrada a primario.
   const esMarca =
     variante === 'marca' && theme.accent.gradient.colors[0] !== 'transparent'
-  const varianteEfectiva: BotonVariante =
-    variante === 'marca' && !esMarca ? 'primario' : variante
+  /** EL ALIAS SE RESUELVE ACÁ Y EN NINGÚN OTRO LADO: si cada uso de
+   *  `varianteEfectiva` tuviera que acordarse de los dos nombres, el
+   *  primero que se olvide pinta distinto y nadie lo ve hasta mirarlo. */
+  const varianteEfectiva: Exclude<BotonVariante, 'sinCaja'> =
+    variante === 'sinCaja'
+      ? 'apoyada'
+      : variante === 'marca' && !esMarca
+        ? 'primario'
+        : variante
 
   // EL MURO NO SALE DEL TEMA (vive en `techo-oficio` de la app), así que
   // sus colores se resuelven ACÁ y no por slot: papel PLENO sobre el
@@ -258,7 +288,16 @@ export function Boton({
   // sólido invierte (papel de fondo, muro de tinta) para que el primario
   // siga leyéndose como primario sin usar el teal prohibido.
   const sobreMuro = superficie === 'muro'
-  const colores: Record<BotonVariante, { fondo: string; texto: string; borde?: string }> = {
+  /** 🔴 `Exclude<…,'sinCaja'>` NO ES PROLIJIDAD: es lo que hace que el
+   *  alias tenga que estar resuelto ANTES de llegar acá. Con el alias
+   *  adentro del `Record`, el compilador pediría una entrada para él y
+   *  el día que alguien la agregara habría **dos filas de color para la
+   *  misma variante**, libres de divergir sin que nada avise. Así, el
+   *  único camino posible pasa por `varianteEfectiva`. */
+  const colores: Record<
+    Exclude<BotonVariante, 'sinCaja'>,
+    { fondo: string; texto: string; borde?: string }
+  > = {
     // S63 — enmienda Ley 21 FIRMADA: el primario ancla al SLOT accent.cta
     // (default tinta = idéntico al de siempre; el raíz del prestador lo
     // resuelve a tealDark con ThemeProvider cta="oficio"; memorial
@@ -277,7 +316,7 @@ export function Boton({
     // un paso real de presencia por tema) + `elevacion.reposo` como
     // canal — el precedente exacto es el segmento activo de
     // SelectorSegmentado (superficie apoyada, Chanel: sombra jamás borde).
-    sinCaja:     { fondo: theme.accent.sinCaja, texto: theme.text.primary },
+    apoyada:     { fondo: theme.accent.apoyada, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
     /* ☠️ ── LÁPIDA DE `compacto` — JUBILADA (S99-B, orden de mesa) ────
      * **EL CONTORNO TRANSPARENTE COMO ACCIÓN MURIÓ EN LA 19.7**, y esta
@@ -339,7 +378,7 @@ export function Boton({
   if (sobreMuro) {
     const papel = palette.light0
     const muro = theme.mode === 'dark' ? palette.tealDarkNoche : palette.tealDark
-    for (const k of Object.keys(colores) as BotonVariante[]) {
+    for (const k of Object.keys(colores) as Exclude<BotonVariante, 'sinCaja'>[]) {
       const traeSuperficie = colores[k].fondo !== 'transparent'
       colores[k] = traeSuperficie
         ? { fondo: papel, texto: muro }
@@ -370,7 +409,7 @@ export function Boton({
     // ni bajando cinco pasos— así que su canal no es el color: es la
     // superficie apoyada. En memorial y dark la elevación es contacto
     // mínimo por diseño, y ahí manda el tono del slot.
-    ...(varianteEfectiva === 'sinCaja' ? { boxShadow: theme.elevacion.reposo } : null),
+    ...(varianteEfectiva === 'apoyada' ? { boxShadow: theme.elevacion.reposo } : null),
     // S82-B — LA ELEVACIÓN DEL CTA, por SLOT y solo donde hace falta: el
     // oro del cliente da 1.55 contra papel y no se recorta por color, así
     // que su canal es la superficie apoyada (la cura de `sinCaja`). El
