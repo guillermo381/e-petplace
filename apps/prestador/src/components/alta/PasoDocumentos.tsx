@@ -33,13 +33,11 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Hoja,
+  HojaCaptura,
   Insignia,
   Separador,
   Tarjeta,
   Texto,
-  capturarConCamara,
-  capturarDeGaleria,
   spacing,
   useAviso,
 } from '@epetplace/ui';
@@ -145,23 +143,23 @@ export function PasoDocumentos({ cuentaComercialId, prestadorId, alSubir }: Paso
     }, [cargar]),
   );
 
-  async function subir(tipo: TipoDocumentoCuenta, camara: boolean) {
-    setEligiendo(null);
-    const captura = camara
-      ? await capturarConCamara({ redimensionarA: 1600, calidad: 0.8 })
-      : await capturarDeGaleria({ redimensionarA: 1600, calidad: 0.8 });
-    // Cancelar NO es un error y no dice nada. Permiso denegado SÍ habla:
-    // el usuario tocó una acción y no pasó nada — el silencio ahí se lee
-    // como que la app está rota (Ley 13).
-    if (captura.tipo === 'permiso_denegado') {
-      mostrar({ texto: t('alta.paso3.permisoDenegado'), variante: 'neutro' });
-      return;
-    }
-    if (captura.tipo !== 'foto') return;
+  /* 🔴 S99-C · R42 — LA PUERTA DEJA DE ESTAR RE-DIBUJADA.
+     Acá vivía la captura entera: `capturarConCamara`/`capturarDeGaleria`
+     detrás de una `<Hoja>` con dos botones escrita a mano. **La anatomía
+     era ya la canónica** (dos `Boton bloque` + la X), así que migrar a
+     `HojaCaptura` NO cambia la forma — cambia lo que no se ve: la pieza
+     trae el **cerrojo sincrónico contra el doble tap**, que ninguna de
+     las copias a mano tenía. *Dos toques antes del próximo render
+     lanzaban dos pickers.* Es cura, no swap.
 
+     Lo que esta función conserva es lo suyo: qué hacer con la foto ya
+     capturada. La voz del permiso denegado la sigue diciendo la PANTALLA
+     (contrato ① de la pieza), y las opciones —1600/0.8, medidas para un
+     documento— pasan derecho (contrato ②). */
+  async function subir(tipo: TipoDocumentoCuenta, uri: string) {
     setSubiendo(true);
     const res = await subirDocumentoCuenta({
-      uri: captura.foto.uri,
+      uri,
       cuentaComercialId,
       tipo,
       nombre: t(CLAVE_TIPO[tipo]),
@@ -306,31 +304,21 @@ export function PasoDocumentos({ cuentaComercialId, prestadorId, alSubir }: Paso
         </Entrada>
       ) : null}
 
-      <Hoja
+      <HojaCaptura
         visible={eligiendo !== null}
-        onCerrar={() => setEligiendo(null)}
         titulo={t('alta.paso3.elegirArchivo')}
-        altura="media"
-      >
-        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={t('alta.paso3.subir')}
-            onPress={() => {
-              if (eligiendo !== null) void subir(eligiendo, true);
-            }}
-          />
-          <Boton
-            variante="compacto"
-            bloque
-            etiqueta={t('alta.paso3.elegirArchivo')}
-            onPress={() => {
-              if (eligiendo !== null) void subir(eligiendo, false);
-            }}
-          />
-        </View>
-      </Hoja>
+        onCerrar={() => setEligiendo(null)}
+        onFoto={(foto) => {
+          if (eligiendo !== null) void subir(eligiendo, foto.uri);
+        }}
+        /* Cancelar NO es un error y no dice nada. Permiso denegado SÍ
+           habla: el usuario tocó una acción y no pasó nada — el silencio
+           ahí se lee como que la app está rota (Ley 13). */
+        onPermisoDenegado={() =>
+          mostrar({ texto: t('alta.paso3.permisoDenegado'), variante: 'neutro' })
+        }
+        opciones={{ redimensionarA: 1600, calidad: 0.8 }}
+      />
     </View>
   );
 }
