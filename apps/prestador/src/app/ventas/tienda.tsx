@@ -167,7 +167,7 @@ import {
   listarTurnosEntrega,
   conteosVitrinaPorEje,
   listarProductosDespensa,
-  listarSkusDelVendedor,
+  listarSkusDelVendedorPagina,
   contarProductosDespensa,
   type ConteosVitrina,
   type ProductoDeVitrina,
@@ -188,7 +188,6 @@ import {
   CaraCliente,
   FiltroEspecie,
   TODAS,
-  filtrarPorEspecie,
   type VistaProductos,
 } from '@/components/vitrina-piezas';
 import { invalidarCapacidadAtender } from '@/lib/capacidad-atender';
@@ -220,26 +219,54 @@ type Pantalla =
       /** «Atiendo en mi local» para venta de productos. `null` = no se
        *  pudo leer y el control NO se monta. */
       ventaMostrador: boolean | null;
-      /* ── TU VITRINA (S99-C, firma del founder 16-ago) ─────────────────
-         Las dos caras del espejo viajan en LA MISMA ola que el local: son
-         una sola pantalla y necesitan las dos para poder compararse. */
-      vitrina: ProductoDeVitrina[];
-      skus: SkuDelVendedor[];
-      /** `null` = los conteos fallaron; los ejes NO se dibujan (jamás un
-       *  filtro con números inventados). Degradar el FILTRO es honesto;
-       *  degradar la lista sería esconder catálogo. */
+      /** `null` = los conteos por eje fallaron; los ejes NO se dibujan
+       *  (jamás un filtro con números inventados). Degradar el FILTRO es
+       *  honesto; degradar la lista sería esconder catálogo. */
       conteos: ConteosVitrina | null;
-      /** CUÁNTOS HAY DE VERDAD en el catálogo comprable, contado por el
-       *  SERVIDOR con los mismos filtros base que la lista.
-       *  🔴 **Su trabajo hoy no es adornar: es volver EXACTA la frase del
-       *  techo.** Sin él, «¿corté el catálogo?» se responde por indicio
-       *  —«me llegaron justo `TECHO_CATALOGO` filas, capaz hay más»—; con
-       *  él se responde con el número. *Un aviso de truncado que dice
-       *  «puede haber más» y uno que dice «hay 700 y ves 600» no informan
-       *  lo mismo: el primero se ignora, el segundo se actúa.*
-       *  `null` = el conteo no llegó ⇒ se vuelve al indicio y se dice
-       *  igual. **Un conteo que no llegó NO es cero** (L-247). */
-      totalCatalogo: number | null;
+    };
+
+/* ═══ EL ESTADO DE LA VITRINA — SEPARADO DEL DE TU LOCAL, y es decisión ═══
+   🔴 **Desde que los filtros son del SERVIDOR, la vitrina tiene su propio
+   ciclo de datos**: cambia con `modo`, `especie` y el texto buscado, y
+   crece al llegar al final. TU LOCAL, en cambio, se lee al enfocar y no
+   depende de ninguno de los tres.
+   *Meterlos en la misma ola obligaría a re-leer repartidores, turnos,
+   pedidos y cupo cada vez que alguien tipea una letra en el buscador* —
+   seis viajes de más por tecla, contra el peaje fijo por petición que
+   L-223 midió. **Dos vidas distintas, dos efectos.** */
+/** LA PÁGINA DE SKUs — **derivada del retorno de su propio lector**.
+ *
+ *  ⚠️ `packages/api` exporta `listarSkusDelVendedorPagina` pero **no su
+ *  tipo `PaginaSkus`** (medido en su `index.ts`). *Pedido a A: una línea.*
+ *  Mientras tanto se DERIVA en vez de re-declararse: una copia a mano del
+ *  shape sería una segunda verdad que envejece sola el día que la página
+ *  gane un campo — exactamente lo que acabamos de sacar de `razonesDeAlcance`.
+ *  Derivándolo, **no puede divergir: si el lector cambia, esto rompe en
+ *  compilación**, que es donde tiene que romper. */
+type PaginaSkus = Extract<
+  Awaited<ReturnType<typeof listarSkusDelVendedorPagina>>,
+  { ok: true }
+>['data'];
+
+type Vitrina =
+  | { estado: 'cargando' }
+  | { estado: 'error' }
+  | {
+      estado: 'listo';
+      /** La cara CLIENTE: el catálogo filtrado por el servidor, hasta el
+       *  techo. La ventana lo recorta del lado del cliente. */
+      productos: ProductoDeVitrina[];
+      /** CUÁNTOS HAY DE VERDAD bajo LOS MISMOS filtros (servidor). Con él
+       *  la frase del techo deja de ser indicio: *«hay 700 y ves 600»* en
+       *  vez de *«puede haber más»*. `null` = el conteo no llegó ⇒ se
+       *  vuelve al indicio **y se dice igual**; un conteo que no llegó
+       *  NO es cero (L-247). */
+      totalProductos: number | null;
+      /** La cara ADMINISTRAR: su página con cursor. */
+      pagina: PaginaSkus;
+      /** `true` mientras se trae la tanda siguiente — para no pedir dos
+       *  veces la misma y para poder decir que está trayendo. */
+      trayendoMas: boolean;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -419,7 +446,7 @@ export default function TuTienda() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, turnos, pedidos, cupo, pres, arranque, vit, skus, conteos, total] =
+        const [reps, turnos, pedidos, cupo, pres, arranque, conteos] =
           await Promise.all([
           listarRepartidores(id),
           listarTurnosEntrega(id),
@@ -434,24 +461,12 @@ export default function TuTienda() {
              SIEMPRE FRESCA y en la MISMA ola (el contexto de arranque ya la
              trae; pedirla aparte sería un peaje por un booleano). */
           obtenerContextoArranque(),
-          /* ── TU VITRINA, en la MISMA ola ────────────────────────────
-             🔴 EL TECHO VIAJA EXPLÍCITO: con `{}` el lector cae en su
-             `?? 100` y la vitrina mostraría 100 de 563 **sin decirlo**.
-             Es la ley que salió de acá y hoy rige la casa: *una lista
-             completa y una truncada se ven igual, así que todo lector
-             con techo por defecto lo declara en su llamada.* */
-            listarProductosDespensa({ limite: TECHO_CATALOGO }),
-            listarSkusDelVendedor(id),
+          /* Los ejes del filtro SÍ viajan acá: no dependen de lo que el
+             vendedor filtre — son el universo contra el que elige. */
             conteosVitrinaPorEje(),
-            /* EL CONTADOR VIAJA CON LOS MISMOS FILTROS BASE QUE LA LISTA —
-               si contara otra cosa, el denominador sería de otro conjunto y
-               la frase mentiría con números reales, que es la peor forma de
-               mentir. **Sin `limite` a propósito:** cuenta el catálogo
-               entero, que es justo contra lo que hay que comparar el techo. */
-            contarProductosDespensa({}),
           ]);
         if (!vigente()) return;
-        if (!reps.ok || !turnos.ok || !pedidos.ok || !vit.ok || !skus.ok) {
+        if (!reps.ok || !turnos.ok || !pedidos.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
@@ -473,10 +488,7 @@ export default function TuTienda() {
              control de estado que no conoce su estado miente en cuanto se
              pinta: encendido o apagado, uno de los dos es falso. */
           ventaMostrador: arranque.ok ? arranque.data.ventaMostradorActiva : null,
-          vitrina: vit.data,
-          skus: skus.data,
           conteos: conteos.ok ? conteos.data : null,
-          totalCatalogo: total.ok ? total.data : null,
         });
       }
     },
@@ -501,47 +513,140 @@ export default function TuTienda() {
    *  `cargar()` directo (ver la nota de la carrera arriba). */
   const recargar = () => setIntento((n) => n + 1);
 
-  /* ── LOS DERIVADOS DE TU VITRINA ──────────────────────────────────────
-     EL FILTRO DE TEXTO — **una sola implementación para las dos caras**.
-     Si cada cara buscara distinto, el vendedor encontraría un producto en
-     un modo y no en el otro, y el espejo dejaría de serlo justo donde más
-     se nota. */
-  const coincide = useCallback(
-    (nombre: string, marca: string | null) => {
-      const q = busca.trim().toLowerCase();
-      if (q.length === 0) return true;
-      return nombre.toLowerCase().includes(q) || (marca ?? '').toLowerCase().includes(q);
-    },
-    [busca],
+  /* ═══ EL CICLO DE LA VITRINA ═══════════════════════════════════════════
+     🔴 **LOS TRES FILTROS SON DEL SERVIDOR** (decisión mía de §XXVIII, ya
+     construida por A). Antes especie y texto filtraban en memoria sobre lo
+     traído, y eso funcionaba **solo mientras cabía todo**: con página, un
+     filtro de cliente devuelve «no hay» sobre un producto que SÍ existe.
+     *Es el mismo defecto que las 100 de 563, con otro nombre.* */
+  const [vitrina, setVitrina] = useState<Vitrina>({ estado: 'cargando' });
+
+  /* EL TEXTO SE ESPERA ANTES DE VIAJAR. Cada tecla es un viaje, y el peaje
+     por petición es fijo (~150 ms, L-223): sin esta espera, escribir
+     «alimento» son ocho consultas de las que siete ya no importan. 300 ms
+     es el umbral donde el que tipea todavía no soltó la tecla. */
+  const [textoServidor, setTextoServidor] = useState('');
+  useEffect(() => {
+    const id = setTimeout(() => setTextoServidor(busca.trim()), 300);
+    return () => clearTimeout(id);
+  }, [busca]);
+
+  const cargarVitrina = useCallback(async () => {
+    const ctx = await contextoVentas();
+    if (!ctx.ok || ctx.data === null) {
+      setVitrina({ estado: 'error' });
+      return;
+    }
+    const filtros = {
+      ...(especie === TODAS ? {} : { especie }),
+      ...(textoServidor.length > 0 ? { texto: textoServidor } : {}),
+    };
+    /* UNA ola con los tres: las dos caras del espejo y el total. El total
+       va con LOS MISMOS filtros — uno global contra una lista filtrada
+       diría «30 de 563» sobre 266, *un número real en el lugar equivocado,
+       que miente peor que uno inventado porque nadie lo duda*. */
+    const [prod, total, pag] = await Promise.all([
+      listarProductosDespensa({ ...filtros, limite: TECHO_CATALOGO }),
+      contarProductosDespensa(filtros),
+      listarSkusDelVendedorPagina(ctx.data.cuentaComercialId, {
+        ...filtros,
+        limite: TAM_VENTANA,
+      }),
+    ]);
+    if (!prod.ok || !pag.ok) {
+      setVitrina({ estado: 'error' });
+      return;
+    }
+    setVitrina({
+      estado: 'listo',
+      productos: prod.data,
+      totalProductos: total.ok ? total.data : null,
+      pagina: pag.data,
+      trayendoMas: false,
+    });
+    setVentana(TAM_VENTANA);
+  }, [especie, textoServidor]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void cargarVitrina();
+    }, [cargarVitrina]),
   );
 
-  /* Los SKUs de este vendedor que NO llegaron a la vitrina — la diferencia
-     entre las dos caras, que es la información del espejo. */
-  const ausentes =
-    pantalla.estado === 'listo'
-      ? (() => {
-          const publicadas = new Set(pantalla.vitrina.map((p) => p.variante_id));
-          return pantalla.skus.filter((s2) => !publicadas.has(s2.variante_id)).length;
-        })()
-      : 0;
 
-  /* Carga al llegar al final, **jamás un botón**: un «cargar más» le pide
-     al pulgar que confirme lo que ya pidió con el scroll. El `ref` es el
-     cerrojo — sin él, dos eventos seguidos suman DOS tandas y la ventana
-     salta sin que nadie haya bajado tanto.
-     ⚠️ El umbral va en PÍXELES y no en índice de fila: 600 dp son ~10
-     filas en LISTA y ~2 tarjetas en ÍCONOS. *Un índice de fila sería el
-     instrumento correcto en un modo y el equivocado en el otro.* */
-  const alLlegarAlFinal = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
-    const faltan = contentSize.height - (contentOffset.y + layoutMeasurement.height);
-    if (faltan > 600 || cargandoVentana.current) return;
-    cargandoVentana.current = true;
-    setVentana((v) => v + TAM_VENTANA);
-    setTimeout(() => {
-      cargandoVentana.current = false;
-    }, 300);
-  }, []);
+  /* ── LLEGAR AL FINAL — dos caras, dos formas de traer más ─────────────
+     🔴 **La cara CLIENTE crece del lado del cliente** (el catálogo filtrado
+     ya está en memoria hasta el techo: `slice` puro, cero viajes) y **la
+     cara ADMINISTRAR pide la página siguiente por CURSOR** — decisión de B
+     con su razón: *«offset asume una lista quieta, y acá el que la lee es
+     el que la mueve»*. El vendedor publica y ajusta stock MIENTRAS
+     recorre; con offset vería un producto repetido o no vería uno que
+     existe, y le echaría la culpa al catálogo.
+     **El gesto no cambia entre las dos** — carga al llegar al final, jamás
+     un botón. *Un cambio de contrato que no cambia el gesto es el mejor
+     tipo de cambio de contrato.*
+     ⚠️ El umbral va en PÍXELES y no en índice de fila: 600 dp son ~10 filas
+     en LISTA y ~2 tarjetas en ÍCONOS. */
+  const alLlegarAlFinal = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+      const faltan = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+      if (faltan > 600 || cargandoVentana.current) return;
+      if (vitrina.estado !== 'listo') return;
+
+      if (modo === 'cliente') {
+        cargandoVentana.current = true;
+        setVentana((v) => v + TAM_VENTANA);
+        setTimeout(() => {
+          cargandoVentana.current = false;
+        }, 300);
+        return;
+      }
+
+      /* ADMINISTRAR: **`siguiente_cursor === null` significa QUE NO HAY
+         MÁS**, y es un dato positivo — no se confunde con un fallo, que
+         llega como `{ ok: false }` y NUNCA como página vacía. */
+      const cursor = vitrina.pagina.siguiente_cursor;
+      if (cursor === null || vitrina.trayendoMas) return;
+      cargandoVentana.current = true;
+      setVitrina({ ...vitrina, trayendoMas: true });
+      void (async () => {
+        const ctx = await contextoVentas();
+        if (!ctx.ok || ctx.data === null) {
+          cargandoVentana.current = false;
+          return;
+        }
+        const r = await listarSkusDelVendedorPagina(ctx.data.cuentaComercialId, {
+          limite: TAM_VENTANA,
+          cursor,
+          ...(especie === TODAS ? {} : { especie }),
+          ...(textoServidor.length > 0 ? { texto: textoServidor } : {}),
+        });
+        cargandoVentana.current = false;
+        if (!r.ok) {
+          /* La tanda que no llegó NO vacía lo que ya está: se deja de
+             traer y el vendedor conserva lo que tenía. *Perder la lista
+             por un viaje fallido sería castigarlo por hacer scroll.* */
+          setVitrina((v) => (v.estado === 'listo' ? { ...v, trayendoMas: false } : v));
+          return;
+        }
+        setVitrina((v) =>
+          v.estado === 'listo'
+            ? {
+                ...v,
+                trayendoMas: false,
+                pagina: {
+                  items: [...v.pagina.items, ...r.data.items],
+                  total: r.data.total,
+                  siguiente_cursor: r.data.siguiente_cursor,
+                },
+              }
+            : v,
+        );
+      })();
+    },
+    [vitrina, modo, especie, textoServidor],
+  );
 
 
   /* ⑥ — las claves van LITERALES, jamás armadas por concatenación: el
@@ -1162,84 +1267,116 @@ export default function TuTienda() {
 
           {/* ═══ ③ LAS FILAS ═══ */}
           <View style={{ gap: spacing[4] }}>
-            {(() => {
-              /* ── CUÁNTAS ESTÁS VIENDO — y de cuántas ────────────────────
-                 🔴 **EL DENOMINADOR ES EL DEL CONJUNTO FILTRADO, no el del
-                 catálogo**, y hoy se puede porque **todo está en memoria**:
-                 la lista trae el catálogo entero y la ventana solo corta el
-                 array. Poner el total del catálogo al lado de una lista
-                 filtrada por «perro» diría «30 de 563» sobre 266 — *un
-                 número real en el lugar equivocado miente peor que un
-                 número inventado, porque nadie lo duda*.
-                 ⚠️ **Y esto cambia el día que la lista se pagine**: ahí el
-                 cliente deja de tener el conjunto y el denominador tiene
-                 que venir del servidor CON LOS MISMOS FILTROS. Es
-                 exactamente por eso que el filtro por estado —y el de
-                 especie, y la búsqueda— tienen que ser del servidor. */
-              const visibles =
-                modo === 'cliente'
-                  ? filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
-                      coincide(p.nombre, p.marca),
-                    ).length
-                  : pantalla.skus.filter((s2) =>
-                      coincide(s2.producto_nombre, s2.producto_marca),
-                    ).length;
-              const mostradas = Math.min(ventana, visibles);
-              /* EL TECHO, AHORA EXACTO. Antes esto era un indicio —«me
-                 llegaron justo `TECHO_CATALOGO` filas, capaz hay más»—; con
-                 el contador del servidor es un hecho con su número. *Un
-                 aviso que dice «puede haber más» se ignora; uno que dice
-                 «hay 700 y ves 600» se actúa.* Si el conteo no llegó se
-                 vuelve al indicio **y se dice igual**: callar el corte es
-                 la falla, no cortarlo. */
-              const cargadas = pantalla.vitrina.length;
-              const cortado =
-                modo === 'cliente' &&
-                (pantalla.totalCatalogo !== null
-                  ? pantalla.totalCatalogo > cargadas
-                  : cargadas >= TECHO_CATALOGO);
-              return (
-                <View style={{ gap: spacing[1] }}>
-                  {visibles > 0 && (
-                    <Texto variante="apoyo" color="tertiary">
-                      {t('ventas.vitrina.viendo', { n: mostradas, de: visibles })}
-                    </Texto>
-                  )}
-                  {cortado && (
-                    <Texto variante="apoyo" color="warning">
-                      {pantalla.totalCatalogo !== null
-                        ? t('ventas.vitrina.catalogoCortadoExacto', {
-                            hay: pantalla.totalCatalogo,
-                            ves: cargadas,
-                          })
-                        : t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
-                    </Texto>
-                  )}
-                </View>
-              );
-            })()}
-            {modo === 'cliente' ? (
-              <CaraCliente
-                productos={filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
-                  coincide(p.nombre, p.marca),
-                )}
-                ventana={ventana}
-                vista={vista}
-                ausentes={ausentes}
-                moneda={pantalla.contexto}
-                idioma={idioma as IdiomaSoportado}
-                alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=cliente`)}
-              />
-            ) : (
-              <CaraAdministrar
-                skus={pantalla.skus.filter((s2) =>
-                  coincide(s2.producto_nombre, s2.producto_marca),
-                )}
-                ventana={ventana}
-                vista={vista}
-                alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=administrar`)}
+            {vitrina.estado === 'cargando' && (
+              <EsqueletoGrupo>
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                <View style={{ height: spacing[3] }} />
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+              </EsqueletoGrupo>
+            )}
+
+            {vitrina.estado === 'error' && (
+              <EstadoVacio
+                titulo={t('ventas.comunes.errorTitulo')}
+                descripcion={t('ventas.comunes.errorDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('ventas.comunes.reintentar')}
+                    onPress={() => {
+                      setVitrina({ estado: 'cargando' });
+                      void cargarVitrina();
+                    }}
+                  />
+                }
               />
             )}
+
+            {vitrina.estado === 'listo' &&
+              (() => {
+                /* ── CUÁNTAS ESTÁS VIENDO — y de cuántas ──────────────────
+                   🔴 **EL DENOMINADOR VIENE DEL SERVIDOR, CON LOS MISMOS
+                   FILTROS.** Antes lo calculaba el cliente sobre el array
+                   completo, y era honesto **solo mientras cabía todo**. Con
+                   filtro de servidor y página, el cliente ya no tiene el
+                   conjunto: si siguiera contando lo suyo diría «30 de 30»
+                   sobre 266. *El total y la lista tienen que salir del
+                   mismo conjunto o el número miente con cifras reales.* */
+                const cliente = modo === 'cliente';
+                const visibles = cliente
+                  ? vitrina.productos.length
+                  : vitrina.pagina.items.length;
+                const mostradas = cliente ? Math.min(ventana, visibles) : visibles;
+                const total = cliente ? vitrina.totalProductos : vitrina.pagina.total;
+                /* EL TECHO, EXACTO. Solo la cara cliente lo tiene: la de
+                   administrar pagina de verdad, así que ahí no hay corte
+                   que declarar — hay más páginas o se terminó, y las dos
+                   cosas se dicen distinto. */
+                const cortado =
+                  cliente &&
+                  (vitrina.totalProductos !== null
+                    ? vitrina.totalProductos > vitrina.productos.length
+                    : vitrina.productos.length >= TECHO_CATALOGO);
+                return (
+                  <View style={{ gap: spacing[1] }}>
+                    {visibles > 0 && (
+                      <Texto variante="apoyo" color="tertiary">
+                        {total !== null
+                          ? t('ventas.vitrina.viendo', { n: mostradas, de: total })
+                          : t('ventas.vitrina.viendoSinTotal', { n: mostradas })}
+                      </Texto>
+                    )}
+                    {cortado && (
+                      <Texto variante="apoyo" color="warning">
+                        {vitrina.totalProductos !== null
+                          ? t('ventas.vitrina.catalogoCortadoExacto', {
+                              hay: vitrina.totalProductos,
+                              ves: vitrina.productos.length,
+                            })
+                          : t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
+                      </Texto>
+                    )}
+                  </View>
+                );
+              })()}
+
+            {vitrina.estado === 'listo' &&
+              (modo === 'cliente' ? (
+                <CaraCliente
+                  /* Ya viene filtrado por el SERVIDOR: acá no se vuelve a
+                     filtrar. Un segundo filtro del lado del cliente sobre
+                     lo que el servidor ya acotó es la puerta por la que
+                     los dos criterios divergen. */
+                  productos={vitrina.productos}
+                  ventana={ventana}
+                  vista={vista}
+                  ausentes={0}
+                  moneda={pantalla.contexto}
+                  idioma={idioma as IdiomaSoportado}
+                  alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=cliente`)}
+                />
+              ) : (
+                <CaraAdministrar
+                  skus={vitrina.pagina.items}
+                  /* La ventana ya la hizo el servidor: se pasa el largo
+                     para que la cara no recorte lo que acaba de traer. */
+                  ventana={vitrina.pagina.items.length}
+                  vista={vista}
+                  alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=administrar`)}
+                />
+              ))}
+
+            {/* EL FINAL SE DICE. *Si no, el vendedor no distingue «terminó»
+                de «falló»* — y el fallo llega por otro camino (el estado
+                `error`), jamás como una lista que deja de crecer. */}
+            {vitrina.estado === 'listo' &&
+              modo === 'administrar' &&
+              vitrina.pagina.siguiente_cursor === null &&
+              vitrina.pagina.items.length > 0 && (
+                <Texto variante="apoyo" color="tertiary">
+                  {t('ventas.vitrina.finDeLista')}
+                </Texto>
+              )}
           </View>
         </ScrollView>
       )}

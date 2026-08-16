@@ -2544,6 +2544,8 @@ export const prestadorEn = {
       catalogoCortado: "You're seeing the first {{n}} products in the catalogue. There may be more.",
       catalogoCortadoExacto: 'There are {{hay}} products in the catalogue and you are seeing {{ves}}.',
       viendo: 'Showing {{n}} of {{de}}',
+      viendoSinTotal: 'Showing {{n}}',
+      finDeLista: 'No more products.',
       leFaltan: '{{n}} missing',
       falta_sku_rechazado: 'Rejected',
       falta_sin_precio_propuesto: 'No price',

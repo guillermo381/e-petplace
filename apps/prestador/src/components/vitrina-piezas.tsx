@@ -50,11 +50,13 @@ export const TODAS = '__todas__';
  *  reconocer por la foto; la fila, para operar. */
 export type VistaProductos = 'lista' | 'iconos';
 
-/** LA ESPECIE ES FILTRO: acota la lista, no la reparte en carpetas. */
-export function filtrarPorEspecie(productos: ProductoDeVitrina[], especie: string): ProductoDeVitrina[] {
-  if (especie === TODAS) return productos;
-  return productos.filter((p) => p.especies_aplicables.includes(especie));
-}
+/* ☠️ ACÁ VIVIÓ `filtrarPorEspecie`, Y MURIÓ CON SU RAZÓN CUMPLIDA.
+   La especie **sigue siendo filtro y no carpeta** —esa ley no cambió—, pero
+   **el filtro se mudó al SERVIDOR** (`FiltrosVitrina.especie`): filtrar en
+   memoria funcionaba solo mientras cabía todo el catálogo, y con página
+   devolvería «no hay» sobre un producto que SÍ existe. *La función no se
+   dejó «por si acaso»: un filtro de cliente conviviendo con uno de servidor
+   es la puerta por la que los dos criterios divergen.* */
 
 export function FiltroEspecie({
   conteos,

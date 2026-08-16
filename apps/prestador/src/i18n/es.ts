@@ -3217,6 +3217,10 @@ export const prestadorEs = {
       /* Con el conteo del servidor el aviso deja de ser indicio. */
       catalogoCortadoExacto: 'Hay {{hay}} productos en el catálogo y estás viendo {{ves}}.',
       viendo: 'Viendo {{n}} de {{de}}',
+      /* Sin total del servidor no se inventa un denominador. */
+      viendoSinTotal: 'Viendo {{n}}',
+      /* El final se DICE: si no, «terminó» y «falló» se ven igual. */
+      finDeLista: 'No hay más productos.',
       leFaltan: 'Le faltan {{n}}',
       /* Rótulos de FILA — el nombre de la razón, no su instrucción.
          Su versión con camino vive en `ventas.producto.razon_*`. */
