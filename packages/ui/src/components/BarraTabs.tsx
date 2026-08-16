@@ -133,7 +133,7 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  hace que se lea como *un vector deformándose* y no como *un botón que
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
-const ALTO_FILA = 56
+const ALTO_FILA = 64
 
 /** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
  *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
@@ -159,10 +159,10 @@ const ALTO_FILA = 56
  *    entero — *por eso siempre se veía «encima» y nunca «metido»: no era
  *    un ajuste fino, era que la fórmula no podía expresar lo que él
  *    pedía*. */
-const DISCO_RADIO = 18
+const DISCO_RADIO = 30
 /** Cuánto sobresale el disco por encima del borde superior de la barra.
  *  *«Que salga muy poco»* — 4 de 36 (11 %). */
-const DISCO_ASOMA = 4
+const DISCO_ASOMA = 14
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
 const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
@@ -170,8 +170,17 @@ const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
  *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
  *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
  *  lado del disco. */
-const VALLE_RADIO = 30
-const VALLE_HONDO = 10
+const VALLE_RADIO = 44
+const VALLE_HONDO = 14
+/** 🔴 EL ANILLO DE FONDO — el pedido literal del founder:
+ *  *«no dejó espacio en blanco entre la barra y el círculo: se
+ *  debería ver el fondo alrededor del círculo»*. El cuerpo se dibuja
+ *  con `fillRule="evenodd"` y un subpath circular MÁS GRANDE que el
+ *  disco: la diferencia entre los dos radios **es** el anillo, y lo
+ *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
+ *  *Mismo principio que la advertencia ③: el hueco existe por
+ *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
+const ANILLO = 5
 /** ── EL BLOQUE DE LA TAB, CON ALTURAS DECLARADAS ────────────────────
  *  🔴 **Están fijas a propósito, y ésa es la cura del tercer hallazgo**
  *  (*«la gráfica aparece dentro del círculo SIN ESTAR CENTRADA»*). Antes
@@ -187,16 +196,17 @@ const VALLE_HONDO = 10
 const ALTO_CAJA_ICONO = 24
 const ALTO_RENGLON = 14
 const GAP_BLOQUE = spacing[0.5]
-const ALTO_BLOQUE = ALTO_CAJA_ICONO + GAP_BLOQUE + ALTO_RENGLON
-/** Dónde queda el centro del ícono en reposo — DERIVADO, no medido a ojo. */
-const REPOSO_ICONO_CY = (ALTO_FILA - ALTO_BLOQUE) / 2 + ALTO_CAJA_ICONO / 2
+/* ☠️ `REPOSO_ICONO_CY` MURIÓ (Ley 37): existía para centrar el ÍCONO en
+ *  el disco, y el activo ya no lleva ícono — lleva su nombre. La subida
+ *  ahora se deriva del centro de la FILA contra el centro del disco, que
+ *  es lo que corresponde cuando lo que sube es una sola línea de texto. */
 /** Cuánto sube el bloque ENTERO (ícono + etiqueta) cuando la tab está
  *  activa. **El bloque no se parte**: ése era el defecto que el founder
  *  vio como *«la palabra abajo y la gráfica arriba»*.
  *
  *  **Derivado de las dos condiciones a la vez:** el disco asoma lo que se
  *  declaró (`DISCO_ASOMA`) **y** el ícono cae en su centro exacto. */
-const SUBIDA_ACTIVA = REPOSO_ICONO_CY - DISCO_CY
+const SUBIDA_ACTIVA = ALTO_FILA / 2 - DISCO_CY
 /** El cuerpo se dibuja MÁS ANCHO que la pantalla y viaja por transform
  *  (ver la nota del viaje). Con un margen de un ancho a cada lado, ningún
  *  desplazamiento posible descubre un borde. */
@@ -247,6 +257,17 @@ function pathBarra(ancho: number, alto: number, estira: number) {
     `H${i1}`,
     `V${alto}`,
     `H${i0}`,
+    `Z`,
+    /* 🔴 EL AGUJERO DEL ANILLO — segundo subpath, y con `fillRule`
+       evenodd es lo que RESTA material en vez de pintarlo. Su radio es el
+       del disco MÁS el anillo: **la diferencia entre los dos círculos es
+       el espacio de fondo que el founder pidió ver**, y se ve el fondo de
+       la pantalla porque acá no se pinta nada — no un color supuesto.
+       Va en `y = DISCO_CY` (coordenadas locales del grupo, igual que el
+       valle) para que viaje con él y no puedan desincronizarse. */
+    `M${-(DISCO_RADIO + ANILLO)} ${DISCO_CY}`,
+    `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${(DISCO_RADIO + ANILLO) * 2} 0`,
+    `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${-(DISCO_RADIO + ANILLO) * 2} 0`,
     `Z`,
   ].join(' ')
 }
@@ -549,6 +570,7 @@ export function BarraTabs({
             <AnimatedPath
               animatedProps={propsCuerpo}
               fill={colorBarra}
+              fillRule="evenodd"
               translateX={ancho * MARGEN_VIAJE}
               translateY={DISCO_ASOMA}
             />
@@ -622,6 +644,16 @@ export function BarraTabs({
                 transitionTimingFunction: cubicBezier(...motion.marca.aperturaBezier),
               }}
             >
+              {/* 🔴 EL ACTIVO CAMBIA SU ÍCONO POR SU NOMBRE, y es la
+                  firma del founder: *«dentro del círculo poner el nombre
+                  del tab»*. **La aritmética dice que las dos cosas no
+                  entran**: con ícono Y nombre el disco necesita r ≥ 33
+                  (d 66) en una fila de 64; con el nombre solo, r 30
+                  alcanza y sobra. *Y el reparto tiene sentido antes que
+                  la cuenta: donde ESTÁS no necesitás el ícono —necesitás
+                  saber cómo se llama—, y el ícono es lo que te dice a
+                  dónde vas en los que NO estás.* */}
+              {esActivo ? null : (
               <View style={{ height: ALTO_CAJA_ICONO, justifyContent: 'center' }}>
               <HuellaDeTab activa={esActivo}>
                 {/* ☠️ La rama de `destacada` MURIÓ acá (ver su lápida
@@ -644,6 +676,7 @@ export function BarraTabs({
                 </Badge>
               </HuellaDeTab>
               </View>
+              )}
               {/* ☠️ EL SUBRAYADO MURIÓ (S99-B). Era el marcador del activo
                   cuando no había disco; con el disco viajando serían DOS
                   marcadores del mismo estado — exactamente lo que la firma

@@ -682,18 +682,6 @@ function GateDeLaBarra() {
   )
 }
 
-// BARRA REAL, en los dos temas del prestador.
-function VerdeDelEstado({ acento, etiqueta }: { acento?: string; etiqueta: string }) {
-  const [tab, setTab] = useState('a')
-  const [txt, setTxt] = useState('')
-  return (
-    <View style={{ gap: spacing[2] }}>
-      <Texto variante="apoyo">{etiqueta}</Texto>
-      <Campo label="Nombre del negocio" value={txt} onChangeText={setTxt} placeholder="tocá para enfocar" />
-      <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella acento={acento} />
-    </View>
-  )
-}
 
 function PataPrestador() {
   const [v, setV] = useState('baño')
@@ -711,15 +699,6 @@ function PataPrestador() {
   )
 }
 
-function CandidatasVerde() {
-  return (
-    <View style={{ gap: spacing[4] }}>
-      <VerdeDelEstado acento={palette.tealDark} etiqueta="(a) tealDark #0A7268 — claro 5.51 · OSCURO 3.37 (pasa por poco, no ilumina)" />
-      <VerdeDelEstado acento={palette.teal} etiqueta="(b) teal PURO #28E8DA — CLARO 1.46 (REPRUEBA el 3:1) · oscuro 12.70" />
-      <VerdeDelEstado etiqueta="(c) EL PAR de dos registros — lo que el slot resuelve hoy: 5.51 en claro · 12.70 en oscuro" />
-    </View>
-  )
-}
 
 // ── ② EL GLOW (S83-B11, cruce armado por C) — las tres capas sobre las
 // Tarjetas PLANAS del prestador en oscuro, que son las de D-589 (par
@@ -780,28 +759,7 @@ function GlowCasaVerde() {
 // ── S83-B33 · LA ESCALA DEL PAPEL VERDE (claro). Los hexes salen del
 // MISMO método verificado del cliente: su #FAF2F5 es exactamente pink
 // puro al 3% sobre light0, así que éstos son teal puro sobre light0.
-const PAPEL_ESCALA: ReadonlyArray<{ pct: number; hex: string; cta: string }> = [
-  { pct: 2, hex: '#F6F9F6', cta: '5.46' },
-  { pct: 3, hex: '#F4F8F6', cta: '5.42' },
-  { pct: 4, hex: '#F2F8F6', cta: '5.40' },
-  { pct: 5, hex: '#F0F8F6', cta: '5.38' },
-]
 
-function EscalaPapelVerde() {
-  return (
-    <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
-      {PAPEL_ESCALA.map((t) => (
-        <View
-          key={t.pct}
-          style={{ flex: 1, minWidth: 130, minHeight: 128, borderRadius: radius.md, overflow: 'hidden', backgroundColor: t.hex, padding: spacing[2], gap: spacing[2] }}
-        >
-          <Tarjeta elevacion="reposo"><Texto variante="apoyo">tarjeta</Texto></Tarjeta>
-          <Texto variante="apoyo">{t.pct}% · CTA {t.cta}</Texto>
-        </View>
-      ))}
-    </View>
-  )
-}
 
 // ── S83-B19 ① LA ESCALA DEL TAPIZ VERDE. Los hexes se derivan en HSL
 // desde el ancla REAL de producción (#080D0E = "3%"), H y S fijos y L
@@ -835,9 +793,6 @@ function EscalaTapiz({ conLuz }: { conLuz: boolean }) {
 
 // ── S83-B19 ② EL AGUA DEL CLIENTE, COPIADA. La receta que corre HOY en
 // hogar/index:966 — entera, 210, centrada, 0.06 — replicada tal cual.
-function AguaRecetaCliente({ color }: { color?: string }) {
-  return <MarcaDeAgua tamano={210} alfa={0.06} color={color} />
-}
 
 // ── EL AGUA EN LA CASA VERDE (S83-B9) — lámina de gate. Las tres
 // variantes sobre el FONDO REAL del prestador (light0 en claro ·
@@ -1045,85 +1000,12 @@ function Decision({ n, asunto, decide, children }: { n: string; asunto: string; 
  *  y su FECHA DE GATE — así se ve qué queda por curar en vez de
  *  desaparecer del radar. Lo que muere del código muere de la galería
  *  (Ley 37); esto es lo otro: lo que sobrevive sin haber sido firmado. */
-function Rechazado({ fecha, razon, children }: { fecha: string; razon: string; children: React.ReactNode }) {
-  const { theme } = useTheme()
-  return (
-    <View style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.md, backgroundColor: theme.status.dangerBg }}>
-      <Texto variante="dato" color="danger">{`RECHAZADO en gate ${fecha}`}</Texto>
-      <Texto variante="apoyo" color="danger">{razon}</Texto>
-      {children}
-    </View>
-  )
-}
 
 /** Las piezas que el founder rechazó y siguen vivas en el código. */
-function LoRechazado() {
-  return (
-    <View style={{ gap: spacing[4] }}>
-      <Rechazado
-        fecha="29-jul-2026"
-        razon="EL CTA DEL CLIENTE EN TINTA (Ley 21, mitad del cliente). Enmendado en r15: el CTA pasó a ocre con label tinta. Sobrevive como `accent.cta` del PRESTADOR (tealDark) y en memorial, donde SÍ rige — por eso no se borra."
-      >
-        <View style={{ height: 48, borderRadius: radius.md, backgroundColor: palette.textLight0, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.light0 }}>el CTA negro de antes</Text>
-        </View>
-      </Rechazado>
-
-      {/* S84-B18 — LAS DOS SIN CAJA, JUNTAS, que es la única forma de ver
-          lo que las separa: no hay superficie que las distinga, así que
-          la jerarquía la dice EL PESO y EL COLOR. `acento` manda
-          (accent.cta + bold), `ghost` recede (tinta + medium). */}
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="apoyo">
-          Las dos SIN superficie ni borde — acento MANDA, ghost RECEDE. Nació porque un botón sólido al
-          lado de una foto compite con la foto (rechazo del founder, vitrina).
-        </Texto>
-        <View style={{ flexDirection: "row", gap: spacing[2] }}>
-          <View style={{ flex: 1 }}><Boton variante="acento" etiqueta="acento" bloque onPress={() => {}} /></View>
-          <View style={{ flex: 1 }}><Boton variante="ghost" etiqueta="ghost" bloque onPress={() => {}} /></View>
-        </View>
-      </View>
-
-      {/* ── LA FLECHA DE `acento` · FIRMADA A LA DERECHA (founder, 3-ago) ──
-          Nació del rebote del `acento` («creo que no del todo — yo lo sé,
-          pero no sé si cualquier persona lo sepa»): el problema era de
-          AFORDANCIA, no de color. Su propuesta fue la flecha pegada al
-          label; lo que su literal no cerraba era de qué lado, así que las
-          DOS posiciones se montaron acá sobre el botón real y su dedo
-          eligió LA DERECHA. Con la firma, la perdedora y la prop `flecha`
-          se borraron EN EL MISMO COMMIT — un candidato perdedor que
-          sobrevive a su gate se vuelve una opción que alguien va a creer
-          disponible. Queda la anatomía firmada, sin alternativas. */}
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="apoyo">
-          LA FLECHA DEL ACENTO — firmada A LA DERECHA. La flecha es de la VARIANTE, no una prop: los
-          cuatro usos vivos la reciben sin decidir nada. Y no miente en ninguno — los cuatro navegan
-          o abren el formulario que los resuelve (E14).
-        </Texto>
-        <Boton variante="acento" etiqueta="Agregar clip" onPress={() => {}} />
-        <Texto variante="apoyo">Y sobre el MURO, que es donde vive el del logo (perfil-piezas):</Texto>
-        <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave }}>
-          <Boton variante="acento" superficie="muro" etiqueta="Cambiar el logo" onPress={() => {}} />
-        </View>
-      </View>
-
-      <Rechazado
-        fecha="29-jul-2026"
-        razon="EL CONTORNO COMO ACCIÓN. `Boton secundario` y `compacto` siguen con borde y siguen VIVOS en decenas de pantallas: su muerte ANCHA es D-483 con mecánica al-tocarse (migra por craft, jamás por barrida). `sinCaja` es el reemplazo firmado — se ve arriba, con su sombra."
-      >
-        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-          <View style={{ flex: 1 }}><Boton variante="secundario" etiqueta="secundario" bloque onPress={() => {}} /></View>
-          <View style={{ flex: 1 }}><Boton variante="compacto" etiqueta="compacto" bloque onPress={() => {}} /></View>
-        </View>
-      </Rechazado>
-    </View>
-  )
-}
 
 function PiezasFaltantes() {
   const { theme } = useTheme()
   const [remonte, setRemonte] = useState(0)
-  const [cruceVisible, setCruceVisible] = useState(true)
   const [hojaScrollAbierta, setHojaScrollAbierta] = useState(false)
   // S99-B · el pie fijo, en sus DOS estados: con desborde (el filete
   // aparece) y sin desborde (no hay nada tapado ⇒ no hay filete).
@@ -1157,51 +1039,6 @@ function PiezasFaltantes() {
         </View>
       </View>
 
-      {/* EntradaDeCruce — hermana de Entrada por el OTRO eje. La muestra
-          tiene que EMULAR el cruce entero (registrar la dirección y
-          volver visible la ventana), porque la pieza no acepta una
-          dirección por prop: la lee del gesto. Es exactamente lo que la
-          hace difícil de mostrar y lo que la hace correcta. */}
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">
-          EntradaDeCruce — 300 ms · desde 32 (spacing[8]) · la dirección la escribe la PUERTA, no el consumidor. Sin cruce previo NO se anima
-        </Texto>
-        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-          <Boton
-            variante="compacto"
-            etiqueta="cruzar →"
-            onPress={() => {
-              registrarCruce('derecha')
-              setCruceVisible(false)
-              setTimeout(() => setCruceVisible(true), 16)
-            }}
-          />
-          <Boton
-            variante="compacto"
-            etiqueta="← cruzar"
-            onPress={() => {
-              registrarCruce('izquierda')
-              setCruceVisible(false)
-              setTimeout(() => setCruceVisible(true), 16)
-            }}
-          />
-          <Boton
-            variante="compacto"
-            etiqueta="sin puerta"
-            onPress={() => {
-              setCruceVisible(false)
-              setTimeout(() => setCruceVisible(true), 16)
-            }}
-          />
-        </View>
-        <View style={{ minHeight: 56 }}>
-          <EntradaDeCruce activo={cruceVisible}>
-            <Tarjeta>
-              <Texto variante="cuerpo">la ventana que llega</Texto>
-            </Tarjeta>
-          </EntradaDeCruce>
-        </View>
-      </View>
 
       <View style={{ gap: spacing[2] }}>
         <Texto variante="dato">EvidenciaFoto.Thumbnail — los tres estados; la foto JAMÁS desaparece por error</Texto>
@@ -1352,71 +1189,12 @@ function TresSalidasOscuro() {
  *  GrillaElegir). Las TARJETAS siguen sin separarse en oscuro — que es
  *  lo que cazó CUATRO veces — y esa es OTRA pregunta.
  *  Acá el halo va sobre `Tarjeta` de verdad, con su contenido real. */
-function HaloSobreTarjeta() {
-  const { theme } = useTheme()
-  const cuerpo = (
-    <View style={{ gap: spacing[1] }}>
-      <Texto variante="cuerpo">Salió a pasear</Texto>
-      <Texto variante="dato">28 jul · 3,1 km en 52 min</Texto>
-    </View>
-  )
-  return (
-    <View style={{ gap: spacing[4], backgroundColor: theme.bg.base, padding: spacing[4], borderRadius: radius.md }}>
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">(a) la Tarjeta como está — card/base 1.037 al 3%</Texto>
-        <Tarjeta elevacion="reposo">{cuerpo}</Tarjeta>
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">(b) LA MISMA Tarjeta con halo direccional (1px al 14% arriba)</Texto>
-        <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, padding: spacing[4], borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.14)' }}>
-          {cuerpo}
-        </View>
-      </View>
-      <Texto variante="apoyo" color="danger">
-        ESTA ES OTRA PREGUNTA, no la que ya firmaste: sin-tarjeta resolvió los CHIPS (día, hora, duración), donde L-b ya mandaba escala y color de texto con ≥4 hermanos. Las TARJETAS siguen sin separarse — y el halo no las toca ni toca ningún texto: solo agrega el borde donde pegaría la luz.
-      </Texto>
-    </View>
-  )
-}
 
 
 /** S82-B r34 — LA ELECCIÓN EXCLUYENTE: tres formas de la misma pregunta
  *  (baño vs baño-y-corte · sesión vs programa). El founder pidió
  *  "toggle" pero declaró que nunca pueden estar los dos prendidos, y eso
  *  NO es dos binarios: es UNA elección. */
-function EleccionExcluyente() {
-  const [seg, setSeg] = useState('bano')
-  // FIRMADO (S82 r37): gana SelectorSegmentado con los DOS agregados del
-  // founder — la letra de la elegida en magenta y LA PATA pisándola. Los
-  // otros dos candidatos (dos Interruptor · SelectorOpcion) MURIERON con
-  // su trabajo hecho: el gate ocurrió y Ley 37 los saca del código, no
-  // los deja "por si acaso". Lo que sobrevive de ellos es el ARGUMENTO,
-  // que vive escrito en la cabecera de SelectorSegmentado — ahí es donde
-  // lo va a buscar quien dude, no en una lámina que ya se firmó.
-  return (
-    <View style={{ gap: spacing[3] }}>
-      <SelectorSegmentado
-        etiqueta="Servicio"
-        proposito="eleccion"
-        segmentos={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
-        activo={seg}
-        onCambio={setSeg}
-      />
-      <Texto variante="apoyo">
-        Con la pata y el magenta deja de leerse como cambio de vista — que era el reparo de la mesa, y
-        el founder lo resolvió mirando. La pata es la MISMA pieza de los otros dos controles
-        (`MarcaEleccion`), no una versión nueva: PATA 24 · MONTA = PATA/3 · −14° · absoluta sobre el
-        canto. Y el aire que la pata invade lo reserva EL COMPONENTE, no la pantalla.
-      </Texto>
-      <Texto variante="apoyo" color="danger">
-        DESVÍO DECLARADO: la Ley 19.3 dice que este control cambia de VISTA y acá elige PRODUCTO. Va
-        escrito en su cabecera con las dos posiciones. Si 19.3 se enmienda o nace una entrada nueva del
-        diccionario es decisión de MESA — el componente no la toma; lo único que hace es no mentir en
-        accesibilidad (con `proposito="eleccion"` el rol pasa de `tab` a `radio`).
-      </Texto>
-    </View>
-  )
-}
 
 function GateS82() {
   const TAPIZ = palette.papelTapiz
@@ -2501,6 +2279,7 @@ export function TokenGallery() {
 }
 
 function GaleriaInterna() {
+  const [cruceVisible, setCruceVisible] = useState(true)
   const { theme, mode, setMode } = useTheme()
   const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
@@ -2588,7 +2367,111 @@ function GaleriaInterna() {
             firmar lo exige — **la pieza se gatea DONDE VIVE**, y un pin
             vive sobre un mapa. En web esto NO se puede juzgar y el
             lienzo lo dice: hay que mirarlo en el teléfono. ═══ */}
-        <Seccion titulo="⭐ GATE S99 — LA BARRA · veredicto aplicado: SIN huella, disco en color de techo, MUY METIDO (10 sobre radio 28) y el valle más hondo. Qué decide ahora: si el viaje se ve FLUIDO">
+        {/* 🔴 S99-B · D-833 — LO QUE ESPERA FIRMA VA PRIMERO.
+            Estas dos muestras vivían enterradas: los glifos adentro de la
+            sección de `EscaleraEstados` (la 40 de 90) y la transición entre
+            las piezas de entrada. **Es el defecto que el founder nombró**
+            —«la lámina del moto estaba en la sección 81 de 95»— repitiéndose
+            con lo recién construido. Se MUEVEN, no se copian: la muestra es
+            una sola y vive donde se la mira. */}
+        <Seccion titulo="⭐ GATE S99 — LOS CUATRO GLIFOS DE NODO Y LA TRANSICIÓN DIRECCIONAL · qué decide: (a) si a 12 px cada nodo dice QUÉ ES sin leer, y (b) si la ventana se siente venir del lado del botón que tocaste">
+          <View style={{ gap: spacing[6] }}>
+            {/* 🔴 S99-B · EL GATE DE LOS CUATRO GLIFOS DE NODO — Y SE
+                MONTAN **DONDE VIVEN**, a 12 px adentro de la escalera
+                real, jamás sueltos en grande. *Es lo que la moto costó
+                DOS veces en esta misma sesión: un glifo aprobado en una
+                lámina limpia se cae cuando llega a su tamaño.*
+
+                ⏪ Acá había SIETE pasos con puntos de demo, y su rótulo
+                decía «las siete narrativas». **Las dos cosas eran
+                falsas**: `pagado`, `empacado` y `despachado` son estados
+                INTERNOS —no narrativas— y de las 7 narrativas solo
+                CUATRO son escalones (`pagando` es antes de que exista
+                promesa; `no_llego` y `cancelado` son DESVÍO, que
+                sustituye la escalera). La demo enseñaba un camino de
+                siete que el producto no tiene. */}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="dato">
+                S99-B · GATE POR ÍCONO — los cuatro nodos a 12 px, en su casa. Vertical · cuadrado · horizontal · diagonal
+              </Texto>
+              <EscaleraEstados
+                registro="compacta"
+                cuandoLlega="Llega entre 14:00 y 16:00"
+                pasos={(
+                  [
+                    ['confirmado', 'Confirmado', 'hecho', 'nodoConfirmado'],
+                    ['preparando', 'Preparando', 'hecho', 'nodoPreparando'],
+                    ['en_camino', 'En camino', 'actual', 'nodoEnCamino'],
+                    ['entregado', 'Entregado', 'pendiente', 'nodoEntregado'],
+                  ] as const
+                ).map(([clave, etiqueta, estado, glifo]) => ({
+                  clave,
+                  etiqueta,
+                  estado,
+                  icono: ({ color }: { color: string }) => (
+                    <Icono nombre={glifo} tamano={12} tinta={color} />
+                  ),
+                }))}
+              />
+              {/* El mismo set a 21 px — la vara de la Ley 9 — para poder
+                  decir si una silueta que funciona chica se sostiene
+                  grande. NO es donde se juzga: es el control. */}
+              <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+                <Texto variante="apoyo">control a 21:</Texto>
+                {(['nodoConfirmado', 'nodoPreparando', 'nodoEnCamino', 'nodoEntregado'] as const).map((g) => (
+                  <Icono key={g} nombre={g} tamano={21} />
+                ))}
+              </View>
+            </View>
+            {/* EntradaDeCruce — hermana de Entrada por el OTRO eje. La muestra
+                tiene que EMULAR el cruce entero (registrar la dirección y
+                volver visible la ventana), porque la pieza no acepta una
+                dirección por prop: la lee del gesto. Es exactamente lo que la
+                hace difícil de mostrar y lo que la hace correcta. */}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="dato">
+                EntradaDeCruce — 300 ms · desde 32 (spacing[8]) · la dirección la escribe la PUERTA, no el consumidor. Sin cruce previo NO se anima
+              </Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <Boton
+                  variante="compacto"
+                  etiqueta="cruzar →"
+                  onPress={() => {
+                    registrarCruce('derecha')
+                    setCruceVisible(false)
+                    setTimeout(() => setCruceVisible(true), 16)
+                  }}
+                />
+                <Boton
+                  variante="compacto"
+                  etiqueta="← cruzar"
+                  onPress={() => {
+                    registrarCruce('izquierda')
+                    setCruceVisible(false)
+                    setTimeout(() => setCruceVisible(true), 16)
+                  }}
+                />
+                <Boton
+                  variante="compacto"
+                  etiqueta="sin puerta"
+                  onPress={() => {
+                    setCruceVisible(false)
+                    setTimeout(() => setCruceVisible(true), 16)
+                  }}
+                />
+              </View>
+              <View style={{ minHeight: 56 }}>
+                <EntradaDeCruce activo={cruceVisible}>
+                  <Tarjeta>
+                    <Texto variante="cuerpo">la ventana que llega</Texto>
+                  </Tarjeta>
+                </EntradaDeCruce>
+              </View>
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S99 — LA BARRA, REHECHA · veredicto aplicado: barra BLANCA (bg.card) + disco en el VERDE DEL TECHO · el disco asoma 4 de 36 · el bloque ícono+etiqueta viaja JUNTO · transición 300→520. Qué decide: si ahora se lee el viaje, y si el disco está bien metido">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
               <PanelTema etiqueta="claro — sobre franjas: el hueco las deja pasar, y el disco viaja CON el valle (un solo grupo)">
@@ -2892,24 +2775,12 @@ function GaleriaInterna() {
 
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
-        <Seccion titulo="✅ FIRMADO S85 (3-ago: «llevala al 5») — CUÁNTO PAPEL VERDE EN CLARO · YA NO ESPERA DECISIÓN: corre el 5% (#F0F8F6). Queda como registro de la escala y de su techo — a 6% cae status.dangerText, que hoy pasa con margen 0.07. Baja al catálogo en la próxima pasada">
-          <ThemeProvider defaultMode="light" cta="oficio">
-            <PanelGateTema etiqueta="prestador CLARO — el papel verde">
-              <EscalaPapelVerde />
-            </PanelGateTema>
-          </ThemeProvider>
-          <Texto variante="apoyo">
-            EL MÉTODO ES EL DEL CLIENTE, reproducido y verificado: su papelTapiz #FAF2F5 es
-            EXACTAMENTE pink puro al 3% sobre light0. Éstos son teal puro sobre light0 — mismo hex
-            de marca, misma dosis, mismo orden. No es un verde elegido a ojo.
-          </Texto>
-          <Texto variante="apoyo">
-            LO QUE EL FONDO ARRASTRA, medido antes de encenderlo (la lección del 8% oscuro): el CTA
-            del prestador en claro baja de 5.51 a 5.42 al 3% — sigue muy por encima del mínimo 3, y
-            CERO pares nuevos caen. A diferencia del oscuro, acá el fondo se aclara poco y los
-            tintes con alpha casi no se mueven.
-          </Texto>
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «YA NO ESPERA DECISIÓN», en su propio título.
+         *  Decía: «✅ FIRMADO S85 (3-ago: «llevala al 5») — CUÁNTO PAPEL VERDE EN CLARO · YA NO ESPERA DECISIÓN: corre el 5% (#F0F8F6). Queda como registro de l…»
+         *  Cuánto papel verde en claro: corre el 5%, firma del 3-ago («llevala al 5»). Vive en el token.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
         <Seccion titulo="① ⭐ GATE S83 — CUÁNTO TAPIZ · qué decide: el founder gateó DOS VECES que el 3% es 'muy muy leve'. Acá está la escala con su par card/base, y el número DA VUELTA la premisa — ver el rótulo">
           <ThemeProvider defaultMode="dark" cta="oficio">
@@ -3031,36 +2902,12 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE (SUPERSEDED por la de arriba: su fondo es palette.light0 pintado a mano, que dejó de ser el fondo real del prestador cuando nació papelTapizOficio en B33) · qué decidió: si la receta del cliente servía en la casa verde, y en qué color">
-          <ThemeProvider defaultMode="light" cta="oficio">
-            <PanelGateTema etiqueta="prestador CLARO — la receta EXACTA del cliente">
-              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                <View style={{ flex: 1, height: 168, borderRadius: radius.md, overflow: 'hidden', backgroundColor: palette.light0 }}>
-                  <AguaRecetaCliente />
-                  <View style={{ padding: spacing[2] }}><Texto variante="apoyo">tal cual: text.primary</Texto></View>
-                </View>
-                <View style={{ flex: 1, height: 168, borderRadius: radius.md, overflow: 'hidden', backgroundColor: palette.light0 }}>
-                  <AguaRecetaCliente color={palette.tealDark} />
-                  <View style={{ padding: spacing[2] }}><Texto variante="apoyo">con el color de la casa</Texto></View>
-                </View>
-              </View>
-            </PanelGateTema>
-          </ThemeProvider>
-          <Texto variante="apoyo">
-            LA AMBIGÜEDAD QUE NO RESUELVO SOLA: "copiá la del cliente" y "con el color de la casa"
-            piden cosas distintas — la del cliente usa text.primary (tinta). Van las DOS; elegís
-            mirando.
-          </Texto>
-          <Texto variante="apoyo">
-            EL 210 FIJO, con su límite medido (B14): en pantalla angosta roza los bordes, que es el
-            defecto que el factor derivado existía para evitar. El equivalente sin número fijo es
-            ~0.55 del ancho — se propone, no se aplica: la receta de partida es la tuya.
-          </Texto>
-          <Texto variante="apoyo">
-            ⚠️ EL CHOQUE SIGUE EN PIE: entera IDENTIFICA. El argumento que dejó la Ley 4 intacta fue
-            que cortada no identificaba. Agua + isotipo del techo serían DOS.
-          </Texto>
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «SUPERSEDED por la de arriba», en su propio título.
+         *  Decía: «① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE (SUPERSEDED por la de arriba: su fondo es palette.light0 pintado a mano, que dejó de ser el fond…»
+         *  El agua copiada del cliente: su propio título declaraba que la de arriba la reemplaza.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
         <Seccion titulo="① ⭐ GATE S83 — LA ATMOSFERA EN LA CASA MAGENTA · qué decide: el mismo glow firmado para el prestador, del lado del cliente. NO necesitó nada nuevo: la pieza pide su color y la pantalla declara su capa">
           <ThemeProvider defaultMode="dark">
@@ -3110,36 +2957,12 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598: gana §15b.1). Lo que se decide acá es el REGISTRO, y la medición dice que ninguno solo sirve en los dos temas — el focus es GRÁFICA (mín 3:1), no texto">
-          {/* cta="oficio" NO ES DECORACIÓN: sin él la lámina resuelve el
-              tema del CLIENTE y el rótulo miente — pintaba papelTapiz
-              magenta donde dice papel algodón, y tapizDark donde dice el
-              verde del oficio. Defecto mío, cazado por el founder en
-              dispositivo (S83-B14): una lámina de gate que pinta la casa
-              equivocada no es una lámina de gate. */}
-          <ThemeProvider defaultMode="light" cta="oficio">
-          <PanelGateTema etiqueta="prestador CLARO — papel #FAF9F7 · montada sobre la casa VERDE (las anteriores estaban sobre el fondo del CLIENTE)">
-            <CandidatasVerde />
-          </PanelGateTema>
-          </ThemeProvider>
-          <ThemeProvider defaultMode="dark" cta="oficio">
-            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E · sobre la casa VERDE (antes: fondo del cliente)">
-              <CandidatasVerde />
-            </PanelGateTema>
-          </ThemeProvider>
-          <Texto variante="apoyo">
-            (c) NO trae un color nuevo: es la regla de dos registros que la Ley 2 y §15b.2 ya
-            tienen — hex PURO sobre superficie oscura, variante *Dark sobre clara. El SLOT lo
-            resuelve solo, porque se declara por TEMA. Está aplicado: lo que corre hoy es (c).
-          </Texto>
-          <Texto variante="apoyo">
-            EL ALCANCE DE LA FIRMA, medido antes de tocar — accent.active lo consumen CUATRO
-            piezas y las cuatro son estado o control funcional, así que ninguna frena: focus de
-            Campo (:97) · borde de CampoFecha con su Hoja abierta (:257) · outline de foco del
-            Boton en web, que es accesibilidad (:274) · huella y pill de la tab (BarraTabs
-            :115/:149). El founder firmó sobre el focus; el slot mueve las cuatro.
-          </Texto>
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «lo FIRMADO», en su propio título.
+         *  Decía: «① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598…»
+         *  Cuál verde para el estado activo. Vive en `accent.active` de las dos casas, y R27 lo vigila.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
         <Seccion titulo="① ⭐ GATE S83 — EL GLOW EN LA CASA VERDE · qué decide: cómo se separa la superficie del fondo cuando YA SE GATEÓ que el fondo al 3% NO COMUNICA y el halo NO ALCANZA. Las tres capas sobre las Tarjetas planas de D-589 (par 1.009: a efectos prácticos, el mismo color que el fondo)">
           <ThemeProvider defaultMode="dark" cta="oficio">
@@ -3209,15 +3032,21 @@ function GaleriaInterna() {
             el contorno que hace de caja, y una caja necesita CUATRO
             lados. El día que alguien lo dibuje en los cuatro, eso sí es
             un borde con otro nombre y ahí sí hace falta mesa. */}
-        <Seccion titulo="EL HALO — FIRMADO en su forma direccional (S82). El canto de luz que separa la superficie en oscuro, donde la sombra no puede: A6 intacta porque no rodea">
-          <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «FIRMADO (S82)», en su propio título.
+         *  Decía: «EL HALO — FIRMADO en su forma direccional (S82). El canto de luz que separa la superficie en oscuro, donde la sombra no puede: A6 intacta po…»
+         *  El halo direccional. Vive en los tokens de elevación; acá solo repetía una firma.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
         {/* ④ FIRMADO (S82 r37): gana SelectorSegmentado con los dos
             agregados del founder. Baja de "espera firma" a MUESTRA. */}
-        <Seccion titulo="LA ELECCIÓN EXCLUYENTE — FIRMADA (S82): SelectorSegmentado con la letra en magenta y LA PATA pisando la elegida">
-          <EleccionExcluyente />
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «FIRMADA (S82)», en su propio título.
+         *  Decía: «LA ELECCIÓN EXCLUYENTE — FIRMADA (S82): SelectorSegmentado con la letra en magenta y LA PATA pisando la elegida…»
+         *  La elección excluyente. Vive en `SelectorSegmentado`; acá solo repetía una firma.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
         {/* PROMOVIDA S83-B1 desde apps/prestador (Ley 11: cuatro
             superficies vivas). Pasó el gate global del founder el
@@ -3231,9 +3060,12 @@ function GaleriaInterna() {
         {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
             que se vea qué queda pendiente de curar (orden founder r16).
             No espera firma — ya la tuvo, y es la deuda que dejó. */}
-        <Seccion titulo="⑤ ⛔ RECHAZADO EN GATE — NO espera tu firma: ya la tuvo. Es lo que sigue vivo en el código y falta curar">
-          <LoRechazado />
-        </Seccion>
+        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+         *  Literal que la descarta: «RECHAZADO EN GATE», en su propio título.
+         *  Decía: «⑤ ⛔ RECHAZADO EN GATE — NO espera tu firma: ya la tuvo. Es lo que sigue vivo en el código y falta curar…»
+         *  Su contenido NO era historia: listaba lo que «sigue vivo en el código y falta curar». Se retira de la VISTA porque su veredicto ya llegó —«NO espera tu firma: ya la tuvo»— y lo pendiente se sigue por su deuda, no por una sección que el founder tiene que saltear cada vez.
+         *  Se retira de la VISTA, no del registro: la galería es donde el
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
 
 
         {/* Paleta */}
@@ -3729,39 +3561,6 @@ function GaleriaInterna() {
               />
             </View>
 
-            {/* S99-B · LAS SIETE NARRATIVAS CON ÍCONO ADENTRO — la forma
-                que reemplaza a las cuatro barras. Y con `cuandoLlega`:
-                los nodos dicen DÓNDE ESTÁ, la ventana dice CUÁNTO FALTA.
-                Los glifos son SLOT del consumidor: acá se montan puntos
-                de demo para probar la FORMA sin inventar siete dibujos
-                que nadie firmó. */}
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="dato">
-                S99-B · compacta con NODOS + ícono adentro + ventana prometida (7 narrativas)
-              </Texto>
-              <EscaleraEstados
-                registro="compacta"
-                cuandoLlega="Llega entre 14:00 y 16:00"
-                pasos={(
-                  [
-                    ['confirmado', 'Confirmado', 'hecho'],
-                    ['pagado', 'Pagado', 'hecho'],
-                    ['preparando', 'Preparando', 'hecho'],
-                    ['empacado', 'Empacado', 'actual'],
-                    ['despachado', 'Despachado', 'pendiente'],
-                    ['en_camino', 'En camino', 'pendiente'],
-                    ['entregado', 'Entregado', 'pendiente'],
-                  ] as const
-                ).map(([clave, etiqueta, estado]) => ({
-                  clave,
-                  etiqueta,
-                  estado,
-                  icono: ({ color }: { color: string }) => (
-                    <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: color }} />
-                  ),
-                }))}
-              />
-            </View>
 
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">compacta · voz de la familia · SIN ícono (el nodo degrada a punto)</Texto>
@@ -5227,6 +5026,20 @@ function GaleriaInterna() {
                 saludo="Zeus está listo."
                 subtitulo="Su paseo empieza en 20 minutos."
                 accionDer={<CampanaDemo />}
+              />
+            </View>
+            {/* S99-B · PORTADA **CON VUELTA** — el caso que no era
+                expresable: un MUNDO al que se entra desde otro («Tu
+                tienda», desde HOY). El isotipo preside y la vuelta vive
+                en su propia fila, en el mismo punto de la pantalla que en
+                `navegacion`. */}
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                atras
+                onAtras={() => {}}
+                isotipo="gradiente"
+                saludo="Tu tienda"
               />
             </View>
           </View>

@@ -475,6 +475,23 @@ export const palette = {
    * solo la luz. */
 
   mapaMoto: '#9D2F75',
+  /** 🔴 EL CUERPO DE LA MOTO, UN PASO MÁS CLARO QUE SU CAJÓN (S99-B,
+   *  firma del founder: *«el cajón puede ser púrpura y LA MOTO UN POQUITO
+   *  MÁS CLARA, no negra»*).
+   *
+   *  **Mismo tono y misma saturación que `mapaMoto` —322° · 0.54, dentro
+   *  de la banda del terreno—; lo único que sube es la LUZ: 0.40 → 0.48.**
+   *  *La misma cura que el pin entero acaba de recibir, aplicada un piso
+   *  más adentro: el volumen sale de dos LUCES del mismo tono, jamás de
+   *  dos tonos distintos, que es lo que volvería al objeto un dibujo de
+   *  dos colores.*
+   *
+   *  ⚠️ **Y 0.48 es el TECHO, medido, no una preferencia:** a 0.52 el
+   *  contraste contra el agua cae a **2.67** y perfora el piso gráfico de
+   *  3:1. Con 0.48 queda **3.58 asfalto · 3.47 parque · 3.06 agua** — el
+   *  agua es el que manda, y por eso no hay margen para «un poquito más»
+   *  sin salirse. */
+  mapaMotoClara: '#BC388C',
   /** El destino es un EDIFICIO, no un marcador (§6ter) ⇒ sus tonos son
    *  neutros cálidos del terreno (sat ~0.10), no marca. Dos planos
    *  porque un volumen necesita dos: cuerpo 3.68 · techo 6.34 contra el

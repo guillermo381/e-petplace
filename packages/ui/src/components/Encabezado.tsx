@@ -51,10 +51,8 @@ type Portada = {
   isotipo?: 'tinta' | 'gradiente' | 'ninguno'
   accionDer?: ReactNode
   titulo?: never
-  atras?: never
-  onAtras?: never
   divisor?: never
-}
+} & ({ atras: true; onAtras: () => void } | { atras?: false; onAtras?: never })
 
 export type EncabezadoProps = Navegacion | Portada
 
@@ -162,12 +160,34 @@ export function Encabezado(props: EncabezadoProps) {
   return (
     <View
       style={{
-        paddingTop: insets.top + spacing[5],
+        /* 🔴 S99-B · LA PORTADA GANA LA VUELTA — y el defecto que cura es
+           un ACOPLAMIENTO, no un registro que faltaba.
+           Las dos variantes ataban **dos ejes que no tienen por qué ir
+           juntos**: «¿lleva identidad?» y «¿se puede volver?». `portada`
+           tenía isotipo y ninguna vuelta; `navegacion`, vuelta y ningún
+           isotipo. **Una pantalla que es un MUNDO pero se entra desde otra
+           —«Tu tienda», desde HOY— no era expresable**, y la salida barata
+           habría sido que el app dibujara un techo a mano: la casa
+           quedaría con dos techos que envejecen distinto.
+           *C frenó bien y no lo dibujó. Esto es lo que faltaba.* */
+        paddingTop: insets.top + (props.atras ? 0 : spacing[5]),
         paddingBottom: spacing[5],       // la portada respira, no comprime
         paddingHorizontal: spacing[4],
         backgroundColor: theme.bg.base,
       }}
     >
+      {props.atras ? (
+        /* La vuelta va EN SU PROPIA FILA, arriba del lockup — jamás en
+           línea. En línea competiría con el isotipo por el borde
+           izquierdo, y **la identidad es lo que tiene que presidir**.
+           `marginLeft` negativo para que el chevron caiga en el MISMO
+           punto de la pantalla que en `navegacion`: *la vuelta vive
+           siempre en el mismo lugar; si se mueve por pantalla, el pulgar
+           tiene que buscarla.* */
+        <View style={{ marginLeft: -spacing[2], marginBottom: spacing[1] }}>
+          <ChevronAtras onAtras={props.onAtras} />
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
           <Isotipo size={32} variant={varianteIsotipo} />
