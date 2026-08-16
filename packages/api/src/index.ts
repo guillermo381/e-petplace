@@ -1121,6 +1121,9 @@ export {
   listarProductosDespensa,
   obtenerFichaProducto,
   buscarProductosDespensa,
+  // S99-L5b (N20, adjudicación (a)): los conteos por eje sobre LO COMPRABLE
+  // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
+  conteosVitrinaPorEje,
   recomendarParaMascota,
   // S96 (12-ago, 2ª tanda): el paso de entendimiento de §5.4, registrado.
   registrarEntendimientoAlergia,
@@ -1132,6 +1135,7 @@ export {
   type ProductoDeVitrina,
   type VarianteDeProducto,
   type FichaProducto,
+  type ConteosVitrina,
   type Recomendacion,
   type FiltrosVitrina,
   // S96: vocabulario VERBATIM del CHECK y de EstadoComposicion de @epetplace/ui.
