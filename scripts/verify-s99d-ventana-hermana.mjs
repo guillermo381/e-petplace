@@ -130,8 +130,44 @@ for (const caso of CASOS) {
          correcciones ya montadas y funcionando — L-235 por tercera vez en
          este lote. *La aguja se calibra contra lo que la pantalla RENDERIZA,
          jamás contra lo que el diccionario guarda.* */
-      const cuerpo = (await page.locator('body').innerText()).toLowerCase();
+      const cuerpo = (await textoActivo()).toLowerCase();
       return { ok: cuerpo.includes(aguja.toLowerCase()), aguja };
+    };
+
+    /* 🔴 EL TEXTO DE LA PANTALLA ACTIVA, Y NO EL DEL `body` — enmienda del
+       17-ago, y sin ella este guard MENTIRÍA EN VERDE.
+       Al curar D-836 la hermana pasó a vivir DENTRO del navegador de tabs, y
+       ahí las pantallas quedan **apiladas**: medido, los dos títulos ocupan
+       la MISMA caja (`y:16`) y el `body.innerText` trae las DOS. O sea que
+       un `body.includes('del lun 17')` podía estar leyendo **el techo del
+       HOY** y dar verde sin que la hermana hubiera cruzado nada.
+       El navegador ya marca la inactiva con `aria-hidden="true"` — se
+       excluye por ahí, que es el dato del propio framework y no una
+       heurística nuestra. *Cuando dos pantallas comparten el DOM, «lo que
+       dice la pantalla» deja de ser «lo que dice el documento».* */
+    const textoActivo = () =>
+      page.evaluate(() => {
+        let out = '';
+        const anda = (n) => {
+          if (n.nodeType === 3) { out += ' ' + (n.textContent ?? ''); return; }
+          if (!(n instanceof Element)) return;
+          if (n.getAttribute('aria-hidden') === 'true') return;
+          for (const h of n.childNodes) anda(h);
+        };
+        anda(document.body);
+        return out;
+      });
+
+    /* 🔴 D-836 · LA BARRA TIENE QUE SEGUIR AHÍ — el brazo que a este guard
+       LE FALTABA, y el founder lo encontró con el dedo en tres segundos.
+       Yo probaba que el día cruzara y que las puertas estuvieran; **jamás
+       probé que la casa siguiera puesta.** Un guard que mide el contenido de
+       una ventana y no su pertenencia a la app da verde sobre un encierro.
+       Se mide por DOS tabs, no por una: con una sola podría ser un rótulo
+       cualquiera de la pantalla; dos que son de la barra y de nadie más. */
+    const barraPuesta = async () => {
+      const t = await textoActivo();
+      return /\bHoy\b/.test(t) && /\bCuenta\b/.test(t);
     };
 
     // ① en el HOY se elige MAÑANA y se cruza: la hermana tiene que abrir ahí
@@ -139,6 +175,10 @@ for (const caso of CASOS) {
     await page.waitForTimeout(1500);
     await puerta.click();
     await page.waitForTimeout(9000);
+    const conBarra = await barraPuesta();
+    console.log(`${conBarra ? '✅' : '🔴'} ${' '.repeat(10)}   la barra sigue puesta en la hermana → ${conBarra ? 'sí' : 'NO — ENCIERRO'}`);
+    if (!conBarra) fallos.push('duenotodo: la ventana hermana PERDIÓ la barra — D-836, encierro');
+
     const r1 = await diaVisible(manana);
     console.log(`${r1.ok ? '✅' : '🔴'} ${' '.repeat(10)}   ida: la hermana dice «${r1.aguja}» → ${r1.ok ? 'sí' : 'NO'}`);
     if (!r1.ok) fallos.push(`duenotodo: la ida NO llevó el día (falta «${r1.aguja}» en la hermana)`);
@@ -147,9 +187,13 @@ for (const caso of CASOS) {
     //    mostrar ESE día. Con `router.back()` el gesto es un POP —la
     //    transición se siente como regreso— y el día llega igual porque
     //    NO viaja: se comparte.
-    await page.getByText(pasado.slice(8, 10), { exact: true }).locator('visible=true').first().click();
+    /* `.last()` y no `.first()`: con las pantallas apiladas el nodo de la
+       ACTIVA es el último del DOM — el primero es el de la que quedó debajo,
+       que no se puede tocar (la corrida anterior murió ahí con un timeout de
+       30 s clickeando un elemento cubierto). */
+    await page.getByText(pasado.slice(8, 10), { exact: true }).locator('visible=true').last().click();
     await page.waitForTimeout(1500);
-    await page.getByText('Tus citas del día', { exact: true }).locator('visible=true').first().click();
+    await page.getByText('Tus citas del día', { exact: true }).locator('visible=true').last().click();
     await page.waitForTimeout(9000);
     const r2 = await diaVisible(pasado);
     console.log(`${r2.ok ? '✅' : '🔴'} ${' '.repeat(10)}   vuelta: el HOY dice «${r2.aguja}» → ${r2.ok ? 'sí' : 'NO'}`);
