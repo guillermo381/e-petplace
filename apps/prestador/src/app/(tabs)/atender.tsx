@@ -65,6 +65,7 @@ import {
   type OficioAtender,
 } from '@/lib/capacidad-atender';
 import { PizarraHoja } from '@/components/atender/pizarra-hoja';
+import { contextoVentas } from '@/lib/cuenta-ventas';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { useTraduccion } from '@/i18n';
 
@@ -185,6 +186,16 @@ type Pantalla =
   // El error DICE su causa y ofrece reintentar (Ley 13 / regla 36): un
   // fallo de lectura jamás se disfraza de «este negocio no atiende».
   | { fase: 'error'; detalle: string }
+  /* ⭐ S99-C · L1 — EL VENDEDOR PURO ENTRA ACÁ Y ESTE CUARTO LE SIRVE.
+     Con la barra puesta (D-820) llega alguien SIN fila de prestador, y
+     hasta hoy este efecto devolvía `error` con el mensaje del wrapper: un
+     dato que falta disfrazado de permiso denegado (L-178). No es que su
+     ATENDER esté roto — **es que su ATENDER es una sola cosa**, y §2.1bis
+     lo dice literal: *«su ATENDER es una sola cosa, y está bien que lo
+     sea»*. Su mitad de tienda sale de `contextoVentas()`, que **no
+     necesita prestador**, así que el cuarto no solo deja de mentir:
+     funciona. */
+  | { fase: 'soloTienda' }
   | {
       fase: 'listo';
       capacidad: CapacidadAtender;
@@ -220,7 +231,18 @@ export default function Atender() {
       let vigente = true;
       void (async () => {
         const p = await obtenerMiPrestador();
-        if (!p.ok) return { fase: 'error' as const, detalle: p.mensaje };
+        if (!p.ok) {
+          /* `sin_prestador` NO es un fallo: es el vendedor puro. Se
+             pregunta por la OTRA mitad antes de declarar nada — y solo si
+             tampoco es vendedora se dice error, que ahí sí lo es. */
+          if (p.codigo === 'sin_prestador') {
+            const ctx = await contextoVentas();
+            if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
+              return { fase: 'soloTienda' as const };
+            }
+          }
+          return { fase: 'error' as const, detalle: p.mensaje };
+        }
         /* LA PIZARRA VIAJA EN LA MISMA OLA que la capacidad: son dos
            lecturas y una sola espera. Su fallo NO tumba la portada —las
            puertas del mostrador no dependen de ella— y `null` NO se pinta
@@ -315,6 +337,34 @@ export default function Atender() {
               <Esqueleto forma="bloque" ancho="100%" alto={88} />
             </View>
           </EsqueletoGrupo>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  /* ⭐ S99-C · el ATENDER del vendedor puro: UNA baldosa, la misma pieza y
+     el mismo destino que la mitad de tienda del dual (`capacidad.tienda`
+     abajo). No es una pantalla aparte — es la misma con una sola cosa. */
+  if (pantalla.fase === 'soloTienda') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <MarcaDeAgua />
+        <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
+          <Encabezado variante="portada" saludo={t('atender.titulo')} />
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('atender.tuTienda')}</Texto>
+            <View style={ESTILO_GRILLA}>
+              <View style={ESTILO_CELDA}>
+                <Baldosa
+                  glifo="despensa"
+                  titulo={t('atender.ventaTitulo')}
+                  capa="consumo"
+                  orden={0}
+                  onPress={() => router.push('/ventas/mostrador')}
+                />
+              </View>
+            </View>
+          </View>
         </ScrollView>
       </View>
     );
