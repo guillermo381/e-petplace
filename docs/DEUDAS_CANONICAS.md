@@ -11711,6 +11711,18 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-271 — LA PAGINACIÓN SIN ORDEN ESTABLE NO ES PAGINACIÓN: ES UNA LOTERÍA QUE SE VE PROLIJA (S99 — hallazgo de A al escribir el pedido de los 722; elevada a ley por la mesa, 16-ago-2026).**
+
+  **El hecho:** un lector sin `ORDER BY` deja que Postgres devuelva el orden que quiera, **y que lo cambie entre corridas**. Sin techo no se nota. **Con páginas, la página 2 repite y saltea filas de la 1** — y la lista se ve impecable las dos veces.
+
+  **Es hermana de L-268 y PEOR DE DETECTAR:** *una lista truncada al menos es consistente entre corridas —siempre miente lo mismo—; ésta cambia sola, así que dos personas mirando lo mismo ven distinto y ninguna tiene con qué probarlo.*
+
+  **🔴 Y NO ES TEÓRICO — el peor caso estaba vivo:** en `listarSkusDelVendedor`, de **532 SKU activos de una cuenta, 525 comparten el MISMO `created_at`** (nacieron en una sola transacción). *Ordenar por fecha ahí no ordena nada: deja 524 filas empatadas al azar.*
+
+  **⇒ LA REGLA, en dos mitades, y la segunda es la que se olvida:** ① **todo lector paginable ordena** · ② **el orden termina en una clave ÚNICA.** *Cualquier criterio humano —nombre, precio, stock, estado— empata; el desempate por PK es lo que convierte un criterio en un orden.*
+
+  **Y el discriminador que lo prueba sin muestrear:** se verifica que la clave de orden sea única sobre el conjunto (`count(*) - count(DISTINCT (clave))` = **0**), porque **una clave única ES un orden total** — no hace falta correr la paginación dos veces y esperar que coincida. *Medido: `(created_at, id)` → 0 repetidos · `created_at` solo → 524 empates.* **La misma consulta mide la cura y el tamaño del agujero.**
+
 - **L-270 — UN BLOQUEO DECLARADO ENVEJECE IGUAL QUE UN DATO (S99 — autocrítica de C; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** C construyó la capacidad en la fila del repartidor, y **al bajar `main` apareció la lámina de B que su propio parte decía estar esperando** — con la ley contraria (**el bloque es la SECCIÓN, no el ítem**) y citando su propia medición. **No las dejó convivir: rige la de B.** Su literal: *«dejé de medir porque tenía una analogía cómoda.»*

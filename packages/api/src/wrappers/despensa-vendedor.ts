@@ -1245,7 +1245,20 @@ export async function listarSkusDelVendedor(
       'ofertas(precio, estado)',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
-    .eq('activo', true);
+    .eq('activo', true)
+    // 🔴 ORDEN ESTABLE — y el desempate por `id` NO es prolijidad: es la
+    // condición para que este lector se pueda paginar algún día.
+    // **Medido (S99): de 532 SKU activos de una cuenta, 525 comparten el
+    // MISMO `created_at`** (nacieron en una sola transacción). Sin desempate,
+    // Postgres devuelve esas 525 en el orden que quiera **y puede cambiarlo
+    // entre corridas** ⇒ la página 2 repetiría y saltearía filas de la 1.
+    // *Una lista truncada al menos es consistente; ésta cambia sola.*
+    // ⚖️ El criterio VISIBLE (por nombre, por stock, por estado) es de la
+    // pantalla y se agrega como parámetro cuando C lo pida; **el desempate
+    // por `id` se queda pase lo que pase** — cualquier criterio que elija
+    // empata, y un orden que empata no ordena.
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: true });
   if (error) return falloDespensa(error.message);
   if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
   const salida: SkuDelVendedor[] = [];
