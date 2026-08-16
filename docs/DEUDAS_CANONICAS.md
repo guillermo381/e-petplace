@@ -17380,6 +17380,18 @@ lanzamiento tenemos que borrar eso».*
 >    el segundo tiene y el primero se agotó **a propósito**, 3 al revés.
 > 3. **El segundo pedido pagado** (`SIEMBRA-S99-FIFO-2`) del turno anterior.
 >
+> 4. **🔴 UNA OFERTA PUBLICADA POR UN CINTURÓN, declarada porque la encontré
+>    midiendo otra cosa:** el brazo discriminador de
+>    `20260819020000` **publicó de verdad** una oferta de Clínica Aurora a
+>    `9.99` sobre una variante ya publicada por otro vendedor —era la única
+>    forma de probar que la competencia quedó abierta—, **y ese INSERT no
+>    estaba en una transacción que revirtiera.** Se reconoce por
+>    `sku_vendedor` = `SIEMBRA-S99-…`, así que la limpieza la alcanza; pero
+>    **es L-234 en carne: una sonda que deja residuo contamina la medición
+>    ajena** — y de hecho contaminó la mía: apareció como *«un precio
+>    propuesto que diverge del publicado»* y por un momento pareció un dato
+>    de producto. **No lo es: es mío.**
+>
 > **Y el orden del borrado, que NO es libre:** ofertas → SKUs → movimientos de
 > inventario → recomposición del saldo. *Borrar el SKU sin su ledger deja
 > movimientos huérfanos apuntando a nada, y el juez
