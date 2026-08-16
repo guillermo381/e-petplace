@@ -38,6 +38,12 @@ export interface PedidoDelVendedor {
   promesa_desde: string | null;
   promesa_hasta: string | null;
   creado_en: string;
+  /** S99-A · L3 — la hora de CONFIRMACIÓN DEL PAGO (el `cerrado_en` del
+   *  intento aprobado, `pagos_intentos` — la fuente MEDIDA; jamás
+   *  `pedidos.pagado_en`, heredada y 0/14). ES la llave del FIFO firmado
+   *  en el Gate 1: sin pago confirmado, el pedido no entra a la cola.
+   *  null = todavía no se confirmó ningún pago. */
+  pago_confirmado_en: string | null;
 }
 
 /** Los pedidos de MI cuenta comercial. La RLS ya restringe por
@@ -49,7 +55,7 @@ export async function listarPedidosDelVendedor(
 ): Promise<ResultadoWrapper<PedidoDelVendedor[], CodigoErrorDespensa>> {
   const { data, error } = await getClient()
     .from('v_pedidos_narrativa')
-    .select('pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at')
+    .select('pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, pago_confirmado_en')
     .eq('cuenta_comercial_id', cuentaComercialId)
     .order('created_at', { ascending: false })
     .limit(limite);
@@ -74,6 +80,8 @@ export async function listarPedidosDelVendedor(
       promesa_hasta:
         typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
       creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      pago_confirmado_en:
+        typeof f.pago_confirmado_en === 'string' ? f.pago_confirmado_en : null,
     });
   }
   return { ok: true, data: salida };
@@ -124,7 +132,7 @@ export async function listarPedidosDelVendedorEnRango(
   const { data, error } = await getClient()
     .from('v_pedidos_narrativa')
     .select(
-      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo',
+      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo, pago_confirmado_en',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
     .or(
@@ -154,6 +162,8 @@ export async function listarPedidosDelVendedorEnRango(
       promesa_hasta:
         typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
       creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      pago_confirmado_en:
+        typeof f.pago_confirmado_en === 'string' ? f.pago_confirmado_en : null,
       dia: typeof f.entrega_fecha_objetivo === 'string' ? f.entrega_fecha_objetivo : null,
     };
     (fila.dia === null ? sinFecha : delRango).push(fila);
