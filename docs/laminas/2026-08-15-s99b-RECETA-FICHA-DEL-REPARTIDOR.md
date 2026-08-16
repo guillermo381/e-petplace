@@ -376,3 +376,58 @@ N12 y N13). Lo único que §D agrega es **su encuadre**:
    el alta; abrir edición desde la ficha es decisión de producto.
 3. **El ojo**, con su pregunta: *entrando desde la fila, ¿la ficha se
    siente la misma pantalla un piso adentro, o se siente otra app?*
+
+---
+
+# 🔴 ⏪ ENMIENDA A §D — MI PREMISA ERA FALSA, Y LA CAUSA NO ES LA QUE PARECE
+
+**§D1 afirmó: *«no hay `onPress` ⇒ la fila no lleva a ningún lado»*.
+Contra `origin/main` eso es FALSO.** C lo corrigió con medición, y
+verificado por mí contra el objeto compartido —no contra su reporte—:
+
+```
+git show origin/main:…/ventas/configuracion.tsx
+  → «🔴 S99-C · L2 — LA FILA ABRE LA FICHA. D-791 …»
+```
+
+**La fila abre la ficha, el interruptor sigue en `fin` y no se lo lleva el
+tap** — y C además le puso al subtítulo lo que el motor ya sabía
+(`repartidor_sin_cuenta`). *O sea que no solo existe el destino: la fila
+dice más de lo que mi §B3 pedía.*
+
+## La causa, y es peor que un número de línea envejecido
+
+La mesa depositó la regla —*los números de línea de otra pista se
+re-buscan por grep, jamás se usan tal cual*— y es correcta. **Pero mi
+error no fue citar `:921`: fue que grepeé y ME DIO `:921` con el código
+viejo adentro.**
+
+Medido: `git merge-base --is-ancestor origin/main HEAD` → **NO**. *Mi
+worktree está atrás de `main`.*
+
+> ## **UN GREP EN TU PROPIO WORKTREE MIDE TU RAMA, NO EL PRODUCTO.**
+> Con cuatro pistas en paralelo, mi árbol es una **foto vieja del
+> territorio ajeno** — y no avisa: devuelve un número de línea, un
+> fragmento de código y toda la apariencia de una medición.
+>
+> ⇒ **territorio propio se mide en el worktree; territorio ajeno se mide
+> contra `origin/main`.** *Es la hermana exacta de L-217 («en origin» no
+> es «en el canon»), del otro lado del espejo: acá lo que está en el
+> canon no está en mi árbol, y leerlo igual da un falso NEGATIVO.*
+
+## Qué sobrevive de §D y qué se cae
+
+| | |
+|---|---|
+| **§D2, la ley** — *en configuración todo se lista en filas; el bloque no es un ítem de la lista, es la pantalla a la que la fila lleva* | ✅ **SOBREVIVE, y C la CONFIRMÓ sin haberla leído**: resolvió el pedido haciendo que la fila fuera una puerta, que es exactamente lo que la ley manda |
+| **§D3** — B2 y B3 como las dos mitades de esa puerta | ✅ sobrevive; C las ejecutó |
+| **§D1** — *«falta el destino»* | 🔴 **SE CAE.** El destino existe |
+
+## ⇒ Y ENTONCES QUÉ FALTA DE VERDAD
+
+Lo que el founder pidió y sigue sin estar: **VER EL ESTADO SIN ENTRAR.**
+
+*Que la fila abra la ficha resuelve «quiero ver todo de esta persona». No
+resuelve «quiero saber cómo está mi operación de un vistazo», que es otra
+pregunta y se contesta en la lista, no adentro.* **Eso sí es la gramática
+de bloque, y es lo único que queda de este frente.**

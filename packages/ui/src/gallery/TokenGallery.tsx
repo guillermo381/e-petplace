@@ -86,6 +86,8 @@ import { EvidenciaFoto, EvidenciaFotoThumbnail, type EvidenciaFotoEstado } from 
 import { BarrasSemana } from '../components/BarrasSemana'
 import { CantoMarca } from '../components/CantoMarca'
 import { Entrada } from '../components/Entrada'
+import { EntradaDeCruce } from '../components/EntradaDeCruce'
+import { registrarCruce } from '../components/cruce'
 import { EvitaTeclado } from '../components/EvitaTeclado'
 import { Huella } from '../brand/Huella'
 import { MapaRecorrido, type PuntoTrackMapa } from '../components/MapaRecorrido'
@@ -1121,6 +1123,7 @@ function LoRechazado() {
 function PiezasFaltantes() {
   const { theme } = useTheme()
   const [remonte, setRemonte] = useState(0)
+  const [cruceVisible, setCruceVisible] = useState(true)
   const [hojaScrollAbierta, setHojaScrollAbierta] = useState(false)
   // S99-B · el pie fijo, en sus DOS estados: con desborde (el filete
   // aparece) y sin desborde (no hay nada tapado ⇒ no hay filete).
@@ -1151,6 +1154,52 @@ function PiezasFaltantes() {
           <Entrada><Texto variante="seccion">lo primero que el ojo encuentra</Texto></Entrada>
           <Entrada orden={1}><Texto variante="cuerpo">lo segundo</Texto></Entrada>
           <Entrada orden={2}><Texto variante="apoyo">lo tercero</Texto></Entrada>
+        </View>
+      </View>
+
+      {/* EntradaDeCruce — hermana de Entrada por el OTRO eje. La muestra
+          tiene que EMULAR el cruce entero (registrar la dirección y
+          volver visible la ventana), porque la pieza no acepta una
+          dirección por prop: la lee del gesto. Es exactamente lo que la
+          hace difícil de mostrar y lo que la hace correcta. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          EntradaDeCruce — 300 ms · desde 32 (spacing[8]) · la dirección la escribe la PUERTA, no el consumidor. Sin cruce previo NO se anima
+        </Texto>
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          <Boton
+            variante="compacto"
+            etiqueta="cruzar →"
+            onPress={() => {
+              registrarCruce('derecha')
+              setCruceVisible(false)
+              setTimeout(() => setCruceVisible(true), 16)
+            }}
+          />
+          <Boton
+            variante="compacto"
+            etiqueta="← cruzar"
+            onPress={() => {
+              registrarCruce('izquierda')
+              setCruceVisible(false)
+              setTimeout(() => setCruceVisible(true), 16)
+            }}
+          />
+          <Boton
+            variante="compacto"
+            etiqueta="sin puerta"
+            onPress={() => {
+              setCruceVisible(false)
+              setTimeout(() => setCruceVisible(true), 16)
+            }}
+          />
+        </View>
+        <View style={{ minHeight: 56 }}>
+          <EntradaDeCruce activo={cruceVisible}>
+            <Tarjeta>
+              <Texto variante="cuerpo">la ventana que llega</Texto>
+            </Tarjeta>
+          </EntradaDeCruce>
         </View>
       </View>
 

@@ -105,6 +105,7 @@ export {
   type PuertaHermanaProps,
 } from './components/PuertaHermana'
 export { registrarCruce, tomarCruce, type DireccionCruce } from './components/cruce'
+export { EntradaDeCruce, type EntradaDeCruceProps } from './components/EntradaDeCruce'
 export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {
