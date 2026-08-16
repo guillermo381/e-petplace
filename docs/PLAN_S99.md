@@ -242,6 +242,12 @@ transversales toda la sesión.**
 >   extracción PROPONE, la persona FIRMA)**, y el PDF es caso NUEVO del
 >   arco de IA: **al Excel determinista §14 NO le aplica; al PDF SÍ —
 >   POST-15-SEP sin cambio.**
+>   **✒️ FIRMA DEL FOUNDER (18-ago, confirmación): EL PDF-FACTURA QUEDA EN
+>   SEPTIEMBRE, SIN CAMBIO — la fecha de §14 rige tal cual. La
+>   consecuencia para OCTUBRE, escrita para que nadie la dé por caída ni
+>   por incluida: la carga por EXCEL DETERMINISTA SÍ llega al lanzamiento
+>   (motor entregado; sin §14 porque no es IA) · la lectura de facturas
+>   en PDF NO llega.**
 >
 > ### 🔴 DICTADO DEL FOUNDER (18-ago, con referencia visual — dos capturas de Rappi): EL SEGUIMIENTO DEL PEDIDO. B forma · D montaje · A censo.
 >
