@@ -918,10 +918,23 @@ export default function ConfiguracionVentas() {
                 {pantalla.repartidores.map((rep, i) => (
                   <View key={rep.repartidor_id}>
                     {i > 0 && <Separador />}
+                    {/* 🔴 S99-C · L2 — LA FILA ABRE LA FICHA. D-791 lo dice
+                        con todas las letras: «reconstruir la sección sin
+                        caminos de edición sería reconstruir el defecto».
+                        Hasta hoy un repartidor se daba de alta y quedaba
+                        inmutable: un documento mal tipeado quedaba mal para
+                        siempre.
+                        El interruptor SIGUE en `fin` y no se lo lleva el
+                        tap: activar/desactivar es un acto de UNA vez desde
+                        la lista — mandarlo adentro de la ficha obligaría a
+                        entrar y salir para apagar a alguien. */}
                     <Celda
                       titulo={rep.nombre}
                       subtitulo={rep.activo ? undefined : t('ventas.config.repartidorInactivo')}
                       metadataMono={rep.documento}
+                      interactiva
+                      accessibilityRole="button"
+                      onPress={() => router.push(`/ventas/repartidor/${rep.repartidor_id}`)}
                       fin={
                         <Interruptor
                           encendido={rep.activo}
@@ -939,12 +952,7 @@ export default function ConfiguracionVentas() {
               variante="secundario"
               bloque
               etiqueta={t('ventas.config.repartidorNuevoCta')}
-              onPress={() => {
-                setRepNombre('');
-                setRepDocumento('');
-                setRepTelefono('');
-                setAltaRepartidor(true);
-              }}
+              onPress={() => router.push('/ventas/repartidor/nuevo')}
             />
           </View>
 
@@ -1070,181 +1078,23 @@ export default function ConfiguracionVentas() {
         </View>
       </Hoja>
 
-      {/* ── hoja: repartidor nuevo ── */}
-      <Hoja
-        visible={altaRepartidor}
-        onCerrar={() => {
-          if (!guardando) setAltaRepartidor(false);
-        }}
-        titulo={t('ventas.config.repartidorNuevoCta')}
-        altura="media"
-      >
-        <HojaScroll>
-          <EvitaTeclado>
-            <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-              <Campo
-                label={t('ventas.config.repartidorNombre')}
-                value={repNombre}
-                onChangeText={setRepNombre}
-                deshabilitado={guardando}
-              />
-              <Campo
-                label={t('ventas.config.repartidorDocumento')}
-                value={repDocumento}
-                onChangeText={setRepDocumento}
-                keyboardType="number-pad"
-                deshabilitado={guardando}
-              />
-              {/* El teléfono con su indicativo — pieza de la casa, no una
-                  caja nueva: `ControlTelefono` ya resuelve el par
-                  selector+campo con UN solo pie, porque lo que se valida es
-                  el E.164 que forman JUNTOS. El placeholder va SIN prefijo:
-                  el indicativo está a la izquierda y repetirlo enseñaría a
-                  escribirlo dos veces. */}
-              <ControlTelefono
-                label={t('ventas.config.repartidorTelefono')}
-                placeholder={t('ventas.config.repartidorTelefonoPlaceholder')}
-                valor={repTelefono}
-                onCambio={setRepTelefono}
-                bandera={bandera(repPaisIso)}
-                prefijo={paisDe(paises, repPaisIso)?.prefijo ?? ''}
-                onElegirPais={() => setEligiendoPais(true)}
-                /* La voz EN VIVO muestra el E.164 que se va a guardar — el
-                   vendedor VE `+593988777666` antes de tocar Guardar, que es
-                   justo lo que habría destapado el `0` de más sin necesidad
-                   de un instrumento. Sin nada tipeado, la ayuda genérica. */
-                ayuda={estadoTelefonoRep()?.voz ?? t('ventas.config.repartidorTelefonoAyuda')}
-                error={
-                  estadoTelefonoRep()?.ok === false ? estadoTelefonoRep()?.voz : undefined
-                }
-              />
-              {/* WhatsApp — **no opcional** (firma: «debemos poder
-                  comunicarnos con él»). Comparte el país del teléfono: pedir
-                  dos indicativos para la misma persona sería preguntar dos
-                  veces lo mismo. */}
-              <Campo
-                label={t('ventas.config.repartidorWhatsapp')}
-                value={repWhatsapp}
-                onChangeText={setRepWhatsapp}
-                placeholder={t('ventas.config.repartidorTelefonoPlaceholder')}
-                keyboardType="phone-pad"
-                ayuda={t('ventas.config.repartidorWhatsappAyuda')}
-                deshabilitado={guardando}
-              />
-              {/* Tipo de documento — vocabulario CERRADO del catálogo
-                  `cat_tipos_documento_titular`, que ya existía. No se inventa
-                  una lista nueva. */}
-              <SelectorOpcion
-                etiqueta={t('ventas.config.repartidorTipoDoc')}
-                disposicion="fila"
-                acento="oficio"
-                seleccionada={repTipoDoc ?? undefined}
-                opciones={[
-                  { codigo: 'CEDULA', etiqueta: t('ventas.config.tipoDoc.cedula') },
-                  { codigo: 'PASAPORTE', etiqueta: t('ventas.config.tipoDoc.pasaporte') },
-                  { codigo: 'RUC', etiqueta: t('ventas.config.tipoDoc.ruc') },
-                ]}
-                onSelect={(c) => setRepTipoDoc(c as 'CEDULA' | 'PASAPORTE' | 'RUC')}
-              />
-              {/* LAS DOS FOTOS. Hoy se DIGITA y la foto acompaña; cuando el
-                  endpoint de visión exista, leerá la del documento y llenará
-                  tipo y número. **La digitación NO es el andamio provisional
-                  que se tira: es el camino que queda vivo** — un campo no
-                  legible tiene que poder completarse a mano, y la regla del
-                  carnet rige igual (L-139: campo no legible = null honesto,
-                  jamás inventado; un número de cédula plausible y equivocado
-                  es peor que un vacío, porque el vacío se llena y el
-                  equivocado se firma). */}
-              <FotoDelRepartidor
-                etiqueta={t('ventas.config.repartidorFotoDoc')}
-                uri={repFotoDocUri}
-                onElegir={setRepFotoDocUri}
-                deshabilitado={guardando || subiendo}
-                marcarSubiendo={setSubiendo}
-                alFallar={() => mostrar({ texto: t('ventas.config.repartidorFotoFallo'), variante: 'error' })}
-              />
-              <FotoDelRepartidor
-                etiqueta={t('ventas.config.repartidorFotoPersona')}
-                uri={repFotoUri}
-                onElegir={setRepFotoUri}
-                deshabilitado={guardando || subiendo}
-                marcarSubiendo={setSubiendo}
-                alFallar={() => mostrar({ texto: t('ventas.config.repartidorFotoFallo'), variante: 'error' })}
-              />
-              {/* LOS VEHÍCULOS — hasta dos, y el tope es de la FUENTE. */}
-              <Texto variante="apoyo">{t('ventas.config.repartidorVehiculos')}</Texto>
-              {repVehiculos.map((v, i) => (
-                <View key={`veh-${i}`} style={{ gap: spacing[2] }}>
-                  <SelectorOpcion
-                    etiqueta={t('ventas.config.repartidorVehiculoTipo')}
-                    disposicion="fila"
-                    acento="oficio"
-                    seleccionada={v.tipo}
-                    opciones={[
-                      { codigo: 'moto', etiqueta: t('ventas.config.vehiculo.moto') },
-                      { codigo: 'carro', etiqueta: t('ventas.config.vehiculo.carro') },
-                    ]}
-                    onSelect={(codigo) =>
-                      setRepVehiculos((prev) =>
-                        prev.map((x, j) => (j === i ? { ...x, tipo: codigo as 'moto' | 'carro' } : x)),
-                      )
-                    }
-                  />
-                  <Campo
-                    label={t('ventas.config.repartidorPlaca')}
-                    value={v.placa}
-                    onChangeText={(texto) =>
-                      setRepVehiculos((prev) =>
-                        prev.map((x, j) => (j === i ? { ...x, placa: texto } : x)),
-                      )
-                    }
-                    autoCapitalize="characters"
-                    deshabilitado={guardando}
-                  />
-                </View>
-              ))}
-              {repVehiculos.length < 2 && (
-                <Boton
-                  variante="compacto"
-                  etiqueta={t('ventas.config.repartidorAgregarVehiculo')}
-                  onPress={() => setRepVehiculos((prev) => [...prev, { tipo: 'moto', placa: '' }])}
-                  deshabilitado={guardando}
-                />
-              )}
-              {/* EL CTA APAGADO DICE QUÉ FALTA, SIEMPRE (precedente S73). Un
-                  botón gris sin explicación manda a adivinar, y acá hay dos
-                  campos nuevos que el vendedor no sabe que son obligatorios:
-                  la foto vive lejos del botón y el WhatsApp parece opcional
-                  porque el teléfono de arriba lo es. */}
-              {(repFotoUri === null || repWhatsapp.trim().length === 0) &&
-                repNombre.trim().length > 0 &&
-                repDocumento.trim().length > 0 && (
-                  <Texto variante="apoyo">
-                    {repFotoUri === null && repWhatsapp.trim().length === 0
-                      ? t('ventas.config.repartidorFaltanDos')
-                      : repFotoUri === null
-                        ? t('ventas.config.repartidorFaltaFoto')
-                        : t('ventas.config.repartidorFaltaWhatsapp')}
-                  </Texto>
-                )}
-              <Boton
-                variante="primario"
-                bloque
-                cargando={guardando}
-                deshabilitado={
-                  repNombre.trim().length === 0 ||
-                  repDocumento.trim().length === 0 ||
-                  repFotoUri === null ||
-                  repWhatsapp.trim().length === 0 ||
-                  estadoTelefonoRep()?.ok === false
-                }
-                etiqueta={t('ventas.config.repartidorGuardarCta')}
-                onPress={() => void guardarRepartidor()}
-              />
-            </View>
-          </EvitaTeclado>
-        </HojaScroll>
-      </Hoja>
+      {/* ☠️ S99-C · L2 — ACÁ VIVÍA LA HOJA DE ALTA DEL REPARTIDOR (174
+          líneas, 12 controles en una columna plana). **Murió entera**: la
+          ficha es PANTALLA, no Hoja (`/ventas/repartidor/[id]`), y su
+          razón no es de tamaño — una Hoja es para una DECISIÓN, una
+          pantalla es para un SUJETO, y acá hay una persona con identidad,
+          papeles, vehículos e historia.
+
+          🔴 **Y LO QUE NO SE FUE CON ELLA — el hallazgo que un borrado
+          prolijo se lleva puesto:** el `ControlTelefono` que vivía acá era
+          del TELÉFONO CONVENCIONAL, que la firma manda matar
+          (*«teléfonos convencionales no pedimos, solo WhatsApp»*). Pero era
+          **el único campo con selector de indicativo**, y el que sobrevive
+          —WhatsApp— no lo tenía. **El selector SE MUDÓ a la ficha, no se
+          borró**: sin él, el WhatsApp obligatorio compone un E.164 sin
+          indicativo que la fuente rebota. *Nadie lo iba a ver: el diff de
+          un borrado se lee como una resta.* */}
+
 
       {/* ── el país del teléfono del repartidor ──
           Misma anatomía que la del perfil: bandera + nombre + indicativo en

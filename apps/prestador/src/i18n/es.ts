@@ -3005,6 +3005,61 @@ export const prestadorEs = {
   // productos», jamás una familia dentro de Servicios. Voz del que TRABAJA:
   // acá el escalón se llama por su nombre («Empacado»), no con la narrativa
   // de la familia — el mismo hecho, dos audiencias (método §6).
+  /* ⭐ S99-C · L2 — LA FICHA DEL REPARTIDOR. No es un formulario: es la
+     ficha de la persona que toca el timbre de una familia (receta §0). La
+     voz sigue esa frase: pide como quien anota a alguien, no como quien
+     completa un trámite. Y el correo pide SIN DISCULPARSE — su ayuda dice
+     PARA QUÉ sirve, jamás por qué lo necesitamos (firma del founder: el
+     correo es garantía del vendedor, no problema del sistema). */
+  fichaRepartidor: {
+    tituloNuevo: 'Nuevo repartidor',
+    tituloEditar: 'Ficha del repartidor',
+    espejoRotulo: 'Así lo ve la familia',
+    espejoSinNombre: 'Sin nombre todavía',
+    espejoSinVehiculo: 'Sin vehículo todavía',
+    fotoTitulo: 'Foto de la persona',
+    fotoAyuda: 'Es la cara que ve la familia cuando abre la puerta.',
+    fotoTomar: 'Agregar foto',
+    fotoCambiar: 'Cambiar foto',
+    nombre: 'Nombre y apellido',
+    seccionContacto: 'Cómo se lo alcanza',
+    whatsapp: 'WhatsApp',
+    whatsappAyuda: 'Es el único canal para llegar a él.',
+    correo: 'Correo',
+    correoAyuda: 'Con este correo entra a la app.',
+    correoInvalido: 'Falta el @ o lo que va después. Por ejemplo: nombre@correo.com',
+    seccionIdentidad: 'Quién responde por él',
+    tipoDocumento: 'Tipo de documento',
+    documento: 'Número de documento',
+    documentoFoto: 'Foto del documento',
+    documentoFotoAgregar: 'Agregar foto del documento',
+    documentoFotoVer: 'Ver documento',
+    documentoFotoCambiar: 'Cambiar',
+    seccionVehiculos: 'Con qué llega',
+    vehiculoTipo: 'Tipo',
+    vehiculoPlaca: 'Placa',
+    vehiculoAgregar: 'Agregar vehículo',
+    vehiculoQuitar: 'Quitar',
+    placaVacia: 'Falta la placa.',
+    placaFormatoMoto: 'Una placa de moto lleva 2 letras, 3 números y una letra — por ejemplo, AB 123 C.',
+    placaFormatoCarro: 'Una placa de carro lleva 3 letras y 3 o 4 números — por ejemplo, ABC 1234.',
+    seccionViajes: 'Sus viajes',
+    viajesSinEntregas: 'Todavía no hizo entregas.',
+    viajesEsteMes_one: '{{count}} entrega este mes.',
+    viajesEsteMes_other: '{{count}} entregas este mes.',
+    guardar: 'Guardar',
+    faltaFoto: 'Falta la foto de la persona.',
+    faltaNombre: 'Falta el nombre.',
+    faltaDocumento: 'Falta el documento.',
+    faltaWhatsapp: 'Falta el WhatsApp.',
+    faltaCorreo: 'Falta el correo.',
+    guardado: 'Repartidor guardado.',
+    fotoFallo: 'No pudimos subir la foto. Probá de nuevo.',
+    permisoCamara: 'Sin permiso de cámara no podemos tomar la foto. Se cambia en los ajustes del teléfono.',
+    cargando: 'Cargando la ficha…',
+    noSePudoCargar: 'No pudimos cargar esta ficha.',
+    reintentar: 'Reintentar',
+  },
   ventas: {
     entradaTitulo: 'Venta de productos',
     entradaDetalle: 'Pedidos, stock y reparto',
