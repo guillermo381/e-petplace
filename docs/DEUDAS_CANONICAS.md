@@ -16941,3 +16941,33 @@ prueba.
 ☠️ **Muere** cuando la disciplina de mutación esté escrita en el header de
 la auto-prueba (el lugar que todo autor de regla lee) y las reglas tocadas
 desde hoy la traigan corrida.
+
+#### D-833 — 🟡 LA GALERÍA ACUMULÓ LO DESCARTADO (firma del founder, 16-ago-2026 — dueño B; PENDIENTE, no urgente: NO se ejecuta en S99)
+
+**La firma, verbatim:** *«en la pantalla de galería de tokens hay
+demasiadas cosas deprecadas, deberíamos eliminar lo que se descartó.
+Dejalo como deuda pendiente.»*
+
+**El porqué que la vuelve más que prolijidad:** la galería es donde el
+founder GATEA las piezas — si está llena de cosas muertas, la que espera
+su firma queda enterrada. **Ya pasó:** la lámina del `moto` estaba al
+final de una página de 95 secciones.
+
+**LA GUARDA que la hace segura** — porque una limpieza es exactamente
+donde algo vivo se borra por parecer muerto:
+1. Se borra lo **DESCARTADO CON LITERAL** (una candidata que perdió su
+   gate, una pieza jubilada por firma) — **jamás lo que «parece viejo»**.
+2. **Lo que espera gate NO se toca:** el `moto` v2 vive en la galería
+   esperando el ojo del founder, y las tres candidatas anteriores están
+   registradas como FALLADAS con su razón, no borradas. *Una candidata
+   fallada con su razón es documentación, no basura.*
+3. **La lápida se conserva:** la casa ya decidió una vez que la razón de
+   un descarte vale más que el descarte. Se retira de la VISTA, se
+   conserva el PORQUÉ.
+
+**Discriminador de cierre: cada baja nombra el literal que la descartó.
+Sin literal, no se borra.**
+
+☠️ **Muere** cuando la galería quede con solo lo vivo y lo que espera
+firma, cada baja con su literal nombrado, y la lámina que espere gate
+ARRIBA.
