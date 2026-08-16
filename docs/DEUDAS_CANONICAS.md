@@ -11708,6 +11708,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-240 — UN GUARD QUE SOLO VALE DESPUÉS DEL CAMBIO NO PROTEGE EL CAMBIO (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
+
+  **El caso (R46):** la regla vigila que toda superficie que le pide a un repartidor su WhatsApp componga al menos UN `ControlTelefono` — **cierto HOY** (lo aporta el campo de teléfono) · **cierto CUANDO el teléfono muera** (lo aporta el WhatsApp) · **FALSO exactamente en el estado que hay que impedir** (el borrado que se lleva el selector sin que nadie lo mude). *El guard da verde a los dos lados del cambio y solo el estado intermedio —el que la regla existe para atrapar— lo pone rojo… si alguien lo comete y lo corre.*
+
+  **El porqué, que es el que se olvida:** el defecto se manifiesta como **UNA RESTA PROLIJA, y nadie revisa por qué algo NO se hizo.** Un diff de borrado se lee como una resta y no como una pérdida — es la hermana de S84 (*«un dato que dice "no se puede" no se descubre nunca»*) en su forma de código.
+
+  **La forma exigible:** al escribir un guard para proteger UNA TRANSICIÓN, se verifica que dé ROJO en el estado intermedio prohibido — no solo verde en los dos estados legales. Un guard que pasa antes y pasa después no ha probado nada sobre el medio.
+
 - **L-239 — HAY COMANDOS CUYO ÉXITO NO RESPONDE LA PREGUNTA (S99 — depositada por orden de mesa, 15-ago-2026, con el repro de C).**
 
   **El repro, literal de C y medido en vivo ANTES de su push:** `git ls-remote --heads origin <ref>` devuelve **EXIT 0 con salida VACÍA cuando el ref NO existe**. La orden de mesa decía *«leé el EXIT»* — y ese exit habría **CONFIRMADO que la rama estaba justo cuando no estaba**. **El error de la orden fue de MESA, no de C** — se declara porque *una ley que nace corrigiendo a quien la dictó vale más que una que nadie tuvo que corregir*.
@@ -16908,3 +16916,28 @@ El optimizador queda declarado FUERA. La frontera con el FIFO del local es
 ☠️ **Muere** cuando un repartidor real salga con N pedidos, los vea como
 UNA salida ordenada, y pueda reordenarlos con el dedo sin romper ninguna
 ventana comprometida.
+
+#### D-832 — 🔴 LA AUTO-PRUEBA VERIFICA QUE UNA REGLA SALGA ROJA, NO POR QUÉ (hueco del MECANISMO — dueño B; nace del atrape de B sobre su propia R46, 16-ago-2026)
+
+**El hallazgo, con el literal de B:** discriminó su propio rojo POR
+MUTACIÓN (sacó el caso malo del fixture y la regla quedó verde) y descubrió
+que **el rojo venía del CASO y no del ancla** — *«un rojo por la razón
+equivocada está tan roto como un verde por la razón equivocada — y acá el
+mecanismo de la casa no lo hubiera notado.»*
+
+**Por qué es DEUDA DEL MECANISMO y no nota de R46:** la auto-prueba de
+`verify:diseno` enciende cada regla y verifica que PUEDE dar rojo — pero
+no discrimina CONTRA QUÉ dio rojo. **Afecta a las 38 auto-pruebas**, no a
+una. Es **la séptima muestra de la familia L-235 y la primera EN EL
+AUDITOR DEL AUDITOR** — el instrumento que existe para que los
+instrumentos no mientan tenía el mismo hueco que vino a cerrar.
+
+**Criterio de disparo (exigible):** ① **toda regla NUEVA discrimina su
+rojo por mutación antes de nacer** (quitar el caso malo → verde; el ancla
+sola no basta) · ② **las existentes se auditan AL TOCARLAS** — no hay
+barrido masivo: la deuda se paga regla a regla, con la mutación como
+prueba.
+
+☠️ **Muere** cuando la disciplina de mutación esté escrita en el header de
+la auto-prueba (el lugar que todo autor de regla lee) y las reglas tocadas
+desde hoy la traigan corrida.
