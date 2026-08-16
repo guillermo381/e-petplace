@@ -2365,6 +2365,7 @@ export const prestadorEn = {
     titulo: 'Your history',
     entrada: 'Your history',
     entradaDetalle: 'Past visits and appointments',
+    entradaDetalleVenta: 'Past orders',
     natCitas: 'Services',
     natPedidos: 'Orders',
     natEtiqueta: 'Which history you are viewing',

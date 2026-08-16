@@ -2963,6 +2963,13 @@ export const prestadorEs = {
     titulo: 'Tu histórico',
     entrada: 'Tu histórico',
     entradaDetalle: 'Las atenciones y citas que ya pasaron',
+    /* ⭐ S99-D · LA VOZ DE LA POBLACIÓN VENDEDOR — hallazgo ② del gate del
+       founder, adjudicado por mesa. La voz de arriba habla de «atenciones y
+       citas», y para el vendedor puro **lo que esa pantalla lista son
+       PEDIDOS**: su app jamás habla de citas ni de atenciones. *Una entrada
+       que promete un contenido y abre otro no es un detalle de copy: es la
+       pantalla diciéndole a alguien que este producto no es para él.* */
+    entradaDetalleVenta: 'Los pedidos que ya pasaron',
     // ⭐ S99-D · L4 — las dos naturalezas del archivo. Se nombran con los
     // DOS NOMBRES firmados de la casa (`LETRA_RECORRIDO` §1: «Servicios» y
     // «Venta de productos»), en la voz del que trabaja y en plural corto —
