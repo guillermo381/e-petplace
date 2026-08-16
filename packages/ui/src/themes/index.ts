@@ -140,7 +140,13 @@ const lightOficio: Theme = {
   // en dispositivo. `tealAlpha16` es el tinte de cuidado que la casa ya
   // usa y ya tiene gate WCAG; no es un color nuevo, es el que
   // corresponde. Lo vigila R27 por AUSENCIA, igual que sus tres hermanos.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark },
+  // ⭐ S99-B · `activoLleno` PISADO ACÁ — y es el punto entero de la
+  // firma del founder: *«lo que queríamos en color oscuro es el VERDE
+  // DEL HEADER en el círculo»*. `tealDark` es literalmente el hex con el
+  // que `useMuroOficio` pinta el techo en claro, así que el disco de la
+  // barra y el techo son **el mismo verde por construcción**, no por
+  // coincidencia tecleada. Papel encima: 5.51 (medido S83-B13).
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -184,7 +190,13 @@ const darkOficio: Theme = {
   // color. Reversa: `cta: palette.tealDark, ctaTexto: palette.textDark0`.
   // 🔴 S98-B · `controlBg` pisado también acá (D-813). `tealAlpha15` es el
   // tinte de cuidado del tema oscuro — su par, no un valor nuevo.
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal },
+  // ⭐ S99-B · `activoLleno` PISADO ACÁ, con la vuelta de registro que
+  // §15b.2 manda y que S83-B31 ya midió para el CTA: en oscuro el techo
+  // es `tealDarkNoche`, y un disco de ESE verde sobre la barra oscura
+  // (`bg.card` = `dark1`) separaría **1.4** — el marcador desaparecería.
+  // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
+  // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

@@ -42,7 +42,11 @@ export const memorialTheme = {
     // token no tenía presencia de control (par 1.07 en claro).
     border:   'rgba(143,166,142,.18)',
     warm:     palette.cream,
-    tinta:    palette.tinta,   // S58: constante — el techo del prestador no celebra ni se apaga
+    tinta:    palette.tinta,    // ⏪ S99-B: **ya NO es «el techo del prestador»** — el techo
+                            // ganó el muro tealDark en S61-B12 y este rótulo quedó cuatro
+                            // sesiones vencido. Costó caro: la barra de tabs se pintó de
+                            // NEGRO en el gate 3 por elegir el token LEYENDO su comentario.
+                            // Hoy es tinta y nada más. Su techo vive en `useMuroOficio`.
   },
 
   text: {
@@ -102,6 +106,19 @@ export const memorialTheme = {
     // S82-B r12 — el fondo del Boton `sinCaja` (memorial: la superficie serena que ya existe):
     // el secundario sin borde necesita un canal, y el borde ya no está.
     apoyada:      palette.memorialDark1,
+
+    /** ⭐ S99-B · EL ACTIVO RELLENO (ver la nota larga en `light.ts`).
+     *
+     *  **REQUERIDO también acá, a diferencia de `controlLleno`** —que
+     *  memorial no porta y sus consumidores esquivan con
+     *  `'controlLleno' in theme.accent`—. La razón es de contrato: la
+     *  barra de tabs **siempre** dibuja su disco, así que un slot
+     *  opcional obligaría a la pieza a inventar un fallback, *y un
+     *  fallback es justo el lugar donde se esconde el color equivocado*
+     *  (D-813 vive de eso). Memorial no se saltea el marcador: lo dice
+     *  en su propia voz, con el par sereno que ya usa su CTA. */
+    activoLleno:      palette.textMemorialDark,
+    sobreActivoLleno: palette.memorialDark0,
 
     gradient:       gradients.transparent,   // B1: en memorial, transparent
     gradientSubtle: gradients.transparent,
