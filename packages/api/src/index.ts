@@ -1124,6 +1124,8 @@ export {
   // S99-L5b (N20, adjudicación (a)): los conteos por eje sobre LO COMPRABLE
   // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
   conteosVitrinaPorEje,
+  // S99 · la promesa ANTES de comprar (firma founder) — por VENDEDOR.
+  promesaPorVendedor,
   recomendarParaMascota,
   // S96 (12-ago, 2ª tanda): el paso de entendimiento de §5.4, registrado.
   registrarEntendimientoAlergia,
@@ -1136,6 +1138,7 @@ export {
   type VarianteDeProducto,
   type FichaProducto,
   type ConteosVitrina,
+  type PromesaDeVendedor,
   type Recomendacion,
   type FiltrosVitrina,
   // S96: vocabulario VERBATIM del CHECK y de EstadoComposicion de @epetplace/ui.

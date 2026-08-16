@@ -20804,6 +20804,10 @@ export type Database = {
       }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
+      promesa_por_vendedor: {
+        Args: { p_cuentas: string[]; p_fecha_programada?: string }
+        Returns: Json
+      }
       proponer_producto_canonico: {
         Args: { p_producto: Json; p_variante: Json }
         Returns: Json
