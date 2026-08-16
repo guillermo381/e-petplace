@@ -1,0 +1,16 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260817140000_s99a_lote0_contexto_arranque.sql
+-- Escrita ANTES de aplicar (disciplina de la casa).
+--
+-- QUÉ DESHACE: la función `obtener_contexto_arranque()` entera.
+-- QUÉ NO DESHACE: nada más — la migración es ADITIVA PURA (un CREATE
+--   FUNCTION, cero tablas, cero datos, cero policies tocadas). Los gates
+--   que la función COMPONE (obtener_mi_prestador · empleado_tiene_rol ·
+--   obtener_mi_posicion_en_prestador · obtener_modalidades_por_oficio)
+--   no son de ella y quedan intactos.
+-- ⚠️ NOTA DE BUNDLES (D-662): revertir la función DESPUÉS de publicar un
+--   OTA que la consuma rompe el arranque de ese bundle (el wrapper cae a
+--   error, no a los caminos viejos). Revertir exige revertir también el
+--   bundle o aceptar la ventana rota.
+-- ═══════════════════════════════════════════════════════════════════════════
+DROP FUNCTION IF EXISTS public.obtener_contexto_arranque();

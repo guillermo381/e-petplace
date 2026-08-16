@@ -46,6 +46,7 @@ Las migraciones las **escribe y ejecuta Claude Code** con el schema completo a l
   -- statements a testear
   COMMIT;
   ```
+- **⚠️ `RESET ROLE` bajo `supabase db push` NO vuelve al rol de la migración: vuelve al rol de LOGIN del tool** (S99-A, medido dos veces el mismo día: primero «permission denied for table» en una aserción post-RESET, después «permission denied for schema supabase_migrations» — el propio REGISTRO de la migración falló). Es la clase *«el instrumento respondió sobre otra cosa»* (L-235) en el motor: el RESET funcionó, pero restauró a OTRO rol. **El patrón para toda migración que cambie de rol:** capturar `v_rol_mig text := current_user;` al abrir el DO block y restaurar con `EXECUTE format('SET LOCAL ROLE %I', v_rol_mig);` — jamás `RESET ROLE`. (Por `db query` el mismo SQL puede pasar limpio: los dos caminos tienen roles de login distintos — un fixture verde por una vía no prueba la otra.)
 - `now()` es constante dentro de una transacción — no se pueden medir duraciones en un test de bloque único (L-122a). CTEs con efectos secundarios no garantizan orden: tests con efectos van en bloque `DO` imperativo con resultados a tabla (L-073/L-122b). El SQL Editor muestra solo el output del último statement (L-081).
 - Éxito de ejecución ≠ corrección de datos: las verificaciones post-test SON el test (L-063).
 

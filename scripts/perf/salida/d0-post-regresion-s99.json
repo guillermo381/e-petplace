@@ -1,0 +1,216 @@
+{
+ "fecha": "2026-08-16T00:22:46.270Z",
+ "cuenta": "demovet/Aurora",
+ "origen": "escritorio (piso, no teléfono)",
+ "peaje_p50": 162.2,
+ "olas_hoy_censo_b1": 13,
+ "resultados": [
+  {
+   "rotulo": "peaje (catálogo de 1 fila)",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 162.2,
+   "p95": 171.6,
+   "min": 149.3,
+   "max": 171.6,
+   "serie": [
+    169.8,
+    171.6,
+    165.8,
+    165.1,
+    153.8,
+    162.2,
+    149.3,
+    157.5
+   ]
+  },
+  {
+   "rotulo": "obtener_mi_prestador (28 focos)",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 164.3,
+   "p95": 174.3,
+   "min": 161.5,
+   "max": 174.3,
+   "serie": [
+    166.2,
+    161.9,
+    164.3,
+    161.5,
+    174.3,
+    170.3,
+    162.6,
+    165.6
+   ]
+  },
+  {
+   "rotulo": "obtener_jornada_recepcion",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 159.1,
+   "p95": 165.8,
+   "min": 154,
+   "max": 165.8,
+   "serie": [
+    161.9,
+    154,
+    156,
+    159.3,
+    161.6,
+    165.8,
+    155.8,
+    159.1
+   ]
+  },
+  {
+   "rotulo": "obtener_plata_del_dia",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 146.8,
+   "p95": 158.8,
+   "min": 143.9,
+   "max": 158.8,
+   "serie": [
+    158.8,
+    146.8,
+    143.9,
+    145.9,
+    156,
+    153.6,
+    147.4,
+    146.3
+   ]
+  },
+  {
+   "rotulo": "citas del día (evento_cita_servicio, 1 oficio)",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 153,
+   "p95": 162.9,
+   "min": 148.1,
+   "max": 162.9,
+   "serie": [
+    162.9,
+    155.1,
+    153,
+    148.1,
+    154.4,
+    151.9,
+    151.3,
+    153.8
+   ]
+  },
+  {
+   "rotulo": "cupo_reparto_del_dia",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 154.7,
+   "p95": 171.8,
+   "min": 150.1,
+   "max": 171.8,
+   "serie": [
+    159.3,
+    150.1,
+    171.8,
+    151.1,
+    154.7,
+    152.2,
+    161.7,
+    157.5
+   ]
+  },
+  {
+   "rotulo": "v_pedidos_narrativa (lista panel)",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 154.4,
+   "p95": 172.4,
+   "min": 147.6,
+   "max": 172.4,
+   "serie": [
+    172.4,
+    152.5,
+    159.1,
+    154.4,
+    162.8,
+    162.5,
+    148.9,
+    147.6
+   ]
+  },
+  {
+   "rotulo": "v_pedidos_narrativa POR RANGO (nuevo)",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 152.4,
+   "p95": 162.2,
+   "min": 141.8,
+   "max": 162.2,
+   "serie": [
+    152.4,
+    159.4,
+    149,
+    141.8,
+    161.9,
+    162.2,
+    157.7,
+    149.6
+   ]
+  },
+  {
+   "rotulo": "repartidores de la cuenta",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 150.7,
+   "p95": 159.8,
+   "min": 147,
+   "max": 159.8,
+   "serie": [
+    153.5,
+    148.6,
+    156.6,
+    150.4,
+    159.8,
+    155.1,
+    147,
+    150.7
+   ]
+  },
+  {
+   "rotulo": "mis cuentas comerciales",
+   "veces": 8,
+   "calentar": 2,
+   "p50": 155.7,
+   "p95": 161,
+   "min": 151.7,
+   "max": 161,
+   "serie": [
+    160.9,
+    154.9,
+    156.1,
+    153.2,
+    161,
+    155.7,
+    151.7,
+    157.9
+   ]
+  },
+  {
+   "rotulo": "prólogo serial del HOY (3 olas de identidad)",
+   "veces": 6,
+   "calentar": 1,
+   "p50": 466.1,
+   "p95": 558.4,
+   "min": 443.5,
+   "max": 558.4,
+   "serie": [
+    443.5,
+    468.7,
+    558.4,
+    462.9,
+    477.4,
+    466.1
+   ]
+  }
+ ]
+}
