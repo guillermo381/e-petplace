@@ -1,3 +1,4 @@
+import type { EscalonAtender } from './capacidad-atender';
 /**
  * LA COMPOSICIÓN DE LA BARRA — UNA SOLA FUENTE (S98-C · D-819).
  *
@@ -38,6 +39,16 @@ export interface CapacidadDeBarra {
   esGestor: boolean;
   /** El **Y** de §2.1bis: rol de mostrador Y capacidad — abre ATENDER. */
   montaAtender: boolean;
+  /* 🔴 S99-D · L-251 — EL ESCALÓN DE ATENDER, y vive ACÁ porque **el destino
+     de una tab es de la barra**. La decisión la toma `escalonDeAtender()`
+     (pieza de C, 6/6 contra sus casos); esto solo la transporta hasta el
+     único lugar que puede ejecutarla.
+     ⚠️ **Y ese reparto no es de prolijidad: es el freno que C midió.** Con
+     UNA sola capacidad la tentación es que la tab monte un `Redirect` — y
+     entonces el atrás del destino vuelve a la tab, que redirige otra vez:
+     **el back queda en una ratonera.** Primo de L-249 y del encierro de
+     D-836 que acabo de curar. *La tab no rebota: la barra apunta.* */
+  escalonAtender: EscalonAtender;
 }
 
 /**
