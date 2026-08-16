@@ -11983,6 +11983,7 @@ export type Database = {
           created_at: string
           cuenta_comercial_id: string
           estado: string
+          hay_stock: boolean
           id: string
           moneda: string
           precio: number
@@ -11998,6 +11999,7 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id: string
           estado?: string
+          hay_stock?: boolean
           id?: string
           moneda?: string
           precio: number
@@ -12013,6 +12015,7 @@ export type Database = {
           created_at?: string
           cuenta_comercial_id?: string
           estado?: string
+          hay_stock?: boolean
           id?: string
           moneda?: string
           precio?: number
