@@ -648,18 +648,19 @@ export default function TuTienda() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      {/* ⚠️ EL ISOTIPO DEL TECHO ES PEDIDO A B, Y NO SE IMPROVISA ACÁ.
-          El founder lo firmó («con isotipo en el techo») y **la pieza no lo
-          expone en esta variante**: `Encabezado` lleva isotipo solo en
-          `portada`, que es el techo de las RAÍCES DE TAB y **no tiene
-          `atras`** — y «Tu tienda» se entra desde HOY, así que sin flecha
-          sería un callejón. *Dibujar el isotipo a mano en el cuerpo sería
-          re-implementar un techo: la Ley 11 lo prohíbe, y de paso la casa
-          tendría dos techos que envejecen distinto.* Pedido a B con su
-          medición; hasta entonces el techo dice su nombre y nada más. */}
+      {/* ✅ EL ISOTIPO VUELVE AL TECHO — el freno era correcto y AHORA
+          TIENE PIEZA. `Encabezado` ganó su vuelta en `portada` (B), con la
+          flecha en su propia fila arriba del lockup **y en el mismo punto
+          de pantalla que en `navegacion`**: por eso «Tu tienda» puede tener
+          identidad sin volverse un callejón.
+          *Lo que NO se hizo mientras faltaba: dibujar el isotipo a mano en
+          el cuerpo. Habría sido un segundo techo en la casa, y dos techos
+          envejecen distinto.* La gramática del techo lo pedía desde §1 —
+          esta pantalla es la casa del vendedor, no una subpantalla. */}
       <Encabezado
-        variante="navegacion"
-        titulo={t('ventas.tienda.titulo')}
+        variante="portada"
+        saludo={t('ventas.tienda.titulo')}
+        isotipo="gradiente"
         atras
         onAtras={() => router.back()}
       />
