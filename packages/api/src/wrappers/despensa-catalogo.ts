@@ -353,8 +353,51 @@ function mapearVitrina(filas: unknown[]): ProductoDeVitrina[] | null {
 export interface FiltrosVitrina {
   familia_codigo?: string;
   country_code?: string;
-  /** Tope de filas. Sin tope una vitrina crece sin techo (D-497). */
+  /** 🔴 TECHO DE FILAS — y su default **NO es inocente** (S99, hallazgo de C
+   *  con la vitrina llena): sin pasarlo, este lector corta en **100**, y una
+   *  lista completa y una truncada **se ven igual**. Con 563 comprables
+   *  mostraba un sexto del catálogo y no lo decía.
+   *  ⇒ **la superficie lo pasa EXPLÍCITO**, y para poder decir «100 de 563»
+   *  usa `contarProductosDespensa` con los MISMOS filtros. */
   limite?: number;
+}
+
+/**
+ * CUÁNTOS HAY DE VERDAD — el compañero obligado de `listarProductosDespensa`.
+ *
+ * 🔴 POR QUÉ NACE UNA FUNCIÓN Y NO UN CAMPO EN LA LISTA: cambiar la forma del
+ * retorno rompería a sus consumidores en caliente, y **este número tiene que
+ * poder pedirse SIN traer las filas** (es un `head` de PostgREST: cuenta en el
+ * servidor y no baja ni una fila al teléfono).
+ *
+ * ⚠️ Y LA CONDICIÓN QUE LO VUELVE ÚTIL EN VEZ DE ENGAÑOSO: **cuenta con los
+ * MISMOS filtros que la lista.** Un total global contra una lista filtrada
+ * diría «12 de 563» sobre un conjunto que nunca tuvo 563 — *sería el mismo
+ * defecto con el número al revés.* Por eso comparte `FiltrosVitrina` y repite
+ * los tres `eq` de la lista; el día que la lista gane un filtro, este cuenta
+ * mal hasta que lo gane también, **y por eso viven pegados en el archivo.**
+ */
+export async function contarProductosDespensa(
+  filtros: FiltrosVitrina = {},
+): Promise<ResultadoWrapper<number, CodigoErrorDespensa>> {
+  let q = getClient()
+    .from('ofertas')
+    .select(SELECT_VITRINA, { count: 'exact', head: true })
+    .eq('estado', 'publicada')
+    .eq('producto_variantes.activo', true)
+    .eq('producto_variantes.productos.estado', 'activo');
+
+  if (filtros.familia_codigo !== undefined) {
+    q = q.eq('producto_variantes.productos.familia_codigo', filtros.familia_codigo);
+  }
+  if (filtros.country_code !== undefined) q = q.eq('country_code', filtros.country_code);
+
+  const { count, error } = await q;
+  if (error) return falloDespensa(error.message);
+  // FAIL-CLOSED DE SIGNIFICADO (L-247): un conteo que no llegó NO es cero.
+  // Decir «0 de 0» sobre una vitrina llena es peor que no decir nada.
+  if (typeof count !== 'number') return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: count };
 }
 
 /**

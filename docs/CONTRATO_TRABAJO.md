@@ -428,6 +428,53 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 ---
 
+### Enmienda Sesión 99 — EL MERGE A `main` ES DE UNA SOLA MANO (regla 88)
+
+> **Con varias pistas en vuelo, `main` lo escribe UNA sola pista — la
+> conductora. Las demás entregan por su rama y NO pushean a `main`.**
+
+**El incidente que la funda (S99, sin daño):** la conductora mergeó y pusheó;
+el push **rebotó** porque otra pista había subido a `main` en paralelo. Se
+integró, se re-verificó la combinación (cuatro typechecks + `verify:diseno`)
+y salió bien. **Salió bien porque el choque fue en el ÍNDICE de git, que
+avisa.** *El próximo va a ser en un archivo compartido, que no avisa: se
+resuelve solo, con una de las dos versiones perdiendo en silencio.*
+
+**Por qué es regla y no preferencia** — es la forma de la **85** (worktree por
+pista) aplicada al DESTINO en vez de al origen: **el aislamiento de los
+árboles no sirve de nada si el punto de fusión lo escriben cuatro manos.** Y
+tiene una razón operativa propia: **el ancla de todo OTA es el commit de
+fusión** (regla 86), así que quien publica tiene que poder afirmar qué hay en
+`main` **en el instante en que arma el bundle** — y no puede afirmarlo si otro
+está empujando al mismo tiempo.
+
+**Lo que la regla NO prohíbe:** que una pista traiga `main` a su rama
+(`git merge main`) todas las veces que quiera — **eso es lo contrario del
+problema: es leer**. Lo que sale de una sola mano es **escribir** `main`.
+
+**Discriminador de cumplimiento, barato:** al cerrar, `git ls-remote origin
+refs/heads/main` tiene que dar el mismo sha que la conductora acaba de
+pushear. *Si dio otro, alguien más escribió, y hay que releer antes de
+publicar cualquier cosa.*
+
+---
+
+### ⚠️ COLISIÓN DE NUMERACIÓN DECLARADA — HAY DOS REGLAS 87 (medido S99, NO resuelta acá)
+
+**El literal:** el changelog tiene **`v1.27 (S97)` → regla 87 = el
+`SALTAR_GATE` declara un rojo con nombre** y **`v1.30 (S88)` → regla 87 = un
+aparato conectado no es un aparato libre.** **Son dos reglas distintas con el
+mismo número, y las dos ya viajaron** (están citadas en actas y partes).
+
+**Por qué se declara en vez de renumerarse:** con `D-832` —la colisión gemela
+de esta misma sesión— se corrió **la que todavía no había viajado**. **Acá
+las dos viajaron**, así que mover cualquiera invalida citas vivas. *Dos
+reglas con el mismo número es peor que un hueco, porque las dos parecen
+legítimas — pero renumerar a ciegas rompe lo que ya se citó.* **Lo arbitra la
+mesa; entretanto, quien cite la 87 dice cuál de las dos.**
+
+---
+
 ### Enmienda Sesión 97 — El `SALTAR_GATE` declara UN rojo con NOMBRE (regla 87)
 
 > **Un `SALTAR_GATE` declara UN rojo, con su nombre. Si el aviso trae OTRO
