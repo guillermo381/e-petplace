@@ -198,6 +198,7 @@ export default function VentaMostrador() {
                   {i > 0 && <Separador />}
                   <Celda
                     titulo={sku.producto_nombre}
+                    tituloEntero
                     subtitulo={sku.presentacion}
                     metadataMono={
                       sku.precio_publicado !== null
@@ -298,6 +299,7 @@ export default function VentaMostrador() {
                   {i > 0 && <Separador />}
                   <Celda
                     titulo={sku.producto_nombre}
+                    tituloEntero
                     subtitulo={
                       sku.precio_publicado === null
                         ? `${sku.presentacion} · ${t('ventas.mostrador.sinPrecio')}`

@@ -1772,7 +1772,13 @@ const BASELINE_R42_CLASES = {
   'apps/cliente/src/app/(tabs)/cuenta/perfil.tsx': 'CURABLE · dueño del lote del cliente',
   'apps/cliente/src/components/HojaFotoMascota.tsx':
     'CURABLE · dueño del lote del cliente. ⚠️ Su propia cabecera ya lo pedía desde S82: «cuando SelectorAvatar gane el encuadre de la casa, esta Hoja muere absorbida» — la deuda estaba declarada por su autor antes de que existiera la pieza.',
-  'apps/prestador/src/app/ventas/configuracion.tsx': 'CURABLE · dueño del lote del prestador',
+  /* ☠️ S99-C · L2 — SALE con la Hoja de alta que la contenía. Su puerta
+     era `FotoDelRepartidor`, dos botones inline sin cerrojo; **murió con
+     su Hoja** y su reemplazo es `HojaCaptura` en la ficha
+     (`/ventas/repartidor/[id]`), que trae el cerrojo. Los dos imports
+     quedaron muertos un rato y se retiraron acá — el mismo residuo que
+     `cuenta/perfil.tsx` (R42 mira la PRESENCIA del identificador, no la
+     llamada). */
   /* ☠️ S99-C · SALE, y NO por migración: era un FALSO POSITIVO del
      instrumento. R42 mira la PRESENCIA de los dos identificadores, y acá
      `capturarConCamara` estaba **importado y jamás llamado** — cero
