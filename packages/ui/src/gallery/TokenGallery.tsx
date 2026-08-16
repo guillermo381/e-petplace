@@ -5028,6 +5028,20 @@ function GaleriaInterna() {
                 accionDer={<CampanaDemo />}
               />
             </View>
+            {/* S99-B · PORTADA **CON VUELTA** — el caso que no era
+                expresable: un MUNDO al que se entra desde otro («Tu
+                tienda», desde HOY). El isotipo preside y la vuelta vive
+                en su propia fila, en el mismo punto de la pantalla que en
+                `navegacion`. */}
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                atras
+                onAtras={() => {}}
+                isotipo="gradiente"
+                saludo="Tu tienda"
+              />
+            </View>
           </View>
         </Seccion>
 
