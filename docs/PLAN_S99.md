@@ -174,6 +174,26 @@ transversales toda la sesión.**
    es una). **La ficha completa:** foto · nombre · documento · WhatsApp
    con indicativo · correo-llave · vehículos (**máx 2 POR CONSTRUCCIÓN,
    jamás escrito en pantalla**) · viajes DERIVADOS.
+   **Y LA FIRMA QUE CIERRA EL ÚLTIMO PUNTO ABIERTO DE L2 (founder, 15-ago,
+   verbatim):** *«hoy en conversación con el vendedor, me debe garantizar
+   que el repartidor tenga un correo con el que se pueda loguear. Ese no
+   va a ser un problema de V1, y en V2 vamos con OTP por WhatsApp.»*
+   ⇒ **EL CORREO ES GARANTÍA DEL VENDEDOR, no problema del sistema** —
+   quien da de alta a un repartidor responde por que tenga con qué entrar.
+   **Cambia el diseño de la pantalla: el alta NO necesita camino de escape
+   ni ayuda para crear correo — el campo es obligatorio y punto. MENOS
+   superficie, no más.** Y la voz del alta lo pide **sin disculparse**:
+   como un dato que el vendedor ya tiene, jamás como un requisito que hay
+   que justificar. ⇒ **OTP POR WHATSAPP = ARCO FUTURO v2, no deuda de
+   esta sesión** — nadie lo espera para octubre; su dependencia tiene
+   nombre: las plantillas de Meta siguen rebotando como marketing y
+   WhatsApp se retoma en sesión propia (§0quater de NOTIFICACIONES). La
+   nota de arquitectura que lo vuelve barato ya rige (enmienda 2 de esta
+   §4): **la identidad de registro es el TELÉFONO (el WhatsApp con
+   indicativo, obligatorio); el correo es solo la LLAVE** — cuando OTP
+   entre, se cambia la puerta y no la persona.
+   ⇒ **L2 QUEDA SIN NINGUNA DECISIÓN DE PRODUCTO ABIERTA. El Gate 2 mira
+   ejecución, no decisiones.**
 5. **LA COLA DEL PEDIDO SE REORDENA (firma del founder, 15-ago):**
    ① **«no entra a la cola ningún pedido que no esté cien por ciento
    confirmado que ya está el pago»** ⇒ la banda ③ ESPERANDO **SE RETIRA**
