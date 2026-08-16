@@ -638,6 +638,42 @@ equivocada (símbolo vs objeto). El brief corregido decía *«se dibuja PARA
 el pin sobre fondo de mapa»* — le faltaba la mitad que esta enmienda
 nombra.
 
+## 6quinquies. LA BARRA LÍQUIDA — LAS DOS FIRMAS DEL FOUNDER (18-ago-2026, S99)
+
+**El verbatim:** *«voy a tomar en cuenta las dos opciones que me das, A y
+A. Solo en la primera, que la huella viva dentro del disco, no estoy
+seguro cómo se vería. Dejemos las dos en A; si la huella dentro del disco
+se ve mal, en ese caso quitaríamos la huella y priorizamos el dinamismo
+del menú.»*
+
+**① LA HUELLA VIVE DENTRO DEL DISCO — firmada, CON SALIDA DECLARADA
+(enmienda a la ley de la huella de tab, §2.6: la huella no muere, SE MUDA
+DE SITIO — el disco es el lugar; la huella sigue siendo la marca).**
+**🔴 La condicional es PARTE de la firma, no una reserva:** si la huella
+dentro del disco se ve mal, SE QUITA LA HUELLA y gana el dinamismo — *el
+founder firmó las dos ramas por adelantado.* **Consecuencia operativa
+para B (lo que la firma le regala):** construye LAS DOS variantes — con
+huella y sin huella — y las trae JUNTAS al gate; el juicio es la
+comparación, por L-241 en la app corriendo, jamás lámina. **Y el criterio
+del gate, escrito para que no sea gusto: la huella entra si a ese tamaño
+SE LEE como huella.** Una huella que a 24 px es una mancha no es
+identidad, es ruido — y ahí la propia condicional ya la mata.
+
+**② ☠️ ATENDER DEJA DE ESTAR DESTACADA — firmada. El disco del activo es
+el ÚNICO énfasis de la barra.** El argumento que la sostiene, para que
+nadie la reabra: **con L-251, ATENDER PUEDE NO EXISTIR — un tab que a
+veces no está no puede ser el centro de gravedad permanente de la
+barra.** La destacada nació cuando ATENDER era fija (S98); dejó de serlo
+en esta misma sesión. *(Lápida gemela en `LA_CASA_DEL_PRESTADOR`; con
+esta firma cierra el 🟡 del Gate 1 — que ya venía muriendo por
+composición y ahora muere también por forma.)*
+
+**③ EL HUECO SE RECORTA, NO SE PINTA (ratificada sin firma porque es
+técnica y B ya la resolvió — hoy L-252):** toda pieza que dependa del
+color del fondo se RECORTA; pintar el fondo adentro de la pieza es una
+copia que diverge sin avisar — y su modo de falla es el PEOR: *funciona
+justo en la pantalla donde se lo probó.*
+
 > *Tercera vez que la casa elige la razón angosta antes que estirar una
 > viva: `no_aplica` como cuarto estado de composición (S96) · la
 > huella-discriminador (S99) · y esta.*

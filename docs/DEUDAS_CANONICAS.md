@@ -11711,6 +11711,12 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-252 — EL HUECO SE RECORTA, NO SE PINTA: TODA PIEZA QUE DEPENDA DEL COLOR DEL FONDO SE RECORTA (S99 — resuelta por B en la barra líquida, ratificada por mesa 18-ago-2026).**
+
+  **El caso:** el disco de la barra líquida se separa de la barra por un hueco DEL COLOR DEL FONDO. Pintar ese hueco (copiar el color del fondo adentro de la pieza) funciona… **justo en la pantalla donde se lo probó** — y diverge sin avisar con el tema, el memorial o cualquier capa nueva: la mancha con forma de media luna no se degrada, aparece. **El modo de falla es el peor porque el verde local es perfecto.**
+
+  **COROLARIO EXIGIBLE:** una pieza que necesita «ver» el fondo lo RECORTA (transparencia real / máscara), jamás lo replica. *Pintar el fondo adentro de la pieza es una copia que diverge sin avisar* — la clase gemela de las dos verdades (D-662): dos fuentes del mismo color terminan diciendo colores distintos.
+
 - **L-251 — UN MENÚ DE UNA OPCIÓN NO ES UN MENÚ: ES UN PEAJE (S99 — ley del dictado del founder, 18-ago-2026; funda los tres escalones de ATENDER).**
 
   **El literal que la funda:** *«si solo tengo venta de productos, ya me muestra la vitrina, para que no tengamos que hacer un clic innecesario. Solo me muestra las opciones cuando tengo más de una.»*
@@ -17187,6 +17193,46 @@ callejón por el camino normal y el forense decide gratis: línea sin
 veredicto = la cadena cuelga · sin línea = el efecto no corre). La
 condición de muerte NO cambia — cambia quién trae el rojo.
 
+#### D-838 — 🔴 LA SIEMBRA MASIVA DE LA VITRINA SE ELIMINA ANTES DE LA OFERTA REAL (orden del founder 18-ago; la deuda se escribió ANTES de sembrar — es la condición, no un trámite)
+
+**El verbatim que la ordena:** *«todavía tenemos que cargar el stock real
+del cliente, pero para las pruebas necesito que me pongas la mayor
+cantidad de productos posibles… Dejalo como deuda, que hay que
+eliminarlos para cargar la oferta real.»*
+
+**Qué se sembró y por qué es barato:** NO se crearon productos (M21
+intacta) — se crearon OFERTAS sobre el canónico existente, por las
+MISMAS puertas del vendedor real (`proponer_sku_vendedor` en bucle +
+`publicar_oferta_sku` como e-PetPlace). Script:
+`supabase/dev/seed-siembra-masiva-s99.sql`.
+
+**LAS CUATRO CONDICIONES, cumplidas al nacer:**
+1. **LA CUENTA ES BORRABLE Y ESTÁ DECLARADA:** todo vive en
+   `eec12ef3` («Despensa de Pruebas (borrable)») — ya en el censo de
+   borrado de D-766. **Cero siembra en Aurora ni en ninguna cuenta de
+   producción** (la lección del Aceite de Salmón, medida esta sesión).
+   **El cruce del founder, resuelto y no improvisado:** la vitrina del
+   cliente es GLOBAL (lee ofertas publicadas de cualquier cuenta) — el
+   founder la ve desde SU cuenta de familia sin que su cuenta venda nada.
+2. **LA MARCA VIVE EN EL DATO, no en una lista:** todo SKU sembrado lleva
+   `sku_vendedor LIKE 'SIEMBRA-S99-%'` (y los rechazados, motivo con
+   prefijo `SIEMBRA:`). **El discriminador de cierre es un CONTEO, no una
+   declaración:** `SELECT count(*) FROM vendedor_skus WHERE sku_vendedor
+   LIKE 'SIEMBRA-S99-%'` **= 0, MEDIDO** (y cero ofertas colgando de esos
+   skus).
+3. **REVERSA BARATA POR CONSTRUCCIÓN:** stock 0 en TODA la siembra
+   (L-231: cero movimientos de ledger que limpiar — la vitrina no filtra
+   por stock, medido, así que el despliegue/filtros se prueban igual).
+   Borrar = DELETE de ofertas + skus por la marca.
+4. **NO SE MAQUILLÓ LA REALIDAD:** cero fotos inventadas — la siembra
+   hereda el canónico tal cual (309/470 sin portada), **porque eso es
+   exactamente lo que el founder tiene que ver**: taparlo escondería la
+   decisión de si las fotos del canónico suben de prioridad.
+
+☠️ **Muere ANTES del primer vendedor real con oferta publicada:** DELETE
+por la marca + el conteo del punto 2 en CERO, medido en el acta que la
+cierre.
+
 #### D-836 — 🔴 SE PIERDEN LOS TABS EN PEDIDOS (dictado del founder 18-ago; dueño: D, ALTA)
 
 **Verbatim:** *«de la parte de pedidos se pierden los cuatro tabs, toca
@@ -17222,4 +17268,20 @@ repartidor decide qué shape necesita el motor.
 ☠️ **Muere** cuando la capacidad viva en la ficha del repartidor (motor
 + pantalla), `recursos_reparto` suelto quede jubilado con lápida, y el
 cupo del día siga computando igual (cinturón con el ANTES medido).
+
+**ENMIENDA (18-ago noche): EL MOTOR ESTÁ PAGADO — queda la SUPERFICIE
+(C).** El disparo sonó (la caminata de C: *«la pantalla describe con
+fidelidad un modelo equivocado»*) y la migración `20260817230000`
+entregó: `recursos_reparto.repartidor_id` (FK nueva) · backfill SOLO
+inequívoco (3 atados 1×1; **Aurora NULL A PROPÓSITO** — 2 repartidores,
+la ambigüedad la resuelve el vendedor en pantalla, jamás una migración
+adivinando) · `configurar_capacidad_repartidor` con la firma S96 hecha
+puerta (propio → ADOPTA el suelto único → crea; jamás duplica) ·
+`cupo_reparto_del_dia` INTACTO (cinturón: cupo idéntico cuenta por
+cuenta, adopción probada y revertida, residuo 0 — **y midió sobre el
+LUNES próximo, no HOY: un domingo el cupo es 0 legítimamente y el primer
+intento del cinturón cayó ahí**). Lector: `Repartidor.capacidad` en
+`listarRepartidores` (embed por la FK, L-247) + wrapper
+`configurarCapacidadRepartidor`. **La ficha del repartidor de C ya puede
+decir la verdad del modelo.**
 
