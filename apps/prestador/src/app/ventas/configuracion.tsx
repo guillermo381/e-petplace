@@ -148,15 +148,16 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  obtenerContextoArranque,
   obtenerMiPrestador,
   actualizarRepartidor,
-  cerrarSesion,
   cupoRepartoDelDia,
   definirRecursoReparto,
   definirTurnoEntrega,
   listarPedidosDelVendedor,
   listarRecursosReparto,
   listarRepartidores,
+  configurarVentaMostrador,
   listarTurnosEntrega,
   type RecursoReparto,
   type Repartidor,
@@ -164,6 +165,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { invalidarCapacidadAtender } from '@/lib/capacidad-atender';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
 
@@ -190,6 +192,9 @@ type Pantalla =
        *  tolerante que la cifra del techo en la lista: la línea del guard
        *  no se monta — ausencia, jamás un número inventado). */
       cupoHoy: { capacidad: number; consumido: number } | null;
+      /** «Atiendo en mi local» para venta de productos. `null` = no se
+       *  pudo leer y el control NO se monta. */
+      ventaMostrador: boolean | null;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -259,7 +264,6 @@ export default function ConfiguracionVentas() {
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
   const [guardando, setGuardando] = useState(false);
-  const [cerrando, setCerrando] = useState(false);
 
   // ⑥ la explicación del estado (el modal que el chip abre)
   const [modalEstado, setModalEstado] = useState(false);
@@ -338,7 +342,7 @@ export default function ConfiguracionVentas() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, recursos, turnos, pedidos, cupo, pres] = await Promise.all([
+        const [reps, recursos, turnos, pedidos, cupo, pres, arranque] = await Promise.all([
           listarRepartidores(id),
           listarRecursosReparto(id),
           listarTurnosEntrega(id),
@@ -349,6 +353,10 @@ export default function ConfiguracionVentas() {
              pantalla es el único camino a sus datos fiscales. Viaja en la
              misma ola — cero espera nueva. */
           obtenerMiPrestador(),
+          /* La perilla «atiendo en mi local» de la VENTA DE PRODUCTOS —
+             SIEMPRE FRESCA y en la MISMA ola (el contexto de arranque ya la
+             trae; pedirla aparte sería un peaje por un booleano). */
+          obtenerContextoArranque(),
         ]);
         if (!vigente()) return;
         if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
@@ -370,6 +378,10 @@ export default function ConfiguracionVentas() {
           cupoHoy: cupo.ok
             ? { capacidad: cupo.data.capacidad, consumido: cupo.data.consumido }
             : null,
+          /* `null` = no se pudo leer ⇒ el interruptor NO se dibuja. Un
+             control de estado que no conoce su estado miente en cuanto se
+             pinta: encendido o apagado, uno de los dos es falso. */
+          ventaMostrador: arranque.ok ? arranque.data.ventaMostradorActiva : null,
         });
       }
     },
@@ -578,7 +590,76 @@ export default function ConfiguracionVentas() {
                   onPress={() => setModalEstado(true)}
                 />
               </View>
-              <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+              {/* 🔴 S99-C — EL PÁRRAFO SOLO CUANDO ES VERDAD. Se pintaba
+                  SIEMPRE, así que con la cuenta **Activa** el chip decía
+                  una cosa y el texto de abajo —«e-PetPlace lo revisa y lo
+                  hace visible»— decía la contraria. *Dos afirmaciones
+                  opuestas en la misma pantalla no confunden a medias: la
+                  persona elige cuál creer, y suele ser la de abajo porque
+                  es la que explica.* Es la voz de una cuenta que TODAVÍA
+                  no está activa; con la cuenta activa sobra. */}
+              {estadoCfg.clave !== 'activa' && (
+                <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+              )}
+            </View>
+          )}
+
+          {/* ⭐ S99-C · «ATIENDO EN MI LOCAL» — dictado del founder: vive
+              ACÁ. Es la perilla de la CUENTA para la venta de productos
+              (`venta_mostrador_activa`), no el `atiende_local` por servicio
+              —ése es de cada oficio y vive en su taller—.
+              **Lo que decide, dicho:** prendida, la baldosa de mostrador se
+              compone en ATENDER; apagada, **no existe** (jamás en gris —
+              un control muerto enseña que la pantalla está rota).
+              Y si el lector falló (`null`) **no se dibuja**: un control de
+              estado que no conoce su estado miente apenas se pinta. */}
+          {pantalla.ventaMostrador !== null && (
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('ventas.config.localTitulo')}</Texto>
+              <Tarjeta relleno="normal">
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: spacing[3],
+                  }}
+                >
+                  <View style={{ flex: 1, gap: spacing[1] }}>
+                    <Texto variante="cuerpo">{t('ventas.config.localEtiqueta')}</Texto>
+                    <Texto variante="apoyo">{t('ventas.config.localDetalle')}</Texto>
+                  </View>
+                  <Interruptor
+                    encendido={pantalla.ventaMostrador}
+                    etiqueta={t('ventas.config.localEtiqueta')}
+                    registro="oficio"
+                    onCambio={(v) => {
+                      const antes = pantalla.ventaMostrador;
+                      /* Optimista y REVERSIBLE: si el servidor rebota se
+                         vuelve al valor anterior y se dice. Dejarlo movido
+                         sería un interruptor que promete estado y no lo
+                         tiene — el defecto que esta misma pantalla ya
+                         declara en su cabecera. */
+                      setPantalla({ ...pantalla, ventaMostrador: v });
+                      void configurarVentaMostrador(
+                        pantalla.contexto.cuentaComercialId,
+                        v,
+                      ).then((r) => {
+                        if (!r.ok) {
+                          setPantalla({ ...pantalla, ventaMostrador: antes });
+                          mostrar({ texto: r.mensaje, variante: 'error' });
+                          return;
+                        }
+                        /* La capacidad de ATENDER cambió: el espejo se
+                           invalida o la barra seguiría con la verdad
+                           vieja hasta el próximo login. */
+                        invalidarCapacidadAtender();
+                        setPantalla({ ...pantalla, ventaMostrador: r.data.ventaMostradorActiva });
+                      });
+                    }}
+                  />
+                </View>
+              </Tarjeta>
             </View>
           )}
 
@@ -679,7 +760,29 @@ export default function ConfiguracionVentas() {
                     <Celda
                       titulo={rep.nombre}
                     tituloEntero
-                      subtitulo={rep.activo ? undefined : t('ventas.config.repartidorInactivo')}
+                      /* 🔴 S99-C — LA FILA DICE LO QUE EL MOTOR YA SABE.
+                         Medido en el aparato: Marco se pintaba EXACTAMENTE
+                         igual que Diego, y `user_id IS NULL` ⇒ el guard #9
+                         rebota TODO despacho suyo (`repartidor_sin_cuenta`,
+                         probado en §XI). El vendedor le asignaba un envío y
+                         rebotaba sin entender por qué. **El dato ya viajaba
+                         y la fila no lo usaba** — quinta muestra de la
+                         clase «la información está y nadie la dice», y la
+                         más cara por frecuencia: CADA repartidor pasa por
+                         este estado entre el alta y el reclamo.
+                         Ley 23 al pie: **se dice ANTES de que lo intente**.
+                         Y la voz nombra QUÉ falta y QUIÉN lo resuelve — lo
+                         resuelve ÉL entrando a la app, no el vendedor. Los
+                         dos estados conviven (puede estar inactivo Y sin
+                         reclamar), así que se COMPONEN, no se pisan. */
+                      subtitulo={
+                        [
+                          rep.activo ? null : t('ventas.config.repartidorInactivo'),
+                          rep.user_id === null ? t('ventas.config.repartidorSinReclamar') : null,
+                        ]
+                          .filter((x): x is string => x !== null)
+                          .join(' · ') || undefined
+                      }
                       metadataMono={rep.documento}
                       interactiva
                       accessibilityRole="button"
@@ -777,25 +880,15 @@ export default function ConfiguracionVentas() {
             </Tarjeta>
           )}
 
-          {/* S96-C: para el VENDEDOR PURO (raíz → /ventas, sin tabs) esta
-              es su única superficie estable — sin esto no tiene forma de
-              cerrar sesión en ningún lado. Al salir, el guard raíz
-              re-evalúa y aterriza en la bienvenida; el caché del contexto
-              se invalida solo (escucha de auth en cuenta-ventas). */}
-          <Boton
-            variante="ghost"
-            bloque
-            cargando={cerrando}
-            etiqueta={t('sesion.cerrarSesion')}
-            onPress={() => {
-              if (cerrando) return;
-              setCerrando(true);
-              void cerrarSesion().then(() => {
-                setCerrando(false);
-                router.replace('/(tabs)');
-              });
-            }}
-          />
+          {/* ☠️ S99-C · ACÁ VIVÍA «CERRAR SESIÓN», y se MUDÓ, no murió.
+              Orden del founder: no va en configuración. **Pero estaba por
+              una razón viva** —el vendedor puro no tiene tabs y ésta era su
+              única superficie estable—, así que borrarla a secas habría
+              repetido exactamente la ratonera que L-249 acaba de costar con
+              el repartidor. *Una salida no se quita: se pone donde
+              corresponde.* Vive ahora **al pie de `/ventas`, su casa**, con
+              el mismo discriminador (`sinOtraCasa`): quien tiene tabs ya
+              tiene la suya en Cuenta. */}
         </ScrollView>
       )}
 

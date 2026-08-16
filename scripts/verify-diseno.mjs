@@ -1720,7 +1720,12 @@ const RELLENO_APPS = Array.from({ length: MINIMOS_CORPUS.apps }, (_, i) => ({
 // («BAJÓ: actualizar baseline»). Declarado a B, dueña del instrumento.
 const BASELINE_R36 = 20;
 const BASELINE_R37 = 3;
-const BASELINE_R38 = 6;
+// S99-C · 6 → 5: la Hoja de alta que murió en `ventas/configuracion.tsx` se
+// llevó sus separadores. **El trinquete se aprieta en el mismo commit que lo
+// baja** — un baseline que queda flojo deja volver la regresión SIN que el
+// lint diga nada, y en un solo-baja eso es peor que no tener la regla: el
+// número más chico se lee como progreso mientras la puerta sigue abierta.
+const BASELINE_R38 = 5;
 const BASELINE_R39 = 6;
 const PRESUPUESTO_SEPARADORES = 3;
 /** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
