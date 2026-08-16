@@ -2527,6 +2527,11 @@ export const prestadorEn = {
       razon_sin_momento_etario: 'We still need to say what age it is for.',
       razon_sin_foto: 'We still need its photo.',
     },
+    tienda: {
+      titulo: 'Your store',
+      vitrinaTitulo: 'Your shelf',
+      localTitulo: 'Your shop',
+    },
     vitrina: {
       vistaLista: 'List',
       vistaIconos: 'Icons',
@@ -2567,14 +2572,10 @@ export const prestadorEn = {
       cancelado: 'Cancelled',
     },
     hoy: {
-      grupoTrabajo: 'Your work today',
-      vitrina: 'Your storefront',
       vitrinaDetalle: 'What families see',
       titulo: 'Product sales',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
       cupoCero: 'No delivery capacity confirmed for today',
-      configuracion: 'Settings',
-      mostrador: 'Counter sale',
       entregas: 'My deliveries today',
       entregasDetalle: 'What you deliver yourself',
       vacioTitulo: 'No orders yet',
@@ -2708,7 +2709,6 @@ export const prestadorEn = {
       exito: 'Sale recorded.',
     },
     config: {
-      titulo: 'Settings',
       detalle:
         'Complete your business at your own pace. e-PetPlace reviews it and makes it visible to customers.',
       // ⑥ the status (§8.6bis) — "under review" → "active"

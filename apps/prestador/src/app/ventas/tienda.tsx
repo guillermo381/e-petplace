@@ -118,8 +118,15 @@
  *    propia cuenta del gate (vendedor puro, 0 filas de prestador).
  */
 
-import { useCallback, useState } from 'react';
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -140,6 +147,7 @@ import {
   MarcaDeAgua,
   radius,
   SelectorOpcion,
+  SelectorSegmentado,
   Separador,
   Tarjeta,
   Texto,
@@ -157,11 +165,31 @@ import {
   listarRepartidores,
   configurarVentaMostrador,
   listarTurnosEntrega,
+  conteosVitrinaPorEje,
+  listarProductosDespensa,
+  listarSkusDelVendedor,
+  type ConteosVitrina,
+  type ProductoDeVitrina,
   type Repartidor,
+  type SkuDelVendedor,
   type TurnoEntrega,
 } from '@epetplace/api';
 
+import { type IdiomaSoportado } from '@epetplace/i18n';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useTraduccion } from '@/i18n';
+import { HojaAjusteStock } from '@/components/hoja-ajuste-stock';
+import { InterruptorEspejo, type ModoEspejo } from '@/components/interruptor-espejo';
+import {
+  CaraAdministrar,
+  CaraCliente,
+  FiltroEspecie,
+  TODAS,
+  filtrarPorEspecie,
+  type VistaProductos,
+} from '@/components/vitrina-piezas';
 import { invalidarCapacidadAtender } from '@/lib/capacidad-atender';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { horaDeSql, hoyLocalISO } from '@/lib/ventas-formato';
@@ -191,6 +219,15 @@ type Pantalla =
       /** «Atiendo en mi local» para venta de productos. `null` = no se
        *  pudo leer y el control NO se monta. */
       ventaMostrador: boolean | null;
+      /* ── TU VITRINA (S99-C, firma del founder 16-ago) ─────────────────
+         Las dos caras del espejo viajan en LA MISMA ola que el local: son
+         una sola pantalla y necesitan las dos para poder compararse. */
+      vitrina: ProductoDeVitrina[];
+      skus: SkuDelVendedor[];
+      /** `null` = los conteos fallaron; los ejes NO se dibujan (jamás un
+       *  filtro con números inventados). Degradar el FILTRO es honesto;
+       *  degradar la lista sería esconder catálogo. */
+      conteos: ConteosVitrina | null;
     };
 
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -250,12 +287,50 @@ function estadoDespensa(estadoCuenta: string): {
    cerrojo sincrónico. */
 
 
-export default function ConfiguracionVentas() {
+/** 🔴 EL TECHO DEL CATÁLOGO — cura un defecto SILENCIOSO: el lector corta
+ *  en `limite ?? 100` y esta sección lo llamaba con `{}`. Contra la base
+ *  viva hay **563 ofertas comprables** ⇒ mostraba 100 y callaba 463. *Una
+ *  lista completa y una truncada se ven igual.* El techo no desaparece:
+ *  **se declara** cuando se alcanza. */
+const TECHO_CATALOGO = 600;
+
+/** LA VENTANA — **30, medido**. Fila real ≈57 dp (título de una línea) /
+ *  ≈78 (dos) contra ≈487 dp útiles ⇒ **6-8 filas por pantalla**. Y lo que
+ *  decide no es el scroll: la ventana **no pide nada al servidor** (corta
+ *  un array ya en memoria), así que agrandarla solo MONTA más — y el modo
+ *  caro es ÍCONOS, con una foto 4:3 por ítem. Se dimensiona por el modo
+ *  pesado porque la ventana es UNA para los dos: que encogiera al cambiar
+ *  de vista tiraría filas que el vendedor ya recorrió. */
+const TAM_VENTANA = 30;
+
+/** **La elección de vista SE RECUERDA**, y en el DISPOSITIVO: es de la
+ *  vista, no de la cuenta. */
+const LLAVE_VISTA = 'vitrina.vista';
+
+export default function TuTienda() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
+
+  /* ── EL ESTADO DE TU VITRINA — vive acá porque **acá vive el scroll**.
+     Las piezas de `vitrina-piezas.tsx` son presentacionales a propósito:
+     el renderer es UNO y por eso el espejo sigue siendo espejo. */
+  const [modo, setModo] = useState<ModoEspejo>('administrar');
+  const [especie, setEspecie] = useState<string>(TODAS);
+  const [busca, setBusca] = useState('');
+  const [vista, setVista] = useState<VistaProductos>('lista');
+  const [ventana, setVentana] = useState(TAM_VENTANA);
+  const cargandoVentana = useRef(false);
+  /** El SKU que se está ajustando. `null` = la Hoja no está montada. */
+  const [ajustandoStock, setAjustandoStock] = useState<SkuDelVendedor | null>(null);
+
+  useEffect(() => {
+    void AsyncStorage.getItem(LLAVE_VISTA).then((v) => {
+      if (v === 'iconos' || v === 'lista') setVista(v);
+    });
+  }, []);
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
@@ -332,7 +407,8 @@ export default function ConfiguracionVentas() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, turnos, pedidos, cupo, pres, arranque] = await Promise.all([
+        const [reps, turnos, pedidos, cupo, pres, arranque, vit, skus, conteos] =
+          await Promise.all([
           listarRepartidores(id),
           listarTurnosEntrega(id),
           listarPedidosDelVendedor(id),
@@ -346,9 +422,18 @@ export default function ConfiguracionVentas() {
              SIEMPRE FRESCA y en la MISMA ola (el contexto de arranque ya la
              trae; pedirla aparte sería un peaje por un booleano). */
           obtenerContextoArranque(),
-        ]);
+          /* ── TU VITRINA, en la MISMA ola ────────────────────────────
+             🔴 EL TECHO VIAJA EXPLÍCITO: con `{}` el lector cae en su
+             `?? 100` y la vitrina mostraría 100 de 563 **sin decirlo**.
+             Es la ley que salió de acá y hoy rige la casa: *una lista
+             completa y una truncada se ven igual, así que todo lector
+             con techo por defecto lo declara en su llamada.* */
+            listarProductosDespensa({ limite: TECHO_CATALOGO }),
+            listarSkusDelVendedor(id),
+            conteosVitrinaPorEje(),
+          ]);
         if (!vigente()) return;
-        if (!reps.ok || !turnos.ok || !pedidos.ok) {
+        if (!reps.ok || !turnos.ok || !pedidos.ok || !vit.ok || !skus.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
@@ -370,6 +455,9 @@ export default function ConfiguracionVentas() {
              control de estado que no conoce su estado miente en cuanto se
              pinta: encendido o apagado, uno de los dos es falso. */
           ventaMostrador: arranque.ok ? arranque.data.ventaMostradorActiva : null,
+          vitrina: vit.data,
+          skus: skus.data,
+          conteos: conteos.ok ? conteos.data : null,
         });
       }
     },
@@ -393,6 +481,49 @@ export default function ConfiguracionVentas() {
   /** Reintento desde el estado de error. Los altas NO lo usan: llaman
    *  `cargar()` directo (ver la nota de la carrera arriba). */
   const recargar = () => setIntento((n) => n + 1);
+
+  /* ── LOS DERIVADOS DE TU VITRINA ──────────────────────────────────────
+     EL FILTRO DE TEXTO — **una sola implementación para las dos caras**.
+     Si cada cara buscara distinto, el vendedor encontraría un producto en
+     un modo y no en el otro, y el espejo dejaría de serlo justo donde más
+     se nota. */
+  const coincide = useCallback(
+    (nombre: string, marca: string | null) => {
+      const q = busca.trim().toLowerCase();
+      if (q.length === 0) return true;
+      return nombre.toLowerCase().includes(q) || (marca ?? '').toLowerCase().includes(q);
+    },
+    [busca],
+  );
+
+  /* Los SKUs de este vendedor que NO llegaron a la vitrina — la diferencia
+     entre las dos caras, que es la información del espejo. */
+  const ausentes =
+    pantalla.estado === 'listo'
+      ? (() => {
+          const publicadas = new Set(pantalla.vitrina.map((p) => p.variante_id));
+          return pantalla.skus.filter((s2) => !publicadas.has(s2.variante_id)).length;
+        })()
+      : 0;
+
+  /* Carga al llegar al final, **jamás un botón**: un «cargar más» le pide
+     al pulgar que confirme lo que ya pidió con el scroll. El `ref` es el
+     cerrojo — sin él, dos eventos seguidos suman DOS tandas y la ventana
+     salta sin que nadie haya bajado tanto.
+     ⚠️ El umbral va en PÍXELES y no en índice de fila: 600 dp son ~10
+     filas en LISTA y ~2 tarjetas en ÍCONOS. *Un índice de fila sería el
+     instrumento correcto en un modo y el equivocado en el otro.* */
+  const alLlegarAlFinal = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    const faltan = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    if (faltan > 600 || cargandoVentana.current) return;
+    cargandoVentana.current = true;
+    setVentana((v) => v + TAM_VENTANA);
+    setTimeout(() => {
+      cargandoVentana.current = false;
+    }, 300);
+  }, []);
+
 
   /* ⑥ — las claves van LITERALES, jamás armadas por concatenación: el
      diccionario tipado rompe con una key inexistente y un template lo
@@ -498,9 +629,18 @@ export default function ConfiguracionVentas() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
+      {/* ⚠️ EL ISOTIPO DEL TECHO ES PEDIDO A B, Y NO SE IMPROVISA ACÁ.
+          El founder lo firmó («con isotipo en el techo») y **la pieza no lo
+          expone en esta variante**: `Encabezado` lleva isotipo solo en
+          `portada`, que es el techo de las RAÍCES DE TAB y **no tiene
+          `atras`** — y «Tu tienda» se entra desde HOY, así que sin flecha
+          sería un callejón. *Dibujar el isotipo a mano en el cuerpo sería
+          re-implementar un techo: la Ley 11 lo prohíbe, y de paso la casa
+          tendría dos techos que envejecen distinto.* Pedido a B con su
+          medición; hasta entonces el techo dice su nombre y nada más. */}
       <Encabezado
         variante="navegacion"
-        titulo={t('ventas.config.titulo')}
+        titulo={t('ventas.tienda.titulo')}
         atras
         onAtras={() => router.back()}
       />
@@ -537,378 +677,517 @@ export default function ConfiguracionVentas() {
       )}
 
       {pantalla.estado === 'listo' && (
+        /* 🔴 LA ESTRUCTURA DE «TU TIENDA», Y SU ORDEN ESTÁ MEDIDO.
+           Firma del founder: **una sola pantalla, dos secciones** — y la
+           razón de que no sean dos pantallas es suya: *la vitrina es donde
+           el vendedor trabaja TODOS LOS DÍAS, configuración es donde entra
+           de vez en cuando, y NEGOCIO y Configuración empezarían a decir lo
+           mismo.*
+
+           **Por qué TU LOCAL va primero aunque la vitrina sea el trabajo
+           diario:** la vitrina termina en una lista con ventana que crece
+           al llegar al final ⇒ **una sección que viva después de ella es
+           inalcanzable.** No es preferencia: con 563 filas no hay pulgar
+           que llegue.
+
+           **Y por qué eso no entierra el trabajo diario:** TU LOCAL
+           **scrollea y se va**, mientras el techo de la vitrina
+           —interruptor · vista · buscador— **queda PEGADO**
+           (`stickyHeaderIndices`). Así la primera pantalla muestra las dos
+           secciones (lo que el founder pidió, literal) y a partir del
+           primer scroll la vitrina se queda con la pantalla entera **sin
+           perder el interruptor de vista**, que es lo que la receta del
+           espejo exige: *un interruptor que se va con el scroll deja al
+           vendedor sin saber en qué modo está justo cuando más abajo
+           llegó.* */
         <ScrollView
+          onScroll={alLlegarAlFinal}
+          scrollEventThrottle={200}
+          stickyHeaderIndices={[1]}
           contentContainerStyle={{
             padding: spacing[4],
             paddingBottom: insets.bottom + spacing[10],
             gap: spacing[5],
           }}
         >
-          {/* ── ⑥ EL ESTADO — el chip chico arriba; EL CHIP MISMO abre su
-              explicación (S97-B: `onPress` en la familia estado — el
-              blanco táctil y el rol viven en la pieza, no se re-deciden
-              acá). El interim del «¿Qué significa?» murió con el
-              ensanche, como estaba declarado. */}
-          {estadoCfg !== null && (
-            <View style={{ gap: spacing[2] }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Insignia
-                  estado={estadoCfg.insignia}
-                  etiqueta={etiquetaEstado}
-                  tamaño="sm"
-                  onPress={() => setModalEstado(true)}
-                />
-              </View>
-              {/* 🔴 S99-C — EL PÁRRAFO SOLO CUANDO ES VERDAD. Se pintaba
-                  SIEMPRE, así que con la cuenta **Activa** el chip decía
-                  una cosa y el texto de abajo —«e-PetPlace lo revisa y lo
-                  hace visible»— decía la contraria. *Dos afirmaciones
-                  opuestas en la misma pantalla no confunden a medias: la
-                  persona elige cuál creer, y suele ser la de abajo porque
-                  es la que explica.* Es la voz de una cuenta que TODAVÍA
-                  no está activa; con la cuenta activa sobra. */}
-              {estadoCfg.clave !== 'activa' && (
-                <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
-              )}
-            </View>
-          )}
-
-          {/* ⭐ S99-C · «ATIENDO EN MI LOCAL» — dictado del founder: vive
-              ACÁ. Es la perilla de la CUENTA para la venta de productos
-              (`venta_mostrador_activa`), no el `atiende_local` por servicio
-              —ése es de cada oficio y vive en su taller—.
-              **Lo que decide, dicho:** prendida, la baldosa de mostrador se
-              compone en ATENDER; apagada, **no existe** (jamás en gris —
-              un control muerto enseña que la pantalla está rota).
-              Y si el lector falló (`null`) **no se dibuja**: un control de
-              estado que no conoce su estado miente apenas se pinta. */}
-          {pantalla.ventaMostrador !== null && (
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('ventas.config.localTitulo')}</Texto>
-              <Tarjeta relleno="normal">
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: spacing[3],
-                  }}
-                >
-                  <View style={{ flex: 1, gap: spacing[1] }}>
-                    <Texto variante="cuerpo">{t('ventas.config.localEtiqueta')}</Texto>
-                    <Texto variante="apoyo">{t('ventas.config.localDetalle')}</Texto>
-                  </View>
-                  <Interruptor
-                    encendido={pantalla.ventaMostrador}
-                    etiqueta={t('ventas.config.localEtiqueta')}
-                    registro="oficio"
-                    onCambio={(v) => {
-                      const antes = pantalla.ventaMostrador;
-                      /* Optimista y REVERSIBLE: si el servidor rebota se
-                         vuelve al valor anterior y se dice. Dejarlo movido
-                         sería un interruptor que promete estado y no lo
-                         tiene — el defecto que esta misma pantalla ya
-                         declara en su cabecera. */
-                      setPantalla({ ...pantalla, ventaMostrador: v });
-                      void configurarVentaMostrador(
-                        pantalla.contexto.cuentaComercialId,
-                        v,
-                      ).then((r) => {
-                        if (!r.ok) {
-                          setPantalla({ ...pantalla, ventaMostrador: antes });
-                          mostrar({ texto: r.mensaje, variante: 'error' });
-                          return;
-                        }
-                        /* La capacidad de ATENDER cambió: el espejo se
-                           invalida o la barra seguiría con la verdad
-                           vieja hasta el próximo login. */
-                        invalidarCapacidadAtender();
-                        setPantalla({ ...pantalla, ventaMostrador: r.data.ventaMostradorActiva });
-                      });
-                    }}
+          {/* ═══ ① TU LOCAL — lo de vez en cuando, arriba y scrolleable ═══
+              ⚠️ **SIN encabezado paraguas, y es decisión declarada.** El
+              founder nombró la sección «TU LOCAL (cortes, repartidores,
+              «Atiendo en mi local»)», y sus tres partes **ya tienen su
+              propio encabezado con su estado** por la gramática de bloque
+              de B (*cada sección declara su estado en su encabezado*).
+              Ponerle un título encima abriría un TERCER nivel de jerarquía
+              para agrupar tres cosas que ya se agrupan por vecindad y por
+              contraste con «Tu vitrina». *Un encabezado que solo repite que
+              lo de abajo va junto no ordena: agrega un piso.* */}
+          <View style={{ gap: spacing[5] }}>
+            {/* ── ⑥ EL ESTADO — el chip chico arriba; EL CHIP MISMO abre su
+                explicación (S97-B: `onPress` en la familia estado — el
+                blanco táctil y el rol viven en la pieza, no se re-deciden
+                acá). El interim del «¿Qué significa?» murió con el
+                ensanche, como estaba declarado. */}
+            {estadoCfg !== null && (
+              <View style={{ gap: spacing[2] }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Insignia
+                    estado={estadoCfg.insignia}
+                    etiqueta={etiquetaEstado}
+                    tamaño="sm"
+                    onPress={() => setModalEstado(true)}
                   />
                 </View>
-              </Tarjeta>
-            </View>
-          )}
+                {/* 🔴 S99-C — EL PÁRRAFO SOLO CUANDO ES VERDAD. Se pintaba
+                    SIEMPRE, así que con la cuenta **Activa** el chip decía
+                    una cosa y el texto de abajo —«e-PetPlace lo revisa y lo
+                    hace visible»— decía la contraria. *Dos afirmaciones
+                    opuestas en la misma pantalla no confunden a medias: la
+                    persona elige cuál creer, y suele ser la de abajo porque
+                    es la que explica.* Es la voz de una cuenta que TODAVÍA
+                    no está activa; con la cuenta activa sobra. */}
+                {estadoCfg.clave !== 'activa' && (
+                  <Texto variante="apoyo">{t('ventas.config.detalle')}</Texto>
+                )}
+              </View>
+            )}
 
-          {/* ── ① QUÉ VENDO · ② CÓMO ENTREGO · ③ COBERTURA — NO SE MONTAN:
-              sin lector ni escritor, un formulario muerto es peor que su
-              ausencia (cabecera). Los contratos exactos viven en el pedido
-              a A del 13-ago; al llegar el esquema entran ACÁ, en este
-              orden, antes del ④.
-              ⚠️ S97 + FIRMA DE MESA (13-ago, 3ª vuelta): son CINCO
-              familias, no tres — `dieta_prescripcion` firmada como familia
-              propia y `accesorio` en el esquema aunque sin carga v1. Este
-              punto de inserción NO asume cantidad: la sección se monta
-              sobre LO QUE EL LECTOR DEVUELVA (map, cero constantes de
-              código ni de conteo) — cinco hoy, N mañana, sin cambio de
-              código acá. La carga ya corrió (442 productos, códigos
-              medidos en 2026-08-13-s97a-esquema-catalogo-maestro.md); lo
-              que falta sigue siendo la ACTIVACIÓN por vendedor (A-1). */}
-
-          {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
-              atención» espera esquema: pedido A-4) ── */}
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
-            <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
-            {pantalla.turnos.length > 0 && (
-              <Tarjeta relleno="ninguno">
-                {pantalla.turnos.map((tur, i) => (
-                  <View key={tur.turno_id}>
-                    {i > 0 && <Separador />}
-                    {/* D-791: la fila REABRE el mismo formulario que la
-                        creó — la puerta upsertea por (cuenta, codigo). */}
-                    <Celda
-                      titulo={tur.codigo}
-                      subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
-                      metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
-                      interactiva
-                      accessibilityRole="button"
-                      onPress={() => {
-                        setTurCodigo(tur.codigo);
-                        setTurCorte(horaDeSql(tur.corte));
-                        setTurDesde(horaDeSql(tur.entrega_desde));
-                        setTurHasta(horaDeSql(tur.entrega_hasta));
-                        setTurDiaSiguiente(tur.dia_offset === 1);
-                        /* EDITAR muestra LO QUE LA FILA TIENE — nunca el
-                           default del alta. Sin esta línea, abrir un corte
-                           L–D para corregirle la hora se lo dejaría en L–V. */
-                        setTurDias(tur.dias_semana);
-                        setTurFestivos(tur.incluye_festivos);
-                        setEditandoTurno(true);
-                        setAltaTurno(true);
+            {/* ⭐ S99-C · «ATIENDO EN MI LOCAL» — dictado del founder: vive
+                ACÁ. Es la perilla de la CUENTA para la venta de productos
+                (`venta_mostrador_activa`), no el `atiende_local` por servicio
+                —ése es de cada oficio y vive en su taller—.
+                **Lo que decide, dicho:** prendida, la baldosa de mostrador se
+                compone en ATENDER; apagada, **no existe** (jamás en gris —
+                un control muerto enseña que la pantalla está rota).
+                Y si el lector falló (`null`) **no se dibuja**: un control de
+                estado que no conoce su estado miente apenas se pinta. */}
+            {pantalla.ventaMostrador !== null && (
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="seccion">{t('ventas.config.localTitulo')}</Texto>
+                <Tarjeta relleno="normal">
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: spacing[3],
+                    }}
+                  >
+                    <View style={{ flex: 1, gap: spacing[1] }}>
+                      <Texto variante="cuerpo">{t('ventas.config.localEtiqueta')}</Texto>
+                      <Texto variante="apoyo">{t('ventas.config.localDetalle')}</Texto>
+                    </View>
+                    <Interruptor
+                      encendido={pantalla.ventaMostrador}
+                      etiqueta={t('ventas.config.localEtiqueta')}
+                      registro="oficio"
+                      onCambio={(v) => {
+                        const antes = pantalla.ventaMostrador;
+                        /* Optimista y REVERSIBLE: si el servidor rebota se
+                           vuelve al valor anterior y se dice. Dejarlo movido
+                           sería un interruptor que promete estado y no lo
+                           tiene — el defecto que esta misma pantalla ya
+                           declara en su cabecera. */
+                        setPantalla({ ...pantalla, ventaMostrador: v });
+                        void configurarVentaMostrador(
+                          pantalla.contexto.cuentaComercialId,
+                          v,
+                        ).then((r) => {
+                          if (!r.ok) {
+                            setPantalla({ ...pantalla, ventaMostrador: antes });
+                            mostrar({ texto: r.mensaje, variante: 'error' });
+                            return;
+                          }
+                          /* La capacidad de ATENDER cambió: el espejo se
+                             invalida o la barra seguiría con la verdad
+                             vieja hasta el próximo login. */
+                          invalidarCapacidadAtender();
+                          setPantalla({ ...pantalla, ventaMostrador: r.data.ventaMostradorActiva });
+                        });
                       }}
                     />
                   </View>
-                ))}
-              </Tarjeta>
+                </Tarjeta>
+              </View>
             )}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('ventas.config.turnoNuevoCta')}
-              onPress={() => {
-                setTurCodigo('');
-                setTurCorte('');
-                setTurDesde('');
-                setTurHasta('');
-                setTurDiaSiguiente(false);
-                // CREAR arranca en L–V (firma del founder) — y se RESETEA
-                // acá: sin esto, abrir el alta después de editar un corte
-                // L–D heredaría sus días como si fueran el default.
-                setTurDias(L_A_V);
-                setTurFestivos(false);
-                setEditandoTurno(false);
-                setAltaTurno(true);
-              }}
-            />
-          </View>
 
-          {/* ── ⑤ QUIÉN — repartidores (🔴 choque declarado en la cabecera:
-              padrón propio hasta la costura repartidor↔equipo de A) ── */}
-          <View style={{ gap: spacing[2] }}>
-            {/* ⭐ EL ENCABEZADO DECLARA EL ESTADO DE LA SECCIÓN — ley de la
-                gramática de bloque (lámina de B, 18-ago): **el bloque es la
-                SECCIÓN, no el ítem**, y así la pantalla no gana una segunda
-                gramática (§D2: en configuración todo se lista en filas).
-                **NO es una fila:** informa y no lleva a ningún lado, así que
-                **no tiene chevron ni tap** — 19.7 al pie (información
-                despliega, acción lleva; esto no hace ninguna de las dos).
-                QUÉ dice, por §3: un hecho **de conjunto que el vendedor no
-                puede deducir mirando una fila**. Acá son dos y los dos hay
-                que contarlos: **cuántos están activos** y **cuánto puede
-                despachar hoy en total**. *La capacidad de Diego no contesta
-                «¿cuánto aguanto hoy?»: eso es una suma, y una suma no vive
-                en la fila de nadie.*
-                Y la SUMA solo cuenta a los ACTIVOS: un repartidor apagado
-                no aporta capacidad, y sumarlo prometería un cupo que no
-                existe. */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'baseline',
-                justifyContent: 'space-between',
-                gap: spacing[3],
-              }}
-            >
-              <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
-              {pantalla.repartidores.length > 0 &&
-                (() => {
-                  const e = estadoSeccionRepartidores(pantalla.repartidores);
-                  /* ⚠️ CON CAPACIDAD CERO **NO CALLA**: dice que falta.
-                     §4 de la lámina lo exige y la casa ya lo pagó una vez
-                     con los alérgenos — **una sección sana y una sin datos
-                     no pueden verse igual**; el silencio se lee como «está
-                     bien», y esa lectura la hace el vendedor, no nosotros.
-                     Lo que la voz NO insinúa, porque no está medido: si la
-                     falta de capacidad además BLOQUEA el despacho. */
-                  return (
-                    <Texto variante="apoyo" color={e.capacidad === 0 ? 'warning' : 'tertiary'}>
-                      {`${t('ventas.config.repartidoresEstado', { n: e.total, activos: e.activos })} · ${
-                        e.capacidad === 0
-                          ? t('ventas.config.repartidoresSinCupoTotal')
-                          : t('ventas.config.repartidoresCupoTotal', { n: e.capacidad })
-                      }`}
-                    </Texto>
-                  );
-                })()}
-            </View>
-            {pantalla.repartidores.length === 0 ? (
-              <Texto variante="apoyo">{t('ventas.config.sinRepartidores')}</Texto>
-            ) : (
-              <Tarjeta relleno="ninguno">
-                {pantalla.repartidores.map((rep, i) => (
-                  <View key={rep.repartidor_id}>
-                    {i > 0 && <Separador />}
-                    {/* 🔴 S99-C · L2 — LA FILA ABRE LA FICHA. D-791 lo dice
-                        con todas las letras: «reconstruir la sección sin
-                        caminos de edición sería reconstruir el defecto».
-                        Hasta hoy un repartidor se daba de alta y quedaba
-                        inmutable: un documento mal tipeado quedaba mal para
-                        siempre.
-                        El interruptor SIGUE en `fin` y no se lo lleva el
-                        tap: activar/desactivar es un acto de UNA vez desde
-                        la lista — mandarlo adentro de la ficha obligaría a
-                        entrar y salir para apagar a alguien. */}
-                    <Celda
-                      titulo={rep.nombre}
-                    tituloEntero
-                      /* 🔴 S99-C — LA FILA DICE LO QUE EL MOTOR YA SABE.
-                         Medido en el aparato: Marco se pintaba EXACTAMENTE
-                         igual que Diego, y `user_id IS NULL` ⇒ el guard #9
-                         rebota TODO despacho suyo (`repartidor_sin_cuenta`,
-                         probado en §XI). El vendedor le asignaba un envío y
-                         rebotaba sin entender por qué. **El dato ya viajaba
-                         y la fila no lo usaba** — quinta muestra de la
-                         clase «la información está y nadie la dice», y la
-                         más cara por frecuencia: CADA repartidor pasa por
-                         este estado entre el alta y el reclamo.
-                         Ley 23 al pie: **se dice ANTES de que lo intente**.
-                         Y la voz nombra QUÉ falta y QUIÉN lo resuelve — lo
-                         resuelve ÉL entrando a la app, no el vendedor. Los
-                         dos estados conviven (puede estar inactivo Y sin
-                         reclamar), así que se COMPONEN, no se pisan. */
-                      /* ⚠️ ACÁ ESTUVO LA CAPACIDAD DURANTE UN COMMIT, Y SE
-                         RETIRÓ POR LA LÁMINA DE B — su lápida queda porque
-                         el error es instructivo.
-                         Yo la puse en la fila razonando por analogía con
-                         ②: *«mudar un acto a su ficha no autoriza a perder
-                         de vista el número que lo hacía útil»*. **La
-                         analogía era falsa y la lámina lo dice con dos
-                         medidas:** ① el estado que el founder pedía es **de
-                         CONJUNTO**, y un conjunto **no cabe en la fila de
-                         UN ítem** — la capacidad de Diego no contesta
-                         «¿cuánto puedo despachar hoy?»; ② un tercer
-                         renglón **empuja la altura de la fila**, justo
-                         después de que ① la fijara en 57 dp por
-                         aritmética. *B me citó mi propia medición.*
-                         ⇒ **la capacidad vive en la ficha** (D-837, donde
-                         se edita) **y su SUMA vive en el encabezado de la
-                         sección**, que es el piso que faltaba. */
-                      subtitulo={
-                        [
-                          rep.activo ? null : t('ventas.config.repartidorInactivo'),
-                          rep.user_id === null ? t('ventas.config.repartidorSinReclamar') : null,
-                        ]
-                          .filter((x): x is string => x !== null)
-                          .join(' · ') || undefined
-                      }
-                      /* ⭐ FIRMA DEL FOUNDER: en la fila van NOMBRE,
-                         VEHÍCULO Y PLACA. El documento se fue a la ficha
-                         —donde se edita— porque **un vendedor no reconoce
-                         a su repartidor por la cédula: lo reconoce por la
-                         moto que ve llegar.** Sin vehículo declarado la
-                         fila calla ese pedazo en vez de inventarlo. */
-                      metadataMono={
-                        rep.vehiculos.length > 0
-                          ? rep.vehiculos
-                              .map(
-                                (v) =>
-                                  `${v.tipo === 'moto' ? t('ventas.config.vehiculo.moto') : t('ventas.config.vehiculo.carro')} ${v.placa}`,
-                              )
-                              .join(' · ')
-                          : undefined
-                      }
-                      interactiva
-                      accessibilityRole="button"
-                      onPress={() => router.push(`/ventas/repartidor/${rep.repartidor_id}`)}
-                      fin={
-                        <Interruptor
-                          encendido={rep.activo}
-                          onCambio={(v) => void alternarRepartidor(rep, v)}
-                          etiqueta={t('ventas.config.repartidorActivar')}
-                          registro="oficio"
-                        />
-                      }
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('ventas.config.repartidorNuevoCta')}
-              onPress={() => router.push('/ventas/repartidor/nuevo')}
-            />
-          </View>
+            {/* ── ① QUÉ VENDO · ② CÓMO ENTREGO · ③ COBERTURA — NO SE MONTAN:
+                sin lector ni escritor, un formulario muerto es peor que su
+                ausencia (cabecera). Los contratos exactos viven en el pedido
+                a A del 13-ago; al llegar el esquema entran ACÁ, en este
+                orden, antes del ④.
+                ⚠️ S97 + FIRMA DE MESA (13-ago, 3ª vuelta): son CINCO
+                familias, no tres — `dieta_prescripcion` firmada como familia
+                propia y `accesorio` en el esquema aunque sin carga v1. Este
+                punto de inserción NO asume cantidad: la sección se monta
+                sobre LO QUE EL LECTOR DEVUELVA (map, cero constantes de
+                código ni de conteo) — cinco hoy, N mañana, sin cambio de
+                código acá. La carga ya corrió (442 productos, códigos
+                medidos en 2026-08-13-s97a-esquema-catalogo-maestro.md); lo
+                que falta sigue siendo la ACTIVACIÓN por vendedor (A-1). */}
 
-          {/* ☠️ S99-C · ACÁ VIVÍA «CAPACIDAD DE REPARTO» CON SU «AGREGAR
-              RECURSO», y muere por firma del founder mirando la pantalla:
-              *«Moto Demo — 20 por día» es capacidad de un REPARTIDOR, no un
-              recurso suelto.*
-              **No se pudo mudar antes y la razón no era de diseño:**
-              `recursos_reparto` no conocía al repartidor, así que esta
-              sección **describía con fidelidad un modelo equivocado** —
-              medido en la caminata (§XIV) y pagado por A en D-837
-              (`repartidor_id` + `configurar_capacidad_repartidor`).
-              **Ahora la capacidad vive DENTRO de la ficha de cada
-              repartidor**, que es donde el founder dijo que era. Y
-              «agregar recurso» no se reemplaza por nada: *no había recursos
-              que agregar — había personas a las que preguntarles cuánto
-              llevan.* */}
-
-          {/* ── ⭐ S98-C · LA FACTURACIÓN SE VA DE ACÁ (firma del founder:
-              *«deben ir donde corresponde, no es de acá»*) ──────────────
-
-              **☠️ «Tu facturación» se mudó a NEGOCIO**, a la sección Cobros,
-              que es donde ya vive la plata del negocio. *La facturación es
-              del NEGOCIO, no del canal de venta* — y por la frontera
-              firmada (DATOS consulta · NEGOCIO configura) su vecino natural
-              son las liquidaciones, no los turnos de reparto.
-
-              **«Datos de facturación» NO se muda: se GATEA.** Su destino
-              —`/cuenta-comercial`— **ya vive en Cuenta**, así que para
-              quien tiene tabs esto era una segunda puerta al mismo sitio,
-              exactamente lo que S84-C34 firmó que no se hace. Pero el
-              VENDEDOR PURO no tiene tabs (todavía: D-820), y sin este
-              puntero se queda **sin ningún camino a sus datos fiscales**.
-              ⇒ se dibuja solo para él, y **muere solo el día que D-820 le
-              dé su barra**. *Retirarlo hoy para todos habría cumplido la
-              firma dejando a alguien sin puerta.* */}
-          {pantalla.sinOtraCasa && (
-            <Tarjeta relleno="ninguno">
-              <CeldaNavegacion
-                registro="tinta"
-                titulo={t('ventas.config.facturacionTitulo')}
-                detalle={t('ventas.config.facturacionDetalle')}
-                onPress={() => router.push('/cuenta-comercial')}
+            {/* ── ④ CUÁNDO — los cortes horarios (la mitad «horarios de
+                atención» espera esquema: pedido A-4) ── */}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('ventas.config.turnosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('ventas.config.turnosDetalle')}</Texto>
+              {pantalla.turnos.length > 0 && (
+                <Tarjeta relleno="ninguno">
+                  {pantalla.turnos.map((tur, i) => (
+                    <View key={tur.turno_id}>
+                      {i > 0 && <Separador />}
+                      {/* D-791: la fila REABRE el mismo formulario que la
+                          creó — la puerta upsertea por (cuenta, codigo). */}
+                      <Celda
+                        titulo={tur.codigo}
+                        subtitulo={tur.dia_offset === 1 ? t('ventas.config.turnoDiaSiguiente') : undefined}
+                        metadataMono={`${horaDeSql(tur.corte)} → ${horaDeSql(tur.entrega_desde)}–${horaDeSql(tur.entrega_hasta)}`}
+                        interactiva
+                        accessibilityRole="button"
+                        onPress={() => {
+                          setTurCodigo(tur.codigo);
+                          setTurCorte(horaDeSql(tur.corte));
+                          setTurDesde(horaDeSql(tur.entrega_desde));
+                          setTurHasta(horaDeSql(tur.entrega_hasta));
+                          setTurDiaSiguiente(tur.dia_offset === 1);
+                          /* EDITAR muestra LO QUE LA FILA TIENE — nunca el
+                             default del alta. Sin esta línea, abrir un corte
+                             L–D para corregirle la hora se lo dejaría en L–V. */
+                          setTurDias(tur.dias_semana);
+                          setTurFestivos(tur.incluye_festivos);
+                          setEditandoTurno(true);
+                          setAltaTurno(true);
+                        }}
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              )}
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('ventas.config.turnoNuevoCta')}
+                onPress={() => {
+                  setTurCodigo('');
+                  setTurCorte('');
+                  setTurDesde('');
+                  setTurHasta('');
+                  setTurDiaSiguiente(false);
+                  // CREAR arranca en L–V (firma del founder) — y se RESETEA
+                  // acá: sin esto, abrir el alta después de editar un corte
+                  // L–D heredaría sus días como si fueran el default.
+                  setTurDias(L_A_V);
+                  setTurFestivos(false);
+                  setEditandoTurno(false);
+                  setAltaTurno(true);
+                }}
               />
-            </Tarjeta>
-          )}
+            </View>
 
-          {/* ☠️ S99-C · ACÁ VIVÍA «CERRAR SESIÓN», y se MUDÓ, no murió.
-              Orden del founder: no va en configuración. **Pero estaba por
-              una razón viva** —el vendedor puro no tiene tabs y ésta era su
-              única superficie estable—, así que borrarla a secas habría
-              repetido exactamente la ratonera que L-249 acaba de costar con
-              el repartidor. *Una salida no se quita: se pone donde
-              corresponde.* Vive ahora **al pie de `/ventas`, su casa**, con
-              el mismo discriminador (`sinOtraCasa`): quien tiene tabs ya
-              tiene la suya en Cuenta. */}
+            {/* ── ⑤ QUIÉN — repartidores (🔴 choque declarado en la cabecera:
+                padrón propio hasta la costura repartidor↔equipo de A) ── */}
+            <View style={{ gap: spacing[2] }}>
+              {/* ⭐ EL ENCABEZADO DECLARA EL ESTADO DE LA SECCIÓN — ley de la
+                  gramática de bloque (lámina de B, 18-ago): **el bloque es la
+                  SECCIÓN, no el ítem**, y así la pantalla no gana una segunda
+                  gramática (§D2: en configuración todo se lista en filas).
+                  **NO es una fila:** informa y no lleva a ningún lado, así que
+                  **no tiene chevron ni tap** — 19.7 al pie (información
+                  despliega, acción lleva; esto no hace ninguna de las dos).
+                  QUÉ dice, por §3: un hecho **de conjunto que el vendedor no
+                  puede deducir mirando una fila**. Acá son dos y los dos hay
+                  que contarlos: **cuántos están activos** y **cuánto puede
+                  despachar hoy en total**. *La capacidad de Diego no contesta
+                  «¿cuánto aguanto hoy?»: eso es una suma, y una suma no vive
+                  en la fila de nadie.*
+                  Y la SUMA solo cuenta a los ACTIVOS: un repartidor apagado
+                  no aporta capacidad, y sumarlo prometería un cupo que no
+                  existe. */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  gap: spacing[3],
+                }}
+              >
+                <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
+                {pantalla.repartidores.length > 0 &&
+                  (() => {
+                    const e = estadoSeccionRepartidores(pantalla.repartidores);
+                    /* ⚠️ CON CAPACIDAD CERO **NO CALLA**: dice que falta.
+                       §4 de la lámina lo exige y la casa ya lo pagó una vez
+                       con los alérgenos — **una sección sana y una sin datos
+                       no pueden verse igual**; el silencio se lee como «está
+                       bien», y esa lectura la hace el vendedor, no nosotros.
+                       Lo que la voz NO insinúa, porque no está medido: si la
+                       falta de capacidad además BLOQUEA el despacho. */
+                    return (
+                      <Texto variante="apoyo" color={e.capacidad === 0 ? 'warning' : 'tertiary'}>
+                        {`${t('ventas.config.repartidoresEstado', { n: e.total, activos: e.activos })} · ${
+                          e.capacidad === 0
+                            ? t('ventas.config.repartidoresSinCupoTotal')
+                            : t('ventas.config.repartidoresCupoTotal', { n: e.capacidad })
+                        }`}
+                      </Texto>
+                    );
+                  })()}
+              </View>
+              {pantalla.repartidores.length === 0 ? (
+                <Texto variante="apoyo">{t('ventas.config.sinRepartidores')}</Texto>
+              ) : (
+                <Tarjeta relleno="ninguno">
+                  {pantalla.repartidores.map((rep, i) => (
+                    <View key={rep.repartidor_id}>
+                      {i > 0 && <Separador />}
+                      {/* 🔴 S99-C · L2 — LA FILA ABRE LA FICHA. D-791 lo dice
+                          con todas las letras: «reconstruir la sección sin
+                          caminos de edición sería reconstruir el defecto».
+                          Hasta hoy un repartidor se daba de alta y quedaba
+                          inmutable: un documento mal tipeado quedaba mal para
+                          siempre.
+                          El interruptor SIGUE en `fin` y no se lo lleva el
+                          tap: activar/desactivar es un acto de UNA vez desde
+                          la lista — mandarlo adentro de la ficha obligaría a
+                          entrar y salir para apagar a alguien. */}
+                      <Celda
+                        titulo={rep.nombre}
+                      tituloEntero
+                        /* 🔴 S99-C — LA FILA DICE LO QUE EL MOTOR YA SABE.
+                           Medido en el aparato: Marco se pintaba EXACTAMENTE
+                           igual que Diego, y `user_id IS NULL` ⇒ el guard #9
+                           rebota TODO despacho suyo (`repartidor_sin_cuenta`,
+                           probado en §XI). El vendedor le asignaba un envío y
+                           rebotaba sin entender por qué. **El dato ya viajaba
+                           y la fila no lo usaba** — quinta muestra de la
+                           clase «la información está y nadie la dice», y la
+                           más cara por frecuencia: CADA repartidor pasa por
+                           este estado entre el alta y el reclamo.
+                           Ley 23 al pie: **se dice ANTES de que lo intente**.
+                           Y la voz nombra QUÉ falta y QUIÉN lo resuelve — lo
+                           resuelve ÉL entrando a la app, no el vendedor. Los
+                           dos estados conviven (puede estar inactivo Y sin
+                           reclamar), así que se COMPONEN, no se pisan. */
+                        /* ⚠️ ACÁ ESTUVO LA CAPACIDAD DURANTE UN COMMIT, Y SE
+                           RETIRÓ POR LA LÁMINA DE B — su lápida queda porque
+                           el error es instructivo.
+                           Yo la puse en la fila razonando por analogía con
+                           ②: *«mudar un acto a su ficha no autoriza a perder
+                           de vista el número que lo hacía útil»*. **La
+                           analogía era falsa y la lámina lo dice con dos
+                           medidas:** ① el estado que el founder pedía es **de
+                           CONJUNTO**, y un conjunto **no cabe en la fila de
+                           UN ítem** — la capacidad de Diego no contesta
+                           «¿cuánto puedo despachar hoy?»; ② un tercer
+                           renglón **empuja la altura de la fila**, justo
+                           después de que ① la fijara en 57 dp por
+                           aritmética. *B me citó mi propia medición.*
+                           ⇒ **la capacidad vive en la ficha** (D-837, donde
+                           se edita) **y su SUMA vive en el encabezado de la
+                           sección**, que es el piso que faltaba. */
+                        subtitulo={
+                          [
+                            rep.activo ? null : t('ventas.config.repartidorInactivo'),
+                            rep.user_id === null ? t('ventas.config.repartidorSinReclamar') : null,
+                          ]
+                            .filter((x): x is string => x !== null)
+                            .join(' · ') || undefined
+                        }
+                        /* ⭐ FIRMA DEL FOUNDER: en la fila van NOMBRE,
+                           VEHÍCULO Y PLACA. El documento se fue a la ficha
+                           —donde se edita— porque **un vendedor no reconoce
+                           a su repartidor por la cédula: lo reconoce por la
+                           moto que ve llegar.** Sin vehículo declarado la
+                           fila calla ese pedazo en vez de inventarlo. */
+                        metadataMono={
+                          rep.vehiculos.length > 0
+                            ? rep.vehiculos
+                                .map(
+                                  (v) =>
+                                    `${v.tipo === 'moto' ? t('ventas.config.vehiculo.moto') : t('ventas.config.vehiculo.carro')} ${v.placa}`,
+                                )
+                                .join(' · ')
+                            : undefined
+                        }
+                        interactiva
+                        accessibilityRole="button"
+                        onPress={() => router.push(`/ventas/repartidor/${rep.repartidor_id}`)}
+                        fin={
+                          <Interruptor
+                            encendido={rep.activo}
+                            onCambio={(v) => void alternarRepartidor(rep, v)}
+                            etiqueta={t('ventas.config.repartidorActivar')}
+                            registro="oficio"
+                          />
+                        }
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              )}
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('ventas.config.repartidorNuevoCta')}
+                onPress={() => router.push('/ventas/repartidor/nuevo')}
+              />
+            </View>
+
+            {/* ☠️ S99-C · ACÁ VIVÍA «CAPACIDAD DE REPARTO» CON SU «AGREGAR
+                RECURSO», y muere por firma del founder mirando la pantalla:
+                *«Moto Demo — 20 por día» es capacidad de un REPARTIDOR, no un
+                recurso suelto.*
+                **No se pudo mudar antes y la razón no era de diseño:**
+                `recursos_reparto` no conocía al repartidor, así que esta
+                sección **describía con fidelidad un modelo equivocado** —
+                medido en la caminata (§XIV) y pagado por A en D-837
+                (`repartidor_id` + `configurar_capacidad_repartidor`).
+                **Ahora la capacidad vive DENTRO de la ficha de cada
+                repartidor**, que es donde el founder dijo que era. Y
+                «agregar recurso» no se reemplaza por nada: *no había recursos
+                que agregar — había personas a las que preguntarles cuánto
+                llevan.* */}
+
+            {/* ── ⭐ S98-C · LA FACTURACIÓN SE VA DE ACÁ (firma del founder:
+                *«deben ir donde corresponde, no es de acá»*) ──────────────
+
+                **☠️ «Tu facturación» se mudó a NEGOCIO**, a la sección Cobros,
+                que es donde ya vive la plata del negocio. *La facturación es
+                del NEGOCIO, no del canal de venta* — y por la frontera
+                firmada (DATOS consulta · NEGOCIO configura) su vecino natural
+                son las liquidaciones, no los turnos de reparto.
+
+                **«Datos de facturación» NO se muda: se GATEA.** Su destino
+                —`/cuenta-comercial`— **ya vive en Cuenta**, así que para
+                quien tiene tabs esto era una segunda puerta al mismo sitio,
+                exactamente lo que S84-C34 firmó que no se hace. Pero el
+                VENDEDOR PURO no tiene tabs (todavía: D-820), y sin este
+                puntero se queda **sin ningún camino a sus datos fiscales**.
+                ⇒ se dibuja solo para él, y **muere solo el día que D-820 le
+                dé su barra**. *Retirarlo hoy para todos habría cumplido la
+                firma dejando a alguien sin puerta.* */}
+            {pantalla.sinOtraCasa && (
+              <Tarjeta relleno="ninguno">
+                <CeldaNavegacion
+                  registro="tinta"
+                  titulo={t('ventas.config.facturacionTitulo')}
+                  detalle={t('ventas.config.facturacionDetalle')}
+                  onPress={() => router.push('/cuenta-comercial')}
+                />
+              </Tarjeta>
+            )}
+
+            {/* ☠️ S99-C · ACÁ VIVÍA «CERRAR SESIÓN», y se MUDÓ, no murió.
+                Orden del founder: no va en configuración. **Pero estaba por
+                una razón viva** —el vendedor puro no tiene tabs y ésta era su
+                única superficie estable—, así que borrarla a secas habría
+                repetido exactamente la ratonera que L-249 acaba de costar con
+                el repartidor. *Una salida no se quita: se pone donde
+                corresponde.* Vive ahora **al pie de `/ventas`, su casa**, con
+                el mismo discriminador (`sinOtraCasa`): quien tiene tabs ya
+                tiene la suya en Cuenta. */}
+          </View>
+
+          {/* ═══ ② EL TECHO DE TU VITRINA — PEGADO (índice 1 del sticky) ═══
+              Lleva fondo propio a propósito: un techo pegajoso sin fondo
+              deja ver las filas corriendo por debajo del control, y ahí el
+              interruptor pasa de informar a ensuciar. */}
+          <View
+            style={{
+              gap: spacing[3],
+              paddingBottom: spacing[3],
+              backgroundColor: theme.bg.base,
+            }}
+          >
+            <Texto variante="seccion">{t('ventas.tienda.vitrinaTitulo')}</Texto>
+            <InterruptorEspejo modo={modo} onCambio={setModo} />
+            {/* CÓMO SE MIRA — segundo control del techo, y responde OTRA
+                pregunta que el de arriba: aquél dice QUÉ miro (mi trabajo o
+                lo que ve la familia), éste CÓMO lo miro. Por eso conviven:
+                no son dos formas de lo mismo. */}
+            <SelectorSegmentado
+              segmentos={[
+                { codigo: 'lista', etiqueta: t('ventas.vitrina.vistaLista') },
+                { codigo: 'iconos', etiqueta: t('ventas.vitrina.vistaIconos') },
+              ]}
+              activo={vista}
+              onCambio={(c) => {
+                const v: VistaProductos = c === 'iconos' ? 'iconos' : 'lista';
+                setVista(v);
+                void AsyncStorage.setItem(LLAVE_VISTA, v);
+              }}
+              etiqueta={t('ventas.vitrina.vistaGrupo')}
+              proposito="vista"
+            />
+            {/* Al escribir, **la ventana vuelve a la primera tanda**: sin
+                eso, buscar con 200 filas ya cargadas dejaría el resultado
+                enterrado bajo el scroll viejo. */}
+            <Campo
+              label={t('ventas.vitrina.buscar')}
+              value={busca}
+              onChangeText={(v) => {
+                setBusca(v);
+                setVentana(TAM_VENTANA);
+              }}
+              autoCapitalize="none"
+            />
+            {/* 🔴 EL FILTRO SOLO EN «VER COMO CLIENTE»: en Administrar no
+                filtraba nada —`SkuDelVendedor` no trae `especies_aplicables`
+                (medido)— y encima **sus números eran de la OTRA cara**. *Un
+                control que no hace nada y además miente el número es peor
+                que su ausencia* (Ley 23). Pedido a A: `especies_aplicables`
+                en el SKU del vendedor. */}
+            {modo === 'cliente' && pantalla.conteos !== null && (
+              <FiltroEspecie conteos={pantalla.conteos} activa={especie} onCambio={setEspecie} />
+            )}
+          </View>
+
+          {/* ═══ ③ LAS FILAS ═══ */}
+          <View style={{ gap: spacing[4] }}>
+            {/* EL CORTE SE DICE. Si el lector devolvió exactamente el techo,
+                hay catálogo que esta pantalla NO está mostrando — y
+                **callarlo es la falla, no cortarlo**. */}
+            {modo === 'cliente' && pantalla.vitrina.length >= TECHO_CATALOGO && (
+              <Texto variante="apoyo" color="warning">
+                {t('ventas.vitrina.catalogoCortado', { n: TECHO_CATALOGO })}
+              </Texto>
+            )}
+            {modo === 'cliente' ? (
+              <CaraCliente
+                productos={filtrarPorEspecie(pantalla.vitrina, especie).filter((p) =>
+                  coincide(p.nombre, p.marca),
+                )}
+                ventana={ventana}
+                vista={vista}
+                ausentes={ausentes}
+                moneda={pantalla.contexto}
+                idioma={idioma as IdiomaSoportado}
+                alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=cliente`)}
+              />
+            ) : (
+              <CaraAdministrar
+                skus={pantalla.skus.filter((s2) =>
+                  coincide(s2.producto_nombre, s2.producto_marca),
+                )}
+                ventana={ventana}
+                vista={vista}
+                alAbrir={(id) => router.push(`/ventas/producto/${id}?modo=administrar`)}
+              />
+            )}
+          </View>
         </ScrollView>
       )}
+
+      {/* LA HOJA DEL AJUSTE DE STOCK — vive acá, al pie del componente y
+          fuera del scroll, como el resto de las Hojas de esta pantalla. Al
+          guardar se re-lee: el stock que muestran las filas lo trae el
+          mismo lector. */}
+      <HojaAjusteStock
+        sku={ajustandoStock}
+        onCerrar={() => setAjustandoStock(null)}
+        onGuardado={() => {
+          setAjustandoStock(null);
+          recargar();
+        }}
+      />
 
       {/* ── ⑥ el modal del estado — qué significa (§8.6bis) ── */}
       <Hoja

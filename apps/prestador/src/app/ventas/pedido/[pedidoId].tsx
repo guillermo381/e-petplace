@@ -424,7 +424,7 @@ export default function PedidoVentas() {
                       variante="secundario"
                       bloque
                       etiqueta={t('ventas.pedido.irConfiguracion')}
-                      onPress={() => router.push('/ventas/configuracion')}
+                      onPress={() => router.push('/ventas/tienda')}
                     />
                   </View>
                 ) : (
