@@ -11711,6 +11711,26 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-266 — EL ESTADO DE UN CONJUNTO NO CABE EN LA FILA DE UN ÍTEM (S99 — el caso y el descarte son de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** el pedido era *«ver el estado sin entrar»* en las secciones de configuración (Local · Turnos · Repartidores), que hoy son **un título y nada más** ⇒ para saber cómo está su configuración, el vendedor tiene que **recorrer y leer cada lista**.
+
+  **La salida obvia era agrandar `Celda` a tres renglones, y NO resolvía el pedido.** El literal de B, que es la lección: *«agrandar la pieza para contestar una pregunta que no es de la pieza es la cura equivocada con mejor cara.»* Sus tres costos medidos: **el estado que falta es DE CONJUNTO** y un conjunto no entra en la fila de un ítem · tocaría **100+ filas de las dos apps** para servir a UNA pantalla · y **empujaría el alto que Stock acaba de fijar en 56**.
+
+  **⇒ LA LEY: cada SECCIÓN declara su estado en su ENCABEZADO. El bloque es la sección, no el ítem.** La fila no cambia, y la guarda del founder se cumple sola: sigue habiendo **una** gramática de ítem y **una** de sección. *Lo prohibido era un ítem dibujado distinto de sus hermanos — y eso no pasa.* El encabezado **informa**: no lleva chevron ni tap.
+
+  **Y sus tres estados con la razón que los vuelve exigibles** —es la letra de `AvisoAlergia` aplicada a otra cosa—: **COMPLETA dice el hecho en positivo** («3 · 2 activos») *porque si callara se vería igual que una sección que no cargó* · **INCOMPLETA dice qué falta** · **VACÍA dice que está vacía**. ⇒ **EL SILENCIO SE LEE COMO «ESTÁ BIEN», Y ESA LECTURA LA HACE EL VENDEDOR, NO NOSOTROS.**
+
+- **L-265 — UN VIAJE DELIBERADO NO ES UNA INEFICIENCIA: ES UNA DEFENSA (S99 — la retractación es de D, sobre un pedido que me había hecho; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** D midió `let enVuelo` y me sirvió *«un viaje más para tu lote de arranque»*. **No vio el `let cache` de al lado**, que hace tres cosas: cachea el null (quien no tiene cuenta comercial paga UNA vez y después cero — así que el *«para TODOS»* era falso justo para esa mitad), cachea la moneda, y **deja el veredicto fresco A PROPÓSITO**, con su razón escrita **tres líneas más arriba de donde miró**: *«EL VEREDICTO, SIEMPRE FRESCO — es el dato del incidente»* (D-821).
+
+  **⇒ Quitar un viaje sin leer su razón es REINTRODUCIR EL INCIDENTE QUE LO PUSO.** Es primo de las lápidas (L-250): **lo que parece sobrar puede ser exactamente lo que impide que algo vuelva.** *La ineficiencia y la defensa se ven idénticas desde afuera; lo único que las distingue es el porqué, y el porqué vive en el archivo.*
+
+  **Y la precisión que corrige el diagnóstico fácil —porque el fácil habría sido «midió viejo»—: NO FUE UNA MEDICIÓN VIEJA, FUE UNA MEDICIÓN PARCIAL.** Por eso **la regla de B (L-260) la habría atajado igual**: manda releer el objeto ajeno **COMPLETO**, no desde donde uno cree que empieza el problema. ⇒ **enmienda a L-260: territorio ajeno se lee ENTERO.**
+
+  **Registro de honestidad, que es lo que la vuelve barata:** el pedido **nunca se ejecutó** — verificado contra el objeto: el cache partido de D-821 está intacto y lo único que esa tanda le agregó al archivo fue `countryCode`. *La retractación llegó antes que el daño porque D volvió a mirar, no porque alguien la frenara.*
+
 - **L-264 — UNA PREMISA ESCRITA EN UN COMENTARIO CADUCA SIN QUE NADA AVISE (S99 — el caso es de C; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** la cabecera de la Hoja de «Agregar producto» decía *«sin buscador (seis productos)»*. **Era verdad y era honesta cuando se escribió.** Con 532 SKUs la premisa murió **y NADA falló**: ni typecheck, ni lint, ni guard. Solo el ojo del founder.
