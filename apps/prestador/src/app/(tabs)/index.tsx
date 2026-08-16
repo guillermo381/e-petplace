@@ -38,6 +38,7 @@ import {
   CeldaNavegacion,
   Encabezado,
   CitaEnVivo,
+  EntradaDeCruce,
   PuertaHermana,
   SelectorDia,
   Esqueleto,
@@ -110,6 +111,7 @@ import { TarjetaVentas } from '@/components/tarjeta-ventas';
 import type { ContextoVentas } from '@/lib/cuenta-ventas';
 import { contextoVentasDesdeArranque } from '@/lib/barra-prestador-lectura';
 import { useDiaEnVista } from '@/lib/dia-en-vista';
+import { usePantallaEnfocada } from '@/lib/pantalla-enfocada';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
@@ -884,6 +886,17 @@ function FilaSalida({
 
 export default function Hoy() {
   const router = useRouter();
+  /* 🔴 S99-D · LA TRANSICIÓN DEL CRUCE — repara una regresión MÍA. Al curar
+     D-836 la hermana pasó de ruta EMPUJADA (stack raíz, `slide_from_right`) a
+     pantalla del navegador de TABS, **que no tiene animación**: el cruce pasó
+     a ser un salto. Lo anticipé en §23.4 y lo serví como pregunta abierta —
+     **declararlo no lo hizo menos regresión: funcionaba y dejó de funcionar.**
+     Se monta en LAS DOS ventanas (simétrico, cierre de B con su salida (c)):
+     `tomarCruce()` CONSUME, así que volver desde otro tab no encuentra gesto
+     y **no anima** — mi §30.2 queda resuelta por construcción, sin prop de
+     más. *La dirección se deriva del GESTO y no de la pila, que es lo único
+     que sobrevive al próximo cambio de mecanismo.* */
+  const enfocada = usePantallaEnfocada();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -2119,6 +2132,7 @@ export default function Hoy() {
   }
 
   return (
+    <EntradaDeCruce activo={enfocada}>
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
       <ScrollView
@@ -2836,5 +2850,6 @@ export default function Hoy() {
           `negocio`, sus otros dos). */}
       <VeloBarraEstadoOficio />
     </View>
+    </EntradaDeCruce>
   );
 }

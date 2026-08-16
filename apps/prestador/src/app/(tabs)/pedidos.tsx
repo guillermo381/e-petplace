@@ -54,6 +54,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Encabezado,
+  EntradaDeCruce,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -81,6 +82,7 @@ import { montoCorto } from '@/lib/formato-techo';
 import { useDiaEnVista } from '@/lib/dia-en-vista';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
+import { usePantallaEnfocada } from '@/lib/pantalla-enfocada';
 import { useTraduccion } from '@/i18n';
 
 /** El MISMO rango que el HOY de citas — el espejo empieza acá. */
@@ -101,6 +103,17 @@ type Estado =
 
 export default function PedidosDelDia() {
   const router = useRouter();
+  /* 🔴 S99-D · LA TRANSICIÓN DEL CRUCE (pieza de B, `EntradaDeCruce`).
+     **Repara una regresión MÍA:** al curar D-836 la hermana pasó de ser ruta
+     EMPUJADA del stack raíz —que anima `slide_from_right`— a ser pantalla del
+     navegador de TABS, que **no tiene animación**. El founder lo midió con el
+     dedo: *«salta como si fueran dos pantallas, y estaba bien hecha en la
+     prueba anterior»*. Yo lo había anticipado en §23.4 y lo serví como
+     pregunta abierta — **declararlo no lo hizo menos regresión**.
+     La dirección **se deriva del gesto y no de la pila**, que es justo lo que
+     esta pieza hace: por eso sobrevive al cambio de mecanismo que ya rompió
+     la intención dos veces. */
+  const enfocada = usePantallaEnfocada();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -273,6 +286,7 @@ export default function PedidosDelDia() {
   }, [router]);
 
   return (
+    <EntradaDeCruce activo={enfocada}>
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
       {/* EL MISMO TECHO DEL HOY — no un encabezado de navegación. La flecha
@@ -386,5 +400,6 @@ export default function PedidosDelDia() {
             dos escalones para lo que es un solo escalón dejan un hueco. */}
       </ScrollView>
     </View>
+    </EntradaDeCruce>
   );
 }
