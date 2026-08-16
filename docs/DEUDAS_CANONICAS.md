@@ -11711,6 +11711,12 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-251 — UN MENÚ DE UNA OPCIÓN NO ES UN MENÚ: ES UN PEAJE (S99 — ley del dictado del founder, 18-ago-2026; funda los tres escalones de ATENDER).**
+
+  **El literal que la funda:** *«si solo tengo venta de productos, ya me muestra la vitrina, para que no tengamos que hacer un clic innecesario. Solo me muestra las opciones cuando tengo más de una.»*
+
+  **La regla en tres escalones, para toda superficie compuesta por capacidad:** CERO capacidades → la entrada NO existe (ni tab, ni gris) · UNA → la pantalla DIRECTA, con su nombre en el techo · DOS o más → el menú/las baldosas. **Con esto murió el 🟡 del Gate 1** («ATENDER destacada con una sola baldosa se siente vacía») — no por diseño sino por composición: *una baldosa sola jamás se dibuja*. Es §2.0 aplicado un piso adentro: la barra ya se componía por capacidad; lo de adentro también.
+
 - **L-250 — UN RENAME MECÁNICO NO ROMPE SOLO CÓDIGO: REESCRIBE EL REGISTRO DE LO QUE MURIÓ, Y ESE REGISTRO ES LO ÚNICO QUE IMPIDE REVIVIRLO (S99 — el caso es de B, del rename `sinCaja`→`apoyada`; depositada por orden de mesa, 18-ago-2026).**
 
   **El caso:** la mesa avisó que un grep del rename se llevaría el `sinCaja` de `Campo`; **B midió y esa prop YA ESTABA MUERTA** (derogada por N11 en esta misma sesión) — no había API que romper. **Lo que sí habría roto son las LÁPIDAS:** «sinCaja MURIÓ, DEROGADA POR N11» habría quedado «apoyada MURIÓ» — **que es falso**, y un registro de muerte falso es la puerta por la que lo muerto revive (nadie desconfía de una lápida).
@@ -17180,4 +17186,40 @@ atada al primer sin-rol REAL** (un recién-registrado de octubre cae al
 callejón por el camino normal y el forense decide gratis: línea sin
 veredicto = la cadena cuelga · sin línea = el efecto no corre). La
 condición de muerte NO cambia — cambia quién trae el rojo.
+
+#### D-836 — 🔴 SE PIERDEN LOS TABS EN PEDIDOS (dictado del founder 18-ago; dueño: D, ALTA)
+
+**Verbatim:** *«de la parte de pedidos se pierden los cuatro tabs, toca
+devolverse al de citas para poder navegar.»* Es un ENCIERRO — la clase de
+L-249 (toda pantalla-única declara su salida al nacer), **y acá ni
+siquiera es pantalla-única: es una ventana de la CASA que perdió la
+casa.** Rompe la navegación del dual recién firmado (las ventanas
+HERMANAS con puertas espejadas presuponen que la barra sigue ahí).
+
+☠️ **Muere** cuando la ventana de pedidos conserve los cuatro tabs (o
+declare por letra por qué no) y el founder navegue ida-y-vuelta sin
+«devolverse al de citas».
+
+#### D-837 — 🔴 LA CAPACIDAD DE REPARTO VIVE DENTRO DE CADA REPARTIDOR (dictado del founder 18-ago; motor A + superficie C; disparo: TRAS la caminata de C por configuración)
+
+**El dictado:** «Moto Demo — 98 a 20 por día» es la capacidad DE UN
+REPARTIDOR, no un recurso suelto — la sección «capacidad de reparto»
+muere como sección y **«agregar recurso» muere como acción**: la
+capacidad se ve y se edita DENTRO de la ficha de cada repartidor.
+
+**Lo medido que la vuelve deuda de MOTOR y no solo de pantalla:**
+`recursos_reparto` (id, cuenta_comercial_id, nombre, capacidad_por_dia,
+dias_operacion, activo) **NO tiene `repartidor_id`** — el modelo actual
+es recurso-suelto-por-cuenta, exactamente lo que el founder dice que no
+es. La cura implica atar recurso→repartidor (o mudar la capacidad a
+`repartidores`) SIN romper `cupo_reparto_del_dia` ni la regla firmada de
+S96 (*el cupo es capacidad por recurso confirmado, jamás número en el
+código*). **El disparo es deliberado: DESPUÉS de la caminata de C por la
+pantalla de configuración (orden literal del founder: entrar, caminar y
+traer hallazgos ANTES de mejorar)** — la forma de la ficha del
+repartidor decide qué shape necesita el motor.
+
+☠️ **Muere** cuando la capacidad viva en la ficha del repartidor (motor
++ pantalla), `recursos_reparto` suelto quede jubilado con lápida, y el
+cupo del día siga computando igual (cinturón con el ANTES medido).
 

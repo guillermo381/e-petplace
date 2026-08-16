@@ -833,8 +833,19 @@ export interface ContextoArranque {
   /** La mitad "posición" de montaAtender (jsonb de posición del motor). */
   esMostradorOGestion: boolean;
   /** La mitad "capacidad de local": oferta activa con atiende_local en un
-   *  oficio cuya modalidad admite atención local. */
+   *  oficio cuya modalidad admite atención local. DERIVADO de
+   *  `oficiosLocales` en el motor (una fuente) — se conserva por compat. */
   hayOficioLocal: boolean;
+  /** S99 (dictado founder ④): LA LISTA de oficios con local — los tres
+   *  escalones de ATENDER cuentan y nombran (0 → sin tab · 1 → pantalla
+   *  directa · 2+ → baldosas; L-251: un menú de una opción es un peaje).
+   *  Capacidades de ATENDER = oficiosLocales ∪ (esVendedora &&
+   *  ventaMostradorActiva ? mostrador : ∅). Fail-closed: motor viejo → []. */
+  oficiosLocales: string[];
+  /** S99 (dictado founder ④): «atiendo en mi local» para VENTA DE
+   *  PRODUCTOS — la perilla de la cuenta, SIEMPRE FRESCA. Apagada, la
+   *  baldosa de mostrador NO existe. Fail-closed: motor viejo → false. */
+  ventaMostradorActiva: boolean;
   cuentaComercial: CuentaComercialDeContexto | null;
   /** El veredicto SIEMPRE FRESCO (D-821): rol seller_productos activo. */
   esVendedora: boolean;
@@ -871,6 +882,8 @@ export async function obtenerContextoArranque(): Promise<
     es_gestor?: unknown;
     posicion?: { es_mostrador_o_gestion?: unknown } | null;
     hay_oficio_local?: unknown;
+    oficios_locales?: unknown;
+    venta_mostrador_activa?: unknown;
     cuenta_comercial?: {
       id?: unknown;
       estado?: unknown;
@@ -929,6 +942,10 @@ export async function obtenerContextoArranque(): Promise<
       esGestor: r.es_gestor === true,
       esMostradorOGestion: r.posicion?.es_mostrador_o_gestion === true,
       hayOficioLocal: r.hay_oficio_local === true,
+      oficiosLocales: Array.isArray(r.oficios_locales)
+        ? (r.oficios_locales as unknown[]).filter((x): x is string => typeof x === 'string')
+        : [],
+      ventaMostradorActiva: r.venta_mostrador_activa === true,
       cuentaComercial,
       esVendedora: r.es_vendedora === true,
       haVendido: r.ha_vendido === true,
