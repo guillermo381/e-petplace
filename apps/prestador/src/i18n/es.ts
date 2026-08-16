@@ -3057,6 +3057,9 @@ export const prestadorEs = {
     vehiculoTipo: 'Tipo',
     vehiculoPlaca: 'Placa',
     vehiculoAgregar: 'Agregar vehículo',
+    capacidadTitulo: 'Cuánto lleva por día',
+    capacidadLabel: 'Entregas por día',
+    capacidadAyuda: 'Es su capacidad, no la del negocio: si suma otro repartidor, el día crece.',
     vehiculoQuitar: 'Quitar',
     placaVacia: 'Falta la placa.',
     placaFormatoMoto: 'Una placa de moto lleva 2 letras, 3 números y una letra — por ejemplo, AB 123 C.',
@@ -3191,6 +3194,7 @@ export const prestadorEs = {
     /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
        misma pantalla, y su voz también. */
     vitrina: {
+      buscar: 'Buscar un producto',
       titulo: 'Tu vitrina',
       todas: 'Todas',
       filtroEspecie: 'Filtrar por especie',

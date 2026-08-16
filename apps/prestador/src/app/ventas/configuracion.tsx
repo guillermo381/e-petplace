@@ -152,14 +152,11 @@ import {
   obtenerMiPrestador,
   actualizarRepartidor,
   cupoRepartoDelDia,
-  definirRecursoReparto,
   definirTurnoEntrega,
   listarPedidosDelVendedor,
-  listarRecursosReparto,
   listarRepartidores,
   configurarVentaMostrador,
   listarTurnosEntrega,
-  type RecursoReparto,
   type Repartidor,
   type TurnoEntrega,
 } from '@epetplace/api';
@@ -181,7 +178,6 @@ type Pantalla =
        *  dos puertas al mismo sitio envejecen distinto (S84-C34). */
       sinOtraCasa: boolean;
       repartidores: Repartidor[];
-      recursos: RecursoReparto[];
       turnos: TurnoEntrega[];
       /** LEY DEL CAMBIO — pedidos vivos con ventana prometida: lo que un
        *  corte nuevo NO mueve. Se lee junto con el resto (un fallo acá es
@@ -283,14 +279,8 @@ export default function ConfiguracionVentas() {
      que el resto — cero espera nueva (la lentitud de esta casa son olas
      encadenadas, no consultas caras). */
 
-  // hoja recurso — `editandoRecurso` = la fila se REABRIÓ (D-791): mismo
-  // formulario, misma puerta (upsert por (cuenta, nombre) — MEDIDO en el
   // motor); el NOMBRE es la llave del upsert y va fijo al reabrir:
   // editable, cambiarlo crearía OTRO recurso en silencio.
-  const [altaRecurso, setAltaRecurso] = useState(false);
-  const [editandoRecurso, setEditandoRecurso] = useState(false);
-  const [recNombre, setRecNombre] = useState('');
-  const [recCapacidad, setRecCapacidad] = useState('');
 
   // hoja turno — ídem: upsert por (cuenta, codigo), el CÓDIGO fijo al
   // reabrir.
@@ -342,9 +332,8 @@ export default function ConfiguracionVentas() {
         /* ⚠️ POSICIONAL: lo nuevo se agrega AL FINAL y su nombre también.
            Sacar o intercalar en el medio desalinea el destructuring en
            silencio — ya costó una corrida en esta misma pista. */
-        const [reps, recursos, turnos, pedidos, cupo, pres, arranque] = await Promise.all([
+        const [reps, turnos, pedidos, cupo, pres, arranque] = await Promise.all([
           listarRepartidores(id),
-          listarRecursosReparto(id),
           listarTurnosEntrega(id),
           listarPedidosDelVendedor(id),
           cupoRepartoDelDia(id, hoyLocalISO()),
@@ -359,7 +348,7 @@ export default function ConfiguracionVentas() {
           obtenerContextoArranque(),
         ]);
         if (!vigente()) return;
-        if (!reps.ok || !recursos.ok || !turnos.ok || !pedidos.ok) {
+        if (!reps.ok || !turnos.ok || !pedidos.ok) {
           setPantalla({ estado: 'error' });
           return;
         }
@@ -368,7 +357,6 @@ export default function ConfiguracionVentas() {
           contexto: ctx.data,
           sinOtraCasa: !pres.ok && pres.codigo === 'sin_prestador',
           repartidores: reps.data,
-          recursos: recursos.data,
           turnos: turnos.data,
           // lo comprometido: vivo Y con ventana prometida (un retiro sin
           // promesa no lo mueve ningún corte)
@@ -466,25 +454,6 @@ export default function ConfiguracionVentas() {
     recargar();
   }
 
-  async function guardarRecurso() {
-    if (guardando || pantalla.estado !== 'listo') return;
-    const capacidad = Number(recCapacidad);
-    if (recNombre.trim().length === 0 || !Number.isInteger(capacidad) || capacidad <= 0) return;
-    setGuardando(true);
-    const r = await definirRecursoReparto({
-      cuenta_comercial_id: pantalla.contexto.cuentaComercialId,
-      nombre: recNombre.trim(),
-      capacidad_por_dia: capacidad,
-    });
-    setGuardando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
-    }
-    mostrar({ texto: t('ventas.config.recursoExito'), variante: 'exito' });
-    setAltaRecurso(false);
-    await cargar();
-  }
 
   async function guardarTurno() {
     if (guardando || pantalla.estado !== 'listo') return;
@@ -783,7 +752,22 @@ export default function ConfiguracionVentas() {
                           .filter((x): x is string => x !== null)
                           .join(' · ') || undefined
                       }
-                      metadataMono={rep.documento}
+                      /* ⭐ FIRMA DEL FOUNDER: en la fila van NOMBRE,
+                         VEHÍCULO Y PLACA. El documento se fue a la ficha
+                         —donde se edita— porque **un vendedor no reconoce
+                         a su repartidor por la cédula: lo reconoce por la
+                         moto que ve llegar.** Sin vehículo declarado la
+                         fila calla ese pedazo en vez de inventarlo. */
+                      metadataMono={
+                        rep.vehiculos.length > 0
+                          ? rep.vehiculos
+                              .map(
+                                (v) =>
+                                  `${v.tipo === 'moto' ? t('ventas.config.vehiculo.moto') : t('ventas.config.vehiculo.carro')} ${v.placa}`,
+                              )
+                              .join(' · ')
+                          : undefined
+                      }
                       interactiva
                       accessibilityRole="button"
                       onPress={() => router.push(`/ventas/repartidor/${rep.repartidor_id}`)}
@@ -808,48 +792,20 @@ export default function ConfiguracionVentas() {
             />
           </View>
 
-          {/* capacidad por recurso */}
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('ventas.config.recursosTitulo')}</Texto>
-            <Texto variante="apoyo">{t('ventas.config.recursosDetalle')}</Texto>
-            {pantalla.recursos.length === 0 ? (
-              <Texto variante="apoyo">{t('ventas.config.sinRecursos')}</Texto>
-            ) : (
-              <Tarjeta relleno="ninguno">
-                {pantalla.recursos.map((rec, i) => (
-                  <View key={rec.recurso_id}>
-                    {i > 0 && <Separador />}
-                    {/* D-791: la fila REABRE el mismo formulario — la
-                        puerta upsertea por (cuenta, nombre). */}
-                    <Celda
-                      titulo={rec.nombre}
-                      subtitulo={rec.activo ? undefined : t('ventas.config.repartidorInactivo')}
-                      metadataMono={t('ventas.config.capacidadPorDia', { n: rec.capacidad_por_dia })}
-                      interactiva
-                      accessibilityRole="button"
-                      onPress={() => {
-                        setRecNombre(rec.nombre);
-                        setRecCapacidad(String(rec.capacidad_por_dia));
-                        setEditandoRecurso(true);
-                        setAltaRecurso(true);
-                      }}
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('ventas.config.recursoNuevoCta')}
-              onPress={() => {
-                setRecNombre('');
-                setRecCapacidad('');
-                setEditandoRecurso(false);
-                setAltaRecurso(true);
-              }}
-            />
-          </View>
+          {/* ☠️ S99-C · ACÁ VIVÍA «CAPACIDAD DE REPARTO» CON SU «AGREGAR
+              RECURSO», y muere por firma del founder mirando la pantalla:
+              *«Moto Demo — 20 por día» es capacidad de un REPARTIDOR, no un
+              recurso suelto.*
+              **No se pudo mudar antes y la razón no era de diseño:**
+              `recursos_reparto` no conocía al repartidor, así que esta
+              sección **describía con fidelidad un modelo equivocado** —
+              medido en la caminata (§XIV) y pagado por A en D-837
+              (`repartidor_id` + `configurar_capacidad_repartidor`).
+              **Ahora la capacidad vive DENTRO de la ficha de cada
+              repartidor**, que es donde el founder dijo que era. Y
+              «agregar recurso» no se reemplaza por nada: *no había recursos
+              que agregar — había personas a las que preguntarles cuánto
+              llevan.* */}
 
           {/* ── ⭐ S98-C · LA FACTURACIÓN SE VA DE ACÁ (firma del founder:
               *«deben ir donde corresponde, no es de acá»*) ──────────────
@@ -951,63 +907,11 @@ export default function ConfiguracionVentas() {
           fue. Su reemplazo VIVE, en la ficha (`/ventas/repartidor/[id]`),
           al lado del WhatsApp: el selector se MUDÓ, no se borró (R46). */}
 
-      {/* ── hoja: recurso nuevo ── */}
-      <Hoja
-        visible={altaRecurso}
-        onCerrar={() => {
-          if (!guardando) setAltaRecurso(false);
-        }}
-        titulo={
-          editandoRecurso
-            ? t('ventas.config.recursoEditarTitulo')
-            : t('ventas.config.recursoNuevoCta')
-        }
-        altura="media"
-      >
-        <HojaScroll>
-          <EvitaTeclado>
-            <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-              {/* el NOMBRE es la llave del upsert: fijo al reabrir —
-                  editable crearía OTRO recurso en silencio (D-791) */}
-              <Campo
-                label={t('ventas.config.recursoNombre')}
-                value={recNombre}
-                onChangeText={setRecNombre}
-                ayuda={editandoRecurso ? t('ventas.config.recursoNombreFijo') : undefined}
-                deshabilitado={guardando || editandoRecurso}
-              />
-              <Campo
-                label={t('ventas.config.recursoCapacidad')}
-                value={recCapacidad}
-                onChangeText={setRecCapacidad}
-                keyboardType="number-pad"
-                deshabilitado={guardando}
-              />
-              {/* LEY DEL CAMBIO: lo ya prometido hoy no se mueve — se dice
-                  ANTES de guardar, no se rechaza ni se oculta. */}
-              {pantalla.estado === 'listo' &&
-                pantalla.cupoHoy !== null &&
-                pantalla.cupoHoy.consumido > 0 && (
-                  <Texto variante="apoyo">
-                    {pantalla.cupoHoy.consumido === 1
-                      ? t('ventas.config.cambio.recursoEntrega1')
-                      : t('ventas.config.cambio.recursoEntregas', {
-                          n: pantalla.cupoHoy.consumido,
-                        })}
-                  </Texto>
-                )}
-              <Boton
-                variante="primario"
-                bloque
-                cargando={guardando}
-                deshabilitado={recNombre.trim().length === 0 || !(Number(recCapacidad) > 0)}
-                etiqueta={t('ventas.config.recursoGuardarCta')}
-                onPress={() => void guardarRecurso()}
-              />
-            </View>
-          </EvitaTeclado>
-        </HojaScroll>
-      </Hoja>
+      {/* ☠️ S99-C — LA HOJA DEL RECURSO MURIÓ CON SU SECCIÓN. Editaba un
+          objeto que el founder declaró inexistente («no hay recursos: hay
+          personas»), y dejarla viva habría sido una puerta a un modelo que
+          ya no rige. Su reemplazo es el campo de capacidad **adentro de la
+          ficha del repartidor** (D-837). */}
 
       {/* ── hoja: corte nuevo ── */}
       <Hoja

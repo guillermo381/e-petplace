@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-255 — UNA CORRECCIÓN PUEDE ROMPER LO QUE YA ESTABA FIRMADO SI NO DISTINGUE QUÉ SE CORRIGE DE QUÉ SE CONSERVA (S99 — el caso es de B, en el re-dibujo del pin; depositada por orden de mesa, 18-ago-2026).**
+
+  **El caso:** la corrección de mesa decía, literal, *«la candidata D queda FIRMADA como silueta ganadora; su TRATAMIENTO cambia»* — y al ejecutar «perspectiva compartida» **B reproyectó la silueta a tres cuartos: destruyó lo único que YA estaba firmado.** *Lo encontró ella misma releyendo la firma.* Vuelve D verbatim; cambia solo el tratamiento.
+
+  **COROLARIO EXIGIBLE, en las dos direcciones:** **toda corrección de mesa NOMBRA EXPLÍCITAMENTE qué NO se toca** — y **quien la ejecuta lee esa mitad ANTES que la otra.** *Una corrección sin su mitad conservadora es una invitación a rehacer lo aprobado.*
+
+  **Y su corolario de medición, que B ya adoptó en la pieza: SE MIDE QUE SE APOYE Y SE MIDE QUE SE RECONOZCA — son DOS pruebas, no una.** El pin pasó la primera (física del mundo: sombra, perspectiva, color del terreno) y falló la segunda (*«no parece una moto»*). **Un objeto integrado que no se reconoce sigue sin servir.**
+
 - **L-254 — UN UMBRAL QUE MIDE TAMAÑO NO MIDE UTILIDAD (S99 — el caso es de C con volumen real; depositada por orden de mesa, 18-ago-2026).**
 
   **El caso, con número:** el umbral del segundo eje de N20 se encendió solo (perro 232, gato 109 — las dos condiciones cruzadas) **y el filtro es inútil igual**: el comodín es MAYORÍA (121/232 en perro, 65/109 en gato), así que filtrar «cachorro» devuelve **149 de 232 — el 64 % del catálogo**. Tres buckets con ≥3 y **ninguno REPARTE**. *Pasa la LETRA de la segunda condición y falla su ESPÍRITU — es exactamente el «adorno con estado» que esa condición existe para evitar.*

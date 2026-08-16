@@ -2424,6 +2424,9 @@ export const prestadorEn = {
     vehiculoTipo: 'Type',
     vehiculoPlaca: 'Plate',
     vehiculoAgregar: 'Add vehicle',
+    capacidadTitulo: 'How much they carry per day',
+    capacidadLabel: 'Deliveries per day',
+    capacidadAyuda: 'This is their capacity, not the business: adding another courier grows the day.',
     vehiculoQuitar: 'Remove',
     placaVacia: 'The plate is missing.',
     placaFormatoMoto: 'A motorcycle plate has 2 letters, 3 numbers and one letter — for example, AB 123 C.',
@@ -2525,6 +2528,7 @@ export const prestadorEn = {
       razon_sin_foto: 'We still need its photo.',
     },
     vitrina: {
+      buscar: 'Search a product',
       titulo: 'Your storefront',
       todas: 'All',
       filtroEspecie: 'Filter by species',

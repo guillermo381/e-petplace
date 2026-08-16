@@ -57,6 +57,7 @@ import Animated, {
 import Svg, { Circle, Path } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -64,7 +65,6 @@ import { useTheme } from '../ThemeProvider'
 import { Badge, useEtiquetaBadge } from './Badge'
 
 const AnimatedPath = Animated.createAnimatedComponent(Path)
-const AnimatedCircle = Animated.createAnimatedComponent(Circle)
 
 /** ☠️ EL LADO DE LA DESTACADA — LÁPIDA (S99-B, firma de mesa).
  *
@@ -112,37 +112,82 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle)
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
 const ALTO_FILA = 56
-const VALLE_RADIO = 34
-const VALLE_HONDO = 13
-const DISCO_RADIO = 26
-/** Cuánto sube el disco sobre el borde. El hueco resultante (disco vs
- *  fondo del valle) es lo que se ve pasar. */
-const DISCO_ALZA = 20
+const VALLE_RADIO = 36
+/** ⏪ ERA 13. **El founder lo midió con el ojo y la aritmética le da la
+ *  razón:** *«la parte cóncava no está tan pronunciada»*. El valle tiene
+ *  que hundirse lo suficiente para ALOJAR al disco, no para insinuarlo. */
+const VALLE_HONDO = 18
+const DISCO_RADIO = 28
+/** 🔴 ⏪ ERA 20 CONTRA UN RADIO DE 26 — y ahí estaba el defecto, medido:
+ *  el disco iba de **-46 a +6** en coordenadas de la fila, o sea que
+ *  **solo 6 px de 52 quedaban DENTRO de la barra (11 %)**. El founder lo
+ *  describió exacto sin ver el número: *«el círculo queda prácticamente
+ *  AFUERA del menú… pareciera que la bolita se sale totalmente, solo
+ *  queda un poquito adentro. Debería estar MUY METIDO.»*
+ *
+ *  Con 10 contra 28, el disco va de **-38 a +18**: **18 px adentro en vez
+ *  de 6, y el valle de 18 lo aloja de verdad.** *No era una preferencia
+ *  de estilo: la geometría decía lo que él vio.* */
+const DISCO_ALZA = 10
+/** Dónde descansa el centro del ícono dentro de la fila (56 de alto,
+ *  con su etiqueta debajo). Medido de la composición, no elegido. */
+const REPOSO_ICONO = 18
 /** Cuánto sube el ÍCONO para caer en el centro del disco. **Derivado, no
- *  elegido:** el disco vive a `-DISCO_ALZA` del borde de la fila y el
- *  ícono descansa ~20 dp bajo ese borde (fila 56, con su etiqueta
- *  abajo). *Si mañana el disco sube más, esto lo sigue sin que nadie se
- *  acuerde — que es la única forma de que dos capas distintas (SVG y
- *  fila) no se desalineen con el tiempo.* */
-const SUBIDA_AL_DISCO = DISCO_ALZA + 20
+ *  elegido** — el disco vive a `-DISCO_ALZA` y el ícono en `REPOSO_ICONO`.
+ *  *Si mañana el disco cambia de alza, esto lo sigue sin que nadie se
+ *  acuerde: es la única forma de que dos capas distintas (SVG y fila) no
+ *  se desalineen con el tiempo.* */
+const SUBIDA_AL_DISCO = DISCO_ALZA + REPOSO_ICONO
+/** El cuerpo se dibuja MÁS ANCHO que la pantalla y viaja por transform
+ *  (ver la nota del viaje). Con un margen de un ancho a cada lado, ningún
+ *  desplazamiento posible descubre un borde. */
+const MARGEN_VIAJE = 1
 
 /** El path del cuerpo con su valle. Worklet: lo corre el hilo de UI en
  *  cada frame del viaje. */
-function pathBarra(ancho: number, alto: number, cx: number, estira: number) {
+/** 🔴 EL VIAJE Y EL ESTIRÓN SE SEPARARON, Y NO ES REFACTOR (S99-B, tras
+ *  el 3er hallazgo del founder: *«NO HACE TRANSICIÓN, SALTA»*).
+ *
+ *  **Lo medido primero, porque el diagnóstico no se adivina:** el defecto
+ *  visible NO estaba solo acá — el disco iba de -46 a +6, o sea **11 %
+ *  adentro**, y un objeto que vive casi afuera del menú *parece* saltar
+ *  aunque interpole. Esa mitad se curó en la geometría.
+ *
+ *  **La otra mitad es de TRANSPORTE, y no la puedo verificar desde acá:**
+ *  si la posición viaja animando la cadena `d` de un `Path`, depende de
+ *  que `react-native-svg` propague esa prop por el hilo de UI en cada
+ *  frame — y **eso solo se comprueba en aparato**. ⇒ **la posición deja
+ *  de depender de eso.**
+ *
+ *  · **EL VIAJE es un `transform` sobre el grupo entero** — el mecanismo
+ *    más sólido que hay, el mismo que ya mueve todo lo demás de la casa.
+ *  · **EL ESTIRÓN sigue animando `d`** — y si esa prop no interpolara en
+ *    algún dispositivo, **se pierde la deformación, jamás el
+ *    movimiento**.
+ *
+ *  *Una animación de dos capas donde la crítica cuelga de la frágil no es
+ *  una animación arriesgada: es una que ya falló y todavía no lo sabés.*
+ *
+ *  El cuerpo se dibuja en coordenadas LOCALES —el valle en `x = 0`— y se
+ *  extiende un ancho a cada lado, para que ningún desplazamiento
+ *  descubra un borde. */
+function pathBarra(ancho: number, alto: number, estira: number) {
   'worklet'
   const r = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.35)
   // el sesgo: el valle se abre hacia el lado del que viene
   const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.45
-  const izq = cx - r + sesgo
-  const der = cx + r + sesgo
+  const izq = -r + sesgo
+  const der = r + sesgo
+  const i0 = -ancho * MARGEN_VIAJE
+  const i1 = ancho * (1 + MARGEN_VIAJE)
   return [
-    `M0 0`,
+    `M${i0} 0`,
     `H${izq}`,
-    `C${izq + r * 0.45} 0 ${cx - r * 0.5} ${VALLE_HONDO} ${cx} ${VALLE_HONDO}`,
-    `C${cx + r * 0.5} ${VALLE_HONDO} ${der - r * 0.45} 0 ${der} 0`,
-    `H${ancho}`,
+    `C${izq + r * 0.45} 0 ${-r * 0.5} ${VALLE_HONDO} 0 ${VALLE_HONDO}`,
+    `C${r * 0.5} ${VALLE_HONDO} ${der - r * 0.45} 0 ${der} 0`,
+    `H${i1}`,
     `V${alto}`,
-    `H0`,
+    `H${i0}`,
     `Z`,
   ].join(' ')
 }
@@ -229,7 +274,6 @@ export function BarraTabs({
   activo,
   onCambiar,
   estadoPorHuella = false,
-  huellaEnDisco = true,
   acento,
 }: {
   /** 2 a 5 tabs.
@@ -248,26 +292,19 @@ export function BarraTabs({
    *  (sin recuadros, sin pills). La huella activa hereda el rol de
    *  accent.active: sigue siendo EL elemento activo de la vista. */
   estadoPorHuella?: boolean
-  /** 🔴 PROP DE GATE, con su condición de muerte escrita (S99-B).
+  /** ☠️ `huellaEnDisco` MURIÓ CON SU CONDICIÓN DE MUERTE CUMPLIDA
+   *  (S99-B). Nació como prop de gate con las DOS ramas construidas
+   *  porque el founder las había firmado por adelantado; el veredicto
+   *  llegó y fue **SIN HUELLA, definitivamente — gana el dinamismo**.
    *
-   *  **El founder firmó las DOS ramas por adelantado:** *«si la huella
-   *  dentro del disco se ve mal, en ese caso quitaríamos la huella y
-   *  priorizamos el dinamismo del menú»*. ⇒ las dos se construyen y **el
-   *  gate elige**; no se adivina ni se pide otra firma.
+   *  ⇒ la rama ganadora se queda en la pieza y la prop se retira, que era
+   *  exactamente lo que su ficha decía que iba a pasar (precedente
+   *  `overshootHuella`). *Una prop de gate que sobrevive a su gate es una
+   *  perilla que nadie firmó.*
    *
-   *  `true` (default) — la huella se MUDA adentro del disco: sigue siendo
-   *  la marca, cambia de sitio (§2.6 enmendada).
-   *  `false` — sin huella; el disco queda como marcador único.
-   *
-   *  **El criterio para que el gate no sea gusto:** la huella entra **si
-   *  a ese tamaño SE LEE como huella**. *Una huella que a 24 px se vuelve
-   *  una mancha no es identidad, es ruido* — y ahí la propia condicional
-   *  del founder ya la mata.
-   *
-   *  ☠️ MUERE con el veredicto: la rama que gane se queda en la pieza y
-   *  la prop se retira (precedente `overshootHuella`, que murió en el
-   *  acto de su firma). */
-  huellaEnDisco?: boolean
+   *  **Y la huella no muere de la casa: muere de ACÁ.** Sigue siendo la
+   *  marca donde significa; en esta barra el marcador es el disco, y dos
+   *  marcadores del mismo estado no conviven. */
   /** PROP DE GATE — override del acento de la tab activa. Default:
    *  `accent.active`, que desde S83-B13 es SLOT y ya resuelve por casa
    *  (pink el cliente · el verde del oficio en sus dos registros).
@@ -325,6 +362,17 @@ export function BarraTabs({
    *  cada layout. */
   void estadoPorHuella
 
+  /** 🔴 EL COLOR DEL TECHO — firma del founder: *«el círculo que marca el
+   *  seleccionado debemos ponerlo en el COLOR OSCURO, el que en este
+   *  momento está en el header»*. La barra deja de ser del color del
+   *  fondo y pasa a ser **la misma superficie oscura del techo**, que es
+   *  lo que la vuelve una pieza de la casa y no un panel neutro.
+   *
+   *  Sale del SLOT, jamás de un hex: `bg.tinta` es el mismo token con el
+   *  que `TechoOficio` pinta su muro, así que **cambia con la casa sin
+   *  que esta pieza sepa en cuál está**. */
+  const colorTecho = theme.bg.tinta
+
   const [ancho, setAncho] = useState(0)
   const reduceMotionBarra = useReducedMotion()
   const quieto = theme.mode === 'memorial' || reduceMotionBarra
@@ -358,10 +406,14 @@ export function BarraTabs({
     )
   }, [cxDestino, ancho, quieto, anchoTab])
 
-  const propsCuerpo = useAnimatedProps(() => ({
-    d: pathBarra(ancho, altoTotal, cx.value, estira.value),
+  /** El grupo VIAJA (transform) · el path solo se DEFORMA. Ver la nota
+   *  de `pathBarra`: la posición no cuelga del mecanismo frágil. */
+  const estiloViaje = useAnimatedStyle(() => ({
+    transform: [{ translateX: cx.value }],
   }))
-  const propsDisco = useAnimatedProps(() => ({ cx: cx.value }))
+  const propsCuerpo = useAnimatedProps(() => ({
+    d: pathBarra(ancho, altoTotal, estira.value),
+  }))
 
   return (
     <View
@@ -376,31 +428,58 @@ export function BarraTabs({
       }}
     >
       {ancho > 0 ? (
-        <Svg
-          width={ancho}
-          height={altoTotal + DISCO_ALZA + DISCO_RADIO}
-          style={{ position: 'absolute', left: 0, top: -(DISCO_ALZA + DISCO_RADIO) }}
+        /* EL LIENZO NO RECORTA: el cuerpo se dibuja más ancho que la
+           pantalla y viaja, así que el SVG tiene que dejarlo salir por
+           los dos lados sin cortar el valle en el camino. */
+        <Animated.View
           pointerEvents="none"
+          style={[
+            {
+              position: 'absolute',
+              left: 0,
+              top: -(DISCO_ALZA + DISCO_RADIO),
+              width: ancho,
+              height: altoTotal + DISCO_ALZA + DISCO_RADIO,
+            },
+            estiloViaje,
+          ]}
         >
-          {/* el cuerpo, corrido hacia abajo para dejarle aire al disco */}
-          <AnimatedPath
-            animatedProps={propsCuerpo}
-            fill={theme.bg.base}
-            translateY={DISCO_ALZA + DISCO_RADIO}
-          />
-          {/* EL DISCO — mismo color que el cuerpo. Entre los dos no se
-              pinta nada: ESE es el hueco. */}
-          <AnimatedCircle
-            animatedProps={propsDisco}
-            cy={DISCO_RADIO}
-            r={DISCO_RADIO}
-            fill={theme.bg.base}
-          />
-        </Svg>
+          <Svg
+            width={ancho * (1 + MARGEN_VIAJE * 2)}
+            height={altoTotal + DISCO_ALZA + DISCO_RADIO}
+            style={{ position: 'absolute', left: -ancho * MARGEN_VIAJE }}
+          >
+            {/* Coordenadas LOCALES: el valle vive en x = 0 del grupo, y
+                el grupo es el que viaja. Por eso el `translateX` del SVG
+                compensa el margen: el 0 local queda en el 0 de la fila. */}
+            <AnimatedPath
+              animatedProps={propsCuerpo}
+              fill={colorTecho}
+              translateX={ancho * MARGEN_VIAJE}
+              translateY={DISCO_ALZA + DISCO_RADIO}
+            />
+            {/* EL DISCO — mismo color que el cuerpo. Entre los dos no se
+                pinta nada: ESE es el hueco. Va quieto en su x local: lo
+                mueve el grupo, igual que al valle, y por eso **no pueden
+                desincronizarse** (era el defecto: dos cosas viajando por
+                mecanismos distintos). */}
+            <Circle
+              cx={ancho * MARGEN_VIAJE}
+              cy={DISCO_RADIO}
+              r={DISCO_RADIO}
+              fill={colorTecho}
+            />
+          </Svg>
+        </Animated.View>
       ) : null}
       {items.map((item) => {
         const esActivo = item.key === activo
-        const color = esActivo ? theme.text.primary : theme.text.tertiary
+        /* 🔴 SOBRE EL TECHO OSCURO EL TEXTO ES PAPEL — §15b.2, la misma
+           regla que ya rige en `TechoOficio` y en `Boton superficie="muro"`.
+           Con la barra en `bg.tinta`, `text.primary` sería tinta sobre
+           tinta: invisible. El activo va PLENO y el resto atenuado — la
+           jerarquía la da la opacidad, no un segundo color. */
+        const color = esActivo ? palette.light0 : palette.papelAtenuado
         // §2.6+§2.8: la huella activa hereda accent.active; memorial
         // degrada a tinta secundaria (jamás color en memorial).
         const colorHuella = theme.mode === 'memorial' ? theme.text.secondary : accentActive
@@ -450,7 +529,9 @@ export function BarraTabs({
                        condicional del founder está firmada por
                        adelantado, así que las dos se construyen y el
                        gate ELIGE. */
-                    activa: huellaEnDisco ? esActivo : false,
+                    /* SIN HUELLA — firma del founder. El disco marca el
+                       activo; la huella acá sería el segundo marcador. */
+                    activa: false,
                     colorHuella,
                   })}
                 </Badge>

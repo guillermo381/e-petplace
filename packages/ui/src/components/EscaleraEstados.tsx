@@ -35,10 +35,27 @@
  *
  * ── LOS DOS REGISTROS ──────────────────────────────────────────────────
  * `compacta`  la tira, para una FILA de lista (la lista Hoy del vendedor,
- *             "Mis pedidos" de la familia). Barras + el nombre del paso
- *             actual.
+ *             "Mis pedidos" de la familia). **NODOS unidos por una línea
+ *             que se rellena**, el nombre del paso y —si hay promesa— la
+ *             ventana de entrega. ⏪ Decía «barras»: ver la lápida abajo.
  * `completa`  el riel vertical, para el DETALLE. Nodo por paso, con su
  *             detalle opcional ("12:40", "Lote A-33").
+ *
+ * ── ☠️ LAS CUATRO BARRAS MURIERON (S99-B, firma del founder) ──────────
+ * Verbatim sobre las capturas de Rappi: *«nosotros tenemos cuatro líneas
+ * verdes; Rappi llena con círculos cada etapa y le va diciendo al cliente
+ * dónde está y cuánto falta. Es mucho más amigable.»*
+ *
+ * 🔴 **El diagnóstico es de GRAMÁTICA, no de estética: una barra solo
+ * puede decir CUÁNTAS VAN.** No tiene adentro, así que el paso hay que
+ * nombrarlo aparte y en texto. **Un nodo sí tiene adentro** — y por eso
+ * puede decir QUÉ ES sin una palabra. *No se cambió de dibujo por gusto:
+ * se cambió de forma porque la vieja no tenía dónde poner el
+ * significado.*
+ *
+ * **La frontera de cuántos nodos: las NARRATIVAS (7), jamás los estados
+ * internos (30).** La pieza no la conoce —recibe `pasos`— y por eso
+ * funciona igual con 4 que con 7; lo que la casa firma es qué se cuenta.
  *
  * ── CHANEL (Ley 16) ────────────────────────────────────────────────────
  * En `compacta`, HECHO y ACTUAL se llenan IGUAL. La tentación era darle
@@ -64,6 +81,7 @@
  * Memorial degrada solo (el acento cae a tinta por el slot del tema).
  */
 
+import type { ReactNode } from 'react'
 import { View } from 'react-native'
 
 import { Texto } from './Texto'
@@ -87,6 +105,21 @@ export type PasoEscalera = {
    * la pantalla con el riel de fechas, jamás este componente.
    */
   detalle?: string
+  /** EL ÍCONO ADENTRO DEL NODO (S99-B · firma del founder sobre Rappi):
+   *  *«un círculo puede llevar un ícono adentro, así que cada etapa dice
+   *  QUÉ ES sin texto»*.
+   *
+   *  **Es SLOT, no diccionario**, por la misma razón que la etiqueta: un
+   *  set de íconos acá adentro obligaría a las dos casas a decir lo mismo
+   *  con el mismo dibujo, y **el vendedor y la familia no miran el mismo
+   *  hecho** (§6 del método). La pieza dice DÓNDE va el ícono; qué ícono
+   *  es, lo dice quien la monta.
+   *
+   *  **Opcional a propósito:** sin él, el nodo es un punto — que es
+   *  exactamente lo que la pieza hacía antes. *Así C y D adoptan de a una
+   *  pantalla en vez de tener que dibujar siete glifos para estrenar la
+   *  forma nueva.* */
+  icono?: (estado: { color: string; lleno: boolean }) => ReactNode
 }
 
 export type DesvioEscalera = {
@@ -118,17 +151,38 @@ export type EscaleraEstadosProps = {
    * color, jamás la gramática.
    */
   acento?: 'control' | 'oficio'
+  /** CUÁNDO LLEGA — la ventana prometida, en `compacta` (S99-B).
+   *
+   *  El founder pidió que la escalera diga *«dónde está Y cuánto
+   *  falta»*; los nodos contestan lo primero y **esto contesta lo
+   *  segundo**. Sale de `promesa_entrega_desde/hasta`, poblado al
+   *  checkout — **dato real, cero motor nuevo**.
+   *
+   *  🔴 **Y ES UN RANGO, JAMÁS UN MINUTO.** N14 prohíbe el ETA al minuto
+   *  en v1 con su razón —*prometer un minuto que no podemos cumplir es
+   *  peor que no prometer*— y una ventana **no es eso**: es lo que el
+   *  vendedor se comprometió a cumplir, escrito en la base. *La ley
+   *  prohíbe la precisión inventada, no la promesa que existe.*
+   *
+   *  La compone la pantalla (voz de máquina, mono — Ley 3); la pieza no
+   *  formatea horas. */
+  cuandoLlega?: string
 }
 
 const RIEL = 24 // ancho de la columna del conector — el de LineaDeVida
 const PUNTO = 10 // diámetro del nodo — el de LineaDeVida
-const BARRA = 4 // alto de la barra de la tira compacta
+const BARRA = 3 // alto del CONECTOR entre nodos (antes: la barra suelta)
+/** El nodo de la tira. 20 sostiene un glifo de 12 adentro y deja la fila
+ *  por debajo del blanco de 44 —la escalera INFORMA, no se toca—, así
+ *  que no compite con ningún target. */
+const NODO = 20
 
 export function EscaleraEstados({
   pasos,
   registro = 'completa',
   desvio,
   acento = 'control',
+  cuandoLlega,
 }: EscaleraEstadosProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
@@ -163,24 +217,69 @@ export function EscaleraEstados({
         accessibilityValue={{ min: 0, max: pasos.length, now: alcanzado }}
         style={{ gap: spacing[1.5] }}
       >
-        <View style={{ flexDirection: 'row', gap: spacing[1] }}>
-          {pasos.map((paso, i) => (
-            <View
-              key={paso.clave}
-              style={{
-                flex: 1,
-                height: BARRA,
-                borderRadius: radius.full,
-                // Ver CHANEL: hecho y actual se llenan igual a propósito.
-                backgroundColor: i < alcanzado ? color : theme.bg.hundido,
-              }}
-            />
-          ))}
+        {/* ☠️ ACÁ VIVÍAN LAS CUATRO BARRAS. Verbatim del founder sobre
+            las capturas: *«nosotros tenemos cuatro líneas verdes; Rappi
+            llena con círculos cada etapa y le va diciendo al cliente
+            dónde está y cuánto falta»*.
+
+            🔴 EL DIAGNÓSTICO, y es de gramática: **una barra solo puede
+            decir CUÁNTAS VAN.** No tiene dónde alojar identidad, así que
+            el paso hay que nombrarlo aparte y en texto. **Un nodo SÍ
+            tiene adentro**: por eso puede decir QUÉ ES sin una palabra.
+            *No cambiamos de dibujo por gusto: cambiamos de forma porque
+            la vieja no tenía lugar donde poner el significado.* */}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {pasos.map((paso, i) => {
+            const lleno = i < alcanzado
+            // El conector se llena HASTA el nodo alcanzado. Binario a
+            // propósito: un relleno parcial afirmaría un progreso DENTRO
+            // del paso, y ese dato no existe (L-139).
+            const conectorLleno = i < alcanzado - 1 + (indiceActual >= 0 && !desvio ? 1 : 0)
+            return (
+              <View key={paso.clave} style={{ flexDirection: 'row', alignItems: 'center', flex: i === pasos.length - 1 ? 0 : 1 }}>
+                <View
+                  style={{
+                    width: NODO,
+                    height: NODO,
+                    borderRadius: radius.full,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    // La gramática que hereda: lo hecho se RELLENA, lo que
+                    // espera se CONTORNEA (19.8 leída en el tiempo).
+                    backgroundColor: lleno ? color : 'transparent',
+                    borderWidth: lleno ? 0 : 1.5,
+                    borderColor: theme.bg.border,
+                  }}
+                >
+                  {paso.icono?.({ color: lleno ? theme.bg.base : theme.text.tertiary, lleno })}
+                </View>
+                {i < pasos.length - 1 ? (
+                  <View
+                    style={{
+                      flex: 1,
+                      height: BARRA,
+                      backgroundColor: conectorLleno ? color : theme.bg.hundido,
+                    }}
+                  />
+                ) : null}
+              </View>
+            )
+          })}
         </View>
-        {pasoNombrado !== undefined ? (
-          <Texto variante="apoyo" color={desvio?.tono === 'alerta' ? 'warning' : undefined}>
-            {pasoNombrado}
-          </Texto>
+        {pasoNombrado !== undefined || cuandoLlega !== undefined ? (
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing[2] }}>
+            {pasoNombrado !== undefined ? (
+              <Texto variante="apoyo" color={desvio?.tono === 'alerta' ? 'warning' : undefined}>
+                {pasoNombrado}
+              </Texto>
+            ) : null}
+            {/* «cuánto falta», en voz de máquina y solo si hay promesa.
+                Con desvío NO se muestra: el camino se cortó y una ventana
+                de entrega ahí sería prometer algo que ya no va a pasar. */}
+            {cuandoLlega !== undefined && desvio === undefined ? (
+              <Texto variante="dato">{cuandoLlega}</Texto>
+            ) : null}
+          </View>
         ) : null}
       </View>
     )

@@ -81,7 +81,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import Svg, { Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
+import Svg, { Circle, Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
 
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 import { motion } from '../tokens/motion'
@@ -185,45 +185,48 @@ function SombraDeSuelo({ id, cx, cy, rx }: { id: string; cx: number; cy: number;
   )
 }
 
-/** LA MOTO — silueta D FIRMADA, **re-dibujada como OBJETO DEL MUNDO**
- *  (§6ter, enmienda del 18-ago tras el segundo rechazo).
+/** LA MOTO — silueta D FIRMADA, con el TRATAMIENTO del mundo.
  *
- *  🔴 QUÉ CAMBIÓ, y no es el dibujo: **el TRATAMIENTO.** Antes era el
- *  símbolo correcto puesto sobre el mundo —*«un símbolo plano dentro de
- *  un círculo es correcto como ÍCONO, y exactamente por eso se ve
- *  pegado»*—. Las cuatro físicas, aplicadas:
+ *  ⏪ 🔴 **CORRECCIÓN DE UN ERROR MÍO, y es de sobre-corrección.** El
+ *  founder devolvió: *«el pin NO PARECE UNA MOTO: se ve la caja y una
+ *  línea»*. Al buscar la causa releí la firma y decía, literal:
+ *  ***«la candidata D queda FIRMADA como silueta ganadora; su TRATAMIENTO
+ *  cambia»***.
  *
- *  ① **SOMBRA EN EL SUELO** — abajo, y es lo que lo para en el piso.
- *  ② **PERSPECTIVA COMPARTIDA** — el mapa es CENITAL. El perfil puro
- *     metía dos perspectivas en la misma imagen. Se inclina a **tres
- *     cuartos**: la rueda trasera más baja y grande (cerca), la
- *     delantera más alta y chica (lejos), y la caja mostrando su TAPA —
- *     *una tapa visible es la firma de que se lo mira desde arriba*.
- *  ③ **EL COLOR PERTENECE AL TERRENO** — `mapaMoto`, nuestro magenta
- *     llevado a la banda de saturación del mapa (ver el token).
- *  ④ **SIN ANILLO** — medido en la tanda anterior: la silueta gana
- *     9.85-11.54 sobre los tres tonos reales; el disco blanco era lo
- *     que no se veía (1.44-1.68) **y lo que la volvía un sticker**. */
+ *  **Yo cambié la SILUETA.** Reproyecté el dibujo a tres cuartos para
+ *  cumplir «perspectiva compartida» y en el camino **destruí lo único
+ *  que ya estaba firmado**: el perfil que se reconocía. *La física del
+ *  mundo se logró y la legibilidad del objeto se perdió — y un objeto
+ *  integrado que no se reconoce sigue sin servir.*
+ *
+ *  ⇒ **Vuelve la silueta D, verbatim**, y encima **solo el tratamiento**:
+ *  sombra en el suelo · color del terreno · sin anillo. La perspectiva se
+ *  paga con **el gesto más barato que no toca la silueta** —las ruedas
+ *  apoyadas en una elipse de sombra, no reproyectadas— porque *la
+ *  perspectiva es una de las cuatro físicas y la legibilidad es la
+ *  condición de todas.*
+ *
+ *  **La vara que deja, firmada por la mesa:** *se mide que SE APOYE y se
+ *  mide que SE RECONOZCA — son DOS pruebas, no una.* Esta pieza pasó la
+ *  primera y falló la segunda; el arreglo no puede volver a cambiarlas
+ *  de lugar. */
 function ObjetoMoto({ lado }: { lado: number }) {
   return (
-    <Svg width={lado} height={lado} viewBox="0 0 32 32">
-      <SombraDeSuelo id="sombraMoto" cx={16} cy={26.5} rx={11} />
-      {/* la caja de reparto — con su TAPA a la vista (perspectiva ②).
-          Es lo que dice «reparto» y no «bicicleta», el riesgo que el
-          primer gate encontró. */}
-      <Path d="M5.2 13.4l4.6-2.1 6.4 1.5-4.4 2.3Z" fill={palette.mapaEdificioTecho} />
-      <Path d="M5.2 13.4l4.4 1.7v5.1l-4.4-1.9Z" fill={palette.mapaMoto} />
-      <Path d="M9.6 15.1l6.6-2.3v4.9l-6.6 2.5Z" fill={palette.mapaMoto} opacity={0.82} />
-      {/* el cuerpo, en diagonal: la trasera abajo-izquierda (cerca), la
-          delantera arriba-derecha (lejos) */}
+    <Svg width={lado} height={lado} viewBox="0 0 24 24">
+      {/* La sombra TOCA la base de las ruedas (cy 17.6 + r 3.4 = 21).
+          ⏪ Antes flotaba 2 px por debajo y eso basta para que el objeto
+          se despegue: una sombra separada de su objeto no lo apoya, lo
+          acompaña. */}
+      <SombraDeSuelo id="sombraMoto" cx={12} cy={21} rx={9.5} />
+      {/* SILUETA D, VERBATIM de la candidata firmada — la caja de reparto
+          es lo que la hace decir «reparto» y no «bicicleta». */}
+      <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={palette.mapaMoto} />
       <Path
-        d="M9.4 20.4l7.2-2.8 4.9-3.1 3.1 1.1-4.2 3.3-6.6 3.6Z"
+        d="M2.6 12.4h9l3.2-4.2h3.6v2.5h-2.3l-2.7 3.5h3.5c1.9 0 3.5 1.2 4.1 2.9H4.4c-.5-1.6-1.9-2.7-3.6-2.9Z"
         fill={palette.mapaMoto}
       />
-      {/* ruedas: elipses, no círculos — un círculo perfecto se lee de
-          frente y rompería la perspectiva que el resto sostiene */}
-      <Ellipse cx={11.2} cy={22.4} rx={3.6} ry={2.4} fill={palette.mapaMoto} />
-      <Ellipse cx={23.2} cy={17.6} rx={2.9} ry={1.9} fill={palette.mapaMoto} />
+      <Circle cx={5.8} cy={17.6} r={3.4} fill={palette.mapaMoto} />
+      <Circle cx={18.2} cy={17.6} r={3.4} fill={palette.mapaMoto} />
     </Svg>
   )
 }
@@ -245,7 +248,13 @@ function ObjetoMoto({ lado }: { lado: number }) {
 function ObjetoDestino({ lado }: { lado: number }) {
   return (
     <Svg width={lado} height={lado} viewBox="0 0 32 32">
-      <SombraDeSuelo id="sombraDestino" cx={16} cy={26.5} rx={10} />
+      {/* ⏪ 🔴 *«la casita NO ESTÁ PEGADA AL MAPA, parece que flota»*.
+          Medido: la base del edificio termina en y≈23.7 y la sombra
+          estaba centrada en 26.5 — **casi 3 px de aire entre el objeto y
+          su sombra**, que es exactamente lo que hace flotar a algo. La
+          sombra ahora se solapa con la base: **una sombra que no toca no
+          apoya.** */}
+      <SombraDeSuelo id="sombraDestino" cx={16} cy={23.2} rx={9.5} />
       {/* techo en tres cuartos: dos aguas, la cumbrera corrida a la
           derecha — el mismo ángulo que la caja de la moto */}
       <Path d="M16 5.4l9.6 6.2-4.3 2.1L16 9.9Z" fill={palette.mapaEdificioTecho} />

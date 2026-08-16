@@ -432,6 +432,13 @@ export const palette = {
    * + 35 % tinta): **sat 0.54 — adentro— y 6.61 de contraste contra el
    * peor tono.** Sigue siendo nuestro; deja de gritar.
    * *No se eligió un color bonito: se calculó el que entra en el mundo.* */
+  /** El texto ATENUADO sobre el techo oscuro de `BarraTabs` (S99-B).
+   *  **Sólido y no alpha, a propósito:** un alpha se compone contra lo
+   *  que haya detrás, y detrás de esta barra hay contenido que cambia por
+   *  pantalla — el mismo argumento por el que su hueco no se pinta.
+   *  Medido: **6.44 contra tinta**, holgado sobre el piso de texto. */
+  papelAtenuado: '#A4A19E',
+
   mapaMoto: '#681F4C',
   /** El destino es un EDIFICIO, no un marcador (§6ter) ⇒ sus tonos son
    *  neutros cálidos del terreno (sat ~0.10), no marca. Dos planos

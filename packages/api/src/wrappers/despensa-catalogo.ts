@@ -501,6 +501,73 @@ export async function conteosVitrinaPorEje(): Promise<
   return { ok: true, data: { por_especie: porEspecie, por_especie_momento: porPar } };
 }
 
+// ── B3 · S99 — LA PROMESA ANTES DE COMPRAR (firma founder 18-ago) ───────────
+
+export interface PromesaDeVendedor {
+  cuenta_comercial_id: string;
+  /** ok:true → hay promesa. `fecha`+`desde`/`hasta` son la ventana real, y
+   *  **`saltos_por_cupo` > 0 significa «no es el corte más cercano: se corrió
+   *  porque el vendedor está lleno»** — ES la señal con la que la voz dice
+   *  «no mañana en la mañana, sino el X». */
+  ok: boolean;
+  fecha: string | null;
+  desde: string | null;
+  hasta: string | null;
+  saltos_por_cupo: number;
+  /** ok:false → la razón TIPADA del motor (`sin_turnos_de_entrega` ·
+   *  `sin_capacidad_de_reparto` · `sin_cupo_ese_dia`). **La superficie la
+   *  DICE — jamás la traduce a un vacío** (L-218: un vacío tendría dos
+   *  significados, «no puede» y «no sabemos»). */
+  error: string | null;
+  detalle: string | null;
+}
+
+/**
+ * La promesa de entrega **POR VENDEDOR**, para decirla ANTES DE COMPRAR.
+ *
+ * 🔴 EL MOMENTO ES LA MITAD DE LA FIRMA (founder, 18-ago): *decirlo DESPUÉS
+ * de comprar es una disculpa; decirlo ANTES es información, y la persona
+ * todavía puede elegir.* Hoy la promesa se puebla al checkout; esto la trae
+ * a la vitrina/ficha.
+ *
+ * 🔴 POR VENDEDOR, JAMÁS POR PRODUCTO — la promesa depende de la CUENTA y el
+ * día, no del SKU: con ~400 productos y 5 vendedores son 5 evaluaciones, no
+ * 400 (medido: ~5 ms las cinco). **Quien llame pasa los vendedores DISTINTOS
+ * de lo que va a pintar.**
+ *
+ * Y la voz que esto habilita, de la firma: dice QUÉ NO SE PUEDE **y QUÉ SÍ**
+ * —jamás solo el rechazo— y **termina en PREGUNTA, no en aviso**: la familia
+ * decide.
+ */
+export async function promesaPorVendedor(
+  cuentas: string[],
+  fechaProgramada?: string,
+): Promise<ResultadoWrapper<PromesaDeVendedor[], CodigoErrorDespensa>> {
+  if (cuentas.length === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient().rpc('promesa_por_vendedor', {
+    p_cuentas: cuentas,
+    p_fecha_programada: fechaProgramada ?? undefined,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  // L-247: degradación propia — motor viejo sin la clave devuelve [].
+  const filas = (Array.isArray(data.promesas) ? data.promesas : []).flatMap((v) => {
+    if (!esObjDespensa(v) || typeof v.cuenta_comercial_id !== 'string') return [];
+    const p = esObjDespensa(v.promesa) ? v.promesa : {};
+    return [{
+      cuenta_comercial_id: v.cuenta_comercial_id,
+      ok: p.ok === true,
+      fecha: typeof p.fecha === 'string' ? p.fecha : null,
+      desde: typeof p.desde === 'string' ? p.desde : null,
+      hasta: typeof p.hasta === 'string' ? p.hasta : null,
+      saltos_por_cupo: typeof p.saltos_por_cupo === 'number' ? p.saltos_por_cupo : 0,
+      error: typeof p.error === 'string' ? p.error : null,
+      detalle: typeof p.detalle === 'string' ? p.detalle : null,
+    }];
+  });
+  return { ok: true, data: filas };
+}
+
 // ── C · Búsqueda propia ─────────────────────────────────────────────────────
 
 /** Busca por nombre o marca dentro de lo PUBLICADO. El `ilike` lo resuelve
