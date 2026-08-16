@@ -173,7 +173,16 @@ export default function Vitrina() {
       {pantalla.estado === 'listo' && (
         <View style={{ paddingHorizontal: spacing[5], gap: spacing[3], paddingBottom: spacing[3] }}>
           <InterruptorEspejo modo={modo} onCambio={setModo} />
-          {pantalla.conteos !== null && (
+          {/* 🔴 S99-C · EL FILTRO SOLO EN «VER COMO CLIENTE», y salió de
+              mirarlo con volumen: en Administrar **no filtraba nada** —
+              `SkuDelVendedor` no trae `especies_aplicables` (medido)— y
+              encima **sus números eran de la OTRA cara**: el chip decía
+              «perros · 266» al lado de una lista de 37 SKUs propios.
+              *Un control que no hace nada y además miente el número es
+              peor que su ausencia* (Ley 23: la puerta no ofrece lo que va
+              a rechazar). **Pedido a A**: `especies_aplicables` en el SKU
+              del vendedor, y con eso el filtro entra también acá. */}
+          {modo === 'cliente' && pantalla.conteos !== null && (
             <FiltroEspecie
               conteos={pantalla.conteos}
               activa={especie}

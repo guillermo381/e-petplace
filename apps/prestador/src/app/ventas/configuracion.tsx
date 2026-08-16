@@ -752,7 +752,22 @@ export default function ConfiguracionVentas() {
                           .filter((x): x is string => x !== null)
                           .join(' · ') || undefined
                       }
-                      metadataMono={rep.documento}
+                      /* ⭐ FIRMA DEL FOUNDER: en la fila van NOMBRE,
+                         VEHÍCULO Y PLACA. El documento se fue a la ficha
+                         —donde se edita— porque **un vendedor no reconoce
+                         a su repartidor por la cédula: lo reconoce por la
+                         moto que ve llegar.** Sin vehículo declarado la
+                         fila calla ese pedazo en vez de inventarlo. */
+                      metadataMono={
+                        rep.vehiculos.length > 0
+                          ? rep.vehiculos
+                              .map(
+                                (v) =>
+                                  `${v.tipo === 'moto' ? t('ventas.config.vehiculo.moto') : t('ventas.config.vehiculo.carro')} ${v.placa}`,
+                              )
+                              .join(' · ')
+                          : undefined
+                      }
                       interactiva
                       accessibilityRole="button"
                       onPress={() => router.push(`/ventas/repartidor/${rep.repartidor_id}`)}
