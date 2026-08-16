@@ -99,6 +99,36 @@ transversales toda la sesión.**
 > - **L4 DESTRABADO (ítem 1):** el dual gana — HERMANAS con puertas
 >   espejadas; el HOY queda con citas. Lápidas en `LA_CASA` §3.1 (hecha) y en
 >   el comentario de `lineaItems` (la pone D al abrir L4).
+> - **⚖️ ADJUDICACIÓN (a) — N20 Y EL BUSCADOR CORREN SOBRE LO COMPRABLE,
+>   JAMÁS SOBRE EL CANÓNICO (mesa, 17-ago-2026 — escrita ACÁ porque es
+>   exactamente donde alguien la va a reabrir).** Las tres razones, y la
+>   tercera decide: ① la vitrina YA parte de `ofertas` con `!inner` — el
+>   canónico sin oferta es invisible POR CONSTRUCCIÓN, y (b) exigiría
+>   deshacerlo, no agregarle algo · ② M21: las 309 fotos que faltan son
+>   trabajo de e-PetPlace — mostrar el canónico incompleto sería exponer
+>   nuestra deuda como si fuera la tienda de otro · ③ **una vitrina que
+>   muestra lo que no se puede comprar MIENTE DOS VECES** — le promete al
+>   cliente algo que nadie vende y le muestra al vendedor un catálogo que
+>   no es su tienda; *la ley de la casa es que el producto no dice nada
+>   antes que decir algo falso*. **La firma S96 «catálogo amplio con
+>   buscador» se cumple con lo comprable CRECIENDO, no con el canónico
+>   visible. EL CANÓNICO ES EL INVENTARIO DE LO QUE UN VENDEDOR PUEDE
+>   PROPONER, no la vitrina de la familia** — quien quiera reabrir esto,
+>   reabre la adjudicación entera, no una lectura de la firma.
+> - **🔴 EL DATO DE NEGOCIO QUE EL FOUNDER TIENE QUE VER ESCRITO (mesa,
+>   17-ago — registrado, NO resuelto): OCTUBRE ABRE CON SEIS PRODUCTOS
+>   COMPRABLES.** Los seis de `MODELO_DESPENSA` §4.3, completos los seis
+>   (foto · momento · composición · oferta — medidos uno por uno,
+>   17-ago). Es honesto y funciona — pero **la vitrina no está limitada
+>   por el software: está limitada por el catálogo CON OFERTA.** Este
+>   número decide si el soft launch necesita más vendedores o más
+>   productos por vendedor, y esa decisión no es de esta sesión.
+> - **L5a, REENCUADRADA (mesa, 17-ago):** mantiene su lugar DESPUÉS de
+>   L5b, pero su nombre real ya no es «la carga por archivo»: **es lo que
+>   hace que la vitrina EXISTA más allá de seis.** Cada SKU que un
+>   vendedor real proponga mapea a un canónico hoy incompleto (222/470
+>   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
+>   canónica (M21) es trabajo de e-PetPlace, no suyo.
 
 > ### 🔴 ORDEN DE PRIORIDAD DE S99 (adjudicada por mesa 15-ago, reversible
 > por palabra del founder — cada pista ve su carril; la fecha la ve la mesa,
@@ -137,8 +167,20 @@ transversales toda la sesión.**
 >   discriminador de #0b**, no de #0a. Los tres instrumentos (censo de
 >   olas · aparato de C · el dedo del founder) siguen teniendo que
 >   coincidir EN AMBOS.
-> - **LA COLA DE LA SESIÓN QUEDA: #0a → L2 → L3 → L5a → L5b → #0b.**
->   L4 entregada · L6 a v1.1.
+> - ~~**LA COLA DE LA SESIÓN QUEDA: #0a → L2 → L3 → L5a → L5b → #0b.**
+>   L4 entregada · L6 a v1.1.~~
+>
+> **⏩ ENMENDADO POR FIRMA (16-ago noche): #0b MUERE COMO LOTE — no se
+> posterga, se DISUELVE dentro de la investigación aplazada (D-834), que
+> el founder congeló a sesión propia** (*«aplacemos la investigación,
+> concentrémonos en cerrar todo el flujo de despensa»*). La discriminación
+> completa vive en D-834: red, olas y bundle MUERTOS por medición; queda
+> dispositivo/arranque; el estado previo TAMBIÉN fallaba N16. **LA COLA
+> QUEDA LIMPIA Y CON UNA SOLA DIRECCIÓN — CERRAR EL FLUJO DE DESPENSA
+> ENTERO: L3 (el durante del vendedor) → L5a (la carga) → L5b (la vitrina
+> y su espejo, con el exprés y la puerta de servicios adentro).**
+> **🔒 NADIE TOCA RENDIMIENTO hasta la sesión propia — rige para las
+> CUATRO pistas.**
 
 ---
 
@@ -296,6 +338,13 @@ base: censos A4 + C4. **Cada cierre de lote reporta su número.**
 
 ## §9 · FUERA DE ALCANCE DECLARADO (para que nadie lo dé por caído)
 
+- **✒️ EL ARCO V3 — FLOTA PROPIA + INTEGRACIÓN LOGÍSTICA (firma del
+  founder en el Gate 2, 16-ago; DESTINO declarado, no deuda de sesión):**
+  *«el vendedor es responsable de agregar el dato del repartidor. En V3,
+  cuando tengamos flota propia, se hará desde nuestro admin o vía API con
+  un proveedor logístico.»* Ratifica el diseño de L2 entero (el correo
+  como garantía del vendedor, el alta por el negocio) — **y se registra
+  para que L2 no se construya de forma que lo impida.**
 - **WhatsApp/Meta** (plantillas + OTP futuro): sesión propia, por firma.
 - **`LETRA_SEDIMENTACION_S80`**: sigue PROPUESTA esperando la firma de sus
   tres opciones (a/b/c). No entra a S99.

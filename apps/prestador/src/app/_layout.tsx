@@ -17,6 +17,7 @@ import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplace
 import { ProveedorI18n } from '@epetplace/i18n';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { DiaEnVistaProvider } from '@/lib/dia-en-vista';
 // Bootstrap de la puerta única (initApi) — efecto de módulo, S44-B4.
 import '@/lib/api';
 // D-292 (S63-B): la tarea de track background tiene que estar DEFINIDA
@@ -222,9 +223,19 @@ export default function RootLayout() {
                 decide el barrido. **No se re-corre por calendario ni
                 "cuando alguien tenga tiempo"**: sin sujeto, volvería a ser
                 esto mismo. */}
-            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-              <Stack.Screen name="(tabs)" />
-            </Stack>
+            {/* ⭐ S99-D · L4 — EL DÍA EN VISTA ENVUELVE A LAS DOS VENTANAS
+                HERMANAS, y por eso vive acá y no en ninguna de las dos: si
+                colgara de una, la otra leería una copia. Es lo que vuelve
+                literal la firma «UN día en DOS ventanas» — y lo que permite
+                que la puerta de vuelta sea un `router.back()` de verdad, o
+                sea que la transición de regreso **se derive del gesto** en
+                lugar de configurarse (dictado del founder, 16-ago).
+                Ver `@/lib/dia-en-vista`. */}
+            <DiaEnVistaProvider>
+              <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+                <Stack.Screen name="(tabs)" />
+              </Stack>
+            </DiaEnVistaProvider>
           </AvisoProvider>
         </EpetThemeProvider>
       </ProveedorI18n>

@@ -2284,7 +2284,10 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 #### D-483 — La ANCHA: la caja del `compacto` muere en todas sus formas, al tocarse 🟡
 🟡 MEDIA. **La enmienda 19.7 S73 se firmó ANGOSTA** (el label gana forma nombrada; `ghost` muere como acción de fila; `compacto` sobrevive en 22c y 19.6). La ANCHA — el contorno transparente del `Boton compacto` muere como forma de la acción secundaria en TODAS sus apariciones, `PieRevelar` se reconstruye sobre la anatomía nueva y 22c se enmienda (la acción con consecuencias sube a sólido o baja a label, sin tercer peso intermedio) — queda como deuda con **mecánica D-318: migra AL TOCARSE** — cada pantalla que pase por craft convierte sus compactos; cero barrida grande (~50 sitios vivos entre las dos apps censados en S73-A, no entran en una sesión). **Precondición: la firma en dispositivo de la lámina 19.7** (sin anatomía sellada no hay destino al que migrar). Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §3).
 
-#### D-484 — El par primario+ghost de las Hojas de decisión (entrada nueva del diccionario) 🟡
+#### D-484 — El par primario+ghost de las Hojas de decisión ✅ PAGADA (S99-B, 16-ago-2026)
+
+**RESOLUCIÓN (B, ratificada por mesa): primario + SECUNDARIO, jamás primario + ghost.** El secundario tiene contorno y cumple 22c; **19.7 prohíbe el contorno transparente como acción de FILA, y el pie de una Hoja no es una fila** — B la cerró leyendo la letra ENTERA: la prohibición nunca había llegado hasta ahí. *(Ficha original abajo, como registro.)*
+
 🟡 MEDIA. **El patrón más repetido de los que caen bajo "los botones sin fondo" del gate S72 — y NO es 19.7** (no es acción de fila): la decisión binaria en Hoja vive hoy como `primario` + `ghost` apilados. Censo S73-A: "Rechazar" del presupuesto clínico (`citas/[mascotaId].tsx:416`, `ghost bloque` — *rechazar un presupuesto* es acción con consecuencias vestida de label, **ya ilegal por 22c hoy**) · "Rechazar" de la autorización (`autorizacion/[solicitudId].tsx:133`) · los "cancelar" de las Hojas de Cuenta en AMBAS apps (`cuenta/index.tsx:112` cliente · `cuenta/index.tsx:307` prestador). Cura: se propone como **ENTRADA NUEVA del diccionario** (la decisión binaria en Hoja) con su propio boceto M1 y gate founder — jamás cura silenciosa por pantalla, porque el par es un PATRÓN y necesita una sola verdad. **Disparo: el próximo boceto que contenga una Hoja de decisión, o la pasada de craft de cualquiera de las superficies censadas.** Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §6; censo del literal de A).
 
 ### Deudas de la tanda 3 de B (S73-B, D-486 → D-490)
@@ -11708,6 +11711,52 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-247 — UNA GARANTÍA QUE SOLO VIVE EN EL PRODUCTOR NO ES UNA GARANTÍA: ES UNA CONVENCIÓN (S99 — ley de D, «de las grandes»; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso:** el wrapper de `repartidorDe` es fail-closed POR DISEÑO (un bundle viejo lee `[]` y degrada al callejón) — y D escribió `c.repartidorDe[0]` directo: con un bundle cuyo wrapper no tenía el campo, eso LANZA, y el guard raíz cayó en «No pudimos entrar a tu cuenta». Su `?? []` es la mitad que faltaba **del lado del CONSUMIDOR**.
+
+  **Las dos mitades que la vuelven exigible:** ① **un ERROR DURO es PEOR CALLEJÓN que el callejón** — el callejón anterior al menos decía qué hacer · ② **lo encontró el FORENSE, no el typecheck** — TS creía el tipo y el bundle tenía otra cosa. *Es la clase entera de esta sesión en una línea, y afecta a TODO campo aditivo que viaje por OTA sobre un bundle que puede ser viejo.*
+
+  **COROLARIO EXIGIBLE: todo consumidor de un campo aditivo degrada por su cuenta, aunque el productor ya degrade.** El tipo de TS describe el contrato NUEVO; el bundle puede ejecutar el viejo — la única defensa que viaja con el consumidor es la suya.
+
+  **La auditoría ordenada al depositar (17-ago, sobre los campos aditivos de la sesión):** `repartidorDe` → D ya degrada (`?? []`) ✓ · `moneda` → `?? fallback` en la barra ✓ · los booleanos (`haVendido` · `esVendedora` · `esGestor` · `esMostradorOGestion` · `hayOficioLocal`) → `undefined` es falsy: degradan por forma ✓ · **`ctx.cuentaComercial === null` en `barra-prestador-lectura` era EL AGUJERO** — el chequeo estricto deja pasar `undefined` y la línea siguiente hace `.id`: la misma clase que el `[0]` de D, curada en el mismo depósito (`== null`) · `pago_confirmado_en` → cero consumidores en apps todavía; **la nota entra al contrato de las bandas de C: su lectura nace con `?? null`**.
+
+- **L-246 — «DEPENDE DEL CENSO» NO ES LO MISMO QUE «DEPENDE DE UN NÚMERO DEL CENSO» (S99 — ley de método, de la auto-corrección de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **La distinción:** el censo decide el **CONTENIDO**; la ley decide la **FORMA** — y la forma se escribe sin esperar. **El caso:** B tenía tres recetas «bloqueadas por cardinalidad» y solo UNA lo estaba de verdad — la navegación N20, donde seis especies y cuatro necesidades **no se componen como doce y quince**: ahí la cardinalidad SÍ es la forma. Las otras dos (completitud, grilla) tenían su anatomía escribible desde el primer día; esperaban un número que solo iba a llenar celdas.
+
+  **COROLARIO EXIGIBLE: antes de declarar una pieza «bloqueada por el censo», nombrar QUÉ número la bloquea y POR QUÉ ese número cambia la forma y no solo el contenido.** Si no se puede nombrar, no está bloqueada — la próxima pista no se frena sola.
+
+- **L-245 — UNA LEY ESCRITA EN UN COMENTARIO NO RIGE NADA (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
+
+  **El caso, literal:** el bloque de acento de `Boton` declara que *«el contorno transparente como acción está muerto desde la 19.7»* — y la variante siguió VIVA **cuarenta líneas más abajo, en el mismo archivo, con 39 usos**. La ley estaba escrita exactamente donde debía estar escrita, y no se cumplía igual.
+
+  **COROLARIO EXIGIBLE: una ley que se puede desobedecer sin que nada falle vive en el LINT o no vive.** (Es L-192 dicha para las leyes: una regla cuyo modo de falla es el silencio no es una regla.)
+
+  **Y SU COROLARIO DE JUBILACIÓN:** la variante NO se borró el día del hallazgo, y eso es lo correcto — 39 sitios en territorio de C y D habrían roto el typecheck a mitad de sesión. **Se jubila CON LÁPIDA y se congela con ratchet solo-baja (R47); se borra cuando llega a CERO** — precedente `precio_plan` (S79). *Congelar primero, borrar en cero.* Y la nota que completa a R47: **nació como MITAD honesta del ratchet a propósito** — «un sólido por superficie» no se puede contar porque el default es sólido y los 48 sin variante no aparecen en ningún grep: *un contador ingenuo bendeciría como preexistente lo que nunca contó. Media regla honesta vale más que una entera que miente.*
+
+- **L-244 — EL DEFAULT DE UNA PIEZA ES UNA DECISIÓN QUE NADIE TOMA (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de B).**
+
+  **El caso:** el default de `Boton` es `primario` (sólido) ⇒ **48 botones son el escalón más fuerte de la casa sin que nadie lo haya elegido.** La pieza EMPUJA; no es descuido de quien la usa. Y el síntoma que lo destapó es el diagnóstico que faltaba: **la escala se usaba como PALETA, no como ESCALERA** — 184 secundarios contra 146 primarios con 19.7 rigiendo, y 7 pantallas con 4–7 sólidos. *Cada pantalla elegía un botón como quien elige un color — por eso el defecto volvía sesión tras sesión sin que nadie fuera descuidado.*
+
+  **COROLARIO EXIGIBLE: el default de toda pieza es el uso MÁS FRECUENTE y MENOS FUERTE, jamás el más enfático.** Y cuando una pieza tiene ESCALA, su default es el escalón bajo — quien quiere subir, LO DECLARA.
+
+  **La auditoría ordenada al depositar (16-ago, contra `packages/ui`):** los defaults de las piezas con parámetro son `reposo` · `capa` · `control` · `cuerpo` · `pantalla` · `completa` — **`Boton` era la ÚNICA pieza de la casa con default enfático sobre una escala** (el `alto` de `HeroMarca` es la forma normal de una pieza de un-uso-por-pantalla, no una escala). El caso era singular; la ley evita el próximo.
+
+- **L-243 — UN GUARD PUEDE ESTAR EN VERDE SOBRE EXACTAMENTE EL DEFECTO QUE EL DEDO ENCUENTRA EN TRES SEGUNDOS (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de D).**
+
+  **El caso, literal:** su guard probaba que el día cruzaba entre las ventanas —y cruzaba—, pero **no tenía forma de ver la DIRECCIÓN**: la vuelta usaba `navigate` con params (porque `back()` no lleva params) y un navigate no es un POP — la pila animaba el regreso con el mismo slide de la ida. *El día cruzaba y el cuerpo decía que seguía avanzando.*
+
+  **La distinción que la hace ley propia (no es L-235):** el instrumento NO respondió sobre otro objeto — **respondió sobre el objeto correcto, y el objeto correcto no contenía la propiedad que importaba.** Un guard mide un HECHO; **la CUALIDAD del movimiento no es un hecho que un guard vea.**
+
+  **COROLARIO EXIGIBLE: toda cura de MOVIMIENTO declara qué mide su guard y qué NO puede medir, y nombra su gate de aparato.** Un verde de movimiento sin esa declaración se lee como cobertura y es una promesa que el guard no hizo.
+
+- **L-242 — EL ANILLO SIGUE AL CONTENIDO INCONTROLABLE (S99 — regla con nombre, adjudicada por mesa 16-ago-2026 ratificando lo que B ejecutó; vale para TODA marca de mapa futura).**
+
+  **La regla:** un halo/anillo alrededor de una marca de mapa **hace falta donde el contenido es INCONTROLABLE** (la cara de una mascota es una FOTO y puede ser del color del asfalto) **y es innecesario donde el color lo elegimos nosotros** (la silueta tinta de la moto: contraste medido 11.54 / 11.19 / 9.85 contra asfalto, parque y agua — más de 3× el piso en los tres; el que desaparecía era EL ANILLO BLANCO: 1.44 / 1.48 / 1.68). **Que el anillo muera en la moto y siga en la mascota NO es inconsistencia: es la MISMA regla aplicada dos veces.**
+
+  **Condición de revivir, escrita EN LA PIEZA (no acá):** el día que un mapa se pinte oscuro. Hoy no existe — cero `customMapStyle` en la casa, el mapa siempre es claro.
+
 - **L-241 — CUANDO MONTAR CUESTA MENOS QUE ENSAYAR, SE MONTA (S99 — LEY del founder, 16-ago-2026, dictada con el reloj a la vista).**
 
   **El literal que la funda:** *«necesitaría ver cómo se ve en el mapa — o literalmente pongámoslo, y si hay que cambiarlo lo cambiamos, porque creo que estamos tardando más poniéndolo en la galería y después acomodándolo, y estamos llenando la galería de cosas que no estamos utilizando.»*
@@ -13685,6 +13734,23 @@ despensa. ⇒ **El día del borrado son TRES cuentas vendedoras de prueba
 inventado— · Tienda Pura · `duenodes`) MÁS la despensa de `duenotodo`** —
 esta ficha es el censo; quien la pague barre contra esta lista, no contra la
 original.
+
+**TERCER ADDENDUM (S99, 17-ago — orden de mesa: los PRODUCTOS fixture
+entran al censo del borrado):** la medición de completitud de lo comprable
+halló **6 productos-fixture con SKU activo y oferta PUBLICADA** que
+sobrevivirían al barrido si solo se borran las cuentas «por nombre»:
+**«Snack de Ave (prueba del gate)»** (cuenta de `duenodes` — muere con
+ella, se lista para que nadie lo cuente entre los seis de §4.3) ·
+**«Croquetas Demo Senior Cordero S97»** (DESPENSA DE PRUEBAS S97) ·
+**«Arena Sanitaria Demo» · «Croquetas Demo Adulto Res» · «Croquetas Demo
+Cachorro Pollo»** (Tienda Pura) · **«Aceite de Salmon Brilliant»** (SKU
+sembrado en **Clínica Aurora** para el Gate 2 del repartidor — ⚠️ Aurora
+NO está en la lista de cuentas borrables: su SKU fixture hay que quitarlo
+APARTE, o queda un producto falso en la cuenta del gate). *La razón de mesa,
+verbatim: un fixture que sobrevive al lanzamiento es un producto falso en
+una tienda real.* Quien pague la deuda barre cuentas Y estos SKUs/ofertas —
+los productos canónicos `DEMO-*` mueren con sus cuentas; el Aceite de
+Aurora, a mano.
 
 #### D-767 — 🟢 LA FORMA DE `productos.imagenes` SIGUE SIN MEDIRSE
 
@@ -16984,3 +17050,93 @@ con la limpieza y su guarda.
 ☠️ **Muere** cuando la galería quede con solo lo vivo y lo que espera
 firma, cada baja con su literal nombrado, y la lámina que espere gate
 ARRIBA.
+
+#### D-834 — 🧊 INVESTIGACIÓN APLAZADA: LOS TIEMPOS DE ARRANQUE (firma del founder 16-ago-2026 — CONGELADA, no abandonada; sesión propia futura)
+
+**LA FIRMA, verbatim:** *«aplacemos la investigación, concentrémonos en
+cerrar todo el flujo de despensa y luego hacemos una sesión exclusiva para
+ver los temas de tiempos.»* **Y #0b NO se posterga: se DISUELVE dentro de
+esta ficha** (su censo y su cura servida viven en el Loop de S99-A).
+
+**⚠️ LA ADVERTENCIA, AL FRENTE: hasta la medición de abajo, NINGUNA CURA
+DE CÓDIGO TIENE DIAGNÓSTICO QUE LA RESPALDE. Nadie optimiza sin saber qué
+domina.**
+
+**MUERTOS POR MEDICIÓN (S99, 16-ago — la sesión futura NO los repite):**
+- **LA RED:** RTT del aparato **39 ms avg / mdev 33** · escritorio
+  **52–96 ms en el mismo minuto** — varía en decenas de ms, no en
+  segundos.
+- **LAS OLAS:** 17→14 medidas del código **Y el tiempo empeoró** — los dos
+  ciertos ⇒ la causa no vive ahí; **ni #0a ni #0b arreglan el dedo.**
+- **EL BUNDLE:** S98 `d4613ce9` = **8.029.019 bytes** · S99 `5ee961a5` =
+  **8.113.986** = **+1,06 %** — y es Hermes bytecode: en frío no hay
+  parseo de JS.
+- **EL INSTRUMENTO:** explica **0,3–0,5 s** de ráfaga, no la franja
+  entera (y su muestra más fina: el primer frame de 2 MB era la pantalla
+  ANTERIOR).
+
+**LO VIVO:** la dispersión de **~1 s entre corridas consecutivas del
+MISMO bundle**. Huele a scheduler / térmico / GC. **Sospechoso restante:
+dispositivo/arranque.**
+
+**LOS DOS PASOS SIGUIENTES, en orden de COSTO:**
+1. **EL SEGUNDO APARATO** — el discriminador más barato: si da números
+   estables, el problema es del teléfono del founder y la investigación
+   muere ahí; si da la misma franja, es nuestro.
+2. **P4 — la traza Perfetto del arranque** (cara, se pide aparte, SOLO si
+   ① no discrimina).
+
+**EL DATO QUE REENCUADRA TODO** (para que la sesión futura no busque una
+regresión donde hay un problema viejo): **el estado previo era 2,0–2,5 s
+Y TAMBIÉN FALLABA N16. El «se siente lento» del founder existía ANTES de
+S99.**
+
+☠️ **Muere** cuando la sesión propia corra el paso ① (y ② si hace falta),
+nombre qué domina la franja, y la cura que salga tenga ese diagnóstico
+atrás.
+
+#### D-835 — 🔴 EL GUARD RAÍZ NO RE-RESUELVE: aceptar y cerrar sesión dejan el esqueleto PARA SIEMPRE (Gate 2, medición de C — 17-ago-2026; dueño: A, ALTO)
+
+**El rojo, medido en aparato real (C, Gate 2 — dos botones distintos):**
+en el callejón `sin_rol` del prestador, **«Aceptar» (el reclamo del
+vínculo) y «Cerrar sesión» dejan la pantalla en ESQUELETO para siempre**
+— cero líneas nuevas de `[sesion]` en el forense — **aunque la acción SÍ
+ocurre** (al reiniciar la app, el estado es el correcto: sin sesión, o el
+vínculo sellado). Si llega a octubre, cada repartidor nuevo cree que la
+app se colgó justo en el momento en que funcionó.
+
+**Por qué es «la puerta de al lado» de una clase ya curada:** el propio
+archivo (`(tabs)/_layout.tsx`, cura (b) de S96-C) declara curado el
+esqueleto-eterno **por la puerta de la EXCEPCIÓN** (el `.catch` que
+faltaba). Esto entra por la vecina: los dos botones SÍ llaman al
+mecanismo de re-resolución (`setSesion('verificando')` +
+`setIntento(n+1)`), y el `useFocusEffect(useCallback(…, [intento]))` del
+guard **no re-dispara pese al cambio de dep** — el esqueleto se pinta y
+nadie vuelve a preguntar.
+
+**Dueño: A** — el mecanismo (`intento` + `useFocusEffect`) vive en el
+guard raíz que A reescribió en el lote #0a; el síntoma es del MECANISMO,
+no de las piezas que lo llaman (el reclamo de C/D hace su parte bien:
+llama al mismo camino que el cierre de sesión).
+
+**Primer paso (repro barata, sin aparato):** el camino «cerrar sesión» es
+reproducible en RN-web con el forense `[sesion]` en la consola — login →
+caer en `sin_rol` → tocar cerrar sesión → medir si `[sesion]` re-emite.
+Hipótesis a discriminar: ① `useFocusEffect` de un LAYOUT (no screen) no
+re-corre al cambiar la identidad del callback estando ya enfocado · ②
+algo en el orden de los dos `set` (batching) deja el efecto viejo como
+vigente · **③ el efecto SÍ re-corre y la CADENA CUELGA** — el log de
+veredicto vive al FINAL del `.then`, así que un `getSession()` que
+deadlockea tras `signOut()` (candidato conocido: `navigator.locks` de
+auth-js) produce el MISMO cero de líneas. **El instrumento que las
+separa ya está commiteado (17-ago): el forense de ARRANQUE del efecto**
+(`[sesion] raíz prestador: resolviendo… (intento N)`) — una pasada de
+aparato o web decide: línea-sin-veredicto = cuelga (③); sin línea = no
+corre (①/②). **La cura NO se escribe antes del rojo discriminado**
+(L-192: el modo de falla es el silencio — exactamente esta clase).
+
+☠️ **Muere** cuando: rojo reproducido → cura aplicada → **el gate en
+aparato repite los DOS botones** (aceptar re-resuelve a la pantalla del
+repartidor; cerrar sesión aterriza en la bienvenida) — con línea
+`[sesion]` nueva visible en cada uno.
+

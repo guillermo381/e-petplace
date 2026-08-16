@@ -2345,6 +2345,12 @@ export const prestadorEn = {
     sinTiendaTitulo: "You don't sell products yet",
     sinTiendaDetalle: 'Once your store is active, your daily orders live here.',
     errorTitulo: "We couldn't load your orders",
+    techoPedidos: 'orders',
+    techoPedido1: 'order',
+    techoValor: 'today',
+    techoValorOtro: 'on {{dia}}',
+    techoEntregados: 'delivered',
+    techoEntregado1: 'delivered',
   },
   historico: {
     especie_perro: 'Dogs',

@@ -50,7 +50,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Encabezado,
@@ -60,8 +60,11 @@ import {
   MarcaDeAgua,
   PuertaHermana,
   SelectorDia,
+  Texto,
+  TresNumeros,
   spacing,
   useTheme,
+  type ColumnaTecho,
 } from '@epetplace/ui';
 import {
   cupoRepartoDelDia,
@@ -73,6 +76,9 @@ import {
 import { diaSemanaCorto, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { VentanaPedidos } from '@/components/ventana-pedidos';
+import { TechoOficio } from '@/components/techo-oficio';
+import { montoCorto } from '@/lib/formato-techo';
+import { useDiaEnVista } from '@/lib/dia-en-vista';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { useTraduccion } from '@/i18n';
@@ -98,16 +104,16 @@ export default function PedidosDelDia() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ dia?: string }>();
 
   const hoy = hoyLocal();
-  /* 🔴 EL DÍA LLEGA POR LA PUERTA. Si la hermana no mandó ninguno, hoy.
-     Se toma como valor INICIAL y después manda la rueda de acá — el día
-     vuelve a la otra ventana por la puerta de regreso, no por este param. */
-  const [dia, setDia] = useState<string>(() => {
-    const p = params.dia;
-    return typeof p === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p) ? p : hoy;
-  });
+  /* 🔴 EL DÍA NO LLEGA NI SE GUARDA: SE COMPARTE. ⏪ Acá vivía un
+     `useState` sembrado desde un param de ruta, y esa forma es la que
+     obligaba a que la vuelta fuera un `navigate` — ver la lápida de
+     `volverACitas`. Con el contexto, las dos ventanas leen LA MISMA pieza
+     de estado: la firma «UN día en DOS ventanas» deja de ser una
+     afirmación sobre el comportamiento y pasa a ser del tipo. */
+  const { dia: diaElegido, elegir: setDia } = useDiaEnVista();
+  const dia = diaElegido ?? hoy;
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
@@ -198,29 +204,123 @@ export default function PedidosDelDia() {
     [estado, dia],
   );
 
-  /* 🔴 LA PUERTA DE VUELTA LLEVA EL DÍA. `navigate` y no `back`: `back`
-     devolvería a la hermana con el día que ella tenía, y ahí «un día en dos
-     ventanas» se rompería justo en el gesto que la firma quiere proteger.
-     `navigate` a una ruta que ya está en la pila no la duplica: la retoma
-     con sus params nuevos. */
+  /* ⭐ S99-D · ④ EL HEADER DE CITAS SE CONSERVA, CAMBIANDO LO QUE CUENTA
+     (dictado del founder, 16-ago). **La lectura de mesa que lo ordena: el
+     vendedor no es un prestador con otra lista — es OTRO OFICIO en la misma
+     casa**, así que su techo es el MISMO techo con SUS magnitudes. Es §2.0
+     aplicado arriba: una casa, un techo, el contenido modulado por oficio.
+
+     LAS TRES COLUMNAS, espejo de `[carga · plata · vidas]` del HOY:
+       ① carga  → cuántos PEDIDOS tiene el día (allá: citas)
+       ② plata  → el valor del día — **se mantiene**, es el mismo concepto
+       ③ vidas  → **entregados**, que reemplaza el cuadro de MASCOTAS porque
+                  de este lado no hay mascotas y no puede haberlas
+                  (`MODELO_DESPENSA` §7.4). *No es que el slot quede vacío:
+                  es que el oficio tiene otra magnitud para ese lugar.*
+
+     🔴 **CERO VIAJE NUEVO Y CERO MOTOR PEDIDO** — los tres salen EN MEMORIA
+     de `delRango`, que ya está traído (medición de A, confirmada acá al
+     escribirlo: count del día · suma de totales · count de entregados). Si
+     alguna vez se quiere el valor con OTRA semántica —server-side, con
+     impuestos o descuentos del motor— eso sí es letra y se pide con número.
+
+     ⚠️ Se omite entero mientras NO HAY VERDAD (cargando/error), igual que el
+     del HOY: ahí no se sabe si es cero o si no se pudo leer, y **un cero
+     dibujado sobre una lectura que falló es peor que una ausencia.** */
+  const techo = useMemo((): [ColumnaTecho, ColumnaTecho, ColumnaTecho] | null => {
+    if (estado.fase !== 'listo') return null;
+    const n = delDia.length;
+    const total = delDia.reduce((suma, p) => suma + (p.total ?? 0), 0);
+    /* «Entregado» se lee del ESTADO NARRATIVO del pedido, que es el
+       vocabulario que esta casa expone al vendedor — no de un estado interno
+       del motor (29 internos → 7 narrativos, S95). Un contador que mira el
+       estado interno se rompe la próxima vez que el motor gane un escalón. */
+    const entregados = delDia.filter((p) => p.narrativa === 'entregado').length;
+    return [
+      { valor: String(n), rotulo: n === 1 ? t('pedidosDia.techoPedido1') : t('pedidosDia.techoPedidos') },
+      {
+        valor: montoCorto(total),
+        /* El mismo criterio del HOY: «del día» a secas se lee como HOY pare
+           donde pare la rueda — cuando no es hoy, el rótulo dice CUÁL. */
+        rotulo:
+          dia === hoy
+            ? t('pedidosDia.techoValor')
+            : t('pedidosDia.techoValorOtro', {
+                dia: `${diaSemanaCorto(dia, idioma as IdiomaSoportado)} ${dia.slice(8, 10)}`,
+              }),
+      },
+      {
+        valor: String(entregados),
+        rotulo: entregados === 1 ? t('pedidosDia.techoEntregado1') : t('pedidosDia.techoEntregados'),
+      },
+    ];
+  }, [estado, delDia, dia, hoy, idioma, t]);
+
+  /* 🔴 LA VUELTA ES UN `back()` — UN POP DE VERDAD, y ésa es la corrección.
+     ⏪ Acá decía: *«`navigate` y no `back`: `back` devolvería a la hermana
+     con el día que ella tenía»*. **Era cierto y por eso estaba mal.** El
+     founder lo cazó caminando: *«el efecto de transición de pantalla, desde
+     pedidos hacia citas, debe ser del lado contrario — se debe sentir que
+     está regresando»*. Un `navigate` con params distintos NO es un pop, así
+     que la pila animaba el regreso con el mismo `slide_from_right` de la
+     ida: **el día cruzaba y el cuerpo decía que seguía avanzando.**
+     La cura no fue elegir otra animación: fue sacarle a la navegación el
+     trabajo de transportar el día (ahora lo comparte el contexto) para que
+     el gesto pueda ser el que corresponde. *La dirección se deriva del
+     gesto; una que se configura se puede configurar mal.* */
   const volverACitas = useCallback(() => {
-    router.navigate({ pathname: '/(tabs)', params: { dia } });
-  }, [router, dia]);
+    router.back();
+  }, [router]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
+      {/* EL MISMO TECHO DEL HOY — no un encabezado de navegación. La flecha
+          de atrás no hace falta: la puerta espejada de abajo ES el camino de
+          vuelta, y tener dos gestos para lo mismo a dos centímetros es la
+          duplicación que §15b.0ter cura en el resto de la casa. */}
+      <TechoOficio
         titulo={t('pedidosDia.titulo')}
-        atras
-        onAtras={volverACitas}
+        /* El nombre del negocio recién existe con la lectura hecha; hasta
+           entonces la cadena vacía, que el techo trata como ausencia — jamás
+           un placeholder que después cambia de texto a la vista. */
+        dato={estado.fase === 'listo' ? estado.contexto.nombreComercial : ''}
+        pie={techo === null ? undefined : <TresNumeros columnas={techo} />}
+        cohorte={null}
+        cohorteAnio={null}
       />
 
       {/* La rueda va FUERA del scroll: es el control de la pantalla, no
           contenido — el mismo lugar que ocupa en el HOY, para que el ojo la
           encuentre donde ya sabe. */}
-      <View style={{ paddingHorizontal: spacing[4] }}>
+      <View style={{ paddingHorizontal: spacing[4], gap: spacing[3] }}>
+        {/* ⭐ S99-D · LA FILA ESPEJADA (dictado del founder, 16-ago). En el
+            HOY: label a la izquierda, puerta a la derecha. Acá al revés —
+            *«el label de Tu día podés ponerlo al costado contrario de la
+            pantalla»*— para que la puerta de vuelta, que por su dirección
+            ancla a la izquierda, no le robe el lugar.
+            **Y el espejo es geométrico, no dos armados que se parecen:** la
+            misma fila, el mismo `space-between`, los dos hijos intercambiados.
+            La puerta ni siquiera sabe de qué lado está: su `direccion` deriva
+            chevron y orden adentro de la pieza (contrato de B). */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: spacing[3],
+          }}
+        >
+          <PuertaHermana
+            etiqueta={t('pedidosDia.puertaCitas')}
+            direccion="izquierda"
+            /* sinVer=0 TRANSICIONAL — misma cura y mismo porqué que la puerta
+               de ida (simetría obligatoria de la ley del contador). */
+            sinVer={0}
+            onPress={volverACitas}
+          />
+          <Texto variante="seccion">{t('agenda.tuDia')}</Texto>
+        </View>
         <SelectorDia
           dias={dias}
           elegido={dia}
@@ -281,17 +381,9 @@ export default function PedidosDelDia() {
           />
         )}
 
-        {/* LA PUERTA DE VUELTA — abajo, que es donde termina la lectura.
-            `direccion` deriva el chevron y el orden: la pieza no se puede
-            montar torcida (contrato de B). */}
-        <PuertaHermana
-          etiqueta={t('pedidosDia.puertaCitas')}
-          direccion="izquierda"
-          /* sinVer=0 TRANSICIONAL — misma cura y mismo porqué que la puerta
-             de ida (simetría obligatoria de la ley del contador). */
-          sinVer={0}
-          onPress={volverACitas}
-        />
+        {/* ☠️ S99-D · acá vivía la puerta de vuelta, al PIE. Subió a la fila
+            del label por el mismo dictado que movió a su espejo en el HOY:
+            dos escalones para lo que es un solo escalón dejan un hueco. */}
       </ScrollView>
     </View>
   );

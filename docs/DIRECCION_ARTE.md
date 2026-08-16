@@ -484,6 +484,45 @@ decisión se reabre.
 
 ### 6b. EL ESTÁNDAR DE LA HOJA DE CONTACTO (proceso, firmado S71)
 
+> ## 🔴 ENMIENDA S99 (firma del founder) — **LA PIEZA SE GATEA DONDE VIVE, NO EN UNA LÁMINA**
+>
+> **La ley nueva, verbatim del dictado:** *«un pin se juzga sobre un mapa
+> real; un campo, dentro de su formulario»* ⇒ **CUANDO MONTAR CUESTA
+> MENOS QUE ENSAYAR, SE MONTA. La lámina se justifica cuando montar es
+> caro o irreversible.**
+>
+> **Qué enmienda, con el literal viejo a la vista:** el paso 4 de abajo
+> dice *«montaje a 21px Y 44px, junto a 5 glifos del registry»* — y esa
+> vecindad **sigue siendo la correcta para un glifo de interfaz, que vive
+> entre otros glifos**. Lo que la enmienda corrige es **suponer que toda
+> pieza se juzga en una hoja de contacto**: cuando el destino no es una
+> fila de íconos sino un mapa, un formulario o una lista, **la vecindad
+> real es ESA**, y la lámina mide otra cosa.
+>
+> **Y no es una preferencia: es la SEGUNDA muestra de una causa con
+> costo medido.** El gate del glifo `moto` falló porque se juzgó sobre
+> lienzo, y su destino era un pin sobre tiles; el founder puso el número:
+> *«estamos tardando más poniéndolo en la galería y después
+> acomodándolo, y llenando la galería de cosas que no usamos»*.
+>
+> **⚠️ LO QUE **NO** DEROGA, y hay que leerlo junto:** el **toque 1 sigue
+> siendo precondición** — la receta de forma va ANTES de que alguien
+> escriba. *Esta enmienda cambia DÓNDE SE VERIFICA la forma, jamás si se
+> decide antes.* Los pasos 1, 2, 3, 5 y 6 quedan intactos: el estudio en
+> números, las metáforas ocupadas, las variantes con su riesgo, el gate
+> POR ÍCONO y la declaración de control **no dependen de dónde se monte**.
+>
+> **COROLARIO FIRMADO, sobre la galería:** **lo que espera firma va
+> PRIMERO.** No espera a nadie ni a ninguna deuda. *Una lámina de gate
+> que no se encuentra no es una lámina de gate* — la regla ya estaba
+> escrita en la propia galería desde S85; hoy es firma.
+>
+> **☠️ Y su consecuencia inmediata, ya ejecutada:** cuando un gate cierra,
+> **su andamio muere** (Ley 37). Las dos hojas de contacto del `moto`
+> —seis candidatas, su helper y su tira de tonos— se retiraron de la
+> galería el mismo día de la firma; el estudio queda en su lámina de
+> `docs/`. *El papel se conserva; el andamio no.*
+
 Con la cláusula del ilustrador enmendada, **la sesión autora los glifos
 — así que el método deja de ser tácito y se vuelve exigible.** La vara
 es la hoja de contacto de S71-B2 (los glifos `caso` y `presupuesto`).

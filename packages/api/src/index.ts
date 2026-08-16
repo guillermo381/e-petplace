@@ -1121,6 +1121,9 @@ export {
   listarProductosDespensa,
   obtenerFichaProducto,
   buscarProductosDespensa,
+  // S99-L5b (N20, adjudicación (a)): los conteos por eje sobre LO COMPRABLE
+  // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
+  conteosVitrinaPorEje,
   recomendarParaMascota,
   // S96 (12-ago, 2ª tanda): el paso de entendimiento de §5.4, registrado.
   registrarEntendimientoAlergia,
@@ -1132,6 +1135,7 @@ export {
   type ProductoDeVitrina,
   type VarianteDeProducto,
   type FichaProducto,
+  type ConteosVitrina,
   type Recomendacion,
   type FiltrosVitrina,
   // S96: vocabulario VERBATIM del CHECK y de EstadoComposicion de @epetplace/ui.
@@ -1186,7 +1190,14 @@ export {
   // despacho ASIGNA repartidor (decisión founder ①).
   despacharPedido,
   entregarRetiroEnMostrador,
+  // S99-L3 · «Poner primero» — el reorden del panel (ratificado por mesa).
+  ponerPedidoPrimero,
+  volverPedidoAlOrden,
   listarSkusDelVendedor,
+  // S99-L5b (N18): el evaluador de alcance — puro, por-SKU, una fuente con
+  // el cliente. El re-export va ACÁ Y AHORA: la segunda muestra de
+  // «motor sin puerta» fue exactamente un wrapper sin barrel.
+  razonesDeAlcance,
   ajustarStockVendedor,
   listarRepartidores,
   registrarRepartidor,
@@ -1212,6 +1223,7 @@ export {
   type PedidoDelVendedor,
   type LoteDeItem,
   type SkuDelVendedor,
+  type RazonAlcance,
   type Repartidor,
   type VehiculoRepartidor,
 } from './wrappers/despensa-vendedor';

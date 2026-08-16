@@ -26,6 +26,9 @@ import {
   type CodigoErrorDespensa,
   type NarrativaPedido,
 } from './_despensa-comun';
+// S99-L5b (N18, una fuente): el guard de composición y la regla de portada
+// son LOS DEL CLIENTE — importados, jamás re-derivados.
+import { composicionEstado, fotosDeProducto, type ComposicionEstado } from './despensa-catalogo';
 
 export interface PedidoDelVendedor {
   pedido_id: string;
@@ -38,6 +41,19 @@ export interface PedidoDelVendedor {
   promesa_desde: string | null;
   promesa_hasta: string | null;
   creado_en: string;
+  /** S99-A · L3 — la hora de CONFIRMACIÓN DEL PAGO (el `cerrado_en` del
+   *  intento aprobado, `pagos_intentos` — la fuente MEDIDA; jamás
+   *  `pedidos.pagado_en`, heredada y 0/14). ES la llave del FIFO firmado
+   *  en el Gate 1: sin pago confirmado, el pedido no entra a la cola.
+   *  null = todavía no se confirmó ningún pago. */
+  pago_confirmado_en: string | null;
+  /** S99-L3 · «Poner primero» (diseño de C ratificado por mesa): marca
+   *  manual del panel. null = orden natural. La regla de orden DENTRO de
+   *  la banda: movidos primero (marca DESC), después FIFO por
+   *  `pago_confirmado_en`. NO cruza bandas — ordena, jamás re-promete.
+   *  El pedido movido LO DICE en la pieza («Movido a mano» + «Volver al
+   *  orden»). ⚠️ L-247: quien lea este campo degrada por su cuenta. */
+  movido_al_frente_en: string | null;
 }
 
 /** Los pedidos de MI cuenta comercial. La RLS ya restringe por
@@ -49,8 +65,11 @@ export async function listarPedidosDelVendedor(
 ): Promise<ResultadoWrapper<PedidoDelVendedor[], CodigoErrorDespensa>> {
   const { data, error } = await getClient()
     .from('v_pedidos_narrativa')
-    .select('pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at')
+    .select('pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, pago_confirmado_en, movido_al_frente_en')
     .eq('cuenta_comercial_id', cuentaComercialId)
+    // ⚠️ Este order es el FETCH («por llegada» — así se NOMBRA en pantalla
+    // mientras el panel no ordene por pago); las bandas y el FIFO firmado
+    // son de la PIEZA, sobre pago_confirmado_en + movido_al_frente_en.
     .order('created_at', { ascending: false })
     .limit(limite);
 
@@ -74,6 +93,10 @@ export async function listarPedidosDelVendedor(
       promesa_hasta:
         typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
       creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      pago_confirmado_en:
+        typeof f.pago_confirmado_en === 'string' ? f.pago_confirmado_en : null,
+      movido_al_frente_en:
+        typeof f.movido_al_frente_en === 'string' ? f.movido_al_frente_en : null,
     });
   }
   return { ok: true, data: salida };
@@ -124,7 +147,7 @@ export async function listarPedidosDelVendedorEnRango(
   const { data, error } = await getClient()
     .from('v_pedidos_narrativa')
     .select(
-      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo',
+      'pedido_id, numero_orden, total, moneda, narrativa, narrativa_nombre, es_terminal, promesa_entrega_desde, promesa_entrega_hasta, created_at, entrega_fecha_objetivo, pago_confirmado_en, movido_al_frente_en',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
     .or(
@@ -154,11 +177,46 @@ export async function listarPedidosDelVendedorEnRango(
       promesa_hasta:
         typeof f.promesa_entrega_hasta === 'string' ? f.promesa_entrega_hasta : null,
       creado_en: typeof f.created_at === 'string' ? f.created_at : '',
+      pago_confirmado_en:
+        typeof f.pago_confirmado_en === 'string' ? f.pago_confirmado_en : null,
+      movido_al_frente_en:
+        typeof f.movido_al_frente_en === 'string' ? f.movido_al_frente_en : null,
       dia: typeof f.entrega_fecha_objetivo === 'string' ? f.entrega_fecha_objetivo : null,
     };
     (fila.dia === null ? sinFecha : delRango).push(fila);
   }
   return { ok: true, data: { delRango, sinFecha } };
+}
+
+// ── S99-L3 · EL REORDEN — las dos puertas de «Poner primero» ────────────────
+
+/** «Poner primero» (diseño de C, ratificado por mesa sin enmienda): vive en
+ *  el DETALLE del pedido, jamás como arrastre. El motor guarda la marca; la
+ *  banda y el orden son de la pieza. Rebotes tipados: `pedido_no_existe` ·
+ *  `no_sos_el_vendedor` · `pedido_terminal` (la ventana ni lo ofrece en
+ *  terminales — AUSENTE, Ley 23; el rebote es el respaldo). */
+export async function ponerPedidoPrimero(
+  pedidoId: string,
+): Promise<ResultadoWrapper<{ movido: true }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('poner_pedido_primero', {
+    p_pedido_id: pedidoId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { movido: true } };
+}
+
+/** «Volver al orden»: limpia la marca. Idempotente y siempre legal sobre lo
+ *  propio (quitar una marca jamás miente) — por eso NO gatea terminal. */
+export async function volverPedidoAlOrden(
+  pedidoId: string,
+): Promise<ResultadoWrapper<{ restaurado: true }, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('volver_pedido_al_orden', {
+    p_pedido_id: pedidoId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: { restaurado: true } };
 }
 
 /** Las líneas a empacar, con su lote si ya se registró. Sin esto el vendedor
@@ -964,10 +1022,29 @@ export interface SkuDelVendedor {
   stock_disponible: number;
   stock_reservado: number;
   estado: string;
+  /** S99-L5b (voz del borde N17+N18): el PORQUÉ de un rechazo — el CHECK de
+   *  la tabla garantiza que `rechazado` ⇒ motivo NOT NULL; en cualquier otro
+   *  estado es null. *Un vendedor jamás cree que publicó algo que no
+   *  publicó* — y tampoco adivina por qué se lo rebotaron. */
+  motivo_rechazo: string | null;
   /** El precio de la oferta PUBLICADA de este SKU. `null` HONESTO = sin
    *  oferta publicada hoy — la pantalla lo dice, no se inventa un precio.
    *  Es lo que el mostrador cobra (S96, hueco declarado por C). */
   precio_publicado: number | null;
+  /** S99-L5b: el estado de la oferta más avanzada de este SKU —
+   *  `publicada` > cualquier otra (`borrador`/`pausada`/`retirada`) > null
+   *  (ninguna oferta). El espejo lo DICE en las dos caras. */
+  oferta_estado: string | null;
+  /** ── Campos CANÓNICOS del producto (M21: los escribe e-PetPlace, el
+   *  vendedor los VE) — viajan para que `razonesDeAlcance` derive de la
+   *  MISMA fuente que el cliente, jamás de un cómputo paralelo. ── */
+  /** Mismo vocabulario y mismo guard que el catálogo del cliente. `null` =
+   *  valor desconocido en la base (no se inventa). */
+  composicion_estado: ComposicionEstado | null;
+  /** El eje etario de N20 — vacío = invisible al segundo toque. */
+  momentos_aplicables: string[];
+  /** La MISMA portada que dibuja la vitrina (`fotosDeProducto`). */
+  foto_portada: string | null;
 }
 
 export async function listarSkusDelVendedor(
@@ -976,8 +1053,8 @@ export async function listarSkusDelVendedor(
   const { data, error } = await getClient()
     .from('vendedor_skus')
     .select(
-      'id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado, ' +
-      'producto_variantes(presentacion, productos(nombre, marca)), ' +
+      'id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado, motivo_rechazo, ' +
+      'producto_variantes(presentacion, productos(nombre, marca, composicion_estado, momentos_aplicables, imagen_url, imagenes)), ' +
       'ofertas(precio, estado)',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
@@ -991,9 +1068,8 @@ export async function listarSkusDelVendedor(
     const producto = variante !== null && esObjDespensa(variante.productos) ? variante.productos : null;
     // El UNIQUE parcial `uq_oferta_publicada_por_variante` garantiza a lo sumo
     // UNA publicada; acá además todas las ofertas del embed son de ESTE sku.
-    const publicada = (Array.isArray(s.ofertas) ? s.ofertas : []).find(
-      (o) => esObjDespensa(o) && o.estado === 'publicada',
-    );
+    const ofertas = (Array.isArray(s.ofertas) ? s.ofertas : []).filter(esObjDespensa);
+    const publicada = ofertas.find((o) => o.estado === 'publicada');
     salida.push({
       sku_id: s.id,
       sku_vendedor: typeof s.sku_vendedor === 'string' ? s.sku_vendedor : '',
@@ -1004,13 +1080,88 @@ export async function listarSkusDelVendedor(
       stock_disponible: typeof s.stock_disponible === 'number' ? s.stock_disponible : 0,
       stock_reservado: typeof s.stock_reservado === 'number' ? s.stock_reservado : 0,
       estado: typeof s.estado === 'string' ? s.estado : '',
+      motivo_rechazo: typeof s.motivo_rechazo === 'string' ? s.motivo_rechazo : null,
       precio_publicado:
-        publicada !== undefined && esObjDespensa(publicada) && typeof publicada.precio === 'number'
-          ? publicada.precio
-          : null,
+        publicada !== undefined && typeof publicada.precio === 'number' ? publicada.precio : null,
+      oferta_estado:
+        publicada !== undefined
+          ? 'publicada'
+          : typeof ofertas[0]?.estado === 'string'
+            ? (ofertas[0].estado as string)
+            : null,
+      composicion_estado: producto !== null ? composicionEstado(producto.composicion_estado) : null,
+      momentos_aplicables:
+        producto !== null && Array.isArray(producto.momentos_aplicables)
+          ? producto.momentos_aplicables.filter((m): m is string => typeof m === 'string')
+          : [],
+      foto_portada: producto !== null ? fotosDeProducto(producto).portada : null,
     });
   }
   return { ok: true, data: salida };
+}
+
+// ── S99-L5b · N18 — LA COMPLETITUD QUE GANA ALCANCE (mitad vendedor) ────────
+
+/** Una razón por la que un SKU no alcanza todo lo que podría. `dueno` decide
+ *  si entra al contador: SOLO lo que el vendedor puede arreglar cuenta. */
+export interface RazonAlcance {
+  codigo:
+    | 'sku_rechazado'        // vendedor — corregir según `motivo_rechazo` y re-proponer
+    | 'sin_stock'            // vendedor — la vitrina NO lo esconde (medido): la compra rebota en la reserva
+    | 'sin_precio_propuesto' // vendedor — el SKU no tiene NINGUNA oferta
+    | 'sku_en_revision'      // e-PetPlace — propuesto/en_revision: la revisión es suya
+    | 'oferta_no_publicada'  // e-PetPlace — hay oferta y la publicación es acto suyo (M21)
+    | 'composicion_ausente'  // e-PetPlace — catálogo canónico: la app ADVIERTE y sale de recomendación para familias con alergia
+    | 'sin_momento_etario'   // e-PetPlace — invisible al eje etapa (N20 y filtro de recomendación)
+    | 'sin_foto';            // e-PetPlace — la vitrina dibuja marcador: pierde cara, no existencia
+  dueno: 'vendedor' | 'epetplace';
+}
+
+/**
+ * N18, LA LEY ENTERA (firmas S96/S99 — el cómputo que la receta 4 de B espera):
+ * **lo incompleto no se esconde, pierde ALCANCE** · el vendedor ve **cuál
+ * campo** lo dejó afuera · **el número puede llegar a cero** (todas las
+ * razones `vendedor` son arreglables por él) · **lo que depende de e-PetPlace
+ * NO entra al contador** (viaja como información, con su dueño dicho) · y
+ * **jamás posición, percentil ni comparación entre vendedores** — esta
+ * función es PURA y por-SKU: no conoce a otro vendedor ni puede.
+ *
+ * UNA FUENTE, JAMÁS CÓMPUTO PARALELO: `composicion_estado` llega por el MISMO
+ * guard del catálogo del cliente · `foto_portada` por `fotosDeProducto` (la
+ * misma regla de portada de la vitrina) · `momentos_aplicables` es la MISMA
+ * columna que filtra la recomendación por etapa. Si el cliente cambia su
+ * regla, este contador cambia con él — no hay segunda verdad que divierja.
+ *
+ * El contador de la pieza: `razones.filter((r) => r.dueno === 'vendedor').length`.
+ */
+export function razonesDeAlcance(sku: SkuDelVendedor): RazonAlcance[] {
+  const razones: RazonAlcance[] = [];
+  // El borde propuesto/publicada (⑤ del censo) — un estado por vez: rechazado
+  // es del vendedor; propuesto/en_revision es de e-PetPlace; aceptado sigue
+  // a la oferta.
+  if (sku.estado === 'rechazado') {
+    razones.push({ codigo: 'sku_rechazado', dueno: 'vendedor' });
+  } else if (sku.estado === 'propuesto' || sku.estado === 'en_revision') {
+    razones.push({ codigo: 'sku_en_revision', dueno: 'epetplace' });
+  } else if (sku.oferta_estado === null) {
+    razones.push({ codigo: 'sin_precio_propuesto', dueno: 'vendedor' });
+  } else if (sku.oferta_estado !== 'publicada') {
+    razones.push({ codigo: 'oferta_no_publicada', dueno: 'epetplace' });
+  }
+  if (sku.stock_disponible <= 0) {
+    razones.push({ codigo: 'sin_stock', dueno: 'vendedor' });
+  }
+  // Lo canónico (M21) — información con dueño, jamás contador:
+  if (sku.composicion_estado === 'ausente' || sku.composicion_estado === null) {
+    razones.push({ codigo: 'composicion_ausente', dueno: 'epetplace' });
+  }
+  if (sku.momentos_aplicables.length === 0) {
+    razones.push({ codigo: 'sin_momento_etario', dueno: 'epetplace' });
+  }
+  if (sku.foto_portada === null) {
+    razones.push({ codigo: 'sin_foto', dueno: 'epetplace' });
+  }
+  return razones;
 }
 
 /**

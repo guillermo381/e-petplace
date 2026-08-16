@@ -25,6 +25,14 @@
  * tiene todo prestador— habría dado verde en el dual y puesto una puerta a
  * ninguna parte en los otros dos.
  *
+ * ⚠️ **SE MIDE EL DÍA QUE SE VE, NO EL DE LA URL** — enmienda del 17-ago.
+ * La v1 leía `?dia=` porque el día viajaba por param; el founder corrigió la
+ * transición y el día pasó a vivir en un contexto compartido
+ * (`@/lib/dia-en-vista`), así que **ya no hay param que leer**. Medir el
+ * mecanismo habría dado ROJO sobre una cura correcta. *Un guard atado a CÓMO
+ * se hace algo caduca con la primera mejora; atado a QUÉ tiene que verse,
+ * sobrevive.* Hoy se lee el día ELEGIDO en la rueda de cada ventana.
+ *
  * ⚠️ RN-web, no dispositivo (L-153).
  *
  * Uso:  node scripts/verify-s99d-ventana-hermana.mjs [--puerto 8082]
@@ -95,32 +103,66 @@ for (const caso of CASOS) {
     const manana = otroDia(hoy, 1);
     const pasado = otroDia(hoy, 2);
 
-    // ① en el HOY se elige MAÑANA y se cruza: el día tiene que viajar
+    /** 🔴 EL DÍA SE LEE POR SU CONSECUENCIA VISIBLE, NO POR LA RUEDA.
+     *  Medido: `SelectorDia` marca al elegido con un WORKLET (escala,
+     *  opacidad, acento) y **no expone `aria-selected` ni `aria-checked`** en
+     *  RN-web — hallazgo ya registrado en el harness de S55. Leer «cuál está
+     *  marcado» es imposible desde afuera.
+     *
+     *  Lo que sí es legible es lo que la persona LEE: **el rótulo del techo
+     *  dice el día cuando NO es hoy** (`del {dow} {dd}`), en las dos ventanas
+     *  —`techo.plataDelDiaOtro` en citas · `pedidosDia.techoValorOtro` en
+     *  pedidos, la misma forma a propósito—. Por eso el par de prueba usa
+     *  mañana y pasado y jamás hoy: con hoy el rótulo se calla el día y el
+     *  guard no tendría qué mirar.
+     *
+     *  *Y es mejor test que el anterior: prueba lo que el usuario ve, no cómo
+     *  se lo pasamos entre pantallas — sobrevive a la próxima mudanza.* */
+    const diaVisible = async (esperado) => {
+      const dow = new Intl.DateTimeFormat('es-EC', { weekday: 'short' })
+        .format(new Date(Number(esperado.slice(0, 4)), Number(esperado.slice(5, 7)) - 1, Number(esperado.slice(8, 10))))
+        .replace('.', '');
+      const aguja = `del ${dow} ${esperado.slice(8, 10)}`;
+      /* 🔴 SIN DISTINGUIR MAYÚSCULAS, y no es prolijidad: el techo
+         MAYUSCULIZA sus rótulos («DEL DOM 16») por CSS de la pieza, así que
+         el diccionario dice una cosa y la pantalla muestra otra. La primera
+         corrida de esta versión dio ROJO por eso, con las cuatro
+         correcciones ya montadas y funcionando — L-235 por tercera vez en
+         este lote. *La aguja se calibra contra lo que la pantalla RENDERIZA,
+         jamás contra lo que el diccionario guarda.* */
+      const cuerpo = (await page.locator('body').innerText()).toLowerCase();
+      return { ok: cuerpo.includes(aguja.toLowerCase()), aguja };
+    };
+
+    // ① en el HOY se elige MAÑANA y se cruza: la hermana tiene que abrir ahí
     await page.getByText(manana.slice(8, 10), { exact: true }).locator('visible=true').first().click();
     await page.waitForTimeout(1500);
     await puerta.click();
     await page.waitForTimeout(9000);
-    const url1 = page.url();
-    const llevoElDia = url1.includes(`dia=${manana}`);
-    console.log(`${llevoElDia ? '✅' : '🔴'} ${' '.repeat(10)}   ida: el día ${manana} ${llevoElDia ? 'viajó' : 'NO viajó'}`);
-    if (!llevoElDia) {
-      fallos.push(`duenotodo: la ida NO llevó el día (url=${url1})`);
-    }
+    const r1 = await diaVisible(manana);
+    console.log(`${r1.ok ? '✅' : '🔴'} ${' '.repeat(10)}   ida: la hermana dice «${r1.aguja}» → ${r1.ok ? 'sí' : 'NO'}`);
+    if (!r1.ok) fallos.push(`duenotodo: la ida NO llevó el día (falta «${r1.aguja}» en la hermana)`);
 
-    // ② en la hermana se mueve la rueda a PASADO MAÑANA y se vuelve:
-    //    el HOY tiene que ADOPTARLO (si volviera con `manana`, `router.back`)
+    // ② se mueve la rueda de la hermana y se vuelve: el HOY tiene que
+    //    mostrar ESE día. Con `router.back()` el gesto es un POP —la
+    //    transición se siente como regreso— y el día llega igual porque
+    //    NO viaja: se comparte.
     await page.getByText(pasado.slice(8, 10), { exact: true }).locator('visible=true').first().click();
     await page.waitForTimeout(1500);
     await page.getByText('Tus citas del día', { exact: true }).locator('visible=true').first().click();
     await page.waitForTimeout(9000);
-    const url2 = page.url();
-    const volvio = url2.includes(`dia=${pasado}`);
-    console.log(`${volvio ? '✅' : '🔴'} ${' '.repeat(10)}   vuelta: el día ${pasado} ${volvio ? 'volvió' : 'NO volvió'}`);
-    if (!volvio) {
-      fallos.push(
-        `duenotodo: la VUELTA no trajo el día — son dos días en dos ventanas (url=${url2})`,
-      );
+    const r2 = await diaVisible(pasado);
+    console.log(`${r2.ok ? '✅' : '🔴'} ${' '.repeat(10)}   vuelta: el HOY dice «${r2.aguja}» → ${r2.ok ? 'sí' : 'NO'}`);
+    if (!r2.ok) {
+      fallos.push(`duenotodo: la VUELTA no trajo el día — dos días en dos ventanas (falta «${r2.aguja}»)`);
     }
+
+    // ③ 🔴 LA VUELTA ES UN POP DE VERDAD, y esto es lo que el founder cazó
+    //    con el dedo: si fuera un `navigate`, la hermana quedaría APILADA
+    //    encima y la pila crecería en vez de encoger. Se mide por la
+    //    profundidad del historial, que es lo único observable desde afuera.
+    const profundidad = await page.evaluate(() => window.history.length);
+    console.log(`${' '.repeat(13)}   pila tras ida+vuelta: ${profundidad} entradas`);
   } catch (e) {
     fallos.push(`${caso.cuenta}: EXCEPCIÓN — ${e instanceof Error ? e.message : String(e)}`);
   } finally {

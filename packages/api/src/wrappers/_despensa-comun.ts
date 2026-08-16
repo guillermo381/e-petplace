@@ -30,6 +30,10 @@ export const CODIGOS_ERROR_DESPENSA = [
   'no_es_tu_pedido',
   'no_sos_el_vendedor',
   'no_sos_admin',
+  // poner_pedido_primero (S99-L3): un pedido cerrado no se ordena en
+  // ninguna cola — la ventana ni ofrece el comando (AUSENTE, Ley 23);
+  // este rebote es el respaldo del motor, no una pantalla esperada.
+  'pedido_terminal',
   // crear_pedido_despensa
   'clave_idempotencia_requerida',
   'pedido_sin_items',
@@ -162,6 +166,7 @@ export const MENSAJES_DESPENSA: Record<
   no_es_tu_pedido:              'Este pedido no es tuyo.',
   no_sos_el_vendedor:           'No sos el vendedor de este pedido.',
   no_sos_admin:                 'No tenés permiso para hacer esto.',
+  pedido_terminal:              'Este pedido ya está cerrado — no hay cola donde ordenarlo.',
   clave_idempotencia_requerida: 'Falta la clave de la compra. Volvé a intentar.',
   pedido_sin_items:             'El pedido no tiene productos.',
   oferta_no_publicada:          'Uno de los productos ya no está disponible.',
