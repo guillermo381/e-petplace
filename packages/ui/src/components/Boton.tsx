@@ -96,6 +96,17 @@ import { useTheme } from '../ThemeProvider'
  * **gana su caso escrito o muere** (Ley 37). *Un escalón que nadie sube
  * no es una opción: es una trampa esperando a que alguien la use para
  * gritar.*
+ *
+ * ⚠️ **`sinCaja` MIENTE EN SU NOMBRE, y lo dice este mismo archivo:**
+ * *«`sinCaja` NO ES SIN CAJA: tiene `accent.sinCaja`, un slot propio que
+ * S82-B r12 le dio JUSTAMENTE para darle presencia de superficie»*.
+ * **Con 5 usos, renombrarla es barato HOY y no lo va a ser después** —
+ * pero **es enmienda de vocabulario firmado (S82) y va a la mesa, no la
+ * decido acá.** *Un nombre que contradice a su dibujo es la clase de
+ * dato que esta casa caza —el glifo `documentosSobre` se renombró por
+ * exactamente esto— y el costo de arreglarlo crece con cada consumidor
+ * nuevo.* **Candidata servida: `apoyada`** (dice lo que hace: se apoya
+ * con elevación en vez de rellenar).
  * ═══════════════════════════════════════════════════════════════════ */
 export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja' | 'acento'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
