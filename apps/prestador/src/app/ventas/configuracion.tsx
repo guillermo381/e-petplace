@@ -708,7 +708,52 @@ export default function ConfiguracionVentas() {
           {/* ── ⑤ QUIÉN — repartidores (🔴 choque declarado en la cabecera:
               padrón propio hasta la costura repartidor↔equipo de A) ── */}
           <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
+            {/* ⭐ EL ENCABEZADO DECLARA EL ESTADO DE LA SECCIÓN — ley de la
+                gramática de bloque (lámina de B, 18-ago): **el bloque es la
+                SECCIÓN, no el ítem**, y así la pantalla no gana una segunda
+                gramática (§D2: en configuración todo se lista en filas).
+                **NO es una fila:** informa y no lleva a ningún lado, así que
+                **no tiene chevron ni tap** — 19.7 al pie (información
+                despliega, acción lleva; esto no hace ninguna de las dos).
+                QUÉ dice, por §3: un hecho **de conjunto que el vendedor no
+                puede deducir mirando una fila**. Acá son dos y los dos hay
+                que contarlos: **cuántos están activos** y **cuánto puede
+                despachar hoy en total**. *La capacidad de Diego no contesta
+                «¿cuánto aguanto hoy?»: eso es una suma, y una suma no vive
+                en la fila de nadie.*
+                Y la SUMA solo cuenta a los ACTIVOS: un repartidor apagado
+                no aporta capacidad, y sumarlo prometería un cupo que no
+                existe. */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                gap: spacing[3],
+              }}
+            >
+              <Texto variante="seccion">{t('ventas.config.repartidoresTitulo')}</Texto>
+              {pantalla.repartidores.length > 0 &&
+                (() => {
+                  const e = estadoSeccionRepartidores(pantalla.repartidores);
+                  /* ⚠️ CON CAPACIDAD CERO **NO CALLA**: dice que falta.
+                     §4 de la lámina lo exige y la casa ya lo pagó una vez
+                     con los alérgenos — **una sección sana y una sin datos
+                     no pueden verse igual**; el silencio se lee como «está
+                     bien», y esa lectura la hace el vendedor, no nosotros.
+                     Lo que la voz NO insinúa, porque no está medido: si la
+                     falta de capacidad además BLOQUEA el despacho. */
+                  return (
+                    <Texto variante="apoyo" color={e.capacidad === 0 ? 'warning' : 'tertiary'}>
+                      {`${t('ventas.config.repartidoresEstado', { n: e.total, activos: e.activos })} · ${
+                        e.capacidad === 0
+                          ? t('ventas.config.repartidoresSinCupoTotal')
+                          : t('ventas.config.repartidoresCupoTotal', { n: e.capacidad })
+                      }`}
+                    </Texto>
+                  );
+                })()}
+            </View>
             {pantalla.repartidores.length === 0 ? (
               <Texto variante="apoyo">{t('ventas.config.sinRepartidores')}</Texto>
             ) : (
@@ -744,6 +789,23 @@ export default function ConfiguracionVentas() {
                          resuelve ÉL entrando a la app, no el vendedor. Los
                          dos estados conviven (puede estar inactivo Y sin
                          reclamar), así que se COMPONEN, no se pisan. */
+                      /* ⚠️ ACÁ ESTUVO LA CAPACIDAD DURANTE UN COMMIT, Y SE
+                         RETIRÓ POR LA LÁMINA DE B — su lápida queda porque
+                         el error es instructivo.
+                         Yo la puse en la fila razonando por analogía con
+                         ②: *«mudar un acto a su ficha no autoriza a perder
+                         de vista el número que lo hacía útil»*. **La
+                         analogía era falsa y la lámina lo dice con dos
+                         medidas:** ① el estado que el founder pedía es **de
+                         CONJUNTO**, y un conjunto **no cabe en la fila de
+                         UN ítem** — la capacidad de Diego no contesta
+                         «¿cuánto puedo despachar hoy?»; ② un tercer
+                         renglón **empuja la altura de la fila**, justo
+                         después de que ① la fijara en 57 dp por
+                         aritmética. *B me citó mi propia medición.*
+                         ⇒ **la capacidad vive en la ficha** (D-837, donde
+                         se edita) **y su SUMA vive en el encabezado de la
+                         sección**, que es el piso que faltaba. */
                       subtitulo={
                         [
                           rep.activo ? null : t('ventas.config.repartidorInactivo'),
@@ -1063,4 +1125,41 @@ export default function ConfiguracionVentas() {
       </Hoja>
     </View>
   );
+}
+
+/** EL ESTADO DE LA SECCIÓN «REPARTIDORES» — un hecho de CONJUNTO.
+ *
+ *  Ley de la gramática de bloque (§3): entra lo que **hay que contar para
+ *  saberlo** y **no está en ninguna fila**. Acá son dos cosas:
+ *  · **cuántos están activos** de cuántos hay;
+ *  · **cuánto se puede despachar hoy en total** — la suma de las
+ *    capacidades **de los activos**.
+ *
+ *  🔴 **La suma excluye a los apagados a propósito.** Un repartidor
+ *  inactivo no aporta capacidad, y sumarlo prometería un cupo que no
+ *  existe — *el número de un encabezado se lee como promesa, no como
+ *  inventario*.
+ *
+ *  ⚠️ **Y no calla cuando falta:** si ningún activo tiene capacidad
+ *  declarada, en vez del total dice que falta. §4 lo exige y la casa ya lo
+ *  pagó una vez: **una sección sana y una sección sin datos no pueden
+ *  verse igual** — el silencio se lee como «está bien», y esa lectura la
+ *  hace el vendedor, no nosotros. (Lo que sigue SIN medir, y por eso la
+ *  voz no lo insinúa: si la falta de capacidad además **bloquea** el
+ *  despacho.)
+ */
+function estadoSeccionRepartidores(reps: Repartidor[]): {
+  total: number;
+  activos: number;
+  capacidad: number;
+} {
+  const activos = reps.filter((r) => r.activo);
+  return {
+    total: reps.length,
+    activos: activos.length,
+    /* Solo los ACTIVOS suman. Un repartidor apagado no aporta capacidad, y
+       sumarlo prometería un cupo que no existe — *el número de un
+       encabezado se lee como promesa, no como inventario*. */
+    capacidad: activos.reduce((suma, r) => suma + (r.capacidad?.capacidad_por_dia ?? 0), 0),
+  };
 }

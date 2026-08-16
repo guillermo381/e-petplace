@@ -67,6 +67,7 @@ import {
   razonesDeAlcance,
   type ConteosVitrina,
   type ProductoDeVitrina,
+  type RazonAlcance,
   type SkuDelVendedor,
 } from '@epetplace/api';
 import { monto, type IdiomaSoportado } from '@epetplace/i18n';
@@ -561,7 +562,7 @@ function CaraAdministrar({
         items={skus.slice(0, ventana).map((s) => {
           /* El contador es SOLO lo suyo — la ley vive en el wrapper y acá
              se LEE. Cero huecos NO DIBUJA NADA. */
-          const mias = razonesDeAlcance(s).filter((r) => r.dueno === 'vendedor').length;
+          const mias = razonesDeAlcance(s).filter((r) => r.dueno === 'vendedor');
           return {
             clave: s.sku_id,
             foto: s.foto_portada,
@@ -575,13 +576,55 @@ function CaraAdministrar({
                ceguera. *Mudar un acto no autoriza a perder la vista de
                conjunto que lo hacía útil.* */
             linea: `${s.presentacion} · ${t('ventas.stock.disponibles', { n: s.stock_disponible })}`,
-            alerta: mias > 0 ? t('ventas.vitrina.leFaltan', { n: mias }) : null,
+            /* 🔴 EL VEREDICTO SE RESUME EN LA LISTA, Y EL RESUMEN CAMBIA DE
+               FORMA SEGÚN CUÁNTOS SEAN — **medido, no elegido**. Contra la
+               base viva, el vendedor con volumen tiene **532 SKUs y 113 con
+               rojo (21 %)**, y de esos **109 llevan UNA sola razón**; solo 4
+               llevan dos y ninguno tres.
+               ⇒ **con UNA razón se dice CUÁL, no cuántas.** «Le faltan 1»
+               ocupa el mismo lugar que «Sin stock» y dice estrictamente
+               menos: obliga a entrar para saber qué falta, en el 96 % de
+               los casos con rojo. *Un contador que casi siempre dice 1 no
+               es un contador: es una marca que además hace preguntar.*
+               Con 2+ el número vuelve a ser lo correcto —ahí sí resume— y
+               **el literal completo vive en la ficha**, que es la frontera
+               VEREDICTO/HUECO tal como estaba escrita. */
+            alerta:
+              mias.length === 1
+                ? t(etiquetaCorta(mias[0]))
+                : mias.length > 1
+                  ? t('ventas.vitrina.leFaltan', { n: mias.length })
+                  : null,
             alPulsar: () => alAbrir(s.producto_id),
           };
         })}
       />
     </View>
   );
+}
+
+/** LA ETIQUETA CORTA DE UNA RAZÓN — para la FILA, no para la ficha.
+ *
+ *  Las voces de `ventas.producto.razon_*` son frases con su camino
+ *  («Corregilo según el motivo y volvé a proponerlo») y **ahí está bien**:
+ *  la ficha tiene lugar y es donde se actúa. **En la fila hay una línea
+ *  compartida con la marca**, así que la misma razón necesita su nombre y
+ *  no su instrucción. *Dos registros de la misma verdad, cada uno del
+ *  tamaño de su casa — no es duplicar la voz: es que un rótulo y una
+ *  indicación no son la misma cosa.*
+ *
+ *  Solo cubre las TRES razones del vendedor (`dueno: 'vendedor'`), que son
+ *  las únicas que llegan acá; el `switch` es total sobre ellas y las de
+ *  e-PetPlace caen al contador, donde no molestan. */
+function etiquetaCorta(r: RazonAlcance): 'ventas.vitrina.falta_sin_stock' {
+  switch (r.codigo) {
+    case 'sku_rechazado':
+      return 'ventas.vitrina.falta_sku_rechazado' as never;
+    case 'sin_precio_propuesto':
+      return 'ventas.vitrina.falta_sin_precio_propuesto' as never;
+    default:
+      return 'ventas.vitrina.falta_sin_stock';
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
