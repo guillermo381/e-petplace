@@ -1831,6 +1831,15 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R47 · el fixture trae las 39 del baseline repartidas + UNA
+     cuadragésima. Lo único que tiene que salir rojo es la que sube el
+     contador; y el ancla no puede ser lo que lo pinta porque hay usos
+     de sobra. */
+  R47: [
+    { path: 'apps/prestador/src/app/a.tsx', src: '<Boton variante="compacto" />\n'.repeat(20) },
+    { path: 'apps/cliente/src/app/b.tsx', src: '<Boton variante="compacto" />\n'.repeat(19) },
+    { path: 'apps/prestador/src/app/nueva.tsx', src: '<Boton variante="compacto" etiqueta="Ver completo" />' },
+  ],
   /* R46 · TRES casos, y las dos legítimas son el peso de la prueba
      (L-236): la que COMPONE el selector · la que MUESTRA y lo declara ·
      y la que pide el WhatsApp sin selector y sin declarar, que es el
@@ -2931,6 +2940,54 @@ function r44(archivos) {
 }
 
 
+/** R47 · LA VARIANTE JUBILADA NO CRECE — `Boton compacto` (S99-B).
+ *
+ *  LA LEY: **el contorno transparente como acción murió en la 19.7**, y
+ *  `variante="compacto"` ES el contorno transparente. Jubilada por orden
+ *  de mesa con su lápida en la pieza.
+ *
+ *  ── POR QUÉ RATCHET Y NO BORRADO ───────────────────────────────────
+ *  39 sitios vivos en territorio de C y de D: sacarla del tipo les
+ *  rompe el typecheck a mitad de sesión. **Se congela y baja sola** a
+ *  medida que cada lote toca su pantalla. Precedente de la casa:
+ *  `precio_plan` (S79) — lápida mecánica, jamás borrado optimista.
+ *  **Muere de verdad cuando este contador llegue a 0.**
+ *
+ *  ── 🔴 ESTA ES *LA MITAD* DE R47, Y LA OTRA SIGUE SIN ESCRIBIRSE ────
+ *  La receta pidió *«un sólido por superficie»*. **Esa mitad NO está
+ *  acá**, y su razón sigue en pie: **el default de `Boton` es sólido**,
+ *  así que los 48 botones sin `variante` no aparecen en ningún grep de
+ *  `variante="primario"` — un contador ingenuo **bendeciría como
+ *  preexistente lo que nunca contó** (el defecto que R44 pagó dos
+ *  veces). Contarlos exige asociar atributos a través de JSX
+ *  multilínea: parseo, no regex, y por eso es tanda propia.
+ *
+ *  *Lo que sí se puede medir hoy se mide hoy; lo que no, se dice que no
+ *  se midió. Media regla honesta vale más que una entera que miente.* */
+const BASELINE_R47 = 39
+function r47(archivos) {
+  const fallos = []
+  let usos = 0
+  for (const { path, src } of archivos) {
+    // Sin comentarios: la lápida de la pieza y este propio header nombran
+    // la variante, y contarlos haría que documentar la deuda la aumente.
+    const n = (sinComentarios(src).match(/variante="compacto"/g) ?? []).length
+    if (n > 0) usos += n
+    void path
+  }
+  if (usos > BASELINE_R47)
+    fallos.push(
+      `R47: \`Boton variante="compacto"\` subió a ${usos} (baseline ${BASELINE_R47}, SOLO-BAJA). Está JUBILADA: el contorno transparente como acción murió en la 19.7 y esta variante ES el contorno transparente. Reemplazo POR LO QUE LA ACCIÓN HACE: NAVEGA → label con chevron (\`ghost\` + \`chevron\`) o \`CeldaNavegacion\` si es fila · EJECUTA → label sin chevron (\`ghost\`) · y si tiene consecuencia de verdad no era terciaria: sube a \`secundario\` (Ley 22c). ⚙️ El baseline BAJA solo: cada lote que toque una de sus pantallas la migra y el número queda abajo para siempre.`,
+    )
+  // ANCLA: si la variante se renombra, este contador daría 0 y su verde
+  // diría «no miré» en vez de «ya no existe» (L-192 · L-226).
+  fallos.push(...ancla('R47', usos, 1, 'usos vivos de la variante jubilada (0 = muere la regla, con firma)'))
+  return {
+    fallos,
+    info: `${usos} uso(s) de la variante jubilada · baseline ${BASELINE_R47} solo-baja · muere cuando llegue a 0`,
+  }
+}
+
 /** R46 · EL SELECTOR DE INDICATIVO NO SE VA CON EL CAMPO QUE MUERE (S99-B).
  *
  *  LA LEY, dictada por mesa sobre un hallazgo de la Dirección de Diseño:
@@ -3093,7 +3150,7 @@ function r45(archivos) {
   }
 }
 
-const REGLAS = { R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3344,6 +3401,7 @@ corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)])
 corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
 corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)', r46(apps)]);
+corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

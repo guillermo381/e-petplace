@@ -57,6 +57,46 @@ import { useTheme } from '../ThemeProvider'
 // (bienvenida del cliente); si el founder la firma, muere el contorno
 // del secundario y la enmienda a la Ley 22 pasa por la MESA. Hasta esa
 // firma, código nuevo sigue usando 'secundario'.
+/* ═══════════════════════════════════════════════════════════════════
+ * ⭐ LA ESCALA (S99-B · ley aplicada a la pieza, orden de mesa)
+ *
+ * LA ESCALERA SE BAJA, NO SE ELIGE. Por superficie:
+ *  ① EL COMPROMISO — `primario` (`destructivo` si destruye · `acento` si
+ *    es momento de marca). **UNO. Exactamente uno.** *Si hay dos, uno de
+ *    los dos no era el compromiso.*
+ *  ② LA ALTERNATIVA REAL — `secundario`, **solo si la otra rama también
+ *    tiene consecuencia** (el par de la Hoja de decisión, D-484).
+ *  ③ LO DEMÁS BAJA A LABEL — `ghost`/`sinCaja`: con chevron si NAVEGA,
+ *    sin chevron si EJECUTA (19.7).
+ *  ④ LA ACCIÓN DE FILA — ☠️ ver la lápida de `compacto`.
+ *
+ * Y EL TAMAÑO NO ES UNA PERILLA DE ÉNFASIS: `md` es EL botón de la casa
+ * (no hace falta declararlo) · `sm` es DENSIDAD, jamás jerarquía ·
+ * `bloque` es del PIE (dice «esto cierra la pantalla»), no del énfasis.
+ *
+ * ── EL CENSO QUE LA PARIÓ (501 botones medidos en `apps/`) ──────────
+ * `secundario` **184** > `primario` 146 · `ghost` 62 · **sin declarar
+ * 48** · `compacto` 39 · `destructivo` 11 · `sinCaja` 5 · `acento` 4 ·
+ * `marca` 2. Tamaños: `md` 415 (por default, **0 explícitos**) · `sm` 83
+ * · **`lg` 3**. `bloque` 60.
+ *
+ * 🔴 **Más secundarios que primarios con 19.7 rigiendo solo puede
+ * significar una cosa: la escala se estaba usando como PALETA, no como
+ * escalera** — cada pantalla elegía un botón como quien elige un color.
+ *
+ * 🔴 **Y EL MECANISMO NO ERA INDISCIPLINA — ES ESTA PIEZA (L-244):** el
+ * default es `primario`, o sea SÓLIDO ⇒ **48 botones son sólidos sin que
+ * nadie lo decidiera**, y los sólidos reales son **211 de 501 (42 %)**.
+ * *La escalera se sube sola.* **El default NO se cambia acá**, y es
+ * decisión: mover el default re-significaría en silencio los 48 sitios
+ * que hoy dependen de él. *Cambiar un default es editar código que nadie
+ * abrió.*
+ *
+ * ☠️ **`lg` (56) TIENE TRES USOS EN 501.** Queda declarado, no tolerado:
+ * **gana su caso escrito o muere** (Ley 37). *Un escalón que nadie sube
+ * no es una opción: es una trampa esperando a que alguien la use para
+ * gritar.*
+ * ═══════════════════════════════════════════════════════════════════ */
 export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja' | 'acento'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
@@ -228,6 +268,31 @@ export function Boton({
     // SelectorSegmentado (superficie apoyada, Chanel: sombra jamás borde).
     sinCaja:     { fondo: theme.accent.sinCaja, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
+    /* ☠️ ── LÁPIDA DE `compacto` — JUBILADA (S99-B, orden de mesa) ────
+     * **EL CONTORNO TRANSPARENTE COMO ACCIÓN MURIÓ EN LA 19.7**, y esta
+     * variante ES el contorno transparente: `fondo: 'transparent'` +
+     * `borde`. La casa lo tenía escrito **en este mismo archivo** —el
+     * bloque de `acento`, abajo, ya la declaraba muerta— y la variante
+     * siguió viva con **39 usos**. *Una ley escrita en un comentario y
+     * desobedecida cuarenta líneas más abajo, en el mismo archivo.*
+     *
+     * **QUÉ ERA, medido:** la acción secundaria adentro de una tarjeta —
+     * «Ver completo» del acordeón del Hogar, «Ver carnet» de la vacuna,
+     * los «agregar» de los pasos del alta. **Las tres NAVEGAN.**
+     *
+     * **QUÉ LA REEMPLAZA, por lo que la acción HACE (19.7):**
+     *  · NAVEGA → label **con chevron** (`ghost` + `chevron`), o
+     *    `CeldaNavegacion` si es fila de lista.
+     *  · EJECUTA → label **sin chevron** (`ghost`).
+     *  · Y si tiene consecuencia de verdad, no era terciaria: sube a ②
+     *    `secundario` (Ley 22c).
+     *
+     * **NO SE BORRA HOY, y es decisión, no tibieza:** 39 sitios vivos en
+     * territorio de C y de D. Sacarla del tipo les rompe el typecheck a
+     * mitad de sesión. **Se jubila con lápida y su cuenta queda
+     * CONGELADA por `R47` (solo-baja)** — el precedente de la casa es
+     * `precio_plan` (S79): la lápida mecánica, no el borrado optimista.
+     * Muere de verdad cuando `R47` llegue a 0. */
     compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
     // ── ACENTO (S84-B18) — EL COMANDO QUE NO COMPITE CON LA FOTO ──────
     // Nace de un rechazo del founder con su razón: un botón SÓLIDO al
