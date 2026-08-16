@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-256 — UN CAMPO CUYO NOMBRE PROMETE UNA CAUSA Y CUENTA OTRA ES PEOR QUE UN CAMPO SIN NOMBRE (S99 — el rojo lo encontró C midiendo; la causa la midió A; depositada por orden de mesa, 18-ago-2026).**
+
+  **El caso:** `saltos_por_cupo` sonaba a «se llenó el cupo» y cuenta **días salteados por CUALQUIER causa**. C midió con sesión real: dos vendedores prometían el 17 con `saltos_por_cupo: 1` **y el cupo VACÍO** (capacidad 15/20, consumido 0). **La causa medida —y descarta la hipótesis más probable de la mesa, que era un borde UTC/local—: era DOMINGO** (`dow 0`, hora local correcta `11:51 sun`) **y `dias_operacion = [1..6]`** ⇒ cupo del domingo = **capacidad 0, consumido 0**. *No hay escasez: el vendedor no reparte los domingos.*
+
+  **Por qué es peor que no tener nombre: quien lo consume construye la voz sobre la causa que el nombre DICE, y nada falla.** La app habría dicho *«no tenemos disponibilidad para mañana»* **con 15 de 15 libres — y el que queda mal es el VENDEDOR**, que pierde una venta por una escasez inventada. *Verosímil-pero-falso (L-139) en su forma más cara: la frase suena bien y el dato la desmiente.*
+
+  **COROLARIO EXIGIBLE: un campo que va a fundar una VOZ nombra la CAUSA, no el efecto** — y si el efecto tiene varias causas, **el campo las distingue o no se usa para hablar.** *(La cura: `disponible = 0` tenía DOS causas —`capacidad 0` = no opera · `consumido ≥ capacidad` = lleno— y ahora viajan separadas en `motivo_corrimiento`.)*
+
+  **Y la regla de método que la acompaña: hasta que el dato distinga, LA VOZ NO SE ESCRIBE** — nunca decir lo que el sistema no puede sostener. *C frenó antes de escribirla; ése es el comportamiento correcto.*
+
 - **L-255 — UNA CORRECCIÓN PUEDE ROMPER LO QUE YA ESTABA FIRMADO SI NO DISTINGUE QUÉ SE CORRIGE DE QUÉ SE CONSERVA (S99 — el caso es de B, en el re-dibujo del pin; depositada por orden de mesa, 18-ago-2026).**
 
   **El caso:** la corrección de mesa decía, literal, *«la candidata D queda FIRMADA como silueta ganadora; su TRATAMIENTO cambia»* — y al ejecutar «perspectiva compartida» **B reproyectó la silueta a tres cuartos: destruyó lo único que YA estaba firmado.** *Lo encontró ella misma releyendo la firma.* Vuelve D verbatim; cambia solo el tratamiento.
@@ -11718,6 +11728,8 @@ defecto que se curó hoy en el cambio de clave.
   **COROLARIO EXIGIBLE, en las dos direcciones:** **toda corrección de mesa NOMBRA EXPLÍCITAMENTE qué NO se toca** — y **quien la ejecuta lee esa mitad ANTES que la otra.** *Una corrección sin su mitad conservadora es una invitación a rehacer lo aprobado.*
 
   **Y su corolario de medición, que B ya adoptó en la pieza: SE MIDE QUE SE APOYE Y SE MIDE QUE SE RECONOZCA — son DOS pruebas, no una.** El pin pasó la primera (física del mundo: sombra, perspectiva, color del terreno) y falló la segunda (*«no parece una moto»*). **Un objeto integrado que no se reconoce sigue sin servir.**
+
+  **🔴 ENMIENDA 18-ago (gate del founder): SON TRES PRUEBAS — SE APOYE · SE RECONOZCA · **Y SEA NUESTRO**.** Verbatim: *«ya se ve mucho mejor, pero hay que ponerle el MAGENTA de e-PetPlace… para que no quede simplemente como un pin negro dentro del mapa. Empezarle a dar ese sentido de PROPIEDAD para que el cliente empiece a sentirlo.»* **Un objeto del mundo que no lleva la marca es de cualquiera** — y en un mapa lleno de pines ajenos, no ser reconocible como nuestro es no existir. *La tercera prueba no reemplaza a las dos: se sube encima.*
 
 - **L-254 — UN UMBRAL QUE MIDE TAMAÑO NO MIDE UTILIDAD (S99 — el caso es de C con volumen real; depositada por orden de mesa, 18-ago-2026).**
 
