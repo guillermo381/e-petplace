@@ -56,6 +56,42 @@ entrás no es un modo: es una preferencia que la app ignora. Vive en
 preferencia local del dispositivo, no en el servidor: **es de la vista,
 no de la cuenta.**
 
+### A2bis · LA FILA COMPACTA — la anatomía que faltaba (S99-B)
+
+*Nota de estado, primero: esta receta **SÍ está en `main`** —
+`docs/laminas/2026-08-18-s99b-RECETA-STOCK-Y-LA-FILA-DEL-REPARTIDOR.md`,
+verificada por contenido con `git show origin/main:…`—. La medición que
+la daba por ausente se tomó antes del merge. **Lo que sí faltaba de
+verdad es esto: la anatomía de la fila.***
+
+**Por qué necesita anatomía propia y no alcanza con «`Celda` con
+`tituloEntero`»:** con 11 productos una fila cómoda era gratis; con
+**399**, el alto de la fila **es** la densidad, y la densidad decide si
+el vendedor puede trabajar. *Una fila que era correcta a 11 no es una
+decisión tomada a 399: es una que nadie volvió a tomar.*
+
+```
+[foto 40]  Pro Pac Adulto Pollo-Arroz 15 kg        $48,90
+           12 en stock · Publicado                      ›
+```
+
+- **Foto 40** — la miniatura es el localizador real cuando hay 399:
+  *el vendedor reconoce la bolsa antes que el nombre*. Es el paso
+  siguiente de la escala del avatar, no un tamaño nuevo.
+- **Dos renglones y nada más.** ① nombre entero (`tituloEntero`) +
+  precio en mono a la derecha · ② stock · estado del espejo.
+- **El precio en MONO y a la derecha** — se compara en columna, y la
+  comparación es la razón de ser de esta vista.
+- **El estado va como TEXTO, no como pill.** 399 pills es una pantalla
+  de confeti; el color se reserva para el veredicto que exige acción
+  (§A3).
+
+**⚠️ Lo que esta anatomía NO decide, y es de aparato:** el ALTO exacto de
+la fila y con él **el número de la ventana**. La receta fija la forma
+(dos renglones + miniatura 40); *cuántas filas entran antes de que N16
+se rompa se mide en el teléfono con los 399 cargados, y lo mide C.*
+**Un número de ventana elegido desde acá sería inventado.**
+
 ## A3 · 🔴 Y EL VOLUMEN TRAE ALGO MEJOR QUE UN PROBLEMA: EL ESPEJO POR FIN TIENE CON QUÉ VERSE
 
 **Medido por A:** 27 rechazados **con motivo** · 26 sin precio · 27 en

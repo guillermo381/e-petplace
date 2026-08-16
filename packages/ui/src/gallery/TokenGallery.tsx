@@ -3976,7 +3976,7 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* Tinta — S58: el techo del prestador (constante en los 3 temas) */}
-        <Seccion titulo="Tinta — el techo del prestador (bg.tinta, constante)">
+        <Seccion titulo="Tinta — superficie oscura constante (bg.tinta). ⚠️ NO es el techo del prestador: ese muro es tealDark desde S61-B12">
           <View style={{ backgroundColor: theme.bg.tinta, borderRadius: radius.md, padding: spacing[5], gap: spacing[2] }}>
             <Text style={{ fontFamily: sans.medium, fontSize: typography.size.lg, color: palette.light0 }}>
               Texto papel sobre tinta

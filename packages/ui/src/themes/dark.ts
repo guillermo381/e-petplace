@@ -43,7 +43,11 @@ export const darkTheme = {
     // token no tenía presencia de control (par 1.07 en claro).
     border:   palette.dark4,
     warm:     palette.creamAlpha06,
-    tinta:    palette.tinta,   // S58: el techo del prestador (constante en los 3 temas)
+    tinta:    palette.tinta,    // ⏪ S99-B: **ya NO es «el techo del prestador»** — el techo
+                            // ganó el muro tealDark en S61-B12 y este rótulo quedó cuatro
+                            // sesiones vencido. Costó caro: la barra de tabs se pintó de
+                            // NEGRO en el gate 3 por elegir el token LEYENDO su comentario.
+                            // Hoy es tinta y nada más. Su techo vive en `useMuroOficio`.
   },
 
   text: {
@@ -130,6 +134,19 @@ export const darkTheme = {
     // mini-gate ("no se hunde") y su firma manda; blanco encima 8.25:1.
     controlLleno: palette.magentaDark,
     sobreControlLleno: '#FFFFFF',
+
+    /** ⭐ S99-B · EL ACTIVO RELLENO (ver la nota larga en `light.ts`).
+     *
+     *  🔴 **EN OSCURO EL RELLENO SE DA VUELTA, y no es un parche: es la
+     *  regla de dos registros que S83-B31 ya firmó para el CTA.** Sobre
+     *  el fondo oscuro de la barra (`bg.card` = `dark1`), `magentaDark`
+     *  —el relleno del tema claro— separa **1.7**: el disco se hundiría
+     *  en la barra y el marcador de «dónde estoy» dejaría de existir.
+     *  ⇒ el relleno pasa al hex CLARO y su contenido a TINTA.
+     *  **Medido:** `ctaOro` sobre `dark1` **9.3** · tinta sobre oro
+     *  **9.2**. */
+    activoLleno:      palette.ctaOro,
+    sobreActivoLleno: palette.textLight0,
 
     gradient:       gradients.firmaUIDark,  // contextos cerrados (ver palette.ts)
     gradientSubtle: {
