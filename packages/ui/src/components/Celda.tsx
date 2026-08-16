@@ -18,6 +18,19 @@
  *
  * ENTRAR A UNA SECCIÓN no es este trabajo (Ley 19.1, S58): eso es
  * CeldaNavegacion — ícono b′ tipado + chevron + pressed 0.99.
+ *
+ * ── EL TÍTULO Y SU LÍNEA (S99-B) ────────────────────────────────────
+ * El título nació a UNA línea y sin perilla, y estuvo bien mientras la
+ * casa listaba cosas cuyo nombre era una ETIQUETA. **La vitrina cambió
+ * eso:** ahí el nombre del producto ES el criterio de elección, y un
+ * nombre cortado no es un detalle de layout — es la fila escondiendo
+ * justo el dato por el que alguien elige.
+ *
+ * ⇒ `tituloEntero` (opt-in, ley completa en su prop). **Opt-in porque
+ * el default sirve a 161 usos vivos:** ensanchar por default sería
+ * cambiar 161 filas para curar cuatro. *La perilla no está para que
+ * cada pantalla elija cómo se ve una fila: está para que diga qué es
+ * su título.*
  */
 
 import { useState, type ReactNode } from 'react'
@@ -46,6 +59,25 @@ type Comun = ZonaFin & {
   subtitulo?: string
   inicio?: ReactNode
   densidad?: CeldaDensidad
+  /** EL TÍTULO SE LEE ENTERO (S99-B · pedido de C con medición).
+   *
+   *  🔴 SU LEY, y es un criterio, no un gusto: **se enciende donde el
+   *  título ES el criterio de elección** —el nombre de un producto en una
+   *  vitrina— y **jamás por prolijidad**. En una fila de navegación
+   *  («Preferencias») el título es una ETIQUETA y una línea es lo
+   *  correcto: ahí no hay nada que decidir.
+   *
+   *  **Opt-in, y por eso el default no se toca:** 161 usos de `Celda`
+   *  viven de una sola línea. *Ensanchar por default sería cambiar 161
+   *  filas para curar cuatro.*
+   *
+   *  ⚠️ **NO tiene techo de líneas, a propósito.** La adjudicación dice
+   *  *«no se trunca»*, y truncar en dos sería la misma falta con otro
+   *  número. La fila CRECE — `ALTURA_MIN` siempre fue un mínimo. *Entre
+   *  un defecto visible (una fila alta con un nombre absurdo) y uno
+   *  silencioso (un nombre cortado que nadie sabe que estaba cortado),
+   *  esta casa elige el visible: el silencioso no se descubre nunca.* */
+  tituloEntero?: boolean
 }
 
 export type CeldaProps =
@@ -53,7 +85,7 @@ export type CeldaProps =
   | (Comun & { interactiva: true; onPress: () => void; accessibilityRole: AccessibilityRole })
 
 export function Celda(props: CeldaProps) {
-  const { titulo, subtitulo, inicio, densidad = 'normal' } = props
+  const { titulo, subtitulo, inicio, densidad = 'normal', tituloEntero = false } = props
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
@@ -117,12 +149,20 @@ export function Celda(props: CeldaProps) {
           chips bajen a su propia línea— y no otro ajuste de flexbox. */}
       <View style={{ flex: 1, minWidth: 96, gap: spacing[0.5] }}>
         <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
+          // `undefined` = sin límite (ver `tituloEntero`). El
+          // `ellipsizeMode` viaja con él: sin corte no hay puntos que
+          // poner, y dejarlo sería una promesa de recorte que no ocurre.
+          numberOfLines={tituloEntero ? undefined : 1}
+          ellipsizeMode={tituloEntero ? undefined : 'tail'}
           style={{
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.base,
             color: theme.text.primary,
+            // El interlineado SOLO cuando puede haber dos líneas: con una
+            // sola, fijarlo movería el centrado de las 161 filas vivas.
+            ...(tituloEntero
+              ? { lineHeight: typography.size.base * typography.leading.snug }
+              : null),
           }}
         >
           {titulo}

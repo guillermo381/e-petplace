@@ -69,7 +69,6 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
   obtenerCitasPorCoordinar,
-  empleadoTieneRol,
   obtenerEquipoNegocio,
   obtenerFranjasHorario,
   obtenerMascotasAtendidas,
@@ -78,6 +77,7 @@ import {
   obtenerChipsEmpleado,
   obtenerMiEmpleadoId,
   obtenerMiPrestador,
+  obtenerContextoArranque,
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerAtencionesAbiertas,
@@ -107,9 +107,10 @@ import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epe
 
 import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
-import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
-import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
+import type { ContextoVentas } from '@/lib/cuenta-ventas';
+import { contextoVentasDesdeArranque } from '@/lib/barra-prestador-lectura';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
+import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -894,18 +895,14 @@ export default function Hoy() {
   // enciende; un fallo no se cachea como ausencia (contextoVentas no
   // cachea fallos) y el próximo foco reintenta.
   const [vendedoraMedida, setVendedoraMedida] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      let vigente = true;
-      void contextoVentas().then((r) => {
-        if (!vigente) return;
-        setVendedoraMedida(r.ok && r.data !== null && r.data.esVendedora);
-      });
-      return () => {
-        vigente = false;
-      };
-    }, []),
-  );
+  /* ⭐ S99-A · #0a — LA SONDA MURIÓ. Acá vivía un `useFocusEffect` propio
+     llamando `contextoVentas()` (2 peticiones encadenadas POR FOCO, para
+     TODOS, deduplicadas en vuelo pero jamás cacheadas — la medición de D).
+     El dato ahora sale del MISMO `obtener_contexto_arranque()` del efecto
+     principal (`cargar`, abajo): cero convivencia entre la sonda vieja y
+     el contexto nuevo (adjudicación de mesa — verificado con el censo de
+     olas). El contrato de la casa se conserva: default false, SOLO una
+     lectura exitosa lo enciende, el próximo foco reintenta. */
   /* S88-C · LA CAMPANA → S89-C · LA VISITA (letra founder, contrato v2
      de A `9f72a924`): la huella mide LO NUEVO desde la última visita a
      /avisos, no lo no-leído — el booleano es de `hayNovedades('prestador')`
@@ -1007,24 +1004,33 @@ export default function Hoy() {
 
   const cargar = useCallback(async (esRefresh = false) => {
     if (!esRefresh) setPantalla({ estado: 'cargando' });
-    const sesion = await verificarSesion();
-    if (!sesion.ok) {
-      setPantalla({ estado: 'error', mensaje: sesion.mensaje });
+    /* ⭐ S99-A · #0a — EL PRÓLOGO EN UN VIAJE (D-738). Acá vivía la
+       cadena `verificarSesion` → `obtenerMiPrestador` → (sin prestador)
+       `contextoVentas` — tres esperas para saber quién soy. La RPC
+       compone los MISMOS gates en el motor. */
+    const ctxR = await obtenerContextoArranque();
+    if (!ctxR.ok) {
+      setPantalla({ estado: 'error', mensaje: ctxR.mensaje });
       return;
     }
-    const prestador = await obtenerMiPrestador();
-    if (!prestador.ok) {
-      /* 🔴 `sin_prestador` NO es un fallo: es el vendedor puro (ver el tipo
+    const c = ctxR.data;
+    // La bandera de la puerta del §0bis sale del MISMO viaje (la sonda
+    // vieja murió arriba): lectura exitosa = verdad medida.
+    setVendedoraMedida(c.esVendedora);
+    if (c.prestador === null) {
+      /* 🔴 sin prestador NO es un fallo: es el vendedor puro (ver el tipo
          `Pantalla`). Se le arma SU HOY —sus pedidos— en vez de una tarjeta
          roja. Si tampoco es vendedora, ahí sí es error y se dice. */
-      if (prestador.codigo === 'sin_prestador') {
-        const ctx = await contextoVentas();
-        if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
-          const cuentaId = ctx.data.cuentaComercialId;
+      {
+        const cv = contextoVentasDesdeArranque(c);
+        if (cv !== null && cv.esVendedora) {
+          const cuentaId = cv.cuentaComercialId;
           /* Una sola ola: las TRES lecturas son independientes y encadenarlas
              sumaría viajes a la primera pantalla (L-224 · N16).
              `misEntregasAsignadas` entra en ESTA ola —no en una segunda—
-             justamente para que la celda de reparto no cueste un viaje. */
+             justamente para que la celda de reparto no cueste un viaje.
+             (Resolución de merge A+C, 16-ago: el contexto viene del viaje
+             único de #0a; la tercera lectura es la cura de C.) */
           const [ped, cupo, entregas] = await Promise.all([
             listarPedidosDelVendedor(cuentaId),
             cupoRepartoDelDia(cuentaId, hoyLocalISO()),
@@ -1036,7 +1042,7 @@ export default function Hoy() {
           setPantalla({
             estado: 'vendedorPuro',
             cuentaComercialId: cuentaId,
-            moneda: ctx.data.moneda,
+            moneda: cv.moneda,
             pedidos: ped.ok ? ped.data : [],
             extras: extras.ok ? extras.data : {},
             cupo: cupo.ok
@@ -1051,9 +1057,25 @@ export default function Hoy() {
           return;
         }
       }
-      setPantalla({ estado: 'error', mensaje: prestador.mensaje });
+      /* Estado INALCANZABLE por diseño (el guard raíz ya desvió a quien no
+         tiene ni negocio ni tienda) — pero si se alcanza, la voz es la del
+         wrapper de siempre, no una inventada acá: UN viaje extra solo en
+         este borde muerto. */
+      const p = await obtenerMiPrestador();
+      if (p.ok) {
+        /* Carrera doblemente imposible (el contexto dijo null y el wrapper
+           resolvió en el mismo foco): se reintenta UNA vez por el camino
+           normal en el próximo foco — cargando honesto, jamás un error
+           con voz inventada. */
+        setPantalla({ estado: 'cargando' });
+        return;
+      }
+      setPantalla({ estado: 'error', mensaje: p.mensaje });
       return;
     }
+    /* El resto del efecto habla `prestador.data.*` desde siempre — se le
+       sirve el MISMO objeto desde el contexto, sin re-pedirlo. */
+    const prestador = { ok: true as const, data: c.prestador };
     /* ⭐ S88-C (LÁMINA_HOME_POR_ROL, punto 1) — EL ROL SE RESUELVE ACÁ,
        ANTES de pintar, y el desvío a AgendaRecepcion MUERE por firma:
        recepción ve LA CONSOLIDADA con su verbo. Costo declarado: los
@@ -1079,11 +1101,9 @@ export default function Hoy() {
     // el brazo admin: un solo viaje extra y SOLO para el no-titular —
     // el mismo RPC que ya pagaba el módulo de preparación (se hoistea,
     // no se duplica: abajo se consume `rol`).
-    let esGestor = esTitular;
-    if (!esGestor) {
-      const rolR = await empleadoTieneRol(prestador.data.id, ['dueño', 'administrador']);
-      esGestor = rolR.ok && rolR.data;
-    }
+    /* ⭐ #0a: el viaje de `empleadoTieneRol` murió — `c.esGestor` ES esa
+       misma pregunta, contestada por el MISMO gate dentro de la RPC. */
+    const esGestor = esTitular || c.esGestor;
     const rol: 'gestor' | 'recepcion' | 'profesional' = esGestor
       ? 'gestor'
       : chipsCero === true

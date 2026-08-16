@@ -15,6 +15,23 @@
  * Gesture.Native() en el ScrollView + Pan simultáneo; el pan solo arrastra
  * la hoja cuando el scroll está en top.
  *
+ * ── EL PIE FIJO (S99-B) — por qué la Hoja lo necesitaba ─────────────
+ * La Hoja envuelve a sus `children` en SU PROPIO scroll, así que **todo
+ * CTA de formulario nacía debajo del pliegue**: medido por C, el
+ * «Ajustar stock» no entraba al abrir. Y como el scroll ya es de la
+ * pieza, cualquier `HojaScroll` adentro quedaba ANIDADO.
+ *
+ * **Los dos atajos se descartaron CON medición, no por gusto** (censo de
+ * C): `altura="contenido"` puede colapsar el scroll —ninguna Hoja de la
+ * casa convive hoy con `HojaScroll`, o sea que ese camino no está
+ * probado— y sacar el scroll interno toca la composición de gestos de
+ * Android, **que RN-web no delata** (L-132, la cicatriz que parió
+ * `HojaScroll`).
+ *
+ * ⇒ El slot `pie` deja el scroll intacto y saca el compromiso afuera.
+ * *No es una comodidad: es la gramática canónica —«un CTA al pie»— que
+ * dentro de una Hoja era inexpresable.*
+ *
  * FOCO — patrón de retorno al disparador (el consumidor lo cablea):
  *   const disparadorRef = useRef<View>(null)
  *   <Boton ref?… onPress={() => setAbierta(true)} />
@@ -93,6 +110,27 @@ export interface HojaProps {
    *  translateY con la curva del prototipo (.32,.72,0,1), ~340ms,
    *  scrim efectivo .4. Memorial la ignora (fades suaves siempre). */
   apertura?: 'default' | 'marca'
+  /** EL PIE FIJO (S99-B · pedido de C con medición) — vive FUERA del
+   *  scroll: el contenido corre por debajo y esto no se mueve.
+   *
+   *  🔴 QUÉ VA ACÁ: **el compromiso**, y nada más — el CTA que cierra la
+   *  decisión de la Hoja. Es la gramática canónica hecha slot: *«un CTA
+   *  al pie, `bloque`, apagado hasta que haya cambios»*, donde **el botón
+   *  apagado ES la promesa de que nada se guardó todavía**.
+   *
+   *  ⛔ QUÉ **NO** VA, para que el slot no se vuelva un cajón:
+   *   · **contenido.** Si necesita más de una línea sobre el CTA, no es
+   *     un pie: es contenido, y el contenido scrollea.
+   *   · **dos botones compitiendo.** Rige 19.7: por superficie UN sólido;
+   *     lo secundario baja a label. *Un pie con dos cajas llenas obliga a
+   *     elegir dos veces.*
+   *
+   *  ✅ SÍ ADMITE **UNA línea de voz sobre el CTA**, y es decisión con
+   *  razón: el precedente S73 manda que **el CTA apagado diga QUÉ FALTA,
+   *  siempre**, y esa frase adentro del scroll queda fuera de vista justo
+   *  cuando el botón gris está a la vista. *Un botón apagado cuya razón
+   *  no se ve es peor que uno sin razón: manda a adivinar.* */
+  pie?: ReactNode
 }
 
 export interface HojaScrollProps {
@@ -147,11 +185,20 @@ export function Hoja({
   altura = 'contenido',
   conCerrar = false,
   apertura = 'default',
+  pie,
 }: HojaProps) {
   const { theme } = useTheme()
   const { height: altoVentana } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const [montada, setMontada] = useState(visible)
+  /** ¿El contenido DESBORDA su caja? De esto —y solo de esto— depende el
+   *  filete del pie. **Un filete permanente separaría de nada la mitad de
+   *  las veces**; medido, el filete deja de ser decoración y pasa a
+   *  significar *hay más arriba*, que es la única razón por la que un pie
+   *  necesita despegarse del contenido. */
+  const [altoVisible, setAltoVisible] = useState(0)
+  const [altoContenido, setAltoContenido] = useState(0)
+  const hayDesborde = altoContenido > altoVisible + 1
 
   const esMemorial = theme.mode === 'memorial'
   /** 🔴 S98-B · REDUCE-MOTION — la Hoja entra al brazo QUIETO de memorial.
@@ -454,12 +501,44 @@ export function Hoja({
                 <AnimatedGHScrollView
                   onScroll={alScroll}
                   scrollEventThrottle={16}
+                  /** 🔴 `flexShrink: 1` — SIN esto el pie no existe: el
+                   *  scroll se dimensiona a su contenido y **empuja al pie
+                   *  fuera de la hoja**, que es el mismo defecto que este
+                   *  slot vino a curar, un piso más abajo. Con pie o sin
+                   *  él, es además lo correcto bajo `maxHeight`: la caja
+                   *  que puede desbordar es la que tiene que ceder. */
+                  style={{ flexShrink: 1 }}
+                  onLayout={(e) => setAltoVisible(e.nativeEvent.layout.height)}
+                  onContentSizeChange={(_a, alto) => setAltoContenido(alto)}
                   contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[1] }}
                   keyboardShouldPersistTaps="handled"
                 >
                   <HojaPanContext.Provider value={pan}>{children}</HojaPanContext.Provider>
                 </AnimatedGHScrollView>
               </GestureDetector>
+
+              {/* EL PIE — fuera del scroll, y por eso siempre a la vista.
+                  Queda DENTRO del `GestureDetector` del pan: arrastrar
+                  desde acá cierra la hoja, como desde el agarre o el
+                  header. No es un supuesto — es el mismo lugar donde la X
+                  de `conCerrar` convive con el pan desde S43.
+
+                  El piso de la safe area NO se re-decide acá: ya lo pone
+                  el `paddingBottom` de la hoja (S65), y ponerlo dos veces
+                  daría el doble de aire en los teléfonos con barra. */}
+              {pie ? (
+                <View
+                  style={{
+                    paddingHorizontal: spacing[4],
+                    paddingTop: spacing[3],
+                    // El filete SOLO cuando hay algo tapado arriba.
+                    borderTopWidth: hayDesborde ? 1 : 0,
+                    borderTopColor: theme.bg.border,
+                  }}
+                >
+                  {pie}
+                </View>
+              ) : null}
             </Animated.View>
           </GestureDetector>
         </KeyboardAvoidingView>
