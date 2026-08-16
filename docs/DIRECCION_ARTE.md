@@ -514,6 +514,77 @@ nadie va a montar no se pide — pedirlo es fabricar deuda (precedente
 S71-B2: de 5 conceptos faltantes se pidieron los 2 que la pantalla
 montaba; los otros 3 esperan a que su superficie tenga boceto).
 
+## 6ter. LA MARCA DE MAPA — CLASE APARTE (firma de mesa, 15-ago-2026, S99-B)
+
+> **Estatuto: FIRMADA.** Salida (a) de un choque declarado en el gate del
+> glifo `moto`. **La regla madre del trazo NO se enmienda.**
+
+**LA FRONTERA, en una línea: el mapa no es interfaz — es MUNDO.**
+
+Las leyes del ícono (§2, Ley 12: *objeto del oficio en trazo 1.9 + UNA
+huella rellena*) gobiernan **la interfaz**: superficies que la casa
+pinta, con su fondo, su tema y su contraste bajo control. **Una marca que
+vive sobre un mapa no cumple ninguna de esas condiciones** — debajo hay
+calles, parques, agua y edificios que no elegimos, a un tamaño que no
+negociamos.
+
+⇒ **Nace la clase «marca de mapa», con su propia física:**
+- **MASA, no trazo.** A 21 px sobre fondo con textura **el trazo
+  desaparece y solo sobrevive la silueta rellena de alto contraste.**
+- **Anillo de separación**, porque el fondo es impredecible.
+- **Sin huella.** No por la regla de los glifos de control (esos no
+  llevan huella *porque son interfaz*): **acá la Ley 12 directamente no
+  gobierna.**
+
+### 🔴 ESTA CLASE NO SE INVENTÓ — SE NOMBRÓ. Y es lo que la hace barata.
+
+**Medido, no argumentado:** las dos marcas que la casa ya dibuja sobre un
+mapa **ya son masa**, desde antes de que esta sección existiera:
+- `MapaRecorrido` marca la posición viva con `backgroundColor` + anillo
+  blanco de 2.5 — **no es un glifo de trazo**.
+- `PinMovible` dibuja `backgroundColor` + anillo — **tampoco**.
+
+*La casa venía usando esta física sin escribirla. Lo que se firma no es
+una excepción nueva: es el nombre de lo que ya regía.*
+
+### POR QUÉ NO SE ENMENDÓ LA REGLA MADRE (la salida (b), descartada)
+
+La otra salida era ensanchar la Ley 12 para admitir relleno **«sobre
+fondo no-controlado»**. Se descartó **porque esa condición no está
+acotada**: toda foto, todo gradiente y todo póster de video son fondo no
+controlado. **Una regla que no puede decir dónde termina no es una
+regla** — y habría dejado entrar el relleno por una puerta que después
+nadie podía cerrar.
+
+**La clase (a) se acota sola, y por construcción: la marca de mapa vive
+en UNA pieza (`PinEnMapa`), y las piezas se cuentan.**
+
+> *Tercera vez que la casa elige la razón angosta antes que estirar una
+> viva: `no_aplica` como cuarto estado de composición (S96) · la
+> huella-discriminador (S99) · y esta.*
+
+### ⏪ LO QUE ESTA FIRMA SUBSUME, y se declara en vez de dejarlo conviviendo
+
+La adjudicación previa de esta misma sesión resolvió que `moto` iba sin
+huella **por una razón angosta propia** (*«la huella no se pone donde es
+el discriminador de un par»*). **Su conclusión sobrevive; su razón queda
+SUPERADA por ésta**, que es mejor: aquella se formuló cuando todavía
+creíamos que `moto` era **un glifo del registry**, y contestaba bien a un
+encuadre equivocado.
+
+**No muere del todo, y por eso no se borra:** sigue siendo la respuesta
+correcta el día que **un glifo de la INTERFAZ** forme un par donde la
+huella discrimine. *Dos letras que gobiernan lo mismo son peores que una
+equivocada — acá gobierna ésta, y la otra queda con su alcance recortado
+y escrito.*
+
+### LO QUE ESTA SECCIÓN NO DECIDE
+
+**Qué dibujo gana.** Las candidatas de `moto` (D con caja · E moto sola ·
+F masa mínima) van al **gate POR ÍCONO del founder** (§6b.5), montadas
+**dentro del anillo del pin, a 21 px sobre tonos de mapa** — jamás sobre
+lienzo blanco, que fue el error del brief de la primera tanda.
+
 ## 6bis. REGISTRO S78 — el glifo del MICRÓFONO: gate por ícono PENDIENTE
 
 > `DictadoEnVivo` (S78-B, la puerta del dictado en vivo) entró al gate de

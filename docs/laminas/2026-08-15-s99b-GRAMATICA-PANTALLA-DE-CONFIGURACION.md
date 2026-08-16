@@ -164,6 +164,39 @@ mentira sobre el dominio.
 
 ---
 
+## §5bis · 🔴 SERVIDO A LA MESA — EL DEFECTO ES MÁS GRANDE QUE LA GRAMÁTICA
+
+**Orden de mesa: nombrarlo, no construirlo.** La gramática de §3 cura la
+pantalla. **Esto no es de la pantalla.**
+
+> **«Tres listas vacías sin guía» no es un problema de organización: es
+> un vendedor que no sabe qué hacer primero el día que abre su tienda.**
+
+**LA PREGUNTA, para que la mesa la trabaje:** *¿qué necesita ver un
+vendedor la primera vez que entra a configurar su tienda, para saber por
+dónde empezar?*
+
+**Por qué es de producto y no de forma:** el taller **te guía porque es
+un wizard** — su forma *es* el onboarding, aunque nadie lo llamó así.
+Ventas no tiene equivalente, y no lo tiene **porque su modelo (colecciones)
+no trae guía de fábrica**. ⇒ **el modelo correcto para el dominio deja un
+hueco que el otro modelo tapaba por accidente.** *Elegir bien el modelo
+no alcanza: hay que pagar lo que ese modelo no da.*
+
+**Los dos lugares de la casa que ya tocan esto, y por eso no arranca de
+cero:**
+- **N18 · la completitud** — *«el vendedor ve exactamente cuál campo lo
+  dejó afuera»*, con voz narrativa + un paso. **La ley del arranque ya
+  está escrita; lo que falta es su superficie.**
+- **El espejo de L5b** — la vitrina que el vendedor administra viéndose
+  como la ve la familia. *Un vendedor que no sabe por dónde empezar y un
+  vendedor que no sabe cómo se ve son la misma persona en dos momentos.*
+
+**Lo que NO propongo acá, a propósito:** ni la pantalla, ni el orden de
+sus pasos, ni si es una zona dentro de configuración o un momento
+aparte. **Nombrar el hueco es el trabajo de esta sección; llenarlo es
+decisión de producto y necesita su propia mesa.**
+
 ## §6 · LO QUE ESTA RECETA NO PUEDE FIRMAR
 
 **El ojo.** Los instrumentos dicen que la anatomía se puede unificar;
