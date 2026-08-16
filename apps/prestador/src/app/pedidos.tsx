@@ -287,6 +287,9 @@ export default function PedidosDelDia() {
         <PuertaHermana
           etiqueta={t('pedidosDia.puertaCitas')}
           direccion="izquierda"
+          /* sinVer=0 TRANSICIONAL — misma cura y mismo porqué que la puerta
+             de ida (simetría obligatoria de la ley del contador). */
+          sinVer={0}
           onPress={volverACitas}
         />
       </ScrollView>

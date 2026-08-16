@@ -1,0 +1,287 @@
+# RECETA DE FORMA — LA FICHA DEL REPARTIDOR (L2)
+
+**Estatuto:** Toque 1 de la Dirección de Diseño. **Va ANTES de que C
+escriba.** No aprueba una pantalla: la pantalla se aprueba en la app.
+
+**La vara que gobierna, firma del founder (verbatim):** *«no es poner
+piezas por poner, cada cosa que hagamos debe tener un sentido… busquemos
+crear las cosas bien. Que sea elegante, que sea eficiente, que sea seguro
+y que se vea espectacular, luxury.»* ⇒ **FUNCIONA · SEGURO · EFICIENTE ·
+ELEGANTE · ESPECTACULAR**, en ese orden. *El founder autorizó ir más
+lento; esta receta gasta ese permiso en decidir antes, no en decorar
+después.*
+
+**Y la frase que ordena la anatomía entera:** *no es un formulario — es
+la ficha de la persona que toca el timbre de una familia.*
+
+---
+
+## §1 · LO MEDIDO, antes de proponer nada
+
+La ficha **no nace en tierra virgen**: el repartidor ya vive hoy como una
+`Hoja` de alta dentro de `ventas/configuracion.tsx` (líneas 1074–1247).
+Medido sobre esa fuente:
+
+| Qué | Hoy | Qué implica para L2 |
+|---|---|---|
+| Forma | **`Hoja altura="media"`** con 12 controles en UNA columna plana | la ficha **deja de ser Hoja** (§3) |
+| Fotos | **DOS bloques `FotoDelRepartidor` IDÉNTICOS** (documento · persona) | 🔴 **el defecto de forma más caro que hay ahí** (§4.1) |
+| Teléfono | `ControlTelefono` **con** selector de indicativo | ⚠️ **es el campo que MUERE** |
+| WhatsApp | `Campo` desnudo, `phone-pad`, **sin indicativo** | ⚠️ **es el campo que SOBREVIVE** — §4.2 |
+| Documento | `keyboardType="number-pad"` **fijo**, con tipo CEDULA/PASAPORTE/RUC | 🔴 un pasaporte lleva letras (N12.2 roto hoy) |
+| Placa | `autoCapitalize="characters"` y **nada más** | 🔴 cero máscara, cero validación (N12.1/N12.3) |
+| Tope de vehículos | `repVehiculos.length < 2 &&` — la puerta ya deja de ofrecer | ✅ **N12.5 ya cumplida en la superficie**; su mitad dura es de A |
+
+### 🔴 EL HALLAZGO QUE SE PIERDE SILENCIOSO SI NADIE LO ESCRIBE
+
+La spec dice *«muere el teléfono convencional»*. **El campo que muere es
+el ÚNICO que hoy tiene el selector de indicativo de país**, y el que
+sobrevive es el que no lo tiene.
+
+> **Al borrar el teléfono, el selector de país se MUEVE a WhatsApp — no
+> se va con él.** Un borrado prolijo deja exactamente la pantalla que la
+> firma prohíbe: un WhatsApp obligatorio sin indicativo, componiendo un
+> E.164 que la fuente rebota.
+
+*Nadie lo iba a ver: el diff de un borrado se lee como una resta.*
+
+---
+
+## §2 · LA ANATOMÍA — cómo se compone una PERSONA en esta casa
+
+**La ley que se hereda, y no la invento acá:** el alta de mascota (lámina
+firmada S91) dice *«se agrupa por lo que la persona ya tiene en la
+cabeza, no por campo»*. Un repartidor se compone igual — y el
+agrupamiento sale de una pregunta que ya tiene respuesta firmada:
+
+> **¿Qué ve la familia del repartidor?** Firma del founder, punto 11 del
+> PLAN: *«Estándar Rappi Uber, sí»* ⇒ **foto · nombre · vehículo ·
+> placa.**
+
+⇒ **Esos cuatro datos NO son cuatro campos del formulario: son LA
+CABECERA de la ficha**, y el resto es lo que solo ve el vendedor.
+
+```
+┌─────────────────────────────────────────┐
+│  ① LO QUE VE LA FAMILIA                 │   ← la cabecera ES el espejo
+│     [foto grande]  Nombre               │
+│                    Moto · AB 123 C      │
+├─────────────────────────────────────────┤
+│  ② CÓMO SE LO ALCANZA                   │
+│     WhatsApp (con indicativo)           │
+│     Correo — con este entra a la app    │
+├─────────────────────────────────────────┤
+│  ③ QUIÉN RESPONDE POR ÉL                │
+│     Tipo + número de documento          │
+│     [miniatura del documento]           │
+├─────────────────────────────────────────┤
+│  ④ CON QUÉ LLEGA                        │
+│     fila vehículo 1                     │
+│     fila vehículo 2                     │
+│     + Agregar vehículo   (muere en 2)   │
+├─────────────────────────────────────────┤
+│  ⑤ SUS VIAJES        (derivado, lectura)│
+└─────────────────────────────────────────┘
+```
+
+**Por qué la cabecera es el espejo y no una decoración:** es **N17
+aplicada a una persona** — *un vendedor que administra su vitrina sobre
+la vitrina no puede no saber cómo se ve*. Acá igual: **el vendedor da de
+alta a alguien VIENDO la tarjeta que va a ver la familia**, y por eso
+sabe —sin que nadie se lo explique— si esa foto sirve para reconocer a
+quien toca el timbre. *Una foto contra un fondo negro se descubre en la
+puerta de una casa, o se descubre acá.*
+
+**Aire entre bloques: `spacing[8]` = 32 (N2).** Máximo **3 separadores**
+en la pantalla (N3) ⇒ los bloques se separan por AIRE y por
+`Texto variante="seccion"`, no por líneas.
+
+---
+
+## §3 · LA FICHA ES PANTALLA, NO HOJA — y el alta y la edición son LA MISMA
+
+**Se sale de la `Hoja`, con dos razones y ninguna es de tamaño:**
+
+1. **Una Hoja es para una DECISIÓN; una pantalla es para un SUJETO.** Lo
+   que hay acá es una persona con identidad, papeles, vehículos e
+   historia. El precedente de la casa es literal: el alta de mascota son
+   **cuatro pantallas**, no una Hoja.
+2. **La Hoja monta un `Modal` nativo** y su desmontaje se lleva el foco y
+   el teclado — con 12 controles y dos capturas de cámara encima, es la
+   superficie equivocada.
+
+**Y una sola pantalla para las dos entradas** (`nuevo` y `[id]`), porque
+D-791 lo dice con todas las letras: *«reconstruir la sección sin caminos
+de edición sería reconstruir el defecto»*. Es la misma orden que el alta
+de mascota ya cumplió: **MATA EL CLON — una pieza, dos entradas.**
+
+**Lo que cambia entre las dos entradas es UNA cosa:** con `[id]`, ⑤
+existe y la cabecera ya tiene cara. Nada más. *Si aparece un segundo
+`if (esNuevo)`, el clon está volviendo por la ventana.*
+
+---
+
+## §4 · LAS SEIS DECISIONES DE FORMA
+
+### 4.1 🔴 LAS DOS FOTOS NO SON LA MISMA COSA — y hoy pesan igual
+
+Medido: dos bloques `FotoDelRepartidor` idénticos, uno debajo del otro.
+**Son dos naturalezas distintas y por eso no pueden verse iguales:**
+
+| | La foto de la PERSONA | La foto del DOCUMENTO |
+|---|---|---|
+| Qué es | **identidad** — la cara que ve la familia | **evidencia** — respalda un número |
+| Dónde vive | **① la cabecera**, grande, presidiendo | **③**, al lado de su número |
+| Cómo se ve | avatar grande | **miniatura** |
+| Se abre entera | no hace falta | **sí, y por acto deliberado** (`VisorFoto`) |
+
+**Y la asimetría tiene mitad de SEGURIDAD, que es la vara ②:** el
+documento es dato de identidad de un tercero y vive en bucket privado.
+**Mostrarlo a tamaño completo por default es exponerlo cada vez que
+alguien abre la ficha en un mostrador con gente al lado.** Miniatura por
+default no es una preferencia estética: es la dosis correcta de un dato
+que solo hay que poder *verificar*, no *contemplar*.
+
+**La captura entra por `HojaCaptura`** (la pieza de B) — es REEMPLAZAR,
+no construir: el censo midió **8 de 10 puertas de foto sin cerrojo contra
+el doble toque, y ésta es una de ellas**.
+
+### 4.2 EL CONTACTO — un solo canal, sin disculpas
+
+- **WhatsApp = `ControlTelefono`** (el par selector+campo con UN solo
+  pie, porque lo que se valida es el E.164 que forman JUNTOS). **El
+  selector se muda desde el teléfono que muere** (§1).
+- **Muere la palabra «opcional»** — *si es el único canal, no es
+  opcional*.
+- **El correo pide sin justificarse.** La firma es explícita: el correo
+  es **garantía del vendedor**, no problema del sistema ⇒ **cero camino
+  de escape, cero ayuda para crearlo, MENOS superficie**. Su `ayuda` dice
+  **para qué sirve**, jamás por qué lo necesitamos: *«Con este correo
+  entra a la app.»* `keyboardType="email-address"` ·
+  `autoCapitalize="none"` (N12.2).
+
+### 4.3 EL VEHÍCULO COMO SUB-OBJETO — FILA, no tarjeta
+
+**La ley de la casa decide sola:** *tarjetas para elegir, filas para
+leer* (S97, Acto II de `Baldosa`). Un vehículo acá **se lee y se edita,
+no se elige entre opciones** ⇒ **fila**.
+
+Su anatomía: **tipo como palabra · placa en MONO · tocable para editar.**
+
+- **La placa va en mono, y no es gusto:** es un código que **se dicta y
+  se transcribe** — el mismo argumento con el que nació `CodigoAEscala`
+  en S96. En sans se confunden `0/O` y `1/l/I`, y una placa mal leída es
+  una moto que nadie encuentra.
+- **«Agregar vehículo» al PIE de su lista** (gramática §3③) y
+  **desaparece en 2** — la regla **jamás se escribe en pantalla** (N12.5).
+- **⛔ CERO GLIFO DE VEHÍCULO EN v1, y es decisión, no olvido.** Un glifo
+  nuevo exige §6b entero (hoja de contacto, 2-3 variantes, montaje a
+  21px, gate POR ÍCONO del founder). **Pedir un dibujo firmado para decir
+  una palabra de cinco letras es exactamente la economía que §6b
+  prohíbe.** *(Y ojo con el vecino: el `moto` que está en gate es **marca
+  de mapa** —`DIRECCION_ARTE` §6ter, otra clase, otra física—; no sirve
+  acá y usarlo mezclaría dos idiomas.)*
+
+### 4.4 N12 ENTERA — la máscara la manda el TIPO
+
+**Nada de esto existe hoy.** El orden ya es correcto en el código (tipo
+antes que placa): se conserva, porque **la máscara y lo que sigue SE
+DERIVAN del tipo elegido** (N12.1).
+
+| Tipo | Forma | Ejemplo del error |
+|---|---|---|
+| **Moto** | 2 letras + 3 números + 1 letra | *«Una placa de moto lleva 2 letras, 3 números y una letra — por ejemplo, AB 123 C.»* |
+| **Carro** | 3 letras + 3–4 números | *«Una placa de carro lleva 3 letras y 3 o 4 números — por ejemplo, ABC 1234.»* |
+
+- **Se valida AL SALIR del campo, jamás al enviar** (N12.3). *Un
+  formulario que reprocha al final hace escribir dos veces.*
+- **El error dice QUÉ y CÓMO, con ejemplo real** (N12.4). «Campo
+  inválido» está prohibido en toda la casa — y **`verify:diseno` R44 lo
+  caza** (baseline solo-baja: esta pantalla no puede sumarle uno).
+- **El teclado del documento SE DERIVA del tipo** (N12.2): `number-pad`
+  con cédula, **alfanumérico con pasaporte**. Hoy está fijo en numérico y
+  un pasaporte no se puede tipear.
+
+### 4.5 N13 — EL CAMPO QUE LLENÓ LA IA SE VE DISTINTO HASTA QUE ALGUIEN LO FIRMA
+
+**La marca vive en `ayuda`, y la razón es N11:** el contorno del campo
+tiene **exactamente tres estados** (reposo · foco · error) y su piso de
+contraste está medido y gateado (R43). **Un cuarto color de borde para
+«esto lo escribió la IA» rompería la ley que acabamos de firmar** —*dos
+estilos de campo jamás conviven en la misma región*— y encima competiría
+con el error, que es el estado que sí tiene que gritar.
+
+⇒ El campo llega **lleno y con su línea de origen debajo**:
+*«Leído del documento.»* · **la línea MUERE en cuanto la persona edita el
+campo** (N13: la señal muere al tocar) ⇒ cero API nueva: es limpiar la
+prop.
+
+**Y el candado que ya rige, con su lección:** si la IA no pudo leer,
+**el campo queda VACÍO y lo dice** — *«No se pudo leer. Escribilo.»*
+JAMÁS un número plausible (L-139). *Un número de cédula verosímil y
+equivocado es peor que un vacío: el vacío se llena, el equivocado se
+firma.*
+
+### 4.6 LOS VIAJES — derivados, y sin ranking
+
+Al pie, de lectura, **voz narrativa + un número** (N18): *«12 entregas
+este mes.»* **JAMÁS** posición, percentil ni comparación entre personas —
+la completitud y el desempeño son de alguien **contra sí mismo**.
+
+**Con cero viajes la sección NO desaparece: dice la verdad serena** —
+*«Todavía no hizo entregas.»* Un repartidor recién creado tiene cero y
+eso no es una falla; **una sección ausente se lee como un dato que falta**.
+
+---
+
+## §5 · LA REFERENCIA DE INDUSTRIA, y el corte
+
+**Uber / DiDi — el alta de conductor, sección «Vehículo».** Es la
+referencia exacta porque resuelve **este** problema y no uno parecido: un
+sub-objeto (el vehículo) que cuelga de una persona, con su tipo primero y
+su placa enmascarada después.
+
+- **LO QUE SE TOMA:** ① el vehículo como **objeto con fila propia** en
+  vez de dos campos sueltos · ② **la máscara derivada del tipo** · ③ **la
+  foto del documento como propuesta editable**, jamás como verdad.
+- **LO QUE NO SE TOMA, y con su razón:** su **máquina de estados de
+  aprobación de documentos** (pendiente/en revisión/aprobado). **Nosotros
+  no tenemos flujo de aprobación para el documento del repartidor** —
+  dibujar tres estados que nadie verifica sería una pantalla mintiendo
+  sobre un proceso inexistente. Y su **barra de progreso del onboarding**:
+  `MODELO_LOYALTY` §2 la prohíbe con todas las letras.
+
+*Se copia el principio, jamás el widget.*
+
+---
+
+## §6 · LAS CINCO VARAS, contestadas una por una
+
+| Vara | Qué la cumple acá |
+|---|---|
+| **FUNCIONA** | el alta **y la edición** en la misma pantalla (§3) — hoy solo hay alta |
+| **SEGURO** | el documento es **evidencia en miniatura**, no un póster (§4.1); la foto va a bucket privado como PATH |
+| **EFICIENTE** | persona · vehículos · viajes en **lecturas PARALELAS, jamás encadenadas** (N16.1) · **`Esqueleto`, el spinner muere** (N16.2) · la foto con **medidas explícitas** para que la pantalla no salte al cargar (N16.3) |
+| **ELEGANTE** | la cabecera dice quién es antes que qué datos tiene; el aire (N2/N3) hace el trabajo que hoy hacen doce cajas apiladas |
+| **ESPECTACULAR** | **la cabecera-espejo**: el vendedor ve la tarjeta de la familia mientras la crea. Es el único gesto de la pantalla que nadie va a esperar — y es gratis, porque esa tarjeta hay que dibujarla igual |
+
+**⚠️ Lo que NINGUNA de estas varas puede firmar: el ojo.** Los
+instrumentos dicen que la anatomía cierra; **ninguno dice si la ficha se
+siente la de una persona o la de un registro**. Esa evaluación es del
+founder y va al gate con su pregunta concreta:
+
+> *Mirando la cabecera: ¿reconocerías a quien va a tocar el timbre?*
+
+---
+
+## §7 · DEUDA DE PIEZA QUE ESTA RECETA DESTAPA (declarada, no ejecutada)
+
+**`ControlTelefono` tiene CUATRO consumidores y vive en
+`apps/prestador/src/components/perfil-piezas.tsx`** — medido:
+`cuenta/perfil.tsx` (×2), `ventas/configuracion.tsx`, `alta/PasoEquipo.tsx`.
+La ficha del repartidor sería el quinto.
+
+La Regla de las Piezas de esta casa promueve **en el segundo consumidor**;
+éste es el quinto. **Su lugar es `packages/ui`.** No bloquea a C —hoy
+funciona donde está— y **el movimiento es mío, no suyo**: queda declarado
+para la mesa, con su número medido, para que no lo descubra el sexto.

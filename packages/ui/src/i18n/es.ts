@@ -172,6 +172,14 @@ export const uiEs = {
     pendientes: '{{etiqueta}}, {{n}} pendientes',
     sinLeer: '{{etiqueta}}, avisos sin leer',
   },
+  // S99-B — PuertaHermana: el número viaja en el label del TOCABLE (la
+  // puerta entera lo es), jamás como nodo aparte. Voz propia y NO
+  // `badge.*`: la palabra firmada por la mesa es «sin ver», y meterle una
+  // tercera forma a un hook llamado Badge —para una pieza que no es un
+  // Badge— sería torcer la pieza equivocada.
+  puertaHermana: {
+    sinVer: '{{etiqueta}}, {{n}} sin ver',
+  },
   sliderPrecio: {
     editarHint: 'Toca el valor para escribirlo',
   },
