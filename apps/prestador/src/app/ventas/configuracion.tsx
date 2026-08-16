@@ -744,10 +744,32 @@ export default function ConfiguracionVentas() {
                          resuelve ÉL entrando a la app, no el vendedor. Los
                          dos estados conviven (puede estar inactivo Y sin
                          reclamar), así que se COMPONEN, no se pisan. */
+                      /* ⭐ ④ · «VER EL ESTADO SIN ENTRAR» (pedido del
+                         founder). La capacidad **ya viajaba en la fila** y
+                         la fila no la usaba — **sexta muestra de la misma
+                         clase**: la información está y nadie la dice. Y la
+                         causa acá es mía: D-837 mudó la capacidad ADENTRO
+                         de la ficha, así que para saber cuántos envíos
+                         aguanta alguien había que entrar.
+                         *Es exactamente lo que ② acababa de enseñar con el
+                         stock: mudar un acto a su ficha no autoriza a
+                         perder de vista el número que lo hacía útil.* Por
+                         eso ④ no esperaba ninguna pieza nueva — el patrón
+                         ya estaba resuelto una hora antes.
+                         ⚠️ **Sin capacidad se DICE, y sin consecuencia**:
+                         que falte es un hecho verificable; **si además
+                         bloquea el despacho NO está medido**, y una voz
+                         que insinúa un bloqueo sin haberlo probado es la
+                         clase de alarma que enseña a desconfiar. */
                       subtitulo={
                         [
                           rep.activo ? null : t('ventas.config.repartidorInactivo'),
                           rep.user_id === null ? t('ventas.config.repartidorSinReclamar') : null,
+                          rep.capacidad === null
+                            ? t('ventas.config.repartidorSinCupo')
+                            : t('ventas.config.repartidorCupo', {
+                                n: rep.capacidad.capacidad_por_dia,
+                              }),
                         ]
                           .filter((x): x is string => x !== null)
                           .join(' · ') || undefined

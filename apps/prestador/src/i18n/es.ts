@@ -3474,6 +3474,10 @@ export const prestadorEs = {
       repartidorGuardarCta: 'Guardar',
       repartidorInactivo: 'Inactivo',
     repartidorSinReclamar: 'Todavía no reclamó su acceso — tiene que entrar a la app con su correo',
+    /* ④ · el estado se ve SIN entrar. Un hecho, sin consecuencia
+       insinuada: si además bloquea el despacho, no está medido. */
+    repartidorCupo: '{{n}} entregas por día',
+    repartidorSinCupo: 'Sin cupo declarado',
     localTitulo: 'Tu local',
     localEtiqueta: 'Atiendo en mi local',
     localDetalle:
