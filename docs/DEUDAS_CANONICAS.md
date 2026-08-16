@@ -11708,6 +11708,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-243 — UN GUARD PUEDE ESTAR EN VERDE SOBRE EXACTAMENTE EL DEFECTO QUE EL DEDO ENCUENTRA EN TRES SEGUNDOS (S99 — depositada por orden de mesa, 16-ago-2026; el caso es de D).**
+
+  **El caso, literal:** su guard probaba que el día cruzaba entre las ventanas —y cruzaba—, pero **no tenía forma de ver la DIRECCIÓN**: la vuelta usaba `navigate` con params (porque `back()` no lleva params) y un navigate no es un POP — la pila animaba el regreso con el mismo slide de la ida. *El día cruzaba y el cuerpo decía que seguía avanzando.*
+
+  **La distinción que la hace ley propia (no es L-235):** el instrumento NO respondió sobre otro objeto — **respondió sobre el objeto correcto, y el objeto correcto no contenía la propiedad que importaba.** Un guard mide un HECHO; **la CUALIDAD del movimiento no es un hecho que un guard vea.**
+
+  **COROLARIO EXIGIBLE: toda cura de MOVIMIENTO declara qué mide su guard y qué NO puede medir, y nombra su gate de aparato.** Un verde de movimiento sin esa declaración se lee como cobertura y es una promesa que el guard no hizo.
+
 - **L-242 — EL ANILLO SIGUE AL CONTENIDO INCONTROLABLE (S99 — regla con nombre, adjudicada por mesa 16-ago-2026 ratificando lo que B ejecutó; vale para TODA marca de mapa futura).**
 
   **La regla:** un halo/anillo alrededor de una marca de mapa **hace falta donde el contenido es INCONTROLABLE** (la cara de una mascota es una FOTO y puede ser del color del asfalto) **y es innecesario donde el color lo elegimos nosotros** (la silueta tinta de la moto: contraste medido 11.54 / 11.19 / 9.85 contra asfalto, parque y agua — más de 3× el piso en los tres; el que desaparecía era EL ANILLO BLANCO: 1.44 / 1.48 / 1.68). **Que el anillo muera en la moto y siga en la mascota NO es inconsistencia: es la MISMA regla aplicada dos veces.**
