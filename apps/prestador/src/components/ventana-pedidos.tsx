@@ -70,90 +70,11 @@ import type { ExtraPanelPedido, PedidoDelVendedor } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { derivarEscalera, type ClaveEscalon } from '@/lib/escalera-pedido';
+/* 🔴 EL ORDEN VIVE APARTE (S99-D) para poder probarse SIN abrir una
+   pantalla: el defecto que lo movió —empates sin desempate— se demuestra
+   con dos objetos y un comparador. Es mudanza, no rediseño. */
+import { ordenDeTrabajo } from '@/lib/orden-pedidos';
 import { fechaLocalISO, horaCorta, hoyLocalISO } from '@/lib/ventas-formato';
-
-/**
- * ☠️ S99-D · `prioridad()` MURIÓ COMO ORDEN — y su razón queda tachada, no
- * borrada, porque no era mala: ordenaba por **estado**, o sea por «qué me
- * falta hacer con éste». La firma del founder en el Gate 1 pide otra cosa —
- * **FIFO por hora de confirmación del pago** — y las dos son legítimas:
- * *«¿qué toco ahora?»* no es *«¿de quién es el turno?»*. Gana la segunda
- * porque es la que el cliente puede reclamar.
- *
- * ── LAS CUATRO BANDAS (ratificación de mesa a C, 17-ago) ───────────────
- *  ① **sin compromiso PRESIDE** — no entra a este comparador: la ventana lo
- *    resuelve un escalón afuera, en su propia sección (`huerfanos`).
- *  ② **«se rompió» SEGUNDA**, con su razón: *lo urgente está por fallar,
- *    esto YA falló, y hay alguien que perdió su tarde esperando.*
- *  ③ **urgente** — 🔴 **HOY NO TIENE PRODUCTOR Y SE DECLARA:** el exprés no
- *    existe en el esquema (censo L5b ⑥, fuera del camino crítico por firma).
- *    La banda **no se inventa con un proxy**: queda escrita, vacía, y el día
- *    que el dato exista entra por un solo lugar. *Una banda que nadie puede
- *    llenar no se dibuja — y «banda vacía no se monta» ya es la regla.*
- *  ④ **los días** — el FIFO.
- *
- * 🔴 **LA SEÑAL DE «SE ROMPIÓ» ES LA MISMA QUE PINTA EL DESVÍO**
- * (`derivarEscalera(...).desvio === 'noLlego'`), y eso es deliberado: si la
- * banda mirara un campo y la insignia otro, **podrían discrepar** y la
- * ventana diría con la posición algo distinto de lo que dice con la
- * etiqueta. *Una sola lectura para el lugar y para el nombre.*
- *
- * ⚠️ **LA PROMESA ES TECHO, JAMÁS CLAVE DE ORDEN.** Si ordenara, esta
- * ventana estaría dibujando **la RUTA** — y la ruta es la otra cola: *FIFO
- * ordena el trabajo del LOCAL, la ruta ordena la SALIDA; el corte es el
- * despacho.* Por eso `promesa_desde` desapareció del comparador.
- */
-type Banda = 0 | 1 | 2;
-
-function banda(desvio: 'noLlego' | 'cancelado' | null | undefined): Banda {
-  if (desvio === 'noLlego') return 0;
-  /* ③ urgente iría acá (return 1) el día que el exprés exista. */
-  return 2;
-}
-
-/**
- * El comparador del trabajo del local.
- *
- * ⚠️ **`?? null` en las dos marcas por L-247:** el lector ya las tipa, pero
- * *toda garantía que solo vive en el productor es una convención* — y con un
- * bundle viejo un `undefined` acá no rompería: **ordenaría mal en silencio**,
- * que es peor.
- *
- * 🔴 **SIN `pago_confirmado_en` NO SE ORDENA POR PROXY.** El que no tiene
- * pago confirmado **no está en la cola** (firma del founder) ⇒ va al final de
- * su banda. *Caer a `created_at` habría dado un orden creíble y falso: el
- * vendedor lo lee como justicia y prepara en el orden equivocado.*
- */
-function ordenDeTrabajo(
-  a: PedidoDelVendedor,
-  b: PedidoDelVendedor,
-  extras: Record<string, ExtraPanelPedido>,
-): number {
-  const esc = (p: PedidoDelVendedor) => {
-    const e = extras[p.pedido_id];
-    return e ? derivarEscalera(e.estado, e.metodo_entrega) : null;
-  };
-  const ba = banda(esc(a)?.desvio);
-  const bb = banda(esc(b)?.desvio);
-  if (ba !== bb) return ba - bb;
-
-  /* EL REORDEN DEL VENDEDOR MANDA DENTRO DE SU BANDA — y no cruza bandas:
-     ordena, jamás re-promete. Entre varios movidos, el más reciente arriba
-     (marca DESC), que es lo que la migración de A definió. */
-  const ma = a.movido_al_frente_en ?? null;
-  const mb = b.movido_al_frente_en ?? null;
-  if (ma !== null && mb !== null) return ma < mb ? 1 : -1;
-  if (ma !== null) return -1;
-  if (mb !== null) return 1;
-
-  /* EL FIFO. Sin pago confirmado, al final: no está en la cola. */
-  const pa = a.pago_confirmado_en ?? null;
-  const pb = b.pago_confirmado_en ?? null;
-  if (pa === null && pb === null) return 0;
-  if (pa === null) return 1;
-  if (pb === null) return -1;
-  return pa < pb ? -1 : 1;
-}
 
 interface Comun {
   extras: Record<string, ExtraPanelPedido>;
