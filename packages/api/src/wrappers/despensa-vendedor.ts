@@ -1232,73 +1232,29 @@ export interface SkuDelVendedor {
   momentos_aplicables: string[];
   /** La MISMA portada que dibuja la vitrina (`fotosDeProducto`). */
   foto_portada: string | null;
+  /** 🔴 LAS RAZONES POR LAS QUE NO ALCANZA TODO LO QUE PODRÍA — **las emite
+   *  el SERVIDOR** (`v_skus_vendedor.razones`), no las deriva esta capa.
+   *  Firma de C, ratificada por mesa: *filtrar por razón en SQL y derivarla
+   *  en TS deja DOS implementaciones de la misma verdad, y van a divergir.*
+   *  El corte: **el servidor decide QUÉ ES VERDAD; el cliente decide DE QUIÉN
+   *  ES y CÓMO SE DICE** — el dueño de una razón es letra de producto y puede
+   *  cambiar sin que cambie una columna; los códigos son lo contrario. */
+  razones: string[];
 }
 
 export async function listarSkusDelVendedor(
   cuentaComercialId: string,
 ): Promise<ResultadoWrapper<SkuDelVendedor[], CodigoErrorDespensa>> {
-  const { data, error } = await getClient()
-    .from('vendedor_skus')
-    .select(
-      'id, sku_vendedor, variante_id, stock_disponible, stock_reservado, estado, motivo_rechazo, ' +
-      'producto_variantes(presentacion, productos(id, nombre, marca, composicion_estado, momentos_aplicables, imagen_url, imagenes)), ' +
-      'ofertas(precio, estado)',
-    )
-    .eq('cuenta_comercial_id', cuentaComercialId)
-    .eq('activo', true)
-    // 🔴 ORDEN ESTABLE — y el desempate por `id` NO es prolijidad: es la
-    // condición para que este lector se pueda paginar algún día.
-    // **Medido (S99): de 532 SKU activos de una cuenta, 525 comparten el
-    // MISMO `created_at`** (nacieron en una sola transacción). Sin desempate,
-    // Postgres devuelve esas 525 en el orden que quiera **y puede cambiarlo
-    // entre corridas** ⇒ la página 2 repetiría y saltearía filas de la 1.
-    // *Una lista truncada al menos es consistente; ésta cambia sola.*
-    // ⚖️ El criterio VISIBLE (por nombre, por stock, por estado) es de la
-    // pantalla y se agrega como parámetro cuando C lo pida; **el desempate
-    // por `id` se queda pase lo que pase** — cualquier criterio que elija
-    // empata, y un orden que empata no ordena.
-    .order('created_at', { ascending: false })
-    .order('id', { ascending: true });
-  if (error) return falloDespensa(error.message);
-  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
-  const salida: SkuDelVendedor[] = [];
-  for (const s of data) {
-    if (!esObjDespensa(s) || typeof s.id !== 'string') return falloDespensa('datos_inconsistentes');
-    const variante = esObjDespensa(s.producto_variantes) ? s.producto_variantes : null;
-    const producto = variante !== null && esObjDespensa(variante.productos) ? variante.productos : null;
-    // El UNIQUE parcial `uq_oferta_publicada_por_variante` garantiza a lo sumo
-    // UNA publicada; acá además todas las ofertas del embed son de ESTE sku.
-    const ofertas = (Array.isArray(s.ofertas) ? s.ofertas : []).filter(esObjDespensa);
-    const publicada = ofertas.find((o) => o.estado === 'publicada');
-    salida.push({
-      sku_id: s.id,
-      sku_vendedor: typeof s.sku_vendedor === 'string' ? s.sku_vendedor : '',
-      variante_id: typeof s.variante_id === 'string' ? s.variante_id : '',
-      producto_id: producto !== null && typeof producto.id === 'string' ? producto.id : '',
-      producto_nombre: producto !== null && typeof producto.nombre === 'string' ? producto.nombre : '',
-      producto_marca: producto !== null && typeof producto.marca === 'string' ? producto.marca : null,
-      presentacion: variante !== null && typeof variante.presentacion === 'string' ? variante.presentacion : '',
-      stock_disponible: typeof s.stock_disponible === 'number' ? s.stock_disponible : 0,
-      stock_reservado: typeof s.stock_reservado === 'number' ? s.stock_reservado : 0,
-      estado: typeof s.estado === 'string' ? s.estado : '',
-      motivo_rechazo: typeof s.motivo_rechazo === 'string' ? s.motivo_rechazo : null,
-      precio_publicado:
-        publicada !== undefined && typeof publicada.precio === 'number' ? publicada.precio : null,
-      oferta_estado:
-        publicada !== undefined
-          ? 'publicada'
-          : typeof ofertas[0]?.estado === 'string'
-            ? (ofertas[0].estado as string)
-            : null,
-      composicion_estado: producto !== null ? composicionEstado(producto.composicion_estado) : null,
-      momentos_aplicables:
-        producto !== null && Array.isArray(producto.momentos_aplicables)
-          ? producto.momentos_aplicables.filter((m): m is string => typeof m === 'string')
-          : [],
-      foto_portada: producto !== null ? fotosDeProducto(producto).portada : null,
-    });
-  }
-  return { ok: true, data: salida };
+  // 🔴 DELEGA, NO REPITE (S99): antes armaba la lista por su cuenta desde la
+  // tabla con embeds. Hoy hay UNA sola implementación —la paginada sobre
+  // `v_skus_vendedor`— y ésta es su caso «todo de una».
+  // *Dos lectores del mismo conjunto son dos órdenes, dos formas y dos
+  // verdades de las razones; el espejo se rompe en el detalle más chico, que
+  // es justo el que nadie va a ir a comparar.*
+  // ⚠️ El techo de 1000 es HONESTO y declarado: hoy el máximo real es 722, y
+  // quien necesite más ya tiene el lector paginado con su total.
+  const r = await listarSkusDelVendedorPagina(cuentaComercialId, { limite: 1000 });
+  return r.ok ? { ok: true, data: r.data.items } : r;
 }
 
 // ── S99 · LA LISTA LARGA — paginación por cursor sobre `v_skus_vendedor` ────
@@ -1315,6 +1271,26 @@ export interface PaginaSkus {
    *  **un fallo llega como `{ ok: false, codigo }`, jamás como una página
    *  vacía.** La superficie no puede colapsar los dos en «no hay más». */
   siguiente_cursor: string | null;
+}
+
+/** Los filtros del lado SERVIDOR, en UN solo lugar — el conteo y la página
+ *  tienen que aplicar exactamente los mismos o el total miente sobre otro
+ *  conjunto (la clase que L-268 cura). */
+function aplicarFiltrosSku<T extends {
+  eq: (c: string, v: string) => T;
+  contains: (c: string, v: string[]) => T;
+  or: (f: string) => T;
+}>(q: T, o?: { estado?: string; especie?: string; texto?: string; razon?: string }): T {
+  let r = q;
+  if (o?.estado !== undefined) r = r.eq('estado', o.estado);
+  if (o?.especie !== undefined) r = r.contains('especies_aplicables', [o.especie]);
+  if (o?.razon !== undefined) r = r.contains('razones', [o.razon]);
+  if (o?.texto !== undefined && o.texto.trim().length > 0) {
+    // Escapa lo que PostgREST usa de separador; el `%` del patrón es nuestro.
+    const t = o.texto.trim().replace(/[,()]/g, ' ');
+    r = r.or(`producto_nombre.ilike.*${t}*,producto_marca.ilike.*${t}*`);
+  }
+  return r;
 }
 
 /**
@@ -1340,7 +1316,22 @@ export interface PaginaSkus {
  */
 export async function listarSkusDelVendedorPagina(
   cuentaComercialId: string,
-  opciones?: { limite?: number; cursor?: string; estado?: string },
+  opciones?: {
+    limite?: number;
+    cursor?: string;
+    /** Estado del SKU (`propuesto` · `aceptado` · `rechazado`…). */
+    estado?: string;
+    /** Especie del producto — el filtro de «Tu tienda». */
+    especie?: string;
+    /** Búsqueda por nombre o marca. 🔴 VA AL SERVIDOR y no al cliente:
+     *  con una página de 30 sobre 722, buscar en memoria devolvería «no hay»
+     *  sobre un producto que SÍ existe (medición de C). */
+    texto?: string;
+    /** Filtra por una razón de alcance (`sin_stock`, `sin_foto`, …). El
+     *  servidor filtra por el MISMO array que emite — jamás por un predicado
+     *  paralelo. */
+    razon?: string;
+  },
 ): Promise<ResultadoWrapper<PaginaSkus, CodigoErrorDespensa>> {
   const limite = opciones?.limite ?? 30;
 
@@ -1350,7 +1341,7 @@ export async function listarSkusDelVendedorPagina(
     .from('v_skus_vendedor')
     .select('id', { count: 'exact', head: true })
     .eq('cuenta_comercial_id', cuentaComercialId);
-  if (opciones?.estado !== undefined) qc = qc.eq('estado', opciones.estado);
+  qc = aplicarFiltrosSku(qc, opciones);
   const { count, error: errorConteo } = await qc;
   if (errorConteo) return falloDespensa(errorConteo.message);
   // FAIL-CLOSED (L-247): un conteo que no llegó NO es cero.
@@ -1363,7 +1354,7 @@ export async function listarSkusDelVendedorPagina(
     .order('producto_nombre', { ascending: true })
     .order('id', { ascending: true })
     .limit(limite);
-  if (opciones?.estado !== undefined) q = q.eq('estado', opciones.estado);
+  q = aplicarFiltrosSku(q, opciones);
   if (opciones?.cursor !== undefined) {
     const corte = opciones.cursor.indexOf('|');
     if (corte !== -1) {
@@ -1399,6 +1390,9 @@ export async function listarSkusDelVendedorPagina(
         ? f.momentos_aplicables.filter((m): m is string => typeof m === 'string')
         : [],
       foto_portada: fotosDeProducto(f).portada,
+      razones: Array.isArray(f.razones)
+        ? f.razones.filter((r): r is string => typeof r === 'string')
+        : [],
     });
   }
 
@@ -1451,34 +1445,35 @@ export interface RazonAlcance {
  * El contador de la pieza: `razones.filter((r) => r.dueno === 'vendedor').length`.
  */
 export function razonesDeAlcance(sku: SkuDelVendedor): RazonAlcance[] {
-  const razones: RazonAlcance[] = [];
-  // El borde propuesto/publicada (⑤ del censo) — un estado por vez: rechazado
-  // es del vendedor; propuesto/en_revision es de e-PetPlace; aceptado sigue
-  // a la oferta.
-  if (sku.estado === 'rechazado') {
-    razones.push({ codigo: 'sku_rechazado', dueno: 'vendedor' });
-  } else if (sku.estado === 'propuesto' || sku.estado === 'en_revision') {
-    razones.push({ codigo: 'sku_en_revision', dueno: 'epetplace' });
-  } else if (sku.oferta_estado === null) {
-    razones.push({ codigo: 'sin_precio_propuesto', dueno: 'vendedor' });
-  } else if (sku.oferta_estado !== 'publicada') {
-    razones.push({ codigo: 'oferta_no_publicada', dueno: 'epetplace' });
-  }
-  if (sku.stock_disponible <= 0) {
-    razones.push({ codigo: 'sin_stock', dueno: 'vendedor' });
-  }
-  // Lo canónico (M21) — información con dueño, jamás contador:
-  if (sku.composicion_estado === 'ausente' || sku.composicion_estado === null) {
-    razones.push({ codigo: 'composicion_ausente', dueno: 'epetplace' });
-  }
-  if (sku.momentos_aplicables.length === 0) {
-    razones.push({ codigo: 'sin_momento_etario', dueno: 'epetplace' });
-  }
-  if (sku.foto_portada === null) {
-    razones.push({ codigo: 'sin_foto', dueno: 'epetplace' });
-  }
-  return razones;
+  // 🔴 YA NO DERIVA: MAPEA. El servidor emite los códigos
+  // (`v_skus_vendedor.razones`) y esta capa les pone **dueño** — que es lo
+  // único que es letra de producto y puede cambiar sin tocar una columna.
+  // *Antes esta función repetía los ocho predicados en TS: dos
+  // implementaciones de la misma verdad, condenadas a divergir el día que
+  // alguien tocara una sola.*
+  // Un código desconocido se ignora en vez de romper: un bundle viejo contra
+  // un servidor nuevo no puede quedarse sin pantalla por una razón que
+  // todavía no sabe nombrar.
+  return sku.razones
+    .map((codigo) => {
+      const dueno = DUENO_DE_RAZON[codigo as RazonAlcance['codigo']];
+      return dueno === undefined ? null : { codigo: codigo as RazonAlcance['codigo'], dueno };
+    })
+    .filter((r): r is RazonAlcance => r !== null);
 }
+
+/** DE QUIÉN es cada razón. **Esto sí vive acá**: es la letra de producto que
+ *  decide qué entra al contador del vendedor (solo lo que él puede arreglar). */
+const DUENO_DE_RAZON: Record<RazonAlcance['codigo'], RazonAlcance['dueno']> = {
+  sku_rechazado:        'vendedor',
+  sku_en_revision:      'epetplace',
+  sin_precio_propuesto: 'vendedor',
+  oferta_no_publicada:  'epetplace',
+  sin_stock:            'vendedor',
+  composicion_ausente:  'epetplace',
+  sin_momento_etario:   'epetplace',
+  sin_foto:             'epetplace',
+};
 
 /**
  * EL AJUSTE DE STOCK — la puerta que este archivo declaraba como hueco existe
