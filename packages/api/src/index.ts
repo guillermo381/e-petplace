@@ -1204,6 +1204,7 @@ export {
   viajesPorRepartidor,
   proponerSkusVendedorLote,
   configurarVentaMostrador,
+  configurarCapacidadRepartidor,
   listarRepartidores,
   registrarRepartidor,
   actualizarRepartidor,

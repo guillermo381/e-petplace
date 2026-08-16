@@ -15000,6 +15000,7 @@ export type Database = {
           dias_operacion: number[]
           id: string
           nombre: string
+          repartidor_id: string | null
           updated_at: string
         }
         Insert: {
@@ -15010,6 +15011,7 @@ export type Database = {
           dias_operacion?: number[]
           id?: string
           nombre: string
+          repartidor_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -15020,6 +15022,7 @@ export type Database = {
           dias_operacion?: number[]
           id?: string
           nombre?: string
+          repartidor_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -15036,6 +15039,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "recursos_reparto_repartidor_id_fkey"
+            columns: ["repartidor_id"]
+            isOneToOne: false
+            referencedRelation: "repartidores"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -19428,6 +19438,14 @@ export type Database = {
           p_prestador_id: string
           p_servicio_id: string
           p_unidades: number
+        }
+        Returns: Json
+      }
+      configurar_capacidad_repartidor: {
+        Args: {
+          p_capacidad_por_dia: number
+          p_dias_operacion?: number[]
+          p_repartidor_id: string
         }
         Returns: Json
       }

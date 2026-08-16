@@ -11711,6 +11711,12 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-252 — EL HUECO SE RECORTA, NO SE PINTA: TODA PIEZA QUE DEPENDA DEL COLOR DEL FONDO SE RECORTA (S99 — resuelta por B en la barra líquida, ratificada por mesa 18-ago-2026).**
+
+  **El caso:** el disco de la barra líquida se separa de la barra por un hueco DEL COLOR DEL FONDO. Pintar ese hueco (copiar el color del fondo adentro de la pieza) funciona… **justo en la pantalla donde se lo probó** — y diverge sin avisar con el tema, el memorial o cualquier capa nueva: la mancha con forma de media luna no se degrada, aparece. **El modo de falla es el peor porque el verde local es perfecto.**
+
+  **COROLARIO EXIGIBLE:** una pieza que necesita «ver» el fondo lo RECORTA (transparencia real / máscara), jamás lo replica. *Pintar el fondo adentro de la pieza es una copia que diverge sin avisar* — la clase gemela de las dos verdades (D-662): dos fuentes del mismo color terminan diciendo colores distintos.
+
 - **L-251 — UN MENÚ DE UNA OPCIÓN NO ES UN MENÚ: ES UN PEAJE (S99 — ley del dictado del founder, 18-ago-2026; funda los tres escalones de ATENDER).**
 
   **El literal que la funda:** *«si solo tengo venta de productos, ya me muestra la vitrina, para que no tengamos que hacer un clic innecesario. Solo me muestra las opciones cuando tengo más de una.»*
@@ -17262,4 +17268,20 @@ repartidor decide qué shape necesita el motor.
 ☠️ **Muere** cuando la capacidad viva en la ficha del repartidor (motor
 + pantalla), `recursos_reparto` suelto quede jubilado con lápida, y el
 cupo del día siga computando igual (cinturón con el ANTES medido).
+
+**ENMIENDA (18-ago noche): EL MOTOR ESTÁ PAGADO — queda la SUPERFICIE
+(C).** El disparo sonó (la caminata de C: *«la pantalla describe con
+fidelidad un modelo equivocado»*) y la migración `20260817230000`
+entregó: `recursos_reparto.repartidor_id` (FK nueva) · backfill SOLO
+inequívoco (3 atados 1×1; **Aurora NULL A PROPÓSITO** — 2 repartidores,
+la ambigüedad la resuelve el vendedor en pantalla, jamás una migración
+adivinando) · `configurar_capacidad_repartidor` con la firma S96 hecha
+puerta (propio → ADOPTA el suelto único → crea; jamás duplica) ·
+`cupo_reparto_del_dia` INTACTO (cinturón: cupo idéntico cuenta por
+cuenta, adopción probada y revertida, residuo 0 — **y midió sobre el
+LUNES próximo, no HOY: un domingo el cupo es 0 legítimamente y el primer
+intento del cinturón cayó ahí**). Lector: `Repartidor.capacidad` en
+`listarRepartidores` (embed por la FK, L-247) + wrapper
+`configurarCapacidadRepartidor`. **La ficha del repartidor de C ya puede
+decir la verdad del modelo.**
 

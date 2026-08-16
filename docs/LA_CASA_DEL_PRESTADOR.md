@@ -38,6 +38,16 @@
 >
 > **El Mostrador deja de ser el ejemplo del chip y pasa a ser la TAB
 > CENTRAL: `ATENDER`.**
+>
+> ☠️ **ENMIENDA 18-ago (S99, firma del founder): `ATENDER` DEJA DE ESTAR
+> DESTACADA.** El disco del tab activo (la barra líquida,
+> `DIRECCION_ARTE` §6quinquies) pasa a ser el ÚNICO énfasis de la barra.
+> **La razón, para que nadie la reabra: con L-251 ATENDER PUEDE NO
+> EXISTIR** — un tab que a veces no está no puede ser el centro de
+> gravedad permanente. *La destacada nació cuando ATENDER era fija; dejó
+> de serlo en esta misma sesión (los tres escalones).* **ATENDER sigue
+> siendo tab POR CAPACIDAD — lo que muere es el énfasis visual
+> permanente, no la tab.*
 
 **El porqué, en una línea del founder:** *la excepción pasó a ser la acción
 que define la app.*

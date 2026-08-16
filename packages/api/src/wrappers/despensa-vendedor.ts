@@ -402,6 +402,13 @@ export interface Repartidor {
    *  campo convierte la edición en un borrado silencioso. null honesto =
    *  registrado sin correo (los anteriores a S98). */
   correo: string | null;
+  /** S99/D-837 (dictado founder ③): LA CAPACIDAD ES DEL REPARTIDOR —
+   *  «Moto Demo, 20 por día» es de UNA persona, no un recurso suelto.
+   *  null = todavía sin capacidad declarada (el suelto legacy de la
+   *  cuenta, si existe, lo ADOPTA `configurarCapacidadRepartidor` al
+   *  primer uso — jamás se duplica). El cupo del día sigue sumando por
+   *  cuenta en el motor: esto es la cara por-persona del MISMO dato. */
+  capacidad: { recurso_id: string; capacidad_por_dia: number; dias_operacion: number[] } | null;
   /** PATH del bucket privado `cuenta-documentos`, **jamás URL**: una URL
    *  firmada guardada vence y la foto se pierde sin error (S47). */
   documento_foto_path: string | null;
@@ -425,7 +432,8 @@ export async function listarRepartidores(
     .select(
       'id, nombre, documento, tipo_documento, telefono, whatsapp, correo, ' +
         'documento_foto_path, foto_path, user_id, activo, ' +
-        'repartidor_vehiculos(id, tipo, placa, orden)',
+        'repartidor_vehiculos(id, tipo, placa, orden), ' +
+        'recursos_reparto(id, capacidad_por_dia, dias_operacion, activo)',
     )
     .eq('cuenta_comercial_id', cuentaComercialId)
     .order('nombre');
@@ -467,6 +475,23 @@ export async function listarRepartidores(
       telefono: typeof r.telefono === 'string' ? r.telefono : null,
       whatsapp: typeof r.whatsapp === 'string' ? r.whatsapp : null,
       correo: typeof r.correo === 'string' ? r.correo : null,
+      capacidad: (() => {
+        // El embed trae los recursos ATADOS a este repartidor (FK nueva);
+        // el activo más reciente es SU capacidad. [] = sin declarar (L-247:
+        // motor viejo sin la FK también cae acá — degrada, no rompe).
+        const rec = (Array.isArray(r.recursos_reparto) ? r.recursos_reparto : [])
+          .filter(esObjDespensa)
+          .find((x) => x.activo === true);
+        return rec !== undefined && typeof rec.id === 'string' && typeof rec.capacidad_por_dia === 'number'
+          ? {
+              recurso_id: rec.id,
+              capacidad_por_dia: rec.capacidad_por_dia,
+              dias_operacion: Array.isArray(rec.dias_operacion)
+                ? rec.dias_operacion.filter((d): d is number => typeof d === 'number')
+                : [],
+            }
+          : null;
+      })(),
       documento_foto_path:
         typeof r.documento_foto_path === 'string' ? r.documento_foto_path : null,
       foto_path: typeof r.foto_path === 'string' ? r.foto_path : null,
@@ -476,6 +501,33 @@ export async function listarRepartidores(
     });
   }
   return { ok: true, data: salida };
+}
+
+/** S99/D-837 · LA CAPACIDAD DEL REPARTIDOR — la puerta que implementa la
+ *  firma S96 «el cupo no se rompe: se suma otro repartidor»: ① edita el
+ *  recurso propio · ② si no tiene, ADOPTA el suelto único de la cuenta
+ *  (jamás duplica capacidad) · ③ si no hay, crea el suyo (capacidad que
+ *  SE SUMA, por acto del vendedor). Con esto «agregar recurso» muere como
+ *  acción de pantalla: el recurso nace y vive con el repartidor. */
+export async function configurarCapacidadRepartidor(input: {
+  repartidor_id: string;
+  capacidad_por_dia: number;
+  /** 0=domingo…6=sábado. Omitido: conserva los días vigentes (o L-V+S al crear). */
+  dias_operacion?: number[];
+}): Promise<
+  ResultadoWrapper<{ recurso_id: string; via: 'propio' | 'adoptado' | 'creado' }, CodigoErrorDespensa>
+> {
+  const { data, error } = await getClient().rpc('configurar_capacidad_repartidor', {
+    p_repartidor_id: input.repartidor_id,
+    p_capacidad_por_dia: input.capacidad_por_dia,
+    p_dias_operacion: input.dias_operacion ?? undefined,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.recurso_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  const via = data.via === 'adoptado' || data.via === 'creado' ? data.via : 'propio';
+  return { ok: true, data: { recurso_id: data.recurso_id, via } };
 }
 
 /** S99 (dictado founder ④) · «Atiendo en mi local» para VENTA DE PRODUCTOS
