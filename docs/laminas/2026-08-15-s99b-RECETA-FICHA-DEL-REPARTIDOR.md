@@ -285,3 +285,94 @@ La Regla de las Piezas de esta casa promueve **en el segundo consumidor**;
 éste es el quinto. **Su lugar es `packages/ui`.** No bloquea a C —hoy
 funciona donde está— y **el movimiento es mío, no suyo**: queda declarado
 para la mesa, con su número medido, para que no lo descubra el sexto.
+
+---
+
+# §D · LA GRAMÁTICA DE BLOQUE, Y DÓNDE ENTRA ESTA FICHA (S99-B)
+
+**El pedido del founder, verbatim:** *«configuración todavía no tiene la
+vista completa, donde muestre el repartidor con toda su ficha. Falta
+simplemente que le pongamos la ficha al repartidor.»*
+
+**Y su guarda, que es lo que hace difícil el pedido:** tiene que
+resolverse **DENTRO** de la gramática de configuración, no como
+excepción — *si el repartidor se muestra con ficha y los cortes con
+fila, la pantalla vuelve a tener dos gramáticas.*
+
+## D1 · 🔴 LO MEDIDO PRIMERO: LA FILA YA EXISTE. LO QUE FALTA ES LA PUERTA
+
+`ventas/configuracion.tsx:918-936` — el repartidor **ya se dibuja**, y se
+dibuja bien encuadrado:
+
+```tsx
+<Tarjeta relleno="ninguno">
+  {pantalla.repartidores.map((rep, i) => (
+    <View key={rep.repartidor_id}>
+      {i > 0 && <Separador />}
+      <Celda titulo={rep.nombre}
+             metadataMono={rep.documento}
+             fin={<Interruptor … />} />   // ← sin onPress
+```
+
+> **No hay `onPress`.** ⇒ **la fila no lleva a ningún lado, y por eso la
+> ficha «no está»: no es que falte una FORMA, falta un DESTINO.**
+
+*Y eso resuelve la guarda del founder sin negociar nada:* **la gramática
+de configuración es UNA —filas dentro de tarjetas— y la ficha es lo que
+hay DETRÁS de una fila, no otra forma dentro de la misma pantalla.** Un
+repartidor desplegado en bloque al lado de cortes en fila sería
+exactamente la pantalla de dos gramáticas que él vino a prohibir.
+
+## D2 · LA LEY, en una línea
+
+> ## **EN CONFIGURACIÓN TODO SE LISTA EN FILAS. EL BLOQUE NO ES UN ÍTEM DE LA LISTA: ES LA PANTALLA A LA QUE LA FILA LLEVA.**
+>
+> La lista muestra **lo que alcanza para reconocer y decidir**; la ficha
+> muestra **todo lo demás**. *Una pantalla no cambia de gramática porque
+> un dato sea más rico: cambia de PISO.*
+
+**Su prueba, y por qué no es una preferencia:** el corte y el turno
+tampoco «caben» enteros en su fila —tienen días, cupos, ventanas— y sin
+embargo nadie propuso desplegarlos en bloque. **El repartidor no es
+distinto por ser una persona: es distinto porque su ficha todavía no
+existe.**
+
+## D3 · LO QUE ESTO CONVIERTE EN CAMINO (y ya estaba firmado)
+
+Las dos curas de §B eran, sin que se viera, **las dos mitades de esta
+puerta**:
+
+| firmado en §B | lo que hace acá |
+|---|---|
+| **B2** — la fila entera es tocable y **lo dice con chevron** (19.7) | **es la puerta**. Sin chevron, el destino existe y nadie lo encuentra: el único afordance visible seguiría siendo el interruptor |
+| **B3** — la fila dice **nombre · vehículo · placa**; el documento **se muda a la ficha** | **es lo que hace que la ficha tenga sentido**: la fila se queda con lo que sirve para reconocer, la ficha recibe lo que sirve para verificar |
+
+⇒ **La ficha no agrega una gramática: completa la que B2 y B3 dejaron a
+medias.** *El documento que hoy va en `metadataMono` no «sobra» en la
+fila — está esperando el piso que todavía no existía.*
+
+## D4 · LA FICHA, QUÉ MUESTRA
+
+La anatomía entera es §A de este mismo documento (la persona, sus dos
+fotos de naturaleza distinta, el vehículo como fila con placa en mono,
+N12 y N13). Lo único que §D agrega es **su encuadre**:
+
+- **Es pantalla, no Hoja.** Una Hoja es para decidir algo y volver; esto
+  es para **mirar y verificar**, y tiene más contenido que altura de
+  hoja. *Además la Hoja ya está ocupada por el alta.*
+- **Techo `navegacion` con el NOMBRE de la persona** — es la variante que
+  ya exige su título (medido: `titulo` es requerido en `Navegacion`), y
+  el nombre es el nombre de la pantalla.
+- **El interruptor de activo NO se muda: se DUPLICA.** Queda en la fila
+  (decidir sin entrar) y aparece en la ficha (decidir mirando). *No es
+  redundancia: son dos momentos distintos, y sacarlo de la fila obligaría
+  a entrar para apagar a alguien.*
+- **El WhatsApp vive acá, a un toque**, como ya declaró §B3.
+
+## D5 · LO QUE NO DECIDE
+
+1. **La ruta.** Es de C.
+2. **Si la ficha permite EDITAR o solo mirar** — hoy la edición vive en
+   el alta; abrir edición desde la ficha es decisión de producto.
+3. **El ojo**, con su pregunta: *entrando desde la fila, ¿la ficha se
+   siente la misma pantalla un piso adentro, o se siente otra app?*

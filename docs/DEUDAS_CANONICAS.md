@@ -16908,3 +16908,46 @@ El optimizador queda declarado FUERA. La frontera con el FIFO del local es
 ☠️ **Muere** cuando un repartidor real salga con N pedidos, los vea como
 UNA salida ordenada, y pueda reordenarlos con el dedo sin romper ninguna
 ventana comprometida.
+
+#### D-832 — 🟡 `accent.controlLleno` NO SE PISA POR CASA: el prestador elige en MAGENTA (misma clase que D-813, hoy DORMANTE)
+
+**Hallazgo de B en S99, midiendo para otra cosa** (buscaba un slot para el
+disco de la barra de tabs y encontré éste de paso).
+
+**MEDIDO, no leído:**
+- `accent.controlLleno` / `sobreControlLleno` se declaran en
+  `themes/light.ts:162` y `themes/dark.ts:131` → **`magentaDark` + blanco**.
+- `lightOficio` y `darkOficio` (`themes/index.ts`) pisan `cta`, `ctaTexto`,
+  `ctaElevado`, `control`, `controlBg`, `active`, `marcaEleccion` y
+  `atmosfera` — **NO pisan `controlLleno`.**
+
+⇒ **el prestador hereda el relleno de elección del CLIENTE**, en la app
+donde §15b.1 firmó que *el magenta vive SOLO en la marca*. **Es
+literalmente D-813 otra vez**, un slot más abajo: aquella era el TINTE de
+la elección, ésta es el RELLENO.
+
+**POR QUÉ ESTÁ DORMANTE Y NO ROJA:** el consumidor en `packages/ui` es
+`SelectorOpcion` con `entidad`, y **el censo da CERO montajes con `entidad`
+en `apps/prestador`** (los otros dos consumidores son del cliente:
+`EncuadreFoto` y `lamina-fusion`). **Dispara con el primer
+`SelectorOpcion entidad` que monte una pantalla del prestador**, y va a
+disparar en silencio: el defecto no lanza, pinta.
+
+**LO QUE LO HACE FÁCIL DE ARREGLAR MAL:** los tres consumidores esquivan el
+slot con `'controlLleno' in theme.accent` porque **memorial no lo porta**.
+*Un guard de presencia no distingue «no existe» de «existe con el color de
+la otra casa»* — copiar ese patrón para el prestador taparía el defecto
+en vez de curarlo.
+
+**LA CURA, con su precedente:** pisar los dos slots en las dos casas de
+oficio y **sumarlos a R27**, que es exactamente lo que S98-B hizo con
+`controlBg` y S99-B con `activoLleno`. *El instrumento ya existe y ya tiene
+la forma; lo que falta es que este slot entre.*
+
+**⚠️ Y la pregunta que la cura obliga a contestar, porque no es mecánica:**
+`controlLleno` **carga texto** (`sobreControlLleno` es blanco), así que su
+registro se da vuelta por tema como el del CTA y el del disco — el par del
+prestador **no es «tealDark en los dos»**. Se mide antes de escribirlo.
+
+**Dueño:** B (`packages/ui` + el juez). **Disparo:** el primer
+`SelectorOpcion entidad` en el prestador, o la próxima tanda que toque R27.

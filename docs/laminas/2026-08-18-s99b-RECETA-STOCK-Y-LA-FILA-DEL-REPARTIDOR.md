@@ -86,11 +86,55 @@ decisión tomada a 399: es una que nadie volvió a tomar.*
   de confeti; el color se reserva para el veredicto que exige acción
   (§A3).
 
-**⚠️ Lo que esta anatomía NO decide, y es de aparato:** el ALTO exacto de
-la fila y con él **el número de la ventana**. La receta fija la forma
-(dos renglones + miniatura 40); *cuántas filas entran antes de que N16
-se rompa se mide en el teléfono con los 399 cargados, y lo mide C.*
-**Un número de ventana elegido desde acá sería inventado.**
+### A2ter · 🔴 EL ALTO, Y MI PROPIA PALABRA SE CAE (S99-B, el cuello)
+
+⏪ Escribí que el alto era *«de aparato»*. **No lo es: es aritmética**, y
+la aritmética la tenía a un grep. Lo que sí es de aparato es otra cosa
+—declarada al final—, pero **el alto sale de la anatomía y sale ahora**,
+porque es lo que destraba los tres frentes.
+
+**La cuenta, con los tokens que ya existen:**
+
+| pieza | número | de dónde sale |
+|---|---|---|
+| miniatura | **40** | `AvatarMascota` talla `sm` — escalón vivo, no un tamaño nuevo |
+| renglón ① (nombre) | 20 | `size.sm` con su interlínea |
+| renglón ② (stock · estado) | 14 | `size.xs` |
+| gap entre renglones | 2 | `spacing[0.5]` |
+| padding vertical | 8 + 8 | `spacing[2]`, el de `Celda` |
+
+**El contenido pesa `max(40, 20+2+14) = 40`** —manda la miniatura, no el
+texto— **y el alto de fila es `40 + 16 = 56`.**
+
+> ## 🔴 Y 56 ES, EXACTAMENTE, `ALTURA_MIN.normal` DE `Celda`.
+>
+> **La fila que Stock necesita no es una fila nueva: es la que la casa ya
+> tiene.** *Mi palabra «compacta» fue la que confundió* — mandó a buscar
+> una densidad más apretada, y lo que Stock necesita no es apretar: es
+> **la fila normal CON su miniatura**, que es lo que vuelve encontrable
+> un catálogo de 399.
+
+**Y por qué no hay una fila de dos renglones más baja, medido:** la
+densidad `compacta` de `Celda` es **48**, o sea **32 de contenido** — y
+dos renglones piden 36. ⇒ ***`compacta` es una fila de UN renglón por
+construcción.*** Quien la use acá va a perder el segundo renglón sin
+darse cuenta. *No es una opción peor: es otra fila.*
+
+### A2quater · LA VENTANA — derivada, con su supuesto a la vista
+
+Con filas de 56 y un área de contenido de ~660 px (teléfono típico, con
+techo y barra descontados): **~12 filas por pantalla.**
+
+- **Ventana inicial: 30** (≈2,5 pantallas — hay scroll antes de que el
+  cargador tenga que pensar).
+- **Se pide la siguiente tanda a la fila 20**, no al final: *cargar
+  cuando ya no hay nada abajo es cargar tarde.*
+
+**⚠️ El supuesto está declarado a propósito** (660 px de área útil). *Si
+el aparato dice otra cosa, el que se mueve es el 30 — la forma no.* **Y
+lo único que sigue siendo de aparato es N16**: que la primera pantalla
+pinte en menos de 1 s con 30 filas y 30 miniaturas. **Eso lo mide C, y
+es lo único que yo no puedo.**
 
 ## A3 · 🔴 Y EL VOLUMEN TRAE ALGO MEJOR QUE UN PROBLEMA: EL ESPEJO POR FIN TIENE CON QUÉ VERSE
 
