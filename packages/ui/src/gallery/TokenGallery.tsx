@@ -4998,17 +4998,43 @@ function GaleriaInterna() {
                   }
                 >
                   <View style={{ gap: spacing[2] }}>
-                    <PuertaHermana etiqueta="Tus pedidos de hoy" direccion="derecha" onPress={() => {}} />
-                    <PuertaHermana etiqueta="Tus citas de hoy" direccion="izquierda" onPress={() => {}} />
+                    {/* CON contador — el par espejado: el número va pegado a
+                        la etiqueta, del lado del chevron, y ese lado lo
+                        deriva `direccion`. */}
+                    <PuertaHermana
+                      etiqueta="Tus pedidos de hoy"
+                      direccion="derecha"
+                      sinVer={3}
+                      onPress={() => {}}
+                    />
+                    <PuertaHermana
+                      etiqueta="Tus citas de hoy"
+                      direccion="izquierda"
+                      sinVer={12}
+                      onPress={() => {}}
+                    />
+                    {/* EN CERO — la regla de existencia se MONTA, no se
+                        describe: una galería solo prueba lo que muestra
+                        (la lección de D-813). */}
+                    <PuertaHermana
+                      etiqueta="Tus pedidos de hoy"
+                      direccion="derecha"
+                      sinVer={0}
+                      onPress={() => {}}
+                    />
                   </View>
                 </PanelTema>
               </ThemeProvider>
             ))}
           </View>
           <Texto variante="dato">
-            Sin contador y sin estado deshabilitado, las dos por decisión: un badge en 0 se lee como ausencia del
-            LUGAR, y apagar la puerta dejaría a alguien sin llegar a su ventana justo el día que no tiene trabajo
-            (Ley 23 — un día vacío no rechaza nada). Si se monta o no es del consumidor: es composición por capacidad.
+            El contador cuenta lo NO VISTO (firma de mesa S99) en mono tabular primary: la jerarquía sale del
+            registro tipográfico, no de pintura — cero acento, cero caja, cero animación. Con 0 no se dibuja nada,
+            y de ahí sale que el número vaya SOLO: un total estaría siempre, éste aparece y desaparece, así que LA
+            APARICIÓN ES EL SIGNIFICADO. La palabra «sin ver» vive en el label del tocable, donde no cuesta ancho.
+            Sin estado deshabilitado por decisión: apagar la puerta dejaría a alguien sin llegar a su ventana justo
+            el día que no tiene trabajo (Ley 23 — un día vacío no rechaza nada). Si se monta o no es del consumidor:
+            es composición por capacidad.
           </Texto>
         </Seccion>
 
