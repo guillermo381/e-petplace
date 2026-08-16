@@ -3188,6 +3188,30 @@ export const prestadorEs = {
       razon_sin_momento_etario: 'Nos falta decir para qué edad sirve.',
       razon_sin_foto: 'Nos falta su foto.',
     },
+    /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
+       misma pantalla, y su voz también. */
+    vitrina: {
+      titulo: 'Tu vitrina',
+      todas: 'Todas',
+      filtroEspecie: 'Filtrar por especie',
+      /* El único caso en que el espejo habla en modo cliente: sin esta
+         frase, «no está» se leería como «se perdió». */
+      ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
+      leFaltan: 'Le faltan {{n}}',
+      vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
+      vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',
+      vacioAdminTitulo: 'Todavía no propusiste productos',
+      vacioAdminDetalle: 'Cuando propongas el primero, va a vivir acá.',
+    },
+    /* D-829 — la mitad que faltaba de la puerta. La voz dice PEDIR, jamás
+       activar: el estado `solicitada` no habilita nada. */
+    servicios: {
+      titulo: '¿También querés ofrecer servicios?',
+      detalle:
+        'Podés pedir que tu negocio ofrezca paseo, estética, veterinaria o adiestramiento. Lo revisamos y te avisamos: no se activa solo.',
+      cta: 'Pedir ofrecer servicios',
+      enRevision: 'Ya lo pediste. Lo estamos revisando y te avisamos cuando se active.',
+    },
     escalones: {
       preparado: 'Preparado',
       empacado: 'Empacado',
@@ -3202,6 +3226,9 @@ export const prestadorEs = {
       cancelado: 'Cancelado',
     },
     hoy: {
+      grupoTrabajo: 'Tu trabajo del día',
+      vitrina: 'Tu vitrina',
+      vitrinaDetalle: 'Lo que ven las familias',
       titulo: 'Pedidos',
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',

@@ -2524,6 +2524,24 @@ export const prestadorEn = {
       razon_sin_momento_etario: 'We still need to say what age it is for.',
       razon_sin_foto: 'We still need its photo.',
     },
+    vitrina: {
+      titulo: 'Your storefront',
+      todas: 'All',
+      filtroEspecie: 'Filter by species',
+      ausentes: "{{n}} of your products aren't shown here because they aren't published yet.",
+      leFaltan: '{{n}} missing',
+      vacioClienteTitulo: 'Your storefront is empty for families',
+      vacioClienteDetalle: 'When we publish your products, families will see them here.',
+      vacioAdminTitulo: "You haven't proposed products yet",
+      vacioAdminDetalle: 'When you propose the first one, it will live here.',
+    },
+    servicios: {
+      titulo: 'Do you also want to offer services?',
+      detalle:
+        'You can ask for your business to offer walks, grooming, vet or training. We review it and let you know: it does not activate on its own.',
+      cta: 'Ask to offer services',
+      enRevision: "You already asked. We're reviewing it and we'll let you know when it activates.",
+    },
     escalones: {
       preparado: 'Prepared',
       empacado: 'Packed',
@@ -2538,6 +2556,9 @@ export const prestadorEn = {
       cancelado: 'Cancelled',
     },
     hoy: {
+      grupoTrabajo: 'Your work today',
+      vitrina: 'Your storefront',
+      vitrinaDetalle: 'What families see',
       titulo: 'Orders',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
       cupoCero: 'No delivery capacity confirmed for today',

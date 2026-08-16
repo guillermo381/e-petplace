@@ -46,6 +46,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { CeldaOfrecerServicios } from '@/components/celda-ofrecer-servicios';
 import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
@@ -206,6 +207,11 @@ export default function HoyVentas() {
             tieneEntregas={pantalla.tieneEntregas}
             onIr={(ruta) => router.push(ruta)}
           />
+
+          {/* D-829 · LA OTRA MANO DE LA PUERTA. Va al PIE y solo aparece si
+              hay algo que ofrecer: no compite con el trabajo del día, y con
+              la naturaleza ya activa no se dibuja. */}
+          <CeldaOfrecerServicios cuentaComercialId={pantalla.contexto.cuentaComercialId} />
         </ScrollView>
       )}
     </View>
