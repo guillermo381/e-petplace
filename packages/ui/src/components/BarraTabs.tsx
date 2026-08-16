@@ -43,29 +43,109 @@
  *   (los `key` de items = nombres de ruta de expo-router)
  */
 
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Animated, {
   cubicBezier,
   Easing,
+  useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
+import Svg, { Circle, Path } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { typography } from '../tokens/typography'
-import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 import { Badge, useEtiquetaBadge } from './Badge'
 
-/** El lado de la superficie de la tab destacada. 44 es el blanco de la
- *  casa (N8, ley de la pieza) — la destacada no gana toque, gana PESO:
- *  su superficie ES el blanco, en vez de quedar dibujada adentro. */
-const DESTACADA_LADO = 44
+const AnimatedPath = Animated.createAnimatedComponent(Path)
+const AnimatedCircle = Animated.createAnimatedComponent(Circle)
+
+/** ☠️ EL LADO DE LA DESTACADA — LÁPIDA (S99-B, firma de mesa).
+ *
+ *  **ATENDER deja de estar destacada permanentemente. `destacada` es
+ *  NO-OP: la prop se acepta y no pinta nada.**
+ *
+ *  **El argumento que la mató, para que nadie la reabra:** con L-251
+ *  **ATENDER PUEDE NO EXISTIR** — la barra se compone por capacidad — y
+ *  ***un tab que a veces no está no puede ser el centro de gravedad
+ *  permanente***. La destacada nació cuando ATENDER era fija; dejó de
+ *  serlo **en esta misma sesión**.
+ *
+ *  Y el defecto que producía, medido contra la barra nueva: con el disco
+ *  del activo viajando, **una ATENDER destacada e inactiva dejaba DOS
+ *  cosas pidiendo ser el centro** — importancia y ubicación peleando por
+ *  el mismo píxel.
+ *
+ *  ⚠️ **No se borra del tipo:** C y D la pasan hoy y sacarla del tipo les
+ *  rompe el typecheck para quitar algo que ya no hace nada. **Sin
+ *  ratchet a propósito:** una prop no-op no crece en daño, y poner un
+ *  instrumento a vigilar algo inofensivo es instrumento para nadie. Se
+ *  retira al tocar cada pantalla.
+ *
+ *  ⚠️ Y su constante MURIÓ del todo: `DESTACADA_LADO = 44` no la lee
+ *  nadie. Se borra en vez de dejarse — *una constante sin consumidor es
+ *  la próxima que alguien usa creyendo que significa algo* (Ley 37). */
+
+/** ── EL VALLE Y EL DISCO (S99-B · firma de mesa sobre la referencia) ──
+ *  La barra deja de ser un rectángulo con un borde: **es UN SOLO VECTOR
+ *  QUE SE DEFORMA.** Su borde superior hunde un valle bajo el tab
+ *  activo, y sobre el valle flota un disco del mismo color.
+ *
+ *  🔴 **EL HUECO NO SE PINTA — NO SE PINTA NADA AHÍ.** Mi advertencia
+ *  ③ decía que un hueco del color del fondo obliga a la pieza a CONOCER
+ *  el fondo, y acá el fondo cambia por tema, por casa **y por pantalla**.
+ *  La salida es que el hueco exista **por AUSENCIA de material**: el
+ *  cuerpo y el disco son dos formas separadas y entre ellas no hay pintura
+ *  — pasa lo que haya debajo, sea lo que sea.
+ *  *Por eso la barra perdió su `backgroundColor`: si el `View` pinta, no
+ *  hay hueco posible. El color vive en el vector, no en la caja.*
+ *
+ *  **La deformación es ASIMÉTRICA en el camino** (`estira`): el valle se
+ *  ensancha hacia el lado del que viene, como una tela tirada. Es lo que
+ *  hace que se lea como *un vector deformándose* y no como *un botón que
+ *  salta*. */
+/** El alto de la fila de tabs (el que ya tenía la barra). */
+const ALTO_FILA = 56
+const VALLE_RADIO = 34
+const VALLE_HONDO = 13
+const DISCO_RADIO = 26
+/** Cuánto sube el disco sobre el borde. El hueco resultante (disco vs
+ *  fondo del valle) es lo que se ve pasar. */
+const DISCO_ALZA = 20
+/** Cuánto sube el ÍCONO para caer en el centro del disco. **Derivado, no
+ *  elegido:** el disco vive a `-DISCO_ALZA` del borde de la fila y el
+ *  ícono descansa ~20 dp bajo ese borde (fila 56, con su etiqueta
+ *  abajo). *Si mañana el disco sube más, esto lo sigue sin que nadie se
+ *  acuerde — que es la única forma de que dos capas distintas (SVG y
+ *  fila) no se desalineen con el tiempo.* */
+const SUBIDA_AL_DISCO = DISCO_ALZA + 20
+
+/** El path del cuerpo con su valle. Worklet: lo corre el hilo de UI en
+ *  cada frame del viaje. */
+function pathBarra(ancho: number, alto: number, cx: number, estira: number) {
+  'worklet'
+  const r = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.35)
+  // el sesgo: el valle se abre hacia el lado del que viene
+  const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.45
+  const izq = cx - r + sesgo
+  const der = cx + r + sesgo
+  return [
+    `M0 0`,
+    `H${izq}`,
+    `C${izq + r * 0.45} 0 ${cx - r * 0.5} ${VALLE_HONDO} ${cx} ${VALLE_HONDO}`,
+    `C${cx + r * 0.5} ${VALLE_HONDO} ${der - r * 0.45} 0 ${der} 0`,
+    `H${ancho}`,
+    `V${alto}`,
+    `H0`,
+    `Z`,
+  ].join(' ')
+}
 
 /** EL OVERSHOOT DE LA HUELLA — **FIRMADO** (mesa 14-ago-2026). Envuelve
  *  el ícono y le da un rebote corto cuando la tab pasa a activa: la
@@ -149,6 +229,7 @@ export function BarraTabs({
   activo,
   onCambiar,
   estadoPorHuella = false,
+  huellaEnDisco = true,
   acento,
 }: {
   /** 2 a 5 tabs.
@@ -167,6 +248,26 @@ export function BarraTabs({
    *  (sin recuadros, sin pills). La huella activa hereda el rol de
    *  accent.active: sigue siendo EL elemento activo de la vista. */
   estadoPorHuella?: boolean
+  /** 🔴 PROP DE GATE, con su condición de muerte escrita (S99-B).
+   *
+   *  **El founder firmó las DOS ramas por adelantado:** *«si la huella
+   *  dentro del disco se ve mal, en ese caso quitaríamos la huella y
+   *  priorizamos el dinamismo del menú»*. ⇒ las dos se construyen y **el
+   *  gate elige**; no se adivina ni se pide otra firma.
+   *
+   *  `true` (default) — la huella se MUDA adentro del disco: sigue siendo
+   *  la marca, cambia de sitio (§2.6 enmendada).
+   *  `false` — sin huella; el disco queda como marcador único.
+   *
+   *  **El criterio para que el gate no sea gusto:** la huella entra **si
+   *  a ese tamaño SE LEE como huella**. *Una huella que a 24 px se vuelve
+   *  una mancha no es identidad, es ruido* — y ahí la propia condicional
+   *  del founder ya la mata.
+   *
+   *  ☠️ MUERE con el veredicto: la rama que gane se queda en la pieza y
+   *  la prop se retira (precedente `overshootHuella`, que murió en el
+   *  acto de su firma). */
+  huellaEnDisco?: boolean
   /** PROP DE GATE — override del acento de la tab activa. Default:
    *  `accent.active`, que desde S83-B13 es SLOT y ya resuelve por casa
    *  (pink el cliente · el verde del oficio en sus dos registros).
@@ -213,16 +314,90 @@ export function BarraTabs({
   }
   const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
 
+  /** El ancho se MIDE (onLayout): el valle viaja al centro del tab
+   *  activo, y con la barra compuesta por CAPACIDAD (L-251) la cantidad
+   *  de destinos es variable. **Nada se calcula contra «4 tabs»** — ésa
+   *  era la objeción ③, y se resuelve derivando en vez de hardcodear. */
+  /** ☠️ `estadoPorHuella` QUEDA NO-OP (S99-B). Nació para decir «el pill
+   *  muere, la huella ES el estado» — y **con el disco ya no hay pill que
+   *  matar ni subrayado que condicionar**: el marcador es uno solo y no
+   *  es opcional. Se acepta para no romper a C y a D; se retira al tocar
+   *  cada layout. */
+  void estadoPorHuella
+
+  const [ancho, setAncho] = useState(0)
+  const reduceMotionBarra = useReducedMotion()
+  const quieto = theme.mode === 'memorial' || reduceMotionBarra
+  const cx = useSharedValue(0)
+  const estira = useSharedValue(0)
+
+  const indiceActivo = Math.max(0, items.findIndex((i) => i.key === activo))
+  const anchoTab = ancho / Math.max(1, items.length)
+  const cxDestino = anchoTab * (indiceActivo + 0.5)
+  const altoTotal = ALTO_FILA + insets.bottom
+
+  useEffect(() => {
+    if (ancho === 0) return
+    if (quieto) {
+      cx.value = cxDestino
+      estira.value = 0
+      return
+    }
+    // el ESTIRÓN: sale de la distancia y del SENTIDO del viaje, y vuelve
+    // a 0 al llegar. Es lo que deforma el valle de un lado y no del otro.
+    const dx = cxDestino - cx.value
+    estira.value = withTiming(Math.max(-1, Math.min(1, dx / (anchoTab * 1.5))), {
+      duration: motion.duration.fast,
+    })
+    cx.value = withTiming(
+      cxDestino,
+      { duration: motion.duration.estandar, easing: Easing.bezier(...motion.marca.aperturaBezier) },
+      () => {
+        estira.value = withTiming(0, { duration: motion.duration.fast })
+      },
+    )
+  }, [cxDestino, ancho, quieto, anchoTab])
+
+  const propsCuerpo = useAnimatedProps(() => ({
+    d: pathBarra(ancho, altoTotal, cx.value, estira.value),
+  }))
+  const propsDisco = useAnimatedProps(() => ({ cx: cx.value }))
+
   return (
     <View
+      onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
       style={{
         flexDirection: 'row',
-        backgroundColor: theme.bg.base,
-        borderTopWidth: 1,
-        borderTopColor: theme.bg.border,
+        /* ⛔ SIN `backgroundColor`, y es LA condición del hueco: si la
+           caja pinta, no hay ausencia posible y el hueco tendría que
+           pintarse del color del fondo — justo lo que la advertencia ③
+           declaró imposible en esta casa. El color vive en el vector. */
         paddingBottom: insets.bottom,
       }}
     >
+      {ancho > 0 ? (
+        <Svg
+          width={ancho}
+          height={altoTotal + DISCO_ALZA + DISCO_RADIO}
+          style={{ position: 'absolute', left: 0, top: -(DISCO_ALZA + DISCO_RADIO) }}
+          pointerEvents="none"
+        >
+          {/* el cuerpo, corrido hacia abajo para dejarle aire al disco */}
+          <AnimatedPath
+            animatedProps={propsCuerpo}
+            fill={theme.bg.base}
+            translateY={DISCO_ALZA + DISCO_RADIO}
+          />
+          {/* EL DISCO — mismo color que el cuerpo. Entre los dos no se
+              pinta nada: ESE es el hueco. */}
+          <AnimatedCircle
+            animatedProps={propsDisco}
+            cy={DISCO_RADIO}
+            r={DISCO_RADIO}
+            fill={theme.bg.base}
+          />
+        </Svg>
+      ) : null}
       {items.map((item) => {
         const esActivo = item.key === activo
         const color = esActivo ? theme.text.primary : theme.text.tertiary
@@ -250,48 +425,41 @@ export function BarraTabs({
                 su segundo consumidor (la campana) — la barra pasa a
                 consumirla: misma geometría S43, misma pill, y la voz del
                 label ahora vive en el riel (antes: hardcodeada acá). */}
-            <HuellaDeTab activa={esActivo}>
-              {item.destacada === true ? (
-                /* EL DESTINO CENTRAL — superficie propia y un paso de
-                   tamaño. Sin color: el acento de esta barra ya está
-                   tomado por la huella activa (N5). */
-                <View
-                  style={{
-                    width: DESTACADA_LADO,
-                    height: DESTACADA_LADO,
-                    borderRadius: radius.full,
-                    backgroundColor: theme.bg.overlay,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Badge n={item.badge ?? 0}>
-                    {item.icono({ color, activa: esActivo, colorHuella })}
-                  </Badge>
-                </View>
-              ) : (
+            <Animated.View
+              style={{
+                /* EL ÍCONO ACTIVO SUBE AL DISCO. El disco es del vector
+                   (SVG) y el ícono es de la fila: lo que los une es este
+                   traslado, derivado de las MISMAS constantes — si el
+                   disco cambia de alza, el ícono lo sigue solo. */
+                transform: [{ translateY: esActivo ? -SUBIDA_AL_DISCO : 0 }],
+                transitionProperty: 'transform',
+                transitionDuration: motion.duration.estandar,
+                transitionTimingFunction: cubicBezier(...motion.marca.aperturaBezier),
+              }}
+            >
+              <HuellaDeTab activa={esActivo}>
+                {/* ☠️ La rama de `destacada` MURIÓ acá (ver su lápida
+                    arriba): ya no hay superficie propia. El disco del
+                    activo es el ÚNICO énfasis de la barra. */}
                 <Badge n={item.badge ?? 0}>
-                  {item.icono({ color, activa: esActivo, colorHuella })}
+                  {item.icono({
+                    color,
+                    /* LAS DOS RAMAS DE LA FIRMA (§2.6 enmendada): con
+                       huella, la huella se MUDA adentro del disco; sin
+                       ella, el disco queda como marcador único. La
+                       condicional del founder está firmada por
+                       adelantado, así que las dos se construyen y el
+                       gate ELIGE. */
+                    activa: huellaEnDisco ? esActivo : false,
+                    colorHuella,
+                  })}
                 </Badge>
-              )}
-            </HuellaDeTab>
-            {/* el subrayado: opacity, jamás slide. Con estadoPorHuella
-                el pill muere — la huella del ícono ES el estado (§2.6). */}
-            {estadoPorHuella ? null : (
-              <Animated.View
-                style={{
-                  width: 18,
-                  height: 3,
-                  borderRadius: radius.full,
-                  backgroundColor: accentActive,
-                  opacity: esActivo ? 1 : 0,
-                  transitionProperty: 'opacity',
-                  transitionDuration: motion.duration.fast,
-                  transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
-                  marginTop: -spacing[0.5],
-                }}
-              />
-            )}
+              </HuellaDeTab>
+            </Animated.View>
+            {/* ☠️ EL SUBRAYADO MURIÓ (S99-B). Era el marcador del activo
+                cuando no había disco; con el disco viajando serían DOS
+                marcadores del mismo estado — exactamente lo que la firma
+                de §2.6 vino a resolver. Un marcador, un significado. */}
             <Text
               style={{
                 fontFamily: typography.family.sans.medium,

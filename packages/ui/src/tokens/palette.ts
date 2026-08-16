@@ -414,6 +414,37 @@ export const palette = {
   // ── Scrim (B3.8) — backdrop de la Hoja, derivado de dark0 ──
   scrim: 'rgba(5,5,8,.52)',
 
+  /* ══ MARCA DE MAPA (S99-B · `DIRECCION_ARTE` §6ter) ══════════════════
+   * **NO son colores de tema, y por eso NO viven en un slot:** una marca
+   * de mapa no se apoya sobre una superficie nuestra — se apoya sobre
+   * tiles que no elegimos, y **el mapa no tiene tema** (medido: cero
+   * `customMapStyle` en la casa). Un slot por casa habría prometido una
+   * variación que el terreno no tiene.
+   *
+   * ── «EL COLOR PERTENECE AL TERRENO», HECHO NÚMERO ─────────────────
+   * La ley dice *«color de marca con la saturación del mapa, jamás un
+   * color de interfaz que grita»*. **Se midió la saturación del terreno
+   * real y salió una BANDA: 0.10 (asfalto) → 0.58 (agua).** Contra esa
+   * banda, nuestros colores de marca gritan: `pink` 1.00 · `tealDark`
+   * 0.84 · `magentaDark` 0.64. *Los tres quedan fuera del mundo.*
+   *
+   * ⇒ **`mapaMoto` es nuestro magenta LLEVADO a la banda** (magentaDark
+   * + 35 % tinta): **sat 0.54 — adentro— y 6.61 de contraste contra el
+   * peor tono.** Sigue siendo nuestro; deja de gritar.
+   * *No se eligió un color bonito: se calculó el que entra en el mundo.* */
+  mapaMoto: '#681F4C',
+  /** El destino es un EDIFICIO, no un marcador (§6ter) ⇒ sus tonos son
+   *  neutros cálidos del terreno (sat ~0.10), no marca. Dos planos
+   *  porque un volumen necesita dos: cuerpo 3.68 · techo 6.34 contra el
+   *  mapa, y **1.73 entre sí — lo que hace que se lean como dos caras**
+   *  en vez de como una mancha. */
+  mapaEdificio: '#6B5F56',
+  mapaEdificioTecho: '#443D37',
+  /** La sombra en el suelo: negra y translúcida, jamás un gris opaco —
+   *  una sombra opaca es una mancha pintada; ésta deja pasar el tile y
+   *  por eso el objeto parece apoyado EN él. */
+  mapaSombra: 'rgba(20,16,14,.28)',
+
 } as const
 
 /**

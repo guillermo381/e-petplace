@@ -101,7 +101,7 @@ export const memorialTheme = {
     atmosfera: palette.textMemorialDark,
     // S82-B r12 — el fondo del Boton `sinCaja` (memorial: la superficie serena que ya existe):
     // el secundario sin borde necesita un canal, y el borde ya no está.
-    sinCaja:      palette.memorialDark1,
+    apoyada:      palette.memorialDark1,
 
     gradient:       gradients.transparent,   // B1: en memorial, transparent
     gradientSubtle: gradients.transparent,

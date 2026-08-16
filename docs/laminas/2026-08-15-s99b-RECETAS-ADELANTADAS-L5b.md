@@ -13,18 +13,35 @@ dependa de ese censo va marcado como tal, no adivinado.
 |---|---|---|---|
 | **1** | **La ficha de producto** (N19) | ✅ **§1, acá** | — |
 | **2** | **El interruptor del espejo** (N17) | ✅ **§2, acá** | — |
-| **3** | **La navegación en dos toques** (N20) | ⏳ pedirla | el censo de A: **qué ejes existen** (especie · necesidad) y con qué cardinalidad |
-| **4** | **La completitud que gana alcance** (N18) | ⏳ pedirla | el cómputo de A: **qué campos entran al contador** |
-| **5** | **La grilla de la vitrina** | ⏳ pedirla | ①: la ficha decide la tarjeta, no al revés |
+| **3** | **La navegación en dos toques** (N20) | ⏳ **sigue bloqueada** | el censo de A: **qué ejes existen** (especie · necesidad) y con qué cardinalidad |
+| **4** | **La completitud que gana alcance** (N18) | ✅ **§3, acá** — *ver la corrección de triaje* | — |
+| **5** | **La grilla de la vitrina** | ✅ **§4, acá** — *ver la corrección de triaje* | — |
 | **6** | **El estado `propuesto` vs `publicada`** | ⏳ pedirla | contrato de mesa de L5b (*el espejo DICE la diferencia*) |
 | **7** | **La escala de botones** | ✅ **ya servida** (`…-RECETA-ESCALA-DE-BOTONES.md`) | — |
 
-**⚠️ Las 3, 4 y 5 NO se adelantan y digo por qué:** las tres dependen de
-**cuántas cosas hay** —cuántas especies, cuántas necesidades, cuántos
-campos de completitud— y una anatomía escrita contra una cardinalidad
-inventada es la clase de receta que hay que rehacer entera. *Adelantar lo
-que no depende del censo es ganar la carrera; adelantar lo que sí, es
-correrla dos veces.*
+### ⏪ CORRECCIÓN DE MI PROPIO TRIAJE — dos de las tres NO estaban bloqueadas
+
+**Esta línea decía:** *«las 3, 4 y 5 NO se adelantan… las tres dependen
+de cuántas cosas hay»*. **Al releerla con la orden de adelantar lo que se
+pueda, dos se cayeron:**
+
+- **La 4 (completitud) NO depende de la lista de campos.** Lo que el
+  censo de A va a decir es **CUÁLES** campos cuentan; **la forma —voz
+  narrativa, un paso, sin barra, sin porcentaje, el contador que llega a
+  cero— no cambia con la lista.** Confundí *el dato* con *su forma*.
+- **La 5 (grilla) ya estaba decidida por una pieza viva:** `Baldosa`
+  (S97) trae su patrón de grilla **como parte de su contrato**. Escribir
+  su receta es en buena medida **decir que no se invente otra**.
+
+**La 3 sigue bloqueada de verdad:** *«especie → necesidad, ambas a la
+vista en la primera pantalla»* (N20) es una decisión de **layout contra
+cardinalidad** — seis especies y cuatro necesidades no se componen como
+doce y quince. *Ahí la cardinalidad sí es la forma.*
+
+> *El criterio que apliqué mal: «depende del censo» no es lo mismo que
+> «depende de un número del censo». La mayoría de las veces el censo
+> decide el CONTENIDO y la ley decide la FORMA — y la forma es lo que yo
+> escribo.*
 
 ---
 
@@ -139,7 +156,102 @@ cambio es instantáneo (no hay viaje que preservar).
 
 ---
 
-## §3 · LO QUE NINGUNA DE LAS DOS PUEDE FIRMAR
+## §3 · LA COMPLETITUD QUE GANA ALCANCE (N18) — la forma
+
+**N18 ya fijó la ley entera** (qué gana lo completo: ALCANCE · qué pasa
+con lo incompleto: **no se esconde, pierde alcance** · jamás ranking).
+Esta receta resuelve **cómo se ve**, que es lo único que falta.
+
+**LA VOZ, literal de N18:** narrativa + **un paso** —
+*«12 productos no aparecen en búsqueda porque no tienen foto.»*
+
+**⛔ LO PROHIBIDO, y no es opinable:** barra de progreso · «perfil 40 %
+completo» · porcentaje · checklist de tareas. `MODELO_LOYALTY` §2 es
+literal: *«la checklist es la chorificación del cuidado y el dark pattern
+que mata el alma del producto»*.
+
+**Dónde vive, en las DOS caras:**
+
+- **En la vitrina (`Administrar`)** — arriba, **una sola línea**, la del
+  hueco más grande. *Si dice tres cosas, es una checklist con otra
+  tipografía.*
+- **En la ficha del producto** — el hueco **de ESE producto**, en su
+  bloque de espejo (§1). Ahí sí es específico: *«esta no aparece en
+  búsqueda porque no tiene foto»*.
+
+**Las dos guardas de la casa:** el contador **puede llegar a cero** · y
+**lo que depende de e-PetPlace NO entra** (§7.5). *Un contador que nunca
+cierra convierte el alcance en una condena.*
+
+### ⚖️ ENMIENDA CON LAS CARDINALIDADES REALES (17-ago) — el contador nace CERCA DE CERO
+
+**Medido:** octubre abre con **6 comprables completos + 1**, sobre **13
+comprables**. ⇒ **la línea de completitud va a decir «1 producto no
+aparece en búsqueda porque…», no «12 productos…».**
+
+**Y eso cambia la forma, no solo el número:**
+
+- **Con un hueco, la línea narrativa ES la superficie entera.** No hace
+  falta zona, ni lista, ni pantalla: **una línea con su paso.** *Montar
+  una sección de completitud para un hueco es construir el tablero antes
+  de tener qué mostrar.*
+- **Y con CERO huecos la línea NO se dibuja** — ni «todo completo», ni
+  un ✅. *El premio por estar completo es que la app deje de hablar del
+  tema; felicitar por lo normal es la mecánica que LOYALTY §2 prohíbe.*
+
+**⚠️ Lo que NO cambia:** los **457 canónicos sin oferta jamás se
+pintan** (la vitrina parte de ofertas con `!inner`), así que **su 66 %
+sin foto NO entra al contador** — es catálogo esperando vendedores, dato
+de negocio del founder, **no un hueco de este vendedor**. *Un contador
+que cuenta lo que no es tuyo no se puede cerrar nunca.*
+
+**Y su costura con el vendedor del primer día:** es **la misma fuente**
+que el HOY con `haVendido = false` y que la configuración — una sola
+verdad de *«qué le falta»*, leída en tres lugares
+(`…-RECETA-EL-VENDEDOR-EL-PRIMER-DIA.md` §5).
+
+---
+
+## §4 · LA GRILLA DE LA VITRINA — la receta es *no inventes otra*
+
+**Se monta `Baldosa`** (S97), y su patrón de grilla **es parte de su
+contrato**: `width: '50%'` con el aire ADENTRO de la celda y **sin
+`gap`** — *el gap no se ve en el porcentaje y la resta se hace en
+píxeles*. **Dos columnas.**
+
+**Por qué `Baldosa` y no `Celda`:** la ley de la casa lo decide sola —
+***tarjetas para elegir, filas para leer*** (S97, Acto II). En la vitrina
+el producto **se elige**. En el panel del vendedor, el mismo producto
+**se lee** ⇒ ahí es `Celda`, **con `tituloEntero`** (S99-B), porque el
+nombre es el criterio.
+
+> **La misma cosa cambia de pieza según lo que la persona esté haciendo
+> con ella.** No es inconsistencia: es la ley aplicada.
+
+### ⚖️ ENMIENDA CON LAS CARDINALIDADES REALES (17-ago)
+
+**Con 11 productos en la especie más grande y 7 en octubre, la grilla no
+necesita NADA de lo que se le suele poner:** sin paginación, sin «cargar
+más», sin scroll infinito, **sin encabezados de sección**. *La lista
+entra en dos pantallas: cualquier andamio de navegación pesa más que el
+contenido que organiza.*
+
+**Y el vacío de la grilla se lee con la ley del vendedor** (`…-EL-VENDEDOR-EL-PRIMER-DIA.md`
+§1): **ausencia de TRABAJO, jamás de negocio.** En la cara de la familia
+eso significa que **una especie sin productos comprables no muestra una
+grilla vacía**: dice qué SÍ hay. *Gato tiene 3 hoy; el día que una
+especie tenga 0, la vitrina no puede quedarse en blanco mirando.*
+
+**Lo único que la grilla decide de nuevo — la anatomía de la baldosa de
+producto**, y sale de N19 recortada a lo que entra en media pantalla:
+**foto 4:3 · nombre (2 líneas, sin truncar) · precio + $/kg en mono**.
+**⛔ La composición y los alérgenos NO entran en la baldosa** — no caben
+sin volverse ilegibles, y **medio dato de alergia es peor que ninguno**:
+viven en la ficha, a un toque.
+
+---
+
+## §5 · LO QUE NINGUNA DE ESTAS PUEDE FIRMAR
 
 **El ojo, en el teléfono, y por la ley de método S99 se mira DONDE VIVE:**
 la ficha dentro de la vitrina y el interruptor con productos reales.

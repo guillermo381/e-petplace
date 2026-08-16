@@ -154,7 +154,7 @@ export const lightTheme = {
     atmosfera: palette.pink,
     // S82-B r12 — el fondo del Boton `sinCaja` (el paso sobre el papel tapiz):
     // el secundario sin borde necesita un canal, y el borde ya no está.
-    sinCaja:      palette.sinCajaLight,
+    apoyada:      palette.sinCajaLight,
     // S73 (entity chip, token PROPUESTO — mini-gate founder pendiente):
     // el elegido LLENO. En dark NO usa el violeta (acento de TEXTO):
     // magentaDark porta blanco 8.25:1 — el MISMO par físico en ambos
