@@ -67,6 +67,39 @@ que un umbral de un solo número no ve: *con 30 productos donde 27 son
 volumen y no ayuda a nadie.* **Un filtro que no reparte no es un filtro:
 es un adorno con estado.**
 
+### 🔴 ⏪ ENMIENDA — MI SEGUNDA CONDICIÓN PASA SU PROPIA LETRA Y FALLA SU ESPÍRITU (hallazgo de C)
+
+**Medido por C sobre el catálogo sembrado:** el comodín es **MAYORÍA** —
+**121 de 232 en perro · 65 de 109 en gato**. ⇒ filtrar «cachorro»
+devuelve **149 de 232: el 64 % del catálogo**.
+
+> **Hay tres buckets con ≥3 y NINGUNO REPARTE.** Mi condición se cumple
+> al pie y **produce exactamente el adorno con estado que existía para
+> evitar.** *Escribí la regla correcta y la medí con la vara equivocada.*
+
+**⇒ EL UMBRAL DEJA DE MEDIR TAMAÑO Y PASA A MEDIR DISCRIMINACIÓN**
+(propuesta de C, que firmo):
+
+> **② ningún bucket se lleva más del ~40 % del total de la especie.**
+> Si uno se lo lleva, filtrar no reparte — no importa cuántos buckets
+> haya ni cuán grandes sean.
+
+**El principio, que vale más que este umbral:**
+***UN UMBRAL QUE MIDE TAMAÑO NO MIDE UTILIDAD.*** *«Hay suficientes» y
+«sirve» son preguntas distintas, y yo respondí la primera creyendo que
+contestaba la segunda.*
+
+### ⚠️ Y LA SUTILEZA QUE LO HACE DIFÍCIL: NO HAY NADA ROTO
+
+**El comodín es mayoría PORQUE la decisión firmada es correcta** —
+`momento` NULL aparece en TODOS los momentos (§3), y eso está bien: un
+alimento para todas las edades **es** para un cachorro.
+
+> **No es un error del comodín ni del umbral: son DOS decisiones
+> correctas que se estorban.** Y por eso se resuelve en el umbral y no
+> revisando la otra: *la que mide utilidad es la que tiene que absorber
+> el efecto de la que dice la verdad.*
+
 **Se deriva del conteo, jamás de una perilla.** *Nadie tiene que
 acordarse de encenderlo el día que el catálogo crezca; y nadie puede
 encenderlo antes «para probar».*

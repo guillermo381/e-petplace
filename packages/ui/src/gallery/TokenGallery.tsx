@@ -659,26 +659,22 @@ function EjemploFichaVacuna() {
  *  *Sobre un fondo plano el hueco se ve igual que si estuviera pintado —
  *  y ése era exactamente el modo de falla que la advertencia ③ nombró:
  *  funciona justo en la pantalla donde se lo probó.* */
-function GateDeLaBarra({ conHuella }: { conHuella: boolean }) {
+function GateDeLaBarra() {
   const { theme } = useTheme()
   const [tab, setTab] = useState('a')
   return (
     <View style={{ gap: spacing[2] }}>
-      <Texto variante="dato">{conHuella ? 'CON huella adentro del disco' : 'SIN huella — el disco solo'}</Texto>
       {/* franjas: el hueco tiene que dejarlas pasar */}
-      <View style={{ justifyContent: 'flex-end', height: 150, overflow: 'hidden', borderRadius: radius.md }}>
+      <View style={{ justifyContent: 'flex-end', height: 170, overflow: 'hidden', borderRadius: radius.md }}>
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-          {Array.from({ length: 10 }, (_, i) => (
+          {Array.from({ length: 11 }, (_, i) => (
             <View
               key={i}
-              style={{
-                height: 15,
-                backgroundColor: i % 2 === 0 ? theme.bg.overlay : theme.bg.card,
-              }}
+              style={{ height: 16, backgroundColor: i % 2 === 0 ? theme.bg.overlay : theme.bg.card }}
             />
           ))}
         </View>
-        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} huellaEnDisco={conHuella} />
+        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} />
       </View>
     </View>
   )
@@ -2543,22 +2539,16 @@ function GaleriaInterna() {
             firmar lo exige — **la pieza se gatea DONDE VIVE**, y un pin
             vive sobre un mapa. En web esto NO se puede juzgar y el
             lienzo lo dice: hay que mirarlo en el teléfono. ═══ */}
-        <Seccion titulo="⭐ GATE S99 — LA BARRA CON VALLE Y DISCO · qué decide: si la HUELLA entra adentro del disco o si el disco queda solo. Las dos ramas están firmadas por adelantado — mirá cuál se lee mejor, no cuál te gusta">
+        <Seccion titulo="⭐ GATE S99 — LA BARRA · veredicto aplicado: SIN huella, disco en color de techo, MUY METIDO (10 sobre radio 28) y el valle más hondo. Qué decide ahora: si el viaje se ve FLUIDO">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
-              <PanelTema etiqueta="claro — las dos, sobre franjas: mirá que el HUECO entre valle y disco las deje pasar">
-                <View style={{ gap: spacing[5] }}>
-                  <GateDeLaBarra conHuella />
-                  <GateDeLaBarra conHuella={false} />
-                </View>
+              <PanelTema etiqueta="claro — sobre franjas: el hueco las deja pasar, y el disco viaja CON el valle (un solo grupo)">
+                <GateDeLaBarra />
               </PanelTema>
             </ThemeProvider>
             <ThemeProvider defaultMode="dark">
-              <PanelTema etiqueta="dark — el hueco no se pinta, se DEJA: por eso funciona en los tres temas sin saber de ninguno">
-                <View style={{ gap: spacing[5] }}>
-                  <GateDeLaBarra conHuella />
-                  <GateDeLaBarra conHuella={false} />
-                </View>
+              <PanelTema etiqueta="dark — mismo mecanismo; el techo sale del slot, no de un hex">
+                <GateDeLaBarra />
               </PanelTema>
             </ThemeProvider>
           </View>
@@ -3690,8 +3680,42 @@ function GaleriaInterna() {
               />
             </View>
 
+            {/* S99-B · LAS SIETE NARRATIVAS CON ÍCONO ADENTRO — la forma
+                que reemplaza a las cuatro barras. Y con `cuandoLlega`:
+                los nodos dicen DÓNDE ESTÁ, la ventana dice CUÁNTO FALTA.
+                Los glifos son SLOT del consumidor: acá se montan puntos
+                de demo para probar la FORMA sin inventar siete dibujos
+                que nadie firmó. */}
             <View style={{ gap: spacing[2] }}>
-              <Texto variante="apoyo">compacta · voz de la familia</Texto>
+              <Texto variante="dato">
+                S99-B · compacta con NODOS + ícono adentro + ventana prometida (7 narrativas)
+              </Texto>
+              <EscaleraEstados
+                registro="compacta"
+                cuandoLlega="Llega entre 14:00 y 16:00"
+                pasos={(
+                  [
+                    ['confirmado', 'Confirmado', 'hecho'],
+                    ['pagado', 'Pagado', 'hecho'],
+                    ['preparando', 'Preparando', 'hecho'],
+                    ['empacado', 'Empacado', 'actual'],
+                    ['despachado', 'Despachado', 'pendiente'],
+                    ['en_camino', 'En camino', 'pendiente'],
+                    ['entregado', 'Entregado', 'pendiente'],
+                  ] as const
+                ).map(([clave, etiqueta, estado]) => ({
+                  clave,
+                  etiqueta,
+                  estado,
+                  icono: ({ color }: { color: string }) => (
+                    <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: color }} />
+                  ),
+                }))}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">compacta · voz de la familia · SIN ícono (el nodo degrada a punto)</Texto>
               <EscaleraEstados
                 registro="compacta"
                 pasos={[
