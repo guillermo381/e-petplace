@@ -505,10 +505,12 @@ export async function conteosVitrinaPorEje(): Promise<
 
 export interface PromesaDeVendedor {
   cuenta_comercial_id: string;
-  /** ok:true → hay promesa. `fecha`+`desde`/`hasta` son la ventana real, y
-   *  **`saltos_por_cupo` > 0 significa «no es el corte más cercano: se corrió
-   *  porque el vendedor está lleno»** — ES la señal con la que la voz dice
-   *  «no mañana en la mañana, sino el X». */
+  /** ok:true → hay promesa. `fecha`+`desde`/`hasta` son la ventana real.
+   *  ⚠️ **`saltos_por_cupo` > 0 significa que la ventana SE CORRIÓ — pero
+   *  NO dice por qué** (rojo de C, 18-ago: prometía con `saltos: 1` y el
+   *  cupo VACÍO, porque era domingo y nadie reparte los domingos). **La
+   *  voz se construye sobre `motivoCorrimiento`, jamás sobre este
+   *  número.** */
   ok: boolean;
   fecha: string | null;
   desde: string | null;
@@ -520,6 +522,22 @@ export interface PromesaDeVendedor {
    *  significados, «no puede» y «no sabemos»). */
   error: string | null;
   detalle: string | null;
+  /** 🔴 LA CAUSA DEL CORRIMIENTO — el campo que la voz necesita:
+   *  · `'sin_operacion'` → ese día el vendedor NO REPARTE (domingo, feriado
+   *    propio). **NO es escasez: decir «no hay disponibilidad» acá sería
+   *    hacerle perder una venta por una escasez que no existe.**
+   *  · `'cupo_lleno'` → sí es escasez: la frase del founder, con su pregunta.
+   *  · `'mixto'` → las dos causas en el tramo salteado.
+   *  · `null` → no hubo corrimiento (o la promesa falló). */
+  motivoCorrimiento: 'sin_operacion' | 'cupo_lleno' | 'mixto' | null;
+}
+
+/** El guard del motivo — estrecha de `unknown` al vocabulario cerrado.
+ *  **Fail-closed de SIGNIFICADO:** lo desconocido (o un motor viejo sin el
+ *  campo) cae en `null` = «no sé por qué se corrió», JAMÁS en `cupo_lleno`,
+ *  que afirmaría una escasez que puede no existir (el rojo de C). */
+function motivoDeCorrimiento(v: unknown): 'sin_operacion' | 'cupo_lleno' | 'mixto' | null {
+  return v === 'sin_operacion' || v === 'cupo_lleno' || v === 'mixto' ? v : null;
 }
 
 /**
@@ -563,6 +581,10 @@ export async function promesaPorVendedor(
       saltos_por_cupo: typeof p.saltos_por_cupo === 'number' ? p.saltos_por_cupo : 0,
       error: typeof p.error === 'string' ? p.error : null,
       detalle: typeof p.detalle === 'string' ? p.detalle : null,
+      // L-247 + fail-closed de SIGNIFICADO: un valor desconocido (o un
+      // motor viejo sin el campo) cae en `null` = «no sé por qué se
+      // corrió» — jamás en `cupo_lleno`, que afirmaría escasez.
+      motivoCorrimiento: motivoDeCorrimiento(v.motivo_corrimiento),
     }];
   });
   return { ok: true, data: filas };
