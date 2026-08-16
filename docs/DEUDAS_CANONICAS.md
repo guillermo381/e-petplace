@@ -11711,6 +11711,20 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-267 — UN RESIDUO DE PRUEBA NO SOLO ENSUCIA LOS DATOS: ENSUCIA EL DIAGNÓSTICO — Y EL PRIMERO QUE SE EQUIVOCA LEYÉNDOLO ES QUIEN LO DEJÓ (S99 — caso propio, A; depositada por orden de mesa, 16-ago-2026).**
+
+  **Es L-234 con su segunda mitad puesta.** Aquella dice que *una sonda que deja residuo contamina la medición ajena*; **ésta agrega que la primera medición contaminada suele ser la PROPIA**, y por una razón simple: **quien dejó el residuo es el que más rápido va a volver a medir esa zona.**
+
+  **El caso, dos veces en la misma jornada y las dos veces contra mí:**
+  1. Reporté **«445 ofertas agotadas y visibles»** como estado de producto. **Las 445 eran mías** — todas en la cuenta de mi siembra masiva; los otros cuatro vendedores tenían cero.
+  2. El cinturón de `20260819020000` **publicó una oferta de verdad** (era la única forma de probar que la competencia quedó abierta) y su INSERT no revertía. Después apareció como **«un precio propuesto que diverge del publicado»** —parecía un dato de producto— y **como una dispersión de precios del 48,1 %** entre vendedores. **Las dos eran la misma fila mía.**
+
+  **⇒ Lo que lo vuelve caro no es el dato sucio: es que el dato sucio SE PARECE AL HALLAZGO QUE UNO ESTÁ BUSCANDO.** Yo estaba midiendo dispersión de precios para calibrar una banda; mi propio residuo produjo exactamente la forma de lo que buscaba, con un número redondo y creíble.
+
+  **COROLARIOS EXIGIBLES, los dos baratos:**
+  · **Todo cinturón que ESCRIBA declara si su escritura revierte** — y si no revierte, la fila nace marcada y su ficha de limpieza la nombra en el mismo commit. *Un `DO $$` fuera de transacción escribe en producción igual que una migración.*
+  · **Antes de reportar una cifra como dato de producto, se pregunta de quién es.** Un `GROUP BY cuenta` de treinta segundos separó las tres veces lo mío de lo real — **y las tres veces lo mío era el 100 %.**
+
 - **L-266 — EL ESTADO DE UN CONJUNTO NO CABE EN LA FILA DE UN ÍTEM (S99 — el caso y el descarte son de B; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** el pedido era *«ver el estado sin entrar»* en las secciones de configuración (Local · Turnos · Repartidores), que hoy son **un título y nada más** ⇒ para saber cómo está su configuración, el vendedor tiene que **recorrer y leer cada lista**.
