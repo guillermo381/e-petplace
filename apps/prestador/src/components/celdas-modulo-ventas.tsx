@@ -25,17 +25,25 @@
  * llamador resuelve `ok && length > 0`, jamás «no pude leer» = «sí hay».
  */
 
-import { CeldaNavegacion, Separador, Tarjeta } from '@epetplace/ui';
+import { View } from "react-native";
+import {
+  CeldaNavegacion,
+  Separador,
+  Tarjeta,
+  Texto,
+  spacing,
+} from "@epetplace/ui";
 
-import { useTraduccion } from '@/i18n';
+import { useTraduccion } from "@/i18n";
 
-/** Las cuatro pantallas del módulo. Tipado cerrado: una ruta nueva no se
+/** Las pantallas del módulo. Tipado cerrado: una ruta nueva no se
  *  cuela como string — se agrega acá y el consumidor la ve. */
 export type RutaModuloVentas =
-  | '/ventas/stock'
-  | '/ventas/mostrador'
-  | '/ventas/entregas'
-  | '/ventas/configuracion';
+  | "/ventas/vitrina"
+  | "/ventas/stock"
+  | "/ventas/mostrador"
+  | "/ventas/entregas"
+  | "/ventas/configuracion";
 
 export interface CeldasModuloVentasProps {
   /** La persona además reparte y tiene envío asignado hoy (§9.1). */
@@ -43,39 +51,62 @@ export interface CeldasModuloVentasProps {
   onIr: (ruta: RutaModuloVentas) => void;
 }
 
-export function CeldasModuloVentas({ tieneEntregas, onIr }: CeldasModuloVentasProps) {
+export function CeldasModuloVentas({
+  tieneEntregas,
+  onIr,
+}: CeldasModuloVentasProps) {
   const { t } = useTraduccion();
 
   return (
-    <Tarjeta relleno="ninguno">
-      <CeldaNavegacion
-        registro="tinta"
-        titulo={t('ventas.hoy.stock')}
-        onPress={() => onIr('/ventas/stock')}
-      />
-      <Separador />
-      <CeldaNavegacion
-        registro="tinta"
-        titulo={t('ventas.hoy.mostrador')}
-        onPress={() => onIr('/ventas/mostrador')}
-      />
-      {tieneEntregas && (
-        <>
+    /* 🔴 DOS GRUPOS Y NO UNA LISTA DE CINCO — lo pidió N3 al quinto ítem, y
+       al obedecerla la pantalla mejoró: con cinco celdas seguidas el menú
+       no dice qué es qué. **La vitrina es LA CARA** (lo que la familia ve)
+       y el resto es **el trabajo de adentro**; separarlos con aire y título
+       es lo que la regla manda, y de paso vuelve el menú legible.
+       *El trinquete no pedía menos líneas: pedía jerarquía.* */
+    <View style={{ gap: spacing[5] }}>
+      <Tarjeta relleno="ninguno">
+        <CeldaNavegacion
+          registro="tinta"
+          titulo={t("ventas.hoy.vitrina")}
+          detalle={t("ventas.hoy.vitrinaDetalle")}
+          onPress={() => onIr("/ventas/vitrina")}
+        />
+      </Tarjeta>
+
+      <View style={{ gap: spacing[3] }}>
+        <Texto variante="seccion">{t("ventas.hoy.grupoTrabajo")}</Texto>
+        <Tarjeta relleno="ninguno">
+          <CeldaNavegacion
+            registro="tinta"
+            titulo={t("ventas.hoy.stock")}
+            onPress={() => onIr("/ventas/stock")}
+          />
           <Separador />
           <CeldaNavegacion
             registro="tinta"
-            titulo={t('ventas.hoy.entregas')}
-            detalle={t('ventas.hoy.entregasDetalle')}
-            onPress={() => onIr('/ventas/entregas')}
+            titulo={t("ventas.hoy.mostrador")}
+            onPress={() => onIr("/ventas/mostrador")}
           />
-        </>
-      )}
-      <Separador />
-      <CeldaNavegacion
-        registro="tinta"
-        titulo={t('ventas.hoy.configuracion')}
-        onPress={() => onIr('/ventas/configuracion')}
-      />
-    </Tarjeta>
+          {tieneEntregas && (
+            <>
+              <Separador />
+              <CeldaNavegacion
+                registro="tinta"
+                titulo={t("ventas.hoy.entregas")}
+                detalle={t("ventas.hoy.entregasDetalle")}
+                onPress={() => onIr("/ventas/entregas")}
+              />
+            </>
+          )}
+          <Separador />
+          <CeldaNavegacion
+            registro="tinta"
+            titulo={t("ventas.hoy.configuracion")}
+            onPress={() => onIr("/ventas/configuracion")}
+          />
+        </Tarjeta>
+      </View>
+    </View>
   );
 }

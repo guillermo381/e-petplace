@@ -126,6 +126,16 @@ export const prestadorEs = {
     titular: 'El arte de cuidar, con las herramientas que mereces.',
     subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
     ingresar: 'Ingresar',
+    // 🔴 S99-C — LA PUERTA QUE FALTABA, y salió de caminar el Gate 2: esta
+    // pantalla ofrecía DOS caminos y los dos eran del prestador. Un
+    // repartidor al que su negocio acaba de registrar tenía que tocar
+    // «Ingresar» —una puerta que todavía no le sirve— para recién ahí
+    // encontrar «Crear tu cuenta». *La app le pedía adivinar dónde estaba
+    // su camino.* Va PRIMERA de las dos etiquetas a propósito: quien fue
+    // registrado llega con una cita; el prestador nuevo viene a tocar la
+    // puerta. La voz espeja `login.crearCuenta` (infinitivo, tuteo neutro)
+    // — no nace una voz nueva para decir lo mismo.
+    registradoPorNegocio: '¿Te registró un negocio? Crear tu cuenta',
     solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
     selloIdentidad: 'Identidad verificada',
     selloPagos: 'Pagos protegidos',
@@ -3079,6 +3089,15 @@ export const prestadorEs = {
     detalleVarios: 'Tenés {{n}} negocios esperándote. Aceptá y entrás a tus entregas.',
     aceptar: 'Aceptar y entrar',
   },
+  /* EL INTERRUPTOR DEL ESPEJO (N17 · receta B §2). Dos modos, una
+     superficie. La voz vive acá y no en cada pantalla porque la montan DOS
+     —el techo de la vitrina y la ficha—: dos copias serían dos nombres
+     para el mismo modo. */
+  espejo: {
+    administrar: 'Administrar',
+    verComoCliente: 'Ver como cliente',
+    etiquetaGrupo: 'Cómo estás mirando tu vitrina',
+  },
   ventas: {
     entradaTitulo: 'Venta de productos',
     entradaDetalle: 'Pedidos, stock y reparto',
@@ -3091,12 +3110,107 @@ export const prestadorEs = {
       detalle: 'Tu venta de productos sí es tuya: entras por acá.',
     },
     comunes: {
+      /* El conector de listas viaja por el riel: `Intl.ListFormat` no está
+         garantizado en Hermes, y armar «a, b y c» a mano en cada pantalla
+         es cómo terminan dos superficies diciendo «y» y «and» en el mismo
+         idioma. */
+      y: 'y',
       reintentar: 'Reintentar',
       errorTitulo: 'No pudimos cargar esto',
       errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
       sinCuentaTitulo: 'Tu negocio todavía no vende productos',
       sinCuentaDetalle:
         'La venta de productos se activa con tu cuenta comercial. Cuando tu negocio la tenga, este es el lugar.',
+    },
+    /* ── LA FICHA DE PRODUCTO DEL ESPEJO (S99-C · N19 + receta B §1) ──
+       La voz de esta ficha es la de la FAMILIA, no la del inventario: es la
+       misma pantalla que ve el dueño, y por eso no dice «SKU», «variante»
+       ni «oferta» en ninguna parte visible. */
+    producto: {
+      titulo: 'El producto',
+      noExisteTitulo: 'Este producto ya no está en el catálogo',
+      noExisteDetalle: 'Puede que e-PetPlace lo haya retirado. Si lo vendías, escribinos.',
+      sinFoto: 'Todavía sin foto',
+      // Se DICE cuántas hay en vez de fingir un carrusel que no es pieza.
+      masFotos: '{{n}} fotos más',
+      sinPresentaciones: 'Este producto todavía no tiene presentaciones cargadas.',
+      // NULO HONESTO: la variante existe y hoy no se puede comprar.
+      sinPrecio: 'Sin precio publicado',
+      // El cálculo que nadie pone. Va en mono porque ES un cálculo.
+      porKg: '{{monto}} / kg',
+      composicionTitulo: 'Composición y alérgenos',
+      composicionSinDeclarar:
+        'Este producto todavía no declara su composición. Las familias con una mascota alérgica van a ver un aviso.',
+      alergenos: 'Contiene: {{lista}}',
+      /* EL LÍMITE DEL ESPEJO, DICHO. La familia ve el nombre de SU mascota
+         en la advertencia; el vendedor no puede verlo —§7.4— y callarlo
+         haría que crea que ese aviso no existe. */
+      limiteEspejoAlergia:
+        'Si la familia tiene una mascota con alergia declarada, acá va a ver una advertencia con su nombre. Vos no la ves: sus mascotas no son tuyas.',
+      paraQuienTitulo: 'Para quién sirve',
+      paraQuien: 'Para {{especies}}, en la etapa {{momentos}}.',
+      // Sin momento NO es «todas las edades»: es que nadie lo declaró.
+      paraQuienSinMomento: 'Para {{especies}}. Todavía no dice para qué edad.',
+      paraQuienSinEspecie: 'Todavía no dice para qué especie sirve.',
+      especie_perro: 'perros',
+      especie_gato: 'gatos',
+      especie_ave: 'aves',
+      especie_pez: 'peces',
+      especie_conejo: 'conejos',
+      especie_roedor: 'roedores',
+      especie_reptil: 'reptiles',
+      momento_cachorro: 'cachorro',
+      momento_adulto: 'adulta',
+      momento_senior: 'mayor',
+      disponibilidadTitulo: 'Disponibilidad',
+      hayStock: '{{n}} disponibles',
+      sinStock: 'Sin stock',
+      // Medido: la vitrina NO lo esconde. Que él lo sepa evita que crea
+      // que dejó de venderse solo.
+      sinStockSeSigueViendo: 'Se sigue viendo en la vitrina, y la compra rebota al reservar.',
+      noLoOfreces: 'Vos no vendés este producto.',
+      // ── El borde propuesto / publicada, con su porqué ──
+      estadoPublicada: 'Publicado: las familias lo ven',
+      estadoEnRevision: 'En revisión de e-PetPlace',
+      estadoRechazado: 'Rechazado',
+      estadoSinOferta: 'Todavía no le pusiste precio',
+      estadoNoPublicada: 'Con precio propuesto, sin publicar',
+      // ── La completitud que gana alcance (N18) ──
+      alcanceCompleto: 'No le falta nada tuyo',
+      alcanceFaltan: 'Le faltan {{n}} cosas tuyas para llegar más lejos',
+      alcanceNuestro: 'Esto es nuestro, no tuyo:',
+      razon_sku_rechazado: 'Corregilo según el motivo y volvé a proponerlo.',
+      razon_sin_stock: 'Sin stock: se ve, pero la compra rebota.',
+      razon_sin_precio_propuesto: 'Todavía no tiene precio propuesto.',
+      razon_sku_en_revision: 'Lo estamos revisando.',
+      razon_oferta_no_publicada: 'Tiene precio y todavía no lo publicamos.',
+      razon_composicion_ausente: 'Nos falta cargar su composición.',
+      razon_sin_momento_etario: 'Nos falta decir para qué edad sirve.',
+      razon_sin_foto: 'Nos falta su foto.',
+    },
+    /* LA VITRINA (S99-C · N17 + N20). Las dos caras del espejo viven en la
+       misma pantalla, y su voz también. */
+    vitrina: {
+      titulo: 'Tu vitrina',
+      todas: 'Todas',
+      filtroEspecie: 'Filtrar por especie',
+      /* El único caso en que el espejo habla en modo cliente: sin esta
+         frase, «no está» se leería como «se perdió». */
+      ausentes: '{{n}} de tus productos no se ven acá porque todavía no están publicados.',
+      leFaltan: 'Le faltan {{n}}',
+      vacioClienteTitulo: 'Tu vitrina está vacía para las familias',
+      vacioClienteDetalle: 'Cuando publiquemos tus productos, las familias los ven acá.',
+      vacioAdminTitulo: 'Todavía no propusiste productos',
+      vacioAdminDetalle: 'Cuando propongas el primero, va a vivir acá.',
+    },
+    /* D-829 — la mitad que faltaba de la puerta. La voz dice PEDIR, jamás
+       activar: el estado `solicitada` no habilita nada. */
+    servicios: {
+      titulo: '¿También querés ofrecer servicios?',
+      detalle:
+        'Podés pedir que tu negocio ofrezca paseo, estética, veterinaria o adiestramiento. Lo revisamos y te avisamos: no se activa solo.',
+      cta: 'Pedir ofrecer servicios',
+      enRevision: 'Ya lo pediste. Lo estamos revisando y te avisamos cuando se active.',
     },
     escalones: {
       preparado: 'Preparado',
@@ -3112,6 +3226,9 @@ export const prestadorEs = {
       cancelado: 'Cancelado',
     },
     hoy: {
+      grupoTrabajo: 'Tu trabajo del día',
+      vitrina: 'Tu vitrina',
+      vitrinaDetalle: 'Lo que ven las familias',
       titulo: 'Pedidos',
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
@@ -3337,6 +3454,11 @@ export const prestadorEs = {
       repartidorPaisSinFormato: 'No validamos la forma de este número',
       repartidorGuardarCta: 'Guardar',
       repartidorInactivo: 'Inactivo',
+    repartidorSinReclamar: 'Todavía no reclamó su acceso — tiene que entrar a la app con su correo',
+    localTitulo: 'Tu local',
+    localEtiqueta: 'Atiendo en mi local',
+    localDetalle:
+      'Con esto prendido, tu venta de mostrador aparece en Atender. Apagado, no aparece.',
       repartidorActivar: 'Activo',
       repartidorExito: 'Repartidor guardado.',
       repartidorYaExistia: 'Ese documento ya estaba registrado.',
