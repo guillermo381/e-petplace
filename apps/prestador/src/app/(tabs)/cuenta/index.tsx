@@ -244,6 +244,10 @@ export default function Cuenta() {
   // Precedente literal de la casa: `consulta.errorDetalle` (S75-B16) se
   // escribió "sin promesa falsa de reintento: si no hay acceso, reintentar
   // no lo arregla".
+  /** Vendedor SIN prestador: su histórico son pedidos, no citas (ver la
+   *  bifurcación de la voz, abajo). Default `false` = la voz de siempre —
+   *  una lectura que no volvió no cambia la voz de nadie. */
+  const [soloPedidos, setSoloPedidos] = useState(false);
   const [fallo, setFallo] = useState<{ reintentable: boolean } | null>(null);
   /** ⭐ S88-C · titularidad para las celdas vitrina/cuenta-comercial —
    *  null = sin confirmar (las celdas no se ofrecen, Ley 23). */
@@ -273,6 +277,13 @@ export default function Cuenta() {
             const ctx = await contextoVentas();
             if (!vigente) return;
             if (ctx.ok && ctx.data !== null && ctx.data.esVendedora) {
+              /* ⭐ S99-D — VENDEDOR SIN PRESTADOR: su histórico lista PEDIDOS
+                 y nada más, así que su entrada no puede hablar de citas. Se
+                 marca ACÁ porque es el único punto donde las dos mitades del
+                 discriminador ya están resueltas (`sin_prestador` **y**
+                 `esVendedora`); preguntarlo otra vez abajo sería un viaje
+                 nuevo para un dato que este `if` ya tiene en la mano. */
+              setSoloPedidos(true);
               setFallo(null);
               setIdentidad({
                 nombre: ctx.data.nombreComercial,
@@ -746,7 +757,20 @@ export default function Cuenta() {
               icono="mes"
               registro="aa"
               titulo={t('historico.entrada')}
-              detalle={t('historico.entradaDetalle')}
+              /* 🔴 LA VOZ SIGUE A LO QUE LA PANTALLA MUESTRA (hallazgo ② del
+                 gate del founder). La entrada prometía «las atenciones y
+                 citas que ya pasaron» **y para el vendedor lista pedidos**.
+                 ⚠️ La cura NO toca la clave compartida: esa frase **es
+                 verdad** para quien tiene citas, y curar una pantalla
+                 rompiendo la voz correcta de otra no es curar — es mover el
+                 defecto. Se bifurca por población, y la clave nueva
+                 (`entradaDetalleVenta`) ya existía en los dos idiomas.
+                 ⚠️ **EL DUAL QUEDA CON LA VOZ DE CITAS, y lo declaro en vez
+                 de taparlo:** su histórico muestra las DOS naturalezas, así
+                 que esta frase le dice MENOS de lo que va a encontrar — es el
+                 mismo defecto en versión leve. **No invento una tercera voz
+                 sin firma**; queda servido a la mesa con su caso. */
+              detalle={t(soloPedidos ? 'historico.entradaDetalleVenta' : 'historico.entradaDetalle')}
               onPress={() => router.push('/historico')}
             />
           </Tarjeta>
