@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-250 — UN RENAME MECÁNICO NO ROMPE SOLO CÓDIGO: REESCRIBE EL REGISTRO DE LO QUE MURIÓ, Y ESE REGISTRO ES LO ÚNICO QUE IMPIDE REVIVIRLO (S99 — el caso es de B, del rename `sinCaja`→`apoyada`; depositada por orden de mesa, 18-ago-2026).**
+
+  **El caso:** la mesa avisó que un grep del rename se llevaría el `sinCaja` de `Campo`; **B midió y esa prop YA ESTABA MUERTA** (derogada por N11 en esta misma sesión) — no había API que romper. **Lo que sí habría roto son las LÁPIDAS:** «sinCaja MURIÓ, DEROGADA POR N11» habría quedado «apoyada MURIÓ» — **que es falso**, y un registro de muerte falso es la puerta por la que lo muerto revive (nadie desconfía de una lápida).
+
+  **COROLARIO EXIGIBLE: todo rename mide primero qué de lo que toca es LÁPIDA y no código vivo — y las lápidas no se renombran JAMÁS: nombran algo que ya no existe, con el nombre con el que existió.**
+
+  **Su aplicación al ratchet, que viaja con la ley:** R48 cuenta `variante="…"` y NO la palabra suelta — contarla metería las lápidas de `Campo` en el contador de `Boton`, **haciendo que documentar una muerte aumente una deuda ajena.**
+
+  **Y al acta: TERCERA vez en la sesión que un dato técnico de mesa lo corrige la medición** (el anillo del pin · el «26 curados» · esta trampa — que era real a medias: había qué proteger, pero no era código). El corolario vigente sigue siendo el correcto: **el dato de mesa viaja como hipótesis a verificar, jamás como premisa.**
+
 - **L-249 — TODA PANTALLA-ÚNICA (SIN BARRA, SIN PILA) DECLARA SU SALIDA AL NACER (S99 — hallazgo del aparato en el cierre de L2; depositada por orden de mesa, 17-ago-2026).**
 
   **El caso, medido en aparato:** el repartidor aterrizó en «Mis entregas de hoy» — correcto por letra (§2.0: sin barra, sin cuartos del negocio; el deep link lo devuelve porque el resolvedor manda) — **y quedó ENCERRADO**: flecha de atrás dibujada y sin efecto, sin tabs, y sin forma de cerrar sesión. **El costo lo prueba: para salir hubo que borrar los datos de la app — y era la única vía JUSTAMENTE porque la app no ofrecía salida.**

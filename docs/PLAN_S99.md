@@ -129,6 +129,26 @@ transversales toda la sesión.**
 >   vendedor real proponga mapea a un canónico hoy incompleto (222/470
 >   sin momento · 309/470 sin foto); N18 le dice cuál campo, y la foto
 >   canónica (M21) es trabajo de e-PetPlace, no suyo.
+> - **⚖️ LA RECETA 7 DEL ESPEJO, RATIFICADA ENTERA CON SU HALLAZGO (mesa,
+>   18-ago — el hallazgo es de B leyendo el contador de C): LA FORMA
+>   DISTINGUE LO MISMO QUE EL CONTADOR, o el contador pierde
+>   credibilidad.** Los cinco estados del SKU no son cinco de la misma
+>   clase: **VEREDICTO de e-PetPlace** (en revisión · rechazado — lo
+>   resuelve la casa, ningún paso del vendedor, JAMÁS cuenta) contra
+>   **HUECO del vendedor** (sin precio · precio sin publicar — lo
+>   resuelve él, un paso, cuenta). *Si el contador distingue y la forma
+>   no, el vendedor ve cinco cosas parejas y un contador que solo cuenta
+>   dos — y la incoherencia se lee como contador roto.* **Las tres
+>   decisiones que van con ella:** el quinto estado —publicado— **NO SE
+>   DIBUJA** (*el premio por estar publicado es que la app deje de hablar
+>   del tema*) · **`motivo_rechazo` va LITERAL** (parafrasear un rechazo
+>   es reescribir lo que decidió otro y le saca al vendedor la única
+>   información con la que puede arreglarlo) · y es **el ÚNICO danger de
+>   la ficha** (el rojo sigue significando «esto está mal y es tuyo»).
+>   **Y a N17 se suma, junto a la ley de C:** en modo cliente la línea
+>   del no-publicado va **AL PIE y con su número, JAMÁS una tarjeta
+>   fantasma** — una familia nunca vería un placeholder, y el espejo deja
+>   de ser espejo en el momento en que inventa una casilla.
 > - **⚖️ N17 GANA SU LEY (mesa, 17-ago — decisión de C, ratificada y
 >   elevada): EL ESPEJO JAMÁS MUESTRA EN «VER COMO CLIENTE» ALGO QUE LA
 >   FAMILIA NO VE.** El caso que la parió: el $/kg NO entra a ese modo

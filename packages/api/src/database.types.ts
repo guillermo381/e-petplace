@@ -20793,6 +20793,14 @@ export type Database = {
         }
         Returns: Json
       }
+      proponer_skus_vendedor_lote: {
+        Args: {
+          p_cuenta_comercial_id: string
+          p_filas: Json
+          p_origen_carga?: string
+        }
+        Returns: Json
+      }
       publicar_oferta_sku: {
         Args: { p_country_code?: string; p_precio: number; p_sku_id: string }
         Returns: Json
@@ -21357,6 +21365,10 @@ export type Database = {
           negocio: string
           nombre: string
         }[]
+      }
+      viajes_por_repartidor: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: Json
       }
       volver_pedido_al_orden: { Args: { p_pedido_id: string }; Returns: Json }
       wizard_crear_cuenta_y_rol: {
