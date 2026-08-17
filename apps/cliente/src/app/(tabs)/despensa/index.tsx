@@ -416,6 +416,11 @@ export default function DespensaDescubrir() {
     return (
       <TarjetaProducto
         nombre={nombreCurado(p.nombre)}
+        // La marca en su propia línea (S100-B): la brecha la midió B contra la
+        // tarjeta local del espejo, que ya la mostraba. Va aparte del nombre por
+        // lo mismo que la presentación — **de tres datos en un renglón, el que
+        // se pierde es siempre el último**. `null` no se dibuja (19.9).
+        marca={p.marca}
         presentacion={p.presentacion}
         precio={p.precio}
         precioPorUnidad={precioPorKilo(p)}
