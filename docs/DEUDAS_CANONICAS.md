@@ -11711,6 +11711,18 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-276 — UN AGREGADO SOBRE OBJETOS DISTINTOS NO MIDE NINGUNO (S99 — el instrumento es de D y se equivocó DOS veces por la misma causa; depositada por orden de mesa, 16-ago-2026).**
+
+  **Los dos cobros, en orden:**
+  1. El instrumento tomaba **el mínimo de TODOS los `div` con opacidad**. Hay un **velo permanente en 0.04** ⇒ **nunca veía el 1 y la aserción NO PODÍA DISPARAR**: *verde por medir otro objeto.*
+  2. Corregido eso, seguía tomando **el mínimo entre los DOS contenedores vivos** ⇒ el «1 → 0» era **la mezcla de dos elementos**: *el comportamiento CORRECTO leído como defecto.*
+
+  **⇒ Un mínimo, un máximo o un promedio que cruza elementos produce un número que EXISTE y no describe NINGUNO** — y lo peor es su simetría: **puede dar verde por lo bajo o rojo por lo alto, las dos sin relación con el hecho.** *No es que el número sea impreciso: es que no es de nadie.*
+
+  **Regla: se mide POR ELEMENTO, o no se mide.**
+
+  **Hermana de L-253 (dos pantallas en el mismo DOM) y le agrega lo suyo:** allá el instrumento **no separaba** dos pantallas; **acá agrega A PROPÓSITO, y el agregado BORRA la distinción.** *El primero es un descuido; el segundo es una decisión de diseño del instrumento que se ve prolija.*
+
 - **L-275 — EL SISTEMA DE ARCHIVOS DE DESARROLLO NO ES EL DEL SERVIDOR DE BUILD (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** `Chevron.tsx` y `chevron.ts` difieren **solo en la mayúscula inicial** ⇒ en macOS **son el mismo archivo**. Literal de B: ***«en un sistema sensible habrían sido dos, y el defecto viajaba SIN SÍNTOMA.»*** Y cobró dos veces: **al limpiar, un `remove` se llevó el archivo recién escrito.**
@@ -17631,6 +17643,49 @@ decir la verdad del modelo.**
 **Y la frontera que NO se cruza (declarada por D):** la vitrina dice **QUÉ HAY AHORA**; el carrito dice **QUÉ PASÓ CON LO QUE ELEGISTE**. Leen la misma señal y **ninguna reemplaza a la otra, ni a la voz del último minuto** (D-827).
 
 ☠️ **Muere** cuando la vitrina distinga comprable de agotado con voz propia, y el agotado siga siendo alcanzable.
+
+#### D-842 — 🔴 LA TRANSICIÓN DEL DUAL SALTA: NO FALTA UNA TRANSICIÓN, SOBRA UN SALTO (S99 — investigación de D, CAUSA LOCALIZADA y NO cerrada; va a la sesión de PULIDO con todo adentro)
+
+**No es un pendiente suelto: es una investigación con estado.** Se deposita
+así **porque lo caro del próximo intento no es el arreglo — es re-descubrir
+lo que ya se descartó.**
+
+**LA CAUSA, MEDIDA POR ELEMENTO (no agregada — ver L-276):** el que se va
+**queda quieto en 1.00**; el que entra marca **1.00 · 1.00 · 0.00** y desde
+ahí rampa. ⇒ **se pinta el ESTADO FINAL durante dos frames y recién entonces
+salta al inicio.** **El navegador PINTA ANTES DEL FLANCO.**
+
+**HIPÓTESIS DESCARTADAS CON MEDICIÓN — no se repiten:**
+- el worktree **enganchado** (`pwd -P` da el primario, pero hoy está
+  exactamente en `origin/main`, y Metro reiniciado con `--clear`)
+- **la pieza no anima** — sí anima, ~250 ms
+- **el gesto no llega** — llega; si no, no habría animación
+
+**LAS CUATRO CURAS DESCARTADAS, con su razón (esto es lo que más ahorra):**
+| cura | por qué no |
+|---|---|
+| `useLayoutEffect` | el frame se pinta con `activo` todavía en `false` |
+| foco síncrono | **mata la animación entera** — `isFocused()` no reporta foco por pantalla acá (medido **dos** veces) |
+| opacidad inicial con *peek* | **el valor inicial no se re-evalúa** |
+| apagado en el toque | — |
+
+**🔴 LA CONTRADICCIÓN QUE ES POR DÓNDE SEGUIR — servida como HIPÓTESIS, no
+como hallazgo:** el contenedor que entra aparece en el DOM **~38 ms después
+del toque**, o sea que **se monta CON la navegación** — *y si es así, la
+tercera cura debería haber funcionado.* D sospecha de un **doble montaje en
+dev consumiendo el cruce antes de tiempo**, y **lo declara sin verificar.**
+
+**POR QUÉ VA A PULIDO Y NO SE FUERZA ACÁ:** **el día cruza y conserva la
+fecha** ⇒ es **defecto de FORMA, no de función**. Y el objetivo ya está
+definido en **una corrida del guard con sus tres salidas** (salto · animó
+limpio · no animó), *que es exactamente lo que abarata el próximo intento.*
+
+⚠️ **Y su antecedente NO se pierde: es una REGRESIÓN reportada DOS veces por
+el founder** — funcionaba y dejó de funcionar (L-269). *Que vaya a pulido es
+una decisión de secuencia, no una degradación de su gravedad.*
+
+☠️ **Muere** cuando el guard de las tres salidas dé «animó limpio» en el
+aparato del founder.
 
 #### D-841 — 🟢 `expira_en` DE UNA RESERVA PAGADA ES UNA FECHA QUE YA NO SIGNIFICA NADA (S99-A, hallazgo de la tanda del inventario)
 
