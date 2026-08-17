@@ -67,6 +67,30 @@ export interface LineaDePedido {
    *  DUEÑO por RLS: si el que mira no es el dueño, esto viene `null` y no
    *  significa "sin atar" — significa "no es tu compra". */
   destino: { mascota_id: string | null; donacion: boolean } | null;
+  /**
+   * 🔴 SI ESTE ÍTEM YA SEDIMENTÓ EN EL EXPEDIENTE (S100 · H-07 de D).
+   *
+   * Derivado de la EXISTENCIA de fila en `evento_producto_asignacion` para
+   * este `pedido_item_id` — no de una suposición sobre el producto. Hace
+   * falta porque **el depósito NO ocurre para todo lo comprado**: está
+   * gateado por `f.entra_al_expediente` (medido en
+   * `_depositar_item_en_expediente`), o sea que **la FAMILIA del producto
+   * decide** — el alimento entra, el juguete no (`BIO_EXPEDIENTE` E2bis).
+   * Sin este dato, decir *«quedó en el expediente de Thor»* por cada ítem
+   * con destino sería verosímil-falso (L-139).
+   *
+   * ⚠️ **`false` NO ES UNA AFIRMACIÓN, Y LA PANTALLA NO PUEDE TRATARLO COMO
+   * TAL.** Tapa TRES causas distintas y no las distingue: ① la familia del
+   * producto no entra al expediente (un juguete) · ② el ítem todavía no
+   * tiene destino atado · ③ la fila existe pero **su mascota no es
+   * legible por quien mira** (la RLS de `evento_producto_asignacion` es
+   * `user_tiene_acceso_a_mascota`). *Un agregado sobre causas distintas no
+   * mide ninguna.*
+   * ⇒ **`true` habilita a decirlo; `false` habilita a CALLAR, jamás a decir
+   * «no quedó en el expediente».** Es la misma disciplina que `destino`
+   * declara dos campos más arriba.
+   */
+  sedimentado: boolean;
 }
 
 export interface SeguimientoEnvio {
@@ -192,7 +216,12 @@ export async function obtenerDetallePedido(
       .maybeSingle(),
     cliente
       .from('pedido_items')
-      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento, pedido_item_destinos(mascota_id, es_donacion)')
+      // `evento_producto_asignacion` va EMBEBIDO, no en un viaje aparte: existe
+      // la FK `evento_producto_asignacion_pedido_item_id_fkey`, así que viaja
+      // en la MISMA ola (N16.1 / L-223 — el peaje por petición es ~150 ms y no
+      // depende de cuánto traiga). Se pide solo el id: alcanza para saber que
+      // la fila EXISTE, y nada del expediente ajeno baja al teléfono.
+      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento, pedido_item_destinos(mascota_id, es_donacion), evento_producto_asignacion(id)')
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
@@ -233,6 +262,15 @@ export async function obtenerDetallePedido(
           mascota_id: typeof d.mascota_id === 'string' ? d.mascota_id : null,
           donacion: d.es_donacion === true,
         };
+      })(),
+      // Sedimentó ⟺ EXISTE la fila. PostgREST entrega el embed como arreglo
+      // (1:N) o como objeto según la cardinalidad que infiera de la FK — se
+      // aceptan las dos formas, igual que `pedido_item_destinos` arriba.
+      // *No se lee ningún campo de la fila: la pregunta es si existe.*
+      sedimentado: (() => {
+        const a = i.evento_producto_asignacion;
+        if (Array.isArray(a)) return a.length > 0;
+        return esObjDespensa(a);
       })(),
     });
   }
