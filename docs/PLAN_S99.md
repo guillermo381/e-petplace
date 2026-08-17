@@ -540,3 +540,103 @@ base: censos A4 + C4. **Cada cierre de lote reporta su número.**
 > marcada ALLÁ con puntero a este §4.1, por el precedente de la casa (*dos
 > letras firmadas que se contradicen son peores que una equivocada* — S83
 > magenta · S88 plata). Cero choques sin declarar.
+
+---
+
+# 🔴 ORDEN DE CIERRE DE S99 — LA FRONTERA, PARA LAS CUATRO PISTAS
+
+> **FIRMA DEL FOUNDER:** *«no abramos frentes nuevos, la sesión ya está
+> extensa. Cerremos lo que ya tenemos y posteriormente abrimos una sesión para
+> el PULIDO DE LOS COMPONENTES.»*
+>
+> **Relevada por A (conductora) y depositada acá, no en un chat: el canal
+> entre pistas sigue caído — lo que no está en un archivo, no llegó.**
+> *La frontera se escribe porque si no cada pista la traza distinta, y la
+> diferencia entre «cura» y «pulido» es justo donde se cuela un frente nuevo.*
+
+## ✅ SE CIERRA EN S99 — son CURAS de defectos VIVOS, no pulido
+
+| Qué | Dueño | Por qué es cura y no pulido |
+|---|---|---|
+| 🔴 **La transición del dual que SIGUE SALTANDO** | **D** | **es una REGRESIÓN reportada DOS veces por el founder: funcionaba y dejó de funcionar.** Es lo más alto de la sesión — y su ley ya está escrita (L-269): *declarar alcanza para un hueco, no para una regresión* |
+| **La barra: que FLOTE sobre el fondo** | **B** | el recorte **funciona**; falta el contenedor — la barra está apoyada en una base blanca y por eso el hueco muestra blanco. *El diagnóstico ya está escrito para que B no revise el `fillRule`, que está bien* |
+| **Ícono Y texto adentro del disco** | **B** | el founder **autoriza agrandarlo** (B midió: r ≥ 33 en fila de 64) ⇒ deroga por firma el reparto «nombre solo en el activo» |
+| **El disco más pegado al piso** | **B** | ajuste de la misma pieza |
+| **La moto en PÚRPURA OSCURO** | **B** | revierte su firma anterior. ⚠️ **con moto y cajón los dos oscuros se pierde lo que los distingue**: la salida probable es invertir, **con número y no por intuición** |
+| **«Tu tienda» en DOS SEGMENTOS** (Tu local · Tu stock, **la vitrina adentro del stock**) | **C** | el apilado en dos pisos **muere**: con 563 filas la sección de abajo es inalcanzable. ⚠️ **Costura previa, de B: dos segmentados anidados compiten** y el vendedor no sabe cuál manda |
+| **Administrar con su AFORDANCE VISIBLE** (el chevron por el slot `senal`) | **B** + **C** | es literalmente el hallazgo del founder: *«el precio y el stock se tocan, pero todavía no se VE que se tocan»* |
+| **El nombre «venta de productos»** en la celda de *Vender por e-PetPlace* | **C** | **está mal**: la venta de productos es el MOSTRADOR y vive en ATENDER |
+
+**Del lado de A: cero pendientes de construcción.** Los dos controles de la
+ficha tienen puerta (`ajustarStockVendedor` · `actualizarPrecioOferta`), la
+paginación con total y filtros al servidor está entera, y la propuesta
+pendiente ya viaja con su hecho.
+
+## ☠️ NO SE ABRE — VA A LA SESIÓN DE PULIDO
+
+- **La ficha del repartidor estilo Uber** — foto con calificación superpuesta ·
+  vehículo **dibujado grande** · **la placa como dato principal** · botones al
+  pie. **Es trabajo NUEVO, no un ajuste.**
+- **La lista de hitos CON HORA** debajo de la escalera de nodos. *A ya declaró
+  que el dato existe del lado del motor y que exponerlo es una línea* —
+  **anotado para esa sesión, no para ésta.**
+- **Las tarjetas como superficies separadas** (*«apilan objetos, no filas»*) —
+  es el corazón de la sesión de pulido.
+- **D-825** (las 11 piezas en `easeOut`): sigue **solo-baja, se cura al TOCAR**
+  cada pieza. *Pasar cerca no es tocar.*
+
+## 📚 LAS TRES REFERENCIAS Y SU LECTURA — depositadas para que el pulido NO las re-derive
+
+**Firma del founder:** *«importé la ficha de Rappi de cómo se ven los glifos
+arriba y el flujo del pedido… y te comparto cómo Uber lo muestra, incluso cómo
+muestra LA FICHA DEL CONDUCTOR, que para mí sería LA FICHA DEL REPARTIDOR. Si
+notás, se ve que HAY UN DISEÑO DETRÁS, se siente que es UNA SUPERFICIE PREMIUM
+en las dos.»* (PedidosYa · Uber ×2)
+
+**LO QUE LA MESA LEYÓ, y NO es estética: es ESTRUCTURA.**
+1. 🔴 **TODO VIVE EN TARJETAS SEPARADAS POR AIRE, NO EN UNA LISTA CONTINUA.**
+   Cada bloque —el paso a paso, la entrega estimada, el conductor— es una
+   **superficie propia** con su fondo, su radio y su respiro. **Nuestra
+   pantalla apila FILAS; la de ellos apila OBJETOS.** *Eso es lo que produce
+   el «hay un diseño detrás» — y por eso el pulido no es pintura.*
+2. **Los nodos:** activo = **disco RELLENO con ícono blanco adentro** ·
+   pendiente = **contorno gris**. **Sin estados intermedios: o pasó o no
+   pasó.** (Confirma el trabajo de B y le da el tratamiento.)
+3. 🔴 **La mitad que nuestra escalera NO tiene:** debajo del recorrido, **cada
+   paso se repite como LÍNEA CON SU HORA EXACTA** (*«recibimos tu pedido
+   12:13» · «el local está preparando 12:15» · «está en camino 12:32»*, y el
+   que falta en gris). **El recorrido de arriba se lee de un vistazo; la lista
+   de abajo dice CUÁNDO.** *Son dos lecturas distintas del mismo hecho y las
+   dos hacen falta.*
+4. El paso **activo va en negrita y con su acción al lado** («Ver mapa»); los
+   cumplidos, en gris con su visto.
+5. La **entrega estimada es su propia tarjeta**, con reloj, **en RANGO** y con
+   el número grande — que es lo que ya está firmado.
+
+**LA FICHA DEL CONDUCTOR DE UBER = LA FICHA DEL REPARTIDOR:** foto **circular
+con la calificación superpuesta en su borde** · **el vehículo dibujado
+grande** al lado de la foto (no un ícono chico: **el objeto**) · **la PLACA
+como el dato más pesado**, arriba a la derecha en negrita, con modelo y color
+debajo en gris · **acciones en una fila al pie**: mensaje ancho, teléfono
+cuadrado, «más» cuadrado.
+**Y la razón de la jerarquía, que es la que hay que copiar: LA PLACA MANDA
+PORQUE ES LO QUE SE VERIFICA EN LA CALLE.** Para el pasajero, que el auto que
+llegó es el suyo; para nosotros, **que la moto que toca el timbre es la que
+dice la app.** *Ya estaba firmado —«estándar Rappi/Uber, sí»— y esto le pone
+la forma.*
+
+> ⚠️ **LO QUE FALTA Y ALGUIEN TIENE QUE PONER: las tres capturas NO están en
+> el repo.** El ANÁLISIS quedó acá; **las imágenes viven en el chat, y el chat
+> muere.** Quien las tenga las deja en `docs/laminas/referencias/` antes de
+> que abra el pulido — *si no, esa sesión arranca leyendo una descripción de
+> algo que no puede mirar, que es exactamente el modo de falla que este
+> depósito viene a evitar.*
+
+## LO QUE CADA PISTA HACE AL CERRAR SU ÚLTIMA TANDA (las tres, sin excepción)
+1. **HANDOFF AL FRENTE de su parte**, con la cola viva y **su próximo paso
+   ejecutable** — no el relato de cómo llegó.
+2. **Rama en origin VERIFICADA POR SHA** (`git ls-remote` imprimiendo un sha
+   que coincide con `rev-parse` local — **jamás por código de salida**, L-239).
+3. **El universo de lo NO hecho, sin maquillar.** *Una cola que se declara
+   vacía cuando no lo está le cuesta a la sesión siguiente el doble: primero
+   descubrirlo, después no confiar en el resto del parte.*

@@ -13,10 +13,25 @@
  * ── LOS SEIS ESCALONES, Y LO QUE ADMINISTRAR AGREGA ──────────────────────
  * ① foto · ② nombre+presentación · ③ precio (+$/kg) · ④ composición y
  * alérgenos · ⑤ para quién sirve · ⑥ disponibilidad.
- * En `Administrar` los seis **siguen estando** y encima aparecen el estado
- * y el alcance. **Se agrega ARRIBA, jamás se reemplaza abajo** (receta §1):
- * *si administrar cambia la anatomía, el vendedor deja de ver lo que ve la
- * familia y el espejo se vuelve una tabla con otro nombre.*
+ * ⚠️ **ENMENDADO POR LA RECETA DE LA FICHA ADMINISTRAR (B, 18-ago).** Acá
+ * decía *«se agrega ARRIBA, jamás se reemplaza abajo»*, y esa mitad seguía
+ * siendo cierta —la anatomía no se toca— **pero llevaba los controles a un
+ * bloque aparte**, que es exactamente lo que el founder reportó: *«lo veo y
+ * no identifico cómo lo edito»*. **El control no faltaba: no estaba donde
+ * está el dato.**
+ *
+ * > **LA LEY QUE RIGE AHORA: administrar no agrega un bloque — ENCIENDE EL
+ * > CONTROL SOBRE EL DATO.**
+ *
+ * Y así el espejo se cumple MEJOR, no peor: *cambiar de modo cambia CÓMO se
+ * ve, jamás QUÉ se ve* — **un bloque (o un botón) que solo existe en un modo
+ * SÍ es «qué se ve»**. Con el control encima del dato, las dos caras tienen
+ * la misma anatomía: ni una fila de más, ni una de menos.
+ *
+ * **Qué queda arriba, y por qué es correcto que quede:** estado de
+ * publicación y alcance — *lo que la familia no ve en NINGUNA forma, así que
+ * no tiene dato espejado sobre el cual apoyarse*. Lo que sí tiene espejo
+ * (precio, stock) **bajó a su dato**.
  *
  * ── 🔴 LOS TRES HUECOS DECLARADOS, medidos y no supuestos ────────────────
  * ① **El carrusel a sangre 4:3 vive DENTRO de `FichaPrestador` y no está
@@ -75,6 +90,8 @@ import { monto, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { InterruptorEspejo, modoDesdeParam, type ModoEspejo } from '@/components/interruptor-espejo';
 import { HojaAjusteStock } from '@/components/hoja-ajuste-stock';
+import { DatoAdministrable } from '@/components/dato-administrable';
+import { HojaPrecio } from '@/components/hoja-precio';
 import { contextoVentas, type ContextoVentas } from '@/lib/cuenta-ventas';
 import { precioPorKg } from '@/lib/precio-por-kg';
 
@@ -89,6 +106,12 @@ type Pantalla =
       /** El SKU de ESTE vendedor para este producto. `null` = el producto
        *  existe en el catálogo y él no lo ofrece — caso legítimo, no error. */
       sku: SkuDelVendedor | null;
+      /** Los SKUs POR VARIANTE. La capa de administración usa uno solo,
+       *  pero **el precio se edita por presentación** —un producto puede
+       *  tener hasta cuatro— y la banda es de la variante, no del
+       *  producto. *Un solo SKU acá haría que la bolsa de 3 kg heredara la
+       *  banda de la de 15.* */
+      skuPorVariante: Record<string, SkuDelVendedor>;
     };
 
 export default function FichaProductoEspejo() {
@@ -104,6 +127,8 @@ export default function FichaProductoEspejo() {
   const [intento, setIntento] = useState(0);
   /** El SKU que se está ajustando. `null` = la Hoja no está montada. */
   const [ajustando, setAjustando] = useState<SkuDelVendedor | null>(null);
+  /** La oferta cuyo precio se está cambiando. `null` = la Hoja no está. */
+  const [editandoPrecio, setEditandoPrecio] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -143,10 +168,16 @@ export default function FichaProductoEspejo() {
            SKUs falla, la capa de administración NO se inventa: el modo
            cliente sigue siendo verdad y administrar lo dice. */
         const variantes = new Set(rFicha.data.variantes.map((v) => v.variante_id));
-        const sku = rSkus.ok
-          ? (rSkus.data.find((s) => variantes.has(s.variante_id)) ?? null)
-          : null;
-        setPantalla({ estado: 'listo', contexto: ctxData, ficha: rFicha.data, sku });
+        const mios = rSkus.ok ? rSkus.data.filter((s) => variantes.has(s.variante_id)) : [];
+        const skuPorVariante: Record<string, SkuDelVendedor> = {};
+        for (const m of mios) skuPorVariante[m.variante_id] = m;
+        setPantalla({
+          estado: 'listo',
+          contexto: ctxData,
+          ficha: rFicha.data,
+          sku: mios[0] ?? null,
+          skuPorVariante,
+        });
       })();
       return () => {
         vigente = false;
@@ -252,6 +283,8 @@ export default function FichaProductoEspejo() {
                 ficha={pantalla.ficha}
                 modo={modo}
                 plata={plataDe(pantalla.contexto)}
+                skuPorVariante={pantalla.skuPorVariante}
+                alEditarPrecio={(ofertaId) => setEditandoPrecio(ofertaId)}
               />
 
               {/* ④ COMPOSICIÓN Y ALÉRGENOS */}
@@ -278,6 +311,28 @@ export default function FichaProductoEspejo() {
           desmontaría y se perdería lo tipeado. *El modo cambia CÓMO se
           mira; no puede cancelar un acto en curso.* Al guardar se re-lee,
           porque el stock que muestra la ficha lo trae el mismo lector. */}
+      {/* LA HOJA DEL PRECIO — al pie, fuera del scroll, como sus hermanas.
+          El SKU de la variante editada es de donde salen la referencia y la
+          banda: **la banda es de la presentación, no del producto**. */}
+      <HojaPrecio
+        ofertaId={editandoPrecio}
+        sku={
+          pantalla.estado === 'listo' && editandoPrecio !== null
+            ? (pantalla.ficha.variantes
+                .filter((v) => v.oferta_id === editandoPrecio)
+                .map((v) => pantalla.skuPorVariante[v.variante_id] ?? null)[0] ?? null)
+            : null
+        }
+        plata={
+          pantalla.estado === 'listo' ? plataDe(pantalla.contexto) : (n: number) => String(n)
+        }
+        onCerrar={() => setEditandoPrecio(null)}
+        onGuardado={() => {
+          setEditandoPrecio(null);
+          setIntento((n) => n + 1);
+        }}
+      />
+
       <HojaAjusteStock
         sku={ajustando}
         onCerrar={() => setAjustando(null)}
@@ -347,10 +402,14 @@ function Presentaciones({
   ficha,
   modo,
   plata,
+  skuPorVariante,
+  alEditarPrecio,
 }: {
   ficha: FichaProducto;
   modo: ModoEspejo;
   plata: (v: number) => string;
+  skuPorVariante: Record<string, SkuDelVendedor>;
+  alEditarPrecio: (ofertaId: string) => void;
 }) {
   const { t } = useTraduccion();
   return (
@@ -366,7 +425,14 @@ function Presentaciones({
       </View>
 
       {ficha.variantes.map((v) => (
-        <FilaPresentacion key={v.variante_id} v={v} modo={modo} plata={plata} />
+        <FilaPresentacion
+          key={v.variante_id}
+          v={v}
+          modo={modo}
+          plata={plata}
+          sku={skuPorVariante[v.variante_id] ?? null}
+          alEditarPrecio={alEditarPrecio}
+        />
       ))}
 
       {ficha.variantes.length === 0 && (
@@ -382,10 +448,14 @@ function FilaPresentacion({
   v,
   modo,
   plata,
+  sku,
+  alEditarPrecio,
 }: {
   v: VarianteDeProducto;
   modo: ModoEspejo;
   plata: (n: number) => string;
+  sku: SkuDelVendedor | null;
+  alEditarPrecio: (ofertaId: string) => void;
 }) {
   const { t } = useTraduccion();
   const porKg = precioPorKg(v.precio, v.peso_kg);
@@ -393,15 +463,47 @@ function FilaPresentacion({
   return (
     <View style={{ gap: spacing[1] }}>
       <Texto variante="cuerpo">{v.presentacion}</Texto>
-      {v.precio === null ? (
-        /* NULO HONESTO: la variante existe y hoy no se puede comprar.
-           Decir $0 sería mentir; esconderla, esconder catálogo. */
-        <Texto variante="apoyo" color="tertiary">
-          {t('ventas.producto.sinPrecio')}
-        </Texto>
-      ) : (
-        <Texto variante="titulo">{plata(v.precio)}</Texto>
-      )}
+      {/* 🔴 EL PRECIO ES EL SEGUNDO DATO ADMINISTRABLE, Y HOY NO SE
+          ENCIENDE — el freno se mantiene, con su medición.
+          La receta le pide su control (§4: un control con DOS resultados
+          —libre dentro de ±15 %, propuesta fuera—, jamás dos controles), y
+          **el motor no existe**: medido contra el objeto, ni
+          `actualizar_precio_oferta` ni `precio_referencia` están en la
+          base. *Un formulario muerto es peor que su ausencia*, y uno que
+          además promete una banda que nadie puede calcular mentiría dos
+          veces: al ofrecer y al confirmar.
+          ⚠️ **Y su `NULL` no puede leerse como «no hay límite»** cuando
+          llegue — es la trampa exacta de `AvisoAlergia`: el silencio se
+          lee como permiso.
+          Por eso el dato **ya viaja envuelto**: el día que el motor exista
+          entra por acá con su `onEditar` y su Hoja, sin tocar la anatomía.
+          Y falta su otra mitad, que la receta declara y no es opcional:
+          **la propuesta pendiente vive EN LA FICHA, sobre el precio** —
+          *un cambio que se acepta y desaparece se lee como que se perdió, y
+          la segunda vez el vendedor deja de pedir.* */}
+      {/* ✅ EL PRECIO SE ENCIENDE — el freno se pagó el mismo día. El motor
+          llegó completo (`actualizar_precio_oferta` con su banda y sus dos
+          rebotes hablados), así que el control entra por donde el dato ya
+          estaba envuelto: **sin tocar la anatomía**.
+          ⚠️ **Solo con oferta publicada**: sin `oferta_id` no hay qué
+          mover, y ofrecerlo igual sería una puerta que rebota (Ley 23).
+          El caso «propuse y no está publicada» no es editable acá y su
+          voz vive en la capa de arriba, que es donde ese estado vive. */}
+      <DatoAdministrable
+        modo={modo}
+        onEditar={v.oferta_id === null ? undefined : () => alEditarPrecio(v.oferta_id as string)}
+        etiqueta={t('ventas.precio.titulo')}
+      >
+        {v.precio === null ? (
+          /* NULO HONESTO: la variante existe y hoy no se puede comprar.
+             Decir $0 sería mentir; esconderla, esconder catálogo. */
+          <Texto variante="apoyo" color="tertiary">
+            {t('ventas.producto.sinPrecio')}
+          </Texto>
+        ) : (
+          <Texto variante="titulo">{plata(v.precio)}</Texto>
+        )}
+      </DatoAdministrable>
       {/* EL PRECIO POR KILO — mono porque es un CÁLCULO (Ley 3), y esa
           diferencia tipográfica es justo su valor: nadie lo pone, nosotros
           sí. Modo administrar hasta que la ficha de la familia lo tenga
@@ -521,11 +623,26 @@ function Disponibilidad({
   return (
     <View style={{ gap: spacing[2] }}>
       <Texto variante="seccion">{t('ventas.producto.disponibilidadTitulo')}</Texto>
-      <Texto variante="cuerpo" color={hay ? 'secondary' : 'warning'}>
-        {hay
-          ? t('ventas.producto.hayStock', { n: sku.stock_disponible })
-          : t('ventas.producto.sinStock')}
-      </Texto>
+      {/* 🔴 ACÁ SE ENCIENDE EL CONTROL SOBRE EL DATO — la ley de la receta
+          de B: **administrar no agrega un bloque, enciende el control**.
+          El número se sigue viendo EXACTAMENTE como lo ve la familia; lo
+          único que cambia es que **se puede tocar**.
+          *Antes el ajuste era un botón aparte debajo, y antes de eso una
+          pantalla entera: las dos veces el control estaba en otro lado que
+          el dato, que es literalmente lo que el founder reportó.*
+          Y así el espejo se cumple MEJOR que antes: un bloque —o un botón—
+          que solo existe en un modo **sí es «qué se ve»**. */}
+      <DatoAdministrable
+        modo={modo}
+        onEditar={() => alAjustar()}
+        etiqueta={t('ventas.stock.ajustarCta')}
+      >
+        <Texto variante="cuerpo" color={hay ? 'secondary' : 'warning'}>
+          {hay
+            ? t('ventas.producto.hayStock', { n: sku.stock_disponible })
+            : t('ventas.producto.sinStock')}
+        </Texto>
+      </DatoAdministrable>
       {/* La vitrina NO esconde lo sin stock (medido en `razonesDeAlcance`):
           la compra rebota en la reserva. El vendedor tiene que saber que se
           sigue viendo. */}
@@ -543,20 +660,6 @@ function Disponibilidad({
         <Texto variante="apoyo" color="tertiary">
           {t('ventas.stock.reservadas', { n: sku.stock_reservado })}
         </Texto>
-      )}
-      {/* EL AJUSTE — solo en Administrar, y **debajo del número**: se toca
-          después de leer cuánto hay, que es el orden en que se cuenta. En
-          «Ver como cliente» no se dibuja, y no por permisos: **la familia
-          no ajusta stock, así que el espejo no puede mostrarlo** (N17). */}
-      {modo === 'administrar' && (
-        <View style={{ alignSelf: 'flex-start', paddingTop: spacing[1] }}>
-          <Boton
-            variante="secundario"
-            tamaño="sm"
-            etiqueta={t('ventas.stock.ajustarCta')}
-            onPress={alAjustar}
-          />
-        </View>
       )}
     </View>
   );

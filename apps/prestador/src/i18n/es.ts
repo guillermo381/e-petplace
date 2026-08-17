@@ -3217,6 +3217,10 @@ export const prestadorEs = {
       /* Con el conteo del servidor el aviso deja de ser indicio. */
       catalogoCortadoExacto: 'Hay {{hay}} productos en el catálogo y estás viendo {{ves}}.',
       viendo: 'Viendo {{n}} de {{de}}',
+      /* Sin total del servidor no se inventa un denominador. */
+      viendoSinTotal: 'Viendo {{n}}',
+      /* El final se DICE: si no, «terminó» y «falló» se ven igual. */
+      finDeLista: 'No hay más productos.',
       leFaltan: 'Le faltan {{n}}',
       /* Rótulos de FILA — el nombre de la razón, no su instrucción.
          Su versión con camino vive en `ventas.producto.razon_*`. */
@@ -3334,6 +3338,19 @@ export const prestadorEs = {
       exitoFactura: 'Factura registrada.',
       exitoDespachado: 'Despachado.',
       exitoEntregado: 'Entregado.',
+    },
+    /* EL PRECIO — un control con DOS resultados. La voz cambia ANTES de
+       confirmar: el vendedor no descubre el resultado al apretar. */
+    precio: {
+      titulo: 'Cambiar el precio',
+      campo: 'Precio',
+      referencia: 'Precio de referencia: {{monto}}',
+      rango: 'Podés moverte entre {{min}} y {{max}} sin pedir permiso.',
+      avisoFuera: 'Ese precio queda fuera del rango: se guarda como propuesta y lo revisamos.',
+      sinReferencia: 'Todavía no calibramos este producto, así que cualquier cambio pasa por aprobación.',
+      guardarCta: 'Guardar el precio',
+      proponerCta: 'Proponer este precio',
+      exito: 'Precio actualizado.',
     },
     stock: {
       disponibles: '{{n}} disponibles',

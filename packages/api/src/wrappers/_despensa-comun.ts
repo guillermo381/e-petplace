@@ -46,6 +46,11 @@ export const CODIGOS_ERROR_DESPENSA = [
   // El CHECK `stock_disponible >= 0` de `vendedor_skus` es el que rebota la
   // sobrerreserva — llega como violación de constraint, no como RAISE.
   'sin_stock',
+  // S99 · la banda de precio — los dos rebotes que la superficie TIENE que
+  // poder decir: sin ellos el vendedor ve «algo salió mal» sobre una decisión
+  // de producto que sí tiene explicación.
+  'sin_referencia_de_precio',
+  'fuera_de_banda',
   // empacar_pedido
   'lote_requerido',
   // entregar_pedido
@@ -177,6 +182,11 @@ export const MENSAJES_DESPENSA: Record<
   oferta_no_publicada:          'Uno de los productos ya no está disponible.',
   item_sin_sku:                 'Uno de los productos perdió su referencia de stock.',
   sin_stock:                    'No hay stock suficiente para uno de los productos.',
+  // ⚠️ Estos dos mensajes son el FALLBACK: el motor manda el suyo CON LOS
+  // NÚMEROS (la referencia y los dos extremos), y la pantalla muestra ése.
+  // *Un rechazo que no dice la banda obliga a adivinar por tanteo.*
+  sin_referencia_de_precio:     'Todavía no está cargado el precio de referencia: tu cambio quedó guardado para aprobación.',
+  fuera_de_banda:               'Ese precio queda fuera del rango que podés mover: quedó guardado para aprobación.',
   lote_requerido:               'Falta registrar el lote de los productos.',
   sin_acceso_a_mascota:         'No tenés acceso a esa mascota.',
   senal_no_existe:              'Esa señal no existe.',

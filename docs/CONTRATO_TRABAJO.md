@@ -428,6 +428,43 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 ---
 
+### Enmienda Sesión 99 — EL WORKTREE AÍSLA EL ÁRBOL, **NO NECESARIAMENTE LOS PAQUETES** (corolario de la regla 85, MEDIDO)
+
+**Hallazgo de D:** en su worktree, `apps/prestador/node_modules/@epetplace/{api,domain,i18n,ui}` resuelve a los `packages/*` **DEL REPO PRIMARIO**, no a los suyos. **Su lectura del riesgo es correcta y es fea:** *una pista que edite `packages/ui` en su worktree no vería su cambio en su propia app y podría concluir que no funciona* — **el modo de falla es que su pieza «no anda» y la pieza esté bien.**
+
+**🔴 PERO LA MEDICIÓN A LOS CUATRO CORRIGE EL ALCANCE, y al revés de como se leía:**
+
+| worktree | `@epetplace/ui` resuelve a |
+|---|---|
+| primario | el suyo |
+| `s99-a` | **el suyo** |
+| `s99-b` | **el suyo** |
+| `s99-c` | **el suyo** |
+| **`s99-d`** | 🔴 **EL PRIMARIO** — el único |
+
+⇒ **D midió bien SU worktree y lo generalizó a los cuatro.** *El aviso decía «esto es directo para B, que vive en `packages/ui`» — y el worktree de B resuelve a sí mismo: **está a salvo, aunque no por diseño sino por cómo se creó su `node_modules`**.*
+
+**⇒ LA REGLA, en su forma correcta: el estado de `node_modules` de un worktree es UN DATO, no una propiedad del mecanismo — se MIDE, no se deduce.** Una línea lo dice:
+```
+cd apps/<app>/node_modules/@epetplace/ui && pwd -P
+```
+*Si imprime otro repo, lo que ves de esa pieza no es tu rama.*
+
+### 🔴 EL TERCER ESTADO — «ENGANCHADO AL PRIMARIO» (nombrado acá porque nadie lo había declarado)
+
+Un worktree cuyos `@epetplace/*` resuelven al repo primario **no está aislado
+ni sincronizado: está ENGANCHADO.** Y conviene tener el nombre, porque las dos
+etiquetas que existían describen mal lo que le pasa.
+
+**Y LA CONSECUENCIA COMPLETA DE ESTAR ENGANCHADO —que es la que explica el caso de D entero—:** ve **`main`** de esos paquetes, **no su propia rama Y TAMPOCO lo que otra pista tenga sin mergear.** Es decir: **recibe los merges de la conductora al instante sin mergear nada, y no ve nada de sus vecinas hasta que la conductora lo baje.** *Ni aislado ni sincronizado: **enganchado**.* **Y su asimetría es lo que
+desorienta: recibe de la conductora sin pedir, y de sus vecinas no recibe
+nada.** *Es literalmente por qué el primario ya tenía los glifos y su worktree
+los servía viejos.*
+
+**🔴 Y LA DISCIPLINA QUE RIGE PARA LAS CUATRO PASE LO QUE PASE (ésta no depende del symlink): Metro se levanta con `--clear` al arrancar y DESPUÉS DE CADA MERGE QUE TOQUE `packages/*`.** La causa inmediata del caso de D fue **caché de transformación**: el primario ya tenía los glifos y Metro servía la versión anterior. *Es primo del ya conocido —un Metro vivo desde antes de un merge es tan viejo como el de otra pista— **con la vuelta de tuerca de que el merge que lo desactualizó fue el de la CONDUCTORA al primario, no el propio**.*
+
+---
+
 ### Enmienda Sesión 99 — EL MERGE A `main` ES DE UNA SOLA MANO (regla 88)
 
 > **Con varias pistas en vuelo, `main` lo escribe UNA sola pista — la

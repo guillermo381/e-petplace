@@ -1204,6 +1204,7 @@ export {
   // «motor sin puerta» fue exactamente un wrapper sin barrel.
   razonesDeAlcance,
   ajustarStockVendedor,
+  actualizarPrecioOferta,
   // S99 · los dos lectores de C (mesa 17-ago) + la carga determinista L5a
   // — al barrel EN EL MISMO COMMIT (la clase motor-sin-puerta no suma más).
   viajesPorRepartidor,

@@ -11711,6 +11711,21 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-272 — UN FIXTURE QUE ENTRA POR LA PUERTA PRUEBA DOS COSAS: LA SUYA Y LA DE LA PUERTA (S99 — lectura de D; cuatro cobros propios de A la confirman; depositada por orden de mesa, 16-ago-2026).**
+
+  **LAS CUATRO CORRECCIONES QUE EL MOTOR LE HIZO A LA SIEMBRA, entre dos actos y sin que ninguna se esquivara:**
+
+  | # | El gate | Lo que enseñó |
+  |---|---|---|
+  | ① | `oferta_no_publicada` | el contrato pide **`oferta_id`, no `sku_id`** — leído del CUERPO, porque la firma decía `p_items jsonb` y no alcanzaba (regla 40) |
+  | ② | `confirmacion_de_pago_no_es_del_cliente` | *«ese camino es del webhook de la pasarela, no de una sesión de persona»* — el claim tenía que estar LIMPIO |
+  | ③ | `pago_sin_reserva` | **la reserva va ANTES del pago**: confirmarlo dejaría el pedido listo para preparar sin mercadería apartada |
+  | ④ | `permission denied for function _mover_estado_pedido` | **la máquina de estados NO es una puerta pública** — `authenticated` no la ejecuta, y está bien |
+
+  **⇒ La lectura de D, que es la lección: *un fixture que entra por la puerta prueba dos cosas: la suya y la de la puerta.*** Y su consecuencia, que da vuelta cómo se leen esos rebotes: **cuatro gates cobraron y ninguno se esquivó — eso es EVIDENCIA ACUMULADA de que el motor está bien cerrado, no una molestia de la siembra.** *Cada rebote es un test que nadie escribió y que se corrió gratis; sembrar por INSERT directo no habría probado ninguno de los cuatro — y tampoco los habría necesitado, que es exactamente el problema.*
+
+  **Y LA SEGUNDA MITAD, del método: EL CASO DE PRUEBA SE FABRICA POR CONSTRUCCIÓN, NO POR SUERTE.** Para darle a D dos pagos en el MISMO instante no se corrió rápido cruzando los dedos: los dos pagos ocurren **en una sola transacción**, y **`now()` no avanza dentro de una transacción** (L-122a) ⇒ **el empate es una certeza, no una probabilidad.** *La misma propiedad que produjo el defecto de toda la jornada (L-271) es la que fabrica su caso de prueba* — y el fixture verifica **el empate**, no el conteo, porque *dos pagos con instantes distintos son justo el caso que el guard ya probaba.*
+
 - **L-271 — LA PAGINACIÓN SIN ORDEN ESTABLE NO ES PAGINACIÓN: ES UNA LOTERÍA QUE SE VE PROLIJA (S99 — hallazgo de A al escribir el pedido de los 722; elevada a ley por la mesa, 16-ago-2026).**
 
   **El hecho:** un lector sin `ORDER BY` deja que Postgres devuelva el orden que quiera, **y que lo cambie entre corridas**. Sin techo no se nota. **Con páginas, la página 2 repite y saltea filas de la 1** — y la lista se ve impecable las dos veces.
@@ -11752,7 +11767,11 @@ defecto que se curó hoy en el cambio de clave.
   arriba — sin error.** Probado el 16-ago: pedir la vitrina ordenada por
   `productos.nombre` devolvió *Broadline · Advantix · CORDERO · GASTRO*.
   *Es la familia L-235 en una herramienta ajena: el instrumento contesta que
-  sí y hace otra cosa.* ⇒ **ordenar por una columna que vive en un embed
+  sí y hace otra cosa.* **Y LO QUE VUELVE CREÍBLE LA TRAMPA ES LA ASIMETRÍA,
+  también medida: el FILTRO por esa MISMA columna embebida SÍ funciona** (se
+  buscó «advantix»: 5 resultados, los 5 coinciden). ⇒ *uno prueba el filtro,
+  anda, y da por bueno el `order` — el instrumento contestó bien una pregunta
+  VECINA.* ⇒ **ordenar por una columna que vive en un embed
   exige una VISTA que la aplane** (`v_skus_vendedor`, S99) — y quien escriba
   `referencedTable` en un `order` tiene que verificar el RESULTADO, no la
   ausencia de error.
@@ -11944,6 +11963,12 @@ defecto que se curó hoy en el cambio de clave.
   **Su aplicación al ratchet, que viaja con la ley:** R48 cuenta `variante="…"` y NO la palabra suelta — contarla metería las lápidas de `Campo` en el contador de `Boton`, **haciendo que documentar una muerte aumente una deuda ajena.**
 
   **Y al acta: TERCERA vez en la sesión que un dato técnico de mesa lo corrige la medición** (el anillo del pin · el «26 curados» · esta trampa — que era real a medias: había qué proteger, pero no era código). El corolario vigente sigue siendo el correcto: **el dato de mesa viaja como hipótesis a verificar, jamás como premisa.**
+
+  > **📌 ACTUALIZACIÓN AL CIERRE DE S99 — SON CINCO, y la quinta es la que le da forma final al corolario.** A las tres de arriba se suman **la lectura del frame de la barra** (superseded por el video) y **la generalización del symlink del worktree**: la mesa midió en UNA pista y lo dio por cierto en las CUATRO — *«esto es directo para B»*, y el worktree de B resolvía a sí mismo. **La mesa DEDUJO del mecanismo lo que era un dato del ENTORNO.**
+  >
+  > **Y es la primera de las cinco que se ataja ANTES de costar**, porque la pista **midió en vez de ejecutar**: si el aviso viajaba tal cual, B salía a buscar un problema que no tenía.
+  >
+  > **⇒ LA FORMA FINAL DEL COROLARIO, con la mitad que faltaba: cuando la mesa GENERALIZA la medición de UNA pista a las cuatro, ESA GENERALIZACIÓN ES EL DATO A VERIFICAR** — no el hallazgo original, que suele estar bien. *Lo que falla no es la medición: es el salto de «lo medí acá» a «pasa en todos lados», y ese salto no lo hace el que midió.*
 
 - **L-249 — TODA PANTALLA-ÚNICA (SIN BARRA, SIN PILA) DECLARA SU SALIDA AL NACER (S99 — hallazgo del aparato en el cierre de L2; depositada por orden de mesa, 17-ago-2026).**
 
@@ -17473,6 +17498,14 @@ lanzamiento tenemos que borrar eso».*
 >    ofertas publicadas — 18 con los dos con stock y precio distinto, 3 donde
 >    el segundo tiene y el primero se agotó **a propósito**, 3 al revés.
 > 3. **El segundo pedido pagado** (`SIEMBRA-S99-FIFO-2`) del turno anterior.
+> 3b. **DOS pedidos pagados EN EL MISMO INSTANTE** (`SIEMBRA-S99-EMPATE-1/2`),
+>    para que el guard del FIFO de D pueda probar el caso de empate. **El
+>    empate se fabricó por construcción, no por suerte: los dos pagos ocurren
+>    en UNA transacción y `now()` no avanza dentro de ella.** *El mismo
+>    mecanismo que produjo el defecto fabrica su caso de prueba.* Resultado en
+>    la cuenta: **4 pagados vivos · 3 instantes · 1 empate** — o sea que el
+>    conjunto sirve para las DOS mitades del guard (discriminar con horas
+>    distintas, y no quedar al azar cuando empatan).
 >
 > 4. **🔴 UNA OFERTA PUBLICADA POR UN CINTURÓN, declarada porque la encontré
 >    midiendo otra cosa:** el brazo discriminador de
