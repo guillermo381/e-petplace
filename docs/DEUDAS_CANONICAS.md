@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-283 — CUANDO UN EFECTO NO APARECE DESPUÉS DE VARIOS INTENTOS DE CALIBRACIÓN, LA PREGUNTA DEJA DE SER *CUÁNTO* Y PASA A SER *SI LA ANATOMÍA PUEDE PRODUCIRLO* (S99 — ocho gates de la barra; depositada 16-ago-2026).**
+
+  **El caso, con su literal (B):** ***«UN PLANO Y UN ARCO NO PRODUCEN UN CAMBIO DE SIGNO: PRODUCEN UN CODO. Lo único fuera del plano era la joroba. Por eso no hay S: NO HABÍA DOS SIGNOS QUE ALTERNAR.»*** El hombro eran **50 px dead-flat seguidos de un arco de circunferencia** — y un arco tiene **curvatura de UN SOLO SIGNO**. ⇒ **la S era INCONSTRUIBLE con esa anatomía, hicieran lo que hicieran con los números.**
+
+  **Ocho gates persiguiendo un efecto que la forma no podía producir.** Cada ronda movió magnitudes —altura de la joroba, radio del valle, viaje— y **ninguna podía funcionar**, porque el defecto no estaba en los valores sino en la **familia de curvas elegida**.
+
+  **⇒ El disparo, para que se note antes del octavo intento: a la SEGUNDA o TERCERA calibración fallida se para de mover números y se pregunta si la forma ADMITE el efecto.** Un plano + un arco no puede dar inflexión; una interpolación monótona no puede dar overshoot; un color plano no puede dar profundidad. *Calibrar una anatomía incapaz produce rondas infinitas que siempre parecen «casi».*
+
+  **Y su gemela de método, que es la que lo hizo visible:** el efecto se volvió medible recién cuando **se midió la referencia en vez de describirla** — cuatro traducciones en prosa («saliente» · «joroba» · «montaña» · «cresta») mandaron a construir un bulto que **la referencia no tiene** (cero columnas sobre el plano, medido). **Tres números terminaron una discusión que cuatro descripciones no pudieron.**
+
 - **L-282 — EL COLOR DE UN TYPECHECK PUEDE VENIR DE UN ARCHIVO GENERADO SIN TRACKEAR: MISMO COMMIT, DOS ÁRBOLES, DOS COLORES (S99 — medido al publicar el último OTA; depositada 16-ago-2026).**
 
   **Medido, no supuesto.** El typecheck de `apps/prestador` dio **ROJO en el repo primario y VERDE en los worktrees de C y D**, sobre **el mismo commit**. Seis errores, todos sobre `/ventas/tienda`, con la forma *«no assignable to … 313 more»*. **El archivo `src/app/ventas/tienda.tsx` EXISTE.**

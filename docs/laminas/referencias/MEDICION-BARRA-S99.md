@@ -74,3 +74,49 @@ Perfilar el borde por columnas y reportar **tres números**: `columnas sobre el 
 (tiene que dar **0**), `profundidad / ancho de hombro` (la vara da **1,08**) y **dónde
 cae la pendiente máxima** (la vara da **28 %**). *Tres números terminan una discusión
 que cuatro descripciones no pudieron.*
+
+---
+
+# ✅ CERRADO POR MEDICIÓN DE B — la causa raíz, y la sospecha confirmada
+
+## ① LA CAUSA RAÍZ: la anatomía no podía producir el efecto
+**El hombro eran 50 px dead-flat + un arco de circunferencia.** Literal de B:
+***«un plano y un arco no producen un cambio de signo: producen un CODO. Lo único
+fuera del plano era la joroba. Por eso no hay S: no había dos signos que alternar.»***
+⇒ **la S era INCONSTRUIBLE**, hicieran lo que hicieran con los números. **Ocho gates.**
+Depositado como **L-283**.
+
+## ② LA SOSPECHA DE ESTE DOCUMENTO, CONFIRMADA POR NÚMERO
+Este archivo dejó escrito —**como sospecha, no como hecho**— que la referencia era un
+valle *profundo y angosto* y lo nuestro un *plato ancho y poco profundo*.
+**Medido: nuestro ratio `0,83` contra `1,08` de la vara — 19,5 px de hombro de más.**
+*La sospecha se declaró como sospecha y la cerró una medición ajena: así se cierra, no
+convirtiéndola en premisa.*
+
+## ③ EL LÍMITE DURO, que hay que decir con la firma
+**La inflexión de la vara cae al 28 %. Lo alcanzable con ANILLO UNIFORME es 50 %, y es
+PISO — no preferencia:** el cambio de signo vive donde el hombro se encuentra con el
+arco, y **ese encuentro no puede pasar del ecuador del disco** o el borde se dobla
+sobre sí mismo. En el ecuador la profundidad ya es 40 %.
+
+**La razón estructural: LA REFERENCIA NO ENVUELVE UN DISCO CON ANILLO UNIFORME** — su
+piso es más ancho y más plano. ***«Son dos geometrías distintas, no la misma peor
+hecha.»*** ⇒ **(a)** anillo uniforme, inflexión al **50 %** · **(b)** soltar el anillo
+uniforme para llegar al **28 %**, que es **derogar la ley de que el disco lleva un
+anillo parejo**.
+
+**VOTO DE MESA: (a), y construir ya.** *El problema nunca fue el porcentaje: era que no
+había inflexión. De «no existe» a «existe al 50 %» es el salto entero; de 50 a 28 es
+afinar.* Si al verlo no alcanza, **(b) es un turno más con el costo ya medido.**
+
+## ④ LO QUE SE CONSTRUYE (ratificado)
+**Muere el hombro plano y muere la joroba.** **Una sola cúbica del plano al arco**:
+sale horizontal, se empina, y entrega al arco **con la misma tangente** — **convexa al
+salir, cóncava al entrar, sin salirse jamás de la línea.** Anillo a **9** (el punto que
+pidió el founder) y el disco **1 px más hundido**.
+**Y el viaje deja de ser un bulto: pasa a ser ASIMETRÍA DEL VALLE** — el hombro de
+adelante se angosta y empina, el de atrás se ensancha. **Material desplazado, sin una
+sola columna arriba del plano.** *Eso es la tela, por fin sin bultos.*
+
+**Alcanzable medido:** columnas sobre el plano **0** (vara 0) · ratio **1,10**
+(vara 1,08) · anillo **9** uniforme.
