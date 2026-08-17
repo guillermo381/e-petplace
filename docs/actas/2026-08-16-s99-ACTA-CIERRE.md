@@ -289,3 +289,43 @@ exigiría **correr el disco más adentro de su tab**. **B no lo decidió.**
 Las **cuatro cosas sin mirar desde hace varias tandas**: el **chevron en Administrar**
 —la pregunta que abrió todo este arco— · el **interruptor del espejo** · **«Tu local ·
 Tu stock»** · el **pin con el par invertido**.
+
+---
+
+## §11 · **EL OTA FINAL DE S99 — la barra COMPLETA**
+
+**Ancla `ea682858`, las dos apps, `dirty: None`.**
+· **PRESTADOR** `01a00def-e6b0…` · group `a5be2bd9` · runtime **1.0.5**
+· **CLIENTE** `01a00df0-a286…` · group `0e65489f` · runtime **1.0.3**
+
+**⚠️ Los dos pies se distinguen SOLO en el octavo carácter** (`01a00de`**f**` vs
+`01a00df`**0**`). *Se distinguen de verdad, pero a simple vista se leen iguales* —
+D-785 sigue viva y el indicador sigue siendo de 8.
+
+**La geometría final, medida sobre lo construido:** columnas sobre el plano **0 en los
+tres casos** · ratio **1,10** reposo · **1,11** viaje · **1,26** extremo (vara 1,08) ·
+**INFLEXIÓN AL 50 % EN LOS TRES** —la condición de esta palanca: **acercó el disco al
+borde SIN TOCAR EL VALLE**— · anillo **9,00** · blanco entre disco y filo **28,4 →
+22,1** · **el disco NO se corre con 3 ni con 4 tabs (0,0)**.
+**Cero números nuevos:** `radius.md = 12` y `spacing[2] = 8` son **escalones de las
+escalas cerradas**.
+
+**🔴 El costo aceptado resultó MUCHO MENOR que el declarado** — y la causa es de método:
+**el hombro medía el trozo equivocado.** *«Lo que importaba no era cuánto SOBRA, era
+cuánto SE COME EL RADIO.»* Re-medido: **hombro 0,0 → 1,8 px · ratio 1,39 → 1,26 ·
+inflexión de 0 % a 25 % del ancho**, a un paso del reposo (35 %). **La pared del extremo
+pasó de ser casi toda esquina a ser casi toda curva.** ⇒ depositado como **la cara
+complementaria de L-285**: *la variable equivocada no tiene sesgo — infla o desinfla
+según de qué lado caiga, y ésta iba a hacerle aceptar al founder un costo que casi no
+existía.*
+
+**Y B curó una nota vencida sin que nadie se lo pidiera** (**L-245bis**): `RADIO_BARRA`
+justificaba su valor con *«el escalón para superficies grandes APOYADAS»* — **una razón
+que caducó el día que la barra fue a sangre**. *La nota no mentía sobre el qué: mentía
+sobre el porqué, y eso ningún lint lo ve.*
+
+**Lo que el founder tiene en la mano:** la barra **completa** —tela · inflexión al 50 %
+en los tres casos · a sangre · disco centrado · íconos centrados · anillo uniforme— más
+las **cuatro que no mira desde hace varias tandas**: el **chevron en Administrar** (la
+pregunta que abrió todo este arco) · el **interruptor del espejo** · **«Tu local · Tu
+stock»** · el **pin con el par invertido**.

@@ -11717,6 +11717,10 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Lo que agrega a la ley de S84** (*«todo freno declara contra qué midió»*): declarar la medición **hace re-abrible** el freno cuando el mundo cambia — es necesario y **cobró**. Pero **no protege del error de fondo**: un número correcto sobre la magnitud equivocada **se lee tan sólido como uno bueno**, y sobrevive a toda re-verificación que se limite a repetir la misma cuenta con datos nuevos.
 
+  **⚠️ SU CARA COMPLEMENTARIA, medida el mismo día y en la misma pieza: la magnitud equivocada también puede hacer parecer PEOR lo que está bien.** El costo declarado del tab del extremo —*«el hombro pasa a 0 px y la S ahí no se lee»*— se midió con el trozo equivocado. Literal de B: ***«lo que importaba no era cuánto SOBRA, era cuánto SE COME EL RADIO»***. Re-medido con la magnitud correcta: **hombro 0,0 → 1,8 px · ratio 1,39 → 1,26 · inflexión de 0 % a 25 % del ancho**, a un paso del reposo (35 %). **La pared del extremo pasó de ser casi toda esquina a ser casi toda curva.**
+
+  ⇒ **La variable equivocada no tiene sesgo: infla o desinfla según de qué lado caiga.** Un freno la usa para descartar de más; **una advertencia la usa para asustar de más** — y ésta iba a hacerle aceptar al founder un costo **que casi no existía**. *Las dos se curan igual: preguntando qué magnitud decide, no repitiendo la cuenta.*
+
   **Regla operativa: al reabrir un freno no se re-corre su cuenta — se re-pregunta QUÉ magnitud decide.** *Si la variable era otra, actualizar los números confirma el descarte en vez de tumbarlo, y el freno se vuelve permanente con evidencia fresca.* **Es la forma más cara de un verde flojo: un NO que se auto-renueva.**
 
 - **L-284 — UN CAMBIO QUE DESTAPA UN DEFECTO LATENTE SE LLEVA LA CULPA DEL DEFECTO (S99 — el valle que mordía el disco; depositada 16-ago-2026).**
@@ -12147,6 +12151,14 @@ defecto que se curó hoy en el cambio de clave.
   **La distinción:** el censo decide el **CONTENIDO**; la ley decide la **FORMA** — y la forma se escribe sin esperar. **El caso:** B tenía tres recetas «bloqueadas por cardinalidad» y solo UNA lo estaba de verdad — la navegación N20, donde seis especies y cuatro necesidades **no se componen como doce y quince**: ahí la cardinalidad SÍ es la forma. Las otras dos (completitud, grilla) tenían su anatomía escribible desde el primer día; esperaban un número que solo iba a llenar celdas.
 
   **COROLARIO EXIGIBLE: antes de declarar una pieza «bloqueada por el censo», nombrar QUÉ número la bloquea y POR QUÉ ese número cambia la forma y no solo el contenido.** Si no se puede nombrar, no está bloqueada — la próxima pista no se frena sola.
+
+- **L-245bis — Y UNA NOTA PUEDE MENTIR SOBRE EL *PORQUÉ* SIN MENTIR SOBRE EL *QUÉ* (S99 — segunda aplicación de L-245 en la misma pieza, sin que nadie la pidiera; depositada 16-ago-2026).**
+
+  **El caso:** `RADIO_BARRA` decía *«`radius.xl` es el escalón que la casa usa para superficies grandes APOYADAS»*. **La nota describía bien el valor y su escala** — lo que había caducado era **su razón**: la barra dejó de estar apoyada el día que fue a sangre. Literal de B: ***«con el cuerpo tocando los cuatro bordes, el radio de arriba ya no describe una superficie flotante: es el remate del filo.»***
+
+  **⇒ Por qué es más difícil de cazar que el caso original de L-245:** aquella era una ley que **no se cumplía** —verificable por grep, 39 usos vivos contra el texto—. **Ésta se cumple: el valor ES `radius.xl` y `radius.xl` ES el escalón de superficies apoyadas.** Todo cierra. **Lo único falso es la premisa de que esto sigue siendo una superficie apoyada** — y eso **ningún lint lo ve**, porque no es una inconsistencia interna: es una descripción que **el mundo dejó atrás**.
+
+  **Regla operativa: cuando una pieza cambia de NATURALEZA —de flotante a a-sangre, de opcional a obligatoria, de una a N— se releen los comentarios que justifican sus constantes, no solo los que las nombran.** *La justificación es la parte que envejece sin dar síntoma.* **Familia de L-166 y L-193.**
 
 - **L-245 — UNA LEY ESCRITA EN UN COMENTARIO NO RIGE NADA (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
 
