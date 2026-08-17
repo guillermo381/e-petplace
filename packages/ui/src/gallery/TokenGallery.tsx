@@ -3550,10 +3550,7 @@ function GaleriaInterna() {
                 presentacion="15 kg"
                 precio={70.9}
                 precioPorUnidad="$4.73 / kg"
-                hayStock
-                cantidad={0}
-                onAgregar={() => {}}
-                onCambiarCantidad={() => {}}
+                compra={{ modo: 'vitrina', hayStock: true, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
                 onPress={() => {}}
               />
             </View>
@@ -3563,10 +3560,7 @@ function GaleriaInterna() {
                 nombre="Acondicionador de agua para acuario"
                 presentacion="250 ml"
                 precio={8.5}
-                hayStock
-                cantidad={2}
-                onAgregar={() => {}}
-                onCambiarCantidad={() => {}}
+                compra={{ modo: 'vitrina', hayStock: true, cantidad: 2, onAgregar: () => {}, onCambiarCantidad: () => {} }}
                 onPress={() => {}}
               />
             </View>
@@ -3575,10 +3569,7 @@ function GaleriaInterna() {
                 nombre="Arena sanitaria aglomerante"
                 presentacion="10 kg"
                 precio={12.75}
-                hayStock={false}
-                cantidad={0}
-                onAgregar={() => {}}
-                onCambiarCantidad={() => {}}
+                compra={{ modo: 'vitrina', hayStock: false, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
                 onPress={() => {}}
               />
             </View>
@@ -3595,11 +3586,8 @@ function GaleriaInterna() {
                 nombre="Pro Pac Pollo y Arroz"
                 presentacion="7.5 kg"
                 precio={42.5}
-                hayStock
-                cantidad={0}
                 alergia={{ composicion: 'declarada_sin_verificar', coincidencia: 'exacta', senal: 'Contiene pollo' }}
-                onAgregar={() => {}}
-                onCambiarCantidad={() => {}}
+                compra={{ modo: 'vitrina', hayStock: true, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
                 onPress={() => {}}
               />
             </View>
@@ -3616,10 +3604,38 @@ function GaleriaInterna() {
                 presentacion="Sobre 85 g"
                 alergia={{ composicion: 'ausente', coincidencia: 'ninguna', senal: 'Sin composición declarada' }}
                 precio={null}
-                hayStock
-                cantidad={0}
-                onAgregar={() => {}}
-                onCambiarCantidad={() => {}}
+                compra={{ modo: 'vitrina', hayStock: true, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
+                onPress={() => {}}
+              />
+            </View>
+          </View>
+
+          <Texto variante="apoyo">
+            🔴 EL ESPEJO DEL VENDEDOR — la MISMA pieza, sin carrito (`modo: 'espejo'`).
+            Es lo que hace que N17 sea verdad y no una intención: el vendedor administra
+            sobre exactamente lo que ve la familia. Miralo al lado de los de arriba —
+            mismo nombre truncado a dos líneas, mismo precio, misma foto. Si acá el
+            nombre NO se truncara, el espejo le estaría mintiendo sobre cómo se ve su
+            producto. Lo único que cambia es que no hay `+`: no hay carrito que ofrecer.
+            Y el veredicto de completitud (N18) solo aparece en la cara ADMINISTRAR.
+          </Texto>
+          <View style={GRILLA_DE_DOS}>
+            <View style={CELDA_DE_GRILLA}>
+              <TarjetaProducto
+                nombre="Pro Pac Adulto Pollo y Arroz"
+                presentacion="15 kg"
+                precio={70.9}
+                compra={{ modo: 'espejo' }}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              <TarjetaProducto
+                nombre="Arena sanitaria aglomerante"
+                presentacion="10 kg"
+                precio={null}
+                alcance="Le faltan 2"
+                compra={{ modo: 'espejo' }}
                 onPress={() => {}}
               />
             </View>

@@ -183,14 +183,59 @@ export interface TarjetaProductoProps {
   /** Ya formateado — ver `PrecioText.porUnidad`. */
   precioPorUnidad?: string
   fotoUrl?: string
-  /** 🔴 BOOLEANO, jamás un número (ver la cabecera). */
-  hayStock: boolean
-  /** Cuántos hay en el carrito. `0` = el control es el `+`. */
-  cantidad: number
-  /** El `+`. Con `cantidad > 0` la pieza monta el stepper y usa
-   *  `onCambiarCantidad` en su lugar. */
-  onAgregar: () => void
-  onCambiarCantidad: (cantidad: number) => void
+  /**
+   * 🔴 **LA COMPRA, COMO UNIÓN DISCRIMINADA** (S100-B · lo que destrabó
+   * la migración del espejo).
+   *
+   * **El caso que la obligó:** el espejo del vendedor monta esta misma
+   * pieza (N17) **y ahí no hay carrito** — el vendedor no compra su
+   * propio producto. Con las props sueltas y obligatorias, el espejo
+   * tenía que pasar `cantidad={0}`, `onAgregar={() => {}}` y un
+   * `hayStock` inventado **solo para que el `+` no se dibujara**.
+   *
+   * ⇒ Eso es *mentir una prop para lograr una combinación legítima*, y
+   * **la casa ya declaró que cuando eso pasa el defecto es de la pieza**
+   * (§12.2, S91) — lo tenía escrito en mi propia cabecera, tres párrafos
+   * más arriba, como razón para NO reusar `Baldosa`. *Me lo cobré a mí
+   * misma.*
+   *
+   * **Con la unión, «tarjeta de vitrina sin carrito» no compila y
+   * «espejo con `+`» tampoco.** Es el mismo movimiento que
+   * `SelectorDestinoItem`, donde «donación para Thor» es inexpresable.
+   *
+   * ⚠️ **Por qué unión y no props opcionales:** con opcionales, olvidar
+   * el carrito en la vitrina real **compilaría** y el `+` desaparecería
+   * en silencio — el mismo agujero que la `advertencia?: string` que
+   * rechacé hace dos lotes. *La forma tiene que hacer imposible el
+   * olvido, no confiar en que nadie olvide.*
+   */
+  compra:
+    | {
+        modo: 'vitrina'
+        /** 🔴 BOOLEANO, jamás un número (ver la cabecera). */
+        hayStock: boolean
+        /** Cuántos hay en el carrito. `0` = el control es el `+`. */
+        cantidad: number
+        /** El `+`. Con `cantidad > 0` la pieza monta el stepper. */
+        onAgregar: () => void
+        onCambiarCantidad: (cantidad: number) => void
+      }
+    /** El ESPEJO del vendedor: **no hay carrito que ofrecer.** No es
+     *  «vitrina con la compra apagada» — es otra cosa, y por eso es otro
+     *  brazo y no un flag. */
+    | { modo: 'espejo' }
+  /**
+   * El resumen del VEREDICTO de completitud (N18), en la cara
+   * ADMINISTRAR del espejo — *«Sin stock», «Le faltan 2»*.
+   *
+   * ⏪ La dejé afuera en el primer corte **por no tener el caso**, y era
+   * lo correcto: *no se firma una pieza contra un caso imaginado*. Entra
+   * ahora **con su caso medido**: el renderer del espejo la monta, y
+   * **la cara CLIENTE la deja en `null`** — el veredicto es del vendedor
+   * y la familia no lo ve. *La separación ya estaba bien hecha del otro
+   * lado; esta prop solo deja de romperla.*
+   */
+  alcance?: string | null
   /** Abrir la ficha. La FOTO y el NOMBRE llevan acá; el `+` no. */
   onPress: () => void
   /**
@@ -247,10 +292,8 @@ export function TarjetaProducto({
   precio,
   precioPorUnidad,
   fotoUrl,
-  hayStock,
-  cantidad,
-  onAgregar,
-  onCambiarCantidad,
+  compra,
+  alcance = null,
   onPress,
   alergia,
 }: TarjetaProductoProps) {
@@ -283,7 +326,7 @@ export function TarjetaProducto({
           style={{
             aspectRatio: RELACION_FOTO,
             backgroundColor: theme.bg.hundido,
-            opacity: hayStock ? 1 : opacity.disabled,
+            opacity: compra.modo === 'espejo' || compra.hayStock ? 1 : opacity.disabled,
           }}
         >
           {fotoUrl === undefined ? null : (
@@ -291,7 +334,7 @@ export function TarjetaProducto({
           )}
 
           {/* Sin stock: el cartel va EN la puerta (ver la cabecera). */}
-          {hayStock ? null : (
+          {compra.modo === 'espejo' || compra.hayStock ? null : (
             <View
               style={{
                 position: 'absolute',
@@ -328,6 +371,16 @@ export function TarjetaProducto({
 
           {presentacion === undefined ? null : (
             <Texto variante="apoyo">{presentacion}</Texto>
+          )}
+
+          {/* EL VEREDICTO DE COMPLETITUD (N18) — solo la cara
+              ADMINISTRAR lo puebla; en la del cliente llega `null` y no
+              se dibuja. Neutro: es trabajo pendiente del vendedor, no
+              una alarma. */}
+          {alcance === null || alcance === undefined ? null : (
+            <Texto variante="apoyo" color="tertiary">
+              {alcance}
+            </Texto>
           )}
 
           {/* 🔴 LA SEÑAL DE ALERGIA — DENTRO de la tarjeta, jamás colgando
@@ -388,9 +441,9 @@ export function TarjetaProducto({
             <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
 
             {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
-            {!hayStock ? null : cantidad === 0 ? (
+            {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
               <Pressable
-                onPress={onAgregar}
+                onPress={compra.onAgregar}
                 accessibilityRole="button"
                 accessibilityLabel={t('tarjetaProducto.agregar', { nombre })}
                 hitSlop={8}
@@ -424,10 +477,10 @@ export function TarjetaProducto({
               // otro al lado. `fast` = 150, la banda micro de N10.
               <Animated.View entering={FadeIn.duration(motion.duration.fast)}>
                 <StepperCantidad
-                  valor={cantidad}
+                  valor={compra.cantidad}
                   min={0}
                   max={TOPE_EN_VITRINA}
-                  onCambio={onCambiarCantidad}
+                  onCambio={compra.onCambiarCantidad}
                   etiqueta={t('tarjetaProducto.cantidad', { nombre })}
                 />
               </Animated.View>

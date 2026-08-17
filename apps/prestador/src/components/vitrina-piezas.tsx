@@ -19,6 +19,8 @@
 import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import {
+  TarjetaProducto,
+  nombreCurado,
   Celda,
   EstadoVacio,
   SelectorOpcion,
@@ -268,11 +270,24 @@ function Filas({ vista, items }: { vista: VistaProductos; items: ItemProducto[] 
         {items.map((it) => (
           <TarjetaProducto
             key={it.clave}
-            foto={it.foto}
-            nombre={it.nombre}
+            fotoUrl={it.foto ?? undefined}
+            /* 🔴 `nombreCurado` — LA MITAD QUE HACE QUE ESTO SEA UN ESPEJO.
+               Sin esto el vendedor lee `CANADA LITTER` y la familia
+               `Canada Litter`: el mismo producto con dos nombres. */
+            nombre={nombreCurado(it.nombre)}
             marca={it.marca}
-            linea={it.linea}
+            /* `linea` ya viene compuesta por la cara (presentación ·
+               stock). Entra como presentación: adoptar la pieza de la
+               casa incluye adoptar su registro tipográfico — es
+               exactamente lo que N17 pide, y lo contrario sería conservar
+               la diferencia que veníamos a borrar. */
+            presentacion={it.linea}
+            precio={null}
             alcance={it.alerta ?? null}
+            /* EL VENDEDOR NO COMPRA SU PROPIO PRODUCTO. No es «vitrina con
+               la compra apagada»: es otro brazo del tipo, y por eso el `+`
+               acá es inexpresable en vez de estar escondido. */
+            compra={{ modo: 'espejo' }}
             onPress={it.alPulsar}
           />
         ))}
@@ -305,82 +320,28 @@ function Filas({ vista, items }: { vista: VistaProductos; items: ItemProducto[] 
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   LA TARJETA — una sola forma para las dos caras. Si cada modo tuviera la
-   suya, el espejo dejaría de ser espejo en su unidad más chica.
-   ───────────────────────────────────────────────────────────────────────── */
-function TarjetaProducto({
-  foto,
-  nombre,
-  marca,
-  linea,
-  alcance = null,
-  onPress,
-}: {
-  foto: string | null;
-  nombre: string;
-  marca: string | null;
-  linea: string;
-  alcance?: string | null;
-  onPress: () => void;
-}) {
-  const { theme } = useTheme();
-  const { t } = useTraduccion();
+/* ☠️ ACÁ VIVÍA LA `TarjetaProducto` LOCAL DEL ESPEJO — JUBILADA EN S100-B.
 
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={nombre}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.97 : 1,
-        borderRadius: radius.lg,
-        overflow: 'hidden',
-        backgroundColor: theme.bg.card,
-      })}
-    >
-      {foto === null ? (
-        /* N9 · sin foto se dibuja el marcador y el producto SIGUE
-           EXISTIENDO: pierde cara, no existencia. */
-        <View
-          style={{
-            width: '100%',
-            aspectRatio: 4 / 3,
-            backgroundColor: theme.bg.hundido,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Texto variante="apoyo" color="tertiary">
-            {t('ventas.producto.sinFoto')}
-          </Texto>
-        </View>
-      ) : (
-        <Image
-          source={{ uri: foto }}
-          style={{ width: '100%', aspectRatio: 4 / 3 }}
-          resizeMode="cover"
-          accessibilityIgnoresInvertColors
-        />
-      )}
+   Su razón de existir era buena: nació ANTES que la pieza de la casa, y
+   su propio comentario decía *«una sola forma para las dos caras: si cada
+   modo tuviera la suya, el espejo dejaría de ser espejo en su unidad más
+   chica»*. **Tenía razón y le faltaba un piso.**
 
-      <View style={{ padding: spacing[4], gap: spacing[1] }}>
-        {/* El nombre NO se trunca: es el criterio de elección (N19). */}
-        <Texto variante="cuerpo">{nombre}</Texto>
-        {marca !== null && (
-          <Texto variante="apoyo" color="secondary">
-            {marca}
-          </Texto>
-        )}
-        <Texto variante="dato" color="secondary">
-          {linea}
-        </Texto>
-        {alcance !== null && (
-          <Texto variante="apoyo" color="warning">
-            {alcance}
-          </Texto>
-        )}
-      </View>
-    </Pressable>
-  );
-}
+   🔴 EL ARGUMENTO QUE LA JUBILA (firma de mesa, S100): esta tarjeta
+   declaraba *«el nombre NO se trunca»* y la que ve la familia lo trunca a
+   dos líneas. ⇒ **el vendedor veía su producto MEJOR de lo que la familia
+   lo ve.**
+
+   > ***EN UN ESPEJO, «VERSE MEJOR» ES EL DEFECTO.***
+
+   Su argumento era correcto en aislamiento y se volvió falso en cuanto
+   hubo dos caras — que es justo lo que una pieza local no puede ver.
+
+   Y lo mismo con el NOMBRE: sin `nombreCurado` el vendedor leía
+   `CANADA LITTER` donde la familia lee `Canada Litter`. **42 % del
+   catálogo.** Dos superficies pintando el mismo dato y desacordando sin
+   síntoma.
+
+   Hoy monta `TarjetaProducto` de `@epetplace/ui` con `modo: 'espejo'`.
+   *No se borró una pieza por prolijidad: se cerró la única grieta por la
+   que el espejo podía mentir.* */
