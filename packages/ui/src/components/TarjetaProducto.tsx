@@ -102,6 +102,23 @@
  * se escribe acá porque *el lugar donde se lee al construir es la pieza,
  * no la bitácora de quien lo descubrió.*
  *
+ * ── LAS DOS TEMPERATURAS · TEMAS Y REDUCE-MOTION, al nacer ─────────
+ * **Tres temas: resuelven solos.** `warning` y `secondary` son slots del
+ * tema —no hay un solo color escrito acá—, así que light, dark y
+ * **memorial** salen de sus propios tokens. *En memorial el acento cae a
+ * tinta por el slot, que es la degradación correcta: un memorial no
+ * necesita menos honestidad, necesita menos estridencia.*
+ *
+ * **`reduce-motion`: NADA QUE DEGRADAR, y se declara en vez de omitirse.**
+ * La señal **no anima**: aparece con el dato y se va con él. *Una pieza
+ * que no mueve no necesita el hook — pero sí necesita decir que lo
+ * pensó, porque el silencio en esta línea se lee como olvido* (N15: toda
+ * pieza nueva declara sus tres temas y su conducta con la preferencia).
+ *
+ * ⛔ **Ninguna de las dos se colapsa JAMÁS dentro de un acordeón**, ni en
+ * tarjeta ni en ficha. *Plegar una advertencia de salud la convierte en
+ * nota al pie, y el acordeón dice «esto es opcional».*
+ *
  * ── LO QUE ESTA PIEZA NO HACE ──────────────────────────────────────
  * No sabe de carrito (recibe `cantidad` y avisa), no formatea precio
  * (`PrecioText`), no decide el orden de la grilla, y **no lista
@@ -122,7 +139,7 @@ import { Image, Pressable, Text, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
 import {
-  alergiaPuedeCallar,
+  temperaturaDeAlergia,
   type CoincidenciaAlergeno,
   type EstadoComposicion,
 } from './AvisoAlergia'
@@ -328,13 +345,29 @@ export function TarjetaProducto({
               alergia es riesgo para la mascota y el agotado es un hecho
               del estante* — dos naranjas seguidos aplanan la
               diferencia. */}
-          {alergia === undefined || alergiaPuedeCallar(alergia) ? null : (
+          {alergia === undefined || temperaturaDeAlergia(alergia) === 'silencio' ? null : (
             <View
               accessible
-              accessibilityRole={alergia.coincidencia === 'ninguna' ? 'text' : 'alert'}
+              // `alert` interrumpe · `text` se anuncia sin cortar. El
+              // lector de pantalla también tiene que poder distinguir
+              // «le hace mal» de «no lo sabemos».
+              accessibilityRole={temperaturaDeAlergia(alergia) === 'alarma' ? 'alert' : 'text'}
               style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}
             >
-              <Texto variante="apoyo" color="warning">
+              <Texto
+                variante="apoyo"
+                // 🔴 LAS DOS TEMPERATURAS (firma del founder · H-008).
+                // El ámbar queda RESERVADO a la alergia declarada; la
+                // ausencia se dice en voz sobria. Con ~51 % de lo
+                // recomendado sin composición, un ámbar acá sería fondo
+                // de pantalla — y entonces el ámbar de la alergia real
+                // no significaría nada.
+                // ⚠️ `secondary` NO es apagado: es el registro de la
+                // casa para lo que se lee sin urgencia. La ausencia se
+                // dice igual de claro; lo que cambia es la temperatura,
+                // no la honestidad.
+                color={temperaturaDeAlergia(alergia) === 'alarma' ? 'warning' : 'secondary'}
+              >
                 {alergia.senal}
               </Texto>
             </View>
