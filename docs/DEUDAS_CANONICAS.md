@@ -11711,6 +11711,18 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-277 — UN VALOR ELEGIDO A MANO AL LADO DE UNO DERIVADO COINCIDE POR CASUALIDAD HASTA QUE NO (S99 — el caso es de B, en la cura de la barra; depositada por orden de mesa, 16-ago-2026).**
+
+  **🔴 EL NÚMERO QUE EXPLICÓ TRES QUEJAS DE UNA:** el hueco era **un círculo de diámetro 78 perforando una barra de 76 de alto**. Dejaba **13 px de barra debajo** ⇒ **el 83 % del alto DESAPARECÍA** en el tab activo. Literal de B, y es ley: ***«un hueco más grande que la barra no es un anillo: es una MORDIDA.»***
+
+  **Y de ahí salían las tres quejas del founder, que eran la misma:** no había barra que hundir ⇒ **los hombros no tenían de dónde salir** · el contacto era un arco corto **porque el resto ya era vacío** · y el valle nunca llegaba a los extremos. *Por eso subir el contraste no arreglaba nada: **era pintar mejor una forma que no estaba pasando.***
+
+  **☠️ Y LA MUERTE DE `VALLE_HONDO` ES LA LECCIÓN:** era **un fondo elegido a mano** al lado de un radio que ahora se **DERIVA** (`DISCO_RADIO + ANILLO`). Literal de B: *«un fondo elegido a mano podía quedar más arriba o más abajo que el disco y romper la uniformidad — eso era, literalmente, «el hueco está muy pequeñito»».*
+
+  **⇒ Es la familia de las dos verdades que coinciden hoy y divergen mañana** (L-268 · L-274), **ahora en GEOMETRÍA — y acá es peor de ver: no divergen en el tiempo, divergen A LO LARGO DE LA FORMA.** *La separación era correcta en un punto y equivocada en el resto, así que **dependía de dónde mirabas** — y quien mirara el punto bueno concluía que estaba bien.*
+
+  **Regla: si un valor tiene que guardar relación con otro, se DERIVA. Un número a mano que hoy coincide es una divergencia con fecha abierta.** Los números lo prueban: anillo **5 en un punto → 8 uniforme** · barra bajo el disco **13 → 21** · recorrido del valle **100 → 156**.
+
 - **L-276 — UN AGREGADO SOBRE OBJETOS DISTINTOS NO MIDE NINGUNO (S99 — el instrumento es de D y se equivocó DOS veces por la misma causa; depositada por orden de mesa, 16-ago-2026).**
 
   **Los dos cobros, en orden:**

@@ -52,3 +52,47 @@ en esta sesión.*
   agrandarlo**.
 - **El recorte del hueco FUNCIONA** (L-252 cumplida). Lo que fallaba era el
   contenedor, y eso ya se curó: **la barra flota.**
+
+---
+
+# ✅ CERRADO POR B — y el número es mejor que el diagnóstico de mesa
+
+**La mesa dijo «el disco está casi afuera» y acertó en frenar el color. B
+encontró la magnitud, que lo vuelve obvio: el hueco era un círculo de
+diámetro 78 perforando una barra de 76 de alto** ⇒ **13 px de barra debajo: el
+83 % del alto desaparecía.** *No era un anillo: era una mordida.*
+
+**La cura es ESTRUCTURAL, no de medida:** el valle **sigue el contorno** en vez
+de perforar, con su radio **DERIVADO** (`DISCO_RADIO + ANILLO`) — *y eso es lo
+que garantiza que la separación sea la misma en todo el arco; antes dependía
+de dónde mirabas.* **☠️ `VALLE_HONDO` murió** (ver **L-277**).
+
+| | antes | ahora |
+|---|---|---|
+| anillo | **5 en un punto** | **8 uniforme** |
+| barra bajo el disco | 13 | **21** |
+| recorrido del valle | 100 | **156** |
+
+**Y la S crece con el viaje** —la saliente escala con el estirón—, que es lo
+que la vuelve notoria **en los extremos**, que es exactamente lo que el
+founder pidió.
+
+## 📌 DECISIÓN DE MÉTODO, al acta
+El arco va en **DOS CÚBICAS con control calculado, no con `A`**. Literal de B:
+*«los flags de barrido de un arco SVG no se pueden verificar sin renderizar, y
+una cúbica cae exactamente donde dice la aritmética — no quise dejar colgada
+de un flag la forma que este gate vino a arreglar».* **Es elegir el mecanismo
+VERIFICABLE sobre el conveniente.**
+
+## ⚠️ EL COSTO VA A FIRMA DEL FOUNDER: LA FILA MIDE 86
+Es lo que exigen **las tres cosas juntas**: disco de **68** (el que hace entrar
+**ícono + texto**, autorizado dos veces) · **metido a un tercio** · con **8 de
+anillo**. **Las tres tiran en la misma dirección.**
+
+**Palanca declarada por B:** *«si 86 es mucho, es el disco (cada px de radio
+cuesta ~2 de barra) o el anillo. **NO HAY UNA TERCERA**».*
+
+**VOTO DE MESA: dejarlo en 86 y juzgarlo CON EL DEDO.** Es la barra de una app
+que se usa **parada en un mostrador**; una barra generosa no molesta ahí como
+molestaría en una app de lectura. **Y si come demasiada pantalla, la palanca
+es un número y baja en un turno.**
