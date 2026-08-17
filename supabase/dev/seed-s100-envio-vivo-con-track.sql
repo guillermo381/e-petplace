@@ -43,15 +43,17 @@ DO $$
 DECLARE
   v_rol_mig  text := current_user;
   v_envio    uuid;
+  v_pedido   uuid;
+  v_rep_id   uuid;
   v_rep_uid  uuid;
   v_puntos   jsonb;
   v_base     bigint;
   v_res      jsonb;
   v_total    int;
 BEGIN
-  -- ── ① EL SUJETO, DERIVADO ───────────────────────────────────────────────
-  -- Un envío que YA SALIÓ y todavía no va hacia el destino: es el que la
-  -- puerta `marcar_en_camino_a_destino` puede mover sin inventar historia.
+  -- ── ① EL SUJETO, DERIVADO — con DOS caminos y ninguno inventado ─────────
+  -- Camino A (el barato): un envío que YA SALIÓ y todavía no va hacia el
+  -- destino. `marcar_en_camino_a_destino` lo mueve sin inventar historia.
   SELECT e.id, r.user_id
     INTO v_envio, v_rep_uid
   FROM envios e
@@ -63,8 +65,36 @@ BEGIN
   ORDER BY e.salio_en DESC
   LIMIT 1;
 
+  -- Camino B: no hay ninguno despachado ⇒ se despacha uno. **Es el paso que
+  -- A señaló y que faltaba**: con `hacia_destino_en = 0` medido, puede que
+  -- tampoco haya nadie en `en_reparto`, y entonces el camino A aborta sin
+  -- haber intentado lo que sí se puede hacer por una puerta real.
+  --
+  -- Corre SIN claim a propósito: `despachar_pedido` gatea con
+  -- `auth.uid() IS NOT NULL AND NOT es_vendedor_de(...)`, o sea que **sin
+  -- sesión pasa** — y así la siembra no suplanta a un vendedor real para
+  -- hacer algo que es del vendedor.
   IF v_envio IS NULL THEN
-    RAISE EXCEPTION 'ABORTA: no hay envío en `en_reparto` con repartidor que tenga cuenta. NO se inventa uno — la siembra existe para dar sujeto vivo, no para fabricar uno.';
+    SELECT p.id, r.id, r.user_id
+      INTO v_pedido, v_rep_id, v_rep_uid
+    FROM pedidos p
+    JOIN repartidores r ON r.cuenta_comercial_id = p.cuenta_comercial_id
+    WHERE p.metodo_entrega = 'despacho'
+      AND r.activo
+      AND r.user_id IS NOT NULL          -- `repartidor_sin_cuenta` rebota
+      AND NOT EXISTS (SELECT 1 FROM envios e WHERE e.pedido_id = p.id)
+    ORDER BY p.created_at DESC
+    LIMIT 1;
+
+    IF v_pedido IS NULL THEN
+      RAISE EXCEPTION 'ABORTA: ni envío en `en_reparto`, ni pedido de despacho sin envío con repartidor que haya reclamado su cuenta. NO se fabrica una compra entera acá — eso ya lo hacen los seeds de S99, y duplicarlos sería tener dos verdades del mismo camino.';
+    END IF;
+
+    v_res := despachar_pedido(v_pedido, v_rep_id);
+    SELECT id INTO v_envio FROM envios WHERE pedido_id = v_pedido;
+    IF v_envio IS NULL THEN
+      RAISE EXCEPTION 'ABORTA: `despachar_pedido` no dejó envío para el pedido %. No se sigue a ciegas.', v_pedido;
+    END IF;
   END IF;
 
   -- ── ② LA VENTANA, POR SU PUERTA REAL ────────────────────────────────────
