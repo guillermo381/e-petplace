@@ -18,6 +18,13 @@
  * LA PIEZA ES **UNA** BALDOSA, NO LA GRILLA — sube la UNIDAD, no el
  * contenedor (la misma línea que separa `ChipEntidad` de su hilera, S91).
  *
+ * ✅ **S100-B · EL PATRÓN SALIÓ A CÓDIGO: vive en `grilla-de-dos.ts`**
+ * (`GRILLA_DE_DOS` + `CELDA_DE_GRILLA`), y este archivo lo APUNTA en vez
+ * de describirlo. **Su segundo consumidor llegó** —`TarjetaProducto`— y
+ * la advertencia de abajo pedía exactamente esto: *no se sincronizan dos
+ * copias, se deja UNA*. **Un patrón que solo se puede obedecer copiándolo
+ * ya tiene su divergencia agendada.**
+ *
  * ⚠️ **EL PATRÓN DE GRILLA VIVE AL PIE DE ESTE ARCHIVO, UNA SOLA VEZ, Y
  * NO SE REPITE ACÁ.** Esta línea llevaba su propia copia —`gap` +
  * `flexBasis: '48%'`— y **quedó congelada mientras el patrón real
