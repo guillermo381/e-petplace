@@ -134,7 +134,7 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  hace que se lea como *un vector deformándose* y no como *un botón que
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
-const ALTO_FILA = 86
+const ALTO_FILA = 85
 
 /** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
  *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
@@ -160,7 +160,7 @@ const ALTO_FILA = 86
  *    entero — *por eso siempre se veía «encima» y nunca «metido»: no era
  *    un ajuste fino, era que la fórmula no podía expresar lo que él
  *    pedía*. */
-const DISCO_RADIO = 34
+const DISCO_RADIO = 33
 /* ☠️ `VALLE_HONDO` MURIÓ (Ley 37): el fondo del valle **ya no se elige**,
  *  se DERIVA de `DISCO_CY + DISCO_RADIO + ANILLO`. Un número suelto podía
  *  quedar más arriba o más abajo que el disco y romper la separación
@@ -174,7 +174,7 @@ const DISCO_RADIO = 34
  *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
-const ANILLO = 9
+const ANILLO = 10
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
 /** 🔴 EL CENTRO DEL DISCO SE DERIVA DEL ANILLO, no del asomo. **Invertir
@@ -182,7 +182,14 @@ const ANILLO = 9
  *  anillo era lo que SOBRABA entre el disco y el valle; ahora es un número
  *  declarado y lo que sobra es cuánto asoma.
  *  `hondo` = 0,76 del alto (proporción medida de la referencia). */
-const DISCO_CY = ALTO_FILA * 0.76 - ANILLO - DISCO_RADIO
+/** 🔴 LO QUE QUEDA DE BARRA DEBAJO DEL VALLE — **absoluto, no cociente**,
+ *  y es la segunda vez en la misma tanda que la lección cobra: copiar el
+ *  0,76 de la referencia era la misma trampa que copiar su 0,46 de anillo.
+ *  Medido: la referencia deja **19 px sobre una barra de 402 de ancho** ⇒ a
+ *  nuestra escala, 15,5. *Lo que hace que la barra se lea entera no es qué
+ *  FRACCIÓN sobra: es cuánta barra QUEDA.* */
+const BAJO_VALLE = 15.5
+const DISCO_CY = ALTO_FILA - BAJO_VALLE - ANILLO - DISCO_RADIO
 /** Cuánto sobresale el disco por encima del borde superior de la barra.
  *  *«Que salga muy poco»* — 4 de 36 (11 %). */
 /** Cuánto asoma — **DERIVADO**. Medido de la referencia: 0,10 del
@@ -221,7 +228,7 @@ const RADIO_BARRA = radius.xl
  *  Ahora el reposo del ícono se DERIVA de las alturas, y la subida se
  *  deriva del reposo. *Si mañana cambia el renglón, el ícono sigue
  *  cayendo en el centro del disco sin que nadie se acuerde de esto.* */
-const ALTO_CAJA_ICONO = 24
+const ALTO_CAJA_ICONO = 18
 const ALTO_RENGLON = 14
 const GAP_BLOQUE = spacing[0.5]
 /* ☠️ `REPOSO_ICONO_CY` MURIÓ (Ley 37): existía para centrar el ÍCONO en
@@ -281,35 +288,45 @@ const SUBIDA_ACTIVA = ALTO_FILA / 2 - DISCO_CY
 function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   'worklet'
   const rc = Math.min(RADIO_BARRA, alto / 2)
-  /* EL FONDO DEL VALLE — **0,76 del alto, medido de la referencia** (60
-     sobre 79). Es la única proporción que ya coincidía antes de medir. */
-  const hondo = alto * 0.76
-  /* El ancho: la referencia recorre **0,31 del ancho de la barra** (123
-     sobre 402). ⏪ Yo tenía 0,48 — el doble—, y ése es medio defecto A:
-     un valle que no entra en un tab de la punta. */
-  const medio = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.25)
-  const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.3
-  /* 🔴 DEFECTO A · LOS HOMBROS SE APOYAN EN LA ESQUINA. En el primer y
-     último tab el valle **no entra**: con el centro a media pestaña,
-     pedía barra donde ya no hay. Se recorta contra la esquina redondeada
-     — *el valle se acorta de un lado en vez de salirse*. */
-  const izq = Math.max(cx - medio + sesgo, rc)
-  const der = Math.min(cx + medio + sesgo, ancho - rc)
+  /* 🔴 EL TRAMO QUE RODEA AL DISCO ES UN ARCO CONCÉNTRICO, y volvió después
+     de que la comparación lado a lado lo probara: con una U de bézier **el
+     valle era más ANGOSTO que el disco a la altura de su ecuador**, así que
+     no había anillo — el disco quedaba APOYADO ENCIMA del blanco. *Una
+     curva libre no puede garantizar una separación; una concéntrica sí, por
+     construcción.*
+     Su radio se DERIVA (disco + anillo), que es lo que hace que el hueco
+     mida lo mismo en todo el arco. */
+  const R = DISCO_RADIO + ANILLO
+  // dónde el borde del hueco cruza la línea superior de la barra
+  const xe = Math.sqrt(Math.max(R * R - DISCO_CY * DISCO_CY, 1))
+  const sesgo = Math.max(-1, Math.min(1, estira)) * 12
+  /* LOS HOMBROS — el despegue TANGENCIAL y ancho que la referencia muestra
+     (baja un píxel a lo largo de seis antes de lanzarse). Se acotan contra
+     la esquina redondeada: en el primer y último tab el valle pedía barra
+     donde ya no hay (defecto A). */
+  const izq = Math.max(cx - xe + sesgo, rc)
+  const der = Math.min(cx + xe + sesgo, ancho - rc)
+  const hombroI = Math.max(izq - VALLE_RADIO, rc)
+  const hombroD = Math.min(der + VALLE_RADIO, ancho - rc)
+  // el arco inferior, en dos cúbicas simétricas con control calculado
+  const a0 = Math.atan2(-DISCO_CY, -xe)
+  const a1 = Math.PI / 2
+  const k = (4 / 3) * Math.tan((a1 - a0) / 4) * R
+  const px = (a: number) => cx + sesgo + R * Math.cos(a)
+  const py = (a: number) => DISCO_CY + R * Math.sin(a)
+  const tx = (a: number) => -Math.sin(a)
+  const ty = (a: number) => Math.cos(a)
+  const a2 = Math.PI - a0
   return [
     `M0 ${alto - rc}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
-    `H${izq}`,
-    /* LA ENTRADA Y LA SALIDA SON TANGENTES A LA HORIZONTAL — el primer
-       control en `y = 0` es lo que hace que el borde **se despegue sin
-       quiebre**, que es lo que la referencia muestra: de x 216 a 222
-       baja UN píxel, y recién después se lanza.
-       ⚠️ **Y no lleva joroba, medido:** en el cuadro en reposo de la
-       referencia hay **CERO columnas por encima de la línea** fuera del
-       disco. Lo que el founder llama «saliente hacia afuera» es este
-       despegue tangencial y ANCHO, no un montículo. */
-    `C${izq + (cx - izq) * 0.55} 0 ${cx - (cx - izq) * 0.42} ${hondo} ${cx} ${hondo}`,
-    `C${cx + (der - cx) * 0.42} ${hondo} ${der - (der - cx) * 0.55} 0 ${der} 0`,
+    `H${hombroI}`,
+    // despegue tangencial: sale de la horizontal sin quiebre y sin joroba
+    `C${hombroI + (izq - hombroI) * 0.6} 0 ${izq - (izq - hombroI) * 0.25} 0 ${izq} 0`,
+    `C${px(a0) + k * tx(a0)} ${py(a0) + k * ty(a0)} ${px(a1) - k * tx(a1)} ${py(a1) - k * ty(a1)} ${px(a1)} ${py(a1)}`,
+    `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(a2) - k * tx(a2)} ${py(a2) - k * ty(a2)} ${der} 0`,
+    `C${der + (hombroD - der) * 0.25} 0 ${hombroD - (hombroD - der) * 0.6} 0 ${hombroD} 0`,
     `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
     `V${alto - rc}`,
