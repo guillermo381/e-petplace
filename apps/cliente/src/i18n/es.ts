@@ -1583,6 +1583,11 @@ export const clienteEs = {
     pasoPreparando: 'Preparando',
     pasoEnCamino: 'En camino',
     pasoEntregado: 'Entregado',
+    // S100-D · L3 · la ceremonia de la entrega. NO repite «Entregado» —
+    // eso ya lo dice la escalera, que es el ESTADO. Esto es el MOMENTO, y
+    // por eso está en pasado y en voz de familia. Cero euforia de compra:
+    // esta casa no celebra transacciones (MODELO_LOYALTY §5).
+    celebracionLlego: 'Tu pedido llegó',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
     desvioCancelado: 'Cancelado',

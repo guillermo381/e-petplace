@@ -73,6 +73,7 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
+import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
@@ -239,6 +240,34 @@ export default function DespensaPedido() {
           />
         ) : (
           <>
+            {/* 0 · LA CELEBRACIÓN — solo con el pedido ENTREGADO, y una
+                sola vez por pedido (la pieza lo recuerda).
+
+                🔴 EL TERCER ACTO VA VACÍO, Y ES LA DECISIÓN MÁS IMPORTANTE
+                DE ESTE LOTE. La letra dice que si «¿para quién fue?» está
+                respondido, la compra deposita un evento en el expediente de
+                esa mascota — y eso es cierto, pero NO para todo ítem: el
+                motor gatea el depósito por `f.entra_al_expediente`, o sea
+                que **la familia del producto decide** (alimento sí, juguete
+                no — BIO_EXPEDIENTE E2bis).
+
+                ⇒ Decir «quedó en el expediente de Thor» por cada ítem con
+                destino sería FALSO para un juguete, y falso de la peor
+                manera: **verosímil** (L-139). El lector de la familia
+                (`LineaDePedido`) no trae hoy ni la familia del producto ni
+                si el evento se depositó, así que la pantalla **no puede
+                saberlo** — y lo que no se sabe no se afirma.
+
+                El slot existe y espera su dato (H-07, dueño A). *Un acto
+                que no tiene nada verdadero que decir no se llena con algo
+                lindo: se deja callado.* */}
+            {detalle.pedido.narrativa === 'entregado' ? (
+              <CelebracionEntrega
+                pedidoId={detalle.pedido.pedido_id}
+                titulo={t('despensa.celebracionLlego')}
+              />
+            ) : null}
+
             {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
                 🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
                 `P-20260816-3f6580` es un identificador de máquina: lo

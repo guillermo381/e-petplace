@@ -1384,6 +1384,11 @@ export const clienteEn = {
     pasoPreparando: 'Preparing',
     pasoEnCamino: 'On the way',
     pasoEntregado: 'Delivered',
+    // S100-D · L3 · the delivery ceremony. It does NOT repeat "Delivered" —
+    // the ladder already says that, and that is the STATE. This is the
+    // MOMENT. No purchase euphoria: this house does not celebrate
+    // transactions (MODELO_LOYALTY §5).
+    celebracionLlego: 'Your order arrived',
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
     desvioCancelado: 'Canceled',
