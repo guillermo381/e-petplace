@@ -208,3 +208,35 @@ perseguir con precisión algo que la referencia no tiene.* **Ver L-278.**
 ## Y EL ANILLO PASÓ DE CONSECUENCIA A CAUSA
 `DISCO_CY` **se deriva de él**. *Es la cura literal de «el hueco está muy
 pequeñito»: **se declara, no se espera a ver cuánto queda.***
+
+---
+
+# ✅ LA BARRA, CERRADA — y una firma pendiente del founder
+
+## LA MEDICIÓN DE LEGIBILIDAD, con el orden invertido como se pidió
+**EL TEXTO NO SE PUEDE ACHICAR:** `xs = 11` es **el piso de la escala cerrada
+de la casa**. Lo único achicable es el ícono, **y su efecto es chico porque lo
+que manda es EL ANCHO DEL TEXTO, no el alto del bloque.**
+⇒ ícono **18**, disco **66**. **El ~60 del founder no se alcanza:** el piso
+real es **62 con el ícono a 12**, *donde el detalle ya muere*.
+
+**Contra la referencia:** disco 66 · **anillo 10 (ref 9,8)** · **asoma 10 %
+(ref 10 %)** · barra **85** con 15,5 debajo del valle (ref equivalente).
+**Bajó de 86 y las tres cosas ganaron a la vez.**
+
+## ⚠️ LA ÚLTIMA DECISIÓN, SERVIDA AL FOUNDER CON SU NÚMERO Y SU IMAGEN
+`disco/alto` da **0,78**; la referencia **0,66**. **Con el texto adentro, 0,66
+es INALCANZABLE** — 0,73 es lo más cerca (disco 62), y para 0,66 hacen falta
+**barra 100 o disco 56, que exige QUE EL TEXTO SALGA.**
+
+**VOTO DE MESA: quedarse en 66 CON el texto.** Tres razones:
+1. **la referencia tiene TRES tabs y ninguno lleva texto** —su disco puede ser
+   chico porque **no tiene que decir nada**— y **la nuestra tiene CINCO y el
+   activo tiene que nombrarse**, que es lo que el founder pidió **dos veces**;
+2. **el texto no se puede achicar más**, así que sacarlo **no es un ajuste:
+   es derogar su propia firma**;
+3. **las cuatro proporciones que importan YA COINCIDEN** — *la única que no,
+   es justamente la que el texto vuelve imposible.*
+
+**La comparación está en `docs/laminas/2026-08-18-s99b-comparacion-barra.png`
+para que el founder decida contra LA IMAGEN, no contra la descripción.**

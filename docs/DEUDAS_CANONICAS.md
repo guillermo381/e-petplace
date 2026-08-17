@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-279 — UNA CURVA LIBRE NO PUEDE GARANTIZAR UNA SEPARACIÓN; UNA CONCÉNTRICA SÍ, POR CONSTRUCCIÓN (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **🔴 EL HALLAZGO, y es lo que la hace valiosa: LA COMPARACIÓN CAZÓ UN DEFECTO QUE NINGÚN NÚMERO MOSTRABA.** Con el valle dibujado como una **U de bézier**, el valle era **más angosto que el disco a la altura de su ecuador** ⇒ **NO HABÍA ANILLO: el disco quedaba apoyado encima del blanco.** **Todos los números daban bien.**
+
+  **⇒ Es L-277 en la FORMA en vez de en el número** (*si un valor guarda relación con otro, se deriva*): una curva libre pasa **cerca** de donde uno quiere y **la separación queda a merced de la forma**; **una concéntrica tiene la separación en su definición.**
+
+  **Y la lección de verificación que va con ella:** *un conjunto de números correctos no prueba una forma.* **La única medición que lo vio fue superponer contra la referencia** — por eso la vara de una pieza visual es **la comparación**, y los números son su apoyo, no su reemplazo.
+
+  **📌 Y su nota de instrumento, que es la mitad que suele faltar:** el primer rasterizador de B **pintaba un rectángulo que borraba el valle y no aplicaba el clamp**. Literal: *«el defecto era del instrumento y lo curé antes de concluir nada sobre la pieza»*. **Sin ese paso, la conclusión habría sido sobre el instrumento y habría viajado como hallazgo de la pieza.**
+
 - **L-278 — UNA PROPORCIÓN COPIADA DE UNA REFERENCIA CON OTRA ESCALA NO CONSERVA LO QUE LA HACÍA FUNCIONAR (S99 — lo desarmó el founder; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** B planteó una disyuntiva —**texto O anillo**— porque copiaba la **proporción** de la referencia (`anillo/radio` = 0,46). **El founder la desarmó de una:** el anillo de la referencia es grande **porque su disco es chico** — sobre un radio chico, 0,46 son pocos píxeles. **Nosotros no necesitamos la proporción: necesitamos que el hueco SE VEA**, y un anillo de 9 sobre nuestro disco grande **ya es más ancho en píxeles reales** que el de la referencia.
@@ -11718,6 +11728,11 @@ defecto que se curó hoy en el cambio de clave.
   **⇒ SE COPIA EL EFECTO, NO EL COCIENTE.** *Una proporción es una relación entre DOS números de esa referencia; trasplantarla a otra escala conserva la aritmética y pierde el hecho perceptual, que es lo único que se estaba tratando de copiar.*
 
   **Y su forma general, porque va a volver:** toda constante tomada de un ejemplo ajeno **se traduce al efecto que produce allá y se re-deriva acá** — *la disyuntiva que parecía del diseño era un artefacto de haber importado el número equivocado.*
+
+  **📌 FORMA OPERATIVA (B, verificando en ABSOLUTOS como se le pidió — y la trampa estaba DOS veces):**
+  · **el anillo de la referencia mide 9,8 px A NUESTRA ESCALA; el nuestro medía 9** ⇒ estaba **0,8 corto, no 7**. *La proporción copiada (0,46 × 34 = 16) pedía **1,6 veces el anillo real de la referencia**.*
+  · **y copiar «hondo/alto = 0,76» era igual de falso.** Su literal cierra la ley: ***lo que hace que la barra se lea entera no es que sobre una FRACCIÓN: es CUÁNTA BARRA QUEDA.*** ⇒ nace `BAJO_VALLE` **derivado de los píxeles reales de la referencia, no de un cociente**.
+  ⇒ **la traducción a absolutos no es una comprobación opcional: es la que dice si el número importado es 0,8 o 7.**
 
   **🔴 Y SU GEMELA, MEDIDA POR B EN LA MISMA PASADA — LA REFERENCIA NO TIENE JOROBA:** cero columnas por encima de la línea plana. **Lo que hay es un DESPEGUE TANGENCIAL** — el borde baja un píxel a lo largo de seis y **recién después** se lanza al valle. *«Saliente hacia afuera» era eso, no un montículo.*
   **⚠️ Y esto retira una palanca que A había servido con su aritmética correcta:** A midió que la joroba mide **2,22 px** y entregó la fórmula para agrandarla (`control = H·9/4`). **El número estaba bien y el OBJETIVO estaba mal** — *era perseguir con precisión algo que la referencia no tiene.* **La joroba se retira.**
