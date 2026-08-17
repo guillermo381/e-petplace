@@ -134,7 +134,7 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  hace que se lea como *un vector deformándose* y no como *un botón que
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
-const ALTO_FILA = 76
+const ALTO_FILA = 86
 
 /** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
  *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
@@ -163,7 +163,7 @@ const ALTO_FILA = 76
 const DISCO_RADIO = 34
 /** Cuánto sobresale el disco por encima del borde superior de la barra.
  *  *«Que salga muy poco»* — 4 de 36 (11 %). */
-const DISCO_ASOMA = 10
+const DISCO_ASOMA = 11
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
 const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
@@ -171,8 +171,12 @@ const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
  *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
  *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
  *  lado del disco. */
-const VALLE_RADIO = 50
-const VALLE_HONDO = 16
+const VALLE_RADIO = 78
+/* ☠️ `VALLE_HONDO` MURIÓ (Ley 37): el fondo del valle **ya no se elige**,
+ *  se DERIVA de `DISCO_CY + DISCO_RADIO + ANILLO`. Un número suelto podía
+ *  quedar más arriba o más abajo que el disco y romper la separación
+ *  uniforme — que es justo lo que el gate reportó como «el hueco está muy
+ *  pequeñito». */
 /** 🔴 EL ANILLO DE FONDO — el pedido literal del founder:
  *  *«no dejó espacio en blanco entre la barra y el círculo: se
  *  debería ver el fondo alrededor del círculo»*. El cuerpo se dibuja
@@ -181,7 +185,7 @@ const VALLE_HONDO = 16
  *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
-const ANILLO = 5
+const ANILLO = 8
 /** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
  *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
  *
@@ -267,46 +271,54 @@ const SUBIDA_ACTIVA = ALTO_FILA / 2 - DISCO_CY
    marcador.* */
 function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   'worklet'
-  const r = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.35)
+  /* EL RADIO DEL VALLE = el del disco MÁS el anillo. **Ya no se elige: se
+     DERIVA**, y eso es lo que garantiza que la separación sea la misma en
+     todo el arco en vez de depender de dónde mire el ojo. */
+  const R = DISCO_RADIO + ANILLO
+  // dónde el contorno del disco cruza el borde superior de la barra
+  const xe = Math.sqrt(Math.max(R * R - DISCO_CY * DISCO_CY, 1))
   // el sesgo: el valle se abre hacia el lado del que viene
-  const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.45
-  const izq = cx - r + sesgo
-  const der = cx + r + sesgo
-  /* 🔴 LOS HOMBROS SALEN EN **S** — sexta corrección, verbatim: *«los
-     bordes de arriba TIENDEN A GIRARSE, no rectos ni como si fueran parte
-     del círculo, sino CON UNA SALIENTE HACIA AFUERA»*. La mesa lo
-     confirmó cuadro por cuadro.
-     ⇒ al salir del valle el borde **se pasa de la horizontal** y recién
-     después se aplana. Ese pequeño monto negativo (hacia arriba) es toda
-     la S: sin él la curva llega a la recta y muere ahí. */
-  const SALIENTE = 4
-  // El cuerpo flota: sus bordes NO son la pantalla, son el ancho útil.
-  const i0 = 0
-  const i1 = ancho
+  const sesgo = Math.max(-1, Math.min(1, estira)) * 10
+  const izq = cx - xe + sesgo
+  const der = cx + xe + sesgo
+  // los HOMBROS: dónde arranca la S antes de caer al valle
+  const hombroI = cx - VALLE_RADIO + sesgo
+  const hombroD = cx + VALLE_RADIO + sesgo
+  /* La S: al salir del valle el borde SE PASA de la horizontal y recién
+     después se aplana. Con el valle hondo, la saliente tiene de dónde
+     salir — que era la queja: *«la S pareciera que no está»*. */
+  const SALIENTE = 5 * (1 + Math.min(Math.abs(estira), 1) * 0.6)
+  /* El arco de abajo, en DOS cúbicas simétricas. Se aproxima en vez de
+     usar `A` a propósito: los flags de barrido de un arco SVG no se
+     pueden verificar sin renderizar, y una cúbica con control calculado
+     cae exactamente donde dice la aritmética. */
+  const a0 = Math.atan2(-DISCO_CY, -xe)   // ángulo del cruce izquierdo
+  const a1 = Math.PI / 2                   // el fondo del arco
+  const d = a1 - a0
+  const k = (4 / 3) * Math.tan(d / 4) * R
+  const px = (a: number) => cx + sesgo + R * Math.cos(a)
+  const py = (a: number) => DISCO_CY + R * Math.sin(a)
+  const tx = (a: number) => -Math.sin(a)
+  const ty = (a: number) => Math.cos(a)
   const rc = Math.min(RADIO_BARRA, alto / 2)
   return [
-    // borde superior izquierdo, con su esquina redondeada
-    `M${i0} ${alto - rc}`,
+    `M0 ${alto - rc}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
-    `H${izq}`,
-    // el valle, con su saliente ANTES de hundirse y DESPUÉS de subir
-    `C${izq + r * 0.3} ${-SALIENTE} ${cx - r * 0.5} ${VALLE_HONDO} ${cx} ${VALLE_HONDO}`,
-    `C${cx + r * 0.5} ${VALLE_HONDO} ${der - r * 0.3} ${-SALIENTE} ${der} 0`,
-    `H${i1 - rc}`,
+    `H${hombroI}`,
+    // hombro izquierdo: sube por encima de la horizontal y cae al valle
+    `C${hombroI + (izq - hombroI) * 0.45} ${-SALIENTE} ${izq - (izq - hombroI) * 0.2} 0 ${izq} 0`,
+    // el arco que abraza al disco, en dos mitades
+    `C${px(a0) + k * tx(a0)} ${py(a0) + k * ty(a0)} ${px(a1) - k * tx(a1)} ${py(a1) - k * ty(a1)} ${px(a1)} ${py(a1)}`,
+    `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(Math.PI - a0) - k * tx(Math.PI - a0)} ${py(Math.PI - a0) - k * ty(Math.PI - a0)} ${der} 0`,
+    // hombro derecho: espejo del izquierdo
+    `C${der + (hombroD - der) * 0.2} 0 ${hombroD - (hombroD - der) * 0.45} ${-SALIENTE} ${hombroD} 0`,
+    `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
     `V${alto - rc}`,
     `a${rc} ${rc} 0 0 1 ${-rc} ${rc}`,
-    `H${i0 + rc}`,
+    `H${rc}`,
     `a${rc} ${rc} 0 0 1 ${-rc} ${-rc}`,
-    `Z`,
-    /* EL AGUJERO DEL ANILLO — segundo subpath; con `fillRule` evenodd
-       RESTA material. Su radio es el del disco MÁS el anillo: la
-       diferencia entre los dos círculos ES el espacio, y por ahí se ve el
-       fondo real de la pantalla porque acá no se pinta nada. */
-    `M${cx - (DISCO_RADIO + ANILLO)} ${DISCO_CY}`,
-    `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${(DISCO_RADIO + ANILLO) * 2} 0`,
-    `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${-(DISCO_RADIO + ANILLO) * 2} 0`,
     `Z`,
   ].join(' ')
 }
