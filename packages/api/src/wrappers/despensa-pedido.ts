@@ -326,6 +326,121 @@ export async function crearPedidoDespensa(input: {
   };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// S100 · EL GATE DE LA PUERTA — la mala noticia se da ANTES de la caja (D-827)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * POR QUÉ EXISTE, medido y no supuesto (censo L0 de S100):
+ *
+ * · `crear_pedido_despensa` **no valida stock** (medido sobre su fuente:
+ *   ni `stock`, ni `hay_stock` aparecen en su cuerpo). El pedido se crea
+ *   contento con un producto agotado.
+ * · La primera vez que alguien se entera es en `iniciar_pago_pedido`, que
+ *   rebota `sin_stock` — o sea **con el dedo sobre «Pagar»**.
+ * · Y hoy **80 de 563 ofertas publicadas** están con `hay_stock = false`
+ *   (14 % de la vitrina): el caso no es de borde, tiene sujetos reales.
+ *
+ * *Una familia que se entera en la caja de que no hay stock no recibe una
+ * mala noticia: recibe un rechazo. La misma noticia en la puerta es
+ * información, y le deja algo que hacer.*
+ *
+ * ── 🔴 EL LÍMITE DE ESTE LECTOR, DECLARADO EN VEZ DE DISIMULADO ─────────
+ * `ofertas.hay_stock` es, literalmente, `stock_disponible > 0` (trigger
+ * `_trg_oferta_deriva_hay_stock`). **Es un booleano que NO mira cantidad.**
+ * ⇒ este lector caza «se agotó» y **NO caza «no alcanza para 5»**: quien
+ * pide 5 de un producto con 1 sigue enterándose en la caja.
+ * Cerrar ese caso exige el motor (el número vive en `vendedor_skus`, que
+ * la familia no puede leer — y **no debe**: la firma de S99 dice booleano
+ * y jamás el inventario ajeno). Va como pedido, no como parche acá.
+ *
+ * ── LO QUE NO JUZGA, A PROPÓSITO ───────────────────────────────────────
+ * Devuelve `cuenta_comercial_id` como DATO y **no decide** qué hacer con
+ * un carrito de dos vendedores (F5 es decisión de mesa, no de un wrapper).
+ */
+export type MotivoNoDisponible = 'ya_no_publicada' | 'agotado';
+
+export interface EstadoOfertaCarrito {
+  oferta_id: string;
+  disponible: boolean;
+  motivo: MotivoNoDisponible | null;
+  /** El precio VIGENTE. El carrito guarda el que vio al agregar, y desde
+   *  S99 el vendedor puede moverlo (`actualizarPrecioOferta`): si difiere,
+   *  la pantalla lo dice ANTES de cobrar en vez de sorprender en el total. */
+  precio_vigente: number | null;
+  /** El dueño REAL de la oferta. Dato, no veredicto (ver arriba). */
+  cuenta_comercial_id: string | null;
+}
+
+/**
+ * Revalida el carrito contra la vitrina de AHORA, en UNA sola ola
+ * (L-223 / N16.1: olas, jamás cadenas encadenadas).
+ *
+ * 🔴 LA PROPIEDAD QUE LO VUELVE CONFIABLE: **recorre los ids que ENTRAN,
+ * no las filas que VUELVEN.** Una oferta borrada, despublicada o que la
+ * RLS ya no deja ver **no vuelve en el `select`** — y si el lector
+ * recorriera el resultado, ese ítem simplemente desaparecería del informe
+ * y la pantalla lo daría por bueno. *Un ítem que falta se ve exactamente
+ * igual que un ítem sano: es la clase de L-268, y acá se cierra por
+ * construcción.*
+ */
+export async function revalidarCarritoDespensa(
+  ofertaIds: string[],
+): Promise<ResultadoWrapper<EstadoOfertaCarrito[], CodigoErrorDespensa>> {
+  // Carrito vacío: cero viajes. No hay nada que revalidar y una petición
+  // que no puede cambiar nada es peaje puro (~150 ms, L-223).
+  if (ofertaIds.length === 0) return { ok: true, data: [] };
+
+  // Un id repetido no se pide dos veces; el informe igual sale por id.
+  const unicos = Array.from(new Set(ofertaIds));
+
+  const { data, error } = await getClient()
+    .from('ofertas')
+    .select('id, estado, hay_stock, precio, cuenta_comercial_id')
+    .in('id', unicos);
+
+  if (error) return falloDespensa(error.message);
+
+  const porId = new Map<string, Record<string, unknown>>();
+  for (const fila of Array.isArray(data) ? data : []) {
+    if (esObjDespensa(fila) && typeof fila.id === 'string') porId.set(fila.id, fila);
+  }
+
+  return {
+    ok: true,
+    // ⬇️ El recorrido es sobre `ofertaIds` — ver la nota de arriba.
+    data: ofertaIds.map((id): EstadoOfertaCarrito => {
+      const fila = porId.get(id);
+
+      // No vino: borrada, despublicada fuera de nuestro alcance, o la RLS
+      // ya no la muestra. En los tres casos la familia NO puede comprarla,
+      // y decirlo es más honesto que omitir la fila.
+      if (fila === undefined) {
+        return {
+          oferta_id: id,
+          disponible: false,
+          motivo: 'ya_no_publicada',
+          precio_vigente: null,
+          cuenta_comercial_id: null,
+        };
+      }
+
+      const publicada = fila.estado === 'publicada';
+      const conStock = fila.hay_stock === true;
+      return {
+        oferta_id: id,
+        disponible: publicada && conStock,
+        // El orden importa: si la bajaron de la vitrina, eso es lo que pasó
+        // — «agotado» sobre una oferta despublicada sería una causa inventada.
+        motivo: !publicada ? 'ya_no_publicada' : !conStock ? 'agotado' : null,
+        precio_vigente: typeof fila.precio === 'number' ? fila.precio : null,
+        cuenta_comercial_id:
+          typeof fila.cuenta_comercial_id === 'string' ? fila.cuenta_comercial_id : null,
+      };
+    }),
+  };
+}
+
 /** Reserva el stock. El motor es idempotente: si ya hay reserva vigente
  *  devuelve `ya_reservado` en vez de duplicar. */
 export async function reservarStockPedido(
