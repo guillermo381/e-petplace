@@ -345,3 +345,57 @@ menos tela **de verdad**.
   **desplazamiento**, **máximas en el viaje y mínimas en reposo**.
 - **EL HUECO NO ES DEL COLOR DEL FONDO** — blanco grisáceo en «Cuenta». Es su
   *«por eso no se nota que está»*. **Independiente de todo lo anterior.**
+
+---
+
+# 🔴 EL HUECO GRIS — DOS CORRECCIONES A LA CURA PROPUESTA, LAS DOS MEDIDAS
+
+## ① `tabBarStyle` NO LLEGA A NADA — la cura sería un NO-OP
+**Medido:** la barra se monta con **`tabBar={...}` (un tabBar CUSTOM)**, y
+`tabBarStyle` es una opción que consume **el tabBar POR DEFECTO**, que acá no
+existe. Además: **`BarraTabs` no lee `tabBarStyle`** (cero menciones) y el
+custom tabBar **solo desestructura `{ state, navigation }`** — ni siquiera
+recibe `descriptors`.
+⇒ **pasar `tabBarStyle` no cambiaría un pixel**, y el gate siguiente se
+quemaría descubriéndolo.
+*Lo bueno de B está confirmado: `BarraTabs` NO pinta fondo (solo el disco) —
+su mitad está bien.*
+
+## 🔴 ② LA CAUSA YA ESTÁ MEDIDA EN EL REPO **DESDE S85**, con archivo y línea
+En `apps/prestador/src/app/_layout.tsx` (nota de **S85-C3**), literal:
+
+> *«El navegador pinta `colors.background` en DOS capas propias —`contentStyle`
+> por escena y `nativeContainerStyle` del ScreenStack
+> (`NativeStackView.native.js:221` y `:252`)— y el tema por default de
+> expo-router lo tiene en **`rgb(242, 242, 242)`**.»*
+
+**`rgb(242,242,242)` ES, literalmente, «blanco grisáceo».** Coincide con la
+descripción del founder **carácter por carácter**.
+
+**Y la misma nota ya midió el costo de la salida obvia:**
+> *«Hacerlas transparentes SE PUEDE (expo-router exporta su `ThemeProvider`)
+> **PERO ROMPE LA TRANSICIÓN FIRMADA**: con las escenas transparentes, el
+> `slide_from_right` de S80-B12 deja ver la pantalla de abajo a través de la
+> que entra.»*
+
+⇒ **la transparencia global está DESCARTADA por costo desde hace 14 sesiones.**
+
+## ⇒ POR DÓNDE VA LA CURA (y no toca transiciones)
+**El hueco no necesita que las ESCENAS sean transparentes: necesita que
+DETRÁS DE LA BARRA esté el color real.** Pintar el fondo verdadero **en el
+área de la barra** —debajo de ella, dentro de su propio contenedor— resuelve
+el hueco **sin tocar `contentStyle` ni `nativeContainerStyle`**, que es lo que
+rompía el `slide_from_right`.
+*Y es la misma forma que ya curó «la barra flota»: el problema nunca fue la
+pieza, fue lo que había detrás.* **La clase REINCIDE — ver abajo.**
+
+## 📌 LA CLASE QUE REINCIDIÓ (tercera vez en la barra)
+**El hueco es del PADRE, no de la pieza.** Ya pasó con *«la barra apoyada
+sobre una base blanca»* y vuelve acá. **Literal de B:** *«yo no puedo pintar
+transparencia sobre el contenedor de mi padre.»*
+
+## ⚠️ Y SI ALGUIEN IGUAL VA POR `position: absolute`
+Saca la barra del flujo ⇒ **TODA pantalla de tabs necesita padding inferior** o
+el último ítem queda debajo. Con barra de 85 y cinco tabs, **son las cinco
+pantallas del prestador y las del cliente**. **Verificar en las dos apps y en
+una lista larga.** *Con la cura de arriba, este riesgo no se paga.*
