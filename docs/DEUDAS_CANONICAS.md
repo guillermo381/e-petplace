@@ -17644,6 +17644,28 @@ decir la verdad del modelo.**
 
 ☠️ **Muere** cuando la vitrina distinga comprable de agotado con voz propia, y el agotado siga siendo alcanzable.
 
+#### D-843 — 🔴 LAS DOS CARAS DEL ESPEJO PAGINAN DISTINTO — ROMPE N17 POR LA PUERTA DE ATRÁS (hallazgo de C, S99; dueño: A + superficie; **umbral: ~600 productos**)
+
+**El hecho:** la cara VENDEDOR pagina **por cursor** (total, siguiente, y no
+pierde ni repite). La cara CLIENTE usa **techo + ventana** (`limite ?? 100`).
+**Hoy no se nota porque el catálogo entra.**
+
+**🔴 EL DÍA QUE EL CATÁLOGO PASE DE ~600, LA CARA CLIENTE TRUNCA Y LA OTRA
+NO** ⇒ **cambiar de modo cambiaría QUÉ se ve**, que es exactamente lo que N17
+prohíbe. *Y entra por la puerta de atrás: nadie va a tocar el espejo ese día —
+lo va a romper el crecimiento del catálogo.*
+
+**Por qué NO se cura hoy:** la cara cliente ya **dice** su corte
+(`contarProductosDespensa` lo volvió exacto), así que **no miente** — L-268
+está cumplida. *Lo que falta no es honestidad: es SIMETRÍA.*
+
+**La cura, cuando dispare:** la vitrina adopta el mismo cursor. La vista
+aplanada (`v_vitrina_publicada`) ya existe y ya ordena igual, **así que es el
+mismo patrón, no un diseño nuevo.**
+
+☠️ **Muere** cuando las dos caras recorran el catálogo con el mismo mecanismo.
+**Disparo medible: `contarProductosDespensa()` ≥ 600.**
+
 #### D-842 — 🔴 LA TRANSICIÓN DEL DUAL SALTA: NO FALTA UNA TRANSICIÓN, SOBRA UN SALTO (S99 — investigación de D, CAUSA LOCALIZADA y NO cerrada; va a la sesión de PULIDO con todo adentro)
 
 **No es un pendiente suelto: es una investigación con estado.** Se deposita
