@@ -11711,6 +11711,21 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-275 — EL SISTEMA DE ARCHIVOS DE DESARROLLO NO ES EL DEL SERVIDOR DE BUILD (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** `Chevron.tsx` y `chevron.ts` difieren **solo en la mayúscula inicial** ⇒ en macOS **son el mismo archivo**. Literal de B: ***«en un sistema sensible habrían sido dos, y el defecto viajaba SIN SÍNTOMA.»*** Y cobró dos veces: **al limpiar, un `remove` se llevó el archivo recién escrito.**
+
+  **Por qué es CLASE y no anécdota:** el árbol de desarrollo (macOS, **insensible por defecto** — verificado el 16-ago creando `Caso.txt` y leyendo `caso.txt`) **no es el del servidor de build ni el de CI** (Linux, sensible). ⇒ **un choque de mayúsculas es INVISIBLE acá y REAL allá**, y su modo de falla es el peor: *acá funciona, allá no compila o —peor— importa el archivo equivocado.* **Y git SÍ distingue**, así que el repo puede llevar los dos y tu disco mostrarte uno.
+
+  **La cura de B, y es mejor que la obvia:** los dos quedaron **juntos** en vez de separados — *«la regla se cumple desde adentro»*. **Separarlos habría dejado la trampa armada para el próximo.**
+
+  **EL INSTRUMENTO, para que esto se mida en vez de recordarse** (una línea, corre en cualquier repo y se apoya en que **git es sensible aunque el disco no lo sea**):
+  ```
+  git ls-files | awk '{print tolower($0)"\t"$0}' | sort | \
+    awk -F'\t' '{if($1==p){print prev; print $2} p=$1; prev=$2}' | sort -u
+  ```
+  **Medido al depositar: CERO colisiones vivas** en el repo — o sea que esto nace **preventivo, no como deuda.** *Candidato a brazo de `verify:diseno` (dueño B): es más barato que la primera vez que rompa un build.*
+
 - **L-274 — UNA ETIQUETA NOMBRA SU NÚMERO, NO LA PANTALLA DONDE VIVE (S99 — hallazgo de C al renombrar; depositada por orden de mesa, 16-ago-2026).**
 
   **El caso:** el cupo decía *«Venta de productos · 3 de 10 entregas hoy»* **tomando prestado el título de la pantalla**. Con el rename habría dicho *«Tu tienda · 3 de 10»* — una etiqueta que nombra el continente y no el contenido. Su literal: ***«el préstamo se veía razonable mientras los dos textos COINCIDÍAN POR CASUALIDAD»***. ⇒ nace su clave propia.
