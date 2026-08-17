@@ -767,3 +767,37 @@ export async function crearIntentoPago(
     },
   };
 }
+
+/**
+ * F6 · EL NOMBRE DE LA TIENDA QUE PREPARA CADA PEDIDO.
+ *
+ * Pasa por DEFINER porque **la familia NO puede leer `cuentas_comerciales`**:
+ * sus dos policies SELECT son `is_admin()` y owner/gestor. Molde D-455 — *los
+ * ids son filtro y jamás permiso*: se contesta solo sobre pedidos de quien
+ * pregunta, y un id ajeno simplemente no vuelve.
+ *
+ * **Expone `nombre_comercial` y nada más** (hay un cinturón en la migración
+ * que verifica que el cuerpo no nombre razón social, RUC, dirección ni dueño).
+ *
+ * Por qué importa: el resumen dice «Entrega 1 de 2» y **eso no explica POR QUÉ
+ * son dos** — la razón es que son dos tiendas. *Una división que no se entiende
+ * se lee como un error del sistema, no como consecuencia de lo que se compró.*
+ */
+export async function obtenerNombresTiendaPorPedido(
+  pedidoIds: string[],
+): Promise<ResultadoWrapper<Record<string, string>, CodigoErrorDespensa>> {
+  if (pedidoIds.length === 0) return { ok: true, data: {} };
+  const { data, error } = await getClient().rpc('obtener_nombres_tienda_por_pedido', {
+    p_pedido_ids: pedidoIds,
+  });
+  if (error) return falloDespensa(error.message);
+  const mapa: Record<string, string> = {};
+  for (const f of Array.isArray(data) ? data : []) {
+    if (esObjDespensa(f) && typeof f.pedido_id === 'string' && typeof f.nombre_comercial === 'string') {
+      mapa[f.pedido_id] = f.nombre_comercial;
+    }
+  }
+  // Nulo honesto por ausencia: un pedido sin entrada es un pedido cuyo nombre
+  // no se pudo leer. La pantalla NO escribe "Lo prepara: —"; omite la línea.
+  return { ok: true, data: mapa };
+}

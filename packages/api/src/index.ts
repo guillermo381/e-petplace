@@ -1183,6 +1183,9 @@ export {
   // adelante — y `referencia` es el id de la COMPRA, jamás el de un pedido.
   crearCompraDesdePedidos,
   crearIntentoPago,
+  // F6: qué tienda prepara cada pedido — la familia no puede leer
+  // `cuentas_comerciales`, así que va por DEFINER angosta (molde D-455).
+  obtenerNombresTiendaPorPedido,
   type CompraCreada,
   type IntentoDePago,
 } from './wrappers/despensa-pedido';

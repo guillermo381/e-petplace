@@ -21100,6 +21100,13 @@ export type Database = {
           nombre: string
         }[]
       }
+      obtener_nombres_tienda_por_pedido: {
+        Args: { p_pedido_ids: string[] }
+        Returns: {
+          nombre_comercial: string
+          pedido_id: string
+        }[]
+      }
       obtener_oferta_adiestramiento_publica: {
         Args: never
         Returns: {
