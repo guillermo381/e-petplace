@@ -1389,6 +1389,12 @@ export const clienteEn = {
     // MOMENT. No purchase euphoria: this house does not celebrate
     // transactions (MODELO_LOYALTY §5).
     celebracionLlego: 'Your order arrived',
+    // The third act: THE SEDIMENT. It speaks of the RECORD, never of points or
+    // rewards — buying is not caring (MODELO_LOYALTY §5). And it does not
+    // congratulate anyone for buying: it says what remained, which is another
+    // thing entirely.
+    celebracionSedimento: "It's now part of {{nombre}}'s story",
+    celebracionSedimentoVarias: "It's now part of your pets' stories",
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
     desvioCancelado: 'Canceled',

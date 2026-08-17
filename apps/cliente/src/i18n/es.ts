@@ -1588,6 +1588,11 @@ export const clienteEs = {
     // por eso está en pasado y en voz de familia. Cero euforia de compra:
     // esta casa no celebra transacciones (MODELO_LOYALTY §5).
     celebracionLlego: 'Tu pedido llegó',
+    // El tercer acto: EL SEDIMENTO. Habla del EXPEDIENTE, jamás de puntos ni
+    // de recompensa — comprar no es cuidar (MODELO_LOYALTY §5). Y no felicita
+    // a nadie por comprar: dice qué quedó, que es otra cosa.
+    celebracionSedimento: 'Quedó en la historia de {{nombre}}',
+    celebracionSedimentoVarias: 'Quedó en la historia de tus mascotas',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
     desvioCancelado: 'Cancelado',

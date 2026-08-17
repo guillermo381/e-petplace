@@ -265,6 +265,40 @@ export default function DespensaPedido() {
               <CelebracionEntrega
                 pedidoId={detalle.pedido.pedido_id}
                 titulo={t('despensa.celebracionLlego')}
+                cierre={(() => {
+                  // ⏪ EL TERCER ACTO YA NO VA VACÍO: `sedimentado` llegó.
+                  //
+                  // 🔴 SE LEE `sedimentado`, JAMÁS `destino`. Un ítem con
+                  // destino NO garantiza depósito —el motor lo gatea por
+                  // `f.entra_al_expediente`, la familia del producto decide—
+                  // así que contar destinos habría dicho «quedó en la
+                  // historia de Thor» de un juguete. Este booleano lo dice
+                  // el servidor por la EXISTENCIA de la fila.
+                  //
+                  // Y su contrato se respeta entero: **`true` habilita a
+                  // decirlo; `false` habilita a CALLAR.** Sin ninguno en
+                  // `true` el acto no existe — no se dice «no quedó en el
+                  // expediente», porque ese `false` tapa tres causas
+                  // distintas (familia que no entra · sin destino · mascota
+                  // no legible por quien mira) y no las distingue.
+                  const sedimentados = detalle.items.filter((i) => i.sedimentado);
+                  if (sedimentados.length === 0) return undefined;
+                  // Los nombres que SÍ podemos nombrar. Si el destino no es
+                  // legible, la mascota no se nombra — pero el hecho sí se
+                  // cuenta: sedimentó igual.
+                  const nombres = [
+                    ...new Set(
+                      sedimentados
+                        .map((i) => i.destino?.mascota_id)
+                        .filter((id): id is string => typeof id === 'string')
+                        .map((id) => nombrePorId[id])
+                        .filter((n): n is string => typeof n === 'string' && n !== ''),
+                    ),
+                  ];
+                  return nombres.length === 1
+                    ? t('despensa.celebracionSedimento', { nombre: nombres[0] })
+                    : t('despensa.celebracionSedimentoVarias');
+                })()}
               />
             ) : null}
 
