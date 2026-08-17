@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-281 — UNA LEY QUE REINCIDE EN EL MISMO LUGAR SEÑALA UN PATRÓN DE CONSTRUCCIÓN, NO UN DESCUIDO (S99 — tres cobros de L-277 en LA MISMA PIEZA; depositada 16-ago-2026).**
+
+  **Los tres, todos en `BarraTabs`:** ① `VALLE_HONDO` a mano al lado de un radio derivado · ② el valle de bézier libre contra el disco (**L-279**) · ③ **el acotado corría el disco y el ícono se quedaba en el centro de su pestaña, calculado por otro lado**. Literal de B en el tercero: ***«dos cosas que tienen que coincidir salían de dos cuentas distintas — el mismo modo de falla que ya me costó el ícono descentrado hace tres gates».***
+
+  **⇒ Cuando la misma ley se cobra tres veces en la misma pieza, el problema dejó de ser la aplicación de la ley: es que la pieza tiene MUCHAS relaciones que se están expresando como VALORES PARALELOS en vez de como derivaciones.** *Cada cobro individual parece un descuido; los tres juntos son un diagnóstico de construcción.*
+
+  **Regla operativa: al tercer cobro de la misma ley en la misma pieza, se censa la pieza entera buscando pares que deban coincidir** — en vez de curar el tercero y esperar al cuarto.
+
 - **L-280 — TRADUCIR UN PEDIDO DE COMPORTAMIENTO A UNA PROPIEDAD ESTÁTICA MANDA A TODOS A MEDIR EL CUADRO EQUIVOCADO (S99 — cuatro gates de la barra; el error es de la MESA; depositada 16-ago-2026).**
 
   **El caso, y es el más caro de la sesión en tiempo:** el founder pidió cuatro veces *«los bordes… con una saliente hacia afuera»*, *«la S mucho más pronunciada»*. **La mesa lo tradujo a una FORMA FIJA — «una joroba»— y todo lo que vino después fue impecable y apuntó al lugar equivocado.**
