@@ -5022,57 +5022,6 @@ export type Database = {
           },
         ]
       }
-      envio_eventos: {
-        Row: {
-          ciudad: string | null
-          descripcion: string | null
-          envio_id: string
-          estado: string
-          fuente: string | null
-          id: string
-          lat: number | null
-          lon: number | null
-          ocurrido_en: string
-        }
-        Insert: {
-          ciudad?: string | null
-          descripcion?: string | null
-          envio_id: string
-          estado: string
-          fuente?: string | null
-          id?: string
-          lat?: number | null
-          lon?: number | null
-          ocurrido_en?: string
-        }
-        Update: {
-          ciudad?: string | null
-          descripcion?: string | null
-          envio_id?: string
-          estado?: string
-          fuente?: string | null
-          id?: string
-          lat?: number | null
-          lon?: number | null
-          ocurrido_en?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "envio_eventos_envio_id_fkey"
-            columns: ["envio_id"]
-            isOneToOne: false
-            referencedRelation: "envios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "envio_eventos_envio_id_fkey"
-            columns: ["envio_id"]
-            isOneToOne: false
-            referencedRelation: "v_dashboard_logistico"
-            referencedColumns: ["envio_id"]
-          },
-        ]
-      }
       envios: {
         Row: {
           bodega_id: string | null

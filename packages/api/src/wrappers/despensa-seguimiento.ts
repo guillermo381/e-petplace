@@ -127,8 +127,35 @@ export interface SeguimientoEnvio {
    * disfrazado de "ya salió y no se movió" (L-139).
    */
   track: PuntoTrackEnvio[] | null;
-  /** Los eventos del courier, del más nuevo al más viejo. */
-  eventos: { ocurrido_en: string; descripcion: string | null }[];
+  /**
+   * ☠️ S100 · AQUÍ VIVÍA `eventos`, LEÍDO DE `envio_eventos` — UNA TABLA MUERTA.
+   *
+   * Medido (H-09 de D, verificado acá): `envio_eventos` tiene **0 filas** y
+   * **CERO funciones que inserten en ella** en todas las migraciones. Tenía
+   * policy y grants, o sea toda la apariencia de una capacidad.
+   *
+   * 🔴 POR QUÉ ERA PEOR QUE UN CAMPO VACÍO: una sección de hitos montada sobre
+   * esto **no podía aparecer nunca, y el instrumento habría dado verde** —
+   * porque una lista vacía es un estado legal y no se distingue de «todavía no
+   * pasó nada». *Una tabla con policy y sin escritor no es una capacidad
+   * pendiente: es una afirmación falsa con infraestructura.*
+   *
+   * Los hitos que SÍ se escriben viven en `envios` y son los tres de abajo.
+   */
+
+  /** Cuándo SALIÓ del local. Lo estampa el despacho. */
+  salio_en: string | null;
+  /** Cuándo el repartidor marcó «voy hacia allá» (`marcar_en_camino_a_destino`).
+   *  🔴 Es también la ventana en la que el motor acepta puntos de track: fuera
+   *  de ella rebota `track_fuera_de_ventana`. */
+  hacia_destino_en: string | null;
+  /**
+   * Cuándo se entregó. Va aunque la mesa pidió solo los dos de arriba: **es el
+   * último escalón de la misma escalera**, sale de la misma fila, en la misma
+   * ola y con la misma RLS — pedirlo después habría costado otra ronda entre
+   * pistas por una línea. Se declara para que se vea que fue decisión.
+   */
+  entregado_en: string | null;
 }
 
 export interface DetallePedido {
@@ -225,7 +252,7 @@ export async function obtenerDetallePedido(
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
-      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, envio_eventos(ocurrido_en, descripcion)')
+      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, salio_en, hacia_destino_en, entregado_en')
       .eq('pedido_id', pedidoId)
       .maybeSingle(),
   ]);
@@ -277,7 +304,7 @@ export async function obtenerDetallePedido(
 
   let envio: SeguimientoEnvio | null = null;
   if (esObjDespensa(env.data) && typeof env.data.id === 'string') {
-    const evs = Array.isArray(env.data.envio_eventos) ? env.data.envio_eventos : [];
+    const hito = (v: unknown): string | null => (typeof v === 'string' ? v : null);
     envio = {
       envio_id: env.data.id,
       transportista: typeof env.data.transportista === 'string' ? env.data.transportista : null,
@@ -306,12 +333,12 @@ export async function obtenerDetallePedido(
         puntos.sort((a, b) => a.t - b.t);
         return puntos.length > 0 ? puntos : null;
       })(),
-      eventos: evs
-        .filter((e): e is { ocurrido_en: string; descripcion: string | null } =>
-          esObjDespensa(e) && typeof e.ocurrido_en === 'string',
-        )
-        .map((e) => ({ ocurrido_en: e.ocurrido_en, descripcion: e.descripcion ?? null }))
-        .sort((a, b) => (a.ocurrido_en < b.ocurrido_en ? 1 : -1)),
+      // Los tres hitos, tal como los estampó el motor. `null` = todavía no
+      // ocurrió — vacío honesto, jamás una fecha inventada para llenar la
+      // escalera (L-139).
+      salio_en: hito(env.data.salio_en),
+      hacia_destino_en: hito(env.data.hacia_destino_en),
+      entregado_en: hito(env.data.entregado_en),
     };
   }
 
