@@ -291,3 +291,57 @@ al lado de los nuestros, **no cuadros en reposo**.
    «Cuenta». Es su *«por eso no se nota que está»*.
 2. **LOS ÍCONOS DE LOS TABS EXTREMOS NO ESTÁN CENTRADOS** — consecuencia del
    acotado: **el disco se corrió y el contenido no lo siguió.**
+
+---
+
+# QUINTO GATE — LA CADENA DE LOS EXTREMOS, Y EL NÚMERO RE-MEDIDO
+
+**Firma:** *«está dejando un borde a la izquierda y a la derecha SIN EL TAB,
+que NO PERMITE GENERAR EL EFECTO DE MONTAÑA. El efecto de la tela describe
+perfectamente lo que quiero generar.»*
+
+## ES UNA CURA, NO TRES — la cadena
+1. **la barra llega al borde** ⇒ hay tela a los dos lados en los extremos ⇒
+2. **el disco no necesita acotarse** ⇒ vuelve al centro de su tab ⇒
+   **los íconos se centran solos** (el otro defecto reportado) ⇒
+3. **con disco centrado y tela alrededor**, el efecto de montaña **puede
+   existir en los cinco tabs**, no solo en los del medio.
+
+## 🔴 PERO EL NÚMERO RE-MEDIDO DICE QUE LLEGAR AL BORDE **NO ALCANZA**
+**La mesa acertó en que el descarte de B se hizo con el valle viejo** — con el
+valle nuevo el desborde **ya no es 45**. **Pero tampoco se arregla ensanchando.**
+
+*Valores leídos del objeto (`BarraTabs.tsx` + tokens): `DISCO_RADIO 33` ·
+`ANILLO 10` · `VALLE_RADIO 50` · `MARGEN_BARRA 16` · 5 tabs · pantalla 390.*
+
+| | centro del 1er tab | valle concéntrico (semiancho **43**) | hombro (semiancho **50**) |
+|---|---|---|---|
+| **hoy** (margen 16) | x = **35,8** | **desborda 7,2** | desborda 14,2 |
+| **A SANGRE** (margen 0) | x = **39,0** | **desborda 4,0** | desborda 11,0 |
+
+**⇒ quitar los 16 px de margen mueve el centro del primer tab solo 3,2 px**,
+porque **el paso entre tabs crece con la barra**. *La restricción no es el
+ancho total: es que **el centro del primer tab está a medio paso del borde
+(~36-39) y el valle necesita 43**.*
+
+**⇒ LA SALIDA «QUE LLEGUE AL BORDE» QUEDA DESCARTADA POR NÚMERO — y también la
+de a sangre**, que la mesa ofrecía como respaldo.
+
+## ⇒ LA QUE SOBREVIVE ES LA ASIMETRÍA, Y **EL MODELO NUEVO LA JUSTIFICA**
+Con 5 tabs y disco 66, **el valle simétrico no cabe en los extremos por ~7 px,
+y ningún ancho lo resuelve.** Queda **asimetrizar el valle en el primero y el
+último** (la salida ② que B misma había planteado).
+
+**Y deja de ser una concesión: es lo que la física del modelo PREDICE.** *Una
+tela no tiene material más allá de su borde* ⇒ **una piedra que cae cerca del
+borde levanta una montaña más chica del lado de afuera.** La asimetría **no
+contradice «tela a los dos lados»: la cumple**, porque del lado de afuera hay
+menos tela **de verdad**.
+**Y conserva lo que importa de la cadena: el disco vuelve al CENTRO de su tab
+⇒ los íconos se centran solos.**
+
+## SIGUEN VIGENTES
+- **EL MODELO** (cuarto gate): el disco **cae y deforma**; las montañas son
+  **desplazamiento**, **máximas en el viaje y mínimas en reposo**.
+- **EL HUECO NO ES DEL COLOR DEL FONDO** — blanco grisáceo en «Cuenta». Es su
+  *«por eso no se nota que está»*. **Independiente de todo lo anterior.**
