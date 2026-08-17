@@ -16,6 +16,10 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+// El punto del track es EL MISMO objeto que escribe el repartidor: se importa
+// su tipo en vez de re-declararlo. Dos declaraciones de la misma forma son dos
+// formas que un día divergen, y el día que divergen nadie se entera.
+import type { PuntoTrackEnvio } from './despensa-repartidor';
 import {
   falloDespensa,
   esObjDespensa,
@@ -63,6 +67,30 @@ export interface LineaDePedido {
    *  DUEÑO por RLS: si el que mira no es el dueño, esto viene `null` y no
    *  significa "sin atar" — significa "no es tu compra". */
   destino: { mascota_id: string | null; donacion: boolean } | null;
+  /**
+   * 🔴 SI ESTE ÍTEM YA SEDIMENTÓ EN EL EXPEDIENTE (S100 · H-07 de D).
+   *
+   * Derivado de la EXISTENCIA de fila en `evento_producto_asignacion` para
+   * este `pedido_item_id` — no de una suposición sobre el producto. Hace
+   * falta porque **el depósito NO ocurre para todo lo comprado**: está
+   * gateado por `f.entra_al_expediente` (medido en
+   * `_depositar_item_en_expediente`), o sea que **la FAMILIA del producto
+   * decide** — el alimento entra, el juguete no (`BIO_EXPEDIENTE` E2bis).
+   * Sin este dato, decir *«quedó en el expediente de Thor»* por cada ítem
+   * con destino sería verosímil-falso (L-139).
+   *
+   * ⚠️ **`false` NO ES UNA AFIRMACIÓN, Y LA PANTALLA NO PUEDE TRATARLO COMO
+   * TAL.** Tapa TRES causas distintas y no las distingue: ① la familia del
+   * producto no entra al expediente (un juguete) · ② el ítem todavía no
+   * tiene destino atado · ③ la fila existe pero **su mascota no es
+   * legible por quien mira** (la RLS de `evento_producto_asignacion` es
+   * `user_tiene_acceso_a_mascota`). *Un agregado sobre causas distintas no
+   * mide ninguna.*
+   * ⇒ **`true` habilita a decirlo; `false` habilita a CALLAR, jamás a decir
+   * «no quedó en el expediente».** Es la misma disciplina que `destino`
+   * declara dos campos más arriba.
+   */
+  sedimentado: boolean;
 }
 
 export interface SeguimientoEnvio {
@@ -78,8 +106,56 @@ export interface SeguimientoEnvio {
    *  día que e-PetPlace subsidie uno, la diferencia tiene que ser legible en
    *  la liquidación. */
   pagado_por: string | null;
-  /** Los eventos del courier, del más nuevo al más viejo. */
-  eventos: { ocurrido_en: string; descripcion: string | null }[];
+  /**
+   * 🔴 EL TRACK DEL REPARTO PARA LA FAMILIA (S100 · H-01 de D).
+   *
+   * No hizo falta motor ni policy: `envios.track_gps` ya existía y
+   * `envios_select` **ya tiene el brazo del dueño** (`p.user_id = auth.uid()`)
+   * — medido sobre `pg_policies`, no supuesto. Lo único que faltaba era que
+   * este lector lo pidiera.
+   *
+   * ⚠️ **LA UNIDAD DE `t` CRUZA SIN CAMBIAR, Y ES DECISIÓN.** El escritor
+   * (`registrarTrackEnvio`) guarda **epoch ms**, no ISO. Convertirlo acá
+   * dejaría a los dos lados de la frontera hablando unidades distintas con
+   * el mismo nombre — que es exactamente el defecto que el rename `ts`→`t`
+   * del paseo dejó como lección: *un campo que cambia de forma al cruzar no
+   * avisa, deja un filtro mudo.* Quien necesite ISO lo hace en un solo lugar
+   * y lo declara: `new Date(p.t).toISOString()`.
+   *
+   * Orden: **ascendente por `t`** (es una trayectoria, se dibuja hacia
+   * adelante). `null` = todavía no hay track — vacío honesto, jamás `[]`
+   * disfrazado de "ya salió y no se movió" (L-139).
+   */
+  track: PuntoTrackEnvio[] | null;
+  /**
+   * ☠️ S100 · AQUÍ VIVÍA `eventos`, LEÍDO DE `envio_eventos` — UNA TABLA MUERTA.
+   *
+   * Medido (H-09 de D, verificado acá): `envio_eventos` tiene **0 filas** y
+   * **CERO funciones que inserten en ella** en todas las migraciones. Tenía
+   * policy y grants, o sea toda la apariencia de una capacidad.
+   *
+   * 🔴 POR QUÉ ERA PEOR QUE UN CAMPO VACÍO: una sección de hitos montada sobre
+   * esto **no podía aparecer nunca, y el instrumento habría dado verde** —
+   * porque una lista vacía es un estado legal y no se distingue de «todavía no
+   * pasó nada». *Una tabla con policy y sin escritor no es una capacidad
+   * pendiente: es una afirmación falsa con infraestructura.*
+   *
+   * Los hitos que SÍ se escriben viven en `envios` y son los tres de abajo.
+   */
+
+  /** Cuándo SALIÓ del local. Lo estampa el despacho. */
+  salio_en: string | null;
+  /** Cuándo el repartidor marcó «voy hacia allá» (`marcar_en_camino_a_destino`).
+   *  🔴 Es también la ventana en la que el motor acepta puntos de track: fuera
+   *  de ella rebota `track_fuera_de_ventana`. */
+  hacia_destino_en: string | null;
+  /**
+   * Cuándo se entregó. Va aunque la mesa pidió solo los dos de arriba: **es el
+   * último escalón de la misma escalera**, sale de la misma fila, en la misma
+   * ola y con la misma RLS — pedirlo después habría costado otra ronda entre
+   * pistas por una línea. Se declara para que se vea que fue decisión.
+   */
+  entregado_en: string | null;
 }
 
 export interface DetallePedido {
@@ -167,11 +243,16 @@ export async function obtenerDetallePedido(
       .maybeSingle(),
     cliente
       .from('pedido_items')
-      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento, pedido_item_destinos(mascota_id, es_donacion)')
+      // `evento_producto_asignacion` va EMBEBIDO, no en un viaje aparte: existe
+      // la FK `evento_producto_asignacion_pedido_item_id_fkey`, así que viaja
+      // en la MISMA ola (N16.1 / L-223 — el peaje por petición es ~150 ms y no
+      // depende de cuánto traiga). Se pide solo el id: alcanza para saber que
+      // la fila EXISTE, y nada del expediente ajeno baja al teléfono.
+      .select('id, nombre_producto, cantidad, precio_unitario, subtotal, impuesto_monto, lote, fecha_vencimiento, pedido_item_destinos(mascota_id, es_donacion), evento_producto_asignacion(id)')
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
-      .select('id, transportista, tracking_code, tracking_url, pagado_por, envio_eventos(ocurrido_en, descripcion)')
+      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, salio_en, hacia_destino_en, entregado_en')
       .eq('pedido_id', pedidoId)
       .maybeSingle(),
   ]);
@@ -209,24 +290,55 @@ export async function obtenerDetallePedido(
           donacion: d.es_donacion === true,
         };
       })(),
+      // Sedimentó ⟺ EXISTE la fila. PostgREST entrega el embed como arreglo
+      // (1:N) o como objeto según la cardinalidad que infiera de la FK — se
+      // aceptan las dos formas, igual que `pedido_item_destinos` arriba.
+      // *No se lee ningún campo de la fila: la pregunta es si existe.*
+      sedimentado: (() => {
+        const a = i.evento_producto_asignacion;
+        if (Array.isArray(a)) return a.length > 0;
+        return esObjDespensa(a);
+      })(),
     });
   }
 
   let envio: SeguimientoEnvio | null = null;
   if (esObjDespensa(env.data) && typeof env.data.id === 'string') {
-    const evs = Array.isArray(env.data.envio_eventos) ? env.data.envio_eventos : [];
+    const hito = (v: unknown): string | null => (typeof v === 'string' ? v : null);
     envio = {
       envio_id: env.data.id,
       transportista: typeof env.data.transportista === 'string' ? env.data.transportista : null,
       tracking_code: typeof env.data.tracking_code === 'string' ? env.data.tracking_code : null,
       tracking_url: typeof env.data.tracking_url === 'string' ? env.data.tracking_url : null,
       pagado_por: typeof env.data.pagado_por === 'string' ? env.data.pagado_por : null,
-      eventos: evs
-        .filter((e): e is { ocurrido_en: string; descripcion: string | null } =>
-          esObjDespensa(e) && typeof e.ocurrido_en === 'string',
-        )
-        .map((e) => ({ ocurrido_en: e.ocurrido_en, descripcion: e.descripcion ?? null }))
-        .sort((a, b) => (a.ocurrido_en < b.ocurrido_en ? 1 : -1)),
+      // El track: se valida punto por punto contra la forma que ESCRIBE el
+      // repartidor (`{lat, lng, t}` — `lng`, no `lon`: leído de su escritor,
+      // no de memoria). Un punto malformado se descarta; una trayectoria a la
+      // que le falta un punto sigue siendo la trayectoria, y un `NaN` metido
+      // en un mapa lo rompe entero.
+      track: (() => {
+        const crudo: unknown = env.data.track_gps;
+        if (!Array.isArray(crudo) || crudo.length === 0) return null;
+        const puntos: PuntoTrackEnvio[] = [];
+        for (const p of crudo as unknown[]) {
+          if (
+            esObjDespensa(p) &&
+            typeof p.lat === 'number' &&
+            typeof p.lng === 'number' &&
+            typeof p.t === 'number'
+          ) {
+            puntos.push({ lat: p.lat, lng: p.lng, t: p.t });
+          }
+        }
+        puntos.sort((a, b) => a.t - b.t);
+        return puntos.length > 0 ? puntos : null;
+      })(),
+      // Los tres hitos, tal como los estampó el motor. `null` = todavía no
+      // ocurrió — vacío honesto, jamás una fecha inventada para llenar la
+      // escalera (L-139).
+      salio_en: hito(env.data.salio_en),
+      hacia_destino_en: hito(env.data.hacia_destino_en),
+      entregado_en: hito(env.data.entregado_en),
     };
   }
 
