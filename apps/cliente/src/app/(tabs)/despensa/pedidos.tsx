@@ -41,6 +41,7 @@ import {
 import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
@@ -67,7 +68,6 @@ export default function DespensaPedidos() {
   );
 
   const voces: VocesEscalera = {
-    pagando: t('despensa.pasoPagando'),
     confirmado: t('despensa.pasoConfirmado'),
     preparando: t('despensa.pasoPreparando'),
     enCamino: t('despensa.pasoEnCamino'),
@@ -88,8 +88,16 @@ export default function DespensaPedidos() {
 
   /** El detalle de la fila: la PROMESA cuando existe (es lo accionable —
    *  quedarse en casa o no), el retiro cuando es retiro. Sin promesa
-   *  guardada NO se inventa fecha (L-139). */
-  function detalleDe(p: PedidoEnLista): string | undefined {
+   *  guardada NO se inventa fecha (L-139).
+   *
+   *  🔴 S100-D · EL ÚLTIMO BRAZO ES EL QUE EVITA UNA FILA MUDA. Desde que
+   *  `pagando` dejó de ser escalón, esa narrativa **no dibuja escalera**;
+   *  si además su detalle fuera `undefined`, la fila quedaría con fecha y
+   *  monto y NADA que diga en qué anda el pedido. La voz sale de
+   *  `narrativa_nombre`, que es el CATÁLOGO —dato, no un `switch` acá—, y
+   *  solo aparece **cuando la escalera no dibuja**: donde la escalera
+   *  habla, este texto no compite con ella (Chanel). */
+  function detalleDe(p: PedidoEnLista, dibujaEscalera: boolean): string | undefined {
     if (p.metodo_entrega === 'retiro') return t('despensa.metodoRetiro');
     if (p.promesa_desde !== null && p.promesa_hasta !== null) {
       return t('despensa.promesaCorta', {
@@ -98,7 +106,7 @@ export default function DespensaPedidos() {
         hasta: horaLocal(p.promesa_hasta),
       });
     }
-    return undefined;
+    return dibujaEscalera ? undefined : p.narrativa_nombre;
   }
 
   return (
@@ -164,9 +172,9 @@ export default function DespensaPedidos() {
                 <TarjetaPedido
                   key={p.pedido_id}
                   titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p)}
+                  detalle={detalleDe(p, pasos.length > 0)}
                   monto={`$ ${p.total.toFixed(2)}`}
-                  pasos={pasos}
+                  pasos={conIconos(pasos)}
                   desvio={desvio}
                   acento="control"
                   etiqueta={t('despensa.verPedido')}

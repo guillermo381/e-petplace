@@ -1375,9 +1375,11 @@ export const clienteEn = {
     recurrenciaActiva: 'The recurring purchase is set up.',
     recurrenciaApagada: 'Done: the recurring purchase is off.',
 
-    // S96 · the order ladder (§8.1 — five steps; "Preparing" deliberately
-    // covers the seller's three internal steps)
-    pasoPagando: 'Paying',
+    // S96 · the order ladder (§8.1 — FOUR steps; "Preparing" deliberately
+    // covers the seller's three internal steps).
+    // S100-D: `pasoPagando` died with its step — `pagando` comes BEFORE
+    // there is a promise, so it is not a rung (B's recipe §1). Its voice
+    // now comes from the catalogue (`narrativa_nombre`), not from here.
     pasoConfirmado: 'Confirmed',
     pasoPreparando: 'Preparing',
     pasoEnCamino: 'On the way',

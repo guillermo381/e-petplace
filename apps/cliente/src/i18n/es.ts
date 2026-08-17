@@ -1574,9 +1574,11 @@ export const clienteEs = {
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
     recurrenciaApagada: 'Listo: la compra recurrente quedó apagada.',
 
-    // S96 · la escalera del pedido (§8.1 — cinco pasos; "Preparando" tapa
-    // los tres escalones internos del vendedor a propósito)
-    pasoPagando: 'Pagando',
+    // S96 · la escalera del pedido (§8.1 — CUATRO pasos; "Preparando" tapa
+    // los tres escalones internos del vendedor a propósito).
+    // S100-D: `pasoPagando` murió con su escalón — `pagando` es ANTES de
+    // que exista una promesa, así que no es peldaño (receta de B §1). Su
+    // voz la pone ahora el catálogo (`narrativa_nombre`), no este mapa.
     pasoConfirmado: 'Confirmado',
     pasoPreparando: 'Preparando',
     pasoEnCamino: 'En camino',

@@ -72,6 +72,7 @@ import {
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
@@ -120,7 +121,6 @@ export default function DespensaPedido() {
   );
 
   const voces: VocesEscalera = {
-    pagando: t('despensa.pasoPagando'),
     confirmado: t('despensa.pasoConfirmado'),
     preparando: t('despensa.pasoPreparando'),
     enCamino: t('despensa.pasoEnCamino'),
@@ -239,11 +239,20 @@ export default function DespensaPedido() {
           />
         ) : (
           <>
-            {/* 1 · EL RECORRIDO — la escalera completa con su desvío. */}
+            {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
+                🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
+                `P-20260816-3f6580` es un identificador de máquina: lo
+                necesita SOPORTE, no la familia. Presidiendo la pantalla
+                le pedía al dueño que se hiciera cargo de un dato que no
+                puede usar, y encima en el lugar donde debía estar lo
+                único que le importa (dónde está su pedido).
+                **No se pierde: viaja entero adentro del enlace de
+                soporte** (`abrirWhatsApp`), que es donde sirve — el mismo
+                criterio de la lista, que ya lo excluía por Chanel («la
+                fila no dice el número de orden — dato de máquina»). El
+                pedido se nombra por su FECHA, que es como lo nombra
+                quien lo hizo. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Texto variante="apoyo" seleccionable>
-                {detalle.pedido.numero_orden}
-              </Texto>
               {(() => {
                 const detalleActual =
                   detalle.pedido.promesa_desde !== null && detalle.pedido.promesa_hasta !== null
@@ -260,7 +269,7 @@ export default function DespensaPedido() {
                 );
                 return (
                   <EscaleraEstados
-                    pasos={pasos}
+                    pasos={conIconos(pasos)}
                     desvio={desvio}
                     registro="completa"
                     acento="control"
