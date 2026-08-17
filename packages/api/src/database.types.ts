@@ -3298,6 +3298,107 @@ export type Database = {
           },
         ]
       }
+      compra_desglose: {
+        Row: {
+          compra_id: string
+          congelado_en: string
+          envio: number
+          impuesto: number
+          pedido_id: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          compra_id: string
+          congelado_en?: string
+          envio: number
+          impuesto: number
+          pedido_id: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          compra_id?: string
+          congelado_en?: string
+          envio?: number
+          impuesto?: number
+          pedido_id?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compra_desglose_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compra_desglose_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compra_desglose_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_logistico"
+            referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "compra_desglose_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_pedidos_narrativa"
+            referencedColumns: ["pedido_id"]
+          },
+        ]
+      }
+      compras: {
+        Row: {
+          clave_idempotencia: string
+          created_at: string
+          envio_total: number
+          estado: string
+          id: string
+          impuesto_total: number
+          moneda: string
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clave_idempotencia: string
+          created_at?: string
+          envio_total?: number
+          estado?: string
+          id?: string
+          impuesto_total?: number
+          moneda?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clave_idempotencia?: string
+          created_at?: string
+          envio_total?: number
+          estado?: string
+          id?: string
+          impuesto_total?: number
+          moneda?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       consentimientos: {
         Row: {
           aceptado: boolean | null
@@ -12693,6 +12794,7 @@ export type Database = {
       pedidos: {
         Row: {
           clave_idempotencia: string | null
+          compra_id: string | null
           costo_envio: number
           country_code: string
           created_at: string | null
@@ -12739,6 +12841,7 @@ export type Database = {
         }
         Insert: {
           clave_idempotencia?: string | null
+          compra_id?: string | null
           costo_envio?: number
           country_code?: string
           created_at?: string | null
@@ -12785,6 +12888,7 @@ export type Database = {
         }
         Update: {
           clave_idempotencia?: string | null
+          compra_id?: string | null
           costo_envio?: number
           country_code?: string
           created_at?: string | null
@@ -12830,6 +12934,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pedidos_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pedidos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
@@ -20022,6 +20133,10 @@ export type Database = {
         }
         Returns: Json
       }
+      crear_compra_desde_pedidos: {
+        Args: { p_clave: string; p_pedido_ids: string[] }
+        Returns: Json
+      }
       crear_cuenta_comercial_inicial: {
         Args: {
           p_country_code: string
@@ -20077,6 +20192,10 @@ export type Database = {
           p_sexo?: string
           p_tipo_agua?: string
         }
+        Returns: Json
+      }
+      crear_intento_pago: {
+        Args: { p_compra_id: string; p_metodo?: string }
         Returns: Json
       }
       crear_mascota_walkin: {
@@ -20819,6 +20938,7 @@ export type Database = {
         Args: { p_mascota_id: string }
         Returns: Json
       }
+      obtener_ficha_repartidor: { Args: { p_envio_id: string }; Returns: Json }
       obtener_groomers_disponibles: {
         Args: {
           p_fecha: string
