@@ -254,17 +254,20 @@ const VALLE_SEMI = (DISCO_RADIO + ANILLO) * Math.sin((ENCUENTRO_GRADOS * Math.PI
  *  angosta y se empina, el de atrás se ensancha. Misma tela, misma
  *  piedra, **sin una sola columna arriba de la línea**. */
 const HOMBRO_VIAJE = 6
-/** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
- *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
+/** 🔴 ⏪ LA BARRA DEJÓ DE FLOTAR Y VA **A SANGRE** — firma del founder:
+ *  *«el tab NO ESTÁ PINTADO HASTA EL EXTREMO DE LA PANTALLA»*.
  *
- *  **El recorte estaba bien y el diagnóstico de mesa lo confirmó:** el
- *  hueco mostraba blanco **porque detrás había blanco** — la barra estaba
- *  APOYADA, no flotando, así que el `evenodd` dejaba ver la base. *L-252
- *  se cumplió; lo que faltaba no era el corte, era el CONTENEDOR.*
+ *  Era `MARGEN_BARRA` (margen del CUERPO) y ahora es `INSET_CONTENIDO`
+ *  (inset de los TABS): **mismo número, otro trabajo.** El cuerpo pinta de
+ *  borde a borde y baja hasta el filo inferior; lo que conserva su aire es
+ *  el contenido.
  *
- *  Con márgenes, lo que se ve por el anillo y alrededor de la barra es el
- *  fondo real de la pantalla — que en el prestador es su verde. */
-const MARGEN_BARRA = spacing[4]
+ *  *Y el hueco del anillo sigue siendo AUSENCIA, no pintura* (L-252): el
+ *  `evenodd` deja ver el fondo real de la pantalla, que es lo que la
+ *  corrección anterior vino a arreglar. **Lo que cambió no es el corte:
+ *  es que la barra ya no deja bordes sin usar** — y esos bordes eran
+ *  justamente el espacio que el clamp del disco necesitaba. */
+const INSET_CONTENIDO = spacing[4]
 /** El radio del cuerpo flotante. `radius.xl` es el escalón que la casa usa
  *  para superficies grandes apoyadas; no nace un número nuevo. */
 const RADIO_BARRA = radius.xl
@@ -399,7 +402,11 @@ function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   const kI = 0.45 * hIzq
   const kD = 0.45 * hDer
   return [
-    `M0 ${alto - rc}`,
+    /* 🔴 ESQUINAS: ARRIBA REDONDEADAS, ABAJO A ESCUADRA. Con la barra a
+       sangre las de abajo apoyan contra el filo de la pantalla, y una
+       esquina redondeada tocando el borde se lee como un error de
+       recorte — no como una superficie. */
+    `M0 ${alto}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
     `H${hombroI}`,
@@ -414,10 +421,7 @@ function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
     `C${der + kD * fx} ${ym - kD * fy} ${hombroD - (hombroD - der) * 0.45} 0 ${hombroD} 0`,
     `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
-    `V${alto - rc}`,
-    `a${rc} ${rc} 0 0 1 ${-rc} ${rc}`,
-    `H${rc}`,
-    `a${rc} ${rc} 0 0 1 ${-rc} ${-rc}`,
+    `V${alto}`,
     `Z`,
   ].join(' ')
 }
@@ -633,14 +637,21 @@ export function BarraTabs({
   const estira = useSharedValue(0)
 
   const indiceActivo = Math.max(0, items.findIndex((i) => i.key === activo))
-  const anchoTab = ancho / Math.max(1, items.length)
+  /* 🔴 EL TAB SE MIDE SOBRE EL CONTENIDO, NO SOBRE LA BARRA. La barra va a
+     sangre pero los tabs conservan su inset ⇒ **el centro del primer tab
+     queda `INSET_CONTENIDO` más adentro**, y eso es exactamente lo que
+     hace que el clamp deje de dispararse. *Si el tab se midiera sobre el
+     ancho total, ir a sangre habría empujado el primer centro HACIA EL
+     BORDE y el clamp habría tirado más fuerte, no menos.* */
+  const anchoUtil = Math.max(1, ancho - 2 * INSET_CONTENIDO)
+  const anchoTab = anchoUtil / Math.max(1, items.length)
   /* 🔴 DEFECTO A · EL DISCO NUNCA SALE DE LA BARRA. En el primer y último
      tab el centro de la pestaña está a menos de un radio del borde, así que
      el disco quedaba COLGANDO afuera con su anillo cortado — que es lo que
      el founder vio en «Hoy» y en «Cuenta» y no pasaba en «Atender».
      Se acota contra la esquina redondeada. *El disco se corre unos píxeles
      de su tab en las puntas; salirse de la barra no es una alternativa.* */
-  const cxCrudo = anchoTab * (indiceActivo + 0.5)
+  const cxCrudo = INSET_CONTENIDO + anchoTab * (indiceActivo + 0.5)
   /* ⏪ Era `DISCO_RADIO + RADIO_BARRA * 0.35` (40 px) y **quedó corto con
      la anatomía nueva**: el valle es más ancho que el disco, así que a 40
      el DISCO entraba y su VALLE no — el hombro se clampaba contra la
@@ -658,7 +669,10 @@ export function BarraTabs({
      costó el ícono descentrado hace tres gates.*
      Ahora el corrimiento se DERIVA de la misma posición del disco. */
   const corrimientoActivo = cxDestino - cxCrudo
-  const altoTotal = ALTO_FILA
+  /* La barra baja HASTA EL FILO: el inset inferior deja de ser margen (que
+     dejaba ver el fondo debajo del cuerpo) y pasa a ser cuerpo pintado.
+     El contenido sigue viviendo en los `ALTO_FILA` de arriba. */
+  const altoTotal = ALTO_FILA + insets.bottom
 
   useEffect(() => {
     if (ancho === 0) return
@@ -704,12 +718,14 @@ export function BarraTabs({
       onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
       style={{
         flexDirection: 'row',
-        /* 🔴 LA BARRA FLOTA (ver `MARGEN_BARRA`). El inset inferior queda
-           como MARGEN y no como padding: así el fondo de la pantalla se ve
-           TAMBIÉN debajo del cuerpo, que es lo que la vuelve una superficie
-           apoyada sobre el contenido y no un zócalo pegado al borde. */
-        marginHorizontal: MARGEN_BARRA,
-        marginBottom: insets.bottom,
+        alignItems: 'flex-start',
+        /* 🔴 A SANGRE (ver `INSET_CONTENIDO`): cero margen lateral y el
+           alto llega al filo inferior. **El inset del contenido NO va acá
+           como padding a propósito** — un hijo absoluto de una caja con
+           padding se posiciona distinto según la versión de Yoga, y el
+           lienzo del vector cuelga de `left: 0`. *El inset vive en la fila
+           interna, donde no hay ninguna ambigüedad que resolver.* */
+        height: altoTotal,
         /* ⛔ SIN `backgroundColor`, y es LA condición del hueco: si la
            caja pinta, no hay ausencia posible y el hueco tendría que
            pintarse del color del fondo — justo lo que la advertencia ③
@@ -757,6 +773,17 @@ export function BarraTabs({
           />
         </View>
       ) : null}
+      {/* LA FILA DEL CONTENIDO — la que conserva el inset que la barra
+          soltó. Es un envoltorio y nada más: la geometría del vector sigue
+          midiéndose contra el ancho ENTERO. */}
+      <View
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          paddingHorizontal: INSET_CONTENIDO,
+          height: ALTO_FILA,
+        }}
+      >
       {items.map((item) => {
         const esActivo = item.key === activo
         /* 🔴 DOS SUPERFICIES, DOS COLORES DE CONTENIDO — y por eso ya no
@@ -872,6 +899,7 @@ export function BarraTabs({
           </Pressable>
         )
       })}
+      </View>
     </View>
   )
 }
