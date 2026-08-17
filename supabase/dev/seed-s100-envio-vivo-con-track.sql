@@ -46,6 +46,8 @@ DECLARE
   v_pedido   uuid;
   v_rep_id   uuid;
   v_rep_uid  uuid;
+  v_cta      uuid;
+  v_owner    uuid;
   v_puntos   jsonb;
   v_base     bigint;
   v_res      jsonb;
@@ -97,6 +99,52 @@ BEGIN
     END IF;
   END IF;
 
+  -- ── ①bis EL SUJETO VIVO ES TRES COSAS, NO UNA (orden de mesa) ───────────
+  -- *Si A reporta cero repartidores con vehículo cargado, la siembra tiene que
+  -- crear uno — o el gate no va a poder distinguir «falta el dato» de «está
+  -- roto».* Eso es exactamente lo que esta sesión frenó dos veces, así que la
+  -- siembra se hace cargo de las tres patas: **track · destino · placa**.
+
+  -- (a) EL DESTINO. `despachar_pedido` lo copia del pedido — medido en su
+  -- INSERT—, así que si viene NULL el problema es del PEDIDO, no del despacho.
+  -- **Se aborta en vez de inventar una coordenada:** un punto fabricado
+  -- dibujaría un mapa creíble apuntando a una casa que no es.
+  SELECT e.repartidor_id, r.cuenta_comercial_id
+    INTO v_rep_id, v_cta
+  FROM envios e JOIN repartidores r ON r.id = e.repartidor_id
+  WHERE e.id = v_envio;
+
+  PERFORM 1 FROM envios
+   WHERE id = v_envio AND destino_lat IS NOT NULL AND destino_lon IS NOT NULL;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ABORTA: el envío % no tiene destino_lat/lon. Sin destino no hay mapa aunque haya track —el encuadre se calcula entre los dos extremos—, y una coordenada inventada apunta a la casa equivocada. Sembrá un pedido con punto en el mapa.', v_envio;
+  END IF;
+
+  -- (b) LA PLACA. Sin vehículo, la ficha del repartidor (F3) no existe, y la
+  -- placa es la que la receta ⑤ pone mandando *porque es lo que se verifica
+  -- en la calle*. La puerta EXIGE ser el vendedor (no tiene el escape de
+  -- `auth.uid()` nulo que sí tiene `despachar_pedido`), así que se actúa como
+  -- el dueño de la cuenta — y por su puerta, que además es idempotente.
+  --
+  -- ⚠️ LA PLACA VA CON FORMATO PLAUSIBLE, Y NO CONTRADICE H-03. Allá el
+  -- defecto era vocabulario de ingeniería en `entrega_referencias`, un campo
+  -- cuyo único propósito es leerse como instrucción — y lo desplazaba. Acá el
+  -- propósito del dato ES mostrarse, y **el propósito de la siembra es que se
+  -- pueda juzgar la pantalla**: una placa que dijera «SIEMBRA» volvería la
+  -- ficha injuzgable, que es justo lo que esta siembra viene a evitar.
+  IF NOT EXISTS (SELECT 1 FROM repartidor_vehiculos WHERE repartidor_id = v_rep_id) THEN
+    SELECT owner_profile_id INTO v_owner FROM cuentas_comerciales WHERE id = v_cta;
+    IF v_owner IS NULL THEN
+      RAISE EXCEPTION 'ABORTA: la cuenta % no tiene dueño, y la puerta del vehículo exige ser el vendedor. No se suplanta a nadie ni se escribe la tabla a mano.', v_cta;
+    END IF;
+    PERFORM set_config('request.jwt.claims',
+                       json_build_object('sub', v_owner, 'role', 'authenticated')::text, true);
+    EXECUTE 'SET LOCAL ROLE authenticated';
+    PERFORM registrar_vehiculo_repartidor(v_rep_id, 'moto', 'PBA-0142');
+    EXECUTE format('SET LOCAL ROLE %I', v_rol_mig);
+    PERFORM set_config('request.jwt.claims', NULL, true);
+  END IF;
+
   -- ── ② LA VENTANA, POR SU PUERTA REAL ────────────────────────────────────
   -- Se actúa COMO EL REPARTIDOR ASIGNADO: la puerta lo exige
   -- (`no_sos_el_repartidor_asignado`) y saltarla escribiendo la columna a
@@ -134,12 +182,28 @@ BEGIN
 
   EXECUTE format('SET LOCAL ROLE %I', v_rol_mig);
 
-  -- ── ④ EL CINTURÓN: que el sujeto quedó VIVO de verdad ───────────────────
+  -- ── ④ EL CINTURÓN: LAS TRES PATAS, no solo el track ─────────────────────
+  -- *Antes de declararla probada, exigí el sujeto vivo: envío con track Y
+  -- destino Y un repartidor con placa* (orden de mesa). El cinturón mide las
+  -- tres **después** de escribir, porque una siembra que no verifica su
+  -- resultado es una siembra que se cree.
   SELECT jsonb_array_length(track_gps) INTO v_total FROM envios WHERE id = v_envio;
   IF v_total IS NULL OR v_total < 2 THEN
     RAISE EXCEPTION 'ABORTA: el track quedó con % punto(s). Con menos de 2 no hay trayectoria y la pantalla no se puede juzgar.', COALESCE(v_total, 0);
   END IF;
 
-  RAISE NOTICE 'SIEMBRA S100 · envío % · % puntos · ventana `hacia_destino` abierta. Retiro: UPDATE envios SET track_gps=NULL WHERE id=''%'';',
-               v_envio, v_total, v_envio;
+  PERFORM 1 FROM envios
+   WHERE id = v_envio AND hacia_destino_en IS NOT NULL
+     AND destino_lat IS NOT NULL AND destino_lon IS NOT NULL;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ABORTA: el envío % quedó sin ventana abierta o sin destino. El track solo, sin destino, dibuja una moto que se mueve sin decir hacia dónde.', v_envio;
+  END IF;
+
+  PERFORM 1 FROM repartidor_vehiculos WHERE repartidor_id = v_rep_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ABORTA: el repartidor % quedó sin vehículo. Sin placa la ficha de F3 no existe, y el gate no podría distinguir «falta el dato» de «está roto».', v_rep_id;
+  END IF;
+
+  RAISE NOTICE 'SIEMBRA S100 · envío % · % puntos · ventana abierta · destino OK · repartidor % con placa. RETIRO: UPDATE envios SET track_gps=NULL, hacia_destino_en=NULL, estado=''en_reparto'' WHERE id=''%'';',
+               v_envio, v_total, v_rep_id, v_envio;
 END $$;
