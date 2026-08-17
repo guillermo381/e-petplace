@@ -425,30 +425,44 @@ export default function DespensaDescubrir() {
         precio={p.precio}
         precioPorUnidad={precioPorKilo(p)}
         fotoUrl={p.foto_url ?? undefined}
-        hayStock={p.hay_stock}
         alergia={alergiaDeTarjeta(p)}
-        cantidad={enCarrito}
-        onAgregar={() =>
-          agregarAlCarrito(
-            {
-              oferta_id: p.oferta_id,
-              producto_id: p.producto_id,
-              variante_id: p.variante_id,
-              nombre: p.nombre,
-              marca: p.marca,
-              presentacion: p.presentacion,
-              precio: p.precio,
-              moneda: p.moneda,
-              foto_url: p.foto_url,
-              especies_aplicables: p.especies_aplicables,
-              alergenos: p.alergenos,
-              cuentaComercialId: p.cuenta_comercial_id,
-              country_code: p.country_code,
-            },
-            1,
-          )
-        }
-        onCambiarCantidad={(n) => fijarCantidad(p.oferta_id, n)}
+        /* 🔴 `compra` es UNIÓN, no props sueltas (S100-B), y me rompió un
+           montaje que ya funcionaba — con razón, y con mi propio argumento
+           en mi contra. El espejo del vendedor NO TIENE CARRITO: con props
+           obligatorias había que pasarle `cantidad={0}` y un `onAgregar`
+           vacío **solo para que el `+` no se dibujara**, que es *mentir una
+           prop para lograr una combinación legítima* — lo que la cabecera de
+           la propia pieza daba como razón para no reusar `Baldosa`.
+           Y UNIÓN en vez de props opcionales **a propósito**: con opcionales,
+           olvidar el carrito acá **compilaría** y el `+` desaparecería en
+           silencio — el mismo agujero que B me rechazó en mi
+           `advertencia?: string`. *La forma tiene que hacer imposible el
+           olvido, no confiar en que nadie olvide.* */
+        compra={{
+          modo: 'vitrina',
+          hayStock: p.hay_stock,
+          cantidad: enCarrito,
+          onAgregar: () =>
+            agregarAlCarrito(
+              {
+                oferta_id: p.oferta_id,
+                producto_id: p.producto_id,
+                variante_id: p.variante_id,
+                nombre: p.nombre,
+                marca: p.marca,
+                presentacion: p.presentacion,
+                precio: p.precio,
+                moneda: p.moneda,
+                foto_url: p.foto_url,
+                especies_aplicables: p.especies_aplicables,
+                alergenos: p.alergenos,
+                cuentaComercialId: p.cuenta_comercial_id,
+                country_code: p.country_code,
+              },
+              1,
+            ),
+          onCambiarCantidad: (n) => fijarCantidad(p.oferta_id, n),
+        }}
         onPress={() =>
           router.push({
             pathname: '/despensa/producto/[productoId]',
