@@ -51,7 +51,6 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
-  Celda,
   CeldaNavegacion,
   Encabezado,
   Entrada,
@@ -71,7 +70,6 @@ import {
 import {
   getEstadoOnboardingDueno,
   buscarProductosDespensa,
-  listarAlergenos,
   listarProductosDespensa,
   contarProductosDespensa,
   mascotasElegibles,
@@ -82,10 +80,10 @@ import {
   type ProductoDeVitrina,
   type Recomendacion,
 } from '@epetplace/api';
-import { CriterioMascota, LienzoProducto } from '@/components/despensa-piezas';
+import { CriterioMascota } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { agregarAlCarrito, fijarCantidad, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
-import { alergenosQueCruzan, vozAlergeno } from '@/lib/despensa/composicion';
+import { cruzarConVigilados } from '@/lib/despensa/composicion';
 import { nombreCurado } from '@/lib/despensa/nombre-curado';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
@@ -131,9 +129,6 @@ export default function DespensaDescubrir() {
    *  inexpresable, no el error genérico que nadie atrapa). */
   const [reco, setReco] = useState<Recomendacion | 'cargando' | { fallo: string } | null>(null);
   const [reintento, setReintento] = useState(0);
-  /** código → nombre_es del catálogo (la advertencia por fila habla la
-   *  voz de la casa, jamás un código con guiones). */
-  const [vocesAlergenos, setVocesAlergenos] = useState<Map<string, string> | undefined>(undefined);
 
   // ── S96 · el buscador y los filtros ──────────────────────────────────
   const [busqueda, setBusqueda] = useState('');
@@ -195,12 +190,13 @@ export default function DespensaDescubrir() {
     void contarProductosDespensa(FILTROS_VITRINA).then((r) => {
       if (vigente) setTotalVitrina(r.ok ? r.data : null);
     });
-    // La voz del catálogo de alérgenos, para la advertencia por fila.
-    void listarAlergenos().then((r) => {
-      if (vigente && r.ok) {
-        setVocesAlergenos(new Map(r.data.map((a) => [a.codigo, a.nombre])));
-      }
-    });
+    // ☠️ Ley 37 · S100-C — AQUÍ VIVÍA `listarAlergenos()`, y su muerte es un
+    // VIAJE DE RED MENOS al abrir (N16). Traía la voz del catálogo para
+    // `vozAlergeno` en la fila; con la señal de la tarjeta, **las voces vienen
+    // ya resueltas por el motor** (`declarado_nombre`/`origen_nombre` de los
+    // vigilados, que es `cat_alergenos.nombre_es`). *No se borró un fetch por
+    // prolijidad: se quedó sin consumidor cuando la voz pasó a viajar con el
+    // dato — y un lector sin lector es un viaje que nadie lee.*
     return () => {
       vigente = false;
     };
@@ -249,15 +245,26 @@ export default function DespensaDescubrir() {
     };
   }, [busqueda]);
 
-  /** Los alérgenos documentados de la mascota elegida — salen del criterio
-   *  que la recomendación ya trajo (dato del expediente, no un cálculo
-   *  nuevo). Sin reco cargada, la búsqueda no puede advertir POR FILA —
-   *  la ficha siempre puede (carga el perfil ella misma): la advertencia
-   *  dura nunca depende solo de esta lista. */
-  const alergenosMascota = useMemo(
+  /** ☠️ Ley 37 · S100-C — acá vivía `alergenosMascota` (los `alergenos_excluidos`
+   *  crudos). Lo reemplaza `vigilados`, que es **el mismo dato expandido**:
+   *  incluye lo que el motor vigila POR RELACIÓN (`ave_no_especificada` para un
+   *  alérgico al pollo) y trae su voz resuelta. *La lista cruda no podía
+   *  distinguir «contiene pollo» de «podría ser pollo», y esa distinción es
+   *  exactamente lo que la señal de la tarjeta tiene que decir.*
+   *
+   *  ⚠️ La dependencia declarada sigue igual y sigue siendo cierta: **sin reco
+   *  cargada no hay vigilados**, así que la tarjeta no puede advertir por
+   *  coincidencia. **La ficha siempre puede** (carga el perfil ella misma): la
+   *  advertencia dura nunca depende solo de esta pantalla. */
+
+  /** Los vigilados EXPANDIDOS del motor (exactos + `puede_ser`), que es lo que
+   *  `cruzarConVigilados` necesita para distinguir «contiene pollo» de «podría
+   *  ser pollo». Viven en el criterio de la reco: son dato del expediente ya
+   *  resuelto por el servidor, jamás un cómputo de esta pantalla. */
+  const vigilados = useMemo(
     () =>
       reco !== null && reco !== 'cargando' && !('fallo' in reco)
-        ? reco.criterio.alergenos_excluidos
+        ? reco.criterio.alergenos_vigilados
         : [],
     [reco],
   );
@@ -339,61 +346,6 @@ export default function DespensaDescubrir() {
     );
   }
 
-  function filaProducto(p: ProductoDeVitrina) {
-    // §5.4 — la advertencia EN LA FILA cuando la búsqueda trae lo que la
-    // recomendación habría excluido. Nombra el alérgeno; jamás esconde.
-    const cruzan = buscando && mascota !== null ? alergenosQueCruzan(p.alergenos, alergenosMascota) : [];
-    return (
-      <View key={p.oferta_id}>
-        <Celda
-          interactiva
-          accessibilityRole="button"
-          onPress={() =>
-            router.push({
-              pathname: '/despensa/producto/[productoId]',
-              params: { productoId: p.producto_id, mascotaId: mascota?.id ?? '' },
-            })
-          }
-          inicio={<LienzoProducto lado={56} fotoUrl={p.foto_url} />}
-          // ④ S100-C — el nombre CURADO, no el del catálogo. 42 % del catálogo
-          // viene EN MAYÚSCULAS y `CANADA LITTER` es nombre de importador, no
-          // de vitrina. Solo cambia la CAJA: no inventa una palabra.
-          titulo={nombreCurado(p.nombre)}
-          subtitulo={[p.marca, p.presentacion].filter((x) => x !== null && x !== '').join(' · ')}
-          metadataMono={`$ ${p.precio.toFixed(2)}`}
-        />
-        {cruzan.length > 0 ? (
-          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
-            <Texto variante="apoyo" color="warning">
-              {t('despensa.filaContiene', {
-                nombre: mascota?.nombre ?? '',
-                lista: cruzan.map((c) => vozAlergeno(c, vocesAlergenos)).join(', '),
-              })}
-            </Texto>
-          </View>
-        ) : null}
-        {/* §8.6ter — SE MUESTRA Y SE DICE. La fila sigue TOCABLE a propósito:
-            la familia entra a ver el producto igual, y apagar el toque sería
-            un callejón (Ley 13). Lo único que cambia es que la pantalla deja
-            de callar.
-            🔴 NEUTRO, NO `warning`, Y ES DECISIÓN: la alergia es riesgo para
-            la mascota y el agotado es un hecho del estante. Dos naranjas
-            seguidos aplanan la diferencia — y un aviso que aparece siempre
-            enseña a ignorar los avisos (la doctrina de los cinco avisos).
-            `apoyo` ya nace `secondary`, así que la distinción no cuesta un
-            token nuevo.
-            ⚠️ ORDEN REVERSIBLE Y DECLARADO: la alergia va PRIMERO porque es
-            de Thor y esto es del estante. Si la mesa lo prefiere al revés,
-            son dos líneas. */}
-        {!p.hay_stock ? (
-          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
-            <Texto variante="apoyo">{t('despensa.filaSinStock')}</Texto>
-          </View>
-        ) : null}
-      </View>
-    );
-  }
-
   /**
    * 🔴 EL PRECIO POR KILO — el dato que decide una compra de alimento y que casi
    * nadie pone (N19 ③). Sale de `peso_kg` de la variante, así que **solo se
@@ -404,6 +356,57 @@ export default function DespensaDescubrir() {
   function precioPorKilo(p: ProductoDeVitrina): string | undefined {
     if (p.peso_kg === null || p.peso_kg <= 0) return undefined;
     return t('despensa.porKilo', { monto: (p.precio / p.peso_kg).toFixed(2) });
+  }
+
+  /**
+   * 🔴 LA SEÑAL DE ALERGIA DE LA TARJETA (S100-C · L1, prop de B).
+   *
+   * **La pieza recibe HECHOS TIPADOS y decide el silencio con
+   * `alergiaPuedeCallar`, la MISMA función que usa `AvisoAlergia`** — así las
+   * dos superficies no pueden discrepar sobre cuándo callar. Acá solo se
+   * compone la VOZ, que es corta a propósito: *«Contiene pollo»*, no el mensaje
+   * largo de la ficha. **La tarjeta SEÑALA que hay conflicto; no LISTA
+   * composición** — el detalle y el paso de entendimiento viven en la ficha.
+   *
+   * ⚖️ **SOLO CON MASCOTA EN CONTEXTO, y es decisión declarada con su medición.**
+   * `alergiaPuedeCallar` habla en todo lo que no sea `verificada`/`no_aplica`, y
+   * medido sobre la vitrina viva: **288 `ausente` + 274 `declarada_sin_verificar`
+   * = 562 de 563 (99,8 %)**, con **cero `verificada`**. Pasar la prop sin mascota
+   * pondría una banda en **prácticamente TODAS** las tarjetas del catálogo — *y
+   * un aviso que aparece siempre enseña a ignorar los avisos* (la doctrina de
+   * los cinco).
+   *
+   * **Y no es una excusa para ablandar la regla: es dónde la regla APLICA.** La
+   * letra de S96 dice que el silencio se lee como *«no tiene pollo»* — **esa
+   * lectura solo existe cuando hay un pollo del que preocuparse**, o sea cuando
+   * hay una mascota en contexto y estamos haciendo una afirmación de seguridad
+   * sobre ELLA. Sin mascota no se afirma nada, así que no hay silencio que
+   * malinterpretar.
+   *
+   * ⚠️ **LO QUE ESTO SÍ DEJA, servido a la mesa (H-008):** con mascota, **~51 %
+   * de lo recomendado va a mostrar la banda de «sin composición declarada»** —
+   * y **ahí es correcto y es lo más importante**: *la familia lee «recomendado
+   * para Thor» como «seguro para Thor», y sin ingredientes no podemos sostener
+   * esa lectura.* **El número alto es el dato malo hablando, no la regla
+   * fallando** — se cura cargando composiciones, jamás callando.
+   */
+  function alergiaDeTarjeta(p: ProductoDeVitrina) {
+    if (mascota === null) return undefined;
+    const cruce = cruzarConVigilados(p.alergenos, vigilados);
+    const lista = (
+      cruce.coincidencia === 'exacta'
+        ? cruce.exactos.map((e) => e.nombre)
+        : cruce.imprecisos.map((i) => i.nombre)
+    ).join(', ');
+    const senal =
+      cruce.coincidencia === 'exacta'
+        ? t('despensa.senalContiene', { lista })
+        : cruce.coincidencia === 'imprecisa'
+          ? t('despensa.senalPodriaContener', { lista })
+          : p.composicion_estado === 'ausente'
+            ? t('despensa.senalSinComposicion')
+            : t('despensa.senalSinVerificar');
+    return { composicion: p.composicion_estado, coincidencia: cruce.coincidencia, senal };
   }
 
   function tarjetaProducto(p: ProductoDeVitrina) {
@@ -418,6 +421,7 @@ export default function DespensaDescubrir() {
         precioPorUnidad={precioPorKilo(p)}
         fotoUrl={p.foto_url ?? undefined}
         hayStock={p.hay_stock}
+        alergia={alergiaDeTarjeta(p)}
         cantidad={enCarrito}
         onAgregar={() =>
           agregarAlCarrito(
@@ -481,27 +485,20 @@ export default function DespensaDescubrir() {
   }
 
   /**
-   * `modo` decide la forma, y el corte **no es estético: es de seguridad.**
+   * ☠️ **EL `modo` MURIÓ (Ley 37) — LAS TRES PUERTAS MONTAN LA MISMA PIEZA.**
    *
-   * · `'grilla'` — vitrina y recomendación. Ahí `TarjetaProducto` rige tal
-   *   cual: la vitrina se ve **sin mascota** (no hay contra qué advertir) y la
-   *   recomendación **excluye duro en el motor**, con verificación fail-closed
-   *   que rechaza la respuesta entera si algo cruza.
-   * · `'filas'` — LA BÚSQUEDA, y sigue en filas A PROPÓSITO. `MODELO_DESPENSA`
-   *   §5.4 firma *«exclusión dura en la RECOMENDACIÓN, advertencia dura en la
-   *   BÚSQUEDA»*: la búsqueda no excluye, **advierte**. `TarjetaProducto` no
-   *   muestra alérgenos por decisión de su autora (*medio dato de alergia es
-   *   peor que ninguno*), así que migrarla hoy **borraría una advertencia de
-   *   salud firmada**. Tampoco se cuelga el aviso FUERA de la tarjeta: eso es
-   *   exactamente H-002, el huérfano que el censo midió en 80 de 563 filas.
-   *   ⏳ **Prop de advertencia pedida a B con el caso concreto.** Cuando exista,
-   *   este `modo` muere y las tres puertas montan la misma pieza.
+   * Existió exactamente una tanda, y su razón era de SEGURIDAD, no de forma: la
+   * búsqueda **advierte** de alergia por letra firmada (`MODELO_DESPENSA` §5.4)
+   * y la tarjeta no tenía dónde decirlo. **Se pidió la prop con el caso concreto
+   * en vez de migrar y borrar la advertencia** — y B la construyó con mejor
+   * forma que la propuesta: hechos tipados en vez de un texto opcional, porque
+   * *un texto opcional deja `undefined` como silencio legal incluso donde la
+   * letra obliga a hablar*.
+   *
+   * Con la prop viva el andamio dejó de tener razón de existir, así que se
+   * retira entero: **el `modo`, `filaProducto` y su `Separador`.**
    */
-  function listaConFacetas(
-    lista: ProductoDeVitrina[],
-    vacio: React.ReactNode,
-    modo: 'grilla' | 'filas' = 'grilla',
-  ) {
+  function listaConFacetas(lista: ProductoDeVitrina[], vacio: React.ReactNode) {
     const { familias, especies } = facetas(lista);
     const filtradas = aplicarFacetas(lista);
     const chipsFamilia = familias
@@ -532,19 +529,10 @@ export default function DespensaDescubrir() {
         ) : null}
         {filtradas.length === 0 ? (
           vacio
-        ) : modo === 'grilla' ? (
+        ) : (
           // La grilla trae su propio margen negativo, así que el aire lateral
           // de la pantalla se pone acá y no adentro de la celda.
           <View style={{ paddingHorizontal: spacing[5] }}>{grillaProductos(filtradas)}</View>
-        ) : (
-          <View>
-            {filtradas.map((p, i) => (
-              <View key={p.oferta_id}>
-                {i > 0 ? <Separador /> : null}
-                {filaProducto(p)}
-              </View>
-            ))}
-          </View>
         )}
       </View>
     );
@@ -662,11 +650,6 @@ export default function DespensaDescubrir() {
                       />
                     }
                   />,
-                  // 🔴 'filas' A PROPÓSITO — ver la nota de `listaConFacetas`.
-                  // La búsqueda ADVIERTE de alergia (§5.4 firmada) y la tarjeta
-                  // todavía no tiene dónde decirlo. Migrarla hoy borraría un
-                  // dato de salud; colgarlo fuera sería H-002.
-                  'filas',
                 )
               )
             ) : mascota !== null ? (

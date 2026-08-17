@@ -1247,6 +1247,13 @@ export const clienteEn = {
     // when the variant declares its weight.
     porKilo: '${{monto}}/kg',
 
+    // 🔴 S100-C — the card's SHORT allergy signals. Same reasoning as `es`:
+    // the card signals a conflict; the detail lives in the product page.
+    senalContiene: 'Contains {{lista}}',
+    senalPodriaContener: 'May contain {{lista}}',
+    senalSinComposicion: 'No ingredients listed',
+    senalSinVerificar: 'Ingredients not verified',
+
     // 🔴 S100-C · H-004 — the ceiling that says so. Same reasoning as `es`:
     // the number AND the way out, never just the limit.
     techoVitrina:

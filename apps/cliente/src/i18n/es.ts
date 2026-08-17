@@ -1445,6 +1445,17 @@ export const clienteEs = {
     // sobre un peso ausente sería peor que no decir nada.
     porKilo: '${{monto}}/kg',
 
+    // 🔴 S100-C — LAS SEÑALES CORTAS DE LA TARJETA (prop `alergia` de B).
+    // CORTAS a propósito: en media pantalla una frase con el nombre de la
+    // mascota son tres líneas y tapa el producto. La tarjeta SEÑALA que hay
+    // conflicto; el detalle y el paso de entendimiento viven en la ficha.
+    // La imprecisa NO baja el tono: si esa proteína ES pollo, le hace igual de
+    // mal — lo que cambia es la voz, no la gravedad.
+    senalContiene: 'Contiene {{lista}}',
+    senalPodriaContener: 'Podría contener {{lista}}',
+    senalSinComposicion: 'Sin composición declarada',
+    senalSinVerificar: 'Composición sin verificar',
+
     // 🔴 S100-C · H-004 — EL TECHO QUE SE DICE. La vitrina carga 50 sobre 563
     // comprables: sin esta línea la familia veía el 8,9 % del catálogo y una
     // lista completa se veía igual que una truncada.
