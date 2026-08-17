@@ -35,9 +35,23 @@
 --   -- y, si se quiere revertir la ventana:
 --   UPDATE envios SET estado='en_reparto', hacia_destino_en=NULL WHERE id = …;
 --
--- ⚠️ ESTE ARCHIVO NO SE CORRIÓ. Se escribió desde un worktree sin `link`, así
--- que **no está verificado contra la base**. Quien lo corra: leer el NOTICE
--- final, que dice qué envío tocó y cuántos puntos quedaron.
+-- ✅ CORRIÓ (S100, ejecutada por A porque mi worktree no tiene `link`), y el
+-- sujeto vivo quedó ENTERO — que es lo que EN CAMINO necesitaba para poder
+-- juzgarse:
+--
+--   envío `474e6ff6-3c99-4f56-842f-b965537903ac` · **6 puntos** de track ·
+--   destino cargado · estado `hacia_destino` con `salio_en` y
+--   `hacia_destino_en` · repartidor «Repartidor de Pruebas» activo ·
+--   **placa `PBA-0142`** (creada por la puerta del vendedor).
+--
+--   RETIRO:
+--     UPDATE envios SET track_gps=NULL, hacia_destino_en=NULL,
+--            estado='en_reparto'
+--      WHERE id='474e6ff6-3c99-4f56-842f-b965537903ac';
+--
+-- ⚠️ **La primera corrida REBOTÓ, y el defecto era mío** — `AND r.activo` en
+-- el camino A (ver su nota). Corregido acá; los números de arriba son de la
+-- corrida buena, **medidos contra la base y no leídos del NOTICE.**
 -- ═══════════════════════════════════════════════════════════════════════════
 DO $$
 DECLARE
@@ -64,6 +78,18 @@ BEGIN
     AND e.hacia_destino_en IS NULL
     AND e.estado = 'en_reparto'
     AND r.user_id IS NOT NULL
+    -- 🔴 `AND r.activo` — SIN ESTO EL SEED REBOTABA CON EL UID CORRECTO.
+    -- `_es_repartidor_del_pedido` es `r.user_id = auth.uid() AND r.activo`,
+    -- y los dos conjuntos NO coinciden: medido por A, **4 repartidores con
+    -- `user_id` contra 5 activos** ⇒ este camino podía elegir uno inactivo y
+    -- después actuar como él, con la sesión bien puesta y la puerta cerrada.
+    --
+    -- **Y el defecto es de FORMA, no de olvido: el camino B de abajo SÍ pedía
+    -- `r.activo`.** El mismo criterio vivía en las dos ramas de esta misma
+    -- función y solo una lo aplicaba — *la tercera vez que esta sesión cobra
+    -- esa clase, y la primera en que es mía* (las otras dos: `TarjetaPedido`
+    -- contra `EscaleraEstados`, y `detalleDe` contra el guard de la pieza).
+    AND r.activo
   ORDER BY e.salio_en DESC
   LIMIT 1;
 
@@ -146,9 +172,22 @@ BEGIN
   END IF;
 
   -- ── ② LA VENTANA, POR SU PUERTA REAL ────────────────────────────────────
-  -- Se actúa COMO EL REPARTIDOR ASIGNADO: la puerta lo exige
-  -- (`no_sos_el_repartidor_asignado`) y saltarla escribiendo la columna a
-  -- mano dejaría un estado que el motor no produce.
+  -- Se actúa COMO EL REPARTIDOR ASIGNADO.
+  --
+  -- ⏪ **ACÁ DECÍA «la puerta lo exige (`no_sos_el_repartidor_asignado`)» Y
+  -- ESA PREMISA ERA FALSA.** Medido por A en la fuente: el guard es
+  -- `auth.uid() IS NOT NULL AND NOT _es_repartidor_del_pedido(...)` ⇒ **sin
+  -- sesión PASA.** La conclusión —actuar como el repartidor— era la correcta,
+  -- pero **por otra razón**: un piso más abajo `_mover_estado_pedido` rebota
+  -- `auth_requerido`, y eso sí no tiene vuelta.
+  --
+  -- *Una conclusión correcta apoyada en una premisa falsa es frágil aunque
+  -- funcione: el que la re-derive desde la premisa va a llegar a otro lado.*
+  -- Es la hermana de L-285 —declarar contra qué mediste— del lado del que
+  -- escribe: **también hay que declarar POR QUÉ**, y que ese porqué resista.
+  --
+  -- Y saltar la puerta escribiendo la columna a mano dejaría un estado que el
+  -- motor no produce, que es la razón que sí se sostiene sola.
   PERFORM set_config('request.jwt.claims',
                      json_build_object('sub', v_rep_uid, 'role', 'authenticated')::text,
                      true);
