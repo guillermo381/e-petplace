@@ -1871,6 +1871,33 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R50 · CUATRO wrappers, y los legítimos son el peso de la prueba
+     (L-236): el que ORDENA antes de tomar el primero · el que
+     desenvuelve un embed (`Array.isArray(x) ? x[0] : x`, que NO es
+     elegir de varios y por eso NO debe salir rojo) · y los DOS del
+     baseline más un TERCERO que lo sube. Lo único rojo tiene que ser el
+     tercero.
+     🔴 Y trae el caso que dio vuelta la regla: uno de los ofensores
+     DECLARA su unicidad en un comentario. Tiene que salir rojo IGUAL —
+     un comentario no es una garantía de la base. */
+  R50: [
+    { path: 'packages/api/src/wrappers/ordena.ts', src: "const publicadas = ofertas.filter(o => o.ok)\nq.order('precio')\nconst x = publicadas[0]" },
+    { path: 'packages/api/src/wrappers/embed.ts', src: "const fila = Array.isArray(data) ? data[0] : data" },
+    { path: 'packages/api/src/wrappers/uno.ts', src: "const publicadas = ofertas.filter(o => o.ok)\nconst a = publicadas[0]" },
+    { path: 'packages/api/src/wrappers/dos.ts', src: "const galeria = fotos.filter(f => f.ok)\nconst b = galeria[0]" },
+    { path: 'packages/api/src/wrappers/tres.ts', src: "/* El UNIQUE garantiza que hay una sola */\nconst elegidas = ofertas.filter(o => o.ok)\nconst c = elegidas[0]" },
+  ],
+  /* R51 · los 5 del baseline + UNO nuevo. Lo único rojo tiene que ser el
+     archivo que no está en la lista; los 5 conocidos alcanzan además
+     para que el ANCLA no sea lo que lo pinta. */
+  R51: [
+    { path: 'packages/ui/src/components/Hoja.tsx', src: 'motion.duration.normal' },
+    { path: 'packages/ui/src/components/VisorFoto.tsx', src: 'motion.duration.normal' },
+    { path: 'packages/ui/src/components/MapaRecorrido.tsx', src: 'motion.duration.normal' },
+    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: 'motion.duration.normal' },
+    { path: 'apps/cliente/src/app/paseo/[atencionId].tsx', src: 'motion.duration.normal' },
+    { path: 'packages/ui/src/components/PiezaNueva.tsx', src: 'withTiming(x, { duration: motion.duration.normal })' },
+  ],
   /* R49 · CUATRO campos, y los dos legítimos son el peso de la prueba
      (L-236): el que da un EJEMPLO de formato · el que EXPLICA dónde
      encontrar el dato —el caso «Código / El código impreso en tu
@@ -3010,6 +3037,152 @@ function r44(archivos) {
 }
 
 
+/** R50 · ELEGIR UNO DE VARIOS SIN DECIR CUÁL (S100-B, encargo de mesa).
+ *
+ *  EL CASO QUE LA PARIÓ (H-001, medido por C): un wrapper afirmaba en un
+ *  comentario que el índice `uq_oferta_publicada_por_variante` garantiza
+ *  **una sola** oferta publicada por variante. **Ese índice NO EXISTE**;
+ *  el real es por `(cuenta_comercial_id, variante_id)` — o sea **N
+ *  vendedores por variante A PROPÓSITO**. Sobre esa premisa el código
+ *  hacía `publicadas[0]` **sin `.order()`** ⇒ **la tarjeta puede decir
+ *  $70.90 y la ficha $75.86 del mismo toque**, en 25 variantes.
+ *
+ *  🔴 **Y NO TIENE SÍNTOMA: cada pantalla se ve bien por separado.** Solo
+ *  el par las delata. Ni `tsc` ni el resto de este lint lo ven.
+ *
+ *  ── 🔴 CÓMO SE MIDIÓ, PORQUE LA PRIMERA REGLA QUE ESCRIBÍ ERA PEOR QUE
+ *  NINGUNA ──────────────────────────────────────────────────────────
+ *  El encargo pedía *«`[0]` sobre colección sin `.order()` en wrappers»*.
+ *  Medido en crudo: **21 casos**, y al clasificarlos apareció el
+ *  problema — la mayoría son `Array.isArray(x) ? x[0] : x`, que **no es
+ *  elegir uno de varios: es DESENVOLVER un embed** de PostgREST que
+ *  puede venir como objeto o como array de uno. Ruido puro.
+ *
+ *  **Y lo grave:** al probar «acepto el caso si el código DECLARA su
+ *  unicidad», **el defecto real PASABA EN VERDE** — porque su comentario
+ *  declara una garantía… que es justamente la falsa. ***Una regla que
+ *  acepta un comentario como prueba premia el mecanismo exacto que
+ *  produjo el daño.***
+ *
+ *  ⇒ El discriminador correcto no es `[0]`: es **`[0]` sobre el
+ *  resultado de un `.filter(...)`** — o sea *elegir uno de un
+ *  subconjunto que por definición puede tener varios*. **Medido sobre 89
+ *  archivos: SOLO 2 casos**, los dos en el mismo archivo, uno de ellos el
+ *  defecto que C encontró. **Quirúrgica y sin ruido.**
+ *
+ *  ── LA SALIDA, y por qué NO es «poné un comentario» ────────────────
+ *  Se sale con **`.order(` en el mismo archivo**: un orden explícito
+ *  vuelve determinista cuál es el primero. *La cura correcta del caso de
+ *  C no es documentar mejor: es ordenar, o traer el criterio del motor.*
+ *
+ *  Baseline **2**, solo-baja, con dueño: **los dos son de `A`**
+ *  (`packages/api`). Muere cuando llegue a 0. */
+const BASELINE_R50 = 2
+function r50(archivos) {
+  const fallos = []
+  const ofensores = []
+
+  for (const { path, src } of archivos) {
+    if (!path.includes('packages/api/')) continue
+    const limpio = sinComentarios(src)
+    for (const m of limpio.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*[^;]*?\.filter\s*\(/g)) {
+      const nombre = m[1]
+      const resto = limpio.slice(m.index + m[0].length)
+      if (!new RegExp(`\\b${nombre}\\s*\\[0\\]`).test(resto)) continue
+      /* 🔴 LA EXENCIÓN ES LOCAL, Y ESTA LÍNEA SE ESCRIBIÓ DOS VECES.
+         La v1 preguntaba `¿el ARCHIVO tiene .order(?` y daba VERDE sobre
+         los dos ofensores reales: `despensa-catalogo.ts` tiene CINCO
+         `.order(` en otras consultas, así que la exención de archivo los
+         cubría a todos. **La regla habría bendecido exactamente el
+         defecto que vino a cazar.**
+         Lo delató el BASELINE: la regla decía 0 y su baseline era 2, y
+         dos números que deben coincidir salieron de dos cuentas
+         distintas (L-281). *Un ratchet sin baseline no habría tenido con
+         qué contradecirse.*
+         ⇒ El orden tiene que estar en la consulta QUE ALIMENTA a este
+         filter, no en cualquier parte del archivo. */
+      const ventana = limpio.slice(Math.max(0, m.index - 600), m.index + m[0].length)
+      if (/\.order\s*\(/.test(ventana)) continue
+      ofensores.push(`${path.split('/').pop()} → ${nombre}[0]`)
+    }
+  }
+
+  if (ofensores.length > BASELINE_R50)
+    fallos.push(
+      `R50: ${ofensores.length} caso(s) que eligen UNO de un subconjunto filtrado sin orden explícito (${ofensores.join(' · ')}, baseline ${BASELINE_R50} SOLO-BAJA). Un \`.filter()\` devuelve por definición VARIOS: tomar \`[0]\` sin \`.order()\` deja que el orden lo decida la base, y dos pantallas que leen lo mismo pueden mostrar cosas distintas SIN SÍNTOMA. La salida es \`.order()\` con el criterio real —o traerlo del motor—, JAMÁS un comentario que afirme unicidad: un comentario no es una garantía de la base hasta que alguien la mide.`,
+    )
+  fallos.push(...ancla('R50', archivos.filter((a) => a.path.includes('packages/api/')).length, 1, 'archivo(s) de wrappers en el corpus'))
+  return {
+    fallos,
+    info: `${ofensores.length} elección/es sin orden · baseline ${BASELINE_R50} solo-baja (dueño A) · mide \`filter()\`+\`[0]\`, NO el \`[0]\` genérico (21 casos, ruido)`,
+  }
+}
+
+/** R51 · UN TOKEN LEGADO NO ENTRA A UNA PIEZA NUEVA (S100-B, mesa).
+ *
+ *  LA LEY: ***un nombre que parece correcto es peor que uno que falta.***
+ *  Un token legado con nombre plausible es **una trampa cebada para el
+ *  próximo que escriba una pieza.**
+ *
+ *  EL CASO: `motion.duration.normal` vale **250** y es LEGADO — el
+ *  vocabulario cerrado de N10 son **150 · 300 · 520**, y su token es
+ *  `estandar`. **D casi lo usa creyendo que era el estándar**; lo frenó
+ *  un comentario, no un gate.
+ *
+ *  ── EL NÚMERO QUE HACE ESTA REGLA NECESARIA ────────────────────────
+ *  Medido: de los cuatro legados (`instant` · `normal` · `slow` ·
+ *  `verySlow`), **tres están en CERO usos y `normal` tiene 15.**
+ *  ***El único legado vivo es justamente el del nombre plausible.***
+ *  *Los que se delatan solos por el nombre nadie los usa.*
+ *
+ *  ── POR QUÉ ACOTADA A LO NUEVO, y no un ratchet global ─────────────
+ *  Los 15 usos viven en **5 archivos** y **migrarlos es cambio de
+ *  MOVIMIENTO en piezas de alto tráfico** (`Hoja`, `VisorFoto`,
+ *  `MapaRecorrido`): 250 → 300 se ve, y eso pide gate en dispositivo, no
+ *  un lint. **La regla congela la lista y prohíbe el archivo 6.**
+ *
+ *  ⇒ **Lo que evita es exacto: que el próximo lo tome creyendo que es el
+ *  estándar.** Los 15 vivos son deuda con dueño y con gate propio.
+ *
+ *  ⚠️ **Renombrar a `legacy_*` se EVALUÓ y NO se hace acá, con su
+ *  razón:** `motion` **se exporta desde `index.ts`**, así que el rename
+ *  cruza a `apps/` y toca dos pistas a la vez. **Es barato y es correcto
+ *  —el nombre dejaría de competir con el vocabulario—, pero es enmienda
+ *  de token con censo de consumidores: tanda propia, no de paso.** Se
+ *  declara para que se decida, no para que se olvide. */
+const LEGADOS_MOTION = ['instant', 'normal', 'slow', 'verySlow']
+/** Los 5 archivos que YA los usan. Solo-baja: sacar uno de acá es una
+ *  migración con gate, y ningún archivo NUEVO puede sumarse. */
+const BASELINE_R51 = [
+  'apps/cliente/src/app/(tabs)/hogar/index.tsx',
+  'apps/cliente/src/app/paseo/[atencionId].tsx',
+  'packages/ui/src/components/Hoja.tsx',
+  'packages/ui/src/components/MapaRecorrido.tsx',
+  'packages/ui/src/components/VisorFoto.tsx',
+]
+function r51(archivos) {
+  const fallos = []
+  const patron = new RegExp(`duration\\.(${LEGADOS_MOTION.join('|')})\\b`)
+  const usan = []
+
+  for (const { path, src } of archivos) {
+    if (!patron.test(sinComentarios(src))) continue
+    usan.push(path)
+    const conocido = BASELINE_R51.some((b) => path.endsWith(b) || b.endsWith(path))
+    if (!conocido)
+      fallos.push(
+        `R51: \`${path}\` usa un token LEGADO de \`motion.duration\` (${LEGADOS_MOTION.join('/')}). El vocabulario del movimiento es CERRADO y son otros: \`fast\` 150 · \`estandar\` 300 · \`grande\` 520 (N10). \`normal\` vale 250 y NO pertenece — su nombre compite con el vocabulario sin ser parte de él. Usá el token de N10 que corresponda al registro del gesto.`,
+      )
+  }
+  // ANCLA: si nadie los usa, la regla dejó de tener sujeto y hay que
+  // mirar si murieron (bueno) o si el nombre del token cambió (malo).
+  fallos.push(...ancla('R51', usan.length, 1, 'archivo(s) que usan un legado de duration'))
+  return {
+    fallos,
+    info: `${usan.length} archivo(s) con legados de \`duration\` · baseline ${BASELINE_R51.length} congelado · medido: 3 de los 4 legados tienen CERO usos y \`normal\` tiene 15 — el único vivo es el del nombre plausible`,
+  }
+}
+
 /** R49 · N11′ · EL PLACEHOLDER NO REPITE LA ETIQUETA (S100-B).
  *
  *  LA LEY, firmada por el founder el 17-ago: *«EL PLACEHOLDER DEJA DE
@@ -3337,7 +3510,7 @@ function r45(archivos) {
   }
 }
 
-const REGLAS = { R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3611,6 +3784,8 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
 corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47(apps)]);
 corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r48(apps)]);
 corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps)]);
+corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
+corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
