@@ -16,6 +16,10 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+// El punto del track es EL MISMO objeto que escribe el repartidor: se importa
+// su tipo en vez de re-declararlo. Dos declaraciones de la misma forma son dos
+// formas que un día divergen, y el día que divergen nadie se entera.
+import type { PuntoTrackEnvio } from './despensa-repartidor';
 import {
   falloDespensa,
   esObjDespensa,
@@ -78,6 +82,27 @@ export interface SeguimientoEnvio {
    *  día que e-PetPlace subsidie uno, la diferencia tiene que ser legible en
    *  la liquidación. */
   pagado_por: string | null;
+  /**
+   * 🔴 EL TRACK DEL REPARTO PARA LA FAMILIA (S100 · H-01 de D).
+   *
+   * No hizo falta motor ni policy: `envios.track_gps` ya existía y
+   * `envios_select` **ya tiene el brazo del dueño** (`p.user_id = auth.uid()`)
+   * — medido sobre `pg_policies`, no supuesto. Lo único que faltaba era que
+   * este lector lo pidiera.
+   *
+   * ⚠️ **LA UNIDAD DE `t` CRUZA SIN CAMBIAR, Y ES DECISIÓN.** El escritor
+   * (`registrarTrackEnvio`) guarda **epoch ms**, no ISO. Convertirlo acá
+   * dejaría a los dos lados de la frontera hablando unidades distintas con
+   * el mismo nombre — que es exactamente el defecto que el rename `ts`→`t`
+   * del paseo dejó como lección: *un campo que cambia de forma al cruzar no
+   * avisa, deja un filtro mudo.* Quien necesite ISO lo hace en un solo lugar
+   * y lo declara: `new Date(p.t).toISOString()`.
+   *
+   * Orden: **ascendente por `t`** (es una trayectoria, se dibuja hacia
+   * adelante). `null` = todavía no hay track — vacío honesto, jamás `[]`
+   * disfrazado de "ya salió y no se movió" (L-139).
+   */
+  track: PuntoTrackEnvio[] | null;
   /** Los eventos del courier, del más nuevo al más viejo. */
   eventos: { ocurrido_en: string; descripcion: string | null }[];
 }
@@ -171,7 +196,7 @@ export async function obtenerDetallePedido(
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
-      .select('id, transportista, tracking_code, tracking_url, pagado_por, envio_eventos(ocurrido_en, descripcion)')
+      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, envio_eventos(ocurrido_en, descripcion)')
       .eq('pedido_id', pedidoId)
       .maybeSingle(),
   ]);
@@ -221,6 +246,28 @@ export async function obtenerDetallePedido(
       tracking_code: typeof env.data.tracking_code === 'string' ? env.data.tracking_code : null,
       tracking_url: typeof env.data.tracking_url === 'string' ? env.data.tracking_url : null,
       pagado_por: typeof env.data.pagado_por === 'string' ? env.data.pagado_por : null,
+      // El track: se valida punto por punto contra la forma que ESCRIBE el
+      // repartidor (`{lat, lng, t}` — `lng`, no `lon`: leído de su escritor,
+      // no de memoria). Un punto malformado se descarta; una trayectoria a la
+      // que le falta un punto sigue siendo la trayectoria, y un `NaN` metido
+      // en un mapa lo rompe entero.
+      track: (() => {
+        const crudo: unknown = env.data.track_gps;
+        if (!Array.isArray(crudo) || crudo.length === 0) return null;
+        const puntos: PuntoTrackEnvio[] = [];
+        for (const p of crudo as unknown[]) {
+          if (
+            esObjDespensa(p) &&
+            typeof p.lat === 'number' &&
+            typeof p.lng === 'number' &&
+            typeof p.t === 'number'
+          ) {
+            puntos.push({ lat: p.lat, lng: p.lng, t: p.t });
+          }
+        }
+        puntos.sort((a, b) => a.t - b.t);
+        return puntos.length > 0 ? puntos : null;
+      })(),
       eventos: evs
         .filter((e): e is { ocurrido_en: string; descripcion: string | null } =>
           esObjDespensa(e) && typeof e.ocurrido_en === 'string',

@@ -41,7 +41,10 @@ BEGIN
       'telefono', '+593999999999',
       'direccion', 'Av. de los Shyris N34-40',
       'ciudad', 'Quito',
-      'referencias', 'SIEMBRA S99 — segundo pedido para el guard del FIFO (D-838)'
+      -- 🔴 S100 (H-03 de D): NULL A PROPÓSITO — ver la nota gemela en
+      -- `seed-s99-empate-de-pago.sql`. `referencias` lo lee el repartidor en la
+      -- puerta; la marca de siembra vive en `nombre_receptor`.
+      'referencias', NULL
     ),
     v_clave, NULL, 'despacho', NULL, 'estandar'
   );
