@@ -445,3 +445,39 @@ la palanca firmada **no estaba en el archivo** (medido, no supuesto) · y **decl
 sospecha COMO sospecha** —el valle profundo contra el plato ancho— **que una medición
 ajena confirmó después con número** (0,83 contra 1,08). *Así se cierra una sospecha: no
 ascendiéndola a premisa.*
+
+---
+
+## §13 · LOS TRES COMPROMISOS CRUZADOS QUE QUEDAN ABIERTOS — con dueño
+
+*Viven acá y no en los partes: **un parte lo lee su sucesora; un compromiso cruzado lo
+tiene que poder encontrar la OTRA pista**, y el canal entre pistas estuvo caído toda la
+sesión.*
+
+| Quién espera | A quién | Qué, y por qué importa |
+|---|---|---|
+| **B** | **A** | **`D-827`** — **sin códigos tipados por constraint, las 3 líneas de R44 quedan clavadas POR DISEÑO, no por olvido.** *Se declara así para que ningún barrido futuro las lea como deuda de prolijidad y las «cure» rompiendo el contrato.* |
+| **B** | **C** | **¿el `Interruptor` del espejo ya reemplazó al segmentado?** — **la API no cambió, así que el cambio es INVISIBLE desde afuera**: solo se sabe si C lo declara. *Un reemplazo que no cambia la firma no deja rastro que alguien pueda medir.* |
+| **B** | **D** | la **confirmación de `EntradaDeCruce`** |
+
+---
+
+## §14 · LA COLA DEL PULIDO — su PRIMER ítem, y el que le sigue
+
+**① DUEÑO: FOUNDER — depositar las TRES referencias en `docs/laminas/referencias/`
+ANTES de que la sesión abra:** **PedidosYa** (el seguimiento con **nodos e hitos**) y
+las **dos de Uber** (la **ficha del conductor** y el **mapa**). **El análisis está; falta
+el objeto.** *Se buscaron y no se pudieron identificar sin adivinar, y no se adivinó.*
+
+**② PRIMER ÍTEM DE QUIEN VUELVA A `BarraTabs`: el censo que L-281 ordena y NO se
+corrió.** La pieza cobró **CUATRO veces** la misma ley —dos números que deben coincidir
+saliendo de dos cuentas distintas—. **Al tercer cobro había que censar la pieza entera;
+se escribió la ley y no se ejecutó el censo, y el cuarto llegó en la ronda siguiente.**
+*No falló el diagnóstico: faltó ejecutar lo que el diagnóstico mandaba.* **No se toca un
+número de esa pieza antes del censo.**
+
+Después: **D-842** (causa localizada + cuatro curas descartadas) · **D-825** ·
+**`nodoFacturado`** · las tarjetas como superficies separadas · la lista de hitos con
+hora (**el dato ya existe en el motor**) · y **la decisión abierta de la barra con su
+precio**: **disco/alto 0,78 contra 0,66** — barra de 100 **o** disco de 56, y **en los
+dos el texto sale del disco**.
