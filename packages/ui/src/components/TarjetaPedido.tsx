@@ -108,9 +108,21 @@ export function TarjetaPedido({
           {monto === undefined ? null : <Texto variante="dato">{monto}</Texto>}
         </View>
 
-        {pasos.length === 0 ? null : (
-          <EscaleraEstados registro="compacta" pasos={pasos} desvio={desvio} acento={acento} />
-        )}
+        {/* ⏪ **S100-B · MURIÓ EL GUARD `pasos.length === 0 ? null`** (H-04,
+            hallazgo de la pista D). Era una re-implementación PARCIAL de
+            una decisión que no le pertenece a esta tarjeta: un pedido
+            `cancelado` llega con `pasos: []` **más** `desvio`, así que el
+            guard mataba la banda y **en la lista el pedido no decía que
+            se había cancelado**.
+
+            La regla de existencia vive en `EscaleraEstados` y ahora dice
+            lo correcto —*sin pasos NI desvío no hay nada que decir*—, así
+            que se la monta SIEMPRE y ella resuelve.
+
+            > *El guard de acá no estaba de más: estaba de menos.* Y
+            > mientras existiera, curar la pieza no alcanzaba — el criterio
+            > vivía en dos lugares y ganaba el de afuera. */}
+        <EscaleraEstados registro="compacta" pasos={pasos} desvio={desvio} acento={acento} />
       </View>
     </Tarjeta>
   )
