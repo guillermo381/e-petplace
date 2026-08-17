@@ -3097,9 +3097,7 @@ export const prestadorEs = {
      —el techo de la vitrina y la ficha—: dos copias serían dos nombres
      para el mismo modo. */
   espejo: {
-    administrar: 'Administrar',
     verComoCliente: 'Ver como cliente',
-    etiquetaGrupo: 'Cómo estás mirando tu vitrina',
   },
   ventas: {
     entradaTitulo: 'Venta de productos',
@@ -3209,8 +3207,9 @@ export const prestadorEs = {
          porque **espera la decisión de B sobre los segmentados
          anidados**. */
       titulo: 'Tu local y tu stock',
-      vitrinaTitulo: 'Tu vitrina',
       localTitulo: 'Tu local',
+      stockTitulo: 'Tu stock',
+      seccionGrupo: 'Qué parte de tu tienda ves',
     },
     vitrina: {
       vistaLista: 'Lista',

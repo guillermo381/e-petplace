@@ -356,6 +356,11 @@ export default function TuTienda() {
   /* ── EL ESTADO DE TU VITRINA — vive acá porque **acá vive el scroll**.
      Las piezas de `vitrina-piezas.tsx` son presentacionales a propósito:
      el renderer es UNO y por eso el espejo sigue siendo espejo. */
+  /** QUÉ estás viendo. **Navegación entre dos temas**, no una lente — por
+   *  eso vive en `SelectorSegmentado` y el espejo no. Arranca en `local`
+   *  porque es lo que el vendedor configura primero y una vez; el stock es
+   *  donde vuelve todos los días, y volver ya es un toque. */
+  const [seccion, setSeccion] = useState<'local' | 'stock'>('local');
   const [modo, setModo] = useState<ModoEspejo>('administrar');
   const [especie, setEspecie] = useState<string>(TODAS);
   const [busca, setBusca] = useState('');
@@ -802,39 +807,51 @@ export default function TuTienda() {
       )}
 
       {pantalla.estado === 'listo' && (
-        /* 🔴 LA ESTRUCTURA DE «TU TIENDA», Y SU ORDEN ESTÁ MEDIDO.
-           Firma del founder: **una sola pantalla, dos secciones** — y la
-           razón de que no sean dos pantallas es suya: *la vitrina es donde
-           el vendedor trabaja TODOS LOS DÍAS, configuración es donde entra
-           de vez en cuando, y NEGOCIO y Configuración empezarían a decir lo
-           mismo.*
+        /* 🔴 LA ESTRUCTURA DE «TU TIENDA» — DOS SEGMENTOS, firma del
+           founder mirando la pantalla: *«sale en dos pisos… la vitrina
+           debería ser otro tab. Solo tendríamos UNA pantalla: una parte
+           con la configuración del local y otra con la del stock. Y dentro
+           de la configuración del stock está la vitrina.»*
 
-           **Por qué TU LOCAL va primero aunque la vitrina sea el trabajo
-           diario:** la vitrina termina en una lista con ventana que crece
-           al llegar al final ⇒ **una sección que viva después de ella es
-           inalcanzable.** No es preferencia: con 563 filas no hay pulgar
-           que llegue.
+           ☠️ **MUERE EL APILADO EN DOS PISOS**, y con él su andamio: el
+           `stickyHeaderIndices` que yo había puesto para que TU LOCAL se
+           fuera y el techo de la vitrina quedara pegado.
 
-           **Y por qué eso no entierra el trabajo diario:** TU LOCAL
-           **scrollea y se va**, mientras el techo de la vitrina
-           —interruptor · vista · buscador— **queda PEGADO**
-           (`stickyHeaderIndices`). Así la primera pantalla muestra las dos
-           secciones (lo que el founder pidió, literal) y a partir del
-           primer scroll la vitrina se queda con la pantalla entera **sin
-           perder el interruptor de vista**, que es lo que la receta del
-           espejo exige: *un interruptor que se va con el scroll deja al
-           vendedor sin saber en qué modo está justo cuando más abajo
-           llegó.* */
-        <ScrollView
-          onScroll={alLlegarAlFinal}
-          scrollEventThrottle={200}
-          stickyHeaderIndices={[1]}
-          contentContainerStyle={{
-            padding: spacing[4],
-            paddingBottom: insets.bottom + spacing[10],
-            gap: spacing[5],
-          }}
-        >
+           **Mi medición sigue siendo cierta y por eso el andamio sobraba:**
+           una sección después de una lista con ventana **es inalcanzable**
+           —con 563 filas no hay pulgar que llegue—. Yo lo ADMINISTRÉ
+           (arriba lo corto, abajo lo largo, el techo pegado); **con dos
+           segmentos el problema DESAPARECE**, porque **nunca hay dos
+           secciones en el mismo scroll**. *La medición era buena y la
+           salida del founder es mejor: no hay nada que sostener.* */
+        <View style={{ flex: 1 }}>
+          {/* EL SEGMENTADO DE AFUERA — FIJO, fuera del scroll: es
+              NAVEGACIÓN entre dos temas, y una navegación que se va con el
+              scroll deja al vendedor sin saber dónde está.
+              🔴 **Y es el ÚNICO segmentado de la pantalla**: el del espejo
+              pasó a `Interruptor` por dictamen de B — *no competían por ser
+              dos, competían por ser IGUALES*. */}
+          <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3] }}>
+            <SelectorSegmentado
+              segmentos={[
+                { codigo: 'local', etiqueta: t('ventas.tienda.localTitulo') },
+                { codigo: 'stock', etiqueta: t('ventas.tienda.stockTitulo') },
+              ]}
+              activo={seccion}
+              onCambio={(c) => setSeccion(c === 'stock' ? 'stock' : 'local')}
+              etiqueta={t('ventas.tienda.seccionGrupo')}
+              proposito="vista"
+            />
+          </View>
+
+          {seccion === 'local' ? (
+            <ScrollView
+              contentContainerStyle={{
+                padding: spacing[4],
+                paddingBottom: insets.bottom + spacing[10],
+                gap: spacing[5],
+              }}
+            >
           {/* ═══ ① TU LOCAL — lo de vez en cuando, arriba y scrolleable ═══
               ⚠️ **SIN encabezado paraguas, y es decisión declarada.** El
               founder nombró la sección «TU LOCAL (cortes, repartidores,
@@ -1210,7 +1227,24 @@ export default function TuTienda() {
                 el mismo discriminador (`sinOtraCasa`): quien tiene tabs ya
                 tiene la suya en Cuenta. */}
           </View>
-
+            </ScrollView>
+          ) : (
+            /* TU STOCK — y **la vitrina vive ACÁ ADENTRO**, que es la firma:
+               no es una sección hermana, es el contenido del stock.
+               El techo de la vitrina queda **pegado** (índice 0): con una
+               sola sección en el scroll, el sticky ya no compensa un
+               apilado — solo cumple lo que la receta del espejo pide, que
+               el interruptor no se pierda de vista al bajar. */
+            <ScrollView
+              onScroll={alLlegarAlFinal}
+              scrollEventThrottle={200}
+              stickyHeaderIndices={[0]}
+              contentContainerStyle={{
+                padding: spacing[4],
+                paddingBottom: insets.bottom + spacing[10],
+                gap: spacing[5],
+              }}
+            >
           {/* ═══ ② EL TECHO DE TU VITRINA — PEGADO (índice 1 del sticky) ═══
               Lleva fondo propio a propósito: un techo pegajoso sin fondo
               deja ver las filas corriendo por debajo del control, y ahí el
@@ -1222,7 +1256,14 @@ export default function TuTienda() {
               backgroundColor: theme.bg.base,
             }}
           >
-            <Texto variante="seccion">{t('ventas.tienda.vitrinaTitulo')}</Texto>
+            {/* ☠️ ACÁ DECÍA «Tu vitrina» Y SE RETIRA. El segmentado de
+                arriba ya dice DÓNDE estás («Tu stock») y el interruptor de
+                abajo CON QUÉ OJOS: un tercer rótulo sería el tercer nivel
+                de jerarquía que ya declaré una vez que no se abre.
+                *La palabra no se pierde: la vitrina ES el contenido del
+                stock, que es justo la firma —«dentro de la configuración
+                del stock está la vitrina»—.* Vuelve el día que esta
+                sección tenga algo más que separar.*/}
             <InterruptorEspejo modo={modo} onCambio={setModo} />
             {/* CÓMO SE MIRA — segundo control del techo, y responde OTRA
                 pregunta que el de arriba: aquél dice QUÉ miro (mi trabajo o
@@ -1378,7 +1419,9 @@ export default function TuTienda() {
                 </Texto>
               )}
           </View>
-        </ScrollView>
+            </ScrollView>
+          )}
+        </View>
       )}
 
       {/* LA HOJA DEL AJUSTE DE STOCK — vive acá, al pie del componente y
