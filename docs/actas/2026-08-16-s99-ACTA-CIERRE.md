@@ -212,3 +212,38 @@ rama no mapeada sale «bien» y no llega a nadie.
   a punta es **el mismo predicado de keyset**, en el test del timeline.
 - **`especies_aplicables` aterriza en el PRÓXIMO publish** — se agregó después
   del OTA de cierre y ninguna superficie lo consume todavía.
+
+---
+
+## §9 · EL ÚLTIMO OTA DE S99 — publicado, con dos correcciones medidas adentro
+
+**Ancla `141a372d`, las dos apps, `dirty: None` en las cuatro entradas (leídas del OBJETO).**
+· **PRESTADOR** `01a00da9-0935…` · group `ed88aee5` · runtime **1.0.5**
+· **CLIENTE** `01a00da9-d974…` · group `c1b2f5a2` · runtime **1.0.3**
+
+**⚠️ D-785 OTRA VEZ, y hay que decirlo ANTES de que el founder mire el pie:** los dos
+updates comparten los **8 primeros caracteres** (`01a00da9`) ⇒ **el pie de Cuenta va a
+mostrar LO MISMO en las dos apps.** Se distinguen recién en el carácter 10
+(`-0935` prestador · `-d974` cliente). **Contra el par anterior sí se distinguen**
+(`01a00d8f`/`01a00d90` → `01a00da9`): *sirve para saber que LLEGÓ algo nuevo, no para
+saber CUÁL de las dos apps estás mirando.*
+
+**Lo que lleva:** la barra como **TELA** — montañas **máximas en viaje (9 px) y mínimas
+en reposo (2 px)**, la del lado del viaje creciendo más, y los **íconos centrados
+derivados de la posición del disco** (no de dos cuentas distintas).
+
+**🔴 LO QUE NO LLEVA, Y POR QUÉ (medido antes de escribir código):** el **hueco gris**.
+La cura propuesta —pasar `tabBarStyle`— **es un no-op**: la barra se monta con un
+**tabBar CUSTOM**, `BarraTabs` no lee esa opción (cero menciones) y el custom solo
+recibe `{state, navigation}`. **Y la causa real ya estaba medida en el repo desde S85**
+(`apps/prestador/src/app/_layout.tsx`): el navegador pinta `colors.background` en dos
+capas propias y **el tema por default de expo-router lo tiene en `rgb(242,242,242)`** —
+literalmente «blanco grisáceo». La misma nota **ya midió que hacerlas transparentes
+ROMPE la transición firmada**. Detalle y camino de cura en
+`docs/laminas/2026-08-16-s99-GATE-BARRA-diagnostico.md`.
+
+**Verificación de la publicación:** `verify:diseno` VERDE con **40 reglas** · typechecks
+**4/4 VERDES** *(con el hallazgo de L-282: el rojo inicial del prestador era un
+`router.d.ts` generado y VIEJO en este árbol — con los tipos frescos, el mismo commit
+compila verde)* · árbol en **0** al bundlear (se apartó un `.claude/settings.json`
+malformado, guardado en scratchpad).

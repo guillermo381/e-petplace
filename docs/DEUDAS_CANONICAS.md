@@ -11711,6 +11711,16 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-282 — EL COLOR DE UN TYPECHECK PUEDE VENIR DE UN ARCHIVO GENERADO SIN TRACKEAR: MISMO COMMIT, DOS ÁRBOLES, DOS COLORES (S99 — medido al publicar el último OTA; depositada 16-ago-2026).**
+
+  **Medido, no supuesto.** El typecheck de `apps/prestador` dio **ROJO en el repo primario y VERDE en los worktrees de C y D**, sobre **el mismo commit**. Seis errores, todos sobre `/ventas/tienda`, con la forma *«no assignable to … 313 more»*. **El archivo `src/app/ventas/tienda.tsx` EXISTE.**
+
+  **La causa: `apps/prestador/.expo/types/router.d.ts` — GENERADO y SIN TRACKEAR.** El primario tenía una copia **anterior a la reestructura** (0 menciones de la ruta); C y D tenían la suya **fresca** (3 menciones). **Copiando la fresca al primario, el mismo comando pasó a VERDE sin tocar una línea de fuente.**
+
+  **⇒ Por qué es peligrosa y no solo molesta:** el rojo **acusa al código correcto**. Una sesión que abra un worktree nuevo, corra el typecheck y lo crea, va a «curar» rutas que funcionan — y el modo de falla es el peor: *el instrumento está bien, el código está bien, y el veredicto es falso*. Es familia de los verdes flojos de S95, en su forma invertida: **un rojo por la razón equivocada está tan roto como un verde por la razón equivocada.**
+
+  **Regla operativa: ante un typecheck que solo falla en UN árbol, se compara el artefacto GENERADO antes de tocar fuente** — `.expo/types/router.d.ts`, tipos de Supabase, cualquier `.d.ts` no versionado. **Y el diagnóstico se cierra por CONTRASTE ENTRE ÁRBOLES**, que es la medición que lo distingue en un comando. *El objeto no decae; el artefacto derivado sí — y este ni siquiera vive en el repo.*
+
 - **L-281 — UNA LEY QUE REINCIDE EN EL MISMO LUGAR SEÑALA UN PATRÓN DE CONSTRUCCIÓN, NO UN DESCUIDO (S99 — tres cobros de L-277 en LA MISMA PIEZA; depositada 16-ago-2026).**
 
   **Los tres, todos en `BarraTabs`:** ① `VALLE_HONDO` a mano al lado de un radio derivado · ② el valle de bézier libre contra el disco (**L-279**) · ③ **el acotado corría el disco y el ícono se quedaba en el centro de su pestaña, calculado por otro lado**. Literal de B en el tercero: ***«dos cosas que tienen que coincidir salían de dos cuentas distintas — el mismo modo de falla que ya me costó el ícono descentrado hace tres gates».***
