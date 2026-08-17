@@ -56,6 +56,9 @@ import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
+import { TarjetaProducto } from '../components/TarjetaProducto'
+import { PrecioText } from '../components/PrecioText'
+import { CELDA_DE_GRILLA, GRILLA_DE_DOS } from '../components/grilla-de-dos'
 import { FilaEntrega } from '../components/FilaEntrega'
 import { AvisoAlergia } from '../components/AvisoAlergia'
 import { CodigoAEscala } from '../components/CodigoAEscala'
@@ -3526,6 +3529,86 @@ function GaleriaInterna() {
 
         <Seccion titulo="SelectorDestinoItem (S96) — a quién va este producto (§6.3)">
           <MuestraSelectorDestino />
+        </Seccion>
+
+        <Seccion titulo="TarjetaProducto + PrecioText (S100) — la vitrina de DOS columnas, con el + que agrega sin abrir">
+          <Texto variante="apoyo">
+            Firma del founder (17-ago): premium · dos columnas · AGREGAR SIN ABRIR DETALLE.
+            Lo que hay que mirar acá son cuatro cosas, y las cuatro son de forma:
+            ① el + está SIEMPRE en la misma esquina (la mano lo encuentra sin mirar) y
+            al agregar MUTA a stepper en el lugar, no aparece otro control al lado ·
+            ② los precios de una fila quedan ALINEADOS aunque un nombre ocupe una línea
+            y el otro dos — eso lo hace el ancla de abajo, y es lo que deja comparar
+            de un vistazo · ③ el sin stock dice el cartel EN la tarjeta, no en otro
+            lado · ④ el $/kg sigue en mono porque es un CÁLCULO: el contraste entre
+            los dos registros es lo que dice cuál es el precio y cuál la cuenta.
+          </Texto>
+          <View style={GRILLA_DE_DOS}>
+            <View style={CELDA_DE_GRILLA}>
+              <TarjetaProducto
+                nombre="Pro Pac Adulto Pollo y Arroz"
+                presentacion="15 kg"
+                precio={70.9}
+                precioPorUnidad="$4.73 / kg"
+                hayStock
+                cantidad={0}
+                onAgregar={() => {}}
+                onCambiarCantidad={() => {}}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              {/* El nombre de DOS líneas al lado del de una: acá se ve el ancla. */}
+              <TarjetaProducto
+                nombre="Acondicionador de agua para acuario"
+                presentacion="250 ml"
+                precio={8.5}
+                hayStock
+                cantidad={2}
+                onAgregar={() => {}}
+                onCambiarCantidad={() => {}}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              <TarjetaProducto
+                nombre="Arena sanitaria aglomerante"
+                presentacion="10 kg"
+                precio={12.75}
+                hayStock={false}
+                cantidad={0}
+                onAgregar={() => {}}
+                onCambiarCantidad={() => {}}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              {/* Sin precio NO se dibuja un $0.00 (19.9): el nulo se calla. */}
+              <TarjetaProducto
+                nombre="Snack dental"
+                presentacion="Sobre 85 g"
+                precio={null}
+                hayStock
+                cantidad={0}
+                onAgregar={() => {}}
+                onCambiarCantidad={() => {}}
+                onPress={() => {}}
+              />
+            </View>
+          </View>
+
+          <Texto variante="apoyo">
+            PrecioText en sus tres registros — vitrina · ficha · línea. El símbolo y la
+            cifra son UNA palabra visual ($6.70, sin espacio) y las cifras son
+            tabulares: en una grilla los precios se leen en columna aunque estén en
+            tarjetas distintas.
+          </Texto>
+          <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'flex-end' }}>
+            <PrecioText valor={6.7} registro="vitrina" />
+            <PrecioText valor={70.9} registro="ficha" porUnidad="$4.73 / kg" />
+            <PrecioText valor={4.5} registro="linea" />
+            <PrecioText valor={9.9} anterior />
+          </View>
         </Seccion>
 
         <Seccion titulo="TarjetaPedido (S96) — un pedido en una lista, de los DOS lados">
