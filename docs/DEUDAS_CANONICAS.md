@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-284 — UN CAMBIO QUE DESTAPA UN DEFECTO LATENTE SE LLEVA LA CULPA DEL DEFECTO (S99 — el valle que mordía el disco; depositada 16-ago-2026).**
+
+  **El caso, con su literal (B):** el retraso del valle iba **12 px** detrás y el anillo medía 9 ⇒ **−2,78 px en viaje: la barra ENCIMA del disco.** La lectura fácil era *«bajar el anillo de 10 a 9 rompió el viaje»*. **Medido: con el anillo en 10 YA MORDÍA 2 px, y nadie lo había medido.** ***«No lo rompió bajar el anillo: lo destapó medirlo.»***
+
+  **⇒ Antes de atribuirle un defecto al cambio más reciente, se mide el estado ANTERIOR con el mismo instrumento.** Si el defecto ya estaba —aunque más chico— el cambio es el **revelador**, no la causa: culparlo manda a revertir lo correcto y **deja viva la causa**, que va a reaparecer más grande con el próximo ajuste.
+
+  **La cura correcta no fue elegir mejor el número: fue volver el defecto INEXPRESABLE** — el retraso ahora **se deriva de `ANILLO − 2`**, así que no existe combinación que muerda. *Un par que debe coincidir y sale de dos cuentas distintas es una bomba con temporizador; derivarlo la desarma.* **Familia de L-277 y L-222.**
+
 - **L-283 — CUANDO UN EFECTO NO APARECE DESPUÉS DE VARIOS INTENTOS DE CALIBRACIÓN, LA PREGUNTA DEJA DE SER *CUÁNTO* Y PASA A SER *SI LA ANATOMÍA PUEDE PRODUCIRLO* (S99 — ocho gates de la barra; depositada 16-ago-2026).**
 
   **El caso, con su literal (B):** ***«UN PLANO Y UN ARCO NO PRODUCEN UN CAMBIO DE SIGNO: PRODUCEN UN CODO. Lo único fuera del plano era la joroba. Por eso no hay S: NO HABÍA DOS SIGNOS QUE ALTERNAR.»*** El hombro eran **50 px dead-flat seguidos de un arco de circunferencia** — y un arco tiene **curvatura de UN SOLO SIGNO**. ⇒ **la S era INCONSTRUIBLE con esa anatomía, hicieran lo que hicieran con los números.**
@@ -11736,6 +11744,8 @@ defecto que se curó hoy en el cambio de clave.
   **Los tres, todos en `BarraTabs`:** ① `VALLE_HONDO` a mano al lado de un radio derivado · ② el valle de bézier libre contra el disco (**L-279**) · ③ **el acotado corría el disco y el ícono se quedaba en el centro de su pestaña, calculado por otro lado**. Literal de B en el tercero: ***«dos cosas que tienen que coincidir salían de dos cuentas distintas — el mismo modo de falla que ya me costó el ícono descentrado hace tres gates».***
 
   **⇒ Cuando la misma ley se cobra tres veces en la misma pieza, el problema dejó de ser la aplicación de la ley: es que la pieza tiene MUCHAS relaciones que se están expresando como VALORES PARALELOS en vez de como derivaciones.** *Cada cobro individual parece un descuido; los tres juntos son un diagnóstico de construcción.*
+
+  **⚠️ CUARTO COBRO, EN LA MISMA PIEZA Y EN LA MISMA SESIÓN EN QUE SE DEPOSITÓ ESTA LEY:** el **retraso del valle contra el anillo** — dos números que debían coincidir, salidos de dos cuentas distintas, mordiendo el disco 2,78 px (L-284). **La ley se escribió, el censo que ella misma ordena NO se corrió, y el cuarto llegó en la ronda siguiente.** *No falló el diagnóstico: faltó ejecutar lo que el diagnóstico mandaba.* **Curado como corresponde: DERIVANDO (`retraso = ANILLO − 2`), no eligiendo mejor el número.**
 
   **Regla operativa: al tercer cobro de la misma ley en la misma pieza, se censa la pieza entera buscando pares que deban coincidir** — en vez de curar el tercero y esperar al cuarto.
 

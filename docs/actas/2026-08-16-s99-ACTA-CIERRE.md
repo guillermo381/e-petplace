@@ -247,3 +247,45 @@ ROMPE la transición firmada**. Detalle y camino de cura en
 `router.d.ts` generado y VIEJO en este árbol — con los tipos frescos, el mismo commit
 compila verde)* · árbol en **0** al bundlear (se apartó un `.claude/settings.json`
 malformado, guardado en scratchpad).
+
+---
+
+## §10 · EL OTA FINAL DE S99 — **la S existe por primera vez**
+
+**Ancla `0770b967`, las dos apps, `dirty: None`.**
+· **PRESTADOR** `01a00dd4-c7c7…` · group `d35bf3d9` · runtime **1.0.5**
+· **CLIENTE** `01a00dd5-9478…` · group `c9f60bb2` · runtime **1.0.3**
+
+**✅ Esta vez los pies SÍ se distinguen** (`01a00dd4` vs `01a00dd5`) — el par anterior
+compartía los ocho. *No se arregló nada: se tuvo suerte con el contador. D-785 sigue
+viva y el próximo par puede volver a colisionar.*
+
+**Los tres números sobre lo CONSTRUIDO** (instrumento que **extrae `pathBarra` del
+archivo real**, no reimplementa la fórmula — que es lo que lo vuelve prueba y no eco):
+**columnas sobre el plano `0` en los tres casos** (vara 0) · **ratio `1,10` en reposo y
+`1,11` en viaje** (vara 1,08) · **inflexión al 50 % de profundidad** = el piso duro
+firmado · **anillo `9,00`**. **Antes: `0,83`** — el plato ancho y poco profundo,
+confirmado por número.
+
+**Los dos defectos que encontró el INSTRUMENTO y no el ojo, los dos curados POR
+CONSTRUCCIÓN:** ① el **retraso del valle mordía el disco** (−2,78 px en viaje) — y
+**con el anillo en 10 ya mordía 2 px sin que nadie lo midiera**: *no lo rompió bajar el
+anillo, lo destapó medirlo* (**L-284**); curado derivando `retraso = ANILLO − 2`, el
+defecto pasa a ser **inexpresable**. ② en el **tab del extremo el path se dibujaba al
+revés** — el clamp del disco no conocía el valle nuevo; curado con
+`margenDisco = RADIO_BARRA + VALLE_SEMI`: *«entra el disco y su valle, o no entra
+ninguno»*.
+
+### Servido al founder, sin bloquear el OTA
+· **Lo que se ve juntando los paneles y NO es un número:** en la vara **el disco es más
+grande respecto de la barra** y el valle lo abraza más. Es la decisión abierta de
+siempre —**disco/alto 0,78 contra 0,66**— con su precio sin cambios: **barra de 100 o
+disco de 56**, y en los dos **el texto sale del disco**.
+· **En el tab del EXTREMO el hombro queda comido por la esquina redondeada**
+(ratio 1,65). **Degradación acotada** —el anillo aguanta en 8,97— y darle hombro
+exigiría **correr el disco más adentro de su tab**. **B no lo decidió.**
+
+### Lo que va con este OTA además de la barra
+Las **cuatro cosas sin mirar desde hace varias tandas**: el **chevron en Administrar**
+—la pregunta que abrió todo este arco— · el **interruptor del espejo** · **«Tu local ·
+Tu stock»** · el **pin con el par invertido**.
