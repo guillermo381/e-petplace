@@ -1429,6 +1429,16 @@ export const clienteEs = {
     familiaSuplemento: 'Suplementos',
     familiaDieta: 'Dieta de prescripción',
 
+    // S99-D · §8.6ter — EL VENDEDOR QUE NO LO TIENE: se muestra y SE DICE.
+    // El choque contra §4.4 está resuelto POR SUJETO en la letra: lo que no
+    // aparece en navegación es el producto que NADIE vende; éste tiene oferta
+    // viva y sin stock, y esconderlo «deja al dueño sin entender».
+    // 🔴 HABLA DEL PRESENTE Y NO PROMETE: §4.4 prohíbe «temporalmente» por
+    // ser una promesa incumplible, y no se ofrece un «avisame cuando llegue»
+    // que todavía no existe — un camino que no lleva a ningún lado es peor
+    // que no ofrecerlo (Ley 13).
+    filaSinStock: 'Ahora no está disponible.',
+
     // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
     // jamás esconde. El paso explícito gatea el agregar.
     filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',

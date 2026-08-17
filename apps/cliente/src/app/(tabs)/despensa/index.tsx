@@ -335,6 +335,24 @@ export default function DespensaDescubrir() {
             </Texto>
           </View>
         ) : null}
+        {/* §8.6ter — SE MUESTRA Y SE DICE. La fila sigue TOCABLE a propósito:
+            la familia entra a ver el producto igual, y apagar el toque sería
+            un callejón (Ley 13). Lo único que cambia es que la pantalla deja
+            de callar.
+            🔴 NEUTRO, NO `warning`, Y ES DECISIÓN: la alergia es riesgo para
+            la mascota y el agotado es un hecho del estante. Dos naranjas
+            seguidos aplanan la diferencia — y un aviso que aparece siempre
+            enseña a ignorar los avisos (la doctrina de los cinco avisos).
+            `apoyo` ya nace `secondary`, así que la distinción no cuesta un
+            token nuevo.
+            ⚠️ ORDEN REVERSIBLE Y DECLARADO: la alergia va PRIMERO porque es
+            de Thor y esto es del estante. Si la mesa lo prefiere al revés,
+            son dos líneas. */}
+        {!p.hay_stock ? (
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+            <Texto variante="apoyo">{t('despensa.filaSinStock')}</Texto>
+          </View>
+        ) : null}
       </View>
     );
   }

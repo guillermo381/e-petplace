@@ -11711,6 +11711,154 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-285 — DECLARAR CONTRA QUÉ MEDISTE TE SALVA DE LA GEOMETRÍA VIEJA; NO TE SALVA DE HABER MEDIDO LA VARIABLE EQUIVOCADA (S99 — el descarte de «a sangre», vencido POR PARTIDA DOBLE; depositada 16-ago-2026).**
+
+  **El caso.** Un freno descartó la barra a sangre con su medición declarada —*centro del primer tab a 39, el valle pidiendo 43*—. **Y estaba vencido por DOS motivos independientes:** ① la **geometría** cambió (el valle nuevo es más angosto) — *eso lo destapó la ley de S84, porque el freno había declarado sus números* · ② **medía la variable equivocada**. Literal de B: ***«si se midiera sobre el ancho total, ir a sangre habría empujado el primer centro hacia el borde y el clamp habría tirado MÁS fuerte, no menos»*** — el tab **se mide sobre el CONTENIDO, no sobre la barra**, y con la variable equivocada **el razonamiento se invierte**: la conclusión no era solo vieja, era **al revés**.
+
+  **⇒ Lo que agrega a la ley de S84** (*«todo freno declara contra qué midió»*): declarar la medición **hace re-abrible** el freno cuando el mundo cambia — es necesario y **cobró**. Pero **no protege del error de fondo**: un número correcto sobre la magnitud equivocada **se lee tan sólido como uno bueno**, y sobrevive a toda re-verificación que se limite a repetir la misma cuenta con datos nuevos.
+
+  **⚠️ SU CARA COMPLEMENTARIA, medida el mismo día y en la misma pieza: la magnitud equivocada también puede hacer parecer PEOR lo que está bien.** El costo declarado del tab del extremo —*«el hombro pasa a 0 px y la S ahí no se lee»*— se midió con el trozo equivocado. Literal de B: ***«lo que importaba no era cuánto SOBRA, era cuánto SE COME EL RADIO»***. Re-medido con la magnitud correcta: **hombro 0,0 → 1,8 px · ratio 1,39 → 1,26 · inflexión de 0 % a 25 % del ancho**, a un paso del reposo (35 %). **La pared del extremo pasó de ser casi toda esquina a ser casi toda curva.**
+
+  ⇒ **La variable equivocada no tiene sesgo: infla o desinfla según de qué lado caiga.** Un freno la usa para descartar de más; **una advertencia la usa para asustar de más** — y ésta iba a hacerle aceptar al founder un costo **que casi no existía**. *Las dos se curan igual: preguntando qué magnitud decide, no repitiendo la cuenta.*
+
+  **Regla operativa: al reabrir un freno no se re-corre su cuenta — se re-pregunta QUÉ magnitud decide.** *Si la variable era otra, actualizar los números confirma el descarte en vez de tumbarlo, y el freno se vuelve permanente con evidencia fresca.* **Es la forma más cara de un verde flojo: un NO que se auto-renueva.**
+
+- **L-284 — UN CAMBIO QUE DESTAPA UN DEFECTO LATENTE SE LLEVA LA CULPA DEL DEFECTO (S99 — el valle que mordía el disco; depositada 16-ago-2026).**
+
+  **El caso, con su literal (B):** el retraso del valle iba **12 px** detrás y el anillo medía 9 ⇒ **−2,78 px en viaje: la barra ENCIMA del disco.** La lectura fácil era *«bajar el anillo de 10 a 9 rompió el viaje»*. **Medido: con el anillo en 10 YA MORDÍA 2 px, y nadie lo había medido.** ***«No lo rompió bajar el anillo: lo destapó medirlo.»***
+
+  **⇒ Antes de atribuirle un defecto al cambio más reciente, se mide el estado ANTERIOR con el mismo instrumento.** Si el defecto ya estaba —aunque más chico— el cambio es el **revelador**, no la causa: culparlo manda a revertir lo correcto y **deja viva la causa**, que va a reaparecer más grande con el próximo ajuste.
+
+  **La cura correcta no fue elegir mejor el número: fue volver el defecto INEXPRESABLE** — el retraso ahora **se deriva de `ANILLO − 2`**, así que no existe combinación que muerda. *Un par que debe coincidir y sale de dos cuentas distintas es una bomba con temporizador; derivarlo la desarma.* **Familia de L-277 y L-222.**
+
+- **L-283 — CUANDO UN EFECTO NO APARECE DESPUÉS DE VARIOS INTENTOS DE CALIBRACIÓN, LA PREGUNTA DEJA DE SER *CUÁNTO* Y PASA A SER *SI LA ANATOMÍA PUEDE PRODUCIRLO* (S99 — ocho gates de la barra; depositada 16-ago-2026).**
+
+  **El caso, con su literal (B):** ***«UN PLANO Y UN ARCO NO PRODUCEN UN CAMBIO DE SIGNO: PRODUCEN UN CODO. Lo único fuera del plano era la joroba. Por eso no hay S: NO HABÍA DOS SIGNOS QUE ALTERNAR.»*** El hombro eran **50 px dead-flat seguidos de un arco de circunferencia** — y un arco tiene **curvatura de UN SOLO SIGNO**. ⇒ **la S era INCONSTRUIBLE con esa anatomía, hicieran lo que hicieran con los números.**
+
+  **Ocho gates persiguiendo un efecto que la forma no podía producir.** Cada ronda movió magnitudes —altura de la joroba, radio del valle, viaje— y **ninguna podía funcionar**, porque el defecto no estaba en los valores sino en la **familia de curvas elegida**.
+
+  **⇒ El disparo, para que se note antes del octavo intento: a la SEGUNDA o TERCERA calibración fallida se para de mover números y se pregunta si la forma ADMITE el efecto.** Un plano + un arco no puede dar inflexión; una interpolación monótona no puede dar overshoot; un color plano no puede dar profundidad. *Calibrar una anatomía incapaz produce rondas infinitas que siempre parecen «casi».*
+
+  **Y su gemela de método, que es la que lo hizo visible:** el efecto se volvió medible recién cuando **se midió la referencia en vez de describirla** — cuatro traducciones en prosa («saliente» · «joroba» · «montaña» · «cresta») mandaron a construir un bulto que **la referencia no tiene** (cero columnas sobre el plano, medido). **Tres números terminaron una discusión que cuatro descripciones no pudieron.**
+
+- **L-282 — EL COLOR DE UN TYPECHECK PUEDE VENIR DE UN ARCHIVO GENERADO SIN TRACKEAR: MISMO COMMIT, DOS ÁRBOLES, DOS COLORES (S99 — medido al publicar el último OTA; depositada 16-ago-2026).**
+
+  **Medido, no supuesto.** El typecheck de `apps/prestador` dio **ROJO en el repo primario y VERDE en los worktrees de C y D**, sobre **el mismo commit**. Seis errores, todos sobre `/ventas/tienda`, con la forma *«no assignable to … 313 more»*. **El archivo `src/app/ventas/tienda.tsx` EXISTE.**
+
+  **La causa: `apps/prestador/.expo/types/router.d.ts` — GENERADO y SIN TRACKEAR.** El primario tenía una copia **anterior a la reestructura** (0 menciones de la ruta); C y D tenían la suya **fresca** (3 menciones). **Copiando la fresca al primario, el mismo comando pasó a VERDE sin tocar una línea de fuente.**
+
+  **⇒ Por qué es peligrosa y no solo molesta:** el rojo **acusa al código correcto**. Una sesión que abra un worktree nuevo, corra el typecheck y lo crea, va a «curar» rutas que funcionan — y el modo de falla es el peor: *el instrumento está bien, el código está bien, y el veredicto es falso*. Es familia de los verdes flojos de S95, en su forma invertida: **un rojo por la razón equivocada está tan roto como un verde por la razón equivocada.**
+
+  **Regla operativa: ante un typecheck que solo falla en UN árbol, se compara el artefacto GENERADO antes de tocar fuente** — `.expo/types/router.d.ts`, tipos de Supabase, cualquier `.d.ts` no versionado. **Y el diagnóstico se cierra por CONTRASTE ENTRE ÁRBOLES**, que es la medición que lo distingue en un comando. *El objeto no decae; el artefacto derivado sí — y este ni siquiera vive en el repo.*
+
+- **L-281 — UNA LEY QUE REINCIDE EN EL MISMO LUGAR SEÑALA UN PATRÓN DE CONSTRUCCIÓN, NO UN DESCUIDO (S99 — tres cobros de L-277 en LA MISMA PIEZA; depositada 16-ago-2026).**
+
+  **Los tres, todos en `BarraTabs`:** ① `VALLE_HONDO` a mano al lado de un radio derivado · ② el valle de bézier libre contra el disco (**L-279**) · ③ **el acotado corría el disco y el ícono se quedaba en el centro de su pestaña, calculado por otro lado**. Literal de B en el tercero: ***«dos cosas que tienen que coincidir salían de dos cuentas distintas — el mismo modo de falla que ya me costó el ícono descentrado hace tres gates».***
+
+  **⇒ Cuando la misma ley se cobra tres veces en la misma pieza, el problema dejó de ser la aplicación de la ley: es que la pieza tiene MUCHAS relaciones que se están expresando como VALORES PARALELOS en vez de como derivaciones.** *Cada cobro individual parece un descuido; los tres juntos son un diagnóstico de construcción.*
+
+  **⚠️ CUARTO COBRO, EN LA MISMA PIEZA Y EN LA MISMA SESIÓN EN QUE SE DEPOSITÓ ESTA LEY:** el **retraso del valle contra el anillo** — dos números que debían coincidir, salidos de dos cuentas distintas, mordiendo el disco 2,78 px (L-284). **La ley se escribió, el censo que ella misma ordena NO se corrió, y el cuarto llegó en la ronda siguiente.** *No falló el diagnóstico: faltó ejecutar lo que el diagnóstico mandaba.* **Curado como corresponde: DERIVANDO (`retraso = ANILLO − 2`), no eligiendo mejor el número.**
+
+  **Regla operativa: al tercer cobro de la misma ley en la misma pieza, se censa la pieza entera buscando pares que deban coincidir** — en vez de curar el tercero y esperar al cuarto.
+
+- **L-280 — TRADUCIR UN PEDIDO DE COMPORTAMIENTO A UNA PROPIEDAD ESTÁTICA MANDA A TODOS A MEDIR EL CUADRO EQUIVOCADO (S99 — cuatro gates de la barra; el error es de la MESA; depositada 16-ago-2026).**
+
+  **El caso, y es el más caro de la sesión en tiempo:** el founder pidió cuatro veces *«los bordes… con una saliente hacia afuera»*, *«la S mucho más pronunciada»*. **La mesa lo tradujo a una FORMA FIJA — «una joroba»— y todo lo que vino después fue impecable y apuntó al lugar equivocado.**
+
+  **Su literal, que recién en el cuarto gate desarmó todo:** ***«no era el círculo en sí mismo, es el efecto que genera EL MOVIMIENTO»*** · *«el círculo CAE en la barra… los bordes se deforman hacia el lado contrario, como si fuera una montaña»*.
+
+  **🔴 LO QUE RECONCILIA TODAS LAS MEDICIONES SIN QUE NINGUNA ESTUVIERA MAL:**
+  · **B midió el video EN REPOSO** y encontró **cero columnas** sobre la línea plana. **Correcto.**
+  · **A midió la joroba en 2,22 px** y entregó la palanca para agrandarla. **Aritmética correcta.**
+  · **El founder ve montañas.** **También correcto — EN MOVIMIENTO.**
+  ⇒ ***nadie se equivocó: se midió el cuadro equivocado, y ese pedido salió de la mesa.***
+
+  **⇒ LA LEY: cuando alguien describe un EFECTO, la pregunta previa a medir es «¿esto vive en un cuadro o en una secuencia?»** — y si vive en una secuencia, **medir el reposo devuelve un cero que parece una respuesta.** *Un fenómeno dinámico traducido a propiedad estática no da error: da un número correcto sobre otra cosa, y todo el trabajo que se apoye en él hereda el desvío.*
+
+  **Y la pista que estaba escrita y nadie leyó: la propia letra de B ya decía «la saliente ESCALA CON EL ESTIRÓN».** *Estaba en el camino correcto y la mesa la mandó a hacerla fija.* **La corrección estaba en el código antes que en la conversación.**
+
+- **L-279 — UNA CURVA LIBRE NO PUEDE GARANTIZAR UNA SEPARACIÓN; UNA CONCÉNTRICA SÍ, POR CONSTRUCCIÓN (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **🔴 EL HALLAZGO, y es lo que la hace valiosa: LA COMPARACIÓN CAZÓ UN DEFECTO QUE NINGÚN NÚMERO MOSTRABA.** Con el valle dibujado como una **U de bézier**, el valle era **más angosto que el disco a la altura de su ecuador** ⇒ **NO HABÍA ANILLO: el disco quedaba apoyado encima del blanco.** **Todos los números daban bien.**
+
+  **⇒ Es L-277 en la FORMA en vez de en el número** (*si un valor guarda relación con otro, se deriva*): una curva libre pasa **cerca** de donde uno quiere y **la separación queda a merced de la forma**; **una concéntrica tiene la separación en su definición.**
+
+  **Y la lección de verificación que va con ella:** *un conjunto de números correctos no prueba una forma.* **La única medición que lo vio fue superponer contra la referencia** — por eso la vara de una pieza visual es **la comparación**, y los números son su apoyo, no su reemplazo.
+
+  **📌 Y su nota de instrumento, que es la mitad que suele faltar:** el primer rasterizador de B **pintaba un rectángulo que borraba el valle y no aplicaba el clamp**. Literal: *«el defecto era del instrumento y lo curé antes de concluir nada sobre la pieza»*. **Sin ese paso, la conclusión habría sido sobre el instrumento y habría viajado como hallazgo de la pieza.**
+
+- **L-278 — UNA PROPORCIÓN COPIADA DE UNA REFERENCIA CON OTRA ESCALA NO CONSERVA LO QUE LA HACÍA FUNCIONAR (S99 — lo desarmó el founder; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** B planteó una disyuntiva —**texto O anillo**— porque copiaba la **proporción** de la referencia (`anillo/radio` = 0,46). **El founder la desarmó de una:** el anillo de la referencia es grande **porque su disco es chico** — sobre un radio chico, 0,46 son pocos píxeles. **Nosotros no necesitamos la proporción: necesitamos que el hueco SE VEA**, y un anillo de 9 sobre nuestro disco grande **ya es más ancho en píxeles reales** que el de la referencia.
+
+  **⇒ SE COPIA EL EFECTO, NO EL COCIENTE.** *Una proporción es una relación entre DOS números de esa referencia; trasplantarla a otra escala conserva la aritmética y pierde el hecho perceptual, que es lo único que se estaba tratando de copiar.*
+
+  **Y su forma general, porque va a volver:** toda constante tomada de un ejemplo ajeno **se traduce al efecto que produce allá y se re-deriva acá** — *la disyuntiva que parecía del diseño era un artefacto de haber importado el número equivocado.*
+
+  **📌 FORMA OPERATIVA (B, verificando en ABSOLUTOS como se le pidió — y la trampa estaba DOS veces):**
+  · **el anillo de la referencia mide 9,8 px A NUESTRA ESCALA; el nuestro medía 9** ⇒ estaba **0,8 corto, no 7**. *La proporción copiada (0,46 × 34 = 16) pedía **1,6 veces el anillo real de la referencia**.*
+  · **y copiar «hondo/alto = 0,76» era igual de falso.** Su literal cierra la ley: ***lo que hace que la barra se lea entera no es que sobre una FRACCIÓN: es CUÁNTA BARRA QUEDA.*** ⇒ nace `BAJO_VALLE` **derivado de los píxeles reales de la referencia, no de un cociente**.
+  ⇒ **la traducción a absolutos no es una comprobación opcional: es la que dice si el número importado es 0,8 o 7.**
+
+  **🔴 Y SU GEMELA, MEDIDA POR B EN LA MISMA PASADA — LA REFERENCIA NO TIENE JOROBA:** cero columnas por encima de la línea plana. **Lo que hay es un DESPEGUE TANGENCIAL** — el borde baja un píxel a lo largo de seis y **recién después** se lanza al valle. *«Saliente hacia afuera» era eso, no un montículo.*
+  **⚠️ Y esto retira una palanca que A había servido con su aritmética correcta:** A midió que la joroba mide **2,22 px** y entregó la fórmula para agrandarla (`control = H·9/4`). **El número estaba bien y el OBJETIVO estaba mal** — *era perseguir con precisión algo que la referencia no tiene.* **La joroba se retira.**
+  ⇒ **la aritmética correcta sobre el objetivo equivocado es indistinguible de un hallazgo, y por eso la vara es la referencia MEDIDA, no la descripción de la referencia.**
+
+- **L-277 — UN VALOR ELEGIDO A MANO AL LADO DE UNO DERIVADO COINCIDE POR CASUALIDAD HASTA QUE NO (S99 — el caso es de B, en la cura de la barra; depositada por orden de mesa, 16-ago-2026).**
+
+  **🔴 EL NÚMERO QUE EXPLICÓ TRES QUEJAS DE UNA:** el hueco era **un círculo de diámetro 78 perforando una barra de 76 de alto**. Dejaba **13 px de barra debajo** ⇒ **el 83 % del alto DESAPARECÍA** en el tab activo. Literal de B, y es ley: ***«un hueco más grande que la barra no es un anillo: es una MORDIDA.»***
+
+  **Y de ahí salían las tres quejas del founder, que eran la misma:** no había barra que hundir ⇒ **los hombros no tenían de dónde salir** · el contacto era un arco corto **porque el resto ya era vacío** · y el valle nunca llegaba a los extremos. *Por eso subir el contraste no arreglaba nada: **era pintar mejor una forma que no estaba pasando.***
+
+  **☠️ Y LA MUERTE DE `VALLE_HONDO` ES LA LECCIÓN:** era **un fondo elegido a mano** al lado de un radio que ahora se **DERIVA** (`DISCO_RADIO + ANILLO`). Literal de B: *«un fondo elegido a mano podía quedar más arriba o más abajo que el disco y romper la uniformidad — eso era, literalmente, «el hueco está muy pequeñito»».*
+
+  **⇒ Es la familia de las dos verdades que coinciden hoy y divergen mañana** (L-268 · L-274), **ahora en GEOMETRÍA — y acá es peor de ver: no divergen en el tiempo, divergen A LO LARGO DE LA FORMA.** *La separación era correcta en un punto y equivocada en el resto, así que **dependía de dónde mirabas** — y quien mirara el punto bueno concluía que estaba bien.*
+
+  **Regla: si un valor tiene que guardar relación con otro, se DERIVA. Un número a mano que hoy coincide es una divergencia con fecha abierta.** Los números lo prueban: anillo **5 en un punto → 8 uniforme** · barra bajo el disco **13 → 21** · recorrido del valle **100 → 156**.
+
+- **L-276 — UN AGREGADO SOBRE OBJETOS DISTINTOS NO MIDE NINGUNO (S99 — el instrumento es de D y se equivocó DOS veces por la misma causa; depositada por orden de mesa, 16-ago-2026).**
+
+  **Los dos cobros, en orden:**
+  1. El instrumento tomaba **el mínimo de TODOS los `div` con opacidad**. Hay un **velo permanente en 0.04** ⇒ **nunca veía el 1 y la aserción NO PODÍA DISPARAR**: *verde por medir otro objeto.*
+  2. Corregido eso, seguía tomando **el mínimo entre los DOS contenedores vivos** ⇒ el «1 → 0» era **la mezcla de dos elementos**: *el comportamiento CORRECTO leído como defecto.*
+
+  **⇒ Un mínimo, un máximo o un promedio que cruza elementos produce un número que EXISTE y no describe NINGUNO** — y lo peor es su simetría: **puede dar verde por lo bajo o rojo por lo alto, las dos sin relación con el hecho.** *No es que el número sea impreciso: es que no es de nadie.*
+
+  **Regla: se mide POR ELEMENTO, o no se mide.**
+
+  **Hermana de L-253 (dos pantallas en el mismo DOM) y le agrega lo suyo:** allá el instrumento **no separaba** dos pantallas; **acá agrega A PROPÓSITO, y el agregado BORRA la distinción.** *El primero es un descuido; el segundo es una decisión de diseño del instrumento que se ve prolija.*
+
+- **L-275 — EL SISTEMA DE ARCHIVOS DE DESARROLLO NO ES EL DEL SERVIDOR DE BUILD (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** `Chevron.tsx` y `chevron.ts` difieren **solo en la mayúscula inicial** ⇒ en macOS **son el mismo archivo**. Literal de B: ***«en un sistema sensible habrían sido dos, y el defecto viajaba SIN SÍNTOMA.»*** Y cobró dos veces: **al limpiar, un `remove` se llevó el archivo recién escrito.**
+
+  **Por qué es CLASE y no anécdota:** el árbol de desarrollo (macOS, **insensible por defecto** — verificado el 16-ago creando `Caso.txt` y leyendo `caso.txt`) **no es el del servidor de build ni el de CI** (Linux, sensible). ⇒ **un choque de mayúsculas es INVISIBLE acá y REAL allá**, y su modo de falla es el peor: *acá funciona, allá no compila o —peor— importa el archivo equivocado.* **Y git SÍ distingue**, así que el repo puede llevar los dos y tu disco mostrarte uno.
+
+  **La cura de B, y es mejor que la obvia:** los dos quedaron **juntos** en vez de separados — *«la regla se cumple desde adentro»*. **Separarlos habría dejado la trampa armada para el próximo.**
+
+  **EL INSTRUMENTO, para que esto se mida en vez de recordarse** (una línea, corre en cualquier repo y se apoya en que **git es sensible aunque el disco no lo sea**):
+  ```
+  git ls-files | awk '{print tolower($0)"\t"$0}' | sort | \
+    awk -F'\t' '{if($1==p){print prev; print $2} p=$1; prev=$2}' | sort -u
+  ```
+  **Medido al depositar: CERO colisiones vivas** en el repo — o sea que esto nace **preventivo, no como deuda.** *Candidato a brazo de `verify:diseno` (dueño B): es más barato que la primera vez que rompa un build.*
+
+- **L-274 — UNA ETIQUETA NOMBRA SU NÚMERO, NO LA PANTALLA DONDE VIVE (S99 — hallazgo de C al renombrar; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** el cupo decía *«Venta de productos · 3 de 10 entregas hoy»* **tomando prestado el título de la pantalla**. Con el rename habría dicho *«Tu tienda · 3 de 10»* — una etiqueta que nombra el continente y no el contenido. Su literal: ***«el préstamo se veía razonable mientras los dos textos COINCIDÍAN POR CASUALIDAD»***. ⇒ nace su clave propia.
+
+  **Es la familia de las dos verdades que coinciden hoy y divergen mañana** —la misma que obligó a que el total del conteo aplique los filtros de la lista (L-268)— **pero acá el acoplamiento no era entre dos cálculos: era entre dos TEXTOS.** *Y por eso es más difícil de ver: dos números que divergen se notan; dos frases que dejan de significar lo mismo siguen leyéndose bien.*
+
+  **⇒ Regla: una etiqueta se escribe desde lo que MIDE.** Reusar el título de la pantalla ahorra una clave y **acopla el significado de un dato a la navegación**, que es lo que más se mueve.
+
+- **L-273 — UN NOMBRE CORRECTO PUEDE VOLVERSE FALSO SIN QUE NADIE LO EDITE (S99 — hallazgo de C; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** *«Venta de productos»* era **el nombre FIRMADO de la naturaleza**, y por eso estaba en el techo. Después **la venta de mostrador se mudó a ATENDER**, y la pantalla quedó llamándose **como algo que ya no pasa en ella**. **Nadie lo escribió mal: lo movió otra decisión.**
+
+  **Es prima de L-245 (la ley del comentario) y de L-264 (la premisa que caduca), pero en el EJE DEL NOMBRE — y la diferencia importa:** aquéllas envejecen porque **el mundo** cambia; **ésta envejece porque una decisión NUESTRA le sacó el referente.** *El cartel sigue perfecto; lo que se movió es el lugar al que apunta.*
+
+  **⇒ COROLARIO EXIGIBLE: toda mudanza de una CAPACIDAD revisa qué NOMBRES la citaban.** *El destino se mueve, y los carteles que apuntaban a él se quedan* — y como cada uno es correcto por separado, **ningún guard los ve**: solo los ve quien recuerda la mudanza, que es exactamente lo que nadie recuerda dos sesiones después.
+
 - **L-272 — UN FIXTURE QUE ENTRA POR LA PUERTA PRUEBA DOS COSAS: LA SUYA Y LA DE LA PUERTA (S99 — lectura de D; cuatro cobros propios de A la confirman; depositada por orden de mesa, 16-ago-2026).**
 
   **LAS CUATRO CORRECCIONES QUE EL MOTOR LE HIZO A LA SIEMBRA, entre dos actos y sin que ninguna se esquivara:**
@@ -12003,6 +12151,14 @@ defecto que se curó hoy en el cambio de clave.
   **La distinción:** el censo decide el **CONTENIDO**; la ley decide la **FORMA** — y la forma se escribe sin esperar. **El caso:** B tenía tres recetas «bloqueadas por cardinalidad» y solo UNA lo estaba de verdad — la navegación N20, donde seis especies y cuatro necesidades **no se componen como doce y quince**: ahí la cardinalidad SÍ es la forma. Las otras dos (completitud, grilla) tenían su anatomía escribible desde el primer día; esperaban un número que solo iba a llenar celdas.
 
   **COROLARIO EXIGIBLE: antes de declarar una pieza «bloqueada por el censo», nombrar QUÉ número la bloquea y POR QUÉ ese número cambia la forma y no solo el contenido.** Si no se puede nombrar, no está bloqueada — la próxima pista no se frena sola.
+
+- **L-245bis — Y UNA NOTA PUEDE MENTIR SOBRE EL *PORQUÉ* SIN MENTIR SOBRE EL *QUÉ* (S99 — segunda aplicación de L-245 en la misma pieza, sin que nadie la pidiera; depositada 16-ago-2026).**
+
+  **El caso:** `RADIO_BARRA` decía *«`radius.xl` es el escalón que la casa usa para superficies grandes APOYADAS»*. **La nota describía bien el valor y su escala** — lo que había caducado era **su razón**: la barra dejó de estar apoyada el día que fue a sangre. Literal de B: ***«con el cuerpo tocando los cuatro bordes, el radio de arriba ya no describe una superficie flotante: es el remate del filo.»***
+
+  **⇒ Por qué es más difícil de cazar que el caso original de L-245:** aquella era una ley que **no se cumplía** —verificable por grep, 39 usos vivos contra el texto—. **Ésta se cumple: el valor ES `radius.xl` y `radius.xl` ES el escalón de superficies apoyadas.** Todo cierra. **Lo único falso es la premisa de que esto sigue siendo una superficie apoyada** — y eso **ningún lint lo ve**, porque no es una inconsistencia interna: es una descripción que **el mundo dejó atrás**.
+
+  **Regla operativa: cuando una pieza cambia de NATURALEZA —de flotante a a-sangre, de opcional a obligatoria, de una a N— se releen los comentarios que justifican sus constantes, no solo los que las nombran.** *La justificación es la parte que envejece sin dar síntoma.* **Familia de L-166 y L-193.**
 
 - **L-245 — UNA LEY ESCRITA EN UN COMENTARIO NO RIGE NADA (S99 — el caso es de B; depositada por orden de mesa, 17-ago-2026).**
 
@@ -17600,6 +17756,71 @@ decir la verdad del modelo.**
 **Y la frontera que NO se cruza (declarada por D):** la vitrina dice **QUÉ HAY AHORA**; el carrito dice **QUÉ PASÓ CON LO QUE ELEGISTE**. Leen la misma señal y **ninguna reemplaza a la otra, ni a la voz del último minuto** (D-827).
 
 ☠️ **Muere** cuando la vitrina distinga comprable de agotado con voz propia, y el agotado siga siendo alcanzable.
+
+#### D-843 — 🔴 LAS DOS CARAS DEL ESPEJO PAGINAN DISTINTO — ROMPE N17 POR LA PUERTA DE ATRÁS (hallazgo de C, S99; dueño: A + superficie; **umbral: ~600 productos**)
+
+**El hecho:** la cara VENDEDOR pagina **por cursor** (total, siguiente, y no
+pierde ni repite). La cara CLIENTE usa **techo + ventana** (`limite ?? 100`).
+**Hoy no se nota porque el catálogo entra.**
+
+**🔴 EL DÍA QUE EL CATÁLOGO PASE DE ~600, LA CARA CLIENTE TRUNCA Y LA OTRA
+NO** ⇒ **cambiar de modo cambiaría QUÉ se ve**, que es exactamente lo que N17
+prohíbe. *Y entra por la puerta de atrás: nadie va a tocar el espejo ese día —
+lo va a romper el crecimiento del catálogo.*
+
+**Por qué NO se cura hoy:** la cara cliente ya **dice** su corte
+(`contarProductosDespensa` lo volvió exacto), así que **no miente** — L-268
+está cumplida. *Lo que falta no es honestidad: es SIMETRÍA.*
+
+**La cura, cuando dispare:** la vitrina adopta el mismo cursor. La vista
+aplanada (`v_vitrina_publicada`) ya existe y ya ordena igual, **así que es el
+mismo patrón, no un diseño nuevo.**
+
+☠️ **Muere** cuando las dos caras recorran el catálogo con el mismo mecanismo.
+**Disparo medible: `contarProductosDespensa()` ≥ 600.**
+
+#### D-842 — 🔴 LA TRANSICIÓN DEL DUAL SALTA: NO FALTA UNA TRANSICIÓN, SOBRA UN SALTO (S99 — investigación de D, CAUSA LOCALIZADA y NO cerrada; va a la sesión de PULIDO con todo adentro)
+
+**No es un pendiente suelto: es una investigación con estado.** Se deposita
+así **porque lo caro del próximo intento no es el arreglo — es re-descubrir
+lo que ya se descartó.**
+
+**LA CAUSA, MEDIDA POR ELEMENTO (no agregada — ver L-276):** el que se va
+**queda quieto en 1.00**; el que entra marca **1.00 · 1.00 · 0.00** y desde
+ahí rampa. ⇒ **se pinta el ESTADO FINAL durante dos frames y recién entonces
+salta al inicio.** **El navegador PINTA ANTES DEL FLANCO.**
+
+**HIPÓTESIS DESCARTADAS CON MEDICIÓN — no se repiten:**
+- el worktree **enganchado** (`pwd -P` da el primario, pero hoy está
+  exactamente en `origin/main`, y Metro reiniciado con `--clear`)
+- **la pieza no anima** — sí anima, ~250 ms
+- **el gesto no llega** — llega; si no, no habría animación
+
+**LAS CUATRO CURAS DESCARTADAS, con su razón (esto es lo que más ahorra):**
+| cura | por qué no |
+|---|---|
+| `useLayoutEffect` | el frame se pinta con `activo` todavía en `false` |
+| foco síncrono | **mata la animación entera** — `isFocused()` no reporta foco por pantalla acá (medido **dos** veces) |
+| opacidad inicial con *peek* | **el valor inicial no se re-evalúa** |
+| apagado en el toque | — |
+
+**🔴 LA CONTRADICCIÓN QUE ES POR DÓNDE SEGUIR — servida como HIPÓTESIS, no
+como hallazgo:** el contenedor que entra aparece en el DOM **~38 ms después
+del toque**, o sea que **se monta CON la navegación** — *y si es así, la
+tercera cura debería haber funcionado.* D sospecha de un **doble montaje en
+dev consumiendo el cruce antes de tiempo**, y **lo declara sin verificar.**
+
+**POR QUÉ VA A PULIDO Y NO SE FUERZA ACÁ:** **el día cruza y conserva la
+fecha** ⇒ es **defecto de FORMA, no de función**. Y el objetivo ya está
+definido en **una corrida del guard con sus tres salidas** (salto · animó
+limpio · no animó), *que es exactamente lo que abarata el próximo intento.*
+
+⚠️ **Y su antecedente NO se pierde: es una REGRESIÓN reportada DOS veces por
+el founder** — funcionaba y dejó de funcionar (L-269). *Que vaya a pulido es
+una decisión de secuencia, no una degradación de su gravedad.*
+
+☠️ **Muere** cuando el guard de las tres salidas dé «animó limpio» en el
+aparato del founder.
 
 #### D-841 — 🟢 `expira_en` DE UNA RESERVA PAGADA ES UNA FECHA QUE YA NO SIGNIFICA NADA (S99-A, hallazgo de la tanda del inventario)
 

@@ -1237,6 +1237,10 @@ export interface SkuDelVendedor {
    *  ⟺ el equipo todavía no cargó la referencia** ⇒ fail-closed: todo cambio
    *  va a aprobación. **Y la superficie LO DICE** — *es la trampa exacta de
    *  `AvisoAlergia`: el silencio se lee como permiso.* */
+  /** Las especies del producto. **Sin esto el filtro por especie de
+   *  «Administrar» no se puede DIBUJAR** —la pantalla no sabe qué chips
+   *  ofrecer— aunque el servidor ya sepa filtrar por él (pedido de C, S99). */
+  especies_aplicables: string[];
   precio_referencia: number | null;
   banda_min: number | null;
   banda_max: number | null;
@@ -1456,6 +1460,9 @@ export async function listarSkusDelVendedorPagina(
         ? f.momentos_aplicables.filter((m): m is string => typeof m === 'string')
         : [],
       foto_portada: fotosDeProducto(f).portada,
+      especies_aplicables: Array.isArray(f.especies_aplicables)
+        ? f.especies_aplicables.filter((e): e is string => typeof e === 'string')
+        : [],
       precio_referencia: typeof f.precio_referencia === 'number' ? f.precio_referencia : null,
       precio_propuesto: typeof f.precio_propuesto === 'number' ? f.precio_propuesto : null,
       // FAIL-CLOSED (L-247): sin `true` explícito, NO hay nada pendiente —

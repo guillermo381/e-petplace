@@ -53,11 +53,13 @@ import { View } from 'react-native';
 import {
   FilaDato,
   EstadoVacio,
+  Icono,
   TarjetaPedido,
   Texto,
   opacity,
   spacing,
   type DesvioEscalera,
+  type IconoNombre,
   type PasoEscalera,
 } from '@epetplace/ui';
 import {
@@ -70,90 +72,40 @@ import type { ExtraPanelPedido, PedidoDelVendedor } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { derivarEscalera, type ClaveEscalon } from '@/lib/escalera-pedido';
+/* 🔴 EL ORDEN VIVE APARTE (S99-D) para poder probarse SIN abrir una
+   pantalla: el defecto que lo movió —empates sin desempate— se demuestra
+   con dos objetos y un comparador. Es mudanza, no rediseño. */
+import { ordenDeTrabajo } from '@/lib/orden-pedidos';
 import { fechaLocalISO, horaCorta, hoyLocalISO } from '@/lib/ventas-formato';
 
 /**
- * ☠️ S99-D · `prioridad()` MURIÓ COMO ORDEN — y su razón queda tachada, no
- * borrada, porque no era mala: ordenaba por **estado**, o sea por «qué me
- * falta hacer con éste». La firma del founder en el Gate 1 pide otra cosa —
- * **FIFO por hora de confirmación del pago** — y las dos son legítimas:
- * *«¿qué toco ahora?»* no es *«¿de quién es el turno?»*. Gana la segunda
- * porque es la que el cliente puede reclamar.
+ * EL GLIFO DE CADA NODO — S99-D sobre los cuatro que entregó B.
  *
- * ── LAS CUATRO BANDAS (ratificación de mesa a C, 17-ago) ───────────────
- *  ① **sin compromiso PRESIDE** — no entra a este comparador: la ventana lo
- *    resuelve un escalón afuera, en su propia sección (`huerfanos`).
- *  ② **«se rompió» SEGUNDA**, con su razón: *lo urgente está por fallar,
- *    esto YA falló, y hay alguien que perdió su tarde esperando.*
- *  ③ **urgente** — 🔴 **HOY NO TIENE PRODUCTOR Y SE DECLARA:** el exprés no
- *    existe en el esquema (censo L5b ⑥, fuera del camino crítico por firma).
- *    La banda **no se inventa con un proxy**: queda escrita, vacía, y el día
- *    que el dato exista entra por un solo lugar. *Una banda que nadie puede
- *    llenar no se dibuja — y «banda vacía no se monta» ya es la regla.*
- *  ④ **los días** — el FIFO.
+ * 🔴 **MAPEADO POR LO QUE EL GLIFO DIBUJA, JAMÁS POR SU NOMBRE.** Los nombres
+ * de B describen la narrativa de la FAMILIA (confirmado · preparando · en
+ * camino · entregado) y mis escalones son los del VENDEDOR; leerlos por el
+ * nombre habría cruzado dos vocabularios. Lo que dibujan —medido en su
+ * fuente— es **bolsa · caja abierta · flecha · visto**, y eso sí cae exacto
+ * sobre el trabajo del local: *junté → empaqué → salió → llegó.*
  *
- * 🔴 **LA SEÑAL DE «SE ROMPIÓ» ES LA MISMA QUE PINTA EL DESVÍO**
- * (`derivarEscalera(...).desvio === 'noLlego'`), y eso es deliberado: si la
- * banda mirara un campo y la insignia otro, **podrían discrepar** y la
- * ventana diría con la posición algo distinto de lo que dice con la
- * etiqueta. *Una sola lectura para el lugar y para el nombre.*
- *
- * ⚠️ **LA PROMESA ES TECHO, JAMÁS CLAVE DE ORDEN.** Si ordenara, esta
- * ventana estaría dibujando **la RUTA** — y la ruta es la otra cola: *FIFO
- * ordena el trabajo del LOCAL, la ruta ordena la SALIDA; el corte es el
- * despacho.* Por eso `promesa_desde` desapareció del comparador.
+ * ⚠️ **`facturado` VA SIN GLIFO, Y ES DECISIÓN:** en el camino de RETIRO el
+ * tercer escalón no es movimiento, así que **la flecha ahí MENTIRÍA** —
+ * diría «va en camino» sobre un pedido que está esperando en el mostrador. Y
+ * no se reusa `fiscal` del registry: recibe `huella`, o sea que está dibujado
+ * para 21 px, y **a 12 px la huella es ruido** (Ley 9) — justo el caso que la
+ * nota de B sobre «masa y no trazo» existe para evitar.
+ * *Un glifo que susurra o que miente es peor que un nodo sin glifo* — y por
+ * eso el slot nació opcional: la escalera funciona entera sin él.
+ * ⇒ **pedido a B: un `nodoFacturado` en masa, a 12 px.** Hasta entonces, el
+ * nodo se dibuja igual y solo le falta su ícono.
  */
-type Banda = 0 | 1 | 2;
-
-function banda(desvio: 'noLlego' | 'cancelado' | null | undefined): Banda {
-  if (desvio === 'noLlego') return 0;
-  /* ③ urgente iría acá (return 1) el día que el exprés exista. */
-  return 2;
-}
-
-/**
- * El comparador del trabajo del local.
- *
- * ⚠️ **`?? null` en las dos marcas por L-247:** el lector ya las tipa, pero
- * *toda garantía que solo vive en el productor es una convención* — y con un
- * bundle viejo un `undefined` acá no rompería: **ordenaría mal en silencio**,
- * que es peor.
- *
- * 🔴 **SIN `pago_confirmado_en` NO SE ORDENA POR PROXY.** El que no tiene
- * pago confirmado **no está en la cola** (firma del founder) ⇒ va al final de
- * su banda. *Caer a `created_at` habría dado un orden creíble y falso: el
- * vendedor lo lee como justicia y prepara en el orden equivocado.*
- */
-function ordenDeTrabajo(
-  a: PedidoDelVendedor,
-  b: PedidoDelVendedor,
-  extras: Record<string, ExtraPanelPedido>,
-): number {
-  const esc = (p: PedidoDelVendedor) => {
-    const e = extras[p.pedido_id];
-    return e ? derivarEscalera(e.estado, e.metodo_entrega) : null;
-  };
-  const ba = banda(esc(a)?.desvio);
-  const bb = banda(esc(b)?.desvio);
-  if (ba !== bb) return ba - bb;
-
-  /* EL REORDEN DEL VENDEDOR MANDA DENTRO DE SU BANDA — y no cruza bandas:
-     ordena, jamás re-promete. Entre varios movidos, el más reciente arriba
-     (marca DESC), que es lo que la migración de A definió. */
-  const ma = a.movido_al_frente_en ?? null;
-  const mb = b.movido_al_frente_en ?? null;
-  if (ma !== null && mb !== null) return ma < mb ? 1 : -1;
-  if (ma !== null) return -1;
-  if (mb !== null) return 1;
-
-  /* EL FIFO. Sin pago confirmado, al final: no está en la cola. */
-  const pa = a.pago_confirmado_en ?? null;
-  const pb = b.pago_confirmado_en ?? null;
-  if (pa === null && pb === null) return 0;
-  if (pa === null) return 1;
-  if (pb === null) return -1;
-  return pa < pb ? -1 : 1;
-}
+const GLIFO_NODO: Partial<Record<ClaveEscalon, IconoNombre>> = {
+  preparado: 'nodoConfirmado', // la bolsa — la mercadería juntada
+  empacado: 'nodoPreparando', // la caja abierta — se está armando
+  despachado: 'nodoEnCamino', // la flecha — el movimiento
+  entregado: 'nodoEntregado', // el visto — se completó
+  retirado: 'nodoEntregado', // el visto: retirar también completa
+};
 
 interface Comun {
   extras: Record<string, ExtraPanelPedido>;
@@ -243,11 +195,22 @@ export function VentanaPedidos({
       const pasos: PasoEscalera[] =
         dimmed || escalera === null
           ? []
-          : escalera.pasos.map((paso) => ({
-              clave: paso.clave,
-              etiqueta: vozEscalon[paso.clave],
-              estado: paso.estado,
-            }));
+          : escalera.pasos.map((paso) => {
+              const glifo = GLIFO_NODO[paso.clave];
+              return {
+                clave: paso.clave,
+                etiqueta: vozEscalon[paso.clave],
+                estado: paso.estado,
+                /* El slot es OPCIONAL por diseño de B y acá se usa como tal:
+                   `facturado` viaja sin glifo (ver `GLIFO_NODO`). */
+                icono:
+                  glifo === undefined
+                    ? undefined
+                    : ({ color }: { color: string }) => (
+                        <Icono nombre={glifo} tamano={12} registro="tinta" tinta={color} />
+                      ),
+              };
+            });
 
       const desvio: DesvioEscalera | undefined =
         escalera?.desvio === 'noLlego'
@@ -312,7 +275,7 @@ export function VentanaPedidos({
       {cupo !== null &&
         (cupo.capacidad > 0 ? (
           <FilaDato
-            etiqueta={t('ventas.hoy.titulo')}
+            etiqueta={t('ventas.hoy.cupoEtiqueta')}
             valor={t('ventas.hoy.cupo', { consumido: cupo.consumido, capacidad: cupo.capacidad })}
             mono
           />

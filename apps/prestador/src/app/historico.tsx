@@ -378,7 +378,19 @@ export default function Historico() {
     // criterio que las citas, y el opuesto al del panel del presente, que
     // ordena por lo que falta hacer. *Dos superficies, dos verdades sobre
     // el mismo objeto, y las dos correctas.*
-    return [...r.data.delRango].sort((x, y) => (y.dia ?? '').localeCompare(x.dia ?? ''));
+    /* 🔴 EL DESEMPATE, hermano del de la ventana (S99-D): ordenar SOLO por
+       `dia` deja los empates —que son la norma, no la excepción— al orden en
+       que llegaron las filas, y el lector por rango **ordena en el servidor
+       por dos claves que tampoco son únicas** (`entrega_fecha_objetivo`,
+       `promesa_entrega_desde`) ⇒ dentro de un día el orden lo decidía Postgres
+       sin garantía, y podía cambiar entre dos aperturas.
+       Se cierra con `numero_orden`, que es único y **la misma clave que usa el
+       panel**: una sola regla en la casa, no dos que se contradicen. */
+    return [...r.data.delRango].sort((x, y) => {
+      const d = (y.dia ?? '').localeCompare(x.dia ?? '');
+      if (d !== 0) return d;
+      return x.numero_orden < y.numero_orden ? -1 : x.numero_orden > y.numero_orden ? 1 : 0;
+    });
   }, []);
 
   const consultar = useCallback(

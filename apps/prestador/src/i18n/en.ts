@@ -2456,9 +2456,7 @@ export const prestadorEn = {
     aceptar: 'Accept and continue',
   },
   espejo: {
-    administrar: 'Manage',
     verComoCliente: 'View as customer',
-    etiquetaGrupo: 'How you are viewing your storefront',
   },
   ventas: {
     entradaTitulo: 'Product sales',
@@ -2528,9 +2526,10 @@ export const prestadorEn = {
       razon_sin_foto: 'We still need its photo.',
     },
     tienda: {
-      titulo: 'Your store',
-      vitrinaTitulo: 'Your shelf',
+      titulo: 'Your shop and your stock',
       localTitulo: 'Your shop',
+      stockTitulo: 'Your stock',
+      seccionGrupo: 'Which part of your store you see',
     },
     vitrina: {
       vistaLista: 'List',
@@ -2577,8 +2576,9 @@ export const prestadorEn = {
     },
     hoy: {
       vitrinaDetalle: 'What families see',
-      titulo: 'Product sales',
+      titulo: 'Your store',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
+      cupoEtiqueta: "Today's deliveries",
       cupoCero: 'No delivery capacity confirmed for today',
       entregas: 'My deliveries today',
       entregasDetalle: 'What you deliver yourself',
@@ -2654,6 +2654,7 @@ export const prestadorEn = {
       guardarCta: 'Save the price',
       proponerCta: 'Propose this price',
       exito: 'Price updated.',
+      pendiente: 'You proposed {{monto}} · under review',
     },
     stock: {
       disponibles: '{{n}} available',

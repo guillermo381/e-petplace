@@ -37,7 +37,22 @@
  *
  * ⚠️ RN-web (L-153).
  *
- * Uso:  node scripts/verify-s99d-orden-fifo.mjs [--puerto 8082]
+ * ── 🔴 SU BRAZO DE EMPATES NO SE PUDO CORRER, Y SE DICE ACÁ ARRIBA ─────
+ * El brazo ①bis existe y **no tiene sujeto alcanzable**: las DOS cuentas del
+ * ecosistema con empates —«Tienda Pura» (`vendedorpuro`, 3 en un instante) y
+ * «Despensa de Pruebas» (`nuevotest2`)— **rechazan la clave de siembra**, y
+ * **ninguna pista cambia la clave de una cuenta que no creó** (freno de la
+ * casa). Se verificó que la clave NO es el problema: con `--cuenta duenodes`
+ * el login entra — pero esa cuenta no tiene empates, y el guard **se niega a
+ * dar verde sin ellos**, que es exactamente lo que tiene que hacer.
+ *
+ * ⇒ **la propiedad se prueba en `verify-s99d-orden-empates.ts`**, sobre la
+ * función pura, sin login y con el comparador viejo adentro como
+ * discriminador. *No se bajó la vara: se movió el objeto a donde se puede
+ * medir.* Este guard recupera su brazo el día que haya empates en una cuenta
+ * alcanzable — o cuando la mesa entregue la credencial.
+ *
+ * Uso:  node scripts/verify-s99d-orden-fifo.mjs [--puerto 8082] [--cuenta X]
  */
 import { chromium } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
@@ -157,6 +172,50 @@ try {
     const b = datos.get(conPago[i]).pago;
     if (a > b) {
       fallos.push(`FIFO roto: ${conPago[i - 1]} (${a}) va antes de ${conPago[i]} (${b})`);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 ①bis EL BRAZO DE LOS EMPATES — y sin él este guard BENDECÍA EL AZAR.
+     ═══════════════════════════════════════════════════════════════════════
+     La primera versión probaba con pedidos de HORAS DISTINTAS, y con eso el
+     comparador viejo pasaba… mientras dejaba el orden de los empatados a
+     merced del orden de llegada de las filas. *Dos elementos en el orden
+     correcto pueden serlo por casualidad* — mi propio criterio, aplicado
+     contra mi propio instrumento.
+
+     Y los empates NO son un caso de borde: **`now()` es constante dentro de
+     una transacción (L-122a)**, así que todo acto que escribe varias filas de
+     una las empata al microsegundo. Medido acá: «Tienda Pura» tiene **3
+     pagados en un solo instante**. En esta casa las marcas de tiempo **nunca
+     son únicas por construcción**.
+
+     El invariante del empate: **dentro de un grupo con el MISMO
+     `pago_confirmado_en`, `numero_orden` asciende.** No porque el número
+     signifique algo —su sufijo es hex aleatorio— sino porque es único: lo que
+     se exige no es justicia (con el mismo instante no existe un «quién llegó
+     primero»), es que **la respuesta no cambie entre dos lecturas**. */
+  const grupos = new Map();
+  for (const n of conPago) {
+    const p = datos.get(n).pago;
+    if (!grupos.has(p)) grupos.set(p, []);
+    grupos.get(p).push(n);
+  }
+  const empatados = [...grupos.entries()].filter(([, ns]) => ns.length > 1);
+  if (empatados.length === 0) {
+    fallos.push(
+      `NINGÚN empate en pantalla — este guard no puede probar el desempate y sin ese brazo BENDICE EL AZAR. ` +
+        `Los empates existen (now() es constante en la transacción): elegí una cuenta que los tenga.`,
+    );
+  }
+  for (const [p, ns] of empatados) {
+    console.log(`\n⚖️  empate de ${ns.length} en ${p}: ${ns.join(' → ')}`);
+    for (let i = 1; i < ns.length; i++) {
+      if (ns[i - 1] >= ns[i]) {
+        fallos.push(
+          `EMPATE SIN DESEMPATE en ${p}: ${ns[i - 1]} va antes de ${ns[i]} y el número no asciende ⇒ el orden es AZAR`,
+        );
+      }
     }
   }
   // ② el que no tiene pago va DESPUÉS de todos los que sí
