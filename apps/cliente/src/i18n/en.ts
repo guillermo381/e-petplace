@@ -1395,6 +1395,18 @@ export const clienteEn = {
     // thing entirely.
     celebracionSedimento: "It's now part of {{nombre}}'s story",
     celebracionSedimentoVarias: "It's now part of your pets' stories",
+    // S100-D · L2 · ON THE WAY. The window is a RANGE and never a minute
+    // (N14): promising a minute we cannot keep is worse than not promising.
+    enCaminoEntrada: 'Follow your order',
+    enCaminoEntradaDetalle: 'See where it is',
+    enCaminoTitulo: 'On the way',
+    enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
+    enCaminoVentana: 'Arrives between',
+    enCaminoVentanaDetalle: "It's a window, not an exact time.",
+    enCaminoQuienTrae: 'Who’s bringing it',
+    promesaRango: '{{desde}} and {{hasta}}',
+    vehiculoMoto: 'Motorcycle',
+    vehiculoCarro: 'Car',
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
     desvioCancelado: 'Canceled',

@@ -43,6 +43,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   CodigoAEscala,
   Encabezado,
   EscaleraEstados,
@@ -340,6 +341,24 @@ export default function DespensaPedido() {
                 );
               })()}
             </View>
+
+            {/* 1bis · LA PUERTA A EN CAMINO — solo mientras la moto va.
+                Navega ⇒ chevron y sin caja (19.7: el contorno transparente
+                murió como acción de fila). Y solo con `en_camino`: antes no
+                hay a quién seguir, y un mapa quieto en el local durante media
+                hora se lee como que algo se colgó. */}
+            {detalle.pedido.narrativa === 'en_camino' ? (
+              <CeldaNavegacion
+                titulo={t('despensa.enCaminoEntrada')}
+                detalle={t('despensa.enCaminoEntradaDetalle')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/despensa/en-camino/[pedidoId]',
+                    params: { pedidoId: detalle.pedido.pedido_id },
+                  })
+                }
+              />
+            ) : null}
 
             {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o
                 muestra en el mostrador). Se LEE, jamás llega por push. */}

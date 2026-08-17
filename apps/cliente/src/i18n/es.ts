@@ -1593,6 +1593,18 @@ export const clienteEs = {
     // a nadie por comprar: dice qué quedó, que es otra cosa.
     celebracionSedimento: 'Quedó en la historia de {{nombre}}',
     celebracionSedimentoVarias: 'Quedó en la historia de tus mascotas',
+    // S100-D · L2 · EN CAMINO. La ventana es RANGO y jamás el minuto (N14):
+    // prometer un minuto que no podemos cumplir es peor que no prometer.
+    enCaminoEntrada: 'Seguir el pedido',
+    enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoTitulo: 'En camino',
+    enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
+    enCaminoVentana: 'Llega entre',
+    enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
+    enCaminoQuienTrae: 'Quién lo trae',
+    promesaRango: '{{desde}} y {{hasta}}',
+    vehiculoMoto: 'Moto',
+    vehiculoCarro: 'Carro',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
     desvioCancelado: 'Cancelado',
