@@ -164,3 +164,47 @@ píldora.**
 
 **Y por L-241 se verifica DONDE VIVE: en la app, con el tab del EXTREMO Y con
 el del MEDIO** — son los dos casos, y **cada uno muestra un defecto distinto.**
+
+---
+
+# TERCER GATE — EL FOUNDER DESARMA LA DISYUNTIVA, Y SE RETIRA LA JOROBA
+
+**Firma:** *«en la imagen del video de referencia el ESPACIO EN BLANCO ES MUY
+GRANDE… reduciendo un poco el tamaño del ícono y el texto, cabrían los cinco
+tabs en toda la barra. ¿O cuál es el ajuste que proponés?»*
+
+## ✅ LA TERCERA SALIDA: ACHICAR ÍCONO Y TEXTO ADENTRO DEL DISCO
+Con el disco bajando de **68 a ~60**, **ganan las tres cosas a la vez**:
+- **el texto SE QUEDA** — firmado dos veces, y con razón propia: **nuestra
+  barra tiene CINCO destinos y el activo tiene que decir dónde estás**; la
+  referencia tiene tres y no lo necesita;
+- **el anillo SUBE** porque hay espacio;
+- **la barra PUEDE BAJAR DE 86**, que también le preocupaba.
+
+## 🔴 EL ORDEN ES AL REVÉS DE COMO SE VENÍA TRABAJANDO
+**El límite lo pone LA LEGIBILIDAD, no la geometría.** El número que B tiene
+que medir es **cuánto se puede achicar antes de que «Despensa» o «Negocio»
+dejen de leerse** — y de ahí sale el disco, **y del disco la barra y el
+anillo. No al revés.**
+Vara de la casa ya escrita: **a 12 px no sobrevive el detalle, sobrevive la
+orientación** — y **el ícono del activo puede permitirse menos detalle que uno
+suelto porque va acompañado del texto.**
+
+## ☠️ LA JOROBA SE RETIRA — y corrige algo que A sirvió
+**B midió la referencia: NO TIENE JOROBA.** Cero columnas por encima de la
+línea plana. **Lo que hay es un DESPEGUE TANGENCIAL** — el borde baja un píxel
+a lo largo de seis y recién después se lanza al valle.
+**⚠️ A había medido bien (2,22 px) y entregado la palanca para agrandarla
+(`control = H·9/4`) — el número estaba bien y el OBJETIVO estaba mal.** *Era
+perseguir con precisión algo que la referencia no tiene.* **Ver L-278.**
+
+## DEFECTO A — las dos mitades ratificadas, con sus descartes MEDIDOS
+- **los hombros se apoyan en la esquina redondeada** en vez de pedir barra que
+  no existe · **el disco se acota** para no salirse en el primero y el último.
+- **Descartes con número:** *ensanchar la barra no alcanza* — **el desborde es
+  45 px y quitar margen da 8** · *correr los tabs* deja el espaciado desigual
+  **y no cura el otro extremo**.
+
+## Y EL ANILLO PASÓ DE CONSECUENCIA A CAUSA
+`DISCO_CY` **se deriva de él**. *Es la cura literal de «el hueco está muy
+pequeñito»: **se declara, no se espera a ver cuánto queda.***
