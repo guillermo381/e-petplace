@@ -1535,6 +1535,7 @@ export const clienteEs = {
     divisionTitulo: 'Tu compra llega en {{n}} entregas',
     divisionDetalle:
       'Son pedidos independientes, uno por tienda: llegan por separado y los seguís por separado. Pagás una sola vez.',
+    preparaTienda: 'Lo prepara: {{tienda}}',
     bloqueEntrega: 'Entrega {{i}} de {{n}}',
     ventanaProxima: 'La más próxima',
     sinLugarEseDia: 'Sin lugar ese día',

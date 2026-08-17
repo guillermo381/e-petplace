@@ -1332,6 +1332,7 @@ export const clienteEn = {
     divisionTitulo: 'Your order arrives in {{n}} deliveries',
     divisionDetalle:
       'These are independent orders, one per store: they arrive separately and you track them separately. You pay once.',
+    preparaTienda: 'Prepared by: {{tienda}}',
     bloqueEntrega: 'Delivery {{i}} of {{n}}',
     ventanaProxima: 'The earliest',
     sinLugarEseDia: 'No room that day',

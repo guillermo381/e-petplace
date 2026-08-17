@@ -78,6 +78,7 @@ import {
   crearPedidoDespensa,
   crearCompraDesdePedidos,
   crearIntentoPago,
+  obtenerNombresTiendaPorPedido,
   nuevaClaveIdempotencia,
   obtenerDireccionHogar,
   obtenerMiPerfil,
@@ -138,6 +139,9 @@ export default function DespensaCheckout() {
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
    *  plata, y el día que discrepe es en una factura. */
   const [compraTotal, setCompraTotal] = useState<number | null>(null);
+  /** F6 · qué tienda prepara cada pedido. Sin entrada = no se pudo leer,
+   *  y la línea NO se dibuja: jamás «Lo prepara: —». */
+  const [tiendas, setTiendas] = useState<Record<string, string>>({});
   const [trabajando, setTrabajando] = useState(false);
 
   // ── La recurrencia (éxito) ─────────────────────────────────────────────
@@ -376,6 +380,9 @@ export default function DespensaCheckout() {
     setPedidos(okIds);
     setCompraId(c.data.compra_id);
     setCompraTotal(c.data.total);
+    // F6: el nombre de la tienda, en UN viaje para los N pedidos.
+    const nom = await obtenerNombresTiendaPorPedido(okIds.map((p) => p.pedido_id));
+    if (nom.ok) setTiendas(nom.data);
     setFase('resumen');
   }
 
@@ -396,6 +403,7 @@ export default function DespensaCheckout() {
       setPedidos([]);
       setCompraId(null);
       setCompraTotal(null);
+      setTiendas({});
       // La clave era de ESE intento: el próximo pedido es otro intento.
       clave.current = nuevaClaveIdempotencia();
     }
@@ -746,6 +754,15 @@ export default function DespensaCheckout() {
                 ) : (
                   <Texto variante="seccion">{t('despensa.resumen')}</Texto>
                 )}
+                {/* F6 · QUIÉN LO PREPARA. Es lo que explica POR QUÉ la compra
+                    llegó partida: la razón de la división es que son dos
+                    tiendas. Si el nombre no se pudo leer, la línea no se
+                    dibuja — jamás «Lo prepara: —». */}
+                {tiendas[p.pedido_id] !== undefined ? (
+                  <Texto variante="apoyo">
+                    {t('despensa.preparaTienda', { tienda: tiendas[p.pedido_id] })}
+                  </Texto>
+                ) : null}
                 {/* QUÉ llega en esta entrega. Va con `Texto` y no con
                     `FilaMonto`: esa pieza NO se dibuja cuando el monto es
                     null —a propósito, para no inventar un "$ 0,00"—, así que
