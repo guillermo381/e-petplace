@@ -1188,6 +1188,10 @@ export {
   type LineaDePedido,
   type SeguimientoEnvio,
   type DetallePedido,
+  // S100 · F3: la ficha del repartidor (tres campos; la foto NO — vive en el
+  // bucket de las cédulas y eso es deuda declarada, no un permiso).
+  obtenerFichaRepartidor,
+  type FichaRepartidor,
 } from './wrappers/despensa-seguimiento';
 
 export {
