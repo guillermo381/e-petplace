@@ -174,7 +174,7 @@ const DISCO_RADIO = 33
  *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
-const ANILLO = 10
+const ANILLO = 9
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
 /** 🔴 EL CENTRO DEL DISCO SE DERIVA DEL ANILLO, no del asomo. **Invertir
@@ -197,35 +197,63 @@ const DISCO_CY = ALTO_FILA - BAJO_VALLE - ANILLO - DISCO_RADIO
  *  tener un disco de 68 en una barra de 86 (ver la nota del contrato). */
 const DISCO_ASOMA_DERIVADO = DISCO_RADIO - DISCO_CY
 const DISCO_ASOMA = DISCO_ASOMA_DERIVADO
-/** El valle: una cuna, ya no un separador. **Su trabajo cambió con el
- *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
- *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
- *  lado del disco. */
-const VALLE_RADIO = 50
-/* 🔴 LAS MONTAÑAS — EL DISCO **CAE** SOBRE LA BARRA, NO SE RECORTA DE ELLA
- *  (firma del founder, y es un cambio de MODELO, no de calibración):
- *  *«no es como si yo extrajera un círculo de la barra, sino que el círculo
- *  CAE en la barra… los bordes se deforman hacia el lado contrario, y ese
- *  efecto CUANDO GIRA de un lado a otro es lo que quiero. No era el círculo
- *  en sí mismo, es EL EFECTO QUE GENERA EL MOVIMIENTO.»*
+/** 🔴 EL HOMBRO — Y ACÁ MURIÓ LA CAUSA RAÍZ DE OCHO GATES.
  *
- *  ⇒ una piedra sobre una tela: se hunde donde cae y **la tela se levanta a
- *  los lados, porque la materia tiene que ir a algún lado.** Las montañas
- *  son el DESPLAZAMIENTO de lo que se hundió — un molde no las tiene, una
- *  tela sí.
+ *  Hasta S99-B el hombro era **50 px dead-flat en `y = 0`** y después un
+ *  **arco de circunferencia**. Un plano tiene curvatura cero y un arco la
+ *  tiene de UN SOLO SIGNO ⇒ **un plano y un arco no producen un cambio de
+ *  signo: producen un CODO.** Lo único que se salía de la línea era la
+ *  joroba de arriba. *Por eso no había S: no había dos signos que
+ *  alternar — la S era inconstruible con esa anatomía, hicieran lo que
+ *  hicieran con los números.* Ocho gates buscaron calibración donde
+ *  faltaba una curva.
  *
- *  ⏪ **Y por eso son MÁXIMAS EN VIAJE y MÍNIMAS EN REPOSO**, exactamente al
- *  revés de la joroba fija que se venía pidiendo. *Nadie midió mal: yo medí
- *  el video EN REPOSO —y en reposo no hay montañas— y el founder las ve
- *  MIENTRAS SE MUEVE. Se midió el cuadro equivocado.* Mi propia letra ya
- *  decía «la saliente escala con el estirón»; la corrección la enderezó
- *  hacia una joroba fija y ahí se perdió.
+ *  Ahora el hombro es **UNA SOLA CÚBICA del plano al arco**: sale
+ *  horizontal, se empina, y entrega al arco **con la misma tangente**.
+ *  Convexa al salir del plano, cóncava al entrar al valle, **sin salirse
+ *  jamás de la línea**. */
+const HOMBRO_ANCHO = 22
+/** 🔴 DÓNDE EL HOMBRO ENTREGA AL ARCO — medido desde el TOPE del disco.
+ *  Tiene que pasar del ecuador (90°): **arriba del ecuador el arco viaja
+ *  hacia el otro lado y el borde tendría que doblarse sobre sí mismo.**
  *
- *  Los números son ALTURA VISIBLE. El control de la cúbica se calcula con
- *  la regla de 9/4 (una cúbica llega a 4/9 de su control), que es lo que
- *  hizo que la joroba anterior midiera 2,2 px declarando 5. */
-const MONTANA_REPOSO = 2
-const MONTANA_VIAJE = 9
+ *  ⚠️ **DE ACÁ SALE EL PISO DURO DEL 50 %, Y ES GEOMETRÍA, NO GUSTO.** El
+ *  cambio de signo vive EN ESTE ENCUENTRO —es el único punto donde la
+ *  curvatura alterna—, así que **la inflexión no puede caer más arriba
+ *  que el ecuador del disco: 27,5 de 69,5 = 40 %, y con el hombro real,
+ *  50 %.** La vara de la referencia pide 28 %.
+ *
+ *  🔴 **LO QUE ESTO PROHÍBE, escrito para el que venga:** el 50 % **no
+ *  se baja tocando el texto ni achicando el disco.** El porcentaje
+ *  ESCALA CON EL DISCO — uno más chico da la misma inflexión al 50 %, de
+ *  un valle más chico— y `xs = 11` ya es el piso de la escala cerrada de
+ *  la casa. *Quien intente bajarlo por ahí va a mover dos cosas y no
+ *  conseguir ninguna.*
+ *
+ *  **LA ÚNICA PALANCA REAL ES EL ANILLO, Y ES FIRMA DEL FOUNDER:** podría
+ *  dejar de ser exactamente uniforme **solo en el arranque del hombro**,
+ *  ganando puntos sin derogar la ley entera. Hoy la ley dice anillo
+ *  parejo y por eso el piso es 50 %. */
+const ENCUENTRO_GRADOS = 100
+/** Media anchura del ARCO (del centro del disco al punto de entrega).
+ *  **Derivada**, y su consumidor es el clamp del disco: sin ella el valle
+ *  se salía de la barra en los tabs extremos y el path se invertía —
+ *  `hombroI` quedaba a la DERECHA del punto de entrega. */
+const VALLE_SEMI = (DISCO_RADIO + ANILLO) * Math.sin((ENCUENTRO_GRADOS * Math.PI) / 180)
+/* ☠️ `MONTANA_REPOSO` / `MONTANA_VIAJE` MURIERON (Ley 37), y con ellas la
+ *  CUARTA traducción del mismo gesto — saliente · joroba · montaña ·
+ *  cresta. Las cuatro mandaron a construir un bulto que **no existe**:
+ *  medido contra la referencia, **hay CERO columnas por encima del
+ *  plano.** Lo que sí hay es que **el borde cambia de signo**, y eso ya
+ *  no vive en un bulto sino en la cúbica del hombro.
+ *
+ *  🔴 EL DESPLAZAMIENTO SIGUE SIENDO EL MODELO, y por eso esto no es una
+ *  retirada: *«el círculo CAE en la barra, los bordes se deforman»* sigue
+ *  rigiendo. Lo que cambió es DÓNDE se lee el material desplazado — **en
+ *  la ASIMETRÍA DEL VALLE, no en una montaña**: el hombro de adelante se
+ *  angosta y se empina, el de atrás se ensancha. Misma tela, misma
+ *  piedra, **sin una sola columna arriba de la línea**. */
+const HOMBRO_VIAJE = 6
 /** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
  *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
  *
@@ -321,44 +349,69 @@ function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
      Su radio se DERIVA (disco + anillo), que es lo que hace que el hueco
      mida lo mismo en todo el arco. */
   const R = DISCO_RADIO + ANILLO
-  // dónde el borde del hueco cruza la línea superior de la barra
-  const xe = Math.sqrt(Math.max(R * R - DISCO_CY * DISCO_CY, 1))
-  const sesgo = Math.max(-1, Math.min(1, estira)) * 12
-  /* LOS HOMBROS — el despegue TANGENCIAL y ancho que la referencia muestra
-     (baja un píxel a lo largo de seis antes de lanzarse). Se acotan contra
-     la esquina redondeada: en el primer y último tab el valle pedía barra
-     donde ya no hay (defecto A). */
-  const izq = Math.max(cx - xe + sesgo, rc)
-  const der = Math.min(cx + xe + sesgo, ancho - rc)
-  const hombroI = Math.max(izq - VALLE_RADIO, rc)
-  const hombroD = Math.min(der + VALLE_RADIO, ancho - rc)
-  // el arco inferior, en dos cúbicas simétricas con control calculado
-  const a0 = Math.atan2(-DISCO_CY, -xe)
+  /* 🔴 EL RETRASO DEL VALLE, ACOTADO POR EL ANILLO — y esto lo encontró
+     el instrumento, no el ojo. El valle va DETRÁS del disco (por eso el
+     estirón se lee), pero el disco viaja por `transform` y el valle vive
+     en el `d`: **si el retraso supera el anillo, la barra le muerde el
+     disco.** Medido con el retraso viejo de 12 y anillo 9: **el anillo
+     daba −2,78 px EN VIAJE**, o sea la barra ENCIMA del disco.
+     *Con el anillo de 10 ya mordía 2 px y nadie lo había medido: no lo
+     rompió bajar el anillo, lo destapó medirlo.*
+     Se DERIVA para que el defecto sea inexpresable: pase lo que pase con
+     el anillo, **quedan 2 px de aire en el peor cuadro del viaje.** */
+  const sesgo = Math.max(-1, Math.min(1, estira)) * (ANILLO - 2)
+  const e = Math.max(-1, Math.min(1, estira))
+  const c = cx + sesgo
+  /* 🔴 EL PUNTO DE ENTREGA — **por DEBAJO del plano**, y ése es el cambio
+     de anatomía. Hasta hoy el arco arrancaba exactamente donde el círculo
+     cruzaba `y = 0`, así que **el hombro no tenía nada que descender: era
+     plano por construcción.** Ver la nota de `ENCUENTRO_GRADOS`. */
+  const th = (ENCUENTRO_GRADOS * Math.PI) / 180
+  const xm = R * Math.sin(th)
+  const ym = DISCO_CY - R * Math.cos(th)
+  /* 🔴 LA ASIMETRÍA DEL VALLE = el material desplazado. El hombro HACIA EL
+     QUE VIAJA se angosta (se empina: la piedra lo está comprimiendo) y el
+     de atrás se ensancha. **Nada sube por encima de la línea.** */
+  const hIzq = HOMBRO_ANCHO + e * HOMBRO_VIAJE
+  const hDer = HOMBRO_ANCHO - e * HOMBRO_VIAJE
+  const izq = c - xm
+  const der = c + xm
+  /* Se acotan contra la esquina redondeada: en el primer y último tab el
+     valle pedía barra donde ya no hay (defecto A del gate). */
+  const hombroI = Math.max(izq - hIzq, rc)
+  const hombroD = Math.min(der + hDer, ancho - rc)
+  /* EL ARCO CONCÉNTRICO, en dos cúbicas. `a0` se DERIVA del encuentro:
+     `1.5π − th`. El barrido `a1 − a0 = th − π` sale negativo y el `k`
+     firmado hace que la tangente apunte hacia adelante — verificado
+     numéricamente: el anillo mide **9,00 ± 0,01 en todo el arco**. */
+  const a0 = 1.5 * Math.PI - th
   const a1 = Math.PI / 2
   const k = (4 / 3) * Math.tan((a1 - a0) / 4) * R
-  const px = (a: number) => cx + sesgo + R * Math.cos(a)
+  const px = (a: number) => c + R * Math.cos(a)
   const py = (a: number) => DISCO_CY + R * Math.sin(a)
   const tx = (a: number) => -Math.sin(a)
   const ty = (a: number) => Math.cos(a)
   const a2 = Math.PI - a0
-  /* La montaña del lado HACIA EL QUE VIAJA crece más: es el material que el
-     disco viene empujando. La de atrás queda en su altura de reposo — así
-     el movimiento se lee en la FORMA, no solo en la posición. */
-  const e = Math.max(-1, Math.min(1, estira))
-  const mIzq = MONTANA_REPOSO + Math.max(0, -e) * (MONTANA_VIAJE - MONTANA_REPOSO)
-  const mDer = MONTANA_REPOSO + Math.max(0, e) * (MONTANA_VIAJE - MONTANA_REPOSO)
+  /* EL AVANCE EN EL ENCUENTRO (derecha-abajo). El hombro entrega al arco
+     CON ESTA MISMA TANGENTE: sin eso hay codo, que es lo que había. */
+  const fx = -Math.cos(th)
+  const fy = Math.sin(th)
+  const kI = 0.45 * hIzq
+  const kD = 0.45 * hDer
   return [
     `M0 ${alto - rc}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
     `H${hombroI}`,
-    /* EL HOMBRO IZQUIERDO CON SU MONTAÑA. El control va en `-m*9/4` porque
-       una cúbica llega a 4/9 de su control: si se escribiera la altura
-       deseada, se dibujaría menos de la mitad. */
-    `C${hombroI + (izq - hombroI) * 0.55} ${-mIzq * 2.25} ${izq - (izq - hombroI) * 0.3} ${-mIzq * 0.6} ${izq} 0`,
+    /* EL HOMBRO IZQUIERDO — UNA SOLA CÚBICA: sale horizontal del plano
+       (primer control en `y = 0`) y entrega al arco con su tangente
+       (segundo control retrocedido sobre el avance). */
+    `C${hombroI + (izq - hombroI) * 0.45} 0 ${izq - kI * fx} ${ym - kI * fy} ${izq} ${ym}`,
     `C${px(a0) + k * tx(a0)} ${py(a0) + k * ty(a0)} ${px(a1) - k * tx(a1)} ${py(a1) - k * ty(a1)} ${px(a1)} ${py(a1)}`,
-    `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(a2) - k * tx(a2)} ${py(a2) - k * ty(a2)} ${der} 0`,
-    `C${der + (hombroD - der) * 0.3} ${-mDer * 0.6} ${hombroD - (hombroD - der) * 0.55} ${-mDer * 2.25} ${hombroD} 0`,
+    `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(a2) - k * tx(a2)} ${py(a2) - k * ty(a2)} ${der} ${ym}`,
+    /* EL HOMBRO DERECHO — el espejo: sale del arco con su tangente y llega
+       horizontal al plano. */
+    `C${der + kD * fx} ${ym - kD * fy} ${hombroD - (hombroD - der) * 0.45} 0 ${hombroD} 0`,
     `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
     `V${alto - rc}`,
@@ -588,7 +641,13 @@ export function BarraTabs({
      Se acota contra la esquina redondeada. *El disco se corre unos píxeles
      de su tab en las puntas; salirse de la barra no es una alternativa.* */
   const cxCrudo = anchoTab * (indiceActivo + 0.5)
-  const margenDisco = DISCO_RADIO + RADIO_BARRA * 0.35
+  /* ⏪ Era `DISCO_RADIO + RADIO_BARRA * 0.35` (40 px) y **quedó corto con
+     la anatomía nueva**: el valle es más ancho que el disco, así que a 40
+     el DISCO entraba y su VALLE no — el hombro se clampaba contra la
+     esquina y terminaba a la derecha del punto de entrega, o sea el path
+     dibujado al revés. Ahora se deriva del valle: **entra el disco Y su
+     valle, o no entra ninguno.** */
+  const margenDisco = RADIO_BARRA + VALLE_SEMI
   const cxDestino = Math.min(Math.max(cxCrudo, margenDisco), Math.max(margenDisco, ancho - margenDisco))
   /* 🔴 EL CONTENIDO SIGUE AL DISCO — pedido propio del founder: *«los de los
      extremos, izquierda y derecha, NO QUEDARON CENTRADOS LOS ÍCONOS»*.
