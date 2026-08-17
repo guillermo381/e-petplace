@@ -1349,6 +1349,11 @@ export const clienteEn = {
     promesaFallo: "We couldn't calculate the delivery window. Please try again.",
     promesaVentana: 'Arrives on {{dia}}, between {{desde}} and {{hasta}}.',
     saltoPorCupo: 'The nearest day was full, so delivery moved to the next one with room.',
+    divisionTitulo: 'Your order arrives in {{n}} deliveries',
+    divisionDetalle:
+      'These are independent orders, one per store: they arrive separately and you track them separately. You pay once.',
+    preparaTienda: 'Prepared by: {{tienda}}',
+    bloqueEntrega: 'Delivery {{i}} of {{n}}',
     ventanaProxima: 'The earliest',
     sinLugarEseDia: 'No room that day',
     programarFecha: 'Schedule another date',

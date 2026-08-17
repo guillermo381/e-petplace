@@ -1560,6 +1560,15 @@ export const clienteEs = {
     promesaFallo: 'No pudimos calcular la ventana de entrega. Probá de nuevo.',
     promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
     saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    // S100 · F5: la división se declara ANTES de pagar. La voz dice lo
+    // CONCRETO —cuántas entregas y qué va en cada una—, no el hecho abstracto:
+    // que llegue en partes no molesta; que llegue una parte cuando esperabas
+    // todo, sí.
+    divisionTitulo: 'Tu compra llega en {{n}} entregas',
+    divisionDetalle:
+      'Son pedidos independientes, uno por tienda: llegan por separado y los seguís por separado. Pagás una sola vez.',
+    preparaTienda: 'Lo prepara: {{tienda}}',
+    bloqueEntrega: 'Entrega {{i}} de {{n}}',
     ventanaProxima: 'La más próxima',
     sinLugarEseDia: 'Sin lugar ese día',
     programarFecha: 'Programar otra fecha',

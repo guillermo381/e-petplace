@@ -49,7 +49,13 @@ BEGIN
         'telefono', '+593999999999',
         'direccion', 'Av. de los Shyris N34-40',
         'ciudad', 'Quito',
-        'referencias', 'SIEMBRA S99 — empate de pago para el guard del FIFO (D-838)'
+        -- 🔴 S100 (H-03 de D): NULL A PROPÓSITO. `referencias` NO es un campo de
+        -- notas internas: es copy OPERATIVO que la pantalla de la familia pinta
+        -- y que el repartidor lee EN LA PUERTA. Un ticket («guard del FIFO,
+        -- D-838») ahí no es una marca de siembra: es vocabulario de ingeniería
+        -- puesto donde alguien busca «casa azul, portón negro».
+        -- La marca DEMO que la casa sí exige vive arriba, en `nombre_receptor`.
+        'referencias', NULL
       ),
       'SIEMBRA-S99-EMPATE-' || v_i, NULL, 'despacho', NULL, 'estandar');
     IF (v_r ->> 'ok') IS DISTINCT FROM 'true' THEN
