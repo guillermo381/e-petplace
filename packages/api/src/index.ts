@@ -1179,6 +1179,12 @@ export {
   type PedidoCreado,
   type EstadoOfertaCarrito,
   type MotivoNoDisponible,
+  // S100 · LA COMPRA: la entidad que se cobra. N pedidos atrás, UN pago
+  // adelante — y `referencia` es el id de la COMPRA, jamás el de un pedido.
+  crearCompraDesdePedidos,
+  crearIntentoPago,
+  type CompraCreada,
+  type IntentoDePago,
 } from './wrappers/despensa-pedido';
 
 export {
