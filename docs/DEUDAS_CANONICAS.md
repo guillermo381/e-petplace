@@ -11964,6 +11964,12 @@ defecto que se curó hoy en el cambio de clave.
 
   **Y al acta: TERCERA vez en la sesión que un dato técnico de mesa lo corrige la medición** (el anillo del pin · el «26 curados» · esta trampa — que era real a medias: había qué proteger, pero no era código). El corolario vigente sigue siendo el correcto: **el dato de mesa viaja como hipótesis a verificar, jamás como premisa.**
 
+  > **📌 ACTUALIZACIÓN AL CIERRE DE S99 — SON CINCO, y la quinta es la que le da forma final al corolario.** A las tres de arriba se suman **la lectura del frame de la barra** (superseded por el video) y **la generalización del symlink del worktree**: la mesa midió en UNA pista y lo dio por cierto en las CUATRO — *«esto es directo para B»*, y el worktree de B resolvía a sí mismo. **La mesa DEDUJO del mecanismo lo que era un dato del ENTORNO.**
+  >
+  > **Y es la primera de las cinco que se ataja ANTES de costar**, porque la pista **midió en vez de ejecutar**: si el aviso viajaba tal cual, B salía a buscar un problema que no tenía.
+  >
+  > **⇒ LA FORMA FINAL DEL COROLARIO, con la mitad que faltaba: cuando la mesa GENERALIZA la medición de UNA pista a las cuatro, ESA GENERALIZACIÓN ES EL DATO A VERIFICAR** — no el hallazgo original, que suele estar bien. *Lo que falla no es la medición: es el salto de «lo medí acá» a «pasa en todos lados», y ese salto no lo hace el que midió.*
+
 - **L-249 — TODA PANTALLA-ÚNICA (SIN BARRA, SIN PILA) DECLARA SU SALIDA AL NACER (S99 — hallazgo del aparato en el cierre de L2; depositada por orden de mesa, 17-ago-2026).**
 
   **El caso, medido en aparato:** el repartidor aterrizó en «Mis entregas de hoy» — correcto por letra (§2.0: sin barra, sin cuartos del negocio; el deep link lo devuelve porque el resolvedor manda) — **y quedó ENCERRADO**: flecha de atrás dibujada y sin efecto, sin tabs, y sin forma de cerrar sesión. **El costo lo prueba: para salir hubo que borrar los datos de la app — y era la única vía JUSTAMENTE porque la app no ofrecía salida.**

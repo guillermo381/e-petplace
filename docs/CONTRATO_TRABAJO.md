@@ -450,7 +450,16 @@ cd apps/<app>/node_modules/@epetplace/ui && pwd -P
 ```
 *Si imprime otro repo, lo que ves de esa pieza no es tu rama.*
 
-**Y LA CONSECUENCIA COMPLETA PARA QUIEN CAIGA DEL LADO DEL PRIMARIO —que es la que explica el caso de D entero—:** ve **`main`** de esos paquetes, **no su propia rama Y TAMPOCO lo que otra pista tenga sin mergear.** Es decir: **recibe los merges de la conductora al instante sin mergear nada, y no ve nada de sus vecinas hasta que la conductora lo baje.** *Ni aislado ni sincronizado: un tercer estado que nadie declaró.*
+### 🔴 EL TERCER ESTADO — «ENGANCHADO AL PRIMARIO» (nombrado acá porque nadie lo había declarado)
+
+Un worktree cuyos `@epetplace/*` resuelven al repo primario **no está aislado
+ni sincronizado: está ENGANCHADO.** Y conviene tener el nombre, porque las dos
+etiquetas que existían describen mal lo que le pasa.
+
+**Y LA CONSECUENCIA COMPLETA DE ESTAR ENGANCHADO —que es la que explica el caso de D entero—:** ve **`main`** de esos paquetes, **no su propia rama Y TAMPOCO lo que otra pista tenga sin mergear.** Es decir: **recibe los merges de la conductora al instante sin mergear nada, y no ve nada de sus vecinas hasta que la conductora lo baje.** *Ni aislado ni sincronizado: **enganchado**.* **Y su asimetría es lo que
+desorienta: recibe de la conductora sin pedir, y de sus vecinas no recibe
+nada.** *Es literalmente por qué el primario ya tenía los glifos y su worktree
+los servía viejos.*
 
 **🔴 Y LA DISCIPLINA QUE RIGE PARA LAS CUATRO PASE LO QUE PASE (ésta no depende del symlink): Metro se levanta con `--clear` al arrancar y DESPUÉS DE CADA MERGE QUE TOQUE `packages/*`.** La causa inmediata del caso de D fue **caché de transformación**: el primario ya tenía los glifos y Metro servía la versión anterior. *Es primo del ya conocido —un Metro vivo desde antes de un merge es tan viejo como el de otra pista— **con la vuelta de tuerca de que el merge que lo desactualizó fue el de la CONDUCTORA al primario, no el propio**.*
 
