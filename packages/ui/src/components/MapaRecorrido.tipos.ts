@@ -89,16 +89,32 @@ export interface MapaRecorridoProps {
    * bezier de la casa, lado entrada, **jamás spring**— y **NO se
    * construyó acá, con su motivo:**
    *
-   * **Es MOVIMIENTO NATIVO** (`AnimatedRegion`/`MarkerAnimated` de
-   * `react-native-maps`, que es `Animated` de RN y no Reanimated), y
-   * **su modo de falla solo se ve en un aparato.** Hoy hay **0 envíos
-   * con track** (medido por A): construirla ahora sería escribir una
-   * animación que nadie puede mirar, sobre un dato que todavía no
-   * existe.
+   * 🔴 **Y AL MEDIRLO APARECIÓ ALGO QUE CORRIGE MI PROPIA ENTREGA: LA
+   * INTERPOLACIÓN YA ESTÁ CONSTRUIDA — vive en `PinEnMapa`**
+   * (`px.value = withTiming(x, conf)`, con el bezier de la casa). *No
+   * hay que escribirla: hay que poder alimentarla.*
    *
-   * ⇒ **La forma queda decidida y el trabajo declarado**, no fingido.
-   * *Entregar el slot y el encuadre —que sí se verifican— y frenar lo
-   * que no se puede ver, es la mitad honesta del pedido.* Su disparo:
-   * el primer envío con track y un teléfono a mano.
+   * **Y ahí está el costo real, que no es el que yo supuse:**
+   * `PinEnMapa` **se posiciona en PÍXELES** porque es él quien anima el
+   * viaje. El `Marker` de `react-native-maps` —lo que este ensanche
+   * usa— **posiciona por COORDENADA y reubica de golpe**: resuelve la
+   * identidad y **deja la interpolación fuera de alcance.**
+   *
+   * ⇒ **Las dos vías NO son equivalentes, y la elección es de mesa:**
+   *   · **`Marker` + slot** (lo entregado): identidad ✅ · interpolación
+   *     ❌ · **costo cero, cero riesgo**, ya está.
+   *   · **exponer proyección** (`mapRef.pointForCoordinate`) y montar
+   *     `PinEnMapa`: identidad ✅ · **interpolación ✅ y ya escrita** ·
+   *     costo **acotado** — hay que recalcular píxeles cuando la cámara
+   *     se mueve, y en modo `vivo` **la cámara solo la mueve esta
+   *     pieza** (`scrollEnabled={!esVivo}`), así que sabe exactamente
+   *     cuándo. **Su gate es en aparato.**
+   *
+   * *Mi primera nota decía «no se construyó porque es movimiento nativo
+   * que no puedo probar». Era cierto a medias y llevaba a la conclusión
+   * equivocada: lo que no se puede probar sin aparato no es la
+   * animación —ya existe y ya se firmó— sino **la proyección que la
+   * alimenta**.* Con 0 envíos con track hoy, el freno sigue en pie; lo
+   * que cambia es **qué se está frenando y cuánto cuesta destrabarlo**.
    */
 }
