@@ -104,15 +104,28 @@
  *
  * ── LO QUE ESTA PIEZA NO HACE ──────────────────────────────────────
  * No sabe de carrito (recibe `cantidad` y avisa), no formatea precio
- * (`PrecioText`), no decide el orden de la grilla, y **no muestra
+ * (`PrecioText`), no decide el orden de la grilla, y **no lista
  * composición ni alérgenos**: no entran sin volverse ilegibles, y
  * **medio dato de alergia es peor que ninguno** — viven en la ficha, a
  * un toque (N19 ④).
+ *
+ * ⏪ **ENMENDADO S100-B:** esta línea decía *«no muestra composición ni
+ * alérgenos»* y quedó corta cuando entró `alergia`. **La distinción que
+ * la salva —y que es la que autoriza el ensanche— es entre LISTAR y
+ * SEÑALAR:** la tarjeta **no lista** ingredientes (eso sí sería medio
+ * dato), pero **sí dice que hay un conflicto**, que es una señal
+ * COMPLETA. *Una advertencia de salud recortada a la mitad es peligrosa;
+ * una advertencia entera que remite al detalle, no.*
  */
 
 import { Image, Pressable, Text, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
+import {
+  alergiaPuedeCallar,
+  type CoincidenciaAlergeno,
+  type EstadoComposicion,
+} from './AvisoAlergia'
 import { PrecioText } from './PrecioText'
 import { StepperCantidad } from './StepperCantidad'
 import { Texto } from './Texto'
@@ -153,6 +166,51 @@ export interface TarjetaProductoProps {
   onCambiarCantidad: (cantidad: number) => void
   /** Abrir la ficha. La FOTO y el NOMBRE llevan acá; el `+` no. */
   onPress: () => void
+  /**
+   * 🔴 LA ADVERTENCIA DE ALERGIA — **para la BÚSQUEDA** (ensanche S100-B,
+   * pedido por C con su caso).
+   *
+   * **La letra que lo obliga** (`MODELO_DESPENSA`, enmienda S96):
+   * ***«exclusión dura en la RECOMENDACIÓN, advertencia dura en la
+   * BÚSQUEDA»***. En vitrina y recomendación esta prop **no va**: la
+   * vitrina se ve sin mascota (no hay contra qué advertir) y la
+   * recomendación **excluye en el motor**. En BÚSQUEDA sí: si la familia
+   * busca pollo para un perro alérgico al pollo, **se lo mostramos y se
+   * lo decimos.**
+   *
+   * ── ⚖️ POR QUÉ RECIBE LOS HECHOS Y NO UN TEXTO ────────────────────
+   * C propuso `advertencia?: string`, y **el QUÉ era correcto pero esa
+   * forma reabre un agujero que la casa ya había cerrado**: con un texto
+   * opcional, `undefined` sería silencio legal **en todos los casos** —
+   * incluido `ausente`, que es *«no tenemos los ingredientes»*.
+   * `AvisoAlergia` cerró eso por construcción (*«la pantalla no tiene
+   * prop para hacerla callar»*), y una segunda forma de decir alergia
+   * con menos estados **habría dejado callar donde la otra habla**.
+   *
+   * ⇒ Recibe **los mismos hechos tipados** y **el silencio lo decide
+   * `alergiaPuedeCallar`, la MISMA función que usa `AvisoAlergia`**. Las
+   * dos piezas no pueden discrepar.
+   *
+   * **Lo que la tarjeta muestra es la SEÑAL, no el detalle** — y eso
+   * respeta el *«medio dato de alergia es peor que ninguno»*: no se
+   * lista composición truncada; se dice **que hay un conflicto**, que es
+   * una señal COMPLETA. El detalle y el paso de entendimiento viven en
+   * la ficha, con `AvisoAlergia` entero.
+   */
+  alergia?: {
+    composicion: EstadoComposicion
+    coincidencia: CoincidenciaAlergeno
+    /**
+     * La voz CORTA de la casa, compuesta por la pantalla — *«Contiene
+     * pollo»*, *«Sin composición declarada»*. **Corta y no el mensaje
+     * largo de la ficha**: en media pantalla una frase con el nombre de
+     * la mascota se vuelve tres líneas y tapa el producto.
+     * *La voz la arma quien conoce el expediente; la pieza no lo conoce
+     * y no arma frases sobre una mascota* (mismo contrato que
+     * `AvisoAlergia.mensaje`).
+     */
+    senal: string
+  }
 }
 
 export function TarjetaProducto({
@@ -166,6 +224,7 @@ export function TarjetaProducto({
   onAgregar,
   onCambiarCantidad,
   onPress,
+  alergia,
 }: TarjetaProductoProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
@@ -235,6 +294,33 @@ export function TarjetaProducto({
               pierde. Nunca se trunca. */}
           {presentacion === undefined ? null : (
             <Texto variante="apoyo">{presentacion}</Texto>
+          )}
+
+          {/* 🔴 LA SEÑAL DE ALERGIA — DENTRO de la tarjeta, jamás colgando
+              debajo. Es H-002 de C: un aviso fuera de la fila no tiene
+              nada que lo ate a su producto, y en una grilla de dos
+              columnas eso es peor todavía — el ojo no sabe de cuál de
+              las dos tarjetas está hablando.
+
+              El silencio lo decide `alergiaPuedeCallar`, LA MISMA
+              función que usa `AvisoAlergia`: las dos piezas no pueden
+              discrepar sobre cuándo callar.
+
+              ⚠️ TONO: `warning`, y el sin-stock queda NEUTRO a propósito
+              (decisión declarada por C, y la tarjeta la respeta): *la
+              alergia es riesgo para la mascota y el agotado es un hecho
+              del estante* — dos naranjas seguidos aplanan la
+              diferencia. */}
+          {alergia === undefined || alergiaPuedeCallar(alergia) ? null : (
+            <View
+              accessible
+              accessibilityRole={alergia.coincidencia === 'ninguna' ? 'text' : 'alert'}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}
+            >
+              <Texto variante="apoyo" color="warning">
+                {alergia.senal}
+              </Texto>
+            </View>
           )}
 
           {/* EL ANCLA — esto es lo que alinea los precios de una fila
