@@ -3532,8 +3532,11 @@ function GaleriaInterna() {
           {/* Las dos caras juntas, que es como se juzga la decisión "una
               pieza y no dos": misma anatomía, distinta voz y distinto
               acento. Y la tercera muestra el caso que no tiene recorrido
-              (una compra de mostrador reclamada): sin pasos NO hay
-              escalera — un riel vacío afirmaría un camino que no existe. */}
+              (una compra de mostrador reclamada): sin pasos NI DESVÍO no
+              hay escalera — un riel vacío afirmaría un camino que no
+              existe.
+              ⚠️ El «ni desvío» NO es una precisión de redacción: es la
+              cura de H-04. Ver la cuarta tarjeta. */}
           <View style={{ gap: spacing[3] }}>
             <TarjetaPedido
               acento="oficio"
@@ -3568,6 +3571,28 @@ function GaleriaInterna() {
               monto="$ 21.40"
               onPress={() => {}}
               etiqueta="Compra en el mostrador de Veterinaria Aurora"
+            />
+            {/* 🔴 EL DISCRIMINADOR DE H-04 — la cuarta tarjeta es la que
+                PROBABA el defecto, y por eso está acá y no en una nota.
+
+                Un pedido `cancelado` llega SIN pasos y CON desvío. Hasta
+                S100-B esta tarjeta se dibujaba **muda**: mismo título,
+                mismo monto, y ni una palabra de que el pedido se había
+                cancelado — se leía como un pedido normal al que le
+                faltaba el progreso.
+
+                Lo que hay que ver: **la banda dice "Cancelaste este
+                pedido"**. Si algún día vuelve a aparecer sin ella, el
+                guard de la regla de existencia volvió a mirar los pasos
+                en vez del contenido. */}
+            <TarjetaPedido
+              titulo="Veterinaria Aurora"
+              detalle="pedido del 12 de agosto · 3 productos"
+              monto="$ 48.90"
+              onPress={() => {}}
+              etiqueta="Tu pedido de Veterinaria Aurora, cancelado"
+              pasos={[]}
+              desvio={{ etiqueta: 'Cancelaste este pedido' }}
             />
           </View>
         </Seccion>
