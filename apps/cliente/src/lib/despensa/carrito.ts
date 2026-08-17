@@ -89,24 +89,121 @@ export function useCarrito(): ItemCarrito[] {
   return useSyncExternalStore(suscribir, leer, leer);
 }
 
-/** Agrega o SUMA cantidad si la oferta ya está (misma oferta = misma
- *  fila; dos presentaciones del mismo producto son dos filas porque son
- *  dos ofertas). */
+/** El mismo estado, sin hook — para quien no es un componente (un
+ *  instrumento, una función que arma el pedido). Es EL MISMO `leer` que
+ *  consume `useCarrito`: una fuente, dos puertas. */
+export function itemsDelCarrito(): ItemCarrito[] {
+  return leer();
+}
+
+/**
+ * Qué pasó al agregar. **La pantalla necesita saberlo para poder hablar**
+ * — sobre todo en `consolidado`, que es el único caso donde el carrito
+ * hace algo que la persona no pidió explícitamente.
+ */
+export type ResultadoAgregar =
+  | { tipo: 'agregado' }
+  | { tipo: 'sumado' }
+  | {
+      /** 🔴 La misma VARIANTE ya estaba, pero de OTRO vendedor. */
+      tipo: 'consolidado';
+      vendedorConservado: string;
+      vendedorDescartado: string;
+    };
+
+/**
+ * Agrega o SUMA cantidad. Tres casos, y el tercero es de S100:
+ *
+ * · misma OFERTA → suma cantidad (dos presentaciones del mismo producto
+ *   siguen siendo dos filas: son dos ofertas distintas).
+ * · misma VARIANTE de OTRO vendedor → **se CONSOLIDA en la que ya estaba.**
+ * · nueva → fila nueva.
+ *
+ * ── 🔴 POR QUÉ SE CONSOLIDA (regla derivada de la firma F5) ────────────
+ * F5 firmó *«un carrito, N pedidos independientes; la división se declara
+ * antes de pagar»*. Y medido: **25 variantes tienen más de una oferta
+ * publicada**, de vendedores distintos — o sea que la misma bolsa aparece
+ * dos veces en la vitrina a dos precios.
+ *
+ * Sin esta regla, una familia agrega «la misma bolsa» dos veces creyendo
+ * que son dos cosas distintas y **recibe DOS pedidos de DOS vendedores**.
+ * *La división se declararía impecablemente y sería incomprensible* — el
+ * defecto no estaría en la voz, estaría en que la voz dice la verdad sobre
+ * algo que nunca debió pasar.
+ *
+ * **La misma variante nunca se parte entre vendedores dentro de un
+ * carrito.** Gana **la que ya estaba** — determinista y sin sorpresa: el
+ * carrito no cambia de vendedor por la espalda.
+ *
+ * Y lo que esta regla **NO** hace: si el vendedor conservado no tiene
+ * stock suficiente, **ahí habla la voz de insuficiente (D-827)** — jamás
+ * se parte en silencio para completar la cantidad.
+ */
 export function agregarAlCarrito(
   item: Omit<ItemCarrito, 'cantidad' | 'destino' | 'advertenciaEntendida'>,
   cantidad: number,
   destino: DestinoItem | null = null,
   advertenciaEntendida = false,
-): void {
-  const existente = items.find((i) => i.oferta_id === item.oferta_id);
-  if (existente) {
-    existente.cantidad += cantidad;
-    if (destino !== null) existente.destino = destino;
-    if (advertenciaEntendida) existente.advertenciaEntendida = true;
-  } else {
-    items.push({ ...item, cantidad, destino, advertenciaEntendida });
+): ResultadoAgregar {
+  const aplicar = (fila: ItemCarrito) => {
+    fila.cantidad += cantidad;
+    if (destino !== null) fila.destino = destino;
+    if (advertenciaEntendida) fila.advertenciaEntendida = true;
+  };
+
+  const mismaOferta = items.find((i) => i.oferta_id === item.oferta_id);
+  if (mismaOferta) {
+    aplicar(mismaOferta);
+    emitir();
+    return { tipo: 'sumado' };
   }
+
+  // La misma variante de OTRO vendedor: se consolida, no se parte.
+  const mismaVariante = items.find((i) => i.variante_id === item.variante_id);
+  if (mismaVariante) {
+    aplicar(mismaVariante);
+    emitir();
+    return {
+      tipo: 'consolidado',
+      vendedorConservado: mismaVariante.cuentaComercialId,
+      vendedorDescartado: item.cuentaComercialId,
+    };
+  }
+
+  items.push({ ...item, cantidad, destino, advertenciaEntendida });
   emitir();
+  return { tipo: 'agregado' };
+}
+
+/**
+ * EL CARRITO PARTIDO EN N PEDIDOS (firma F5 del founder, 17-ago-2026:
+ * *«un carrito, N pedidos independientes en v1; la división se declara
+ * antes de pagar y se explica después»*).
+ *
+ * Es una función PURA sobre el carrito — no llama a nadie. La división
+ * **coincide con lo que el motor ya hace por construcción**:
+ * `crear_pedido_despensa` recibe UN `cuenta_comercial_id`, así que un
+ * pedido es, y siempre fue, de un solo vendedor. *La firma no le pelea al
+ * motor: lo confirma.*
+ *
+ * **El orden es el de APARICIÓN en el carrito**, no alfabético ni por
+ * monto: la pantalla que declara «son 2 pedidos» tiene que listarlos en el
+ * orden en que la persona los armó, o la declaración se lee como si el
+ * sistema hubiera reordenado su compra.
+ */
+export interface GrupoDeVendedor {
+  cuentaComercialId: string;
+  items: ItemCarrito[];
+}
+
+export function agruparPorVendedor(lista: ItemCarrito[]): GrupoDeVendedor[] {
+  const grupos: GrupoDeVendedor[] = [];
+  for (const it of lista) {
+    const g = grupos.find((x) => x.cuentaComercialId === it.cuentaComercialId);
+    if (g) g.items.push(it);
+    else grupos.push({ cuentaComercialId: it.cuentaComercialId, items: [it] });
+  }
+  return grupos;
 }
 
 export function quitarDelCarrito(ofertaId: string): void {
