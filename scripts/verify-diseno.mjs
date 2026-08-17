@@ -1880,6 +1880,16 @@ const FIXTURES = {
      🔴 Y trae el caso que dio vuelta la regla: uno de los ofensores
      DECLARA su unicidad en un comentario. Tiene que salir rojo IGUAL —
      un comentario no es una garantía de la base. */
+  /* R52 · el legítimo es el peso de la prueba (L-236): una pantalla de
+     despensa que NO monta el control tiene que salir VERDE, y el motor
+     que conserva `p_fecha_programada` NO debe pintarse rojo — se quitó la
+     puerta, no el motor. Lo único rojo es el que vuelve a montarlo. */
+  R52: [
+    { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<SelectorVentana opciones={v} elegida={e} onElegir={f} />" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/motor.ts', src: "calcularPromesaDespensa({ fecha_programada: f })" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/checkout.tsx', src: "<SelectorVentana onProgramarOtra={() => abrir()} etiquetaProgramarOtra={t('despensa.programarFecha')} />" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/otra.tsx', src: "<CampoFecha label={t('despensa.programarFecha')} />" },
+  ],
   R50: [
     { path: 'packages/api/src/wrappers/ordena.ts', src: "const publicadas = ofertas.filter(o => o.ok)\nq.order('precio')\nconst x = publicadas[0]" },
     { path: 'packages/api/src/wrappers/embed.ts', src: "const fila = Array.isArray(data) ? data[0] : data" },
@@ -3590,7 +3600,55 @@ function r45(archivos) {
   }
 }
 
-const REGLAS = { R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R52 · «PROGRAMAR OTRA FECHA» NO VUELVE (S100 · G-16, firma del founder 17-ago-2026).
+ *
+ *  EL CASO QUE LA PARIÓ: el founder pidió quitar ese control **repetidamente**
+ *  y **volvía a aparecer en cada ronda**. La causa no fue desobediencia:
+ *  `LETRA_RECORRIDO_DESPENSA_S96` §6.2 decía **«Entra»**, y **la letra gana**
+ *  porque es lo único que la pista siguiente lee.
+ *
+ *  🔴 LA LEY QUE MECANIZA: *una decisión que no queda escrita se vuelve a
+ *  proponer.* La letra ya quedó derogada y tachada; esto es el diente, porque
+ *  **una ley que vive en el lint no se degrada.**
+ *
+ *  QUÉ MIDE: que la superficie de la despensa no monte el control. NO mide el
+ *  motor — `calcular_promesa_despensa` conserva `p_fecha_programada` a
+ *  propósito: *se quitó la puerta, no el motor.*
+ */
+const BASELINE_R52 = 1
+
+function r52(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (!path.includes('/despensa/')) continue
+    // Los dos corpus se solapan: sin dedup el mismo archivo cuenta dos veces
+    // y el baseline mide el solape en vez del defecto.
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    if (/onProgramarOtra\s*=|despensa\.programarFecha|despensa\.programarPlaceholder/.test(limpio)) {
+      ofensores.push(path.split('/').pop())
+    }
+  }
+  // 🔴 BASELINE SOLO-BAJA, y es una DEUDA declarada, no una excepción: la orden
+  // de mesa al registrar el gate fue **no curar nada**, así que el control sigue
+  // montado hasta S101. La ley queda mecanizada igual — lo que no puede pasar es
+  // que CREZCA. ☠️ Muere cuando llegue a 0.
+  if (ofensores.length > BASELINE_R52)
+    fallos.push(
+      `R52: «Programar otra fecha» está montado en ${ofensores.length} archivo(s) (${ofensores.join(' · ')}), baseline ${BASELINE_R52} SOLO-BAJA. DEROGADO por firma del founder (17-ago-2026, gate de S100) y tachado en \`LETRA_RECORRIDO_DESPENSA_S96\` §6.2. El control SALE del checkout; el CUPO por día futuro y el \`p_fecha_programada\` del motor SIGUEN VIGENTES — se quitó la puerta, no el motor.`,
+    )
+  fallos.push(...ancla('R52', archivos.filter((a) => a.path.includes('/despensa/')).length, 1, 'archivo(s) de despensa en el corpus'))
+  return {
+    fallos,
+    info: `${ofensores.length} monta(n) el control derogado · baseline ${BASELINE_R52} solo-baja (dueño A, S101) · firma founder 17-ago-2026`,
+  }
+}
+
+const REGLAS = { R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3866,6 +3924,7 @@ corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r
 corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps)]);
 corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
+corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

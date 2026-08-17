@@ -50,7 +50,7 @@
 > significa catálogo chico** (§4.1). Suma al alcance el **repartidor con
 > pantalla —y con él el GPS y la foto de entrega—**, la **venta de
 > mostrador con código de reclamo**, el retiro en tienda, el catálogo
-> amplio con buscador, la fecha programada, la donación y las
+> amplio con buscador, ~~la fecha programada~~ (**☠️ el CONTROL derogado por firma del founder 17-ago-2026 — ver `LETRA_RECORRIDO_DESPENSA_S96` §6.2; el CUPO por día futuro sigue vigente**), la donación y las
 > direcciones con Places (§11.1). Nacen **D-774 a D-779**;
 > **`D-770` nace y muere el mismo día**.
 >
@@ -1671,7 +1671,7 @@ función.
   pantalla —**el GPS y la foto de entrega entran a v1**—, venta de
   mostrador **donde el vendedor jamás elige la mascota** (el cliente la
   reclama con el código de la factura), retiro en tienda, catálogo
-  amplio con buscador, fecha programada con cupo por día futuro,
+  amplio con buscador, ~~fecha programada~~ (**☠️ control derogado 17-ago-2026 — ver `LETRA_RECORRIDO_DESPENSA_S96` §6.2**) con cupo por día futuro,
   donación sin destino elegible, direcciones con Places, cinco avisos,
   cancelar hasta «preparado», y **dos nombres —`Servicios` y `Venta de
   productos`— como primer candado del cinturón de §3.4**. Nacen **D-774

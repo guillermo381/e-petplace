@@ -41,8 +41,9 @@
 7. **Sin mascota elegida se muestra todo.** Seis especies.
 8. **Compra recurrente en v1, con cobro al medio de pago guardado**, con
    aviso honesto y un interruptor para apagarla.
-9. **Programar la fecha de entrega entra**, y el cupo existe por cada
-   día futuro.
+9. ~~**Programar la fecha de entrega entra**~~ **☠️ DEROGADO por firma del
+   founder, 17-ago-2026 (gate de S100) — ver §6.2.** El control SALE del
+   checkout; **el cupo por cada día futuro SIGUE VIGENTE**.
 10. **La donación entra a v1**, sin destino elegible: el refugio lo elige
     e-PetPlace y la foto se manda a mano. **El reparto lo hace el
     founder y no consume cupo.**
@@ -285,12 +286,39 @@ primer cobro real es el mismo día que exista la pasarela** (D-778).
 
 ### 6.2 Programar la fecha de entrega
 
-**Entra.** Programar con más aviso permite planificar la ruta y sumar
-vehículos: es mejor servicio y mejor operación.
+> ## ☠️ **DEROGADO POR FIRMA DEL FOUNDER — 17-ago-2026 (gate de S100)**
+>
+> **«Programar otra fecha» SALE de la superficie del checkout.** El founder
+> lo pidió quitar **repetidamente** y **volvía a aparecer en cada ronda**.
+>
+> **LA RAZÓN POR LA QUE SE DEPOSITA ACÁ Y NO EN UN PROMPT:** *una decisión
+> que no queda escrita se vuelve a proponer.* No es que alguien
+> desobedeciera — **es que esta sección decía «Entra» y la letra gana**,
+> porque es lo único que la pista siguiente lee. Es el mismo patrón que el
+> canon ya pagó tres veces (el magenta en S83, la plata en S83 y en S88):
+> **dos letras firmadas que se contradicen son peores que una equivocada,
+> porque cualquiera cita la que le conviene y está «en regla».**
+>
+> **QUÉ MUERE:** el control de programar otra fecha en el checkout — el
+> `onProgramarOtra` del `SelectorVentana`, el `CampoFecha` que abre, y las
+> voces `despensa.programarFecha` / `despensa.programarPlaceholder`.
+>
+> **QUÉ NO MUERE, y es importante no barrerlo de más:** el **cupo por día
+> futuro** sigue existiendo y sigue siendo lo que respalda la promesa; y
+> `calcular_promesa_despensa` **conserva su parámetro `p_fecha_programada`**,
+> que es motor y no superficie. *Lo que se quita es la puerta, no el motor
+> — el día que la fecha programada vuelva por decisión, vuelve sin
+> reconstruirse.*
+>
+> **MECANIZADO:** `verify:diseno` **R52** (R51 ya estaba tomada por otra ley: el número se verificó, no se supuso) — *una ley que vive en el lint no se
+> degrada.*
 
-**La condición que lo hace honesto:** el cupo existe **por cada día
-futuro** y la promesa lo consume. Un día sin capacidad confirmada no se
-puede prometer.
+~~**Entra.** Programar con más aviso permite planificar la ruta y sumar
+vehículos: es mejor servicio y mejor operación.~~
+
+**La condición que lo hace honesto** *(SIGUE VIGENTE — es del cupo, no del
+control)*: el cupo existe **por cada día futuro** y la promesa lo consume.
+Un día sin capacidad confirmada no se puede prometer.
 
 ### 6.3 El carrito
 
