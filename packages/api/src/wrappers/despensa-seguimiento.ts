@@ -156,6 +156,21 @@ export interface SeguimientoEnvio {
    * pistas por una línea. Se declara para que se vea que fue decisión.
    */
   entregado_en: string | null;
+  /**
+   * 🔴 EL PUNTO AL QUE VA (S100 · H-11 de D). **Misma forma exacta que H-01**:
+   * la columna ya existía, la familia ya podía leerla por el brazo del dueño
+   * de `envios_select`, y **el lector simplemente no la pedía**.
+   *
+   * Sin esto **no hay mapa aunque haya track**: el encuadre se calcula entre
+   * los dos extremos, y *una moto moviéndose sin el punto al que va no dice
+   * «tu pedido se acerca» — dice «algo se mueve».*
+   *
+   * `null` = el envío no tiene destino cargado. **Medido: 2 de 4 lo tienen**
+   * ⇒ vacío honesto, y **la pantalla no dibuja mapa sin destino** en vez de
+   * encuadrar sobre un punto inventado (L-139).
+   */
+  destino_lat: number | null;
+  destino_lon: number | null;
 }
 
 export interface DetallePedido {
@@ -252,7 +267,7 @@ export async function obtenerDetallePedido(
       .eq('pedido_id', pedidoId),
     cliente
       .from('envios')
-      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, salio_en, hacia_destino_en, entregado_en')
+      .select('id, transportista, tracking_code, tracking_url, pagado_por, track_gps, salio_en, hacia_destino_en, entregado_en, destino_lat, destino_lon')
       .eq('pedido_id', pedidoId)
       .maybeSingle(),
   ]);
@@ -339,6 +354,11 @@ export async function obtenerDetallePedido(
       salio_en: hito(env.data.salio_en),
       hacia_destino_en: hito(env.data.hacia_destino_en),
       entregado_en: hito(env.data.entregado_en),
+      // El destino: número o null. Un `0` es una coordenada válida, así que se
+      // pregunta por el TIPO y no por la verdad del valor — `|| null` habría
+      // convertido el meridiano de Greenwich en «sin destino».
+      destino_lat: typeof env.data.destino_lat === 'number' ? env.data.destino_lat : null,
+      destino_lon: typeof env.data.destino_lon === 'number' ? env.data.destino_lon : null,
     };
   }
 
@@ -365,6 +385,57 @@ export async function obtenerDetallePedido(
       costo_envio: n(c.costo_envio),
       descuento_monto: n(c.descuento_monto),
       envio,
+    },
+  };
+}
+
+/**
+ * F3 · LA FICHA DEL REPARTIDOR PARA LA FAMILIA (S100 · H-02).
+ *
+ * Tres campos y nada más: **nombre · tipo de vehículo · placa**. La placa
+ * manda, porque es lo que se verifica en la calle.
+ *
+ * 🔴 **LA FOTO NO SALE, Y NO ES UN OLVIDO.** `repartidores.foto_path` vive en
+ * `cuenta-documentos`, **el bucket de los documentos de identidad**. La salida
+ * correcta no es una policy fina sobre un bucket sensible: es que la foto de
+ * perfil viva en SU propio bucket, con su carga y su consentimiento. Deuda
+ * declarada por mesa, fuera de S100. ⇒ la ficha sale con **tres de cuatro y el
+ * hueco se dice** (N13). *Uber sin foto sigue siendo Uber; sin placa, no.*
+ *
+ * Pasa por DEFINER porque `repartidores` y `repartidor_vehiculos` NO son
+ * legibles por la familia —son datos de un tercero— y el gate vive en el
+ * cuerpo, keyed por el ENVÍO (molde D-455: los ids son filtro, jamás permiso).
+ *
+ * ⚠️ **`hay_ficha:false` tapa DOS casos a propósito** —el envío no es tuyo, o
+ * todavía no tiene repartidor— y **no los distingue**: separarlos le
+ * confirmaría a un curioso que el envío existe.
+ * ⚠️ Y el dato vivo, para que un vacío no se lea como falla: **6 repartidores,
+ * 1 con vehículo cargado.**
+ */
+export interface FichaRepartidor {
+  nombre: string | null;
+  vehiculo_tipo: string | null;
+  vehiculo_placa: string | null;
+}
+
+export async function obtenerFichaRepartidor(
+  envioId: string,
+): Promise<ResultadoWrapper<FichaRepartidor | null, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('obtener_ficha_repartidor', {
+    p_envio_id: envioId,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
+  // `null` = no hay ficha que mostrar. La pantalla no dibuja la tarjeta, en
+  // vez de dibujarla con tres guiones.
+  if (data.hay_ficha !== true) return { ok: true, data: null };
+  const s = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null);
+  return {
+    ok: true,
+    data: {
+      nombre: s(data.nombre),
+      vehiculo_tipo: s(data.vehiculo_tipo),
+      vehiculo_placa: s(data.vehiculo_placa),
     },
   };
 }
