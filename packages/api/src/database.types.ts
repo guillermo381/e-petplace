@@ -19213,6 +19213,7 @@ export type Database = {
           producto_id: string | null
           producto_marca: string | null
           producto_nombre: string | null
+          propuesta_pendiente: boolean | null
           razones: string[] | null
           sku_vendedor: string | null
           stock_disponible: number | null

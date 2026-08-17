@@ -1240,6 +1240,21 @@ export interface SkuDelVendedor {
   precio_referencia: number | null;
   banda_min: number | null;
   banda_max: number | null;
+  /** 🔴 EL PRECIO QUE EL VENDEDOR PIDIÓ. Cuando el cambio cae fuera de banda
+   *  —o no hay referencia— la puerta **guarda la propuesta** y rebota, para
+   *  no perderle el trabajo. Sin este dato la pantalla vuelve a mostrar el
+   *  precio viejo y **no queda rastro de que hay algo esperando**.
+   *  Literal de C, que es el porqué: *«un cambio que se acepta y desaparece
+   *  se lee como que se perdió, y la segunda vez el vendedor deja de pedir».* */
+  precio_propuesto: number | null;
+  /** ¿HAY ALGO ESPERANDO APROBACIÓN? **Lo emite el servidor**, mismo corte
+   *  que las razones: es un HECHO, no una presentación. *Comparar en el
+   *  cliente parece trivial hasta que dos superficies lo comparan distinto —
+   *  una olvida el caso NULL y otra no— y el vendedor ve «pendiente» en una
+   *  pantalla y nada en la otra.*
+   *  **Se apaga cuando la propuesta ya coincide con lo publicado**: una marca
+   *  que no se apaga al cumplirse deja de significar algo en dos días. */
+  propuesta_pendiente: boolean;
   /** 🔴 LAS RAZONES POR LAS QUE NO ALCANZA TODO LO QUE PODRÍA — **las emite
    *  el SERVIDOR** (`v_skus_vendedor.razones`), no las deriva esta capa.
    *  Firma de C, ratificada por mesa: *filtrar por razón en SQL y derivarla
@@ -1442,6 +1457,11 @@ export async function listarSkusDelVendedorPagina(
         : [],
       foto_portada: fotosDeProducto(f).portada,
       precio_referencia: typeof f.precio_referencia === 'number' ? f.precio_referencia : null,
+      precio_propuesto: typeof f.precio_propuesto === 'number' ? f.precio_propuesto : null,
+      // FAIL-CLOSED (L-247): sin `true` explícito, NO hay nada pendiente —
+      // inventar un «pendiente» que no existe manda al vendedor a esperar
+      // una aprobación que nadie pidió.
+      propuesta_pendiente: f.propuesta_pendiente === true,
       banda_min: typeof f.banda_min === 'number' ? f.banda_min : null,
       banda_max: typeof f.banda_max === 'number' ? f.banda_max : null,
       razones: Array.isArray(f.razones)
