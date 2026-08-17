@@ -1439,6 +1439,14 @@ export const clienteEs = {
     // que no ofrecerlo (Ley 13).
     filaSinStock: 'Ahora no está disponible.',
 
+    // 🔴 S100-C · H-004 — EL TECHO QUE SE DICE. La vitrina carga 50 sobre 563
+    // comprables: sin esta línea la familia veía el 8,9 % del catálogo y una
+    // lista completa se veía igual que una truncada.
+    // Dice el número Y el camino: sin la segunda mitad sería un aviso que
+    // informa un límite y no ofrece salida (Ley 13, el callejón).
+    techoVitrina:
+      'Te mostramos {{mostrados}} de {{total}} productos. Buscá por nombre o marca para llegar al resto.',
+
     // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
     // jamás esconde. El paso explícito gatea el agregar.
     filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',

@@ -69,6 +69,7 @@ import {
   buscarProductosDespensa,
   listarAlergenos,
   listarProductosDespensa,
+  contarProductosDespensa,
   mascotasElegibles,
   obtenerMascotasDeFamilia,
   recomendarParaMascota,
@@ -86,6 +87,22 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
 type Fase<T> = T | 'cargando' | 'error';
 
+/**
+ * 🔴 LOS FILTROS DE LA VITRINA, EN UNA SOLA CONSTANTE — y no es prolijidad.
+ *
+ * `contarProductosDespensa` exige por contrato contar con **los mismos
+ * filtros** que la lista: *un total global contra una lista filtrada diría
+ * «50 de 563» sobre un conjunto que nunca tuvo 563*. Compartir el objeto
+ * vuelve **inexpresable** que se desincronicen — el día que la vitrina gane
+ * un filtro, el conteo lo gana en el mismo acto. *La alternativa era repetir
+ * el literal en dos llamadas y confiar en que nadie toque una sola: eso ya
+ * tiene nombre en esta casa.*
+ *
+ * `limite` viaja acá aunque NO sea un filtro (`aplicarFiltrosVitrina` lo
+ * ignora): es el techo, y vive pegado a lo que corta para que se lean juntos.
+ */
+const FILTROS_VITRINA = { limite: 50 } as const;
+
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -100,6 +117,10 @@ export default function DespensaDescubrir() {
     typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null,
   );
   const [vitrina, setVitrina] = useState<Fase<ProductoDeVitrina[]>>('cargando');
+  /** 🔴 CUÁNTOS HAY DE VERDAD (H-004, S100-C). `null` = no lo sabemos, y por
+   *  eso NO se dice nada: afirmar un total que no llegó sería peor que callar.
+   *  Solo se habla cuando el techo efectivamente cortó. */
+  const [totalVitrina, setTotalVitrina] = useState<number | null>(null);
   /** Ver S95-I: el fallo de la recomendación viaja CON su código —
    *  `exclusion_no_verificable` tiene voz propia (L-222: el estado malo
    *  inexpresable, no el error genérico que nadie atrapa). */
@@ -158,8 +179,16 @@ export default function DespensaDescubrir() {
   useEffect(() => {
     let vigente = true;
     setVitrina('cargando');
-    void listarProductosDespensa({ limite: 50 }).then((r) => {
+    void listarProductosDespensa(FILTROS_VITRINA).then((r) => {
       if (vigente) setVitrina(r.ok ? r.data : 'error');
+    });
+    // H-004 — el compañero obligado del techo. Va en su propio viaje (es un
+    // `head` de PostgREST: cuenta en el servidor y no baja una sola fila) y
+    // su fallo NO ensucia la lista: sin número, la pantalla simplemente no
+    // dice cuántos hay. Degradar a «0 de 0» sobre una vitrina llena sería
+    // el mismo defecto con el número al revés.
+    void contarProductosDespensa(FILTROS_VITRINA).then((r) => {
+      if (vigente) setTotalVitrina(r.ok ? r.data : null);
     });
     // La voz del catálogo de alérgenos, para la advertencia por fila.
     void listarAlergenos().then((r) => {
@@ -571,6 +600,25 @@ export default function DespensaDescubrir() {
                 {elegibles.length > 0 ? (
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">{t('despensa.elegiMascota')}</Texto>
+                  </View>
+                ) : null}
+                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE.
+                    La vitrina carga 50 y el catálogo comprable tiene 563: la
+                    familia veía el 8,9 % y **una lista completa y una truncada
+                    se veían igual**. `contarProductosDespensa` existía desde
+                    S99 para exactamente esto y no tenía un solo consumidor —
+                    la cura estaba construida y sin consumir.
+                    Se habla SOLO cuando el techo cortó de verdad
+                    (`total > cargados`): en una vitrina que entra entera, el
+                    número sobra y avisar de más enseña a ignorar los avisos. */}
+                {totalVitrina !== null && totalVitrina > vitrina.length ? (
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">
+                      {t('despensa.techoVitrina', {
+                        mostrados: vitrina.length,
+                        total: totalVitrina,
+                      })}
+                    </Texto>
                   </View>
                 ) : null}
                 {listaConFacetas(vitrina, null)}

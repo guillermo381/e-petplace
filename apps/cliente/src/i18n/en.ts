@@ -1243,6 +1243,11 @@ export const clienteEn = {
     // Speaks about the present and promises nothing (§4.4 bans "temporarily").
     filaSinStock: "It's not available right now.",
 
+    // 🔴 S100-C · H-004 — the ceiling that says so. Same reasoning as `es`:
+    // the number AND the way out, never just the limit.
+    techoVitrina:
+      'Showing {{mostrados}} of {{total}} products. Search by name or brand to reach the rest.',
+
     // S96 · the allergy warning (§5.4) — names pet and allergen, never hides.
     filaContiene: "Contains {{lista}}, and {{nombre}}'s record lists it as an allergy.",
     alergiaContiene: '{{nombre}} is allergic to {{lista}} and this food contains it.',
