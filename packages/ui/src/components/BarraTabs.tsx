@@ -267,10 +267,23 @@ const HOMBRO_VIAJE = 6
  *  corrección anterior vino a arreglar. **Lo que cambió no es el corte:
  *  es que la barra ya no deja bordes sin usar** — y esos bordes eran
  *  justamente el espacio que el clamp del disco necesitaba. */
-const INSET_CONTENIDO = spacing[4]
-/** El radio del cuerpo flotante. `radius.xl` es el escalón que la casa usa
- *  para superficies grandes apoyadas; no nace un número nuevo. */
-const RADIO_BARRA = radius.xl
+const INSET_CONTENIDO = spacing[2]
+/** ⏪ Era `radius.xl` (20), *«el escalón que la casa usa para superficies
+ *  grandes apoyadas»* — **y esa razón caducó cuando la barra dejó de estar
+ *  apoyada y pasó a ir a sangre.** Con el cuerpo tocando los cuatro
+ *  bordes, el radio de arriba ya no describe una superficie flotante: es
+ *  el remate del filo.
+ *
+ *  🔴 Y ADEMÁS PAGA DOS COSAS A LA VEZ, que es por lo que se eligió esta
+ *  palanca y no otra (medición servida y firmada):
+ *  · **`margenDisco = rc + VALLE_SEMI`** ⇒ bajar `rc` acerca el disco al
+ *    borde **sin tocar el valle**, o sea sin mover la inflexión del 50 %.
+ *  · **menos radio comiéndose el hombro** en el tab del extremo.
+ *  Las otras dos palancas se descartaron CON NÚMERO: `INSET` a 0 revive el
+ *  clamp (12,2 px) y angostar el valle empuja la inflexión de 50 % a 68 %.
+ *
+ *  `radius.md` es escalón de la escala cerrada: no nace un número nuevo. */
+const RADIO_BARRA = radius.md
 /** ── EL BLOQUE DE LA TAB, CON ALTURAS DECLARADAS ────────────────────
  *  🔴 **Están fijas a propósito, y ésa es la cura del tercer hallazgo**
  *  (*«la gráfica aparece dentro del círculo SIN ESTAR CENTRADA»*). Antes
