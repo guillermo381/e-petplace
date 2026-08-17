@@ -87,6 +87,7 @@ import { BarrasSemana } from '../components/BarrasSemana'
 import { CantoMarca } from '../components/CantoMarca'
 import { Entrada } from '../components/Entrada'
 import { Fundido } from '../components/Fundido'
+import { Chevron } from '../components/chevron'
 import { EntradaDeCruce } from '../components/EntradaDeCruce'
 import { registrarCruce } from '../components/cruce'
 import { EvitaTeclado } from '../components/EvitaTeclado'
@@ -1041,6 +1042,20 @@ function PiezasFaltantes() {
         </View>
       </View>
 
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          Chevron — el trazo suelto para slots que NO son una fila (el `senal` de DatoAdministrable). E14: › lleva · ⌄ despliega
+        </Texto>
+        <Tarjeta>
+          {(['derecha', 'abajo', 'arriba', 'izquierda'] as const).map((d) => (
+            <View key={d} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+              <Texto variante="apoyo">{d}</Texto>
+              <Chevron direccion={d} />
+            </View>
+          ))}
+        </Tarjeta>
+      </View>
 
       {/* Fundido — la TERCERA de la familia de entradas, y la que no tiene
           eje: nada viajó, la misma superficie pasó a decir otra cosa. Se
