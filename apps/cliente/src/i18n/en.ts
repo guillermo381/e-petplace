@@ -1249,6 +1249,10 @@ export const clienteEn = {
 
     // 🔴 S100-C — the card's SHORT allergy signals. Same reasoning as `es`:
     // the card signals a conflict; the detail lives in the product page.
+    // 🔴 S100-C · N19 ⑥ — real availability. `hay_stock` is a BOOLEAN by
+    // signature: it answers «can I buy this?», never how many are left.
+    fichaSinStock: "This size isn't available right now.",
+    tambienVieneEn: 'Also comes in {{lista}}, not available today.',
     senalContiene: 'Contains {{lista}}',
     senalPodriaContener: 'May contain {{lista}}',
     senalSinComposicion: 'No ingredients listed',

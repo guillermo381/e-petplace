@@ -62,6 +62,9 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  nombreCurado,
+  PrecioText,
+  SelectorOpcion,
   Separador,
   StepperCantidad,
   Texto,
@@ -203,6 +206,19 @@ export default function DespensaProducto() {
               v.cuenta_comercial_id !== null &&
               v.country_code !== null,
           )
+        : [],
+    [ficha],
+  );
+
+  /** Las presentaciones que EXISTEN y no se pueden comprar hoy. Viajan para
+   *  DECIRSE en ⑥ —una línea, no filas tocables—: **no son una opción, son
+   *  una ausencia**, y ofrecerlas como elegibles sería una puerta que rebota
+   *  (Ley 23). El nulo honesto de S95 se conserva; lo que muere es la tabla
+   *  que las mostraba como si se pudieran elegir. */
+  const sinOferta = useMemo(
+    () =>
+      ficha !== 'cargando' && ficha !== 'error'
+        ? ficha.variantes.filter((v) => v.oferta_id === null || v.precio === null)
         : [],
     [ficha],
   );
@@ -416,16 +432,75 @@ export default function DespensaProducto() {
               ) : null}
             </View>
 
-            {/* 2 · QUÉ ES — sin caja (A6): jerarquía y aire. */}
+            {/* ② · QUÉ ES — nombre CURADO + su línea de identidad.
+                🔴 `descripcion` DEJA DE PINTARSE COMO PROSA, y es por medición:
+                no es una descripción. Medido sobre los 470 activos —
+                **promedio 10 caracteres, máximo 29, CERO sobre 200** — y sus
+                literales son sub-líneas del importador: «Linea Dorada»,
+                «Veterinary Diet», «Gatos», «Premium». *Pintar «Linea Dorada»
+                como párrafo de cuerpo le promete al lector una descripción que
+                no existe.* Va donde pertenece: junto a la marca, con el
+                separador de la casa. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-              <Texto variante="titulo">{ficha.nombre}</Texto>
-              {ficha.marca !== null ? <Texto variante="apoyo">{ficha.marca}</Texto> : null}
-              {ficha.descripcion !== null ? (
-                <View style={{ paddingTop: spacing[2] }}>
-                  <Texto variante="cuerpo">{ficha.descripcion}</Texto>
-                </View>
+              <Texto variante="titulo">{nombreCurado(ficha.nombre)}</Texto>
+              {ficha.marca !== null || ficha.descripcion !== null ? (
+                <Texto variante="apoyo">
+                  {[ficha.marca, ficha.descripcion].filter((x) => x !== null).join(' · ')}
+                </Texto>
               ) : null}
             </View>
+
+            {/* ② bis · LAS PRESENTACIONES COMO CHIPS (N19 ②) — elegir acá y ver
+                el precio abajo, en vez de leer una tabla de filas.
+                Medido: **392 de 470 productos (83 %) tienen UNA sola** ⇒ con una
+                el grupo colapsa y no se dibuja (no se le pide una decisión a
+                quien no tiene alternativa).
+                🔴 Los chips son SOLO de lo comprable, y las presentaciones sin
+                oferta se DICEN abajo en vez de fingirse chips apagados:
+                `SelectorOpcion` no tiene deshabilitado por opción, y **una
+                puerta que se ofrece para rebotar es Ley 23**. El nulo honesto
+                se conserva — la variante existe y no se puede comprar. */}
+            {comprables.length > 1 ? (
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <SelectorOpcion
+                  etiqueta={t('despensa.presentaciones')}
+                  disposicion="tira"
+                  opciones={comprables.map((v) => ({
+                    codigo: v.variante_id,
+                    etiqueta: v.presentacion,
+                  }))}
+                  seleccionada={varianteId ?? undefined}
+                  onSelect={setVarianteId}
+                />
+              </View>
+            ) : null}
+
+            {/* ③ · EL PRECIO, y debajo EL PRECIO POR KILO (N19 ③).
+                🔴 El $/kg es el dato que decide una compra de alimento y que casi
+                ningún catálogo pone — **y solo aparece cuando hay peso**: medido,
+                248 de 563 filas (44 %) lo declaran. Sin peso no hay cuenta, y
+                una cuenta sobre un peso ausente destruiría lo único que le da
+                valor: que sea cierta.
+                El registro es el mensaje (Ley 3): el precio en su voz, el $/kg
+                en mono porque **lo derivó una máquina**. */}
+            {variante !== null && variante.precio !== null ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <PrecioText
+                  valor={variante.precio}
+                  // `ficha` — el registro que la pieza reserva para «el
+                  // protagonista de la ficha, el que decide la compra».
+                  registro="ficha"
+                  porUnidad={
+                    precioPorKg(
+                      variante.precio,
+                      variante.peso_kg,
+                      MONEDA_FALLBACK,
+                      idioma as IdiomaSoportado,
+                    ) ?? undefined
+                  }
+                />
+              </View>
+            ) : null}
 
             {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
                 haya alérgeno documentado relevante: la pieza recibe los
@@ -478,25 +553,6 @@ export default function DespensaProducto() {
               </View>
             ) : null}
 
-            {/* 4 · EL PORQUÉ (S95-I, sin cambios de criterio) */}
-            {porque.length > 0 ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                <Texto variante="seccion">
-                  {nombreMascota !== null
-                    ? t('despensa.porqueTituloMascota', { nombre: nombreMascota })
-                    : t('despensa.porqueTitulo')}
-                </Texto>
-                {porque.map((f) => (
-                  <Texto key={f} variante="cuerpo">
-                    {f}
-                  </Texto>
-                ))}
-                {ficha.es_dieta_prescripcion ? (
-                  <Texto variante="apoyo">{t('despensa.porquePrescripcion')}</Texto>
-                ) : null}
-              </View>
-            ) : null}
-
             {/* 5 · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
                 mejor e-commerce; candado ① de §5.4: sin composición se DICE).
                 Todo en voz de "declarado por el fabricante" — la app
@@ -535,99 +591,55 @@ export default function DespensaProducto() {
               )}
             </View>
 
-            {/* 6 · LAS PRESENTACIONES — elegir es comprar la correcta.
-                Las sin oferta se dicen (nulo honesto), jamás "$ 0,00". */}
-            <View style={{ gap: spacing[2] }}>
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <Texto variante="seccion">{t('despensa.presentaciones')}</Texto>
+            {/* ⑤ · PARA QUIÉN SIRVE (N19 ⑤ — era la 4 y baja UN puesto: la
+                composición sube a ④ para quedar PEGADA a su advertencia).
+                Nuestro diferencial: no lo tiene ninguno de los referentes. */}
+            {porque.length > 0 ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                <Texto variante="seccion">
+                  {nombreMascota !== null
+                    ? t('despensa.porqueTituloMascota', { nombre: nombreMascota })
+                    : t('despensa.porqueTitulo')}
+                </Texto>
+                {porque.map((f) => (
+                  <Texto key={f} variante="cuerpo">
+                    {f}
+                  </Texto>
+                ))}
+                {ficha.es_dieta_prescripcion ? (
+                  <Texto variante="apoyo">{t('despensa.porquePrescripcion')}</Texto>
+                ) : null}
               </View>
-              {ficha.variantes.length === 0 ? (
-                <View style={{ paddingHorizontal: spacing[5] }}>
-                  <EstadoVacio
-                    registro="seccion"
-                    titulo={t('despensa.sinPresentaciones')}
-                    descripcion={t('despensa.sinPresentacionesDetalle')}
-                  />
-                </View>
-              ) : (
-                <View>
-                  {ficha.variantes.map((v, i) => {
-                    const comprable = v.oferta_id !== null && v.precio !== null;
-                    const elegida = v.variante_id === varianteId;
-                    return (
-                      <View key={v.variante_id}>
-                        {i > 0 ? <Separador /> : null}
-                        {comprable ? (
-                          <Celda
-                            interactiva
-                            accessibilityRole="radio"
-                            onPress={() => {
-                              setVarianteId(v.variante_id);
-                            }}
-                            titulo={v.presentacion}
-                            subtitulo={elegida ? t('despensa.presentacionElegida') : undefined}
-                            metadataMono={v.precio !== null ? `$ ${v.precio.toFixed(2)}` : undefined}
-                            /* ⭐ S99-D · EL PRECIO POR KILO — el escalón que
-                               nadie pone (receta de B, firma de la mesa).
-                               `metadataMono` y `fin` CONVIVEN apilados en la
-                               zona fin (mono arriba, nodo abajo) — o sea que
-                               «debajo del precio» no hay que construirlo: la
-                               pieza ya lo hace, y por eso no nace nada nuevo.
+            ) : null}
 
-                               🔴 **VA POR PRESENTACIÓN Y NO UNA VEZ EN LA
-                               FICHA**, y es lo único que interpreté de la
-                               receta: con varias presentaciones un $/kg
-                               suelto no diría de cuál es — y comparar
-                               presentaciones **es justo el trabajo para el
-                               que sirve**. Un número ambiguo en el lugar
-                               donde se decide sería peor que no ponerlo.
-
-                               El registro es el mensaje (Ley 3): mono porque
-                               **lo derivó una máquina**, y esa diferencia
-                               tipográfica es la que lo hace leer como
-                               cálculo. Sin peso declarado NO SE DIBUJA —
-                               el nulo lo decide el helper y acá solo se
-                               respeta (inventar el peso mataría el valor del
-                               dato: que sea cierto).
-
-                               ⚠️ `MONEDA_FALLBACK` NO es una elección mía:
-                               es lo que ESTA pantalla ya asume dos líneas
-                               más arriba (`$ ${'{'}precio.toFixed(2){'}'}`, hardcodeado).
-                               Formatear el $/kg con el riel de moneda y el
-                               precio a mano habría puesto **dos formatos de
-                               plata a un centímetro**. Los dos se mueven
-                               juntos el día que esta ficha adopte D-448 —
-                               declarado, no arreglado de costado. */
-                            fin={
-                              v.precio !== null
-                                ? (() => {
-                                    const porKg = precioPorKg(
-                                      v.precio,
-                                      v.peso_kg,
-                                      MONEDA_FALLBACK,
-                                      idioma as IdiomaSoportado,
-                                    );
-                                    return porKg === null ? undefined : (
-                                      <Texto variante="dato" color="secondary">
-                                        {porKg}
-                                      </Texto>
-                                    );
-                                  })()
-                                : undefined
-                            }
-                          />
-                        ) : (
-                          <Celda
-                            titulo={v.presentacion}
-                            subtitulo={t('despensa.varianteSinOferta')}
-                          />
-                        )}
-                      </View>
-                    );
+            {/* ⑥ · DISPONIBILIDAD REAL — y las presentaciones que NO se pueden
+                comprar, DICHAS (N19 ⑥).
+                ☠️ Acá vivía la tabla de presentaciones en `Celda`. La reemplazan
+                los chips de ②: **elegir y ver el precio arriba** en vez de leer
+                una tabla de filas con el precio repetido en cada una.
+                🔴 Lo que la tabla SÍ hacía y no se pierde: decir las variantes
+                sin oferta. Se conserva como UNA línea —no como filas tocables—
+                porque **no son una opción: son una ausencia**. El nulo honesto
+                se mantiene; lo que muere es fingir que se pueden elegir.
+                Y `hay_stock` es BOOLEANO por firma: dice «¿puedo comprar esto?»,
+                jamás cuánto queda. A midió el límite exacto del dato —
+                `stock_disponible > 0`— así que esta línea **no puede** decir
+                «alcanza para 5» ni aunque alguien lo pida. */}
+            {variante !== null && !variante.hay_stock ? (
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo">{t('despensa.fichaSinStock')}</Texto>
+              </View>
+            ) : null}
+            {sinOferta.length > 0 ? (
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo">
+                  {t('despensa.tambienVieneEn', {
+                    lista: sinOferta.map((v) => v.presentacion).join(', '),
                   })}
-                </View>
-              )}
-            </View>
+                </Texto>
+              </View>
+            ) : null}
+
 
             {/* 7 · LA CANTIDAD */}
             {comprables.length > 0 ? (

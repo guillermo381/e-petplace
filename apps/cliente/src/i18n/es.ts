@@ -1451,6 +1451,13 @@ export const clienteEs = {
     // conflicto; el detalle y el paso de entendimiento viven en la ficha.
     // La imprecisa NO baja el tono: si esa proteína ES pollo, le hace igual de
     // mal — lo que cambia es la voz, no la gravedad.
+    // 🔴 S100-C · N19 ⑥ — DISPONIBILIDAD REAL. `hay_stock` es BOOLEANO por
+    // firma: dice «¿puedo comprar esto?», jamás cuánto queda (medido por A:
+    // es literalmente `stock_disponible > 0`). Sin numero, sin urgencia.
+    fichaSinStock: 'Esta presentación no está disponible ahora.',
+    // Las presentaciones que existen y no se pueden comprar: se DICEN, y no
+    // se ofrecen como elegibles — no son una opción, son una ausencia.
+    tambienVieneEn: 'También viene en {{lista}}, sin disponibilidad hoy.',
     senalContiene: 'Contiene {{lista}}',
     senalPodriaContener: 'Podría contener {{lista}}',
     senalSinComposicion: 'Sin composición declarada',

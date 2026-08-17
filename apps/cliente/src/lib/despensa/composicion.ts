@@ -47,17 +47,27 @@ export function alergenosDeMascota(detalle: unknown[]): string[] {
   return salida;
 }
 
-/** Cruce LITERAL (case-insensitive) — lo usa la fila de búsqueda de
- *  Descubrir, que solo tiene los nombres del criterio de la
- *  recomendación a mano. La ficha usa el cruce EXPANDIDO de abajo, que
- *  es el que ve las relaciones (ave ⊃ pollo). */
-export function alergenosQueCruzan(
-  productoAlergenos: string[],
-  mascotaAlergenos: string[],
-): string[] {
-  const prohibidos = new Set(mascotaAlergenos.map((a) => a.trim().toLowerCase()));
-  return productoAlergenos.filter((a) => prohibidos.has(a.trim().toLowerCase()));
-}
+/**
+ * ☠️ **ACÁ VIVÍA `alergenosQueCruzan`, Y SU MUERTE ES DE SALUD, NO DE ORDEN**
+ * (S100-C · censo de alérgenos ordenado por la mesa).
+ *
+ * Hacía el cruce **LITERAL**: solo coincidencia exacta. Su comentario decía
+ * *«lo usa la fila de búsqueda de Descubrir»* — y era cierto. **La
+ * consecuencia, que nadie había medido: a alguien cuyo perro es alérgico al
+ * pollo, la búsqueda NO le decía que un producto declara `ave_no_especificada`
+ * y podría ser pollo.** Advertía de menos, sin error, sin traza y sin síntoma:
+ * *el que falta no se ve.*
+ *
+ * Al migrar la búsqueda a la tarjeta pasó a `cruzarConVigilados` (el de abajo,
+ * que ve las relaciones) y **esta función quedó con CERO consumidores en todo
+ * el monorepo** — verificada por grep sobre `apps`, `packages` y `scripts`.
+ *
+ * 🔴 **Se borra en vez de dejarse «por si acaso», y ésa es la decisión:** una
+ * función de salud que cruza de menos, exportada y sin consumidores, **es el
+ * arma que agarra el próximo que necesite «cruzar alérgenos» y encuentre el
+ * nombre más obvio.** *Un residuo inofensivo hoy es un default peligroso
+ * mañana.* **El cruce de alérgenos de esta casa es UNO: `cruzarConVigilados`.**
+ */
 
 export interface CruceAlergia {
   coincidencia: 'ninguna' | 'exacta' | 'imprecisa';

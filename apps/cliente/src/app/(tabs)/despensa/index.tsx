@@ -59,6 +59,7 @@ import {
   EstadoVacio,
   FiltroPills,
   Icono,
+  nombreCurado,
   Separador,
   TarjetaProducto,
   Texto,
@@ -84,7 +85,6 @@ import { CriterioMascota } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { agregarAlCarrito, fijarCantidad, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { cruzarConVigilados } from '@/lib/despensa/composicion';
-import { nombreCurado } from '@/lib/despensa/nombre-curado';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
