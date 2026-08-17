@@ -81,6 +81,27 @@
  * La prop no acepta cantidad **por construcción** — así el número no
  * puede llegar a esta superficie ni por descuido.
  *
+ * ── 🔴 EL ACOPLAMIENTO QUE VIAJA CON ESTA PIEZA (declarado por C) ───
+ * **El `nombre` llega YA CURADO** — hoy lo cura `nombreCurado`, que vive
+ * en `apps/cliente/src/lib/despensa/` porque es donde se consume. **La
+ * pieza recibe el resultado y no sabe de eso**, y está bien que no sepa.
+ *
+ * ⚠️ **PERO EL DÍA QUE EL ESPEJO DEL VENDEDOR MONTE ESTA MISMA PIEZA
+ * (N17: una fuente, N consumidores), `nombreCurado` TIENE QUE SUBIR CON
+ * ELLA.** Si el espejo la monta y le pasa el nombre CRUDO, **el vendedor
+ * y la familia van a ver nombres distintos del mismo producto** — que es
+ * exactamente el defecto H-001 con otro disfraz: *dos superficies
+ * pintando el mismo dato y desacordando sin síntoma*.
+ *
+ * **Y el porqué del cuidado, medido:** 42 % del catálogo viene EN
+ * MAYÚSCULAS (`CANADA LITTER`). *La curación no agrega palabras —cambia
+ * la caja—, pero si una sola de las dos caras la aplica, el desacuerdo
+ * es visible y nadie sabe cuál es el nombre real.*
+ *
+ * ⇒ **No es trabajo de hoy: es una condición de la próxima mudanza**, y
+ * se escribe acá porque *el lugar donde se lee al construir es la pieza,
+ * no la bitácora de quien lo descubrió.*
+ *
  * ── LO QUE ESTA PIEZA NO HACE ──────────────────────────────────────
  * No sabe de carrito (recibe `cantidad` y avisa), no formatea precio
  * (`PrecioText`), no decide el orden de la grilla, y **no muestra
