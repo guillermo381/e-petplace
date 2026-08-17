@@ -175,3 +175,50 @@ hubiera dicho solo *«a sangre no alcanza»*, **el disco se quedaba corrido para
 siempre** y nadie habría sabido por qué. *La ley se escribió en S84 como criterio; acá
 se ve cuánto vale: un freno con su medición adentro tiene fecha de vencimiento — uno
 sin ella es permanente por accidente.*
+
+---
+
+# ✅ EL BORDE, RESUELTO — y la decisión de la tercera palanca
+
+## ① EL CLAMP MURIÓ donde vive el producto
+**0,0 px en 3 tabs y 0,2 px en 4.** El prestador típico y el cliente tienen **4**
+⇒ **en la app del founder el disco YA ESTÁ EN EL CENTRO de su tab**, y **los íconos se
+curaron solos** — seguían al disco corrido, y el disco dejó de correrse.
+
+**Y el descarte estaba vencido POR PARTIDA DOBLE** (depositado como **L-285**): no era
+solo el valle más angosto — **el tab se mide sobre el CONTENIDO, no sobre la barra.**
+*Con la variable equivocada el razonamiento se invertía: ir a sangre habría empujado el
+primer centro hacia el borde y el clamp habría tirado MÁS fuerte, no menos.*
+
+## ② EL TERCER SÍNTOMA NO ERA EL ANILLO
+Medido **por dirección**: izquierda **9,1** · diagonal **9,1** · abajo **9,0** ⇒ **es
+uniforme**. Lo que el founder ve son **19,4 px de BARRA entre el valle y el filo**, que
+**sumados al anillo** se leen como *28 de un lado contra 9 arriba*.
+**Las dos primeras hipótesis caen.** *El ojo reportó la SUMA de dos cosas como si fuera
+una sola — y por eso la cura que pedía («emparejá el anillo») habría roto lo que estaba
+bien.*
+
+## ③ DECISIÓN DE MESA, RATIFICADA POR EL FOUNDER: la tercera palanca
+**`rc 20 → 12` + `INSET 8`.** Blanco a **22 px**, **clamp muerto**, **inflexión
+intacta**. Es la más barata de las tres medidas por B, y **las otras dos rompen algo**:
+`INSET 0` **revive el clamp** (12,2 px) · el **valle más angosto empuja la inflexión de
+50 % a 68 %**.
+
+**⚠️ LA FIRMA QUE IMPLICA, escrita para que nadie la descubra después:
+LAS ESQUINAS SUPERIORES DE LA BARRA PASAN DE 20 A 12 — menos redondeadas.**
+
+## ④ EL COSTO, ACEPTADO CON SU RAZÓN
+**En el tab del EXTREMO el hombro pasa a 0 px y la S ahí no se lee** — se lee el radio
+de la esquina. **Es el precio de que el disco esté centrado**, y darle hombro al
+extremo **es volver a correrlo**: lo contrario de lo que el founder pidió tres veces.
+**Con `rc 12` alivia** —hay menos radio comiéndose el hombro— **pero no desaparece**.
+**B lo mide y lo reporta CON NÚMERO después del cambio**, para que el founder lo juzgue
+sabiéndolo. **No se invierte y el anillo aguanta: la degradación está acotada.**
+
+## 🔴 ESTADO AL ESCRIBIR — el publish está FRENADO, con su medición
+**Mergeado y verificado:** la **barra a sangre** + el **clamp muerto** (`c6726310`;
+typechecks y `verify:diseno` verdes).
+**NO está adentro la tercera palanca:** medido en el archivo, **`RADIO_BARRA =
+radius.xl = 20`** y **`INSET_CONTENIDO = spacing[4] = 16`** — la decisión pide **12 y
+8**. *Publicar ahora mandaría al teléfono una barra sin la palanca que la mesa acaba de
+firmar, y gastaría el OTA final en una versión intermedia.* **Se publica cuando entre.**

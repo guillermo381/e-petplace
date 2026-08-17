@@ -11711,6 +11711,14 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-285 — DECLARAR CONTRA QUÉ MEDISTE TE SALVA DE LA GEOMETRÍA VIEJA; NO TE SALVA DE HABER MEDIDO LA VARIABLE EQUIVOCADA (S99 — el descarte de «a sangre», vencido POR PARTIDA DOBLE; depositada 16-ago-2026).**
+
+  **El caso.** Un freno descartó la barra a sangre con su medición declarada —*centro del primer tab a 39, el valle pidiendo 43*—. **Y estaba vencido por DOS motivos independientes:** ① la **geometría** cambió (el valle nuevo es más angosto) — *eso lo destapó la ley de S84, porque el freno había declarado sus números* · ② **medía la variable equivocada**. Literal de B: ***«si se midiera sobre el ancho total, ir a sangre habría empujado el primer centro hacia el borde y el clamp habría tirado MÁS fuerte, no menos»*** — el tab **se mide sobre el CONTENIDO, no sobre la barra**, y con la variable equivocada **el razonamiento se invierte**: la conclusión no era solo vieja, era **al revés**.
+
+  **⇒ Lo que agrega a la ley de S84** (*«todo freno declara contra qué midió»*): declarar la medición **hace re-abrible** el freno cuando el mundo cambia — es necesario y **cobró**. Pero **no protege del error de fondo**: un número correcto sobre la magnitud equivocada **se lee tan sólido como uno bueno**, y sobrevive a toda re-verificación que se limite a repetir la misma cuenta con datos nuevos.
+
+  **Regla operativa: al reabrir un freno no se re-corre su cuenta — se re-pregunta QUÉ magnitud decide.** *Si la variable era otra, actualizar los números confirma el descarte en vez de tumbarlo, y el freno se vuelve permanente con evidencia fresca.* **Es la forma más cara de un verde flojo: un NO que se auto-renueva.**
+
 - **L-284 — UN CAMBIO QUE DESTAPA UN DEFECTO LATENTE SE LLEVA LA CULPA DEL DEFECTO (S99 — el valle que mordía el disco; depositada 16-ago-2026).**
 
   **El caso, con su literal (B):** el retraso del valle iba **12 px** detrás y el anillo medía 9 ⇒ **−2,78 px en viaje: la barra ENCIMA del disco.** La lectura fácil era *«bajar el anillo de 10 a 9 rompió el viaje»*. **Medido: con el anillo en 10 YA MORDÍA 2 px, y nadie lo había medido.** ***«No lo rompió bajar el anillo: lo destapó medirlo.»***
