@@ -11711,6 +11711,18 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-278 — UNA PROPORCIÓN COPIADA DE UNA REFERENCIA CON OTRA ESCALA NO CONSERVA LO QUE LA HACÍA FUNCIONAR (S99 — lo desarmó el founder; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** B planteó una disyuntiva —**texto O anillo**— porque copiaba la **proporción** de la referencia (`anillo/radio` = 0,46). **El founder la desarmó de una:** el anillo de la referencia es grande **porque su disco es chico** — sobre un radio chico, 0,46 son pocos píxeles. **Nosotros no necesitamos la proporción: necesitamos que el hueco SE VEA**, y un anillo de 9 sobre nuestro disco grande **ya es más ancho en píxeles reales** que el de la referencia.
+
+  **⇒ SE COPIA EL EFECTO, NO EL COCIENTE.** *Una proporción es una relación entre DOS números de esa referencia; trasplantarla a otra escala conserva la aritmética y pierde el hecho perceptual, que es lo único que se estaba tratando de copiar.*
+
+  **Y su forma general, porque va a volver:** toda constante tomada de un ejemplo ajeno **se traduce al efecto que produce allá y se re-deriva acá** — *la disyuntiva que parecía del diseño era un artefacto de haber importado el número equivocado.*
+
+  **🔴 Y SU GEMELA, MEDIDA POR B EN LA MISMA PASADA — LA REFERENCIA NO TIENE JOROBA:** cero columnas por encima de la línea plana. **Lo que hay es un DESPEGUE TANGENCIAL** — el borde baja un píxel a lo largo de seis y **recién después** se lanza al valle. *«Saliente hacia afuera» era eso, no un montículo.*
+  **⚠️ Y esto retira una palanca que A había servido con su aritmética correcta:** A midió que la joroba mide **2,22 px** y entregó la fórmula para agrandarla (`control = H·9/4`). **El número estaba bien y el OBJETIVO estaba mal** — *era perseguir con precisión algo que la referencia no tiene.* **La joroba se retira.**
+  ⇒ **la aritmética correcta sobre el objetivo equivocado es indistinguible de un hallazgo, y por eso la vara es la referencia MEDIDA, no la descripción de la referencia.**
+
 - **L-277 — UN VALOR ELEGIDO A MANO AL LADO DE UNO DERIVADO COINCIDE POR CASUALIDAD HASTA QUE NO (S99 — el caso es de B, en la cura de la barra; depositada por orden de mesa, 16-ago-2026).**
 
   **🔴 EL NÚMERO QUE EXPLICÓ TRES QUEJAS DE UNA:** el hueco era **un círculo de diámetro 78 perforando una barra de 76 de alto**. Dejaba **13 px de barra debajo** ⇒ **el 83 % del alto DESAPARECÍA** en el tab activo. Literal de B, y es ley: ***«un hueco más grande que la barra no es un anillo: es una MORDIDA.»***
