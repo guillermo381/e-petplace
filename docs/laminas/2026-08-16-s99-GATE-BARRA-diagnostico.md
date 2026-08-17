@@ -96,3 +96,71 @@ cuesta ~2 de barra) o el anillo. **NO HAY UNA TERCERA**».*
 que se usa **parada en un mostrador**; una barra generosa no molesta ahí como
 molestaría en una app de lectura. **Y si come demasiada pantalla, la palanca
 es un número y baja en un turno.**
+
+---
+
+# SEGUNDO GATE — SON DOS DEFECTOS SEPARADOS, Y UNO YA TIENE SU NÚMERO
+
+**Firma:** *«todos los puntos mejoraron pero necesitan refinamiento — eso va a
+la otra sesión. En ÉSTA, que quede bien el menú: NO HA ENTENDIDO NI LA S NI
+LOS BORDES.»*
+
+**Se estaban tratando como uno y son DOS**, con causas distintas y curas
+distintas.
+
+## 🔴 DEFECTO A — EL DISCO SE SALE DEL ANCHO DE LA BARRA EN LOS TABS EXTREMOS
+- **«Cuenta»** (último): el disco sobresale por el **costado derecho**, la
+  barra termina y **el anillo queda cortado**.
+- **«Hoy»** (primero): lo mismo del lado izquierdo.
+- **«Atender»** (medio): **NO pasa** — hay barra a los dos lados.
+
+**⇒ No es la S: es que EL VALLE EN UN TAB EXTREMO NECESITA MÁS ANCHO DE BARRA
+DEL QUE HAY.** Las dos frases del founder son la misma cosa: *«cubre los
+bordes»* y *«en los extremos no pintó nada»* — **no falta la curva: se acabó
+la barra.**
+
+**Y es DECISIÓN, no calibración.** Tres salidas, y B elige con número:
+① la barra **se ensancha** (menos margen lateral) para que el valle quepa ·
+② el valle se **asimetriza** en el primero y el último (el hombro de afuera se
+acorta) · ③ los tabs extremos **se corren hacia adentro**.
+
+## 🔴 DEFECTO B — LA S NO SE VE EN EL MEDIO · **YA ESTÁ MEDIDO: NO ES LA HIPÓTESIS**
+
+**La mesa preguntó si la saliente es CERO en reposo y solo crece con el
+movimiento. Medido contra el código vivo: NO.** `BarraTabs.tsx:290`
+
+```
+const SALIENTE = 5 * (1 + Math.min(Math.abs(estira), 1) * 0.6)
+```
+con `estira = 0` da **5**, no cero. **La hipótesis se descarta.**
+
+**🔴 LA CAUSA REAL ES ARITMÉTICA, Y ES OTRA: LA CÚBICA NO LLEGA A SU PUNTO DE
+CONTROL.** El hombro se dibuja con un control en `-SALIENTE`, pero una cúbica
+**pasa CERCA de sus controles, nunca por ellos**. Con
+`y(t) = 3(1-t)²t·(-S)`, el máximo cae en `t = 1/3` y vale **`S · 4/9`**:
+
+| | `SALIENTE` | **pico REAL de la joroba** | sobre la barra de 86 |
+|---|---|---|---|
+| **reposo** | 5,0 | **2,22 px** | **2,6 %** |
+| viaje completo | 8,0 | 3,56 px | 4,1 % |
+
+**⇒ La joroba existe y mide 2,2 px. Ése es el defecto entero: no está
+ausente, es IMPERCEPTIBLE.** *Y explica por qué «la S existe en la letra» y no
+en la pantalla — las dos cosas eran ciertas.*
+
+**Palanca directa:** para una joroba de `H` px visibles, el control va en
+`H · 9/4`. *Una saliente de 6 px reales pide un control en 13,5, no en 6.*
+
+## EL ANILLO
+En «Atender» **se ve, pero es una línea fina**. **El founder no lo volvió a
+pedir ⇒ no se toca.** Si al resolver A y B queda espacio, **se lee mejor
+grueso**.
+
+## LA VARA Y DÓNDE SE VERIFICA
+**EL VIDEO, no el frame** — el frame ya llevó a una lectura equivocada una vez
+en esta sesión. En la referencia: **el valle recorre buena parte del ancho, la
+saliente se ve CON LA BARRA QUIETA, y el disco nunca se sale del ancho de la
+píldora.**
+
+**Y por L-241 se verifica DONDE VIVE: en la app, con el tab del EXTREMO Y con
+el del MEDIO** — son los dos casos, y **cada uno muestra un defecto distinto.**
