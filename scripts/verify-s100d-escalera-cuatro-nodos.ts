@@ -34,6 +34,8 @@
  * *Un guard que no se probó en rojo es una afirmación, no una medición.*
  */
 
+import { readFileSync } from 'node:fs';
+
 import {
   escaleraDePedido,
   GLIFO_NODO,
@@ -94,6 +96,32 @@ ok(
 console.log('\n⑤ TODO NODO DIBUJADO TIENE SU GLIFO');
 const sinGlifo = feliz.pasos.filter((p) => GLIFO_NODO[p.clave] === undefined);
 ok(sinGlifo.length === 0, 'los cuatro tienen glifo', sinGlifo.map((p) => p.clave).join(', '));
+
+console.log('\n⑥ CON DESVÍO NO SE PROMETE VENTANA (receta ④ de B)');
+// ⚠️ LO QUE ESTE ASSERT PRUEBA Y LO QUE NO, declarado: `detalleDe` vive
+// adentro del componente y no se exporta, así que esto mide la FUENTE, no
+// el comportamiento. Prueba que el brazo existe y que es el PRIMERO —que
+// es donde estaba el defecto: los brazos de retiro y promesa lo tapaban—.
+// No prueba que la voz sea la correcta; eso lo ve el ojo.
+// *Un guard que no declara su límite se lee como si probara más.*
+const fuente = readFileSync('apps/cliente/src/app/(tabs)/despensa/pedidos.tsx', 'utf8');
+const cuerpo = fuente.match(/function detalleDe\([\s\S]*?\n  \}/);
+ok(cuerpo !== null, 'se pudo extraer `detalleDe` de la pantalla real');
+if (cuerpo !== null) {
+  const lineas = cuerpo[0]
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith('if (') || l.startsWith('return '));
+  ok(
+    /escalera\.desvio !== undefined/.test(lineas[0] ?? ''),
+    'el brazo del DESVÍO es el PRIMERO (antes que retiro y que promesa)',
+    lineas[0] ?? '(sin brazos)',
+  );
+  ok(
+    /return undefined/.test(lineas[0] ?? ''),
+    'con desvío devuelve VACÍO — ni promesa ni narrativa (la banda ya lo dice)',
+  );
+}
 
 // ── EL DISCRIMINADOR ────────────────────────────────────────────────────
 // Réplica EXACTA del comportamiento viejo. Si los asserts ① y ③ no la

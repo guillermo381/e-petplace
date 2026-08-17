@@ -96,8 +96,35 @@ export default function DespensaPedidos() {
    *  monto y NADA que diga en qué anda el pedido. La voz sale de
    *  `narrativa_nombre`, que es el CATÁLOGO —dato, no un `switch` acá—, y
    *  solo aparece **cuando la escalera no dibuja**: donde la escalera
-   *  habla, este texto no compite con ella (Chanel). */
-  function detalleDe(p: PedidoEnLista, dibujaEscalera: boolean): string | undefined {
+   *  habla, este texto no compite con ella (Chanel).
+   *
+   *  🔴 S100-D · EL BRAZO DEL DESVÍO — la fila PROMETÍA UNA ENTREGA QUE YA
+   *  NO VA A PASAR. Con `no_llego` o `cancelado`, si el pedido tenía
+   *  promesa guardada esta función la devolvía igual, así que un pedido
+   *  que volvió seguía diciendo «llega entre 14:00 y 16:00».
+   *
+   *  La receta de B lo prohíbe con todas las letras —*prometer una entrega
+   *  que ya no va a pasar es peor que no prometer*— y **`EscaleraEstados`
+   *  YA lo cumple adentro** (`cuandoLlega !== undefined && desvio ===
+   *  undefined`). Lo que fallaba es que la ventana de ESTA fila no viaja
+   *  por ese slot: viaja como texto suelto en `detalle`, y el guard de la
+   *  pieza no lo alcanza.
+   *
+   *  ⇒ **El mismo criterio vivía en dos lugares y solo uno lo aplicaba.**
+   *  Es exactamente la clase que B me corrigió hoy en `TarjetaPedido`, y
+   *  aparece de nuevo a un archivo de distancia. *No se cura ensanchando
+   *  la pieza: se cura no mandándole una promesa que la letra ya prohibió.*
+   *
+   *  Con desvío el detalle queda VACÍO a propósito: la banda ya dice qué
+   *  pasó, y repetirlo en la línea de arriba sería decir dos veces lo
+   *  mismo (Chanel) — por eso tampoco cae a `narrativa_nombre`. */
+  function detalleDe(
+    p: PedidoEnLista,
+    escalera: { pasos: unknown[]; desvio?: unknown },
+  ): string | undefined {
+    // El desvío manda sobre todo lo demás, incluso sobre el retiro: un
+    // retiro cancelado tampoco se retira.
+    if (escalera.desvio !== undefined) return undefined;
     if (p.metodo_entrega === 'retiro') return t('despensa.metodoRetiro');
     if (p.promesa_desde !== null && p.promesa_hasta !== null) {
       return t('despensa.promesaCorta', {
@@ -106,7 +133,7 @@ export default function DespensaPedidos() {
         hasta: horaLocal(p.promesa_hasta),
       });
     }
-    return dibujaEscalera ? undefined : p.narrativa_nombre;
+    return escalera.pasos.length > 0 ? undefined : p.narrativa_nombre;
   }
 
   return (
@@ -167,12 +194,13 @@ export default function DespensaPedidos() {
         ) : (
           <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
             {pedidos.map((p) => {
-              const { pasos, desvio } = escaleraDePedido(p.narrativa, voces);
+              const escalera = escaleraDePedido(p.narrativa, voces);
+              const { pasos, desvio } = escalera;
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
                   titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p, pasos.length > 0)}
+                  detalle={detalleDe(p, escalera)}
                   monto={`$ ${p.total.toFixed(2)}`}
                   pasos={conIconos(pasos)}
                   desvio={desvio}
