@@ -202,6 +202,30 @@ const DISCO_ASOMA = DISCO_ASOMA_DERIVADO
  *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
  *  lado del disco. */
 const VALLE_RADIO = 50
+/* 🔴 LAS MONTAÑAS — EL DISCO **CAE** SOBRE LA BARRA, NO SE RECORTA DE ELLA
+ *  (firma del founder, y es un cambio de MODELO, no de calibración):
+ *  *«no es como si yo extrajera un círculo de la barra, sino que el círculo
+ *  CAE en la barra… los bordes se deforman hacia el lado contrario, y ese
+ *  efecto CUANDO GIRA de un lado a otro es lo que quiero. No era el círculo
+ *  en sí mismo, es EL EFECTO QUE GENERA EL MOVIMIENTO.»*
+ *
+ *  ⇒ una piedra sobre una tela: se hunde donde cae y **la tela se levanta a
+ *  los lados, porque la materia tiene que ir a algún lado.** Las montañas
+ *  son el DESPLAZAMIENTO de lo que se hundió — un molde no las tiene, una
+ *  tela sí.
+ *
+ *  ⏪ **Y por eso son MÁXIMAS EN VIAJE y MÍNIMAS EN REPOSO**, exactamente al
+ *  revés de la joroba fija que se venía pidiendo. *Nadie midió mal: yo medí
+ *  el video EN REPOSO —y en reposo no hay montañas— y el founder las ve
+ *  MIENTRAS SE MUEVE. Se midió el cuadro equivocado.* Mi propia letra ya
+ *  decía «la saliente escala con el estirón»; la corrección la enderezó
+ *  hacia una joroba fija y ahí se perdió.
+ *
+ *  Los números son ALTURA VISIBLE. El control de la cúbica se calcula con
+ *  la regla de 9/4 (una cúbica llega a 4/9 de su control), que es lo que
+ *  hizo que la joroba anterior midiera 2,2 px declarando 5. */
+const MONTANA_REPOSO = 2
+const MONTANA_VIAJE = 9
 /** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
  *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
  *
@@ -317,16 +341,24 @@ function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   const tx = (a: number) => -Math.sin(a)
   const ty = (a: number) => Math.cos(a)
   const a2 = Math.PI - a0
+  /* La montaña del lado HACIA EL QUE VIAJA crece más: es el material que el
+     disco viene empujando. La de atrás queda en su altura de reposo — así
+     el movimiento se lee en la FORMA, no solo en la posición. */
+  const e = Math.max(-1, Math.min(1, estira))
+  const mIzq = MONTANA_REPOSO + Math.max(0, -e) * (MONTANA_VIAJE - MONTANA_REPOSO)
+  const mDer = MONTANA_REPOSO + Math.max(0, e) * (MONTANA_VIAJE - MONTANA_REPOSO)
   return [
     `M0 ${alto - rc}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
     `H${hombroI}`,
-    // despegue tangencial: sale de la horizontal sin quiebre y sin joroba
-    `C${hombroI + (izq - hombroI) * 0.6} 0 ${izq - (izq - hombroI) * 0.25} 0 ${izq} 0`,
+    /* EL HOMBRO IZQUIERDO CON SU MONTAÑA. El control va en `-m*9/4` porque
+       una cúbica llega a 4/9 de su control: si se escribiera la altura
+       deseada, se dibujaría menos de la mitad. */
+    `C${hombroI + (izq - hombroI) * 0.55} ${-mIzq * 2.25} ${izq - (izq - hombroI) * 0.3} ${-mIzq * 0.6} ${izq} 0`,
     `C${px(a0) + k * tx(a0)} ${py(a0) + k * ty(a0)} ${px(a1) - k * tx(a1)} ${py(a1) - k * ty(a1)} ${px(a1)} ${py(a1)}`,
     `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(a2) - k * tx(a2)} ${py(a2) - k * ty(a2)} ${der} 0`,
-    `C${der + (hombroD - der) * 0.25} 0 ${hombroD - (hombroD - der) * 0.6} 0 ${hombroD} 0`,
+    `C${der + (hombroD - der) * 0.3} ${-mDer * 0.6} ${hombroD - (hombroD - der) * 0.55} ${-mDer * 2.25} ${hombroD} 0`,
     `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
     `V${alto - rc}`,
@@ -558,6 +590,15 @@ export function BarraTabs({
   const cxCrudo = anchoTab * (indiceActivo + 0.5)
   const margenDisco = DISCO_RADIO + RADIO_BARRA * 0.35
   const cxDestino = Math.min(Math.max(cxCrudo, margenDisco), Math.max(margenDisco, ancho - margenDisco))
+  /* 🔴 EL CONTENIDO SIGUE AL DISCO — pedido propio del founder: *«los de los
+     extremos, izquierda y derecha, NO QUEDARON CENTRADOS LOS ÍCONOS»*.
+     **Era un defecto que yo introduje con el acotado:** el disco se corría
+     para no salirse de la barra y el ícono se quedaba en el centro de su
+     pestaña, calculado por otro lado. *Dos cosas que tienen que coincidir
+     salían de dos cuentas distintas — el mismo modo de falla que ya me
+     costó el ícono descentrado hace tres gates.*
+     Ahora el corrimiento se DERIVA de la misma posición del disco. */
+  const corrimientoActivo = cxDestino - cxCrudo
   const altoTotal = ALTO_FILA
 
   useEffect(() => {
@@ -706,7 +747,11 @@ export function BarraTabs({
                    La duración acompaña al viaje del disco (`grande`): si
                    el disco tarda 520 y el ícono 300, el ícono llega
                    primero y **espera a su propio marcador**. */
-                transform: [{ translateY: esActivo ? -SUBIDA_ACTIVA : 0 }],
+                transform: [
+                  { translateY: esActivo ? -SUBIDA_ACTIVA : 0 },
+                  // sigue al disco cuando éste se acotó contra el borde
+                  { translateX: esActivo ? corrimientoActivo : 0 },
+                ],
                 transitionProperty: 'transform',
                 transitionDuration: motion.duration.grande,
                 transitionTimingFunction: cubicBezier(...motion.marca.aperturaBezier),
