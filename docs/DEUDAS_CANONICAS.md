@@ -11711,6 +11711,22 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-274 — UNA ETIQUETA NOMBRA SU NÚMERO, NO LA PANTALLA DONDE VIVE (S99 — hallazgo de C al renombrar; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** el cupo decía *«Venta de productos · 3 de 10 entregas hoy»* **tomando prestado el título de la pantalla**. Con el rename habría dicho *«Tu tienda · 3 de 10»* — una etiqueta que nombra el continente y no el contenido. Su literal: ***«el préstamo se veía razonable mientras los dos textos COINCIDÍAN POR CASUALIDAD»***. ⇒ nace su clave propia.
+
+  **Es la familia de las dos verdades que coinciden hoy y divergen mañana** —la misma que obligó a que el total del conteo aplique los filtros de la lista (L-268)— **pero acá el acoplamiento no era entre dos cálculos: era entre dos TEXTOS.** *Y por eso es más difícil de ver: dos números que divergen se notan; dos frases que dejan de significar lo mismo siguen leyéndose bien.*
+
+  **⇒ Regla: una etiqueta se escribe desde lo que MIDE.** Reusar el título de la pantalla ahorra una clave y **acopla el significado de un dato a la navegación**, que es lo que más se mueve.
+
+- **L-273 — UN NOMBRE CORRECTO PUEDE VOLVERSE FALSO SIN QUE NADIE LO EDITE (S99 — hallazgo de C; depositada por orden de mesa, 16-ago-2026).**
+
+  **El caso:** *«Venta de productos»* era **el nombre FIRMADO de la naturaleza**, y por eso estaba en el techo. Después **la venta de mostrador se mudó a ATENDER**, y la pantalla quedó llamándose **como algo que ya no pasa en ella**. **Nadie lo escribió mal: lo movió otra decisión.**
+
+  **Es prima de L-245 (la ley del comentario) y de L-264 (la premisa que caduca), pero en el EJE DEL NOMBRE — y la diferencia importa:** aquéllas envejecen porque **el mundo** cambia; **ésta envejece porque una decisión NUESTRA le sacó el referente.** *El cartel sigue perfecto; lo que se movió es el lugar al que apunta.*
+
+  **⇒ COROLARIO EXIGIBLE: toda mudanza de una CAPACIDAD revisa qué NOMBRES la citaban.** *El destino se mueve, y los carteles que apuntaban a él se quedan* — y como cada uno es correcto por separado, **ningún guard los ve**: solo los ve quien recuerda la mudanza, que es exactamente lo que nadie recuerda dos sesiones después.
+
 - **L-272 — UN FIXTURE QUE ENTRA POR LA PUERTA PRUEBA DOS COSAS: LA SUYA Y LA DE LA PUERTA (S99 — lectura de D; cuatro cobros propios de A la confirman; depositada por orden de mesa, 16-ago-2026).**
 
   **LAS CUATRO CORRECCIONES QUE EL MOTOR LE HIZO A LA SIEMBRA, entre dos actos y sin que ninguna se esquivara:**
