@@ -240,3 +240,54 @@ es INALCANZABLE** — 0,73 es lo más cerca (disco 62), y para 0,66 hacen falta
 
 **La comparación está en `docs/laminas/2026-08-18-s99b-comparacion-barra.png`
 para que el founder decida contra LA IMAGEN, no contra la descripción.**
+
+---
+
+# 🔴 CUARTO GATE — CAMBIA EL MODELO, NO LA CALIBRACIÓN
+
+**Firma VERBATIM:** *«el efecto que quiero que se note es, por ejemplo, SI CAE
+ALGO SOBRE LA BARRA. Los bordes NO SIGUEN EL CÍRCULO, no es como si yo
+EXTRAJERA un círculo de la barra, sino que EL CÍRCULO CAE EN LA BARRA. Los
+bordes de cada extremo del círculo son COMO SI FUERA UNA MONTAÑA, se DEFORMAN
+HACIA EL LADO CONTRARIO… Y ese efecto, CUANDO GIRA EL TAB DE UN LADO A OTRO,
+es lo que genera lo que quiero. NO ERA EL CÍRCULO EN SÍ MISMO, ES EL EFECTO
+QUE GENERA EL MOVIMIENTO.»*
+
+## LO QUE CAMBIA: DOS FÍSICAS DISTINTAS
+
+| lo que construimos | lo que él quiere |
+|---|---|
+| **RESTAR** el círculo de la barra | **EL DISCO CAE** sobre la barra y la **DEFORMA** |
+| el borde **sigue el contorno** del disco — un **molde** | la barra es **TELA**: se hunde donde cae **y se levanta a los lados** |
+| geometría **concéntrica**, separación garantizada | **desplazamiento**: la materia tiene que ir a algún lado |
+
+**⇒ LAS MONTAÑAS NO SON UN ADORNO: SON EL DESPLAZAMIENTO DE LO QUE SE HUNDIÓ.**
+*Un molde no tiene montañas; una tela sí.* **Eso es lo que él viene llamando
+«la S» desde el primer gate**, y lo que la mesa tradujo mal como *«una saliente
+hacia afuera»*.
+
+## 🔴 POR QUÉ NADIE LO ENCONTRABA — y por qué nadie se equivocó
+**B midió el video EN REPOSO: cero columnas sobre la plana. Su medición era
+correcta.** Lo que el founder quiere **no está en el reposo: es el
+COMPORTAMIENTO durante el viaje.**
+⇒ **B mide el video EN MOVIMIENTO** — los cuadros intermedios del cruce,
+**cuando el disco está a mitad de camino y el valle está deformado
+asimétricamente.** *Ahí vive lo que él vio y quiso.* **Ver L-280.**
+
+## LO QUE HAY QUE RESOLVER
+**Que la barra se comporte como MATERIAL y no como molde:** el disco
+**desplaza** · los hombros **se levantan porque algo bajó** · y **la
+deformación es MÁXIMA durante el viaje y mínima en reposo** — que es
+**exactamente lo contrario** de lo que se le venía pidiendo (una joroba fija).
+
+**Y su propia letra ya tenía la mitad: *«la saliente ESCALA CON EL ESTIRÓN»*.
+Estaba en el camino correcto y la mesa la mandó a hacerla fija.**
+
+**Vara: la comparación EN MOVIMIENTO** — cuadros intermedios de la referencia
+al lado de los nuestros, **no cuadros en reposo**.
+
+## Y LOS DOS DEFECTOS DEL GATE, QUE SON INDEPENDIENTES DE ESTO
+1. **EL HUECO NO ES DEL COLOR DEL FONDO** — se ve **blanco grisáceo** en
+   «Cuenta». Es su *«por eso no se nota que está»*.
+2. **LOS ÍCONOS DE LOS TABS EXTREMOS NO ESTÁN CENTRADOS** — consecuencia del
+   acotado: **el disco se corrió y el contenido no lo siguió.**
