@@ -4200,7 +4200,14 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="Campo — tocá para ver el foco (nada se anima al tipear)">
+        <Seccion titulo="Campo — N11′: la etiqueta va AFUERA y ARRIBA (tocá para ver el foco; nada se anima al tipear)">
+          <Texto variante="apoyo">
+            S100-B · la etiqueta salió de la caja (⏪ S99 la había metido adentro). Mirá
+            las tres cosas que la ley pide y que acá se pueden ver juntas: el rótulo
+            NO cambia de tamaño al enfocar ni al llenarse · el placeholder enseña el
+            FORMATO en vez de repetir el rótulo · y el aire de 8 contra el pie de 26
+            deja a cada etiqueta inequívocamente más cerca de SU caja que de la de arriba.
+          </Texto>
           <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[5] }}>
             <Campo label="Nombre de la mascota" placeholder="ej: Zeus" />
             <Campo label="Con ayuda" placeholder="ej: 8 kg" ayuda="El peso aparece en el carnet" keyboardType="numeric" />
@@ -4213,6 +4220,22 @@ function GaleriaInterna() {
               iconoIzq={<View style={{ width: 16, height: 16, borderRadius: radius.full, borderWidth: 2, borderColor: theme.text.tertiary }} />}
             />
             <Campo label="Notas (multilínea, alto fijo)" placeholder="Observaciones del paseo…" multilinea={3} />
+            {/* N11′ · LA ÚNICA EXENCIÓN. Va en la galería porque una prop sin
+                muestra no se puede firmar — y porque su riesgo es que se use
+                fuera de búsqueda para «ganar altura». Verla al lado de los de
+                arriba muestra por qué no: es el único que puede prescindir del
+                rótulo, y solo porque la lupa ya lo dice. */}
+            <Texto variante="apoyo">
+              N11′ · la exención de BÚSQUEDA — lupa + placeholder, sin etiqueta.
+              El `label` sigue siendo obligatorio y lo oye el lector de pantalla:
+              lo que se apaga es el píxel, jamás el nombre.
+            </Texto>
+            <Campo
+              label="Buscar"
+              etiquetaVisible={false}
+              placeholder="Buscar en la despensa"
+              iconoIzq={<View style={{ width: 16, height: 16, borderRadius: radius.full, borderWidth: 2, borderColor: theme.text.tertiary }} />}
+            />
           </View>
 
           {/* S83-B1 — EL PIE, Y POR QUÉ UN CONTROL COMPUESTO LO SUBE UN NIVEL.

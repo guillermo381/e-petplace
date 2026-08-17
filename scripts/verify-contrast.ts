@@ -129,10 +129,23 @@ function paresDe(t: Theme, nombre: string): Pair[] {
    *  Su hermana mecánica es R43 en `verify:diseno`, que vigila el mismo
    *  piso del lado del token — dos guards, dos puertas. */
   add('border.campo / bg.base (N11 ≥3:1)', t.border.campo, t.bg.base, undefined, true)
-  /** Y la etiqueta que N11 metió ADENTRO de la caja: su fondo ya no es la
-   *  pantalla, es el interior del campo. El par cambió de vecino, así que
-   *  se mide en su vecino nuevo. */
-  add('text.secondary / interior del campo (etiqueta N11 adentro)', t.text.secondary, INTERIOR_CAMPO(t))
+  /** ⏪ S99-B midió la etiqueta contra el INTERIOR de la caja, porque N11
+   *  la había metido adentro.
+   *
+   *  ✅ **S100-B · N11′ la sacó AFUERA Y ARRIBA ⇒ su vecino vuelve a ser
+   *  la pantalla.** Se corrige EN EL MISMO COMMIT que mueve la etiqueta, y
+   *  esa simultaneidad es la regla, no la prolijidad: *un gate que mide un
+   *  vecino que la pieza ya no tiene sigue dando verde y deja de estar
+   *  midiendo el producto.* Esta casa ya lo pagó dos veces —el par del
+   *  avatar en S98 y el `bgCampo` que N11 destapó en S99—, las dos por el
+   *  mismo mecanismo: la pieza se mudó y el gate se quedó.
+   *
+   *  **Y el par se endurece al mudarse, no se afloja:** `bg.base` es el
+   *  papel tapiz, más oscuro que el interior blanco de la caja, así que
+   *  la etiqueta pasa a medirse contra el fondo MENOS favorable de los
+   *  dos. *Cuando un elemento se muda al vecino más duro y el gate sigue
+   *  verde, el verde vale más que antes.* */
+  add('text.secondary / bg.base (etiqueta N11′ afuera)', t.text.secondary, t.bg.base)
 
   // Acentos usados como texto (links, labels) sobre base y card
   add('accent.primary / bg.base', t.accent.primary, t.bg.base)

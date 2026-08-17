@@ -1871,6 +1871,18 @@ const FIXTURES = {
   /* R43 · el fixture es una `palette.ts` sintética con las TRES casas
      (para que el ANCLA no sea lo que lo pone rojo) y UNA por debajo del
      piso. Lo que tiene que salir rojo es la casa floja. */
+  /* R49 · CUATRO campos, y los dos legítimos son el peso de la prueba
+     (L-236): el que da un EJEMPLO de formato · el que EXPLICA dónde
+     encontrar el dato —el caso «Código / El código impreso en tu
+     factura», que es real y NO debe salir rojo— · y los dos ecos, uno
+     por literal y otro por clave `t()` repetida. Los legítimos alcanzan
+     además para que el ANCLA no sea lo que lo pinta. */
+  R49: [
+    { path: 'apps/cliente/src/app/bien-ejemplo.tsx', src: `<Campo label="Teléfono de contacto" placeholder="+593 99 123 4567" />` },
+    { path: 'apps/cliente/src/app/bien-explica.tsx', src: `<Campo label={t('r.codigo')} placeholder={t('r.codigoPlaceholder')} />` },
+    { path: 'apps/prestador/src/app/eco-literal.tsx', src: `<Campo label="Diagnóstico" placeholder="diagnóstico" />` },
+    { path: 'apps/prestador/src/app/eco-clave.tsx', src: `<Campo label={t('v.medicamento')} placeholder={t('v.medicamento')} />` },
+  ],
   /* R48 · las 5 del baseline + UNA sexta. Y trae además una LÁPIDA de
      `Campo` —la palabra suelta en un comentario— que NO debe contarse:
      el fixture prueba que la regla mide `variante="…"` y no la palabra. */
@@ -2998,6 +3010,84 @@ function r44(archivos) {
 }
 
 
+/** R49 · N11′ · EL PLACEHOLDER NO REPITE LA ETIQUETA (S100-B).
+ *
+ *  LA LEY, firmada por el founder el 17-ago: *«EL PLACEHOLDER DEJA DE
+ *  REPETIR LA ETIQUETA Y PASA A SER UN EJEMPLO DEL FORMATO: bajo
+ *  "Teléfono de contacto" va "+593 99 123 4567", no "Teléfono". Repetir
+ *  la etiqueta adentro es desperdiciar el único lugar donde se puede
+ *  enseñar el formato sin hablar.»*
+ *
+ *  Con N11′ la etiqueta salió AFUERA y quedó siempre visible ⇒ el
+ *  interior de la caja se liberó. **Un placeholder que repite el rótulo
+ *  deja ese lugar vacío por partida doble: no enseña nada Y ocupa el
+ *  espacio del ejemplo que sí serviría.**
+ *
+ *  ── 🔴 LO QUE ESTA REGLA CAZA, Y LO QUE NO — leerlo antes de confiar
+ *  en su verde ─────────────────────────────────────────────────────────
+ *  **CAZA solo la repetición INEQUÍVOCA**: el mismo literal, o la misma
+ *  clave `t()` en los dos lugares. **NO caza «repite con otras
+ *  palabras»**, y eso NO es un olvido: es el resultado de medirlo.
+ *
+ *  El censo de apertura (123 `<Campo>`, 56 con etiqueta y placeholder)
+ *  dio **CERO idénticos** y **TRES donde el placeholder contiene a la
+ *  etiqueta** — y de esos tres, **uno es legítimo**:
+ *    · ✅ `label="Código"` · `placeholder="El código impreso en tu
+ *      factura"` → **no repite: dice DÓNDE ENCONTRARLO.** Es exactamente
+ *      lo que la ley pide.
+ *    · ❌ `label="Diagnóstico"` · `placeholder="Diagnóstico principal"`
+ *    · ❌ `label="Medicamento"` · `placeholder="Nombre del medicamento"`
+ *
+ *  ⇒ **una regla por «contiene» habría gritado 1 de cada 3 veces sin
+ *  razón.** La diferencia entre los tres no es sintáctica —es si el texto
+ *  AGREGA algo—, y eso un lint no lo puede ver. *Media regla honesta vale
+ *  más que una entera que miente* (S99-B, R47): la mitad inequívoca queda
+ *  mecanizada para siempre, y **los dos ofensores reales viajan como
+ *  hallazgo con dueño (C), que es donde se pueden arreglar con criterio.**
+ *
+ *  Nace en **0** y es solo-baja por construcción: prohíbe hacia adelante
+ *  sin pedirle a nadie que cure nada hoy. */
+const BASELINE_R49 = 0
+function r49(archivos) {
+  const fallos = []
+  let camposConAmbos = 0
+  const ofensores = []
+
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src)
+    // El bloque de un <Campo …/>. El techo de 900 chars evita que un
+    // bloque sin cerrar se coma la pantalla entera y fabrique pares que
+    // no existen — mismo cuidado que R42 con sus puertas.
+    for (const m of limpio.matchAll(/<Campo\b[\s\S]{0,900}?\/>/g)) {
+      const b = m[0]
+      const lab = b.match(/\blabel=(?:\{t\('([^']+)'\)\}|"([^"]+)")/)
+      const ph = b.match(/\bplaceholder=(?:\{t\('([^']+)'\)\}|"([^"]+)")/)
+      if (lab === null || ph === null) continue
+      camposConAmbos++
+      const claveL = lab[1] ?? null
+      const claveP = ph[1] ?? null
+      const litL = lab[2] ?? null
+      const litP = ph[2] ?? null
+      const mismaClave = claveL !== null && claveL === claveP
+      const mismoLiteral =
+        litL !== null && litP !== null && litL.trim().toLowerCase() === litP.trim().toLowerCase()
+      if (mismaClave || mismoLiteral)
+        ofensores.push(`${path} — ${mismaClave ? `t('${claveL}')` : `"${litL}"`}`)
+    }
+  }
+
+  if (ofensores.length > BASELINE_R49)
+    fallos.push(
+      `R49: ${ofensores.length} campo(s) con el placeholder REPITIENDO su etiqueta (${ofensores.join(' · ')}). N11′: el placeholder es el ejemplo del FORMATO, no el eco del rótulo — bajo «Teléfono de contacto» va «+593 99 123 4567». Con la etiqueta afuera y siempre visible, repetirla adentro desperdicia el único lugar donde se enseña el formato sin hablar. Si de verdad no hay ejemplo que dar, el campo va SIN placeholder: el vacío es honesto, el eco no.`,
+    )
+  // ANCLA: sin campos con las dos props, esta regla no está mirando nada.
+  fallos.push(...ancla('R49', camposConAmbos, 1, 'campo(s) con etiqueta Y placeholder'))
+  return {
+    fallos,
+    info: `${ofensores.length} eco(s) literal(es) · ${camposConAmbos} campo(s) con etiqueta y placeholder · baseline ${BASELINE_R49} · ⚠️ NO mide «repite con otras palabras» (2 casos vivos, dueño C — ver cabecera)`,
+  }
+}
+
 /** R48 · EL ALIAS RENOMBRADO NO CRECE — `Boton sinCaja` → `apoyada`
  *  (S99-B, adjudicación de mesa).
  *
@@ -3247,7 +3337,7 @@ function r45(archivos) {
   }
 }
 
-const REGLAS = { R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3520,6 +3610,7 @@ corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45(
 corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)', r46(apps)]);
 corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47(apps)]);
 corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r48(apps)]);
+corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
