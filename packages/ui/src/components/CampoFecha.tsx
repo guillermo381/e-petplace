@@ -40,11 +40,11 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { estiloDeCaja } from './caja-de-campo'
+import { estiloDeCaja, ALTO_CAJA_CAMPO } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
-import { PieDeCampo } from './Campo'
+import { EtiquetaDeCampo, PieDeCampo } from './Campo'
 import { useTraduccionUi } from '../i18n'
 import { Hoja, HojaScroll } from './Hoja'
 import { Boton } from './Boton'
@@ -54,12 +54,19 @@ import { Boton } from './Boton'
  *  EL ALTO SIGUE A `Campo` y **eso es la ley, no una coincidencia**:
  *  N11 dice *«dos estilos de campo jamás conviven en la misma región»*,
  *  y una fecha 14 px más baja que el campo de al lado son dos estilos.
- *  El número es el mismo derivado de `Campo` (aire + etiqueta + línea +
- *  aire + los dos bordes), calculado acá para que no haya un 62 tecleado
- *  en dos archivos. */
-const ALTO_LINEA_CF = Math.round(typography.size.base * typography.leading.normal)
-const ALTO_ETIQUETA_CF = Math.round(typography.size.xs * typography.leading.normal)
-const ALTO = Math.round(ALTO_LINEA_CF + ALTO_ETIQUETA_CF + spacing[1.5] * 2 + 1.5 * 2)
+ *
+ *  🔴 **S100-B · LA FÓRMULA SE IMPORTA, YA NO SE RE-DERIVA — y el motivo
+ *  es que la copia estuvo a punto de cobrarse hoy.** S99 evitó el número
+ *  mágico calculándolo acá, con este comentario: *«para que no haya un 62
+ *  tecleado en dos archivos»*. **Evitó el número tecleado y dejó la
+ *  FÓRMULA duplicada**, que es la misma enfermedad un piso más abajo:
+ *  cuando N11′ bajó la caja de 62 a 48, `Campo` cambió y **esta línea se
+ *  habría quedado en 62 sin romper nada** — dos estilos de campo
+ *  conviviendo, que es exactamente lo que N11 prohíbe.
+ *
+ *  > *Derivar un número no es compartirlo. Dos derivaciones idénticas son
+ *  > dos fuentes de verdad que hoy coinciden.* */
+const ALTO = ALTO_CAJA_CAMPO
 const ALTO_LISTA = 200 // 5 filas de 40 — las listas scrollean adentro
 const ALTO_FILA = 40   // FIJO: el centrado al abrir se calcula por índice
 
@@ -284,6 +291,20 @@ export function CampoFecha({
           text: valor ? `${texto}, precisión ${valor.precision}` : placeholder,
         }}
       >
+        {/* S100-B · N11′ — la etiqueta sale de la CAJA y se queda DENTRO
+            del Pressable. Las dos mitades importan:
+            · **fuera de la caja** porque lo pide N11′, y porque acá el
+              argumento pesa más que en `Campo`: la caja de una fecha
+              muestra un valor LARGO («12 de septiembre de 2019»), así
+              que era justo donde el rótulo encogido peor se leía.
+            · **dentro del Pressable** porque la razón que S99 escribió
+              sigue siendo buena —*la etiqueta forma parte del control*—
+              y así tocar el rótulo abre el selector, que es el
+              comportamiento de un `<label for>` de toda la vida.
+            ⇒ *La enmienda mueve el píxel sin tirar el razonamiento que
+            había abajo.* */}
+        <EtiquetaDeCampo>{label}</EtiquetaDeCampo>
+
         <Animated.View
           style={{
             /* S99-B · N11 — la anatomía sale de `caja-de-campo.ts`, la
@@ -293,23 +314,10 @@ export function CampoFecha({
             justifyContent: 'center',
             height: ALTO,
             paddingHorizontal: spacing[3],
-            paddingVertical: spacing[1.5],
+            paddingVertical: 0,
             transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
           }}
         >
-          {/* N11 · la etiqueta ADENTRO de la caja — estaba arriba y
-              afuera. Va acá y no en su propio bloque porque este campo
-              es un Pressable: la etiqueta forma parte del control. */}
-          <Text
-            numberOfLines={1}
-            style={{
-              fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.xs,
-              color: theme.text.secondary,
-            }}
-          >
-            {label}
-          </Text>
           <Text
             numberOfLines={1}
             style={{

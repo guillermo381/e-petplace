@@ -336,6 +336,37 @@ export {
 // estado malo es INEXPRESABLE (L-222).
 export { TarjetaPedido, type TarjetaPedidoProps } from './components/TarjetaPedido'
 
+// PrecioText — S100-B: LA VOZ DEL PRECIO, una sola para toda la casa. Nace
+// porque el precio se escribia a mano en 53 sitios (`$ ${x.toFixed(2)}`) y en
+// la vitrina se pintaba con `metadataMono` — el slot de la METADATA de una
+// fila. El diagnostico no es tipografico sino de JERARQUIA: en una tarjeta de
+// compra el precio no es metadata, es el dato que decide. NO deroga la Ley 3:
+// el $/kg SE QUEDA en mono porque es un CALCULO.
+export { PrecioText, formatearPrecio, type PrecioTextProps, type PrecioRegistro } from './components/PrecioText'
+
+// TarjetaProducto — S100-B: un producto en la vitrina de dos columnas, con el
+// `+` que lo agrega SIN abrir la ficha (firma del founder; mecanismo de
+// Instacart, su superficie de ranking/urgencia queda afuera). El `+` vive
+// SIEMPRE en la misma esquina —la mano lo encuentra sin mirar— y al agregar
+// MUTA a stepper en el lugar. `hayStock` es BOOLEANO por construccion: la
+// familia necesita «¿puedo comprar esto?», jamas el inventario ajeno.
+export { TarjetaProducto, type TarjetaProductoProps } from './components/TarjetaProducto'
+
+// nombreCurado — S100-B: la caja del nombre de producto, UNA para las dos
+// caras. Sube desde `apps/cliente` porque el espejo del vendedor no podía
+// consumirla sin duplicarla, y con 42% del catálogo EN MAYÚSCULAS una sola
+// cara curando significa que vendedor y familia ven nombres distintos del
+// mismo producto. Viaja con `TarjetaProducto`: la pieza y la función que
+// prepara su dato son N17 aplicada a la lógica, no solo a la forma.
+export { nombreCurado } from './nombre-curado'
+
+// La grilla de dos columnas — S100-B: el patron MEDIDO, en codigo y una sola
+// vez. Vivia en un comentario JSDoc de `Baldosa`: ejecutable por copia y
+// verificable por nadie. Sale a `.ts` cuando aparecio su segundo consumidor,
+// que es lo que ese mismo archivo pedia («no se sincronizan dos copias: se
+// deja UNA»). Sin `gap`, porque el gap no se ve en el porcentaje.
+export { CELDA_DE_GRILLA, GRILLA_DE_DOS } from './components/grilla-de-dos'
+
 // FilaEntrega — S96-B: UNA parada del repartidor (§9.1). Su vara no es la
 // del resto de la casa: se lee a pleno sol, arriba de una moto.
 //

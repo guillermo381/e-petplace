@@ -109,6 +109,14 @@ export const uiEn = {
   // S96-B — EscaleraEstados: only the a11y label lives here (FORM). The
   // step NAME arrives as a prop: seller and family read the same fact in
   // different voices, and an audience cannot be deduplicated.
+  // S100-B — la vitrina a dos columnas. `sinStock` es BOOLEANO en la
+  // pieza: la familia necesita «¿puedo comprar esto?», jamás el
+  // inventario ajeno (firma S99).
+  tarjetaProducto: {
+    sinStock: 'Out of stock',
+    agregar: 'Add {{nombre}} to cart',
+    cantidad: 'Quantity of {{nombre}}',
+  },
   escaleraEstados: {
     progreso: 'Step {{n}} of {{total}}: {{etiqueta}}',
     progresoSinPaso: 'Step {{n}} of {{total}}',

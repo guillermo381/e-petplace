@@ -187,8 +187,34 @@ export function EscaleraEstados({
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
 
-  // Regla de existencia: sin pasos no hay escalera (nunca un riel vacío).
-  if (pasos.length === 0) return null
+  /** Regla de existencia — ⏪ **ENMENDADA S100-B, y decía de menos.**
+   *
+   *  Decía *«sin pasos no hay escalera»* y devolvía `null` con
+   *  `pasos.length === 0`. **Cierto para la escalera, FALSO para la
+   *  pieza:** el desvío es una BANDA que sustituye al camino, no un
+   *  peldaño suyo — así que con `pasos: []` + `desvio` esta línea se
+   *  tragaba **el único contenido que había**.
+   *
+   *  🔴 **El caso real, medido (H-04, hallazgo de la pista D):** un
+   *  pedido `cancelado` devuelve `pasos: []` **más** `desvio` ⇒ **en la
+   *  lista no decía que se había cancelado.** Se veía como un pedido
+   *  cualquiera al que le faltaba el progreso.
+   *
+   *  ⚠️ **Y el guard estaba DUPLICADO un piso más arriba** —
+   *  `TarjetaPedido` tenía su propio `pasos.length === 0 ? null`—, así
+   *  que curar solo allá no habría cambiado nada: la pieza volvía a
+   *  tragárselo acá. *Cuando el mismo criterio vive en dos lugares, el
+   *  que se cura es el que se ve, y el otro sigue mandando.*
+   *
+   *  ⇒ La regla correcta es sobre CONTENIDO, no sobre pasos: **sin
+   *  pasos NI desvío no hay nada que decir.** Con desvío solo, la banda
+   *  se monta sola — que es exactamente la verdad que hay para contar. */
+  if (pasos.length === 0 && desvio === undefined) return null
+
+  /** Sin pasos, lo único que se dibuja es la banda. No es «una escalera
+   *  con cero peldaños»: es un hecho suelto — por eso más abajo no se
+   *  monta el riel vacío ni se anuncia como barra de progreso. */
+  const soloDesvio = pasos.length === 0
 
   const color = acento === 'oficio' ? theme.accent.primary : theme.accent.control
   const indiceActual = pasos.findIndex((p) => p.estado === 'actual')
@@ -212,9 +238,16 @@ export function EscaleraEstados({
     return (
       <View
         accessible
-        accessibilityRole="progressbar"
-        accessibilityLabel={etiquetaA11y}
-        accessibilityValue={{ min: 0, max: pasos.length, now: alcanzado }}
+        {...(soloDesvio
+          ? // Sin pasos NO es una barra de progreso: anunciar «0 de 0»
+            // sería inventar una escala que no existe. El texto de la
+            // banda ya dice el hecho, y con eso alcanza.
+            {}
+          : {
+              accessibilityRole: 'progressbar' as const,
+              accessibilityLabel: etiquetaA11y,
+              accessibilityValue: { min: 0, max: pasos.length, now: alcanzado },
+            })}
         style={{ gap: spacing[1.5] }}
       >
         {/* ☠️ ACÁ VIVÍAN LAS CUATRO BARRAS. Verbatim del founder sobre
@@ -228,6 +261,11 @@ export function EscaleraEstados({
             tiene adentro**: por eso puede decir QUÉ ES sin una palabra.
             *No cambiamos de dibujo por gusto: cambiamos de forma porque
             la vieja no tenía lugar donde poner el significado.* */}
+        {/* El riel de nodos solo existe si hay camino. Sin pasos NO se
+            monta una fila vacía: un contenedor sin hijos igual aporta su
+            `gap` al de arriba, y la banda quedaría con un aire que nadie
+            pidió. */}
+        {soloDesvio ? null : (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {pasos.map((paso, i) => {
             const lleno = i < alcanzado
@@ -266,6 +304,7 @@ export function EscaleraEstados({
             )
           })}
         </View>
+        )}
         {pasoNombrado !== undefined || cuandoLlega !== undefined ? (
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing[2] }}>
             {pasoNombrado !== undefined ? (

@@ -17,9 +17,13 @@
  * ═══════════════════════════════════════════════════════════════════
  *
  * Consecuencias de diseño:
- *   · Label SIEMPRE visible y ADENTRO de la caja (S99-B · N11 — antes
- *     iba arriba y afuera; nunca fue placeholder-como-label, y sigue sin
- *     serlo: el placeholder es solo formato, ej: "ej: Zeus").
+ *   · Label SIEMPRE visible, **AFUERA Y ARRIBA de la caja** (S100-B ·
+ *     **N11′**, firma del founder 17-ago — ⏪ S99-B lo había metido
+ *     adentro por N11; la ley se reabrió con evidencia y volvió afuera.
+ *     El porqué entero vive en `caja-de-campo.ts`). **Nunca fue
+ *     placeholder-como-label y sigue sin serlo** — al contrario: N11′ le
+ *     da al placeholder su trabajo propio, que es **enseñar el FORMATO**
+ *     (bajo «Teléfono de contacto» va «+593 99 123 4567», no «Teléfono»).
  *   · Borde 1.5px SIEMPRE — el foco/error cambia COLOR, no grosor.
  *   · El slot de ayuda/error tiene altura reservada: el mensaje no
  *     empuja el layout al aparecer (error reemplaza a ayuda).
@@ -39,7 +43,13 @@ import {
 } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
-import { estiloDeCaja } from './caja-de-campo'
+import {
+  estiloDeCaja,
+  ALTO_CAJA_CAMPO,
+  ALTO_LINEA_CAMPO,
+  GAP_ETIQUETA,
+  TAMANO_ETIQUETA,
+} from './caja-de-campo'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -50,14 +60,13 @@ import { useTraduccionUi } from '../i18n'
 /** ⏪ S99-B · `BORDE` y el fondo salen ahora de `caja-de-campo.ts` — la
  *  anatomía vivía copiada en tres piezas (ver su cabecera). Acá quedan
  *  solo las medidas propias de ESTE campo. */
-/** La línea de entrada: el alto del texto que se tipea. */
-const ALTO_LINEA = Math.round(typography.size.base * typography.leading.normal)   // 24
-/** El alto de la caja es DERIVADO, no elegido (N11 · la etiqueta entró
- *  adentro): aire + etiqueta + línea + aire = 6 + 16 + 24 + 6 + los dos
- *  bordes = **62**. Se calcula para que quien mueva la escala de N1 no
- *  tenga que acordarse de mover también este número. */
-const ALTO_ETIQUETA = Math.round(typography.size.xs * typography.leading.normal)  // 16
-const ALTO = Math.round(ALTO_LINEA + ALTO_ETIQUETA + spacing[1.5] * 2 + 1.5 * 2)  // 62
+/** ⏪ S100-B · **N11′** — el alto de la caja y la línea de entrada salen
+ *  ahora de `caja-de-campo.ts`, igual que el borde y el fondo: **con la
+ *  etiqueta afuera, las tres piezas vuelven a tener la MISMA caja**, y
+ *  dejar el número acá sería la cuarta copia que ese archivo existe para
+ *  evitar. La caja pasa de **62 a 48** (ya no aloja la etiqueta). */
+const ALTO_LINEA = ALTO_LINEA_CAMPO  // 24
+const ALTO = ALTO_CAJA_CAMPO         // 48
 const LINEA_MENSAJE = typography.size.sm * typography.leading.normal  // slot reservado
 
 /** El alto EXACTO que el pie reserva: 13 × 1.6 + 4 = **24.8 px**. Es el
@@ -70,6 +79,48 @@ const LINEA_MENSAJE = typography.size.sm * typography.leading.normal  // slot re
  *  lo elimina) y no "igualar el alto" en el consumidor — igualar acierta
  *  en reposo y falla justo cuando aparece el error. */
 export const ALTO_PIE_CAMPO = LINEA_MENSAJE + spacing[1]
+
+export interface EtiquetaDeCampoProps {
+  /** El nombre del campo. Visible SIEMPRE (salvo la exención de N11′). */
+  children: string
+}
+
+/**
+ * EtiquetaDeCampo — el rótulo de un control de formulario: **afuera,
+ * arriba, siempre visible y siempre del mismo tamaño** (N11′).
+ *
+ * **Vive acá y no en cada pieza por la misma razón que `PieDeCampo`**: es
+ * la anatomía DE un campo, y son piezas simétricas — *el pie va abajo, la
+ * etiqueta va arriba, y las dos las montan las tres piezas de campo.*
+ * Escrita una vez, `Campo`, `CampoFecha` y `CampoCodigo` no pueden
+ * divergir. **Y esta vez el riesgo de divergir era real, no teórico: las
+ * tres tenían la etiqueta escrita distinta hasta hoy** — dos adentro a
+ * `xs`, una afuera a `sm`.
+ *
+ * ⚠️ **Lo que esta pieza NO hace, y es deliberado: no cambia con el
+ * estado.** No recibe `error` ni `enfocado`. *Si los recibiera, alguien
+ * los usaría* — y N11′ dice literal que la etiqueta **jamás cambia de
+ * tamaño ni de color** por foco o por contenido. **La forma más barata de
+ * garantizar que un dato no se use es no pasarlo.**
+ */
+export function EtiquetaDeCampo({ children }: EtiquetaDeCampoProps) {
+  const { theme } = useTheme()
+
+  return (
+    <Text
+      numberOfLines={1}
+      style={{
+        fontFamily: typography.family.sans.medium,
+        fontSize: TAMANO_ETIQUETA,
+        lineHeight: Math.round(TAMANO_ETIQUETA * typography.leading.normal),
+        color: theme.text.secondary,
+        marginBottom: GAP_ETIQUETA,
+      }}
+    >
+      {children}
+    </Text>
+  )
+}
 
 export interface PieDeCampoProps {
   /** Helper. `error` lo reemplaza en el MISMO slot. */
@@ -143,6 +194,26 @@ export interface CampoProps
   > {
   /** Obligatorio: es el label visible Y el accessibilityLabel. */
   label: string
+  /** **N11′ · LA EXENCIÓN DE BÚSQUEDA, y la única.** El campo de búsqueda
+   *  no lleva etiqueta: **lupa + placeholder** es el patrón universal, y
+   *  *«poner "Buscar" arriba de una lupa es decir dos veces lo mismo»*.
+   *
+   *  🔴 **`label` SIGUE SIENDO OBLIGATORIO — lo que se apaga es el PÍXEL,
+   *  jamás el nombre.** El `accessibilityLabel` se monta igual, así que
+   *  quien navega con lector de pantalla oye «Buscar» exactamente como
+   *  antes. *Una prop que apagara el label de verdad convertiría la
+   *  exención visual de N11′ en un agujero de accesibilidad, y N11′ no
+   *  pidió eso.*
+   *
+   *  **Opt-in, y por eso el default es `true`:** el caso raro se declara;
+   *  el caso normal no se puede olvidar. Precedente de la casa:
+   *  `SelectorOpcion.etiquetaVisible` (S65).
+   *
+   *  ⚠️ **CUÁNDO:** solo en búsqueda. Usarlo para «ganar altura» en un
+   *  formulario es exactamente lo que la firma prohíbe — *el costo de
+   *  altura de N11′ se compensa con **menos campos por pantalla**, jamás
+   *  escondiendo rótulos.* */
+  etiquetaVisible?: boolean
   /** Helper bajo el campo (`text.secondary` desde S83-B26 — ver la nota
    *  en su render). `error` lo reemplaza en el MISMO slot. */
   ayuda?: string
@@ -183,6 +254,7 @@ export interface CampoProps
 
 export function Campo({
   label,
+  etiquetaVisible = true,
   ayuda,
   error,
   deshabilitado = false,
@@ -201,42 +273,34 @@ export function Campo({
   // El color del contorno y el interior salen de la anatomía compartida
   // (`caja-de-campo.ts`): tres piezas, una definición.
   const altoCampo = multilinea
-    ? multilinea * ALTO_LINEA + ALTO_ETIQUETA + spacing[2] * 2 + 1.5 * 2
+    ? multilinea * ALTO_LINEA + spacing[3] * 2
     : ALTO
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
-      {/* ── S99-B · N11: LA ETIQUETA ENTRA A LA CAJA ──────────────────
-          Estaba AFUERA, arriba. N11 la pide *«adentro de los límites de
-          la caja»*, y no es capricho de estilo: una etiqueta afuera deja
-          al campo vacío siendo un rectángulo sin identidad —hay que
-          mirar arriba para saber qué es—, y adentro **el campo se
-          explica solo**. La caja crece de 48 a 62 para alojarla; el alto
-          es DERIVADO (etiqueta + línea de entrada + los dos aires), no
-          un número elegido.
+      {/* ── S100-B · N11′: LA ETIQUETA SALE DE LA CAJA ────────────────
+          ⏪ S99-B la había metido adentro (N11). **La ley se reabrió con
+          evidencia y volvió AFUERA Y ARRIBA**: adentro tiene que
+          encogerse para dejar entrar el valor, y pierde legibilidad
+          justo cuando el campo está lleno — que es cuando la persona
+          revisa antes de pagar. La caja vuelve de 62 a **48**, derivada.
+          El razonamiento entero vive en `caja-de-campo.ts`.
           ⚠️ El label NO se anima ni flota: la regla rectora de esta
-          pieza sigue siendo que nada se mueve mientras alguien tipea. */}
+          pieza sigue siendo que nada se mueve mientras alguien tipea —
+          y ahora es más fácil de cumplir, porque la etiqueta ya no
+          comparte caja con el valor. */}
+      {etiquetaVisible ? <EtiquetaDeCampo>{label}</EtiquetaDeCampo> : null}
+
       <Animated.View
         style={{
           ...estiloDeCaja(theme, { error: !!error, enfocado }),
           justifyContent: 'center',
           height: altoCampo,
           paddingHorizontal: spacing[3],
-          paddingVertical: multilinea ? spacing[2] : spacing[1.5],
+          paddingVertical: multilinea ? spacing[3] : 0,
           transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
         }}
       >
-        <Text
-          numberOfLines={1}
-          style={{
-            fontFamily: typography.family.sans.medium,
-            fontSize: typography.size.xs,
-            color: theme.text.secondary,
-          }}
-        >
-          {label}
-        </Text>
-
         <View
           style={{
             flexDirection: 'row',

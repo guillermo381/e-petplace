@@ -60,15 +60,27 @@ import { estiloDeCaja } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
-import { PieDeCampo } from './Campo'
+import { EtiquetaDeCampo, PieDeCampo } from './Campo'
 
 /** ⏪ S99-B · `BORDE` murió acá: sale de `caja-de-campo.ts` (Ley 37 —
  *  su razón se cumplió cuando la anatomía se extrajo).
- *  ⚠️ EL ALTO **NO** SIGUE A `Campo`, y ahora es a propósito: `Campo`
- *  creció a 62 porque su etiqueta entró a la caja, y acá la etiqueta
- *  NO entra —una caja de UN dígito no tiene lugar para un rótulo, y
- *  ponerlo repetiría el mismo texto seis veces—. El label de esta pieza
- *  se queda arriba, con su razón escrita, y por eso su caja conserva 48. */
+ *
+ *  ⏪ **S99-B decía: *«EL ALTO NO SIGUE A `Campo`, y ahora es a
+ *  propósito»*** — porque `Campo` había crecido a 62 con la etiqueta
+ *  adentro y acá la etiqueta se quedaba arriba.
+ *
+ *  ✅ **S100-B · N11′ REUNIFICA LOS DOS ALTOS: `Campo` volvió a 48 y
+ *  esta caja nunca se movió de ahí.** La divergencia declarada «a
+ *  propósito» duró exactamente una sesión, y desaparece sola porque la
+ *  ley general adoptó la forma que esta pieza defendía.
+ *
+ *  ⚠️ **Se conserva el `48` local y NO se importa `ALTO_CAJA_CAMPO`, con
+ *  su razón:** coinciden hoy, pero **no son el mismo número** — el de
+ *  `Campo` es *línea de texto + aire*, y el de acá es el **target táctil
+ *  de una caja de UN dígito**, que no tiene línea de texto que envolver.
+ *  *Atar dos números que coinciden por casualidad es cómo se fabrica el
+ *  próximo acoplamiento invisible:* el día que la escala de N1 mueva la
+ *  línea de entrada, `Campo` debe crecer y esta caja **no**. */
 const ALTO_CAJA = 48 // md — target táctil
 
 export interface CampoCodigoProps {
@@ -115,17 +127,24 @@ export function CampoCodigo({
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
-      {/* Label — anatomía de Campo, byte a byte */}
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-          marginBottom: spacing[1.5],
-        }}
-      >
-        {etiqueta}
-      </Text>
+      {/* S100-B · N11′ — LA ETIQUETA PASA A SER `EtiquetaDeCampo`, LA
+          PIEZA COMPARTIDA. Acá estaba escrita a mano con el comentario
+          *«anatomía de Campo, byte a byte»* — y **ese comentario venía
+          siendo falso desde S99**, cuando `Campo` metió su etiqueta
+          adentro de la caja a `xs`. La copia siguió pintando bien y
+          diciendo mal, sin romper nada.
+
+          🔴 **Y el sentido de la enmienda se ve mejor desde acá que
+          desde `Campo`: los valores que N11′ manda —afuera, arriba,
+          `sm`, `text.secondary`— son EXACTAMENTE los que esta pieza
+          tenía desde siempre.** La casa no adoptó una forma nueva: le
+          dio la razón a la que ya tenía escrita, y el «6 seis veces
+          repetido» que justificaba la excepción resultó ser el
+          argumento general.
+
+          Único cambio real: el aire pasa de 6 a **8** (`GAP_ETIQUETA`),
+          por N2 — múltiplo de 8, sin tallar excepción. */}
+      <EtiquetaDeCampo>{etiqueta}</EtiquetaDeCampo>
 
       {/* La fila de cajas + el input invisible ENCIMA. El input cubre la
           fila entera: el tap enfoca donde sea que caiga (no hay "caja

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 /**
  * Tipos compartidos de MapaRecorrido — los importan la implementación
  * nativa (MapaRecorrido.tsx) y la web (MapaRecorrido.web.tsx) para que
@@ -46,4 +48,73 @@ export interface MapaRecorridoProps {
    *  (D-318, lo ejecuta A). Default false: la caja sigue siendo el
    *  reposo de los consumidores en flujo. */
   aSangre?: boolean
+  /**
+   * 🔴 **LA IDENTIDAD DEL MARCADOR VIVO — SLOT, jamás diccionario**
+   * (S100-B · pedido de D con su caso: la pantalla EN CAMINO).
+   *
+   * **N14 es explícita: `paseo = la cara de la mascota · entrega = la
+   * moto`**, y *«el mapa de e-PetPlace se reconoce como de
+   * e-PetPlace»*. Hasta hoy el marcador vivo era **un punto de color
+   * fijo** ⇒ **una entrega se dibujaba con la identidad de un paseo.**
+   *
+   * **Es SLOT y no una unión de tipos** por la misma razón que el ícono
+   * de `EscaleraEstados`: **el mapa sabe DÓNDE va la marca; QUÉ marca
+   * es, lo sabe quien lo monta.** Un diccionario acá adentro obligaría
+   * a esta pieza a conocer `PinEnMapa`, la moto y la mascota — y a
+   * crecer con cada oficio nuevo.
+   *
+   * Ausente = el punto de color de siempre (el paseo no cambia).
+   */
+  marcadorVivo?: ReactNode
+  /**
+   * **EL DESTINO — el otro extremo, y no es decoración.**
+   *
+   * *Sin él, una moto moviéndose no dice «tu pedido se acerca»: dice
+   * «algo se mueve»* (D, y es el argumento que decide esta prop). Con
+   * destino, **el encuadre deja de seguir al último punto y abarca LOS
+   * DOS EXTREMOS** — que es lo que convierte el movimiento en una
+   * distancia que se acorta.
+   *
+   * Fijo: no se anima ni se sigue. Sin él, el modo `vivo` se comporta
+   * exactamente como antes.
+   */
+  destino?: PuntoLatLng
+  /** La marca del destino. Mismo criterio de slot que `marcadorVivo`;
+   *  sin ella el destino existe para el encuadre pero no se dibuja. */
+  marcadorDestino?: ReactNode
+  /**
+   * ── ⚠️ LO QUE ESTE ENSANCHE **NO** TRAE: LA INTERPOLACIÓN ──────────
+   * D la pidió con razón —*«el GPS llega cada ~60 s; sin interpolación
+   * el pin salta y parece roto»*, y la receta ⑤ ya decidió su forma:
+   * bezier de la casa, lado entrada, **jamás spring**— y **NO se
+   * construyó acá, con su motivo:**
+   *
+   * 🔴 **Y AL MEDIRLO APARECIÓ ALGO QUE CORRIGE MI PROPIA ENTREGA: LA
+   * INTERPOLACIÓN YA ESTÁ CONSTRUIDA — vive en `PinEnMapa`**
+   * (`px.value = withTiming(x, conf)`, con el bezier de la casa). *No
+   * hay que escribirla: hay que poder alimentarla.*
+   *
+   * **Y ahí está el costo real, que no es el que yo supuse:**
+   * `PinEnMapa` **se posiciona en PÍXELES** porque es él quien anima el
+   * viaje. El `Marker` de `react-native-maps` —lo que este ensanche
+   * usa— **posiciona por COORDENADA y reubica de golpe**: resuelve la
+   * identidad y **deja la interpolación fuera de alcance.**
+   *
+   * ⇒ **Las dos vías NO son equivalentes, y la elección es de mesa:**
+   *   · **`Marker` + slot** (lo entregado): identidad ✅ · interpolación
+   *     ❌ · **costo cero, cero riesgo**, ya está.
+   *   · **exponer proyección** (`mapRef.pointForCoordinate`) y montar
+   *     `PinEnMapa`: identidad ✅ · **interpolación ✅ y ya escrita** ·
+   *     costo **acotado** — hay que recalcular píxeles cuando la cámara
+   *     se mueve, y en modo `vivo` **la cámara solo la mueve esta
+   *     pieza** (`scrollEnabled={!esVivo}`), así que sabe exactamente
+   *     cuándo. **Su gate es en aparato.**
+   *
+   * *Mi primera nota decía «no se construyó porque es movimiento nativo
+   * que no puedo probar». Era cierto a medias y llevaba a la conclusión
+   * equivocada: lo que no se puede probar sin aparato no es la
+   * animación —ya existe y ya se firmó— sino **la proyección que la
+   * alimenta**.* Con 0 envíos con track hoy, el freno sigue en pie; lo
+   * que cambia es **qué se está frenando y cuánto cuesta destrabarlo**.
+   */
 }

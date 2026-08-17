@@ -129,6 +129,14 @@ export const uiEs = {
   // familia "Estamos preparando tu pedido" — mismo hecho, dos
   // audiencias, y una audiencia no se deduplica (`METODO_TRES_PISTAS`
   // §6). Por eso NO hay diccionario de estados en este namespace.
+  // S100-B — la vitrina a dos columnas. `sinStock` es BOOLEANO en la
+  // pieza: la familia necesita «¿puedo comprar esto?», jamás el
+  // inventario ajeno (firma S99).
+  tarjetaProducto: {
+    sinStock: 'Sin stock',
+    agregar: 'Agregar {{nombre}} al carrito',
+    cantidad: 'Cantidad de {{nombre}}',
+  },
   escaleraEstados: {
     progreso: 'Paso {{n}} de {{total}}: {{etiqueta}}',
     progresoSinPaso: 'Paso {{n}} de {{total}}',

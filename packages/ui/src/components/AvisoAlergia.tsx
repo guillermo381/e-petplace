@@ -162,6 +162,89 @@ export type CoincidenciaAlergeno =
    */
   | 'imprecisa'
 
+/**
+ * ── LOS DOS SILENCIOS LEGALES, EN UNA SOLA FUNCIÓN (S100-B) ──────────
+ * `verificada` calla porque COTEJAMOS Y ESTÁ BIEN. `no_aplica` calla
+ * porque NO HAY NADA QUE COTEJAR. Son dos silencios distintos con el
+ * mismo píxel — y por eso son dos valores del tipo y no uno.
+ * **En TODO el resto se habla, y la pantalla no tiene con qué
+ * impedírselo.**
+ *
+ * ⚠️ **DEFENSA EN PROFUNDIDAD, declarada:** `no_aplica` CON un alérgeno
+ * encontrado es incoherente, y A confirmó que la puerta lo rebota. Aun
+ * así **no se asume que el dato llegó limpio**: si esa combinación
+ * llegara igual, **se habla**. *Ante una incoherencia, el error barato
+ * es advertir de más y el caro es callar — y acá el caro se paga en el
+ * cuerpo de una mascota.* Por eso el silencio exige `ninguna` en los DOS
+ * casos y no confía en el estado solo.
+ *
+ * 🔴 **POR QUÉ SE EXTRAJO** (S100-B, ensanche pedido por C con caso):
+ * `TarjetaProducto` necesita la misma advertencia en la BÚSQUEDA
+ * (`MODELO_DESPENSA`: *«exclusión dura en la RECOMENDACIÓN, advertencia
+ * dura en la BÚSQUEDA»*). **Si cada pieza escribiera su propio criterio
+ * de cuándo callar, el día que uno cambie la casa tendría dos reglas de
+ * silencio sobre alergias** — y el modo de falla de ese desacuerdo es
+ * que una superficie se calle donde la otra advierte. *Una sola
+ * función: las dos piezas no pueden discrepar.*
+ */
+export function alergiaPuedeCallar({
+  composicion,
+  coincidencia,
+}: {
+  composicion: EstadoComposicion
+  coincidencia: CoincidenciaAlergeno
+}): boolean {
+  return coincidencia === 'ninguna' && (composicion === 'verificada' || composicion === 'no_aplica')
+}
+
+/**
+ * ── LAS TRES TEMPERATURAS (firma del founder, 17-ago · H-008) ────────
+ * La banda de composición **dejó de tener una sola voz**:
+ *
+ * · **`alarma`** — el producto toca una **ALERGIA DECLARADA** de la
+ *   mascota elegida. Riesgo real, urgencia real ⇒ **ámbar**.
+ * · **`ausencia`** — solo *no sabemos qué tiene*. **Se dice igual de
+ *   claro y no se esconde nunca**, pero **sin color de alarma**.
+ * · **`silencio`** — uno de los dos silencios legales (`verificada` /
+ *   `no_aplica`).
+ *
+ * 🔴 **LA RAZÓN, Y ES UN NÚMERO** (medido por C sobre la vitrina viva):
+ * con la mascota elegida, **~51 % de lo recomendado va a decir «sin
+ * composición declarada»** — `288 ausente + 274 declarada_sin_verificar
+ * = 562 de 563, y CERO verificada`.
+ *
+ * > ***Un ámbar que aparece en la mitad de las tarjetas deja de
+ * > significar peligro y pasa a ser fondo de pantalla. Reservar el ámbar
+ * > es lo que hace que el ámbar siga significando algo.***
+ *
+ * ⚠️ **Lo que esta firma NO reabre:** el silencio sigue prohibido en los
+ * dos casos que hablan. **La ausencia se DICE; lo que no se hace es
+ * gritarla.** Y `ausencia` **no es el mismo valor** que «no hay
+ * alergia»: son **TRES** estados, no dos.
+ *
+ * **Vive acá y no en cada pieza** por lo mismo que `alergiaPuedeCallar`:
+ * `AvisoAlergia` y `TarjetaProducto` **no pueden discrepar sobre qué
+ * temperatura le toca a un hecho.**
+ *
+ * *El 51 % es el dato malo hablando, no la regla fallando: N18 se
+ * encarga —la composición es campo de completitud y lo incompleto pierde
+ * alcance—, así que el número baja solo cuando los vendedores carguen.*
+ */
+export type TemperaturaAlergia = 'alarma' | 'ausencia' | 'silencio'
+
+export function temperaturaDeAlergia({
+  composicion,
+  coincidencia,
+}: {
+  composicion: EstadoComposicion
+  coincidencia: CoincidenciaAlergeno
+}): TemperaturaAlergia {
+  if (alergiaPuedeCallar({ composicion, coincidencia })) return 'silencio'
+  // EXACTA e IMPRECISA comparten alarma: si esa proteína ES el alérgeno,
+  // le hace igual de mal. La diferencia la dice la VOZ, no el color.
+  return coincidencia === 'ninguna' ? 'ausencia' : 'alarma'
+}
+
 export type AvisoAlergiaProps = {
   /** El HECHO, no lo que la pantalla quiere mostrar. */
   composicion: EstadoComposicion
@@ -201,23 +284,9 @@ export function AvisoAlergia({
 }: AvisoAlergiaProps) {
   const { theme } = useTheme()
 
-  // ── LOS DOS SILENCIOS LEGALES ────────────────────────────────────────
-  // `verificada` calla porque COTEJAMOS Y ESTÁ BIEN. `no_aplica` calla
-  // porque NO HAY NADA QUE COTEJAR. Son dos silencios distintos con el
-  // mismo píxel — y por eso son dos valores del tipo y no uno.
-  // En TODO el resto la pieza habla, y la pantalla no tiene con qué
-  // impedírselo.
   const hayAdvertencia = coincidencia !== 'ninguna'
 
-  // ⚠️ DEFENSA EN PROFUNDIDAD, declarada: `no_aplica` CON un alérgeno
-  // encontrado es incoherente, y A confirmó que la puerta lo rebota
-  // (`no_aplica` con ingredientes presentes no pasa). Aun así esta pieza
-  // NO asume que el dato llegó limpio: si esa combinación llegara igual,
-  // **habla**. *Ante una incoherencia, el error barato es advertir de más
-  // y el caro es callar — y acá el caro se paga en el cuerpo de una
-  // mascota.* Por eso el silencio pide `!hayAdvertencia` en los DOS casos
-  // y no confía en el estado solo.
-  if (!hayAdvertencia && (composicion === 'verificada' || composicion === 'no_aplica')) return null
+  if (alergiaPuedeCallar({ composicion, coincidencia })) return null
 
   const alerta = hayAdvertencia
 

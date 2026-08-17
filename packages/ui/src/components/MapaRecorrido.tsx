@@ -14,7 +14,7 @@
  * blanco para despegarlo del mapa.
  *
  * modo 'vivo': sigue el último punto con animateToRegion CORTO
- * (motion.duration.normal, ease del SDK — sin rebotes, Ley 6);
+ * (motion.duration.legacy_normal, ease del SDK — sin rebotes, Ley 6);
  * gestos apagados (el paseador no navega el mapa, camina).
  * modo 'recorrido': fitToCoordinates con aire al montar; zoom y
  * pan HABILITADOS (decisión B2.6: acercarse a una esquina del paseo
@@ -67,6 +67,9 @@ export function MapaRecorrido({
   puntos,
   modo,
   capa = 'cuidado',
+  marcadorVivo,
+  destino,
+  marcadorDestino,
   centroInicial,
   alto = ALTO_DEFAULT,
   aSangre = false,
@@ -95,14 +98,33 @@ export function MapaRecorrido({
     longitude: (centroInicial ?? CENTRO_DEFAULT).lng,
   }
 
-  // vivo: seguir el último punto — corto y sobrio, jamás rebote (Ley 6).
+  /* vivo: seguir el último punto — corto y sobrio, jamás rebote (Ley 6).
+   *
+   * 🔴 **CON DESTINO, EL ENCUADRE ABARCA LOS DOS EXTREMOS** (S100-B ·
+   * pedido de D). Seguir solo a la moto muestra movimiento; **mostrar
+   * la moto Y la casa muestra una DISTANCIA QUE SE ACORTA**, que es lo
+   * que la familia está mirando. *Sin el destino, una moto moviéndose
+   * no dice «tu pedido se acerca»: dice «algo se mueve».*
+   *
+   * El `animated: true` acá SÍ corresponde —el encuadre se reajusta con
+   * cada fix— y usa el mismo registro que el seguimiento. */
   useEffect(() => {
     if (!esVivo || ultimo === null) return
+    if (destino !== undefined) {
+      mapRef.current?.fitToCoordinates(
+        [ultimo, { latitude: destino.lat, longitude: destino.lng }],
+        {
+          edgePadding: { top: AIRE_ENCUADRE, right: AIRE_ENCUADRE, bottom: AIRE_ENCUADRE, left: AIRE_ENCUADRE },
+          animated: true,
+        },
+      )
+      return
+    }
     mapRef.current?.animateToRegion(
       { ...ultimo, latitudeDelta: DELTA_VIVO, longitudeDelta: DELTA_VIVO },
-      motion.duration.normal,
+      motion.duration.estandar,
     )
-  }, [esVivo, ultimo?.latitude, ultimo?.longitude])
+  }, [esVivo, ultimo?.latitude, ultimo?.longitude, destino?.lat, destino?.lng])
 
   function encuadrarRecorrido() {
     if (esVivo || coords.length === 0) return
@@ -145,18 +167,39 @@ export function MapaRecorrido({
             />
           ) : null,
         )}
+        {/* EL DESTINO — fijo, no se sigue ni se anima. Va ANTES del vivo
+            para que la marca que se mueve quede encima al cruzarse. */}
+        {destino !== undefined && marcadorDestino !== undefined && (
+          <Marker
+            coordinate={{ latitude: destino.lat, longitude: destino.lng }}
+            anchor={{ x: 0.5, y: 1 }}
+            tracksViewChanges={false}
+          >
+            {marcadorDestino}
+          </Marker>
+        )}
         {esVivo && ultimo !== null && (
-          <Marker coordinate={ultimo} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
-            <View
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: radius.full,
-                backgroundColor: colorPunto,
-                borderWidth: 2.5,
-                borderColor: palette.white,
-              }}
-            />
+          <Marker
+            coordinate={ultimo}
+            /* Con marca propia el ancla va al PIE (un pin apoya en el
+               suelo); el punto de siempre se centra en su coordenada. */
+            anchor={marcadorVivo === undefined ? { x: 0.5, y: 0.5 } : { x: 0.5, y: 1 }}
+            tracksViewChanges={false}
+          >
+            {marcadorVivo === undefined ? (
+              <View
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: radius.full,
+                  backgroundColor: colorPunto,
+                  borderWidth: 2.5,
+                  borderColor: palette.white,
+                }}
+              />
+            ) : (
+              marcadorVivo
+            )}
           </Marker>
         )}
       </MapView>

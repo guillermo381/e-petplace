@@ -153,7 +153,7 @@ function saludoPorFranja(hora: number, t: TraductorHogar): string {
 // Entrada escalonada de zonas (S52-P2f): fade+translate sutil, tokens
 // de la casa (<300ms, Ley 6); solo al montar — jamás en re-fetch.
 const entradaZona = (orden: number) =>
-  FadeInDown.duration(motion.duration.normal).delay(orden * motion.stagger.fast);
+  FadeInDown.duration(motion.duration.legacy_normal).delay(orden * motion.stagger.fast);
 
 // S71-A3: cuandoRelativo y nombreDia MURIERON con las frases largas de
 // la zona de servicios (el rail habla en fecha corta mono — regla E4);
