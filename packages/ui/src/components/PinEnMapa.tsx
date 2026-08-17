@@ -221,9 +221,16 @@ function ObjetoMoto({ lado }: { lado: number }) {
       <SombraDeSuelo id="sombraMoto" cx={12} cy={21} rx={9.5} />
       {/* SILUETA D, VERBATIM de la candidata firmada — la caja de reparto
           es lo que la hace decir «reparto» y no «bicicleta». */}
-      {/* EL CAJÓN — se queda en `mapaMoto`, el tono más oscuro del par, y
-          por eso preside: es lo que hace decir «reparto». */}
-      <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={palette.mapaMoto} />
+      {/* 🔴 ⏪ EL PAR SE DIO VUELTA — firma del founder revertida: *«hay que
+          poner la moto en PÚRPURA OSCURO, no en púrpura claro»*.
+          **Y no alcanzaba con oscurecer la moto: con las dos piezas en el
+          mismo tono la separación cae a 1.00 y el objeto pierde su
+          volumen** — el volumen era el par, no el color. Medido: el par
+          invertido conserva su separación EXACTA (1.32, es el mismo par
+          dado vuelta) y las dos piezas siguen sobre el piso gráfico
+          contra el terreno (moto 4.72/4.58/4.03 · cajón 3.58/3.47/3.06).
+          ⇒ **el CAJÓN toma el registro claro.** */}
+      <Path d="M2.6 5.8h7.2a1.2 1.2 0 0 1 1.2 1.2v4.6H2.6Z" fill={palette.mapaCajon} />
       {/* 🔴 EL ISOTIPO ADENTRO DEL CAJÓN — firma del founder («y quedaría
           perfecto»). El path viene EXPORTADO de la marca, jamás copiado.
           Va en papel: 6.2 contra el cajón, holgado sobre el piso gráfico.
@@ -240,15 +247,15 @@ function ObjetoMoto({ lado }: { lado: number }) {
       >
         <Path d={ISOTIPO_PATH} fill={palette.light0} />
       </G>
-      {/* EL CUERPO Y LAS RUEDAS — un paso más CLAROS que el cajón. El
-          volumen sale de dos LUCES del mismo tono; dos tonos distintos
-          habrían vuelto al objeto un dibujo de dos colores. */}
+      {/* EL CUERPO Y LAS RUEDAS — el registro OSCURO. El volumen sigue
+          saliendo de dos LUCES del mismo tono; lo único que cambió es
+          cuál va en cuál. */}
       <Path
         d="M2.6 12.4h9l3.2-4.2h3.6v2.5h-2.3l-2.7 3.5h3.5c1.9 0 3.5 1.2 4.1 2.9H4.4c-.5-1.6-1.9-2.7-3.6-2.9Z"
-        fill={palette.mapaMotoClara}
+        fill={palette.mapaMoto}
       />
-      <Circle cx={5.8} cy={17.6} r={3.4} fill={palette.mapaMotoClara} />
-      <Circle cx={18.2} cy={17.6} r={3.4} fill={palette.mapaMotoClara} />
+      <Circle cx={5.8} cy={17.6} r={3.4} fill={palette.mapaMoto} />
+      <Circle cx={18.2} cy={17.6} r={3.4} fill={palette.mapaMoto} />
     </Svg>
   )
 }

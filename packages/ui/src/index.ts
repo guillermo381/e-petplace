@@ -106,6 +106,11 @@ export {
 } from './components/PuertaHermana'
 export { registrarCruce, tomarCruce, type DireccionCruce } from './components/cruce'
 export { EntradaDeCruce, type EntradaDeCruceProps } from './components/EntradaDeCruce'
+export { Fundido, type FundidoProps } from './components/Fundido'
+// Chevron — S99-B: el portador del trazo suelto, para slots que NO son
+// una fila entera (el `senal` de DatoAdministrable). El path sigue sin
+// exportarse: se usa la pieza, jamás la geometría.
+export { Chevron, type ChevronProps, type DireccionChevron } from './components/chevron'
 export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {
