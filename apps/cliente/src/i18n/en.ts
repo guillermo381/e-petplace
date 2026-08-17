@@ -1239,6 +1239,10 @@ export const clienteEn = {
     familiaSuplemento: 'Supplements',
     familiaDieta: 'Prescription diet',
 
+    // S99-D · §8.6ter — the seller who doesn't have it: shown AND said.
+    // Speaks about the present and promises nothing (§4.4 bans "temporarily").
+    filaSinStock: "It's not available right now.",
+
     // S96 · the allergy warning (§5.4) — names pet and allergen, never hides.
     filaContiene: "Contains {{lista}}, and {{nombre}}'s record lists it as an allergy.",
     alergiaContiene: '{{nombre}} is allergic to {{lista}} and this food contains it.',
