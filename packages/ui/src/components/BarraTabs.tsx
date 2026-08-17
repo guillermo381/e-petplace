@@ -161,17 +161,6 @@ const ALTO_FILA = 86
  *    un ajuste fino, era que la fórmula no podía expresar lo que él
  *    pedía*. */
 const DISCO_RADIO = 34
-/** Cuánto sobresale el disco por encima del borde superior de la barra.
- *  *«Que salga muy poco»* — 4 de 36 (11 %). */
-const DISCO_ASOMA = 11
-/** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
- *  superior de la barra. */
-const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
-/** El valle: una cuna, ya no un separador. **Su trabajo cambió con el
- *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
- *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
- *  lado del disco. */
-const VALLE_RADIO = 78
 /* ☠️ `VALLE_HONDO` MURIÓ (Ley 37): el fondo del valle **ya no se elige**,
  *  se DERIVA de `DISCO_CY + DISCO_RADIO + ANILLO`. Un número suelto podía
  *  quedar más arriba o más abajo que el disco y romper la separación
@@ -185,7 +174,27 @@ const VALLE_RADIO = 78
  *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
-const ANILLO = 8
+const ANILLO = 9
+/** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
+ *  superior de la barra. */
+/** 🔴 EL CENTRO DEL DISCO SE DERIVA DEL ANILLO, no del asomo. **Invertir
+ *  la dependencia es la cura de «el hueco está muy pequeñito»:** antes el
+ *  anillo era lo que SOBRABA entre el disco y el valle; ahora es un número
+ *  declarado y lo que sobra es cuánto asoma.
+ *  `hondo` = 0,76 del alto (proporción medida de la referencia). */
+const DISCO_CY = ALTO_FILA * 0.76 - ANILLO - DISCO_RADIO
+/** Cuánto sobresale el disco por encima del borde superior de la barra.
+ *  *«Que salga muy poco»* — 4 de 36 (11 %). */
+/** Cuánto asoma — **DERIVADO**. Medido de la referencia: 0,10 del
+ *  diámetro. Con anillo 9 y barra 86 sale ~0,18, y ése es el precio de
+ *  tener un disco de 68 en una barra de 86 (ver la nota del contrato). */
+const DISCO_ASOMA_DERIVADO = DISCO_RADIO - DISCO_CY
+const DISCO_ASOMA = DISCO_ASOMA_DERIVADO
+/** El valle: una cuna, ya no un separador. **Su trabajo cambió con el
+ *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
+ *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
+ *  lado del disco. */
+const VALLE_RADIO = 50
 /** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
  *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
  *
@@ -271,48 +280,36 @@ const SUBIDA_ACTIVA = ALTO_FILA / 2 - DISCO_CY
    marcador.* */
 function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   'worklet'
-  /* EL RADIO DEL VALLE = el del disco MÁS el anillo. **Ya no se elige: se
-     DERIVA**, y eso es lo que garantiza que la separación sea la misma en
-     todo el arco en vez de depender de dónde mire el ojo. */
-  const R = DISCO_RADIO + ANILLO
-  // dónde el contorno del disco cruza el borde superior de la barra
-  const xe = Math.sqrt(Math.max(R * R - DISCO_CY * DISCO_CY, 1))
-  // el sesgo: el valle se abre hacia el lado del que viene
-  const sesgo = Math.max(-1, Math.min(1, estira)) * 10
-  const izq = cx - xe + sesgo
-  const der = cx + xe + sesgo
-  // los HOMBROS: dónde arranca la S antes de caer al valle
-  const hombroI = cx - VALLE_RADIO + sesgo
-  const hombroD = cx + VALLE_RADIO + sesgo
-  /* La S: al salir del valle el borde SE PASA de la horizontal y recién
-     después se aplana. Con el valle hondo, la saliente tiene de dónde
-     salir — que era la queja: *«la S pareciera que no está»*. */
-  const SALIENTE = 5 * (1 + Math.min(Math.abs(estira), 1) * 0.6)
-  /* El arco de abajo, en DOS cúbicas simétricas. Se aproxima en vez de
-     usar `A` a propósito: los flags de barrido de un arco SVG no se
-     pueden verificar sin renderizar, y una cúbica con control calculado
-     cae exactamente donde dice la aritmética. */
-  const a0 = Math.atan2(-DISCO_CY, -xe)   // ángulo del cruce izquierdo
-  const a1 = Math.PI / 2                   // el fondo del arco
-  const d = a1 - a0
-  const k = (4 / 3) * Math.tan(d / 4) * R
-  const px = (a: number) => cx + sesgo + R * Math.cos(a)
-  const py = (a: number) => DISCO_CY + R * Math.sin(a)
-  const tx = (a: number) => -Math.sin(a)
-  const ty = (a: number) => Math.cos(a)
   const rc = Math.min(RADIO_BARRA, alto / 2)
+  /* EL FONDO DEL VALLE — **0,76 del alto, medido de la referencia** (60
+     sobre 79). Es la única proporción que ya coincidía antes de medir. */
+  const hondo = alto * 0.76
+  /* El ancho: la referencia recorre **0,31 del ancho de la barra** (123
+     sobre 402). ⏪ Yo tenía 0,48 — el doble—, y ése es medio defecto A:
+     un valle que no entra en un tab de la punta. */
+  const medio = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.25)
+  const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.3
+  /* 🔴 DEFECTO A · LOS HOMBROS SE APOYAN EN LA ESQUINA. En el primer y
+     último tab el valle **no entra**: con el centro a media pestaña,
+     pedía barra donde ya no hay. Se recorta contra la esquina redondeada
+     — *el valle se acorta de un lado en vez de salirse*. */
+  const izq = Math.max(cx - medio + sesgo, rc)
+  const der = Math.min(cx + medio + sesgo, ancho - rc)
   return [
     `M0 ${alto - rc}`,
     `V${rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
-    `H${hombroI}`,
-    // hombro izquierdo: sube por encima de la horizontal y cae al valle
-    `C${hombroI + (izq - hombroI) * 0.45} ${-SALIENTE} ${izq - (izq - hombroI) * 0.2} 0 ${izq} 0`,
-    // el arco que abraza al disco, en dos mitades
-    `C${px(a0) + k * tx(a0)} ${py(a0) + k * ty(a0)} ${px(a1) - k * tx(a1)} ${py(a1) - k * ty(a1)} ${px(a1)} ${py(a1)}`,
-    `C${px(a1) + k * tx(a1)} ${py(a1) + k * ty(a1)} ${px(Math.PI - a0) - k * tx(Math.PI - a0)} ${py(Math.PI - a0) - k * ty(Math.PI - a0)} ${der} 0`,
-    // hombro derecho: espejo del izquierdo
-    `C${der + (hombroD - der) * 0.2} 0 ${hombroD - (hombroD - der) * 0.45} ${-SALIENTE} ${hombroD} 0`,
+    `H${izq}`,
+    /* LA ENTRADA Y LA SALIDA SON TANGENTES A LA HORIZONTAL — el primer
+       control en `y = 0` es lo que hace que el borde **se despegue sin
+       quiebre**, que es lo que la referencia muestra: de x 216 a 222
+       baja UN píxel, y recién después se lanza.
+       ⚠️ **Y no lleva joroba, medido:** en el cuadro en reposo de la
+       referencia hay **CERO columnas por encima de la línea** fuera del
+       disco. Lo que el founder llama «saliente hacia afuera» es este
+       despegue tangencial y ANCHO, no un montículo. */
+    `C${izq + (cx - izq) * 0.55} 0 ${cx - (cx - izq) * 0.42} ${hondo} ${cx} ${hondo}`,
+    `C${cx + (der - cx) * 0.42} ${hondo} ${der - (der - cx) * 0.55} 0 ${der} 0`,
     `H${ancho - rc}`,
     `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
     `V${alto - rc}`,
@@ -535,7 +532,15 @@ export function BarraTabs({
 
   const indiceActivo = Math.max(0, items.findIndex((i) => i.key === activo))
   const anchoTab = ancho / Math.max(1, items.length)
-  const cxDestino = anchoTab * (indiceActivo + 0.5)
+  /* 🔴 DEFECTO A · EL DISCO NUNCA SALE DE LA BARRA. En el primer y último
+     tab el centro de la pestaña está a menos de un radio del borde, así que
+     el disco quedaba COLGANDO afuera con su anillo cortado — que es lo que
+     el founder vio en «Hoy» y en «Cuenta» y no pasaba en «Atender».
+     Se acota contra la esquina redondeada. *El disco se corre unos píxeles
+     de su tab en las puntas; salirse de la barra no es una alternativa.* */
+  const cxCrudo = anchoTab * (indiceActivo + 0.5)
+  const margenDisco = DISCO_RADIO + RADIO_BARRA * 0.35
+  const cxDestino = Math.min(Math.max(cxCrudo, margenDisco), Math.max(margenDisco, ancho - margenDisco))
   const altoTotal = ALTO_FILA
 
   useEffect(() => {
