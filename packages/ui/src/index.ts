@@ -352,6 +352,14 @@ export { PrecioText, formatearPrecio, type PrecioTextProps, type PrecioRegistro 
 // familia necesita «¿puedo comprar esto?», jamas el inventario ajeno.
 export { TarjetaProducto, type TarjetaProductoProps } from './components/TarjetaProducto'
 
+// nombreCurado — S100-B: la caja del nombre de producto, UNA para las dos
+// caras. Sube desde `apps/cliente` porque el espejo del vendedor no podía
+// consumirla sin duplicarla, y con 42% del catálogo EN MAYÚSCULAS una sola
+// cara curando significa que vendedor y familia ven nombres distintos del
+// mismo producto. Viaja con `TarjetaProducto`: la pieza y la función que
+// prepara su dato son N17 aplicada a la lógica, no solo a la forma.
+export { nombreCurado } from './nombre-curado'
+
 // La grilla de dos columnas — S100-B: el patron MEDIDO, en codigo y una sola
 // vez. Vivia en un comentario JSDoc de `Baldosa`: ejecutable por copia y
 // verificable por nadie. Sale a `.ts` cuando aparecio su segundo consumidor,

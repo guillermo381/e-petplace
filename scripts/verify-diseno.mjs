@@ -1891,12 +1891,12 @@ const FIXTURES = {
      archivo que no está en la lista; los 5 conocidos alcanzan además
      para que el ANCLA no sea lo que lo pinta. */
   R51: [
-    { path: 'packages/ui/src/components/Hoja.tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/VisorFoto.tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/MapaRecorrido.tsx', src: 'motion.duration.normal' },
-    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: 'motion.duration.normal' },
-    { path: 'apps/cliente/src/app/paseo/[atencionId].tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/PiezaNueva.tsx', src: 'withTiming(x, { duration: motion.duration.normal })' },
+    { path: 'packages/ui/src/components/Hoja.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/VisorFoto.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/MapaRecorrido.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'apps/cliente/src/app/paseo/[atencionId].tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/PiezaNueva.tsx', src: 'withTiming(x, { duration: motion.duration.legacy_normal })' },
   ],
   /* R49 · CUATRO campos, y los dos legítimos son el peso de la prueba
      (L-236): el que da un EJEMPLO de formato · el que EXPLICA dónde
@@ -3219,12 +3219,28 @@ function r51(archivos) {
         `R51: \`${path}\` usa un token LEGADO de \`motion.duration\` (${LEGADOS_MOTION.join('/')}). El vocabulario del movimiento es CERRADO y son otros: \`fast\` 150 · \`estandar\` 300 · \`grande\` 520 (N10). \`normal\` vale 250 y NO pertenece — su nombre compite con el vocabulario sin ser parte de él. Usá el token de N10 que corresponda al registro del gesto.`,
       )
   }
-  // ANCLA: si nadie los usa, la regla dejó de tener sujeto y hay que
-  // mirar si murieron (bueno) o si el nombre del token cambió (malo).
-  fallos.push(...ancla('R51', usan.length, 1, 'archivo(s) que usan un legado de duration'))
+  /* 🔴 EL ANCLA MIDE EL SUJETO, NO LOS OFENSORES — y esta línea se
+     corrige aplicando a mi propia regla el corolario que la mesa acaba
+     de firmar (*toda regla nueva tiene que poder llegar a cero*).
+
+     ⏪ Decía `ancla('R51', usan.length, 1, …)`: exigía **al menos UN
+     archivo usando legados**. ⇒ **el día que alguien migrara los 15 usos
+     a la banda de N10 —o sea, el día que la deuda se pagara entera— la
+     regla habría salido ROJA por ANCLA ROTA.** *Castigaba su propio
+     éxito*, que es exactamente el rojo falso permanente que A encontró
+     en R50, en su otra forma.
+
+     ⇒ Lo que la regla necesita para no estar ciega **no es que alguien
+     la viole: es que sus tokens SIGAN EXISTIENDO.** Si los `legacy_*`
+     desaparecen de `motion.ts`, esta regla se quedó sin sujeto — y eso
+     no es un rojo, es su condición de MUERTE (con firma). El ancla lo
+     dice en vez de fingir que vigila. */
+  const fuenteMotion = readFileSync('packages/ui/src/tokens/motion.ts', 'utf8')
+  const vivos = LEGADOS_MOTION.filter((t) => new RegExp(`\\b${t}\\s*:`).test(fuenteMotion))
+  fallos.push(...ancla('R51', vivos.length, 1, 'token(s) legado(s) declarado(s) en motion.ts (0 = la regla perdió su sujeto y MUERE con firma, no es rojo)'))
   return {
     fallos,
-    info: `${usan.length} archivo(s) con legados de \`duration\` · baseline ${BASELINE_R51.length} congelado · medido: 3 de los 4 legados tienen CERO usos y \`normal\` tiene 15 — el único vivo es el del nombre plausible`,
+    info: `${usan.length} archivo(s) con legados de \`duration\` · ${vivos.length}/${LEGADOS_MOTION.length} token(s) legado(s) vivo(s) · baseline ${BASELINE_R51.length} congelado · medido: 3 de los 4 legados tienen CERO usos y \`normal\` tiene 15 — el único vivo es el del nombre plausible`,
   }
 }
 
