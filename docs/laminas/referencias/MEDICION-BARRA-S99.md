@@ -121,3 +121,57 @@ sola columna arriba del plano.** *Eso es la tela, por fin sin bultos.*
 
 **Alcanzable medido:** columnas sobre el plano **0** (vara 0) · ratio **1,10**
 (vara 1,08) · anillo **9** uniforme.
+
+---
+
+# 🔴 RONDA FINAL — EL BORDE. Y un descarte que hay que RE-MEDIR
+
+**Firma verbatim del founder:** *«casi, estamos cerca, falta arreglar las de las
+esquinas y ya. Cuando el foco está en los tabs de las esquinas LOS JALA HACIA EL
+CENTRO, y HAY SUFICIENTE ESPACIO EN LOS BORDES SIN USAR para que eso no sea necesario.
+Incluso el tab NO ESTÁ PINTADO HASTA EL EXTREMO DE LA PANTALLA.»*
+
+## SON DOS COSAS COMIÉNDOSE EL BORDE A LA VEZ
+① **la BARRA tiene margen lateral** y no llega al borde de la pantalla · ② **y además
+el DISCO se corre hacia adentro** por el clamp (`margenDisco = RADIO_BARRA +
+VALLE_SEMI`). Se ve en las capturas: en **«Cuenta»** el disco está corrido a la
+izquierda de su tab **con espacio libre a la derecha**; en **«Hoy»**, al revés.
+
+## 🔴 EL DESCARTE ANTERIOR SE RE-MIDE — se hizo con OTRA geometría
+Se descartó la barra a sangre midiendo *«ni a sangre alcanza»*: **centro del primer tab
+a 39, el valle pidiendo 43**. **Pero eso era con el VALLE VIEJO** (semiancho 43,
+ratio 0,48). **El valle de hoy es MÁS PROFUNDO Y MÁS ANGOSTO — ratio 1,10** ⇒ **su
+semiancho es MENOR**, y la cuenta que produjo el descarte **ya no describe la pieza.**
+
+**⇒ Lo que B re-corre, con el valle ACTUAL:** ¿cuánto mide `VALLE_SEMI` hoy, y cuánto
+queda **del centro del primer tab al borde** si la barra va a sangre?
+· **Si alcanza:** el clamp **deja de hacer falta** y el disco vuelve al **centro de su
+tab** — que es lo que el founder viene pidiendo hace tres gates.
+· **Si NO alcanza:** se sirve **con el número** — cuánto falta y cuál es la palanca
+(menos margen · correr los tabs · achicar el valle un punto más).
+
+## ⚠️ EL ORDEN IMPORTA, porque las dos cosas se encadenan
+**PRIMERO la barra A SANGRE** —que además es su *«no está pintado hasta el extremo de
+la pantalla»*— **y RECIÉN AHÍ se re-evalúa el clamp**: con más ancho disponible,
+`margenDisco` **puede no dispararse en ningún tab**.
+**Y el efecto secundario que el founder ya nombró dos veces se cura solo si el clamp
+deja de actuar:** los íconos vuelven a estar centrados en su tab, porque **hoy siguen
+al disco corrido**.
+
+## Y de paso, medirlo
+El **hombro comido por la esquina redondeada** en el tab del extremo (ratio 1,65,
+anillo aguantando en 8,97) **debería aliviarse con la barra a sangre** — se mide, no se
+supone.
+
+---
+
+### 📌 LA LEY DE S84 COBRA SU PRIMER DIVIDENDO MEDIBLE
+> *«Todo freno declara CONTRA QUÉ MIDIÓ — un "no se puede" **no se descubre nunca**,
+> porque nadie verifica por qué algo no se hizo.»*
+
+**Este descarte declaró contra qué midió** (centro a 39, valle pidiendo 43, semiancho
+43) **y por eso se pudo re-abrir dos gates después, cuando la geometría cambió.** Si
+hubiera dicho solo *«a sangre no alcanza»*, **el disco se quedaba corrido para
+siempre** y nadie habría sabido por qué. *La ley se escribió en S84 como criterio; acá
+se ve cuánto vale: un freno con su medición adentro tiene fecha de vencimiento — uno
+sin ella es permanente por accidente.*
