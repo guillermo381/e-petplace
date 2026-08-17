@@ -177,10 +177,30 @@ desambigua lo que ya circula.***
 
 ---
 
+## §7bis · EL OTA DE CIERRE SÍ LLEGÓ — resuelto por EVIDENCIA, no por medición
+
+La mesa levantó la duda de *«el OTA no está publicado, o no le llegó»* y pidió
+medirlo en las dos direcciones. **La verificación quedó interrumpida a mitad —
+y no hizo falta: el founder GATEÓ la barra publicada**, con seis
+observaciones sobre la forma del disco y del valle. **Solo se puede describir
+así lo que se está mirando.**
+
+**Se registra como resuelto POR EVIDENCIA y se dice cuál**, en vez de
+declararlo verificado: *ancla `d93edd32` · pie `01a00d5a…` · runtimes 1.0.5 y
+1.0.3, que son los de los binarios del founder.* **Lo que NO se llegó a
+verificar del objeto es el mapeo rama→canal**, y queda dicho por si alguna vez
+vuelve la duda: **es lo primero que hay que mirar**, porque un publish a una
+rama no mapeada sale «bien» y no llega a nadie.
+
 ## §8 · LO QUE ESTA SESIÓN **NO** HIZO, SIN MAQUILLAR
 
 - **La transición del dual sigue saltando.** Es lo más visible del gate y
   **cierra sin curarse.**
+- **La barra NO pasó su gate**, y su diagnóstico cambia el pedido: **el
+  problema es la GEOMETRÍA, no el color** — el disco asoma casi entero, así
+  que el valle es superficial y *la S existe pero no tiene recorrido*. Las
+  tres salidas que el founder ofrece son de color y **ninguna arregla esto**.
+  Diagnóstico completo en `docs/laminas/2026-08-16-s99-GATE-BARRA-diagnostico.md`.
 - **Ninguna de las referencias de precio reales está cargada** ⇒ la banda vive
   hoy sobre un fixture.
 - **La reestructura de «Tu tienda» se construyó y NO se vio en un teléfono
