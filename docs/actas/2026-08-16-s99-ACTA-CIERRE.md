@@ -329,3 +329,119 @@ en los tres casos · a sangre · disco centrado · íconos centrados · anillo u
 las **cuatro que no mira desde hace varias tandas**: el **chevron en Administrar** (la
 pregunta que abrió todo este arco) · el **interruptor del espejo** · **«Tu local · Tu
 stock»** · el **pin con el par invertido**.
+
+
+---
+
+## §2bis · LAS FIRMAS DE LA ÚLTIMA JORNADA, CON SU LITERAL
+
+| Firma | Literal |
+|---|---|
+| **🏁 LA BARRA — el cierre del arco** | ***«perfecto, ahora sí quedó, casi no lo logramos.»*** |
+| **La cadena de selección entre vendedores** | el orden lo decide el sistema, no el vendedor — **y hoy corre SIN DATOS**: sin calificaciones, la cadena **colapsa a antigüedad** (declarado en §8) |
+| **El borde de la barra** | *«hay SUFICIENTE ESPACIO EN LOS BORDES SIN USAR para que eso no sea necesario. Incluso el tab NO ESTÁ PINTADO HASTA EL EXTREMO DE LA PANTALLA.»* |
+| **La S, en su forma final** | *«a MITAD DE CAMINO el tab que rodea el anillo CAMBIA LA PARTE BLANCA DE DIRECCIÓN»* — **la traducción correcta era «punto de inflexión», y llegó al octavo gate** |
+
+---
+
+## §12 · EL ARCO DE LA BARRA — ocho gates, y CINCO leyes que no son sobre barras
+
+> **LA LECCIÓN DE MÉTODO, AL FRENTE, porque es lo que evita el próximo arco de ocho:**
+> **a la segunda o tercera calibración fallida se para de mover números y se pregunta
+> SI LA FORMA ADMITE EL EFECTO.** *Calibrar una anatomía incapaz produce rondas
+> infinitas que siempre parecen «casi».*
+
+**Ocho gates para una barra de navegación.** Lo que los justifica no es la barra: son
+las cinco leyes que salieron, **ninguna de las cuales es sobre barras**.
+
+| # | La ley | Su caso |
+|---|---|---|
+| ① | **La referencia se MIDE, no se describe** | Cuatro traducciones en prosa —*saliente · joroba · montaña · cresta*— mandaron a construir **un bulto que la referencia no tiene** (medido: **cero columnas sobre el plano**). **Tres números terminaron una discusión que cuatro descripciones no pudieron.** |
+| ② | **Un agregado sobre objetos distintos no mide ninguno** | promediar lo que no es comparable devuelve un número que **existe y no describe nada** |
+| ③ | **Una proporción trasplantada a otra escala deja de ser la misma proporción** | lo que se ve bien en la referencia **no se ve bien copiando su cociente** a un objeto de otro tamaño |
+| ④ | **Una curva libre no garantiza separación** | el valle de bézier contra el disco: *nada en la fórmula impedía que se tocaran* |
+| ⑤ | **🔴 LA ANATOMÍA INCAPAZ** (**L-283**) | ***«un plano y un arco no producen un cambio de signo: producen un CODO»*** — el hombro eran **50 px dead-flat + un arco de circunferencia**, que tiene **curvatura de un solo signo**. ⇒ **la S era INCONSTRUIBLE**, hicieran lo que hicieran con los números. **Ocho gates persiguiendo un efecto que la forma no podía producir.** |
+
+**Y las dos que salieron del cierre, que son de la misma familia y valen para todo:**
+**L-285** —*declarar contra qué mediste te salva de la geometría vieja; no te salva de
+haber medido la variable equivocada*— **con su cara complementaria**: la magnitud
+equivocada **no tiene sesgo** — descartó de más en el freno de «a sangre» y **asustó de
+más** en el costo del tab del extremo, que resultó casi inexistente. Y **L-245bis**:
+*una nota puede mentir sobre el PORQUÉ sin mentir sobre el QUÉ*, y eso **ningún lint lo
+ve**.
+
+**Lo que costó y lo que se llevó:** ocho gates · **cinco leyes de método** · una pieza
+que ahora **se verifica con tres números** en vez de discutirse · y un instrumento que
+**extrae `pathBarra` del archivo real en vez de reimplementar la fórmula** — *por eso
+mide la pieza y no su eco*.
+
+---
+
+## §5bis · LA COLA DEL PULIDO — estado REAL de sus insumos
+
+**Lo depositado:** `docs/laminas/referencias/` tiene **los cinco recortes de la barra**
+y **`MEDICION-BARRA-S99.md`** con el perfil medido, el límite duro del 50 %, la
+decisión de la tercera palanca y su costo.
+
+**🔴 LO QUE SIGUE FALTANDO, medido y no maquillado: las TRES referencias del pulido
+—PedidosYa + Uber ×2— NO ESTÁN EN EL REPO.** Verificado por listado: en esa carpeta
+solo hay material de la barra. **Se buscaron y no se pudieron identificar sin adivinar,
+y no se adivinó** — *poner la imagen equivocada como vara es exactamente el modo de
+falla que esta sesión pasó ocho gates aprendiendo.* **Su análisis SÍ está** (apilan
+OBJETOS, no filas · la ficha del repartidor con la placa mandando porque **es lo que se
+verifica en la calle** · las tarjetas como superficies separadas · la lista de hitos con
+hora, **cuyo dato ya existe en el motor**) — **falta el objeto.** Sigue siendo deuda con
+dueño: **el founder**, antes de que abra el pulido.
+
+**Y la decisión abierta de la barra, servida con su precio:** **disco/alto `0,78` en la
+referencia contra `0,66` nuestro.** El precio no cambió: **barra de 100 o disco de 56**,
+y **en los dos casos el texto sale del disco.** *No se decidió, y se declara para que no
+se lea como cerrado.*
+
+---
+
+## §8bis · LO QUE ESTA SESIÓN **NO** HIZO — el cierre, sin maquillar
+
+**De código:**
+· **D-842 — la transición del dual.** Causa **localizada**, **cuatro curas descartadas
+con su razón**; va al pulido. *No se dejó como «pendiente»: se dejó con el diagnóstico
+hecho para que la próxima no lo repita.*
+· **El hueco gris del navegador.** Camino escrito y **la salida obvia descartada por
+costo medido desde S85** (transparentar las escenas **rompe la transición firmada**).
+**Y `tabBarStyle` es un no-op contra un tabBar custom** — medido, para que nadie lo
+intente de nuevo.
+· **El residuo del cinturón** (D-838): la siembra entera, **con su cierre por
+conteo-cero medido**.
+
+**Y lo que NO es de código y es del founder — las tres que ninguna pista puede hacer:**
+① **las referencias de precio, producto por producto** (la siembra es un **fixture**, no
+una carga: el precio de referencia sembrado del precio actual es **circular** y la
+letra lo prohíbe) · ② **octubre abre con SEIS productos comprables reales** · ③ **la
+cadena de selección entre vendedores está CONSTRUIDA SIN DATOS** ⇒ **sin calificaciones
+el orden colapsa a ANTIGÜEDAD**, y va a seguir así hasta que existan. *Se declara
+porque una cadena que ordena por un criterio que no tiene datos **parece** que ordena.*
+
+---
+
+## §6bis · LA MESA REGISTRANDO SUS PROPIOS ERRORES
+
+*Un canon donde solo se anotan los errores ajenos se vuelve un expediente, y ahí nadie
+frena a nadie.* Los de la mesa en esta sesión, en el mismo lugar donde se anotan los de
+las pistas:
+
+| # | Lo que la mesa afirmó | Lo que midió la fuente |
+|---|---|---|
+| ① | *«hay DOS CRESTAS NEGRAS flanqueando el hueco»* | **cero columnas sobre el plano.** No hay crestas — y **la medición de B en reposo, que se había leído como incompleta, estaba bien** |
+| ② | *«tres recortes de la referencia»* | **cuatro** |
+| ③ | *«las tres referencias depositadas en `docs/laminas/referencias/`»* | **no están**: lo depositado es material de la barra |
+| ④ | *«el símlink es directo para B»* | **falso para B** — medido en los cuatro worktrees |
+| ⑤ | *«el chevron ya está»* | cierto **en la rama**, falso **en el canon** |
+| ⑥ | la reestructura, pedida **dos veces** | **ya estaba en `main`** |
+| ⑦ | *«`tabBarStyle` cura el hueco»* | **no-op**: la barra usa un tabBar **custom** |
+
+**Y las tres del lado bueno, que es lo que vuelve simétrico el registro:** la mesa
+**frenó el depósito de cuatro números de deuda ya tomados** · **paró un publish** cuando
+la palanca firmada **no estaba en el archivo** (medido, no supuesto) · y **declaró una
+sospecha COMO sospecha** —el valle profundo contra el plato ancho— **que una medición
+ajena confirmó después con número** (0,83 contra 1,08). *Así se cierra una sospecha: no
+ascendiéndola a premisa.*
