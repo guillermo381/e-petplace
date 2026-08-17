@@ -11711,6 +11711,22 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+- **L-280 — TRADUCIR UN PEDIDO DE COMPORTAMIENTO A UNA PROPIEDAD ESTÁTICA MANDA A TODOS A MEDIR EL CUADRO EQUIVOCADO (S99 — cuatro gates de la barra; el error es de la MESA; depositada 16-ago-2026).**
+
+  **El caso, y es el más caro de la sesión en tiempo:** el founder pidió cuatro veces *«los bordes… con una saliente hacia afuera»*, *«la S mucho más pronunciada»*. **La mesa lo tradujo a una FORMA FIJA — «una joroba»— y todo lo que vino después fue impecable y apuntó al lugar equivocado.**
+
+  **Su literal, que recién en el cuarto gate desarmó todo:** ***«no era el círculo en sí mismo, es el efecto que genera EL MOVIMIENTO»*** · *«el círculo CAE en la barra… los bordes se deforman hacia el lado contrario, como si fuera una montaña»*.
+
+  **🔴 LO QUE RECONCILIA TODAS LAS MEDICIONES SIN QUE NINGUNA ESTUVIERA MAL:**
+  · **B midió el video EN REPOSO** y encontró **cero columnas** sobre la línea plana. **Correcto.**
+  · **A midió la joroba en 2,22 px** y entregó la palanca para agrandarla. **Aritmética correcta.**
+  · **El founder ve montañas.** **También correcto — EN MOVIMIENTO.**
+  ⇒ ***nadie se equivocó: se midió el cuadro equivocado, y ese pedido salió de la mesa.***
+
+  **⇒ LA LEY: cuando alguien describe un EFECTO, la pregunta previa a medir es «¿esto vive en un cuadro o en una secuencia?»** — y si vive en una secuencia, **medir el reposo devuelve un cero que parece una respuesta.** *Un fenómeno dinámico traducido a propiedad estática no da error: da un número correcto sobre otra cosa, y todo el trabajo que se apoye en él hereda el desvío.*
+
+  **Y la pista que estaba escrita y nadie leyó: la propia letra de B ya decía «la saliente ESCALA CON EL ESTIRÓN».** *Estaba en el camino correcto y la mesa la mandó a hacerla fija.* **La corrección estaba en el código antes que en la conversación.**
+
 - **L-279 — UNA CURVA LIBRE NO PUEDE GARANTIZAR UNA SEPARACIÓN; UNA CONCÉNTRICA SÍ, POR CONSTRUCCIÓN (S99 — el caso es de B; depositada por orden de mesa, 16-ago-2026).**
 
   **🔴 EL HALLAZGO, y es lo que la hace valiosa: LA COMPARACIÓN CAZÓ UN DEFECTO QUE NINGÚN NÚMERO MOSTRABA.** Con el valle dibujado como una **U de bézier**, el valle era **más angosto que el disco a la altura de su ecuador** ⇒ **NO HABÍA ANILLO: el disco quedaba apoyado encima del blanco.** **Todos los números daban bien.**
