@@ -136,7 +136,7 @@ export default function DetallePaseo() {
   const irABanda = useCallback(
     (extendida: boolean) => {
       despl.value = withSpring(extendida ? 0 : Math.max(extAlto.value - PEEK, 0), {
-        duration: motion.duration.normal,
+        duration: motion.duration.legacy_normal,
         dampingRatio: 0.85,
       });
       fijarExtendida(extendida);
@@ -159,7 +159,7 @@ export default function DetallePaseo() {
       if (h === extAlto.value) return;
       extAlto.value = h;
       if (!bandaExtendidaRef.current) {
-        despl.value = withSpring(Math.max(h - PEEK, 0), { duration: motion.duration.normal, dampingRatio: 0.85 });
+        despl.value = withSpring(Math.max(h - PEEK, 0), { duration: motion.duration.legacy_normal, dampingRatio: 0.85 });
       }
     },
     [despl, extAlto],
@@ -181,7 +181,7 @@ export default function DetallePaseo() {
           const asomada = Math.max(extAlto.value - PEEK, 0);
           const abrir = e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < asomada / 2;
           despl.value = withSpring(abrir ? 0 : asomada, {
-            duration: motion.duration.normal,
+            duration: motion.duration.legacy_normal,
             dampingRatio: 0.85,
           });
           scheduleOnRN(fijarExtendida, abrir);

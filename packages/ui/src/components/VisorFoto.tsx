@@ -60,7 +60,7 @@ export function VisorFoto({
   useEffect(() => {
     if (visible) {
       setIndice(Math.min(Math.max(indiceInicial, 0), Math.max(fotos.length - 1, 0)))
-      opacidad.value = withTiming(1, { duration: motion.duration.normal })
+      opacidad.value = withTiming(1, { duration: motion.duration.legacy_normal })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, indiceInicial])

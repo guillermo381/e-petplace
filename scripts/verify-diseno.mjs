@@ -3077,7 +3077,12 @@ function r44(archivos) {
  *
  *  Baseline **2**, solo-baja, con dueño: **los dos son de `A`**
  *  (`packages/api`). Muere cuando llegue a 0. */
-const BASELINE_R50 = 2
+/** ⏪ Nació en **2** y **bajó a 0 el mismo día**, sin que nadie curara
+ *  nada: los dos «ofensores» eran **uno ya curado que la regla no veía**
+ *  (`.sort()` en vez de `.order()`) y **uno legítimo por N19**. *Un
+ *  baseline que describe mal lo que cuenta es una deuda inventada — y
+ *  peor: con solo-baja, inmortal.* */
+const BASELINE_R50 = 0
 function r50(archivos) {
   const fallos = []
   const ofensores = []
@@ -3101,8 +3106,43 @@ function r50(archivos) {
          qué contradecirse.*
          ⇒ El orden tiene que estar en la consulta QUE ALIMENTA a este
          filter, no en cualquier parte del archivo. */
-      const ventana = limpio.slice(Math.max(0, m.index - 600), m.index + m[0].length)
-      if (/\.order\s*\(/.test(ventana)) continue
+      /* 🔴 LA VENTANA COMPRENDE EL TRAMO ENTERO, y esta línea también se
+         escribió dos veces. La v2 miraba **600 chars ANTES** del filter
+         — y el orden vive DESPUÉS: *se filtra, se ordena, se toma el
+         primero.* Con esa ventana, la cura de A (un `.sort()`
+         encadenado al `.filter()`) **quedaba invisible y el sitio seguía
+         contando como ofensor para siempre.**
+         *Segunda vez en el día que esta regla mide en el lugar
+         equivocado: primero el archivo entero, ahora media ventana. La
+         forma correcta es la obvia — el orden puede estar en la consulta
+         que alimenta (antes) o encadenado al filtro (después), así que
+         la ventana es de punta a punta.* */
+      const finUso = resto.search(new RegExp(`\\b${nombre}\\s*\\[0\\]`))
+      const ventana = limpio.slice(
+        Math.max(0, m.index - 600),
+        m.index + m[0].length + (finUso >= 0 ? finUso : 0),
+      )
+      /* ⏪ **S100-B · ENMIENDA DE A, y tenía razón: LA REGLA MEDÍA LA
+         PALABRA, NO LA PROPIEDAD.** Pedía `.order(` — de la base — y su
+         cura de H-001 usa un **`.sort()` en el cliente por `created_at`
+         con desempate por `id`**, que es *orden total y determinista sin
+         depender de lo que devuelva la base*: **la propiedad que esta
+         regla persigue, cumplida por un mecanismo que la regla no
+         reconocía.** ⇒ habría seguido contándolo como ofensor para
+         siempre, y con solo-baja **el contador no podía bajar nunca: la
+         regla quedaba incapaz de registrar su propio éxito.**
+         La propiedad es ORDEN TOTAL EXPLÍCITO; `order` y `sort` son dos
+         formas de conseguirla. */
+      if (/\.(order|sort)\s*\(/.test(ventana)) continue
+      /* La exención por LETRA, nombrada y no por baseline (pedido de A):
+         `fotosDeProducto` toma `galeria[0]` y **ahí el orden ES DATO** —
+         un `jsonb` con el orden del autor— y **N19 le da significado
+         explícito a la primera**: *«la primera foto es el producto solo,
+         sin composición de marketing»*. No hay nada que ordenar: elegir
+         la primera **es** el criterio.
+         *Se exenta nombrando su ley, no escondiéndola en un número: un
+         baseline dice «hay 2 y no sé por qué»; esto dice cuál y por qué.* */
+      if (/function\s+fotosDeProducto|const\s+fotosDeProducto/.test(limpio.slice(Math.max(0, m.index - 1200), m.index))) continue
       ofensores.push(`${path.split('/').pop()} → ${nombre}[0]`)
     }
   }
@@ -3150,7 +3190,12 @@ function r50(archivos) {
  *  —el nombre dejaría de competir con el vocabulario—, pero es enmienda
  *  de token con censo de consumidores: tanda propia, no de paso.** Se
  *  declara para que se decida, no para que se olvide. */
-const LEGADOS_MOTION = ['instant', 'normal', 'slow', 'verySlow']
+/** ⏪ Eran `instant`/`normal`/`slow`/`verySlow`. **S100-B los renombró a
+ *  `legacy_*`** para que el nombre se delate solo, así que la regla
+ *  vigila los nombres NUEVOS. *Si siguiera vigilando los viejos, tras el
+ *  rename encontraría CERO y su ancla lo diría — que es exactamente lo
+ *  que pasó, y por eso el ancla estaba puesta.* */
+const LEGADOS_MOTION = ['legacy_instant', 'legacy_normal', 'legacy_slow', 'legacy_verySlow']
 /** Los 5 archivos que YA los usan. Solo-baja: sacar uno de acá es una
  *  migración con gate, y ningún archivo NUEVO puede sumarse. */
 const BASELINE_R51 = [

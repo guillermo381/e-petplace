@@ -14,7 +14,7 @@
  * blanco para despegarlo del mapa.
  *
  * modo 'vivo': sigue el último punto con animateToRegion CORTO
- * (motion.duration.normal, ease del SDK — sin rebotes, Ley 6);
+ * (motion.duration.legacy_normal, ease del SDK — sin rebotes, Ley 6);
  * gestos apagados (el paseador no navega el mapa, camina).
  * modo 'recorrido': fitToCoordinates con aire al montar; zoom y
  * pan HABILITADOS (decisión B2.6: acercarse a una esquina del paseo
@@ -100,7 +100,7 @@ export function MapaRecorrido({
     if (!esVivo || ultimo === null) return
     mapRef.current?.animateToRegion(
       { ...ultimo, latitudeDelta: DELTA_VIVO, longitudeDelta: DELTA_VIVO },
-      motion.duration.normal,
+      motion.duration.legacy_normal,
     )
   }, [esVivo, ultimo?.latitude, ultimo?.longitude])
 
