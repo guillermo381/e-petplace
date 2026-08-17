@@ -152,6 +152,16 @@ export interface TarjetaProductoProps {
    *  producto. Va junto al nombre porque **sin él dos variantes se ven
    *  idénticas** (N19 ②). */
   presentacion?: string
+  /**
+   * La marca, en su propia línea bajo el nombre (S100-B · brecha medida
+   * contra la tarjeta local del espejo del vendedor, que ya la mostraba).
+   *
+   * **Va aparte y no pegada al nombre** por la misma razón que la
+   * presentación: son tres datos distintos y **el que se pierde cuando
+   * comparten renglón es siempre el último**. `null`/`undefined` = no se
+   * dibuja (19.9).
+   */
+  marca?: string | null
   precio: number | null
   /** Ya formateado — ver `PrecioText.porUnidad`. */
   precioPorUnidad?: string
@@ -215,6 +225,7 @@ export interface TarjetaProductoProps {
 
 export function TarjetaProducto({
   nombre,
+  marca,
   presentacion,
   precio,
   precioPorUnidad,
@@ -292,6 +303,12 @@ export function TarjetaProducto({
               producto, así que compartir renglón con un nombre que
               puede ocupar dos líneas la volvería lo primero que se
               pierde. Nunca se trunca. */}
+          {marca === undefined || marca === null ? null : (
+            <Texto variante="apoyo" color="secondary">
+              {marca}
+            </Texto>
+          )}
+
           {presentacion === undefined ? null : (
             <Texto variante="apoyo">{presentacion}</Texto>
           )}
