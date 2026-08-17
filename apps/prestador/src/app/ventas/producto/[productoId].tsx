@@ -504,6 +504,28 @@ function FilaPresentacion({
           <Texto variante="titulo">{plata(v.precio)}</Texto>
         )}
       </DatoAdministrable>
+      {/* ✅ LA PROPUESTA PENDIENTE, SOBRE EL PRECIO — la mitad que la
+          receta declaraba obligatoria y que A acaba de destrabar.
+          *El vendedor pedía otro precio y no pasaba nada visible: un
+          cambio que se acepta y desaparece se lee como que se perdió, y
+          la segunda vez deja de pedir.* **No es un aviso que pasa: es un
+          ESTADO del dato**, y por eso vive acá y no en un toast.
+          🔴 **El hecho lo emite el SERVIDOR** (`propuesta_pendiente`),
+          igual que las razones — *comparar en el cliente parece trivial
+          hasta que dos superficies lo comparan distinto y el vendedor ve
+          «pendiente» en una pantalla y nada en la otra.*
+          Y con el brazo que la vuelve creíble: **se apaga sola cuando la
+          propuesta ya coincide con lo publicado** — una marca que no se
+          apaga al cumplirse deja de significar algo en dos días. */}
+      {modo === 'administrar' &&
+        sku !== null &&
+        sku.propuesta_pendiente &&
+        sku.precio_propuesto !== null && (
+          <Texto variante="apoyo" color="warning">
+            {t('ventas.precio.pendiente', { monto: plata(sku.precio_propuesto) })}
+          </Texto>
+        )}
+
       {/* EL PRECIO POR KILO — mono porque es un CÁLCULO (Ley 3), y esa
           diferencia tipográfica es justo su valor: nadie lo pone, nosotros
           sí. Modo administrar hasta que la ficha de la familia lo tenga

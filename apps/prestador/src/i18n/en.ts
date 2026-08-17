@@ -2528,7 +2528,7 @@ export const prestadorEn = {
       razon_sin_foto: 'We still need its photo.',
     },
     tienda: {
-      titulo: 'Your store',
+      titulo: 'Your shop and your stock',
       vitrinaTitulo: 'Your shelf',
       localTitulo: 'Your shop',
     },
@@ -2577,8 +2577,9 @@ export const prestadorEn = {
     },
     hoy: {
       vitrinaDetalle: 'What families see',
-      titulo: 'Product sales',
+      titulo: 'Your store',
       cupo: '{{consumido}} of {{capacidad}} deliveries today',
+      cupoEtiqueta: "Today's deliveries",
       cupoCero: 'No delivery capacity confirmed for today',
       entregas: 'My deliveries today',
       entregasDetalle: 'What you deliver yourself',
@@ -2654,6 +2655,7 @@ export const prestadorEn = {
       guardarCta: 'Save the price',
       proponerCta: 'Propose this price',
       exito: 'Price updated.',
+      pendiente: 'You proposed {{monto}} · under review',
     },
     stock: {
       disponibles: '{{n}} available',

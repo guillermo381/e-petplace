@@ -3197,7 +3197,18 @@ export const prestadorEs = {
        16-ago). El nombre del techo es del NEGOCIO del vendedor, no del
        módulo: él no entra a «configuración», entra a su tienda. */
     tienda: {
-      titulo: 'Tu tienda',
+      /* ⚠️ ESTA PANTALLA DEJA DE LLAMARSE «Tu tienda», y no es un gusto:
+         **ese nombre se lo llevó `/ventas`** por corrección del founder
+         (②). Dos cosas con el mismo nombre, una adentro de la otra, es
+         peor que un nombre mediocre — *el vendedor no sabría cuál tocó.*
+         El nombre nuevo sale de **sus propias dos partes**, en el
+         vocabulario del founder («la configuración del local y la
+         configuración del stock»), sin inventar una palabra.
+         ⏳ **Provisional declarado:** ① rehace esta pantalla en dos
+         segmentos y puede volver a colapsar los nombres. No se adelantó
+         porque **espera la decisión de B sobre los segmentados
+         anidados**. */
+      titulo: 'Tu local y tu stock',
       vitrinaTitulo: 'Tu vitrina',
       localTitulo: 'Tu local',
     },
@@ -3266,8 +3277,25 @@ export const prestadorEs = {
          («Venta de productos», §1.2), el mismo que dice la celda que trae
          acá — se toca una puerta y se aterriza en un lugar que se llama
          igual. El titular del contenido sigue vivo abajo (②). */
-      titulo: 'Venta de productos',
+      /* ⭐ S99-C · «TU TIENDA» — corrección del founder mirando la
+         pantalla: *«Vender por e-PetPlace: cuando le das clic sale VENTA
+         DE PRODUCTOS, y ahí no tiene nada que ver — la venta de productos
+         se va a hacer desde el tab de ATENDER».*
+         **El nombre no envejeció por descuido: lo movió otra decisión.**
+         «Venta de productos» era el nombre FIRMADO de la naturaleza y por
+         eso se puso acá; después la venta de mostrador se mudó a ATENDER
+         y esta pantalla quedó llamándose como algo que ya no pasa acá.
+         *Un nombre correcto puede volverse falso sin que nadie lo toque:
+         basta con que se mude lo que nombraba.* */
+      titulo: 'Tu tienda',
       cupo: '{{consumido}} de {{capacidad}} entregas hoy',
+      /* 🔴 LA ETIQUETA DEL CUPO DEJA DE SER EL TÍTULO DE LA PANTALLA.
+         Reusaba `titulo`, así que la fila decía «Venta de productos ·
+         3 de 10 entregas hoy» — y con el rename habría dicho «Tu tienda ·
+         3 de 10». *Una etiqueta tiene que nombrar SU número, no la
+         pantalla donde vive; el préstamo se veía razonable mientras los
+         dos textos coincidían por casualidad.* */
+      cupoEtiqueta: 'Entregas de hoy',
       cupoCero: 'Sin reparto confirmado para hoy',
       entregas: 'Mis entregas de hoy',
       entregasDetalle: 'Lo que llevas tú',
@@ -3351,6 +3379,9 @@ export const prestadorEs = {
       guardarCta: 'Guardar el precio',
       proponerCta: 'Proponer este precio',
       exito: 'Precio actualizado.',
+      /* ESTADO del dato, no aviso que pasa. Se apaga cuando la
+         propuesta coincide con lo publicado — lo decide el servidor. */
+      pendiente: 'Propusiste {{monto}} · en revisión',
     },
     stock: {
       disponibles: '{{n}} disponibles',

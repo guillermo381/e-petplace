@@ -312,7 +312,7 @@ export function VentanaPedidos({
       {cupo !== null &&
         (cupo.capacidad > 0 ? (
           <FilaDato
-            etiqueta={t('ventas.hoy.titulo')}
+            etiqueta={t('ventas.hoy.cupoEtiqueta')}
             valor={t('ventas.hoy.cupo', { consumido: cupo.consumido, capacidad: cupo.capacidad })}
             mono
           />

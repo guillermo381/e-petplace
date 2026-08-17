@@ -22,13 +22,14 @@
  *   permiso**. Un control que se ve «libre» y después manda todo a
  *   revisión miente dos veces — al ofrecer y al confirmar.
  *
- * ── LO QUE FALTA, Y NO ES OPCIONAL ──────────────────────────────────────
- * 📬 **Pedido a A: `precio_propuesto` en `SkuDelVendedor`** (medido: el
- * lector no lo trae). Sin él **no se puede pintar la propuesta pendiente
- * sobre el precio**, que la receta declara obligatoria: *un cambio que se
- * acepta y desaparece se lee como que se perdió, y la segunda vez el
- * vendedor deja de pedir.* El rebote del servidor sí lo dice al confirmar;
- * lo que falta es que **quede** dicho.
+ * ── ✅ LA MITAD QUE FALTABA, CERRADA ────────────────────────────────────
+ * A entregó `precio_propuesto` **y** `propuesta_pendiente` (el hecho lo
+ * emite el servidor, mismo corte que las razones), así que **la propuesta
+ * pendiente ya se pinta EN LA FICHA, sobre el precio** — que es donde la
+ * receta la pedía: *no es un aviso que pasa, es un estado del dato.*
+ * Y con el brazo que la vuelve creíble: **se apaga cuando la propuesta
+ * coincide con lo publicado** — *una marca que no se apaga al cumplirse
+ * deja de significar algo en dos días.*
  */
 
 import { useState } from 'react';
