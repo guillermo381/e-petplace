@@ -82,6 +82,7 @@ import { CriterioMascota, LienzoProducto } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { alergenosQueCruzan, vozAlergeno } from '@/lib/despensa/composicion';
+import { nombreCurado } from '@/lib/despensa/nombre-curado';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -350,7 +351,10 @@ export default function DespensaDescubrir() {
             })
           }
           inicio={<LienzoProducto lado={56} fotoUrl={p.foto_url} />}
-          titulo={p.nombre}
+          // ④ S100-C — el nombre CURADO, no el del catálogo. 42 % del catálogo
+          // viene EN MAYÚSCULAS y `CANADA LITTER` es nombre de importador, no
+          // de vitrina. Solo cambia la CAJA: no inventa una palabra.
+          titulo={nombreCurado(p.nombre)}
           subtitulo={[p.marca, p.presentacion].filter((x) => x !== null && x !== '').join(' · ')}
           metadataMono={`$ ${p.precio.toFixed(2)}`}
         />

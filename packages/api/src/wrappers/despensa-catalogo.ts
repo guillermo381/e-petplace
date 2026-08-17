@@ -251,6 +251,65 @@ function literalArrayPg(valores: string[]): string {
   return `{${valores.map((v) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 }
 
+/** Quita diacríticos por descomposición Unicode. **La ñ cae a n a propósito**:
+ *  el dato está sin acentuar, así que «niño» tiene que encontrar «nino». */
+function sinDiacriticos(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * 🔴 LA EXPRESIÓN DE BÚSQUEDA DE LA VITRINA — UNA SOLA, PARA LAS DOS PUERTAS
+ * (S100-C, H-003).
+ *
+ * **EL ROJO QUE LA PARIÓ:** `ilike` **no** es insensible a acentos, y el
+ * catálogo llegó SIN acentuar — medido: **0 de 563 nombres tienen tilde o ñ**
+ * (`nutricion`, `arena de bano`, `pequenos mamiferos`). ⇒ `nutrición` devolvía
+ * **0 filas** y `nutricion` devolvía **2**. *No es que el buscador fuera
+ * estricto con el dato sucio: es que el dato sucio castigaba a quien escribe
+ * bien su propio idioma — y en Quito eso es casi todo el mundo.*
+ *
+ * **SE NORMALIZAN LOS DOS LADOS DE LA COMPARACIÓN** (adjudicación de mesa):
+ * se busca con el término **tal como se tecleó** Y con su versión sin
+ * diacríticos. Así entra el caso de hoy (término acentuado contra dato sin
+ * acentuar) **y** el de mañana (si un vendedor carga «Nutrición» bien escrito,
+ * el término acentuado lo encuentra igual).
+ *
+ * ⚠️ **EL HUECO QUE QUEDA, DECLARADO Y NO DISIMULADO:** término SIN acento
+ * contra dato CON acento (teclear «nutricion» y que la fila diga «Nutrición»)
+ * **NO se cubre desde acá** — habría que quitarle los acentos a la COLUMNA, y
+ * eso es `unaccent` en el servidor con su índice: motor. Hoy no muerde porque
+ * el dato tiene cero acentos; **muerde el día que alguien cargue bien.** *Se
+ * escribe para que ese día se encuentre esta nota y no se re-descubra el
+ * defecto desde cero.*
+ *
+ * **Y LA CATEGORÍA ENTRA AL ALCANCE** (misma adjudicación): `familia_codigo`
+ * es palabra en español (`alimento`, `higiene`, `suplemento`,
+ * `antiparasitario`, `heno`, `sustrato`), así que buscar «alimento» o «dieta»
+ * ahora encuentra. *Antes la familia podía teclear la categoría que la propia
+ * pantalla le muestra como filtro y no encontrar nada.*
+ *
+ * **El saneo es POR REMOCIÓN, jamás por escape**, y es decisión: `,()` parten
+ * la sintaxis del `or` de PostgREST y `%_\` son comodines de LIKE. Escapar
+ * deja abierta la posibilidad de armar un patrón malformado; **remover no
+ * puede fallar.** El costo es que «50%» busca «50», y es aceptable.
+ * *Antes las dos puertas saneaban DISTINTO —una limpiaba `,()` y la otra
+ * escapaba `%_`— así que la misma búsqueda podía comportarse distinto según
+ * por dónde entrara. Ahora hay una sola función y eso es inexpresable.*
+ *
+ * MEDIDO contra la base viva, antes → después:
+ * «nutrición» **0 → 2** · categoría «alimento» **11 → 285** ·
+ * «higiene» **0 → 11** · «baño» **0 → 2**.
+ */
+function expresionBusquedaVitrina(texto: string): string | null {
+  const base = texto.replace(/[,()%_\\]/g, ' ').trim();
+  if (base.length === 0) return null;
+  const variantes = [...new Set([base, sinDiacriticos(base)])];
+  const columnas = ['nombre', 'marca', 'familia_codigo'];
+  return variantes
+    .flatMap((v) => columnas.map((c) => `${c}.ilike.*${v}*`))
+    .join(',');
+}
+
 const SELECT_VITRINA = `
   id, precio, moneda, country_code, cuenta_comercial_id, hay_stock,
   producto_variantes!inner (
@@ -458,9 +517,12 @@ function aplicarFiltrosVitrina<T extends {
   if (f.familia_codigo !== undefined) r = r.eq('familia_codigo', f.familia_codigo);
   if (f.country_code !== undefined) r = r.eq('country_code', f.country_code);
   if (f.especie !== undefined) r = r.contains('especies_aplicables', [f.especie]);
-  if (f.texto !== undefined && f.texto.trim().length > 0) {
-    const t = f.texto.trim().replace(/[,()]/g, ' ');
-    r = r.or(`nombre.ilike.*${t}*,marca.ilike.*${t}*`);
+  if (f.texto !== undefined) {
+    // Una sola fuente de la expresión (S100-C): si el conteo y la lista
+    // sanearan distinto, contarían conjuntos distintos — el mismo defecto que
+    // esta función existe para impedir, con el texto en vez de con un `eq`.
+    const expr = expresionBusquedaVitrina(f.texto);
+    if (expr !== null) r = r.or(expr);
   }
   return r;
 }
@@ -509,7 +571,10 @@ export async function obtenerFichaProducto(
       .maybeSingle(),
     cliente
       .from('producto_variantes')
-      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code, hay_stock)')
+      // `created_at` entra por la cura de S100 (H-001 de C): sin él no hay
+      // criterio de antigüedad y la elección entre vendedores no puede ser
+      // determinista. Ver la nota larga abajo.
+      .select('id, codigo, presentacion, contenido_valor, contenido_unidad, peso_kg, ofertas(id, precio, moneda, estado, cuenta_comercial_id, country_code, hay_stock, created_at)')
       .eq('producto_id', productoId)
       .eq('activo', true),
   ]);
@@ -528,11 +593,44 @@ export async function obtenerFichaProducto(
     if (!esObjDespensa(v) || typeof v.id !== 'string' || typeof v.presentacion !== 'string') {
       return falloDespensa('datos_inconsistentes');
     }
-    // El UNIQUE parcial `uq_oferta_publicada_por_variante` garantiza que hay
-    // **una sola** publicada por variante — no hay que elegir entre varias.
-    const publicadas = (Array.isArray(v.ofertas) ? v.ofertas : []).filter(
-      (o) => esObjDespensa(o) && o.estado === 'publicada',
-    );
+    // ☠️ S100 · LA PREMISA QUE DECÍA ESTA LÍNEA ERA FALSA (H-001 de C).
+    //
+    // Decía: *«el UNIQUE parcial `uq_oferta_publicada_por_variante` garantiza
+    // que hay una sola publicada por variante — no hay que elegir entre
+    // varias»*. **Ese índice NO EXISTE.** El que existe, medido en
+    // `pg_indexes`, es `uq_oferta_publicada_por_cuenta_variante` UNIQUE
+    // (cuenta_comercial_id, variante_id) — o sea que garantiza **una por
+    // VENDEDOR**, y N vendedores por variante son legales A PROPÓSITO.
+    //
+    // Medido: 563 ofertas publicadas sobre 538 variantes ⇒ **25 variantes con
+    // más de una**. Con `publicadas[0]` y sin `.order()`, el vendedor elegido
+    // lo decidía el orden que Postgres tuviera ganas de devolver ⇒ **la
+    // tarjeta podía decir $70.90 y la ficha $75.86 del mismo toque**. *No
+    // tenía síntoma: cada pantalla se veía bien sola.*
+    //
+    // 🔴 LO QUE ESTA CURA HACE Y LO QUE NO, porque la diferencia importa:
+    // hace la elección **DETERMINISTA** — la misma oferta, siempre, en todas
+    // las superficies. **NO implementa la cadena de selección entre
+    // vendedores**, que es decisión de negocio y hoy no existe como motor
+    // (censo de C: no hay función que correr).
+    //
+    // El criterio es **ANTIGÜEDAD**, y no es una invención: es el fallback que
+    // el propio canon ya nombra —*«sin calificaciones el orden colapsa a
+    // ANTIGÜEDAD»*—. **No se ordena por precio**: la letra dice CALIFICACIÓN,
+    // y colapsar por el más barato habría parecido correcto mientras
+    // contradecía la letra sin que nadie lo notara.
+    const publicadas = (Array.isArray(v.ofertas) ? v.ofertas : [])
+      .filter((o) => esObjDespensa(o) && o.estado === 'publicada')
+      .sort((a, b) => {
+        const ca = esObjDespensa(a) && typeof a.created_at === 'string' ? a.created_at : '';
+        const cb = esObjDespensa(b) && typeof b.created_at === 'string' ? b.created_at : '';
+        if (ca !== cb) return ca < cb ? -1 : 1;
+        // Desempate por id: sin él, dos ofertas del mismo instante volverían a
+        // ser un sorteo — que es justo el defecto que se está curando.
+        const ia = esObjDespensa(a) && typeof a.id === 'string' ? a.id : '';
+        const ib = esObjDespensa(b) && typeof b.id === 'string' ? b.id : '';
+        return ia < ib ? -1 : ia > ib ? 1 : 0;
+      });
     const of: unknown = publicadas[0];
     variantes.push({
       variante_id: v.id,
@@ -728,9 +826,11 @@ export async function buscarProductosDespensa(
   termino: string,
   limite = 50,
 ): Promise<ResultadoWrapper<ProductoDeVitrina[], CodigoErrorDespensa>> {
-  const t = termino.trim();
-  if (t.length === 0) return { ok: true, data: [] };
-  const patron = `%${t.replace(/[%_]/g, (c) => `\\${c}`)}%`;
+  // S100-C · H-003: la MISMA expresión que la vitrina — acentos normalizados
+  // en los dos lados y la categoría adentro. Un término que solo deja signos
+  // de puntuación devuelve `null` ⇒ vacío honesto, igual que el término vacío.
+  const expr = expresionBusquedaVitrina(termino);
+  if (expr === null) return { ok: true, data: [] };
 
   // La VISTA, por lo mismo que la lista: el buscador es la otra puerta a la
   // misma vitrina y **tiene que devolver el mismo orden** — si busca y
@@ -742,7 +842,7 @@ export async function buscarProductosDespensa(
   const { data, error } = await getClient()
     .from('v_vitrina_publicada')
     .select('*')
-    .or(`nombre.ilike.${patron},marca.ilike.${patron}`)
+    .or(expr)
     .order('nombre', { ascending: true })
     .order('oferta_id', { ascending: true })
     .limit(limite);
