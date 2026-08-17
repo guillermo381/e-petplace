@@ -475,9 +475,15 @@ export const palette = {
    * solo la luz. */
 
   mapaMoto: '#9D2F75',
-  /** 🔴 EL CUERPO DE LA MOTO, UN PASO MÁS CLARO QUE SU CAJÓN (S99-B,
-   *  firma del founder: *«el cajón puede ser púrpura y LA MOTO UN POQUITO
-   *  MÁS CLARA, no negra»*).
+  /** 🔴 EL CAJÓN — el registro CLARO del par (S99-B).
+   *
+   *  ⏪ **NACIÓ COMO `mapaMotoClara` Y CAMBIÓ DE TRABAJO**, así que cambia
+   *  de nombre: el founder revirtió su firma —*«hay que poner la moto en
+   *  PÚRPURA OSCURO, no en púrpura claro»*— y el par se dio vuelta.
+   *  **Un token que se llama «moto» y pinta el cajón es exactamente la
+   *  letra vencida que en esta misma sesión hizo salir la barra en
+   *  negro** (`bg.tinta`, «el techo del prestador»). Se renombra en el
+   *  acto, no «cuando alguien lo note».
    *
    *  **Mismo tono y misma saturación que `mapaMoto` —322° · 0.54, dentro
    *  de la banda del terreno—; lo único que sube es la LUZ: 0.40 → 0.48.**
@@ -491,7 +497,7 @@ export const palette = {
    *  3:1. Con 0.48 queda **3.58 asfalto · 3.47 parque · 3.06 agua** — el
    *  agua es el que manda, y por eso no hay margen para «un poquito más»
    *  sin salirse. */
-  mapaMotoClara: '#BC388C',
+  mapaCajon: '#BC388C',
   /** El destino es un EDIFICIO, no un marcador (§6ter) ⇒ sus tonos son
    *  neutros cálidos del terreno (sat ~0.10), no marca. Dos planos
    *  porque un volumen necesita dos: cuerpo 3.68 · techo 6.34 contra el

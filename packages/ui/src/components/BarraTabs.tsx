@@ -58,11 +58,12 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import Svg, { Circle, Path } from 'react-native-svg'
+import Svg, { Path } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
+import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 import { Badge, useEtiquetaBadge } from './Badge'
@@ -133,7 +134,7 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  hace que se lea como *un vector deformándose* y no como *un botón que
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
-const ALTO_FILA = 64
+const ALTO_FILA = 76
 
 /** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
  *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
@@ -159,10 +160,10 @@ const ALTO_FILA = 64
  *    entero — *por eso siempre se veía «encima» y nunca «metido»: no era
  *    un ajuste fino, era que la fórmula no podía expresar lo que él
  *    pedía*. */
-const DISCO_RADIO = 30
+const DISCO_RADIO = 34
 /** Cuánto sobresale el disco por encima del borde superior de la barra.
  *  *«Que salga muy poco»* — 4 de 36 (11 %). */
-const DISCO_ASOMA = 14
+const DISCO_ASOMA = 10
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
 const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
@@ -170,8 +171,8 @@ const DISCO_CY = DISCO_RADIO - DISCO_ASOMA
  *  color** — ver la nota del hueco. Más ancho que el disco a propósito:
  *  lo que se ve del valle son los HOMBROS, la caída del blanco a cada
  *  lado del disco. */
-const VALLE_RADIO = 44
-const VALLE_HONDO = 14
+const VALLE_RADIO = 50
+const VALLE_HONDO = 16
 /** 🔴 EL ANILLO DE FONDO — el pedido literal del founder:
  *  *«no dejó espacio en blanco entre la barra y el círculo: se
  *  debería ver el fondo alrededor del círculo»*. El cuerpo se dibuja
@@ -181,6 +182,20 @@ const VALLE_HONDO = 14
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
 const ANILLO = 5
+/** 🔴 LA BARRA FLOTA — sexta corrección del gate: *«el espacio alrededor
+ *  ya funciona, pero lo dejó EN BLANCO. Debería ser el VERDE DEL FONDO.»*
+ *
+ *  **El recorte estaba bien y el diagnóstico de mesa lo confirmó:** el
+ *  hueco mostraba blanco **porque detrás había blanco** — la barra estaba
+ *  APOYADA, no flotando, así que el `evenodd` dejaba ver la base. *L-252
+ *  se cumplió; lo que faltaba no era el corte, era el CONTENEDOR.*
+ *
+ *  Con márgenes, lo que se ve por el anillo y alrededor de la barra es el
+ *  fondo real de la pantalla — que en el prestador es su verde. */
+const MARGEN_BARRA = spacing[4]
+/** El radio del cuerpo flotante. `radius.xl` es el escalón que la casa usa
+ *  para superficies grandes apoyadas; no nace un número nuevo. */
+const RADIO_BARRA = radius.xl
 /** ── EL BLOQUE DE LA TAB, CON ALTURAS DECLARADAS ────────────────────
  *  🔴 **Están fijas a propósito, y ésa es la cura del tercer hallazgo**
  *  (*«la gráfica aparece dentro del círculo SIN ESTAR CENTRADA»*). Antes
@@ -210,7 +225,6 @@ const SUBIDA_ACTIVA = ALTO_FILA / 2 - DISCO_CY
 /** El cuerpo se dibuja MÁS ANCHO que la pantalla y viaja por transform
  *  (ver la nota del viaje). Con un margen de un ancho a cada lado, ningún
  *  desplazamiento posible descubre un borde. */
-const MARGEN_VIAJE = 1
 
 /** El path del cuerpo con su valle. Worklet: lo corre el hilo de UI en
  *  cada frame del viaje. */
@@ -240,32 +254,57 @@ const MARGEN_VIAJE = 1
  *  El cuerpo se dibuja en coordenadas LOCALES —el valle en `x = 0`— y se
  *  extiende un ancho a cada lado, para que ningún desplazamiento
  *  descubra un borde. */
-function pathBarra(ancho: number, alto: number, estira: number) {
+/* 🔴 ⏪ EL CUERPO DEJÓ DE VIAJAR, y es consecuencia de que FLOTE.
+   Antes el grupo entero se trasladaba y el cuerpo se dibujaba más ancho
+   que la pantalla para que ningún borde se descubriera. **Con un cuerpo
+   flotante eso es imposible: sus esquinas redondeadas son puntos fijos de
+   la pantalla y no pueden moverse con el valle.**
+   ⇒ el cuerpo queda QUIETO y **el valle y su hueco viajan DENTRO del
+   `d`**, que es el mecanismo que la nota anterior evitaba. *La mitigación
+   se conserva y es la que importa: **el DISCO sigue viajando por
+   transform**, así que si algún día `d` no interpolara en un dispositivo,
+   se perdería la deformación del valle — jamás el movimiento del
+   marcador.* */
+function pathBarra(ancho: number, alto: number, estira: number, cx: number) {
   'worklet'
   const r = VALLE_RADIO * (1 + Math.min(Math.abs(estira), 1) * 0.35)
   // el sesgo: el valle se abre hacia el lado del que viene
   const sesgo = Math.max(-1, Math.min(1, estira)) * VALLE_RADIO * 0.45
-  const izq = -r + sesgo
-  const der = r + sesgo
-  const i0 = -ancho * MARGEN_VIAJE
-  const i1 = ancho * (1 + MARGEN_VIAJE)
+  const izq = cx - r + sesgo
+  const der = cx + r + sesgo
+  /* 🔴 LOS HOMBROS SALEN EN **S** — sexta corrección, verbatim: *«los
+     bordes de arriba TIENDEN A GIRARSE, no rectos ni como si fueran parte
+     del círculo, sino CON UNA SALIENTE HACIA AFUERA»*. La mesa lo
+     confirmó cuadro por cuadro.
+     ⇒ al salir del valle el borde **se pasa de la horizontal** y recién
+     después se aplana. Ese pequeño monto negativo (hacia arriba) es toda
+     la S: sin él la curva llega a la recta y muere ahí. */
+  const SALIENTE = 4
+  // El cuerpo flota: sus bordes NO son la pantalla, son el ancho útil.
+  const i0 = 0
+  const i1 = ancho
+  const rc = Math.min(RADIO_BARRA, alto / 2)
   return [
-    `M${i0} 0`,
+    // borde superior izquierdo, con su esquina redondeada
+    `M${i0} ${alto - rc}`,
+    `V${rc}`,
+    `a${rc} ${rc} 0 0 1 ${rc} ${-rc}`,
     `H${izq}`,
-    `C${izq + r * 0.45} 0 ${-r * 0.5} ${VALLE_HONDO} 0 ${VALLE_HONDO}`,
-    `C${r * 0.5} ${VALLE_HONDO} ${der - r * 0.45} 0 ${der} 0`,
-    `H${i1}`,
-    `V${alto}`,
-    `H${i0}`,
+    // el valle, con su saliente ANTES de hundirse y DESPUÉS de subir
+    `C${izq + r * 0.3} ${-SALIENTE} ${cx - r * 0.5} ${VALLE_HONDO} ${cx} ${VALLE_HONDO}`,
+    `C${cx + r * 0.5} ${VALLE_HONDO} ${der - r * 0.3} ${-SALIENTE} ${der} 0`,
+    `H${i1 - rc}`,
+    `a${rc} ${rc} 0 0 1 ${rc} ${rc}`,
+    `V${alto - rc}`,
+    `a${rc} ${rc} 0 0 1 ${-rc} ${rc}`,
+    `H${i0 + rc}`,
+    `a${rc} ${rc} 0 0 1 ${-rc} ${-rc}`,
     `Z`,
-    /* 🔴 EL AGUJERO DEL ANILLO — segundo subpath, y con `fillRule`
-       evenodd es lo que RESTA material en vez de pintarlo. Su radio es el
-       del disco MÁS el anillo: **la diferencia entre los dos círculos es
-       el espacio de fondo que el founder pidió ver**, y se ve el fondo de
-       la pantalla porque acá no se pinta nada — no un color supuesto.
-       Va en `y = DISCO_CY` (coordenadas locales del grupo, igual que el
-       valle) para que viaje con él y no puedan desincronizarse. */
-    `M${-(DISCO_RADIO + ANILLO)} ${DISCO_CY}`,
+    /* EL AGUJERO DEL ANILLO — segundo subpath; con `fillRule` evenodd
+       RESTA material. Su radio es el del disco MÁS el anillo: la
+       diferencia entre los dos círculos ES el espacio, y por ahí se ve el
+       fondo real de la pantalla porque acá no se pinta nada. */
+    `M${cx - (DISCO_RADIO + ANILLO)} ${DISCO_CY}`,
     `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${(DISCO_RADIO + ANILLO) * 2} 0`,
     `a${DISCO_RADIO + ANILLO} ${DISCO_RADIO + ANILLO} 0 1 0 ${-(DISCO_RADIO + ANILLO) * 2} 0`,
     `Z`,
@@ -485,7 +524,7 @@ export function BarraTabs({
   const indiceActivo = Math.max(0, items.findIndex((i) => i.key === activo))
   const anchoTab = ancho / Math.max(1, items.length)
   const cxDestino = anchoTab * (indiceActivo + 0.5)
-  const altoTotal = ALTO_FILA + insets.bottom
+  const altoTotal = ALTO_FILA
 
   useEffect(() => {
     if (ancho === 0) return
@@ -523,7 +562,7 @@ export function BarraTabs({
     transform: [{ translateX: cx.value }],
   }))
   const propsCuerpo = useAnimatedProps(() => ({
-    d: pathBarra(ancho, altoTotal, estira.value),
+    d: pathBarra(ancho, altoTotal, estira.value, cx.value),
   }))
 
   return (
@@ -531,63 +570,58 @@ export function BarraTabs({
       onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
       style={{
         flexDirection: 'row',
+        /* 🔴 LA BARRA FLOTA (ver `MARGEN_BARRA`). El inset inferior queda
+           como MARGEN y no como padding: así el fondo de la pantalla se ve
+           TAMBIÉN debajo del cuerpo, que es lo que la vuelve una superficie
+           apoyada sobre el contenido y no un zócalo pegado al borde. */
+        marginHorizontal: MARGEN_BARRA,
+        marginBottom: insets.bottom,
         /* ⛔ SIN `backgroundColor`, y es LA condición del hueco: si la
            caja pinta, no hay ausencia posible y el hueco tendría que
            pintarse del color del fondo — justo lo que la advertencia ③
            declaró imposible en esta casa. El color vive en el vector. */
-        paddingBottom: insets.bottom,
       }}
     >
       {ancho > 0 ? (
-        /* EL LIENZO NO RECORTA: el cuerpo se dibuja más ancho que la
-           pantalla y viaja, así que el SVG tiene que dejarlo salir por
-           los dos lados sin cortar el valle en el camino. */
-        <Animated.View
+        /* EL LIENZO ESTÁ QUIETO: el cuerpo flota y sus esquinas son
+           puntos fijos. Lo único que sube es lo que el disco ASOMA. */
+        <View
           pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              left: 0,
-              /* El lienzo sube exactamente lo que el disco ASOMA — ni un
-                 píxel más. **Derivado**: el punto más alto del disco es
-                 `DISCO_CY - DISCO_RADIO`, que por construcción es
-                 `-DISCO_ASOMA`. */
-              top: -DISCO_ASOMA,
-              width: ancho,
-              height: altoTotal + DISCO_ASOMA,
-            },
-            estiloViaje,
-          ]}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: -DISCO_ASOMA,
+            width: ancho,
+            height: altoTotal + DISCO_ASOMA,
+          }}
         >
-          <Svg
-            width={ancho * (1 + MARGEN_VIAJE * 2)}
-            height={altoTotal + DISCO_ASOMA}
-            style={{ position: 'absolute', left: -ancho * MARGEN_VIAJE }}
-          >
-            {/* Coordenadas LOCALES: el valle vive en x = 0 del grupo, y
-                el grupo es el que viaja. Por eso el `translateX` del SVG
-                compensa el margen: el 0 local queda en el 0 de la fila. */}
+          <Svg width={ancho} height={altoTotal + DISCO_ASOMA}>
             <AnimatedPath
               animatedProps={propsCuerpo}
               fill={colorBarra}
               fillRule="evenodd"
-              translateX={ancho * MARGEN_VIAJE}
               translateY={DISCO_ASOMA}
             />
-            {/* EL DISCO — **ya no es del color del cuerpo**: es el
-                marcador, y su contraste contra la barra es lo que hace
-                el trabajo que antes se le pedía a un hueco de cero
-                píxeles. Va quieto en su x local: lo mueve el grupo, igual
-                que al valle, y por eso **no pueden desincronizarse** (era
-                el defecto: dos cosas viajando por mecanismos distintos). */}
-            <Circle
-              cx={ancho * MARGEN_VIAJE}
-              cy={DISCO_ASOMA + DISCO_CY}
-              r={DISCO_RADIO}
-              fill={colorDisco}
-            />
           </Svg>
-        </Animated.View>
+          {/* EL DISCO — viaja por TRANSFORM, no por `d`. Es la mitigación
+              declarada en `pathBarra`: si el `d` no interpolara en algún
+              dispositivo se perdería la deformación del valle, **jamás el
+              movimiento del marcador**. */}
+          <Animated.View
+            style={[
+              {
+                position: 'absolute',
+                left: -DISCO_RADIO,
+                top: 0,
+                width: DISCO_RADIO * 2,
+                height: DISCO_RADIO * 2,
+                borderRadius: DISCO_RADIO,
+                backgroundColor: colorDisco,
+              },
+              estiloViaje,
+            ]}
+          />
+        </View>
       ) : null}
       {items.map((item) => {
         const esActivo = item.key === activo
@@ -653,7 +687,6 @@ export function BarraTabs({
                   la cuenta: donde ESTÁS no necesitás el ícono —necesitás
                   saber cómo se llama—, y el ícono es lo que te dice a
                   dónde vas en los que NO estás.* */}
-              {esActivo ? null : (
               <View style={{ height: ALTO_CAJA_ICONO, justifyContent: 'center' }}>
               <HuellaDeTab activa={esActivo}>
                 {/* ☠️ La rama de `destacada` MURIÓ acá (ver su lápida
@@ -676,7 +709,6 @@ export function BarraTabs({
                 </Badge>
               </HuellaDeTab>
               </View>
-              )}
               {/* ☠️ EL SUBRAYADO MURIÓ (S99-B). Era el marcador del activo
                   cuando no había disco; con el disco viajando serían DOS
                   marcadores del mismo estado — exactamente lo que la firma

@@ -163,10 +163,13 @@ declara su estado en su encabezado, y las filas no cambian.**
 
 1. **El ±15 % y el flujo de aprobación** — son de motor y de producto.
 2. **Las voces exactas** — del riel.
-3. **El portador del fundido de modo** que C pidió: **es mío y no está
-   construido**. *Se declara acá para que no se pierda: hoy el cambio de
-   modo es instantáneo a propósito, porque usar `Entrada` habría sido la
-   pieza equivocada — C frenó bien.*
+3. ✅ ⏪ **El portador del fundido de modo — YA ESTÁ CONSTRUIDO** (S99-B,
+   posterior a esta receta): nace **`Fundido`**, y **reemplaza al
+   `<View key={modo}>` del consumidor**, porque hace las dos cosas
+   —remonta y funde— y así C deja de tener que acordarse de la primera.
+   *150 ms, cero desplazamiento: nada viajó, la misma superficie pasó a
+   decir otra cosa; moverla sugeriría que llegó de algún lado.* C frenó
+   bien al no improvisarlo — esta era la pieza que faltaba, y era mía.
 4. **El ojo**, con su pregunta: *en Administrar, ¿te das cuenta de que el
    precio se toca sin que nadie te lo diga?* **Si hace falta buscarlo, el
    control sigue sin estar donde está el dato.**
