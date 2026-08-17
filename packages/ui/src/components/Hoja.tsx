@@ -255,7 +255,7 @@ export function Hoja({
     // apagarse. Con `sinRebote` cae al slide sereno, igual que memorial.
     const esMarca = apertura === 'marca' && !sinRebote
     backdrop.value = withTiming(esMarca ? motion.marca.scrimEfectivo / 0.52 : 1, {
-      duration: esMarca ? motion.marca.aperturaMs : motion.duration.normal,
+      duration: esMarca ? motion.marca.aperturaMs : motion.duration.legacy_normal,
     })
     // 🔴 EL CAMINO QUE FUNDE: la hoja YA ESTÁ en su sitio y lo único que
     // corre es la opacidad. `translateY` se planta en 0 sin animar — no
@@ -263,14 +263,14 @@ export function Hoja({
     if (funde) {
       translateY.value = 0
       opacidadHoja.value = withTiming(1, {
-        duration: motion.duration.normal,
+        duration: motion.duration.legacy_normal,
         easing: Easing.bezier(...motion.easing.easeOut.bezier),
       })
       return
     }
     translateY.value = sinRebote
       ? withTiming(0, {
-          duration: motion.duration.normal,
+          duration: motion.duration.legacy_normal,
           easing: Easing.bezier(...motion.easing.easeOut.bezier),
         })
       : esMarca
@@ -278,7 +278,7 @@ export function Hoja({
             duration: motion.marca.aperturaMs,
             easing: Easing.bezier(...motion.marca.aperturaBezier),
           })
-        : withSpring(0, { duration: motion.duration.normal, dampingRatio: 0.85 })
+        : withSpring(0, { duration: motion.duration.legacy_normal, dampingRatio: 0.85 })
   }
 
   const cerrarAnimado = () => {
@@ -306,14 +306,14 @@ export function Hoja({
       // la preferencia pidió sacar.
       opacidadHoja.value = withTiming(
         0,
-        { duration: motion.duration.normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
+        { duration: motion.duration.legacy_normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
         remate,
       )
       return
     }
     translateY.value = withTiming(
       altoReal.value,
-      { duration: motion.duration.normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
+      { duration: motion.duration.legacy_normal, easing: Easing.bezier(...motion.easing.easeIn.bezier) },
       remate,
     )
   }
@@ -392,11 +392,11 @@ export function Hoja({
             // `sinRebote`: vuelve sereno, sin rebotar.
             translateY.value = sinRebote
               ? withTiming(0, {
-                  duration: motion.duration.normal,
+                  duration: motion.duration.legacy_normal,
                   easing: Easing.bezier(...motion.easing.easeOut.bezier),
                 })
               : withSpring(0, {
-                  duration: motion.duration.normal,
+                  duration: motion.duration.legacy_normal,
                   dampingRatio: 0.85,
                 })
           }

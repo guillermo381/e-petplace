@@ -1891,12 +1891,12 @@ const FIXTURES = {
      archivo que no está en la lista; los 5 conocidos alcanzan además
      para que el ANCLA no sea lo que lo pinta. */
   R51: [
-    { path: 'packages/ui/src/components/Hoja.tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/VisorFoto.tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/MapaRecorrido.tsx', src: 'motion.duration.normal' },
-    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: 'motion.duration.normal' },
-    { path: 'apps/cliente/src/app/paseo/[atencionId].tsx', src: 'motion.duration.normal' },
-    { path: 'packages/ui/src/components/PiezaNueva.tsx', src: 'withTiming(x, { duration: motion.duration.normal })' },
+    { path: 'packages/ui/src/components/Hoja.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/VisorFoto.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/MapaRecorrido.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'apps/cliente/src/app/paseo/[atencionId].tsx', src: 'motion.duration.legacy_normal' },
+    { path: 'packages/ui/src/components/PiezaNueva.tsx', src: 'withTiming(x, { duration: motion.duration.legacy_normal })' },
   ],
   /* R49 · CUATRO campos, y los dos legítimos son el peso de la prueba
      (L-236): el que da un EJEMPLO de formato · el que EXPLICA dónde
@@ -3077,7 +3077,12 @@ function r44(archivos) {
  *
  *  Baseline **2**, solo-baja, con dueño: **los dos son de `A`**
  *  (`packages/api`). Muere cuando llegue a 0. */
-const BASELINE_R50 = 2
+/** ⏪ Nació en **2** y **bajó a 0 el mismo día**, sin que nadie curara
+ *  nada: los dos «ofensores» eran **uno ya curado que la regla no veía**
+ *  (`.sort()` en vez de `.order()`) y **uno legítimo por N19**. *Un
+ *  baseline que describe mal lo que cuenta es una deuda inventada — y
+ *  peor: con solo-baja, inmortal.* */
+const BASELINE_R50 = 0
 function r50(archivos) {
   const fallos = []
   const ofensores = []
@@ -3101,8 +3106,43 @@ function r50(archivos) {
          qué contradecirse.*
          ⇒ El orden tiene que estar en la consulta QUE ALIMENTA a este
          filter, no en cualquier parte del archivo. */
-      const ventana = limpio.slice(Math.max(0, m.index - 600), m.index + m[0].length)
-      if (/\.order\s*\(/.test(ventana)) continue
+      /* 🔴 LA VENTANA COMPRENDE EL TRAMO ENTERO, y esta línea también se
+         escribió dos veces. La v2 miraba **600 chars ANTES** del filter
+         — y el orden vive DESPUÉS: *se filtra, se ordena, se toma el
+         primero.* Con esa ventana, la cura de A (un `.sort()`
+         encadenado al `.filter()`) **quedaba invisible y el sitio seguía
+         contando como ofensor para siempre.**
+         *Segunda vez en el día que esta regla mide en el lugar
+         equivocado: primero el archivo entero, ahora media ventana. La
+         forma correcta es la obvia — el orden puede estar en la consulta
+         que alimenta (antes) o encadenado al filtro (después), así que
+         la ventana es de punta a punta.* */
+      const finUso = resto.search(new RegExp(`\\b${nombre}\\s*\\[0\\]`))
+      const ventana = limpio.slice(
+        Math.max(0, m.index - 600),
+        m.index + m[0].length + (finUso >= 0 ? finUso : 0),
+      )
+      /* ⏪ **S100-B · ENMIENDA DE A, y tenía razón: LA REGLA MEDÍA LA
+         PALABRA, NO LA PROPIEDAD.** Pedía `.order(` — de la base — y su
+         cura de H-001 usa un **`.sort()` en el cliente por `created_at`
+         con desempate por `id`**, que es *orden total y determinista sin
+         depender de lo que devuelva la base*: **la propiedad que esta
+         regla persigue, cumplida por un mecanismo que la regla no
+         reconocía.** ⇒ habría seguido contándolo como ofensor para
+         siempre, y con solo-baja **el contador no podía bajar nunca: la
+         regla quedaba incapaz de registrar su propio éxito.**
+         La propiedad es ORDEN TOTAL EXPLÍCITO; `order` y `sort` son dos
+         formas de conseguirla. */
+      if (/\.(order|sort)\s*\(/.test(ventana)) continue
+      /* La exención por LETRA, nombrada y no por baseline (pedido de A):
+         `fotosDeProducto` toma `galeria[0]` y **ahí el orden ES DATO** —
+         un `jsonb` con el orden del autor— y **N19 le da significado
+         explícito a la primera**: *«la primera foto es el producto solo,
+         sin composición de marketing»*. No hay nada que ordenar: elegir
+         la primera **es** el criterio.
+         *Se exenta nombrando su ley, no escondiéndola en un número: un
+         baseline dice «hay 2 y no sé por qué»; esto dice cuál y por qué.* */
+      if (/function\s+fotosDeProducto|const\s+fotosDeProducto/.test(limpio.slice(Math.max(0, m.index - 1200), m.index))) continue
       ofensores.push(`${path.split('/').pop()} → ${nombre}[0]`)
     }
   }
@@ -3150,7 +3190,12 @@ function r50(archivos) {
  *  —el nombre dejaría de competir con el vocabulario—, pero es enmienda
  *  de token con censo de consumidores: tanda propia, no de paso.** Se
  *  declara para que se decida, no para que se olvide. */
-const LEGADOS_MOTION = ['instant', 'normal', 'slow', 'verySlow']
+/** ⏪ Eran `instant`/`normal`/`slow`/`verySlow`. **S100-B los renombró a
+ *  `legacy_*`** para que el nombre se delate solo, así que la regla
+ *  vigila los nombres NUEVOS. *Si siguiera vigilando los viejos, tras el
+ *  rename encontraría CERO y su ancla lo diría — que es exactamente lo
+ *  que pasó, y por eso el ancla estaba puesta.* */
+const LEGADOS_MOTION = ['legacy_instant', 'legacy_normal', 'legacy_slow', 'legacy_verySlow']
 /** Los 5 archivos que YA los usan. Solo-baja: sacar uno de acá es una
  *  migración con gate, y ningún archivo NUEVO puede sumarse. */
 const BASELINE_R51 = [
@@ -3174,12 +3219,28 @@ function r51(archivos) {
         `R51: \`${path}\` usa un token LEGADO de \`motion.duration\` (${LEGADOS_MOTION.join('/')}). El vocabulario del movimiento es CERRADO y son otros: \`fast\` 150 · \`estandar\` 300 · \`grande\` 520 (N10). \`normal\` vale 250 y NO pertenece — su nombre compite con el vocabulario sin ser parte de él. Usá el token de N10 que corresponda al registro del gesto.`,
       )
   }
-  // ANCLA: si nadie los usa, la regla dejó de tener sujeto y hay que
-  // mirar si murieron (bueno) o si el nombre del token cambió (malo).
-  fallos.push(...ancla('R51', usan.length, 1, 'archivo(s) que usan un legado de duration'))
+  /* 🔴 EL ANCLA MIDE EL SUJETO, NO LOS OFENSORES — y esta línea se
+     corrige aplicando a mi propia regla el corolario que la mesa acaba
+     de firmar (*toda regla nueva tiene que poder llegar a cero*).
+
+     ⏪ Decía `ancla('R51', usan.length, 1, …)`: exigía **al menos UN
+     archivo usando legados**. ⇒ **el día que alguien migrara los 15 usos
+     a la banda de N10 —o sea, el día que la deuda se pagara entera— la
+     regla habría salido ROJA por ANCLA ROTA.** *Castigaba su propio
+     éxito*, que es exactamente el rojo falso permanente que A encontró
+     en R50, en su otra forma.
+
+     ⇒ Lo que la regla necesita para no estar ciega **no es que alguien
+     la viole: es que sus tokens SIGAN EXISTIENDO.** Si los `legacy_*`
+     desaparecen de `motion.ts`, esta regla se quedó sin sujeto — y eso
+     no es un rojo, es su condición de MUERTE (con firma). El ancla lo
+     dice en vez de fingir que vigila. */
+  const fuenteMotion = readFileSync('packages/ui/src/tokens/motion.ts', 'utf8')
+  const vivos = LEGADOS_MOTION.filter((t) => new RegExp(`\\b${t}\\s*:`).test(fuenteMotion))
+  fallos.push(...ancla('R51', vivos.length, 1, 'token(s) legado(s) declarado(s) en motion.ts (0 = la regla perdió su sujeto y MUERE con firma, no es rojo)'))
   return {
     fallos,
-    info: `${usan.length} archivo(s) con legados de \`duration\` · baseline ${BASELINE_R51.length} congelado · medido: 3 de los 4 legados tienen CERO usos y \`normal\` tiene 15 — el único vivo es el del nombre plausible`,
+    info: `${usan.length} archivo(s) con legados de \`duration\` · ${vivos.length}/${LEGADOS_MOTION.length} token(s) legado(s) vivo(s) · baseline ${BASELINE_R51.length} congelado · medido: 3 de los 4 legados tienen CERO usos y \`normal\` tiene 15 — el único vivo es el del nombre plausible`,
   }
 }
 

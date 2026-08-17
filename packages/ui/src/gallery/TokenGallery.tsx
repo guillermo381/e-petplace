@@ -3604,8 +3604,13 @@ function GaleriaInterna() {
               />
             </View>
             <View style={CELDA_DE_GRILLA}>
-              {/* El OTRO silencio ilegal: no sabemos qué tiene. La pieza
-                  habla igual — la pantalla no tiene con qué callarla. */}
+              {/* 🔴 LA SEGUNDA TEMPERATURA (firma del founder · H-008).
+                  El OTRO silencio ilegal —no sabemos qué tiene— habla
+                  igual, pero SIN ámbar. Miralas juntas: si las dos
+                  gritaran, con ~51% del catálogo sin composición el
+                  ámbar sería fondo de pantalla y el de la alergia real
+                  no significaría nada. Reservar el ámbar es lo que lo
+                  mantiene con sentido. */}
               <TarjetaProducto
                 nombre="Snack dental"
                 presentacion="Sobre 85 g"

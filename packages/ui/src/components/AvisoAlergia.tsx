@@ -197,6 +197,54 @@ export function alergiaPuedeCallar({
   return coincidencia === 'ninguna' && (composicion === 'verificada' || composicion === 'no_aplica')
 }
 
+/**
+ * ── LAS TRES TEMPERATURAS (firma del founder, 17-ago · H-008) ────────
+ * La banda de composición **dejó de tener una sola voz**:
+ *
+ * · **`alarma`** — el producto toca una **ALERGIA DECLARADA** de la
+ *   mascota elegida. Riesgo real, urgencia real ⇒ **ámbar**.
+ * · **`ausencia`** — solo *no sabemos qué tiene*. **Se dice igual de
+ *   claro y no se esconde nunca**, pero **sin color de alarma**.
+ * · **`silencio`** — uno de los dos silencios legales (`verificada` /
+ *   `no_aplica`).
+ *
+ * 🔴 **LA RAZÓN, Y ES UN NÚMERO** (medido por C sobre la vitrina viva):
+ * con la mascota elegida, **~51 % de lo recomendado va a decir «sin
+ * composición declarada»** — `288 ausente + 274 declarada_sin_verificar
+ * = 562 de 563, y CERO verificada`.
+ *
+ * > ***Un ámbar que aparece en la mitad de las tarjetas deja de
+ * > significar peligro y pasa a ser fondo de pantalla. Reservar el ámbar
+ * > es lo que hace que el ámbar siga significando algo.***
+ *
+ * ⚠️ **Lo que esta firma NO reabre:** el silencio sigue prohibido en los
+ * dos casos que hablan. **La ausencia se DICE; lo que no se hace es
+ * gritarla.** Y `ausencia` **no es el mismo valor** que «no hay
+ * alergia»: son **TRES** estados, no dos.
+ *
+ * **Vive acá y no en cada pieza** por lo mismo que `alergiaPuedeCallar`:
+ * `AvisoAlergia` y `TarjetaProducto` **no pueden discrepar sobre qué
+ * temperatura le toca a un hecho.**
+ *
+ * *El 51 % es el dato malo hablando, no la regla fallando: N18 se
+ * encarga —la composición es campo de completitud y lo incompleto pierde
+ * alcance—, así que el número baja solo cuando los vendedores carguen.*
+ */
+export type TemperaturaAlergia = 'alarma' | 'ausencia' | 'silencio'
+
+export function temperaturaDeAlergia({
+  composicion,
+  coincidencia,
+}: {
+  composicion: EstadoComposicion
+  coincidencia: CoincidenciaAlergeno
+}): TemperaturaAlergia {
+  if (alergiaPuedeCallar({ composicion, coincidencia })) return 'silencio'
+  // EXACTA e IMPRECISA comparten alarma: si esa proteína ES el alérgeno,
+  // le hace igual de mal. La diferencia la dice la VOZ, no el color.
+  return coincidencia === 'ninguna' ? 'ausencia' : 'alarma'
+}
+
 export type AvisoAlergiaProps = {
   /** El HECHO, no lo que la pantalla quiere mostrar. */
   composicion: EstadoComposicion

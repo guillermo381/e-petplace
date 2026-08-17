@@ -7,11 +7,35 @@
 
 export const motion = {
   duration: {
-    instant:  80,
+    /* ── ☠️ LOS CUATRO LEGADOS, RENOMBRADOS (S100-B) ─────────────────
+       Se llamaban `instant` · `normal` · `slow` · `verySlow`, y el
+       problema no era que existieran: era que **sus nombres competían
+       con el vocabulario sin ser parte de él.**
+
+       🔴 EL CASO QUE LO OBLIGÓ: `normal` vale **250** y el vocabulario
+       cerrado de N10 es **150 · 300 · 520**. Una pista casi lo usa en
+       una pieza nueva **creyendo que era el estándar** — la frenó un
+       comentario, no un gate.
+
+       ⚡ Y LA MEDICIÓN QUE LO VUELVE HECHO, no doctrina: de los cuatro,
+       **`instant`, `slow` y `verySlow` tenían CERO usos** y `normal`
+       tenía **15**. ***El único legado vivo era justamente el del
+       nombre plausible.*** Los que se delatan solos por el nombre no
+       los usa nadie — y por eso el nombre ERA el defecto.
+
+       ⚠️ **NINGÚN VALOR CAMBIÓ: 250 sigue siendo 250.** Este rename no
+       toca cómo se ve nada; solo hace que el nombre diga la verdad. La
+       migración de los 15 usos a la banda de N10 es otra cosa —cambia
+       el MOVIMIENTO y pide gate en dispositivo—, y sigue pendiente con
+       su dueño.
+
+       > *Un nombre que parece correcto es peor que uno que falta: el
+       > que falta se busca, el que parece correcto se usa.* */
+    legacy_instant:  80,
     fast:     150,
-    normal:   250,
-    slow:     400,
-    verySlow: 600,
+    legacy_normal:   250,
+    legacy_slow:     400,
+    legacy_verySlow: 600,
 
     /* ── N10 · EL VOCABULARIO CERRADO DEL MOVIMIENTO (Norte, mesa
        13-ago-2026) ──────────────────────────────────────────────────
