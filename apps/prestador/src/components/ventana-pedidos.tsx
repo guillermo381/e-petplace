@@ -53,11 +53,13 @@ import { View } from 'react-native';
 import {
   FilaDato,
   EstadoVacio,
+  Icono,
   TarjetaPedido,
   Texto,
   opacity,
   spacing,
   type DesvioEscalera,
+  type IconoNombre,
   type PasoEscalera,
 } from '@epetplace/ui';
 import {
@@ -75,6 +77,35 @@ import { derivarEscalera, type ClaveEscalon } from '@/lib/escalera-pedido';
    con dos objetos y un comparador. Es mudanza, no rediseño. */
 import { ordenDeTrabajo } from '@/lib/orden-pedidos';
 import { fechaLocalISO, horaCorta, hoyLocalISO } from '@/lib/ventas-formato';
+
+/**
+ * EL GLIFO DE CADA NODO — S99-D sobre los cuatro que entregó B.
+ *
+ * 🔴 **MAPEADO POR LO QUE EL GLIFO DIBUJA, JAMÁS POR SU NOMBRE.** Los nombres
+ * de B describen la narrativa de la FAMILIA (confirmado · preparando · en
+ * camino · entregado) y mis escalones son los del VENDEDOR; leerlos por el
+ * nombre habría cruzado dos vocabularios. Lo que dibujan —medido en su
+ * fuente— es **bolsa · caja abierta · flecha · visto**, y eso sí cae exacto
+ * sobre el trabajo del local: *junté → empaqué → salió → llegó.*
+ *
+ * ⚠️ **`facturado` VA SIN GLIFO, Y ES DECISIÓN:** en el camino de RETIRO el
+ * tercer escalón no es movimiento, así que **la flecha ahí MENTIRÍA** —
+ * diría «va en camino» sobre un pedido que está esperando en el mostrador. Y
+ * no se reusa `fiscal` del registry: recibe `huella`, o sea que está dibujado
+ * para 21 px, y **a 12 px la huella es ruido** (Ley 9) — justo el caso que la
+ * nota de B sobre «masa y no trazo» existe para evitar.
+ * *Un glifo que susurra o que miente es peor que un nodo sin glifo* — y por
+ * eso el slot nació opcional: la escalera funciona entera sin él.
+ * ⇒ **pedido a B: un `nodoFacturado` en masa, a 12 px.** Hasta entonces, el
+ * nodo se dibuja igual y solo le falta su ícono.
+ */
+const GLIFO_NODO: Partial<Record<ClaveEscalon, IconoNombre>> = {
+  preparado: 'nodoConfirmado', // la bolsa — la mercadería juntada
+  empacado: 'nodoPreparando', // la caja abierta — se está armando
+  despachado: 'nodoEnCamino', // la flecha — el movimiento
+  entregado: 'nodoEntregado', // el visto — se completó
+  retirado: 'nodoEntregado', // el visto: retirar también completa
+};
 
 interface Comun {
   extras: Record<string, ExtraPanelPedido>;
@@ -164,11 +195,22 @@ export function VentanaPedidos({
       const pasos: PasoEscalera[] =
         dimmed || escalera === null
           ? []
-          : escalera.pasos.map((paso) => ({
-              clave: paso.clave,
-              etiqueta: vozEscalon[paso.clave],
-              estado: paso.estado,
-            }));
+          : escalera.pasos.map((paso) => {
+              const glifo = GLIFO_NODO[paso.clave];
+              return {
+                clave: paso.clave,
+                etiqueta: vozEscalon[paso.clave],
+                estado: paso.estado,
+                /* El slot es OPCIONAL por diseño de B y acá se usa como tal:
+                   `facturado` viaja sin glifo (ver `GLIFO_NODO`). */
+                icono:
+                  glifo === undefined
+                    ? undefined
+                    : ({ color }: { color: string }) => (
+                        <Icono nombre={glifo} tamano={12} registro="tinta" tinta={color} />
+                      ),
+              };
+            });
 
       const desvio: DesvioEscalera | undefined =
         escalera?.desvio === 'noLlego'
