@@ -1439,6 +1439,38 @@ export const clienteEs = {
     // que no ofrecerlo (Ley 13).
     filaSinStock: 'Ahora no está disponible.',
 
+    // 🔴 S100-C · N19 ③ — EL PRECIO POR KILO. El dato que decide una compra de
+    // alimento y que casi ningún catálogo pone. Solo aparece cuando la variante
+    // declara su peso: sin `peso_kg` no hay cuenta, y una cuenta inventada
+    // sobre un peso ausente sería peor que no decir nada.
+    porKilo: '${{monto}}/kg',
+
+    // 🔴 S100-C — LAS SEÑALES CORTAS DE LA TARJETA (prop `alergia` de B).
+    // CORTAS a propósito: en media pantalla una frase con el nombre de la
+    // mascota son tres líneas y tapa el producto. La tarjeta SEÑALA que hay
+    // conflicto; el detalle y el paso de entendimiento viven en la ficha.
+    // La imprecisa NO baja el tono: si esa proteína ES pollo, le hace igual de
+    // mal — lo que cambia es la voz, no la gravedad.
+    // 🔴 S100-C · N19 ⑥ — DISPONIBILIDAD REAL. `hay_stock` es BOOLEANO por
+    // firma: dice «¿puedo comprar esto?», jamás cuánto queda (medido por A:
+    // es literalmente `stock_disponible > 0`). Sin numero, sin urgencia.
+    fichaSinStock: 'Esta presentación no está disponible ahora.',
+    // Las presentaciones que existen y no se pueden comprar: se DICEN, y no
+    // se ofrecen como elegibles — no son una opción, son una ausencia.
+    tambienVieneEn: 'También viene en {{lista}}, sin disponibilidad hoy.',
+    senalContiene: 'Contiene {{lista}}',
+    senalPodriaContener: 'Podría contener {{lista}}',
+    senalSinComposicion: 'Sin composición declarada',
+    senalSinVerificar: 'Composición sin verificar',
+
+    // 🔴 S100-C · H-004 — EL TECHO QUE SE DICE. La vitrina carga 50 sobre 563
+    // comprables: sin esta línea la familia veía el 8,9 % del catálogo y una
+    // lista completa se veía igual que una truncada.
+    // Dice el número Y el camino: sin la segunda mitad sería un aviso que
+    // informa un límite y no ofrece salida (Ley 13, el callejón).
+    techoVitrina:
+      'Te mostramos {{mostrados}} de {{total}} productos. Buscá por nombre o marca para llegar al resto.',
+
     // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
     // jamás esconde. El paso explícito gatea el agregar.
     filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',
