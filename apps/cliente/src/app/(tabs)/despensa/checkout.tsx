@@ -76,7 +76,8 @@ import {
   cancelarPedidoDespensa,
   configurarRecurrencia,
   crearPedidoDespensa,
-  iniciarPagoPedido,
+  crearCompraDesdePedidos,
+  crearIntentoPago,
   nuevaClaveIdempotencia,
   obtenerDireccionHogar,
   obtenerMiPerfil,
@@ -87,7 +88,7 @@ import {
 import { fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
-import { useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
+import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
 
 type Fase = 'armado' | 'resumen' | 'exito';
@@ -129,7 +130,14 @@ export default function DespensaCheckout() {
 
   // ── El pedido del motor ────────────────────────────────────────────────
   const clave = useRef(nuevaClaveIdempotencia());
-  const [pedido, setPedido] = useState<PedidoCreado | null>(null);
+  /** Los N pedidos creados — uno por vendedor (F5). Vacío = todavía no. */
+  const [pedidos, setPedidos] = useState<PedidoCreado[]>([]);
+  /** La compra que los agrupa: lo que se cobra. */
+  const [compraId, setCompraId] = useState<string | null>(null);
+  /** El total DE LA COMPRA, tal como lo devolvió el motor. Esta pantalla
+   *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
+   *  plata, y el día que discrepe es en una factura. */
+  const [compraTotal, setCompraTotal] = useState<number | null>(null);
   const [trabajando, setTrabajando] = useState(false);
 
   // ── La recurrencia (éxito) ─────────────────────────────────────────────
@@ -137,9 +145,25 @@ export default function DespensaCheckout() {
   const [recurrenciaId, setRecurrenciaId] = useState<string | null>(null);
   const [activandoRec, setActivandoRec] = useState(false);
 
-  /** El vendedor del pedido — del carrito (no-nulo por ítem desde el
-   *  cableo del 12-ago; null acá solo significa carrito vacío). */
-  const cuentaComercialId = items[0]?.cuentaComercialId ?? null;
+  /**
+   * 🔴 S100 · LOS GRUPOS POR VENDEDOR — el cabezal (F5).
+   *
+   * ☠️ Acá vivía `items[0]?.cuentaComercialId`, **y se le aplicaba AL PEDIDO
+   * ENTERO**. Con un carrito de dos vendedores eso creaba UN pedido a nombre
+   * del primero **con mercadería del segundo, acreditada al primero** —
+   * *plata al comerciante equivocado, sin error y sin traza.* Medido antes de
+   * curarlo: **0 ítems mal atribuidos, $0** — el arma estaba cargada y no se
+   * había disparado, porque hasta F5 nadie armaba carritos mixtos.
+   *
+   * Hoy el carrito se parte en **N pedidos independientes, cada uno bajo SU
+   * cuenta**, y el motor lo garantiza por construcción: un trigger sobre
+   * `pedido_items` rebota la oferta que no es del vendedor del pedido.
+   */
+  const grupos = useMemo(() => agruparPorVendedor(items), [items]);
+  /** La promesa y las ventanas se piden para el PRIMER grupo. Con un vendedor
+   *  —el caso de hoy— es exactamente lo de antes. Con varios, cada bloque del
+   *  resumen muestra la suya (ver `promesasPorGrupo`). */
+  const cuentaComercialId = grupos[0]?.cuentaComercialId ?? null;
 
   useEffect(() => {
     let vigente = true;
@@ -278,66 +302,121 @@ export default function DespensaCheckout() {
     return null;
   }, [items, cuentaComercialId, metodo, direccion, receptor, telefono, promesa, t]);
 
+  /**
+   * 🔴 UN PEDIDO POR VENDEDOR, Y UNA COMPRA QUE LOS AGRUPA (F5).
+   *
+   * · Los N pedidos se crean **en paralelo, no encadenados** (L-223 / N16.1:
+   *   el peaje por petición es ~150 ms y no depende de cuánto traiga).
+   * · **Si alguno falla, se cancelan los que sí entraron** antes de rebotar.
+   *   *Dejar medio carrito convertido en pedidos huérfanos es exactamente la
+   *   clase de los 137 del prototipo.*
+   * · Recién con los N creados nace **la compra**, que es lo que se cobra:
+   *   **N pedidos atrás, UN pago adelante.**
+   * · La clave de idempotencia es **la misma del intento**, con el índice del
+   *   grupo: un reintento reencuentra sus pedidos en vez de duplicarlos.
+   */
   async function verTotal() {
-    if (trabajando || falta !== null || cuentaComercialId === null) return;
+    if (trabajando || falta !== null || grupos.length === 0) return;
     setTrabajando(true);
     const dir = direccion !== 'cargando' ? direccion : null;
-    const r = await crearPedidoDespensa({
-      cuenta_comercial_id: cuentaComercialId,
-      items: items.map((i) => ({
-        oferta_id: i.oferta_id,
-        cantidad: i.cantidad,
-        mascota_id: i.destino?.tipo === 'mascota' ? i.destino.mascotaId : undefined,
-        donacion: i.destino?.tipo === 'donacion' ? true : undefined,
-      })),
-      entrega: {
-        nombre_receptor: receptor.trim(),
-        telefono: telefono.trim(),
-        // Retiro: el motor estampa "Retiro en tienda" cuando no hay
-        // dirección — acá no se inventa una.
-        direccion: metodo === 'despacho' && dir !== null ? dir.direccion : '',
-        ciudad: metodo === 'despacho' && dir !== null ? dir.ciudad : '',
-        sector: metodo === 'despacho' ? dir?.sector ?? undefined : undefined,
-        referencias: metodo === 'despacho' ? dir?.referencias ?? undefined : undefined,
-        instrucciones: instrucciones.trim() === '' ? undefined : instrucciones.trim(),
-        lat: metodo === 'despacho' ? dir?.lat ?? undefined : undefined,
-        lon: metodo === 'despacho' ? dir?.lon ?? undefined : undefined,
-      },
-      clave_idempotencia: clave.current,
-      metodo_entrega: metodo,
-      fecha_programada: fechaElegida?.fecha,
-    });
-    setTrabajando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
+    const entrega = {
+      nombre_receptor: receptor.trim(),
+      telefono: telefono.trim(),
+      // Retiro: el motor estampa "Retiro en tienda" cuando no hay
+      // dirección — acá no se inventa una.
+      direccion: metodo === 'despacho' && dir !== null ? dir.direccion : '',
+      ciudad: metodo === 'despacho' && dir !== null ? dir.ciudad : '',
+      sector: metodo === 'despacho' ? dir?.sector ?? undefined : undefined,
+      referencias: metodo === 'despacho' ? dir?.referencias ?? undefined : undefined,
+      instrucciones: instrucciones.trim() === '' ? undefined : instrucciones.trim(),
+      lat: metodo === 'despacho' ? dir?.lat ?? undefined : undefined,
+      lon: metodo === 'despacho' ? dir?.lon ?? undefined : undefined,
+    };
+
+    const creados = await Promise.all(
+      grupos.map((g, i) =>
+        crearPedidoDespensa({
+          cuenta_comercial_id: g.cuentaComercialId,
+          items: g.items.map((it) => ({
+            oferta_id: it.oferta_id,
+            cantidad: it.cantidad,
+            mascota_id: it.destino?.tipo === 'mascota' ? it.destino.mascotaId : undefined,
+            donacion: it.destino?.tipo === 'donacion' ? true : undefined,
+          })),
+          entrega,
+          clave_idempotencia: `${clave.current}:g${i}`,
+          metodo_entrega: metodo,
+          fecha_programada: fechaElegida?.fecha,
+        }),
+      ),
+    );
+
+    const okIds = creados.filter((r) => r.ok).map((r) => (r as { data: PedidoCreado }).data);
+    const fallo = creados.find((r) => !r.ok);
+    if (fallo !== undefined && !fallo.ok) {
+      // 🔴 CERO HUÉRFANOS: lo que sí entró se cancela antes de rebotar.
+      await Promise.all(
+        okIds.map((p) => cancelarPedidoDespensa(p.pedido_id, 'grupo_incompleto_en_checkout')),
+      );
+      setTrabajando(false);
+      mostrar({ texto: fallo.mensaje, variante: 'error' });
       return;
     }
-    setPedido(r.data);
+
+    // LA COMPRA: lo que se cobra. Su id es el `dev_reference` de la pasarela.
+    const c = await crearCompraDesdePedidos(
+      okIds.map((p) => p.pedido_id),
+      clave.current,
+    );
+    setTrabajando(false);
+    if (!c.ok) {
+      mostrar({ texto: c.mensaje, variante: 'error' });
+      return;
+    }
+    setPedidos(okIds);
+    setCompraId(c.data.compra_id);
+    setCompraTotal(c.data.total);
     setFase('resumen');
   }
 
-  /** Volver a editar CANCELA el pedido creado — cero huérfanos. */
+  /** Volver a editar CANCELA **los N pedidos** creados — cero huérfanos. */
   async function volverAEditar() {
     if (trabajando) return;
-    if (pedido !== null) {
+    if (pedidos.length > 0) {
       setTrabajando(true);
-      const r = await cancelarPedidoDespensa(pedido.pedido_id, 'edicion_en_checkout');
+      const rs = await Promise.all(
+        pedidos.map((p) => cancelarPedidoDespensa(p.pedido_id, 'edicion_en_checkout')),
+      );
       setTrabajando(false);
-      if (!r.ok) {
-        mostrar({ texto: r.mensaje, variante: 'error' });
+      const fallo = rs.find((r) => !r.ok);
+      if (fallo !== undefined && !fallo.ok) {
+        mostrar({ texto: fallo.mensaje, variante: 'error' });
         return;
       }
-      setPedido(null);
+      setPedidos([]);
+      setCompraId(null);
+      setCompraTotal(null);
       // La clave era de ESE intento: el próximo pedido es otro intento.
       clave.current = nuevaClaveIdempotencia();
     }
     setFase('armado');
   }
 
+  /**
+   * 🔴 UN SOLO COBRO PARA LA FAMILIA: se paga **la compra**, no los pedidos.
+   * `crearIntentoPago` aparta la mercadería de todos, congela el desglose y
+   * devuelve la `referencia` que la pasarela va a llevar como `dev_reference`.
+   * **Si a algún pedido no le queda stock, rebota con el nombre del producto y
+   * la compra entera no avanza** — una compra que cobra un total no puede
+   * quedar medio reservada.
+   *
+   * ⚠️ Esto es el INTENTO. La confirmación final la da el servidor: que el
+   * proveedor conteste «aprobado» es señal optimista, no el hecho.
+   */
   async function pagar() {
-    if (trabajando || pedido === null) return;
+    if (trabajando || compraId === null) return;
     setTrabajando(true);
-    const r = await iniciarPagoPedido(pedido.pedido_id);
+    const r = await crearIntentoPago(compraId);
     setTrabajando(false);
     if (!r.ok) {
       mostrar({ texto: r.mensaje, variante: 'error' });
@@ -429,13 +508,13 @@ export default function DespensaCheckout() {
    *  pagar, la salida se convierte en volver-a-editar (que cancela). */
   useEffect(() => {
     const sub = navigation.addListener('beforeRemove', (e) => {
-      if (pedido === null || fase === 'exito') return;
+      if (pedidos.length === 0 || fase === 'exito') return;
       e.preventDefault();
       void volverAEditar();
     });
     return sub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, pedido, fase, trabajando]);
+  }, [navigation, pedidos, fase, trabajando]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -642,26 +721,61 @@ export default function DespensaCheckout() {
               )}
             </>
           )
-        ) : fase === 'resumen' && pedido !== null ? (
+        ) : fase === 'resumen' && pedidos.length > 0 ? (
           <>
-            {/* EL RESUMEN — números del MOTOR, tal cual llegaron. */}
+            {/* 🔴 LA DIVISIÓN SE DECLARA ANTES DE PAGAR (F5 + receta ③ de B).
+                N pedidos = N BLOQUES, cada uno con lo suyo. La confirmación
+                posterior explica que son independientes.
+                *Un total único sobre dos entregas distintas es una promesa
+                que la pantalla no puede cumplir.* */}
+            {pedidos.length > 1 ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <Texto variante="seccion">
+                  {t('despensa.divisionTitulo', { n: pedidos.length })}
+                </Texto>
+                <Texto variante="apoyo">{t('despensa.divisionDetalle')}</Texto>
+              </View>
+            ) : null}
+
+            {pedidos.map((p, i) => (
+              <View key={p.pedido_id} style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                {pedidos.length > 1 ? (
+                  <Texto variante="seccion">
+                    {t('despensa.bloqueEntrega', { i: i + 1, n: pedidos.length })}
+                  </Texto>
+                ) : (
+                  <Texto variante="seccion">{t('despensa.resumen')}</Texto>
+                )}
+                {/* QUÉ llega en esta entrega. Va con `Texto` y no con
+                    `FilaMonto`: esa pieza NO se dibuja cuando el monto es
+                    null —a propósito, para no inventar un "$ 0,00"—, así que
+                    usarla acá habría hecho desaparecer los ítems en silencio. */}
+                {grupos[i]?.items.map((it) => (
+                  <Texto key={it.oferta_id} variante="apoyo">
+                    {`${it.cantidad} × ${it.nombre}`}
+                  </Texto>
+                ))}
+                {p.subtotal !== null ? (
+                  <FilaMonto etiqueta={t('despensa.subtotal')} monto={dinero(p.subtotal)} />
+                ) : null}
+                {p.impuesto !== null ? (
+                  <FilaMonto etiqueta={t('despensa.impuesto')} monto={dinero(p.impuesto)} />
+                ) : null}
+                {p.envio !== null ? (
+                  <FilaMonto
+                    etiqueta={metodo === 'retiro' ? t('despensa.envioRetiro') : t('despensa.envio')}
+                    monto={dinero(p.envio)}
+                  />
+                ) : null}
+              </View>
+            ))}
+
+            {/* EL TOTAL ES EL DE LA COMPRA, dicho por el motor — esta
+                pantalla no suma los bloques. UN SOLO COBRO para la familia. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Texto variante="seccion">{t('despensa.resumen')}</Texto>
-              {pedido.subtotal !== null ? (
-                <FilaMonto etiqueta={t('despensa.subtotal')} monto={dinero(pedido.subtotal)} />
-              ) : null}
-              {pedido.impuesto !== null ? (
-                <FilaMonto etiqueta={t('despensa.impuesto')} monto={dinero(pedido.impuesto)} />
-              ) : null}
-              {pedido.envio !== null ? (
-                <FilaMonto
-                  etiqueta={metodo === 'retiro' ? t('despensa.envioRetiro') : t('despensa.envio')}
-                  monto={dinero(pedido.envio)}
-                />
-              ) : null}
               <Separador />
-              {pedido.total !== null ? (
-                <FilaMonto etiqueta={t('despensa.total')} monto={dinero(pedido.total)} destacada />
+              {compraTotal !== null ? (
+                <FilaMonto etiqueta={t('despensa.total')} monto={dinero(compraTotal)} destacada />
               ) : (
                 <Texto variante="apoyo">{t('despensa.totalNoLlego')}</Texto>
               )}

@@ -664,3 +664,106 @@ export async function alternarRecurrencia(
   if (!esObjDespensa(data) || data.ok !== true) return falloDespensa('datos_inconsistentes');
   return { ok: true, data: { activo: data.activo === true } };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S100 · LA COMPRA — la entidad que se cobra (F5: un carrito, N pedidos)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface CompraCreada {
+  compra_id: string;
+  ya_existia: boolean;
+  /** `null` cuando `ya_existia` (el motor devuelve solo el id). Nulo honesto:
+   *  los totales se releen de la compra. */
+  total: number | null;
+}
+
+/**
+ * Agrupa N pedidos en UNA compra. **La familia sigue viendo N pedidos con N
+ * entregas** (F5 firmado); la compra existe para que **la plata tenga un solo
+ * dueño y un solo número** — y para que la pasarela tenga un `dev_reference`
+ * que no sea el id de un pedido cualquiera.
+ *
+ * 🔴 Los montos NO se pasan: el motor los suma de los pedidos. *Un total
+ * calculado en dos lugares es un total que algún día discrepa, y el día que
+ * discrepa es en una factura.*
+ *
+ * La clave de idempotencia **NO se prefija con el uid acá**, a diferencia de
+ * `crearPedidoDespensa`: el motor de compras ya **filtra por `user_id`** en su
+ * búsqueda y su UNIQUE es `(user_id, clave)`. *Ese prefijo era una defensa en
+ * la capa equivocada; acá la puerta está bien cerrada del lado de adentro.*
+ */
+export async function crearCompraDesdePedidos(
+  pedidoIds: string[],
+  claveIdempotencia: string,
+): Promise<ResultadoWrapper<CompraCreada, CodigoErrorDespensa>> {
+  if (pedidoIds.length === 0) return falloDespensaCodigo('pedido_sin_items');
+  const { data, error } = await getClient().rpc('crear_compra_desde_pedidos', {
+    p_pedido_ids: pedidoIds,
+    p_clave: claveIdempotencia,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.compra_id !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      compra_id: data.compra_id,
+      ya_existia: data.ya_existia === true,
+      total: typeof data.total === 'number' ? data.total : null,
+    },
+  };
+}
+
+export interface IntentoDePago {
+  compra_id: string;
+  /** Lo que la pasarela va a llevar como `dev_reference`: **el id de la
+   *  COMPRA, jamás el de un pedido.** */
+  referencia: string;
+  monto: number;
+  moneda: string;
+  metodo: string;
+}
+
+/**
+ * 🔴 EL CONTRATO DE LA PUERTA DE PAGO — y S101 se enchufa acá sin tocar la
+ * pantalla.
+ *
+ * Esta función **no cobra**: aparta la mercadería de TODOS los pedidos de la
+ * compra, congela el desglose y deja la compra en `esperando_pago`. Devuelve lo
+ * que el proveedor necesita para abrir su formulario.
+ *
+ * **Primero se aparta, después se pide la tarjeta.** Si a algún pedido no le
+ * queda stock, el motor rebota `sin_stock` **con el nombre del producto** y
+ * **aborta la compra entera**: *una compra que cobra un total no puede quedar
+ * medio reservada.*
+ *
+ * ⚠️ **LA CONFIRMACIÓN FINAL NO LA DA LA APP.** Esto es el INTENTO. Que el
+ * proveedor conteste «aprobado» es una señal optimista; el pedido queda
+ * confirmado ante el vendedor **cuando el servidor lo confirma por webhook**.
+ * Por eso `confirmar_pago_pedido` no se exporta desde esta capa: si viviera
+ * acá, cualquiera con la anon key podría declarar pagada una compra.
+ */
+export async function crearIntentoPago(
+  compraId: string,
+  metodo = 'simulado',
+): Promise<ResultadoWrapper<IntentoDePago, CodigoErrorDespensa>> {
+  const { data, error } = await getClient().rpc('crear_intento_pago', {
+    p_compra_id: compraId,
+    p_metodo: metodo,
+  });
+  if (error) return falloDespensa(error.message);
+  if (!esObjDespensa(data) || data.ok !== true || typeof data.referencia !== 'string') {
+    return falloDespensa('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      compra_id: compraId,
+      referencia: data.referencia,
+      monto: typeof data.monto === 'number' ? data.monto : 0,
+      moneda: typeof data.moneda === 'string' ? data.moneda : 'USD',
+      metodo: typeof data.metodo === 'string' ? data.metodo : metodo,
+    },
+  };
+}
