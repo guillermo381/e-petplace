@@ -2,7 +2,8 @@
 
 **Los cinco recortes del founder viven en esta carpeta y SON LA VARA.** Se trabaja
 contra las imágenes, no contra la descripción — porque la descripción ya se tradujo
-mal tres veces.
+mal **cuatro veces** («saliente» · «joroba» · «montaña» · «cresta»), y la anatomía que
+esas cuatro mandaron a construir **no podía producir el efecto** (L-283).
 
 | archivo | qué es |
 |---|---|
