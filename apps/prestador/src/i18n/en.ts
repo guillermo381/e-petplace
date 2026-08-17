@@ -2456,9 +2456,7 @@ export const prestadorEn = {
     aceptar: 'Accept and continue',
   },
   espejo: {
-    administrar: 'Manage',
     verComoCliente: 'View as customer',
-    etiquetaGrupo: 'How you are viewing your storefront',
   },
   ventas: {
     entradaTitulo: 'Product sales',
@@ -2529,8 +2527,9 @@ export const prestadorEn = {
     },
     tienda: {
       titulo: 'Your shop and your stock',
-      vitrinaTitulo: 'Your shelf',
       localTitulo: 'Your shop',
+      stockTitulo: 'Your stock',
+      seccionGrupo: 'Which part of your store you see',
     },
     vitrina: {
       vistaLista: 'List',

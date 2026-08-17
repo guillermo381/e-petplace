@@ -37,7 +37,7 @@
  */
 
 import { Pressable, View } from 'react-native';
-import { spacing } from '@epetplace/ui';
+import { Chevron, spacing } from '@epetplace/ui';
 
 import type { ModoEspejo } from '@/components/interruptor-espejo';
 
@@ -99,7 +99,13 @@ export function DatoAdministrable({
           lado. Si el dato cediera espacio, la línea se leería distinta en
           los dos modos y volveríamos al mismo problema. */}
       <View style={{ flex: 1 }}>{children}</View>
-      {senal}
+      {/* ✅ LA SEÑAL, POR FIN. B extrajo `Chevron` — el portador para slots
+          que NO son una fila entera — así que el trazo entra por la PIEZA
+          y el path sigue sin exportarse. *Frenar fue lo correcto: la
+          alternativa era la quinta copia del mismo path.*
+          `direccion="derecha"` es E14 aplicada: **acción LLEVA** (abre la
+          Hoja que resuelve), información desplegaría. */}
+      {senal ?? <Chevron direccion="derecha" />}
     </Pressable>
   );
 }
