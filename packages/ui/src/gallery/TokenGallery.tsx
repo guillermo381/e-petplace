@@ -3583,10 +3583,33 @@ function GaleriaInterna() {
               />
             </View>
             <View style={CELDA_DE_GRILLA}>
-              {/* Sin precio NO se dibuja un $0.00 (19.9): el nulo se calla. */}
+              {/* 🔴 LA SEÑAL DE ALERGIA — solo en BÚSQUEDA (la letra:
+                  «exclusión dura en la RECOMENDACIÓN, advertencia dura en
+                  la BÚSQUEDA»). Va DENTRO de la tarjeta: un aviso colgando
+                  fuera de la fila no tiene qué lo ate a su producto, y en
+                  dos columnas el ojo no sabe de cuál habla.
+                  El naranja es de la alergia y el sin-stock queda neutro a
+                  propósito: la alergia es riesgo para la mascota, el
+                  agotado es un hecho del estante. */}
+              <TarjetaProducto
+                nombre="Pro Pac Pollo y Arroz"
+                presentacion="7.5 kg"
+                precio={42.5}
+                hayStock
+                cantidad={0}
+                alergia={{ composicion: 'declarada_sin_verificar', coincidencia: 'exacta', senal: 'Contiene pollo' }}
+                onAgregar={() => {}}
+                onCambiarCantidad={() => {}}
+                onPress={() => {}}
+              />
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              {/* El OTRO silencio ilegal: no sabemos qué tiene. La pieza
+                  habla igual — la pantalla no tiene con qué callarla. */}
               <TarjetaProducto
                 nombre="Snack dental"
                 presentacion="Sobre 85 g"
+                alergia={{ composicion: 'ausente', coincidencia: 'ninguna', senal: 'Sin composición declarada' }}
                 precio={null}
                 hayStock
                 cantidad={0}
