@@ -1160,6 +1160,9 @@ export {
   calcularPromesaDespensa,
   nuevaClaveIdempotencia,
   crearPedidoDespensa,
+  // S100 · el gate de la puerta (D-827): revalida el carrito contra la
+  // vitrina de AHORA, antes de la caja.
+  revalidarCarritoDespensa,
   reservarStockPedido,
   iniciarPagoPedido,
   cancelarPedidoDespensa,
@@ -1174,6 +1177,8 @@ export {
   type ItemDeCompra,
   type DatosDeEntrega,
   type PedidoCreado,
+  type EstadoOfertaCarrito,
+  type MotivoNoDisponible,
 } from './wrappers/despensa-pedido';
 
 export {
