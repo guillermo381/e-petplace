@@ -3075,6 +3075,25 @@ function r44(archivos) {
  *  vuelve determinista cuál es el primero. *La cura correcta del caso de
  *  C no es documentar mejor: es ordenar, o traer el criterio del motor.*
  *
+ *  ── ⚠️ EL LÍMITE DE ESTA REGLA, ESCRITO PARA QUE SU VERDE NO SE LEA
+ *  DE MÁS (aporte de A, cuarta aparición del patrón) ─────────────────
+ *  A encontró el mismo defecto una cuarta vez —`publicadas[0]` ·
+ *  `items[0]` · `galeria[0]` · **y la placa del repartidor**: hay hasta
+ *  2 vehículos por repartidor y `envios` no registra cuál se usó, así
+ *  que mostrar «la placa» era elegir uno de N—. Lo resolvió por `orden`
+ *  ASC, **que sí es criterio porque LO ESCRIBE EL VENDEDOR**.
+ *
+ *  🔴 **Y ahí está la ley que esta regla NO puede mecanizar entera: el
+ *  problema no es la ausencia de `.order()` — es si EL CRITERIO EXISTE
+ *  y QUIÉN LO ESCRIBIÓ.** Un `.sort()` por un campo cualquiera pasa este
+ *  lint y puede no ser criterio de nada.
+ *
+ *  ⇒ **Esta regla caza la forma más barata del defecto —elegir sin
+ *  NINGÚN orden— y no puede juzgar si el orden elegido significa algo.**
+ *  *Su verde dice «acá alguien decidió un orden», jamás «el orden es el
+ *  correcto».* La segunda mitad no se mecaniza honestamente: se declara
+ *  y se enseña.
+ *
  *  Baseline **2**, solo-baja, con dueño: **los dos son de `A`**
  *  (`packages/api`). Muere cuando llegue a 0. */
 /** ⏪ Nació en **2** y **bajó a 0 el mismo día**, sin que nadie curara
