@@ -1606,13 +1606,37 @@ export const clienteEs = {
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
     recurrenciaApagada: 'Listo: la compra recurrente quedó apagada.',
 
-    // S96 · la escalera del pedido (§8.1 — cinco pasos; "Preparando" tapa
-    // los tres escalones internos del vendedor a propósito)
-    pasoPagando: 'Pagando',
+    // S96 · la escalera del pedido (§8.1 — CUATRO pasos; "Preparando" tapa
+    // los tres escalones internos del vendedor a propósito).
+    // S100-D: `pasoPagando` murió con su escalón — `pagando` es ANTES de
+    // que exista una promesa, así que no es peldaño (receta de B §1). Su
+    // voz la pone ahora el catálogo (`narrativa_nombre`), no este mapa.
     pasoConfirmado: 'Confirmado',
     pasoPreparando: 'Preparando',
     pasoEnCamino: 'En camino',
     pasoEntregado: 'Entregado',
+    // S100-D · L3 · la ceremonia de la entrega. NO repite «Entregado» —
+    // eso ya lo dice la escalera, que es el ESTADO. Esto es el MOMENTO, y
+    // por eso está en pasado y en voz de familia. Cero euforia de compra:
+    // esta casa no celebra transacciones (MODELO_LOYALTY §5).
+    celebracionLlego: 'Tu pedido llegó',
+    // El tercer acto: EL SEDIMENTO. Habla del EXPEDIENTE, jamás de puntos ni
+    // de recompensa — comprar no es cuidar (MODELO_LOYALTY §5). Y no felicita
+    // a nadie por comprar: dice qué quedó, que es otra cosa.
+    celebracionSedimento: 'Quedó en la historia de {{nombre}}',
+    celebracionSedimentoVarias: 'Quedó en la historia de tus mascotas',
+    // S100-D · L2 · EN CAMINO. La ventana es RANGO y jamás el minuto (N14):
+    // prometer un minuto que no podemos cumplir es peor que no prometer.
+    enCaminoEntrada: 'Seguir el pedido',
+    enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoTitulo: 'En camino',
+    enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
+    enCaminoVentana: 'Llega entre',
+    enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
+    enCaminoQuienTrae: 'Quién lo trae',
+    promesaRango: '{{desde}} y {{hasta}}',
+    vehiculoMoto: 'Moto',
+    vehiculoCarro: 'Carro',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
     desvioCancelado: 'Cancelado',

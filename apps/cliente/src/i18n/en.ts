@@ -1395,13 +1395,38 @@ export const clienteEn = {
     recurrenciaActiva: 'The recurring purchase is set up.',
     recurrenciaApagada: 'Done: the recurring purchase is off.',
 
-    // S96 · the order ladder (§8.1 — five steps; "Preparing" deliberately
-    // covers the seller's three internal steps)
-    pasoPagando: 'Paying',
+    // S96 · the order ladder (§8.1 — FOUR steps; "Preparing" deliberately
+    // covers the seller's three internal steps).
+    // S100-D: `pasoPagando` died with its step — `pagando` comes BEFORE
+    // there is a promise, so it is not a rung (B's recipe §1). Its voice
+    // now comes from the catalogue (`narrativa_nombre`), not from here.
     pasoConfirmado: 'Confirmed',
     pasoPreparando: 'Preparing',
     pasoEnCamino: 'On the way',
     pasoEntregado: 'Delivered',
+    // S100-D · L3 · the delivery ceremony. It does NOT repeat "Delivered" —
+    // the ladder already says that, and that is the STATE. This is the
+    // MOMENT. No purchase euphoria: this house does not celebrate
+    // transactions (MODELO_LOYALTY §5).
+    celebracionLlego: 'Your order arrived',
+    // The third act: THE SEDIMENT. It speaks of the RECORD, never of points or
+    // rewards — buying is not caring (MODELO_LOYALTY §5). And it does not
+    // congratulate anyone for buying: it says what remained, which is another
+    // thing entirely.
+    celebracionSedimento: "It's now part of {{nombre}}'s story",
+    celebracionSedimentoVarias: "It's now part of your pets' stories",
+    // S100-D · L2 · ON THE WAY. The window is a RANGE and never a minute
+    // (N14): promising a minute we cannot keep is worse than not promising.
+    enCaminoEntrada: 'Follow your order',
+    enCaminoEntradaDetalle: 'See where it is',
+    enCaminoTitulo: 'On the way',
+    enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
+    enCaminoVentana: 'Arrives between',
+    enCaminoVentanaDetalle: "It's a window, not an exact time.",
+    enCaminoQuienTrae: 'Who’s bringing it',
+    promesaRango: '{{desde}} and {{hasta}}',
+    vehiculoMoto: 'Motorcycle',
+    vehiculoCarro: 'Car',
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
     desvioCancelado: 'Canceled',

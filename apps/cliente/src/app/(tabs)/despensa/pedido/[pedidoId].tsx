@@ -43,6 +43,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   CodigoAEscala,
   Encabezado,
   EscaleraEstados,
@@ -72,6 +73,8 @@ import {
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { conIconos } from '@/lib/despensa/escalera-iconos';
+import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
@@ -120,7 +123,6 @@ export default function DespensaPedido() {
   );
 
   const voces: VocesEscalera = {
-    pagando: t('despensa.pasoPagando'),
     confirmado: t('despensa.pasoConfirmado'),
     preparando: t('despensa.pasoPreparando'),
     enCamino: t('despensa.pasoEnCamino'),
@@ -239,11 +241,82 @@ export default function DespensaPedido() {
           />
         ) : (
           <>
-            {/* 1 · EL RECORRIDO — la escalera completa con su desvío. */}
+            {/* 0 · LA CELEBRACIÓN — solo con el pedido ENTREGADO, y una
+                sola vez por pedido (la pieza lo recuerda).
+
+                🔴 EL TERCER ACTO VA VACÍO, Y ES LA DECISIÓN MÁS IMPORTANTE
+                DE ESTE LOTE. La letra dice que si «¿para quién fue?» está
+                respondido, la compra deposita un evento en el expediente de
+                esa mascota — y eso es cierto, pero NO para todo ítem: el
+                motor gatea el depósito por `f.entra_al_expediente`, o sea
+                que **la familia del producto decide** (alimento sí, juguete
+                no — BIO_EXPEDIENTE E2bis).
+
+                ⇒ Decir «quedó en el expediente de Thor» por cada ítem con
+                destino sería FALSO para un juguete, y falso de la peor
+                manera: **verosímil** (L-139). El lector de la familia
+                (`LineaDePedido`) no trae hoy ni la familia del producto ni
+                si el evento se depositó, así que la pantalla **no puede
+                saberlo** — y lo que no se sabe no se afirma.
+
+                El slot existe y espera su dato (H-07, dueño A). *Un acto
+                que no tiene nada verdadero que decir no se llena con algo
+                lindo: se deja callado.* */}
+            {detalle.pedido.narrativa === 'entregado' ? (
+              <CelebracionEntrega
+                pedidoId={detalle.pedido.pedido_id}
+                titulo={t('despensa.celebracionLlego')}
+                cierre={(() => {
+                  // ⏪ EL TERCER ACTO YA NO VA VACÍO: `sedimentado` llegó.
+                  //
+                  // 🔴 SE LEE `sedimentado`, JAMÁS `destino`. Un ítem con
+                  // destino NO garantiza depósito —el motor lo gatea por
+                  // `f.entra_al_expediente`, la familia del producto decide—
+                  // así que contar destinos habría dicho «quedó en la
+                  // historia de Thor» de un juguete. Este booleano lo dice
+                  // el servidor por la EXISTENCIA de la fila.
+                  //
+                  // Y su contrato se respeta entero: **`true` habilita a
+                  // decirlo; `false` habilita a CALLAR.** Sin ninguno en
+                  // `true` el acto no existe — no se dice «no quedó en el
+                  // expediente», porque ese `false` tapa tres causas
+                  // distintas (familia que no entra · sin destino · mascota
+                  // no legible por quien mira) y no las distingue.
+                  const sedimentados = detalle.items.filter((i) => i.sedimentado);
+                  if (sedimentados.length === 0) return undefined;
+                  // Los nombres que SÍ podemos nombrar. Si el destino no es
+                  // legible, la mascota no se nombra — pero el hecho sí se
+                  // cuenta: sedimentó igual.
+                  const nombres = [
+                    ...new Set(
+                      sedimentados
+                        .map((i) => i.destino?.mascota_id)
+                        .filter((id): id is string => typeof id === 'string')
+                        .map((id) => nombrePorId[id])
+                        .filter((n): n is string => typeof n === 'string' && n !== ''),
+                    ),
+                  ];
+                  return nombres.length === 1
+                    ? t('despensa.celebracionSedimento', { nombre: nombres[0] })
+                    : t('despensa.celebracionSedimentoVarias');
+                })()}
+              />
+            ) : null}
+
+            {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
+                🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
+                `P-20260816-3f6580` es un identificador de máquina: lo
+                necesita SOPORTE, no la familia. Presidiendo la pantalla
+                le pedía al dueño que se hiciera cargo de un dato que no
+                puede usar, y encima en el lugar donde debía estar lo
+                único que le importa (dónde está su pedido).
+                **No se pierde: viaja entero adentro del enlace de
+                soporte** (`abrirWhatsApp`), que es donde sirve — el mismo
+                criterio de la lista, que ya lo excluía por Chanel («la
+                fila no dice el número de orden — dato de máquina»). El
+                pedido se nombra por su FECHA, que es como lo nombra
+                quien lo hizo. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Texto variante="apoyo" seleccionable>
-                {detalle.pedido.numero_orden}
-              </Texto>
               {(() => {
                 const detalleActual =
                   detalle.pedido.promesa_desde !== null && detalle.pedido.promesa_hasta !== null
@@ -260,7 +333,7 @@ export default function DespensaPedido() {
                 );
                 return (
                   <EscaleraEstados
-                    pasos={pasos}
+                    pasos={conIconos(pasos)}
                     desvio={desvio}
                     registro="completa"
                     acento="control"
@@ -268,6 +341,24 @@ export default function DespensaPedido() {
                 );
               })()}
             </View>
+
+            {/* 1bis · LA PUERTA A EN CAMINO — solo mientras la moto va.
+                Navega ⇒ chevron y sin caja (19.7: el contorno transparente
+                murió como acción de fila). Y solo con `en_camino`: antes no
+                hay a quién seguir, y un mapa quieto en el local durante media
+                hora se lee como que algo se colgó. */}
+            {detalle.pedido.narrativa === 'en_camino' ? (
+              <CeldaNavegacion
+                titulo={t('despensa.enCaminoEntrada')}
+                detalle={t('despensa.enCaminoEntradaDetalle')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/despensa/en-camino/[pedidoId]',
+                    params: { pedidoId: detalle.pedido.pedido_id },
+                  })
+                }
+              />
+            ) : null}
 
             {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o
                 muestra en el mostrador). Se LEE, jamás llega por push. */}
