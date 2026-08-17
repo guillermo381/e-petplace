@@ -1439,6 +1439,12 @@ export const clienteEs = {
     // que no ofrecerlo (Ley 13).
     filaSinStock: 'Ahora no está disponible.',
 
+    // 🔴 S100-C · N19 ③ — EL PRECIO POR KILO. El dato que decide una compra de
+    // alimento y que casi ningún catálogo pone. Solo aparece cuando la variante
+    // declara su peso: sin `peso_kg` no hay cuenta, y una cuenta inventada
+    // sobre un peso ausente sería peor que no decir nada.
+    porKilo: '${{monto}}/kg',
+
     // 🔴 S100-C · H-004 — EL TECHO QUE SE DICE. La vitrina carga 50 sobre 563
     // comprables: sin esta línea la familia veía el 8,9 % del catálogo y una
     // lista completa se veía igual que una truncada.

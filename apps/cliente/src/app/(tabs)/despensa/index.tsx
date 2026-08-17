@@ -54,13 +54,17 @@ import {
   Celda,
   CeldaNavegacion,
   Encabezado,
+  Entrada,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   FiltroPills,
   Icono,
   Separador,
+  TarjetaProducto,
   Texto,
+  CELDA_DE_GRILLA,
+  GRILLA_DE_DOS,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -80,7 +84,7 @@ import {
 } from '@epetplace/api';
 import { CriterioMascota, LienzoProducto } from '@/components/despensa-piezas';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { agregarAlCarrito, fijarCantidad, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { alergenosQueCruzan, vozAlergeno } from '@/lib/despensa/composicion';
 import { nombreCurado } from '@/lib/despensa/nombre-curado';
 import { useTraduccion } from '@/i18n';
@@ -390,7 +394,114 @@ export default function DespensaDescubrir() {
     );
   }
 
-  function listaConFacetas(lista: ProductoDeVitrina[], vacio: React.ReactNode) {
+  /**
+   * 🔴 EL PRECIO POR KILO — el dato que decide una compra de alimento y que casi
+   * nadie pone (N19 ③). Sale de `peso_kg` de la variante, así que **solo se
+   * dice cuando existe**: null honesto, jamás un cálculo sobre un peso ausente.
+   * Se piden 2 decimales porque a $4,7267/kg el dato deja de ayudar y empieza a
+   * ser ruido.
+   */
+  function precioPorKilo(p: ProductoDeVitrina): string | undefined {
+    if (p.peso_kg === null || p.peso_kg <= 0) return undefined;
+    return t('despensa.porKilo', { monto: (p.precio / p.peso_kg).toFixed(2) });
+  }
+
+  function tarjetaProducto(p: ProductoDeVitrina) {
+    // La cantidad ya en el carrito: con 0 la pieza monta el `+`, con >0 el
+    // stepper. La pieza no sabe de carrito — recibe el número y avisa.
+    const enCarrito = carrito.find((i) => i.oferta_id === p.oferta_id)?.cantidad ?? 0;
+    return (
+      <TarjetaProducto
+        nombre={nombreCurado(p.nombre)}
+        presentacion={p.presentacion}
+        precio={p.precio}
+        precioPorUnidad={precioPorKilo(p)}
+        fotoUrl={p.foto_url ?? undefined}
+        hayStock={p.hay_stock}
+        cantidad={enCarrito}
+        onAgregar={() =>
+          agregarAlCarrito(
+            {
+              oferta_id: p.oferta_id,
+              producto_id: p.producto_id,
+              variante_id: p.variante_id,
+              nombre: p.nombre,
+              marca: p.marca,
+              presentacion: p.presentacion,
+              precio: p.precio,
+              moneda: p.moneda,
+              foto_url: p.foto_url,
+              especies_aplicables: p.especies_aplicables,
+              alergenos: p.alergenos,
+              cuentaComercialId: p.cuenta_comercial_id,
+              country_code: p.country_code,
+            },
+            1,
+          )
+        }
+        onCambiarCantidad={(n) => fijarCantidad(p.oferta_id, n)}
+        onPress={() =>
+          router.push({
+            pathname: '/despensa/producto/[productoId]',
+            params: { productoId: p.producto_id, mascotaId: mascota?.id ?? '' },
+          })
+        }
+      />
+    );
+  }
+
+  /**
+   * 🔴 LA VITRINA A DOS COLUMNAS (L1, S100-C). La grilla **no se inventa ni se
+   * copia**: `GRILLA_DE_DOS`/`CELDA_DE_GRILLA` vienen de B con su medición
+   * adentro (el gap no se ve en el porcentaje — por eso el patrón saca el gap
+   * de la cuenta en vez de buscar un tercer porcentaje con más margen).
+   *
+   * **La persiana la pone `Entrada`, NO un `FadeInDown` a mano** — y lo corrigió
+   * R7 sobre mi primera versión: *«la entrada tiene UN portador»*. **La regla no
+   * era prolijidad: mi versión artesanal ignoraba `useReducedMotion` y
+   * `memorial`** ⇒ quien pidió menos movimiento en su teléfono habría visto el
+   * desplazamiento igual, y una familia en memorial habría recibido una vitrina
+   * animada. `Entrada` resuelve las tres cosas adentro con una línea.
+   *
+   * `orden` es **semántico** (posición en la lectura), y va **topeado en 8**: sin
+   * tope, el producto 40 esperaría su turno detrás de 39 escalones — *un stagger
+   * sin techo deja de ser ritmo y pasa a ser latencia*. Del 9 en adelante entran
+   * juntos, que es lo que hace el ojo al bajar rápido.
+   */
+  function grillaProductos(lista: ProductoDeVitrina[]) {
+    return (
+      <View style={GRILLA_DE_DOS}>
+        {lista.map((p, i) => (
+          <View key={p.oferta_id} style={CELDA_DE_GRILLA}>
+            <Entrada orden={Math.min(i, 8)}>{tarjetaProducto(p)}</Entrada>
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  /**
+   * `modo` decide la forma, y el corte **no es estético: es de seguridad.**
+   *
+   * · `'grilla'` — vitrina y recomendación. Ahí `TarjetaProducto` rige tal
+   *   cual: la vitrina se ve **sin mascota** (no hay contra qué advertir) y la
+   *   recomendación **excluye duro en el motor**, con verificación fail-closed
+   *   que rechaza la respuesta entera si algo cruza.
+   * · `'filas'` — LA BÚSQUEDA, y sigue en filas A PROPÓSITO. `MODELO_DESPENSA`
+   *   §5.4 firma *«exclusión dura en la RECOMENDACIÓN, advertencia dura en la
+   *   BÚSQUEDA»*: la búsqueda no excluye, **advierte**. `TarjetaProducto` no
+   *   muestra alérgenos por decisión de su autora (*medio dato de alergia es
+   *   peor que ninguno*), así que migrarla hoy **borraría una advertencia de
+   *   salud firmada**. Tampoco se cuelga el aviso FUERA de la tarjeta: eso es
+   *   exactamente H-002, el huérfano que el censo midió en 80 de 563 filas.
+   *   ⏳ **Prop de advertencia pedida a B con el caso concreto.** Cuando exista,
+   *   este `modo` muere y las tres puertas montan la misma pieza.
+   */
+  function listaConFacetas(
+    lista: ProductoDeVitrina[],
+    vacio: React.ReactNode,
+    modo: 'grilla' | 'filas' = 'grilla',
+  ) {
     const { familias, especies } = facetas(lista);
     const filtradas = aplicarFacetas(lista);
     const chipsFamilia = familias
@@ -421,6 +532,10 @@ export default function DespensaDescubrir() {
         ) : null}
         {filtradas.length === 0 ? (
           vacio
+        ) : modo === 'grilla' ? (
+          // La grilla trae su propio margen negativo, así que el aire lateral
+          // de la pantalla se pone acá y no adentro de la celda.
+          <View style={{ paddingHorizontal: spacing[5] }}>{grillaProductos(filtradas)}</View>
         ) : (
           <View>
             {filtradas.map((p, i) => (
@@ -547,6 +662,11 @@ export default function DespensaDescubrir() {
                       />
                     }
                   />,
+                  // 🔴 'filas' A PROPÓSITO — ver la nota de `listaConFacetas`.
+                  // La búsqueda ADVIERTE de alergia (§5.4 firmada) y la tarjeta
+                  // todavía no tiene dónde decirlo. Migrarla hoy borraría un
+                  // dato de salud; colgarlo fuera sería H-002.
+                  'filas',
                 )
               )
             ) : mascota !== null ? (

@@ -1243,6 +1243,10 @@ export const clienteEn = {
     // Speaks about the present and promises nothing (§4.4 bans "temporarily").
     filaSinStock: "It's not available right now.",
 
+    // 🔴 S100-C · N19 ③ — price per kilo. Same reasoning as `es`: only shown
+    // when the variant declares its weight.
+    porKilo: '${{monto}}/kg',
+
     // 🔴 S100-C · H-004 — the ceiling that says so. Same reasoning as `es`:
     // the number AND the way out, never just the limit.
     techoVitrina:
