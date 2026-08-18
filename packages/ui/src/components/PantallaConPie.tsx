@@ -75,6 +75,19 @@ export interface PantallaConPieProps {
    * no tenerlo según su estado, y con la reserva derivada ese caso deja de
    * necesitar una condición en el `paddingBottom` del consumidor* — que es
    * justo donde vivía el `96`.
+   *
+   * 🔴 **PASALO COMO FRAGMENTO O COMO CONTROLES SUELTOS, no envuelto en un
+   * `View` tuyo.** El contenedor de la pieza lleva `pointerEvents="box-none"`
+   * para que el gesto de scroll pase entre los botones (ver su nota), **pero
+   * eso cubre UNA capa: un `View` intermedio tuyo vuelve a capturar el toque
+   * en todo su rectángulo y reabre la zona muerta.**
+   *
+   * ✅ `pie={<><Boton …/><Boton …/></>}`
+   * ⛔ `pie={<View style={{ gap: 8 }}><Boton …/><Boton …/></View>}`
+   * — si necesitás agrupar de verdad, ese `View` lleva `pointerEvents="box-none"`.
+   *
+   * *Se dice acá y no en la cabecera porque **es una trampa del consumidor,
+   * y el lugar donde se lee al construir es la prop que se está tipeando.***
    */
   pie?: ReactNode
   children: ReactNode
@@ -124,6 +137,33 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
 
       {pie === undefined ? null : (
         <View
+          /* 🔴 `box-none` — LA ZONA MUERTA DE GESTO, CURADA (S100b-B).
+           *
+           * **El defecto, y lo encontré equivocándome:** reporté que la
+           * ficha «no scrollea». La pista C midió la fuente y dijo que sí.
+           * Al preguntarme POR QUÉ me había equivocado apareció la causa
+           * real: **mi swipe empezó dentro de la banda del pie, y el pie
+           * se comió el gesto.** La captura salió idéntica y la leí como
+           * «no scrollea».
+           *
+           * ⇒ **Un pie que captura el toque en toda su banda deja sin
+           * scroll el tercio inferior de la pantalla.** Y ahí es
+           * exactamente donde una familia apoya el pulgar: *quien sostiene
+           * el teléfono con una mano arrastra abajo, no arriba.* Con el pie
+           * capturando, la pantalla se siente trabada y la persona
+           * concluye que no hay más contenido.
+           *
+           * **`box-none` = el contenedor no es blanco de toque; sus hijos
+           * sí.** Los botones siguen funcionando; el aire entre ellos deja
+           * pasar el gesto al `ScrollView` de abajo.
+           *
+           * ✅ **Y es SEGURO precisamente por la otra mitad de esta pieza:**
+           * como la reserva se deriva del alto medido, **debajo del pie no
+           * queda contenido** — el toque que pasa cae sobre espacio vacío
+           * del scroll y lo único que puede hacer es desplazar. *Sin la
+           * reserva derivada, `box-none` habría dejado tocar contenido
+           * escondido; las dos mitades se necesitan.* */
+          pointerEvents="box-none"
           onLayout={(e) => {
             const h = e.nativeEvent.layout.height
             // Solo escribimos si cambió: `onLayout` puede repetir el mismo
