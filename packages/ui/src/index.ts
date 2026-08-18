@@ -67,6 +67,22 @@ export { PantallaConPie, type PantallaConPieProps } from './components/PantallaC
 // Un glifo con su número encima — pedido de D con su límite medido: no
 // podía hacer el contador sin inventar un color que la casa no expone.
 export { GlifoConContador, type GlifoConContadorProps } from './components/GlifoConContador'
+// CarritoFlotante — S100d-B (puntos 8·9·12 del gate): LA ÚNICA PUERTA al
+// carrito, abajo a la derecha, donde llega el pulgar. Se pasa como `pie` de
+// `PantallaConPie` para que su reserva sea DERIVADA y no tape la última
+// tarjeta (L-301). **Con el carrito vacío no se dibuja** — el primer `+` la
+// hace entrar, y eso ES «al agregar se abre el flotante».
+// ⚠️ Su montaje y el RETIRO de la canasta del encabezado van en el MISMO
+// commit: montarla sola deja dos puertas; retirar la otra sola deja cero.
+export { CarritoFlotante, type CarritoFlotanteProps } from './components/CarritoFlotante'
+// FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
+// MANDA (es lo único verificable desde la puerta) · sin placa el nombre
+// preside, y es 1 de 2 casos vivos · el hueco de la foto se DIBUJA, jamás se
+// reemplaza por una cara genérica. La monta la pista D en EN CAMINO.
+export { FichaRepartidor, type FichaRepartidorProps } from './components/FichaRepartidor'
+// La GOTA — F-PIN (puntos 16·23·26): UN dibujo para el glifo `ubicacion` y
+// para la marca del mapa, con su ancla derivada (la punta, no el centro).
+export { GOTA_D, GOTA_OJO, GOTA_PUNTA_Y, desplazamientoDePunta } from './components/gota'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // Destape — S97+-B: la ceremonia de cierre del wizard de alta (pedido de C,
 // contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
@@ -113,6 +129,13 @@ export {
 export { registrarCruce, tomarCruce, type DireccionCruce } from './components/cruce'
 export { EntradaDeCruce, type EntradaDeCruceProps } from './components/EntradaDeCruce'
 export { Fundido, type FundidoProps } from './components/Fundido'
+// Salida — S100d-B (punto 13): la CUARTA de la familia del movimiento.
+// `Entrada` aparece · `EntradaDeCruce` llega · `Fundido` cambia ·
+// **`Salida` se va**. Envuelve una FILA DE LISTA: se apaga en su lugar y las
+// vecinas cierran el hueco. ⚠️ Exige `key` estable por ítem — con
+// `key={index}` React renumera en vez de desmontar y la salida NO dispara,
+// sin error y sin warning.
+export { Salida, type SalidaProps } from './components/Salida'
 // Chevron — S99-B: el portador del trazo suelto, para slots que NO son
 // una fila entera (el `senal` de DatoAdministrable). El path sigue sin
 // exportarse: se usa la pieza, jamás la geometría.

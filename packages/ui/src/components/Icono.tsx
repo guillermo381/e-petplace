@@ -77,6 +77,12 @@ export type IconoNombre =
   //    acá: la categoría "glifo de control" es §6bis de DIRECCION_ARTE,
   //    PENDIENTE desde S78 — regla 80 (la ley va DESPUÉS del gate).
   | 'lapiz' | 'compartir'
+  /** S100d-B — EL FILTRO, pedido por la pista C con su literal del founder
+   *  (punto 2 del gate: *«buscador en el MISMO escalón que Filtrar, con
+   *  ícono clásico de filtro»*) y con el registry censado antes de pedir:
+   *  **no había candidato**. Familia de CONTROL ⇒ **sin huella**, como
+   *  `lapiz`. Gate por ícono a 21 px PENDIENTE (§2.9). */
+  | 'filtro'
   // ── S89-B: DESCARGAR — nace por pedido autocontenido de D (lámina
   //    `LAMINA_DOCUMENTOS_DEL_HOGAR.md`): las filas de papeles tienen su
   //    `iconoCta` cableado y NO había glifo. **Prestarle `compartir` es
@@ -662,7 +668,40 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      entorno no hay rasterizador de SVG** (ni `cairosvg`, ni `rsvg-convert`,
      ni Inkscape), así que **no se pudo verificar la legibilidad a 21 px sin
      pasar por RN-web o por un publish.** Se dice en vez de darse por bueno. */
-  carrito: ({ tinta, huella }) => (
+  /* ⏪ ═══ ENMENDADO S100d-B — LA HUELLA SALE DE LA CESTA (punto 8 del gate).
+     Firma del founder, verbatim: *«quedó arriba, muy pequeño y **con una
+     huella ocre encima**. Hay que hacerlo mucho mejor.»*
+
+     **Lo que sobrevive entero:** el carrito con ruedas y su barra de empuje
+     (la enmienda de S100c) y la distinción `carrito` ≠ `despensa` (S100b).
+     **Lo único que se va es la huella.**
+
+     🔴 **Y LA RAZÓN NO ES «LO PIDIÓ EL FOUNDER» — es que este glifo cambió
+     de familia y nadie lo había registrado.** Su propio tipo, veinte líneas
+     más arriba, ya describía a `papelera` como *«familia de CONTROL: sin
+     huella, como `lapiz`»*. **`carrito` es exactamente eso:** su único
+     consumidor medido contra `origin/main` (`despensa/index.tsx:747`) es un
+     `Pressable`, y a partir de hoy el otro es el carrito flotante. *No nombra
+     una sección ni un servicio: es el botón que abre lo que llevás.*
+
+     ⇒ **LA REGLA, y ya estaba viva sin escribirse: un glifo montado DENTRO
+     de un control no lleva huella.** Ley 12 pide la mascota presente en los
+     glifos que NOMBRAN algo; los verbos de la casa —`lapiz`, `papelera`,
+     `compartir`, `descargar`— nunca la llevaron. *Lo que cambia hoy no es la
+     ley: es que este glifo se había clasificado mal.*
+
+     **Y la mitad medible, que es la que sobrevive a que alguien cambie de
+     opinión:** la huella iba a `escala 0.38` DENTRO de la cesta —un interior
+     de ~9 unidades de la grilla 24—, o sea **~7,9 px en el gate de 21 px**.
+     **Ley 9 es literal: a 21 px la huella SOBREVIVE O ES RUIDO.** Acá era
+     ruido, y encima ruido teñido: `carrito` hereda el ocre de `despensa`, así
+     que sobre el disco ocre del flotante la huella habría desaparecido contra
+     su propio fondo.
+
+     ⚠️ **SIN GATE DE ÍCONO — §2.9 sigue exigiendo el ojo del founder a 21 px,
+     y en este entorno NO hay rasterizador de SVG** (ni `cairosvg`, ni
+     `rsvg-convert`, ni Inkscape). *Se declara en vez de darse por bueno.* */
+  carrito: ({ tinta }) => (
     <>
       {/* la barra de empuje: entra por la izquierda y baja a la cesta */}
       <Path d="M2.4 4.2h2.3l1.2 4.4" {...trazo(tinta)} />
@@ -674,7 +713,6 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       {/* LAS RUEDAS — el rasgo que ninguna bolsa ni canasta puede tener */}
       <Circle cx={10.2} cy={20} r={1.5} {...trazo(tinta)} />
       <Circle cx={17.6} cy={20} r={1.5} {...trazo(tinta)} />
-      <Huella color={huella} x={10.4} y={10.6} escala={0.38} />
     </>
   ),
   /* 🔴 PEDIDO — S100c-B, pedido de la pista D con su defecto medido.
@@ -887,12 +925,46 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={9.3} y={9.5} escala={0.3} />
     </>
   ),
-  // El pin del hero — la huella vive en la gota (deja de ser placeholder).
-  ubicacion: ({ tinta, huella }) => (
-    <>
-      <Path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z" {...trazo(tinta)} />
-      <Huella color={huella} x={8.9} y={6.6} escala={0.36} />
-    </>
+  /* LA GOTA — el pin de la casa. ⏪ Decía *«la huella vive en la gota»*.
+     **S100d-B: LA HUELLA SALE** (punto 17 del gate, pedido por la pista A con
+     su superficie exacta: la fila de dirección de la ficha de entrega).
+
+     🔴 **LA RAZÓN ES MEDIBLE Y SOBREVIVE A QUE ALGUIEN CAMBIE DE OPINIÓN:**
+     la gota es una forma **cerrada y angosta** — su interior útil son ~9
+     unidades de la grilla 24 ⇒ **~7,5 px en el gate de 21** (§2.9). **Ley 9
+     es literal: a 21 px la huella SOBREVIVE O ES RUIDO.** Acá era ruido.
+     *«Lo pidió el founder» no habría sobrevivido a que cambiara de opinión;
+     esto sí.*
+
+     ⚡ **Y EL PEOR CASO VIVO NO ES EL GATE DE 21 — es más chico.** La pista
+     D midió su consumidor nuevo: el último nodo de la escalera de estados
+     dibuja este glifo a **12 px** (`TAMANO_EN_NODO`, dentro de un nodo de
+     20). **A 12, el interior queda en ~4,3 px: ahí la huella no es ruido,
+     es un borrón.** *El número llegó de afuera y hace más fuerte el
+     argumento, no más débil — por eso entra acá y no en una bitácora.*
+
+     ⚠️ **EL ALCANCE, CENSADO CONTRA `origin/main` Y NO CONTRA MI ÁRBOL**
+     (L-305 / la enmienda de §D: un grep en el worktree propio mide la rama,
+     no el producto): **8 consumidores** — `despensa/checkout.tsx:719` y
+     `:1147` (los dos de A, y los dos lo quieren) + **seis del prestador**
+     (`como-te-ven:283` · `cuenta/perfil:1339` · `grooming/index:308` ·
+     `grooming/taller:789` · `paseo/index:289` · `seccion-sede:218`).
+     **Los seis del prestador cambian de aspecto sin que nadie de esa app lo
+     haya pedido, y se declara acá en vez de descubrirse en su próximo gate.**
+
+     ── F-PIN · DÓNDE VA ESTA GOTA Y DÓNDE NO (firma del founder, 18-ago) ──
+     *«El pin es una GOTA tipo Uber, no un punto»*, pedido tres veces.
+     **El reparto, y lo decide `DIRECCION_ARTE` §6ter, no el gusto:**
+       · una ubicación **se MUESTRA como dato** (celda, label, escalera,
+         seguir el pedido) ⇒ **esta gota**.
+       · el momento de **AJUSTAR** el punto (`PinMovible`) ⇒ **gota**, que
+         ahí es una capa de INTERFAZ dibujada sobre el mapa.
+       · el **mundo** del mapa (el destino, la moto) ⇒ **OBJETO**
+         (`ObjetoDestino`, `ObjetoMoto`): *el mapa no es interfaz, es MUNDO.*
+     *Meter la gota adentro del lienzo pondría dos idiomas peleando en la
+     misma superficie.* */
+  ubicacion: ({ tinta }) => (
+    <Path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z" {...trazo(tinta)} />
   ),
   // El silbato del adiestrador — MATA la estrella (violaba el set).
   training: ({ tinta, huella }) => (
@@ -1371,6 +1443,27 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M13.6 6.4 17.6 10.4" {...trazo(tinta)} />
     </>
   ),
+  /* EL FILTRO — EL EMBUDO, y la elección entre las dos formas «clásicas» no
+     es de gusto: **dicen cosas distintas.**
+       · **el embudo** = entra mucho, sale poco ⇒ *FILTRAR*.
+       · **las tres barras con perillas** = mover valores ⇒ *AJUSTAR* (es el
+         `tune` de Material, y en esta casa ese trabajo ya lo hacen
+         `SliderPrecio` y `StepperCantidad`).
+     El founder pidió *«el clásico de filtro»* y el clásico de FILTRAR es el
+     embudo. *Montar el de ajustar diría «cambiá valores» donde la pantalla
+     dice «mostrame menos».*
+
+     **Sobrevive a 21 px por construcción:** es **una sola silueta cerrada y
+     grande** —sin detalle interno que se empaste— y su rasgo (el ancho que
+     se angosta hacia abajo) es geometría, no trazo fino. Ley 9.
+
+     Sin huella: familia de CONTROL, como `lapiz` (ver el tipo).
+     ⚠️ **GATE POR ÍCONO PENDIENTE (§2.9)** — y con el mismo límite declarado
+     que sus vecinos de esta vuelta: **en este entorno no hay rasterizador de
+     SVG**, así que no se pudo mirar chico sin publicar. */
+  filtro: ({ tinta }) => (
+    <Path d="M4.2 5.4h15.6l-6.1 7.2v5.1l-3.4 1.9v-7z" {...trazo(tinta)} />
+  ),
   // Compartir: la flecha que SALE de la bandeja (convención de
   // plataforma iOS/Android — el trazo de la referencia, literal). La
   // bandeja abierta arriba dice "sale de acá", jamás un nodo-y-aristas
@@ -1574,6 +1667,9 @@ export function Icono({
     // control resuelve a tinta a propósito: pedirle capa no lo tiñe.
     lapiz: { pura: colorTinta, aa: colorTinta },
     compartir: { pura: colorTinta, aa: colorTinta },
+    // S100d-B — el filtro entra a la familia de los controles (mismo
+    // criterio: un control no pertenece a una capa).
+    filtro: { pura: colorTinta, aa: colorTinta },
     // S89-B: descargar entra a la familia de sus vecinos — mismo criterio
     // (un control no pertenece a una capa) y misma resolución.
     descargar: { pura: colorTinta, aa: colorTinta },

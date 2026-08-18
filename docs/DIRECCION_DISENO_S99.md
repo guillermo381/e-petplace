@@ -495,14 +495,65 @@ acción o cambio de clase.**
 
 ## N24 · EL CONTROL NO CAMBIA EL TAMAÑO DE LO QUE LO CONTIENE
 
+> # ⏪ ENMENDADA POR EL GATE SIGUIENTE — 18-ago-2026, S100d-B
+>
+> **La ley SOBREVIVE ENTERA. Lo que se corrige es su CURA**, y la corrigió el
+> propio founder mirando la cura puesta:
+>
+> > *«sigue saltando el escalón — **se reservó espacio; quiero que SE AJUSTE
+> > el tamaño para que no salte**»* (punto 7) · *«fichas alargadas… se
+> > resuelve dejando el agregar pequeño como Laika: **al dar el más, en el
+> > MISMO escalón queda: eliminar/restar · unidades · más**»* (punto 5).
+>
+> **🔴 QUÉ ESTABA MAL, Y NO ERA EL NÚMERO: ERA QUÉ COSA SALTABA.** N24 leyó
+> *«salta un escalón»* como **la tarjeta creciendo** y reservó el hueco. La
+> tarjeta dejó de crecer ✅ **y el founder volvió a ver el mismo defecto**,
+> porque lo que saltaba era **EL CONTROL, cambiando de RENGLÓN**: el `+` vivía
+> en la fila del precio y el stepper aparecía un piso más abajo. *Se curó el
+> síntoma que la ley nombraba, no el que el founder veía.*
+>
+> **Y la reserva tenía un costo que la cura obvia escondía:** el hueco se
+> pagaba en **el 100 % de las tarjetas** y lo usaba una minoría —las que están
+> en el carrito—, sobre una ficha que el founder ya leía como *alargada*.
+>
+> ⇒ **LA FORMA CORRECTA: el control tiene SU PROPIO ESCALÓN, siempre**, y el
+> precio sube a su línea. El renglón existe con `cantidad === 0` (lo ocupa el
+> `+`) y con `cantidad > 0` (lo ocupa el stepper): mismo alto, mismo borde
+> derecho, misma casa. **El control ya no se muda: cambia de forma sin cambiar
+> de renglón.**
+>
+> **Y NO ES UNA PREFERENCIA — LA CUENTA LA FUERZA:** el control tiene **tres
+> blancos táctiles** y N8 los fija en 44 ⇒ **3 × 44 = 132 dp** contra una caja
+> interna de tarjeta de **138**. *No hay ancho para un precio al lado, con
+> ninguna geometría:* achicar el píxel con `hitSlop` —que es como la casa
+> cumple N8 en espacio corto— **no achica el blanco**, y son los blancos los
+> que no entran.
+>
+> **Medido:** 80 dp → **70 dp** de bloque, **−10 dp por tarjeta y cero salto**.
+> *Se declara chico a propósito: la ficha alargada NO se cura acá* — sus dos
+> acreedores están medidos y son del founder, no de la pieza (**la foto 1:1,
+> +41 dp** · **el bloque de texto**).
+>
+> **LA LECCIÓN, que es lo que trasciende a esta tarjeta:**
+> ### Cuando una cura no convence al founder DOS veces, lo que hay que revisar no es el número: es QUÉ SUJETO nombró la ley. Acá el sujeto era «el contenedor» y el sujeto verdadero era «el control».
+>
+> *(Y su cara operativa: la reserva de espacio y el cambio de renglón son dos
+> defectos distintos que producen la misma queja.)*
+
 **FIRMA DEL FOUNDER, verbatim:** *«al agregar salta un escalón por debajo de
 todo y queda viéndose feo.»*
 
-**LA LEY:**
+**LA LEY (sobrevive):**
 
-> **UN CONTROL QUE CAMBIA DE FORMA SEGÚN SU ESTADO RESERVA SU ESPACIO MÁXIMO
-> DESDE EL PRIMER RENDER. El contenedor no cambia de tamaño porque su control
-> cambió de estado.**
+> **UN CONTROL QUE CAMBIA DE FORMA SEGÚN SU ESTADO NO CAMBIA EL TAMAÑO NI EL
+> RENGLÓN DE LO QUE LO CONTIENE. El contenedor no cambia de tamaño porque su
+> control cambió de estado — y el control no se muda de escalón porque cambió
+> de forma.**
+>
+> ⏪ *(letra v1.1, derogada en su mitad de cura:)* «UN CONTROL QUE CAMBIA DE
+> FORMA SEGÚN SU ESTADO **RESERVA SU ESPACIO MÁXIMO DESDE EL PRIMER RENDER**.»
+> **Reservar es UNA forma de cumplirla, y resultó la peor de las dos:** paga
+> el hueco siempre y no impide la mudanza de renglón.
 
 **Lo medido, sobre la misma tarjeta antes y después de tocar el `+`:**
 **+44,1 dp** — exactamente un blanco de 44 — **y la tarjeta vecina de la misma
@@ -616,6 +667,161 @@ igual.*
 
 ---
 
+# §1ter · LAS DOS LEYES DE S100d (N26–N27) — las dos firmas del founder
+
+> **Estatuto: depositadas por B el 18-ago-2026, SIN APARATO.** Salen de dos
+> firmas explícitas del founder sobre el gate de S100c (`docs/loop/S100c-GATE-FOUNDER.md`).
+>
+> 🔴 **Y su límite se declara primero, porque cambia cómo se las lee:** las
+> tres pistas midieron `adb devices` y **las tres dieron lista vacía** ⇒ **nada
+> de S100d tiene ojo.** *Estas leyes son correctas contra la letra firmada y
+> contra la fuente; su calibración en píxeles NO está verificada.*
+
+## N26 · LOS DOS ACENTOS DE LA CASA DEL CLIENTE — F-OCRE
+
+**FIRMA DEL FOUNDER (18-ago-2026):** *«el `+` de agregar va en OCRE. La casa
+reconoce DOS ACENTOS con roles distintos — uno leve y uno fuerte: **magenta =
+marca · ocre = acción de compra**.»*
+
+**LA LEY:**
+
+> ## LA APP DEL CLIENTE TIENE **DOS** ACENTOS Y SE REPARTEN POR **ROL**, JAMÁS POR PANTALLA.
+>
+> · **MAGENTA — marca y ELECCIÓN (leve).** La marca, el estado activo, la
+>   selección. Slots: `accent.brand` · `accent.active` · `accent.control` ·
+>   `accent.controlBg`.
+> · **OCRE — ACCIÓN DE COMPRA (fuerte).** El CTA que compra · el `+` que
+>   agrega · el stepper que ajusta una compra · la puerta al carrito. Slot:
+>   `accent.cta` (+ `accent.ctaTexto`).
+> · **NINGUNO — todo lo demás.**
+>
+> **DOS ES EL TECHO. Un tercer acento no existe, y los dos no se APILAN sobre
+> el mismo objeto.**
+
+### La frontera, dicha de la única forma que no se puede leer de dos maneras
+
+**No es *«¿estoy en el flujo de compra?»*. Es *«¿este control COMPRA, o
+ELIGE?»***
+
+*El ocre no es el color de la pantalla de compra: es el color del ACTO de
+comprar.* **Caso probado con la pista A, en el checkout:** su selector de
+modalidad (despacho / retiro) **ELIGE** ⇒ se queda magenta, aunque viva en la
+pantalla más comercial de la app. *A lo declaró como borde y no lo movió solo;
+esta ley existe para que la próxima no tenga que preguntar.*
+
+### 🔴 Lo que esta ley NO es: una decisión nueva sobre el CTA
+
+**Medido en la fuente, no de memoria:** `accent.cta` **ya era el oro
+`#FCBC1D` desde S82-B**, firmado por el founder en galería, con su par medido
+(**label tinta 8.40 en claro · 9.96 en los dos temas**; el blanco daba 2.02 y
+por eso no se usa). ⇒ **F-OCRE no mueve el CTA: lo RATIFICA**, y lo que hace
+es **extender esa familia a los controles de compra que no son CTA.**
+*Cero par de contraste nuevo, cero medición nueva.*
+
+### La reconciliación con N5, que es lo que la vuelve construible
+
+S100b había medido que la vitrina gastaba **1,17 % de sus píxeles en color de
+marca, y eran los `+`** — uno por producto — y curó **apagándolos**, citando
+N5 (*un acento por pantalla*). **Con F-OCRE los `+` vuelven a teñir. No es
+una vuelta atrás, y la razón la da N23**, que se firmó DESPUÉS de aquella
+cura:
+
+> **el color marca CLASE, jamás importancia.**
+
+⇒ Aquella lectura trató el `+` repetido como **un acento de JERARQUÍA
+repetido**, y con ese encuadre N5 lo condenaba. **Pero el ocre no jerarquiza:
+dice de qué CLASE es el control.** *Un marcador de clase se repite tantas
+veces como miembros tenga la clase — eso no es ruido, es la clase siendo
+consistente.* Lo que N5 sigue prohibiendo, y sigue cumplido, es **un segundo
+acento compitiendo por la atención**: en la vitrina **el magenta no aparece**,
+así que el ocre es el único acento presente.
+
+### Las tres degradaciones, que viven en la FUENTE y no en la disciplina
+
+**Memorial:** `accent.cta` es tinta por `getTheme` — *un memorial no celebra*.
+**Prestador:** su oficio ancla a tealDark por `lightOficio`/`darkOficio`, así
+que **el oro no se le escapa a la otra app por ningún camino** — y el espejo
+del vendedor **ni siquiera dibuja el `+`** (`compra: { modo: 'espejo' }`).
+*Ninguna pantalla tiene que acordarse de nada.*
+
+### 🔴 EL CHOQUE CON LETRA FIRMADA, DECLARADO Y RESUELTO EN SU ARCHIVO
+
+`DISEÑO_EXPERIENCIA` **§15b.1** (S58, ratificada S83) dice *«UN acento de
+oficio … para TODO estado y control funcional»*. **F-OCRE agrega un rol que
+esa letra no contempla** ⇒ **§15b.1 queda enmendada EN SU PROPIO ARCHIVO**,
+con fecha y razón, y **no solo acá**.
+
+> *Dos letras firmadas que se contradicen son peores que una equivocada:
+> cualquiera cita la que le conviene y está «en regla».* **Tercer cobro del
+> mismo precedente** — el magenta (S83) y la plata (S83 y S88) se
+> reconciliaron igual.
+
+## N27 · LA HUELLA NO ENTRA A UN CONTROL — F-PIN y su hermana
+
+**FIRMA DEL FOUNDER (18-ago-2026), en dos puntos distintos del mismo gate:**
+punto 8, el carrito *«con una huella ocre encima»* · punto 17, el glifo de
+ubicación *«sin huella dentro»* · y **F-PIN**, pedida **tres veces**: *«el pin
+es una GOTA tipo Uber, no un punto»*.
+
+**LA LEY:**
+
+> ## UN GLIFO MONTADO DENTRO DE UN CONTROL NO LLEVA HUELLA. La huella es de los glifos que NOMBRAN algo; los verbos no la llevan.
+>
+> Y su hermana: **una ubicación se marca con una GOTA.** La gota va donde una
+> ubicación **se muestra como dato** y en el momento de **ajustarla**; en el
+> **mundo** del mapa van OBJETOS, no gotas (`DIRECCION_ARTE` §6ter: *el mapa
+> no es interfaz, es MUNDO*).
+
+**No funda una excepción a Ley 12: la RECONOCE.** Los verbos de esta casa
+—`lapiz`, `papelera`, `compartir`, `descargar`— nunca llevaron huella, y el
+registry ya los resolvía juntos como *«un control no pertenece a una capa»*.
+**Lo que faltaba era el criterio escrito**, y sin él `carrito` se clasificó
+mal al nacer.
+
+### La mitad medible, que es la que sobrevive a que alguien cambie de opinión
+
+**La gota es forma cerrada y angosta:** su interior útil son ~9 unidades de la
+grilla 24 ⇒ **~7,5 px en el gate de 21** (§2.9). **Ley 9 es literal: a 21 px
+la huella SOBREVIVE O ES RUIDO.**
+
+⚡ **Y el peor caso vivo es más chico todavía, medido por la pista D:** el
+último nodo de la escalera de estados dibuja ese glifo a **12 px** ⇒ **~4,3 px
+de interior. Ahí la huella no es ruido: es un borrón.**
+
+> ***«Lo pidió el founder» no sobrevive a que el founder cambie de opinión;
+> un número sí.*** *Las dos razones apuntan al mismo lado — por eso se
+> deposita la medible.*
+
+### El alcance, censado y no supuesto
+
+**8 consumidores de `ubicacion`**, medidos **contra `origin/main` y no contra
+el worktree propio** (L-305): 2 del checkout —los dos lo querían— y **6 del
+prestador, que cambian de aspecto sin que nadie de esa app lo haya pedido.**
+*Se declara acá en vez de descubrirse en su próximo gate.*
+
+### 🔴 La cláusula que F-PIN deroga, y por qué el argumento viejo era falso
+
+`PinMovible` decía, firmado: *«no se dibuja un pin-gota… **el punto ya dice
+acá**»*. **Se tacha con fecha y razón EN SU ARCHIVO.** Y lo que se cayó no fue
+el gusto: **fue la premisa.** La propia voz de esa pantalla dice *«Ajustá el
+mapa hasta que **el pin** quede sobre tu puerta»* ⇒ **la palabra y el dibujo
+salían de dos lugares distintos y no coincidían.** *Un punto no dice «acá»:
+dice «algo». La punta de una gota señala.*
+
+### ⚠️ Y LA TRAMPA QUE LA GOTA TRAE, que el punto no tenía
+
+**Hallazgo de la pista A:** con un disco centrado, *«lo que el ojo lee»* y *«el
+centro geométrico que el mapa reporta»* eran **el mismo píxel**. Con una gota
+**el ojo lee la PUNTA** ⇒ dibujarla centrada haría marcar medio glifo más
+arriba de lo que la persona cree: **un sesgo sistemático en cada dirección
+guardada de la base.**
+
+⇒ **el ancla se DERIVA de la silueta** (`gota.ts`), jamás se ajusta a ojo.
+*No es un retoque óptico: es la diferencia entre marcar la puerta y marcar el
+techo.*
+
+---
+
 ## §2 · CANDIDATA CON GATE (no es ley)
 
 **Háptica sutil en confirmaciones clave** («entregado» con foto · el
@@ -624,6 +830,14 @@ dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
 
+- **v1.2 (18-ago-2026, S100d-B, SIN APARATO):** entran **N26 (F-OCRE, los dos
+  acentos)** y **N27 (la huella fuera del control + F-PIN, la gota)**, las dos
+  firmas del founder sobre el gate de S100c. **N24 queda ENMENDADA EN SU MITAD
+  DE CURA** —la ley sobrevive, la reserva de espacio se reemplaza por el
+  escalón propio del control— y **N26 obliga una enmienda a
+  `DISEÑO_EXPERIENCIA` §15b.1, hecha en SU archivo.** 🔴 **Nada de esta
+  versión tiene ojo: las tres pistas midieron `adb devices` y las tres dieron
+  vacío.**
 - **v1.1 (18-ago-2026, S100c-B, con APARATO):** entran **N21–N25**, las cinco
   del gate del founder sobre la OTA `fbd7b6e0`. **Las cinco traen su medición
   adentro**, con instrumento nuevo (`scripts/censar-superficies.py`,
