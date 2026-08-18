@@ -3348,12 +3348,35 @@ function GaleriaInterna() {
           <MuestraPantallaConPie />
         </Seccion>
 
+        <Seccion titulo="StepperCantidad · el menos→papelera del CARRITO (S100b · G-08)">
+          <View style={{ gap: spacing[3] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <StepperCantidad valor={1} min={0} max={12} onCambio={() => {}} etiqueta="Con papelera" onBorrar={() => {}} />
+              <StepperCantidad valor={1} min={0} max={12} onCambio={() => {}} etiqueta="Sin papelera" />
+            </View>
+            <Texto variante="apoyo">
+              El discriminador son los DOS juntos: el de la izquierda es el del CARRITO —en 1 el menos es
+              papelera y BORRA— y el de la derecha es el de la GRILLA, donde en 1 se apaga sereno porque
+              bajar de 1 devuelve la tarjeta a su +, y el tile no desaparece. La distinción es [SPEC] de
+              eBay: la papelera solo va donde el stepper está asociado a un tile que se va. Sin
+              confirmación a propósito: la acción es inmediata y el deshacer es de la pantalla, que es la
+              única que sabe qué se borró.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="GlifoConContador (S100b) — un glifo con su número encima (G-14)">
           <View style={{ flexDirection: 'row', gap: spacing[7], alignItems: 'center' }}>
             <GlifoConContador nombre="carrito" cuenta={0} etiqueta="Carrito, vacío" />
             <GlifoConContador nombre="carrito" cuenta={3} etiqueta="Carrito, 3 productos" />
             <GlifoConContador nombre="carrito" cuenta={12} etiqueta="Carrito, 12 productos" />
             <GlifoConContador nombre="carrito" cuenta={140} etiqueta="Carrito, 140 productos" />
+            {/* El caso ANIDADO — el consumidor natural de esta pieza. Acá la
+                voz vive en el tocable y la pieza se borra del árbol: un solo
+                nodo accesible, no dos. */}
+            <Pressable accessibilityRole="button" accessibilityLabel="Carrito, 3 productos" onPress={() => {}}>
+              <GlifoConContador nombre="carrito" cuenta={3} dentroDeTocable />
+            </Pressable>
           </View>
           <Texto variante="apoyo">
             Cuatro casos, y el primero es el discriminador: con 0 NO se dibuja disco — un cero en un

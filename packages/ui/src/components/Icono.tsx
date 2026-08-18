@@ -30,6 +30,9 @@ export type IconoNombre =
   /** G-14 (S100b-B) — LA CANASTA, distinta de `despensa`: aquélla es la
    *  SECCIÓN y ésta es lo que llevás adentro. Conviven en pantalla. */
   | 'carrito'
+  /** G-08 (S100b-B) — el `−` del stepper con cantidad 1, **solo en el
+   *  carrito**. Familia de CONTROL: sin huella, como `lapiz`. */
+  | 'papelera'
   // ☠️ 'coach' MURIÓ COMO NOMBRE (S84-B11) — RENAME a 'ia', firmado.
   //    El dibujo NO cambió una línea: son las mismas tres chispas de
   //    CHISPA. Lo que cambió es qué nombra. El código decía que este
@@ -571,6 +574,30 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   ),
   // El billete con huella ocre — la plata del cuidado (pagos y
   // liquidaciones comparten dibujo).
+  /* PAPELERA — G-08 (S100b-B). El `−` del stepper se vuelve papelera
+     CUANDO LA CANTIDAD ES 1 **y solo en el carrito** (`[SPEC]` eBay: *«the
+     delete action is only to be used when the numeric stepper is pair or
+     associated with an item tile such as item list in cart»*). En la
+     grilla el menos en 1 vuelve a «Agregar»: ahí el tile no desaparece.
+
+     🔴 **SIN HUELLA, Y NO ES UN OLVIDO DE LA LEY 12: es la familia de
+     CONTROL.** Medido en el registry antes de dibujarla — `lapiz`,
+     `compartir` y `descargar` **no llevan huella ninguna**. ⇒ existe una
+     familia exenta y la papelera pertenece a ella.
+     *Y en este glifo la exención además salva el significado: una huella
+     adentro de un tacho de basura diría algo que esta casa jamás querría
+     decir.* La ley pedía la mascota presente en los glifos que nombran su
+     mundo; un control de borrado no nombra su mundo. */
+  papelera: ({ tinta }) => (
+    <>
+      {/* la tapa y su asa */}
+      <Path d="M4.2 6.6h15.6M9.4 6.6V5.2a1.2 1.2 0 0 1 1.2-1.2h2.8a1.2 1.2 0 0 1 1.2 1.2v1.4" {...trazo(tinta)} />
+      {/* el cuerpo */}
+      <Path d="M6.2 6.6l.9 11.6a1.6 1.6 0 0 0 1.6 1.5h6.6a1.6 1.6 0 0 0 1.6-1.5l.9-11.6" {...trazo(tinta)} />
+      {/* las dos estrías: dicen «tacho» a 21px, que es donde se gatea */}
+      <Path d="M10.4 10.2v5.6M13.6 10.2v5.6" {...trazo(tinta)} />
+    </>
+  ),
   /* 🔴 CARRITO — G-14 (S100b-B). *«El carrito no tiene ícono en la barra:
      es un botón de texto donde la industria usa una canasta con su
      contador.»*
@@ -1344,6 +1371,9 @@ export function Icono({
        llevás adentro de ella. *Darle color propio los separaría en la
        pantalla justo donde tienen que leerse juntos.* */
     carrito: { pura: theme.status.warning, aa: theme.status.warningText },
+    /* Control puro: se viste de TINTA, no de capa — no nombra un mundo,
+       ejecuta una acción. Mismo criterio que `lapiz`. */
+    papelera: { pura: colorTinta, aa: colorTinta },
     // ✅ OCRE — FIRMADO (founder, S84-B17), y con esta firma se cierra la
     // pregunta que el glifo arrastraba desde que nació: **QUÉ ES el
     // destello**. No es marca (habría quedado en magenta por §5.1) ni
