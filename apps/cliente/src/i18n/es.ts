@@ -1172,6 +1172,17 @@ export const clienteEs = {
     // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
     // encuentra la casa, el punto igual existe.
     sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    /* A-03 (S100c) · el buscador apagado LO DICE. Antes se apagaba en silencio
+       y desde la pantalla se veía igual que «no encontré nada» y que «estoy
+       buscando» — tres estados con una sola pinta (L-218).
+       Espeja `lugares.ts:81` y no lo reusa: D-539, `packages/api` habla español
+       fijo y no sabe traducir. */
+    /* S100c · la libreta de direcciones. El nombre es la LLAVE con la que la
+       persona reconoce el lugar; la calle es el detalle. */
+    aliasLabel: 'Nombre de esta dirección',
+    aliasAyuda: 'Para reconocerla después: «Oficina», «Casa de mamá».',
+    agregarOtra: 'Agregar otra dirección',
+    buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escribila a mano y poné el punto en el mapa.',
     puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
     puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
@@ -1538,6 +1549,31 @@ export const clienteEs = {
      *  presentaciones **no muestra ningún precio hasta que elegís**. */
     precioDesde: 'desde',
     faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
+
+    /* 🔴 A-01 (S100c) · LO QUE CAMBIÓ MIENTRAS EL CARRITO ESTABA GUARDADO.
+       Dos hechos distintos con dos voces distintas a propósito: «se agotó»
+       invita a volver más adelante, «ya no está a la venta» no. Fundirlos en
+       un «no disponible» ahorraría una key y le sacaría a la familia lo único
+       que le sirve para decidir qué hacer.
+       ⚠️ Ninguna culpa a la familia ni se disculpa de más: es un hecho del
+       mundo, dicho en una línea. */
+    /* A-02 (S100c) · el resumen confirma cómo y cuándo llega. El rótulo es
+       una PREGUNTA contestada, no una etiqueta de formulario: la familia no
+       está llenando un campo, está revisando una promesa. */
+    resumenComoLlega: 'Cómo llega',
+    resumenFechaPorEntrega: 'Cada entrega va por su cuenta y tiene su propia fecha.',
+
+    /* 🔴 A-01(b) · el tope de lo que se puede llevar, dicho ANTES de pagar.
+       Literal del founder. **Dice cuánto podés llevar, jamás cuánto hay**: el
+       motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
+       pidiendo 3 contesta 3 y no se filtra inventario ajeno.
+       Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
+    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
+
+    itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
+    itemYaNoEsta: 'Ya no está a la venta.',
+    itemPrecioCambio: 'El precio cambió: ahora es {{precio}}.',
+    faltaSacarNoDisponibles: 'Sacá del carrito lo que ya no está disponible para seguir.',
 
     // S96 · las otras puertas
     tusPedidos: 'Tus pedidos',

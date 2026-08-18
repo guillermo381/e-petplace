@@ -20,6 +20,9 @@ import type { ResultadoWrapper } from '../resultado';
 // su tipo en vez de re-declararlo. Dos declaraciones de la misma forma son dos
 // formas que un día divergen, y el día que divergen nadie se entera.
 import type { PuntoTrackEnvio } from './despensa-repartidor';
+// La portada sale del MISMO resolvedor que usa la vitrina — una fuente, no un
+// cómputo paralelo. `imagen_url` manda y `imagenes` es el respaldo.
+import { fotosDeProducto } from './despensa-catalogo';
 import {
   falloDespensa,
   esObjDespensa,
@@ -437,5 +440,194 @@ export async function obtenerFichaRepartidor(
       vehiculo_tipo: s(data.vehiculo_tipo),
       vehiculo_placa: s(data.vehiculo_placa),
     },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S100c · LOS DOS LECTORES QUE LA LISTA DE PEDIDOS NECESITA (pedidos de D)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * QUÉ TRAE CADA PEDIDO — para que dos tarjetas del mismo día se distingan.
+ *
+ * POR QUÉ EXISTE, con el número de D medido contra la cuenta del gate:
+ * **23 pedidos en 5 días locales, 9 el 17-ago y 9 el 12-ago** ⇒ nueve tarjetas
+ * con el mismo título, dos veces. `v_pedidos_narrativa` **no trae ítems**, así
+ * que la lista no puede decir ni qué producto es ni cuántos son.
+ * *Una lista donde nueve filas se ven iguales no es una lista: es un montón.*
+ *
+ * ── UNA SOLA PETICIÓN, y no es una preferencia ─────────────────────────────
+ * El peaje es de la PETICIÓN, no del volumen (L-223: traer 105 filas costó
+ * MENOS que traer una) ⇒ los ítems de 30 pedidos cuestan lo mismo que los de
+ * uno, y **la portada viaja en el mismo viaje por el embed** (`producto_id`
+ * tiene FK a `productos`, verificado en los tipos generados). Sin el embed
+ * esto serían dos olas encadenadas para pintar una tarjeta.
+ *
+ * ── 🔴 LA PROPIEDAD QUE LO VUELVE CONFIABLE ───────────────────────────────
+ * **Recorre los ids que ENTRAN, no las filas que VUELVEN** — la misma cura que
+ * `revalidarCarritoDespensa`. Un pedido sin ítems visibles **aparece en el
+ * informe con su hueco honesto**; si se recorriera el resultado, esa fila
+ * simplemente no existiría y la pantalla la daría por buena. *Un ítem que
+ * falta se ve exactamente igual que uno sano.*
+ *
+ * ── LO QUE **NO** HACE, con el número de D que lo justifica ────────────────
+ * **No exige foto.** Del catálogo entero **161 de 470 productos tienen imagen**
+ * y **5 de los 23 pedidos no tienen ninguna** ⇒ `portada: null` es un estado
+ * NORMAL, no un error. La pieza dibuja su hueco; acá no se inventa una imagen.
+ * **No agrega los nombres restantes:** **20 de 23 pedidos tienen UN solo ítem**
+ * ⇒ el caso es «un producto» y el raro es «y 2 más». Se devuelve el conteo y la
+ * superficie decide cómo decirlo.
+ */
+export interface ResumenItemsPedido {
+  pedido_id: string;
+  /** El nombre del primer ítem. Sale de `pedido_items.nombre_producto`, que
+   *  está DENORMALIZADO en la fila: es el nombre **con el que se compró**, y
+   *  sigue siendo verdad aunque el catálogo renombre el producto después.
+   *  `null` = el pedido no tiene ítems visibles (ver la propiedad de arriba). */
+  primer_item: string | null;
+  /** Cuántas LÍNEAS distintas, no cuántas unidades. */
+  cuantos_items: number;
+  /** `null` es un estado normal y frecuente — ver «lo que no hace». */
+  portada: string | null;
+}
+
+export async function resumenDeItemsDePedidos(
+  pedidoIds: string[],
+): Promise<ResultadoWrapper<ResumenItemsPedido[], CodigoErrorDespensa>> {
+  // Cero pedidos: cero viajes. Una petición que no puede cambiar nada es
+  // peaje puro (~150 ms).
+  if (pedidoIds.length === 0) return { ok: true, data: [] };
+  const unicos = Array.from(new Set(pedidoIds));
+
+  const { data, error } = await getClient()
+    .from('pedido_items')
+    // El embed va inline: postgrest-js infiere la forma del literal.
+    .select('pedido_id, nombre_producto, created_at, id, productos(imagen_url, imagenes)')
+    .in('pedido_id', unicos)
+    // 🔴 ORDEN TOTAL, NO PARCIAL: `created_at` SOLO empata — D midió tres
+    // pedidos a las 23:21/23:22/23:23 y adentro de un pedido los ítems nacen
+    // en la misma transacción, o sea con el MISMO instante. Con un orden que
+    // empata, «el primer ítem» sería el que el motor devuelva ese día.
+    // Desempatar por `id` lo vuelve determinista (unicidad de la clave ⇒ orden
+    // total) — es la cura del cursor compuesto de S99 aplicada a un ORDER BY.
+    .order('created_at', { ascending: true })
+    .order('id', { ascending: true });
+
+  if (error) return falloDespensa(error.message);
+
+  const porPedido = new Map<string, { nombre: string | null; cuantos: number; portada: string | null }>();
+  for (const fila of Array.isArray(data) ? data : []) {
+    if (!esObjDespensa(fila) || typeof fila.pedido_id !== 'string') continue;
+    const previo = porPedido.get(fila.pedido_id);
+    if (previo !== undefined) {
+      previo.cuantos += 1;
+      continue;
+    }
+    // El PRIMERO por el orden de arriba manda: nombre y portada salen de la
+    // misma línea, así que la foto siempre es la del producto que se nombra.
+    // *Nombrar uno y mostrar la foto de otro es peor que no mostrar foto.*
+    const prod = esObjDespensa(fila.productos) ? fila.productos : null;
+    porPedido.set(fila.pedido_id, {
+      nombre: typeof fila.nombre_producto === 'string' ? fila.nombre_producto : null,
+      cuantos: 1,
+      portada: prod === null ? null : fotosDeProducto(prod).portada,
+    });
+  }
+
+  return {
+    ok: true,
+    // ⬇️ Sobre los ids que ENTRARON — ver la propiedad de la cabecera.
+    data: unicos.map((id): ResumenItemsPedido => {
+      const r = porPedido.get(id);
+      return {
+        pedido_id: id,
+        primer_item: r?.nombre ?? null,
+        cuantos_items: r?.cuantos ?? 0,
+        portada: r?.portada ?? null,
+      };
+    }),
+  };
+}
+
+/**
+ * LA FACTURA DE CADA PEDIDO — el dato que entraba por una puerta y no salía
+ * por ninguna.
+ *
+ * Medido por D contra la base viva: **`facturas` tiene 6 filas, las 6 con
+ * `pedido_id`, 5 del founder; la policy `facturas_owner` YA deja leer al
+ * dueño; y los lectores en `apps/cliente` son CERO.** Lo que escribe es
+ * `registrar_factura_pedido` desde el panel del vendedor.
+ * *No falta permiso ni falta dato: faltaba la puerta de salida.*
+ *
+ * ── ⚠️ DOS NOMBRES QUE SE MIDIERON EN VEZ DE ADIVINARSE (regla 22) ─────────
+ * El pedido decía «`numero`»: **la columna real es `numero_factura`**.
+ * Y hay **DOS** columnas de archivo — `archivo_url` y `pdf_url` — así que
+ * **se devuelven las dos y no se elige por la superficie**: cuál abre el botón
+ * depende de cuál esté poblada, y eso se mide contra los datos, no acá.
+ *
+ * ── LA AUSENCIA ES NORMAL, Y POR ESO NO ES UN HUECO SOSPECHOSO ────────────
+ * Con 6 facturas sobre 22+ pedidos, **la mayoría no tiene**: `factura: null`
+ * significa «todavía no la emitieron», que es un hecho del negocio y no una
+ * falla de lectura. Igual se recorre por los ids que ENTRAN, para que un
+ * pedido no pueda desaparecer del informe sin que nadie lo note.
+ */
+export interface FacturaDePedido {
+  factura_id: string;
+  numero_factura: string;
+  clave_acceso: string | null;
+  /** Las DOS, a propósito — ver la nota de la cabecera. */
+  archivo_url: string | null;
+  pdf_url: string | null;
+  estado: string;
+  fecha_emision: string;
+}
+
+export interface FacturaDeUnPedido {
+  pedido_id: string;
+  /** `null` = todavía no hay factura emitida. Es normal, no un fallo. */
+  factura: FacturaDePedido | null;
+}
+
+export async function facturasDePedidos(
+  pedidoIds: string[],
+): Promise<ResultadoWrapper<FacturaDeUnPedido[], CodigoErrorDespensa>> {
+  if (pedidoIds.length === 0) return { ok: true, data: [] };
+  const unicos = Array.from(new Set(pedidoIds));
+
+  const { data, error } = await getClient()
+    .from('facturas')
+    .select('id, pedido_id, numero_factura, clave_acceso, archivo_url, pdf_url, estado, fecha_emision')
+    .in('pedido_id', unicos)
+    // Si un pedido tuviera más de una (una nota de crédito, un reemplazo),
+    // manda la MÁS NUEVA. Desempate por `id`: orden total, igual que arriba.
+    .order('fecha_emision', { ascending: false })
+    .order('id', { ascending: false });
+
+  if (error) return falloDespensa(error.message);
+
+  const porPedido = new Map<string, FacturaDePedido>();
+  for (const f of Array.isArray(data) ? data : []) {
+    if (!esObjDespensa(f)) continue;
+    if (typeof f.pedido_id !== 'string' || typeof f.id !== 'string') continue;
+    if (typeof f.numero_factura !== 'string') continue;
+    // La primera que llega por pedido es la más nueva (orden de arriba).
+    if (porPedido.has(f.pedido_id)) continue;
+    porPedido.set(f.pedido_id, {
+      factura_id: f.id,
+      numero_factura: f.numero_factura,
+      clave_acceso: typeof f.clave_acceso === 'string' ? f.clave_acceso : null,
+      archivo_url: typeof f.archivo_url === 'string' ? f.archivo_url : null,
+      pdf_url: typeof f.pdf_url === 'string' ? f.pdf_url : null,
+      estado: typeof f.estado === 'string' ? f.estado : 'desconocido',
+      fecha_emision: typeof f.fecha_emision === 'string' ? f.fecha_emision : '',
+    });
+  }
+
+  return {
+    ok: true,
+    data: unicos.map((id): FacturaDeUnPedido => ({
+      pedido_id: id,
+      factura: porPedido.get(id) ?? null,
+    })),
   };
 }

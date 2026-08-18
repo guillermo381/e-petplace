@@ -18,6 +18,12 @@ const CODIGOS_ERROR_DIRECCION = [
   'telefono_invalido',
   // S79-A4: las coordenadas van en PAR y en rango, o no van (L-139).
   'coordenadas_invalidas',
+  // S100c · los cuatro del alias. Cada uno con voz propia: `datos_invalidos`
+  // como cajón de sastre es justo lo que D-827 nombra.
+  'alias_requerido',
+  'alias_muy_largo',
+  'punto_requerido',
+  'direccion_no_encontrada',
 ] as const;
 
 export type CodigoErrorDireccion = (typeof CODIGOS_ERROR_DIRECCION)[number];
@@ -31,6 +37,10 @@ const MENSAJES_ERROR_DIRECCION: Record<
   ciudad_requerida:     'Contanos en qué ciudad está tu hogar.',
   telefono_invalido:    'El teléfono no es válido — sin el signo +.',
   coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
+  alias_requerido:      'Ponele un nombre para reconocerla — «Oficina», «Casa de mamá».',
+  alias_muy_largo:      'El nombre es muy largo. Con pocas palabras alcanza.',
+  punto_requerido:      'Falta el punto en el mapa: es lo que encuentra la puerta.',
+  direccion_no_encontrada: 'Esa dirección ya no está en tu lista.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -152,6 +162,113 @@ export async function guardarDireccionHogar(
       codigo: 'datos_inconsistentes',
       mensaje: MENSAJES_ERROR_DIRECCION.datos_inconsistentes,
     };
+  }
+  return { ok: true, data: { direccionId: o.direccion_id } };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// S100c · LAS DIRECCIONES CON ALIAS — «oficina», «suegra», además del hogar
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// MEDIDO ANTES DE CONSTRUIR: `direcciones_guardadas.alias` es **NOT NULL** y
+// el índice único es PARCIAL (`WHERE es_principal`) ⇒ la tabla admitía N
+// direcciones por persona **desde siempre**. Lo que no existía era la puerta:
+// `guardar_direccion_hogar` hardcodea `'Hogar'` + `es_principal = true`, y el
+// lector filtraba `.eq('es_principal', true)`.
+// *El esquema se adelantó y la puerta se quedó* — el patrón inverso al lector
+// de carrito que se construyó sin consumidores.
+
+/** Una dirección de la libreta. La principal viene marcada y NO se mezcla:
+ *  sigue siendo la del hogar, con su propia puerta. */
+export interface DireccionGuardada extends DireccionHogar {
+  alias: string;
+  es_principal: boolean;
+}
+
+/**
+ * TODAS las direcciones de la persona, la principal primero.
+ *
+ * ⚠️ NO reemplaza a `obtenerDireccionHogar`: esa sigue siendo la puerta del
+ * hogar y la consumen paseo, grooming, veterinaria y adiestramiento. *Un
+ * lector nuevo no jubila a uno vivo sin censar a sus consumidores.*
+ */
+export async function listarMisDirecciones(): Promise<
+  ResultadoWrapper<DireccionGuardada[], CodigoErrorDireccion>
+> {
+  const { data, error } = await getClient()
+    .from('direcciones_guardadas')
+    .select('id, alias, direccion, ciudad, sector, referencias, telefono, lat, lon, es_principal')
+    // La principal primero; el resto por alias, que es como la persona las
+    // busca. `created_at` las ordenaría por cuándo las escribió, que es un
+    // dato que ella no recuerda.
+    .order('es_principal', { ascending: false })
+    .order('alias', { ascending: true });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_DIRECCION.datos_inconsistentes };
+  }
+
+  const salida: DireccionGuardada[] = [];
+  for (const d of data) {
+    if (typeof d.id !== 'string' || typeof d.direccion !== 'string') continue;
+    if (typeof d.ciudad !== 'string' || typeof d.alias !== 'string') continue;
+    salida.push({
+      id: d.id,
+      alias: d.alias,
+      direccion: d.direccion,
+      ciudad: d.ciudad,
+      sector: d.sector ?? null,
+      referencias: d.referencias ?? null,
+      telefono: d.telefono ?? null,
+      lat: typeof d.lat === 'number' ? d.lat : null,
+      lon: typeof d.lon === 'number' ? d.lon : null,
+      es_principal: d.es_principal === true,
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+/**
+ * Guarda una dirección CON ALIAS. Crea si no se pasa `direccionId`, edita si sí.
+ *
+ * 🔴 NUNCA toca la principal: el motor escribe `es_principal = false` sin
+ * excepción, y la principal tiene su propio índice único. Guardar una oficina
+ * **no puede** desplazar al hogar ni por error de llamada.
+ *
+ * ⚠️ EL PUNTO ES OBLIGATORIO, y no es decisión de esta capa: la tabla lleva
+ * `chk_direccion_con_punto`. El motor lo rebota con `punto_requerido` en vez
+ * de dejar explotar el constraint — *un error de constraint sale como
+ * `datos_invalidos`, y esa voz no le dice a nadie qué hacer* (D-827 en chico).
+ */
+export async function guardarDireccionConAlias(input: {
+  alias: string;
+  direccion: string;
+  ciudad: string;
+  sector?: string | null;
+  referencias?: string | null;
+  telefono?: string | null;
+  lat: number;
+  lon: number;
+  /** Presente = edita esa dirección; ausente = crea una nueva. */
+  direccionId?: string | null;
+}): Promise<ResultadoWrapper<{ direccionId: string }, CodigoErrorDireccion>> {
+  const { data, error } = await getClient().rpc('guardar_direccion_con_alias', {
+    p_alias: input.alias,
+    p_direccion: input.direccion,
+    p_ciudad: input.ciudad,
+    p_sector: input.sector ?? undefined,
+    p_referencias: input.referencias ?? undefined,
+    p_telefono: input.telefono ?? undefined,
+    p_lat: input.lat,
+    p_lon: input.lon,
+    p_direccion_id: input.direccionId ?? undefined,
+  });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true || typeof o.direccion_id !== 'string') {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_DIRECCION.datos_inconsistentes };
   }
   return { ok: true, data: { direccionId: o.direccion_id } };
 }

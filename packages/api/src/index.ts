@@ -540,6 +540,10 @@ export {
 export {
   obtenerDireccionHogar,
   guardarDireccionHogar,
+  // S100c · la libreta de direcciones con alias. NO reemplaza a la del hogar.
+  listarMisDirecciones,
+  guardarDireccionConAlias,
+  type DireccionGuardada,
   type DireccionHogar,
   type GuardarDireccionHogarInput,
   type CodigoErrorDireccion,
@@ -1163,6 +1167,9 @@ export {
   // S100 · el gate de la puerta (D-827): revalida el carrito contra la
   // vitrina de AHORA, antes de la caja.
   revalidarCarritoDespensa,
+  // S100c · la otra mitad de la mala noticia en la puerta: «pedí 3 y hay 1».
+  maximoComprableDeOfertas,
+  type MaximoDeOferta,
   reservarStockPedido,
   iniciarPagoPedido,
   cancelarPedidoDespensa,
@@ -1201,6 +1208,15 @@ export {
   // bucket de las cédulas y eso es deuda declarada, no un permiso).
   obtenerFichaRepartidor,
   type FichaRepartidor,
+  // S100c · los dos lectores que la lista de pedidos necesitaba (pedidos de D,
+  // los dos con su caso medido contra la base). El primero cura las nueve
+  // tarjetas iguales del mismo día; el segundo saca a la luz un dato que
+  // entraba por el panel del vendedor y no salía por ninguna puerta.
+  resumenDeItemsDePedidos,
+  type ResumenItemsPedido,
+  facturasDePedidos,
+  type FacturaDePedido,
+  type FacturaDeUnPedido,
 } from './wrappers/despensa-seguimiento';
 
 export {

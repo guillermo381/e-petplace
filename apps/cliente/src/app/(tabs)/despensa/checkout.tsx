@@ -81,8 +81,10 @@ import {
   crearIntentoPago,
   obtenerNombresTiendaPorPedido,
   nuevaClaveIdempotencia,
+  listarMisDirecciones,
   obtenerDireccionHogar,
   obtenerMiPerfil,
+  type DireccionGuardada,
   type DireccionHogar,
   type PedidoCreado,
   type PromesaEntrega,
@@ -113,6 +115,20 @@ export default function DespensaCheckout() {
   // ── La dirección y quién recibe ────────────────────────────────────────
   const [direccion, setDireccion] = useState<DireccionHogar | null | 'cargando'>('cargando');
   const [hojaDireccion, setHojaDireccion] = useState(false);
+  /**
+   * 🔴 S100c · LA LIBRETA — «Oficina», «Casa de mamá», además del hogar.
+   *
+   * Medido antes de construir: `direcciones_guardadas.alias` es NOT NULL y su
+   * índice único es PARCIAL (`WHERE es_principal`) ⇒ **la tabla admitía N
+   * direcciones desde siempre**; lo que faltaba era la puerta.
+   *
+   * `hojaLibreta` = elegir entre las guardadas. `hojaAlias` = crear una nueva
+   * con nombre. Son DOS hojas y no una con modos: *una hoja que a veces lista
+   * y a veces edita es dos pantallas compartiendo un título.*
+   */
+  const [direcciones, setDirecciones] = useState<DireccionGuardada[]>([]);
+  const [hojaLibreta, setHojaLibreta] = useState(false);
+  const [hojaAlias, setHojaAlias] = useState(false);
   const [receptor, setReceptor] = useState('');
   const [telefono, setTelefono] = useState('');
   const [instrucciones, setInstrucciones] = useState('');
@@ -179,7 +195,13 @@ export default function DespensaCheckout() {
   useEffect(() => {
     let vigente = true;
     void (async () => {
-      const [dir, perfil] = await Promise.all([obtenerDireccionHogar(), obtenerMiPerfil()]);
+      const [dir, perfil, libreta] = await Promise.all([
+        obtenerDireccionHogar(),
+        obtenerMiPerfil(),
+        // Misma ola: el peaje es de la petición, no del volumen (L-223).
+        listarMisDirecciones(),
+      ]);
+      if (libreta.ok) setDirecciones(libreta.data);
       if (!vigente) return;
       setDireccion(dir.ok ? dir.data : null);
       // Prefill honesto: lo que la casa ya sabe se ofrece, jamás se exige
@@ -687,11 +709,25 @@ export default function DespensaCheckout() {
                          otra pantalla, pero **abre el formulario que la
                          resuelve**, que es el mismo criterio. */
                       <CeldaNavegacion
+                        /* A-06 (S100c) · el pin, pedido por el founder: *«ahí
+                           le falta el pin o el glifo de ubicación»*.
+                           ⚠️ Mi arranque decía que el glifo era de B y había que
+                           pedírselo. **Falso, medido:** `ubicacion` ya existe en
+                           el registry (`Icono.tsx:800`, capa `cuidado`) desde el
+                           lote b′. *Pedir una pieza construida cuesta una vuelta
+                           de canal y la respuesta es un grep.* */
+                        icono="ubicacion"
                         titulo={direccion.direccion}
                         detalle={[direccion.ciudad, direccion.referencias]
                           .filter((x): x is string => x !== null && x !== '')
                           .join(' · ')}
-                        onPress={() => setHojaDireccion(true)}
+                        /* Con UNA sola dirección la libreta no tiene nada que
+                           elegir: el toque va derecho a editarla. Con dos o
+                           más, abre la libreta. *Un selector de un elemento es
+                           un paso que no decide nada.* */
+                        onPress={() =>
+                          direcciones.length > 1 ? setHojaLibreta(true) : setHojaDireccion(true)
+                        }
                       />
                     )}
                   </View>
@@ -773,6 +809,24 @@ export default function DespensaCheckout() {
                         ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
                     {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
                       <SelectorVentana
+                        /* 🔴 A-05 (S100c) · LA TIRA. El founder: «cuándo se
+                           entrega» es invisible sin deslizar.
+                           **B lo midió y es peor que eso:** la sección arranca
+                           en **y = 595,9 dp** y el pie fijo empieza en ~**593**
+                           ⇒ no es que haya que deslizar, es que **nace debajo
+                           del pie**. Cuatro opciones apiladas de hasta tres
+                           líneas, después de dirección y quién recibe.
+                           El eje no se inventó: `SelectorOpcion` tiene
+                           `disposicion` fila/tira/grilla desde S55-B4, y la
+                           tira nació justo para esto (el CUÁNDO tipo Teams).
+                           ⚠️ LA LEY 23 SIGUE EN PIE Y ES FÁCIL DE ROMPER ACÁ:
+                           en `tira` el día lleno **recibe el toque** —hace
+                           falta para contar SU motivo cuando hay más de uno—
+                           pero **jamás llama a `onElegir`**. El servidor sigue
+                           sin poder recibir un día sin cupo. *Si alguien
+                           cablea `onElegir` en esa rama, rompe la ley* (aviso
+                           de B, dueña de la pieza). */
+                        disposicion="tira"
                         opciones={ventanas}
                         elegida={fechaElegida?.fecha ?? 'proxima'}
                         onElegir={(clave) => {
@@ -882,6 +936,65 @@ export default function DespensaCheckout() {
                 </Tarjeta>
               </View>
             ))}
+
+            {/* 🔴 A-02 (S100c) · CÓMO Y CUÁNDO LLEGA, A LA VISTA AL PAGAR.
+                Literal del founder: *«lo único que le faltaría al checkout es
+                la confirmación de la modalidad de entrega y la fecha probable
+                de entrega, para que la persona lo pueda observar desde ahí»*.
+
+                Medido antes de construir: el resumen tenía «Envío $2.50» —que
+                dice cuánto CUESTA, no que va a tu casa— y la promesa vivía
+                dentro de `fase === 'armado'`, o sea **en la pantalla anterior**:
+                se elegía y no se podía releer con el dedo sobre «Pagar».
+                La dirección entra en el mismo bloque aunque no estaba en el
+                pedido: es la misma pregunta —«¿esto llega bien?»— y omitirla
+                dejaba media respuesta.
+
+                ── 🔴 POR QUÉ VA UNA VEZ Y NO ADENTRO DE CADA CARTA ──────────
+                El método y la dirección son **de la compra**: hay UN `metodo` y
+                UNA dirección para todo. Repetirlos en N cartas sería decir N
+                veces lo mismo.
+                Y la FECHA no se puede repetir por otra razón, que es de dato:
+                `cuentaComercialId` sale de **`grupos[0]`** (:177) ⇒ la promesa
+                que hay en pantalla es la del PRIMER vendedor. Pintarla dentro
+                de la segunda carta sería **afirmar sobre la entrega del otro
+                vendedor un dato que nadie calculó** — la misma frase que ya
+                está escrita 60 líneas más arriba: *una promesa que la pantalla
+                no puede cumplir*. Con N entregas se dice lo único que sí es
+                cierto: que cada una va por su cuenta. */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+              <Texto variante="seccion">{t('despensa.resumenComoLlega')}</Texto>
+              <Texto variante="cuerpo">
+                {metodo === 'retiro' ? t('despensa.metodoRetiro') : t('despensa.metodoDespacho')}
+              </Texto>
+
+              {/* La dirección solo con despacho: en retiro no hay dirección de
+                  la familia que mostrar, y la de la tienda no se captura. */}
+              {metodo === 'despacho' && direccion !== 'cargando' && direccion !== null ? (
+                <Texto variante="apoyo">
+                  {[direccion.direccion, direccion.ciudad].filter((x) => x !== '').join(' · ')}
+                </Texto>
+              ) : null}
+
+              {/* La fecha: con UNA entrega es la promesa que se eligió; con
+                  varias, el hecho que sí se puede afirmar. Y si la promesa
+                  falló o no llegó, **no se inventa una fecha**: no se dibuja
+                  nada (L-139 — el nulo honesto). */}
+              {pedidos.length > 1 ? (
+                <Texto variante="apoyo">{t('despensa.resumenFechaPorEntrega')}</Texto>
+              ) : metodo === 'despacho' &&
+                promesa !== null &&
+                promesa !== 'cargando' &&
+                !('fallo' in promesa) ? (
+                <Texto variante="cuerpo">
+                  {t('despensa.promesaVentana', {
+                    dia: diaLocal(promesa.fecha),
+                    desde: horaLocal(promesa.desde),
+                    hasta: horaLocal(promesa.hasta),
+                  })}
+                </Texto>
+              ) : null}
+            </View>
 
             {/* EL TOTAL ES EL DE LA COMPRA, dicho por el motor — esta
                 pantalla no suma los bloques. UN SOLO COBRO para la familia. */}
@@ -1012,6 +1125,69 @@ export default function DespensaCheckout() {
             setDireccion(d);
             if (telefono === '' && d.telefono !== null) setTelefono(d.telefono);
             setHojaDireccion(false);
+          }}
+        />
+      </Hoja>
+
+      {/* 🔴 S100c · LA LIBRETA — elegir entre las direcciones guardadas.
+          Cada una se lee por su NOMBRE («Oficina»), que es la llave con la
+          que la persona la reconoce; la calle va de detalle. La principal
+          viene primera del lector, y no se marca con una insignia: *venir
+          primera ya lo dice, y una insignia de «principal» compite con el
+          nombre que la persona eligió.* */}
+      <Hoja
+        visible={hojaLibreta}
+        onCerrar={() => setHojaLibreta(false)}
+        titulo={t('despensa.aDonde')}
+      >
+        <View style={{ gap: spacing[2] }}>
+          {direcciones.map((d) => (
+            <CeldaNavegacion
+              key={d.id}
+              icono="ubicacion"
+              titulo={d.alias}
+              detalle={[d.direccion, d.ciudad].filter((x) => x !== '').join(' · ')}
+              onPress={() => {
+                setDireccion(d);
+                setHojaLibreta(false);
+              }}
+            />
+          ))}
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={t('direccion.agregarOtra')}
+            onPress={() => {
+              setHojaLibreta(false);
+              setHojaAlias(true);
+            }}
+          />
+        </View>
+      </Hoja>
+
+      {/* La dirección NUEVA con su nombre. Misma captura de siempre —una sola
+          en toda la casa— con la bandera `conAlias`: dos formularios de
+          dirección divergen, y el día que divergen la mitad de la gente pone
+          el punto y la otra mitad no. */}
+      <Hoja
+        visible={hojaAlias}
+        onCerrar={() => setHojaAlias(false)}
+        titulo={t('direccion.agregarOtra')}
+        altura="completa"
+      >
+        <DireccionHogarForm
+          inicial={null}
+          exigirPunto
+          conAlias
+          onGuardada={(d) => {
+            setDireccion(d);
+            setHojaAlias(false);
+            // La libreta se re-lee del motor, no se parchea en memoria: el
+            // alias y el id los decidió el server (L-166 — el dato vivo se
+            // lee de su fuente al momento de usarlo).
+            void listarMisDirecciones().then((r) => {
+              if (r.ok) setDirecciones(r.data);
+            });
           }}
         />
       </Hoja>
