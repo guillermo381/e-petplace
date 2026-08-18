@@ -455,6 +455,51 @@ export function Hoja({
                   borderTopRightRadius: radius['2xl'],
                   height: altoHoja,
                   maxHeight: altoMax,
+                  /* 🔴 EL ALTO PUEDE CEDER — S100c (defecto A-04, reportado
+                     por el founder, diagnosticado por la pista A y CONFIRMADO
+                     EN APARATO por B con la prueba que podía tumbarlo).
+
+                     **El síntoma:** *«al escribir la dirección, como sube el
+                     mapa, me deja el texto casi pegado al techo»*. **Medido:
+                     es peor** — con el teclado arriba, en una Hoja
+                     `altura="completa"`, **el campo ENFOCADO sale de pantalla
+                     por arriba** (no aparece en el árbol), el título y el asa
+                     también, y el rótulo que queda cae en **y = 8,5 dp**
+                     contra un inset de barra de estado de **25,6 dp** — o sea
+                     **17,1 dp por encima del área segura, encima del reloj**.
+
+                     **La causa NO es una pieza mal hecha: son dos correctas
+                     que juntas no pueden convivir.**
+                       · el `KeyboardAvoidingView` de arriba usa
+                         `behavior="padding"` —decisión MEDIDA de S83-B36, que
+                         no se toca— y con el teclado le suma un
+                         `paddingBottom` de su alto ⇒ **la caja útil pasa a
+                         `H − K`**.
+                       · pero `altura="completa"` fija **`height: 0.9·H`**, y
+                         un hijo de alto FIJO alineado al fondo de una caja
+                         más chica **no se encoge: desborda hacia ARRIBA.**
+
+                     ⇒ **`flexShrink: 1` le da con qué ceder.** No cambia nada
+                     sin teclado (no hay presión) y no toca la decisión de
+                     `padding`.
+
+                     ✅ **LA PRUEBA QUE PODÍA TUMBAR EL MECANISMO Y NO LO
+                     TUMBÓ** — corrida en aparato antes de escribir esta línea:
+                     con **`altura="contenido"`** (`height: undefined` +
+                     `maxHeight`, o sea que YA encogía sola) el mismo teclado
+                     **no desborda nada**: título en **74,7 dp**, los dos
+                     campos, la ayuda y el botón `Listo` en **409,6**, todo
+                     visible. *Si `contenido` también hubiera empujado
+                     contenido fuera de pantalla, el mecanismo estaba mal y
+                     esta cura sería la equivocada.*
+
+                     ⚠️ **Y el borde que hay que mirar en el gate** (lo señaló
+                     A y es correcto): al encoger, el `ScrollView` interno se
+                     queda con el scroll —que es lo que se quiere— y el
+                     `paddingBottom` de acá abajo **no debe comerse la última
+                     fila**; en la Hoja de dirección esa fila es justo el
+                     `Guardar`. **No tiene ojo todavía.** */
+                  flexShrink: 1,
                   // S65 (hallazgo founder, ambas apps): la Hoja es una
                   // superficie ANCLADA AL FONDO — sin el inset, su última
                   // fila (el Guardar/Continuar de turno) queda bajo la
