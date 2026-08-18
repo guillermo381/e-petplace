@@ -499,10 +499,21 @@ export default function DespensaEnCamino() {
                   regla no se lee. */}
               <GestureDetector gesture={pan}>
                 <View>
+                  {/* 🔴 S100d · EL ASA SALE DEL ÁRBOL DE ACCESIBILIDAD, y no
+                      es un descuido: **ahora hay DOS controles que hacen lo
+                      MISMO** (el asa y la señal de arrastre de abajo), y
+                      anunciar los dos le pone al lector de pantalla dos
+                      botones idénticos seguidos. *Dos voces para una acción
+                      no es el doble de accesible: es una lista más larga
+                      donde hay que adivinar si son la misma cosa.*
+                      ⇒ el asa queda como lo que es —**un tirador**, para el
+                      dedo— y **el control que se anuncia es la señal, que
+                      además lleva su estado** (`expanded`), cosa que el asa
+                      nunca dijo. El toque del asa sigue vivo para todos. */}
                   <Pressable
                     onPress={() => irA(!extendidaRef.current)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('despensa.enCaminoHojaVerMas')}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
                     style={{ alignItems: 'center', paddingVertical: spacing[2], minHeight: 24 }}
                   >
                     {/* El asa — anatomía CANÓNICA de `Hoja` (36×4, bg.border). */}
@@ -550,7 +561,6 @@ export default function DespensaEnCamino() {
                       style={{
                         paddingHorizontal: spacing[5],
                         paddingBottom: spacing[2],
-                        gap: spacing[2],
                       }}
                     >
                       <View
@@ -565,41 +575,50 @@ export default function DespensaEnCamino() {
                         <CodigoAEscala codigo={codigo} />
                         <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
                       </View>
-
-                      {/* LA SEÑAL DE ARRASTRE — el mismo `onPress` que el
-                          asa, y adentro del `GestureDetector`, así que
-                          también se puede arrastrar desde acá. Va CENTRADA
-                          porque acompaña al asa, que está centrada: dos
-                          señales del mismo gesto alineadas se leen como una.
-                          `Chevron` es la pieza de la casa para slots que no
-                          son una fila entera (S99-B) — el path crudo está
-                          prohibido por la cabecera de `chevron.tsx`. */}
-                      <Pressable
-                        onPress={() => irA(!extendidaRef.current)}
-                        accessibilityRole="button"
-                        accessibilityState={{ expanded: extendida }}
-                        accessibilityLabel={
-                          extendida
-                            ? t('despensa.enCaminoHojaVerMenos')
-                            : t('despensa.enCaminoHojaVerMas')
-                        }
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: spacing[1],
-                          paddingVertical: spacing[1],
-                        }}
-                      >
-                        <Chevron direccion={extendida ? 'abajo' : 'arriba'} lado={16} />
-                        <Texto variante="apoyo">
-                          {extendida
-                            ? t('despensa.enCaminoHojaVerMenos')
-                            : t('despensa.enCaminoHojaVerMas')}
-                        </Texto>
-                      </Pressable>
                     </View>
                   )}
+
+                  {/* LA SEÑAL DE ARRASTRE — el mismo `onPress` que el asa, y
+                      adentro del `GestureDetector`, así que también se puede
+                      arrastrar desde acá. Va CENTRADA porque acompaña al asa,
+                      que está centrada: dos señales del mismo gesto alineadas
+                      se leen como una. `Chevron` es la pieza de la casa para
+                      slots que no son una fila entera (S99-B) — el path crudo
+                      está prohibido por la cabecera de `chevron.tsx`.
+
+                      🔴 **Y VIVE AFUERA DEL `if` DEL CÓDIGO A PROPÓSITO.**
+                      La primera versión la puse adentro, y eso dejaba **la
+                      hoja sin una sola señal de que sube justo cuando menos
+                      tiene a la vista**: sin código, lo único visible sería
+                      el asa de 4 px. *El caso raro es exactamente donde el
+                      affordance hace más falta, y meterlo adentro de la rama
+                      del caso común es cómo un defecto se esconde de su
+                      propia cura.* */}
+                  <Pressable
+                    onPress={() => irA(!extendidaRef.current)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: extendida }}
+                    accessibilityLabel={
+                      extendida
+                        ? t('despensa.enCaminoHojaVerMenos')
+                        : t('despensa.enCaminoHojaVerMas')
+                    }
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: spacing[1],
+                      paddingVertical: spacing[1],
+                      paddingBottom: spacing[2],
+                    }}
+                  >
+                    <Chevron direccion={extendida ? 'abajo' : 'arriba'} lado={16} />
+                    <Texto variante="apoyo">
+                      {extendida
+                        ? t('despensa.enCaminoHojaVerMenos')
+                        : t('despensa.enCaminoHojaVerMas')}
+                    </Texto>
+                  </Pressable>
                 </View>
               </GestureDetector>
 
