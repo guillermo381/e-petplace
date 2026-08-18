@@ -84,7 +84,7 @@ cuáles están en este bundle.*
 | # | qué mirar |
 |---|---|
 | **17** | **LA FICHA DE ENTREGA**: los cuatro grupos rotulados (a dónde · quién recibe · instrucciones · cuándo) pasan a vivir sobre **UNA carta**. Y el glifo de ubicación **sin huella dentro** |
-| **20** | el tope de compra **en las TRES puertas** (ficha · carrito · vitrina): subir por encima del stock **lo dice en la puerta**, jamás en la caja. ✅ **EJERCIDO EN APARATO por C sobre producto real** — `Advantage Perros 10-25 kg`, **stock 2**, `hay_stock = true` (*el caso exacto del founder: el booleano dice «sí se puede comprar» y no puede decir «no alcanza para 3»*): pedir 2 → queda 2 sin voz · pedir 3 → **queda 2 y lo dice** · bajar → sin consulta |
+| **20** | el tope de compra **en las TRES puertas** (ficha · carrito · vitrina): subir por encima del stock **lo dice en la puerta**, jamás en la caja. **Ejercido EN RN-WEB por C** (⚠️ **no en el teléfono** — ver §④) sobre producto real: `Advantage Perros 10-25 kg`, **stock 2**, `hay_stock = true` (*el caso exacto del founder: el booleano dice «sí se puede comprar» y no puede decir «no alcanza para 3»*): pedir 2 → queda 2 sin voz · pedir 3 → **queda 2 y lo dice** · bajar → sin consulta |
 | **28** | el alias de dirección **es alcanzable**: con UNA sola dirección ahora se puede agregar otra |
 
 ---
@@ -136,14 +136,44 @@ arriba. No es un punto a medias: es lo que el founder autorizó, medido.
   instrumento que busca lo que uno RECUERDA del texto, y no el texto, produce el
   rojo que uno temía.* Lo cazó C y lo curó buscando el literal.
 
-### ⚠️ Lo que va a aparecer en pantalla y NO es de esta vuelta
+### 🔴 DÓNDE SE VERIFICÓ CADA COSA — y por qué la palabra importa
 
-La consola de desarrollo tira `<button> cannot contain a nested <button>` en
-Despensa. **Censado: los pares anidados son el `+` DENTRO de la tarjeta de
-producto** — no el control de filtro ni el flotante, que montan sus glifos con
-`dentroDeTocable` y quedan limpios. Es la clase ya fichada como **D-311**, y
-**solo existe en dev: no viaja a preview.** *Se declara para que en el gate
-nadie lo atribuya a una pieza de hoy.*
+**«Aparato» en esta casa significa EL TELÉFONO del founder. Solo B lo tiene
+enchufado.** Todo lo demás es **RN-web** (`:8095`, vara 384×832, cuenta `+8`),
+que sirve para **comparar un antes con un después** y **jamás para declarar cómo
+se ve en el teléfono**.
+
+| pista | dónde verificó | estatuto |
+|---|---|---|
+| **B** | **teléfono** (SM-S938B) | los números del punto 7 y el «antes» de sus once |
+| **D** | **teléfono** | el 30 ✅ y el hallazgo de la fuga (13 contra 12) |
+| **C** | **RN-web** | sus nueve puntos: **construidos y verificados en web**, esperando el ojo |
+| **A** | **ningún render** | fuente, tipos, consultas a la base y camino real por HTTP — **cero píxeles** |
+
+⚠️ **Y no es una formalidad, porque la propia jornada lo probó dos veces:**
+RN-web **no reproduce** el `Gesture.Pan` de la `Hoja`, y **no habría reproducido
+el recorte del stepper del punto 7** — que solo aparece donde `overflow:'hidden'`
+recorta de verdad. *Conflar los dos renderers es exactamente lo que la regla de
+cierre de esta vuelta existe para impedir.*
+
+**Registrado con nombre porque es el modo de falla del día:** C reportó su punto
+20 como *«ejercido en aparato»*, B lo cazó, y **C se corrigió antes de que la
+palabra entrara al canon**. *Prefiero un resumen que diga menos y sea cierto.*
+
+### ~~Lo que va a aparecer en pantalla y NO es de esta vuelta~~ — PREDICCIÓN FALSADA
+
+~~La consola tira `<button> cannot contain a nested <button>` y el founder lo va
+a ver.~~ **MEDIDO POR B EN EL TELÉFONO sobre el build preview: cero nodos de
+toast, cero coincidencias en `logcat`.** El toast es de `__DEV__` y **un preview
+no lo es** ⇒ **el founder no lo va a ver.**
+
+**Lo que sí sobrevive es el diagnóstico del productor:** los pares anidados son
+el `+` **dentro** de la tarjeta de producto (tarjeta tocable con un tocable
+adentro) — no el control de filtro ni el flotante, que usan `dentroDeTocable` y
+quedan limpios. Clase **D-311**, ya fichada.
+
+*Se deja tachado y no borrado: **el diagnóstico era bueno y la predicción era
+mala**, y esa distinción es la que enseña.*
 - **El límite de las tres vistas cerradas hoy**: están **vacías**, así que su
   `200 · 0 filas` no distingue «la RLS bloquea» de «no hay nada». Se re-mide con
   la primera venta y la primera reseña reales.
