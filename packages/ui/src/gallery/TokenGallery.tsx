@@ -54,6 +54,7 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { PantallaConPie } from '../components/PantallaConPie'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -396,6 +397,56 @@ function MuestraSelectorDestino() {
       etiquetaDonacion="Donar este producto"
       detalleDonacion="Lo entregamos a un refugio. No suma a ningún expediente."
     />
+  )
+}
+
+/* S100b-B: muestra viva de PantallaConPie — y su DISCRIMINADOR es la
+   última línea, no la primera.
+
+   🔴 QUÉ HAY QUE VER: **«Declara contener: Cordero, Arroz.» tiene que
+   quedar alcanzable scrolleando hasta el fondo.** Ése es exactamente el
+   contenido que el pie fijo tapaba en la ficha real —composición y
+   alérgenos, con la pantalla sin scroll— y por eso la muestra lo usa de
+   sujeto en vez de un «ítem 12» cualquiera.
+
+   El pie lleva DOS botones a propósito: el defecto original venía de que
+   la pantalla estimaba el alto del pie en `96`, y con dos botones ese
+   número se queda corto. **Si algún día la última línea vuelve a quedar
+   debajo del pie, la reserva dejó de derivarse del alto medido.** */
+function MuestraPantallaConPie() {
+  const filas = [
+    'Foto del producto',
+    'Nombre y presentación',
+    'Precio y precio por kilo',
+    'Para quién sirve',
+    'Disponibilidad',
+    'Composición',
+    'Declara contener: Cordero, Arroz.',
+  ]
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View style={{ height: 320, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)' }}>
+        <PantallaConPie
+          contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}
+          pie={
+            <>
+              <Boton etiqueta="Agregar al carrito" bloque onPress={() => {}} />
+              <Boton etiqueta="Ver carrito · 1" variante="secundario" bloque onPress={() => {}} />
+            </>
+          }
+        >
+          {filas.map((f) => (
+            <Celda key={f} titulo={f} />
+          ))}
+        </PantallaConPie>
+      </View>
+      <Texto variante="apoyo">
+        El pie se mide a sí mismo y esa misma medida reserva el scroll: no hay dos cuentas que puedan
+        discrepar. Scrolleá hasta el fondo — la última línea tiene que quedar por encima del pie.
+        Antes de esta pieza cinco pantallas estimaban ese alto a mano, y en la ficha lo que quedaba
+        debajo era la composición y los alérgenos.
+      </Texto>
+    </View>
   )
 }
 
@@ -3292,6 +3343,10 @@ function GaleriaInterna() {
           <MuestraPieRevelar />
         </Seccion>
 
+        <Seccion titulo="PantallaConPie (S100b) — el pie fijo RESERVA su propio lugar">
+          <MuestraPantallaConPie />
+        </Seccion>
+
         <Seccion titulo="SelectorVentana (S96) — cuándo llega, y por qué un día no se puede elegir (§6.2)">
           <MuestraVentana />
         </Seccion>
@@ -3536,12 +3591,26 @@ function GaleriaInterna() {
             Firma del founder (17-ago): premium · dos columnas · AGREGAR SIN ABRIR DETALLE.
             Lo que hay que mirar acá son cuatro cosas, y las cuatro son de forma:
             ① el + está SIEMPRE en la misma esquina (la mano lo encuentra sin mirar) y
-            al agregar MUTA a stepper en el lugar, no aparece otro control al lado ·
+            al agregar MUTA a stepper — mismo control, mismo borde derecho ·
             ② los precios de una fila quedan ALINEADOS aunque un nombre ocupe una línea
             y el otro dos — eso lo hace el ancla de abajo, y es lo que deja comparar
             de un vistazo · ③ el sin stock dice el cartel EN la tarjeta, no en otro
             lado · ④ el $/kg sigue en mono porque es un CÁLCULO: el contraste entre
             los dos registros es lo que dice cuál es el precio y cuál la cuenta.
+          </Texto>
+          <Texto variante="apoyo">
+            🔴 RE-DERIVACIÓN S100b — tres cosas más que mirar. ⑤ El PRECIO bajó de peso
+            700 a 500: mismo cuerpo, menos grito. Medido contra Laika, que pone 20 px en
+            500 sobre una tarjeta de 366 px mientras nosotros poníamos 20 px en 700 sobre
+            una de 164 — casi la misma tipografía en menos de la mitad de ancho.
+            ⑥ Con cantidad, el stepper baja a SU PROPIA FILA y va COMPACTO (116 dp, no
+            144): en la caja de 138 el de 144 se recortaba y el + quedaba fuera del
+            layout — eso era G-01. El blanco táctil sigue siendo 44 vía hitSlop: se achica
+            el píxel, no el target. ⑦ NINGUNA de estas muestras pasa fotoUrl, así que
+            todas exhiben el ESTADO SIN FOTO: glifo de despensa centrado sobre el fondo
+            hundido. No es un placeholder de carga y no debe parecerlo — «no hay foto» y
+            «todavía no llegó» son dos cosas distintas. Es el estado permanente del
+            granel, la marca chica y el producto del vendedor local.
           </Texto>
           <View style={GRILLA_DE_DOS}>
             <View style={CELDA_DE_GRILLA}>
