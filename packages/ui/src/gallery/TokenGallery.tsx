@@ -3354,6 +3354,12 @@ function GaleriaInterna() {
             <GlifoConContador nombre="carrito" cuenta={3} etiqueta="Carrito, 3 productos" />
             <GlifoConContador nombre="carrito" cuenta={12} etiqueta="Carrito, 12 productos" />
             <GlifoConContador nombre="carrito" cuenta={140} etiqueta="Carrito, 140 productos" />
+            {/* El caso ANIDADO — el consumidor natural de esta pieza. Acá la
+                voz vive en el tocable y la pieza se borra del árbol: un solo
+                nodo accesible, no dos. */}
+            <Pressable accessibilityRole="button" accessibilityLabel="Carrito, 3 productos" onPress={() => {}}>
+              <GlifoConContador nombre="carrito" cuenta={3} dentroDeTocable />
+            </Pressable>
           </View>
           <Texto variante="apoyo">
             Cuatro casos, y el primero es el discriminador: con 0 NO se dibuja disco — un cero en un
