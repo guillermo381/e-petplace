@@ -10,7 +10,8 @@
 
 | | |
 |---|---|
-| **`main`** | **`e20113b6`** · árbol en **0** |
+| **ANCLA DE LAS DOS OTA** | **`e20113b6`** — es el commit que se está mirando |
+| **`main`** | avanza con commits **solo de `docs/`** por encima del ancla (este archivo entre ellos). *Se dice así a propósito: «main = el ancla» es cierto al escribirse y falso una hora después.* |
 | **OTA cliente** | group **`e6ebf9d3`** · runtime **1.0.3** |
 | **OTA prestador** | group **`2e57c413`** · runtime **1.0.5** |
 | **ancla de las dos** | **`e20113b6`**, leída del OBJETO en las 4 plataformas · `dirty: None`, **sin asterisco** |
@@ -274,3 +275,24 @@ documento que abrir**, así que la casa «Facturas» no se montó: el número va
 - **El glifo del carrito a 21 px: sin verificar** (sin rasterizador).
 - **`PantallaConPie` subió el pie ~52 dp:** mi censo dio **cero compensaciones vivas** en mis pantallas,
   pero **eso lo dice el typecheck y el pie es asunto de píxeles.**
+
+---
+
+## ⑧ 🔴 LO QUE ESPERA EL OJO DEL FOUNDER — juicios que ningún instrumento puede emitir
+
+*Cada pista declaró lo que no pudo verificar. Se juntan acá porque el founder mira UNA pantalla, no cuatro
+territorios.*
+
+| # | qué mirar | por qué nadie lo pudo medir |
+|---|---|---|
+| 1 | **Los tres glifos a 21 px** — `carrito` con ruedas · `papelera` · `pedido` (la caja con tapa) | **no hay rasterizador SVG en el entorno** (ni `cairosvg`, ni `rsvg-convert`, ni Inkscape). §2.9 exige ese tamaño y **ese gate es del founder** |
+| 2 | **Los DOS huecos angostos de la barra de cinco: 28,8 dp cada uno**, contra los **20,7 dp** con que el prestador ya vive aprobado | *si dos huecos se leen peor que uno, eso es ojo* — la aritmética dice que caben, no que se vean bien |
+| 3 | **El pie subió ~52 dp** en ficha, carrito y checkout | mi censo dio **cero compensaciones vivas**, pero **eso lo dice el typecheck y el pie es asunto de píxeles** |
+| 4 | **La tarjeta de la vitrina es ~44 dp más alta que en la OTA anterior** | costo declarado de N24. C midió que **la primera igual entra con 42 dp de sobra** — pero *«entra» no es «se ve bien»* |
+| 5 | **Que el `Guardar` de la Hoja de dirección no quede comido abajo** | la cura de `Hoja` es un **no-op en RN-web** (no hay insets del sistema) ⇒ solo el aparato lo dice |
+| 6 | **El `PISO_DEL_MAPA` al 40 %** y si la hoja arrastrable **se siente** como la del paseo | «se siente» no tiene instrumento |
+| 7 | **Si la lista de pedidos ahora DISTINGUE** | ⚠️ **9 pedidos en 4 minutos es tráfico de prueba**: va a quedar repetición, y **eso es el dato, no la cura fallando** |
+| 8 | **Si el autocompletado de direcciones aparece** | ver §6①bis: puede haber estado funcionando y siendo invisible |
+
+**Y la advertencia que vale para las ocho:** *los instrumentos declaran ausencia de defecto conocido, jamás
+presencia de calidad.* Cuatro typechecks y un lint verdes **no dicen que nada tape a nada**.
