@@ -28,11 +28,29 @@ No es una pantalla: es **la anatomía de pie de página de toda la despensa**.
 > ninguna es ésas**. *Dos números míos discrepaban —la tabla decía cinco, el lint decía que esas dos
 > no tenían pie— y no los crucé.* **L-287, cobrada contra mí por no leer mi propia salida.**
 >
-> **La causa real ahí es ARITMÉTICA, y el nombre que le puse a la captura ya la decía**
-> (`…-eta-cortado.png` — *cortado*, no *tapado*): status ~48 + encabezado ~56 + **mapa 380** + 20 +
+> **⑤ «EN CAMINO» SÍ TIENE CAUSA, Y ES ARITMÉTICA** — el nombre que le puse a la captura ya la decía
+> (`…-eta-cortado.png`: *cortado*, no *tapado*): status ~48 + encabezado ~56 + **mapa 380** + 20 +
 > escalera vertical ~176 ≈ **680 dp**, contra el filo de la barra que medí en **699**. ⇒ *«Llega
 > entre»* arranca a **19 dp del borde**, y **el mapa solo se come el 54 % del alto**.
 > **La cura es la que §6 ya nombra: el mapa deja de ser BANDA y pasa a ser FONDO** (N14/Uber). Es de D.
+>
+> ### 🔴 ④ NO TIENE CAUSA NINGUNA — y esta frase lo mantuvo vivo tres mensajes
+>
+> **Lo levantó D y es un defecto de MI redacción, no de la medición.** Escribí *«la causa real ahí es
+> aritmética»* refiriéndome al **par ④/⑤**, **y la aritmética de arriba es SOLO la de «en camino»**.
+> **El detalle del pedido nunca tuvo síntoma medido propio:** entró por mi mis-atribución en H-105 y
+> salió con ella — pero **la frase que explicaba el retiro lo arrastró** como si conservara una causa,
+> y así llegó a la mesa como *«nadie lo está mirando»*.
+>
+> **Medido por D sobre su fuente, y coherente con lo que yo medí:** cero `position:'absolute'` (sus
+> tres botones viven dentro de dos `Hoja`) · el visor lo acota el navegador —**el `ScrollView` de una
+> pantalla de tab termina en `y=699.0 dp`, el filo exacto**— · y el código de la puerta ya es el
+> bloque 2 de 6. **Sin superficie fija y con el visor acotado, no existe el mecanismo que produce un
+> corte.** ⇒ **④ se retira del todo.**
+>
+> ***LA LEY QUE DEJA, y es de D: un ítem retirado de una tabla puede sobrevivir en la frase que
+> explica el retiro.*** *Corregir la tabla no alcanza — hay que corregir también el resumen de la
+> corrección, que es donde el lector siguiente va a buscar el porqué.*
 
 > **La causa es una sola y es de composición: el contenido no reserva el alto del pie fijo.**
 > *Un CTA fijo que no descuenta su propio alto del área scrolleable no «tapa a veces»: tapa
