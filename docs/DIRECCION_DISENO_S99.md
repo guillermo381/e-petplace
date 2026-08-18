@@ -297,6 +297,325 @@ qué come y no lo inventamos*, `LETRA_RECORRIDO_DESPENSA_S96` §5.3).
 
 ---
 
+# §1bis · LAS TRES LEYES DE S100c (N21–N23) — nacidas del gate del founder
+
+> **Estatuto: depositadas por B el 18-ago-2026, con APARATO.** Las tres salen
+> de observaciones literales del founder sobre la app publicada (OTA
+> `fbd7b6e0`, ancla `f107eac9`), y **las tres traen su medición adentro**, no
+> su descripción. *Esta casa ya pagó ocho gates por traducir una referencia a
+> prosa en vez de medirla* (S99, la barra).
+>
+> **Instrumento: `scripts/censar-superficies.py`**, verificado contra
+> geometría plantada ANTES de usarse — y su `#FFFFFF` vs `#FAF9F7` = **1.052**
+> coincide con el número que la casa ya había medido por otro camino y escrito
+> en `Tarjeta.tsx:127`. *Dos cuentas, un número* (L-287).
+>
+> **Medición completa: `docs/laminas/2026-08-18-s100c-MEDICION-SUPERFICIES.md`.**
+
+## N21 · LA LEY DE SUPERFICIES — lo que AGRUPA va en carta; lo que ES la pantalla, no
+
+**FIRMA DEL FOUNDER, verbatim:** *«como toda la pantalla está sin fondo, todo
+está escrito directamente sobre el fondo, sin tener bordes blancos, se
+pierde… el código se pierde porque queda entre colores»*.
+
+**LA LEY, en una línea:**
+
+> **UN GRUPO DE DATOS QUE SE LEE JUNTO VIVE SOBRE UNA SUPERFICIE PROPIA.
+> LO QUE ES LA PANTALLA MISMA —SU TÍTULO, SU PIE, SU ACCIÓN— NO LLEVA CARTA.**
+
+**El criterio operativo, para no tener que interpretar:** si el bloque tiene
+un rótulo que lo nombra («A dónde te lo llevamos», «Quién recibe», «El total
+de tu pedido»), **ese rótulo está declarando un grupo ⇒ el grupo va en
+carta.** Un rótulo sin superficie es un grupo que se anunció y no se dibujó.
+
+**LO QUE NO LLEVA CARTA, para que la ley no se lea como «poner cajas a
+todo»:** el encabezado de la pantalla · el pie fijo con su CTA · una lista
+cuyos ítems YA son cartas (no se anida) · el fondo mismo. **Ante la duda,
+rige la regla de oro de N1–N10: quitá antes que agregar** — la ley pide UNA
+superficie por grupo, jamás una por elemento.
+
+### 🔴 LO MEDIDO — el defecto tiene número, y el número da vuelta el diagnóstico
+
+**Censo del recorrido de la despensa, aparato SM-S938B, 18-ago-2026, mismo
+recorte para todas** (`separadores = planos distintos del fondo + reglas`):
+
+| pantalla | planos | reglas | **separadores** | **% de fondo** |
+|---|---|---|---|---|
+| Hogar | 5 | 8 | 13 | — (degradado) |
+| Tus pedidos | 2 | 11 | 13 | 19,9 % |
+| checkout | 3 | 4 | 7 | 62,3 % |
+| vitrina | 2 | 4 | 6 | 38,1 % |
+| carrito | 3 | 2 | 5 | **69,7 %** |
+| resumen del total | 2 | 3 | 5 | 50,3 % |
+| **detalle del pedido** | **0** | **0** | **0** | **88,5 %** |
+
+**El detalle del pedido tiene CUATRO grupos rotulados —la escalera, «Qué
+pediste», «A dónde te lo llevamos», «El total de tu pedido»— y CERO
+superficies. El 88,5 % de su área útil es un solo color.** Ahí vive el código
+de la puerta (`pedido/[pedidoId].tsx:396`), dentro de un `View` con padding y
+sin superficie: **la frase del founder es literalmente el código.**
+
+### 🔴 Y LO QUE NO ES EL DEFECTO — porque la cura obvia habría sido la equivocada
+
+**No nos falta contraste: nos falta la superficie.** Medido el mismo día,
+misma vara:
+
+| | fondo | carta | **contraste** |
+|---|---|---|---|
+| **nosotros** | `#FAF2F5` | `#FFFFFF` | **1,10** |
+| **Laika (aparato)** | `#F2F2F2` | `#FFFFFF` | 1,119 |
+| **Laika (captura del repo)** | `#F2F2F2` | `#FFFFFF` | 1,119 |
+
+*Cuando ponemos carta, separamos igual que la referencia.* ⇒ **subir el
+contraste no habría curado nada**; lo que falta es poner la superficie donde
+hoy no hay ninguna. **Y el reparto del área lo dice solo:** el carrito de
+Laika es **22,4 % fondo / 45,1 % superficie**; el nuestro, **69,7 % fondo /
+10,2 % superficie** — y la mayor parte de ese 10 % es la barra de tabs.
+
+### ⚠️ LOS DOS CEROS NO SON EL MISMO CERO — la trampa, declarada
+
+`referencia-laika-resumen-pedido.jpeg` también da **0 planos**, y **no
+significa lo mismo**: tiene SIETE cartas separadas por **hairline** sobre
+fondo casi-blanco. Su censo real es **0 planos · 23 reglas**. El nuestro es
+**0 · 0**. *Apoyar la ley en esa equivalencia habría sido una conclusión
+correcta sobre una premisa falsa* (L-294), y por eso el instrumento cuenta
+las dos cosas.
+
+⇒ **La separación puede ser RELLENO o BORDE. Lo que la ley prohíbe es
+NINGUNA.** La casa tiene las dos: `Tarjeta` en claro recupera su hairline
+(enmienda S86) y en oscuro usa el halo. **El material ya existía: lo que
+faltaba era la ley que dice dónde va.**
+
+## N22 · LA «i» EN CÍRCULO ES EL ESTÁNDAR DE LA CASA PARA EXPLICAR
+
+**FIRMA DEL FOUNDER, verbatim:** *«punto superpositivo la i en el círculo con
+la información… creo que lo tenemos que dejar como estándar cuando tenemos
+que mandar información»*.
+
+**LA LEY:**
+
+> **LO QUE SE NECESITA PARA DECIDIR QUEDA A LA VISTA.
+> LO QUE SE NECESITA PARA ENTENDER VA DETRÁS DE UNA «i».**
+
+**⇒ Todo párrafo explicativo permanentemente visible es candidato a «i» con
+Hoja.** El corte no es de longitud: es de función. *Un dato que cambia la
+decisión no se pliega; una explicación de por qué el dato es así, sí.*
+
+**Y su límite, que viene de una ley ya firmada y no se reabre:** **una
+advertencia de salud JAMÁS se pliega** (`MODELO_DESPENSA` §6/§10 — *plegar
+una advertencia de salud la convierte en nota al pie*). La «i» es para
+explicar, nunca para esconder un riesgo.
+
+**Precedente vivo, ya construido:** A lo montó en S100b para la donación
+(`carrito.tsx`, `onExplicarDonacion`) y para los dos párrafos de «que llegue
+solo» (`checkout.tsx`). **La ley no inventa un patrón: nombra el que ya
+funcionó y lo vuelve obligatorio.** Y la referencia lo respalda: el carrito
+de Laika usa exactamente esa forma —«i» en círculo + chevron dentro de una
+carta— para su banda de membresía.
+
+### Lo censado hoy, con su alto recuperable
+
+| dónde | párrafo siempre visible | alto |
+|---|---|---|
+| carrito | *«El total con envío e impuestos lo vas a ver antes de pagar.»* | **40,5 dp** |
+| checkout | *«Lo que el repartidor tiene que saber: "dejar en portería"…»* | **~61 dp** (3 líneas) |
+| resumen | *«Todavía no hay medio de pago real: no se cobra nada…»* | **~75 dp** (3 líneas + título) |
+
+⚠️ **Los tres son candidatos, no órdenes.** El de la instrucción de entrega
+**explica un campo que se está por llenar**, así que puede ser de los que
+deciden: **lo decide su dueño (A) mirándolo, no yo desde la ley.**
+
+## N23 · EL COLOR MARCA CLASE, JAMÁS IMPORTANCIA
+
+**FIRMA DEL FOUNDER, verbatim:** *«en las pantallas que tienen mucha
+información, cierta información tiene un color de letra diferente — lo más
+importante en el color de acento y el complemento en color normal. Como
+usuario me rompe la rutina visual»*.
+
+**LA LEY:**
+
+> **EL COLOR MARCA LO QUE ES DE OTRA CLASE, JAMÁS LO QUE ES MÁS IMPORTANTE
+> DENTRO DE LA MISMA FRASE. Lo importante dentro de un texto se marca con
+> PESO o con TAMAÑO. El acento se reserva para lo ACCIONABLE y para lo que
+> necesita ALARMA — y un dato importante no es un dato accionable.**
+
+**Es N5 (un acento por pantalla) un nivel más adentro.** N5 acota *cuántos*
+elementos se tiñen; N23 acota *qué* se tiñe. **Y las dos salieron del mismo
+hallazgo:** en S100b el `+` de la vitrina no pesaba por su tamaño sino por su
+**cardinalidad** — *un elemento correcto en su tamaño puede ser incorrecto en
+su repetición.* N23 es la vuelta de tuerca: **también puede ser incorrecto en
+su MOTIVO.**
+
+### 🔴 EL CENSO, y su resultado es bueno — con una consecuencia
+
+**Medido sobre la fuente el 18-ago-2026 (no sobre píxeles: el código es
+exacto y los píxeles no distinguen intención):**
+
+- **`Texto` NO TIENE COLOR DE ACENTO.** Su `TextoColor` es
+  `primary | secondary | tertiary | danger | success | warning` — **solo
+  texto y STATUS, que es precisamente «otra clase».** No existe forma de
+  teñir un texto con el color de marca desde la pieza.
+- **`PrecioText` no tiñe:** `text.primary` / `text.tertiary` /
+  `text.secondary`. El precio manda por **tamaño y peso**, jamás por color.
+- **Cero `color:` explícito sobre texto en toda la despensa del cliente.**
+- Los usos de acento sobre texto en `packages/ui` son **tres familias
+  legales**: **acción** (`Boton` variante `acento`; la etiqueta de acción de
+  `Aviso`), **estado** (`Badge`, `BarraTabs`, `CampoCodigo`) y **marca
+  firmada** (`bienvenida.tsx:81`, la palabra del titular con su destello,
+  `DIRECCION_ARTE` §5).
+
+⇒ **LA LEY YA SE CUMPLE POR CONSTRUCCIÓN, y eso cambia qué hay que hacer con
+ella: no hay nada que curar, hay algo que IMPEDIR.** El riesgo no es el
+código de hoy —es el `accent` que alguien le agregue mañana a `TextoColor`
+«porque hace falta destacar un dato». **Esta ley existe para que esa línea
+tenga que discutirse en vez de escribirse.**
+
+### ✅ EL SUJETO ERA EL REFERENTE — resuelto por la mesa, 18-ago-2026
+
+**El censo de B no reprodujo el patrón en nuestra app, y no lo rellenó.** La
+mesa lo aclaró: **el founder estaba describiendo LAIKA** —el `7 % OFF` en
+verde junto al precio en negro, la membresía en gris con corona, las etiquetas
+de oferta—, **y la mesa lo transmitió como si el sujeto fuéramos nosotros.**
+
+⇒ **N23 no cura: IMPIDE**, y eso la vuelve más valiosa, no menos. *Una ley que
+nace antes que su defecto es lo más barato que esta casa puede comprar*, y
+ésta ya tiene su caso de estudio **con nombre y medido**: el anti-patrón vive
+en la referencia, en `docs/diseno/referencias/`.
+
+**La lección quedó al canon como L-296:** *un hallazgo cambia de significado
+si se pierde sobre qué objeto se observó.* **Lo cazó medir en vez de aceptar
+el encargo.**
+
+**El anti-patrón, para que la vara quede a la vista:** Laika, en la misma
+tarjeta, pone precio tachado + precio con membresía en color + `% OFF` +
+`OFERTA` + `BAJÓ DE PRECIO`. **Cuatro líneas de precio y tres colores para
+decir un número.** *Si todo grita, nada señala.* Va junto a la ley de
+temperaturas: **ámbar solo cuando hay riesgo real; acento solo cuando hay
+acción o cambio de clase.**
+
+## N24 · EL CONTROL NO CAMBIA EL TAMAÑO DE LO QUE LO CONTIENE
+
+**FIRMA DEL FOUNDER, verbatim:** *«al agregar salta un escalón por debajo de
+todo y queda viéndose feo.»*
+
+**LA LEY:**
+
+> **UN CONTROL QUE CAMBIA DE FORMA SEGÚN SU ESTADO RESERVA SU ESPACIO MÁXIMO
+> DESDE EL PRIMER RENDER. El contenedor no cambia de tamaño porque su control
+> cambió de estado.**
+
+**Lo medido, sobre la misma tarjeta antes y después de tocar el `+`:**
+**+44,1 dp** — exactamente un blanco de 44 — **y la tarjeta vecina de la misma
+fila no se mueve.** *Ése es el «escalón»: la fila deja de ser una fila.*
+
+> ⏪ **CORRECCIÓN DE MI PROPIA MEDICIÓN, y la levantó C (18-ago).** Esta línea
+> decía **«309,0 → 353,1 dp»** como si fueran el alto de la tarjeta. **No lo
+> son: son un piso.** C midió la misma tarjeta en **332 dp** y **declaró la
+> discrepancia como discrepancia, no como corrección** — que es lo que la hizo
+> resoluble.
+>
+> **La causa, medida:** mi columna de barrido pasaba a **8 px del borde
+> derecho**, o sea **dentro del arco de la esquina** (`radius.lg` = 16 dp =
+> 45 px) ⇒ **recortaba ~19,4 px arriba y otros tantos abajo: 13,8 dp de menos.**
+> *Un instrumento que barre una columna no mide un rectángulo redondeado: mide
+> la cuerda que le tocó.*
+>
+> 🔴 **PERO EL NÚMERO QUE LA LEY USA ES EL DELTA, Y EL DELTA ES INMUNE:** el
+> recorte de esquina quita lo mismo antes y después. Re-medido en **dos
+> columnas distintas** —una junto al borde (309,0 → 353,1) y otra por el centro,
+> donde la foto interrumpe el barrido (169,6 → 213,7)— **las dos dan
+> exactamente +44,1.** Y la fuente lo dice por un tercer camino: `BOTON_COMPACTO`
+> 36 + `gap` 8 = **44**.
+>
+> ⇒ **tres cuentas, un número.** *El absoluto estaba mal medido y la ley no se
+> apoyaba en él* — pero se corrige igual, porque **una cifra equivocada en el
+> canon la va a citar alguien que no sabe para qué se midió.*
+
+**Y la aritmética que prueba que no es un descuido:** caja interna **138 dp**;
+el `+` entra al lado del precio (68 + 8 + 44 = **120**), el stepper compacto
+no (68 + 8 + 116 = **192**). **La cura no puede ser «achicar un poco».**
+
+⇒ **El alto de la tarjeta deja de depender del estado**: el control vive en
+una fila propia de alto constante, que aloja el `+` con cantidad 0 y el
+stepper con cantidad ≥ 1. **El defecto se vuelve inexpresable**, que es el
+mismo movimiento con el que `PantallaConPie` mató la reserva estimada.
+
+⚠️ **Su costo, declarado: +44 dp en todas las tarjetas**, sobre una que ya
+venía creciendo (el 1:1 le sumó ~41 dp en S100b). **El acreedor es el que
+S100b ya nombró: el bloque de texto y el header.** *Se declara en vez de
+compensarlo encogiendo la letra.*
+
+### 🔴 EL PRESUPUESTO QUE ESTE COSTO CONSUMIÓ — medido por C en la vitrina viva
+
+**C midió el efecto real del +44 sobre la vitrina de 50 tarjetas, y con eso el
+número tiene su CUARTA cuenta** (las dos columnas del barrido · la fuente
+`36 + 8` · y ahora el alto real):
+
+| | antes del merge | después |
+|---|---|---|
+| alto de la tarjeta de grilla | 332 dp | **376 dp** |
+| cromo antes del primer producto | 213 dp | 213 dp (N24 no lo toca) |
+| ¿entra la primera tarjeta entera? | sí | **sí, con 42 dp de sobra** |
+
+🔴 **Y LA ARITMÉTICA DEL CONTRAFÁCTICO, que es lo que hay que leer:** con el
+cromo que la vitrina tenía esa misma mañana (**317 dp**), la tarjeta habría ido
+de 433 a **809** contra un visor útil que termina en **747** ⇒ **se pasaba por
+62 dp.**
+
+> **N24 y la cura del cromo se cruzaron por casualidad y salió bien.** Si este
+> merge hubiera entrado un día antes, **el founder habría visto la primera
+> tarjeta cortada otra vez** — y ninguna de las dos pistas lo habría entendido:
+> *B midió su tarjeta, C midió su cromo, y **el que decide es la suma, que no
+> era de nadie.***
+
+⇒ **LOS 42 dp DE SOBRA SON TODO EL MARGEN QUE LE QUEDA A LA VITRINA.**
+**Cualquier cosa que agregue alto al cromo o a la tarjeta lo consume**, y la
+próxima que lo haga sin medir la suma va a cortar la primera fila. *Queda como
+presupuesto vivo, no como anécdota.* **Al canon como L-301.**
+
+## N25 · UNA SOLA PUERTA AL CARRITO, Y ES LA QUE ALCANZA EL PULGAR
+
+**FIRMA DEL FOUNDER:** *«no es un carrito, es una bolsa y se ve muy fea. Hay
+que poner un carrito, que es lo que siempre han utilizado todas las
+compañías»* + **el carrito va FLOTANTE, abajo a la derecha** (arrastrable
+queda para después).
+
+**① EL GLIFO LLEVA RUEDAS.** Es el único rasgo que una bolsa y una canasta
+**no pueden tener**, y sobrevive a 21 px porque son dos discos y no un detalle
+de trazo. **La distinción `carrito` ≠ `despensa` de S100b SIGUE EN PIE** —*la
+tab dice dónde estás, el carrito dice cuánto llevás*—: lo que se corrige no es
+la distinción, es la forma.
+
+> 🔴 **Y la causa hay que dejarla escrita, porque es la lección:** la forma se
+> eligió desde la palabra *«canasta»*, que estaba en el texto del gate, **en
+> vez de medirse contra el objeto**. Una canasta con asa de arco y cuerpo que
+> se angosta **tiene la silueta de una bolsa**, y a 21 px la silueta es todo
+> lo que queda. **Es la ley de la barra de S99 en ropa nueva: la referencia se
+> MIDE, no se describe.**
+
+**② HAY UNA SOLA PUERTA: LA FLOTANTE REEMPLAZA A LA DEL ENCABEZADO.**
+*Dos puertas al mismo cuarto no son redundancia: son dos lugares donde
+aprender lo mismo, y la segunda le roba sentido a la primera.* La del
+encabezado vive en `x=[344,368] · y=[80,104]` — **el ángulo superior derecho,
+la peor zona para un pulgar** en una pantalla de 832 dp.
+
+**③ Y NO NECESITA MECANISMO NUEVO, que es lo que la vuelve barata:** una
+flotante sobre un scroll reintroduce **H-105** (el pie que tapa contenido),
+que es justo lo que S100b curó. **`PantallaConPie` ya lo resuelve**: su
+reserva es DERIVADA, así que **una flotante montada como su `pie` no puede
+tapar contenido.** *Montada a mano con `position:'absolute'` vuelve el
+defecto — y R53 muerde, que es lo que tiene que hacer.*
+
+⚠️ **La flotante es de la VITRINA.** En el carrito, el checkout y el resumen
+no va: ahí el carrito no es un destino, es la pantalla en la que ya estás.
+
+**④ LA ELIMINACIÓN DA ACUSE.** Sin confirmación previa —firmado en S100b: la
+acción es inmediata y el deshacer es de la pantalla, la única que sabe qué se
+borró— **pero con acuse**. *Un borrado silencioso y un borrado fallido se ven
+igual.*
+
+---
+
 ## §2 · CANDIDATA CON GATE (no es ley)
 
 **Háptica sutil en confirmaciones clave** («entregado» con foto · el
@@ -305,6 +624,16 @@ dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
 
+- **v1.1 (18-ago-2026, S100c-B, con APARATO):** entran **N21–N25**, las cinco
+  del gate del founder sobre la OTA `fbd7b6e0`. **Las cinco traen su medición
+  adentro**, con instrumento nuevo (`scripts/censar-superficies.py`,
+  verificado contra geometría plantada antes de usarse) y la medición completa
+  en `docs/laminas/2026-08-18-s100c-MEDICION-SUPERFICIES.md`.
+  **N25 ② reabre una decisión de S100b** (la canasta del encabezado) y lo
+  declara: la puerta al carrito pasa a ser una sola, la flotante.
+  **N23 se depositó con su censo dando BIEN** —la ley ya se cumple por
+  construcción— y con lo que no se pudo reproducir declarado como pregunta al
+  founder, no rellenado.
 - **v1.0 (14-ago-2026, mesa S99):** nace con N11–N20 sobre la investigación
   de mesa + las firmas del founder de esta sesión (campos N11 · vehículo
   máx 2 por construcción · correo como llave · estándar Rappi/Uber para la

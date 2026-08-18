@@ -33,6 +33,10 @@ export type IconoNombre =
   /** G-08 (S100b-B) — el `−` del stepper con cantidad 1, **solo en el
    *  carrito**. Familia de CONTROL: sin huella, como `lapiz`. */
   | 'papelera'
+  /** S100c-B, pedido de D — LA TAB DE PEDIDOS. Distinto de `despensa` (la
+   *  sección) y de `carrito` (lo que llevás sin comprar): esto es lo que YA
+   *  compraste y está en camino. Las tres conviven en la misma barra. */
+  | 'pedido'
   // ☠️ 'coach' MURIÓ COMO NOMBRE (S84-B11) — RENAME a 'ia', firmado.
   //    El dibujo NO cambió una línea: son las mismas tres chispas de
   //    CHISPA. Lo que cambió es qué nombra. El código decía que este
@@ -671,6 +675,51 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Circle cx={10.2} cy={20} r={1.5} {...trazo(tinta)} />
       <Circle cx={17.6} cy={20} r={1.5} {...trazo(tinta)} />
       <Huella color={huella} x={10.4} y={10.6} escala={0.38} />
+    </>
+  ),
+  /* 🔴 PEDIDO — S100c-B, pedido de la pista D con su defecto medido.
+
+     **El caso:** la barra de cinco tabs entró en este bundle y **Pedidos
+     quedó usando el glifo `despensa` PRESTADO** ⇒ **dos tabs vecinas con el
+     MISMO dibujo.** *Dos tabs que se dibujan igual le piden al dueño que lea
+     la etiqueta para saber dónde está, y la etiqueta mide 11 px.*
+
+     **D no lo inventó y frenó bien:** un glifo se firma por gate (§2.9) y
+     elegir la forma desde la palabra es la lección que S99 pagó con ocho
+     gates. **Lo pidió con el caso, que es como se pide una pieza.**
+
+     ── POR QUÉ UNA CAJA, Y NO OTRA COSA ────────────────────────────────
+     La familia ya tiene los otros dos momentos de la compra y hay que
+     distinguirse de ELLOS, no de una idea:
+       · `despensa` = **la bolsa** — la SECCIÓN, donde se compra.
+       · `carrito`  = **el carro con ruedas** — lo que llevás y todavía no
+                      compraste.
+       · `pedido`   = **la caja cerrada** — lo que YA compraste y viene en
+                      camino.
+
+     **El discriminador es LA TAPA**: una costura horizontal cruzando el
+     cuerpo, que ni la bolsa ni el carro tienen. *Y sobrevive a 21 px porque
+     es una LÍNEA RECTA de lado a lado — el rasgo más barato de leer que
+     existe, al revés de un detalle de trazo* (Ley 9).
+
+     **La huella va DENTRO de la caja**, y acá el lugar dice algo igual que
+     en `carrito`: **lo que viene en la caja es para la mascota.**
+
+     ⚠️ **SIN GATE DE ÍCONO — §2.9 pide verlo a 21 px y ese gate es del
+     founder.** Y se declara el mismo límite que el `carrito` con ruedas:
+     **en este entorno no hay rasterizador de SVG**, así que su legibilidad
+     a 21 px **no se verificó**. Se dice en vez de darse por bueno. */
+  pedido: ({ tinta, huella }) => (
+    <>
+      {/* el cuerpo de la caja */}
+      <Path
+        d="M4.2 8.6h15.6v9.3a1.6 1.6 0 0 1-1.6 1.5H5.8a1.6 1.6 0 0 1-1.6-1.5Z"
+        {...trazo(tinta)}
+      />
+      {/* LA TAPA — el discriminador: una costura recta de lado a lado que
+          ni la bolsa ni el carro tienen */}
+      <Path d="M3.2 5.4h17.6v3.2H3.2Z" {...trazo(tinta)} />
+      <Huella color={huella} x={9.9} y={11.6} escala={0.38} />
     </>
   ),
   pagos: ({ tinta, huella }) => (
@@ -1413,6 +1462,10 @@ export function Icono({
        llevás adentro de ella. *Darle color propio los separaría en la
        pantalla justo donde tienen que leerse juntos.* */
     carrito: { pura: theme.status.warning, aa: theme.status.warningText },
+    /* `pedido` HEREDA el ocre de la despensa por el mismo motivo que
+       `carrito`: es la misma familia (comprar), en otro momento. Un color
+       propio diría que es otro mundo. */
+    pedido: { pura: theme.status.warning, aa: theme.status.warningText },
     /* Control puro: se viste de TINTA, no de capa — no nombra un mundo,
        ejecuta una acción. Mismo criterio que `lapiz`. */
     papelera: { pura: colorTinta, aa: colorTinta },

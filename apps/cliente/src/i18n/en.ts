@@ -12,6 +12,8 @@ export const clienteEn = {
   tabs: {
     hogar: 'Home',
     explorar: 'Explore',
+    // S100c-D — Orders takes Explore's slot in the bar (founder's call).
+    pedidos: 'Orders',
     despensa: 'Pantry',
     cuenta: 'Account',
   },
@@ -162,6 +164,12 @@ export const clienteEn = {
     // r6-2 — mirror of es.ts (Espejo enforces parity).
     recoCitaDe: "{{mascota}}'s visit",
     recoCargarCarnet: "Add {{mascota}}'s card",
+    // S100c-D — the in-flight order reaches Home (declared unmounted since
+    // S82-C; its trigger fired in S95). The most advanced state presides.
+    recoPedidoEnCamino: 'Your order is on its way',
+    recoPedidoPreparando: 'Your order is being prepared',
+    recoPedidoConfirmado: 'Your order is confirmed',
+    recoPedidosVarios: 'You have {{n}} orders in progress',
     venceEnMin: 'Expires in {{n}} min',
     presupuestoDe: 'Estimate from {{negocio}}',
     presupuestoPara: 'Estimate for {{mascota}}',
@@ -1038,6 +1046,12 @@ export const clienteEn = {
     // S96-D — the movable point (§7): if Places can't find the house,
     // the point still exists.
     sinResultados: "We couldn't find that address. Type it anyway and place the point by hand on the map.",
+    /* A-03 (S100c) — see the Spanish side. */
+    /* S100c — see the Spanish side. */
+    aliasLabel: 'Name for this address',
+    aliasAyuda: 'So you recognize it later: “Office”, “Mom’s place”.',
+    agregarOtra: 'Add another address',
+    buscadorApagado: 'Address search is unavailable right now. Type it by hand and place the point on the map.',
     puntoEtiqueta: 'Move the map to adjust the delivery point',
     puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
     ponerPunto: 'Place the point on the map',
@@ -1322,8 +1336,27 @@ export const clienteEn = {
     precioDesde: 'from',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
 
+    /* A-01 (S100c) — see the Spanish side for why these are two voices and
+       not one «unavailable». */
+    /* A-02 (S100c) — see the Spanish side. */
+    resumenComoLlega: 'How it arrives',
+    resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
+
+    /* A-01(b) (S100c) — see the Spanish side. */
+    maximoEntregable: 'We can get you {{n}} of this one right now — that’s what we added to your cart.',
+
+    itemSeAgoto: 'It sold out while it was in your cart.',
+    itemYaNoEsta: "It's no longer for sale.",
+    itemPrecioCambio: 'The price changed: it’s now {{precio}}.',
+    faltaSacarNoDisponibles: 'Remove what’s no longer available to continue.',
+
     // S96 · the other doors
     tusPedidos: 'Your orders',
+    // S100c-D · los dos rótulos de la casa de Pedidos. Solo se dibujan
+    // cuando existen LAS DOS secciones: con una sola, rotular anuncia
+    // una división que no está (Chanel).
+    pedidosEnCurso: 'In progress',
+    pedidosHistorial: 'History',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',
     reclamoEntrada: 'Bought at the store?',
     reclamoEntradaDetalle: "Enter your invoice code and the purchase joins their record.",
@@ -1390,6 +1423,9 @@ export const clienteEn = {
     envio: 'Shipping',
     envioRetiro: 'Store pickup',
     total: 'Total',
+    // S100c-D — the receipt, inside the total card. No way to open it yet:
+    // measured, all 6 invoices have both file URLs empty.
+    facturaNumero: 'Invoice',
     totalNoLlego: 'This order already existed. See the total in Your orders.',
     pagoSimuladoTitulo: 'Simulated payment',
     pagoSimuladoDetalle:
@@ -1463,6 +1499,9 @@ export const clienteEn = {
     enCaminoVentana: 'Arrives between',
     enCaminoVentanaDetalle: "It's a window, not an exact time.",
     enCaminoQuienTrae: 'Who’s bringing it',
+    // S100c-D — the draggable sheet, and the honest photo gap.
+    enCaminoHojaVerMas: 'See the order details',
+    repartidorSinFoto: 'We’re not showing their photo yet',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',
@@ -1473,6 +1512,8 @@ export const clienteEn = {
     // S96 · Your orders
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Order from {{dia}}',
+    // S100c-D — what the order carries, as the row's title.
+    pedidoTraeVarios: '{{producto}} and {{n}} more',
     verPedido: 'View order',
     errorPedidosTitulo: "We couldn't load your orders",
     sinPedidosTitulo: "You haven't ordered anything yet",

@@ -868,7 +868,7 @@ export default function DespensaDescubrir() {
             <View>
               <CeldaNavegacion
                 titulo={t('despensa.tusPedidos')}
-                onPress={() => router.push('/despensa/pedidos')}
+                onPress={() => router.push('/pedidos')}
               />
               <Separador />
             </View>

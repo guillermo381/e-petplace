@@ -90,6 +90,8 @@ import {
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
   obtenerSolicitudesPendientesDueno,
+  listarMisPedidos,
+  type PedidoEnLista,
   hayNovedades,
   resolverUrlFoto,
   resolverUrlsFotos,
@@ -671,6 +673,24 @@ export default function Hogar() {
   const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
   // S88-D · la campana: presencia por booleano (jamás la lista acá).
   const [conNovedades, setConNovedades] = useState(false);
+  /**
+   * 🔴 S100c-D · LOS PEDIDOS EN VUELO — la fila que faltaba en la posición
+   * consolidada (firma del founder: *«los pedidos que estén en vuelo o
+   * próximos deben llegar a la posición consolidada del Hogar y hoy no
+   * están llegando»*).
+   *
+   * **No es una fila nueva: es una fila DECLARADA SIN MONTAR desde S82-C**,
+   * con su condición escrita en el propio render — *«cero motor de despensa
+   * (L-139 — no se fabrica el dato); **monta cuando exista**»*. El motor
+   * existe desde S95 y la despensa cerró de punta a punta en S96/S100. *Un
+   * ítem diferido con su disparo adentro es lo correcto; lo que falta es que
+   * alguien barra los disparos ya cumplidos.*
+   *
+   * Vacío mientras carga o si la lectura falla — best-effort igual que sus
+   * vecinas: una franja que no se dibuja no afirma nada, una que dice «no
+   * tenés pedidos» sí (L-139).
+   */
+  const [pedidosEnVuelo, setPedidosEnVuelo] = useState<PedidoEnLista[]>([]);
 
   const esMemorial = theme.mode === 'memorial';
 
@@ -782,6 +802,37 @@ export default function Hogar() {
         // a la última visita de ESTA casa) — cada app pasa SU nombre.
         void hayNovedades('cliente').then((h) => {
           if (vigente) setConNovedades(h.ok ? h.data : false);
+        });
+        /* 🔴 PONTE AL DÍA: LOS PEDIDOS EN VUELO (S100c-D).
+         *
+         * **Se filtra ACÁ y no en el lector, y es decisión medida, no
+         * pereza:** L-223 dice que *el costo no está en los datos, está en
+         * la PETICIÓN* —un peaje fijo de ~150 ms que no depende de cuánto
+         * traiga—, y esta casa lo probó al revés (*traer 105 filas costó
+         * MENOS que traer una*). Pedirle a A un lector nuevo para descartar
+         * filas en el server habría costado una ronda entre pistas y CERO
+         * milisegundos.
+         *
+         * **`pagando` NO entra, y ése es el filtro que importa.** La promesa
+         * de entrega **nace con el pedido, antes del pago** (censo S100b-D:
+         * `pagando` = 4 · con promesa = 4 · **con pago confirmado = 0**) ⇒
+         * meter un `pagando` acá sería prometerle a la familia una entrega
+         * que todavía no está comprada. *Es la mitad exacta del defecto que
+         * S100b curó por el otro lado.*
+         * Los terminales tampoco: `entregado` y `cancelado` ya no esperan
+         * nada — su casa es el historial. */
+        void listarMisPedidos().then((ps) => {
+          if (!vigente) return;
+          setPedidosEnVuelo(
+            ps.ok
+              ? ps.data.filter(
+                  (p) =>
+                    p.narrativa === 'confirmado' ||
+                    p.narrativa === 'preparando' ||
+                    p.narrativa === 'en_camino',
+                )
+              : [],
+          );
         });
         // PONTE AL DÍA: presupuestos vigentes (E7: SOLO 'enviado' — el
         // vencido perezoso jamás pide acción; lector ya ordenado venceEn ASC).
@@ -906,6 +957,14 @@ export default function Hogar() {
   // S61-A11: proximaCita (el hero global) MURIÓ — la acción vive en la
   // ficha de cada mascota (proxima_cita_por_mascota); Ley 37 aplicada.
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
+  /** La hora de la ventana prometida. Locale EXPLÍCITO, el mismo par que
+   *  usan `pedidos.tsx` y `en-camino` — *dos formas del mismo reloj en
+   *  pantallas vecinas divergen el día que alguien toque una sola.* */
+  const horaLocal = (iso: string) =>
+    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   // ── r6: LAS FILAS DE PONTE AL DÍA se computan ACÁ porque el punto de
   // estado de cada mascota del techo muestra SU cuenta de pendientes —
@@ -990,6 +1049,88 @@ export default function Hogar() {
             router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId } }),
         }),
       ),
+      /* 🔴 EL PEDIDO EN VUELO — UNA SOLA FILA, Y EL COLAPSO ES LETRA
+         FIRMADA, NO ECONOMÍA DE ESPACIO.
+         `DISEÑO_EXPERIENCIA` §10ter.1: *«el eje de Ponte al día no es el
+         TIEMPO, es ACCIÓN vs INFORMACIÓN — lo que espera acción preside y
+         **no colapsa** (colapsar acciones esconde trabajo pendiente); el
+         colapso rige sobre lo informativo»*. **Un pedido en vuelo no
+         espera nada del dueño: es información** ⇒ colapsa.
+         *Y el número dice por qué importa: la cuenta del gate tiene **12
+         pedidos en vuelo hoy** (10 preparando + 2 en camino). Sin colapso,
+         Ponte al día se convierte en una lista de pedidos y las vacunas y
+         las citas quedan detrás del «Ver 12 más».*
+
+         **DÓNDE VA, declarado como reversible:** después de los tres
+         grupos que esperan ACCIÓN (autorizaciones, presupuestos, citas por
+         coordinar) y antes de la alerta de vacuna. *Una entrega de hoy
+         tiene hora; un refuerzo de vacuna tiene semanas.* Es una posición
+         en un array — el gate la mueve con una línea. */
+      ...(() => {
+        if (pedidosEnVuelo.length === 0) return [];
+        /* La NARRATIVA MÁS AVANZADA preside — lo que sigue primero (Ley 7).
+           El orden es explícito y no alfabético ni de catálogo: si mañana
+           nace una narrativa nueva, cae en `0` y **no se cuela adelante**. */
+        const rango = (n: PedidoEnLista['narrativa']) =>
+          n === 'en_camino' ? 3 : n === 'preparando' ? 2 : n === 'confirmado' ? 1 : 0;
+        const preside = [...pedidosEnVuelo].sort((a, b) => {
+          const d = rango(b.narrativa) - rango(a.narrativa);
+          if (d !== 0) return d;
+          // Empate: la promesa más próxima. Sin promesa va al final — un
+          // nulo no puede ordenar como si fuera «pronto» (L-139).
+          if (a.promesa_desde === null) return 1;
+          if (b.promesa_desde === null) return -1;
+          return a.promesa_desde < b.promesa_desde ? -1 : 1;
+        })[0];
+        const varios = pedidosEnVuelo.length > 1;
+        return [
+          {
+            key: 'pedidos-en-vuelo',
+            // 🔴 SIN MASCOTA, y es correcto: un pedido es de la FAMILIA y
+            // sus ítems pueden ir a varias mascotas o a ninguna. Cae en el
+            // precedente ya firmado de la fila `cita-`: **existe en la
+            // lista y no cuenta como pendiente**, porque «N por resolver»
+            // no puede incluir algo que no se resuelve. El cotejo __DEV__
+            // de abajo filtra por `mascotaId === m.id`, así que un `null`
+            // queda fuera de todas las cuentas por construcción.
+            mascotaId: null,
+            capa: 'cuidado',
+            icono: 'despensa',
+            titulo: varios
+              ? t('hogar.recoPedidosVarios', { n: pedidosEnVuelo.length })
+              : t(
+                  preside.narrativa === 'en_camino'
+                    ? 'hogar.recoPedidoEnCamino'
+                    : preside.narrativa === 'preparando'
+                      ? 'hogar.recoPedidoPreparando'
+                      : 'hogar.recoPedidoConfirmado',
+                ),
+            // La ventana prometida, si la hay. Acá SÍ es honesta —a
+            // diferencia de en `pagando`— porque estas tres narrativas ya
+            // tienen el pago confirmado.
+            detalle:
+              preside.promesa_desde !== null && preside.promesa_hasta !== null
+                ? t('despensa.promesaCorta', {
+                    dia: fechaLargaHumana(preside.promesa_desde, idioma),
+                    desde: horaLocal(preside.promesa_desde),
+                    hasta: horaLocal(preside.promesa_hasta),
+                  })
+                : null,
+            onPress: () =>
+              varios
+                ? router.push('/pedidos')
+                : preside.narrativa === 'en_camino'
+                  ? router.push({
+                      pathname: '/pedidos/en-camino/[pedidoId]',
+                      params: { pedidoId: preside.pedido_id },
+                    })
+                  : router.push({
+                      pathname: '/pedidos/pedido/[pedidoId]',
+                      params: { pedidoId: preside.pedido_id },
+                    }),
+          } satisfies FilaReco_,
+        ];
+      })(),
       // la alerta de vacuna (era la voz pideAtencion de la ficha)
       ...mascotas.flatMap((m): FilaReco_[] => {
         // 🔴 LA COMPOSICIÓN TAMBIÉN RIGE ACÁ (reincidencia del gate): un

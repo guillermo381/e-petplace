@@ -11,6 +11,10 @@ export const clienteEs = {
   tabs: {
     hogar: 'Hogar',
     explorar: 'Explorar',
+    // S100c-D · Pedidos entra a la barra en el slot de Explorar (firma del
+    // founder). La etiqueta de `explorar` QUEDA: la pantalla sigue viva y
+    // se alcanza desde el perfil de la mascota — lo que salió es su botón.
+    pedidos: 'Pedidos',
     // S95-I · el cuarto slot (§3, el ciclo del trono). Le guarda el lugar
     // a Comunidad: cuando ésta nazca, la Despensa le entrega el trono.
     despensa: 'Despensa',
@@ -213,6 +217,18 @@ export const clienteEs = {
     // fila-resumen de la semana murió con sus keys (Ley 37).
     recoCitaDe: 'La cita de {{mascota}}',
     recoCargarCarnet: 'Cargar el carnet de {{mascota}}',
+    // 🔴 S100c-D · EL PEDIDO EN VUELO LLEGA AL HOGAR. La fila estaba
+    // DECLARADA SIN MONTAR desde S82-C —*«monta cuando exista [el motor
+    // de despensa]»*— y el motor existe desde S95. Voz por narrativa: la
+    // más avanzada preside (lo que sigue, primero).
+    recoPedidoEnCamino: 'Tu pedido va en camino',
+    recoPedidoPreparando: 'Tu pedido se está preparando',
+    recoPedidoConfirmado: 'Tu pedido está confirmado',
+    // COLAPSA, y no es gusto: `DISEÑO_EXPERIENCIA` §10ter.1 firma que *«el
+    // eje de Ponte al día no es el TIEMPO, es ACCIÓN vs INFORMACIÓN — lo
+    // que espera acción preside y no colapsa; el colapso rige sobre lo
+    // informativo»*. Un pedido en vuelo no espera nada del dueño.
+    recoPedidosVarios: 'Tenés {{n}} pedidos en curso',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
@@ -1172,6 +1188,17 @@ export const clienteEs = {
     // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
     // encuentra la casa, el punto igual existe.
     sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    /* A-03 (S100c) · el buscador apagado LO DICE. Antes se apagaba en silencio
+       y desde la pantalla se veía igual que «no encontré nada» y que «estoy
+       buscando» — tres estados con una sola pinta (L-218).
+       Espeja `lugares.ts:81` y no lo reusa: D-539, `packages/api` habla español
+       fijo y no sabe traducir. */
+    /* S100c · la libreta de direcciones. El nombre es la LLAVE con la que la
+       persona reconoce el lugar; la calle es el detalle. */
+    aliasLabel: 'Nombre de esta dirección',
+    aliasAyuda: 'Para reconocerla después: «Oficina», «Casa de mamá».',
+    agregarOtra: 'Agregar otra dirección',
+    buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escribila a mano y poné el punto en el mapa.',
     puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
     puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
@@ -1539,8 +1566,38 @@ export const clienteEs = {
     precioDesde: 'desde',
     faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
 
+    /* 🔴 A-01 (S100c) · LO QUE CAMBIÓ MIENTRAS EL CARRITO ESTABA GUARDADO.
+       Dos hechos distintos con dos voces distintas a propósito: «se agotó»
+       invita a volver más adelante, «ya no está a la venta» no. Fundirlos en
+       un «no disponible» ahorraría una key y le sacaría a la familia lo único
+       que le sirve para decidir qué hacer.
+       ⚠️ Ninguna culpa a la familia ni se disculpa de más: es un hecho del
+       mundo, dicho en una línea. */
+    /* A-02 (S100c) · el resumen confirma cómo y cuándo llega. El rótulo es
+       una PREGUNTA contestada, no una etiqueta de formulario: la familia no
+       está llenando un campo, está revisando una promesa. */
+    resumenComoLlega: 'Cómo llega',
+    resumenFechaPorEntrega: 'Cada entrega va por su cuenta y tiene su propia fecha.',
+
+    /* 🔴 A-01(b) · el tope de lo que se puede llevar, dicho ANTES de pagar.
+       Literal del founder. **Dice cuánto podés llevar, jamás cuánto hay**: el
+       motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
+       pidiendo 3 contesta 3 y no se filtra inventario ajeno.
+       Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
+    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
+
+    itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
+    itemYaNoEsta: 'Ya no está a la venta.',
+    itemPrecioCambio: 'El precio cambió: ahora es {{precio}}.',
+    faltaSacarNoDisponibles: 'Sacá del carrito lo que ya no está disponible para seguir.',
+
     // S96 · las otras puertas
     tusPedidos: 'Tus pedidos',
+    // S100c-D · los dos rótulos de la casa de Pedidos. Solo se dibujan
+    // cuando existen LAS DOS secciones: con una sola, rotular anuncia
+    // una división que no está (Chanel).
+    pedidosEnCurso: 'En curso',
+    pedidosHistorial: 'Historial',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
     reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',
@@ -1626,6 +1683,11 @@ export const clienteEs = {
     envio: 'Envío',
     envioRetiro: 'Retiro en tienda',
     total: 'Total',
+    // S100c-D · el comprobante, dentro de la carta del total. NO hay camino
+    // a abrirlo, y es MEDIDO: las 6 facturas de la base tienen `archivo_url`
+    // y `pdf_url` en CERO. Un botón que no abre nada es una puerta que
+    // rebota (Ley 23) — y encima sobre el papel de la contabilidad ajena.
+    facturaNumero: 'Factura',
     totalNoLlego: 'Este pedido ya estaba creado. El total lo ves en Tus pedidos.',
     pagoSimuladoTitulo: 'Pago simulado',
     pagoSimuladoDetalle:
@@ -1700,6 +1762,14 @@ export const clienteEs = {
     enCaminoVentana: 'Llega entre',
     enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
     enCaminoQuienTrae: 'Quién lo trae',
+    // S100c-D · la hoja arrastrable. La voz del asa dice QUÉ hace, no cómo
+    // se hace (nadie necesita que le expliquen que se arrastra: se agarra).
+    enCaminoHojaVerMas: 'Ver los detalles del pedido',
+    // 🔴 El hueco de la foto se NOMBRA para el lector de pantalla en vez de
+    // quedar mudo: un círculo vacío sin voz es un elemento que no existe
+    // para quien no ve, y acá el hueco es información (la ficha está
+    // incompleta A PROPÓSITO, con su deuda firmada).
+    repartidorSinFoto: 'Todavía no mostramos su foto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',
@@ -1710,6 +1780,10 @@ export const clienteEs = {
     // S96 · Tus pedidos
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Pedido del {{dia}}',
+    // S100c-D · qué trae el pedido, en el título de la fila. «y N más» y no
+    // «N productos»: **20 de 23 pedidos de la cuenta del gate tienen UN solo
+    // ítem** — la voz se escribe para el caso real, no para el ejemplo.
+    pedidoTraeVarios: '{{producto}} y {{n}} más',
     verPedido: 'Ver el pedido',
     errorPedidosTitulo: 'No pudimos cargar tus pedidos',
     sinPedidosTitulo: 'Todavía no pediste nada',

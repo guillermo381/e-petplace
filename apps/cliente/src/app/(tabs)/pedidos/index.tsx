@@ -34,10 +34,16 @@ import {
   EstadoVacio,
   Separador,
   TarjetaPedido,
+  Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
+import {
+  listarMisPedidos,
+  resumenDeItemsDePedidos,
+  type PedidoEnLista,
+  type ResumenItemsPedido,
+} from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 import {
   escaleraDePedido,
@@ -55,14 +61,40 @@ export default function DespensaPedidos() {
   const { t, idioma } = useTraduccion();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
+  /**
+   * 🔴 S100c-D · QUÉ TRAE CADA PEDIDO — el dato que faltaba para que la lista
+   * DISTINGA (D-03, firma del founder: *«dice pedido 17 de agosto, pedido 17
+   * de agosto»*).
+   *
+   * **Medido en la cuenta del gate:** 23 pedidos en 5 días locales, **nueve
+   * el 17-ago y nueve el 12-ago** ⇒ nueve tarjetas con el mismo título, dos
+   * veces. Con solo el día, **1 de esas 9 es distinta**; con el nombre del
+   * producto, 4.
+   *
+   * Va en una **segunda ola y no encadenada**: los ids salen de la primera,
+   * así que no hay forma de pedirlo antes — pero el mapa se pinta igual si
+   * esto falla o tarda (`{}` vacío ⇒ la tarjeta cae a su título de fecha).
+   * *Una lista que no se dibuja hasta saber qué trae es peor que una que no
+   * lo dice.*
+   */
+  const [resumen, setResumen] = useState<Record<string, ResumenItemsPedido>>({});
   const [reintento, setReintento] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       setPedidos('cargando');
+      setResumen({});
       void listarMisPedidos().then((r) => {
-        if (vigente) setPedidos(r.ok ? r.data : 'error');
+        if (!vigente) return;
+        setPedidos(r.ok ? r.data : 'error');
+        if (!r.ok || r.data.length === 0) return;
+        void resumenDeItemsDePedidos(r.data.map((p) => p.pedido_id)).then((s) => {
+          if (!vigente || !s.ok) return;
+          const mapa: Record<string, ResumenItemsPedido> = {};
+          for (const x of s.data) mapa[x.pedido_id] = x;
+          setResumen(mapa);
+        });
       });
       return () => {
         vigente = false;
@@ -139,12 +171,11 @@ export default function DespensaPedidos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('despensa.tusPedidos')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* 🔴 PORTADA, NO NAVEGACIÓN — Pedidos es una CASA desde S100c, y una
+          casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
+          ofrece un camino que no existe* (Ley 23), y encima `router.back()`
+          desde acá saltaría a cualquier pantalla anterior. */}
+      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} />
 
       <ScrollView
         contentContainerStyle={{
@@ -190,7 +221,7 @@ export default function DespensaPedidos() {
                 <Boton
                   variante="secundario"
                   etiqueta={t('despensa.carritoVacioIr')}
-                  onPress={() => router.back()}
+                  onPress={() => router.push('/despensa')}
                 />
               }
             />
@@ -202,8 +233,24 @@ export default function DespensaPedidos() {
             />
           </>
         ) : (
-          <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-            {pedidos.map((p) => {
+          /* 🔴 LA CASA: EN CURSO ARRIBA, HISTORIAL ABAJO (firma del founder,
+             S100c). *Lo que todavía puede pasar algo preside; lo que ya
+             terminó se consulta.* El corte es `es_terminal`, que lo dice el
+             CATÁLOGO —dato del motor, no un `switch` acá—, así que el día
+             que nazca una narrativa nueva cae del lado correcto sola.
+
+             **Los dos rótulos aparecen SOLO si existen las dos secciones**:
+             con una sola, rotular anuncia una división que no está (Chanel). */
+          <>
+            {[
+              { lista: pedidos.filter((p) => !p.es_terminal), rotulo: 'despensa.pedidosEnCurso' as const },
+              { lista: pedidos.filter((p) => p.es_terminal), rotulo: 'despensa.pedidosHistorial' as const },
+            ]
+              .filter((s) => s.lista.length > 0)
+              .map((seccion, _i, vivas) => (
+                <View key={seccion.rotulo} style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
+                  {vivas.length > 1 ? <Texto variante="seccion">{t(seccion.rotulo)}</Texto> : null}
+                  {seccion.lista.map((p) => {
               const escalera = escaleraDePedido(p.narrativa, voces);
               const { pasos, desvio } = escalera;
               const portador = portadorDeEstado({
@@ -211,11 +258,50 @@ export default function DespensaPedidos() {
                 metodoEntrega: p.metodo_entrega,
                 tienePromesa: p.promesa_desde !== null && p.promesa_hasta !== null,
               });
+              /* 🔴 EL TÍTULO PASA A SER **QUÉ TRAE**, Y LA FECHA BAJA A LA
+                 LÍNEA DE APOYO. Es el pedido literal del founder —*«necesita
+                 miniatura del primer producto y qué trae»*— y lo que la
+                 medición dice que hace falta: **la fecha no nombra nada
+                 cuando hay nueve el mismo día.**
+
+                 ⚠️ **Y ES REVERSIBLE EN UNA LÍNEA, declarado:** S100-D había
+                 decidido que *«el pedido se nombra por su FECHA, que es como
+                 lo nombra quien lo hizo»*. **Esa decisión seguía siendo
+                 buena contra el `numero_orden`** —dato de máquina, y la ley
+                 Chanel de la cabecera de esta pantalla lo sigue excluyendo,
+                 intacta— **pero no contra el producto**, que es humano y es
+                 lo que la familia recuerda de su compra. *Lo que cambió no
+                 es el criterio: es que ahora hay nueve pedidos donde antes
+                 la mesa imaginaba uno.*
+
+                 **La fecha NO se pierde**: viaja en la línea de apoyo junto
+                 a la promesa. Y si el resumen no llegó —falla o todavía
+                 carga— la tarjeta **cae a su título de fecha** y no queda
+                 nunca sin nombre. */
+              const res = resumen[p.pedido_id];
+              const queTrae =
+                res === undefined || res.primer_item === null
+                  ? null
+                  : res.cuantos_items > 1
+                    ? t('despensa.pedidoTraeVarios', {
+                        producto: res.primer_item,
+                        n: res.cuantos_items - 1,
+                      })
+                    : res.primer_item;
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
-                  titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p, portador)}
+                  titulo={queTrae ?? t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
+                  detalle={
+                    queTrae === null
+                      ? detalleDe(p, portador)
+                      : // Con el producto arriba, la fecha vuelve como apoyo —
+                        // y si además hay algo que decir del estado, van las
+                        // dos separadas por el punto medio de la casa.
+                        [t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) }), detalleDe(p, portador)]
+                          .filter((x): x is string => x !== undefined)
+                          .join(' · ')
+                  }
                   /* 🔴 LA INSIGNIA — el pedido sin recorrido gana FIGURA.
                      Diagnóstico de B con aparato: esas tarjetas eran «título
                      + fecha + precio y nada más» al lado de vecinas con una
@@ -241,14 +327,28 @@ export default function DespensaPedidos() {
                   etiqueta={t('despensa.verPedido')}
                   onPress={() =>
                     router.push({
-                      pathname: '/despensa/pedido/[pedidoId]',
+                      pathname: '/pedidos/pedido/[pedidoId]',
                       params: { pedidoId: p.pedido_id },
                     })
                   }
                 />
               );
-            })}
-          </View>
+                  })}
+                </View>
+              ))}
+            {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa,
+                y hasta hoy vivía SOLO en el estado vacío. *Una entrada que
+                existe solo cuando no tenés nada es una entrada que nadie
+                encuentra el día que la necesita.* */}
+            <View style={{ paddingTop: spacing[2] }}>
+              <Separador />
+              <CeldaNavegacion
+                titulo={t('despensa.reclamoEntrada')}
+                detalle={t('despensa.reclamoEntradaDetalle')}
+                onPress={() => router.push('/despensa/reclamo')}
+              />
+            </View>
+          </>
         )}
       </ScrollView>
     </View>

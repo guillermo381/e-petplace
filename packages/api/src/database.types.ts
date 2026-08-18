@@ -20628,6 +20628,20 @@ export type Database = {
         }[]
       }
       get_user_features: { Args: { p_user_id: string }; Returns: Json }
+      guardar_direccion_con_alias: {
+        Args: {
+          p_alias: string
+          p_ciudad: string
+          p_direccion: string
+          p_direccion_id?: string
+          p_lat?: number
+          p_lon?: number
+          p_referencias?: string
+          p_sector?: string
+          p_telefono?: string
+        }
+        Returns: Json
+      }
       guardar_direccion_hogar: {
         Args: {
           p_ciudad: string
@@ -20734,6 +20748,7 @@ export type Database = {
         Returns: boolean
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
+      maximo_comprable_de_ofertas: { Args: { p_items: Json }; Returns: Json }
       mi_email: { Args: never; Returns: string }
       mi_firma_clinica: {
         Args: { p_prestador_id: string }

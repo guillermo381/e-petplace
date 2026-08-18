@@ -92,7 +92,19 @@ export function LienzoProducto({
         width: lado,
         height: lado,
         borderRadius: radius.suave,
-        backgroundColor: theme.bg.overlay,
+        /* 🔴 H-115 (S100c, hallazgo de B) · EL MARCO LILA DEL CARRITO ERA ESTO.
+           `bg.overlay` es el lavanda del fallback: la cama sobre la que se
+           recorta el glifo cuando NO hay foto. Se pintaba **también detrás de
+           la foto**, y con packshots de fondo transparente —que es lo normal
+           en catálogo de producto— el lavanda asoma alrededor del envase y se
+           lee como un marco de color que nadie puso a propósito.
+           ⚠️ Y por qué sobrevivió a la cura de S100b: el mismo defecto se
+           arregló en `TarjetaProducto` (la vitrina) y **no viajó**, porque esta
+           pieza es su propia implementación. *Una pieza de producto viviendo
+           en una app hace que cada superficie nueva vuelva a heredar el
+           defecto* ⇒ B propone subirla a `packages/ui`; queda como deuda con
+           dueño y disparo, no en esta vuelta (ver el parte). */
+        backgroundColor: fotoUrl === null ? theme.bg.overlay : theme.bg.card,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',

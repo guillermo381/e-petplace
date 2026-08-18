@@ -52,6 +52,7 @@ import {
   Hoja,
   Insignia,
   SelectorOpcion,
+  Tarjeta,
   Separador,
   Texto,
   spacing,
@@ -66,6 +67,8 @@ import {
   obtenerCodigoEntrega,
   obtenerDetallePedido,
   obtenerMascotasDeFamilia,
+  facturasDePedidos,
+  type FacturaDePedido,
   type DetallePedido,
   type LineaDePedido,
   type MascotaResumen,
@@ -88,6 +91,9 @@ export default function DespensaPedido() {
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
   const [codigo, setCodigo] = useState<string | null>(null);
+  /** LA FACTURA del pedido. `null` = todavía no hay factura emitida —
+   *  **es normal, no un fallo**: medido, 6 facturas sobre 23 pedidos. */
+  const [factura, setFactura] = useState<FacturaDePedido | null>(null);
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [reintento, setReintento] = useState(0);
   const [trabajando, setTrabajando] = useState(false);
@@ -104,6 +110,9 @@ export default function DespensaPedido() {
       });
       void obtenerCodigoEntrega(pedidoId).then((r) => {
         if (vigente && r.ok) setCodigo(r.data.codigo);
+      });
+      void facturasDePedidos([pedidoId]).then((r) => {
+        if (vigente && r.ok) setFactura(r.data[0]?.factura ?? null);
       });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
@@ -311,6 +320,35 @@ export default function DespensaPedido() {
               />
             ) : null}
 
+            {/* ═══ 🔴 S100c-D · N21: LAS CUATRO CARTAS ═══════════════════
+                FIRMA DEL FOUNDER: *«como toda la pantalla está sin fondo,
+                todo está escrito directamente sobre el fondo, sin tener
+                bordes blancos, se pierde… el código se pierde porque queda
+                entre colores»*.
+
+                **Medido por B con aparato:** esta pantalla tenía **4 grupos
+                rotulados y CERO superficies**, y **88,5 % de su área útil
+                era un solo color** — el peor de las siete de la despensa.
+                *La frase del founder es literalmente el código*, que vivía
+                en un `View` con padding.
+
+                🔴 **Y LO QUE NO ERA EL DEFECTO, porque la cura obvia habría
+                sido la equivocada:** *no falta contraste, falta superficie*.
+                Nuestro fondo/carta da **1,10** y el de Laika **1,119** —
+                *cuando ponemos carta, separamos igual que la referencia*.
+                Subir el contraste no habría curado nada.
+
+                ── QUÉ **NO** LLEVA CARTA, y sale de MEDIR la referencia ──
+                N21 excluye *«el encabezado de la pantalla · el pie con su
+                CTA»*, y `referencia-rappi-seguimiento-escalera-y-rango.jpeg`
+                lo confirma en esta misma pantalla: **la escalera y el rango
+                van sobre el fondo pelado**, y las cartas empiezan recién en
+                el código. ⇒ quedan afuera **la escalera** (que además es una
+                FIGURA, no texto sobre fondo), **la puerta a «en camino»**
+                (navega) y **la salida** (es la acción de la pantalla).
+                **Cuatro cartas, no seis** — N21 pide una superficie por
+                GRUPO, jamás una por elemento. ═══════════════════════════ */}
+
             {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
                 🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
                 `P-20260816-3f6580` es un identificador de máquina: lo
@@ -384,7 +422,7 @@ export default function DespensaPedido() {
                 detalle={t('despensa.enCaminoEntradaDetalle')}
                 onPress={() =>
                   router.push({
-                    pathname: '/despensa/en-camino/[pedidoId]',
+                    pathname: '/pedidos/en-camino/[pedidoId]',
                     params: { pedidoId: detalle.pedido.pedido_id },
                   })
                 }
@@ -394,27 +432,46 @@ export default function DespensaPedido() {
             {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o
                 muestra en el mostrador). Se LEE, jamás llega por push. */}
             {codigo !== null ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <CodigoAEscala
-                  codigo={codigo}
-                  etiqueta={
-                    detalle.pedido.metodo_entrega === 'retiro'
-                      ? t('despensa.codigoMostrador')
-                      : t('despensa.codigoPuerta')
-                  }
-                />
-                <Texto variante="apoyo">
-                  {detalle.pedido.metodo_entrega === 'retiro'
-                    ? t('despensa.codigoMostradorDetalle')
-                    : t('despensa.codigoPuertaDetalle')}
-                </Texto>
+              /* 🔴 CARTA ①, y es LA del founder: *«el código se pierde
+                 porque queda entre colores»*. La referencia le da carta
+                 propia con su regla adentro
+                 (`referencia-rappi-mapa-rango-y-codigo.png`), y la regla
+                 NO se pliega bajo una «i» (N22): *un dato que cambia la
+                 decisión no se pliega* — y cuándo darlo ES la decisión. */
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <Tarjeta relleno="amplio">
+                  <View style={{ gap: spacing[1] }}>
+                    <CodigoAEscala
+                      codigo={codigo}
+                      etiqueta={
+                        detalle.pedido.metodo_entrega === 'retiro'
+                          ? t('despensa.codigoMostrador')
+                          : t('despensa.codigoPuerta')
+                      }
+                    />
+                    <Texto variante="apoyo">
+                      {detalle.pedido.metodo_entrega === 'retiro'
+                        ? t('despensa.codigoMostradorDetalle')
+                        : t('despensa.codigoPuertaDetalle')}
+                    </Texto>
+                  </View>
+                </Tarjeta>
               </View>
             ) : null}
 
             {/* 3 · QUÉ PEDISTE — con lote cuando ya se empacó y el destino
                 de cada ítem cuando la fuente lo dice. */}
-            <View style={{ gap: spacing[2] }}>
-              <View style={{ paddingHorizontal: spacing[5] }}>
+            {/* 🔴 CARTA ② — el grupo que el rótulo anuncia. N21: *«si el
+                bloque tiene un rótulo que lo nombra, ese rótulo está
+                declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
+                superficie es un grupo que se anunció y no se dibujó»*.
+                `relleno="ninguno"` porque adentro van `Celda` a sangre con
+                sus `Separador` — el mismo patrón que la lista de Cuenta,
+                que ya cumplía N21 antes de que N21 existiera. */}
+            <View style={{ paddingHorizontal: spacing[4] }}>
+            <Tarjeta relleno="ninguno">
+            <View style={{ gap: spacing[2], paddingVertical: spacing[3] }}>
+              <View style={{ paddingHorizontal: spacing[4] }}>
                 <Texto variante="seccion">{t('despensa.quePediste')}</Texto>
               </View>
               {detalle.items.map((linea, i) => {
@@ -456,10 +513,15 @@ export default function DespensaPedido() {
                 );
               })}
             </View>
+            </Tarjeta>
+            </View>
 
-            {/* 4 · A DÓNDE VA (despacho) — el snapshot congelado. */}
+            {/* 4 · A DÓNDE VA (despacho) — el snapshot congelado.
+                🔴 CARTA ③ — rótulo *«A dónde te lo llevamos»* ⇒ grupo. */}
             {detalle.pedido.metodo_entrega !== 'retiro' && detalle.entrega.direccion !== null ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+              <View style={{ paddingHorizontal: spacing[4] }}>
+              <Tarjeta relleno="amplio">
+              <View style={{ gap: spacing[1] }}>
                 <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
                 <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
                 {detalle.entrega.referencias !== null ? (
@@ -473,10 +535,17 @@ export default function DespensaPedido() {
                   </Texto>
                 ) : null}
               </View>
+              </Tarjeta>
+              </View>
             ) : null}
 
-            {/* 5 · LA PLATA — transportada del motor, jamás sumada acá. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+            {/* 5 · LA PLATA — transportada del motor, jamás sumada acá.
+                🔴 CARTA ④ — rótulo *«El total de tu pedido»* ⇒ grupo. Y es
+                el que más lo pide: **cuatro filas de números que se leen
+                como una sola cosa.** */}
+            <View style={{ paddingHorizontal: spacing[4] }}>
+            <Tarjeta relleno="amplio">
+            <View style={{ gap: spacing[2] }}>
               <Texto variante="seccion">{t('despensa.resumen')}</Texto>
               <FilaMonto etiqueta={t('despensa.subtotal')} monto={`$ ${detalle.subtotal.toFixed(2)}`} />
               <FilaMonto etiqueta={t('despensa.impuesto')} monto={`$ ${detalle.impuesto_total.toFixed(2)}`} />
@@ -490,10 +559,49 @@ export default function DespensaPedido() {
               />
               <Separador />
               <FilaMonto etiqueta={t('despensa.total')} monto={`$ ${detalle.pedido.total.toFixed(2)}`} destacada />
+
+              {/* 🔴 S100c-D · LA FACTURA — el founder la pidió como acceso de
+                  la casa de Pedidos, y **vive acá y no en una casa aparte**
+                  por lo que dio la medición.
+
+                  **Lo medido contra la base viva (18-ago-2026):**
+                    `facturas` = 6 filas · **con `archivo_url` = 0** · **con
+                    `pdf_url` = 0** · con `clave_acceso` = 1 · 5 son del
+                    founder · policy `facturas_owner` · lectores = **cero**.
+
+                  ⇒ **Ninguna factura tiene documento adjunto.** Una pantalla
+                  «Facturas» con una fila por pedido y un botón que no abre
+                  nada es **una puerta que rebota** (Ley 23), y encima sobre
+                  el papel que la gente usa para su contabilidad. *Lo honesto
+                  no es una casa vacía: es el número donde tiene sentido.*
+
+                  Va DENTRO de la carta del total y no en una quinta: es el
+                  comprobante de esa misma plata, y N21 pide una superficie
+                  por GRUPO, jamás una por elemento.
+
+                  **El día que `archivo_url` o `pdf_url` se pueblen**, acá
+                  entra el camino a abrirlo — y recién entonces «Facturas»
+                  como acceso propio tiene objeto. A devolvió las DOS urls a
+                  propósito, sin elegir por mí: *elegir una a ciegas sería
+                  decidir la pantalla con una moneda.* */}
+              {factura === null ? null : (
+                <>
+                  <Separador />
+                  <FilaMonto
+                    etiqueta={t('despensa.facturaNumero')}
+                    monto={factura.numero_factura}
+                  />
+                </>
+              )}
+            </View>
+            </Tarjeta>
             </View>
 
             {/* 6 · LA SALIDA — cancelar HASTA preparado; después, hablar.
-                El corte es un hecho operativo, no un reloj (§8.3). */}
+                El corte es un hecho operativo, no un reloj (§8.3).
+                SIN CARTA por N21: *«el pie fijo con su CTA no lleva
+                carta»* — es la acción de la pantalla, no un grupo de
+                datos que se lea junto. */}
             {!detalle.pedido.es_terminal &&
             (detalle.pedido.narrativa === 'pagando' || detalle.pedido.narrativa === 'confirmado') ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
