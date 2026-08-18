@@ -621,24 +621,21 @@ export default function DespensaDescubrir() {
                 gate**: WCAG 368/0, cero pares nuevos.
                 Con `0` no dibuja disco (19.9) y a partir de 100 dice «99+»:
                 la salida es decir «muchos», jamás encoger la letra. */}
-            {/* ⚠️ **LA ETIQUETA VA EN LOS DOS, Y NO ES DESCUIDO.** La pieza
-                fija `accessible` + `accessibilityRole="image"` adentro, así
-                que anidada en un `Pressable` quedan **dos nodos accesibles**:
-                el que se TOCA y el que está DENTRO. *El que tiene que estar
-                nombrado es el que se toca* — un botón sin nombre no se puede
-                activar a ciegas—, y por eso el `accessibilityLabel` del
-                `Pressable` no se sacó. La redundancia en el árbol es el
-                precio; que el botón quede mudo, no. **Declarado a B: su
-                contrato no contempla montarse dentro de un tocable.** */}
-            <GlifoConContador
-              nombre="carrito"
-              cuenta={unidades}
-              etiqueta={
-                unidades === 0
-                  ? t('despensa.irAlCarrito')
-                  : t('despensa.irAlCarritoCon', { n: unidades })
-              }
-            />
+            {/* ⏪ **ACÁ VIVÍA UNA REDUNDANCIA DECLARADA, Y LA PIEZA LA
+                CURÓ.** La primera versión fijaba `accessible` +
+                `role="image"` adentro, así que anidada en un tocable quedaban
+                **dos nodos accesibles**. Yo dejé la voz en el `Pressable`
+                —*el que tiene que estar nombrado es el que se toca: un botón
+                sin nombre no se activa a ciegas*— y **declaré la duplicación
+                en vez de esconderla**.
+                B la cerró con una **unión discriminada**, no con un flag
+                suelto: con un boolean opcional seguían siendo expresables
+                **los dos** estados malos —*suelta y sin nombre* (muda para el
+                lector) y *anidada con nombre* (la voz duplicada)—. **Con la
+                unión ninguno de los dos compila.**
+                ⇒ acá va `dentroDeTocable` y **sin `etiqueta`**: la pieza se
+                borra del árbol y el único nodo nombrado es el `Pressable`. */}
+            <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
           </Pressable>
         }
       />
