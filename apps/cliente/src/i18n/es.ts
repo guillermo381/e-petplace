@@ -1522,7 +1522,9 @@ export const clienteEs = {
     carritoVacioDetalle: 'Lo que agregues desde la despensa lo vas a ver acá.',
     carritoVacioIr: 'Volver a la despensa',
     cantidadDe: 'Cantidad de {{nombre}}',
-    quitar: 'Quitar',
+    // ☠️ S100b-A · G-08: murió `quitar`. El botón de texto se fue con la
+    // papelera del stepper — dos controles para la misma intención eran uno de
+    // más, y la voz sin consumidor es la mitad del control esperando.
     paraQuien: '¿Para quién es?',
     // S100b-A · G-10: la salida al reparto. Voz de familia y en infinitivo
     // porque EJECUTA (Ley 22c) — no promete una pantalla nueva, abre la

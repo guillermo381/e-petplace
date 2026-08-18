@@ -41,6 +41,7 @@ import {
   Boton,
   Celda,
   Encabezado,
+  Hoja,
   EstadoVacio,
   SelectorDestinoItem,
   Separador,
@@ -189,6 +190,11 @@ export default function DespensaCarrito() {
   const [repartirPedido, setRepartirPedido] = useState(false);
   const repartir = repartirPedido || yaRepartido || destinoComun === null;
 
+  /** G-09 · el detalle de la donación salió del bloque y vive detrás de la «i».
+   *  La Hoja la monta la PANTALLA, no el selector: *un selector que además abre
+   *  modales empieza a conocer la navegación de su pantalla* (B). */
+  const [hojaDonacion, setHojaDonacion] = useState(false);
+
   /** Las especies que la familia YA tiene registradas (todas, no solo
    *  elegibles: un ave en memorial sigue probando que la familia registra
    *  aves — la invitación de §5.2 es para especies NUNCA registradas). */
@@ -266,18 +272,25 @@ export default function DespensaCarrito() {
                     justifyContent: 'space-between',
                   }}
                 >
+                  {/* 🔴 G-08 · EL MENOS EN 1 ES LA PAPELERA, y el botón «Quitar»
+                      MURIÓ con él. Eran DOS controles para la misma intención:
+                      stepper (144 dp) + un botón aparte (89.6 dp), medidos por B.
+                      El estándar es de eBay `[SPEC]` y trae su matiz: *la
+                      papelera solo se usa cuando el stepper está pegado a un
+                      tile que va a desaparecer* — o sea ACÁ, en el carrito. En
+                      la grilla no se pasa `onBorrar`: allá bajar de 1 devuelve
+                      la tarjeta a su «+», el producto sigue existiendo, y una
+                      papelera prometería un borrado que no ocurre.
+                      Y el menos en 1 BORRA, no se deshabilita: *«I tried minus
+                      because I thought you could get it down to zero»*. Sin
+                      diálogo de confirmación — acción inmediata. */}
                   <StepperCantidad
                     valor={item.cantidad}
                     min={1}
                     max={99}
                     onCambio={(n) => fijarCantidad(item.oferta_id, n)}
+                    onBorrar={() => quitarDelCarrito(item.oferta_id)}
                     etiqueta={t('despensa.cantidadDe', { nombre: item.nombre })}
-                  />
-                  {/* Acción de fila: label sin caja (19.7) — quitar EJECUTA. */}
-                  <Boton
-                    variante="secundario"
-                    etiqueta={t('despensa.quitar')}
-                    onPress={() => quitarDelCarrito(item.oferta_id)}
                   />
                 </View>
 
@@ -300,6 +313,7 @@ export default function DespensaCarrito() {
                       rotulo={t('despensa.paraQuien')}
                       etiquetaDonacion={t('despensa.donarEste')}
                       detalleDonacion={t('despensa.donacionDetalle')}
+                      onExplicarDonacion={() => setHojaDonacion(true)}
                     />
                   </View>
                 ) : null}
@@ -341,6 +355,7 @@ export default function DespensaCarrito() {
                   rotulo={t('despensa.paraQuien')}
                   etiquetaDonacion={t('despensa.donarEste')}
                   detalleDonacion={t('despensa.donacionDetalle')}
+                  onExplicarDonacion={() => setHojaDonacion(true)}
                 />
                 {/* El reparto SE OFRECE solo cuando hay algo que repartir.
                     Con un producto la opción no existe: ofrecer «repartir» un
@@ -364,6 +379,25 @@ export default function DespensaCarrito() {
             </View>
         </PantallaConPie>
       )}
+
+      {/* G-09 · LO QUE LA «i» ABRE. El texto es el MISMO de siempre y no se
+          recortó al mudarlo: los dos límites de §6.4 —la donación jamás entra a
+          un expediente y jamás otorga beneficio— son la letra, no un adorno.
+          Cambia dónde se lee, no qué dice. */}
+      <Hoja
+        visible={hojaDonacion}
+        onCerrar={() => setHojaDonacion(false)}
+        titulo={t('despensa.donarEste')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('despensa.donacionDetalle')}</Texto>
+          <Boton
+            etiqueta={t('despensa.listoDatos')}
+            bloque
+            onPress={() => setHojaDonacion(false)}
+          />
+        </View>
+      </Hoja>
     </View>
   );
 }

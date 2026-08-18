@@ -1311,7 +1311,6 @@ export const clienteEn = {
     carritoVacioDetalle: "Anything you add from the pantry will show up here.",
     carritoVacioIr: 'Back to the pantry',
     cantidadDe: 'Quantity of {{nombre}}',
-    quitar: 'Remove',
     paraQuien: 'Who is it for?',
     repartirEntreMascotas: 'Split between several pets',
     donarEste: 'Donate this product',
