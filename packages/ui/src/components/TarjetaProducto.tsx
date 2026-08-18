@@ -154,7 +154,7 @@ import {
 } from './AvisoAlergia'
 import { Icono } from './Icono'
 import { PrecioText } from './PrecioText'
-import { StepperCantidad } from './StepperCantidad'
+import { ALTO_STEPPER_COMPACTO, StepperCantidad } from './StepperCantidad'
 import { Texto } from './Texto'
 import { usePresionado } from './usePresionado'
 import { motion } from '../tokens/motion'
@@ -199,6 +199,13 @@ import { useTraduccionUi } from '../i18n'
 const RELACION_FOTO = 1
 /** El techo del stepper en la vitrina. Comprar 30 sacos es un caso de
  *  ficha, no de grilla: acá el gesto es «lo quiero», no «cuántos». */
+/** EL LUGAR RESERVADO DEL CONTROL — N24 (S100c-B).
+ *
+ *  Se DERIVA del alto real del stepper compacto: no es un `44` tecleado. El
+ *  `gap` de su contenedor aporta los 8 restantes, y la suma reproduce
+ *  exactamente el crecimiento que el aparato midió (309,0 → 353,1 dp). */
+const ALTO_SLOT_CONTROL = ALTO_STEPPER_COMPACTO
+
 const TOPE_EN_VITRINA = 12
 
 export interface TarjetaProductoProps {
@@ -612,24 +619,52 @@ export function TarjetaProducto({
                 arriba). Sigue siendo EL MISMO CONTROL cambiando de forma
                 —no aparece otro al lado— y conserva su ancla a la derecha:
                 el `+` y el stepper comparten borde derecho, así que la mano
-                lo sigue encontrando donde estaba. `fast` = 150 (N10). */}
-            {compra.modo === 'espejo' || !compra.hayStock || compra.cantidad === 0 ? null : (
-              <Animated.View
-                entering={FadeIn.duration(motion.duration.fast)}
-                style={{ alignItems: 'flex-end' }}
-              >
-                <StepperCantidad
-                  valor={compra.cantidad}
-                  min={0}
-                  max={TOPE_EN_VITRINA}
-                  onCambio={compra.onCambiarCantidad}
-                  etiqueta={t('tarjetaProducto.cantidad', { nombre })}
-                  // 116 dp en vez de 144 — lo que entra en la caja de 138
-                  // sin recortar el `+`. Ver `BOTON_COMPACTO` en la pieza.
-                  compacto
-                />
-              </Animated.View>
-            )}
+                lo sigue encontrando donde estaba. `fast` = 150 (N10).
+
+                🔴 **Y SU LUGAR ESTÁ RESERVADO SIEMPRE — N24 (S100c-B).**
+                Firma del founder: *«al agregar salta un escalón por debajo
+                de todo y queda viéndose feo.»*
+
+                **Medido en el aparato, la misma tarjeta antes y después de
+                tocar el `+`: 309,0 dp → 353,1 dp.** La tarjeta crecía
+                **44,1 dp** y **su vecina de la misma fila no se movía** ⇒ la
+                fila dejaba de ser una fila.
+
+                **Y la fuente da el mismo número por otro camino:**
+                `BOTON_COMPACTO` = 36 + el `gap: spacing[2]` = 8 ⇒ **44**.
+                *Dos cuentas, un número* (L-287) — por eso la reserva se
+                DERIVA de esas dos constantes y no se teclea un `44`: si el
+                stepper cambia de alto, la reserva lo sigue sola.
+
+                ⇒ **El alto de la tarjeta deja de depender del estado.** El
+                slot existe siempre; lo que cambia es si está ocupado. *El
+                defecto se vuelve inexpresable*, que es el mismo movimiento
+                con el que `PantallaConPie` mató la reserva estimada.
+
+                ⚠️ **COSTO DECLARADO, no escondido: +44 dp en TODAS las
+                tarjetas**, sobre una que ya venía creciendo (el 1:1 le sumó
+                ~41 dp en S100b). **El acreedor es el que S100b ya nombró: el
+                bloque de texto y el header.** *Se declara en vez de
+                compensarlo encogiendo la letra.* */}
+            <View style={{ height: ALTO_SLOT_CONTROL, justifyContent: 'flex-end' }}>
+              {compra.modo === 'espejo' || !compra.hayStock || compra.cantidad === 0 ? null : (
+                <Animated.View
+                  entering={FadeIn.duration(motion.duration.fast)}
+                  style={{ alignItems: 'flex-end' }}
+                >
+                  <StepperCantidad
+                    valor={compra.cantidad}
+                    min={0}
+                    max={TOPE_EN_VITRINA}
+                    onCambio={compra.onCambiarCantidad}
+                    etiqueta={t('tarjetaProducto.cantidad', { nombre })}
+                    // 116 dp en vez de 144 — lo que entra en la caja de 138
+                    // sin recortar el `+`. Ver `BOTON_COMPACTO` en la pieza.
+                    compacto
+                  />
+                </Animated.View>
+              )}
+            </View>
           </View>
         </View>
       </Pressable>

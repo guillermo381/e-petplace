@@ -619,16 +619,58 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      ⚠️ **SIN GATE DE ÍCONO — §2.9 exige verlo a su tamaño de diseño Y a
      21 px, y ese gate es del founder.** Se declara pendiente en vez de
      darse por bueno. */
+  /* ⏪ ENMENDADO S100c-B — N25 ①. LA CANASTA PASA A SER UN CARRITO.
+     Firma del founder: *«no es un carrito, es una bolsa y se ve muy fea.
+     Hay que poner un carrito, que es lo que siempre han utilizado todas
+     las compañías.»*
+
+     🔴 **LA CAUSA HAY QUE DEJARLA ESCRITA, PORQUE ES LA LECCIÓN Y NO EL
+     ERROR:** el argumento de S100b para que este glifo NO fuera alias de
+     `despensa` **sigue en pie y no se toca** (*la tab dice dónde estás, el
+     carrito dice cuánto llevás*). Lo que falló no fue la distinción: **fue
+     que la forma se eligió desde la palabra «canasta»** —que estaba en el
+     texto del gate— **en vez de medirse contra el objeto.** Una canasta con
+     asa de arco y cuerpo que se angosta **tiene exactamente la silueta de
+     una bolsa**, y a 21 px la silueta es todo lo que queda.
+
+     > *Es la ley de la barra de S99 en ropa nueva: **la referencia se MIDE,
+     > no se describe.*** Allá cuatro traducciones en prosa mandaron a
+     > construir un bulto que la referencia no tenía; acá una palabra mandó
+     > a dibujar una bolsa.
+
+     **EL DISCRIMINADOR SON LAS RUEDAS, y por eso es el correcto:** es el
+     único rasgo que una bolsa y una canasta **no pueden tener**. Y
+     sobrevive al gate de 21 px porque son **dos discos**, no un detalle de
+     trazo (Ley 9: a 21 px la huella sobrevive o es ruido — lo mismo vale
+     para cualquier rasgo).
+
+     **La barra de empuje entra por la izquierda** —el otro rasgo que la
+     industria repite (Laika, Amazon, Mercado Libre, Rappi)— y ancla la
+     lectura: sin ella, un trapecio con ruedas puede leerse como changuito
+     de supermercado o como zapato.
+
+     **LA HUELLA SE QUEDA ADENTRO DE LA CESTA**, y su razón no cambió: *lo
+     que se lleva es para la mascota.* Es de los pocos glifos donde el lugar
+     de la huella además DICE algo.
+
+     ⚠️ **SIN GATE DE ÍCONO — §2.9 exige verlo a su tamaño de diseño Y a
+     21 px, y ese gate es del founder.** Y se declara algo más: **en este
+     entorno no hay rasterizador de SVG** (ni `cairosvg`, ni `rsvg-convert`,
+     ni Inkscape), así que **no se pudo verificar la legibilidad a 21 px sin
+     pasar por RN-web o por un publish.** Se dice en vez de darse por bueno. */
   carrito: ({ tinta, huella }) => (
     <>
-      {/* el asa */}
-      <Path d="M8.6 8.4a3.4 3.4 0 0 1 6.8 0" {...trazo(tinta)} />
-      {/* la canasta — se angosta hacia abajo, como una canasta real */}
+      {/* la barra de empuje: entra por la izquierda y baja a la cesta */}
+      <Path d="M2.4 4.2h2.3l1.2 4.4" {...trazo(tinta)} />
+      {/* la cesta — trapecio abierto arriba, apoyado sobre el eje */}
       <Path
-        d="M3.8 8.4h16.4l-1.5 9.3a1.7 1.7 0 0 1-1.7 1.4H7a1.7 1.7 0 0 1-1.7-1.4Z"
+        d="M5.9 8.6h15.7l-1.6 6.6a1.7 1.7 0 0 1-1.6 1.3H9.1a1.7 1.7 0 0 1-1.7-1.3Z"
         {...trazo(tinta)}
       />
-      <Huella color={huella} x={9.0} y={11.4} escala={0.38} />
+      {/* LAS RUEDAS — el rasgo que ninguna bolsa ni canasta puede tener */}
+      <Circle cx={10.2} cy={20} r={1.5} {...trazo(tinta)} />
+      <Circle cx={17.6} cy={20} r={1.5} {...trazo(tinta)} />
+      <Huella color={huella} x={10.4} y={10.6} escala={0.38} />
     </>
   ),
   pagos: ({ tinta, huella }) => (
