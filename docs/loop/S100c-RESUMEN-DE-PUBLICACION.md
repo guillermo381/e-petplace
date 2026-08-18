@@ -6,7 +6,45 @@
 
 ---
 
-## 🎯 ⓪bis · EL BUNDLE DEL GATE — **ÉSTE es el que se mira**
+## 🎯 ⓪ter · EL BUNDLE DEL GATE — **FINAL. ÉSTE es el que se mira**
+
+| | |
+|---|---|
+| **`main`** | **`e20113b6`** · árbol en **0** |
+| **OTA cliente** | group **`e6ebf9d3`** · runtime **1.0.3** |
+| **OTA prestador** | group **`2e57c413`** · runtime **1.0.5** |
+| **ancla de las dos** | **`e20113b6`**, leída del OBJETO en las 4 plataformas · `dirty: None`, **sin asterisco** |
+
+**Lo que este bundle tiene y el anterior NO:** el **glifo `pedido` CONSUMIDO** (`_layout.tsx:192` —
+antes la tab Pedidos dibujaba `despensa` y quedaban **dos tabs vecinas con la misma bolsa**) y **la
+miniatura montada** en la lista de pedidos. *Sin esto el founder habría vuelto a ver su hallazgo original
+—«pedido 17 de agosto, pedido 17 de agosto»— y lo habría leído como «la cura no funcionó» cuando la
+verdad era «la cura no viajó».* **Aviso de D, y tenía razón.**
+
+**CORTE DECLARADO:** lo que `origin/pista-d` tiene más allá de `e20113b6` es **solo `docs/loop/S100c-D.md`**
+(medido) ⇒ **no hay nada de código afuera del bundle.**
+
+### 🔴 UN ERROR MÍO, DECLARADO: EL ANCLA NO COINCIDIÓ CON LO QUE DECLARÉ
+
+**Declaré `b4ec5445` y publiqué contra `e20113b6`.** Lo cazó verificar el ancla contra el objeto después
+de publicar — *que es exactamente para lo que sirve declarar antes.*
+
+**La causa es mía y no de nadie más: LEVANTÉ LA VEDA ANTES DEL ÚLTIMO PUBLISH.** B estaba autorizada a
+depositar y depositó (`e20113b6` = L-305 al canon), y `main` se movió debajo de mí mientras yo bundleaba.
+
+**El daño, medido antes de decidir:** `git diff --name-only b4ec5445..e20113b6` → **`docs/DEUDAS_CANONICAS.md`
+y nada más** ⇒ **el bundle es funcionalmente idéntico al declarado.** Con eso, la salida correcta era
+publicar el prestador **contra el mismo `e20113b6`** para que las dos OTA compartan ancla, y no
+re-declarar el número viejo. *Un ancla que no coincide no se corrige escribiendo el número que uno quería:
+se corrige diciendo cuál salió.*
+
+**La lección, que es de secuencia y no de git:** **la veda se levanta DESPUÉS del último publish, jamás
+cuando la última pista avisa que está en cero.** *Avisar que estás en cero no es lo mismo que quedarte en
+cero* — y la mano que publica es la única que sabe cuándo terminó de bundlear.
+
+---
+
+## ⓪bis · EL SEGUNDO BUNDLE — superseded por ⓪ter (le faltaba el glifo consumido)
 
 | | |
 |---|---|
