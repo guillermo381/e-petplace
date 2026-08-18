@@ -213,6 +213,18 @@ export const clienteEs = {
     // fila-resumen de la semana murió con sus keys (Ley 37).
     recoCitaDe: 'La cita de {{mascota}}',
     recoCargarCarnet: 'Cargar el carnet de {{mascota}}',
+    // 🔴 S100c-D · EL PEDIDO EN VUELO LLEGA AL HOGAR. La fila estaba
+    // DECLARADA SIN MONTAR desde S82-C —*«monta cuando exista [el motor
+    // de despensa]»*— y el motor existe desde S95. Voz por narrativa: la
+    // más avanzada preside (lo que sigue, primero).
+    recoPedidoEnCamino: 'Tu pedido va en camino',
+    recoPedidoPreparando: 'Tu pedido se está preparando',
+    recoPedidoConfirmado: 'Tu pedido está confirmado',
+    // COLAPSA, y no es gusto: `DISEÑO_EXPERIENCIA` §10ter.1 firma que *«el
+    // eje de Ponte al día no es el TIEMPO, es ACCIÓN vs INFORMACIÓN — lo
+    // que espera acción preside y no colapsa; el colapso rige sobre lo
+    // informativo»*. Un pedido en vuelo no espera nada del dueño.
+    recoPedidosVarios: 'Tenés {{n}} pedidos en curso',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
@@ -1662,6 +1674,11 @@ export const clienteEs = {
     envio: 'Envío',
     envioRetiro: 'Retiro en tienda',
     total: 'Total',
+    // S100c-D · el comprobante, dentro de la carta del total. NO hay camino
+    // a abrirlo, y es MEDIDO: las 6 facturas de la base tienen `archivo_url`
+    // y `pdf_url` en CERO. Un botón que no abre nada es una puerta que
+    // rebota (Ley 23) — y encima sobre el papel de la contabilidad ajena.
+    facturaNumero: 'Factura',
     totalNoLlego: 'Este pedido ya estaba creado. El total lo ves en Tus pedidos.',
     pagoSimuladoTitulo: 'Pago simulado',
     pagoSimuladoDetalle:
@@ -1736,6 +1753,14 @@ export const clienteEs = {
     enCaminoVentana: 'Llega entre',
     enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
     enCaminoQuienTrae: 'Quién lo trae',
+    // S100c-D · la hoja arrastrable. La voz del asa dice QUÉ hace, no cómo
+    // se hace (nadie necesita que le expliquen que se arrastra: se agarra).
+    enCaminoHojaVerMas: 'Ver los detalles del pedido',
+    // 🔴 El hueco de la foto se NOMBRA para el lector de pantalla en vez de
+    // quedar mudo: un círculo vacío sin voz es un elemento que no existe
+    // para quien no ve, y acá el hueco es información (la ficha está
+    // incompleta A PROPÓSITO, con su deuda firmada).
+    repartidorSinFoto: 'Todavía no mostramos su foto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',
@@ -1746,6 +1771,10 @@ export const clienteEs = {
     // S96 · Tus pedidos
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Pedido del {{dia}}',
+    // S100c-D · qué trae el pedido, en el título de la fila. «y N más» y no
+    // «N productos»: **20 de 23 pedidos de la cuenta del gate tienen UN solo
+    // ítem** — la voz se escribe para el caso real, no para el ejemplo.
+    pedidoTraeVarios: '{{producto}} y {{n}} más',
     verPedido: 'Ver el pedido',
     errorPedidosTitulo: 'No pudimos cargar tus pedidos',
     sinPedidosTitulo: 'Todavía no pediste nada',

@@ -37,7 +37,12 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
+import {
+  listarMisPedidos,
+  resumenDeItemsDePedidos,
+  type PedidoEnLista,
+  type ResumenItemsPedido,
+} from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 import {
   escaleraDePedido,
@@ -55,14 +60,40 @@ export default function DespensaPedidos() {
   const { t, idioma } = useTraduccion();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
+  /**
+   * 🔴 S100c-D · QUÉ TRAE CADA PEDIDO — el dato que faltaba para que la lista
+   * DISTINGA (D-03, firma del founder: *«dice pedido 17 de agosto, pedido 17
+   * de agosto»*).
+   *
+   * **Medido en la cuenta del gate:** 23 pedidos en 5 días locales, **nueve
+   * el 17-ago y nueve el 12-ago** ⇒ nueve tarjetas con el mismo título, dos
+   * veces. Con solo el día, **1 de esas 9 es distinta**; con el nombre del
+   * producto, 4.
+   *
+   * Va en una **segunda ola y no encadenada**: los ids salen de la primera,
+   * así que no hay forma de pedirlo antes — pero el mapa se pinta igual si
+   * esto falla o tarda (`{}` vacío ⇒ la tarjeta cae a su título de fecha).
+   * *Una lista que no se dibuja hasta saber qué trae es peor que una que no
+   * lo dice.*
+   */
+  const [resumen, setResumen] = useState<Record<string, ResumenItemsPedido>>({});
   const [reintento, setReintento] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       setPedidos('cargando');
+      setResumen({});
       void listarMisPedidos().then((r) => {
-        if (vigente) setPedidos(r.ok ? r.data : 'error');
+        if (!vigente) return;
+        setPedidos(r.ok ? r.data : 'error');
+        if (!r.ok || r.data.length === 0) return;
+        void resumenDeItemsDePedidos(r.data.map((p) => p.pedido_id)).then((s) => {
+          if (!vigente || !s.ok) return;
+          const mapa: Record<string, ResumenItemsPedido> = {};
+          for (const x of s.data) mapa[x.pedido_id] = x;
+          setResumen(mapa);
+        });
       });
       return () => {
         vigente = false;
@@ -211,11 +242,50 @@ export default function DespensaPedidos() {
                 metodoEntrega: p.metodo_entrega,
                 tienePromesa: p.promesa_desde !== null && p.promesa_hasta !== null,
               });
+              /* 🔴 EL TÍTULO PASA A SER **QUÉ TRAE**, Y LA FECHA BAJA A LA
+                 LÍNEA DE APOYO. Es el pedido literal del founder —*«necesita
+                 miniatura del primer producto y qué trae»*— y lo que la
+                 medición dice que hace falta: **la fecha no nombra nada
+                 cuando hay nueve el mismo día.**
+
+                 ⚠️ **Y ES REVERSIBLE EN UNA LÍNEA, declarado:** S100-D había
+                 decidido que *«el pedido se nombra por su FECHA, que es como
+                 lo nombra quien lo hizo»*. **Esa decisión seguía siendo
+                 buena contra el `numero_orden`** —dato de máquina, y la ley
+                 Chanel de la cabecera de esta pantalla lo sigue excluyendo,
+                 intacta— **pero no contra el producto**, que es humano y es
+                 lo que la familia recuerda de su compra. *Lo que cambió no
+                 es el criterio: es que ahora hay nueve pedidos donde antes
+                 la mesa imaginaba uno.*
+
+                 **La fecha NO se pierde**: viaja en la línea de apoyo junto
+                 a la promesa. Y si el resumen no llegó —falla o todavía
+                 carga— la tarjeta **cae a su título de fecha** y no queda
+                 nunca sin nombre. */
+              const res = resumen[p.pedido_id];
+              const queTrae =
+                res === undefined || res.primer_item === null
+                  ? null
+                  : res.cuantos_items > 1
+                    ? t('despensa.pedidoTraeVarios', {
+                        producto: res.primer_item,
+                        n: res.cuantos_items - 1,
+                      })
+                    : res.primer_item;
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
-                  titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p, portador)}
+                  titulo={queTrae ?? t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
+                  detalle={
+                    queTrae === null
+                      ? detalleDe(p, portador)
+                      : // Con el producto arriba, la fecha vuelve como apoyo —
+                        // y si además hay algo que decir del estado, van las
+                        // dos separadas por el punto medio de la casa.
+                        [t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) }), detalleDe(p, portador)]
+                          .filter((x): x is string => x !== undefined)
+                          .join(' · ')
+                  }
                   /* 🔴 LA INSIGNIA — el pedido sin recorrido gana FIGURA.
                      Diagnóstico de B con aparato: esas tarjetas eran «título
                      + fecha + precio y nada más» al lado de vecinas con una

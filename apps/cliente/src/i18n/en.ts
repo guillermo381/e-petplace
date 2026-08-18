@@ -162,6 +162,12 @@ export const clienteEn = {
     // r6-2 — mirror of es.ts (Espejo enforces parity).
     recoCitaDe: "{{mascota}}'s visit",
     recoCargarCarnet: "Add {{mascota}}'s card",
+    // S100c-D — the in-flight order reaches Home (declared unmounted since
+    // S82-C; its trigger fired in S95). The most advanced state presides.
+    recoPedidoEnCamino: 'Your order is on its way',
+    recoPedidoPreparando: 'Your order is being prepared',
+    recoPedidoConfirmado: 'Your order is confirmed',
+    recoPedidosVarios: 'You have {{n}} orders in progress',
     venceEnMin: 'Expires in {{n}} min',
     presupuestoDe: 'Estimate from {{negocio}}',
     presupuestoPara: 'Estimate for {{mascota}}',
@@ -1410,6 +1416,9 @@ export const clienteEn = {
     envio: 'Shipping',
     envioRetiro: 'Store pickup',
     total: 'Total',
+    // S100c-D — the receipt, inside the total card. No way to open it yet:
+    // measured, all 6 invoices have both file URLs empty.
+    facturaNumero: 'Invoice',
     totalNoLlego: 'This order already existed. See the total in Your orders.',
     pagoSimuladoTitulo: 'Simulated payment',
     pagoSimuladoDetalle:
@@ -1483,6 +1492,9 @@ export const clienteEn = {
     enCaminoVentana: 'Arrives between',
     enCaminoVentanaDetalle: "It's a window, not an exact time.",
     enCaminoQuienTrae: 'Who’s bringing it',
+    // S100c-D — the draggable sheet, and the honest photo gap.
+    enCaminoHojaVerMas: 'See the order details',
+    repartidorSinFoto: 'We’re not showing their photo yet',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',
@@ -1493,6 +1505,8 @@ export const clienteEn = {
     // S96 · Your orders
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Order from {{dia}}',
+    // S100c-D — what the order carries, as the row's title.
+    pedidoTraeVarios: '{{producto}} and {{n}} more',
     verPedido: 'View order',
     errorPedidosTitulo: "We couldn't load your orders",
     sinPedidosTitulo: "You haven't ordered anything yet",
