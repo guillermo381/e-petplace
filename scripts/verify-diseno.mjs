@@ -3616,7 +3616,13 @@ function r45(archivos) {
  *  motor — `calcular_promesa_despensa` conserva `p_fecha_programada` a
  *  propósito: *se quitó la puerta, no el motor.*
  */
-const BASELINE_R52 = 1
+/* 🔴 EL BASELINE MURIÓ EN S100b-A, y la regla NO: son dos cosas distintas.
+   El 1 no era una excepción de diseño — era la orden de mesa al registrar el
+   gate («no curar nada, S101 lo toma con plan»). **Esa razón se agotó cuando
+   el control salió**, así que la deuda se cierra en su número y la ley pasa a
+   DURA EN 0. Lo que muere es la tolerancia, jamás el diente: R52 existe para
+   que el control **no vuelva**, y ese trabajo empieza recién ahora. */
+const BASELINE_R52 = 0
 
 function r52(archivos) {
   const fallos = []
@@ -3633,10 +3639,10 @@ function r52(archivos) {
       ofensores.push(path.split('/').pop())
     }
   }
-  // 🔴 BASELINE SOLO-BAJA, y es una DEUDA declarada, no una excepción: la orden
-  // de mesa al registrar el gate fue **no curar nada**, así que el control sigue
-  // montado hasta S101. La ley queda mecanizada igual — lo que no puede pasar es
-  // que CREZCA. ☠️ Muere cuando llegue a 0.
+  // ☠️ DURA EN 0 desde S100b-A: el control salió del checkout y la tolerancia
+  // se cerró con él (ver la nota del baseline). De acá en más cualquier
+  // reaparición es un fallo, que es exactamente para lo que la regla se
+  // escribió — el control ya volvió tres veces.
   if (ofensores.length > BASELINE_R52)
     fallos.push(
       `R52: «Programar otra fecha» está montado en ${ofensores.length} archivo(s) (${ofensores.join(' · ')}), baseline ${BASELINE_R52} SOLO-BAJA. DEROGADO por firma del founder (17-ago-2026, gate de S100) y tachado en \`LETRA_RECORRIDO_DESPENSA_S96\` §6.2. El control SALE del checkout; el CUPO por día futuro y el \`p_fecha_programada\` del motor SIGUEN VIGENTES — se quitó la puerta, no el motor.`,
@@ -3644,7 +3650,7 @@ function r52(archivos) {
   fallos.push(...ancla('R52', archivos.filter((a) => a.path.includes('/despensa/')).length, 1, 'archivo(s) de despensa en el corpus'))
   return {
     fallos,
-    info: `${ofensores.length} monta(n) el control derogado · baseline ${BASELINE_R52} solo-baja (dueño A, S101) · firma founder 17-ago-2026`,
+    info: `${ofensores.length} monta(n) el control derogado · DURA EN 0 desde S100b-A (la puerta salió; el \`p_fecha_programada\` del motor sigue vivo) · firma founder 17-ago-2026`,
   }
 }
 

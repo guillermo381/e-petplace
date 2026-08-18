@@ -53,7 +53,6 @@ import { router, useNavigation } from 'expo-router';
 import {
   Boton,
   Campo,
-  CampoFecha,
   Celda,
   Encabezado,
   EstadoVacio,
@@ -125,7 +124,6 @@ export default function DespensaCheckout() {
    *  lleno se DIBUJA con su porqué — no desaparece (Ley 23 al revés: la
    *  puerta tampoco esconde lo que el usuario busca). */
   const [ventanas, setVentanas] = useState<OpcionVentana[] | 'cargando' | null>(null);
-  const [mostrarCalendario, setMostrarCalendario] = useState(false);
   /** La altura REAL de la barra del CTA (cambia por fase). */
   const [barAlto, setBarAlto] = useState(0);
 
@@ -682,7 +680,8 @@ export default function DespensaCheckout() {
                         ) : null}
                       </>
                     )}
-                    {/* Las opciones — el día lleno se DIBUJA con su porqué. */}
+                    {/* Las opciones — el día lleno se DIBUJA con su porqué.
+                        ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
                     {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
                       <SelectorVentana
                         opciones={ventanas}
@@ -693,37 +692,36 @@ export default function DespensaCheckout() {
                           } else {
                             setFechaElegida({ fecha: clave, precision: 'exacta' });
                           }
-                          setMostrarCalendario(false);
                         }}
-                        onProgramarOtra={() => setMostrarCalendario(true)}
-                        etiquetaProgramarOtra={t('despensa.programarFecha')}
                       />
                     ) : null}
-                    {mostrarCalendario ||
-                    (fechaElegida !== undefined &&
-                      Array.isArray(ventanas) &&
-                      !ventanas.some((v) => v.clave === fechaElegida.fecha)) ? (
-                      <>
-                        <CampoFecha
-                          label={t('despensa.programarFecha')}
-                          valor={fechaElegida}
-                          onChange={setFechaElegida}
-                          placeholder={t('despensa.programarPlaceholder')}
-                          ayuda={t('despensa.programarAyuda')}
-                          tituloHoja={t('despensa.programarFecha')}
-                        />
-                        {fechaElegida !== undefined ? (
-                          <Boton
-                            variante="secundario"
-                            etiqueta={t('despensa.quitarFecha')}
-                            onPress={() => {
-                              setFechaElegida(undefined);
-                              setMostrarCalendario(false);
-                            }}
-                          />
-                        ) : null}
-                      </>
-                    ) : null}
+                    {/* ═══════════════════════════════════════════════════════
+                        ☠️ ACÁ VIVÍA «PROGRAMAR OTRA FECHA» — DEROGADO POR FIRMA
+                        DEL FOUNDER (17-ago-2026, gate de S100 · G-16).
+                        Murieron: el `onProgramarOtra` del SelectorVentana, el
+                        `CampoFecha` que abría, el estado `mostrarCalendario` y
+                        las voces `programarFecha` / `programarPlaceholder` /
+                        `programarAyuda` / `quitarFecha`.
+
+                        POR QUÉ ESTA LÁPIDA Y NO UN BORRADO LIMPIO: el founder
+                        lo pidió quitar REPETIDAMENTE y volvía en cada ronda.
+                        No fue desobediencia — la letra decía «Entra» y la letra
+                        gana. Hoy `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
+                        tachada con su razón, y `verify:diseno` R52 lo vigila.
+
+                        QUÉ **NO** MURIÓ, para que nadie lo barra de más: el
+                        CUPO por día futuro sigue vigente y es lo que respalda
+                        la promesa, y `calcular_promesa_despensa` conserva su
+                        `p_fecha_programada` — eso es MOTOR. Se quitó la puerta,
+                        no el motor: el día que vuelva por decisión, vuelve sin
+                        reconstruirse. `SelectorVentana` conserva su prop
+                        opcional intacta por el mismo motivo.
+
+                        Y volver a la más próxima NO se perdió: la opción
+                        `proxima` del propio selector la devuelve (por eso el
+                        botón «quitarFecha» se fue con el bloque y no dejó
+                        callejón).
+                        ═══════════════════════════════════════════════════════ */}
                   </View>
                 </>
               )}

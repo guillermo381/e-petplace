@@ -1313,6 +1313,7 @@ export const clienteEn = {
     cantidadDe: 'Quantity of {{nombre}}',
     quitar: 'Remove',
     paraQuien: 'Who is it for?',
+    repartirEntreMascotas: 'Split between several pets',
     donarEste: 'Donate this product',
     donacionDetalle:
       "e-PetPlace picks the shelter and the team coordinates the delivery. A donation never joins a record and never earns rewards: it's a gift, not a purchase with a prize.",
@@ -1356,10 +1357,8 @@ export const clienteEn = {
     bloqueEntrega: 'Delivery {{i}} of {{n}}',
     ventanaProxima: 'The earliest',
     sinLugarEseDia: 'No room that day',
-    programarFecha: 'Schedule another date',
-    programarPlaceholder: 'Pick a day',
-    programarAyuda: 'We only promise days with confirmed capacity.',
-    quitarFecha: 'Back to the earliest delivery',
+    // ☠️ S100b-A · G-16 — ver la nota en `es.ts`. El espejo se mantiene: la
+    // clave muere en los DOS idiomas o el typecheck lo dice.
     resumen: 'Your order total',
     subtotal: 'Products',
     impuesto: 'VAT',

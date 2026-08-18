@@ -1524,6 +1524,10 @@ export const clienteEs = {
     cantidadDe: 'Cantidad de {{nombre}}',
     quitar: 'Quitar',
     paraQuien: '¿Para quién es?',
+    // S100b-A · G-10: la salida al reparto. Voz de familia y en infinitivo
+    // porque EJECUTA (Ley 22c) — no promete una pantalla nueva, abre la
+    // misma lista con una pregunta por producto.
+    repartirEntreMascotas: 'Repartir entre varias mascotas',
     donarEste: 'Donar este producto',
     donacionDetalle:
       'El refugio lo elige e-PetPlace y la entrega la coordina el equipo. Una donación no entra a ningún expediente ni suma beneficios: es un regalo, no una compra con premio.',
@@ -1571,10 +1575,13 @@ export const clienteEs = {
     bloqueEntrega: 'Entrega {{i}} de {{n}}',
     ventanaProxima: 'La más próxima',
     sinLugarEseDia: 'Sin lugar ese día',
-    programarFecha: 'Programar otra fecha',
-    programarPlaceholder: 'Elegí un día',
-    programarAyuda: 'Solo se prometen días con capacidad confirmada.',
-    quitarFecha: 'Volver a la entrega más próxima',
+    // ☠️ S100b-A · G-16: murieron `programarFecha`, `programarPlaceholder`,
+    // `programarAyuda` y `quitarFecha` — el control quedó DEROGADO por firma
+    // del founder (17-ago-2026) y `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
+    // tachada. Se borran las claves y no solo el montaje: *una voz sin
+    // consumidor es la mitad del control esperando que alguien la vuelva a
+    // usar* — y este control ya volvió tres veces. El motor conserva su
+    // `p_fecha_programada`; lo que no queda es con qué decirlo.
     resumen: 'El total de tu pedido',
     subtotal: 'Productos',
     impuesto: 'IVA',

@@ -64,6 +64,7 @@ import {
   quitarDelCarrito,
   useCarrito,
 } from '@/lib/despensa/carrito';
+import { destinoComunDelCarrito, destinosAdmitidos } from '@/lib/despensa/destinos';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -124,6 +125,7 @@ export default function DespensaCarrito() {
       elegibles.map((m) => ({
         id: m.id,
         nombre: m.nombre,
+        especie: m.especie,
         fotoUrl: caraDeMascotaPorRuta({
           especie: m.especie,
           rutaImagen: m.raza_ruta_imagen,
@@ -132,6 +134,61 @@ export default function DespensaCarrito() {
       })),
     [elegibles, fotos],
   );
+
+  /**
+   * 🔴 G-03 · EL DESTINO NO OFRECE ESPECIES IMPOSIBLES.
+   *
+   * El gate lo vio con todas las letras: **alimento para perro ofreciendo
+   * loro, hámster y pez.** El producto ya declara `especies_aplicables` —
+   * lo que faltaba era que el selector lo mirara.
+   *
+   * `[]` = SIN RESTRICCIÓN, y se respeta: un producto que no declara especie
+   * (una cama, un juguete) sirve para toda la casa. *Leer `[]` como «no
+   * aplica a nadie» habría vaciado el selector de media vitrina* — la lista
+   * vacía significa «no se declaró», jamás «ninguna».
+   */
+  const destinosPara = useCallback(
+    (item: { especies_aplicables: string[] }) =>
+      destinosAdmitidos(destinos, item.especies_aplicables),
+    [destinos],
+  );
+
+  /**
+   * 🔴 G-10 · LA PREGUNTA SE HACE UNA VEZ, NO UNA POR PRODUCTO.
+   *
+   * **La tensión que hubo que resolver, porque toca letra firmada:** §4 dice
+   * que *«la app nunca adivina de quién es una compra»*, y la cabecera de
+   * `SelectorDestinoItem` prohíbe preseleccionar. Heredar mal sería
+   * exactamente eso. **La salida: no se hereda una respuesta que nadie dio
+   * — se deja de REPETIR la pregunta.** Nada nace elegido; lo que cambia es
+   * que la respuesta de la familia vale para la compra hasta que ella misma
+   * decida repartirla. *La app sigue sin adivinar: pregunta una vez.*
+   *
+   * Y CUÁNDO NO SE PUEDE PREGUNTAR UNA SOLA VEZ — se DERIVA, no se decide:
+   * si los productos no admiten las mismas mascotas (comida de perro + comida
+   * de ave en el mismo carrito), una pregunta única mentiría, porque ninguna
+   * respuesta sirve para los dos. Ahí el reparto no es una opción: es la
+   * única forma honesta, y la pantalla se abre repartida sola.
+   */
+  const destinoComun = useMemo(
+    () =>
+      destinoComunDelCarrito(
+        destinos,
+        items.map((it) => it.especies_aplicables),
+      ),
+    [destinos, items],
+  );
+
+  /** Los ítems ya no coinciden en destino ⇒ la compra YA está repartida y la
+   *  pantalla lo refleja. No es un modo que alguien prendió: es un hecho. */
+  const yaRepartido = useMemo(() => {
+    const clave = (d: typeof items[number]['destino']) =>
+      d === null ? 'null' : d.tipo === 'donacion' ? 'donacion' : d.mascotaId;
+    return new Set(items.map((it) => clave(it.destino))).size > 1;
+  }, [items]);
+
+  const [repartirPedido, setRepartirPedido] = useState(false);
+  const repartir = repartirPedido || yaRepartido || destinoComun === null;
 
   /** Las especies que la familia YA tiene registradas (todas, no solo
    *  elegibles: un ave en memorial sigue probando que la familia registra
@@ -216,22 +273,26 @@ export default function DespensaCarrito() {
 
                 {/* EL DESTINO (§6.3) — la firma. null es legal y se ata después.
                     Con las mascotas en error NO se finge una familia vacía:
-                    se dice, y el destino se puede atar después (§4). */}
-                <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                  {mascotas === 'error' ? (
-                    <Texto variante="apoyo" color="warning">
-                      {t('despensa.errorMascotasDestino')}
-                    </Texto>
-                  ) : null}
-                  <SelectorDestinoItem
-                    mascotas={destinos}
-                    destino={item.destino}
-                    onCambiar={(d) => fijarDestino(item.oferta_id, d)}
-                    rotulo={t('despensa.paraQuien')}
-                    etiquetaDonacion={t('despensa.donarEste')}
-                    detalleDonacion={t('despensa.donacionDetalle')}
-                  />
-                </View>
+                    se dice, y el destino se puede atar después (§4).
+                    G-10: por ÍTEM solo cuando la compra va repartida; si no,
+                    la pregunta vive una sola vez debajo de la lista. */}
+                {repartir ? (
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                    {mascotas === 'error' ? (
+                      <Texto variante="apoyo" color="warning">
+                        {t('despensa.errorMascotasDestino')}
+                      </Texto>
+                    ) : null}
+                    <SelectorDestinoItem
+                      mascotas={destinosPara(item)}
+                      destino={item.destino}
+                      onCambiar={(d) => fijarDestino(item.oferta_id, d)}
+                      rotulo={t('despensa.paraQuien')}
+                      etiquetaDonacion={t('despensa.donarEste')}
+                      detalleDonacion={t('despensa.donacionDetalle')}
+                    />
+                  </View>
+                ) : null}
 
                 {/* §5.2 — especie no registrada: se ofrece, la compra sigue. */}
                 {especieNoRegistrada(item) && item.destino === null ? (
@@ -248,6 +309,44 @@ export default function DespensaCarrito() {
                 ) : null}
               </View>
             ))}
+
+            {/* 🔴 G-10 · LA PREGUNTA ÚNICA. Vive acá abajo —una sola vez para
+                toda la compra— y NO nace contestada: `destino` sale del primer
+                ítem, que arranca en `null`. Al elegir, la respuesta se aplica a
+                todos los ítems; §4 se cumple porque quien decide es la familia,
+                una vez, en vez de N veces la misma cosa. */}
+            {!repartir && destinoComun !== null ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+                {mascotas === 'error' ? (
+                  <Texto variante="apoyo" color="warning">
+                    {t('despensa.errorMascotasDestino')}
+                  </Texto>
+                ) : null}
+                <SelectorDestinoItem
+                  mascotas={destinoComun}
+                  destino={items[0].destino}
+                  onCambiar={(d) => {
+                    for (const it of items) fijarDestino(it.oferta_id, d);
+                  }}
+                  rotulo={t('despensa.paraQuien')}
+                  etiquetaDonacion={t('despensa.donarEste')}
+                  detalleDonacion={t('despensa.donacionDetalle')}
+                />
+                {/* El reparto SE OFRECE solo cuando hay algo que repartir.
+                    Con un producto la opción no existe: ofrecer «repartir» un
+                    solo ítem es un control que no puede hacer nada.
+                    EJECUTA (no navega) ⇒ label sin chevron: `ghost`. Ley 19.7
+                    — el contorno transparente murió como acción de fila; el
+                    único sólido de esta pantalla es «Continuar». */}
+                {items.length > 1 ? (
+                  <Boton
+                    variante="ghost"
+                    etiqueta={t('despensa.repartirEntreMascotas')}
+                    onPress={() => setRepartirPedido(true)}
+                  />
+                ) : null}
+              </View>
+            ) : null}
 
             {/* La honestidad del total: lo dice el motor, no esta pantalla. */}
             <View style={{ paddingHorizontal: spacing[5] }}>
