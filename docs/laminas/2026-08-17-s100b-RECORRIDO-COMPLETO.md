@@ -7,7 +7,7 @@
 
 ---
 
-## 🔴 §1 · EL PATRÓN QUE APARECIÓ CINCO VECES Y NO ESTÁ EN LOS DIECISÉIS
+## 🔴 §1 · EL PATRÓN QUE APARECIÓ **TRES** VECES Y NO ESTÁ EN LOS DIECISÉIS
 
 **El CTA fijo se pinta ENCIMA del contenido.**
 No es una pantalla: es **la anatomía de pie de página de toda la despensa**.
@@ -17,8 +17,22 @@ No es una pantalla: es **la anatomía de pie de página de toda la despensa**.
 | ① | **ficha de producto** | `Composición` · la lista de ingredientes · **`Declara contener: Cordero, Arroz.`** | y 1518-1592 bajo CTA 1543-1602 (ver la corrección de §1bis) |
 | ② | **carrito** | *«El total con envío e impuestos lo vas a ver antes de pagar»* | **9.6 dp** (1614-1728 bajo 1701-1760) |
 | ③ | **dirección y entrega** | **`Instrucciones de entrega`** — que G-11 dice que debería ser *el único campo* de la pantalla | 1682-1744 bajo CTA 1701-1760 |
-| ④ | **detalle del pedido** | `A dónde te lo llevamos` | cortado por la barra de tabs |
-| ⑤ | **en camino** | **`Llega entre`** — el rango de llegada, *el dato por el que se abre la pantalla* | el rótulo entra a 1894-1966; **su valor cae debajo** |
+
+> ### ⏪ ④ Y ⑤ SALEN DE ESTA TABLA — corrección de la pista D, verificada
+>
+> Listé aquí **el detalle del pedido** y **en camino**. **D midió la fuente: ninguno de los dos tiene
+> pie fijo** —cero `position:'absolute'`; sus botones viven dentro de un `EstadoVacio` y de dos
+> `Hoja`—. **Montar `PantallaConPie` ahí sería un no-op.**
+>
+> 🔴 **Y lo peor es que mi propio instrumento ya lo decía:** el baseline de **R53 lista 11 rutas y
+> ninguna es ésas**. *Dos números míos discrepaban —la tabla decía cinco, el lint decía que esas dos
+> no tenían pie— y no los crucé.* **L-287, cobrada contra mí por no leer mi propia salida.**
+>
+> **La causa real ahí es ARITMÉTICA, y el nombre que le puse a la captura ya la decía**
+> (`…-eta-cortado.png` — *cortado*, no *tapado*): status ~48 + encabezado ~56 + **mapa 380** + 20 +
+> escalera vertical ~176 ≈ **680 dp**, contra el filo de la barra que medí en **699**. ⇒ *«Llega
+> entre»* arranca a **19 dp del borde**, y **el mapa solo se come el 54 % del alto**.
+> **La cura es la que §6 ya nombra: el mapa deja de ser BANDA y pasa a ser FONDO** (N14/Uber). Es de D.
 
 > **La causa es una sola y es de composición: el contenido no reserva el alto del pie fijo.**
 > *Un CTA fijo que no descuenta su propio alto del área scrolleable no «tapa a veces»: tapa
@@ -133,7 +147,7 @@ estado que contar.* **La lista no lo cuenta.** `EscaleraEstados` tiene su regla 
 (*sin pasos no hay escalera*) y es correcta como pieza; **lo que falta es que el pedido sin pasos
 diga su estado de otra forma.**
 
-### ② «TUS PEDIDOS» NO TIENE ENTRADA — verificado en las dos superficies
+### ② «TUS PEDIDOS» — LA ENTRADA EXISTE Y ESTÁ ENTERRADA ⏪ *corregido*
 
 **G-15 dice *«falta acceso desde la primera pantalla de Despensa»*. Medido, es más ancho:**
 
@@ -142,10 +156,14 @@ diga su estado de otra forma.**
 | **Despensa**, arriba del todo | ❌ solo título · chips de mascota · Buscar · dos voces · chips de categoría y especie |
 | **Cuenta**, índice completo | ❌ Tu perfil · Tu dirección · Tu familia · Documentos · Preferencias · Pagos · Ayuda y legales · (galería) · Sesión |
 
-⇒ **El único camino que encontré es el CTA de la pantalla «Listo».** Una vez que salís de ahí,
-*tus pedidos existen y no se pueden abrir.* Llegué por deep link (`cliente://despensa/pedidos`)
-para poder seguir midiendo. **Dueño: D** (⚠️ *si hay una entrada que no vi, esto se corrige con una
-captura — lo declaro como medido en dos superficies, no como exhaustivo*).
+> 🔴 **CORRECCIÓN (D, verificada):** dije *«no tiene entrada»* y **es falso en la letra**. La entrada
+> **existe** — `despensa/index.tsx:763`, una `CeldaNavegacion` a `/despensa/pedidos`. Lo que es cierto
+> es **dónde está: al fondo del ScrollView, detrás de la vitrina entera** (~25 filas). Por eso no la
+> encontré recorriendo y tuve que entrar por deep link.
+>
+> *Mi advertencia de la primera versión —«si hay una entrada que no vi, esto se corrige»— era la
+> correcta, y la corrección llegó.* **No hay que construirla: hay que subirla. Dueño: D.**
+> **La tabla de Cuenta sí es exacta: ahí no está.**
 
 ---
 
