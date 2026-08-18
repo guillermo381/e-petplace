@@ -83,6 +83,55 @@ export interface MapaRecorridoProps {
    *  sin ella el destino existe para el encuadre pero no se dibuja. */
   marcadorDestino?: ReactNode
   /**
+   * 🔴 **QUIÉN ESTÁ MIRANDO — y es el eje que decide los gestos** (S100d-B ·
+   * punto 24① del gate, pedido por la pista D **con la causa medida en la
+   * fuente**).
+   *
+   * **El literal del founder:** *«el mapa NO es navegable»*. **Y la causa
+   * estaba escrita en esta misma pieza sin que nadie la releyera:**
+   * `scrollEnabled={!esVivo}` / `zoomEnabled={!esVivo}`, con su comentario
+   * *«gestos apagados (el paseador no navega el mapa, camina)»*.
+   *
+   * ⇒ **La decisión se tomó para el PASEO y la heredó la ENTREGA, que es
+   * otro acto.** *El paseador camina con el perro en la mano y no navega
+   * nada; la familia mira dónde viene su pedido y quiere acercarse a su
+   * cuadra.* Mismo `modo="vivo"`, dos personas distintas.
+   *
+   * ── POR QUÉ ES UNA PROP Y NO SE DERIVA DE `destino` ─────────────────
+   * Derivarlo de *«hay destino ⇒ es una entrega»* funcionaría **hoy** —D es
+   * el único `vivo` con destino— y **se rompería sin síntoma** el día que un
+   * paseo lleve destino. *Es la familia de D-806: un acoplamiento entre dos
+   * valores que casualmente coinciden no tiene síntoma hasta que dejan de
+   * coincidir.*
+   *
+   * **Default `'operador'` ⇒ cero regresión para el paseo.**
+   *
+   * **`'espectador'` enciende TRES cosas juntas, y ninguna sirve sola:**
+   * ① pan y zoom · ② **el gesto SUSPENDE el auto-encuadre** —si no, el
+   * próximo fix del GPS le arranca el mapa de la mano— · ③ **el control de
+   * RECENTRAR**, que es lo que devuelve el encuadre después de ②. *Sin ③, ②
+   * deja al usuario perdido sin camino de vuelta; sin ②, ① es una promesa
+   * que el próximo fix rompe.*
+   *
+   * ⚠️ **`MapaRecorrido.web.tsx` no implementa esto** (ni `destino`, ni los
+   * marcadores): **solo se gatea en aparato.**
+   */
+  mirada?: 'operador' | 'espectador'
+  /**
+   * Cuánto aire dejarle por abajo al control de RECENTRAR, en dp.
+   *
+   * **Existe porque la pieza no sabe qué la tapa.** En EN CAMINO el borde
+   * superior del mapa lo ocupa la carta flotante del rango y el inferior una
+   * hoja arrastrable (medido por D) ⇒ un control fijo abajo-derecha queda
+   * debajo de la hoja. *Quien monta sabe qué cubre su mapa; la pieza no —
+   * y adivinarlo sería la estimación que esta casa ya paga cara.*
+   */
+  aireInferior?: number
+  /** La voz del control de recentrar — *«Volver al recorrido»*. **Obligatoria
+   *  en la práctica cuando `mirada='espectador'`:** un botón sin nombre no se
+   *  activa a ciegas. Se deja opcional porque con `'operador'` no existe. */
+  etiquetaRecentrar?: string
+  /**
    * ── ⚠️ LO QUE ESTE ENSANCHE **NO** TRAE: LA INTERPOLACIÓN ──────────
    * D la pidió con razón —*«el GPS llega cada ~60 s; sin interpolación
    * el pin salta y parece roto»*, y la receta ⑤ ya decidió su forma:

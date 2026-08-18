@@ -36,12 +36,64 @@
  * intermedios que nadie pidió, y en un formulario eso se paga en
  * re-renders y en un valor que "tiembla" mientras el dedo está apoyado.
  *
- * ── LA CRUZ, y por qué no es un glifo ──────────────────────────────────
- * Punto relleno + anillo, el mismo lenguaje con que `MapaRecorrido` marca
- * su posición viva. **No se dibuja un pin-gota**: el "pin placeholder"
- * murió en S58 y no se resucita, y un glifo nuevo exigiría hoja de
- * contacto y gate por ícono (§6b) para un elemento que no lo necesita —
- * el punto ya dice "acá", que es todo lo que tiene que decir.
+ * ── ⏪ LA CRUZ, y por qué no es un glifo ───────────────────────────────
+ * 🔴 ═══ DEROGADA POR F-PIN — S100d-B ═══ Firma del founder, **pedida TRES
+ * veces** (puntos 16, 23 y 26 del gate): *«sigue sin pin, pone un punto:
+ * quiero un pin como el de Uber»*. **La cláusula de abajo NO SE BORRA** —
+ * se tacha con fecha y razón, porque su argumento era defendible y hay que
+ * poder ver contra qué se decidió.
+ *
+ * **Qué de aquel argumento resultó falso, y no es «el gusto del founder»:**
+ * decía que *el punto ya dice «acá»*. **No lo dice.** La propia voz de la
+ * pantalla lo desmiente: `direccion.puntoAyuda` reza *«Ajustá el mapa hasta
+ * que **el pin** quede sobre tu puerta»* ⇒ **la palabra y el dibujo salían
+ * de dos lugares distintos y no coincidían** — el defecto que esta casa
+ * lleva un mes cazando, acá entre una voz y una silueta. *Un punto no dice
+ * «acá»: dice «algo». La punta de una gota sí señala.*
+ *
+ * **Y el costo que frenaba —«un glifo nuevo exige §6b»— desapareció:** la
+ * gota **ya existe firmada en el registry** (`Icono` `ubicacion`), así que
+ * no nace un dibujo: se **reusa el que la casa ya tenía**, por `gota.ts`.
+ *
+ * ⏪ *(letra derogada, conservada:)* «Punto relleno + anillo, el mismo
+ * lenguaje con que `MapaRecorrido` marca su posición viva. **No se dibuja
+ * un pin-gota**: el "pin placeholder" murió en S58 y no se resucita, y un
+ * glifo nuevo exigiría hoja de contacto y gate por ícono (§6b) para un
+ * elemento que no lo necesita — el punto ya dice "acá", que es todo lo que
+ * tiene que decir.»
+ *
+ * ── 🔴 LOS DOS DEFECTOS QUE CURA ESTA TANDA (punto 27 · causa raíz de A) ──
+ * **①  «no hay zoom in/out».** No era un olvido: es una trampa de la
+ * librería. `react-native-maps` declara en su nativo de Android
+ * `@ReactProp(name = "zoomEnabled", defaultBoolean = false)`
+ * (`MapManager.java:266` → `setZoomGesturesEnabled`), mientras su propia
+ * doc dice `@default true` **y deja escrito el `TODO: Why is the Android
+ * reactprop defaultvalue set to false?`** (`dist/src/MapView.d.ts:592-601`).
+ * ⇒ **no pasar la prop deja el pinch APAGADO.** `MapaZona` y `MapaRecorrido`
+ * la setean explícita y por eso nunca lo pisaron: *el único mapa de la casa
+ * donde hacer zoom ES el trabajo era justo el único que no la declaraba.*
+ *
+ * ⚠️ **EL LÍMITE DE ESTA CURA, declarado por A y conservado tal cual:**
+ * `zoomControlEnabled` sí nace en `true`, así que los botones +/− de Android
+ * **deberían** estar. El founder dice que no hay zoom. O pellizcó y no pasó
+ * nada —lo explica ①— o los botones tampoco aparecen —**eso ① no lo
+ * explica**—. **Sin aparato no se puede distinguir.** La cura es correcta
+ * bajo las dos lecturas; **si al verificar los botones tampoco están, hay un
+ * SEGUNDO defecto y no es éste.**
+ *
+ * **② «al cambiar la dirección no la ajusta en el mapa».** `initialRegion`
+ * es **NO CONTROLADO**: se lee una vez, al montar. Cuando el dueño elige una
+ * predicción de Places la pantalla actualiza `lat`/`lon` **y el mapa las
+ * ignoraba**. Y el borde que lo volvía intermitente —por eso «a veces sí»—:
+ * la pieza solo se monta con punto, así que **sin punto previo MONTA y el
+ * `initialRegion` toma bien; con punto previo ya está montada y no se
+ * mueve.** *El defecto se ve solo EDITANDO, jamás creando.*
+ *
+ * 🔴 **LA PREDICCIÓN FALSABLE DE A, que se corre ANTES de creerle a esta
+ * cura:** con una dirección que YA tiene punto, elegir una predicción lejana
+ * **no** debe mover el mapa (defecto reproducido); con una dirección SIN
+ * punto, **sí** debe moverlo. **Si las dos se comportan igual, el mecanismo
+ * está mal y se vuelve a empezar.** *No se corrió: no hay aparato.*
  *
  * POR OTA, SIN BUILD: `react-native-maps` ya es dependencia de las dos
  * apps y de este paquete, y su módulo nativo está horneado desde la
@@ -52,17 +104,26 @@
  * (`MapaRecorrido`, `MapaZona`), no un mecanismo nuevo.
  */
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { View } from 'react-native'
 import MapView from 'react-native-maps'
+import Svg, { Circle, Path } from 'react-native-svg'
 
+import { desplazamientoDePunta, GOTA_D, GOTA_OJO } from './gota'
+import { motion } from '../tokens/motion'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
 /** Encuadre de calle: suficiente para reconocer la cuadra. */
 const DELTA = 0.0025
-const PUNTO = 16
-const ANILLO = 3
+/** El lado de la gota. **34 y no 16**: el punto viejo medía 16 y el founder
+ *  lo leyó como *«un punto»*; una marca que tiene que señalar una puerta en
+ *  una cuadra necesita cuerpo. Con 34 de lado, la silueta mide **~20 × 25
+ *  dp** (la gota ocupa 14/24 de ancho y 18/24 de alto de su caja). */
+const GOTA = 34
+/** El halo blanco que la despega del lienzo — medido en la referencia de
+ *  Uber: sin él, una gota oscura sobre asfalto oscuro desaparece. */
+const HALO = 2.5
 
 export interface PinMovibleProps {
   /** OBLIGATORIAS — ver el espejo del CHECK en el encabezado. */
@@ -82,10 +143,32 @@ export interface PinMovibleProps {
 
 export function PinMovible({ lat, lon, onMover, alto = 220, etiqueta }: PinMovibleProps) {
   const { theme } = useTheme()
+  const mapa = useRef<MapView>(null)
   // El centro que la pieza YA reportó: evita devolverle a la pantalla el
   // mismo par que acaba de pasarnos (un ciclo de escritura por cada
   // re-render del padre).
   const ultimo = useRef({ lat, lon })
+
+  /* 🔴 ② EL MAPA SIGUE A LAS PROPS — la cura del «no lo ajusta al cambiar
+     la dirección» (ver la cabecera).
+
+     **El guard es el que ya estaba escrito y por eso la cura es barata:**
+     `ultimo` guarda lo último que la pieza REPORTÓ. Comparar las props
+     contra él distingue las dos causas posibles de un cambio:
+       · vienen IGUALES a lo reportado ⇒ **lo movió el dedo** ⇒ no se toca
+         nada. *Animar acá sería arrancarle el mapa de la mano.*
+       · vienen DISTINTAS ⇒ **se lo cambiaron desde afuera** (Places) ⇒ se
+         anima hasta ahí.
+     *Sin esa distinción, un `animateToRegion` en cada cambio pelea contra el
+     arrastre y el mapa tiembla.* El regalo es de la pista A. */
+  useEffect(() => {
+    if (lat === ultimo.current.lat && lon === ultimo.current.lon) return
+    ultimo.current = { lat, lon }
+    mapa.current?.animateToRegion(
+      { latitude: lat, longitude: lon, latitudeDelta: DELTA, longitudeDelta: DELTA },
+      motion.duration.estandar,
+    )
+  }, [lat, lon])
 
   return (
     <View
@@ -94,6 +177,7 @@ export function PinMovible({ lat, lon, onMover, alto = 220, etiqueta }: PinMovib
       style={{ height: alto, borderRadius: radius.suave, overflow: 'hidden' }}
     >
       <MapView
+        ref={mapa}
         style={{ flex: 1 }}
         initialRegion={{ latitude: lat, longitude: lon, latitudeDelta: DELTA, longitudeDelta: DELTA }}
         onRegionChangeComplete={(r) => {
@@ -101,6 +185,13 @@ export function PinMovible({ lat, lon, onMover, alto = 220, etiqueta }: PinMovib
           ultimo.current = { lat: r.latitude, lon: r.longitude }
           onMover(r.latitude, r.longitude)
         }}
+        /* 🔴 ① EL PINCH, DECLARADO EXPLÍCITO. **No es redundante: en Android
+           el nativo lo apaga si nadie lo pide** (`defaultBoolean = false`,
+           contra el `@default true` de su propia doc — ver la cabecera).
+           ⛔ **No se borra por «ya viene en true»:** viene en true en la
+           documentación y en false en el aparato. */
+        zoomEnabled
+        scrollEnabled
         // El pin es el CENTRO: rotar o inclinar desalinearía lo que el
         // usuario cree que está marcando.
         rotateEnabled={false}
@@ -114,17 +205,35 @@ export function PinMovible({ lat, lon, onMover, alto = 220, etiqueta }: PinMovib
         pointerEvents="none"
         style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}
       >
-        <View
-          style={{
-            width: PUNTO,
-            height: PUNTO,
-            borderRadius: radius.full,
-            backgroundColor: theme.accent.control,
-            borderWidth: ANILLO,
-            borderColor: theme.text.inverse,
-            boxShadow: theme.elevacion.reposo,
-          }}
-        />
+        {/* 🔴 LA GOTA, SUBIDA HASTA QUE SU PUNTA CAE EN EL CENTRO.
+            **Hallazgo de la pista A y es el que salva la cura:** con el disco
+            viejo, «lo que el ojo lee» y «el centro que el mapa reporta» eran
+            el mismo píxel. Con una gota **el ojo lee la PUNTA**, así que
+            dibujarla centrada haría marcar ~medio glifo más arriba de lo que
+            la persona cree ⇒ **un sesgo sistemático en cada dirección
+            guardada**. El desplazamiento se DERIVA de la silueta
+            (`gota.ts`): si la forma cambia, el ancla la sigue sola. */}
+        <View style={{ transform: [{ translateY: -desplazamientoDePunta(GOTA) }] }}>
+          <Svg width={GOTA} height={GOTA} viewBox="0 0 24 24">
+            {/* EL HALO — la gota se dibuja DOS veces: primero engrosada en
+                papel, después llena. Es lo que la despega de cualquier
+                lienzo (medido en la referencia de Uber: su pin lleva ese
+                contorno claro). Sin él, una marca oscura sobre asfalto
+                oscuro desaparece justo cuando hay que ubicarla. */}
+            <Path
+              d={GOTA_D}
+              fill={theme.text.inverse}
+              stroke={theme.text.inverse}
+              strokeWidth={HALO}
+              strokeLinejoin="round"
+            />
+            <Path d={GOTA_D} fill={theme.accent.control} />
+            {/* EL OJO — el hueco claro del centro. En la referencia es lo que
+                impide que la gota se lea como una mancha: el contorno interno
+                le devuelve la silueta a la forma. */}
+            <Circle cx={GOTA_OJO.cx} cy={GOTA_OJO.cy} r={GOTA_OJO.r} fill={theme.text.inverse} />
+          </Svg>
+        </View>
       </View>
     </View>
   )

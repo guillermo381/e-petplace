@@ -61,10 +61,16 @@ import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { AvatarMascota } from './AvatarMascota'
+import { Icono } from './Icono'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
 
 export type ChipEntidadTamano = 'compacto' | 'general'
-export type ChipEntidadSujeto = 'mascota' | 'persona' | 'cosa'
+/** 🔴 `'donacion'` NACE EN S100d-B (punto 15 del gate). No es una entidad
+ *  más: es **la única respuesta a «¿para quién es?» que no es un ser**, y
+ *  por eso su fallback no es una inicial sino **el glifo del refugio** —
+ *  *una «D» en un círculo no dice nada; un refugio dice a dónde va.*
+ *  Ver `SelectorDestinoItem` para por qué comparte hilera con las caras. */
+export type ChipEntidadSujeto = 'mascota' | 'persona' | 'cosa' | 'donacion'
 
 /** Las dos calibraciones, derivadas de las escalas de la casa. */
 const CALIBRE = {
@@ -117,6 +123,8 @@ export function ChipEntidad({
   // modelo, no usarlo. Con esto deja de hacer falta esquivarlo.
   const conFoto = typeof fotoUrl === 'string' && fotoUrl.length > 0
   const conAvatar = conFoto || sujeto === 'mascota'
+  // La donación no tiene cara ni inicial: lleva el glifo de a dónde va.
+  const conGlifoRefugio = !conFoto && sujeto === 'donacion'
 
   return (
     <Pressable
@@ -154,6 +162,14 @@ export function ChipEntidad({
             justifyContent: 'center',
           }}
         >
+          {conGlifoRefugio ? (
+            <Icono
+              nombre="refugio"
+              tamano={Math.round(c.diametro * 0.6)}
+              registro="tinta"
+              tinta={theme.text.secondary}
+            />
+          ) : (
           <Text
             style={{
               fontFamily: typography.family.sans.medium,
@@ -163,6 +179,7 @@ export function ChipEntidad({
           >
             {nombre.trim().charAt(0).toUpperCase()}
           </Text>
+          )}
         </View>
       )}
       <Text
