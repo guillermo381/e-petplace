@@ -165,5 +165,75 @@ if ((await jack.count()) === 0) {
   );
 }
 
+// ── ③ H-301 · ¿CUÁNTOS RESULTADOS CAMBIAN DE POSICIÓN? ──────────────────
+/**
+ * 🔴 EL NÚMERO QUE EL FOUNDER PIDIÓ al firmar H-301: *«declaralo reversible
+ * y dejá el número: cuántos resultados cambian de posición con Jack
+ * elegido»*.
+ *
+ * Se mide **sobre la pantalla**, con el mismo término, primero SIN mascota
+ * y después CON Jack, y se comparan las dos listas ordenadas. **No se
+ * calcula del catálogo**: lo que importa es lo que la familia ve.
+ *
+ * ⚠️ **Y se mide también CUÁNTOS SON DE SU ESPECIE arriba de todo**, porque
+ * «cambiaron de posición» solo dice que se movieron — *no dice que se
+ * movieron para el lado correcto.*
+ */
+console.log('\n── ③ H-301 · EL ORDEN POR ESPECIE, ANTES Y DESPUÉS ──');
+await page.goto(`${BASE}/despensa`, { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(9000);
+await marcarScroller();
+
+const TERMINO = 'alimento';
+const sinM = await buscar(TERMINO);
+console.log(`  sin mascota · «${TERMINO}» ⇒ ${sinM.n} tarjetas`);
+
+await marcarScroller();
+const jack2 = page.locator('[data-medicion-scroller] [aria-label*="Jack"]').first();
+if ((await jack2.count()) === 0) {
+  console.log('  ⚠ no encontré a Jack — el número de ③ NO se reporta (no se rellena).');
+} else {
+  await jack2.click();
+  await page.waitForTimeout(8000);
+  const conM = await contarTarjetas();
+  console.log(`  con Jack   · «${TERMINO}» ⇒ ${conM.n} tarjetas`);
+
+  // Las listas COMPLETAS, en orden, para comparar posición por posición.
+  const lista = async () => {
+    await marcarScroller();
+    return page.evaluate(() => {
+      const sc = document.querySelector('[data-medicion-scroller]');
+      if (sc === null) return [];
+      return [...sc.querySelectorAll('[role="button"][aria-label]')]
+        .map((e) => ({ et: e.getAttribute('aria-label') ?? '', r: e.getBoundingClientRect() }))
+        .filter((x) => x.r.width > 100 && x.r.width < 230 && x.r.height > 120)
+        .map((x) => x.et);
+    });
+  };
+  const despues = await lista();
+  // Volver a SIN mascota re-tocando a Jack (el chip alterna la elección).
+  await jack2.click();
+  await page.waitForTimeout(8000);
+  const antes = await lista();
+
+  if (antes.length === 0 || despues.length === 0) {
+    console.log('  ⚠ una de las dos listas vino vacía — se declara, no se compara.');
+  } else {
+    const pos = new Map(antes.map((et, i) => [et, i]));
+    let movidos = 0;
+    let nuevos = 0;
+    despues.forEach((et, i) => {
+      const p = pos.get(et);
+      if (p === undefined) nuevos++;
+      else if (p !== i) movidos++;
+    });
+    console.log(`     largo antes ${antes.length} · largo después ${despues.length}`);
+    console.log(`  🔴 resultados que CAMBIAN DE POSICIÓN ....... ${movidos}`);
+    console.log(`     resultados que ANTES NO ESTABAN .......... ${nuevos}`);
+    console.log(`     los 3 primeros ANTES:  ${antes.slice(0, 3).join(' · ')}`);
+    console.log(`     los 3 primeros DESPUÉS: ${despues.slice(0, 3).join(' · ')}`);
+  }
+}
+
 console.log(`\nerrores de página: ${errores.length}`);
 await browser.close();
