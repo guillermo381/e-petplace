@@ -1259,8 +1259,8 @@ export const clienteEn = {
     filtrosTitulo: 'Filter',
     filtrosVer: 'See {{n}} products',
     filtrosLimpiar: 'Clear {{n}} filters',
-    // S100d-C · ④ — each axis label says how many options it holds.
-    filtroEjeCon: '{{titulo}} · {{n}}',
+    // ☠️ S100d-bis — `filtroEjeCon` died: the count explained nothing once
+    // `envuelve` stopped hiding options. See the Spanish dictionary.
     filtroCategoria: 'Category',
     filtroEspecie: 'For which animal',
     filtroMarca: 'Brand',

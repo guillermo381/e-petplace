@@ -1464,12 +1464,11 @@ export const clienteEs = {
     filtrosTitulo: 'Filtrar',
     filtrosVer: 'Ver {{n}} productos',
     filtrosLimpiar: 'Limpiar {{n}} filtros',
-    // 🔴 S100d-C · punto ④ — el rótulo de cada eje DICE cuántas opciones
-    // tiene. Medido: «Marca» ofrece 13 y se ven 4; «Presentación» ofrece 15
-    // y se ven 4. *Un eje que muestra cuatro de trece y no lo dice se lee
-    // como un eje de cuatro.* El separador es el mismo « · » que ya usa
-    // `filtrarCon`: la casa dice «rótulo · número» en un solo dialecto.
-    filtroEjeCon: '{{titulo}} · {{n}}',
+    // ☠️ S100d-bis · Ley 37 — acá vivía `filtroEjeCon` («Categoría · 3»).
+    // **La mató el founder con una pregunta:** *«no sé por qué pone el 3»*.
+    // Medido: contaba las opciones del eje **y las tres estaban a la
+    // vista**. Nació como la mitad de la cura del truncado; la otra mitad
+    // (`envuelve`) lo resolvió de raíz y dejó a ésta sin nada que declarar.
     filtroCategoria: 'Categoría',
     filtroEspecie: 'Para qué animal',
     filtroMarca: 'Marca',
