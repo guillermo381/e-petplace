@@ -1884,6 +1884,16 @@ const FIXTURES = {
      despensa que NO monta el control tiene que salir VERDE, y el motor
      que conserva `p_fecha_programada` NO debe pintarse rojo — se quitó la
      puerta, no el motor. Lo único rojo es el que vuelve a montarlo. */
+  /* R53 · el fixture prueba que DISCRIMINA (corolario de L-236): un solo
+     ofensor real y TRES que NO deben pintarse rojo — la pantalla que ya
+     monta la pieza, la que usa `absolute` para otra cosa (un badge, lejos
+     de cualquier `bottom: 0`), y una del baseline congelado. */
+  R53: [
+    { path: 'apps/cliente/src/app/(tabs)/despensa/nueva.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/ok.tsx', src: "<PantallaConPie pie={<Boton />}>{contenido}</PantallaConPie>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/badge.tsx', src: "<View style={{ position: 'absolute', top: 0, right: 0 }}><Insignia /></View>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+  ],
   R52: [
     { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<SelectorVentana opciones={v} elegida={e} onElegir={f} />" },
     { path: 'apps/cliente/src/app/(tabs)/despensa/motor.ts', src: "calcularPromesaDespensa({ fecha_programada: f })" },
@@ -3616,6 +3626,80 @@ function r45(archivos) {
  *  motor — `calcular_promesa_despensa` conserva `p_fecha_programada` a
  *  propósito: *se quitó la puerta, no el motor.*
  */
+/* 🔴 R53 · UN PIE FIJO RESERVA SU PROPIO LUGAR (S100b-B).
+
+   EL DEFECTO QUE LA OBLIGA, medido en el aparato: el pie fijo se pintaba
+   ENCIMA del contenido en CINCO pantallas de la despensa, y en la ficha lo
+   tapado era **la composición y los alérgenos** — con la ficha sin scroll,
+   o sea inalcanzables.
+
+   La causa no era el pie: era que el contenido **estimaba** su alto.
+   Literal de la ficha antes de la cura:
+       paddingBottom: insets.bottom + (conCta ? spacing[8] + 96 : spacing[8])
+   El `96` es el alto del pie TECLEADO. Ese pie lleva dos botones apilados.
+
+   ⚠️ **POR QUÉ NINGÚN INSTRUMENTO LO CAZÓ ANTES, y es lo que justifica que
+   esta regla exista:** el nodo tapado **sigue en el árbol de accesibilidad**
+   — medido, el lector anuncia la composición que el ojo no ve. *Un check
+   que lea el árbol da VERDE sobre este defecto.* Hubo que mirar la pantalla.
+
+   QUÉ CAZA: un contenedor `position:'absolute'` con `bottom: 0` en una
+   pantalla de app que **no** monta `PantallaConPie`. Baseline SOLO-BAJA con
+   los 11 medidos al nacer; cada migración lo baja.
+
+   ⚠️ SU LÍMITE, ESCRITO: la regla ve **la forma** (un pie absoluto a mano),
+   no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
+   pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
+   honestamente — se cura por construcción, que es de lo que trata la pieza. */
+const BASELINE_R53 = [
+  'apps/cliente/src/app/(tabs)/despensa/carrito.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/checkout.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/index.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/producto/[productoId].tsx',
+  'apps/cliente/src/app/(tabs)/hogar/index.tsx',
+  'apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx',
+  'apps/cliente/src/app/(tabs)/hogar/veterinaria.tsx',
+  'apps/cliente/src/app/paseo/[atencionId].tsx',
+  'apps/cliente/src/app/prestador/[prestadorId].tsx',
+  'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
+  'apps/prestador/src/app/bienvenida-dia1.tsx',
+]
+
+function r53(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    // El pie a mano: absolute + bottom:0 cerca. Ventana corta para no
+    // confundirlo con un absolute de otra cosa (un badge, un overlay).
+    const aMano = /position:\s*'absolute'[\s\S]{0,160}?bottom:\s*0\b/.test(limpio)
+    if (!aMano) continue
+    // Si monta la pieza, el pie ya reserva: no es ofensor.
+    if (/\bPantallaConPie\b/.test(limpio)) continue
+    ofensores.push(path)
+  }
+  const nuevos = ofensores.filter((o) => !BASELINE_R53.some((b) => o.endsWith(b) || b.endsWith(o)))
+  if (nuevos.length > 0)
+    fallos.push(
+      `R53: ${nuevos.length} pantalla(s) NUEVA(S) dibujan un pie fijo a mano (baseline ${BASELINE_R53.length} congelado por RUTA). Un pie que el consumidor posiciona es un pie cuyo alto el consumidor tiene que ESTIMAR — y estimarlo es el defecto que tapó la composición y los alérgenos en la ficha. Montá \`PantallaConPie\`: el pie se mide a sí mismo y esa misma medida reserva el scroll.\n   ${nuevos.join('\n   ')}`,
+    )
+  /* EL ANCLA MIDE EL SUJETO, JAMÁS A LOS INFRACTORES (L-291): lo que esta
+     regla necesita para no estar ciega no es que alguien la viole —el día
+     que las 11 migren, `ofensores` es 0 y eso es su ÉXITO— sino que la
+     pieza a la que manda SIGA EXISTIENDO. Si `PantallaConPie` desaparece,
+     la regla apunta a la nada y su silencio pasa a significar «no miré». */
+  const indice = readFileSync('packages/ui/src/index.ts', 'utf8')
+  const destino = /export \{\s*PantallaConPie\b/.test(indice) ? 1 : 0
+  fallos.push(...ancla('R53', destino, 1, 'la pieza destino `PantallaConPie` exportada desde packages/ui (0 = la regla se quedó sin a dónde mandar)'))
+  return {
+    fallos,
+    info: `${ofensores.length} pantalla(s) con pie fijo a mano · baseline ${BASELINE_R53.length} congelado por ruta · la migración es de C/A/D · su verde dice «el pie lo pone la pieza», jamás «nada tapa a nada»`,
+  }
+}
+
 const BASELINE_R52 = 1
 
 function r52(archivos) {
@@ -3648,7 +3732,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3925,6 +4009,7 @@ corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps
 corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
+corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...appsCodigo])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

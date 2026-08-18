@@ -54,6 +54,7 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { PantallaConPie } from '../components/PantallaConPie'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -396,6 +397,56 @@ function MuestraSelectorDestino() {
       etiquetaDonacion="Donar este producto"
       detalleDonacion="Lo entregamos a un refugio. No suma a ningún expediente."
     />
+  )
+}
+
+/* S100b-B: muestra viva de PantallaConPie — y su DISCRIMINADOR es la
+   última línea, no la primera.
+
+   🔴 QUÉ HAY QUE VER: **«Declara contener: Cordero, Arroz.» tiene que
+   quedar alcanzable scrolleando hasta el fondo.** Ése es exactamente el
+   contenido que el pie fijo tapaba en la ficha real —composición y
+   alérgenos, con la pantalla sin scroll— y por eso la muestra lo usa de
+   sujeto en vez de un «ítem 12» cualquiera.
+
+   El pie lleva DOS botones a propósito: el defecto original venía de que
+   la pantalla estimaba el alto del pie en `96`, y con dos botones ese
+   número se queda corto. **Si algún día la última línea vuelve a quedar
+   debajo del pie, la reserva dejó de derivarse del alto medido.** */
+function MuestraPantallaConPie() {
+  const filas = [
+    'Foto del producto',
+    'Nombre y presentación',
+    'Precio y precio por kilo',
+    'Para quién sirve',
+    'Disponibilidad',
+    'Composición',
+    'Declara contener: Cordero, Arroz.',
+  ]
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View style={{ height: 320, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)' }}>
+        <PantallaConPie
+          contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}
+          pie={
+            <>
+              <Boton etiqueta="Agregar al carrito" bloque onPress={() => {}} />
+              <Boton etiqueta="Ver carrito · 1" variante="secundario" bloque onPress={() => {}} />
+            </>
+          }
+        >
+          {filas.map((f) => (
+            <Celda key={f} titulo={f} />
+          ))}
+        </PantallaConPie>
+      </View>
+      <Texto variante="apoyo">
+        El pie se mide a sí mismo y esa misma medida reserva el scroll: no hay dos cuentas que puedan
+        discrepar. Scrolleá hasta el fondo — la última línea tiene que quedar por encima del pie.
+        Antes de esta pieza cinco pantallas estimaban ese alto a mano, y en la ficha lo que quedaba
+        debajo era la composición y los alérgenos.
+      </Texto>
+    </View>
   )
 }
 
@@ -3290,6 +3341,10 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="PantallaConPie (S100b) — el pie fijo RESERVA su propio lugar">
+          <MuestraPantallaConPie />
         </Seccion>
 
         <Seccion titulo="SelectorVentana (S96) — cuándo llega, y por qué un día no se puede elegir (§6.2)">
