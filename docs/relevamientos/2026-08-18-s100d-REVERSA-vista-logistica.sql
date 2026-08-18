@@ -1,0 +1,28 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260820070000_s100d_vista_logistica_security_invoker.sql`
+-- Escrita ANTES de aplicar la migración (regla de la casa).
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- 🔴 QUÉ DESHACE Y QUÉ **NO**:
+--
+-- DESHACE: devuelve `v_dashboard_logistico` a ejecutarse con los privilegios de
+-- su DUEÑO (`postgres`), o sea **saltando la RLS** de `envios`, `pedidos` y
+-- `profiles`.
+--
+-- ⚠️ **REVERTIR ESTO REABRE UNA EXPOSICIÓN DE DATOS PERSONALES.** La vista
+-- devuelve `cliente_nombre` y `cliente_email` de clientes reales, y `anon`
+-- tiene `SELECT` sobre ella — o sea que con la anon key, que **viaja pública
+-- en cada bundle por diseño**, cualquiera vuelve a leer nombres y correos.
+-- Medido el 18-ago-2026 por camino real: `GET /rest/v1/v_dashboard_logistico`
+-- con la anon key devolvía **HTTP 200 con fila**.
+--
+-- ⇒ **NO se revierte para «arreglar» un tablero que se quedó en blanco.** Si un
+-- consumidor externo (el admin, que usa la anon key sobre esta misma base) dejó
+-- de ver datos, la salida correcta es darle una credencial que corresponda o un
+-- lector propio con su gate — jamás volver a abrirle la puerta a todo internet.
+-- *El founder firmó romper hacia el lado seguro: «un tablero externo en blanco
+-- se arregla en horas; emails de clientes expuestos no se des-exponen».*
+--
+-- NO DESHACE: nada de datos. La migración no toca ni una fila.
+
+ALTER VIEW public.v_dashboard_logistico SET (security_invoker = false);
