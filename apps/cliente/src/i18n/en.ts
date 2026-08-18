@@ -1501,6 +1501,8 @@ export const clienteEn = {
     enCaminoQuienTrae: 'Who’s bringing it',
     // S100c-D — the draggable sheet, and the honest photo gap.
     enCaminoHojaVerMas: 'See the order details',
+    // S100d — the drag hint became visible, so it needs its other half.
+    enCaminoHojaVerMenos: 'Hide the details',
     repartidorSinFoto: 'We’re not showing their photo yet',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',

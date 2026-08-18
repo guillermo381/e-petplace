@@ -91,6 +91,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
+  Chevron,
   CodigoAEscala,
   Encabezado,
   Esqueleto,
@@ -164,7 +165,13 @@ export default function DespensaEnCamino() {
   //    calcó de `Hoja`. El contenedor TRASLADA (translateY), jamás
   //    teletransporta: la hoja que sube MUESTRA que hay más abajo.
   const extendidaRef = useRef(false);
-  const [, setExtendida] = useState(false);
+  /* 🔴 S100d · EL ESTADO DEJA DE SER MUDO. Acá decía `const [, setExtendida]`
+     —se escribía y no se leía— porque nada de la pantalla cambiaba al abrir.
+     Ahora sí: **la señal de arrastre gira** (⌃ cuando hay más arriba, ⌄
+     cuando ya está abierta) y su voz cambia con ella. *Una flecha que apunta
+     siempre para el mismo lado deja de ser una señal y pasa a ser un adorno.*
+     El `ref` se conserva porque el gesto lo lee desde el hilo de UI. */
+  const [extendida, setExtendida] = useState(false);
   const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
   const extAlto = useSharedValue(0); // alto medido del bloque plegable
   const desplBase = useSharedValue(0); // ancla del arrastre en curso
@@ -453,7 +460,25 @@ export default function DespensaEnCamino() {
                 right: 0,
                 bottom: 0,
                 maxHeight: altoLienzo * (1 - PISO_DEL_MAPA),
-                backgroundColor: theme.bg.base,
+                /* 🔴 S100d · PUNTO 24④ DEL GATE — firma del founder: *«fondo
+                   de la hoja BLANCO, no magenta claro»*.
+                   Acá decía `bg.base`, que **es** el magenta claro:
+                   `papelTapiz` = pink puro al 3 % sobre el papel algodón
+                   (`palette.ts:228`, S82-B r10). Sobre el mapa —que es una
+                   foto del mundo, clara y neutra— ese tinte se lee como una
+                   mancha, no como una superficie.
+                   ⇒ va `bg.card`, que en claro **es blanco** (`light1`).
+                   **Y se arregla con el TOKEN, no con un `#FFFFFF`:** la
+                   hoja es una SUPERFICIE de la casa, y en oscuro y en
+                   memorial tiene que seguir siendo la superficie de su tema.
+                   *Teclear blanco acá curaría el tema claro y rompería los
+                   otros dos, que es la clase de cura que se ve bien en la
+                   captura del gate y mal en el teléfono de otro.*
+                   ⚠️ Esta cura NO es QF-01. QF-01 —*«no me gusta cómo se ven
+                   las cosas sobre nuestro fondo»*— sigue abierta y es de
+                   vuelta propia por decisión del founder; ésta es el pedido
+                   puntual que él firmó aparte, sobre ESTA hoja. */
+                backgroundColor: theme.bg.card,
                 borderTopLeftRadius: radius.lg,
                 borderTopRightRadius: radius.lg,
                 boxShadow: theme.elevacion.elevada,
@@ -491,15 +516,88 @@ export default function DespensaEnCamino() {
                     />
                   </Pressable>
                   {codigo === null ? null : (
+                    /* 🔴 S100d · PUNTO 24③ — firma del founder: *«resaltar el
+                       título "El código de tu entrega" para que se note que
+                       se puede subir»*. Son DOS cosas en una frase y se
+                       curan por separado, porque son dos defectos:
+
+                       **(a) EL TÍTULO NO RESALTABA.** Venía como `etiqueta`
+                       de `CodigoAEscala`, que lo pinta en `apoyo` — la voz
+                       más chica y más apagada de la casa. ⇒ el título sale
+                       de la pieza y se monta acá en `seccion`, y el bloque
+                       entero pasa a una **superficie hundida**: sobre la
+                       hoja blanca de 24④ el código deja de flotar sobre la
+                       nada y se lee como una cosa sola. *Es la anatomía
+                       medida de las dos referencias: Uber le da al PIN una
+                       carta tintada propia dentro de la hoja
+                       (`referencia-uber-tarjeta-del-conductor.jpeg`) y Rappi
+                       le da al código su carta con la regla adentro
+                       (`referencia-rappi-mapa-rango-y-codigo.png`).*
+                       ⚠️ La escala del número NO se toca: sigue mono 2xl por
+                       la excepción firmada de `CodigoAEscala` — este dato se
+                       DICTA en una puerta, y el mono es la herramienta.
+
+                       **(b) NO SE NOTABA QUE SUBE**, que es lo que el
+                       founder está diciendo de verdad. El asa canónica es
+                       36×4 en `bg.border`, y sobre blanco eso es casi nada;
+                       y la única voz que decía «hay más» vivía en un
+                       `accessibilityLabel` — **invisible para quien ve**.
+                       *Un affordance que solo existe para el lector de
+                       pantalla no es un affordance: es una nota al pie.*
+                       ⇒ la voz se DIBUJA, con su chevron, y **el chevron
+                       gira** con el estado (⌃ sube · ⌄ baja). */
                     <View
                       style={{
                         paddingHorizontal: spacing[5],
-                        paddingBottom: spacing[3],
-                        gap: spacing[1],
+                        paddingBottom: spacing[2],
+                        gap: spacing[2],
                       }}
                     >
-                      <CodigoAEscala codigo={codigo} etiqueta={t('despensa.codigoPuerta')} />
-                      <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
+                      <View
+                        style={{
+                          backgroundColor: theme.bg.hundido,
+                          borderRadius: radius.md,
+                          padding: spacing[4],
+                          gap: spacing[1],
+                        }}
+                      >
+                        <Texto variante="seccion">{t('despensa.codigoPuerta')}</Texto>
+                        <CodigoAEscala codigo={codigo} />
+                        <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
+                      </View>
+
+                      {/* LA SEÑAL DE ARRASTRE — el mismo `onPress` que el
+                          asa, y adentro del `GestureDetector`, así que
+                          también se puede arrastrar desde acá. Va CENTRADA
+                          porque acompaña al asa, que está centrada: dos
+                          señales del mismo gesto alineadas se leen como una.
+                          `Chevron` es la pieza de la casa para slots que no
+                          son una fila entera (S99-B) — el path crudo está
+                          prohibido por la cabecera de `chevron.tsx`. */}
+                      <Pressable
+                        onPress={() => irA(!extendidaRef.current)}
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: extendida }}
+                        accessibilityLabel={
+                          extendida
+                            ? t('despensa.enCaminoHojaVerMenos')
+                            : t('despensa.enCaminoHojaVerMas')
+                        }
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: spacing[1],
+                          paddingVertical: spacing[1],
+                        }}
+                      >
+                        <Chevron direccion={extendida ? 'abajo' : 'arriba'} lado={16} />
+                        <Texto variante="apoyo">
+                          {extendida
+                            ? t('despensa.enCaminoHojaVerMenos')
+                            : t('despensa.enCaminoHojaVerMas')}
+                        </Texto>
+                      </Pressable>
                     </View>
                   )}
                 </View>
@@ -523,31 +621,36 @@ export default function DespensaEnCamino() {
                     gap: spacing[5],
                   }}
                 >
-                  {(() => {
-                    const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
-                    return (
-                      <EscaleraEstados
-                        pasos={conIconos(pasos)}
-                        desvio={desvio}
-                        registro="completa"
-                        acento="control"
-                      />
-                    );
-                  })()}
+                  {/* 🔴 S100d · PUNTO 24② — EL ORDEN CAMBIA, Y ESO ES LA CURA.
+                      Firma del founder: *«al arrastrar no sale la ficha del
+                      conductor como en Uber»* — **hoja abajo = mapa + rango ·
+                      hoja arriba = la ficha completa + detalles**.
 
-                  <Separador />
+                      **Y la ficha SÍ estaba montada. Lo que fallaba era el
+                      orden.** Iba última, debajo de la escalera completa y de
+                      un separador, adentro de un `ScrollView` cuyo alto está
+                      acotado por el techo de la hoja (`PISO_DEL_MAPA`) ⇒ **el
+                      dedo abría la hoja y lo que aparecía era la escalera; la
+                      ficha quedaba debajo del pliegue, detrás de un SEGUNDO
+                      gesto** (el scroll interno) que nadie anuncia.
+                      *Un elemento que existe pero que exige dos gestos para
+                      aparecer es, para quien mira, un elemento que no está —
+                      y el founder lo reportó exactamente así, con esas
+                      palabras, en el punto 25.*
 
-                  {/* ④ QUIÉN LO TRAE — la ficha, sobre la anatomía MEDIDA de
-                      `referencia-uber-tarjeta-del-conductor.jpeg`: la ficha es
-                      **una carta**, la **placa manda arriba**, el vehículo va
-                      debajo en apoyo, el nombre abajo, y **la foto es un
-                      círculo a la izquierda**.
+                      Y el orden nuevo no es gusto: es la anatomía medida de
+                      `referencia-uber-tarjeta-del-conductor.jpeg` leída con
+                      la firma encima. Uber ordena código → detalles → ficha;
+                      **el founder pidió ficha → detalles y manda la firma**,
+                      que además es lo que la espera en la puerta necesita
+                      primero: *quién viene, y recién después en qué anda.*
 
-                      🔴 `null` NO se dibuja con guiones: el lector tapa DOS
-                      casos a propósito (el envío no es tuyo · todavía no tiene
-                      repartidor) para no confirmarle a un curioso que el envío
-                      existe. *Una ficha con tres rayas afirma «este repartidor
-                      no tiene nombre»; la ausencia no afirma nada.* */}
+                      ⏳ **CUANDO LLEGUE `FichaRepartidor` DE B** (punto 25,
+                      contrato acordado: `nombre` · `placa` · `vehiculo` ·
+                      `fotoUrl` · `etiquetaFoto` · `acciones`), esta
+                      composición se reemplaza por la pieza y **el orden se
+                      queda**: lo que se cura acá es la POSICIÓN, y esa no la
+                      trae ninguna pieza. */}
                   {ficha === null ? null : (
                     <Tarjeta relleno="amplio">
                       <View style={{ gap: spacing[2] }}>
@@ -603,7 +706,16 @@ export default function DespensaEnCamino() {
                                 **uno se DICE y el otro se VERIFICA** es cómo
                                 alguien le dice la placa al repartidor. *Una
                                 jerarquía que se arregla creando una confusión
-                                peor no está arreglada.* */}
+                                peor no está arreglada.*
+
+                                🔴 **Y EL CASO SIN PLACA NO ES UN BORDE: es la
+                                MITAD de la cuenta del gate.** Medido hoy
+                                contra la base viva: **2 pedidos `en_camino`,
+                                los dos con repartidor, y UNO con CERO
+                                vehículos cargados.** Por eso la rama sin placa
+                                no dibuja un hueco ni un guion — el nombre sube
+                                a presidir y la ficha se sostiene con lo que
+                                tiene. */}
                             {ficha.vehiculo_placa === null ? (
                               <Texto variante="cuerpo">{ficha.nombre}</Texto>
                             ) : (
@@ -626,6 +738,60 @@ export default function DespensaEnCamino() {
                       </View>
                     </Tarjeta>
                   )}
+
+                  {/* 🔴 S100d · PUNTO 23 — A DÓNDE VA, CON SU GLIFO DE
+                      UBICACIÓN. Firma del founder: *«falta en la ESCALERA y en
+                      SEGUIR EL PEDIDO el glifo de ubicación»* — y «Seguir el
+                      pedido» es LITERALMENTE la puerta a esta pantalla
+                      (`despensa.enCaminoEntrada`).
+
+                      **Y acá había un hueco de verdad, no solo un glifo que
+                      falta: la pantalla del seguimiento NO decía a dónde va el
+                      pedido.** Lo dibujaba —el punto en el mapa— y no lo
+                      DECÍA. *Un punto en un mapa se parece a todas las
+                      direcciones de la cuadra; el texto es lo que deja
+                      confirmar que la dirección es la tuya, que es exactamente
+                      lo que el founder pidió poder hacer antes de que la moto
+                      salga.* La referencia lo trae en la misma posición:
+                      Uber pone «Meet at your pickup spot on Avenida Amazonas»
+                      como carta de la hoja, debajo del código.
+
+                      El glifo es `ubicacion` —la GOTA— por la dosis que B fijó
+                      con F-PIN: **gota donde una ubicación se MUESTRA COMO
+                      DATO; objeto del mundo (la casita, la moto) adentro del
+                      mapa** (`DIRECCION_ARTE` §6ter: *el mapa no es interfaz,
+                      es MUNDO*). Por eso el marcador del mapa de arriba NO
+                      cambia y este sí. */}
+                  {detalle.entrega.direccion === null ? null : (
+                    <Tarjeta relleno="amplio">
+                      <View style={{ gap: spacing[1] }}>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}
+                        >
+                          <Icono nombre="ubicacion" tamano={18} />
+                          <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
+                        </View>
+                        <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
+                        {detalle.entrega.referencias === null ? null : (
+                          <Texto variante="apoyo">{detalle.entrega.referencias}</Texto>
+                        )}
+                      </View>
+                    </Tarjeta>
+                  )}
+
+                  <Separador />
+
+                  {(() => {
+                    const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
+                    return (
+                      <EscaleraEstados
+                        pasos={conIconos(pasos)}
+                        desvio={desvio}
+                        registro="completa"
+                        acento="control"
+                      />
+                    );
+                  })()}
                 </ScrollView>
               </View>
             </GestureHandlerRootView>

@@ -79,11 +79,45 @@ const ESCALERA: { clave: NarrativaPedido; voz: keyof VocesEscalera }[] = [
  * el ícono es lo que hace que cada etapa diga QUÉ ES **sin texto**, que es
  * la pregunta del ojo de la receta (§6.3).
  */
+/* 🔴 S100d · PUNTO 23 DEL GATE — EL ÚLTIMO NODO PASA A SER LA UBICACIÓN.
+ *
+ * Firma del founder: *«Ya está el código y el pedido. Falta en la ESCALERA y
+ * en SEGUIR EL PEDIDO el glifo de ubicación»*.
+ *
+ * **Y la referencia lo tiene medido, no interpretado.** En
+ * `docs/diseno/referencias/referencia-rappi-seguimiento-escalera-y-rango.jpeg`
+ * la escalera horizontal tiene CUATRO nodos y **el último es una casa**: los
+ * tres primeros dicen QUÉ PASA CON EL PEDIDO (se tomó · se arma · va en
+ * camino) y el cuarto dice **A DÓNDE LLEGA**. *El cuarto nodo no es otro
+ * verbo: es el destino, y por eso es el único que cambia de familia.*
+ *
+ * ⏪ Acá decía `nodoEntregado` — *«el visto, el único que COMPLETA algo»*—, y
+ * ese argumento **se cae al mirar cómo pinta la pieza**: la escalera ya dice
+ * lo completado con el RELLENO del nodo (hecho · actual · pendiente). ⇒ el
+ * visto estaba diciendo por dibujo lo que el color ya decía, y el glifo se
+ * quedaba sin trabajo. *Un glifo que repite lo que el estado ya comunica es
+ * un lugar desperdiciado, y acá el lugar tenía algo mejor que decir.*
+ *
+ * ⚠️ **QUÉ NO SE TOCA, y es a propósito:**
+ *  · **el vendedor conserva su visto** (`apps/prestador/.../ventana-pedidos`
+ *    mapea `entregado`/`retirado` a `nodoEntregado`). *Para la familia el
+ *    último paso es SU casa; para el vendedor es una entrega que se completó
+ *    — el mismo hecho visto desde dos lados, y el glifo dice el lado.*
+ *  · **el sello de la celebración sigue siendo el visto**, y ahora deja de
+ *    repetir a la escalera: el sello marca el ACTO que se cierra, el nodo
+ *    marca el LUGAR. Su comentario quedó viejo con este cambio y se corrigió
+ *    en su archivo, en vez de dejar una prosa que afirma lo contrario.
+ *
+ * 🔴 **LA DEPENDENCIA, DECLARADA:** `ubicacion` hoy lleva una **Huella
+ * adentro** (`Icono.tsx:891`) y acá se dibuja a **12 px**. B ya firmó
+ * quitársela por Ley 9 (punto 17: *«sin huella dentro»*). **Hasta que ese
+ * commit llegue, este nodo se ve recargado** — se declara para que quien lo
+ * mire antes no lo lea como un desvío nuevo. */
 export const GLIFO_NODO: Record<string, IconoNombre> = {
   confirmado: 'nodoConfirmado', // la bolsa — el pedido tomado
   preparando: 'nodoPreparando', // la caja abierta — se está armando
   en_camino: 'nodoEnCamino', // la flecha — el movimiento
-  entregado: 'nodoEntregado', // el visto — el único que COMPLETA algo
+  entregado: 'ubicacion', // la gota — TU casa, que es donde termina el camino
 };
 
 /**
