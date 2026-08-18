@@ -1044,6 +1044,8 @@ export const clienteEn = {
     // S96-D — the movable point (§7): if Places can't find the house,
     // the point still exists.
     sinResultados: "We couldn't find that address. Type it anyway and place the point by hand on the map.",
+    /* A-03 (S100c) — see the Spanish side. */
+    buscadorApagado: 'Address search is unavailable right now. Type it by hand and place the point on the map.',
     puntoEtiqueta: 'Move the map to adjust the delivery point',
     puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
     ponerPunto: 'Place the point on the map',
@@ -1311,6 +1313,17 @@ export const clienteEn = {
     faltaPresentacion: 'Pick a size to add it.',
     precioDesde: 'from',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
+
+    /* A-01 (S100c) — see the Spanish side for why these are two voices and
+       not one «unavailable». */
+    /* A-02 (S100c) — see the Spanish side. */
+    resumenComoLlega: 'How it arrives',
+    resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
+
+    itemSeAgoto: 'It sold out while it was in your cart.',
+    itemYaNoEsta: "It's no longer for sale.",
+    itemPrecioCambio: 'The price changed: it’s now {{precio}}.',
+    faltaSacarNoDisponibles: 'Remove what’s no longer available to continue.',
 
     // S96 · the other doors
     tusPedidos: 'Your orders',

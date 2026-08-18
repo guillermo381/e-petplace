@@ -56,16 +56,24 @@ import {
   mascotasElegibles,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
+  revalidarCarritoDespensa,
+  type EstadoOfertaCarrito,
   type MascotaResumen,
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
 import {
   fijarCantidad,
   fijarDestino,
+  itemsDelCarrito,
   quitarDelCarrito,
   useCarrito,
 } from '@/lib/despensa/carrito';
 import { destinoComunDelCarrito, destinosAdmitidos } from '@/lib/despensa/destinos';
+import {
+  itemsBloqueados,
+  precioNuevoDelItem,
+  problemaDelItem,
+} from '@/lib/despensa/disponibilidad';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -82,9 +90,53 @@ export default function DespensaCarrito() {
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [fotos, setFotos] = useState<Record<string, string>>({});
 
+  /**
+   * 🔴 A-01 (S100c) · EL CARRITO SE REVISA CONTRA LA VITRINA DE AHORA.
+   *
+   * **`revalidarCarritoDespensa` existía desde S100 con CERO consumidores** —
+   * censo en todo el repo: dos apariciones, su definición y su export, y
+   * ninguna llamada. *Motor sin puerta*, con 30 líneas de cabecera describiendo
+   * un comportamiento que no ocurría: la primera y única vez que la familia se
+   * enteraba de que algo se había agotado era **con el dedo sobre «Pagar»**,
+   * que es literalmente lo que esa función dice que vino a evitar.
+   *
+   * Acá está la puerta. Corre **al recuperar el foco**, que es el momento en
+   * que la familia retoma un carrito que estuvo parado — el caso que el propio
+   * founder declaró legítimo (*«que falle al pagar solo es legítimo cuando el
+   * carrito estuvo tiempo parado»*), y que igual merece enterarse antes.
+   *
+   * ⚠️ `null` = NO SE PUDO MEDIR, y **no bloquea** (Ley 13 / L-218: un fallo
+   * jamás se disfraza de veredicto). Si la red falla, el carrito no inventa que
+   * todo está bien **ni** acusa de agotado a un producto sano: no dice nada y el
+   * motor sigue siendo la última palabra. *El gate de la puerta reduce el daño;
+   * no reemplaza al del servidor.*
+   */
+  const [estados, setEstados] = useState<Record<string, EstadoOfertaCarrito> | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+
+      // OLA PARALELA, jamás encadenada al onboarding (L-223: el peaje de
+      // ~150 ms por petición se paga una vez, no en fila). La revalidación
+      // no necesita saber nada de la familia.
+      void (async () => {
+        const ofertas = itemsDelCarrito().map((i) => i.oferta_id);
+        if (ofertas.length === 0) {
+          if (vigente) setEstados({});
+          return;
+        }
+        const r = await revalidarCarritoDespensa(ofertas);
+        if (!vigente) return;
+        if (!r.ok) {
+          setEstados(null);
+          return;
+        }
+        const mapa: Record<string, EstadoOfertaCarrito> = {};
+        for (const e of r.data) mapa[e.oferta_id] = e;
+        setEstados(mapa);
+      })();
+
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente) return;
@@ -212,6 +264,21 @@ export default function DespensaCarrito() {
     return !item.especies_aplicables.some((e) => especiesFamilia.has(e));
   }
 
+  /** Las tres reglas viven en `lib/despensa/disponibilidad.ts` — la pantalla
+   *  las CONSUME, no las repite. Ahí las puede importar un instrumento y
+   *  medir la misma función que corre acá; el porqué de cada una vive en esa
+   *  cabecera, incluido el límite del booleano de stock.
+   *
+   *  🔴 `precio_vigente` se consume **porque el lector lo devuelve**: traer un
+   *  campo y no dibujarlo es consumir un lector en silencio —lo que R45
+   *  vigila para el lector de rango— y habría dejado *dentro de la propia
+   *  cura* la clase de defecto que la cura vino a cerrar. Es la conquista de
+   *  S95 puesta donde se ve: **el precio que se muestra ES el precio.** */
+  const problemaDe = (ofertaId: string) => problemaDelItem(estados, ofertaId);
+  const precioNuevoDe = (item: { oferta_id: string; precio: number }) =>
+    precioNuevoDelItem(estados, item);
+  const bloqueados = useMemo(() => itemsBloqueados(estados, items), [estados, items]);
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
@@ -246,11 +313,26 @@ export default function DespensaCarrito() {
         <PantallaConPie
           contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
           pie={
-            <Boton
-              etiqueta={t('despensa.continuar')}
-              bloque
-              onPress={() => router.push('/despensa/checkout')}
-            />
+            /* ⚠️ FRAGMENTO, NO `View` — `PantallaConPie` lleva
+               `pointerEvents="box-none"` y cubre UNA capa: un `View` propio acá
+               reabre la zona muerta de gesto del tercio inferior (R54, aviso de
+               B con el caso). */
+            <>
+              {/* El CTA apagado DICE QUÉ FALTA (S73-B), igual que en la ficha. */}
+              {/* Sin `{{n}}`: la casa no tiene convención de plural (cero
+                  `_one`/`_other` en los diccionarios) y cada ítem afectado ya
+                  se nombra arriba. *Un contador acá obligaría a elegir entre
+                  «1 productos» y una regla de plural que el riel no tiene.* */}
+              {bloqueados > 0 ? (
+                <Texto variante="apoyo">{t('despensa.faltaSacarNoDisponibles')}</Texto>
+              ) : null}
+              <Boton
+                etiqueta={t('despensa.continuar')}
+                bloque
+                deshabilitado={bloqueados > 0}
+                onPress={() => router.push('/despensa/checkout')}
+              />
+            </>
           }
         >
             {items.map((item, i) => (
@@ -264,6 +346,34 @@ export default function DespensaCarrito() {
                     .join(' · ')}
                   metadataMono={`$ ${item.precio.toFixed(2)}`}
                 />
+
+                {/* 🔴 A-01 · LO QUE LE PASÓ A ESTE ÍTEM MIENTRAS ESTABA GUARDADO.
+                    Va PEGADO al producto y no en un aviso general de la
+                    pantalla: *«uno de tus productos ya no está» obliga a la
+                    familia a adivinar cuál*, que es la misma clase de defecto
+                    que la voz `sin_stock` del motor —«uno de los productos»—
+                    tiene hoy en la caja. Acá se puede nombrar, así que se nombra.
+                    El motivo se dice con su palabra: «se agotó» y «ya no está a
+                    la venta» son dos hechos distintos y la familia hace cosas
+                    distintas con cada uno. */}
+                {problemaDe(item.oferta_id) !== null ? (
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo" color="warning">
+                      {problemaDe(item.oferta_id) === 'agotado'
+                        ? t('despensa.itemSeAgoto')
+                        : t('despensa.itemYaNoEsta')}
+                    </Texto>
+                  </View>
+                ) : precioNuevoDe(item) !== null ? (
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">
+                      {t('despensa.itemPrecioCambio', {
+                        precio: `$ ${(precioNuevoDe(item) ?? 0).toFixed(2)}`,
+                      })}
+                    </Texto>
+                  </View>
+                ) : null}
+
                 <View
                   style={{
                     paddingHorizontal: spacing[5],

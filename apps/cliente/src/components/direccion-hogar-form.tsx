@@ -102,6 +102,25 @@ export function DireccionHogarForm({
   const sesionRef = useRef<string>(crearSesionLugares());
   const placesApagado = useRef(false);
   const resolviendo = useRef(false);
+  /**
+   * 🔴 A-03 (S100c) · EL APAGADO DEJA DE SER SILENCIOSO.
+   *
+   * El founder: *«hoy se escribe la dirección a mano y no aparece ningún
+   * autocompletado»*. **Places SÍ está cableado** (S79-A4) — lo que no estaba
+   * era la voz: con `sin_configuracion` el formulario levantaba
+   * `placesApagado` y **no volvía a intentar nunca**, sin decir una palabra.
+   * Desde la pantalla eso se ve exactamente igual que «no encontré nada» y que
+   * «todavía estoy buscando»: **una misma pinta para tres estados**, que es
+   * L-218 en la puerta de la dirección.
+   *
+   * La degradación a mano SE CONSERVA (Ley 23, y es correcta: la dirección se
+   * puede escribir). Lo que cambia es que **se dice**.
+   *
+   * ⚠️ Solo habla el apagado PERMANENTE. Un fallo de red mientras se tipea
+   * sigue en silencio a propósito: *avisar en cada tecla enseña a ignorar los
+   * avisos*, y ese error sí se cura solo en la tecla siguiente.
+   */
+  const [buscadorApagado, setBuscadorApagado] = useState(false);
 
   // ── EL PUNTO (S96 · §7) ──────────────────────────────────────────
   const [punto, setPunto] = useState<{ lat: number; lon: number } | null>(
@@ -130,7 +149,11 @@ export function DireccionHogarForm({
         const r = await buscarLugares({ texto, sesion: sesionRef.current });
         setBuscando(false);
         if (!r.ok) {
-          if (r.codigo === 'sin_configuracion') placesApagado.current = true;
+          if (r.codigo === 'sin_configuracion') {
+            placesApagado.current = true;
+            // A-03: el apagado permanente HABLA (ver la nota del estado).
+            setBuscadorApagado(true);
+          }
           // red/google mientras se tipea: silencio — se sigue a mano.
           setPredicciones([]);
           setBusquedaVacia(false);
@@ -222,6 +245,17 @@ export function DireccionHogarForm({
         // encuentra igual existe — el punto se pone a mano.
         sinResultados={busquedaVacia ? t('direccion.sinResultados') : undefined}
       />
+
+      {/* A-03 · el buscador apagado lo DICE, y dice qué hacer.
+          ⚠️ La voz se duplica acá en vez de reusar la del wrapper
+          (`lugares.ts:81`, que dice exactamente esto) por **D-539**:
+          `packages/api` no tiene capa de idioma y habla español fijo — mostrar
+          su `mensaje` dejaría este formulario en español dentro de una app en
+          inglés. *La voz se copia al riel; no se toma prestada de un paquete
+          que no sabe traducir.* */}
+      {buscadorApagado ? (
+        <Texto variante="apoyo">{t('direccion.buscadorApagado')}</Texto>
+      ) : null}
       <Campo label={t('direccion.ciudadLabel')} value={ciudad} onChangeText={setCiudad} autoCapitalize="words" />
       <Campo label={t('direccion.sectorLabel')} value={sector} onChangeText={setSector} autoCapitalize="words" />
       <Campo

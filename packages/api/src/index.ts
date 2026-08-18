@@ -1201,6 +1201,15 @@ export {
   // bucket de las cédulas y eso es deuda declarada, no un permiso).
   obtenerFichaRepartidor,
   type FichaRepartidor,
+  // S100c · los dos lectores que la lista de pedidos necesitaba (pedidos de D,
+  // los dos con su caso medido contra la base). El primero cura las nueve
+  // tarjetas iguales del mismo día; el segundo saca a la luz un dato que
+  // entraba por el panel del vendedor y no salía por ninguna puerta.
+  resumenDeItemsDePedidos,
+  type ResumenItemsPedido,
+  facturasDePedidos,
+  type FacturaDePedido,
+  type FacturaDeUnPedido,
 } from './wrappers/despensa-seguimiento';
 
 export {
