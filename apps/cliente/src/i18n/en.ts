@@ -1306,6 +1306,13 @@ export const clienteEn = {
     precioDesde: 'from',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
 
+    /* A-01 (S100c) — see the Spanish side for why these are two voices and
+       not one «unavailable». */
+    itemSeAgoto: 'It sold out while it was in your cart.',
+    itemYaNoEsta: "It's no longer for sale.",
+    itemPrecioCambio: 'The price changed: it’s now {{precio}}.',
+    faltaSacarNoDisponibles: 'Remove what’s no longer available to continue.',
+
     // S96 · the other doors
     tusPedidos: 'Your orders',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',

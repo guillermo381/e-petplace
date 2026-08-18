@@ -1521,6 +1521,18 @@ export const clienteEs = {
     precioDesde: 'desde',
     faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
 
+    /* 🔴 A-01 (S100c) · LO QUE CAMBIÓ MIENTRAS EL CARRITO ESTABA GUARDADO.
+       Dos hechos distintos con dos voces distintas a propósito: «se agotó»
+       invita a volver más adelante, «ya no está a la venta» no. Fundirlos en
+       un «no disponible» ahorraría una key y le sacaría a la familia lo único
+       que le sirve para decidir qué hacer.
+       ⚠️ Ninguna culpa a la familia ni se disculpa de más: es un hecho del
+       mundo, dicho en una línea. */
+    itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
+    itemYaNoEsta: 'Ya no está a la venta.',
+    itemPrecioCambio: 'El precio cambió: ahora es {{precio}}.',
+    faltaSacarNoDisponibles: 'Sacá del carrito lo que ya no está disponible para seguir.',
+
     // S96 · las otras puertas
     tusPedidos: 'Tus pedidos',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',

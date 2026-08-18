@@ -330,6 +330,26 @@ export default function DespensaProducto() {
     if (ficha === 'cargando' || ficha === 'error') return null;
     if (comprables.length === 0) return null; // sin oferta no hay CTA
     if (variante === null) return t('despensa.faltaPresentacion');
+    // 🔴 A-01 (S100c) · LA MALA NOTICIA SE DA EN LA PUERTA, Y ESTA ES LA PUERTA.
+    // Literal del founder: *«si lo acabo de agregar, no debería llegar hasta ese
+    // mensaje, sino que ya el producto no me lo debería haber dejado entrar al
+    // carrito»*. Tenía razón, y por más de lo que dijo: **la vitrina YA gateaba**
+    // (`TarjetaProducto` apaga el `+` sin `hayStock`) y **esta ficha no**. Las
+    // dos puertas al mismo carrito se comportaban distinto.
+    //
+    // Y lo peor no era que dejara pasar: es que **lo decía y lo dejaba pasar
+    // igual** — `despensa.fichaSinStock` se pintaba 400 dp más abajo con el CTA
+    // encendido al lado. *Una pantalla que informa el impedimento y no lo aplica
+    // es peor que una que calla: enseña que el aviso no significa nada.*
+    //
+    // ⚠️ EL LÍMITE DE ESTA LÍNEA, DECLARADO PARA QUE NADIE LEA SU VERDE DE MÁS:
+    // `hay_stock` es `stock_disponible > 0` (trigger `_trg_oferta_deriva_hay_stock`)
+    // — **booleano por FIRMA de S99**, jamás un número: *la familia necesita
+    // «¿puedo comprar esto?», no el inventario ajeno*. ⇒ esto caza «se agotó» y
+    // **NO caza «no alcanza para 5»**: quien pide 5 de un producto con 1 se sigue
+    // enterando en la caja. Cerrar ese caso exige que el motor conteste
+    // «¿alcanza para N?» con un booleano — pedido Q4, no parche acá.
+    if (!variante.hay_stock) return t('despensa.fichaSinStock');
     if (exigeEntendimiento && !entendido) return t('despensa.faltaEntendimiento');
     return null;
   }, [ficha, comprables, variante, exigeEntendimiento, entendido, t]);
@@ -756,16 +776,21 @@ export default function DespensaProducto() {
                 🔴 Lo que la tabla SÍ hacía y no se pierde: decir las variantes
                 sin oferta. Se conserva como UNA línea —no como filas tocables—
                 porque **no son una opción: son una ausencia**. El nulo honesto
-                se mantiene; lo que muere es fingir que se pueden elegir.
-                Y `hay_stock` es BOOLEANO por firma: dice «¿puedo comprar esto?»,
-                jamás cuánto queda. A midió el límite exacto del dato —
-                `stock_disponible > 0`— así que esta línea **no puede** decir
-                «alcanza para 5» ni aunque alguien lo pida. */}
-            {variante !== null && !variante.hay_stock ? (
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <Texto variante="apoyo">{t('despensa.fichaSinStock')}</Texto>
-              </View>
-            ) : null}
+                se mantiene; lo que muere es fingir que se pueden elegir. */}
+            {/* ☠️ ACÁ VIVÍA `despensa.fichaSinStock` PARA LA PRESENTACIÓN
+                ELEGIDA, y se MUDÓ al pie — no se borró: `faltaParaAgregar` lo
+                dice ahora pegado al CTA que apaga.
+                🔴 ES UNA CURA DE DOS MITADES Y SE DECLARA: si alguien repone
+                esta línea «porque informa», el mismo texto queda DOS VECES en
+                una pantalla —acá y en el pie, a 400 dp— que es exactamente el
+                defecto que C curó en H-205 con el nombre del producto.
+                Lo que decide dónde va no es el gusto: **el impedimento vive
+                donde se ejerce**. La ley de la casa es que el Confirmar apagado
+                DICE QUÉ FALTA (S73-B), y el que apaga es el pie.
+                ⚠️ Lo que esta mudanza NO resuelve, y queda como límite: el chip
+                de una presentación agotada **se sigue pudiendo elegir**. Elegirla
+                es legal —así se ve su precio y se entiende por qué no se puede—;
+                lo que ya no es legal es AGREGARLA. */}
             {sinOferta.length > 0 ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <Texto variante="apoyo">
