@@ -57,7 +57,31 @@ export type SelectorDestinoItemProps = {
   mascotas: MascotaDestino[]
   /** `null` = todavía sin destino, y es LEGAL (ver el encabezado). */
   destino: DestinoItem | null
-  onCambiar: (destino: DestinoItem) => void
+  /**
+   * 🔴 **EMITE `null` — S100b-B, y esto cierra el «estado sin salida» del
+   * gate (G-03, mitad 2: *«la donación, una vez marcada, NO SE PUEDE
+   * DESMARCAR»*).**
+   *
+   * ⏪ **Era `(destino: DestinoItem) => void`, y ahí estaba el defecto,
+   * en el TIPO:** la pieza **recibía** `DestinoItem | null` pero **no
+   * podía emitir `null`** ⇒ podía mostrar «sin destino» y no tenía cómo
+   * volver a él. Tocar la donación otra vez la RE-ELEGÍA.
+   *
+   * > ### 🔴 LA IRONÍA, escrita acá para que no se repita en otra pieza
+   * > **La cabecera de este archivo celebra que el tipo vuelve
+   * > inexpresable el estado ilegal** —«donación para Thor» no compila—.
+   * > **Y el mismo tipo volvió inexpresable la SALIDA.**
+   * >
+   * > ***Un tipo que cierra el estado ilegal también puede cerrar el
+   * > camino de vuelta.*** Cuando se cierra un estado por construcción,
+   * > la pregunta que sigue no es *«¿qué más no debería poder pasar?»*
+   * > sino ***«¿desde acá se puede volver?»***
+   *
+   * **La letra ya lo respaldaba:** §4 dice que *«sin destino es legal»*
+   * — hoy lo era **de entrada y no de salida**. (Hallazgo de la pista A,
+   * con el eslabón medido: su `fijarDestino` ya aceptaba `null`.)
+   */
+  onCambiar: (destino: DestinoItem | null) => void
   /** Voz de la casa: "¿Para quién es?" */
   rotulo?: string
   /** Voz de la casa: "Donar este producto" */
@@ -90,7 +114,15 @@ export function SelectorDestinoItem({
             fotoUrl={m.fotoUrl}
             tamano="general"
             elegido={destino?.tipo === 'mascota' && destino.mascotaId === m.id}
-            onPress={() => onCambiar({ tipo: 'mascota', mascotaId: m.id })}
+            /* La misma salida que la donación, por simetría: si esta
+               mascota YA es el destino, tocarla vuelve a «sin destino».
+               *Una pieza donde una opción se puede soltar y la otra no
+               enseña que el control es impredecible.* */
+            onPress={() =>
+              destino?.tipo === 'mascota' && destino.mascotaId === m.id
+                ? onCambiar(null)
+                : onCambiar({ tipo: 'mascota', mascotaId: m.id })
+            }
           />
         ))}
       </View>
@@ -102,7 +134,7 @@ export function SelectorDestinoItem({
         encendido={donacionElegida}
         rol="radio"
         etiqueta={etiquetaDonacion}
-        onPress={() => onCambiar({ tipo: 'donacion' })}
+        onPress={() => onCambiar(donacionElegida ? null : { tipo: 'donacion' })}
       >
         <View style={{ flex: 1, gap: spacing[0.5] }}>
           <Texto variante="cuerpo">{etiquetaDonacion}</Texto>

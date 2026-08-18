@@ -64,6 +64,9 @@ export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
 // El pie fijo que RESERVA SU PROPIO LUGAR — la cura de las cinco pantallas
 // donde el pie se pintaba encima del contenido (S100b-B).
 export { PantallaConPie, type PantallaConPieProps } from './components/PantallaConPie'
+// Un glifo con su número encima — pedido de D con su límite medido: no
+// podía hacer el contador sin inventar un color que la casa no expone.
+export { GlifoConContador, type GlifoConContadorProps } from './components/GlifoConContador'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // Destape — S97+-B: la ceremonia de cierre del wizard de alta (pedido de C,
 // contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
