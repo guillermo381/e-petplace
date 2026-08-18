@@ -915,6 +915,35 @@ export async function promesaPorVendedor(
 export async function buscarProductosDespensa(
   termino: string,
   limite = 50,
+  /**
+   * 🔴 H-301 · LA ESPECIE DE LA MASCOTA ELEGIDA — **ORDENA, NO FILTRA**
+   * (firma del founder, 18-ago-2026).
+   *
+   * **EL ROJO:** con Jack (gato) elegido, buscar «alimento» devolvía 50
+   * tarjetas y **las tres primeras declaraban, en su propia ficha, «Está
+   * pensado para perros.»** Medido en aparato, no leído.
+   *
+   * **POR QUÉ ORDENAR Y NO FILTRAR, que es la parte que no se puede
+   * reabrir sin volver a la letra:** `LETRA_RECORRIDO_DESPENSA_S96` §5.2
+   * dice *«si se compra para una especie que no está en la familia… se
+   * ofrece, no se exige, y la compra sigue igual»*. **Filtrar
+   * contradiría letra firmada** — una familia con un gato tiene que poder
+   * comprarle algo a un perro. **Ordenar respeta la letra sin esconder
+   * nada:** primero lo que ella puede comer, después el resto.
+   *
+   * 🔴 **Y EL ORDEN SE HACE EN EL SERVIDOR, EN DOS BALDES, NO REORDENANDO
+   * LO TRAÍDO.** Es la decisión de diseño de esta función y tiene su
+   * razón medida: la búsqueda trae **50 de hasta 285 coincidencias**
+   * («alimento»). Reordenar esas 50 en memoria **solo reacomoda la página
+   * y jamás alcanza al gato que quedó en el puesto 51 alfabético** —
+   * habría sido un orden que se ve correcto en pantalla y que deja afuera
+   * exactamente lo que vino a priorizar. *Un orden aplicado después del
+   * corte no ordena el catálogo: ordena el recorte.*
+   *
+   * `undefined` = sin mascota elegida ⇒ una sola consulta y el orden
+   * alfabético de siempre. **La forma vieja de llamar sigue valiendo.**
+   */
+  especiePrioritaria?: string,
 ): Promise<ResultadoWrapper<ProductoDeVitrina[], CodigoErrorDespensa>> {
   // S100-C · H-003: la MISMA expresión que la vitrina — acentos normalizados
   // en los dos lados y la categoría adentro. Un término que solo deja signos
@@ -929,35 +958,76 @@ export async function buscarProductosDespensa(
   // coincidencias—; es el ORDER el que se acepta y se ignora. Esa asimetría
   // es lo que vuelve creíble la trampa: uno prueba el filtro, anda, y da por
   // bueno el resto.)
-  const corrida = async (e: string) =>
-    getClient()
-      .from('v_vitrina_publicada')
-      .select('*')
-      .or(e)
+  /** Una consulta al balde, con el orden alfabético de siempre adentro.
+   *  `balde` acota por especie; `undefined` = sin acotar. */
+  const consulta = async (e: string, balde: 'suya' | 'resto' | undefined, tope: number) => {
+    let q = getClient().from('v_vitrina_publicada').select('*').or(e);
+    if (balde === 'suya' && especiePrioritaria !== undefined) {
+      q = q.contains('especies_aplicables', [especiePrioritaria]);
+    }
+    if (balde === 'resto' && especiePrioritaria !== undefined) {
+      // 🔴 `is.null` VA AUNQUE HOY NO HAGA FALTA, y es a propósito.
+      // Medido el 18-ago: **0 de 470 productos** tienen
+      // `especies_aplicables` nula o vacía ⇒ hoy `not.cs` alcanza. Pero en
+      // SQL `NOT (NULL @> ...)` es NULL, no TRUE, así que **el día que
+      // entre un producto sin especie declarada desaparecería del segundo
+      // balde sin un solo error** — y como el primero tampoco lo trae,
+      // desaparecería de la búsqueda entera. *Un producto que se cae de una
+      // lista no tiene síntoma: nadie ve al que falta.* Cuesta una cláusula.
+      q = q.or(
+        `especies_aplicables.not.cs.{${especiePrioritaria}},especies_aplicables.is.null`,
+      );
+    }
+    return q
       .order('nombre', { ascending: true })
       .order('oferta_id', { ascending: true })
-      .limit(limite);
+      .limit(tope);
+  };
 
-  const { data, error } = await corrida(expr);
+  /** Corre una expresión completa: sin especie, un viaje; con especie,
+   *  **los dos baldes en orden**. El segundo solo se pide si el primero no
+   *  llenó el cupo — *si lo que ella come ya llena la pantalla, el resto no
+   *  hace falta traerlo.* */
+  const corrida = async (
+    e: string,
+  ): Promise<{ ok: false; mensaje: string } | { ok: true; filas: ProductoDeVitrina[] }> => {
+    if (especiePrioritaria === undefined) {
+      const r = await consulta(e, undefined, limite);
+      if (r.error) return { ok: false, mensaje: r.error.message };
+      if (!Array.isArray(r.data)) return { ok: false, mensaje: 'datos_inconsistentes' };
+      const m = mapearVitrinaPlana(r.data);
+      return m === null ? { ok: false, mensaje: 'datos_inconsistentes' } : { ok: true, filas: m };
+    }
+    const a = await consulta(e, 'suya', limite);
+    if (a.error) return { ok: false, mensaje: a.error.message };
+    if (!Array.isArray(a.data)) return { ok: false, mensaje: 'datos_inconsistentes' };
+    const suyas = mapearVitrinaPlana(a.data);
+    if (suyas === null) return { ok: false, mensaje: 'datos_inconsistentes' };
+    if (suyas.length >= limite) return { ok: true, filas: suyas };
 
-  if (error) return falloDespensa(error.message);
-  if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
-  const productos = mapearVitrinaPlana(data);
-  if (productos === null) return falloDespensa('datos_inconsistentes');
-  if (productos.length > 0) return { ok: true, data: productos };
+    const b = await consulta(e, 'resto', limite - suyas.length);
+    if (b.error) return { ok: false, mensaje: b.error.message };
+    if (!Array.isArray(b.data)) return { ok: false, mensaje: 'datos_inconsistentes' };
+    const resto = mapearVitrinaPlana(b.data);
+    if (resto === null) return { ok: false, mensaje: 'datos_inconsistentes' };
+    return { ok: true, filas: [...suyas, ...resto] };
+  };
+
+  const r1 = await corrida(expr);
+  if (!r1.ok) return falloDespensa(r1.mensaje);
+  if (r1.filas.length > 0) return { ok: true, data: r1.filas };
 
   // 🔴 C-01 · CERO RESULTADOS ⇒ SE PRUEBA EL RESPALDO PEGADO (ver su
   // función). Solo acá: donde no hay nada que degradar. Si el respaldo no
   // aplica —término corto, o que ya trae separadores— se devuelve el vacío
   // honesto de siempre, sin un segundo viaje.
+  // ⚠️ El respaldo hereda el orden por especie: **las dos curas se componen**
+  // — quien busque «proplan» con Jack elegido ve primero el Pro Plan de gato.
   const pegada = expresionBusquedaPegada(termino);
   if (pegada === null) return { ok: true, data: [] };
   const r2 = await corrida(pegada);
-  if (r2.error) return falloDespensa(r2.error.message);
-  if (!Array.isArray(r2.data)) return falloDespensa('datos_inconsistentes');
-  const respaldo = mapearVitrinaPlana(r2.data);
-  if (respaldo === null) return falloDespensa('datos_inconsistentes');
-  return { ok: true, data: respaldo };
+  if (!r2.ok) return falloDespensa(r2.mensaje);
+  return { ok: true, data: r2.filas };
 }
 
 // ── D · 🔴 LA RECOMENDACIÓN — §exclusión ────────────────────────────────────

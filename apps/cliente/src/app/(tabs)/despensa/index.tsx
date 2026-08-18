@@ -237,6 +237,30 @@ export default function DespensaDescubrir() {
 
   // ── S96 · LA BÚSQUEDA. El `ilike` lo resuelve Postgres; término corto
   //    no viaja. Los resultados NO excluyen por alergia: ADVIERTEN (§5.4).
+  //
+  // 🔴 S100c-C · H-301 · LA ESPECIE DE LA MASCOTA **ORDENA** LOS RESULTADOS
+  // (firma del founder, 18-ago-2026).
+  //
+  // **El rojo, medido en aparato:** con Jack (gato) elegido, buscar
+  // «alimento» devolvía 50 tarjetas y **las tres primeras declaraban «Está
+  // pensado para perros.»** — la recomendación filtraba por especie
+  // (`despensa-catalogo.ts:980`) y **la búsqueda no recibía ninguna.**
+  //
+  // **ORDENA, NO FILTRA, y eso no es matiz:** `LETRA_RECORRIDO_DESPENSA_S96`
+  // §5.2 firma que *«si se compra para una especie que no está en la
+  // familia… se ofrece, no se exige, y la compra sigue igual»*. Una familia
+  // con un gato tiene que poder comprarle algo a un perro. ⇒ primero lo que
+  // ella puede comer, **después el resto, que sigue estando.**
+  //
+  // ⚠️ **REVERSIBLE EN ESTA LÍNEA**, y se declara porque el founder lo pidió
+  // así: quitar el tercer argumento devuelve el orden alfabético único de
+  // antes. **No hay estado nuevo ni migración** — el wrapper trata
+  // `undefined` como «sin mascota» y hace un solo viaje.
+  //
+  // ⏳ **LO QUE QUEDA APROBADO Y DIFERIDO, para que no se lea como olvido:**
+  // la señal en la tarjeta («para perros») está **aprobada por el founder y
+  // NO entra hoy** — la vitrina tiene 42 dp de presupuesto vivo y son todos
+  // (L-301). Entra cuando haya margen.
   useEffect(() => {
     const termino = busqueda.trim();
     if (termino.length < 2) {
@@ -246,7 +270,7 @@ export default function DespensaDescubrir() {
     let vigente = true;
     setResultados('cargando');
     const timer = setTimeout(() => {
-      void buscarProductosDespensa(termino).then((r) => {
+      void buscarProductosDespensa(termino, undefined, mascota?.especie).then((r) => {
         if (vigente) setResultados(r.ok ? r.data : 'error');
       });
     }, 350);
@@ -254,7 +278,11 @@ export default function DespensaDescubrir() {
       vigente = false;
       clearTimeout(timer);
     };
-  }, [busqueda]);
+    // `mascota` entra a las deps a propósito: cambiar de mascota con una
+    // búsqueda escrita re-consulta con el orden de la nueva. Sin eso, elegir
+    // a Jack dejaría en pantalla el orden del perro anterior — *un orden
+    // viejo se ve exactamente igual que uno correcto.*
+  }, [busqueda, mascota]);
 
   /** ☠️ Ley 37 · S100-C — acá vivía `alergenosMascota` (los `alergenos_excluidos`
    *  crudos). Lo reemplaza `vigilados`, que es **el mismo dato expandido**:
