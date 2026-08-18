@@ -1,8 +1,23 @@
-# S100b · RESUMEN DE PUBLICACIÓN — **ARMADO Y VERIFICADO, ESPERANDO GO**
+# S100b · RESUMEN DE PUBLICACIÓN — **✅ ARMADO Y VERDE, ESPERANDO GO**
 
 > **Mano publicadora: A.** El push a `main` y las dos OTA **piden firma del founder en pantalla**.
-> Este documento se escribe ANTES del GO para que, cuando llegue, no haya nada que decidir.
-> **Estado: 🔴 BLOQUEADO por una decisión de C↔D — ver §0.** Todo lo demás está verificado.
+> **NADA SE PUBLICÓ.** El ensamblado vive en la rama local `ensamblado`.
+
+## ⭐ EL ESTADO, EN UNA TABLA
+
+| | |
+|---|---|
+| **SHA del ensamblado** | **`f2cb91ee75ab`** · 78 commits sobre `main` `22e5fc3e` · árbol en **0** |
+| ramas dentro | **las cuatro**, verificado por `merge-base --is-ancestor`: A `8556009b` · B `99debdd0` · C `1d22b176` · D `887943e0` |
+| `verify:diseno` | ✅ **VERDE · 46 reglas** *(44 en main + R53 y R54 que entran con B)* |
+| typechecks | ✅ **los cuatro en 0**: `@epetplace/api` · `@epetplace/ui` · `apps/cliente` · `apps/prestador` |
+| `verify-s100b-destinos` | ✅ **12/12** |
+| migraciones | ✅ **349 local = 349 remoto · 0 solo-local · 0 solo-remoto** |
+| **inconsistencias abiertas** | **ninguna de motor.** Cero migraciones nuevas en toda la vuelta |
+
+**Conflictos: dos, los dos resueltos.** El de `index.tsx` **lo disolvió C** mergeando a D en su rama y
+reaplicando sus dos cortes; el del lint **lo resolví yo combinando** (R53 con su escape + R54 de B, y mi
+`BASELINE_R52 = 0`). **Ninguno era visible en las ramas.**
 
 ---
 
@@ -127,11 +142,12 @@ archivo que nadie commitea.*
 |---|---|
 | 1 | `pnpm install` si algún `package.json` se movió |
 | 2 | **Metro `--clear`** — obligatorio: las cuatro pistas tocaron `packages/*` |
-| 3 | `verify:diseno` **ENTERO** sobre el ensamblado (44 reglas + R53/R54 de B = las que haya) |
-| 4 | **Los cuatro typechecks**: `@epetplace/api`, `@epetplace/ui`, `apps/cliente`, `apps/prestador` |
-| 5 | `verify-s100b-destinos.ts` (12/12, mi instrumento de G-03/G-10) |
-| 6 | Migraciones: **local = remoto**, medido con el comando y no de memoria |
-| 7 | Declarar el **SHA de `main`** resultante y toda inconsistencia abierta |
+| 3 | ✅ `verify:diseno` **ENTERO** sobre el ensamblado — **VERDE, 46 reglas** |
+| 4 | ✅ **Los cuatro typechecks** en exit 0 |
+| 5 | ✅ `verify-s100b-destinos.ts` — **12/12** |
+| 6 | ✅ Migraciones **349 = 349**, medido con el comando — cero desalineadas |
+| 7 | ✅ SHA declarado arriba · **cero inconsistencias de motor** |
+| 8 | ⏳ **Metro `--clear`** al levantar — obligatorio, la vuelta tocó `packages/ui` fuerte |
 
 ---
 
@@ -208,9 +224,66 @@ salen sin placa*), no una regresión de esta vuelta.
 - **EN CAMINO con el mapa a sangre y la placa mandando** — es lo que se verifica en la calle
 - **«Tus pedidos» tiene entrada** (antes el único camino era el CTA post-compra)
 
+**La ficha**
+- 🔴 **LA FICHA GANÓ PRECIO, y no estaba en los dieciséis:** con 3 presentaciones y ninguna elegida **no
+  mostraba NINGÚN importe**. Ahora dice **«desde $24.90 · $8,30/kg»**.
+  *Lo encontró C **mirando la captura**, no midiendo — y es la síntesis de la vuelta: **sus cuatro números
+  decían que la ficha estaba curada, y la ficha no tenía precio.** Los instrumentos declaran ausencia de
+  defecto conocido, jamás presencia de calidad. Es la razón por la que esta vuelta existió.*
+
+**El número de G-04, que es el que ordenó todo**
+- **el cromo antes del primer producto: 470 → 317 dp** (70,7 % → 50,2 % del alto útil en la vara de C).
+  **En el aparato de B el antes era 84,1 %, y ése es el que vale para el gate.** **−153 dp · −20,5 puntos.**
+  *La vara de C está calibrada contra la de B: su tarjeta mide 164,0 dp contra los 163,9 medidos.*
+
 **Y lo que nadie vio nunca**
 - 🔴 **LA CEREMONIA DE ENTREGA.** Tres actos. **Existe desde S100 y jamás pudo abrirse** porque no había un
   solo pedido entregado completo en la base — ni real ni demo. **Hoy tiene sujeto.**
+
+---
+
+## §5bis · 🔴 LAS TRES DECISIONES REVERSIBLES — van al OJO, no como defectos
+
+*Ninguna es un rojo oculto: las tres se tomaron con su número y se declaran para que el founder las juzgue
+mirando, que es lo único que puede resolverlas.*
+
+**① LA PRIMERA TARJETA NO ENTRA POR 18 dp.** «Tus pedidos» arriba de la grilla cura G-15 —hallazgo firmado
+del founder— y **cuesta 77 dp**. Arriba ⇒ cromo 317, faltan 18. Debajo de la grilla ⇒ cromo 240, **entra
+con 59 de sobra**. **Se publica ARRIBA** (el founder pidió encontrarla; la tarjeta se completa deslizando
+un dedo) y **es reversible moviendo un bloque**.
+*C intentó el tercer camino y lo declara: quitarle el renglón de explicación ahorró **2 dp de los 18** —
+`CeldaNavegacion` tiene alto mínimo ⇒ **la forma no admite el efecto**, y ahí paró de mover números.*
+
+**② LA VITRINA NO TIENE PIE FIJO** ⇒ **no hay CTA de avanzar a pagar desde la grilla.** Decisión de mesa:
+la canasta permanente del encabezado —que **no colapsa al scrollear**— lo cubre, y el alto recuperado es lo
+que G-04 pedía. **La pérdida que D declaró y NO midió: el CTA al pie es patrón fuerte en tiendas.** *Es lo
+único de esa decisión que es juicio y no medición.* **Si el founder extraña un camino directo a pagar, se
+reabre.**
+
+**③ H-204 — DOS MEDICIONES HONESTAS DISCREPAN.** C **no lo reproduce**: en su vara los tres chips están
+visibles y el toque **selecciona**. *Y estuvo a punto de reportar que sí lo reproducía: su primer toque
+murió por «element is not visible», y no era la app — era su selector agarrando el nodo homónimo de la
+vitrina retenida en el DOM, de 0×0.* **Un fallo de selector se lee igual que el defecto que uno vino a
+medir.**
+**El paso exacto para el founder:** abrir un producto con más de una presentación (`Active Mind 7+`, 3 /
+7,5 / 15 kg), **sin deslizar**, tocar **7.5 kg** o **15 kg** — *no el primero*. Debe marcarse, irse la
+línea «Elegí una presentación», y el precio pasar de «desde $24.90» al exacto. **Si no se marca, H-204
+está vivo.**
+
+---
+
+## §5ter · TRES FIRMAS CHICAS PENDIENTES, y una deuda de catálogo que ninguna pantalla tapa
+
+**Firmas (§2.9 — el gate es POR ÍCONO, sobre píxeles):**
+- **glifo `carrito` y glifo `papelera` a 21 px** — nacieron en esta vuelta y no pasaron por el ojo.
+- **los puntos de 10 dp** de la escalera del detalle.
+- **`PISO_DEL_MAPA` al 40 %** en EN CAMINO.
+
+**🟡 DEUDA DE CATÁLOGO — es DATO, y ninguna cura de layout la tapa:**
+- **23 de 50 tarjetas de la vitrina NO tienen foto (46 %)** ⇒ **la primera pantalla tiene cajas grises.**
+  **Verificado que no es el aparato:** 33 imágenes cargadas, **0 fallos de red**. Le pone número al H-103.
+- **CERO ofertas de `juguete` publicadas**, y ninguna familia `entra_al_expediente = false` aplicable a
+  perro — por eso la siembra usó higiene de gato para el lado que no sedimenta.
 
 ---
 
