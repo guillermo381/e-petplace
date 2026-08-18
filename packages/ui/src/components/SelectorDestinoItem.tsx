@@ -37,12 +37,14 @@
  * lo re-dibuja: la casa tiene UNO.
  */
 
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import { ChipEntidad } from './ChipEntidad'
 import { TarjetaEstado } from './TarjetaEstado'
+import { Icono } from './Icono'
 import { Texto } from './Texto'
 import { spacing } from '../tokens/spacing'
+import { useTheme } from '../ThemeProvider'
 
 export type MascotaDestino = {
   id: string
@@ -86,8 +88,33 @@ export type SelectorDestinoItemProps = {
   rotulo?: string
   /** Voz de la casa: "Donar este producto" */
   etiquetaDonacion: string
-  /** El límite de §6.4 dicho en voz humana, si la pantalla quiere decirlo. */
+  /**
+   * El límite de §6.4 dicho en voz humana.
+   *
+   * ⏪ **S100b-B — YA NO SE PINTA COMO PÁRRAFO.** Medido en el aparato:
+   * el bloque de donación ocupaba **343.8 × 144.7 dp = 6.9× el área de
+   * una pastilla de mascota** (107.4 × 66.8), y **81.1 dp de eso eran
+   * este texto**. El gate lo dijo así: *«debe ser una pastilla, del
+   * mismo tamaño y familia que las de mascota — es una opción más de
+   * «para quién es», no un anuncio»*.
+   *
+   * ⇒ **Ahora viaja detrás de la «i»**: se muestra cuando la persona la
+   * pide, con `onExplicarDonacion`. *Una explicación que sigue ahí
+   * después de la décima compra dejó de explicar y es ruido.*
+   */
   detalleDonacion?: string
+  /**
+   * 🔴 ABRE LA EXPLICACIÓN DE LA DONACIÓN — **la Hoja la monta la
+   * pantalla, no esta pieza.**
+   *
+   * *Un componente de selección que además abre modales empieza a
+   * conocer la navegación de su pantalla.* Acá vive **la «i»**; lo que
+   * pasa al tocarla es de quien la monta.
+   *
+   * **Ausente = no se dibuja la «i»** (19.9), y entonces `detalleDonacion`
+   * no tiene por dónde salir: **si pasás el detalle, pasá también esto.**
+   */
+  onExplicarDonacion?: () => void
 }
 
 export function SelectorDestinoItem({
@@ -97,7 +124,9 @@ export function SelectorDestinoItem({
   rotulo,
   etiquetaDonacion,
   detalleDonacion,
+  onExplicarDonacion,
 }: SelectorDestinoItemProps) {
+  const { theme } = useTheme()
   const donacionElegida = destino?.tipo === 'donacion'
 
   return (
@@ -130,17 +159,44 @@ export function SelectorDestinoItem({
       {/* La donación, aparte: otra naturaleza, otra hilera. Habla la
           gramática ESTÁ/ESPERA de la casa (`TarjetaEstado`), que es la
           que ya usamos para "esto rige / esto no". */}
-      <TarjetaEstado
-        encendido={donacionElegida}
-        rol="radio"
-        etiqueta={etiquetaDonacion}
-        onPress={() => onCambiar(donacionElegida ? null : { tipo: 'donacion' })}
-      >
-        <View style={{ flex: 1, gap: spacing[0.5] }}>
+      {/* 🔴 S100b-B · DEJA DE SER UN ANUNCIO Y PASA A SER UNA OPCIÓN.
+          Medido: ocupaba **6.9× el área de una pastilla de mascota**
+          (343.8 × 144.7 dp contra 107.4 × 66.8) — *no competía con las
+          pastillas: las presidía.*
+
+          **`alignSelf: 'flex-start'` es lo que la achica a su contenido:**
+          antes tomaba el ancho entero de la pantalla por ser hija directa
+          de una columna. Misma gramática (`TarjetaEstado` rol radio, la
+          de ESTÁ/ESPERA), mismo registro tipográfico, tamaño de pastilla.
+
+          ⚠️ **Y SIGUE EN SU PROPIO RENGLÓN, fuera de la hilera de caras,
+          a propósito:** §6.4 dice que **la donación NO es una mascota
+          más**. Compartir hilera la volvería una cara más; compartir
+          FORMA sin compartir hilera dice las dos cosas a la vez — *es una
+          opción del mismo rango, y no es una mascota.* */}
+      <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+        <TarjetaEstado
+          encendido={donacionElegida}
+          rol="radio"
+          etiqueta={etiquetaDonacion}
+          onPress={() => onCambiar(donacionElegida ? null : { tipo: 'donacion' })}
+        >
           <Texto variante="cuerpo">{etiquetaDonacion}</Texto>
-          {detalleDonacion === undefined ? null : <Texto variante="apoyo">{detalleDonacion}</Texto>}
-        </View>
-      </TarjetaEstado>
+        </TarjetaEstado>
+
+        {/* La «i»: el detalle se pide, no se impone. Sin callback no se
+            dibuja — y sin ella el detalle no tendría salida. */}
+        {detalleDonacion === undefined || onExplicarDonacion === undefined ? null : (
+          <Pressable
+            onPress={onExplicarDonacion}
+            accessibilityRole="button"
+            accessibilityLabel={detalleDonacion}
+            hitSlop={12}
+          >
+            <Icono nombre="info" tamano={20} registro="tinta" tinta={theme.text.secondary} />
+          </Pressable>
+        )}
+      </View>
     </View>
   )
 }

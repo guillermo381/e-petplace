@@ -117,6 +117,14 @@ export const uiEn = {
     agregar: 'Add {{nombre}} to cart',
     cantidad: 'Quantity of {{nombre}}',
   },
+  // H-203 (hallazgo de C): estos dos vivían HARDCODEADOS en español
+  // dentro de la pieza. Un lector de pantalla en inglés los oía en
+  // español — familia D-539, y acá se cierra donde correspondía.
+  stepperCantidad: {
+    menos: 'Decrease',
+    borrar: 'Remove item from cart',
+    mas: 'Increase',
+  },
   escaleraEstados: {
     progreso: 'Step {{n}} of {{total}}: {{etiqueta}}',
     progresoSinPaso: 'Step {{n}} of {{total}}',
