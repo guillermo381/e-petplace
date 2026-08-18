@@ -1,0 +1,872 @@
+{
+  "url": "https://laika.com.co/perros/alimento/concentrado",
+  "titulo": "Concentrado para perros: mejores precios y entrega el mismo día | Laika Colombia",
+  "viewport": {
+    "w": 390,
+    "h": 664
+  },
+  "scrollY": 0,
+  "superficie": "vitrina",
+  "deteccion": {
+    "metodo": "auto",
+    "firma": "DIV|368"
+  },
+  "densidad": {
+    "viewport": {
+      "w": 390,
+      "h": 664
+    },
+    "productos_visibles_primera_pantalla": 1,
+    "productos_completos_primera_pantalla": 0,
+    "alto_cromo_antes_del_primer_producto_px": 436.7,
+    "cromo_como_porcentaje_de_pantalla": 65.8,
+    "total_tarjetas_en_dom": 20
+  },
+  "tarjetas": [
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 436.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 437.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 449.7,
+        "w": 186.4,
+        "h": 20,
+        "area": 3728
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 529.7,
+        "w": 86.7,
+        "h": 28,
+        "area": 2426
+      },
+      "control": {
+        "x": 174.6,
+        "y": 671.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Royal Canin - Mini Puppy",
+        "precio": "$120.700",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 724.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 725.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 737.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 827.7,
+        "w": 81.1,
+        "h": 28,
+        "area": 2270
+      },
+      "control": {
+        "x": 174.6,
+        "y": 959.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Royal Canin - Shih Tzu Adulto",
+        "precio": "$99.400",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 1012.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 1013.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 1025.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 1115.7,
+        "w": 85.1,
+        "h": 28,
+        "area": 2384
+      },
+      "control": {
+        "x": 174.6,
+        "y": 1247.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Hills Sd - Small & Mini Alimento Saludable Perro Adulto Sabor Pollo",
+        "precio": "$107.900",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 1300.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 1301.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 1313.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 1403.7,
+        "w": 76.4,
+        "h": 28,
+        "area": 2140
+      },
+      "control": {
+        "x": 174.6,
+        "y": 1535.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Max - Professional Line Adulto Performance Pollo & Arroz",
+        "precio": "$41.900",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 1588.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 1589.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 1601.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 1691.7,
+        "w": 70.4,
+        "h": 28,
+        "area": 1972
+      },
+      "control": {
+        "x": 174.6,
+        "y": 1823.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "True Nature - Alimento Perros Adultos Razas Pequeñas Pollo y Vegetales",
+        "precio": "$81.100",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 1876.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 1877.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 1889.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 1988.7,
+        "w": 76.9,
+        "h": 28,
+        "area": 2154
+      },
+      "control": {
+        "x": 174.6,
+        "y": 2111.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Besties - Alimento Perros Adultos Sabor Carne y Pollo",
+        "precio": "$89.910",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "600",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 2164.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 2165.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 2177.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 2267.7,
+        "w": 85.7,
+        "h": 28,
+        "area": 2398
+      },
+      "control": {
+        "x": 174.6,
+        "y": 2399.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "True Nature - Alimento Perros Adultos Razas Medianas y Grandes Pollo Vegetales",
+        "precio": "$101.400",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 2452.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 2453.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 2465.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 2555.7,
+        "w": 76.4,
+        "h": 28,
+        "area": 2140
+      },
+      "control": {
+        "x": 174.6,
+        "y": 2687.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "True Nature - Alimento Puppy Razas Pequeñas Pollo y Vegetales",
+        "precio": "$57.800",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 2740.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 2741.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 2753.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 2843.7,
+        "w": 77.9,
+        "h": 28,
+        "area": 2181
+      },
+      "control": {
+        "x": 174.6,
+        "y": 2975.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "True Nature - Alimento Perros Adultos Todas Las Razas Cordero y Arroz",
+        "precio": "$151.100",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 3028.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 3029.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 3041.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 3131.7,
+        "w": 85.7,
+        "h": 28,
+        "area": 2398
+      },
+      "control": {
+        "x": 174.6,
+        "y": 3263.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "True Nature - Alimento Puppy Razas Medianas y Grandes Pollo Vegetales",
+        "precio": "$101.400",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 3316.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 3317.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 3329.7,
+        "w": 186.4,
+        "h": 40,
+        "area": 7456
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 3428.7,
+        "w": 84.4,
+        "h": 28,
+        "area": 2363
+      },
+      "control": {
+        "x": 174.6,
+        "y": 3551.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Besties - Alimento Perros Cachorros Sabor Carne y Pollo",
+        "precio": "$115.920",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "600",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 12,
+        "y": 3604.7,
+        "w": 366,
+        "h": 280,
+        "area": 102480
+      },
+      "imagen": {
+        "x": 13,
+        "y": 3605.7,
+        "w": 145.6,
+        "h": 278,
+        "area": 40475
+      },
+      "nombre": {
+        "x": 174.6,
+        "y": 3617.7,
+        "w": 186.4,
+        "h": 20,
+        "area": 3728
+      },
+      "precio": {
+        "x": 174.6,
+        "y": 3697.7,
+        "w": 81.5,
+        "h": 28,
+        "area": 2281
+      },
+      "control": {
+        "x": 174.6,
+        "y": 3839.7,
+        "w": 186.4,
+        "h": 32,
+        "area": 5965
+      },
+      "texto": {
+        "nombre": "Chunky - Pollo Adultos",
+        "precio": "$80.400",
+        "control": "Agregar"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 20,
+          "peso": "500",
+          "color": "lab(8.11897 0.811279 -12.254)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.395,
+        "control_sobre_tarjeta": 0.058,
+        "precio_sobre_nombre_fontsize": 1.429,
+        "control_sobre_imagen_area": 0.147,
+        "alto_imagen_sobre_alto_tarjeta": 0.993
+      },
+      "area_tactil_control": {
+        "w": 186.4,
+        "h": 32,
+        "cumple_48": false,
+        "cumple_44": false
+      }
+    }
+  ],
+  "meta": {
+    "referente": "laika",
+    "superficie": "vitrina",
+    "dispositivo": "iPhone 13",
+    "captura": "salida/capturas/laika-vitrina.png",
+    "medido_en": "2026-08-18T01:33:59.127Z"
+  },
+  "resumen": {
+    "n_tarjetas_medidas": 12,
+    "mediana_imagen_sobre_tarjeta": 0.395,
+    "mediana_alto_imagen_sobre_alto_tarjeta": 0.993,
+    "mediana_control_sobre_tarjeta": 0.058,
+    "mediana_precio_sobre_nombre_fontsize": 1.429,
+    "mediana_control_sobre_imagen_area": 0.147,
+    "controles_que_cumplen_48dp": 0,
+    "controles_medidos": 12
+  }
+}
