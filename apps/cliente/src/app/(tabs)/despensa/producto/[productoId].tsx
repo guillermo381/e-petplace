@@ -237,25 +237,27 @@ function RotuloPlegable({
             `CeldaNavegacion`: **el rótulo vecino es 20/Bold**, y un trazo de
             2 al lado se lee como nota al pie de su propio título.
 
-            🔴 **EL OCRE NO ESTÁ MONTADO TODAVÍA, Y NO ES UN OLVIDO: LO
-            FRENÓ EL LINT, CON RAZÓN.** B me pasó el montaje como
-            `color={theme.accent.cta}` y **`verify:diseno` lo rebotó** —
-            *Ley 21: `accent.cta` re-resuelto en apps, baseline 0*. La regla
-            dice que **el ocre lo resuelve la PIEZA por su slot**, jamás una
-            pantalla metiendo la mano en el tema; si cada superficie eligiera
-            su ocre, el día que la casa cambie el CTA quedarían dos.
+            🔴 **EL OCRE ENTRA POR `tono`, Y LA HISTORIA DE CÓMO LLEGÓ ES
+            LA PARTE QUE VALE.** B me pasó el montaje como
+            `color={theme.accent.cta}` y **su propio lint lo rebotó** —
+            *Ley 21: `accent.cta` re-resuelto en apps, baseline 0*, porque
+            **el ocre lo resuelve la PIEZA por su slot**: si cada superficie
+            eligiera el suyo, el día que la casa cambie el CTA quedarían dos.
 
-            ⇒ **NO se apaga la regla, NO se sube su baseline y NO se teclea
-            un hex.** Se le pidió a B un **registro de TONO** en la pieza
-            —hermano del `enfasis` que ya construyó— que resuelva el ocre
-            adentro. *Es la misma historia que el grosor, un piso más
-            arriba: yo puedo declarar QUÉ es esta flecha; el COLOR con el
-            que la casa dice «esto se acciona» es de `packages/ui`.*
+            **Había tres salidas y dos eran trampa:** apagar la regla, subir
+            su baseline, o **pedir la pieza**. *Un lint que se apaga para
+            que pase un caso deja de vigilar los otros* — y la excusa
+            perfecta estaba servida: lo pedía quien escribió la regla.
 
-            **Mientras tanto va con su grosor y su tinta de siempre**, y el
-            punto queda **cerrado en su mitad de grosor y ABIERTO en su
-            mitad de color, con dueño B.** */}
-        <Chevron direccion={abierta ? 'arriba' : 'abajo'} enfasis="seccion" />
+            ⇒ `tono="accion"` resuelve el ocre **adentro**. `color` sigue
+            existiendo en la pieza pero **no es la puerta del acento**: es
+            para una flecha sobre un muro o un canto, donde cambia el
+            contraste. *Acá no se pasa.* */}
+        <Chevron
+          direccion={abierta ? 'arriba' : 'abajo'}
+          enfasis="seccion"
+          tono="accion"
+        />
       </Animated.View>
     </Pressable>
   );
@@ -872,7 +874,48 @@ export default function DespensaProducto() {
                   acento="control"
                   opciones={comprables.map((v) => ({
                     codigo: v.variante_id,
-                    etiqueta: v.presentacion,
+                    /**
+                     * 🔴 S100d-bis · **CUANDO DOS PRESENTACIONES SE LLAMAN
+                     * IGUAL, EL PRECIO LAS DISTINGUE — Y ESTO NO INVENTA UNA
+                     * DIFERENCIA: DEJA DE ESCONDER UNA QUE EXISTE.**
+                     *
+                     * **Lo encontró MIRAR una captura, no medir.** Corrí
+                     * cuatro varas sobre esta ficha y las cuatro dieron
+                     * verde mientras «Adulto Cordero y Arroz» dibujaba
+                     * **dos chips que decían “12.7 kg”** — uno a **$57,19**
+                     * y otro a **$94,50**. *La familia veía dos botones
+                     * idénticos y uno costaba 65 % más.*
+                     *
+                     * **Medido contra la base viva (18-ago): 6 de 470
+                     * productos** tienen la misma presentación en DOS
+                     * variantes distintas. Poco, y el que cae adentro no
+                     * tiene forma de elegir.
+                     *
+                     * ⚖️ **Por qué se cura acá y no en la pieza** (medido con
+                     * B): `SelectorOpcion` recibe `etiqueta` y la dibuja —
+                     * **no sabe que hay otra igual**. *Una pieza no puede
+                     * desambiguar lo que no ve; el que ve el conjunto es
+                     * quien arma la lista.*
+                     *
+                     * ⚠️ **SOLO cuando repite**, y ése es el límite que lo
+                     * vuelve legal: en los 464 productos sanos el chip sigue
+                     * diciendo «2.5 kg» y nada más. *Poner el precio en
+                     * todos sería ruido —el precio ya vive abajo, grande, y
+                     * cambia al elegir—; ponerlo donde el rótulo no alcanza
+                     * es honestidad.*
+                     *
+                     * 🔴 **Y NO ES LA CURA DEL DATO, que sigue abierto con su
+                     * número:** hay **25 variantes con más de una oferta
+                     * publicada** contra la firma *«una oferta por
+                     * producto»* de `MODELO_DESPENSA`. **Eso es motor y
+                     * catálogo, no pantalla** — servido a A. *Esta línea
+                     * hace que el defecto del dato se VEA en vez de
+                     * disfrazarse de dos botones iguales.*
+                     */
+                    etiqueta:
+                      comprables.filter((o) => o.presentacion === v.presentacion).length > 1
+                        ? `${v.presentacion} · $ ${v.precio.toFixed(2)}`
+                        : v.presentacion,
                   }))}
                   seleccionada={varianteId ?? undefined}
                   onSelect={setVarianteId}
