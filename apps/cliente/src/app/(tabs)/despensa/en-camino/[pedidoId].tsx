@@ -250,7 +250,27 @@ export default function DespensaEnCamino() {
           {/* ② LA HOJA — ENCIMA del mapa, anclada abajo. Su alto lo pone su
               contenido y solo topa contra el piso del mapa (`PISO_DEL_MAPA`).
               El scroll vive ADENTRO: si el contenido no entra, se desliza la
-              hoja, jamás la pantalla. */}
+              hoja, jamás la pantalla.
+
+              R53-DECLARADO: esto no es un pie sobre el contenido — ES el contenido.
+              La hoja se dimensiona por lo que trae y solo topa contra un `maxHeight`
+              **derivado del lienzo medido**, y **su scroll vive adentro de ella**.
+              Debajo hay un MAPA de alto fijo: **fondo, no contenido que scrollea**
+              ⇒ no hay dos cosas que reservar una para la otra, y el defecto que R53
+              persigue —*un pie cuyo alto el consumidor tiene que ESTIMAR*— es
+              **inexpresable acá**: nadie estima nada, porque no hay dos cuentas.
+
+              🔴 **Y montar `PantallaConPie` sería una REGRESIÓN, no un
+              cumplimiento:** esa pieza mete a sus hijos en un `ScrollView` ⇒
+              devolvería el mapa a ser **una banda que scrollea**, que es
+              exactamente el defecto que esta vuelta curó y que el gate del founder
+              vio como el rango de llegada cortado a ~19 dp del filo.
+
+              ⚠️ **La declaración es POR PIE, no por archivo** (mecanismo de B): hoy
+              este archivo tiene **UN** pie y **UNA** razón. *Si mañana alguien
+              agrega acá un pie de verdad —contenido de página debajo de una barra
+              fija— la regla vuelve a morder, y tiene que morder.* Este escape cubre
+              esta anatomía y nada más. */}
           <View
             style={{
               position: 'absolute',
