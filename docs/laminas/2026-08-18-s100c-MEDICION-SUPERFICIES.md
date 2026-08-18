@@ -211,14 +211,31 @@ queda viéndose feo.»*
 
 **Medido sobre la misma tarjeta, antes y después de tocar el `+`:**
 
-| | alto de la tarjeta |
-|---|---|
-| **antes** (con `+`) | **309,0 dp** |
-| **después** (con stepper) | **353,1 dp** |
+| columna del barrido | antes (con `+`) | después (con stepper) | **delta** |
+|---|---|---|---|
+| junto al borde (8 px del filo) | 309,0 dp | 353,1 dp | **+44,1** |
+| por el centro (la foto interrumpe) | 169,6 dp | 213,7 dp | **+44,1** |
 
 ⇒ **la tarjeta crece 44,1 dp — exactamente un blanco de 44 (N8)** — **y su
 vecina de la misma fila no se mueve.** Ése es el «escalón»: la fila deja de
 ser una fila.
+
+> ⏪ **CORRECCIÓN, LEVANTADA POR C.** Mi primera lectura dio **309,0 / 353,1**
+> como si fueran el alto de la tarjeta. **Son un piso.** C midió **332 dp** sobre
+> la vitrina real y **declaró la discrepancia como discrepancia, no como
+> corrección** — que es lo que la hizo resoluble.
+>
+> **La causa, medida:** la columna de barrido pasaba a **8 px del borde**, o sea
+> **dentro del arco de la esquina** (`radius.lg` 16 dp = 45 px) ⇒ **~13,8 dp
+> recortados** entre las dos puntas. *Un barrido por columna no mide un
+> rectángulo redondeado: mide la cuerda que le tocó.*
+>
+> 🔴 **El delta es INMUNE** —el recorte quita lo mismo antes y después—: las dos
+> columnas dan **+44,1** aunque sus absolutos difieran en 139 dp. Con la fuente
+> (`BOTON_COMPACTO` 36 + `gap` 8 = 44) son **tres cuentas y un número.**
+> *La ley nunca se apoyó en el absoluto; se corrige igual, porque una cifra
+> equivocada en una lámina la cita después alguien que no sabe para qué se
+> midió.*
 
 **Por qué no entra en su renglón, con los números de S100b:** caja interna
 **138 dp**; el `+` solo entra al lado del precio (68 + 8 + 44 = **120 ≤ 138**),
