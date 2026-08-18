@@ -609,7 +609,47 @@ export function TarjetaProducto({
 
               ✅ **De paso devuelve presupuesto:** los 10 dp vuelven al margen
               de la vitrina que L-301 dejó en 42. */}
-          <View style={{ marginTop: 'auto', paddingTop: spacing[2], gap: spacing[2] }}>
+          {/* 🔴 `flexShrink: 0` — LA MITAD QUE FALTABA, Y LA ENCONTRÓ EL APARATO
+              CONTRA MI PROPIA CURA (S100d-B, medido en el SM-S938B sobre el
+              bundle `e6ebf9d3`).
+
+              **El defecto REAL del punto 7 no era el salto: era un RECORTE.**
+              Medido tocando el `+` en la vitrina viva:
+
+                tarjeta antes de agregar …………………… 336,4 dp
+                tarjeta después …………………………………… 336,4 dp  (no crece ✅)
+                el stepper que aparece ………………… **18,1 dp de sus 36**
+
+              **El stepper sale por debajo del borde y `overflow: 'hidden'` lo
+              tija por la mitad** — y la tarjeta vecina, sin cantidad, muestra
+              su `+` entero al lado. *El founder lo llamó «sigue saltando el
+              escalón»; lo que veía era un control cortado.*
+
+              **La causa, y por eso no la curaba mover el control de renglón:**
+              este contenedor lleva `flex: 1` —lo necesita para que
+              `marginTop: 'auto'` ancle el bloque abajo— y **`flex: 1` incluye
+              `flexShrink: 1`**: cuando el contenido no entra, el bloque se
+              deja ENCOGER y lo que sobra se corta en silencio.
+
+                caja de texto disponible ……………… 172,1 dp
+                contenido con la forma vieja …… 209,0 dp  ⇒ desborda 36,9
+                contenido con el escalón único … 199,3 dp  ⇒ desborda 27,2
+
+              ⇒ **mi propia cura devolvía 9,7 dp contra un desborde de 36,9: no
+              alcanzaba, y lo habría descubierto el founder en el tercer gate
+              del mismo punto.** *La cuenta del escalón era correcta y la
+              conclusión estaba incompleta — el alto no era el problema.*
+
+              **`flexShrink: 0` hace el recorte inexpresable EN EL BLOQUE QUE
+              IMPORTA:** el precio y el control conservan sus 70,3 dp pase lo
+              que pase. Si algo tiene que ceder, cede el bloque de texto — que
+              ya tiene techo de líneas y degrada legiblemente. *Entre cortar un
+              nombre y cortar el control con el que se compra, no hay empate.*
+
+              ⚠️ **SIN OJO: esto se midió sobre el bundle viejo y la cura no se
+              vio correr.** Su verificación es el primer paso del recorrido:
+              **tocar el `+` y que el stepper mida 36, no 18.** */}
+          <View style={{ marginTop: 'auto', flexShrink: 0, paddingTop: spacing[2], gap: spacing[2] }}>
             {/* EL PRECIO, en su propia línea. Sigue anclado abajo con el
                 bloque, así que los escalones de una fila coinciden aunque los
                 nombres midan distinto — que es para lo que existe el ancla. */}
