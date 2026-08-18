@@ -5320,6 +5320,45 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="Encabezado · el buscador EN LA FILA, y el título que se apaga (S100b · G-04)">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                saludo="Despensa"
+                busqueda={
+                  <Campo
+                    label="Buscar"
+                    etiquetaVisible={false}
+                    placeholder="Nombre o marca"
+                    value=""
+                    onChangeText={() => {}}
+                  />
+                }
+                accionDer={
+                  <Pressable accessibilityRole="button" accessibilityLabel="Carrito, 3 productos" onPress={() => {}}>
+                    <GlifoConContador nombre="carrito" cuenta={3} dentroDeTocable />
+                  </Pressable>
+                }
+              />
+            </View>
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado variante="navegacion" titulo="Adulto Cordero y Arroz" atras onAtras={() => {}} tituloVisible={false} />
+            </View>
+            <Texto variante="apoyo">
+              Arriba: el buscador y el carrito viven en la MISMA fila que el isotipo, como en la
+              referencia — y el nombre de la pantalla deja de gastar 41.6 dp para decir lo que la tab
+              acaba de decir con su huella encendida. El nombre NO muere: sigue anunciándose como
+              header para el lector. Es el patrón de Campo.etiquetaVisible: se apaga el píxel, jamás
+              el nombre.
+              Abajo: el mismo apagado en la ficha, donde el header repetía el nombre del producto que
+              N19 ya ordena en el cuerpo. Dos veces el mismo dato en la misma pantalla.
+              ⚠️ Esto NO es un header que colapsa al scrollear: ese patrón es otro y no está
+              construido. Apagarlo fijo cuesta el contexto cuando bajaste mucho, y se declara.
+            </Texto>
+          </View>
+        </Seccion>
+
         {/* Encabezado — B3.6 */}
         <Seccion titulo="Encabezado — navegación y portada">
           <View style={{ gap: spacing[4] }}>
