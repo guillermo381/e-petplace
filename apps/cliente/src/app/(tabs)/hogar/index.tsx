@@ -1118,14 +1118,14 @@ export default function Hogar() {
                 : null,
             onPress: () =>
               varios
-                ? router.push('/despensa/pedidos')
+                ? router.push('/pedidos')
                 : preside.narrativa === 'en_camino'
                   ? router.push({
-                      pathname: '/despensa/en-camino/[pedidoId]',
+                      pathname: '/pedidos/en-camino/[pedidoId]',
                       params: { pedidoId: preside.pedido_id },
                     })
                   : router.push({
-                      pathname: '/despensa/pedido/[pedidoId]',
+                      pathname: '/pedidos/pedido/[pedidoId]',
                       params: { pedidoId: preside.pedido_id },
                     }),
           } satisfies FilaReco_,

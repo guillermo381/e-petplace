@@ -11,6 +11,10 @@ export const clienteEs = {
   tabs: {
     hogar: 'Hogar',
     explorar: 'Explorar',
+    // S100c-D · Pedidos entra a la barra en el slot de Explorar (firma del
+    // founder). La etiqueta de `explorar` QUEDA: la pantalla sigue viva y
+    // se alcanza desde el perfil de la mascota — lo que salió es su botón.
+    pedidos: 'Pedidos',
     // S95-I · el cuarto slot (§3, el ciclo del trono). Le guarda el lugar
     // a Comunidad: cuando ésta nazca, la Despensa le entrega el trono.
     despensa: 'Despensa',
@@ -1589,6 +1593,11 @@ export const clienteEs = {
 
     // S96 · las otras puertas
     tusPedidos: 'Tus pedidos',
+    // S100c-D · los dos rótulos de la casa de Pedidos. Solo se dibujan
+    // cuando existen LAS DOS secciones: con una sola, rotular anuncia
+    // una división que no está (Chanel).
+    pedidosEnCurso: 'En curso',
+    pedidosHistorial: 'Historial',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
     reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',

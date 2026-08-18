@@ -422,7 +422,7 @@ export default function DespensaPedido() {
                 detalle={t('despensa.enCaminoEntradaDetalle')}
                 onPress={() =>
                   router.push({
-                    pathname: '/despensa/en-camino/[pedidoId]',
+                    pathname: '/pedidos/en-camino/[pedidoId]',
                     params: { pedidoId: detalle.pedido.pedido_id },
                   })
                 }

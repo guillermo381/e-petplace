@@ -34,6 +34,7 @@ import {
   EstadoVacio,
   Separador,
   TarjetaPedido,
+  Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -170,12 +171,11 @@ export default function DespensaPedidos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('despensa.tusPedidos')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* 🔴 PORTADA, NO NAVEGACIÓN — Pedidos es una CASA desde S100c, y una
+          casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
+          ofrece un camino que no existe* (Ley 23), y encima `router.back()`
+          desde acá saltaría a cualquier pantalla anterior. */}
+      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} />
 
       <ScrollView
         contentContainerStyle={{
@@ -221,7 +221,7 @@ export default function DespensaPedidos() {
                 <Boton
                   variante="secundario"
                   etiqueta={t('despensa.carritoVacioIr')}
-                  onPress={() => router.back()}
+                  onPress={() => router.push('/despensa')}
                 />
               }
             />
@@ -233,8 +233,24 @@ export default function DespensaPedidos() {
             />
           </>
         ) : (
-          <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-            {pedidos.map((p) => {
+          /* 🔴 LA CASA: EN CURSO ARRIBA, HISTORIAL ABAJO (firma del founder,
+             S100c). *Lo que todavía puede pasar algo preside; lo que ya
+             terminó se consulta.* El corte es `es_terminal`, que lo dice el
+             CATÁLOGO —dato del motor, no un `switch` acá—, así que el día
+             que nazca una narrativa nueva cae del lado correcto sola.
+
+             **Los dos rótulos aparecen SOLO si existen las dos secciones**:
+             con una sola, rotular anuncia una división que no está (Chanel). */
+          <>
+            {[
+              { lista: pedidos.filter((p) => !p.es_terminal), rotulo: 'despensa.pedidosEnCurso' as const },
+              { lista: pedidos.filter((p) => p.es_terminal), rotulo: 'despensa.pedidosHistorial' as const },
+            ]
+              .filter((s) => s.lista.length > 0)
+              .map((seccion, _i, vivas) => (
+                <View key={seccion.rotulo} style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
+                  {vivas.length > 1 ? <Texto variante="seccion">{t(seccion.rotulo)}</Texto> : null}
+                  {seccion.lista.map((p) => {
               const escalera = escaleraDePedido(p.narrativa, voces);
               const { pasos, desvio } = escalera;
               const portador = portadorDeEstado({
@@ -311,14 +327,28 @@ export default function DespensaPedidos() {
                   etiqueta={t('despensa.verPedido')}
                   onPress={() =>
                     router.push({
-                      pathname: '/despensa/pedido/[pedidoId]',
+                      pathname: '/pedidos/pedido/[pedidoId]',
                       params: { pedidoId: p.pedido_id },
                     })
                   }
                 />
               );
-            })}
-          </View>
+                  })}
+                </View>
+              ))}
+            {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa,
+                y hasta hoy vivía SOLO en el estado vacío. *Una entrada que
+                existe solo cuando no tenés nada es una entrada que nadie
+                encuentra el día que la necesita.* */}
+            <View style={{ paddingTop: spacing[2] }}>
+              <Separador />
+              <CeldaNavegacion
+                titulo={t('despensa.reclamoEntrada')}
+                detalle={t('despensa.reclamoEntradaDetalle')}
+                onPress={() => router.push('/despensa/reclamo')}
+              />
+            </View>
+          </>
         )}
       </ScrollView>
     </View>
