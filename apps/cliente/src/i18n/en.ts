@@ -1297,6 +1297,7 @@ export const clienteEn = {
     agregadoPara: 'Added to your cart for {{nombre}}.',
     verCarrito: 'View cart · {{n}}',
     faltaPresentacion: 'Pick a size to add it.',
+    precioDesde: 'from',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
 
     // S96 · the other doors

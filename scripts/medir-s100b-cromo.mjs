@@ -356,6 +356,10 @@ if (cards.length > 0) {
   console.log(
     `  al abrir: visor ${antes?.clientHeight} · contenido ${antes?.scrollHeight} · ¿puede scrollear? ${antes?.puedeScrollear ? 'SÍ' : 'NO'} (sobran ${antes?.sobrante})`,
   );
+  /* La ficha EN REPOSO — lo primero que ve una familia, y lo que el gate
+     del founder juzga. *Una captura del tope prueba que nada quedó
+     inalcanzable; solo la del reposo dice si la pantalla vende.* */
+  await page.screenshot({ path: `scripts/capturas/s100b-c-ficha-${ROTULO}-reposo.png` });
 
   // El scroll EFECTIVO: se pide y se vuelve a medir. Que el contenedor
   // diga que puede no prueba que lo haga.
@@ -387,6 +391,23 @@ if (cards.length > 0) {
       `  ${tapado ? '🔴' : ' ✓'} «${clave}»: y ${c.top}–${c.top + c.alto}${tapado ? ` · INALCANZABLE (pie en ${pieTop})` : ''}`,
     );
   }
+  /* 🔴 ¿LA FICHA MUESTRA PRECIO SIN PRESENTACIÓN ELEGIDA?
+     Con varias presentaciones ninguna se elige sola, y el bloque de precio
+     se pintaba SOLO con una elegida ⇒ **la ficha no mostraba ningún precio
+     hasta que la familia tocaba un chip**. *Una ficha sin precio no vende.*
+     Apareció MIRANDO la captura y no midiéndola — ningún número de este
+     script lo decía. Se mecaniza acá para que no vuelva callado. */
+  const conPrecio = await page.evaluate(() => {
+    const d = document.querySelector('[data-medicion-scroller]');
+    const txt = d === null ? '' : (d.textContent ?? '');
+    const m = txt.match(/\$\s?[\d.,]+/g) ?? [];
+    return { hay: m.length > 0, muestras: m.slice(0, 3) };
+  });
+  console.log(
+    `  ${conPrecio.hay ? '✅' : '🔴'} precio visible en el cuerpo de la ficha: ${
+      conPrecio.hay ? conPrecio.muestras.join(' · ') : 'NINGUNO — la ficha no dice cuánto sale'
+    }`,
+  );
   await page.screenshot({ path: `scripts/capturas/s100b-c-ficha-${ROTULO}-tope.png` });
 } else {
   console.log('  ⚠ sin tarjeta no hay ficha que medir.');

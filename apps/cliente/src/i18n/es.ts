@@ -1508,6 +1508,11 @@ export const clienteEs = {
     agregadoPara: 'Agregado al carrito para {{nombre}}.',
     verCarrito: 'Ver carrito · {{n}}',
     faltaPresentacion: 'Elegí una presentación para agregarlo.',
+    /** El precio de la presentación más barata, mientras no haya una
+     *  elegida. Es la escalera del precio honesto de S82: **lo que varía
+     *  dice «desde»**. Sin esto la ficha de un producto con varias
+     *  presentaciones **no muestra ningún precio hasta que elegís**. */
+    precioDesde: 'desde',
     faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
 
     // S96 · las otras puertas

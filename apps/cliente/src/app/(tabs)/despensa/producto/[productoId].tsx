@@ -230,6 +230,24 @@ export default function DespensaProducto() {
 
   const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
 
+  /** La presentación COMPRABLE más barata — la que sostiene el «desde»
+   *  mientras no haya una elegida.
+   *
+   *  🔴 **El criterio es explícito y por eso se puede discutir: el precio
+   *  MÁS BAJO.** No es «la primera de la lista» — *el primer elemento de
+   *  una colección sin criterio es una decisión de negocio por accidente*
+   *  (L-289). Y el mínimo es el único criterio que hace verdadera la
+   *  palabra «desde»: con cualquier otro, el número mostrado sería un
+   *  precio que la familia podría encontrar más barato dos toques después,
+   *  que es exactamente la clase de sorpresa que esta casa no hace. */
+  const masBarata = useMemo(
+    () =>
+      comprables.length === 0
+        ? null
+        : comprables.reduce((a, b) => (b.precio < a.precio ? b : a)),
+    [comprables],
+  );
+
   /** §5.4 — los HECHOS para AvisoAlergia v3: `composicion_estado` viene
    *  del MOTOR (columna con cuatro literales; solo verificada y no_aplica
    *  callan, y son dos silencios distintos) y la coincidencia sale del
@@ -548,6 +566,28 @@ export default function DespensaProducto() {
                 valor: que sea cierta.
                 El registro es el mensaje (Ley 3): el precio en su voz, el $/kg
                 en mono porque **lo derivó una máquina**. */}
+            {/* 🔴 S100b-C — LA FICHA SIN PRECIO. Este bloque se pintaba SOLO
+                con una presentación elegida, y con más de una **no se elige
+                sola** (la auto-selección es solo para el caso de una). ⇒ en
+                un producto de 3 presentaciones, **la ficha no mostraba
+                NINGÚN precio hasta que la familia tocaba un chip**.
+                *Una ficha sin precio no vende: obliga a adivinar cuánto
+                sale antes de saber si te interesa.*
+                Apareció MIRANDO la captura, no midiéndola — ningún número
+                de los que este archivo produce decía «acá no hay precio».
+
+                La cura NO es preseleccionar: **el primer elemento de una
+                colección sin criterio es una decisión de negocio por
+                accidente** (L-289), y elegirle la presentación a la familia
+                es decidir cuánto va a gastar. Se muestra **«desde» el precio
+                de la más barata**, que es la escalera del precio honesto ya
+                firmada en S82: *lo que varía dice «desde»*. Al elegir un
+                chip, el precio pasa a ser el exacto de esa presentación.
+
+                ⚠️ La palabra va en su propia línea y no pegada al número
+                porque `PrecioText` no tiene forma de prefijo; **se le pidió
+                a B la prop con este caso** — la tipografía del precio es de
+                la pieza, no de esta pantalla. */}
             {variante !== null && variante.precio !== null ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
                 <PrecioText
@@ -559,6 +599,22 @@ export default function DespensaProducto() {
                     precioPorKg(
                       variante.precio,
                       variante.peso_kg,
+                      MONEDA_FALLBACK,
+                      idioma as IdiomaSoportado,
+                    ) ?? undefined
+                  }
+                />
+              </View>
+            ) : masBarata !== null ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <Texto variante="apoyo">{t('despensa.precioDesde')}</Texto>
+                <PrecioText
+                  valor={masBarata.precio}
+                  registro="ficha"
+                  porUnidad={
+                    precioPorKg(
+                      masBarata.precio,
+                      masBarata.peso_kg,
                       MONEDA_FALLBACK,
                       idioma as IdiomaSoportado,
                     ) ?? undefined
