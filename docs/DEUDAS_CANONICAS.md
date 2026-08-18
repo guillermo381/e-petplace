@@ -11711,7 +11711,18 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
-### Lecciones S100c (L-296 → L-299) — depositadas por B el 18-ago-2026, con aparato
+### Lecciones S100c (L-296 → L-300) — depositadas por B el 18-ago-2026, con aparato
+
+- **L-300 — UN BACKTICK DENTRO DE UN MENSAJE DE COMMIT ENTRECOMILLADO ES SUSTITUCIÓN DE COMANDO: EL MENSAJE PIERDE TEXTO Y EL COMMIT SALE VERDE (S100c-B — error propio, medido después de pushear; depositada 18-ago-2026).**
+
+  Esta casa escribe mensajes de commit largos, en prosa, **llenos de backticks** —es su convención para nombrar archivos, props y funciones—. Con `git commit -m "…"` en zsh/bash, **cada par de backticks se ejecuta como comando y su salida reemplaza al texto.**
+
+  **Medido:** el mensaje decía *«los dos en un solo `etiqueta`»* y quedó *«los dos en un solo  —»*. El shell imprimió `command not found: etiqueta`, **`git commit` devolvió 0, el gate de pre-commit dio verde y el push salió limpio.** *Ninguno de los tres semáforos de la casa mira el contenido del mensaje.*
+
+  ⇒ **El mensaje de un commit se verifica DESPUÉS de escribirlo** (`git log -1 --format=%B`), o se escribe por una vía que no interpreta: `-F archivo`, `-F -` por stdin, o comillas simples. **Y la corrección no se hace reescribiendo la historia de una rama ya pusheada** — se anota, porque *forzar un push para arreglar una palabra le rompe el árbol a quien ya la trajo.*
+
+  **Su familia es la de siempre y por eso vale:** la verificación cuyo modo de falla es el silencio no es una verificación (L-192). Acá el silencio es doble — el commit funciona **y** el texto perdido es justo el que explicaba por qué algo no se hizo.
+
 
 > **Las cuatro nacieron midiendo, y tres de ellas cazaron un error de quien las escribió o de quien las encargó.** *Techo verificado por grep contra este archivo antes de numerar: L-295 → siguiente libre L-296* (`L-714` sigue descartado por su propia ficha: es un typo de `D-714`, no una lección).
 
