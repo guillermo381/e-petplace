@@ -9,12 +9,12 @@
 
 ## 🔴 §1 · EL PATRÓN QUE APARECIÓ CINCO VECES Y NO ESTÁ EN LOS DIECISÉIS
 
-**El CTA fijo se pinta ENCIMA del contenido, y lo que queda debajo es inalcanzable.**
+**El CTA fijo se pinta ENCIMA del contenido.**
 No es una pantalla: es **la anatomía de pie de página de toda la despensa**.
 
 | # | pantalla | qué queda tapado | solape medido |
 |---|---|---|---|
-| ① | **ficha de producto** | `Composición` · la lista de ingredientes · **`Declara contener: Cordero, Arroz.`** | y 1518-1592 bajo CTA 1543-1602 · **y la ficha NO SCROLLEA** |
+| ① | **ficha de producto** | `Composición` · la lista de ingredientes · **`Declara contener: Cordero, Arroz.`** | y 1518-1592 bajo CTA 1543-1602 (ver la corrección de §1bis) |
 | ② | **carrito** | *«El total con envío e impuestos lo vas a ver antes de pagar»* | **9.6 dp** (1614-1728 bajo 1701-1760) |
 | ③ | **dirección y entrega** | **`Instrucciones de entrega`** — que G-11 dice que debería ser *el único campo* de la pantalla | 1682-1744 bajo CTA 1701-1760 |
 | ④ | **detalle del pedido** | `A dónde te lo llevamos` | cortado por la barra de tabs |
@@ -24,10 +24,35 @@ No es una pantalla: es **la anatomía de pie de página de toda la despensa**.
 > *Un CTA fijo que no descuenta su propio alto del área scrolleable no «tapa a veces»: tapa
 > siempre, y solo se nota cuando lo que queda abajo importa.*
 >
-> **⇒ El caso ① es de SALUD y por eso sube solo:** lo tapado es la composición y los alérgenos, y
-> la ficha **no scrollea**, así que no hay gesto que los recupere. La ley de la casa previó el
-> acordeón —*«plegar una advertencia de salud la convierte en nota al pie»*—; **acá está pintada
-> encima, que es peor, y por eso la ley no lo atrapó.**
+> **⇒ El caso ① sigue siendo el que sube solo, y es de SALUD:** lo tapado en reposo es la composición
+> y los alérgenos. **⚠️ Se recuperan scrolleando — ver la corrección de §1bis**, que desarma mi primera
+> lectura. Lo que queda en pie: la ley de la casa previó el acordeón —*«plegar una advertencia de salud
+> la convierte en nota al pie»*— y **acá el dato de salud arranca debajo de un botón**, que es un
+> escalón más abajo que plegado. *Menos grave de lo que reporté, y todavía lo primero de la lista.*
+
+---
+
+> ## 🔴 §1bis · CORRECCIÓN — DIJE «LA FICHA NO SCROLLEA» Y ERA FALSO
+>
+> **Lo escribí yo y estaba mal.** La hipótesis la levantó **la pista C leyendo la fuente** (*«el
+> `ScrollView` es normal; debería scrollear»*) y **la verifiqué en el aparato: la ficha SÍ scrollea** —
+> `Composición` se movió de `y=1499` a `y=860` con un swipe, y **al fondo el contenido queda entero por
+> encima del pie**. ⇒ **la composición y los alérgenos NO son inalcanzables.**
+>
+> **Por qué me equivoqué, que es el dato que vale:** mi swipe empezó en `y=1500` — **encima del pie
+> fijo, que se comió el gesto**. La captura salió idéntica y la leí como *«no scrollea»*.
+>
+> **LO QUE SÍ ES CIERTO, y sigue siendo defecto:**
+> ① **con el pie de DOS botones el contenido queda tapado EN REPOSO** —medido: `Composición` 1518-1592
+> bajo el CTA 1543-1602— porque la reserva estimada no alcanza · ② **la banda del pie es una ZONA
+> MUERTA DE GESTO**: quien arrastre en el tercio inferior encuentra la pantalla trabada y puede no
+> descubrir nunca que abajo hay más. *Ese segundo punto no lo tenía ninguno de los dos, y salió de
+> investigar mi propio error.*
+>
+> **La cura NO cambia:** derivar la reserva quita ①, y con ① resuelto ② deja de costar (un pie que no
+> tapa nada puede comerse el gesto sin consecuencia). **Lo que cambia es la GRAVEDAD y el mecanismo.**
+> *Tenía la cura correcta apoyada en una premisa falsa — L-294, cobrada contra mí y por una pista
+> vecina que leyó la fuente.*
 
 ---
 
