@@ -45,8 +45,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -60,6 +59,7 @@ import {
   FiltroPills,
   Icono,
   nombreCurado,
+  PantallaConPie,
   Separador,
   TarjetaProducto,
   Texto,
@@ -109,7 +109,6 @@ const FILTROS_VITRINA = { limite: 50 } as const;
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const insets = useSafeAreaInsets();
   const carrito = useCarrito();
   // La puerta desde la mascota (§5.1): su perfil llega con el eje puesto.
   const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
@@ -581,11 +580,31 @@ export default function DespensaDescubrir() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="portada" saludo={t('despensa.titulo')} isotipo="gradiente" />
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
+      {/* 🔴 EL MISMO DEFECTO QUE LA FICHA, EN SU FORMA MÁS BARATA
+          (S100b-C): acá el alto de la barra del carrito se estimaba con un
+          `72` tecleado. **Es el par que debe coincidir saliendo de dos
+          cuentas distintas**, y el día que la barra gane una línea —un
+          total, un aviso de envío— la reserva se queda corta sin que nadie
+          toque nada. Se DERIVA con `PantallaConPie`, igual que la ficha:
+          el pie se mide a sí mismo. El `insets.bottom` es de la pieza.
+
+          ⚠️ El pie va como FRAGMENTO: `pointerEvents="box-none"` cubre una
+          sola capa y un `View` propio reabriría la zona muerta de gesto. */}
+      <PantallaConPie
+        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
+        pie={
+          unidades > 0 ? (
+            <Boton
+              etiqueta={t('despensa.verCarrito', { n: unidades })}
+              bloque
+              onPress={() => router.push('/despensa/carrito')}
+            />
+          ) : undefined
+        }
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + (unidades > 0 ? spacing[8] + 72 : spacing[8]),
+          // Solo el aire del final de MI contenido. Acá vivía `+ 72`.
+          paddingBottom: spacing[8],
           gap: spacing[5],
         }}
       >
@@ -616,10 +635,23 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ⓪bis · EL BUSCADOR (S96 — §5.1) */}
+            {/* ⓪bis · EL BUSCADOR (S96 — §5.1).
+                🔴 G-04 (S100b-C): la etiqueta visible SE APAGA. Medido en
+                el aparato, el bloque del buscador ocupaba **106 dp** para
+                una caja de texto de 26 — el resto era etiqueta y aire, en
+                una pantalla donde el primer producto no llegaba a
+                aparecer.
+                **La cura no se inventó: estaba construida y sin consumir.**
+                `Campo.etiquetaVisible` existe desde N11′ y su propia
+                cabecera nombra este caso con todas las letras: *«el
+                buscador no lleva etiqueta: lupa + placeholder es el patrón
+                universal»*. Y lo que se apaga es el PÍXEL, jamás el
+                nombre: el `accessibilityLabel` se monta igual, así que el
+                lector de pantalla sigue diciendo lo mismo que antes. */}
             <View style={{ paddingHorizontal: spacing[5] }}>
               <Campo
                 label={t('despensa.buscarLabel')}
+                etiquetaVisible={false}
                 value={busqueda}
                 onChangeText={setBusqueda}
                 placeholder={t('despensa.buscarPlaceholder')}
@@ -723,12 +755,22 @@ export default function DespensaDescubrir() {
               />
             ) : (
               <View style={{ gap: spacing[3] }}>
-                {elegibles.length > 0 ? (
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">{t('despensa.elegiMascota')}</Texto>
-                  </View>
-                ) : null}
-                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE.
+                {/* ☠️ ACÁ VIVÍA LA VOZ «elegí una mascota» (G-04, S100b-C).
+                    Muere por DOS razones, y la segunda es la que la
+                    condena:
+                    ① Es una EXPLICACIÓN, y la tira de caras que está
+                      justo encima ya es la invitación — *pedir por texto
+                      lo que un control visible ya ofrece es cobrarle al
+                      alto de la pantalla dos veces por lo mismo.*
+                    ② 🔴 **Mentía en un caso real.** Se pintaba con
+                      `elegibles.length > 0` y el selector de mascotas se
+                      pinta con `> 1`: con UNA sola mascota elegible, la
+                      app pedía elegir **y no había control para hacerlo**.
+                      Un control que no existe es peor que uno feo.
+                    El criterio no se pierde: al elegir una mascota,
+                    `CriterioMascota` lo DICE con su cara y su razón. */}
+                {listaConFacetas(vitrina, null)}
+                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE, AHORA AL PIE.
                     La vitrina carga 50 y el catálogo comprable tiene 563: la
                     familia veía el 8,9 % y **una lista completa y una truncada
                     se veían igual**. `contarProductosDespensa` existía desde
@@ -736,7 +778,16 @@ export default function DespensaDescubrir() {
                     la cura estaba construida y sin consumir.
                     Se habla SOLO cuando el techo cortó de verdad
                     (`total > cargados`): en una vitrina que entra entera, el
-                    número sobra y avisar de más enseña a ignorar los avisos. */}
+                    número sobra y avisar de más enseña a ignorar los avisos.
+
+                    🔴 S100b-C — **BAJA DE LA CABECERA AL PIE DE LA GRILLA**,
+                    y no es solo por los 40 dp que le devuelve a la
+                    mercadería: **arriba el número no tiene nada que
+                    calificar todavía**. «Mostramos 50 de 563» se lee
+                    ANTES de haber visto uno solo. Al pie llega cuando la
+                    lista efectivamente se terminó, que es el momento en
+                    que la pregunta «¿esto es todo?» aparece sola. *El
+                    dato no cambió: cambió el instante en que sirve.* */}
                 {totalVitrina !== null && totalVitrina > vitrina.length ? (
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">
@@ -747,7 +798,6 @@ export default function DespensaDescubrir() {
                     </Texto>
                   </View>
                 ) : null}
-                {listaConFacetas(vitrina, null)}
               </View>
             )}
 
@@ -771,29 +821,7 @@ export default function DespensaDescubrir() {
             </View>
           </>
         )}
-      </ScrollView>
-
-      {/* LA BARRA DEL CARRITO — existe solo cuando hay algo adentro. */}
-      {unidades > 0 ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: spacing[5],
-            paddingTop: spacing[3],
-            paddingBottom: insets.bottom + spacing[3],
-            backgroundColor: theme.bg.base,
-          }}
-        >
-          <Boton
-            etiqueta={t('despensa.verCarrito', { n: unidades })}
-            bloque
-            onPress={() => router.push('/despensa/carrito')}
-          />
-        </View>
-      ) : null}
+      </PantallaConPie>
     </View>
   );
 }
