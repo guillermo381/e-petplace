@@ -5,7 +5,9 @@
  *
  * ── LA COMPOSICIÓN (receta ⑤) ──────────────────────────────────────────────
  * El mapa es EL FONDO —ocupa el lienzo entero— y la HOJA se apoya ENCIMA,
- * anclada abajo: rango · escalera · quién lo trae · el código de la puerta.
+ * anclada abajo: **rango · código de la puerta · escalera · quién lo trae**.
+ * *El código va segundo y no cuarto: es el único dato que se usa EN LA PUERTA,
+ * con el repartidor delante — todo lo demás se consulta desde el sillón.*
  *
  * 🔴 **S100b-D · ESTO ERA UNA BANDA Y AHORA ES UN FONDO, Y ES CAMBIO DE
  * MECANISMO, NO DE ESTILO.** La cabecera de S100 ya decía «el mapa preside y
@@ -311,6 +313,25 @@ export default function DespensaEnCamino() {
                 </View>
               ) : null}
 
+              {/* 🔴 ② EL CÓDIGO DE LA PUERTA (F2) — SUBIÓ DE CUARTO A
+                  SEGUNDO, y la razón es de uso, no de estética.
+                  **Es el único dato de esta pantalla que se usa EN LA PUERTA**
+                  —con el repartidor delante y el teléfono en la mano—; todo lo
+                  demás se consulta antes y desde el sillón. *Lo que se necesita
+                  bajo presión no puede estar al final de una hoja que hay que
+                  desplegar.* La vara de Rappi lo pone arriba con su regla
+                  pegada, y ésa es la referencia declarada.
+                  `[IMPRESIÓN]` de B, tomada por mí y **reversible en el gate**:
+                  es un reordenamiento, no una pieza.
+                  La regla de CUÁNDO darlo viaja pegada abajo — separadas, la
+                  regla no se lee. */}
+              {codigo === null ? null : (
+                <View style={{ gap: spacing[1] }}>
+                  <CodigoAEscala codigo={codigo} etiqueta={t('despensa.codigoPuerta')} />
+                  <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
+                </View>
+              )}
+
               {(() => {
                 const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
                 return (
@@ -379,13 +400,6 @@ export default function DespensaEnCamino() {
                 </View>
               )}
 
-              {/* ④ EL CÓDIGO DE LA PUERTA (F2) — con su voz de CUÁNDO darlo. */}
-              {codigo === null ? null : (
-                <View style={{ gap: spacing[1] }}>
-                  <CodigoAEscala codigo={codigo} etiqueta={t('despensa.codigoPuerta')} />
-                  <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
-                </View>
-              )}
             </ScrollView>
           </View>
         </View>

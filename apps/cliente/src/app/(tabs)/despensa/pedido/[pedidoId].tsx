@@ -51,6 +51,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
+  Insignia,
   SelectorOpcion,
   Separador,
   Texto,
@@ -342,10 +343,14 @@ export default function DespensaPedido() {
                 // vive en una función y no en un `if` por pantalla.
                 if (escaleraMuda(escalera)) {
                   return (
-                    <View style={{ gap: spacing[1] }}>
-                      {/* El nombre del estado sale del CATÁLOGO —dato, no un
+                    <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+                      {/* LA MISMA FORMA QUE EN LA LISTA, y a propósito: quien
+                          vio la insignia en su fila encuentra **la misma
+                          figura** al abrir. *Dos formas distintas para el
+                          mismo hecho le piden al dueño que las relacione.*
+                          El nombre del estado sale del CATÁLOGO —dato, no un
                           `switch`— y la voz que lo explica, del riel. */}
-                      <Texto variante="seccion">{detalle.pedido.narrativa_nombre}</Texto>
+                      <Insignia estado="info" etiqueta={detalle.pedido.narrativa_nombre} />
                       <Texto variante="apoyo">{t('despensa.estadoSinRecorrido')}</Texto>
                     </View>
                   );

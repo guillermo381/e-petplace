@@ -58,6 +58,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FiltroPills,
+  GlifoConContador,
   Icono,
   nombreCurado,
   Separador,
@@ -610,23 +611,34 @@ export default function DespensaDescubrir() {
             }
             hitSlop={spacing[3]}
           >
-            {/* ⚠️ EL CONTADOR VA AL LADO Y NO ADENTRO DE UN DISCO DE COLOR,
-                Y ES UN LÍMITE DE PIEZA QUE SE DECLARA EN VEZ DE FORZARSE.
-                El badge de la industria es un disco de acento pleno con el
-                número en color inverso — y **`Texto` no tiene color inverso**
-                (sus seis colores son semánticos: primary…warning). El par que
-                la casa sí tiene para texto sobre acento pleno vive adentro de
-                `Boton` (`accent.cta` / `accent.ctaTexto`) y no está expuesto.
-                *Pintar el número con un color crudo para que se parezca al
-                badge sería inventar contraste sin medirlo, en la pieza más
-                pública de la tienda.*
-                ⇒ **canasta + número al lado**, que es un contador honesto y
-                legible por construcción. El disco se lo pedí a B con el caso;
-                cuando exista, esto son tres líneas. */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
-              <Icono nombre="carrito" tamano={24} />
-              {unidades === 0 ? null : <Texto variante="dato">{String(unidades)}</Texto>}
-            </View>
+            {/* ✅ EL DISCO LLEGÓ. Antes esto era «canasta + número al lado»
+                porque `Texto` no tiene color inverso y el par
+                texto-sobre-acento vivía encerrado en `Boton` — *pintar el
+                número con un color crudo habría sido inventar contraste sin
+                medirlo, en la pieza más pública de la tienda.* Se pidió la
+                pieza en vez de inventarla y B la construyó reusando el par
+                del timbre `+` de `TarjetaProducto`, que **ya está en el
+                gate**: WCAG 368/0, cero pares nuevos.
+                Con `0` no dibuja disco (19.9) y a partir de 100 dice «99+»:
+                la salida es decir «muchos», jamás encoger la letra. */}
+            {/* ⚠️ **LA ETIQUETA VA EN LOS DOS, Y NO ES DESCUIDO.** La pieza
+                fija `accessible` + `accessibilityRole="image"` adentro, así
+                que anidada en un `Pressable` quedan **dos nodos accesibles**:
+                el que se TOCA y el que está DENTRO. *El que tiene que estar
+                nombrado es el que se toca* — un botón sin nombre no se puede
+                activar a ciegas—, y por eso el `accessibilityLabel` del
+                `Pressable` no se sacó. La redundancia en el árbol es el
+                precio; que el botón quede mudo, no. **Declarado a B: su
+                contrato no contempla montarse dentro de un tocable.** */}
+            <GlifoConContador
+              nombre="carrito"
+              cuenta={unidades}
+              etiqueta={
+                unidades === 0
+                  ? t('despensa.irAlCarrito')
+                  : t('despensa.irAlCarritoCon', { n: unidades })
+              }
+            />
           </Pressable>
         }
       />

@@ -40,7 +40,12 @@ import {
 } from '@epetplace/ui';
 import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
-import { escaleraDePedido, portadorDeEstado, type VocesEscalera } from '@/lib/despensa/escalera';
+import {
+  escaleraDePedido,
+  portadorDeEstado,
+  type PortadorDeEstado,
+  type VocesEscalera,
+} from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 
@@ -105,21 +110,17 @@ export default function DespensaPedidos() {
    *  **Por eso ahora se puede medir: `verify-s100b-d-el-estado-se-dice.ts`
    *  corre la función real y su discriminador reproduce este orden viejo y
    *  exige que falle.** */
-  function detalleDe(p: PedidoEnLista): string | undefined {
+  function detalleDe(p: PedidoEnLista, portador: PortadorDeEstado): string | undefined {
     const desde = p.promesa_desde;
     const hasta = p.promesa_hasta;
-    const portador = portadorDeEstado({
-      narrativa: p.narrativa,
-      metodoEntrega: p.metodo_entrega,
-      tienePromesa: desde !== null && hasta !== null,
-    });
     switch (portador) {
       case 'nada':
         return undefined;
-      // El NOMBRE del estado sale del catálogo —dato, no un `switch` de
-      // voces acá—; el `case` solo elige QUIÉN habla.
+      // 🔴 EL ESTADO YA NO VIAJA POR ACÁ — lo lleva la INSIGNIA de la
+      // tarjeta (ver abajo). Esta línea devuelve vacío para no decir dos
+      // veces lo mismo (Chanel).
       case 'estado':
-        return p.narrativa_nombre;
+        return undefined;
       case 'retiro':
         return t('despensa.metodoRetiro');
       case 'promesa':
@@ -198,11 +199,34 @@ export default function DespensaPedidos() {
             {pedidos.map((p) => {
               const escalera = escaleraDePedido(p.narrativa, voces);
               const { pasos, desvio } = escalera;
+              const portador = portadorDeEstado({
+                narrativa: p.narrativa,
+                metodoEntrega: p.metodo_entrega,
+                tienePromesa: p.promesa_desde !== null && p.promesa_hasta !== null,
+              });
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
                   titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p)}
+                  detalle={detalleDe(p, portador)}
+                  /* 🔴 LA INSIGNIA — el pedido sin recorrido gana FIGURA.
+                     Diagnóstico de B con aparato: esas tarjetas eran «título
+                     + fecha + precio y nada más» al lado de vecinas con una
+                     escalera de cuatro nodos, y **un `apoyo` gris no alcanza
+                     ahí — no por tipografía, por CONTRASTE DE FORMA**: la
+                     vecina tiene una figura y ésta no, así que se lee como
+                     «le falta algo» en vez de «está en otro estado».
+                     *Un pedido sin recorrido no tiene una escalera vacía:
+                     tiene un estado.*
+                     El invariante que B pide —«si hay `pasos`, no pases
+                     `estado`»— se cumple **por construcción**: `portador`
+                     vale `'estado'` exactamente cuando la escalera no
+                     dibuja, y eso lo vigila el guard. */
+                  estado={
+                    portador === 'estado'
+                      ? { etiqueta: p.narrativa_nombre, tono: 'info' }
+                      : undefined
+                  }
                   monto={`$ ${p.total.toFixed(2)}`}
                   pasos={conIconos(pasos)}
                   desvio={desvio}
