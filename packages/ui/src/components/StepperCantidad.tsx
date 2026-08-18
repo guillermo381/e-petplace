@@ -96,8 +96,28 @@ export interface StepperCantidadProps {
   onCambio: (valor: number) => void
   /** accessibilityLabel del control (el label visible es de la pantalla). */
   etiqueta: string
-  /** Ley 22 por registro: 'control' (cliente, default) · 'oficio' (prestador). */
-  registro?: 'control' | 'oficio'
+  /**
+   * Ley 22 por registro: 'control' (cliente, default) · 'oficio' (prestador)
+   * · **'compra'** (F-OCRE).
+   *
+   * 🔴 **`'compra'` NACE CON F-OCRE** (firma del founder, 18-ago-2026): la
+   * casa reconoce **DOS acentos con roles distintos** — *magenta = marca y
+   * elección (leve) · ocre = acción de compra (fuerte)*. Un stepper que
+   * ajusta **cuánto vas a comprar** pertenece a la segunda familia, así que
+   * sus signos toman `accent.cta` —el mismo oro del CTA del cliente— y no
+   * el magenta de la elección.
+   *
+   * ⚠️ **No es «el stepper de la despensa»: es el stepper cuando lo que
+   * ajusta es una COMPRA.** El cupo por franja del arte del paseo sigue en
+   * `'oficio'` y el acuario en `'control'` — *un registro que se elige por
+   * pantalla en vez de por naturaleza deja de ser una clase y pasa a ser un
+   * segundo estilo*, que es lo que N11 prohíbe para los campos y vale igual
+   * acá.
+   *
+   * **Memorial degrada solo:** `accent.cta` en memorial es tinta por
+   * `getTheme` (un memorial no celebra), sin que esta pieza lo sepa.
+   */
+  registro?: 'control' | 'oficio' | 'compra'
   /**
    * Para contenedores angostos — hoy, la tarjeta de vitrina (ver la nota de
    * `BOTON_COMPACTO`). **116 dp en vez de 144**, con el blanco de 44
@@ -208,7 +228,10 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
     ? theme.accent.control // memorial: tinta (la marca no celebra ahí)
     : registro === 'oficio'
       ? theme.accent.primary
-      : theme.accent.control
+      : // F-OCRE: la acción de compra tiene su propio acento (ver la prop).
+        registro === 'compra'
+        ? theme.accent.cta
+        : theme.accent.control
 
   const irA = (destino: number) => {
     const d = Math.min(Math.max(destino, min), max)

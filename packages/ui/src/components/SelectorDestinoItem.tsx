@@ -15,15 +15,20 @@
  * **no compila.** *Un guard del servidor protege el dato; el tipo protege
  * al que construye la pantalla.*
  *
- * ── LA DONACIÓN NO ES UNA MASCOTA MÁS, Y POR ESO NO ES UN CHIP MÁS ─────
- * Se dibuja SEPARADA, con su propio rótulo. Ponerla en la hilera de caras
+ * ── ⏪ LA DONACIÓN NO ES UNA MASCOTA MÁS, Y POR ESO NO ES UN CHIP MÁS ──
+ * 🔴 ═══ DEROGADA EN SU MITAD DE FORMA — S100d-B (punto 15). ═══ La
+ * donación **pasa a ser un chip de la MISMA hilera**, con el glifo del
+ * refugio en vez de cara. **Lo que NO se deroga son los dos límites de
+ * §6.4**, que siguen enteros y viven en el motor. El porqué del cambio está
+ * en el cuerpo, sobre el chip. *(letra derogada, conservada:)*
+ * «Se dibuja SEPARADA, con su propio rótulo. Ponerla en la hilera de caras
  * la volvería "una mascota más de la lista", y no lo es: **§6.4 le pone
  * dos límites duros** — jamás entra a ningún expediente (no hay mascota)
  * y jamás otorga beneficio comercial (`MODELO_LOYALTY` §7.2:
  * *"reconocer una donación con un descuento la convierte en compra"*).
  * Es la misma razón por la que §1 separa `Servicios` de `Venta de
  * productos`: **dos naturalezas no comparten hilera** — y esa separación
- * visual es el primer candado, igual que allá, y es gratis.
+ * visual es el primer candado, igual que allá, y es gratis.»
  *
  * ── SIN DESTINO ES LEGAL ───────────────────────────────────────────────
  * `destino: null` no es un error: la regla general de §4 dice que *"la
@@ -40,7 +45,6 @@
 import { Pressable, View } from 'react-native'
 
 import { ChipEntidad } from './ChipEntidad'
-import { TarjetaEstado } from './TarjetaEstado'
 import { Icono } from './Icono'
 import { Texto } from './Texto'
 import { spacing } from '../tokens/spacing'
@@ -115,6 +119,39 @@ export type SelectorDestinoItemProps = {
    * no tiene por dónde salir: **si pasás el detalle, pasá también esto.**
    */
   onExplicarDonacion?: () => void
+  /**
+   * 🔴 SE ELIGIÓ LA DONACIÓN — **el disparo del agradecimiento** (S100d-B ·
+   * punto 15: *«al activar, modal de agradecimiento»*).
+   *
+   * **Se llama SOLO al elegirla, jamás al soltarla** (ver el cuerpo). La
+   * Hoja la monta la PANTALLA: esta pieza selecciona y avisa, y no conoce
+   * la navegación de quien la monta — la misma ley que ya rige para la «i».
+   *
+   * **Ausente ⇒ el chip funciona igual y no pasa nada más.** *Un
+   * agradecimiento que la pantalla no montó no es un error de la pieza.*
+   *
+   * ── LA VOZ, escrita por B y montada por A (vive en `apps/cliente/i18n`) ──
+   * Base del founder: *«Agradecemos tu buen corazón, este producto será
+   * enviado a un refugio»*, con el pedido explícito de **mejorarla**.
+   *
+   * > **título** — «Gracias.»
+   * > **cuerpo** — «Este producto no va a llegar a tu casa: va a un
+   * > refugio, a una mascota que todavía está esperando la suya.
+   * > No suma puntos ni descuentos, y es a propósito: una donación que
+   * > da algo a cambio deja de ser una donación.»
+   * > **cierre** — «Listo»
+   *
+   * **Las tres decisiones de voz, con su razón:**
+   * ① *«no va a llegar a tu casa»* — **es información, no cortesía**: sin
+   *    eso, alguien espera un paquete que nunca sale para su dirección.
+   * ② el límite de §6.4 se dice **como virtud y no como descargo**. *«No
+   *    otorga beneficio comercial» es letra de contrato; «una donación que
+   *    da algo a cambio deja de ser una donación» es la misma regla dicha
+   *    de manera que se entienda y además se comparta.*
+   * ③ **no se nombra a ninguna mascota** de la familia. La pieza no las
+   *    conoce, y el punto del texto es justamente que **no es para ellas**.
+   */
+  onDonacionElegida?: () => void
 }
 
 export function SelectorDestinoItem({
@@ -125,6 +162,7 @@ export function SelectorDestinoItem({
   etiquetaDonacion,
   detalleDonacion,
   onExplicarDonacion,
+  onDonacionElegida,
 }: SelectorDestinoItemProps) {
   const { theme } = useTheme()
   const donacionElegida = destino?.tipo === 'donacion'
@@ -154,49 +192,76 @@ export function SelectorDestinoItem({
             }
           />
         ))}
+
+        {/* 🔴 LA DONACIÓN, EN LA MISMA HILERA — S100d-B, punto 15 del gate.
+            Firma del founder: *«donación sigue como botón»* ⇒ **chip/toggle**.
+
+            ⏪ **QUÉ SE DEROGA, y su letra queda arriba tachada:** esta pieza
+            declaraba *«otra naturaleza, otra hilera»* y montaba la donación
+            en un `TarjetaEstado` en su propio renglón. **El argumento era el
+            candado de §1** (`Servicios` separado de `Venta de productos`) y
+            **estaba mal trasladado.**
+
+            **Por qué:** allá se separan **dos líneas de negocio** que no
+            deben mezclarse nunca. Acá hay **UNA pregunta —«¿para quién es
+            este producto?»— y varias respuestas.** *«Para un refugio» es una
+            respuesta legítima a esa pregunta, no otra pregunta.* Sacarla de
+            la hilera no la volvía «no-mascota»: la volvía **otro tipo de
+            control**, y eso es exactamente lo que el founder leyó — *«sigue
+            como botón»*.
+
+            ✅ **§6.4 NO SE NEGOCIA Y NO SE TOCA:** la donación sigue sin
+            entrar a ningún expediente y sin otorgar beneficio comercial.
+            **Esos dos límites viven en el MOTOR** (`chk_destino_excluyente`
+            y `MODELO_LOYALTY` §7.2), que es donde tienen que vivir. *Un
+            límite de negocio defendido por un renglón de layout no es un
+            límite: es una esperanza.*
+
+            🔴 **Y EL DISCRIMINADOR VISIBLE NO SE PIERDE, CAMBIA DE LUGAR:**
+            el chip de la donación **no lleva cara ni inicial — lleva el
+            glifo del REFUGIO** (`sujeto="donacion"`). *Comparte la forma,
+            porque es una opción del mismo rango; no comparte el contenido,
+            porque no es una mascota.* La distinción pasa de la GEOMETRÍA —
+            que el founder leyó mal, y con razón — al DIBUJO, que dice a
+            dónde va el producto. */}
+        <ChipEntidad
+          nombre={etiquetaDonacion}
+          sujeto="donacion"
+          tamano="general"
+          elegido={donacionElegida}
+          onPress={() => {
+            if (donacionElegida) {
+              onCambiar(null)
+              return
+            }
+            onCambiar({ tipo: 'donacion' })
+            /* 🔴 EL AGRADECIMIENTO SE AVISA, NO SE MONTA ACÁ — y respeta la
+               ley que esta pieza ya tenía escrita para la «i»: *un componente
+               de selección que además abre modales empieza a conocer la
+               navegación de su pantalla.*
+
+               **Solo al ELEGIR, jamás al soltar.** Agradecer dos veces —una
+               al marcar y otra al desmarcar— convertiría el gesto en un
+               diálogo, y **agradecer al desmarcar sería directamente
+               reprochar.** */
+            onDonacionElegida?.()
+          }}
+        />
       </View>
 
-      {/* La donación, aparte: otra naturaleza, otra hilera. Habla la
-          gramática ESTÁ/ESPERA de la casa (`TarjetaEstado`), que es la
-          que ya usamos para "esto rige / esto no". */}
-      {/* 🔴 S100b-B · DEJA DE SER UN ANUNCIO Y PASA A SER UNA OPCIÓN.
-          Medido: ocupaba **6.9× el área de una pastilla de mascota**
-          (343.8 × 144.7 dp contra 107.4 × 66.8) — *no competía con las
-          pastillas: las presidía.*
-
-          **`alignSelf: 'flex-start'` es lo que la achica a su contenido:**
-          antes tomaba el ancho entero de la pantalla por ser hija directa
-          de una columna. Misma gramática (`TarjetaEstado` rol radio, la
-          de ESTÁ/ESPERA), mismo registro tipográfico, tamaño de pastilla.
-
-          ⚠️ **Y SIGUE EN SU PROPIO RENGLÓN, fuera de la hilera de caras,
-          a propósito:** §6.4 dice que **la donación NO es una mascota
-          más**. Compartir hilera la volvería una cara más; compartir
-          FORMA sin compartir hilera dice las dos cosas a la vez — *es una
-          opción del mismo rango, y no es una mascota.* */}
-      <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-        <TarjetaEstado
-          encendido={donacionElegida}
-          rol="radio"
-          etiqueta={etiquetaDonacion}
-          onPress={() => onCambiar(donacionElegida ? null : { tipo: 'donacion' })}
+      {/* La «i»: el detalle se pide, no se impone. Sin callback no se
+          dibuja — y sin ella el detalle no tendría salida. */}
+      {detalleDonacion === undefined || onExplicarDonacion === undefined ? null : (
+        <Pressable
+          onPress={onExplicarDonacion}
+          accessibilityRole="button"
+          accessibilityLabel={detalleDonacion}
+          hitSlop={12}
+          style={{ alignSelf: 'flex-start' }}
         >
-          <Texto variante="cuerpo">{etiquetaDonacion}</Texto>
-        </TarjetaEstado>
-
-        {/* La «i»: el detalle se pide, no se impone. Sin callback no se
-            dibuja — y sin ella el detalle no tendría salida. */}
-        {detalleDonacion === undefined || onExplicarDonacion === undefined ? null : (
-          <Pressable
-            onPress={onExplicarDonacion}
-            accessibilityRole="button"
-            accessibilityLabel={detalleDonacion}
-            hitSlop={12}
-          >
-            <Icono nombre="info" tamano={20} registro="tinta" tinta={theme.text.secondary} />
-          </Pressable>
-        )}
-      </View>
+          <Icono nombre="info" tamano={20} registro="tinta" tinta={theme.text.secondary} />
+        </Pressable>
+      )}
     </View>
   )
 }

@@ -30,9 +30,12 @@
  * pide.
  */
 
-import { useEffect, useRef } from 'react'
-import { View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Pressable, View } from 'react-native'
 import MapView, { Marker, Polyline } from 'react-native-maps'
+
+import { Icono } from './Icono'
+import { spacing } from '../tokens/spacing'
 
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
@@ -73,9 +76,19 @@ export function MapaRecorrido({
   centroInicial,
   alto = ALTO_DEFAULT,
   aSangre = false,
+  mirada = 'operador',
+  aireInferior = 0,
+  etiquetaRecentrar,
 }: MapaRecorridoProps) {
   const { theme } = useTheme()
   const mapRef = useRef<MapView>(null)
+  /* 🔴 EL GESTO SUSPENDE EL AUTO-ENCUADRE — S100d-B (punto 24①).
+     Sin esto, encender los gestos sería una promesa que el próximo fix del
+     GPS rompe: la cámara volvería a encuadrar y **le arrancaría el mapa de
+     la mano** a quien está mirando su cuadra. *Un mapa que se puede mover y
+     vuelve solo es peor que uno que no se mueve: el primero se siente roto,
+     el segundo se entiende.* */
+  const [encuadreSuspendido, setEncuadreSuspendido] = useState(false)
 
   const k = CAPA_A_KEY[capa]
   const colorTrazo = 'capaText' in theme ? theme.capaText[k] : theme.capa[k]
@@ -92,6 +105,7 @@ export function MapaRecorrido({
   const coords = tramos.flat()
   const ultimo = coords.length > 0 ? coords[coords.length - 1] : null
   const esVivo = modo === 'vivo'
+  const esEspectador = mirada === 'espectador'
 
   const centro = ultimo ?? {
     latitude: (centroInicial ?? CENTRO_DEFAULT).lat,
@@ -110,6 +124,9 @@ export function MapaRecorrido({
    * cada fix— y usa el mismo registro que el seguimiento. */
   useEffect(() => {
     if (!esVivo || ultimo === null) return
+    // El gesto manda: mientras el encuadre esté suspendido, la cámara no se
+    // mueve sola. Se recupera con el control de RECENTRAR, jamás sola.
+    if (encuadreSuspendido) return
     if (destino !== undefined) {
       mapRef.current?.fitToCoordinates(
         [ultimo, { latitude: destino.lat, longitude: destino.lng }],
@@ -124,7 +141,7 @@ export function MapaRecorrido({
       { ...ultimo, latitudeDelta: DELTA_VIVO, longitudeDelta: DELTA_VIVO },
       motion.duration.estandar,
     )
-  }, [esVivo, ultimo?.latitude, ultimo?.longitude, destino?.lat, destino?.lng])
+  }, [esVivo, encuadreSuspendido, ultimo?.latitude, ultimo?.longitude, destino?.lat, destino?.lng])
 
   function encuadrarRecorrido() {
     if (esVivo || coords.length === 0) return
@@ -142,8 +159,16 @@ export function MapaRecorrido({
         style={{ flex: 1 }}
         initialRegion={{ ...centro, latitudeDelta: DELTA_VIVO, longitudeDelta: DELTA_VIVO }}
         onMapReady={encuadrarRecorrido}
-        scrollEnabled={!esVivo}
-        zoomEnabled={!esVivo}
+        /* ⏪ Decía `{!esVivo}` en las dos, con el comentario *«el paseador no
+           navega el mapa, camina»*. **Esa decisión es correcta para el PASEO
+           y la heredaba la ENTREGA**, que es otro acto y otra persona (ver
+           `mirada` en los tipos). Ahora el eje es QUIÉN MIRA. */
+        scrollEnabled={!esVivo || esEspectador}
+        zoomEnabled={!esVivo || esEspectador}
+        /* El pan del usuario es la señal de «me lo llevo yo». `onPanDrag`
+           dispara con el dedo y NO con `animateToRegion`, así que la propia
+           cámara de la pieza no se auto-suspende. */
+        onPanDrag={esEspectador ? () => setEncuadreSuspendido(true) : undefined}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
@@ -203,6 +228,41 @@ export function MapaRecorrido({
           </Marker>
         )}
       </MapView>
+
+      {/* 🔴 RECENTRAR — **solo cuando hay algo que recentrar** (S100d-B).
+
+          Con el encuadre vivo no se dibuja: *un control que no hace nada
+          enseña que los controles de esta pantalla no hacen nada* (19.9, el
+          nulo no se pinta). Aparece **al primer gesto** y es la vuelta a
+          casa que ese gesto se llevó.
+
+          **`aireInferior` lo levanta sobre lo que el consumidor sepa que
+          tapa el mapa** — en EN CAMINO, una hoja arrastrable. La pieza no
+          adivina qué la cubre. */}
+      {esEspectador && encuadreSuspendido ? (
+        <Pressable
+          onPress={() => setEncuadreSuspendido(false)}
+          accessibilityRole="button"
+          accessibilityLabel={etiquetaRecentrar ?? ''}
+          hitSlop={8}
+          style={{
+            position: 'absolute',
+            right: spacing[4],
+            bottom: spacing[4] + aireInferior,
+            width: 44,
+            height: 44,
+            borderRadius: radius.full,
+            backgroundColor: theme.bg.card,
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: theme.elevacion.elevada,
+          }}
+        >
+          {/* La gota: es el mismo idioma con que la casa dice «una ubicación»
+              fuera del lienzo, y acá dice «volvé a la que importa». */}
+          <Icono nombre="ubicacion" tamano={22} registro="tinta" tinta={theme.text.primary} />
+        </Pressable>
+      ) : null}
     </View>
   )
 }
