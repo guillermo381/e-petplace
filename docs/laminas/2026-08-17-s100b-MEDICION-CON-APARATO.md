@@ -46,6 +46,53 @@ app de ayer**.
 
 ---
 
+### 🔴 §1bis · CORRECCIÓN A §1 — HECHA POR MÍ MISMA, CON EL HARNESS (17-ago, tras entrar el benchmark)
+
+**Lo que §1 comparaba estaba mal emparejado, y lo digo antes de que alguien construya encima.**
+La tabla de arriba enfrenta **nuestra tarjeta de GRILLA (164 dp)** contra **la FILA de la app de
+Laika (384 dp)** — *dos familias de layout distintas*. Una fila de ancho completo siempre va a dar
+porcentajes chicos: **el denominador no es comparable.**
+
+**Medido con el harness sobre la vitrina web de Laika** (`laika.com.co/perros/alimento/concentrado`,
+viewport 390 — el mismo camino que caminé en el teléfono):
+
+| | Laika (web) | nosotros (app) |
+|---|---|---|
+| ancho de tarjeta | **366 px** | **164 dp** |
+| nombre | **14 px** · peso **400** | **16 px** · peso **400** |
+| precio | **20 px** · peso **500** | **20 px** · peso **700** |
+| precio ÷ nombre (font-size) | **1.429×** | **1.25×** |
+| foto ÷ área de tarjeta | **39.5 %** | **40.3 %** |
+| control ÷ área de tarjeta | **5.8 %** | **2.6 %** |
+| área táctil del control ≥48 | **NO** (186×32) | **sí** (36 + `hitSlop` 8 = 52) |
+
+**☠️ SE RETIRA:** *«el precio es 2.5× más grande relativo»* como comparación contra Laika. En la
+misma familia de layout **su ratio precio÷nombre es MAYOR que el nuestro** (1.429 contra 1.25), su
+foto ocupa lo mismo, y su control pesa **más** del doble que el nuestro. *En tres de las cuatro
+razones del harness no salimos peor: salimos mejor.*
+
+**✅ LO QUE SOBREVIVE, y ahora sin normalizar por nada — que es lo que lo vuelve sólido:**
+
+> **Ponemos casi la misma tipografía —16/20 contra 14/20— en un contenedor de MENOS DE LA MITAD DE
+> ANCHO (164 contra 366). Y el precio va en bold 700 donde el suyo va en 500.**
+
+⇒ **El diagnóstico se afina y mejora: G-06 no es tanto de TAMAÑO como de PESO.** A igual cuerpo
+(20 px), `700` contra `500` es lo que hace que el precio grite — y grita adentro de una caja que
+tiene menos de la mitad del ancho para absorberlo. *Cambiar el peso es más barato y menos riesgoso
+que mover la escala, y es lo primero que la re-derivación debería probar.*
+
+**Y la ley de la casa que esto ilustra, cobrada contra mí:** una conclusión correcta —*«la escala no
+se re-derivó»*— apoyada en una comparación mal emparejada **es frágil aunque acierte** (**L-294**).
+*El número que la delató no fue el ojo: fue que tres razones del harness dieran lo contrario de lo
+que yo esperaba* (**L-287**).
+
+**⚖️ Un dato honesto que va con esto:** la vitrina **web** de Laika tiene **65.8 % de cromo antes del
+primer producto y CERO productos completos en la primera pantalla** — o sea, **peor que nuestro
+84.1 % en productos completos, y del mismo orden en cromo.** *Su APP resuelve esto (27 %); su web no.*
+**G-04 sigue siendo nuestro, pero no somos el único que lo tiene.**
+
+---
+
 ## 🔴 §2 · G-01 — EL `+` NO ESTÁ ROTO: ESTÁ RECORTADO. Causa cerrada.
 
 **La lógica del stepper está SANA** — su `+` llama a `irA(v + 1)` y está habilitado mientras
