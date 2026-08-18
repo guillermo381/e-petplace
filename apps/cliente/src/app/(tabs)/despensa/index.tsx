@@ -45,8 +45,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -58,6 +57,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FiltroPills,
+  GlifoConContador,
   Icono,
   nombreCurado,
   Separador,
@@ -109,7 +109,6 @@ const FILTROS_VITRINA = { limite: 50 } as const;
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const insets = useSafeAreaInsets();
   const carrito = useCarrito();
   // La puerta desde la mascota (§5.1): su perfil llega con el eje puesto.
   const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
@@ -579,13 +578,108 @@ export default function DespensaDescubrir() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="portada" saludo={t('despensa.titulo')} isotipo="gradiente" />
+      {/* 🔴 S100b-D · G-14 · EL CARRITO DEJA DE SER UN BOTÓN DE TEXTO.
+          El gate: *«el carrito no tiene ícono en la barra: es un botón de
+          texto donde la industria usa una canasta con su contador»*.
+
+          **Va en `accionDer`, que es el slot que la pieza ya tiene para
+          esto** — no es un override. Y va ACÁ y no en la barra de tabs por
+          un dato, no por gusto: **la barra ya tiene sus cuatro slots**
+          (hogar · explorar · despensa · cuenta) y el cuarto es del ciclo
+          del trono; meter el carrito ahí rompería la gramática de la única
+          barra que el dueño ve todos los días.
+
+          **PERMANENTE, con o sin unidades.** Antes el único acceso existía
+          solo con `unidades > 0` ⇒ *un carrito vacío no tenía puerta, así
+          que no había forma de ver qué había adentro ni de volver.* El
+          contador aparece solo cuando hay algo: un «0» sobre la canasta es
+          ruido con forma de dato. */}
+      <Encabezado
+        variante="portada"
+        saludo={t('despensa.titulo')}
+        isotipo="gradiente"
+        /* 🔴 S100b-D · EL BUSCADOR SUBE A LA FILA DEL ENCABEZADO — y es el
+           slot que B entregó justo antes de cerrar, con la medición de C
+           adentro: **apilado debajo costaba 76 dp para una caja de texto de
+           26**, y en la referencia (Laika) **el buscador y el carrito viven
+           en la MISMA fila que el logo**.
+           Con `busqueda` el encabezado deja de apilar: `[isotipo]
+           [buscador] [carrito]`. **El título no se apaga: deja de gastar
+           píxeles** —sigue anunciándose al lector en un nodo sin alto—,
+           que es el patrón ya firmado en `Campo.etiquetaVisible`.
+           ⚠️ **El alto que esto libera es de la VITRINA, o sea de C (G-04):
+           una pantalla que no mostraba un solo producto.** Se monta desde
+           acá porque el encabezado es «Despensa de arriba» y es mío, con C
+           parada por orden de mesa — *una pieza entregada y sin consumidor
+           muere sin que nadie se entere.* Si C repiensa la composición,
+           esto se mueve; lo que no vuelve es el apilado. */
+        busqueda={
+          <Campo
+            label={t('despensa.buscarLabel')}
+            etiquetaVisible={false}
+            value={busqueda}
+            onChangeText={setBusqueda}
+            placeholder={t('despensa.buscarPlaceholder')}
+            autoCapitalize="none"
+          />
+        }
+        accionDer={
+          <Pressable
+            onPress={() => router.push('/despensa/carrito')}
+            accessibilityRole="button"
+            accessibilityLabel={
+              unidades === 0
+                ? t('despensa.irAlCarrito')
+                : t('despensa.irAlCarritoCon', { n: unidades })
+            }
+            hitSlop={spacing[3]}
+          >
+            {/* ✅ EL DISCO LLEGÓ. Antes esto era «canasta + número al lado»
+                porque `Texto` no tiene color inverso y el par
+                texto-sobre-acento vivía encerrado en `Boton` — *pintar el
+                número con un color crudo habría sido inventar contraste sin
+                medirlo, en la pieza más pública de la tienda.* Se pidió la
+                pieza en vez de inventarla y B la construyó reusando el par
+                del timbre `+` de `TarjetaProducto`, que **ya está en el
+                gate**: WCAG 368/0, cero pares nuevos.
+                Con `0` no dibuja disco (19.9) y a partir de 100 dice «99+»:
+                la salida es decir «muchos», jamás encoger la letra. */}
+            {/* ⏪ **ACÁ VIVÍA UNA REDUNDANCIA DECLARADA, Y LA PIEZA LA
+                CURÓ.** La primera versión fijaba `accessible` +
+                `role="image"` adentro, así que anidada en un tocable quedaban
+                **dos nodos accesibles**. Yo dejé la voz en el `Pressable`
+                —*el que tiene que estar nombrado es el que se toca: un botón
+                sin nombre no se activa a ciegas*— y **declaré la duplicación
+                en vez de esconderla**.
+                B la cerró con una **unión discriminada**, no con un flag
+                suelto: con un boolean opcional seguían siendo expresables
+                **los dos** estados malos —*suelta y sin nombre* (muda para el
+                lector) y *anidada con nombre* (la voz duplicada)—. **Con la
+                unión ninguno de los dos compila.**
+                ⇒ acá va `dentroDeTocable` y **sin `etiqueta`**: la pieza se
+                borra del árbol y el único nodo nombrado es el `Pressable`. */}
+            <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
+          </Pressable>
+        }
+      />
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + (unidades > 0 ? spacing[8] + 72 : spacing[8]),
+          // Sin barra fija abajo, la reserva es solo el aire del final
+          // del contenido: el `+ 72` estimaba el alto de un pie que ya no
+          // existe (la clase que `PantallaConPie` vino a volver inexpresable).
+          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+          // B midió que **el navegador ya acota**: el `ScrollView` de una
+          // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
+          // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
+          // lo cuenta DOS VECES. `spacing[8]` es el aire de cola; el inset
+          // era la cara «sobra» del malentendido de los 53 dp.
+          // *Yo lo había defendido como «aire de cola» y C tenía razón: era
+          // una línea vieja, no una posición.* Se unifica en las tres
+          // pantallas — dos reglas para lo mismo divergen.
+          paddingBottom: spacing[8],
           gap: spacing[5],
         }}
       >
@@ -616,16 +710,76 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ⓪bis · EL BUSCADOR (S96 — §5.1) */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Campo
-                label={t('despensa.buscarLabel')}
-                value={busqueda}
-                onChangeText={setBusqueda}
-                placeholder={t('despensa.buscarPlaceholder')}
-                autoCapitalize="none"
+            {/* 🔴 S100b-D · G-15 · «TUS PEDIDOS» SUBE ACÁ, Y LA CURA NO ERA
+                LA QUE EL GATE SUPUSO. El gate dice *«falta acceso a mis
+                pedidos desde la primera pantalla de Despensa»* y B, con
+                aparato, lo midió más ancho: *«no tiene entrada»*, y llegó por
+                deep link.
+
+                **Medido: la entrada EXISTÍA** — esta misma celda, al FONDO
+                del scroll, **detrás de la vitrina entera** (hasta 50 productos
+                en grilla de dos ≈ 25 filas). *No estaba ausente: estaba
+                enterrada, que en la práctica es lo mismo y en la cura no lo
+                es.* ⇒ **no se construye, se sube.**
+
+                Va DESPUÉS del filtro de mascota y ANTES del buscador: es la
+                primera cosa que se ve sin deslizar, y una sola fila.
+                ⚠️ **Cuesta una fila de alto, y eso toca a G-04** (la primera
+                pantalla que no muestra un solo producto, dueño C). Se declara
+                para que quien la repiense sepa que esta fila está acá por
+                firma y no por inercia: si su composición la quiere en otro
+                lugar, se mueve — lo que no puede es volver al fondo.
+
+                ⏪ Y la tabla de Cuenta de B **sí era exacta**: ahí no hay
+                entrada, y eso queda vivo (dueño por asignar). */}
+            {/* 🔴 ENMIENDA DE C A ESTA FILA (S100b-C) — **se queda arriba, y
+                pierde su renglón de explicación.**
+
+                D la subió y declaró que tocaba G-04 dejando la puerta
+                abierta (*«si su composición la quiere en otro lugar, se
+                mueve — lo que no puede es volver al fondo»*). Medí el costo
+                con el aparato: **la fila entera cuesta 79 dp** (58 + su
+                separación) y con ella **la primera tarjeta dejó de entrar
+                entera por 20 dp**. Sin ella el cromo baja de 319 a 240.
+
+                ⇒ El choque es real y es entre dos hallazgos firmados:
+                **G-15 pide que «mis pedidos» sea encontrable · G-04 pide que
+                la vitrina muestre mercadería.** No hay respuesta gratis, y
+                la ordena el propio gate: *«G-04 es el que ordena a los
+                demás»*, y *«una vitrina que no muestra mercadería no es una
+                vitrina»*.
+
+                **Pero enterrarla otra vez reproduce la queja del founder.**
+                Se le quitó el `detalle` —«Seguí lo que pediste, del más
+                reciente»— porque es una EXPLICACIÓN y la regla del arranque
+                la manda detrás de un toque: lo que se necesita para DECIDIR
+                queda visible, lo que se necesita para ENTENDER no. El título
+                ya dice qué hay del otro lado. **Eso se sostiene por sí solo
+                y se queda.**
+
+                🔴 **PERO NO ALCANZA, Y SE DICE CON EL NÚMERO: ahorró 2 dp de
+                los 18 que faltaban** (319 → 317). `CeldaNavegacion` tiene
+                alto mínimo, así que la fila cuesta ~77 dp lleve o no su
+                explicación. ⇒ **la forma NO admite el efecto**, y acá se
+                para de mover números en vez de buscar el tercero.
+
+                **La decisión queda BINARIA y va al gate con su número: la
+                fila arriba, o la primera tarjeta entera. No hay medio.**
+                Se elige dejarla arriba —el founder pidió encontrarla y la
+                tarjeta se completa deslizando un dedo— y se declara como
+                **reversible en una línea**: moverla debajo de la grilla
+                devuelve el cromo a 240 dp y la tarjeta entra con 59 de
+                sobra. *Lo que no se hace es esconder el costo.* */}
+            <View>
+              <CeldaNavegacion
+                titulo={t('despensa.tusPedidos')}
+                onPress={() => router.push('/despensa/pedidos')}
               />
+              <Separador />
             </View>
+
+            {/* ⏪ ⓪bis · EL BUSCADOR SE FUE A LA FILA DEL ENCABEZADO
+                (ver su comentario arriba). Acá costaba 76 dp apilado. */}
 
             {/* ① · EL CRITERIO — la firma (S95-I, sin cambios) */}
             {mascota !== null && !buscando ? (
@@ -723,12 +877,21 @@ export default function DespensaDescubrir() {
               />
             ) : (
               <View style={{ gap: spacing[3] }}>
-                {elegibles.length > 0 ? (
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">{t('despensa.elegiMascota')}</Texto>
-                  </View>
-                ) : null}
-                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE.
+                {/* ☠️ ACÁ VIVÍA LA VOZ «elegí una mascota» (G-04, S100b-C).
+                    Muere por DOS razones, y la segunda es la que la condena:
+                    ① Es una EXPLICACIÓN, y la tira de caras que está justo
+                      encima ya es la invitación — *pedir por texto lo que un
+                      control visible ya ofrece es cobrarle al alto de la
+                      pantalla dos veces por lo mismo.*
+                    ② 🔴 **Mentía en un caso real.** Se pintaba con
+                      `elegibles.length > 0` y el selector de mascotas se
+                      pinta con `> 1`: con UNA sola mascota elegible, la app
+                      pedía elegir **y no había control para hacerlo**. Un
+                      control que no existe es peor que uno feo.
+                    El criterio no se pierde: al elegir una mascota,
+                    `CriterioMascota` lo DICE con su cara y su razón. */}
+                {listaConFacetas(vitrina, null)}
+                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE, AHORA AL PIE.
                     La vitrina carga 50 y el catálogo comprable tiene 563: la
                     familia veía el 8,9 % y **una lista completa y una truncada
                     se veían igual**. `contarProductosDespensa` existía desde
@@ -736,7 +899,15 @@ export default function DespensaDescubrir() {
                     la cura estaba construida y sin consumir.
                     Se habla SOLO cuando el techo cortó de verdad
                     (`total > cargados`): en una vitrina que entra entera, el
-                    número sobra y avisar de más enseña a ignorar los avisos. */}
+                    número sobra y avisar de más enseña a ignorar los avisos.
+
+                    🔴 S100b-C — **BAJA DE LA CABECERA AL PIE DE LA GRILLA**, y
+                    no es solo por los 40 dp que le devuelve a la mercadería:
+                    **arriba el número no tiene nada que calificar todavía**.
+                    «Mostramos 50 de 563» se lee ANTES de haber visto uno solo.
+                    Al pie llega cuando la lista efectivamente se terminó, que
+                    es el momento en que la pregunta «¿esto es todo?» aparece
+                    sola. *El dato no cambió: cambió el instante en que sirve.* */}
                 {totalVitrina !== null && totalVitrina > vitrina.length ? (
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">
@@ -747,21 +918,17 @@ export default function DespensaDescubrir() {
                     </Texto>
                   </View>
                 ) : null}
-                {listaConFacetas(vitrina, null)}
               </View>
             )}
 
-            {/* ③ · LAS OTRAS PUERTAS — el pedido vivo y el código del local.
+            {/* ③ · LA OTRA PUERTA — el código del local.
                 CeldaNavegacion: acción que LLEVA (E14, chevron ›). Sin
                 glifo: el registry no tiene glifos de pedido/factura y un
-                glifo repetido de despensa sería decoración (Ley 12). */}
+                glifo repetido de despensa sería decoración (Ley 12).
+
+                ⏪ **«TUS PEDIDOS» SE FUE DE ACÁ ARRIBA** — ver su comentario
+                junto al buscador. */}
             <View>
-              <Separador />
-              <CeldaNavegacion
-                titulo={t('despensa.tusPedidos')}
-                detalle={t('despensa.tusPedidosDetalle')}
-                onPress={() => router.push('/despensa/pedidos')}
-              />
               <Separador />
               <CeldaNavegacion
                 titulo={t('despensa.reclamoEntrada')}
@@ -773,27 +940,21 @@ export default function DespensaDescubrir() {
         )}
       </ScrollView>
 
-      {/* LA BARRA DEL CARRITO — existe solo cuando hay algo adentro. */}
-      {unidades > 0 ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: spacing[5],
-            paddingTop: spacing[3],
-            paddingBottom: insets.bottom + spacing[3],
-            backgroundColor: theme.bg.base,
-          }}
-        >
-          <Boton
-            etiqueta={t('despensa.verCarrito', { n: unidades })}
-            bloque
-            onPress={() => router.push('/despensa/carrito')}
-          />
-        </View>
-      ) : null}
+      {/* ☠️ **S100b-D · MURIÓ LA BARRA FIJA «VER CARRITO (N)»** — es
+          exactamente el *«botón de texto»* que G-14 nombra, y con la canasta
+          permanente en el encabezado pasó a ser **una segunda puerta al mismo
+          cuarto** (Chanel: la casa dice una cosa una vez).
+
+          **Y su muerte paga tres cosas de una:** el pie fijo desaparece, con
+          él el aire muerto que dejaba contra la barra de tabs, y la vitrina
+          recupera ese alto — que es justo lo que G-04 necesita.
+
+          ⚠️ **Lo que se pierde y se declara:** la barra era también el ACUSE
+          de haber agregado algo («ya hay 3 acá abajo»). Ese trabajo pasa al
+          contador de la canasta, que **está siempre a la vista porque el
+          encabezado no colapsa al scrollear** (medido por B: 156.4 dp, no
+          colapsa). *Si en el gate el acuse no se siente, el arreglo es dar
+          señal al contador —no resucitar la barra.* */}
     </View>
   );
 }

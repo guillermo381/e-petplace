@@ -24,7 +24,6 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -40,7 +39,12 @@ import {
 } from '@epetplace/ui';
 import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
-import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import {
+  escaleraDePedido,
+  portadorDeEstado,
+  type PortadorDeEstado,
+  type VocesEscalera,
+} from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 
@@ -49,7 +53,6 @@ type Fase<T> = T | 'cargando' | 'error';
 export default function DespensaPedidos() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
-  const insets = useSafeAreaInsets();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
   const [reintento, setReintento] = useState(0);
@@ -86,54 +89,52 @@ export default function DespensaPedidos() {
       minute: '2-digit',
     });
 
-  /** El detalle de la fila: la PROMESA cuando existe (es lo accionable —
-   *  quedarse en casa o no), el retiro cuando es retiro. Sin promesa
-   *  guardada NO se inventa fecha (L-139).
+  /** La línea de apoyo de la fila. **La DECISIÓN no vive acá: vive en
+   *  `portadorDeEstado`** — esta función solo le pone voz a lo que aquélla
+   *  eligió (Ley 3: el riel habla, la lib decide).
    *
-   *  🔴 S100-D · EL ÚLTIMO BRAZO ES EL QUE EVITA UNA FILA MUDA. Desde que
-   *  `pagando` dejó de ser escalón, esa narrativa **no dibuja escalera**;
-   *  si además su detalle fuera `undefined`, la fila quedaría con fecha y
-   *  monto y NADA que diga en qué anda el pedido. La voz sale de
-   *  `narrativa_nombre`, que es el CATÁLOGO —dato, no un `switch` acá—, y
-   *  solo aparece **cuando la escalera no dibuja**: donde la escalera
-   *  habla, este texto no compite con ella (Chanel).
+   *  🔴 **S100b-D · POR QUÉ SE MUDÓ, y es el hallazgo del gate.** El founder
+   *  vio *«cuatro de seis pedidos no dicen en qué estado están»*. Acá vivían
+   *  cuatro `if` en un orden, y **el orden era el defecto**: el brazo que
+   *  cubría al pedido sin escalera estaba ÚLTIMO, detrás del de la promesa —
+   *  y la promesa **nace con el pedido, antes del pago** (censo: 4 de 4
+   *  `pagando` la tienen). ⇒ el pedido no solo quedaba mudo: **prometía una
+   *  entrega sin tener el pago confirmado.**
    *
-   *  🔴 S100-D · EL BRAZO DEL DESVÍO — la fila PROMETÍA UNA ENTREGA QUE YA
-   *  NO VA A PASAR. Con `no_llego` o `cancelado`, si el pedido tenía
-   *  promesa guardada esta función la devolvía igual, así que un pedido
-   *  que volvió seguía diciendo «llega entre 14:00 y 16:00».
-   *
-   *  La receta de B lo prohíbe con todas las letras —*prometer una entrega
-   *  que ya no va a pasar es peor que no prometer*— y **`EscaleraEstados`
-   *  YA lo cumple adentro** (`cuandoLlega !== undefined && desvio ===
-   *  undefined`). Lo que fallaba es que la ventana de ESTA fila no viaja
-   *  por ese slot: viaja como texto suelto en `detalle`, y el guard de la
-   *  pieza no lo alcanza.
-   *
-   *  ⇒ **El mismo criterio vivía en dos lugares y solo uno lo aplicaba.**
-   *  Es exactamente la clase que B me corrigió hoy en `TarjetaPedido`, y
-   *  aparece de nuevo a un archivo de distancia. *No se cura ensanchando
-   *  la pieza: se cura no mandándole una promesa que la letra ya prohibió.*
-   *
-   *  Con desvío el detalle queda VACÍO a propósito: la banda ya dice qué
-   *  pasó, y repetirlo en la línea de arriba sería decir dos veces lo
-   *  mismo (Chanel) — por eso tampoco cae a `narrativa_nombre`. */
-  function detalleDe(
-    p: PedidoEnLista,
-    escalera: { pasos: unknown[]; desvio?: unknown },
-  ): string | undefined {
-    // El desvío manda sobre todo lo demás, incluso sobre el retiro: un
-    // retiro cancelado tampoco se retira.
-    if (escalera.desvio !== undefined) return undefined;
-    if (p.metodo_entrega === 'retiro') return t('despensa.metodoRetiro');
-    if (p.promesa_desde !== null && p.promesa_hasta !== null) {
-      return t('despensa.promesaCorta', {
-        dia: diaHumano(p.promesa_desde),
-        desde: horaLocal(p.promesa_desde),
-        hasta: horaLocal(p.promesa_hasta),
-      });
+   *  Es la MISMA clase que S100 ya curó para el desvío —*prometer una entrega
+   *  que ya no va a pasar*— y que llegó por el otro lado: *prometer una que
+   *  todavía no está comprada.* Curar una y dejar viva la otra es lo que pasa
+   *  cuando la regla es un orden de `if` y no un objeto que se pueda medir.
+   *  **Por eso ahora se puede medir: `verify-s100b-d-el-estado-se-dice.ts`
+   *  corre la función real y su discriminador reproduce este orden viejo y
+   *  exige que falle.** */
+  function detalleDe(p: PedidoEnLista, portador: PortadorDeEstado): string | undefined {
+    const desde = p.promesa_desde;
+    const hasta = p.promesa_hasta;
+    switch (portador) {
+      case 'nada':
+        return undefined;
+      // 🔴 EL ESTADO YA NO VIAJA POR ACÁ — lo lleva la INSIGNIA de la
+      // tarjeta (ver abajo). Esta línea devuelve vacío para no decir dos
+      // veces lo mismo (Chanel).
+      case 'estado':
+        return undefined;
+      case 'retiro':
+        return t('despensa.metodoRetiro');
+      case 'promesa':
+        // Se re-pregunta por los nulos en vez de castear: la implicación
+        // «portador = promesa ⇒ las dos existen» vive en la lib y el
+        // compilador no la ve. Es un ESTRECHAMIENTO, jamás un segundo
+        // criterio — un `as string` acá compilaría y pintaría
+        // «Invalid Date» el día que la implicación deje de valer.
+        return desde === null || hasta === null
+          ? undefined
+          : t('despensa.promesaCorta', {
+              dia: diaHumano(desde),
+              desde: horaLocal(desde),
+              hasta: horaLocal(hasta),
+            });
     }
-    return escalera.pasos.length > 0 ? undefined : p.narrativa_nombre;
   }
 
   return (
@@ -148,7 +149,16 @@ export default function DespensaPedidos() {
       <ScrollView
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + spacing[8],
+          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+          // B midió que **el navegador ya acota**: el `ScrollView` de una
+          // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
+          // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
+          // lo cuenta DOS VECES. `spacing[8]` es el aire de cola; el inset
+          // era la cara «sobra» del malentendido de los 53 dp.
+          // *Yo lo había defendido como «aire de cola» y C tenía razón: era
+          // una línea vieja, no una posición.* Se unifica en las tres
+          // pantallas — dos reglas para lo mismo divergen.
+          paddingBottom: spacing[8],
           gap: spacing[4],
         }}
       >
@@ -196,11 +206,34 @@ export default function DespensaPedidos() {
             {pedidos.map((p) => {
               const escalera = escaleraDePedido(p.narrativa, voces);
               const { pasos, desvio } = escalera;
+              const portador = portadorDeEstado({
+                narrativa: p.narrativa,
+                metodoEntrega: p.metodo_entrega,
+                tienePromesa: p.promesa_desde !== null && p.promesa_hasta !== null,
+              });
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
                   titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p, escalera)}
+                  detalle={detalleDe(p, portador)}
+                  /* 🔴 LA INSIGNIA — el pedido sin recorrido gana FIGURA.
+                     Diagnóstico de B con aparato: esas tarjetas eran «título
+                     + fecha + precio y nada más» al lado de vecinas con una
+                     escalera de cuatro nodos, y **un `apoyo` gris no alcanza
+                     ahí — no por tipografía, por CONTRASTE DE FORMA**: la
+                     vecina tiene una figura y ésta no, así que se lee como
+                     «le falta algo» en vez de «está en otro estado».
+                     *Un pedido sin recorrido no tiene una escalera vacía:
+                     tiene un estado.*
+                     El invariante que B pide —«si hay `pasos`, no pases
+                     `estado`»— se cumple **por construcción**: `portador`
+                     vale `'estado'` exactamente cuando la escalera no
+                     dibuja, y eso lo vigila el guard. */
+                  estado={
+                    portador === 'estado'
+                      ? { etiqueta: p.narrativa_nombre, tono: 'info' }
+                      : undefined
+                  }
                   monto={`$ ${p.total.toFixed(2)}`}
                   pasos={conIconos(pasos)}
                   desvio={desvio}

@@ -86,6 +86,89 @@ export const GLIFO_NODO: Record<string, IconoNombre> = {
   entregado: 'nodoEntregado', // el visto — el único que COMPLETA algo
 };
 
+/**
+ * ¿LA ESCALERA NO DIBUJA NADA? Entonces el estado necesita OTRO portador.
+ *
+ * 🔴 **S100b-D · POR QUÉ ESTO ES UNA FUNCIÓN Y NO UN `if` EN CADA PANTALLA.**
+ * El gate del founder devolvió *«cuatro de seis pedidos no dicen en qué estado
+ * están»* (B, con aparato). **Medido contra la base, la causa no era la pieza:**
+ * `pagando` sale sin pasos y sin desvío —decisión de S100, y sigue siendo la
+ * correcta— pero la red de seguridad que yo escribí para ese caso
+ * (*caer a `narrativa_nombre`*) **era INALCANZABLE POR CONSTRUCCIÓN**: iba
+ * detrás del brazo de la promesa, y la promesa **nace con el pedido, antes del
+ * pago**. Censo: **4 de 4 pedidos `pagando` tienen promesa y ninguno tiene pago
+ * confirmado.** ⇒ la rama nunca corría, y el pedido no solo quedaba mudo:
+ * **prometía una entrega sin tener el pago.**
+ *
+ * *Un comentario que describe una rama que el DATO vuelve inalcanzable es peor
+ * que no tener la rama: dice que el caso está cubierto.*
+ *
+ * El predicado es **el mismo que `EscaleraEstados` usa adentro** para su regla
+ * de existencia (`pasos.length === 0 && desvio === undefined`). Se escribe acá
+ * UNA vez y lo consumen las dos superficies —la lista y el detalle—, porque la
+ * lección que esta pista ya pagó tres veces en un día es que **el mismo
+ * criterio en dos lugares diverge**, y la tercera vez fue adentro de mi propia
+ * función.
+ */
+export function escaleraMuda(e: { pasos: unknown[]; desvio?: unknown }): boolean {
+  return e.pasos.length === 0 && e.desvio === undefined;
+}
+
+/**
+ * QUÉ DICE LA LÍNEA DE APOYO DE LA FILA — la DECISIÓN, sin una sola voz.
+ *
+ * Vive acá y no adentro de la pantalla **para que el guard pueda medir la
+ * función real en vez de una réplica de ella**. *Un instrumento que
+ * re-declara la regla que vigila mide su propio eco* — y el defecto que esta
+ * función cura fue exactamente un orden de ramas, que es lo que ninguna
+ * prueba de tipos ve.
+ *
+ * El ORDEN es la regla, y cada brazo tiene su razón:
+ *  ① `nada` con desvío — la banda ya dice qué pasó; repetirlo sería decir dos
+ *     veces lo mismo (Chanel). Y manda incluso sobre el retiro: *un retiro
+ *     cancelado tampoco se retira.*
+ *  ② `estado` sin escalera — **esta línea es el ÚNICO portador**, así que gana
+ *     sobre todo lo que la siga. Iba último y el dato lo volvía inalcanzable.
+ *  ③ `retiro` — no hay ventana que prometer: la familia va a buscarlo.
+ *  ④ `promesa` — la ventana, que es lo accionable (quedarse en casa o no).
+ *  ⑤ `nada` — la escalera dibuja y habla sola.
+ */
+export type PortadorDeEstado = 'nada' | 'estado' | 'retiro' | 'promesa';
+
+export function portadorDeEstado(p: {
+  narrativa: NarrativaPedido;
+  /** `null` = el pedido no declara método. **No es retiro**: un dato ausente
+   *  no se lee como una elección (lo cazó `tsc` — la columna es nullable y
+   *  yo la había tipado `string`). */
+  metodoEntrega: string | null;
+  tienePromesa: boolean;
+}): PortadorDeEstado {
+  // Se recalcula acá adentro a propósito: si el portador se decidiera con una
+  // escalera que le pasan de afuera, dos llamadores podrían mandarle escaleras
+  // distintas para el mismo pedido. La narrativa es la ÚNICA entrada.
+  const escalera = escaleraDePedido(p.narrativa, VOCES_MUDAS);
+  if (escalera.desvio !== undefined) return 'nada';
+  if (escaleraMuda(escalera)) return 'estado';
+  if (p.metodoEntrega === 'retiro') return 'retiro';
+  if (p.tienePromesa) return 'promesa';
+  return 'nada';
+}
+
+/** La forma de la escalera no depende de las voces — solo de la narrativa —,
+ *  así que el portador la calcula con voces vacías. Se nombra en vez de pasar
+ *  un objeto literal para que quede dicho que **el vacío es deliberado y no un
+ *  descuido**: si alguna vez una voz cambiara la FORMA, esto rompería y hay
+ *  que enterarse. */
+const VOCES_MUDAS: VocesEscalera = {
+  confirmado: '',
+  preparando: '',
+  enCamino: '',
+  entregado: '',
+  noLlego: '',
+  noLlegoDetalle: '',
+  cancelado: '',
+};
+
 export function escaleraDePedido(
   narrativa: NarrativaPedido,
   voces: VocesEscalera,
