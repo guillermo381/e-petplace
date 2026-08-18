@@ -1888,6 +1888,14 @@ const FIXTURES = {
      ofensor real y TRES que NO deben pintarse rojo — la pantalla que ya
      monta la pieza, la que usa `absolute` para otra cosa (un badge, lejos
      de cualquier `bottom: 0`), y una del baseline congelado. */
+  /* R54 · discrimina: el fragmento y el View con box-none NO deben salir
+     rojos; el View desnudo sí. */
+  R54: [
+    { path: 'apps/cliente/src/app/ok-fragmento.tsx', src: "<PantallaConPie pie={<><Boton /><Boton /></>}>{x}</PantallaConPie>" },
+    { path: 'apps/cliente/src/app/ok-boxnone.tsx', src: '<PantallaConPie pie={<View pointerEvents="box-none" style={{ gap: 8 }}><Boton /></View>}>{x}</PantallaConPie>' },
+    { path: 'apps/cliente/src/app/malo.tsx', src: "<PantallaConPie pie={<View style={{ gap: 8 }}><Boton /></View>}>{x}</PantallaConPie>" },
+    { path: 'apps/prestador/src/app/otra-pieza.tsx', src: "<FichaPrestador pie={<View style={{ gap: 8 }}><Boton /></View>} />" },
+  ],
   R53: [
     { path: 'apps/cliente/src/app/(tabs)/despensa/nueva.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
     { path: 'apps/cliente/src/app/(tabs)/despensa/ok.tsx', src: "<PantallaConPie pie={<Boton />}>{contenido}</PantallaConPie>" },
@@ -3651,6 +3659,58 @@ function r45(archivos) {
    no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
    pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
    honestamente — se cura por construcción, que es de lo que trata la pieza. */
+/* 🔴 R54 · EL PIE NO SE ENVUELVE EN UN VIEW QUE CAPTURE (S100b-B).
+
+   LA TRAMPA: `PantallaConPie` lleva `pointerEvents="box-none"` para que el
+   gesto de scroll pase entre los botones — **pero eso cubre UNA capa.** Un
+   `View` intermedio del consumidor vuelve a capturar el toque en todo su
+   rectángulo y **reabre la zona muerta de gesto**, que es el defecto rojo
+   que la pieza vino a cerrar: con el pie capturando, el tercio inferior de
+   la pantalla no scrollea — *y ahí es donde una familia apoya el pulgar.*
+
+   ⚠️ SU LÍMITE: caza `pie={<View` sin `box-none` en la misma expresión.
+   **No ve un componente propio que adentro tenga un View** — eso no se
+   mecaniza honestamente y se enseña. *Su verde dice «no envolviste el pie
+   en un View desnudo», jamás «el gesto pasa».* */
+const BASELINE_R54 = 0
+
+function r54(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    /* 🔴 ACOTADA A `PantallaConPie` — y la acoté porque SOBRE-DISPARÓ en su
+       primera corrida. Cazó `como-te-ven.tsx`, que monta `FichaPrestador`
+       —otra pieza que también expone una prop `pie`, y cuyo pie NO es un
+       overlay fijo, así que `box-none` ahí no significa nada.
+       *Una regla que grita sobre un caso legítimo enseña a ignorarla*
+       (L-236). Lo delató que su baseline dijera 0 y ella dijera 1: dos
+       números que no coincidían, y esta vez sí los crucé. */
+    if (!/\bPantallaConPie\b/.test(limpio)) continue
+    for (const m of limpio.matchAll(/pie=\{\s*<View([\s\S]{0,220}?)>/g)) {
+      if (!/pointerEvents=\{?["']box-none["']\}?/.test(m[1])) ofensores.push(path)
+    }
+  }
+  if (ofensores.length > BASELINE_R54)
+    fallos.push(
+      `R54: ${ofensores.length} pie(s) envuelto(s) en un \`View\` sin \`pointerEvents="box-none"\` (baseline ${BASELINE_R54}, DURA EN 0).\n   ${[...new Set(ofensores)].join('\n   ')}\n   Un View intermedio captura el toque en todo su rectángulo y reabre la ZONA MUERTA DE GESTO: el tercio inferior deja de scrollear. Pasá el pie como fragmento (\`pie={<><Boton/><Boton/></>}\`), o ponele \`pointerEvents="box-none"\` a ese View.`,
+    )
+  /* ANCLA POR SUJETO (L-291): lo que esta regla necesita no es que alguien
+     la viole, sino que la pieza siga declarando su `box-none`. Si eso
+     desaparece, la regla vigila una trampa que ya no existe — o peor,
+     deja de vigilar la que sí. */
+  const fuente = readFileSync('packages/ui/src/components/PantallaConPie.tsx', 'utf8')
+  const vivo = /pointerEvents="box-none"/.test(fuente) ? 1 : 0
+  fallos.push(...ancla('R54', vivo, 1, '`box-none` declarado en PantallaConPie (0 = la pieza dejó de dejar pasar el gesto y esta regla perdió su sujeto)'))
+  return {
+    fallos,
+    info: `${ofensores.length} pie(s) envuelto(s) sin box-none · DURA EN 0 · acotada a PantallaConPie (sobre-disparaba contra la prop pie de FichaPrestador) · su verde dice «no hay View desnudo», jamás «el gesto pasa»`,
+  }
+}
+
 const BASELINE_R53 = [
   'apps/cliente/src/app/(tabs)/despensa/carrito.tsx',
   'apps/cliente/src/app/(tabs)/despensa/checkout.tsx',
@@ -3732,7 +3792,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4010,6 +4070,7 @@ corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...app
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
 corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...appsCodigo])]);
+corridas.push(['R54 (el pie no se envuelve en un View que capture)', r54([...apps, ...appsCodigo])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
