@@ -50,6 +50,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
+  Icono,
   Insignia,
   SelectorOpcion,
   Tarjeta,
@@ -418,6 +419,17 @@ export default function DespensaPedido() {
                 hora se lee como que algo se colgó. */}
             {detalle.pedido.narrativa === 'en_camino' ? (
               <CeldaNavegacion
+                /* 🔴 S100d · PUNTO 23 — *«falta en la ESCALERA y en SEGUIR EL
+                   PEDIDO el glifo de ubicación»*. Ésta es literalmente la
+                   celda «Seguir el pedido», y estaba **sin glifo**: la única
+                   celda de esta pantalla que entraba muda mientras todas las
+                   de Cuenta llevan el suyo. La gota es el glifo correcto por
+                   la dosis que B fijó con F-PIN — **gota donde una ubicación
+                   se muestra como DATO; objeto del mundo adentro del mapa**
+                   (`DIRECCION_ARTE` §6ter). *Y acá el glifo hace trabajo, no
+                   decoración: la diferencia entre «ver el pedido» y «ver
+                   dónde está» es justo lo que esta celda ofrece.* */
+                icono="ubicacion"
                 titulo={t('despensa.enCaminoEntrada')}
                 detalle={t('despensa.enCaminoEntradaDetalle')}
                 onPress={() =>
@@ -522,7 +534,17 @@ export default function DespensaPedido() {
               <View style={{ paddingHorizontal: spacing[4] }}>
               <Tarjeta relleno="amplio">
               <View style={{ gap: spacing[1] }}>
-                <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
+                {/* 🔴 S100d · PUNTO 23 — la otra mitad. El rótulo que nombra
+                    una DIRECCIÓN entraba sin glifo, y es exactamente el mismo
+                    pedido que el founder hizo en el checkout (punto 17). *Un
+                    rótulo de ubicación sin su marca obliga a leer la carta
+                    entera para saber de qué habla; con la gota se reconoce
+                    antes de leerla.* Va del lado del rótulo y NO del texto de
+                    la dirección: marca el GRUPO, que es lo que N21 pide. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                  <Icono nombre="ubicacion" tamano={18} />
+                  <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
+                </View>
                 <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
                 {detalle.entrega.referencias !== null ? (
                   <Texto variante="apoyo">{detalle.entrega.referencias}</Texto>

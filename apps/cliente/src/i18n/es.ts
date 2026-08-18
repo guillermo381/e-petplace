@@ -1761,10 +1761,16 @@ export const clienteEs = {
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
     enCaminoVentana: 'Llega entre',
     enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
+    enCaminoRecentrar: 'Volver al recorrido',
     enCaminoQuienTrae: 'Quién lo trae',
     // S100c-D · la hoja arrastrable. La voz del asa dice QUÉ hace, no cómo
     // se hace (nadie necesita que le expliquen que se arrastra: se agarra).
     enCaminoHojaVerMas: 'Ver los detalles del pedido',
+    // 🔴 S100d · punto 24③ — la voz del asa DEJA DE SER SOLO PARA EL LECTOR DE
+    // PANTALLA y se dibuja. Al hacerse visible necesita su otra mitad: una
+    // señal que dice «ver más» cuando ya está abierta miente. *La flecha y la
+    // voz cambian juntas o no cambia ninguna.*
+    enCaminoHojaVerMenos: 'Ocultar los detalles',
     // 🔴 El hueco de la foto se NOMBRA para el lector de pantalla en vez de
     // quedar mudo: un círculo vacío sin voz es un elemento que no existe
     // para quien no ve, y acá el hueco es información (la ficha está
