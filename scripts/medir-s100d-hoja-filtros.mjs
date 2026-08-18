@@ -55,7 +55,12 @@ await page.goto(`${BASE}/despensa`, { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(9000);
 
 console.log('\n═══ ④ · LA HOJA DE FILTROS — ¿el desborde se ALCANZA? ═══');
-const btn = page.locator('[role="button"]').filter({ hasText: /Filtrar/i }).first();
+/* 🔴 SE BUSCA POR NOMBRE ACCESIBLE, NO POR TEXTO — y el cambio lo
+   obligó la propia cura: con el glifo de embudo el control **dejó de
+   tener texto**, y el selector viejo (`hasText`) devolvió cero y
+   reportó «no se encontró el control». *Un selector que se queda viejo
+   no avisa: dice que la cosa no está.* */
+const btn = page.getByRole('button', { name: /Filtrar/i }).first();
 if ((await btn.count()) === 0) {
   console.log('  ⚠ no se encontró el control «Filtrar».');
   await browser.close();
@@ -124,7 +129,40 @@ for (const t of tiras) {
   );
 }
 
-/** 🔴 LA MITAD QUE SÍ ES MÍA: ¿el rótulo de cada eje DICE cuántas opciones
+console.log(`  tiras horizontales que desbordan: ${tiras.length}`);
+
+/**
+ * 🔴 CON `envuelve` LAS TIRAS DESAPARECEN, ASÍ QUE LA PREGUNTA CAMBIA — y
+ * **hay que cambiar la vara o el cero miente**. Sin scroller horizontal el
+ * bloque de arriba imprime «0 tiras» y eso se lee igual que «no hay
+ * chips»: la medición que prueba la cura es **¿SE VEN TODOS?**, o sea si
+ * algún chip cae fuera del ancho de su contenedor.
+ *
+ * *Es el mismo modo de falla que ya cobré una vez hoy: cuando la cura
+ * cambia la forma, la métrica vieja deja de medir el defecto y su número
+ * bueno no prueba nada.*
+ */
+const alcanzables = await page.evaluate(() => {
+  const chips = [...document.querySelectorAll('[role="radio"]')];
+  if (chips.length === 0) return null;
+  let cortados = 0;
+  for (const c of chips) {
+    const r = c.getBoundingClientRect();
+    const p = c.parentElement;
+    if (p === null) continue;
+    const pr = p.getBoundingClientRect();
+    // Fuera del ancho de su contenedor por más de 1 dp de redondeo.
+    if (r.right > pr.right + 1 || r.left < pr.left - 1) cortados++;
+  }
+  return { total: chips.length, cortados };
+});
+console.log(
+  alcanzables === null
+    ? '  ⚠ no se encontraron chips en la hoja.'
+    : `  🔴 ④ (mitad de ALCANCE) chips en la hoja: ${alcanzables.total} · fuera del ancho de su contenedor: ${alcanzables.cortados} ${alcanzables.cortados === 0 ? '✓ se ven todos' : '✗'}`,
+);
+
+/** 🔴 LA MITAD DE SEÑAL: ¿el rótulo de cada eje DICE cuántas opciones
  *  tiene? Un truncado declarado no acerca un chip, pero deja de mentir. */
 const rotulos = await page.evaluate(() =>
   [...document.querySelectorAll('*')]

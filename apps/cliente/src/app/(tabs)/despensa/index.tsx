@@ -45,11 +45,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
+  CarritoFlotante,
   CeldaNavegacion,
   Encabezado,
   Entrada,
@@ -58,6 +59,7 @@ import {
   EstadoVacio,
   GlifoConContador,
   Icono,
+  PantallaConPie,
   nombreCurado,
   Separador,
   TarjetaProducto,
@@ -123,21 +125,29 @@ const FILTROS_VITRINA = { limite: 50 } as const;
  * y se encogería solo **en cada apertura de la app**. *Un control que salta
  * al llegar los datos se lee como un error, no como carga.*
  *
- * `spacing[24]` = 96 dp, contra los **73 dp** que el control mide vacío
- * (medido 18-ago, 384×832): el escalón de la escala que lo cubre con
- * margen para su segunda voz, *«Filtrar · 2»*.
+ * `spacing[12]` = **48 dp**, contra el glifo de **24×24** medido en
+ * pantalla (18-ago, 384×832): el escalón de la escala que cubre el target
+ * de 44 del tocable con dos de margen.
+ *
+ * ⏪ **ARRANCÓ EN 96 Y BAJÓ A LA MITAD, y el porqué es una lección chica:**
+ * el primer número se calculó contra el control **en TEXTO** —*«Filtrar»*
+ * medía 73 dp y *«Filtrar · 2»* algo más—. Cuando B sirvió el glifo de
+ * embudo el control pasó a 24×24 y **la reserva quedó cobrando 96 dp para
+ * un ícono**, o sea 48 dp de ancho que le sacaba al buscador sin que nadie
+ * los usara. *Una reserva se re-mide cuando cambia lo que reserva; si no,
+ * es un número correcto para un mundo que ya no existe.*
  *
  * ⚠️ **Es `minWidth` y no `width`, y la diferencia es de honestidad:** si
- * el conteo hiciera crecer la etiqueta más allá de 96, el control **crece
- * en vez de recortarse**. Ese sí es un cambio de ancho que la persona
- * provocó tocando un filtro — N24 protege del salto que ocurre *sin que
- * nadie haga nada*, no de la consecuencia visible de un acto propio.
+ * el disco del contador ensanchara el glifo, el control **crece en vez de
+ * recortarse**. Ese sí es un cambio de ancho que la persona provocó
+ * tocando un filtro — N24 protege del salto que ocurre *sin que nadie haga
+ * nada*, no de la consecuencia visible de un acto propio.
  *
- * ⏪ **Nació como `= 100` y R36 lo rebotó con razón**: *el ritmo sale de
- * `spacing`, jamás de un número por pantalla.* Se corrigió subiendo al
- * escalón, no apagando la regla ni bajando su baseline.
+ * ⏪ **Y nació como `= 100` pelado: R36 lo rebotó con razón** — *el ritmo
+ * sale de `spacing`, jamás de un número por pantalla.* Se corrigió subiendo
+ * al escalón, no apagando la regla ni bajando su baseline.
  */
-const LUGAR_CONTROL_FILTRO = spacing[24];
+const LUGAR_CONTROL_FILTRO = spacing[12];
 
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
@@ -713,52 +723,74 @@ export default function DespensaDescubrir() {
           de renderizar el texto: *borde rojo sin una palabra*). **No se
           apaga el lint ni se monta un `PieDeCampo` decorativo** — gamear
           el instrumento es peor que el defecto. */}
+      {/* ═══════════════════════════════════════════════════════════════
+          ☠️ S100d-C · puntos ⑧ ⑨ ⑫ · **LA CANASTA DEL TECHO MUERE EN EL
+          MISMO COMMIT EN QUE ENTRA EL FLOTANTE.** Ver el pie de la
+          pantalla, abajo — el porqué vive ahí, junto a la pieza que la
+          reemplaza, para que nadie lea una mitad sin la otra.
+          ═══════════════════════════════════════════════════════════════ */}
       <Encabezado
         variante="portada"
         saludo={t('despensa.titulo')}
         isotipo="gradiente"
-        accionDer={
-          <Pressable
-            onPress={() => router.push('/despensa/carrito')}
-            accessibilityRole="button"
-            accessibilityLabel={
-              unidades === 0
-                ? t('despensa.irAlCarrito')
-                : t('despensa.irAlCarritoCon', { n: unidades })
-            }
-            hitSlop={spacing[3]}
-          >
-            {/* ✅ EL DISCO LLEGÓ. Antes esto era «canasta + número al lado»
-                porque `Texto` no tiene color inverso y el par
-                texto-sobre-acento vivía encerrado en `Boton` — *pintar el
-                número con un color crudo habría sido inventar contraste sin
-                medirlo, en la pieza más pública de la tienda.* Se pidió la
-                pieza en vez de inventarla y B la construyó reusando el par
-                del timbre `+` de `TarjetaProducto`, que **ya está en el
-                gate**: WCAG 368/0, cero pares nuevos.
-                Con `0` no dibuja disco (19.9) y a partir de 100 dice «99+»:
-                la salida es decir «muchos», jamás encoger la letra. */}
-            {/* ⏪ **ACÁ VIVÍA UNA REDUNDANCIA DECLARADA, Y LA PIEZA LA
-                CURÓ.** La primera versión fijaba `accessible` +
-                `role="image"` adentro, así que anidada en un tocable quedaban
-                **dos nodos accesibles**. Yo dejé la voz en el `Pressable`
-                —*el que tiene que estar nombrado es el que se toca: un botón
-                sin nombre no se activa a ciegas*— y **declaré la duplicación
-                en vez de esconderla**.
-                B la cerró con una **unión discriminada**, no con un flag
-                suelto: con un boolean opcional seguían siendo expresables
-                **los dos** estados malos —*suelta y sin nombre* (muda para el
-                lector) y *anidada con nombre* (la voz duplicada)—. **Con la
-                unión ninguno de los dos compila.**
-                ⇒ acá va `dentroDeTocable` y **sin `etiqueta`**: la pieza se
-                borra del árbol y el único nodo nombrado es el `Pressable`. */}
-            <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
-          </Pressable>
-        }
+        /* ☠️ ACÁ VIVÍA `accionDer` CON LA CANASTA. Su historia completa —el
+           disco que B construyó, la unión `dentroDeTocable` que mató la voz
+           duplicada del lector— vive en el git; **lo que importa hoy es por
+           qué el slot queda vacío**, y eso está al pie de esta pantalla.
+           *Nada de eso se perdió: `GlifoConContador` sigue vivo y lo monta
+           el control de filtro, dos renglones más abajo.* */
       />
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
+      {/* ═══════════════════════════════════════════════════════════════
+          🔴 S100d-C · puntos ⑧ ⑨ ⑫ · **EL CARRITO FLOTANTE ENTRA Y LA
+          CANASTA DEL TECHO SALE — EN EL MISMO COMMIT, POR PEDIDO DE B Y
+          POR N25.**
+          ═══════════════════════════════════════════════════════════════
+
+          **Los tres literales del founder:**
+          · ⑧ *«no puso un carrito flotante abajo a la derecha en todas las
+            pantallas; quedó arriba, muy pequeño y con una huella ocre
+            encima. Hay que hacerlo mucho mejor»*.
+          · ⑨ *«carrito flotante: no está»*.
+          · ⑫ *«al agregar se abre un CTA de ver carrito, y debería abrir el
+            carrito flotante»*.
+
+          🔴 **POR QUÉ MONTAR Y RETIRAR VAN JUNTOS, y no es coordinación de
+          cortesía:** montar el flotante dejando la canasta arriba da **DOS
+          puertas al mismo cuarto** (N25 existe para matar eso); retirar la
+          canasta sin montar el flotante deja **CERO** — *y ése es el
+          intervalo en el que la tienda no se puede pagar.* B lo pidió con
+          esas palabras y tiene razón.
+
+          ⏪ **LO QUE ESTO DEROGA, con su razón vieja a la vista:** S100b-D
+          hizo la canasta del techo **permanente, con o sin unidades**,
+          porque *«un carrito vacío no tenía puerta»*. Era correcto con la
+          barra que había. **Hoy el flotante no se dibuja con `cuenta === 0`
+          y eso es la firma de ⑫**: *la puerta al carrito no es una pantalla
+          que se abre, es una puerta que APARECE cuando hay algo del otro
+          lado.* Un carrito vacío no tiene nada que mostrar, así que la
+          puerta que faltaba no falta.
+
+          🔴 **Y POR ESO EL `ScrollView` SE VA A `PantallaConPie`, que es una
+          migración de MOTOR y no de forma.** La pieza **mide su pie y con
+          esa misma medida reserva el scroll** ⇒ el disco **no puede tapar
+          la última tarjeta**. Con un flotante `position:'absolute'` a mano
+          se habría comido en silencio los 42 dp de margen que L-301 dejó
+          declarados, y R53 muerde por eso mismo.
+
+          ⚠️ **La pieza va SUELTA, sin envolverla en un `View` propio**: el
+          `pointerEvents="box-none"` de `PantallaConPie` cubre UNA capa, y
+          un envoltorio reabre la zona muerta de gesto en el tercio
+          inferior — justo donde el pulgar sostiene el teléfono (R54). */}
+      <PantallaConPie
+        pie={
+          <CarritoFlotante
+            cuenta={unidades}
+            onAbrir={() => router.push('/despensa/carrito')}
+            etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+          />
+        }
+        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
         contentContainerStyle={{
           /* 🔴 S100d-C · punto ③ · 8 → 0. **EL AIRE ESTABA PAGADO TRES
              VECES, y mi predecesora solo pudo ver dos.**
@@ -871,16 +903,27 @@ export default function DespensaDescubrir() {
                 CRITERIO*); el buscador y el filtro son alcance y viven
                 pegados a la mercadería que acotan.
 
-                ⏳ **EL ÍCONO DE FILTRO ESTÁ PEDIDO Y NO ESTÁ.** Medido: el
-                union de `IconoNombre` **no tiene ningún candidato** — ni
-                «filtro», ni embudo, ni barras. Se le pidió a B con su
-                forma (familia de CONTROL sin huella, como `lapiz`) y **se
-                monta en cuanto exista**, con `GlifoConContador` llevando
-                cuántos filtros hay activos —la misma pieza y el mismo par
-                ya gateado del carrito—. **Hasta entonces el control dice su
-                nombre en texto y lo declaro abierto: la mitad de
-                composición de ② está cerrada, la mitad de ícono no.**
-                *No se dibuja un glifo en una pantalla* (Ley 12 · L-175). */}
+                ✅ **EL ÍCONO CLÁSICO DE FILTRO LLEGÓ Y ESTÁ MONTADO.**
+                Medido al abrir la vuelta: el union de `IconoNombre` **no
+                tenía ningún candidato** — ni embudo, ni barras. Se le pidió
+                a B con su forma (familia de CONTROL, sin huella, como
+                `lapiz`) **en vez de dibujarlo acá** (Ley 12 · L-175), y B
+                lo construyó como **embudo** con su argumento: *el clásico
+                de FILTRAR es el embudo; el de las perillas dice «cambiá
+                valores» donde la pantalla dice «mostrame menos»*.
+                ⚠️ **Su gate por ícono a 21 px sigue PENDIENTE (§2.9)** y B
+                lo declaró: en su entorno no hay rasterizador de SVG, así
+                que **nadie lo vio chico todavía**. Se monta igual porque
+                el gate es del founder en dispositivo, no de la pista.
+
+                🔴 **EL CONTEO PASA DE PALABRA A DISCO.** Antes el control
+                decía *«Filtrar · 2»*; ahora lo lleva `GlifoConContador`,
+                **la misma pieza y el mismo par ya gateado (368/0) del
+                carrito** — cero contraste nuevo. Con `0` no dibuja disco
+                (19.9: un cero sobre un glifo es ruido con forma de dato).
+                Y va `dentroDeTocable` **sin `etiqueta`**: el único nodo
+                nombrado tiene que ser el `Pressable`, o el lector anuncia
+                el control dos veces. */}
             <View
               style={{
                 flexDirection: 'row',
@@ -908,18 +951,20 @@ export default function DespensaDescubrir() {
                   así que sin reserva el buscador nacería ancho y se
                   encogería solo. *Un control que salta al llegar los datos
                   se lee como un error de la app, no como carga.* */}
-              <View style={{ minWidth: LUGAR_CONTROL_FILTRO, alignItems: 'flex-end' }}>
+              <View style={{ minWidth: LUGAR_CONTROL_FILTRO, alignItems: 'center', justifyContent: 'center', minHeight: 44 }}>
                 {listaParaFiltrar.length > 0 ? (
-                  <Boton
-                    variante="secundario"
-                    tamaño="sm"
-                    etiqueta={
+                  <Pressable
+                    onPress={() => setFiltrosAbiertos(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
                       filtrosActivos === 0
                         ? t('despensa.filtrar')
                         : t('despensa.filtrarCon', { n: filtrosActivos })
                     }
-                    onPress={() => setFiltrosAbiertos(true)}
-                  />
+                    hitSlop={spacing[3]}
+                  >
+                    <GlifoConContador nombre="filtro" cuenta={filtrosActivos} dentroDeTocable />
+                  </Pressable>
                 ) : null}
               </View>
             </View>
@@ -1175,7 +1220,7 @@ export default function DespensaDescubrir() {
             </View>
           </>
         )}
-      </ScrollView>
+      </PantallaConPie>
 
       {/* ☠️ **S100b-D · MURIÓ LA BARRA FIJA «VER CARRITO (N)»** — es
           exactamente el *«botón de texto»* que G-14 nombra, y con la canasta

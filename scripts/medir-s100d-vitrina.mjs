@@ -252,7 +252,8 @@ console.log(`  🔴 CROMO — el primer producto empieza en y ${yGrilla ?? '?'} 
 
 // ══ ④ · LA HOJA DE FILTROS ═════════════════════════════════════════════
 console.log('\n── ④ · LA HOJA DE FILTROS · ¿los chips se pueden alcanzar? ──');
-const btnFiltrar = page.locator('[data-medicion-scroller] [role="button"]').filter({ hasText: /Filtrar/i }).first();
+/* Por NOMBRE ACCESIBLE: con el glifo de embudo el control no tiene texto. */
+const btnFiltrar = page.getByRole('button', { name: /Filtrar/i }).first();
 if ((await btnFiltrar.count()) === 0) {
   console.log('  ⚠ no se encontró el control «Filtrar» — ④ no se reporta.');
 } else {

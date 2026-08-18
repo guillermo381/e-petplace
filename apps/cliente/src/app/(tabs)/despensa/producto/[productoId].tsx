@@ -57,12 +57,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   AvisoAlergia,
   Boton,
-  /* ☠️ Ley 37 · S100d-C — acá vivía `Celda`, **sin un solo consumidor**: la
-     tabla de presentaciones que la montaba murió en S96 y el import se
-     quedó. No lo caza el typecheck (un import sin usar compila) y no lo
-     caza `verify:diseno`. Apareció al contar montajes por pieza mientras
-     retiraba `PieRevelar`. *Un import muerto es la puerta por la que
-     alguien vuelve a montar la tabla que se decidió no tener.* */
+  CarritoFlotante,
+  /* ☠️ Ley 37 · S100d-C — entre `Boton` y `Chevron` vivía `Celda`, **sin un
+     solo consumidor**: la tabla de presentaciones que la montaba murió en
+     S96 y el import se quedó. No lo caza el typecheck (un import sin usar
+     compila) y no lo caza `verify:diseno`; apareció al contar montajes por
+     pieza mientras retiraba `PieRevelar`. *Un import muerto es la puerta
+     por la que alguien vuelve a montar la tabla que se decidió no tener.* */
   Chevron,
   Encabezado,
   Esqueleto,
@@ -615,6 +616,34 @@ export default function DespensaProducto() {
         pie={
           conCta ? (
             <>
+              {/* 🔴 S100d-C · punto ⑫ · **EL FLOTANTE REEMPLAZA AL CTA DE
+                  «VER CARRITO», Y ESO ES LITERALMENTE LO QUE EL FOUNDER
+                  PIDIÓ.** Su literal: *«al agregar se abre un CTA de ver
+                  carrito, y debería abrir el carrito flotante»*. **El CTA
+                  que él vio es el que vivía acá abajo**, y muere: no se
+                  esconde, lo reemplaza una pieza que hace su trabajo mejor
+                  y en el lugar donde llega el pulgar.
+
+                  ⚖️ **POR QUÉ TAMBIÉN EN LA FICHA, y no solo en la vitrina.**
+                  N25 dice que el flotante es *«de la VITRINA (no del
+                  carrito/checkout/resumen)»* y **la ficha no es ninguno de
+                  esos**: es donde se agrega. Y el punto ⑫ **es de esta
+                  pantalla** — el CTA que el founder describe no existe en la
+                  vitrina. *Montarlo solo en la vitrina habría cumplido la
+                  letra de N25 y dejado el punto ⑫ sin curar, con la ficha
+                  sin una sola puerta al carrito después de agregar.*
+
+                  ⚠️ **VA ARRIBA DEL CTA, y el orden importa:** `PantallaConPie`
+                  apila su pie, así que el disco queda **sobre** el botón de
+                  agregar, alineado a la derecha por la propia pieza
+                  (`alignSelf`). *Se declara la composición porque es MÍA y no
+                  de la pieza: si el founder la quiere en otro lado, se mueve
+                  sin tocar `packages/ui`.* */}
+              <CarritoFlotante
+                cuenta={unidades}
+                onAbrir={() => router.push('/despensa/carrito')}
+                etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+              />
               {faltaParaAgregar !== null ? (
                 <Texto variante="apoyo">{faltaParaAgregar}</Texto>
               ) : null}
@@ -630,24 +659,13 @@ export default function DespensaProducto() {
                 deshabilitado={faltaParaAgregar !== null}
                 onPress={() => void agregar()}
               />
-              {/* ⚖️ «Ver carrito» BAJA DE BOTÓN A LABEL, y la razón está
-                  medida en la referencia, no argumentada: **la ficha de
-                  Laika tiene UN solo botón en el pie** y el carrito vive
-                  como ícono con contador en el encabezado. Dos botones
-                  bloque apilados son **128 dp de control permanente sobre
-                  un visor de 665** — el 19 % de la pantalla, que es
-                  exactamente «el control pesa más que el producto».
-                  Y la casa ya tiene la ley: lo que NAVEGA no viste de
-                  botón. **No se elimina** —sería un callejón hasta que
-                  aterrice el ícono de carrito de G-14—: se despriorizA. */}
-              {unidades > 0 ? (
-                <Boton
-                  variante="ghost"
-                  bloque
-                  etiqueta={t('despensa.verCarrito', { n: unidades })}
-                  onPress={() => router.push('/despensa/carrito')}
-                />
-              ) : null}
+              {/* ☠️ S100d-C · punto ⑫ — **ACÁ VIVÍA EL «Ver carrito (N)» EN
+                  GHOST, Y MUERE.** Su nota decía que no se eliminaba
+                  *«sería un callejón hasta que aterrice el ícono de carrito
+                  de G-14»* — el ícono aterrizó, y ahora lo reemplaza el
+                  flotante de arriba, que además está donde llega el pulgar.
+                  *La condición que lo mantenía vivo era explícita y se
+                  cumplió: por eso se puede cobrar sin discutirla.* */}
             </>
           ) : undefined
         }

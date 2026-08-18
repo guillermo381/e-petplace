@@ -247,7 +247,20 @@ export function HojaFiltrosDespensa({
         <Texto variante="seccion">
           {t('despensa.filtroEjeCon', { titulo, n: opciones.length })}
         </Texto>
-        <FiltroPills opciones={opciones} activo={activo} onCambio={set} onLimpiar={() => set(null)} />
+        {/* ✅ `envuelve` — la otra mitad del punto ④, servida por B con la
+            medición de arriba adentro. **Mismos chips, misma pata, mismo
+            aire**: lo único que cambia es dónde caen. Con esto el eje
+            «Marca» pasa de mostrar 4 de 13 a mostrarlos todos, y **la
+            segunda mitad no medida —el pan de la `Hoja` compitiendo con el
+            arrastre horizontal— deja de poder ocurrir: sin gesto
+            horizontal no hay con qué competir.** */}
+        <FiltroPills
+          opciones={opciones}
+          activo={activo}
+          onCambio={set}
+          onLimpiar={() => set(null)}
+          disposicion="envuelve"
+        />
       </View>
     );
   }
