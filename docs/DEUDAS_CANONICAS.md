@@ -11711,7 +11711,35 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
-### Lecciones S100c (L-296 → L-301) — depositadas por B el 18-ago-2026, con aparato
+### Lecciones S100c (L-296 → L-304) — depositadas por B el 18-ago-2026, con aparato
+
+> ⚠️ **NOTA DE NUMERACIÓN, y es un error de la mesa:** circuló que *«el canon llega a L-295 y L-296…L-301 no existen en ninguna rama pusheada»*. **Es falso, medido contra el objeto:** `origin/main` tiene los siete encabezados **L-295 → L-301**, y **L-301 entró en el commit `160d51de`**. El grep que lo negó corrió contra un fetch viejo. **Los números de abajo se tomaron midiendo `origin/main` en el momento de escribir, no de ese aviso** — que es exactamente la ley que el aviso pedía aplicar. ***Un número citado en un chat no es un número reservado; y tampoco lo es un número NEGADO en un chat.***
+
+- **L-304 — UN NÚMERO IMPOSIBLE ES EL INSTRUMENTO PIDIENDO QUE LO MIREN (S100c — error propio, cazado tarde; depositada 18-ago-2026).**
+
+  El primer barrido del perfil de la barra de tabs devolvió **«profundidad 0,0 dp»** sobre una barra que **visiblemente tiene curva**. Se siguió adelante, y recién al abrir la captura apareció la causa: **el umbral de blanco estaba atrapando el fondo claro de la pantalla, no la barra.**
+
+  ⇒ *El instrumento no falló en silencio — dijo un imposible, y el imposible es su forma de pedir auditoría.* **Un cero, un empate exacto o un valor que la vista contradice se auditan ANTES de usarse.**
+
+  **Hermana de L-287** (*lo que delata a un instrumento es un número que no coincide con otro*), con el matiz que la hace propia: **acá el otro número era la propia pantalla.** Y su contracara, que D nombró el mismo día: el `initApi` de su predecesora **producía una pantalla vacía perfectamente plausible**. ***El absurdo se caza; lo plausible no.***
+
+- **L-303 — ANTES DE DERIVAR UNA RESTRICCIÓN, SE CENSA SI LA OTRA APP YA LA VIVE (S100c — cuarta ocurrencia medida en dos vueltas; depositada 18-ago-2026).**
+
+  **Cuatro veces en dos sesiones una capacidad ya existía del otro lado y nadie fue a buscarla:** `ControlTelefono` (D-498: *la casa tiene UNA*) · **Google Places** · **la barra de cinco tabs** · y **la medición que la resolvía**.
+
+  **El monorepo tiene dos apps que comparten `packages/ui`**, así que casi toda capacidad de forma **existe dos veces o está a un import de distancia.** ⇒ **el censo de la app hermana es un paso del relevamiento, no una cortesía.** *Es más barato mirar la otra barra que derivar por qué la propia no puede.*
+
+- **L-302 — CUANDO DOS MEDICIONES CORRECTAS DISCREPAN, LA SALIDA NO ES UNA TERCERA CUENTA: ES BUSCAR UN OBJETO QUE YA RESUELVA EL CASO (S100c — error de B corregido por el dato del founder; depositada 18-ago-2026).**
+
+  D midió la geometría del valle de la barra y **declaró que no podía afirmar** si el hombro mordía el ícono vecino. B midió la caja del ícono (**24,2 dp**) y creyó cerrar el hueco: derivó que con cinco tabs el hombro **muerde en 360 dp** y **libra por 1,3 dp** en el teléfono del founder. **Los dos números eran correctos y la conclusión era falsa.**
+
+  **El founder aportó el objeto: `e-PetPlace Negocios` TIENE CINCO TABS Y SE VEN BIEN**, en el mismo teléfono. Medido después: **la misma pieza** (`BarraTabs` de `packages/ui`), **la misma caja de ícono** (24,2 dp), **la misma etiqueta**. Lo que difiere es **dónde está el disco** — el prestador vive con **20,7 dp** de hueco al ícono vecino; el cliente con cinco tendría **28,8**. ⇒ **más aire que el caso ya aprobado: cabe.**
+
+  ⇒ ***La respuesta estaba en una app nuestra, en el mismo teléfono, desde antes de empezar.*** Es **L-301 en su forma más cara**: allá el número que decidía era la suma de dos pistas; **acá era un objeto que ninguna de las dos fue a mirar.**
+
+  🔴 **Y SU DAÑO CONCRETO, para que no se lea como anécdota: B estaba por ENMENDAR el contrato «2 a 5 tabs» de `BarraTabs` declarándolo «letra que invita al defecto».** *El contrato era correcto y la restricción era falsa.* ***UNA RESTRICCIÓN MAL DERIVADA NO SOLO FRENA TRABAJO: SE CONVIERTE EN LEY, y el siguiente la hereda como verdad medida.***
+
+### Lecciones S100c previas (L-296 → L-301) — depositadas por B el 18-ago-2026, con aparato
 
 - **L-301 — CUANDO DOS PISTAS CURAN SOBRE EL MISMO EJE, EL NÚMERO QUE DECIDE ES LA SUMA — Y LA SUMA NO ES DE NADIE (S100c · hallazgo de C sobre el cruce con N24; depositada 18-ago-2026).**
 
