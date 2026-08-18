@@ -687,6 +687,14 @@ export default function DespensaCheckout() {
                          otra pantalla, pero **abre el formulario que la
                          resuelve**, que es el mismo criterio. */
                       <CeldaNavegacion
+                        /* A-06 (S100c) · el pin, pedido por el founder: *«ahí
+                           le falta el pin o el glifo de ubicación»*.
+                           ⚠️ Mi arranque decía que el glifo era de B y había que
+                           pedírselo. **Falso, medido:** `ubicacion` ya existe en
+                           el registry (`Icono.tsx:800`, capa `cuidado`) desde el
+                           lote b′. *Pedir una pieza construida cuesta una vuelta
+                           de canal y la respuesta es un grep.* */
+                        icono="ubicacion"
                         titulo={direccion.direccion}
                         detalle={[direccion.ciudad, direccion.referencias]
                           .filter((x): x is string => x !== null && x !== '')
@@ -882,6 +890,65 @@ export default function DespensaCheckout() {
                 </Tarjeta>
               </View>
             ))}
+
+            {/* 🔴 A-02 (S100c) · CÓMO Y CUÁNDO LLEGA, A LA VISTA AL PAGAR.
+                Literal del founder: *«lo único que le faltaría al checkout es
+                la confirmación de la modalidad de entrega y la fecha probable
+                de entrega, para que la persona lo pueda observar desde ahí»*.
+
+                Medido antes de construir: el resumen tenía «Envío $2.50» —que
+                dice cuánto CUESTA, no que va a tu casa— y la promesa vivía
+                dentro de `fase === 'armado'`, o sea **en la pantalla anterior**:
+                se elegía y no se podía releer con el dedo sobre «Pagar».
+                La dirección entra en el mismo bloque aunque no estaba en el
+                pedido: es la misma pregunta —«¿esto llega bien?»— y omitirla
+                dejaba media respuesta.
+
+                ── 🔴 POR QUÉ VA UNA VEZ Y NO ADENTRO DE CADA CARTA ──────────
+                El método y la dirección son **de la compra**: hay UN `metodo` y
+                UNA dirección para todo. Repetirlos en N cartas sería decir N
+                veces lo mismo.
+                Y la FECHA no se puede repetir por otra razón, que es de dato:
+                `cuentaComercialId` sale de **`grupos[0]`** (:177) ⇒ la promesa
+                que hay en pantalla es la del PRIMER vendedor. Pintarla dentro
+                de la segunda carta sería **afirmar sobre la entrega del otro
+                vendedor un dato que nadie calculó** — la misma frase que ya
+                está escrita 60 líneas más arriba: *una promesa que la pantalla
+                no puede cumplir*. Con N entregas se dice lo único que sí es
+                cierto: que cada una va por su cuenta. */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+              <Texto variante="seccion">{t('despensa.resumenComoLlega')}</Texto>
+              <Texto variante="cuerpo">
+                {metodo === 'retiro' ? t('despensa.metodoRetiro') : t('despensa.metodoDespacho')}
+              </Texto>
+
+              {/* La dirección solo con despacho: en retiro no hay dirección de
+                  la familia que mostrar, y la de la tienda no se captura. */}
+              {metodo === 'despacho' && direccion !== 'cargando' && direccion !== null ? (
+                <Texto variante="apoyo">
+                  {[direccion.direccion, direccion.ciudad].filter((x) => x !== '').join(' · ')}
+                </Texto>
+              ) : null}
+
+              {/* La fecha: con UNA entrega es la promesa que se eligió; con
+                  varias, el hecho que sí se puede afirmar. Y si la promesa
+                  falló o no llegó, **no se inventa una fecha**: no se dibuja
+                  nada (L-139 — el nulo honesto). */}
+              {pedidos.length > 1 ? (
+                <Texto variante="apoyo">{t('despensa.resumenFechaPorEntrega')}</Texto>
+              ) : metodo === 'despacho' &&
+                promesa !== null &&
+                promesa !== 'cargando' &&
+                !('fallo' in promesa) ? (
+                <Texto variante="cuerpo">
+                  {t('despensa.promesaVentana', {
+                    dia: diaLocal(promesa.fecha),
+                    desde: horaLocal(promesa.desde),
+                    hasta: horaLocal(promesa.hasta),
+                  })}
+                </Texto>
+              ) : null}
+            </View>
 
             {/* EL TOTAL ES EL DE LA COMPRA, dicho por el motor — esta
                 pantalla no suma los bloques. UN SOLO COBRO para la familia. */}

@@ -1172,6 +1172,12 @@ export const clienteEs = {
     // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
     // encuentra la casa, el punto igual existe.
     sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    /* A-03 (S100c) · el buscador apagado LO DICE. Antes se apagaba en silencio
+       y desde la pantalla se veía igual que «no encontré nada» y que «estoy
+       buscando» — tres estados con una sola pinta (L-218).
+       Espeja `lugares.ts:81` y no lo reusa: D-539, `packages/api` habla español
+       fijo y no sabe traducir. */
+    buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escribila a mano y poné el punto en el mapa.',
     puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
     puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
@@ -1528,6 +1534,12 @@ export const clienteEs = {
        que le sirve para decidir qué hacer.
        ⚠️ Ninguna culpa a la familia ni se disculpa de más: es un hecho del
        mundo, dicho en una línea. */
+    /* A-02 (S100c) · el resumen confirma cómo y cuándo llega. El rótulo es
+       una PREGUNTA contestada, no una etiqueta de formulario: la familia no
+       está llenando un campo, está revisando una promesa. */
+    resumenComoLlega: 'Cómo llega',
+    resumenFechaPorEntrega: 'Cada entrega va por su cuenta y tiene su propia fecha.',
+
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',
     itemPrecioCambio: 'El precio cambió: ahora es {{precio}}.',
