@@ -250,10 +250,16 @@ que se agregó. **No lo puedo probar y no lo doy por probado.**
 **Lo que NO hice: abrir una H-nnn contra C.** *Acusar a la vitrina con la medición diciendo lo contrario
 sería fabricar un dueño.*
 
-**② H-301 (de C) — la búsqueda ignora la especie de la mascota.** Con un gato elegido, los primeros
-resultados de «alimento» declaran *«Está pensado para perros»*. **No se curó porque filtrar
-contradiría letra firmada** (`LETRA_RECORRIDO_DESPENSA_S96` §5.2: *se ofrece, no se exige*). La salida
-legítima es **orden o señal**, y eso es decisión de producto. **Va al gate.**
+**② ☑️ H-301 — CURADO Y EN `main`. ESTE PÁRRAFO ESTABA VENCIDO Y SE CORRIGE ACÁ.**
+*Decía que la búsqueda ignoraba la especie y que «va al gate».* **El founder firmó ORDENAR, no filtrar,
+la cura entró, y está en el bundle.** Verificable sin creerle a nadie:
+`git show origin/main:packages/api/src/wrappers/despensa-catalogo.ts | grep -c especiePrioritaria` → **6**
+· `git show "origin/main:apps/cliente/src/app/(tabs)/despensa/index.tsx" | grep -c "mascota?.especie"` → **1**.
+**No filtra** (§5.2: *se ofrece, no se exige*). El orden se hace **en el servidor, en dos baldes** — ver §4-15bis.
+🔴 **Y se corrige EN SU LUGAR y no solo en una bitácora, porque la sesión siguiente lee este resumen
+ANTES que las bitácoras de las pistas y heredaría una deuda ya pagada.** *Era cierto al escribirse y el
+mundo se movió doce horas después: el mismo modo de falla que esta vuelta cobró CUATRO veces entre las
+cuatro pistas.* **Lo cazó C midiendo mi documento contra el objeto, no leyéndolo con más cuidado.**
 
 **③ El margen de la vitrina quedó en 42 dp** (medición de C). **Cualquier pieza que sume alto al cromo o
 a la tarjeta vuelve a cortar la primera tarjeta.**
