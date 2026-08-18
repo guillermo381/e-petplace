@@ -293,19 +293,30 @@ export default function DespensaCarrito() {
   /** G-09 · el detalle de la donación salió del bloque y vive detrás de la «i».
    *  La Hoja la monta la PANTALLA, no el selector: *un selector que además abre
    *  modales empieza a conocer la navegación de su pantalla* (B). */
-  const [hojaDonacion, setHojaDonacion] = useState(false);
   /**
-   * 🔴 S100d · EL AGRADECIMIENTO — Hoja PROPIA, no la de la «i».
+   * 🔴 S100d · UNA SOLA HOJA DE DONACIÓN, abierta por DOS caminos.
    *
-   * Se parecen y no son lo mismo, y juntarlas rompería las dos:
-   * · la de la «i» (`hojaDonacion`) la ABRE LA PERSONA cuando quiere saber
-   *   qué es donar — es una explicación **pedida**;
-   * · ésta la abre **el sistema** al elegir el chip — es un **agradecimiento**,
-   *   y llega sin que nadie lo pida.
-   * *Un agradecimiento que además explica las reglas deja de agradecer; una
-   * explicación que además agradece llega cuando nadie la pidió.*
+   * ── LO QUE CONSTRUÍ PRIMERO Y POR QUÉ CAMBIÉ ──────────────────────────
+   * Había hecho **dos** Hojas, con este argumento: la de la «i» la abre la
+   * persona (explicación pedida) y la del agradecimiento la abre el sistema
+   * ⇒ *un agradecimiento que además explica las reglas deja de agradecer*.
+   *
+   * **El literal del founder dice otra cosa, y manda:** *«al seleccionar el
+   * chip, el modal se abre solo CON LA INFORMACIÓN DE LA "i"»*. Pidió UN
+   * modal, no dos.
+   *
+   * **Y B agregó la razón estructural que a mí me faltaba:** *dos hojas con
+   * el mismo contenido divergen la primera vez que alguien cura una.* Con
+   * dos, el día que §6.4 cambie hay que acordarse de las dos — y la que se
+   * olvida es siempre la que se abre sola.
+   *
+   * ── LO QUE SÍ SOBREVIVE DE MI ARGUMENTO, en el ORDEN ──────────────────
+   * El agradecimiento va **arriba** y la regla **debajo**. *Quien acaba de
+   * donar lee primero el gracias; quien vino a entender qué es donar
+   * encuentra la regla igual, un renglón más abajo.* Una sola hoja no obliga
+   * a elegir entre las dos voces: obliga a ordenarlas.
    */
-  const [hojaGracias, setHojaGracias] = useState(false);
+  const [hojaDonacion, setHojaDonacion] = useState(false);
 
   /** Las especies que la familia YA tiene registradas (todas, no solo
    *  elegibles: un ave en memorial sigue probando que la familia registra
@@ -500,7 +511,7 @@ export default function DespensaCarrito() {
                          la monta la pantalla — la misma ley que ya rige para
                          la «i», y por eso esto es una prop y no un modal
                          adentro del selector. */
-                      onDonacionElegida={() => setHojaGracias(true)}
+                      onDonacionElegida={() => setHojaDonacion(true)}
                     />
                   </View>
                 ) : null}
@@ -543,7 +554,7 @@ export default function DespensaCarrito() {
                   etiquetaDonacion={t('despensa.donarEste')}
                   detalleDonacion={t('despensa.donacionDetalle')}
                   onExplicarDonacion={() => setHojaDonacion(true)}
-                  onDonacionElegida={() => setHojaGracias(true)}
+                  onDonacionElegida={() => setHojaDonacion(true)}
                 />
                 {/* El reparto SE OFRECE solo cuando hay algo que repartir.
                     Con un producto la opción no existe: ofrecer «repartir» un
@@ -575,44 +586,27 @@ export default function DespensaCarrito() {
       <Hoja
         visible={hojaDonacion}
         onCerrar={() => setHojaDonacion(false)}
-        titulo={t('despensa.donarEste')}
+        titulo={t('despensa.donacionGraciasTitulo')}
       >
         <View style={{ gap: spacing[3] }}>
-          <Texto variante="cuerpo">{t('despensa.donacionDetalle')}</Texto>
+          {/* EL AGRADECIMIENTO PRIMERO — quien acaba de donar lee esto. */}
+          <Texto variante="cuerpo">{t('despensa.donacionGraciasCuerpo')}</Texto>
+          {/* Y LA REGLA DEBAJO — los dos límites de §6.4 (la donación jamás
+              entra a un expediente y jamás otorga beneficio) siguen a la vista
+              para quien vino a entender qué es donar. NO se recortaron al
+              unificar: son la letra, no un adorno.
+              ⚠️ Y viven ACÁ y en ningún otro lado: si alguien vuelve a abrir
+              una segunda hoja para el agradecimiento, este texto queda
+              duplicado y el día que §6.4 cambie se va a curar uno solo. */}
+          <Texto variante="apoyo">{t('despensa.donacionDetalle')}</Texto>
           <Boton
-            etiqueta={t('despensa.listoDatos')}
+            etiqueta={t('despensa.donacionGraciasCierre')}
             bloque
             onPress={() => setHojaDonacion(false)}
           />
         </View>
       </Hoja>
 
-      {/* 🔴 S100d · EL AGRADECIMIENTO (punto 15) — se abre SOLO al elegir la
-          donación, no al tocar la «i».
-
-          ⚠️ Por qué el título va en el `titulo` de la Hoja y no como un
-          `Texto` adentro: la Hoja ya tiene su jerarquía de encabezado, y meter
-          un segundo título dentro del cuerpo dibuja dos jerarquías para una
-          sola cosa (N23 al revés).
-
-          ⚠️ Y por qué NO repite los límites de §6.4 que ya dice la «i»: los
-          dice, pero **en otra clave**. La «i» explica una regla a quien la fue
-          a buscar; esto agradece a quien acaba de donar. *La misma frase en
-          los dos lugares convierte el agradecimiento en un descargo.* */}
-      <Hoja
-        visible={hojaGracias}
-        onCerrar={() => setHojaGracias(false)}
-        titulo={t('despensa.donacionGraciasTitulo')}
-      >
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="cuerpo">{t('despensa.donacionGraciasCuerpo')}</Texto>
-          <Boton
-            etiqueta={t('despensa.donacionGraciasCierre')}
-            bloque
-            onPress={() => setHojaGracias(false)}
-          />
-        </View>
-      </Hoja>
     </View>
   );
 }
