@@ -1296,6 +1296,12 @@ export const clienteEn = {
     agregado: 'Added to your cart.',
     agregadoPara: 'Added to your cart for {{nombre}}.',
     verCarrito: 'View cart · {{n}}',
+    // S100b-D · G-14 · the header basket. This is an icon's ACCESSIBLE NAME,
+    // not a visible label: the screen reader has to say where it leads AND
+    // how many are in there, because it does not relate the number the eye
+    // sees next to the glyph on its own.
+    irAlCarrito: 'Go to cart',
+    irAlCarritoCon: 'Go to cart · {{n}} in the cart',
     faltaPresentacion: 'Pick a size to add it.',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
 

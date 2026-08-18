@@ -1507,6 +1507,12 @@ export const clienteEs = {
     agregado: 'Agregado al carrito.',
     agregadoPara: 'Agregado al carrito para {{nombre}}.',
     verCarrito: 'Ver carrito · {{n}}',
+    // S100b-D · G-14 · la canasta del encabezado. Es el NOMBRE ACCESIBLE de
+    // un ícono, no una etiqueta visible: el lector de pantalla tiene que
+    // decir a dónde lleva Y cuánto hay, porque el número que el ojo ve al
+    // lado del glifo él no lo relaciona solo.
+    irAlCarrito: 'Ir al carrito',
+    irAlCarritoCon: 'Ir al carrito · {{n}} en el carrito',
     faltaPresentacion: 'Elegí una presentación para agregarlo.',
     faltaEntendimiento: 'Leé el aviso de arriba: falta que confirmes que lo tuviste en cuenta.',
 

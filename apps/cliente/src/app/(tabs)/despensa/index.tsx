@@ -45,7 +45,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -579,13 +579,66 @@ export default function DespensaDescubrir() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="portada" saludo={t('despensa.titulo')} isotipo="gradiente" />
+      {/* 🔴 S100b-D · G-14 · EL CARRITO DEJA DE SER UN BOTÓN DE TEXTO.
+          El gate: *«el carrito no tiene ícono en la barra: es un botón de
+          texto donde la industria usa una canasta con su contador»*.
+
+          **Va en `accionDer`, que es el slot que la pieza ya tiene para
+          esto** — no es un override. Y va ACÁ y no en la barra de tabs por
+          un dato, no por gusto: **la barra ya tiene sus cuatro slots**
+          (hogar · explorar · despensa · cuenta) y el cuarto es del ciclo
+          del trono; meter el carrito ahí rompería la gramática de la única
+          barra que el dueño ve todos los días.
+
+          **PERMANENTE, con o sin unidades.** Antes el único acceso existía
+          solo con `unidades > 0` ⇒ *un carrito vacío no tenía puerta, así
+          que no había forma de ver qué había adentro ni de volver.* El
+          contador aparece solo cuando hay algo: un «0» sobre la canasta es
+          ruido con forma de dato. */}
+      <Encabezado
+        variante="portada"
+        saludo={t('despensa.titulo')}
+        isotipo="gradiente"
+        accionDer={
+          <Pressable
+            onPress={() => router.push('/despensa/carrito')}
+            accessibilityRole="button"
+            accessibilityLabel={
+              unidades === 0
+                ? t('despensa.irAlCarrito')
+                : t('despensa.irAlCarritoCon', { n: unidades })
+            }
+            hitSlop={spacing[3]}
+          >
+            {/* ⚠️ EL CONTADOR VA AL LADO Y NO ADENTRO DE UN DISCO DE COLOR,
+                Y ES UN LÍMITE DE PIEZA QUE SE DECLARA EN VEZ DE FORZARSE.
+                El badge de la industria es un disco de acento pleno con el
+                número en color inverso — y **`Texto` no tiene color inverso**
+                (sus seis colores son semánticos: primary…warning). El par que
+                la casa sí tiene para texto sobre acento pleno vive adentro de
+                `Boton` (`accent.cta` / `accent.ctaTexto`) y no está expuesto.
+                *Pintar el número con un color crudo para que se parezca al
+                badge sería inventar contraste sin medirlo, en la pieza más
+                pública de la tienda.*
+                ⇒ **canasta + número al lado**, que es un contador honesto y
+                legible por construcción. El disco se lo pedí a B con el caso;
+                cuando exista, esto son tres líneas. */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+              <Icono nombre="carrito" tamano={24} />
+              {unidades === 0 ? null : <Texto variante="dato">{String(unidades)}</Texto>}
+            </View>
+          </Pressable>
+        }
+      />
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + (unidades > 0 ? spacing[8] + 72 : spacing[8]),
+          // Sin barra fija abajo, la reserva es solo el aire del final
+          // del contenido: el `+ 72` estimaba el alto de un pie que ya no
+          // existe (la clase que `PantallaConPie` vino a volver inexpresable).
+          paddingBottom: insets.bottom + spacing[8],
           gap: spacing[5],
         }}
       >
@@ -615,6 +668,37 @@ export default function DespensaDescubrir() {
                 onElegir={setMascotaId}
               />
             ) : null}
+
+            {/* 🔴 S100b-D · G-15 · «TUS PEDIDOS» SUBE ACÁ, Y LA CURA NO ERA
+                LA QUE EL GATE SUPUSO. El gate dice *«falta acceso a mis
+                pedidos desde la primera pantalla de Despensa»* y B, con
+                aparato, lo midió más ancho: *«no tiene entrada»*, y llegó por
+                deep link.
+
+                **Medido: la entrada EXISTÍA** — esta misma celda, al FONDO
+                del scroll, **detrás de la vitrina entera** (hasta 50 productos
+                en grilla de dos ≈ 25 filas). *No estaba ausente: estaba
+                enterrada, que en la práctica es lo mismo y en la cura no lo
+                es.* ⇒ **no se construye, se sube.**
+
+                Va DESPUÉS del filtro de mascota y ANTES del buscador: es la
+                primera cosa que se ve sin deslizar, y una sola fila.
+                ⚠️ **Cuesta una fila de alto, y eso toca a G-04** (la primera
+                pantalla que no muestra un solo producto, dueño C). Se declara
+                para que quien la repiense sepa que esta fila está acá por
+                firma y no por inercia: si su composición la quiere en otro
+                lugar, se mueve — lo que no puede es volver al fondo.
+
+                ⏪ Y la tabla de Cuenta de B **sí era exacta**: ahí no hay
+                entrada, y eso queda vivo (dueño por asignar). */}
+            <View>
+              <CeldaNavegacion
+                titulo={t('despensa.tusPedidos')}
+                detalle={t('despensa.tusPedidosDetalle')}
+                onPress={() => router.push('/despensa/pedidos')}
+              />
+              <Separador />
+            </View>
 
             {/* ⓪bis · EL BUSCADOR (S96 — §5.1) */}
             <View style={{ paddingHorizontal: spacing[5] }}>
@@ -751,17 +835,14 @@ export default function DespensaDescubrir() {
               </View>
             )}
 
-            {/* ③ · LAS OTRAS PUERTAS — el pedido vivo y el código del local.
+            {/* ③ · LA OTRA PUERTA — el código del local.
                 CeldaNavegacion: acción que LLEVA (E14, chevron ›). Sin
                 glifo: el registry no tiene glifos de pedido/factura y un
-                glifo repetido de despensa sería decoración (Ley 12). */}
+                glifo repetido de despensa sería decoración (Ley 12).
+
+                ⏪ **«TUS PEDIDOS» SE FUE DE ACÁ ARRIBA** — ver su comentario
+                junto al buscador. */}
             <View>
-              <Separador />
-              <CeldaNavegacion
-                titulo={t('despensa.tusPedidos')}
-                detalle={t('despensa.tusPedidosDetalle')}
-                onPress={() => router.push('/despensa/pedidos')}
-              />
               <Separador />
               <CeldaNavegacion
                 titulo={t('despensa.reclamoEntrada')}
@@ -773,27 +854,21 @@ export default function DespensaDescubrir() {
         )}
       </ScrollView>
 
-      {/* LA BARRA DEL CARRITO — existe solo cuando hay algo adentro. */}
-      {unidades > 0 ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: spacing[5],
-            paddingTop: spacing[3],
-            paddingBottom: insets.bottom + spacing[3],
-            backgroundColor: theme.bg.base,
-          }}
-        >
-          <Boton
-            etiqueta={t('despensa.verCarrito', { n: unidades })}
-            bloque
-            onPress={() => router.push('/despensa/carrito')}
-          />
-        </View>
-      ) : null}
+      {/* ☠️ **S100b-D · MURIÓ LA BARRA FIJA «VER CARRITO (N)»** — es
+          exactamente el *«botón de texto»* que G-14 nombra, y con la canasta
+          permanente en el encabezado pasó a ser **una segunda puerta al mismo
+          cuarto** (Chanel: la casa dice una cosa una vez).
+
+          **Y su muerte paga tres cosas de una:** el pie fijo desaparece, con
+          él el aire muerto que dejaba contra la barra de tabs, y la vitrina
+          recupera ese alto — que es justo lo que G-04 necesita.
+
+          ⚠️ **Lo que se pierde y se declara:** la barra era también el ACUSE
+          de haber agregado algo («ya hay 3 acá abajo»). Ese trabajo pasa al
+          contador de la canasta, que **está siempre a la vista porque el
+          encabezado no colapsa al scrollear** (medido por B: 156.4 dp, no
+          colapsa). *Si en el gate el acuse no se siente, el arreglo es dar
+          señal al contador —no resucitar la barra.* */}
     </View>
   );
 }
