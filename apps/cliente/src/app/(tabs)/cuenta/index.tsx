@@ -66,6 +66,19 @@ export default function Cuenta() {
     // de TRIPLE a doble turno (le quedan `historia_clinica` y
     // `ficha_identidad` en `lib/papeles.ts`, que es otra decisión abierta).
     { etiqueta: t('documentos.titulo'), ruta: '/cuenta/documentos' as const, icono: 'documentos' as const },
+    /* 🔴 S100c-D · «TUS PEDIDOS» GANA SU ENTRADA ACÁ — deuda abierta desde
+     * S100b, declarada sin dueño (*«la tabla de B era exacta: ahí no
+     * está»*), y el founder la nombró de nuevo en este gate: **mientras no
+     * haya pedidos, el acceso vive en Cuenta.**
+     *
+     * **Va SIN condición, y se declara:** ofrecerla solo con pedidos exige
+     * que Cuenta cuente pedidos —una petición más en una pantalla que hoy
+     * no lee nada— y **el peldaño 0 de «Tus pedidos» ya está construido**:
+     * su estado vacío tiene voz, camino a la despensa y la entrada al
+     * reclamo del local. *Una puerta que abre a un vacío que sabe hablar no
+     * es una puerta que rebota* (Ley 23). Si la mesa firma la quinta tab,
+     * esta fila puede quedarse igual: Cuenta es el cajón de todo. */
+    { etiqueta: t('despensa.tusPedidos'), ruta: '/despensa/pedidos' as const, icono: 'despensa' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
