@@ -781,6 +781,24 @@ export default function DespensaCheckout() {
                         ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
                     {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
                       <SelectorVentana
+                        /* 🔴 A-05 (S100c) · LA TIRA. El founder: «cuándo se
+                           entrega» es invisible sin deslizar.
+                           **B lo midió y es peor que eso:** la sección arranca
+                           en **y = 595,9 dp** y el pie fijo empieza en ~**593**
+                           ⇒ no es que haya que deslizar, es que **nace debajo
+                           del pie**. Cuatro opciones apiladas de hasta tres
+                           líneas, después de dirección y quién recibe.
+                           El eje no se inventó: `SelectorOpcion` tiene
+                           `disposicion` fila/tira/grilla desde S55-B4, y la
+                           tira nació justo para esto (el CUÁNDO tipo Teams).
+                           ⚠️ LA LEY 23 SIGUE EN PIE Y ES FÁCIL DE ROMPER ACÁ:
+                           en `tira` el día lleno **recibe el toque** —hace
+                           falta para contar SU motivo cuando hay más de uno—
+                           pero **jamás llama a `onElegir`**. El servidor sigue
+                           sin poder recibir un día sin cupo. *Si alguien
+                           cablea `onElegir` en esa rama, rompe la ley* (aviso
+                           de B, dueña de la pieza). */
+                        disposicion="tira"
                         opciones={ventanas}
                         elegida={fechaElegida?.fecha ?? 'proxima'}
                         onElegir={(clave) => {
