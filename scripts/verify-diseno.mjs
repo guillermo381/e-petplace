@@ -1884,6 +1884,33 @@ const FIXTURES = {
      despensa que NO monta el control tiene que salir VERDE, y el motor
      que conserva `p_fecha_programada` NO debe pintarse rojo — se quitó la
      puerta, no el motor. Lo único rojo es el que vuelve a montarlo. */
+  /* R53 · el fixture prueba que DISCRIMINA (corolario de L-236): un solo
+     ofensor real y TRES que NO deben pintarse rojo — la pantalla que ya
+     monta la pieza, la que usa `absolute` para otra cosa (un badge, lejos
+     de cualquier `bottom: 0`), y una del baseline congelado. */
+  /* R54 · discrimina: el fragmento y el View con box-none NO deben salir
+     rojos; el View desnudo sí. */
+  R54: [
+    { path: 'apps/cliente/src/app/ok-fragmento.tsx', src: "<PantallaConPie pie={<><Boton /><Boton /></>}>{x}</PantallaConPie>" },
+    { path: 'apps/cliente/src/app/ok-boxnone.tsx', src: '<PantallaConPie pie={<View pointerEvents="box-none" style={{ gap: 8 }}><Boton /></View>}>{x}</PantallaConPie>' },
+    { path: 'apps/cliente/src/app/malo.tsx', src: "<PantallaConPie pie={<View style={{ gap: 8 }}><Boton /></View>}>{x}</PantallaConPie>" },
+    { path: 'apps/prestador/src/app/otra-pieza.tsx', src: "<FichaPrestador pie={<View style={{ gap: 8 }}><Boton /></View>} />" },
+  ],
+  R53: [
+    { path: 'apps/cliente/src/app/(tabs)/despensa/nueva.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/ok.tsx', src: "<PantallaConPie pie={<Boton />}>{contenido}</PantallaConPie>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/badge.tsx', src: "<View style={{ position: 'absolute', top: 0, right: 0 }}><Insignia /></View>" },
+    { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* El escape por DECLARACIÓN: con su razón NO sale rojo… */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/declarada.tsx', src: "/* R53-DECLARADO: la hoja tiene maxHeight y su scroll vive adentro, asi que la hoja ES el contenido y no hay nada que reservar. */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* …y la marca PELADA sí, porque un marcador sin razón es un bypass con
+       otro nombre. Este par es el que prueba que el escape cuesta algo. */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/pelada.tsx', src: "/* R53-DECLARADO: */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* 🔴 LA CONDICIÓN DE MESA, hecha caso: UNA razón y DOS pies ⇒ el que
+       sobra MUERDE. Es lo que impide que la declaración se vuelva una
+       exención de archivo por la puerta de atrás. */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/dos-pies.tsx', src: "/* R53-DECLARADO: la hoja tiene maxHeight y su scroll vive adentro, no hay nada que reservar. */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+  ],
   R52: [
     { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<SelectorVentana opciones={v} elegida={e} onElegir={f} />" },
     { path: 'apps/cliente/src/app/(tabs)/despensa/motor.ts', src: "calcularPromesaDespensa({ fecha_programada: f })" },
@@ -3616,7 +3643,188 @@ function r45(archivos) {
  *  motor — `calcular_promesa_despensa` conserva `p_fecha_programada` a
  *  propósito: *se quitó la puerta, no el motor.*
  */
-const BASELINE_R52 = 1
+/* 🔴 R53 · UN PIE FIJO RESERVA SU PROPIO LUGAR (S100b-B).
+
+   EL DEFECTO QUE LA OBLIGA, medido en el aparato: el pie fijo se pintaba
+   ENCIMA del contenido en CINCO pantallas de la despensa, y en la ficha lo
+   tapado era **la composición y los alérgenos** — con la ficha sin scroll,
+   o sea inalcanzables.
+
+   La causa no era el pie: era que el contenido **estimaba** su alto.
+   Literal de la ficha antes de la cura:
+       paddingBottom: insets.bottom + (conCta ? spacing[8] + 96 : spacing[8])
+   El `96` es el alto del pie TECLEADO. Ese pie lleva dos botones apilados.
+
+   ⚠️ **POR QUÉ NINGÚN INSTRUMENTO LO CAZÓ ANTES, y es lo que justifica que
+   esta regla exista:** el nodo tapado **sigue en el árbol de accesibilidad**
+   — medido, el lector anuncia la composición que el ojo no ve. *Un check
+   que lea el árbol da VERDE sobre este defecto.* Hubo que mirar la pantalla.
+
+   QUÉ CAZA: un contenedor `position:'absolute'` con `bottom: 0` en una
+   pantalla de app que **no** monta `PantallaConPie`. Baseline SOLO-BAJA con
+   los 11 medidos al nacer; cada migración lo baja.
+
+   ⚠️ SU LÍMITE, ESCRITO: la regla ve **la forma** (un pie absoluto a mano),
+   no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
+   pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
+   honestamente — se cura por construcción, que es de lo que trata la pieza. */
+/* 🔴 R54 · EL PIE NO SE ENVUELVE EN UN VIEW QUE CAPTURE (S100b-B).
+
+   LA TRAMPA: `PantallaConPie` lleva `pointerEvents="box-none"` para que el
+   gesto de scroll pase entre los botones — **pero eso cubre UNA capa.** Un
+   `View` intermedio del consumidor vuelve a capturar el toque en todo su
+   rectángulo y **reabre la zona muerta de gesto**, que es el defecto rojo
+   que la pieza vino a cerrar: con el pie capturando, el tercio inferior de
+   la pantalla no scrollea — *y ahí es donde una familia apoya el pulgar.*
+
+   ⚠️ SU LÍMITE: caza `pie={<View` sin `box-none` en la misma expresión.
+   **No ve un componente propio que adentro tenga un View** — eso no se
+   mecaniza honestamente y se enseña. *Su verde dice «no envolviste el pie
+   en un View desnudo», jamás «el gesto pasa».* */
+const BASELINE_R54 = 0
+
+function r54(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    /* 🔴 ACOTADA A `PantallaConPie` — y la acoté porque SOBRE-DISPARÓ en su
+       primera corrida. Cazó `como-te-ven.tsx`, que monta `FichaPrestador`
+       —otra pieza que también expone una prop `pie`, y cuyo pie NO es un
+       overlay fijo, así que `box-none` ahí no significa nada.
+       *Una regla que grita sobre un caso legítimo enseña a ignorarla*
+       (L-236). Lo delató que su baseline dijera 0 y ella dijera 1: dos
+       números que no coincidían, y esta vez sí los crucé. */
+    if (!/\bPantallaConPie\b/.test(limpio)) continue
+    for (const m of limpio.matchAll(/pie=\{\s*<View([\s\S]{0,220}?)>/g)) {
+      if (!/pointerEvents=\{?["']box-none["']\}?/.test(m[1])) ofensores.push(path)
+    }
+  }
+  if (ofensores.length > BASELINE_R54)
+    fallos.push(
+      `R54: ${ofensores.length} pie(s) envuelto(s) en un \`View\` sin \`pointerEvents="box-none"\` (baseline ${BASELINE_R54}, DURA EN 0).\n   ${[...new Set(ofensores)].join('\n   ')}\n   Un View intermedio captura el toque en todo su rectángulo y reabre la ZONA MUERTA DE GESTO: el tercio inferior deja de scrollear. Pasá el pie como fragmento (\`pie={<><Boton/><Boton/></>}\`), o ponele \`pointerEvents="box-none"\` a ese View.`,
+    )
+  /* ANCLA POR SUJETO (L-291): lo que esta regla necesita no es que alguien
+     la viole, sino que la pieza siga declarando su `box-none`. Si eso
+     desaparece, la regla vigila una trampa que ya no existe — o peor,
+     deja de vigilar la que sí. */
+  const fuente = readFileSync('packages/ui/src/components/PantallaConPie.tsx', 'utf8')
+  const vivo = /pointerEvents="box-none"/.test(fuente) ? 1 : 0
+  fallos.push(...ancla('R54', vivo, 1, '`box-none` declarado en PantallaConPie (0 = la pieza dejó de dejar pasar el gesto y esta regla perdió su sujeto)'))
+  return {
+    fallos,
+    info: `${ofensores.length} pie(s) envuelto(s) sin box-none · DURA EN 0 · acotada a PantallaConPie (sobre-disparaba contra la prop pie de FichaPrestador) · su verde dice «no hay View desnudo», jamás «el gesto pasa»`,
+  }
+}
+
+const BASELINE_R53 = [
+  'apps/cliente/src/app/(tabs)/despensa/carrito.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/checkout.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/index.tsx',
+  'apps/cliente/src/app/(tabs)/despensa/producto/[productoId].tsx',
+  'apps/cliente/src/app/(tabs)/hogar/index.tsx',
+  'apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx',
+  'apps/cliente/src/app/(tabs)/hogar/veterinaria.tsx',
+  'apps/cliente/src/app/paseo/[atencionId].tsx',
+  'apps/cliente/src/app/prestador/[prestadorId].tsx',
+  'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
+  'apps/prestador/src/app/bienvenida-dia1.tsx',
+]
+
+function r53(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  const declarados = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    // El pie a mano: absolute + bottom:0 cerca. Ventana corta para no
+    // confundirlo con un absolute de otra cosa (un badge, un overlay).
+    /* 🔴 SE CUENTAN LOS PIES, NO SE PREGUNTA SI HAY UNO. La condición de
+       mesa es explícita: *si mañana alguien pone contenido de página bajo
+       un pie fijo en esa ruta, la regla tiene que volver a morder*. Con un
+       `test()` booleano y un escape por archivo, **el segundo pie entraría
+       gratis** — que es exactamente la objeción que esta casa le hizo a la
+       exención por ruta, repetida un piso más arriba. */
+    const pies = [...limpio.matchAll(/position:\s*'absolute'[\s\S]{0,160}?bottom:\s*0\b/g)].length
+    if (pies === 0) continue
+    // Si monta la pieza, el pie ya reserva: no es ofensor.
+    if (/\bPantallaConPie\b/.test(limpio)) continue
+    /* 🔴 EL ESCAPE POR DECLARACIÓN — S100b-B, tras el primer caso legítimo
+       que la regla cazó (la hoja sobre el mapa de «en camino», al
+       ensamblar el bundle).
+
+       **Por qué existe:** R53 caza LA FORMA —un pie absoluto a mano— y hay
+       una anatomía distinta que tiene esa misma forma y **no puede tener
+       el defecto**: una HOJA con `maxHeight` cuyo scroll vive ADENTRO.
+       Ahí *la hoja ES el contenido*, así que **no hay dos cosas que
+       reservar una para la otra** y el defecto es inexpresable. Montar
+       `PantallaConPie` sería peor: el fondo no scrollea, así que la pieza
+       no tendría nada que reservar.
+
+       **Por qué DECLARACIÓN y no una lista de rutas** (que era el camino
+       barato, y el mecanismo ya existía porque el baseline es por ruta):
+       *una lista de paths deja pasar en silencio al SEGUNDO pie que
+       alguien agregue en ese mismo archivo* — la objeción es la que esta
+       casa ya escribió en R45/R46. **La declaración viaja con el pie, no
+       con el archivo.**
+
+       ⚙️ **Se busca en `src` CRUDO y no en `limpio`**: declarar ES prosa,
+       igual que en R45. Si se buscara en el texto sin comentarios, la
+       única forma de declarar sería con código.
+
+       🔴 **Y EXIGE UNA RAZÓN ESCRITA, no una marca pelada:** el patrón
+       pide ≥16 caracteres después de los dos puntos. *Un marcador vacío
+       sería un `SALTAR_GATE` con otro nombre — y lo que hace honesto a un
+       escape no es que exista: es que cueste una frase que alguien pueda
+       leer y discutir.* Los declarados se CUENTAN y se informan, así que
+       si empiezan a crecer se ve. */
+    /* UNA DECLARACIÓN POR PIE. Si hay dos pies y una sola razón escrita,
+       **el que sobra sigue siendo ofensor** — el escape cubre lo que
+       alguien se tomó el trabajo de justificar, y nada más.
+
+       ⚠️ SU LÍMITE, ESCRITO: el lint cuenta, **no puede saber CUÁL
+       declaración corresponde a CUÁL pie**. *Su verde dice «hay tantas
+       razones escritas como pies», jamás «cada razón es la correcta».*
+       Esa mitad no se mecaniza honestamente y se lee en revisión. */
+    const razones = [...src.matchAll(/R53-DECLARADO:\s*\S.{15,}/g)].length
+    if (razones >= pies) {
+      declarados.push(path)
+      continue
+    }
+    ofensores.push(`${path}${razones > 0 ? `  (${pies} pie(s), ${razones} declarado(s))` : ''}`)
+  }
+  const nuevos = ofensores.filter((o) => !BASELINE_R53.some((b) => o.endsWith(b) || b.endsWith(o)))
+  if (nuevos.length > 0)
+    fallos.push(
+      `R53: ${nuevos.length} pantalla(s) NUEVA(S) dibujan un pie fijo a mano (baseline ${BASELINE_R53.length} congelado por RUTA). Un pie que el consumidor posiciona es un pie cuyo alto el consumidor tiene que ESTIMAR — y estimarlo es el defecto que tapó la composición y los alérgenos en la ficha. Montá \`PantallaConPie\`: el pie se mide a sí mismo y esa misma medida reserva el scroll.\n   ${nuevos.join('\n   ')}`,
+    )
+  /* EL ANCLA MIDE EL SUJETO, JAMÁS A LOS INFRACTORES (L-291): lo que esta
+     regla necesita para no estar ciega no es que alguien la viole —el día
+     que las 11 migren, `ofensores` es 0 y eso es su ÉXITO— sino que la
+     pieza a la que manda SIGA EXISTIENDO. Si `PantallaConPie` desaparece,
+     la regla apunta a la nada y su silencio pasa a significar «no miré». */
+  const indice = readFileSync('packages/ui/src/index.ts', 'utf8')
+  const destino = /export \{\s*PantallaConPie\b/.test(indice) ? 1 : 0
+  fallos.push(...ancla('R53', destino, 1, 'la pieza destino `PantallaConPie` exportada desde packages/ui (0 = la regla se quedó sin a dónde mandar)'))
+  return {
+    fallos,
+    info: `${ofensores.length} con pie fijo a mano · ${declarados.length} declarado(s)${declarados.length > 0 ? ` (${declarados.map((d) => d.split('/').pop()).join(' · ')})` : ''} · baseline ${BASELINE_R53.length} congelado por ruta · su verde dice «el pie lo pone la pieza», jamás «nada tapa a nada»`,
+  }
+}
+
+/* 🔴 EL BASELINE MURIÓ EN S100b-A, y la regla NO: son dos cosas distintas.
+   El 1 no era una excepción de diseño — era la orden de mesa al registrar el
+   gate («no curar nada, S101 lo toma con plan»). **Esa razón se agotó cuando
+   el control salió**, así que la deuda se cierra en su número y la ley pasa a
+   DURA EN 0. Lo que muere es la tolerancia, jamás el diente: R52 existe para
+   que el control **no vuelva**, y ese trabajo empieza recién ahora. */
+const BASELINE_R52 = 0
 
 function r52(archivos) {
   const fallos = []
@@ -3633,10 +3841,10 @@ function r52(archivos) {
       ofensores.push(path.split('/').pop())
     }
   }
-  // 🔴 BASELINE SOLO-BAJA, y es una DEUDA declarada, no una excepción: la orden
-  // de mesa al registrar el gate fue **no curar nada**, así que el control sigue
-  // montado hasta S101. La ley queda mecanizada igual — lo que no puede pasar es
-  // que CREZCA. ☠️ Muere cuando llegue a 0.
+  // ☠️ DURA EN 0 desde S100b-A: el control salió del checkout y la tolerancia
+  // se cerró con él (ver la nota del baseline). De acá en más cualquier
+  // reaparición es un fallo, que es exactamente para lo que la regla se
+  // escribió — el control ya volvió tres veces.
   if (ofensores.length > BASELINE_R52)
     fallos.push(
       `R52: «Programar otra fecha» está montado en ${ofensores.length} archivo(s) (${ofensores.join(' · ')}), baseline ${BASELINE_R52} SOLO-BAJA. DEROGADO por firma del founder (17-ago-2026, gate de S100) y tachado en \`LETRA_RECORRIDO_DESPENSA_S96\` §6.2. El control SALE del checkout; el CUPO por día futuro y el \`p_fecha_programada\` del motor SIGUEN VIGENTES — se quitó la puerta, no el motor.`,
@@ -3644,11 +3852,11 @@ function r52(archivos) {
   fallos.push(...ancla('R52', archivos.filter((a) => a.path.includes('/despensa/')).length, 1, 'archivo(s) de despensa en el corpus'))
   return {
     fallos,
-    info: `${ofensores.length} monta(n) el control derogado · baseline ${BASELINE_R52} solo-baja (dueño A, S101) · firma founder 17-ago-2026`,
+    info: `${ofensores.length} monta(n) el control derogado · DURA EN 0 desde S100b-A (la puerta salió; el \`p_fecha_programada\` del motor sigue vivo) · firma founder 17-ago-2026`,
   }
 }
 
-const REGLAS = { R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -3925,6 +4133,8 @@ corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps
 corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
+corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...appsCodigo])]);
+corridas.push(['R54 (el pie no se envuelve en un View que capture)', r54([...apps, ...appsCodigo])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

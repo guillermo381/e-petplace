@@ -1533,8 +1533,14 @@ export const clienteEs = {
     carritoVacioDetalle: 'Lo que agregues desde la despensa lo vas a ver acá.',
     carritoVacioIr: 'Volver a la despensa',
     cantidadDe: 'Cantidad de {{nombre}}',
-    quitar: 'Quitar',
+    // ☠️ S100b-A · G-08: murió `quitar`. El botón de texto se fue con la
+    // papelera del stepper — dos controles para la misma intención eran uno de
+    // más, y la voz sin consumidor es la mitad del control esperando.
     paraQuien: '¿Para quién es?',
+    // S100b-A · G-10: la salida al reparto. Voz de familia y en infinitivo
+    // porque EJECUTA (Ley 22c) — no promete una pantalla nueva, abre la
+    // misma lista con una pregunta por producto.
+    repartirEntreMascotas: 'Repartir entre varias mascotas',
     donarEste: 'Donar este producto',
     donacionDetalle:
       'El refugio lo elige e-PetPlace y la entrega la coordina el equipo. Una donación no entra a ningún expediente ni suma beneficios: es un regalo, no una compra con premio.',
@@ -1556,9 +1562,16 @@ export const clienteEs = {
     aDonde: 'A dónde te lo llevamos',
     sinDireccion: 'Todavía no nos contaste tu dirección.',
     agregarDireccion: 'Agregar mi dirección',
-    cambiarDireccion: 'Cambiar la dirección',
+    // ☠️ S100b-A · G-11: murió `cambiarDireccion`. La dirección dejó de tener
+    // un botón propio — la línea con chevron ES el control (referencia Laika).
+    quienRecibe: 'Quién recibe',
+    listoDatos: 'Listo',
     receptorLabel: 'Quién recibe',
     telefonoLabel: 'Teléfono de contacto',
+    // El benchmark lo vuelve barato y obligatorio: 49 % de los sitios NO
+    // explica por qué pide el teléfono, y más del 70 % de los encuestados es
+    // reticente a darlo. Decir para qué es, al lado del campo, cuesta nada.
+    telefonoAyuda: 'Es el número al que llama el repartidor si no encuentra la casa.',
     instruccionesLabel: 'Instrucciones de entrega',
     instruccionesAyuda:
       'Lo que el repartidor tiene que saber: "dejar en portería", "entregar a Carla". Si no hay nadie, esta instrucción decide.',
@@ -1582,10 +1595,13 @@ export const clienteEs = {
     bloqueEntrega: 'Entrega {{i}} de {{n}}',
     ventanaProxima: 'La más próxima',
     sinLugarEseDia: 'Sin lugar ese día',
-    programarFecha: 'Programar otra fecha',
-    programarPlaceholder: 'Elegí un día',
-    programarAyuda: 'Solo se prometen días con capacidad confirmada.',
-    quitarFecha: 'Volver a la entrega más próxima',
+    // ☠️ S100b-A · G-16: murieron `programarFecha`, `programarPlaceholder`,
+    // `programarAyuda` y `quitarFecha` — el control quedó DEROGADO por firma
+    // del founder (17-ago-2026) y `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
+    // tachada. Se borran las claves y no solo el montaje: *una voz sin
+    // consumidor es la mitad del control esperando que alguien la vuelva a
+    // usar* — y este control ya volvió tres veces. El motor conserva su
+    // `p_fecha_programada`; lo que no queda es con qué decirlo.
     resumen: 'El total de tu pedido',
     subtotal: 'Productos',
     impuesto: 'IVA',
@@ -1621,6 +1637,10 @@ export const clienteEs = {
     recurrenciaSinPasarela:
       'El cobro automático se activa cuando esté el medio de pago. Hasta entonces, nada se cobra.',
     recurrenciaCada: '¿Cada cuánto?',
+    // S100b-A · G-13: la voz del hueco. El interruptor dice la intención; la
+    // cadencia la cierra, y mientras falta la pantalla lo DICE.
+    recurrenciaElegiCada: 'Elegí cada cuánto querés que llegue y queda configurado.',
+    recurrenciaQueEs: 'Qué es «Que llegue solo»',
     recurrenciaDias: 'Cada {{n}} días',
     recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
     recurrenciaActiva: 'La compra recurrente quedó configurada.',

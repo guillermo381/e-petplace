@@ -11711,6 +11711,80 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+### Lecciones S100 (L-286 → L-295) — depositadas en la apertura de S100b por orden de mesa, 17-ago-2026
+
+> **Por qué se depositan acá y no quedan en las bitácoras: vivían en `docs/loop/S100-{A,B,C,D}.md` y en la mesa, que es exactamente lo que la pista siguiente NO lee.** La misma jornada lo cobró dos veces — **G-16 volvió cuatro veces** porque la firma que lo prohibía no estaba en la letra, y **N11′ estuvo a punto** porque su bitácora se declaraba «DEPOSITADA VERBATIM» sin estarlo en la letra. ***UNA FIRMA QUE VIVE EN UN PARTE NO ESTÁ FIRMADA.***
+
+- **L-295 — CURAR EL CÓDIGO AJENO RESUELVE EL DEFECTO Y BORRA EL APRENDIZAJE (S100 — ley de método de la mesa; depositada 17-ago-2026).**
+
+  Cuando una pista encuentra un defecto en territorio ajeno y lo cura de paso, **el defecto desaparece y con él desaparece la única evidencia de que esa clase de defecto existe en esa mano.** El dueño no lo ve, no lo mide, y **vuelve a escribirlo** — porque nadie le mostró el patrón, solo le limpiaron el resultado.
+
+  ⇒ **Un hallazgo ajeno viaja como `H-nnn` con dueño, jamás como cura silenciosa.** *La cura barata de hoy es la reincidencia de mañana*, y el costo se paga en la pista que nunca supo que había fallado. **Es lo que vuelve al protocolo de territorios una regla de aprendizaje y no solo de merge.**
+
+- **L-294 — UNA CONCLUSIÓN CORRECTA APOYADA EN UNA PREMISA FALSA ES FRÁGIL AUNQUE FUNCIONE: LA RAZÓN ESCRITA TAMBIÉN SE MIDE (S100 — ley de método de la mesa; depositada 17-ago-2026).**
+
+  Una decisión puede ser **la correcta** y estar sostenida por un motivo que no resiste medición. Mientras el mundo no cambie, nada falla y nadie mira. **Pero la razón es lo que la pista siguiente hereda** — no la conclusión —, y el día que la premisa se vuelve visiblemente falsa, **la decisión buena cae con ella.**
+
+  ⇒ **Se mide el POR QUÉ con el mismo rigor que el QUÉ.** *Una conclusión acertada por el motivo equivocado no es un acierto: es una coincidencia con fecha de vencimiento.* **Hermana directa de L-285** (la variable equivocada se lee tan sólida como la buena) y de L-158 (leer la fuente, no el reporte).
+
+- **L-293 — EL NOMBRE DE UN ARCHIVO ES UNA AFIRMACIÓN NO VERIFICADA HASTA QUE SE ABRE (S100b — la captura de Rappi; depositada 17-ago-2026).**
+
+  **El caso, medido hoy:** una captura de referencia del founder llegó con el nombre **`nuestro-barra-s99-141a372d.png`** — el nombre exacto de **una medición NUESTRA** que vive en `docs/laminas/referencias/`. **Los dos archivos existen y son distintos** (25,7 kB el nuestro · 124 kB la captura de Rappi). *Un `ls` los muestra como el mismo objeto en dos carpetas; solo abrirlos los distingue.*
+
+  ⇒ **Nada se cita, se depende ni se archiva por su nombre: se abre.** El daño de esta clase no es un error visible sino **una vara equivocada** — construir contra la referencia que no era, que es el modo de falla que S99 pasó ocho gates aprendiendo. **Familia de L-235** (el instrumento respondió sobre otra cosa): acá *el archivo respondió por otro archivo*.
+
+- **L-292 — UNA DECISIÓN DE NO-CONSTRUIR QUE NO QUEDA ESCRITA SE VUELVE A PROPONER (S100 — G-16, cuatro veces; depositada 17-ago-2026).**
+
+  **El caso:** el founder pidió quitar «programar otra fecha» **repetidamente**, y **volvió a aparecer cada vez**. Nadie desobedeció: **la letra firmada decía lo contrario** (`LETRA_RECORRIDO_DESPENSA_S96` §6.2 · `MODELO_DESPENSA`) **y la letra gana, porque es lo único que la pista siguiente lee.**
+
+  **⇒ La asimetría que la explica, y es la razón de la ley:** lo construido deja rastro —código, migración, pantalla— y **una decisión de NO construir no deja ninguno**. *Un «sí» se defiende solo; un «no» solo existe si está escrito.* **Se deposita en la letra que lo contradice, tachando y no borrando**, y se mecaniza donde se pueda: *una ley que vive en el lint no se degrada.*
+
+- **L-291 — EL ANCLA DE UNA REGLA MIDE EL SUJETO, JAMÁS A LOS INFRACTORES — Y TODA REGLA TIENE QUE PODER LLEGAR A CERO (S100 — R51 y R50; depositada 17-ago-2026).**
+
+  **Los dos casos, los dos de B y los dos cazados por su propio mecanismo:** **R51** anclaba en *«al menos UN archivo usando legados»* ⇒ **el día que la deuda se pagara entera, la regla habría salido ROJA por ancla rota — se ponía roja cuando la cumplían del todo.** **R50** contaba como ofensor un sitio ya curado por otra vía ⇒ **su contador no podía bajar nunca y quedaba incapaz de registrar su propio éxito.**
+
+  ⇒ **El ancla verifica que el SUJETO siga existiendo** (que los `legacy_*` sigan declarados), no que queden infractores. Si el sujeto desaparece, **eso no es un rojo: es la condición de MUERTE de la regla, y el ancla lo dice en vez de fingir que vigila.**
+
+  **⚠️ Y el corolario operativo: un rojo falso permanente es peor que ninguna regla, porque enseña a ignorar el instrumento.** *Una regla que no puede llegar a cero no está midiendo la propiedad: está midiendo la forma.*
+
+- **L-290 — UNA TABLA CON POLICY Y SIN ESCRITOR NO ES CAPACIDAD PENDIENTE: ES AFIRMACIÓN FALSA CON INFRAESTRUCTURA (S100 — `envio_eventos`; depositada 17-ago-2026).**
+
+  **El caso:** `envio_eventos` tenía tabla, RLS y permisos — **y ningún productor**. *Todo lo que un censo mira decía que la capacidad existía*: el objeto está, la policy está, el grant está. **Lo único que faltaba era lo único que importa: alguien que escriba una fila.** Jubilada en S100-A (`20260820020000_s100a_jubilar_envio_eventos.sql`).
+
+  ⇒ **Una capacidad se mide por su ESCRITOR, jamás por su esquema.** Es más cara que una tabla ausente: la ausente se nota, **la poblada de infraestructura se lee como hecha** y sostiene decisiones ajenas durante sesiones.
+
+  **HERMANA, del mismo día: un comentario que afirma una garantía de la base es una afirmación no verificada hasta que se mide contra la base.** *El comentario y la constraint divergen sin romper nada — el código sigue funcionando y la prosa sigue mintiendo, cada uno en su carril* (D-790). **Y lo peor: una regla que acepta un comentario como prueba premia el mecanismo exacto que produjo el daño** (medido al escribir R50).
+
+- **L-289 — EL PRIMER ELEMENTO DE UNA COLECCIÓN SIN CRITERIO DECLARADO ES UNA DECISIÓN DE NEGOCIO TOMADA POR ACCIDENTE (S100 — CUATRO apariciones; depositada 17-ago-2026).**
+
+  **Las cuatro, medidas:** `publicadas[0]` · `items[0]` · `galeria[0]` · **y la placa del repartidor** (hasta 2 vehículos por repartidor, y `envios` no registra cuál se usó ⇒ *mostrar «la placa» era elegir uno de N*). **Sin orden, el que sale es el que la base devolvió** — y eso no es un default: es **el precio, la foto o la placa que el cliente ve**, elegidos por el planificador de consultas.
+
+  **⇒ Y la formulación que quedó al cuarto cobro, que es más ancha que la regla: la ley no es sobre `.order()` — es sobre si EL CRITERIO EXISTE y QUIÉN LO ESCRIBIÓ.** La placa se resolvió por `orden` ASC **porque ese orden lo escribe el vendedor**. Un `.sort()` por un campo cualquiera cumple la forma y puede no ser criterio de nada.
+
+  **Su mitad mecanizable es R50, con su límite escrito en su propia cabecera:** *su verde dice «acá alguien decidió un orden», jamás «el orden es el correcto».* **La segunda mitad no se mecaniza honestamente: se declara y se enseña.**
+
+- **L-288 — NINGUNA VISTA ALCANZA SOLA: EL CASO LO TIENE QUIEN CONSUME, EL AGUJERO QUE LA FORMA ABRE LO VE QUIEN CONSTRUYE LA PIEZA (S100 — el ensanche de `MapaRecorrido`; depositada 17-ago-2026).**
+
+  **Quien monta una pieza sabe qué necesita y no ve qué rompe**; **quien la construye ve el agujero y no tiene el caso.** Ninguno de los dos puede decidir bien solo, y el modo de falla es asimétrico: *el consumidor pide una prop y obtiene una pieza que sirve a un caso y se degrada para los otros N.*
+
+  **⇒ La forma del pedido es la ley: SE PIDE CON EL CASO, JAMÁS CON LA FIRMA IMAGINADA.** Quien construye elige la forma —slot en vez de diccionario, unión discriminada en vez de props opcionales— **porque es el único que ve a los demás consumidores.**
+
+  **El caso que la prueba en las dos direcciones:** D pidió con el caso y recibió **slot** (`marcadorVivo`) en vez de un diccionario que habría obligado al mapa a conocer cada oficio; **y en el mismo lote la pieza de B impedía la migración del espejo** —cuatro props obligatorias de carrito— *obligando a mentir props para lograr una combinación legítima*, que es **el defecto de la pieza** y solo se vio con el segundo consumidor en la mano.
+
+- **L-287 — LO QUE DELATA A UN INSTRUMENTO ES UN NÚMERO QUE NO COINCIDE CON OTRO: UN RATCHET SIN LÍNEA BASE NO TIENE CON QUÉ CONTRADECIRSE (S100 — R50, dos veces en un día; depositada 17-ago-2026).**
+
+  **El caso, y se cobró DOS veces sobre la misma regla:** R50 nació preguntando *«¿el ARCHIVO tiene `.order(`?»* — y el archivo del defecto tenía **cinco `.order(` en otras consultas** ⇒ la regla **salió VERDE sobre el defecto que vino a cazar**. Curada la exención a local, **volvió a medir mal**: miraba 600 chars **antes** del `filter`, y el orden vive **después**.
+
+  **Las dos veces la delató lo mismo: la regla decía 0 y su baseline decía 2.** *Ningún ojo leyendo el código con más cuidado las habría encontrado — las dos versiones se leían perfectamente razonables.*
+
+  ⇒ **Toda regla, censo o ratchet nace con su línea base medida por un camino DISTINTO del que usa la regla.** Un verde sin con qué contrastarse no es una medición: es una afirmación. **Y su fixture prueba que DISCRIMINA, no que dispara** (corolario de L-236).
+
+- **L-286 — SE CORRE EL INSTRUMENTO CONTRA EL OBJETO; JAMÁS SE RELEE EL CÓDIGO CON MÁS CUIDADO (S100 — las tres veces que la medición corrigió a quien la hizo; depositada 17-ago-2026).**
+
+  **La evidencia es la distribución, no el argumento:** las tres veces que en S100 la medición corrigió a quien la había hecho, **ninguna se veía leyendo mejor.** Releer es barato y **produce confianza sin producir información** — el código que uno acaba de escribir se lee como uno lo pensó, no como quedó.
+
+  ⇒ **Ante una duda sobre el comportamiento, se corre algo: el instrumento, el fixture, la consulta, la app.** *Releer confirma la intención; correr mide el resultado.* **Es la raíz común de L-287** (el número que contradice), **L-290** (el escritor que no existe) **y L-293** (el archivo que no es el que dice ser): en las tres, lo que faltaba era **tocar el objeto**.
+
 - **L-285 — DECLARAR CONTRA QUÉ MEDISTE TE SALVA DE LA GEOMETRÍA VIEJA; NO TE SALVA DE HABER MEDIDO LA VARIABLE EQUIVOCADA (S99 — el descarte de «a sangre», vencido POR PARTIDA DOBLE; depositada 16-ago-2026).**
 
   **El caso.** Un freno descartó la barra a sangre con su medición declarada —*centro del primer tab a 39, el valle pidiendo 43*—. **Y estaba vencido por DOS motivos independientes:** ① la **geometría** cambió (el valle nuevo es más angosto) — *eso lo destapó la ley de S84, porque el freno había declarado sus números* · ② **medía la variable equivocada**. Literal de B: ***«si se midiera sobre el ancho total, ir a sangre habría empujado el primer centro hacia el borde y el clamp habría tirado MÁS fuerte, no menos»*** — el tab **se mide sobre el CONTENIDO, no sobre la barra**, y con la variable equivocada **el razonamiento se invierte**: la conclusión no era solo vieja, era **al revés**.

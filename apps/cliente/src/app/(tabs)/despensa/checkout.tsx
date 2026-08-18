@@ -47,22 +47,23 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
   Boton,
   Campo,
-  CampoFecha,
-  Celda,
+  CeldaNavegacion,
   Encabezado,
   EstadoVacio,
   EvitaTeclado,
   Hoja,
+  Icono,
   Interruptor,
+  PantallaConPie,
   SelectorOpcion,
   SelectorVentana,
   Separador,
+  Tarjeta,
   Texto,
   spacing,
   useAviso,
@@ -103,7 +104,6 @@ export default function DespensaCheckout() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
-  const insets = useSafeAreaInsets();
   const items = useCarrito();
   const navigation = useNavigation();
 
@@ -116,6 +116,8 @@ export default function DespensaCheckout() {
   const [receptor, setReceptor] = useState('');
   const [telefono, setTelefono] = useState('');
   const [instrucciones, setInstrucciones] = useState('');
+  /** G-11 · quién recibe se EDITA en su Hoja, no en la pantalla de revisar. */
+  const [hojaReceptor, setHojaReceptor] = useState(false);
 
   // ── La ventana de entrega ──────────────────────────────────────────────
   const [promesa, setPromesa] = useState<PromesaEntrega | 'cargando' | { fallo: string } | null>(null);
@@ -125,9 +127,6 @@ export default function DespensaCheckout() {
    *  lleno se DIBUJA con su porqué — no desaparece (Ley 23 al revés: la
    *  puerta tampoco esconde lo que el usuario busca). */
   const [ventanas, setVentanas] = useState<OpcionVentana[] | 'cargando' | null>(null);
-  const [mostrarCalendario, setMostrarCalendario] = useState(false);
-  /** La altura REAL de la barra del CTA (cambia por fase). */
-  const [barAlto, setBarAlto] = useState(0);
 
   // ── El pedido del motor ────────────────────────────────────────────────
   const clave = useRef(nuevaClaveIdempotencia());
@@ -145,9 +144,17 @@ export default function DespensaCheckout() {
   const [trabajando, setTrabajando] = useState(false);
 
   // ── La recurrencia (éxito) ─────────────────────────────────────────────
-  const [cadencia, setCadencia] = useState<number>(30);
+  /** 🔴 `null` = TODAVÍA NO ELIGIÓ, y no es lo mismo que 30 (G-13). El 30 que
+   *  vivía acá era un default que el interruptor habría comprometido contra el
+   *  motor sin que nadie lo dijera — *un default es una decisión que alguien
+   *  toma en nombre de otro y no queda registrada.* */
+  const [cadencia, setCadencia] = useState<number | null>(null);
   const [recurrenciaId, setRecurrenciaId] = useState<string | null>(null);
   const [activandoRec, setActivandoRec] = useState(false);
+  /** La INTENCIÓN, separada del hecho: el interruptor la expresa, la cadencia
+   *  la cierra. Sin esta separación el interruptor mentiría en el medio. */
+  const [quiereRecurrencia, setQuiereRecurrencia] = useState(false);
+  const [hojaRecurrencia, setHojaRecurrencia] = useState(false);
 
   /**
    * 🔴 S100 · LOS GRUPOS POR VENDEDOR — el cabezal (F5).
@@ -441,6 +448,10 @@ export default function DespensaCheckout() {
   async function alternarRec(encendido: boolean) {
     if (activandoRec) return;
     if (!encendido) {
+      setQuiereRecurrencia(false);
+      setCadencia(null);
+      // Apagar con la intención puesta y sin cadencia elegida no toca el
+      // motor: nunca se creó nada que apagar.
       if (recurrenciaId === null) return;
       setActivandoRec(true);
       const r = await alternarRecurrencia(recurrenciaId, false);
@@ -453,6 +464,14 @@ export default function DespensaCheckout() {
       mostrar({ texto: t('despensa.recurrenciaApagada'), variante: 'exito' });
       return;
     }
+    // Prender declara la INTENCIÓN y revela las frecuencias. El motor se toca
+    // recién cuando la familia dice cada cuánto (G-13).
+    setQuiereRecurrencia(true);
+  }
+
+  /** Lo que SÍ compromete al motor, con la cadencia que la familia eligió. */
+  async function activarRecurrenciaCon(dias: number) {
+    if (activandoRec || recurrenciaId !== null) return;
     if (cuentaComercialId === null) return;
     setActivandoRec(true);
     // 🔴 SIEMPRE el ref (vara de C ②): en el éxito el carrito puede
@@ -463,7 +482,7 @@ export default function DespensaCheckout() {
       cuenta_comercial_id: cuentaComercialId,
       items: itemsCompradosRef.current,
       entrega: entregaCompradaRef.current,
-      frecuencia_dias: cadencia,
+      frecuencia_dias: dias,
       metodo_entrega: metodo,
     });
     setActivandoRec(false);
@@ -524,6 +543,52 @@ export default function DespensaCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, pedidos, fase, trabajando]);
 
+  /** EL PIE POR FASE — el apagado dice qué falta.
+   *  `undefined` cuando no hay acción (carrito vacío): la pieza entonces NO
+   *  dibuja pie y NO reserva nada. *Antes esa rama pintaba una barra vacía y
+   *  le robaba su alto al contenido igual.* */
+  const pieDelCta =
+    fase === 'armado' && items.length > 0 ? (
+      <>
+        {falta !== null ? <Texto variante="apoyo">{falta}</Texto> : null}
+        <Boton
+          etiqueta={t('despensa.verTotal')}
+          bloque
+          cargando={trabajando}
+          deshabilitado={falta !== null}
+          onPress={() => void verTotal()}
+        />
+      </>
+    ) : fase === 'resumen' ? (
+      /* 🔴 G-12 · UN SOLO SÓLIDO. Eran DOS botones del mismo peso apilados
+         —«Pagar (simulado)» y «Volver a editar»—, y B lo dijo con la frase
+         justa: *dos bloques del mismo peso significan que nadie decidió cuál
+         importa.* Acá importa pagar; volver a editar es la salida, y una
+         salida no compite con el destino.
+         Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
+         label sin chevron. */
+      <>
+        <Boton
+          etiqueta={t('despensa.pagarSimulado')}
+          bloque
+          cargando={trabajando}
+          onPress={() => void pagar()}
+        />
+        <Boton
+          variante="ghost"
+          bloque
+          etiqueta={t('despensa.volverAEditar')}
+          onPress={() => void volverAEditar()}
+        />
+      </>
+    ) : fase === 'exito' ? (
+      <Boton
+        etiqueta={t('despensa.verTusPedidos')}
+        bloque
+        onPress={() => router.replace('/despensa/pedidos')}
+      />
+    ) : undefined;
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {fase === 'exito' ? (
@@ -547,16 +612,20 @@ export default function DespensaCheckout() {
       )}
 
       <EvitaTeclado>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          paddingTop: spacing[4],
-          // La cola del scroll = la barra MEDIDA (vara de C ⑧: la barra
-          // tiene una altura en armado y otra en resumen — un número
-          // crudo mentía a medias) + aire.
-          paddingBottom: (barAlto > 0 ? barAlto : insets.bottom + spacing[8]) + spacing[6],
-          gap: spacing[5],
-        }}
+      {/* 🔴 H-105 · EL PIE RESERVA SU PROPIO LUGAR (pieza de B).
+          Esta pantalla YA derivaba su reserva con un `onLayout` propio, así
+          que su solape ③ —«Instrucciones de entrega» debajo del CTA— **no lo
+          explicaba la estimación**, que era la causa del carrito. Se monta la
+          pieza igual, y por dos razones: deja UNA sola anatomía de pie en la
+          despensa (el `barAlto` a mano era el segundo mecanismo, y dos
+          mecanismos divergen), y mete el pie DENTRO del `EvitaTeclado`, que es
+          la hipótesis viva de ese solape — antes el CTA vivía afuera y no se
+          movía con el teclado. **Lo confirma el aparato, no yo**: queda pedido
+          a B, que lo tiene. */}
+      <PantallaConPie
+        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
+        contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
+        pie={pieDelCta}
       >
         {fase === 'armado' ? (
           items.length === 0 ? (
@@ -608,38 +677,56 @@ export default function DespensaCheckout() {
                         />
                       </View>
                     ) : (
-                      <>
-                        <Celda
-                          titulo={direccion.direccion}
-                          subtitulo={[direccion.ciudad, direccion.referencias]
-                            .filter((x): x is string => x !== null && x !== '')
-                            .join(' · ')}
-                        />
-                        <View style={{ paddingHorizontal: spacing[5] }}>
-                          <Boton
-                            variante="secundario"
-                            etiqueta={t('despensa.cambiarDireccion')}
-                            onPress={() => setHojaDireccion(true)}
-                          />
-                        </View>
-                      </>
+                      /* 🔴 G-11 · LA DIRECCIÓN ES UNA LÍNEA CON CHEVRON, no un
+                         botón. Acá vivía un `Boton secundario` de ancho casi
+                         completo debajo de la dirección — dos bloques para una
+                         cosa. La industria (referencia-laika-direccion) usa la
+                         propia línea como el control, y la casa ya tiene esa
+                         anatomía: `CeldaNavegacion`.
+                         E14 lo autoriza con chevron a la derecha: no navega a
+                         otra pantalla, pero **abre el formulario que la
+                         resuelve**, que es el mismo criterio. */
+                      <CeldaNavegacion
+                        titulo={direccion.direccion}
+                        detalle={[direccion.ciudad, direccion.referencias]
+                          .filter((x): x is string => x !== null && x !== '')
+                          .join(' · ')}
+                        onPress={() => setHojaDireccion(true)}
+                      />
                     )}
                   </View>
 
-                  {/* 3 · QUIÉN RECIBE + LA INSTRUCCIÓN QUE DECIDE (§9.3) */}
+                  {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
+                      ═══════════════════════════════════════════════════════
+                      Eran DOS campos de edición abiertos en la pantalla donde
+                      la familia REVISA antes de pagar. El gate pidió que se
+                      muestren fijos: *editar es otro momento.* Un campo abierto
+                      invita a escribir; acá el trabajo es leer y confirmar.
+
+                      LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
+                      del perfil no siempre es quien recibe— pero por un toque
+                      explícito, no por tener el cursor a mano.
+
+                      Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
+                      resuelve: mostrar fijo un vacío sería un callejón, que es
+                      peor que el campo que se sacó. */}
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
+                    </View>
+                    <CeldaNavegacion
+                      titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
+                      detalle={
+                        telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
+                      }
+                      onPress={() => setHojaReceptor(true)}
+                    />
+                  </View>
+
+                  {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
+                      la pantalla, tal como pidió el gate. Y es justo el que
+                      quedaba tapado por el CTA (medición de B, solape ③). */}
                   <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                    <Campo
-                      label={t('despensa.receptorLabel')}
-                      value={receptor}
-                      onChangeText={setReceptor}
-                      autoCapitalize="words"
-                    />
-                    <Campo
-                      label={t('despensa.telefonoLabel')}
-                      value={telefono}
-                      onChangeText={setTelefono}
-                      keyboardType="phone-pad"
-                    />
                     <Campo
                       label={t('despensa.instruccionesLabel')}
                       value={instrucciones}
@@ -682,7 +769,8 @@ export default function DespensaCheckout() {
                         ) : null}
                       </>
                     )}
-                    {/* Las opciones — el día lleno se DIBUJA con su porqué. */}
+                    {/* Las opciones — el día lleno se DIBUJA con su porqué.
+                        ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
                     {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
                       <SelectorVentana
                         opciones={ventanas}
@@ -693,37 +781,36 @@ export default function DespensaCheckout() {
                           } else {
                             setFechaElegida({ fecha: clave, precision: 'exacta' });
                           }
-                          setMostrarCalendario(false);
                         }}
-                        onProgramarOtra={() => setMostrarCalendario(true)}
-                        etiquetaProgramarOtra={t('despensa.programarFecha')}
                       />
                     ) : null}
-                    {mostrarCalendario ||
-                    (fechaElegida !== undefined &&
-                      Array.isArray(ventanas) &&
-                      !ventanas.some((v) => v.clave === fechaElegida.fecha)) ? (
-                      <>
-                        <CampoFecha
-                          label={t('despensa.programarFecha')}
-                          valor={fechaElegida}
-                          onChange={setFechaElegida}
-                          placeholder={t('despensa.programarPlaceholder')}
-                          ayuda={t('despensa.programarAyuda')}
-                          tituloHoja={t('despensa.programarFecha')}
-                        />
-                        {fechaElegida !== undefined ? (
-                          <Boton
-                            variante="secundario"
-                            etiqueta={t('despensa.quitarFecha')}
-                            onPress={() => {
-                              setFechaElegida(undefined);
-                              setMostrarCalendario(false);
-                            }}
-                          />
-                        ) : null}
-                      </>
-                    ) : null}
+                    {/* ═══════════════════════════════════════════════════════
+                        ☠️ ACÁ VIVÍA «PROGRAMAR OTRA FECHA» — DEROGADO POR FIRMA
+                        DEL FOUNDER (17-ago-2026, gate de S100 · G-16).
+                        Murieron: el `onProgramarOtra` del SelectorVentana, el
+                        `CampoFecha` que abría, el estado `mostrarCalendario` y
+                        las voces `programarFecha` / `programarPlaceholder` /
+                        `programarAyuda` / `quitarFecha`.
+
+                        POR QUÉ ESTA LÁPIDA Y NO UN BORRADO LIMPIO: el founder
+                        lo pidió quitar REPETIDAMENTE y volvía en cada ronda.
+                        No fue desobediencia — la letra decía «Entra» y la letra
+                        gana. Hoy `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
+                        tachada con su razón, y `verify:diseno` R52 lo vigila.
+
+                        QUÉ **NO** MURIÓ, para que nadie lo barra de más: el
+                        CUPO por día futuro sigue vigente y es lo que respalda
+                        la promesa, y `calcular_promesa_despensa` conserva su
+                        `p_fecha_programada` — eso es MOTOR. Se quitó la puerta,
+                        no el motor: el día que vuelva por decisión, vuelve sin
+                        reconstruirse. `SelectorVentana` conserva su prop
+                        opcional intacta por el mismo motivo.
+
+                        Y volver a la más próxima NO se perdió: la opción
+                        `proxima` del propio selector la devuelve (por eso el
+                        botón «quitarFecha» se fue con el bloque y no dejó
+                        callejón).
+                        ═══════════════════════════════════════════════════════ */}
                   </View>
                 </>
               )}
@@ -745,8 +832,15 @@ export default function DespensaCheckout() {
               </View>
             ) : null}
 
+            {/* 🔴 G-12 · CADA ENTREGA ES UNA CARTA, no un bloque apoyado sobre
+                el fondo pelado. Sin superficie, N entregas se leen como una
+                lista larga y no como N cosas separadas — que es justo lo que
+                la división tiene que comunicar. La carta es el borde que dice
+                dónde termina una entrega y empieza la otra. */}
             {pedidos.map((p, i) => (
-              <View key={p.pedido_id} style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+              <View key={p.pedido_id} style={{ paddingHorizontal: spacing[5] }}>
+                <Tarjeta>
+                  <View style={{ gap: spacing[2] }}>
                 {pedidos.length > 1 ? (
                   <Texto variante="seccion">
                     {t('despensa.bloqueEntrega', { i: i + 1, n: pedidos.length })}
@@ -784,6 +878,8 @@ export default function DespensaCheckout() {
                     monto={dinero(p.envio)}
                   />
                 ) : null}
+                  </View>
+                </Tarjeta>
               </View>
             ))}
 
@@ -822,6 +918,13 @@ export default function DespensaCheckout() {
             {/* §6.1 — LA RECURRENCIA, con el mensaje honesto VERBATIM. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               <Separador />
+              {/* 🔴 G-13 · EL TÍTULO, LA «i» Y EL INTERRUPTOR — nada más.
+                  Acá vivían DOS párrafos explicativos SIEMPRE visibles (60.8 +
+                  40.5 dp medidos por B) sobre una pantalla cuyo trabajo es
+                  decir «quedó creado». La letra §6.1 exige que el mensaje sea
+                  VERBATIM, y lo sigue siendo — cambia DÓNDE se lee, no qué
+                  dice: *una condición que hay que leer sí o sí no se borra;
+                  se pone donde no le gane a lo que la persona vino a hacer.* */}
               <View
                 style={{
                   flexDirection: 'row',
@@ -829,87 +932,70 @@ export default function DespensaCheckout() {
                   justifyContent: 'space-between',
                 }}
               >
-                <View style={{ flex: 1, paddingRight: spacing[3] }}>
+                <View
+                  style={{
+                    flex: 1,
+                    paddingRight: spacing[3],
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing[2],
+                  }}
+                >
                   <Texto variante="seccion">{t('despensa.recurrenciaTitulo')}</Texto>
+                  <Pressable
+                    onPress={() => setHojaRecurrencia(true)}
+                    hitSlop={12}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('despensa.recurrenciaQueEs')}
+                  >
+                    <Icono nombre="info" tamano={20} registro="capa" />
+                  </Pressable>
                 </View>
                 <Interruptor
-                  encendido={recurrenciaId !== null}
+                  encendido={quiereRecurrencia}
                   onCambio={(v) => void alternarRec(v)}
                   etiqueta={t('despensa.recurrenciaTitulo')}
                 />
               </View>
-              {/* El mensaje de la letra, verbatim (decisión ⑤ de la mesa). */}
-              <Texto variante="apoyo">{t('despensa.recurrenciaHonesta')}</Texto>
-              <Texto variante="apoyo">{t('despensa.recurrenciaSinPasarela')}</Texto>
-              {recurrenciaId === null ? (
-                <SelectorOpcion
-                  etiqueta={t('despensa.recurrenciaCada')}
-                  opciones={CADENCIAS.map((d) => ({
-                    codigo: String(d),
-                    etiqueta: t('despensa.recurrenciaDias', { n: d }),
-                  }))}
-                  seleccionada={String(cadencia)}
-                  onSelect={(c) => setCadencia(Number(c))}
-                  acento="control"
-                />
-              ) : (
-                <Texto variante="apoyo">{t('despensa.recurrenciaLista')}</Texto>
-              )}
+              {/* LAS FRECUENCIAS NO EXISTEN HASTA QUE EL INTERRUPTOR ESTÁ
+                  ENCENDIDO (G-13). Y el interruptor expresa la INTENCIÓN: lo
+                  que cierra el trato es elegir cada cuánto.
+                  POR QUÉ ASÍ Y NO «prender y listo con 30 por defecto»: el
+                  motor NO es idempotente —`configurar_recurrencia` no toma
+                  clave de idempotencia—, así que prender con un default y
+                  dejar cambiarlo después crearía DOS recurrencias, o exigiría
+                  apagar y volver a crear dejando una fila muerta. *Comprometer
+                  al motor con un número que la familia todavía no eligió es
+                  inventarle una decisión.* Con este orden se crea UNA, con la
+                  cadencia que ella dijo. */}
+              {quiereRecurrencia ? (
+                recurrenciaId === null ? (
+                  <>
+                    <SelectorOpcion
+                      etiqueta={t('despensa.recurrenciaCada')}
+                      opciones={CADENCIAS.map((d) => ({
+                        codigo: String(d),
+                        etiqueta: t('despensa.recurrenciaDias', { n: d }),
+                      }))}
+                      seleccionada={cadencia === null ? '' : String(cadencia)}
+                      onSelect={(c) => {
+                        setCadencia(Number(c));
+                        void activarRecurrenciaCon(Number(c));
+                      }}
+                      acento="control"
+                    />
+                    {/* El apagado dice qué falta — regla de la casa. */}
+                    <Texto variante="apoyo">{t('despensa.recurrenciaElegiCada')}</Texto>
+                  </>
+                ) : (
+                  <Texto variante="apoyo">{t('despensa.recurrenciaLista')}</Texto>
+                )
+              ) : null}
             </View>
           </>
         ) : null}
-      </ScrollView>
+      </PantallaConPie>
       </EvitaTeclado>
-
-      {/* LA BARRA DEL CTA por fase — el apagado dice qué falta. */}
-      <View
-        onLayout={(e) => setBarAlto(e.nativeEvent.layout.height)}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          paddingHorizontal: spacing[5],
-          paddingTop: spacing[3],
-          paddingBottom: insets.bottom + spacing[3],
-          backgroundColor: theme.bg.base,
-          gap: spacing[2],
-        }}
-      >
-        {fase === 'armado' && items.length > 0 ? (
-          <>
-            {falta !== null ? <Texto variante="apoyo">{falta}</Texto> : null}
-            <Boton
-              etiqueta={t('despensa.verTotal')}
-              bloque
-              cargando={trabajando}
-              deshabilitado={falta !== null}
-              onPress={() => void verTotal()}
-            />
-          </>
-        ) : fase === 'resumen' ? (
-          <>
-            <Boton
-              etiqueta={t('despensa.pagarSimulado')}
-              bloque
-              cargando={trabajando}
-              onPress={() => void pagar()}
-            />
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('despensa.volverAEditar')}
-              onPress={() => void volverAEditar()}
-            />
-          </>
-        ) : fase === 'exito' ? (
-          <Boton
-            etiqueta={t('despensa.verTusPedidos')}
-            bloque
-            onPress={() => router.replace('/despensa/pedidos')}
-          />
-        ) : null}
-      </View>
 
       {/* LA HOJA DE DIRECCIÓN — la captura es UNA en toda la casa (el
           formulario compartido de S79); agregar sin salir del flujo (§7). */}
@@ -928,6 +1014,66 @@ export default function DespensaCheckout() {
             setHojaDireccion(false);
           }}
         />
+      </Hoja>
+
+      {/* G-11 · LOS DATOS DE ENTREGA SE EDITAN ACÁ, en su momento.
+          ⚠️ HUECO DECLARADO, no un olvido: el teléfono va con `Campo` y **le
+          falta el selector de indicativo** que el gate pidió. La pieza de la
+          casa existe (`ControlTelefono`: selector + campo con UN pie, porque
+          lo que se valida es el E.164 que forman JUNTOS) pero vive en
+          `apps/prestador/src/components/perfil-piezas` — **no está en
+          `packages/ui`**, así que este lado no la alcanza.
+          Pedido a B: promoverla (precedente D-498, «la casa tiene UNA»).
+          NO se clona de este lado: un segundo teléfono con su propia idea de
+          E.164 es exactamente lo que esa deuda cerró.
+          Y ojo con lo que NO es defecto: un `+57` sobre una dirección de Quito
+          está BIEN — P21, la cuenta es global y el país es contexto de
+          operación (medición de B en el gate). */}
+      <Hoja
+        visible={hojaReceptor}
+        onCerrar={() => setHojaReceptor(false)}
+        titulo={t('despensa.quienRecibe')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Campo
+            label={t('despensa.receptorLabel')}
+            value={receptor}
+            onChangeText={setReceptor}
+            autoCapitalize="words"
+          />
+          <Campo
+            label={t('despensa.telefonoLabel')}
+            value={telefono}
+            onChangeText={setTelefono}
+            keyboardType="phone-pad"
+            placeholder="+593 99 123 4567"
+            ayuda={t('despensa.telefonoAyuda')}
+          />
+          <Boton
+            etiqueta={t('despensa.listoDatos')}
+            bloque
+            onPress={() => setHojaReceptor(false)}
+          />
+        </View>
+      </Hoja>
+
+      {/* G-13 · LA «i». Los dos mensajes de §6.1 VERBATIM — no se recortaron
+          ni se reescribieron al mudarlos: la letra los firmó así, y una
+          condición de cobro que se resume deja de ser la condición. */}
+      <Hoja
+        visible={hojaRecurrencia}
+        onCerrar={() => setHojaRecurrencia(false)}
+        titulo={t('despensa.recurrenciaTitulo')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('despensa.recurrenciaHonesta')}</Texto>
+          <Texto variante="cuerpo">{t('despensa.recurrenciaSinPasarela')}</Texto>
+          <Boton
+            etiqueta={t('despensa.listoDatos')}
+            bloque
+            onPress={() => setHojaRecurrencia(false)}
+          />
+        </View>
       </Hoja>
     </View>
   );
