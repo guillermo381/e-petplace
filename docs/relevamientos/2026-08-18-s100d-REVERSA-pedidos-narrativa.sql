@@ -1,0 +1,35 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260820090000_s100d_pedidos_narrativa_security_invoker.sql`
+-- Escrita ANTES de aplicar la migración (regla de la casa).
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- 🔴 QUÉ DESHACE Y QUÉ **NO**:
+--
+-- DESHACE: devuelve `v_pedidos_narrativa` a ejecutarse con los privilegios de su
+-- DUEÑO (`postgres`), o sea **saltando la RLS de `pedidos`**.
+--
+-- ⚠️ **REVERTIR ESTO REABRE UNA FUGA VIVA ENTRE PERSONAS REALES.** No es un
+-- riesgo teórico: estaba ocurriendo en la pantalla del founder el 18-ago-2026.
+-- Medido con su propio JWT, antes de curar:
+--
+--     pedidos en vuelo que la vista le devolvía …… 13
+--     de esos, AJENOS ………………………………………………………………  1
+--
+-- Bajo el rótulo «Tus pedidos» aparecían pedidos de **tres cuentas distintas**,
+-- una de ellas **de una persona real** — no una cuenta de prueba. Lo que se veía
+-- de un pedido ajeno: nombre del producto, fecha, total, estado, la escalera de
+-- estados y la miniatura.
+--
+-- ⚠️ **Y el argumento que NO sirve para revertir:** *«total, el wrapper ya
+-- filtra por `user_id`»*. **Ese filtro es un TAPÓN, no la defensa.** Vive en el
+-- cliente, solo protege a `listarMisPedidos`, y **cualquier consumidor nuevo de
+-- esta vista nace sin él**. La defensa es la RLS, y es esto.
+--
+-- ⇒ Si algún consumidor se rompe al aplicar la migración, la salida correcta es
+-- darle el gate que le corresponda —la RLS de `pedidos` ya concede al dueño, al
+-- vendedor (`es_vendedor_de`) y al admin—, **jamás devolverle a la vista el
+-- poder de saltarse la RLS de todos.**
+--
+-- NO DESHACE: nada de datos. La migración no toca ni una fila.
+
+ALTER VIEW public.v_pedidos_narrativa SET (security_invoker = false);
