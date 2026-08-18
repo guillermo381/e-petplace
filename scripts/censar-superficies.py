@@ -64,6 +64,18 @@ QUÉ NO VE — el límite, escrito antes de que alguien confíe de más:
     contra una referencia comprimida. **El número que sí cruza formatos es el
     ÁREA DE FONDO en %**, y por eso es el titular de la ley.
 
+🔴 LO QUE ESTE INSTRUMENTO **NO** SIRVE PARA AUDITAR, y hay que decirlo acá
+porque su compañero natural en una sesión con aparato es `uiautomator dump`:
+**NINGUNA AUDITORÍA DE BLANCOS DE 44 (N8) SE HACE DESDE EL ÁRBOL SOLO** (L-299).
+`uiautomator` **no reporta `hitSlop`**: las `bounds` son las del `View`, no las
+del área táctil, así que **sub-reporta por exactamente `2 × hitSlop`**. Medido
+el 18-ago-2026: el carrito del encabezado sale `23,8 dp` en el árbol y su
+blanco real es **48 dp** (`hitSlop={spacing[3]}`), o sea que **cumple N8 con
+margen**. Esta casa usa `hitSlop` como recurso firmado —es la forma de cumplir
+N8 sin agrandar el píxel—, así que el falso positivo es la norma, no la
+excepción. **Todo blanco se verifica contra la FUENTE, o contra el árbol MÁS
+su `hitSlop`.**
+
 USO:
   python3 scripts/censar-superficies.py <captura.png> [--recorte-sup 0.05]
          [--recorte-inf 0.06] [--min-area 0.012] [--json]

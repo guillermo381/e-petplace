@@ -470,14 +470,21 @@ código de hoy —es el `accent` que alguien le agregue mañana a `TextoColor`
 «porque hace falta destacar un dato». **Esta ley existe para que esa línea
 tenga que discutirse en vez de escribirse.**
 
-⚠️ **Y LO QUE NO PUDE REPRODUCIR, declarado en vez de rellenado:** el censo
-**no encuentra en nuestra app el patrón que el founder describe** (color
-usado para jerarquizar dentro de una frase). Los candidatos más cercanos son
-`Pago simulado` en `warning` y las insignias de estado — **los dos son «otra
-clase», o sea legales bajo esta misma ley**. *El caso lo tiene quien lo vio*
-(L-288): **queda como pregunta al founder — en qué pantalla lo notó** — y la
-ley se adopta igual, porque **es correcta con caso o sin él** y su costo es
-cero.
+### ✅ EL SUJETO ERA EL REFERENTE — resuelto por la mesa, 18-ago-2026
+
+**El censo de B no reprodujo el patrón en nuestra app, y no lo rellenó.** La
+mesa lo aclaró: **el founder estaba describiendo LAIKA** —el `7 % OFF` en
+verde junto al precio en negro, la membresía en gris con corona, las etiquetas
+de oferta—, **y la mesa lo transmitió como si el sujeto fuéramos nosotros.**
+
+⇒ **N23 no cura: IMPIDE**, y eso la vuelve más valiosa, no menos. *Una ley que
+nace antes que su defecto es lo más barato que esta casa puede comprar*, y
+ésta ya tiene su caso de estudio **con nombre y medido**: el anti-patrón vive
+en la referencia, en `docs/diseno/referencias/`.
+
+**La lección quedó al canon como L-296:** *un hallazgo cambia de significado
+si se pierde sobre qué objeto se observó.* **Lo cazó medir en vez de aceptar
+el encargo.**
 
 **El anti-patrón, para que la vara quede a la vista:** Laika, en la misma
 tarjeta, pone precio tachado + precio con membresía en color + `% OFF` +
