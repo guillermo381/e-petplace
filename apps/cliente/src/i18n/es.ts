@@ -1761,6 +1761,7 @@ export const clienteEs = {
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
     enCaminoVentana: 'Llega entre',
     enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
+    enCaminoRecentrar: 'Volver al recorrido',
     enCaminoQuienTrae: 'Quién lo trae',
     // S100c-D · la hoja arrastrable. La voz del asa dice QUÉ hace, no cómo
     // se hace (nadie necesita que le expliquen que se arrastra: se agarra).

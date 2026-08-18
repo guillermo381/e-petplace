@@ -1498,6 +1498,7 @@ export const clienteEn = {
     enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
     enCaminoVentana: 'Arrives between',
     enCaminoVentanaDetalle: "It's a window, not an exact time.",
+    enCaminoRecentrar: 'Back to the route',
     enCaminoQuienTrae: 'Who’s bringing it',
     // S100c-D — the draggable sheet, and the honest photo gap.
     enCaminoHojaVerMas: 'See the order details',

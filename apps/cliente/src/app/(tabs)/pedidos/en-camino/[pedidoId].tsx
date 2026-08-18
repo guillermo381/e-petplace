@@ -98,6 +98,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   EscaleraEstados,
+  FichaRepartidor as FichaRepartidorPieza,
   Icono,
   MapaRecorrido,
   MarcaDeMapa,
@@ -159,6 +160,14 @@ export default function DespensaEnCamino() {
   /** El alto REAL del lienzo, medido. De acá salen el mapa y el techo de la
    *  hoja: una sola cuenta, jamás dos que deban coincidir (L-284). */
   const [altoLienzo, setAltoLienzo] = useState(0);
+  /** El alto de la CABECERA de la hoja —lo que queda a la vista con la hoja
+   *  abajo—, MEDIDO. Alimenta el `aireInferior` del recentrar de B: *quien
+   *  monta sabe qué tapa su mapa; la pieza no.*
+   *  Se mide en vez de teclearse por la misma razón que `altoLienzo`: esa
+   *  cabecera crece o se achica con el código, con la voz de la regla y con
+   *  el idioma, y **un número tecleado acá volvería a mentir en el primer
+   *  teléfono distinto** (es el defecto que esta pantalla ya curó en S100b). */
+  const [altoCabecera, setAltoCabecera] = useState(0);
   const [reintento, setReintento] = useState(0);
 
   // ── LA FÍSICA DE LA HOJA — calcada de `paseo/[atencionId]`, que a su vez la
@@ -345,6 +354,39 @@ export default function DespensaEnCamino() {
             return (
               <MapaRecorrido
                 modo="vivo"
+                /* ✅ S100d · PUNTO 24① — *«el mapa NO es navegable»*.
+                   **La causa no era esta pantalla y lo medí antes de pedir:**
+                   `MapaRecorrido` apagaba pan y zoom en `modo="vivo"`
+                   (`scrollEnabled={!esVivo}` / `zoomEnabled={!esVivo}`), y esa
+                   decisión **se tomó para el PASEO** —*«el paseador no navega
+                   el mapa, camina»*, dice su propia cabecera— **y la ENTREGA
+                   la heredó sin que nadie volviera a hacer la pregunta**.
+
+                   🔴 **Y la forma que volvió de B es mejor que la que pedí:**
+                   yo pedí una prop de gestos; ella nombró **el eje — QUIÉN
+                   MIRA**. *Una prop llamada `gestos` habría descrito el
+                   síntoma; `mirada` describe la razón, y por eso la próxima
+                   herencia va a ser explícita en vez de silenciosa.*
+                   Con `'espectador'` entran las tres juntas y **ninguna sirve
+                   sola**: pan+zoom · **el gesto suspende el auto-encuadre**
+                   (sin eso, el próximo fix del GPS le arranca el mapa de la
+                   mano) · **recentrar**, que es el camino de vuelta.
+                   El default sigue siendo `'operador'` ⇒ **el paseo no cambia
+                   una línea.**
+
+                   ⚠️ **Solo se gatea en APARATO:** `MapaRecorrido.web.tsx` no
+                   implementa nada de esto. */
+                mirada="espectador"
+                /* El aire del recentrar sale de la cabecera MEDIDA + el asomo,
+                   que es exactamente lo que la hoja tapa cuando está abajo.
+                   ⚠️ **Con la hoja ARRIBA el control puede quedar detrás de
+                   ella, y se acepta declarado:** con la hoja arriba lo que se
+                   está mirando es la hoja, no el mapa. *Seguir el borde de la
+                   hoja mientras se arrastra pediría atar la prop al valor
+                   animado — un mecanismo nuevo para un control que en ese
+                   estado nadie está buscando.* */
+                aireInferior={altoCabecera + PEEK}
+                etiquetaRecentrar={t('despensa.enCaminoRecentrar')}
                 aSangre
                 alto={altoLienzo}
                 // Sin destino la pieza se comporta como antes (sigue al
@@ -498,7 +540,12 @@ export default function DespensaEnCamino() {
                   La regla de CUÁNDO darlo viaja pegada abajo — separadas, la
                   regla no se lee. */}
               <GestureDetector gesture={pan}>
-                <View>
+                <View
+                  onLayout={(e) => {
+                    const h = e.nativeEvent.layout.height;
+                    setAltoCabecera((previo) => (Math.abs(previo - h) < 0.5 ? previo : h));
+                  }}
+                >
                   {/* 🔴 S100d · EL ASA SALE DEL ÁRBOL DE ACCESIBILIDAD, y no
                       es un descuido: **ahora hay DOS controles que hacen lo
                       MISMO** (el asa y la señal de arrastre de abajo), y
@@ -670,92 +717,51 @@ export default function DespensaEnCamino() {
                       composición se reemplaza por la pieza y **el orden se
                       queda**: lo que se cura acá es la POSICIÓN, y esa no la
                       trae ninguna pieza. */}
-                  {ficha === null ? null : (
-                    <Tarjeta relleno="amplio">
-                      <View style={{ gap: spacing[2] }}>
-                        <Texto variante="apoyo">{t('despensa.enCaminoQuienTrae')}</Texto>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                          {/* 🔴 EL HUECO DE LA FOTO, MARCADO Y DIGNO — DEUDA
-                              FIRMADA, NO UN OLVIDO. `repartidores.foto_path`
-                              vive en `cuenta-documentos`, **el bucket de los
-                              documentos de identidad**; la salida correcta no
-                              es una policy fina sobre un bucket sensible, es
-                              que la foto de perfil viva en SU bucket con su
-                              carga y su consentimiento (fuera de S100).
-                              **Se dibuja el LUGAR, no la cara.** Un avatar
-                              genérico con rostro sería el verosímil-falso más
-                              caro que existe acá: *quien espera en la puerta
-                              compararía una cara que nadie eligió.* El día que
-                              la foto llegue, entra en este círculo y nada más
-                              se mueve. */}
-                          <View
-                            style={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: radius.full,
-                              backgroundColor: theme.bg.hundido,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                            accessible
-                            accessibilityLabel={t('despensa.repartidorSinFoto')}
-                          >
-                            <Icono
-                              nombre="cuenta"
-                              tamano={22}
-                              registro="tinta"
-                              tinta={theme.text.tertiary}
-                            />
-                          </View>
-                          <View style={{ flex: 1, gap: spacing[0.5] }}>
-                            {/* 🔴 LA PLACA MANDA. Medido por B en aparato antes
-                                de esta vuelta: el nombre salía en 24.2 dp y la
-                                placa en 18.8 dp gris — el elemento más chico y
-                                más apagado de la ficha. La referencia de Uber
-                                la pone **arriba y en el cuerpo más grande de la
-                                tarjeta**, y el porqué está en nuestro propio
-                                README: *«la placa es lo que se verifica en la
-                                calle, no la cara»* — y encima **nuestra ficha
-                                no tiene foto**, así que el nombre no alcanza ni
-                                para reconocer a nadie.
+                  {ficha === null || ficha.nombre === null ? null : (
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="apoyo">{t('despensa.enCaminoQuienTrae')}</Texto>
+                      {/* ✅ S100d · LA PIEZA DE B REEMPLAZA MI COMPOSICIÓN — y
+                          lo que se reemplaza es SOLO la composición: **la
+                          POSICIÓN ya estaba curada** y por eso la pieza nace
+                          donde se la ve. *Si hubiera llegado antes de mover el
+                          orden, habría vuelto a desaparecer detrás del segundo
+                          gesto, montada y todo.*
 
-                                ⚠️ **Y NO SUBE A `CodigoAEscala`, A PROPÓSITO.**
-                                En esta misma hoja vive el CÓDIGO DE LA PUERTA
-                                en esa escala, y dos números mono grandes donde
-                                **uno se DICE y el otro se VERIFICA** es cómo
-                                alguien le dice la placa al repartidor. *Una
-                                jerarquía que se arregla creando una confusión
-                                peor no está arreglada.*
+                          Mis cuatro condiciones viven adentro de la pieza como
+                          ley suya —la placa manda, la placa jamás sube a
+                          `CodigoAEscala`, el hueco de la foto se dibuja y
+                          jamás es una cara genérica, y `placa === null` es
+                          primera clase—, así que **esta pantalla dejó de ser
+                          el lugar donde se sostienen**: pasaron de comentario
+                          mío a regla de la casa.
 
-                                🔴 **Y EL CASO SIN PLACA NO ES UN BORDE: es la
-                                MITAD de la cuenta del gate.** Medido hoy
-                                contra la base viva: **2 pedidos `en_camino`,
-                                los dos con repartidor, y UNO con CERO
-                                vehículos cargados.** Por eso la rama sin placa
-                                no dibuja un hueco ni un guion — el nombre sube
-                                a presidir y la ficha se sostiene con lo que
-                                tiene. */}
-                            {ficha.vehiculo_placa === null ? (
-                              <Texto variante="cuerpo">{ficha.nombre}</Texto>
-                            ) : (
-                              <>
-                                <Texto variante="datoMd">{ficha.vehiculo_placa}</Texto>
-                                <Texto variante="apoyo">
-                                  {t(
-                                    ficha.vehiculo_tipo === 'carro'
-                                      ? 'despensa.vehiculoCarro'
-                                      : 'despensa.vehiculoMoto',
-                                  )}
-                                </Texto>
-                                {ficha.nombre === null ? null : (
-                                  <Texto variante="apoyo">{ficha.nombre}</Texto>
-                                )}
-                              </>
-                            )}
-                          </View>
-                        </View>
-                      </View>
-                    </Tarjeta>
+                          🔴 **`nombre === null` NO DIBUJA, y es una rama que
+                          hoy NO SE ALCANZA.** Medido: `repartidores.nombre` es
+                          **NOT NULL** en la base ⇒ el `null` del tipo solo
+                          puede venir del lector, que mapea cadena vacía a
+                          `null`. *Se escribe igual porque el tipo lo admite y
+                          la pieza pide `string`: dejar que TypeScript decida
+                          esto con un `?? ''` pondría una ficha con el nombre
+                          en blanco, que afirma «este repartidor no tiene
+                          nombre».* Si algún día se alcanza, **el costo es
+                          perder la placa** —el dato que se verifica en la
+                          calle— y ahí la pieza necesita admitir nombre nulo:
+                          queda dicho, no descubierto. */}
+                      <FichaRepartidorPieza
+                        nombre={ficha.nombre}
+                        placa={ficha.vehiculo_placa}
+                        vehiculo={
+                          ficha.vehiculo_placa === null
+                            ? null
+                            : t(
+                                ficha.vehiculo_tipo === 'carro'
+                                  ? 'despensa.vehiculoCarro'
+                                  : 'despensa.vehiculoMoto',
+                              )
+                        }
+                        etiquetaFoto={t('despensa.repartidorSinFoto')}
+                      />
+                    </View>
                   )}
 
                   {/* 🔴 S100d · PUNTO 23 — A DÓNDE VA, CON SU GLIFO DE
