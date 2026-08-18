@@ -171,14 +171,25 @@ export default function TabsLayout() {
           {
             key: 'pedidos',
             etiqueta: t('tabs.pedidos'),
-            /* ⚠️ GLIFO PRESTADO — `despensa`, y se dice en vez de taparse.
-             * No hay glifo de «pedido» en el registry y **un glifo se firma
-             * por gate** (§2.9): inventarlo acá sería elegir la forma desde
-             * la palabra, que es la lección que S99 pagó con ocho gates.
-             * *El préstamo tiene costo declarado: DOS tabs vecinas con el
-             * mismo dibujo* — pedido a B, y va al gate como pregunta. */
+            /* ✅ GLIFO PROPIO — el préstamo duró un commit. Yo había montado
+             * `despensa` **declarando su costo** (dos tabs vecinas con el
+             * mismo dibujo) en vez de inventar una forma, porque *un glifo se
+             * firma por gate* (§2.9); **B lo construyó con el pedido en la
+             * mano y su discriminador es LA TAPA** — una costura horizontal de
+             * lado a lado que ni la bolsa (`despensa`) ni el carro (`carrito`)
+             * tienen, y que **sobrevive a 21 px porque es una recta**, no un
+             * detalle de trazo.
+             *
+             * Con esto los tres momentos de la compra se distinguen en la
+             * misma barra: **bolsa = la sección · carro = lo que llevás sin
+             * comprar · caja = lo que ya compraste y viene en camino.** Hereda
+             * el ocre de `despensa`: misma familia, otro momento.
+             *
+             * ⚠️ **SIN GATE DE ÍCONO todavía** — B declaró que no hay
+             * rasterizador SVG en su entorno, así que **nadie lo vio a 21 px**.
+             * Va al ojo del founder junto con `carrito` y `papelera`. */
             icono: ({ color, activa, colorHuella }) => (
-              <Icono nombre="despensa" tinta={color} huella={colorHuella} activa={activa} />
+              <Icono nombre="pedido" tinta={color} huella={colorHuella} activa={activa} />
             ),
           } satisfies BarraTabsItem,
         ]

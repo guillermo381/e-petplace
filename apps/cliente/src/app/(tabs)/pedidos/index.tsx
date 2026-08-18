@@ -24,6 +24,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
+import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -34,6 +35,7 @@ import {
   EstadoVacio,
   Separador,
   TarjetaPedido,
+  radius,
   Texto,
   spacing,
   useTheme,
@@ -291,6 +293,53 @@ export default function DespensaPedidos() {
               return (
                 <TarjetaPedido
                   key={p.pedido_id}
+                  /* 🔴 LA MINIATURA — el pedido literal del founder, y **el
+                     dato que de verdad separa una tarjeta de su vecina**: con
+                     nueve títulos iguales el mismo día, la foto es lo primero
+                     que el ojo distingue.
+
+                     **Se monta con `Image` y NO con `LienzoProducto`, y es
+                     decisión medida:** esa pieza pinta su fondo **también
+                     detrás de la foto** —el «marco lila» que el founder
+                     reportó en el carrito (H-115, cura de A)—, y acá habría
+                     **muchas más miniaturas juntas que en el carrito**, así
+                     que se vería peor. *Evitar la pieza que tiene el defecto
+                     es más barato que depender de que su cura viaje.*
+
+                     **`contain` y no `cover`**, copiado del criterio ya
+                     firmado en la vitrina: *un envase alto y una bolsa ancha
+                     entran enteros; `cover` recortaría justo la etiqueta, que
+                     es lo único que la familia usa para reconocer el
+                     producto.* Y `transition={0}` — Ley 13: nada se anima al
+                     llegar el dato.
+
+                     🔴 **SIN FOTO NO SE DIBUJA NADA**, y eso es contrato de la
+                     pieza: *«ausente NO reserva lugar — el hueco honesto es
+                     que no esté»*. Medido: **5 de 23 pedidos del gate no
+                     tienen foto** (161 de 470 en el catálogo) ⇒ **un cuadrado
+                     vacío en 1 de cada 5 filas se lee como caja rota**, y una
+                     caja rota es peor que no tener miniatura. */
+                  miniatura={
+                    res?.portada == null ? undefined : (
+                      <View
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: radius.sm,
+                          overflow: 'hidden',
+                          backgroundColor: theme.bg.card,
+                        }}
+                      >
+                        <Image
+                          source={{ uri: res.portada }}
+                          contentFit="contain"
+                          style={{ width: 44, height: 44 }}
+                          transition={0}
+                          accessibilityRole="image"
+                        />
+                      </View>
+                    )
+                  }
                   titulo={queTrae ?? t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
                   detalle={
                     queTrae === null
