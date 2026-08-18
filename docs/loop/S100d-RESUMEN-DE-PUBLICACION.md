@@ -84,7 +84,7 @@ cuáles están en este bundle.*
 | # | qué mirar |
 |---|---|
 | **17** | **LA FICHA DE ENTREGA**: los cuatro grupos rotulados (a dónde · quién recibe · instrucciones · cuándo) pasan a vivir sobre **UNA carta**. Y el glifo de ubicación **sin huella dentro** |
-| **20** | el tope de compra: subir por encima del stock **lo dice en la puerta** — «de este producto podemos entregarte N» |
+| **20** | el tope de compra **en las TRES puertas** (ficha · carrito · vitrina): subir por encima del stock **lo dice en la puerta**, jamás en la caja. ✅ **EJERCIDO EN APARATO por C sobre producto real** — `Advantage Perros 10-25 kg`, **stock 2**, `hay_stock = true` (*el caso exacto del founder: el booleano dice «sí se puede comprar» y no puede decir «no alcanza para 3»*): pedir 2 → queda 2 sin voz · pedir 3 → **queda 2 y lo dice** · bajar → sin consulta |
 | **28** | el alias de dirección **es alcanzable**: con UNA sola dirección ahora se puede agregar otra |
 
 ---
@@ -128,6 +128,22 @@ arriba. No es un punto a medias: es lo que el founder autorizó, medido.
   ficha y las cuatro dieron verde; **el «Brilliant · Brilliant» lo encontró
   mirar la captura**, porque ninguna vara preguntaba *«¿estos dos campos dicen
   lo mismo?»*. *Lo que la vara no pregunta, la vara no lo contesta.*
+- 🔴 **Y un instrumento fabricó el defecto que venía a descartar.** El detector
+  de C buscaba la voz por *«podés llevar»* —**su paráfrasis**— y el diccionario
+  dice *«De este producto podemos entregarte N ahora»*. Con esa regex el reporte
+  decía **«(sin voz)»** en el caso acotado, o sea *«la app no le dijo nada a la
+  familia»*: **exactamente el defecto que el aparato venía a descartar.** *Un
+  instrumento que busca lo que uno RECUERDA del texto, y no el texto, produce el
+  rojo que uno temía.* Lo cazó C y lo curó buscando el literal.
+
+### ⚠️ Lo que va a aparecer en pantalla y NO es de esta vuelta
+
+La consola de desarrollo tira `<button> cannot contain a nested <button>` en
+Despensa. **Censado: los pares anidados son el `+` DENTRO de la tarjeta de
+producto** — no el control de filtro ni el flotante, que montan sus glifos con
+`dentroDeTocable` y quedan limpios. Es la clase ya fichada como **D-311**, y
+**solo existe en dev: no viaja a preview.** *Se declara para que en el gate
+nadie lo atribuya a una pieza de hoy.*
 - **El límite de las tres vistas cerradas hoy**: están **vacías**, así que su
   `200 · 0 filas` no distingue «la RLS bloquea» de «no hay nada». Se re-mide con
   la primera venta y la primera reseña reales.
