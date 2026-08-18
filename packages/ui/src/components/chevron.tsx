@@ -108,6 +108,30 @@ export interface ChevronProps {
    * adentro.*
    */
   enfasis?: 'fila' | 'seccion'
+  /**
+   * 🔴 **EL TONO — el acento lo resuelve LA PIEZA, jamás la pantalla**
+   * (S100d·bis, y lo pidió C **después de que mi propio lint la frenara**).
+   *
+   * **Le pasé un ejemplo con `color={theme.accent.cta}` y `verify:diseno` lo
+   * rebotó:** *«Ley 21 · `accent.cta` re-resuelto en apps, baseline 0»*. **La
+   * regla tenía razón y mi ejemplo estaba mal.** *Si cada superficie eligiera
+   * su ocre, el día que la casa cambie el CTA quedarían dos.*
+   *
+   * ✅ **Y C hizo lo correcto con el rojo: no apagó la regla, no subió el
+   * baseline y no tecleó un hex.** Pidió la pieza. *Un lint que se apaga para
+   * que pase un caso deja de vigilar los otros.*
+   *
+   * · **`'neutro'`** (default) — `text.tertiary`, el de los tres portadores
+   *   vivos. Cero cambio.
+   * · **`'accion'`** — **el ocre de N26 v2**, resuelto acá adentro: *la flecha
+   *   que despliega ACCIONA.*
+   *
+   * ⚠️ **`color` sigue existiendo y NO es la puerta del acento:** es para
+   * cuando la flecha vive sobre una superficie que le cambia el contraste (un
+   * muro, un canto). **Para decir «esto acciona» se usa `tono`** — la pantalla
+   * declara QUÉ es la flecha; con qué color lo dice la casa, es de la casa.
+   */
+  tono?: 'neutro' | 'accion'
 }
 
 /** EL PORTADOR PARA SLOTS QUE NO SON UNA FILA ENTERA (S99-B).
@@ -126,7 +150,7 @@ export interface ChevronProps {
  *  LLEVA**, y esto lleva—. *Un lápiz sería una segunda señal para el
  *  mismo gesto. Lo que su queja pide —que se VEA— lo dan los dos; lo que
  *  decide es cuál ya significa eso en el resto del producto.* */
-export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila' }: ChevronProps) {
+export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila', tono = 'neutro' }: ChevronProps) {
   const { theme } = useTheme()
   return (
     /* `aria-hidden`: el chevron nunca es la etiqueta de nada — lo que un
@@ -135,7 +159,11 @@ export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila' }: Che
     <Svg width={lado} height={lado} viewBox="0 0 24 24" fill="none" aria-hidden>
       <Path
         d={CHEVRON[direccion]}
-        stroke={color ?? theme.text.tertiary}
+        /* El orden importa: un `color` explícito gana —es la salida para una
+           superficie que cambia el contraste—, y si no lo hay manda el TONO,
+           que es donde vive el acento de la casa. La pantalla nunca escribe
+           el ocre. */
+        stroke={color ?? (tono === 'accion' ? theme.accent.cta : theme.text.tertiary)}
         strokeWidth={enfasis === 'seccion' ? 2.75 : 2}
         strokeLinecap="round"
         strokeLinejoin="round"
