@@ -66,17 +66,44 @@ const stepperSrc = leer('packages/ui/src/components/StepperCantidad.tsx')
 const BOTON = Number(extraer(stepperSrc, /const BOTON = (\d+)/, 'BOTON', 'StepperCantidad.tsx')[1])
 const gapStepperKey = extraer(
   stepperSrc,
-  /flexDirection: 'row', alignItems: 'center', gap: spacing\[([\d.]+)\]/,
+  /alignItems: 'center', gap: compacto \? spacing\[[\d.]+\] : spacing\[([\d.]+)\]/,
   'el gap del stepper',
   'StepperCantidad.tsx',
 )[1]
-const minWidthKey = extraer(stepperSrc, /minWidth: spacing\[([\d.]+)\]/, 'el minWidth del valor', 'StepperCantidad.tsx')[1]
+const minWidthKey = extraer(stepperSrc, /minWidth: compacto \? spacing\[[\d.]+\] : spacing\[([\d.]+)\]/, 'el minWidth del valor', 'StepperCantidad.tsx')[1]
 
 const GAP_STEPPER = sp(gapStepperKey)
 const MIN_VALOR = sp(minWidthKey)
 /** [−] gap [valor] gap [+] — los dos botones son View de ancho fijo:
  *  `flexShrink` por defecto es 0, así que NO ceden. */
 const ANCHO_STEPPER = BOTON * 2 + GAP_STEPPER * 2 + MIN_VALOR
+
+/* 🔴 EL INSTRUMENTO SIGUE A LA PIEZA (S100b-B). Cuando la tarjeta pasó a
+   montar la variante COMPACTA, seguir midiendo la de 44 habría dado un
+   rojo perfectamente creíble sobre una anatomía que ya no existe — que es
+   la lección de la barra de S99 en su otra cara: *un instrumento que no
+   sigue a su pieza mide su propio eco.* Los tres números salen del archivo
+   real igual que los de arriba. */
+const BOTON_COMPACTO = Number(
+  extraer(stepperSrc, /const BOTON_COMPACTO = (\d+)/, 'BOTON_COMPACTO', 'StepperCantidad.tsx')[1],
+)
+const gapCompactoKey = extraer(
+  stepperSrc,
+  /gap: compacto \? spacing\[([\d.]+)\]/,
+  'el gap compacto del stepper',
+  'StepperCantidad.tsx',
+)[1]
+const minValorCompactoKey = extraer(
+  stepperSrc,
+  /minWidth: compacto \? spacing\[([\d.]+)\]/,
+  'el minWidth compacto del valor',
+  'StepperCantidad.tsx',
+)[1]
+const ANCHO_STEPPER_COMPACTO = BOTON_COMPACTO * 2 + sp(gapCompactoKey) * 2 + sp(minValorCompactoKey)
+/** El blanco táctil efectivo: el visual más su `hitSlop` a cada lado. N8
+ *  se cumple sobre ESTE número, no sobre el visual. */
+const HOLGURA = (BOTON - BOTON_COMPACTO) / 2
+const TACTIL_COMPACTO = BOTON_COMPACTO + HOLGURA * 2
 
 // ── LA TARJETA, del archivo real ──────────────────────────────────
 const tarjetaSrc = leer('packages/ui/src/components/TarjetaProducto.tsx')
@@ -98,6 +125,10 @@ const gapFilaKey = extraer(
 const GAP_FILA = sp(gapFilaKey)
 /** El `+` en reposo (antes de mutar a stepper). */
 const TIMBRE = Number(extraer(tarjetaSrc, /\n\s*width: (\d+),\n\s*height: \1,\n\s*borderRadius: radius\.full/, 'el ancho del timbre `+`', 'TarjetaProducto.tsx')[1])
+/** ¿El control vive en su propia fila? Si sí, dispone de la caja entera y
+ *  no compite con el precio. Se LEE del archivo, no se supone. */
+const CONTROL_EN_SU_FILA = /alignItems: 'flex-end' \}\}\s*>\s*\n\s*<StepperCantidad/.test(tarjetaSrc)
+
 
 // ── LA GRILLA Y LA PANTALLA, de los archivos reales ────────────────
 const grillaSrc = leer('packages/ui/src/components/grilla-de-dos.ts')
@@ -130,7 +161,6 @@ const anchoCelda = anchoGrilla / 2
 const anchoTarjeta = anchoCelda - PAD_CELDA * 2
 const cajaInterna = anchoTarjeta - BORDE * 2 - PAD_TARJETA * 2
 
-const sobraStepper = cajaInterna - ANCHO_STEPPER
 const sobraTimbre = cajaInterna - TIMBRE
 
 console.log('═══ GEOMETRÍA DE LA TARJETA DE VITRINA ═══')
@@ -149,37 +179,62 @@ console.log(`CAJA INTERNA       ${cajaInterna.toFixed(1)} dp   ← acá tiene qu
 console.log('')
 console.log('── el veredicto ──')
 console.log(`cantidad 0 (timbre + ):  ${TIMBRE} dp   ⇒ sobran ${sobraTimbre.toFixed(1)} dp para el precio`)
-console.log(`cantidad ≥1 (stepper) :  ${ANCHO_STEPPER} dp   ⇒ ${sobraStepper >= 0 ? `sobran ${sobraStepper.toFixed(1)}` : `FALTAN ${Math.abs(sobraStepper).toFixed(1)}`} dp`)
+console.log(`cantidad ≥1 (stepper 44) : ${ANCHO_STEPPER} dp   ⇒ ${(cajaInterna - ANCHO_STEPPER).toFixed(1)} dp (negativo = por esto existe la variante compacta)`)
+console.log('')
+
+console.log('── la re-derivación (S100b-B) ──')
+console.log(`stepper COMPACTO: ${BOTON_COMPACTO}·2 + ${sp(gapCompactoKey)}·2 + ${sp(minValorCompactoKey)} = ${ANCHO_STEPPER_COMPACTO} dp`)
+console.log(`blanco táctil efectivo: ${BOTON_COMPACTO} visual + ${HOLGURA}·2 de hitSlop = ${TACTIL_COMPACTO} dp (N8 exige 44)`)
+console.log(`el control vive en su propia fila: ${CONTROL_EN_SU_FILA ? 'SÍ (dispone de la caja entera)' : 'NO (comparte renglón con el precio)'}`)
 console.log('')
 
 let fallos = 0
 
-if (sobraStepper < 0) {
+/* La re-derivación se verifica sobre lo que la tarjeta MONTA HOY: el
+   compacto, y en su propia fila. */
+const sobraCompacto = cajaInterna - ANCHO_STEPPER_COMPACTO
+if (sobraCompacto < 0) {
   fallos++
-  console.log('🔴 EL STEPPER NO ENTRA EN LA TARJETA — y el precio todavía no pidió nada.')
-  console.log(`   El control solo se pasa por ${Math.abs(sobraStepper).toFixed(1)} dp.`)
-  console.log(`   Con el precio en la misma fila (gap ${GAP_FILA}), el faltante es MAYOR.`)
-  if (RECORTA) {
-    console.log('   Y la tarjeta lleva `overflow: hidden` ⇒ lo que sobra NO se ve: SE CORTA.')
-    console.log('   ⇒ el `+` es el elemento más a la derecha: es el primero que desaparece.')
-    console.log('   ⇒ EXPLICA G-01 ENTERO: «aparece el −, no hay camino a 2» + «el número')
-    console.log('     queda casi fuera del recuadro». UN solo defecto, DOS síntomas.')
-  }
+  console.log(`🔴 el stepper COMPACTO tampoco entra: faltan ${Math.abs(sobraCompacto).toFixed(1)} dp.`)
 } else {
-  console.log('✅ el stepper entra en la caja interna.')
+  console.log(`✅ el stepper compacto entra en la caja con ${sobraCompacto.toFixed(1)} dp de sobra.`)
 }
 
-/** El precio necesita lugar REAL, no cero. Un control que entra
- *  «justo» deja al precio en 0 dp, y el precio es el dato que la ley
- *  de la vuelta pone SEGUNDO (§2 del acta de apertura). */
+if (TACTIL_COMPACTO < 44) {
+  fallos++
+  console.log(`🔴 N8 ROTA: el blanco táctil efectivo es ${TACTIL_COMPACTO} dp y la ley pide 44.`)
+  console.log('   Lo que se achica es el PÍXEL, jamás el TARGET: subí el hitSlop, no el visual.')
+} else {
+  console.log(`✅ N8 se cumple: ${TACTIL_COMPACTO} dp de blanco efectivo.`)
+}
+
+/* El de 44 sigue siendo el correcto para contenedores anchos (el carrito
+   lo monta y ahí mide 144 con sus dos botones). Su "no entra" en la caja
+   de 138 ya NO es un fallo: es la razón por la que existe el compacto. */
+console.log('')
+console.log(`(el stepper de 44 sigue midiendo ${ANCHO_STEPPER} dp — correcto para la fila ancha del carrito,`)
+console.log(` donde se midió 144.0 dp con \`Menos\` y \`Más\` presentes. Acá no entra, y por eso hay variante.)`)
+console.log('')
+
+/* EL PRECIO COMPARTE RENGLÓN SOLO CON EL TIMBRE (cantidad 0). Con
+   cantidad, el control baja a su fila y el precio dispone de la caja
+   entera — por eso el mínimo se mide contra el TIMBRE y no contra el
+   stepper. */
 const MINIMO_PARA_PRECIO = 56
-const paraPrecio = cajaInterna - ANCHO_STEPPER - GAP_FILA
+const paraPrecio = cajaInterna - TIMBRE - GAP_FILA
 if (paraPrecio < MINIMO_PARA_PRECIO) {
   fallos++
-  console.log('')
   console.log(`🔴 AL PRECIO LE QUEDAN ${paraPrecio.toFixed(1)} dp (mínimo legible ~${MINIMO_PARA_PRECIO}).`)
-  console.log('   La ley de la vuelta pone la mercadería primero y el precio segundo;')
-  console.log('   un control que se come el renglón entero invierte esa jerarquía.')
+} else {
+  console.log(`✅ al precio le quedan ${paraPrecio.toFixed(1)} dp en su renglón (mínimo ~${MINIMO_PARA_PRECIO}).`)
+}
+
+if (!CONTROL_EN_SU_FILA) {
+  fallos++
+  console.log('')
+  console.log('🔴 EL CONTROL VOLVIÓ AL RENGLÓN DEL PRECIO.')
+  console.log(`   Ahí necesita ${(ANCHO_STEPPER_COMPACTO + GAP_FILA + MINIMO_PARA_PRECIO).toFixed(0)} dp y la caja tiene ${cajaInterna.toFixed(0)}.`)
+  console.log('   Con `overflow: hidden` eso vuelve a recortar el `+`: es G-01 de nuevo.')
 }
 
 console.log('')

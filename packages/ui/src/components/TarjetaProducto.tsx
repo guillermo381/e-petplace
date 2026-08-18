@@ -30,10 +30,19 @@
  * mirar* — y por eso su posición es **ley de la pieza y no composición
  * del consumidor**: nadie lo re-ubica.
  *
- * **Al agregar, el `+` MUTA A STEPPER en el lugar** (`− 1 +`), 150 ms —
+ * **Al agregar, el `+` MUTA A STEPPER** (`− 1 +`), 150 ms —
  * `motion.duration.fast`, la banda micro de N10. **No aparece un control
  * nuevo al lado: el mismo control cambia de forma**, que es lo que hace
  * que la acción se sienta directa y no como un formulario.
+ *
+ * ⏪ **ENMENDADO S100b-B — esta línea decía «en el lugar» y hoy es falso.**
+ * El stepper **baja a su propia fila**, porque en la caja de 138 dp no
+ * entran precio + stepper en el mismo renglón (la aritmética está en el
+ * cuerpo, sobre el ancla). *Se corrige acá en vez de dejarlo dicho de
+ * menos: una constante y su comentario divergiendo no rompe nada, y por
+ * eso sobrevive —el código sigue funcionando y la prosa sigue mintiendo*
+ * (D-790). **Lo que NO cambió es la ley: sigue siendo UN control que
+ * cambia de forma, y sigue anclado al mismo borde derecho.**
  *
  * ── 🔴 EL NOMBRE: DOS LÍNEAS MÁXIMO — adjudicación de mesa ─────────
  * C midió el catálogo real (563 nombres): **42 % EN MAYÚSCULAS** ·
@@ -143,6 +152,7 @@ import {
   type CoincidenciaAlergeno,
   type EstadoComposicion,
 } from './AvisoAlergia'
+import { Icono } from './Icono'
 import { PrecioText } from './PrecioText'
 import { StepperCantidad } from './StepperCantidad'
 import { Texto } from './Texto'
@@ -321,15 +331,56 @@ export function TarjetaProducto({
           borderColor: theme.bg.border,
         }}
       >
-        {/* LA FOTO — a sangre arriba, relación fija (ver RELACION_FOTO). */}
+        {/* LA FOTO — a sangre arriba, relación fija (ver RELACION_FOTO).
+
+            🔴 S100b-B · MUERE EL «MARCO PÚRPURA», y su causa estaba medida:
+            el fondo de esta caja era `bg.hundido` (lavanda). Con un packshot
+            de **fondo transparente** —que es lo que manda el catálogo real—
+            ese lavanda asomaba alrededor del producto y se leía como un
+            marco de color. Medido en el aparato, misma fila y misma pieza:
+            una foto opaca ocupaba el **100 %** del ancho de su caja y un
+            packshot transparente el **48 %**, con 43 dp de lavanda a cada
+            lado. *No era el contenedor «mal dimensionado»: era un fondo
+            visible detrás de píxeles transparentes.*
+
+            ⇒ **Con foto, la caja toma `bg.card`: el MISMO color que la
+            tarjeta.** Un packshot transparente queda apoyado sobre la
+            superficie de la tarjeta, sin marco; una foto opaca la llena de
+            borde a borde. **Una sola caja que sirve a los dos tipos.**
+
+            ⚠️ **Y la mitad que la forma NO puede resolver, declarada:** con
+            `cover`, un asset cuya relación no sea 4:3 se recorta. La cura no
+            es elegir otro `resizeMode` —`contain` letterboxea y devuelve el
+            marco por la otra puerta— sino **que el asset llegue en 4:3**.
+            *Si la imagen llega con la relación de la caja, el modo de render
+            deja de importar.* Eso es del estándar de imagen, no de la pieza. */}
         <View
           style={{
             aspectRatio: RELACION_FOTO,
-            backgroundColor: theme.bg.hundido,
+            backgroundColor: fotoUrl === undefined ? theme.bg.hundido : theme.bg.card,
             opacity: compra.modo === 'espejo' || compra.hayStock ? 1 : opacity.disabled,
           }}
         >
-          {fotoUrl === undefined ? null : (
+          {fotoUrl === undefined ? (
+            /* 🔴 EL PRODUCTO SIN FOTO — ESTADO PROPIO, NO DEGRADADO.
+               Baymard midió que los ítems sin miniatura *«were often
+               completely ignored»* ⇒ una caja vacía no es neutral: **cuesta
+               ventas**. Y no es una etapa: **el granel, la marca chica y el
+               producto del vendedor local no van a tener galería nunca.**
+
+               Por eso lleva marca en vez de vacío — el glifo de la despensa,
+               centrado, en voz terciaria. **Y por eso el lavanda se queda
+               ACÁ y solo acá:** el mismo color que antes enmarcaba por
+               accidente ahora *significa* «este producto no tiene foto».
+
+               ⛔ **Jamás se parece al esqueleto de carga.** Es estático y no
+               brilla: *«no hay foto» y «todavía no llegó» son dos cosas
+               distintas, y dibujarlas igual es la Ley 23 aplicada al tiempo*
+               (§12.3). */
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Icono nombre="despensa" tamano={32} registro="tinta" tinta={theme.text.tertiary} />
+            </View>
+          ) : (
             <Image source={{ uri: fotoUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
           )}
 
@@ -427,21 +478,45 @@ export function TarjetaProducto({
           )}
 
           {/* EL ANCLA — esto es lo que alinea los precios de una fila
-              aunque los nombres midan distinto. Ver la cabecera. */}
-          <View
-            style={{
-              marginTop: 'auto',
-              paddingTop: spacing[2],
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              gap: spacing[2],
-            }}
-          >
-            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+              aunque los nombres midan distinto. Ver la cabecera.
 
-            {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
-            {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
+              🔴 RE-DERIVACIÓN S100b-B · EL CONTROL BAJA A SU PROPIA FILA
+              CUANDO HAY CANTIDAD, y el motivo es aritmética de la caja:
+
+                caja interna ………………………… 138 dp
+                precio ($57.19, medido) …… 68 dp
+                gap ………………………………………………  8 dp
+                stepper compacto ……………… 116 dp
+                                            ──────
+                en UNA fila hacen falta … 192 dp
+
+              **No entra, y forzarlo es exactamente el defecto que G-01
+              reportó**: con `overflow: 'hidden'`, lo que no entra no se
+              ve — se corta, empezando por la derecha, que es donde vive
+              el `+`.
+
+              ⇒ Con `cantidad === 0` el timbre comparte fila con el precio
+              (68 + 8 + 36 = 112 ≤ 138, entra con aire). Con `cantidad > 0`
+              el control **baja**, y ahí dispone de los 138 completos.
+
+              *El alto extra solo lo paga la tarjeta que YA está en el
+              carrito —una minoría— y lo paga a cambio de mostrar su
+              estado, que es justo lo que el benchmark señala como el
+              defecto real: «el control lleva la acción pero no lleva el
+              estado» (96 % de los sitios no destacan lo ya agregado).* */}
+          <View style={{ marginTop: 'auto', paddingTop: spacing[2], gap: spacing[2] }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                gap: spacing[2],
+              }}
+            >
+              <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+
+              {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
+              {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
               <Pressable
                 onPress={compra.onAgregar}
                 accessibilityRole="button"
@@ -472,16 +547,28 @@ export function TarjetaProducto({
                   +
                 </Text>
               </Pressable>
-            ) : (
-              // La MUTACIÓN: el mismo control cambia de forma, no aparece
-              // otro al lado. `fast` = 150, la banda micro de N10.
-              <Animated.View entering={FadeIn.duration(motion.duration.fast)}>
+              ) : null}
+            </View>
+
+            {/* LA MUTACIÓN, ahora en SU PROPIA FILA (ver la aritmética de
+                arriba). Sigue siendo EL MISMO CONTROL cambiando de forma
+                —no aparece otro al lado— y conserva su ancla a la derecha:
+                el `+` y el stepper comparten borde derecho, así que la mano
+                lo sigue encontrando donde estaba. `fast` = 150 (N10). */}
+            {compra.modo === 'espejo' || !compra.hayStock || compra.cantidad === 0 ? null : (
+              <Animated.View
+                entering={FadeIn.duration(motion.duration.fast)}
+                style={{ alignItems: 'flex-end' }}
+              >
                 <StepperCantidad
                   valor={compra.cantidad}
                   min={0}
                   max={TOPE_EN_VITRINA}
                   onCambio={compra.onCambiarCantidad}
                   etiqueta={t('tarjetaProducto.cantidad', { nombre })}
+                  // 116 dp en vez de 144 — lo que entra en la caja de 138
+                  // sin recortar el `+`. Ver `BOTON_COMPACTO` en la pieza.
+                  compacto
                 />
               </Animated.View>
             )}

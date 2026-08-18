@@ -3591,12 +3591,26 @@ function GaleriaInterna() {
             Firma del founder (17-ago): premium · dos columnas · AGREGAR SIN ABRIR DETALLE.
             Lo que hay que mirar acá son cuatro cosas, y las cuatro son de forma:
             ① el + está SIEMPRE en la misma esquina (la mano lo encuentra sin mirar) y
-            al agregar MUTA a stepper en el lugar, no aparece otro control al lado ·
+            al agregar MUTA a stepper — mismo control, mismo borde derecho ·
             ② los precios de una fila quedan ALINEADOS aunque un nombre ocupe una línea
             y el otro dos — eso lo hace el ancla de abajo, y es lo que deja comparar
             de un vistazo · ③ el sin stock dice el cartel EN la tarjeta, no en otro
             lado · ④ el $/kg sigue en mono porque es un CÁLCULO: el contraste entre
             los dos registros es lo que dice cuál es el precio y cuál la cuenta.
+          </Texto>
+          <Texto variante="apoyo">
+            🔴 RE-DERIVACIÓN S100b — tres cosas más que mirar. ⑤ El PRECIO bajó de peso
+            700 a 500: mismo cuerpo, menos grito. Medido contra Laika, que pone 20 px en
+            500 sobre una tarjeta de 366 px mientras nosotros poníamos 20 px en 700 sobre
+            una de 164 — casi la misma tipografía en menos de la mitad de ancho.
+            ⑥ Con cantidad, el stepper baja a SU PROPIA FILA y va COMPACTO (116 dp, no
+            144): en la caja de 138 el de 144 se recortaba y el + quedaba fuera del
+            layout — eso era G-01. El blanco táctil sigue siendo 44 vía hitSlop: se achica
+            el píxel, no el target. ⑦ NINGUNA de estas muestras pasa fotoUrl, así que
+            todas exhiben el ESTADO SIN FOTO: glifo de despensa centrado sobre el fondo
+            hundido. No es un placeholder de carga y no debe parecerlo — «no hay foto» y
+            «todavía no llegó» son dos cosas distintas. Es el estado permanente del
+            granel, la marca chica y el producto del vendedor local.
           </Texto>
           <View style={GRILLA_DE_DOS}>
             <View style={CELDA_DE_GRILLA}>
