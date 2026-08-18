@@ -52,18 +52,25 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AvisoAlergia,
   Boton,
-  Celda,
+  CarritoFlotante,
+  /* ☠️ Ley 37 · S100d-C — entre `Boton` y `Chevron` vivía `Celda`, **sin un
+     solo consumidor**: la tabla de presentaciones que la montaba murió en
+     S96 y el import se quedó. No lo caza el typecheck (un import sin usar
+     compila) y no lo caza `verify:diseno`; apareció al contar montajes por
+     pieza mientras retiraba `PieRevelar`. *Un import muerto es la puerta
+     por la que alguien vuelve a montar la tabla que se decidió no tener.* */
+  Chevron,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   nombreCurado,
   PantallaConPie,
-  PieRevelar,
   PrecioText,
   SelectorOpcion,
   Separador,
@@ -73,6 +80,7 @@ import {
   radius,
   spacing,
   useAviso,
+  usePresionado,
   useTheme,
 } from '@epetplace/ui';
 import { precioPorKg, MONEDA_FALLBACK, type IdiomaSoportado } from '@epetplace/i18n';
@@ -98,13 +106,113 @@ import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
 
-/** 🔴 C-04 · cuántos ingredientes quedan a la vista sin revelar.
- *  **6, y el número sale de la medición, no del gusto:** de los 202
- *  productos con ingredientes, **38 tienen 6 o menos** (esos no dibujan
- *  control) y **164 tienen más** (esos lo dibujan). La mediana es 12. Con
- *  un corte más alto el control casi no aparecería; con uno más bajo
- *  ocultaría lo poco que muchos productos declaran. */
-const INGREDIENTES_A_LA_VISTA = 6;
+/**
+ * ☠️ S100d-C · punto ⑩ — ACÁ VIVÍA `INGREDIENTES_A_LA_VISTA = 6`, Y MUERE
+ * CON EL CONTROL QUE LO NECESITABA (Ley 37).
+ *
+ * **El gate del founder, verbatim:** *«hoy flecha + label “6 más” — debería
+ * ser solo el más al costado o la sola flecha»*. Con la sección plegada
+ * ENTERA el corte no tiene sentido: **cerrada no se ve nada, abierta se ve
+ * todo.** Un truncado a 6 con un revelado encima era la segunda señal del
+ * mismo gesto — *dos controles para una sola decisión.*
+ *
+ * *(El número seguía siendo correcto y por eso se deja escrito: de los 202
+ * productos con ingredientes, 38 tienen 6 o menos y 164 tienen más. No se
+ * borra porque estuviera mal medido: se borra porque ya no decide nada.)*
+ */
+
+/**
+ * 🔴 S100d-C · `RotuloPlegable` — EL RÓTULO DE SECCIÓN QUE DESPLIEGA, Y
+ * **NACE LOCAL DESPUÉS DE PROBAR LA PIEZA DE LA CASA Y MEDIR QUE NO
+ * ENCAJA.** El orden importa: primero se montó `CeldaNavegacion
+ * direccion="abajo"` —que existe exactamente para esto y cuyo JSDoc dice
+ * que nació para *«el hueco que C midió»*—, se midió, y el número la
+ * rebotó.
+ *
+ * **LO MEDIDO EN APARATO (18-ago, 384×832, la ficha real montada):**
+ *
+ * | rótulo | con `CeldaNavegacion` | con `Texto variante="seccion"` |
+ * |---|---|---|
+ * | «Composición» | **16 px · DMSans_500Medium** | 20 px · DMSans_700Bold |
+ * | «Por qué te lo mostramos» | — | **20 px · DMSans_700Bold** |
+ *
+ * ⇒ **la ficha quedaba con DOS rótulos de sección de peso distinto, y el
+ * que se achicaba era justamente el que el founder pidió volver
+ * plegable.** *Un título que encoge al ganar un control se lee como que
+ * dejó de ser un título* — y el punto ⑩ es un punto de señales: la última
+ * pantalla donde conviene que algo se lea distinto de sus hermanas.
+ *
+ * **Por qué la pieza no encaja, sin que eso sea un defecto suyo:**
+ * `CeldaNavegacion` es una CELDA —su título es `sans.medium` a
+ * `size.base`, el registro de una fila de navegación— y `Texto
+ * variante="seccion"` es **el rótulo de bloque de la casa**, el que nació
+ * matando diez definiciones de `TituloBloque`. La ficha es una pila de
+ * bloques, no una lista de celdas. *El perfil del prestador la monta y
+ * tiene razón: allá cada sección ES una fila dentro de su tarjeta.*
+ *
+ * **LO QUE ESTO **NO** ES: un clon.** El trazo del chevron **no se copia**
+ * — sale de `Chevron`, la pieza que `packages/ui` exporta *«para slots que
+ * NO son una fila entera»*, que es literalmente este caso. Sin ella la
+ * única salida habría sido teclear el `d`, y ésa es la quinta copia que
+ * L-175 persigue. También son de la casa el `usePresionado` (0.97, la
+ * receta única) y la dirección, que sale de la tabla por la prop.
+ *
+ * ☠️ **CONDICIÓN DE MUERTE, escrita para que se pueda cobrar:** esta
+ * anatomía se retira el día que `CeldaNavegacion` pueda rotular como
+ * sección (una prop de jerarquía en la pieza, decisión de B). **Se le pide
+ * a B con esta medición adentro.** Mientras tanto vive acá, con **un solo
+ * consumidor**, que es la razón por la que no se promueve: *inventar un
+ * contrato en `packages/ui` para un cliente único es fabricar la deuda al
+ * revés.*
+ *
+ * ⚠️ **HUECO DE A11Y DECLARADO, no parcheado:** anuncia rol `button` con
+ * el nombre del rótulo, y **no dice si está desplegado**
+ * (`accessibilityState={{ expanded }}`). Es el MISMO hueco que
+ * `CeldaNavegacion` tiene y que el perfil del prestador ya declaró como
+ * candidata de enmienda para B. *Ponerlo solo acá dejaría la casa con dos
+ * comportamientos de lector para el mismo gesto* — se declara y se pide
+ * junto con lo anterior.
+ */
+function RotuloPlegable({
+  titulo,
+  abierta,
+  onAlternar,
+}: {
+  titulo: string;
+  abierta: boolean;
+  onAlternar: () => void;
+}) {
+  const { handlers, estiloPresionado } = usePresionado(0.99);
+  return (
+    <Pressable
+      onPress={onAlternar}
+      onPressIn={handlers.onPressIn}
+      onPressOut={handlers.onPressOut}
+      accessibilityRole="button"
+      accessibilityLabel={titulo}
+    >
+      <Animated.View
+        style={[
+          estiloPresionado,
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            /* El target de 44 sin tocar el ritmo del bloque: el rótulo ya
+               mide 26 de línea, así que el aire va adentro del tocable y
+               no como margen de la sección. */
+            minHeight: 44,
+          },
+        ]}
+      >
+        <Texto variante="seccion">{titulo}</Texto>
+        {/* E14 · la dirección codifica una verdad del contenido y por eso
+            se declara acá: `abajo` revela · `arriba` pliega. */}
+        <Chevron direccion={abierta ? 'arriba' : 'abajo'} />
+      </Animated.View>
+    </Pressable>
+  );
+}
 
 export default function DespensaProducto() {
   const { theme } = useTheme();
@@ -131,8 +239,8 @@ export default function DespensaProducto() {
   const [registrando, setRegistrando] = useState(false);
   const [visor, setVisor] = useState<number | null>(null);
   const [reintento, setReintento] = useState(0);
-  /** 🔴 S100c-C · C-04 — la lista de ingredientes, plegada. Ver el bloque
-   *  de la composición para el porqué y sus dos números. */
+  /** 🔴 S100d-C · punto ⑩+⑪ — la sección de composición, PLEGADA DE ENTRADA.
+   *  Ver el bloque de la composición para el porqué y sus números. */
   const [composicionAbierta, setComposicionAbierta] = useState(false);
   /** A-01(b): la consulta del máximo está en vuelo. Bloquea el doble toque —
    *  sin esto, dos toques rápidos agregan dos veces mientras se pregunta. */
@@ -508,6 +616,34 @@ export default function DespensaProducto() {
         pie={
           conCta ? (
             <>
+              {/* 🔴 S100d-C · punto ⑫ · **EL FLOTANTE REEMPLAZA AL CTA DE
+                  «VER CARRITO», Y ESO ES LITERALMENTE LO QUE EL FOUNDER
+                  PIDIÓ.** Su literal: *«al agregar se abre un CTA de ver
+                  carrito, y debería abrir el carrito flotante»*. **El CTA
+                  que él vio es el que vivía acá abajo**, y muere: no se
+                  esconde, lo reemplaza una pieza que hace su trabajo mejor
+                  y en el lugar donde llega el pulgar.
+
+                  ⚖️ **POR QUÉ TAMBIÉN EN LA FICHA, y no solo en la vitrina.**
+                  N25 dice que el flotante es *«de la VITRINA (no del
+                  carrito/checkout/resumen)»* y **la ficha no es ninguno de
+                  esos**: es donde se agrega. Y el punto ⑫ **es de esta
+                  pantalla** — el CTA que el founder describe no existe en la
+                  vitrina. *Montarlo solo en la vitrina habría cumplido la
+                  letra de N25 y dejado el punto ⑫ sin curar, con la ficha
+                  sin una sola puerta al carrito después de agregar.*
+
+                  ⚠️ **VA ARRIBA DEL CTA, y el orden importa:** `PantallaConPie`
+                  apila su pie, así que el disco queda **sobre** el botón de
+                  agregar, alineado a la derecha por la propia pieza
+                  (`alignSelf`). *Se declara la composición porque es MÍA y no
+                  de la pieza: si el founder la quiere en otro lado, se mueve
+                  sin tocar `packages/ui`.* */}
+              <CarritoFlotante
+                cuenta={unidades}
+                onAbrir={() => router.push('/despensa/carrito')}
+                etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+              />
               {faltaParaAgregar !== null ? (
                 <Texto variante="apoyo">{faltaParaAgregar}</Texto>
               ) : null}
@@ -523,24 +659,13 @@ export default function DespensaProducto() {
                 deshabilitado={faltaParaAgregar !== null}
                 onPress={() => void agregar()}
               />
-              {/* ⚖️ «Ver carrito» BAJA DE BOTÓN A LABEL, y la razón está
-                  medida en la referencia, no argumentada: **la ficha de
-                  Laika tiene UN solo botón en el pie** y el carrito vive
-                  como ícono con contador en el encabezado. Dos botones
-                  bloque apilados son **128 dp de control permanente sobre
-                  un visor de 665** — el 19 % de la pantalla, que es
-                  exactamente «el control pesa más que el producto».
-                  Y la casa ya tiene la ley: lo que NAVEGA no viste de
-                  botón. **No se elimina** —sería un callejón hasta que
-                  aterrice el ícono de carrito de G-14—: se despriorizA. */}
-              {unidades > 0 ? (
-                <Boton
-                  variante="ghost"
-                  bloque
-                  etiqueta={t('despensa.verCarrito', { n: unidades })}
-                  onPress={() => router.push('/despensa/carrito')}
-                />
-              ) : null}
+              {/* ☠️ S100d-C · punto ⑫ — **ACÁ VIVÍA EL «Ver carrito (N)» EN
+                  GHOST, Y MUERE.** Su nota decía que no se eliminaba
+                  *«sería un callejón hasta que aterrice el ícono de carrito
+                  de G-14»* — el ícono aterrizó, y ahora lo reemplaza el
+                  flotante de arriba, que además está donde llega el pulgar.
+                  *La condición que lo mantenía vivo era explícita y se
+                  cumplió: por eso se puede cobrar sin discutirla.* */}
             </>
           ) : undefined
         }
@@ -765,97 +890,173 @@ export default function DespensaProducto() {
               </View>
             ) : null}
 
-            {/* 5 · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
+            {/* ④ · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
                 mejor e-commerce; candado ① de §5.4: sin composición se DICE).
                 Todo en voz de "declarado por el fabricante" — la app
-                transporta, jamás avala. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Texto variante="seccion">{t('despensa.composicion')}</Texto>
-              {/* El ESTADO manda (letra de A, 12-ago): solo `verificada` y
-                  `no_aplica` callan su condición; `declarada_sin_verificar`
-                  y `ausente` la DICEN. Y `no_aplica` jamás pide
-                  ingredientes: no es un dato que falte. */}
-              {ficha.composicion_estado === 'no_aplica' ? (
-                <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
-              ) : ficha.composicion_estado === 'ausente' ||
-                (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0) ? (
-                <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
-              ) : (
-                <>
-                  {/* 🔴 S100c-C · C-04 · LA LISTA DE INGREDIENTES SE PLIEGA.
-                      El gate: *«en las imágenes de Laika tenían un más para
-                      los descriptores adicionales; acá no los veo, están
-                      todos hacia abajo»*.
+                transporta, jamás avala.
 
-                      🔴 **LO MEDIDO CONTRA LA BASE VIVA (18-ago) PARTE EL
-                      HALLAZGO EN DOS, Y UNA MITAD NO SE CONSTRUYE:**
+                ═══════════════════════════════════════════════════════════
+                🔴 S100d-C · PUNTOS ⑩ Y ⑪ — LA SECCIÓN SE PLIEGA ENTERA, CON
+                UNA SOLA SEÑAL, Y **NO SE PLIEGA NADA MÁS EN TODA LA FICHA.**
+                ═══════════════════════════════════════════════════════════
 
-                      · `descripcion` — **promedio 10 caracteres, máximo 29**
-                        (y 6 productos sin ella). *Mi predecesora ya lo había
-                        medido y el número sigue siendo ése.* **No se pliega
-                        NADA ahí: un acordeón sobre diez caracteres es un
-                        control que promete contenido que no existe.**
-                      · `ingredientes_activos` — **202 de 470 la tienen, con
-                        11 ingredientes de promedio y hasta 26; el texto
-                        promedia 194 caracteres y llega a 517, y 163 de 470
-                        pasan de 120.** *Ésta sí es la prosa que el founder
-                        vio plegada en Laika*, y en pantalla midió **120 dp
-                        de una sola tirada.**
+                **Los dos literales del founder que gobiernan esto:**
+                · ⑩ *«hoy flecha + label “6 más” — debería ser solo el más al
+                  costado o la sola flecha»*.
+                · ⑪ *«por ahora solo agregá los más para ver descripción y
+                  características»*, con la orden expresa de **re-medir antes
+                  de plegar: “si sigue siendo aire, decilo con el número y
+                  plegá solo lo que tenga cuerpo”.**
 
-                      **Se usa `PieRevelar`, que es la pieza que la casa ya
-                      tiene para esto** (19.6 · «revelar el resto de una
-                      sección») — cero componente nuevo, Ley 11. Y encaja
-                      mejor que un acordeón de texto: `n` es **cuántos
-                      ingredientes quedan**, un número real y verificable, no
-                      un «ver más» mudo.
+                🔴 **RE-MEDIDO EL 18-AGO CONTRA LA BASE VIVA (470 vendibles)
+                Y CONTRA LA FICHA MONTADA — y la orden se cumple al pie:**
 
-                      ⚠️ **CON 6 O MENOS NO SE DIBUJA EL CONTROL** (38 de los
-                      202 productos): se muestran todos y listo. *Un control
-                      que revela nada es peor que el texto que ahorra.* */}
-                  {ficha.ingredientes_activos.length > 0 ? (
-                    <>
-                      <Texto variante="cuerpo">
-                        {(composicionAbierta
-                          ? ficha.ingredientes_activos
-                          : ficha.ingredientes_activos.slice(0, INGREDIENTES_A_LA_VISTA)
-                        ).join(', ')}
+                | qué | medido | qué se hizo |
+                |---|---|---|
+                | `descripcion` | **464/470 la tienen · promedio 10,5 car · máximo 29 · CERO sobre 60** | **NADA.** No es una descripción: son sub-líneas del importador («Perro», «Premium»). *Un «+» sobre diez caracteres promete contenido que no existe.* Se dice con el número, que es lo que el founder pidió |
+                | «características» (`porque`) | en pantalla, **una sola frase de 25 car en 58 dp** · `tallas_aplicables` **0 de 470** | **NADA.** Un encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp** y escondería nuestro diferencial. *No es que no valga la pena: es que la aritmética da negativo* |
+                | `composicion_mercado` | **vacía en 470 de 470** | nada que plegar |
+                | **`ingredientes_activos`** | **202/470 · 10,5 ingredientes de promedio, hasta 26 · texto de 194 car de promedio, hasta 517** | 🔴 **SE PLIEGA. Es la única prosa con cuerpo de la ficha** |
+
+                **Y el número que lo vuelve una mejora y no una preferencia:**
+                sobre el producto más largo del catálogo (25 ingredientes, 517
+                car) la ficha medía **704 dp de contenido sobre ~630 útiles ⇒
+                no entraba**. Plegando esta sección baja a **~546 dp: la ficha
+                entera cabe sin deslizar.** *Ése era el «tipo Laika».*
+
+                🔴 **LA SEÑAL ES UNA Y ESTÁ AL COSTADO — y la pieza YA
+                EXISTÍA.** `CeldaNavegacion direccion="abajo"|"arriba"` es el
+                encabezado de sección que despliega de la casa: su propio
+                JSDoc dice que nació para este hueco, y **no tenía un solo
+                consumidor real en `apps`** (medido: solo la galería y el
+                perfil del prestador). Cero componente nuevo (Ley 11), cero
+                trazo copiado (L-175).
+
+                ⚖️ **POR QUÉ LA FLECHA Y NO EL «+», teniendo el founder
+                permitidas las dos** (*«solo el más al costado O la sola
+                flecha»*): **E14 es letra firmada — información DESPLIEGA con
+                chevron · acción LLEVA**. Y hay una razón que no es de esta
+                pantalla: **F-OCRE le acaba de dar al «+» el rol de ACCIÓN DE
+                COMPRA**. Un «+» que pliega prosa sería el mismo signo con dos
+                significados en la misma app, y el que pierde es el que vende.
+                *Reversible en una línea si el founder prefiere el «+»: es un
+                cambio de `direccion` por un glifo, sin tocar la estructura.*
+
+                🔴 **LO QUE **NO** ENTRA AL PLEGADO, y no es decisión de esta
+                pantalla: LA ADVERTENCIA DE ALÉRGENO.** `MODELO_DESPENSA`
+                §6/§10 (*plegar una advertencia de salud la convierte en nota
+                al pie*) y el límite explícito de N22. Queda **hermana del
+                encabezado, no hija**: se ve con la sección cerrada. Lo mismo
+                el `AvisoAlergia` de arriba, que además gatea el CTA.
+
+                ⚠️ **Y SIN INGREDIENTES NO SE DIBUJA EL CONTROL** (268 de 470
+                productos): la sección se queda abierta diciendo su verdad —
+                *«no tenemos los ingredientes»* es honestidad, no prosa, y
+                esconderla detrás de un toque sería justo el candado ① al
+                revés. *Un control que revela nada es peor que el texto que
+                ahorra.*
+
+                ⏸️ **LO QUE NO SE TOCÓ, POR ORDEN: las SUPERFICIES.** N21
+                admitiría que esta sección viva en carta —el perfil del
+                prestador la monta así—, pero **QF-01 (el fondo) está
+                declarada ABIERTA y fuera de esta vuelta por el founder**
+                (*«ese es un cambio más de fondo; por ahora solo agregá los
+                más»*). Agregar una carta acá sería atacar QF-01 de costado. */}
+            {(() => {
+              /** ¿Hay prosa que plegar? El ESTADO manda (letra de A, 12-ago):
+               *  `no_aplica` jamás pide ingredientes —no es un dato que
+               *  falte— y `ausente` DICE que no los tiene aunque la columna
+               *  traiga algo. En los dos casos no hay nada detrás del
+               *  control, así que el control no existe. */
+              const puedePlegar =
+                ficha.composicion_estado !== 'no_aplica' &&
+                ficha.composicion_estado !== 'ausente' &&
+                ficha.ingredientes_activos.length > 0;
+
+              /** La advertencia de alérgeno — SIEMPRE a la vista, plegada la
+               *  sección o no. Se compone una vez y se monta en las dos
+               *  ramas: *dos copias de una advertencia de salud es como se
+               *  fabrica el día en que una de las dos deja de pintarse.* */
+              const advertencia =
+                ficha.alergenos.length > 0 ? (
+                  <Texto variante="apoyo">
+                    {t('despensa.composicionAlergenos', {
+                      lista: ficha.alergenos.map((c) => vozAlergeno(c, vocesAlergenos)).join(', '),
+                    })}
+                  </Texto>
+                ) : null;
+
+              if (!puedePlegar) {
+                return (
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
+                    {ficha.composicion_estado === 'no_aplica' ? (
+                      <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+                    ) : ficha.composicion_estado === 'ausente' ||
+                      (ficha.ingredientes_activos.length === 0 &&
+                        ficha.alergenos.length === 0) ? (
+                      <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
+                    ) : null}
+                    {advertencia}
+                    {ficha.composicion_estado === 'no_aplica' ? null : (
+                      <Texto variante="apoyo">
+                        {ficha.composicion_estado === 'verificada'
+                          ? t('despensa.composicionVerificada')
+                          : t('despensa.composicionFuente')}
                       </Texto>
-                      <PieRevelar
-                        n={ficha.ingredientes_activos.length - INGREDIENTES_A_LA_VISTA}
-                        revelado={composicionAbierta}
-                        onPress={() => setComposicionAbierta((v) => !v)}
-                      />
+                    )}
+                  </View>
+                );
+              }
+
+              return (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                  {/* ⚖️ **EL RÓTULO NO LLEVA CUENTA, Y ES UNA RENUNCIA
+                      DELIBERADA.** Poner *«25 ingredientes»* al lado
+                      ayudaría a decidir si vale abrirlo —es el trabajo que
+                      hacía el `n` del `PieRevelar`, y la casa lo admite: su
+                      galería monta `titulo="Sus vacunas" detalle="8
+                      aplicadas"`—. **No entra porque el punto ⑩ es
+                      exactamente sobre CONTAR SEÑALES**: el founder objetó
+                      *dos cosas diciendo «hay más»* y pidió *«UNA señal, no
+                      dos»*. Un rótulo con cuenta al lado de un chevron
+                      corre el riesgo de volver a leerse como dos — *y un
+                      punto reportado cerrado que reaparece es rojo de
+                      método, no de pieza.* La cuenta no se pierde: es lo
+                      primero que se ve al abrir. **Vuelve con una línea si
+                      el founder la quiere.** */}
+                  <RotuloPlegable
+                    titulo={t('despensa.composicion')}
+                    abierta={composicionAbierta}
+                    onAlternar={() => setComposicionAbierta((v) => !v)}
+                  />
+                  {advertencia}
+                  {composicionAbierta ? (
+                    <>
+                      <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                      <Texto variante="apoyo">
+                        {ficha.composicion_estado === 'verificada'
+                          ? t('despensa.composicionVerificada')
+                          : t('despensa.composicionFuente')}
+                      </Texto>
                     </>
                   ) : null}
-                  {/* 🔴 LA ADVERTENCIA DE ALÉRGENO **JAMÁS SE PLIEGA** —
-                      queda FUERA del revelado a propósito, y no es una
-                      decisión de esta pantalla: `MODELO_DESPENSA` §6/§10
-                      (*plegar una advertencia de salud la convierte en nota
-                      al pie*) y el límite explícito de N22 (*la «i» es para
-                      explicar, nunca para esconder un riesgo*).
-                      Por eso el plegado envuelve SOLO la lista de arriba y
-                      esta línea es su hermana, no su hija. */}
-                  {ficha.alergenos.length > 0 ? (
-                    <Texto variante="apoyo">
-                      {t('despensa.composicionAlergenos', {
-                        lista: ficha.alergenos
-                          .map((c) => vozAlergeno(c, vocesAlergenos))
-                          .join(', '),
-                      })}
-                    </Texto>
-                  ) : null}
-                  <Texto variante="apoyo">
-                    {ficha.composicion_estado === 'verificada'
-                      ? t('despensa.composicionVerificada')
-                      : t('despensa.composicionFuente')}
-                  </Texto>
-                </>
-              )}
-            </View>
+                </View>
+              );
+            })()}
 
             {/* ⑤ · PARA QUIÉN SIRVE (N19 ⑤ — era la 4 y baja UN puesto: la
                 composición sube a ④ para quedar PEGADA a su advertencia).
-                Nuestro diferencial: no lo tiene ninguno de los referentes. */}
+                Nuestro diferencial: no lo tiene ninguno de los referentes.
+
+                🔴 S100d-C · **ESTA SECCIÓN NO SE PLIEGA, Y ES LO QUE EL
+                PUNTO ⑪ LLAMA «características».** Medido en la ficha
+                montada: **una sola frase de 25 caracteres en 58 dp**, y
+                `tallas_aplicables` está en **0 de 470** productos. Un
+                encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp**
+                y escondería el único bloque que ningún competidor tiene.
+                *La aritmética da negativo, y el founder pidió el número
+                antes que el control: «plegá solo lo que tenga cuerpo».* */}
             {porque.length > 0 ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
                 <Texto variante="seccion">

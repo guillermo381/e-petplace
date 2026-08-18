@@ -1259,6 +1259,8 @@ export const clienteEn = {
     filtrosTitulo: 'Filter',
     filtrosVer: 'See {{n}} products',
     filtrosLimpiar: 'Clear {{n}} filters',
+    // S100d-C · ④ — each axis label says how many options it holds.
+    filtroEjeCon: '{{titulo}} · {{n}}',
     filtroCategoria: 'Category',
     filtroEspecie: 'For which animal',
     filtroMarca: 'Brand',
