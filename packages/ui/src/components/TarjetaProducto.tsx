@@ -44,6 +44,14 @@
  * (D-790). **Lo que NO cambió es la ley: sigue siendo UN control que
  * cambia de forma, y sigue anclado al mismo borde derecho.**
  *
+ * ⏪ **RE-ENMENDADO S100d-B — «en el lugar» VUELVE A SER VERDAD, y por eso
+ * esta nota se conserva en vez de borrarse.** El control tiene **su propio
+ * escalón, siempre**: el `+` y el stepper viven en el MISMO renglón, con el
+ * mismo alto y el mismo borde derecho, y **el precio subió a su propia
+ * línea**. *Lo que bajó no fue el control: fue el precio.* La cuenta que lo
+ * vuelve forzado —tres blancos de 44 son 132 en una caja de 138— está en el
+ * cuerpo, sobre el ancla, junto con lo que deroga de S100b y S100c.
+ *
  * ── 🔴 EL NOMBRE: DOS LÍNEAS MÁXIMO — adjudicación de mesa ─────────
  * C midió el catálogo real (563 nombres): **42 % EN MAYÚSCULAS** ·
  * **18 % pasan los 40 caracteres** · **máximo 81** · y dos categorías
@@ -199,11 +207,16 @@ import { useTraduccionUi } from '../i18n'
 const RELACION_FOTO = 1
 /** El techo del stepper en la vitrina. Comprar 30 sacos es un caso de
  *  ficha, no de grilla: acá el gesto es «lo quiero», no «cuántos». */
-/** EL LUGAR RESERVADO DEL CONTROL — N24 (S100c-B).
+/** EL ALTO DEL ESCALÓN DEL CONTROL — N24 (S100c-B), re-encuadrado en S100d-B.
  *
- *  Se DERIVA del alto real del stepper compacto: no es un `44` tecleado. El
- *  `gap` de su contenedor aporta los 8 restantes, y la suma reproduce
- *  exactamente el crecimiento que el aparato midió (309,0 → 353,1 dp). */
+ *  Se DERIVA del alto real del stepper compacto: no es un `36` tecleado. *Si
+ *  el stepper cambia de alto, el escalón lo sigue solo* — que es la
+ *  diferencia entre derivar y emparejar a mano (L-284).
+ *
+ *  ⏪ Nació como **el lugar RESERVADO** de un control que vivía un piso más
+ *  abajo. Hoy no reserva nada: **es el renglón donde el control VIVE**, en
+ *  los dos estados. *La constante no cambió de valor ni de origen; cambió de
+ *  trabajo, y se dice acá porque su nombre viejo describía el otro.* */
 const ALTO_SLOT_CONTROL = ALTO_STEPPER_COMPACTO
 
 const TOPE_EN_VITRINA = 12
@@ -515,6 +528,11 @@ export function TarjetaProducto({
           {/* EL ANCLA — esto es lo que alinea los precios de una fila
               aunque los nombres midan distinto. Ver la cabecera.
 
+              ⏪ **DEROGADO S100d-B — lo de abajo describe la forma VIEJA.**
+              Se conserva porque su aritmética sigue siendo cierta y es la
+              mitad de la prueba de por qué la forma nueva es forzada; lo que
+              caduca es la CONCLUSIÓN («el control baja cuando hay cantidad»).
+
               🔴 RE-DERIVACIÓN S100b-B · EL CONTROL BAJA A SU PROPIA FILA
               CUANDO HAY CANTIDAD, y el motivo es aritmética de la caja:
 
@@ -539,17 +557,77 @@ export function TarjetaProducto({
               estado, que es justo lo que el benchmark señala como el
               defecto real: «el control lleva la acción pero no lleva el
               estado» (96 % de los sitios no destacan lo ya agregado).* */}
+          {/* 🔴 EL ESCALÓN DEL CONTROL — S100d-B, y ES LA CURA DE LOS PUNTOS
+              5 Y 7 DEL GATE.
+
+              **Firma del founder, verbatim:** *«fichas alargadas… se resuelve
+              dejando el agregar pequeño como Laika: al dar el más, en el MISMO
+              escalón queda: eliminar/restar · unidades · más»* · *«sigue
+              saltando el escalón — se reservó espacio; quiero que SE AJUSTE el
+              tamaño para que no salte.»*
+
+              ⏪ **LO QUE SE DEROGA, con su razón:** S100b bajó el control a una
+              segunda fila y S100c le reservó el lugar (N24). **Las dos curas
+              atacaban el síntoma equivocado.** El founder no está describiendo
+              una tarjeta que crece: está describiendo **un control que CAMBIA
+              DE ESCALÓN** — el `+` vivía en la fila del precio y el stepper
+              aparecía un piso más abajo. *Reservar el hueco dejó de mover a la
+              vecina, pero el control siguió mudándose de renglón, y encima la
+              tarjeta pagaba el hueco vacío en el 100 % de los casos.*
+
+              ── 🔴 LA CUENTA QUE VUELVE FORZADA ESTA FORMA (no es preferencia)
+              El control tiene TRES blancos táctiles y N8 los fija en 44:
+
+                  3 blancos × 44 dp ………………… 132 dp
+                  caja interna de la tarjeta … 138 dp
+                                               ───────
+                  le sobran ………………………………………   6 dp
+
+              ⇒ **el control ocupa la caja entera.** No hay ancho para un precio
+              al lado — y no lo hay con NINGUNA geometría: achicar el píxel con
+              `hitSlop` (que es como la casa cumple N8 en espacio corto) no
+              achica el BLANCO, y son los blancos los que no entran. *No es que
+              el control sea grande: es que tres targets de 44 y un precio no
+              caben en 138 dp, y eso no se negocia con estilo.*
+
+              ⇒ **El precio sube a su propia línea y el control se queda con el
+              último escalón, SIEMPRE.** El escalón existe con `cantidad === 0`
+              (lo ocupa el `+`) y con `cantidad > 0` (lo ocupa el stepper): **es
+              el mismo renglón, el mismo alto y el mismo borde derecho.** *El
+              control ya no se muda: cambia de forma sin cambiar de casa* — que
+              es lo que la cabecera de esta pieza dice desde el primer día y lo
+              que las dos curas anteriores no habían logrado.
+
+              ── LO QUE MIDE, contra lo que el founder vio ──────────────────
+                  antes (S100c) … fila del precio 36 + gap 8 + slot 36 = 80 dp
+                  ahora ………………… precio ~26 + gap 8 + escalón 36 ……… = 70 dp
+              **−10 dp por tarjeta, y CERO salto.** *Se declara chico a
+              propósito: la ficha alargada no se cura acá.* Los dos acreedores
+              reales están medidos y son decisión del founder, no de la pieza:
+              **la foto 1:1 (+41 dp sobre el 4:3 anterior)** y **el bloque de
+              texto**. ⛔ Y no se cura encogiendo la letra (cabecera).
+
+              ✅ **De paso devuelve presupuesto:** los 10 dp vuelven al margen
+              de la vitrina que L-301 dejó en 42. */}
           <View style={{ marginTop: 'auto', paddingTop: spacing[2], gap: spacing[2] }}>
+            {/* EL PRECIO, en su propia línea. Sigue anclado abajo con el
+                bloque, así que los escalones de una fila coinciden aunque los
+                nombres midan distinto — que es para lo que existe el ancla. */}
+            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+
+            {/* EL ESCALÓN. Alto FIJO y derivado del control, alineado a la
+                derecha en los dos estados. Con `espejo` o sin stock queda
+                vacío y no se dibuja nada adentro — pero el renglón se conserva
+                para que la vitrina no mezcle dos alturas de tarjeta según el
+                stock del vendedor. */}
             <View
               style={{
+                height: ALTO_SLOT_CONTROL,
                 flexDirection: 'row',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                gap: spacing[2],
+                alignItems: 'center',
+                justifyContent: 'flex-end',
               }}
             >
-              <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
-
               {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
               {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
               <Pressable
@@ -595,8 +673,46 @@ export function TarjetaProducto({
 
                      ⚠️ Ley 22 no se rompe: el timbre sigue siendo una
                      superficie llena y tocable —no un contorno—; lo que
-                     cambia es de qué color se llena. */
-                  backgroundColor: theme.bg.hundido,
+                     cambia es de qué color se llena.
+
+                     ⏪ ═══ DEROGADO POR F-OCRE — S100d-B, firma del founder
+                     sobre el timbre neutro EN DISPOSITIVO (punto 6 del gate):
+                     ***«el + en OCRE»***. El párrafo de arriba se conserva
+                     entero porque su medición sigue siendo cierta y porque la
+                     reconciliación se apoya en ella.
+
+                     🔴 **POR QUÉ NO ES UNA VUELTA ATRÁS, y la razón la da N23
+                     (que se firmó DESPUÉS de aquella cura):** *el color marca
+                     CLASE, jamás importancia.* La cura de S100b leyó el `+`
+                     repetido como **un acento de JERARQUÍA repetido**, y con
+                     esa lectura N5 lo condenaba —un acento por pantalla, y
+                     había uno por producto—. **Pero el ocre no jerarquiza:
+                     dice de qué CLASE es el control** («esto se agrega al
+                     carrito»). *Un marcador de clase se repite tantas veces
+                     como miembros tenga la clase; eso no es ruido, es la clase
+                     siendo consistente.* Lo que N5 sigue prohibiendo —y sigue
+                     cumplido— es **un segundo acento que compita por la
+                     atención**: el magenta de marca y elección **no aparece en
+                     la vitrina**, así que el ocre es el único acento presente.
+
+                     ⇒ **F-OCRE reparte los dos acentos de la casa por ROL:**
+                     magenta = marca y elección (leve) · **ocre = acción de
+                     compra (fuerte)**. La ley y sus dosis quedan depositadas
+                     en `DIRECCION_DISENO_S99` §1ter (N26), con la enmienda a
+                     `DISEÑO_EXPERIENCIA` §15b.1 hecha EN SU ARCHIVO.
+
+                     **El par de contraste NO se inventa acá:** es el que la
+                     casa ya midió y gateó para el CTA del cliente — **oro
+                     `accent.cta` con el signo en `accent.ctaTexto` (tinta):
+                     8.40 en claro, 9.96 en los dos temas.** *El blanco sobre
+                     el oro daba 2.02 y por eso no se usa.*
+
+                     **Memorial y prestador degradan solos:** `accent.cta` es
+                     tinta en memorial por `getTheme` y tealDark en el
+                     prestador por `lightOficio` — y el espejo del vendedor no
+                     dibuja este control (`modo: 'espejo'`), así que el oro no
+                     se le escapa a la otra app por ningún camino. */
+                  backgroundColor: theme.accent.cta,
                 }}
               >
                 <Text
@@ -604,60 +720,35 @@ export function TarjetaProducto({
                     fontFamily: typography.family.sans.bold,
                     fontSize: typography.size.md,
                     lineHeight: 24,
-                    // Tinta sobre la superficie hundida: el par que la casa
-                    // ya usa en los botones del stepper. Cero acento acá.
-                    color: theme.text.primary,
+                    // El par medido y gateado del CTA del cliente (ver arriba).
+                    color: theme.accent.ctaTexto,
                   }}
                 >
                   +
                 </Text>
               </Pressable>
-              ) : null}
-            </View>
+              ) : (
+                /* LA MUTACIÓN — **EN EL MISMO ESCALÓN**, no un piso abajo.
+                   Sigue siendo EL MISMO CONTROL cambiando de forma —no aparece
+                   otro al lado—, conserva su ancla al borde derecho y ahora
+                   además conserva su RENGLÓN: la mano lo encuentra donde estaba
+                   sin tener que volver a buscarlo. `fast` = 150 (N10).
 
-            {/* LA MUTACIÓN, ahora en SU PROPIA FILA (ver la aritmética de
-                arriba). Sigue siendo EL MISMO CONTROL cambiando de forma
-                —no aparece otro al lado— y conserva su ancla a la derecha:
-                el `+` y el stepper comparten borde derecho, así que la mano
-                lo sigue encontrando donde estaba. `fast` = 150 (N10).
-
-                🔴 **Y SU LUGAR ESTÁ RESERVADO SIEMPRE — N24 (S100c-B).**
-                Firma del founder: *«al agregar salta un escalón por debajo
-                de todo y queda viéndose feo.»*
-
-                **Medido en el aparato, la misma tarjeta antes y después de
-                tocar el `+`: 309,0 dp → 353,1 dp.** La tarjeta crecía
-                **44,1 dp** y **su vecina de la misma fila no se movía** ⇒ la
-                fila dejaba de ser una fila.
-
-                **Y la fuente da el mismo número por otro camino:**
-                `BOTON_COMPACTO` = 36 + el `gap: spacing[2]` = 8 ⇒ **44**.
-                *Dos cuentas, un número* (L-287) — por eso la reserva se
-                DERIVA de esas dos constantes y no se teclea un `44`: si el
-                stepper cambia de alto, la reserva lo sigue sola.
-
-                ⇒ **El alto de la tarjeta deja de depender del estado.** El
-                slot existe siempre; lo que cambia es si está ocupado. *El
-                defecto se vuelve inexpresable*, que es el mismo movimiento
-                con el que `PantallaConPie` mató la reserva estimada.
-
-                ⚠️ **COSTO DECLARADO, no escondido: +44 dp en TODAS las
-                tarjetas**, sobre una que ya venía creciendo (el 1:1 le sumó
-                ~41 dp en S100b). **El acreedor es el que S100b ya nombró: el
-                bloque de texto y el header.** *Se declara en vez de
-                compensarlo encogiendo la letra.* */}
-            <View style={{ height: ALTO_SLOT_CONTROL, justifyContent: 'flex-end' }}>
-              {compra.modo === 'espejo' || !compra.hayStock || compra.cantidad === 0 ? null : (
-                <Animated.View
-                  entering={FadeIn.duration(motion.duration.fast)}
-                  style={{ alignItems: 'flex-end' }}
-                >
+                   ⚠️ **El `FadeIn` se queda y el `layout` NO entra:** con el
+                   alto del escalón fijo no hay nada que animar de tamaño, y una
+                   transición de layout acá volvería a mover la caja — que es
+                   justo lo que el founder pidió que dejara de pasar. */
+                <Animated.View entering={FadeIn.duration(motion.duration.fast)}>
                   <StepperCantidad
                     valor={compra.cantidad}
                     min={0}
                     max={TOPE_EN_VITRINA}
                     onCambio={compra.onCambiarCantidad}
                     etiqueta={t('tarjetaProducto.cantidad', { nombre })}
+                    // F-OCRE: lo que se ajusta acá es una COMPRA (ver la prop
+                    // `registro` de la pieza). El magenta de la elección no
+                    // entra a la vitrina.
+                    registro="compra"
                     // 116 dp en vez de 144 — lo que entra en la caja de 138
                     // sin recortar el `+`. Ver `BOTON_COMPACTO` en la pieza.
                     compacto

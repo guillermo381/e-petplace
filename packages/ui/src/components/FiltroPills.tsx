@@ -91,26 +91,72 @@ export interface FiltroPillsProps<C extends string> {
    *  ella el eje se puede apagar. La diferencia es del consumidor, no de
    *  la pieza. */
   onLimpiar?: () => void
+  /**
+   * 🔴 DÓNDE CAEN LOS CHIPS — `'tira'` (default, cero cambio) · `'envuelve'`
+   * (S100d-B · punto 4 del gate, pedido por la pista C **con su número**).
+   *
+   * **El literal del founder:** *«modal de filtro genial. PERO chips sin
+   * visibilidad horizontal»*. **Y lo que lo vuelve una decisión y no una
+   * queja son los cinco ejes que C midió en aparato (384 dp, 18-ago):**
+   *
+   * | eje | opciones | se ve | queda fuera |
+   * |---|---|---|---|
+   * | Categoría | 3 | 89 % | 42 dp |
+   * | Especie | 5 | 78 % | 97 dp |
+   * | **Marca** | **13** | **22 %** | **1254 dp** |
+   * | **Presentación** | **15** | **23 %** | **1149 dp** |
+   * | Precio | 4 | 77 % | 106 dp |
+   *
+   * ⚠️ **Y C hizo lo que vuelve creíble el número: trató de falsar la causa
+   * fácil primero.** Probó si la tira scrollea (**las 5 sí**) y si el evento
+   * de rueda la mueve (**las 5 sí**) ⇒ **la tira NO está rota.** *La mitad
+   * obvia de la cura era la que no hacía falta, y decirlo le ahorró a esta
+   * pieza un arreglo sobre algo que funciona.*
+   *
+   * ⇒ **El defecto que queda es de FORMA:** en una hoja dedicada a filtrar,
+   * un riel horizontal **esconde el 78 % de un eje y no dice cuánto
+   * esconde**. Aunque el dedo llegue, encontrar una marca son **1254 dp de
+   * arrastre** — *eso no es filtrar, es buscar a ciegas.*
+   *
+   * **La ANATOMÍA NO CAMBIA** — mismos chips, misma pata, mismo
+   * `MarcaEleccion`, mismos gaps. **Cambia dónde caen.** Es el mismo ensanche
+   * que `SelectorOpcion` tiene firmado desde S55 (`fila | tira | grilla |
+   * columnas`), y por eso entra acá en vez de nacer un chip local: *una tira
+   * de chips propia en la pantalla sería la copia que L-175 prohíbe.*
+   *
+   * ⚠️ **La segunda mitad, declarada por C SIN veredicto y conservada acá:**
+   * `Hoja` monta su contenido en un `ScrollView` de gesture-handler con un
+   * `Gesture.Pan` que arrastra la hoja, y esta pieza usa un `ScrollView` de
+   * react-native a secas ⇒ **en el teléfono ese pan podría ganarle al
+   * arrastre horizontal.** RN-web no reproduce ese gesto. *No se afirma que
+   * pase.* **Pero si pasa, `'envuelve'` lo mata de raíz: sin gesto horizontal
+   * no hay con qué competir.**
+   */
+  disposicion?: 'tira' | 'envuelve'
 }
 
-export function FiltroPills<C extends string>({ opciones, activo, onCambio, onLimpiar }: FiltroPillsProps<C>) {
+export function FiltroPills<C extends string>({
+  opciones,
+  activo,
+  onCambio,
+  onLimpiar,
+  disposicion = 'tira',
+}: FiltroPillsProps<C>) {
   const { theme } = useTheme()
 
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      // ⚠️ el aire de ARRIBA no es estético: la pata MONTA el canto y un
-      // ScrollView recorta a sus bordes. Con paddingTop 4 (lo que había)
-      // la pata se cortaba por la mitad. 12 > MONTA(8), con margen.
-      contentContainerStyle={{
-        gap: spacing[2.5],
-        paddingHorizontal: spacing[4],
-        paddingTop: spacing[3],
-        paddingBottom: spacing[1],
-      }}
-    >
-      {opciones.map((o) => {
+  /* El aire es EL MISMO en las dos disposiciones — es lo que hace que esto
+     sea un ensanche y no una segunda pieza. ⚠️ El `paddingTop` no es
+     estético en ninguna de las dos: la pata MONTA el canto del chip. En la
+     tira lo recorta el `ScrollView`; envolviendo lo recortaría el `overflow`
+     de la Hoja. Mismo número, misma razón. */
+  const aire = {
+    gap: spacing[2.5],
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[1],
+  }
+
+  const chips = opciones.map((o) => {
         const elegido = o.codigo === activo
         const colorPlaca =
           o.capa === 'identidad' ? theme.capa.identidad : o.capa === 'cuidado' ? theme.capa.cuidado : theme.text.primary
@@ -187,7 +233,18 @@ export function FiltroPills<C extends string>({ opciones, activo, onCambio, onLi
             {elegido ? <MarcaEleccion color={theme.accent.control} /> : null}
           </Pressable>
         )
-      })}
+  })
+
+  /* 'envuelve' — un `View` con `flexWrap`: mismos chips, mismo aire, sin
+     riel. **No hay `ScrollView`, y ésa es la cura**: lo que no entra a lo
+     ancho baja de renglón en vez de esconderse a la derecha. */
+  if (disposicion === 'envuelve') {
+    return <View style={{ ...aire, flexDirection: 'row', flexWrap: 'wrap' }}>{chips}</View>
+  }
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={aire}>
+      {chips}
     </ScrollView>
   )
 }

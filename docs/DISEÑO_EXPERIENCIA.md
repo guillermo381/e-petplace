@@ -6,6 +6,12 @@
 > · TOTAL jamás en HOY · **la asimetría del fallback:** el vet lee
 > "Procedimiento", el dueño OMITE — `procedimiento` NO entra a
 > `KEY_VOZ_SERVICIO`). Base previa:
+> **v2.5 — S100d-B (18 Ago 2026).** **§15b.1 ENMENDADA por F-OCRE** (firma
+> del founder): la mitad del PRESTADOR queda intacta; **en la casa del
+> CLIENTE rigen DOS acentos por ROL** — magenta = marca y elección · ocre =
+> acción de compra. La ley entera vive en `DIRECCION_DISENO_S99` §1ter · N26.
+> *Se enmienda en su propio archivo y no solo en la ficha nueva.*
+>
 > **v2.3 — S70/T3 (19 Jul 2026).** Nace **§15b.0 LA CASA DEL
 > PRESTADOR** — la ley de la distribución, firmada founder sobre los
 > bocetos v2: HOY acciona / NEGOCIO gestiona · lo que sigue preside, lo
@@ -832,6 +838,42 @@ voz honesta, mono para dato de máquina. Otra firma en la ropa:
    la marca. Muere el tinte verdeVital como color de control (era
    semántica de éxito prestada) y muere la barra magenta de tab activa
    (la huella en el acento la reemplaza, §2.6/2.7).
+
+   > ### ⏪ 🔴 ENMENDADA POR **F-OCRE** — firma del founder, 18-ago-2026 (S100d)
+   >
+   > **La mitad del PRESTADOR queda INTACTA y sigue rigiendo entera:** su
+   > app tiene UN acento de oficio (tealDark) para todo estado y control
+   > funcional, y el magenta sigue viviendo solo en la marca. **Nada de
+   > lo de arriba cambia para el prestador.**
+   >
+   > **Lo que se enmienda es su ALCANCE sobre la casa del CLIENTE.** Firma
+   > verbatim: *«el `+` de agregar va en OCRE. La casa reconoce DOS
+   > ACENTOS con roles distintos — uno leve y uno fuerte: magenta = marca ·
+   > ocre = acción de compra.»*
+   >
+   > ⇒ **En el cliente rigen DOS acentos, repartidos por ROL:**
+   > **magenta** = marca y elección (leve) · **ocre `accent.cta`** = acción
+   > de compra (fuerte) · **ninguno** = todo lo demás. **Dos es el techo, y
+   > no se apilan sobre el mismo objeto.** La ley entera, con sus dosis, su
+   > frontera (*«¿este control COMPRA o ELIGE?»*) y su reconciliación con
+   > N5/N23, vive en **`DIRECCION_DISENO_S99` §1ter · N26**.
+   >
+   > **La cláusula que deja de regir tal cual está escrita** es *«UN acento
+   > … para TODO estado y control funcional»* **leída como ley de las dos
+   > apps**. Ya venía enmendándose de hecho y sin declararse: S82-B pasó el
+   > CTA del cliente a ocre y S83-B13 hizo que `accent.active` resolviera
+   > **por casa**. *La app del cliente hace rato que tenía más de un
+   > acento; lo que faltaba era decirlo, y con qué reparto.*
+   >
+   > **Se enmienda ACÁ, en su archivo, y no solo en la ficha nueva** —
+   > *dos letras firmadas que se contradicen son peores que una
+   > equivocada: cualquiera cita la que le conviene y está «en regla»*
+   > (mismo precedente que el magenta en S83 y la plata en S83/S88).
+   >
+   > ⚠️ **SIN OJO:** las tres pistas de S100d midieron `adb devices` y las
+   > tres dieron lista vacía. La enmienda es correcta contra la letra
+   > firmada y contra la fuente; **su calibración en píxeles no está
+   > verificada en dispositivo.**
 2. El techo de tinta: header en bg.tinta (#221E19, token constante en
    los 3 temas), la MISMA curva orgánica del techo vivo del cliente
    (44/26, calibración en gate), texto en papel (palette.light0).

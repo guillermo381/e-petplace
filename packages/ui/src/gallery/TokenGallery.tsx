@@ -56,6 +56,9 @@ import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
+import { CarritoFlotante } from '../components/CarritoFlotante'
+import { FichaRepartidor } from '../components/FichaRepartidor'
+import { Salida } from '../components/Salida'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -3381,6 +3384,56 @@ function GaleriaInterna() {
               única que sabe qué se borró.
             </Texto>
           </View>
+        </Seccion>
+
+        <Seccion titulo="CarritoFlotante (S100d) — la ÚNICA puerta al carrito, donde llega el pulgar">
+          <View style={{ flexDirection: 'row', gap: spacing[7], alignItems: 'center' }}>
+            <CarritoFlotante cuenta={1} onAbrir={() => {}} etiqueta="Ver tu carrito, 1 producto" />
+            <CarritoFlotante cuenta={12} onAbrir={() => {}} etiqueta="Ver tu carrito, 12 productos" />
+            <CarritoFlotante cuenta={140} onAbrir={() => {}} etiqueta="Ver tu carrito, 140 productos" />
+          </View>
+          <Texto variante="apoyo">
+            El cuarto caso es el que NO se ve, y es el discriminador: con `cuenta={0}` la pieza no se
+            dibuja — no hay nada del otro lado de esa puerta. Por eso «al agregar se abre el
+            flotante»: el primer + la hace entrar. Ocre (F-OCRE, acción de compra) con el glifo en
+            tinta —el par 8.40 del CTA— y el contador en tinta sobre papel, que además lo separa del
+            oro. El carrito lleva ruedas y NO lleva huella: es un control.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="FichaRepartidor (S100d) — quién va a tocar el timbre">
+          <View style={{ gap: spacing[4] }}>
+            <FichaRepartidor
+              nombre="Byron Ernesto"
+              placa="PDL-8812"
+              vehiculo="Moto roja"
+              etiquetaFoto="Todavía no tenemos su foto"
+            />
+            <FichaRepartidor nombre="Byron Ernesto" etiquetaFoto="Todavía no tenemos su foto" />
+          </View>
+          <Texto variante="apoyo">
+            Los dos casos son REALES y en la misma proporción: de los 2 pedidos en camino de hoy, uno
+            tiene placa y el otro tiene CERO vehículos. Arriba la placa manda (es lo único que la
+            familia puede verificar desde la puerta, y va en mono porque se lee de una moto). Abajo,
+            sin placa, el nombre preside y no queda ni hueco ni guion. El círculo hundido es el hueco
+            de la foto, declarado — jamás una cara genérica.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="Salida (S100d) — la cuarta de la familia: lo que estaba y ya no está">
+          <View style={{ gap: spacing[2] }}>
+            <Salida>
+              <Tarjeta>
+                <Texto variante="cuerpo">Una fila de lista cualquiera</Texto>
+              </Tarjeta>
+            </Salida>
+          </View>
+          <Texto variante="apoyo">
+            Es la pieza que NO se puede mirar quieta: su trabajo ocurre al desmontarse. Se apaga en su
+            lugar (micro, 150) y recién entonces las vecinas cierran el hueco (estándar, 300). Su
+            gate real es el carrito, borrando. ⚠️ Exige key estable por ítem: con key=index React
+            renumera en vez de desmontar y la salida no dispara, sin error y sin warning.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="GlifoConContador (S100b) — un glifo con su número encima (G-14)">
