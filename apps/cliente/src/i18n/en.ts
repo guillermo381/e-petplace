@@ -1374,6 +1374,19 @@ export const clienteEn = {
     donarEste: 'Donate this product',
     donacionDetalle:
       "e-PetPlace picks the shelter and the team coordinates the delivery. A donation never joins a record and never earns rewards: it's a gift, not a purchase with a prize.",
+    // S100d · el agradecimiento al ELEGIR la donación. Las tres decisiones de
+    // la voz viajan al inglés: la información antes que la cortesía, el límite
+    // como virtud y no como descargo, y ninguna mascota nombrada.
+    // S100d · el pedido que no se puede abrir, y NO es la red. La voz habla
+    // del caso común y no nombra el raro, por la misma razón que en español.
+    pedidoNoDisponibleTitulo: "We couldn't find this order",
+    pedidoNoDisponibleDetalle:
+      'It may no longer be available. Your other orders are still here.',
+    pedidoNoDisponibleVolver: 'See your orders',
+    donacionGraciasTitulo: 'Thank you.',
+    donacionGraciasCuerpo:
+      "This product won't arrive at your home: it goes to a shelter, to a pet still waiting for one. It earns no points and no discounts, and that's on purpose: a donation that gives something back stops being a donation.",
+    donacionGraciasCierre: 'Done',
     especieNoRegistrada:
       "This product is for a species you haven't registered in your family yet. You can register them now or later — the purchase goes through either way.",
     registrarla: 'Register a pet',

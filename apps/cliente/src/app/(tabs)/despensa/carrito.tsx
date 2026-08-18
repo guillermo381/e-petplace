@@ -294,6 +294,18 @@ export default function DespensaCarrito() {
    *  La Hoja la monta la PANTALLA, no el selector: *un selector que además abre
    *  modales empieza a conocer la navegación de su pantalla* (B). */
   const [hojaDonacion, setHojaDonacion] = useState(false);
+  /**
+   * 🔴 S100d · EL AGRADECIMIENTO — Hoja PROPIA, no la de la «i».
+   *
+   * Se parecen y no son lo mismo, y juntarlas rompería las dos:
+   * · la de la «i» (`hojaDonacion`) la ABRE LA PERSONA cuando quiere saber
+   *   qué es donar — es una explicación **pedida**;
+   * · ésta la abre **el sistema** al elegir el chip — es un **agradecimiento**,
+   *   y llega sin que nadie lo pida.
+   * *Un agradecimiento que además explica las reglas deja de agradecer; una
+   * explicación que además agradece llega cuando nadie la pidió.*
+   */
+  const [hojaGracias, setHojaGracias] = useState(false);
 
   /** Las especies que la familia YA tiene registradas (todas, no solo
    *  elegibles: un ave en memorial sigue probando que la familia registra
@@ -483,6 +495,12 @@ export default function DespensaCarrito() {
                       etiquetaDonacion={t('despensa.donarEste')}
                       detalleDonacion={t('despensa.donacionDetalle')}
                       onExplicarDonacion={() => setHojaDonacion(true)}
+                      /* S100d · punto 15: al ELEGIR la donación, el
+                         agradecimiento se abre solo. La pieza avisa; la Hoja
+                         la monta la pantalla — la misma ley que ya rige para
+                         la «i», y por eso esto es una prop y no un modal
+                         adentro del selector. */
+                      onDonacionElegida={() => setHojaGracias(true)}
                     />
                   </View>
                 ) : null}
@@ -525,6 +543,7 @@ export default function DespensaCarrito() {
                   etiquetaDonacion={t('despensa.donarEste')}
                   detalleDonacion={t('despensa.donacionDetalle')}
                   onExplicarDonacion={() => setHojaDonacion(true)}
+                  onDonacionElegida={() => setHojaGracias(true)}
                 />
                 {/* El reparto SE OFRECE solo cuando hay algo que repartir.
                     Con un producto la opción no existe: ofrecer «repartir» un
@@ -564,6 +583,33 @@ export default function DespensaCarrito() {
             etiqueta={t('despensa.listoDatos')}
             bloque
             onPress={() => setHojaDonacion(false)}
+          />
+        </View>
+      </Hoja>
+
+      {/* 🔴 S100d · EL AGRADECIMIENTO (punto 15) — se abre SOLO al elegir la
+          donación, no al tocar la «i».
+
+          ⚠️ Por qué el título va en el `titulo` de la Hoja y no como un
+          `Texto` adentro: la Hoja ya tiene su jerarquía de encabezado, y meter
+          un segundo título dentro del cuerpo dibuja dos jerarquías para una
+          sola cosa (N23 al revés).
+
+          ⚠️ Y por qué NO repite los límites de §6.4 que ya dice la «i»: los
+          dice, pero **en otra clave**. La «i» explica una regla a quien la fue
+          a buscar; esto agradece a quien acaba de donar. *La misma frase en
+          los dos lugares convierte el agradecimiento en un descargo.* */}
+      <Hoja
+        visible={hojaGracias}
+        onCerrar={() => setHojaGracias(false)}
+        titulo={t('despensa.donacionGraciasTitulo')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('despensa.donacionGraciasCuerpo')}</Texto>
+          <Boton
+            etiqueta={t('despensa.donacionGraciasCierre')}
+            bloque
+            onPress={() => setHojaGracias(false)}
           />
         </View>
       </Hoja>
