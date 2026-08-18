@@ -67,6 +67,7 @@ import {
   CELDA_DE_GRILLA,
   GRILLA_DE_DOS,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -74,6 +75,7 @@ import {
   buscarProductosDespensa,
   listarProductosDespensa,
   contarProductosDespensa,
+  maximoComprableDeOfertas,
   mascotasElegibles,
   obtenerMascotasDeFamilia,
   recomendarParaMascota,
@@ -92,6 +94,7 @@ import {
 } from '@/components/hoja-filtros-despensa';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { agregarAlCarrito, fijarCantidad, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import { cruzarConVigilados } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
@@ -152,6 +155,7 @@ const LUGAR_CONTROL_FILTRO = spacing[12];
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const { mostrar } = useAviso();
   const carrito = useCarrito();
   // La puerta desde la mascota (§5.1): su perfil llega con el eje puesto.
   const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
@@ -527,7 +531,59 @@ export default function DespensaDescubrir() {
               },
               1,
             ),
-          onCambiarCantidad: (n) => fijarCantidad(p.oferta_id, n),
+          /**
+           * 🔴 S100d-C · punto ⑳ · **LA VITRINA DEJA DE ACEPTAR MÁS DE LO QUE
+           * HAY — y era la última de las TRES puertas sin tope.**
+           *
+           * El founder: *«pedí 3 y hay 1»*. `hay_stock` es **booleano por
+           * firma de S99** (*la familia necesita «¿puedo comprar esto?», no
+           * el inventario ajeno*) ⇒ **caza «se agotó» y no puede cazar «no
+           * alcanza para 3»**. Medido por A contra la base: **31 de 483
+           * ofertas publicadas tienen ≤2 unidades y 70 tienen ≤5**, todas con
+           * `hay_stock = true` — o sea que el caso no es raro: es el **6,4 %**
+           * del catálogo, y hasta hoy reventaba recién al pagar.
+           *
+           * **La lógica NO se escribe acá**: `tope-de-compra.ts` es de A y las
+           * tres puertas (ficha · vitrina · carrito) montan LA MISMA. *Curarlo
+           * por pantalla lo escondería en una y lo dejaría vivo en las otras
+           * dos* — que es exactamente cómo llegó a haber tres.
+           *
+           * ⚠️ **BAJAR NO CONSULTA** (`n <= enCarrito` va directo): pedirle
+           * permiso al motor para llevar MENOS es un viaje que no decide
+           * nada, y acá el dedo repite el `−`.
+           *
+           * ⚠️ **`sin_medir` NO es `agotado`** (Ley 13): si la consulta falla
+           * se aplica lo pedido y el motor sigue siendo la última palabra.
+           * *Un fallo de red no se disfraza de «no hay stock» — inventar una
+           * mala noticia es peor que darla tarde.*
+           */
+          onCambiarCantidad: (n) => {
+            if (n <= enCarrito) {
+              fijarCantidad(p.oferta_id, n);
+              return;
+            }
+            void (async () => {
+              const r = await maximoComprableDeOfertas([
+                { oferta_id: p.oferta_id, cantidad: n },
+              ]);
+              const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
+              const tope = decidirTope(n, maximo);
+              if (tope.clase === 'agotado') {
+                // Se agotó entre que se pintó la vitrina y este toque. **La
+                // cantidad no se toca**: bajarla sola escondería que el
+                // producto se cayó, y la tarjeta ya no lo va a poder decir.
+                mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+                return;
+              }
+              if (tope.clase === 'acotado') {
+                mostrar({
+                  texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
+                  variante: 'neutro',
+                });
+              }
+              fijarCantidad(p.oferta_id, tope.cantidad);
+            })();
+          },
         }}
         onPress={() =>
           router.push({

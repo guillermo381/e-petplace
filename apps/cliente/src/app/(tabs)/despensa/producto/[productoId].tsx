@@ -740,13 +740,45 @@ export default function DespensaProducto() {
                 como párrafo de cuerpo le promete al lector una descripción que
                 no existe.* Va donde pertenece: junto a la marca, con el
                 separador de la casa. */}
+            {/* 🔴 S100d-C · **«Brilliant · Brilliant» — LA MARCA DICHA DOS
+                VECES, Y NO LA ENCONTRÓ NINGÚN NÚMERO: LA ENCONTRÓ MIRAR.**
+
+                Corrí cuatro mediciones sobre esta ficha en la vuelta —altos,
+                tipografías, largos de texto, señales del control— y **las
+                cuatro daban verde**, porque ninguna preguntaba *«¿estos dos
+                campos dicen lo mismo?»*. Apareció en la captura, de un
+                vistazo. *Es el mismo modo de falla que S100b registró con la
+                ficha sin precio: lo que la vara no pregunta, la vara no lo
+                contesta.*
+
+                **Medido después de verlo, contra la base viva (18-ago): 106
+                de 470 vendibles —el 22,6 %— tienen `descripcion` IDÉNTICA a
+                `marca`**, y 107 la tienen contenida. ⇒ **en casi una de cada
+                cuatro fichas del catálogo, esta línea repetía la marca.**
+
+                Y refuerza lo que el punto ⑪ concluyó por otro camino:
+                **`descripcion` no es una descripción.** Promedia 10,5
+                caracteres, y una de cada cuatro veces es literalmente el
+                nombre de la marca otra vez.
+
+                **La cura es de la PANTALLA y no del dato:** el catálogo dice
+                lo que dice y no se le reescribe —el importador es su fuente—;
+                lo que estaba mal era juntar dos campos sin preguntar si
+                traían lo mismo. Se compara **normalizado** (`trim` +
+                minúsculas) porque *«Brilliant»* y *«brilliant »* son el mismo
+                dato con distinta suerte de carga. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
               <Texto variante="titulo">{nombreCurado(ficha.nombre)}</Texto>
-              {ficha.marca !== null || ficha.descripcion !== null ? (
-                <Texto variante="apoyo">
-                  {[ficha.marca, ficha.descripcion].filter((x) => x !== null).join(' · ')}
-                </Texto>
-              ) : null}
+              {(() => {
+                const norm = (x: string) => x.trim().toLowerCase();
+                const partes = [ficha.marca, ficha.descripcion]
+                  .filter((x): x is string => x !== null && x.trim().length > 0)
+                  // El eco se retira, jamás el primero: la MARCA preside.
+                  .filter((x, i, todas) => todas.findIndex((y) => norm(y) === norm(x)) === i);
+                return partes.length > 0 ? (
+                  <Texto variante="apoyo">{partes.join(' · ')}</Texto>
+                ) : null;
+              })()}
             </View>
 
             {/* ② bis · LAS PRESENTACIONES COMO CHIPS (N19 ②) — elegir acá y ver
