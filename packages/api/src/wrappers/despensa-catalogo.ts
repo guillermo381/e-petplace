@@ -310,6 +310,96 @@ function expresionBusquedaVitrina(texto: string): string | null {
     .join(',');
 }
 
+/**
+ * 🔴 EL RESPALDO PEGADO — «proplan» tiene que encontrar «Pro Plan»
+ * (S100c-C · C-01).
+ *
+ * **EL ROJO, del founder sobre la OTA `fbd7b6e0`:** *«puse todo proplan,
+ * todo pegado… me la encontró solo cuando pongo dos palabras»*.
+ *
+ * 🔴 **Y LA MEDICIÓN DIO VUELTA MEDIA HIPÓTESIS.** El hallazgo llegaba con
+ * *«probablemente también curar los nombres del catálogo»*. **Medido contra
+ * la base viva el 18-ago:**
+ *
+ * | | |
+ * |---|---|
+ * | marcas distintas con espacio adentro | **20 de 105** |
+ * | productos que caen bajo esas marcas | **196 de 470 (41,7 %)** |
+ * | productos cuyo `nombre` tiene espacios | **462 de 470** |
+ *
+ * ⇒ **el catálogo NO está sucio: «Pro Plan» se escribe con espacio.**
+ * Curar los nombres habría significado escribir MAL 196 productos para que
+ * el buscador funcionara. *La mitad de la cura que parecía obvia era la que
+ * hacía el daño* — la ley de S99, cobrada de nuevo.
+ *
+ * **Y no es un caso: es una CLASE**, medida en pantalla con el mismo aparato:
+ * `pro plan` 20 / `proplan` **0** · `royal canin` 50 / `royalcanin` **0** ·
+ * `taste of the wild` 27 / `tasteofthewild` **0** · `hills` **0** (el
+ * catálogo dice `Hill's`: el separador ahí es un apóstrofo, no un espacio).
+ *
+ * ── CÓMO, y por qué así ─────────────────────────────────────────────────
+ * `ilike` compara contra la COLUMNA tal cual, y PostgREST no puede
+ * transformarla — colapsar el dato del otro lado es `unaccent`/`replace` en
+ * el servidor **con su índice: eso es MOTOR y no vive acá**. Desde el
+ * cliente lo único posible es aflojar el PATRÓN: se intercala el comodín
+ * entre las letras, así `proplan` → `p*r*o*p*l*a*n` alcanza a `Pro Plan`,
+ * `Royal Canin` y `Hill's` sin importar QUÉ separador tenían.
+ *
+ * 🔴 **SE DISPARA SOLO CUANDO LA BÚSQUEDA EXACTA DEVOLVIÓ CERO, y ésa es la
+ * decisión que lo vuelve seguro.** Un patrón con comodines entre letras es
+ * MENOS preciso que el exacto: correrlo siempre volvería difusa toda
+ * búsqueda, incluidas las que hoy funcionan y el founder aprobó. Corriendo
+ * solo sobre el cero, **el peor caso posible es una pantalla que hoy dice
+ * "Nada con X"** ⇒ no puede degradar ningún resultado existente, porque
+ * donde actúa no hay ninguno.
+ *
+ * 🔴 **LAS TRES PRIMERAS LETRAS VAN PEGADAS, Y ESO LO ORDENÓ UNA MEDICIÓN,
+ * NO UNA INTUICIÓN.** La primera versión intercalaba el comodín entre
+ * TODAS las letras, y medida en pantalla devolvió:
+ * `proplan` **22** (contra 20 del exacto) · `tasteofthewild` **27** (exacto
+ * 27, clavado) · **`hills` 11, encabezado por «Higgins Vita Seed mezcla
+ * natural»** — porque `h*i*l*l*s` se satisface con letras sueltas de una
+ * frase entera. Y el dato que lo condena: **`Hill's` no existe en el
+ * catálogo** (0 productos en `marca`, medido). *O sea que el respaldo
+ * convertía un vacío HONESTO en once resultados que no tienen nada que ver
+ * — que es peor que no encontrar, porque el vacío se entiende y la lista
+ * equivocada se cree.*
+ *
+ * Con el prefijo anclado (`hil*l*s`) «Higgins» ya no puede entrar, y los
+ * casos reales no pierden nada: **ninguna marca parte sus tres primeras
+ * letras** —`Pro Plan`, `Royal Canin`, `Taste of the Wild`, `Hill's` las
+ * tienen todas pegadas—.
+ *
+ * **Los tres límites, declarados:**
+ * · **Término con separador NO entra** — si ya escribió «pro plan», el
+ *   exacto es mejor y este respaldo no aporta.
+ * · **Mínimo 4 letras.** Con 2 o 3 el patrón se vuelve ruido puro
+ *   (`a*b*c` matchea medio catálogo). *El corte es arbitrario y por eso se
+ *   escribe: es el número a discutir si el gate trae un caso.*
+ * · **Una marca cuya primera palabra tenga 1 o 2 letras no la encuentra**
+ *   (un hipotético «Bi Fresh» tecleado `bifresh`). Se acepta a cambio de
+ *   la precisión: **cero marcas del catálogo de hoy caen en ese caso**.
+ *
+ * ⚠️ **NO se aplica al CONTEO** (`contarProductosDespensa`): hoy la app no
+ * le pasa `texto`, así que no hay divergencia posible. **El día que se lo
+ * pase, el conteo va a contar el exacto y la lista el respaldo** — se
+ * declara acá, junto a la causa, para que ese día no se busque el defecto
+ * en la vista.
+ */
+function expresionBusquedaPegada(texto: string): string | null {
+  const base = texto.replace(/[,()%_\\]/g, ' ').trim();
+  // Si ya trae separadores, el exacto es el bueno: este respaldo no aplica.
+  if (/[\s'’\-.]/.test(base)) return null;
+  const letras = sinDiacriticos(base);
+  if (letras.length < 4 || letras.length > 24) return null;
+  // Prefijo PEGADO + comodín entre el resto: `proplan` → `pro*p*l*a*n`.
+  const ANCLA = 3;
+  const patron = letras.slice(0, ANCLA) + letras.slice(ANCLA).split('').map((c) => `*${c}`).join('');
+  return ['nombre', 'marca', 'familia_codigo']
+    .map((c) => `${c}.ilike.*${patron}*`)
+    .join(',');
+}
+
 const SELECT_VITRINA = `
   id, precio, moneda, country_code, cuenta_comercial_id, hay_stock,
   producto_variantes!inner (
@@ -839,19 +929,35 @@ export async function buscarProductosDespensa(
   // coincidencias—; es el ORDER el que se acepta y se ignora. Esa asimetría
   // es lo que vuelve creíble la trampa: uno prueba el filtro, anda, y da por
   // bueno el resto.)
-  const { data, error } = await getClient()
-    .from('v_vitrina_publicada')
-    .select('*')
-    .or(expr)
-    .order('nombre', { ascending: true })
-    .order('oferta_id', { ascending: true })
-    .limit(limite);
+  const corrida = async (e: string) =>
+    getClient()
+      .from('v_vitrina_publicada')
+      .select('*')
+      .or(e)
+      .order('nombre', { ascending: true })
+      .order('oferta_id', { ascending: true })
+      .limit(limite);
+
+  const { data, error } = await corrida(expr);
 
   if (error) return falloDespensa(error.message);
   if (!Array.isArray(data)) return falloDespensa('datos_inconsistentes');
   const productos = mapearVitrinaPlana(data);
   if (productos === null) return falloDespensa('datos_inconsistentes');
-  return { ok: true, data: productos };
+  if (productos.length > 0) return { ok: true, data: productos };
+
+  // 🔴 C-01 · CERO RESULTADOS ⇒ SE PRUEBA EL RESPALDO PEGADO (ver su
+  // función). Solo acá: donde no hay nada que degradar. Si el respaldo no
+  // aplica —término corto, o que ya trae separadores— se devuelve el vacío
+  // honesto de siempre, sin un segundo viaje.
+  const pegada = expresionBusquedaPegada(termino);
+  if (pegada === null) return { ok: true, data: [] };
+  const r2 = await corrida(pegada);
+  if (r2.error) return falloDespensa(r2.error.message);
+  if (!Array.isArray(r2.data)) return falloDespensa('datos_inconsistentes');
+  const respaldo = mapearVitrinaPlana(r2.data);
+  if (respaldo === null) return falloDespensa('datos_inconsistentes');
+  return { ok: true, data: respaldo };
 }
 
 // ── D · 🔴 LA RECOMENDACIÓN — §exclusión ────────────────────────────────────

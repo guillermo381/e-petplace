@@ -56,7 +56,6 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  FiltroPills,
   GlifoConContador,
   Icono,
   nombreCurado,
@@ -82,6 +81,13 @@ import {
   type Recomendacion,
 } from '@epetplace/api';
 import { CriterioMascota } from '@/components/despensa-piezas';
+import {
+  HojaFiltrosDespensa,
+  SIN_FILTROS,
+  aplicarFiltros,
+  contarFiltrosActivos,
+  type FiltrosDespensa,
+} from '@/components/hoja-filtros-despensa';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { agregarAlCarrito, fijarCantidad, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { cruzarConVigilados } from '@/lib/despensa/composicion';
@@ -132,8 +138,14 @@ export default function DespensaDescubrir() {
   // ── S96 · el buscador y los filtros ──────────────────────────────────
   const [busqueda, setBusqueda] = useState('');
   const [resultados, setResultados] = useState<Fase<ProductoDeVitrina[]> | null>(null);
-  const [familiaFiltro, setFamiliaFiltro] = useState<string | null>(null);
-  const [especieFiltro, setEspecieFiltro] = useState<string | null>(null);
+  /** 🔴 S100c-C · C-02 — los cinco ejes viven en UN objeto y no en cinco
+   *  `useState`: contarlos, limpiarlos y pasarlos a la hoja son
+   *  operaciones sobre EL conjunto, y con estados sueltos cada una se
+   *  escribe cinco veces —y la sexta se olvida—. La forma vive en
+   *  `hoja-filtros-despensa.tsx`, junto a la hoja que los ofrece, para
+   *  que el filtro y su puerta no puedan divergir. */
+  const [filtros, setFiltros] = useState<FiltrosDespensa>(SIN_FILTROS);
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
 
   const elegibles = useMemo(
     () => mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], null),
@@ -293,13 +305,11 @@ export default function DespensaDescubrir() {
       ? null // con mascota y sin búsqueda, la lista es la recomendación (abajo)
       : vitrina;
 
-  /** Facetas DERIVADAS de lo cargado — un filtro solo existe si hay datos
-   *  que parte (censo S82: si un eje no parte los datos, no se dibuja). */
-  function facetas(lista: ProductoDeVitrina[]) {
-    const familias = [...new Set(lista.map((p) => p.familia_codigo))];
-    const especies = [...new Set(lista.flatMap((p) => p.especies_aplicables))];
-    return { familias, especies };
-  }
+  /* ☠️ S100c-C · Ley 37 — acá vivían `facetas()` y `aplicarFacetas()`.
+     Los dos se mudaron enteros a `hoja-filtros-despensa.tsx`, que ahora
+     deriva CINCO ejes en vez de dos. **Se borran en vez de dejarse**: un
+     derivador de facetas que ya nadie llama es la próxima fuente de un
+     filtro que se aplica en un lado y no en el otro. */
 
   /** Ley 3: el código de familia sale por diccionario; lo que no matchea
    *  no se pinta como chip (antes un chip de menos que un código crudo). */
@@ -335,14 +345,6 @@ export default function DespensaDescubrir() {
       default:
         return null;
     }
-  }
-
-  function aplicarFacetas(lista: ProductoDeVitrina[]): ProductoDeVitrina[] {
-    return lista.filter(
-      (p) =>
-        (familiaFiltro === null || p.familia_codigo === familiaFiltro) &&
-        (especieFiltro === null || p.especies_aplicables.includes(especieFiltro)),
-    );
   }
 
   /**
@@ -516,35 +518,51 @@ export default function DespensaDescubrir() {
    * Con la prop viva el andamio dejó de tener razón de existir, así que se
    * retira entero: **el `modo`, `filaProducto` y su `Separador`.**
    */
+  /**
+   * 🔴 S100c-C · C-02 · LAS DOS TIRAS DE CHIPS MUEREN; QUEDA UN CONTROL.
+   *
+   * El gate: *«con el teclado desplegado no veo absolutamente nada más»*.
+   * **Medido antes de tocar: las dos tiras costaban 132 dp de 317 de
+   * cromo — el 42 %** — y son las facetas de lo cargado, así que **crecen
+   * con el catálogo**: con 563 productos los chips no llegan nunca.
+   *
+   * ⚠️ **DOS COSAS QUE LA MEDICIÓN CORRIGIÓ, y hay que dejarlas escritas
+   * porque la firma de mesa decía otra cosa:**
+   *
+   * ① *«la fila de ESPECIES muere cuando hay mascota elegida — hoy se
+   * contradice»*: **no se contradice.** El guard vive en esta función
+   * desde S96-D (`mascota === null &&`), **está en el ancla publicada
+   * `f107eac9`** (verificado con `git show`) y **medido en aparato NO se
+   * dibuja** con Jack elegido. *La cura que la mesa nombró no habría
+   * curado nada, porque ya estaba hecha.*
+   *
+   * ② Lo que el founder VIO sí es real, y estaba en otra superficie:
+   * **la BÚSQUEDA ignora la mascota.** Con Jack (gato) elegido, buscar
+   * «alimento» devuelve 50 tarjetas y las tres primeras declaran, en su
+   * propia ficha, *«Está pensado para perros.»* ⇒ **H-301**, abajo.
+   * *Una observación correcta con una causa mal atribuida se cura en el
+   * lugar equivocado y el defecto sigue vivo con mejor cara.*
+   *
+   * El eje ESPECIE **no se pierde**: se muda adentro de la hoja, donde
+   * convive con los otros cuatro en vez de gastar una fila.
+   */
   function listaConFacetas(lista: ProductoDeVitrina[], vacio: React.ReactNode) {
-    const { familias, especies } = facetas(lista);
-    const filtradas = aplicarFacetas(lista);
-    const chipsFamilia = familias
-      .map((f) => ({ codigo: f, etiqueta: etiquetaFamilia(f), icono: null }))
-      .filter((x): x is { codigo: string; etiqueta: string; icono: null } => x.etiqueta !== null);
-    const chipsEspecie = especies
-      .map((e) => ({ codigo: e, etiqueta: etiquetaEspecie(e), icono: null }))
-      .filter((x): x is { codigo: string; etiqueta: string; icono: null } => x.etiqueta !== null);
+    const filtradas = aplicarFiltros(lista, filtros);
+    const activos = contarFiltrosActivos(filtros);
     return (
       <View style={{ gap: spacing[3] }}>
-        {chipsFamilia.length > 1 ? (
-          <FiltroPills
-            opciones={chipsFamilia}
-            activo={familiaFiltro}
-            onCambio={setFamiliaFiltro}
-            onLimpiar={() => setFamiliaFiltro(null)}
+        <View style={{ paddingHorizontal: spacing[5] }}>
+          <Boton
+            variante="secundario"
+            tamaño="sm"
+            etiqueta={
+              activos === 0
+                ? t('despensa.filtrar')
+                : t('despensa.filtrarCon', { n: activos })
+            }
+            onPress={() => setFiltrosAbiertos(true)}
           />
-        ) : null}
-        {/* La especie solo parte datos cuando NO hay mascota elegida: con
-            mascota, su especie ya es el criterio del motor. */}
-        {mascota === null && chipsEspecie.length > 1 ? (
-          <FiltroPills
-            opciones={chipsEspecie}
-            activo={especieFiltro}
-            onCambio={setEspecieFiltro}
-            onLimpiar={() => setEspecieFiltro(null)}
-          />
-        ) : null}
+        </View>
         {filtradas.length === 0 ? (
           vacio
         ) : (
@@ -575,6 +593,22 @@ export default function DespensaDescubrir() {
   );
 
   const unidades = unidadesEnCarrito(carrito);
+
+  /** La lista que la hoja de filtros usa para derivar sus facetas: la
+   *  MISMA que se está mostrando, sin filtrar. Se calcula acá y no adentro
+   *  de la hoja porque **cuál es la lista vigente es decisión de esta
+   *  pantalla** (búsqueda > recomendación > vitrina), y duplicar esa
+   *  precedencia en dos lugares es cómo se fabrica una hoja que ofrece
+   *  filtros de una lista que el ojo no está viendo. */
+  const listaParaFiltrar: ProductoDeVitrina[] = buscando
+    ? Array.isArray(resultados)
+      ? resultados
+      : []
+    : mascota !== null
+      ? (recomendados ?? [])
+      : Array.isArray(vitrina)
+        ? vitrina
+        : [];
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -613,6 +647,30 @@ export default function DespensaDescubrir() {
            parada por orden de mesa — *una pieza entregada y sin consumidor
            muere sin que nadie se entere.* Si C repiensa la composición,
            esto se mueve; lo que no vuelve es el apilado. */
+        /* 🔴 S100c-C · C-03 · LO QUE **NO** SE HIZO ACÁ, Y POR QUÉ — H-302.
+           El gate: *«se pierde mucho espacio»* entre el buscador y la barra
+           de mascotas. **Medido (18-ago, 384×832): 74 dp** entre el borde
+           inferior de la CAJA DE TEXTO (y 58) y la barra (y 132).
+           La causa está en la pieza y se leyó, no se supuso: `Campo` reserva
+           SIEMPRE el slot de ayuda/error (`PieDeCampo`, `minHeight:
+           ALTO_PIE_CAMPO`) *para que el mensaje no empuje el layout al
+           aparecer* — regla correcta que acá protege de nada: **un buscador
+           no valida.** Son **26 dp** de los 74.
+
+           Se probó `sinPie` (la prop existe) y **`verify:diseno` lo frenó
+           con razón: R29** — con `sinPie` el `Campo` sigue pintando su borde
+           de error pero deja de renderizar el texto ⇒ *borde rojo sin una
+           palabra que lo explique*, y el modo de falla es el silencio
+           (L-192). La regla asume que quien apaga el pie es un CONTROL
+           COMPUESTO que lo monta por sus hijos; **un campo que no puede
+           tener mensaje es un tercer caso que la regla no contempla.**
+
+           ⇒ **NO se apaga el lint y NO se monta un `PieDeCampo` decorativo
+           para callarlo** — gamear el instrumento es peor que el defecto.
+           El arreglo es de la PIEZA y es de B (H-302): que `Campo` pueda
+           declarar «este campo no tiene mensaje» de forma que `ayuda`/`error`
+           sean **inexpresables** ahí. Con eso R29 sigue mordiendo donde debe
+           y estos 26 dp vuelven. *Los otros 48 sí se curaron, abajo.* */
         busqueda={
           <Campo
             label={t('despensa.buscarLabel')}
@@ -666,7 +724,16 @@ export default function DespensaDescubrir() {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          paddingTop: spacing[4],
+          /* 🔴 S100c-C · C-03 · 16 → 8. **El aire estaba pagado dos veces.**
+             El `Encabezado` en variante portada ya trae `paddingBottom:
+             spacing[5]` (20 dp) —*«la portada respira, no comprime»*, y esa
+             decisión es de la pieza y no se toca—, así que estos 16 se
+             sumaban a un colchón que ya existía: 36 dp entre el buscador y
+             la primera cosa que se toca.
+             Se baja a 8 y quedan 28, que siguen siendo aire. **No se baja a
+             0 a propósito**: pegar la barra de mascotas al filo del
+             encabezado la haría leer como parte de él. */
+          paddingTop: spacing[2],
           // Sin barra fija abajo, la reserva es solo el aire del final
           // del contenido: el `+ 72` estimaba el alto de un pie que ya no
           // existe (la clase que `PantallaConPie` vino a volver inexpresable).
@@ -955,6 +1022,24 @@ export default function DespensaDescubrir() {
           encabezado no colapsa al scrollear** (medido por B: 156.4 dp, no
           colapsa). *Si en el gate el acuse no se siente, el arreglo es dar
           señal al contador —no resucitar la barra.* */}
+
+      {/* 🔴 S100c-C · C-02 · LA HOJA DE FILTROS.
+          Vive FUERA del `ScrollView` porque es una superficie sobre la
+          pantalla, no contenido de ella.
+          **Se le pasa la lista SIN filtrar** (`listaParaFiltrar`): las
+          facetas salen de lo que hay, no de lo que quedó — si salieran de
+          lo filtrado, elegir «Alimento» borraría las demás categorías de
+          la hoja y no habría forma de volver sin limpiar todo. */}
+      <HojaFiltrosDespensa
+        visible={filtrosAbiertos}
+        onCerrar={() => setFiltrosAbiertos(false)}
+        lista={listaParaFiltrar}
+        filtros={filtros}
+        onCambio={setFiltros}
+        ocultarEspecie={mascota !== null}
+        vozFamilia={etiquetaFamilia}
+        vozEspecie={etiquetaEspecie}
+      />
     </View>
   );
 }

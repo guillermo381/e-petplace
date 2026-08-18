@@ -1429,6 +1429,24 @@ export const clienteEs = {
     familiaSuplemento: 'Suplementos',
     familiaDieta: 'Dieta de prescripción',
 
+    // S100c-C · C-02 — las dos tiras de chips pasan a UN control con hoja.
+    // El contador va en la etiqueta: un botón que dice cuántos filtros hay
+    // puestos es la única forma de saberlo sin abrirlo.
+    filtrar: 'Filtrar',
+    filtrarCon: 'Filtrar · {{n}}',
+    filtrosTitulo: 'Filtrar',
+    filtrosVer: 'Ver {{n}} productos',
+    filtrosLimpiar: 'Limpiar {{n}} filtros',
+    filtroCategoria: 'Categoría',
+    filtroEspecie: 'Para qué animal',
+    filtroMarca: 'Marca',
+    filtroPresentacion: 'Presentación',
+    filtroPrecio: 'Precio',
+    precio_hasta10: 'Hasta $10',
+    precio_de10a25: '$10 a $25',
+    precio_de25a50: '$25 a $50',
+    precio_mas50: 'Más de $50',
+
     // S99-D · §8.6ter — EL VENDEDOR QUE NO LO TIENE: se muestra y SE DICE.
     // El choque contra §4.4 está resuelto POR SUJETO en la letra: lo que no
     // aparece en navegación es el producto que NADIE vende; éste tiene oferta
