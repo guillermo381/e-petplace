@@ -52,6 +52,7 @@ import { View } from 'react-native'
 
 import { EscaleraEstados, type DesvioEscalera, type PasoEscalera } from './EscaleraEstados'
 import { Tarjeta } from './Tarjeta'
+import { Insignia } from './Insignia'
 import { Texto } from './Texto'
 import { spacing } from '../tokens/spacing'
 
@@ -72,6 +73,58 @@ export type TarjetaPedidoProps = {
   pasos?: PasoEscalera[]
   /** El camino se interrumpió — ver la decisión ① de `EscaleraEstados`. */
   desvio?: DesvioEscalera
+  /**
+   * 🔴 EL ESTADO DE UN PEDIDO QUE TODAVÍA NO TIENE RECORRIDO (S100b-B ·
+   * pedido de la pista D **con el caso medido**).
+   *
+   * **EL CASO, y no es hipotético — es la lista que vio el founder:**
+   * `pagando` = 4 · con promesa = 4 · con pago confirmado = **0**, y son
+   * **los cuatro primeros** de la lista. Esas tarjetas salían con título,
+   * fecha y monto **y nada más**, al lado de vecinas con escalera de
+   * cuatro nodos.
+   *
+   * **Por qué no alcanzaba el `detalle` en `apoyo`** (que es lo que había):
+   * no es un problema de tipografía sino de **contraste de FORMA** — la
+   * tarjeta vecina tiene una figura y ésta no, así que se lee como *«le
+   * falta algo»* en vez de *«está en otro estado»*.
+   *
+   * ── POR QUÉ NO CRECIÓ `EscaleraEstados` PARA ESTO ──────────────────
+   * Su regla de existencia es correcta: **sin pasos no hay escalera.** Un
+   * modo «sin pasos pero con estado» le devuelve adentro justo la
+   * ambigüedad que le sacamos. ***Un pedido sin recorrido no tiene una
+   * escalera vacía: tiene un estado.***
+   *
+   * ── POR QUÉ NO ES `desvio` ─────────────────────────────────────────
+   * `desvio` significa **el camino se interrumpió**, y `pagando` no se
+   * interrumpió: todavía no empezó. *Usarlo diría que algo salió mal.*
+   *
+   * ── 🔴 POR QUÉ ES UN PAR TIPADO Y NO UN `ReactNode` ────────────────
+   * D ofreció las dos formas y elijo la cerrada. **Un slot libre entrega
+   * la FORMA al consumidor**, y entonces cada pantalla resuelve «el estado
+   * de un pedido» a su manera — que es exactamente la divergencia que esta
+   * tarjeta existe para no tener.
+   *
+   * **La voz sigue siendo del consumidor** (él pasa `etiqueta`, y el
+   * vendedor y la familia dicen cosas distintas del mismo hecho); **la
+   * forma es de la pieza**, que monta `Insignia` adentro. *Es el reparto
+   * de siempre: la casa comparte la forma, cada voz es suya.*
+   *
+   * ⚠️ **Mutuamente excluyente con `pasos` en la práctica:** si el pedido
+   * ya tiene recorrido, su estado lo cuenta la escalera. Pasar los dos
+   * dibuja dos veces lo mismo — la pieza no lo prohíbe por tipo porque
+   * `pasos` es opcional y su ausencia ya es la señal, pero **si aparecen
+   * juntos, el que sobra es éste.**
+   */
+  estado?: {
+    /** La voz de quien monta. Jamás la compone esta pieza. */
+    etiqueta: string
+    /**
+     * El vocabulario de `Insignia`, **reusado y no reinventado** (L-175:
+     * se ensancha la respuesta que la casa ya tiene). `info` es el default
+     * porque *«todavía no pasó nada»* no es una alerta ni un logro.
+     */
+    tono?: 'info' | 'proximo' | 'atencion'
+  }
   /** `oficio` = panel del vendedor · `control` = app de la familia. */
   acento?: 'control' | 'oficio'
   onPress: () => void
@@ -85,6 +138,7 @@ export function TarjetaPedido({
   monto,
   pasos = [],
   desvio,
+  estado,
   acento = 'control',
   onPress,
   etiqueta,
@@ -107,6 +161,18 @@ export function TarjetaPedido({
               se dibuja: "$0,00" es mentira con formato de dato (19.9). */}
           {monto === undefined ? null : <Texto variante="dato">{monto}</Texto>}
         </View>
+
+        {/* 🔴 EL ESTADO SIN RECORRIDO — ver la prop `estado`. Va DESPUÉS
+            del encabezado y ANTES de la escalera: ocupa el lugar donde la
+            vecina tiene su figura, que es exactamente el contraste de
+            forma que faltaba. La voz la trae quien monta; la forma la
+            resuelve `Insignia`, para que dos pantallas no lo dibujen
+            distinto. */}
+        {estado === undefined ? null : (
+          <View style={{ flexDirection: 'row' }}>
+            <Insignia estado={estado.tono ?? 'info'} etiqueta={estado.etiqueta} />
+          </View>
+        )}
 
         {/* ⏪ **S100-B · MURIÓ EL GUARD `pasos.length === 0 ? null`** (H-04,
             hallazgo de la pista D). Era una re-implementación PARCIAL de

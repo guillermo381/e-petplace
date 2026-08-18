@@ -55,6 +55,7 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PantallaConPie } from '../components/PantallaConPie'
+import { GlifoConContador } from '../components/GlifoConContador'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -3345,6 +3346,23 @@ function GaleriaInterna() {
 
         <Seccion titulo="PantallaConPie (S100b) — el pie fijo RESERVA su propio lugar">
           <MuestraPantallaConPie />
+        </Seccion>
+
+        <Seccion titulo="GlifoConContador (S100b) — un glifo con su número encima (G-14)">
+          <View style={{ flexDirection: 'row', gap: spacing[7], alignItems: 'center' }}>
+            <GlifoConContador nombre="carrito" cuenta={0} etiqueta="Carrito, vacío" />
+            <GlifoConContador nombre="carrito" cuenta={3} etiqueta="Carrito, 3 productos" />
+            <GlifoConContador nombre="carrito" cuenta={12} etiqueta="Carrito, 12 productos" />
+            <GlifoConContador nombre="carrito" cuenta={140} etiqueta="Carrito, 140 productos" />
+          </View>
+          <Texto variante="apoyo">
+            Cuatro casos, y el primero es el discriminador: con 0 NO se dibuja disco — un cero en un
+            contador es ruido con forma de dato (19.9). Con 140 dice 99+ : la salida es decir «muchos»,
+            jamás encoger la letra, porque un contador ilegible no cuenta nada. El número va sobre el
+            MISMO par que el timbre + de TarjetaProducto, que ya está medido en el gate de contraste: no
+            se inventa un color acá. Y el disco no escala con el glifo — es una señal, y una señal que
+            crece con su soporte deja de ser constante.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="SelectorVentana (S96) — cuándo llega, y por qué un día no se puede elegir (§6.2)">
