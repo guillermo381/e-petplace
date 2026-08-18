@@ -31,11 +31,13 @@ import { Pressable, Text, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
+import { Icono } from './Icono'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 
 const BOTON = 44 // target táctil directo
 
@@ -98,6 +100,28 @@ export interface StepperCantidadProps {
    * igual acá.*
    */
   compacto?: boolean
+  /**
+   * 🔴 EL `−` SE VUELVE PAPELERA EN EL MÍNIMO — **y solo donde corresponde**
+   * (G-08, S100b-B).
+   *
+   * **`[SPEC]` eBay, y el matiz es el que decide dónde va:** *«the delete
+   * action is only to be used when the numeric stepper is pair or
+   * associated with an item tile such as item list in cart»*.
+   * ⇒ **En el CARRITO sí**: bajar de 1 hace desaparecer la fila, y la
+   * papelera lo anuncia. **En la GRILLA no**: ahí bajar de 1 devuelve la
+   * tarjeta a su `+`, el tile no desaparece, y una papelera prometería un
+   * borrado que no ocurre.
+   *
+   * **Presente ⇒ en el mínimo el botón BORRA, no se apaga** (Baymard/NN-g:
+   * un control deshabilitado en el límite deja al usuario sin salida
+   * visible). **Ausente ⇒ conducta de siempre**: apagado sereno.
+   *
+   * ⚠️ **Sin confirmación, a propósito.** La acción es inmediata y **el
+   * deshacer es de la pantalla**, que es la única que sabe qué se borró y
+   * puede reponerlo. *Un diálogo de «¿estás seguro?» por quitar un
+   * producto del carrito cobra a todos el error de unos pocos.*
+   */
+  onBorrar?: () => void
 }
 
 function BotonPaso({
@@ -108,7 +132,7 @@ function BotonPaso({
   etiqueta,
   compacto,
 }: {
-  signo: 'menos' | 'mas'
+  signo: 'menos' | 'mas' | 'papelera'
   habilitado: boolean
   color: string
   onPress: () => void
@@ -147,17 +171,22 @@ function BotonPaso({
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
-        <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
-          {signo === 'mas' ? <Path d="M10 4v12" stroke={color} strokeWidth={2} strokeLinecap="round" /> : null}
-          <Path d="M4 10h12" stroke={color} strokeWidth={2} strokeLinecap="round" />
-        </Svg>
+        {signo === 'papelera' ? (
+          <Icono nombre="papelera" tamano={20} registro="tinta" tinta={color} />
+        ) : (
+          <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+            {signo === 'mas' ? <Path d="M10 4v12" stroke={color} strokeWidth={2} strokeLinecap="round" /> : null}
+            <Path d="M4 10h12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+          </Svg>
+        )}
       </Animated.View>
     </Pressable>
   )
 }
 
-export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', compacto = false }: StepperCantidadProps) {
+export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', compacto = false, onBorrar }: StepperCantidadProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const esMemorial = theme.mode === 'memorial'
 
   if (__DEV__ && min >= max) {
@@ -189,13 +218,15 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       style={{ flexDirection: 'row', alignItems: 'center', gap: compacto ? spacing[2] : spacing[3] }}
     >
+      {/* En el mínimo, con `onBorrar`, el menos es PAPELERA y ejecuta el
+          borrado; sin él, se apaga sereno como siempre. */}
       <BotonPaso
-        signo="menos"
-        habilitado={v > min}
+        signo={onBorrar !== undefined && v <= min ? 'papelera' : 'menos'}
+        habilitado={v > min || onBorrar !== undefined}
         // en el límite se apaga SERENO (voz terciaria) — jamás error
-        color={v > min ? acento : theme.text.tertiary}
-        onPress={() => irA(v - 1)}
-        etiqueta="Menos"
+        color={v > min || onBorrar !== undefined ? acento : theme.text.tertiary}
+        onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
+        etiqueta={onBorrar !== undefined && v <= min ? t('stepperCantidad.borrar') : t('stepperCantidad.menos')}
         compacto={compacto}
       />
       <Text
@@ -217,7 +248,7 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         habilitado={v < max}
         color={v < max ? acento : theme.text.tertiary}
         onPress={() => irA(v + 1)}
-        etiqueta="Más"
+        etiqueta={t('stepperCantidad.mas')}
         compacto={compacto}
       />
     </View>
