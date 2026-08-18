@@ -1500,9 +1500,12 @@ export const clienteEn = {
     enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
     enCaminoVentana: 'Arrives between',
     enCaminoVentanaDetalle: "It's a window, not an exact time.",
+    enCaminoRecentrar: 'Back to the route',
     enCaminoQuienTrae: 'Who’s bringing it',
     // S100c-D — the draggable sheet, and the honest photo gap.
     enCaminoHojaVerMas: 'See the order details',
+    // S100d — the drag hint became visible, so it needs its other half.
+    enCaminoHojaVerMenos: 'Hide the details',
     repartidorSinFoto: 'We’re not showing their photo yet',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',

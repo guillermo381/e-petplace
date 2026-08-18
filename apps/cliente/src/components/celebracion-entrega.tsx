@@ -133,11 +133,20 @@ export function CelebracionEntrega({ pedidoId, titulo, cierre }: CelebracionEntr
     <View style={{ paddingHorizontal: spacing[5], gap: spacing[2], alignItems: 'center' }}>
       {/* ① EL SELLO — 24, no 32, y no es gusto. El glifo está dibujado en
           MASA para sobrevivir a 12 px; a 32 deja de leerse como sello y se
-          lee como bulto. Y hay una segunda razón, que es Chanel: la escalera
-          de esta misma pantalla YA dibuja `nodoEntregado` en su último nodo.
-          Repetirlo grande diría dos veces lo mismo — acá entra como SELLO
-          del momento (el acto que se cierra), no como estado (que es trabajo
-          de la escalera, y ya lo hace bien). */}
+          lee como bulto. Entra como SELLO del momento (el acto que se
+          cierra), no como estado — que es trabajo de la escalera y ya lo
+          hace bien.
+
+          ⏪ **S100d · ACÁ HABÍA UNA SEGUNDA RAZÓN Y SE VENCIÓ.** Decía que la
+          escalera de esta misma pantalla *«YA dibuja `nodoEntregado` en su
+          último nodo»*, así que repetirlo grande diría dos veces lo mismo.
+          **Dejó de ser cierto:** el punto 23 del gate movió ese nodo a
+          `ubicacion` (la gota — TU casa). ⇒ hoy **no hay repetición**: el
+          nodo dice DÓNDE termina el camino y este sello dice QUE terminó.
+          *La conclusión no cambia —el visto sigue siendo el sello correcto—;
+          lo que cambia es que ya no se sostiene en un hecho que se venció.
+          Se corrige acá porque una prosa que afirma algo falso del vecino
+          manda al próximo a buscar un conflicto que no existe.* */}
       <Acto indice={0} quieto={quieto}>
         <Icono nombre="nodoEntregado" tamano={24} registro="tinta" tinta={theme.accent.control} />
       </Acto>
