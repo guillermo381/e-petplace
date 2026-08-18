@@ -1303,6 +1303,7 @@ export const clienteEn = {
     irAlCarrito: 'Go to cart',
     irAlCarritoCon: 'Go to cart · {{n}} in the cart',
     faltaPresentacion: 'Pick a size to add it.',
+    precioDesde: 'from',
     faltaEntendimiento: 'Read the notice above: you still need to confirm you took it into account.',
 
     // S96 · the other doors
@@ -1317,8 +1318,8 @@ export const clienteEn = {
     carritoVacioDetalle: "Anything you add from the pantry will show up here.",
     carritoVacioIr: 'Back to the pantry',
     cantidadDe: 'Quantity of {{nombre}}',
-    quitar: 'Remove',
     paraQuien: 'Who is it for?',
+    repartirEntreMascotas: 'Split between several pets',
     donarEste: 'Donate this product',
     donacionDetalle:
       "e-PetPlace picks the shelter and the team coordinates the delivery. A donation never joins a record and never earns rewards: it's a gift, not a purchase with a prize.",
@@ -1340,7 +1341,10 @@ export const clienteEn = {
     aDonde: 'Where we deliver',
     sinDireccion: "You haven't told us your address yet.",
     agregarDireccion: 'Add my address',
-    cambiarDireccion: 'Change address',
+    // ☠️ S100b-A · G-11 — ver la nota en `es.ts`.
+    quienRecibe: 'Who receives it',
+    listoDatos: 'Done',
+    telefonoAyuda: "It's the number the courier calls if they can't find the house.",
     receptorLabel: 'Who receives it',
     telefonoLabel: 'Contact phone',
     instruccionesLabel: 'Delivery instructions',
@@ -1362,10 +1366,8 @@ export const clienteEn = {
     bloqueEntrega: 'Delivery {{i}} of {{n}}',
     ventanaProxima: 'The earliest',
     sinLugarEseDia: 'No room that day',
-    programarFecha: 'Schedule another date',
-    programarPlaceholder: 'Pick a day',
-    programarAyuda: 'We only promise days with confirmed capacity.',
-    quitarFecha: 'Back to the earliest delivery',
+    // ☠️ S100b-A · G-16 — ver la nota en `es.ts`. El espejo se mantiene: la
+    // clave muere en los DOS idiomas o el typecheck lo dice.
     resumen: 'Your order total',
     subtotal: 'Products',
     impuesto: 'VAT',
@@ -1401,6 +1403,8 @@ export const clienteEn = {
     recurrenciaSinPasarela:
       'Automatic charging turns on once the payment method exists. Until then, nothing is charged.',
     recurrenciaCada: 'How often?',
+    recurrenciaElegiCada: 'Pick how often you want it and it’s all set.',
+    recurrenciaQueEs: 'What “Let it arrive on its own” means',
     recurrenciaDias: 'Every {{n}} days',
     recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
     recurrenciaActiva: 'The recurring purchase is set up.',

@@ -1,0 +1,32 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maqueta de verificación — geometría conocida</title>
+<style>
+ *{margin:0;padding:0;box-sizing:border-box}
+ body{font-family:system-ui,sans-serif;background:#fff}
+ /* CROMO DE ALTO CONOCIDO = 200px exactos */
+ .buscador{height:56px;background:#f2f2f2;display:flex;align-items:center;padding:0 16px;color:#666}
+ .filtros{height:44px;background:#fafafa;display:flex;align-items:center;gap:8px;padding:0 16px;font-size:13px;color:#555}
+ .aviso{height:100px;background:#fff5e0;display:flex;align-items:center;padding:0 16px;font-size:13px}
+ /* TARJETA DE GEOMETRÍA CONOCIDA: 176 x 280, foto 176x176, nombre 14px, precio 18px, control 44x44 */
+ .grid{display:grid;grid-template-columns:176px 176px;gap:10px;padding:0 14px}
+ .card{width:176px;height:280px;border:0;position:relative;overflow:hidden}
+ .card .foto{width:176px;height:176px;display:block;background:#dfe6ee}
+ .card .nombre{font-size:14px;line-height:18px;font-weight:400;padding:6px 6px 0;color:#111}
+ .card .precio{font-size:18px;line-height:22px;font-weight:700;padding:2px 6px 0;color:#000}
+ .card .add{position:absolute;right:6px;bottom:6px;width:44px;height:44px;border-radius:22px;background:#111;color:#fff;font-size:20px;border:none}
+</style></head><body>
+<div class="buscador">Buscar en la tienda</div>
+<div class="filtros">Filtros · Categoría · Marca</div>
+<div class="aviso">Envío gratis en pedidos sobre $20. Aviso de alto conocido para medir el cromo.</div>
+<div class="grid" id="g"></div>
+<script>
+ const nombres=['Alimento para perro adulto raza mediana 2kg','Arena sanitaria aglomerante para gato 4kg','Collar antipulgas para perro talla M','Snack dental para perro pequeño 100g','Shampoo hipoalergénico para gato 250ml','Comedero doble de acero inoxidable','Juguete mordedor de caucho natural','Cama acolchada lavable talla L'];
+ document.getElementById('g').innerHTML = nombres.map((n,i)=>`
+  <div class="card">
+    <img class="foto" alt="${n}" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='176' height='176'><rect width='176' height='176' fill='%23dfe6ee'/></svg>">
+    <div class="nombre">${n}</div>
+    <div class="precio">$${(8+i*2.35).toFixed(2)}</div>
+    <button class="add" aria-label="Agregar al carrito">+</button>
+  </div>`).join('');
+</script></body></html>

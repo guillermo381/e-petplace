@@ -732,10 +732,47 @@ export default function DespensaDescubrir() {
 
                 ⏪ Y la tabla de Cuenta de B **sí era exacta**: ahí no hay
                 entrada, y eso queda vivo (dueño por asignar). */}
+            {/* 🔴 ENMIENDA DE C A ESTA FILA (S100b-C) — **se queda arriba, y
+                pierde su renglón de explicación.**
+
+                D la subió y declaró que tocaba G-04 dejando la puerta
+                abierta (*«si su composición la quiere en otro lugar, se
+                mueve — lo que no puede es volver al fondo»*). Medí el costo
+                con el aparato: **la fila entera cuesta 79 dp** (58 + su
+                separación) y con ella **la primera tarjeta dejó de entrar
+                entera por 20 dp**. Sin ella el cromo baja de 319 a 240.
+
+                ⇒ El choque es real y es entre dos hallazgos firmados:
+                **G-15 pide que «mis pedidos» sea encontrable · G-04 pide que
+                la vitrina muestre mercadería.** No hay respuesta gratis, y
+                la ordena el propio gate: *«G-04 es el que ordena a los
+                demás»*, y *«una vitrina que no muestra mercadería no es una
+                vitrina»*.
+
+                **Pero enterrarla otra vez reproduce la queja del founder.**
+                Se le quitó el `detalle` —«Seguí lo que pediste, del más
+                reciente»— porque es una EXPLICACIÓN y la regla del arranque
+                la manda detrás de un toque: lo que se necesita para DECIDIR
+                queda visible, lo que se necesita para ENTENDER no. El título
+                ya dice qué hay del otro lado. **Eso se sostiene por sí solo
+                y se queda.**
+
+                🔴 **PERO NO ALCANZA, Y SE DICE CON EL NÚMERO: ahorró 2 dp de
+                los 18 que faltaban** (319 → 317). `CeldaNavegacion` tiene
+                alto mínimo, así que la fila cuesta ~77 dp lleve o no su
+                explicación. ⇒ **la forma NO admite el efecto**, y acá se
+                para de mover números en vez de buscar el tercero.
+
+                **La decisión queda BINARIA y va al gate con su número: la
+                fila arriba, o la primera tarjeta entera. No hay medio.**
+                Se elige dejarla arriba —el founder pidió encontrarla y la
+                tarjeta se completa deslizando un dedo— y se declara como
+                **reversible en una línea**: moverla debajo de la grilla
+                devuelve el cromo a 240 dp y la tarjeta entra con 59 de
+                sobra. *Lo que no se hace es esconder el costo.* */}
             <View>
               <CeldaNavegacion
                 titulo={t('despensa.tusPedidos')}
-                detalle={t('despensa.tusPedidosDetalle')}
                 onPress={() => router.push('/despensa/pedidos')}
               />
               <Separador />
@@ -840,12 +877,21 @@ export default function DespensaDescubrir() {
               />
             ) : (
               <View style={{ gap: spacing[3] }}>
-                {elegibles.length > 0 ? (
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">{t('despensa.elegiMascota')}</Texto>
-                  </View>
-                ) : null}
-                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE.
+                {/* ☠️ ACÁ VIVÍA LA VOZ «elegí una mascota» (G-04, S100b-C).
+                    Muere por DOS razones, y la segunda es la que la condena:
+                    ① Es una EXPLICACIÓN, y la tira de caras que está justo
+                      encima ya es la invitación — *pedir por texto lo que un
+                      control visible ya ofrece es cobrarle al alto de la
+                      pantalla dos veces por lo mismo.*
+                    ② 🔴 **Mentía en un caso real.** Se pintaba con
+                      `elegibles.length > 0` y el selector de mascotas se
+                      pinta con `> 1`: con UNA sola mascota elegible, la app
+                      pedía elegir **y no había control para hacerlo**. Un
+                      control que no existe es peor que uno feo.
+                    El criterio no se pierde: al elegir una mascota,
+                    `CriterioMascota` lo DICE con su cara y su razón. */}
+                {listaConFacetas(vitrina, null)}
+                {/* 🔴 H-004 (S100-C) — EL TECHO QUE SE DICE, AHORA AL PIE.
                     La vitrina carga 50 y el catálogo comprable tiene 563: la
                     familia veía el 8,9 % y **una lista completa y una truncada
                     se veían igual**. `contarProductosDespensa` existía desde
@@ -853,7 +899,15 @@ export default function DespensaDescubrir() {
                     la cura estaba construida y sin consumir.
                     Se habla SOLO cuando el techo cortó de verdad
                     (`total > cargados`): en una vitrina que entra entera, el
-                    número sobra y avisar de más enseña a ignorar los avisos. */}
+                    número sobra y avisar de más enseña a ignorar los avisos.
+
+                    🔴 S100b-C — **BAJA DE LA CABECERA AL PIE DE LA GRILLA**, y
+                    no es solo por los 40 dp que le devuelve a la mercadería:
+                    **arriba el número no tiene nada que calificar todavía**.
+                    «Mostramos 50 de 563» se lee ANTES de haber visto uno solo.
+                    Al pie llega cuando la lista efectivamente se terminó, que
+                    es el momento en que la pregunta «¿esto es todo?» aparece
+                    sola. *El dato no cambió: cambió el instante en que sirve.* */}
                 {totalVitrina !== null && totalVitrina > vitrina.length ? (
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">
@@ -864,7 +918,6 @@ export default function DespensaDescubrir() {
                     </Texto>
                   </View>
                 ) : null}
-                {listaConFacetas(vitrina, null)}
               </View>
             )}
 

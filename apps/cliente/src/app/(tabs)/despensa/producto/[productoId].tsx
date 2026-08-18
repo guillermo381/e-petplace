@@ -51,8 +51,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   AvisoAlergia,
@@ -63,6 +62,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   nombreCurado,
+  PantallaConPie,
   PrecioText,
   SelectorOpcion,
   Separador,
@@ -100,7 +100,6 @@ export default function DespensaProducto() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
-  const insets = useSafeAreaInsets();
   const carrito = useCarrito();
   const { productoId, mascotaId } = useLocalSearchParams<{
     productoId: string;
@@ -230,6 +229,24 @@ export default function DespensaProducto() {
   }, [comprables, varianteId]);
 
   const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
+
+  /** La presentación COMPRABLE más barata — la que sostiene el «desde»
+   *  mientras no haya una elegida.
+   *
+   *  🔴 **El criterio es explícito y por eso se puede discutir: el precio
+   *  MÁS BAJO.** No es «la primera de la lista» — *el primer elemento de
+   *  una colección sin criterio es una decisión de negocio por accidente*
+   *  (L-289). Y el mínimo es el único criterio que hace verdadera la
+   *  palabra «desde»: con cualquier otro, el número mostrado sería un
+   *  precio que la familia podría encontrar más barato dos toques después,
+   *  que es exactamente la clase de sorpresa que esta casa no hace. */
+  const masBarata = useMemo(
+    () =>
+      comprables.length === 0
+        ? null
+        : comprables.reduce((a, b) => (b.precio < a.precio ? b : a)),
+    [comprables],
+  );
 
   /** §5.4 — los HECHOS para AvisoAlergia v3: `composicion_estado` viene
    *  del MOTOR (columna con cuatro literales; solo verificada y no_aplica
@@ -363,18 +380,99 @@ export default function DespensaProducto() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* 🔴 EL TÍTULO DEL ENCABEZADO SE APAGA (H-205, S100b-C) — el nombre
+          del producto se pintaba DOS VECES en 350 dp: acá en mono
+          mayúsculas (`ACTIVE MIND 7+`, que lee como código de máquina y es
+          la misma clase que el C4 de S74) y 300 dp más abajo en voz humana.
+          **Cuál de los dos cede lo decide N19 y no el gusto:** su orden es
+          ① foto ② nombre + presentación ⇒ **el del cuerpo es obligatorio y
+          el del header sobra.** La referencia tampoco pone el nombre en su
+          encabezado.
+          ⚠️ **El costo, declarado y no escondido:** `Encabezado` NO colapsa
+          al scrollear —ese patrón no existe en la casa—, así que apagar el
+          título fijo **cuesta el contexto cuando bajaste mucho**. Se acepta
+          porque el nombre vive arriba de todo el contenido y la flecha de
+          volver no depende de él. El nombre sigue anunciándose al lector de
+          pantalla: se apaga el píxel, jamás el nombre. */}
       <Encabezado
         variante="navegacion"
         titulo={ficha !== 'cargando' && ficha !== 'error' ? ficha.nombre : t('despensa.tituloProducto')}
+        tituloVisible={false}
         atras
         onAtras={() => router.back()}
       />
 
-      <ScrollView
+      {/* 🔴 G-02 · EL CONTENIDO TAPADO — CURADO EN LA RAÍZ (S100b-C, L1).
+          Acá vivía un `ScrollView` que estimaba el alto del pie con un
+          `96` TECLEADO. Medido: el pie de esta pantalla mide **128 dp**
+          cuando el carrito tiene algo (`spacing[3]` + botón 48 + gap 8 +
+          botón 48 + `spacing[3]`), y **más todavía** cuando el CTA apagado
+          dice qué falta. La reserva y el pie salían de dos cuentas
+          distintas y tenían que coincidir — *la forma exacta del defecto
+          que esta casa ya tiene nombrada*.
+
+          🔴 Y LA CONDICIÓN DE REPRODUCCIÓN EXPLICA POR QUÉ SOBREVIVIÓ A
+          TODOS LOS GATES, medida en el aparato de C: **con el carrito
+          VACÍO el pie tiene UN botón y los 96 dp alcanzan justo**. El
+          defecto solo aparece llegando a la ficha con algo ya adentro del
+          carrito — *un camino que no es el primero que camina nadie*.
+
+          ⇒ `PantallaConPie` (B, S100b): el pie se mide a sí mismo y esa
+          MISMA medida reserva el scroll. No hay dos cuentas: hay una. El
+          `insets.bottom` también es de la pieza, así que sale de acá. */}
+      <PantallaConPie
+        /* ⚠️ EL PIE VA COMO FRAGMENTO, NO ENVUELTO EN UN `View` — y no es
+           estilo: `PantallaConPie` lleva `pointerEvents="box-none"` para
+           que el gesto de scroll ATRAVIESE la banda del pie, y `box-none`
+           cubre UNA SOLA CAPA. Un `View` propio acá volvería a capturar
+           todo su rectángulo y **reabriría la zona muerta de gesto en el
+           tercio inferior** — justo donde el pulgar sostiene el teléfono.
+           (Aviso de B con el caso; si alguna vez hace falta agrupar de
+           verdad, ese `View` lleva su propio `pointerEvents="box-none"`.) */
+        pie={
+          conCta ? (
+            <>
+              {faltaParaAgregar !== null ? (
+                <Texto variante="apoyo">{faltaParaAgregar}</Texto>
+              ) : null}
+              <Boton
+                etiqueta={
+                  variante !== null
+                    ? t('despensa.agregarConPrecio', {
+                        precio: `$ ${(variante.precio * cantidad).toFixed(2)}`,
+                      })
+                    : t('despensa.agregar')
+                }
+                bloque
+                deshabilitado={faltaParaAgregar !== null}
+                onPress={agregar}
+              />
+              {/* ⚖️ «Ver carrito» BAJA DE BOTÓN A LABEL, y la razón está
+                  medida en la referencia, no argumentada: **la ficha de
+                  Laika tiene UN solo botón en el pie** y el carrito vive
+                  como ícono con contador en el encabezado. Dos botones
+                  bloque apilados son **128 dp de control permanente sobre
+                  un visor de 665** — el 19 % de la pantalla, que es
+                  exactamente «el control pesa más que el producto».
+                  Y la casa ya tiene la ley: lo que NAVEGA no viste de
+                  botón. **No se elimina** —sería un callejón hasta que
+                  aterrice el ícono de carrito de G-14—: se despriorizA. */}
+              {unidades > 0 ? (
+                <Boton
+                  variante="ghost"
+                  bloque
+                  etiqueta={t('despensa.verCarrito', { n: unidades })}
+                  onPress={() => router.push('/despensa/carrito')}
+                />
+              ) : null}
+            </>
+          ) : undefined
+        }
         contentContainerStyle={{
           paddingTop: spacing[4],
-          // Deja aire para la barra fija del CTA cuando existe.
-          paddingBottom: insets.bottom + (conCta ? spacing[8] + 96 : spacing[8]),
+          // Solo el aire del final de MI contenido: la reserva del pie la
+          // suma la pieza. Acá vivía `+ 96`.
+          paddingBottom: spacing[8],
           gap: spacing[5],
         }}
       >
@@ -483,6 +581,28 @@ export default function DespensaProducto() {
                 valor: que sea cierta.
                 El registro es el mensaje (Ley 3): el precio en su voz, el $/kg
                 en mono porque **lo derivó una máquina**. */}
+            {/* 🔴 S100b-C — LA FICHA SIN PRECIO. Este bloque se pintaba SOLO
+                con una presentación elegida, y con más de una **no se elige
+                sola** (la auto-selección es solo para el caso de una). ⇒ en
+                un producto de 3 presentaciones, **la ficha no mostraba
+                NINGÚN precio hasta que la familia tocaba un chip**.
+                *Una ficha sin precio no vende: obliga a adivinar cuánto
+                sale antes de saber si te interesa.*
+                Apareció MIRANDO la captura, no midiéndola — ningún número
+                de los que este archivo produce decía «acá no hay precio».
+
+                La cura NO es preseleccionar: **el primer elemento de una
+                colección sin criterio es una decisión de negocio por
+                accidente** (L-289), y elegirle la presentación a la familia
+                es decidir cuánto va a gastar. Se muestra **«desde» el precio
+                de la más barata**, que es la escalera del precio honesto ya
+                firmada en S82: *lo que varía dice «desde»*. Al elegir un
+                chip, el precio pasa a ser el exacto de esa presentación.
+
+                ⚠️ La palabra va en su propia línea y no pegada al número
+                porque `PrecioText` no tiene forma de prefijo; **se le pidió
+                a B la prop con este caso** — la tipografía del precio es de
+                la pieza, no de esta pantalla. */}
             {variante !== null && variante.precio !== null ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
                 <PrecioText
@@ -494,6 +614,22 @@ export default function DespensaProducto() {
                     precioPorKg(
                       variante.precio,
                       variante.peso_kg,
+                      MONEDA_FALLBACK,
+                      idioma as IdiomaSoportado,
+                    ) ?? undefined
+                  }
+                />
+              </View>
+            ) : masBarata !== null ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <Texto variante="apoyo">{t('despensa.precioDesde')}</Texto>
+                <PrecioText
+                  valor={masBarata.precio}
+                  registro="ficha"
+                  porUnidad={
+                    precioPorKg(
+                      masBarata.precio,
+                      masBarata.peso_kg,
                       MONEDA_FALLBACK,
                       idioma as IdiomaSoportado,
                     ) ?? undefined
@@ -663,49 +799,7 @@ export default function DespensaProducto() {
             ) : null}
           </>
         )}
-      </ScrollView>
-
-      {/* LA BARRA FIJA DEL CTA — el plano que separa (E13: sobrevive la
-          superficie que separa planos). El apagado DICE qué falta. */}
-      {conCta ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: spacing[5],
-            paddingTop: spacing[3],
-            paddingBottom: insets.bottom + spacing[3],
-            backgroundColor: theme.bg.base,
-            gap: spacing[2],
-          }}
-        >
-          {faltaParaAgregar !== null ? (
-            <Texto variante="apoyo">{faltaParaAgregar}</Texto>
-          ) : null}
-          <Boton
-            etiqueta={
-              variante !== null
-                ? t('despensa.agregarConPrecio', {
-                    precio: `$ ${(variante.precio * cantidad).toFixed(2)}`,
-                  })
-                : t('despensa.agregar')
-            }
-            bloque
-            deshabilitado={faltaParaAgregar !== null}
-            onPress={agregar}
-          />
-          {unidades > 0 ? (
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('despensa.verCarrito', { n: unidades })}
-              onPress={() => router.push('/despensa/carrito')}
-            />
-          ) : null}
-        </View>
-      ) : null}
+      </PantallaConPie>
 
       <VisorFoto
         visible={visor !== null}
