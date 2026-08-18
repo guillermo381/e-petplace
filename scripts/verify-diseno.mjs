@@ -1901,6 +1901,15 @@ const FIXTURES = {
     { path: 'apps/cliente/src/app/(tabs)/despensa/ok.tsx', src: "<PantallaConPie pie={<Boton />}>{contenido}</PantallaConPie>" },
     { path: 'apps/cliente/src/app/(tabs)/despensa/badge.tsx', src: "<View style={{ position: 'absolute', top: 0, right: 0 }}><Insignia /></View>" },
     { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* El escape por DECLARACIÓN: con su razón NO sale rojo… */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/declarada.tsx', src: "/* R53-DECLARADO: la hoja tiene maxHeight y su scroll vive adentro, asi que la hoja ES el contenido y no hay nada que reservar. */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* …y la marca PELADA sí, porque un marcador sin razón es un bypass con
+       otro nombre. Este par es el que prueba que el escape cuesta algo. */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/pelada.tsx', src: "/* R53-DECLARADO: */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
+    /* 🔴 LA CONDICIÓN DE MESA, hecha caso: UNA razón y DOS pies ⇒ el que
+       sobra MUERDE. Es lo que impide que la declaración se vuelva una
+       exención de archivo por la puerta de atrás. */
+    { path: 'apps/cliente/src/app/(tabs)/despensa/dos-pies.tsx', src: "/* R53-DECLARADO: la hoja tiene maxHeight y su scroll vive adentro, no hay nada que reservar. */\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>\n<View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Boton /></View>" },
   ],
   R52: [
     { path: 'apps/cliente/src/app/(tabs)/despensa/carrito.tsx', src: "<SelectorVentana opciones={v} elegida={e} onElegir={f} />" },
@@ -3729,17 +3738,66 @@ function r53(archivos) {
   const fallos = []
   const vistos = new Set()
   const ofensores = []
+  const declarados = []
   for (const { path, src } of archivos) {
     if (vistos.has(path)) continue
     vistos.add(path)
     const limpio = sinComentarios(src)
     // El pie a mano: absolute + bottom:0 cerca. Ventana corta para no
     // confundirlo con un absolute de otra cosa (un badge, un overlay).
-    const aMano = /position:\s*'absolute'[\s\S]{0,160}?bottom:\s*0\b/.test(limpio)
-    if (!aMano) continue
+    /* 🔴 SE CUENTAN LOS PIES, NO SE PREGUNTA SI HAY UNO. La condición de
+       mesa es explícita: *si mañana alguien pone contenido de página bajo
+       un pie fijo en esa ruta, la regla tiene que volver a morder*. Con un
+       `test()` booleano y un escape por archivo, **el segundo pie entraría
+       gratis** — que es exactamente la objeción que esta casa le hizo a la
+       exención por ruta, repetida un piso más arriba. */
+    const pies = [...limpio.matchAll(/position:\s*'absolute'[\s\S]{0,160}?bottom:\s*0\b/g)].length
+    if (pies === 0) continue
     // Si monta la pieza, el pie ya reserva: no es ofensor.
     if (/\bPantallaConPie\b/.test(limpio)) continue
-    ofensores.push(path)
+    /* 🔴 EL ESCAPE POR DECLARACIÓN — S100b-B, tras el primer caso legítimo
+       que la regla cazó (la hoja sobre el mapa de «en camino», al
+       ensamblar el bundle).
+
+       **Por qué existe:** R53 caza LA FORMA —un pie absoluto a mano— y hay
+       una anatomía distinta que tiene esa misma forma y **no puede tener
+       el defecto**: una HOJA con `maxHeight` cuyo scroll vive ADENTRO.
+       Ahí *la hoja ES el contenido*, así que **no hay dos cosas que
+       reservar una para la otra** y el defecto es inexpresable. Montar
+       `PantallaConPie` sería peor: el fondo no scrollea, así que la pieza
+       no tendría nada que reservar.
+
+       **Por qué DECLARACIÓN y no una lista de rutas** (que era el camino
+       barato, y el mecanismo ya existía porque el baseline es por ruta):
+       *una lista de paths deja pasar en silencio al SEGUNDO pie que
+       alguien agregue en ese mismo archivo* — la objeción es la que esta
+       casa ya escribió en R45/R46. **La declaración viaja con el pie, no
+       con el archivo.**
+
+       ⚙️ **Se busca en `src` CRUDO y no en `limpio`**: declarar ES prosa,
+       igual que en R45. Si se buscara en el texto sin comentarios, la
+       única forma de declarar sería con código.
+
+       🔴 **Y EXIGE UNA RAZÓN ESCRITA, no una marca pelada:** el patrón
+       pide ≥16 caracteres después de los dos puntos. *Un marcador vacío
+       sería un `SALTAR_GATE` con otro nombre — y lo que hace honesto a un
+       escape no es que exista: es que cueste una frase que alguien pueda
+       leer y discutir.* Los declarados se CUENTAN y se informan, así que
+       si empiezan a crecer se ve. */
+    /* UNA DECLARACIÓN POR PIE. Si hay dos pies y una sola razón escrita,
+       **el que sobra sigue siendo ofensor** — el escape cubre lo que
+       alguien se tomó el trabajo de justificar, y nada más.
+
+       ⚠️ SU LÍMITE, ESCRITO: el lint cuenta, **no puede saber CUÁL
+       declaración corresponde a CUÁL pie**. *Su verde dice «hay tantas
+       razones escritas como pies», jamás «cada razón es la correcta».*
+       Esa mitad no se mecaniza honestamente y se lee en revisión. */
+    const razones = [...src.matchAll(/R53-DECLARADO:\s*\S.{15,}/g)].length
+    if (razones >= pies) {
+      declarados.push(path)
+      continue
+    }
+    ofensores.push(`${path}${razones > 0 ? `  (${pies} pie(s), ${razones} declarado(s))` : ''}`)
   }
   const nuevos = ofensores.filter((o) => !BASELINE_R53.some((b) => o.endsWith(b) || b.endsWith(o)))
   if (nuevos.length > 0)
@@ -3756,7 +3814,7 @@ function r53(archivos) {
   fallos.push(...ancla('R53', destino, 1, 'la pieza destino `PantallaConPie` exportada desde packages/ui (0 = la regla se quedó sin a dónde mandar)'))
   return {
     fallos,
-    info: `${ofensores.length} pantalla(s) con pie fijo a mano · baseline ${BASELINE_R53.length} congelado por ruta · la migración es de C/A/D · su verde dice «el pie lo pone la pieza», jamás «nada tapa a nada»`,
+    info: `${ofensores.length} con pie fijo a mano · ${declarados.length} declarado(s)${declarados.length > 0 ? ` (${declarados.map((d) => d.split('/').pop()).join(' · ')})` : ''} · baseline ${BASELINE_R53.length} congelado por ruta · su verde dice «el pie lo pone la pieza», jamás «nada tapa a nada»`,
   }
 }
 
