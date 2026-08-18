@@ -32,7 +32,7 @@ import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
 import { HojaCaptura } from '../components/HojaCaptura'
-import { PinEnMapa } from '../components/PinEnMapa'
+import { MarcaDeMapa, PinEnMapa } from '../components/PinEnMapa'
 import { LienzoMapa } from './LienzoMapa'
 import { PuertaHermana } from '../components/PuertaHermana'
 import { CitaEnVivo } from '../components/CitaEnVivo'
@@ -1680,6 +1680,24 @@ function EnsayoDelAnillo() {
         <LienzoMapa alto={140}>
           <PinConAnilloDePrueba x={0} y={0} />
         </LienzoMapa>
+      </View>
+
+      {/* 🔴 `MarcaDeMapa` — LA MISMA MARCA, SIN SU POSICIÓN (S100c-B).
+          Es el DIBUJO solo, para el slot `marcadorVivo`/`marcadorDestino`
+          de `MapaRecorrido`, donde el `<Marker>` del mapa ya resolvió el
+          dónde. **No es otro dibujo: `PinEnMapa` la consume**, así que lo
+          que se mira acá es exactamente lo que viaja en el mapa — no hay
+          dos siluetas que se puedan desincronizar.
+          Fuera del mapa a propósito: lo que este cuadro juzga es la
+          SILUETA, y §6ter ya firmó su integración con tiles arriba. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          La marca sin su posición — el mismo dibujo que monta el mapa por su slot:
+        </Texto>
+        <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+          <MarcaDeMapa variante="moto" />
+          <MarcaDeMapa variante="destino" />
+        </View>
       </View>
     </View>
   )
