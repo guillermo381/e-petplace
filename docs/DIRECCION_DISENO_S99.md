@@ -683,16 +683,48 @@ igual.*
 reconoce DOS ACENTOS con roles distintos — uno leve y uno fuerte: **magenta =
 marca · ocre = acción de compra**.»*
 
-**LA LEY:**
+> # ⏪ 🔴 ENMENDADA EL MISMO DÍA — S100d·bis, segundo veredicto del founder
+>
+> **La ley de los DOS acentos sobrevive entera. Lo que se ensancha es la
+> FRONTERA**, y la ensanchó el founder mirando el bundle:
+>
+> > **TODO LO ACCIONABLE ES OCRE · el magenta queda para MARCA y SELECCIÓN.**
+>
+> **Sus tres literales, que son la prueba y no el adorno:** *«afuera en ocre,
+> adentro en magenta»* (el stepper de la ficha — **está mal, va ocre también
+> adentro**) · *«la flecha en ocre, más gruesa»* · *«el pin con borde grueso
+> en ocre»*.
+>
+> 🔴 **QUÉ ESTABA MAL EN MI REDACCIÓN, y lo levantaron DOS pistas el mismo día
+> con el mismo argumento:** escribí *«ocre = ACCIÓN DE COMPRA»* y puse la
+> frontera en ***«¿este control COMPRA o ELIGE?»***. **Con esa letra, la flecha
+> que despliega prosa y la gota que marca una dirección quedaban afuera** — y
+> el founder las pidió ocre. **A y C frenaron su montaje y me lo devolvieron en
+> vez de resolverlo cada una por su lado**, que es exactamente lo que hay que
+> hacer con una ley que no cierra. *Dos letras que se contradicen son peores
+> que una equivocada: cualquiera cita la que le conviene y está en regla.*
+>
+> ⇒ **LA FRONTERA SE CORRE UN CASILLERO: no es «compra o elige», es «ACCIONA o
+> SELECCIONA».** *Comprar era un caso de accionar, no la categoría.* **La ley
+> no se contradecía: se estaba diciendo de menos.**
+>
+> ⏪ *(letra v1, derogada por ensanche:)* «**OCRE — ACCIÓN DE COMPRA:** el CTA
+> que compra · el `+` que agrega · el stepper que ajusta una compra · la puerta
+> al carrito.» **No era falsa: era angosta.**
+
+**LA LEY (v2 — la que rige):**
 
 > ## LA APP DEL CLIENTE TIENE **DOS** ACENTOS Y SE REPARTEN POR **ROL**, JAMÁS POR PANTALLA.
 >
-> · **MAGENTA — marca y ELECCIÓN (leve).** La marca, el estado activo, la
->   selección. Slots: `accent.brand` · `accent.active` · `accent.control` ·
->   `accent.controlBg`.
-> · **OCRE — ACCIÓN DE COMPRA (fuerte).** El CTA que compra · el `+` que
->   agrega · el stepper que ajusta una compra · la puerta al carrito. Slot:
->   `accent.cta` (+ `accent.ctaTexto`).
+> · **OCRE — LO QUE SE ACCIONA (fuerte).** Lo que se toca para que pase algo,
+>   **y la marca que señala aquello sobre lo que se acciona**: el CTA · el `+`
+>   que agrega · el stepper (**afuera Y adentro de la ficha**) · la puerta al
+>   carrito · **la flecha que despliega** · **la gota que marca una
+>   ubicación**. Slot: `accent.cta` (+ `accent.ctaTexto`).
+> · **MAGENTA — MARCA y SELECCIÓN (leve).** Lo que dice *«esto es
+>   e-PetPlace»* y lo que dice *«elegiste esto»*: la marca, el estado activo,
+>   los chips y toggles de elección. Slots: `accent.brand` · `accent.active` ·
+>   `accent.control` · `accent.controlBg`.
 > · **NINGUNO — todo lo demás.**
 >
 > **DOS ES EL TECHO. Un tercer acento no existe, y los dos no se APILAN sobre
@@ -700,8 +732,9 @@ marca · ocre = acción de compra**.»*
 
 ### La frontera, dicha de la única forma que no se puede leer de dos maneras
 
-**No es *«¿estoy en el flujo de compra?»*. Es *«¿este control COMPRA, o
-ELIGE?»***
+**No es *«¿estoy en el flujo de compra?»*. Es *«¿este control ACCIONA, o
+SELECCIONA?»*** ⏪ *(decía «COMPRA o ELIGE» — ensanchado por el founder el
+mismo día; ver la enmienda arriba.)*
 
 *El ocre no es el color de la pantalla de compra: es el color del ACTO de
 comprar.* **Caso probado con la pista A, en el checkout:** su selector de

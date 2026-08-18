@@ -59,6 +59,7 @@ import { GlifoConContador } from '../components/GlifoConContador'
 import { CarritoFlotante } from '../components/CarritoFlotante'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
+import { GotaUbicacion } from '../components/GotaUbicacion'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -3384,6 +3385,20 @@ function GaleriaInterna() {
               única que sabe qué se borró.
             </Texto>
           </View>
+        </Seccion>
+
+        <Seccion titulo="GotaUbicacion (S100d·bis) — la marca del mapa, fuera del mapa">
+          <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+            <GotaUbicacion />
+            <GotaUbicacion lado={20} />
+            <GotaUbicacion lado={40} />
+          </View>
+          <Texto variante="apoyo">
+            Borde grueso en ocre (firma del founder). Es el MISMO dibujo que el glifo `ubicacion` y que
+            el pin del mapa — uno solo, en `gota.ts`. Y acá se ancla por el CENTRO: en el mapa la punta
+            marca una coordenada y por eso sube; fuera del mapa no marca nada, y alinear por la punta
+            la dejaría visualmente alta al lado de una línea de texto.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="CarritoFlotante (S100d) — la ÚNICA puerta al carrito, donde llega el pulgar">

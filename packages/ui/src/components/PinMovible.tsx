@@ -227,7 +227,13 @@ export function PinMovible({ lat, lon, onMover, alto = 220, etiqueta }: PinMovib
               strokeWidth={HALO}
               strokeLinejoin="round"
             />
-            <Path d={GOTA_D} fill={theme.accent.control} />
+            {/* 🔴 OCRE — S100d·bis, firma del founder: *«el pin con borde
+                grueso en ocre»*. ⏪ Era `accent.control` (magenta).
+                **N26 v2:** el magenta quedó para marca y selección; **la gota
+                marca aquello sobre lo que se acciona** y ésa es la familia del
+                ocre. *No es una excepción: es la frontera corrida un casillero
+                el mismo día, por el founder.* */}
+            <Path d={GOTA_D} fill={theme.accent.cta} />
             {/* EL OJO — el hueco claro del centro. En la referencia es lo que
                 impide que la gota se lea como una mancha: el contorno interno
                 le devuelve la silueta a la forma. */}

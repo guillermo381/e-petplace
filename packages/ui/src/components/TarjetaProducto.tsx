@@ -405,7 +405,34 @@ export function TarjetaProducto({
         <View
           style={{
             aspectRatio: RELACION_FOTO,
-            backgroundColor: fotoUrl === undefined ? theme.bg.hundido : theme.bg.card,
+            /* 🔴 LA CAJA NO IMPONE FONDO — S100d·bis, firma del founder:
+               *«la imagen de la bolsa de comida está puesta sobre un fondo
+               blanco, y el fondo es magenta: choca, se ve sobrepuesta, como que
+               no encaja. Ideal que la imagen del producto no tenga fondo
+               propio»*.
+
+               ⏪ Era `bg.card`. **Y esa elección ya era una cura de otra cosa:**
+               S100b la puso ahí para matar el «marco púrpura» que producía el
+               `bg.hundido` alrededor de un packshot transparente. *La cura era
+               correcta y el encuadre estaba mal: se cambió QUÉ fondo pinta la
+               caja, cuando lo que sobraba era QUE PINTE UNO.*
+
+               ⇒ **`transparent`: un packshot transparente se apoya directo en
+               la superficie de la tarjeta, sea cual sea el tema.**
+
+               ⚠️ **Y LA MITAD QUE ESTA PIEZA NO PUEDE CURAR, declarada (mitad ②
+               de la firma):** en la mayoría del catálogo **el blanco está
+               QUEMADO EN LOS PÍXELES del JPEG** — ninguna caja se lo quita.
+               Ese rectángulo blanco **no es un defecto de esta pieza: es dato**,
+               y su cura es el estándar de imagen (PNG transparente, que es lo
+               que entregan las galerías de marca).
+
+               ⛔ **Y NO SE MAQUILLA:** mientras el catálogo se cura, la vitrina
+               va a mezclar fotos que flotan con fotos con rectángulo. *Poner un
+               fondo blanco general que «empareje» es exactamente lo que el
+               founder acaba de rechazar* — emparejaría hacia abajo, volviendo a
+               ponerle a los assets buenos el defecto de los malos. */
+            backgroundColor: fotoUrl === undefined ? theme.bg.hundido : 'transparent',
             opacity: compra.modo === 'espejo' || compra.hayStock ? 1 : opacity.disabled,
           }}
         >
@@ -650,24 +677,48 @@ export function TarjetaProducto({
               vio correr.** Su verificación es el primer paso del recorrido:
               **tocar el `+` y que el stepper mida 36, no 18.** */}
           <View style={{ marginTop: 'auto', flexShrink: 0, paddingTop: spacing[2], gap: spacing[2] }}>
-            {/* EL PRECIO, en su propia línea. Sigue anclado abajo con el
-                bloque, así que los escalones de una fila coinciden aunque los
-                nombres midan distinto — que es para lo que existe el ancla. */}
-            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+            {/* 🔴 EL PRECIO Y EL CONTROL COMPARTEN EL ESCALÓN — S100d·bis.
 
-            {/* EL ESCALÓN. Alto FIJO y derivado del control, alineado a la
-                derecha en los dos estados. Con `espejo` o sin stock queda
-                vacío y no se dibuja nada adentro — pero el renglón se conserva
-                para que la vitrina no mezcle dos alturas de tarjeta según el
-                stock del vendedor. */}
+                **Firma del founder sobre el resultado anterior:** *«no está en
+                el mismo escalón, está uno más abajo ahora todo junto; debemos
+                hacerlo MÁS PEQUEÑO para que quede junto al peso»*.
+
+                ⏪ **Deroga mi propia forma de esta mañana** (precio arriba,
+                control en su renglón). **Y deroga con ella una cuenta MÍA que
+                era correcta:** demostré que tres blancos de 44 son 132 dp y no
+                entran junto a un precio en 140,3, y concluí que el control
+                necesitaba renglón propio. *El founder miró el resultado y
+                eligió el otro lado del intercambio.* **La cuenta no estaba mal:
+                estaba contestando la pregunta que yo elegí.**
+
+                **Lo que hace que la firma sea construible sin romper N8:** el
+                calibre `menudo` achica el PÍXEL y no el BLANCO — 26 + `hitSlop`
+                9 = 44, y los blancos se tocan sin pisarse (la cuenta vive en
+                `BOTON_MENUDO`). **70,0 dp de control contra 70,4 disponibles.**
+
+                ⚠️ **`flexShrink: 0` en el control y el precio cediendo:** si un
+                precio de tres dígitos aprieta la fila, **el que se ajusta es el
+                precio, jamás el control** — *entre un precio apretado y un
+                control cortado, ya sabemos cuál duele.*
+
+                ⚠️ **AMBIGÜEDAD DECLARADA, no resuelta a mi gusto:** *«junto al
+                peso»* se leyó como **junto al PRECIO** —el elemento de esa
+                línea, y el más pesado de la tarjeta—. **La otra lectura posible
+                es la presentación** («frasco 300 ml»). *Se declara para que se
+                corrija con una palabra en vez de descubrirse en el próximo
+                gate.* */}
             <View
               style={{
-                height: ALTO_SLOT_CONTROL,
+                minHeight: ALTO_SLOT_CONTROL,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
+                gap: spacing[2],
               }}
             >
+              <View style={{ flexShrink: 1 }}>
+                <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+              </View>
               {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
               {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
               <Pressable
@@ -778,7 +829,7 @@ export function TarjetaProducto({
                    alto del escalón fijo no hay nada que animar de tamaño, y una
                    transición de layout acá volvería a mover la caja — que es
                    justo lo que el founder pidió que dejara de pasar. */
-                <Animated.View entering={FadeIn.duration(motion.duration.fast)}>
+                <Animated.View entering={FadeIn.duration(motion.duration.fast)} style={{ flexShrink: 0 }}>
                   <StepperCantidad
                     valor={compra.cantidad}
                     min={0}
@@ -789,9 +840,9 @@ export function TarjetaProducto({
                     // `registro` de la pieza). El magenta de la elección no
                     // entra a la vitrina.
                     registro="compra"
-                    // 116 dp en vez de 144 — lo que entra en la caja de 138
-                    // sin recortar el `+`. Ver `BOTON_COMPACTO` en la pieza.
-                    compacto
+                    // 70 dp — lo único que entra junto al precio. Ver
+                    // `BOTON_MENUDO`: el blanco de 44 se conserva por hitSlop.
+                    tamano="menudo"
                   />
                 </Animated.View>
               )}

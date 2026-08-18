@@ -127,6 +127,14 @@ export type SelectorDestinoItemProps = {
    * Hoja la monta la PANTALLA: esta pieza selecciona y avisa, y no conoce
    * la navegación de quien la monta — la misma ley que ya rige para la «i».
    *
+   * 🔴 **S100d·bis — LA HOJA QUE SE ABRE ES LA MISMA QUE ABRE LA «i».** Firma
+   * del founder: *«al seleccionar el chip, el modal se abre solo con la
+   * información de la «i» — el agradecimiento y la info son el mismo
+   * momento»*. ⇒ **quien monte esto no arma dos hojas:** monta UNA, con el
+   * agradecimiento arriba y el detalle de §6.4 debajo, y la abre por los dos
+   * caminos. *Dos hojas para el mismo contenido divergen la primera vez que
+   * alguien cura una.*
+   *
    * **Ausente ⇒ el chip funciona igual y no pasa nada más.** *Un
    * agradecimiento que la pantalla no montó no es un error de la pieza.*
    *
@@ -247,21 +255,32 @@ export function SelectorDestinoItem({
             onDonacionElegida?.()
           }}
         />
+
+        {/* 🔴 LA «i» SUBE AL ESCALÓN DEL CHIP — S100d·bis, punto 12 del segundo
+            veredicto: *«la «i» sube al escalón del chip, justo al lado»*.
+
+            ⏪ Vivía en su propio renglón, debajo. **Y era la mitad que quedaba
+            de la mudanza anterior:** cuando la donación bajó a la hilera, su
+            «i» se quedó donde estaba ⇒ **el chip y su explicación dejaron de
+            verse como una cosa.** *Una «i» a un renglón de distancia no explica
+            un chip: explica la sección.*
+
+            Va DENTRO del `flexWrap`, así que si la hilera envuelve, la «i»
+            envuelve con su chip y no se separa nunca de él. */}
+        {detalleDonacion === undefined || onExplicarDonacion === undefined ? null : (
+          <Pressable
+            onPress={onExplicarDonacion}
+            accessibilityRole="button"
+            accessibilityLabel={detalleDonacion}
+            hitSlop={12}
+            style={{ alignSelf: 'center' }}
+          >
+            <Icono nombre="info" tamano={20} registro="tinta" tinta={theme.text.secondary} />
+          </Pressable>
+        )}
       </View>
 
-      {/* La «i»: el detalle se pide, no se impone. Sin callback no se
-          dibuja — y sin ella el detalle no tendría salida. */}
-      {detalleDonacion === undefined || onExplicarDonacion === undefined ? null : (
-        <Pressable
-          onPress={onExplicarDonacion}
-          accessibilityRole="button"
-          accessibilityLabel={detalleDonacion}
-          hitSlop={12}
-          style={{ alignSelf: 'flex-start' }}
-        >
-          <Icono nombre="info" tamano={20} registro="tinta" tinta={theme.text.secondary} />
-        </Pressable>
-      )}
+
     </View>
   )
 }
