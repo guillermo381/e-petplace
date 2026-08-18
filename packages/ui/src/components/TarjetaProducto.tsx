@@ -556,20 +556,50 @@ export function TarjetaProducto({
                   borderRadius: radius.full,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: theme.accent.control,
+                  /* 🔴 EL TIMBRE VA NEUTRO — S100b-B, firma de mesa sobre
+                     un hallazgo MEDIDO, y es lo que más cambia la cara de
+                     la vitrina.
+
+                     **El número que lo obliga:** el censo de acento midió
+                     que la vitrina gasta **1.17 % de sus píxeles en color
+                     de marca, y son los `+`** — uno por tarjeta, todos
+                     idénticos. **N5 pide UN acento por pantalla y la
+                     vitrina tenía uno por PRODUCTO.**
+
+                     ⇒ ***El `+` no pesaba por su tamaño —36 dp con blanco
+                     de 44, y Baymard recomienda el control en la grilla
+                     para este tipo de compra— sino por su REPETICIÓN.***
+                     Un elemento correcto en su tamaño puede ser incorrecto
+                     en su cardinalidad.
+
+                     **La cura no es achicarlo: es que deje de teñir.** El
+                     timbre toma la MISMA superficie hundida que usan los
+                     botones de `StepperCantidad`, con el signo en tinta.
+                     **El acento queda reservado para el ESTADO**: aparece
+                     cuando el producto YA ESTÁ en el carrito, que es
+                     cuando el stepper lo trae en su glifo.
+
+                     ✅ **Y de paso cierra el «control sin estado» del
+                     benchmark** (Baymard: **96 %** de los sitios no
+                     destaca lo que ya está en el carrito; el testeo
+                     registró *«Oh my God, how do I tell if I added
+                     it?»*). ***Un control que solo se tiñe cuando dice
+                     algo deja de ser decoración y vuelve a señalar.***
+
+                     ⚠️ Ley 22 no se rompe: el timbre sigue siendo una
+                     superficie llena y tocable —no un contorno—; lo que
+                     cambia es de qué color se llena. */
+                  backgroundColor: theme.bg.hundido,
                 }}
               >
-                {/* El signo va sobre el acento: el papel es el contraste
-                    que la casa ya usa para lo lleno (mismo criterio que
-                    el nodo lleno de `EscaleraEstados`). `Texto` no tiene
-                    color sobre-acento y no se le inventa uno acá: eso
-                    sería ensanchar una pieza ajena de paso. */}
                 <Text
                   style={{
                     fontFamily: typography.family.sans.bold,
                     fontSize: typography.size.md,
                     lineHeight: 24,
-                    color: theme.bg.base,
+                    // Tinta sobre la superficie hundida: el par que la casa
+                    // ya usa en los botones del stepper. Cero acento acá.
+                    color: theme.text.primary,
                   }}
                 >
                   +

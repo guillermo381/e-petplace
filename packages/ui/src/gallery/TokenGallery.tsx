@@ -3348,6 +3348,23 @@ function GaleriaInterna() {
           <MuestraPantallaConPie />
         </Seccion>
 
+        <Seccion titulo="StepperCantidad · el menos→papelera del CARRITO (S100b · G-08)">
+          <View style={{ gap: spacing[3] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <StepperCantidad valor={1} min={0} max={12} onCambio={() => {}} etiqueta="Con papelera" onBorrar={() => {}} />
+              <StepperCantidad valor={1} min={0} max={12} onCambio={() => {}} etiqueta="Sin papelera" />
+            </View>
+            <Texto variante="apoyo">
+              El discriminador son los DOS juntos: el de la izquierda es el del CARRITO —en 1 el menos es
+              papelera y BORRA— y el de la derecha es el de la GRILLA, donde en 1 se apaga sereno porque
+              bajar de 1 devuelve la tarjeta a su +, y el tile no desaparece. La distinción es [SPEC] de
+              eBay: la papelera solo va donde el stepper está asociado a un tile que se va. Sin
+              confirmación a propósito: la acción es inmediata y el deshacer es de la pantalla, que es la
+              única que sabe qué se borró.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="GlifoConContador (S100b) — un glifo con su número encima (G-14)">
           <View style={{ flexDirection: 'row', gap: spacing[7], alignItems: 'center' }}>
             <GlifoConContador nombre="carrito" cuenta={0} etiqueta="Carrito, vacío" />
@@ -5300,6 +5317,45 @@ function GaleriaInterna() {
                 <EjemploMapaRecorrido />
               </PanelTema>
             </ThemeProvider>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Encabezado · el buscador EN LA FILA, y el título que se apaga (S100b · G-04)">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                saludo="Despensa"
+                busqueda={
+                  <Campo
+                    label="Buscar"
+                    etiquetaVisible={false}
+                    placeholder="Nombre o marca"
+                    value=""
+                    onChangeText={() => {}}
+                  />
+                }
+                accionDer={
+                  <Pressable accessibilityRole="button" accessibilityLabel="Carrito, 3 productos" onPress={() => {}}>
+                    <GlifoConContador nombre="carrito" cuenta={3} dentroDeTocable />
+                  </Pressable>
+                }
+              />
+            </View>
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado variante="navegacion" titulo="Adulto Cordero y Arroz" atras onAtras={() => {}} tituloVisible={false} />
+            </View>
+            <Texto variante="apoyo">
+              Arriba: el buscador y el carrito viven en la MISMA fila que el isotipo, como en la
+              referencia — y el nombre de la pantalla deja de gastar 41.6 dp para decir lo que la tab
+              acaba de decir con su huella encendida. El nombre NO muere: sigue anunciándose como
+              header para el lector. Es el patrón de Campo.etiquetaVisible: se apaga el píxel, jamás
+              el nombre.
+              Abajo: el mismo apagado en la ficha, donde el header repetía el nombre del producto que
+              N19 ya ordena en el cuerpo. Dos veces el mismo dato en la misma pantalla.
+              ⚠️ Esto NO es un header que colapsa al scrollear: ese patrón es otro y no está
+              construido. Apagarlo fijo cuesta el contexto cuando bajaste mucho, y se declara.
+            </Texto>
           </View>
         </Seccion>
 
