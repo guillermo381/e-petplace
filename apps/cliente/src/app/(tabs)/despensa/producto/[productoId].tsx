@@ -380,9 +380,24 @@ export default function DespensaProducto() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* 🔴 EL TÍTULO DEL ENCABEZADO SE APAGA (H-205, S100b-C) — el nombre
+          del producto se pintaba DOS VECES en 350 dp: acá en mono
+          mayúsculas (`ACTIVE MIND 7+`, que lee como código de máquina y es
+          la misma clase que el C4 de S74) y 300 dp más abajo en voz humana.
+          **Cuál de los dos cede lo decide N19 y no el gusto:** su orden es
+          ① foto ② nombre + presentación ⇒ **el del cuerpo es obligatorio y
+          el del header sobra.** La referencia tampoco pone el nombre en su
+          encabezado.
+          ⚠️ **El costo, declarado y no escondido:** `Encabezado` NO colapsa
+          al scrollear —ese patrón no existe en la casa—, así que apagar el
+          título fijo **cuesta el contexto cuando bajaste mucho**. Se acepta
+          porque el nombre vive arriba de todo el contenido y la flecha de
+          volver no depende de él. El nombre sigue anunciándose al lector de
+          pantalla: se apaga el píxel, jamás el nombre. */}
       <Encabezado
         variante="navegacion"
         titulo={ficha !== 'cargando' && ficha !== 'error' ? ficha.nombre : t('despensa.tituloProducto')}
+        tituloVisible={false}
         atras
         onAtras={() => router.back()}
       />

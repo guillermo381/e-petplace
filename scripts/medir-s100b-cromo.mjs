@@ -409,6 +409,100 @@ if (cards.length > 0) {
     }`,
   );
   await page.screenshot({ path: `scripts/capturas/s100b-c-ficha-${ROTULO}-tope.png` });
+
+  /* 🔴 ¿EL CHIP DE PRESENTACIÓN SELECCIONA CUANDO SE LO TOCA? (H-204)
+     **Está en disputa entre dos varas y por eso se mide, no se argumenta.**
+     B lo vio no seleccionar en el aparato; yo no lo reproduzco. Su propia
+     medición descartó mi hipótesis (los chips NO caían en la banda del
+     pie: `y=[1373,1426]` contra un CTA en `[1543,1602]`).
+     Esto no resuelve el teléfono — **no puede**: acá no hay gesto táctil
+     real. Lo que sí hace es partir la pregunta en dos y contestar una:
+     **si la LÓGICA de selección responde**, lo que queda abierto es la
+     capa de gesto, y no el manejo del estado. *Media pregunta contestada
+     vale más que un veredicto entero sobre lo que no se puede ver.* */
+  /* ⚠️ El chip NO es `role="button"`: `SelectorOpcion` lo monta como radio.
+     Mi primera versión lo buscó como botón, contó cero y lo reportó como
+     «esta ficha no tiene chips» — **sobre una ficha que tenía tres.** *Un
+     selector que no agarra produce una ausencia, y una ausencia se lee como
+     un hecho.* Se busca por TEXTO, que es lo que la familia ve.
+     Y se vuelve al tope del scroll antes de tocar: al final del recorrido
+     los chips quedaron arriba del pliegue (`y=-35`). */
+  await page.evaluate(() => {
+    const d = document.querySelector('[data-medicion-scroller]');
+    if (d !== null) d.scrollTop = 0;
+  });
+  await page.waitForTimeout(1200);
+  /* Se enumeran TODOS los candidatos con su caja y su visibilidad antes de
+     tocar nada. *Mi primera versión hizo `.first().click()` y se cayó por
+     timeout con «element is not visible» — que es un dato, no un fallo del
+     script: había un nodo de texto que coincide y no se ve.* Enumerar
+     primero distingue «el chip no responde» de «agarré el nodo equivocado»,
+     y esa diferencia es justo la que está en disputa. */
+  const candidatos = await page.evaluate(() => {
+    /* 🔴 SE BUSCA **DENTRO DEL SCROLLER VIVO**, no en el documento. Es la
+       TERCERA vez que `expo-router` me engaña con la pantalla anterior
+       retenida en el DOM: la primera midió el scroller de la vitrina como
+       si fuera el de la ficha; la segunda devolvió 30 «candidatos de chip»
+       —para una ficha de tres— todos de 0×0, que eran las presentaciones
+       de las 50 tarjetas de la vitrina, ocultas pero presentes.
+       *Una app de una sola pantalla a la vista tiene varias en el árbol, y
+       un `querySelectorAll` sobre `document` las cuenta todas.* */
+    const raiz = document.querySelector('[data-medicion-scroller]') ?? document;
+    return [...raiz.querySelectorAll('*')]
+      .filter(
+        (e) =>
+          e.children.length === 0 &&
+          /^\d+([.,]\d+)?\s*(kg|g|ml|l)$/i.test((e.textContent ?? '').trim()),
+      )
+      .map((e) => {
+        const r = e.getBoundingClientRect();
+        const s = getComputedStyle(e);
+        return {
+          texto: (e.textContent ?? '').trim(),
+          top: Math.round(r.top),
+          alto: Math.round(r.height),
+          ancho: Math.round(r.width),
+          visible: r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none',
+        };
+      });
+  });
+  if (candidatos.length === 0) {
+    console.log('  ·  H-204: esta ficha no tiene chips de presentación — nada que probar');
+  } else {
+    console.log(`  H-204 · candidatos de chip en el DOM: ${candidatos.length}`);
+    candidatos.forEach((c) =>
+      console.log(
+        `      «${c.texto}» y ${c.top} · ${c.ancho}×${c.alto} · ${c.visible ? 'VISIBLE' : '🔴 NO VISIBLE'}`,
+      ),
+    );
+    const visible = candidatos.find((c) => c.visible);
+    if (visible === undefined) {
+      console.log('  🔴 H-204 · NINGÚN chip visible en el DOM ⇒ no se puede tocar');
+    } else {
+      const faltaAntes = (await cajaDe('Elegí una presentación')) !== null;
+      try {
+        /* ⚠️ EL TOQUE TAMBIÉN VA ACOTADO AL SCROLLER VIVO. Sin acotar,
+           `getByText('3 kg')` agarra el nodo homónimo de la vitrina
+           retenida —0×0, invisible— y el click muere por timeout: **un
+           fallo del selector que se lee igual que el defecto que vine a
+           medir.** Estuve a punto de reportar «reproduje H-204» con eso. */
+        await page
+          .locator('[data-medicion-scroller]')
+          .getByText(visible.texto, { exact: true })
+          .first()
+          .click({ timeout: 8000 });
+        await page.waitForTimeout(2000);
+        const faltaDespues = (await cajaDe('Elegí una presentación')) !== null;
+        console.log(
+          `  ${faltaAntes && !faltaDespues ? '✅' : '🔴'} H-204 · toque en «${visible.texto}»: ` +
+            `«falta elegir presentación» ${faltaAntes ? 'estaba' : 'NO estaba'} → ${faltaDespues ? 'SIGUE' : 'se fue'}` +
+            `  ⇒ la lógica de selección ${faltaAntes && !faltaDespues ? 'RESPONDE' : 'NO respondió'}`,
+        );
+      } catch {
+        console.log(`  🔴 H-204 · el toque en «${visible.texto}» no llegó (timeout) — el nodo no es tocable`);
+      }
+    }
+  }
 } else {
   console.log('  ⚠ sin tarjeta no hay ficha que medir.');
 }

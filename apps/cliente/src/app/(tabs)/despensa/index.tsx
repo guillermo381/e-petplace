@@ -578,7 +578,32 @@ export default function DespensaDescubrir() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="portada" saludo={t('despensa.titulo')} isotipo="gradiente" />
+      {/* 🔴 G-04 · EL BUSCADOR SUBE A LA FILA DEL ENCABEZADO — y no es una
+          preferencia: **es lo que la referencia hace, medido.** En
+          `referencia-laika-vitrina-inicio-perfil-mascota.jpeg` el logo, el
+          buscador y el carrito viven en **UNA sola fila**; acá vivían
+          apilados, y el bloque apilado costaba **76 dp para una caja de
+          texto de 26**.
+          `Encabezado` con `busqueda` deja de apilar (pieza de B, pedida con
+          este caso): `[isotipo][buscador][acción]`. El nombre de la
+          pantalla deja de gastar su renglón y se anuncia al lector sin
+          alto — el mismo patrón de `etiquetaVisible`, y con su razón
+          propia: **la tab ya dice en qué pantalla estás.** */}
+      <Encabezado
+        variante="portada"
+        saludo={t('despensa.titulo')}
+        isotipo="gradiente"
+        busqueda={
+          <Campo
+            label={t('despensa.buscarLabel')}
+            etiquetaVisible={false}
+            value={busqueda}
+            onChangeText={setBusqueda}
+            placeholder={t('despensa.buscarPlaceholder')}
+            autoCapitalize="none"
+          />
+        }
+      />
 
       {/* 🔴 EL MISMO DEFECTO QUE LA FICHA, EN SU FORMA MÁS BARATA
           (S100b-C): acá el alto de la barra del carrito se estimaba con un
@@ -635,29 +660,11 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ⓪bis · EL BUSCADOR (S96 — §5.1).
-                🔴 G-04 (S100b-C): la etiqueta visible SE APAGA. Medido en
-                el aparato, el bloque del buscador ocupaba **106 dp** para
-                una caja de texto de 26 — el resto era etiqueta y aire, en
-                una pantalla donde el primer producto no llegaba a
-                aparecer.
-                **La cura no se inventó: estaba construida y sin consumir.**
-                `Campo.etiquetaVisible` existe desde N11′ y su propia
-                cabecera nombra este caso con todas las letras: *«el
-                buscador no lleva etiqueta: lupa + placeholder es el patrón
-                universal»*. Y lo que se apaga es el PÍXEL, jamás el
-                nombre: el `accessibilityLabel` se monta igual, así que el
-                lector de pantalla sigue diciendo lo mismo que antes. */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Campo
-                label={t('despensa.buscarLabel')}
-                etiquetaVisible={false}
-                value={busqueda}
-                onChangeText={setBusqueda}
-                placeholder={t('despensa.buscarPlaceholder')}
-                autoCapitalize="none"
-              />
-            </View>
+            {/* ☠️ ACÁ VIVÍA EL BUSCADOR APILADO (S96 §5.1). Subió a la fila
+                del encabezado — ver el comentario de `Encabezado` arriba.
+                Su primera cura de S100b-C fue apagarle la etiqueta
+                (`etiquetaVisible={false}`, −30 dp); **esa prop viaja con
+                él** y sigue siendo la que lo hace caber en la fila. */}
 
             {/* ① · EL CRITERIO — la firma (S95-I, sin cambios) */}
             {mascota !== null && !buscando ? (
