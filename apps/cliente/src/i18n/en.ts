@@ -162,6 +162,12 @@ export const clienteEn = {
     // r6-2 — mirror of es.ts (Espejo enforces parity).
     recoCitaDe: "{{mascota}}'s visit",
     recoCargarCarnet: "Add {{mascota}}'s card",
+    // S100c-D — the in-flight order reaches Home (declared unmounted since
+    // S82-C; its trigger fired in S95). The most advanced state presides.
+    recoPedidoEnCamino: 'Your order is on its way',
+    recoPedidoPreparando: 'Your order is being prepared',
+    recoPedidoConfirmado: 'Your order is confirmed',
+    recoPedidosVarios: 'You have {{n}} orders in progress',
     venceEnMin: 'Expires in {{n}} min',
     presupuestoDe: 'Estimate from {{negocio}}',
     presupuestoPara: 'Estimate for {{mascota}}',

@@ -213,6 +213,18 @@ export const clienteEs = {
     // fila-resumen de la semana murió con sus keys (Ley 37).
     recoCitaDe: 'La cita de {{mascota}}',
     recoCargarCarnet: 'Cargar el carnet de {{mascota}}',
+    // 🔴 S100c-D · EL PEDIDO EN VUELO LLEGA AL HOGAR. La fila estaba
+    // DECLARADA SIN MONTAR desde S82-C —*«monta cuando exista [el motor
+    // de despensa]»*— y el motor existe desde S95. Voz por narrativa: la
+    // más avanzada preside (lo que sigue, primero).
+    recoPedidoEnCamino: 'Tu pedido va en camino',
+    recoPedidoPreparando: 'Tu pedido se está preparando',
+    recoPedidoConfirmado: 'Tu pedido está confirmado',
+    // COLAPSA, y no es gusto: `DISEÑO_EXPERIENCIA` §10ter.1 firma que *«el
+    // eje de Ponte al día no es el TIEMPO, es ACCIÓN vs INFORMACIÓN — lo
+    // que espera acción preside y no colapsa; el colapso rige sobre lo
+    // informativo»*. Un pedido en vuelo no espera nada del dueño.
+    recoPedidosVarios: 'Tenés {{n}} pedidos en curso',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
