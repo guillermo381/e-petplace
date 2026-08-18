@@ -6,7 +6,46 @@
 
 ---
 
-## 🎯 ⓪bis · EL BUNDLE DEL GATE — **ÉSTE es el que se mira**
+## 🎯 ⓪ter · EL BUNDLE DEL GATE — **FINAL. ÉSTE es el que se mira**
+
+| | |
+|---|---|
+| **ANCLA DE LAS DOS OTA** | **`e20113b6`** — es el commit que se está mirando |
+| **`main`** | avanza con commits **solo de `docs/`** por encima del ancla (este archivo entre ellos). *Se dice así a propósito: «main = el ancla» es cierto al escribirse y falso una hora después.* |
+| **OTA cliente** | group **`e6ebf9d3`** · runtime **1.0.3** |
+| **OTA prestador** | group **`2e57c413`** · runtime **1.0.5** |
+| **ancla de las dos** | **`e20113b6`**, leída del OBJETO en las 4 plataformas · `dirty: None`, **sin asterisco** |
+
+**Lo que este bundle tiene y el anterior NO:** el **glifo `pedido` CONSUMIDO** (`_layout.tsx:192` —
+antes la tab Pedidos dibujaba `despensa` y quedaban **dos tabs vecinas con la misma bolsa**) y **la
+miniatura montada** en la lista de pedidos. *Sin esto el founder habría vuelto a ver su hallazgo original
+—«pedido 17 de agosto, pedido 17 de agosto»— y lo habría leído como «la cura no funcionó» cuando la
+verdad era «la cura no viajó».* **Aviso de D, y tenía razón.**
+
+**CORTE DECLARADO:** lo que `origin/pista-d` tiene más allá de `e20113b6` es **solo `docs/loop/S100c-D.md`**
+(medido) ⇒ **no hay nada de código afuera del bundle.**
+
+### 🔴 UN ERROR MÍO, DECLARADO: EL ANCLA NO COINCIDIÓ CON LO QUE DECLARÉ
+
+**Declaré `b4ec5445` y publiqué contra `e20113b6`.** Lo cazó verificar el ancla contra el objeto después
+de publicar — *que es exactamente para lo que sirve declarar antes.*
+
+**La causa es mía y no de nadie más: LEVANTÉ LA VEDA ANTES DEL ÚLTIMO PUBLISH.** B estaba autorizada a
+depositar y depositó (`e20113b6` = L-305 al canon), y `main` se movió debajo de mí mientras yo bundleaba.
+
+**El daño, medido antes de decidir:** `git diff --name-only b4ec5445..e20113b6` → **`docs/DEUDAS_CANONICAS.md`
+y nada más** ⇒ **el bundle es funcionalmente idéntico al declarado.** Con eso, la salida correcta era
+publicar el prestador **contra el mismo `e20113b6`** para que las dos OTA compartan ancla, y no
+re-declarar el número viejo. *Un ancla que no coincide no se corrige escribiendo el número que uno quería:
+se corrige diciendo cuál salió.*
+
+**La lección, que es de secuencia y no de git:** **la veda se levanta DESPUÉS del último publish, jamás
+cuando la última pista avisa que está en cero.** *Avisar que estás en cero no es lo mismo que quedarte en
+cero* — y la mano que publica es la única que sabe cuándo terminó de bundlear.
+
+---
+
+## ⓪bis · EL SEGUNDO BUNDLE — superseded por ⓪ter (le faltaba el glifo consumido)
 
 | | |
 |---|---|
@@ -211,10 +250,16 @@ que se agregó. **No lo puedo probar y no lo doy por probado.**
 **Lo que NO hice: abrir una H-nnn contra C.** *Acusar a la vitrina con la medición diciendo lo contrario
 sería fabricar un dueño.*
 
-**② H-301 (de C) — la búsqueda ignora la especie de la mascota.** Con un gato elegido, los primeros
-resultados de «alimento» declaran *«Está pensado para perros»*. **No se curó porque filtrar
-contradiría letra firmada** (`LETRA_RECORRIDO_DESPENSA_S96` §5.2: *se ofrece, no se exige*). La salida
-legítima es **orden o señal**, y eso es decisión de producto. **Va al gate.**
+**② ☑️ H-301 — CURADO Y EN `main`. ESTE PÁRRAFO ESTABA VENCIDO Y SE CORRIGE ACÁ.**
+*Decía que la búsqueda ignoraba la especie y que «va al gate».* **El founder firmó ORDENAR, no filtrar,
+la cura entró, y está en el bundle.** Verificable sin creerle a nadie:
+`git show origin/main:packages/api/src/wrappers/despensa-catalogo.ts | grep -c especiePrioritaria` → **6**
+· `git show "origin/main:apps/cliente/src/app/(tabs)/despensa/index.tsx" | grep -c "mascota?.especie"` → **1**.
+**No filtra** (§5.2: *se ofrece, no se exige*). El orden se hace **en el servidor, en dos baldes** — ver §4-15bis.
+🔴 **Y se corrige EN SU LUGAR y no solo en una bitácora, porque la sesión siguiente lee este resumen
+ANTES que las bitácoras de las pistas y heredaría una deuda ya pagada.** *Era cierto al escribirse y el
+mundo se movió doce horas después: el mismo modo de falla que esta vuelta cobró CUATRO veces entre las
+cuatro pistas.* **Lo cazó C midiendo mi documento contra el objeto, no leyéndolo con más cuidado.**
 
 **③ El margen de la vitrina quedó en 42 dp** (medición de C). **Cualquier pieza que sume alto al cromo o
 a la tarjeta vuelve a cortar la primera tarjeta.**
@@ -236,3 +281,24 @@ documento que abrir**, así que la casa «Facturas» no se montó: el número va
 - **El glifo del carrito a 21 px: sin verificar** (sin rasterizador).
 - **`PantallaConPie` subió el pie ~52 dp:** mi censo dio **cero compensaciones vivas** en mis pantallas,
   pero **eso lo dice el typecheck y el pie es asunto de píxeles.**
+
+---
+
+## ⑧ 🔴 LO QUE ESPERA EL OJO DEL FOUNDER — juicios que ningún instrumento puede emitir
+
+*Cada pista declaró lo que no pudo verificar. Se juntan acá porque el founder mira UNA pantalla, no cuatro
+territorios.*
+
+| # | qué mirar | por qué nadie lo pudo medir |
+|---|---|---|
+| 1 | **Los tres glifos a 21 px** — `carrito` con ruedas · `papelera` · `pedido` (la caja con tapa) | **no hay rasterizador SVG en el entorno** (ni `cairosvg`, ni `rsvg-convert`, ni Inkscape). §2.9 exige ese tamaño y **ese gate es del founder** |
+| 2 | **Los DOS huecos angostos de la barra de cinco: 28,8 dp cada uno**, contra los **20,7 dp** con que el prestador ya vive aprobado | *si dos huecos se leen peor que uno, eso es ojo* — la aritmética dice que caben, no que se vean bien |
+| 3 | **El pie subió ~52 dp** en ficha, carrito y checkout | mi censo dio **cero compensaciones vivas**, pero **eso lo dice el typecheck y el pie es asunto de píxeles** |
+| 4 | **La tarjeta de la vitrina es ~44 dp más alta que en la OTA anterior** | costo declarado de N24. C midió que **la primera igual entra con 42 dp de sobra** — pero *«entra» no es «se ve bien»* |
+| 5 | **Que el `Guardar` de la Hoja de dirección no quede comido abajo** | la cura de `Hoja` es un **no-op en RN-web** (no hay insets del sistema) ⇒ solo el aparato lo dice |
+| 6 | **El `PISO_DEL_MAPA` al 40 %** y si la hoja arrastrable **se siente** como la del paseo | «se siente» no tiene instrumento |
+| 7 | **Si la lista de pedidos ahora DISTINGUE** | ⚠️ **9 pedidos en 4 minutos es tráfico de prueba**: va a quedar repetición, y **eso es el dato, no la cura fallando** |
+| 8 | **Si el autocompletado de direcciones aparece** | ver §6①bis: puede haber estado funcionando y siendo invisible |
+
+**Y la advertencia que vale para las ocho:** *los instrumentos declaran ausencia de defecto conocido, jamás
+presencia de calidad.* Cuatro typechecks y un lint verdes **no dicen que nada tape a nada**.
