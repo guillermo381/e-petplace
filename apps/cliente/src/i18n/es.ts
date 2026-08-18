@@ -1177,6 +1177,11 @@ export const clienteEs = {
        buscando» — tres estados con una sola pinta (L-218).
        Espeja `lugares.ts:81` y no lo reusa: D-539, `packages/api` habla español
        fijo y no sabe traducir. */
+    /* S100c · la libreta de direcciones. El nombre es la LLAVE con la que la
+       persona reconoce el lugar; la calle es el detalle. */
+    aliasLabel: 'Nombre de esta dirección',
+    aliasAyuda: 'Para reconocerla después: «Oficina», «Casa de mamá».',
+    agregarOtra: 'Agregar otra dirección',
     buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escribila a mano y poné el punto en el mapa.',
     puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
     puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
@@ -1539,6 +1544,13 @@ export const clienteEs = {
        está llenando un campo, está revisando una promesa. */
     resumenComoLlega: 'Cómo llega',
     resumenFechaPorEntrega: 'Cada entrega va por su cuenta y tiene su propia fecha.',
+
+    /* 🔴 A-01(b) · el tope de lo que se puede llevar, dicho ANTES de pagar.
+       Literal del founder. **Dice cuánto podés llevar, jamás cuánto hay**: el
+       motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
+       pidiendo 3 contesta 3 y no se filtra inventario ajeno.
+       Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
+    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
 
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',

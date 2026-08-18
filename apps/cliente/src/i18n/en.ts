@@ -1039,6 +1039,10 @@ export const clienteEn = {
     // the point still exists.
     sinResultados: "We couldn't find that address. Type it anyway and place the point by hand on the map.",
     /* A-03 (S100c) — see the Spanish side. */
+    /* S100c — see the Spanish side. */
+    aliasLabel: 'Name for this address',
+    aliasAyuda: 'So you recognize it later: “Office”, “Mom’s place”.',
+    agregarOtra: 'Add another address',
     buscadorApagado: 'Address search is unavailable right now. Type it by hand and place the point on the map.',
     puntoEtiqueta: 'Move the map to adjust the delivery point',
     puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
@@ -1313,6 +1317,9 @@ export const clienteEn = {
     /* A-02 (S100c) — see the Spanish side. */
     resumenComoLlega: 'How it arrives',
     resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
+
+    /* A-01(b) (S100c) — see the Spanish side. */
+    maximoEntregable: 'We can get you {{n}} of this one right now — that’s what we added to your cart.',
 
     itemSeAgoto: 'It sold out while it was in your cart.',
     itemYaNoEsta: "It's no longer for sale.",

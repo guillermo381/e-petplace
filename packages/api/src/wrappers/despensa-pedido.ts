@@ -801,3 +801,55 @@ export async function obtenerNombresTiendaPorPedido(
   // no se pudo leer. La pantalla NO escribe "Lo prepara: —"; omite la línea.
   return { ok: true, data: mapa };
 }
+
+/**
+ * ② «¿CUÁNTAS PUEDO LLEVAR?» — la otra mitad de la mala noticia en la puerta.
+ *
+ * EL CASO, con su número medido (18-ago-2026, base viva): **31 de 483 ofertas
+ * publicadas tienen 2 unidades o menos, y 70 tienen 5 o menos.** Todas con
+ * `hay_stock = true`, o sea que **entran al carrito sin que nada las frene** y
+ * revientan recién en `reservar_stock_pedido`. *Es exactamente lo que el
+ * founder golpeó: agregó algo, y le dijeron que no alcanzaba al pagar.*
+ *
+ * ── 🔴 POR QUÉ ESTO NO SE PUDO HACER DEL LADO DEL CLIENTE ─────────────────
+ * Medido: `skus_select ON vendedor_skus = (es_vendedor_de(...) OR is_admin())`
+ * ⇒ **la familia NO puede leer `stock_disponible`**, y `ofertas` solo expone
+ * el booleano. Sin función que conteste, la única forma de enterarse es el
+ * rebote del pago.
+ *
+ * ── LA FORMA, QUE ES SU PROPIA DEFENSA ────────────────────────────────────
+ * El motor devuelve **`LEAST(lo que pediste, lo que hay)`**, jamás el stock.
+ * Con 500 en bodega y pidiendo 3, contesta **3**: no se aprende nada de las
+ * 500. El número real aparece **solo cuando es menor que lo pedido**, que es
+ * el único caso en que la familia lo necesita. ⇒ no se puede recorrer la
+ * vitrina midiendo inventario ajeno: **cada respuesta está acotada por la
+ * pregunta.**
+ * *Igual es una enmienda a la firma de S99 («booleano y jamás un número») y
+ * está declarada como tal en la cabecera de la migración y en el parte.*
+ */
+export interface MaximoDeOferta {
+  oferta_id: string;
+  /** Cuántas de ESTA oferta se pueden llevar ahora, acotado por lo pedido.
+   *  `0` = no hay ninguna (agotada, despublicada o inexistente — las tres se
+   *  ven igual a propósito: para quien compra significan lo mismo). */
+  maximo: number;
+}
+
+export async function maximoComprableDeOfertas(
+  pedidos: { oferta_id: string; cantidad: number }[],
+): Promise<ResultadoWrapper<MaximoDeOferta[], CodigoErrorDespensa>> {
+  if (pedidos.length === 0) return { ok: true, data: [] };
+
+  const { data, error } = await getClient().rpc('maximo_comprable_de_ofertas', {
+    p_items: pedidos as unknown as never,
+  });
+  if (error) return falloDespensa(error.message);
+
+  const salida: MaximoDeOferta[] = [];
+  for (const f of Array.isArray(data) ? data : []) {
+    if (!esObjDespensa(f)) continue;
+    if (typeof f.oferta_id !== 'string' || typeof f.maximo !== 'number') continue;
+    salida.push({ oferta_id: f.oferta_id, maximo: f.maximo });
+  }
+  return { ok: true, data: salida };
+}

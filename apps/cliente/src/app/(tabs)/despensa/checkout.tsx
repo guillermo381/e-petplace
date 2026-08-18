@@ -81,8 +81,10 @@ import {
   crearIntentoPago,
   obtenerNombresTiendaPorPedido,
   nuevaClaveIdempotencia,
+  listarMisDirecciones,
   obtenerDireccionHogar,
   obtenerMiPerfil,
+  type DireccionGuardada,
   type DireccionHogar,
   type PedidoCreado,
   type PromesaEntrega,
@@ -113,6 +115,20 @@ export default function DespensaCheckout() {
   // ── La dirección y quién recibe ────────────────────────────────────────
   const [direccion, setDireccion] = useState<DireccionHogar | null | 'cargando'>('cargando');
   const [hojaDireccion, setHojaDireccion] = useState(false);
+  /**
+   * 🔴 S100c · LA LIBRETA — «Oficina», «Casa de mamá», además del hogar.
+   *
+   * Medido antes de construir: `direcciones_guardadas.alias` es NOT NULL y su
+   * índice único es PARCIAL (`WHERE es_principal`) ⇒ **la tabla admitía N
+   * direcciones desde siempre**; lo que faltaba era la puerta.
+   *
+   * `hojaLibreta` = elegir entre las guardadas. `hojaAlias` = crear una nueva
+   * con nombre. Son DOS hojas y no una con modos: *una hoja que a veces lista
+   * y a veces edita es dos pantallas compartiendo un título.*
+   */
+  const [direcciones, setDirecciones] = useState<DireccionGuardada[]>([]);
+  const [hojaLibreta, setHojaLibreta] = useState(false);
+  const [hojaAlias, setHojaAlias] = useState(false);
   const [receptor, setReceptor] = useState('');
   const [telefono, setTelefono] = useState('');
   const [instrucciones, setInstrucciones] = useState('');
@@ -179,7 +195,13 @@ export default function DespensaCheckout() {
   useEffect(() => {
     let vigente = true;
     void (async () => {
-      const [dir, perfil] = await Promise.all([obtenerDireccionHogar(), obtenerMiPerfil()]);
+      const [dir, perfil, libreta] = await Promise.all([
+        obtenerDireccionHogar(),
+        obtenerMiPerfil(),
+        // Misma ola: el peaje es de la petición, no del volumen (L-223).
+        listarMisDirecciones(),
+      ]);
+      if (libreta.ok) setDirecciones(libreta.data);
       if (!vigente) return;
       setDireccion(dir.ok ? dir.data : null);
       // Prefill honesto: lo que la casa ya sabe se ofrece, jamás se exige
@@ -699,7 +721,13 @@ export default function DespensaCheckout() {
                         detalle={[direccion.ciudad, direccion.referencias]
                           .filter((x): x is string => x !== null && x !== '')
                           .join(' · ')}
-                        onPress={() => setHojaDireccion(true)}
+                        /* Con UNA sola dirección la libreta no tiene nada que
+                           elegir: el toque va derecho a editarla. Con dos o
+                           más, abre la libreta. *Un selector de un elemento es
+                           un paso que no decide nada.* */
+                        onPress={() =>
+                          direcciones.length > 1 ? setHojaLibreta(true) : setHojaDireccion(true)
+                        }
                       />
                     )}
                   </View>
@@ -1097,6 +1125,69 @@ export default function DespensaCheckout() {
             setDireccion(d);
             if (telefono === '' && d.telefono !== null) setTelefono(d.telefono);
             setHojaDireccion(false);
+          }}
+        />
+      </Hoja>
+
+      {/* 🔴 S100c · LA LIBRETA — elegir entre las direcciones guardadas.
+          Cada una se lee por su NOMBRE («Oficina»), que es la llave con la
+          que la persona la reconoce; la calle va de detalle. La principal
+          viene primera del lector, y no se marca con una insignia: *venir
+          primera ya lo dice, y una insignia de «principal» compite con el
+          nombre que la persona eligió.* */}
+      <Hoja
+        visible={hojaLibreta}
+        onCerrar={() => setHojaLibreta(false)}
+        titulo={t('despensa.aDonde')}
+      >
+        <View style={{ gap: spacing[2] }}>
+          {direcciones.map((d) => (
+            <CeldaNavegacion
+              key={d.id}
+              icono="ubicacion"
+              titulo={d.alias}
+              detalle={[d.direccion, d.ciudad].filter((x) => x !== '').join(' · ')}
+              onPress={() => {
+                setDireccion(d);
+                setHojaLibreta(false);
+              }}
+            />
+          ))}
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={t('direccion.agregarOtra')}
+            onPress={() => {
+              setHojaLibreta(false);
+              setHojaAlias(true);
+            }}
+          />
+        </View>
+      </Hoja>
+
+      {/* La dirección NUEVA con su nombre. Misma captura de siempre —una sola
+          en toda la casa— con la bandera `conAlias`: dos formularios de
+          dirección divergen, y el día que divergen la mitad de la gente pone
+          el punto y la otra mitad no. */}
+      <Hoja
+        visible={hojaAlias}
+        onCerrar={() => setHojaAlias(false)}
+        titulo={t('direccion.agregarOtra')}
+        altura="completa"
+      >
+        <DireccionHogarForm
+          inicial={null}
+          exigirPunto
+          conAlias
+          onGuardada={(d) => {
+            setDireccion(d);
+            setHojaAlias(false);
+            // La libreta se re-lee del motor, no se parchea en memoria: el
+            // alias y el id los decidió el server (L-166 — el dato vivo se
+            // lee de su fuente al momento de usarlo).
+            void listarMisDirecciones().then((r) => {
+              if (r.ok) setDirecciones(r.data);
+            });
           }}
         />
       </Hoja>

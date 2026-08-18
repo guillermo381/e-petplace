@@ -80,6 +80,7 @@ import {
   listarAlergenos,
   obtenerFichaProducto,
   obtenerPerfilMascota,
+  maximoComprableDeOfertas,
   registrarEntendimientoAlergia,
   type AlergenoVigilado,
   type FichaProducto,
@@ -121,6 +122,9 @@ export default function DespensaProducto() {
   const [registrando, setRegistrando] = useState(false);
   const [visor, setVisor] = useState<number | null>(null);
   const [reintento, setReintento] = useState(0);
+  /** A-01(b): la consulta del máximo está en vuelo. Bloquea el doble toque —
+   *  sin esto, dos toques rápidos agregan dos veces mientras se pregunta. */
+  const [consultandoMaximo, setConsultandoMaximo] = useState(false);
 
   const idMascota =
     typeof mascotaId === 'string' && mascotaId.trim().length > 0 ? mascotaId : null;
@@ -354,8 +358,48 @@ export default function DespensaProducto() {
     return null;
   }, [ficha, comprables, variante, exigeEntendimiento, entendido, t]);
 
-  function agregar() {
+  /**
+   * 🔴 A-01(b) · «PEDÍ 3 Y HAY 1» — la otra mitad, cerrada en la puerta.
+   *
+   * `hay_stock` (booleano, firma S99) ya frena lo AGOTADO. Lo que no podía
+   * frenar es la cantidad, y **medido: 31 de 483 ofertas publicadas tienen 2
+   * unidades o menos, y 70 tienen 5 o menos** — todas con `hay_stock = true`,
+   * o sea que entran al carrito y revientan recién al pagar. *Es el caso
+   * exacto del founder.*
+   *
+   * El motor contesta `LEAST(pedido, disponible)`: **nunca dice cuánto hay,
+   * dice cuánto podés llevar.** Pidiendo 3 sobre 500 contesta 3 y no se
+   * aprende nada del inventario ajeno.
+   *
+   * ⚠️ Y SI LA CONSULTA FALLA **NO SE BLOQUEA** (Ley 13): se agrega lo que
+   * la persona pidió y el motor sigue siendo la última palabra. *Un fallo de
+   * red no se disfraza de «no hay stock»* — eso sería inventar una mala
+   * noticia, que es peor que darla tarde.
+   */
+  async function agregar() {
     if (ficha === 'cargando' || ficha === 'error' || variante === null) return;
+    if (consultandoMaximo) return;
+
+    let aAgregar = cantidad;
+    setConsultandoMaximo(true);
+    const r = await maximoComprableDeOfertas([
+      { oferta_id: variante.oferta_id, cantidad },
+    ]);
+    setConsultandoMaximo(false);
+
+    if (r.ok && r.data.length > 0) {
+      const max = r.data[0].maximo;
+      if (max <= 0) {
+        // Se agotó entre que se pintó la ficha y este toque.
+        mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+        return;
+      }
+      if (max < cantidad) {
+        aAgregar = max;
+        mostrar({ texto: t('despensa.maximoEntregable', { n: max }), variante: 'neutro' });
+      }
+    }
+
     agregarAlCarrito(
       {
         oferta_id: variante.oferta_id,
@@ -374,7 +418,7 @@ export default function DespensaProducto() {
         cuentaComercialId: variante.cuenta_comercial_id,
         country_code: variante.country_code,
       },
-      cantidad,
+      aAgregar,
       idMascota !== null ? { tipo: 'mascota', mascotaId: idMascota } : null,
       exigeEntendimiento && entendido,
     );
@@ -465,7 +509,7 @@ export default function DespensaProducto() {
                 }
                 bloque
                 deshabilitado={faltaParaAgregar !== null}
-                onPress={agregar}
+                onPress={() => void agregar()}
               />
               {/* ⚖️ «Ver carrito» BAJA DE BOTÓN A LABEL, y la razón está
                   medida en la referencia, no argumentada: **la ficha de

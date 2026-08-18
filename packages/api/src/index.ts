@@ -540,6 +540,10 @@ export {
 export {
   obtenerDireccionHogar,
   guardarDireccionHogar,
+  // S100c · la libreta de direcciones con alias. NO reemplaza a la del hogar.
+  listarMisDirecciones,
+  guardarDireccionConAlias,
+  type DireccionGuardada,
   type DireccionHogar,
   type GuardarDireccionHogarInput,
   type CodigoErrorDireccion,
@@ -1163,6 +1167,9 @@ export {
   // S100 · el gate de la puerta (D-827): revalida el carrito contra la
   // vitrina de AHORA, antes de la caja.
   revalidarCarritoDespensa,
+  // S100c · la otra mitad de la mala noticia en la puerta: «pedí 3 y hay 1».
+  maximoComprableDeOfertas,
+  type MaximoDeOferta,
   reservarStockPedido,
   iniciarPagoPedido,
   cancelarPedidoDespensa,

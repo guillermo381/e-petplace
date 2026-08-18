@@ -45,6 +45,7 @@ import {
 import {
   buscarLugares,
   crearSesionLugares,
+  guardarDireccionConAlias,
   guardarDireccionHogar,
   resolverLugar,
   type DireccionHogar,
@@ -64,12 +65,32 @@ export function DireccionHogarForm({
   inicial,
   onGuardada,
   exigirPunto = false,
+  conAlias = false,
+  aliasInicial = '',
+  direccionId = null,
 }: {
   inicial: DireccionHogar | null;
   onGuardada: (direccion: DireccionHogar) => void;
   /** §7 de la letra S96: en el checkout de la despensa el punto es
    *  OBLIGATORIO. Default false: Cuenta no cambia sin su propio gate. */
   exigirPunto?: boolean;
+  /**
+   * 🔴 S100c · MODO LIBRETA — «Oficina», «Casa de mamá», además del hogar.
+   *
+   * `false` (default) = el formulario de SIEMPRE: escribe LA principal por
+   * `guardar_direccion_hogar`. **Ningún consumidor existente se mueve.**
+   * `true` = pide un nombre y escribe por `guardar_direccion_con_alias`, que
+   * **nunca** pone `es_principal` ⇒ guardar una oficina no puede desplazar al
+   * hogar ni por error de llamada.
+   *
+   * *Se hizo con una bandera y no con un formulario nuevo porque la captura
+   * es UNA en toda la casa (S79): dos formularios de dirección divergen, y el
+   * día que divergen la mitad de la gente pone el punto y la otra mitad no.*
+   */
+  conAlias?: boolean;
+  aliasInicial?: string;
+  /** Presente = EDITA esa dirección de la libreta; ausente = crea una. */
+  direccionId?: string | null;
 }) {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -79,6 +100,7 @@ export function DireccionHogarForm({
   const [sector, setSector] = useState(inicial?.sector ?? '');
   const [referencias, setReferencias] = useState(inicial?.referencias ?? '');
   const [guardando, setGuardando] = useState(false);
+  const [alias, setAlias] = useState(aliasInicial);
 
   // ── Places (S79-A4) ──────────────────────────────────────────────
   const [lugar, setLugar] = useState<LugarResuelto | null>(
@@ -199,6 +221,40 @@ export function DireccionHogarForm({
   async function guardar() {
     if (guardando) return;
     setGuardando(true);
+
+    if (conAlias) {
+      // El punto ya está exigido por el botón (`faltaPunto`) y por el motor
+      // (`punto_requerido`): acá no puede ser null, y el `??` es para el
+      // typechecker, no una degradación silenciosa.
+      const ra = await guardarDireccionConAlias({
+        alias,
+        direccion,
+        ciudad,
+        sector: sector.trim() === '' ? null : sector,
+        referencias: referencias.trim() === '' ? null : referencias,
+        lat: punto?.lat ?? 0,
+        lon: punto?.lon ?? 0,
+        direccionId,
+      });
+      setGuardando(false);
+      if (!ra.ok) {
+        mostrar({ texto: ra.mensaje, variante: 'error' });
+        return;
+      }
+      mostrar({ texto: t('direccion.guardada'), variante: 'exito' });
+      onGuardada({
+        id: ra.data.direccionId,
+        direccion: direccion.trim(),
+        ciudad: ciudad.trim(),
+        sector: sector.trim() === '' ? null : sector.trim(),
+        referencias: referencias.trim() === '' ? null : referencias.trim(),
+        telefono: inicial?.telefono ?? null,
+        lat: punto?.lat ?? null,
+        lon: punto?.lon ?? null,
+      });
+      return;
+    }
+
     const r = await guardarDireccionHogar({
       direccion,
       ciudad,
@@ -229,6 +285,17 @@ export function DireccionHogarForm({
 
   return (
     <View style={{ gap: spacing[2] }}>
+      {/* El nombre va PRIMERO en modo libreta: es la llave con la que la
+          persona va a reconocerla después, no un detalle del final. */}
+      {conAlias ? (
+        <Campo
+          label={t('direccion.aliasLabel')}
+          value={alias}
+          onChangeText={setAlias}
+          ayuda={t('direccion.aliasAyuda')}
+          autoCapitalize="words"
+        />
+      ) : null}
       <BuscadorDeLugar
         valor={direccion}
         onCambiarTexto={editarDireccion}
@@ -291,7 +358,12 @@ export function DireccionHogarForm({
         etiqueta={t('direccion.guardar')}
         bloque
         cargando={guardando}
-        deshabilitado={direccion.trim() === '' || ciudad.trim() === '' || faltaPunto}
+        deshabilitado={
+          direccion.trim() === '' ||
+          ciudad.trim() === '' ||
+          faltaPunto ||
+          (conAlias && alias.trim() === '')
+        }
         onPress={() => void guardar()}
       />
     </View>
