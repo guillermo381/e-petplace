@@ -585,7 +585,7 @@ export default function DespensaCheckout() {
       <Boton
         etiqueta={t('despensa.verTusPedidos')}
         bloque
-        onPress={() => router.replace('/despensa/pedidos')}
+        onPress={() => router.replace('/pedidos')}
       />
     ) : undefined;
 

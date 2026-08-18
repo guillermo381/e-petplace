@@ -78,7 +78,7 @@ export default function Cuenta() {
      * reclamo del local. *Una puerta que abre a un vacío que sabe hablar no
      * es una puerta que rebota* (Ley 23). Si la mesa firma la quinta tab,
      * esta fila puede quedarse igual: Cuenta es el cajón de todo. */
-    { etiqueta: t('despensa.tusPedidos'), ruta: '/despensa/pedidos' as const, icono: 'despensa' as const },
+    { etiqueta: t('despensa.tusPedidos'), ruta: '/pedidos' as const, icono: 'despensa' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },

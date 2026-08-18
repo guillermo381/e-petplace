@@ -12,6 +12,8 @@ export const clienteEn = {
   tabs: {
     hogar: 'Home',
     explorar: 'Explore',
+    // S100c-D — Orders takes Explore's slot in the bar (founder's call).
+    pedidos: 'Orders',
     despensa: 'Pantry',
     cuenta: 'Account',
   },
@@ -1327,6 +1329,11 @@ export const clienteEn = {
 
     // S96 · the other doors
     tusPedidos: 'Your orders',
+    // S100c-D · los dos rótulos de la casa de Pedidos. Solo se dibujan
+    // cuando existen LAS DOS secciones: con una sola, rotular anuncia
+    // una división que no está (Chanel).
+    pedidosEnCurso: 'In progress',
+    pedidosHistorial: 'History',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',
     reclamoEntrada: 'Bought at the store?',
     reclamoEntradaDetalle: "Enter your invoice code and the purchase joins their record.",
