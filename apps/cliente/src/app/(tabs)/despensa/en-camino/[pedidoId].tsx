@@ -4,17 +4,44 @@
  * TESIS: *eso de la pantalla es TU pedido*, no un mapa genérico con un punto.
  *
  * ── LA COMPOSICIÓN (receta ⑤) ──────────────────────────────────────────────
- * El mapa PRESIDE y es FONDO (`aSangre`); debajo, una banda fija con estado ·
- * ventana prometida · quién lo trae · el código de la puerta.
+ * El mapa es EL FONDO —ocupa el lienzo entero— y la HOJA se apoya ENCIMA,
+ * anclada abajo: rango · escalera · quién lo trae · el código de la puerta.
  *
- * 🔴 **LA BANDA NO ES UNA `Hoja`, Y ES DECISIÓN DE FORMA, NO ATAJO.** La
- * receta dice «Hoja inferior», y en esta casa `Hoja` **monta un `Modal`
- * nativo**: sirve para una DECISIÓN que se toma y se cierra. Acá la banda es
- * el estado permanente de la pantalla —se mira, no se decide— y un modal
- * sobre un mapa se lleva el foco, se puede cerrar y deja al dueño mirando un
- * mapa mudo. *La intención de la receta es «el mapa es fondo, la información
- * vive abajo», y eso se cumple con layout; montarla en Modal cumpliría la
- * palabra y rompería la intención.*
+ * 🔴 **S100b-D · ESTO ERA UNA BANDA Y AHORA ES UN FONDO, Y ES CAMBIO DE
+ * MECANISMO, NO DE ESTILO.** La cabecera de S100 ya decía «el mapa preside y
+ * es FONDO», y **no era cierto**: `aSangre` solo mata la caja de la pieza; el
+ * mapa seguía siendo **un bloque de 380 dp adentro de un ScrollView**, o sea
+ * una banda que scrollea. *Un comentario que declara la intención no la
+ * implementa.*
+ *
+ * **Lo que costaba, medido, y por eso el gate lo vio:**
+ *   status ~48 + Encabezado ~56 + mapa 380 + 20 + escalera vertical ~176
+ *     ≈ **680 dp**, contra el filo de la barra de tabs en **699 dp** (B, con
+ *     aparato) ⇒ **«LLEGA ENTRE» arrancaba a ~19 dp del borde.**
+ * **El mapa solo se comía el 54 % del alto**, y lo que quedaba abajo era
+ * justo el dato por el que la familia abre esta pantalla.
+ *
+ * ⚠️ **Y la palabra que la mesa usó para mandar la cura era la equivocada.**
+ * El encargo decía *«el pie se pinta encima»* y la cura era `PantallaConPie`.
+ * Medido: **esta pantalla no tiene pie fijo** (cero `position:'absolute'`; su
+ * único `Boton` vive adentro del `EstadoVacio` de error) ⇒ montar esa pieza
+ * habría sido **un no-op que da verde y deja el defecto vivo**. *La captura
+ * de B se llamaba `…-eta-CORTADO.png`, no «tapado»: el nombre ya traía el
+ * diagnóstico correcto y la cura mandada era la del otro defecto.*
+ *
+ * 🔴 **LA HOJA NO ES UNA `Hoja`, Y ES DECISIÓN DE FORMA, NO ATAJO.** En esta
+ * casa `Hoja` **monta un `Modal` nativo**: sirve para una DECISIÓN que se toma
+ * y se cierra. Acá es el estado permanente de la pantalla —se mira, no se
+ * decide— y un modal sobre un mapa se lleva el foco, se puede cerrar y deja al
+ * dueño mirando un mapa mudo. *La intención de la receta es «el mapa es fondo,
+ * la información vive abajo», y eso se cumple con layout; montarla en Modal
+ * cumpliría la palabra y rompería la intención.*
+ *
+ * **El alto de la hoja se DERIVA del lienzo medido, jamás se teclea** (L-284,
+ * y el mismo movimiento que `PantallaConPie` hizo con su pie): la hoja crece
+ * con su contenido y **el mapa nunca baja del 40 % del lienzo**. En un
+ * teléfono chico la hoja se achica sola y scrollea adentro; en uno grande el
+ * mapa gana el aire. *Un `alto` fijo es el número que produjo este defecto.*
  *
  * ── ⚠️ DOS COSAS DEL MAPA ESTÁN PEDIDAS A B Y NO ESTÁN ACÁ ────────────────
  * ① **el marcador vivo es el del PASEO, no la moto** — `MapaRecorrido` en
@@ -50,6 +77,7 @@ import {
   MapaRecorrido,
   Separador,
   Texto,
+  radius,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -67,8 +95,21 @@ import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
 
-/** Alto del mapa: preside sin comerse la banda. */
-const ALTO_MAPA = 380;
+/**
+ * EL PISO DEL MAPA — la fracción del lienzo que la hoja **nunca** le quita.
+ *
+ * No es «el alto del mapa»: es su MÍNIMO. La hoja se dimensiona por su
+ * contenido y solo topa acá; el mapa se queda con el resto, que en una hoja
+ * corta es mucho más que esto. *Se expresa como piso del mapa y no como techo
+ * de la hoja porque lo que la tesis defiende es el mapa: «eso de la pantalla
+ * es TU pedido».*
+ *
+ * ⚠️ **La FRACCIÓN es la firma; los dp son consecuencia.** Un mínimo en dp se
+ * ve distinto en cada teléfono y es exactamente lo que produjo el defecto que
+ * esta pantalla acaba de curar. El número exacto es del gate: si el founder
+ * quiere más mapa o más hoja, se mueve esta línea y nada más.
+ */
+const PISO_DEL_MAPA = 0.4;
 
 export default function DespensaEnCamino() {
   const { theme } = useTheme();
@@ -79,6 +120,9 @@ export default function DespensaEnCamino() {
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
   const [ficha, setFicha] = useState<FichaRepartidor | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
+  /** El alto REAL del lienzo, medido. De acá salen el mapa y el techo de la
+   *  hoja: una sola cuenta, jamás dos que deban coincidir (L-284). */
+  const [altoLienzo, setAltoLienzo] = useState(0);
   const [reintento, setReintento] = useState(0);
 
   useFocusEffect(
@@ -135,7 +179,7 @@ export default function DespensaEnCamino() {
       {detalle === 'cargando' ? (
         <EsqueletoGrupo>
           <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-            <Esqueleto forma="bloque" ancho="100%" alto={ALTO_MAPA} />
+            <Esqueleto forma="bloque" ancho="100%" alto={240} />
             <Esqueleto forma="bloque" ancho="100%" alto={120} />
           </View>
         </EsqueletoGrupo>
@@ -152,25 +196,40 @@ export default function DespensaEnCamino() {
           }
         />
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
-          {/* ① EL MAPA — preside y es fondo. */}
+        // EL LIENZO — se mide a sí mismo y de ahí sale todo lo demás. El
+        // `flex: 1` es lo que hace que el mapa sea FONDO: ocupa lo que
+        // queda bajo el encabezado, sin que nadie teclee cuánto es.
+        <View
+          style={{ flex: 1 }}
+          onLayout={(e) => {
+            const h = e.nativeEvent.layout.height;
+            setAltoLienzo((previo) => (Math.abs(previo - h) < 0.5 ? previo : h));
+          }}
+        >
+          {/* ① EL MAPA — FONDO A SANGRE, el lienzo entero. */}
           {(() => {
             const track = detalle.envio?.track ?? null;
             if (track === null) {
               // Vacío HONESTO: no hay track todavía. No se dibuja un mapa
               // centrado en ninguna parte con un punto inventado — *un mapa
               // sin datos que igual se pinta se lee como «no se mueve»*.
+              // Va arriba del todo: sin mapa, el fondo no existe y la hoja
+              // se apoya sobre la pantalla.
               return (
                 <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[4] }}>
                   <Texto variante="apoyo">{t('despensa.enCaminoSinTrack')}</Texto>
                 </View>
               );
             }
+            // El alto sale del lienzo MEDIDO. Mientras vale 0 (el primer
+            // frame, antes del layout) el mapa no se dibuja: pintarlo con
+            // alto 0 y después saltar a pantalla completa es un parpadeo.
+            if (altoLienzo === 0) return null;
             return (
               <MapaRecorrido
                 modo="vivo"
                 aSangre
-                alto={ALTO_MAPA}
+                alto={altoLienzo}
                 // 🔴 LA ÚNICA CONVERSIÓN DE `t`, Y VIVE ACÁ POR CONTRATO.
                 // El motor guarda **epoch ms** y la pieza del mapa pide
                 // **ISO** (`PuntoTrackMapa.t: string`). A dejó el lector sin
@@ -188,38 +247,66 @@ export default function DespensaEnCamino() {
             );
           })()}
 
-          {/* ② LA BANDA — estado, ventana, quién lo trae, el código. */}
-          <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[5], gap: spacing[5] }}>
-            {(() => {
-              const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
-              return (
-                <EscaleraEstados
-                  pasos={conIconos(pasos)}
-                  desvio={desvio}
-                  registro="completa"
-                  acento="control"
-                />
-              );
-            })()}
+          {/* ② LA HOJA — ENCIMA del mapa, anclada abajo. Su alto lo pone su
+              contenido y solo topa contra el piso del mapa (`PISO_DEL_MAPA`).
+              El scroll vive ADENTRO: si el contenido no entra, se desliza la
+              hoja, jamás la pantalla. */}
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              maxHeight: altoLienzo * (1 - PISO_DEL_MAPA),
+              backgroundColor: theme.bg.base,
+              borderTopLeftRadius: radius.lg,
+              borderTopRightRadius: radius.lg,
+              boxShadow: theme.elevacion.elevada,
+            }}
+          >
+            <ScrollView
+              contentContainerStyle={{
+                paddingHorizontal: spacing[5],
+                paddingTop: spacing[5],
+                paddingBottom: insets.bottom + spacing[6],
+                gap: spacing[5],
+              }}
+            >
+              {/* 🔴 EL RANGO VA PRIMERO, Y ESE ES EL CAMBIO DE ORDEN.
+                  Antes cerraba la banda detrás de la escalera y quedaba
+                  fuera de pantalla. **Es el dato por el que la familia abre
+                  esta pantalla** —quedarse en casa o no—, así que preside la
+                  hoja y se ve sin deslizar nada.
+                  RANGO, jamás el minuto (N14). Y con desvío NO se muestra:
+                  prometer una entrega que ya no va a pasar es peor que no
+                  prometer. */}
+              {desvioVivo(detalle) ? null : detalle.pedido.promesa_desde !== null &&
+                detalle.pedido.promesa_hasta !== null ? (
+                <View style={{ gap: spacing[1] }}>
+                  <Texto variante="seccion">{t('despensa.enCaminoVentana')}</Texto>
+                  <Texto variante="dato">
+                    {t('despensa.promesaRango', {
+                      desde: horaLocal(detalle.pedido.promesa_desde),
+                      hasta: horaLocal(detalle.pedido.promesa_hasta),
+                    })}
+                  </Texto>
+                  <Texto variante="apoyo">{t('despensa.enCaminoVentanaDetalle')}</Texto>
+                </View>
+              ) : null}
 
-            {/* LA VENTANA PROMETIDA — RANGO, jamás el minuto (N14). Y con
-                desvío NO se muestra: prometer una entrega que ya no va a
-                pasar es peor que no prometer. */}
-            {desvioVivo(detalle) ? null : detalle.pedido.promesa_desde !== null &&
-              detalle.pedido.promesa_hasta !== null ? (
-              <View style={{ gap: spacing[1] }}>
-                <Texto variante="seccion">{t('despensa.enCaminoVentana')}</Texto>
-                <Texto variante="dato">
-                  {t('despensa.promesaRango', {
-                    desde: horaLocal(detalle.pedido.promesa_desde),
-                    hasta: horaLocal(detalle.pedido.promesa_hasta),
-                  })}
-                </Texto>
-                <Texto variante="apoyo">{t('despensa.enCaminoVentanaDetalle')}</Texto>
-              </View>
-            ) : null}
+              {(() => {
+                const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
+                return (
+                  <EscaleraEstados
+                    pasos={conIconos(pasos)}
+                    desvio={desvio}
+                    registro="completa"
+                    acento="control"
+                  />
+                );
+              })()}
 
-            <Separador />
+              <Separador />
 
             {/* ③ QUIÉN LO TRAE — F3, con TRES de cuatro.
                 🔴 `null` NO se dibuja con guiones: el lector tapa DOS casos a
@@ -231,33 +318,60 @@ export default function DespensaEnCamino() {
                 bucket de las cédulas — es deuda con dueño, no un permiso que
                 falta. **No se pone un avatar genérico con cara: eso sería el
                 verosímil-falso con rostro.** */}
-            {ficha === null ? null : (
-              <View style={{ gap: spacing[1] }}>
-                <Texto variante="seccion">{t('despensa.enCaminoQuienTrae')}</Texto>
-                <Texto variante="cuerpo">{ficha.nombre}</Texto>
-                {ficha.vehiculo_placa === null ? null : (
-                  <Texto variante="dato">
-                    {t(
-                      ficha.vehiculo_tipo === 'carro'
-                        ? 'despensa.vehiculoCarro'
-                        : 'despensa.vehiculoMoto',
-                    )}
-                    {' · '}
-                    {ficha.vehiculo_placa}
-                  </Texto>
-                )}
-              </View>
-            )}
+              {ficha === null ? null : (
+                <View style={{ gap: spacing[1] }}>
+                  <Texto variante="apoyo">{t('despensa.enCaminoQuienTrae')}</Texto>
+                  {/* 🔴 S100b-D · LA PLACA MANDA, Y LA JERARQUÍA ESTABA
+                      INVERTIDA. Medido por B en aparato: el nombre salía en
+                      **24.2 dp** y la placa en **18.8 dp gris** — el elemento
+                      más chico y más apagado de la ficha.
+                      Nuestro propio README de referencias dice de Uber: *«la
+                      ficha de quien llega, con LA PLACA MANDANDO … porque la
+                      placa es lo que se verifica en la calle, no la cara»*.
+                      **Quien espera en la puerta no compara caras: compara
+                      placas** — y encima nuestra ficha **no tiene foto** (la
+                      del repartidor vive en el bucket de las cédulas), así que
+                      el nombre no alcanza ni para reconocer a nadie.
+                      ⇒ la placa sube a `datoMd` y el nombre baja a `apoyo`.
 
-            {/* ④ EL CÓDIGO DE LA PUERTA (F2) — con su voz de CUÁNDO darlo. */}
-            {codigo === null ? null : (
-              <View style={{ gap: spacing[1] }}>
-                <CodigoAEscala codigo={codigo} etiqueta={t('despensa.codigoPuerta')} />
-                <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
-              </View>
-            )}
+                      ⚠️ **Y NO SUBE MÁS QUE ESO, A PROPÓSITO.** La tentación
+                      era `CodigoAEscala` (mono a `2xl`), que es lo que manda
+                      de verdad. **Pero en esta misma hoja vive el CÓDIGO DE LA
+                      PUERTA en esa escala**, y dos números mono grandes en una
+                      pantalla donde uno se DICE y el otro se VERIFICA es cómo
+                      alguien le dice la placa al repartidor. *Una jerarquía
+                      que se arregla creando una confusión peor no está
+                      arreglada.* La placa manda dentro de su ficha; el código
+                      sigue mandando en la pantalla. */}
+                  {ficha.vehiculo_placa === null ? (
+                    <Texto variante="cuerpo">{ficha.nombre}</Texto>
+                  ) : (
+                    <>
+                      <Texto variante="datoMd">{ficha.vehiculo_placa}</Texto>
+                      <Texto variante="apoyo">
+                        {t(
+                          ficha.vehiculo_tipo === 'carro'
+                            ? 'despensa.vehiculoCarro'
+                            : 'despensa.vehiculoMoto',
+                        )}
+                        {' · '}
+                        {ficha.nombre}
+                      </Texto>
+                    </>
+                  )}
+                </View>
+              )}
+
+              {/* ④ EL CÓDIGO DE LA PUERTA (F2) — con su voz de CUÁNDO darlo. */}
+              {codigo === null ? null : (
+                <View style={{ gap: spacing[1] }}>
+                  <CodigoAEscala codigo={codigo} etiqueta={t('despensa.codigoPuerta')} />
+                  <Texto variante="apoyo">{t('despensa.codigoPuertaDetalle')}</Texto>
+                </View>
+              )}
+            </ScrollView>
           </View>
-        </ScrollView>
+        </View>
       )}
     </View>
   );
