@@ -48,6 +48,7 @@
  * Presentacional puro. Memorial degrada por slot.
  */
 
+import { type ReactNode } from 'react'
 import { View } from 'react-native'
 
 import { EscaleraEstados, type DesvioEscalera, type PasoEscalera } from './EscaleraEstados'
@@ -125,6 +126,43 @@ export type TarjetaPedidoProps = {
      */
     tono?: 'info' | 'proximo' | 'atencion'
   }
+  /**
+   * 🔴 LA MINIATURA — S100c-B, pedido de D con su caso medido.
+   *
+   * **El defecto que la pide, en palabras del founder:** *«dice pedido 17
+   * de agosto, pedido 17 de agosto»*. **Medido por D en la cuenta del
+   * gate: 23 pedidos en 5 días locales, con NUEVE el 17-ago y NUEVE el
+   * 12-ago** ⇒ nueve tarjetas con el mismo título, dos veces. *El título
+   * no distingue porque no puede: la fecha es lo único que trae, y se
+   * repite.*
+   *
+   * **Es un SLOT y no una `fotoUrl`**, por el mismo criterio que
+   * `marcadorVivo` en `MapaRecorrido`: **la tarjeta sabe DÓNDE va la
+   * miniatura; QUÉ miniatura es, lo sabe quien la monta.** Una `fotoUrl`
+   * acá obligaría a esta pieza a resolver firma de URL, `contentFit`,
+   * fallback y estado sin foto — cuatro decisiones que ya viven resueltas
+   * en la app.
+   *
+   * ── 🔴 LOS DOS NÚMEROS DE D DEFINEN LA FORMA, no la decoran ─────────
+   * · **20 de 23 pedidos tienen UN SOLO ítem** ⇒ el slot es para **UNA**
+   *   miniatura, no para una pila. *Diseñar una pila para el 13 % es
+   *   dimensionar la pieza por la excepción* — el mismo error que la casa
+   *   ya nombró al no dimensionar `TarjetaProducto` por el nombre sin
+   *   curar.
+   * · **5 de 23 pedidos no tienen foto** (y el catálogo entero: **161 de
+   *   470**) ⇒ **el slot ADMITE el hueco y no lo exige.** Es opcional, y
+   *   sin él la tarjeta sigue siendo una tarjeta: no deja un cuadrado
+   *   vacío ni reserva su lugar. *Un hueco que se dibuja como caja rota
+   *   es peor que no tener miniatura.*
+   *
+   * ⚠️ **Y LA TRAMPA QUE VIAJA CON ESTO, avisada antes y no después:** hoy
+   * la miniatura de producto de la app la dibuja `LienzoProducto`, que
+   * **pinta su fondo también detrás de una foto** — de ahí el «marco
+   * lila» que el founder reporta en el carrito (H-115, cura de una línea,
+   * tomada por A). **Si este slot monta esa pieza sin la cura, hereda el
+   * defecto en la lista de pedidos.**
+   */
+  miniatura?: ReactNode
   /** `oficio` = panel del vendedor · `control` = app de la familia. */
   acento?: 'control' | 'oficio'
   onPress: () => void
@@ -139,6 +177,7 @@ export function TarjetaPedido({
   pasos = [],
   desvio,
   estado,
+  miniatura,
   acento = 'control',
   onPress,
   etiqueta,
@@ -147,6 +186,12 @@ export function TarjetaPedido({
     <Tarjeta interactiva onPress={onPress} accessibilityRole="button" etiqueta={etiqueta} relleno="amplio">
       <View style={{ gap: spacing[3] }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>
+          {/* LA MINIATURA, cuando la hay. Va PRIMERA porque es lo que
+              distingue: con nueve títulos idénticos en la lista, la foto
+              es el único dato que separa una tarjeta de su vecina.
+              Ausente NO reserva lugar — el hueco honesto es que no esté
+              (ver la prop). */}
+          {miniatura}
           <View style={{ flex: 1, gap: spacing[0.5] }}>
             <Texto variante="seccion" numberOfLines={1}>
               {titulo}
