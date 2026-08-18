@@ -68,6 +68,14 @@
  * presentación en SU PROPIA línea** (jamás compitiendo con el nombre
  * por el mismo renglón, porque **la presentación es dato que decide la
  * compra**) · **el nombre largo completo vive en la ficha.**
+ *
+ * ⏪ **S100d·bis — «su propia línea» CAMBIA DE VECINO, no de rango.** Por
+ * palabra del founder la presentación **baja a compartir renglón con el
+ * control** (*«la cantidad abajo, junto a la presentación»*). **Lo que la
+ * cláusula protegía sigue protegido:** no comparte renglón **con el
+ * nombre**, que era el vecino que se la comía. *Y sigue sin truncarse
+ * nunca: cuando no entra, envuelve* — la aritmética y su acreedor están
+ * en el cuerpo, sobre el ancla.
  * ⛔ Prohibido resolverlo encogiendo la letra o truncando la
  * presentación.
  *
@@ -495,10 +503,6 @@ export function TarjetaProducto({
             </Texto>
           )}
 
-          {presentacion === undefined ? null : (
-            <Texto variante="apoyo">{presentacion}</Texto>
-          )}
-
           {/* EL VEREDICTO DE COMPLETITUD (N18) — solo la cara
               ADMINISTRAR lo puebla; en la del cliente llega `null` y no
               se dibuja. Neutro: es trabajo pendiente del vendedor, no
@@ -716,8 +720,42 @@ export function TarjetaProducto({
                 gap: spacing[2],
               }}
             >
+              {/* 🔴 LA PRESENTACIÓN COMPARTE EL RENGLÓN CON EL CONTROL —
+                  S100d·bis, palabra del founder cerrando una ambigüedad que
+                  declaré en vez de resolver a mi gusto: *«la cantidad abajo,
+                  junto a la PRESENTACIÓN»* — el renglón del «2 kg», **no el
+                  del $24.90**.
+
+                  ⏪ Vivía arriba, en el bloque de texto, «en su propia línea».
+                  Esa letra sobrevive en su intención —*la presentación es dato
+                  que decide la compra y no compite con el nombre*— y **cambia
+                  de vecino: ahora comparte renglón con el control, no con el
+                  nombre.**
+
+                  🔴 **EL COSTO, MEDIDO EN EL APARATO Y NO ESTIMADO:**
+                      «frasco 300 ml» …………………………… 91,0 dp
+                      lo que queda junto al control … 62,3 dp
+                  ⇒ **no entra en una línea, y ENVUELVE.** *«60 tabletas» (~75)
+                  también.* Con 62,3 dp entran ~9 caracteres.
+
+                  **ENVUELVE Y NO SE TRUNCA, y es la ley de esta pieza la que
+                  lo decide, no mi gusto:** su cabecera dice ⛔ *«prohibido
+                  resolverlo encogiendo la letra o truncando la presentación»*.
+                  *Entre una presentación en dos líneas y una presentación
+                  cortada, la cortada es la que hace comprar el producto
+                  equivocado.*
+
+                  ⚠️ **Y el acreedor es de DATOS, no de forma:** si la
+                  envoltura se ve mal, la palanca es **la voz de la
+                  presentación** («300 ml» en vez de «frasco 300 ml»), igual que
+                  el nombre curado. *Dimensionar la pieza para el peor dato sin
+                  curar es dejar que el dato malo decida la forma de la casa* —
+                  la misma frase que ya gobierna el nombre, tres párrafos más
+                  arriba de esta pieza. */}
               <View style={{ flexShrink: 1 }}>
-                <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+                {presentacion === undefined ? null : (
+                  <Texto variante="apoyo">{presentacion}</Texto>
+                )}
               </View>
               {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
               {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
@@ -847,6 +885,12 @@ export function TarjetaProducto({
                 </Animated.View>
               )}
             </View>
+
+            {/* EL PRECIO, último y anclado abajo. Sigue siendo lo que alinea
+                la fila: las dos tarjetas comparten alto, así que sus precios
+                caen a la misma altura aunque un nombre mida dos líneas y el
+                otro una — que es para lo que existe la grilla. */}
+            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
           </View>
         </View>
       </Pressable>
