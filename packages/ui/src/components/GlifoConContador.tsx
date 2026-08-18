@@ -53,33 +53,72 @@ const DISCO = 18
  *  cuenta nada. */
 const TOPE = 99
 
-export interface GlifoConContadorProps {
+type Base = {
   nombre: IconoNombre
   /** El tamaño del glifo. El disco NO escala con él a propósito: es una
    *  señal, y una señal que crece con su soporte deja de ser constante. */
   tamano?: number
   /** Cuántos. **`0` no dibuja disco** — ver la nota de la cabecera. */
   cuenta: number
-  /**
-   * 🔴 EL LABEL COMPLETO, y es OBLIGATORIO. La voz la trae quien monta
-   * —*«Carrito, 3 productos»*— porque **esta pieza no sabe qué está
-   * contando**. Sin él, un lector de pantalla anuncia un número suelto.
-   */
-  etiqueta: string
 }
 
-export function GlifoConContador({ nombre, tamano = 24, cuenta, etiqueta }: GlifoConContadorProps) {
+/**
+ * 🔴 QUIÉN ES EL NODO ACCESIBLE — UNIÓN DISCRIMINADA (S100b-B · reporte de
+ * la pista D al montarla, **con su caso**).
+ *
+ * **El defecto que D encontró:** la pieza se declaraba `accessible` siempre,
+ * y **su consumidor natural es un `Pressable`** —un contador de carrito
+ * existe para tocarse—. Adentro de un tocable quedaban **DOS nodos
+ * accesibles**: el que se toca y el de adentro, con la voz duplicada.
+ *
+ * **D resolvió bien lo urgente** (dejó el label en el `Pressable`, *porque
+ * el que tiene que estar nombrado es el que se toca: un botón sin nombre no
+ * se activa a ciegas*) y **declaró la redundancia en vez de esconderla**.
+ * La decisión de contrato es de la pieza, y es ésta.
+ *
+ * **Por qué unión y no un `boolean` opcional:** con un flag suelto quedan
+ * expresables los dos estados malos — *suelta y sin nombre* (muda para el
+ * lector) y *anidada con nombre* (la voz duplicada que D midió). **Con la
+ * unión ninguno de los dos compila.** Es el mismo movimiento que `compra`
+ * en `TarjetaProducto` y que `SelectorDestinoItem`: *la forma hace
+ * imposible el olvido, en vez de confiar en que nadie olvide.*
+ */
+export type GlifoConContadorProps = Base &
+  (
+    | {
+        /** Suelta: **la pieza ES el nodo**, y por eso su voz es obligatoria
+         *  — no sabe qué está contando, así que la trae quien la monta.
+         *  *«Carrito, 3 productos»*, jamás un número suelto. */
+        dentroDeTocable?: false
+        etiqueta: string
+      }
+    | {
+        /** Dentro de un `Pressable`/`Boton`: **la pieza se borra del árbol
+         *  de accesibilidad** y el nombre lo pone el tocable, que es el que
+         *  se activa. **No acepta `etiqueta`**: dos voces para un gesto es
+         *  exactamente lo que este brazo existe para impedir. */
+        dentroDeTocable: true
+        etiqueta?: never
+      }
+  )
+
+export function GlifoConContador(props: GlifoConContadorProps) {
+  const { nombre, tamano = 24, cuenta } = props
+  const anidada = props.dentroDeTocable === true
   const { theme } = useTheme()
   const hay = cuenta > 0
   const texto = cuenta > TOPE ? `${TOPE}+` : String(cuenta)
 
   return (
     <View
-      accessible
-      accessibilityLabel={etiqueta}
+      // Anidada: la pieza NO es nodo y su subárbol no se anuncia — el
+      // tocable que la contiene ya tiene la voz. Suelta: ella es el nodo.
+      accessible={!anidada}
+      accessibilityLabel={anidada ? undefined : props.etiqueta}
       // El número va en el label, no como texto suelto: el lector cuenta
       // la misma historia que el ojo, una sola vez.
-      accessibilityRole="image"
+      accessibilityRole={anidada ? undefined : 'image'}
+      importantForAccessibility={anidada ? 'no-hide-descendants' : 'auto'}
       style={{ width: tamano, height: tamano }}
     >
       <Icono nombre={nombre} tamano={tamano} />
