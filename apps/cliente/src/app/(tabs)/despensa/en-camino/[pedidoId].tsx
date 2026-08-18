@@ -51,14 +51,24 @@
  * come?»*): con el rango arriba, **la hoja puede bajar sin esconder el dato
  * por el que la familia abre la pantalla.** Reversible en el gate.
  *
+ * **④ N14 CIERRA — LA ENTREGA DEJA DE DIBUJARSE COMO UN PASEO.** Las dos
+ * marcas del mapa son `MarcaDeMapa` (`moto` y `destino`), la pieza que B
+ * separó de `PinEnMapa` para poder montarla **sin su posición** — adentro de
+ * un `Marker` el «dónde» ya está resuelto.
+ *
+ * ⏪ **Y ACÁ ME EQUIVOQUÉ DOS VECES EN LA MISMA LÍNEA, y se cuenta:** frené el
+ * glifo de la moto *«porque no existe»* —**existía**, con su silueta firmada
+ * por el founder— y, mientras tanto, monté el destino con un `Icono` dentro de
+ * un círculo hecho a mano: **un glifo de INTERFAZ haciendo de objeto del
+ * MUNDO**, que es exactamente lo que `DIRECCION_ARTE` §6ter prohíbe (*«el mapa
+ * no es interfaz, es MUNDO»*: masa y no trazo, con anillo, sin huella).
+ * *El freno fue por la razón correcta y sobre una premisa falsa; y el error
+ * que sí cometí lo cometí un renglón más abajo del que frené.*
+ *
  * ── ⚠️ LO QUE SIGUE FALTANDO, DICHO ────────────────────────────────────────
- * ① **el marcador vivo sigue siendo el punto del PASEO.** El slot
- * `marcadorVivo` existe y está implementado; **lo que no existe es el glifo de
- * la moto**, y un glifo se firma por gate (§2.9) — *poner el de la despensa
- * porque «es de la tienda» sería elegir la forma desde la palabra, que es
- * exactamente lo que S99 dejó como lección*. Pedido a B.
- * ② **la INTERPOLACIÓN**: con fixes cada ~60 s el marcador salta. Su forma y
- * su costo están medidos en la cabecera de `MapaRecorrido.tipos.ts`.
+ * **la INTERPOLACIÓN**: con fixes cada ~60 s el marcador salta. Su forma y su
+ * costo están medidos en la cabecera de `MapaRecorrido.tipos.ts` — y ahora que
+ * la marca se monta por slot, lo que falta es la proyección que la alimenta.
  *
  * ── LO QUE NO ENTRA, POR LETRA ─────────────────────────────────────────────
  * Publicidad sobre el mapa · **ETA al minuto** (*prometer un minuto que no
@@ -89,6 +99,7 @@ import {
   EscaleraEstados,
   Icono,
   MapaRecorrido,
+  MarcaDeMapa,
   Separador,
   Tarjeta,
   Texto,
@@ -338,28 +349,30 @@ export default function DespensaEnCamino() {
                 // un pedido sin track abriría el mapa en el default de Quito
                 // — un mapa correcto de un lugar que no es el tuyo.
                 centroInicial={destino}
+                /* 🔴 LAS DOS MARCAS SON `MarcaDeMapa`, Y LA PRIMERA VERSIÓN
+                   DE ESTA LÍNEA ERA EL DEFECTO QUE §6ter PROHÍBE.
+                   Yo había montado acá un `Icono` («hogar») dentro de un
+                   círculo hecho a mano — o sea **un glifo de INTERFAZ
+                   haciendo de objeto del MUNDO**, que es exactamente lo que
+                   `DIRECCION_ARTE` §6ter existe para impedir: *«el mapa no
+                   es interfaz, es MUNDO»* — masa y no trazo, con anillo de
+                   separación y sin huella.
+                   *Frené el glifo de la moto por la razón correcta y me
+                   fabriqué el mismo error un renglón más abajo con la casa.*
+                   Lo cazó B al contestar el pedido. Ahora las dos salen de
+                   la pieza firmada, con UN solo dibujo. */
                 marcadorDestino={
-                  destino === undefined ? undefined : (
-                    /* LA MARCA DEL DESTINO. El slot existe porque **el mapa
-                       sabe DÓNDE va la marca y quien lo monta sabe QUÉ marca
-                       es** (contrato de la pieza). Es la casa, que es lo que
-                       la referencia de Rappi dibuja en el punto de entrega —
-                       y es un glifo YA FIRMADO del registry, no uno nuevo. */
-                    <View
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: radius.full,
-                        backgroundColor: theme.bg.card,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: theme.elevacion.elevada,
-                      }}
-                    >
-                      <Icono nombre="hogar" tamano={18} registro="tinta" tinta={theme.text.primary} />
-                    </View>
-                  )
+                  destino === undefined ? undefined : <MarcaDeMapa variante="destino" />
                 }
+                /* ✅ N14 CIERRA: *«paseo = la cara de la mascota · entrega =
+                   la moto»*. Hasta hoy una entrega se dibujaba con el punto
+                   de color del PASEO. **Mi premisa para no montarla era
+                   falsa** —creí que el glifo no existía; existe, con su
+                   silueta firmada por el founder, y lo que faltaba era poder
+                   montarla sin su posición (`MarcaDeMapa` nació de ahí).
+                   *El freno estuvo bien y la razón estaba equivocada: no
+                   inventé una forma, pero tampoco fui a buscar la que había.* */
+                marcadorVivo={<MarcaDeMapa variante="moto" />}
                 // 🔴 LA ÚNICA CONVERSIÓN DE `t`, Y VIVE ACÁ POR CONTRATO. El
                 // motor guarda **epoch ms** y la pieza pide **ISO**. A dejó el
                 // lector sin convertir A PROPÓSITO —*un campo que cambia de

@@ -1393,6 +1393,9 @@ export const clienteEn = {
     envio: 'Shipping',
     envioRetiro: 'Store pickup',
     total: 'Total',
+    // S100c-D — the receipt, inside the total card. No way to open it yet:
+    // measured, all 6 invoices have both file URLs empty.
+    facturaNumero: 'Invoice',
     totalNoLlego: 'This order already existed. See the total in Your orders.',
     pagoSimuladoTitulo: 'Simulated payment',
     pagoSimuladoDetalle:
@@ -1479,6 +1482,8 @@ export const clienteEn = {
     // S96 · Your orders
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Order from {{dia}}',
+    // S100c-D — what the order carries, as the row's title.
+    pedidoTraeVarios: '{{producto}} and {{n}} more',
     verPedido: 'View order',
     errorPedidosTitulo: "We couldn't load your orders",
     sinPedidosTitulo: "You haven't ordered anything yet",

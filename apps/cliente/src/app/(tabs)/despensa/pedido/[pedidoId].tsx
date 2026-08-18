@@ -67,6 +67,8 @@ import {
   obtenerCodigoEntrega,
   obtenerDetallePedido,
   obtenerMascotasDeFamilia,
+  facturasDePedidos,
+  type FacturaDePedido,
   type DetallePedido,
   type LineaDePedido,
   type MascotaResumen,
@@ -89,6 +91,9 @@ export default function DespensaPedido() {
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
   const [codigo, setCodigo] = useState<string | null>(null);
+  /** LA FACTURA del pedido. `null` = todavía no hay factura emitida —
+   *  **es normal, no un fallo**: medido, 6 facturas sobre 23 pedidos. */
+  const [factura, setFactura] = useState<FacturaDePedido | null>(null);
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [reintento, setReintento] = useState(0);
   const [trabajando, setTrabajando] = useState(false);
@@ -105,6 +110,9 @@ export default function DespensaPedido() {
       });
       void obtenerCodigoEntrega(pedidoId).then((r) => {
         if (vigente && r.ok) setCodigo(r.data.codigo);
+      });
+      void facturasDePedidos([pedidoId]).then((r) => {
+        if (vigente && r.ok) setFactura(r.data[0]?.factura ?? null);
       });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
@@ -551,6 +559,40 @@ export default function DespensaPedido() {
               />
               <Separador />
               <FilaMonto etiqueta={t('despensa.total')} monto={`$ ${detalle.pedido.total.toFixed(2)}`} destacada />
+
+              {/* 🔴 S100c-D · LA FACTURA — el founder la pidió como acceso de
+                  la casa de Pedidos, y **vive acá y no en una casa aparte**
+                  por lo que dio la medición.
+
+                  **Lo medido contra la base viva (18-ago-2026):**
+                    `facturas` = 6 filas · **con `archivo_url` = 0** · **con
+                    `pdf_url` = 0** · con `clave_acceso` = 1 · 5 son del
+                    founder · policy `facturas_owner` · lectores = **cero**.
+
+                  ⇒ **Ninguna factura tiene documento adjunto.** Una pantalla
+                  «Facturas» con una fila por pedido y un botón que no abre
+                  nada es **una puerta que rebota** (Ley 23), y encima sobre
+                  el papel que la gente usa para su contabilidad. *Lo honesto
+                  no es una casa vacía: es el número donde tiene sentido.*
+
+                  Va DENTRO de la carta del total y no en una quinta: es el
+                  comprobante de esa misma plata, y N21 pide una superficie
+                  por GRUPO, jamás una por elemento.
+
+                  **El día que `archivo_url` o `pdf_url` se pueblen**, acá
+                  entra el camino a abrirlo — y recién entonces «Facturas»
+                  como acceso propio tiene objeto. A devolvió las DOS urls a
+                  propósito, sin elegir por mí: *elegir una a ciegas sería
+                  decidir la pantalla con una moneda.* */}
+              {factura === null ? null : (
+                <>
+                  <Separador />
+                  <FilaMonto
+                    etiqueta={t('despensa.facturaNumero')}
+                    monto={factura.numero_factura}
+                  />
+                </>
+              )}
             </View>
             </Tarjeta>
             </View>

@@ -1644,6 +1644,11 @@ export const clienteEs = {
     envio: 'Envío',
     envioRetiro: 'Retiro en tienda',
     total: 'Total',
+    // S100c-D · el comprobante, dentro de la carta del total. NO hay camino
+    // a abrirlo, y es MEDIDO: las 6 facturas de la base tienen `archivo_url`
+    // y `pdf_url` en CERO. Un botón que no abre nada es una puerta que
+    // rebota (Ley 23) — y encima sobre el papel de la contabilidad ajena.
+    facturaNumero: 'Factura',
     totalNoLlego: 'Este pedido ya estaba creado. El total lo ves en Tus pedidos.',
     pagoSimuladoTitulo: 'Pago simulado',
     pagoSimuladoDetalle:
@@ -1736,6 +1741,10 @@ export const clienteEs = {
     // S96 · Tus pedidos
     promesaCorta: '{{dia}}, {{desde}}–{{hasta}}',
     pedidoDel: 'Pedido del {{dia}}',
+    // S100c-D · qué trae el pedido, en el título de la fila. «y N más» y no
+    // «N productos»: **20 de 23 pedidos de la cuenta del gate tienen UN solo
+    // ítem** — la voz se escribe para el caso real, no para el ejemplo.
+    pedidoTraeVarios: '{{producto}} y {{n}} más',
     verPedido: 'Ver el pedido',
     errorPedidosTitulo: 'No pudimos cargar tus pedidos',
     sinPedidosTitulo: 'Todavía no pediste nada',
