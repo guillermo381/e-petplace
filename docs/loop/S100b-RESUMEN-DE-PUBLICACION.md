@@ -301,6 +301,44 @@ está vivo.**
 
 ---
 
+## §6bis · 🔴 CÓMO ENTRARON LOS CUATRO HANDOFFS A `main` — y por qué la ancestría miente acá
+
+*Se escribe porque **quien audite por ancestría va a concluir que tres pistas no mergearon, estando
+enteras**, y eso cuesta una hora y una acusación falsa sobre trabajo ajeno. Hallazgo de C, medido.*
+
+**El de B entró por MERGE DE RAMA** (su rama se mergeó al ensamblado antes de que ella escribiera el
+handoff). **Los de A, C y D entraron POR CONTENIDO** — `git checkout origin/pista-X -- docs/loop/S100b-X.md`
+— porque **se escribieron DESPUÉS del push del ensamblado**: `main` se pusheó a las **23:04** y los tres
+handoffs entre las **23:54 y 23:56**. **Causa de reloj, no de descuido.**
+
+**⇒ `pista-a`, `pista-c` y `pista-d` NO SON ANCESTROS DE `main`. Y eso NO significa que no mergearon:**
+
+| | ancestro de `main` | blob del handoff |
+|---|---|---|
+| `pista-a` | 🔴 no | ✅ **byte a byte idéntico** |
+| `pista-b` | ✅ sí | ✅ idéntico |
+| `pista-c` | 🔴 no | ✅ **byte a byte idéntico** |
+| `pista-d` | 🔴 no | ✅ **byte a byte idéntico** |
+
+**Su código SÍ entró, en el ensamblado.** Verificado una por una: los commits propios de las tres ramas
+posteriores a su merge tocan **exactamente un archivo cada uno — su propio `docs/loop/S100b-X.md`**. Barrido
+sobre las tres: **cero archivos fuera de `docs/loop` quedaron afuera de `main`.**
+
+> ### 🔴 LA LEY, y es de C
+> **PARA «¿ESTO ESTÁ EN `main`?» EL CRITERIO ES EL CONTENIDO, NO LA ANCESTRÍA.**
+> *Un merge por pathspec transporta CONTENIDO y no LINAJE, y pedir las dos cosas a la vez es
+> incompatible* — «docs puros, acotado por pathspec» y «que quede como ancestro» no pueden cumplirse
+> juntas.
+
+**☠️ Y NO SE REESCRIBE EL HISTORIAL para arreglarlo:** arrastraría los merges de las ramas y cambiaría una
+forma ya aprobada, **por prolijidad de log**. *La ancestría rota acá es contable, no material — y desde
+esta línea, además, declarada.*
+
+**Es la misma forma que esta vuelta aprendió a desconfiar —dos números que no coinciden— con una vuelta de
+tuerca: acá ninguno de los dos miente. Miden cosas distintas.**
+
+---
+
 ## §7 · LA ADVERTENCIA QUE ESTE DOCUMENTO NO PUEDE LEVANTAR
 
 **Todo lo verificado acá es typecheck, lint, aritmética y consultas a la base. Nada de eso dice que se vea
