@@ -36,6 +36,30 @@ const ZONA_LATERAL = 44  // reservada SIEMPRE — centrado óptico del título
 type Navegacion = {
   variante: 'navegacion'
   titulo: string
+  /**
+   * 🔴 EL TÍTULO SE APAGA, NO SE BORRA — S100b-B (el título duplicado de la
+   * ficha, marcado por el founder en el gate).
+   *
+   * **El caso, medido:** en la ficha de producto el header dice *«Adulto
+   * Cordero y Arroz»* (26.7 dp) **y el cuerpo lo repite** (34.1 dp) 800 px
+   * más abajo. **Dos veces el mismo dato en la misma pantalla.**
+   *
+   * **Y cuál de los dos cede lo decide la letra, no el gusto:** `N19`
+   * ordena la ficha ① foto ② **nombre + presentación** ③ precio… ⇒ **el
+   * nombre en el CUERPO es obligatorio**. El que sobra es el del header.
+   *
+   * **`false` apaga el píxel y conserva el nombre**: el nodo sigue
+   * anunciándose como `header` para el lector. *Mismo patrón que
+   * `Campo.etiquetaVisible` y que `busqueda` en la portada — **se apaga el
+   * píxel, jamás el nombre**.* Default `true`: el caso raro se declara, el
+   * normal no se puede olvidar.
+   *
+   * ⚠️ **Lo que esto NO es: un header que se colapsa al scrollear.** Ese
+   * patrón —el título aparece cuando el del cuerpo se va— es otra cosa y
+   * **no está construido**. Apagarlo fijo cuesta el contexto cuando la
+   * persona bajó mucho; se declara en vez de venderse como equivalente.
+   */
+  tituloVisible?: boolean
   accionDer?: ReactNode
   divisor?: boolean
   saludo?: never
@@ -50,6 +74,30 @@ type Portada = {
   subtitulo?: string
   isotipo?: 'tinta' | 'gradiente' | 'ninguno'
   accionDer?: ReactNode
+  /**
+   * 🔴 EL BUSCADOR EN LA FILA DEL ENCABEZADO — S100b-B (G-04 · H-202 de C).
+   *
+   * **El caso, medido por las dos varas y con acreedor:**
+   * · nuestro encabezado ocupa **156.4 dp, NO colapsa al scrollear**, y
+   *   lleva **una sola fila útil**: el nombre de la pantalla en la que ya
+   *   estás. **Laika usa 149 dp para buscador Y dirección.** *Mismo
+   *   presupuesto, distinto retorno.*
+   * · C midió que **su buscador cuesta 76 dp para una caja de texto de 26**,
+   *   apilado debajo, y que **en la referencia el buscador y el carrito
+   *   viven en la MISMA fila del encabezado**, junto al logo.
+   * · 🔴 y la deuda que lo vuelve urgente: **la primera tarjeta de la
+   *   vitrina no entra entera por 3 dp.** El paso de la foto a 1:1 le sumó
+   *   ~41 dp a la tarjeta y **se comió exactamente ese margen**. *El costo
+   *   que declaré tenía contraparte, y es este slot.*
+   *
+   * **Con `busqueda` presente el encabezado deja de apilar** y pasa a
+   * `[isotipo] [buscador] [acción]` en una sola fila.
+   *
+   * ⚠️ **Es un SLOT y no un `onBuscar`:** el campo lo monta la pantalla,
+   * que es la que conoce su estado, su placeholder y su debounce. *Un
+   * encabezado que además gestiona una búsqueda deja de ser un encabezado.*
+   */
+  busqueda?: ReactNode
   titulo?: never
   divisor?: never
 } & ({ atras: true; onAtras: () => void } | { atras?: false; onAtras?: never })
@@ -131,7 +179,9 @@ export function Encabezado(props: EncabezadoProps) {
               textAlign: 'center',
               fontFamily: typography.family.sans.medium,
               fontSize: typography.size.md,
-              color: theme.text.primary,
+              // Apagado: el nodo sigue siendo `header` y sigue teniendo el
+              // texto para el lector; lo único que se va es la tinta.
+              color: props.tituloVisible === false ? 'transparent' : theme.text.primary,
             }}
           >
             {props.titulo}
@@ -154,7 +204,7 @@ export function Encabezado(props: EncabezadoProps) {
   // dos pisos con vacío muerto a la derecha del isotipo). La acción vive
   // en línea con la voz; la portada sigue respirando por padding, no por
   // huecos.
-  const { saludo, subtitulo, isotipo = 'gradiente', accionDer } = props
+  const { saludo, subtitulo, isotipo = 'gradiente', accionDer, busqueda } = props
   const varianteIsotipo =
     theme.mode === 'memorial' ? 'blanco' : isotipo === 'tinta' && theme.mode === 'dark' ? 'blanco' : isotipo
   return (
@@ -192,6 +242,29 @@ export function Encabezado(props: EncabezadoProps) {
         {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
           <Isotipo size={32} variant={varianteIsotipo} />
         ) : null}
+
+        {busqueda === undefined ? null : (
+          /* 🔴 EL TÍTULO DEJA DE GASTAR PÍXELES Y NO DEJA DE EXISTIR.
+             El buscador toma la fila; el nombre de la pantalla sigue
+             ANUNCIÁNDOSE al lector, en un nodo sin alto.
+
+             **No es un atajo: es el patrón que la casa ya firmó** en
+             `Campo.etiquetaVisible` — *se apaga el píxel, jamás el
+             nombre*. Y acá tiene además su razón propia: **la barra de
+             tabs ya dice en qué pantalla estás**, con su huella encendida.
+             *Un rótulo que repite la tab cuesta 41.6 dp para decir lo que
+             el pulgar acaba de elegir.* */
+          <>
+            <View
+              accessibilityRole="header"
+              accessibilityLabel={saludo}
+              style={{ width: 0, height: 0 }}
+            />
+            <View style={{ flex: 1 }}>{busqueda}</View>
+          </>
+        )}
+
+        {busqueda !== undefined ? null : (
         <View style={{ flex: 1, gap: 2 }}>
           <Text
             accessibilityRole="header"
@@ -217,6 +290,7 @@ export function Encabezado(props: EncabezadoProps) {
             </Text>
           ) : null}
         </View>
+        )}
         {accionDer ?? null}
       </View>
     </View>
