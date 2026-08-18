@@ -27,6 +27,9 @@ import { Huella } from '../brand/Huella'
 
 export type IconoNombre =
   | 'paseo' | 'veterinaria' | 'grooming' | 'refugio' | 'despensa'
+  /** G-14 (S100b-B) — LA CANASTA, distinta de `despensa`: aquélla es la
+   *  SECCIÓN y ésta es lo que llevás adentro. Conviven en pantalla. */
+  | 'carrito'
   // ☠️ 'coach' MURIÓ COMO NOMBRE (S84-B11) — RENAME a 'ia', firmado.
   //    El dibujo NO cambió una línea: son las mismas tres chispas de
   //    CHISPA. Lo que cambió es qué nombra. El código decía que este
@@ -568,6 +571,39 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   ),
   // El billete con huella ocre — la plata del cuidado (pagos y
   // liquidaciones comparten dibujo).
+  /* 🔴 CARRITO — G-14 (S100b-B). *«El carrito no tiene ícono en la barra:
+     es un botón de texto donde la industria usa una canasta con su
+     contador.»*
+
+     POR QUÉ ES GLIFO NUEVO Y NO `despensa`, que era la salida barata:
+     **`despensa` es LA SECCIÓN y el carrito es LO QUE LLEVÁS ADENTRO de
+     ella.** Pueden —y van a— convivir en la misma pantalla: la tab dice
+     dónde estás, el carrito dice cuánto llevás. *Con un alias, el mismo
+     dibujo diría «acá se compra» y «esto es tuyo» al mismo tiempo, y en
+     la barra de tabs quedarían dos bolsas idénticas con significados
+     distintos* — el mismo argumento con el que `info` no fue alias de
+     `ayuda` (S98).
+
+     LA HUELLA VA ADENTRO DE LA CANASTA, y acá el lugar es el significado:
+     **lo que se lleva en la canasta es para la mascota.** Ley 12 pedía la
+     huella presente; este glifo es de los pocos donde además *dice algo*
+     al estar donde está.
+
+     ⚠️ **SIN GATE DE ÍCONO — §2.9 exige verlo a su tamaño de diseño Y a
+     21 px, y ese gate es del founder.** Se declara pendiente en vez de
+     darse por bueno. */
+  carrito: ({ tinta, huella }) => (
+    <>
+      {/* el asa */}
+      <Path d="M8.6 8.4a3.4 3.4 0 0 1 6.8 0" {...trazo(tinta)} />
+      {/* la canasta — se angosta hacia abajo, como una canasta real */}
+      <Path
+        d="M3.8 8.4h16.4l-1.5 9.3a1.7 1.7 0 0 1-1.7 1.4H7a1.7 1.7 0 0 1-1.7-1.4Z"
+        {...trazo(tinta)}
+      />
+      <Huella color={huella} x={9.0} y={11.4} escala={0.38} />
+    </>
+  ),
   pagos: ({ tinta, huella }) => (
     <>
       <Path d="M3.4 7.4h17.2a0 0 0 0 1 0 0v9.2a0 0 0 0 1 0 0H3.4a0 0 0 0 1 0 0V7.4a0 0 0 0 1 0 0Z" {...trazo(tinta)} />
@@ -1303,6 +1339,11 @@ export function Icono({
     grooming: { pura: theme.status.warning, aa: theme.status.warningText },
     refugio: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
     despensa: { pura: theme.status.warning, aa: theme.status.warningText },
+    /* El carrito HEREDA el color de `despensa` y no elige el suyo: es la
+       misma capa (CONSUMO) y son la misma familia — la sección y lo que
+       llevás adentro de ella. *Darle color propio los separaría en la
+       pantalla justo donde tienen que leerse juntos.* */
+    carrito: { pura: theme.status.warning, aa: theme.status.warningText },
     // ✅ OCRE — FIRMADO (founder, S84-B17), y con esta firma se cierra la
     // pregunta que el glifo arrastraba desde que nació: **QUÉ ES el
     // destello**. No es marca (habría quedado en magenta por §5.1) ni

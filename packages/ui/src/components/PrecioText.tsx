@@ -94,11 +94,45 @@ export interface PrecioTextProps {
   anterior?: boolean
 }
 
+/* 🔴 EL PESO BAJÓ DE 700 A 500 — RE-DERIVACIÓN DE S100b-B, y el motivo es
+   una medición, no un gusto.
+
+   G-06 del gate decía *«el precio es demasiado grande en toda la casa»*,
+   con Laika como vara. **Medido con el harness sobre su vitrina web:**
+
+   | | Laika | nosotros (antes) |
+   |---|---|---|
+   | ancho de tarjeta | 366 px | **164 dp** |
+   | nombre | 14 px · peso 400 | 16 px · peso 400 |
+   | precio | 20 px · **peso 500** | 20 px · **peso 700** |
+
+   ⇒ **El cuerpo era el mismo (20). Lo que no era el mismo era el PESO** —y
+   la caja, que mide menos de la mitad—. *Casi la misma tipografía en menos
+   de la mitad de ancho, y el precio dos pesos más pesado.*
+
+   **Por eso se mueve el peso y no el tamaño:** el precio tiene que seguir
+   siendo el dato que decide (Baymard lo lista como atributo requerido, y
+   achicarlo lo degradaría), pero **no tiene por qué gritar para mandar**.
+   *Bajar el peso conserva la jerarquía y le devuelve el aire a la tarjeta;
+   bajar el tamaño habría cambiado la jerarquía.*
+
+   ⚠️ **Y una autocorrección que viaja con esto, para que nadie reconstruya
+   el argumento viejo:** mi primera comparación daba *«el precio es 2.5×
+   más grande»* y **estaba mal emparejada** — enfrentaba nuestra tarjeta de
+   GRILLA contra la FILA de la app de Laika, dos familias de layout. En la
+   misma familia **su ratio precio÷nombre es MAYOR que el nuestro** (1.429
+   contra 1.25). *La conclusión sobrevivió; la razón que la sostenía, no.*
+
+   **`ficha` sigue al mismo criterio POR COHERENCIA, no por medición
+   propia:** a 28 px en `bold` el precio era el elemento más pesado de la
+   ficha —más que el nombre del producto, que va en `light`—. Su gate es el
+   ojo del founder, y se declara como derivado en vez de presentarse como
+   medido. `linea` no se toca: ya era `regular`. */
 const RECETA: Record<PrecioRegistro, { size: number; familia: string; leading: number }> = {
   // La escala sale de N1 por TOKEN, jamás tecleada: quien corra la
   // escala mueve los precios con ella.
-  vitrina: { size: typography.size.md, familia: typography.family.sans.bold, leading: 26 },
-  ficha: { size: typography.size.xl, familia: typography.family.sans.bold, leading: 34 },
+  vitrina: { size: typography.size.md, familia: typography.family.sans.medium, leading: 26 },
+  ficha: { size: typography.size.xl, familia: typography.family.sans.medium, leading: 34 },
   linea: { size: typography.size.base, familia: typography.family.sans.regular, leading: 24 },
 }
 
