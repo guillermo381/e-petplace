@@ -112,6 +112,33 @@ type Fase<T> = T | 'cargando' | 'error';
  */
 const FILTROS_VITRINA = { limite: 50 } as const;
 
+/**
+ * 🔴 EL LUGAR RESERVADO PARA «FILTRAR» — N24, **y sale de la escala, no de
+ * un número tecleado.**
+ *
+ * El control **aparece y desaparece**: con la lista vacía no se ofrece
+ * (Ley 23 — la puerta no ofrece lo que va a rechazar; la hoja abriría sin
+ * un solo eje). **Al abrir la Despensa la lista SIEMPRE está vacía un
+ * instante** mientras carga, así que sin reserva el buscador nacería ancho
+ * y se encogería solo **en cada apertura de la app**. *Un control que salta
+ * al llegar los datos se lee como un error, no como carga.*
+ *
+ * `spacing[24]` = 96 dp, contra los **73 dp** que el control mide vacío
+ * (medido 18-ago, 384×832): el escalón de la escala que lo cubre con
+ * margen para su segunda voz, *«Filtrar · 2»*.
+ *
+ * ⚠️ **Es `minWidth` y no `width`, y la diferencia es de honestidad:** si
+ * el conteo hiciera crecer la etiqueta más allá de 96, el control **crece
+ * en vez de recortarse**. Ese sí es un cambio de ancho que la persona
+ * provocó tocando un filtro — N24 protege del salto que ocurre *sin que
+ * nadie haga nada*, no de la consecuencia visible de un acto propio.
+ *
+ * ⏪ **Nació como `= 100` y R36 lo rebotó con razón**: *el ritmo sale de
+ * `spacing`, jamás de un número por pantalla.* Se corrigió subiendo al
+ * escalón, no apagando la regla ni bajando su baseline.
+ */
+const LUGAR_CONTROL_FILTRO = spacing[24];
+
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -576,29 +603,18 @@ export default function DespensaDescubrir() {
    */
   function listaConFacetas(lista: ProductoDeVitrina[], vacio: React.ReactNode) {
     const filtradas = aplicarFiltros(lista, filtros);
-    const activos = contarFiltrosActivos(filtros);
-    return (
-      <View style={{ gap: spacing[3] }}>
-        <View style={{ paddingHorizontal: spacing[5] }}>
-          <Boton
-            variante="secundario"
-            tamaño="sm"
-            etiqueta={
-              activos === 0
-                ? t('despensa.filtrar')
-                : t('despensa.filtrarCon', { n: activos })
-            }
-            onPress={() => setFiltrosAbiertos(true)}
-          />
-        </View>
-        {filtradas.length === 0 ? (
-          vacio
-        ) : (
-          // La grilla trae su propio margen negativo, así que el aire lateral
-          // de la pantalla se pone acá y no adentro de la celda.
-          <View style={{ paddingHorizontal: spacing[5] }}>{grillaProductos(filtradas)}</View>
-        )}
-      </View>
+    /* ⏪ S100d-C · punto ② — **EL CONTROL «FILTRAR» SE FUE DE ACÁ ARRIBA**,
+       a la fila del buscador. Ver `filaDeAlcance`.
+       *No se movió por composición: se movió porque acá no podía estar en
+       el mismo escalón que el buscador, y eso es lo que el founder pidió.*
+       Lo que queda en esta función es lo único que siempre fue suyo: la
+       grilla y su vacío. */
+    return filtradas.length === 0 ? (
+      vacio
+    ) : (
+      // La grilla trae su propio margen negativo, así que el aire lateral
+      // de la pantalla se pone acá y no adentro de la celda.
+      <View style={{ paddingHorizontal: spacing[5] }}>{grillaProductos(filtradas)}</View>
     );
   }
 
@@ -621,6 +637,7 @@ export default function DespensaDescubrir() {
   );
 
   const unidades = unidadesEnCarrito(carrito);
+  const filtrosActivos = contarFiltrosActivos(filtros);
 
   /** La lista que la hoja de filtros usa para derivar sus facetas: la
    *  MISMA que se está mostrando, sin filtrar. Se calcula acá y no adentro
@@ -656,59 +673,50 @@ export default function DespensaDescubrir() {
           que no había forma de ver qué había adentro ni de volver.* El
           contador aparece solo cuando hay algo: un «0» sobre la canasta es
           ruido con forma de dato. */}
+      {/* ═══════════════════════════════════════════════════════════════
+          🔴 S100d-C · PUNTOS ㉛ Y ② — LA CABECERA VUELVE A SER UNA FILA:
+          `[isotipo] [Despensa] [carrito]`, EL MISMO HEADER QUE PEDIDOS.
+          ═══════════════════════════════════════════════════════════════
+
+          **Los dos literales del founder, que apuntan al mismo sitio:**
+          · ㉛ *«sigue sin diseño, pero simplificalo: dejá el header de
+            Despensa como el que acabás de crear de Pedidos»*.
+          · ② *«label “Despensa” junto al isotipo, como en Pedidos»*.
+
+          **Qué había y qué medí antes de tocar (18-ago, 384×832):** el
+          encabezado montaba el slot `busqueda`, y ese slot **apaga el
+          rótulo por contrato** —lo deja en un nodo de 0×0 que solo existe
+          para el lector—. Medido literal: *«Despensa» 0×0 @ y 58 ←
+          anunciado, no pintado*. ⇒ **el label que el founder pide no
+          faltaba por olvido: lo apagaba el slot que ocupaba su fila.**
+          *No se podía cumplir ② sin deshacer esa decisión, y por eso ② y
+          ㉛ son el mismo trabajo.*
+
+          ⏪ **Y LO QUE SE DESHACE ES UNA DECISIÓN DE S100b-D CON SU RAZÓN
+          ESCRITA, así que se responde a esa razón y no se pisa en
+          silencio.** D subió el buscador acá porque *«apilado debajo
+          costaba 76 dp para una caja de texto de 26»*, y ese costo era
+          real. **Lo que cambió es a dónde baja:** no vuelve a su piso
+          propio —eso sí serían 76 dp otra vez— sino que **comparte fila
+          con «Filtrar»**, que ya existía y ya gastaba su escalón. *El
+          buscador deja de tener piso propio: se muda al que ya estaba
+          pago.* D dejó la puerta abierta con todas las letras (*«si C
+          repiensa la composición, esto se mueve; lo que no vuelve es el
+          apilado»*) — **y no vuelve.**
+
+          ⏸️ **H-302 SIGUE VIVA Y SIGUE SIENDO DE B**, y ahora cuesta lo
+          mismo en su nuevo lugar: `Campo` reserva SIEMPRE el slot de
+          ayuda/error (`PieDeCampo`) *para que el mensaje no empuje el
+          layout*, y un buscador **no valida** ⇒ son **26 dp que no
+          protegen de nada**. `sinPie` existe y **R29 lo frena con razón**
+          (con `sinPie` el `Campo` sigue pintando su borde de error y deja
+          de renderizar el texto: *borde rojo sin una palabra*). **No se
+          apaga el lint ni se monta un `PieDeCampo` decorativo** — gamear
+          el instrumento es peor que el defecto. */}
       <Encabezado
         variante="portada"
         saludo={t('despensa.titulo')}
         isotipo="gradiente"
-        /* 🔴 S100b-D · EL BUSCADOR SUBE A LA FILA DEL ENCABEZADO — y es el
-           slot que B entregó justo antes de cerrar, con la medición de C
-           adentro: **apilado debajo costaba 76 dp para una caja de texto de
-           26**, y en la referencia (Laika) **el buscador y el carrito viven
-           en la MISMA fila que el logo**.
-           Con `busqueda` el encabezado deja de apilar: `[isotipo]
-           [buscador] [carrito]`. **El título no se apaga: deja de gastar
-           píxeles** —sigue anunciándose al lector en un nodo sin alto—,
-           que es el patrón ya firmado en `Campo.etiquetaVisible`.
-           ⚠️ **El alto que esto libera es de la VITRINA, o sea de C (G-04):
-           una pantalla que no mostraba un solo producto.** Se monta desde
-           acá porque el encabezado es «Despensa de arriba» y es mío, con C
-           parada por orden de mesa — *una pieza entregada y sin consumidor
-           muere sin que nadie se entere.* Si C repiensa la composición,
-           esto se mueve; lo que no vuelve es el apilado. */
-        /* 🔴 S100c-C · C-03 · LO QUE **NO** SE HIZO ACÁ, Y POR QUÉ — H-302.
-           El gate: *«se pierde mucho espacio»* entre el buscador y la barra
-           de mascotas. **Medido (18-ago, 384×832): 74 dp** entre el borde
-           inferior de la CAJA DE TEXTO (y 58) y la barra (y 132).
-           La causa está en la pieza y se leyó, no se supuso: `Campo` reserva
-           SIEMPRE el slot de ayuda/error (`PieDeCampo`, `minHeight:
-           ALTO_PIE_CAMPO`) *para que el mensaje no empuje el layout al
-           aparecer* — regla correcta que acá protege de nada: **un buscador
-           no valida.** Son **26 dp** de los 74.
-
-           Se probó `sinPie` (la prop existe) y **`verify:diseno` lo frenó
-           con razón: R29** — con `sinPie` el `Campo` sigue pintando su borde
-           de error pero deja de renderizar el texto ⇒ *borde rojo sin una
-           palabra que lo explique*, y el modo de falla es el silencio
-           (L-192). La regla asume que quien apaga el pie es un CONTROL
-           COMPUESTO que lo monta por sus hijos; **un campo que no puede
-           tener mensaje es un tercer caso que la regla no contempla.**
-
-           ⇒ **NO se apaga el lint y NO se monta un `PieDeCampo` decorativo
-           para callarlo** — gamear el instrumento es peor que el defecto.
-           El arreglo es de la PIEZA y es de B (H-302): que `Campo` pueda
-           declarar «este campo no tiene mensaje» de forma que `ayuda`/`error`
-           sean **inexpresables** ahí. Con eso R29 sigue mordiendo donde debe
-           y estos 26 dp vuelven. *Los otros 48 sí se curaron, abajo.* */
-        busqueda={
-          <Campo
-            label={t('despensa.buscarLabel')}
-            etiquetaVisible={false}
-            value={busqueda}
-            onChangeText={setBusqueda}
-            placeholder={t('despensa.buscarPlaceholder')}
-            autoCapitalize="none"
-          />
-        }
         accionDer={
           <Pressable
             onPress={() => router.push('/despensa/carrito')}
@@ -752,16 +760,44 @@ export default function DespensaDescubrir() {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          /* 🔴 S100c-C · C-03 · 16 → 8. **El aire estaba pagado dos veces.**
-             El `Encabezado` en variante portada ya trae `paddingBottom:
-             spacing[5]` (20 dp) —*«la portada respira, no comprime»*, y esa
-             decisión es de la pieza y no se toca—, así que estos 16 se
-             sumaban a un colchón que ya existía: 36 dp entre el buscador y
-             la primera cosa que se toca.
-             Se baja a 8 y quedan 28, que siguen siendo aire. **No se baja a
-             0 a propósito**: pegar la barra de mascotas al filo del
-             encabezado la haría leer como parte de él. */
-          paddingTop: spacing[2],
+          /* 🔴 S100d-C · punto ③ · 8 → 0. **EL AIRE ESTABA PAGADO TRES
+             VECES, y mi predecesora solo pudo ver dos.**
+
+             El gate: *«disminuyó, pero AÚN hay espacio muerto entre el
+             header y los chips de mascota»*. Medido antes de tocar
+             (18-ago, 384×832): **66 dp** entre el borde inferior de la
+             caja de texto y el primer bloque del scroll.
+
+             Los tres pagadores, cada uno con su dueño:
+              ① `Encabezado` portada · `paddingBottom: spacing[5]` = **20** —
+                 *«la portada respira, no comprime»*: decisión de la pieza,
+                 **no se toca**.
+              ② este `paddingTop` = **8** — MÍO, y es el que se va.
+              ③ `FiltroPills` · `paddingTop: spacing[3]` = **12** — y **no
+                 es aire**: la pata del chip elegido MONTA el canto y un
+                 `ScrollView` recorta a sus bordes; con menos, la pata se
+                 corta por la mitad. Su propio comentario lo dice. **No se
+                 toca tampoco.**
+
+             ⇒ **de los tres, exactamente uno era gratis, y es éste.**
+             Mi predecesora lo bajó de 16 a 8 y se frenó con una razón
+             correcta *para su composición*: *«pegar la barra de mascotas
+             al filo del encabezado la haría leer como parte de él»*.
+             **Con el buscador adentro del encabezado eso era cierto.** Hoy
+             el encabezado es una fila de identidad y **sigue habiendo 32 dp
+             de separación** (20 de ① + 12 de ③) sin que yo ponga uno solo:
+             la barra no queda pegada a nada. *La razón no era falsa: le
+             cambió el mundo debajo.*
+
+             ⚠️ **Y lo que ESTE número no cura, dicho con su dueño:** los
+             26 dp del `PieDeCampo` del buscador siguen ahí y siguen siendo
+             de B (H-302). Yo no puedo tocarlos sin gamear R29. */
+          /* `spacing[0]` y no un `0` pelado —R36 lo contaría como número
+             crudo, con razón— y **la clave no se borra a propósito**: un
+             cero escrito dice *«acá se decidió no poner aire»*; una clave
+             ausente no distingue la decisión del olvido, y este renglón es
+             justamente el que dos vueltas seguidas tocaron. */
+          paddingTop: spacing[0],
           // Sin barra fija abajo, la reserva es solo el aire del final
           // del contenido: el `+ 72` estimaba el alto de un pie que ya no
           // existe (la clase que `PantallaConPie` vino a volver inexpresable).
@@ -805,6 +841,90 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
+            {/* ═══════════════════════════════════════════════════════════
+                🔴 S100d-C · punto ② · LA FILA DE ALCANCE — EL BUSCADOR Y
+                «FILTRAR» EN EL MISMO ESCALÓN.
+                ═══════════════════════════════════════════════════════════
+
+                **Literal del founder:** *«buscador en el MISMO escalón que
+                Filtrar, con ícono clásico de filtro»*.
+
+                **Medido antes de tocar (18-ago, 384×832): estaban a 249 dp
+                de distancia vertical** — el buscador en la fila del
+                encabezado (y 32) y «Filtrar» adentro de la lista (y 281).
+                *Dos controles que hacen el mismo trabajo —acotar qué se
+                ve— vivían en dos pisos distintos de la pantalla.*
+
+                🔴 **VIVE ACÁ ARRIBA Y NO ADENTRO DE `listaConFacetas`, Y ES
+                UNA DECISIÓN, NO UN DETALLE DE MONTAJE.** «Filtrar» estaba
+                adentro de esa función, que **NO se llama en las ramas de
+                error ni de vacío**. Si el buscador se mudaba ahí, una
+                búsqueda sin resultados **haría desaparecer la caja de
+                texto que la escribió**: la persona quedaría mirando *«no
+                encontramos nada»* sin forma de corregir el término.
+                *Un callejón que solo aparece cuando la búsqueda falla es
+                justo el que ningún camino feliz muestra.*
+
+                ⚖️ **EL ORDEN — el criterio preside, el alcance sigue.** La
+                barra de mascotas va PRIMERO porque es la firma de la
+                pantalla (§5.1: *el tab da ALCANCE, el expediente da
+                CRITERIO*); el buscador y el filtro son alcance y viven
+                pegados a la mercadería que acotan.
+
+                ⏳ **EL ÍCONO DE FILTRO ESTÁ PEDIDO Y NO ESTÁ.** Medido: el
+                union de `IconoNombre` **no tiene ningún candidato** — ni
+                «filtro», ni embudo, ni barras. Se le pidió a B con su
+                forma (familia de CONTROL sin huella, como `lapiz`) y **se
+                monta en cuanto exista**, con `GlifoConContador` llevando
+                cuántos filtros hay activos —la misma pieza y el mismo par
+                ya gateado del carrito—. **Hasta entonces el control dice su
+                nombre en texto y lo declaro abierto: la mitad de
+                composición de ② está cerrada, la mitad de ícono no.**
+                *No se dibuja un glifo en una pantalla* (Ley 12 · L-175). */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                gap: spacing[2],
+                paddingHorizontal: spacing[5],
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Campo
+                  label={t('despensa.buscarLabel')}
+                  etiquetaVisible={false}
+                  value={busqueda}
+                  onChangeText={setBusqueda}
+                  placeholder={t('despensa.buscarPlaceholder')}
+                  autoCapitalize="none"
+                />
+              </View>
+              {/* 🔴 EL SLOT SE RESERVA SIEMPRE — N24, y acá la regla se paga
+                  en cada apertura de la app, no en un caso raro. `Filtrar`
+                  solo existe cuando hay algo que filtrar (Ley 23: la puerta
+                  no ofrece lo que va a rechazar — con la lista vacía la hoja
+                  abriría sin un solo eje). Pero **al abrir la Despensa la
+                  lista SIEMPRE está vacía por un instante** mientras carga,
+                  así que sin reserva el buscador nacería ancho y se
+                  encogería solo. *Un control que salta al llegar los datos
+                  se lee como un error de la app, no como carga.* */}
+              <View style={{ minWidth: LUGAR_CONTROL_FILTRO, alignItems: 'flex-end' }}>
+                {listaParaFiltrar.length > 0 ? (
+                  <Boton
+                    variante="secundario"
+                    tamaño="sm"
+                    etiqueta={
+                      filtrosActivos === 0
+                        ? t('despensa.filtrar')
+                        : t('despensa.filtrarCon', { n: filtrosActivos })
+                    }
+                    onPress={() => setFiltrosAbiertos(true)}
+                  />
+                ) : null}
+              </View>
+            </View>
+
+            {/* ☠️ S100d-C · punto ② · **ACÁ VIVÍA «TUS PEDIDOS», Y SE VA.** */}
             {/* 🔴 S100b-D · G-15 · «TUS PEDIDOS» SUBE ACÁ, Y LA CURA NO ERA
                 LA QUE EL GATE SUPUSO. El gate dice *«falta acceso a mis
                 pedidos desde la primera pantalla de Despensa»* y B, con
@@ -864,17 +984,39 @@ export default function DespensaDescubrir() {
                 tarjeta se completa deslizando un dedo— y se declara como
                 **reversible en una línea**: moverla debajo de la grilla
                 devuelve el cromo a 240 dp y la tarjeta entra con 59 de
-                sobra. *Lo que no se hace es esconder el costo.* */}
-            <View>
-              <CeldaNavegacion
-                titulo={t('despensa.tusPedidos')}
-                onPress={() => router.push('/pedidos')}
-              />
-              <Separador />
-            </View>
+                sobra. *Lo que no se hace es esconder el costo.*
 
-            {/* ⏪ ⓪bis · EL BUSCADOR SE FUE A LA FILA DEL ENCABEZADO
-                (ver su comentario arriba). Acá costaba 76 dp apilado. */}
+                ═══════════════════════════════════════════════════════════
+                ☠️ **Y EL GATE DE S100c LA MATÓ — punto ②, verbatim: *«Quinta
+                tab OK. PERO “Tus pedidos” sigue TAMBIÉN en Despensa bajo
+                los chips»*.**
+                ═══════════════════════════════════════════════════════════
+
+                **La decisión binaria que D y C se pasaron dos vueltas
+                discutiendo —la fila arriba, o la primera tarjeta entera—
+                dejó de tener las dos opciones: apareció una tercera puerta
+                que ninguno de los dos tenía cuando decidió.** *Pedidos es
+                una TAB desde S100c.* ⇒ esta celda es **una segunda puerta
+                al mismo cuarto**, y la casa dice una cosa UNA vez (Chanel).
+
+                **Medido antes de borrarla (18-ago): y 204, 56 dp de alto,
+                y con su separación 77 dp** — que vuelven enteros a la
+                mercadería. *Es el mismo alto que G-04 venía reclamando
+                desde S100b, cobrado sin tener que elegir entre dos cosas
+                buenas: la que sobraba se volvió obvia sola.*
+
+                **Coordinado con D antes de tocar** (dueña de
+                `(tabs)/pedidos/**`): confirmó que **NO mueve la ruta en
+                esta vuelta**, así que el destino sigue existiendo donde
+                está. Y al revés también: mi pantalla ya no la nombra, así
+                que un futuro cambio suyo no me puede romper.
+
+                ⚠️ **Lo que NO se toca y hay que saber:** el toque desde el
+                Hogar y la quinta tab. Esta celda era la TERCERA. */}
+
+            {/* ⏪ ⓪bis · EL BUSCADOR VOLVIÓ A ESTE PISO, pero **compartiendo
+                el escalón de «Filtrar»** en vez de tener uno propio
+                (S100d-C · punto ②) — ver la fila de alcance, arriba. */}
 
             {/* ① · EL CRITERIO — la firma (S95-I, sin cambios) */}
             {mascota !== null && !buscando ? (

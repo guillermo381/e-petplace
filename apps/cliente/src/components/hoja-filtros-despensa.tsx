@@ -179,7 +179,62 @@ export function HojaFiltrosDespensa({
 
   /** Una sección = un rótulo + su tira. **Se dibuja solo si su eje parte
    *  los datos** (más de una opción): ofrecer un filtro de una sola
-   *  opción es una puerta que no lleva a ningún lado. */
+   *  opción es una puerta que no lleva a ningún lado.
+   *
+   * ══════════════════════════════════════════════════════════════════════
+   * 🔴 S100d-C · punto ④ · **EL RÓTULO DICE CUÁNTAS OPCIONES TIENE EL EJE —
+   * Y ESTO ES LA MITAD DE LA CURA, NO LA CURA.**
+   * ══════════════════════════════════════════════════════════════════════
+   *
+   * **El gate, verbatim:** *«Modal de filtro genial. PERO chips sin
+   * visibilidad horizontal»*.
+   *
+   * **Medido con aparato propio (18-ago, 384×832, la hoja abierta) — y el
+   * número es el hallazgo, no la queja:**
+   *
+   * | eje | opciones | se ve | queda fuera |
+   * |---|---|---|---|
+   * | Categoría | 3 | 89 % | 42 dp |
+   * | Especie | 5 | 78 % | 97 dp |
+   * | **Marca** | **13** | **22 %** | **1254 dp** |
+   * | **Presentación** | **15** | **23 %** | **1149 dp** |
+   * | Precio | 4 | 77 % | 106 dp |
+   *
+   * 🔴 **Y LO PRIMERO QUE SE HIZO FUE TRATAR DE FALSAR LA CAUSA CÓMODA:**
+   * se probó si el DOM deja scrollear la tira (**sí, las cinco**) y si el
+   * evento de rueda la mueve (**sí, las cinco**). ⇒ **la tira NO está
+   * rota**, y mandar a arreglar el scroll habría sido curar algo que
+   * funciona. *La mitad obvia de la cura era la que no hacía falta.*
+   *
+   * **Lo que queda es de FORMA: en una hoja dedicada a filtrar, un riel
+   * horizontal esconde el 78 % de un eje y no dice cuánto esconde.** Aunque
+   * el dedo llegue, encontrar «Royal Canin» son 1254 dp de arrastre — eso
+   * no es filtrar, es buscar a ciegas.
+   *
+   * **Esto —el conteo en el rótulo— no acerca un solo chip.** Lo que hace
+   * es **convertir un truncado silencioso en uno declarado**, que es la
+   * misma ley que la vitrina ya cumple al pie de su grilla con *«Mostramos
+   * 50 de 563»*. *Un eje que muestra cuatro de trece y no lo dice se lee
+   * como un eje de cuatro.*
+   *
+   * ⏳ **LA OTRA MITAD ESTÁ PEDIDA A B Y NO ES MÍA:** que `FiltroPills`
+   * acepte que el consumidor declare su disposición —`'tira'` (hoy,
+   * default) · `'envuelve'` (un `flexWrap`, mismos chips, misma pata)—, el
+   * mismo ensanche que `SelectorOpcion` tiene firmado desde S55. **Se le
+   * pidió a B con esta medición adentro.**
+   *
+   * ⚖️ **Y lo que se DESCARTÓ, para que no se reintente:** montar
+   * `SelectorOpcion disposicion="grilla"`, que envuelve y ya existe. *Es la
+   * salida barata y cambia la anatomía que el founder acaba de aprobar
+   * («modal de filtro genial») — una regresión que ningún instrumento caza,
+   * porque lo que se rompe es una aprobación y no un build.*
+   *
+   * ⚠️ **Segunda mitad NO medida y declarada sin veredicto:** `Hoja` monta
+   * su contenido en un `ScrollView` de gesture-handler con un
+   * `Gesture.Pan` que arrastra la hoja, y `FiltroPills` usa un `ScrollView`
+   * de react-native a secas — en el teléfono ese pan **podría** ganarle al
+   * arrastre horizontal. RN-web no reproduce ese gesto. *No se afirma que
+   * pase; se deja escrito porque si pasa, envolver lo mata de raíz.* */
   function seccion(
     titulo: string,
     opciones: { codigo: string; etiqueta: string; icono: null }[],
@@ -189,7 +244,9 @@ export function HojaFiltrosDespensa({
     if (opciones.length < 2) return null;
     return (
       <View style={{ gap: spacing[2] }}>
-        <Texto variante="seccion">{titulo}</Texto>
+        <Texto variante="seccion">
+          {t('despensa.filtroEjeCon', { titulo, n: opciones.length })}
+        </Texto>
         <FiltroPills opciones={opciones} activo={activo} onCambio={set} onLimpiar={() => set(null)} />
       </View>
     );

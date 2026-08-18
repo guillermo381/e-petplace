@@ -1464,6 +1464,12 @@ export const clienteEs = {
     filtrosTitulo: 'Filtrar',
     filtrosVer: 'Ver {{n}} productos',
     filtrosLimpiar: 'Limpiar {{n}} filtros',
+    // 🔴 S100d-C · punto ④ — el rótulo de cada eje DICE cuántas opciones
+    // tiene. Medido: «Marca» ofrece 13 y se ven 4; «Presentación» ofrece 15
+    // y se ven 4. *Un eje que muestra cuatro de trece y no lo dice se lee
+    // como un eje de cuatro.* El separador es el mismo « · » que ya usa
+    // `filtrarCon`: la casa dice «rótulo · número» en un solo dialecto.
+    filtroEjeCon: '{{titulo}} · {{n}}',
     filtroCategoria: 'Categoría',
     filtroEspecie: 'Para qué animal',
     filtroMarca: 'Marca',
