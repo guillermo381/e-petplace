@@ -45,12 +45,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
   CarritoFlotante,
+  COLA_CARRITO_FLOTANTE,
   CeldaNavegacion,
   Encabezado,
   Entrada,
@@ -59,7 +60,6 @@ import {
   EstadoVacio,
   GlifoConContador,
   Icono,
-  PantallaConPie,
   nombreCurado,
   Separador,
   TarjetaProducto,
@@ -838,15 +838,17 @@ export default function DespensaDescubrir() {
           `pointerEvents="box-none"` de `PantallaConPie` cubre UNA capa, y
           un envoltorio reabre la zona muerta de gesto en el tercio
           inferior — justo donde el pulgar sostiene el teléfono (R54). */}
-      <PantallaConPie
-        pie={
-          <CarritoFlotante
-            cuenta={unidades}
-            onAbrir={() => router.push('/despensa/carrito')}
-            etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
-          />
-        }
-        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
+      {/* ⏪ S100d-bis · **VUELVE A SER UN `ScrollView`, Y NO ES UN PASO
+          ATRÁS: `PantallaConPie` ya no tiene nada que reservar acá.**
+          Su trabajo es **medir el pie y reservar ese alto**; el carrito
+          flotante **dejó de ser un pie** (B lo midió con el founder: la
+          banda del pie es opaca y de ancho completo, así que el disco no
+          flotaba — *ocupaba una franja que tapaba la última tarjeta*, con
+          el blanco terminando en 619,4 y la banda arrancando en 619,0).
+          **Sin pie que medir, la pieza sería un `ScrollView` con una capa
+          de más.** La cola la pone la constante que exporta el disco. */}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           /* 🔴 S100d-C · punto ③ · 8 → 0. **EL AIRE ESTABA PAGADO TRES
              VECES, y mi predecesora solo pudo ver dos.**
@@ -898,7 +900,15 @@ export default function DespensaDescubrir() {
           // *Yo lo había defendido como «aire de cola» y C tenía razón: era
           // una línea vieja, no una posición.* Se unifica en las tres
           // pantallas — dos reglas para lo mismo divergen.
-          paddingBottom: spacing[8],
+          // 🔴 S100d-bis · **+ la cola del disco flotante.** Ya no hay pie
+          // que se mida solo: el overlay se apoya sobre el scroll y sin
+          // esta reserva **se sienta encima de la última tarjeta** — el
+          // mismo defecto que la banda del pie causaba, entrando por la
+          // otra puerta. La constante la exporta la pieza, derivada de su
+          // propio tamaño: *un número tecleado que tenga que coincidir con
+          // el diámetro de un disco de otro paquete son dos cuentas que
+          // tienen que dar igual.*
+          paddingBottom: spacing[8] + COLA_CARRITO_FLOTANTE,
           gap: spacing[5],
         }}
       >
@@ -1276,7 +1286,7 @@ export default function DespensaDescubrir() {
             </View>
           </>
         )}
-      </PantallaConPie>
+      </ScrollView>
 
       {/* ☠️ **S100b-D · MURIÓ LA BARRA FIJA «VER CARRITO (N)»** — es
           exactamente el *«botón de texto»* que G-14 nombra, y con la canasta
@@ -1293,6 +1303,15 @@ export default function DespensaDescubrir() {
           encabezado no colapsa al scrollear** (medido por B: 156.4 dp, no
           colapsa). *Si en el gate el acuse no se siente, el arreglo es dar
           señal al contador —no resucitar la barra.* */}
+
+      {/* 🔴 S100d-bis · EL CARRITO FLOTANTE, COMO OVERLAY — hermano del
+          scroll. Con `cuenta === 0` la pieza no se dibuja: **la puerta al
+          carrito aparece cuando hay algo del otro lado** (punto ⑫). */}
+      <CarritoFlotante
+        cuenta={unidades}
+        onAbrir={() => router.push('/despensa/carrito')}
+        etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+      />
 
       {/* 🔴 S100c-C · C-02 · LA HOJA DE FILTROS.
           Vive FUERA del `ScrollView` porque es una superficie sobre la

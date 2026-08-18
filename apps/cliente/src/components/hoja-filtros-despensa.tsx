@@ -240,26 +240,70 @@ export function HojaFiltrosDespensa({
     opciones: { codigo: string; etiqueta: string; icono: null }[],
     activo: string | null,
     set: (v: string | null) => void,
+    /**
+     * 🔴 S100d-bis · **CÓMO CAEN LOS CHIPS DE ESTE EJE — y NO es un gusto
+     * por sección: es una propiedad del EJE, medida.**
+     *
+     * **Segundo veredicto del founder:** *«no lo corrigió, los apiló.
+     * Mejoró pero no me termina de convencer»* — y lo específico:
+     * **CATEGORÍA, PARA QUÉ ANIMAL y PRECIO en scroll horizontal; “todo lo
+     * demás está perfecto”.** ⇒ Marca y Presentación envueltas quedaron
+     * **aprobadas**; los otros tres vuelven a la tira.
+     *
+     * **Y lo que separa a los tres de los otros dos está MEDIDO contra el
+     * catálogo (18-ago, 470 vendibles), no elegido por nombre:**
+     *
+     * | eje | techo | quién lo fija |
+     * |---|---|---|
+     * | Categoría | **4** | `etiquetaFamilia` — el catálogo tiene 8 códigos y **solo 4 tienen voz**; lo que no matchea no se pinta (Ley 3) |
+     * | Para qué animal | **6** | `etiquetaEspecie`, las seis especies de la casa |
+     * | Precio | **4** | `TRAMOS_PRECIO`, cortes fijos declarados |
+     * | **Marca** | **105** | el catálogo — **crece con cada carga** |
+     * | **Presentación** | **138** | el catálogo — ídem |
+     *
+     * ⇒ **los tres de la tira tienen TECHO CONOCIDO y lo fija el código;
+     * los dos que envuelven crecen con lo que se cargue.** Un eje de cuatro
+     * opciones envuelto gasta dos renglones para no esconder nada; uno de
+     * 105 en una tira esconde el 78 % (medido en la vuelta pasada). *La
+     * regla no es «tres sí y dos no»: es que un eje acotado entra en una
+     * fila y uno abierto no va a entrar nunca.*
+     *
+     * ⚠️ **Se pasa como argumento y no se deriva de `opciones.length`** a
+     * propósito: con la vitrina cargando 50 de 563, una marca puede
+     * aparecer con **dos** opciones en pantalla y seguir siendo un eje de
+     * 105. *Derivar la forma del recorte haría que el mismo filtro cambiara
+     * de anatomía entre dos búsquedas.*
+     */
+    disposicion: 'tira' | 'envuelve',
   ) {
     if (opciones.length < 2) return null;
     return (
       <View style={{ gap: spacing[2] }}>
-        <Texto variante="seccion">
-          {t('despensa.filtroEjeCon', { titulo, n: opciones.length })}
-        </Texto>
-        {/* ✅ `envuelve` — la otra mitad del punto ④, servida por B con la
-            medición de arriba adentro. **Mismos chips, misma pata, mismo
-            aire**: lo único que cambia es dónde caen. Con esto el eje
-            «Marca» pasa de mostrar 4 de 13 a mostrarlos todos, y **la
-            segunda mitad no medida —el pan de la `Hoja` compitiendo con el
-            arrastre horizontal— deja de poder ocurrir: sin gesto
-            horizontal no hay con qué competir.** */}
+        {/* ☠️ S100d-bis · **ACÁ VIVÍA «Categoría · 3», Y LO MATÓ EL FOUNDER
+            CON UNA PREGUNTA: *«que por cierto, no sé por qué pone el 3»*.**
+
+            **Medido, y el número le da la razón:** el `3` contaba las
+            opciones del eje — **y las tres estaban a la vista.** *Un
+            contador que anuncia lo que ya se ve no informa: pide que lo
+            descifren.* Lo mismo en los otros cuatro: con `envuelve` no hay
+            nada oculto que contar, y en la tira **el chip cortado ya es la
+            señal** de que hay más.
+
+            ⏪ **Nació como la mitad de MI cura del punto ④** —*«convertir un
+            truncado silencioso en uno declarado»*, la misma ley que la
+            vitrina cumple con «Mostramos 50 de 563»—. **La otra mitad
+            —`envuelve`, de B— resolvió el truncado de raíz, y con el
+            truncado desapareció lo que este número declaraba.** *Una
+            señal correcta sobre un problema que ya no existe se vuelve
+            ruido, y la mía duró exactamente una vuelta.* Ley 37: sale de
+            la UI, sale del código (y con ella su key). */}
+        <Texto variante="seccion">{titulo}</Texto>
         <FiltroPills
           opciones={opciones}
           activo={activo}
           onCambio={set}
           onLimpiar={() => set(null)}
-          disposicion="envuelve"
+          disposicion={disposicion}
         />
       </View>
     );
@@ -297,22 +341,45 @@ export function HojaFiltrosDespensa({
           />
         ) : null}
 
-        {seccion(t('despensa.filtroCategoria'), ejes.familias, filtros.familia, (v) =>
-          onCambio({ ...filtros, familia: v }),
+        {/* Los TRES de techo conocido van en tira (firma del founder, y su
+            razón medida en `seccion`); los DOS que crecen con el catálogo
+            envuelven. */}
+        {seccion(
+          t('despensa.filtroCategoria'),
+          ejes.familias,
+          filtros.familia,
+          (v) => onCambio({ ...filtros, familia: v }),
+          'tira',
         )}
         {ocultarEspecie
           ? null
-          : seccion(t('despensa.filtroEspecie'), ejes.especies, filtros.especie, (v) =>
-              onCambio({ ...filtros, especie: v }),
+          : seccion(
+              t('despensa.filtroEspecie'),
+              ejes.especies,
+              filtros.especie,
+              (v) => onCambio({ ...filtros, especie: v }),
+              'tira',
             )}
-        {seccion(t('despensa.filtroMarca'), ejes.marcas, filtros.marca, (v) =>
-          onCambio({ ...filtros, marca: v }),
+        {seccion(
+          t('despensa.filtroMarca'),
+          ejes.marcas,
+          filtros.marca,
+          (v) => onCambio({ ...filtros, marca: v }),
+          'envuelve',
         )}
-        {seccion(t('despensa.filtroPresentacion'), ejes.presentaciones, filtros.presentacion, (v) =>
-          onCambio({ ...filtros, presentacion: v }),
+        {seccion(
+          t('despensa.filtroPresentacion'),
+          ejes.presentaciones,
+          filtros.presentacion,
+          (v) => onCambio({ ...filtros, presentacion: v }),
+          'envuelve',
         )}
-        {seccion(t('despensa.filtroPrecio'), ejes.precios, filtros.precio, (v) =>
-          onCambio({ ...filtros, precio: v }),
+        {seccion(
+          t('despensa.filtroPrecio'),
+          ejes.precios,
+          filtros.precio,
+          (v) => onCambio({ ...filtros, precio: v }),
+          'tira',
         )}
       </View>
     </Hoja>

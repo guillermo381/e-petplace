@@ -104,7 +104,32 @@ export function LienzoProducto({
            en una app hace que cada superficie nueva vuelva a heredar el
            defecto* ⇒ B propone subirla a `packages/ui`; queda como deuda con
            dueño y disparo, no en esta vuelta (ver el parte). */
-        backgroundColor: fotoUrl === null ? theme.bg.overlay : theme.bg.card,
+        /* 🔴 S100d-bis · **LA CAJA DE LA IMAGEN SE QUEDA SIN FONDO CUANDO HAY
+           FOTO** (segundo veredicto del founder, punto ⑥). Medido antes:
+           esta caja pintaba **`rgb(255,255,255)`** —`bg.card`— detrás de la
+           foto, y con packshots de fondo transparente el rectángulo blanco
+           se lee como un marco que nadie puso.
+           **B curó `TarjetaProducto` con el MISMO criterio** (`bg.card` →
+           `transparent`) y me pasó el dato para que las dos cajas queden
+           iguales — *el defecto de H-115 sobrevivió porque esta pieza es su
+           propia implementación y la cura de la vitrina no viajó; que esta
+           vez viaje es coordinación, no copia.*
+
+           ⚠️ **EL FALLBACK CONSERVA SU CAMA, y no es inconsistencia:** sin
+           foto lo que se dibuja es un GLIFO, y un glifo suelto sobre el
+           fondo de la casa deja de leerse como «acá va una imagen» y pasa a
+           leerse como un adorno del texto. *La cama existe para decir que
+           hay un lugar vacío, no para separar una foto del fondo.*
+
+           🔴 **Y LA MITAD QUE ESTA LÍNEA NO PUEDE CURAR, declarada para que
+           no se lea como defecto de la pieza:** en buena parte del catálogo
+           **el blanco está QUEMADO EN LOS PÍXELES del JPEG** (dato de B).
+           Esas fotos van a seguir mostrando su rectángulo con el fondo en
+           `transparent`. **Es dato, y su cura es el estándar de imagen.**
+           ⛔ Y **no se maquilla**: poner un blanco general que «empareje»
+           es lo que el founder acaba de rechazar — *emparejaría hacia
+           abajo, poniéndole a los assets buenos el defecto de los malos.* */
+        backgroundColor: fotoUrl === null ? theme.bg.overlay : 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',

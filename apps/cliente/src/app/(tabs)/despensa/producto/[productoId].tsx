@@ -58,6 +58,7 @@ import {
   AvisoAlergia,
   Boton,
   CarritoFlotante,
+  COLA_CARRITO_FLOTANTE,
   /* ☠️ Ley 37 · S100d-C — entre `Boton` y `Chevron` vivía `Celda`, **sin un
      solo consumidor**: la tabla de presentaciones que la montaba murió en
      S96 y el import se quedó. No lo caza el typecheck (un import sin usar
@@ -75,6 +76,7 @@ import {
   SelectorOpcion,
   Separador,
   StepperCantidad,
+  Tarjeta,
   Texto,
   VisorFoto,
   radius,
@@ -182,6 +184,11 @@ function RotuloPlegable({
   abierta: boolean;
   onAlternar: () => void;
 }) {
+  /* ☠️ Acá vivía `useTheme()`, para pasarle el ocre al chevron. **Se va con
+     él**: mientras el color lo resuelva la pieza, esta anatomía no tiene
+     por qué conocer el tema. *Un hook que queda vivo «por si vuelve» es la
+     puerta por la que alguien re-teclea el color el día que se descongele
+     el pedido.* */
   const { handlers, estiloPresionado } = usePresionado(0.99);
   return (
     <Pressable
@@ -207,8 +214,50 @@ function RotuloPlegable({
       >
         <Texto variante="seccion">{titulo}</Texto>
         {/* E14 · la dirección codifica una verdad del contenido y por eso
-            se declara acá: `abajo` revela · `arriba` pliega. */}
-        <Chevron direccion={abierta ? 'arriba' : 'abajo'} />
+            se declara acá: `abajo` revela · `arriba` pliega.
+
+            🔴 S100d-bis · **OCRE Y MÁS GRUESA — firma del founder, y la LEY
+            SE ENSANCHÓ en vez de tallarme una excepción.**
+
+            Yo froné antes de montarla: **F-OCRE decía «ocre = ACCIÓN DE
+            COMPRA»** y esta flecha no compra, despliega prosa — era la misma
+            razón por la que descarté el «+». **A llegó al mismo borde el
+            mismo día por otro camino** (la gota que marca una ubicación y
+            tampoco compra), y B enmendó la letra: **N26 v2 — «OCRE: LO QUE
+            SE ACCIONA · MAGENTA: MARCA Y SELECCIÓN».** *La frontera pasó de
+            «¿compra o elige?» a «¿acciona o selecciona?»: comprar era un
+            caso de accionar, no la categoría.*
+
+            ⚠️ **Lo que esto NO movió: quién es la flecha.** E14 sigue
+            intacta —información DESPLIEGA, acción LLEVA— y el «+» sigue
+            descartado para plegar. **Cambió el color, no el portador.**
+
+            `enfasis="seccion"` = **2.75 de trazo** (el default de fila es 2),
+            y su porqué es el mismo número que me hizo frenar con
+            `CeldaNavegacion`: **el rótulo vecino es 20/Bold**, y un trazo de
+            2 al lado se lee como nota al pie de su propio título.
+
+            🔴 **EL OCRE ENTRA POR `tono`, Y LA HISTORIA DE CÓMO LLEGÓ ES
+            LA PARTE QUE VALE.** B me pasó el montaje como
+            `color={theme.accent.cta}` y **su propio lint lo rebotó** —
+            *Ley 21: `accent.cta` re-resuelto en apps, baseline 0*, porque
+            **el ocre lo resuelve la PIEZA por su slot**: si cada superficie
+            eligiera el suyo, el día que la casa cambie el CTA quedarían dos.
+
+            **Había tres salidas y dos eran trampa:** apagar la regla, subir
+            su baseline, o **pedir la pieza**. *Un lint que se apaga para
+            que pase un caso deja de vigilar los otros* — y la excusa
+            perfecta estaba servida: lo pedía quien escribió la regla.
+
+            ⇒ `tono="accion"` resuelve el ocre **adentro**. `color` sigue
+            existiendo en la pieza pero **no es la puerta del acento**: es
+            para una flecha sobre un muro o un canto, donde cambia el
+            contraste. *Acá no se pasa.* */}
+        <Chevron
+          direccion={abierta ? 'arriba' : 'abajo'}
+          enfasis="seccion"
+          tono="accion"
+        />
       </Animated.View>
     </Pressable>
   );
@@ -616,34 +665,18 @@ export default function DespensaProducto() {
         pie={
           conCta ? (
             <>
-              {/* 🔴 S100d-C · punto ⑫ · **EL FLOTANTE REEMPLAZA AL CTA DE
-                  «VER CARRITO», Y ESO ES LITERALMENTE LO QUE EL FOUNDER
-                  PIDIÓ.** Su literal: *«al agregar se abre un CTA de ver
-                  carrito, y debería abrir el carrito flotante»*. **El CTA
-                  que él vio es el que vivía acá abajo**, y muere: no se
-                  esconde, lo reemplaza una pieza que hace su trabajo mejor
-                  y en el lugar donde llega el pulgar.
-
-                  ⚖️ **POR QUÉ TAMBIÉN EN LA FICHA, y no solo en la vitrina.**
-                  N25 dice que el flotante es *«de la VITRINA (no del
-                  carrito/checkout/resumen)»* y **la ficha no es ninguno de
-                  esos**: es donde se agrega. Y el punto ⑫ **es de esta
-                  pantalla** — el CTA que el founder describe no existe en la
-                  vitrina. *Montarlo solo en la vitrina habría cumplido la
-                  letra de N25 y dejado el punto ⑫ sin curar, con la ficha
-                  sin una sola puerta al carrito después de agregar.*
-
-                  ⚠️ **VA ARRIBA DEL CTA, y el orden importa:** `PantallaConPie`
-                  apila su pie, así que el disco queda **sobre** el botón de
-                  agregar, alineado a la derecha por la propia pieza
-                  (`alignSelf`). *Se declara la composición porque es MÍA y no
-                  de la pieza: si el founder la quiere en otro lado, se mueve
-                  sin tocar `packages/ui`.* */}
-              <CarritoFlotante
-                cuenta={unidades}
-                onAbrir={() => router.push('/despensa/carrito')}
-                etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
-              />
+              {/* ⏪ S100d-bis · **EL FLOTANTE SE FUE DEL PIE, Y NO POR
+                  COMPOSICIÓN: PORQUE EL PIE ERA LA CAUSA DEL DEFECTO.**
+                  B lo midió con el founder mirando: la banda del pie es
+                  **opaca y de ancho completo**, así que el disco no
+                  flotaba — *ocupaba una franja que tapaba el contenido*.
+                  El blanco de la tarjeta terminaba en **619,4 dp** y la
+                  banda arrancaba en **619,0**: lo que B y yo leímos como
+                  «stepper cortado» era la banda encima.
+                  ⇒ ahora es **overlay hermano del scroll**, abajo de este
+                  bloque. *La instrucción de montarlo como `pie` fue de B y
+                  la corrigió B; lo que a mí me toca es que el montaje
+                  cambió de lugar, no de intención.* */}
               {faltaParaAgregar !== null ? (
                 <Texto variante="apoyo">{faltaParaAgregar}</Texto>
               ) : null}
@@ -671,9 +704,14 @@ export default function DespensaProducto() {
         }
         contentContainerStyle={{
           paddingTop: spacing[4],
-          // Solo el aire del final de MI contenido: la reserva del pie la
+          // Solo el aire del final de MI contenido: la reserva del PIE la
           // suma la pieza. Acá vivía `+ 96`.
-          paddingBottom: spacing[8],
+          // 🔴 S100d-bis · **el disco flotante NO es el pie**, así que su
+          // alto no lo reserva nadie: lo suma acá con la constante que la
+          // propia pieza exporta. *Un número tecleado que tenga que
+          // coincidir con el tamaño de un disco de otro paquete es la
+          // clase de deuda que `PantallaConPie` vino a matar.*
+          paddingBottom: spacing[8] + COLA_CARRITO_FLOTANTE,
           gap: spacing[5],
         }}
       >
@@ -793,12 +831,91 @@ export default function DespensaProducto() {
                 se conserva — la variante existe y no se puede comprar. */}
             {comprables.length > 1 ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
+                {/* ═══════════════════════════════════════════════════════
+                    🔴 S100d-bis · **EL CHIP ELEGIDO DEJA DE SER VERDE Y PASA
+                    A MAGENTA — Y LA CURA ERA UNA PROP QUE ESTA PANTALLA
+                    NUNCA DECLARÓ.**
+                    ═══════════════════════════════════════════════════════
+
+                    **Segundo veredicto del founder:** el chip de
+                    presentación *«marca en verde y debe ser magenta»*, con
+                    el principio nuevo: **magenta = marca y SELECCIÓN · ocre
+                    = ACCIÓN.** Un chip elegido es selección.
+
+                    🔴 **DE DÓNDE SALÍA EL VERDE, medido en la pieza y no
+                    supuesto:** `SelectorOpcion` resuelve su acento por el
+                    prop `acento`, y **esta pantalla no lo pasaba** ⇒ caía al
+                    default `'capa'`, que resuelve a `capaText.identidad` /
+                    `capaBg.identidad` — **el verdeVital**. *No era un color
+                    tecleado ni un estado heredado de otra pieza: era un
+                    DEFAULT que nadie declaró.*
+
+                    **Y no es una cura improvisada: es la migración que la
+                    propia pieza tenía escrita.** Su JSDoc dice, desde S58:
+                    *«'capa' (default, verdeVital) MUERE como color de
+                    control — las pantallas construidas migran AL PASO de la
+                    pasada; el default se retira cuando la última migre»*.
+                    ⇒ **esta es esa migración**, y por eso la cura va acá y
+                    no en `packages/ui`: *el default sigue siendo legal
+                    mientras quede una pantalla sin migrar, y arreglarlo en
+                    la pieza rompería a las que todavía lo esperan.*
+
+                    ⚠️ **Lo que `'control'` resuelve, por casa y sin un hex
+                    escrito acá:** cliente → `accent.control` (magentaDark
+                    en claro, violetText en oscuro) · memorial → tinta (*no
+                    celebra*). **Y de paso deja de haber dos vocabularios de
+                    selección en la misma pantalla:** los chips de la hoja
+                    de filtros ya marcaban con `accent.control` desde
+                    S83-B17. *La app decía «elegido» de dos colores
+                    distintos a dos toques de distancia.* */}
                 <SelectorOpcion
                   etiqueta={t('despensa.presentaciones')}
                   disposicion="tira"
+                  acento="control"
                   opciones={comprables.map((v) => ({
                     codigo: v.variante_id,
-                    etiqueta: v.presentacion,
+                    /**
+                     * 🔴 S100d-bis · **CUANDO DOS PRESENTACIONES SE LLAMAN
+                     * IGUAL, EL PRECIO LAS DISTINGUE — Y ESTO NO INVENTA UNA
+                     * DIFERENCIA: DEJA DE ESCONDER UNA QUE EXISTE.**
+                     *
+                     * **Lo encontró MIRAR una captura, no medir.** Corrí
+                     * cuatro varas sobre esta ficha y las cuatro dieron
+                     * verde mientras «Adulto Cordero y Arroz» dibujaba
+                     * **dos chips que decían “12.7 kg”** — uno a **$57,19**
+                     * y otro a **$94,50**. *La familia veía dos botones
+                     * idénticos y uno costaba 65 % más.*
+                     *
+                     * **Medido contra la base viva (18-ago): 6 de 470
+                     * productos** tienen la misma presentación en DOS
+                     * variantes distintas. Poco, y el que cae adentro no
+                     * tiene forma de elegir.
+                     *
+                     * ⚖️ **Por qué se cura acá y no en la pieza** (medido con
+                     * B): `SelectorOpcion` recibe `etiqueta` y la dibuja —
+                     * **no sabe que hay otra igual**. *Una pieza no puede
+                     * desambiguar lo que no ve; el que ve el conjunto es
+                     * quien arma la lista.*
+                     *
+                     * ⚠️ **SOLO cuando repite**, y ése es el límite que lo
+                     * vuelve legal: en los 464 productos sanos el chip sigue
+                     * diciendo «2.5 kg» y nada más. *Poner el precio en
+                     * todos sería ruido —el precio ya vive abajo, grande, y
+                     * cambia al elegir—; ponerlo donde el rótulo no alcanza
+                     * es honestidad.*
+                     *
+                     * 🔴 **Y NO ES LA CURA DEL DATO, que sigue abierto con su
+                     * número:** hay **25 variantes con más de una oferta
+                     * publicada** contra la firma *«una oferta por
+                     * producto»* de `MODELO_DESPENSA`. **Eso es motor y
+                     * catálogo, no pantalla** — servido a A. *Esta línea
+                     * hace que el defecto del dato se VEA en vez de
+                     * disfrazarse de dos botones iguales.*
+                     */
+                    etiqueta:
+                      comprables.filter((o) => o.presentacion === v.presentacion).length > 1
+                        ? `${v.presentacion} · $ ${v.precio.toFixed(2)}`
+                        : v.presentacion,
                   }))}
                   seleccionada={varianteId ?? undefined}
                   onSelect={setVarianteId}
@@ -1042,7 +1159,50 @@ export default function DespensaProducto() {
               }
 
               return (
-                <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                /* ═══════════════════════════════════════════════════════
+                   🔴 S100d-bis · **LA COMPOSICIÓN GANA SU CAJÓN BLANCO —
+                   N21 EN SU CASO LITERAL.**
+                   ═══════════════════════════════════════════════════════
+
+                   **Literal del founder:** *«no dejarla sobre fondo»*.
+                   Y es exactamente lo que N21 dice: **un grupo de datos con
+                   rótulo propio va EN CARTA; lo que ES la pantalla
+                   (encabezado, pie, CTA) no.** Esta sección tiene rótulo,
+                   tiene contenido plegable y tiene su advertencia: **es un
+                   grupo, no la pantalla.**
+
+                   ⏪ **Y en la vuelta pasada NO la puse, con una razón que
+                   ya venció:** dije que **QF-01 (el fondo) estaba abierta y
+                   fuera del alcance** por orden del founder (*«ese es un
+                   cambio más de fondo; por ahora solo agregá los más»*), y
+                   que agregar una carta sería atacar QF-01 de costado.
+                   **El segundo veredicto la pidió explícitamente**, así que
+                   la razón se cae por firma. *No estaba equivocada: estaba
+                   esperando esta decisión.*
+
+                   **LO QUE CUESTA, MEDIDO ANTES DE PONERLA (RN-web,
+                   384×832):** el bloque cerrado medía **72 dp** sobre fondo
+                   transparente, sin sombra y sin radio. La carta suma
+                   `relleno="amplio"` = **16 arriba y 16 abajo = 32 dp** ⇒
+                   **~104 dp cerrada.** La ficha del producto más largo
+                   estaba en 562 dp sobre ~630 útiles, así que **entra**,
+                   con menos aire. *Se declara el costo en vez de
+                   descubrirlo en el gate.*
+
+                   ⚠️ **`elevacion="reposo"` y no una sombra más fuerte:** la
+                   carta acá separa del fondo, **no celebra**. Y el
+                   `paddingHorizontal` de la sección se va: **el que separa
+                   del borde ahora es el relleno de la carta** — dos aires
+                   apilados serían el mismo error que curé en el punto ③.
+
+                   🔴 **LO QUE NO CAMBIA, Y ES LO QUE MÁS IMPORTA:** la
+                   advertencia de alérgeno **sigue FUERA del plegado**,
+                   dentro de la carta y visible con la sección cerrada
+                   (`MODELO_DESPENSA` §6/§10 · N22). *La carta cambió la
+                   superficie, no qué se esconde.* */
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <Tarjeta elevacion="reposo" relleno="amplio">
+                    <View style={{ gap: spacing[2] }}>
                   {/* ⚖️ **EL RÓTULO NO LLEVA CUENTA, Y ES UNA RENUNCIA
                       DELIBERADA.** Poner *«25 ingredientes»* al lado
                       ayudaría a decidir si vale abrirlo —es el trabajo que
@@ -1073,6 +1233,8 @@ export default function DespensaProducto() {
                       </Texto>
                     </>
                   ) : null}
+                    </View>
+                  </Tarjeta>
                 </View>
               );
             })()}
@@ -1152,18 +1314,39 @@ export default function DespensaProducto() {
                 }}
               >
                 <Texto variante="cuerpo">{t('despensa.cantidad')}</Texto>
+                {/* 🔴 S100d-bis · `registro="compra"` — el ocre ADENTRO de la
+                    ficha. Literal del founder sobre el estado anterior:
+                    *«afuera en ocre, adentro en magenta»* = **está mal**.
+                    N26 v2 lo ordena sin ambigüedad: **sumar unidades es
+                    ACCIONAR**, y el stepper de la ficha hace el mismo
+                    trabajo que el de la tarjeta. *El mismo gesto no puede
+                    tener dos colores según en qué pantalla se toca.* */}
                 <StepperCantidad
                   valor={cantidad}
                   min={1}
                   max={99}
                   onCambio={setCantidad}
                   etiqueta={t('despensa.cantidad')}
+                  registro="compra"
                 />
               </View>
             ) : null}
           </>
         )}
       </PantallaConPie>
+
+      {/* 🔴 S100d-bis · **EL CARRITO FLOTANTE, COMO OVERLAY** — hermano del
+          scroll y no su pie (ver el comentario del pie). `PantallaConPie`
+          ya reserva el alto de SU pie; **la cola de este disco la pone la
+          pantalla** con `COLA_CARRITO_FLOTANTE`, que la pieza exporta
+          derivada de su propio tamaño. *Sin ella el disco se sienta encima
+          del último bloque de la ficha — que es el defecto que acabamos de
+          curar, reintroducido por el otro lado.* */}
+      <CarritoFlotante
+        cuenta={unidades}
+        onAbrir={() => router.push('/despensa/carrito')}
+        etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+      />
 
       <VisorFoto
         visible={visor !== null}
