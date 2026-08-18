@@ -264,6 +264,23 @@ export default function DespensaEnCamino() {
               boxShadow: theme.elevacion.elevada,
             }}
           >
+            {/* ⚠️ **RIESGO ABIERTO, DECLARADO Y NO COMPENSADO A OJO** (H-112,
+                medido por A sobre la fuente): `insets.bottom` **no es** el
+                alto de la barra de tabs. `BarraTabs` dibuja `ALTO_FILA (85) +
+                insets.bottom`, y toda pantalla de tab reserva `insets.bottom +
+                spacing[8] (32)` ⇒ **los insets se cancelan y falta una
+                constante de 53 dp**, en cualquier teléfono.
+
+                Si esa premisa es cierta, el pie de esta hoja queda 53 dp bajo
+                la barra y lo tapado sería **el código de la puerta**. *No lo
+                compenso sumando 53 acá*: sería otra vez **dos números que
+                deben coincidir saliendo de dos cuentas distintas**, que es
+                exactamente el defecto que `PantallaConPie` acaba de desarmar
+                derivando. A pidió a B un `useAltoBarraTabs()` derivado del
+                mismo `ALTO_FILA` que la barra pinta; **esta hoja es su tercer
+                consumidor** y migra cuando exista.
+                ⚠️ Y la premisa **no está medida en aparato**: A llegó al 53
+                por aritmética sobre la fuente y lo declaró así. */}
             <ScrollView
               contentContainerStyle={{
                 paddingHorizontal: spacing[5],
