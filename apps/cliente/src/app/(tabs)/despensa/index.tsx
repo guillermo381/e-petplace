@@ -600,6 +600,31 @@ export default function DespensaDescubrir() {
         variante="portada"
         saludo={t('despensa.titulo')}
         isotipo="gradiente"
+        /* 🔴 S100b-D · EL BUSCADOR SUBE A LA FILA DEL ENCABEZADO — y es el
+           slot que B entregó justo antes de cerrar, con la medición de C
+           adentro: **apilado debajo costaba 76 dp para una caja de texto de
+           26**, y en la referencia (Laika) **el buscador y el carrito viven
+           en la MISMA fila que el logo**.
+           Con `busqueda` el encabezado deja de apilar: `[isotipo]
+           [buscador] [carrito]`. **El título no se apaga: deja de gastar
+           píxeles** —sigue anunciándose al lector en un nodo sin alto—,
+           que es el patrón ya firmado en `Campo.etiquetaVisible`.
+           ⚠️ **El alto que esto libera es de la VITRINA, o sea de C (G-04):
+           una pantalla que no mostraba un solo producto.** Se monta desde
+           acá porque el encabezado es «Despensa de arriba» y es mío, con C
+           parada por orden de mesa — *una pieza entregada y sin consumidor
+           muere sin que nadie se entere.* Si C repiensa la composición,
+           esto se mueve; lo que no vuelve es el apilado. */
+        busqueda={
+          <Campo
+            label={t('despensa.buscarLabel')}
+            etiquetaVisible={false}
+            value={busqueda}
+            onChangeText={setBusqueda}
+            placeholder={t('despensa.buscarPlaceholder')}
+            autoCapitalize="none"
+          />
+        }
         accionDer={
           <Pressable
             onPress={() => router.push('/despensa/carrito')}
@@ -709,16 +734,8 @@ export default function DespensaDescubrir() {
               <Separador />
             </View>
 
-            {/* ⓪bis · EL BUSCADOR (S96 — §5.1) */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Campo
-                label={t('despensa.buscarLabel')}
-                value={busqueda}
-                onChangeText={setBusqueda}
-                placeholder={t('despensa.buscarPlaceholder')}
-                autoCapitalize="none"
-              />
-            </View>
+            {/* ⏪ ⓪bis · EL BUSCADOR SE FUE A LA FILA DEL ENCABEZADO
+                (ver su comentario arriba). Acá costaba 76 dp apilado. */}
 
             {/* ① · EL CRITERIO — la firma (S95-I, sin cambios) */}
             {mascota !== null && !buscando ? (
