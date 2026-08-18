@@ -14,7 +14,7 @@
 // **`revision_riesgo` no sale porque decirle a alguien que está bajo sospecha
 // de fraude es maltrato.**
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 // El punto del track es EL MISMO objeto que escribe el repartidor: se importa
 // su tipo en vez de re-declararlo. Dos declaraciones de la misma forma son dos
@@ -25,6 +25,7 @@ import type { PuntoTrackEnvio } from './despensa-repartidor';
 import { fotosDeProducto } from './despensa-catalogo';
 import {
   falloDespensa,
+  falloDespensaCodigo,
   esObjDespensa,
   esNarrativa,
   type CodigoErrorDespensa,
@@ -220,17 +221,60 @@ function mapearPedido(f: unknown): PedidoEnLista | null {
 }
 
 /**
- * Mis pedidos. La RLS de `pedidos` (`user_id = auth.uid() OR
- * es_vendedor_de(...) OR is_admin()`) es la que decide qué se ve — este
- * wrapper no filtra por dueño, porque un filtro en el cliente sobre datos que
- * el server ya entregó no protege nada.
+ * Mis pedidos.
+ *
+ * 🔴 S100d · ACÁ HABÍA UNA FUGA VIVA ENTRE PERSONAS, Y LA CABECERA VIEJA ERA
+ * LA QUE LA SOSTENÍA. Decía:
+ *
+ *   > *«este wrapper no filtra por dueño, porque un filtro en el cliente sobre
+ *   > datos que el server ya entregó no protege nada»*
+ *
+ * **El principio es correcto y la premisa era falsa.** Un filtro de cliente no
+ * protege **cuando el server filtra**; acá el server **no filtraba**:
+ * `v_pedidos_narrativa` es una vista **sin `security_invoker`**, así que corre
+ * con los privilegios de su dueño (`postgres`) y **la RLS de `pedidos` no se
+ * evalúa nunca**. ⇒ no había filtro en el server *ni* en el cliente: no había
+ * filtro en ningún lado.
+ *
+ * **Medido en el aparato por la pista D, 18-ago-2026** — y solo el aparato
+ * podía encontrarlo:
+ *
+ *     v_pedidos_narrativa en vuelo, TODOS los usuarios  → 13
+ *     mismo conteo, solo el user del founder            → 12
+ *
+ * *La base decía 12 y el teléfono decía 13. **El defecto vivía exactamente en
+ * la diferencia entre las dos preguntas**, y ninguna medición contra la base lo
+ * habría encontrado, porque medía «los del founder».* En la pantalla salían,
+ * bajo «Tus pedidos», pedidos de **tres cuentas ajenas** — una de ellas de una
+ * persona real, no una cuenta de prueba.
+ *
+ * ⚠️ EL DETALLE **NO** SE FUGABA: `obtenerDetallePedido` pide la cabecera de
+ * `pedidos`, que sí tiene RLS, y rebota. *La tabla se defiende; la vista no.*
+ *
+ * ── POR QUÉ EL FILTRO IGUAL, Y NO SOLO LA CURA DE RAÍZ ────────────────────
+ * La cura de raíz es `security_invoker` en la vista, y va aparte porque **puede
+ * cambiar lo que la vista le devuelve a sus otros consumidores** y eso pide
+ * firma. Este filtro es barato, reversible y no le puede romper nada a nadie.
+ * **Y las dos hacen falta:** con solo la vista, cualquier consumidor nuevo que
+ * nazca antes de la firma hereda la fuga; con solo este filtro, la vista sigue
+ * abierta para el próximo que la consuma.
+ *
+ * ⚠️ Y ESTE FILTRO NO ES LA DEFENSA — es un tapón. La defensa es la RLS. *Si
+ * alguien lee esta línea como «ya está protegido» y por eso no firma la vista,
+ * el tapón se convirtió en el problema.*
  */
 export async function listarMisPedidos(
   limite = 30,
 ): Promise<ResultadoWrapper<PedidoEnLista[], CodigoErrorDespensa>> {
+  const uid = await uidActual();
+  // Sin sesión no se devuelve «vacío»: se dice. Un `[]` acá sería L-218 —
+  // «no tenés pedidos» y «no sé quién sos» son dos cosas distintas.
+  if (uid === null) return falloDespensaCodigo('auth_requerido');
+
   const { data, error } = await getClient()
     .from('v_pedidos_narrativa')
     .select('*')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false })
     .limit(limite);
 
