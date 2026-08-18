@@ -46,7 +46,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -110,7 +109,6 @@ const FILTROS_VITRINA = { limite: 50 } as const;
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const insets = useSafeAreaInsets();
   const carrito = useCarrito();
   // La puerta desde la mascota (§5.1): su perfil llega con el eje puesto.
   const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
@@ -672,7 +670,16 @@ export default function DespensaDescubrir() {
           // Sin barra fija abajo, la reserva es solo el aire del final
           // del contenido: el `+ 72` estimaba el alto de un pie que ya no
           // existe (la clase que `PantallaConPie` vino a volver inexpresable).
-          paddingBottom: insets.bottom + spacing[8],
+          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+          // B midió que **el navegador ya acota**: el `ScrollView` de una
+          // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
+          // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
+          // lo cuenta DOS VECES. `spacing[8]` es el aire de cola; el inset
+          // era la cara «sobra» del malentendido de los 53 dp.
+          // *Yo lo había defendido como «aire de cola» y C tenía razón: era
+          // una línea vieja, no una posición.* Se unifica en las tres
+          // pantallas — dos reglas para lo mismo divergen.
+          paddingBottom: spacing[8],
           gap: spacing[5],
         }}
       >
