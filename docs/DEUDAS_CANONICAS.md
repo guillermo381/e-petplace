@@ -11711,6 +11711,30 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+### Lecciones S100d (L-306 → L-307) — depositadas por B el 18-ago-2026
+
+- **L-306 — UNA HERRAMIENTA QUE «NO ESTÁ» SE MIDE IGUAL QUE UN DATO QUE «NO ESTÁ» (S100d).**
+
+  **Tres sesiones seguidas declararon, con todas las letras, que *«en este entorno NO HAY RASTERIZADOR DE SVG (ni `cairosvg`, ni `rsvg-convert`, ni Inkscape)»*** y por eso **cinco glifos quedaron sin su gate de 21 px** (§2.9) — `carrito`, `papelera`, `pedido`, y en esta vuelta `filtro` y la gota. La frase viajó de handoff en handoff como un hecho del entorno.
+
+  **Es falsa.** `qlmanage -t -s 1400 -o <dir> <archivo>.svg` —**el QuickLook de macOS, que está en toda máquina de esta casa**— rasteriza SVG y produjo la lámina en un comando. **El gate corrió el mismo día en que se volvió a declarar imposible.**
+
+  > **La causa NO fue pereza: fue que el negativo se buscó en una sola familia.** Se preguntó *«¿está instalado alguno de LOS TRES que conozco?»* y la respuesta —correcta— se reportó como *«no hay rasterizador»*. **Es exactamente L-305 aplicada a una herramienta en vez de a un dato:** el cero no decía *«no se puede»*, decía ***«no busqué fuera de mi lista»***.
+
+  ⇒ **antes de declarar que una VERIFICACIÓN no se puede correr, se declara qué se buscó** — y una capacidad del sistema operativo entra en la búsqueda igual que un paquete. *Un freno bien declarado es oro; un freno declarado sobre una lista incompleta congela un gate por sesiones enteras.*
+
+  ⚠️ **Y su daño medido, para que se vea el tamaño:** con el rasterizador a mano, **la lámina mostró que la huella adentro del carrito y de la gota es un borrón a 12 px y ruido a 21** — o sea que **la evidencia que decidía N27 estaba a un comando de distancia todo el tiempo**, y la decisión venía sosteniéndose solo en el ojo del founder.
+
+- **L-307 — CUANDO UNA CURA NO CONVENCE DOS VECES, LO QUE HAY QUE REVISAR NO ES EL NÚMERO: ES QUÉ SUJETO NOMBRÓ LA LEY (S100d).**
+
+  El founder reportó *«al agregar salta un escalón»*. **N24 lo leyó como «el contenedor crece» y reservó el hueco.** La tarjeta dejó de crecer ✅ **y el founder volvió a reportar exactamente lo mismo** — *«sigue saltando el escalón»* —, porque lo que saltaba era **el CONTROL, cambiando de renglón**: el `+` vivía en la fila del precio y el stepper aparecía un piso más abajo.
+
+  > **La ley era correcta y la medición era correcta. El sujeto estaba mal.** *Se curó el síntoma que la ley nombraba, no el que la persona veía* — y por eso la segunda cura tampoco funcionó: **estaba mejor ejecutada sobre la misma lectura equivocada.**
+
+  ⚠️ **Y la cura equivocada tenía un costo escondido que la queja no menciona:** la reserva se pagaba en **el 100 % de las tarjetas** y la usaba una minoría. *Una cura que no resuelve suele además cobrar; la segunda parte no se ve porque todos están mirando si resolvió.*
+
+  ⇒ **a la segunda queja idéntica se para de calibrar y se re-lee el literal buscando el SUJETO** — qué cosa, exactamente, está haciendo lo que molesta. **Hermana directa de L-283** (*a la segunda o tercera calibración fallida se pregunta si la FORMA admite el efecto*): allá el sujeto era la anatomía, acá es de quién habla la ley.
+
 ### Lecciones S100c (L-296 → L-305) — depositadas por B el 18-ago-2026, con aparato
 
 - **L-305 — UN NEGATIVO SALIDO DE UNA BÚSQUEDA RESTRINGIDA NO ES UN NEGATIVO (S100c — hallazgo de D sobre su propio error, depositado por B con su nombre; 18-ago-2026).**
