@@ -1335,7 +1335,10 @@ export const clienteEn = {
     aDonde: 'Where we deliver',
     sinDireccion: "You haven't told us your address yet.",
     agregarDireccion: 'Add my address',
-    cambiarDireccion: 'Change address',
+    // ☠️ S100b-A · G-11 — ver la nota en `es.ts`.
+    quienRecibe: 'Who receives it',
+    listoDatos: 'Done',
+    telefonoAyuda: "It's the number the courier calls if they can't find the house.",
     receptorLabel: 'Who receives it',
     telefonoLabel: 'Contact phone',
     instruccionesLabel: 'Delivery instructions',
@@ -1394,6 +1397,8 @@ export const clienteEn = {
     recurrenciaSinPasarela:
       'Automatic charging turns on once the payment method exists. Until then, nothing is charged.',
     recurrenciaCada: 'How often?',
+    recurrenciaElegiCada: 'Pick how often you want it and it’s all set.',
+    recurrenciaQueEs: 'What “Let it arrive on its own” means',
     recurrenciaDias: 'Every {{n}} days',
     recurrenciaLista: "Done: it's set up. You manage it from Your orders.",
     recurrenciaActiva: 'The recurring purchase is set up.',

@@ -1549,9 +1549,16 @@ export const clienteEs = {
     aDonde: 'A dónde te lo llevamos',
     sinDireccion: 'Todavía no nos contaste tu dirección.',
     agregarDireccion: 'Agregar mi dirección',
-    cambiarDireccion: 'Cambiar la dirección',
+    // ☠️ S100b-A · G-11: murió `cambiarDireccion`. La dirección dejó de tener
+    // un botón propio — la línea con chevron ES el control (referencia Laika).
+    quienRecibe: 'Quién recibe',
+    listoDatos: 'Listo',
     receptorLabel: 'Quién recibe',
     telefonoLabel: 'Teléfono de contacto',
+    // El benchmark lo vuelve barato y obligatorio: 49 % de los sitios NO
+    // explica por qué pide el teléfono, y más del 70 % de los encuestados es
+    // reticente a darlo. Decir para qué es, al lado del campo, cuesta nada.
+    telefonoAyuda: 'Es el número al que llama el repartidor si no encuentra la casa.',
     instruccionesLabel: 'Instrucciones de entrega',
     instruccionesAyuda:
       'Lo que el repartidor tiene que saber: "dejar en portería", "entregar a Carla". Si no hay nadie, esta instrucción decide.',
@@ -1617,6 +1624,10 @@ export const clienteEs = {
     recurrenciaSinPasarela:
       'El cobro automático se activa cuando esté el medio de pago. Hasta entonces, nada se cobra.',
     recurrenciaCada: '¿Cada cuánto?',
+    // S100b-A · G-13: la voz del hueco. El interruptor dice la intención; la
+    // cadencia la cierra, y mientras falta la pantalla lo DICE.
+    recurrenciaElegiCada: 'Elegí cada cuánto querés que llegue y queda configurado.',
+    recurrenciaQueEs: 'Qué es «Que llegue solo»',
     recurrenciaDias: 'Cada {{n}} días',
     recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
