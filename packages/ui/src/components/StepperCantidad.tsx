@@ -39,6 +39,44 @@ import { useTheme } from '../ThemeProvider'
 
 const BOTON = 44 // target táctil directo
 
+/* 🔴 LA VARIANTE COMPACTA — nace de un defecto MEDIDO, no de una necesidad
+   estética (S100b-B).
+
+   **G-01 del gate: «el `+` pone 1, aparece el `−`, y no hay camino a 2».**
+   La lógica del stepper estaba SANA. La causa era geométrica:
+
+       caja interna de la tarjeta de vitrina …… 138 dp
+       este stepper (44·2 + 12·2 + 32) ………… 144 dp
+                                              ───────
+                                              FALTAN 6 dp
+
+   …y la tarjeta lleva `overflow: 'hidden'`, así que **el `+` —el elemento
+   más a la derecha— quedaba recortado fuera del layout.** Medido en el
+   aparato: en la tarjeta el contenedor quedaba en **74 dp**, `Menos`
+   presente y **`Más` AUSENTE DEL ÁRBOL**. En el carrito, donde la fila es
+   ancha, la misma pieza da **144.0 dp con los dos botones**. *La app se
+   provee a sí misma el experimento de control.*
+
+   ── POR QUÉ NO SE ACHICA EL BLANCO TÁCTIL ──────────────────────────
+   **N8 es ley firmada: blancos de 44, y ningún consumidor la re-decide.**
+   Achicar el botón a 36 y quedarse ahí habría curado el recorte rompiendo
+   una ley para tapar un síntoma.
+
+   ⇒ **Lo que se achica es el PÍXEL, no el TARGET:** 36 visuales + `hitSlop`
+   4 = **44 de blanco efectivo**. *No es una excepción a N8: es la forma en
+   que N8 se cumple cuando el espacio no alcanza* — y el precedente ya vivía
+   tres líneas más arriba en la casa, en el timbre `+` de `TarjetaProducto`
+   (36 visuales + `hitSlop` 8 = 52).
+
+   **El gap NO baja de 8 a propósito:** con `hitSlop` 4 por lado, dos
+   botones separados 8 dp tienen sus áreas táctiles *tocándose y no
+   solapadas*. Bajar el gap las solaparía y el toque se volvería ambiguo
+   —un stepper que a veces resta cuando quisiste sumar es peor que uno
+   apretado—. *El número no es «lo que entra»: es el mínimo que mantiene
+   los dos targets separados.* */
+const BOTON_COMPACTO = 36
+const HOLGURA_COMPACTA = (BOTON - BOTON_COMPACTO) / 2 // 4 ⇒ 36 + 4·2 = 44
+
 export interface StepperCantidadProps {
   valor: number
   min: number
@@ -48,6 +86,18 @@ export interface StepperCantidadProps {
   etiqueta: string
   /** Ley 22 por registro: 'control' (cliente, default) · 'oficio' (prestador). */
   registro?: 'control' | 'oficio'
+  /**
+   * Para contenedores angostos — hoy, la tarjeta de vitrina (ver la nota de
+   * `BOTON_COMPACTO`). **116 dp en vez de 144**, con el blanco de 44
+   * intacto vía `hitSlop`.
+   *
+   * ⚠️ **No es «el stepper chico»: es el mismo stepper en una caja que no
+   * da para 144.** Si la caja da, se usa el normal — *una variante que se
+   * elige por gusto deja de ser una respuesta a una restricción y pasa a
+   * ser un segundo estilo, que es lo que N11 prohíbe para los campos y vale
+   * igual acá.*
+   */
+  compacto?: boolean
 }
 
 function BotonPaso({
@@ -56,12 +106,14 @@ function BotonPaso({
   color,
   onPress,
   etiqueta,
+  compacto,
 }: {
   signo: 'menos' | 'mas'
   habilitado: boolean
   color: string
   onPress: () => void
   etiqueta: string
+  compacto: boolean
 }) {
   const { theme } = useTheme()
   const [presionado, setPresionado] = useState(false)
@@ -77,11 +129,14 @@ function BotonPaso({
         if (habilitado) setPresionado(true)
       }}
       onPressOut={() => setPresionado(false)}
+      // El blanco de 44 se conserva SIEMPRE: en compacto lo completa el
+      // hitSlop, porque lo que se achica es el píxel y no el target (N8).
+      hitSlop={compacto ? HOLGURA_COMPACTA : 0}
     >
       <Animated.View
         style={{
-          width: BOTON,
-          height: BOTON,
+          width: compacto ? BOTON_COMPACTO : BOTON,
+          height: compacto ? BOTON_COMPACTO : BOTON,
           borderRadius: radius.suave,
           backgroundColor: theme.bg.hundido,
           alignItems: 'center',
@@ -101,7 +156,7 @@ function BotonPaso({
   )
 }
 
-export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control' }: StepperCantidadProps) {
+export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', compacto = false }: StepperCantidadProps) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
 
@@ -132,7 +187,7 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         if (e.nativeEvent.actionName === 'decrement') irA(v - 1)
       }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: compacto ? spacing[2] : spacing[3] }}
     >
       <BotonPaso
         signo="menos"
@@ -141,10 +196,11 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         color={v > min ? acento : theme.text.tertiary}
         onPress={() => irA(v - 1)}
         etiqueta="Menos"
+        compacto={compacto}
       />
       <Text
         style={{
-          minWidth: spacing[8],
+          minWidth: compacto ? spacing[7] : spacing[8],
           textAlign: 'center',
           // dato de máquina: mono tabular (Ley 3)
           fontFamily: typography.family.mono.regular,
@@ -162,6 +218,7 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         color={v < max ? acento : theme.text.tertiary}
         onPress={() => irA(v + 1)}
         etiqueta="Más"
+        compacto={compacto}
       />
     </View>
   )

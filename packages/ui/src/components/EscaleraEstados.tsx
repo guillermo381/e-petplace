@@ -119,7 +119,10 @@ export type PasoEscalera = {
    *  exactamente lo que la pieza hacía antes. *Así C y D adoptan de a una
    *  pantalla en vez de tener que dibujar siete glifos para estrenar la
    *  forma nueva.* */
-  icono?: (estado: { color: string; lleno: boolean }) => ReactNode
+  /** ⚠️ **`tamano` lo pasa LA PIEZA, derivado del nodo** (ver `NODO`): el
+   *  consumidor lo recibe y no lo inventa. *Si el nodo crece y el glifo se
+   *  queda, el defecto sale en la pantalla y no en ningún gate.* */
+  icono?: (estado: { color: string; lleno: boolean; tamano: number }) => ReactNode
 }
 
 export type DesvioEscalera = {
@@ -172,10 +175,39 @@ export type EscaleraEstadosProps = {
 const RIEL = 24 // ancho de la columna del conector — el de LineaDeVida
 const PUNTO = 10 // diámetro del nodo — el de LineaDeVida
 const BARRA = 3 // alto del CONECTOR entre nodos (antes: la barra suelta)
-/** El nodo de la tira. 20 sostiene un glifo de 12 adentro y deja la fila
- *  por debajo del blanco de 44 —la escalera INFORMA, no se toca—, así
- *  que no compite con ningún target. */
-const NODO = 20
+/* 🔴 EL NODO CRECE DE 20 A 32 — G-15, firma del founder sobre el gate de
+   S100: *«la escalera mejoró mucho, pero el círculo de cada nodo con su
+   glifo tiene que ser MÁS GRANDE»*.
+
+   ⏪ **Lo que decía antes, y por qué su razón sigue viva a medias:** *«20
+   sostiene un glifo de 12 y deja la fila por debajo del blanco de 44 —la
+   escalera INFORMA, no se toca—, así que no compite con ningún target»*.
+   **Esa restricción NO se deroga: 32 sigue por debajo de 44**, así que el
+   nodo sigue sin leerse como tocable. *Lo que estaba mal no era el techo:
+   era haberse quedado pegado al piso.*
+
+   **De dónde sale el 32, porque no se eligió: se derivó.** Con el glifo
+   en 12 el nodo estaba **por debajo del tamaño al que la propia casa
+   gatea la legibilidad de un glifo** —§2.9: *todo ícono se gatea a su
+   tamaño de diseño Y a 21px*—. Un glifo de 12 nunca pasó ese gate porque
+   nunca se lo corrió a ese tamaño. **32 = `spacing[8]`, y su glifo
+   derivado da 24, que es el default de `Icono` y está por encima del 21.**
+
+   🔴 **Y EL PAR QUE SE DESARMA DE PASO, que vale más que el número:** el
+   glifo entra por SLOT, así que su tamaño lo elegía **el consumidor** —
+   hoy, un 12 tecleado en `apps/`. **Dos números que tienen que guardar
+   relación, viviendo en dos archivos: eso se separa solo.** Agrandar el
+   nodo sin tocar el slot habría dejado un glifo de 12 perdido en un
+   círculo de 32, y el defecto habría aparecido en la pantalla y no en
+   ningún gate.
+   ⇒ **La pieza pasa el `tamano` al slot, DERIVADO del nodo.** El
+   consumidor lo recibe; no lo inventa. *Un par que debe coincidir y sale
+   de dos cuentas distintas es una bomba con temporizador; derivarlo la
+   desarma* (L-284). */
+const NODO = 32
+/** El glifo, DERIVADO del nodo — nunca tecleado aparte. El 8 es el aire
+ *  que el nodo ya tenía (20 − 12), conservado al crecer. */
+const GLIFO_EN_NODO = NODO - 8
 
 export function EscaleraEstados({
   pasos,
@@ -289,7 +321,7 @@ export function EscaleraEstados({
                     borderColor: theme.bg.border,
                   }}
                 >
-                  {paso.icono?.({ color: lleno ? theme.bg.base : theme.text.tertiary, lleno })}
+                  {paso.icono?.({ color: lleno ? theme.bg.base : theme.text.tertiary, lleno, tamano: GLIFO_EN_NODO })}
                 </View>
                 {i < pasos.length - 1 ? (
                   <View

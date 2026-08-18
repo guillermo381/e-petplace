@@ -61,6 +61,9 @@ export { Separador } from './components/Separador'
 export { Texto, type TextoProps, type TextoVariante, type TextoColor } from './components/Texto'
 export { FilaDato, type FilaDatoProps } from './components/FilaDato'
 export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
+// El pie fijo que RESERVA SU PROPIO LUGAR — la cura de las cinco pantallas
+// donde el pie se pintaba encima del contenido (S100b-B).
+export { PantallaConPie, type PantallaConPieProps } from './components/PantallaConPie'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // Destape — S97+-B: la ceremonia de cierre del wizard de alta (pedido de C,
 // contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
