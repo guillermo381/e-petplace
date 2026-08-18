@@ -79,6 +79,16 @@ const BOTON = 44 // target táctil directo
 const BOTON_COMPACTO = 36
 const HOLGURA_COMPACTA = (BOTON - BOTON_COMPACTO) / 2 // 4 ⇒ 36 + 4·2 = 44
 
+/** EL ALTO DEL STEPPER COMPACTO — exportado para que quien RESERVE su lugar
+ *  lo DERIVE en vez de teclear un número (N24, S100c-B).
+ *
+ *  Su consumidor es `TarjetaProducto`: reserva este alto SIEMPRE para que la
+ *  tarjeta no crezca al agregar. *Si el stepper cambia de alto, la reserva lo
+ *  sigue sola* — que es la diferencia entre derivar y emparejar a mano
+ *  (L-284: un par que debe coincidir y sale de dos lugares es una bomba con
+ *  temporizador). */
+export const ALTO_STEPPER_COMPACTO = BOTON_COMPACTO
+
 export interface StepperCantidadProps {
   valor: number
   min: number
