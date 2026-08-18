@@ -38,7 +38,6 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -51,6 +50,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
+  Insignia,
   SelectorOpcion,
   Separador,
   Texto,
@@ -72,7 +72,7 @@ import {
 } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
-import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
@@ -84,7 +84,6 @@ export default function DespensaPedido() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
-  const insets = useSafeAreaInsets();
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
@@ -216,7 +215,16 @@ export default function DespensaPedido() {
       <ScrollView
         contentContainerStyle={{
           paddingTop: spacing[4],
-          paddingBottom: insets.bottom + spacing[8],
+          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+          // B midió que **el navegador ya acota**: el `ScrollView` de una
+          // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
+          // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
+          // lo cuenta DOS VECES. `spacing[8]` es el aire de cola; el inset
+          // era la cara «sobra» del malentendido de los 53 dp.
+          // *Yo lo había defendido como «aire de cola» y C tenía razón: era
+          // una línea vieja, no una posición.* Se unifica en las tres
+          // pantallas — dos reglas para lo mismo divergen.
+          paddingBottom: spacing[8],
           gap: spacing[5],
         }}
       >
@@ -326,11 +334,34 @@ export default function DespensaPedido() {
                         hasta: horaLocal(detalle.pedido.promesa_hasta),
                       })
                     : undefined;
-                const { pasos, desvio } = escaleraDePedido(
+                const escalera = escaleraDePedido(
                   detalle.pedido.narrativa,
                   voces,
                   detalleActual,
                 );
+                const { pasos, desvio } = escalera;
+                // 🔴 S100b-D · EL DETALLE TAMBIÉN QUEDABA MUDO, y era la
+                // MISMA causa que en la lista (ver `escaleraMuda`). Con
+                // `pagando` la pieza no dibuja —su regla de existencia es
+                // correcta— así que la zona 1, que es *el lugar donde el
+                // dueño busca en qué anda su pedido*, no renderizaba nada.
+                // El hallazgo llegó por la lista; **la segunda superficie
+                // solo aparece midiendo las dos**, y por eso el criterio
+                // vive en una función y no en un `if` por pantalla.
+                if (escaleraMuda(escalera)) {
+                  return (
+                    <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+                      {/* LA MISMA FORMA QUE EN LA LISTA, y a propósito: quien
+                          vio la insignia en su fila encuentra **la misma
+                          figura** al abrir. *Dos formas distintas para el
+                          mismo hecho le piden al dueño que las relacione.*
+                          El nombre del estado sale del CATÁLOGO —dato, no un
+                          `switch`— y la voz que lo explica, del riel. */}
+                      <Insignia estado="info" etiqueta={detalle.pedido.narrativa_nombre} />
+                      <Texto variante="apoyo">{t('despensa.estadoSinRecorrido')}</Texto>
+                    </View>
+                  );
+                }
                 return (
                   <EscaleraEstados
                     pasos={conIconos(pasos)}
