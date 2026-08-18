@@ -11711,6 +11711,20 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+### Lecciones S100c (L-296 → L-305) — depositadas por B el 18-ago-2026, con aparato
+
+- **L-305 — UN NEGATIVO SALIDO DE UNA BÚSQUEDA RESTRINGIDA NO ES UN NEGATIVO (S100c — hallazgo de D sobre su propio error, depositado por B con su nombre; 18-ago-2026).**
+
+  D reportó que **`L-296`…`L-301` no existían en ninguna rama pusheada**, con el comando pegado. B lo midió y **estaban en `origin/main` y en `origin/pista-b`**. La primera explicación —*un fetch viejo*— era la amable. **D revisó qué había corrido de verdad y encontró la otra:** para el canon grepeó **su propio worktree** y no `origin/main`; y para las ramas **filtró por `docs/loop/`**, *donde una lección nunca podía estar.* ⇒ **su búsqueda no podía encontrar lo que buscaba**, y su cero no decía *«no existe»*: decía ***«no busqué ahí»***.
+
+  > **Un POSITIVO sobrevive a un filtro mal puesto** — lo que encontraste, encontraste. **Un NEGATIVO no sobrevive a nada:** su valor entero depende de que el alcance fuera el correcto, y el alcance es justo lo que no se ve en el resultado.
+
+  ⚠️ **Y lo que lo volvió creíble es lo que más engaña: viajó con el comando pegado.** *Pegar el comando prueba que corriste algo, no que corriste lo correcto.* **Un `grep -c` que devuelve 0 y un `grep -c` sobre la carpeta equivocada son indistinguibles en el reporte.**
+
+  ⇒ **todo negativo declara SU ALCANCE, no solo su comando**: qué ref, qué rutas, qué patrón — *y quien lo recibe verifica el alcance antes que el número.* **Su daño real estaba a un paso:** D había pasado ese «L-295» a A como insumo para depositar; **si A hubiera numerado desde ahí, seis lecciones nacían duplicadas.**
+
+  **Hermana de L-302** (*ante dos mediciones que no cierran, buscá el objeto que ya resuelve el caso*) y **cara complementaria de la ley de la mesa del mismo día:** *un número citado en un chat no es un número reservado — **y tampoco lo es un número NEGADO en un chat.***
+
 ### Lecciones S100c (L-296 → L-304) — depositadas por B el 18-ago-2026, con aparato
 
 > ⚠️ **NOTA DE NUMERACIÓN, y es un error de la mesa:** circuló que *«el canon llega a L-295 y L-296…L-301 no existen en ninguna rama pusheada»*. **Es falso, medido contra el objeto:** `origin/main` tiene los siete encabezados **L-295 → L-301**, y **L-301 entró en el commit `160d51de`**. El grep que lo negó corrió contra un fetch viejo. **Los números de abajo se tomaron midiendo `origin/main` en el momento de escribir, no de ese aviso** — que es exactamente la ley que el aviso pedía aplicar. ***Un número citado en un chat no es un número reservado; y tampoco lo es un número NEGADO en un chat.***
