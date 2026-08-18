@@ -1227,9 +1227,9 @@ nadie la miró — exactamente el modo de falla que la enmienda nombra.*
 
 ---
 
-## 12. S91 — TRES PIEZAS DE CRAFT QUE NACIERON EN LA VITRINA
+## §12 · S91 — TRES PIEZAS DE CRAFT QUE NACIERON EN LA VITRINA
 
-### 12.1 EL CARRUSEL A SANGRE, Y POR QUÉ 4:3 NO ES UN NÚMERO SINO UNA FORMA
+### §12.1 EL CARRUSEL A SANGRE, Y POR QUÉ 4:3 NO ES UN NÚMERO SINO UNA FORMA
 
 `FichaPrestador` tenía la portada con **ALTO FIJO**, y ese es el defecto:
 **un alto fijo no tiene relación** — la misma foto se ve distinta en cada
@@ -1242,7 +1242,7 @@ foto** — recién ahí una guía de encuadre para el prestador puede ser honest
 *Escribirla antes habría sido aspiracional* (es la precondición literal de
 **D-696**).
 
-### 12.2 EL CHIP DE ENTIDAD: DOS EJES QUE NUNCA DEBIERON ESTAR ATADOS
+### §12.2 EL CHIP DE ENTIDAD: DOS EJES QUE NUNCA DEBIERON ESTAR ATADOS
 
 `ChipEntidad` resolvía `conHuella = sujeto === 'mascota'` — o sea que **un
 sujeto que no fuera mascota IGNORABA la foto por completo**, y la combinación
@@ -1260,7 +1260,7 @@ usarlo**. Con el ensanche deja de hacer falta esquivarlo.
 *Regla que deja: cuando una pieza obliga a mentir una prop para lograr una
 combinación legítima, el defecto es de la pieza.*
 
-### 12.3 LA ESCALERA DE LA PORTADA — cuatro peldaños, ninguno vacío
+### §12.3 LA ESCALERA DE LA PORTADA — cuatro peldaños, ninguno vacío
 
 **① imagen de portada → ② poster del video → ③ logo CENTRADO → ④ monograma.**
 
@@ -1281,7 +1281,7 @@ solo al contenido.
 
 ---
 
-## 13. EL NORTE DE DISEÑO (firma del founder, 13-ago-2026 — depósito VERBATIM)
+## §13 · EL NORTE DE DISEÑO (firma del founder, 13-ago-2026 — depósito VERBATIM)
 
 > **Estatuto:** FIRMADA. Depositada por S97-A el 14-ago-2026, **verbatim**.
 > Es la vara transversal contra la que **cada pista se auto-gatea**, con
@@ -1545,7 +1545,7 @@ cambio de estado · celebración. **Nada más se mueve.**
 
 ---
 
-### 13.1 🔴 CHOQUE DECLARADO CONTRA LETRA FIRMADA — N6 y el escalón 45
+### §13.1 🔴 CHOQUE DECLARADO CONTRA LETRA FIRMADA — N6 y el escalón 45
 
 **No se resuelve acá. Se declara, que es lo que la casa exige** (precedente
 S63: *el choque SE DECLARA, jamás se difiere callado*).

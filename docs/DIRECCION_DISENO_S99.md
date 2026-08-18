@@ -88,9 +88,15 @@ frena antes de que se escriba.**
 
 ## N11 · EL CAMPO DE ESCRITURA
 
+> ⚠️ **ENMENDADA POR N11′ (firma del founder, 17-ago-2026 — gate de S100).**
+> La cláusula de la etiqueta adentro está **DEROGADA**; todo lo demás de N11
+> sigue vigente. **La enmienda vive abajo, en esta misma sección** — no en un
+> parte de pista. *La letra vieja se tacha y no se borra.*
+
 **El interior del campo es lo más claro de su región.** Interior claro y
 vacío · **contorno visible ≥3:1** contra el fondo · **caja cerrada** (jamás
-subrayado suelto) · **etiqueta adentro de los límites de la caja** · radios
+subrayado suelto) · ~~**etiqueta adentro de los límites de la caja**~~
+**⇒ DEROGADO por N11′: la etiqueta va AFUERA Y ARRIBA** · radios
 de la escala N4.
 
 **☠️ El relleno gris sólido muere:** se lee como deshabilitado, tiene señal
@@ -101,6 +107,67 @@ existe, por eso no se rellena.
 **Dos estilos de campo jamás conviven en la misma región de una pantalla.**
 Estados: foco con presencia (borde en acento + elevación sutil) · error con
 voz (N12.4) · deshabilitado ahora sí distinguible del vacío.
+
+### N11′ · LA ETIQUETA SALE DE LA CAJA — enmienda firmada, 17-ago-2026
+
+> **POR QUÉ ESTÁ ACÁ Y NO EN UN PARTE:** esta firma vivió su primer día en
+> `docs/loop/S100-B.md` y en una lámina. Un parte de pista es justo lo que
+> las otras pistas no leen — y esa bitácora la declaraba «DEPOSITADA
+> VERBATIM», así que se la podía dar por depositada **en la letra** sin
+> estarlo. **UNA FIRMA QUE VIVE EN UN PARTE NO ESTÁ FIRMADA.** Es el mismo
+> defecto que G-16 cerró el mismo día en `LETRA_RECORRIDO_DESPENSA_S96`
+> §6.2: *una decisión que no queda escrita en la letra se vuelve a
+> proponer.* Texto copiado **VERBATIM** de su fuente, sin re-redactar.
+
+> · **ENMIENDA N11′** (una ley firmada se reabre con EVIDENCIA, jamás con
+> preferencia — esta se reabrió y se sostuvo): **LA ETIQUETA VA AFUERA Y
+> ARRIBA DEL CAMPO, SIEMPRE VISIBLE Y SIEMPRE DEL MISMO TAMAÑO.**
+> Razón: la etiqueta adentro tiene que encogerse para dejar entrar el
+> valor, y pierde legibilidad justo cuando el campo está lleno — que es
+> cuando la persona revisa antes de pagar. En español pesa el doble
+> («Instrucciones de entrega» encogida es nota al pie), y el autofill del
+> sistema tapa el interior de la caja.
+> **LO QUE N11 PROTEGÍA Y SIGUE VIGENTE:** nada de subrayado suelto —
+> caja cerrada, contorno ≥3:1, interior claro (el relleno gris sólido
+> sigue muerto), foco con acento + elevación sutil, radios N4.
+> **LOS NÚMEROS QUE EVITAN QUE LA ETIQUETA SE DESPEGUE** (el riesgo real
+> de sacarla afuera):
+> · etiqueta a **6-8px de SU campo** · **≥24px entre un campo y el
+>   siguiente**. La etiqueta tiene que estar inequívocamente más cerca de
+>   su caja que de la de arriba. Si esa proporción se rompe, la ley se
+>   rompió.
+> · la etiqueta **jamás cambia de tamaño ni de color** por foco o por
+>   contenido.
+> · **EL PLACEHOLDER DEJA DE REPETIR LA ETIQUETA Y PASA A SER UN EJEMPLO
+>   DEL FORMATO**: bajo «Teléfono de contacto» va «+593 99 123 4567», no
+>   «Teléfono». Repetir la etiqueta adentro es desperdiciar el único lugar
+>   donde se puede enseñar el formato sin hablar.
+> · el **error va DEBAJO del campo, jamás reemplaza a la etiqueta** (N12.4
+>   sigue mandando: qué está mal y cómo se arregla, con ejemplo real).
+> **EXENCIÓN:** el campo de **BÚSQUEDA no lleva etiqueta** — lupa +
+> placeholder, que es el patrón universal. Poner «Buscar» arriba de una
+> lupa es decir dos veces lo mismo.
+> **COSTO ACEPTADO:** afuera cuesta altura. Se compensa con **MENOS CAMPOS
+> POR PANTALLA**, jamás encogiendo.
+
+**Su alcance, medido en S100-B (no estimado):** **123 `<Campo>` vivos**
+(98 prestador · 25 cliente) + **19 `<CampoFecha>`** + 15 en galería. **No
+hay migración por pantalla que amortigüe: cambiar la pieza ES la
+migración** — cero `TextInput` crudo en las apps (censado en S99). La
+enmienda se ejecutó en las tres piezas de campo con una sola definición
+(`EtiquetaDeCampo`, hermana simétrica de `PieDeCampo`), **para que no
+puedan divergir**.
+
+**Y el hallazgo que la orienta:** `CampoCodigo` **ya cumplía N11′** desde
+siempre, con su razón escrita como *excepción* (*«una caja de UN dígito no
+tiene lugar para un rótulo»*). ***La excepción de ayer es la norma de
+hoy*** — N11′ no le pide que cambie: le da la razón. *Cuando una enmienda
+hace que una excepción vieja deje de ser excepción, la enmienda está bien
+orientada.*
+
+**Fuentes de este depósito** (se leen si hace falta el contexto de
+ejecución, jamás para re-derivar la ley): `docs/loop/S100-B.md` §«LA
+ENMIENDA N11′» · `docs/laminas/2026-08-17-s100b-LAS-SEIS-RECETAS-DE-FORMA.md`.
 
 ## N12 · EL FORMULARIO PREMIUM
 
