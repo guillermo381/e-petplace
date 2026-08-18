@@ -1239,6 +1239,22 @@ export const clienteEn = {
     familiaSuplemento: 'Supplements',
     familiaDieta: 'Prescription diet',
 
+    // S100c-C · C-02 — the two chip strips become ONE control with a sheet.
+    filtrar: 'Filter',
+    filtrarCon: 'Filter · {{n}}',
+    filtrosTitulo: 'Filter',
+    filtrosVer: 'See {{n}} products',
+    filtrosLimpiar: 'Clear {{n}} filters',
+    filtroCategoria: 'Category',
+    filtroEspecie: 'For which animal',
+    filtroMarca: 'Brand',
+    filtroPresentacion: 'Size',
+    filtroPrecio: 'Price',
+    precio_hasta10: 'Up to $10',
+    precio_de10a25: '$10 to $25',
+    precio_de25a50: '$25 to $50',
+    precio_mas50: 'Over $50',
+
     // S99-D · §8.6ter — the seller who doesn't have it: shown AND said.
     // Speaks about the present and promises nothing (§4.4 bans "temporarily").
     filaSinStock: "It's not available right now.",
