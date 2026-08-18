@@ -369,6 +369,61 @@ if ((await tarjeta.count()) === 0) {
   }
 }
 
+// ── ⑤ C-05 · EL NOMBRE EN LA TARJETA ────────────────────────────────────
+/**
+ * El founder: *«el nombre del producto queda muy alargado; evaluar tamaño
+ * de letra»*, y en la misma frase *«en general se ve bien»* ⇒ **es
+ * afinamiento, no rojo, y se mide con esa temperatura.**
+ *
+ * ⚠️ **La cura NO es mía: el nombre lo pinta `TarjetaProducto`
+ * (`packages/ui`) sobre la caja de `nombreCurado`.** Esto existe para
+ * entregarle a B un NÚMERO en vez de una impresión.
+ */
+console.log('\n── ⑤ C-05 · EL NOMBRE EN LA TARJETA ──');
+await page.goto(`${BASE}/despensa`, { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(9000);
+await scroller();
+const nombres = await page.evaluate(() => {
+  const sc = document.querySelector('[data-medicion-scroller]');
+  if (sc === null) return [];
+  const tarjetas = [...sc.querySelectorAll('[role="button"][aria-label]')].filter((e) => {
+    const r = e.getBoundingClientRect();
+    return r.width > 100 && r.width < 230 && r.height > 120;
+  });
+  return tarjetas.slice(0, 12).map((tj) => {
+    const r = tj.getBoundingClientRect();
+    // El bloque del nombre: el texto más alto que NO es el precio.
+    const textos = [...tj.querySelectorAll('div')]
+      .filter((d) => d.children.length === 0 && (d.textContent ?? '').trim().length > 0)
+      .map((d) => {
+        const rr = d.getBoundingClientRect();
+        const cs = getComputedStyle(d);
+        return {
+          texto: (d.textContent ?? '').trim(),
+          alto: Math.round(rr.height),
+          fuente: Math.round(parseFloat(cs.fontSize)),
+          linea: Math.round(parseFloat(cs.lineHeight) || 0),
+        };
+      })
+      .filter((x) => !/^\$/.test(x.texto));
+    const nombre = textos.sort((a, b) => b.texto.length - a.texto.length)[0];
+    return { altoTarjeta: Math.round(r.height), nombre };
+  });
+});
+const conNombre = nombres.filter((x) => x.nombre !== undefined);
+if (conNombre.length === 0) console.log('  ⚠ no se pudo aislar el bloque del nombre — se declara.');
+else {
+  const lineas = (x) => (x.nombre.linea > 0 ? Math.round(x.nombre.alto / x.nombre.linea) : 0);
+  for (const x of conNombre)
+    console.log(
+      `    ${String(x.nombre.texto.length).padStart(3)} car · ${String(x.nombre.alto).padStart(3)} dp · ${lineas(x)} línea(s) · fuente ${x.nombre.fuente}/${x.nombre.linea} · «${x.nombre.texto.slice(0, 34)}»`,
+    );
+  const maxL = Math.max(...conNombre.map(lineas));
+  const conDos = conNombre.filter((x) => lineas(x) >= 2).length;
+  console.log(`  🔴 tarjetas cuyo nombre ocupa 2+ líneas: ${conDos} de ${conNombre.length} · máximo ${maxL} líneas`);
+  console.log(`     fuente/interlínea del nombre: ${conNombre[0].nombre.fuente}/${conNombre[0].nombre.linea} dp — el dato que B necesita`);
+}
+
 console.log(`\nerrores de página: ${errores.length}`);
 for (const e of errores.slice(0, 4)) console.log(`  ✗ ${e.slice(0, 140)}`);
 await browser.close();

@@ -63,6 +63,7 @@ import {
   EstadoVacio,
   nombreCurado,
   PantallaConPie,
+  PieRevelar,
   PrecioText,
   SelectorOpcion,
   Separador,
@@ -96,6 +97,14 @@ import { useTraduccion } from '@/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
 
+/** 🔴 C-04 · cuántos ingredientes quedan a la vista sin revelar.
+ *  **6, y el número sale de la medición, no del gusto:** de los 202
+ *  productos con ingredientes, **38 tienen 6 o menos** (esos no dibujan
+ *  control) y **164 tienen más** (esos lo dibujan). La mediana es 12. Con
+ *  un corte más alto el control casi no aparecería; con uno más bajo
+ *  ocultaría lo poco que muchos productos declaran. */
+const INGREDIENTES_A_LA_VISTA = 6;
+
 export default function DespensaProducto() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -121,6 +130,9 @@ export default function DespensaProducto() {
   const [registrando, setRegistrando] = useState(false);
   const [visor, setVisor] = useState<number | null>(null);
   const [reintento, setReintento] = useState(0);
+  /** 🔴 S100c-C · C-04 — la lista de ingredientes, plegada. Ver el bloque
+   *  de la composición para el porqué y sus dos números. */
+  const [composicionAbierta, setComposicionAbierta] = useState(false);
 
   const idMascota =
     typeof mascotaId === 'string' && mascotaId.trim().length > 0 ? mascotaId : null;
@@ -706,9 +718,59 @@ export default function DespensaProducto() {
                 <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
               ) : (
                 <>
+                  {/* 🔴 S100c-C · C-04 · LA LISTA DE INGREDIENTES SE PLIEGA.
+                      El gate: *«en las imágenes de Laika tenían un más para
+                      los descriptores adicionales; acá no los veo, están
+                      todos hacia abajo»*.
+
+                      🔴 **LO MEDIDO CONTRA LA BASE VIVA (18-ago) PARTE EL
+                      HALLAZGO EN DOS, Y UNA MITAD NO SE CONSTRUYE:**
+
+                      · `descripcion` — **promedio 10 caracteres, máximo 29**
+                        (y 6 productos sin ella). *Mi predecesora ya lo había
+                        medido y el número sigue siendo ése.* **No se pliega
+                        NADA ahí: un acordeón sobre diez caracteres es un
+                        control que promete contenido que no existe.**
+                      · `ingredientes_activos` — **202 de 470 la tienen, con
+                        11 ingredientes de promedio y hasta 26; el texto
+                        promedia 194 caracteres y llega a 517, y 163 de 470
+                        pasan de 120.** *Ésta sí es la prosa que el founder
+                        vio plegada en Laika*, y en pantalla midió **120 dp
+                        de una sola tirada.**
+
+                      **Se usa `PieRevelar`, que es la pieza que la casa ya
+                      tiene para esto** (19.6 · «revelar el resto de una
+                      sección») — cero componente nuevo, Ley 11. Y encaja
+                      mejor que un acordeón de texto: `n` es **cuántos
+                      ingredientes quedan**, un número real y verificable, no
+                      un «ver más» mudo.
+
+                      ⚠️ **CON 6 O MENOS NO SE DIBUJA EL CONTROL** (38 de los
+                      202 productos): se muestran todos y listo. *Un control
+                      que revela nada es peor que el texto que ahorra.* */}
                   {ficha.ingredientes_activos.length > 0 ? (
-                    <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                    <>
+                      <Texto variante="cuerpo">
+                        {(composicionAbierta
+                          ? ficha.ingredientes_activos
+                          : ficha.ingredientes_activos.slice(0, INGREDIENTES_A_LA_VISTA)
+                        ).join(', ')}
+                      </Texto>
+                      <PieRevelar
+                        n={ficha.ingredientes_activos.length - INGREDIENTES_A_LA_VISTA}
+                        revelado={composicionAbierta}
+                        onPress={() => setComposicionAbierta((v) => !v)}
+                      />
+                    </>
                   ) : null}
+                  {/* 🔴 LA ADVERTENCIA DE ALÉRGENO **JAMÁS SE PLIEGA** —
+                      queda FUERA del revelado a propósito, y no es una
+                      decisión de esta pantalla: `MODELO_DESPENSA` §6/§10
+                      (*plegar una advertencia de salud la convierte en nota
+                      al pie*) y el límite explícito de N22 (*la «i» es para
+                      explicar, nunca para esconder un riesgo*).
+                      Por eso el plegado envuelve SOLO la lista de arriba y
+                      esta línea es su hermana, no su hija. */}
                   {ficha.alergenos.length > 0 ? (
                     <Texto variante="apoyo">
                       {t('despensa.composicionAlergenos', {
