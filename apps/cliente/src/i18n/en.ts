@@ -1453,6 +1453,9 @@ export const clienteEn = {
     enCaminoVentana: 'Arrives between',
     enCaminoVentanaDetalle: "It's a window, not an exact time.",
     enCaminoQuienTrae: 'Who’s bringing it',
+    // S100c-D — the draggable sheet, and the honest photo gap.
+    enCaminoHojaVerMas: 'See the order details',
+    repartidorSinFoto: 'We’re not showing their photo yet',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',

@@ -1694,6 +1694,14 @@ export const clienteEs = {
     enCaminoVentana: 'Llega entre',
     enCaminoVentanaDetalle: 'Es una ventana, no una hora exacta.',
     enCaminoQuienTrae: 'Quién lo trae',
+    // S100c-D · la hoja arrastrable. La voz del asa dice QUÉ hace, no cómo
+    // se hace (nadie necesita que le expliquen que se arrastra: se agarra).
+    enCaminoHojaVerMas: 'Ver los detalles del pedido',
+    // 🔴 El hueco de la foto se NOMBRA para el lector de pantalla en vez de
+    // quedar mudo: un círculo vacío sin voz es un elemento que no existe
+    // para quien no ve, y acá el hueco es información (la ficha está
+    // incompleta A PROPÓSITO, con su deuda firmada).
+    repartidorSinFoto: 'Todavía no mostramos su foto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',
