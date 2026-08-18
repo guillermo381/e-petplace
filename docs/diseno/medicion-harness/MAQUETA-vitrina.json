@@ -1,0 +1,596 @@
+{
+  "url": "http://localhost:8099/tienda-demo.html",
+  "titulo": "Maqueta de verificación — geometría conocida",
+  "viewport": {
+    "w": 390,
+    "h": 664
+  },
+  "scrollY": 0,
+  "superficie": "vitrina",
+  "deteccion": {
+    "metodo": "auto",
+    "firma": "DIV|176"
+  },
+  "densidad": {
+    "viewport": {
+      "w": 390,
+      "h": 664
+    },
+    "productos_visibles_primera_pantalla": 4,
+    "productos_completos_primera_pantalla": 2,
+    "alto_cromo_antes_del_primer_producto_px": 200,
+    "cromo_como_porcentaje_de_pantalla": 30.1,
+    "total_tarjetas_en_dom": 8
+  },
+  "tarjetas": [
+    {
+      "tarjeta": {
+        "x": 14,
+        "y": 200,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 14,
+        "y": 200,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 14,
+        "y": 376,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 14,
+        "y": 418,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 140,
+        "y": 430,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Alimento para perro adulto raza mediana 2kg",
+        "precio": "$8.00",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 200,
+        "y": 200,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 200,
+        "y": 200,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 200,
+        "y": 376,
+        "w": 176,
+        "h": 60,
+        "area": 10560
+      },
+      "precio": {
+        "x": 200,
+        "y": 436,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 326,
+        "y": 430,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Arena sanitaria aglomerante para gato 4kg",
+        "precio": "$10.35",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 14,
+        "y": 490,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 14,
+        "y": 490,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 14,
+        "y": 666,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 14,
+        "y": 708,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 140,
+        "y": 720,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Collar antipulgas para perro talla M",
+        "precio": "$12.70",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 200,
+        "y": 490,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 200,
+        "y": 490,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 200,
+        "y": 666,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 200,
+        "y": 708,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 326,
+        "y": 720,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Snack dental para perro pequeño 100g",
+        "precio": "$15.05",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 14,
+        "y": 780,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 14,
+        "y": 780,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 14,
+        "y": 956,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 14,
+        "y": 998,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 140,
+        "y": 1010,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Shampoo hipoalergénico para gato 250ml",
+        "precio": "$17.40",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 200,
+        "y": 780,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 200,
+        "y": 780,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 200,
+        "y": 956,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 200,
+        "y": 998,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 326,
+        "y": 1010,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Comedero doble de acero inoxidable",
+        "precio": "$19.75",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 14,
+        "y": 1070,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 14,
+        "y": 1070,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 14,
+        "y": 1246,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 14,
+        "y": 1288,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 140,
+        "y": 1300,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Juguete mordedor de caucho natural",
+        "precio": "$22.10",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    },
+    {
+      "tarjeta": {
+        "x": 200,
+        "y": 1070,
+        "w": 176,
+        "h": 280,
+        "area": 49280
+      },
+      "imagen": {
+        "x": 200,
+        "y": 1070,
+        "w": 176,
+        "h": 176,
+        "area": 30976
+      },
+      "nombre": {
+        "x": 200,
+        "y": 1246,
+        "w": 176,
+        "h": 42,
+        "area": 7392
+      },
+      "precio": {
+        "x": 200,
+        "y": 1288,
+        "w": 176,
+        "h": 24,
+        "area": 4224
+      },
+      "control": {
+        "x": 326,
+        "y": 1300,
+        "w": 44,
+        "h": 44,
+        "area": 1936
+      },
+      "texto": {
+        "nombre": "Cama acolchada lavable talla L",
+        "precio": "$24.45",
+        "control": "Agregar al carrito"
+      },
+      "tipografia": {
+        "nombre": {
+          "px": 14,
+          "peso": "400",
+          "color": "rgb(17, 17, 17)",
+          "transform": "none"
+        },
+        "precio": {
+          "px": 18,
+          "peso": "700",
+          "color": "rgb(0, 0, 0)",
+          "transform": "none"
+        }
+      },
+      "proporciones": {
+        "imagen_sobre_tarjeta": 0.629,
+        "control_sobre_tarjeta": 0.039,
+        "precio_sobre_nombre_fontsize": 1.286,
+        "control_sobre_imagen_area": 0.063,
+        "alto_imagen_sobre_alto_tarjeta": 0.629
+      },
+      "area_tactil_control": {
+        "w": 44,
+        "h": 44,
+        "cumple_48": false,
+        "cumple_44": true
+      }
+    }
+  ],
+  "meta": {
+    "referente": "MAQUETA",
+    "superficie": "vitrina",
+    "dispositivo": "iPhone 13",
+    "captura": "salida/capturas/MAQUETA-vitrina.png",
+    "medido_en": "2026-08-18T01:30:21.262Z"
+  },
+  "resumen": {
+    "n_tarjetas_medidas": 8,
+    "mediana_imagen_sobre_tarjeta": 0.629,
+    "mediana_alto_imagen_sobre_alto_tarjeta": 0.629,
+    "mediana_control_sobre_tarjeta": 0.039,
+    "mediana_precio_sobre_nombre_fontsize": 1.286,
+    "mediana_control_sobre_imagen_area": 0.063,
+    "controles_que_cumplen_48dp": 0,
+    "controles_medidos": 8
+  }
+}

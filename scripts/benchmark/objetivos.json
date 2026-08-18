@@ -1,0 +1,155 @@
+{
+  "_comentario": "Editá las URLs si cambian. pausa:true = el navegador se abre visible, acomodás la pantalla (login, dirección, pedido en curso) y apretás ENTER. Las superficies 'seguimiento' requieren un pedido REAL en el estado correcto: Amazon solo muestra mapa a <=10 paradas y MELI solo en reparto. Si no coincide la ventana, dejá la celda vacía — no la completes de memoria.",
+  "objetivos": [
+    {
+      "nombre": "chewy",
+      "superficie": "vitrina",
+      "url": "https://www.chewy.com/b/dog-food-386",
+      "pausa": false
+    },
+    {
+      "nombre": "chewy",
+      "superficie": "ficha",
+      "url": "https://www.chewy.com/b/dog-food-386",
+      "pausa": true
+    },
+    {
+      "nombre": "chewy",
+      "superficie": "carrito",
+      "url": "https://www.chewy.com/app/cart",
+      "pausa": true
+    },
+    {
+      "nombre": "instacart",
+      "superficie": "vitrina",
+      "url": "https://www.instacart.com/store",
+      "pausa": true
+    },
+    {
+      "nombre": "instacart",
+      "superficie": "carrito",
+      "url": "https://www.instacart.com/store",
+      "pausa": true
+    },
+    {
+      "nombre": "instacart",
+      "superficie": "direccion",
+      "url": "https://www.instacart.com/store",
+      "pausa": true
+    },
+    {
+      "nombre": "amazon",
+      "superficie": "vitrina",
+      "url": "https://www.amazon.com/s?k=dog+food",
+      "pausa": false
+    },
+    {
+      "nombre": "amazon",
+      "superficie": "ficha",
+      "url": "https://www.amazon.com/s?k=dog+food",
+      "pausa": true
+    },
+    {
+      "nombre": "rappi",
+      "superficie": "vitrina",
+      "url": "https://www.rappi.com.co/",
+      "pausa": true
+    },
+    {
+      "nombre": "rappi",
+      "superficie": "carrito",
+      "url": "https://www.rappi.com.co/",
+      "pausa": true
+    },
+    {
+      "nombre": "rappi",
+      "superficie": "direccion",
+      "url": "https://www.rappi.com.co/",
+      "pausa": true
+    },
+    {
+      "nombre": "rappi",
+      "superficie": "seguimiento",
+      "url": "https://www.rappi.com.co/",
+      "pausa": true
+    },
+    {
+      "nombre": "laika",
+      "superficie": "vitrina",
+      "url": "https://laika.com.co/perros/alimento/concentrado",
+      "pausa": true
+    },
+    {
+      "nombre": "laika",
+      "superficie": "ficha",
+      "url": "https://laika.com.co/perros/alimento/concentrado",
+      "pausa": true
+    },
+    {
+      "nombre": "mercadolibre",
+      "superficie": "vitrina",
+      "url": "https://listado.mercadolibre.com.ec/alimento-perros",
+      "pausa": false
+    },
+    {
+      "nombre": "mercadolibre",
+      "superficie": "ficha",
+      "url": "https://listado.mercadolibre.com.ec/alimento-perros",
+      "pausa": true
+    },
+    {
+      "nombre": "ubereats",
+      "superficie": "seguimiento",
+      "url": "https://www.ubereats.com/",
+      "pausa": true
+    },
+    {
+      "nombre": "doordash",
+      "superficie": "seguimiento",
+      "url": "https://www.doordash.com/",
+      "pausa": true
+    },
+    {
+      "nombre": "instacart",
+      "superficie": "ficha",
+      "url": "https://www.instacart.com/store",
+      "pausa": true
+    },
+    {
+      "nombre": "chewy",
+      "superficie": "direccion",
+      "url": "https://www.chewy.com/app/cart",
+      "pausa": true
+    },
+    {
+      "nombre": "mercadolibre",
+      "superficie": "carrito",
+      "url": "https://www.mercadolibre.com.ec/gz/cart",
+      "pausa": true
+    },
+    {
+      "nombre": "mercadolibre",
+      "superficie": "direccion",
+      "url": "https://www.mercadolibre.com.ec/gz/cart",
+      "pausa": true
+    },
+    {
+      "nombre": "uber",
+      "superficie": "seguimiento",
+      "url": "https://m.uber.com/looking",
+      "pausa": true
+    },
+    {
+      "nombre": "amazon",
+      "superficie": "seguimiento",
+      "url": "https://www.amazon.com/gp/css/order-history",
+      "pausa": true
+    },
+    {
+      "nombre": "mercadolibre",
+      "superficie": "seguimiento",
+      "url": "https://www.mercadolibre.com.ec/compras",
+      "pausa": true
+    }
+  ]
+}
