@@ -6,7 +6,35 @@
 
 ---
 
-## ⓪ 🔴 EL PRIMER BUNDLE YA SALIÓ — y esto es el estado, no un plan
+## 🎯 ⓪bis · EL BUNDLE DEL GATE — **ÉSTE es el que se mira**
+
+| | |
+|---|---|
+| **`main`** | **`902cb47b`** · árbol en **0** |
+| **OTA cliente** | group **`63188915`** · runtime **1.0.3** |
+| **OTA prestador** | group **`1079553c`** · runtime **1.0.5** |
+| **ancla de las dos** | **`902cb47b`**, **leída del OBJETO** en las 4 plataformas |
+| **asterisco** | **NINGUNO** — `dirty: None` en las cuatro |
+| Metro | **`--clear-cache` en los dos publish** |
+
+**Ancla DECLARADA antes de elegir** (`902cb47b`) y después verificada contra el objeto: coinciden.
+
+**Instrumentos sobre ESTE ensamblado:** los **4 typechecks exit 0** · `verify:diseno` **VERDE 46 reglas**
+· `verify-s100c-disponibilidad` **18/18**.
+
+**Orden del segundo ensamble:** `main` (ff) → **B** `0fd68bfb` → **C** `d85c44e0` → **D** `bdee13e2`.
+**Cero conflictos en las tres.** (A ya estaba dentro desde el primer bundle.)
+
+**Lo que entró en esta segunda pasada y no estaba en la primera:** el **glifo `pedido`** (caja con tapa —
+antes la tab nueva prestaba el de la despensa y quedaban dos vecinas con el mismo dibujo) · la **quinta
+tab** de D · el **orden por especie** de C (H-301 firmado) · el cierre de cola de B.
+
+**Sujetos vivos, re-medidos DESPUÉS de este publish:** envío `474e6ff6` **`hacia_destino` · 6 puntos** ·
+pedido `21fb1284` **`entregado` · 2 ítems · 1 depósito total** ⇒ **los tres intactos.**
+
+---
+
+## ⓪ EL PRIMER BUNDLE — la base, ya superseded
 
 | | |
 |---|---|
@@ -21,9 +49,10 @@
 `eas-cli` **`update:view` rechaza `--non-interactive`** y devuelve una **lista**, una fila por plataforma.
 *Se anota porque los tres detalles hacen fallar el comando del canon tal como está escrito.*
 
-**⚠️ ESTE BUNDLE VA A SER SUPERSEDIDO.** El founder decidió **una pasada completa** en vez de un gate a
-medias: entran la quinta tab de D y el cierre de cola de B. **El bundle del gate se publica ENCIMA de
-`efa59a6d`.** Este queda como base verificada, no como el objeto del gate.
+**☑️ SUPERSEDIDO POR `902cb47b` (§0bis), como estaba previsto.** El founder decidió **una pasada
+completa** en vez de un gate a medias. **Este bundle queda como base verificada; el objeto del gate es el
+de arriba.** *Se conserva porque su ancla y sus verdes son ciertos y porque el canal guarda los dos
+groups: quien mire el historial del canal tiene que poder saber cuál era cuál.*
 
 ---
 
@@ -88,8 +117,13 @@ por eso vive en este archivo.
    primera tarjeta **igual entra entera, con 42 dp de sobra**. *Si esto no está en la lista, se lee como
    que algo creció solo.*
 3. **El `+` de la vitrina muta a stepper sin romper la fila.**
-4. **El glifo del carrito ahora es un CARRITO CON RUEDAS**, no una canasta. 🔴 **Necesita el ojo del
-   founder a 21 px** (§2.9): B no pudo verificarlo — no hay rasterizador SVG en el entorno.
+4. 🔴 **TRES GLIFOS NUEVOS, LOS TRES SIN VERIFICAR, los tres a mirar A 21 px** (§2.9 — ese gate es del
+   founder): **`carrito`** ahora tiene **ruedas** (era una canasta que se leía como bolsa) ·
+   **`papelera`** (el `−` del stepper en 1, solo en el carrito) · **`pedido`**, una **caja con tapa** para
+   la tab nueva, cuyo discriminador es **la costura horizontal** que ni la bolsa ni el carro tienen.
+   **No hay rasterizador SVG en el entorno** (ni `cairosvg`, ni `rsvg-convert`, ni Inkscape) ⇒ **nadie
+   pudo mirarlos chicos.** *Se declara en vez de darse por bueno: es el juicio que el ojo del founder sí
+   puede emitir y el nuestro no.*
 5. **Con el teclado arriba la Hoja ya no empuja el contenido fuera de pantalla.** ⚠️ **Mirar que el
    `Guardar` de la Hoja de dirección no quede comido abajo.**
 6. **La ventana de entrega va en TIRA HORIZONTAL** (antes cuatro opciones apiladas).
@@ -105,6 +139,15 @@ por eso vive en este archivo.
 13. **48 de los 74 dp muertos del buscador**, recuperados.
 14. **La composición se pliega**; **la advertencia de alérgeno NO se plieg**a.
 15. **El cromo de la vitrina: 317 → 213 dp** (50,2 % → 33,8 % del alto útil).
+15bis. 🔴 **LA BÚSQUEDA ORDENA POR LA ESPECIE DE LA MASCOTA ELEGIDA** (H-301, firmado). Con un gato
+    elegido y «alimento»: **19 resultados cambian de posición y 31 no estaban antes** — ninguna de 50
+    tarjetas quedó en su lugar. Los tres primeros pasan de *«pensado para perros»* a *«para gatos»*.
+    **No filtra** (§5.2: se ofrece, no se exige). El orden se hace **en el servidor, en dos baldes**: la
+    búsqueda trae 50 de hasta 285, así que reordenar en memoria **habría ordenado el recorte y no el
+    catálogo**, y esos 31 habrían seguido invisibles con una pantalla que *parecía* correcta.
+    **Reversible en una línea** (quitar el tercer argumento devuelve el orden alfabético único).
+    ⚠️ **La señal «para perros» en la tarjeta está APROBADA y DIFERIDA, no olvidada:** la vitrina tiene
+    **42 dp de presupuesto vivo y son todos**.
 
 ### Del carrito al «listo» (A)
 16. **La ficha ya no deja agregar un producto agotado** — y antes **lo decía y lo dejaba pasar igual**.
