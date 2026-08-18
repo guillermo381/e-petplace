@@ -165,10 +165,38 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 
-/** La foto manda 4:3, la misma relación que la portada de la vitrina
- *  (§12.1): **con relación fija el marco existe antes que la foto**, así
- *  que la grilla no salta al cargar (N16 ③). */
-const RELACION_FOTO = 4 / 3
+/* 🔴 LA FOTO PASA A 1:1 — S100b-B, y la razón es que el asset manda.
+
+   ⏪ **Era 4:3, heredado de la portada de la vitrina del prestador**
+   (§12.1). Ese 4:3 es correcto **para una foto de un LUGAR**, que es lo
+   que aquella portada muestra. **Un packshot no es una foto de un lugar.**
+
+   **Lo que decidió el cambio son dos `[SPEC]` independientes del
+   benchmark, no una preferencia:**
+   · **eBay Playbook — 1:1, *«our dominant and recommended ratio»***.
+   · **Instacart (catálogo de grocery, el análogo más cercano al nuestro)
+     — 1:1, mínimo 600×600, fondo blanco puro, y el producto llenando el
+     85 % del área.**
+
+   ⇒ **Las galerías de marca entregan cuadrado.** Con la caja en 4:3 y
+   `cover`, un packshot cuadrado conforme **pierde el 25 % de su alto**:
+   se recorta arriba y abajo, justo donde vive el producto que llena el
+   85 %. *El defecto no se habría visto hoy —con dos tercios del catálogo
+   sin foto— sino EXACTAMENTE el día que llegaran las fotos buenas.* Eso
+   es lo contrario de que la forma espere al dato.
+
+   **LO QUE NO CAMBIA, y es por lo que la relación sigue siendo FIJA:**
+   con relación fija el marco existe antes que la foto, así que la grilla
+   **no salta al cargar** (N16 ③).
+
+   ⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO: la tarjeta crece ~41 dp de
+   alto** (la foto pasa de 123 a 164 sobre una tarjeta de 164 de ancho).
+   La tarjeta ya era alta —305 dp medidos, más que la fila de ancho
+   completo de Laika (271)—, así que **el bloque de texto queda como el
+   siguiente candidato de la re-derivación**. *Se declara acá en vez de
+   compensarlo encogiendo la letra, que es justo lo que la cabecera de
+   esta pieza prohíbe.* Su juez es el ojo en dispositivo. */
+const RELACION_FOTO = 1
 /** El techo del stepper en la vitrina. Comprar 30 sacos es un caso de
  *  ficha, no de grilla: acá el gesto es «lo quiero», no «cuántos». */
 const TOPE_EN_VITRINA = 12
