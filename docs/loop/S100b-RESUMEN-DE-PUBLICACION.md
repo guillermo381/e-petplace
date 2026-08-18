@@ -18,11 +18,54 @@ rojo apareció al ensamblar*. **Apareció otra vez, y otra vez solo al ensamblar
 | `pista-d` | 🔴 **conflicto con C** en `apps/cliente/src/app/(tabs)/despensa/index.tsx` — **4 bloques** |
 | `pista-a` | 🟡 conflicto con B en `scripts/verify-diseno.mjs` — **mecánico, lo resuelvo yo** |
 
+### 🔴 EL ROJO QUE SOLO APARECIÓ AL ENSAMBLAR — R53 sobre la pantalla de D
+
+**No estaba en ninguna rama.** Al mergear D, el gate de commit frenó:
+
+```
+✗ R53: 1 pantalla(s) NUEVA(S) dibujan un pie fijo a mano (baseline 11 por RUTA)
+   apps/cliente/src/app/(tabs)/despensa/en-camino/[pedidoId].tsx
+```
+
+Es **nueva** porque D rehízo esa pantalla en esta vuelta (mapa a sangre + hoja anclada). B había medido que
+`en-camino/` **no** tenía pie fijo — **cierto cuando lo midió, falso después del rebuild**.
+
+**Y era FORMA, no defecto**, verificado leyendo el archivo: la hoja lleva `maxHeight`, **el scroll vive
+ADENTRO** y lo que hay debajo es **el mapa, que no scrollea** ⇒ no hay contenido de página que el pie pueda
+tapar, y el defecto que R53 persigue *(el consumidor estima el alto del pie)* es **inexpresable** ahí.
+Montar `PantallaConPie` sería una **regresión**: devolvería el mapa a ser una banda que scrollea.
+
+**NO SE BYPASSEÓ con `SALTAR_GATE`, y las dos razones quedan escritas:**
+① saltar un gate para publicar es lo que el gate existe para impedir · ② **habría metido el pie nuevo de D
+DENTRO del baseline de 11 — el intercambio silencioso que el baseline-por-ruta existe para evitar.**
+
+**ADJUDICACIÓN DE MESA: R53 gana el ESCAPE POR DECLARACIÓN** (patrón R45/R46), **y la ruta NO entra al
+baseline** — meterla ahí la registraría como *deuda pendiente* y no lo es. **B lo aplicó** (`99debdd0`), y
+su mecanismo trae sus propios dientes, verificados en su código antes de confiarle nada:
+- la razón se busca en el `src` **crudo** con `/R53-DECLARADO:\s*\S.{15,}/` ⇒ **exige ≥16 caracteres de
+  razón real**. Un marcador pelado **no escapa** (fixture `pelada.tsx`).
+- **es UNA declaración POR PIE, no por archivo**: con dos pies y una razón, **el que sobra muerde**
+  (fixture `dos-pies.tsx`) ⇒ *si mañana alguien mete contenido de página bajo un pie fijo en esa ruta, la
+  regla vuelve a morder.*
+- los declarados **se informan por nombre** en la salida del lint: si crecen, se ven.
+
+**⚠️ Su límite, escrito para que no se lea de más:** el lint **cuenta**; no puede saber cuál declaración
+corresponde a cuál pie. Su verde dice *«hay tantas razones escritas como pies»*, jamás *«cada razón es la
+correcta»*. **Esa mitad se lee en revisión.**
+**Y la declaración la escribe D**, no B ni yo: *la forma es de B, el motivo es de la pantalla* — una razón
+escrita por quien no la compuso es la clase de comentario que envejece mal sin que nadie lo note.
+
+**☠️ ESTO NO ES UN BYPASS Y NO SE LEE COMO TAL:** un bypass suprime el gate; **acá el gate sigue corriendo,
+sigue contando y sigue mordiendo** — lo que cambió es que el caso legítimo tiene que pagar una frase que
+alguien puede leer y discutir.
+
 ### El de A↔B: mecánico, sin decisión
 B agregó **R53** y **R54**; yo bajé `BASELINE_R52` de 1 a 0. **Mismo punto de inserción, cero desacuerdo:
 sobreviven los dos lados.** Condición que B pidió y que se respeta: **R53 conserva su baseline POR RUTA**
 (11 rutas nombradas, no un número — *un baseline numérico esconde un intercambio*) y **R54 DURA EN 0**.
-*Si al correr el lint sobre el ensamblado R53 baja de 11, no es fallo: es C y A migrando.*
+**🔴 Y LA NOTA QUE EVITA QUE SE LEA COMO REGRESIÓN: si al correr el lint sobre el ensamblado R53 BAJA de
+11, eso NO es un fallo — es C y A migrando.** *Un baseline solo-baja que baja está haciendo su trabajo; el
+número chico es el progreso, no el síntoma.*
 
 ### 🔴 El de C↔D: una decisión de producto, y por eso no la toma la mano publicadora
 C y D curaron la misma pantalla —**la que ordenó toda la vuelta** (G-04)— con arquitecturas incompatibles:
