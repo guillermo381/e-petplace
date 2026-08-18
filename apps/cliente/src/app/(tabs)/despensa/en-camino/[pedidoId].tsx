@@ -66,7 +66,6 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -116,7 +115,6 @@ const PISO_DEL_MAPA = 0.4;
 export default function DespensaEnCamino() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
-  const insets = useSafeAreaInsets();
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
@@ -266,28 +264,32 @@ export default function DespensaEnCamino() {
               boxShadow: theme.elevacion.elevada,
             }}
           >
-            {/* ⚠️ **RIESGO ABIERTO, DECLARADO Y NO COMPENSADO A OJO** (H-112,
-                medido por A sobre la fuente): `insets.bottom` **no es** el
-                alto de la barra de tabs. `BarraTabs` dibuja `ALTO_FILA (85) +
-                insets.bottom`, y toda pantalla de tab reserva `insets.bottom +
-                spacing[8] (32)` ⇒ **los insets se cancelan y falta una
-                constante de 53 dp**, en cualquier teléfono.
+            {/* ⏪ **ACÁ VIVÍA UN RIESGO DECLARADO QUE LA MEDICIÓN MATÓ, y
+                se cuenta en vez de borrarse.** A calculó por aritmética sobre
+                la fuente que a toda pantalla de tab le faltaban **53 dp** de
+                reserva (`BarraTabs` dibuja `ALTO_FILA 85 + insets.bottom` y las
+                pantallas reservan `insets.bottom + spacing[8] 32`, con los
+                insets cancelándose). Yo lo dejé escrito como rojo abierto
+                porque, de ser cierto, **lo tapado en esta hoja era el CÓDIGO DE
+                LA PUERTA**.
 
-                Si esa premisa es cierta, el pie de esta hoja queda 53 dp bajo
-                la barra y lo tapado sería **el código de la puerta**. *No lo
-                compenso sumando 53 acá*: sería otra vez **dos números que
-                deben coincidir saliendo de dos cuentas distintas**, que es
-                exactamente el defecto que `PantallaConPie` acaba de desarmar
-                derivando. A pidió a B un `useAltoBarraTabs()` derivado del
-                mismo `ALTO_FILA` que la barra pinta; **esta hoja es su tercer
-                consumidor** y migra cuando exista.
-                ⚠️ Y la premisa **no está medida en aparato**: A llegó al 53
-                por aritmética sobre la fuente y lo declaró así. */}
+                **B lo midió en el aparato y son CERO:** el `ScrollView` de una
+                pantalla de tab tiene bounds `y=[254, 1966]` ⇒ **su viewport
+                termina en 699.0 dp, exactamente el filo de la barra.** *El
+                navegador ya reserva ese alto.* La aritmética era correcta y la
+                premisa no — que es lo que A había advertido de su propio
+                número.
+
+                ⇒ **Y de ahí sale esta línea:** si la barra ya absorbió el
+                `insets.bottom`, sumarlo acá lo cuenta **dos veces** — el pie de
+                esta hoja vive *arriba* de la barra, no contra el filo de la
+                pantalla. Es la cara «sobra» del mismo malentendido, y es el
+                aire muerto que el founder ve en G-12. **Se saca.** */}
             <ScrollView
               contentContainerStyle={{
                 paddingHorizontal: spacing[5],
                 paddingTop: spacing[5],
-                paddingBottom: insets.bottom + spacing[6],
+                paddingBottom: spacing[6],
                 gap: spacing[5],
               }}
             >
