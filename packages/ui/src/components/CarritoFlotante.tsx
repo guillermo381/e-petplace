@@ -39,20 +39,49 @@
  * *No es coordinación de cortesía: es el intervalo en el que la tienda no se
  * puede pagar.*
  *
- * ── DÓNDE VIVE Y POR QUÉ NO SE POSICIONA A MANO ───────────────────────
- * **Se pasa como `pie` de `PantallaConPie`.** No es un capricho de armado:
- * esa pieza **mide su pie y con esa misma medida reserva el scroll**, así
- * que **este disco no puede tapar la última tarjeta de la vitrina** — que es
- * exactamente el presupuesto que L-301 dejó en **42 dp** y que un flotante
- * absoluto se habría comido sin avisar.
+ * ── 🔴 FLOTA DE VERDAD: ES OVERLAY PURO ───────────────────────────────
+ * **Firma del founder, S100d·bis, punto 7, verbatim:** *«SÍ está abajo a la
+ * derecha pero **NO FLOTA**: ocupa una franja fixeada que cubre el contenido.
+ * El contenido debería pasar **DEBAJO** del carrito y mantenerse visible en
+ * todas las pantallas mientras tenga productos.»*
+ *
+ * ⏪ **DEROGADO: nació montándose como `pie` de `PantallaConPie`, y la
+ * decisión fue MÍA.** El argumento que di —*«así su reserva es derivada y no
+ * puede tapar la última tarjeta»*— **era verdadero para el FINAL del scroll y
+ * falso para todo el resto del recorrido.**
+ *
+ * 🔴 **Y lo encontré midiendo, con el founder mirando:**
+ * ```
+ * dónde termina el blanco de la tarjeta (por píxel) …… 619,4 dp
+ * dónde arranca la banda del pie (FAB 631 − su padding 12) … 619,0 dp
+ * ```
+ * *Dos cuentas, un número.* **El pie de `PantallaConPie` es una banda OPACA
+ * de ancho completo pintada sobre el scroll**; su reserva garantiza que
+ * *puedas llegar* al final del contenido, **no que nada quede tapado en la
+ * posición donde estás parado**. Con el flotante ahí, esa banda tapaba la
+ * parte de abajo de la fila visible — y se leía como un stepper cortado.
+ *
+ * ⚠️ **Y el instrumento me dio VERDE encima:** el árbol reportaba el stepper
+ * con sus 35,9 dp y la tarjeta sin crecer. **Las dos cosas eran ciertas y el
+ * ojo veía un control cortado** — el árbol mide LAYOUT y lo que fallaba era el
+ * PINTADO. *La señal de verificación que yo mismo propuse midió la capa
+ * equivocada.*
+ *
+ * ⇒ **`position: 'absolute'`, abajo a la derecha, SIN huella en el layout.**
+ * El scroll pasa por debajo, que es lo que un flotante debe hacer.
  *
  * ```tsx
- * <PantallaConPie pie={<CarritoFlotante cuenta={unidades} onAbrir={…} etiqueta={…} />}>
+ * <View style={{ flex: 1 }}>
+ *   <ScrollView contentContainerStyle={{ paddingBottom: COLA_CARRITO_FLOTANTE }}>…</ScrollView>
+ *   <CarritoFlotante cuenta={unidades} onAbrir={…} etiqueta={…} />
+ * </View>
  * ```
- * 🔴 **PASALA SUELTA, jamás envuelta en un `View` tuyo** — el `box-none` de
- * `PantallaConPie` cubre UNA capa y un envoltorio reabre la zona muerta de
- * gesto (R54). Por eso esta pieza **se alinea sola a la derecha**
- * (`alignSelf`) en vez de pedirle al consumidor un contenedor.
+ * 🔴 **LA MITAD QUE EL CONSUMIDOR NO PUEDE OLVIDAR, y por eso viaja como
+ * constante y no como número:** el disco flota **encima** del contenido ⇒ **la
+ * cola del scroll la pone la pantalla** con `COLA_CARRITO_FLOTANTE`. *Sin esa
+ * cola, el último ítem y cualquier CTA quedan debajo del disco* — que es
+ * L-301 con otro disfraz. **Se exporta derivada del disco: si el disco cambia
+ * de tamaño, la cola lo sigue sola.**
  *
  * ── EL COLOR: F-OCRE, Y EL PAR YA ESTABA MEDIDO ───────────────────────
  * Disco en `accent.cta` (el oro del CTA del cliente) con el glifo en
@@ -120,6 +149,18 @@ const CONTADOR = 20
  *  jamás encoger la letra** — la misma ley que `GlifoConContador`. */
 const TOPE = 99
 
+/** 🔴 LA COLA QUE LA PANTALLA LE DEBE AL SCROLL — derivada, jamás tecleada.
+ *
+ *  El disco flota **encima** del contenido, así que el último ítem y cualquier
+ *  CTA quedarían debajo de él si el scroll no reservara su cola. *Es el mismo
+ *  defecto que `PantallaConPie` mató para los pies —una reserva estimada— y
+ *  por eso acá viaja como CONSTANTE derivada del disco y no como un número
+ *  suelto en cada pantalla.*
+ *
+ *  `disco + su aire de abajo + un respiro` — con esto el último elemento
+ *  queda ENTERO por encima del flotante. */
+export const COLA_CARRITO_FLOTANTE = DISCO + spacing[5] + spacing[4]
+
 export interface CarritoFlotanteProps {
   /** Unidades en el carrito. **`0` ⇒ la pieza no se dibuja** (ver cabecera). */
   cuenta: number
@@ -139,9 +180,12 @@ export function CarritoFlotante({ cuenta, onAbrir, etiqueta }: CarritoFlotantePr
   return (
     <Animated.View
       entering={FadeIn.duration(motion.duration.estandar)}
-      // La pieza se alinea SOLA — ver la nota de `box-none` en la cabecera:
-      // pedirle un contenedor al consumidor reabriría la zona muerta.
-      style={[{ alignSelf: 'flex-end' }, estiloPresionado]}
+      /* La pieza se posiciona SOLA — overlay puro (ver la cabecera). El
+         consumidor solo la monta como hermana del scroll y le da la cola. */
+      style={[
+        { position: 'absolute', right: spacing[5], bottom: spacing[5] },
+        estiloPresionado,
+      ]}
     >
       <Pressable
         onPress={onAbrir}
