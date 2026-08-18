@@ -505,9 +505,31 @@ todo y queda viéndose feo.»*
 > cambió de estado.**
 
 **Lo medido, sobre la misma tarjeta antes y después de tocar el `+`:**
-**309,0 dp → 353,1 dp = +44,1 dp**, exactamente un blanco de 44 — **y la
-tarjeta vecina de la misma fila no se mueve.** *Ése es el «escalón»: la fila
-deja de ser una fila.*
+**+44,1 dp** — exactamente un blanco de 44 — **y la tarjeta vecina de la misma
+fila no se mueve.** *Ése es el «escalón»: la fila deja de ser una fila.*
+
+> ⏪ **CORRECCIÓN DE MI PROPIA MEDICIÓN, y la levantó C (18-ago).** Esta línea
+> decía **«309,0 → 353,1 dp»** como si fueran el alto de la tarjeta. **No lo
+> son: son un piso.** C midió la misma tarjeta en **332 dp** y **declaró la
+> discrepancia como discrepancia, no como corrección** — que es lo que la hizo
+> resoluble.
+>
+> **La causa, medida:** mi columna de barrido pasaba a **8 px del borde
+> derecho**, o sea **dentro del arco de la esquina** (`radius.lg` = 16 dp =
+> 45 px) ⇒ **recortaba ~19,4 px arriba y otros tantos abajo: 13,8 dp de menos.**
+> *Un instrumento que barre una columna no mide un rectángulo redondeado: mide
+> la cuerda que le tocó.*
+>
+> 🔴 **PERO EL NÚMERO QUE LA LEY USA ES EL DELTA, Y EL DELTA ES INMUNE:** el
+> recorte de esquina quita lo mismo antes y después. Re-medido en **dos
+> columnas distintas** —una junto al borde (309,0 → 353,1) y otra por el centro,
+> donde la foto interrumpe el barrido (169,6 → 213,7)— **las dos dan
+> exactamente +44,1.** Y la fuente lo dice por un tercer camino: `BOTON_COMPACTO`
+> 36 + `gap` 8 = **44**.
+>
+> ⇒ **tres cuentas, un número.** *El absoluto estaba mal medido y la ley no se
+> apoyaba en él* — pero se corrige igual, porque **una cifra equivocada en el
+> canon la va a citar alguien que no sabe para qué se midió.*
 
 **Y la aritmética que prueba que no es un descuido:** caja interna **138 dp**;
 el `+` entra al lado del precio (68 + 8 + 44 = **120**), el stepper compacto
