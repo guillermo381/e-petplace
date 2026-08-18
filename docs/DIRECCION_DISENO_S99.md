@@ -545,6 +545,34 @@ venía creciendo (el 1:1 le sumó ~41 dp en S100b). **El acreedor es el que
 S100b ya nombró: el bloque de texto y el header.** *Se declara en vez de
 compensarlo encogiendo la letra.*
 
+### 🔴 EL PRESUPUESTO QUE ESTE COSTO CONSUMIÓ — medido por C en la vitrina viva
+
+**C midió el efecto real del +44 sobre la vitrina de 50 tarjetas, y con eso el
+número tiene su CUARTA cuenta** (las dos columnas del barrido · la fuente
+`36 + 8` · y ahora el alto real):
+
+| | antes del merge | después |
+|---|---|---|
+| alto de la tarjeta de grilla | 332 dp | **376 dp** |
+| cromo antes del primer producto | 213 dp | 213 dp (N24 no lo toca) |
+| ¿entra la primera tarjeta entera? | sí | **sí, con 42 dp de sobra** |
+
+🔴 **Y LA ARITMÉTICA DEL CONTRAFÁCTICO, que es lo que hay que leer:** con el
+cromo que la vitrina tenía esa misma mañana (**317 dp**), la tarjeta habría ido
+de 433 a **809** contra un visor útil que termina en **747** ⇒ **se pasaba por
+62 dp.**
+
+> **N24 y la cura del cromo se cruzaron por casualidad y salió bien.** Si este
+> merge hubiera entrado un día antes, **el founder habría visto la primera
+> tarjeta cortada otra vez** — y ninguna de las dos pistas lo habría entendido:
+> *B midió su tarjeta, C midió su cromo, y **el que decide es la suma, que no
+> era de nadie.***
+
+⇒ **LOS 42 dp DE SOBRA SON TODO EL MARGEN QUE LE QUEDA A LA VITRINA.**
+**Cualquier cosa que agregue alto al cromo o a la tarjeta lo consume**, y la
+próxima que lo haga sin medir la suma va a cortar la primera fila. *Queda como
+presupuesto vivo, no como anécdota.* **Al canon como L-301.**
+
 ## N25 · UNA SOLA PUERTA AL CARRITO, Y ES LA QUE ALCANZA EL PULGAR
 
 **FIRMA DEL FOUNDER:** *«no es un carrito, es una bolsa y se ve muy fea. Hay

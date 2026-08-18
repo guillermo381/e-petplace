@@ -11711,7 +11711,20 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
-### Lecciones S100c (L-296 → L-300) — depositadas por B el 18-ago-2026, con aparato
+### Lecciones S100c (L-296 → L-301) — depositadas por B el 18-ago-2026, con aparato
+
+- **L-301 — CUANDO DOS PISTAS CURAN SOBRE EL MISMO EJE, EL NÚMERO QUE DECIDE ES LA SUMA — Y LA SUMA NO ES DE NADIE (S100c · hallazgo de C sobre el cruce con N24; depositada 18-ago-2026).**
+
+  **B midió su tarjeta** (N24: el slot del control reservado ⇒ **+44 dp**, con su costo declarado y su acreedor nombrado). **C midió su cromo** (la vitrina pasó de 317 a **213 dp** antes del primer producto). **Las dos mediciones eran correctas, las dos declararon su costo, y ninguna de las dos podía ver el defecto**, porque el defecto no vivía en ninguno de los dos números.
+
+  **Medido por C en la vitrina viva, después del merge:** tarjeta **376 dp** desde 329 ⇒ termina en **705** contra un visor útil que acaba en **747**: entra con **42 dp de sobra**. **Con el cromo de esa misma mañana (317 dp)** habría ido de 433 a **809** ⇒ **se pasaba por 62 dp, y la primera fila salía cortada otra vez.**
+
+  ⇒ ***Se cruzaron por casualidad y salió bien.*** Si el merge hubiera entrado un día antes, el founder habría visto el mismo defecto que acababa de reportar, **y ninguna de las dos pistas lo habría entendido**: cada una tenía su número y su razón, y las dos seguían siendo ciertas.
+
+  **La regla que sale, y es de coordinación, no de diseño:** **una pista que cambia el alto (o el ancho) de algo que comparte eje con otra declara su delta EN EL EJE, no solo en su pieza** — y **quien tenga el aparato mide la SUMA contra el visor útil antes de que las dos entren.** *Un costo declarado en la pieza propia es honesto y no alcanza: el que corta no es el costo, es el total.*
+
+  **Y su corolario operativo, con su número vivo:** la vitrina quedó con **42 dp de margen**. **Ése es el presupuesto, y la próxima pieza que agregue alto lo consume.** *Un margen que nadie escribe se gasta dos veces.*
+
 
 - **L-300 — UN BACKTICK DENTRO DE UN MENSAJE DE COMMIT ENTRECOMILLADO ES SUSTITUCIÓN DE COMANDO: EL MENSAJE PIERDE TEXTO Y EL COMMIT SALE VERDE (S100c-B — error propio, medido después de pushear; depositada 18-ago-2026).**
 
