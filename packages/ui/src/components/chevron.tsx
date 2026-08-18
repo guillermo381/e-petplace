@@ -81,6 +81,33 @@ export interface ChevronProps {
    *  la casa, puesto en un solo lugar por primera vez. */
   color?: string
   lado?: number
+  /**
+   * 🔴 **EL PESO DEL TRAZO — REGISTRO, no un `strokeWidth` suelto**
+   * (S100d·bis, pedido de la pista C con su medición).
+   *
+   * **Firma del founder sobre el rótulo plegable de la ficha:** *«la flecha
+   * en ocre, **más gruesa**»*.
+   *
+   * **C midió antes de pedir y frenó bien:** esta pieza acepta `color` y **no
+   * aceptaba grosor** — el `strokeWidth` estaba tecleado adentro. *El trazo
+   * del chevron es geometría compartida; este archivo existe justamente para
+   * que nadie lo redibuje* (L-175). **Y pidió un REGISTRO y no un número, con
+   * su razón:** *«un `strokeWidth` suelto invita a que cada pantalla elija el
+   * suyo»*. **Tiene razón y por eso es una unión de dos palabras, no un
+   * `number`.**
+   *
+   * · **`'fila'`** (default) — el chevron de una celda o una fila. 2.0.
+   * · **`'seccion'`** — el que despliega un BLOQUE, junto a un rótulo de
+   *   sección. **2.75**, para que pese lo que pesa su vecino tipográfico
+   *   (`Texto variante="seccion"` es 20/Bold; un trazo de 2 al lado se lee
+   *   como una nota al pie de su propio título).
+   *
+   * ⚠️ **El COLOR sigue siendo del consumidor** y con F-OCRE (N26 v2) el de
+   * sección va en `accent.cta`: **la flecha que despliega ACCIONA.** *No es
+   * una excepción a la ley: la ley se ensanchó el mismo día, con este caso
+   * adentro.*
+   */
+  enfasis?: 'fila' | 'seccion'
 }
 
 /** EL PORTADOR PARA SLOTS QUE NO SON UNA FILA ENTERA (S99-B).
@@ -99,7 +126,7 @@ export interface ChevronProps {
  *  LLEVA**, y esto lleva—. *Un lápiz sería una segunda señal para el
  *  mismo gesto. Lo que su queja pide —que se VEA— lo dan los dos; lo que
  *  decide es cuál ya significa eso en el resto del producto.* */
-export function Chevron({ direccion, color, lado = LADO }: ChevronProps) {
+export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila' }: ChevronProps) {
   const { theme } = useTheme()
   return (
     /* `aria-hidden`: el chevron nunca es la etiqueta de nada — lo que un
@@ -109,7 +136,7 @@ export function Chevron({ direccion, color, lado = LADO }: ChevronProps) {
       <Path
         d={CHEVRON[direccion]}
         stroke={color ?? theme.text.tertiary}
-        strokeWidth={2}
+        strokeWidth={enfasis === 'seccion' ? 2.75 : 2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

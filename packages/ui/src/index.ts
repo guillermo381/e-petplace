@@ -74,7 +74,7 @@ export { GlifoConContador, type GlifoConContadorProps } from './components/Glifo
 // hace entrar, y eso ES «al agregar se abre el flotante».
 // ⚠️ Su montaje y el RETIRO de la canasta del encabezado van en el MISMO
 // commit: montarla sola deja dos puertas; retirar la otra sola deja cero.
-export { CarritoFlotante, type CarritoFlotanteProps } from './components/CarritoFlotante'
+export { CarritoFlotante, COLA_CARRITO_FLOTANTE, type CarritoFlotanteProps } from './components/CarritoFlotante'
 // FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
 // MANDA (es lo único verificable desde la puerta) · sin placa el nombre
 // preside, y es 1 de 2 casos vivos · el hueco de la foto se DIBUJA, jamás se
@@ -83,6 +83,10 @@ export { FichaRepartidor, type FichaRepartidorProps } from './components/FichaRe
 // La GOTA — F-PIN (puntos 16·23·26): UN dibujo para el glifo `ubicacion` y
 // para la marca del mapa, con su ancla derivada (la punta, no el centro).
 export { GOTA_D, GOTA_OJO, GOTA_PUNTA_Y, desplazamientoDePunta } from './components/gota'
+// GotaUbicacion — S100d·bis: la marca del mapa FUERA del mapa, con borde
+// grueso ocre (firma del founder). Mismo dibujo que el glifo y que el pin;
+// **se ancla por el CENTRO**, porque fuera del mapa la punta no marca nada.
+export { GotaUbicacion, type GotaUbicacionProps } from './components/GotaUbicacion'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // Destape — S97+-B: la ceremonia de cierre del wizard de alta (pedido de C,
 // contrato firmado de mesa). Corre UNA vez; avisa su fin por `alTerminar`,
@@ -171,7 +175,7 @@ export {
 } from './components/SelectorSegmentado'
 export { SliderPrecio, type SliderPrecioProps } from './components/SliderPrecio'
 export { Interruptor, type InterruptorProps } from './components/Interruptor'
-export { StepperCantidad, type StepperCantidadProps } from './components/StepperCantidad'
+export { StepperCantidad, ALTO_STEPPER_COMPACTO, ALTO_STEPPER_MENUDO, type StepperCantidadProps, type TamanoStepper } from './components/StepperCantidad'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
 export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'
 export {

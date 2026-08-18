@@ -79,6 +79,48 @@ const BOTON = 44 // target táctil directo
 const BOTON_COMPACTO = 36
 const HOLGURA_COMPACTA = (BOTON - BOTON_COMPACTO) / 2 // 4 ⇒ 36 + 4·2 = 44
 
+/* 🔴 EL MENUDO — nace de una FIRMA, no de una preferencia (S100d·bis).
+
+   **Founder, punto 5 del segundo veredicto, verbatim:** *«no está en el mismo
+   escalón, está uno más abajo ahora todo junto; **debemos hacerlo MÁS PEQUEÑO
+   para que quede junto al peso**»*.
+
+   ⏪ **Y contradice una cuenta mía que era correcta.** Yo demostré que **tres
+   blancos de 44 son 132 dp y no entran junto a un precio en una caja de 140,3**
+   — por eso el control se había mudado a su propio escalón. **El founder vio el
+   resultado y eligió el otro lado del intercambio: control más chico, misma
+   fila.** *Su decisión, declarada: la cuenta no estaba mal, estaba contestando
+   la pregunta que yo elegí.*
+
+   ── LA GEOMETRÍA, DERIVADA PARA QUE N8 SOBREVIVA IGUAL ──────────────
+   **Lo que se achica es el PÍXEL, no el BLANCO** — la misma receta con la que
+   nació el compacto, llevada a su límite:
+
+       caja interna de la tarjeta ……………………… 140,3 dp
+       precio ($18.50, medido en aparato) …… 61,9
+       aire ……………………………………………………………………  8
+                                              ───────
+       queda para el control ………………………………  70,4 dp
+
+       botón 26 + número 18 + botón 26 ……………  70,0  ✅ entra
+
+   **Y los blancos siguen siendo de 44 SIN solaparse, que es lo que lo vuelve
+   legal:** con `hitSlop` 9 cada botón mide 26 + 9·2 = **44**; el blanco del
+   primero termina en 35,0 y el del segundo arranca en 35,4 ⇒ **se tocan y no
+   se pisan.** *Un stepper que a veces resta cuando quisiste sumar es peor que
+   uno apretado* — la misma frase que gobierna el gap del compacto.
+
+   ⚠️ **EL LÍMITE MEDIDO, declarado y no escondido: esto entra con precios de
+   hasta ~62 dp** (dos dígitos y centavos, que es todo el catálogo de hoy).
+   **Con un precio de tres dígitos la fila queda justa** y el precio es el que
+   cede. *Se dice acá porque el día que entre un producto de $150 nadie va a
+   saber por qué se ve apretado.* */
+const BOTON_MENUDO = 26
+const HOLGURA_MENUDA = (BOTON - BOTON_MENUDO) / 2 // 9 ⇒ 26 + 9·2 = 44
+/** El número, en la única medida que deja cerrar los 70,4. Dos cifras en mono
+ *  a `size.sm` entran; el tope de la vitrina es 12. */
+const NUMERO_MENUDO = 18
+
 /** EL ALTO DEL STEPPER COMPACTO — exportado para que quien RESERVE su lugar
  *  lo DERIVE en vez de teclear un número (N24, S100c-B).
  *
@@ -88,6 +130,13 @@ const HOLGURA_COMPACTA = (BOTON - BOTON_COMPACTO) / 2 // 4 ⇒ 36 + 4·2 = 44
  *  (L-284: un par que debe coincidir y sale de dos lugares es una bomba con
  *  temporizador). */
 export const ALTO_STEPPER_COMPACTO = BOTON_COMPACTO
+/** El alto del menudo, por el mismo motivo: quien lo aloje lo DERIVA. */
+export const ALTO_STEPPER_MENUDO = BOTON_MENUDO
+
+/** Los tres calibres. **No son «tres estilos»: son tres cajas.** Se elige por
+ *  el ancho que hay, jamás por gusto — *una variante que se elige por gusto
+ *  deja de ser una respuesta a una restricción.* */
+export type TamanoStepper = 'normal' | 'compacto' | 'menudo'
 
 export interface StepperCantidadProps {
   valor: number
@@ -119,6 +168,9 @@ export interface StepperCantidadProps {
    */
   registro?: 'control' | 'oficio' | 'compra'
   /**
+   * **'normal'** 144 · **'compacto'** 116 · **'menudo'** 70 — los tres con el
+   * blanco de 44 intacto vía `hitSlop` (ver `BOTON_MENUDO`).
+   *
    * Para contenedores angostos — hoy, la tarjeta de vitrina (ver la nota de
    * `BOTON_COMPACTO`). **116 dp en vez de 144**, con el blanco de 44
    * intacto vía `hitSlop`.
@@ -129,7 +181,7 @@ export interface StepperCantidadProps {
    * ser un segundo estilo, que es lo que N11 prohíbe para los campos y vale
    * igual acá.*
    */
-  compacto?: boolean
+  tamano?: TamanoStepper
   /**
    * 🔴 EL `−` SE VUELVE PAPELERA EN EL MÍNIMO — **y solo donde corresponde**
    * (G-08, S100b-B).
@@ -160,15 +212,17 @@ function BotonPaso({
   color,
   onPress,
   etiqueta,
-  compacto,
+  tamano,
 }: {
   signo: 'menos' | 'mas' | 'papelera'
   habilitado: boolean
   color: string
   onPress: () => void
   etiqueta: string
-  compacto: boolean
+  tamano: TamanoStepper
 }) {
+  const lado = tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON
+  const holgura = tamano === 'menudo' ? HOLGURA_MENUDA : tamano === 'compacto' ? HOLGURA_COMPACTA : 0
   const { theme } = useTheme()
   const [presionado, setPresionado] = useState(false)
   return (
@@ -185,12 +239,12 @@ function BotonPaso({
       onPressOut={() => setPresionado(false)}
       // El blanco de 44 se conserva SIEMPRE: en compacto lo completa el
       // hitSlop, porque lo que se achica es el píxel y no el target (N8).
-      hitSlop={compacto ? HOLGURA_COMPACTA : 0}
+      hitSlop={holgura}
     >
       <Animated.View
         style={{
-          width: compacto ? BOTON_COMPACTO : BOTON,
-          height: compacto ? BOTON_COMPACTO : BOTON,
+          width: lado,
+          height: lado,
           borderRadius: radius.suave,
           backgroundColor: theme.bg.hundido,
           alignItems: 'center',
@@ -202,7 +256,7 @@ function BotonPaso({
         }}
       >
         {signo === 'papelera' ? (
-          <Icono nombre="papelera" tamano={20} registro="tinta" tinta={color} />
+          <Icono nombre="papelera" tamano={tamano === 'menudo' ? 16 : 20} registro="tinta" tinta={color} />
         ) : (
           <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
             {signo === 'mas' ? <Path d="M10 4v12" stroke={color} strokeWidth={2} strokeLinecap="round" /> : null}
@@ -214,7 +268,7 @@ function BotonPaso({
   )
 }
 
-export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', compacto = false, onBorrar }: StepperCantidadProps) {
+export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', tamano = 'normal', onBorrar }: StepperCantidadProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   const esMemorial = theme.mode === 'memorial'
@@ -249,7 +303,15 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         if (e.nativeEvent.actionName === 'decrement') irA(v - 1)
       }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: compacto ? spacing[2] : spacing[3] }}
+      /* El aire entre celdas es lo ÚLTIMO que se achica y lo primero que se
+         mira: es lo que mantiene los blancos táctiles separados. En `menudo`
+         llega a 0 y los blancos igual no se pisan — la cuenta está en
+         `BOTON_MENUDO`. */
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: tamano === 'menudo' ? 0 : tamano === 'compacto' ? spacing[2] : spacing[3],
+      }}
     >
       {/* En el mínimo, con `onBorrar`, el menos es PAPELERA y ejecuta el
           borrado; sin él, se apaga sereno como siempre. */}
@@ -260,15 +322,15 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         color={v > min || onBorrar !== undefined ? acento : theme.text.tertiary}
         onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
         etiqueta={onBorrar !== undefined && v <= min ? t('stepperCantidad.borrar') : t('stepperCantidad.menos')}
-        compacto={compacto}
+        tamano={tamano}
       />
       <Text
         style={{
-          minWidth: compacto ? spacing[7] : spacing[8],
+          minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
           textAlign: 'center',
           // dato de máquina: mono tabular (Ley 3)
           fontFamily: typography.family.mono.regular,
-          fontSize: typography.size.md,
+          fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
           fontVariant: ['tabular-nums'],
           letterSpacing: typography.tracking.mono,
           color: theme.text.primary,
@@ -282,7 +344,7 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         color={v < max ? acento : theme.text.tertiary}
         onPress={() => irA(v + 1)}
         etiqueta={t('stepperCantidad.mas')}
-        compacto={compacto}
+        tamano={tamano}
       />
     </View>
   )
