@@ -47,8 +47,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
   Boton,
@@ -60,6 +59,7 @@ import {
   Hoja,
   Icono,
   Interruptor,
+  PantallaConPie,
   SelectorOpcion,
   SelectorVentana,
   Separador,
@@ -104,7 +104,6 @@ export default function DespensaCheckout() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
-  const insets = useSafeAreaInsets();
   const items = useCarrito();
   const navigation = useNavigation();
 
@@ -128,8 +127,6 @@ export default function DespensaCheckout() {
    *  lleno se DIBUJA con su porqué — no desaparece (Ley 23 al revés: la
    *  puerta tampoco esconde lo que el usuario busca). */
   const [ventanas, setVentanas] = useState<OpcionVentana[] | 'cargando' | null>(null);
-  /** La altura REAL de la barra del CTA (cambia por fase). */
-  const [barAlto, setBarAlto] = useState(0);
 
   // ── El pedido del motor ────────────────────────────────────────────────
   const clave = useRef(nuevaClaveIdempotencia());
@@ -546,6 +543,52 @@ export default function DespensaCheckout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, pedidos, fase, trabajando]);
 
+  /** EL PIE POR FASE — el apagado dice qué falta.
+   *  `undefined` cuando no hay acción (carrito vacío): la pieza entonces NO
+   *  dibuja pie y NO reserva nada. *Antes esa rama pintaba una barra vacía y
+   *  le robaba su alto al contenido igual.* */
+  const pieDelCta =
+    fase === 'armado' && items.length > 0 ? (
+      <>
+        {falta !== null ? <Texto variante="apoyo">{falta}</Texto> : null}
+        <Boton
+          etiqueta={t('despensa.verTotal')}
+          bloque
+          cargando={trabajando}
+          deshabilitado={falta !== null}
+          onPress={() => void verTotal()}
+        />
+      </>
+    ) : fase === 'resumen' ? (
+      /* 🔴 G-12 · UN SOLO SÓLIDO. Eran DOS botones del mismo peso apilados
+         —«Pagar (simulado)» y «Volver a editar»—, y B lo dijo con la frase
+         justa: *dos bloques del mismo peso significan que nadie decidió cuál
+         importa.* Acá importa pagar; volver a editar es la salida, y una
+         salida no compite con el destino.
+         Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
+         label sin chevron. */
+      <>
+        <Boton
+          etiqueta={t('despensa.pagarSimulado')}
+          bloque
+          cargando={trabajando}
+          onPress={() => void pagar()}
+        />
+        <Boton
+          variante="ghost"
+          bloque
+          etiqueta={t('despensa.volverAEditar')}
+          onPress={() => void volverAEditar()}
+        />
+      </>
+    ) : fase === 'exito' ? (
+      <Boton
+        etiqueta={t('despensa.verTusPedidos')}
+        bloque
+        onPress={() => router.replace('/despensa/pedidos')}
+      />
+    ) : undefined;
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {fase === 'exito' ? (
@@ -569,16 +612,20 @@ export default function DespensaCheckout() {
       )}
 
       <EvitaTeclado>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          paddingTop: spacing[4],
-          // La cola del scroll = la barra MEDIDA (vara de C ⑧: la barra
-          // tiene una altura en armado y otra en resumen — un número
-          // crudo mentía a medias) + aire.
-          paddingBottom: (barAlto > 0 ? barAlto : insets.bottom + spacing[8]) + spacing[6],
-          gap: spacing[5],
-        }}
+      {/* 🔴 H-105 · EL PIE RESERVA SU PROPIO LUGAR (pieza de B).
+          Esta pantalla YA derivaba su reserva con un `onLayout` propio, así
+          que su solape ③ —«Instrucciones de entrega» debajo del CTA— **no lo
+          explicaba la estimación**, que era la causa del carrito. Se monta la
+          pieza igual, y por dos razones: deja UNA sola anatomía de pie en la
+          despensa (el `barAlto` a mano era el segundo mecanismo, y dos
+          mecanismos divergen), y mete el pie DENTRO del `EvitaTeclado`, que es
+          la hipótesis viva de ese solape — antes el CTA vivía afuera y no se
+          movía con el teclado. **Lo confirma el aparato, no yo**: queda pedido
+          a B, que lo tiene. */}
+      <PantallaConPie
+        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
+        contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
+        pie={pieDelCta}
       >
         {fase === 'armado' ? (
           items.length === 0 ? (
@@ -947,65 +994,8 @@ export default function DespensaCheckout() {
             </View>
           </>
         ) : null}
-      </ScrollView>
+      </PantallaConPie>
       </EvitaTeclado>
-
-      {/* LA BARRA DEL CTA por fase — el apagado dice qué falta. */}
-      <View
-        onLayout={(e) => setBarAlto(e.nativeEvent.layout.height)}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          paddingHorizontal: spacing[5],
-          paddingTop: spacing[3],
-          paddingBottom: insets.bottom + spacing[3],
-          backgroundColor: theme.bg.base,
-          gap: spacing[2],
-        }}
-      >
-        {fase === 'armado' && items.length > 0 ? (
-          <>
-            {falta !== null ? <Texto variante="apoyo">{falta}</Texto> : null}
-            <Boton
-              etiqueta={t('despensa.verTotal')}
-              bloque
-              cargando={trabajando}
-              deshabilitado={falta !== null}
-              onPress={() => void verTotal()}
-            />
-          </>
-        ) : fase === 'resumen' ? (
-          /* 🔴 G-12 · UN SOLO SÓLIDO. Eran DOS botones del mismo peso apilados
-             —«Pagar (simulado)» y «Volver a editar»—, y B lo dijo con la frase
-             justa: *dos bloques del mismo peso significan que nadie decidió
-             cuál importa.* Acá importa pagar; volver a editar es la salida, y
-             una salida no compite con el destino.
-             Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
-             label sin chevron. */
-          <>
-            <Boton
-              etiqueta={t('despensa.pagarSimulado')}
-              bloque
-              cargando={trabajando}
-              onPress={() => void pagar()}
-            />
-            <Boton
-              variante="ghost"
-              bloque
-              etiqueta={t('despensa.volverAEditar')}
-              onPress={() => void volverAEditar()}
-            />
-          </>
-        ) : fase === 'exito' ? (
-          <Boton
-            etiqueta={t('despensa.verTusPedidos')}
-            bloque
-            onPress={() => router.replace('/despensa/pedidos')}
-          />
-        ) : null}
-      </View>
 
       {/* LA HOJA DE DIRECCIÓN — la captura es UNA en toda la casa (el
           formulario compartido de S79); agregar sin salir del flujo (§7). */}

@@ -35,8 +35,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -45,6 +44,7 @@ import {
   EstadoVacio,
   SelectorDestinoItem,
   Separador,
+  PantallaConPie,
   StepperCantidad,
   Texto,
   spacing,
@@ -76,7 +76,6 @@ type Fase<T> = T | 'cargando' | 'error';
 export default function DespensaCarrito() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const insets = useSafeAreaInsets();
   const items = useCarrito();
 
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
@@ -229,14 +228,25 @@ export default function DespensaCarrito() {
           }
         />
       ) : (
-        <>
-          <ScrollView
-            contentContainerStyle={{
-              paddingTop: spacing[4],
-              paddingBottom: insets.bottom + spacing[8] + 120,
-              gap: spacing[5],
-            }}
-          >
+        /* 🔴 H-105 · EL PIE RESERVA SU PROPIO LUGAR (pieza de B, S100b).
+           ☠️ Acá vivía `paddingBottom: insets.bottom + spacing[8] + 120`. Ese
+           120 era una ESTIMACIÓN del alto del pie, y B lo midió en el aparato:
+           el aviso del total quedaba **9.6 dp debajo del CTA**, inalcanzable.
+           La cura no fue elegir mejor el número: es que ya no hay número. El
+           pie se mide a sí mismo y esa misma medida reserva el scroll — dos
+           cuentas que debían coincidir pasaron a ser una.
+           Y el `insets.bottom` también se fue: vive adentro de la pieza (Ley 8,
+           precedente `Hoja` S65). */
+        <PantallaConPie
+          contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
+          pie={
+            <Boton
+              etiqueta={t('despensa.continuar')}
+              bloque
+              onPress={() => router.push('/despensa/checkout')}
+            />
+          }
+        >
             {items.map((item, i) => (
               <View key={item.oferta_id} style={{ gap: spacing[3] }}>
                 {i > 0 ? <Separador /> : null}
@@ -352,27 +362,7 @@ export default function DespensaCarrito() {
             <View style={{ paddingHorizontal: spacing[5] }}>
               <Texto variante="apoyo">{t('despensa.totalLoDiceElMotor')}</Texto>
             </View>
-          </ScrollView>
-
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              paddingHorizontal: spacing[5],
-              paddingTop: spacing[3],
-              paddingBottom: insets.bottom + spacing[3],
-              backgroundColor: theme.bg.base,
-            }}
-          >
-            <Boton
-              etiqueta={t('despensa.continuar')}
-              bloque
-              onPress={() => router.push('/despensa/checkout')}
-            />
-          </View>
-        </>
+        </PantallaConPie>
       )}
     </View>
   );
