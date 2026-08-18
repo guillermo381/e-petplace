@@ -40,7 +40,7 @@ import {
 } from '@epetplace/ui';
 import { listarMisPedidos, type PedidoEnLista } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
-import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { escaleraDePedido, portadorDeEstado, type VocesEscalera } from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 
@@ -86,54 +86,56 @@ export default function DespensaPedidos() {
       minute: '2-digit',
     });
 
-  /** El detalle de la fila: la PROMESA cuando existe (es lo accionable —
-   *  quedarse en casa o no), el retiro cuando es retiro. Sin promesa
-   *  guardada NO se inventa fecha (L-139).
+  /** La línea de apoyo de la fila. **La DECISIÓN no vive acá: vive en
+   *  `portadorDeEstado`** — esta función solo le pone voz a lo que aquélla
+   *  eligió (Ley 3: el riel habla, la lib decide).
    *
-   *  🔴 S100-D · EL ÚLTIMO BRAZO ES EL QUE EVITA UNA FILA MUDA. Desde que
-   *  `pagando` dejó de ser escalón, esa narrativa **no dibuja escalera**;
-   *  si además su detalle fuera `undefined`, la fila quedaría con fecha y
-   *  monto y NADA que diga en qué anda el pedido. La voz sale de
-   *  `narrativa_nombre`, que es el CATÁLOGO —dato, no un `switch` acá—, y
-   *  solo aparece **cuando la escalera no dibuja**: donde la escalera
-   *  habla, este texto no compite con ella (Chanel).
+   *  🔴 **S100b-D · POR QUÉ SE MUDÓ, y es el hallazgo del gate.** El founder
+   *  vio *«cuatro de seis pedidos no dicen en qué estado están»*. Acá vivían
+   *  cuatro `if` en un orden, y **el orden era el defecto**: el brazo que
+   *  cubría al pedido sin escalera estaba ÚLTIMO, detrás del de la promesa —
+   *  y la promesa **nace con el pedido, antes del pago** (censo: 4 de 4
+   *  `pagando` la tienen). ⇒ el pedido no solo quedaba mudo: **prometía una
+   *  entrega sin tener el pago confirmado.**
    *
-   *  🔴 S100-D · EL BRAZO DEL DESVÍO — la fila PROMETÍA UNA ENTREGA QUE YA
-   *  NO VA A PASAR. Con `no_llego` o `cancelado`, si el pedido tenía
-   *  promesa guardada esta función la devolvía igual, así que un pedido
-   *  que volvió seguía diciendo «llega entre 14:00 y 16:00».
-   *
-   *  La receta de B lo prohíbe con todas las letras —*prometer una entrega
-   *  que ya no va a pasar es peor que no prometer*— y **`EscaleraEstados`
-   *  YA lo cumple adentro** (`cuandoLlega !== undefined && desvio ===
-   *  undefined`). Lo que fallaba es que la ventana de ESTA fila no viaja
-   *  por ese slot: viaja como texto suelto en `detalle`, y el guard de la
-   *  pieza no lo alcanza.
-   *
-   *  ⇒ **El mismo criterio vivía en dos lugares y solo uno lo aplicaba.**
-   *  Es exactamente la clase que B me corrigió hoy en `TarjetaPedido`, y
-   *  aparece de nuevo a un archivo de distancia. *No se cura ensanchando
-   *  la pieza: se cura no mandándole una promesa que la letra ya prohibió.*
-   *
-   *  Con desvío el detalle queda VACÍO a propósito: la banda ya dice qué
-   *  pasó, y repetirlo en la línea de arriba sería decir dos veces lo
-   *  mismo (Chanel) — por eso tampoco cae a `narrativa_nombre`. */
-  function detalleDe(
-    p: PedidoEnLista,
-    escalera: { pasos: unknown[]; desvio?: unknown },
-  ): string | undefined {
-    // El desvío manda sobre todo lo demás, incluso sobre el retiro: un
-    // retiro cancelado tampoco se retira.
-    if (escalera.desvio !== undefined) return undefined;
-    if (p.metodo_entrega === 'retiro') return t('despensa.metodoRetiro');
-    if (p.promesa_desde !== null && p.promesa_hasta !== null) {
-      return t('despensa.promesaCorta', {
-        dia: diaHumano(p.promesa_desde),
-        desde: horaLocal(p.promesa_desde),
-        hasta: horaLocal(p.promesa_hasta),
-      });
+   *  Es la MISMA clase que S100 ya curó para el desvío —*prometer una entrega
+   *  que ya no va a pasar*— y que llegó por el otro lado: *prometer una que
+   *  todavía no está comprada.* Curar una y dejar viva la otra es lo que pasa
+   *  cuando la regla es un orden de `if` y no un objeto que se pueda medir.
+   *  **Por eso ahora se puede medir: `verify-s100b-d-el-estado-se-dice.ts`
+   *  corre la función real y su discriminador reproduce este orden viejo y
+   *  exige que falle.** */
+  function detalleDe(p: PedidoEnLista): string | undefined {
+    const desde = p.promesa_desde;
+    const hasta = p.promesa_hasta;
+    const portador = portadorDeEstado({
+      narrativa: p.narrativa,
+      metodoEntrega: p.metodo_entrega,
+      tienePromesa: desde !== null && hasta !== null,
+    });
+    switch (portador) {
+      case 'nada':
+        return undefined;
+      // El NOMBRE del estado sale del catálogo —dato, no un `switch` de
+      // voces acá—; el `case` solo elige QUIÉN habla.
+      case 'estado':
+        return p.narrativa_nombre;
+      case 'retiro':
+        return t('despensa.metodoRetiro');
+      case 'promesa':
+        // Se re-pregunta por los nulos en vez de castear: la implicación
+        // «portador = promesa ⇒ las dos existen» vive en la lib y el
+        // compilador no la ve. Es un ESTRECHAMIENTO, jamás un segundo
+        // criterio — un `as string` acá compilaría y pintaría
+        // «Invalid Date» el día que la implicación deje de valer.
+        return desde === null || hasta === null
+          ? undefined
+          : t('despensa.promesaCorta', {
+              dia: diaHumano(desde),
+              desde: horaLocal(desde),
+              hasta: horaLocal(hasta),
+            });
     }
-    return escalera.pasos.length > 0 ? undefined : p.narrativa_nombre;
   }
 
   return (
@@ -200,7 +202,7 @@ export default function DespensaPedidos() {
                 <TarjetaPedido
                   key={p.pedido_id}
                   titulo={t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
-                  detalle={detalleDe(p, escalera)}
+                  detalle={detalleDe(p)}
                   monto={`$ ${p.total.toFixed(2)}`}
                   pasos={conIconos(pasos)}
                   desvio={desvio}

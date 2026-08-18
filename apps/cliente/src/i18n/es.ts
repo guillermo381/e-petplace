@@ -1624,6 +1624,14 @@ export const clienteEs = {
     pasoPreparando: 'Preparando',
     pasoEnCamino: 'En camino',
     pasoEntregado: 'Entregado',
+    // S100b-D · LA VOZ DEL PEDIDO QUE TODAVÍA NO TIENE RECORRIDO. El NOMBRE
+    // del estado lo pone el catálogo (`narrativa_nombre`); esto explica qué
+    // significa. Tiene que ser verdad para los DOS casos que `pagando` tapa
+    // —pago sin confirmar y revisión de riesgo—, porque decirle a alguien
+    // que está bajo sospecha de fraude es maltrato (`_despensa-comun.ts`).
+    // Por eso habla del PAGO y no del vendedor: el vendedor todavía no lo
+    // vio, y prometer que "lo está confirmando" sería falso.
+    estadoSinRecorrido: 'Todavía no confirmamos el pago. Te avisamos apenas esté.',
     // S100-D · L3 · la ceremonia de la entrega. NO repite «Entregado» —
     // eso ya lo dice la escalera, que es el ESTADO. Esto es el MOMENTO, y
     // por eso está en pasado y en voz de familia. Cero euforia de compra:

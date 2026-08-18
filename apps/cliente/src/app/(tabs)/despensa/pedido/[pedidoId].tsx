@@ -72,7 +72,7 @@ import {
 } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
-import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
@@ -326,11 +326,30 @@ export default function DespensaPedido() {
                         hasta: horaLocal(detalle.pedido.promesa_hasta),
                       })
                     : undefined;
-                const { pasos, desvio } = escaleraDePedido(
+                const escalera = escaleraDePedido(
                   detalle.pedido.narrativa,
                   voces,
                   detalleActual,
                 );
+                const { pasos, desvio } = escalera;
+                // 🔴 S100b-D · EL DETALLE TAMBIÉN QUEDABA MUDO, y era la
+                // MISMA causa que en la lista (ver `escaleraMuda`). Con
+                // `pagando` la pieza no dibuja —su regla de existencia es
+                // correcta— así que la zona 1, que es *el lugar donde el
+                // dueño busca en qué anda su pedido*, no renderizaba nada.
+                // El hallazgo llegó por la lista; **la segunda superficie
+                // solo aparece midiendo las dos**, y por eso el criterio
+                // vive en una función y no en un `if` por pantalla.
+                if (escaleraMuda(escalera)) {
+                  return (
+                    <View style={{ gap: spacing[1] }}>
+                      {/* El nombre del estado sale del CATÁLOGO —dato, no un
+                          `switch`— y la voz que lo explica, del riel. */}
+                      <Texto variante="seccion">{detalle.pedido.narrativa_nombre}</Texto>
+                      <Texto variante="apoyo">{t('despensa.estadoSinRecorrido')}</Texto>
+                    </View>
+                  );
+                }
                 return (
                   <EscaleraEstados
                     pasos={conIconos(pasos)}

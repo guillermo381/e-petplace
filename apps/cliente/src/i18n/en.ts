@@ -1409,6 +1409,14 @@ export const clienteEn = {
     pasoPreparando: 'Preparing',
     pasoEnCamino: 'On the way',
     pasoEntregado: 'Delivered',
+    // S100b-D · THE VOICE OF AN ORDER THAT HAS NO JOURNEY YET. The state's
+    // NAME comes from the catalogue (`narrativa_nombre`); this explains what
+    // it means. It must be true for BOTH cases `pagando` covers —payment not
+    // yet confirmed and risk review— because telling someone they are under
+    // fraud suspicion is mistreatment (`_despensa-comun.ts`). That is why it
+    // speaks of the PAYMENT and not the seller: the seller has not seen it
+    // yet, and saying they are confirming it would be false.
+    estadoSinRecorrido: "We haven't confirmed the payment yet. We'll let you know as soon as we do.",
     // S100-D · L3 · the delivery ceremony. It does NOT repeat "Delivered" —
     // the ladder already says that, and that is the STATE. This is the
     // MOMENT. No purchase euphoria: this house does not celebrate
