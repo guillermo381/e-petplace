@@ -48,6 +48,34 @@
  * **Precedente directo:** `Hoja` absorbió su `insets.bottom` en S65 por
  * este mismo motivo, y desde entonces nadie tuvo que acordarse.
  *
+ * 🔴 **Y EL INSET SE DERIVA, NO SE SUMA — LA PIEZA SE COBRÓ SU PROPIA LEY
+ * (S100c-B, medido en aparato).** El founder reportó *«~1 cm muerto entre el
+ * botón y el menú»*. **Medido en el SM-S938B:** barra de navegación del
+ * sistema **52 dp** · `insets.bottom + spacing[3]` = **64 dp** de reserva ·
+ * y el CTA quedó con su base en **638 dp** contra el filo de la barra de
+ * tabs en **699** ⇒ **61 dp de hueco**. *Dos cuentas, un número: la reserva
+ * predicha explica el hueco medido.*
+ *
+ * **La causa: adentro de `(tabs)` el navegador YA reserva la barra del
+ * sistema** —lo mismo que B midió para el scroll (`ScrollView` de una
+ * pantalla de tab termina exactamente en 699 dp)—, así que sumarle
+ * `insets.bottom` **lo cuenta dos veces.** *Es el defecto que esta pieza
+ * nació para matar, cometido por la pieza misma: dos números que deben
+ * coincidir saliendo de dos lugares.*
+ *
+ * ⇒ **La cura NO es una prop** (`absorbeInset?: boolean` habría devuelto la
+ * decisión al consumidor, que es justo lo que la Ley 8 prohíbe **y** habría
+ * dejado el par descoordinado otra vez). **Se DERIVA:** el contenedor se
+ * mide en la ventana y reserva **solo lo que falta** entre su base y la base
+ * de la pantalla. Adentro de tabs eso da **0**; en una pantalla suelta da el
+ * inset entero. *El consumidor no tiene nada que declarar porque no hay nada
+ * que saber.*
+ *
+ * ⚠️ **NO TIENE OJO TODAVÍA.** Se midió el defecto en el aparato; **la cura
+ * no se vio correr** —eso exige un publish— y su modo de falla, si la
+ * derivación se equivoca, es **el pie pegado al borde** en una pantalla
+ * suelta. **Va al gate del conjunto.**
+ *
  * ── LO QUE ESTA PIEZA NO HACE ──────────────────────────────────────
  * No decide qué va en el pie (recibe un `ReactNode`), no dibuja fondo
  * propio más allá del de la pantalla, y **no opina sobre cuántas acciones
@@ -59,8 +87,8 @@
  * de todo lo que quedaba debajo.*
  */
 
-import { useState, type ReactNode } from 'react'
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
+import { useRef, useState, type ReactNode } from 'react'
+import { Dimensions, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { spacing } from '../tokens/spacing'
@@ -111,6 +139,13 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
    *  layout — un frame sin reserva no se ve porque el pie tampoco está
    *  dibujado todavía. */
   const [altoPie, setAltoPie] = useState(0)
+  /** 🔴 LO QUE FALTA DEL INSET, DERIVADO (ver cabecera).
+   *
+   *  Arranca en `insets.bottom` —el valor CONSERVADOR: si la medición nunca
+   *  llegara, el pie queda separado de más, jamás pegado al borde. *De los
+   *  dos errores posibles se elige el que no tapa nada.* */
+  const [insetFaltante, setInsetFaltante] = useState(insets.bottom)
+  const contenedor = useRef<View>(null)
 
   const propio = StyleSheet.flatten(contentContainerStyle) ?? {}
   /** `paddingBottom` puede venir como número o como porcentaje/string; solo
@@ -120,7 +155,23 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
   const propioAbajo = typeof propio.paddingBottom === 'number' ? propio.paddingBottom : 0
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <View
+      ref={contenedor}
+      /* LA DERIVACIÓN DEL INSET: cuánto de la barra del sistema queda
+         REALMENTE debajo de esta pieza. Adentro de `(tabs)` el navegador ya
+         la reservó y su base coincide con la del área útil ⇒ falta 0. En una
+         pantalla suelta la base llega al borde físico ⇒ falta el inset
+         entero. **La pieza no pregunta dónde está montada: lo mide.** */
+      onLayout={() => {
+        contenedor.current?.measureInWindow((_x, y, _w, alto) => {
+          const baseDePantalla = Dimensions.get('screen').height
+          const yaReservado = Math.max(0, baseDePantalla - (y + alto))
+          const falta = Math.max(0, insets.bottom - yaReservado)
+          setInsetFaltante((previo) => (Math.abs(previo - falta) < 0.5 ? previo : falta))
+        })
+      }}
+      style={{ flex: 1, backgroundColor: theme.bg.base }}
+    >
       <ScrollView
         {...scrollProps}
         contentContainerStyle={[
@@ -177,8 +228,10 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
             bottom: 0,
             paddingHorizontal: spacing[5],
             paddingTop: spacing[3],
-            // El inset del sistema es de la pieza (ver la cabecera).
-            paddingBottom: insets.bottom + spacing[3],
+            // El inset del sistema es de la pieza (ver la cabecera), y va
+            // DERIVADO: solo lo que falta. Adentro de tabs esto es 0 y el
+            // pie deja de tener ~52 dp de hueco muerto debajo.
+            paddingBottom: insetFaltante + spacing[3],
             backgroundColor: theme.bg.base,
             gap: spacing[2],
           }}
