@@ -297,6 +297,50 @@ function ObjetoDestino({ lado }: { lado: number }) {
   )
 }
 
+/**
+ * 🔴 LA MARCA SIN SU POSICIÓN — S100c-B, pedido de la pista D.
+ *
+ * **El hueco, y era mío:** `PinEnMapa` suelda DOS responsabilidades —
+ * **dónde va** (traduce x/y y anima el viaje, `position:'absolute'`) y
+ * **qué se dibuja** (el objeto del mundo con su física de §6ter). El slot
+ * `marcadorVivo` / `marcadorDestino` de `MapaRecorrido` **solo necesita la
+ * segunda**: ahí el `<Marker>` del mapa ya resolvió la posición.
+ *
+ * *Montar `PinEnMapa` adentro de un `Marker` obliga a pasarle `x={0} y={0}`
+ * —una posición inventada para satisfacer una prop que ahí no significa
+ * nada— y encima le deja un `position:'absolute'` dentro de un contenedor
+ * que no lo espera.* **Eso no es usar la pieza: es esquivarla.**
+ *
+ * ⇒ **`MarcaDeMapa` es el DIBUJO solo.** `PinEnMapa` pasa a ser *«la marca
+ * MÁS su viaje»* y la consume, así que **hay un solo dibujo y no dos que
+ * se puedan desincronizar** (L-284: un par que debe coincidir y sale de dos
+ * lugares es una bomba con temporizador).
+ *
+ * ⛔ **Y NO NACE UN GLIFO `moto` EN `Icono`, que era lo que se me pidió.**
+ * `DIRECCION_ARTE` **§6ter está FIRMADA** (mesa, 15-ago-2026) y dice que
+ * *el mapa no es interfaz, es MUNDO*: la marca de mapa es **masa y no
+ * trazo**, lleva anillo de separación y **no lleva huella** —no por la
+ * exención de los glifos de control, sino porque **ahí la Ley 12 no
+ * gobierna**—. Meterla en `Icono` la pondría bajo R30 como glifo de
+ * interfaz e invitaría a montarla a 21 px junto a una huella, que es
+ * exactamente lo que §6ter existe para impedir.
+ *
+ * **La moto YA EXISTE y ya pasó su gate con el founder** (silueta D
+ * firmada, con la corrección de sobre-corrección escrita arriba). *Lo que
+ * faltaba no era dibujarla: era poder montarla sin su posición.*
+ */
+export function MarcaDeMapa({
+  variante,
+  lado = LADO_OBJETO,
+}: {
+  variante: 'moto' | 'destino'
+  /** Default `LADO_OBJETO` (44) — el blanco que §6ter le da a los objetos
+   *  del mundo, para que no compitan en tamaño con el pin de la mascota. */
+  lado?: number
+}) {
+  return variante === 'moto' ? <ObjetoMoto lado={lado} /> : <ObjetoDestino lado={lado} />
+}
+
 export function PinEnMapa({ variante = 'mascota', nombre, fotoUrl, especie, x, y }: PinEnMapaProps) {
   const { theme } = useTheme()
   /** El hook se llama SUELTO y se combina después — `memorial || hook()`
