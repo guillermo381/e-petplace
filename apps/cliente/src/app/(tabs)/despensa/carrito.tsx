@@ -49,11 +49,13 @@ import {
   StepperCantidad,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
   mascotasElegibles,
+  maximoComprableDeOfertas,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
   revalidarCarritoDespensa,
@@ -74,6 +76,7 @@ import {
   precioNuevoDelItem,
   problemaDelItem,
 } from '@/lib/despensa/disponibilidad';
+import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
@@ -85,7 +88,52 @@ type Fase<T> = T | 'cargando' | 'error';
 export default function DespensaCarrito() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const { mostrar } = useAviso();
   const items = useCarrito();
+
+  /**
+   * 🔴 PUNTO 20 (S100d) · SUBIR LA CANTIDAD PREGUNTA CUÁNTO SE PUEDE LLEVAR.
+   *
+   * La decisión NO está acá: está en `decidirTope`, pura y compartida por las
+   * tres puertas (ficha · vitrina · carrito). Acá solo vive el viaje al motor y
+   * la voz. *Si la regla viviera en esta pantalla, curarla en el carrito la
+   * dejaría rota en las otras dos — que es exactamente el estado que encontré.*
+   *
+   * ⚠️ BAJAR NO CONSULTA, y no es un atajo: soltar unidades siempre se puede.
+   * Preguntarle al motor permiso para llevar MENOS es un viaje que no decide
+   * nada, y en una pantalla donde el dedo repite el «−» se pagaría en cada
+   * toque.
+   *
+   * ⚠️ LEY 13 — si la consulta falla, `decidirTope` devuelve `sin_medir` y
+   * **se aplica lo pedido**. El motor sigue siendo la última palabra al pagar.
+   * *Un fallo de red no se disfraza de «no hay stock».*
+   */
+  const ajustarCantidadConTope = useCallback(
+    async (item: { oferta_id: string; cantidad: number }, n: number): Promise<void> => {
+      if (n <= item.cantidad) {
+        fijarCantidad(item.oferta_id, n);
+        return;
+      }
+      const r = await maximoComprableDeOfertas([{ oferta_id: item.oferta_id, cantidad: n }]);
+      const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
+      const tope = decidirTope(n, maximo);
+      if (tope.clase === 'agotado') {
+        // Se agotó entre que se pintó el carrito y este toque. La cantidad NO
+        // se toca: la fila ya tiene su propia voz de bloqueo (`itemsBloqueados`)
+        // y bajarla sola escondería que el producto se cayó.
+        mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+        return;
+      }
+      if (tope.clase === 'acotado') {
+        mostrar({
+          texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
+          variante: 'neutro',
+        });
+      }
+      fijarCantidad(item.oferta_id, tope.cantidad);
+    },
+    [mostrar, t],
+  );
 
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [fotos, setFotos] = useState<Record<string, string>>({});
@@ -398,7 +446,18 @@ export default function DespensaCarrito() {
                     valor={item.cantidad}
                     min={1}
                     max={99}
-                    onCambio={(n) => fijarCantidad(item.oferta_id, n)}
+                    /* 🔴 PUNTO 20 (S100d) · SUBIR ACÁ TAMBIÉN CONSULTA EL TOPE.
+                       El founder: *«pedí 3 y hay 1»*. Medido en S100d: de las
+                       TRES puertas que suben cantidad, solo la ficha topeaba —
+                       la vitrina y ésta escribían el carrito sin preguntar
+                       nada. ⇒ la mala noticia llegaba recién en la caja.
+                       La regla vive en `tope-de-compra.ts`, una sola vez para
+                       las tres (no puede vivir en `StepperCantidad`: el dato es
+                       una consulta al motor y la pieza es presentacional).
+                       ⚠️ Bajar no consulta: soltar unidades siempre se puede, y
+                       preguntarle al motor por permiso para llevar MENOS es un
+                       viaje que no decide nada. */
+                    onCambio={(n) => void ajustarCantidadConTope(item, n)}
                     onBorrar={() => quitarDelCarrito(item.oferta_id)}
                     etiqueta={t('despensa.cantidadDe', { nombre: item.nombre })}
                   />

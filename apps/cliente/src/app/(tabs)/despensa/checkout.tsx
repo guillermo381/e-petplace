@@ -683,14 +683,53 @@ export default function DespensaCheckout() {
                   <Texto variante="apoyo">{t('despensa.retiroDetalle')}</Texto>
                 </View>
               ) : (
-                <>
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                {/* 🔴 PUNTO 17 (S100d) · LA FICHA DE ENTREGA.
+                    ═══════════════════════════════════════════════════════════
+                    Founder, verbatim: *«Falta el glifo de ubicación —sin huella
+                    dentro— y el label necesita soporte: crear una FICHA DE
+                    ENTREGA. Lo demás está bien»*.
+
+                    N21 lo autoriza y además nombra estas secciones con todas
+                    las letras: *«si el bloque tiene un rótulo que lo nombra
+                    («A dónde te lo llevamos», «Quién recibe») ese rótulo está
+                    declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
+                    superficie es un grupo que se anunció y no se dibujó»*.
+                    Acá había CUATRO rótulos y CERO superficies.
+
+                    ⚠️ POR QUÉ **UNA** CARTA Y NO CUATRO, que es la decisión:
+                    los puntos 18 («quién recibe») y 19 («cuándo se entrega»)
+                    están ✅ APROBADOS por el founder. Cuatro cartas los
+                    reestructura; UNA los deja intactos y solo pone el piso que
+                    faltaba. *Y son una sola cosa —la entrega—, que es lo que el
+                    founder nombró en singular.*
+
+                    ⚠️ `relleno="ninguno"` NO ES DECORACIÓN — es lo que conserva
+                    la anatomía de adentro: con relleno normal, la carta metería
+                    su propio padding y `CeldaNavegacion` dejaría de salir a
+                    sangre, que es el patrón que E14 fijó para la dirección.
+                    Con `ninguno`, «a sangre» pasa a significar «al borde de la
+                    carta» en vez de «al borde de la pantalla», y la celda sigue
+                    siendo el control de ancho completo que era.
+
+                    LA ARITMÉTICA, declarada porque NO SE VIO EN APARATO: los
+                    cinco `paddingHorizontal` de adentro bajan de `spacing[5]`
+                    (20) a `spacing[3]` (12) — el relleno normal de la casa
+                    dentro de una carta. La carta se separa 20 de la pantalla.
+                    ⇒ el rótulo queda a **32** del borde de la pantalla contra
+                    los 20 de antes, y la celda a **20** contra 0.
+                    *Introducir una carta MUEVE cosas: no hay forma de que no lo
+                    haga. Los números van escritos para que el ojo del gate
+                    juzgue un corrimiento declarado y no una sorpresa.* */}
+                <Tarjeta relleno="ninguno">
+                <View style={{ gap: spacing[4], paddingVertical: spacing[4] }}>
                   {/* 2 · A DÓNDE (§7) */}
                   <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[5] }}>
+                    <View style={{ paddingHorizontal: spacing[3] }}>
                       <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
                     </View>
                     {direccion === 'cargando' ? null : direccion === null ? (
-                      <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                      <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
                         <Texto variante="apoyo">{t('despensa.sinDireccion')}</Texto>
                         <Boton
                           variante="secundario"
@@ -747,7 +786,7 @@ export default function DespensaCheckout() {
                       resuelve: mostrar fijo un vacío sería un callejón, que es
                       peor que el campo que se sacó. */}
                   <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[5] }}>
+                    <View style={{ paddingHorizontal: spacing[3] }}>
                       <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
                     </View>
                     <CeldaNavegacion
@@ -762,7 +801,7 @@ export default function DespensaCheckout() {
                   {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
                       la pantalla, tal como pidió el gate. Y es justo el que
                       quedaba tapado por el CTA (medición de B, solape ③). */}
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                  <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
                     <Campo
                       label={t('despensa.instruccionesLabel')}
                       value={instrucciones}
@@ -773,7 +812,7 @@ export default function DespensaCheckout() {
                   </View>
 
                   {/* 4 · CUÁNDO — la ventana que el cupo respalda (§6.2/§7.2) */}
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                  <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
                     <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
                     {cuentaComercialId === null ? (
                       /* Hueco declarado #1 — el estado honesto, jamás una
@@ -866,7 +905,9 @@ export default function DespensaCheckout() {
                         callejón).
                         ═══════════════════════════════════════════════════════ */}
                   </View>
-                </>
+                </View>
+                </Tarjeta>
+                </View>
               )}
             </>
           )
@@ -1118,15 +1159,56 @@ export default function DespensaCheckout() {
         titulo={t('despensa.aDonde')}
         altura="completa"
       >
-        <DireccionHogarForm
-          inicial={direccion !== 'cargando' ? direccion : null}
-          exigirPunto
-          onGuardada={(d) => {
-            setDireccion(d);
-            if (telefono === '' && d.telefono !== null) setTelefono(d.telefono);
-            setHojaDireccion(false);
-          }}
-        />
+        <View style={{ gap: spacing[3] }}>
+          <DireccionHogarForm
+            inicial={direccion !== 'cargando' ? direccion : null}
+            exigirPunto
+            onGuardada={(d) => {
+              setDireccion(d);
+              if (telefono === '' && d.telefono !== null) setTelefono(d.telefono);
+              setHojaDireccion(false);
+            }}
+          />
+          {/* 🔴 PUNTO 28 (S100d) · ACÁ SE ROMPE EL DEADLOCK DE ARRANQUE.
+              ═══════════════════════════════════════════════════════════════
+              Founder: *«No tiene opción de guardar la dirección con un alias»*.
+
+              MEDIDO, y la causa NO era que faltara construirlo: el alias estaba
+              ENTERO —motor, wrapper, libreta y formulario con `conAlias`— y
+              **viajaba en la OTA que el founder miró** (`e9390704` es ancestro
+              de `e20113b6`, verificado con `merge-base --is-ancestor`, no de
+              memoria). *Lo que faltaba no era la pieza: era poder llegar a ella.*
+
+              EL MECANISMO, que es un candado que se cierra sobre sí mismo:
+                · la fila de dirección abría la LIBRETA solo con `length > 1`;
+                · con UNA dirección abría el formulario de edición, que no tiene
+                  alias ni camino a agregar;
+                · y el ÚNICO botón «agregar otra» vivía DENTRO de la libreta.
+              ⇒ para llegar a la libreta hacían falta dos direcciones, y para
+              tener dos había que pasar por la libreta. **El founder tiene una.
+              Nadie con una sola dirección podía salir de ahí jamás.**
+
+              ⚠️ LA REGLA DEL `length > 1` NO ERA EL ERROR Y POR ESO NO LA TOCO.
+              Su razón sigue en pie —*«un selector de un elemento es un paso que
+              no decide nada»*— y es cierta PARA ELEGIR. Lo que no vio es que la
+              libreta hacía DOS trabajos: elegir y agregar. El candado no lo puso
+              una regla equivocada: lo puso una regla correcta que era la única
+              puerta de otra cosa. *Es la misma forma que la Hoja de S100c: dos
+              decisiones buenas que juntas no pueden convivir.*
+
+              LA CURA es dar la segunda salida donde el que tiene UNA dirección
+              realmente está, en vez de mandarlo a un selector de un elemento.
+              Con dos o más, la libreta sigue presidiendo como siempre. */}
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={t('direccion.agregarOtra')}
+            onPress={() => {
+              setHojaDireccion(false);
+              setHojaAlias(true);
+            }}
+          />
+        </View>
       </Hoja>
 
       {/* 🔴 S100c · LA LIBRETA — elegir entre las direcciones guardadas.
