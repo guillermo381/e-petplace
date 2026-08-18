@@ -11711,6 +11711,68 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+### Lecciones S100c (L-296 → L-301) — depositadas por B el 18-ago-2026, con aparato
+
+- **L-301 — CUANDO DOS PISTAS CURAN SOBRE EL MISMO EJE, EL NÚMERO QUE DECIDE ES LA SUMA — Y LA SUMA NO ES DE NADIE (S100c · hallazgo de C sobre el cruce con N24; depositada 18-ago-2026).**
+
+  **B midió su tarjeta** (N24: el slot del control reservado ⇒ **+44 dp**, con su costo declarado y su acreedor nombrado). **C midió su cromo** (la vitrina pasó de 317 a **213 dp** antes del primer producto). **Las dos mediciones eran correctas, las dos declararon su costo, y ninguna de las dos podía ver el defecto**, porque el defecto no vivía en ninguno de los dos números.
+
+  **Medido por C en la vitrina viva, después del merge:** tarjeta **376 dp** desde 329 ⇒ termina en **705** contra un visor útil que acaba en **747**: entra con **42 dp de sobra**. **Con el cromo de esa misma mañana (317 dp)** habría ido de 433 a **809** ⇒ **se pasaba por 62 dp, y la primera fila salía cortada otra vez.**
+
+  ⇒ ***Se cruzaron por casualidad y salió bien.*** Si el merge hubiera entrado un día antes, el founder habría visto el mismo defecto que acababa de reportar, **y ninguna de las dos pistas lo habría entendido**: cada una tenía su número y su razón, y las dos seguían siendo ciertas.
+
+  **La regla que sale, y es de coordinación, no de diseño:** **una pista que cambia el alto (o el ancho) de algo que comparte eje con otra declara su delta EN EL EJE, no solo en su pieza** — y **quien tenga el aparato mide la SUMA contra el visor útil antes de que las dos entren.** *Un costo declarado en la pieza propia es honesto y no alcanza: el que corta no es el costo, es el total.*
+
+  **Y su corolario operativo, con su número vivo:** la vitrina quedó con **42 dp de margen**. **Ése es el presupuesto, y la próxima pieza que agregue alto lo consume.** *Un margen que nadie escribe se gasta dos veces.*
+
+
+- **L-300 — UN BACKTICK DENTRO DE UN MENSAJE DE COMMIT ENTRECOMILLADO ES SUSTITUCIÓN DE COMANDO: EL MENSAJE PIERDE TEXTO Y EL COMMIT SALE VERDE (S100c-B — error propio, medido después de pushear; depositada 18-ago-2026).**
+
+  Esta casa escribe mensajes de commit largos, en prosa, **llenos de backticks** —es su convención para nombrar archivos, props y funciones—. Con `git commit -m "…"` en zsh/bash, **cada par de backticks se ejecuta como comando y su salida reemplaza al texto.**
+
+  **Medido:** el mensaje decía *«los dos en un solo `etiqueta`»* y quedó *«los dos en un solo  —»*. El shell imprimió `command not found: etiqueta`, **`git commit` devolvió 0, el gate de pre-commit dio verde y el push salió limpio.** *Ninguno de los tres semáforos de la casa mira el contenido del mensaje.*
+
+  ⇒ **El mensaje de un commit se verifica DESPUÉS de escribirlo** (`git log -1 --format=%B`), o se escribe por una vía que no interpreta: `-F archivo`, `-F -` por stdin, o comillas simples. **Y la corrección no se hace reescribiendo la historia de una rama ya pusheada** — se anota, porque *forzar un push para arreglar una palabra le rompe el árbol a quien ya la trajo.*
+
+  **Su familia es la de siempre y por eso vale:** la verificación cuyo modo de falla es el silencio no es una verificación (L-192). Acá el silencio es doble — el commit funciona **y** el texto perdido es justo el que explicaba por qué algo no se hizo.
+
+
+> **Las cuatro nacieron midiendo, y tres de ellas cazaron un error de quien las escribió o de quien las encargó.** *Techo verificado por grep contra este archivo antes de numerar: L-295 → siguiente libre L-296* (`L-714` sigue descartado por su propia ficha: es un typo de `D-714`, no una lección).
+
+- **L-296 — UN HALLAZGO CAMBIA DE SIGNIFICADO SI SE PIERDE SOBRE QUÉ OBJETO SE OBSERVÓ (S100c — error de la mesa, declarado por la mesa; depositada 18-ago-2026).**
+
+  La mesa transmitió a B una observación del founder sobre color de texto —*«lo más importante en el color de acento y el complemento en color normal… me rompe la rutina visual»*— **como si fuera un hallazgo sobre NUESTRA app. El founder estaba describiendo LAIKA**: el `7 % OFF` en verde junto al precio en negro, la membresía en gris con corona, las etiquetas de oferta.
+
+  **El censo de B no lo reprodujo, y en vez de rellenarlo lo declaró:** `Texto` no tiene color de acento (`primary | secondary | tertiary | danger | success | warning`), `PrecioText` no tiñe, cero `color:` explícito en toda la despensa. **Los tres candidatos más cercanos resultaron legales bajo la ley misma.**
+
+  ⇒ **Un encargo que llega sin su objeto se mide antes de obedecerse.** *El mismo texto describiendo el mismo síntoma es un rojo si el sujeto somos nosotros y una vara si el sujeto es el referente* — y **la diferencia no está en la observación: está en el dato que la mesa no transmitió.** Hermana de L-288 (*el caso lo tiene quien consume*) por el otro lado: acá el caso lo tenía quien MIRÓ, y se perdió al pasarlo.
+
+  **Y el corolario que salva el trabajo en vez de tirarlo: la ley se depositó igual y es correcta.** No cura — **IMPIDE**. *Una ley que nace antes que su defecto es lo más barato que esta casa puede comprar*, y ahora tiene su caso de estudio con nombre y medido: el anti-patrón vive en la referencia.
+
+- **L-297 — CUANDO DOS OBJETOS MIDEN IGUAL EN LA VARIABLE OBVIA, LA VARIABLE OBVIA NO ES LA CAUSA (S100c — la ley de superficies; depositada 18-ago-2026).**
+
+  El founder dijo *«se pierde porque queda entre colores»*, y la lectura de primera intención es **contraste**. Medido: **nuestra carta contra su fondo da 1,10; la de Laika, 1,119.** *Prácticamente el mismo número.* ⇒ **subir el contraste habría oscurecido la app sin arreglar nada**, y encima habría movido un valor que ya estaba bien.
+
+  **Lo que sí discrimina es otra variable, y salta sola cuando se la mide:** el reparto del área. **Carrito de Laika 22,4 % fondo / 45,1 % superficie; el nuestro 69,7 % / 10,2 %.** *No falta contraste: falta superficie.*
+
+  ⇒ **Antes de mover la variable que el síntoma sugiere, se mide en el referente.** Si ahí vale lo mismo, **la causa es otra y moverla es empeorar por el lado correcto.** Hermana de L-285 (*al reabrir un freno no se re-corre su cuenta: se re-pregunta QUÉ MAGNITUD DECIDE*), acá aplicada antes de tocar nada en vez de después.
+
+- **L-298 — UN NÚMERO IGUAL SOBRE ANATOMÍAS DISTINTAS NO COMPARA NADA (S100c — los dos ceros; depositada 18-ago-2026).**
+
+  El censo de superficies dio **0 planos** para nuestro detalle de pedido **y también 0 planos** para el resumen de Laika. **No significaban lo mismo.** Laika tiene **siete cartas** ahí, separadas por **hairline** sobre fondo casi-blanco: el relleno no las distingue y el instrumento no las veía. Lo nuestro es **un solo color al 88,5 %**. Censo completo: **Laika 0 planos · 23 reglas** contra **nuestro 0 · 0**.
+
+  ⇒ **Dos objetos que producen el mismo número por mecanismos distintos no son comparables, y el número no avisa.** El instrumento se enmendó para contar **planos Y reglas**, y para **declarar `0/0` como pregunta** en vez de veredicto. *Apoyar la ley en esa equivalencia habría sido L-294 en su forma más cara: la conclusión era correcta y la premisa, falsa.*
+
+  **Es la ley del agregado de S99 aplicada a una equivalencia:** *un agregado sobre objetos distintos no mide ninguno* — acá, **un cero sobre anatomías distintas no describe ninguna.**
+
+- **L-299 — NINGUNA AUDITORÍA DE BLANCOS SE HACE DESDE EL ÁRBOL DE ACCESIBILIDAD SOLO (S100c — error propio de B, cazado antes de reportar; depositada 18-ago-2026).**
+
+  B reportó que el carrito del encabezado **violaba N8**: `uiautomator dump` daba `23,8 × 23,8 dp` contra los 44 de ley. **Era falso.** El `Pressable` lleva `hitSlop={spacing[3]}` ⇒ **24 + 12×2 = 48 dp de blanco efectivo**, que **supera** el mínimo.
+
+  **`uiautomator dump` NO reporta `hitSlop`.** Las `bounds` son las del `View`, no las del área táctil ⇒ **el árbol sub-reporta por exactamente `2 × hitSlop`**, y esta casa usa `hitSlop` como recurso normal y firmado (`Boton`, `GlifoConContador`, el timbre `+` de `TarjetaProducto`, que es justo la forma de cumplir N8 sin agrandar el píxel).
+
+  ⇒ **Todo blanco se verifica contra la FUENTE, o contra el árbol MÁS su `hitSlop`.** *Lo cazó que dos cuentas no coincidieran —el árbol decía 23,8 y la fuente decía 48—, no una relectura más cuidadosa de la captura* (L-287). **Y su gemela ya estaba escrita del otro lado:** en S100b el árbol reportaba precios de filas recortadas que la pantalla no mostraba. **El árbol miente en las dos direcciones: dice de más lo que no se ve, y de menos lo que sí se toca.**
+
 ### Lecciones S100 (L-286 → L-295) — depositadas en la apertura de S100b por orden de mesa, 17-ago-2026
 
 > **Por qué se depositan acá y no quedan en las bitácoras: vivían en `docs/loop/S100-{A,B,C,D}.md` y en la mesa, que es exactamente lo que la pista siguiente NO lee.** La misma jornada lo cobró dos veces — **G-16 volvió cuatro veces** porque la firma que lo prohibía no estaba en la letra, y **N11′ estuvo a punto** porque su bitácora se declaraba «DEPOSITADA VERBATIM» sin estarlo en la letra. ***UNA FIRMA QUE VIVE EN UN PARTE NO ESTÁ FIRMADA.***
