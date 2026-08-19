@@ -213,8 +213,17 @@ import { useTraduccionUi } from '../i18n'
    compensarlo encogiendo la letra, que es justo lo que la cabecera de
    esta pieza prohíbe.* Su juez es el ojo en dispositivo. */
 const RELACION_FOTO = 1
-/** El techo del stepper en la vitrina. Comprar 30 sacos es un caso de
- *  ficha, no de grilla: acá el gesto es «lo quiero», no «cuántos». */
+/** ⏪ **ERA 12, con esta razón: *«comprar 30 sacos es un caso de ficha, no de
+ *  grilla: acá el gesto es lo quiero, no cuántos»*. S100d·bis LA DEROGA con
+ *  un caso real del founder:** *«a veces compro barf y pido 50 unidades»*.
+ *  **La premisa era falsa para una clase entera de producto** —la comida
+ *  cruda se compra por volumen— y el tope la volvía inalcanzable desde la
+ *  grilla sin que nada lo explicara.
+ *
+ *  **99 no es un número de negocio: es de LEGIBILIDAD** (dos cifras en el
+ *  control). 🔴 **El límite real es el STOCK, y no lo aplica esta pieza:** no
+ *  lo conoce —`hayStock` es booleano por firma— así que lo acota el motor con
+ *  `LEAST(pedido, disponible)` y la pantalla lo dice con un aviso efímero. */
 /** EL ALTO DEL ESCALÓN DEL CONTROL — N24 (S100c-B), re-encuadrado en S100d-B.
  *
  *  Se DERIVA del alto real del stepper compacto: no es un `36` tecleado. *Si
@@ -226,7 +235,7 @@ const RELACION_FOTO = 1
  *  los dos estados. *La constante no cambió de valor ni de origen; cambió de
  *  trabajo, y se dice acá porque su nombre viejo describía el otro.* */
 
-const TOPE_EN_VITRINA = 12
+const TOPE_EN_VITRINA = 99
 
 export interface TarjetaProductoProps {
   nombre: string
@@ -756,6 +765,10 @@ export function TarjetaProducto({
                     // F-OCRE / N26 v2: lo que se ajusta acá es una compra.
                     registro="compra"
                     tamano="ancho"
+                    // El número se tipea (el caso del barf). En la vitrina el
+                    // cero devuelve el botón: nada desaparece.
+                    editable
+                    salida="vuelve-al-boton"
                     /* 🔴 LA PAPELERA VUELVE A LA GRILLA, y esto DEROGA la
                        cláusula de `StepperCantidad` que decía *«en la grilla
                        no»*. **Su argumento era que ahí bajar de 1 no hace

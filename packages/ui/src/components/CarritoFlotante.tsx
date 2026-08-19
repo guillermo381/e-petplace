@@ -83,6 +83,19 @@
  * L-301 con otro disfraz. **Se exporta derivada del disco: si el disco cambia
  * de tamaño, la cola lo sigue sola.**
  *
+ * ── 🔴 VIVE EN EL SHELL — N28, firma del founder (S100d·bis) ──────────
+ * *«mientras tenga productos debe estar visible en TODA la app, y desaparece
+ * cuando no tiene productos»*. **Su condición de existencia es el CARRITO, no
+ * la ruta** ⇒ se monta UNA vez sobre las tabs, no por pantalla.
+ *
+ * **Dónde se CALLA, y la lista es parte de la ley:** `carrito` y `checkout`.
+ * *Ahí el carrito no es un destino: es la pantalla en la que ya estás, y una
+ * puerta al cuarto donde estás parado es ruido con forma de atajo.*
+ *
+ * ⚠️ **Subir al shell NO lo exime de su cola:** sigue siendo overlay puro y
+ * **cada pantalla paga su `COLA_CARRITO_FLOTANTE`**. *El shell decide dónde
+ * VIVE una pieza, no quién paga su espacio.*
+ *
  * ── EL COLOR: F-OCRE, Y EL PAR YA ESTABA MEDIDO ───────────────────────
  * Disco en `accent.cta` (el oro del CTA del cliente) con el glifo en
  * `accent.ctaTexto` (tinta) — **8.40 en claro, 9.96 en los dos temas**; el
@@ -169,9 +182,21 @@ export interface CarritoFlotanteProps {
    *  productos»*—. **Obligatoria:** el nodo que se toca es éste y un botón
    *  sin nombre no se activa a ciegas. */
   etiqueta: string
+  /**
+   * Cuánto levantarlo desde el borde inferior, en dp.
+   *
+   * **Existe porque la pieza no sabe qué hay debajo.** Montada en el shell, lo
+   * que hay debajo es **la barra de tabs**, y su alto lo mide el shell con un
+   * `onLayout` en vez de teclearlo — *un número tecleado ahí miente en el
+   * primer teléfono con otra barra, y ya pagamos esa forma dos veces hoy.*
+   *
+   * Ausente = se apoya en el borde con su aire propio (el caso de una pantalla
+   * suelta, sin barra debajo).
+   */
+  aireInferior?: number
 }
 
-export function CarritoFlotante({ cuenta, onAbrir, etiqueta }: CarritoFlotanteProps) {
+export function CarritoFlotante({ cuenta, onAbrir, etiqueta, aireInferior = 0 }: CarritoFlotanteProps) {
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado()
 
@@ -183,7 +208,7 @@ export function CarritoFlotante({ cuenta, onAbrir, etiqueta }: CarritoFlotantePr
       /* La pieza se posiciona SOLA — overlay puro (ver la cabecera). El
          consumidor solo la monta como hermana del scroll y le da la cola. */
       style={[
-        { position: 'absolute', right: spacing[5], bottom: spacing[5] },
+        { position: 'absolute', right: spacing[5], bottom: spacing[5] + aireInferior },
         estiloPresionado,
       ]}
     >

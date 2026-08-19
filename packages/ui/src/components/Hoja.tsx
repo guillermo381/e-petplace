@@ -137,6 +137,40 @@ export interface HojaScrollProps {
   children: ReactNode
   style?: object
   contentContainerStyle?: object
+  /**
+   * 🔴 **EL EJE — S100d·bis, y nace de un rojo MEDIDO por la pista C en
+   * aparato, con su contra-caso.**
+   *
+   * ⏪ **Esta pieza resolvía el arbitraje SOLO para el eje vertical**, porque
+   * ése fue el caso que la parió (S45-B3.2: listas anidadas en una Hoja). **Y
+   * el mismo defecto existía en horizontal sin que nadie lo hubiera ejercido:**
+   * una tira de chips adentro de una Hoja **no scrollea** — el `Gesture.Pan`
+   * del swipe-to-close le gana el arrastre.
+   *
+   * **El rojo de C, con lo que lo vuelve una medición y no una impresión:**
+   * ```
+   * arrastre HORIZONTAL real …… los 4 chips quedan en x135 · x356 · x595 · x880
+   *                             ANTES y DESPUÉS: idénticos, ni un píxel
+   * contra-caso VERTICAL ……… «Marca» y1079 → y436   (643 px)
+   * ```
+   * ⇒ **el gesto LLEGA y el horizontal lo captura otro.** *Sin el contra-caso,
+   * «no se movió» también podía ser «el swipe no entró», y la cura habría ido
+   * a la causa equivocada.*
+   *
+   * ⚠️ **El daño no era estético:** en «Para qué animal» **5 opciones y solo 4
+   * alcanzables**, y en Precio *«Más de $50»* con **ancho CERO**, clipeado
+   * fuera de pantalla. ***Un filtro inalcanzable es peor que uno ausente:
+   * ocupa lugar y promete.***
+   *
+   * ✅ **Y la degradación NO es una cortesía: es la condición** (restricción de
+   * C, y tiene razón). `FiltroPills` vive **también fuera** de una Hoja —la
+   * barra de mascotas de la vitrina, la portada del prestador—, así que sin
+   * `pan` en el contexto esto es un `ScrollView` común. *Un componente que solo
+   * anda dentro de su padre es una pieza con dueño oculto.*
+   */
+  horizontal?: boolean
+  /** Passthrough — una tira de chips no muestra su barra. */
+  showsHorizontalScrollIndicator?: boolean
 }
 
 /**
@@ -152,7 +186,7 @@ export interface HojaScrollProps {
  * ScrollView normal.
  */
 export const HojaScroll = forwardRef<GHScrollView, HojaScrollProps>(function HojaScroll(
-  { children, style, contentContainerStyle },
+  { children, style, contentContainerStyle, horizontal = false, showsHorizontalScrollIndicator },
   ref,
 ) {
   const pan = useContext(HojaPanContext)
@@ -166,6 +200,8 @@ export const HojaScroll = forwardRef<GHScrollView, HojaScrollProps>(function Hoj
     <GHScrollView
       ref={ref}
       nestedScrollEnabled
+      horizontal={horizontal}
+      showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
       style={style}
       contentContainerStyle={contentContainerStyle}
     >

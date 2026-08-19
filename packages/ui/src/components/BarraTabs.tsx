@@ -135,6 +135,13 @@ const AnimatedPath = Animated.createAnimatedComponent(Path)
  *  salta*. */
 /** El alto de la fila de tabs (el que ya tenía la barra). */
 const ALTO_FILA = 85
+/** El alto de la FILA de la barra, exportado para que quien flote encima lo
+ *  DERIVE en vez de teclearlo (S100d·bis — el carrito flotante del shell).
+ *  ⚠️ **No incluye `insets.bottom`**: el alto total es `ALTO_FILA + inset`, y
+ *  el inset lo pone el aparato. Quien flote arriba de la barra suma su propio
+ *  aire; quien necesite el total exacto, lo mide. *Se exporta la parte que es
+ *  de la pieza, no la que es del teléfono.* */
+export const ALTO_FILA_TABS = ALTO_FILA
 
 /** 🔴 ⏪ LA GEOMETRÍA SE REHIZO ENTERA (gate 3, tres hallazgos del founder
  *  sobre la misma pieza: *«la gráfica aparece dentro del círculo SIN
