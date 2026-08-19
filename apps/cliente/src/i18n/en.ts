@@ -1060,7 +1060,10 @@ export const clienteEn = {
     // obligaba a arrastrar sobre el mapa, y eso movía el punto.
     cambiarDireccion: 'Change the address',
     ajustarPunto: 'Adjust the point on the map',
-    listoConPunto: 'Done with the point',
+    confirmarPunto: 'Confirm point',
+    mapaBloqueado: 'The map is locked. Tap “Adjust point” to move it.',
+    guardarComoOtra: 'Save as another address',
+    guardarComoOtraAyuda: 'A name to recognize it later — “Office”, “Mom’s place”.',
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
