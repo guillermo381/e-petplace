@@ -470,7 +470,47 @@ export function SelectorOpcion({
         </Text>
       ) : null}
       {disposicion === 'tira' ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing[2] }}>
+        /* 🔴 `nestedScrollEnabled` — S100d·bis, y es la TERCERA causa del mismo
+            síntoma (rojo medido por C en aparato: en un producto de 3
+            comprables el tercer chip llega a `x 1022` sobre 1080 y **el
+            arrastre horizontal no lo mueve**).
+
+            **Las otras dos quedaron DESCARTADAS por la fuente, no por
+            intuición:**
+            · **arbitraje de gestos** (el pan de una `Hoja` gana el arrastre —
+              el caso de `FiltroPills`): **imposible acá, no hay ninguna `Hoja`
+              en la ficha.** *Sin pan no hay con quién competir.*
+            · **scroller sin acotar** (el caso de D en EN CAMINO): **no aplica,
+              esta pieza SÍ tiene su `ScrollView`.**
+
+            ⇒ **la causa es el ANIDAMIENTO:** la ficha envuelve todo en
+            `PantallaConPie`, que es un `ScrollView` vertical, y **en Android un
+            scroller anidado que no declara `nestedScrollEnabled` no recibe el
+            arrastre — el padre se lo queda.** *Por eso el contra-caso vertical
+            de C sí movía: el que respondía era el padre.*
+
+            ✅ **El discriminador es la pieza de al lado que SÍ funciona:**
+            `HojaScroll` lo declara (`Hoja.tsx:202`) y esta tira no. *Dos
+            scrollers de la misma casa, uno anda y el otro no, y la única
+            diferencia es esta línea.*
+
+            ⚠️ **TRES pantallas, TRES síntomas idénticos, TRES causas
+            distintas.** *Es la clase de defecto que se «cura» tres veces mal
+            si uno se guía por cómo se ve en vez de por qué lo produce* — y por
+            eso acá no se aplicó la cura de `FiltroPills`, que no habría hecho
+            nada y habría llevado a concluir que el arbitraje no era el
+            problema (falso: lo era, en la otra pieza).
+
+            ⚠️ **Y el origen del desborde, declarado por C y conservado:** su
+            desambiguación por precio **lo agravó, no lo creó** — con etiquetas
+            cortas ya desbordaba a los cuatro chips. **L-284: un cambio que
+            destapa un defecto latente se lleva la culpa del defecto.** */
+        <ScrollView
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ flexDirection: 'row', gap: spacing[2] }}
+        >
           {chips}
         </ScrollView>
       ) : (

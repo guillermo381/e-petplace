@@ -332,6 +332,15 @@ export function FichaPrestador({
           <ScrollView
             ref={riel}
             horizontal
+            /* `nestedScrollEnabled` — S100d·bis. **Su caso NO está medido acá;
+               la CLASE sí:** en Android un scroller horizontal anidado en uno
+               vertical que no lo declara **no recibe el arrastre — el padre se
+               lo queda**, y esta casa lo cobró en `SelectorOpcion` con rojo
+               producido en aparato. *La bandera es inerte cuando no hay
+               anidamiento, así que ponerla no cuesta nada y no ponerla deja una
+               bomba con temporizador.* **Se ejecuta el censo en vez de escribir
+               la ley y esperar el cuarto cobro** (S99 hizo lo segundo). */
+            nestedScrollEnabled
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEnabled={cicla}
