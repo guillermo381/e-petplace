@@ -54,7 +54,8 @@
  * esta pieza viven en la misma casa.
  */
 
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { HojaScroll } from './Hoja'
 import Svg from 'react-native-svg'
 
 import { Icono, type IconoNombre } from './Icono'
@@ -242,10 +243,18 @@ export function FiltroPills<C extends string>({
     return <View style={{ ...aire, flexDirection: 'row', flexWrap: 'wrap' }}>{chips}</View>
   }
 
+  /* 🔴 LA TIRA CEDE EL GESTO — S100d·bis, contra el rojo medido por C.
+     ⏪ Era un `ScrollView` de react-native a secas: **adentro de una Hoja, el
+     `Gesture.Pan` del swipe-to-close le ganaba el arrastre y la tira no se
+     movía ni un píxel** (los cuatro chips en las mismas x antes y después).
+     `HojaScroll` es la pieza que la casa YA tenía para este arbitraje —solo
+     resolvía el eje vertical— y **fuera de una Hoja degrada a scroll común**,
+     que es la restricción que C puso y que esta pieza necesita: vive también
+     en la vitrina y en la portada del prestador. */
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={aire}>
+    <HojaScroll horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={aire}>
       {chips}
-    </ScrollView>
+    </HojaScroll>
   )
 }
 
@@ -286,7 +295,13 @@ export interface FiltroMascotasProps {
  *  haya relleno; acá no hay. */
 export function FiltroMascotas({ mascotas, elegida, onElegir }: FiltroMascotasProps) {
   return (
-    <ScrollView
+    /* Misma pieza que la tira de arriba, por la misma razón: si algún día esta
+       hilera se monta adentro de una Hoja, el pan del swipe-to-close le ganaría
+       el arrastre sin avisar. **Hoy vive FUERA de una Hoja y por eso degrada a
+       scroll común** — que es exactamente lo que hace `HojaScroll` sin `pan` en
+       el contexto. *Se migra ahora, con la de al lado, para que las dos hileras
+       de chips de la casa no envejezcan distinto.* */
+    <HojaScroll
       horizontal
       showsHorizontalScrollIndicator={false}
       // ⚠️ el aire de ARRIBA no es estético (ver FiltroPills): la pata
@@ -314,6 +329,6 @@ export function FiltroMascotas({ mascotas, elegida, onElegir }: FiltroMascotasPr
           onPress={() => onElegir(elegida === m.id ? null : m.id)}
         />
       ))}
-    </ScrollView>
+    </HojaScroll>
   )
 }
