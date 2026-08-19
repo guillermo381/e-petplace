@@ -502,6 +502,10 @@ export default function DespensaPedido() {
                   letra TINTA sobre ocre ……… **8,40**  ← el par firmado
                 **La letra en ocre está a menos de la mitad del piso más
                 permisivo de la casa** ⇒ pedirla sería pedir que no se lea.
+                ⏪ **Y el fondo NO lo causó, lo empeora** (censo de B): ya
+                fallaba a **1,62** sobre el papel anterior y a **1,70** sobre
+                blanco. *Atribuirle a un cambio reciente un defecto que ya
+                estaba es la forma más barata de arreglar lo que no era.*
                 *El founder pidió que se DESTAQUE y nombró el ocre; el ocre
                 cumple las dos cosas del otro lado del par — de relleno, con
                 la letra en tinta.* Y así destaca **más** que una letra de
@@ -521,8 +525,21 @@ export default function DespensaPedido() {
                       <Texto variante="seccion">{t('despensa.enCaminoEntrada')}</Texto>
                     </View>
                     <Texto variante="apoyo">{t('despensa.enCaminoEntradaDetalle')}</Texto>
+                    {/* 🔴 `primario` Y NO `acento` — ME EQUIVOQUÉ Y SE CUENTA.
+                        Monté `acento` creyendo que era el CTA oro RELLENO, y
+                        su receta es la contraria:
+                          `acento:   { fondo: 'transparent', texto: accent.cta }`  ← letra OCRE
+                          `primario: { fondo: accent.cta, texto: accent.ctaTexto }` ← relleno OCRE
+                        ⇒ **había montado exactamente el par que acababa de
+                        medir como imposible** (1,70 sobre carta blanca), con
+                        el comentario correcto escrito encima.
+                        *Medí el par, escribí la razón, y después elegí la
+                        variante por su NOMBRE en vez de por su receta —
+                        «acento» sonaba a «el del acento».* Lo cazó el censo
+                        de ocre de B, no yo.
+                        El par que rige: **ctaTexto sobre ocre = 9,96**. */}
                     <Boton
-                      variante="acento"
+                      variante="primario"
                       etiqueta={t('despensa.enCaminoCta')}
                       onPress={() =>
                         router.push({
