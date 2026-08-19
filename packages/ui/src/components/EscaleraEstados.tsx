@@ -519,7 +519,30 @@ export function EscaleraEstados({
               )}
             </View>
 
-            <View style={{ flex: 1, paddingBottom: spacing[4], gap: spacing[0.5] }}>
+            {/* 🔴 EL AIRE ENTRE EL NODO Y SU TEXTO — S100d·bis, firma del
+                founder: *«la letra está pegada a los pasos del stepper — hay
+                que separarla un poco hacia la derecha»*.
+
+                **Y no estaba pegada: se PISABAN.** Medido en el aparato sobre
+                `01a0188b`:
+                ```
+                el nodo pintado ……………… x[22,0 · 54,0]
+                el texto arranca en …… x 51,9
+                                        ───────
+                    hueco real …………… **−2,1 dp**
+                ```
+                **Nadie movió el texto: lo alcanzó el nodo.** *Con el punto de
+                10 en un riel de 24 sobraban ~7 dp; con el nodo de 32 en un riel
+                de 32 el disco llega hasta el borde de la columna y se mete
+                abajo de la primera letra.* **Es el costo lateral de agrandar el
+                nodo, y no se vio al derivar el alto porque el alto no era donde
+                estaba.**
+
+                **El 12 se DERIVA de la referencia, no se elige:** en
+                `referencia-pedidosya-...` el hueco glifo→texto mide ~8 dp con un
+                check de ~20 dp; **escalado a nuestro nodo de 32: 8 × 32/20 ≈
+                12,8** ⇒ `spacing[3]`, el escalón de la casa más cercano. */}
+            <View style={{ flex: 1, paddingBottom: spacing[4], gap: spacing[0.5], marginLeft: spacing[3] }}>
               {/* La jerarquía del ACTUAL se dice con TIPOGRAFÍA (Ley 18),
                   jamás con un anillo: el anillo es de "en vivo" (Ley 7).
 
@@ -572,9 +595,39 @@ export function EscaleraEstados({
                   la lectura de nadie. ⇒ **la cura, que sale gratis: una firma
                   sobre pieza COMPARTIDA va a SU DUEÑO; las demás pistas la
                   reciben como AVISO, jamás como orden.** */}
+              {/* 🔴 LA LETRA BAJA DE REGISTRO — S100d·bis, firma del founder:
+                  *«disminuir el tamaño de la letra»*.
+
+                  ⏪ Era `seccion` (20 **rótulo**) para el actual y `cuerpo`
+                  (16) para el resto. **Ahora `enfasis` (14 negrita) y `apoyo`
+                  (14)** — medido contra
+                  `referencia-pedidosya-seguimiento-hitos-con-hora`: *ahí los
+                  hitos son texto de APOYO y no titulares; **el peso lo carga
+                  la escalera, no la tipografía**.*
+
+                  🔴 **Y de paso muere un defecto de accesibilidad que nadie
+                  buscaba:** `seccion` trae `accessibilityRole="header"` de
+                  fábrica ⇒ **el lector venía anunciando el paso en curso como
+                  un ENCABEZADO.** *Un encabezado titula una sección; el hito
+                  actual es un elemento de una lista.* `enfasis` **no es
+                  rótulo**, así que el gesto y el lector vuelven a contar la
+                  misma historia.
+
+                  **LOS TRES ESTADOS SIGUEN DISTINGUIÉNDOSE, y se dicen acá
+                  porque bajar el tamaño podía llevárselos puestos:**
+                  ```
+                  cumplido …… 14 regular · tinta PLENA   (+ disco lleno)
+                  actual …… 14 NEGRITA  · tinta PLENA   (+ anillo hueco EN COLOR)
+                  pendiente … 14 regular · tinta TERCIARIA (+ anillo gris)
+                  ```
+                  ⚠️ **El color va EXPLÍCITO y no por default de la variante:**
+                  `apoyo` nace `secondary`, y dejarlo así habría **apagado los
+                  cumplidos**, que en la referencia del cliente van en tinta
+                  plena. *La distinción no es «lo hecho se apaga» —eso es la app
+                  del repartidor— sino «lo que falta se apaga».* */}
               <Texto
-                variante={preside ? 'seccion' : 'cuerpo'}
-                color={cortado || paso.estado === 'pendiente' ? 'tertiary' : undefined}
+                variante={preside ? 'enfasis' : 'apoyo'}
+                color={cortado || paso.estado === 'pendiente' ? 'tertiary' : 'primary'}
               >
                 {paso.etiqueta}
               </Texto>
