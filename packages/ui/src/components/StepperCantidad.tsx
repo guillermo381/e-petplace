@@ -27,7 +27,7 @@
  */
 
 import { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, Text, TextInput, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
@@ -147,7 +147,18 @@ const NUMERO_MENUDO = 18
 
    **El reparto es `space-between`**: los botones a los bordes y el número al
    medio. Sin `gap` — el aire lo pone la caja, que es lo que sobra. */
-const BOTON_ANCHO = BOTON // 44: el blanco directo, sin holgura prestada
+/* ⏪ **ERA 44 — S100d·bis, firma del founder: *«más pequeño, al menos 20 %; se
+   ve más grande que el precio»*.** La vara es suya y es la correcta: el
+   `PrecioText` de vitrina corre a `size.md` con leading **26**, y un control de
+   44 lo superaba **1,69×**. Con 34 queda en **1,31×** — presente sin gritar.
+
+   **−22,7 %, y los 44 de blanco NO se pierden:** `hitSlop` 5 los repone exacto
+   (34 + 5·2 = 44). *Lo que encoge es la tinta, no el blanco* — la misma receta
+   con la que nacieron el compacto y el menudo, que acá es legítima porque el
+   control tiene la caja entera y sus tres celdas quedan a 46 dp de distancia
+   entre centros: **los blancos no se pisan.** */
+const BOTON_ANCHO = 34
+const HOLGURA_ANCHA = (BOTON - BOTON_ANCHO) / 2 // 5 ⇒ 34 + 5·2 = 44
 
 /** EL ALTO DEL STEPPER COMPACTO — exportado para que quien RESERVE su lugar
  *  lo DERIVE en vez de teclear un número (N24, S100c-B).
@@ -237,6 +248,63 @@ export interface StepperCantidadProps {
    * producto del carrito cobra a todos el error de unos pocos.*
    */
   onBorrar?: () => void
+  /**
+   * 🔴 **EL NÚMERO SE TIPEA** — hallazgo NUEVO del founder, que no estaba en
+   * ninguno de los 31 puntos y sale de un cliente real: *«a veces compro barf
+   * y pido 50 unidades; subir de a una en algunos productos es incómodo»*.
+   *
+   * **Va en las TRES superficies —vitrina, ficha y CARRITO— con un solo
+   * mecanismo**, que por eso vive en la pieza y no en cada pantalla. *El
+   * carrito es donde más se ajustan cantidades: es el momento en que se revisa
+   * todo junto antes de pagar.*
+   *
+   * ── LAS TRES RESPUESTAS QUE UN CAMPO NUMÉRICO NECESITA, DECIDIDAS ──────
+   * ① **el CERO tipeado hace lo mismo que la papelera.** *El cero es la
+   *    papelera dicha con el teclado; que un mismo destino tenga dos caminos
+   *    con efectos distintos es lo que vuelve impredecible un control.*
+   * ② **salir del campo VACÍO devuelve el valor anterior.** *Un vacío no es
+   *    una intención: es un formulario a medio escribir.* ⛔ Jamás se
+   *    interpreta como cero — borrar y no haber terminado de escribir se ven
+   *    igual en la pantalla y significan lo contrario.
+   * ③ **hay tope, y no es de negocio: es de LEGIBILIDAD.** `max` sigue
+   *    mandando; el de la vitrina sube a 99 (ver `TOPE_EN_VITRINA`). **El
+   *    límite REAL es el stock, y no lo aplica esta pieza** — ver abajo.
+   *
+   * ── 🔴 EL AJUSTE AL STOCK NO PUEDE VIVIR ACÁ, Y ES UNA FIRMA QUE LO IMPIDE ──
+   * El founder pidió: *«tenemos 12 y el usuario tipea 50 ⇒ el valor se ajusta
+   * automático a 12 y sale un aviso de 3 segundos»*. **El ajuste es correcto y
+   * esta pieza NO puede hacerlo: no sabe cuánto stock hay.**
+   *
+   * **Y no es un olvido: es la firma de S99** — *`hay_stock` es BOOLEANO y
+   * jamás un número; la familia necesita «¿puedo comprar esto?», no el
+   * inventario ajeno.* `TarjetaProducto` lo cumple por construcción.
+   *
+   * ⇒ **el reparto que respeta las dos cosas:** la pieza emite lo tipeado ·
+   * **el motor ajusta** (`LEAST(pedido, disponible)`, que ya existe) · **la
+   * pantalla muestra el aviso efímero** con `useAviso` —la pieza de la casa,
+   * auto-cierre sin botón de cerrar— usando **la voz de insuficiente que A ya
+   * escribió**. *Tres capas, cada una con lo que sabe.*
+   */
+  editable?: boolean
+  /**
+   * 🔴 **QUÉ SIGNIFICA LLEGAR A CERO ACÁ — declarado, jamás inferido.**
+   *
+   * **Las dos superficies difieren de verdad y el founder lo marcó:** en el
+   * **carrito** el cero (y la papelera) **sacan el ítem de la lista**, y ahí el
+   * acuse ya lo da `Salida`; en la **vitrina** el cero **devuelve la tarjeta a
+   * su botón «Agregar»** y no desaparece nada.
+   *
+   * ⚠️ **Se pasa como propiedad y no se deduce de la ruta**: *una pieza que
+   * adivina en qué pantalla está empieza a conocer la navegación de su
+   * consumidor* — y el día que alguien la monte en una tercera superficie, la
+   * deducción falla en silencio.
+   *
+   * ✅ **Y de acá sale por qué NO hay dos voces encimadas:** el aviso efímero
+   * solo aparece cuando lo tipeado **supera el stock**, y el acuse de salida
+   * solo cuando llega **a cero**. *No son dos avisos del mismo acto: son dos
+   * actos que no pueden ocurrir juntos.*
+   */
+  salida?: 'quita-el-item' | 'vuelve-al-boton'
 }
 
 function BotonPaso({
@@ -256,7 +324,14 @@ function BotonPaso({
 }) {
   const lado =
     tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON_ANCHO
-  const holgura = tamano === 'menudo' ? HOLGURA_MENUDA : tamano === 'compacto' ? HOLGURA_COMPACTA : 0
+  const holgura =
+    tamano === 'menudo'
+      ? HOLGURA_MENUDA
+      : tamano === 'compacto'
+        ? HOLGURA_COMPACTA
+        : tamano === 'ancho'
+          ? HOLGURA_ANCHA
+          : 0
   const { theme } = useTheme()
   const [presionado, setPresionado] = useState(false)
   return (
@@ -280,7 +355,9 @@ function BotonPaso({
           width: lado,
           height: lado,
           borderRadius: radius.suave,
-          backgroundColor: theme.bg.hundido,
+          // Dentro del bloque de `ancho` la superficie ya la pone el
+          // contenedor: una caja adentro de otra rompería el bloque en tres.
+          backgroundColor: tamano === 'ancho' ? 'transparent' : theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
           transform: [{ scale: presionado ? 0.99 : 1 }],
@@ -302,7 +379,18 @@ function BotonPaso({
   )
 }
 
-export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro = 'control', tamano = 'normal', onBorrar }: StepperCantidadProps) {
+export function StepperCantidad({
+  valor,
+  min,
+  max,
+  onCambio,
+  etiqueta,
+  registro = 'control',
+  tamano = 'normal',
+  onBorrar,
+  editable = false,
+  salida = 'vuelve-al-boton',
+}: StepperCantidadProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   const esMemorial = theme.mode === 'memorial'
@@ -312,6 +400,10 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
   }
 
   const v = Math.min(Math.max(valor, min), max)
+  /* 🔴 EL BORRADOR DEL CAMPO — vive mientras se escribe y muere al confirmar.
+     `null` = nadie está escribiendo y manda `valor`. */
+  const [borrador, setBorrador] = useState<string | null>(null)
+
   const acento = esMemorial
     ? theme.accent.control // memorial: tinta (la marca no celebra ahí)
     : registro === 'oficio'
@@ -320,6 +412,24 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         registro === 'compra'
         ? theme.accent.cta
         : theme.accent.control
+
+  /* LAS TRES REGLAS DEL CAMPO, en un solo lugar (ver la prop `editable`):
+     vacío ⇒ vuelve el anterior · cero ⇒ lo mismo que la papelera · resto ⇒
+     se acota a `max` acá y **al stock lo acota el motor**. */
+  const confirmar = () => {
+    const crudo = borrador
+    setBorrador(null)
+    if (crudo === null || crudo.trim() === '') return // ② vacío: no es una intención
+    const n = Number.parseInt(crudo, 10)
+    if (Number.isNaN(n)) return
+    if (n <= 0) {
+      // ① el cero es la papelera dicha con el teclado
+      if (onBorrar !== undefined) onBorrar()
+      else irA(min)
+      return
+    }
+    irA(n)
+  }
 
   const irA = (destino: number) => {
     const d = Math.min(Math.max(destino, min), max)
@@ -344,10 +454,32 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        // `ancho` toma la caja entera y reparte: botones a los bordes, número
-        // al medio. El aire lo pone la caja, no un `gap`.
+        /* 🔴 EN `ancho` EL CONTROL ES **UN BLOQUE**, no tres cosas sueltas —
+           S100d·bis, y salió de mi propio ojo sobre la captura del gate:
+           *«dos cuadraditos lavanda con signos ocre contra un bloque ocre
+           lleno; ocupan la misma caja pero no se ven como el mismo objeto
+           cambiando de forma»*.
+
+           **La geometría ya era correcta y la LECTURA no:** `Mutacion`
+           garantiza que las dos formas compartan caja, pero **compartir caja
+           no alcanza para leerse como una transformación si una es un bloque
+           lleno y la otra son tres piezas flotando.**
+
+           ⇒ el contenedor toma **el mismo relleno y el mismo radio que el
+           botón** (`accent.cta`), y las tres celdas viven ADENTRO. *El botón
+           no se convierte en tres cosas: se divide en tres.*
+
+           **El par de contraste no es nuevo:** signos y número en
+           `accent.ctaTexto` sobre `accent.cta` — 8.40 en claro, 9.96 en los
+           dos temas, el mismo que ya usa el CTA. */
         ...(tamano === 'ancho'
-          ? { width: '100%', justifyContent: 'space-between' as const }
+          ? {
+              width: '100%',
+              justifyContent: 'space-between' as const,
+              backgroundColor: esMemorial ? theme.bg.hundido : theme.accent.cta,
+              borderRadius: radius.suave,
+              overflow: 'hidden' as const,
+            }
           : { gap: tamano === 'menudo' ? 0 : tamano === 'compacto' ? spacing[2] : spacing[3] }),
       }}
     >
@@ -359,23 +491,63 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
         // en el límite se apaga SERENO (voz terciaria) — jamás error
         color={v > min || onBorrar !== undefined ? acento : theme.text.tertiary}
         onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
-        etiqueta={onBorrar !== undefined && v <= min ? t('stepperCantidad.borrar') : t('stepperCantidad.menos')}
+        /* La voz del destino dice QUÉ pasa, y por eso depende de `salida`:
+           en el carrito el ítem se va de la lista; en la vitrina la tarjeta
+           se queda y vuelve su botón. *Un lector de pantalla que anuncia
+           «quitar del carrito» donde nada se quita miente sobre el efecto.* */
+        etiqueta={
+          onBorrar !== undefined && v <= min
+            ? salida === 'quita-el-item'
+              ? t('stepperCantidad.borrar')
+              : t('stepperCantidad.quitarDeLaCompra')
+            : t('stepperCantidad.menos')
+        }
         tamano={tamano}
       />
-      <Text
-        style={{
-          minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
-          textAlign: 'center',
-          // dato de máquina: mono tabular (Ley 3)
-          fontFamily: typography.family.mono.regular,
-          fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
-          fontVariant: ['tabular-nums'],
-          letterSpacing: typography.tracking.mono,
-          color: theme.text.primary,
-        }}
-      >
-        {v}
-      </Text>
+      {editable ? (
+        /* 🔴 EL NÚMERO ES UN CAMPO — ver la prop `editable`.
+           **El estado de texto es LOCAL y solo mientras se escribe:** el valor
+           que manda sigue siendo `valor`, así que un ajuste que venga de
+           afuera —el motor recortando al stock— se refleja solo. *Si el campo
+           fuera la fuente de verdad, el recorte del servidor no podría
+           corregirlo y la persona vería 50 sobre un stock de 12.* */
+        <TextInput
+          value={borrador ?? String(v)}
+          onChangeText={(t) => setBorrador(t.replace(/[^0-9]/g, ''))}
+          onFocus={() => setBorrador(String(v))}
+          onEndEditing={confirmar}
+          onSubmitEditing={confirmar}
+          keyboardType="number-pad"
+          returnKeyType="done"
+          selectTextOnFocus
+          accessibilityLabel={etiqueta}
+          style={{
+            minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
+            textAlign: 'center',
+            padding: 0,
+            fontFamily: typography.family.mono.regular,
+            fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
+            fontVariant: ['tabular-nums'],
+            letterSpacing: typography.tracking.mono,
+            color: tamano === 'ancho' && !esMemorial ? theme.accent.ctaTexto : theme.text.primary,
+          }}
+        />
+      ) : (
+        <Text
+          style={{
+            minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
+            textAlign: 'center',
+            // dato de máquina: mono tabular (Ley 3)
+            fontFamily: typography.family.mono.regular,
+            fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
+            fontVariant: ['tabular-nums'],
+            letterSpacing: typography.tracking.mono,
+            color: tamano === 'ancho' && !esMemorial ? theme.accent.ctaTexto : theme.text.primary,
+          }}
+        >
+          {v}
+        </Text>
+      )}
       <BotonPaso
         signo="mas"
         habilitado={v < max}

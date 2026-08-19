@@ -124,6 +124,7 @@ export const uiEn = {
   stepperCantidad: {
     menos: 'Decrease',
     borrar: 'Remove item from cart',
+    quitarDeLaCompra: 'Remove from purchase',
     mas: 'Increase',
   },
   escaleraEstados: {

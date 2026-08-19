@@ -248,8 +248,50 @@ export const palette = {
    *  es mover este número: es la tanda de los textos de capa del claro,
    *  con su re-medición. El margen de 0.07 es el techo real de esta
    *  perilla, y está acá escrito para que no se descubra chocando. */
-  papelTapizOficio: '#F0F8F6',
-  papelTapiz: '#FAF2F5',  // S82-B r10 ENCENDIDO (orden founder): pink 3% sobre papel algodón
+  /* ⏪ ═══ REVOCADO — S100d·bis, firma del founder ═══ Era **`#F0F8F6`, teal
+   *  puro al 3 %**, el gemelo del rosa del cliente y hermano de la misma r10.
+   *  **Cae por el MISMO argumento que lo revocó del otro lado —*«hoy tenemos
+   *  muchas más cosas en la app»*— y con más razón acá:** el prestador carga
+   *  mostrador, tres talleres y expedientes clínicos.
+   *  ✅ **Y las dos casas vuelven a compartir criterio de fondo en vez de
+   *  divergir.** Medido sobre las superficies DEL PRESTADOR, no las del
+   *  cliente: **vs carta 1,079 → 1,081 · borde de campo 3,41 → 3,41 · su
+   *  tealDark 5,38 → 5,37.** *No pierde una décima de contraste: el cambio es
+   *  puramente de tinte.* */
+  papelTapizOficio: '#F6F6F6',
+  /* ⏪ ═══ REVOCADO — S100d·bis. **El founder revoca su propia firma de
+   *  S82-B r10** (*«pink 3 % sobre papel algodón»*), con su razón textual:
+   *  *«sí lo firmé, pero hoy que ya tenemos muchas más cosas en la app, voy a
+   *  tener que revocar esa firma»*.
+   *
+   *  🔴 **NO ES UN ERROR CORREGIDO: es una decisión que era correcta en su
+   *  contexto y dejó de serlo cuando el contenido creció.** Con la app llena de
+   *  cartas blancas, packshots dispares, chips y dos acentos, ese 3 % dejó de
+   *  ser textura y empezó a **teñir lo que se apoya encima**.
+   *
+   *  **Y el hallazgo que lo volvió fácil de decidir, medido contra los
+   *  referentes:** *lo que se lee como «lejos del blanco» NO es la claridad,
+   *  es el TINTE.*
+   *  ```
+   *  nosotros #FAF2F5 …… 1,100 vs carta   teñido Δ8
+   *  Laika    #F2F2F2 …… 1,119            NEUTRO   ← MÁS OSCURA y se ve más limpia
+   *  Rappi    #F6F6F6 …… 1,081            NEUTRO
+   *  ```
+   *  **Con fondo teñido, «más blanco» y «más contraste» se pelean** (aclarar
+   *  el rosa a la mitad baja el par a 1,053 y las cartas dejan de leerse como
+   *  cartas); **con neutro no se pelean.** *La tensión del pedido era un
+   *  artefacto del tinte, no del pedido.*
+   *
+   *  ⚠️ **LO QUE NO CAMBIA:** el rosa sigue vivo **en la marca, en el magenta
+   *  y en los acentos**. Se retira del rol de **PAPEL DE FONDO**, que es un rol
+   *  distinto del color de marca.
+   *
+   *  🔴 **EL VALOR ES AJUSTABLE, y es condición del founder:** *«asegurá que
+   *  si en algún caso decido que se ve peor, podamos seguir ajustando hasta
+   *  encontrar el punto»*. **Se ajusta ACÁ y llega a toda la app** — censado:
+   *  **cero fondos tecleados en pantallas y cero en piezas**. Qué re-medir con
+   *  cada cambio: los tres números de abajo. */
+  papelTapiz: '#F6F6F6',
   /** Los candidatos del gate (S82-B r9) — pink puro compositado sobre
    *  papel algodón al 2/3/4/5%: mezcla de DOS tokens FIRMADOS, jamás
    *  hexes huérfanos. El de la lámina de Claude Design ("PAPEL TAPIZ ·
@@ -301,7 +343,12 @@ export const palette = {
    *  deliberadamente** — esta casa ya se quemó con un par «al filo por
    *  redondeo» (la nota de `dark1`), y un piso que se aprueba por el
    *  tercer decimal no es un piso. */
-  campoBordeL: '#88829A',  // claro    → 3.34:1 sobre papelTapiz #FAF2F5
+  /* ⏪ La nota decía **«3.34:1 sobre papelTapiz #FAF2F5»** y con el fondo nuevo
+   *  habría mentido sobre contra qué se midió. **Re-corrido, no deducido:
+   *  3,41:1 sobre `papelTapiz` #F6F6F6** — piso de N11/R43 = 3,00. *Una nota
+   *  que miente sobre su propia calibración es peor que ninguna: la siguiente
+   *  persona la cita.* */
+  campoBordeL: '#88829A',  // claro    → 3.41:1 sobre papelTapiz #F6F6F6
   campoBordeD: '#62627A',  // oscuro   → 3.40:1 sobre tapizDark  #0D050D
   campoBordeM: '#5A695A',  // memorial → 3.34:1 sobre bosque nocturno #0A0E0A (verde sereno)
 

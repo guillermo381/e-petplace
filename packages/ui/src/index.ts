@@ -121,7 +121,7 @@ export {
 } from './components/Insignia'
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
 export { HeroMarca, type HeroMarcaProps, type HeroMarcaVariante } from './components/HeroMarca'
-export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
+export { BarraTabs, ALTO_FILA_TABS, type BarraTabsItem } from './components/BarraTabs'
 export { Hoja, HojaScroll, type HojaProps, type HojaAltura, type HojaScrollProps } from './components/Hoja'
 export { HojaCaptura, type HojaCapturaProps } from './components/HojaCaptura'
 export { PinEnMapa, MarcaDeMapa, LADO_PIN, type PinEnMapaProps } from './components/PinEnMapa'

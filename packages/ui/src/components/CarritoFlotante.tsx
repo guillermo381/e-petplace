@@ -169,9 +169,21 @@ export interface CarritoFlotanteProps {
    *  productos»*—. **Obligatoria:** el nodo que se toca es éste y un botón
    *  sin nombre no se activa a ciegas. */
   etiqueta: string
+  /**
+   * Cuánto levantarlo desde el borde inferior, en dp.
+   *
+   * **Existe porque la pieza no sabe qué hay debajo.** Montada en el shell, lo
+   * que hay debajo es **la barra de tabs**, y su alto lo mide el shell con un
+   * `onLayout` en vez de teclearlo — *un número tecleado ahí miente en el
+   * primer teléfono con otra barra, y ya pagamos esa forma dos veces hoy.*
+   *
+   * Ausente = se apoya en el borde con su aire propio (el caso de una pantalla
+   * suelta, sin barra debajo).
+   */
+  aireInferior?: number
 }
 
-export function CarritoFlotante({ cuenta, onAbrir, etiqueta }: CarritoFlotanteProps) {
+export function CarritoFlotante({ cuenta, onAbrir, etiqueta, aireInferior = 0 }: CarritoFlotanteProps) {
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado()
 
@@ -183,7 +195,7 @@ export function CarritoFlotante({ cuenta, onAbrir, etiqueta }: CarritoFlotantePr
       /* La pieza se posiciona SOLA — overlay puro (ver la cabecera). El
          consumidor solo la monta como hermana del scroll y le da la cola. */
       style={[
-        { position: 'absolute', right: spacing[5], bottom: spacing[5] },
+        { position: 'absolute', right: spacing[5], bottom: spacing[5] + aireInferior },
         estiloPresionado,
       ]}
     >

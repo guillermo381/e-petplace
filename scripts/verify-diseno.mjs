@@ -1028,13 +1028,33 @@ function r16(fuentes) {
   // cliente". El founder ENMENDÓ esa letra en S83: un tinte por casa en
   // LOS DOS temas. Así que ahora la regla es SIMÉTRICA con la oscura —
   // el prestador se separa TENIENDO EL SUYO, no quedándose en el neutro.
+  /* ⏪ ═══ LA MITAD CLARA CAMBIA DE LETRA — S100d·bis, y la cambia una FIRMA,
+     no un hallazgo. ═══
+
+     **Hasta hoy exigía dos cosas: que el prestador NO recibiera el tinte del
+     cliente, y que su tinte fuera OTRO HEX** (*«la separación es de nombre y
+     no de color»*). **El founder revocó los DOS papeles tapiz en claro** —el
+     rosa del cliente y el teal del prestador— *«hoy tenemos muchas más cosas
+     en la app»*, **así que en claro las dos casas comparten el papel neutro a
+     propósito.**
+
+     ⇒ **con la letra vieja, esta regla se pondría ROJA contra una decisión
+     firmada** — que es exactamente el caso que R26 ya vivió en S83-B17.
+
+     **La letra nueva, y NO es «se apagó la regla»:** en claro se exige que las
+     dos casas estén en **el MISMO neutro**; el día que alguien vuelva a teñir
+     una sola, la regla lo caza igual. *Pasa de vigilar que se separen a
+     vigilar que no diverjan — el sujeto cambió, la vigilancia no.*
+
+     ✅ **Y la mitad OSCURA no se toca:** ahí el tinte por casa SIGUE FIRMADO y
+     sigue siendo necesario. **Medido:** un neutro en oscuro da **1,003 contra
+     la carta** —indistinguible— y borraría las tarjetas de las dos apps.
+     ***El tema oscuro no es el claro invertido: en claro el tinte estorbaba,
+     en oscuro es lo único que separa la carta del fondo.*** */
   const papelOficio = hex('papelTapizOficio');
   const encendido = !igual(luz, tapiz);
-  const separado = /const lightOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.papelTapizOficio/.test(temas);
-  if (encendido && !separado)
-    fallos.push(`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a papelTapizOficio — el prestador estaría recibiendo el tinte MAGENTA del cliente en claro (S83-B33: un tinte por casa en los DOS temas)`);
-  if (papelOficio && encendido && separado && igual(tapiz, papelOficio))
-    fallos.push(`R16: papelTapiz y papelTapizOficio son el MISMO hex (${tapiz[1]}) — la separación es de nombre y no de color, en claro`);
+  if (papelOficio && !igual(tapiz, papelOficio))
+    fallos.push(`R16: papelTapiz (${tapiz[1]}) y papelTapizOficio (${papelOficio[1]}) DIVERGEN en claro — la firma de S100d·bis revocó los dos tapices y puso a las dos casas en el mismo papel neutro. Si se vuelve a teñir una, se tiñen las dos o se re-abre la letra.`);
 
   // ── MITAD OSCURA: el prestador se separa TENIENDO EL SUYO ──
   const encendidoOsc = !igual(oscuro, tapizD);
@@ -1044,7 +1064,7 @@ function r16(fuentes) {
   if (encendidoOsc && separadoOsc && igual(tapizD, tapizDO))
     fallos.push(`R16: tapizDark y tapizDarkOficio son el MISMO hex (${tapizD[1]}) — la separación es de nombre y no de color: las dos casas se verían iguales (S82-B r29)`);
 
-  const claro = `claro[tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación=${separado ? 'construida ' + (papelOficio ? papelOficio[1] : '') : 'no construida'}]`;
+  const claro = `claro[papel COMPARTIDO ${tapiz[1]} en las dos casas${encendido ? '' : ' (=light0)'} — los dos tapices revocados S100d·bis]`;
   const osc = `oscuro[tapiz=${encendidoOsc ? 'ENCENDIDO ' + tapizD[1] : 'apagado (=dark0)'} · separación=${separadoOsc ? 'construida ' + tapizDO[1] : 'no construida'}]`;
   return { fallos, info: `${claro} · ${osc}` };
 }
@@ -3896,17 +3916,27 @@ for (const [nombre, fixture] of Object.entries(FIXTURES)) {
  *  mitad oscura sin separar—; estos dos cubren los otros, para que ningún
  *  brazo quede sin su rojo. Un brazo sin prueba es una regla decorativa
  *  adentro de una regla viva, que es L-192 escondida un piso más abajo. */
+/* ⏪ **EL PRIMER FIXTURE SE REESCRIBIÓ EN S100d·bis, y el motivo es de método:**
+   probaba el brazo *«lightOficio no pisa bg.base»*, que la firma del founder
+   DEROGÓ al revocar los dos tapices en claro. **Seguía dando ROJO —así que la
+   auto-prueba pasaba— pero por una razón distinta de la que decía su nombre.**
+   *Un fixture que enrojece por otro motivo del que declara es un verde flojo
+   con la polaridad dada vuelta: no avisa que su brazo murió.* ⇒ ahora prueba
+   la letra nueva, que es la divergencia. */
 const EXTRAS_R16 = [
-  ['R16·brazo claro (tinte encendido, lightOficio sin pisar)', {
-    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\npapelTapizOficio: '#F4F8F6',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
+  ['R16·brazo claro (las dos casas DIVERGEN en claro)', {
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#F6F6F6',\npapelTapizOficio: '#F0F8F6',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
     temas:
-      'const lightOficio: Theme = { ...lightTheme }\n' +
+      'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.papelTapizOficio },\n}\n' +
       'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
   }],
-  ['R16·brazo hexes (las dos casas con el mismo tapiz)', {
-    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#0D050D',",
+  ['R16·brazo OSCURO (las dos casas con el mismo tapiz en oscuro)', {
+    /* En claro las dos casas COINCIDEN (la letra nueva), así que el único
+       rojo que puede encender este fixture es el de la mitad OSCURA — que es
+       lo que viene a probar. */
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#F6F6F6',\npapelTapizOficio: '#F6F6F6',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#0D050D',",
     temas:
-      'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.light0 },\n}\n' +
+      'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.papelTapizOficio },\n}\n' +
       'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
   }],
 ];
