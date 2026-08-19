@@ -1910,6 +1910,14 @@ const FIXTURES = {
      de cualquier `bottom: 0`), y una del baseline congelado. */
   /* R54 · discrimina: el fragmento y el View con box-none NO deben salir
      rojos; el View desnudo sí. */
+  /* R56 · discrimina: el `acento` NUEVO del cliente sale rojo; el del
+     baseline no; y el del PRESTADOR tampoco — ahí el slot es teal. */
+  R56: [
+    { path: 'apps/cliente/src/app/(tabs)/hogar/nuevo.tsx', src: '<Boton variante="acento" etiqueta={t(\'x\')} onPress={f} />' },
+    { path: 'apps/cliente/src/app/(tabs)/hogar/index.tsx', src: '<Boton variante="acento" etiqueta={t(\'x\')} onPress={f} />' },
+    { path: 'apps/prestador/src/app/(tabs)/cuenta/perfil.tsx', src: '<Boton variante="acento" etiqueta={t(\'x\')} onPress={f} />' },
+    { path: 'apps/cliente/src/app/(tabs)/hogar/ok.tsx', src: '<Boton variante="primario" etiqueta={t(\'x\')} onPress={f} />' },
+  ],
   /* R55 · discrimina: el envoltorio que reserva el tope ARRIBA DE UN TECHO
      sale rojo; el que reserva SIN techo adentro (estado centrado, el caso
      real de checkout-reserva) NO; y el techo suelto tampoco. */
@@ -3702,6 +3710,70 @@ function r45(archivos) {
    no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
    pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
    honestamente — se cura por construcción, que es de lo que trata la pieza. */
+/* 🔴 R56 · EL ORO NO ES TINTA EN EL CLIENTE (S100d·bis, relevo de B · H-207).
+
+   `Boton variante="acento"` es **letra `accent.cta` sin relleno**. En el
+   cliente ese slot es el oro, y el oro como TINTA no llega en ninguna
+   superficie clara:
+
+       ocre sobre carta blanca ……… 1,70      piso: texto 4,5 · grande 3,0
+       ocre sobre el fondo neutro … 1,57
+       tinta sobre relleno ocre …… 9,96      ← `primario`, el otro lado del par
+
+   **Y no es un criterio nuevo: `ctaOro` lo declara donde nace**, en
+   `palette.ts` — *«sobre papel 1.62 NO rige»*. Esta variante hace eso.
+
+   ── POR QUÉ MIRA LA APP Y NO LA VARIANTE SOLA ────────────────────────
+   **En el prestador el MISMO slot resuelve a `tealDark` y da 5,37** ⇒ ahí la
+   variante es legítima y sus 4 montajes se quedan. *Marcar la variante en
+   abstracto habría gritado sobre cuatro casos correctos, que es como se
+   enseña a ignorar un lint* (L-236).
+
+   ⚠️ **SU LÍMITE, declarado:** mira el tema CLARO, que es el que la familia
+   usa por defecto y el que el founder camina. En oscuro el oro cae sobre
+   superficie oscura y el par cambia. *Su rojo dice «acá el oro va como
+   tinta», jamás «esto es ilegible en todos los temas».*
+
+   ── DURA EN 0 — Y NACIÓ SOLO-BAJA CON UN CASO ADENTRO ────────────────
+   ⏪ **Nació con `hogar/index.tsx` en su baseline**, declarado como *deuda con
+   dueño y no exención*: el ocre como acción es **F-OCRE**, y cambiarle el
+   color a un acento recién firmado no era de esta pista.
+
+   ✅ **El founder lo firmó el mismo día y el baseline murió con la firma:**
+   *«el ocre NO se usa como tinta sobre fondo — se usa como RELLENO con letra
+   tinta encima»*. El caso pasó a `primario` (**1,70 → 9,96**) y esta regla
+   **DURA EN 0**. *Un baseline que se vacía por decisión, y no por
+   costumbre.* */
+const BASELINE_R56 = []
+
+function r56(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (!path.startsWith('apps/cliente/')) continue
+    const limpio = sinComentarios(src)
+    for (const _ of limpio.matchAll(/variante=\{?["']acento["']\}?/g)) ofensores.push(path)
+  }
+  const nuevos = [...new Set(ofensores)].filter((p) => !BASELINE_R56.includes(p))
+  if (nuevos.length > 0)
+    fallos.push(
+      `R56: ${nuevos.length} \`Boton variante="acento"\` nuevo(s) en el cliente (baseline ${BASELINE_R56.length}, SOLO-BAJA).\n   ${nuevos.join('\n   ')}\n   Esa variante es LETRA oro sin relleno: 1,70 sobre carta blanca y 1,57 sobre el fondo — el piso de texto es 4,5. Si querés el oro visible usá \`primario\` (relleno ocre + letra tinta = 9,96), que es el par que la casa ya usa en CarritoFlotante y en el stepper.`,
+    )
+  /* ANCLA POR SUJETO (L-291): la regla existe porque la receta de `acento`
+     es texto sin relleno. Si dejara de serlo, vigila un defecto que ya no
+     existe. */
+  const fuente = readFileSync('packages/ui/src/components/Boton.tsx', 'utf8')
+  const vivo = /acento:\s*\{ fondo: 'transparent', texto: theme\.accent\.cta \}/.test(fuente) ? 1 : 0
+  fallos.push(...ancla('R56', vivo, 1, '`acento` sigue siendo letra sin relleno (0 = la receta cambió y esta regla perdió su sujeto)'))
+  return {
+    fallos,
+    info: `${[...new Set(ofensores)].length} montaje(s) de \`acento\` en el cliente · DURA EN 0 (nació SOLO-BAJA con hogar/index adentro; el founder firmó la enmienda a F-OCRE el mismo día y el caso pasó a \`primario\`: 1,70 → 9,96) · el prestador queda fuera A PROPÓSITO: ahí el slot es teal y da 5,37`,
+  }
+}
+
 /* 🔴 R55 · EL TOPE LO PAGA `Encabezado`, Y NADIE MÁS (S100d·bis, relevo de B).
 
    ── EL DEFECTO, MEDIDO EN APARATO SOBRE EL BUNDLE `01a01807` ──────────
@@ -3748,7 +3820,24 @@ function r45(archivos) {
    ⚠️ **SU LÍMITE, dicho:** ve el envoltorio inmediato. Un componente propio
    que adentro reserve el tope **no lo ve**. *Su verde dice «ningún envoltorio
    de techo reserva el tope», jamás «todos los techos arrancan a la misma
-   altura»* — eso lo dice el aparato. */
+   altura»* — eso lo dice el aparato.
+
+   ── 🔴 EL HOGAR NO ES UN HUECO DE ESTA REGLA: ES UNA DECISIÓN ─────────
+   **`hogar/index.tsx` NO monta `Encabezado`** — tiene **hero propio**
+   (`HeroMarca techoVivo`), y su primer texto arranca en **114,1 dp** con el
+   saludo en **136,9**, contra la vara de **54,0**.
+
+   **FIRMA DEL FOUNDER, 18-ago-2026, verbatim:** *«el Hogar va a necesitar
+   tratamiento especial, por ahora no lo toquemos»*. ⇒ **queda fuera de la
+   vara A PROPÓSITO y con fecha**, no por olvido ni por límite del
+   instrumento.
+
+   ⛔ **NO se «alinea a Despensa» y esta regla no lo persigue.** *No es el
+   mismo objeto pintado más abajo: es otro objeto* — alinearlo es una
+   decisión de diseño, no una cura de inset. **Se escribe acá porque una
+   decisión de NO construir que no queda escrita se vuelve a proponer**, y la
+   próxima pista que lea la tabla de alturas va a ver 114,1 y querer
+   arreglarlo. */
 const BASELINE_R55 = 0
 
 function r55(archivos) {
@@ -3981,7 +4070,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4269,6 +4358,7 @@ corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...app
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
 corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...appsCodigo])]);
+corridas.push(['R56 (el oro no es tinta en el cliente)', r56([...apps, ...appsCodigo])]);
 corridas.push(['R55 (el tope lo paga Encabezado, y nadie mas)', r55([...apps, ...appsCodigo])]);
 corridas.push(['R54 (el pie no se envuelve en un View que capture)', r54([...apps, ...appsCodigo])]);
 

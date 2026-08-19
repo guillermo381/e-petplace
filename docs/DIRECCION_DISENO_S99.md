@@ -742,6 +742,56 @@ modalidad (despacho / retiro) **ELIGE** ⇒ se queda magenta, aunque viva en la
 pantalla más comercial de la app. *A lo declaró como borde y no lo movió solo;
 esta ley existe para que la próxima no tenga que preguntar.*
 
+### 🔴 ENMIENDA N26.1 — LA DOSIS DEL OCRE: VA DEL LADO QUE SE LEE (18-ago-2026, firma del founder)
+
+> **Verbatim:** *«el ocre NO se usa como TINTA sobre fondo — se usa como
+> RELLENO con letra tinta encima»*.
+
+**N26 firmó el ocre como color de ACCIÓN y no dijo su FORMA. Eso se cobró DOS
+VECES EN UN SOLO DÍA**, y por eso la dosis entra a la letra:
+
+```
+ocre como TINTA, sobre carta blanca ………………… 1,70      piso: texto 4,5 · no-texto 3,0
+ocre como TINTA, sobre el fondo neutro ……… 1,57
+ocre como TINTA, sobre papel algodón ……………… 1,62
+RELLENO ocre + letra tinta …………………………………… **9,96**   ← la forma firmada
+```
+
+**Los dos cobros del mismo día, que son la razón de escribirla:**
+- **el stepper de la vitrina pintaba sus signos ocre SOBRE EL BLOQUE OCRE —
+  contraste `1.00`.** El founder reportó *«ya no me deja poner las opciones de
+  aumentar y disminuir»*: **los botones estaban y eran invisibles.**
+- **una pista montó `Boton variante="acento"` para un CTA creyendo que era el
+  oro RELLENO** — *eligió la variante **por su nombre y no por su receta***.
+
+> **Las dos veces el par correcto estaba ESCRITO encima y el código pintaba el
+> otro.** *Un acento sin su dosis escrita se vuelve a usar mal.*
+
+**🔴 Y EL DATO QUE CORRIGE EL ENCUADRE: el fondo `#F6F6F6` NO causó esto.** Ya
+fallaba a **1,62** sobre el papel anterior y a **1,70** sobre blanco. **Lo
+empeora, no lo causa** ⇒ *el fondo no se toca —está firmado al 100 %—; lo que
+se decide es dónde puede aparecer el ocre.* **Atribuirle a un cambio reciente
+un defecto que ya estaba es la forma más barata de arreglar lo que no era.**
+
+**Lo que la enmienda ordenó, ejecutado:** `hogar/index.tsx` —la pantalla de
+ENTRADA, probablemente el primer ocre que ve una familia— pasa de `acento` a
+`primario` (**1,70 → 9,96**) · el `Chevron tono="accion"` **mueve el ocre a su
+caja** (trazo en `ctaTexto` sobre disco ocre: **9,96**), porque para un glifo de
+trazo *oscurecer hasta 3,0 exigiría un ámbar que ya no es el oro de la casa —
+sería un color nuevo, no una dosis* · y **`R56` lo sostiene, DURA EN 0.**
+
+⚠️ **EL PRESTADOR NO SE TOCA, y se declara para que nadie lo «empareje» por
+simetría:** ahí el mismo slot resuelve a **`tealDark`, que da 5,37** sobre el
+fondo. **Sus cuatro montajes de `acento` son legítimos.** *No es la variante lo
+que falla: es el color que el slot entrega en cada casa.*
+
+⚠️ **Y un hallazgo que la medición destapó y que esta enmienda NO cura:** el
+tono `neutro` del chevron —`text.tertiary`, el default de los tres portadores
+vivos— da **2,40 / 2,22** y **tampoco llega al piso no-textual de 3,0.** Su
+palette lo declara *«decorativo»*, y **un chevron que es la única señal de que
+algo se despliega no es decorativo.** *Tocarlo mueve los tres portadores de las
+dos apps y no es lo que se firmó hoy.* **Dueño: mesa.**
+
 ### 🔴 Lo que esta ley NO es: una decisión nueva sobre el CTA
 
 **Medido en la fuente, no de memoria:** `accent.cta` **ya era el oro

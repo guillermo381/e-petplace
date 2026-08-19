@@ -454,11 +454,30 @@ export function DireccionHogarForm({
           {/* LOS DOS BOTONES, UNO AL LADO DEL OTRO (paso ① del founder).
               Van en fila y no apilados porque **son la misma clase de
               decisión** —qué parte de la dirección querés tocar— y apilarlos
-              haría leer uno como principal y el otro como secundario. */}
+              haría leer uno como principal y el otro como secundario.
+
+              🔴 **Y AHORA SE DISTINGUEN POR COLOR — firma del founder,
+              18-ago-2026:** *«Cambiar dirección ponlo en ocre, para contrastar
+              los dos botones»*. **En fila y con la misma receta, los dos se
+              leían como el mismo botón repetido**; la fila resolvía la
+              jerarquía y no la LECTURA.
+
+              ⚠️ **Va en `primario` y no en `acento`, y eso es N26.1 —firmada
+              el mismo día— haciendo su trabajo:** el ocre **como tinta** da
+              **1,70** sobre esta superficie; **como relleno con letra tinta da
+              9,96**. *La firma pidió «en ocre», no «en letra ocre» — y de las
+              dos formas del ocre solo una se lee.*
+
+              📌 **Observación para el ojo del founder, declarada y no
+              resuelta acá:** cuando aparece `Guardar` —que también es
+              `primario`— la pantalla queda con **dos rellenos ocre**. Se
+              distinguen por TAMAÑO (este va a media fila; `Guardar` es de
+              ancho completo y vive al final), pero *si en el aparato compiten,
+              lo que cede es éste y no el CTA*. */}
           <View style={{ flexDirection: 'row', gap: spacing[2] }}>
             <View style={{ flex: 1 }}>
               <Boton
-                variante="secundario"
+                variante="primario"
                 bloque
                 etiqueta={t('direccion.cambiarDireccion')}
                 onPress={() => {
