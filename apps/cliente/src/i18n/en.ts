@@ -1494,10 +1494,11 @@ export const clienteEn = {
     // S100-D: `pasoPagando` died with its step — `pagando` comes BEFORE
     // there is a promise, so it is not a rung (B's recipe §1). Its voice
     // now comes from the catalogue (`narrativa_nombre`), not from here.
-    pasoConfirmado: 'Confirmed',
-    pasoPreparando: 'Preparing',
-    pasoEnCamino: 'On the way',
-    pasoEntregado: 'Delivered',
+    // S100d — the steps narrate instead of labelling a machine state.
+    pasoConfirmado: 'We got your order',
+    pasoPreparando: 'We’re getting your order ready',
+    pasoEnCamino: 'Your order is on its way',
+    pasoEntregado: 'Your order arrived',
     // S100b-D · THE VOICE OF AN ORDER THAT HAS NO JOURNEY YET. The state's
     // NAME comes from the catalogue (`narrativa_nombre`); this explains what
     // it means. It must be true for BOTH cases `pagando` covers —payment not
