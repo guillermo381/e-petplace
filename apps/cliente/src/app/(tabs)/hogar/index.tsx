@@ -691,6 +691,12 @@ export default function Hogar() {
    * tenés pedidos» sí (L-139).
    */
   const [pedidosEnVuelo, setPedidosEnVuelo] = useState<PedidoEnLista[]>([]);
+  /** ¿La familia tiene ALGÚN pedido? Decide la DOSIS de la puerta del local
+   *  (§ canal de adquisición). `null` = todavía no sabemos ⇒ **no se dibuja
+   *  ninguna de las dos formas**: *elegir la prominente por defecto le
+   *  gritaría a quien ya compra, y elegir la discreta le escondería su única
+   *  puerta a quien no. Un tercer estado honesto cuesta un `null`.* */
+  const [hayPedidos, setHayPedidos] = useState<boolean | null>(null);
 
   const esMemorial = theme.mode === 'memorial';
 
@@ -823,6 +829,10 @@ export default function Hogar() {
          * nada — su casa es el historial. */
         void listarMisPedidos().then((ps) => {
           if (!vigente) return;
+          // La MISMA lectura sirve a las dos preguntas: cuántos van en vuelo
+          // (la fila de Ponte al día) y si existe alguno (la dosis de la
+          // puerta del local). *Pedir dos veces lo mismo paga dos peajes.*
+          setHayPedidos(ps.ok ? ps.data.length > 0 : null);
           setPedidosEnVuelo(
             ps.ok
               ? ps.data.filter(
@@ -1644,6 +1654,61 @@ export default function Hogar() {
           código murió con ellas; las voces de ficha y hogar.voz QUEDAN
           — pares conservados por decisión founder S52 para contextos
           sin sujeto visible. */}
+
+      {/* ── 🔴 S100d · ¿COMPRASTE EN EL LOCAL? — Y ACÁ NO ES UNA CELDA MÁS:
+          ES UN CANAL DE ADQUISICIÓN. ─────────────────────────────────────
+          Firma del founder: *«vincula una compra física al expediente, pero
+          más allá de eso ES UN MECANISMO PARA TRAER LOS USUARIOS QUE MIS
+          PRESTADORES ATIENDEN EN SU LOCAL»*.
+
+          **Por qué se muda al Hogar, medido:** vivía **al fondo del scroll de
+          la Despensa, detrás de hasta 50 productos** (medición de C) ⇒ como
+          canal **casi no existía**. Y peor: **el cliente nuevo NO TIENE tab
+          de Pedidos**, así que su única puerta estaba **detrás de la
+          condición que él todavía no cumple**. *Una puerta de entrada que
+          exige haber entrado no es una puerta de entrada.*
+
+          🔴 **LA DOSIS ES LA FIRMA, y por eso son dos formas y no una:**
+          **sin pedidos preside** —es su única puerta y es descubrimiento—;
+          **con pedidos baja a celda discreta** pero **no desaparece**: quien
+          compra en el local todos los meses vuelve a vincular. *El error
+          sería tratarlo como onboarding —que se muestra una vez y se va— o
+          como acceso fijo —que grita para siempre.*
+
+          Y la secuencia que esto habilita es la que el founder quiere:
+          **vincula desde el Hogar → eso crea su primer pedido → NACE EL TAB →
+          lo descubre.** *El tab aparece como consecuencia de haber hecho
+          algo, no como promesa vacía.*
+
+          ⚠️ **Las voces son de C** (`despensa.reclamoEntrada*`) y se
+          **importan, no se copian**: dos copias del mismo texto divergen
+          siempre. Su puerta de la Despensa **sale por firma del founder** —
+          la Despensa es donde se compra ONLINE y el reclamo es para quien
+          compró OFFLINE: era el lugar equivocado por concepto, no solo por
+          posición. */}
+      {hayPedidos === null ? null : hayPedidos ? (
+        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[6] }}>
+          <CeldaNavegacion
+            icono="despensa"
+            titulo={t('despensa.reclamoEntrada')}
+            onPress={() => router.push('/despensa/reclamo')}
+          />
+        </View>
+      ) : (
+        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[6] }}>
+          <Tarjeta relleno="amplio">
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('despensa.reclamoEntrada')}</Texto>
+              <Texto variante="apoyo">{t('despensa.reclamoEntradaDetalle')}</Texto>
+              <Boton
+                variante="acento"
+                etiqueta={t('despensa.reclamoCta')}
+                onPress={() => router.push('/despensa/reclamo')}
+              />
+            </View>
+          </Tarjeta>
+        </View>
+      )}
 
       {/* ── TUS SERVICIOS (S60-A6 → S73 ítem 1, letra founder): MÍNIMO 4
           por prioridad de uso + «Descubre» — la regla de existencia S60
