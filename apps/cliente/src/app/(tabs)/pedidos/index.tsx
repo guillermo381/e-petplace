@@ -493,11 +493,34 @@ export default function DespensaPedidos() {
                                 ⇒ pedido a A: **`producto_id` en el resumen**
                                 —un campo en un lector suyo que ya existe— y
                                 esto pasa a llevar a la ficha en una línea. */}
-                            {p.narrativa === 'entregado' ? (
+                            {/* ✅ S100d · YA LLEVA A LA FICHA. A ensanchó su
+                                lector con `producto_id` —**de la MISMA fila**
+                                que el nombre y la portada, cero viajes
+                                nuevos— y esto pasó de media palanca a
+                                entera: se vuelve a comprar **al precio y con
+                                el stock de HOY**.
+
+                                🔴 **SIN `producto_id` NO SE OFRECE EL CAMINO,
+                                y es contrato de A**: `null` significa que el
+                                producto **ya no está publicado** ⇒ el botón
+                                llevaría a una ficha que no existe. *Una
+                                puerta que rebota es peor que ninguna puerta*
+                                (Ley 23) — y acá rebotaría justo cuando la
+                                familia quiso repetir su compra.
+
+                                **Solo en ENTREGADOS**: ofrecer repetir un
+                                pedido cancelado sería ofrecer repetir algo
+                                que no pasó. */}
+                            {p.narrativa === 'entregado' && resumen[p.pedido_id]?.producto_id ? (
                               <Boton
                                 variante="secundario"
                                 etiqueta={t('despensa.pedirDeNuevo')}
-                                onPress={() => router.push('/despensa')}
+                                onPress={() =>
+                                  router.push({
+                                    pathname: '/despensa/producto/[productoId]',
+                                    params: { productoId: resumen[p.pedido_id]!.producto_id! },
+                                  })
+                                }
                               />
                             ) : null}
                           </View>
