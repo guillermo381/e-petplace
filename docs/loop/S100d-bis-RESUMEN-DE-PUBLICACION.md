@@ -54,6 +54,51 @@ que está por cambiar.*
 
 ---
 
+## ⓪ 🔴 DOS CATEGORÍAS, Y NO SE JUNTAN BAJO LA MISMA PALABRA
+
+*El founder gatea distinto lo que ya alguien miró. Mezclarlas le haría gastar el
+mismo cuidado en todo y quedarse sin cuidado justo donde hace falta.*
+
+### ✅ VISTO EN APARATO — alguien ya lo miró correr
+`24①` mapa navegable y recentrar · `24②③④` la ficha al arrastrar, el código
+resaltado con su señal, el fondo blanco · **los TRES topes de la hoja y su
+scroll, ejercidos** · `23` la gota en la escalera, en «Seguir el pedido» y en el
+rótulo · `25` la ficha del repartidor con placa y hueco de foto · `30` la fila
+del pedido · **el chip magenta de C** con su desambiguación · **el campo tipeable
+de C en la ficha**.
+
+### ⚠️ CONSTRUIDO SIN OJO — nadie lo vio correr
+**el fondo neutro y TODO lo de B** · **la reestructura de Pedidos** · **el canal
+de adquisición en el Hogar** (la puerta del local, dos dosis) · **la ventana
+vencida** en lista, detalle y EN CAMINO · **todo lo mío**: el modal de dirección,
+la ficha de entrega, la gota, el alias, el campo tipeable del carrito.
+
+⚠️ **D partió su propio reporte así a propósito** — lo que vio fue con el dev
+build, y **las tres últimas filas suyas se construyeron DESPUÉS de soltar el
+aparato**. *No quiso que entraran bajo la misma palabra, y tiene razón.*
+
+---
+
+## ⓪bis 🔴 LO QUE VA A PARECER UN DEFECTO Y NO LO ES
+
+**«Está tardando más de lo previsto» va a aparecer casi siempre en tu cuenta.**
+
+    pedidos con ventana ……………………… 30
+    con la ventana VENCIDA ……………… 27
+
+**Es tráfico de prueba viejo, no un problema del producto.** *Una cuenta de
+pruebas con meses de pedidos sin cerrar hace que un aviso correcto se vea como
+un aviso roto.*
+
+⚠️ **Y el umbral de los 20 minutos NO está calibrado contra comportamiento, y se
+declara con esas palabras:** hay **UNA sola entrega con ventana en toda la base**
+y **llegó 20 h antes**. El número sale del **8 % de la ventana más angosta**, no
+de atrasos observados. **Se recalibra cuando haya atrasos reales.** *Un umbral
+derivado de una proporción no es un umbral medido — funciona hasta que alguien
+lo trata como si lo fuera.*
+
+---
+
 ## ① QUÉ CAMBIA, CON SU NÚMERO DE GATE
 
 ### Pista B — las piezas
@@ -186,6 +231,12 @@ código pasa la prop (`:670`), `Encabezado:219` la mapea a `color:'transparent'`
 **hay un solo sitio que pinta el título**, el stack va con `headerShown:false`
 — **y el teléfono lo pinta igual.**
 
+✅ **Y el discriminador llegó después, resuelto SIN aparato:** los bounds del nodo
+del techo son **`x 146–934`**, que es **exactamente la caja centrada del
+`Encabezado` entre sus dos zonas de 44** ⇒ **lo que se ve arriba ES ese `Text`, y
+su `color:'transparent'` no se honra.** **Es de la pieza**, y ya no es «sin causa
+atribuida»: es una causa MEDIDA por geometría, no la explicación cómoda.
+
 ⚠️ **Va como HECHO MEDIDO Y SIN CAUSA ATRIBUIDA**, con dueño B. *C ya se
 equivocó una vez atribuyendo este defecto, y la explicación cómoda vuelve a ser
 «transparent no anda en nativo» — que es exactamente la clase de causa que suena
@@ -242,7 +293,7 @@ no sabemos.**
 |---|---|
 | **H-205, su segunda mitad** | el nombre **sigue apareciendo dos veces**: `tituloVisible={false}` no apaga el píxel en aparato. Hecho medido, **sin causa atribuida**, dueño B |
 | 🔴 **la tira de PRESENTACIONES desborda y no scrollea** | el tercer chip llega a **x 1022 sobre 1080** y toca el filo. **Es el mismo defecto de los filtros en OTRA pieza** (`SelectorOpcion disposicion="tira"`, no `FiltroPills`) ⇒ **la cura de B no lo alcanza.** Apareció al agregar el precio al chip, pero **con etiquetas cortas ya desbordaba a los cuatro**: la cura lo destapó, no lo creó |
-| 🔴 **la carta de composición queda TAPADA por el CTA** | en el producto de 4 presentaciones se ve solo el borde superior asomando. **Es alto, no superficie** — con `#F6F6F6` y una presentación elegida, la ficha creció |
+| ~~la carta de composición tapada por el CTA~~ | 🔴 **RETIRADO POR C — no era un defecto, lo había medido mal.** Medido después: la carta termina en **686** y el CTA arranca en **687** ⇒ **cero solape**; hay 267 dp por debajo del pliegue y scrolleando **se lee entera**. *`PantallaConPie` estaba haciendo su trabajo.* **Su error, declarado por ella: miró una captura ESTÁTICA, vio el borde asomando y concluyó «tapada» — nunca intentó scrollear.** *Lo que había era «hay más abajo» y leyó «no se puede llegar».* **Se deja tachado y no borrado**: es el mismo error que ella misma le había advertido a D horas antes (*«el árbol te va a decir que está en su lugar; ejercé el gesto»*) — **una captura prueba lo que se VE; para saber si algo se ALCANZA hay que ejercerlo** |
 | **las 6 vistas del admin** (GMV, MRR, pitch, ranking) | siguen legibles por `anon`: cerrarlas apaga el tablero **con certeza**. Disparo escrito: **antes de compartir `/inversores` con alguien externo** |
 | **la cura estructural de `consentimientos`** | su firma era condicional y la condición falló |
 | **las 25 variantes con más de una oferta publicada** | **cero del mismo vendedor, 25 de vendedores DISTINTOS, hasta 48 % de brecha, ningún UNIQUE.** Es el caso **multi-vendedor** contra la firma «una oferta por producto». **La cura de C hace que se VEA; no lo resuelve — no puede.** Es de mesa |
