@@ -1,0 +1,246 @@
+# S100d·bis · RESUMEN DE PUBLICACIÓN — el bundle de cierre de la tanda
+
+> **Escrito por la mano publicadora ANTES de disparar.** Su trabajo es que el
+> founder sepa **qué está mirando** y **qué NO puede gatear en este objeto**.
+>
+> 🔴 **Ningún punto se declara CERRADO acá.** Todos dicen dónde se verificaron.
+> *Un punto reportado cerrado que reaparece en el próximo gate es rojo de
+> método, no de pieza.*
+
+---
+
+## 🔴 ANTES QUE NADA: EL FONDO CAMBIA **TODAS** LAS PANTALLAS DE **LAS DOS** APPS
+
+**`#F6F6F6` — el fondo neutro.** No es un cambio de una pantalla: es el papel
+sobre el que se dibuja **todo**, incluidas **decenas de superficies que ninguna
+pista tocó en esta vuelta**.
+
+> ⚠️ **SI ALGO SE VE RARO EN UNA SUPERFICIE QUE NADIE TOCÓ, LA PRIMERA SOSPECHA
+> ES EL FONDO — NO UNA REGRESIÓN.** *Buscar un culpable en el diff cuando la
+> causa es el papel cuesta una tarde.*
+
+**Y es AJUSTABLE sin abrir una sesión — el founder lo pidió explícito:**
+
+    packages/ui/src/tokens/palette.ts
+      papelTapiz:        '#F6F6F6'   ← el CLIENTE   (línea 294)
+      papelTapizOficio:  '#F6F6F6'   ← el PRESTADOR (línea 261)
+
+**Los dos en el mismo archivo, a treinta líneas uno del otro.** ⇒ *mover un
+valor cambia una app entera; mover los dos, las dos.* **La próxima iteración
+cuesta UN VALOR, no una vuelta.** Cada token lleva escrito qué se re-mide con
+cada cambio.
+
+### ⚠️ EL OSCURO **NO** SE TOCA, y el número es la razón
+
+| tema oscuro | contraste carta / fondo |
+|---|---|
+| **hoy**, con tinte 3 % `#0D050D` | **1,037** |
+| con el neutro `#0D0D0D` | **1,003 ⇒ INDISTINGUIBLE** |
+
+**Un neutro en oscuro borra las tarjetas de las dos apps.** ⇒ la revocación es
+**solo del tema claro**. *El tema oscuro no es el claro invertido: en claro el
+tinte estorbaba; en oscuro es lo único que separa la carta del fondo.*
+**Aplicarlo por simetría habría vaciado la app oscura, y nadie lo habría visto
+hasta un gate en oscuro — que no hacemos nunca.**
+
+### ⚠️ Y UNA CONSECUENCIA QUE YA SE SABE, ANTES DE MIRAR
+
+**Todos los números de superficie de C se midieron contra el fondo VIEJO** (la
+carta a `rgb(255,255,255)`, los altos, los contrastes). Con `#F6F6F6` **la carta
+blanca deja de separarse igual** — que es justamente el trabajo que el founder
+le pidió a la carta. ⇒ **la carta de composición necesita un ojo DESPUÉS del
+fondo.** *C decidió no re-medir ahora, y es lo correcto: mediría contra una vara
+que está por cambiar.*
+
+---
+
+## ① QUÉ CAMBIA, CON SU NÚMERO DE GATE
+
+### Pista B — las piezas
+
+| # | qué | dónde se verificó |
+|---|---|---|
+| **5·7** | **el stepper 44 → 34 dp** (−22,7 %, el blanco de 44 intacto) y **un bloque, no tres piezas** | aparato |
+| — | **el arbitraje de gestos**: `HojaScroll` gana el eje horizontal, `FiltroPills` cede el pan. **Degrada solo fuera de una Hoja** | aparato |
+| — | **el número editable** con ajuste al stock, un mecanismo para las tres superficies | ver ② |
+| **8·9·12** | **el flotante sube al SHELL** — existe por el CARRITO, no por la pantalla; se calla en `carrito` y `checkout` | aparato |
+| — | **los headers a la altura de Despensa** — inset **derivado**: 88,2 → 54,0 dp | aparato |
+| **—** | **el fondo `#F6F6F6`** + el mapa de superficies + `R16` con letra nueva | ver arriba |
+| **H-205** | 🔴 **DIAGNOSTICADO, NO CURADO** — ver ③ |
+
+### Pista C — la vitrina y la ficha
+
+| # | qué | dónde |
+|---|---|---|
+| — | **la composición SIN CARTA cuando no hay ingredientes** — curado **subiendo la carta afuera del `if`**, no duplicándola: *«una rama sin superficie» deja de ser expresable* | RN-web |
+| **9** | el chip de presentación en magenta `rgb(142,31,104)` | 🔴 **RN-web, NO en aparato** — declarado, ver ④ |
+| — | **la puerta del local SALE de la Despensa** (firma del founder). La vitrina termina la vuelta **sin ninguna puerta prestada: solo mercadería** | RN-web |
+
+### Pista D — pedidos y el camino
+
+| # | qué |
+|---|---|
+| **24** | el scroll de la hoja (su plegable de 475 en una hoja de 365) · **el tercer estado: que baje del todo conservando su asa** |
+| — | **la reestructura de Pedidos**: el vivo arriba **sin hueco cuando no hay nada** · chips solo «Entregados · Cancelados» · **«Pedir de nuevo»** en cada entregado |
+
+### Pista A — el checkout y la dirección
+
+| # | qué |
+|---|---|
+| **17** | la ficha de entrega (una carta, N21) con **la gota ocre junto a la dirección** |
+| **20** | el tope de compra en las tres puertas · **el campo tipeable encendido en el carrito** |
+| **28** | el alias alcanzable |
+| — | 🔴 **el modal de dirección: SIN CAMPO al entrar y SIN MAPA hasta que se pide** — ver ② |
+| — | **`places_id` con su auditoría** — ver ⑤ |
+
+---
+
+## ② 🔴 EL MODAL DE DIRECCIÓN — la clase eliminada, no parcheada
+
+**El rojo, verbatim:** *«para poder guardar dirección o agregar otra me toca
+tocar el mapa, y literalmente me desacomoda la dirección… **si no me di cuenta,
+no pasa**»*. ⇒ **se guardaba una dirección distinta de la elegida sin que la
+persona se enterara** — lo peor que puede pasar en una pantalla de entrega.
+
+**La causa:** el mapa vivía **en medio del formulario que scrollea**. Para llegar
+a los botones había que arrastrar **sobre él**, y arrastrarlo **mueve el punto**
+porque el pin *es* el centro. *El gesto de navegar y el gesto de editar eran el
+mismo gesto.*
+
+**La cura:** al entrar **no hay campo de texto** (la dirección se muestra, con
+una puerta explícita para cambiarla) · **el mapa no se monta hasta que se pide** ·
+**las acciones y Guardar van ANTES del mapa**, que queda último y sin nada debajo.
+
+🔴 **Un mapa que no está no puede comerse el scroll.** *Reordenar los botones
+solo era la mitad barata: el defecto habría vuelto apenas alguien agregara un
+campo abajo.*
+
+### El campo tipeable: la causa real, y las tres nos equivocamos
+
+**A dijo** que el aviso estaba montado en las tres. **B dijo** que faltaba montar
+la Hoja. **Ninguna era la causa.** Medido:
+
+    grep "editable" en apps/cliente/.../despensa/   →   CERO
+    StepperCantidad.tsx:288   editable?: boolean   (default false)
+
+⇒ **`editable` no estaba encendido en ninguna superficie: la pieza era *motor
+sin puerta*.** Y el aviso **no había que cablearlo aparte** — el campo emite por
+el **mismo `onCambio`**, así que tipear 50 con 12 en stock entra por el mismo
+camino que tocar el «+». **La cura era una palabra por superficie.**
+
+**La voz, ajustada al pedido del founder** (*«disculpá, por ahora solo tenemos
+12»*), conservando su **«por ahora»** —la escasez es de hoy, no del producto— y
+diciendo **qué pasó con el número**, no solo cuánto hay:
+
+> *«Por ahora tenemos 12 de este producto — dejamos esa cantidad en tu carrito.»*
+
+⚠️ **`sin_medir` NO es alias de `agotado`:** si la consulta de stock falla **se
+aplica lo pedido** (Ley 13). *Un fallo de red no se disfraza de «no hay stock».*
+El instrumento lo caza — su rojo producido es exactamente colapsar las dos
+clases (8/10 contra 10/10).
+
+---
+
+## ③ 🔴 H-205 — DIAGNOSTICADO Y NO CURADO, y cambió de causa
+
+**No era `color:'transparent'` fallando en aparato.** Son **dos strings del mismo
+dato**: el techo recibe `ficha.nombre` **crudo** y el cuerpo pinta
+`nombreCurado(...)`. Con **42 % del catálogo en MAYÚSCULAS**, arriba «NUTRA PRO
+ADULTO LIGHT» y abajo «Nutra Pro Adulto Light».
+
+**Por eso el web nunca lo delató:** con un nombre ya en caja normal las dos
+versiones coinciden.
+
+**AL CANON — y es de B:** ***un acoplamiento declarado por escrito se cobra
+solo.*** Ella misma escribió esta mañana, en `TarjetaProducto`: *«el día que otra
+superficie monte esto, `nombreCurado` tiene que subir con ella»* — **se cumplió
+doce horas después, en la pantalla de al lado.**
+
+---
+
+## ④ DÓNDE SE VERIFICÓ CADA COSA — la palabra importa
+
+**«Aparato» = el teléfono del founder.** Todo lo demás es **RN-web**, que sirve
+para **comparar un antes con un después** y **jamás para declarar cómo se ve**.
+
+⚠️ **Y la jornada lo probó tres veces:** RN-web **no reproduce** el `Gesture.Pan`
+de la Hoja · **no habría reproducido** el recorte del stepper · y **el scroll
+horizontal de los filtros andaba en web y NO en el teléfono**.
+
+**El chip magenta de C sale CONSTRUIDO, SIN VERIFICAR EN APARATO**, con su razón
+medida: el producto que abrió tenía **una sola presentación** y el grupo colapsa
+por diseño; cuando fue a buscar uno con varias, **el teléfono ya tenía el dev
+build** (248 MB medidos).
+
+---
+
+## ⑤ `places_id` — LA AUDITORÍA QUE CREÍAMOS TENER
+
+**Era una COLUMNA SIN ESCRITOR:** existe en el DDL, **0 de 3** direcciones la
+tienen, **el wrapper no la mandaba y la RPC no la tomaba**. *El cero no probaba
+que Places fallara: probaba que nuestra puerta no lo guardaba.*
+
+🔴 **Lo grave no era la columna vacía:** guardábamos **el punto final** y **no la
+coordenada que Places resolvió** ⇒ **la divergencia no era auditable después del
+hecho.** Hoy son 3 direcciones y el daño es **de volumen, no de diseño**: con 500
+clientes, cada punto corrido es **una entrega fallida sin causa rastreable**.
+
+**Migración `20260820100000`, aditiva**, con reversa escrita antes y cinturón de
+cuatro brazos —el tercero verifica que **un caller VIEJO sigue resolviendo**, o
+sea que el bundle publicado no se rompe—.
+
+**Las direcciones viejas NO se reparan** (firma del founder): no hay contra qué
+comparar y **no se inventa un `places_id` retroactivo**. **Su NULL es la verdad:
+no sabemos.**
+
+---
+
+## ⑥ LO QUE **NO** ESTÁ EN ESTE BUNDLE
+
+| qué | por qué |
+|---|---|
+| **H-205** | diagnosticado, la cura es de C y es chica |
+| **el chip magenta en aparato** | construido y verificado solo en web |
+| **la carta de composición contra el fondo nuevo** | sus números son del fondo viejo — pide un ojo |
+| **las 6 vistas del admin** (GMV, MRR, pitch, ranking) | siguen legibles por `anon`: cerrarlas apaga el tablero **con certeza**. Disparo escrito: **antes de compartir `/inversores` con alguien externo** |
+| **la cura estructural de `consentimientos`** | su firma era condicional y la condición falló |
+| **las 25 variantes con más de una oferta publicada** | **cero del mismo vendedor, 25 de vendedores DISTINTOS, hasta 48 % de brecha, ningún UNIQUE.** Es el caso **multi-vendedor** contra la firma «una oferta por producto». **La cura de C hace que se VEA; no lo resuelve — no puede.** Es de mesa |
+| **oscuro y memorial** | no medidos por ninguna pista, en toda la vuelta |
+
+---
+
+## ⑦ AVISOS OPERATIVOS
+
+- ⚠️ **`router.d.ts` está gitignoreado:** tras un merge el typecheck **falla sobre
+  rutas que SÍ existen** hasta regenerarlo. *No mordió en los tres ensambles de
+  hoy; que no muerda no es que no exista.*
+- ⚠️ **El pie de Cuenta muestra el `updateId`, NO el group.** Con el criterio
+  equivocado se frena un bundle sano o se declara que el founder mira el objeto
+  viejo cuando mira el nuevo.
+- ⚠️ **Los updateId de android e ios comparten los primeros 8 caracteres**, y en
+  el bundle anterior **las dos APPS también**. Sirven para saber **qué
+  publicación** corre, **no** qué app ni qué plataforma.
+- ⚠️ **El teléfono no recibe OTA con un dev build instalado** (mismo package).
+  **Se lee exactamente igual que D-786.** La secuencia fue: **D restaura la
+  preview y la verifica por tamaño → recién ahí se publica.**
+
+---
+
+## ⑧ LA LECCIÓN DE LA JORNADA, con sus cobros
+
+> **Un negativo medido una vez y citado después no es una medición: es una cita.**
+
+**Cobrado seis veces, con seis sujetos distintos:** `adb devices` vacío (eran tres
+pistas) · «no hay rasterizador de SVG» (lo había: `qlmanage`) · un `grep` con un
+`=` de más · el «aviso no montado» de B, cierto al escribirlo y vencido al
+citarlo · el «editable montado» de A, que miraba otro camino · y **una presencia
+PREDICHA** (el toast de `<button>` anidado, que no existe en preview).
+
+**Ninguno lo encontró leer con más cuidado. Los seis los encontró volver a medir
+el objeto.** Y su hermana, de B: ***un dato propio, medido con las propias manos,
+es el que menos se vuelve a mirar.***
+
+**Y la de C, que es la que más ahorra hacia adelante:** midió la composición sobre
+el producto con **25 ingredientes** —el caso rico, para ver el plegado— y con él
+perdió de vista el pobre, **que son 268 de 470, la mayoría del catálogo**.
+***Elegir el caso más interesante para medir es elegir el menos representativo.***
