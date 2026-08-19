@@ -128,6 +128,19 @@ export interface GuardarDireccionHogarInput {
    *  la parió (LETRA_PERFIL_S79 §2.2). Van en par o rebota. */
   lat?: number | null;
   lon?: number | null;
+  /**
+   * 🔴 S100d·bis · LA AUDITORÍA DEL PUNTO (ver la nota larga en
+   * `guardarDireccionConAlias`). `places_id` era una columna sin escritor, y
+   * sin la coordenada que Places resolvió **la divergencia entre lo que el
+   * dueño eligió y lo que se guardó no era auditable después del hecho.**
+   *
+   * ⚠️ OPCIONALES a propósito: una dirección escrita a mano no pasó por Places.
+   * *Mandar el punto final como si fuera el de Places haría la auditoría
+   * siempre verde y sería peor que no tenerla.*
+   */
+  placesId?: string | null;
+  latPlaces?: number | null;
+  lonPlaces?: number | null;
 }
 
 /**
@@ -151,6 +164,9 @@ export async function guardarDireccionHogar(
     // texto que las parió). El tipo generado no admite null explícito.
     p_lat: input.lat ?? undefined,
     p_lon: input.lon ?? undefined,
+    p_places_id: input.placesId ?? undefined,
+    p_lat_places: input.latPlaces ?? undefined,
+    p_lon_places: input.lonPlaces ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -252,6 +268,32 @@ export async function guardarDireccionConAlias(input: {
   lon: number;
   /** Presente = edita esa dirección; ausente = crea una nueva. */
   direccionId?: string | null;
+  /**
+   * 🔴 S100d·bis · LA AUDITORÍA DEL PUNTO — `places_id` era una COLUMNA SIN
+   * ESCRITOR.
+   *
+   * Medido: la columna existe desde su DDL, y **0 de 3 direcciones la tienen**
+   * porque **este wrapper nunca la mandaba y la RPC no la tomaba**. *El cero no
+   * probaba que Places fallara: probaba que nuestra puerta no lo guardaba.*
+   *
+   * ⚠️ Y lo grave no era la columna vacía: **guardábamos el punto final y NO la
+   * coordenada que Places resolvió** ⇒ cuando el mapa corría el pin sin que el
+   * dueño se enterara —el defecto que el founder reportó—, **la divergencia no
+   * era auditable después del hecho: no había contra qué comparar.**
+   *
+   * Con estos tres, el dato nuevo nace completo y la divergencia se vuelve
+   * medible. **Las direcciones viejas quedan como están** (decisión firmada:
+   * no se inventa un `places_id` retroactivo) — su NULL es la verdad: *no
+   * sabemos*.
+   *
+   * ⚠️ Los tres son OPCIONALES a propósito: una dirección escrita a mano no
+   * pasó por Places y **no tiene** coordenada resuelta. *Mandar el punto final
+   * como si fuera el de Places haría la auditoría siempre verde y sería peor
+   * que no tenerla.*
+   */
+  placesId?: string | null;
+  latPlaces?: number | null;
+  lonPlaces?: number | null;
 }): Promise<ResultadoWrapper<{ direccionId: string }, CodigoErrorDireccion>> {
   const { data, error } = await getClient().rpc('guardar_direccion_con_alias', {
     p_alias: input.alias,
@@ -263,6 +305,9 @@ export async function guardarDireccionConAlias(input: {
     p_lat: input.lat,
     p_lon: input.lon,
     p_direccion_id: input.direccionId ?? undefined,
+    p_places_id: input.placesId ?? undefined,
+    p_lat_places: input.latPlaces ?? undefined,
+    p_lon_places: input.lonPlaces ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
