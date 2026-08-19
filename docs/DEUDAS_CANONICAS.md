@@ -18158,3 +18158,88 @@ prestador **no es «tealDark en los dos»**. Se mide antes de escribirlo.
 
 **Dueño:** B (`packages/ui` + el juez). **Disparo:** el primer
 `SelectorOpcion entidad` en el prestador, o la próxima tanda que toque R27.
+
+---
+
+## L-313 — UN NÚMERO PUEDE FALLAR POR LA PREGUNTA O POR SU INSUMO, Y DESDE ADENTRO LOS DOS SE VEN IDÉNTICOS
+
+**Firmada por el founder, S100d·bis (19-ago-2026).** Nació como candidata en el
+acta de B, D la marcó **NO RIGE** esperando esta firma, y llega con **dos casos
+del mismo día, uno por cabeza** — que es lo que la vuelve enseñable en vez de
+elegante.
+
+> **Un número correcto puede ser un dato falso de dos maneras distintas, y ninguna
+> se nota desde adentro: porque contesta OTRA PREGUNTA, o porque su INSUMO era
+> otra cosa. Lo único que las separa de un dato creíble y falso es DECLARAR
+> CONTRA QUÉ SE MIDIÓ.**
+
+**EL CASO DE LA PREGUNTA (B).** Derivó el costo vertical de agrandar el nodo de
+10 a 32 (**+12,0**) y lo midió sobre otro objeto (**+11,9**). *Dos cuentas
+independientes, un número: impecable.* **Y el costo HORIZONTAL no estaba ni en la
+derivada ni en la medición, porque las dos miraban el alto** — el nodo crecido
+alcanzó el texto: `x[22,0 · 54,0]` contra un texto que arranca en `51,9` ⇒
+**−2,1 dp, se pisaban.** *No falló la medición: faltó la segunda pregunta.*
+**Lo encontró el ojo del founder** (*«la letra está pegada a los pasos»*), **no un
+instrumento.**
+
+**EL CASO DEL INSUMO (D).** Derivó el hueco viejo en **4,2 dp** tomando un `24`
+que era **interlineado y no nodo**; el real era **7,0**.
+
+**LO QUE SALVÓ A LOS DOS ES LO MISMO, Y ES BARATO:** los dos habían **declarado
+contra qué midieron** — D incluso lo dejó condicional (*«si ese 24 era el
+interlineado, la cuenta se cae»*). ⇒ **las dos correcciones costaron UNA LÍNEA en
+vez de una sesión.** *Un número sin su vara declarada no se puede corregir: se
+puede, como mucho, dejar de creer — y eso llega siempre tarde.*
+
+**Es la forma general de L-285**, y su parentesco con el corolario de la casa:
+*el número correcto de la pregunta equivocada se siente exactamente igual de
+sólido que el de la correcta.*
+
+---
+
+## L-314 — UNA REGLA QUE SOLO PROTEGE CUANDO VES VENIR EL PROBLEMA NO ES UNA REGLA: ES ATENCIÓN
+
+**Firmada por el founder, S100d·bis.**
+
+> **La regla que sirve es la que cubre EL CASO QUE NO VISTE. Y para que se sepa
+> cuál es cuál, alguien tiene que RECHAZAR EL CRÉDITO — porque desde afuera la
+> previsión y la costumbre producen exactamente el mismo código, y quien lee el
+> diff no puede distinguirlas.**
+
+**El caso:** D le atribuyó a B **previsión** por haber derivado
+`RIEL_VERTICAL = NODO` en vez de teclear un número. **B rechazó el crédito: lo
+escribió ANTES de saber que el hueco existía**, por costumbre de L-284 — no
+porque hubiera anticipado el defecto.
+
+*La distinción importa porque decide qué se puede confiar hacia adelante.* Una
+derivación que nació **por costumbre** protege el próximo caso que nadie vio; una
+que nació **porque el autor vio venir éste** solo protege los que alguien
+anticipe. **El diff es idéntico; la garantía, no.**
+
+⚠️ **Corolario operativo:** en un acta, atribuir previsión a una decisión que fue
+costumbre **infla la confianza en el mecanismo**. *El único que puede corregirlo
+es quien la tomó, y solo si se molesta en decir que no la vio venir.*
+
+---
+
+## L-315 — EL MAQUILLAJE NO ES MENTIR: ES DEJAR DE MIRAR UNA DIFERENCIA
+
+**Firmada por el founder, S100d·bis.**
+
+> **El reporte falso más probable no se fabrica: se obtiene NO DISTINGUIENDO dos
+> cosas que en pantalla se parecen. No hace falta inventar nada — alcanza con
+> dejar de mirar una diferencia.**
+
+**El caso, y por eso es el que enseña:** el estado `confirmado` **como hito
+ACTUAL** nunca se vio (cero pedidos ahí — D-764: sin pasarela nada llega). **Pero
+la voz correcta ESTABA en pantalla**: «Recibimos tu pedido», renderizada y
+legible, **como paso ya cumplido** de un pedido `en_camino`.
+
+⇒ **reportarlo verde no habría requerido inventar nada.** Alcanzaba con no
+distinguir *un paso cumplido* de *un hito presidiendo, en negrita y con su
+anillo*. **La voz es la misma; el estado que prueba, no.**
+
+**La cura es la orden del founder, y va con la ley:** *«si no hay ningún pedido
+pagado con el que verificarlo, decilo — no midas otro estado para reportarlo como
+éste»*. ⇒ **un verde se declara sobre EL caso, jamás sobre uno que se le parece**,
+y cuando el caso no existe **se dice que no existe**.
