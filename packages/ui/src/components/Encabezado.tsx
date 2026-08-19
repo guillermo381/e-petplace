@@ -214,9 +214,37 @@ export function Encabezado(props: EncabezadoProps) {
               textAlign: 'center',
               fontFamily: typography.family.sans.medium,
               fontSize: typography.size.md,
-              // Apagado: el nodo sigue siendo `header` y sigue teniendo el
-              // texto para el lector; lo único que se va es la tinta.
-              color: props.tituloVisible === false ? 'transparent' : theme.text.primary,
+              /* 🔴 APAGADO CON EL COLOR DEL FONDO, NO CON `transparent` —
+                 S100d·bis, contra un hecho MEDIDO en aparato.
+
+                 ⏪ **Era `'transparent'` y en este Android NO SE HONRA: el
+                 título se pinta igual.** H-205 se dio por cerrado en S100b y
+                 volvió — *y volvió invisible en RN-web, que es donde se
+                 verificó.*
+
+                 **Cómo se probó que la caja era ÉSTA y no otra** (vía de C,
+                 más barata que el experimento que yo había pedido): los bounds
+                 del volcado dan **`x 146–934` sobre 1080**, y esta pieza los
+                 predice exactos — `(spacing[2] + ZONA_LATERAL) × 2.8125 = 146`,
+                 simétrico. *Dos cuentas, un número.*
+                 ⚠️ **Y el límite de esa prueba, declarado:** `uiautomator`
+                 reporta el nodo **aunque sea transparente** —es la capa de
+                 accesibilidad—, así que **el volcado prueba QUIÉN es la caja y
+                 la captura prueba que está PINTADA.** Ninguna sola alcanza.
+
+                 **La cura NO depende de saber por qué `transparent` falla:**
+                 se pinta con el color del propio fondo. *Un color opaco se
+                 honra siempre* — y como sale del MISMO token que pinta este
+                 techo, si el fondo cambia, el apagado lo sigue solo. **Hoy eso
+                 importa más que nunca: el fondo acaba de pasar a `#F6F6F6`.**
+
+                 ✅ **Y conserva lo que el mecanismo existía para conservar:**
+                 el nodo sigue siendo `header`, sigue teniendo el texto para el
+                 lector, y sigue ocupando su caja. *Cualquier cura que lo
+                 borrara del árbol —`null`, `display:none`— habría apagado el
+                 píxel matando la accesibilidad, que es el motivo por el que
+                 esta prop no es simplemente no pasar `titulo`.* */
+              color: props.tituloVisible === false ? theme.bg.base : theme.text.primary,
             }}
           >
             {props.titulo}
