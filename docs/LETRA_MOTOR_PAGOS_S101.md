@@ -199,12 +199,36 @@ pasar, en orden, TODAS estas compuertas — y cada rechazo tiene su voz (§7):
 | 0 | **La compra no tiene ya un intento en vuelo** (el candado de la migración 2, verificado también en código) | «Tu pago anterior se está procesando» — jamás segundo débito |
 | 1 | **La reserva de stock sigue viva** (no venció el TTL) | Se rearma el carrito contra stock actual; si ya no hay: «producto ya no disponible» (firma S99) |
 | 2 | **El monto a debitar == el desglose congelado**, centavo a centavo | No se cobra. Hallazgo rojo a soporte — un monto que divergió del desglose es defecto NUESTRO, no del cliente |
-| 3 | **La dirección está dentro de cobertura** | Se corrige antes de cobrar, no después |
+| 3 | ~~**La dirección está dentro de cobertura**~~ · 🔴 **ESTRUCTURALMENTE NO EVALUABLE EN EL MOTOR** — ver estatuto abajo | *(no la evalúa el pago)* |
 | 4 | **El vendedor sigue activo** (cuenta activa, regla 7.13) | No se cobra |
 | 5 | **La tarjeta/token existe y está vigente** | Voz de datos inválidos, corregir |
 
 **Regla madre: todo lo que pueda impedir la entrega se verifica ANTES del débito.**
 Cobrar y descubrir después es exactamente el caso que ya no podemos deshacer barato.
+
+#### 🔴 ESTATUTO DE LA COMPUERTA 3 — firma de mesa, 19-ago noche
+
+**La cobertura queda FUERA del motor de pago POR DISEÑO, no por falta de datos.**
+
+Se valida **cuando el cliente elige la dirección**, jamás al pagar. Descubrir «fuera de
+cobertura» en el cobro **es el patrón que E5 prohíbe**: el cliente enterándose de un
+problema del pedido *a través del pago*. Ponerla acá sería construir, con forma de
+compuerta, exactamente lo que §7 declara inaceptable.
+
+⇒ **El pago CONFÍA en que la dirección llegó validada aguas arriba.** Y esa confianza
+**se declara en voz alta, no se asume**: `verificar_compuertas_pre_cobro` devuelve
+`no_evaluables: ["cobertura"]` **siempre — incluso dentro del `ok:true`**, para que
+ningún llamador pueda leer un verde como «cobertura verificada».
+
+*Una compuerta que no puede evaluar y calla es peor que una que falta: la que falta se
+nota.*
+
+> ⚠️ **Hoy esa confianza NO está respaldada aguas arriba, y está medido:**
+> `crear_pedido_despensa` escribe la ciudad y nunca la verifica; `zonas_cobertura` es la
+> tabla de courier, con 20 filas, 0 activas y cero lectores. **Deuda `D-850`**, dueño el
+> flujo de elección de dirección del cliente, disparo **antes del primer pedido real de
+> octubre**. Inofensivo mientras todo sea semilla y todo sea Quito; deja de serlo el día
+> uno.
 
 ### §5.1 · Y RECIÉN AHÍ, EL WEBHOOK
 

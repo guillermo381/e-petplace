@@ -18374,6 +18374,39 @@ Misma definición, medido. Ninguno hace daño; sobra uno.
 **Dueño:** A / motor. **Disparo:** la próxima migración que toque
 `direcciones_guardadas`.
 
+## 🟠 D-850 — NADIE VALIDA COBERTURA EN NINGÚN PUNTO DEL FLUJO
+
+**Medido en S101-A (19-ago-2026), censando las compuertas pre-cobro:**
+
+- `crear_pedido_despensa` **escribe** `entrega_ciudad` / `entrega_sector` y
+  **jamás los verifica**. Un pedido a cualquier ciudad del mundo se acepta.
+- `zonas_cobertura` **existe y es letra muerta**: 20 filas, **CERO activas**,
+  **cero funciones la leen**. Y no es la tabla del caso — es la de **courier**
+  (transportistas medidos: borzo, laar, picap, servientrega, tramaco, con
+  `tarifa_base`/`tarifa_kg`), apagada a propósito porque la despensa va en
+  **moto propia** (firma S95).
+- **Quito ni figura entre sus ciudades**, y **los 35 pedidos vivos son de Quito**
+  ⇒ cablear ahí una validación **rechazaría 35 de 35**.
+
+**Hoy es inofensivo y por eso nadie lo vio: todo es semilla y todo es Quito.**
+El día que entre un pedido real de otra ciudad, se acepta, se cobra, y el
+problema aparece cuando no hay quién lo entregue.
+
+🔴 **NO es deuda del motor de pagos, y meterla ahí sería el error.** Firma de
+mesa (19-ago, noche): **la cobertura se valida cuando el cliente ELIGE LA
+DIRECCIÓN, jamás al pagar** — descubrir «fuera de cobertura» en el cobro es
+exactamente el patrón que E5 prohíbe: *el cliente descubriendo un problema del
+pedido a través del pago.*
+
+**Dueño:** el flujo de elección de dirección del lado cliente.
+**Disparo:** **antes del primer pedido real de octubre.**
+
+**Relación:** `LETRA_MOTOR_PAGOS_S101` §5.0 deja la compuerta 3 declarada como
+**estructuralmente no evaluable en el motor**, con `no_evaluables:["cobertura"]`
+viajando **incluso dentro del `ok:true`** — para que ningún llamador lea un verde
+como «cobertura verificada». *Esa visibilidad es lo único que hoy impide que esta
+deuda se vuelva invisible.*
+
 ## ⚠️ NO NACE FICHA — dos que quedan apuntadas a deuda existente
 
 **① `confirmado` como hito ACTUAL nunca se vio.** No es deuda nueva: **está
