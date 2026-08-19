@@ -1,10 +1,10 @@
 # LETRA_MOTOR_PAGOS_S101.md — e-PetPlace
 
-> **Nota de depósito (S101-A, 19-ago-2026):** esta letra vivía solo en la conversación de apertura. Se deposita **VERBATIM** — la sesión no editó una coma. Las enmiendas que el censo B0 produjo **no se aplicaron acá**: viven en `docs/relevamientos/2026-08-19-s101-censo-pagos.md` §9, y esta letra se enmienda cuando el founder las firme. *Una letra corregida en silencio deja de ser el documento que se firmó.*
+> **Nota de depósito (S101-A, 19-ago-2026):** esta letra vivía solo en la conversación de apertura. Se depositó **VERBATIM** como v1.0. **Las enmiendas E1-E7 de la mesa de la tarde YA ESTÁN APLICADAS** en este cuerpo (v1.1) — su porqué vive completo en `docs/ENMIENDA_S101_MOTOR_v1.1.md`, que **se conserva y no se borra**. La letra vieja va **tachada, no borrada**: *quien lea esto dentro de tres sesiones tiene que poder ver qué decía antes y por qué cambió.*
 
 ---
 
-> **Versión:** v1.0 · **Abierta:** 19-ago-2026 · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Versión:** v1.1 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
 > **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
 >
 > **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
@@ -58,9 +58,39 @@ Con eso la URL existe, es real y se le puede pasar a Erick en el momento en que 
 
 ---
 
-## §3 · LAS DOS TABLAS
+## §3 · ~~LAS DOS TABLAS~~ — 🔴 **DEROGADA ENTERA (E1, 19-ago)**
 
-**Eje `proveedor` desde la primera migración.** No es previsión: DeUna está en conversación y **no está en el catálogo de APMs de Nuvei** — es una integración directa con su propio contrato y su propia certificación. Agregar un segundo proveedor después de la primera plata real es una migración con backfill sobre filas de dinero. *El esqueleto nace completo; lo que se enciende son opciones.*
+> **El motor ya existe: estas tablas NO se crean.** El censo B0 midió vivos
+> `pagos_intentos`, `pagos_eventos`, `compras`, `compra_desglose`,
+> `cat_transiciones_pedido` y `confirmar_pago_pedido` — con el enchufe de S100 declarado
+> en el código (*«y S101 se enchufa acá sin tocar la pantalla»*).
+>
+> **Lo que rige en su lugar:** la migración 2 **enmienda `pagos_intentos`** —
+> `compra_id` · `confirmado_por` · `proveedor_transaction_id` · `authorization_code` ·
+> `marca` · `bin` · `ultimos4` — y agrega el candado de idempotencia.
+>
+> **El candado, corregido por firma de mesa (19-ago, cierre):**
+> **`UNIQUE (proveedor, proveedor_transaction_id, pedido_id)` parcial.**
+> ~~El literal `(proveedor, proveedor_referencia)`~~ quedó **descartado por prueba**: es
+> **inconstruible** junto con la orquestación. Rojo producido sobre la compra real
+> `fc8e2a85`, que ya tiene dos pedidos — el segundo intento viola la constraint, porque
+> `proveedor_referencia` guarda el `dev_reference` y **el dev_reference es la COMPRA**,
+> compartida por sus N pedidos. *El candado va al identificador de la pasarela y al grano
+> correcto, que es lo que esta sección quería decir.*
+>
+> **`webhook_events` (migración 1) SE QUEDA.** La enmienda la dejó condicionada al ítem ①
+> — «si la medición la declara duplicación, se revierte». **La medición se hizo y NO es
+> duplicación:** ninguna de las dos se deriva de la otra, y la cardinalidad lo prueba
+> (un golpe HTTP de una compra de N pedidos deja **1 fila allá y N acá**). Medido además:
+> `pagos_eventos` tiene **un solo escritor y un solo lector**, los dos
+> `confirmar_pago_pedido`. **La reversa de la migración 1 no se propone.**
+>
+> *Lo de abajo se conserva tachado porque su razonamiento sigue siendo el correcto —
+> lo que estaba mal era el supuesto de que el terreno estaba vacío.*
+
+### ~~Letra vieja de §3, conservada~~
+
+~~**Eje `proveedor` desde la primera migración.**~~ No es previsión: DeUna está en conversación y **no está en el catálogo de APMs de Nuvei** — es una integración directa con su propio contrato y su propia certificación. Agregar un segundo proveedor después de la primera plata real es una migración con backfill sobre filas de dinero. *El esqueleto nace completo; lo que se enciende son opciones.*
 
 ### `pagos` (candidata)
 
@@ -99,6 +129,16 @@ Con eso la URL existe, es real y se le puede pasar a Erick en el momento en que 
 
 **Precedente de la casa:** 46 transiciones como dato en el motor de la despensa (S95). Mismo patrón.
 
+> 🔴 **CORRECCIÓN E2 (19-ago) — `esperando_otp` CAMBIA DE DUEÑO.** Fuente: Erick,
+> *«el formulario de tokenización pide el usuario el otp pero en el débito no se debe
+> pedir»*. **`esperando_otp` y `en_desafio` son estados del ALTA DE TARJETA** (Add Card
+> en el WebView), **no del cobro**. El flujo de débito **no espera desafío**, y ninguna
+> pantalla de cobro se construye esperando un código.
+> **El handler del webhook no cambia:** los `status_detail` 1/31/32/33/35-48 se siguen
+> recibiendo, registrando y tolerando — lo que cambia es **qué flujo de UI los consume**.
+> *Construir la pantalla de cobro esperando un OTP que nunca llega es un embudo que se
+> cuelga sin que nada falle.*
+
 **Regla madre: el handler tolera códigos desconocidos sin romper.** La doc de Nuvei tiene al menos un código sin significado definido (`status_detail 30`, "Transaction seated", solo Ecuador). Un código no mapeado **no es un error: es un evento que se registra y no mueve nada**, y dispara aviso a soporte.
 
 Mapa de partida (del plan, sección ④ — a verificar contra la doc viva):
@@ -124,6 +164,26 @@ Mapa de partida (del plan, sección ④ — a verificar contra la doc viva):
 
 ## §5 · EL WEBHOOK, EN ORDEN
 
+### §5.0 · PASO CERO — LAS COMPUERTAS PRE-COBRO (E3, 19-ago)
+
+**Fuente: el reverso es MISMO-DÍA (Erick).** Si deshacer un cobro es caro o imposible,
+**la plata que no se cobra mal no hay que devolverla.** El débito no se dispara sin
+pasar, en orden, TODAS estas compuertas — y cada rechazo tiene su voz (§7):
+
+| # | Compuerta | Si falla |
+|---|---|---|
+| 0 | **La compra no tiene ya un intento en vuelo** (el candado de la migración 2, verificado también en código) | «Tu pago anterior se está procesando» — jamás segundo débito |
+| 1 | **La reserva de stock sigue viva** (no venció el TTL) | Se rearma el carrito contra stock actual; si ya no hay: «producto ya no disponible» (firma S99) |
+| 2 | **El monto a debitar == el desglose congelado**, centavo a centavo | No se cobra. Hallazgo rojo a soporte — un monto que divergió del desglose es defecto NUESTRO, no del cliente |
+| 3 | **La dirección está dentro de cobertura** | Se corrige antes de cobrar, no después |
+| 4 | **El vendedor sigue activo** (cuenta activa, regla 7.13) | No se cobra |
+| 5 | **La tarjeta/token existe y está vigente** | Voz de datos inválidos, corregir |
+
+**Regla madre: todo lo que pueda impedir la entrega se verifica ANTES del débito.**
+Cobrar y descubrir después es exactamente el caso que ya no podemos deshacer barato.
+
+### §5.1 · Y RECIÉN AHÍ, EL WEBHOOK
+
 1. **Persistir el crudo** antes de razonar sobre él.
 2. **Verificar el `stoken`** = MD5 de `transaction_id` + `_` + `application_code` + `_` + `user_id` + `_` + `app_key`. Si no coincide: registrar y **cortar**. No mueve nada.
 3. **Deduplicar por `proveedor_transaction_id`.** La doc avisa que el mismo evento puede llegar repetido.
@@ -147,7 +207,20 @@ La respuesta síncrona del débito trae status — **es señal optimista, jamás
 El segundo no hace nada, por idempotencia. **Los dos dejan traza** en `webhook_events`. Si el que llega segundo dice algo distinto del primero, es hallazgo: se registra y se avisa, no se sobrescribe en silencio.
 
 **④ No llega ninguno.**
-El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos sin confirmar con antigüedad mayor a un umbral. Sin ese barrido, un pago cobrado por Nuvei y nunca confirmado queda invisible **con la plata ya debitada al cliente**.
+El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos sin confirmar. Sin ese barrido, un pago cobrado por Nuvei y nunca confirmado queda invisible **con la plata ya debitada al cliente**.
+
+> 🔴 **CADENCIA CORREGIDA — E4 (19-ago): EL BARRIDO ES MISMO-DÍA, no «mayor a un umbral».**
+> Fuente: el reverso es mismo-día. Un cobro huérfano detectado **hoy** se reversa;
+> detectado **mañana** es plata del cliente retenida y un caso de soporte.
+> - El barrido (`GET /v2/transaction/`) corre **varias veces al día**, y **la última
+>   pasada corre antes del corte del día de Nuvei**.
+> - ⚠️ **La hora del corte NO está medida** — Erick dijo que *«depende del carrier, la
+>   hora varía»*. Hasta tener el dato, la última pasada corre a las **22:00
+>   America/Guayaquil como SUPUESTO DECLARADO**, y la pregunta va a la lista de Erick:
+>   *¿a qué hora cierra el día para efectos del reverso?*
+> - Todo hallazgo se registra con su resolución: `confirmado_tardio` ·
+>   `reversado_mismo_dia` · `huerfano_escalado` (los nombres los fija la pista contra lo
+>   que exista en la base, no contra esta letra).
 
 **Dos casos hermanos que también se prueban:** el **webhook tardío** (puede llegar hasta 48 h después, cuando el pedido ya se resolvió por consulta activa — la idempotencia lo absorbe) y el **webhook duplicado**.
 
@@ -165,8 +238,12 @@ El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos 
 | Timeout / sin respuesta | **No es rechazo.** Estamos confirmando | Esperar, con destino claro |
 | Tarjeta vencida o datos inválidos | Revisar los datos | Corregir |
 | Desconocido | No pudimos completar el cobro, ya lo estamos viendo | Soporte |
+| **Compuerta pre-cobro falla** (§5.0 #1-#4) — *fila nueva, E5* | La causa real, **ANTES de tocar la tarjeta**: «el producto ya no está disponible», «tu dirección quedó fuera de cobertura» | Resolver y reintentar — **la tarjeta nunca se enteró** |
 
 **Un timeout dibujado como rechazo hace que el cliente vuelva a pagar algo que ya pagó.** Es la clase de error que cuesta doble.
+
+> **El principio que agrega E5:** el cliente **jamás descubre un problema del pedido a
+> través de un cobro fallido o de una devolución**. Lo descubre antes, con su nombre.
 
 ---
 
@@ -190,6 +267,16 @@ No es orden de alcance: es una razón medida. `MODELO_FINANCIERO` §3.2 **congel
 
 Tampoco entran: el reembolso y la postventa · el catálogo · las cinco deudas vivas de S100d · la recurrencia (depende de MIT, sin respuesta de Nuvei).
 
+> 🔴 **EXCLUSIÓN CONDICIONADA NUEVA — E6 (19-ago).** La política de reembolsos al medio
+> de pago original (T&C §9.2) queda **SUSPENDIDA DE REDACCIÓN** hasta la respuesta de
+> Erick sobre el refund diferido (anulación mismo-día vs `POST /v2/transaction/refund/`).
+> **La pista NO construye ningún flujo de refund por API hasta esa respuesta.**
+>
+> **El saldo NO está condicionado y se construye como vía por defecto** — su letra propia
+> es `docs/LETRA_SALDO.md` (v1.0, 19-ago), nacida por disparo de la regla 7.16 de
+> `MODELO_FINANCIERO`. *Esa letra rige con cualquier respuesta de Nuvei: por eso se
+> escribió hoy en vez de esperar.* **Nada del saldo se construye en S101** — es de S102.
+
 ---
 
 ## §10 · PROTOCOLO
@@ -203,20 +290,34 @@ Tampoco entran: el reembolso y la postventa · el catálogo · las cinco deudas 
 
 ---
 
-## §11 · EL ORDEN DE EJECUCIÓN
+## §11 · EL ORDEN DE EJECUCIÓN — **REORDENADO POR E7 (19-ago), con el estado real**
 
-1. **B0 — el censo.** Sin esto no se migra.
-2. **El endpoint del webhook desplegado** ⇒ **sale la URL para Erick.**
-3. Migración de `pagos` y `webhook_events`, con reversa escrita **antes**.
-4. La máquina de estados como dato.
-5. El webhook completo — validación, dedupe, transición idempotente.
-6. Los cuatro casos con su arnés sobre fixtures.
-7. `pagando` → pagado y la escalera que se dibuja sola. **Mirado con el ojo, no solo por instrumento.**
-8. La taxonomía de fallo con voz.
-9. El correo de confirmación con **DF + código de autorización** — requisito de certificación, no cortesía.
-10. *(Cuando lleguen credenciales y callback registrada)* el cobro contra sandbox de punta a punta.
+| Paso | Qué | Estado |
+|---|---|---|
+| 1 | **B0 — el censo** | ✅ **ejecutado**, con hallazgos transpuestos en esta v1.1 |
+| 2 | **Buzón desplegado + URL** | ✅ **probado**, secretos validando, URL en manos de Nuvei |
+| 3 | **Migración 2** — enmienda `pagos_intentos` (ya NO crea `pagos`) | 🔨 **entregada, sin aplicar** — la corre el founder |
+| **3bis** | **Las compuertas pre-cobro (§5.0)** — *paso NUEVO de E3* | pendiente, entra **después** de la migración 2 |
+| 4 | La máquina de estados como dato, **con E2 aplicada** | pendiente |
+| 5 | El webhook completo — validación, dedupe, transición idempotente | pendiente |
+| 6 | Los cuatro casos con arnés, **con la cadencia mismo-día de E4** | pendiente |
+| 7 | La escalera de los clavados — **semilla confirmada**: el gate los mira, el corte semilla/real los marca | pendiente |
+| 8 | La taxonomía de fallo con voz, **con la fila de E5** | pendiente |
+| 9 | El correo de certificación con **DF + código de autorización** | pendiente |
+| 10 | El cobro contra sandbox de punta a punta | ⏳ **bloqueado** por registro de callback (Nuvei) |
 
 **Del 1 al 9 no depende de ninguna respuesta de Nuvei.** Solo el 10.
+
+> ⚠️ **Salvo lo que E6 congeló:** ningún flujo de refund por API se construye hasta la
+> respuesta sobre el refund diferido. Eso **no bloquea** ningún paso de esta tabla —
+> el refund nunca estuvo en el alcance de S101 (§9).
+
+> 🔴 **Nota sobre el paso 7, medida el 19-ago:** los pedidos clavados **se vencen solos**.
+> Hay un cron **activo** (job 12, `7 * * * *`) corriendo `expirar_pedidos_sin_pago()`, y
+> durante la propia sesión pasaron de 6 a 5 (`09a2f00b` → `cancelado_sistema`).
+> **Firma de mesa (19-ago, cierre): camino (a) — se dejan decaer, el cron NO se toca, y
+> el gate de la escalera usa un pedido creado FRESCO.** *Un gate montado sobre un
+> conjunto que caduca es un gate que un día no se puede correr.*
 
 ---
 
@@ -225,3 +326,30 @@ Tampoco entran: el reembolso y la postventa · el catálogo · las cinco deudas 
 Se escribe al cerrar, con nombre y razón. **Se publica lo incompleto, jamás lo falso.**
 
 Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y callback registrada.** Si al cierre siguen faltando, la sesión entrega del 1 al 9 y **lo dice**, en vez de declarar verde un circuito que nunca cerró.
+
+---
+
+## Historial
+
+- **v1.1 (19-ago-2026, S101 — mesa de la tarde + cierre):** aplica **E1-E7** de
+  `docs/ENMIENDA_S101_MOTOR_v1.1.md`, que **se conserva porque el porqué no se borra**.
+  **E1** deroga §3 entera — el motor ya existía y la migración 2 **enmienda
+  `pagos_intentos`** en vez de crear tablas · **E2** corrige §4: `esperando_otp` y
+  `en_desafio` son del **alta de tarjeta**, no del cobro (fuente: Erick) · **E3** agrega
+  §5.0, las **seis compuertas pre-cobro** · **E4** cambia la cadencia del caso ④ a
+  **mismo-día**, con las 22:00 Guayaquil como **supuesto declarado** hasta medir el corte
+  real · **E5** suma la fila de la compuerta a §7 · **E6** suspende la redacción del
+  reembolso al medio de pago original y remite el saldo a `LETRA_SALDO.md` · **E7**
+  reordena §11 con el estado real y el paso **3bis**.
+  **Dos correcciones que la aplicación agregó y la enmienda no podía saber:**
+  ① el ítem ① de E1 **se resolvió: `webhook_events` NO es duplicación y se queda**
+  (la cardinalidad lo prueba); ② el «UNIQUE primero» **quedó descartado por rojo
+  producido** sobre la compra real `fc8e2a85` y **reemplazado por firma de mesa** por
+  `UNIQUE (proveedor, proveedor_transaction_id, pedido_id)` parcial.
+  La letra vieja va **tachada, no borrada**.
+
+- **v1.0 (19-ago-2026, S101 — apertura):** depositada **VERBATIM** desde la conversación
+  de apertura, sin editar una coma. Nació declarando que **ningún nombre de tabla,
+  columna o función estaba medido** y que **si la fuente la contradecía, gana la fuente**.
+  *Es exactamente lo que pasó: el censo B0 la contradijo en §3 y la letra se enmendó en
+  vez de defenderse.*

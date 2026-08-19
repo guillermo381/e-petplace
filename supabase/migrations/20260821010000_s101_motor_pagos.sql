@@ -44,20 +44,26 @@
 -- ───────────────────────────────────────────────────────────────────────────
 
 
--- ═══ ⓪ FOTO PREVIA — para que el cinturón mida el DELTA, no un número fijo ═══
+-- ───────────────────────────────────────────────────────────────────────────
+-- ⓪ SOBRE LOS PEDIDOS CLAVADOS — POR QUÉ EL CINTURÓN NO LOS MIDE
 --
--- 🔴 POR QUÉ NO SE AFIRMA UN NÚMERO: hay un cron VIVO (job 12, cada hora al
---    minuto 7) corriendo `expirar_pedidos_sin_pago()`. Los pedidos en
---    narrativa `pagando` **se vencen solos**: durante esta misma sesión
---    pasaron de 6 a 5 (`09a2f00b` se fue a `cancelado_sistema`).
---    Un cinturón que exigiera «tienen que ser 6» abortaría la migración por
---    algo que no tiene nada que ver con ella — y ya lo hizo una vez, en el
---    ensayo en seco. Lo que hay que afirmar es **que ESTA migración no movió
---    ninguno**, o sea el delta contra su propia foto de entrada.
-CREATE TEMP TABLE _s101_antes AS
-  SELECT count(*) AS clavados
-    FROM pedidos p JOIN cat_estados_pedido ce ON ce.codigo = p.estado
-   WHERE ce.narrativa = 'pagando';
+-- Firma de mesa (19-ago, cierre), camino (a): **los clavados se dejan decaer,
+-- el cron NO se toca, y el gate de la escalera usa un pedido creado fresco.**
+--
+-- Hay un cron VIVO (job 12, `7 * * * *`) corriendo `expirar_pedidos_sin_pago()`
+-- y los pedidos en narrativa `pagando` **se vencen solos** — durante la sesión
+-- que escribió esto pasaron de 6 a 5 (`09a2f00b` → `cancelado_sistema`).
+--
+-- Esta migración **no puede mover un pedido: es DDL más una definición de
+-- función, cero DML sobre `pedidos`.** Un cinturón que igual los contara
+-- tendría que elegir entre dos cosas malas:
+--   · afirmar un número fijo → aborta cuando el cron hace su trabajo
+--     (ya pasó: la primera versión de este cinturón abortó el ensayo en seco);
+--   · afirmar el delta → aborta si el cron dispara DURANTE la migración,
+--     que por firma ② es comportamiento esperado y correcto.
+-- ⇒ **No se mide.** *Un cinturón que puede abortar por algo que la migración
+--   no controla no protege: interrumpe.*
+-- ───────────────────────────────────────────────────────────────────────────
 
 
 -- ═══ ① LA FRONTERA CONTRA `webhook_events`, DECLARADA EN EL OBJETO ═══
@@ -324,18 +330,5 @@ BEGIN
     RAISE EXCEPTION 'cinturon: puerta mal — anon=% authenticated=% service_role=%', v_anon, v_auth, v_srv;
   END IF;
 
-  -- Los clavados son SEMILLA CONFIRMADA (firma de mesa): esta migración no los
-  -- toca, y el cinturón lo VERIFICA en vez de prometerlo — por DELTA contra su
-  -- propia foto, porque el cron los vence solos y un número fijo mentiría.
-  DECLARE v_antes int; v_ahora int;
-  BEGIN
-    SELECT clavados INTO v_antes FROM _s101_antes;
-    SELECT count(*) INTO v_ahora FROM pedidos p JOIN cat_estados_pedido ce ON ce.codigo=p.estado
-     WHERE ce.narrativa='pagando';
-    IF v_ahora <> v_antes THEN
-      RAISE EXCEPTION 'cinturon: los pedidos en narrativa pagando pasaron de % a % DURANTE esta migración — no debía tocar ninguno', v_antes, v_ahora;
-    END IF;
-  END;
+  -- Los pedidos clavados NO se miden acá, a propósito: ver la nota ⓪ arriba.
 END $$;
-
-DROP TABLE IF EXISTS _s101_antes;
