@@ -1464,12 +1464,11 @@ export const clienteEs = {
     filtrosTitulo: 'Filtrar',
     filtrosVer: 'Ver {{n}} productos',
     filtrosLimpiar: 'Limpiar {{n}} filtros',
-    // 🔴 S100d-C · punto ④ — el rótulo de cada eje DICE cuántas opciones
-    // tiene. Medido: «Marca» ofrece 13 y se ven 4; «Presentación» ofrece 15
-    // y se ven 4. *Un eje que muestra cuatro de trece y no lo dice se lee
-    // como un eje de cuatro.* El separador es el mismo « · » que ya usa
-    // `filtrarCon`: la casa dice «rótulo · número» en un solo dialecto.
-    filtroEjeCon: '{{titulo}} · {{n}}',
+    // ☠️ S100d-bis · Ley 37 — acá vivía `filtroEjeCon` («Categoría · 3»).
+    // **La mató el founder con una pregunta:** *«no sé por qué pone el 3»*.
+    // Medido: contaba las opciones del eje **y las tres estaban a la
+    // vista**. Nació como la mitad de la cura del truncado; la otra mitad
+    // (`envuelve`) lo resolvió de raíz y dejó a ésta sin nada que declarar.
     filtroCategoria: 'Categoría',
     filtroEspecie: 'Para qué animal',
     filtroMarca: 'Marca',
@@ -1625,6 +1624,36 @@ export const clienteEs = {
     donarEste: 'Donar este producto',
     donacionDetalle:
       'El refugio lo elige e-PetPlace y la entrega la coordina el equipo. Una donación no entra a ningún expediente ni suma beneficios: es un regalo, no una compra con premio.',
+    // 🔴 S100d · EL AGRADECIMIENTO, al ELEGIR la donación (punto 15).
+    // Base del founder: «Agradecemos tu buen corazón, este producto será
+    // enviado a un refugio», con el pedido explícito de mejorarla. La voz la
+    // escribió B; acá se monta sin retocarla, con sus tres decisiones:
+    // ① «no va a llegar a tu casa» es INFORMACIÓN, no cortesía — sin eso
+    //    alguien espera un paquete que nunca sale para su dirección.
+    // ② el límite de §6.4 se dice como VIRTUD y no como descargo: «no otorga
+    //    beneficio comercial» es letra de contrato; esto es la misma regla
+    //    dicha de manera que se entienda y además se comparta.
+    // ③ NO se nombra ninguna mascota de la familia — el punto del texto es
+    //    justamente que no es para ellas.
+    // 🔴 S100d · EL PEDIDO QUE NO SE PUEDE ABRIR — y NO es un problema de red.
+    //
+    // Acá el detalle decía «Revisa tu conexión y prueba de nuevo» con un
+    // Reintentar, para un caso donde reintentar NO PUEDE funcionar nunca.
+    //
+    // ⚠️ LA VOZ SE ESCRIBIÓ PARA EL CASO COMÚN Y **NO** NOMBRA EL RARO (aviso
+    // de D, y es de las buenas): el caso «era de otra cuenta» y el caso «ya no
+    // está» se ven distintos para quien mira, pero con la vista ya cerrada por
+    // `security_invoker` el primero **no debería poder pasar** — y mencionarlo
+    // lo reabre como pregunta en la cabeza de quien lee. *Una voz que se
+    // defiende de algo que no ocurre le enseña al lector que ocurre.*
+    pedidoNoDisponibleTitulo: 'No encontramos este pedido',
+    pedidoNoDisponibleDetalle:
+      'Puede que ya no esté disponible. Tus otros pedidos siguen acá.',
+    pedidoNoDisponibleVolver: 'Ver tus pedidos',
+    donacionGraciasTitulo: 'Gracias.',
+    donacionGraciasCuerpo:
+      'Este producto no va a llegar a tu casa: va a un refugio, a una mascota que todavía está esperando la suya. No suma puntos ni descuentos, y es a propósito: una donación que da algo a cambio deja de ser una donación.',
+    donacionGraciasCierre: 'Listo',
     especieNoRegistrada:
       'Este producto es para una especie que todavía no tenés registrada en tu familia. Podés registrarla ahora o después — la compra sigue igual.',
     registrarla: 'Registrar una mascota',
