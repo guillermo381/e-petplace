@@ -1135,29 +1135,6 @@ export default function DespensaProducto() {
                   </Texto>
                 ) : null;
 
-              if (!puedePlegar) {
-                return (
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
-                    {ficha.composicion_estado === 'no_aplica' ? (
-                      <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
-                    ) : ficha.composicion_estado === 'ausente' ||
-                      (ficha.ingredientes_activos.length === 0 &&
-                        ficha.alergenos.length === 0) ? (
-                      <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
-                    ) : null}
-                    {advertencia}
-                    {ficha.composicion_estado === 'no_aplica' ? null : (
-                      <Texto variante="apoyo">
-                        {ficha.composicion_estado === 'verificada'
-                          ? t('despensa.composicionVerificada')
-                          : t('despensa.composicionFuente')}
-                      </Texto>
-                    )}
-                  </View>
-                );
-              }
-
               return (
                 /* ═══════════════════════════════════════════════════════
                    🔴 S100d-bis · **LA COMPOSICIÓN GANA SU CAJÓN BLANCO —
@@ -1217,15 +1194,64 @@ export default function DespensaProducto() {
                       método, no de pieza.* La cuenta no se pierde: es lo
                       primero que se ve al abrir. **Vuelve con una línea si
                       el founder la quiere.** */}
-                  <RotuloPlegable
-                    titulo={t('despensa.composicion')}
-                    abierta={composicionAbierta}
-                    onAlternar={() => setComposicionAbierta((v) => !v)}
-                  />
+                  {/* ═══════════════════════════════════════════════════
+                      🔴 S100d-bis · **LA CARTA ENVUELVE LAS DOS RAMAS, Y ESO
+                      ES LA CURA — NO UN REFACTOR.**
+                      ═══════════════════════════════════════════════════
+
+                      **Verificado en APARATO (18-ago, preview `01a0175e`) y
+                      no en web:** abrí una ficha **sin ingredientes**
+                      (`Aceite de Salmon Brilliant`) y **la composición
+                      quedaba SOBRE EL FONDO, sin carta** — que es
+                      exactamente lo que el founder pidió que no pasara.
+
+                      **La causa fue mía y es de forma:** puse la carta
+                      **solo en la rama plegable**, y la rama honesta —la que
+                      dice *«no tenemos los ingredientes»*— se quedó afuera.
+                      *Y el web no lo mostró porque yo medí sobre el producto
+                      con 25 ingredientes: elegí el caso rico para ver el
+                      plegado y con él perdí de vista el caso pobre, que es
+                      **268 de 470 productos** — la mayoría del catálogo.*
+
+                      ⇒ **la carta se sube afuera del `if` y las dos ramas
+                      quedan adentro.** No es prolijidad: con la carta
+                      compartida **«una rama sin superficie» deja de ser
+                      expresable**, que es como esta casa cura las dos
+                      cuentas que tienen que dar igual. *Duplicarla en la
+                      segunda rama habría arreglado el síntoma y dejado viva
+                      la forma que lo produjo.* */}
+                  {puedePlegar ? (
+                    <RotuloPlegable
+                      titulo={t('despensa.composicion')}
+                      abierta={composicionAbierta}
+                      onAlternar={() => setComposicionAbierta((v) => !v)}
+                    />
+                  ) : (
+                    /* Sin ingredientes no hay control: la sección se queda
+                       abierta diciendo su verdad. *Un control que revela
+                       nada es peor que el texto que ahorra*, y esconder la
+                       frase honesta detrás de un toque sería el candado ①
+                       de §5.4 al revés. */
+                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
+                  )}
+
+                  {puedePlegar ? null : ficha.composicion_estado === 'no_aplica' ? (
+                    <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+                  ) : ficha.composicion_estado === 'ausente' ||
+                    (ficha.ingredientes_activos.length === 0 &&
+                      ficha.alergenos.length === 0) ? (
+                    <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
+                  ) : null}
+
                   {advertencia}
-                  {composicionAbierta ? (
+
+                  {/* La fuente: con el plegado, adentro; sin él, a la vista.
+                      `no_aplica` no la lleva — no es un dato que falte. */}
+                  {(puedePlegar ? composicionAbierta : ficha.composicion_estado !== 'no_aplica') ? (
                     <>
-                      <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                      {puedePlegar ? (
+                        <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                      ) : null}
                       <Texto variante="apoyo">
                         {ficha.composicion_estado === 'verificada'
                           ? t('despensa.composicionVerificada')

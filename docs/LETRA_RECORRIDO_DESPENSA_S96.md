@@ -188,6 +188,48 @@ de las mascotas del ecosistema — que es exactamente lo que §7.4 de
 entrega. Sin repartidor, sin ventana, con código en el mostrador. Misma
 comisión, mismo evento del expediente.
 
+### 4.bis 🔴 DÓNDE VIVE LA PUERTA — ENMIENDA FIRMADA (S100d·bis, 18-ago-2026)
+
+> **⚠️ LEER PRIMERO QUÉ SE DEROGA Y QUÉ NO, porque no es lo que el encargo
+> supuso — y decirlo mal sería peor que no decirlo.**
+>
+> **§4 NO se deroga. Ni una línea.** El mecanismo —*el vet registra contra
+> nadie · su factura lleva un código · el cliente lo reclama y elige la
+> mascota*— **rige entero**, sigue siendo v1 y sigue siendo el canal de
+> adquisición. **Lo que se enmienda es algo que §4 nunca dijo: DÓNDE está
+> la puerta.**
+>
+> *Se escribe así a propósito. El encargo decía «se deroga §4», y §4
+> **jamás nombró a la Despensa**: la puerta la puso una PANTALLA. Tachar
+> una cláusula por algo que no dice es como se pierden mecanismos enteros
+> — el día que alguien lea «§4 derogado» va a creer que el reclamo murió.*
+
+**LA FIRMA DEL FOUNDER (18-ago-2026): la entrada del código SALE de la
+Despensa.** ~~La celda «¿Compraste en el local?» al pie de la vitrina~~ se
+retira. **La puerta vive en el Hogar** (prominente sin pedidos, discreta
+después) **y en Pedidos** (acceso arriba).
+
+**Las tres razones, y la tercera es la que manda:**
+
+1. **Como canal, casi no existía donde estaba.** Medido: la celda vivía al
+   FONDO del scroll de la Despensa, **detrás de hasta 50 productos en
+   grilla de dos**. *Un canal de adquisición que exige veinticinco filas de
+   deslizamiento no es un canal.* Ése es el diagnóstico que motivó moverla,
+   no una preferencia de composición.
+2. **Con el Hogar y Pedidos cubiertos, la de la Despensa era la TERCERA
+   puerta al mismo cuarto.** *Esa figura ya se mató dos veces en esta app*
+   —el hub del paseo en S60, y «Tus pedidos» en esta misma sesión—.
+3. 🔴 **Y la razón de concepto, que sobrevive a cualquier composición: LA
+   DESPENSA ES DONDE SE COMPRA ONLINE; EL RECLAMO ES PARA QUIEN COMPRÓ
+   OFFLINE.** Era el lugar equivocado **por concepto, no solo por
+   posición** — moverla dentro de la misma pantalla no lo habría curado.
+
+**Por qué queda escrito y tachado en vez de borrado:** *una decisión de
+NO-construir que no queda escrita se vuelve a proponer.* Sin esta nota, la
+próxima pasada por la vitrina ve una tienda sin puerta al reclamo y la
+vuelve a poner — con las mismas buenas intenciones y el mismo resultado.
+**Misma forma que §6.2 y que la cláusula derogada de `PinMovible`.**
+
 ---
 
 ## 5. EL CATÁLOGO — AMPLIO, Y CON CRITERIO
