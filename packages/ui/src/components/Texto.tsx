@@ -87,7 +87,7 @@ import type { ReactNode } from 'react'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
-export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato' | 'datoMd' | 'voz'
+export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz'
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
  *  colores de STATUS — 'danger' y 'success' resuelven contra
  *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
@@ -159,6 +159,37 @@ const RECETA: Record<
   cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary', leading: 24 }, // D-482: la prosa de la casa · N1: 16/24
 
   apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: 20 },
+  /* 🔴 `enfasis` — EL ELEMENTO DESTACADO DE UNA LISTA, QUE NO ES UN RÓTULO
+     (S100d·bis).
+
+     **Nace de un pedido del founder sobre la escalera** —*«disminuir el tamaño
+     de la letra»*— **y de un defecto que apareció al ir a cumplirlo.**
+
+     ── 🔴 EL DEFECTO, QUE ES DE ACCESIBILIDAD Y NADIE BUSCABA ──────────
+     Para destacar el hito en curso, `EscaleraEstados` usaba **`seccion`** — la
+     única variante en negrita de la casa. **Y `seccion` lleva
+     `accessibilityRole="header"` DE FÁBRICA** (está escrito en su propia
+     cabecera: *«el rol de a11y viaja con la variante»*).
+
+     ⇒ **un lector de pantalla venía anunciando «el paso en el que estás» como
+     un ENCABEZADO**, uno por pedido en curso. *Un encabezado es el título de
+     una sección; el hito actual es un elemento de una lista.* **El gesto y el
+     lector contaban historias distintas** — lo mismo que esta pieza vigila en
+     su propio `accessibilityLabel`.
+
+     ── POR QUÉ NO ALCANZABA NINGUNA DE LAS SIETE ──────────────────────
+     `seccion` es 20 **y es rótulo** · `cuerpo` 16 **y no tiene peso** ·
+     `apoyo` 14 **y tampoco** · `dato` es mono, voz de máquina. **El trabajo
+     "destacar UN elemento adentro de una lista compacta, sin ascenderlo a
+     título" no existía en el diccionario** (Ley 19) — y usar el rótulo para
+     eso es lo que produjo el falso encabezado.
+
+     **`size.sm` para que la lista sea de APOYO y no de titulares** — medido en
+     `referencia-pedidosya-seguimiento-hitos-con-hora`: ahí los hitos corren muy
+     por debajo de un cuerpo de 16, *el peso lo carga la escalera y no la
+     tipografía*. **Color `primary` y no `secondary`**, porque lo destacado se
+     lee lleno; quien quiera apagarlo pasa `color`. */
+  enfasis: { fontFamily: typography.family.sans.bold,    fontSize: typography.size.sm, color: 'primary', leading: 20 },
   dato:    { fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: 'secondary', tabular: true },
   // S81 (pedido de C — "el precio mono-primary" de coordinar y los
   // cierres): el dato PROMINENTE — mono a md en primary. Sigue siendo
