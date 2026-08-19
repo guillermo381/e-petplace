@@ -155,13 +155,33 @@ Deno.serve(async (req) => {
     if (eC || !compra) throw new Error(`compra_no_legible: ${eC?.message}`);
 
     const { data: desglose, error: eD } = await db
-      .from('compra_desglose').select('pedido_id, total').eq('compra_id', compraId);
+      .from('compra_desglose').select('pedido_id, total, subtotal, impuesto, envio')
+      .eq('compra_id', compraId);
     if (eD) throw new Error(`desglose_no_legible: ${eD.message}`);
 
     const montoCongelado = (desglose ?? []).reduce((a, d) => a + Number(d.total), 0);
+
+    // 🔴 EL IVA SALE DEL DESGLOSE CONGELADO, NO DE UN 0 FIJO.
+    //    La primera versión mandaba `vat: 0` hardcodeado y Nuvei rebotó 403
+    //    `order.vat Invalid`. Acá el número lo dice el desglose — que es el
+    //    mismo que se le prometió al cliente. *Un impuesto tecleado a mano en
+    //    el request es un número que puede divergir del que se cobró.*
+    //    `p_vat` permite forzarlo SOLO para probar variantes contra el
+    //    sandbox sin redeployar; en producto no existe.
+    const ivaCongelado = (desglose ?? []).reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
+    const baseImponible = (desglose ?? []).reduce((a, d) => a + Number(d.subtotal ?? 0), 0);
+    const vat = typeof body.vat === 'number' ? body.vat : Number(ivaCongelado.toFixed(2));
+    const taxable = typeof body.taxable_amount === 'number'
+      ? body.taxable_amount
+      : (vat > 0 ? Number(baseImponible.toFixed(2)) : 0);
+
     anotar('1_compra', {
       estado: compra.estado, total_compra: compra.total,
       monto_congelado: montoCongelado, lineas_desglose: (desglose ?? []).length,
+      vat_congelado: ivaCongelado, vat_enviado: vat, taxable_amount: taxable,
+      nota: ivaCongelado === 0
+        ? 'IVA 0 (EC_IVA_0). Si Nuvei rebota `order.vat Invalid`, el choque es contra la tasa configurada en LA CUENTA, no contra este pedido.'
+        : undefined,
     });
 
     // ═══ 2 · EL TOKEN ═══
@@ -246,9 +266,12 @@ Deno.serve(async (req) => {
       user: { id: userId, email },
       order: {
         amount: Number(montoCongelado.toFixed(2)),
-        description: `e-PetPlace compra ${compraId.slice(0, 8)}`,
+        description: typeof body.descripcion === 'string' && body.descripcion.trim()
+          ? body.descripcion.trim()                       // escenarios de rechazo de la doc
+          : `e-PetPlace compra ${compraId.slice(0, 8)}`,
         dev_reference: compraId,
-        vat: 0,
+        vat,
+        taxable_amount: taxable,
       },
       card: { token },
     });
@@ -263,13 +286,34 @@ Deno.serve(async (req) => {
     // 🔴 Caso ② de la letra. Acá NO se llama a confirmar_pago_*. El pedido se
     //    confirma cuando el WEBHOOK lo diga. Escribir 'aprobado' desde esta
     //    respuesta sería creerle al canal que la letra declara no confiable.
+    const aprobado = tx.status === 'success';
+
+    // 🔴 EL MOTIVO SE ARMA CON LO QUE HAYA, Y NUNCA QUEDA NULL EN UN RECHAZO.
+    //    Medido en el intento `14e5319d`: quedó `rechazado` con
+    //    `motivo_rechazo = NULL` y `cerrado_en = NULL`, porque el error de
+    //    Nuvei no venía en `transaction.message` sino en un objeto `error` de
+    //    primer nivel — y mi lectura solo miraba el primero.
+    //    *Un rechazo sin motivo obliga a abrir el payload crudo para saber qué
+    //    pasó; y el payload crudo no se puede listar ni contar.*
+    const err = (debit.json as any)?.error ?? null;
+    const motivo = aprobado ? null : (
+      tx.message
+      ?? (err ? `${err.type ?? 'error'}: ${err.description ?? ''} ${err.help ? '· ' + err.help : ''}`.trim() : null)
+      ?? (tx.status_detail !== undefined ? `status_detail=${tx.status_detail}` : null)
+      ?? `http_${debit.status}`     // último recurso: jamás NULL
+    );
+
+    // 🔴 UN INTENTO QUE TERMINÓ SE CIERRA. Sin `cerrado_en`, un intento muerto
+    //    es indistinguible de uno en vuelo para cualquiera que mire la tabla —
+    //    y la compuerta 0 existe precisamente para no cobrar dos veces.
     await db.from('pagos_intentos').update({
-      estado: tx.status === 'success' ? 'pendiente' : 'rechazado',
+      estado: aprobado ? 'pendiente' : 'rechazado',
       proveedor_transaction_id: tx.id ? String(tx.id) : null,
       authorization_code: tx.authorization_code ?? null,
-      motivo_rechazo: tx.status === 'success' ? null : (tx.message ?? tx.status_detail?.toString() ?? null),
+      motivo_rechazo: motivo,
       payload_crudo: (debit.json ?? { crudo: debit.crudo }) as Record<string, unknown>,
       actualizado_en: new Date().toISOString(),
+      cerrado_en: aprobado ? null : new Date().toISOString(),
     }).eq('id', intento.id);
 
     return new Response(JSON.stringify({
