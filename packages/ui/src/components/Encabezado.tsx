@@ -18,7 +18,7 @@
  *     <Isotipo/>) = dosis alta (dueño). La portada respira.
  */
 
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -147,12 +147,47 @@ function ChevronAtras({ onAtras }: { onAtras: () => void }) {
 export function Encabezado(props: EncabezadoProps) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
+  /* 🔴 EL INSET DE ARRIBA SE **DERIVA**, NO SE SUMA — S100d·bis, y es el mismo
+     movimiento con el que `PantallaConPie` curó el inset de abajo.
+
+     **Firma del founder, recorriendo la app:** *«explorar sale en una altura,
+     despensa más arriba, tus pedidos más arriba, cuenta más abajo. Me gustaría
+     que todos quedaran a la altura que está Despensa»*.
+
+     **Medido en el SM-S938B, primer texto de cada tab:**
+     ```
+     Despensa · Pedidos …… 54,0 dp   ← la vara que firmó el founder
+     Explorar · Cuenta …… 88,2 dp   (+34,2)
+     ```
+     **88,2 − 54,0 = 34,2 = exactamente `insets.top`.** *Dos pantallas reservan
+     la barra de estado por su cuenta y este techo la volvía a reservar: el
+     inset se contaba DOS VECES.*
+
+     ⇒ **la pieza mide dónde quedó parada y agrega solo lo que falta.** Adentro
+     de una pantalla que ya reservó, eso da **0**; suelta, da el inset entero.
+     *El consumidor no tiene nada que declarar porque no hay nada que saber* —
+     y el defecto **deja de ser expresable**, que es lo que el founder pidió:
+     no que se calibre, sino que no pueda volver.
+
+     **Arranca en `insets.top`, el valor CONSERVADOR:** si la medición nunca
+     llegara, el techo queda separado de más, jamás pisado por la barra de
+     estado. *De los dos errores posibles se elige el que no tapa nada.* */
+  const [insetFaltante, setInsetFaltante] = useState(insets.top)
+  const contenedor = useRef<View>(null)
+  const medirInset = () => {
+    contenedor.current?.measureInWindow((_x, y) => {
+      const falta = Math.max(0, insets.top - Math.max(0, y))
+      setInsetFaltante((previo) => (Math.abs(previo - falta) < 0.5 ? previo : falta))
+    })
+  }
 
   if (props.variante === 'navegacion') {
     return (
       <View
+        ref={contenedor}
+        onLayout={medirInset}
         style={{
-          paddingTop: insets.top,
+          paddingTop: insetFaltante,
           backgroundColor: theme.bg.base,
           ...(props.divisor
             ? { borderBottomWidth: 1, borderBottomColor: theme.bg.border }
@@ -220,7 +255,7 @@ export function Encabezado(props: EncabezadoProps) {
            habría sido que el app dibujara un techo a mano: la casa
            quedaría con dos techos que envejecen distinto.
            *C frenó bien y no lo dibujó. Esto es lo que faltaba.* */
-        paddingTop: insets.top + (props.atras ? 0 : spacing[5]),
+        paddingTop: insetFaltante + (props.atras ? 0 : spacing[5]),
         paddingBottom: spacing[5],       // la portada respira, no comprime
         paddingHorizontal: spacing[4],
         backgroundColor: theme.bg.base,
