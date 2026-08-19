@@ -1817,6 +1817,7 @@ export const clienteEs = {
     // prometer un minuto que no podemos cumplir es peor que no prometer.
     enCaminoEntrada: 'Seguir el pedido',
     enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoCta: 'Ver por dónde va',
     enCaminoTitulo: 'En camino',
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
     enCaminoVentana: 'Llega entre',
