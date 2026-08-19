@@ -50,7 +50,6 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
-  CarritoFlotante,
   COLA_CARRITO_FLOTANTE,
   Encabezado,
   Entrada,
@@ -1324,14 +1323,24 @@ export default function DespensaDescubrir() {
           colapsa). *Si en el gate el acuse no se siente, el arreglo es dar
           señal al contador —no resucitar la barra.* */}
 
-      {/* 🔴 S100d-bis · EL CARRITO FLOTANTE, COMO OVERLAY — hermano del
-          scroll. Con `cuenta === 0` la pieza no se dibuja: **la puerta al
-          carrito aparece cuando hay algo del otro lado** (punto ⑫). */}
-      <CarritoFlotante
-        cuenta={unidades}
-        onAbrir={() => router.push('/despensa/carrito')}
-        etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
-      />
+      {/* ☠️ AQUÍ VIVÍA EL CARRITO FLOTANTE — **murió porque el shell lo monta**
+          (N28: su condición de existencia es el CARRITO, no la ruta).
+
+          🔴 **Y mientras las dos vivieron, el founder vio DOS:** *«ahora me
+          aparecen dos carritos cuando estoy en Despensa»*. **Medido en el
+          bundle `01a01807`, los dos en el árbol con sus dos cajas:**
+          `y[622,9 · 679,1]` (éste) y `y[670,9 · 727,1]` (el del shell).
+
+          *Las dos entregas eran correctas por separado* —C curó su montaje de
+          pie a hermano del scroll; B lo subió al shell— **y nadie cruzó que la
+          primera dejaba de hacer falta cuando entró la segunda.** Un typecheck
+          no ve dos montajes de la misma pieza: los dos compilan.
+
+          ⚠️ **LO QUE NO MURIÓ CON ÉL, y es la mitad que se olvida:
+          `COLA_CARRITO_FLOTANTE` en el `paddingBottom` del scroll SE QUEDA.**
+          El disco del shell sigue flotando ENCIMA de esta pantalla; *sacar la
+          cola junto con el montaje cambiaría dos carritos por un carrito que
+          tapa el último producto.* */}
 
       {/* 🔴 S100c-C · C-02 · LA HOJA DE FILTROS.
           Vive FUERA del `ScrollView` porque es una superficie sobre la

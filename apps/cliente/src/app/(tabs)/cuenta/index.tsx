@@ -90,7 +90,7 @@ export default function Cuenta() {
   ];
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         <Encabezado variante="portada" saludo={t('cuenta.titulo')} />
 

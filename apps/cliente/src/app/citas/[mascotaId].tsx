@@ -267,7 +267,7 @@ export default function CitasDeMascota() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
       <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
         {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen

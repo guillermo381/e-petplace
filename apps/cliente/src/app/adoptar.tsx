@@ -26,7 +26,7 @@ export default function Adoptar() {
   const { t } = useTraduccion();
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('adoptar.titulo')} atras onAtras={() => router.back()} />
       <View style={{ flex: 1, justifyContent: 'center', padding: spacing[6] }}>
         <EstadoVacio

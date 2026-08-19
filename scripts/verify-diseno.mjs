@@ -1910,6 +1910,20 @@ const FIXTURES = {
      de cualquier `bottom: 0`), y una del baseline congelado. */
   /* R54 · discrimina: el fragmento y el View con box-none NO deben salir
      rojos; el View desnudo sí. */
+  /* R55 · discrimina: el envoltorio que reserva el tope ARRIBA DE UN TECHO
+     sale rojo; el que reserva SIN techo adentro (estado centrado, el caso
+     real de checkout-reserva) NO; y el techo suelto tampoco. */
+  R55: [
+    { path: 'apps/cliente/src/app/(tabs)/explorar/malo.tsx', src: "<SafeAreaView edges={['top']} style={{ flex: 1 }}>\n<Encabezado variante=\"portada\" saludo={t('x')} />\n</SafeAreaView>" },
+    { path: 'apps/cliente/src/app/(tabs)/explorar/malo-un-piso.tsx', src: "<SafeAreaView edges={['top']} style={{ flex: 1 }}>\n<View style={{ flex: 1 }}>\n<Encabezado variante=\"portada\" saludo={t('x')} />\n</View>\n</SafeAreaView>" },
+    { path: 'apps/cliente/src/app/(tabs)/explorar/malo-padding.tsx', src: "<View style={{ flex: 1, paddingTop: insets.top }}>\n<Encabezado variante=\"navegacion\" titulo={t('x')} atras />\n</View>" },
+    /* 🔴 EL CONTRA-CASO QUE VALE MÁS QUE LOS TRES ROJOS: mismo envoltorio,
+       mismo `edges`, y SIN techo adentro — es el estado centrado que SÍ debe
+       reservar. Si esto saliera rojo, la cura metería la pantalla debajo de
+       la barra de estado, que es peor que el defecto que la regla persigue. */
+    { path: 'apps/cliente/src/app/(tabs)/explorar/ok-estado.tsx', src: "<SafeAreaView edges={['top']} style={{ flex: 1 }}>\n<Encabezado variante=\"portada\" saludo={t('x')} />\n</SafeAreaView>\n<SafeAreaView edges={['top']} style={{ flex: 1 }}>\n<View style={{ flex: 1 }}>\n<EstadoVacio titulo={t('y')} />\n</View>\n</SafeAreaView>" },
+    { path: 'apps/cliente/src/app/(tabs)/explorar/ok-curado.tsx', src: "<SafeAreaView edges={[]} style={{ flex: 1 }}>\n<Encabezado variante=\"portada\" saludo={t('x')} />\n</SafeAreaView>" },
+  ],
   R54: [
     { path: 'apps/cliente/src/app/ok-fragmento.tsx', src: "<PantallaConPie pie={<><Boton /><Boton /></>}>{x}</PantallaConPie>" },
     { path: 'apps/cliente/src/app/ok-boxnone.tsx', src: '<PantallaConPie pie={<View pointerEvents="box-none" style={{ gap: 8 }}><Boton /></View>}>{x}</PantallaConPie>' },
@@ -3688,6 +3702,97 @@ function r45(archivos) {
    no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
    pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
    honestamente — se cura por construcción, que es de lo que trata la pieza. */
+/* 🔴 R55 · EL TOPE LO PAGA `Encabezado`, Y NADIE MÁS (S100d·bis, relevo de B).
+
+   ── EL DEFECTO, MEDIDO EN APARATO SOBRE EL BUNDLE `01a01807` ──────────
+   **Founder, recorriendo las cinco tabs:** *«Explorar está más abajo, Despensa
+   más arriba, Tus pedidos igual que Despensa, y Tu cuenta vuelve a estar más
+   abajo»*. **El primer texto de cada tab, medido:**
+
+       Despensa · Tus pedidos …… 54,0 dp   ← la vara que firmó el founder
+       Explorar · Tu cuenta …… 88,2 dp
+
+   **88,2 − 54,0 = 34,2 = `insets.top`** (34,13 leído del `cutoutSpec` del
+   aparato). **El inset se pagaba DOS VECES**, y las dos pantallas que lo
+   pagaban eran exactamente las dos envueltas en `SafeAreaView edges={['top']}`.
+
+   ── 🔴 POR QUÉ ESTO ES UNA REGLA Y NO UNA CURA DE DOS ARCHIVOS ────────
+   **`Encabezado` YA traía la cura** —deriva su inset midiendo dónde quedó
+   parado— **y estaba corriendo, y el defecto estaba en la pantalla igual.**
+   Medido, con el discriminador que lo prueba:
+
+       carnet.tsx      → padre con `paddingTop` en JS   → derivó 0   ✅ 34,1 dp
+       explorar/index  → padre `SafeAreaView` (nativo)  → derivó 34  ❌ 88,2 dp
+
+   *La medición pierde su carrera contra un padre que aplica su padding del
+   lado nativo, y **falla hacia su valor de arranque —el conservador— sin
+   decirlo**.* ⇒ **una cura cuyo modo de falla es el silencio no es una cura**
+   (L-192), y por eso el sujeto de esta regla no es el techo: **son los
+   consumidores.** Con ninguno reservando, la derivación queda siempre en el
+   caso que sí funciona, y esta regla es lo que lo sostiene.
+
+   ── QUÉ CAZA, Y QUÉ NO ────────────────────────────────────────────────
+   Caza una reserva del tope (`edges={['top']}` o `paddingTop: insets.top`)
+   **en la línea que abre el envoltorio de un `<Encabezado`**, saltando
+   comentarios y envoltorios de layout.
+
+   ⚠️ **ES POR OCURRENCIA, JAMÁS POR ARCHIVO — y la diferencia se midió.**
+   `checkout-reserva.tsx` tiene **cinco** `SafeAreaView edges={['top']}` y
+   **solo la quinta envuelve un techo**; las otras cuatro son estados
+   centrados (procesando, éxito, rechazo, hold vencido) **que no montan
+   `Encabezado` y por lo tanto SÍ deben reservar el tope**. *Una regla por
+   archivo las habría marcado a las cinco y la cura habría metido cuatro
+   pantallas debajo de la barra de estado* — el sobre-disparo que L-236 y el
+   propio R54 ya cobraron una vez.
+
+   ⚠️ **SU LÍMITE, dicho:** ve el envoltorio inmediato. Un componente propio
+   que adentro reserve el tope **no lo ve**. *Su verde dice «ningún envoltorio
+   de techo reserva el tope», jamás «todos los techos arrancan a la misma
+   altura»* — eso lo dice el aparato. */
+const BASELINE_R55 = 0
+
+function r55(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  const ofensores = []
+  const RESERVA = /edges=\{\[['"]top|paddingTop:\s*insets\.top/
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (!/<Encabezado\b/.test(src)) continue
+    const lineas = src.split('\n')
+    for (let i = 0; i < lineas.length; i++) {
+      if (!RESERVA.test(lineas[i])) continue
+      /* El primer elemento JSX de adentro. Se saltan comentarios y
+         envoltorios de layout puro: el techo puede vivir un piso más
+         adentro sin dejar de estar envuelto por esta reserva. */
+      for (let j = i + 1; j < Math.min(i + 10, lineas.length); j++) {
+        const s = lineas[j].trim()
+        if (!s || /^(\{\/\*|\*|\/\/|<View|<ScrollView|<PantallaConPie)/.test(s)) continue
+        if (s.startsWith('<Encabezado')) ofensores.push(`${path}:${i + 1}`)
+        break
+      }
+    }
+  }
+  if (ofensores.length > BASELINE_R55)
+    fallos.push(
+      `R55: ${ofensores.length} envoltorio(s) de \`Encabezado\` reservando el tope (baseline ${BASELINE_R55}, DURA EN 0).\n   ${[...new Set(ofensores)].join('\n   ')}\n   El techo ya paga el inset de arriba: reservarlo también acá lo cobra DOS VECES y la pantalla arranca 34 dp más abajo que las demás (medido: 88,2 contra la vara de 54,0). Sacá la reserva de este envoltorio — \`edges={[]}\`, o quitá el \`paddingTop: insets.top\`.`,
+    )
+  /* ANCLA POR SUJETO (L-291): esta regla existe porque el TECHO paga el
+     tope. Si dejara de pagarlo, prohibirle al consumidor que lo pague deja
+     a todas las pantallas debajo de la barra de estado — la regla pasaría
+     de proteger a causar el defecto. */
+  const fuente = readFileSync('packages/ui/src/components/Encabezado.tsx', 'utf8')
+  const vivo = /useSafeAreaInsets\(\)/.test(fuente) && /paddingTop: insetFaltante/.test(fuente) ? 1 : 0
+  fallos.push(
+    ...ancla('R55', vivo, 1, '`Encabezado` sigue pagando el inset de arriba (0 = dejó de pagarlo y esta regla pasó de proteger a causar el defecto)'),
+  )
+  return {
+    fallos,
+    info: `${ofensores.length} envoltorio(s) de techo reservando el tope · DURA EN 0 · POR OCURRENCIA y no por archivo (checkout-reserva tiene 5 SafeAreaView y solo 1 envuelve techo) · su verde dice «nadie lo reserva dos veces», jamás «todos arrancan igual»`,
+  }
+}
+
 /* 🔴 R54 · EL PIE NO SE ENVUELVE EN UN VIEW QUE CAPTURE (S100b-B).
 
    LA TRAMPA: `PantallaConPie` lleva `pointerEvents="box-none"` para que el
@@ -3876,7 +3981,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4164,6 +4269,7 @@ corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...app
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);
 corridas.push(['R52 (G-16: «Programar otra fecha» no vuelve)', r52([...apps, ...appsCodigo])]);
 corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...appsCodigo])]);
+corridas.push(['R55 (el tope lo paga Encabezado, y nadie mas)', r55([...apps, ...appsCodigo])]);
 corridas.push(['R54 (el pie no se envuelve en un View que capture)', r54([...apps, ...appsCodigo])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré

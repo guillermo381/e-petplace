@@ -339,7 +339,7 @@ export default function LaminaFusion() {
   }, [])
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo="Lámina S74" atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}>
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
