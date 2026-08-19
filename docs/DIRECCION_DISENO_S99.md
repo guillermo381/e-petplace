@@ -667,7 +667,7 @@ igual.*
 
 ---
 
-# §1ter · LAS DOS LEYES DE S100d (N26–N27) — las dos firmas del founder
+# §1ter · LAS LEYES DE S100d (N26–N28) — las firmas del founder
 
 > **Estatuto: depositadas por B el 18-ago-2026, SIN APARATO.** Salen de dos
 > firmas explícitas del founder sobre el gate de S100c (`docs/loop/S100c-GATE-FOUNDER.md`).
@@ -853,6 +853,61 @@ guardada de la base.**
 *No es un retoque óptico: es la diferencia entre marcar la puerta y marcar el
 techo.*
 
+## N28 · LO QUE VIVE EN EL SHELL — y bajo qué condición
+
+**FIRMA DEL FOUNDER (S100d·bis), sobre el carrito flotante:** *«si salgo de
+Despensa, se pierde el carro; **mientras tenga productos debe estar visible en
+TODA la app**, y desaparece cuando no tiene productos»* — y después, sobre el
+cruce de territorio que hizo falta para cumplirla: *«el montaje **ES** la
+decisión, no un detalle de implementación»*.
+
+**LA LEY:**
+
+> ## UNA PIEZA SUBE AL SHELL CUANDO SU CONDICIÓN DE EXISTENCIA ES UN **DATO**, NO UNA RUTA.
+>
+> · **Existe por el DATO** — si la pregunta *«¿tiene que estar acá?»* se
+>   contesta mirando el estado (hay algo en el carrito, hay un paseo en curso)
+>   y no mirando en qué pantalla estás, **la pieza es del shell.**
+> · **Se CALLA por SUPERFICIE**, con lista explícita y su razón escrita. *El
+>   silencio es una decisión que se declara; nunca un olvido que se descubre.*
+> · **El montaje en el shell es una decisión de PRODUCTO y se firma** — aunque
+>   el archivo que se toca sea de otra pista.
+
+### El caso que la funda, y por qué el criterio no es «se usa mucho»
+
+El flotante vivía en **dos pantallas** (vitrina y ficha). *Salir de la Despensa
+lo perdía* — y con él, **la única puerta al carrito** (N25 mató la del techo).
+**No era que faltara en un par de lugares: era que su condición estaba escrita
+en el lugar equivocado.** Un carrito con productos **es un hecho de la sesión**,
+y un hecho de la sesión no puede depender de en qué pantalla parás.
+
+**Su lista de silencio, con la razón que la hace exigible:** `carrito` y
+`checkout`. *Ahí el carrito no es un destino: es la pantalla en la que ya estás,
+y una puerta al cuarto donde estás parado es ruido con forma de atajo.*
+
+### ⚠️ EL COSTO, QUE ES LO QUE MANTIENE LA VARA ALTA
+
+**Todo lo que vive en el shell lo paga CADA pantalla** — en layout, en gesto y
+en render, incluidas las que no saben que existe. ⇒ **el criterio no es «se usa
+en muchas pantallas»: es que su ausencia en cualquiera sea un DEFECTO.** *Si en
+alguna pantalla su ausencia se lee como una omisión razonable, no es del shell:
+es de un grupo de pantallas, y ahí vive.*
+
+### Y lo que el shell NO resuelve, para que nadie lo suba por la razón fácil
+
+**Subir al shell no arregla que algo tape contenido.** El flotante sigue siendo
+overlay puro y **la cola del scroll la sigue poniendo cada pantalla**
+(`COLA_CARRITO_FLOTANTE`). *El shell decide DÓNDE VIVE una pieza, no quién paga
+su espacio.*
+
+### La costura que el shell obliga a derivar
+
+**El aire sobre la barra de tabs se MIDE, no se teclea** — nace
+`ALTO_FILA_TABS`, y se exporta **solo la parte que es de la pieza** (85);
+`insets.bottom` es del aparato y lo pone él. *Un número tecleado ahí miente en
+el primer teléfono distinto, y esta casa ya pagó esa forma tres veces en un
+día.*
+
 ---
 
 ## §2 · CANDIDATA CON GATE (no es ley)
@@ -863,6 +918,11 @@ dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
 
+- **v1.3 (18-ago-2026, S100d·bis):** entra **N28 — LO QUE VIVE EN EL SHELL**,
+  con el criterio (*existe por el DATO, se calla por SUPERFICIE*) y su costo
+  declarado (*lo que vive en el shell lo paga cada pantalla ⇒ la vara no es «se
+  usa mucho», es «su ausencia sería un defecto»*). Nace del carrito flotante y
+  del cruce de territorio que el founder firmó: **el montaje ES la decisión.**
 - **v1.2 (18-ago-2026, S100d-B, SIN APARATO):** entran **N26 (F-OCRE, los dos
   acentos)** y **N27 (la huella fuera del control + F-PIN, la gota)**, las dos
   firmas del founder sobre el gate de S100c. **N24 queda ENMENDADA EN SU MITAD
