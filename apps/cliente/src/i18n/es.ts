@@ -1602,6 +1602,11 @@ export const clienteEs = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'En curso',
+    // S100d · los chips del HISTÓRICO. Solo estos dos: lo en curso vive
+    // arriba y no se repite abajo (firma del founder).
+    chipEntregados: 'Entregados',
+    chipCancelados: 'Cancelados',
+    pedirDeNuevo: 'Pedir de nuevo',
     pedidosHistorial: 'Historial',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
@@ -1811,6 +1816,11 @@ export const clienteEs = {
     // para quien no ve, y acá el hueco es información (la ficha está
     // incompleta A PROPÓSITO, con su deuda firmada).
     repartidorSinFoto: 'Todavía no mostramos su foto',
+    // 🔴 S100d · LA VENTANA QUE YA PASÓ (firma del founder). Describe lo que
+    // la familia ya está viendo y **no atribuye culpa**: la app sabe que la
+    // hora pasó, no sabe por qué. *«Demorado» sería una acusación al vendedor
+    // que no podemos sostener con lo que tenemos.*
+    ventanaTardando: 'Está tardando más de lo previsto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',

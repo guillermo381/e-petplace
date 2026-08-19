@@ -118,6 +118,7 @@ import {
   type FichaRepartidor,
 } from '@epetplace/api';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
+import { ventanaVencida } from '@/lib/despensa/ventana';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 
@@ -601,6 +602,21 @@ export default function DespensaEnCamino() {
                       hasta: horaLocal(detalle.pedido.promesa_hasta),
                     })}
                   </Texto>
+                  {/* 🔴 S100d · LA VENTANA QUE YA PASÓ — firma del founder.
+                      **La ventana NO se borra: se le agrega la voz.** Lo
+                      prometido sigue siendo el dato contra el que se mide el
+                      atraso; taparlo dejaría a la familia sin saber respecto
+                      de qué está tardando.
+                      Va en `warning` y no en `danger`: *una entrega que se
+                      atrasa no es un error del sistema — sigue en camino.* Es
+                      el mismo registro que la banda de desvío de la escalera.
+                      Y **acá es donde más hace falta**: esta carta flota sobre
+                      el mapa y es lo único que se lee con la hoja abajo. */}
+                  {ventanaVencida(detalle.pedido.promesa_hasta) ? (
+                    <Texto variante="apoyo" color="warning">
+                      {t('despensa.ventanaTardando')}
+                    </Texto>
+                  ) : null}
                 </View>
               </Tarjeta>
             </View>

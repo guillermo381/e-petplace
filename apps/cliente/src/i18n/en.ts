@@ -1358,6 +1358,9 @@ export const clienteEn = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'In progress',
+    chipEntregados: 'Delivered',
+    chipCancelados: 'Cancelled',
+    pedirDeNuevo: 'Order again',
     pedidosHistorial: 'History',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',
     reclamoEntrada: 'Bought at the store?',
@@ -1520,6 +1523,8 @@ export const clienteEn = {
     // S100d — the drag hint became visible, so it needs its other half.
     enCaminoHojaVerMenos: 'Hide the details',
     repartidorSinFoto: 'We’re not showing their photo yet',
+    // S100d — the window that already passed. Describes, never blames.
+    ventanaTardando: 'It’s taking longer than expected',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',
