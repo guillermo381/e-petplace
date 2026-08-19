@@ -77,6 +77,7 @@ import {
 import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
+import { ventanaVencida } from '@/lib/despensa/ventana';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
@@ -420,13 +421,27 @@ export default function DespensaPedido() {
                 quien lo hizo. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               {(() => {
+                /* 🔴 S100d · LA VENTANA QUE YA PASÓ. La ventana **se
+                   conserva y se le agrega la voz** —es el dato contra el
+                   que se mide el atraso—, y la voz **no atribuye culpa**:
+                   la app sabe que la hora pasó, no sabe por qué.
+                   Va pegada al mismo renglón porque `EscaleraEstados` da
+                   UNA línea de detalle por paso: *separarlas en dos pasos
+                   inventaría un escalón que el pedido no tiene.* */
                 const detalleActual =
                   detalle.pedido.promesa_desde !== null && detalle.pedido.promesa_hasta !== null
-                    ? t('despensa.promesaCorta', {
-                        dia: diaHumano(detalle.pedido.promesa_desde),
-                        desde: horaLocal(detalle.pedido.promesa_desde),
-                        hasta: horaLocal(detalle.pedido.promesa_hasta),
-                      })
+                    ? [
+                        t('despensa.promesaCorta', {
+                          dia: diaHumano(detalle.pedido.promesa_desde),
+                          desde: horaLocal(detalle.pedido.promesa_desde),
+                          hasta: horaLocal(detalle.pedido.promesa_hasta),
+                        }),
+                        ventanaVencida(detalle.pedido.promesa_hasta)
+                          ? t('despensa.ventanaTardando')
+                          : null,
+                      ]
+                        .filter((x): x is string => x !== null)
+                        .join(' · ')
                     : undefined;
                 const escalera = escaleraDePedido(
                   detalle.pedido.narrativa,

@@ -163,12 +163,52 @@ export default function DespensaReclamo() {
           <>
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               <Texto variante="cuerpo">{t('despensa.reclamoIntro')}</Texto>
+              {/* 🔴 S100d · EL CAMPO SE ESCRIBE PARA EL MOMENTO, NO PARA LA
+                  PANTALLA. Firma del founder: quien entra este código está
+                  **parado en la caja, con el vendedor esperando**. Todo lo de
+                  acá sale de ese contexto:
+
+                  · **`autoFocus`** — el teclado abre solo. *Un toque de más
+                    con alguien esperando es donde el canal se enfría.*
+                  · **sin corrector ni sugerencias ni autocompletado**
+                    (`autoCorrect` · `spellCheck` · `autoComplete`).
+                    🔴 **AL CANON: el corrector es el enemigo de un código
+                    alfanumérico** — `7NTYFYHM` es exactamente la clase de
+                    cadena que un teclado "ayuda" a convertir en otra cosa.
+                    *Un teclado bien elegido no alcanza si el sistema opina
+                    sobre lo que se escribe.*
+                  · **`maxLength` 8** — el largo es del motor, medido abajo.
+
+                  ⏪ **Y EL ENCARGO DE LA MESA DECÍA «TECLADO NUMÉRICO». NO SE
+                  APLICA, Y LA MEDICIÓN ES LA RAZÓN:** los códigos vivos son
+                  **alfanuméricos de 8** (`7NTYFYHM` · `R63UWNPY` ·
+                  `3CDQEHTT`; **0 de 4 son solo dígitos**) y el motor los
+                  genera de un alfabeto con letras. *Un teclado numérico los
+                  dejaría INTIPEABLES — con el vendedor mirando, que es el
+                  momento exacto que la firma quería proteger.* El pedido de
+                  fondo («que el teclado abra solo, que no estorbe») se cumple
+                  entero; lo que no se cumple es la forma, porque la forma
+                  estaba sobre un supuesto que el dato desmiente.
+
+                  ✅ **Y lo que NO hago, también por medición:** no fuerzo
+                  mayúsculas ni recorto espacios en el valor. **El motor ya
+                  normaliza** (`upper(btrim(p_codigo))`), así que tipear en
+                  minúscula **no es un rechazo falso**. *Normalizar acá sería
+                  una segunda cuenta que debe coincidir con la del servidor —
+                  la deuda que L-281 cobró cuatro veces.* `autoCapitalize` se
+                  queda porque es del TECLADO: ayuda al dedo, no decide el
+                  dato. */}
               <Campo
                 label={t('despensa.reclamoCodigoLabel')}
                 value={codigo}
                 onChangeText={setCodigo}
                 placeholder={t('despensa.reclamoCodigoPlaceholder')}
                 autoCapitalize="characters"
+                autoFocus
+                autoCorrect={false}
+                spellCheck={false}
+                autoComplete="off"
+                maxLength={8}
               />
             </View>
 

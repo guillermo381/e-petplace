@@ -1350,7 +1350,8 @@ export const clienteEn = {
     resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
 
     /* A-01(b) (S100c) — see the Spanish side. */
-    maximoEntregable: 'We can get you {{n}} of this one right now — that’s what we added to your cart.',
+    // S100d·bis · dice qué PASÓ con el número, no solo cuánto hay.
+    maximoEntregable: 'We have {{n}} of this one for now — that’s the amount we left in your cart.',
 
     itemSeAgoto: 'It sold out while it was in your cart.',
     itemYaNoEsta: "It's no longer for sale.",
@@ -1363,6 +1364,9 @@ export const clienteEn = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'In progress',
+    chipEntregados: 'Delivered',
+    chipCancelados: 'Cancelled',
+    pedirDeNuevo: 'Order again',
     pedidosHistorial: 'History',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',
     reclamoEntrada: 'Bought at the store?',
@@ -1525,6 +1529,8 @@ export const clienteEn = {
     // S100d — the drag hint became visible, so it needs its other half.
     enCaminoHojaVerMenos: 'Hide the details',
     repartidorSinFoto: 'We’re not showing their photo yet',
+    // S100d — the window that already passed. Describes, never blames.
+    ventanaTardando: 'It’s taking longer than expected',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',

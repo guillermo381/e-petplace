@@ -99,6 +99,7 @@ import {
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
 import { agregarAlCarrito, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import {
   alergenosDeMascota,
   cruzarConVigilados,
@@ -627,9 +628,45 @@ export default function DespensaProducto() {
           porque el nombre vive arriba de todo el contenido y la flecha de
           volver no depende de él. El nombre sigue anunciándose al lector de
           pantalla: se apaga el píxel, jamás el nombre. */}
+      {/* ═══════════════════════════════════════════════════════════════
+          🔴 S100d-bis · **H-205 CAMBIÓ DE CAUSA, Y LA VIEJA ERA MÍA.**
+          ═══════════════════════════════════════════════════════════════
+
+          Lo vi en el aparato —«NUTRA PRO ADULTO LIGHT» arriba y «Nutra Pro
+          Adulto Light» abajo— **y se lo pasé a B diagnosticado como
+          «`color: transparent` no funciona en nativo».** *Estaba
+          equivocada, y era la explicación cómoda: ponía la causa en la
+          pieza ajena.*
+
+          **La causa real, medida:** son **DOS STRINGS DISTINTOS DEL MISMO
+          DATO** — el techo recibía `ficha.nombre` **crudo** y el cuerpo
+          pinta `nombreCurado(ficha.nombre)`. Con **42 % del catálogo
+          cargado en MAYÚSCULAS**, arriba salía el grito del importador y
+          abajo el nombre curado. *El píxel nunca dejó de apagarse: lo que
+          se veía era el nombre SIN curar, en un nodo que sí se pinta —
+          `tituloVisible={false}` apaga el título de `navegacion`, y el
+          nombre volvía por otro lado.*
+
+          🔴 **Y POR QUÉ EL WEB NUNCA LO DELATÓ, que es lo que hay que
+          aprender:** yo medí sobre productos **ya en caja normal**, donde
+          `nombreCurado()` no cambia nada ⇒ **las dos versiones coinciden y
+          el defecto es invisible.** *No fue que el web mintiera: fue que
+          elegí los casos en que las dos ramas dan lo mismo.* Es la
+          hermana exacta del error de la carta: **el caso que elegí para
+          medir era el que no distinguía.**
+
+          ⇒ la cura es **una función**: el techo recibe el MISMO dato
+          curado que el cuerpo. *El acoplamiento estaba declarado por
+          escrito esta misma mañana —«el día que otra superficie monte
+          esto, `nombreCurado` tiene que subir con ella»— y se cobró doce
+          horas después, en la pantalla de al lado.* */}
       <Encabezado
         variante="navegacion"
-        titulo={ficha !== 'cargando' && ficha !== 'error' ? ficha.nombre : t('despensa.tituloProducto')}
+        titulo={
+          ficha !== 'cargando' && ficha !== 'error'
+            ? nombreCurado(ficha.nombre)
+            : t('despensa.tituloProducto')
+        }
         tituloVisible={false}
         atras
         onAtras={() => router.back()}
@@ -1135,29 +1172,6 @@ export default function DespensaProducto() {
                   </Texto>
                 ) : null;
 
-              if (!puedePlegar) {
-                return (
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
-                    {ficha.composicion_estado === 'no_aplica' ? (
-                      <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
-                    ) : ficha.composicion_estado === 'ausente' ||
-                      (ficha.ingredientes_activos.length === 0 &&
-                        ficha.alergenos.length === 0) ? (
-                      <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
-                    ) : null}
-                    {advertencia}
-                    {ficha.composicion_estado === 'no_aplica' ? null : (
-                      <Texto variante="apoyo">
-                        {ficha.composicion_estado === 'verificada'
-                          ? t('despensa.composicionVerificada')
-                          : t('despensa.composicionFuente')}
-                      </Texto>
-                    )}
-                  </View>
-                );
-              }
-
               return (
                 /* ═══════════════════════════════════════════════════════
                    🔴 S100d-bis · **LA COMPOSICIÓN GANA SU CAJÓN BLANCO —
@@ -1217,15 +1231,64 @@ export default function DespensaProducto() {
                       método, no de pieza.* La cuenta no se pierde: es lo
                       primero que se ve al abrir. **Vuelve con una línea si
                       el founder la quiere.** */}
-                  <RotuloPlegable
-                    titulo={t('despensa.composicion')}
-                    abierta={composicionAbierta}
-                    onAlternar={() => setComposicionAbierta((v) => !v)}
-                  />
+                  {/* ═══════════════════════════════════════════════════
+                      🔴 S100d-bis · **LA CARTA ENVUELVE LAS DOS RAMAS, Y ESO
+                      ES LA CURA — NO UN REFACTOR.**
+                      ═══════════════════════════════════════════════════
+
+                      **Verificado en APARATO (18-ago, preview `01a0175e`) y
+                      no en web:** abrí una ficha **sin ingredientes**
+                      (`Aceite de Salmon Brilliant`) y **la composición
+                      quedaba SOBRE EL FONDO, sin carta** — que es
+                      exactamente lo que el founder pidió que no pasara.
+
+                      **La causa fue mía y es de forma:** puse la carta
+                      **solo en la rama plegable**, y la rama honesta —la que
+                      dice *«no tenemos los ingredientes»*— se quedó afuera.
+                      *Y el web no lo mostró porque yo medí sobre el producto
+                      con 25 ingredientes: elegí el caso rico para ver el
+                      plegado y con él perdí de vista el caso pobre, que es
+                      **268 de 470 productos** — la mayoría del catálogo.*
+
+                      ⇒ **la carta se sube afuera del `if` y las dos ramas
+                      quedan adentro.** No es prolijidad: con la carta
+                      compartida **«una rama sin superficie» deja de ser
+                      expresable**, que es como esta casa cura las dos
+                      cuentas que tienen que dar igual. *Duplicarla en la
+                      segunda rama habría arreglado el síntoma y dejado viva
+                      la forma que lo produjo.* */}
+                  {puedePlegar ? (
+                    <RotuloPlegable
+                      titulo={t('despensa.composicion')}
+                      abierta={composicionAbierta}
+                      onAlternar={() => setComposicionAbierta((v) => !v)}
+                    />
+                  ) : (
+                    /* Sin ingredientes no hay control: la sección se queda
+                       abierta diciendo su verdad. *Un control que revela
+                       nada es peor que el texto que ahorra*, y esconder la
+                       frase honesta detrás de un toque sería el candado ①
+                       de §5.4 al revés. */
+                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
+                  )}
+
+                  {puedePlegar ? null : ficha.composicion_estado === 'no_aplica' ? (
+                    <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+                  ) : ficha.composicion_estado === 'ausente' ||
+                    (ficha.ingredientes_activos.length === 0 &&
+                      ficha.alergenos.length === 0) ? (
+                    <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
+                  ) : null}
+
                   {advertencia}
-                  {composicionAbierta ? (
+
+                  {/* La fuente: con el plegado, adentro; sin él, a la vista.
+                      `no_aplica` no la lleva — no es un dato que falte. */}
+                  {(puedePlegar ? composicionAbierta : ficha.composicion_estado !== 'no_aplica') ? (
                     <>
-                      <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                      {puedePlegar ? (
+                        <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                      ) : null}
                       <Texto variante="apoyo">
                         {ficha.composicion_estado === 'verificada'
                           ? t('despensa.composicionVerificada')
@@ -1321,11 +1384,76 @@ export default function DespensaProducto() {
                     ACCIONAR**, y el stepper de la ficha hace el mismo
                     trabajo que el de la tarjeta. *El mismo gesto no puede
                     tener dos colores según en qué pantalla se toca.* */}
+                {/* ═══════════════════════════════════════════════════
+                    🔴 S100d-bis · **EL CAMPO SE ENCIENDE, Y SU `onCambio`
+                    PASA POR EL TOPE — LAS DOS COSAS O NINGUNA.**
+                    ═══════════════════════════════════════════════════
+
+                    **El caso del founder:** *tipea 50 con 12 en stock, el
+                    número se ajusta a 12 solo y nadie le explica por qué.*
+                    **`editable` sin el tope produce el defecto al revés:**
+                    el campo aceptaría 50, la ficha mostraría 50, y el
+                    recorte llegaría recién al tocar «Agregar». *Un número
+                    que se queda mintiendo hasta el último toque es peor que
+                    uno que se corrige enseguida.*
+
+                    ⚠️ **Antes de rutearlo medí CUÁNDO emite la pieza**, que
+                    es lo que lo vuelve barato: `onCambio` sale de
+                    `confirmar()`, atado a `onEndEditing`/`onSubmitEditing`
+                    — **al CONFIRMAR, no por tecla.** ⇒ es **un viaje al
+                    motor por número tipeado**, no uno por dígito. *Si
+                    hubiera emitido por tecla, esto habría sido una consulta
+                    por pulsación y la cura sería otra.*
+
+                    ⚠️ **Y BAJAR NO CONSULTA**, igual que en la vitrina:
+                    pedirle permiso al motor para llevar MENOS es un viaje
+                    que no decide nada.
+
+                    🔴 **`sin_medir` NO ES `agotado` (Ley 13).** Si la
+                    consulta falla se aplica lo pedido y el motor sigue
+                    siendo la última palabra. *Un fallo de red no se
+                    disfraza de «no hay stock»: inventar una mala noticia es
+                    peor que darla tarde* — y el instrumento de A lo caza,
+                    su rojo producido es exactamente colapsar las dos
+                    clases.
+
+                    ⏪ **El tope de `agregar()` NO se retira**, y no es
+                    redundancia: entre que se tipea el número y se toca el
+                    botón **el stock puede cambiar**. *Son dos momentos, no
+                    dos copias.* */}
                 <StepperCantidad
                   valor={cantidad}
                   min={1}
                   max={99}
-                  onCambio={setCantidad}
+                  editable
+                  onCambio={(n) => {
+                    if (n <= cantidad) {
+                      setCantidad(n);
+                      return;
+                    }
+                    if (variante === null) {
+                      setCantidad(n);
+                      return;
+                    }
+                    void (async () => {
+                      const r = await maximoComprableDeOfertas([
+                        { oferta_id: variante.oferta_id, cantidad: n },
+                      ]);
+                      const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
+                      const tope = decidirTope(n, maximo);
+                      if (tope.clase === 'agotado') {
+                        mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+                        return;
+                      }
+                      if (tope.clase === 'acotado') {
+                        mostrar({
+                          texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
+                          variante: 'neutro',
+                        });
+                      }
+                      setCantidad(tope.cantidad);
+                    })();
+                  }}
                   etiqueta={t('despensa.cantidad')}
                   registro="compra"
                 />

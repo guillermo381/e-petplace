@@ -1600,7 +1600,16 @@ export const clienteEs = {
        motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
        pidiendo 3 contesta 3 y no se filtra inventario ajeno.
        Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
-    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
+    /* 🔴 S100d·bis · LA VOZ DEL NÚMERO QUE SE AJUSTA SOLO.
+       Founder: *«disculpá, por ahora solo tenemos 12 disponibles»*, con el
+       pedido de ajustarla a la voz de la casa.
+       Lo que se conserva de su literal: **el pedido de disculpas** y **el
+       "por ahora"** — la escasez es de hoy, no del producto.
+       Lo que se ajusta: la casa no dice «disculpá» por algo que no hizo mal
+       (Ley 13 en tono), y **la frase tiene que decir qué PASÓ con el número**,
+       no solo cuánto hay: *un número que cambia bajo el dedo sin voz es peor
+       que el defecto original.* */
+    maximoEntregable: 'Por ahora tenemos {{n}} de este producto — dejamos esa cantidad en tu carrito.',
 
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',
@@ -1613,6 +1622,11 @@ export const clienteEs = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'En curso',
+    // S100d · los chips del HISTÓRICO. Solo estos dos: lo en curso vive
+    // arriba y no se repite abajo (firma del founder).
+    chipEntregados: 'Entregados',
+    chipCancelados: 'Cancelados',
+    pedirDeNuevo: 'Pedir de nuevo',
     pedidosHistorial: 'Historial',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
@@ -1822,6 +1836,11 @@ export const clienteEs = {
     // para quien no ve, y acá el hueco es información (la ficha está
     // incompleta A PROPÓSITO, con su deuda firmada).
     repartidorSinFoto: 'Todavía no mostramos su foto',
+    // 🔴 S100d · LA VENTANA QUE YA PASÓ (firma del founder). Describe lo que
+    // la familia ya está viendo y **no atribuye culpa**: la app sabe que la
+    // hora pasó, no sabe por qué. *«Demorado» sería una acusación al vendedor
+    // que no podemos sostener con lo que tenemos.*
+    ventanaTardando: 'Está tardando más de lo previsto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',
