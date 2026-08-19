@@ -73,7 +73,7 @@ que está por cambiar.*
 | # | qué | dónde |
 |---|---|---|
 | — | **la composición SIN CARTA cuando no hay ingredientes** — curado **subiendo la carta afuera del `if`**, no duplicándola: *«una rama sin superficie» deja de ser expresable* | RN-web |
-| **9** | el chip de presentación en magenta `rgb(142,31,104)` | 🔴 **RN-web, NO en aparato** — declarado, ver ④ |
+| **9** | el chip de presentación en magenta `rgb(142,31,104)`, **con su precio cuando la etiqueta repite** («12.7 kg · $ 57.19» contra «12.7 kg · $ 94.50») | ✅ **APARATO** |
 | — | **la puerta del local SALE de la Despensa** (firma del founder). La vitrina termina la vuelta **sin ninguna puerta prestada: solo mercadería** | RN-web |
 
 ### Pista D — pedidos y el camino
@@ -141,7 +141,28 @@ clases (8/10 contra 10/10).
 
 ---
 
-## ③ 🔴 H-205 — DIAGNOSTICADO Y NO CURADO, y cambió de causa
+### 🔴 Y LA CURA DE «UNA PALABRA» NO ERA DE UNA PALABRA EN LA FICHA
+
+Yo dije *«la cura es `editable`, una palabra por superficie»*. **C lo verificó
+contra la pieza antes de aplicarlo y la mitad era falsa:**
+
+- **la vitrina no necesitaba nada** — `TarjetaProducto:770` ya lo enciende adentro;
+- **la ficha necesitaba mucho más:** su `onCambio` era `setCantidad` pelado y **el
+  tope solo corría al tocar «Agregar»** ⇒ **tipear 50 habría dejado el 50
+  mintiendo en pantalla hasta el último toque.**
+
+*Mi «una palabra» era cierta para dos superficies y falsa para la tercera —
+y la tercera era justo la que el founder iba a tocar.* **Lo ruteó por
+`decidirTope` con las tres condiciones intactas.**
+
+⚠️ **Y midió CUÁNDO emite la pieza antes de rutearlo, que es lo que lo vuelve
+barato:** `onCambio` sale de `confirmar()`, atado a `onEndEditing` ⇒ **un viaje
+por número tipeado, no uno por dígito.** *Si hubiera emitido por tecla, la cura
+era otra.*
+
+---
+
+## ③ 🔴 H-205 — CURADO A MEDIAS, y la mitad que queda NO tiene causa atribuida
 
 **No era `color:'transparent'` fallando en aparato.** Son **dos strings del mismo
 dato**: el techo recibe `ficha.nombre` **crudo** y el cuerpo pinta
@@ -156,6 +177,21 @@ solo.*** Ella misma escribió esta mañana, en `TarjetaProducto`: *«el día que
 superficie monte esto, `nombreCurado` tiene que subir con ella»* — **se cumplió
 doce horas después, en la pantalla de al lado.**
 
+### ✅ Esa mitad está CURADA — y en aparato las dos versiones ya coinciden.
+
+### 🔴 PERO EL NOMBRE SIGUE APARECIENDO DOS VECES
+
+**`tituloVisible={false}` NO apaga el píxel en el aparato.** Medido por C: el
+código pasa la prop (`:670`), `Encabezado:219` la mapea a `color:'transparent'`,
+**hay un solo sitio que pinta el título**, el stack va con `headerShown:false`
+— **y el teléfono lo pinta igual.**
+
+⚠️ **Va como HECHO MEDIDO Y SIN CAUSA ATRIBUIDA**, con dueño B. *C ya se
+equivocó una vez atribuyendo este defecto, y la explicación cómoda vuelve a ser
+«transparent no anda en nativo» — que es exactamente la clase de causa que suena
+bien y no se midió.* **Prefiere entregar la captura sin diagnóstico que un
+diagnóstico que hay que desandar.**
+
 ---
 
 ## ④ DÓNDE SE VERIFICÓ CADA COSA — la palabra importa
@@ -167,10 +203,15 @@ para **comparar un antes con un después** y **jamás para declarar cómo se ve*
 de la Hoja · **no habría reproducido** el recorte del stepper · y **el scroll
 horizontal de los filtros andaba en web y NO en el teléfono**.
 
-**El chip magenta de C sale CONSTRUIDO, SIN VERIFICAR EN APARATO**, con su razón
-medida: el producto que abrió tenía **una sola presentación** y el grupo colapsa
-por diseño; cuando fue a buscar uno con varias, **el teléfono ya tenía el dev
-build** (248 MB medidos).
+**✅ Y al final C SÍ tuvo aparato:** D le prestó el dev build apuntado a su Metro,
+así que **vio su propia rama corriendo en el teléfono antes de que existiera para
+nadie más.** De ahí salieron el chip verificado, la mitad curable de H-205 **y
+los dos rojos nuevos que el web no mostraba** (⑥).
+
+⚠️ **Su preocupación por la carta blanca sobre el fondo nuevo quedó DESPEJADA en
+aparato: la carta sí se separa, se lee como superficie y no como parche.** *Era
+una preocupación razonable y el aparato la contestó.* Lo que **no** despejó es el
+**alto** — eso es el rojo ② de ⑥.
 
 ---
 
@@ -199,9 +240,9 @@ no sabemos.**
 
 | qué | por qué |
 |---|---|
-| **H-205** | diagnosticado, la cura es de C y es chica |
-| **el chip magenta en aparato** | construido y verificado solo en web |
-| **la carta de composición contra el fondo nuevo** | sus números son del fondo viejo — pide un ojo |
+| **H-205, su segunda mitad** | el nombre **sigue apareciendo dos veces**: `tituloVisible={false}` no apaga el píxel en aparato. Hecho medido, **sin causa atribuida**, dueño B |
+| 🔴 **la tira de PRESENTACIONES desborda y no scrollea** | el tercer chip llega a **x 1022 sobre 1080** y toca el filo. **Es el mismo defecto de los filtros en OTRA pieza** (`SelectorOpcion disposicion="tira"`, no `FiltroPills`) ⇒ **la cura de B no lo alcanza.** Apareció al agregar el precio al chip, pero **con etiquetas cortas ya desbordaba a los cuatro**: la cura lo destapó, no lo creó |
+| 🔴 **la carta de composición queda TAPADA por el CTA** | en el producto de 4 presentaciones se ve solo el borde superior asomando. **Es alto, no superficie** — con `#F6F6F6` y una presentación elegida, la ficha creció |
 | **las 6 vistas del admin** (GMV, MRR, pitch, ranking) | siguen legibles por `anon`: cerrarlas apaga el tablero **con certeza**. Disparo escrito: **antes de compartir `/inversores` con alguien externo** |
 | **la cura estructural de `consentimientos`** | su firma era condicional y la condición falló |
 | **las 25 variantes con más de una oferta publicada** | **cero del mismo vendedor, 25 de vendedores DISTINTOS, hasta 48 % de brecha, ningún UNIQUE.** Es el caso **multi-vendedor** contra la firma «una oferta por producto». **La cura de C hace que se VEA; no lo resuelve — no puede.** Es de mesa |
