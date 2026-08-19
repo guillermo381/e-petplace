@@ -43,10 +43,26 @@ function calcularStoken(txId: string, userId: string): string {
 
 function extraer(p: Record<string, any>) {
   const t = p?.transaction ?? {};
+
+  // 🔴 CUÁL de los tres lugares trajo el stoken SE REGISTRA, no se adivina.
+  //    El comentario de arriba prometía que `detalle` diría cuál acertó y la
+  //    primera versión NO lo guardaba: decía «stoken no coincide» sin decir de
+  //    dónde lo sacó. **El evento real de Nuvei es una observación de una sola
+  //    vez** — si llega y no anotamos la procedencia, un `false` no distingue
+  //    «la fórmula está mal» de «lo leí del lugar equivocado», y hay que
+  //    esperar al siguiente evento para desempatar.
+  const candidatos: Array<[string, unknown]> = [
+    ['transaction.stoken', t.stoken],
+    ['raiz.stoken', p?.stoken],
+    ['card.stoken', p?.card?.stoken],
+  ];
+  const hit = candidatos.find(([, v]) => typeof v === 'string' && v.length > 0);
+
   return {
     txId: String(t.id ?? p?.transaction_id ?? ''),
     userId: String(p?.user?.id ?? t.user_id ?? ''),
-    stoken: String(t.stoken ?? p?.stoken ?? p?.card?.stoken ?? ''),
+    stoken: hit ? String(hit[1]) : '',
+    stokenDe: hit ? hit[0] : 'ninguno de los tres',
     devRef: String(t.dev_reference ?? ''),
     status: t.status ?? null,
     detail: t.status_detail ?? null,
@@ -116,7 +132,7 @@ Deno.serve(async (req) => {
       payload,
       stoken_valido: valido,
       resultado: valido === false ? 'stoken_invalido' : 'recibido',
-      detalle: `${detalle} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`,
+      detalle: `${detalle} · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`,
     });
   } catch (e) {
     // 🔴 500 A PROPÓSITO. Es el único caso donde queremos que reintenten: si
