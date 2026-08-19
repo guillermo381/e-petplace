@@ -18407,6 +18407,90 @@ viajando **incluso dentro del `ok:true`** — para que ningún llamador lea un v
 como «cobertura verificada». *Esa visibilidad es lo único que hoy impide que esta
 deuda se vuelva invisible.*
 
+## 🔴 D-851 — UNA RESERVA VENCIDA NO SE PUEDE REARMAR: EL CLIENTE NO PUEDE PAGAR NUNCA
+
+**Medido en S101-A (19-ago-2026), intentando rearmar la compra `a2efd9b7`.**
+
+`inventario_reservas` tiene **`UNIQUE (pedido_id, sku_id)`**. Cuando la reserva vence,
+**la fila queda ahí** en estado `expirada`; `reservar_stock_pedido` hace un INSERT nuevo
+que choca contra ese UNIQUE. Y `iniciar_pago_pedido` **atrapa cualquier excepción y la
+reporta como `sin_stock`**.
+
+**El caso concreto medido:** `stock_disponible = 2`, cantidad pedida `1`.
+**Había stock de sobra y el mensaje decía que no** — y encima con el texto genérico
+(*«algún producto del pedido»*), porque su propia sub-consulta de diagnóstico no
+encontraba ningún faltante… **porque no lo había.**
+
+🔴 **En producto:** un cliente abandona el checkout, deja vencer los 30 minutos, vuelve
+a pagar — y **no puede completar ese pedido nunca**. La app le dice «no queda
+suficiente» habiendo stock, y reintentar da lo mismo. *No hay salida por el camino del
+usuario.*
+
+**DOS CURAS CANDIDATAS, NINGUNA ELEGIDA — la medición que las separa está pendiente:**
+(a) liberar/borrar la reserva vencida antes de re-reservar — *pero hay un
+`inventario_movimientos` de tipo `reserva` asociado, y no se midió si `stock_disponible`
+se recalcula o se corrompe*; (b) hacer el UNIQUE **parcial sobre `estado='vigente'`** —
+más limpio, *pero cambia un constraint vivo de inventario y hay que ver qué más se
+apoya en él*. **Elegir sin esa medición sería adivinar sobre stock.**
+
+**Dueño:** A / motor. **Disparo:** **antes del lanzamiento de octubre** — hoy solo lo
+pisan los ensayos porque nadie real abandona un checkout todavía.
+
+**De paso, un defecto hermano en el mismo lugar:** el `EXCEPTION WHEN OTHERS` de
+`iniciar_pago_pedido` **traduce toda falla a `sin_stock`**. *Un manejador que renombra
+cualquier causa a la más plausible convierte un diagnóstico en una adivinanza —
+y esta ficha existió tres horas antes de que alguien leyera el motivo real.*
+
+## 🔴 D-852 — SI LA CUENTA DE NUVEI EXIGE `vat > 0`, NINGÚN PRODUCTO DE OCTUBRE SE COBRA
+
+**Medido en S101-A (19-ago-2026), del `payload_crudo` del intento `14e5319d`:**
+
+```json
+{"type":"OperationNotAllowedError","description":"order.vat Invalid",
+ "help":"Check the parameter vat, if tax_percentage > 0 should be > 0"}
+```
+
+El desglose congelado de esa compra dice **`impuesto = 0.00`, `impuesto_pct = 0.00`,
+código `EC_IVA_0`** ⇒ **`vat: 0` era CORRECTO.** La queja de Nuvei es la inversa, así
+que el choque es contra **la tasa configurada en LA CUENTA**, no contra el pedido.
+
+🔴 **Por qué esto no es un detalle del ensayo:** `MODELO_DESPENSA` y el catálogo v1 dicen
+que **los SEIS productos comprables de octubre tributan `EC_IVA_0`**. Si la cuenta
+—staging **y producción**— exige `vat > 0`, **ningún producto real se puede cobrar el
+día uno.** *Es exactamente el patrón de §2.3bis: la aritmética escrita suponía IVA 15 %
+y los productos reales tributan 0.*
+
+**Dueño:** founder (pregunta a Erick). **Disparo:** 🔴 **PRECONDICIÓN DE LA APERTURA** —
+se responde antes de que exista una venta real, no cuando falle la primera.
+
+**La pregunta exacta, que ya no es una hipótesis:** *¿qué `tax_percentage` tiene
+configurada la cuenta EPETPLACESTG-EC, cómo debe verse un pedido de IVA 0 %, y la
+configuración de producción es la misma?*
+
+## 🟡 D-853 — LA PÁGINA DEL ADD CARD NO PUEDE VIVIR EN UNA EDGE FUNCTION
+
+**Medido en S101-A con una sonda descartable** (desplegada, medida y borrada — 404
+verificado): **Supabase degrada HTML a `text/plain` a propósito** en el dominio
+compartido `*.supabase.co`. Es una protección anti-phishing y **está bien que exista**.
+
+| tipo enviado | qué llega |
+|---|---|
+| `text/html; charset=utf-8` · `text/html` · `application/xhtml+xml` | 🔴 `text/plain` |
+| `application/json` · `text/plain; charset=utf-8` | ✅ intacto |
+| **`TEXT/HTML; charset=UTF-8`** | ✅ intacto — la comparación es **case-sensitive** |
+
+**Hoy corre con `TEXT/HTML`, que es un RODEO A UNA PROTECCIÓN, declarado como tal en el
+archivo.** Es **frágil**: el día que normalicen la comparación, la página vuelve a verse
+como texto **en silencio**.
+
+⇒ **La cura no es un header: es mudar la página.** El Add Card es superficie de PRODUCTO
+y su lugar es un host web propio (la landing de `epetplace.com` o un dominio propio),
+con las credenciales CLIENT inyectadas ahí. *La plataforma no está fallando — está
+diciendo que ése no es el lugar para servir una página.*
+
+**Dueño:** la letra de la puerta de pago (en producción de mesa).
+**Disparo:** antes de que la página la use alguien que no sea el founder.
+
 ## ⚠️ NO NACE FICHA — dos que quedan apuntadas a deuda existente
 
 **① `confirmado` como hito ACTUAL nunca se vio.** No es deuda nueva: **está
@@ -18418,3 +18502,5 @@ el pedido», +36 derivado por el nodo 10→32). **No es defecto: la pantalla
 scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
+
+- **L-316** — **EL CRUDO SE ABRE ANTES DE DIAGNOSTICAR: una tabla de estados dice QUÉ pasó, y el payload guardado dice POR QUÉ.** S101-A lo pagó en el mismo día y en la misma fila. El débito rebotó 403 y el error se leyó **dos veces mal desde lo genérico** —primero como *«configuración de Nuvei, carrier/operación no habilitada»*, después como *«el intento quedó en vuelo y bloquea el reintento»*— y **una sola vez bien, abriendo `pagos_intentos.payload_crudo`**, donde decía literal `order.vat Invalid`. **Las dos lecturas equivocadas mandaban a esperar a un tercero; la correcta era un campo de nuestro propio request.** Y el mismo `SELECT` que lo destapó corrigió de paso la otra premisa: el intento **no** estaba `iniciado`, estaba `rechazado` — el hueco real era que su `motivo_rechazo` y su `cerrado_en` estaban en NULL, porque el error venía en un objeto `error` de primer nivel y el lector solo miraba `transaction.message`. **Corolario operativo:** guardar el crudo no alcanza — *un crudo que nadie abre es un dato que no existe*, y por eso todo rechazo debe destilar **su motivo a una columna legible** (jamás NULL: con `http_<status>` como último recurso), porque **un payload jsonb no se puede listar, contar ni agrupar, y nadie lo abre cuando hay una explicación plausible a mano.** Hermana de L-166 (todo dato vivo se lee del objeto al usarlo) aplicada al diagnóstico de errores ajenos. Origen: S101-A, el 403 de Nuvei.
