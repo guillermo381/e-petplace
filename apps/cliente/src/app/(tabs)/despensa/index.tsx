@@ -52,7 +52,6 @@ import {
   Campo,
   CarritoFlotante,
   COLA_CARRITO_FLOTANTE,
-  CeldaNavegacion,
   Encabezado,
   Entrada,
   Esqueleto,
@@ -61,7 +60,6 @@ import {
   GlifoConContador,
   Icono,
   nombreCurado,
-  Separador,
   TarjetaProducto,
   Texto,
   CELDA_DE_GRILLA,
@@ -1269,21 +1267,43 @@ export default function DespensaDescubrir() {
               </View>
             )}
 
-            {/* ③ · LA OTRA PUERTA — el código del local.
-                CeldaNavegacion: acción que LLEVA (E14, chevron ›). Sin
-                glifo: el registry no tiene glifos de pedido/factura y un
-                glifo repetido de despensa sería decoración (Ley 12).
+            {/* ═══════════════════════════════════════════════════════════
+                ☠️ S100d-bis · **ACÁ VIVÍA «¿COMPRASTE EN EL LOCAL?», Y SALE
+                POR FIRMA DEL FOUNDER.** La puerta vive ahora en el **Hogar**
+                (prominente sin pedidos, discreta después) y en **Pedidos**.
+                ═══════════════════════════════════════════════════════════
 
-                ⏪ **«TUS PEDIDOS» SE FUE DE ACÁ ARRIBA** — ver su comentario
-                junto al buscador. */}
-            <View>
-              <Separador />
-              <CeldaNavegacion
-                titulo={t('despensa.reclamoEntrada')}
-                detalle={t('despensa.reclamoEntradaDetalle')}
-                onPress={() => router.push('/despensa/reclamo')}
-              />
-            </View>
+                **Las tres razones, y la tercera es la que manda:**
+                ① **Como canal, acá casi no existía.** Vivía al FONDO de este
+                  scroll, **detrás de hasta 50 productos en grilla de dos**
+                  —unas 25 filas—. *Un canal de adquisición que exige
+                  veinticinco deslizamientos no es un canal*, y ése fue el
+                  diagnóstico que motivó moverlo.
+                ② Con el Hogar y Pedidos cubiertos, **ésta era la TERCERA
+                  puerta al mismo cuarto** — figura que esta app ya mató dos
+                  veces: el hub del paseo en S60 y «Tus pedidos» en esta
+                  misma sesión.
+                ③ 🔴 **Y la de concepto, que sobrevive a cualquier
+                  composición: LA DESPENSA ES DONDE SE COMPRA ONLINE; EL
+                  RECLAMO ES PARA QUIEN COMPRÓ OFFLINE.** *Era el lugar
+                  equivocado por concepto, no solo por posición* — moverla
+                  dentro de esta pantalla no lo habría curado.
+
+                🔴 **NO SE BORRA EN SILENCIO: la enmienda vive en la LETRA**,
+                `LETRA_RECORRIDO_DESPENSA_S96` §4.bis, tachada y con fecha.
+                *Una decisión de no-construir que no queda escrita se vuelve
+                a proponer* — sin esa nota, la próxima pasada por la vitrina
+                ve una tienda sin puerta al reclamo y la vuelve a poner.
+
+                ⚠️ **Y lo que la letra NO dice, para que nadie lo lea de
+                más: §4 sigue entero.** El mecanismo —el vet registra contra
+                nadie, su factura lleva un código, el cliente lo reclama—
+                **rige y es v1**. Lo que se enmendó es DÓNDE está la puerta,
+                que es algo que §4 nunca dijo: **la puso una pantalla.**
+
+                ⏪ Y acá arriba también vivía «Tus pedidos», que salió en
+                S100d por la misma figura. *La vitrina terminó la vuelta sin
+                ninguna puerta prestada: solo mercadería.* */}
           </>
         )}
       </ScrollView>
