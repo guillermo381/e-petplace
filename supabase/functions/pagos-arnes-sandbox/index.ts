@@ -95,6 +95,24 @@ Deno.serve(async (req) => {
   const tarjeta = body.tarjeta ?? null;   // ⚠️ de la DOC de Nuvei, ver abajo
   const email: string = body.email ?? 'arnes-s101@epetplace.test';
 
+  // ── ENMIENDA ADITIVA (19-ago, tras el 401 «Application is not PCI») ──
+  //
+  // 🔴 EL CAMINO DE `tarjeta` NO SE TOCÓ: si Erick habilita la tokenización
+  //    directa en staging, este arnés dispara sin un solo cambio, como se
+  //    ordenó.
+  //
+  // Lo que se agrega es la OTRA punta: aceptar un `token` ya emitido por el
+  // SDK del navegador (el camino REAL del producto). Se hace acá y no en una
+  // función nueva a propósito: duplicar el débito significaría duplicar las
+  // compuertas, el registro del intento y la regla de la señal optimista —
+  // tres lugares donde después divergen.
+  const tokenExterno: string | null = typeof body.token === 'string' && body.token.trim()
+    ? body.token.trim() : null;
+  // El `user.id` DEBE ser el mismo con el que se tokenizó: es el que entra al
+  // stoken. Si viene de afuera, manda el de afuera.
+  const userExterno: string | null = typeof body.user_id === 'string' && body.user_id.trim()
+    ? body.user_id.trim() : null;
+
   if (!compraId) {
     return new Response(JSON.stringify({ ok: false, error: 'falta_compra_id' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },
@@ -105,11 +123,13 @@ Deno.serve(async (req) => {
   //    Nuvei. Fabricar un PAN plausible es la clase de dato verosímil-y-falso
   //    que esta casa ya pagó caro: pasaría los formatos y fallaría en el cobro
   //    sin decir por qué.
-  if (!tarjeta?.number || !tarjeta?.expiry_month || !tarjeta?.expiry_year || !tarjeta?.cvc) {
+  if (!tokenExterno && (!tarjeta?.number || !tarjeta?.expiry_month || !tarjeta?.expiry_year || !tarjeta?.cvc)) {
     return new Response(JSON.stringify({
-      ok: false, error: 'falta_tarjeta_de_prueba',
-      detalle: 'Pasar { tarjeta: { number, holder_name, expiry_month, expiry_year, cvc, type } } ' +
-               'tomada de la doc de Nuvei. No se inventa ningún PAN.',
+      ok: false, error: 'falta_tarjeta_o_token',
+      detalle: 'O bien { token, user_id } ya emitido por el SDK del navegador (camino REAL), ' +
+               'o bien { tarjeta: { number, holder_name, expiry_month, expiry_year, cvc, type } } ' +
+               'de la doc de Nuvei (camino server-to-server, que exige app PCI). ' +
+               'No se inventa ningún PAN.',
     }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
@@ -119,7 +139,12 @@ Deno.serve(async (req) => {
     });
   }
 
-  const userId = `arnes-${compraId.slice(0, 8)}`;
+  // 🔴 EL user.id ES EL QUE ENTRA AL STOKEN. Si el token vino de afuera, hay
+  //    que usar EL MISMO con el que se tokenizó — si acá inventáramos otro, el
+  //    stoken daría false por una razón que no es la fórmula, y habríamos
+  //    quemado la observación de un solo tiro diagnosticando el problema
+  //    equivocado.
+  const userId = userExterno ?? `arnes-${compraId.slice(0, 8)}`;
 
   try {
     // ═══ 1 · LA COMPRA Y SU DESGLOSE CONGELADO ═══
@@ -139,7 +164,20 @@ Deno.serve(async (req) => {
       monto_congelado: montoCongelado, lineas_desglose: (desglose ?? []).length,
     });
 
-    // ═══ 2 · TOKENIZACIÓN SERVER-TO-SERVER (solo sandbox, ver cabecera) ═══
+    // ═══ 2 · EL TOKEN ═══
+    // Camino A (REAL): vino del SDK del navegador. Nuestro server nunca vio el PAN.
+    // Camino B (server-to-server): tokenizamos acá. **MEDIDO 19-ago: Nuvei lo
+    //   rebota con 401 «Application is not PCI», ni siquiera en sandbox.** Se
+    //   conserva intacto por orden de mesa: si Erick habilita la tokenización
+    //   directa en staging, dispara sin cambios.
+    let token: string | null = tokenExterno;
+    if (token) {
+      anotar('2_tokenizacion', {
+        via: 'SDK del navegador (camino real)', token_obtenido: true,
+        token_preview: token.slice(0, 6) + '…',
+        nota: 'el PAN nunca tocó nuestro servidor',
+      });
+    } else {
     const add = await nuvei('/v2/card/add/', {
       user: { id: userId, email },
       card: {
@@ -151,17 +189,21 @@ Deno.serve(async (req) => {
         type: tarjeta.type ?? 'vi',
       },
     });
-    const token = (add.json as any)?.card?.token ?? null;
+    token = (add.json as any)?.card?.token ?? null;
     anotar('2_tokenizacion', {
-      http: add.status, token_obtenido: !!token,
+      via: 'server-to-server', http: add.status, token_obtenido: !!token,
       // el token NO se persiste; se muestra truncado solo para la traza del arnés
       token_preview: token ? String(token).slice(0, 6) + '…' : null,
       respuesta: token ? undefined : add.crudo,
+      pista: add.status === 401
+        ? 'HTTP 401 «Application is not PCI»: este camino NO existe para una app no-PCI. Usar el Add Card del navegador.'
+        : undefined,
     });
     if (!token) {
       return new Response(JSON.stringify({ ok: false, error: 'tokenizacion_fallo', paso }), {
         status: 200, headers: { 'Content-Type': 'application/json' },
       });
+    }
     }
 
     // ═══ 3 · LAS COMPUERTAS PRE-COBRO — ANTES de registrar y de disparar ═══

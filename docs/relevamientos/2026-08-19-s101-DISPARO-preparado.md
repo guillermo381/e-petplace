@@ -31,44 +31,50 @@ armado a mano prueba la función, no el camino.*
 1 va a rebotar `reserva_vencida` — **y eso es correcto, no un bug**. Se rearma corriendo
 `crear_intento_pago` de nuevo sobre la misma compra (es idempotente por PK del desglose).
 
-## El cuerpo del POST — ARMADO Y LISTO
+## 🔴 EL CAMINO CAMBIÓ — server-to-server MURIÓ POR MEDICIÓN
 
-**La tarjeta es la oficial de `developers.paymentez.com/api/#test-cards`, escenario ÉXITO.**
+El disparo del 19-ago rebotó en la tokenización con **`401 Application is not PCI`**:
+Nuvei **no acepta PAN server-to-server de una app no-PCI, ni en sandbox**. La advertencia
+de la cabecera del arnés resultó literal.
+
+⇒ **El disparo va por el Add Card real**, que es camino del producto y no descartable.
+
+### Paso 1 · cargar las credenciales CLIENT (una vez)
 
 ```bash
-curl -s -X POST \
-  https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/pagos-arnes-sandbox \
-  -H "Content-Type: application/json" \
-  -H "x-arnes-secret: <ARNES_SECRET>" \
-  -d '{
-    "compra_id": "a2efd9b7-eac4-4e6e-baed-956554e7215c",
-    "email": "arnes-s101@epetplace.test",
-    "tarjeta": {
-      "number":       "4111111111111111",
-      "holder_name":  "ARNES S101",
-      "expiry_month": 12,
-      "expiry_year":  2030,
-      "cvc":          "123",
-      "type":         "vi"
-    }
-  }' | python3 -m json.tool
+npx supabase secrets set NUVEI_APP_CODE_CLIENT=...
+npx supabase secrets set NUVEI_APP_KEY_CLIENT=...
+# opcional, si la doc da otra URL de SDK:
+# npx supabase secrets set NUVEI_SDK_URL=...
+npx supabase functions deploy pagos-addcard-stg --no-verify-jwt --use-api
 ```
 
-🔴 **Lo ejecuta el founder, no la pista.** `ARNES_SECRET` vive **solo** en los secrets
-de la función — no está en el árbol local ni debe estarlo. *Que la pista no pueda
-disparar sola es la puerta funcionando, no un obstáculo.*
+### Paso 2 · rearmar la reserva (vence a los 30 min)
 
-### Dos precisiones de la doc, ya respetadas
+```bash
+npx supabase --experimental db query --linked \
+  --file docs/relevamientos/2026-08-19-s101-REARMAR-compra-del-gate.sql
+```
 
-**① No se combina tarjeta de escenario con `order.description` de escenario.** El arnés
-manda `description: "e-PetPlace compra <8 chars>"` — una descripción **común**, no un
-disparador de escenario. Con la tarjeta de éxito, la combinación es legal.
+Verde: `2_compuertas` con `"ok": true` y `3_reserva` con `vigentes=1`.
 
-**② El `user.id` que va en el débito es el que entra al `stoken`.** El arnés usa
-**el mismo** `arnes-<compra_id[0:8]>` en la tokenización y en el débito, y el buzón lo
-lee del payload (`user.id`, con caída a `transaction.user_id`). *Si registráramos uno y
-mandáramos otro, el `stoken` daría false por una razón que no es la fórmula — y
-habríamos quemado la observación de un solo tiro diagnosticando el problema equivocado.*
+### Paso 3 · abrir la página y tokenizar
+
+```
+https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/pagos-addcard-stg?k=<ARNES_SECRET>&compra=a2efd9b7-eac4-4e6e-baed-956554e7215c
+```
+
+La página trae la **4111 1111 1111 1111** precargada (vto 12/2030, CVC 123). El botón
+tokeniza **en el navegador** y el **servidor** dispara el débito — el navegador nunca
+conoce `ARNES_SECRET`.
+
+⚠️ El secreto viaja en la URL y **queda en el historial del navegador**. Proporcionado
+para un ensayo de sandbox; **muere con la letra del Add Card real**, donde la puerta es
+la sesión del usuario.
+
+### Si Erick habilita PCI en staging
+
+El arnés **no cambió** por ese lado: el `curl` con `tarjeta` sigue sirviendo tal cual.
 
 ## Qué mirar después, en orden
 
