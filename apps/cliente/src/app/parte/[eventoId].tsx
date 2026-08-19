@@ -114,7 +114,7 @@ export default function ParteConsultaScreen() {
       : t('parte.tituloSinNombre');
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
       <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
 
       {estado === 'cargando' ? (

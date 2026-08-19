@@ -1060,7 +1060,10 @@ export const clienteEn = {
     // obligaba a arrastrar sobre el mapa, y eso movía el punto.
     cambiarDireccion: 'Change the address',
     ajustarPunto: 'Adjust the point on the map',
-    listoConPunto: 'Done with the point',
+    confirmarPunto: 'Confirm point',
+    mapaBloqueado: 'The map is locked. Tap “Adjust point” to move it.',
+    guardarComoOtra: 'Save as another address',
+    guardarComoOtraAyuda: 'A name to recognize it later — “Office”, “Mom’s place”.',
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
@@ -1350,7 +1353,8 @@ export const clienteEn = {
     resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
 
     /* A-01(b) (S100c) — see the Spanish side. */
-    maximoEntregable: 'We can get you {{n}} of this one right now — that’s what we added to your cart.',
+    // S100d·bis · dice qué PASÓ con el número, no solo cuánto hay.
+    maximoEntregable: 'We have {{n}} of this one for now — that’s the amount we left in your cart.',
 
     itemSeAgoto: 'It sold out while it was in your cart.',
     itemYaNoEsta: "It's no longer for sale.",
@@ -1363,6 +1367,9 @@ export const clienteEn = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'In progress',
+    chipEntregados: 'Delivered',
+    chipCancelados: 'Cancelled',
+    pedirDeNuevo: 'Order again',
     pedidosHistorial: 'History',
     tusPedidosDetalle: 'Follow what you ordered, newest first.',
     reclamoEntrada: 'Bought at the store?',
@@ -1487,10 +1494,11 @@ export const clienteEn = {
     // S100-D: `pasoPagando` died with its step — `pagando` comes BEFORE
     // there is a promise, so it is not a rung (B's recipe §1). Its voice
     // now comes from the catalogue (`narrativa_nombre`), not from here.
-    pasoConfirmado: 'Confirmed',
-    pasoPreparando: 'Preparing',
-    pasoEnCamino: 'On the way',
-    pasoEntregado: 'Delivered',
+    // S100d — the steps narrate instead of labelling a machine state.
+    pasoConfirmado: 'We got your order',
+    pasoPreparando: 'We’re getting your order ready',
+    pasoEnCamino: 'Your order is on its way',
+    pasoEntregado: 'Your order arrived',
     // S100b-D · THE VOICE OF AN ORDER THAT HAS NO JOURNEY YET. The state's
     // NAME comes from the catalogue (`narrativa_nombre`); this explains what
     // it means. It must be true for BOTH cases `pagando` covers —payment not
@@ -1514,6 +1522,7 @@ export const clienteEn = {
     // (N14): promising a minute we cannot keep is worse than not promising.
     enCaminoEntrada: 'Follow your order',
     enCaminoEntradaDetalle: 'See where it is',
+    enCaminoCta: 'See where it is',
     enCaminoTitulo: 'On the way',
     enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
     enCaminoVentana: 'Arrives between',
@@ -1525,6 +1534,8 @@ export const clienteEn = {
     // S100d — the drag hint became visible, so it needs its other half.
     enCaminoHojaVerMenos: 'Hide the details',
     repartidorSinFoto: 'We’re not showing their photo yet',
+    // S100d — the window that already passed. Describes, never blames.
+    ventanaTardando: 'It’s taking longer than expected',
     promesaRango: '{{desde}} and {{hasta}}',
     vehiculoMoto: 'Motorcycle',
     vehiculoCarro: 'Car',

@@ -301,7 +301,7 @@ export default function CarnetDeVacunas() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('carnet.titulo')} atras onAtras={() => router.back()} />
 
       {/* B2 · captura */}

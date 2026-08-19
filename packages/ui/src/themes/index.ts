@@ -146,7 +146,7 @@ const lightOficio: Theme = {
   // que `useMuroOficio` pinta el techo en claro, así que el disco de la
   // barra y el techo son **el mismo verde por construcción**, no por
   // coincidencia tecleada. Papel encima: 5.51 (medido S83-B13).
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -196,7 +196,7 @@ const darkOficio: Theme = {
   // (`bg.card` = `dark1`) separaría **1.4** — el marcador desaparecería.
   // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
   // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

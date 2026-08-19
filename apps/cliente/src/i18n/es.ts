@@ -1211,9 +1211,10 @@ export const clienteEs = {
     // concreto, no prometen una pantalla nueva.
     cambiarDireccion: 'Cambiar la dirección',
     ajustarPunto: 'Ajustar el punto en el mapa',
-    // Cierra el mapa. No dice «Guardar» a propósito: guardar es el botón de
-    // abajo, y dos botones que parecen decir lo mismo hacen dudar de los dos.
-    listoConPunto: 'Listo con el punto',
+    confirmarPunto: 'Confirmar punto',
+    mapaBloqueado: 'El mapa está fijo. Tocá «Ajustar punto» para moverlo.',
+    guardarComoOtra: 'Guardar como otra dirección',
+    guardarComoOtraAyuda: 'Un nombre para reconocerla después — «Oficina», «Casa de mamá».',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
@@ -1600,7 +1601,16 @@ export const clienteEs = {
        motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
        pidiendo 3 contesta 3 y no se filtra inventario ajeno.
        Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
-    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
+    /* 🔴 S100d·bis · LA VOZ DEL NÚMERO QUE SE AJUSTA SOLO.
+       Founder: *«disculpá, por ahora solo tenemos 12 disponibles»*, con el
+       pedido de ajustarla a la voz de la casa.
+       Lo que se conserva de su literal: **el pedido de disculpas** y **el
+       "por ahora"** — la escasez es de hoy, no del producto.
+       Lo que se ajusta: la casa no dice «disculpá» por algo que no hizo mal
+       (Ley 13 en tono), y **la frase tiene que decir qué PASÓ con el número**,
+       no solo cuánto hay: *un número que cambia bajo el dedo sin voz es peor
+       que el defecto original.* */
+    maximoEntregable: 'Por ahora tenemos {{n}} de este producto — dejamos esa cantidad en tu carrito.',
 
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',
@@ -1613,6 +1623,11 @@ export const clienteEs = {
     // cuando existen LAS DOS secciones: con una sola, rotular anuncia
     // una división que no está (Chanel).
     pedidosEnCurso: 'En curso',
+    // S100d · los chips del HISTÓRICO. Solo estos dos: lo en curso vive
+    // arriba y no se repite abajo (firma del founder).
+    chipEntregados: 'Entregados',
+    chipCancelados: 'Cancelados',
+    pedirDeNuevo: 'Pedir de nuevo',
     pedidosHistorial: 'Historial',
     tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
@@ -1777,10 +1792,21 @@ export const clienteEs = {
     // S100-D: `pasoPagando` murió con su escalón — `pagando` es ANTES de
     // que exista una promesa, así que no es peldaño (receta de B §1). Su
     // voz la pone ahora el catálogo (`narrativa_nombre`), no este mapa.
-    pasoConfirmado: 'Confirmado',
-    pasoPreparando: 'Preparando',
-    pasoEnCamino: 'En camino',
-    pasoEntregado: 'Entregado',
+    // 🔴 S100d · LAS VOCES DE LA ESCALERA PASAN DE ETIQUETA A RELATO.
+    // Firma del founder: *«debería salir con la escalera y un mensaje de
+    // "estamos preparando tu pedido"… muy parecido a como lo maneja Rappi»*.
+    // ⏪ Decían «Confirmado · Preparando · En camino · Entregado» — **rótulos
+    // de estado de máquina**: nombran la casilla, no le cuentan nada a nadie.
+    // Ahora **narran en primera persona del plural**, que es lo que hace la
+    // referencia: *quien mira no quiere saber en qué estado está su pedido —
+    // quiere saber qué está pasando con su comida.*
+    // ⚠️ Y NO rompen la fila de la lista: en `registro="compacta"` la pieza
+    // usa la etiqueta **solo para el lector de pantalla** (medido en su
+    // fuente), así que el largo nuevo no toca la tira de cuatro nodos.
+    pasoConfirmado: 'Recibimos tu pedido',
+    pasoPreparando: 'Estamos preparando tu pedido',
+    pasoEnCamino: 'Tu pedido va en camino',
+    pasoEntregado: 'Tu pedido llegó',
     // S100b-D · LA VOZ DEL PEDIDO QUE TODAVÍA NO TIENE RECORRIDO. El NOMBRE
     // del estado lo pone el catálogo (`narrativa_nombre`); esto explica qué
     // significa. Tiene que ser verdad para los DOS casos que `pagando` tapa
@@ -1803,6 +1829,7 @@ export const clienteEs = {
     // prometer un minuto que no podemos cumplir es peor que no prometer.
     enCaminoEntrada: 'Seguir el pedido',
     enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoCta: 'Ver por dónde va',
     enCaminoTitulo: 'En camino',
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
     enCaminoVentana: 'Llega entre',
@@ -1822,6 +1849,11 @@ export const clienteEs = {
     // para quien no ve, y acá el hueco es información (la ficha está
     // incompleta A PROPÓSITO, con su deuda firmada).
     repartidorSinFoto: 'Todavía no mostramos su foto',
+    // 🔴 S100d · LA VENTANA QUE YA PASÓ (firma del founder). Describe lo que
+    // la familia ya está viendo y **no atribuye culpa**: la app sabe que la
+    // hora pasó, no sabe por qué. *«Demorado» sería una acusación al vendedor
+    // que no podemos sostener con lo que tenemos.*
+    ventanaTardando: 'Está tardando más de lo previsto',
     promesaRango: '{{desde}} y {{hasta}}',
     vehiculoMoto: 'Moto',
     vehiculoCarro: 'Carro',

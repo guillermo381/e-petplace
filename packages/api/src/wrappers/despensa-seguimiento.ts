@@ -533,6 +533,24 @@ export interface ResumenItemsPedido {
   cuantos_items: number;
   /** `null` es un estado normal y frecuente — ver «lo que no hace». */
   portada: string | null;
+  /**
+   * 🔴 S100d·bis · EL PRODUCTO DEL PRIMER ÍTEM — para «Pedir de nuevo».
+   *
+   * Pedido de D con su caso: sin este campo, «Pedir de nuevo» **solo podía
+   * llevar a la Despensa**, no a la ficha. *Y la alternativa —mandar al carrito
+   * con el precio del pedido viejo— habría sido prometer una plata que el
+   * checkout desmiente.*
+   *
+   * ⚠️ Sale de la **MISMA fila** que `primer_item` y `portada`, por el mismo
+   * orden total: *nombrar un producto, mostrar la foto de otro y navegar a un
+   * tercero es la clase de defecto que no se ve hasta que alguien toca.*
+   *
+   * ⚠️ Y es el **id del catálogo**, no el del ítem: lo que se quiere volver a
+   * comprar es **el producto**, no la línea de aquella compra. `null` cuando el
+   * producto ya no está publicado — y entonces la superficie **no debe ofrecer
+   * el camino**, porque llevaría a una ficha que no existe.
+   */
+  producto_id: string | null;
 }
 
 export async function resumenDeItemsDePedidos(
@@ -546,7 +564,7 @@ export async function resumenDeItemsDePedidos(
   const { data, error } = await getClient()
     .from('pedido_items')
     // El embed va inline: postgrest-js infiere la forma del literal.
-    .select('pedido_id, nombre_producto, created_at, id, productos(imagen_url, imagenes)')
+    .select('pedido_id, nombre_producto, producto_id, created_at, id, productos(imagen_url, imagenes)')
     .in('pedido_id', unicos)
     // 🔴 ORDEN TOTAL, NO PARCIAL: `created_at` SOLO empata — D midió tres
     // pedidos a las 23:21/23:22/23:23 y adentro de un pedido los ítems nacen
@@ -559,7 +577,10 @@ export async function resumenDeItemsDePedidos(
 
   if (error) return falloDespensa(error.message);
 
-  const porPedido = new Map<string, { nombre: string | null; cuantos: number; portada: string | null }>();
+  const porPedido = new Map<
+    string,
+    { nombre: string | null; cuantos: number; portada: string | null; productoId: string | null }
+  >();
   for (const fila of Array.isArray(data) ? data : []) {
     if (!esObjDespensa(fila) || typeof fila.pedido_id !== 'string') continue;
     const previo = porPedido.get(fila.pedido_id);
@@ -575,6 +596,9 @@ export async function resumenDeItemsDePedidos(
       nombre: typeof fila.nombre_producto === 'string' ? fila.nombre_producto : null,
       cuantos: 1,
       portada: prod === null ? null : fotosDeProducto(prod).portada,
+      // Misma fila que el nombre y la portada: el orden total de arriba es lo
+      // que garantiza que los tres hablen del MISMO producto.
+      productoId: typeof fila.producto_id === 'string' ? fila.producto_id : null,
     });
   }
 
@@ -588,6 +612,7 @@ export async function resumenDeItemsDePedidos(
         primer_item: r?.nombre ?? null,
         cuantos_items: r?.cuantos ?? 0,
         portada: r?.portada ?? null,
+        producto_id: r?.productoId ?? null,
       };
     }),
   };

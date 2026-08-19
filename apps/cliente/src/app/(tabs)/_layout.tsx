@@ -53,6 +53,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tabs, useRouter } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -104,7 +106,7 @@ const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
  *
  *  **El aire sobre la barra se MIDE**: su alto cambia con el inset del aparato
  *  y con el largo de las etiquetas. */
-function FlotanteDelCarrito({ ruta }: { ruta: string }) {
+function FlotanteDelCarrito({ ruta, altoBarra }: { ruta: string; altoBarra: number }) {
   const { t } = useTraduccion();
   const router = useRouter();
   const items = useCarrito();
@@ -114,7 +116,33 @@ function FlotanteDelCarrito({ ruta }: { ruta: string }) {
   return (
     <CarritoFlotante
       cuenta={unidades}
-      aireInferior={ALTO_FILA_TABS}
+      /* 🔴 EL ALTO **ENTERO** DE LA BARRA, NO EL DE SU FILA — S100d·bis, relevo
+         de B, y es la mitad ② del defecto que el founder vio.
+
+         **Su literal:** *«el botón que quedó flotante quedó DEBAJO DEL MENÚ»*.
+         **Medido en el bundle `01a01807`:**
+
+             el flotante del shell …………………… y[670,9 · 727,1]
+             la barra de tabs arranca en …… y  699,0
+                                              ───────
+             invadía la barra ………………………………  28,1 dp
+
+         **La cuenta de dónde salió el 28:**
+         ```
+         lo que se le pasaba …… ALTO_FILA_TABS      = 85
+         lo que la barra ocupa … 85 + insets.bottom = 133
+                                 ─────
+             faltaban …………………………  48  (= el inset del aparato)
+         ```
+         ⚠️ **Y las dos piezas lo tenían escrito.** `BarraTabs`: *«**no incluye
+         `insets.bottom`**: el alto total es `ALTO_FILA + inset`»*.
+         `CarritoFlotante`: *«su alto lo mide el shell con un `onLayout` en vez
+         de teclearlo — un número tecleado ahí miente en el primer teléfono con
+         otra barra»*. **El shell tecleó la constante igual.** *Un contrato que
+         avisa en su propia línea y se incumple en la de al lado es la forma
+         barata de L-284: dos números que deben coincidir, saliendo de dos
+         lugares.* */
+      aireInferior={altoBarra}
       onAbrir={() => router.push('/despensa/carrito')}
       etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
     />
@@ -127,6 +155,31 @@ export default function TabsLayout() {
    *  dibuja. *Ante la duda no se ofrece una casa vacía* — el acceso vive en
    *  Cuenta, que es exactamente lo que la firma dice. */
   const [tienePedidos, setTienePedidos] = useState<boolean | null>(null);
+
+  /* 🔴 EL ALTO DE LA BARRA — **SE MIDE, Y ARRANCA EN EL VALOR DERIVADO.**
+   *
+   * Las dos mitades importan y la segunda es la lección de esta vuelta:
+   *
+   * ① **se mide** (`onLayout` sobre la barra real) porque su alto cambia con el
+   *    inset del aparato, con el idioma de las etiquetas y con cuántas tabs
+   *    hay —cuatro o cinco según haya pedidos—. *Un número tecleado acá miente
+   *    en el primer teléfono distinto, y ya mintió en éste.*
+   *
+   * ② **arranca en `ALTO_FILA_TABS + insets.bottom`, que es la fórmula propia
+   *    de `BarraTabs`** (`altoTotal = ALTO_FILA + insets.bottom`, leída de su
+   *    fuente). ⚠️ **Y esto no es cinturón de más: es lo que separa esta
+   *    medición de la que HOY está fallando en `Encabezado`.**
+   *
+   * *Medido en este mismo bundle: el techo deriva su inset con
+   * `measureInWindow` y, contra un padre que aplica su padding del lado nativo,
+   * **pierde la carrera y se queda con su valor de arranque — que ahí es el
+   * EQUIVOCADO**, y por eso el defecto es invisible y lleva dos vueltas vivo.*
+   *
+   * ⇒ **la regla que dejo escrita: una medición asincrónica solo es segura si
+   * su valor de arranque ya es correcto.** Con el arranque bueno, perder la
+   * carrera no cuesta nada; con el arranque malo, perderla es el defecto. */
+  const insets = useSafeAreaInsets();
+  const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insets.bottom);
 
   useEffect(() => {
     let vive = true;
@@ -270,7 +323,16 @@ export default function TabsLayout() {
               del cliente y la pieza es de `packages/ui`. Se toca acá porque el
               montaje ES la firma —el flotante deja de ser de una pantalla— y
               se declara en vez de hacerse callado. */}
-          <FlotanteDelCarrito ruta={state.routes[state.index].name} />
+          <FlotanteDelCarrito ruta={state.routes[state.index].name} altoBarra={altoBarra} />
+          <View
+            onLayout={(e) => {
+              const alto = e.nativeEvent.layout.height;
+              // Se ignora el 0 del primer paso: un cero mediría "no hay barra"
+              // y bajaría el flotante justo donde lo tapa. El umbral evita
+              // re-render por ruido de sub-píxel.
+              setAltoBarra((previo) => (alto > 0 && Math.abs(previo - alto) > 0.5 ? alto : previo));
+            }}
+          >
           <BarraTabs
           items={items}
           activo={state.routes[state.index].name}
@@ -293,6 +355,7 @@ export default function TabsLayout() {
             // el pill muere; la huella hereda el rol de accent.active.
             estadoPorHuella
           />
+          </View>
         </>
       )}
     >

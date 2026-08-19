@@ -368,6 +368,30 @@ export function Boton({
     // registro de CTA (primary|secondary|tertiary|danger|success).
     // Pintarlo desde el consumidor era rojo de lint POR CONSTRUCCIÓN —
     // el hueco estaba acá, no allá.
+    /* 🔴 LEELE LA RECETA, NO EL NOMBRE — S100d·bis (H-207).
+       **`acento` NO es «el botón del acento»: es LETRA `accent.cta` SIN
+       relleno.** En el cliente ese slot es el oro, y el oro **como tinta** no
+       llega en ninguna superficie clara:
+
+           ocre sobre carta blanca ………………… 1,70     piso: texto 4,5 · grande 3,0
+           ocre sobre el fondo neutro ……… 1,57
+           ocre sobre papel algodón ……………… 1,62
+           tinta sobre relleno ocre ………… **9,96**  ← `primario`, el otro lado del par
+
+       ⚠️ **Y la casa YA lo tenía escrito donde nace el color:** `ctaOro`
+       declara en `palette.ts` *«sobre papel 1.62 NO rige»*. **Esta variante
+       hace exactamente eso.**
+
+       🔴 **EL MODO DE FALLA ES ELEGIR POR EL NOMBRE, y se cobró el mismo día
+       en que se midió:** otra pista montó `acento` para un CTA creyendo que
+       era el oro RELLENO —con el par correcto ya medido y escrito encima— y
+       lo cazó este censo antes del gate. *«acento» sonaba a «el del acento».*
+       **Si lo que querés es el oro visible, es `primario`.**
+
+       ✅ **En el PRESTADOR sí llega:** ahí el mismo slot resuelve a `tealDark`
+       y da **5,37** sobre el fondo. *No es la variante lo que falla: es el
+       color que el slot entrega en cada casa* — por eso R56 mira la app y no
+       la variante sola. */
     acento:      { fondo: 'transparent', texto: theme.accent.cta },
   }
 
