@@ -792,6 +792,119 @@ palette lo declara *«decorativo»*, y **un chevron que es la única señal de q
 algo se despliega no es decorativo.** *Tocarlo mueve los tres portadores de las
 dos apps y no es lo que se firmó hoy.* **Dueño: mesa.**
 
+### 🔴 ENMIENDA N26.2 — LA DOSIS DEL MAGENTA CUANDO SE REPITE (19-ago-2026, firma del founder)
+
+> **Verbatim:** *«el magenta de la escalera está muy fuerte, debemos poner un
+> magenta más suave, como el verde de Rappi»*.
+
+**N26 firmó el magenta como marca y selección. Esta enmienda NO toca ese rol:
+cambia su DOSIS cuando el color se REPITE en una serie** — exactamente el
+movimiento que N26.1 hizo con el ocre. *Un color que identifica cuando aparece
+una vez, satura cuando aparece cuatro.*
+
+**🔴 Y el número invirtió la cura obvia, que es lo que esta enmienda deja
+escrito para la próxima referencia que se quiera copiar:**
+
+```
+el verde de RAPPI  H133 S51% L50%   vs carta 2,34   ·  su glifo blanco 2,22
+nuestro #8E1F68    H321 S64% L34%   vs carta 8,25   ·  su glifo (papel) 7,84
+```
+
+**El verde de la referencia no llega a ningún piso.** ⇒ *«ponelo como el verde
+de Rappi» al pie de la letra habría llevado el glifo de 7,84 a 2,22* — **el
+1,00 del stepper con otro color, y lo frenó medir la referencia ANTES de
+copiarla.** *Lo que hace suave a la referencia no es su matiz: es que es más
+CLARA (L50 contra L34) y menos saturada. Lo que baja es el contraste.*
+
+**EL VALOR FIRMADO: `#AE3785`** (H321 S52 L45) — *misma familia, mismo rol*.
+```
+disco vs carta blanca …… 5,70      disco vs #F6F6F6 …… 5,27      glifo encima …… 5,42
+```
+**−31 % de contraste, y los dos pares holgados.** Se sirvió también `#C23D93`
+(disco 4,79 · glifo **4,55**) y el founder eligió el primero: *«un par que se
+decide por el redondeo no es un par decidido — cualquier ajuste futuro del
+fondo lo tira abajo»*, **y el fondo ya se movió una vez esta semana.**
+
+### ⚠️ POR QUÉ VIVE EN UN SLOT PROPIO — el censo es la razón, y va adentro
+
+```
+accent.control  →  64 ocurrencias en 28 archivos
+```
+`SelectorOpcion` ×8 · `SelectorDia` ×4 · `Interruptor` · `SliderPrecio` ·
+`SelectorEspecie` · `FiltroPills` · `StepperCantidad` · `ChipEntidad` ·
+`GlifoConContador` · `PinMovible` · `MapaZona` · `CarritoFlotante` ·
+`MarcaEleccion` + 4 pantallas.
+
+⇒ **el valor entra por `accent.hito`, que consume SOLO la escalera.** *Una
+queja sobre cuatro discos habría cambiado media app.* **Quien lo «unifique»
+después por prolijidad estará deshaciendo la razón por la que existe** — se
+escribe acá para que esa persona lea el censo antes de tocarlo.
+
+**Lo que NO cambió, declarado:** el **prestador** (su rama usa `accent.primary`,
+teal, y el slot quedó anclado al teal en los temas de oficio para que el magenta
+del cliente no pueda filtrarse) · y **oscuro y memorial**, que conservan
+exactamente lo de hoy: *el founder firmó un valor medido contra superficies
+CLARAS; elegir el par oscuro por mi cuenta sería firmar por él.*
+
+### ✅ ENMIENDA A 19.8 — SOLO LO CUMPLIDO SE RELLENA (19-ago-2026, firma del founder)
+
+> **Verbatim:** *«hueco en los que esperan»*.
+
+~~**Lo que decía:** *lo que YA PASÓ se rellena · lo que ESPERA se contornea*, con
+`actual` contado del lado de lo que pasó (`lleno = hecho || actual`).~~
+**DEROGADO para la vertical.** *No se borra: describía bien la intención y erraba
+en dónde ponía al hito en curso.*
+
+**LA GRAMÍTICA QUE RIGE:**
+```
+cumplido …… disco LLENO con su check
+actual ……… ANILLO HUECO **en color**  + la negrita que la pieza ya ponía
+pendiente … ANILLO HUECO **en gris**   + su texto gris
+```
+**Vara literal:** `referencia-rappi-repartidor-detalle-de-ruta`.
+
+**Lo que la tumbó fue una MEDICIÓN.** Capturado en el bundle `01a01844`: *tres
+discos magenta idénticos y la negrita cargando sola* ⇒ **la forma no distinguía
+al actual.** *En la referencia son DOS señales —peso y forma—; acá era una.*
+
+**Sus tres pares, medidos antes de aplicar:**
+```
+cumplido:  glifo papel sobre el disco #AE3785 ……… 5,42  ✅
+actual:    anillo y glifo #AE3785 sobre carta …… 5,70  ✅   (sobre #F6F6F6: 5,27)
+pendiente: anillo gris sobre carta ………………………… 2,40  ⚠️ decorativo, declarado
+```
+✅ **Y se ayuda con N26.2:** con el actual hueco, **tres discos magenta seguidos
+pasan a ser DOS** — la otra mitad de por qué la escalera se leía como una barra.
+
+⚠️ **ALCANCE: rige la VERTICAL, no la horizontal.** La tira calcula su relleno
+por índice y **su propia vara la contradice** —en `referencia-rappi-seguimiento-…`
+el nodo en curso está **RELLENO**—. *Dos referencias, dos gramáticas: se aplica
+donde la firma tiene su evidencia y el resto se declara en vez de estirarse.*
+
+### 🔴 LA LEY DE GOBIERNO QUE SALE DE CÓMO LLEGÓ ESTA FIRMA
+
+**La misma línea recibió DOS órdENES OPUESTAS, en paralelo, a dos pistas:**
+
+| a quién | literal |
+|---|---|
+| **a B** (dueña de la pieza) | *«es 19.8 y todavía no la firmó. **No la cambies**.»* |
+| **a D** | *«**el nodo actual va HUECO** — firma del founder»* |
+
+**Las dos eran reales:** la firma llegó **entre** los dos mensajes y no se
+re-avisó. **Error de la mesa, declarado por la mesa.**
+
+> ⇒ **UNA FIRMA SOBRE PIEZA COMPARTIDA VA A SU DUEÑO; LAS DEMÁS PISTAS LA
+> RECIBEN COMO AVISO, JAMÁS COMO ORDEN.**
+
+**Es peor que las tres veces que el canon ya registró** (el magenta de S72, la
+plata de S83 y S88): *allá eran dos letras viejas conviviendo, que se descubren
+LEYENDO; acá eran dos órdenes simultáneas, que se descubren CHOCANDO — y chocan
+en el código.* **Y solo la mesa puede cometerlo.**
+
+✅ **El costo fue CERO porque las dos pistas frenaron** — y **la que traía la
+orden fue la primera en decir que no podía insistir.** *Un mecanismo donde quien
+trae la firma ajena se abstiene de empujarla es el que funciona.*
+
 ### 🔴 Lo que esta ley NO es: una decisión nueva sobre el CTA
 
 **Medido en la fuente, no de memoria:** `accent.cta` **ya era el oro

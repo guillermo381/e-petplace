@@ -42,6 +42,45 @@ export const palette = {
   pinkVivo:  '#DF00A1',  // B3.1c — el magenta más vivo que pasa 4.5:1 con blanco
                          // (4.514:1; #E000A2 falla). SOLO stop 0 del gradiente firma dark. rgb(223,0,161)
   magentaDark: '#8E1F68', // S58 (firma founder) — el registro FUNCIONAL de la capa
+  /* 🔴 EL MAGENTA DE LA SERIE — **firma del founder, 19-ago-2026 (S100d·bis).**
+     *«el magenta de la escalera está muy fuerte, debemos poner un magenta más
+     suave, como el verde de Rappi»*.
+
+     ── EL NÚMERO QUE INVIRTIÓ LA CURA OBVIA ───────────────────────────
+     **Se midió la referencia ANTES de copiarla**, y el verde de Rappi
+     (`(62,193,91)`, muestreado de `referencia-rappi-seguimiento-escalera-y-rango`)
+     **no llega a ningún piso:**
+     ```
+     verde de Rappi vs carta blanca …… 2,34      su glifo blanco encima …… 2,22
+     nuestro #8E1F68 vs carta ………………… 8,25      su glifo (papel) ……………… 7,84
+     ```
+     ⇒ *«ponerlo como el verde de Rappi» al pie de la letra habría llevado el
+     glifo de 7,84 a 2,22* — **el 1,00 del stepper con otro color.**
+
+     **Lo que de verdad lo hace suave, medido:** el de Rappi es **más CLARO**
+     (L50 contra L34) y **menos saturado** (S51 % contra S64 %). *Nuestro
+     magenta es un color OSCURO sobre blanco, y un color oscuro repetido en
+     cuatro discos se lee como una barra.* ⇒ **lo que baja es el CONTRASTE, no
+     el matiz: misma familia H321, mismo ROL** (N26 v2: marca y selección).
+
+     ── EL VALOR FIRMADO, CON SUS DOS PARES ────────────────────────────
+     ```
+     #AE3785  S52 / L45   disco vs carta 5,70 · vs #F6F6F6 5,27 · glifo 5,42
+     ```
+     **−31 % de contraste contra el `magentaDark`, y los DOS pares holgados.**
+     ⏪ Se sirvió también `#C23D93` (L50, disco 4,79 · glifo **4,55**) y el
+     founder eligió éste: *«la B queda a 0,05 del piso y un par que se decide
+     por el redondeo no es un par decidido — cualquier ajuste futuro del fondo
+     lo tira abajo»*. **Y el fondo ya se movió una vez esta semana.**
+
+     ⚠️ **POR QUÉ ES UN COLOR NUEVO Y NO UN `magentaDark` MÁS CLARO — el censo
+     que lo decide:** `accent.control` tiene **64 ocurrencias en 28 archivos**
+     (`SelectorOpcion` ×8, `SelectorDia` ×4, `Interruptor`, `SliderPrecio`,
+     `PinMovible`, los chips…). *Una queja sobre cuatro discos habría cambiado
+     media app.* **Este valor entra por un slot propio —`accent.hito`— que
+     consume SOLO la escalera. Quien lo «unifique» después por prolijidad
+     estará deshaciendo la razón por la que existe.** */
+  magentaSerie: '#AE3785',
                           // marca/afecto: acento de CONTROLES del cliente en claro
                           // (selección, toggles, slider, píldoras de día). El puro
                           // #FF00AF conserva su reserva INTACTA (destello, huella de

@@ -92,6 +92,12 @@ export const darkTheme = {
 
     // S58 — acento de controles del cliente en dark: violetText (gateado
     // S44 — cero pares nuevos por firma).
+    /** El hito de la serie. ⚠️ **Igual a `control` A PROPÓSITO: el founder
+     *  firmó `#AE3785` medido contra carta blanca y `#F6F6F6` —superficies
+     *  CLARAS—. El par sobre fondo oscuro NO se midió, y elegirlo acá sería
+     *  firmar por él. Este tema conserva exactamente lo de hoy hasta que
+     *  exista su medición.** */
+    hito:          palette.violetText,
     control:       palette.violetText,
     /** 🔴 EL TINTE DE LA ELECCIÓN — SLOT NUEVO (S98-B, cura de D-813).
      *  MISMO VALOR que hoy (`capaBg.comunidad` en dark es `pinkAlpha09`):

@@ -84,6 +84,12 @@ export const memorialTheme = {
     warmBorder:    'rgba(250,246,232,.18)',
 
     // S58 — en memorial el control es TINTA (la marca no celebra ahí)
+    /** El hito de la serie. ⚠️ **Igual a `control` A PROPÓSITO: el founder
+     *  firmó `#AE3785` medido contra carta blanca y `#F6F6F6` —superficies
+     *  CLARAS—. El par sobre fondo oscuro NO se midió, y elegirlo acá sería
+     *  firmar por él. Este tema conserva exactamente lo de hoy hasta que
+     *  exista su medición.** */
+    hito:          palette.textMemorialDark,
     control:       palette.textMemorialDark,
     /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
      *  quiero comunicar con la pata es: este es el seleccionado").

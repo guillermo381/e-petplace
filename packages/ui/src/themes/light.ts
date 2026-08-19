@@ -114,6 +114,14 @@ export const lightTheme = {
     // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
     // usa: su oficio es tealDark (§15b).
     control:       palette.magentaDark,
+    /** 🔴 EL COLOR DEL HITO EN UNA SERIE — slot propio, S100d·bis (firma founder).
+     *  **Existe para que la DOSIS de un color repetido se pueda bajar sin tocar
+     *  el token compartido.** `accent.control` vive en 64 sitios de 28 archivos;
+     *  la escalera es UNO. *Suavizar el magenta ahí habría movido selectores,
+     *  interruptores, el slider, el pin y los chips.*
+     *  ⚠️ **Cambia la dosis, JAMÁS el rol** (N26 v2: el magenta sigue siendo
+     *  marca y selección). Ver `palette.magentaSerie` para los dos pares. */
+    hito:          palette.magentaSerie,
     /** 🔴 EL TINTE DE LA ELECCIÓN — SLOT NUEVO (S98-B, cura de D-813).
      *  MISMO VALOR que hoy: `capaBg.comunidad` es `pinkAlpha08`, así que
      *  el cliente NO cambia un píxel. Lo que cambia es de dónde sale.

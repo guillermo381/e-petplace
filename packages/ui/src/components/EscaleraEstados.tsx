@@ -209,6 +209,33 @@ const NODO = 32
  *  que el nodo ya tenía (20 − 12), conservado al crecer. */
 const GLIFO_EN_NODO = NODO - 8
 
+/* 🔴 EL RIEL DE LA VERTICAL SE DERIVA DEL NODO — S100d·bis.
+   Era `RIEL` (24) con un punto de 10 adentro. **Con el nodo en 32 ya no
+   entra**, y un número tecleado acá volvería a separarse del nodo la próxima
+   vez que el nodo cambie. *Dos números que deben guardar relación no salen de
+   dos lugares* (L-284).
+
+   ── EL COSTO EN ALTO, MEDIDO Y DECLARADO (orden del founder) ─────────
+   En la vertical cada dp del nodo **multiplica por la cantidad de hitos**:
+   ```
+   ANTES  riel = 4 (marginTop) + 10 (punto) + 16 (conector mín) = 30
+          fila = max(riel, contenido 24 + 16) ……………………………… 40 dp
+   AHORA  riel = 4 + 32 + 16 …………………………………………………………………… 52 dp
+          fila = max(52, 40) ………………………………………………………………… 52 dp   (+12)
+   ```
+   ⇒ **+12 dp por fila que tenga conector.** Con cuatro hitos son **tres**
+   (la última no lo tiene) ⇒ **+36 dp** en el detalle.
+   ⚠️ **Y NO crece la fila que trae `detalle`:** ahí el contenido ya mide
+   `24 + 2 + ~20 + 16 = 62 > 52` y manda él.
+   **En ancho:** el texto se corre **+8 dp** a la derecha (riel 24 → 32).
+
+   **Su acreedor, dicho:** el detalle del pedido **no tiene tope** —es una
+   pantalla que scrollea—, así que el crecimiento no desplaza a nadie fuera de
+   vista. *Se declara igual porque D acaba de sumar 64,4 dp a esa misma
+   pantalla con «Seguir el pedido», y dos crecimientos que nadie suma es como
+   se llega a una pantalla que no termina nunca.* */
+const RIEL_VERTICAL = NODO
+
 export function EscaleraEstados({
   pasos,
   registro = 'completa',
@@ -248,7 +275,19 @@ export function EscaleraEstados({
    *  monta el riel vacío ni se anuncia como barra de progreso. */
   const soloDesvio = pasos.length === 0
 
-  const color = acento === 'oficio' ? theme.accent.primary : theme.accent.control
+  /* 🔴 EL CLIENTE PINTA CON `accent.hito`, NO CON `accent.control` — S100d·bis,
+     firma del founder: *«un magenta más suave, como el verde de Rappi»*.
+
+     **El slot es propio porque el censo lo obligó:** `accent.control` vive en
+     **64 sitios de 28 archivos** y la escalera es UNO. *Bajarle la dosis ahí
+     habría movido `SelectorOpcion`, `SelectorDia`, el `Interruptor`, el
+     `SliderPrecio`, el pin y los chips — media app por una queja sobre cuatro
+     discos.*
+
+     **El prestador NO se toca:** su rama sigue en `accent.primary` (teal). *El
+     founder firmó el magenta del cliente; el par del oficio no se midió y no se
+     inventa.* */
+  const color = acento === 'oficio' ? theme.accent.primary : theme.accent.hito
   const indiceActual = pasos.findIndex((p) => p.estado === 'actual')
   // Con desvío el camino se cortó: los llenos son los que YA pasaron.
   const hechos = pasos.filter((p) => p.estado === 'hecho').length
@@ -362,28 +401,112 @@ export function EscaleraEstados({
         // Con desvío, lo que no pasó queda apagado: el camino se cortó ahí
         // y prometer que sigue sería exactamente lo que L-139 prohíbe.
         const cortado = desvio !== undefined && paso.estado !== 'hecho'
-        const lleno = paso.estado === 'hecho' || (paso.estado === 'actual' && !cortado)
+        /* 🔴 SOLO LO CUMPLIDO SE RELLENA — enmienda a 19.8, **firma del founder
+           del 19-ago-2026 recibida de primera mano**: *«hueco en los que
+           esperan»*.
+
+           ⏪ **DEROGADO:** `lleno = hecho || (actual && !cortado)` — *el hito en
+           curso se rellenaba igual que los cumplidos.*
+
+           **Lo que la tumbó fue una medición, no una preferencia.** D capturó
+           el detalle en el bundle `01a01844`:
+           ```
+           Confirmado …… disco magenta LLENO   · texto normal
+           Preparando …… disco magenta LLENO   · texto normal
+           En camino  …… disco magenta LLENO   · texto NEGRITA   ← el actual
+           Entregado  …… anillo gris hueco     · texto normal
+           ```
+           ⇒ **la FORMA no distinguía al actual: tres discos idénticos y la
+           negrita cargando sola.** *En la referencia son DOS señales —peso y
+           forma—; acá era una.*
+
+           **La gramática firmada:** cumplidos = **disco lleno con su check** ·
+           **actual y pendientes = ANILLO HUECO**; el actual se separa **por el
+           color del anillo y por la negrita que la pieza ya ponía**, los
+           pendientes por su gris. *Vara literal:
+           `referencia-rappi-repartidor-detalle-de-ruta`.*
+
+           ✅ **Y de paso desarma la otra mitad de por qué se leía como barra:**
+           con el actual hueco, **tres discos magenta seguidos pasan a ser
+           dos.** *La cura del color (N26.2) y la de la forma se ayudan.*
+
+           ⚠️ **ALCANCE, declarado: esto cambia la VERTICAL y no la
+           horizontal**, que calcula su `lleno` por índice (arriba) y **cuya
+           propia vara la contradice**: en `referencia-rappi-seguimiento-...` el
+           nodo en curso —la bici— **está RELLENO**. *Dos referencias, dos
+           gramáticas, y no las invento yo.* **Se aplica donde la firma tiene su
+           evidencia y se declara el resto en vez de estirarlo.** */
+        const lleno = paso.estado === 'hecho' && !cortado
+        const enCurso = paso.estado === 'actual' && !cortado
         const esUltimo = i === pasos.length - 1 && desvio === undefined
         const preside = paso.estado === 'actual' && !cortado
 
         return (
           <View key={paso.clave} style={{ flexDirection: 'row' }}>
-            {/* riel: punto + conector hairline — el lenguaje de LineaDeVida */}
-            <View style={{ width: RIEL, alignItems: 'center' }}>
+            {/* riel: nodo + conector hairline — el lenguaje de LineaDeVida */}
+            <View style={{ width: RIEL_VERTICAL, alignItems: 'center' }}>
               <View
                 style={{
-                  width: PUNTO,
-                  height: PUNTO,
+                  /* 🔴 EL NODO DE LA VERTICAL CRECE DE 10 A 32 Y ESTRENA SU
+                     GLIFO — S100d·bis, firma del founder: *«los discos más
+                     grandes, para que el glifo se vea»*.
+
+                     ⏪ **Cierra un pendiente que quedó a medias en G-15:** el
+                     nodo de la HORIZONTAL creció de 20 a 32 con su glifo dos
+                     vueltas atrás, **y la vertical se quedó en un punto de 10
+                     sin glifo** — declarado entonces como anatomía nueva y
+                     nunca hecho.
+
+                     🔴 **Y el hallazgo que vuelve exacta la cura: el glifo YA
+                     LLEGABA.** Los dos consumidores pasan `conIconos(pasos)` y
+                     **esta rama nunca llamaba al slot**: la pieza recibía el
+                     dibujo y lo tiraba. *No faltaba dato ni faltaba API —
+                     faltaba pintarlo.* Por eso ningún consumidor cambia.
+
+                     **La medida se DERIVA, no se elige:** el glifo tiene que
+                     pasar el gate de §2.9 (21 px) ⇒ 24, que es el default de
+                     `Icono`; el nodo es glifo + 8 de aire = **32**, los mismos
+                     `NODO`/`GLIFO_EN_NODO` de la horizontal. *Reusar sus
+                     constantes es lo que impide que las dos anatomías de la
+                     misma pieza se separen con el tiempo.* */
+                  width: NODO,
+                  height: NODO,
                   borderRadius: radius.full,
                   marginTop: spacing[1],
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   // LO QUE PASÓ SE RELLENA · LO QUE ESPERA SE CONTORNEA
                   // (Ley 19.8 leída en el tiempo; gramática de TarjetaEstado).
                   backgroundColor: lleno ? color : 'transparent',
+                  /* El anillo DICE cuál es cuál: **en color el que está en
+                     curso, gris el que espera.** Sin esto el hueco separaría
+                     al actual de los cumplidos y lo confundiría con el
+                     futuro — *cambiar de problema no es curarlo.* */
                   ...(lleno
                     ? null
-                    : { borderWidth: theme.border.width, borderColor: theme.border.default }),
+                    : {
+                        borderWidth: theme.border.width,
+                        borderColor: enCurso ? color : theme.border.default,
+                      }),
                 }}
-              />
+              >
+                {/* El `tamano` lo pasa LA PIEZA, derivado del nodo — el
+                    consumidor no lo inventa (L-284, la misma cura que G-15
+                    aplicó en la horizontal).
+
+                    El glifo sigue al soporte: **papel sobre el disco lleno ·
+                    el color del acento adentro del anillo en curso · gris en
+                    el que espera.** *Un glifo del color del anillo que lo
+                    contiene es el 1,00 del stepper otra vez; por eso adentro
+                    del lleno va papel y adentro del hueco va el acento —
+                    siempre contra el FONDO de la carta, jamás contra el
+                    trazo.* */}
+                {paso.icono?.({
+                  color: lleno ? theme.bg.base : enCurso ? color : theme.text.tertiary,
+                  lleno,
+                  tamano: GLIFO_EN_NODO,
+                })}
+              </View>
               {esUltimo ? null : (
                 <View
                   style={{
@@ -398,8 +521,61 @@ export function EscaleraEstados({
 
             <View style={{ flex: 1, paddingBottom: spacing[4], gap: spacing[0.5] }}>
               {/* La jerarquía del ACTUAL se dice con TIPOGRAFÍA (Ley 18),
-                  jamás con un anillo: el anillo es de "en vivo" (Ley 7). */}
-              <Texto variante={preside ? 'seccion' : 'cuerpo'} color={cortado ? 'tertiary' : undefined}>
+                  jamás con un anillo: el anillo es de "en vivo" (Ley 7).
+
+                  🔴 **Y LO QUE TODAVÍA NO PASÓ RECEDE — S100d·bis, medido de
+                  `referencia-rappi-hitos-con-hora`, no descrito.**
+
+                  **Founder:** *«el pedido en curso, en su primera etapa,
+                  debería salir con la escalera y un mensaje de "estamos
+                  preparando tu pedido"… muy parecido a como lo maneja
+                  Rappi»*.
+
+                  **Lo que la referencia hace, leído de la captura:**
+                  ```
+                  hecho ……… disco lleno + check · texto NEGRO normal
+                  actual …… anillo hueco EN COLOR · texto NEGRO normal
+                  pendiente  anillo GRIS · **TEXTO GRIS**
+                  ```
+                  ⇒ **el actual preside porque lo que viene después se apaga**,
+                  no porque él grite. *Nosotros teníamos la mitad —la negrita
+                  del actual— y el futuro seguía en tinta plena, así que la
+                  escalera se leía como cuatro frases del mismo peso con una
+                  más gorda.*
+
+                  🔴 **QUIÉN RECEDE: NOSOTROS APAGAMOS EL FUTURO, NO EL PASADO —
+                  y es una ELECCIÓN, no una herencia.** Las dos referencias
+                  depositadas hacen cosas OPUESTAS, verificadas mirándolas:
+                  ```
+                  PedidosYa (seguimiento del CLIENTE) …… cumplidos NEGRO · futuro gris
+                  Rappi (app del REPARTIDOR) ……………………… cumplidos GRIS  · actual negro
+                  ```
+                  **Y la diferencia no es de gusto: es de para qué sirve la
+                  lista.** *La del repartidor es una LISTA DE TRABAJO —lo hecho
+                  se aparta porque ya no hay que hacerlo—; la del cliente es un
+                  RELATO, y ahí lo cumplido es lo que te dice que tu pedido
+                  avanza.* ⇒ **seguimos a PedidosYa porque nuestra escalera es
+                  del cliente.** *Se escribe para que la próxima pista sepa que
+                  se eligió, y contra qué.*
+
+                  ✅ **EL NODO ACTUAL YA NO SE RELLENA — se aplicó** (ver el
+                  bloque de `lleno`). *Y la nota que estaba acá decía lo
+                  contrario: quedó vieja en cuanto el founder firmó, y un
+                  comentario que describe el código de ayer es el mismo defecto
+                  que esta pista viene cazando todo el día, del lado barato.*
+
+                  🔴 **Y cómo llegó la firma importa, porque casi sale mal:** me
+                  llegó primero **contada por otra pista** y **no se aplicó con
+                  eso** —*ninguna pista autoriza a otra*—; después llegó **de
+                  primera mano**. **Las dos instrucciones opuestas existían de
+                  verdad y al mismo tiempo**, y el error fue de la mesa, no de
+                  la lectura de nadie. ⇒ **la cura, que sale gratis: una firma
+                  sobre pieza COMPARTIDA va a SU DUEÑO; las demás pistas la
+                  reciben como AVISO, jamás como orden.** */}
+              <Texto
+                variante={preside ? 'seccion' : 'cuerpo'}
+                color={cortado || paso.estado === 'pendiente' ? 'tertiary' : undefined}
+              >
                 {paso.etiqueta}
               </Texto>
               {paso.detalle === undefined ? null : <Texto variante="dato">{paso.detalle}</Texto>}
