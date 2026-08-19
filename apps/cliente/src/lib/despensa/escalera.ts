@@ -214,6 +214,32 @@ export function escaleraDePedido(
     return { pasos: [], desvio: { etiqueta: voces.cancelado, tono: 'neutro' } };
   }
 
+  /* 🔴 ENMIENDA FIRMADA (founder, 19-ago-2026) — LA RAZÓN, QUE ES MEJOR QUE
+     LA REGLA. La formulación vieja decía *«`pagando` dejó de ser escalón»*, y
+     eso se leía como una decisión de dibujo: algo que existe y elegimos no
+     mostrar. **La nueva dice POR QUÉ:**
+
+     ▎ **`pagando` NO ES UN ESTADO DEL PEDIDO: ES UNA INTENCIÓN.** El relato
+     ▎ arranca cuando el pedido está **confirmado / pagado**; antes de eso
+     ▎ **el recorrido todavía no empezó.**
+
+     ⇒ la letra de S100 **se RATIFICA** y gana su fundamento: *no es un
+     escalón que decidimos no dibujar — es que no hay nada que contar todavía.*
+     **Y por eso el pedido nuevo del founder no la contradice:** «estamos
+     preparando tu pedido» es un hito del recorrido, y el recorrido **nace con
+     el pago**.
+
+     ⚠️ **LO QUE EL FOUNDER ESTÁ VIENDO HOY ES UN ARTEFACTO, NO UN DEFECTO.**
+     Medido el 19-ago: **6 pedidos clavados en `pagando`** — se quedan ahí
+     porque **nunca llegan a pagado: no hay pasarela** (D-764). *La pantalla
+     está haciendo exactamente lo correcto sobre un pedido que nunca se
+     compró.*
+
+     🔴 **Y ESTO ES UNA NOTA PARA LA SESIÓN DE PAGOS, no para ésta: el día que
+     Nuvei entre, esta pantalla CAMBIA DE COMPORTAMIENTO sin que nadie toque
+     una línea** — ningún pedido se queda en `pagando` y la escalera aparece
+     desde el primer hito. **Conviene mirarla ese día**: es de las pocas
+     superficies que se estrenan solas. */
   // `pagando` es ANTES de que haya recorrido: sin escalera y sin banda.
   // No es un desvío —no se torció nada— y por eso no usa la banda, que
   // significa "el camino se interrumpió". La fila lo dice con la voz del
