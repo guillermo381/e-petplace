@@ -398,8 +398,39 @@ export function EscaleraEstados({
 
             <View style={{ flex: 1, paddingBottom: spacing[4], gap: spacing[0.5] }}>
               {/* La jerarquía del ACTUAL se dice con TIPOGRAFÍA (Ley 18),
-                  jamás con un anillo: el anillo es de "en vivo" (Ley 7). */}
-              <Texto variante={preside ? 'seccion' : 'cuerpo'} color={cortado ? 'tertiary' : undefined}>
+                  jamás con un anillo: el anillo es de "en vivo" (Ley 7).
+
+                  🔴 **Y LO QUE TODAVÍA NO PASÓ RECEDE — S100d·bis, medido de
+                  `referencia-rappi-hitos-con-hora`, no descrito.**
+
+                  **Founder:** *«el pedido en curso, en su primera etapa,
+                  debería salir con la escalera y un mensaje de "estamos
+                  preparando tu pedido"… muy parecido a como lo maneja
+                  Rappi»*.
+
+                  **Lo que la referencia hace, leído de la captura:**
+                  ```
+                  hecho ……… disco lleno + check · texto NEGRO normal
+                  actual …… anillo hueco EN COLOR · texto NEGRO normal
+                  pendiente  anillo GRIS · **TEXTO GRIS**
+                  ```
+                  ⇒ **el actual preside porque lo que viene después se apaga**,
+                  no porque él grite. *Nosotros teníamos la mitad —la negrita
+                  del actual— y el futuro seguía en tinta plena, así que la
+                  escalera se leía como cuatro frases del mismo peso con una
+                  más gorda.*
+
+                  ⚠️ **Lo que NO copié, y va como pregunta al founder:** en la
+                  referencia el **actual es un anillo HUECO en color** y acá se
+                  RELLENA (`lleno` incluye `actual`). *Las dos lecturas son
+                  defendibles —la nuestra dice «esto ya está en marcha», la suya
+                  «esto todavía no terminó»— y cambiarla es tocar la gramática
+                  firmada de 19.8, no una dosis.* **Se declara en vez de
+                  cambiarse de callado.** */}
+              <Texto
+                variante={preside ? 'seccion' : 'cuerpo'}
+                color={cortado || paso.estado === 'pendiente' ? 'tertiary' : undefined}
+              >
                 {paso.etiqueta}
               </Texto>
               {paso.detalle === undefined ? null : <Texto variante="dato">{paso.detalle}</Texto>}
