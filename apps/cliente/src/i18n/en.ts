@@ -1350,7 +1350,8 @@ export const clienteEn = {
     resumenFechaPorEntrega: 'Each delivery travels on its own and has its own date.',
 
     /* A-01(b) (S100c) — see the Spanish side. */
-    maximoEntregable: 'We can get you {{n}} of this one right now — that’s what we added to your cart.',
+    // S100d·bis · dice qué PASÓ con el número, no solo cuánto hay.
+    maximoEntregable: 'We have {{n}} of this one for now — that’s the amount we left in your cart.',
 
     itemSeAgoto: 'It sold out while it was in your cart.',
     itemYaNoEsta: "It's no longer for sale.",

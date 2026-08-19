@@ -480,6 +480,19 @@ export default function DespensaCarrito() {
                        ⚠️ Bajar no consulta: soltar unidades siempre se puede, y
                        preguntarle al motor por permiso para llevar MENOS es un
                        viaje que no decide nada. */
+                    /* 🔴 S100d·bis · EL NÚMERO SE PUEDE TIPEAR.
+                       Medido antes de encenderlo: `editable` no estaba
+                       encendido en NINGUNA superficie ⇒ la pieza de B era
+                       *motor sin puerta*. Acá está la puerta del carrito.
+
+                       ⚠️ Y el aviso NO hizo falta cablearlo aparte: el campo
+                       emite por el MISMO `onCambio` (`StepperCantidad:436`),
+                       así que tipear 50 con 12 en stock entra por
+                       `ajustarCantidadConTope` igual que tocar el «+» — el
+                       motor acota y la voz sale. *Un segundo camino para el
+                       mismo hecho habría sido un segundo lugar donde olvidar
+                       la voz.* */
+                    editable
                     onCambio={(n) => void ajustarCantidadConTope(item, n)}
                     onBorrar={() => quitarDelCarrito(item.oferta_id)}
                     etiqueta={t('despensa.cantidadDe', { nombre: item.nombre })}

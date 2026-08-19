@@ -1600,7 +1600,16 @@ export const clienteEs = {
        motor devuelve LEAST(pedido, disponible), así que sobre 500 unidades
        pidiendo 3 contesta 3 y no se filtra inventario ajeno.
        Y no culpa a nadie ni se disculpa: es un hecho del mundo, en una línea. */
-    maximoEntregable: 'De este producto podemos entregarte {{n}} ahora — eso agregamos a tu carrito.',
+    /* 🔴 S100d·bis · LA VOZ DEL NÚMERO QUE SE AJUSTA SOLO.
+       Founder: *«disculpá, por ahora solo tenemos 12 disponibles»*, con el
+       pedido de ajustarla a la voz de la casa.
+       Lo que se conserva de su literal: **el pedido de disculpas** y **el
+       "por ahora"** — la escasez es de hoy, no del producto.
+       Lo que se ajusta: la casa no dice «disculpá» por algo que no hizo mal
+       (Ley 13 en tono), y **la frase tiene que decir qué PASÓ con el número**,
+       no solo cuánto hay: *un número que cambia bajo el dedo sin voz es peor
+       que el defecto original.* */
+    maximoEntregable: 'Por ahora tenemos {{n}} de este producto — dejamos esa cantidad en tu carrito.',
 
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',
