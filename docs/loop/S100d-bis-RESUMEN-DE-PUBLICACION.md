@@ -543,3 +543,101 @@ escribirlo: es la única evidencia de que una lección cambió una conducta.*
 | **`consentimientos`**: la cura estructural | mesa | su firma era condicional y **la condición falló** |
 | **25 variantes con más de una oferta publicada** | mesa | **cero del mismo vendedor, 25 de vendedores distintos, hasta 48 % de brecha, ningún UNIQUE** ⇒ es el caso **multi-vendedor** contra la firma «una oferta por producto» |
 | **el detalle del pedido: ~100 dp de crecimiento** | producto | no es defecto — **es el freno para la tercera cosa que quiera entrar** |
+
+
+---
+
+## ⑮ 🔴 EL BUNDLE DE CIERRE DE S100d·bis
+
+    CLIENTE     group a69e45f3-4276-4aeb-aa27-fa59f8881569   pie: 01a0189f   rt 1.0.3
+    PRESTADOR   group 78ef6a65-29da-4c14-91d9-0fd9cd6d6d65   pie: 01a018a0   rt 1.0.5
+    ANCLA (las dos)  1da94f3d  =  origin/main  ·  árbol 0, SIN asterisco
+
+Las cuatro contenidas · 4 typechecks exit 0 · `verify:diseno` VERDE 48 ·
+overlays del shell en verde · tope 10/10.
+
+**Sujetos vivos, re-medidos después de publicar:**
+
+    envío  474e6ff6   hacia_destino · 6 puntos · destino OK · código 1402
+    pedido 21fb1284   entregado · 2 ítems · 1 depósito al expediente
+
+**Lo que trae:** el hueco entre nodo y texto (**`RIEL_VERTICAL` derivado del
+nodo, no tecleado**) · la letra de los hitos en **`enfasis`** en vez de
+`seccion` · el magenta **`#AE3785`** en slot propio · el nodo en **32** con su
+glifo · el **anillo hueco**.
+
+**Números a exigir (los dejó B):** hueco ≈ **+12 dp** · los tres estados con sus
+tres tratamientos · la fila con conector **sin cambio en 52**.
+
+---
+
+## ⑯ LAS TRES DEL CIERRE, AL CANON
+
+### ① UN ELEMENTO QUE CRECE PAGA EN LOS DOS EJES, Y SE PRESUPUESTÓ UNO
+
+B derivó el costo **vertical** del nodo (**+12,0**) y lo midió (**+11,9**): dos
+cuentas, un número, la segunda sobre otro objeto. **Impecable.**
+
+**El costo HORIZONTAL no estaba ni en la derivada ni en la medición, porque las
+dos miraban el alto** — y el nodo, al crecer de 10 a 32, **alcanzó el texto**:
+`x[22,0 · 54,0]` contra un texto que arranca en `51,9` ⇒ **−2,1 dp: se pisaban.**
+
+> **El número correcto de la pregunta equivocada se siente igual de sólido que
+> el de la correcta.** *No falló la medición: faltó la segunda pregunta.*
+
+**Lo encontró el ojo del founder** (*«la letra está pegada a los pasos»*), **no
+un instrumento.** Y la cura es la buena: `RIEL_VERTICAL = NODO` **derivado**, que
+vuelve el defecto **inexpresable** en vez de elegir un número nuevo.
+
+⚠️ **Y lo confirmaron DOS instrumentos que no se hablan:** D midió **0,2 dp de
+hueco de layout**; B, por otro camino, **−2,1 dp de extensión pintada.** *Dos
+caminos distintos, la misma conclusión — más fuerte que dos corridas del mismo.*
+
+**Y su gemelo, el mismo día, en la otra cabeza:** D derivó el hueco viejo en
+**4,2 dp** tomando un `24` que era **interlineado y no nodo**; el real es **7,0**.
+**Lo había declarado condicional** —*«si ese 24 era el interlineado, la cuenta se
+cae»*— y **la corrección costó una línea.** ⇒ *un número puede fallar por la
+PREGUNTA o por su INSUMO, y desde adentro los dos se ven idénticos: lo único que
+los separó fue haber declarado contra qué se midió.*
+
+### ② UN RÓTULO USADO POR SU APARIENCIA ARRASTRA SU SEMÁNTICA
+
+`seccion` trae **`accessibilityRole="header"` de fábrica**, y la escalera la usaba
+para el hito en curso ⇒ **el lector venía anunciando «el paso en el que estás»
+como un ENCABEZADO, uno por pedido.**
+
+> **Cuando el trabajo que hace falta no está en el diccionario, se agrega la
+> palabra — no se toma prestada la que se le parece.**
+
+Por eso nace `enfasis` (14 bold, **sin header**) en vez de reusar. **Aditiva:**
+verificado, **un solo consumidor** (`EscaleraEstados:629`).
+
+### ③ UN GREP QUE NO ENCUENTRA NO ES LO MISMO QUE ALGO QUE NO ESTÁ
+
+Busqué `variante="enfasis"` y **di 0** — a un paso de reportar que B había
+declarado un consumidor inexistente. **Se pasa por variable**
+(`variante={preside ? 'enfasis' : 'apoyo'}`), así que el patrón **no podía**
+encontrarlo.
+
+**Sexta vez del mismo animal en la jornada, ahora en su forma más barata.**
+
+---
+
+## ⑰ ⚠️ LO QUE **NO** SE PUDO MEDIR, DICHO COMO EL FOUNDER LO PIDIÓ
+
+**`confirmado` como estado ACTUAL nunca se vio.** En la pantalla verificada,
+«Recibimos tu pedido» aparece como **paso ya cumplido** de un pedido `en_camino`:
+**la voz existe y es la correcta, pero nadie vio ese hito presidiendo, en negrita
+y con su anillo.** **Cero pedidos en ese estado** — D-764: sin pasarela nada llega
+ahí.
+
+*Es literalmente lo que el founder pidió: «si no hay ningún pedido pagado con el
+que verificarlo, decilo — no midas otro estado para reportarlo como éste».*
+
+### ⚠️ Y EL OPERATIVO QUE LAS DOS PISTAS CONFIRMARON POR SEPARADO
+
+**El primer lanzamiento después de un publish sigue sirviendo el bundle VIEJO**
+(B midió `01a01844` en el primero y `01a0188b` en el segundo; D lo reprodujo).
+⇒ **con roaming hacen falta DOS aperturas, y el pie se lee con la mano ANTES de
+medir nada.** *Si se mide en el primero, todo lo nuevo sale «no está» y se
+reportan rojos falsos sobre trabajo que sí está.*
