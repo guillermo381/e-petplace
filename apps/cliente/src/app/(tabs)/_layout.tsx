@@ -53,10 +53,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BarraTabs, Icono, type BarraTabsItem } from '@epetplace/ui';
+import { ALTO_FILA_TABS, BarraTabs, CarritoFlotante, Icono, type BarraTabsItem } from '@epetplace/ui';
+import { useCarrito } from '@/lib/despensa/carrito';
 import { listarMisPedidos } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -93,6 +94,32 @@ import { useTraduccion } from '@/i18n';
  * la barra gana su casa de postventa. Eso no se esconde.
  */
 const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
+
+
+/** El flotante del carrito, montado UNA vez sobre las cinco tabs.
+ *
+ *  **Existe por el CARRITO** (`cuenta > 0` — con cero, la pieza no se dibuja
+ *  sola) y **se calla por SUPERFICIE**: en `carrito` y `checkout` el carrito no
+ *  es un destino, es la pantalla en la que ya estás.
+ *
+ *  **El aire sobre la barra se MIDE**: su alto cambia con el inset del aparato
+ *  y con el largo de las etiquetas. */
+function FlotanteDelCarrito({ ruta }: { ruta: string }) {
+  const { t } = useTraduccion();
+  const router = useRouter();
+  const items = useCarrito();
+  const unidades = items.reduce((n, i) => n + i.cantidad, 0);
+  if (unidades <= 0) return null;
+  if (ruta === 'carrito' || ruta === 'checkout') return null;
+  return (
+    <CarritoFlotante
+      cuenta={unidades}
+      aireInferior={ALTO_FILA_TABS}
+      onAbrir={() => router.push('/despensa/carrito')}
+      etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
+    />
+  );
+}
 
 export default function TabsLayout() {
   const { t } = useTraduccion();
@@ -219,10 +246,35 @@ export default function TabsLayout() {
       // porque los pasos previos ya no existían.
       screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => (
-        <BarraTabs
+        <>
+          {/* 🔴 EL CARRITO FLOTANTE VIVE EN EL SHELL — S100d·bis, firma del
+              founder: *«si salgo de Despensa, se pierde el carro; mientras
+              tenga productos debe estar visible en TODA la app, y desaparece
+              cuando no tiene productos»*.
+
+              ⏪ **Vivía por PANTALLA** (vitrina y ficha), así que salir de la
+              Despensa lo perdía. **Su condición de existencia es el CARRITO,
+              no la ruta** — y por eso se monta acá, una vez, sobre las cinco
+              tabs.
+
+              **Dónde se CALLA, con su razón:** `carrito` y `checkout`. *Ahí el
+              carrito no es un destino: es la pantalla en la que ya estás, y
+              una puerta al cuarto donde estás parado es ruido con forma de
+              atajo.* **La lista es por SUPERFICIE; la existencia, por dato.**
+
+              **El aire lo MIDE la barra**, no lo teclea nadie: su alto cambia
+              con el inset del aparato y con el idioma de las etiquetas. *Un
+              número acá miente en el primer teléfono distinto.*
+
+              ⚠️ **CRUCE DE TERRITORIO DECLARADO:** este archivo es del shell
+              del cliente y la pieza es de `packages/ui`. Se toca acá porque el
+              montaje ES la firma —el flotante deja de ser de una pantalla— y
+              se declara en vez de hacerse callado. */}
+          <FlotanteDelCarrito ruta={state.routes[state.index].name} />
+          <BarraTabs
           items={items}
           activo={state.routes[state.index].name}
-          onCambiar={(key) => {
+            onCambiar={(key) => {
             const activa = state.routes[state.index];
             // D-402: el PRESS del tab lleva SIEMPRE a la raíz de ese
             // mundo — sea re-toque del activo o entrada a otro tab
@@ -236,11 +288,12 @@ export default function TabsLayout() {
             if (key !== activa.name) {
               navigation.navigate(key);
             }
-          }}
-          // S53 (§2.6): el set b′ marca la tab activa con la HUELLA —
-          // el pill muere; la huella hereda el rol de accent.active.
-          estadoPorHuella
-        />
+            }}
+            // S53 (§2.6): el set b′ marca la tab activa con la HUELLA —
+            // el pill muere; la huella hereda el rol de accent.active.
+            estadoPorHuella
+          />
+        </>
       )}
     >
       {/* ⚠️ EL MISMO ORDEN QUE `items`, Y NO POR PROLIJIDAD: son **dos listas
