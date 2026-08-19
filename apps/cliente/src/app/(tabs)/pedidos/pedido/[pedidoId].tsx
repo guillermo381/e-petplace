@@ -436,7 +436,7 @@ export default function DespensaPedido() {
                           desde: horaLocal(detalle.pedido.promesa_desde),
                           hasta: horaLocal(detalle.pedido.promesa_hasta),
                         }),
-                        ventanaVencida(detalle.pedido.promesa_hasta)
+                        ventanaVencida(detalle.pedido.promesa_hasta, detalle.pedido.narrativa)
                           ? t('despensa.ventanaTardando')
                           : null,
                       ]
@@ -487,28 +487,70 @@ export default function DespensaPedido() {
                 murió como acción de fila). Y solo con `en_camino`: antes no
                 hay a quién seguir, y un mapa quieto en el local durante media
                 hora se lee como que algo se colgó. */}
+            {/* 🔴 S100d · «SEGUIR EL PEDIDO» GANA CARTA Y GANA OCRE — firma
+                del founder: *«hay que ponerle un fondo blanco… es uno de los
+                más importantes… ponerle la letra en el OCRE»*.
+
+                **LA CARTA (N21):** era una celda **sin superficie propia**, y
+                eso dejó de ser gratis cuando el fondo pasó a `#F6F6F6`: *una
+                acción sobre fondo neutro y sin superficie no es discreta —
+                desaparece.*
+
+                🔴 **EL OCRE VA COMO RELLENO Y NO COMO LETRA, Y LO DECIDE UN
+                NÚMERO, no el gusto:**
+                  ocre sobre carta blanca …… **1,70**  (piso de texto **4,5**)
+                  letra TINTA sobre ocre ……… **8,40**  ← el par firmado
+                **La letra en ocre está a menos de la mitad del piso más
+                permisivo de la casa** ⇒ pedirla sería pedir que no se lea.
+                ⏪ **Y el fondo NO lo causó, lo empeora** (censo de B): ya
+                fallaba a **1,62** sobre el papel anterior y a **1,70** sobre
+                blanco. *Atribuirle a un cambio reciente un defecto que ya
+                estaba es la forma más barata de arreglar lo que no era.*
+                *El founder pidió que se DESTAQUE y nombró el ocre; el ocre
+                cumple las dos cosas del otro lado del par — de relleno, con
+                la letra en tinta.* Y así destaca **más** que una letra de
+                color: es el único sólido de esta pantalla.
+
+                **Y es legal por 19.7, no a pesar de ella:** *«por superficie
+                UN sólido, la primaria»* — «Tengo un problema» es
+                `secundario`, así que el lugar del sólido estaba libre, y
+                mientras la moto va **ésta es la acción primaria del pedido**.
+                *La ley prohíbe el segundo sólido, no el primero.* */}
             {detalle.pedido.narrativa === 'en_camino' ? (
-              <CeldaNavegacion
-                /* 🔴 S100d · PUNTO 23 — *«falta en la ESCALERA y en SEGUIR EL
-                   PEDIDO el glifo de ubicación»*. Ésta es literalmente la
-                   celda «Seguir el pedido», y estaba **sin glifo**: la única
-                   celda de esta pantalla que entraba muda mientras todas las
-                   de Cuenta llevan el suyo. La gota es el glifo correcto por
-                   la dosis que B fijó con F-PIN — **gota donde una ubicación
-                   se muestra como DATO; objeto del mundo adentro del mapa**
-                   (`DIRECCION_ARTE` §6ter). *Y acá el glifo hace trabajo, no
-                   decoración: la diferencia entre «ver el pedido» y «ver
-                   dónde está» es justo lo que esta celda ofrece.* */
-                icono="ubicacion"
-                titulo={t('despensa.enCaminoEntrada')}
-                detalle={t('despensa.enCaminoEntradaDetalle')}
-                onPress={() =>
-                  router.push({
-                    pathname: '/pedidos/en-camino/[pedidoId]',
-                    params: { pedidoId: detalle.pedido.pedido_id },
-                  })
-                }
-              />
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <Tarjeta relleno="amplio">
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                      <Icono nombre="ubicacion" tamano={18} />
+                      <Texto variante="seccion">{t('despensa.enCaminoEntrada')}</Texto>
+                    </View>
+                    <Texto variante="apoyo">{t('despensa.enCaminoEntradaDetalle')}</Texto>
+                    {/* 🔴 `primario` Y NO `acento` — ME EQUIVOQUÉ Y SE CUENTA.
+                        Monté `acento` creyendo que era el CTA oro RELLENO, y
+                        su receta es la contraria:
+                          `acento:   { fondo: 'transparent', texto: accent.cta }`  ← letra OCRE
+                          `primario: { fondo: accent.cta, texto: accent.ctaTexto }` ← relleno OCRE
+                        ⇒ **había montado exactamente el par que acababa de
+                        medir como imposible** (1,70 sobre carta blanca), con
+                        el comentario correcto escrito encima.
+                        *Medí el par, escribí la razón, y después elegí la
+                        variante por su NOMBRE en vez de por su receta —
+                        «acento» sonaba a «el del acento».* Lo cazó el censo
+                        de ocre de B, no yo.
+                        El par que rige: **ctaTexto sobre ocre = 9,96**. */}
+                    <Boton
+                      variante="primario"
+                      etiqueta={t('despensa.enCaminoCta')}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/pedidos/en-camino/[pedidoId]',
+                          params: { pedidoId: detalle.pedido.pedido_id },
+                        })
+                      }
+                    />
+                  </View>
+                </Tarjeta>
+              </View>
             ) : null}
 
             {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o

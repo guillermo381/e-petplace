@@ -1211,9 +1211,10 @@ export const clienteEs = {
     // concreto, no prometen una pantalla nueva.
     cambiarDireccion: 'Cambiar la dirección',
     ajustarPunto: 'Ajustar el punto en el mapa',
-    // Cierra el mapa. No dice «Guardar» a propósito: guardar es el botón de
-    // abajo, y dos botones que parecen decir lo mismo hacen dudar de los dos.
-    listoConPunto: 'Listo con el punto',
+    confirmarPunto: 'Confirmar punto',
+    mapaBloqueado: 'El mapa está fijo. Tocá «Ajustar punto» para moverlo.',
+    guardarComoOtra: 'Guardar como otra dirección',
+    guardarComoOtraAyuda: 'Un nombre para reconocerla después — «Oficina», «Casa de mamá».',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
@@ -1817,6 +1818,7 @@ export const clienteEs = {
     // prometer un minuto que no podemos cumplir es peor que no prometer.
     enCaminoEntrada: 'Seguir el pedido',
     enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoCta: 'Ver por dónde va',
     enCaminoTitulo: 'En camino',
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
     enCaminoVentana: 'Llega entre',
