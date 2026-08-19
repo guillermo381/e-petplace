@@ -1,0 +1,227 @@
+# LETRA_MOTOR_PAGOS_S101.md — e-PetPlace
+
+> **Nota de depósito (S101-A, 19-ago-2026):** esta letra vivía solo en la conversación de apertura. Se deposita **VERBATIM** — la sesión no editó una coma. Las enmiendas que el censo B0 produjo **no se aplicaron acá**: viven en `docs/relevamientos/2026-08-19-s101-censo-pagos.md` §9, y esta letra se enmienda cuando el founder las firme. *Una letra corregida en silencio deja de ser el documento que se firmó.*
+
+---
+
+> **Versión:** v1.0 · **Abierta:** 19-ago-2026 · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
+>
+> **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
+> **Qué NO autoriza:** tocar el ledger, el devengo, la comisión o la liquidación. Ver §9.
+>
+> **⚠️ NINGÚN NOMBRE DE TABLA, COLUMNA O FUNCIÓN DE ESTE DOCUMENTO ESTÁ MEDIDO.**
+> Todo lo de §3 y §4 es **candidato** hasta que el censo B0 lo confirme contra la base.
+> Si la fuente contradice a esta letra, **gana la fuente** — y esta letra se enmienda.
+
+---
+
+## §0 · LOS DOS FRENOS PROPIOS DE ESTA SESIÓN
+
+Además de los cinco de la casa:
+
+1. **Todo corre contra SANDBOX.** Cualquier cosa que toque plata real —aunque sea una transacción de prueba de un dólar— **pide firma explícita del founder**.
+2. **El endpoint del webhook es público por necesidad.** Desde su primera línea, **no mueve un solo estado sin validar el `stoken`**. Un endpoint público que cambia estados sin validar es una puerta para marcar pedidos como pagados desde afuera.
+
+---
+
+## §1 · B0 — EL CENSO, ANTES DE UNA LÍNEA
+
+**Precondición dura. Ninguna migración antes de esto.** Se mide contra la base y el código, no contra este documento ni contra la memoria de nadie. Salida: un relevamiento en `docs/relevamientos/`.
+
+Qué hay que medir, y el resultado se escribe aunque sea "no existe":
+
+1. **`pagando`** — dónde vive (¿enum? ¿columna? ¿metadata?), quién lo escribe, quién lo lee, y **los cuatro pedidos clavados ahí**: sus ids, sus montos, su antigüedad.
+2. **La compra y su desglose** — nombre real de las tablas, columnas del desglose, si el congelamiento al cobrar ya está implementado o solo escrito.
+3. **La relación compra ↔ pedido** — ¿una compra puede tener N pedidos? La respuesta decide la forma entera de la reconciliación.
+4. **El pago simulado** — dónde se registra hoy (`metadata.pago_simulado`, `pagado_en`), y **qué función lo escribe**.
+5. **`confirmar_pago_pedido`** — verificar que sigue revocada de `authenticated` (D-764). Si no lo está, es hallazgo rojo y se reporta antes de seguir.
+6. **Tablas que ya nacieron para esto** — cualquier `payments`, `pagos`, `transacciones`, `webhook_events` preexistente. **El peor resultado posible es crear una tabla al lado de una que ya existe.**
+7. **Los estados del pedido** — la escalera de cuatro y qué los dispara.
+8. **`fee_configs` y `seller_comisiones`** — solo LEER y reportar los números vivos (D-748: el 20 %). **No se toca nada:** es territorio de S102.
+
+---
+
+## §2 · EL PRIMER ENTREGABLE ES UNA URL
+
+**Orden de prioridad, por encima de todo lo demás.** El founder ya pidió a Nuvei el registro de la callback de staging; ese registro **exige una URL concreta que responda**. Mientras no exista, el pedido queda esperando y la ida y vuelta se paga dos veces.
+
+**Entregable:** la Edge Function desplegada en staging, pública, que:
+
+- Responde **HTTP 200 inmediato** a todo POST bien formado.
+- **Persiste el payload crudo** en `webhook_events` con el resultado de la validación del `stoken`.
+- **No mueve ningún estado todavía.** En esta primera versión es un buzón con traza, no un actuador.
+
+Con eso la URL existe, es real y se le puede pasar a Erick en el momento en que la pida.
+
+**Dos funciones, no una con bandera:** staging y producción son despliegues separados con secretos separados. *(Si Nuvei solo admite una URL por cuenta, es la pregunta 5 del bloque a Erick — hasta saberlo, se construye como dos.)*
+
+---
+
+## §3 · LAS DOS TABLAS
+
+**Eje `proveedor` desde la primera migración.** No es previsión: DeUna está en conversación y **no está en el catálogo de APMs de Nuvei** — es una integración directa con su propio contrato y su propia certificación. Agregar un segundo proveedor después de la primera plata real es una migración con backfill sobre filas de dinero. *El esqueleto nace completo; lo que se enciende son opciones.*
+
+### `pagos` (candidata)
+
+| Campo | Nota |
+|---|---|
+| `id` | |
+| `compra_id` | **La compra es el padre. `dev_reference` = compra**, jamás pedido (firma S100) |
+| `proveedor` | `nuvei` · `deuna` · … — enum, no texto libre |
+| `proveedor_transaction_id` | el DF de Nuvei. **Único por proveedor** — es la llave de la idempotencia |
+| `estado` | estado **nuestro**, narrativo. Ver §4 |
+| `proveedor_status` / `proveedor_status_detail` | crudo, **jamás interpretado en la columna** |
+| `authorization_code` | requisito del correo de certificación |
+| `monto` · `moneda` | el monto **congelado al cobrar** |
+| `desglose_congelado` | jsonb. Existe porque el reembolso parcial probablemente no existe: si el desglose se moviera después del cobro, no habría con qué reconciliar |
+| `marca` · `bin` · `ultimos4` | para el correo y para soporte |
+| `intentos` | un pago puede tener N intentos; la compra no |
+| `creado_en` · `confirmado_en` · `confirmado_por` | `confirmado_por` distingue **webhook** de **consulta activa**. Sin eso no se puede auditar cuál de los cuatro casos ocurrió |
+
+### `webhook_events` (candidata)
+
+| Campo | Nota |
+|---|---|
+| `id` · `recibido_en` | |
+| `proveedor` | |
+| `payload` | **crudo, tal cual llegó.** Nunca normalizado |
+| `stoken_valido` | booleano del resultado de la verificación |
+| `transaction_id` | extraído, para dedupe |
+| `resultado` | `aplicado` · `duplicado` · `stoken_invalido` · `monto_no_coincide` · `desconocido` |
+| `pago_id` | nullable — un evento puede llegar sin pago que lo reciba |
+
+**Todo evento se persiste, incluso el que se rechaza.** Un webhook con `stoken` inválido es la traza de un intento de fraude: descartarlo sin guardarlo es perder la única evidencia.
+
+---
+
+## §4 · LA MÁQUINA DE ESTADOS, COMO DATO
+
+**Precedente de la casa:** 46 transiciones como dato en el motor de la despensa (S95). Mismo patrón.
+
+**Regla madre: el handler tolera códigos desconocidos sin romper.** La doc de Nuvei tiene al menos un código sin significado definido (`status_detail 30`, "Transaction seated", solo Ecuador). Un código no mapeado **no es un error: es un evento que se registra y no mueve nada**, y dispara aviso a soporte.
+
+Mapa de partida (del plan, sección ④ — a verificar contra la doc viva):
+
+| `status_detail` | Significado | Nuestro estado |
+|---|---|---|
+| `3` | aprobada | **pagado** |
+| `1` · `31` | requiere verificación / OTP | esperando_otp |
+| `32` / `33` | OTP validado / no validado | pagado / rechazado |
+| `35` `36` `37` `48` | ciclo 3DS | en_desafio |
+| `9` `6` `11` `12` | rechazos y fraude | rechazado (con motivo distinto cada uno) |
+| `27` `28` | refund pendiente / solicitado | devolucion_en_curso |
+| `7` / `34` | refund total / parcial | devuelto |
+| `4` | disputa | en_disputa |
+| `8` | contracargo | contracargo |
+| `29` | anulada | anulado |
+| `30` | *(sin definición publicada)* | **desconocido — registra, no mueve** |
+| *(status 2)* | cancelación de una aprobada | anulado |
+
+**Toda transición es idempotente.** Aplicar dos veces el mismo evento deja el mismo resultado.
+
+---
+
+## §5 · EL WEBHOOK, EN ORDEN
+
+1. **Persistir el crudo** antes de razonar sobre él.
+2. **Verificar el `stoken`** = MD5 de `transaction_id` + `_` + `application_code` + `_` + `user_id` + `_` + `app_key`. Si no coincide: registrar y **cortar**. No mueve nada.
+3. **Deduplicar por `proveedor_transaction_id`.** La doc avisa que el mismo evento puede llegar repetido.
+4. **Validar que el monto coincida con el de la compra.** Recomendación explícita de la doc. Si no coincide: registrar como `monto_no_coincide`, **no mover nada**, avisar. Un cobro por un monto que no es el nuestro es el defecto más caro posible.
+5. **Aplicar la transición**, idempotente.
+6. **Responder 200 rápido.** Si tarda, reintentan con backoff hasta 48 h. Lo pesado va asíncrono.
+
+---
+
+## §6 · LOS CUATRO CASOS
+
+El acta los pide escritos **y probados**. Van con arnés sobre fixtures — no necesitan pasarela.
+
+**① Llega el webhook, el teléfono no volvió.**
+El webhook manda. El pedido avanza solo. Cuando la app vuelva, **lee un estado ya movido y no lo re-decide**. Es el caso normal, no el excepcional.
+
+**② Vuelve el teléfono, el webhook no llegó.**
+La respuesta síncrona del débito trae status — **es señal optimista, jamás confirmación**. El pedido queda en espera declarada, **con voz propia**: *"estamos confirmando tu pago"*, nunca *"pago rechazado"* ni un spinner mudo. Reconciliación por consulta activa a `GET /v2/transaction/<id>`, con reintentos espaciados.
+
+**③ Llegan los dos.**
+El segundo no hace nada, por idempotencia. **Los dos dejan traza** en `webhook_events`. Si el que llega segundo dice algo distinto del primero, es hallazgo: se registra y se avisa, no se sobrescribe en silencio.
+
+**④ No llega ninguno.**
+El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos sin confirmar con antigüedad mayor a un umbral. Sin ese barrido, un pago cobrado por Nuvei y nunca confirmado queda invisible **con la plata ya debitada al cliente**.
+
+**Dos casos hermanos que también se prueban:** el **webhook tardío** (puede llegar hasta 48 h después, cuando el pedido ya se resolvió por consulta activa — la idempotencia lo absorbe) y el **webhook duplicado**.
+
+---
+
+## §7 · EL FALLO CON VOZ
+
+**La casa ya pagó por confundir clases de error.** Cada uno tiene voz propia y salida propia:
+
+| Causa | Qué se le dice | Salida |
+|---|---|---|
+| Rechazo del banco | El banco no autorizó | Probar otra tarjeta |
+| OTP incorrecto | El código no coincide | Reintentar el código, con su límite |
+| Fondos insuficientes | **Nunca se nombra.** El emisor no autoriza el importe | Otra tarjeta |
+| Timeout / sin respuesta | **No es rechazo.** Estamos confirmando | Esperar, con destino claro |
+| Tarjeta vencida o datos inválidos | Revisar los datos | Corregir |
+| Desconocido | No pudimos completar el cobro, ya lo estamos viendo | Soporte |
+
+**Un timeout dibujado como rechazo hace que el cliente vuelva a pagar algo que ya pagó.** Es la clase de error que cuesta doble.
+
+---
+
+## §8 · EL PEDIDO QUE CAMBIA SIN QUE NADIE LO TOQUE
+
+Hay **cuatro pedidos clavados en `pagando`** porque no había pasarela. El día que el motor entre, **esa pantalla cambia de comportamiento sin que nadie edite una línea**.
+
+**Un cambio que nadie hizo es el que nadie va a ir a verificar. Se mira a propósito**, con el ojo del founder, y va al gate.
+
+Y `pagando` **es una intención, no un estado** (firma del founder, S100): la letra y el código deben decir lo mismo.
+
+---
+
+## §9 · LO QUE NO ENTRA, Y LA RAZÓN
+
+**El ledger. El devengo. La comisión. La liquidación.**
+
+No es orden de alcance: es una razón medida. `MODELO_FINANCIERO` §3.2 **congela el fee en el evento y prohíbe recalcular eventos viejos**. Hoy conviven **tres números** para la misma comisión — 10 % firmado, 14 % en la letra y en los seeds, 20 % vivo en `seller_comisiones`. **Si el webhook se cablea al ledger antes de que exista un solo número, cada cobro congela una comisión equivocada de forma irreversible por diseño.**
+
+⇒ **El motor termina cuando el pedido queda pagado.** Lo que pasa después con esa plata es S102.
+
+Tampoco entran: el reembolso y la postventa · el catálogo · las cinco deudas vivas de S100d · la recurrencia (depende de MIT, sin respuesta de Nuvei).
+
+---
+
+## §10 · PROTOCOLO
+
+- **Una sola pista.** Los pagos no se reparten hasta que el flujo cierre en sandbox. *Cuatro pistas tocando un circuito de dinero es cómo se cobra dos veces.*
+- Bitácora `docs/loop/S101-A.md` · commit por pathspec · los cinco frenos.
+- **Migrar y publicar piden firma del founder.**
+- **Cualquier cosa que toque plata real pide firma explícita, aunque sea de prueba.**
+- Los secretos (`app_code`, `app_key` de servidor) viven **solo en secrets de Edge Functions**. Jamás en la app, jamás en el repo. *(Precedente: las credenciales de prueba de Nuvei están commiteadas en su repo público del SDK. Que nunca pase lo mismo con las nuestras.)*
+- El **Auth-Token** se genera **en el momento de cada request**: `Base64(APP_CODE;UNIX_TIMESTAMP;SHA256(app_key+timestamp))`, con ventana de **15 segundos**. Relojes desincronizados hacen fallar cobros que no tienen nada malo.
+
+---
+
+## §11 · EL ORDEN DE EJECUCIÓN
+
+1. **B0 — el censo.** Sin esto no se migra.
+2. **El endpoint del webhook desplegado** ⇒ **sale la URL para Erick.**
+3. Migración de `pagos` y `webhook_events`, con reversa escrita **antes**.
+4. La máquina de estados como dato.
+5. El webhook completo — validación, dedupe, transición idempotente.
+6. Los cuatro casos con su arnés sobre fixtures.
+7. `pagando` → pagado y la escalera que se dibuja sola. **Mirado con el ojo, no solo por instrumento.**
+8. La taxonomía de fallo con voz.
+9. El correo de confirmación con **DF + código de autorización** — requisito de certificación, no cortesía.
+10. *(Cuando lleguen credenciales y callback registrada)* el cobro contra sandbox de punta a punta.
+
+**Del 1 al 9 no depende de ninguna respuesta de Nuvei.** Solo el 10.
+
+---
+
+## §12 · LO QUE ESTA SESIÓN DECLARA QUE NO PUDO
+
+Se escribe al cerrar, con nombre y razón. **Se publica lo incompleto, jamás lo falso.**
+
+Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y callback registrada.** Si al cierre siguen faltando, la sesión entrega del 1 al 9 y **lo dice**, en vez de declarar verde un circuito que nunca cerró.
