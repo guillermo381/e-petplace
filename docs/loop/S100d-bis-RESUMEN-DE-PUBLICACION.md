@@ -434,3 +434,65 @@ pregunta estaba mal.***
 carrito **se midieron contra el fondo viejo**. C verificó **con el ojo** que sobre
 `#F6F6F6` los tres se leen y que la carta se separa — **pero «se lee» no es un
 número de contraste, y no se presenta como si lo fuera.**
+
+
+---
+
+## ⑪ EL OBJETO DE CIERRE DE LA TANDA
+
+    CLIENTE     group 1e082956-5461-47cf-8779-d23368ce6708   pie: 01a0188b   rt 1.0.3
+    PRESTADOR   group ff5fc8ac-314d-42cf-9f5d-10f15526ef55   pie: 01a0188c   rt 1.0.5
+    ANCLA (las dos)  821c099d  =  origin/main  ·  árbol 0, SIN asterisco
+
+Las cuatro pistas contenidas · 4 typechecks exit 0 · `verify:diseno` VERDE **48**
+· overlays del shell en verde · tope 10/10.
+
+### ✅ LOS DOS RELLENOS OCRE NO COMPITEN — medido en aparato
+
+    «Cambiar la dirección»   x 56–528     473 px    46.827 px²
+    «Guardar dirección»      x 56–1023    968 px    95.832 px²   ⇒ 2,05×
+
+**El doble exacto de superficie** ⇒ se separan por tamaño y el CTA conserva su
+primacía. **«Cambiar» no cede.** Fondo confirmado en aparato: `(246,246,246)`.
+
+### ⚠️ EL NÚMERO QUE NADIE HABÍA SUMADO
+
+**El detalle del pedido crece ~100 dp**: **+64,4** medido (la carta de «Seguir el
+pedido») y **+36** derivado (el nodo 10→32). **La pantalla scrollea y los paga**,
+así que no es defecto — **y ninguno de los dos lo es por separado.** *Lo que no
+existía era la suma.* **Ahora existe, y es el freno para la tercera cosa que
+quiera entrar a esa pantalla.**
+
+---
+
+## ⑫ 🔴 LA REFERENCIA QUE ESTABA EN LA CARPETA Y DECÍA OTRA MARCA
+
+**El canon reclama desde S99 §5bis las tres referencias de la cola del pulido, y
+las daba por AUSENTES** («verificado por listado… se buscaron, no se pudieron
+identificar sin adivinar, y NO SE ADIVINÓ»).
+
+**Estaban.** El archivo del founder se llamaba **`Rappi traking 1.jpg`** y **es de
+PedidosYa** — lo dice la propia imagen, impreso en la captura: **«Delivery a cargo
+de PedidosYa»**, más el rojo de PedidosYa en los acentos, que no es el verde de
+Rappi. Quedó como `referencia-pedidosya-seguimiento-hitos-con-hora.jpg`, **con el
+literal en la fila del README**, para que quien la dude dentro de seis meses tenga
+el argumento **al lado del archivo** y no en un parte.
+
+**Y la segunda estaba mal nombrada en OTRO eje:** `Rappi trakinng2 .png` **sí es
+Rappi**, pero es **la app del REPARTIDOR**, no la del cliente. *Dos archivos, dos
+afirmaciones falsas, ejes distintos: una erraba la app, la otra el actor.*
+
+> 🔴 **AL CANON: UN NOMBRE DE ARCHIVO ES UNA AFIRMACIÓN, Y VALE LO QUE VALE QUIEN
+> LO TIPEÓ.**
+>
+> La búsqueda que lo dio por ausente **fue impecable** —ramas, remotos, `find`
+> desde la raíz— **y habría fallado igual, porque el objeto estaba ahí y decía
+> «Rappi» en la tapa.** *No falló el método de búsqueda: falló confiar en el
+> nombre como si fuera el contenido.*
+>
+> **Y el riesgo era el INVERSO al que se temía:** no era poner la vara equivocada
+> delante del ojo — era **dejar cerrado un hueco que estaba abierto con su propio
+> objeto adentro de la carpeta.**
+
+*Lo cerró D abriendo la imagen antes de nombrarla. El freno de no tocarla desde
+el ensamble fue correcto: el que nombra tiene que ser el que la mira.*
