@@ -148,6 +148,23 @@ const PISO_DEL_MAPA = 0.4;
  */
 const PEEK = 26;
 
+/**
+ * 🔴 S100d · LA MANIJA — lo único que queda a la vista con la hoja ABAJO DEL
+ * TODO. Firma del founder: *«debo poder bajarla TODA, por si quiero ver el
+ * mapa completo»*.
+ *
+ * **44 y no menos, y no es estético: es el mínimo tocable de la casa.** Si la
+ * hoja se fuera del todo, volver a subirla exigiría adivinar dónde agarrarla.
+ * *Una hoja que desaparece sin puerta no es un mapa a pantalla completa: es
+ * contenido perdido* — y el código de la puerta vive adentro.
+ */
+const MANIJA = 44;
+
+/** Las TRES posiciones de la hoja (mecanismo de Uber completo):
+ *  `abajo` = el mapa es el lienzo entero · `reposo` = rango + código sin mover
+ *  un dedo · `arriba` = la ficha y los detalles. */
+type PosicionHoja = 'abajo' | 'reposo' | 'arriba';
+
 export default function DespensaEnCamino() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -168,21 +185,32 @@ export default function DespensaEnCamino() {
    *  el idioma, y **un número tecleado acá volvería a mentir en el primer
    *  teléfono distinto** (es el defecto que esta pantalla ya curó en S100b). */
   const [altoCabecera, setAltoCabecera] = useState(0);
+  /**
+   * 🔴 EL ALTO DE LA HOJA, MEDIDO EN LA HOJA — y no compuesto de partes.
+   *
+   * ⏪ Antes esto se armaba sumando la cabecera + el alto del plegable, y
+   * **esa composición fue el defecto**: los dos insumos llegan en pasadas
+   * distintas, así que hubo corridas donde los topes se calcularon con el
+   * plegable todavía en cero y la hoja quedó anclada a un número que ya no
+   * era. *Dos medidas que hay que sumar para obtener una tercera son dos
+   * oportunidades de que la tercera esté vieja* — la familia de L-281.
+   * ⇒ se mide **lo que se quiere saber**, en un solo `onLayout`.
+   */
+  const [altoHoja, setAltoHoja] = useState(0);
   const [reintento, setReintento] = useState(0);
 
   // ── LA FÍSICA DE LA HOJA — calcada de `paseo/[atencionId]`, que a su vez la
   //    calcó de `Hoja`. El contenedor TRASLADA (translateY), jamás
   //    teletransporta: la hoja que sube MUESTRA que hay más abajo.
-  const extendidaRef = useRef(false);
+  const posicionRef = useRef<PosicionHoja>('reposo');
   /* 🔴 S100d · EL ESTADO DEJA DE SER MUDO. Acá decía `const [, setExtendida]`
      —se escribía y no se leía— porque nada de la pantalla cambiaba al abrir.
      Ahora sí: **la señal de arrastre gira** (⌃ cuando hay más arriba, ⌄
      cuando ya está abierta) y su voz cambia con ella. *Una flecha que apunta
      siempre para el mismo lado deja de ser una señal y pasa a ser un adorno.*
      El `ref` se conserva porque el gesto lo lee desde el hilo de UI. */
-  const [extendida, setExtendida] = useState(false);
+  const [posicion, setPosicion] = useState<PosicionHoja>('reposo');
   const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
-  const extAlto = useSharedValue(0); // alto del CONTENIDO del plegable
   /**
    * 🔴 S100d · EL IMÁN «ASOMADA», TOPADO — Y ES LA CURA DEL DEFECTO QUE DEJÓ
    * A ESTA PANTALLA SIN HOJA EN EL GATE.
@@ -222,13 +250,14 @@ export default function DespensaEnCamino() {
    * números a la vista (contenido · hueco · traslado) sobre el pedido de
    * plegable más alto — con ficha, dirección y escalera montadas.
    */
-  const asomada = useSharedValue(0);
+  const topeReposo = useSharedValue(0);
+  const topeAbajo = useSharedValue(0);
   const desplBase = useSharedValue(0); // ancla del arrastre en curso
   const estiloHoja = useAnimatedStyle(() => ({ transform: [{ translateY: despl.value }] }));
 
-  const fijarExtendida = useCallback((v: boolean) => {
-    extendidaRef.current = v;
-    setExtendida(v);
+  const fijarPosicion = useCallback((v: PosicionHoja) => {
+    posicionRef.current = v;
+    setPosicion(v);
   }, []);
 
   /** El tope de la hoja, derivado del lienzo MEDIDO — la misma cuenta que su
@@ -240,54 +269,72 @@ export default function DespensaEnCamino() {
    *  Se llama desde el layout del plegable Y desde el efecto de abajo: los
    *  tres insumos (lienzo, cabecera, contenido) llegan en pasadas distintas
    *  y **el último en llegar tiene que corregir a los anteriores.** */
-  const fijarAsomada = useCallback(() => {
-    // Sin lienzo medido no hay tope que respetar: la hoja se queda donde
-    // entró (fuera de cuadro) en vez de saltar a una posición inventada.
-    if (topeHoja <= 0) return;
-    const hueco = Math.max(topeHoja - altoCabecera, 0);
-    const nueva = Math.max(Math.min(extAlto.value, hueco) - PEEK, 0);
-    asomada.value = nueva;
-    if (!extendidaRef.current) {
-      despl.value = withSpring(nueva, {
-        duration: motion.duration.estandar,
-        dampingRatio: 0.85,
-      });
-    }
-  }, [topeHoja, altoCabecera, asomada, despl, extAlto]);
+  /** El HUECO que le queda al plegable: lo que la hoja puede darle sin pasar
+   *  su tope. **También acota su altura** (ver el `maxHeight` del bloque):
+   *  sin eso el scroller mide lo que mide su contenido y **no scrollea, se
+   *  desborda** — medido en aparato: 475 dp de contenido en una hoja de 365,
+   *  con ~330 dp inalcanzables. */
+  const hueco = Math.max(topeHoja - altoCabecera, 0);
 
-  /** El lienzo y la cabecera llegan por estado de React, así que su cambio no
-   *  pasa por el layout del plegable. Sin esto, una hoja que ya se ancló con
-   *  un tope viejo se queda con él. */
+  /**
+   * Recalcula LOS DOS TOPES con lo medido y re-ancla la hoja donde esté.
+   *
+   * **Los tres estados, con su número** (mecanismo de Uber completo):
+   *  · `arriba` = **0** — la hoja entera; la ficha y los detalles.
+   *  · `reposo` = **alto de la hoja − (cabecera + PEEK)** — rango y código a
+   *    la vista sin mover un dedo.
+   *  · `abajo`  = **alto de la hoja − MANIJA** — el mapa es el lienzo entero
+   *    y queda **el asa** para volver.
+   *
+   * *Los tres salen de lo MEDIDO: si mañana la cabecera crece porque cambió
+   * una voz, los tres se corren solos. Un tope tecleado es el que miente en
+   * el primer teléfono distinto.*
+   */
+  const fijarTopes = useCallback(() => {
+    if (altoHoja <= 0 || altoCabecera <= 0) return;
+    const reposo = Math.max(altoHoja - (altoCabecera + PEEK), 0);
+    const abajo = Math.max(altoHoja - MANIJA, 0);
+    topeReposo.value = reposo;
+    topeAbajo.value = abajo;
+    // Re-ancla SIN cambiar de estado: la hoja se queda donde el dueño la
+    // dejó y solo corrige su número. *Mover la hoja porque llegó un dato
+    // sería la pantalla decidiendo por el dedo.*
+    const destino = posicionRef.current === 'arriba' ? 0 : posicionRef.current === 'abajo' ? abajo : reposo;
+    despl.value = withSpring(destino, {
+      duration: motion.duration.estandar,
+      dampingRatio: 0.85,
+    });
+  }, [altoHoja, altoCabecera, topeReposo, topeAbajo, despl]);
+
+  /** Los dos insumos llegan por estado de React y en pasadas distintas: el
+   *  último en llegar corrige al anterior. */
   useEffect(() => {
-    fijarAsomada();
-  }, [fijarAsomada]);
+    fijarTopes();
+  }, [fijarTopes]);
 
-  const irA = useCallback(
-    (abierta: boolean) => {
-      despl.value = withSpring(abierta ? 0 : asomada.value, {
-        duration: motion.duration.estandar,
-        dampingRatio: 0.85,
-      });
-      fijarExtendida(abierta);
-    },
-    [despl, asomada, fijarExtendida],
-  );
-
-  /** El bloque plegable se mide al layout: de ahí sale el CONTENIDO, que es
-   *  uno de los tres insumos del imán (la ficha del repartidor llega después
-   *  que el resto — su id sale del envío, así que el contenido crece). */
-  const medirPlegable = useCallback(
-    (e: LayoutChangeEvent) => {
-      const h = e.nativeEvent.layout.height;
-      if (h === extAlto.value) return;
-      extAlto.value = h;
-      fijarAsomada();
-    },
-    [extAlto, fijarAsomada],
-  );
+  /** El toque del asa CICLA hacia arriba y vuelve: abajo → reposo → arriba →
+   *  reposo. *Un toque que desde arriba saltara hasta abajo del todo haría
+   *  desaparecer la hoja de un golpe, y el dueño no pidió eso: pidió poder
+   *  bajarla.* Bajar del todo es del ARRASTRE, que es un gesto deliberado. */
+  const irAlSiguiente = useCallback(() => {
+    const actual = posicionRef.current;
+    // Desde `abajo` y desde `arriba` el toque va a `reposo`; desde `reposo`
+    // sube. **`abajo` no es alcanzable por toque a propósito** —lo dice el
+    // tipo, y el typecheck lo confirmó rebotando la rama muerta que escribí:
+    // *bajar del todo es un gesto deliberado, no el efecto de un toque.*
+    const destino: PosicionHoja = actual === 'reposo' ? 'arriba' : 'reposo';
+    despl.value = withSpring(destino === 'arriba' ? 0 : topeReposo.value, {
+      duration: motion.duration.estandar,
+      dampingRatio: 0.85,
+    });
+    fijarPosicion(destino);
+  }, [despl, topeReposo, fijarPosicion]);
 
   /** Arrastre sobre el asa Y la cabecera; las dos posiciones son imanes y la
    *  velocidad de salida decide (receta `Hoja`: 800). El clic sigue vivo. */
+  /** Arrastre sobre el asa Y la cabecera. **TRES imanes**: el gesto decide
+   *  por velocidad si la hay, y si no por cercanía. *Con tres posiciones, un
+   *  umbral de "mitad" ya no alcanza: hay dos mitades.* */
   const pan = useMemo(
     () =>
       Gesture.Pan()
@@ -296,22 +343,37 @@ export default function DespensaEnCamino() {
         })
         .onChange((e) => {
           const v = desplBase.value + e.translationY;
-          // El tope del arrastre es el MISMO imán topado: si acá quedara el
-          // cálculo viejo, el dedo podría empujar la hoja fuera de cuadro
-          // aunque el resorte la devuelva bien. *Una cura que arregla el
-          // resorte y deja el arrastre suelto cura la mitad que se ve.*
-          despl.value = Math.min(Math.max(v, 0), asomada.value);
+          // El recorrido va de ARRIBA (0) a ABAJO DEL TODO — el mismo tope
+          // que el resorte, jamás un número aparte.
+          despl.value = Math.min(Math.max(v, 0), topeAbajo.value);
         })
         .onEnd((e) => {
-          const tope = asomada.value;
-          const abrir = e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < tope / 2;
-          despl.value = withSpring(abrir ? 0 : tope, {
-            duration: motion.duration.estandar,
-            dampingRatio: 0.85,
-          });
-          scheduleOnRN(fijarExtendida, abrir);
+          const arriba = 0;
+          const reposo = topeReposo.value;
+          const abajo = topeAbajo.value;
+          const actual = despl.value;
+          let destino: PosicionHoja;
+          if (e.velocityY < -800) {
+            // Impulso hacia arriba: sube UN escalón, no salta hasta el techo.
+            destino = actual > reposo ? 'reposo' : 'arriba';
+          } else if (e.velocityY > 800) {
+            destino = actual < reposo ? 'reposo' : 'abajo';
+          } else {
+            // Sin impulso manda la cercanía, con los TRES en la cuenta.
+            const d = [
+              { p: 'arriba' as const, v: Math.abs(actual - arriba) },
+              { p: 'reposo' as const, v: Math.abs(actual - reposo) },
+              { p: 'abajo' as const, v: Math.abs(actual - abajo) },
+            ].sort((x, y) => x.v - y.v);
+            destino = d[0].p;
+          }
+          despl.value = withSpring(
+            destino === 'arriba' ? arriba : destino === 'reposo' ? reposo : abajo,
+            { duration: motion.duration.estandar, dampingRatio: 0.85 },
+          );
+          scheduleOnRN(fijarPosicion, destino);
         }),
-    [despl, desplBase, asomada, fijarExtendida],
+    [despl, desplBase, topeReposo, topeAbajo, fijarPosicion],
   );
 
   useFocusEffect(
@@ -598,7 +660,12 @@ export default function DespensaEnCamino() {
               estiloHoja,
             ]}
           >
-            <GestureHandlerRootView>
+            <GestureHandlerRootView
+              onLayout={(e) => {
+                const h = e.nativeEvent.layout.height;
+                setAltoHoja((previo) => (Math.abs(previo - h) < 0.5 ? previo : h));
+              }}
+            >
               {/* CABECERA ARRASTRABLE: asa + el código. El pan vive acá y no
                   en el scroll de abajo — *el gesto no pelea con la lista*.
 
@@ -628,7 +695,7 @@ export default function DespensaEnCamino() {
                       además lleva su estado** (`expanded`), cosa que el asa
                       nunca dijo. El toque del asa sigue vivo para todos. */}
                   <Pressable
-                    onPress={() => irA(!extendidaRef.current)}
+                    onPress={irAlSiguiente}
                     accessibilityElementsHidden
                     importantForAccessibility="no-hide-descendants"
                     style={{ alignItems: 'center', paddingVertical: spacing[2], minHeight: 24 }}
@@ -712,11 +779,11 @@ export default function DespensaEnCamino() {
                       del caso común es cómo un defecto se esconde de su
                       propia cura.* */}
                   <Pressable
-                    onPress={() => irA(!extendidaRef.current)}
+                    onPress={irAlSiguiente}
                     accessibilityRole="button"
-                    accessibilityState={{ expanded: extendida }}
+                    accessibilityState={{ expanded: posicion === 'arriba' }}
                     accessibilityLabel={
-                      extendida
+                      posicion === 'arriba'
                         ? t('despensa.enCaminoHojaVerMenos')
                         : t('despensa.enCaminoHojaVerMas')
                     }
@@ -729,9 +796,9 @@ export default function DespensaEnCamino() {
                       paddingBottom: spacing[2],
                     }}
                   >
-                    <Chevron direccion={extendida ? 'abajo' : 'arriba'} lado={16} />
+                    <Chevron direccion={posicion === 'arriba' ? 'abajo' : 'arriba'} lado={16} />
                     <Texto variante="apoyo">
-                      {extendida
+                      {posicion === 'arriba'
                         ? t('despensa.enCaminoHojaVerMenos')
                         : t('despensa.enCaminoHojaVerMas')}
                     </Texto>
@@ -745,7 +812,18 @@ export default function DespensaEnCamino() {
                   hoja lo ACOTE, y un `ScrollView` sin altura acotada no
                   scrollea: se recorta — y en pantalla eso se ve idéntico a
                   una zona muerta de gesto. */}
-              <View onLayout={medirPlegable} style={{ flexShrink: 1 }}>
+              {/* 🔴 S100d · `maxHeight` — LA CURA DEL SCROLL, MEDIDA.
+                  El `flexShrink` solo NO acotaba: medido en aparato, este
+                  bloque medía **475 dp dentro de una hoja topada en 365** ⇒
+                  el `ScrollView` era tan alto como su contenido, así que
+                  **no tenía nada que desplazar** y ~330 dp quedaban
+                  inalcanzables (la dirección y la escalera).
+                  *No era arbitraje de gestos —el pan vive en la cabecera—:
+                  era un scroller que nunca se acotó. Dos síntomas parecidos,
+                  dos causas distintas.*
+                  El tope sale del MISMO `hueco` que alimenta los imanes: una
+                  sola cuenta, jamás dos que deban coincidir (L-281). */}
+              <View style={{ flexShrink: 1, maxHeight: hueco > 0 ? hueco : undefined }}>
                 <ScrollView
                   contentContainerStyle={{
                     paddingHorizontal: spacing[5],
