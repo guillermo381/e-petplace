@@ -18385,3 +18385,67 @@ el pedido», +36 derivado por el nodo 10→32). **No es defecto: la pantalla
 scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
+
+---
+
+## 🟡 D-850 — NI `RotuloPlegable` NI `CeldaNavegacion` ANUNCIAN SI ESTÁN DESPLEGADOS
+
+**Depositada por C, S100d·bis.** Los dos encabezados de sección que despliegan de
+la casa anuncian **rol `button` con el nombre del rótulo** y **no dicen su
+estado**: falta `accessibilityState={{ expanded }}`.
+
+    `RotuloPlegable`  (local, ficha de producto — apps/cliente)   ✗
+    `CeldaNavegacion` (packages/ui, con `direccion` abajo/arriba)  ✗
+
+⚠️ **Ya estaba declarado dos veces y NUNCA fichado**, que es la razón por la que
+nace: el perfil del prestador lo dejó escrito como *«candidata de enmienda para
+B»* en S84, y C lo volvió a declarar en S100d — **las dos veces en un comentario
+de código, ninguna en el canon.** *Una deuda que solo vive en el archivo que la
+sufre no se encuentra: hay que tropezarla.*
+
+🔴 **Y por qué NO se parcheó en la anatomía local, que es la decisión:** ponerlo
+solo ahí dejaría **la casa con dos comportamientos de lector para el mismo
+gesto** — uno que anuncia el despliegue y otro que no. *Dos comportamientos para
+el mismo gesto es peor que uno malo en los dos lados: el primero no se puede
+aprender.*
+
+**Dueño:** B (`CeldaNavegacion` primero; la local lo hereda del mismo criterio).
+**Disparo:** la próxima tanda que toque `CeldaNavegacion`.
+**Aceptado por B en S100d·bis**, con esa condición de ir junto o no ir.
+
+---
+
+## 🟢 D-851 — `RotuloPlegable` ES UNA ANATOMÍA LOCAL CON FECHA DE VENCIMIENTO
+
+**Depositada por C, S100d·bis.** La ficha de producto monta un encabezado de
+sección que despliega **propio**, en vez de `CeldaNavegacion direccion="abajo"`,
+que existe exactamente para eso.
+
+**LA MEDICIÓN QUE LO OBLIGÓ (aparato de C, 384×832, la ficha montada):**
+
+    rótulo          con `CeldaNavegacion`      con `Texto variante="seccion"`
+    «Composición»   16 px · DMSans_500Medium   20 px · DMSans_700Bold
+    «Por qué…»      —                          20 px · DMSans_700Bold
+
+⇒ **la ficha quedaba con DOS rótulos de sección de peso distinto, y el que se
+achicaba era justamente el que se volvía plegable.** *Un título que encoge al
+ganar un control se lee como que dejó de ser un título.*
+
+**No es un defecto de la pieza:** `CeldaNavegacion` es una CELDA —su título es el
+registro de una fila de navegación— y `Texto variante="seccion"` es **el rótulo de
+BLOQUE** de la casa. *El perfil del prestador la monta bien porque allá cada
+sección ES una fila dentro de su tarjeta; la ficha es una pila de bloques.*
+⚠️ **Y su JSDoc quedó corregido por B en la misma vuelta**: decía que había nacido
+para *«el hueco que C midió»*, y esta medición prueba que para ESE hueco no sirve.
+*Una pieza que promete un caso que no cumple es peor que una que no lo menciona.*
+
+**LO QUE NO ES: un clon.** El trazo del chevron **no se copia** — sale de
+`Chevron`, la pieza que `packages/ui` exporta para slots que no son una fila
+entera. También son de la casa `usePresionado` y la dirección por prop.
+
+☠️ **CONDICIÓN DE MUERTE:** se retira el día que `CeldaNavegacion` pueda rotular
+como SECCIÓN (una prop de jerarquía). **Mientras tanto vive local con UN solo
+consumidor**, que es la razón por la que no se promueve — *inventar un contrato en
+`packages/ui` para un cliente único es fabricar la deuda al revés.*
+**Veredicto de B (S100d·bis): queda local.** **Dueño:** B. **Disparo:** el segundo
+consumidor, o la prop de jerarquía.
