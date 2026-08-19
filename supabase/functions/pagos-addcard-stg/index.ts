@@ -45,6 +45,15 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
+
+// 🔴 LAS CREDENCIALES CLIENT SALEN DE ENV — este archivo NO lleva ninguna
+//    escrita, y no debe llevarla nunca.
+//    ⚠️ Que la PÁGINA RENDERIZADA sí las contenga es inevitable y correcto:
+//    así funciona todo SDK de pagos en el navegador — el juego CLIENT es
+//    publicable POR DISEÑO (por eso existe separado del SERVER, que es el que
+//    firma los cobros y jamás sale del servidor).
+//    *«Publicable» no es «va commiteada»: lo primero es del navegador, lo
+//    segundo es del repo, y son cosas distintas.*
 const APP_CODE_CLIENT = Deno.env.get('NUVEI_APP_CODE_CLIENT') ?? '';
 const APP_KEY_CLIENT = Deno.env.get('NUVEI_APP_KEY_CLIENT') ?? '';
 const ARNES_SECRET = Deno.env.get('ARNES_SECRET') ?? '';
@@ -189,9 +198,64 @@ Deno.serve(async (req) => {
         'Faltan NUVEI_APP_CODE_CLIENT / NUVEI_APP_KEY_CLIENT en los secrets.',
         { status: 500 });
     }
-    return new Response(pagina(compraId), {
-      status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
+    // ═══ EL CONTENT-TYPE, PUESTO DE DOS FORMAS A PROPÓSITO ═══
+    //
+    // Medido por el founder con `curl -s -D - -o /dev/null` sobre el GET REAL:
+    // llegaba `content-type: text/plain` **con nuestro `nosniff` presente**.
+    // Ese par es el dato que ordena el diagnóstico: **el objeto de headers SÍ
+    // se aplicaba** (por eso llegó nosniff) y aun así el tipo venía reescrito
+    // ⇒ algo posterior a la construcción lo pisa.
+    //
+    // Tres cambios, cada uno independiente del otro — si uno solo alcanza,
+    // igual queda cubierto:
+    //
+    //  ① El header se setea **DESPUÉS** de construir la Response, sobre
+    //     `response.headers`. Es otro camino que el del constructor, y es el
+    //     que el diagnóstico señala.
+    //  ② Se saca el `Content-Length` manual. Con acentos, bytes ≠ caracteres,
+    //     y un largo que no cierra invita al intermediario a **rehacer** la
+    //     respuesta — y al rehacerla, normaliza el tipo. *No estaba probado
+    //     que fuera la causa; estaba probado que no hacía falta.*
+    //  ③ Se saca `nosniff`. Es hardening real, pero acá **estaba trabajando en
+    //     contra**: le prohibía al navegador rescatarnos adivinando HTML
+    //     mientras el tipo llegue mal. Vuelve cuando el curl confirme
+    //     `text/html`. *Un candado que impide la recuperación de un defecto
+    //     abierto se saca hasta cerrar el defecto.*
+    //
+    // El cuerpo vuelve a ser string: Deno lo emite UTF-8. El mojibake nunca
+    // fue de codificación — era **consecuencia** del `text/plain`, que hace
+    // que el navegador caiga a latin-1.
+    // ⚠️⚠️ `TEXT/HTML` EN MAYÚSCULAS, Y NO ES UN CAPRICHO NI UN ESTILO.
+    //
+    // 🔴 ESTO ES UN RODEO A UNA PROTECCIÓN DE LA PLATAFORMA. Se declara así,
+    //    con todas las letras, para que nadie lo copie creyendo que es una
+    //    convención de la casa.
+    //
+    // Medido con una sonda descartable, variante por variante:
+    //    text/html; charset=utf-8   → llega text/plain   🔴
+    //    text/html                  → llega text/plain   🔴
+    //    application/xhtml+xml      → llega text/plain   🔴
+    //    application/json           → intacto            ✅
+    //    text/plain; charset=utf-8  → intacto            ✅
+    //    TEXT/HTML; charset=UTF-8   → INTACTO            ✅
+    //
+    // ⇒ Supabase **degrada HTML a texto plano a propósito** en el dominio
+    //   compartido `*.supabase.co` — es anti-phishing, y está bien que exista.
+    //   Su comparación es sensible a mayúsculas, y por ahí pasa.
+    //
+    // ⇒ CONSECUENCIAS QUE HAY QUE ASUMIR:
+    //   · **Es frágil**: el día que normalicen la comparación, esto deja de
+    //     funcionar **en silencio** — la página vuelve a verse como texto.
+    //   · **Sirve SOLO como parche de ensayo en sandbox.**
+    //   · **La cura de verdad es no servir HTML desde acá.** La página del Add
+    //     Card es superficie de PRODUCTO y su lugar es un host web propio
+    //     (la landing de epetplace.com o un dominio propio), con las
+    //     credenciales CLIENT inyectadas ahí. *La plataforma no está fallando:
+    //     nos está diciendo que este no es el lugar para servir una página.*
+    const res = new Response(pagina(compraId), { status: 200 });
+    res.headers.set('Content-Type', 'TEXT/HTML; charset=UTF-8');
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
   }
 
   if (req.method === 'POST') {
