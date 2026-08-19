@@ -384,3 +384,53 @@ sigue solo.** *Hoy importa doble: el fondo acaba de pasar a `#F6F6F6`.*
 de precio de C no estaba en la preview, y **sin ella la tira no desborda** ⇒ el
 experimento habría dado un **falso «no hay defecto»**. **C lo corre apenas salga
 el bundle.**
+
+
+---
+
+## ⑩ ✅ VERIFICADO EN APARATO **DESPUÉS** DE PUBLICAR — sobre `01a01807`
+
+*C verificó el pie con sus manos antes de medir nada* (`update 01a01807 · preview
+· 18/08 22:18`). **Sin ese paso, todo lo de abajo mediría otro objeto.**
+
+| | resultado |
+|---|---|
+| **la tira de presentaciones** | ✅ **VERDE.** Arrastre horizontal 760 → 420: los tres chips **−48 px**. Contra-caso vertical: la pantalla scrollea (1251 → 680) |
+| **H-205** | ✅ **CERRADO** — el nombre aparece **una sola vez** |
+| los chips desambiguados · la carta blanca sobre `#F6F6F6` · el fondo neutro | ✅ vistos |
+
+**El −48 cierra con la aritmética y por eso vale:** el contenido terminaba en
+**1022** sobre una caja de **~1025** ⇒ el desborde real era **~48 px** y **se
+recorrió entero**. *No es «se movió un poco»: se movió todo lo que había.*
+
+⚠️ **Y la espera valió:** sin la desambiguación de precio en el bundle **la tira
+no desbordaba**, así que el experimento habría dado un **falso «no hay defecto»**
+— habría concluido que la cura funcionaba **sin haberla probado nunca contra el
+caso real.**
+
+### 🔴 LA CUARTA TRAMPA DEL MISMO ANIMAL, EN LA MISMA JORNADA
+
+**El primer arrastre de C fue `900 → 200` y la app NAVEGÓ a «Tus pedidos»: el
+gesto se lo comió el «atrás» del sistema** (arrancó a 180 px del borde derecho,
+dentro de la zona de gesto de Android).
+
+> **Si se quedaba con esa corrida, el volcado decía «la tira no se movió» —y era
+> CIERTO— y el reporte habría sido «la cura de B falló».** *El número era correcto
+> y contestaba otra pregunta.* **Lo cazó que la PANTALLA había cambiado, no la
+> posición de los chips.**
+
+⇒ **al instrumento le falta un guard: todo arrastre verifica que sigue en la
+misma pantalla antes de creerle a su Δ.**
+
+**Van CUATRO formas distintas del mismo animal en un día, todas de C y todas
+declaradas por ella:** la voz buscada por su paráfrasis · el selector que
+envejeció con el glifo · el `goto` que reiniciaba el carrito que iba a medir · y
+el borde que se roba el gesto. ***Cuatro veces el aparato midió bien y la
+pregunta estaba mal.***
+
+### ⚠️ LO QUE SIGUE SIN MEDIR CONTRA EL FONDO NUEVO
+
+**Los CONTRASTES**: el magenta del chip, el ocre de la flecha y el disco del
+carrito **se midieron contra el fondo viejo**. C verificó **con el ojo** que sobre
+`#F6F6F6` los tres se leen y que la carta se separa — **pero «se lee» no es un
+número de contraste, y no se presenta como si lo fuera.**
