@@ -209,6 +209,33 @@ const NODO = 32
  *  que el nodo ya tenía (20 − 12), conservado al crecer. */
 const GLIFO_EN_NODO = NODO - 8
 
+/* 🔴 EL RIEL DE LA VERTICAL SE DERIVA DEL NODO — S100d·bis.
+   Era `RIEL` (24) con un punto de 10 adentro. **Con el nodo en 32 ya no
+   entra**, y un número tecleado acá volvería a separarse del nodo la próxima
+   vez que el nodo cambie. *Dos números que deben guardar relación no salen de
+   dos lugares* (L-284).
+
+   ── EL COSTO EN ALTO, MEDIDO Y DECLARADO (orden del founder) ─────────
+   En la vertical cada dp del nodo **multiplica por la cantidad de hitos**:
+   ```
+   ANTES  riel = 4 (marginTop) + 10 (punto) + 16 (conector mín) = 30
+          fila = max(riel, contenido 24 + 16) ……………………………… 40 dp
+   AHORA  riel = 4 + 32 + 16 …………………………………………………………………… 52 dp
+          fila = max(52, 40) ………………………………………………………………… 52 dp   (+12)
+   ```
+   ⇒ **+12 dp por fila que tenga conector.** Con cuatro hitos son **tres**
+   (la última no lo tiene) ⇒ **+36 dp** en el detalle.
+   ⚠️ **Y NO crece la fila que trae `detalle`:** ahí el contenido ya mide
+   `24 + 2 + ~20 + 16 = 62 > 52` y manda él.
+   **En ancho:** el texto se corre **+8 dp** a la derecha (riel 24 → 32).
+
+   **Su acreedor, dicho:** el detalle del pedido **no tiene tope** —es una
+   pantalla que scrollea—, así que el crecimiento no desplaza a nadie fuera de
+   vista. *Se declara igual porque D acaba de sumar 64,4 dp a esa misma
+   pantalla con «Seguir el pedido», y dos crecimientos que nadie suma es como
+   se llega a una pantalla que no termina nunca.* */
+const RIEL_VERTICAL = NODO
+
 export function EscaleraEstados({
   pasos,
   registro = 'completa',
@@ -248,7 +275,19 @@ export function EscaleraEstados({
    *  monta el riel vacío ni se anuncia como barra de progreso. */
   const soloDesvio = pasos.length === 0
 
-  const color = acento === 'oficio' ? theme.accent.primary : theme.accent.control
+  /* 🔴 EL CLIENTE PINTA CON `accent.hito`, NO CON `accent.control` — S100d·bis,
+     firma del founder: *«un magenta más suave, como el verde de Rappi»*.
+
+     **El slot es propio porque el censo lo obligó:** `accent.control` vive en
+     **64 sitios de 28 archivos** y la escalera es UNO. *Bajarle la dosis ahí
+     habría movido `SelectorOpcion`, `SelectorDia`, el `Interruptor`, el
+     `SliderPrecio`, el pin y los chips — media app por una queja sobre cuatro
+     discos.*
+
+     **El prestador NO se toca:** su rama sigue en `accent.primary` (teal). *El
+     founder firmó el magenta del cliente; el par del oficio no se midió y no se
+     inventa.* */
+  const color = acento === 'oficio' ? theme.accent.primary : theme.accent.hito
   const indiceActual = pasos.findIndex((p) => p.estado === 'actual')
   // Con desvío el camino se cortó: los llenos son los que YA pasaron.
   const hechos = pasos.filter((p) => p.estado === 'hecho').length
@@ -368,14 +407,38 @@ export function EscaleraEstados({
 
         return (
           <View key={paso.clave} style={{ flexDirection: 'row' }}>
-            {/* riel: punto + conector hairline — el lenguaje de LineaDeVida */}
-            <View style={{ width: RIEL, alignItems: 'center' }}>
+            {/* riel: nodo + conector hairline — el lenguaje de LineaDeVida */}
+            <View style={{ width: RIEL_VERTICAL, alignItems: 'center' }}>
               <View
                 style={{
-                  width: PUNTO,
-                  height: PUNTO,
+                  /* 🔴 EL NODO DE LA VERTICAL CRECE DE 10 A 32 Y ESTRENA SU
+                     GLIFO — S100d·bis, firma del founder: *«los discos más
+                     grandes, para que el glifo se vea»*.
+
+                     ⏪ **Cierra un pendiente que quedó a medias en G-15:** el
+                     nodo de la HORIZONTAL creció de 20 a 32 con su glifo dos
+                     vueltas atrás, **y la vertical se quedó en un punto de 10
+                     sin glifo** — declarado entonces como anatomía nueva y
+                     nunca hecho.
+
+                     🔴 **Y el hallazgo que vuelve exacta la cura: el glifo YA
+                     LLEGABA.** Los dos consumidores pasan `conIconos(pasos)` y
+                     **esta rama nunca llamaba al slot**: la pieza recibía el
+                     dibujo y lo tiraba. *No faltaba dato ni faltaba API —
+                     faltaba pintarlo.* Por eso ningún consumidor cambia.
+
+                     **La medida se DERIVA, no se elige:** el glifo tiene que
+                     pasar el gate de §2.9 (21 px) ⇒ 24, que es el default de
+                     `Icono`; el nodo es glifo + 8 de aire = **32**, los mismos
+                     `NODO`/`GLIFO_EN_NODO` de la horizontal. *Reusar sus
+                     constantes es lo que impide que las dos anatomías de la
+                     misma pieza se separen con el tiempo.* */
+                  width: NODO,
+                  height: NODO,
                   borderRadius: radius.full,
                   marginTop: spacing[1],
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   // LO QUE PASÓ SE RELLENA · LO QUE ESPERA SE CONTORNEA
                   // (Ley 19.8 leída en el tiempo; gramática de TarjetaEstado).
                   backgroundColor: lleno ? color : 'transparent',
@@ -383,7 +446,16 @@ export function EscaleraEstados({
                     ? null
                     : { borderWidth: theme.border.width, borderColor: theme.border.default }),
                 }}
-              />
+              >
+                {/* El `tamano` lo pasa LA PIEZA, derivado del nodo — el
+                    consumidor no lo inventa (L-284, la misma cura que G-15
+                    aplicó en la horizontal). */}
+                {paso.icono?.({
+                  color: lleno ? theme.bg.base : theme.text.tertiary,
+                  lleno,
+                  tamano: GLIFO_EN_NODO,
+                })}
+              </View>
               {esUltimo ? null : (
                 <View
                   style={{
