@@ -311,6 +311,7 @@ function BotonPaso({
   signo,
   habilitado,
   color,
+  atenuado,
   onPress,
   etiqueta,
   tamano,
@@ -318,6 +319,9 @@ function BotonPaso({
   signo: 'menos' | 'mas' | 'papelera'
   habilitado: boolean
   color: string
+  /** Apagado SERENO sobre un soporte lleno: el color no cambia (sobre el
+   *  bloque solo hay UNA tinta legible), lo que baja es la presencia. */
+  atenuado: boolean
   onPress: () => void
   etiqueta: string
   tamano: TamanoStepper
@@ -360,6 +364,7 @@ function BotonPaso({
           backgroundColor: tamano === 'ancho' ? 'transparent' : theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
+          opacity: atenuado ? 0.4 : 1,
           transform: [{ scale: presionado ? 0.99 : 1 }],
           transitionProperty: 'transform',
           transitionDuration: motion.duration.fast,
@@ -412,6 +417,47 @@ export function StepperCantidad({
         registro === 'compra'
         ? theme.accent.cta
         : theme.accent.control
+
+  /* 🔴 LA TINTA DEL CONTROL — **UNA SOLA, PARA LAS TRES CELDAS** (S100d·bis,
+     relevo de B).
+
+     ── EL DEFECTO QUE CURA, MEDIDO EN APARATO SOBRE EL BUNDLE `01a01807` ──
+     **Founder, verbatim:** *«me sale el uno, me deja tipearlo, PERO YA NO ME
+     DEJA poner las opciones de aumentar y disminuir con los botones de al
+     lado»*. **Los botones estaban en el árbol, con sus cajas enteras:**
+
+         Quitar de la compra … x[ 33,4 ·  67,2]  33,8 × 33,8   presente
+         Más ………………………………………… x[137,6 · 171,4]  33,8 × 33,8   presente
+
+     **Y no existían para el ojo.** Barrido de 26 muestras por el centro del
+     `+`, de `y=618` a `y=645`: **las 26 dieron `(252,188,29)`** — el ocre del
+     bloque, sin una sola variación. *Los signos se pintaban **ocre sobre el
+     bloque ocre**.*
+
+         signo ocre sobre bloque ocre …… **1.00**
+         signo tinta sobre bloque ocre …… **9.96**
+
+     ── 🔴 POR QUÉ ES L-284 Y NO UN DESCUIDO ────────────────────────────
+     **La intención estaba escrita, medida y firmada** cuatro comentarios más
+     arriba: *«signos y número en `accent.ctaTexto` sobre `accent.cta` — 8.40 en
+     claro»*. **El número la cumplía y los signos no**, porque el color salía de
+     DOS lugares: el número lo derivaba de `tamano === 'ancho'` y los signos se
+     quedaban con `acento` —que en `registro='compra'` **es** `accent.cta`, o
+     sea el color del propio bloque—.
+
+     ⇒ *dos valores que deben coincidir saliendo de dos lugares.* **La cura no
+     es corregir el segundo: es que haya UNO.** Las tres celdas leen esta
+     constante y **la divergencia deja de ser expresable**.
+
+     ── Y LA LECCIÓN QUE SE LLEVA, que no es sobre colores ──────────────
+     **Un control invisible y un control ausente son indistinguibles desde
+     afuera.** El founder no reportó *«no se ven los botones»* sino *«no me
+     deja»* — describió el EFECTO, que es todo lo que puede ver. *Por eso el
+     árbol dio verde: medía la capa equivocada.* **Es la segunda vez en la misma
+     pieza y en la misma vuelta que el árbol dice «está» sobre algo que el ojo
+     no tiene** (la primera fue el pie opaco tapando el control). */
+  const sobreBloqueLleno = tamano === 'ancho' && !esMemorial
+  const tintaDelControl = sobreBloqueLleno ? theme.accent.ctaTexto : acento
 
   /* LAS TRES REGLAS DEL CAMPO, en un solo lugar (ver la prop `editable`):
      vacío ⇒ vuelve el anterior · cero ⇒ lo mismo que la papelera · resto ⇒
@@ -488,8 +534,17 @@ export function StepperCantidad({
       <BotonPaso
         signo={onBorrar !== undefined && v <= min ? 'papelera' : 'menos'}
         habilitado={v > min || onBorrar !== undefined}
-        // en el límite se apaga SERENO (voz terciaria) — jamás error
-        color={v > min || onBorrar !== undefined ? acento : theme.text.tertiary}
+        /* En el límite se apaga SERENO — jamás error. **Sobre el bloque lleno
+           el apagado NO puede ser un color**: la única tinta legible ahí es
+           `ctaTexto`, así que lo que baja es la presencia (ver `atenuado`). */
+        color={
+          v > min || onBorrar !== undefined
+            ? tintaDelControl
+            : sobreBloqueLleno
+              ? tintaDelControl
+              : theme.text.tertiary
+        }
+        atenuado={!(v > min || onBorrar !== undefined) && sobreBloqueLleno}
         onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
         /* La voz del destino dice QUÉ pasa, y por eso depende de `salida`:
            en el carrito el ítem se va de la lista; en la vitrina la tarjeta
@@ -529,7 +584,8 @@ export function StepperCantidad({
             fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
             fontVariant: ['tabular-nums'],
             letterSpacing: typography.tracking.mono,
-            color: tamano === 'ancho' && !esMemorial ? theme.accent.ctaTexto : theme.text.primary,
+            // MISMA fuente que los signos — ver `tintaDelControl`.
+            color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
           }}
         />
       ) : (
@@ -542,7 +598,8 @@ export function StepperCantidad({
             fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
             fontVariant: ['tabular-nums'],
             letterSpacing: typography.tracking.mono,
-            color: tamano === 'ancho' && !esMemorial ? theme.accent.ctaTexto : theme.text.primary,
+            // MISMA fuente que los signos — ver `tintaDelControl`.
+            color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
           }}
         >
           {v}
@@ -551,7 +608,8 @@ export function StepperCantidad({
       <BotonPaso
         signo="mas"
         habilitado={v < max}
-        color={v < max ? acento : theme.text.tertiary}
+        color={v < max ? tintaDelControl : sobreBloqueLleno ? tintaDelControl : theme.text.tertiary}
+        atenuado={v >= max && sobreBloqueLleno}
         onPress={() => irA(v + 1)}
         etiqueta={t('stepperCantidad.mas')}
         tamano={tamano}

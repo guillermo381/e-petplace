@@ -197,7 +197,7 @@ export default function HubAdiestramiento() {
   const visibles = vista === 'proximos' ? proximos : historial;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('adiestramiento.hubTitulo')} atras onAtras={() => router.back()} />
       <ScrollView
         ref={scrollRef}

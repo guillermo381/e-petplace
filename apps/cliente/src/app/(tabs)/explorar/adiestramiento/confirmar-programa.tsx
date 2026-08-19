@@ -140,7 +140,7 @@ export default function ConfirmarPrograma() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
         variante="navegacion"
         titulo={t('adiestramiento.resumenProgramaTitulo')}

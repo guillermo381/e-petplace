@@ -57,7 +57,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   AvisoAlergia,
   Boton,
-  CarritoFlotante,
   COLA_CARRITO_FLOTANTE,
   /* ☠️ Ley 37 · S100d-C — entre `Boton` y `Chevron` vivía `Celda`, **sin un
      solo consumidor**: la tabla de presentaciones que la montaba murió en
@@ -1463,18 +1462,22 @@ export default function DespensaProducto() {
         )}
       </PantallaConPie>
 
-      {/* 🔴 S100d-bis · **EL CARRITO FLOTANTE, COMO OVERLAY** — hermano del
-          scroll y no su pie (ver el comentario del pie). `PantallaConPie`
-          ya reserva el alto de SU pie; **la cola de este disco la pone la
-          pantalla** con `COLA_CARRITO_FLOTANTE`, que la pieza exporta
-          derivada de su propio tamaño. *Sin ella el disco se sienta encima
-          del último bloque de la ficha — que es el defecto que acabamos de
-          curar, reintroducido por el otro lado.* */}
-      <CarritoFlotante
-        cuenta={unidades}
-        onAbrir={() => router.push('/despensa/carrito')}
-        etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
-      />
+      {/* ☠️ AQUÍ VIVÍA EL CARRITO FLOTANTE — **murió porque el shell lo monta**
+          (N28). Ver la lápida gemela en la vitrina: eran DOS discos vivos a la
+          vez y el founder los vio.
+
+          ⚠️ **`COLA_CARRITO_FLOTANTE` en el `paddingBottom` del scroll SE
+          QUEDA:** `PantallaConPie` reserva el alto de SU pie, no el del disco
+          del shell, que sigue flotando encima de esta ficha.
+
+          🔴 **Y esta pantalla pesa más que la vitrina para esto, por algo que
+          cambió hoy:** D montó *«Pedir de nuevo»* apuntando acá, así que **la
+          ficha ya no se alcanza solo desde la vitrina — se llega desde
+          Pedidos, con la intención de comprar ya formada.** *Si el camino al
+          carrito se rompiera acá, lo destaparía la familia que vuelve a
+          comprar.* Por eso el disco del shell tiene que verse también en esta
+          ruta: **no está en la lista de las que lo callan** (solo `carrito` y
+          `checkout`). */}
 
       <VisorFoto
         visible={visor !== null}

@@ -137,7 +137,7 @@ export default function VeterinariaDisponibles() {
   const mascota = typeof perfil === 'object' ? perfil.mascota : null;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('veterinaria.quienTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina — la duración no viaja:
