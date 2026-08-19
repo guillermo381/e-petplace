@@ -4,7 +4,7 @@
 
 ---
 
-> **Versión:** v1.1 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Versión:** v1.2 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
 > **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
 >
 > **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
@@ -139,6 +139,30 @@ Con eso la URL existe, es real y se le puede pasar a Erick en el momento en que 
 > *Construir la pantalla de cobro esperando un OTP que nunca llega es un embudo que se
 > cuelga sin que nada falle.*
 
+> ✅ **CONFIRMACIÓN E2 (Erick, 19-ago noche): recurrencia con Diners CONFIRMADA** —
+> **OTP en la tokenización, débito limpio, las tres marcas.** *No cambia una línea de
+> código: confirma que E2 leyó bien el reparto.* Y desbloquea de hecho la recurrencia,
+> que §9 excluía «por depender de MIT, sin respuesta de Nuvei» — **la respuesta llegó y
+> es afirmativa**; el alcance de S101 no cambia por eso (la recurrencia sigue fuera),
+> pero deja de estar bloqueada por una incógnita.
+
+> 🔴 **EL WEBHOOK NOTIFICA *TODO* EVENTO (Erick, 19-ago noche), incluidos reversos y
+> cierre de lote.** Dos consecuencias que este mapa tiene que absorber:
+>
+> **(a) Los códigos de reverso van a llegar DE VERDAD** ⇒ `27` · `28` · `7` · `34` ·
+> `29` **son TRANSICIONES del mapa, no códigos meramente tolerados.** Cuando el paso 4
+> construya la máquina como dato, **estos cinco entran con su fila propia** — si cayeran
+> al cajón de «desconocido: registra y no mueve», un reverso real dejaría el pedido
+> confirmado con la plata ya devuelta. *La tolerancia es para lo que no conocemos; estos
+> los conocemos.*
+>
+> **(b) El cierre de lote llega diario y NO ES UNA TRANSACCIÓN.** No mueve ningún pedido.
+> **Se identifica cuando aparezca el primero** — su `payload` crudo queda guardado
+> entero en `webhook_events`, que es justamente para lo que la tabla se hizo. Es
+> **candidato a disparador de la conciliación diaria** en lugar de un cron a reloj —
+> *un disparo que llega cuando el lote de verdad cerró es mejor que uno que adivina la
+> hora*. **NO se cablea todavía: primero se mira la forma del evento real.**
+
 **Regla madre: el handler tolera códigos desconocidos sin romper.** La doc de Nuvei tiene al menos un código sin significado definido (`status_detail 30`, "Transaction seated", solo Ecuador). Un código no mapeado **no es un error: es un evento que se registra y no mueve nada**, y dispara aviso a soporte.
 
 Mapa de partida (del plan, sección ④ — a verificar contra la doc viva):
@@ -214,10 +238,17 @@ El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos 
 > detectado **mañana** es plata del cliente retenida y un caso de soporte.
 > - El barrido (`GET /v2/transaction/`) corre **varias veces al día**, y **la última
 >   pasada corre antes del corte del día de Nuvei**.
-> - ⚠️ **La hora del corte NO está medida** — Erick dijo que *«depende del carrier, la
->   hora varía»*. Hasta tener el dato, la última pasada corre a las **22:00
->   America/Guayaquil como SUPUESTO DECLARADO**, y la pregunta va a la lista de Erick:
->   *¿a qué hora cierra el día para efectos del reverso?*
+> - ✅ **LA HORA YA ESTÁ MEDIDA — y el supuesto quedó REFUTADO** (fuente: **Erick,
+>   19-ago, noche**). Los cortes son **17:00 (Medianet)** y **17:50 (Datafast)**.
+>   ~~El supuesto declarado de las 22:00 America/Guayaquil~~ estaba **casi seis horas
+>   tarde**: la «última pasada» habría corrido **después de los dos cortes**, o sea que
+>   el barrido pensado para reversar mismo-día no habría podido reversar nada.
+>   **Cadencia que rige:** una pasada **~12:00** y la **última a las 16:15
+>   America/Guayaquil** — 45 min de margen antes del corte más temprano.
+>   > *Esto es la ley de S84 cobrando de nuevo: el supuesto se declaró CON SU NÚMERO,
+>   > y por eso se pudo refutar con un dato. Si hubiera dicho solo «corre al final del
+>   > día», nadie habría tenido contra qué contrastarlo y el barrido habría nacido
+>   > inútil sin que ningún test lo notara.*
 > - Todo hallazgo se registra con su resolución: `confirmado_tardio` ·
 >   `reversado_mismo_dia` · `huerfano_escalado` (los nombres los fija la pista contra lo
 >   que exista en la base, no contra esta letra).
@@ -330,6 +361,20 @@ Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y ca
 ---
 
 ## Historial
+
+- **v1.2 (19-ago-2026, noche — las tres calibraciones de Erick):** ① **el supuesto de
+  las 22:00 queda REFUTADO por dato**: los cortes son **17:00 (Medianet)** y **17:50
+  (Datafast)**, y la última pasada del barrido se fija en **16:15 America/Guayaquil**
+  con una previa ~12:00. *El supuesto estaba casi seis horas tarde — el barrido habría
+  corrido después de los dos cortes y no habría podido reversar nada. Se pudo refutar
+  porque se había declarado con su número.* · ② **recurrencia con Diners CONFIRMADA**
+  (OTP en tokenización, débito limpio, las tres marcas): **cero cambio de código**,
+  confirma E2 y saca a la recurrencia de «bloqueada por incógnita» sin meterla al
+  alcance de S101 · ③ **el webhook notifica TODO evento**: los códigos de reverso
+  (27 · 28 · 7 · 34 · 29) pasan a ser **transiciones del mapa, no códigos tolerados**,
+  y el **cierre de lote** —diario, y que no es una transacción— queda como **candidato
+  a disparador de la conciliación diaria**, sin cablear hasta ver la forma del evento
+  real.
 
 - **v1.1 (19-ago-2026, S101 — mesa de la tarde + cierre):** aplica **E1-E7** de
   `docs/ENMIENDA_S101_MOTOR_v1.1.md`, que **se conserva porque el porqué no se borra**.

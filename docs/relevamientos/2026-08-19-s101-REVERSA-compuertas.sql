@@ -1,0 +1,11 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260821020000_s101_compuertas_pre_cobro.sql
+-- S101-A · 19-ago-2026
+--
+-- 🔴 QUÉ NO DESHACE: nada de datos — la función solo LEE. Revertir la borra y
+--    deja el débito sin sus compuertas. Si ya hay un llamador de débito vivo,
+--    revertir esto lo deja cobrando sin verificar nada antes de tocar la
+--    tarjeta, que es exactamente lo que E3 existe para impedir.
+--    ⇒ No revertir mientras exista un llamador de débito.
+-- ═══════════════════════════════════════════════════════════════════════════
+DROP FUNCTION IF EXISTS public.verificar_compuertas_pre_cobro(uuid, text);
