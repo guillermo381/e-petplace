@@ -1792,10 +1792,21 @@ export const clienteEs = {
     // S100-D: `pasoPagando` murió con su escalón — `pagando` es ANTES de
     // que exista una promesa, así que no es peldaño (receta de B §1). Su
     // voz la pone ahora el catálogo (`narrativa_nombre`), no este mapa.
-    pasoConfirmado: 'Confirmado',
-    pasoPreparando: 'Preparando',
-    pasoEnCamino: 'En camino',
-    pasoEntregado: 'Entregado',
+    // 🔴 S100d · LAS VOCES DE LA ESCALERA PASAN DE ETIQUETA A RELATO.
+    // Firma del founder: *«debería salir con la escalera y un mensaje de
+    // "estamos preparando tu pedido"… muy parecido a como lo maneja Rappi»*.
+    // ⏪ Decían «Confirmado · Preparando · En camino · Entregado» — **rótulos
+    // de estado de máquina**: nombran la casilla, no le cuentan nada a nadie.
+    // Ahora **narran en primera persona del plural**, que es lo que hace la
+    // referencia: *quien mira no quiere saber en qué estado está su pedido —
+    // quiere saber qué está pasando con su comida.*
+    // ⚠️ Y NO rompen la fila de la lista: en `registro="compacta"` la pieza
+    // usa la etiqueta **solo para el lector de pantalla** (medido en su
+    // fuente), así que el largo nuevo no toca la tira de cuatro nodos.
+    pasoConfirmado: 'Recibimos tu pedido',
+    pasoPreparando: 'Estamos preparando tu pedido',
+    pasoEnCamino: 'Tu pedido va en camino',
+    pasoEntregado: 'Tu pedido llegó',
     // S100b-D · LA VOZ DEL PEDIDO QUE TODAVÍA NO TIENE RECORRIDO. El NOMBRE
     // del estado lo pone el catálogo (`narrativa_nombre`); esto explica qué
     // significa. Tiene que ser verdad para los DOS casos que `pagando` tapa

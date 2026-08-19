@@ -102,13 +102,34 @@ salió de medir esta app en S99-B. Estas tres son su fuente, ahora en el repo.
 |---|---|---|
 | `referencia-rappi-seguimiento-escalera-y-rango.jpeg` | Seguimiento · escalera horizontal + mapa | **La escalera de CUATRO nodos con ícono adentro** y la línea que se rellena hasta el actual — el nodo futuro queda hueco y gris. Y arriba, **el estado narrado como titular en voz humana** («Tu Rappi va en camino a tu dirección») en vez de una etiqueta de máquina. **La hora es un RANGO, no una promesa** (`Entrega actualizada 11:40 PM – 12:05 AM`) — *un rango que se corrige no miente; una hora exacta sí.* Es la vara literal de nuestra escalera. |
 | `referencia-rappi-hitos-con-hora.jpg` | Seguimiento · lista vertical de hitos | **La otra forma de lo mismo, y la que S99 §5bis venía pidiendo: los hitos apilados con SU HORA.** Cumplido = check verde lleno · en curso = anillo verde hueco **y es el único que muestra hora** (`08:42 PM`) · futuro = gris apagado y sin hora. **Ese dato ya existe en nuestro motor** — es la forma lo que faltaba. Debajo, la tarjeta del repartidor con dos acciones (`To call` en contorno, `Chat` en sólido: *una sola primaria*). |
+| 🔴 `referencia-pedidosya-seguimiento-hitos-con-hora.jpg` | **PedidosYa** · seguimiento: escalera horizontal + hitos verticales con hora | **ES DE PEDIDOSYA, NO DE RAPPI** — lo dice adentro: *«Delivery a cargo de PedidosYa»*. **Cierra el hueco que el canon reclamaba desde S99.** Trae las DOS formas juntas: la **escalera horizontal de 4 nodos con glifo** arriba (tres llenos, el futuro hueco gris) y **debajo los mismos hitos apilados con su hora** (`12:13 · 12:15 · 12:32`). Tres cosas que no están en las de Rappi: ① **el hito habla POR SU NOMBRE a la persona** («Veronica, recibimos tu pedido») · ② **la acción del hito actual va INLINE en su renglón** (`Ver mapa` en rojo), no en una carta aparte — *la acción vive donde está el estado que la justifica* · ③ **la ventana va abajo, en su propia zona con reloj** (`Entrega actualizada entre 12:34 - 12:44`). ⚠️ Y difiere de Rappi en el PESO: acá los cumplidos van en texto negro y **solo el futuro recede a gris**; en Rappi los cumplidos también recibian gris. *Las dos son defendibles y no son la misma decisión.* **Llegó como `Rappi traking 1.jpg`** — nombre equivocado de app; se renombró al abrirla. |
+| `referencia-rappi-repartidor-detalle-de-ruta.png` | **Rappi · app del REPARTIDOR** — detalle de la ruta con sus paradas | ⚠️ **NO es la pantalla del cliente**: es la del repartidor eligiendo ruta (`Continuar`, `¿Hay algo mal en la ruta?`). **Su valor es que muestra la gramática de nodos en su forma más limpia:** cumplido = **disco LLENO con check** y **texto GRIS** · actual = **ANILLO HUECO en color con glifo adentro** (la casita del destino) y **texto NEGRO**. *Es la vara literal de la enmienda a 19.8 que el founder firmó el 19-ago: el actual va HUECO y se distingue por color y peso, no por relleno.* **Llegó como `Rappi trakinng2 .png`** — con espacios y error de tipeo; se renombró. |
 | `referencia-rappi-mapa-rango-y-codigo.png` | Seguimiento · mapa a sangre + código de entrega | **El rango de entrega como banda flotante SOBRE el mapa**, con la hora en verde y grande. **El código de entrega con su advertencia adentro** (`Código: 298 — Compártelo a tu Rappi solo cuando tus productos sean entregados`): *el código y la regla de cuándo darlo viven juntos, porque separados nadie lee la regla.* Y la honestidad operativa que nos sirve: **dice que el repartidor va a entregar otro pedido antes** en vez de esconderlo. ⚠️ **Este archivo llegó con el nombre `nuestro-barra-s99-141a372d.png`** — nombre de un archivo NUESTRO que vive en `docs/laminas/referencias/`. Se renombró en el depósito; el original sigue intacto en su carpeta. |
 
 ---
 
-## ⚠️ LO QUE ESTA CARPETA **NO** TIENE — declarado, no rellenado
+## ✅ EL HUECO DE PEDIDOSYA — **CERRADO el 19-ago-2026**
 
-**No hay ninguna captura de PedidosYa.** El canon de S99 §5bis la reclamaba
+**Lo cierra `referencia-pedidosya-seguimiento-hitos-con-hora.jpg`**, que el
+canon reclamaba desde **S99 §5bis** como primer ítem del pulido con dueño
+FOUNDER.
+
+🔴 **Y cómo estuvo a punto de no cerrarse nunca: llegó llamándose `Rappi
+traking 1.jpg`.** Por el nombre, dos pistas la dieron por una captura de
+Rappi ya existente y **el hueco siguió declarado abierto mientras el objeto
+estaba en la carpeta**. Se cerró **abriendo el archivo**, no leyendo su
+nombre — adentro dice *«Delivery a cargo de PedidosYa»*.
+
+> **Un nombre de archivo es una AFIRMACIÓN, y vale exactamente lo que vale
+> quien lo tipeó.** Acá el nombre afirmaba la app equivocada, y **el error no
+> se propagó porque alguien miró la imagen antes de escribir la fila.**
+
+*Se conserva el relato del hueco abajo, tachado y no borrado: el modo de
+falla que lo mantuvo abierto es más útil que la fila que lo cierra.*
+
+### ~~LO QUE ESTA CARPETA NO TIENE~~ *(VENCIDO — ver arriba)*
+
+~~**No hay ninguna captura de PedidosYa.**~~ El canon de S99 §5bis la reclamaba
 —«seguimiento con nodos e hitos»— como primer ítem del pulido con dueño
 FOUNDER. **Sigue sin objeto en el repo.**
 
