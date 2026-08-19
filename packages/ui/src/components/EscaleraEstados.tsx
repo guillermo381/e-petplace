@@ -492,13 +492,33 @@ export function EscaleraEstados({
                   escalera se leía como cuatro frases del mismo peso con una
                   más gorda.*
 
-                  ⚠️ **Lo que NO copié, y va como pregunta al founder:** en la
-                  referencia el **actual es un anillo HUECO en color** y acá se
-                  RELLENA (`lleno` incluye `actual`). *Las dos lecturas son
-                  defendibles —la nuestra dice «esto ya está en marcha», la suya
-                  «esto todavía no terminó»— y cambiarla es tocar la gramática
-                  firmada de 19.8, no una dosis.* **Se declara en vez de
-                  cambiarse de callado.** */}
+                  🔴 **QUIÉN RECEDE: NOSOTROS APAGAMOS EL FUTURO, NO EL PASADO —
+                  y es una ELECCIÓN, no una herencia.** Las dos referencias
+                  depositadas hacen cosas OPUESTAS, verificadas mirándolas:
+                  ```
+                  PedidosYa (seguimiento del CLIENTE) …… cumplidos NEGRO · futuro gris
+                  Rappi (app del REPARTIDOR) ……………………… cumplidos GRIS  · actual negro
+                  ```
+                  **Y la diferencia no es de gusto: es de para qué sirve la
+                  lista.** *La del repartidor es una LISTA DE TRABAJO —lo hecho
+                  se aparta porque ya no hay que hacerlo—; la del cliente es un
+                  RELATO, y ahí lo cumplido es lo que te dice que tu pedido
+                  avanza.* ⇒ **seguimos a PedidosYa porque nuestra escalera es
+                  del cliente.** *Se escribe para que la próxima pista sepa que
+                  se eligió, y contra qué.*
+
+                  ⚠️ **Lo que NO cambié: el nodo ACTUAL sigue RELLENO** y en la
+                  referencia es un **anillo HUECO en color con su glifo adentro**
+                  (verificado en `referencia-rappi-repartidor-detalle-de-ruta`).
+                  **Hay evidencia de aparato de que hoy no distingue** —D midió
+                  en `01a01844`: *tres discos idénticos y la negrita cargando
+                  sola*—, **y me llegó por otra pista que el founder lo firmó.**
+                  🔴 **No se cambia con eso:** *el founder me dijo a mí, en esta
+                  misma sesión, «es 19.8 y todavía no la firmó — no la
+                  cambies»*, **y una firma que llega contada por un tercero no
+                  reemplaza a la que se recibió de primera mano.** *Ya perdimos
+                  vueltas por letra anunciada cuyo literal no viajó (L-142).*
+                  **Se aplica cuando el founder lo diga acá.** */}
               <Texto
                 variante={preside ? 'seccion' : 'cuerpo'}
                 color={cortado || paso.estado === 'pendiente' ? 'tertiary' : undefined}
