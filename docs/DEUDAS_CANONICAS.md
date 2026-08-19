@@ -11711,6 +11711,41 @@ defecto que se curó hoy en el cambio de clave.
 
   **⇒ Y su corolario EXIGIBLE para toda regla nueva de la casa: nace con casos que NO debe atrapar.** *Un fixture que solo prueba que dispara no probó que discrimina* — B lo hizo con dos legítimas adentro a propósito, **y esa es la vara desde ahora.**
 
+### Lecciones S100d·bis (L-311 → L-312) — depositadas por B el 18-ago-2026, **firmadas por el founder** al aceptar las tres curas del relevo
+
+- **L-311 — UN CONTROL INVISIBLE Y UNO AUSENTE SON INDISTINGUIBLES DESDE AFUERA (S100d·bis, relevo de B — con aparato).**
+
+  **Reporte del founder sobre el bundle `01a01807`:** *«me sale el uno, me deja tipearlo, PERO YA NO ME DEJA poner las opciones de aumentar y disminuir con los botones de al lado»*.
+
+  **El árbol daba VERDE, con las tres celdas y sus cajas enteras:**
+  ```
+  Quitar de la compra …… x[ 33,4 ·  67,2]  33,8 × 33,8   presente
+  campo («1») ……………………… x[ 86,4 · 118,4]  32,0 × 27,4   presente
+  Más ………………………………………… x[137,6 · 171,4]  33,8 × 33,8   presente
+  ```
+  **Los píxeles decían lo contrario.** Barrido de **26 muestras** por el centro del `+`: **las 26 dieron `(252,188,29)`**, sin una variación. **Los signos se pintaban ocre sobre el bloque ocre — contraste `1.00`.**
+
+  > **De ahí sale la lección y no es sobre colores: quien mira no puede distinguir «no se ve» de «no está», así que reporta el EFECTO.** *Por eso el literal fue «no me deja» y no «no se ven los botones»* — y por eso el árbol dio verde: **medía LAYOUT y lo que fallaba era el PINTADO.** *Es la segunda vez en la misma pieza y en la misma vuelta que el árbol dice «está» sobre algo que el ojo no tiene.*
+
+  ⚠️ **Su corolario, que es lo que costó las hipótesis equivocadas: cuando TRES cambios entran en el mismo commit, el síntoma no dice cuál fue.** La mutación, el calibre y el campo tipeable entraron juntos; **las tres pistas —y yo— sospechamos de una de las tres, y la causa no era ninguna.** *Un síntoma no señala culpables: solo dice que algo cambió.*
+
+  ✅ **Y la cura no fue corregir el color equivocado: fue que hubiera UNO.** La pieza **ya declaraba el par correcto en su comentario** (`ctaTexto` sobre `cta`, 9.96) y **solo el número lo cumplía** — dos valores que deben coincidir saliendo de dos lugares (**L-284**). *Corregir el segundo lo dejaba listo para divergir de nuevo.*
+
+- **L-312 — UNA DERIVACIÓN QUE PIERDE LA CARRERA FALLA HACIA SU VALOR DE ARRANQUE, EN SILENCIO (S100d·bis, relevo de B — con aparato).**
+
+  **Los headers desalineados NO eran una regresión: la cura nunca estuvo corriendo.** `Encabezado` deriva su inset midiendo dónde quedó parado (`measureInWindow`) y agrega *solo lo que falta*. **El discriminador, medido en el mismo aparato y el mismo bundle:**
+  ```
+  carnet.tsx      padre con `paddingTop` en JS   → derivó  0   ✅ 34,1 dp
+  explorar/index  padre `SafeAreaView` (nativo)  → derivó 34   ❌ 88,2 dp
+  ```
+  **Contra un padre que aplica su padding del lado nativo, la medición pierde la carrera y se queda con su valor de arranque — el conservador — sin decirlo.** Su comentario afirmaba *«el defecto deja de ser expresable»* y **el defecto estaba en la pantalla mientras lo afirmaba.**
+
+  > ⇒ **una medición asincrónica solo es segura si su valor de arranque ya es correcto.** Con el arranque bueno, perder la carrera no cuesta nada; **con el arranque malo, perder la carrera ES el defecto** — y es invisible, porque el valor conservador se ve razonable. *Es L-192 con otro sujeto: una verificación cuyo modo de falla es el silencio no es una verificación.*
+
+  ✅ **La cura fue sacarle la carrera de encima**, no ganarla: **18 envoltorios dejan de reservar el tope**, con lo que todos quedan en el caso que la derivación **sí** resuelve. **Y su guard —`R55`— es POR OCURRENCIA y jamás por archivo**, decidido por un caso medido: `checkout-reserva.tsx` tiene **cinco** `SafeAreaView edges={['top']}` y **solo una envuelve un techo**; las otras cuatro son estados centrados que **sí deben reservar**. *Una regla por archivo habría marcado las cinco y la cura habría mandado cuatro pantallas debajo de la barra de estado — la cura peor que el defecto.*
+
+  🔴 **Y su rojo no fue sintético:** corrida contra el árbol pre-cura da **18**, post-cura **0**. *La validación más fuerte que un instrumento puede tener es que el defecto vivo sea su rojo.*
+
 ### Lecciones S100d·bis (L-308 → L-310) — depositadas por B el 18-ago-2026
 
 - **L-308 — LOS BOUNDS PRUEBAN QUÉ CAJA ES; UN STRING ÚNICO PRUEBA DE QUÉ PROP SALIÓ (S100d·bis — hallazgo de la pista C).**
