@@ -18158,3 +18158,230 @@ prestador **no es «tealDark en los dos»**. Se mide antes de escribirlo.
 
 **Dueño:** B (`packages/ui` + el juez). **Disparo:** el primer
 `SelectorOpcion entidad` en el prestador, o la próxima tanda que toque R27.
+
+---
+
+## L-313 — UN NÚMERO PUEDE FALLAR POR LA PREGUNTA O POR SU INSUMO, Y DESDE ADENTRO LOS DOS SE VEN IDÉNTICOS
+
+**Firmada por el founder, S100d·bis (19-ago-2026).** Nació como candidata en el
+acta de B, D la marcó **NO RIGE** esperando esta firma, y llega con **dos casos
+del mismo día, uno por cabeza** — que es lo que la vuelve enseñable en vez de
+elegante.
+
+> **Un número correcto puede ser un dato falso de dos maneras distintas, y ninguna
+> se nota desde adentro: porque contesta OTRA PREGUNTA, o porque su INSUMO era
+> otra cosa. Lo único que las separa de un dato creíble y falso es DECLARAR
+> CONTRA QUÉ SE MIDIÓ.**
+
+**EL CASO DE LA PREGUNTA (B).** Derivó el costo vertical de agrandar el nodo de
+10 a 32 (**+12,0**) y lo midió sobre otro objeto (**+11,9**). *Dos cuentas
+independientes, un número: impecable.* **Y el costo HORIZONTAL no estaba ni en la
+derivada ni en la medición, porque las dos miraban el alto** — el nodo crecido
+alcanzó el texto: `x[22,0 · 54,0]` contra un texto que arranca en `51,9` ⇒
+**−2,1 dp, se pisaban.** *No falló la medición: faltó la segunda pregunta.*
+**Lo encontró el ojo del founder** (*«la letra está pegada a los pasos»*), **no un
+instrumento.**
+
+**EL CASO DEL INSUMO (D).** Derivó el hueco viejo en **4,2 dp** tomando un `24`
+que era **interlineado y no nodo**; el real era **7,0**.
+
+**LO QUE SALVÓ A LOS DOS ES LO MISMO, Y ES BARATO:** los dos habían **declarado
+contra qué midieron** — D incluso lo dejó condicional (*«si ese 24 era el
+interlineado, la cuenta se cae»*). ⇒ **las dos correcciones costaron UNA LÍNEA en
+vez de una sesión.** *Un número sin su vara declarada no se puede corregir: se
+puede, como mucho, dejar de creer — y eso llega siempre tarde.*
+
+**Es la forma general de L-285**, y su parentesco con el corolario de la casa:
+*el número correcto de la pregunta equivocada se siente exactamente igual de
+sólido que el de la correcta.*
+
+---
+
+## L-314 — UNA REGLA QUE SOLO PROTEGE CUANDO VES VENIR EL PROBLEMA NO ES UNA REGLA: ES ATENCIÓN
+
+**Firmada por el founder, S100d·bis.**
+
+> **La regla que sirve es la que cubre EL CASO QUE NO VISTE. Y para que se sepa
+> cuál es cuál, alguien tiene que RECHAZAR EL CRÉDITO — porque desde afuera la
+> previsión y la costumbre producen exactamente el mismo código, y quien lee el
+> diff no puede distinguirlas.**
+
+**El caso:** D le atribuyó a B **previsión** por haber derivado
+`RIEL_VERTICAL = NODO` en vez de teclear un número. **B rechazó el crédito: lo
+escribió ANTES de saber que el hueco existía**, por costumbre de L-284 — no
+porque hubiera anticipado el defecto.
+
+*La distinción importa porque decide qué se puede confiar hacia adelante.* Una
+derivación que nació **por costumbre** protege el próximo caso que nadie vio; una
+que nació **porque el autor vio venir éste** solo protege los que alguien
+anticipe. **El diff es idéntico; la garantía, no.**
+
+⚠️ **Corolario operativo:** en un acta, atribuir previsión a una decisión que fue
+costumbre **infla la confianza en el mecanismo**. *El único que puede corregirlo
+es quien la tomó, y solo si se molesta en decir que no la vio venir.*
+
+---
+
+## L-315 — EL MAQUILLAJE NO ES MENTIR: ES DEJAR DE MIRAR UNA DIFERENCIA
+
+**Firmada por el founder, S100d·bis.**
+
+> **El reporte falso más probable no se fabrica: se obtiene NO DISTINGUIENDO dos
+> cosas que en pantalla se parecen. No hace falta inventar nada — alcanza con
+> dejar de mirar una diferencia.**
+
+**El caso, y por eso es el que enseña:** el estado `confirmado` **como hito
+ACTUAL** nunca se vio (cero pedidos ahí — D-764: sin pasarela nada llega). **Pero
+la voz correcta ESTABA en pantalla**: «Recibimos tu pedido», renderizada y
+legible, **como paso ya cumplido** de un pedido `en_camino`.
+
+⇒ **reportarlo verde no habría requerido inventar nada.** Alcanzaba con no
+distinguir *un paso cumplido* de *un hito presidiendo, en negrita y con su
+anillo*. **La voz es la misma; el estado que prueba, no.**
+
+**La cura es la orden del founder, y va con la ley:** *«si no hay ningún pedido
+pagado con el que verificarlo, decilo — no midas otro estado para reportarlo como
+éste»*. ⇒ **un verde se declara sobre EL caso, jamás sobre uno que se le parece**,
+y cuando el caso no existe **se dice que no existe**.
+
+---
+
+# DEUDAS S100d·bis — PISTA A (19-ago-2026)
+
+> **Se depositan acá y no solo en el resumen de la vuelta por el precedente de
+> `D-757`:** *un hallazgo que vive en un parte es un hallazgo que la sesión
+> siguiente no encuentra.* Los seis números se verificaron libres **en todo el
+> repo**, no solo en este archivo.
+
+## 🔴 D-844 — SEIS VISTAS EXPONEN GMV, MRR Y EL RANKING DE USUARIOS A CUALQUIERA CON LA ANON KEY
+
+`v_pitch_metrics` · `v_mrr` · `v_gmv_mensual` · `v_metricas_tiempo_real` ·
+`v_crecimiento_usuarios` · `v_ranking_usuarios`.
+
+**Mecanismo:** no declaran `security_invoker`, así que corren con los privilegios
+de su dueño (`postgres`) y **la RLS de las tablas de abajo no se evalúa**. Y
+`anon` tiene `SELECT` — **la anon key viaja pública en cada bundle, por diseño**.
+
+**Rojo producido por camino real** (no inferido de los grants), 18-ago-2026:
+`v_pitch_metrics`, `v_mrr`, `v_metricas_tiempo_real`, `v_crecimiento_usuarios` y
+`v_ranking_usuarios` devolvieron **HTTP 200 con fila**.
+**Contra-caso que lo vuelve sólido:** la MISMA llave contra tablas da `pedidos`
+**401**, `familias` **404**, `mascotas` **200 con 0 filas** ⇒ *la llave se comporta
+bien sobre tablas y no sobre estas vistas.*
+
+⚠️ **NO se cerraron a propósito, y no es un olvido:** las consume
+**`e-petplace-admin`**, que S95 midió que entra con la credencial **`anon`** sobre
+esta misma base ⇒ **cerrarlas deja el tablero del founder en blanco CON CERTEZA,
+no como riesgo.**
+
+**Dueño:** founder. **Disparo:** cuando el admin migre a un camino autenticado, y
+🔴 **ANTES de compartir `/inversores` con alguien externo.**
+
+## 🔴 D-845 — `consentimientos` ACEPTA UN CONSENTIMIENTO A NOMBRE DE CUALQUIERA
+
+La policy `consentimientos_insert` es `WITH CHECK true` para `{authenticated,
+anon}`, `anon` **tiene** el grant de INSERT, y `user_id` es **nullable y sin
+default** ⇒ **se puede insertar un consentimiento con cualquier `user_id`**.
+
+**S92 conservó el INSERT anónimo A PROPÓSITO**, con su razón escrita: *«aceptar
+términos antes de tener cuenta es un flujo legítimo»*. **Eso sigue siendo cierto.**
+Lo que la decisión no cubrió es que el flujo legítimo necesita `user_id IS NULL`,
+y `WITH CHECK true` concede mucho más.
+
+🔴 **LA CURA DE UNA LÍNEA ESTÁ FALSADA — se probó y rompe el registro.** El único
+escritor real en los siete repos (`e-petplace-v2/src/pages/Login.tsx:328`) inserta
+**con `user_id`** justo tras `signUp`, y **cuando el alta exige confirmar el
+correo `data.session` es null ⇒ el cliente sigue siendo `anon` y `auth.uid()` es
+NULL** ⇒ `WITH CHECK (user_id IS NULL OR user_id = auth.uid())` **rechaza y el
+alta falla**.
+
+⇒ **el flujo legítimo y la forja son indistinguibles en la base**: los dos son
+«anon escribiendo un `user_id` ajeno». **La cura que cierra es estructural** — que
+el consentimiento deje de ser *un dato que el cliente afirma* y pase a ser *una
+consecuencia del registro* (RPC `DEFINER` o trigger en el alta).
+
+**Dueño:** mesa. **Disparo:** turno propio — toca `e-petplace-v2`, web viva fuera
+de este monorepo. **Riesgo declarado y aceptado por el founder mientras tanto: la
+forja es posible y se detectaría en auditoría, no en la puerta.**
+
+## 🔴 D-846 — 25 VARIANTES TIENEN MÁS DE UNA OFERTA PUBLICADA, CONTRA LA FIRMA «UNA OFERTA POR PRODUCTO»
+
+Medido contra la base, 18-ago-2026:
+
+    variantes con MÁS DE UNA oferta publicada …… 25
+    duplicadas por EL MISMO vendedor ……………………  0
+    duplicadas por vendedores DISTINTOS ……………… 25
+    brecha de precio máxima entre ellas ………………… 48 %
+    UNIQUE que lo impida ………………………………………… NINGUNO
+
+⇒ **no es error de carga: es el caso MULTI-VENDEDOR**, que `MODELO_DESPENSA` dice
+que v1 no tiene (un solo vendedor, «una oferta por producto»).
+
+🔴 **Y no es cosmético: la vitrina curada es el foso entero** —*«mostrar siete
+opciones a una app que conoce a la mascota es admitir que no sabe»*— **y se apoya
+en que haya UNA.** Hoy **la ficha muestra una de las dos sin decir cuál ni por
+qué** (L-289 exacto).
+
+**Lo que la cura de C hace y lo que NO:** cuando dos presentaciones se llaman
+igual, el chip **agrega su precio** («12.7 kg · $57.19» contra «12.7 kg · $94.50»)
+⇒ **hace que el defecto se VEA. No lo resuelve — no puede: es del motor y del
+catálogo.**
+
+⚠️ **Y su consecuencia aguas abajo, medida por D:** su lista de pedidos titula por
+nombre de producto ⇒ **dos pedidos del mismo producto a vendedores distintos se
+ven idénticos**, y hoy nada los separa.
+
+**Dueño:** mesa. **Disparo:** o la letra cambió o el dato la viola — se decide
+antes de la primera venta real.
+
+## 🟡 D-847 — `guardarComoOtra` DEL MODAL DE DIRECCIÓN: CONSTRUIDO Y NO EJERCIDO
+
+El camino «Guardar como otra dirección» está construido y **nadie lo ejerció**.
+
+⚠️ **El fallo fue del instrumento, no de la pantalla, y se declara así:** el alias
+no entró al campo con `adb shell input text`, y **con el alias vacío el botón
+estaba CORRECTAMENTE deshabilitado**, así que el toque cayó en la barra de tabs.
+
+**Lo que sí quedó verificado en aparato:** los cuatro pasos del flujo y su
+discriminador (guardar → re-entrar → **lat/lon idénticos**).
+
+**Dueño:** A. **Disparo:** la próxima vuelta con aparato — es un ejercicio de
+minutos.
+
+## 🟡 D-848 — EL LOTE DE CUATRO VISTAS CERRADAS NO ESTÁ PROBADO POR SU SALIDA
+
+`v_conversion_funnel` · `v_resenas_todas` · `v_daas_eligible_users` ·
+`v_criaderos_publicos` recibieron `security_invoker` (migración
+`20260820080000`).
+
+**Solo `v_resenas_todas` está probada cerrada por su salida** (401). Las otras
+tres dan `200 · 0 filas`, y **medido con privilegio las cuatro vistas están
+VACÍAS** ⇒ **ese cero no distingue «la RLS bloquea» de «no hay nada».**
+
+*Es la advertencia del propio censo mordiendo su verificación: un cero de hoy no
+es un control.*
+
+**Lo que SÍ está probado:** el mecanismo (el cinturón + el 401 de reseñas prueban
+que `security_invoker` surte efecto).
+
+**Dueño:** A / motor. **Disparo:** **la primera venta y la primera reseña reales**
+— antes no hay nada que medir.
+
+## 🟢 D-849 — `uq_direccion_principal` Y `uq_direcciones_principal_por_user` SON ÍNDICES DUPLICADOS
+
+Misma definición, medido. Ninguno hace daño; sobra uno.
+
+**Dueño:** A / motor. **Disparo:** la próxima migración que toque
+`direcciones_guardadas`.
+
+## ⚠️ NO NACE FICHA — dos que quedan apuntadas a deuda existente
+
+**① `confirmado` como hito ACTUAL nunca se vio.** No es deuda nueva: **está
+bloqueada por `D-764`** (sin pasarela no llega ningún pedido a ese estado). *La
+voz existe y es correcta; lo que nadie vio es el hito presidiendo.*
+
+**② El detalle del pedido crece ~100 dp** (+64,4 medido por la carta de «Seguir
+el pedido», +36 derivado por el nodo 10→32). **No es defecto: la pantalla
+scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
+que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
+suma existe para la tercera cosa que quiera entrar.
