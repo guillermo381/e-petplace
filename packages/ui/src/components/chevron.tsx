@@ -62,8 +62,10 @@ export const CHEVRON: Record<DireccionChevron, string> = {
  * extensión.
  * ══════════════════════════════════════════════════════════════════════ */
 
+import { View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 
+import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
 /** El tamaño de los tres portadores vivos. Se conserva idéntico: esta
@@ -150,12 +152,42 @@ export interface ChevronProps {
  *  LLEVA**, y esto lleva—. *Un lápiz sería una segunda señal para el
  *  mismo gesto. Lo que su queja pide —que se VEA— lo dan los dos; lo que
  *  decide es cuál ya significa eso en el resto del producto.* */
+/* 🔴 EL AIRE DEL DISCO DE `accion` — el trazo no toca su borde.
+   Derivado del lado para que el disco siga al chevron si cambia de tamaño
+   (L-284: dos números que deben coincidir no salen de dos lugares). */
+const RESPIRO_ACCION = 8
+
 export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila', tono = 'neutro' }: ChevronProps) {
   const { theme } = useTheme()
-  return (
-    /* `aria-hidden`: el chevron nunca es la etiqueta de nada — lo que un
-       lector de pantalla anuncia es la ACCIÓN, y ésa la declara quien
-       monta. Los tres portadores vivos ya lo ocultan igual. */
+  /* 🔴 `accion` ES RELLENO, NO TINTA — enmienda a F-OCRE, firma del founder
+     del 18-ago-2026 (S100d·bis, H-207).
+
+     **Su regla, verbatim:** *«el ocre NO se usa como tinta sobre fondo — se
+     usa como RELLENO con letra tinta encima»*.
+
+     ── LO QUE SE MIDIÓ ANTES DE ELEGIR, porque él pidió proponer y no forzar ──
+     El chevron **no es texto**: su piso es **3,0** (WCAG 1.4.11), no 4,5.
+     ```
+     ocre como TRAZO, sobre carta / sobre el fondo …… 1,70 / 1,57   ❌
+     (a) RELLENO ocre + trazo en `ctaTexto` …………………… **9,96**      ✅
+     (b) oscurecer el trazo hasta 3,0 ………………………………… exige L≈0,30 contra
+         el L=0,57 del oro ⇒ **un ámbar oscuro que YA NO ES el oro de la
+         casa**: sería un color nuevo, no una dosis. ❌
+     ```
+     ⇒ **gana (a), que además es la salida que el propio founder nombró:**
+     *«que el acento viva en el fondo de su caja»*. **El ocre no se apaga:
+     cambia de lado.**
+
+     ⚠️ **Y el dato incómodo que aparece al medir, declarado y NO curado
+     acá:** el tono `neutro` —`text.tertiary`, el default de los tres
+     portadores vivos— da **2,40 / 2,22** y **tampoco llega a 3,0**. *Su
+     palette lo declara «decorativo», y un chevron que es la única señal de
+     que algo se despliega no es decorativo.* **No se toca en esta vuelta:
+     cambiarlo mueve los tres portadores de las dos apps y no es lo que el
+     founder firmó.** Va como hallazgo. */
+  const esAccion = tono === 'accion' && color === undefined
+  const trazo = color ?? (esAccion ? theme.accent.ctaTexto : theme.text.tertiary)
+  const dibujo = (
     <Svg width={lado} height={lado} viewBox="0 0 24 24" fill="none" aria-hidden>
       <Path
         d={CHEVRON[direccion]}
@@ -163,11 +195,31 @@ export function Chevron({ direccion, color, lado = LADO, enfasis = 'fila', tono 
            superficie que cambia el contraste—, y si no lo hay manda el TONO,
            que es donde vive el acento de la casa. La pantalla nunca escribe
            el ocre. */
-        stroke={color ?? (tono === 'accion' ? theme.accent.cta : theme.text.tertiary)}
+        stroke={trazo}
         strokeWidth={enfasis === 'seccion' ? 2.75 : 2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </Svg>
+  )
+  if (!esAccion) return dibujo
+  return (
+    <View
+      /* `aria-hidden` viaja con el dibujo: el disco es soporte, no contenido
+         — lo que el lector anuncia sigue siendo la acción de quien monta. */
+      aria-hidden
+      style={{
+        width: lado + RESPIRO_ACCION,
+        height: lado + RESPIRO_ACCION,
+        borderRadius: radius.full,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // Memorial degrada solo: `accent.cta` ahí es tinta (un memorial no
+        // celebra), y `ctaTexto` su papel. Ningún color escrito acá.
+        backgroundColor: theme.accent.cta,
+      }}
+    >
+      {dibujo}
+    </View>
   )
 }

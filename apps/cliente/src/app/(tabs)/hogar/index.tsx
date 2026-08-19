@@ -1700,8 +1700,17 @@ export default function Hogar() {
             <View style={{ gap: spacing[2] }}>
               <Texto variante="seccion">{t('despensa.reclamoEntrada')}</Texto>
               <Texto variante="apoyo">{t('despensa.reclamoEntradaDetalle')}</Texto>
+              {/* 🔴 ERA `acento` — enmienda a F-OCRE, firma del founder del
+                  18-ago-2026 (H-207). **`acento` es LETRA oro sin relleno**, y
+                  el oro como tinta no llega en superficie clara:
+                  **1,70 sobre esta carta blanca**, contra un piso de 4,5.
+                  `primario` es el MISMO oro del otro lado del par —relleno
+                  ocre, letra tinta— y da **9,96**.
+
+                  ⚠️ **Pesa doble acá: es la pantalla de ENTRADA**, o sea
+                  probablemente el primer ocre que ve una familia. */}
               <Boton
-                variante="acento"
+                variante="primario"
                 etiqueta={t('despensa.reclamoCta')}
                 onPress={() => router.push('/despensa/reclamo')}
               />

@@ -3734,13 +3734,17 @@ function r45(archivos) {
    superficie oscura y el par cambia. *Su rojo dice «acá el oro va como
    tinta», jamás «esto es ilegible en todos los temas».*
 
-   ── EL BASELINE NO ES UNA EXENCIÓN: ES UNA DEUDA CON DUEÑO ───────────
-   El caso vivo es `hogar/index.tsx` — **la pantalla de entrada de la app**,
-   probablemente el primer ocre que ve una familia. **NO se curó a propósito:
-   `accent.cta` como acción es F-OCRE, firma del founder del 18-ago**, y
-   cambiarle el color a un acento recién firmado no es de esta pista.
-   *Se congela para que no CREZCA mientras la mesa decide.* SOLO-BAJA. */
-const BASELINE_R56 = ['apps/cliente/src/app/(tabs)/hogar/index.tsx']
+   ── DURA EN 0 — Y NACIÓ SOLO-BAJA CON UN CASO ADENTRO ────────────────
+   ⏪ **Nació con `hogar/index.tsx` en su baseline**, declarado como *deuda con
+   dueño y no exención*: el ocre como acción es **F-OCRE**, y cambiarle el
+   color a un acento recién firmado no era de esta pista.
+
+   ✅ **El founder lo firmó el mismo día y el baseline murió con la firma:**
+   *«el ocre NO se usa como tinta sobre fondo — se usa como RELLENO con letra
+   tinta encima»*. El caso pasó a `primario` (**1,70 → 9,96**) y esta regla
+   **DURA EN 0**. *Un baseline que se vacía por decisión, y no por
+   costumbre.* */
+const BASELINE_R56 = []
 
 function r56(archivos) {
   const fallos = []
@@ -3766,7 +3770,7 @@ function r56(archivos) {
   fallos.push(...ancla('R56', vivo, 1, '`acento` sigue siendo letra sin relleno (0 = la receta cambió y esta regla perdió su sujeto)'))
   return {
     fallos,
-    info: `${[...new Set(ofensores)].length} montaje(s) de \`acento\` en el cliente · baseline ${BASELINE_R56.length} (hogar/index — la pantalla de ENTRADA; no se curó porque F-OCRE es firma del founder) · SOLO-BAJA · el prestador queda fuera: ahí el slot es teal y da 5,37`,
+    info: `${[...new Set(ofensores)].length} montaje(s) de \`acento\` en el cliente · DURA EN 0 (nació SOLO-BAJA con hogar/index adentro; el founder firmó la enmienda a F-OCRE el mismo día y el caso pasó a \`primario\`: 1,70 → 9,96) · el prestador queda fuera A PROPÓSITO: ahí el slot es teal y da 5,37`,
   }
 }
 
