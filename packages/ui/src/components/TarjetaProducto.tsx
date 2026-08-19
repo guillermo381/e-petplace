@@ -160,8 +160,8 @@
  * una advertencia entera que remite al detalle, no.*
  */
 
-import { Image, Pressable, Text, View } from 'react-native'
-import Animated, { FadeIn } from 'react-native-reanimated'
+import { Image, Pressable, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 
 import {
   temperaturaDeAlergia,
@@ -170,14 +170,14 @@ import {
 } from './AvisoAlergia'
 import { Icono } from './Icono'
 import { PrecioText } from './PrecioText'
-import { ALTO_STEPPER_COMPACTO, StepperCantidad } from './StepperCantidad'
+import { ALTO_STEPPER_ANCHO, StepperCantidad } from './StepperCantidad'
+import { Boton } from './Boton'
+import { Mutacion } from './Mutacion'
 import { Texto } from './Texto'
 import { usePresionado } from './usePresionado'
-import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 
@@ -225,7 +225,6 @@ const RELACION_FOTO = 1
  *  abajo. Hoy no reserva nada: **es el renglón donde el control VIVE**, en
  *  los dos estados. *La constante no cambió de valor ni de origen; cambió de
  *  trabajo, y se dice acá porque su nombre viejo describía el otro.* */
-const ALTO_SLOT_CONTROL = ALTO_STEPPER_COMPACTO
 
 const TOPE_EN_VITRINA = 12
 
@@ -681,216 +680,96 @@ export function TarjetaProducto({
               vio correr.** Su verificación es el primer paso del recorrido:
               **tocar el `+` y que el stepper mida 36, no 18.** */}
           <View style={{ marginTop: 'auto', flexShrink: 0, paddingTop: spacing[2], gap: spacing[2] }}>
-            {/* 🔴 EL PRECIO Y EL CONTROL COMPARTEN EL ESCALÓN — S100d·bis.
+              {/* 🔴 CUARTA ITERACIÓN — Y LA PRIMERA QUE NO ELIGE A QUIÉN
+                SACARLE EL RENGLÓN (S100d·bis).
 
-                **Firma del founder sobre el resultado anterior:** *«no está en
-                el mismo escalón, está uno más abajo ahora todo junto; debemos
-                hacerlo MÁS PEQUEÑO para que quede junto al peso»*.
+                **Firma del founder, después de mandarme a mirar el objeto que
+                ya lo resolvía:** *«el botón Agregar tiene una microanimación y
+                **se transforma** en el selector de cantidad; si eliminás, la
+                microanimación es inversa»*.
 
-                ⏪ **Deroga mi propia forma de esta mañana** (precio arriba,
-                control en su renglón). **Y deroga con ella una cuenta MÍA que
-                era correcta:** demostré que tres blancos de 44 son 132 dp y no
-                entran junto a un precio en 140,3, y concluí que el control
-                necesitaba renglón propio. *El founder miró el resultado y
-                eligió el otro lado del intercambio.* **La cuenta no estaba mal:
-                estaba contestando la pregunta que yo elegí.**
+                ── LO MEDIDO EN LAIKA, en el teléfono del founder ──────────
+                    botón «Agregar» ……………………… 130,8 × 28,8 dp
+                    control [🗑] N [+] ………………… 129,0 × 27,4 dp
+                    sus botones …………………………………  36,6 × 27,4
+                    su caja interna …………………… 130,8   (la nuestra: 140,3)
 
-                **Lo que hace que la firma sea construible sin romper N8:** el
-                calibre `menudo` achica el PÍXEL y no el BLANCO — 26 + `hitSlop`
-                9 = 44, y los blancos se tocan sin pisarse (la cuenta vive en
-                `BOTON_MENUDO`). **70,0 dp de control contra 70,4 disponibles.**
+                ⇒ **el control tiene renglón PROPIO y COMPLETO, y los dos
+                estados ocupan la misma caja.** *Con menos espacio que nosotros
+                les entra cómodo — porque no lo pusieron al lado de nada.*
 
-                ⚠️ **`flexShrink: 0` en el control y el precio cediendo:** si un
-                precio de tres dígitos aprieta la fila, **el que se ajusta es el
-                precio, jamás el control** — *entre un precio apretado y un
-                control cortado, ya sabemos cuál duele.*
+                ⏪ **LAS TRES FORMAS ANTERIORES, DEROGADAS — y ninguna fue un
+                error de cálculo:**
+                  · S100b: el control baja a otra fila ⇒ **la tarjeta crece.**
+                  · S100c (N24): se reserva el hueco ⇒ **el hueco se paga
+                    siempre y el control sigue mudándose de renglón.**
+                  · S100d: escalón propio a la derecha, y después junto a la
+                    presentación ⇒ **la presentación envuelve.**
+                ***Las tres eligieron a quién sacarle el renglón. Ésta no tiene
+                que elegir porque no se lo pide a nadie.***
 
-                ⚠️ **AMBIGÜEDAD DECLARADA, no resuelta a mi gusto:** *«junto al
-                peso»* se leyó como **junto al PRECIO** —el elemento de esa
-                línea, y el más pesado de la tarjeta—. **La otra lectura posible
-                es la presentación** («frasco 300 ml»). *Se declara para que se
-                corrija con una palabra en vez de descubrirse en el próximo
-                gate.* */}
-            <View
-              style={{
-                minHeight: ALTO_SLOT_CONTROL,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: spacing[2],
-              }}
-            >
-              {/* 🔴 LA PRESENTACIÓN COMPARTE EL RENGLÓN CON EL CONTROL —
-                  S100d·bis, palabra del founder cerrando una ambigüedad que
-                  declaré en vez de resolver a mi gusto: *«la cantidad abajo,
-                  junto a la PRESENTACIÓN»* — el renglón del «2 kg», **no el
-                  del $24.90**.
+                ✅ **Y las tres cosas que el founder pidió juntas, juntas:**
+                ① la presentación **recupera su línea entera** ② la tarjeta
+                **no cambia de alto jamás** ③ **los 44 de blanco vuelven sin
+                `hitSlop` forzado** (3 × 44 = 132 ≤ 140,3).
 
-                  ⏪ Vivía arriba, en el bloque de texto, «en su propia línea».
-                  Esa letra sobrevive en su intención —*la presentación es dato
-                  que decide la compra y no compite con el nombre*— y **cambia
-                  de vecino: ahora comparte renglón con el control, no con el
-                  nombre.**
+                🔴 **LA LEY DE MÉTODO, que vale más que esta tarjeta:** la cura
+                salió de **mirar el objeto que ya la resolvía**, en el mismo
+                teléfono, disponible desde el día uno. **L-302.** *Antes de la
+                cuarta iteración de cualquier cosa, se censa quién ya la
+                resolvió.* */}
+            {presentacion === undefined ? null : (
+              <Texto variante="apoyo">{presentacion}</Texto>
+            )}
 
-                  🔴 **EL COSTO, MEDIDO EN EL APARATO Y NO ESTIMADO:**
-                      «frasco 300 ml» …………………………… 91,0 dp
-                      lo que queda junto al control … 62,3 dp
-                  ⇒ **no entra en una línea, y ENVUELVE.** *«60 tabletas» (~75)
-                  también.* Con 62,3 dp entran ~9 caracteres.
+            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
 
-                  **ENVUELVE Y NO SE TRUNCA, y es la ley de esta pieza la que
-                  lo decide, no mi gusto:** su cabecera dice ⛔ *«prohibido
-                  resolverlo encogiendo la letra o truncando la presentación»*.
-                  *Entre una presentación en dos líneas y una presentación
-                  cortada, la cortada es la que hace comprar el producto
-                  equivocado.*
+            {/* EL CONTROL, EN SU RENGLÓN COMPLETO. `Mutacion` sostiene la caja
+                —alto DERIVADO del stepper, jamás tecleado— y cruza las dos
+                formas adentro de ella. La inversa sale sola de `estado`.
 
-                  ⚠️ **Y el acreedor es de DATOS, no de forma:** si la
-                  envoltura se ve mal, la palanca es **la voz de la
-                  presentación** («300 ml» en vez de «frasco 300 ml»), igual que
-                  el nombre curado. *Dimensionar la pieza para el peor dato sin
-                  curar es dejar que el dato malo decida la forma de la casa* —
-                  la misma frase que ya gobierna el nombre, tres párrafos más
-                  arriba de esta pieza. */}
-              <View style={{ flexShrink: 1 }}>
-                {presentacion === undefined ? null : (
-                  <Texto variante="apoyo">{presentacion}</Texto>
-                )}
-              </View>
-              {/* EL TIMBRE. Siempre en esta esquina — ley de la pieza. */}
-              {compra.modo === 'espejo' || !compra.hayStock ? null : compra.cantidad === 0 ? (
-              <Pressable
-                onPress={compra.onAgregar}
-                accessibilityRole="button"
-                accessibilityLabel={t('tarjetaProducto.agregar', { nombre })}
-                hitSlop={8}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: radius.full,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  /* 🔴 EL TIMBRE VA NEUTRO — S100b-B, firma de mesa sobre
-                     un hallazgo MEDIDO, y es lo que más cambia la cara de
-                     la vitrina.
-
-                     **El número que lo obliga:** el censo de acento midió
-                     que la vitrina gasta **1.17 % de sus píxeles en color
-                     de marca, y son los `+`** — uno por tarjeta, todos
-                     idénticos. **N5 pide UN acento por pantalla y la
-                     vitrina tenía uno por PRODUCTO.**
-
-                     ⇒ ***El `+` no pesaba por su tamaño —36 dp con blanco
-                     de 44, y Baymard recomienda el control en la grilla
-                     para este tipo de compra— sino por su REPETICIÓN.***
-                     Un elemento correcto en su tamaño puede ser incorrecto
-                     en su cardinalidad.
-
-                     **La cura no es achicarlo: es que deje de teñir.** El
-                     timbre toma la MISMA superficie hundida que usan los
-                     botones de `StepperCantidad`, con el signo en tinta.
-                     **El acento queda reservado para el ESTADO**: aparece
-                     cuando el producto YA ESTÁ en el carrito, que es
-                     cuando el stepper lo trae en su glifo.
-
-                     ✅ **Y de paso cierra el «control sin estado» del
-                     benchmark** (Baymard: **96 %** de los sitios no
-                     destaca lo que ya está en el carrito; el testeo
-                     registró *«Oh my God, how do I tell if I added
-                     it?»*). ***Un control que solo se tiñe cuando dice
-                     algo deja de ser decoración y vuelve a señalar.***
-
-                     ⚠️ Ley 22 no se rompe: el timbre sigue siendo una
-                     superficie llena y tocable —no un contorno—; lo que
-                     cambia es de qué color se llena.
-
-                     ⏪ ═══ DEROGADO POR F-OCRE — S100d-B, firma del founder
-                     sobre el timbre neutro EN DISPOSITIVO (punto 6 del gate):
-                     ***«el + en OCRE»***. El párrafo de arriba se conserva
-                     entero porque su medición sigue siendo cierta y porque la
-                     reconciliación se apoya en ella.
-
-                     🔴 **POR QUÉ NO ES UNA VUELTA ATRÁS, y la razón la da N23
-                     (que se firmó DESPUÉS de aquella cura):** *el color marca
-                     CLASE, jamás importancia.* La cura de S100b leyó el `+`
-                     repetido como **un acento de JERARQUÍA repetido**, y con
-                     esa lectura N5 lo condenaba —un acento por pantalla, y
-                     había uno por producto—. **Pero el ocre no jerarquiza:
-                     dice de qué CLASE es el control** («esto se agrega al
-                     carrito»). *Un marcador de clase se repite tantas veces
-                     como miembros tenga la clase; eso no es ruido, es la clase
-                     siendo consistente.* Lo que N5 sigue prohibiendo —y sigue
-                     cumplido— es **un segundo acento que compita por la
-                     atención**: el magenta de marca y elección **no aparece en
-                     la vitrina**, así que el ocre es el único acento presente.
-
-                     ⇒ **F-OCRE reparte los dos acentos de la casa por ROL:**
-                     magenta = marca y elección (leve) · **ocre = acción de
-                     compra (fuerte)**. La ley y sus dosis quedan depositadas
-                     en `DIRECCION_DISENO_S99` §1ter (N26), con la enmienda a
-                     `DISEÑO_EXPERIENCIA` §15b.1 hecha EN SU ARCHIVO.
-
-                     **El par de contraste NO se inventa acá:** es el que la
-                     casa ya midió y gateó para el CTA del cliente — **oro
-                     `accent.cta` con el signo en `accent.ctaTexto` (tinta):
-                     8.40 en claro, 9.96 en los dos temas.** *El blanco sobre
-                     el oro daba 2.02 y por eso no se usa.*
-
-                     **Memorial y prestador degradan solos:** `accent.cta` es
-                     tinta en memorial por `getTheme` y tealDark en el
-                     prestador por `lightOficio` — y el espejo del vendedor no
-                     dibuja este control (`modo: 'espejo'`), así que el oro no
-                     se le escapa a la otra app por ningún camino. */
-                  backgroundColor: theme.accent.cta,
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.bold,
-                    fontSize: typography.size.md,
-                    lineHeight: 24,
-                    // El par medido y gateado del CTA del cliente (ver arriba).
-                    color: theme.accent.ctaTexto,
-                  }}
-                >
-                  +
-                </Text>
-              </Pressable>
-              ) : (
-                /* LA MUTACIÓN — **EN EL MISMO ESCALÓN**, no un piso abajo.
-                   Sigue siendo EL MISMO CONTROL cambiando de forma —no aparece
-                   otro al lado—, conserva su ancla al borde derecho y ahora
-                   además conserva su RENGLÓN: la mano lo encuentra donde estaba
-                   sin tener que volver a buscarlo. `fast` = 150 (N10).
-
-                   ⚠️ **El `FadeIn` se queda y el `layout` NO entra:** con el
-                   alto del escalón fijo no hay nada que animar de tamaño, y una
-                   transición de layout acá volvería a mover la caja — que es
-                   justo lo que el founder pidió que dejara de pasar. */
-                <Animated.View entering={FadeIn.duration(motion.duration.fast)} style={{ flexShrink: 0 }}>
+                ⚠️ **Con `espejo` o sin stock la caja NO se dibuja**: no hay dos
+                formas que turnar. *El espejo del vendedor no compra su propio
+                producto, y un agotado no ofrece un botón que no va a andar.* */}
+            {compra.modo === 'espejo' || !compra.hayStock ? null : (
+              <Mutacion
+                alto={ALTO_STEPPER_ANCHO}
+                estado={compra.cantidad === 0 ? 'reposo' : 'activo'}
+                reposo={
+                  <Boton
+                    etiqueta={t('tarjetaProducto.agregarCorto')}
+                    onPress={compra.onAgregar}
+                    // `bloque` = ancho completo, que es la mitad de la forma
+                    // de Laika: el botón OCUPA la caja que después va a
+                    // ocupar el stepper.
+                    bloque
+                    tamaño="sm"
+                  />
+                }
+                activo={
                   <StepperCantidad
                     valor={compra.cantidad}
-                    min={0}
+                    min={1}
                     max={TOPE_EN_VITRINA}
                     onCambio={compra.onCambiarCantidad}
                     etiqueta={t('tarjetaProducto.cantidad', { nombre })}
-                    // F-OCRE: lo que se ajusta acá es una COMPRA (ver la prop
-                    // `registro` de la pieza). El magenta de la elección no
-                    // entra a la vitrina.
+                    // F-OCRE / N26 v2: lo que se ajusta acá es una compra.
                     registro="compra"
-                    // 70 dp — lo único que entra junto al precio. Ver
-                    // `BOTON_MENUDO`: el blanco de 44 se conserva por hitSlop.
-                    tamano="menudo"
+                    tamano="ancho"
+                    /* 🔴 LA PAPELERA VUELVE A LA GRILLA, y esto DEROGA la
+                       cláusula de `StepperCantidad` que decía *«en la grilla
+                       no»*. **Su argumento era que ahí bajar de 1 no hace
+                       desaparecer nada, así que una papelera prometería un
+                       borrado que no ocurre.** Con la transformación **sí
+                       ocurre**: el control desaparece y vuelve a ser «Agregar».
+                       *La cláusula no estaba mal: describía una tarjeta que ya
+                       no existe.* Y es lo que el founder nombró desde el
+                       principio — *«eliminar/restar»*. */
+                    onBorrar={() => compra.onCambiarCantidad(0)}
                   />
-                </Animated.View>
-              )}
-            </View>
-
-            {/* EL PRECIO, último y anclado abajo. Sigue siendo lo que alinea
-                la fila: las dos tarjetas comparten alto, así que sus precios
-                caen a la misma altura aunque un nombre mida dos líneas y el
-                otro una — que es para lo que existe la grilla. */}
-            <PrecioText valor={precio} registro="vitrina" porUnidad={precioPorUnidad} />
+                }
+              />
+            )}
           </View>
         </View>
       </Pressable>

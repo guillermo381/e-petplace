@@ -140,6 +140,11 @@ export { Fundido, type FundidoProps } from './components/Fundido'
 // `key={index}` React renumera en vez de desmontar y la salida NO dispara,
 // sin error y sin warning.
 export { Salida, type SalidaProps } from './components/Salida'
+// Mutacion — S100d·bis: la QUINTA de la familia del movimiento. Dos formas se
+// turnan LA MISMA CAJA y se cruzan adentro de ella; la inversa sale sola de
+// `estado`. Su condición está medida y es la que la hace posible: los dos
+// estados ocupan exactamente la misma caja.
+export { Mutacion, type MutacionProps } from './components/Mutacion'
 // Chevron — S99-B: el portador del trazo suelto, para slots que NO son
 // una fila entera (el `senal` de DatoAdministrable). El path sigue sin
 // exportarse: se usa la pieza, jamás la geometría.
@@ -175,7 +180,7 @@ export {
 } from './components/SelectorSegmentado'
 export { SliderPrecio, type SliderPrecioProps } from './components/SliderPrecio'
 export { Interruptor, type InterruptorProps } from './components/Interruptor'
-export { StepperCantidad, ALTO_STEPPER_COMPACTO, ALTO_STEPPER_MENUDO, type StepperCantidadProps, type TamanoStepper } from './components/StepperCantidad'
+export { StepperCantidad, ALTO_STEPPER_COMPACTO, ALTO_STEPPER_MENUDO, ALTO_STEPPER_ANCHO, type StepperCantidadProps, type TamanoStepper } from './components/StepperCantidad'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
 export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'
 export {
