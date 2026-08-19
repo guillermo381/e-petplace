@@ -136,6 +136,7 @@ export const uiEs = {
     sinStock: 'Sin stock',
     agregar: 'Agregar {{nombre}} al carrito',
     cantidad: 'Cantidad de {{nombre}}',
+    agregarCorto: 'Agregar',
   },
   // H-203 (hallazgo de C): estos dos vivían HARDCODEADOS en español
   // dentro de la pieza. Un lector de pantalla en inglés los oía en

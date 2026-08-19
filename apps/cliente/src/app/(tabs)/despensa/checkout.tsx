@@ -56,6 +56,7 @@ import {
   Encabezado,
   EstadoVacio,
   EvitaTeclado,
+  GotaUbicacion,
   Hoja,
   Icono,
   Interruptor,
@@ -725,7 +726,35 @@ export default function DespensaCheckout() {
                 <View style={{ gap: spacing[4], paddingVertical: spacing[4] }}>
                   {/* 2 · A DÓNDE (§7) */}
                   <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[3] }}>
+                    {/* 🔴 S100d·bis · LA GOTA JUNTO A LA DIRECCIÓN.
+                        Founder: *«la gota con borde grueso ocre fuera del mapa,
+                        junto a la dirección»*. Es la otra mitad del punto 17 —
+                        *«el label necesita soporte»*: el rótulo deja de ser una
+                        línea de texto suelta y pasa a tener una marca que dice
+                        de qué habla.
+
+                        ⚠️ NO reemplaza el glifo de la `CeldaNavegacion` de
+                        abajo, y es decisión de la pieza (B): son dos trabajos
+                        distintos —éste rotula la sección, aquél marca la fila—
+                        y por eso `CeldaNavegacion` NO cambió de contrato.
+
+                        ⚠️ Y EL OCRE NO ES UNA EXCEPCIÓN A N26: la ley se
+                        ENSANCHÓ. Su primera redacción decía «ocre = acción de
+                        compra» y dos pistas llegaron al mismo borde el mismo
+                        día (esta gota y la flecha del acordeón de C), ninguna
+                        de las dos compra. N26 v2: **«¿ACCIONA o SELECCIONA?»**
+                        — comprar era un caso de accionar, no la categoría.
+                        *Frené el montaje hasta que la ley lo dijera, en vez de
+                        montar un ocre que la contradijera.* */}
+                    <View
+                      style={{
+                        paddingHorizontal: spacing[3],
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing[2],
+                      }}
+                    >
+                      <GotaUbicacion />
                       <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
                     </View>
                     {direccion === 'cargando' ? null : direccion === null ? (

@@ -97,6 +97,19 @@ export default function DespensaPedido() {
   const [factura, setFactura] = useState<FacturaDePedido | null>(null);
   const [mascotas, setMascotas] = useState<Fase<MascotaResumen[]>>('cargando');
   const [reintento, setReintento] = useState(0);
+  /**
+   * 🔴 S100d · «ESTE PEDIDO NO ESTÁ», que NO es «falló la red».
+   *
+   * Bandera propia y no un tercer valor de `detalle`, a propósito: `detalle`
+   * modela QUÉ HAY para pintar (cargando · datos · nada), y esto modela POR QUÉ
+   * no hay. *Meterlo adentro obligaría a cada lectura de `detalle` a distinguir
+   * dos clases de vacío que no le importan.*
+   *
+   * Su disparo es más ancho que la fuga que lo destapó: con la vista cerrada
+   * por `security_invoker`, **cualquier link viejo a un pedido ajeno cae acá** —
+   * y también un pedido que dejó de ser tuyo. *No muere con la fuga.*
+   */
+  const [noDisponible, setNoDisponible] = useState(false);
   const [trabajando, setTrabajando] = useState(false);
   const [hojaCancelar, setHojaCancelar] = useState(false);
   /** El ítem que se está atando (Hoja del selector de mascota). */
@@ -107,7 +120,18 @@ export default function DespensaPedido() {
     useCallback(() => {
       let vigente = true;
       void obtenerDetallePedido(pedidoId).then((r) => {
-        if (vigente) setDetalle(r.ok ? r.data : 'error');
+        if (!vigente) return;
+        setDetalle(r.ok ? r.data : 'error');
+        /* 🔴 S100d · EL CÓDIGO SE CONSERVA, y acá está el defecto que había.
+           Esta línea era `setDetalle(r.ok ? r.data : 'error')` a secas: el
+           wrapper YA distingue «no existe» de «falló la red» —devuelve
+           `pedido_no_existe` con su mensaje propio— y **la pantalla tiraba esa
+           distinción**, colapsando los dos casos en 'error'.
+           Resultado: un permiso denegado se mostraba como «Revisa tu conexión»
+           con un Reintentar que no podía funcionar nunca.
+           *Es la forma del día: la capa de abajo sabe la diferencia y la de
+           arriba la descarta.* */
+        setNoDisponible(!r.ok && r.codigo === 'pedido_no_existe');
       });
       void obtenerCodigoEntrega(pedidoId).then((r) => {
         if (vigente && r.ok) setCodigo(r.data.codigo);
@@ -246,17 +270,48 @@ export default function DespensaPedido() {
             </View>
           </EsqueletoGrupo>
         ) : detalle === 'error' ? (
-          <EstadoVacio
-            titulo={t('despensa.errorPedidoTitulo')}
-            descripcion={t('despensa.errorVitrinaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => setReintento((n) => n + 1)}
-              />
-            }
-          />
+          /* 🔴 S100d · DOS FALLOS DISTINTOS, DOS SALIDAS DISTINTAS.
+             ═══════════════════════════════════════════════════════════════
+             Antes había UNA sola rama: «Revisa tu conexión» + Reintentar,
+             para todo. Ante un pedido que no está, ese botón **no puede
+             funcionar nunca** — y *un botón que no puede funcionar es peor
+             que ninguno: promete una salida que no existe.*
+
+             ⚠️ EL REINTENTAR **SE CONSERVA** en el otro brazo, y no es un
+             detalle: ahí sí sirve. *Quitarlo de los dos habría sido curar de
+             más* — cambiar un callejón por otro (pedido de D, dueño de esta
+             pantalla).
+
+             ⚠️ Y LA VOZ NO NOMBRA EL CASO «era de otra cuenta» aunque sea
+             uno de los dos que caen acá: con la vista cerrada por
+             `security_invoker` **no debería poder pasar**, y mencionarlo lo
+             reabre como pregunta en la cabeza de quien lee. *Una voz que se
+             defiende de algo que no ocurre le enseña al lector que ocurre.* */
+          noDisponible ? (
+            <EstadoVacio
+              titulo={t('despensa.pedidoNoDisponibleTitulo')}
+              descripcion={t('despensa.pedidoNoDisponibleDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('despensa.pedidoNoDisponibleVolver')}
+                  onPress={() => router.replace('/pedidos')}
+                />
+              }
+            />
+          ) : (
+            <EstadoVacio
+              titulo={t('despensa.errorPedidoTitulo')}
+              descripcion={t('despensa.errorVitrinaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => setReintento((n) => n + 1)}
+                />
+              }
+            />
+          )
         ) : (
           <>
             {/* 0 · LA CELEBRACIÓN — solo con el pedido ENTREGADO, y una

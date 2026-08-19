@@ -121,6 +121,34 @@ const HOLGURA_MENUDA = (BOTON - BOTON_MENUDO) / 2 // 9 ⇒ 26 + 9·2 = 44
  *  a `size.sm` entran; el tope de la vitrina es 12. */
 const NUMERO_MENUDO = 18
 
+/* 🔴 EL ANCHO — la CUARTA iteración del control de la vitrina, y la primera
+   que no elige entre tres cosas que el founder pidió juntas (S100d·bis).
+
+   **Salió de MIRAR EL OBJETO QUE YA LO RESOLVÍA**, en el mismo teléfono,
+   disponible desde el día uno. Medido en Laika:
+
+       botón «Agregar» …………………… 130,8 × 28,8 dp   (ancho completo)
+       control [🗑] N [+] ……………… 129,0 × 27,4 dp   (la MISMA caja)
+       sus botones ……………………………  36,6 × 27,4
+
+   ⇒ **el control NO comparte renglón con ningún dato: tiene el suyo, completo.**
+   Y por eso puede tener botones grandes: *nada compite con él.*
+
+   ── LO QUE ESTO DESTRABA, y son las tres a la vez ───────────────────
+   ① el control no le quita el renglón a la presentación ni al precio;
+   ② la tarjeta no cambia de alto **jamás** (la caja existe siempre);
+   ③ **los 44 de blanco vuelven SIN `hitSlop` forzado** — con la caja entera
+      (140,3 dp en nuestra tarjeta, **más que los 130,8 de Laika**) los tres
+      targets entran holgados: 3 × 44 = 132 ≤ 140,3.
+
+   *Las tres iteraciones anteriores fallaron por la misma razón y ninguna era
+   un error de cálculo: **cada una eligió a quién sacarle el renglón.** Ésta no
+   tiene que elegir porque no se lo pide a nadie.*
+
+   **El reparto es `space-between`**: los botones a los bordes y el número al
+   medio. Sin `gap` — el aire lo pone la caja, que es lo que sobra. */
+const BOTON_ANCHO = BOTON // 44: el blanco directo, sin holgura prestada
+
 /** EL ALTO DEL STEPPER COMPACTO — exportado para que quien RESERVE su lugar
  *  lo DERIVE en vez de teclear un número (N24, S100c-B).
  *
@@ -132,11 +160,16 @@ const NUMERO_MENUDO = 18
 export const ALTO_STEPPER_COMPACTO = BOTON_COMPACTO
 /** El alto del menudo, por el mismo motivo: quien lo aloje lo DERIVA. */
 export const ALTO_STEPPER_MENUDO = BOTON_MENUDO
+/** El alto del ancho — **la caja que `Mutacion` comparte entre las dos formas**
+ *  de la tarjeta de vitrina. Se DERIVA acá para que el botón «Agregar» y el
+ *  stepper no puedan discrepar: *dos números que deben coincidir saliendo de
+ *  dos lugares es una bomba con temporizador* (L-284). */
+export const ALTO_STEPPER_ANCHO = BOTON_ANCHO
 
 /** Los tres calibres. **No son «tres estilos»: son tres cajas.** Se elige por
  *  el ancho que hay, jamás por gusto — *una variante que se elige por gusto
  *  deja de ser una respuesta a una restricción.* */
-export type TamanoStepper = 'normal' | 'compacto' | 'menudo'
+export type TamanoStepper = 'normal' | 'compacto' | 'menudo' | 'ancho'
 
 export interface StepperCantidadProps {
   valor: number
@@ -221,7 +254,8 @@ function BotonPaso({
   etiqueta: string
   tamano: TamanoStepper
 }) {
-  const lado = tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON
+  const lado =
+    tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON_ANCHO
   const holgura = tamano === 'menudo' ? HOLGURA_MENUDA : tamano === 'compacto' ? HOLGURA_COMPACTA : 0
   const { theme } = useTheme()
   const [presionado, setPresionado] = useState(false)
@@ -310,7 +344,11 @@ export function StepperCantidad({ valor, min, max, onCambio, etiqueta, registro 
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: tamano === 'menudo' ? 0 : tamano === 'compacto' ? spacing[2] : spacing[3],
+        // `ancho` toma la caja entera y reparte: botones a los bordes, número
+        // al medio. El aire lo pone la caja, no un `gap`.
+        ...(tamano === 'ancho'
+          ? { width: '100%', justifyContent: 'space-between' as const }
+          : { gap: tamano === 'menudo' ? 0 : tamano === 'compacto' ? spacing[2] : spacing[3] }),
       }}
     >
       {/* En el mínimo, con `onBorrar`, el menos es PAPELERA y ejecuta el

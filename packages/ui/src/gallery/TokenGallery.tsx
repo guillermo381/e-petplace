@@ -60,6 +60,8 @@ import { CarritoFlotante } from '../components/CarritoFlotante'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
+import { Mutacion } from '../components/Mutacion'
+import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -3385,6 +3387,42 @@ function GaleriaInterna() {
               única que sabe qué se borró.
             </Texto>
           </View>
+        </Seccion>
+
+        <Seccion titulo="Mutacion (S100d·bis) — lo que cambia de forma sin irse">
+          <View style={{ gap: spacing[3], maxWidth: 200 }}>
+            <Mutacion
+              alto={ALTO_STEPPER_ANCHO}
+              estado="reposo"
+              reposo={<Boton etiqueta="Agregar" onPress={() => {}} bloque tamaño="sm" />}
+              activo={<Texto variante="apoyo">—</Texto>}
+            />
+            <Mutacion
+              alto={ALTO_STEPPER_ANCHO}
+              estado="activo"
+              reposo={<Texto variante="apoyo">—</Texto>}
+              activo={
+                <StepperCantidad
+                  valor={2}
+                  min={1}
+                  max={12}
+                  onCambio={() => {}}
+                  etiqueta="Cantidad"
+                  registro="compra"
+                  tamano="ancho"
+                  onBorrar={() => {}}
+                />
+              }
+            />
+          </View>
+          <Texto variante="apoyo">
+            Las dos formas de la tarjeta de vitrina, en la MISMA caja — que es la condición que hace
+            posible la transformación (medida en Laika: botón 130,8×28,8 · control 129,0×27,4). Con
+            cajas distintas no hay transformación: hay reemplazo. Acá se ven quietas y separadas; la
+            pieza las cruza con un fundido de 150 ms y la inversa sale sola de `estado`.
+            ⚠️ La microanimación NO se pudo medir en el aparato (screencap 400 ms, sin ffmpeg): la
+            juzga el ojo del founder.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="GotaUbicacion (S100d·bis) — la marca del mapa, fuera del mapa">
