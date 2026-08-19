@@ -291,8 +291,8 @@ no sabemos.**
 
 | qué | por qué |
 |---|---|
-| **H-205, su segunda mitad** | el nombre **sigue apareciendo dos veces**: `tituloVisible={false}` no apaga el píxel en aparato. Hecho medido, **sin causa atribuida**, dueño B |
-| 🔴 **la tira de PRESENTACIONES desborda y no scrollea** | el tercer chip llega a **x 1022 sobre 1080** y toca el filo. **Es el mismo defecto de los filtros en OTRA pieza** (`SelectorOpcion disposicion="tira"`, no `FiltroPills`) ⇒ **la cura de B no lo alcanza.** Apareció al agregar el precio al chip, pero **con etiquetas cortas ya desbordaba a los cuatro**: la cura lo destapó, no lo creó |
+| ~~H-205, su segunda mitad~~ | ✅ **CURADO por B en el bundle.** Ver ⑨ |
+| ~~la tira de PRESENTACIONES desborda~~ | ✅ **CURADO por B en el bundle** — y era una **TERCERA causa** del mismo síntoma. Ver ⑨ |
 | ~~la carta de composición tapada por el CTA~~ | 🔴 **RETIRADO POR C — no era un defecto, lo había medido mal.** Medido después: la carta termina en **686** y el CTA arranca en **687** ⇒ **cero solape**; hay 267 dp por debajo del pliegue y scrolleando **se lee entera**. *`PantallaConPie` estaba haciendo su trabajo.* **Su error, declarado por ella: miró una captura ESTÁTICA, vio el borde asomando y concluyó «tapada» — nunca intentó scrollear.** *Lo que había era «hay más abajo» y leyó «no se puede llegar».* **Se deja tachado y no borrado**: es el mismo error que ella misma le había advertido a D horas antes (*«el árbol te va a decir que está en su lugar; ejercé el gesto»*) — **una captura prueba lo que se VE; para saber si algo se ALCANZA hay que ejercerlo** |
 | **las 6 vistas del admin** (GMV, MRR, pitch, ranking) | siguen legibles por `anon`: cerrarlas apaga el tablero **con certeza**. Disparo escrito: **antes de compartir `/inversores` con alguien externo** |
 | **la cura estructural de `consentimientos`** | su firma era condicional y la condición falló |
@@ -336,3 +336,51 @@ es el que menos se vuelve a mirar.***
 el producto con **25 ingredientes** —el caso rico, para ver el plegado— y con él
 perdió de vista el pobre, **que son 268 de 470, la mayoría del catálogo**.
 ***Elegir el caso más interesante para medir es elegir el menos representativo.***
+
+
+---
+
+## ⑨ LOS DOS ÚLTIMOS ROJOS — CURADOS, y el primero es la lección de la vuelta
+
+### 🔴 LA TIRA: TRES PANTALLAS, TRES SÍNTOMAS IDÉNTICOS, **TRES CAUSAS DISTINTAS**
+
+| pantalla | causa |
+|---|---|
+| los filtros | **arbitraje**: el pan de una `Hoja` se quedaba el gesto |
+| la de D | **scroller sin acotar** |
+| **la tira de presentaciones** | **ANIDAMIENTO** — un scroller horizontal dentro de uno vertical que **no declara `nestedScrollEnabled`**: en Android **el padre se queda el arrastre** |
+
+**Las dos primeras se descartaron POR LA FUENTE, no por intuición:** *no hay
+ninguna `Hoja` en la ficha* ⇒ no es arbitraje · *`SelectorOpcion` **sí** tiene su
+`ScrollView`* ⇒ no es scroller sin acotar. **Y el contra-caso vertical de C, que
+sí movía, era la prueba: respondía el padre.**
+
+⚠️ ***Es la clase de defecto que se «cura» tres veces mal si uno se guía por cómo
+se ve.*** **C y D frenaron a B las dos veces que iba a generalizar, y tenían
+razón las dos.**
+
+✅ **Y B ejecutó el CENSO DE LA CLASE, no solo el caso:** `FichaPrestador` y
+`SelectorVentana` también tenían scroller horizontal sin declararlo. *S99 escribió
+esta ley —censar la clase al tercer cobro— y **no ejecutó el censo**; el cuarto
+cobro llegó a la ronda siguiente. Esta vez sí se corrió.*
+
+### H-205 — curado **sin** saber por qué falla, y eso es una virtud
+
+**`color:'transparent'` no se honra en este Android.** Probado por C por **dos
+vías independientes**, y la segunda es la fuerte: el techo mostraba el nombre en
+**MAYÚSCULAS** —el crudo— y **el único consumidor que renderiza el crudo era el
+`titulo` del `Encabezado`**. *Los bounds prueban qué caja es; las mayúsculas
+prueban de qué prop salió el string.*
+
+**La cura pinta con el color del propio fondo** ⇒ **no depende de saber por qué
+`transparent` falla** —eso queda **sin diagnosticar y declarado así**— y **sale
+del mismo token que pinta el techo, así que si el fondo cambia el apagado lo
+sigue solo.** *Hoy importa doble: el fondo acaba de pasar a `#F6F6F6`.*
+✅ **Conserva la accesibilidad**, que es la razón de existir de la prop.
+
+### ⚠️ NINGUNO DE LOS TRES SE VIO CORRER
+
+**Y el de la tira NO SE PODÍA ejercer antes de este publish:** la desambiguación
+de precio de C no estaba en la preview, y **sin ella la tira no desborda** ⇒ el
+experimento habría dado un **falso «no hay defecto»**. **C lo corre apenas salga
+el bundle.**
