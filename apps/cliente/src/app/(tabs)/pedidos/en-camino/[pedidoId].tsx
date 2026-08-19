@@ -77,7 +77,7 @@
  * la tenemos y no se inventa) · llamada directa en esta superficie.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -182,7 +182,47 @@ export default function DespensaEnCamino() {
      El `ref` se conserva porque el gesto lo lee desde el hilo de UI. */
   const [extendida, setExtendida] = useState(false);
   const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
-  const extAlto = useSharedValue(0); // alto medido del bloque plegable
+  const extAlto = useSharedValue(0); // alto del CONTENIDO del plegable
+  /**
+   * 🔴 S100d · EL IMÁN «ASOMADA», TOPADO — Y ES LA CURA DEL DEFECTO QUE DEJÓ
+   * A ESTA PANTALLA SIN HOJA EN EL GATE.
+   *
+   * ── EL DEFECTO, con sus números medidos en aparato ─────────────────────
+   * Acá el imán se calculaba `extAlto - PEEK`, o sea **sobre el alto del
+   * CONTENIDO del plegable**. Pero la hoja está topada por `maxHeight`
+   * (`PISO_DEL_MAPA`), y el contenido NO lo está ⇒ **cuando el contenido pasa
+   * el hueco disponible, la hoja se traslada MÁS DE LO QUE MIDE y se va
+   * entera abajo.** Medido en el bundle del gate: tope de la hoja **342 dp**,
+   * cabecera **198**, hueco **144**; con un contenido de ~400 el traslado
+   * daba **374 sobre una hoja de 342** ⇒ la hoja quedaba **por debajo del
+   * borde**: invisible para el ojo y ausente para el dedo.
+   *
+   * ── 🔴 POR QUÉ NO ES «SE ROMPIÓ HOY» — la condición que el founder puso
+   * para dejarme curar: *un mecanismo que explica el defecto de hoy tiene que
+   * explicar también el ayer.* **Éste lo explica: el defecto es LATENTE desde
+   * que la hoja nació** y solo se manifiesta pasado un umbral de contenido.
+   * Ayer el plegable traía menos (la escalera y una ficha chica); hoy le
+   * entraron **la carta de la dirección** y **la ficha de B**, y cruzó.
+   * ⇒ *ni la carta ni la ficha rompieron nada: **un cambio que destapa un
+   * defecto latente se lleva la culpa del defecto** (L-284).*
+   *
+   * ── LA CUENTA, Y CONTRA QUÉ MAGNITUD ──────────────────────────────────
+   * El imán se topa contra **lo que la hoja REALMENTE mide después del
+   * tope**, jamás contra el contenido:
+   *     hueco   = tope de la hoja − cabecera medida
+   *     asomada = min(contenido, hueco) − PEEK
+   * *Topar contra el contenido sería la cuenta correcta sobre la magnitud
+   * equivocada, y el mismo defecto volvería con el próximo contenido que
+   * crezca* (aviso de A, adoptado).
+   *
+   * ── SU DISCRIMINADOR, que es lo que lo separa de curar por suerte ──────
+   * El defecto **solo existe cuando `contenido > hueco`**. ⇒ el caso que
+   * prueba la cura no es «la hoja se ve»: es **un plegable MÁS ALTO que el
+   * hueco y la hoja igual vuelve a su lugar**. Se verifica con los tres
+   * números a la vista (contenido · hueco · traslado) sobre el pedido de
+   * plegable más alto — con ficha, dirección y escalera montadas.
+   */
+  const asomada = useSharedValue(0);
   const desplBase = useSharedValue(0); // ancla del arrastre en curso
   const estiloHoja = useAnimatedStyle(() => ({ transform: [{ translateY: despl.value }] }));
 
@@ -191,33 +231,59 @@ export default function DespensaEnCamino() {
     setExtendida(v);
   }, []);
 
+  /** El tope de la hoja, derivado del lienzo MEDIDO — la misma cuenta que su
+   *  `maxHeight`, en un solo lugar: *dos números que deben coincidir saliendo
+   *  de dos cuentas distintas es la deuda que L-281 cobró cuatro veces.* */
+  const topeHoja = altoLienzo * (1 - PISO_DEL_MAPA);
+
+  /** Recalcula el imán con lo medido y re-ancla la hoja si está plegada.
+   *  Se llama desde el layout del plegable Y desde el efecto de abajo: los
+   *  tres insumos (lienzo, cabecera, contenido) llegan en pasadas distintas
+   *  y **el último en llegar tiene que corregir a los anteriores.** */
+  const fijarAsomada = useCallback(() => {
+    // Sin lienzo medido no hay tope que respetar: la hoja se queda donde
+    // entró (fuera de cuadro) en vez de saltar a una posición inventada.
+    if (topeHoja <= 0) return;
+    const hueco = Math.max(topeHoja - altoCabecera, 0);
+    const nueva = Math.max(Math.min(extAlto.value, hueco) - PEEK, 0);
+    asomada.value = nueva;
+    if (!extendidaRef.current) {
+      despl.value = withSpring(nueva, {
+        duration: motion.duration.estandar,
+        dampingRatio: 0.85,
+      });
+    }
+  }, [topeHoja, altoCabecera, asomada, despl, extAlto]);
+
+  /** El lienzo y la cabecera llegan por estado de React, así que su cambio no
+   *  pasa por el layout del plegable. Sin esto, una hoja que ya se ancló con
+   *  un tope viejo se queda con él. */
+  useEffect(() => {
+    fijarAsomada();
+  }, [fijarAsomada]);
+
   const irA = useCallback(
     (abierta: boolean) => {
-      despl.value = withSpring(abierta ? 0 : Math.max(extAlto.value - PEEK, 0), {
+      despl.value = withSpring(abierta ? 0 : asomada.value, {
         duration: motion.duration.estandar,
         dampingRatio: 0.85,
       });
       fijarExtendida(abierta);
     },
-    [despl, extAlto, fijarExtendida],
+    [despl, asomada, fijarExtendida],
   );
 
-  /** El bloque plegable se mide al layout: fija el imán «asomada» con su PEEK
-   *  y re-ancla si el contenido cambió (la ficha del repartidor llega
-   *  después que el resto — su id sale del envío). */
+  /** El bloque plegable se mide al layout: de ahí sale el CONTENIDO, que es
+   *  uno de los tres insumos del imán (la ficha del repartidor llega después
+   *  que el resto — su id sale del envío, así que el contenido crece). */
   const medirPlegable = useCallback(
     (e: LayoutChangeEvent) => {
       const h = e.nativeEvent.layout.height;
       if (h === extAlto.value) return;
       extAlto.value = h;
-      if (!extendidaRef.current) {
-        despl.value = withSpring(Math.max(h - PEEK, 0), {
-          duration: motion.duration.estandar,
-          dampingRatio: 0.85,
-        });
-      }
+      fijarAsomada();
     },
-    [despl, extAlto],
+    [extAlto, fijarAsomada],
   );
 
   /** Arrastre sobre el asa Y la cabecera; las dos posiciones son imanes y la
@@ -230,18 +296,22 @@ export default function DespensaEnCamino() {
         })
         .onChange((e) => {
           const v = desplBase.value + e.translationY;
-          despl.value = Math.min(Math.max(v, 0), Math.max(extAlto.value - PEEK, 0));
+          // El tope del arrastre es el MISMO imán topado: si acá quedara el
+          // cálculo viejo, el dedo podría empujar la hoja fuera de cuadro
+          // aunque el resorte la devuelva bien. *Una cura que arregla el
+          // resorte y deja el arrastre suelto cura la mitad que se ve.*
+          despl.value = Math.min(Math.max(v, 0), asomada.value);
         })
         .onEnd((e) => {
-          const asomada = Math.max(extAlto.value - PEEK, 0);
-          const abrir = e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < asomada / 2;
-          despl.value = withSpring(abrir ? 0 : asomada, {
+          const tope = asomada.value;
+          const abrir = e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < tope / 2;
+          despl.value = withSpring(abrir ? 0 : tope, {
             duration: motion.duration.estandar,
             dampingRatio: 0.85,
           });
           scheduleOnRN(fijarExtendida, abrir);
         }),
-    [despl, desplBase, extAlto, fijarExtendida],
+    [despl, desplBase, asomada, fijarExtendida],
   );
 
   useFocusEffect(
