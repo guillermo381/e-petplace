@@ -144,6 +144,7 @@ export const uiEs = {
   stepperCantidad: {
     menos: 'Menos',
     borrar: 'Quitar del carrito',
+    quitarDeLaCompra: 'Quitar de la compra',
     mas: 'Más',
   },
   escaleraEstados: {
