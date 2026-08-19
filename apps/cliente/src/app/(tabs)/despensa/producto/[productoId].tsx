@@ -99,6 +99,7 @@ import {
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
 import { agregarAlCarrito, unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import {
   alergenosDeMascota,
   cruzarConVigilados,
@@ -627,9 +628,45 @@ export default function DespensaProducto() {
           porque el nombre vive arriba de todo el contenido y la flecha de
           volver no depende de él. El nombre sigue anunciándose al lector de
           pantalla: se apaga el píxel, jamás el nombre. */}
+      {/* ═══════════════════════════════════════════════════════════════
+          🔴 S100d-bis · **H-205 CAMBIÓ DE CAUSA, Y LA VIEJA ERA MÍA.**
+          ═══════════════════════════════════════════════════════════════
+
+          Lo vi en el aparato —«NUTRA PRO ADULTO LIGHT» arriba y «Nutra Pro
+          Adulto Light» abajo— **y se lo pasé a B diagnosticado como
+          «`color: transparent` no funciona en nativo».** *Estaba
+          equivocada, y era la explicación cómoda: ponía la causa en la
+          pieza ajena.*
+
+          **La causa real, medida:** son **DOS STRINGS DISTINTOS DEL MISMO
+          DATO** — el techo recibía `ficha.nombre` **crudo** y el cuerpo
+          pinta `nombreCurado(ficha.nombre)`. Con **42 % del catálogo
+          cargado en MAYÚSCULAS**, arriba salía el grito del importador y
+          abajo el nombre curado. *El píxel nunca dejó de apagarse: lo que
+          se veía era el nombre SIN curar, en un nodo que sí se pinta —
+          `tituloVisible={false}` apaga el título de `navegacion`, y el
+          nombre volvía por otro lado.*
+
+          🔴 **Y POR QUÉ EL WEB NUNCA LO DELATÓ, que es lo que hay que
+          aprender:** yo medí sobre productos **ya en caja normal**, donde
+          `nombreCurado()` no cambia nada ⇒ **las dos versiones coinciden y
+          el defecto es invisible.** *No fue que el web mintiera: fue que
+          elegí los casos en que las dos ramas dan lo mismo.* Es la
+          hermana exacta del error de la carta: **el caso que elegí para
+          medir era el que no distinguía.**
+
+          ⇒ la cura es **una función**: el techo recibe el MISMO dato
+          curado que el cuerpo. *El acoplamiento estaba declarado por
+          escrito esta misma mañana —«el día que otra superficie monte
+          esto, `nombreCurado` tiene que subir con ella»— y se cobró doce
+          horas después, en la pantalla de al lado.* */}
       <Encabezado
         variante="navegacion"
-        titulo={ficha !== 'cargando' && ficha !== 'error' ? ficha.nombre : t('despensa.tituloProducto')}
+        titulo={
+          ficha !== 'cargando' && ficha !== 'error'
+            ? nombreCurado(ficha.nombre)
+            : t('despensa.tituloProducto')
+        }
         tituloVisible={false}
         atras
         onAtras={() => router.back()}
@@ -1347,11 +1384,76 @@ export default function DespensaProducto() {
                     ACCIONAR**, y el stepper de la ficha hace el mismo
                     trabajo que el de la tarjeta. *El mismo gesto no puede
                     tener dos colores según en qué pantalla se toca.* */}
+                {/* ═══════════════════════════════════════════════════
+                    🔴 S100d-bis · **EL CAMPO SE ENCIENDE, Y SU `onCambio`
+                    PASA POR EL TOPE — LAS DOS COSAS O NINGUNA.**
+                    ═══════════════════════════════════════════════════
+
+                    **El caso del founder:** *tipea 50 con 12 en stock, el
+                    número se ajusta a 12 solo y nadie le explica por qué.*
+                    **`editable` sin el tope produce el defecto al revés:**
+                    el campo aceptaría 50, la ficha mostraría 50, y el
+                    recorte llegaría recién al tocar «Agregar». *Un número
+                    que se queda mintiendo hasta el último toque es peor que
+                    uno que se corrige enseguida.*
+
+                    ⚠️ **Antes de rutearlo medí CUÁNDO emite la pieza**, que
+                    es lo que lo vuelve barato: `onCambio` sale de
+                    `confirmar()`, atado a `onEndEditing`/`onSubmitEditing`
+                    — **al CONFIRMAR, no por tecla.** ⇒ es **un viaje al
+                    motor por número tipeado**, no uno por dígito. *Si
+                    hubiera emitido por tecla, esto habría sido una consulta
+                    por pulsación y la cura sería otra.*
+
+                    ⚠️ **Y BAJAR NO CONSULTA**, igual que en la vitrina:
+                    pedirle permiso al motor para llevar MENOS es un viaje
+                    que no decide nada.
+
+                    🔴 **`sin_medir` NO ES `agotado` (Ley 13).** Si la
+                    consulta falla se aplica lo pedido y el motor sigue
+                    siendo la última palabra. *Un fallo de red no se
+                    disfraza de «no hay stock»: inventar una mala noticia es
+                    peor que darla tarde* — y el instrumento de A lo caza,
+                    su rojo producido es exactamente colapsar las dos
+                    clases.
+
+                    ⏪ **El tope de `agregar()` NO se retira**, y no es
+                    redundancia: entre que se tipea el número y se toca el
+                    botón **el stock puede cambiar**. *Son dos momentos, no
+                    dos copias.* */}
                 <StepperCantidad
                   valor={cantidad}
                   min={1}
                   max={99}
-                  onCambio={setCantidad}
+                  editable
+                  onCambio={(n) => {
+                    if (n <= cantidad) {
+                      setCantidad(n);
+                      return;
+                    }
+                    if (variante === null) {
+                      setCantidad(n);
+                      return;
+                    }
+                    void (async () => {
+                      const r = await maximoComprableDeOfertas([
+                        { oferta_id: variante.oferta_id, cantidad: n },
+                      ]);
+                      const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
+                      const tope = decidirTope(n, maximo);
+                      if (tope.clase === 'agotado') {
+                        mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+                        return;
+                      }
+                      if (tope.clase === 'acotado') {
+                        mostrar({
+                          texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
+                          variante: 'neutro',
+                        });
+                      }
+                      setCantidad(tope.cantidad);
+                    })();
+                  }}
                   etiqueta={t('despensa.cantidad')}
                   registro="compra"
                 />
