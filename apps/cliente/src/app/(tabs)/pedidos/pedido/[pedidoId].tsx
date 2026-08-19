@@ -436,7 +436,7 @@ export default function DespensaPedido() {
                           desde: horaLocal(detalle.pedido.promesa_desde),
                           hasta: horaLocal(detalle.pedido.promesa_hasta),
                         }),
-                        ventanaVencida(detalle.pedido.promesa_hasta)
+                        ventanaVencida(detalle.pedido.promesa_hasta, detalle.pedido.narrativa)
                           ? t('despensa.ventanaTardando')
                           : null,
                       ]

@@ -232,7 +232,7 @@ export default function DespensaPedidos() {
           [
             queTrae === null ? undefined : t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) }),
             detalleDe(p, portador),
-            ventanaVencida(p.promesa_hasta) ? t('despensa.ventanaTardando') : undefined,
+            ventanaVencida(p.promesa_hasta, p.narrativa) ? t('despensa.ventanaTardando') : undefined,
           ]
             .filter((x): x is string => x !== undefined)
             .join(' · ') || undefined

@@ -109,6 +109,7 @@ import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { CoachHoja } from '@/components/coach';
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
+import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
@@ -1118,13 +1119,26 @@ export default function Hogar() {
             // La ventana prometida, si la hay. Acá SÍ es honesta —a
             // diferencia de en `pagando`— porque estas tres narrativas ya
             // tienen el pago confirmado.
+            /* 🔴 S100d · LA VENTANA QUE YA PASÓ, TAMBIÉN ACÁ — y esta
+               superficie casi se queda muda. El encargo nombraba tres
+               (lista, detalle y EN CAMINO) y **el Hogar es la CUARTA que
+               muestra la ventana**: es la primera fila de «Ponte al día»,
+               o sea **la que más se ve de las cuatro**.
+               *Un pedido que dice que tarda en tres pantallas y calla en la
+               primera es exactamente el defecto que la firma quería evitar
+               — y lo encontré mirando el aparato, no leyendo el encargo.* */
             detalle:
               preside.promesa_desde !== null && preside.promesa_hasta !== null
-                ? t('despensa.promesaCorta', {
-                    dia: fechaLargaHumana(preside.promesa_desde, idioma),
-                    desde: horaLocal(preside.promesa_desde),
-                    hasta: horaLocal(preside.promesa_hasta),
-                  })
+                ? [
+                    t('despensa.promesaCorta', {
+                      dia: fechaLargaHumana(preside.promesa_desde, idioma),
+                      desde: horaLocal(preside.promesa_desde),
+                      hasta: horaLocal(preside.promesa_hasta),
+                    }),
+                    ventanaVencida(preside.promesa_hasta, preside.narrativa) ? t('despensa.ventanaTardando') : null,
+                  ]
+                    .filter((x): x is string => x !== null)
+                    .join(' · ')
                 : null,
             onPress: () =>
               varios

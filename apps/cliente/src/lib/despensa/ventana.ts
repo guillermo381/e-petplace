@@ -49,6 +49,26 @@
  * prueba y quedó viejo.
  */
 
+/**
+ * 🔴 SOLO LO QUE TODAVÍA VIENE EN CAMINO PUEDE ESTAR TARDANDO.
+ *
+ * **Lo encontró el aparato y es un verosímil-falso de manual:** con la
+ * primera versión, un pedido **CANCELADO** decía *«Está tardando más de lo
+ * previsto»* — y **un cancelado no tarda: no va a llegar.** Lo mismo un
+ * entregado, que ya llegó, y un `pagando`, que **ni siquiera está comprado**
+ * (su promesa nace con el pedido, antes del pago — censo S100b-D).
+ *
+ * *La ventana vencida era condición NECESARIA y yo la traté como suficiente.
+ * El reloj solo dice que la hora pasó; lo que decide si eso es un ATRASO es
+ * el estado del pedido.*
+ *
+ * Vive acá y no en cada pantalla **por lo mismo que el predicado**: cuatro
+ * superficies preguntando lo mismo con cuatro condiciones escritas a mano
+ * son cuatro oportunidades de que una se olvide — y la que se olvide va a
+ * ser la que nadie mire.
+ */
+const EN_VUELO = new Set(['confirmado', 'preparando', 'en_camino']);
+
 /** Los minutos de gracia después del fin de la ventana. Ver la cabecera:
  *  **elegido, no medido**, y con su razón. */
 export const GRACIA_VENTANA_MIN = 20;
@@ -64,7 +84,12 @@ export const GRACIA_VENTANA_MIN = 20;
  * esperar**: una función que lee el reloj adentro solo se puede verificar
  * el día que el reloj coopere.
  */
-export function ventanaVencida(promesaHasta: string | null, ahora: number = Date.now()): boolean {
+export function ventanaVencida(
+  promesaHasta: string | null,
+  narrativa: string,
+  ahora: number = Date.now(),
+): boolean {
+  if (!EN_VUELO.has(narrativa)) return false;
   if (promesaHasta === null) return false;
   const fin = Date.parse(promesaHasta);
   if (Number.isNaN(fin)) return false;
