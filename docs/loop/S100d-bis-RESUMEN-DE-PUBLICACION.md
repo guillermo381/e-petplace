@@ -496,3 +496,50 @@ afirmaciones falsas, ejes distintos: una erraba la app, la otra el actor.*
 
 *Lo cerró D abriendo la imagen antes de nombrarla. El freno de no tocarla desde
 el ensamble fue correcto: el que nombra tiene que ser el que la mira.*
+
+
+---
+
+## ⑬ ✅ EL OBJETO FINAL, VERIFICADO EN APARATO SOBRE `01a0188b`
+
+*C leyó el pie con sus manos antes de medir* (`update 01a0188b · preview ·
+19/08 00:43`).
+
+| qué | estado |
+|---|---|
+| **H-205** | ✅ **el nombre aparece UNA sola vez.** El volcado muestra el nodo del techo (`y 137–212`) y **la captura lo muestra vacío** ⇒ *se apaga el píxel sin apagar el nombre*, que era exactamente el límite que se pidió |
+| **la flecha ocre (N26.1)** | ✅ **disco ocre con chevron en tinta**, pegado al rótulo y dentro de la carta ⇒ **se lee como control de sección y no se confunde con un botón** |
+| **la carta blanca sobre `#F6F6F6`** | ✅ se separa; se lee como superficie |
+| **la tira de presentaciones** | ✅ scrollea — **−48 px, todo el desborde** |
+| **los dos rellenos ocre del modal** | ✅ **2,05×**, no compiten |
+| **el modal de dirección** | ✅ sus **cuatro pasos** y su discriminador (guardar → re-entrar → **lat/lon idénticos**) |
+
+### 🔴 EL HALLAZGO QUE **NO** SE REPORTÓ, Y VALE TANTO COMO LOS QUE SÍ
+
+La primera captura del bundle final mostraba **el título cortado por arriba y la
+foto ausente**. *Se veía exactamente como un defecto de layout.*
+
+**C lo ejerció antes de concluir: scrolleó al tope y estaba todo bien.** Era **la
+ficha en una posición de scroll intermedia**, porque **el deep link no la abre en
+0**.
+
+> **Es literalmente la misma trampa de la «carta tapada» que ella misma retiró
+> horas antes** — *una imagen quieta no distingue «está roto» de «está
+> scrolleado»*. **Esta vez la vara nueva funcionó: ejercer antes de concluir.**
+
+*Un falso rojo que no se reporta no deja rastro en ningún acta, y por eso hay que
+escribirlo: es la única evidencia de que una lección cambió una conducta.*
+
+---
+
+## ⑭ LO QUE QUEDA ABIERTO AL CERRAR, CON DUEÑO
+
+| qué | dueño | por qué no se cerró |
+|---|---|---|
+| **los contrastes contra el fondo nuevo** — chip magenta, ocre, disco del carrito | C / B | se midieron contra el fondo viejo. Con el ojo sobre `#F6F6F6` los tres **se leen** — **pero «se lee» no es un número de contraste y no se presenta como si lo fuera** |
+| **el tono `neutro` del chevron: 2,40 / 2,22** | **mesa** | su palette lo llama «decorativo» y **un chevron que es la ÚNICA señal de que algo se despliega no es decorativo**. Mueve las DOS apps |
+| **`guardarComoOtra`** del modal | A | **construido y NO ejercido** — el fallo fue de mi instrumento (el alias no entró al campo y el botón estaba correctamente deshabilitado) |
+| **las 6 vistas del admin** legibles por `anon` | founder | cerrarlas apaga el tablero **con certeza**. Disparo: **antes de compartir `/inversores` con alguien externo** |
+| **`consentimientos`**: la cura estructural | mesa | su firma era condicional y **la condición falló** |
+| **25 variantes con más de una oferta publicada** | mesa | **cero del mismo vendedor, 25 de vendedores distintos, hasta 48 % de brecha, ningún UNIQUE** ⇒ es el caso **multi-vendedor** contra la firma «una oferta por producto» |
+| **el detalle del pedido: ~100 dp de crecimiento** | producto | no es defecto — **es el freno para la tercera cosa que quiera entrar** |
