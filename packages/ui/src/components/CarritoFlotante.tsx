@@ -83,6 +83,19 @@
  * L-301 con otro disfraz. **Se exporta derivada del disco: si el disco cambia
  * de tamaño, la cola lo sigue sola.**
  *
+ * ── 🔴 VIVE EN EL SHELL — N28, firma del founder (S100d·bis) ──────────
+ * *«mientras tenga productos debe estar visible en TODA la app, y desaparece
+ * cuando no tiene productos»*. **Su condición de existencia es el CARRITO, no
+ * la ruta** ⇒ se monta UNA vez sobre las tabs, no por pantalla.
+ *
+ * **Dónde se CALLA, y la lista es parte de la ley:** `carrito` y `checkout`.
+ * *Ahí el carrito no es un destino: es la pantalla en la que ya estás, y una
+ * puerta al cuarto donde estás parado es ruido con forma de atajo.*
+ *
+ * ⚠️ **Subir al shell NO lo exime de su cola:** sigue siendo overlay puro y
+ * **cada pantalla paga su `COLA_CARRITO_FLOTANTE`**. *El shell decide dónde
+ * VIVE una pieza, no quién paga su espacio.*
+ *
  * ── EL COLOR: F-OCRE, Y EL PAR YA ESTABA MEDIDO ───────────────────────
  * Disco en `accent.cta` (el oro del CTA del cliente) con el glifo en
  * `accent.ctaTexto` (tinta) — **8.40 en claro, 9.96 en los dos temas**; el
