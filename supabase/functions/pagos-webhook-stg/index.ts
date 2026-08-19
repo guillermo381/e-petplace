@@ -135,10 +135,26 @@ Deno.serve(async (req) => {
       detalle: `${detalle} · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`,
     });
   } catch (e) {
-    // 🔴 500 A PROPÓSITO. Es el único caso donde queremos que reintenten: si
-    //    no pudimos guardarlo, todavía no lo tenemos.
+    // 🔴 429, NO 500 — Y LA DIFERENCIA ES EL REINTENTO ENTERO.
+    //
+    //    La doc de Nuvei: los reintentos corren hasta recibir 200 durante 48 h,
+    //    **pero un status ≥ 500 los DETIENE definitivamente.**
+    //
+    //    La primera versión devolvía 500 «a propósito, para que reintenten» —
+    //    y lograba exactamente lo contrario: **mataba el único reintento que
+    //    queremos.** Un evento que no pudimos guardar y que además nadie
+    //    reenvía es un evento perdido para siempre, y en pagos eso es un cobro
+    //    sin traza.
+    //
+    //    Se elige **429** entre los 4xx porque es el único que dice la verdad:
+    //    no es culpa del que llama (400 lo culparía a él), no es permanente —
+    //    es «no pude ahora, volvé». *El código de estado es parte del
+    //    contrato, no decoración: acá decidía si el evento existe o no.*
     console.error('[webhook] fallo al persistir', e);
-    return new Response('retry', { status: 500 });
+    return new Response(
+      JSON.stringify({ ok: false, error: 'no_pudimos_persistir', reintentar: true }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } },
+    );
   }
 
   // ④ 200 rápido. Si tarda, reintentan con backoff hasta 48 h.
