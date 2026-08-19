@@ -4750,9 +4750,12 @@ export type Database = {
           id: string
           instrucciones_entrega: string | null
           lat: number | null
+          lat_places: number | null
           lon: number | null
+          lon_places: number | null
           nombre_receptor: string | null
           places_id: string | null
+          punto_movido_a_mano: boolean | null
           referencias: string | null
           sector: string | null
           telefono: string | null
@@ -4768,9 +4771,12 @@ export type Database = {
           id?: string
           instrucciones_entrega?: string | null
           lat?: number | null
+          lat_places?: number | null
           lon?: number | null
+          lon_places?: number | null
           nombre_receptor?: string | null
           places_id?: string | null
+          punto_movido_a_mano?: boolean | null
           referencias?: string | null
           sector?: string | null
           telefono?: string | null
@@ -4786,9 +4792,12 @@ export type Database = {
           id?: string
           instrucciones_entrega?: string | null
           lat?: number | null
+          lat_places?: number | null
           lon?: number | null
+          lon_places?: number | null
           nombre_receptor?: string | null
           places_id?: string | null
+          punto_movido_a_mano?: boolean | null
           referencias?: string | null
           sector?: string | null
           telefono?: string | null
@@ -20635,7 +20644,10 @@ export type Database = {
           p_direccion: string
           p_direccion_id?: string
           p_lat?: number
+          p_lat_places?: number
           p_lon?: number
+          p_lon_places?: number
+          p_places_id?: string
           p_referencias?: string
           p_sector?: string
           p_telefono?: string
@@ -20647,7 +20659,10 @@ export type Database = {
           p_ciudad: string
           p_direccion: string
           p_lat?: number
+          p_lat_places?: number
           p_lon?: number
+          p_lon_places?: number
+          p_places_id?: string
           p_referencias?: string
           p_sector?: string
           p_telefono?: string

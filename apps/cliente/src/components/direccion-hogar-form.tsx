@@ -151,6 +151,51 @@ export function DireccionHogarForm({
       : null,
   );
 
+  /**
+   * 🔴 S100d·bis · LO QUE PLACES RESOLVIÓ, aparte del punto final.
+   *
+   * Nace `null` al abrir sobre una dirección existente **a propósito**: no
+   * sabemos con qué se guardó, y **inventarlo copiando `punto` haría la
+   * auditoría siempre verde** — peor que no tenerla. Solo se puebla cuando
+   * Places resuelve EN ESTA sesión del formulario.
+   */
+  const [puntoPlaces, setPuntoPlaces] = useState<{ lat: number; lon: number } | null>(null);
+  const [placesId, setPlacesId] = useState<string | null>(null);
+
+  /**
+   * 🔴 S100d·bis · AL ENTRAR NO HAY CAMPO DE TEXTO — y esto ELIMINA LA CLASE.
+   *
+   * Founder, verbatim: *«para poder guardar dirección o agregar otra me toca
+   * tocar el mapa, y literalmente me desacomoda la dirección; me toca volver a
+   * subir y volver a escribirla SI ME DI CUENTA. **Si no me di cuenta, no
+   * pasa**»*. ⇒ **se guardaba una dirección distinta de la elegida sin que la
+   * persona se enterara**, que es lo peor que puede pasar en una pantalla de
+   * entrega.
+   *
+   * ── LA CAUSA, y por qué mover botones NO alcanzaba ────────────────────
+   * El mapa vivía EN MEDIO del formulario que scrollea. Para llegar a los
+   * botones de abajo había que arrastrar **sobre el mapa** — y arrastrar el
+   * mapa **mueve el punto**, porque el pin ES el centro (`PinMovible`).
+   * *El gesto de navegar y el gesto de editar eran el mismo gesto.*
+   *
+   * ── LA CURA FIRMADA: que no haya nada que tocar sin pedirlo ───────────
+   * `false` = el formulario abre **en lectura**, con la dirección mostrada y
+   * dos acciones. El campo aparece **solo si se pide cambiarla**, y el mapa
+   * **solo si se pide ajustar el punto**.
+   *
+   * 🔴 **Un mapa que no está no puede comerse el scroll.** Por eso esto elimina
+   * la clase entera en vez de parchear un caso: no hay orden de botones que
+   * arregle un mapa que intercepta el gesto, y sí hay un mapa ausente que no
+   * intercepta nada.
+   *
+   * ⚠️ Al CREAR (sin `inicial`) abre en edición: no se puede crear una
+   * dirección sin escribirla, y obligar a un toque extra ahí sería ceremonia.
+   */
+  const [editandoTexto, setEditandoTexto] = useState(
+    inicial === null || inicial.direccion.trim() === '',
+  );
+  const [mostrandoMapa, setMostrandoMapa] = useState(false);
+
   useEffect(() => {
     if (placesApagado.current || resolviendo.current) return;
     const texto = direccion.trim();
@@ -209,6 +254,12 @@ export function DireccionHogarForm({
     // La resolución SIEMBRA el punto — y el dueño lo ajusta a mano si la
     // casa real no es donde Places cree (§7).
     setPunto({ lat: r.data.lat, lon: r.data.lon });
+    /* 🔴 S100d·bis · Y SE GUARDA APARTE LO QUE PLACES DIJO.
+       `punto` se mueve con el mapa; esto NO. Son dos datos distintos y hasta
+       hoy guardábamos solo el primero ⇒ cuando el pin se corría sin que el
+       dueño se enterara, **no había contra qué comparar**. */
+    setPuntoPlaces({ lat: r.data.lat, lon: r.data.lon });
+    setPlacesId(placeId);
   }
 
   function editarDireccion(texto: string) {
@@ -235,6 +286,11 @@ export function DireccionHogarForm({
         lat: punto?.lat ?? 0,
         lon: punto?.lon ?? 0,
         direccionId,
+        // S100d·bis · van los tres o no va ninguno: sin resolución de Places
+        // en ESTA sesión, la respuesta honesta del motor es NULL («no sabemos»).
+        placesId,
+        latPlaces: puntoPlaces?.lat ?? null,
+        lonPlaces: puntoPlaces?.lon ?? null,
       });
       setGuardando(false);
       if (!ra.ok) {
@@ -262,6 +318,9 @@ export function DireccionHogarForm({
       referencias: referencias.trim() === '' ? null : referencias,
       lat: punto?.lat ?? null,
       lon: punto?.lon ?? null,
+      placesId,
+      latPlaces: puntoPlaces?.lat ?? null,
+      lonPlaces: puntoPlaces?.lon ?? null,
     });
     setGuardando(false);
     if (!r.ok) {
@@ -296,6 +355,27 @@ export function DireccionHogarForm({
           autoCapitalize="words"
         />
       ) : null}
+      {/* 🔴 S100d·bis · LA DIRECCIÓN EN LECTURA, con su puerta explícita.
+          Ver la nota larga de `editandoTexto`: al entrar NO hay campo, así que
+          no hay nada que se pueda desacomodar sin haberlo pedido. */}
+      {!editandoTexto ? (
+        <View style={{ gap: spacing[2] }}>
+          <Texto variante="apoyo">{t('direccion.direccionLabel')}</Texto>
+          <Texto variante="cuerpo">{direccion}</Texto>
+          {[ciudad, sector, referencias].some((x) => x.trim() !== '') ? (
+            <Texto variante="apoyo">
+              {[ciudad, sector, referencias].filter((x) => x.trim() !== '').join(' · ')}
+            </Texto>
+          ) : null}
+          <Boton
+            variante="secundario"
+            etiqueta={t('direccion.cambiarDireccion')}
+            onPress={() => setEditandoTexto(true)}
+          />
+        </View>
+      ) : null}
+
+      {editandoTexto ? (
       <BuscadorDeLugar
         valor={direccion}
         onCambiarTexto={editarDireccion}
@@ -312,6 +392,7 @@ export function DireccionHogarForm({
         // encuentra igual existe — el punto se pone a mano.
         sinResultados={busquedaVacia ? t('direccion.sinResultados') : undefined}
       />
+      ) : null}
 
       {/* A-03 · el buscador apagado lo DICE, y dice qué hacer.
           ⚠️ La voz se duplica acá en vez de reusar la del wrapper
@@ -320,40 +401,55 @@ export function DireccionHogarForm({
           su `mensaje` dejaría este formulario en español dentro de una app en
           inglés. *La voz se copia al riel; no se toma prestada de un paquete
           que no sabe traducir.* */}
-      {buscadorApagado ? (
+      {buscadorApagado && editandoTexto ? (
         <Texto variante="apoyo">{t('direccion.buscadorApagado')}</Texto>
       ) : null}
-      <Campo label={t('direccion.ciudadLabel')} value={ciudad} onChangeText={setCiudad} autoCapitalize="words" />
-      <Campo label={t('direccion.sectorLabel')} value={sector} onChangeText={setSector} autoCapitalize="words" />
-      <Campo
-        label={t('direccion.referenciasLabel')}
-        value={referencias}
-        onChangeText={setReferencias}
-        ayuda={t('direccion.referenciasAyuda')}
-        autoCapitalize="sentences"
-      />
-
-      {/* EL PUNTO (§7) — el pin es el centro; se mueve el mapa. Sin
-          ninguna coordenada todavía, el camino es ponerlo a mano. */}
-      {punto !== null ? (
-        <View style={{ gap: spacing[1] }}>
-          <PinMovible
-            lat={punto.lat}
-            lon={punto.lon}
-            onMover={(lat, lon) => setPunto({ lat, lon })}
-            etiqueta={t('direccion.puntoEtiqueta')}
+      {editandoTexto ? (
+        <>
+          <Campo label={t('direccion.ciudadLabel')} value={ciudad} onChangeText={setCiudad} autoCapitalize="words" />
+          <Campo label={t('direccion.sectorLabel')} value={sector} onChangeText={setSector} autoCapitalize="words" />
+          <Campo
+            label={t('direccion.referenciasLabel')}
+            value={referencias}
+            onChangeText={setReferencias}
+            ayuda={t('direccion.referenciasAyuda')}
+            autoCapitalize="sentences"
           />
-          <Texto variante="apoyo">{t('direccion.puntoAyuda')}</Texto>
-        </View>
-      ) : (
+        </>
+      ) : null}
+
+      {/* 🔴 S100d·bis · LAS ACCIONES VAN **ANTES** DEL MAPA.
+          ═══════════════════════════════════════════════════════════════════
+          Founder: *«los botones de acción no pueden quedar detrás del mapa»*.
+          Acá está el orden invertido respecto de antes: **ajustar el punto y
+          Guardar quedan arriba, y el mapa —cuando existe— va último.**
+
+          ⚠️ Y el orden solo es la mitad barata de la cura. La otra es que **el
+          mapa no se monta hasta que alguien lo pide**: con el mapa ausente no
+          hay gesto que interceptar, y por eso el defecto no puede volver por
+          otra puerta. *Reordenar sin esto dejaría el mapa comiéndose el scroll
+          apenas alguien agregue un campo debajo.* */}
+      {faltaPunto ? <Texto variante="apoyo">{t('direccion.faltaPunto')}</Texto> : null}
+
+      {punto === null ? (
+        /* Sin ninguna coordenada todavía: el camino es ponerlo a mano, y ese
+           toque ES el pedido explícito de ver el mapa. */
         <Boton
           variante="secundario"
           etiqueta={t('direccion.ponerPunto')}
-          onPress={() => setPunto(SEMILLA_QUITO)}
+          onPress={() => {
+            setPunto(SEMILLA_QUITO);
+            setMostrandoMapa(true);
+          }}
+        />
+      ) : (
+        <Boton
+          variante="secundario"
+          etiqueta={mostrandoMapa ? t('direccion.listoConPunto') : t('direccion.ajustarPunto')}
+          onPress={() => setMostrandoMapa((v) => !v)}
         />
       )}
 
-      {faltaPunto ? <Texto variante="apoyo">{t('direccion.faltaPunto')}</Texto> : null}
       <Boton
         etiqueta={t('direccion.guardar')}
         bloque
@@ -366,6 +462,21 @@ export function DireccionHogarForm({
         }
         onPress={() => void guardar()}
       />
+
+      {/* EL MAPA, ÚLTIMO Y SOLO SI SE PIDIÓ (§7 — el pin es el centro, se
+          mueve el mapa). Nada vive debajo, así que **nunca hay que atravesarlo
+          para llegar a nada.** */}
+      {punto !== null && mostrandoMapa ? (
+        <View style={{ gap: spacing[1] }}>
+          <PinMovible
+            lat={punto.lat}
+            lon={punto.lon}
+            onMover={(lat, lon) => setPunto({ lat, lon })}
+            etiqueta={t('direccion.puntoEtiqueta')}
+          />
+          <Texto variante="apoyo">{t('direccion.puntoAyuda')}</Texto>
+        </View>
+      ) : null}
     </View>
   );
 }

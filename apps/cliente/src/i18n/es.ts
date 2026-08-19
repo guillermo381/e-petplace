@@ -1203,6 +1203,17 @@ export const clienteEs = {
     puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
     faltaPunto: 'Falta el punto en el mapa: es lo que encuentra tu casa cuando la dirección no alcanza.',
+    // 🔴 S100d·bis · LAS DOS PUERTAS EXPLÍCITAS. Antes el campo y el mapa
+    // estaban siempre puestos, y llegar a los botones obligaba a arrastrar
+    // sobre el mapa — que MUEVE el punto. El founder: «me desacomoda la
+    // dirección… si no me di cuenta, no pasa».
+    // Los dos verbos son de ACCIÓN y en infinitivo (Ley 22c): abren algo
+    // concreto, no prometen una pantalla nueva.
+    cambiarDireccion: 'Cambiar la dirección',
+    ajustarPunto: 'Ajustar el punto en el mapa',
+    // Cierra el mapa. No dice «Guardar» a propósito: guardar es el botón de
+    // abajo, y dos botones que parecen decir lo mismo hacen dudar de los dos.
+    listoConPunto: 'Listo con el punto',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).

@@ -1056,6 +1056,11 @@ export const clienteEn = {
     puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
     ponerPunto: 'Place the point on the map',
     faltaPunto: "The map point is missing: it's what finds your home when the address isn't enough.",
+    // S100d·bis · las dos puertas explícitas: sin ellas, llegar a los botones
+    // obligaba a arrastrar sobre el mapa, y eso movía el punto.
+    cambiarDireccion: 'Change the address',
+    ajustarPunto: 'Adjust the point on the map',
+    listoConPunto: 'Done with the point',
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
