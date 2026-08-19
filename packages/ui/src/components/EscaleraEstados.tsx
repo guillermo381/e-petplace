@@ -401,7 +401,43 @@ export function EscaleraEstados({
         // Con desvío, lo que no pasó queda apagado: el camino se cortó ahí
         // y prometer que sigue sería exactamente lo que L-139 prohíbe.
         const cortado = desvio !== undefined && paso.estado !== 'hecho'
-        const lleno = paso.estado === 'hecho' || (paso.estado === 'actual' && !cortado)
+        /* 🔴 SOLO LO CUMPLIDO SE RELLENA — enmienda a 19.8, **firma del founder
+           del 19-ago-2026 recibida de primera mano**: *«hueco en los que
+           esperan»*.
+
+           ⏪ **DEROGADO:** `lleno = hecho || (actual && !cortado)` — *el hito en
+           curso se rellenaba igual que los cumplidos.*
+
+           **Lo que la tumbó fue una medición, no una preferencia.** D capturó
+           el detalle en el bundle `01a01844`:
+           ```
+           Confirmado …… disco magenta LLENO   · texto normal
+           Preparando …… disco magenta LLENO   · texto normal
+           En camino  …… disco magenta LLENO   · texto NEGRITA   ← el actual
+           Entregado  …… anillo gris hueco     · texto normal
+           ```
+           ⇒ **la FORMA no distinguía al actual: tres discos idénticos y la
+           negrita cargando sola.** *En la referencia son DOS señales —peso y
+           forma—; acá era una.*
+
+           **La gramática firmada:** cumplidos = **disco lleno con su check** ·
+           **actual y pendientes = ANILLO HUECO**; el actual se separa **por el
+           color del anillo y por la negrita que la pieza ya ponía**, los
+           pendientes por su gris. *Vara literal:
+           `referencia-rappi-repartidor-detalle-de-ruta`.*
+
+           ✅ **Y de paso desarma la otra mitad de por qué se leía como barra:**
+           con el actual hueco, **tres discos magenta seguidos pasan a ser
+           dos.** *La cura del color (N26.2) y la de la forma se ayudan.*
+
+           ⚠️ **ALCANCE, declarado: esto cambia la VERTICAL y no la
+           horizontal**, que calcula su `lleno` por índice (arriba) y **cuya
+           propia vara la contradice**: en `referencia-rappi-seguimiento-...` el
+           nodo en curso —la bici— **está RELLENO**. *Dos referencias, dos
+           gramáticas, y no las invento yo.* **Se aplica donde la firma tiene su
+           evidencia y se declara el resto en vez de estirarlo.** */
+        const lleno = paso.estado === 'hecho' && !cortado
+        const enCurso = paso.estado === 'actual' && !cortado
         const esUltimo = i === pasos.length - 1 && desvio === undefined
         const preside = paso.estado === 'actual' && !cortado
 
@@ -442,16 +478,31 @@ export function EscaleraEstados({
                   // LO QUE PASÓ SE RELLENA · LO QUE ESPERA SE CONTORNEA
                   // (Ley 19.8 leída en el tiempo; gramática de TarjetaEstado).
                   backgroundColor: lleno ? color : 'transparent',
+                  /* El anillo DICE cuál es cuál: **en color el que está en
+                     curso, gris el que espera.** Sin esto el hueco separaría
+                     al actual de los cumplidos y lo confundiría con el
+                     futuro — *cambiar de problema no es curarlo.* */
                   ...(lleno
                     ? null
-                    : { borderWidth: theme.border.width, borderColor: theme.border.default }),
+                    : {
+                        borderWidth: theme.border.width,
+                        borderColor: enCurso ? color : theme.border.default,
+                      }),
                 }}
               >
                 {/* El `tamano` lo pasa LA PIEZA, derivado del nodo — el
                     consumidor no lo inventa (L-284, la misma cura que G-15
-                    aplicó en la horizontal). */}
+                    aplicó en la horizontal).
+
+                    El glifo sigue al soporte: **papel sobre el disco lleno ·
+                    el color del acento adentro del anillo en curso · gris en
+                    el que espera.** *Un glifo del color del anillo que lo
+                    contiene es el 1,00 del stepper otra vez; por eso adentro
+                    del lleno va papel y adentro del hueco va el acento —
+                    siempre contra el FONDO de la carta, jamás contra el
+                    trazo.* */}
                 {paso.icono?.({
-                  color: lleno ? theme.bg.base : theme.text.tertiary,
+                  color: lleno ? theme.bg.base : enCurso ? color : theme.text.tertiary,
                   lleno,
                   tamano: GLIFO_EN_NODO,
                 })}
@@ -507,18 +558,20 @@ export function EscaleraEstados({
                   del cliente.** *Se escribe para que la próxima pista sepa que
                   se eligió, y contra qué.*
 
-                  ⚠️ **Lo que NO cambié: el nodo ACTUAL sigue RELLENO** y en la
-                  referencia es un **anillo HUECO en color con su glifo adentro**
-                  (verificado en `referencia-rappi-repartidor-detalle-de-ruta`).
-                  **Hay evidencia de aparato de que hoy no distingue** —D midió
-                  en `01a01844`: *tres discos idénticos y la negrita cargando
-                  sola*—, **y me llegó por otra pista que el founder lo firmó.**
-                  🔴 **No se cambia con eso:** *el founder me dijo a mí, en esta
-                  misma sesión, «es 19.8 y todavía no la firmó — no la
-                  cambies»*, **y una firma que llega contada por un tercero no
-                  reemplaza a la que se recibió de primera mano.** *Ya perdimos
-                  vueltas por letra anunciada cuyo literal no viajó (L-142).*
-                  **Se aplica cuando el founder lo diga acá.** */}
+                  ✅ **EL NODO ACTUAL YA NO SE RELLENA — se aplicó** (ver el
+                  bloque de `lleno`). *Y la nota que estaba acá decía lo
+                  contrario: quedó vieja en cuanto el founder firmó, y un
+                  comentario que describe el código de ayer es el mismo defecto
+                  que esta pista viene cazando todo el día, del lado barato.*
+
+                  🔴 **Y cómo llegó la firma importa, porque casi sale mal:** me
+                  llegó primero **contada por otra pista** y **no se aplicó con
+                  eso** —*ninguna pista autoriza a otra*—; después llegó **de
+                  primera mano**. **Las dos instrucciones opuestas existían de
+                  verdad y al mismo tiempo**, y el error fue de la mesa, no de
+                  la lectura de nadie. ⇒ **la cura, que sale gratis: una firma
+                  sobre pieza COMPARTIDA va a SU DUEÑO; las demás pistas la
+                  reciben como AVISO, jamás como orden.** */}
               <Texto
                 variante={preside ? 'seccion' : 'cuerpo'}
                 color={cortado || paso.estado === 'pendiente' ? 'tertiary' : undefined}

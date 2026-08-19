@@ -24,9 +24,23 @@ cancelado`.
 
 | narrativa | ¿nodo? | por qué |
 |---|---|---|
-| `pagando` | **NO** | es **antes** de que exista una promesa. Dibujar la escalera ahí **prometería un recorrido que todavía no arrancó** |
+| `pagando` | **NO** | 🔴 **`pagando` NO ES UN ESTADO DEL PEDIDO: ES UNA INTENCIÓN** — enmienda del founder, 19-ago-2026. ~~*es antes de que exista una promesa; dibujar la escalera ahí prometería un recorrido que todavía no arrancó*~~ **La vieja decía la verdad y no decía POR QUÉ.** *El recorrido no es que decidimos no dibujarlo: es que **todavía no empezó**.* **El relato arranca con el pago CONFIRMADO**, y su primer hito es *«estamos preparando tu pedido»* |
 | `confirmado` · `preparando` · `en_camino` · `entregado` | **SÍ** | son el camino |
 | `no_llego` · `cancelado` | **NO** | son **DESVÍO**, y la pieza ya los trata como banda que **SUSTITUYE** la escalera |
+
+### 🔴 LO QUE EL FOUNDER VE HOY NO ES UN DEFECTO: ES LA PASARELA QUE FALTA
+
+**Cuatro pedidos en `pagando` sin escalera** — y **es un ARTEFACTO, no un
+fallo.** *Los pedidos se quedan clavados ahí porque **nunca llegan a
+pagado**: sin pasarela no hay quién confirme el cobro.* **Con Nuvei conectado
+ninguno se queda, y la escalera aparece desde su primer hito.**
+
+⚠️ **Y esto va escrito para la SESIÓN DE PAGOS, que es quien lo va a ver
+cambiar:** *el día que la pasarela entre, **esta pantalla cambia de
+comportamiento sin que nadie toque una línea**.* **Conviene mirarla ese día** —
+es de las pocas superficies cuyo comportamiento depende de un sistema que
+todavía no existe, y **un cambio que nadie hizo es el que nadie va a ir a
+verificar.**
 
 **⇒ CUATRO nodos.** *Y el desvío no es un quinto nodo por una razón que
 ya está escrita en la pieza: un camino que se cortó no avanzó un

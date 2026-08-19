@@ -846,16 +846,64 @@ del cliente no pueda filtrarse) · y **oscuro y memorial**, que conservan
 exactamente lo de hoy: *el founder firmó un valor medido contra superficies
 CLARAS; elegir el par oscuro por mi cuenta sería firmar por él.*
 
-### 🔴 Y LO QUE SIGUE ABIERTO, SIN FIRMA: LA FORMA DEL NODO ACTUAL
+### ✅ ENMIENDA A 19.8 — SOLO LO CUMPLIDO SE RELLENA (19-ago-2026, firma del founder)
 
-En la referencia el hito **en curso es un anillo HUECO en color**; el nuestro se
-**RELLENA** igual que los cumplidos. **Medido en aparato por la pista D sobre el
-bundle `01a01844`:** *«tres discos idénticos y lo único que separa al actual es
-la negrita»*. ⇒ **hoy la forma no distingue y el peso carga solo.**
+> **Verbatim:** *«hueco en los que esperan»*.
 
-**No se cambió: es gramática de 19.8, no dosis.** *Y las dos curas se ayudan —
-bajando la saturación Y sacando un disco lleno, la lectura de «barra» se
-desarma por los dos lados—, pero la segunda mitad espera firma.*
+~~**Lo que decía:** *lo que YA PASÓ se rellena · lo que ESPERA se contornea*, con
+`actual` contado del lado de lo que pasó (`lleno = hecho || actual`).~~
+**DEROGADO para la vertical.** *No se borra: describía bien la intención y erraba
+en dónde ponía al hito en curso.*
+
+**LA GRAMÍTICA QUE RIGE:**
+```
+cumplido …… disco LLENO con su check
+actual ……… ANILLO HUECO **en color**  + la negrita que la pieza ya ponía
+pendiente … ANILLO HUECO **en gris**   + su texto gris
+```
+**Vara literal:** `referencia-rappi-repartidor-detalle-de-ruta`.
+
+**Lo que la tumbó fue una MEDICIÓN.** Capturado en el bundle `01a01844`: *tres
+discos magenta idénticos y la negrita cargando sola* ⇒ **la forma no distinguía
+al actual.** *En la referencia son DOS señales —peso y forma—; acá era una.*
+
+**Sus tres pares, medidos antes de aplicar:**
+```
+cumplido:  glifo papel sobre el disco #AE3785 ……… 5,42  ✅
+actual:    anillo y glifo #AE3785 sobre carta …… 5,70  ✅   (sobre #F6F6F6: 5,27)
+pendiente: anillo gris sobre carta ………………………… 2,40  ⚠️ decorativo, declarado
+```
+✅ **Y se ayuda con N26.2:** con el actual hueco, **tres discos magenta seguidos
+pasan a ser DOS** — la otra mitad de por qué la escalera se leía como una barra.
+
+⚠️ **ALCANCE: rige la VERTICAL, no la horizontal.** La tira calcula su relleno
+por índice y **su propia vara la contradice** —en `referencia-rappi-seguimiento-…`
+el nodo en curso está **RELLENO**—. *Dos referencias, dos gramáticas: se aplica
+donde la firma tiene su evidencia y el resto se declara en vez de estirarse.*
+
+### 🔴 LA LEY DE GOBIERNO QUE SALE DE CÓMO LLEGÓ ESTA FIRMA
+
+**La misma línea recibió DOS órdENES OPUESTAS, en paralelo, a dos pistas:**
+
+| a quién | literal |
+|---|---|
+| **a B** (dueña de la pieza) | *«es 19.8 y todavía no la firmó. **No la cambies**.»* |
+| **a D** | *«**el nodo actual va HUECO** — firma del founder»* |
+
+**Las dos eran reales:** la firma llegó **entre** los dos mensajes y no se
+re-avisó. **Error de la mesa, declarado por la mesa.**
+
+> ⇒ **UNA FIRMA SOBRE PIEZA COMPARTIDA VA A SU DUEÑO; LAS DEMÁS PISTAS LA
+> RECIBEN COMO AVISO, JAMÁS COMO ORDEN.**
+
+**Es peor que las tres veces que el canon ya registró** (el magenta de S72, la
+plata de S83 y S88): *allá eran dos letras viejas conviviendo, que se descubren
+LEYENDO; acá eran dos órdenes simultáneas, que se descubren CHOCANDO — y chocan
+en el código.* **Y solo la mesa puede cometerlo.**
+
+✅ **El costo fue CERO porque las dos pistas frenaron** — y **la que traía la
+orden fue la primera en decir que no podía insistir.** *Un mecanismo donde quien
+trae la firma ajena se abstiene de empujarla es el que funciona.*
 
 ### 🔴 Lo que esta ley NO es: una decisión nueva sobre el CTA
 
