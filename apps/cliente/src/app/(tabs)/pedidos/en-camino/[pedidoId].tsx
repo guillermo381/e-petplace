@@ -612,7 +612,7 @@ export default function DespensaEnCamino() {
                       el mismo registro que la banda de desvío de la escalera.
                       Y **acá es donde más hace falta**: esta carta flota sobre
                       el mapa y es lo único que se lee con la hoja abajo. */}
-                  {ventanaVencida(detalle.pedido.promesa_hasta) ? (
+                  {ventanaVencida(detalle.pedido.promesa_hasta, detalle.pedido.narrativa) ? (
                     <Texto variante="apoyo" color="warning">
                       {t('despensa.ventanaTardando')}
                     </Texto>

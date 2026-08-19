@@ -1521,6 +1521,7 @@ export const clienteEn = {
     // (N14): promising a minute we cannot keep is worse than not promising.
     enCaminoEntrada: 'Follow your order',
     enCaminoEntradaDetalle: 'See where it is',
+    enCaminoCta: 'See where it is',
     enCaminoTitulo: 'On the way',
     enCaminoSinTrack: "We don't have their location yet. As soon as they set off, you'll be able to follow along here.",
     enCaminoVentana: 'Arrives between',
