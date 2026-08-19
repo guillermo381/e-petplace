@@ -1,27 +1,47 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // S101-A · ADD CARD — LA PUERTA REAL DE TOKENIZACIÓN
 //
-// Nace porque el camino server-to-server MURIÓ POR MEDICIÓN: Nuvei rebota
-// `401 Application is not PCI` — ni siquiera en sandbox. **No era una
-// preferencia de arquitectura: es que ese camino no existe para nosotros.**
+// ┌─────────────────────────────────────────────────────────────────────────┐
+// │ 🔴 EL PRINCIPIO INNEGOCIABLE                                            │
+// │                                                                         │
+// │ EL PAN VIVE ÚNICAMENTE DENTRO DEL FORMULARIO DE NUVEI.                  │
+// │ Nuestra página lo ALOJA; jamás lo LEE.                                  │
+// │                                                                         │
+// │ ⇒ Los campos los pinta el widget `PaymentForm` del SDK, que monta sus   │
+// │   propios inputs. Nuestro JS **nunca** hace `.value` sobre el número,   │
+// │   nunca lo mete en una variable, nunca lo manda a ningún lado.          │
+// │ ⇒ PROHIBIDO en esta página: logs del contenido del formulario,          │
+// │   analytics, y cualquier error-tracking que capture el DOM (Sentry con  │
+// │   session replay, LogRocket, hotjar y parientes). Un replay que grabe   │
+// │   este formulario mete el PAN en un tercero **y nos vuelve PCI**.       │
+// │                                                                         │
+// │ Ésta es la razón por la que somos NO-PCI, y el proveedor LO VERIFICA:   │
+// │ el 19-ago el camino server-to-server rebotó con                         │
+// │ `401 Application is not PCI`. No es una política nuestra que podamos    │
+// │ relajar — es una puerta cerrada del otro lado.                          │
+// └─────────────────────────────────────────────────────────────────────────┘
 //
-// 🔴 ESTO SÍ ES CAMINO DEL PRODUCTO. El PAN se tokeniza EN EL NAVEGADOR contra
-//    el dominio de Nuvei y **jamás toca nuestro servidor** — que es
-//    exactamente lo que la cabecera del arnés advertía y lo que la letra de la
-//    puerta de pago iba a pedir igual. Esta página es la v0 de esa puerta:
-//    fea, mínima, y por el camino correcto.
+// ⚠️ VERSIÓN ANTERIOR DE ESTE ARCHIVO VIOLABA EL PRINCIPIO y se corrigió:
+//    montaba inputs propios y leía el número con `.value`. Funcionaba, y por
+//    eso era peligroso — *el PAN en una variable de nuestro JS no rompe nada
+//    visible; solo cambia en qué régimen de cumplimiento estamos parados.*
 //
-// POR QUÉ ES UNA EDGE FUNCTION Y NO UN HTML EN EL REPO:
-//    las credenciales CLIENT se inyectan **en el momento de servir**, desde los
-//    secrets. Un HTML estático las tendría escritas adentro y commiteadas.
-//    *El juego CLIENT es menos sensible que el SERVER, pero «menos sensible»
-//    no es «va al repo».*
+// ── MEDIDO CONTRA LA FUENTE (github.com/paymentez/paymentez.js, 19-ago) ──
+//    · SDK:  https://cdn.paymentez.com/ccapi/sdk/payment_stable.min.js
+//            + payment_stable.min.css
+//      **UN SOLO CDN: la doc NO distingue host de staging.** Lo que separa
+//      staging de producción es el PRIMER argumento de `Payment.init`.
+//    · init: Payment.init('stg'|'prod'|'local', APP_CODE, APP_KEY)
+//            ⚠️ el ambiente va PRIMERO, y el objeto es `Payment` (no `Paymentez`).
+//    · form: <div class="payment-form" id="my-card" data-capture-name="true">
+//            var cardToSave = $('#my-card').PaymentForm('card');
+//            Payment.addCard(uid, email, cardToSave, ok, err, myCard);
+//      El widget **exige jQuery** (es un plugin jQuery).
 //
-// ⚠️ PUERTA: se sirve solo con `?k=<ARNES_SECRET>`. Es proporcionado para un
-//    ensayo de sandbox que corre el founder, y **se declara su costo**: el
-//    secreto viaja en la URL y queda en el historial del navegador. Para el
-//    arco real del Add Card la puerta es la sesión del usuario, no un secreto
-//    en la query — esto muere con esa letra.
+// POR QUÉ ES EDGE FUNCTION Y NO UN HTML EN EL REPO: las credenciales CLIENT se
+// inyectan **al servir**, desde los secrets. La llave client es publicable por
+// diseño (viaja al navegador en todo SDK de pagos), pero *publicable no es
+// «va commiteada»*.
 // ═══════════════════════════════════════════════════════════════════════════
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
@@ -29,83 +49,119 @@ const APP_CODE_CLIENT = Deno.env.get('NUVEI_APP_CODE_CLIENT') ?? '';
 const APP_KEY_CLIENT = Deno.env.get('NUVEI_APP_KEY_CLIENT') ?? '';
 const ARNES_SECRET = Deno.env.get('ARNES_SECRET') ?? '';
 
-// ⚠️ NO MEDIDO: la URL del SDK sale de env para no clavar en código algo que
-//    nadie verificó. Si la doc dice otra, se cambia el secreto y no el archivo.
-const SDK_URL = Deno.env.get('NUVEI_SDK_URL')
-  ?? 'https://cdn.paymentez.com/ccapi/sdk/payment_checkout_3.0.0.js';
+// Medidos del repo oficial. Salen de env igual, para poder corregirlos sin
+// tocar el archivo si la doc cambia.
+const SDK_JS = Deno.env.get('NUVEI_SDK_JS')
+  ?? 'https://cdn.paymentez.com/ccapi/sdk/payment_stable.min.js';
+const SDK_CSS = Deno.env.get('NUVEI_SDK_CSS')
+  ?? 'https://cdn.paymentez.com/ccapi/sdk/payment_stable.min.css';
+const JQUERY = Deno.env.get('JQUERY_URL')
+  ?? 'https://code.jquery.com/jquery-3.7.1.min.js';
+
+// 'stg' | 'prod' — lo decide el ambiente, no una constante suelta.
+const MODO = AMBIENTE === 'produccion' ? 'prod' : 'stg';
 
 const ARNES_URL = `${Deno.env.get('SUPABASE_URL')}/functions/v1/pagos-arnes-sandbox`;
 
-function pagina(compraId: string, k: string): string {
+function pagina(compraId: string): string {
   // El `user_id` se fija ACÁ y viaja igual a la tokenización y al débito:
-  // es el que entra al stoken.
+  // es el que entra al `stoken`. Si divergieran, el stoken daría false por
+  // una razón que no es la fórmula.
   const userId = `arnes-${compraId.slice(0, 8)}`;
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Add Card · sandbox S101</title>
+<title>Agregar tarjeta · sandbox</title>
+<link href="${SDK_CSS}" rel="stylesheet" type="text/css">
 <style>
-  body { font: 15px/1.5 system-ui, sans-serif; max-width: 34rem; margin: 2rem auto; padding: 0 1rem; }
-  code { background: #f4f4f5; padding: .1rem .3rem; border-radius: 3px; }
-  button { font: inherit; padding: .6rem 1.1rem; border-radius: 6px; border: 0;
-           background: #111; color: #fff; cursor: pointer; }
-  button[disabled] { opacity: .5; cursor: default; }
-  pre { background: #f4f4f5; padding: .8rem; border-radius: 6px; overflow: auto; font-size: 13px; }
-  .aviso { background: #fff7ed; border-left: 3px solid #ea580c; padding: .7rem .9rem; }
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 30rem; margin: 2rem auto; padding: 0 1rem; }
+  code { background:#f4f4f5; padding:.1rem .3rem; border-radius:3px; font-size:.9em; }
+  button { font:inherit; padding:.7rem 1.2rem; border-radius:8px; border:0;
+           background:#111; color:#fff; cursor:pointer; }
+  button[disabled] { opacity:.45; cursor:default; }
+  pre { background:#f4f4f5; padding:.8rem; border-radius:8px; overflow:auto; font-size:12.5px; }
+  .aviso { background:#fff7ed; border-left:3px solid #ea580c; padding:.7rem .9rem; font-size:14px; }
+  .estado { font-weight:600; margin-top:1rem; }
 </style></head><body>
-<h1>Add Card · sandbox</h1>
-<p class="aviso"><b>Solo sandbox.</b> El PAN se tokeniza en el navegador contra Nuvei;
-nuestro servidor no lo ve. Tarjeta de prueba: <code>4111 1111 1111 1111</code>,
+
+<h1>Agregar tarjeta</h1>
+<p class="aviso"><b>Solo sandbox.</b> Los campos de abajo los monta el SDK de Nuvei:
+<b>el número de tarjeta no pasa por nuestro código</b>. Prueba: <code>4111 1111 1111 1111</code>,
 vencimiento futuro, CVC de 3 dígitos.</p>
 
-<p>Compra: <code>${compraId}</code> · user: <code>${userId}</code></p>
+<p>Compra <code>${compraId}</code></p>
 
-<p>
-  <label>Número <input id="num" value="4111111111111111" size="22"></label><br>
-  <label>MM <input id="mm" value="12" size="3"></label>
-  <label>AAAA <input id="yy" value="2030" size="5"></label>
-  <label>CVC <input id="cvc" value="123" size="4"></label>
-</p>
+<!-- 🔴 El widget monta ACÁ sus propios campos. No hay inputs nuestros. -->
+<div class="payment-form" id="my-card" data-capture-name="true"></div>
 
-<p><button id="go">Tokenizar y cobrar</button></p>
+<p><button id="go">Guardar tarjeta y cobrar</button></p>
+<p class="estado" id="estado">—</p>
 <pre id="out">esperando…</pre>
 
-<script src="${SDK_URL}"></script>
+<script src="${JQUERY}"></script>
+<script src="${SDK_JS}" charset="UTF-8"></script>
 <script>
-const out = document.getElementById('out');
-const log = (t) => { out.textContent = typeof t === 'string' ? t : JSON.stringify(t, null, 2); };
+var out = document.getElementById('out');
+var est = document.getElementById('estado');
+function log(t){ out.textContent = typeof t === 'string' ? t : JSON.stringify(t, null, 2); }
+
+// ⑤ LOS TRES DESENLACES DEL ADD CARD, con lugar hecho desde el día uno.
+//    No es un happy-path soldado: 'abandonada' existe acá aunque hoy solo la
+//    dispare cerrar la pestaña, porque el día que se instrumente ya tiene
+//    dónde vivir.
+var DESENLACE = { GUARDADA: 'guardada', RECHAZADA: 'rechazada', ABANDONADA: 'abandonada' };
+var desenlace = DESENLACE.ABANDONADA;   // hasta que algo diga lo contrario
+function marcar(d, detalle){ desenlace = d; est.textContent = 'Desenlace: ' + d; if (detalle) log(detalle); }
+
+// El OTP de Diners vive en ESTE arco (tarjeta 36417002140808 · OTP 012345 éxito
+// / 543210 pendiente). Para el camino feliz con la 4111 no aparece; cuando
+// aparezca, el SDK lo pide en su propio formulario — tampoco lo leemos nosotros.
 
 try {
-  // El SDK de Nuvei/Paymentez se inicializa con el juego CLIENT.
-  Paymentez.init(${JSON.stringify(APP_CODE_CLIENT)}, ${JSON.stringify(APP_KEY_CLIENT)}, 'stg');
-} catch (e) { log('No se pudo inicializar el SDK: ' + e + '\\n\\nSDK: ${SDK_URL}'); }
+  Payment.init(${JSON.stringify(MODO)}, ${JSON.stringify(APP_CODE_CLIENT)}, ${JSON.stringify(APP_KEY_CLIENT)});
+} catch (e) {
+  marcar(DESENLACE.RECHAZADA, 'No se pudo inicializar el SDK: ' + e + '\\n\\nJS: ${SDK_JS}');
+}
 
 document.getElementById('go').onclick = function () {
-  const b = this; b.disabled = true; log('tokenizando en el navegador…');
-  const card = {
-    number: document.getElementById('num').value.trim(),
-    holder_name: 'ARNES S101',
-    expiry_month: parseInt(document.getElementById('mm').value, 10),
-    expiry_year: parseInt(document.getElementById('yy').value, 10),
-    cvc: document.getElementById('cvc').value.trim(),
-    type: 'vi'
-  };
-  const user = { id: ${JSON.stringify(userId)}, email: 'arnes-s101@epetplace.test' };
+  var b = this; b.disabled = true;
+  log('tokenizando dentro del formulario de Nuvei…');
 
-  Paymentez.addCard(user, card, function (resp) {
-    if (!resp || !resp.card || !resp.card.token) {
-      log({ paso: 'tokenizacion_fallo', respuesta: resp });
-      b.disabled = false; return;
-    }
-    log('token obtenido (' + String(resp.card.token).slice(0, 6) + '…) · disparando el débito…');
-    // 🔴 El token va al SERVIDOR, que es quien tiene el secreto del arnés.
-    //    El navegador nunca conoce ARNES_SECRET.
-    fetch(location.pathname + location.search, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ compra_id: ${JSON.stringify(compraId)},
-                             token: resp.card.token, user_id: user.id })
-    }).then(r => r.json()).then(log).catch(e => log('error: ' + e));
-  });
+  var myCard = $('#my-card');
+  var cardToSave;
+  try { cardToSave = myCard.PaymentForm('card'); }
+  catch (e) { b.disabled = false; return marcar(DESENLACE.RECHAZADA, 'formulario inválido: ' + e); }
+
+  Payment.addCard(
+    ${JSON.stringify(userId)},
+    'arnes-s101@epetplace.test',
+    cardToSave,
+    function (resp) {                                   // éxito
+      var card = resp && resp.card ? resp.card : {};
+      if (!card.token) { b.disabled = false; return marcar(DESENLACE.RECHAZADA, resp); }
+      marcar(DESENLACE.GUARDADA);
+      log('token obtenido · disparando el débito…');
+      // 🔴 El token va al SERVIDOR. El navegador nunca conoce ARNES_SECRET.
+      //    Y viaja el MISMO user_id con el que se tokenizó.
+      fetch(location.pathname + location.search, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          compra_id: ${JSON.stringify(compraId)},
+          token: card.token,
+          user_id: ${JSON.stringify(userId)},
+          // metadatos NO sensibles, para la tabla de tarjetas del producto
+          bin: card.bin || null, ultimos4: card.number || null,
+          marca: card.type || null, titular: card.holder_name || null
+        })
+      }).then(function(r){ return r.json(); }).then(log)
+        .catch(function(e){ log('error al disparar el débito: ' + e); });
+    },
+    function (err) {                                    // rechazo
+      b.disabled = false;
+      marcar(DESENLACE.RECHAZADA, err);
+    },
+    myCard
+  );
 };
 </script>
 </body></html>`;
@@ -117,12 +173,14 @@ Deno.serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const k = url.searchParams.get('k') ?? '';
-  if (!ARNES_SECRET || k !== ARNES_SECRET) {
+  // ⚠️ Puerta por secreto en la query: proporcionado para un ensayo de sandbox
+  //    que corre el founder, y con su costo declarado — queda en el historial
+  //    del navegador. **Muere con la letra del Add Card real**, donde la puerta
+  //    es la sesión del usuario.
+  if (!ARNES_SECRET || url.searchParams.get('k') !== ARNES_SECRET) {
     return new Response('no autorizado', { status: 401 });
   }
 
-  // ── GET: sirve la página con las credenciales CLIENT inyectadas ──
   if (req.method === 'GET') {
     const compraId = url.searchParams.get('compra') ?? '';
     if (!compraId) return new Response('falta ?compra=<uuid>', { status: 400 });
@@ -131,18 +189,23 @@ Deno.serve(async (req) => {
         'Faltan NUVEI_APP_CODE_CLIENT / NUVEI_APP_KEY_CLIENT en los secrets.',
         { status: 500 });
     }
-    return new Response(pagina(compraId, k), {
+    return new Response(pagina(compraId), {
       status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   }
 
-  // ── POST: recibe el token del navegador y llama al arnés CON el secreto ──
   if (req.method === 'POST') {
-    const body = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+    // 🔴 Solo se reenvía lo que el arnés necesita. Aunque el navegador mandara
+    //    de más, acá se corta: nada parecido a un PAN cruza este punto.
+    const limpio = {
+      compra_id: body.compra_id, token: body.token, user_id: body.user_id,
+      email: body.email,
+    };
     const r = await fetch(ARNES_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-arnes-secret': ARNES_SECRET },
-      body: JSON.stringify(body),
+      body: JSON.stringify(limpio),
     });
     return new Response(await r.text(), {
       status: r.status, headers: { 'Content-Type': 'application/json' },

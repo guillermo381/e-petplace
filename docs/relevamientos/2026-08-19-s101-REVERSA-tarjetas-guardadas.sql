@@ -1,0 +1,15 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260821030000_s101_tarjetas_guardadas.sql
+-- S101-A · 19-ago-2026
+--
+-- 🔴 QUÉ NO DESHACE: revertir BORRA LAS REFERENCIAS DE TOKEN.
+--    La tabla no guarda ningún dato de tarjeta reutilizable por nosotros —
+--    guarda el TOKEN del proveedor, que es lo único con lo que se puede volver
+--    a cobrar. Perderlo significa que **cada cliente tiene que volver a cargar
+--    su tarjeta**, y en el medio se caen las compras recurrentes.
+--    ⇒ Si ya hay filas de personas reales, exportarlas antes:
+--        \copy (select * from public.tarjetas_guardadas) to 'tarjetas.csv' csv header
+--    El token NO es un dato de tarjeta: sin nuestras credenciales de servidor
+--    no sirve para nada. Pero es nuestro, y no se regenera.
+-- ═══════════════════════════════════════════════════════════════════════════
+DROP TABLE IF EXISTS public.tarjetas_guardadas;
