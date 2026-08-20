@@ -1445,6 +1445,7 @@ export const clienteEs = {
     // ── S101-B · FASE 4 · LA ESPERA ────────────────────────────────────
     // 🔴 Nunca un spinner mudo, nunca "rechazado" por timeout.
     esperaTitulo: 'Estamos confirmando tu pago',
+    esperaTituloCorto: 'Tu pago',
     esperaCuerpo: 'Puede tardar unos segundos. Podés cerrar esta pantalla: tu pedido sigue solo.',
     // El tope NO declara desenlace — la compra sigue viva.
     esperaSigueAbierta: 'Está tardando más de lo normal. Tu pedido sigue en curso y te vamos a avisar.',

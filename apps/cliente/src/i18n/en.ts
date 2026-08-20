@@ -1240,6 +1240,7 @@ export const clienteEn = {
   despensa: {
     // S101-B · Fase 4 — the wait. Never a mute spinner, never "declined" on timeout.
     esperaTitulo: "We're confirming your payment",
+    esperaTituloCorto: 'Your payment',
     esperaCuerpo: 'It may take a few seconds. You can close this screen — your order keeps going.',
     esperaSigueAbierta: "It's taking longer than usual. Your order is still going and we'll let you know.",
     esperaFallida: "The payment didn't go through. You weren't charged.",

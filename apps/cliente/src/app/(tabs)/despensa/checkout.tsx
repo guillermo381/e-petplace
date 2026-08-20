@@ -190,6 +190,22 @@ export default function DespensaCheckout() {
      checkout sondee por existir. *La lección del andamio del alta otra vez:
      las pantallas no hacen cosas por estar abiertas.* */
   const espera = useEsperaDeConfirmacion(fase === 'confirmando' ? compraId : null);
+
+  /* ═══ 🔴 EL HOOK SE ESCUCHA — porque antes NO ═══════════════════════════
+     **Medido en el aparato el 20-ago:** la compra quedó `pagada` en la base a
+     los 34 s y la pantalla seguía diciendo «Estamos confirmando» **a los 78**.
+     Causa: `useEsperaDeConfirmacion` se llamaba y **nadie leía su resultado**.
+
+     Es *motor sin puerta* por tercera vez en el día, una capa más arriba cada
+     vez. *La pieza estaba bien construida, probada, y desconectada del único
+     lugar donde su resultado importa.* */
+  useEffect(() => {
+    if (espera.fase !== 'resuelta') return;
+    /* Solo `pagada` es éxito. Los otros desenlaces **no se dibujan como
+       éxito ni como rechazo**: la pantalla los dice con su voz y la compra
+       sigue viva donde corresponda. */
+    if (espera.estado === 'pagada') setFase('exito');
+  }, [espera]);
   /** El total DE LA COMPRA, tal como lo devolvió el motor. Esta pantalla
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
    *  plata, y el día que discrepe es en una factura. */
@@ -732,7 +748,12 @@ export default function DespensaCheckout() {
            compra ya disparada sería una puerta a pagar dos veces. */
         <Encabezado
           variante="navegacion"
-          titulo={fase === 'confirmando' ? t('despensa.esperaTitulo') : t('despensa.exitoTitulo')}
+          /* 🔴 El título del HEADER es corto a propósito: «Estamos confirmando tu
+             pago» **se truncaba en pantalla** («…tu pa…»), y un título cortado
+             en el momento en que la familia acaba de entregar su tarjeta es
+             peor que uno breve. La frase entera vive en el CUERPO, que es
+             donde hay lugar para decirla. */
+          titulo={fase === 'confirmando' ? t('despensa.esperaTituloCorto') : t('despensa.exitoTitulo')}
         />
       ) : (
         <Encabezado
@@ -1199,6 +1220,20 @@ export default function DespensaCheckout() {
                 *Una advertencia que dejó de ser cierta no es inofensiva: le
                 enseña a la familia a no creerle a las advertencias.* */}
           </>
+        ) : fase === 'confirmando' ? (
+          /* 🔴 LA PANTALLA NO PUEDE ESTAR VACÍA JUSTO ACÁ. Medido en el
+             aparato: título truncado, un botón, y nada más — en el segundo
+             exacto en que la familia acabó de entregar su tarjeta.
+             *El silencio, en ese momento, se lee como que algo salió mal.* */
+          <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+            <Texto variante="titulo">{t('despensa.esperaTitulo')}</Texto>
+            <Texto variante="cuerpo">{t('despensa.esperaCuerpo')}</Texto>
+            {/* El tope habla y **no declara desenlace**: la compra sigue viva
+                y el barrido la resuelve el mismo día. */}
+            {espera.fase === 'sigue_abierta' ? (
+              <Texto variante="apoyo">{t('despensa.esperaSigueAbierta')}</Texto>
+            ) : null}
+          </View>
         ) : fase === 'exito' ? (
           <>
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>

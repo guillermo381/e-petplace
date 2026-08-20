@@ -979,3 +979,59 @@ Apex `epetplace.com` **verificado**, remitente firmado **`hola@epetplace.com`**,
 de B: isotipo hosted sin tracking con wordmark de texto como fallback, **la
 casa heredada entera** (tapiz + CTA + link por audiencia), y **`lang` según
 el idioma del destinatario**.
+
+
+---
+
+## §7bis · EL CANAL FORZADO — cuando el canal es un REQUISITO y no una preferencia
+*(enmienda S101-B · 20-ago-2026 · firma de mesa)*
+
+**§7 elige UN canal: el primero habilitado con transporte vivo, por `orden`.** Esa
+regla sirve mientras el canal sea una **preferencia**. **Hay casos donde no lo es.**
+
+### El caso que la parió, con su literal
+
+> «El diseño queda a su criterio pero necesitamos que ese **correo** adjunte esos
+> 2 códigos.» — **Erick, Nuvei, 20-ago-2026**
+
+El comprobante de pago **tiene que ser un correo**: es **requisito de
+certificación de la pasarela**. **Medido en el primer circuito real:** salió con
+`canal_elegido = "push"`, porque el selector hizo exactamente su trabajo.
+*Nada falló — salió por un canal que no cumple el requisito, y un verde que
+cumple otra cosa es peor que un rojo.*
+
+### La regla
+
+> **Un requisito no se somete al selector de canal.**
+>
+> `cat_notificacion_tipos.canal_forzado` fija el canal **obligatorio** de un tipo,
+> por encima del `orden`. **Es DATO del catálogo, no una excepción escondida en
+> el código del elector** — *para que cualquiera pueda ver qué tipos tienen canal
+> obligatorio mirando una tabla, en vez de descubrirlo leyendo una función.*
+>
+> 🔴 **Los demás canales pueden ACOMPAÑAR; jamás sustituir.** Esto fija el que
+> tiene que salir, no prohíbe los otros.
+
+**Hoy: `pago_confirmado → email`.** Cualquier otro se agrega con su porqué.
+
+---
+
+## §7ter · ⚖️ LA LEY DEL MOTOR SIN PUERTA
+*(depositada S101-B · tres casos medidos el mismo día)*
+
+> **La pieza bien construida, probada, y desconectada del único lugar donde su
+> resultado importa — y el instrumento miraba la pieza, no el cable.**
+
+Los tres casos, cada uno una capa más arriba:
+
+1. **El actuador** existía, estaba encendido, y **el buzón nunca lo llamaba**.
+2. **El arnés** llamaba al actuador **directo** — y por eso no podía ver ①.
+3. **El hook de espera**: la pantalla lo invocaba y **no leía su resultado**. La
+   compra quedaba `pagada` a los 34 s y la pantalla decía «confirmando» a los 78.
+
+**Consecuencia exigible:**
+
+> **Todo productor nuevo —hook, actuador, RPC— se prueba DESDE SU CONSUMIDOR REAL
+> al menos una vez antes de declararse verde. La pieza sola no alcanza.**
+
+*Los tres pasaron sus pruebas. Ninguna prueba tocaba el cable.*
