@@ -48,8 +48,25 @@ console.log('¿el SDK considera VÁLIDO el formulario?:',
 await p.waitForTimeout(2500);   // deja que el SDK consulte el BIN
 
 await p.locator('#guardar').click();
-console.log('— GUARDAR tocado, esperando 35 s —');
-await p.waitForTimeout(35000);
+console.log('— GUARDAR tocado —');
+await p.waitForTimeout(9000);
+
+/* El desafío (OTP) lo monta el SDK cuando card.status === 'pending'.
+   Sus campos son `.verification` y `.verification-btn` — medidos del SDK. */
+const OTP = process.argv[4];
+if (OTP && await p.locator('#tarjeta input.verification').count()) {
+  console.log(`— desafío montado · escribiendo OTP ${OTP} —`);
+  /* 🔴 `fill()` NO sirve: el SDK habilita su botón escuchando eventos de
+     tecla, y fill los saltea. Medido — el ensayo murió con el botón
+     `not enabled`. Se tipea. */
+  const inp = p.locator('#tarjeta input.verification').first();
+  await inp.click(); await inp.type(OTP, { delay: 90 });
+  await p.waitForTimeout(800);
+  await p.locator('#tarjeta input.verification-btn, #tarjeta .verification-btn').first().click();
+  await p.waitForTimeout(12000);
+} else {
+  await p.waitForTimeout(26000);
+}
 
 console.log('\nestado en pantalla:', JSON.stringify(await p.locator('#estado').textContent()));
 console.log('¿montó el contenedor del OTP?:',
