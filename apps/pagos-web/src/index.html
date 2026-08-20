@@ -209,6 +209,19 @@
     var tarjeta;
     try {
       tarjeta = campo.PaymentForm('card');
+      /* 🔴 `PaymentForm('card')` NO LANZA cuando los datos no validan:
+         **devuelve `null`** (medido en `getCard()`, que arranca con
+         `let data = null` y solo lo llena `if (this.isValidData())`).
+         La v1 lo pasaba igual a `addCard`, que revienta con
+         «Cannot read properties of null (reading 'card')» — un pageerror NO
+         capturado ⇒ ni éxito ni error ⇒ **cuelgue mudo**.
+         *El `try/catch` no alcanzaba: no había excepción que atrapar.* */
+      if (!tarjeta) {
+        pararReloj();
+        btn.disabled = false;
+        decir('Revisá los datos de la tarjeta.', 'error');
+        return;
+      }
     } catch (e) {
       pararReloj();
       btn.disabled = false;
