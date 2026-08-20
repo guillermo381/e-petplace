@@ -281,6 +281,34 @@ El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos 
 
 ---
 
+## §6ter · 🔑 EL REVERSO DESPUÉS DEL CORTE — LITERAL DE ERICK (20-ago-2026)
+
+> «el reverso es diario, por medio de nosotros»
+
+> «el reverso si pasa el cierre de lote es con el banco — Alexandra le puede
+> ayudar con la información de los contactos a quien enviar la petición»
+
+⇒ **La premisa de `E6` queda CONFIRMADA, y el hallazgo que abrió el link de la API
+del refund CIERRA.** El reverso por API es **mismo día**; pasado el cierre de lote
+**no es un endpoint: es un trámite con el banco**, y el contacto lo provee
+Alexandra.
+
+**Lo que esto FIJA, y lo que NO cambia:**
+- ✅ `E6` sigue · ✅ «el saldo es la única vía **automática**» sigue · ✅ la
+  cadencia del barrido queda como está — **el reverso mismo-día sigue siendo el
+  camino barato y limpio para el huérfano**, y ahora se sabe por qué: *pasado el
+  corte deja de ser código y pasa a ser gestión humana con un tercero.*
+- `LETRA_SALDO` §8.4 resuelve: **el camino al medio de pago original post-corte
+  EXISTE, como vía manual con el banco.** *No es «no se puede»: es «no lo hace un
+  sistema».*
+- 🔴 **La promesa exacta de T&C se decide en S102** (founder + contador + §9.2).
+  *Prometer «te devolvemos al medio original» sin decir que puede tardar un
+  trámite sería vender un automatismo que no existe.*
+- **Al tablero del carril externo:** el contacto de reversos post-corte **se suma
+  al bloque comercial de Alexandra**.
+
+---
+
 ## §6bis · 🔑 LAS DOS RESPUESTAS DE ERICK (20-ago-2026) — DEPOSITADAS VERBATIM
 
 ### ① La forma del `order` con IVA 0
