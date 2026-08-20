@@ -1315,3 +1315,17 @@ export {
   type CodigoAltaTarjeta,
   type EstadoAlta,
 } from './wrappers/pagos-alta-tarjeta';
+
+export {
+  verificarCompuertas,
+  COMPUERTAS_DEFECTO_NUESTRO,
+  type CodigoCompuerta,
+  type Compuertas,
+  type CompuertasVerde,
+  type CompuertasRojo,
+} from './wrappers/pagos-compuertas';
+
+export {
+  listarTarjetasGuardadas,
+  type TarjetaGuardada,
+} from './wrappers/tarjetas-guardadas';

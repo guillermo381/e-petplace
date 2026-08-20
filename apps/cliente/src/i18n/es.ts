@@ -1442,6 +1442,23 @@ export const clienteEs = {
   // traduce contra los diccionarios que la casa ya tiene y lo que no
   // matchea no se pinta (Ley 3).
   despensa: {
+    // ── S101-B · FASE 3 · LAS VOCES DE LAS COMPUERTAS (letra §3.1) ──────
+    // 🔴 Cada una habla ANTES de tocar la tarjeta. La regla madre: el cliente
+    //    jamás descubre un problema del pedido a través del cobro.
+    //    Y las tres de «defecto nuestro» NO lo culpan ni le piden que revise
+    //    nada: le decimos que lo estamos viendo nosotros.
+    cobroPagoEnProceso: 'Tu pago anterior se está procesando.',
+    cobroReservaVencida: 'Tu reserva venció. Vamos a revisar que todo siga disponible.',
+    cobroVendedorNoActivo: 'Esta tienda no está recibiendo pedidos en este momento.',
+    cobroTokenAusente: 'Elegí con qué tarjeta querés pagar.',
+    cobroCompraNoExiste: 'No encontramos esta compra.',
+    // Las tres nuestras comparten voz a propósito: la causa fina es de soporte,
+    // no de la familia — distinguirlas en pantalla sería contarle un problema
+    // interno que no puede resolver.
+    cobroDefectoNuestro: 'No pudimos completar el cobro. Ya lo estamos viendo.',
+    cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
+    // El estado de espera — la PANTALLA es Fase 4; acá solo su voz.
+    cobroConfirmando: 'Estamos confirmando tu pago.',
     titulo: 'Despensa',
     tituloProducto: 'Producto',
 

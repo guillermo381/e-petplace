@@ -111,13 +111,20 @@ pantalla real.**
 
 `verificar_compuertas_pre_cobro(p_compra_id, p_token)` *(medido: existe, migración `20260821020000`)*. **Cada fallo se muestra con su voz ANTES de tocar la tarjeta.**
 
-**Los NUEVE códigos tipados que la función ya devuelve** *(medidos leyendo la migración, no la bitácora)*, con la voz que esta letra les fija:
+**Los OCHO códigos tipados que la función devuelve**, con la voz que esta letra les fija:
+
+> 🔴 **CORRECCIÓN A LA v1.0 DE ESTA LETRA (20-ago), y es un error mío de medición:** la
+> v1.0 decía **NUEVE** códigos e incluía `pedidos_sin_reserva`. **No es un código: es una
+> CLAVE DEL `detalle`** dentro de `reserva_vencida`. *Grepeé identificadores sin distinguir
+> el código de su detalle — medí por NOMBRE en vez de por ESTRUCTURA, que es exactamente el
+> modo de falla que S95 registró con el invariante que daba verde por la razón equivocada.*
+> ⇒ **La matriz es 8/8**, y los que faltaban ensayar son **DOS**, no tres: `compra_sin_pedidos`
+> y `desglose_incompleto` — *y son justamente los dos que hablan hacia soporte.*
 
 | Código | Qué pasó | Voz (es) | Salida |
 |---|---|---|---|
 | `pago_en_proceso` | ya hay un intento en vuelo | «Tu pago anterior se está procesando.» | esperar — **jamás un segundo débito** |
 | `reserva_vencida` | venció el TTL del carrito | «Tu reserva venció. Vamos a revisar que todo siga disponible.» | rearmar contra stock actual |
-| `pedidos_sin_reserva` | el pedido no tiene reserva viva | idem `reserva_vencida` — **misma causa para la familia** | idem |
 | `monto_divergente` | el total no coincide con el desglose congelado | «No pudimos completar el cobro. Ya lo estamos viendo.» | **soporte — es defecto NUESTRO, no del cliente** |
 | `vendedor_no_activo` | la tienda dejó de estar activa | «Esta tienda no está recibiendo pedidos en este momento.» | volver al catálogo |
 | `token_ausente` | no hay medio de pago | «Elegí con qué tarjeta querés pagar.» | ir al alta / a la lista |
@@ -125,7 +132,7 @@ pantalla real.**
 | `compra_sin_pedidos` | 🟠 la compra no tiene pedidos | «No pudimos completar el cobro. Ya lo estamos viendo.» | **soporte — defecto nuestro** |
 | `desglose_incompleto` | 🟠 falta desglose congelado | «No pudimos completar el cobro. Ya lo estamos viendo.» | **soporte — defecto nuestro** |
 
-> 🔴 **HALLAZGO DE ESTA FASE, medido y no heredado: TRES de los nueve códigos no tienen ensayo.** El arnés de S101-A dio **7/7**, pero sus casos ejercitaron **seis códigos** (`token_ausente · monto_divergente · pago_en_proceso · reserva_vencida · vendedor_no_activo · compra_no_existe`) más el camino feliz. **Quedan sin producir en rojo: `pedidos_sin_reserva` · `compra_sin_pedidos` · `desglose_incompleto`.**
+> 🔴 **HALLAZGO, corregido en la v1.2: DOS de los OCHO códigos no tienen ensayo.** El arnés de S101-A dio **7/7**, y sus casos ejercitaron **seis** más el camino feliz. **Quedan sin producir en rojo: `compra_sin_pedidos` · `desglose_incompleto`.**
 > *Un 7/7 sobre una función de nueve salidas es un verde honesto de lo que probó y mudo sobre lo que no. Los tres entran a la matriz de ensayo de la Fase 3 — y los dos últimos importan porque su voz es «defecto nuestro», o sea que si alguna vez disparan, disparan hacia soporte y no hacia el cliente.*
 
 ### §3.2 · La compuerta 3 (cobertura) — no evaluable POR DISEÑO
@@ -283,6 +290,7 @@ El cierre de S101-A declaró *«cuatro sentidos de la misma palabra, dos de ello
 
 | # | Abierto | Dueño | Disparo |
 |---|---|---|---|
+| 0 | **Los dos códigos sin ensayo** (`compra_sin_pedidos` · `desglose_incompleto`) | la pista | **Fase 3** |
 | 1 | La cura de vocabulario de §8.3 | sesión de la primera cadena del saldo (S102) | 🔴 antes de esa cadena |
 | 2 | Ensayo en rojo de los **tres códigos sin probar** (`pedidos_sin_reserva · compra_sin_pedidos · desglose_incompleto`) | la pista | Fase 3 |
 | 3 | `order.vat` — el débito verde de punta a punta | Nuvei / Erick · founder persigue | 🔴 precondición de octubre (`D-852`) |

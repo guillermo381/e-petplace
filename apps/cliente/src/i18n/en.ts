@@ -1238,6 +1238,16 @@ export const clienteEn = {
   // ── D-430 (S67): contextual appointment detail (LOTE S67 APPROVED by founder, Jul 18 2026) ──
   // ── S95-I · THE PANTRY (string batch PENDING FOUNDER GATE) ───────────
   despensa: {
+    // S101-B · Fase 3 — gate voices. The three "our defect" ones never blame
+    // the customer nor ask them to check anything.
+    cobroPagoEnProceso: 'Your previous payment is still processing.',
+    cobroReservaVencida: "Your hold expired. We'll check everything is still available.",
+    cobroVendedorNoActivo: "This shop isn't taking orders right now.",
+    cobroTokenAusente: 'Choose which card you want to pay with.',
+    cobroCompraNoExiste: "We couldn't find this purchase.",
+    cobroDefectoNuestro: "We couldn't complete the charge. We're already looking into it.",
+    cobroDesconocido: "We couldn't complete the charge. We're already looking into it.",
+    cobroConfirmando: "We're confirming your payment.",
     titulo: 'Pantry',
     tituloProducto: 'Product',
 

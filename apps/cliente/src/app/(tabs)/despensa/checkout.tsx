@@ -80,6 +80,10 @@ import {
   crearPedidoDespensa,
   crearCompraDesdePedidos,
   crearIntentoPago,
+  verificarCompuertas,
+  listarTarjetasGuardadas,
+  COMPUERTAS_DEFECTO_NUESTRO,
+  type CodigoCompuerta,
   obtenerNombresTiendaPorPedido,
   nuevaClaveIdempotencia,
   listarMisDirecciones,
@@ -94,14 +98,41 @@ import { fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
+import { cobrarConTarjetaGuardada, hayCobroAndamio, type TarjetaParaCobro } from '@/lib/pagos/cobro-andamio';
 import { useTraduccion } from '@/i18n';
 
-type Fase = 'armado' | 'resumen' | 'exito';
+/* 🔴 S101-B · FASE 3 — NACE `confirmando`.
+   La v1 tenía TRES fases y **la espera no tenía dónde vivir**: el único camino
+   desde `resumen` era `exito`, así que la pantalla no podía decir la verdad
+   mientras el motor todavía no la sabía.
+   *La PANTALLA de espera es Fase 4 — acá entra sólo el estado, que es la
+   costura: sin él, la Fase 4 tendría que reformar el tipo antes de empezar.* */
+type Fase = 'armado' | 'resumen' | 'confirmando' | 'exito';
 
 /** Las cadencias ofrecidas (§6.1: cada N días, 7–90). Un menú corto y
  *  legible antes que un número libre — mismo criterio que el menú de
  *  duraciones del paseo. */
 const CADENCIAS = [7, 15, 30, 60] as const;
+
+/**
+ * 🔴 CADA COMPUERTA, SU VOZ (letra §3.1). **Es un MAPA, no un `switch`**: un
+ * código nuevo en el motor rompe el typecheck acá en vez de caer en silencio
+ * al cajón de «desconocido».
+ *
+ * Las tres de **defecto nuestro** no están en este mapa a propósito — las
+ * resuelve `esDefectoNuestro` con una sola voz. *La causa fina es de soporte;
+ * contársela a la familia sería darle un problema que no puede resolver.*
+ */
+const VOZ_COMPUERTA: Record<
+  Exclude<CodigoCompuerta, 'monto_divergente' | 'compra_sin_pedidos' | 'desglose_incompleto'>,
+  Parameters<ReturnType<typeof useTraduccion>['t']>[0]
+> = {
+  pago_en_proceso: 'despensa.cobroPagoEnProceso',
+  reserva_vencida: 'despensa.cobroReservaVencida',
+  vendedor_no_activo: 'despensa.cobroVendedorNoActivo',
+  token_ausente: 'despensa.cobroTokenAusente',
+  compra_no_existe: 'despensa.cobroCompraNoExiste',
+};
 
 export default function DespensaCheckout() {
   const { theme } = useTheme();
@@ -451,17 +482,89 @@ export default function DespensaCheckout() {
    * ⚠️ Esto es el INTENTO. La confirmación final la da el servidor: que el
    * proveedor conteste «aprobado» es señal optimista, no el hecho.
    */
+  /**
+   * 🔴 S101-B · FASE 3 — EL ENCHUFE. Acá `pagar()` DEJA DE DECLARAR ÉXITO POR
+   * SU CUENTA.
+   *
+   * Lo que hacía la v1 era correcto **para un cobro simulado** (el método por
+   * defecto de `crearIntentoPago` es literalmente `'simulado'`): pasaba a
+   * `exito` con el sobre en la mano. **Lo que la vuelve falsa es que el cobro
+   * ahora es real.**
+   *
+   * El orden, y cada paso tiene su porqué:
+   *   ① preparar la compra (reserva + desglose congelado) — ya existía
+   *   ② **LAS COMPUERTAS, ANTES DE TOCAR LA TARJETA** — *la plata que no se
+   *      cobra mal no hay que devolverla, y el reverso es mismo-día*
+   *   ③ el débito
+   *   ④ `confirmando` — **la respuesta síncrona es SEÑAL OPTIMISTA, jamás
+   *      confirmación**: confirma el webhook, o el barrido
+   *
+   * 🔴 **Nada de esto nace por abrirse ni por re-renderizar.** Corre al TOCAR,
+   * y solo al tocar. *Es la lección del andamio del alta —una pantalla que
+   * fabricaba estado por abrirse volvió inobservable un vencimiento—, cumplida
+   * acá por construcción y no por cuidado.*
+   */
   async function pagar() {
     if (trabajando || compraId === null) return;
     setTrabajando(true);
+
+    // ① Preparar la compra. NO cobra: aparta y congela (lápida vigente).
     const r = await crearIntentoPago(compraId);
-    setTrabajando(false);
     if (!r.ok) {
+      setTrabajando(false);
       mostrar({ texto: r.mensaje, variante: 'error' });
       return;
     }
+
+    /* 🔴 La tarjeta se lee AL TOCAR, no al montar la pantalla. *Leerla al abrir
+       no fabricaría estado, pero sí ataría el checkout a una consulta que la
+       mayoría de las veces no se usa — y la lección del andamio anterior es
+       justamente que las pantallas no hagan cosas por abrirse.*
+       ⚠️ ANDAMIO: «la más reciente» muere con la Fase 5 (`cobro-andamio.ts`). */
+    const tj = await listarTarjetasGuardadas();
+    const tarjeta: TarjetaParaCobro = tj.ok && tj.data.length > 0
+      ? { token: tj.data[0].token, userId: tj.data[0].id }
+      : null;
+
+    // ② LAS COMPUERTAS. Cada fallo habla ANTES de que la tarjeta se entere.
+    const g = await verificarCompuertas(compraId, tarjeta?.token ?? null);
+    if (!g.ok) {
+      setTrabajando(false);
+      mostrar({ texto: t('despensa.cobroDesconocido'), variante: 'error' });
+      return;
+    }
+    if (!g.data.ok) {
+      setTrabajando(false);
+      /* 🔴 Las de «defecto nuestro» comparten voz a propósito: la causa fina es
+         de soporte. *Contarle a la familia un problema interno que no puede
+         resolver no la ayuda — la deja mirando un error que no es suyo.* */
+      /* El estrechamiento es explícito: `esDefectoNuestro` es un booleano y no
+         le dice nada al tipo. **El mapa solo acepta los cinco que no son
+         nuestros**, y el `includes` es lo que lo prueba ante el compilador. */
+      const cod = g.data.codigo;
+      const nuestro = (COMPUERTAS_DEFECTO_NUESTRO as readonly string[]).includes(cod);
+      mostrar({
+        texto: nuestro
+          ? t('despensa.cobroDefectoNuestro')
+          : t(VOZ_COMPUERTA[cod as keyof typeof VOZ_COMPUERTA]),
+        variante: 'error',
+      });
+      return;
+    }
+
+    // ③④ El débito y la espera declarada.
+    //    ⚠️ ANDAMIO: ver `cobrarConTarjetaGuardada`. Muere con la Fase 5.
+    const cobro = await cobrarConTarjetaGuardada(compraId, tarjeta);
+    setTrabajando(false);
+    if (!cobro.ok) {
+      mostrar({ texto: t(cobro.voz), variante: 'error' });
+      return;
+    }
+
     vaciarCarrito();
-    setFase('exito');
+    /* 🔴 `confirmando`, NO `exito`: el proveedor contestó, pero **el hecho lo
+       tiene el servidor**. La pantalla de esta espera es Fase 4. */
+    setFase('confirmando');
   }
 
   /** §6.1 — la recurrencia se activa desde el éxito, con el mensaje
