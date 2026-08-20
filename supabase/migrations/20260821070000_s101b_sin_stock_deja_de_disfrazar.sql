@@ -81,8 +81,13 @@ BEGIN
       USING ERRCODE = '22023';
   END IF;
 
-  -- 🔴 SIN `WHEN OTHERS`. Lo que el reservador lance sale **con su código y su
-  --    mensaje**. Si mañana aparece una causa nueva, la vamos a ver por su
+  -- 🔴 SIN MANEJADOR ATRAPA-TODO. Lo que el reservador lance sale **con su
+  --    código y su mensaje**.
+  --    (La frase literal del manejador **no se escribe acá a propósito**: el
+  --     cinturón de abajo lee `pg_get_functiondef`, que **devuelve también los
+  --     comentarios**, y se disparó contra su propia advertencia. Es **L-170**,
+  --     ya escrita en la casa, cobrada de nuevo — *un censo que lee comentarios
+  --     como código no distingue una prohibición de una infracción*.) Si mañana aparece una causa nueva, la vamos a ver por su
   --    nombre en vez de descubrirla ocho días después midiendo stock a mano.
   v_res := reservar_stock_pedido(p_pedido_id, p_minutos_vigencia);
 

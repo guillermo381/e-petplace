@@ -44,23 +44,50 @@
 --   efecto colateral. *No estábamos eligiendo entre dos curas: una de las dos
 --   era la corrección de un constraint mal escrito.*
 --
--- ═══ 🔴 PERO (b) SOLA NO ALCANZA, Y ESO TAMBIÉN SE MIDIÓ ════════════════════
+-- ═══ 🔴 CORRECCIÓN DE UN DIAGNÓSTICO MÍO, ANTES DE APLICAR ═════════════════
 --
--- **17 reservas están en `vigente` y 15 de ellas YA VENCIERON** — 18 unidades
--- apartadas en 10 SKUs, la más vieja del **12-ago (ocho días)**. Contra un
--- `stock_reservado` total de 19: **casi toda la mercadería reservada del sistema
--- está secuestrada por reservas muertas.**
+-- Una versión anterior de esta migración decía dos cosas y **las dos eran
+-- falsas**. Quedan escritas porque el error explica la cura:
 --
--- Causa: `expirar_reservas_vencidas()` **existe desde S95 y NADIE LA LLAMA** —
--- censados los 10 jobs de `cron.job`: no está. *Es exactamente lo que S99
--- predijo cuando invirtió la cura obvia; la deuda no era teórica y creció.*
+-- ❌ *«`expirar_reservas_vencidas()` existe desde S95 y nadie la llama»* —
+--    **FALSO.** Corre cada 5 minutos: **1.146 corridas `succeeded`**, la última
+--    de hace minutos. Lo afirmé sobre un censo de `cron.job` **truncado por un
+--    `head`**: eran 12 jobs y vi 10. *Medí mal y afirmé fuerte — la misma clase
+--    de error que estuve cazando todo el día.*
 --
--- Con esas filas en `vigente`, el UNIQUE parcial **las seguiría considerando
--- vigentes y seguiría bloqueando**. Un índice parcial **no puede** filtrar por
--- `expira_en > now()` (no es inmutable) ⇒ la vigencia real la tiene que resolver
--- **el reservador**, y de paso **devolver la mercadería**.
+-- ❌ *«18 unidades secuestradas por reservas muertas»* — **FALSO.** Medido por
+--    estado del pedido: `liberado_preparacion` 12 · `documentado` 4 ·
+--    `en_reparto` 1 · `hacia_destino` 1. **Es mercadería VENDIDA Y EN CAMINO.**
+--    El barredor no las toca **a propósito**: su gate dice, textual,
+--    *«sin esta línea, un tick libera mercadería VENDIDA y el mostrador la
+--    vuelve a vender»*. **Es la regla madre de S99, y estaba funcionando.**
 --
--- ⇒ Esta migración hace **las dos mitades**, porque una sin la otra no cura nada.
+-- ⇒ **El `cron.schedule` sale de esta migración**: habría duplicado un job vivo.
+--
+-- ═══ 🔴🔴 Y LO QUE LA CORRECCIÓN DESTAPÓ EN MI PROPIA CURA ═══════════════════
+--
+-- El rearme, como estaba escrito, liberaba **cualquier** reserva vigente vencida
+-- del par (pedido, sku) — **incluida la de un pedido ya despachado**. Aplicada
+-- tal cual, **habría abierto exactamente el agujero que S99 cerró**: devolver al
+-- disponible mercadería que ya viaja hacia una casa.
+--
+-- *Lo encontró la medición que hice para corregir mi error anterior.* Si el
+-- primer diagnóstico hubiera sido correcto, nadie habría mirado los estados de
+-- los pedidos y la cura firmada habría entrado con el agujero adentro.
+--
+-- ⇒ **El rearme hereda el gate del barredor**: solo se rearma la reserva de un
+--   pedido que **todavía no se despachó**. Y no se copia la lista: se pregunta
+--   por lo que importa —¿esta mercadería ya salió?— con los mismos estados que
+--   el barredor considera seguros, **más `pagando`**, que es donde vive un
+--   pedido que está reintentando pagar y es justo el caso de `D-851`.
+--
+-- 🔴 **Lo que queda ABIERTO y no se cura acá** (es de la despensa, no del pago):
+--   una reserva de un pedido despachado sigue en `vigente` con `expira_en`
+--   pasado. **No es plata en riesgo** —el stock está bien contado— pero **es un
+--   estado que miente sobre lo que es**, y fue exactamente lo que me hizo leer
+--   «secuestrada» donde decía «vendida». Debería pasar a `consumida`. *Un
+--   estado que no describe la realidad no es un detalle de prolijidad: es una
+--   trampa para el próximo que lo lea.*
 
 -- ── ① EL CONSTRAINT DICE LO QUE QUERÍA DECIR ────────────────────────────────
 ALTER TABLE public.inventario_reservas
@@ -123,6 +150,17 @@ BEGIN
     END IF;
 
     IF v_prev.id IS NOT NULL THEN
+      -- 🔴 EL GATE DE S99, HEREDADO: **no se devuelve mercadería que ya salió.**
+      --    Si el pedido pasó de la preparación, su reserva no se rearma ni se
+      --    libera — se deja como está y el rearme aborta hablado. *Liberar acá
+      --    haría que el mostrador vuelva a vender algo que ya va en camino.*
+      IF NOT EXISTS (SELECT 1 FROM pedidos p
+                      WHERE p.id = p_pedido_id
+                        AND p.estado IN ('creado','esperando_pago','pagando')) THEN
+        RAISE EXCEPTION 'reserva_no_rearmable: el pedido ya salió de preparación'
+          USING ERRCODE = '22023';
+      END IF;
+
       -- 🔴 VIGENTE PERO VENCIDA: se cierra **y se devuelve la mercadería**.
       --    El movimiento compensatorio es obligatorio: sin él la re-reserva
       --    descontaría el stock por segunda vez. *El estado de la fila es una
@@ -153,22 +191,6 @@ BEGIN
     'expira_en', now() + (p_minutos_vigencia || ' minutes')::interval);
 END $$;
 
--- ── ③ EL RELOJ QUE FALTABA ─────────────────────────────────────────────────
---
--- 🔴 `expirar_reservas_vencidas()` existe desde S95-M3 y **nadie la llamaba**.
---    El rearme de arriba cura a la familia que vuelve; **esto cura al VENDEDOR**,
---    que hoy tiene 18 unidades apartadas por reservas muertas de hasta ocho días.
---    *Sin el reloj, la mercadería se libera solo si alguien vuelve a intentar
---    comprarla — y lo que nadie reintenta queda secuestrado para siempre.*
---
---    Cada 5 minutos, no cada minuto: la ventana es de 30, y un barrido más
---    frecuente no libera antes nada — solo trabaja de más.
-SELECT cron.schedule(
-  'expirar-reservas-vencidas',
-  '*/5 * * * *',
-  $cron$SELECT public.expirar_reservas_vencidas();$cron$
-);
-
 -- ── CINTURÓN ───────────────────────────────────────────────────────────────
 DO $$
 DECLARE v_idx int; v_con int; v_job int; v_def text;
@@ -181,8 +203,10 @@ BEGIN
    WHERE conrelid='inventario_reservas'::regclass AND conname='inventario_reservas_pedido_id_sku_id_key';
   IF v_con <> 0 THEN RAISE EXCEPTION 'CINTURÓN: el UNIQUE ciego al estado sigue vivo'; END IF;
 
-  SELECT count(*) INTO v_job FROM cron.job WHERE jobname='expirar-reservas-vencidas' AND active;
-  IF v_job <> 1 THEN RAISE EXCEPTION 'CINTURÓN: el reloj no quedó agendado'; END IF;
+  -- El reloj YA existía y corre; esta migración no lo toca. Se verifica que
+  -- siga habiendo **exactamente uno** — un duplicado sería daño nuestro.
+  SELECT count(*) INTO v_job FROM cron.job WHERE jobname ILIKE '%reserva%' AND active;
+  IF v_job <> 1 THEN RAISE EXCEPTION 'CINTURÓN: relojes de reserva activos = % (debe ser 1)', v_job; END IF;
 
   SELECT pg_get_functiondef(p.oid) INTO v_def FROM pg_proc p
     JOIN pg_namespace n ON n.oid=p.pronamespace
@@ -192,6 +216,10 @@ BEGIN
   IF v_def NOT ILIKE '%liberacion_reserva%' THEN
     RAISE EXCEPTION 'CINTURÓN: el rearme no devuelve la mercadería';
   END IF;
+  -- 🔴 EL DISCRIMINADOR QUE IMPORTA MÁS: sin el gate, la cura reabre S99.
+  IF v_def NOT ILIKE '%reserva_no_rearmable%' THEN
+    RAISE EXCEPTION 'CINTURÓN: el rearme puede liberar mercadería ya despachada';
+  END IF;
 
-  RAISE NOTICE 'cinturón verde · la reserva se rearma, el stock vuelve, y el reloj corre';
+  RAISE NOTICE 'cinturón verde · la reserva se rearma, el stock vuelve, y lo despachado no se toca';
 END $$;
