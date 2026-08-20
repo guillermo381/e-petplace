@@ -1128,6 +1128,18 @@ export const clienteEn = {
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
     laminaFusion: 'S74 plate · avatar fusion',
+    // S101-B — GATE SCAFFOLD, not the final surface (Ley 37: dies with the
+    // gate). The real home for "payment methods" is decided in ITS gate.
+    // Rendered ONLY when the payments config is present.
+    gateAltaTarjeta: 'S101-B gate · add card',
+    // All four say what was READ FROM THE SERVER — the `?desenlace=` in the
+    // return URL is a hint, never the fact.
+    altaGuardada: 'Done — your card is saved.',
+    altaRechazada: "We couldn't save the card. Try another one.",
+    // The ③ case: coming back without finishing leaves the request OPEN.
+    altaPendiente: "The request is still open — it hasn't expired yet.",
+    altaAbandonada: 'The request expired without being completed.',
+    altaNoAbrio: "We couldn't open the form. Try again.",
     idioma: 'Language',
     idiomaEs: 'Español',
     idiomaEn: 'English',

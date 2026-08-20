@@ -1300,6 +1300,20 @@ export const clienteEs = {
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
     laminaFusion: 'Lámina S74 · la fusión del avatar',
+    // S101-B — ANDAMIO DE GATE, no superficie definitiva (Ley 37: muere con el
+    // gate). La casa real de «medios de pago» se decide en SU gate, no acá; el
+    // literal lo dice para que nadie lo confunda con producto terminado.
+    // Se dibuja SOLO si hay config de pagos — sin config, la celda no existe.
+    gateAltaTarjeta: 'Gate S101-B · agregar tarjeta',
+    // Las cuatro voces del desenlace. 🔴 Todas dicen lo LEÍDO DEL SERVIDOR:
+    // el `?desenlace=` de la URL de retorno es una pista, jamás el hecho.
+    altaGuardada: 'Listo, tu tarjeta quedó guardada.',
+    altaRechazada: 'No pudimos guardar la tarjeta. Prueba con otra.',
+    // 🔴 El caso ③: al volver sin completar, el alta SIGUE ABIERTA. Decir
+    // «abandonada» acá sería deducirla del retorno del navegador.
+    altaPendiente: 'El alta sigue abierta — todavía no vence.',
+    altaAbandonada: 'El alta venció sin completarse.',
+    altaNoAbrio: 'No pudimos abrir el formulario. Prueba de nuevo.',
     idioma: 'Idioma',
     idiomaEs: 'Español',
     idiomaEn: 'English',

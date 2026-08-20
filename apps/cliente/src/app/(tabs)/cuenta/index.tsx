@@ -11,10 +11,12 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Updates from 'expo-updates';
+import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import {
   Boton,
   Celda,
   CeldaNavegacion,
+  useAviso,
   Encabezado,
   Hoja,
   Separador,
@@ -40,11 +42,47 @@ function TituloBloque({ texto }: { texto: string }) {
   );
 }
 
+/**
+ * S101-B · P1 — LA CONFIG DE PAGOS.
+ *
+ * 🔴 La celda del gate se dibuja SOLO si esto existe (condición de mesa).
+ *    Sin URL, `abrirAltaDeTarjeta()` devolvería `sin_url_configurada` DESPUÉS
+ *    de que la persona ya tocó — y una entrada que se ofrece y no puede abrir
+ *    nada es peor que ninguna: se toca, no pasa nada, y el que la tocó no sabe
+ *    si falló él o la app.
+ */
+const HAY_CONFIG_PAGOS = Boolean(process.env.EXPO_PUBLIC_PAGOS_ALTA_URL);
+
 export default function Cuenta() {
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
+  const { mostrar } = useAviso();
+
+  /**
+   * S101-B · ANDAMIO DEL GATE. Corre el alta y **dice lo que leyó del
+   * SERVIDOR**, jamás lo que trajo la URL de retorno.
+   *
+   * 🔴 El caso ③ vive en el `pendiente`: al volver sin completar, el alta
+   *    SIGUE ABIERTA y eso es lo que se muestra. *Decir «abandonada» acá
+   *    sería deducirla del retorno del navegador — y eso confundiría que la
+   *    persona cerró la ventana con que el alta de verdad venció.*
+   */
+  async function correrAltaDeTarjeta() {
+    const r = await abrirAltaDeTarjeta();
+    if (r.estado === 'no_se_pudo_abrir') {
+      mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
+      return;
+    }
+    const voz = {
+      guardada: { texto: t('cuenta.altaGuardada'), variante: 'exito' as const },
+      rechazada: { texto: t('cuenta.altaRechazada'), variante: 'error' as const },
+      pendiente: { texto: t('cuenta.altaPendiente'), variante: 'neutro' as const },
+      abandonada: { texto: t('cuenta.altaAbandonada'), variante: 'neutro' as const },
+    }[r.estado];
+    mostrar(voz);
+  }
 
   const [salirAbierta, setSalirAbierta] = useState(false);
   const [cerrando, setCerrando] = useState(false);
@@ -107,6 +145,27 @@ export default function Cuenta() {
               </View>
             ))}
           </Tarjeta>
+
+          {/* ── S101-B · ANDAMIO DEL GATE DEL ALTA DE TARJETA ──────────────
+              🔴 NO es la superficie definitiva de «medios de pago»: esa se
+              decide en SU gate, con su letra y su skill. Esto existe para que
+              el founder pueda ejercitar el MECANISMO —`expo-web-browser`, que
+              está horneado desde el scaffold y nunca se usó— y muere con el
+              gate (Ley 37), igual que la entrada de la lámina de S74.
+
+              🔴 SE DIBUJA SOLO SI HAY CONFIG (condición de mesa): sin
+              `EXPO_PUBLIC_PAGOS_ALTA_URL` la celda NO EXISTE. *Una entrada que
+              se ofrece y no puede abrir nada es peor que ninguna: se toca, no
+              pasa nada, y el que la tocó no sabe si falló él o la app.* ── */}
+          {HAY_CONFIG_PAGOS ? (
+            <Tarjeta relleno="ninguno">
+              <CeldaNavegacion
+                icono="preferencias"
+                titulo={t('cuenta.gateAltaTarjeta')}
+                onPress={() => void correrAltaDeTarjeta()}
+              />
+            </Tarjeta>
+          ) : null}
 
           {/* ── Sesión y cuenta ── */}
           <View style={{ gap: spacing[3] }}>

@@ -11,7 +11,25 @@
 
 ---
 
-## §0 · 🔴 DOS PRECONDICIONES QUE FALTAN — el gate NO se puede convocar todavía
+## §0 · ✅ LAS DOS PRECONDICIONES, CUMPLIDAS (19-ago, autorizadas por mesa)
+
+| # | Qué era | Estado |
+|---|---|---|
+| **P1** | `EXPO_PUBLIC_PAGOS_ALTA_URL` | ✅ cargada con el dominio estable medido |
+| **P2** | punto de entrada en la app | ✅ **celda en Cuenta**, aprobada como **ANDAMIO DE GATE, no superficie definitiva** |
+
+**La celda se dibuja SOLO si la config está presente** (condición de mesa): sin
+`EXPO_PUBLIC_PAGOS_ALTA_URL`, **la celda no existe**. *Una entrada que se ofrece y no puede
+abrir nada es peor que ninguna: se toca, no pasa nada, y el que la tocó no sabe si falló él
+o la app.*
+
+Su literal lo dice honesto: **«Gate S101-B · agregar tarjeta»**. **Muere con el gate**
+(Ley 37), igual que la entrada de la lámina de S74 que vive dos filas más arriba. **La casa
+definitiva de «medios de pago» se decide en SU gate, no acá.**
+
+<details><summary>Texto original de §0, conservado (las precondiciones cuando faltaban)</summary>
+
+### 🔴 DOS PRECONDICIONES QUE FALTAN — el gate NO se puede convocar todavía
 
 **Se declaran acá, y no en una nota al pie, porque sin ellas el founder abre la app y no
 encuentra nada que tocar.** Las dos son trabajo de pista, no del founder:
@@ -29,6 +47,8 @@ corre primero hasta donde el aparato la deje, y esto todavía no llega al aparat
 el checkout · una pantalla de medios de pago) es **superficie**, y se decide con la skill
 de diseño y la letra. *Para el gate del mecanismo alcanza una entrada mínima; para el
 producto, no.*
+
+</details>
 
 ---
 
@@ -111,6 +131,27 @@ está en el binario desde el scaffold, así que **no hay dependencia nativa nuev
 > **Este es el caso que más fácil se aprueba mal.** Si la app dijera «abandonada» apenas
 > vuelve, **parecería correcto** y estaría midiendo el retorno del navegador en vez del
 > hecho. **El verde de ③ es que la app NO se apure.**
+
+#### 🔴 CÓMO SE OBSERVA EL VENCIMIENTO — **sin editar una sola fila**
+
+**El TTL es de 15 minutos** (`crear_alta_tarjeta`: `now() + interval '15 minutes'` — el
+mismo número que el hold de la agenda de S54).
+
+**La expiración es PEREZOSA**: nadie marca nada, la **lectura** deriva el estado. Por eso
+hay exactamente **dos** formas legítimas de observarla, y ninguna toca la fila:
+
+| Vía | Cómo |
+|---|---|
+| **A · esperar** | dejar pasar los 15 minutos y volver a tocar la celda / releer el alta. *Es la vía del gate en dispositivo: mide lo mismo que va a pasarle a una familia real.* |
+| **B · producir** | crear un alta **que nace vencida** (`expira_en` en el pasado, en el mismo `INSERT`) y leerla. *Es la vía del arnés, y ya corrió: paso C del ensayo en seco.* |
+
+🔴 **Lo que NO se hace, y por qué:** **jamás un `UPDATE` a mano** poniendo `estado =
+'abandonada'`. *Eso no observaría el vencimiento — lo fabricaría, y encima probaría el
+camino equivocado: dejaría la fila en un estado que el motor nunca escribe por sí mismo.*
+**El discriminador que importa ya está medido y es justamente ése:**
+`fila_vencida_sigue=pendiente` **mientras la lectura devuelve `abandonada`**. Si alguien
+hubiera hecho el `UPDATE`, ese discriminador diría `abandonada` en los dos lados y **el
+ensayo habría pasado sin probar nada**.
 
 ---
 

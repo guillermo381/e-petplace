@@ -18467,7 +18467,35 @@ se responde antes de que exista una venta real, no cuando falle la primera.
 configurada la cuenta EPETPLACESTG-EC, cómo debe verse un pedido de IVA 0 %, y la
 configuración de producción es la misma?*
 
-## 🟡 D-853 — LA PÁGINA DEL ADD CARD NO PUEDE VIVIR EN UNA EDGE FUNCTION
+## ☠️ D-853 — LA PÁGINA DEL ADD CARD NO PUEDE VIVIR EN UNA EDGE FUNCTION · **CERRADA POR MEDICIÓN (S101-B, 19-ago-2026)**
+
+> ✅ **CERRADA, y no por argumento: por medición contra el objeto.** La página de
+> producto vive en **host propio** (`apps/pagos-web` → proyecto Vercel
+> `epetplace-pagos-stg`, dominio estable **`epetplace-pagos-stg.vercel.app`**, medido del
+> objeto y no derivado del nombre). Servida desde ahí, el `curl` del **GET real** devuelve:
+>
+> ```
+> HTTP/2 200
+> content-type: text/html; charset=utf-8      ← INTACTO
+> x-content-type-options: nosniff · x-frame-options: DENY · referrer-policy: no-referrer
+> ```
+>
+> ⇒ **En host propio no hay degradación**, y con ella **muere la necesidad del rodeo**.
+>
+> 🔴 **EL RODEO `TEXT/HTML; charset=UTF-8` QUEDA MARCADO SOLO-ENSAYO — que nadie lo
+> herede como receta.** Vive únicamente en `supabase/functions/pagos-addcard-stg`, que es
+> **el prototipo de ensayo de S101-A y no es producto**. Su archivo ya lo declara con
+> todas las letras (*«esto es un rodeo a una protección de la plataforma»*). **No se copia
+> a ninguna función nueva**, y muere con el prototipo.
+>
+> *Y la lectura que conviene conservar, porque es la que evitó pelear con la plataforma:
+> **Supabase nunca estuvo fallando — estaba diciendo que ése no era el lugar para servir
+> una página.** La cura no fue encontrar el header que pasa: fue mudarse.*
+
+---
+
+### Ficha original (S101-A), conservada
+
 
 **Medido en S101-A con una sonda descartable** (desplegada, medida y borrada — 404
 verificado): **Supabase degrada HTML a `text/plain` a propósito** en el dominio
