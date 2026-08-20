@@ -85,11 +85,22 @@ Deno.serve(async (req) => {
       p_crudo: crudo,
       p_origen: 'barrido',
     });
-    if (e2) { console.error('[conciliar] resolver falló', p.compra_id, e2); continue; }
+    /* 🔴 UN ERROR NO ES UNA RESOLUCIÓN, Y NO PUEDE DESAPARECER.
+       La v1 hacía `continue` y el barrido devolvía `revisados: 2, resumen: {}`
+       — *«no hice nada y no digo por qué»*, que es la forma más cara de un
+       verde. Medido en la primera corrida real. */
+    if (e2) {
+      console.error('[conciliar] resolver falló', p.compra_id, e2);
+      resumen['error_al_resolver'] = (resumen['error_al_resolver'] ?? 0) + 1;
+      escalados.push(`${p.compra_id} (error: ${e2.message})`);
+      continue;
+    }
 
     const resol = (res as { resolucion?: string })?.resolucion ?? 'desconocida';
     resumen[resol] = (resumen[resol] ?? 0) + 1;
-    if (resol === 'huerfano_escalado') escalados.push(p.compra_id);
+    // Todo lo que empieza con `huerfano` necesita una persona, no solo el que
+    // el proveedor no reconoció.
+    if (resol.startsWith('huerfano')) escalados.push(`${p.compra_id} (${resol})`);
   }
 
   /* 🔴 Los escalados se NOMBRAN en la respuesta y en el log. *Un barrido que
