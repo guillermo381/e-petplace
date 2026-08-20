@@ -524,44 +524,31 @@ export default function DespensaCheckout() {
       return;
     }
 
-    /* 🔴 La tarjeta se lee AL TOCAR, no al montar la pantalla. *Leerla al abrir
-       no fabricaría estado, pero sí ataría el checkout a una consulta que la
-       mayoría de las veces no se usa — y la lección del andamio anterior es
-       justamente que las pantallas no hagan cosas por abrirse.*
-       ⚠️ ANDAMIO: «la más reciente» muere con la Fase 5 (`cobro-andamio.ts`). */
+    /* 🔴 La tarjeta se lee AL TOCAR, no al montar. *Leerla al abrir no
+       fabricaría estado, pero sí ataría el checkout a una consulta que la
+       mayoría de las veces no se usa.*
+       ⚠️ ANDAMIO: «la más reciente» muere con la Fase 5. */
     const tj = await listarTarjetasGuardadas();
-    /* 🔴 Solo el ID. **El token no sale de la base hacia la app** más de lo
-       necesario, y el cobro lo resuelve server-side desde el id. */
     const tarjeta: TarjetaParaCobro = tj.ok && tj.data.length > 0
       ? { id: tj.data[0].id }
       : null;
-    const hayToken = tj.ok && tj.data.length > 0 ? tj.data[0].token : null;
 
-    // ② LAS COMPUERTAS. Cada fallo habla ANTES de que la tarjeta se entere.
-    const g = await verificarCompuertas(compraId, hayToken);
-    if (!g.ok) {
-      setTrabajando(false);
-      mostrar({ texto: t('despensa.cobroDesconocido'), variante: 'error' });
-      return;
-    }
-    if (!g.data.ok) {
-      setTrabajando(false);
-      /* 🔴 Las de «defecto nuestro» comparten voz a propósito: la causa fina es
-         de soporte. *Contarle a la familia un problema interno que no puede
-         resolver no la ayuda — la deja mirando un error que no es suyo.* */
-      /* El estrechamiento es explícito: `esDefectoNuestro` es un booleano y no
-         le dice nada al tipo. **El mapa solo acepta los cinco que no son
-         nuestros**, y el `includes` es lo que lo prueba ante el compilador. */
-      const cod = g.data.codigo;
-      const nuestro = (COMPUERTAS_DEFECTO_NUESTRO as readonly string[]).includes(cod);
-      mostrar({
-        texto: nuestro
-          ? t('despensa.cobroDefectoNuestro')
-          : t(VOZ_COMPUERTA[cod as keyof typeof VOZ_COMPUERTA]),
-        variante: 'error',
-      });
-      return;
-    }
+    /* ═══ 🔴 LAS COMPUERTAS NO SE LLAMAN DESDE ACÁ, Y NO ES POR UN GRANT ═══
+       Medido: `verificar_compuertas_pre_cobro` **no es ejecutable por
+       `authenticated`** (`has_function_privilege` = false). Mi primera versión
+       la llamaba igual desde la app, y por eso el cobro salía con la voz
+       genérica: el RPC rebotaba antes de llegar al cobro.
+
+       **Y conceder el permiso habría sido la cura equivocada.** La función es
+       DEFINER y **no verifica pertenencia**: con EXECUTE, cualquiera podría
+       pasarle ids de compras ajenas y aprender su estado — *un oráculo de
+       compras de otros, abierto para ahorrarnos un viaje.*
+
+       ⇒ **Las compuertas corren SERVER-SIDE dentro de `pagos-cobro`**, que sí
+       verifica pertenencia, y **devuelve el código tipado**. La app le da voz a
+       ESE código. La letra se cumple igual —*cada fallo con su voz antes de
+       tocar la tarjeta*— porque **la tarjeta no se toca hasta después de que
+       las compuertas corrieron**; lo único que cambia es quién las corre. */
 
     // ③④ El débito y la espera declarada.
     //    ⚠️ ANDAMIO: ver `cobrarConTarjetaGuardada`. Muere con la Fase 5.

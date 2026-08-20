@@ -46,6 +46,11 @@ export function hayCobroAndamio(): boolean {
  *  hiciera falta una nueva, el typecheck obliga a agregarla a la letra. */
 export type VozCobro =
   | 'despensa.cobroDesconocido'
+  | 'despensa.cobroPagoEnProceso'
+  | 'despensa.cobroReservaVencida'
+  | 'despensa.cobroVendedorNoActivo'
+  | 'despensa.cobroCompraNoExiste'
+  | 'despensa.cobroDefectoNuestro'
   | 'despensa.cobroTokenAusente'
   | 'despensa.cobroRechazado'
   | 'despensa.cobroConfirmando';
@@ -89,7 +94,16 @@ export async function cobrarConTarjetaGuardada(
        dibuja como error de datos: *pedirle a la familia que revise algo que
        puede estar perfecto es la clase de error que hace que vuelva a pagar lo
        que ya pagó.* Lo que no reconocemos habla genérico y va a soporte. */
+    /* 🔴 Los códigos de COMPUERTA llegan por acá ahora, porque las compuertas
+       corren dentro de `pagos-cobro`. Cada uno con su voz — la letra §3.1. */
     if (r.codigo === 'token_ausente') return { ok: false, voz: 'despensa.cobroTokenAusente' };
+    if (r.codigo === 'pago_en_proceso') return { ok: false, voz: 'despensa.cobroPagoEnProceso' };
+    if (r.codigo === 'reserva_vencida') return { ok: false, voz: 'despensa.cobroReservaVencida' };
+    if (r.codigo === 'vendedor_no_activo') return { ok: false, voz: 'despensa.cobroVendedorNoActivo' };
+    if (r.codigo === 'compra_no_existe') return { ok: false, voz: 'despensa.cobroCompraNoExiste' };
+    /* Las de defecto NUESTRO comparten voz: la causa fina es de soporte. */
+    if (r.codigo === 'monto_divergente' || r.codigo === 'desglose_incompleto')
+      return { ok: false, voz: 'despensa.cobroDefectoNuestro' };
     if (r.codigo === 'rechazado') return { ok: false, voz: 'despensa.cobroRechazado' };
     if (r.codigo === 'sin_respuesta') return { ok: false, voz: 'despensa.cobroConfirmando' };
     return { ok: false, voz: 'despensa.cobroDesconocido' };

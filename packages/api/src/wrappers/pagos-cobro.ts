@@ -16,7 +16,10 @@ export type CodigoCobro =
   | 'sin_sesion' | 'sesion_no_verificable' | 'datos_invalidos'
   | 'monto_no_se_recibe' | 'compra_no_existe' | 'token_ausente'
   | 'desglose_incompleto' | 'rechazado' | 'sin_respuesta'
-  | 'no_se_pudo_completar' | 'servidor_sin_configurar';
+  | 'no_se_pudo_completar' | 'servidor_sin_configurar'
+  /* Los de COMPUERTA: viajan tal cual desde el 409 del servidor. */
+  | 'pago_en_proceso' | 'reserva_vencida' | 'vendedor_no_activo'
+  | 'monto_divergente' | 'compra_sin_pedidos';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
@@ -50,6 +53,13 @@ export async function cobrarCompra(
     }
     const d = (data ?? {}) as Record<string, unknown>;
     if (codigo === 'no_se_pudo_completar' && typeof d.codigo === 'string') codigo = d.codigo;
+    /* 🔴 INSTRUMENTO — patrón `stoken_de` de S101-A: que el PRÓXIMO intento
+       PRODUZCA el dato en vez de dejarnos hipotetizando. Sin logs de Edge
+       Function por CLI, esta línea es la única forma de saber en qué punto
+       cortó. **Solo el código y el status: ningún dato de la compra ni de la
+       tarjeta.** Se retira cuando la causa esté identificada. */
+    const st = (ctx as Response | undefined)?.status ?? '-';
+    console.log(`[cobro] codigo=${codigo} http=${st} msg=${(error as Error).message ?? '-'}`);
     return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo };
   }
   const d = (data ?? {}) as Record<string, unknown>;
