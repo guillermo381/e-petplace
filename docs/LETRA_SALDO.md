@@ -1,6 +1,6 @@
 # LETRA_SALDO.md — e-PetPlace
 
-> **Versión:** v1.0 · **Nace:** 19-ago-2026 (S101, mesa founder + arquitecto)
+> **Versión:** v1.1 · **Nace:** 19-ago-2026 (S101, mesa founder + arquitecto) · **Ratificada:** 19-ago-2026 (S101-B, apertura — §2 y §5 firmadas)
 > **Disparo:** `MODELO_FINANCIERO` regla 7.16 lo dejó **declarado y apagado** con la
 > condición *«su letra propia nace antes del primer crédito real»*. El primer crédito
 > real quedó firmado hoy (el reembolso por saldo como vía por defecto) ⇒ el disparo sonó
@@ -31,10 +31,17 @@ real que el cliente ya pagó y no recibió lo que pagaba. Por eso:
 
 **Del usuario que pagó.** La plata vuelve a quien la puso, no al hogar ni a la familia.
 
-*(Propuesta de mesa con voto del arquitecto, pendiente de ratificación founder en S102.
-La alternativa —saldo del hogar— mezcla plata de personas distintas en una bolsa que
-nadie autorizó a compartir; si dos adultos del hogar pagan cada uno con su tarjeta, sus
-reembolsos no son intercambiables.)*
+✅ **RATIFICADA — firma del founder, 19-ago-2026 (mesa de apertura S101-B).** ~~Pendiente
+de ratificación founder en S102.~~ **Esta cláusula RIGE.**
+
+*El argumento que la sostiene se conserva porque el porqué no se borra: la alternativa
+—saldo del hogar— mezcla plata de personas distintas en una bolsa que nadie autorizó a
+compartir; si dos adultos del hogar pagan cada uno con su tarjeta, sus reembolsos no son
+intercambiables.*
+
+> **Coherencia medida, no supuesta:** `tarjetas_guardadas` (S101-A) ya nace con el mismo
+> criterio — la tarjeta es de la **persona** (`user_id`), no del hogar. *El medio de pago
+> y lo que vuelve por él pertenecen al mismo dueño.*
 
 ## §3 · DE DÓNDE NACE (fuentes v1, lista cerrada)
 
@@ -76,9 +83,17 @@ clientes), nunca ingreso. Ver §7.
   resto va al medio de pago. **Orden fijo: primero el saldo, después la tarjeta** — así
   la porción expuesta a la pasarela es la menor posible, y un eventual reverso de ese
   cobro es más chico.
-  - *(Propuesta de mesa pendiente de ratificación founder. La alternativa todo-o-nada es
-    más simple de construir pero produce el caso absurdo: cliente con $18 de saldo no
-    puede comprar algo de $20 sin ignorar su saldo.)*
+  - ✅ **RATIFICADA — firma del founder, 19-ago-2026 (mesa de apertura S101-B), tal como
+    la mesa la propuso.** ~~Pendiente de ratificación founder.~~ **Esta cláusula RIGE.**
+  - *La razón se conserva: la alternativa todo-o-nada es más simple de construir pero
+    produce el caso absurdo —cliente con $18 de saldo no puede comprar algo de $20 sin
+    ignorar su saldo—. Y el orden fijo tiene una segunda virtud que el reverso mismo-día
+    vuelve concreta: cuanto menos plata pasó por la pasarela, menos hay que deshacer
+    contra un reloj que cierra a las 17:00.*
+  - ⚠️ **Lo que la firma NO adelanta:** el motor del saldo sigue siendo **S102**. Lo que
+    S101-B toma de acá es **la costura** — el monto a debitar entra como dato del
+    desglose y jamás como total hardcodeado, para que el día que el saldo exista se
+    enchufe sin reformar el cobro (`PLAN_S101B_SUPERFICIE_PAGO` §8).
 - **Reverso de una compra mixta**: cada porción vuelve por donde vino — la porción saldo
   vuelve como crédito nuevo (movimiento, no edición), la porción tarjeta sigue la
   política de reembolsos vigente.
@@ -116,7 +131,7 @@ al cliente por recuperar su plata). Si el volumen lo vuelve caro, se revisa con 
 
 | # | Abierto | Dueño |
 |---|---|---|
-| 1 | Ratificar §2 (del usuario) y §5 (mixto) | Founder, S102 |
+| 1 | ~~Ratificar §2 (del usuario) y §5 (mixto)~~ ✅ **CERRADO** — firmadas por el founder el **19-ago-2026** en la mesa de apertura de S101-B, las dos como la mesa las propuso | — |
 | 2 | Régimen legal del saldo en Ecuador: ¿dinero electrónico, custodia, prescripción a favor del Estado? | Contador + abogado (pregunta 4 de la lista acumulada) |
 | 3 | Plazo de prescripción real para el reconocimiento de §7 | Contador |
 | 4 | La promesa del camino al medio de pago original en los T&C | Respuesta de Nuvei (refund diferido sí/no) |
@@ -125,6 +140,15 @@ al cliente por recuperar su plata). Si el volumen lo vuelve caro, se revisa con 
 ---
 
 ## Historial
+
+- **v1.1 (19-ago-2026, S101-B — mesa de apertura):** **las dos propuestas de mesa pasan a
+  letra que RIGE.** §2 (el saldo es del usuario que pagó) y §5 (pago mixto saldo-primero)
+  quedan **ratificadas por firma del founder, las dos tal como la mesa las propuso**; el
+  ítem 1 de §8 cierra. **El argumento de cada una se conserva, no se borra** — una
+  cláusula firmada sin su porqué es una que la próxima mesa re-litiga desde cero. Se
+  agrega en §2 la coherencia **medida** con `tarjetas_guardadas` (la tarjeta también es
+  de la persona) y en §5 el límite explícito de lo que la firma **no** adelanta: el motor
+  del saldo sigue siendo S102; S101-B solo deja la costura.
 
 - **v1.0 (19-ago-2026, S101):** nace por disparo de la regla 7.16. Deposita las firmas
   del founder de la jornada (no vence · reclasifica a 3 meses · universal) y las dos
