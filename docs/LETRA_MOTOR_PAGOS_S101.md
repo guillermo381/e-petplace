@@ -281,6 +281,35 @@ El pedido no avanza. Lo resuelve **un barrido por consulta activa** sobre pagos 
 
 ---
 
+## §6bis · 🔑 LAS DOS RESPUESTAS DE ERICK (20-ago-2026) — DEPOSITADAS VERBATIM
+
+### ① La forma del `order` con IVA 0
+
+> ```json
+> "order": { "amount": 5, "taxable_amount": 0, "tax_percentage": 0,
+> "vat": 0, "installments_type": 0, "installments": 0, ... }
+> ```
+
+⇒ **`vat: 0` es válido**, y lo que faltaba era mandar **`tax_percentage: 0`** y
+**`taxable_amount: 0`** junto con él. **`D-852` deja de ser incógnita.**
+
+> 🔴 **Y cómo se implementa, que es lo que evita el próximo rebote:** los tres campos van
+> **DERIVADOS del desglose congelado, jamás literales**. *Un cero tecleado a mano funciona
+> hoy porque todo el catálogo es `EC_IVA_0`, y miente el día que entre un producto
+> gravado.* **Fail-closed:** si un ítem tuviera IVA ≠ 0, la función **corta con su código
+> propio** —territorio no probado— en vez de mandar ceros mentirosos.
+
+### ② El OTP `543210`
+
+> «correcto, el formulario es quien valida eso — solo debes esperar la respuesta valid o
+> rechazada»
+
+⇒ **El hallazgo abierto CIERRA.** *La página ya hace exactamente eso: no interpreta el
+código, espera el desenlace del SDK.* Lo que medimos —que `543210` terminaba en `guardada`—
+**no era un defecto nuestro**: es el formulario validando, que es su trabajo.
+
+---
+
 ## §7 · EL FALLO CON VOZ
 
 **La casa ya pagó por confundir clases de error.** Cada uno tiene voz propia y salida propia:

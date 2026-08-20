@@ -116,10 +116,16 @@ Deno.serve(async (req) => {
   }
 
   const { data: tarjeta } = await db.from('tarjetas_guardadas')
-    .select('id, user_id, token, estado').eq('id', tarjetaId).maybeSingle();
+    .select('id, user_id, token, estado, proveedor_uid').eq('id', tarjetaId).maybeSingle();
   if (!tarjeta || tarjeta.user_id !== userId || tarjeta.estado !== 'guardada') {
     return json({ ok: false, codigo: 'token_ausente' }, 409);
   }
+
+  /* Sin `proveedor_uid` no se puede cobrar esa tarjeta: **no se adivina**.
+     *Mandar el id de auth «por si acaso» es exactamente lo que produjo el
+     rebote que esta cura corrige.* */
+  const uidProveedor = (tarjeta as { proveedor_uid?: string | null }).proveedor_uid ?? '';
+  if (!uidProveedor) return json({ ok: false, codigo: 'tarjeta_sin_uid' }, 409);
 
   // ── ② EL MONTO SALE DEL DESGLOSE CONGELADO ────────────────────────────────
   const { data: desglose } = await db.from('compra_desglose')
@@ -130,6 +136,31 @@ Deno.serve(async (req) => {
   const monto = desglose.reduce((a, d) => a + Number(d.total ?? 0), 0);
   const iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
   const base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
+
+  /* 🔑 LA FORMA DEL `order` CON IVA 0 — respuesta de Erick, 20-ago (letra §6bis):
+     `vat: 0` es válido **siempre que vayan también `tax_percentage: 0` y
+     `taxable_amount: 0`**. Eso cierra `D-852`.
+
+     🔴 Y van DERIVADOS del desglose, jamás literales: *un cero tecleado a mano
+     funciona hoy porque todo el catálogo es `EC_IVA_0`, y miente el día que
+     entre un producto gravado.* */
+  const pct = base > 0 ? Number(((iva / base) * 100).toFixed(2)) : 0;
+
+  /* 🔴 FAIL-CLOSED HONESTO: con IVA ≠ 0 estamos en territorio que **nadie
+     probó** contra esta cuenta. Se corta con código propio en vez de mandar
+     números que no sabemos si el proveedor acepta. *Mandar ceros con un IVA
+     real sería declararle al proveedor algo falso sobre la venta.* */
+  if (iva > 0) {
+    await db.from('pagos_intentos').insert({
+      pedido_id: desglose[0].pedido_id, compra_id: compraId, proveedor: 'nuvei',
+      proveedor_referencia: compraId, monto, moneda: compra.moneda ?? 'USD',
+      forma: 'tokenizacion', estado: 'rechazado',
+      motivo_rechazo: `iva_no_cero_sin_probar: iva=${iva} pct=${pct}`,
+      cerrado_en: new Date().toISOString(),
+      clave_idempotencia: `cobro:iva:${compraId}:${Date.now()}`,
+    });
+    return json({ ok: false, codigo: 'iva_no_probado' }, 409);
+  }
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
   const { data: g } = await db.rpc('verificar_compuertas_pre_cobro', {
@@ -160,13 +191,21 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Auth-Token': await authToken() },
       body: JSON.stringify({
-        user: { id: userId, email: u.user.email ?? 'sin-correo@epetplace.com' },
+        /* 🔴 EL uid ES EL DEL PROVEEDOR, no el nuestro. La tarjeta se tokenizó
+           con el handle del alta; mandar el id de auth hace que el proveedor
+           rebote `uid does not match` — **medido en el aparato el 20-ago**.
+           *Un identificador que significa algo del otro lado no se sustituye
+           por el equivalente del nuestro solo porque nombren a la misma
+           persona.* */
+        user: { id: uidProveedor, email: u.user.email ?? 'sin-correo@epetplace.com' },
         order: {
           amount: Number(monto.toFixed(2)),
           description: `e-PetPlace compra ${compraId.slice(0, 8)}`,
           dev_reference: compraId,          // 🔴 LA COMPRA, jamás un pedido
-          vat: Number(iva.toFixed(2)),      // del desglose, no tecleado
+          // 🔑 Los TRES juntos — forma exacta de Erick, derivada del desglose.
+          vat: Number(iva.toFixed(2)),
           taxable_amount: iva > 0 ? Number(base.toFixed(2)) : 0,
+          tax_percentage: pct,
         },
         card: { token: tarjeta.token },
       }),
