@@ -490,6 +490,56 @@ export type Database = {
           },
         ]
       }
+      altas_tarjeta: {
+        Row: {
+          cerrada_en: string | null
+          creada_en: string
+          estado: string
+          expira_en: string
+          id: string
+          motivo: string | null
+          proveedor: string
+          stoken_detalle: string | null
+          stoken_valido: boolean | null
+          tarjeta_id: string | null
+          user_id: string
+        }
+        Insert: {
+          cerrada_en?: string | null
+          creada_en?: string
+          estado?: string
+          expira_en: string
+          id?: string
+          motivo?: string | null
+          proveedor?: string
+          stoken_detalle?: string | null
+          stoken_valido?: boolean | null
+          tarjeta_id?: string | null
+          user_id: string
+        }
+        Update: {
+          cerrada_en?: string | null
+          creada_en?: string
+          estado?: string
+          expira_en?: string
+          id?: string
+          motivo?: string | null
+          proveedor?: string
+          stoken_detalle?: string | null
+          stoken_valido?: boolean | null
+          tarjeta_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "altas_tarjeta_tarjeta_id_fkey"
+            columns: ["tarjeta_id"]
+            isOneToOne: false
+            referencedRelation: "tarjetas_guardadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analytics_aggregated: {
         Row: {
           active_users: number | null
@@ -12323,12 +12373,17 @@ export type Database = {
       pagos_intentos: {
         Row: {
           actualizado_en: string
+          authorization_code: string | null
+          bin: string | null
           cerrado_en: string | null
           clave_idempotencia: string
+          compra_id: string | null
+          confirmado_por: string | null
           creado_en: string
           estado: string
           forma: string
           id: string
+          marca: string | null
           moneda: string
           monto: number
           motivo_rechazo: string | null
@@ -12336,16 +12391,23 @@ export type Database = {
           pedido_id: string
           proveedor: string
           proveedor_referencia: string | null
+          proveedor_transaction_id: string | null
+          ultimos4: string | null
           url_redireccion: string | null
         }
         Insert: {
           actualizado_en?: string
+          authorization_code?: string | null
+          bin?: string | null
           cerrado_en?: string | null
           clave_idempotencia: string
+          compra_id?: string | null
+          confirmado_por?: string | null
           creado_en?: string
           estado?: string
           forma: string
           id?: string
+          marca?: string | null
           moneda?: string
           monto: number
           motivo_rechazo?: string | null
@@ -12353,16 +12415,23 @@ export type Database = {
           pedido_id: string
           proveedor: string
           proveedor_referencia?: string | null
+          proveedor_transaction_id?: string | null
+          ultimos4?: string | null
           url_redireccion?: string | null
         }
         Update: {
           actualizado_en?: string
+          authorization_code?: string | null
+          bin?: string | null
           cerrado_en?: string | null
           clave_idempotencia?: string
+          compra_id?: string | null
+          confirmado_por?: string | null
           creado_en?: string
           estado?: string
           forma?: string
           id?: string
+          marca?: string | null
           moneda?: string
           monto?: number
           motivo_rechazo?: string | null
@@ -12370,9 +12439,18 @@ export type Database = {
           pedido_id?: string
           proveedor?: string
           proveedor_referencia?: string | null
+          proveedor_transaction_id?: string | null
+          ultimos4?: string | null
           url_redireccion?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pagos_intentos_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pagos_intentos_pedido_id_fkey"
             columns: ["pedido_id"]
@@ -17252,6 +17330,51 @@ export type Database = {
           },
         ]
       }
+      tarjetas_guardadas: {
+        Row: {
+          actualizada_en: string
+          bin: string | null
+          creada_en: string
+          estado: string
+          id: string
+          marca: string | null
+          motivo_rechazo: string | null
+          proveedor: string
+          titular: string | null
+          token: string
+          ultimos4: string | null
+          user_id: string
+        }
+        Insert: {
+          actualizada_en?: string
+          bin?: string | null
+          creada_en?: string
+          estado?: string
+          id?: string
+          marca?: string | null
+          motivo_rechazo?: string | null
+          proveedor: string
+          titular?: string | null
+          token: string
+          ultimos4?: string | null
+          user_id: string
+        }
+        Update: {
+          actualizada_en?: string
+          bin?: string | null
+          creada_en?: string
+          estado?: string
+          id?: string
+          marca?: string | null
+          motivo_rechazo?: string | null
+          proveedor?: string
+          titular?: string | null
+          token?: string
+          ultimos4?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       test_data_registry: {
         Row: {
           created_at: string
@@ -18459,6 +18582,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      webhook_events: {
+        Row: {
+          ambiente: string
+          detalle: string | null
+          id: string
+          pago_id: string | null
+          payload: Json
+          proveedor: string
+          recibido_en: string
+          resultado: string
+          stoken_valido: boolean | null
+          transaction_id: string | null
+        }
+        Insert: {
+          ambiente: string
+          detalle?: string | null
+          id?: string
+          pago_id?: string | null
+          payload: Json
+          proveedor: string
+          recibido_en?: string
+          resultado: string
+          stoken_valido?: boolean | null
+          transaction_id?: string | null
+        }
+        Update: {
+          ambiente?: string
+          detalle?: string | null
+          id?: string
+          pago_id?: string | null
+          payload?: Json
+          proveedor?: string
+          recibido_en?: string
+          resultado?: string
+          stoken_valido?: boolean | null
+          transaction_id?: string | null
+        }
+        Relationships: []
       }
       zonas_cobertura: {
         Row: {
@@ -20022,6 +20184,23 @@ export type Database = {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
         Returns: Json
       }
+      confirmar_pago_compra: {
+        Args: {
+          p_authorization_code?: string
+          p_bin?: string
+          p_clave_idempotencia: string
+          p_compra_id: string
+          p_confirmado_por?: string
+          p_marca?: string
+          p_monto?: number
+          p_payload?: Json
+          p_proveedor: string
+          p_referencia: string
+          p_transaction_id?: string
+          p_ultimos4?: string
+        }
+        Returns: Json
+      }
       confirmar_pago_pedido: {
         Args: {
           p_clave_idempotencia: string
@@ -20106,6 +20285,7 @@ export type Database = {
         }
         Returns: Json
       }
+      crear_alta_tarjeta: { Args: { p_proveedor?: string }; Returns: Json }
       crear_bloqueo_agenda: {
         Args: {
           p_empleado_id?: string
@@ -20822,6 +21002,7 @@ export type Database = {
         Args: { p_familia_servicio: string; p_mascota_id: string }
         Returns: Json
       }
+      obtener_alta_tarjeta: { Args: { p_alta_id: string }; Returns: Json }
       obtener_atenciones_abiertas: {
         Args: { p_dias_atras?: number; p_prestador_id: string }
         Returns: {
@@ -21732,6 +21913,21 @@ export type Database = {
         Args: { p_minutos_vigencia?: number; p_pedido_id: string }
         Returns: Json
       }
+      resolver_alta_tarjeta: {
+        Args: {
+          p_alta_id: string
+          p_bin?: string
+          p_desenlace: string
+          p_marca?: string
+          p_motivo?: string
+          p_stoken_detalle?: string
+          p_stoken_valido?: boolean
+          p_titular?: string
+          p_token?: string
+          p_ultimos4?: string
+        }
+        Returns: Json
+      }
       resolver_comision_despensa: {
         Args: { p_country_code?: string; p_fecha?: string }
         Returns: Json
@@ -21961,6 +22157,10 @@ export type Database = {
           problema: string
           tabla_tipada: string
         }[]
+      }
+      verificar_compuertas_pre_cobro: {
+        Args: { p_compra_id: string; p_token?: string }
+        Returns: Json
       }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }
