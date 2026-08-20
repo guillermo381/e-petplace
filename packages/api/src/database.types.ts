@@ -17333,6 +17333,7 @@ export type Database = {
       tarjetas_guardadas: {
         Row: {
           actualizada_en: string
+          alias: string | null
           bin: string | null
           creada_en: string
           estado: string
@@ -17347,6 +17348,7 @@ export type Database = {
         }
         Insert: {
           actualizada_en?: string
+          alias?: string | null
           bin?: string | null
           creada_en?: string
           estado?: string
@@ -17361,6 +17363,7 @@ export type Database = {
         }
         Update: {
           actualizada_en?: string
+          alias?: string | null
           bin?: string | null
           creada_en?: string
           estado?: string
@@ -21915,6 +21918,7 @@ export type Database = {
       }
       resolver_alta_tarjeta: {
         Args: {
+          p_alias?: string
           p_alta_id: string
           p_bin?: string
           p_desenlace: string
