@@ -1,81 +1,50 @@
 /**
- * S101-B · ABRIR EL ALTA DE TARJETA Y VOLVER.
+ * S101-B · ABRIR EL ALTA DE TARJETA.
  *
- * 🔴 POR QUÉ `expo-web-browser` Y NO UN WebView EMBEBIDO — dos razones, y la
- *    segunda no es de costo:
+ * 🔴 EMBEBIDA, y el porqué está medido en el aparato (firma del founder,
+ *    19-ago): con `expo-web-browser` el retorno viajaba por `cliente://…` y
+ *    **falló DOS veces en el teléfono del founder** — «página no encontrada»
+ *    al volver. *Un mecanismo cuyo último tramo depende de que el sistema
+ *    operativo resuelva un esquema es un mecanismo con una puerta que no
+ *    controlamos.* Embebido, el retorno no sale de la app.
  *
- *    ① `react-native-webview` NO está instalado en el monorepo (medido,
- *       S101-B Fase 1) ⇒ sería dep nativa nueva y **build nativa** con todo
- *       su tren de distribución. `expo-web-browser` entró en el scaffold del
- *       5-jul ⇒ **está horneado en el binario vigente**: cero build.
+ *    Costo asumido y declarado: `react-native-webview` es **dependencia
+ *    nativa** ⇒ version bump y **build nueva** (L-134). Se paga a propósito.
  *
- *    ② El navegador del sistema le muestra a la familia **la URL real** del
- *       formulario donde va a tipear su tarjeta. Un WebView embebido no.
- *       *Para la única pantalla del producto donde se escribe un número de
- *       tarjeta, que se pueda ver de quién es el dominio no es un detalle de
- *       implementación.*
- *
- * ⚠️ `expo-web-browser` está instalado desde el scaffold y **nunca se
- *    ejercitó** (cero consumidores en 45 días). Este es su primer uso: el
- *    ensayo en dispositivo **es el gate del mecanismo entero**, y si el
- *    retorno no cierra limpio se frena y se escala — pasar al WebView
- *    embebido es build nativa, y esa decisión no es de la pista.
+ * 🔴 LO QUE NO CAMBIA: el handle lo emite el servidor, y **el desenlace se lee
+ *    del servidor**. La pantalla del WebView es el contenedor; la verdad sigue
+ *    estando en la fila del alta.
  */
 
-import * as WebBrowser from 'expo-web-browser';
-import { crearAltaTarjeta, obtenerAltaTarjeta, type EstadoAlta } from '@epetplace/api';
+import { router, type Href } from 'expo-router';
+import { crearAltaTarjeta } from '@epetplace/api';
 
-/** Dónde vive la página del alta. Sale de la config de la app, no de acá. */
+/** Dónde vive la página del alta. Sale de la config, no de acá. */
 const BASE = process.env.EXPO_PUBLIC_PAGOS_ALTA_URL ?? '';
 
-/** El esquema propio al que el navegador devuelve el control. */
-const VOLVER = 'cliente://pagos/alta';
-
-export type ResultadoAlta =
-  | { estado: EstadoAlta; altaId: string }
-  | { estado: 'no_se_pudo_abrir'; motivo: string };
+export type AperturaAlta =
+  | { ok: true; altaId: string }
+  | { ok: false; motivo: string };
 
 /**
- * Abre el alta, espera a que el navegador vuelva, y **confirma contra el
- * servidor**.
+ * Emite el handle y abre la pantalla embebida.
  *
- * 🔴 EL RETORNO DEL NAVEGADOR NO DECIDE NADA. Ni el `?desenlace=` de la URL,
- *    ni el `type` que devuelve `openAuthSessionAsync`. Los dos son PISTAS.
- *    El hecho lo tiene la fila del alta, y por eso siempre se relee.
- *
- *    *Deducir el desenlace del retorno confundiría tres cosas distintas: que
- *    la familia cerró la ventana, que el navegador falló, y que el alta de
- *    verdad venció. Solo la fila que expiró es un hecho* (enmienda de mesa,
- *    19-ago).
+ * **No devuelve el desenlace**, y es a propósito: el desenlace lo resuelve la
+ * pantalla releyendo el servidor cuando la vista se cierra —por mensaje de la
+ * página o porque la persona salió—. *Devolverlo acá obligaría a esta función
+ * a esperar un evento que puede no llegar nunca, que es exactamente el cuelgue
+ * que esta sesión ya pagó una vez.*
  */
-export async function abrirAltaDeTarjeta(): Promise<ResultadoAlta> {
-  if (!BASE) {
-    return { estado: 'no_se_pudo_abrir', motivo: 'sin_url_configurada' };
-  }
+export async function abrirAltaDeTarjeta(): Promise<AperturaAlta> {
+  if (!BASE) return { ok: false, motivo: 'sin_url_configurada' };
 
-  // ① El handle nace en el servidor, atado a la sesión. La app no lo inventa.
   const alta = await crearAltaTarjeta('nuvei');
-  if (!alta.ok) return { estado: 'no_se_pudo_abrir', motivo: alta.codigo };
+  if (!alta.ok) return { ok: false, motivo: alta.codigo };
 
-  const url =
-    `${BASE}?alta=${encodeURIComponent(alta.data.altaId)}` +
-    `&volver=${encodeURIComponent(VOLVER)}`;
-
-  // ② El navegador del sistema. `openAuthSessionAsync` vuelve solo cuando la
-  //    página redirige a nuestro esquema **o** cuando la persona lo cierra —
-  //    y los dos casos se tratan igual: releyendo el servidor.
-  try {
-    await WebBrowser.openAuthSessionAsync(url, VOLVER);
-  } catch (e) {
-    // Que el navegador no abra NO cancela el alta: la fila sigue viva hasta
-    // su TTL, y si la persona no vuelve, vencerá como `abandonada`. Se
-    // devuelve el alta igual para poder releerla.
-    return { estado: 'no_se_pudo_abrir', motivo: String(e) };
-  }
-
-  // ③ 🔴 LA FUENTE DE VERDAD. Siempre, en todos los caminos.
-  const leida = await obtenerAltaTarjeta(alta.data.altaId);
-  if (!leida.ok) return { estado: 'no_se_pudo_abrir', motivo: leida.codigo };
-
-  return { estado: leida.data.estado, altaId: leida.data.altaId };
+  /* ⚠️ El cast existe porque los tipos de ruta de expo-router son GENERADOS
+     (`.expo/types/router.d.ts`) y esta pantalla es nueva: el union todavía no
+     la conoce. Se regenera al correr metro/build. *Se declara para que nadie
+     lo copie creyendo que los `Href` se castean por costumbre.* */
+  router.push(`/pagos/alta-tarjeta?alta=${encodeURIComponent(alta.data.altaId)}` as Href);
+  return { ok: true, altaId: alta.data.altaId };
 }

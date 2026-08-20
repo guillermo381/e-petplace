@@ -43,7 +43,9 @@
   button[disabled]{opacity:.4;cursor:default}
   .estado{margin-top:18px;font-size:14px;min-height:1.4em}
   .estado[data-tono="error"]{color:var(--magenta)}
-  .pie{margin-top:28px;padding-top:16px;border-top:1px solid var(--linea);
+  .sello{margin-top:20px;font-size:13px;color:var(--gris);text-align:center;
+         letter-spacing:.01em}
+  .pie{margin-top:20px;padding-top:16px;border-top:1px solid var(--linea);
        color:var(--gris);font-size:13px}
   @media (prefers-color-scheme:dark){
     :root{--tinta:#F2EFEA;--papel:#17150F;--linea:#332F28;--gris:#A39C93;--magenta:#FF6FC0}
@@ -62,6 +64,8 @@
 
   <button id="guardar">Guardar tarjeta</button>
   <p class="estado" id="estado" role="status" aria-live="polite"></p>
+
+  <p class="sello" aria-hidden="false">Procesado por <strong>Nuvei</strong></p>
 
   <p class="pie">Tus datos de tarjeta viajan cifrados a tu procesador de pagos.
      e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que
@@ -116,6 +120,31 @@
      distintas: que cerró la ventana, que el navegador falló, y que el alta
      de verdad venció. Solo la fila que expiró es un hecho.*                 */
   function terminar(desenlace, motivo) {
+    /* ── 🔴 S101-B · EL RETORNO, DESPUÉS DEL DEEP LINK ROTO ────────────────
+       El custom tab devolvía el control por `cliente://…` y **falló DOS veces
+       en manos del founder** («página no encontrada»). Firma de mesa: el alta
+       pasa a **WebView embebido**, y el aviso viaja por `postMessage`.
+
+       🔴 EL MENSAJE ES SEÑAL, JAMÁS HECHO. La app, al recibirlo, cierra la
+       vista y **relee el servidor** — el desenlace lo tiene la fila del alta.
+       *Mandar el desenlace por un canal que la página controla y creerle
+       sería exactamente lo que la enmienda de `abandonada` prohíbe.*
+
+       El redirect por esquema **se conserva** para el caso en que esta página
+       se abra fuera del WebView: no se rompe un camino porque llegó otro. */
+    try {
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          fuente: 'epetplace-alta-tarjeta', desenlace: desenlace, alta: alta,
+        }));
+        decir(desenlace === 'guardada'
+          ? 'Listo, tu tarjeta quedó guardada.'
+          : 'No pudimos guardar la tarjeta.',
+          desenlace === 'guardada' ? null : 'error');
+        return;
+      }
+    } catch (e) { /* si el puente no está, sigue el camino de abajo */ }
+
     if (!volverPermitido(volver)) {
       decir(desenlace === 'guardada'
         ? 'Listo, tu tarjeta quedó guardada. Ya podés cerrar esta ventana.'

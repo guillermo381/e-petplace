@@ -71,18 +71,13 @@ export default function Cuenta() {
    */
   async function correrAltaDeTarjeta() {
     const r = await abrirAltaDeTarjeta();
-    if (r.estado === 'no_se_pudo_abrir') {
-      mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
-      return;
-    }
-    const voz = {
-      guardada: { texto: t('cuenta.altaGuardada'), variante: 'exito' as const },
-      rechazada: { texto: t('cuenta.altaRechazada'), variante: 'error' as const },
-      pendiente: { texto: t('cuenta.altaPendiente'), variante: 'neutro' as const },
-      abandonada: { texto: t('cuenta.altaAbandonada'), variante: 'neutro' as const },
-    }[r.estado];
-    mostrar(voz);
+    if (!r.ok) mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
+    /* 🔴 El desenlace NO se resuelve acá: lo dice la pantalla del WebView
+       releyendo el servidor cuando la vista se cierra. *Esperarlo en este
+       punto obligaría a aguardar un evento que puede no llegar nunca — el
+       cuelgue que esta sesión ya pagó una vez.* */
   }
+
 
   const [salirAbierta, setSalirAbierta] = useState(false);
   const [cerrando, setCerrando] = useState(false);
