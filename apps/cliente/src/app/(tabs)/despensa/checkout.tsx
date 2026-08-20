@@ -1192,22 +1192,18 @@ export default function DespensaCheckout() {
               )}
             </View>
 
-            {/* §6.5 — EL PAGO ES SIMULADO, imposible de confundir. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-              <Texto variante="seccion" color="warning">
-                {t('despensa.pagoSimuladoTitulo')}
-              </Texto>
-              <Texto variante="apoyo">{t('despensa.pagoSimuladoDetalle')}</Texto>
-            </View>
+            {/* ☠️ S101-B · LA BANDA DE «PAGO SIMULADO» MUERE (Ley 37).
+                §6.5 la puso cuando el cobro ERA simulado, y decía la verdad.
+                **Con el enchufe de Fase 3 el cobro es real**, así que la banda
+                pasó de honesta a falsa de un día para el otro.
+                *Una advertencia que dejó de ser cierta no es inofensiva: le
+                enseña a la familia a no creerle a las advertencias.* */}
           </>
         ) : fase === 'exito' ? (
           <>
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               <Texto variante="titulo">{t('despensa.exitoCuerpo')}</Texto>
               <Texto variante="cuerpo">{t('despensa.exitoDetalle')}</Texto>
-              <Texto variante="apoyo" color="warning">
-                {t('despensa.pagoSimuladoRecordatorio')}
-              </Texto>
               {metodo === 'retiro' ? (
                 <Texto variante="cuerpo">{t('despensa.exitoRetiro')}</Texto>
               ) : null}

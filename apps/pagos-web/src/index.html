@@ -287,7 +287,10 @@
         var card = (resp && resp.card) ? resp.card : {};
         if (!card.token) {
           btn.disabled = false;
-          decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
+          /* 🔴 Una respuesta OK sin token **no es un veredicto del emisor**: es
+             una anomalía nuestra o del proveedor. *Decirle «probá con otra» la
+             manda a probar tarjetas que van a fallar todas igual.* */
+          decir('No pudimos guardar la tarjeta. Ya lo estamos viendo.', 'error');
           return;
         }
         /* 🔴 Al servidor viajan el token y los METADATOS DE RECONOCIMIENTO.
@@ -315,14 +318,47 @@
           decir('Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Probá de nuevo.', 'error');
         });
       },
-      function () {
+      function (resp) {
         pararReloj();
-        /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
-           la causa fina la resuelve la app con la taxonomía de la letra §7.
-           «Fondos insuficientes» jamás se nombra. */
         btn.disabled = false;
-        decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
-        terminar('rechazada');
+
+        /* ═══ 🔴 QUIÉN HABLÓ: ¿EL EMISOR, O NOSOTROS? ═════════════════════
+           Este callback lo dispara el SDK ante **cualquier** fallo — el banco
+           que dice que no, pero también un `OperationNotAllowed`, un token de
+           auth vencido o un 5xx del proveedor. La v1 los trataba a todos
+           igual: «probá con otra tarjeta», y declaraba `rechazada`.
+
+           **Medido el 20-ago en el aparato:** con las credenciales cruzadas la
+           pantalla del cobro dijo *«el banco no autorizó»* cuando el emisor
+           **nunca opinó** — y le pidió a la familia que probara otra tarjeta
+           cuando NINGUNA iba a funcionar. La misma trampa vive acá.
+
+           ⇒ Se separan. Y ante la duda **NO se declara desenlace**, que es el
+           mismo criterio que el reloj de arriba ya usa: *un final inventado es
+           peor que un final que falta — el que falta se nota.*                */
+        var tipo = '';
+        try { tipo = String((resp && resp.error && resp.error.type) || ''); } catch (e) {}
+        /* Se registra en consola, no en pantalla: la familia no lee tipos de
+           error, y el aparato/soporte sí necesita el crudo. */
+        if (tipo) { try { console.log('[alta] fallo del SDK · type=' + tipo); } catch (e) {} }
+
+        var esVeredictoDelEmisor = /reject|declin|denied|insufficient|fraud|card/i.test(tipo);
+        var esDefectoTecnico = /OperationNotAllowed|AuthError|Server ?Error|AttributeError|Timeout|Invalid ?Token/i.test(tipo);
+
+        if (esVeredictoDelEmisor && !esDefectoTecnico) {
+          /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
+             la causa fina la resuelve la app con la taxonomía de la letra §7.
+             «Fondos insuficientes» jamás se nombra. */
+          decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
+          terminar('rechazada');
+          return;
+        }
+
+        /* Defecto nuestro, o causa que no supimos leer: **el alta queda
+           abierta** (vence sola) y la voz no le pide nada a la familia.
+           ⚠️ El mapa de `type` está incompleto a propósito: se cierra
+           midiendo un rechazo real en sandbox, no enumerando de memoria. */
+        decir('No pudimos guardar la tarjeta. Ya lo estamos viendo — probá de nuevo en un momento.', 'error');
       },
       campo
     );

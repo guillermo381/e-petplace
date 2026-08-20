@@ -102,7 +102,12 @@ export async function cobrarConTarjetaGuardada(
     if (r.codigo === 'vendedor_no_activo') return { ok: false, voz: 'despensa.cobroVendedorNoActivo' };
     if (r.codigo === 'compra_no_existe') return { ok: false, voz: 'despensa.cobroCompraNoExiste' };
     /* Las de defecto NUESTRO comparten voz: la causa fina es de soporte. */
-    if (r.codigo === 'monto_divergente' || r.codigo === 'desglose_incompleto')
+    /* 🔴 Todo lo que es NUESTRO habla hacia soporte y NO le pide nada a la
+       familia. *Pedirle que revise o que pruebe otra tarjeta cuando el defecto
+       es nuestro la manda a resolver algo que no puede.* */
+    if (r.codigo === 'monto_divergente' || r.codigo === 'desglose_incompleto'
+        || r.codigo === 'defecto_nuestro' || r.codigo === 'compra_sin_pedidos'
+        || r.codigo === 'tarjeta_sin_uid' || r.codigo === 'iva_no_probado')
       return { ok: false, voz: 'despensa.cobroDefectoNuestro' };
     if (r.codigo === 'rechazado') return { ok: false, voz: 'despensa.cobroRechazado' };
     if (r.codigo === 'sin_respuesta') return { ok: false, voz: 'despensa.cobroConfirmando' };

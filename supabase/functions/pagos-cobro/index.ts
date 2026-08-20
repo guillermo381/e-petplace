@@ -230,6 +230,24 @@ Deno.serve(async (req) => {
      recurso. *Un rechazo sin motivo obliga a abrir el crudo, y nadie lo abre
      cuando hay una explicación plausible a mano.* */
   const err = (jsonResp.error ?? {}) as Record<string, unknown>;
+
+  /* ═══ 🔴 QUIÉN HABLÓ: ¿EL BANCO, O NOSOTROS? ═══════════════════════════════
+     **El banco solo habla cuando OPINÓ.** Un `OperationNotAllowed*`, un
+     `AuthError`, un `Server Error` o un HTTP 5xx **no son veredictos del
+     emisor**: son defectos de nuestro request o del proveedor.
+
+     Medido el 20-ago en el aparato: la pantalla dijo «el banco no autorizó,
+     probá con otra tarjeta» cuando la causa era `uid does not match`. *Le pidió
+     a la familia que probara otra tarjeta cuando NINGUNA iba a funcionar* — y
+     además le atribuyó al emisor una decisión que nunca tomó.
+
+     ⇒ Se separan, y el criterio es uno: **veredicto del emisor ⟺ hubo
+     transacción y su `status` la rechazó.** Todo lo demás es nuestro. */
+  const tipoErr = String(err.type ?? '');
+  const esDefectoTecnico =
+    status >= 500 ||
+    /OperationNotAllowed|AuthError|Server ?Error|AttributeError|Invalid/i.test(tipoErr) ||
+    (!aprobado && !tx.status);          // sin transacción, el banco no opinó
   const motivo = aprobado ? null : [
     err.type, err.description, tx.message, tx.status_detail,
   ].filter(Boolean).join(': ').slice(0, 400) || `http_${status}`;
@@ -247,6 +265,14 @@ Deno.serve(async (req) => {
      y el llamador pasa a `confirmando`. **Acá nadie dice «pagado»** — eso lo
      dice el webhook, o el barrido. El estado del intento queda `pendiente`
      justamente por eso. */
-  if (!aprobado) return json({ ok: false, codigo: 'rechazado', motivo }, 409);
+  if (!aprobado) {
+    return json({
+      ok: false,
+      /* `rechazado` = el emisor dijo que no. `defecto_nuestro` = falló algo de
+         nuestro lado o del proveedor, y la familia no tiene nada que corregir. */
+      codigo: esDefectoTecnico ? 'defecto_nuestro' : 'rechazado',
+      motivo,
+    }, 409);
+  }
   return json({ ok: true, señal: 'optimista', estado: 'confirmando' });
 });

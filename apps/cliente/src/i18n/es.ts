@@ -1800,7 +1800,7 @@ export const clienteEs = {
     exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Podés seguirlo en Tus pedidos.',
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
-    pagarSimulado: 'Pagar (simulado)',
+    pagarSimulado: 'Pagar',
     volverAEditar: 'Volver a editar',
     verTusPedidos: 'Ver tus pedidos',
     faltaItems: 'El carrito está vacío.',

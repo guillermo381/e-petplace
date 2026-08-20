@@ -1493,7 +1493,7 @@ export const clienteEn = {
     exitoDetalle: "We'll let you know when the seller confirms it. You can follow it in Your orders.",
     exitoRetiro: "When it's ready for pickup, you'll see the counter code in the order detail.",
     verTotal: 'See the total',
-    pagarSimulado: 'Pay (simulated)',
+    pagarSimulado: 'Pay',
     volverAEditar: 'Back to editing',
     verTusPedidos: 'See your orders',
     faltaItems: 'Your cart is empty.',

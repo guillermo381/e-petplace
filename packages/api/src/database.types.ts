@@ -17341,6 +17341,7 @@ export type Database = {
           marca: string | null
           motivo_rechazo: string | null
           proveedor: string
+          proveedor_uid: string | null
           titular: string | null
           token: string
           ultimos4: string | null
@@ -17356,6 +17357,7 @@ export type Database = {
           marca?: string | null
           motivo_rechazo?: string | null
           proveedor: string
+          proveedor_uid?: string | null
           titular?: string | null
           token: string
           ultimos4?: string | null
@@ -17371,6 +17373,7 @@ export type Database = {
           marca?: string | null
           motivo_rechazo?: string | null
           proveedor?: string
+          proveedor_uid?: string | null
           titular?: string | null
           token?: string
           ultimos4?: string | null

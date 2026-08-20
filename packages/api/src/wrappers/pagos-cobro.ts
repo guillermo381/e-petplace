@@ -15,7 +15,8 @@ import type { ResultadoWrapper } from '../resultado';
 export type CodigoCobro =
   | 'sin_sesion' | 'sesion_no_verificable' | 'datos_invalidos'
   | 'monto_no_se_recibe' | 'compra_no_existe' | 'token_ausente'
-  | 'desglose_incompleto' | 'rechazado' | 'sin_respuesta'
+  | 'desglose_incompleto' | 'rechazado' | 'defecto_nuestro' | 'sin_respuesta'
+  | 'tarjeta_sin_uid' | 'iva_no_probado'
   | 'no_se_pudo_completar' | 'servidor_sin_configurar'
   /* Los de COMPUERTA: viajan tal cual desde el 409 del servidor. */
   | 'pago_en_proceso' | 'reserva_vencida' | 'vendedor_no_activo'
