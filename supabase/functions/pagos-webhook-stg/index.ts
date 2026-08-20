@@ -15,7 +15,13 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
+/* 🔴 `createHmac` FALTABA EN EL IMPORT y el uso estaba escrito igual. En Deno eso
+   no es un error de compilación: es un **ReferenceError en runtime**, uncaught,
+   que la plataforma devuelve como **500 Internal Server Error** — y un 500
+   DETIENE los reintentos de Nuvei para siempre.
+   *Un typecheck no corre sobre estas funciones, así que el único lugar donde
+   este defecto podía aparecer era el request real de un cobro real.* */
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 const APP_CODE = Deno.env.get('NUVEI_APP_CODE_SERVER') ?? '';
@@ -126,6 +132,27 @@ function extraer(p: Record<string, any>) {
   };
 }
 
+/** Guarda el crudo y **devuelve el id**, para completarlo después. Lo mínimo
+ *  indispensable: si esto falla, no hay evento. */
+async function guardarCrudo(payload: unknown): Promise<string> {
+  const { data, error } = await db.from('webhook_events').insert({
+    ambiente: AMBIENTE,
+    proveedor: 'nuvei',
+    payload,
+    /* 🔴 `desconocido` y no un estado nuevo: el CHECK de `resultado` tiene
+       vocabulario cerrado, y **ampliarlo es una decisión de letra, no un
+       atajo de código**. `desconocido` dice exactamente lo que pasó —el
+       evento llegó y su desenlace todavía no se determinó— y el análisis lo
+       reemplaza un instante después. *Inventar un valor que el CHECK rechaza
+       fue lo que rompió la primera versión de esta cura: la persistencia
+       falló, devolvimos 429, y el buzón «que persiste todo» no persistió.* */
+    resultado: 'desconocido',
+    detalle: 'crudo persistido antes de analizar',
+  }).select('id').single();
+  if (error) throw error;
+  return data.id as string;
+}
+
 async function guardar(row: Record<string, unknown>) {
   const { error } = await db.from('webhook_events').insert({
     ambiente: AMBIENTE,
@@ -160,54 +187,66 @@ Deno.serve(async (req) => {
     return new Response('ok', { status: 200 });
   }
 
-  const d = extraer(payload);
+  /* ═══ 🔴 ENMIENDA DE DISEÑO (20-ago) — SE PERSISTE ANTES DE ANALIZAR ══════
+     **Un buzón que promete persistir todo no puede tener un camino de entrada
+     capaz de 500.** La v0 analizaba primero y guardaba después, así que
+     cualquier defecto del análisis —una fórmula, un campo nuevo, un import que
+     falta— **se llevaba el evento puesto**.
 
-  // ② VALIDACIÓN DEL STOKEN. En v0 solo se REGISTRA el resultado: no corta
-  //    nada porque no hay nada que cortar todavía. Cuando el actuador entre,
-  //    esta misma verificación pasa a ser la puerta.
-  const v = verificarStoken(d.txId, d.appCode, d.userId, d.stoken);
-  const valido = v.valido;
-  /* 🔴 EL FRENO DECLARA CONTRA QUÉ MIDIÓ (L-285). La v0 decía «no coincide» a
-     secas, y por eso 24 filas fueron **una sola observación repetida** sin que
-     nadie pudiera saberlo. Ahora cada fila lleva la fórmula, la credencial y —
-     lo que decide si el actuador puede tocarla— si el evento está **autenticado
-     de verdad**. */
-  const autenticado = valido === true && v.credencial === 'SERVER';
-  const detalle =
-    `receta=${v.receta} · credencial=${v.credencial} · autenticado=${autenticado}` +
-    (valido === null ? ' · no evaluable: faltan datos o credencial' : '') +
-    ` · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`;
+     Y el costo no es «se pierde un log»: **un 500 detiene los reintentos de
+     Nuvei definitivamente** (su doc: reintentan hasta 200 durante 48 h, pero
+     ≥500 corta). *Analizar antes de guardar convierte cualquier bug de análisis
+     en pérdida permanente de un evento de plata.*
 
-  // ③ PERSISTIR SIEMPRE, incluso lo rechazado.
+     Medido el 20-ago: el callback del primer débito real (`DF-2098100`) **SÍ
+     llegó** y nosotros devolvimos 500. Durante horas el hallazgo fue «el
+     callback no llega» — *era nuestro, y estábamos buscando afuera.*
+
+     ⇒ Orden nuevo: **① guardar el crudo · ② analizar · ③ completar la fila.**
+     Si ② o ③ fallan, el evento **ya está a salvo** y respondemos 200: el
+     análisis se puede rehacer sobre el crudo cuando queramos; el evento
+     perdido no vuelve nunca. */
+  let idFila: string | null = null;
   try {
-    await guardar({
-      transaction_id: d.txId || null,
-      payload,
-      stoken_valido: valido,
-      resultado: valido === false ? 'stoken_invalido' : 'recibido',
-      detalle,
-    });
+    idFila = await guardarCrudo(payload);
   } catch (e) {
-    // 🔴 429, NO 500 — Y LA DIFERENCIA ES EL REINTENTO ENTERO.
-    //
-    //    La doc de Nuvei: los reintentos corren hasta recibir 200 durante 48 h,
-    //    **pero un status ≥ 500 los DETIENE definitivamente.**
-    //
-    //    La primera versión devolvía 500 «a propósito, para que reintenten» —
-    //    y lograba exactamente lo contrario: **mataba el único reintento que
-    //    queremos.** Un evento que no pudimos guardar y que además nadie
-    //    reenvía es un evento perdido para siempre, y en pagos eso es un cobro
-    //    sin traza.
-    //
-    //    Se elige **429** entre los 4xx porque es el único que dice la verdad:
-    //    no es culpa del que llama (400 lo culparía a él), no es permanente —
-    //    es «no pude ahora, volvé». *El código de estado es parte del
-    //    contrato, no decoración: acá decidía si el evento existe o no.*
-    console.error('[webhook] fallo al persistir', e);
+    // Único caso que merece reintento: no pudimos guardar. 429, jamás 500.
+    console.error('[webhook] fallo al persistir el crudo', e);
     return new Response(
       JSON.stringify({ ok: false, error: 'no_pudimos_persistir', reintentar: true }),
       { status: 429, headers: { 'Content-Type': 'application/json' } },
     );
+  }
+
+  try {
+    const d = extraer(payload);
+    const v = verificarStoken(d.txId, d.appCode, d.userId, d.stoken);
+    /* 🔴 EL FRENO DECLARA CONTRA QUÉ MIDIÓ (L-285). Cada fila lleva la fórmula,
+       la credencial y —lo que decide si el actuador puede tocarla— si el evento
+       está **autenticado de verdad**. */
+    const autenticado = v.valido === true && v.credencial === 'SERVER';
+    const detalle =
+      `receta=${v.receta} · credencial=${v.credencial} · autenticado=${autenticado}` +
+      (v.valido === null ? ' · no evaluable: faltan datos o credencial' : '') +
+      ` · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`;
+
+    await db.from('webhook_events').update({
+      transaction_id: d.txId || null,
+      stoken_valido: v.valido,
+      resultado: v.valido === false ? 'stoken_invalido' : 'recibido',
+      detalle,
+    }).eq('id', idFila);
+  } catch (e) {
+    /* 🔴 El análisis falló, **el evento NO se pierde**. Queda con
+       `resultado='recibido_sin_analizar'` y su crudo entero: se puede volver a
+       analizar cuando el defecto esté curado. *Antes, esto era un 500 y el
+       evento no existía.* */
+    console.error('[webhook] el análisis falló; el crudo quedó a salvo', e);
+    try {
+      await db.from('webhook_events')
+        .update({ detalle: `analisis_fallo: ${String(e).slice(0, 400)}` })
+        .eq('id', idFila);
+    } catch { /* ni siquiera esto puede tumbar la respuesta */ }
   }
 
   // ④ 200 rápido. Si tarda, reintentan con backoff hasta 48 h.
