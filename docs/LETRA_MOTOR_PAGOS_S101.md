@@ -4,7 +4,7 @@
 
 ---
 
-> **Versión:** v1.2 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Versión:** v1.3 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick, después el estatuto de la compuerta 3) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
 > **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
 >
 > **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
@@ -385,6 +385,23 @@ Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y ca
 ---
 
 ## Historial
+
+- **v1.3 (19-ago-2026, noche — el estatuto de la compuerta 3) · entrada depositada en
+  S101-B, 19-ago:** el **`ESTATUTO DE LA COMPUERTA 3`** de §5.0 —*la cobertura queda fuera
+  del motor de pago **por diseño**, no por falta de datos; se valida al elegir la
+  dirección, y el `no_evaluables:["cobertura"]` viaja también dentro del `ok:true` para
+  que ningún llamador lea un verde como «cobertura verificada»*— **entró al cuerpo en
+  S101-A y su entrada de historial nunca se escribió**, de modo que el encabezado siguió
+  diciendo v1.2 con la v1.3 ya adentro.
+  **Su literal y su porqué viven en `docs/loop/S101-A.md`, TANDA 6 ① — esta entrada
+  APUNTA ahí y no reconstruye la decisión de memoria.** Nace con ella la deuda **`D-850`**
+  (nadie valida cobertura en ningún punto del flujo), cuyo dueño es el flujo de elección
+  de dirección del cliente y cuyo disparo es **antes del primer pedido real de octubre**.
+  > *Cura autorizada por la mesa el 19-ago, junto con la del encabezado del plan de
+  > S101-B: **un encabezado que miente es la clase de defecto que se mata en pareja** —
+  > quien lea solo la versión va a creer que el estatuto de la compuerta 3 no está
+  > escrito, y ese es justo el párrafo que impide construir en el cobro el patrón que
+  > E5 prohíbe.*
 
 - **v1.2 (19-ago-2026, noche — las tres calibraciones de Erick):** ① **el supuesto de
   las 22:00 queda REFUTADO por dato**: los cortes son **17:00 (Medianet)** y **17:50

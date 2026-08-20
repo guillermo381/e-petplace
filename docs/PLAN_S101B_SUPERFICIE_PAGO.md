@@ -1,10 +1,14 @@
 # PLAN_S101B_SUPERFICIE_PAGO.md — e-PetPlace
 
-> **Nota de depósito (S101-B, 19-ago-2026):** este plan vivía solo en la orden de mesa de apertura. Se depositó **VERBATIM** — no se editó una coma del cuerpo. **Se declara una incoherencia interna del documento, y NO se cura sin firma:** el encabezado dice `**Versión:** v1.0` mientras el `Historial` registra una **v1.1** (las cuatro firmas de la mesa de apertura) y la orden de mesa lo nombra **v1.1**. *Corregir el header sería editar un documento que se mandó depositar verbatim; callarlo dejaría dos versiones conviviendo en el mismo archivo.* Se enmienda cuando el founder lo firme. **Y su regla de precedencia se aplica desde ya:** si este plan contradice al repo o a la letra, **gana la fuente** y el plan se enmienda con su marca.
+> **Nota de depósito (S101-B, 19-ago-2026):** este plan vivía solo en la orden de mesa de apertura. Se depositó **VERBATIM** — no se editó una coma del cuerpo.
+>
+> ✅ **La única enmienda, autorizada por la mesa el 19-ago: el encabezado subió de `v1.0` a `v1.1`.** El depósito lo había declarado como incoherencia interna y **no lo curó sin firma** —el `Historial` registraba una v1.1 con las cuatro firmas de la apertura, y el encabezado seguía en v1.0—. **La mesa dictaminó que fue omisión propia al enmendar el historial sin subir el encabezado, y que el registro correcto es el historial.** *Se cura acá, con su marca, en vez de dejar dos versiones conviviendo en el mismo archivo.*
+>
+> **Su regla de precedencia se aplica desde el primer día:** si este plan contradice al repo o a la letra, **gana la fuente** y el plan se enmienda con su marca.
 
 ---
 
-> **Versión:** v1.0 · **Nace:** 19-ago-2026 · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **UNA SOLA PISTA**
+> **Versión:** v1.1 · **Nace:** 19-ago-2026 · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **UNA SOLA PISTA**
 > **Fuentes que obedece (en este orden):** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101.md` v1.2+ · acta de apertura S101-B · `LETRA_SALDO.md` v1.0 · `DIRECCION_ARTE` + skill `epetplace-design-system` (el CÓMO visual) · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si este plan contradice al repo o a cualquiera de esas fuentes, **gana la fuente y el plan se enmienda**. Este plan ORDENA el trabajo; no crea letra nueva ni firma nada.
 >
