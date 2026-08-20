@@ -522,12 +522,15 @@ export default function DespensaCheckout() {
        justamente que las pantallas no hagan cosas por abrirse.*
        ⚠️ ANDAMIO: «la más reciente» muere con la Fase 5 (`cobro-andamio.ts`). */
     const tj = await listarTarjetasGuardadas();
+    /* 🔴 Solo el ID. **El token no sale de la base hacia la app** más de lo
+       necesario, y el cobro lo resuelve server-side desde el id. */
     const tarjeta: TarjetaParaCobro = tj.ok && tj.data.length > 0
-      ? { token: tj.data[0].token, userId: tj.data[0].id }
+      ? { id: tj.data[0].id }
       : null;
+    const hayToken = tj.ok && tj.data.length > 0 ? tj.data[0].token : null;
 
     // ② LAS COMPUERTAS. Cada fallo habla ANTES de que la tarjeta se entere.
-    const g = await verificarCompuertas(compraId, tarjeta?.token ?? null);
+    const g = await verificarCompuertas(compraId, hayToken);
     if (!g.ok) {
       setTrabajando(false);
       mostrar({ texto: t('despensa.cobroDesconocido'), variante: 'error' });

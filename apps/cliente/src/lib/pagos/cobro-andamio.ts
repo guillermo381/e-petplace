@@ -27,11 +27,19 @@
 
 
 
-/** Sin esto, el andamio no existe — la pantalla no debe ofrecer pagar. */
-const ARNES = process.env.EXPO_PUBLIC_PAGOS_ARNES_URL ?? '';
+/**
+ * 🔴 LO ÚNICO ANDAMIO ACÁ ES LA SELECCIÓN DE TARJETA. **La función de cobro es
+ *    PRODUCTO y no muere** (`supabase/functions/pagos-cobro`): autoriza por el
+ *    JWT de la familia, **el monto jamás viaja del cliente** (lo lee del
+ *    desglose congelado), verifica pertenencia y corre las compuertas
+ *    server-side.
+ *
+ * *Se llama por la puerta única del cliente Supabase — la sesión viaja sola.*
+ */
+import { cobrarCompra } from '@epetplace/api';
 
 export function hayCobroAndamio(): boolean {
-  return Boolean(ARNES);
+  return true;
 }
 
 /** Las voces que este andamio puede pedir. Cerradas a propósito: si mañana
@@ -41,7 +49,7 @@ export type VozCobro =
   | 'despensa.cobroTokenAusente'
   | 'despensa.cobroConfirmando';
 
-export type TarjetaParaCobro = { token: string; userId: string } | null;
+export type TarjetaParaCobro = { id: string } | null;
 
 export type ResultadoCobro =
   | { ok: true }
@@ -63,19 +71,13 @@ export async function cobrarConTarjetaGuardada(
   compraId: string,
   tarjeta: TarjetaParaCobro,
 ): Promise<ResultadoCobro> {
-  if (!ARNES) return { ok: false, voz: 'despensa.cobroDesconocido' };
   if (!tarjeta) return { ok: false, voz: 'despensa.cobroTokenAusente' };
 
   try {
-    const r = await fetch(ARNES, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        compra_id: compraId,
-        token: tarjeta.token,
-        user_id: tarjeta.userId,
-      }),
-    });
+    /* 🔴 SOLO IDS. **El monto no viaja** — lo lee el servidor del desglose
+       congelado. *Mandarlo desde acá haría que la compuerta 2 verificara un
+       número contra sí mismo.* */
+    const r = await cobrarCompra(compraId, tarjeta.id);
 
     /* 🔴 La respuesta se lee como SEÑAL, no como hecho. Un `ok` acá significa
        «el proveedor contestó», y el llamador pasa a `confirmando` — **jamás a

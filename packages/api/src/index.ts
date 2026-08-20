@@ -1329,3 +1329,5 @@ export {
   listarTarjetasGuardadas,
   type TarjetaGuardada,
 } from './wrappers/tarjetas-guardadas';
+
+export { cobrarCompra, type CodigoCobro, type SenalDeCobro } from './wrappers/pagos-cobro';
