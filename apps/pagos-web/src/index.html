@@ -145,15 +145,72 @@
     return;
   }
 
+  /* ── 🔴 S101-B · EL CAMINO DEL DESAFÍO (OTP), Y POR QUÉ FALTABA ────────
+     Medido en la fuente del SDK (`Payment.createToken`), su contrato es:
+
+       200 && card.status === 'pending' && payment_form definido
+         → payment_form.PaymentForm('showVerification', resp, ok, err)
+       si no
+         → ok(resp)  |  err(resp)
+
+     ⇒ Cuando la tarjeta pide OTP, **el SDK NO llama a nuestros callbacks**:
+       monta su propio contenedor de verificación y recién llama al nuestro
+       cuando el código se valida. La v1 de esta página no contemplaba ese
+       estado, así que se quedaba en «Guardando…» **para siempre**: ni éxito,
+       ni error, ni salida. *Un spinner mudo, que es exactamente lo que la
+       letra prohíbe para el cobro y vale igual acá.*
+
+     La cura tiene TRES piezas, y ninguna adivina nombres: las clases salen
+     medidas del SDK (`.verification-container`, `.verification-wrapper`).  */
+  var TIMEOUT_MS = 30000;
+  var reloj = null;
+  var desafioVisto = false;
+
+  function pararReloj() { if (reloj) { clearTimeout(reloj); reloj = null; } }
+
+  /** ① Vigila la aparición del desafío. Si aparece, la espera deja de ser
+   *  muda: pasa a decir lo que la persona tiene que hacer. */
+  function vigilarDesafio() {
+    var obs = new MutationObserver(function () {
+      if (desafioVisto) return;
+      if (campoTieneDesafio()) {
+        desafioVisto = true;
+        pararReloj();                       /* el desafío NO es un cuelgue */
+        decir('Te enviamos un código para confirmar la tarjeta. Escribilo acá arriba.');
+        obs.disconnect();
+      }
+    });
+    obs.observe(document.getElementById('tarjeta'), { childList: true, subtree: true });
+  }
+
+  function campoTieneDesafio() {
+    var n = document.getElementById('tarjeta');
+    return !!(n && n.querySelector('.verification-container, .verification-wrapper, .otp-wrapper'));
+  }
+
   btn.onclick = function () {
     btn.disabled = true;
     decir('Guardando…');
+    desafioVisto = false;
+    vigilarDesafio();
+
+    /* ② 🔴 EL TIMEOUT — deber heredado de la letra §4: **nunca un spinner
+       mudo**. Si en 30 s no llegó ni desenlace ni desafío, la página lo dice
+       y devuelve el control. *No declara ningún desenlace: no sabe cuál es, y
+       el hecho lo tiene el servidor.* La app, al volver, relee igual. */
+    pararReloj();
+    reloj = setTimeout(function () {
+      if (desafioVisto) return;
+      btn.disabled = false;
+      decir('Esto está tardando más de lo normal. Podés intentar de nuevo, o cerrar y volver desde la app.', 'error');
+    }, TIMEOUT_MS);
 
     var campo = $('#tarjeta');
     var tarjeta;
     try {
       tarjeta = campo.PaymentForm('card');
     } catch (e) {
+      pararReloj();
       btn.disabled = false;
       /* El SDK valida sus propios campos. Su queja es sobre la forma del
          dato, no sobre el dato: no se registra ni se reenvía. */
@@ -169,6 +226,7 @@
       CONFIG.EMAIL_ALTA,
       tarjeta,
       function (resp) {
+        pararReloj();
         var card = (resp && resp.card) ? resp.card : {};
         if (!card.token) {
           btn.disabled = false;
@@ -198,6 +256,7 @@
         });
       },
       function () {
+        pararReloj();
         /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
            la causa fina la resuelve la app con la taxonomía de la letra §7.
            «Fondos insuficientes» jamás se nombra. */
