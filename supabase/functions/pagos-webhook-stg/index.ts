@@ -236,6 +236,26 @@ Deno.serve(async (req) => {
       resultado: v.valido === false ? 'stoken_invalido' : 'recibido',
       detalle,
     }).eq('id', idFila);
+    /* ═══ 🔴 LA PUERTA DEL ACTUADOR ══════════════════════════════════════
+       **Medido el 20-ago con un pago real:** el evento llegaba, se guardaba
+       `autenticado=true`… y la compra se quedaba en `esperando_pago`.
+       El actuador existía, estaba encendido, y **nadie lo llamaba**.
+       *Motor sin puerta* — y **el arnés no podía verlo porque llamaba al
+       actuador directo**, saltándose justo el eslabón que faltaba.
+
+       ⇒ Se llama ACÁ, después de tener el veredicto y **con el evento ya a
+         salvo**. Si el actuador falla, **el 200 se devuelve igual**: el evento
+         está persistido y el barrido lo resuelve. *Un fallo del actuador no
+         puede costar el reintento del proveedor.* */
+    try {
+      const { data: act, error: e3 } = await db.rpc('aplicar_evento_de_pago', {
+        p_evento_id: idFila,
+      });
+      if (e3) console.error('[webhook] el actuador falló', e3);
+      else console.log('[webhook] actuador:', JSON.stringify(act));
+    } catch (e) {
+      console.error('[webhook] el actuador lanzó', e);
+    }
   } catch (e) {
     /* 🔴 El análisis falló, **el evento NO se pierde**. Queda con
        `resultado='recibido_sin_analizar'` y su crudo entero: se puede volver a
