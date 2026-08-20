@@ -35,75 +35,61 @@ const db = createClient(
  *    campo `detalle` deja escrito cuál acertó en el primer evento real.
  *    Cuando se sepa, se fija uno y se borran los otros dos.
  */
-function calcularStoken(txId: string, userId: string): string {
-  return createHash('md5')
-    .update(`${txId}_${APP_CODE}_${userId}_${APP_KEY}`)
+/* ═══ 🔑 LA RECETA DEL `stoken` — CONTESTADA POR EL PROVEEDOR (20-ago) ══════
+   **HMAC-SHA256**, con la *application key* como **CLAVE** (no como pedazo del
+   mensaje) y el mensaje `orderId_applicationCode_uid`.
+
+   🔴 POR QUÉ NO SALIÓ MIDIENDO, y es la lección: se probaron **~200.000 recetas
+   de hash PLANO** —permutaciones de los ocho campos del crudo, seis
+   separadores, cuatro algoritmos, la clave al principio y al final, las dos
+   credenciales— y **ninguna podía acertar**, porque el espacio entero estaba
+   equivocado: *la clave no era un campo más de la cadena, era la llave del
+   HMAC*. **Una búsqueda exhaustiva dentro de la familia equivocada se siente
+   como evidencia de que la respuesta no existe.** La contestó una línea del
+   proveedor, igual que el `vat`.
+
+   ✅ **Validada contra la historia ANTES de ser ley** (orden de mesa): de los
+   24 eventos guardados con `stoken`, **19 validan y son los 19 firmados por el
+   proveedor**. Los 5 restantes son **sondas nuestras de S101-A**
+   (`transaction.id = TEST-1` / `TEST-429`, `user.id = u` / `u-1`, sin
+   `application_code`): *nadie les calculó un stoken jamás, así que no pueden
+   validar — no son un contraejemplo de la fórmula, son filas que no fueron
+   firmadas.* **19/19 de lo firmado.**
+
+   🔴🔴 **Y LO QUE LA RECETA DESTAPA, QUE NO ES CHICO:** la clave se elige por la
+   credencial DEL EVENTO. Las altas vienen firmadas con la **CLIENT**… y la
+   CLIENT **es pública por diseño: la sirve nuestra propia página de pago**.
+   ⇒ **El `stoken` de un callback de ALTA no es un control de seguridad**:
+   cualquiera que abra la página puede firmar uno. Solo el de **cobro** —clave
+   SERVER, que jamás sale del servidor— autentica de verdad.
+   ⇒ **EL ACTUADOR SOLO PUEDE MOVER PLATA CON EVENTOS `-SERVER`.** Tratar los
+   dos iguales sería poner un candado cuya llave está colgada en la puerta. */
+const RECETA = 'hmac-sha256-v2:HMAC(appKey, tx_appCode_uid)';
+
+function verificarStoken(
+  txId: string, appCode: string, uid: string, recibido: string,
+): { valido: boolean | null; receta: string; credencial: string } {
+  /* La credencial se elige por lo que el proveedor DIJO haber usado — es un
+     dato del payload, no un supuesto nuestro. */
+  const esServer = appCode.toUpperCase().endsWith('-SERVER');
+  const credencial = esServer ? 'SERVER' : appCode ? 'CLIENT' : 'desconocida';
+  const key = esServer ? APP_KEY : KEY_CLIENT;
+
+  if (!recibido || !txId || !appCode || !uid || !key)
+    return { valido: null, receta: RECETA, credencial };
+
+  const calc = createHmac('sha256', key)
+    .update(`${txId}_${appCode}_${uid}`)
     .digest('hex');
+  return { valido: calc.toLowerCase() === recibido.toLowerCase(), receta: RECETA, credencial };
 }
 
-/* ═══ 🔴 EL BANCO DE PRUEBAS DEL STOKEN — DIAGNÓSTICO, JAMÁS AUTORIDAD ═══════
-   **Medido el 20-ago abriendo el crudo guardado**, antes de gastar el tiro
-   único del débito:
-     · el `stoken` que llega tiene **64 caracteres** ⇒ es **SHA-256**. Nuestra
-       fórmula calcula **MD5** (32) ⇒ **no puede coincidir jamás, por largo**;
-     · los 25 callosbacks guardados traen `application_code` terminado en
-       **`-CLIENT`** (son altas de tarjeta) y nosotros firmamos con la clave
-       **SERVER** ⇒ **credenciales cruzadas**, la misma familia de defecto que
-       ya nos costó dos rojos hoy.
-   ⇒ 24 de 24 en `false` tienen **dos causas candidatas**, y una sola fila no
-     alcanzaba para desempatarlas.
-
-   🔴 **ESTO NO OTORGA VALIDEZ.** `stoken_valido` lo sigue decidiendo la receta
-   canónica y nada más. *Un verificador que acepta «cualquiera de N recetas»
-   deja entrar por la más débil — sería cambiar un candado por una lista de
-   llaves.* Esto solo ANOTA qué receta reproduce el valor recibido, para poder
-   **fijar una** y borrar el banco.
-
-   Es L-285 aplicada: *el freno declara contra qué midió.* La v0 decía «stoken
-   no coincide» sin decir contra qué — y por eso 24 filas no enseñaron nada. */
-const CODE_CLIENT = Deno.env.get('NUVEI_APP_CODE_CLIENT') ?? '';
-const KEY_CLIENT = Deno.env.get('NUVEI_APP_KEY_CLIENT') ?? '';
-
-function recetaQueCoincide(
-  txId: string, userId: string, status: string, appCode: string, recibido: string,
-  amount: string, auth: string, detail: string, email: string,
-): string {
-  if (!recibido) return 'sin_stoken';
-
-  /* 🔴 LA MATRIZ DE LA PRIMERA PASADA ERA MÍA, NO MEDIDA: seis órdenes que se
-     me ocurrieron, y las 144 fallaron. **Un espacio de búsqueda inventado que
-     no encuentra nada no prueba que la respuesta no esté ahí: prueba que no
-     buscaste donde estaba.** Ahora se recorre de forma COMBINATORIA sobre los
-     campos que el crudo realmente trae. */
-  const pool: Record<string, string> = {
-    TX: txId, UID: userId, ST: status, CODE: appCode,
-    AMT: amount, AUTH: auth, DETAIL: detail, EMAIL: email,
-  };
-  const nombres = Object.keys(pool);
-  const juegos: Array<[string, string]> = [['SERVER', APP_KEY], ['CLIENT', KEY_CLIENT]];
-  const seps = ['_', '', '.', '-', '|', ':'];
-  const algos = ['sha256', 'md5', 'sha1', 'sha512'];
-
-  function* perms(n: number, pre: string[] = []): Generator<string[]> {
-    if (pre.length === n) { yield pre; return; }
-    for (const x of nombres) if (!pre.includes(x)) yield* perms(n, [...pre, x]);
-  }
-
-  for (const [quien, key] of juegos) {
-    if (!key) continue;
-    for (let n = 1; n <= 4; n++)
-      for (const orden of perms(n))
-        for (const pos of ['fin', 'inicio'])
-          for (const sep of seps)
-            for (const algo of algos) {
-              const campos = orden.map((k) => pool[k]);
-              const s = (pos === 'fin' ? [...campos, key] : [key, ...campos]).join(sep);
-              if (createHash(algo).update(s).digest('hex').toLowerCase() === recibido.toLowerCase())
-                return `RECETA=${algo}|sep="${sep}"|key_al_${pos}|${orden.join('+')}|clave=${quien}`;
-            }
-  }
-  return 'ninguna_de_la_matriz_combinatoria';
-}
+/* ☠️ EL BANCO DE PRUEBAS COMBINATORIO Y SU ENSAYO MURIERON ACÁ (Ley 37).
+   Existieron para no gastar el tiro del débito averiguando la fórmula, y su
+   trabajo lo terminó el proveedor. **Se van enteros, con su secreto**:
+   `PAGOS_ENSAYO_SECRET` queda sin consumidor y entra a la baja del cierre.
+   *Un diagnóstico que sobrevive a su pregunta es una puerta abierta que ya no
+   sirve para nada.* */
 
 function extraer(p: Record<string, any>) {
   const t = p?.transaction ?? {};
@@ -176,61 +162,21 @@ Deno.serve(async (req) => {
 
   const d = extraer(payload);
 
-  /* ═══ ☠️ ENSAYO — NACE CON SU MUERTE ESCRITA ═══════════════════════════════
-     Corre el banco de pruebas contra un crudo YA GUARDADO y **devuelve la
-     receta sin persistir nada**.
-
-     🔴 POR QUÉ EXISTE, y por qué no es un lujo: la alternativa era **gastar el
-     tiro único del débito** para averiguar una fórmula que los 25 crudos ya
-     guardados podían contestar solos. *Un disparo que se usa para responder lo
-     que la evidencia vieja ya sabía es un disparo perdido.*
-
-     🔴 NO MUEVE, NO GUARDA, NO VALIDA NADA. Devuelve un nombre de receta.
-     **Muere junto con el banco de pruebas**, en cuanto la receta se fije. */
-  if (new URL(req.url).searchParams.get('ensayo') === '1') {
-    /* 🔴 Secreto PROPIO, no el `ARNES_SECRET`: ése quedó en chat e historial
-       de navegador en S101-A y **está pendiente de rotación**. *Reusar un
-       secreto que ya sabés que se filtró es elegir la comodidad sobre lo
-       único que un secreto tiene que ser.* */
-    const secreto = Deno.env.get('PAGOS_ENSAYO_SECRET') ?? '';
-    if (!secreto || req.headers.get('x-ensayo-secret') !== secreto)
-      return new Response('no', { status: 401 });
-    return Response.json({
-      ensayo: true,
-      largo_stoken: d.stoken.length,
-      stoken_de: d.stokenDe,
-      app_code_del_payload: d.appCode,
-      receta: recetaQueCoincide(
-        d.txId, d.userId, String(d.status ?? ''), String(d.appCode ?? ''), d.stoken,
-        String(d.monto ?? ''), String(d.auth ?? ''), String(d.detail ?? ''), String(d.email ?? ''),
-      ),
-    });
-  }
-
   // ② VALIDACIÓN DEL STOKEN. En v0 solo se REGISTRA el resultado: no corta
   //    nada porque no hay nada que cortar todavía. Cuando el actuador entre,
   //    esta misma verificación pasa a ser la puerta.
-  let valido: boolean | null = null;
-  let detalle = 'v0 buzón: no se movió ningún estado';
-  if (d.txId && d.userId && d.stoken && APP_CODE && APP_KEY) {
-    valido = calcularStoken(d.txId, d.userId).toLowerCase() === d.stoken.toLowerCase();
-    /* 🔴 El freno DECLARA CONTRA QUÉ MIDIÓ (L-285). La v0 decía «no coincide»
-       a secas, y 24 filas no enseñaron nada porque el `false` no distinguía
-       fórmula equivocada de credencial cruzada. */
-    if (!valido) detalle = `stoken no coincide · ${recetaQueCoincide(
-      d.txId, d.userId, String(d.status ?? ''), String(d.appCode ?? ''), d.stoken,
-      String(d.monto ?? ''), String(d.auth ?? ''), String(d.detail ?? ''), String(d.email ?? ''),
-    )}`;
-  } else {
-    const faltan = [
-      !d.txId && 'transaction_id',
-      !d.userId && 'user_id',
-      !d.stoken && 'stoken',
-      !APP_CODE && 'APP_CODE',
-      !APP_KEY && 'APP_KEY',
-    ].filter(Boolean).join(', ');
-    detalle = `no se pudo validar: faltan ${faltan}`;
-  }
+  const v = verificarStoken(d.txId, d.appCode, d.userId, d.stoken);
+  const valido = v.valido;
+  /* 🔴 EL FRENO DECLARA CONTRA QUÉ MIDIÓ (L-285). La v0 decía «no coincide» a
+     secas, y por eso 24 filas fueron **una sola observación repetida** sin que
+     nadie pudiera saberlo. Ahora cada fila lleva la fórmula, la credencial y —
+     lo que decide si el actuador puede tocarla— si el evento está **autenticado
+     de verdad**. */
+  const autenticado = valido === true && v.credencial === 'SERVER';
+  const detalle =
+    `receta=${v.receta} · credencial=${v.credencial} · autenticado=${autenticado}` +
+    (valido === null ? ' · no evaluable: faltan datos o credencial' : '') +
+    ` · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`;
 
   // ③ PERSISTIR SIEMPRE, incluso lo rechazado.
   try {
@@ -239,7 +185,7 @@ Deno.serve(async (req) => {
       payload,
       stoken_valido: valido,
       resultado: valido === false ? 'stoken_invalido' : 'recibido',
-      detalle: `${detalle} · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`,
+      detalle,
     });
   } catch (e) {
     // 🔴 429, NO 500 — Y LA DIFERENCIA ES EL REINTENTO ENTERO.
