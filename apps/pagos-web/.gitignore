@@ -1,0 +1,7 @@
+# El build es generado. `config.js` lleva la config pública del SDK inyectada
+# desde el entorno de Vercel: se genera al desplegar y NO se commitea.
+# *«Publicable» no es «va commiteada».*
+dist/
+.vercel/
+.vercel
+.env*

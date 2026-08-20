@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Agregar tarjeta · e-PetPlace</title>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     🔴 EL PRINCIPIO INNEGOCIABLE — heredado de S101-A y verificado por el
+     proveedor DOS VECES EL MISMO DÍA (19-ago): rechazó el PAN
+     server-to-server con `401 Application is not PCI`, y aceptó el token
+     emitido por su propio SDK en el navegador.
+
+     EL PAN VIVE ÚNICAMENTE DENTRO DEL FORMULARIO DE NUVEI.
+     Esta página lo ALOJA; jamás lo LEE.
+
+     ⇒ Los campos los pinta el widget `PaymentForm` del SDK. Nuestro JS nunca
+       hace `.value` sobre el número, nunca lo mete en una variable, nunca lo
+       manda a ningún lado.
+     ⇒ PROHIBIDO EN ESTA PÁGINA, para siempre: logs del contenido del
+       formulario, analytics, y cualquier error-tracking que capture el DOM
+       (Sentry con session replay, LogRocket, hotjar y parientes). Un replay
+       que grabe este formulario mete el PAN en un tercero **y nos vuelve
+       PCI**.
+
+     No es una política nuestra que podamos relajar: es una puerta cerrada
+     del otro lado.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<link rel="stylesheet" href="__SDK_CSS__">
+<style>
+  :root{--tinta:#221E19;--papel:#FAF9F7;--linea:#E6E2DC;--magenta:#8E1F68;--gris:#6B6560}
+  *{box-sizing:border-box}
+  body{font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+       color:var(--tinta);background:var(--papel);margin:0;padding:24px 20px 48px}
+  main{max-width:26rem;margin:0 auto}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 4px}
+  .sub{color:var(--gris);font-size:14px;margin:0 0 24px}
+  .payment-form{margin-bottom:20px}
+  button{font:inherit;font-weight:600;width:100%;padding:15px 20px;border-radius:12px;
+         border:0;background:var(--tinta);color:#fff;cursor:pointer;-webkit-appearance:none}
+  button[disabled]{opacity:.4;cursor:default}
+  .estado{margin-top:18px;font-size:14px;min-height:1.4em}
+  .estado[data-tono="error"]{color:var(--magenta)}
+  .pie{margin-top:28px;padding-top:16px;border-top:1px solid var(--linea);
+       color:var(--gris);font-size:13px}
+  @media (prefers-color-scheme:dark){
+    :root{--tinta:#F2EFEA;--papel:#17150F;--linea:#332F28;--gris:#A39C93;--magenta:#FF6FC0}
+    button{background:#F2EFEA;color:#17150F}
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Agregar tarjeta</h1>
+  <p class="sub">Los campos los muestra directamente tu procesador de pagos.
+     El número de tu tarjeta no pasa por e-PetPlace.</p>
+
+  <!-- 🔴 El widget del SDK monta ACÁ sus propios campos. No hay inputs nuestros. -->
+  <div class="payment-form" id="tarjeta" data-capture-name="true"></div>
+
+  <button id="guardar">Guardar tarjeta</button>
+  <p class="estado" id="estado" role="status" aria-live="polite"></p>
+
+  <p class="pie">Tus datos de tarjeta viajan cifrados a tu procesador de pagos.
+     e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que
+     puedas reconocerla.</p>
+</main>
+
+<script src="__JQUERY__"></script>
+<script src="__SDK_JS__" charset="UTF-8"></script>
+<script src="./config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var est = document.getElementById('estado');
+  var btn = document.getElementById('guardar');
+
+  /* La voz habla de lo que pasó, jamás del número. Nunca se registra el
+     contenido del formulario — ni acá ni en ningún lado. */
+  function decir(texto, tono) {
+    est.textContent = texto || '';
+    if (tono) { est.setAttribute('data-tono', tono); } else { est.removeAttribute('data-tono'); }
+  }
+
+  /* ── LOS PARÁMETROS DE LA URL ──────────────────────────────────────────
+     `alta`   — handle OPACO del alta. **No es un secreto y no identifica a
+                nadie por sí solo**: el servidor es quien sabe de quién es.
+     `volver` — a dónde devolver el navegador cuando el alta termina. Se
+                valida contra una lista blanca: un `volver` libre convertiría
+                esta página en un redirector abierto.                        */
+  var qs = new URLSearchParams(location.search);
+  var alta = qs.get('alta') || '';
+  var volver = qs.get('volver') || '';
+
+  function volverPermitido(u) {
+    if (!u) return false;
+    for (var i = 0; i < CONFIG.ESQUEMAS_VOLVER.length; i++) {
+      if (u.indexOf(CONFIG.ESQUEMAS_VOLVER[i]) === 0) return true;
+    }
+    return false;
+  }
+
+  /* ── LOS TRES DESENLACES ───────────────────────────────────────────────
+     `guardada` y `rechazada` los dice ESTA página, devolviendo el navegador
+     con su desenlace puesto.
+
+     🔴 `abandonada` NO la dice esta página, y es a propósito: si la familia
+     cierra el navegador, este código ya no corre. **La detecta la app**,
+     cuando el navegador vuelve sin desenlace. *Un desenlace que depende de
+     que corra el código de la página que se cerró no es un desenlace: es una
+     suposición.*                                                            */
+  function terminar(desenlace, motivo) {
+    if (!volverPermitido(volver)) {
+      decir(desenlace === 'guardada'
+        ? 'Listo, tu tarjeta quedó guardada. Ya podés cerrar esta ventana.'
+        : 'No pudimos guardar la tarjeta. Ya podés cerrar esta ventana.',
+        desenlace === 'guardada' ? null : 'error');
+      return;
+    }
+    var sep = volver.indexOf('?') === -1 ? '?' : '&';
+    var url = volver + sep + 'desenlace=' + encodeURIComponent(desenlace);
+    if (motivo) url += '&motivo=' + encodeURIComponent(motivo);
+    location.replace(url);
+  }
+
+  if (!alta) {
+    btn.disabled = true;
+    decir('Este enlace no es válido. Volvé a intentarlo desde la app.', 'error');
+    return;
+  }
+
+  try {
+    /* Medido contra la fuente (github.com/paymentez/paymentez.js):
+       el objeto es `Payment` y **el ambiente va PRIMERO**. */
+    Payment.init(CONFIG.MODO, CONFIG.APP_CODE, CONFIG.APP_KEY);
+  } catch (e) {
+    btn.disabled = true;
+    decir('No pudimos abrir el formulario de pago. Probá de nuevo en un momento.', 'error');
+    return;
+  }
+
+  btn.onclick = function () {
+    btn.disabled = true;
+    decir('Guardando…');
+
+    var campo = $('#tarjeta');
+    var tarjeta;
+    try {
+      tarjeta = campo.PaymentForm('card');
+    } catch (e) {
+      btn.disabled = false;
+      /* El SDK valida sus propios campos. Su queja es sobre la forma del
+         dato, no sobre el dato: no se registra ni se reenvía. */
+      decir('Revisá los datos de la tarjeta.', 'error');
+      return;
+    }
+
+    Payment.addCard(
+      alta,                 /* el handle es el uid ante el proveedor: el mismo
+                               valor que el servidor usará para el `stoken`.
+                               Si divergieran, el stoken daría false por una
+                               razón que no es la fórmula. */
+      CONFIG.EMAIL_ALTA,
+      tarjeta,
+      function (resp) {
+        var card = (resp && resp.card) ? resp.card : {};
+        if (!card.token) {
+          btn.disabled = false;
+          decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
+          return;
+        }
+        /* 🔴 Al servidor viajan el token y los METADATOS DE RECONOCIMIENTO.
+           Nada parecido a un PAN cruza este punto: `card.number` que entrega
+           el SDK son los últimos cuatro dígitos, no el número. */
+        fetch(CONFIG.API_ALTA, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            alta: alta,
+            token: card.token,
+            bin: card.bin || null,
+            ultimos4: card.number || null,
+            marca: card.type || null,
+            titular: card.holder_name || null
+          })
+        })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function () { terminar('guardada'); })
+        .catch(function () {
+          btn.disabled = false;
+          decir('Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Probá de nuevo.', 'error');
+        });
+      },
+      function () {
+        /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
+           la causa fina la resuelve la app con la taxonomía de la letra §7.
+           «Fondos insuficientes» jamás se nombra. */
+        btn.disabled = false;
+        decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
+        terminar('rechazada');
+      },
+      campo
+    );
+  };
+})();
+</script>
+</body>
+</html>

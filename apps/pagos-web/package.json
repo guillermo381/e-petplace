@@ -1,0 +1,9 @@
+{
+  "name": "@epetplace/pagos-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "La página del alta de tarjeta. Estática, sin secretos, servida desde host propio.",
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}
