@@ -1,6 +1,6 @@
 # LETRA_PUERTA_DE_PAGO_S101B.md — e-PetPlace
 
-> **Versión:** v1.1 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias) · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
+> **Versión:** v1.2 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias · el alta nace al tocar) · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
 > **Fuentes que obedece (en este orden):** el repo y la base · `LETRA_MOTOR_PAGOS_S101.md` **v1.3** · `LETRA_SALDO.md` **v1.1** · `docs/loop/S101-A.md` · el acta de apertura S101-B · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si esta letra contradice a la fuente, **gana la fuente** y la letra se enmienda con su marca.
 >
@@ -64,6 +64,28 @@ De ahí bajan las cuatro reglas que gobiernan cada pieza:
 > ⇒ **El `?desenlace=` que trae la URL de retorno es una PISTA para pintar rápido, jamás la fuente.** La app confirma contra el servidor antes de declarar nada.
 >
 > ⇒ **Y de acá sale la forma del alta:** el handle es el `id` de una **fila propia de altas pendientes**, emitida server-side con el usuario del auth y un TTL corto. *Sin fila no hay vencimiento, y sin vencimiento «abandonada» no se puede medir: sería una suposición con nombre de estado.*
+
+### 🔴 REQUISITO DE LA PANTALLA REAL DE MEDIOS DE PAGO — *firma del founder, 20-ago-2026*
+
+**El alta nace cuando la familia toca «agregar tarjeta», JAMÁS al abrir la pantalla.**
+Y **la pantalla lee el estado de las altas que YA existen** (pendiente / vencida) en vez de
+fabricar una nueva por mirar.
+
+**De dónde sale este requisito, y por qué no es una preferencia:** el andamio de gate crea
+un alta **al abrirse**. Medido en el aparato del founder el 20-ago: **diez altas en cuatro
+minutos** (04:13→04:17), *todas* `pendiente` y *ninguna* vencida — mientras las ocho de sus
+reintentos previos (03:55→03:58) **sí estaban vencidas**.
+
+⇒ **La voz del vencimiento era INALCANZABLE por construcción:** cada reentrada nacía una
+fila nueva, y la app leía siempre la recién nacida. *La derivación del servidor funcionaba
+perfecto; lo que fallaba es que la pantalla miraba el objeto equivocado.*
+
+> **La forma general, que es lo que hay que conservar:** *un estado que solo aparece con el
+> paso del tiempo no se puede observar en una pantalla que reinicia su reloj cada vez que
+> la abrís.* Vale para el alta, y vale para cualquier vencimiento que se quiera mostrar.
+
+**La cura NO va al andamio** —que muere con la Fase 5—: **va acá, como requisito de la
+pantalla real.**
 
 ### ✍️ EL ALIAS DE LA TARJETA — *enmienda, firma del founder 20-ago-2026*
 
@@ -273,6 +295,14 @@ El cierre de S101-A declaró *«cuatro sentidos de la misma palabra, dos de ello
 ---
 
 ## Historial
+
+- **v1.2 (20-ago-2026 — firma del founder): EL ALTA NACE AL TOCAR, NO AL ABRIR.** Requisito
+  de la pantalla real de Medios de pago, nacido de un hallazgo del gate: el andamio creaba
+  un alta **al abrirse** y por eso **la voz del vencimiento era inalcanzable** — diez altas
+  en cuatro minutos, ninguna vencida. *La derivación del servidor estaba bien; la pantalla
+  miraba el objeto equivocado.* **La forma general vale más que el caso:** un estado que
+  solo aparece con el paso del tiempo no se puede observar en una pantalla que reinicia su
+  reloj cada vez que se abre.
 
 - **v1.1 (20-ago-2026 — enmienda por firma del founder): EL ALIAS DE LA TARJETA.** La
   familia puede nombrar su tarjeta al guardarla. Entra en **dos piezas**: §2 (el alta lo
