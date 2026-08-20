@@ -134,6 +134,12 @@ BEGIN
    WHERE c.estado='esperando_pago'
      AND EXISTS (SELECT 1 FROM pedidos p WHERE p.compra_id=c.id)
      AND EXISTS (SELECT 1 FROM compra_desglose d WHERE d.compra_id=c.id)
+     -- 🔴 El pedido tiene que estar en un estado CONFIRMABLE. No es esquivar un
+     --    guard: es elegir un sujeto válido. *Un pedido `cancelado_cliente` no
+     --    se confirma, y probar sobre él mediría el rebote de la máquina de
+     --    estados en vez de lo que este arnés viene a medir.*
+     AND NOT EXISTS (SELECT 1 FROM pedidos p2 WHERE p2.compra_id=c.id
+                       AND p2.estado NOT IN ('creado','esperando_pago','pagando'))
    ORDER BY c.created_at DESC LIMIT 1;
   IF v_compra IS NULL THEN RAISE EXCEPTION 'ARNÉS: no hay compra cobrable'; END IF;
 

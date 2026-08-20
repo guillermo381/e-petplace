@@ -144,7 +144,7 @@ DO $$
 DECLARE
   v_compra uuid; v_pedido uuid; v_ev1 uuid; v_ev2 uuid; v_res jsonb;
   v_body jsonb; v_estado text; v_n int; v_correos int; v_correos0 int;
-  v_sku uuid; v_cuenta uuid; v_oferta uuid;
+  v_sku uuid; v_cuenta uuid; v_oferta uuid; v_tx text;
 BEGIN
   -- ── el actuador se enciende SOLO adentro de esta transacción ───────────────
   -- *Probar un actuador apagado no prueba nada; y encenderlo fuera de una
@@ -161,19 +161,45 @@ BEGIN
    WHERE c.estado='esperando_pago'
      AND EXISTS (SELECT 1 FROM pedidos p WHERE p.compra_id=c.id)
      AND EXISTS (SELECT 1 FROM compra_desglose d WHERE d.compra_id=c.id)
+     -- 🔴 El pedido tiene que estar en un estado CONFIRMABLE. No es esquivar un
+     --    guard: es elegir un sujeto válido. *Un pedido `cancelado_cliente` no
+     --    se confirma, y probar sobre él mediría el rebote de la máquina de
+     --    estados en vez de lo que este arnés viene a medir.*
+     AND NOT EXISTS (SELECT 1 FROM pedidos p2 WHERE p2.compra_id=c.id
+                       AND p2.estado NOT IN ('creado','esperando_pago','pagando'))
    ORDER BY c.created_at DESC LIMIT 1;
   IF v_compra IS NULL THEN RAISE EXCEPTION 'ARNÉS: no hay compra cobrable para el laboratorio'; END IF;
+
+  -- 🔴 EL CAMINO REAL, PASO 0: la mercadería se aparta antes de pagar. El motor
+  --    se niega a confirmar sin reserva viva (`pago_sin_reserva`, S95-K) — y no
+  --    se lo esquiva: se hace lo que hace el camino real.
+  PERFORM reservar_stock_pedido(p.id, 30) FROM pedidos p WHERE p.compra_id = v_compra;
+
+  -- 🔴 EL CAMINO REAL, PASO 1: el intento se registra ANTES del disparo, con su
+  --    `proveedor_transaction_id`. Es exactamente lo que hace `pagos-cobro`.
+  v_tx := 'DF-ARNES-'||substr(gen_random_uuid()::text,1,8);
+  UPDATE pagos_intentos SET proveedor_transaction_id = v_tx
+   WHERE compra_id = v_compra AND proveedor_transaction_id IS NULL;
+  IF NOT EXISTS (SELECT 1 FROM pagos_intentos
+                  WHERE compra_id=v_compra AND proveedor_transaction_id=v_tx) THEN
+    UPDATE pagos_intentos SET proveedor_transaction_id = v_tx WHERE compra_id = v_compra;
+  END IF;
 
   -- ── el fixture: el crudo REAL, con el dev_reference apuntando a esta compra ─
   v_body := jsonb_build_object(
     'transaction', jsonb_build_object(
-      -- 🔴 El id se VARÍA por corrida, y no por comodidad: `pagos_intentos`
-      --    tiene un UNIQUE (proveedor, transaction_id, pedido_id) y el
-      --    `DF-2098177` real **ya está tomado por el débito de verdad**.
-      --    *Que rebote es una defensa buena: impide reaplicar la misma
-      --    transacción del proveedor sobre otro pedido.* El resto del body
-      --    sigue siendo el crudo real.
-      'id','DF-ARNES-'||substr(gen_random_uuid()::text,1,8),'status','1','amount',(SELECT total FROM compras WHERE id=v_compra),
+      -- ☠️ ACÁ ESTABA EL DEFECTO DEL ARNÉS, y quedó escrito porque cuesta más
+      --    de lo que parece: la v1 **variaba el id para esquivar** el UNIQUE
+      --    `uq_pagos_intentos_tx_por_pedido` cuando le rebotó, y lo declaró
+      --    como «una defensa buena» —lo era— **y al esquivarla dejó de probar
+      --    el caso real**. Dio 5/5 verde mientras el actuador NO podía
+      --    confirmar un solo pago de verdad.
+      --    *Un fixture que rodea un obstáculo prueba el mundo donde el
+      --     obstáculo no existe.*
+      --    ⇒ Ahora el arnés **reproduce el camino real**: el intento se
+      --      registra primero (como hace `pagos-cobro`) y el webhook llega con
+      --      el MISMO id.
+      'id', v_tx, 'status','1','amount',(SELECT total FROM compras WHERE id=v_compra),
       'current_status','APPROVED','authorization_code','RqRvA2',
       'application_code','EPETPLACESTG-EC-SERVER','dev_reference',v_compra::text,
       'stoken','486ad60de297b3679ad410a4506e989a48220cad9e5eb2789c6ba86082ea894a',

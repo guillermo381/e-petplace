@@ -1,0 +1,8 @@
+-- REVERSA de 20260821120000 — el reuso del intento. ESCRITA ANTES.
+-- Vuelve `confirmar_pago_pedido` a INSERTAR siempre un intento nuevo.
+-- 🔴 NO deshace: las confirmaciones ya hechas, ni los intentos ya reusados
+--    (quedan en 'aprobado' con su transaction_id, que es la verdad).
+-- 🔴 Y reintroduce el defecto medido: con el intento registrado antes de
+--    disparar, el webhook real vuelve a chocar contra
+--    `uq_pagos_intentos_tx_por_pedido` y NINGÚN pago real se confirma.
+--    *Esta reversa no es neutra: apaga el cobro.*
