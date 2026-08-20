@@ -43,9 +43,14 @@ https://<host>/?alta=<handle>&volver=<url-de-retorno>
 
 | Desenlace | Quién lo dice |
 |---|---|
-| `guardada` | esta página, devolviendo el navegador con `?desenlace=guardada` |
-| `rechazada` | esta página, ídem |
-| **`abandonada`** | 🔴 **la APP, no esta página.** Si la familia cierra el navegador, este código ya no corre. *Un desenlace que depende de que corra el código de la página que se cerró no es un desenlace: es una suposición.* La app lo deduce del retorno sin desenlace. |
+| `guardada` | **el SERVIDOR**, al cerrar el alta. La página solo devuelve el navegador con `?desenlace=guardada` como **pista** |
+| `rechazada` | ídem |
+| **`abandonada`** | 🔴 **el SERVIDOR: es un alta que VENCIÓ sin desenlace.** Ni la página ni la app la deducen |
+
+> **🔴 Enmienda de mesa (19-ago) — y corrige la primera versión de este archivo.**
+> La v1 decía que `abandonada` la deducía **la app**, del retorno sin desenlace. **Está mal y se cambió.** Deducirla del retorno confundiría **tres cosas distintas**: que la familia cerró la ventana, que el navegador falló, y que el alta de verdad venció. **Solo la fila que expiró es un hecho.**
+>
+> ⇒ **El `?desenlace=` de la URL es una PISTA para pintar rápido, jamás la fuente.** La app confirma contra el servidor. *La casa persiste todo, incluso lo rechazado — y «abandonada» solo existe si hay una fila que venció.*
 
 ---
 

@@ -52,9 +52,18 @@ De ahí bajan las cuatro reglas que gobiernan cada pieza:
 |---|---|---|---|
 | **`guardada`** | el SDK emitió token y el servidor lo persistió | «Listo, tu tarjeta quedó guardada.» / «Done — your card is saved.» | vuelve con la tarjeta ya elegible |
 | **`rechazada`** | el emisor o el SDK rechazaron el alta | la voz de la taxonomía de §5, **según la causa** — jamás genérica si la causa se conoce | corregir datos o probar otra tarjeta |
-| **`abandonada`** | la familia cerró el WebView | **sin voz de error: no falló nada.** Se vuelve donde estaba | **sin residuo: ni fila fantasma ni estado colgado** |
+| **`abandonada`** | **el alta VENCIÓ sin desenlace** | **sin voz de error: no falló nada.** Se vuelve donde estaba | la fila del alta queda cerrada por vencimiento — **la tarjeta nunca nace** |
 
 **`abandonada` es el estado INICIAL, hasta que algo diga lo contrario** *(medido: así está construido el prototipo)*. *Un flujo cuyo estado inicial es «éxito pendiente de confirmar» declara guardada una tarjeta que nadie guardó.*
+
+> 🔴 **ENMIENDA DE MESA (19-ago) — `abandonada` LA DICE EL SERVIDOR, y esto corrige la v1.0 de esta letra.**
+> La v1.0 la definía como *«la familia cerró el WebView»*, deducida del retorno del navegador. **No rige.** `abandonada` es **un alta que venció sin desenlace, leída del servidor.**
+>
+> **La razón, y es la que hay que conservar:** deducirla del retorno confundiría **tres cosas distintas** —que la familia cerró la ventana, que el navegador falló, y que el alta de verdad venció—. **Solo la fila que expiró es un hecho.** *La casa persiste todo, incluso lo rechazado; «abandonada» solo existe si hay una fila que venció.*
+>
+> ⇒ **El `?desenlace=` que trae la URL de retorno es una PISTA para pintar rápido, jamás la fuente.** La app confirma contra el servidor antes de declarar nada.
+>
+> ⇒ **Y de acá sale la forma del alta:** el handle es el `id` de una **fila propia de altas pendientes**, emitida server-side con el usuario del auth y un TTL corto. *Sin fila no hay vencimiento, y sin vencimiento «abandonada» no se puede medir: sería una suposición con nombre de estado.*
 
 **El OTP vive ACÁ y solo acá.** Diners pide OTP **en la tokenización**; el débito va limpio *(confirmado por Erick — E2 + la confirmación de recurrencia)*. Tarjeta de prueba `36417002140808` · `012345` éxito / `543210` pendiente. **Lo pide el formulario del SDK — nosotros no lo leemos.**
 

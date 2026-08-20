@@ -105,13 +105,16 @@
 
   /* ── LOS TRES DESENLACES ───────────────────────────────────────────────
      `guardada` y `rechazada` los dice ESTA página, devolviendo el navegador
-     con su desenlace puesto.
+     con su desenlace puesto. **Pero el desenlace de la URL es una PISTA, no
+     el hecho**: el hecho lo tiene el servidor, que es quien cerró el alta.
 
-     🔴 `abandonada` NO la dice esta página, y es a propósito: si la familia
-     cierra el navegador, este código ya no corre. **La detecta la app**,
-     cuando el navegador vuelve sin desenlace. *Un desenlace que depende de
-     que corra el código de la página que se cerró no es un desenlace: es una
-     suposición.*                                                            */
+     🔴 `abandonada` NO la dice esta página, y TAMPOCO se deduce del retorno
+     del navegador (enmienda de mesa, 19-ago): es **un alta que venció sin
+     desenlace**, y se lee del SERVIDOR.
+     *Si la familia cierra el navegador, este código ya no corre — y deducir
+     «abandonada» de un retorno sin parámetro confundiría tres cosas
+     distintas: que cerró la ventana, que el navegador falló, y que el alta
+     de verdad venció. Solo la fila que expiró es un hecho.*                 */
   function terminar(desenlace, motivo) {
     if (!volverPermitido(volver)) {
       decir(desenlace === 'guardada'

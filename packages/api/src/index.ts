@@ -1306,3 +1306,12 @@ export {
   type RecursoReparto,
   type TurnoEntrega,
 } from './wrappers/despensa-panel-extra';
+
+export {
+  crearAltaTarjeta,
+  obtenerAltaTarjeta,
+  type AltaEmitida,
+  type AltaLeida,
+  type CodigoAltaTarjeta,
+  type EstadoAlta,
+} from './wrappers/pagos-alta-tarjeta';
