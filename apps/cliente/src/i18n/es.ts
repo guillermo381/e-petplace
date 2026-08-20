@@ -1442,6 +1442,15 @@ export const clienteEs = {
   // traduce contra los diccionarios que la casa ya tiene y lo que no
   // matchea no se pinta (Ley 3).
   despensa: {
+    // ── S101-B · FASE 4 · LA ESPERA ────────────────────────────────────
+    // 🔴 Nunca un spinner mudo, nunca "rechazado" por timeout.
+    esperaTitulo: 'Estamos confirmando tu pago',
+    esperaCuerpo: 'Puede tardar unos segundos. Podés cerrar esta pantalla: tu pedido sigue solo.',
+    // El tope NO declara desenlace — la compra sigue viva.
+    esperaSigueAbierta: 'Está tardando más de lo normal. Tu pedido sigue en curso y te vamos a avisar.',
+    esperaFallida: 'El pago no se completó. No te cobramos nada.',
+    esperaCancelada: 'Esta compra quedó cancelada.',
+    esperaVerPedidos: 'Ver mis pedidos',
     // ── S101-B · FASE 3 · LAS VOCES DE LAS COMPUERTAS (letra §3.1) ──────
     // 🔴 Cada una habla ANTES de tocar la tarjeta. La regla madre: el cliente
     //    jamás descubre un problema del pedido a través del cobro.

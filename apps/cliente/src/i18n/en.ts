@@ -1238,6 +1238,13 @@ export const clienteEn = {
   // ── D-430 (S67): contextual appointment detail (LOTE S67 APPROVED by founder, Jul 18 2026) ──
   // ── S95-I · THE PANTRY (string batch PENDING FOUNDER GATE) ───────────
   despensa: {
+    // S101-B · Fase 4 — the wait. Never a mute spinner, never "declined" on timeout.
+    esperaTitulo: "We're confirming your payment",
+    esperaCuerpo: 'It may take a few seconds. You can close this screen — your order keeps going.',
+    esperaSigueAbierta: "It's taking longer than usual. Your order is still going and we'll let you know.",
+    esperaFallida: "The payment didn't go through. You weren't charged.",
+    esperaCancelada: 'This purchase was cancelled.',
+    esperaVerPedidos: 'See my orders',
     // S101-B · Fase 3 — gate voices. The three "our defect" ones never blame
     // the customer nor ask them to check anything.
     cobroPagoEnProceso: 'Your previous payment is still processing.',

@@ -1331,3 +1331,5 @@ export {
 } from './wrappers/tarjetas-guardadas';
 
 export { cobrarCompra, type CodigoCobro, type SenalDeCobro } from './wrappers/pagos-cobro';
+
+export { leerEstadoCompra, type EstadoCompra, type EsperaCompra } from './wrappers/pagos-espera';

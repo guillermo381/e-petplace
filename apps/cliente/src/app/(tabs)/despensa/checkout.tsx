@@ -99,6 +99,7 @@ import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
 import { cobrarConTarjetaGuardada, hayCobroAndamio, type TarjetaParaCobro } from '@/lib/pagos/cobro-andamio';
+import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
 
 /* 🔴 S101-B · FASE 3 — NACE `confirmando`.
@@ -138,6 +139,7 @@ export default function DespensaCheckout() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
+
   const items = useCarrito();
   const navigation = useNavigation();
 
@@ -182,6 +184,12 @@ export default function DespensaCheckout() {
   const [pedidos, setPedidos] = useState<PedidoCreado[]>([]);
   /** La compra que los agrupa: lo que se cobra. */
   const [compraId, setCompraId] = useState<string | null>(null);
+
+  /* 🔴 S101-B · FASE 4 — LA ESPERA MIRA SOLA. Se activa únicamente en
+     `confirmando`: pasarle `null` en las otras fases es lo que impide que el
+     checkout sondee por existir. *La lección del andamio del alta otra vez:
+     las pantallas no hacen cosas por estar abiertas.* */
+  const espera = useEsperaDeConfirmacion(fase === 'confirmando' ? compraId : null);
   /** El total DE LA COMPRA, tal como lo devolvió el motor. Esta pantalla
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
    *  plata, y el día que discrepe es en una factura. */
@@ -716,15 +724,29 @@ export default function DespensaCheckout() {
         bloque
         onPress={() => router.replace('/pedidos')}
       />
+    ) : fase === 'confirmando' ? (
+      /* 🔴 La salida existe DESDE EL PRIMER SEGUNDO. *Una espera sin puerta es
+         una pantalla que retiene: el pedido avanza igual sin que nadie la
+         mire, y decirlo es lo que la vuelve honesta.* */
+      <Boton
+        etiqueta={t('despensa.esperaVerPedidos')}
+        bloque
+        onPress={() => router.replace('/pedidos')}
+      />
     ) : undefined;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {fase === 'exito' ? (
+      {fase === 'exito' || fase === 'confirmando' ? (
         /* En el éxito NO hay atrás: el pedido ya vive en el motor y volver
            al checkout de una compra hecha sería una puerta a pagar dos
            veces. La única salida es Tus pedidos. */
-        <Encabezado variante="navegacion" titulo={t('despensa.exitoTitulo')} />
+        /* Ni en el éxito ni en la espera hay atrás: volver al checkout de una
+           compra ya disparada sería una puerta a pagar dos veces. */
+        <Encabezado
+          variante="navegacion"
+          titulo={fase === 'confirmando' ? t('despensa.esperaTitulo') : t('despensa.exitoTitulo')}
+        />
       ) : (
         <Encabezado
           variante="navegacion"
