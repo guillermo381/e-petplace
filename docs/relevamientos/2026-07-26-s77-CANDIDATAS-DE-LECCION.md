@@ -727,3 +727,48 @@ solo el teclado. El que sirve para bajar el teclado es el **Done** del propio
 teclado.
 
 **⚠️ SIN FIRMA (regla 80).** Vale para quien monte el primer E2E en dispositivo.
+
+---
+
+### 24 · Commit y push jamás son comandos SUCESIVOS: un push que corre aunque su commit falló no es un push tardío, es un push de OTRA COSA
+
+**Origen (S101-B, incidente propio de la pista, 19-ago-2026, declarado por ella
+misma antes de que nadie lo notara):** la mesa había ordenado, con todas las
+letras, que *origin no reciba HEAD rojo* — el commit de los tipos primero, el
+push recién con el typecheck verde. La pista puso las dos cosas en el mismo
+bloque, **como líneas sucesivas y no encadenadas**:
+
+```
+git commit -F "$MSG" -- <rutas>      # ← falló: uno de los pathspec estaba SIN TRACKEAR
+git push origin main                 # ← corrió igual, y subió el commit ANTERIOR
+```
+
+El commit rebotó con `error: pathspec … did not match any file(s) known to git`
+—el archivo de registro era nuevo y nadie le había hecho `git add -N`— **y el
+push, que no sabía nada de eso, publicó el HEAD que había: el commit con el
+typecheck en rojo.** Exactamente lo que la orden existía para evitar.
+
+**Por qué es una trampa y no un descuido:** el push **hizo su trabajo bien**. No
+falló, no avisó, no tenía por qué. Reportó `07d661e9..60aadedb` con toda
+naturalidad. *El error no fue de git ni del pathspec: fue creer que dos comandos
+escritos uno debajo del otro guardan una relación de dependencia que nadie
+declaró.* Es **L-191 girada hacia la ejecución**: aquella dice que el exit code
+se lee del comando y no del pipe; ésta dice que **el segundo comando no hereda el
+resultado del primero solo por estar abajo**.
+
+**La forma exigible:**
+- `git commit … && git push …` — encadenados, o
+- **verificar el sha del commit entre medio** antes de pushear (que es lo que hay
+  que hacer igual cuando el commit y el push viven en turnos distintos).
+
+**Y el corolario que la vuelve barata:** un pathspec sobre un archivo nuevo
+**necesita `git add -N` primero** (la forma pathspec no ve los archivos sin
+trackear — ya está en la regla 84 ① del contrato). El incidente fue la regla 84
+cobrándose por el lado que no se estaba mirando.
+
+**Cómo terminó:** curado en minutos —`add -N` → commit → push— con origin en
+HEAD verde verificado **por sha y por ancestro**, y el commit rojo conservado en
+la historia con su motivo, que es lo que la mesa sí quería.
+
+**⚠️ SIN FIRMA (regla 80).** Rige **ya como práctica en la pista de pagos** por
+orden de mesa del 19-ago; entra al canon si el founder la firma.
