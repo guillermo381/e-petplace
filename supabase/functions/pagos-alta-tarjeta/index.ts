@@ -149,6 +149,11 @@ Deno.serve(async (req) => {
     p_marca: typeof body.marca === 'string' ? body.marca : null,
     p_titular: typeof body.titular === 'string' ? body.titular : null,
     p_motivo: typeof body.motivo === 'string' ? body.motivo : null,
+    /* 🔴 El alias es DATO DEL CLIENTE: se acota y se pasa tal cual. No se
+       interpreta, no se compara, no decide nada. El largo se recorta acá
+       además del CHECK — *un CHECK que rebota le da a la familia un error
+       por algo que podíamos haber acomodado.* */
+    p_alias: typeof body.alias === 'string' ? body.alias.trim().slice(0, 40) || null : null,
     p_stoken_valido: stokenValido,
     p_stoken_detalle: stokenDetalle,
   });

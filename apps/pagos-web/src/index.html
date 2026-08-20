@@ -41,6 +41,12 @@
   button{font:inherit;font-weight:600;width:100%;padding:15px 20px;border-radius:12px;
          border:0;background:var(--tinta);color:#fff;cursor:pointer;-webkit-appearance:none}
   button[disabled]{opacity:.4;cursor:default}
+  .alias-label{display:block;font-size:14px;font-weight:500;margin:4px 0 6px}
+  .alias-label span{font-weight:400;color:var(--gris)}
+  .alias{width:100%;font:inherit;padding:12px 14px;border-radius:10px;
+         border:1px solid var(--linea);background:transparent;color:var(--tinta);
+         margin-bottom:6px;-webkit-appearance:none}
+  .alias-ayuda{margin:0 0 18px;font-size:13px;color:var(--gris)}
   .estado{margin-top:18px;font-size:14px;min-height:1.4em}
   .estado[data-tono="error"]{color:var(--magenta)}
   .sello{margin-top:20px;font-size:13px;color:var(--gris);text-align:center;
@@ -61,6 +67,15 @@
 
   <!-- 🔴 El widget del SDK monta ACÁ sus propios campos. No hay inputs nuestros. -->
   <div class="payment-form" id="tarjeta" data-capture-name="true"></div>
+
+  <!-- 🔴 EL ALIAS ES NUESTRO CAMPO, NO DEL SDK — y eso es lo correcto: no es
+       un dato de tarjeta. Va FUERA del widget a propósito. *Meterlo adentro lo
+       pondría en el mismo formulario que el PAN, y lo que vale de ese
+       formulario es que solo tiene datos de tarjeta.* -->
+  <label class="alias-label" for="alias">Ponele un nombre <span>(opcional)</span></label>
+  <input id="alias" class="alias" type="text" maxlength="40" autocomplete="off"
+         placeholder="Visa de Kari" aria-describedby="alias-ayuda">
+  <p id="alias-ayuda" class="alias-ayuda">Para reconocerla después. Podés dejarlo vacío.</p>
 
   <button id="guardar">Guardar tarjeta</button>
   <p class="estado" id="estado" role="status" aria-live="polite"></p>
@@ -287,7 +302,10 @@
             bin: card.bin || null,
             ultimos4: card.number || null,
             marca: card.type || null,
-            titular: card.holder_name || null
+            titular: card.holder_name || null,
+            /* Texto de la persona. Se manda tal cual (el servidor lo acota y
+               lo normaliza); acá no se interpreta ni se usa para nada. */
+            alias: (document.getElementById('alias').value || '').slice(0, 40)
           })
         })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })

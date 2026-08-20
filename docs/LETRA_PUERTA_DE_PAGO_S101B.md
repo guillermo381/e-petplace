@@ -1,6 +1,6 @@
 # LETRA_PUERTA_DE_PAGO_S101B.md — e-PetPlace
 
-> **Versión:** v1.0 · **Nace:** 19-ago-2026 · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
+> **Versión:** v1.1 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias) · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
 > **Fuentes que obedece (en este orden):** el repo y la base · `LETRA_MOTOR_PAGOS_S101.md` **v1.3** · `LETRA_SALDO.md` **v1.1** · `docs/loop/S101-A.md` · el acta de apertura S101-B · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si esta letra contradice a la fuente, **gana la fuente** y la letra se enmienda con su marca.
 >
@@ -64,6 +64,18 @@ De ahí bajan las cuatro reglas que gobiernan cada pieza:
 > ⇒ **El `?desenlace=` que trae la URL de retorno es una PISTA para pintar rápido, jamás la fuente.** La app confirma contra el servidor antes de declarar nada.
 >
 > ⇒ **Y de acá sale la forma del alta:** el handle es el `id` de una **fila propia de altas pendientes**, emitida server-side con el usuario del auth y un TTL corto. *Sin fila no hay vencimiento, y sin vencimiento «abandonada» no se puede medir: sería una suposición con nombre de estado.*
+
+### ✍️ EL ALIAS DE LA TARJETA — *enmienda, firma del founder 20-ago-2026*
+
+**La familia puede nombrarla al guardarla** («Visa de Kari»). **Opcional siempre.**
+
+| Regla | Por qué |
+|---|---|
+| **Nunca obligatorio** | *Una tarjeta sin nombre es perfectamente usable; exigirlo sería inventar un requisito que nadie pidió.* `NULL` es un estado normal, no un pendiente |
+| **Es DATO DEL CLIENTE: se guarda tal cual y JAMÁS se usa para lógica** | no decide, no agrupa, no enruta, no se compara. *El día que algo ramifique por el alias, el texto que una persona escribió para reconocer su tarjeta pasa a ser una llave — y las llaves no se tipean a mano* |
+| **Largo acotado (40)** | *un texto libre sin techo en una tabla de medios de pago es una puerta para meter cualquier cosa* |
+| **El campo va FUERA del widget del SDK** | no es un dato de tarjeta. *Meterlo adentro lo pondría en el mismo formulario que el PAN, y lo que vale de ese formulario es que solo tiene datos de tarjeta* |
+| **Re-presentar la misma tarjeta sin alias NO borra el que tenía** | *el silencio no es una orden de borrar* |
 
 **El OTP vive ACÁ y solo acá.** Diners pide OTP **en la tokenización**; el débito va limpio *(confirmado por Erick — E2 + la confirmación de recurrencia)*. Tarjeta de prueba `36417002140808` · `012345` éxito / `543210` pendiente. **Lo pide el formulario del SDK — nosotros no lo leemos.**
 
@@ -182,7 +194,7 @@ La cobertura **se valida cuando el cliente elige la dirección, jamás al pagar*
 
 | Acto | Regla |
 |---|---|
-| **Listar** | por la puerta única (`@epetplace/api`). Se muestra **marca + últimos 4**, jamás nada más |
+| **Listar** | por la puerta única (`@epetplace/api`). **El alias si existe, y SIEMPRE marca + últimos 4** — *el nombre ayuda a elegir, pero los cuatro dígitos son lo que deja verificar que es la que uno cree; el alias los acompaña, jamás los reemplaza.* Nada más que eso *(enmienda 20-ago)* |
 | **Borrar** | **acto server-side**: endpoint del proveedor **y** la fila local. **P1 rige — doble confirmación destructiva.** El dueño sí puede borrar la suya: *quitar una tarjeta es derecho de la persona* |
 | **Lista vacía** | **estado vacío digno con camino** (agregar tarjeta), jamás un hueco mudo |
 
@@ -261,5 +273,13 @@ El cierre de S101-A declaró *«cuatro sentidos de la misma palabra, dos de ello
 ---
 
 ## Historial
+
+- **v1.1 (20-ago-2026 — enmienda por firma del founder): EL ALIAS DE LA TARJETA.** La
+  familia puede nombrar su tarjeta al guardarla. Entra en **dos piezas**: §2 (el alta lo
+  captura) y §7 (la lista lo muestra, **sin reemplazar marca + últimos 4**). Las cuatro
+  reglas que la vuelven inofensiva están en §2: **opcional siempre · dato del cliente que
+  jamás se usa para lógica · largo acotado · el campo va fuera del widget del SDK**. *Lo
+  que se protege con eso no es el alias: es que un texto tipeado por una persona no se
+  convierta nunca en una llave del sistema.*
 
 - **v1.0 (19-ago-2026, S101-B · Fase 0):** nace como contrato de estados, voces y flujos de la superficie del cobro, con las **siete piezas** que el acta de apertura §2① pidió y el **insumo de vocabulario** que la mesa agregó al dar el visto. **Dos hallazgos propios, los dos por medición y no por herencia:** ① **tres de los nueve códigos tipados de `verificar_compuertas_pre_cobro` no tienen ensayo** —el 7/7 de S101-A ejercitó seis— y dos de ellos hablan hacia soporte, no hacia el cliente; ② **la colisión de «saldo» es de UNA cadena visible por idioma, no de dos sentidos conviviendo**, y en inglés la palabra natural para la plata (*balance*) ya está tomada por las salidas del paquete. Nace declarando que **ningún nombre de pantalla está medido** y que **si la fuente la contradice, gana la fuente** — la misma cláusula que en S101-A hizo que la letra del motor se enmendara en vez de defenderse.
