@@ -30,8 +30,26 @@ export async function cobrarCompra(
   });
 
   if (error) {
+    /* 🔴 `functions.invoke` marca `error` para TODO status no-2xx —incluidos
+       nuestros 409, que traen el código tipado en el cuerpo— y en ese caso
+       **`data` viene vacío**. Leerlo solo de `data` perdía la causa y dejaba
+       todo hablando con la voz genérica.
+       *Medido en el aparato: el cobro dijo «no pudimos completar» cuando el
+       motor sabía perfectamente qué había pasado. Un error que llega con su
+       causa y se dibuja sin ella es peor que uno sin causa: hace creer que no
+       la hay.*
+       El cuerpo viaja en `error.context`, que es la Response. */
+    let codigo = 'no_se_pudo_completar';
+    const ctx = (error as { context?: unknown }).context;
+    if (ctx && typeof (ctx as Response).text === 'function') {
+      try {
+        const cuerpo = await (ctx as Response).clone().text();
+        const j = JSON.parse(cuerpo) as Record<string, unknown>;
+        if (typeof j.codigo === 'string') codigo = j.codigo;
+      } catch { /* si no se puede leer, queda la voz genérica */ }
+    }
     const d = (data ?? {}) as Record<string, unknown>;
-    const codigo = typeof d.codigo === 'string' ? d.codigo : 'no_se_pudo_completar';
+    if (codigo === 'no_se_pudo_completar' && typeof d.codigo === 'string') codigo = d.codigo;
     return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo };
   }
   const d = (data ?? {}) as Record<string, unknown>;

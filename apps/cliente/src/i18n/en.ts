@@ -1253,6 +1253,7 @@ export const clienteEn = {
     cobroTokenAusente: 'Choose which card you want to pay with.',
     cobroCompraNoExiste: "We couldn't find this purchase.",
     cobroDefectoNuestro: "We couldn't complete the charge. We're already looking into it.",
+    cobroRechazado: "The bank didn't authorise the payment. Try another card.",
     cobroDesconocido: "We couldn't complete the charge. We're already looking into it.",
     cobroConfirmando: "We're confirming your payment.",
     titulo: 'Pantry',

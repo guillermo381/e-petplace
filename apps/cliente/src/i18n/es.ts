@@ -1465,6 +1465,7 @@ export const clienteEs = {
     // no de la familia — distinguirlas en pantalla sería contarle un problema
     // interno que no puede resolver.
     cobroDefectoNuestro: 'No pudimos completar el cobro. Ya lo estamos viendo.',
+    cobroRechazado: 'El banco no autorizó el pago. Probá con otra tarjeta.',
     cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
     // El estado de espera — la PANTALLA es Fase 4; acá solo su voz.
     cobroConfirmando: 'Estamos confirmando tu pago.',

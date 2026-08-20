@@ -47,6 +47,7 @@ export function hayCobroAndamio(): boolean {
 export type VozCobro =
   | 'despensa.cobroDesconocido'
   | 'despensa.cobroTokenAusente'
+  | 'despensa.cobroRechazado'
   | 'despensa.cobroConfirmando';
 
 export type TarjetaParaCobro = { id: string } | null;
@@ -84,9 +85,13 @@ export async function cobrarConTarjetaGuardada(
        `exito`**. Confirma el webhook, o el barrido mismo-día. */
     if (r.ok) return { ok: true };
 
-    /* 🔴 Un rechazo sin causa reconocida NO se dibuja como error de datos.
-       *Pedirle a la familia que revise algo que puede estar perfecto es la
-       clase de error que hace que vuelva a pagar lo que ya pagó.* */
+    /* Cada causa, su voz. **`rechazado` es del emisor**, y por eso NO se
+       dibuja como error de datos: *pedirle a la familia que revise algo que
+       puede estar perfecto es la clase de error que hace que vuelva a pagar lo
+       que ya pagó.* Lo que no reconocemos habla genérico y va a soporte. */
+    if (r.codigo === 'token_ausente') return { ok: false, voz: 'despensa.cobroTokenAusente' };
+    if (r.codigo === 'rechazado') return { ok: false, voz: 'despensa.cobroRechazado' };
+    if (r.codigo === 'sin_respuesta') return { ok: false, voz: 'despensa.cobroConfirmando' };
     return { ok: false, voz: 'despensa.cobroDesconocido' };
   } catch {
     /* Red caída ≠ rechazo del banco. **No es un desenlace**: la voz de espera
