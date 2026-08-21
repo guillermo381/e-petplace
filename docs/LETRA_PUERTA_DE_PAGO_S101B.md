@@ -1,6 +1,6 @@
 # LETRA_PUERTA_DE_PAGO_S101B.md — e-PetPlace
 
-> **Versión:** v1.2 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias · el alta nace al tocar) · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
+> **Versión:** v1.3 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias · el alta nace al tocar) · **21-ago-2026 (la superficie es UNA — §8)** · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
 > **Fuentes que obedece (en este orden):** el repo y la base · `LETRA_MOTOR_PAGOS_S101.md` **v1.3** · `LETRA_SALDO.md` **v1.1** · `docs/loop/S101-A.md` · el acta de apertura S101-B · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si esta letra contradice a la fuente, **gana la fuente** y la letra se enmienda con su marca.
 >
@@ -302,7 +302,62 @@ El cierre de S101-A declaró *«cuatro sentidos de la misma palabra, dos de ello
 
 ---
 
+## §8 · LA SUPERFICIE DE PAGO ES **UNA PIEZA** (21-ago-2026, orden del founder)
+
+> Esta letra decía **qué** ve la familia cuando paga. Le faltaba decir
+> **cuántas veces está escrito**.
+
+**La despensa y el checkout de los cuatro oficios tenían la misma sección
+escrita dos veces** —mismo estado, misma hoja, misma regla de preselección— y
+**ya habían empezado a separarse**: el botón de una era `bloque` en un pie fijo
+y el de la otra era chico y vivía suelto en el scroll.
+
+> *Dos copias no divergen el día que se escriben: divergen el día que alguien
+> afina una. Y la que no se afina no da error — se queda vieja.*
+
+**Lo que rige:**
+
+① **Un solo botón de pagar en la casa.** Mismo tamaño, misma presencia, mismo
+   gate de habilitación, en las dos puertas.
+② La sección vive **dentro de una superficie de tarjeta**.
+③ **La fila de la elegida termina en «Cambiar ›»** — ☠️ muere «Elegido».
+   *Era una etiqueta contando lo que la fila ya mostraba, y ocupaba el único
+   lugar donde tenía que estar la acción.*
+④ **La fila JAMÁS finge una elegida.** Sin elección hecha, no se dibuja ninguna
+   tarjeta: se invita a elegir.
+   🔴 **Y la cura obvia estaba prohibida:** preseleccionar la primera parece
+   natural, pero el lector ordena por fecha descendente ⇒ **es la más
+   reciente**, que es literalmente la regla de andamio que la Fase 5 mató.
+   *Habría vuelto por la puerta de una cura de coherencia.*
+⑤ Cada medio de la hoja lleva **marca a la izquierda y «›» a la derecha** —
+   forma de camino. **DeUna va a ser una fila más**, y por eso la sección se
+   llama «cómo quieres pagar» y no «tus tarjetas».
+⑥ **El carrito flotante se calla dentro del checkout**, en las dos puertas.
+⑦ **La espera tiene UNA animación para las dos**, y su regla es de honestidad:
+   **el segmento no crece, viaja**. *Una barra de progreso afirma cuánto falta,
+   y el tiempo lo tiene el proveedor.* Sin porcentaje, sin countdown, sin
+   `value` en a11y — *anunciar «45 %» a quien no ve la pantalla sería la misma
+   mentira dicha en voz alta.* **La voz escrita se queda: la animación
+   acompaña, no reemplaza.**
+
+⚠️ **Y no queda en promesa: lo vigila `R57`** de `verify:diseno`, con su límite
+declarado — *mide que las dos pantallas MONTEN la misma pieza, jamás que se
+vean igual.*
+
+### §8bis · LA PÁGINA DEL ALTA TAMBIÉN ES LA CASA
+
+**El barrido del CTA recorrió la app y la página del alta quedó afuera.**
+*Un CTA que cambia de color en la casa y no en la puerta de al lado deja de ser
+el CTA de la casa.* Rige: **el CTA en relleno ocre con letra tinta** (F-OCRE, y
+**no se invierte con el tema**), los campos del proveedor con **el marco de la
+casa y su interior respetado**, y el código de verificación en **voz de máquina
+para los dígitos, voz de la casa para lo que le habla a la persona**.
+
+---
+
 ## Historial
+
+- **v1.3 (21-ago-2026, cierre S101-B/C · orden del founder):** nace **§8 · la superficie de pago es UNA PIEZA** (los siete puntos, con `R57` vigilándolo y su límite declarado) y **§8bis · la página del alta también es la casa**. La enmienda ④ registra la trampa medida: *preseleccionar la primera habría resucitado el andamio de «la más reciente» por la puerta de una cura de coherencia.*
 
 - **v1.2 (20-ago-2026 — firma del founder): EL ALTA NACE AL TOCAR, NO AL ABRIR.** Requisito
   de la pantalla real de Medios de pago, nacido de un hallazgo del gate: el andamio creaba

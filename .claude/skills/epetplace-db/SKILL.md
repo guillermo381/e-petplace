@@ -65,6 +65,65 @@ Las migraciones las **escribe y ejecuta Claude Code** con el schema completo a l
 - Build TS verde ≠ contrato real: runtime test E2E no-opcional para wrappers de RPC (L-114, regla 47).
 - Tras cambiar RPCs, regenerar tipos: `pnpm --filter @epetplace/api gen:types` (CLI autenticado por keychain — secretos JAMÁS por chat, L-130).
 
+## Motor de pagos y actuadores externos (S101, 21-ago-2026)
+
+Cuatro reglas medidas en producción de staging, cada una con el defecto que las
+parió. **Valen para todo motor que reciba un evento de un tercero.**
+
+### 1 · Rechazar, no ignorar — y menos aún ignorar un SUJETO
+
+Un actuador que recibe un evento cuyo **sujeto no conoce** no falla: **lo
+IGNORA**. No hay error, no hay log, no hay síntoma — hay silencio con cara de
+normalidad.
+
+⇒ **Agregar un sujeto al motor obliga a censar TODOS los consumidores del
+evento, no solo la puerta de entrada.** La puerta es lo fácil (una condición y
+un `if`); lo que falta suele estar **tres piezas más adelante**, en quien lee el
+evento al final.
+
+### 2 · `401` ≠ `503` — la ausencia y la ilegibilidad son distintas
+
+«No hay sesión» es del cliente (**401**). «No pude verificar la sesión» es
+nuestro (**503**).
+
+> *Mezclarlos le dice «logueate» a alguien que ya está logueado, y manda a
+> soporte a buscar un problema de credenciales que no existe.*
+
+### 3 · El identificador que viaja al tercero es NUESTRO, y se elige por sujeto
+
+`dev_reference` (o su equivalente) **no se hereda del camino viejo**. Si el
+motor gana un sujeto nuevo y la referencia sigue armándose con el id del sujeto
+anterior, **sale vacía** — *un cobro que sale sin referencia es plata que se
+mueve sin traza.*
+
+Lo mismo vale para los **nombres de campo** de una notificación: un campo
+llamado `compra_id` que lleva el id de una cita es el mismo defecto, en el
+nombre.
+
+### 4 · Persistir ANTES de analizar
+
+Un webhook se **guarda crudo primero** y se analiza después.
+
+**El caso que lo enseñó:** el analizador lanzó por un import faltante → 500 →
+el proveedor dejó de reintentar **para siempre**, y del evento no quedó nada.
+*Si el crudo se hubiera guardado antes, el bug habría sido una fila para
+reprocesar en vez de un evento perdido.*
+
+**Corolario (L-316):** guardar el crudo no alcanza — **todo rechazo destila su
+motivo a una columna legible**, jamás NULL (con `http_<status>` como último
+recurso). *Un payload `jsonb` no se puede listar, contar ni agrupar, y nadie lo
+abre cuando hay una explicación plausible a mano.*
+
+### Y dos que salieron del mismo día, sobre cómo se escriben los guards
+
+- **Cuando el ORDEN importa, se escribe como CINTURÓN y no como nota.** Una
+  precondición que vive en un comentario se cumple mientras alguien la lea; una
+  que vive en un `DO $$ … RAISE EXCEPTION` **aborta con el agujero todavía
+  cerrado**.
+- **Un vocabulario cerrado (`CHECK`) no se amplía de paso.** Si el valor que
+  necesitás no está, es una decisión de letra — no un valor más que se agrega
+  para que la migración pase.
+
 ## Diagnóstico
 
 - 404 de PostgREST sobre RPC que existe = schema cache viejo (`NOTIFY pgrst, 'reload schema'`) o proyecto equivocado — verificar el ref ANTES de cada RUN, una sola pestaña/conexión (L-123/L-127). No confiar en el copy genérico del wrapper.

@@ -1,6 +1,6 @@
 # LETRA_PAGO_CITAS.md — e-PetPlace · S101-C
 
-> **Versión:** v1.0 · **Nace:** 20-ago-2026 (mesa founder + arquitecto, sobre el censo
+> **Versión:** v1.1 · **Nace:** 20-ago-2026 · **RIGE — enchufe EJECUTADO 21-ago-2026** (mesa founder + arquitecto, sobre el censo
 > de la segunda puerta del mismo día).
 > **Fuentes que obedece:** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101` (el motor
 > rige entero) · `LETRA_SALDO` v1.1 · `POLITICAS_EPETPLACE` (P14 · P16 · P18 · P22) ·
@@ -98,7 +98,42 @@ funcionalidades — decisión founder 20-ago) · P22 (letra propia).
 
 ---
 
+## §9 · EL ENCHUFE, EJECUTADO (21-ago-2026)
+
+**Esta letra RIGE y su construcción está viva.** Lo ejecutado:
+
+| pieza | estado |
+|---|---|
+| `pagos_intentos` apunta a **una cita** — y a **exactamente un** sujeto | ✅ `20260822010000` |
+| `cita_desglose` congelado, **con moneda** | ✅ `20260822020000` |
+| El congelado por **TRIGGER**, no por productor | ✅ `20260822030000` — *cubre las SIETE puertas que insertan citas, y la octava que alguien escriba sin leer esta letra* |
+| `user_tiene_acceso_a_mascota_como` — el acceso con usuario explícito | ✅ `20260822040000` |
+| ☠️ `confirmar_cita_pagada` **REVOCADA** | ✅ `20260822050000` |
+
+🔴 **LO QUE EL ENCHUFE ENSEÑÓ, y no estaba en esta letra:**
+
+**El reemplazo no estaba listo cuando el arnés cobró una cita.** La pantalla que
+montan los cuatro oficios **seguía llamando a la RPC vieja**, y las dos cosas
+eran ciertas a la vez sin contradecirse — *por eso no había síntoma*.
+
+> **Un productor probado solo por su arnés está probado como productor, no como
+> reemplazo:** el arnés demuestra que la puerta nueva **abre**, jamás que la
+> vieja **dejó de usarse**. Lo segundo es un censo de consumidores, y es lo
+> único que autoriza cerrar la vieja.
+
+⇒ **La precondición se escribió como CINTURÓN, no como nota:** la migración del
+`REVOKE` verifica que el reemplazo esté en pie y **aborta con el agujero
+todavía cerrado** si falta algo. *Una precondición que vive en un comentario se
+cumple mientras alguien la lea.*
+
+**Las 138 citas con `pago_simulado: true` siguen siendo DATOS DECLARADOS** — las
+resuelve el corte semilla/real ya firmado. No se tocaron.
+
+---
+
 ## Historial
+
+- **v1.1 (21-ago-2026, cierre S101-B/C):** nace **§9 · el enchufe ejecutado** con sus cinco migraciones y la lección que impuso: *un productor probado solo por su arnés está probado como productor, no como reemplazo.* La precondición del `REVOKE` quedó como **cinturón**, no como nota.
 
 - **v1.0 (20-ago-2026):** nace en mesa sobre el censo de la segunda puerta (mismo
   día): puerta única `checkout-reserva`, 12 compuertas vivas, `confirmar_cita_pagada`

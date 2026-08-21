@@ -18407,7 +18407,15 @@ viajando **incluso dentro del `ok:true`** — para que ningún llamador lea un v
 como «cobertura verificada». *Esa visibilidad es lo único que hoy impide que esta
 deuda se vuelva invisible.*
 
-## 🔴 D-851 — UNA RESERVA VENCIDA NO SE PUEDE REARMAR: EL CLIENTE NO PUEDE PAGAR NUNCA
+## ☠️ D-851 — UNA RESERVA VENCIDA NO SE PUEDE REARMAR · **CERRADA (S101-B, 20-ago-2026)**
+
+> ✅ **Curada por `20260821080000`** — la reserva se rearma. **Y el censo que la
+> ordenó invirtió la cura obvia:** encender el reloj de reservas —lo que todos
+> daban por el arreglo— **habría liberado mercadería YA VENDIDA** para que el
+> mostrador la volviera a vender. *La cura que parecía trivial era la que hacía
+> el daño.* Primero el gate, después el reloj.
+
+### Su texto original, conservado
 
 **Medido en S101-A (19-ago-2026), intentando rearmar la compra `a2efd9b7`.**
 
@@ -18441,7 +18449,17 @@ pisan los ensayos porque nadie real abandona un checkout todavía.
 cualquier causa a la más plausible convierte un diagnóstico en una adivinanza —
 y esta ficha existió tres horas antes de que alguien leyera el motivo real.*
 
-## 🔴 D-852 — SI LA CUENTA DE NUVEI EXIGE `vat > 0`, NINGÚN PRODUCTO DE OCTUBRE SE COBRA
+## ☠️ D-852 — EL `vat` DE NUVEI · **CERRADA (S101-B, 20-ago-2026) — Y LA PREMISA ERA FALSA**
+
+> 🔴 **No era la configuración de Nuvei: era NUESTRO `vat`.** La ficha nació
+> diciendo *«si la cuenta exige `vat > 0`»* y el crudo del intento decía
+> literal `order.vat Invalid`. **El campo lo mandábamos nosotros.**
+>
+> *Dos lecturas equivocadas mandaron a esperar a un tercero; la correcta estaba
+> en un campo de nuestro propio request* — el caso que parió **L-316**.
+> ⇒ Hoy la despensa y los servicios cobran con `EC_IVA_0` sin rebote.
+
+### Su texto original, conservado
 
 **Medido en S101-A (19-ago-2026), del `payload_crudo` del intento `14e5319d`:**
 
@@ -18531,11 +18549,48 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-326** — **CUANDO EL ORDEN IMPORTA, SE ESCRIBE COMO CINTURÓN Y NO COMO NOTA.** El orden *«REVOKE con el reemplazo listo, JAMÁS antes»* estaba firmado, escrito en la ficha y repetido en la letra — **y aun así el reemplazo no estaba listo cuando llegó el turno de revocar.** *Una precondición que vive en un comentario se cumple mientras alguien la lea; y el día que no la lean es justo el día en que el que ejecuta viene con la orden en la mano y la da por cumplida.* ⇒ La migración del `REVOKE` lleva su precondición como `DO $$ … RAISE EXCEPTION`: si el desglose, el trigger, el actuador o el lector de acceso no están en pie, **aborta con el agujero todavía cerrado**. Y su cinturón de salida lleva **discriminador**: sin él, un `has_function_privilege` que devolviera `false` para todo haría pasar los dos asserts sin medir nada. Origen: S101-C.
+
+- **L-325** — **UN VOCABULARIO CERRADO NO SE AMPLÍA DE PASO.** Tres veces en la misma sesión inventé un valor contra un `CHECK` cerrado —`resultado='recibido_sin_analizar'`, `categoria='pagos'`, `tipo='boolean'`— **porque el valor que necesitaba no estaba y el que había no encajaba**. Las tres veces el `CHECK` tenía razón: *el vocabulario es una decisión de letra, y agregarle un valor para que la migración pase es tomar esa decisión sin que nadie la firme.* La cura correcta es siempre la misma: **usar el valor que ya significa eso, o parar y pedir la letra.** Origen: S101-B.
+
+- **L-324** — **UN AGREGADO SIEMPRE CONTESTA, Y POR ESO NO SIRVE PARA FAIL-CLOSED.** `_concepto_de_pago` nació devolviendo *«0 productos»* para un id desconocido: **un `COUNT` sobre cero filas no devuelve cero filas — devuelve una fila con un cero.** *Y una frase construida sobre ese cero se lee como un hecho («no compró nada») cuando el hecho real es «no sé qué es esto».* ⇒ El fail-closed exige `CASE WHEN count(*) = 0 THEN NULL`: **hay que distinguir «cero» de «no sé» explícitamente, porque el agregado no lo hace por vos.** Hermana de la ley del nulo honesto. Origen: S101-C.
+
+- **L-323** — **`is_nullable` VA AL CENSO: UN DATO QUE SIEMPRE ESTÁ SE VE IGUAL SEA O NO OBLIGATORIO.** El censo del contrato de la cita miró columnas, tipos y CHECKs, y **no miró nullability**. `pagos_intentos.pedido_id` era `NOT NULL` ⇒ **un intento para una cita era inexpresable**, y el censo no lo vio porque en todas las filas vivas el pedido estaba. *Un campo obligatorio y un campo que siempre viene lleno son indistinguibles mirando datos: la diferencia está en el esquema, y hay que ir a buscarla.* Lo cazó el cinturón al intentar crear el estado malo. Origen: S101-C.
+
+- **L-322** — **UN GATE QUE GRITA SIEMPRE NO GRITA: SIN BASELINE NO HAY «NO CAMBIÓ».** Un lint sin línea base no distingue lo que acabás de romper de lo que ya estaba roto, y **su rojo permanente enseña a saltearlo**. Su hermana operativa: **un ratchet que cambia de baseline es otro guard** — al mover el piso hay que **re-producir el rojo contra el piso nuevo**, o el verde de la primera corrida no prueba nada. Y el corolario que lo cierra: *el rojo se mide sobre `main`, no sobre el aviso.* Origen: S101 (R57 y el precedente de R35).
+
+- **L-321** — **SE PRUEBA LA DEFENSA, NO LA LISTA.** Verificar que un permiso está sacado leyendo el ACL es leer **la lista**; producir el rebote con `SET ROLE` + ejecutar es probar **la defensa**. *«El permiso está revocado» es una lectura; «rebotó con 42501» es un hecho.* Y su gemela de instrumento, del mismo día: la primera versión del medidor usaba `RAISE NOTICE` y **salió muda** — *un instrumento que no imprime no midió nada* (L-192 otra vez). ⇒ Todo instrumento devuelve **filas**, y todo censo que devuelve vacío **se prueba antes contra un caso con resultado conocido**: un vacío que no probó que sabe encontrar algo no es una medición. Origen: S101-C.
+
+- **L-320** — **UN ARNÉS QUE RODEA UN GUARD ESCONDE EL DEFECTO QUE EL GUARD ESTABA SEÑALANDO.** Mi arnés variaba el `transaction_id` en cada corrida para esquivar un UNIQUE que le molestaba. **Ese UNIQUE estaba señalando una colisión real** que dejaba al actuador sin poder confirmar ningún pago verdadero — y el arnés, al esquivarla, la volvió invisible y siguió dando verde. ⇒ **Cuando un arnés choca contra un guard, se reproduce el camino real; esquivarlo exige justificación escrita.** *Un guard que molesta a un test suele estar diciendo algo sobre el producto, no sobre el test.* Origen: S101-B.
+
+- **L-319** — **EL ARTEFACTO NO ES LA MATERIA PRIMA.** El `stoken` se buscó durante horas probando ~200.000 recetas de hash sobre la familia equivocada, porque se asumió que era un digest de una cadena. **Era un HMAC** — y la diferencia no es de algoritmo: es que **la clave entra por otro lado**. *Ninguna cantidad de fuerza bruta sobre la familia equivocada encuentra la respuesta, y el fracaso se lee como «me falta un ingrediente» en vez de «estoy en la familia equivocada».* ⇒ Antes de barrer combinaciones se pregunta **de qué CLASE es el artefacto**; y cuando el tercero puede contestarlo, **se pregunta**: el correo a Erick costó un día y la fuerza bruta no habría terminado nunca. Origen: S101-B.
+
+- **L-318** — **MOTOR SIN PUERTA: LAS CUATRO APARICIONES DEL MISMO DÍA, Y LA VARIANTE QUE NO TIENE SÍNTOMA.** La pieza estaba bien construida, probada… y desconectada del único lugar donde su resultado importa. **Apareció cuatro veces en una sesión, una capa más arriba cada vez:** ① el actuador construido y nunca llamado desde el webhook · ② el arnés llamándolo directo, salteando el productor real · ③ `useEsperaDeConfirmacion` llamado y **su resultado nunca leído** (la compra quedó `pagada` a los 34 s y la pantalla decía «Estamos confirmando» a los 78) · ④ el constructor de filas del comprobante, escrito y jamás insertado en la plantilla. **🔴 Y su variante MÁS GRAVE, que es de otra clase: el actuador que recibe un sujeto que no conoce y LO IGNORA.** *No falla: no hace nada.* No hubo error, ni log, ni síntoma — hubo **silencio con cara de normalidad**. ⇒ **Toda pieza nueva se prueba desde su CONSUMIDOR REAL**, y **agregar un sujeto obliga a censar todos los consumidores del evento**, no solo la puerta. Origen: S101-B/C.
+
 - **L-317** — **UN REEMPLAZO SE MIDE DESDE EL CONSUMIDOR QUE VA A REEMPLAZAR, JAMÁS DESDE UN ARNÉS.** S101-C abrió con la orden firmada *«REVOKE con el reemplazo funcionando»* y con la evidencia en la mano: la noche anterior un paseo real se había cobrado por la puerta nueva, punta a punta, con su comprobante. **Y el reemplazo NO estaba listo:** `components/checkout-reserva.tsx` —la pieza única que montan **los cuatro oficios**— seguía llamando a la RPC vieja. *El arnés había estrenado la puerta nueva y dejado la vieja en uso, y las dos cosas son ciertas a la vez sin contradecirse: por eso no hay síntoma.* **Revocar ahí habría dejado a paseo, grooming, veterinaria y adiestramiento sin poder reservar — con la ficha diciendo «cerrada».** ⇒ **Un productor probado solo por su arnés está probado como productor, no como reemplazo:** el arnés demuestra que la puerta nueva ABRE, jamás que la vieja dejó de usarse. **Lo segundo es un censo de consumidores, y es lo único que autoriza cerrar la vieja.** **Corolario mecánico, aplicado en la misma migración:** *cuando el orden importa, se escribe como CINTURÓN y no como nota* — la del `REVOKE` verifica que el reemplazo esté en pie y **aborta con el agujero todavía cerrado** si falta algo, porque *una precondición que vive en un comentario se cumple mientras alguien la lea.* Hermana de la ley del motor sin puerta, del otro lado: ahí faltaba el consumidor; acá **sobraba el viejo**. Origen: S101-C, el enchufe de los cuatro oficios.
 
 - **L-316** — **EL CRUDO SE ABRE ANTES DE DIAGNOSTICAR: una tabla de estados dice QUÉ pasó, y el payload guardado dice POR QUÉ.** S101-A lo pagó en el mismo día y en la misma fila. El débito rebotó 403 y el error se leyó **dos veces mal desde lo genérico** —primero como *«configuración de Nuvei, carrier/operación no habilitada»*, después como *«el intento quedó en vuelo y bloquea el reintento»*— y **una sola vez bien, abriendo `pagos_intentos.payload_crudo`**, donde decía literal `order.vat Invalid`. **Las dos lecturas equivocadas mandaban a esperar a un tercero; la correcta era un campo de nuestro propio request.** Y el mismo `SELECT` que lo destapó corrigió de paso la otra premisa: el intento **no** estaba `iniciado`, estaba `rechazado` — el hueco real era que su `motivo_rechazo` y su `cerrado_en` estaban en NULL, porque el error venía en un objeto `error` de primer nivel y el lector solo miraba `transaction.message`. **Corolario operativo:** guardar el crudo no alcanza — *un crudo que nadie abre es un dato que no existe*, y por eso todo rechazo debe destilar **su motivo a una columna legible** (jamás NULL: con `http_<status>` como último recurso), porque **un payload jsonb no se puede listar, contar ni agrupar, y nadie lo abre cuando hay una explicación plausible a mano.** Hermana de L-166 (todo dato vivo se lee del objeto al usarlo) aplicada al diagnóstico de errores ajenos. Origen: S101-A, el 403 de Nuvei.
 
-### D-854 🔴 · LA PUERTA DE SERVICIOS NO PASA POR EL MOTOR DE PAGOS
+### ☠️ D-854 · LA PUERTA DE SERVICIOS AL MOTOR DE PAGOS — **CERRADA (S101-C, 21-ago-2026)**
+
+> ✅ **Los CUATRO oficios cobran por `pagos-cobro`** con la cita como sujeto →
+> webhook → actuador → comprobante. Cinco migraciones (`20260822010000` a
+> `050000`) y el enchufe de `checkout-reserva.tsx`, la pieza que los cuatro
+> montan.
+>
+> **Evidencia:** paseo `933ab7bc` · `confirmada · pagada · tx=DF-2099065 ·
+> confirmado_por=webhook`, pagado **desde la app en el aparato**, con su
+> comprobante leído en el correo diciendo **«Paseo de Mascotas»**.
+>
+> 🔴 **Lo que su cierre enseñó, y vale más que la ficha:** el actuador **no
+> conocía el sujeto cita**. El webhook llegó, validó su stoken, quedó
+> autenticado… y la cita no se movió. *Un actuador que no conoce un sujeto no
+> falla: lo IGNORA — no hubo error, ni log, ni síntoma.* ⇒ **agregar un sujeto
+> obliga a censar TODOS los consumidores del evento, no solo la puerta.**
+
+### Su texto original, conservado
+
+### D-854 · LA PUERTA DE SERVICIOS NO PASA POR EL MOTOR DE PAGOS
 > S101-B · 20-ago-2026 · **hallazgo del founder EN EL APARATO** (pagó un paseo y
 > el flujo se declaró pagado a sí mismo) · censo:
 > `docs/relevamientos/2026-08-20-s101b-censo-puerta-de-servicios.md`

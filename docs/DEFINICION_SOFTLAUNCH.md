@@ -68,15 +68,46 @@ fecha. El destino incluye:
 > ninguna superficie del cliente muestra con push real.
 
 > **PRECONDICIÓN SUMADA EN S101-B (20-ago-2026) — LA SEGUNDA PUERTA DE PAGO:**
-> ③ **LA PUERTA DE SERVICIOS CONECTADA AL MOTOR (`D-854`).** El circuito de pago
+> ~~③ **LA PUERTA DE SERVICIOS CONECTADA AL MOTOR (`D-854`).** El circuito de pago
 > real quedó vivo para la **despensa**; **los servicios siguen declarándose
 > pagados a sí mismos** (`confirmar_cita_pagada` escribe `pago_simulado: true`).
-> **Octubre abre con SERVICIOS** ⇒ es 🔴 pre-lanzamiento obligatorio.
-> ④ 🔴 **`confirmar_cita_pagada` REVOCADA DE `authenticated` (`D-855`).** Hoy
+> **Octubre abre con SERVICIOS** ⇒ es 🔴 pre-lanzamiento obligatorio.~~
+> ~~④ 🔴 **`confirmar_cita_pagada` REVOCADA DE `authenticated` (`D-855`).** Hoy
 > **cualquiera con una cuenta puede declarar pagada su propia cita** — la
 > despensa cerró esa puerta y servicios no. **PRODUCCIÓN JAMÁS ABRE CON ESA RPC
 > VIVA**, y muere con el REVOKE de S101-C, **jamás antes del reemplazo**:
-> revocar sin puerta nueva deja a los cuatro oficios sin poder reservar.
+> revocar sin puerta nueva deja a los cuatro oficios sin poder reservar.~~
+>
+> ## ✅ ③ y ④ **CERRADAS** — S101-C, 21-ago-2026, con su evidencia
+>
+> **La letra vieja va tachada y NO borrada** (regla de la casa): *quien lea esto
+> dentro de tres sesiones tiene que poder ver qué bloqueaba octubre y por qué
+> dejó de hacerlo.*
+>
+> **③ · la puerta de servicios, al motor.** Los CUATRO oficios —paseo, grooming,
+> veterinaria, adiestramiento— cobran por `pagos-cobro` con la **cita** como
+> sujeto → webhook → actuador → comprobante. **Evidencia:** paseo `933ab7bc`,
+> `confirmada · pagada · tx=DF-2099065 · confirmado_por=webhook`, **pagado desde
+> la app en el aparato**, con su comprobante leído en el correo.
+>
+> **④ · el REVOKE, verificado en LAS DOS PUNTAS y no supuesto:**
+>
+> ```
+> authenticated PUEDE ejecutarla     : false
+> intento REAL como authenticated    : REBOTÓ · SQLSTATE 42501
+> discriminador crear_bloqueo_agenda : true   ← reservar sigue vivo
+> ```
+>
+> ⚠️ **Y el orden importó de verdad, no como formalidad:** al abrir S101-C el
+> reemplazo **todavía no estaba** —la pantalla de los cuatro oficios seguía
+> llamando a la RPC vieja— y el paseo de la noche anterior la había estrenado
+> **desde un arnés**. *Revocar ahí habría dejado a los cuatro oficios sin poder
+> reservar, con la ficha diciendo «cerrada».* Por eso la precondición quedó
+> escrita **como cinturón dentro de la migración**, y no como nota.
+>
+> 🔴 **LO QUE ESTAS DOS NO CIERRAN, y sigue rojo para octubre:** el ambiente es
+> **sandbox de punta a punta**. Producción exige credenciales nuevas de Nuvei,
+> host productivo y el visto de certificación — ver el acta de cierre S101-B/C.
 
 > **NOTA DE OPERACIÓN — LA LETRA UBER (founder S70, 19 Jul 2026;
 > letra completa en `POLITICAS_EPETPLACE.md` P21).** Todo lo que sigue

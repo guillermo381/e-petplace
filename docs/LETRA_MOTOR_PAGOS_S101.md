@@ -4,7 +4,7 @@
 
 ---
 
-> **Versión:** v1.3 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick, después el estatuto de la compuerta 3) · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Versión:** v1.4 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick, después el estatuto de la compuerta 3) · **21-ago-2026 (lo que la construcción enmendó — §10)** · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
 > **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
 >
 > **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
@@ -441,7 +441,82 @@ Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y ca
 
 ---
 
+## §10 · LO QUE LA CONSTRUCCIÓN ENMENDÓ (21-ago-2026, cierre S101-B/C)
+
+> **Estas cuatro no las decidió la mesa: las impuso el objeto.** Se depositan
+> acá porque *una letra que no absorbe lo que su construcción descubrió deja de
+> ser la fuente y pasa a ser un recuerdo.*
+
+### §10.1 · EL COMPROBANTE DICE **QUÉ** SE PAGÓ
+
+**Hallazgo del founder en el aparato:** pagó un paseo y el correo describía una
+compra de despensa.
+
+**Lo que la medición dijo, sin maquillar:** el comprobante del paseo **sí** salió
+con su comercio, y 34 minutos antes había salido otro de despensa. *Pero no se
+cierra con «era otro correo»:* lo que destapó es **por qué los dos se pueden
+confundir**, y eso sí es defecto.
+
+🔴 **El comprobante NO decía qué se pagó.** Título, comercio, monto y códigos —
+nada más. Dos compras completamente distintas **solo se distinguían por el
+nombre del negocio**.
+
+> *Un respaldo que no dice qué se pagó obliga a deducirlo del comercio, y el que
+> lo lee puede deducir mal. La confusión no fue un descuido de lectura: fue la
+> consecuencia de un correo que no lo decía.*
+
+⇒ Nace **`_concepto_de_pago(sujeto)`**: cita ⇒ el servicio con su nombre ·
+compra ⇒ los productos. **Fail-closed**: si no lo sabemos, genérico honesto —
+**jamás el concepto del otro sujeto**.
+
+⚠️ **Y su primera versión falló por una razón que vale más que el caso:** con un
+id desconocido devolvía *«0 productos»* en vez de `NULL`. **Un agregado sin
+filas devuelve una fila igual.** *El fail-closed no se escribe con un `COUNT`:
+se escribe con el `CASE` que distingue «cero» de «no sé».*
+
+### §10.2 · EL COMPROBANTE ES **UNO** ENTRE PRODUCTORES
+
+Los dos sujetos —compra y cita— emiten **la misma notificación**, con la misma
+forma y la misma clave de deduplicación (`comprobante:<sujeto>`).
+
+🔴 **Y su clave se llama `sujeto_id`, no `compra_id`.** La primera versión
+mandaba `compra_id` **para una cita**. *Un campo que nombra al sujeto viejo es
+el mismo defecto que el `dev_reference`: el dato del camino viejo colándose en
+el nuevo, esta vez en el NOMBRE.*
+
+> *La familia no tiene por qué notar que compró un paseo en vez de un producto.*
+
+### §10.3 · LA LEY DEL ACTUADOR: **SOLO `SERVER` Y AUTENTICADO**
+
+El actuador aplica **únicamente** eventos con `stoken` válido **y** credencial
+`SERVER`. Todo lo demás se registra y no mueve nada.
+
+🔴 **Y la variante grave que S101-C midió: un actuador que no conoce un sujeto
+NO FALLA — LO IGNORA.** El webhook llegó, validó su stoken, quedó autenticado…
+y la cita no se movió. **No hubo error, ni log, ni síntoma: hubo silencio con
+cara de normalidad.**
+
+⇒ **Regla depositada:** *agregar un SUJETO al motor obliga a censar TODOS los
+consumidores del evento, no solo la puerta de entrada.* La puerta fue lo fácil
+—una condición y un `if`—; lo que faltaba estaba **tres piezas más adelante**,
+en quien lee el evento al final.
+
+### §10.4 · `ignora_techo` — EL COMPROBANTE NO ES UNA NOTIFICACIÓN MÁS
+
+El comprobante **no compite por el techo diario de avisos** ni resuelve canal
+por preferencia: **sale por email, siempre**.
+
+> *Un respaldo de pago que no llega porque «ya se mandaron muchos avisos hoy» no
+> es un aviso perdido: es la única prueba de que la familia pagó.*
+
+Su letra completa vive en `MODELO_NOTIFICACIONES` §0quinquies (fuente única);
+acá queda **solo el porqué del lado del motor**.
+
+---
+
 ## Historial
+
+- **v1.4 (21-ago-2026, cierre S101-B/C):** nace **§10 · lo que la construcción enmendó** — el concepto del comprobante (con su fail-closed y el agregado que siempre contesta) · el comprobante único entre productores (`sujeto_id`, no `compra_id`) · **la ley del actuador SERVER y su variante grave: un sujeto desconocido no falla, se IGNORA** · `ignora_techo` con puntero a su fuente única. *No las decidió la mesa: las impuso el objeto.*
 
 - **v1.3 (19-ago-2026, noche — el estatuto de la compuerta 3) · entrada depositada en
   S101-B, 19-ago:** el **`ESTATUTO DE LA COMPUERTA 3`** de §5.0 —*la cobertura queda fuera

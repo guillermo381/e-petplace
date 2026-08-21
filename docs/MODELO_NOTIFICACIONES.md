@@ -69,6 +69,65 @@ que queda abajo como foto de S87, con su nota.)*
 
 ---
 
+## 0quinquies. S101-B/C (21-ago-2026) — **EL COMPROBANTE DE PAGO NO ES UNA NOTIFICACIÓN MÁS**
+
+> **Fuente única de `ignora_techo` y del canal forzado.** El motor de pagos
+> apunta acá y no repite la letra (`LETRA_MOTOR_PAGOS_S101` §10.4).
+
+### El requisito, y NO es nuestro — es de CERTIFICACIÓN
+
+**Literal de Erick (Nuvei), 20-ago-2026:**
+
+> «El diseño queda a su criterio pero necesitamos que ese correo adjunte esos 2
+> códigos.»
+
+Los dos: **el id de transacción** y **el código de autorización**
+(p. ej. `DF-2098100` / `RqRvA2`).
+
+⇒ **El comprobante no es un aviso de cortesía: es la condición para poder
+cobrar en producción.** Y eso cambia sus reglas.
+
+### ① `ignora_techo` — no compite por el techo diario
+
+**El techo existe porque avisar todo enseña a ignorar los avisos.** Ese
+argumento **no aplica acá**:
+
+> *Un respaldo de pago que no llega porque «ya se mandaron muchos avisos hoy» no
+> es un aviso perdido: es la única prueba de que la familia pagó — y encima es
+> lo que el certificador nos exige tener.*
+
+### ② EL CANAL VA FORZADO A EMAIL — no se resuelve por preferencia
+
+Un comprobante **tiene que quedar guardado en algún lado que la persona pueda
+buscar dentro de seis meses**. Un push se lee y se va; un in-app vive dentro de
+una app que puede desinstalarse.
+
+⚠️ **Y su límite, declarado:** esto **no** apaga las preferencias de la persona
+para todo lo demás. *Forzar el canal de UN tipo por su naturaleza no es lo mismo
+que ignorar lo que la familia pidió.*
+
+### ③ QUÉ LLEVA, Y POR QUÉ LLEVA EL CONCEPTO
+
+Título · comercio · **concepto (qué se pagó)** · monto · moneda · **los dos
+códigos** · el sujeto.
+
+🔴 **El concepto entró tarde y por un reporte del founder:** pagó un paseo y el
+correo describía una compra de despensa. **La medición dijo que eran dos correos
+distintos** — *y aun así el defecto era real:* el comprobante **no decía qué se
+pagó**, así que dos compras completamente distintas solo se distinguían por el
+nombre del comercio. *La confusión no fue un descuido de lectura: fue la
+consecuencia de un correo que no lo decía.*
+
+**Se deriva del SUJETO y es fail-closed:** si no lo sabemos, genérico honesto —
+**jamás el concepto del otro sujeto**.
+
+### ④ LO DISPARA EL ACTUADOR, JAMÁS LA SEÑAL OPTIMISTA
+
+En la transición a confirmado, y solo ahí. *Un correo sobre un pago que todavía
+no está confirmado sería exactamente la mentira que toda la letra prohíbe.*
+
+---
+
 ## 0quater. S91 (8-ago-2026) — CAE UNA ESPERA, NO TRES → y AL CIERRE DEL DÍA LA LÍNEA SE CONGELA *(medición de C + decisión founder, ambas verbatim)*
 
 > ⚠️ **Este § tiene DOS momentos del MISMO día y hay que leer los dos.** Abre con
@@ -821,6 +880,8 @@ cuando prometió callar.* **La nota declarada en la migración
   founder), y con su línea en `MODELO_FINANCIERO` fechada.
 
 ## Historial
+
+- **S101-B/C (21-ago-2026):** nace **§0quinquies — el comprobante de pago no es una notificación más**: `ignora_techo` (no compite por el techo diario) + **canal forzado a email** (con su límite declarado: no apaga las preferencias para lo demás) + **el concepto derivado del sujeto, fail-closed** + lo dispara el actuador y jamás la señal optimista. **Su origen no es preferencia nuestra: es requisito de CERTIFICACIÓN de Nuvei**, con el literal de Erick depositado.
 
 - **v1 (S87, 4 Ago 2026) — ENMENDADO CONTRA LO VIVO.** El censo midió que la
   premisa madre de la v0 era falsa: **las tres capas no estaban en cero**. Siete

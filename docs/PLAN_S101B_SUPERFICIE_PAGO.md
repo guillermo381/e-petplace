@@ -8,7 +8,37 @@
 
 ---
 
-> **Versión:** v1.1 · **Nace:** 19-ago-2026 · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **UNA SOLA PISTA**
+> **Versión:** v1.2 · **Nace:** 19-ago-2026 · **EJECUTADO:** 21-ago-2026 · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **UNA SOLA PISTA**
+
+---
+
+## ✅ EJECUTADO — nota de cierre (21-ago-2026, gate del founder VERDE)
+
+**Las seis fases corrieron.** El alta, el cobro, el webhook, la espera, los
+medios de pago y el actuador están vivos y verificados en el aparato, y
+**S101-C sumó la segunda puerta** (servicios) sobre el mismo motor.
+
+🔴 **Y lo que este plan NO previó, que es lo que vale registrar:**
+
+① **La Fase 5 no terminaba en «elegir tarjeta»: terminaba en UNA PIEZA.** El
+plan trataba la sección de pago como una pantalla más; la construcción encontró
+que **existía dos veces y ya divergía**. La unificación no estaba escrita acá —
+la pidió el founder al verla, y hoy la vigila `R57`.
+
+② **El motor se dio por «hasta que el pedido queda pagado», y el sujeto era
+UNO.** S101-C probó que el actuador **ignora en silencio** un sujeto que no
+conoce. *No falla: no hace nada* — y este plan no tenía una fase para eso.
+
+③ **El carril externo se cumplió al revés de lo previsto:** el `vat` estaba
+declarado como rojo esperado que no frena, y **resultó no ser de Nuvei sino
+nuestro**. El reloj externo que sí mandó fue otro.
+
+> *Un plan ejecutado no se archiva diciendo «se hizo»: se archiva diciendo
+> **qué no vio**, porque eso es lo único que le sirve al que escriba el
+> próximo.*
+
+**Su regla de precedencia sigue rigiendo hacia atrás:** donde este plan
+contradiga al repo o a la letra, **gana la fuente**.
 > **Fuentes que obedece (en este orden):** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101.md` v1.2+ · acta de apertura S101-B · `LETRA_SALDO.md` v1.0 · `DIRECCION_ARTE` + skill `epetplace-design-system` (el CÓMO visual) · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si este plan contradice al repo o a cualquiera de esas fuentes, **gana la fuente y el plan se enmienda**. Este plan ORDENA el trabajo; no crea letra nueva ni firma nada.
 >
@@ -213,5 +243,6 @@ Ledger / devengo / comisión / liquidación → **S102** (letra financiera v3.0;
 
 ## Historial
 
+- **v1.2 (21-ago-2026, cierre de S101-B/C con gate del founder VERDE):** marcado **EJECUTADO** con su nota de cierre. Se registran **las tres cosas que el plan no vio** —la sección de pago como PIEZA y no como pantalla · el actuador que ignora un sujeto desconocido · el `vat` que era nuestro y no del proveedor— porque *un plan ejecutado sirve por lo que no vio, no por lo que se cumplió.*
 - **v1.1 (19-ago-2026, mesa de apertura con el founder):** cuatro firmas registradas — ① orden de construcción confirmado · ② `LETRA_SALDO` §2 y §5 **ratificadas** como la mesa las propuso (la pista las transpone a la letra) · ③ el vat sin respuesta **no frena**: se construye el flujo completo y el rebote por vat queda como rojo esperado y documentado · ④ enmienda de protocolo: **la ejecución de push/migración/deploy es de la sesión**, con validación de mesa y autorización del founder tanda por tanda (el founder hace de bus, no de mano ejecutora).
 - **v1.0 (19-ago-2026):** nace al abrir S101-B sobre el acta de apertura, `LETRA_MOTOR_PAGOS_S101` v1.2 y `LETRA_SALDO` v1.0. Ordena las seis fases del acta §2②, deja el actuador del webhook construido-y-apagado hasta la fila del stoken, fija la costura del saldo sin construir su motor, y tabula el carril externo con sus relojes (vat 🔴 octubre · Alexandra = reloj real · DeUna corte 11-sep).
