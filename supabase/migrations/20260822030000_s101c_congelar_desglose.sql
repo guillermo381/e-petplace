@@ -47,7 +47,7 @@ BEGIN
     FROM prestadores pr JOIN cuentas_comerciales cc ON cc.id = pr.cuenta_comercial_id
    WHERE pr.id = NEW.prestador_id;
 
-  /* Sin moneda no se congela nada — y **no se inventa 'USD'**. La cita queda
+  /* Sin moneda no se congela nada — y **la moneda no se inventa**. La cita queda
      sin desglose, y la compuerta 2 del motor la rebota fail-closed diciendo
      que falta. *Un desglose con una moneda supuesta cobra en una moneda que
      nadie eligió.* */
@@ -78,21 +78,32 @@ BEGIN
   RETURN NEW;
 END $fn$;
 
+DROP TRIGGER IF EXISTS trg_cita_congela_desglose ON public.evento_cita_servicio;
 CREATE TRIGGER trg_cita_congela_desglose
   AFTER INSERT ON public.evento_cita_servicio
   FOR EACH ROW EXECUTE FUNCTION public._trg_cita_congela_desglose();
 
 -- ── CINTURÓN ───────────────────────────────────────────────────────────────
 DO $$
-DECLARE v_n int;
+DECLARE v_n int; v_codigo text;
 BEGIN
   SELECT count(*) INTO v_n FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
    WHERE c.relname='evento_cita_servicio' AND t.tgname='trg_cita_congela_desglose';
   IF v_n <> 1 THEN RAISE EXCEPTION 'CINTURON: el congelador no quedó atado'; END IF;
 
-  -- El discriminador: que NO invente moneda. Si algún día alguien pone un
-  -- default 'USD', esto lo caza.
-  IF pg_get_functiondef('public._trg_cita_congela_desglose()'::regprocedure) ILIKE '%''USD''%' THEN
+  /* 🔴 EL DISCRIMINADOR: que NO invente moneda. Si algún día alguien pone un
+     default de moneda literal, esto lo caza.
+     ⚠️ Y se mide sobre el CÓDIGO SIN COMENTARIOS: `pg_get_functiondef` devuelve
+     los comentarios, y este mismo cinturón **se disparó dos veces contra su
+     propia advertencia** antes de escribirse así. Es **L-170**, cuarta vez en
+     la jornada — *un censo que lee comentarios como código no distingue una
+     prohibición de una infracción.* */
+  SELECT regexp_replace(
+           regexp_replace(pg_get_functiondef('public._trg_cita_congela_desglose()'::regprocedure),
+                          '/\*.*?\*/', '', 'gs'),
+           '--[^\n]*', '', 'g')
+    INTO v_codigo;
+  IF v_codigo ~ '''[A-Z]{3}''' THEN
     RAISE EXCEPTION 'CINTURON: el congelador tiene una moneda literal adentro';
   END IF;
 

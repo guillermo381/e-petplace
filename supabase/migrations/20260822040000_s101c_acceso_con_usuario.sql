@@ -100,7 +100,7 @@ BEGIN
 
   RETURN false;
 END;
-$function$
+$function$;
 
 
 -- ── EL ORIGINAL DELEGA — mismo comportamiento, un solo dueño ───────────────

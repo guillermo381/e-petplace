@@ -48,6 +48,22 @@ COMMENT ON COLUMN public.pagos_intentos.cita_id IS
 CREATE INDEX IF NOT EXISTS idx_pagos_intentos_cita ON public.pagos_intentos (cita_id)
   WHERE cita_id IS NOT NULL;
 
+-- ── ①bis 🔴 `pedido_id` DEJA DE SER NOT NULL — medido al aplicar ───────────
+--
+-- El cinturón lo cazó: **`pedido_id` era `NOT NULL`**, así que un intento de
+-- CITA era **inexpresable** — el invariante «exactamente uno» no podía existir
+-- porque el pedido era obligatorio.
+--
+-- *Lo encontró el cinturón intentando crear el estado malo a propósito, que es
+-- literalmente para lo que existe.* **No lo vio el censo**: `is_nullable` no
+-- estaba entre lo que medí, y todas las filas tenían pedido — un dato que
+-- siempre está presente **se ve igual** esté o no obligado.
+--
+-- 🔴 Y la nulabilidad **no afloja nada**: lo que protegía el `NOT NULL` —que
+--    ningún intento quede sin sujeto— **pasa a protegerlo el CHECK**, que además
+--    cubre el caso que el `NOT NULL` no veía: dos sujetos a la vez.
+ALTER TABLE public.pagos_intentos ALTER COLUMN pedido_id DROP NOT NULL;
+
 -- ── ② EL INVARIANTE QUE FALTABA ────────────────────────────────────────────
 ALTER TABLE public.pagos_intentos
   ADD CONSTRAINT chk_intento_un_solo_sujeto
@@ -75,8 +91,17 @@ DECLARE v_n int;
 BEGIN
   -- El discriminador que importa: el estado malo tiene que ser INEXPRESABLE.
   BEGIN
-    INSERT INTO pagos_intentos (pedido_id, cita_id, proveedor, monto, moneda, forma, estado)
-      VALUES (NULL, NULL, 'nuvei', 1, 'USD', 'tokenizacion', 'pendiente');
+    /* 🔴 EL FIXTURE LLEVA TODO LO OBLIGATORIO A PROPÓSITO. La primera versión
+       omitía `clave_idempotencia` (NOT NULL) y rebotaba con `not_null_violation`
+       — **daba «verde» por la razón equivocada**: probaba que la tabla exige una
+       clave, no que el sujeto sea obligatorio.
+       *Un rojo por la causa equivocada está tan roto como un verde por la causa
+       equivocada.* Por eso el `EXCEPTION` atrapa SOLO `check_violation`: si
+       vuelve a rebotar por otra cosa, la migración se cae y se ve. */
+    INSERT INTO pagos_intentos
+      (pedido_id, cita_id, proveedor, monto, moneda, forma, estado, clave_idempotencia)
+      VALUES (NULL, NULL, 'nuvei', 1, 'USD', 'tokenizacion', 'pendiente',
+              'cinturon:' || gen_random_uuid()::text);
     RAISE EXCEPTION 'CINTURON: se pudo crear un intento SIN sujeto';
   EXCEPTION WHEN check_violation THEN NULL;
   END;
