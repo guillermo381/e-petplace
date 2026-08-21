@@ -79,10 +79,35 @@ viaja en el render). **La consigue la MESA por Erick — hilo activo.**
 
 *Es la disciplina de `LETRA_DEUNA` §12: **se preguntan, no se adivinan.***
 
+### 🔴 ⑤ SUBE DE PRIORIDAD — **AHORA BLOQUEA UNA LETRA** *(enlace inverso, 21-ago)*
+
+**`LETRA_COBRO_RECURRENTE` v1.0 §6 depende de esta ficha, y lo dice con todas
+las letras:**
+
+> *«mientras “no aprobado con causa conocida” y “no aprobado sin causa”
+> compartan etiqueta, este aviso no puede distinguir **“tu tarjeta venció,
+> actualizala”** de **“hubo un problema, escribinos”**. Esta letra depende de esa
+> separación para cumplir su §6.»*
+
+**Y en el cobro recurrente el costo es mayor que en el cobro presente, por una
+razón de forma:** *en un cobro con el cliente mirando, una voz genérica lo
+frustra pero él está ahí y puede reintentar.* **En una serie, el cliente NO está
+mirando: el aviso de fallo es su único contacto con el problema.**
+
+> ### **Un aviso que no puede decir «actualizá tu tarjeta» convierte un cobro recuperable en una serie pausada — y en un cliente que no vuelve.**
+
+*Es la diferencia entre recuperar el cobro y perder al cliente, decidida por una
+etiqueta.*
+
+**⇒ Esta ficha deja de ser solo un defecto del registro y pasa a ser una
+PRECONDICIÓN de la construcción del cobro recurrente.**
+
 > **Dueño:** la cura es **motor → pista A**; **la tabla es de la mesa (Erick)**.
-> **☠️ DISPARO: la ventana de certificación** — cuando haya rechazos reales de un
-> tarjetahabiente, cada uno mal clasificado es un cliente perdido y un ticket
-> falso.
+> **☠️ DISPARO — DOS, y el segundo llega antes:**
+> ① **la ventana de certificación** — cada rechazo real mal clasificado es un
+> cliente perdido y un ticket falso.
+> ② 🔴 **la construcción del cobro recurrente**, que no puede cumplir su §6 sin
+> esta separación.
 > **☠️ MUERTE:** un no-aprobado con causa conocida y uno sin causa **se
 > distinguen en el registro y en la salida**, y se pueden contar por separado.
 > **Se cruza con:** `LETRA_MOTOR_PAGOS_S101` §7 (la ley que hoy no se cumple
