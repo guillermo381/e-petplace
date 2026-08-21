@@ -366,9 +366,14 @@ medición y la conclusión:**
 
 ---
 
-## ⑧bis · LAS DOS LECCIONES QUE LA MESA MANDÓ FUNDAR — **SIN NÚMERO** *(A asigna; `L-332` y `L-333` dan cero en los dos árboles al 21-ago, pero eso REDUCE la ventana y no la cierra)*
+## ⑧bis · LAS DOS LECCIONES QUE LA MESA MANDÓ FUNDAR — **`L-332` y `L-333`**
 
-### ⓐ — **CAPA QUE BORRA ≠ SUPERFICIE EQUIVOCADA. SE CURAN DISTINTO.**
+> ✅ **Números asignados por A el 21-ago**, medidos en su worktree **y** contra
+> `origin/pista/s102-b`. **Y lo asignó ella por ser la dueña del territorio de
+> `DEUDAS_CANONICAS.md`** — que es exactamente lo que `L-331` pide y lo que
+> **ninguno de los dos podía cerrar midiendo solo**.
+
+### `L-332` — **CAPA QUE BORRA ≠ SUPERFICIE EQUIVOCADA. SE CURAN DISTINTO.**
 
 **Dos familias que se confunden porque las dos terminan en un verde falso:**
 
@@ -403,7 +408,7 @@ manifest tenía sus cuatro claves— **mientras la APK no traía
 
 ---
 
-### ⓑ — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR**
+### `L-333` — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR**
 
 > ### **Un verde que promete de más es el que nadie vuelve a mirar.**
 
@@ -424,6 +429,60 @@ salir verde con la cosa rota?* **Si sí, la línea promete de más.**
 medición estaba bien y la prueba real ya existía en otro bloque** — *lo único
 equivocado era el rótulo.* **Curar la voz no debilitó nada: hizo visible dónde
 vivía la prueba.**
+
+---
+
+### ⓒ — **UN CONTROL DE INSTRUMENTO EXIGE UN VEREDICTO, NO UNA DETECCIÓN** *(sin número — a la confirmación de A)*
+
+> ### **Probar que el termómetro marca no es probar que el médico diagnostique.**
+
+**Es la generalización de `L-333`:** allá la VOZ prometía más que la medición;
+acá **el CONTROL cubre menos que el instrumento**. *En las dos el verde es
+cierto y no alcanza.*
+
+**El caso que la funda, medido sobre `verify-apk-contenido.mjs`:** su
+`--autoprueba` corría **solo el detector** (`traeBundle`) y verificaba que
+reconociera una APK sin bundle.
+
+> **Podía dar VERDE mientras el juez daba un FALSO VERDE sobre la MISMA APK.**
+> *La APK mala no trae bundle → el detector la detecta → verde. Y el juez, sobre
+> esa misma APK, entraba por una rama que leía el `package.json` de hoy → verde
+> también.* **Los dos verdes ciertos, y el conjunto mintiendo.**
+
+**Lo que la vuelve exigible, en una pregunta:** *¿el control ejercita la DECISIÓN
+del instrumento, o solo una de sus partes?* **Si solo mide una parte, su verde
+no dice nada sobre el veredicto** — y el veredicto es lo único que alguien va a
+leer.
+
+**Su forma correcta:** el control le pasa el caso malo **al juez entero** y
+**exige un veredicto no-verde**. *(Aplicado por A el mismo día: su autoprueba
+ahora corre `juzgarApk()` completo y exige rojo o no concluyente.)*
+
+**Y su parienta directa, que la casa ya tenía:** `L-330` —*un cero sin control
+positivo no es un cero*—. **Acá el hueco no es el control que falta: es el
+control que existe y cubre la mitad de abajo.**
+
+---
+
+### 📐 PRINCIPIO REGISTRADO — **LA CURA ES CORTAR UNA FUGA, NO AMPUTAR UNA FUNCIÓN** *(dictamen de mesa, 21-ago)*
+
+**Nace de la revisión del juez de A.** Su rama dev-client tenía **una línea** que
+leía el repo dentro de un juez que mira el ZIP. **La salida propuesta era borrar
+la rama entera; la correcta era cortar esa línea.**
+
+**Por qué la amputación era peor, y no es un argumento de elegancia:** borrar la
+rama ponía el guard en **ROJO sobre una clase entera de artefactos legítimos**
+—una dev build sana no trae bundle y arranca perfecto—.
+
+> ### **Y un guard que da rojo sobre lo legítimo es el guard que alguien empieza a saltear — y ahí pierde también los casos que sí detectaba.**
+>
+> *Es la mecánica exacta de la **regla 87 · SALTAR_GATE**: un rojo conocido se
+> vuelve la llave de todos los demás.*
+
+**El discriminador que probó la cura, y lo corrió A:** *la misma APK sin bundle
+que antes pasaba **VERDE** ahora sale **NO CONCLUYENTE**.* **Mismo objeto,
+veredicto opuesto** — el arreglo probado contra el caso que lo motivó, no contra
+la confianza de quien lo hizo.
 
 ---
 
