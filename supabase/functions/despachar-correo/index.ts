@@ -112,6 +112,12 @@ type Datos = {
      *Es motor-sin-puerta en la capa de plantilla, y la lección es del
       instrumento: yo verifiqué la MATERIA PRIMA (la fila de la intención) y
       el requisito habla del ARTEFACTO (el correo renderizado).* */
+  /* 🔴 QUÉ SE PAGÓ. **Medido el 20-ago: el comprobante no lo decía.** Llevaba
+     título, comercio, monto y códigos — y dos correos de compras distintas
+     solo se distinguían por el nombre del comercio.
+     *Un respaldo de transacción que no dice qué se pagó obliga a deducirlo del
+     nombre del negocio, y el que lo lee puede deducir mal.* */
+  concepto?: string;
   transaction_id?: string;
   authorization_code?: string;
   monto?: number | string;
@@ -134,6 +140,8 @@ function bloqueCodigosPago(d: Datos): string {
   /* 🔴 Los dos códigos que la certificación exige, **en MONO**: son voz de
      máquina, y el que los va a leer los está comparando carácter por carácter
      contra un estado de cuenta. */
+  /* El concepto va PRIMERO: es lo que la persona busca cuando abre el correo. */
+  if (d.concepto) filas.push(['Concepto', d.concepto, false]);
   if (d.monto !== undefined && d.monto !== null)
     filas.push(['Monto', `${d.moneda ?? 'USD'} ${Number(d.monto).toFixed(2)}`, true]);
   if (d.transaction_id) filas.push(['Transacción', d.transaction_id, true]);
