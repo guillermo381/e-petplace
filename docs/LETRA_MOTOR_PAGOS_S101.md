@@ -4,7 +4,7 @@
 
 ---
 
-> **Versión:** v1.4 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick, después el estatuto de la compuerta 3) · **21-ago-2026 (lo que la construcción enmendó — §10)** · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
+> **Versión:** v1.5 · **Abierta:** 19-ago-2026 · **Enmendada:** 19-ago-2026 (E1-E7, después las tres calibraciones de Erick, después el estatuto de la compuerta 3) · **21-ago-2026 (lo que la construcción enmendó — §10)** · **21-ago-2026 · v1.5: el censo ⑧ apuntaba a una tabla inexistente — `seller_comisiones` borrada, `D-748` cerrada, rige solo `fee_configs`** · Sesión **S101 · LOS PAGOS** · **UNA SOLA PISTA**
 > **Fuente de las decisiones:** acta de apertura S101 · `planintegracionnuveiepetplace.md` (censo ③ ejecutado 19-ago) · firmas del founder de esta jornada.
 >
 > **Qué autoriza:** construir el motor de cobro **hasta el punto en que el pedido queda pagado**.
@@ -38,7 +38,21 @@ Qué hay que medir, y el resultado se escribe aunque sea "no existe":
 5. **`confirmar_pago_pedido`** — verificar que sigue revocada de `authenticated` (D-764). Si no lo está, es hallazgo rojo y se reporta antes de seguir.
 6. **Tablas que ya nacieron para esto** — cualquier `payments`, `pagos`, `transacciones`, `webhook_events` preexistente. **El peor resultado posible es crear una tabla al lado de una que ya existe.**
 7. **Los estados del pedido** — la escalera de cuatro y qué los dispara.
-8. **`fee_configs` y `seller_comisiones`** — solo LEER y reportar los números vivos (D-748: el 20 %). **No se toca nada:** es territorio de S102.
+8. ~~**`fee_configs` y `seller_comisiones`** — solo LEER y reportar los números vivos (D-748: el 20 %).~~ **No se toca nada:** es territorio de S102.
+   > 🔴 **ENMIENDA S101-D (21-ago-2026) — `seller_comisiones` YA NO EXISTE.**
+   > `to_regclass('public.seller_comisiones')` → **NULL**: la borró
+   > `20260811120000_s95_m1_limpieza_comercio.sql:129`, que la nombra por número.
+   > **`D-748` queda CERRADA** (pagada por eliminación del objeto).
+   > ⇒ **De este punto rige solo `fee_configs`**, con **el 10 % firmado y su base
+   > declarada** — *el 20 % no tiene dónde vivir.*
+   > **La cláusula «no se toca nada: es territorio de S102» SIGUE VIGENTE** y es
+   > lo único de este punto que no cambió.
+   >
+   > *Se enmienda con marca en vez de borrarse porque **esto es letra viva, no
+   > bitácora**: una ley que manda leer un objeto muerto envía a la próxima
+   > sesión a buscar plata donde no hay tabla. Distinto es el REPORTE de haberlo
+   > hecho —`S101-A.md:17`, ⑦ VERDE— que **no se reescribe: es una orden
+   > cumplida y su registro es correcto.*** Hallazgo: **S102-B**.
 
 ---
 
@@ -515,6 +529,23 @@ acá queda **solo el porqué del lado del motor**.
 ---
 
 ## Historial
+
+- **v1.5 (21-ago-2026, S101-D · dictamen de mesa, relevo 5):** el **punto ⑧ del
+  censo** mandaba *«leer y reportar los números vivos de `fee_configs` y
+  `seller_comisiones` (D-748: el 20 %)»* — **y `seller_comisiones` no existe
+  desde el 11-ago**: `to_regclass` → NULL, la borró
+  `20260811120000_s95_m1_limpieza_comercio.sql:129`, que la nombra por número.
+  **`D-748` queda cerrada; de ese punto rige solo `fee_configs` con el 10 %
+  firmado y su base declarada.** El literal viejo va **tachado y no borrado**, y
+  **la cláusula «no se toca nada: es territorio de S102» sigue vigente** — es lo
+  único del punto que no cambió.
+  > **Por qué esta línea se enmienda y el reporte de S101-A NO:** *una ley viva
+  > que manda leer un objeto muerto envía a la próxima sesión a buscar plata
+  > donde no hay tabla; un reporte de haberlo hecho —`S101-A.md:17`, ⑦ VERDE,
+  > que dice exactamente que no existe— es una **orden cumplida**, y una orden
+  > cumplida no se reescribe.* **La distinción es de clase, no de prolijidad:
+  > letra viva se enmienda, bitácora se conserva.**
+  > Hallazgo: **S102-B** (censo transversal) · depósito y enmienda: **S101-D**.
 
 - **v1.4 (21-ago-2026, cierre S101-B/C):** nace **§10 · lo que la construcción enmendó** — el concepto del comprobante (con su fail-closed y el agregado que siempre contesta) · el comprobante único entre productores (`sujeto_id`, no `compra_id`) · **la ley del actuador SERVER y su variante grave: un sujeto desconocido no falla, se IGNORA** · `ignora_techo` con puntero a su fuente única. *No las decidió la mesa: las impuso el objeto.*
 
