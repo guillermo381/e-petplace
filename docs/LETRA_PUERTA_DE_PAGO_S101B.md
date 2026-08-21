@@ -1,6 +1,6 @@
 # LETRA_PUERTA_DE_PAGO_S101B.md — e-PetPlace
 
-> **Versión:** v1.3 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias · el alta nace al tocar) · **21-ago-2026 (la superficie es UNA — §8)** · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
+> **Versión:** v1.4 · **Nace:** 19-ago-2026 · **Enmendada:** 20-ago-2026 (el alias · el alta nace al tocar) · **21-ago-2026 (la superficie es UNA — §8bis)** · **21-ago-2026 · v1.4 CURA EDITORIAL: el segundo `§8` pasa a `§8bis` y su hijo a `§8ter` — CERO cambios de contenido** · Sesión **S101-B · LA SUPERFICIE DEL PAGO** · **Fase 0**
 > **Fuentes que obedece (en este orden):** el repo y la base · `LETRA_MOTOR_PAGOS_S101.md` **v1.3** · `LETRA_SALDO.md` **v1.1** · `docs/loop/S101-A.md` · el acta de apertura S101-B · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO`.
 > **Regla de precedencia:** si esta letra contradice a la fuente, **gana la fuente** y la letra se enmienda con su marca.
 >
@@ -302,7 +302,7 @@ El cierre de S101-A declaró *«cuatro sentidos de la misma palabra, dos de ello
 
 ---
 
-## §8 · LA SUPERFICIE DE PAGO ES **UNA PIEZA** (21-ago-2026, orden del founder)
+## §8bis · LA SUPERFICIE DE PAGO ES **UNA PIEZA** (21-ago-2026, orden del founder)
 
 > Esta letra decía **qué** ve la familia cuando paga. Le faltaba decir
 > **cuántas veces está escrito**.
@@ -344,7 +344,7 @@ y el de la otra era chico y vivía suelto en el scroll.
 declarado — *mide que las dos pantallas MONTEN la misma pieza, jamás que se
 vean igual.*
 
-### §8bis · LA PÁGINA DEL ALTA TAMBIÉN ES LA CASA
+### §8ter · LA PÁGINA DEL ALTA TAMBIÉN ES LA CASA
 
 **El barrido del CTA recorrió la app y la página del alta quedó afuera.**
 *Un CTA que cambia de color en la casa y no en la puerta de al lado deja de ser
@@ -356,6 +356,33 @@ para los dígitos, voz de la casa para lo que le habla a la persona**.
 ---
 
 ## Historial
+
+- **v1.4 (21-ago-2026, S101-D · orden de mesa — CURA EDITORIAL, CERO CONTENIDO):**
+  esta letra tenía **DOS secciones numeradas `§8`** —`EL VOCABULARIO DE LA PLATA`
+  (que sigue siendo `§8`) y `LA SUPERFICIE DE PAGO ES UNA PIEZA`, agregada en la v1.3
+  **después** de `§9` y `§10` sin ver que el número estaba tomado—. **El mapeo, para
+  que nadie relea de memoria:**
+
+  | Antes | Ahora |
+  |---|---|
+  | `§8 · EL VOCABULARIO DE LA PLATA` | **`§8` — sin cambio** |
+  | `§8 · LA SUPERFICIE DE PAGO ES UNA PIEZA` | **`§8bis`** |
+  | `§8bis · LA PÁGINA DEL ALTA TAMBIÉN ES LA CASA` | **`§8ter`** |
+
+  ⚠️ **La mesa ordenó «el segundo §8 pasa a §8bis» sin el dato de que `§8bis` YA
+  EXISTÍA como hijo de esa misma sección.** Medido antes de tocar; se aplicó la
+  resolución que **conserva la intención de la orden** (la sección nombrada recibe el
+  nombre que la mesa le dio) **y corre al hijo a `§8ter`**, que se lee como su
+  continuación natural. **Citadores externos medidos: solo los dos documentos de
+  S101-D**, curados en el mismo commit. **Reversible por una línea si la mesa
+  prefiere `§11`.**
+
+  *El porqué de curarlo y no dejarlo: `PLAN_MESA_103` cita «§8» con los DOS sentidos
+  —`LETRA_SALDO`/vocabulario en su §5, la pieza única en su cola A1— y `R57` vigila
+  la segunda. **Una referencia ambigua cuyo modo de falla es el silencio** —quien la
+  siga llega a la sección equivocada y no recibe ningún error— es la misma clase de
+  deuda que dos letras firmadas contradiciéndose, más chica.* **Ni una coma del
+  cuerpo se tocó: solo tres encabezados y esta entrada.**
 
 - **v1.3 (21-ago-2026, cierre S101-B/C · orden del founder):** nace **§8 · la superficie de pago es UNA PIEZA** (los siete puntos, con `R57` vigilándolo y su límite declarado) y **§8bis · la página del alta también es la casa**. La enmienda ④ registra la trampa medida: *preseleccionar la primera habría resucitado el andamio de «la más reciente» por la puerta de una cura de coherencia.*
 

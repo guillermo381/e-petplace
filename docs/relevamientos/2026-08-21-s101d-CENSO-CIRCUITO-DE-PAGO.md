@@ -1,6 +1,8 @@
 # CENSO A0 · EL CIRCUITO DE PAGO CONTRA LA LEY VISUAL
 
-> **S102-A** · 21-ago-2026 · Frente A de la **MESA 103** · `PLAN_MESA_103` §2-A0
+> **S101-D** · 21-ago-2026 · Frente A de la **MESA 103** · `PLAN_MESA_103` §2-A0
+> *(nació como `S102-A`; renumerada por dictamen de mesa — la pasada es del mismo
+> arco que S101-B/C y `S102` queda íntegra para la plata. Ver `docs/loop/S101-D.md`.)*
 > **Contra qué se midió:** `DIRECCION_ARTE` §9bis · skill `epetplace-design-system`
 > (Leyes 1–23 + diccionario 19.x) · `DIRECTIVA_CRAFT_CLIENTE` ·
 > `LETRA_PUERTA_DE_PAGO_S101B` v1.3 · las cinco marcas del **gate ⑤** firmadas por
@@ -57,10 +59,10 @@ el de la cola A1 del plan; el estado corrige a la cola donde la fuente lo exige.
 
 | # | Marca (cola A1) | Su ley | Estado MEDIDO |
 |---|---|---|---|
-| **1** | Botón ocre en agregar tarjeta | **Ley 21 · enmienda S82 (el ORO `#FCBC1D`, label en tinta)** + `LETRA_PUERTA_DE_PAGO` §8bis | ✅ **YA HECHO — no es trabajo pendiente.** `index.html` L38-39 declara `--cta:#FCBC1D; --cta-letra:#221E19` y **L139 lo consume**: `background:var(--cta);color:var(--cta-letra)`. Lo ejecutó **S101-C** (`a3b5d4f1`). ⇒ **pasa de COLA a GATE**: se mira, no se construye |
-| **2** | Assets oficiales de franquicia | Ley 12 + `DIRECCION_ARTE` §6b (gobernanza del set) | 🔒 **BLOQUEADO POR OBJETO AUSENTE.** `logo-franquicia.tsx` L34-40 ya tiene el mapa (VISA·MC·DINERS·AMEX·DISC) y la caja consistente (`ANCHO 56 · ALTO 32`, L50-51); **no hay un solo asset en el repo** y la rama que devolvería `null` **no existe** — todas caen al texto por diseño. **Dueño: FOUNDER** (depositar los archivos). *Precedente exacto: las tres referencias de S99 que no estaban en el repo y NO se adivinaron* |
+| **1** | Botón ocre en agregar tarjeta | **Ley 21 · enmienda S82 (el ORO `#FCBC1D`, label en tinta)** + `LETRA_PUERTA_DE_PAGO` §8ter | ✅ **YA HECHO — no es trabajo pendiente.** `index.html` L38-39 declara `--cta:#FCBC1D; --cta-letra:#221E19` y **L139 lo consume**: `background:var(--cta);color:var(--cta-letra)`. Lo ejecutó **S101-C** (`a3b5d4f1`). ⇒ **pasa de COLA a GATE**: se mira, no se construye |
+| **2** | Assets oficiales de franquicia | Ley 12 + `DIRECCION_ARTE` §6b (gobernanza del set) | 🔒 **BLOQUEADO POR OBJETO AUSENTE.** `logo-franquicia.tsx` L34-40 ya tiene el mapa (VISA·MC·DINERS·AMEX·DISC) y la caja consistente (`ANCHO 56 · ALTO 32`, L50-51); **no hay un solo asset en el repo** y la rama que devolvería `null` **no existe** — todas caen al texto por diseño. **Dueño: FOUNDER — el kit de marcas YA ESTÁ PEDIDO a Nuvei** (relevo 2). 🔴 **El fallback de texto NO SE TOCA mientras tanto**: al llegar los archivos *cambia el interior de la caja y nada más*. *Precedente exacto: las tres referencias de S99 que no estaban en el repo y NO se adivinaron* |
 | **3** | La elegida inconfundible | **L-b** (dosis del relleno) + **19.8** (el eje: se rellena lo que existe) | 🟡 **PARCIAL.** S101-C ya ejecutó §8③ («Cambiar ›», ☠️ murió «Elegido») y §8④ (la fila **jamás finge** una elegida). **Lo que la marca ④ del gate ⑤ pedía —que la elegida se DISTINGA— es juicio de píxeles, no de código.** ⇒ **al gate del ojo**; construir a ciegas contra L-b sería inventar la dosis |
-| **4** | Columnas del comprobante cuando el valor envuelve | Ley 3 (voz) + Ley 18 (estructura) | 🔄 **CAMBIA DE TERRITORIO, y hay que decirlo: el comprobante NO ES UNA PANTALLA.** Vive en `despachar-correo` L154-158 (`<tr>` de dos `<td>`), con `font-size` y `line-height` **inline** (L156-157) porque **una edge function no puede importar tokens**. ⇒ no es una marca de la pasada de UI: es HTML de correo. *Su clase de defecto sí es conocida: es el mismo «DINER / S» que S101-C curó midiendo contra la palabra más larga* |
+| **4** | Columnas del comprobante cuando el valor envuelve | Ley 3 (voz) + Ley 18 (estructura) | ➡️ **REASIGNADA A PISTA B — sale de la cola de A, NO se borra** *(dictamen de mesa, relevo 2)*. **El comprobante no es una pantalla:** vive en `supabase/functions/despachar-correo/index.ts` L154-158 (`<tr>` de dos `<td>`), con `font-size` y `line-height` **inline** (L156-157) porque **una edge function no puede importar tokens**. Es **territorio server**. *Su clase de defecto sí es conocida y viaja con el puntero: es el mismo «DINER / S» que S101-C curó midiendo contra la palabra más larga + `numberOfLines` — acá el equivalente es medir la etiqueta más larga de L137-149 y decidir el ancho de la columna, jamás dejar que envuelva sola* |
 | **5** | La voz vieja del éxito | **Ley 17.3** (una acción, un nombre, todo el flujo) + Ley 17.4 | 🔴 **VIVA Y LOCALIZADA: `apps/cliente/src/i18n/es.ts:1858`** — *«Te avisamos cuando el vendedor lo confirme. Puedes seguirlo en Tus pedidos.»* **Describe el mundo anterior al motor**: hoy lo que se confirma es **el PAGO** (webhook/barrido), no el vendedor. Su vecindad ya dice la verdad (`pago.esperaTitulo` = «Estamos confirmando tu pago») ⇒ **la línea quedó sola contra su propio namespace** |
 | **6** | Sección bajo el fold · título truncado | §9 composición + Ley 18 | 🟡 **NO MEDIBLE LEYENDO.** §8② puso la sección dentro de `Tarjeta` y §8① el pie fijo — si **hoy** sigue naciendo bajo el fold es cuestión de alto de pantalla y de contenido. ⇒ **exige dispositivo con pedido FRESCO** (`D-851`: toda medición usa compra fresca) |
 | **7** | **D-857** — el voseo restante | **regla 27 / L-148** (la app habla en tuteo) | 🔴 **RE-MEDIDO: son 32 cadenas, no 10.** Detalle y método en §6 |
@@ -73,7 +75,7 @@ el de la cola A1 del plan; el estado corrige a la cola donde la fuente lo exige.
 | **N1** | Los **cuatro checkouts de oficio** pintan texto con `<Text style={{fontFamily: typography…}}>` crudo en vez de `<Texto variante>` | **Ley 1** (cero valores crudos donde hay componente) + la razón de existir de `Texto` (S71: *la jerarquía se re-decide a mano en cada pantalla*) | `paseo/checkout.tsx` L82·L102·L120-123 · `grooming` L106·L134·L144·L165-168 · `veterinaria` L103·L111·L139·L156-159 · `adiestramiento` L59-61 |
 | **N2** | `checkout-reserva.tsx` — tipografía cruda y **un número mágico fuera de `spacing`** | Ley 1 + Ley 3 | L298 (`fontFamily`+`fontSize` inline) · L317/L320 (mono + `tabular-nums`) · **L316 `gap: 2`** |
 | **N3** | **Dos claves huérfanas** y **un encabezado que dejó de ser cierto** | **Ley 37** (lo que sale de la UI sale del código) + honestidad §0 de la letra | `es.ts:1319` `medioElegido: 'Elegido'` — su propio vecino la declara MUERTA (L1484-1486) · `es.ts:1449` `pagosMetodosPronto` («el pago es simulado») · 🔴 **`app/(tabs)/cuenta/pagos.tsx` L1-9 sigue diciendo en su encabezado que el pago es simulado, con el motor real vivo** — *es `D-855` en su forma de comentario: una banda que dejó de ser cierta* |
-| **N4** | 🔴 **Una línea en VOSEO dentro de la superficie de pago, fuera del riel i18n** | regla 27 / L-148, **alcanzada por `LETRA_PUERTA_DE_PAGO` §8bis** (*la página del alta también es la casa*) | **`apps/pagos-web/src/index.html:472`** — *«…probá de nuevo en un momento.»* **Es la ÚNICA disidente**: las otras 19 voces de esa página son tuteo (`Prueba`·`Puedes`·`Revisa`·`Escríbelo`·`Ponle`·`Vuelve`). **NO cuenta en D-857**, cuyo territorio declarado es `es.ts` |
+| **N4** | 🔴 **Una línea en VOSEO dentro de la superficie de pago, fuera del riel i18n** | regla 27 / L-148, **alcanzada por `LETRA_PUERTA_DE_PAGO` §8ter** (*la página del alta también es la casa*) | **`apps/pagos-web/src/index.html:472`** — *«…probá de nuevo en un momento.»* **Es la ÚNICA disidente**: las otras 19 voces de esa página son tuteo (`Prueba`·`Puedes`·`Revisa`·`Escríbelo`·`Ponle`·`Vuelve`). **NO cuenta en D-857**, cuyo territorio declarado es `es.ts` |
 
 ---
 
@@ -82,12 +84,14 @@ el de la cola A1 del plan; el estado corrige a la cola donde la fuente lo exige.
 *Se listan porque callarlos sería peor; se dejan sin ejecutar porque marcarlos sin
 ley sería exactamente lo que §0bis de la directiva prohíbe.*
 
-1. **La página del alta tiene 20 literales de voz DUROS, fuera del riel i18n**
-   (`index.html` L7·L170-193·L262-472). **La app es es/en desde el día 1; esta
-   página es solo-es.** No hay ley que obligue a i18n en una superficie web fuera
-   del monorepo de apps — y §8bis la declara «la casa» sin decir nada del idioma.
-   **La pregunta que el gate tiene que responder: ¿una familia con el teléfono en
-   inglés cruza a una pantalla en español para dar su tarjeta?**
+1. ~~**La página del alta tiene 20 literales de voz DUROS, fuera del riel i18n.**~~
+   ✅ **RESUELTO — YA NO ES CANDIDATO. FIRMA DEL FOUNDER (21-ago-2026):
+   *el circuito de pago habla LOS DOS idiomas de la app (es/en)*.** Pasa a **ley**,
+   y la página del alta pasa de candidato a **trabajo de cola**. *La pregunta que
+   este candidato hacía —«¿una familia con el teléfono en inglés cruza a una
+   pantalla en español para dar su tarjeta?»— la contestó la firma.*
+   ⇒ **Su alcance no se supone: lo fija el censo de perímetro de §4bis**, que la
+   propia firma ordenó correr ANTES de construir.
 2. **Los hex del comprobante no declaran su deuda.** La web SÍ lo hace, y con todas
    las letras (L33-37: *«LOS HEX VAN COPIADOS… deuda declarada, no descuido»*).
    `despachar-correo` L46-56 los copia igual **y no dice nada**. *No es un defecto
@@ -105,6 +109,53 @@ para que quien toque ese archivo lo vea.
 
 ---
 
+## §4bis · EL PERÍMETRO DE LA BRECHA i18n — *ordenado por la firma, corrido ANTES de construir*
+
+> **Qué mide:** toda pieza del circuito de pago que vive **FUERA** del sistema de
+> tokens es/en de la app. **Y para cada una, la pregunta que decide el trabajo:
+> ¿de dónde RECIBE el idioma?** — porque *una pieza que lo adivina es una pieza que
+> se va a equivocar en silencio.*
+
+### 🔴 EL HALLAZGO QUE REPARTE EL TRABAJO, y ACHICA la mitad server
+
+**El riel de idioma del correo YA EXISTE y NO SE USA.** `despachar-correo` L390-397
+lee `user_preferencias.idioma` del **destinatario** y se lo pasa a
+`plantillaHtml(d, tipo, idioma)`. **Medido: dentro de la plantilla `idioma` se usa
+en UN solo lugar — el atributo `<html lang>` (L212). El cuerpo entero está en
+español duro.**
+
+> *El correo se DECLARA en inglés y escribe en español.* Eso no es una brecha
+> pendiente: es una **afirmación falsa en un atributo**, y es peor que no declarar
+> nada — un lector de pantalla y un cliente de correo le creen al `lang`.
+
+⇒ **La mitad B no es «construir el riel»: es USAR el que ya llega.** *Motor sin
+puerta en su forma de idioma* (`L-318`): la pieza construida, correcta, y
+desconectada del único lugar donde su resultado importa.
+
+### El perímetro, pieza por pieza
+
+| # | Pieza fuera del riel | Por qué está fuera | Terr. | **Cómo RECIBE el idioma** | Estado medido |
+|---|---|---|---|---|---|
+| **P1** | **Página del alta** — 20 literales duros (`apps/pagos-web/src/index.html` L7 · L170-193 · L262-472) | HTML plano servido por Vercel: **no puede importar `@epetplace/i18n`** (mismo motivo por el que copia los hex, declarado en su L33-37) | **A** | 🔴 **HOY NO LO RECIBE.** `app/pagos/alta-tarjeta.tsx:72` arma `${BASE}?alta=<id>` — **sin `lang`**; `lib/pagos/alta-tarjeta.ts:48` tampoco lo pasa. **La app SÍ sabe el idioma** (riel i18n vivo). ⇒ **viaja por la URL, como el `alta`.** ⚠️ **Jamás `navigator.language`**: el WebView reporta el locale del sistema, **no la preferencia elegida en la app**, y `D-316` existe justamente porque son cosas distintas | 🔴 **solo-es** |
+| **P2** | **Comprobante** — etiquetas de columna (`despachar-correo` L137-149: *Mascota · Con · Fecha · Concepto · Monto · Transacción · Autorización · Hora*) + `'USD'` por defecto (L146) | edge function Deno: no importa tokens ni el riel | **B** | ✅ **YA LO RECIBE** (L390-397 → parámetro `idioma`) | 🔴 **llega y no se usa** |
+| **P3** | **El resto del cuerpo del correo**, todas las plantillas por `tipo` | ídem P2 | **B** | ✅ **YA LO RECIBE** — mismo parámetro | 🔴 misma brecha, **alcance mayor que P2**: el comprobante es una sección de un correo que entero está en español |
+| **P4** | **`despachar-push`** L205-206 — fallbacks `'Tienes una novedad en e-PetPlace'` / `'Abre la app para verla.'` | edge function | **B** | ✖️ **no lee idioma** | 🟡 **su voz principal NO es suya**: sale de `datos.titulo`/`datos.mensaje` del **encolador** (L31). ⇒ el idioma del push se decide **donde se encola**, fuera del circuito de pago. **Solo los dos fallbacks son territorio de esta ficha** |
+
+### Lo que el perímetro NO alcanza, declarado
+
+- **La voz encolada del push** (quien escribe `datos.titulo`): es del motor de
+  notificaciones, no del circuito de pago. **Se nombra para que la mesa lo reparta,
+  no se adopta.**
+- **El SDK del proveedor dentro de la página del alta**: sus campos alojados los
+  rotula **Nuvei**, no nosotros. *Su idioma es una pregunta para el proveedor —
+  posiblemente un parámetro de init— y ninguna medición nuestra lo resuelve.*
+  🔴 **Consecuencia honesta: aunque P1 se cure entera, el formulario de la tarjeta
+  puede seguir en español.** Que nadie declare la brecha cerrada sin ese dato.
+- **Cero verificación de que las traducciones EXISTAN**: este censo mide el
+  perímetro y la cañería, **no el inventario de cadenas `en` que habría que escribir**.
+
+---
+
 ## §5 · LO QUE EL CENSO LE CORRIGE AL PLAN
 
 *La cláusula de precedencia del plan («si contradice al repo, gana la fuente») se
@@ -114,11 +165,13 @@ ejerció **tres veces**, y las tres ACHICAN el trabajo:*
 |---|---|---|
 | **1 · botón ocre** | trabajo pendiente | **ya ejecutado en S101-C** — pasa a gate |
 | **2 · assets de franquicia** | *«cambia el interior de la caja y nada más»* | correcto **y bloqueado**: el objeto no existe en el repo. **Dueño founder** |
-| **4 · columnas del comprobante** | ítem de la pasada de UI | **el comprobante es un correo server-side** — otro territorio, otras herramientas |
+| **4 · columnas del comprobante** | ítem de la pasada de UI | **el comprobante es un correo server-side** ⇒ **REASIGNADO A PISTA B con puntero** (dictamen de mesa, relevo 2), no borrado |
 
-⇒ **De los ocho ítems, los que quedan como trabajo de pantalla son 5, 6, 7 y las
-cuatro marcas nuevas N1-N4.** *Tres se disolvieron al medirlos — el mismo reparto
-que S101 registró con sus siete frenos.*
+⇒ **De los ocho ítems, los que quedan como trabajo de pantalla de A son 5, 6, 7 y
+las cuatro marcas nuevas N1-N4.** *Tres salieron de la cola al medirlos —uno hecho,
+uno bloqueado, uno reasignado—: el mismo reparto que S101 registró con sus siete
+frenos.* **Ninguno se «resolvió» achicando el alcance: el ④ tiene dueño nuevo y el
+② tiene dueño humano.**
 
 ---
 
@@ -181,10 +234,14 @@ pista.** *La regla 27 alcanza a las dos apps: lo que falta es el dueño, no la l
 
 | # | Qué | Tipo |
 |---|---|---|
-| 1 | Los **cuatro candidatos de §4** — sobre todo **el idioma de la página del alta** | gate: rigen o se cierran |
-| 2 | **Las 36 del prestador**: ¿ficha propia, o enmienda de alcance de `D-857`? | adjudicación |
-| 3 | **Los assets de franquicia** — depositarlos en el repo | acto del founder |
-| 4 | El **doble §8** de `LETRA_PUERTA_DE_PAGO` v1.3 (dos secciones firmadas con el mismo número) | decisión chica de mesa |
-| 5 | La cola re-ordenada de §5 (5 ítems + N1-N4), tanda por tanda | autorización |
+| 1 | **El reparto del perímetro i18n de §4bis** — P1 es de **A**, P2/P3/P4 son de **B** · y la pregunta que ninguna medición nuestra contesta: **el idioma del formulario del proveedor** | reparto de mesa |
+| 2 | Los **tres candidatos que quedan** en §4 (los hex sin declarar · la URL del isotipo · la caja del logo) | gate: rigen o se cierran |
+| 3 | La cola re-ordenada de §5 (⑤ ⑥ ⑦ + N1-N4 + P1), tanda por tanda | autorización |
+| 4 | ③ **la elegida inconfundible** y ⑧ **la animación** | juicio de píxeles, en dispositivo |
+
+**Ya resueltos por el relevo 2 — no vuelven a la mesa:** el idioma (**firmado: es/en**) ·
+las 36 del prestador (**`D-858`**, dueño la sesión del prestador) · la lección del
+instrumento (**`L-327`**) · la marca ④ (**reasignada a Pista B**) · el doble §8
+(**curado: `§8bis`/`§8ter`, letra a v1.4**) · los assets (**kit pedido a Nuvei**).
 
 *Nada de lo anterior se ejecutó. Se publica lo incompleto, jamás lo falso.*

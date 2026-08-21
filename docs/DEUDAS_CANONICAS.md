@@ -18549,6 +18549,10 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-327** — **UN INSTRUMENTO PUEDE SER CIEGO A LA CLASE ENTERA QUE VINO A MEDIR, Y SU SÍNTOMA ES UN NÚMERO CHICO QUE PARECE UNA BUENA NOTICIA.** Censando el voseo del cliente, el medidor daba **5** cuando el archivo tenía **32**. La causa no era la lista de verbos: **`\b` en JavaScript está definido sobre el alfabeto ASCII**, así que después de una vocal acentuada **no hay frontera de palabra** y `\b(probá)\b` **nunca** matchea «Probá de nuevo». ⇒ **Todo imperativo voseo —que por definición termina en á/é/í— era INVISIBLE**, y solo pasaban las formas terminadas en `s` (`Tenés` · `seguís` · `Pagás` · `vos`). *El instrumento no fallaba al azar: fallaba exactamente en la clase que definía la deuda, y su verde parcial se leía como avance.* **Cura: fronteras por lookaround Unicode (`(?<!\p{L})…(?!\p{L})` con flag `u`), jamás `\b`, en todo censo sobre español.**
+  **② Su gemela del mismo día, que infla en vez de encoger: UNA FORMA QUE LAS DOS VOCES COMPARTEN NO DISCRIMINA NADA.** `vas` y `estás` se leen como voseo y **no lo son** —el verbo es idéntico en tuteo («tú vas a ver» = «vos vas a ver»)—; incluirlos llevó el censo **de 5 a 20 con quince cadenas que no había que tocar**. *Prueba viva en el propio archivo: `es.ts:1326` dice «Vas a borrar… pero **puedes** volver» — tuteo puro con un «vas» adentro.* ⇒ **antes de sumar un token a un censo se pregunta si el token existe también del otro lado; si existe, no mide.**
+  **③ Y LA CONTRAPRUEBA, que es lo reutilizable y lo que cazó ①:** un **barrido de recall independiente** —contar toda palabra terminada en á/é/í dentro de comillas— devolvió `Probá`×7 · `Elegí`×6 · `Ingresá`×2 **contra un instrumento que reportaba 0 de esas formas**. *Dos instrumentos que miden lo mismo y no coinciden: uno está roto, y **el que da el número más chico es el sospechoso**.* Hermana de L-321 (*un censo que devuelve vacío se prueba antes contra un caso con resultado conocido*) — acá el caso conocido lo fabricó el recall, no la memoria. Origen: S101-D.
+
 - **L-326** — **CUANDO EL ORDEN IMPORTA, SE ESCRIBE COMO CINTURÓN Y NO COMO NOTA.** El orden *«REVOKE con el reemplazo listo, JAMÁS antes»* estaba firmado, escrito en la ficha y repetido en la letra — **y aun así el reemplazo no estaba listo cuando llegó el turno de revocar.** *Una precondición que vive en un comentario se cumple mientras alguien la lea; y el día que no la lean es justo el día en que el que ejecuta viene con la orden en la mano y la da por cumplida.* ⇒ La migración del `REVOKE` lleva su precondición como `DO $$ … RAISE EXCEPTION`: si el desglose, el trigger, el actuador o el lector de acceso no están en pie, **aborta con el agujero todavía cerrado**. Y su cinturón de salida lleva **discriminador**: sin él, un `has_function_privilege` que devolviera `false` para todo haría pasar los dos asserts sin medir nada. Origen: S101-C.
 
 - **L-325** — **UN VOCABULARIO CERRADO NO SE AMPLÍA DE PASO.** Tres veces en la misma sesión inventé un valor contra un `CHECK` cerrado —`resultado='recibido_sin_analizar'`, `categoria='pagos'`, `tipo='boolean'`— **porque el valor que necesitaba no estaba y el que había no encajaba**. Las tres veces el `CHECK` tenía razón: *el vocabulario es una decisión de letra, y agregarle un valor para que la migración pase es tomar esa decisión sin que nadie la firme.* La cura correcta es siempre la misma: **usar el valor que ya significa eso, o parar y pedir la letra.** Origen: S101-B.
@@ -18623,6 +18627,43 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-858 🟢 · EL VOSEO DEL PRESTADOR — 36 cadenas, medidas y FUERA del territorio de `D-857`
+> S101-D · 21-ago-2026 · **apareció barriendo el cliente, no buscando el prestador**
+
+La casa habla **tuteo neutro** (regla 27 / L-148) **en las DOS apps** — la ley nunca
+distinguió. Al re-medir `D-857` con instrumento propio se corrió el mismo censo
+sobre los tres diccionarios, y el resultado reparte solo:
+
+| Archivo | Cadenas con voseo |
+|---|---|
+| `apps/cliente/src/i18n/es.ts` | **32** → territorio de `D-857` |
+| **`apps/prestador/src/i18n/es.ts`** | **36** → **esta ficha** |
+| `packages/ui/src/i18n/es.ts` | **0** ✅ *el paquete compartido ya habla tuteo* |
+
+Muestras medidas: *«Volvé a buscar a la mascota y probá de nuevo»* (L2404) ·
+*«No tenés avisos»* (L2844) · *«Aceptá y entrás a tus entregas»* (L3092) ·
+*«Corregilo según el motivo y volvé a proponerlo»* (L3183) · *«Escribí el nombre de
+tu negocio»* (L3669) · *«Elegí al menos un día»* (L3591).
+
+🔴 **Por qué nace ficha propia en vez de ensancharse `D-857`:** su ficha acota el
+territorio a `es.ts` **del cliente**, con nombre y ruta. *Ensanchar el territorio de
+un vocabulario cerrado de paso es exactamente lo que L-325 prohíbe* — y acá el costo
+no es teórico: **son 36 cadenas repartidas en pantallas de otro actor, cada una con
+su gate.** La pasada de diseño del cliente no puede gatearlas.
+
+⚠️ **Y el número se re-mide antes de barrer, con el instrumento curado por `L-327`:**
+`\b` en JS es ASCII y deja invisible **todo** imperativo acentuado; `vas`/`estás` no
+son voseo. **36 salió del instrumento con las cuatro trampas ya pagadas** — pero es
+un conteo de CADENAS, no de pantallas, y quien lo ejecute mide de nuevo sobre su
+árbol.
+
+**Dueño:** **la sesión del prestador** (su pasada de diseño o su próximo lote de
+strings). **Disparo:** cuando esa sesión abra — *no antes: barrer strings de un
+actor cuyas pantallas nadie va a mirar es cómo se queman los gates* (el mismo
+argumento con el que S101-C dejó vivas las suyas a propósito).
+
+---
+
 ### D-857 🟢 · EL VOSEO SOBREVIVIÓ A SU BARRIDA — 17 líneas medidas
 > S101-C · 20-ago-2026 · **apareció comparando las dos puertas de pago**
 
@@ -18646,6 +18687,29 @@ pantalla que habría que volver a mirar.
 ⚠️ **Y la trampa medida, para quien las barra:** el primer censo dio **5** porque
 el regex pedía espacio después del verbo — `Elegí ` con mayúscula al principio
 de la frase no matcheaba. *El número chico no era la deuda: era el instrumento.*
+
+> ### 🔴 ENMIENDA S101-D (21-ago-2026) — **el resto no es 10: son 32.** Y la propia advertencia de arriba se cobró DOS VECES MÁS
+>
+> Se re-midió con instrumento propio, como esta ficha ordenaba. **El resto vivo en
+> `apps/cliente/src/i18n/es.ts` es 32 cadenas**, no 10. El «17 medidas» del título y
+> el «7 curadas» del cuerpo **no se tocan**: son el registro de S101-C y siguen
+> siendo ciertos de lo que S101-C midió con el instrumento que tenía.
+>
+> **Las cuatro trampas del censo, en orden** (la ley que salió de acá es **`L-327`**):
+> ① la de esta ficha (el espacio) · ② **comentarios leídos como voz** —43 falsos: el
+> archivo comenta su propia historia en voseo (L-170)— · ③ **`vas` y `estás` NO son
+> voseo** —el verbo es idéntico en tuteo; incluirlos infló el censo de 5 a 20 con 15
+> cadenas que no hay que tocar, y la prueba viva está en este mismo archivo: `es.ts:1326`
+> dice *«Vas a borrar… pero **puedes** volver»*, tuteo puro con un «vas» adentro— ·
+> 🔴 ④ **`\b` en JavaScript es ASCII**: después de una vocal acentuada no hay frontera
+> de palabra ⇒ `\b(probá)\b` **nunca** matchea «Probá de nuevo», y **todo imperativo
+> voseo era invisible**; solo pasaban las formas terminadas en `s`.
+>
+> **Lo que cazó ④:** un **barrido de recall independiente** devolvió `Probá`×7 ·
+> `Elegí`×6 · `Ingresá`×2 contra un instrumento que reportaba **0** de esas formas.
+>
+> **Territorio confirmado, no ensanchado:** las **36 del prestador** son **`D-858`**,
+> ficha aparte con dueño propio. `packages/ui` está en **0**.
 
 **Dueño:** la pasada de diseño. **Disparo:** su sesión, junto a las cinco marcas
 firmadas del gate ⑤.
