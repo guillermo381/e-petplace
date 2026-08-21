@@ -1859,7 +1859,6 @@ export const clienteEs = {
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
     pagarSimulado: 'Pagar',
-    volverAEditar: 'Volver a editar',
     verTusPedidos: 'Ver tus pedidos',
     faltaItems: 'El carrito está vacío.',
     faltaVendedor: 'Todavía no podemos crear pedidos desde la app: falta conectar el vendedor de la oferta.',

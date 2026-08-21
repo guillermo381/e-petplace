@@ -156,8 +156,12 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
              *   invitar. La primera vez se elige una vez; a partir de ahí
              *   «Cambiar» significa cambiar. */
             <Celda
+              /* 🔴 UNA SOLA VEZ, y no dos. ⏪ Llevaba título **y** subtítulo
+                 diciendo lo mismo —«Elige cómo quieres pagar» arriba en
+                 negrita y «Elige con cuál quieres pagar» abajo—: *la misma
+                 frase dicha dos veces con distinto peso no enfatiza, hace
+                 dudar de si son dos cosas.* (Founder, 21-ago.) */
               titulo={t('pago.elegiMedioTitulo')}
-              subtitulo={t('pago.elegiMedio')}
               interactiva
               accessibilityRole="button"
               onPress={medio.abrirEleccion}

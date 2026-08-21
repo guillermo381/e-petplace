@@ -712,12 +712,18 @@ export default function DespensaCheckout() {
           trabajando={trabajando}
           onPagar={() => void pagar()}
         />
-        <Boton
-          variante="ghost"
-          bloque
-          etiqueta={t('despensa.volverAEditar')}
-          onPress={() => void volverAEditar()}
-        />
+        {/* ☠️ «VOLVER A EDITAR» MURIÓ ACÁ (founder, 21-ago): *«es redundante
+            con la flecha atrás que está arriba y nos tapa de una ojeada el
+            medio de pago»*.
+
+            🔴 **Se midió antes de sacarlo, porque no era obvio:** el botón
+            **cancela los pedidos creados y libera el stock**, y la flecha
+            podría haber sido solo navegación — sacarlo así habría dejado
+            pedidos huérfanos reteniendo mercadería, en silencio.
+            **La medición lo desactivó: `onAtras` YA llama a `volverAEditar()`
+            en la fase `resumen`.** Misma conducta, un control menos.
+            *El freno se disuelve contra el objeto, que es como tiene que
+            terminar un freno que resultó innecesario.* */}
       </>
     ) : fase === 'exito' ? (
       <Boton

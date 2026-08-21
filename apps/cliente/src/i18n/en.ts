@@ -1524,7 +1524,6 @@ export const clienteEn = {
     exitoRetiro: "When it's ready for pickup, you'll see the counter code in the order detail.",
     verTotal: 'See the total',
     pagarSimulado: 'Pay',
-    volverAEditar: 'Back to editing',
     verTusPedidos: 'See your orders',
     faltaItems: 'Your cart is empty.',
     faltaVendedor: "We can't create orders from the app yet: the offer's seller connection is missing.",
