@@ -1302,18 +1302,18 @@ export const clienteEs = {
     //    mismo contrato, y el nombre de la pantalla es la decisión de
     //    arquitectura.
     medios: 'Medios de pago',
-    mediosSub: 'Con qué pagás en e-PetPlace',
-    mediosVacioTitulo: 'Todavía no guardaste ninguno',
-    mediosVacio: 'Guardá una tarjeta para pagar más rápido. Podés borrarla cuando quieras.',
+    mediosSub: 'Con qué pagas en e-PetPlace',
+    mediosVacioTitulo: 'Todavía no guardas ninguno',
+    mediosVacio: 'Guarda una tarjeta para pagar más rápido. Puedes borrarla cuando quieras.',
     medioAgregar: 'Agregar tarjeta',
     medioElegido: 'Elegido',
     medioVence: 'Vence {{fecha}}',
     medioVencidoEn: 'Venció {{fecha}}',
-    medioVencidoAyuda: 'Una tarjeta vencida no puede cobrarse. Agregá otra para seguir pagando.',
+    medioVencidoAyuda: 'Una tarjeta vencida no puede cobrarse. Agrega otra para seguir pagando.',
     medioBorrar: 'Borrar',
     medioBorrarTitulo: '¿Borrar este medio de pago?',
     // P1 — la segunda confirmación DICE QUÉ SE BORRA, con su nombre.
-    medioBorrarCuerpo: 'Vas a borrar {{cual}}. No se puede deshacer, pero podés volver a guardarla cuando quieras.',
+    medioBorrarCuerpo: 'Vas a borrar {{cual}}. No se puede deshacer, pero puedes volver a guardarla cuando quieras.',
     medioBorrarConfirmar: 'Sí, borrar',
     medioBorrarCancelar: 'No, dejarla',
     medioBorrado: 'Listo, la borramos.',
@@ -1325,7 +1325,7 @@ export const clienteEs = {
     // gate). La casa real de «medios de pago» se decide en SU gate, no acá; el
     // literal lo dice para que nadie lo confunda con producto terminado.
     // Se dibuja SOLO si hay config de pagos — sin config, la celda no existe.
-    gateAltaTarjeta: 'Gate S101-B · agregar tarjeta',
+    gateAltaTarjeta: 'Agregar tarjeta',
     // Las cuatro voces del desenlace. 🔴 Todas dicen lo LEÍDO DEL SERVIDOR:
     // el `?desenlace=` de la URL de retorno es una pista, jamás el hecho.
     altaGuardada: 'Listo, tu tarjeta quedó guardada.',
@@ -1437,7 +1437,7 @@ export const clienteEs = {
     servicioPaseo: 'Paseo',
     pagosMetodos: 'Métodos de pago',
     pagosMetodosPronto: 'En preparación — por ahora el pago es simulado y no se cobra nada real.',
-    pagosMetodosYaEsta: 'Los administrás en Cuenta › Medios de pago.',
+    pagosMetodosYaEsta: 'Los administras en Cuenta › Medios de pago.',
     // Ayuda y legales
     terminosTitulo: 'Términos y condiciones',
     privacidadTitulo: 'Política de privacidad',
@@ -1466,12 +1466,12 @@ export const clienteEs = {
   despensa: {
     // ── S101-B · FASE 4 · LA ESPERA ────────────────────────────────────
     // 🔴 Nunca un spinner mudo, nunca "rechazado" por timeout.
-    comoPagas: 'Cómo querés pagar',
-    sinMedios: 'Todavía no guardaste una tarjeta.',
-    elegiMedio: 'Elegí con cuál querés pagar.',
+    comoPagas: 'Cómo quieres pagar',
+    sinMedios: 'Todavía no guardas una tarjeta.',
+    elegiMedio: 'Elige con cuál quieres pagar.',
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',
-    esperaCuerpo: 'Puede tardar unos segundos. Podés cerrar esta pantalla: tu pedido sigue solo.',
+    esperaCuerpo: 'Puede tardar unos segundos. Puedes cerrar esta pantalla: tu pedido sigue solo.',
     // El tope NO declara desenlace — la compra sigue viva.
     esperaSigueAbierta: 'Está tardando más de lo normal. Tu pedido sigue en curso y te vamos a avisar.',
     esperaFallida: 'El pago no se completó. No te cobramos nada.',
@@ -1485,13 +1485,13 @@ export const clienteEs = {
     cobroPagoEnProceso: 'Tu pago anterior se está procesando.',
     cobroReservaVencida: 'Tu reserva venció. Vamos a revisar que todo siga disponible.',
     cobroVendedorNoActivo: 'Esta tienda no está recibiendo pedidos en este momento.',
-    cobroTokenAusente: 'Elegí con qué tarjeta querés pagar.',
+    cobroTokenAusente: 'Elige con qué tarjeta quieres pagar.',
     cobroCompraNoExiste: 'No encontramos esta compra.',
     // Las tres nuestras comparten voz a propósito: la causa fina es de soporte,
     // no de la familia — distinguirlas en pantalla sería contarle un problema
     // interno que no puede resolver.
     cobroDefectoNuestro: 'No pudimos completar el cobro. Ya lo estamos viendo.',
-    cobroRechazado: 'El banco no autorizó el pago. Probá con otra tarjeta.',
+    cobroRechazado: 'El banco no autorizó el pago. Prueba con otra tarjeta.',
     cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
     // El estado de espera — la PANTALLA es Fase 4; acá solo su voz.
     cobroConfirmando: 'Estamos confirmando tu pago.',
@@ -1841,7 +1841,7 @@ export const clienteEs = {
     // S96 · la recurrencia (§6.1 — el mensaje honesto es VERBATIM de la letra)
     recurrenciaTitulo: 'Que llegue solo',
     recurrenciaHonesta:
-      'Este pedido se cargará automáticamente al medio de pago guardado. Lo podés desactivar cuando quieras.',
+      'Este pedido se cargará automáticamente al medio de pago guardado. Lo puedes desactivar cuando quieras.',
     recurrenciaSinPasarela:
       'El cobro automático se activa cuando esté el medio de pago. Hasta entonces, nada se cobra.',
     recurrenciaCada: '¿Cada cuánto?',

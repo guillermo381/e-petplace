@@ -1147,7 +1147,7 @@ export const clienteEn = {
     // S101-B — GATE SCAFFOLD, not the final surface (Ley 37: dies with the
     // gate). The real home for "payment methods" is decided in ITS gate.
     // Rendered ONLY when the payments config is present.
-    gateAltaTarjeta: 'S101-B gate · add card',
+    gateAltaTarjeta: 'Add card',
     // All four say what was READ FROM THE SERVER — the `?desenlace=` in the
     // return URL is a hint, never the fact.
     altaGuardada: 'Done — your card is saved.',

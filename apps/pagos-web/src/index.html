@@ -72,10 +72,10 @@
        un dato de tarjeta. Va FUERA del widget a propósito. *Meterlo adentro lo
        pondría en el mismo formulario que el PAN, y lo que vale de ese
        formulario es que solo tiene datos de tarjeta.* -->
-  <label class="alias-label" for="alias">Ponele un nombre <span>(opcional)</span></label>
+  <label class="alias-label" for="alias">Ponle un nombre <span>(opcional)</span></label>
   <input id="alias" class="alias" type="text" maxlength="40" autocomplete="off"
          placeholder="Visa de Kari" aria-describedby="alias-ayuda">
-  <p id="alias-ayuda" class="alias-ayuda">Para reconocerla después. Podés dejarlo vacío.</p>
+  <p id="alias-ayuda" class="alias-ayuda">Para reconocerla después. Puedes dejarlo vacío.</p>
 
   <button id="guardar">Guardar tarjeta</button>
   <p class="estado" id="estado" role="status" aria-live="polite"></p>
@@ -162,8 +162,8 @@
 
     if (!volverPermitido(volver)) {
       decir(desenlace === 'guardada'
-        ? 'Listo, tu tarjeta quedó guardada. Ya podés cerrar esta ventana.'
-        : 'No pudimos guardar la tarjeta. Ya podés cerrar esta ventana.',
+        ? 'Listo, tu tarjeta quedó guardada. Ya puedes cerrar esta ventana.'
+        : 'No pudimos guardar la tarjeta. Ya puedes cerrar esta ventana.',
         desenlace === 'guardada' ? null : 'error');
       return;
     }
@@ -175,7 +175,7 @@
 
   if (!alta) {
     btn.disabled = true;
-    decir('Este enlace no es válido. Volvé a intentarlo desde la app.', 'error');
+    decir('Este enlace no es válido. Vuelve a intentarlo desde la app.', 'error');
     return;
   }
 
@@ -185,7 +185,7 @@
     Payment.init(CONFIG.MODO, CONFIG.APP_CODE, CONFIG.APP_KEY);
   } catch (e) {
     btn.disabled = true;
-    decir('No pudimos abrir el formulario de pago. Probá de nuevo en un momento.', 'error');
+    decir('No pudimos abrir el formulario de pago. Prueba de nuevo en un momento.', 'error');
     return;
   }
 
@@ -246,7 +246,7 @@
     reloj = setTimeout(function () {
       if (desafioVisto) return;
       btn.disabled = false;
-      decir('Esto está tardando más de lo normal. Podés intentar de nuevo, o cerrar y volver desde la app.', 'error');
+      decir('Esto está tardando más de lo normal. Puedes intentar de nuevo, o cerrar y volver desde la app.', 'error');
     }, TIMEOUT_MS);
 
     var campo = $('#tarjeta');
@@ -263,7 +263,7 @@
       if (!tarjeta) {
         pararReloj();
         btn.disabled = false;
-        decir('Revisá los datos de la tarjeta.', 'error');
+        decir('Revisa los datos de la tarjeta.', 'error');
         return;
       }
     } catch (e) {
@@ -271,7 +271,7 @@
       btn.disabled = false;
       /* El SDK valida sus propios campos. Su queja es sobre la forma del
          dato, no sobre el dato: no se registra ni se reenvía. */
-      decir('Revisá los datos de la tarjeta.', 'error');
+      decir('Revisa los datos de la tarjeta.', 'error');
       return;
     }
 
@@ -319,7 +319,7 @@
         .then(function () { terminar('guardada'); })
         .catch(function () {
           btn.disabled = false;
-          decir('Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Probá de nuevo.', 'error');
+          decir('Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Prueba de nuevo.', 'error');
         });
       },
       function (resp) {
@@ -353,7 +353,7 @@
           /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
              la causa fina la resuelve la app con la taxonomía de la letra §7.
              «Fondos insuficientes» jamás se nombra. */
-          decir('No pudimos guardar la tarjeta. Probá con otra.', 'error');
+          decir('No pudimos guardar la tarjeta. Prueba con otra.', 'error');
           terminar('rechazada');
           return;
         }
