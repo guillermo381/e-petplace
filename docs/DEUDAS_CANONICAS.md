@@ -18683,6 +18683,57 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-865 🔴 · UN PERFIL DE BUILD PROMETE UNA CAPACIDAD QUE LAS DEPENDENCIAS NO DAN
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHA-perfil-promete-lo-que-no-tiene.md`** · depositada por A, número medido en los dos árboles (`L-331`)
+
+`apps/cliente/eas.json` declara `developmentClient: true` desde **`71364782`, 8-jul-2026 (S45)**, y **`expo-dev-client` nunca se agregó**: cero commits hasta hoy. ⇒ **ese perfil construye una APK sin bundle y sin quién se lo baje: nació roto y nunca funcionó — SEIS SEMANAS.**
+
+> **Su modo de falla es el peor posible: la APK se instala, arranca, y se queda en el splash para siempre.** *No hay crash, no hay log, no hay síntoma que nombre la causa.* Y nadie lo notó porque la casa gatea con `preview`, que sí trae bundle — **el perfil roto era el que casi nadie usaba, hasta que S101-D lo usó.**
+
+🔴 **LO QUE LA VUELVE ÚTIL NO ES EL DEFECTO: ES QUIÉN LO ENCONTRÓ.** *No lo encontró una build ni un gate: lo encontró **la mitad de un guard que no necesita APK ni build** (`verify-apk-contenido.mjs --coherencia`), corrida sobre las dos apps **antes** de gastar un ciclo de EAS.* **El chequeo más barato del juez cazó el defecto más viejo.**
+
+**Estado: la cura está EN VUELO** (`expo-dev-client ~57.0.14` commiteado en `pista/s101-d`) ⇒ **lo que queda no es curar: es verificar con el guard cuando llegue a `main`.** *No se fabrica deuda fantasma por un trabajo ya hecho.*
+
+---
+
+### D-866 🔴 · NINGUNA BUILD NATIVA DE ESTA CASA ES REPRODUCIBLE DESDE UN COMMIT
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHA-requirecommit.md`**
+
+Ni `apps/cliente` ni `apps/prestador` fijaban `cli.requireCommit` ⇒ **EAS archiva el ÁRBOL, no el commit.**
+
+**Y no es un riesgo teórico: se midió el mismo día.** La build salió de `76f83f5f` —que **no** tiene `expo-dev-client`— y **la APK resultante lo trae** (`expo/modules/devlauncher` ×1884).
+
+> ### **No es que EAS ignore lo no commiteado: LO USA.**
+> *Y eso empeora el problema en vez de mejorarlo — el hash del acta apunta a un código que nunca se construyó.* **Esta casa cita hashes para todo, y un gate del founder sobre un artefacto de procedencia irreconstruible no se puede repetir ni citar: entonces no es un gate.**
+
+**Es la gemela nativa de lo que S91 curó en OTA** (`publicar-ota.mjs`, veda + acto único: *«un publish sucio es inauditable después»*). **Allá el riesgo era estructural; acá hubo un artefacto concreto instalado en un teléfono.**
+
+**✅ CURADA EN S101-D**, en las dos apps —es de clase, no de instancia— y **con su razón vuelta MECÁNICA**: el esquema de `eas.json` rechaza la clave de comentario (`"cli.// is not allowed"`, medido antes de gastar un build), así que **el porqué vive en un guard que exige la bandera**. *Un comentario se borra sin que nadie se entere; un guard en rojo obliga a leer por qué.*
+
+---
+
+### D-867 🔴 · EL ACTUADOR COLAPSA SIETE CAUSAS EN `desconocido`, Y ESA VOZ ES LA DE «SOPORTE»
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
+
+La letra define **siete** causas de rechazo con voz propia; **el actuador tiene DOS salidas**. Los tres rechazos reales que la base vio —`0/31`, `2/32`, `5/14`— **caen los tres en `desconocido`**.
+
+> ### **Un rechazo del banco saca al cliente del flujo Y genera un ticket que no era. Se paga dos veces.**
+
+**La cura es de FORMA, no de vocabulario:** separar *«no aprobado con causa conocida»* de *«no aprobado sin causa»*. **No nacen voces nuevas.**
+
+🔒 **BLOQUEADA por la tabla de códigos de Erick:** sin saber qué significa `31` no se puede mapear, y **mapear por parecido sería exactamente el defecto que el censo vino a medir.**
+
+⚠️ **Y su límite, nombrado como silencio y no como verde ni como ficha aparte:** *la rama no-aprobada **nunca corrió contra un intento real*** — los 8 casos `desconocido` son sondas del arnés sin intento ligado.
+
+---
+
+### D-868 🟡 · TRES ESTADOS DEL PROVEEDOR NUNCA SE EJERCITARON
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
+
+`review` · `pending` · `rejected` están contemplados en el código y **jamás los produjo un intento real**. *Un camino que nadie pisó no tiene síntoma hasta que alguien real lo pisa* — la lección madre de S96, aplicada al vocabulario del proveedor. **Disparo: la ventana de certificación, donde el proveedor los puede provocar a pedido.**
+
+---
+
 ### D-864 🟡 · LAS 8 CITAS `pendiente_pago` SON **INCOBRABLES POR CONSTRUCCIÓN** — no les falta un dato: les falta el productor
 > S101-D · 21-ago-2026 · **medido acá, con el enum leído y no adivinado**
 
