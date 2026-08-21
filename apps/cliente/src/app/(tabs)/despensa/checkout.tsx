@@ -46,7 +46,7 @@
  * apagado dice qué falta · error dice qué pasó · voz de familia.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
@@ -82,6 +82,7 @@ import {
   crearIntentoPago,
   verificarCompuertas,
   listarTarjetasGuardadas,
+  type TarjetaGuardada,
   COMPUERTAS_DEFECTO_NUESTRO,
   type CodigoCompuerta,
   obtenerNombresTiendaPorPedido,
@@ -99,6 +100,8 @@ import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
 import { cobrarConTarjetaGuardada, hayCobroAndamio, type TarjetaParaCobro } from '@/lib/pagos/cobro-andamio';
+import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
+import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
 
@@ -189,6 +192,36 @@ export default function DespensaCheckout() {
      `confirmando`: pasarle `null` en las otras fases es lo que impide que el
      checkout sondee por existir. *La lección del andamio del alta otra vez:
      las pantallas no hacen cosas por estar abiertas.* */
+  /* ═══ FASE 5 · EL MEDIO DE PAGO ELEGIDO ═══════════════════════════════
+     🔴 Se lee al llegar al RESUMEN, no al montar el checkout: *antes de que
+     haya un total que pagar, con qué se paga no es una pregunta.* */
+  const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
+  const [medioElegido, setMedioElegido] = useState<string | null>(null);
+  const [eligiendoMedio, setEligiendoMedio] = useState(false);
+
+  const leerMedios = useCallback(async () => {
+    const r = await listarTarjetasGuardadas();
+    if (!r.ok) return;
+    setMedios(r.data);
+    /* 🔴 Preselección **solo cuando hay UNA**: con una sola tarjeta preguntar
+       es fricción sin decisión. Con dos o más **no se elige por la familia** —
+       ése era el andamio. */
+    setMedioElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
+  }, []);
+
+  useEffect(() => {
+    if (fase === 'resumen') void leerMedios();
+  }, [fase, leerMedios]);
+
+  /* 🔴 AGREGAR SIN PERDER LA COMPRA: el alta abre su WebView y al volver esta
+     pantalla relee sus medios. *La compra ya vive en el motor — salir a
+     guardar una tarjeta no puede costarla.* */
+  const agregarMedio = useCallback(async () => {
+    setEligiendoMedio(false);
+    const r = await abrirAltaDeTarjeta();
+    if (!r.ok) mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
+  }, [mostrar, t]);
+
   const espera = useEsperaDeConfirmacion(fase === 'confirmando' ? compraId : null);
 
   /* ═══ 🔴 EL HOOK SE ESCUCHA — porque antes NO ═══════════════════════════
@@ -540,14 +573,12 @@ export default function DespensaCheckout() {
       return;
     }
 
-    /* 🔴 La tarjeta se lee AL TOCAR, no al montar. *Leerla al abrir no
-       fabricaría estado, pero sí ataría el checkout a una consulta que la
-       mayoría de las veces no se usa.*
-       ⚠️ ANDAMIO: «la más reciente» muere con la Fase 5. */
-    const tj = await listarTarjetasGuardadas();
-    const tarjeta: TarjetaParaCobro = tj.ok && tj.data.length > 0
-      ? { id: tj.data[0].id }
-      : null;
+    /* ☠️ FASE 5 · «LA MÁS RECIENTE» MURIÓ ACÁ.
+       Era regla de ANDAMIO y nació declarándolo: **elegir por la familia cuál
+       de sus tarjetas se cobra es exactamente lo que una pantalla de medios de
+       pago existe para no hacer.** Ahora se cobra **la que ella eligió**, y si
+       no eligió ninguna la pantalla se lo pide antes de tocar nada. */
+    const tarjeta: TarjetaParaCobro = medioElegido ? { id: medioElegido } : null;
 
     /* ═══ 🔴 LAS COMPUERTAS NO SE LLAMAN DESDE ACÁ, Y NO ES POR UN GRANT ═══
        Medido: `verificar_compuertas_pre_cobro` **no es ejecutable por
@@ -1213,6 +1244,41 @@ export default function DespensaCheckout() {
               )}
             </View>
 
+            {/* ═══ FASE 5 · CÓMO QUERÉS PAGAR ═══════════════════════════════
+                🔴 **La sección se llama CÓMO QUERÉS PAGAR, no «tu tarjeta»** —
+                y no es copy: es arquitectura. **DeUna entra como segundo riel
+                sobre el mismo contrato de compra.** *Si esta sección se llama
+                «tus tarjetas», el día que entre DeUna hay que rehacerla; si se
+                llama «cómo querés pagar», DeUna es una fila más.* */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+              <Separador />
+              <Texto variante="seccion">{t('despensa.comoPagas')}</Texto>
+              {medios.length === 0 ? (
+                <>
+                  <Texto variante="apoyo">{t('despensa.sinMedios')}</Texto>
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('cuenta.medioAgregar')}
+                    onPress={() => void agregarMedio()}
+                  />
+                </>
+              ) : (
+                <>
+                  <FilaMedioDePago
+                    tarjeta={medios.find((m) => m.id === medioElegido) ?? medios[0]}
+                    elegida={medioElegido !== null}
+                    onPress={() => setEligiendoMedio(true)}
+                  />
+                  {/* 🔴 Con DOS o más y ninguna elegida, la pantalla lo DICE en
+                      vez de elegir sola. *Elegir por la familia es el andamio
+                      que esta fase vino a matar.* */}
+                  {medioElegido === null ? (
+                    <Texto variante="apoyo">{t('despensa.elegiMedio')}</Texto>
+                  ) : null}
+                </>
+              )}
+            </View>
+
             {/* ☠️ S101-B · LA BANDA DE «PAGO SIMULADO» MUERE (Ley 37).
                 §6.5 la puso cuando el cobro ERA simulado, y decía la verdad.
                 **Con el enchufe de Fase 3 el cobro es real**, así que la banda
@@ -1325,6 +1391,32 @@ export default function DespensaCheckout() {
         ) : null}
       </PantallaConPie>
       </EvitaTeclado>
+
+      {/* ═══ FASE 5 · ELEGIR EL MEDIO DE PAGO ═══════════════════════════ */}
+      <Hoja
+        visible={eligiendoMedio}
+        onCerrar={() => setEligiendoMedio(false)}
+        titulo={t('despensa.comoPagas')}
+      >
+        <View style={{ gap: spacing[2] }}>
+          {medios.map((m) => (
+            <FilaMedioDePago
+              key={m.id}
+              tarjeta={m}
+              elegida={m.id === medioElegido}
+              onPress={() => { setMedioElegido(m.id); setEligiendoMedio(false); }}
+            />
+          ))}
+          {/* 🔴 AGREGAR DESDE ACÁ, sin perder la compra en curso: la compra ya
+              existe en el motor y esta pantalla vuelve a su fase. */}
+          <Boton
+            variante="secundario"
+            etiqueta={t('cuenta.medioAgregar')}
+            bloque
+            onPress={() => void agregarMedio()}
+          />
+        </View>
+      </Hoja>
 
       {/* LA HOJA DE DIRECCIÓN — la captura es UNA en toda la casa (el
           formulario compartido de S79); agregar sin salir del flujo (§7). */}

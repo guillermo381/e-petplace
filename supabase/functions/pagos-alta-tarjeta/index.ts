@@ -147,6 +147,11 @@ Deno.serve(async (req) => {
     p_bin: typeof body.bin === 'string' ? body.bin : null,
     p_ultimos4: typeof body.ultimos4 === 'string' ? body.ultimos4 : null,
     p_marca: typeof body.marca === 'string' ? body.marca : null,
+    /* 🔴 FASE 5: el vencimiento **solo llega en el alta**. Si no se guarda acá,
+       no se puede recuperar sin pedirle a la familia que cargue la tarjeta de
+       nuevo — y la lista prometería un dato que el motor no tiene. */
+    p_expira_mes: Number.isFinite(Number(body.expira_mes)) ? Number(body.expira_mes) : null,
+    p_expira_anio: Number.isFinite(Number(body.expira_anio)) ? Number(body.expira_anio) : null,
     p_titular: typeof body.titular === 'string' ? body.titular : null,
     p_motivo: typeof body.motivo === 'string' ? body.motivo : null,
     /* 🔴 El alias es DATO DEL CLIENTE: se acota y se pasa tal cual. No se

@@ -1297,6 +1297,27 @@ export const clienteEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
   },
   cuenta: {
+    // ── S101-B · FASE 5 · LOS MEDIOS DE PAGO ───────────────────────────
+    // 🔴 «Medio de pago», no «tarjeta»: DeUna entra como otro medio sobre el
+    //    mismo contrato, y el nombre de la pantalla es la decisión de
+    //    arquitectura.
+    medios: 'Medios de pago',
+    mediosSub: 'Con qué pagás en e-PetPlace',
+    mediosVacioTitulo: 'Todavía no guardaste ninguno',
+    mediosVacio: 'Guardá una tarjeta para pagar más rápido. Podés borrarla cuando quieras.',
+    medioAgregar: 'Agregar tarjeta',
+    medioElegido: 'Elegido',
+    medioVence: 'Vence {{fecha}}',
+    medioVencidoEn: 'Venció {{fecha}}',
+    medioVencidoAyuda: 'Una tarjeta vencida no puede cobrarse. Agregá otra para seguir pagando.',
+    medioBorrar: 'Borrar',
+    medioBorrarTitulo: '¿Borrar este medio de pago?',
+    // P1 — la segunda confirmación DICE QUÉ SE BORRA, con su nombre.
+    medioBorrarCuerpo: 'Vas a borrar {{cual}}. No se puede deshacer, pero podés volver a guardarla cuando quieras.',
+    medioBorrarConfirmar: 'Sí, borrar',
+    medioBorrarCancelar: 'No, dejarla',
+    medioBorrado: 'Listo, la borramos.',
+    medioBorrarFallo: 'No pudimos borrarla. Ya lo estamos viendo.',
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
     laminaFusion: 'Lámina S74 · la fusión del avatar',
@@ -1416,6 +1437,7 @@ export const clienteEs = {
     servicioPaseo: 'Paseo',
     pagosMetodos: 'Métodos de pago',
     pagosMetodosPronto: 'En preparación — por ahora el pago es simulado y no se cobra nada real.',
+    pagosMetodosYaEsta: 'Los administrás en Cuenta › Medios de pago.',
     // Ayuda y legales
     terminosTitulo: 'Términos y condiciones',
     privacidadTitulo: 'Política de privacidad',
@@ -1444,6 +1466,9 @@ export const clienteEs = {
   despensa: {
     // ── S101-B · FASE 4 · LA ESPERA ────────────────────────────────────
     // 🔴 Nunca un spinner mudo, nunca "rechazado" por timeout.
+    comoPagas: 'Cómo querés pagar',
+    sinMedios: 'Todavía no guardaste una tarjeta.',
+    elegiMedio: 'Elegí con cuál querés pagar.',
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',
     esperaCuerpo: 'Puede tardar unos segundos. Podés cerrar esta pantalla: tu pedido sigue solo.',

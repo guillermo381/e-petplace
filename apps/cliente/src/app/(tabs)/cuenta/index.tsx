@@ -114,6 +114,10 @@ export default function Cuenta() {
     { etiqueta: t('despensa.tusPedidos'), ruta: '/pedidos' as const, icono: 'despensa' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
+    /* 🔴 «Medios de pago» es OTRA cosa que «Pagos»: aquélla es el historial de
+       lo que pagaste; ésta es CON QUÉ pagás. *Meterlas en una sola pantalla
+       mezclaría un registro con una configuración.* */
+    { etiqueta: t('cuenta.medios'), ruta: '/cuenta/medios' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
     // S74 — ENTRADA TEMPORAL del gate de la fusión del avatar (la lámina
     // se juzga en DISPOSITIVO: Chromium aplica borderCurve y no puede
@@ -141,26 +145,14 @@ export default function Cuenta() {
             ))}
           </Tarjeta>
 
-          {/* ── S101-B · ANDAMIO DEL GATE DEL ALTA DE TARJETA ──────────────
-              🔴 NO es la superficie definitiva de «medios de pago»: esa se
-              decide en SU gate, con su letra y su skill. Esto existe para que
-              el founder pueda ejercitar el MECANISMO —`expo-web-browser`, que
-              está horneado desde el scaffold y nunca se usó— y muere con el
-              gate (Ley 37), igual que la entrada de la lámina de S74.
-
-              🔴 SE DIBUJA SOLO SI HAY CONFIG (condición de mesa): sin
-              `EXPO_PUBLIC_PAGOS_ALTA_URL` la celda NO EXISTE. *Una entrada que
-              se ofrece y no puede abrir nada es peor que ninguna: se toca, no
-              pasa nada, y el que la tocó no sabe si falló él o la app.* ── */}
-          {HAY_CONFIG_PAGOS ? (
-            <Tarjeta relleno="ninguno">
-              <CeldaNavegacion
-                icono="preferencias"
-                titulo={t('cuenta.gateAltaTarjeta')}
-                onPress={() => void correrAltaDeTarjeta()}
-              />
-            </Tarjeta>
-          ) : null}
+          {/* ☠️ S101-B · FASE 5 — LA CELDA DEL GATE MURIÓ ACÁ (Ley 37).
+              Existió para que el founder pudiera ejercitar el mecanismo del
+              alta antes de que hubiera pantalla, y **nació declarando que
+              moría con el gate**. El gate pasó y la pantalla real existe:
+              «Medios de pago» vive en el grupo de arriba, con su lista, su
+              alta al tocar y su borrado con doble confirmación.
+              *Un andamio que sobrevive a su obra deja de ser andamio y pasa a
+              ser una segunda puerta que nadie mantiene.* ── */}
 
           {/* ── Sesión y cuenta ── */}
           <View style={{ gap: spacing[3] }}>

@@ -1328,6 +1328,8 @@ export {
 export {
   listarTarjetasGuardadas,
   type TarjetaGuardada,
+  borrarTarjetaGuardada,
+  type CodigoBorrado,
 } from './wrappers/tarjetas-guardadas';
 
 export { cobrarCompra, type CodigoCobro, type SenalDeCobro } from './wrappers/pagos-cobro';

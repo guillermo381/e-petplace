@@ -100,7 +100,7 @@ export default function PagosCuenta() {
             {t('cuenta.pagosMetodos')}
           </Text>
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            {t('cuenta.pagosMetodosPronto')}
+            {t('cuenta.pagosMetodosYaEsta')}
           </Text>
         </View>
       </ScrollView>

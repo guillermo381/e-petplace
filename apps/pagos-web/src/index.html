@@ -305,6 +305,10 @@
             bin: card.bin || null,
             ultimos4: card.number || null,
             marca: card.type || null,
+            /* El vencimiento que el SDK devuelve. **No es el PAN** — son dos
+               números que la familia ya ve impresos en su tarjeta. */
+            expira_mes: card.expiry_month || null,
+            expira_anio: card.expiry_year || null,
             titular: card.holder_name || null,
             /* Texto de la persona. Se manda tal cual (el servidor lo acota y
                lo normaliza); acá no se interpreta ni se usa para nada. */

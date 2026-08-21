@@ -1125,6 +1125,22 @@ export const clienteEn = {
     errorDetalle: 'Check your connection and try again.',
   },
   cuenta: {
+    medios: 'Payment methods',
+    mediosSub: 'How you pay on e-PetPlace',
+    mediosVacioTitulo: "You haven't saved any yet",
+    mediosVacio: 'Save a card to pay faster. You can delete it whenever you want.',
+    medioAgregar: 'Add card',
+    medioElegido: 'Selected',
+    medioVence: 'Expires {{fecha}}',
+    medioVencidoEn: 'Expired {{fecha}}',
+    medioVencidoAyuda: "An expired card can't be charged. Add another one to keep paying.",
+    medioBorrar: 'Delete',
+    medioBorrarTitulo: 'Delete this payment method?',
+    medioBorrarCuerpo: "You're about to delete {{cual}}. This can't be undone, but you can save it again anytime.",
+    medioBorrarConfirmar: 'Yes, delete',
+    medioBorrarCancelar: 'No, keep it',
+    medioBorrado: 'Done, we deleted it.',
+    medioBorrarFallo: "We couldn't delete it. We're looking into it.",
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
     laminaFusion: 'S74 plate · avatar fusion',
@@ -1221,6 +1237,7 @@ export const clienteEn = {
     servicioPaseo: 'Walk',
     pagosMetodos: 'Payment methods',
     pagosMetodosPronto: 'In preparation — for now payment is simulated and nothing real is charged.',
+    pagosMetodosYaEsta: 'Manage them in Account › Payment methods.',
     terminosTitulo: 'Terms and conditions',
     privacidadTitulo: 'Privacy policy',
     legalPlaceholder: 'The final legal texts are in preparation. This app is in a test phase: no real money is charged and your data is used only to run the service.',
@@ -1239,6 +1256,9 @@ export const clienteEn = {
   // ── S95-I · THE PANTRY (string batch PENDING FOUNDER GATE) ───────────
   despensa: {
     // S101-B · Fase 4 — the wait. Never a mute spinner, never "declined" on timeout.
+    comoPagas: 'How do you want to pay',
+    sinMedios: "You haven't saved a card yet.",
+    elegiMedio: 'Choose which one to pay with.',
     esperaTitulo: "We're confirming your payment",
     esperaTituloCorto: 'Your payment',
     esperaCuerpo: 'It may take a few seconds. You can close this screen — your order keeps going.',

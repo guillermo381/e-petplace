@@ -2044,6 +2044,7 @@ export type Database = {
         Row: {
           activo: boolean
           audiencia: string
+          canal_forzado: string | null
           categoria: string
           codigo: string
           descripcion: string
@@ -2052,6 +2053,7 @@ export type Database = {
         Insert: {
           activo?: boolean
           audiencia?: string
+          canal_forzado?: string | null
           categoria: string
           codigo: string
           descripcion: string
@@ -2060,12 +2062,20 @@ export type Database = {
         Update: {
           activo?: boolean
           audiencia?: string
+          canal_forzado?: string | null
           categoria?: string
           codigo?: string
           descripcion?: string
           en_sombra?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "cat_notificacion_tipos_canal_forzado_fkey"
+            columns: ["canal_forzado"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_canales"
+            referencedColumns: ["codigo"]
+          },
           {
             foreignKeyName: "cat_notificacion_tipos_categoria_fkey"
             columns: ["categoria"]
@@ -17337,6 +17347,8 @@ export type Database = {
           bin: string | null
           creada_en: string
           estado: string
+          expira_anio: number | null
+          expira_mes: number | null
           id: string
           marca: string | null
           motivo_rechazo: string | null
@@ -17353,6 +17365,8 @@ export type Database = {
           bin?: string | null
           creada_en?: string
           estado?: string
+          expira_anio?: number | null
+          expira_mes?: number | null
           id?: string
           marca?: string | null
           motivo_rechazo?: string | null
@@ -17369,6 +17383,8 @@ export type Database = {
           bin?: string | null
           creada_en?: string
           estado?: string
+          expira_anio?: number | null
+          expira_mes?: number | null
           id?: string
           marca?: string | null
           motivo_rechazo?: string | null
@@ -19779,6 +19795,7 @@ export type Database = {
         }
         Returns: string
       }
+      _pago_aprobado: { Args: { p_crudo: Json }; Returns: boolean }
       _prestador_bloqueado: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: boolean
@@ -20030,6 +20047,7 @@ export type Database = {
         Args: { p_activo: boolean; p_recurrencia_id: string }
         Returns: Json
       }
+      aplicar_evento_de_pago: { Args: { p_evento_id: string }; Returns: Json }
       aplicar_reembolso: {
         Args: {
           p_aplicado_por?: string
@@ -21568,6 +21586,15 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagos_pendientes_de_conciliar: {
+        Args: { p_minutos_de_gracia?: number }
+        Returns: {
+          compra_id: string
+          creado_en: string
+          monto: number
+          transaction_id: string
+        }[]
+      }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
       poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
       preferencia_efectiva: {
@@ -21925,6 +21952,8 @@ export type Database = {
           p_alta_id: string
           p_bin?: string
           p_desenlace: string
+          p_expira_anio?: number
+          p_expira_mes?: number
           p_marca?: string
           p_motivo?: string
           p_stoken_detalle?: string
@@ -21937,6 +21966,10 @@ export type Database = {
       }
       resolver_comision_despensa: {
         Args: { p_country_code?: string; p_fecha?: string }
+        Returns: Json
+      }
+      resolver_consulta_activa: {
+        Args: { p_compra_id: string; p_crudo: Json; p_origen?: string }
         Returns: Json
       }
       resolver_fee_aplicable: {
