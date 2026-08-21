@@ -1485,6 +1485,9 @@ export const clienteEs = {
        que la fila ya mostraba, y ocupaba el único lugar donde tenía que
        estar la acción.* Hoy esa zona es CTA. */
     medioCambiar: 'Cambiar',
+    /* La invitación cuando todavía no hay ninguna elegida. **No es «Cambiar»**:
+       cambiar exige que haya algo que cambiar. */
+    elegiMedioTitulo: 'Elige cómo quieres pagar',
     /* ① El botón de pagar de la casa: UNA voz para las dos puertas. */
     pagar: 'Pagar',
     sinMedios: 'Todavía no guardas una tarjeta.',

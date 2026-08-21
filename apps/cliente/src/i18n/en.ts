@@ -1257,6 +1257,7 @@ export const clienteEn = {
   pago: {
     comoPagas: 'How do you want to pay',
     medioCambiar: 'Change',
+    elegiMedioTitulo: 'Choose how you want to pay',
     pagar: 'Pay',
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',

@@ -39,10 +39,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import {
-  Boton, Hoja, Tarjeta, Texto, spacing, useAviso,
+  Boton, Celda, Chevron, Hoja, Tarjeta, Texto, spacing, useAviso,
 } from '@epetplace/ui';
 import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
 import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
+import { LogoFranquicia } from '@/components/logo-franquicia';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -127,20 +128,43 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
                 onPress={() => void medio.agregar()}
               />
             </>
+          ) : elegido !== null ? (
+            /* ③ HAY UNA ELEGIDA: se muestra, **«Cambiar» significa cambiar**, y
+               `BotonPagar` está habilitado — *se paga directo, sin entrar a
+               ningún lado.* (Corrección del founder, 21-ago.) */
+            <FilaMedioDePago
+              tarjeta={medios.find((m) => m.id === elegido)!}
+              zonaFin="cambiar"
+              onPress={medio.abrirEleccion}
+            />
           ) : (
-            <>
-              {/* ③ La elegida, con su CTA visible. */}
-              <FilaMedioDePago
-                tarjeta={medios.find((m) => m.id === elegido) ?? medios[0]}
-                zonaFin="cambiar"
-                onPress={medio.abrirEleccion}
-              />
-              {/* 🔴 Con DOS o más y ninguna elegida, la pantalla lo DICE en vez
-                  de elegir sola. */}
-              {elegido === null ? (
-                <Texto variante="apoyo">{t('pago.elegiMedio')}</Texto>
-              ) : null}
-            </>
+            /* 🔴 NO HAY ELEGIDA — Y ACÁ NO SE DIBUJA NINGUNA TARJETA.
+             *
+             * ⏪ **El defecto que esto cura, reportado por el founder en el
+             * aparato:** la fila caía a `medios[0]` y mostraba una tarjeta con
+             * su alias y sus cuatro dígitos, rematada con «Cambiar ›» — y
+             * `Pagar` estaba apagado. *La pantalla afirmaba que había una
+             * elegida y el botón decía que no; «Cambiar» prometía cambiar algo
+             * que no existía.*
+             *
+             * 🔴 Y LA CURA OBVIA ERA LA TRAMPA: preseleccionar `medios[0]`
+             *    parece lo natural, pero el lector ordena por `creada_en DESC`
+             *    ⇒ `medios[0]` **es la más reciente**, que es LITERALMENTE la
+             *    regla de andamio que la Fase 5 mató, con el mismo valor.
+             *    *Habría vuelto por la puerta de una cura de coherencia.*
+             *
+             * ⇒ Se cura la MENTIRA, no el paso: la fila deja de fingir y pasa a
+             *   invitar. La primera vez se elige una vez; a partir de ahí
+             *   «Cambiar» significa cambiar. */
+            <Celda
+              titulo={t('pago.elegiMedioTitulo')}
+              subtitulo={t('pago.elegiMedio')}
+              interactiva
+              accessibilityRole="button"
+              onPress={medio.abrirEleccion}
+              inicio={<LogoFranquicia marca={null} />}
+              fin={<Chevron direccion="derecha" />}
+            />
           )}
         </View>
       </Tarjeta>
