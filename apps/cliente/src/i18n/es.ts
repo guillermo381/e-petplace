@@ -1627,7 +1627,7 @@ export const clienteEs = {
     // jamás esconde. El paso explícito gatea el agregar.
     filaContiene: 'Contiene {{lista}}, y el expediente de {{nombre}} lo registra como alergia.',
     alergiaContiene: '{{nombre}} es alérgico a {{lista}} y este alimento lo contiene.',
-    alergiaContieneDetalle: 'Podés comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
+    alergiaContieneDetalle: 'Puedes comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
     alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
     alergiaSinVerificar:
       'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisá la etiqueta antes de dárselo.',
@@ -1771,12 +1771,12 @@ export const clienteEs = {
       'Este producto no va a llegar a tu casa: va a un refugio, a una mascota que todavía está esperando la suya. No suma puntos ni descuentos, y es a propósito: una donación que da algo a cambio deja de ser una donación.',
     donacionGraciasCierre: 'Listo',
     especieNoRegistrada:
-      'Este producto es para una especie que todavía no tenés registrada en tu familia. Podés registrarla ahora o después — la compra sigue igual.',
+      'Este producto es para una especie que todavía no tienes registrada en tu familia. Puedes registrarla ahora o después — la compra sigue igual.',
     registrarla: 'Registrar una mascota',
     totalLoDiceElMotor: 'El total con envío e impuestos lo vas a ver antes de pagar.',
     continuar: 'Continuar',
     errorMascotasDestino:
-      'No pudimos cargar tus mascotas para elegir el destino. Podés comprar igual y atarlo después.',
+      'No pudimos cargar tus mascotas para elegir el destino. Puedes comprar igual y atarlo después.',
 
     // S96 · el checkout (§6/§7)
     checkoutTitulo: 'Tu pedido',
@@ -1846,7 +1846,7 @@ export const clienteEs = {
     pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
     exitoTitulo: 'Listo',
     exitoCuerpo: 'Tu pedido quedó creado.',
-    exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Podés seguirlo en Tus pedidos.',
+    exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Puedes seguirlo en Tus pedidos.',
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
     pagarSimulado: 'Pagar',
@@ -1870,7 +1870,7 @@ export const clienteEs = {
     recurrenciaCada: '¿Cada cuánto?',
     // S100b-A · G-13: la voz del hueco. El interruptor dice la intención; la
     // cadencia la cierra, y mientras falta la pantalla lo DICE.
-    recurrenciaElegiCada: 'Elegí cada cuánto querés que llegue y queda configurado.',
+    recurrenciaElegiCada: 'Elige cada cuánto quieres que llegue y queda configurado.',
     recurrenciaQueEs: 'Qué es «Que llegue solo»',
     recurrenciaDias: 'Cada {{n}} días',
     recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
@@ -1995,7 +1995,7 @@ export const clienteEs = {
     // S96 · el reclamo del código (§4 — el vendedor jamás elige la mascota)
     reclamoTitulo: 'El código de tu factura',
     reclamoIntro:
-      'Si compraste en el local, tu factura tiene un código. Ingresalo, elegí para quién fue, y la compra entra a su expediente.',
+      'Si compraste en el local, tu factura tiene un código. Ingrésalo, elige para quién fue, y la compra entra a su expediente.',
     reclamoCodigoLabel: 'Código',
     reclamoCodigoPlaceholder: 'El código impreso en tu factura',
     reclamoFaltaCodigo: 'Ingresá el código de la factura.',
@@ -2013,7 +2013,7 @@ export const clienteEs = {
       'Estamos armando el catálogo con productos que sirvan de verdad a tu mascota. Cuando esté, lo vas a ver acá.',
     sinParaMascotaTitulo: 'Nada para {{nombre}} por ahora',
     sinParaMascotaDetalle:
-      'Puede que todavía no haya productos cargados, o que lo publicado no sea para ella. Podés ver toda la despensa igual.',
+      'Puede que todavía no haya productos cargados, o que lo publicado no sea para ella. Puedes ver toda la despensa igual.',
 
     // Los errores — dicen qué pasó y qué hacer (Ley 17.4)
     errorMascotasTitulo: 'No pudimos cargar tus mascotas',

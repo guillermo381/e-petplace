@@ -18568,6 +18568,35 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-857 🟢 · EL VOSEO SOBREVIVIÓ A SU BARRIDA — 17 líneas medidas
+> S101-C · 20-ago-2026 · **apareció comparando las dos puertas de pago**
+
+La casa habla **tuteo neutro** (regla 27 / L-148) y el founder ordenó la barrida
+en el gate ⑤. **Quedaron vivas: 17 líneas** en `apps/cliente/src/i18n/es.ts`
+(`Elegí` · `Podés` · `tenés` · `querés` · `Ingresalo` · `contá`…).
+
+🔴 **Cómo apareció, que es lo interesante:** no lo encontró un grep de barrida —
+lo encontró **correr las dos puertas de pago una detrás de la otra**. El éxito
+del paseo dice «Paseo confirmado» y el de la despensa decía *«Podés seguirlo en
+Tus pedidos»*. **Puestas al lado, la que desentona se ve; leídas por separado,
+las dos parecen bien.**
+
+**Curadas en S101-C: 7** — las del camino de pago, porque estaban justo en la
+comparación que el gate del founder iba a hacer.
+
+**Las 10 restantes NO se tocaron A PROPÓSITO.** *Ensanchar el territorio de
+strings la noche de un gate es cómo se queman los gates:* cada una vive en una
+pantalla que habría que volver a mirar.
+
+⚠️ **Y la trampa medida, para quien las barra:** el primer censo dio **5** porque
+el regex pedía espacio después del verbo — `Elegí ` con mayúscula al principio
+de la frase no matcheaba. *El número chico no era la deuda: era el instrumento.*
+
+**Dueño:** la pasada de diseño. **Disparo:** su sesión, junto a las cinco marcas
+firmadas del gate ⑤.
+
+---
+
 ### D-856 🟡 · TRES PUERTAS DE PAGO SIGUEN SIMULADAS — y lo dicen
 > S101-C · 20-ago-2026 · **lo encontró el typecheck**, no un censo
 
