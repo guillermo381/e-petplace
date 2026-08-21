@@ -767,16 +767,26 @@ export const clienteEs = {
     total: 'Total',
     holdVoz: 'Te guardamos este horario por 15 minutos.',
     procesando: 'Procesando el pago…',
-    pagar: 'Pagar (simulado)',
+    pagar: 'Pagar',
+    /* 🔴 LA BANDA DE «SIMULADO» SIGUE VIVA, Y NO ES UN OLVIDO — es la verdad
+       de TRES puertas que todavía no cobran: el PLAN de paseo, el PAQUETE de
+       salidas y el PROGRAMA de adiestramiento (`plan-hoja`, `paquete-hoja`,
+       `confirmar-programa`). Esas tres siguen contratando por su RPC, sin
+       tocar la tarjeta.
+       ☠️ De donde SÍ murió es de la reserva suelta —el checkout de los cuatro
+       oficios—, que desde S101-C cobra de verdad.
+       *La encontró el typecheck al borrarla: mi censo había mirado una sola
+       puerta y las otras tres decían la verdad. Borrar la banda de las tres
+       habría convertido tres avisos honestos en tres silencios falsos.* */
     simuladoAviso: 'Fase de pruebas: el pago es simulado — no se cobra nada real.',
     exitoTitulo: 'Paseo confirmado',
     exitoDetalle: 'Ya está en la agenda del paseador. Lo verás en tu Hogar.',
     volverHogar: 'Ir al Hogar',
-    rechazado: 'El pago no pasó',
-    rechazadoDetalle: 'No se cobró nada. Puedes intentarlo de nuevo.',
-    reintentar: 'Intentar de nuevo',
-    timeout: 'El pago está tardando',
-    timeoutDetalle: 'No sabemos si pasó. En esta fase simulada, vuelve a intentar.',
+    // ☠️ S101-C · MURIERON `rechazado`, `rechazadoDetalle`, `reintentar`,
+    //    `timeout` y `timeoutDetalle` (Ley 37): eran las pantallas enteras del
+    //    simulador. Con el cobro real un fallo es un AVISO y la familia se
+    //    queda en el resumen con su hold vivo — y `timeoutDetalle` decía
+    //    literalmente «en esta fase simulada», que ya era falso.
     holdVencido: 'Este horario se liberó',
     holdVencidoDetalle: 'Pasaron los 15 minutos del apartado. Elige otro horario.',
     elegirOtro: 'Elegir otro horario',
@@ -1463,12 +1473,17 @@ export const clienteEs = {
   // motor —`M3`, `S|M|L`, los códigos de especie— JAMÁS aparece acá: se
   // traduce contra los diccionarios que la casa ya tiene y lo que no
   // matchea no se pinta (Ley 3).
-  despensa: {
-    // ── S101-B · FASE 4 · LA ESPERA ────────────────────────────────────
-    // 🔴 Nunca un spinner mudo, nunca "rechazado" por timeout.
+  // ══ S101-C · LA VOZ DEL PAGO — SU PROPIA CASA ═══════════════════════
+  // 🔴 Estas frases vivían bajo `despensa.*`, y era su dirección equivocada:
+  //    **«El banco no autorizó el pago» no es una frase de despensa.** Desde
+  //    que los servicios se cobran por el mismo motor, la voz es de LA CASA.
+  //    *Dejarlas allá obligaba a copiarlas para el checkout de la cita — y una
+  //    voz copiada es una voz que un día alguien afina de un solo lado.*
+  pago: {
     comoPagas: 'Cómo quieres pagar',
     sinMedios: 'Todavía no guardas una tarjeta.',
     elegiMedio: 'Elige con cuál quieres pagar.',
+    // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',
     esperaCuerpo: 'Puede tardar unos segundos. Puedes cerrar esta pantalla: tu pedido sigue solo.',
@@ -1477,24 +1492,32 @@ export const clienteEs = {
     esperaFallida: 'El pago no se completó. No te cobramos nada.',
     esperaCancelada: 'Esta compra quedó cancelada.',
     esperaVerPedidos: 'Ver mis pedidos',
-    // ── S101-B · FASE 3 · LAS VOCES DE LAS COMPUERTAS (letra §3.1) ──────
-    // 🔴 Cada una habla ANTES de tocar la tarjeta. La regla madre: el cliente
-    //    jamás descubre un problema del pedido a través del cobro.
-    //    Y las tres de «defecto nuestro» NO lo culpan ni le piden que revise
-    //    nada: le decimos que lo estamos viendo nosotros.
+    // La cita tiene su propio cuerpo: lo que sigue solo es la RESERVA.
+    esperaCuerpoCita: 'Puede tardar unos segundos. Puedes cerrar esta pantalla: tu reserva sigue en pie.',
+    esperaSigueAbiertaCita: 'Está tardando más de lo normal. Tu reserva sigue en pie y te vamos a avisar.',
+    // 🔴 Una reserva que venció NO es un pago que falló, y no comparte su voz.
+    esperaExpirada: 'El horario que apartamos se liberó. No te cobramos nada.',
+    esperaCanceladaCita: 'Esta reserva quedó cancelada.',
+    // ── LAS COMPUERTAS (letra §3.1) ────────────────────────────────────
+    // 🔴 Cada una habla ANTES de tocar la tarjeta. La regla madre: la familia
+    //    jamás descubre un problema de su pedido —o de su reserva— a través
+    //    del cobro. Y las de «defecto nuestro» NO la culpan ni le piden que
+    //    revise nada: le decimos que lo estamos viendo nosotros.
     cobroPagoEnProceso: 'Tu pago anterior se está procesando.',
     cobroReservaVencida: 'Tu reserva venció. Vamos a revisar que todo siga disponible.',
     cobroVendedorNoActivo: 'Esta tienda no está recibiendo pedidos en este momento.',
-    cobroTokenAusente: 'Elige con qué tarjeta quieres pagar.',
+    cobroElegiMedio: 'Elige con qué tarjeta quieres pagar.',
     cobroCompraNoExiste: 'No encontramos esta compra.',
-    // Las tres nuestras comparten voz a propósito: la causa fina es de soporte,
+    cobroCitaNoExiste: 'No encontramos esta reserva.',
+    // Las nuestras comparten voz a propósito: la causa fina es de soporte,
     // no de la familia — distinguirlas en pantalla sería contarle un problema
     // interno que no puede resolver.
     cobroDefectoNuestro: 'No pudimos completar el cobro. Ya lo estamos viendo.',
     cobroRechazado: 'El banco no autorizó el pago. Prueba con otra tarjeta.',
     cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
-    // El estado de espera — la PANTALLA es Fase 4; acá solo su voz.
     cobroConfirmando: 'Estamos confirmando tu pago.',
+  },
+  despensa: {
     titulo: 'Despensa',
     tituloProducto: 'Producto',
 

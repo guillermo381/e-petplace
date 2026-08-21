@@ -14,7 +14,8 @@ import type { ResultadoWrapper } from '../resultado';
 
 export type CodigoCobro =
   | 'sin_sesion' | 'sesion_no_verificable' | 'datos_invalidos'
-  | 'monto_no_se_recibe' | 'compra_no_existe' | 'token_ausente'
+  | 'monto_no_se_recibe' | 'compra_no_existe' | 'cita_no_existe' | 'token_ausente'
+  | 'metodo_no_permitido'
   | 'desglose_incompleto' | 'rechazado' | 'defecto_nuestro' | 'sin_respuesta'
   | 'tarjeta_sin_uid' | 'iva_no_probado'
   | 'no_se_pudo_completar' | 'servidor_sin_configurar'
@@ -25,12 +26,43 @@ export type CodigoCobro =
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
 
+/**
+ * 🔴 EL SUJETO — **una casa, un motor, dos puertas** (S101-C).
+ *
+ * La compra de despensa y la cita de servicio se cobran **por la misma
+ * función**, que ya exige *exactamente uno* de los dos en su puerta. Acá el
+ * tipo hace lo mismo del lado del cliente: **no existe la forma de pedir un
+ * cobro sin sujeto, ni con dos.**
+ *
+ * *Un segundo wrapper para el segundo sujeto sería el primer día de la
+ * divergencia — y lo que el founder gatea es justamente que el paseo se
+ * sienta igual que la despensa.*
+ */
+export type SujetoDeCobro = { tipo: 'compra'; id: string } | { tipo: 'cita'; id: string };
+
 export async function cobrarCompra(
   compraId: string,
   tarjetaId: string,
 ): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'compra', id: compraId }, tarjetaId);
+}
+
+/** La cita de servicio — el mismo motor, la misma señal, la misma lectura. */
+export async function cobrarCita(
+  citaId: string,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'cita', id: citaId }, tarjetaId);
+}
+
+export async function cobrarSujeto(
+  sujeto: SujetoDeCobro,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
   const { data, error } = await getClient().functions.invoke('pagos-cobro', {
-    body: { compra_id: compraId, tarjeta_id: tarjetaId },
+    body: sujeto.tipo === 'compra'
+      ? { compra_id: sujeto.id, tarjeta_id: tarjetaId }
+      : { cita_id: sujeto.id, tarjeta_id: tarjetaId },
   });
 
   if (error) {

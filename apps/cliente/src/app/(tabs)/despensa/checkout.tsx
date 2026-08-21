@@ -84,7 +84,6 @@ import {
   listarTarjetasGuardadas,
   type TarjetaGuardada,
   COMPUERTAS_DEFECTO_NUESTRO,
-  type CodigoCompuerta,
   obtenerNombresTiendaPorPedido,
   nuevaClaveIdempotencia,
   listarMisDirecciones,
@@ -99,7 +98,7 @@ import { fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
-import { cobrarConTarjetaGuardada, hayCobroAndamio, type TarjetaParaCobro } from '@/lib/pagos/cobro-andamio';
+import { cobrar } from '@/lib/pagos/cobro';
 import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
@@ -118,25 +117,13 @@ type Fase = 'armado' | 'resumen' | 'confirmando' | 'exito';
  *  duraciones del paseo. */
 const CADENCIAS = [7, 15, 30, 60] as const;
 
-/**
- * 🔴 CADA COMPUERTA, SU VOZ (letra §3.1). **Es un MAPA, no un `switch`**: un
- * código nuevo en el motor rompe el typecheck acá en vez de caer en silencio
- * al cajón de «desconocido».
- *
- * Las tres de **defecto nuestro** no están en este mapa a propósito — las
- * resuelve `esDefectoNuestro` con una sola voz. *La causa fina es de soporte;
- * contársela a la familia sería darle un problema que no puede resolver.*
- */
-const VOZ_COMPUERTA: Record<
-  Exclude<CodigoCompuerta, 'monto_divergente' | 'compra_sin_pedidos' | 'desglose_incompleto'>,
-  Parameters<ReturnType<typeof useTraduccion>['t']>[0]
-> = {
-  pago_en_proceso: 'despensa.cobroPagoEnProceso',
-  reserva_vencida: 'despensa.cobroReservaVencida',
-  vendedor_no_activo: 'despensa.cobroVendedorNoActivo',
-  token_ausente: 'despensa.cobroTokenAusente',
-  compra_no_existe: 'despensa.cobroCompraNoExiste',
-};
+/* ☠️ ACÁ VIVÍA `VOZ_COMPUERTA` — **con CERO consumidores** (Ley 37, medido
+   por grep antes de borrarlo). Quedó muerto el día que las compuertas pasaron
+   a correr server-side dentro de `pagos-cobro` y el código tipado empezó a
+   llegar por la respuesta. Hoy la traducción código → frase vive **una sola
+   vez**, en `lib/pagos/cobro.ts`, y **la comparten las dos puertas**:
+   *un mapa de voces por pantalla es como el paseo y la despensa terminan
+   diciendo cosas distintas sobre el mismo rechazo del mismo banco.* */
 
 export default function DespensaCheckout() {
   const { theme } = useTheme();
@@ -222,7 +209,9 @@ export default function DespensaCheckout() {
     if (!r.ok) mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
   }, [mostrar, t]);
 
-  const espera = useEsperaDeConfirmacion(fase === 'confirmando' ? compraId : null);
+  const espera = useEsperaDeConfirmacion(
+    fase === 'confirmando' && compraId ? { tipo: 'compra', id: compraId } : null,
+  );
 
   /* ═══ 🔴 EL HOOK SE ESCUCHA — porque antes NO ═══════════════════════════
      **Medido en el aparato el 20-ago:** la compra quedó `pagada` en la base a
@@ -578,7 +567,7 @@ export default function DespensaCheckout() {
        de sus tarjetas se cobra es exactamente lo que una pantalla de medios de
        pago existe para no hacer.** Ahora se cobra **la que ella eligió**, y si
        no eligió ninguna la pantalla se lo pide antes de tocar nada. */
-    const tarjeta: TarjetaParaCobro = medioElegido ? { id: medioElegido } : null;
+    const medio = medioElegido;
 
     /* ═══ 🔴 LAS COMPUERTAS NO SE LLAMAN DESDE ACÁ, Y NO ES POR UN GRANT ═══
        Medido: `verificar_compuertas_pre_cobro` **no es ejecutable por
@@ -597,9 +586,10 @@ export default function DespensaCheckout() {
        tocar la tarjeta*— porque **la tarjeta no se toca hasta después de que
        las compuertas corrieron**; lo único que cambia es quién las corre. */
 
-    // ③④ El débito y la espera declarada.
-    //    ⚠️ ANDAMIO: ver `cobrarConTarjetaGuardada`. Muere con la Fase 5.
-    const cobro = await cobrarConTarjetaGuardada(compraId, tarjeta);
+    // ③④ El débito y la espera declarada — **por el cobro de la casa**.
+    //    ☠️ El andamio `cobrarConTarjetaGuardada` murió acá: su lápida decía
+    //    «muere en la Fase 5», y la Fase 5 cerró.
+    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio);
     setTrabajando(false);
     if (!cobro.ok) {
       mostrar({ texto: t(cobro.voz), variante: 'error' });
@@ -763,7 +753,7 @@ export default function DespensaCheckout() {
          una pantalla que retiene: el pedido avanza igual sin que nadie la
          mire, y decirlo es lo que la vuelve honesta.* */
       <Boton
-        etiqueta={t('despensa.esperaVerPedidos')}
+        etiqueta={t('pago.esperaVerPedidos')}
         bloque
         onPress={() => router.replace('/pedidos')}
       />
@@ -784,7 +774,7 @@ export default function DespensaCheckout() {
              en el momento en que la familia acaba de entregar su tarjeta es
              peor que uno breve. La frase entera vive en el CUERPO, que es
              donde hay lugar para decirla. */
-          titulo={fase === 'confirmando' ? t('despensa.esperaTituloCorto') : t('despensa.exitoTitulo')}
+          titulo={fase === 'confirmando' ? t('pago.esperaTituloCorto') : t('despensa.exitoTitulo')}
         />
       ) : (
         <Encabezado
@@ -1252,10 +1242,10 @@ export default function DespensaCheckout() {
                 llama «cómo querés pagar», DeUna es una fila más.* */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
               <Separador />
-              <Texto variante="seccion">{t('despensa.comoPagas')}</Texto>
+              <Texto variante="seccion">{t('pago.comoPagas')}</Texto>
               {medios.length === 0 ? (
                 <>
-                  <Texto variante="apoyo">{t('despensa.sinMedios')}</Texto>
+                  <Texto variante="apoyo">{t('pago.sinMedios')}</Texto>
                   <Boton
                     variante="secundario"
                     etiqueta={t('cuenta.medioAgregar')}
@@ -1273,7 +1263,7 @@ export default function DespensaCheckout() {
                       vez de elegir sola. *Elegir por la familia es el andamio
                       que esta fase vino a matar.* */}
                   {medioElegido === null ? (
-                    <Texto variante="apoyo">{t('despensa.elegiMedio')}</Texto>
+                    <Texto variante="apoyo">{t('pago.elegiMedio')}</Texto>
                   ) : null}
                 </>
               )}
@@ -1292,12 +1282,12 @@ export default function DespensaCheckout() {
              exacto en que la familia acabó de entregar su tarjeta.
              *El silencio, en ese momento, se lee como que algo salió mal.* */
           <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-            <Texto variante="titulo">{t('despensa.esperaTitulo')}</Texto>
-            <Texto variante="cuerpo">{t('despensa.esperaCuerpo')}</Texto>
+            <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
+            <Texto variante="cuerpo">{t('pago.esperaCuerpo')}</Texto>
             {/* El tope habla y **no declara desenlace**: la compra sigue viva
                 y el barrido la resuelve el mismo día. */}
             {espera.fase === 'sigue_abierta' ? (
-              <Texto variante="apoyo">{t('despensa.esperaSigueAbierta')}</Texto>
+              <Texto variante="apoyo">{t('pago.esperaSigueAbierta')}</Texto>
             ) : null}
           </View>
         ) : fase === 'exito' ? (
@@ -1396,7 +1386,7 @@ export default function DespensaCheckout() {
       <Hoja
         visible={eligiendoMedio}
         onCerrar={() => setEligiendoMedio(false)}
-        titulo={t('despensa.comoPagas')}
+        titulo={t('pago.comoPagas')}
       >
         <View style={{ gap: spacing[2] }}>
           {medios.map((m) => (

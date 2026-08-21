@@ -1332,6 +1332,12 @@ export {
   type CodigoBorrado,
 } from './wrappers/tarjetas-guardadas';
 
-export { cobrarCompra, type CodigoCobro, type SenalDeCobro } from './wrappers/pagos-cobro';
+export {
+  cobrarCompra, cobrarCita, cobrarSujeto,
+  type CodigoCobro, type SenalDeCobro, type SujetoDeCobro,
+} from './wrappers/pagos-cobro';
 
-export { leerEstadoCompra, type EstadoCompra, type EsperaCompra } from './wrappers/pagos-espera';
+export {
+  leerEstadoCompra, leerEstadoCita,
+  type EstadoCompra, type EsperaCompra, type EstadoCita, type EsperaCita,
+} from './wrappers/pagos-espera';

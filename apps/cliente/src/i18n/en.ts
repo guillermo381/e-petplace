@@ -641,16 +641,14 @@ export const clienteEn = {
     total: 'Total',
     holdVoz: 'We are holding this time for you for 15 minutes.',
     procesando: 'Processing the payment…',
-    pagar: 'Pay (simulated)',
+    pagar: 'Pay',
+    // Still true for THREE doors that don't charge yet: walk plan, walk pack
+    // and training programme. It died only for the single-booking checkout.
     simuladoAviso: 'Test phase: the payment is simulated — nothing real is charged.',
     exitoTitulo: 'Walk confirmed',
     exitoDetalle: "It's on the walker's schedule. You'll see it in your Home.",
     volverHogar: 'Go to Home',
-    rechazado: "The payment didn't go through",
-    rechazadoDetalle: 'Nothing was charged. You can try again.',
-    reintentar: 'Try again',
-    timeout: 'The payment is taking long',
-    timeoutDetalle: "We don't know if it went through. In this simulated phase, try again.",
+    // S101-C — the simulator's whole screens died here (see the Spanish note).
     holdVencido: 'This time was released',
     holdVencidoDetalle: 'The 15-minute hold ran out. Pick another time.',
     elegirOtro: 'Pick another time',
@@ -1254,8 +1252,9 @@ export const clienteEn = {
   },
   // ── D-430 (S67): contextual appointment detail (LOTE S67 APPROVED by founder, Jul 18 2026) ──
   // ── S95-I · THE PANTRY (string batch PENDING FOUNDER GATE) ───────────
-  despensa: {
-    // S101-B · Fase 4 — the wait. Never a mute spinner, never "declined" on timeout.
+  // S101-C — the voice of PAYING, in its own house: "the bank didn't authorise"
+  // was never a pantry sentence. Shared by the pantry and by services.
+  pago: {
     comoPagas: 'How do you want to pay',
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',
@@ -1266,17 +1265,24 @@ export const clienteEn = {
     esperaFallida: "The payment didn't go through. You weren't charged.",
     esperaCancelada: 'This purchase was cancelled.',
     esperaVerPedidos: 'See my orders',
-    // S101-B · Fase 3 — gate voices. The three "our defect" ones never blame
-    // the customer nor ask them to check anything.
+    esperaCuerpoCita: 'It may take a few seconds. You can close this screen — your booking stands.',
+    esperaSigueAbiertaCita: "It's taking longer than usual. Your booking stands and we'll let you know.",
+    esperaExpirada: "The slot we were holding was released. You weren't charged.",
+    esperaCanceladaCita: 'This booking was cancelled.',
+    // Gate voices. The "our defect" ones never blame the customer nor ask
+    // them to check anything.
     cobroPagoEnProceso: 'Your previous payment is still processing.',
     cobroReservaVencida: "Your hold expired. We'll check everything is still available.",
     cobroVendedorNoActivo: "This shop isn't taking orders right now.",
-    cobroTokenAusente: 'Choose which card you want to pay with.',
+    cobroElegiMedio: 'Choose which card you want to pay with.',
     cobroCompraNoExiste: "We couldn't find this purchase.",
+    cobroCitaNoExiste: "We couldn't find this booking.",
     cobroDefectoNuestro: "We couldn't complete the charge. We're already looking into it.",
     cobroRechazado: "The bank didn't authorise the payment. Try another card.",
     cobroDesconocido: "We couldn't complete the charge. We're already looking into it.",
     cobroConfirmando: "We're confirming your payment.",
+  },
+  despensa: {
     titulo: 'Pantry',
     tituloProducto: 'Product',
 

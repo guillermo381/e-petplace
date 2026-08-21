@@ -31,7 +31,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { leerEstadoCompra, type EstadoCompra } from '@epetplace/api';
+import {
+  leerEstadoCompra, leerEstadoCita,
+  type EstadoCompra, type EstadoCita,
+} from '@epetplace/api';
 
 /** Arranca a 2 s y se abre hasta 15 s. */
 const PASOS_MS = [2_000, 3_000, 5_000, 8_000, 12_000, 15_000] as const;
@@ -44,24 +47,43 @@ const PASOS_MS = [2_000, 3_000, 5_000, 8_000, 12_000, 15_000] as const;
  */
 const TOPE_MS = 90_000;
 
+/**
+ * 🔴 QUÉ SE ESPERA — **el sujeto, explícito** (S101-C). La compra de despensa y
+ *    la cita de servicio esperan **con esta misma pieza**.
+ *
+ *    *Un segundo hook para el segundo sujeto habría sido el lugar exacto donde
+ *    las dos puertas empiezan a comportarse distinto: el backoff de una se
+ *    afina, el de la otra no, y un día el paseo tarda más que la despensa sin
+ *    que nadie sepa por qué.*
+ */
+export type SujetoEnEspera = { tipo: 'compra'; id: string } | { tipo: 'cita'; id: string };
+
 export type Espera =
   | { fase: 'mirando' }
-  | { fase: 'resuelta'; estado: EstadoCompra }
+  /** 🔴 El estado viaja **en el vocabulario de su sujeto**, sin traducirse.
+   *  *«pagada» es la única palabra que los dos comparten, y es la única que
+   *  esta pantalla necesita comparar.* */
+  | { fase: 'resuelta'; estado: EstadoCompra | EstadoCita | null }
   | { fase: 'sigue_abierta' };
 
 /**
- * Mira hasta que la compra se resuelva, se acabe el tope, o la pantalla pierda
+ * Mira hasta que el sujeto se resuelva, se acabe el tope, o la pantalla pierda
  * el foco. **No escribe nada** — solo lee.
  */
-export function useEsperaDeConfirmacion(compraId: string | null): Espera {
+export function useEsperaDeConfirmacion(sujeto: SujetoEnEspera | null): Espera {
   const [espera, setEspera] = useState<Espera>({ fase: 'mirando' });
   const vivo = useRef(true);
+  /* Las dos identidades por separado: son las dependencias reales del efecto.
+     Pasar el objeto lo remontaría en cada render —un literal nuevo cada vez—
+     y el sondeo arrancaría de cero para siempre, sin cerrar nunca. */
+  const tipo = sujeto?.tipo ?? null;
+  const sujetoId = sujeto?.id ?? null;
 
   useEffect(() => {
-    if (compraId === null) return;
+    if (sujetoId === null || tipo === null) return;
     /* El `null` ya se descartó arriba; se fija en una const para que el
        closure no dependa de una prop que TS ve como nullable. */
-    const id: string = compraId;
+    const id: string = sujetoId;
     vivo.current = true;
     const desde = Date.now();
     let paso = 0;
@@ -78,7 +100,7 @@ export function useEsperaDeConfirmacion(compraId: string | null): Espera {
         return;
       }
 
-      const r = await leerEstadoCompra(id);
+      const r = tipo === 'compra' ? await leerEstadoCompra(id) : await leerEstadoCita(id);
       if (!vivo.current) return;
 
       if (r.ok && r.data.resuelta) {
@@ -101,7 +123,7 @@ export function useEsperaDeConfirmacion(compraId: string | null): Espera {
 
     timer = setTimeout(mirar, PASOS_MS[0]);
     return () => { vivo.current = false; if (timer) clearTimeout(timer); };
-  }, [compraId]);
+  }, [tipo, sujetoId]);
 
   return espera;
 }

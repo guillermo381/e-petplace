@@ -438,6 +438,21 @@ export interface InputConfirmarCita {
  * Chequeo perezoso del hold (vencido → 'hold_expirado') + pre-validación
  * del motor financiero (falla → 'pago_no_disponible'). NO crea el evento
  * económico: nace al cerrar con calidad (variante b, S54).
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │ 🔴 S101-C · LA RPC DE ABAJO ESTÁ **REVOCADA** DE `authenticated`.       │
+ * │                                                                         │
+ * │ Este wrapper **ya no tiene consumidores en la app**: el checkout de los │
+ * │ cuatro oficios cobra por `pagos-cobro` con la cita como sujeto. Lo que  │
+ * │ queda llamándolo son los **arneses de regresión** de S54–S57.           │
+ * │                                                                         │
+ * │ 🔴 Y NO SE BORRA A PROPÓSITO: cuando uno de esos arneses corra, va a    │
+ * │    rebotar con `42501` — **y ese rebote es la evidencia medible de que  │
+ * │    la puerta cerró.** *Un arnés que sigue pasando después de un REVOKE  │
+ * │    está probando otra cosa.*                                            │
+ * │                                                                         │
+ * │ Si alguien necesita pagar una cita: **`cobrarCita`**, no esto.          │
+ * └─────────────────────────────────────────────────────────────────────────┘
  */
 export async function confirmarCitaPagada(
   input: InputConfirmarCita,
