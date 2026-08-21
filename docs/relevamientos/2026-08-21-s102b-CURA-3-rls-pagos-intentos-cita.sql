@@ -77,6 +77,7 @@ CREATE POLICY pagos_select ON public.pagos_intentos
   );
 
 ALTER TABLE public.pagos_intentos
+  DROP CONSTRAINT IF EXISTS chk_intento_de_cita_declara_pagador,
   DROP CONSTRAINT IF EXISTS chk_pagador_viaja_con_su_origen,
   DROP COLUMN IF EXISTS pagador_origen,
   DROP COLUMN IF EXISTS pagador_user_id;
@@ -174,6 +175,48 @@ UPDATE public.pagos_intentos pi
    AND pi.pagador_user_id IS NULL
    AND m.user_id IS NOT NULL;
 
+-- ── ③bis 🔴 EL CINTURÓN DE LA TANDA, HECHO MECANISMO ───────────────────────
+-- Orden de mesa (21-ago): *«migración + cableado de pagos-cobro juntos, en ese
+-- orden, jamás la migración sola. Escribirlo en la migración misma si el
+-- mecanismo lo permite, no en nota.»*
+--
+-- **El mecanismo existe y es este CHECK.** Una fila de CITA sin pagador pasa a
+-- ser INEXPRESABLE.
+--
+-- 🔴 **HACE DOS TRABAJOS, y por eso es la pieza correcta y no una ceremonia:**
+--
+--   ① **VALIDA EL BACKFILL AL CREARSE.** Si el UPDATE de arriba se saltó una
+--      fila, **la creación del CHECK FALLA y la migración entera aborta**.
+--      *No es un cinturón que revisa después: es el mismo acto.*
+--
+--   ② **OBLIGA AL CABLEADO.** Si `pagos-cobro` se despliega sin las dos claves,
+--      su INSERT de una cita **rebota con un error de constraint** en vez de
+--      escribir NULL en silencio.
+--
+-- ⚠️ **EL COSTO, DECLARADO DE ANTEMANO PARA QUE EL PRIMER ROJO NO SORPRENDA:
+--    aplicar esta migración SIN cablear la function DEJA EL COBRO DE CITAS
+--    CAÍDO.** *Se acepta a propósito, y es exactamente lo que la mesa pidió:
+--    la alternativa —permitir NULL— es que cada cobro nuevo nazca invisible
+--    para quien lo pagó, en silencio y para siempre.*
+--
+-- > **Un cobro que falla se nota en el minuto uno. Una fila invisible no se
+-- > nota nunca.** *Entre un rojo ruidoso y un estado que miente, la casa ya
+-- > eligió: el estado malo se vuelve inexpresable* (L-222).
+--
+-- **Se crea VALIDADO (no `NOT VALID`) a propósito**: `NOT VALID` eximiría a las
+-- filas existentes y con eso perdería el trabajo ①. *Un CHECK que no mira lo
+-- que ya está no puede probar que el backfill terminó.*
+ALTER TABLE public.pagos_intentos
+  ADD CONSTRAINT chk_intento_de_cita_declara_pagador
+  CHECK (pedido_id IS NOT NULL OR pagador_user_id IS NOT NULL);
+
+COMMENT ON CONSTRAINT chk_intento_de_cita_declara_pagador ON public.pagos_intentos IS
+  'S102: un intento de CITA no puede existir sin saber quién pagó. '
+  'Las filas de PEDIDO quedan exentas: su dueño se resuelve por pedidos.user_id, '
+  'y confirmar_pago_pedido las crea sin sesión de pagador. '
+  'Este CHECK es el cinturón de la tanda: si pagos-cobro no manda pagador_user_id, '
+  'el cobro de cita REBOTA en vez de nacer invisible.';
+
 -- ── ④  LA POLICY — SE ENSANCHA, NO SE REEMPLAZA ────────────────────────────
 DROP POLICY IF EXISTS pagos_select ON public.pagos_intentos;
 
@@ -252,11 +295,17 @@ COMMIT;
 -- **La columna nace vacía para todo lo que venga.** Quien la llena es la
 -- puerta, y la puerta es una EDGE FUNCTION, no la DB.
 --
--- ⚠️ **Si esta migración se aplica sola, el resultado es exactamente el defecto
---    que S101 nombró cuatro veces en un día: la pieza construida, probada y
---    desconectada del único lugar donde su resultado importa.** Peor: la
---    policy nueva parecería andar (los 7 backfilleados se ven) y **todo cobro
---    NUEVO nacería invisible para su pagador.**
+-- ✅ **PERO YA NO SE PUEDE APLICAR SOLA EN SILENCIO — eso lo cierra el CHECK
+--    `chk_intento_de_cita_declara_pagador` de §③bis.** Con la migración puesta
+--    y la function sin cablear, **el cobro de cita REBOTA con error de
+--    constraint.** *Sigue siendo un problema; deja de ser un problema
+--    invisible.*
+--
+-- ⚠️ **Y por eso las dos van en la MISMA tanda, en este orden.** Sin el CHECK,
+--    el resultado habría sido el defecto que S101 nombró cuatro veces en un
+--    día —la pieza construida, probada y desconectada— con el agravante de que
+--    **la policy nueva parecería andar** (los 7 backfilleados se ven) mientras
+--    **todo cobro NUEVO nacía invisible para su pagador.**
 --
 -- ── PEDIDO AUTOCONTENIDO PARA QUIEN TOQUE `pagos-cobro` (§6 del método) ─────
 --

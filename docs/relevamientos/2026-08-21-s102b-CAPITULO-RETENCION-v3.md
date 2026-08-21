@@ -83,40 +83,49 @@ resumieron.**
 > vuelve mucho más barato de escribir. *Se dice acá porque la secuencia natural
 > (plazo → qué hacer) es la cara.*
 
-### 📌 PRE-CARGA DE LA PREGUNTA 4 — LA REGLA 7.8 YA EMPUJA EN UN SENTIDO
+### 📌 LA PREGUNTA 4 QUEDA ABIERTA LIMPIA — la pre-carga se RETIRÓ, y por qué
 
-**`MODELO_FINANCIERO` §7.8 «Cómo se borra algo», literal:**
+> **Dictamen de mesa, 21-ago:** *«la pre-carga queda RETIRADA — el literal de 7.8
+> no dice anonimizar; eso es P15, candidata sin firma. La 4 queda abierta limpia
+> para founder + abogado.»*
+
+**Se conserva la medición que la retiró, porque el porqué no se borra.**
+
+**`MODELO_FINANCIERO` §7.8 «Cómo se borra algo», literal completo:**
 
 > **No se borra.** Eventos, liquidaciones, cuentas comerciales, roles: nunca
 > DELETE en producción. Usar estados.
 
-⇒ **Para el lado financiero la casa ya decidió, y decidió que NO se borra.** Eso
-**pre-carga la pregunta 4 hacia ANONIMIZAR**: si la fila del pago no puede
-desaparecer, la única forma de honrar un derecho de supresión es **quitarle el
-dato personal y conservar el respaldo**.
+**Eso es TODO lo que dice.** Y de ahí salen los dos huecos que impiden usarla
+como pre-carga:
 
-> ### ⚠️ PERO LA 7.8 NO ALCANZA SOLA, Y HAY QUE DECIR POR QUÉ — medido contra el literal
->
 > **① Su alcance NO nombra estas tablas.** Dice *«eventos, liquidaciones,
 > cuentas comerciales, roles»*. **`pagos_intentos`, `pagos_eventos` y
 > `webhook_events` no están en esa lista.** *Extender una regla por parecido es
 > exactamente cómo `cuenta_comercial_id` entró a una lista de veredictos por
-> vecindad y rompió ocho policies (S91).* **Si la 7.8 va a cubrirlas, se
-> ENSANCHA con firma; no se asume.**
+> vecindad y rompió ocho policies (S91).*
 >
-> **② La 7.8 dice «usar estados», NO dice «anonimizar».** *Son dos cosas
-> distintas: un estado marca la fila como inactiva y **el `holder_name` sigue
-> ahí**.* **La anonimización es una operación que la 7.8 no describe** y que
-> esta letra tendría que definir: qué campos se vacían, con qué se reemplazan, y
-> **cómo se prueba que se hizo**.
+> **② Dice «usar estados», NO dice «anonimizar».** *Son dos cosas distintas: un
+> estado marca la fila como inactiva y **el `holder_name` sigue ahí**.* **La
+> anonimización es una operación que §7.8 no describe** — y donde vive esa idea
+> es en **P15, que es CANDIDATA SIN FIRMA.**
+
+> ### ⇒ **Apoyar la pregunta 4 en la 7.8 habría sido construir sobre una regla que no cubre estas tablas y sobre una operación que ninguna letra firmada define.**
 >
-> 🔴 **Y por eso se anota acá:** el insumo de D-405 (`docs/INSUMO_D405_PRIVACIDAD.md`,
-> fila 1) resume la 7.8 como *«la plata no se borra: se anonimiza la referencia
-> personal»*. **La segunda mitad de esa frase NO está en el literal de §7.8.**
-> *El insumo se depositó VERBATIM por orden de mesa y no se edita; la
-> divergencia se declara acá, que es donde se va a construir.* **Y su propia
-> regla de precedencia lo resuelve: «si este insumo contradice al repo, gana la
-> fuente».**
+> *Una pre-carga que sale de una lectura ensanchada no orienta la decisión: la
+> contamina — y llega al abogado con una respuesta ya sugerida por un texto que
+> no dice eso.*
+
+**⇒ La pregunta 4 vuelve a su estado limpio: `⟨A FIRMAR⟩`, sin sentido
+sugerido, para founder + abogado en D-405.**
+
+> 🔴 **Y la divergencia queda declarada, que es lo que rige:** el insumo de D-405
+> (`docs/INSUMO_D405_PRIVACIDAD.md`, fila 1) resume la 7.8 como *«la plata no se
+> borra: se anonimiza la referencia personal»*. **La segunda mitad de esa frase
+> NO está en el literal.** *El insumo se depositó VERBATIM por orden de mesa y no
+> se edita; la divergencia se declara acá, que es donde se va a construir.* **Y
+> su propia regla de precedencia lo resuelve: «si este insumo contradice al repo,
+> gana la fuente».**
 
 ---
 

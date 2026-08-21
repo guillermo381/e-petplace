@@ -1,5 +1,27 @@
 # S102-B → PISTA A · PEDIDO AUTOCONTENIDO — CUATRO FICHAS SIN NÚMERO + UNA CORRECCIÓN
 
+> ## ✅ EJECUTADO POR A — 21-ago-2026 · `origin/pista/s101-d` · sha `cea064a1…`
+>
+> **Verificado por B contra el objeto (regla 59), no contra el reporte de A:**
+> el sha coincide, las cuatro fichas existen **con cuerpo**, los cruces están
+> **rellenados** y quedan **cero placeholders**.
+>
+> | ficha | número asignado |
+> |---|---|
+> | `v_ranking_usuarios` a `anon` (§②) | **`D-860`** 🔴 |
+> | retención del dato de pago (§③) | **`D-861`** 🔴 |
+> | comprobante al dueño, no al pagador (§④) | **`D-862`** 🟡 |
+> | seis vistas de métricas a `anon` (§⑤) | **`D-863`** 🟡 |
+> | la lección (§⑥bis) | **`L-328`** |
+>
+> **`D-748` cerrada en las tres ocurrencias** de §⑥ · **cuarta ocurrencia
+> hallada y NO tocada** (`LETRA_MOTOR_PAGOS_S101.md:41`) — es una orden de S101
+> **ya ejecutada**, y editarla sería reescribir una orden cumplida. **Va a la
+> mesa como decisión.**
+>
+> *Este archivo queda como el pedido tal como se emitió. Lo que rige es lo
+> depositado.*
+
 > **Este archivo SUPERSEDE a `2026-08-21-s102b-FICHAS-D858-D861.md`**, que
 > reservaba `D-858` → `D-861`. **`D-858` ya era de A** (asignada horas antes en
 > su worktree, todavía sin pushear — por eso el grep de B no la vio: **medí
@@ -331,17 +353,27 @@ migración que la pagó **la nombra por número en su propio comentario.**
 
 ---
 
-## ⑥bis · LECCIÓN NUEVA A DEPOSITAR — **`L-327`** *(orden de mesa, relevo 3 punto 5)*
+## ⑥bis · LECCIÓN NUEVA — **DEPOSITADA POR A COMO `L-328`** ✅
 
-> **Número medido por grep el 21-ago:** techo del canon **`L-326`**; `L-327` y
-> `L-328` dan **0 archivos** en `docs/`, `scripts/`, `packages/`, `apps/`,
-> `supabase/`.
-> **⚠️ Con la misma advertencia que la regla de §⓪ acaba de dejar escrita: ese
-> grep mide MI árbol y origin, no los worktrees ajenos. A confirma al depositar.**
+> ### 🔴 LA REGLA DE §⓪ SE COBRÓ ACÁ, SOBRE LA LECCIÓN QUE LA ENUNCIA
+>
+> **La redacté como `L-327`** con el grep bien corrido sobre `origin` (techo
+> `L-326`; `L-327` y `L-328` daban 0 archivos). **`L-327` ya era de A** —la
+> lección del `\b` ASCII en censos de español— y vivía en su worktree sin
+> pushear.
+>
+> **⇒ A la depositó como `L-328`.** *Escribí el número con el mismo método que
+> acababa de declarar insuficiente, en la misma tanda.* **No hay mejor
+> evidencia de que la regla hacía falta que su autor rompiéndola una línea más
+> abajo.**
+>
+> **El texto que rige es el depositado por A** (`origin/pista/s101-d`,
+> `docs/DEUDAS_CANONICAS.md:18582`), que además lleva esta historia adentro.
+> Lo de abajo es la redacción de origen y se conserva como registro.
 
 ---
 
-### L-327 — EL PATRÓN CORRECTO PARA UNA CLASE PUEDE SER LA CURA EQUIVOCADA PARA UN MIEMBRO DE ESA CLASE
+### L-328 — EL PATRÓN CORRECTO PARA UNA CLASE PUEDE SER LA CURA EQUIVOCADA PARA UN MIEMBRO DE ESA CLASE
 
 **La clase:** vistas de `public` con grant a `anon` y sin `security_invoker` —
 corren como su dueño y **bypassean la RLS de las tablas de abajo**. La casa ya
