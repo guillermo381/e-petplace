@@ -5,7 +5,26 @@
 > jornada, y los seis dieron un resultado creíble y falso.
 > **Se enlaza con `L-321`** (*un censo que devuelve vacío se prueba antes contra un
 > caso con resultado conocido*) y **`L-329`** (*un snapshot se vuelve a tomar, no
-> se edita*).
+> se edita*). **De acá salió `L-330`** — el control se DECLARA junto al número.
+>
+> ---
+>
+> ## 🔴 LA DISTINCIÓN QUE ORDENA TODO ESTE ARCHIVO *(dictamen de mesa)*
+>
+> ### **LOS CONTROLES CURAN INSTRUMENTOS · LAS LEYES CURAN LECTORES · LOS INVARIANTES CURAN RESULTADOS PLAUSIBLES.**
+>
+> **No son intercambiables**, y los seis casos de abajo lo prueban repartiéndose
+> en las tres columnas:
+>
+> | remedio | qué defecto cura | casos de este archivo |
+> |---|---|---|
+> | **control positivo** | el instrumento **que calla** — ceros y verdes falsos | ① `\b` ASCII · ② bytecode Hermes · ④ `$REPOS` de zsh · ⑥ la columna equivocada |
+> | **invariante de salida** | el **resultado plausible** — no hay cero ni verde, hay un número que se ve bien | ③ `Math.round` deformando cinco marcas |
+> | **ley** | el **lector distraído** — el instrumento dijo la verdad y se leyó mal | ⑤ el exit del pipe (`L-191` **ya existía**) |
+>
+> ⚠️ **Y por eso la distinción no es taxonomía: elegir el remedio equivocado deja
+> el defecto vivo con cara de atendido.** *A `Math.round` se le puede correr
+> control positivo todo el día y nunca va a fallar — porque no está callando.*
 
 ---
 
@@ -149,7 +168,7 @@ equivoca: contradice a quien midió bien.*
 
 ---
 
-## §3 · 📮 CANDIDATA DE LECCIÓN — **se propone a la mesa, no se funda sola**
+## §3 · ✅ **FUNDADA COMO `L-330`** *(la mesa la firmó el mismo día — el texto de abajo es su propuesta original, conservado)*
 
 > ### **EL CONTROL POSITIVO VIAJA CON EL NÚMERO, NO CON LA CONFIANZA DE QUIEN LO CORRIÓ.**
 >
