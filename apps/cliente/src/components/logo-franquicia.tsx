@@ -2,24 +2,32 @@
  * S101-C · EL LOGO DE FRANQUICIA — la marca de la tarjeta, a la izquierda de
  * su fila (orden del founder ④).
  *
- * ═══ 🔴 LO QUE ESTA PIEZA **NO** TIENE, dicho antes que nada ════════════════
+ * ═══ ✅ S101-D · LOS ASSETS LLEGARON, Y CAMBIÓ EL INTERIOR DE LA CAJA ═══════
  *
- * **No hay assets oficiales de franquicia en el repo.** Se midió: cero
- * archivos de marca de Visa / Mastercard / Diners / Amex / Discover, y el
- * registry de `Icono` tiene 45 glifos, **ninguno de ellos una franquicia**.
+ * **La promesa de esta pieza se cumplió al pie.** Decía: *«el día que los
+ * assets se depositen, cambia el interior de esta caja y nada más — ni la fila,
+ * ni la hoja, ni el alto de nada»*. **Eso es exactamente lo que pasó:**
+ * `ANCHO_LOGO`, `ALTO_LOGO`, el radio, el fondo y el fallback **siguen
+ * idénticos**; lo único nuevo es qué se dibuja adentro cuando la marca tiene
+ * archivo.
  *
- * La orden dice: *«activos estándar de franquicia (set consistente), **fallback
- * a texto si la marca no tiene ícono conocido — jamás un hueco**»*. Hoy
- * **ninguna** tiene ícono conocido en la casa ⇒ **por la propia regla de la
- * orden, todas caen al fallback de texto.** *Dibujar a mano un logo de
- * franquicia sería peor que el texto por dos motivos a la vez: es artwork con
- * dueño, y a 28 px un logo mal redibujado se lee como error, no como marca.*
+ * **De dónde salieron:** de la doc de Nuvei (sección *Card Brands*), vendored en
+ * `assets/marcas/` con su `PROCEDENCIA.md` — fuente, URLs y fecha. **Jamás
+ * hotlink**: un CDN ajeno puede cambiar un archivo sin avisarnos, y pedirle la
+ * imagen en cada fila le contaría a un tercero cuándo abre la app cada familia.
  *
- * ⇒ **Lo que sí garantiza esta pieza es el SET CONSISTENTE**: misma caja,
- *   mismo radio, mismo aire, misma tipografía para las cinco y para la
- *   desconocida. **Lo único que cambia adentro es el texto.**
- *   *El día que los assets se depositen, cambia el interior de esta caja y
- *   nada más — ni la fila, ni la hoja, ni el alto de nada.*
+ * 🔴 **NO SE REDIBUJÓ NINGUNA A MANO** (orden de mesa). Son marcas registradas:
+ * el `.svg` del proveedor es la fuente de verdad y Metro lo compila
+ * (`metro.config.js` + `react-native-svg-transformer`, S101-D). *Un logo
+ * redibujado a ojo se lee como error, no como marca.*
+ *
+ * ⇒ **El SET CONSISTENTE sigue siendo lo que esta pieza garantiza**: misma
+ *   caja, mismo radio, mismo aire para las cinco, para la desconocida y para la
+ *   ausente. **Lo que cambia adentro es el contenido, jamás la caja.**
+ *
+ * 🔴 **EL FALLBACK DE TEXTO NO SE TOCÓ Y SIGUE SIENDO LEY** (firma vigente):
+ *    toda marca **sin archivo** —hoy las 19 restantes del catálogo del
+ *    proveedor— dibuja su nombre corto exactamente como antes.
  *
  * 🔴 **JAMÁS UN HUECO**, y está hecho imposible: sin `marca`, la caja dibuja
  *    el glifo `pagos` de la casa. *No existe la rama que devuelve `null`.*
@@ -27,6 +35,12 @@
 
 import { View } from 'react-native';
 import { Icono, Texto, radius, useTheme } from '@epetplace/ui';
+
+import Visa from '../../assets/marcas/ic_visa.svg';
+import Mastercard from '../../assets/marcas/ic_mastercard.svg';
+import Diners from '../../assets/marcas/ic_diners.svg';
+import Amex from '../../assets/marcas/ic_amex.svg';
+import Discover from '../../assets/marcas/ic_discover.svg';
 
 /** Los códigos que devuelve el proveedor → el nombre corto que se dibuja.
  *  **Corto a propósito**: en 40 px de ancho, «American Express» no entra y
@@ -50,9 +64,31 @@ const NOMBRE_CORTO: Record<string, string> = {
 export const ANCHO_LOGO = 56;
 const ALTO_LOGO = 32;
 
+/* 🔴 EL ARCHIVO Y SU RELACIÓN DE ASPECTO, MEDIDOS DEL `viewBox` DE CADA SVG —
+   no supuestos, y **no son iguales entre sí**: Visa viene `56×18`, Mastercard
+   `56×37`, y Amex/Diners/Discover `32×21`.
+   *Pasarles un `width` y un `height` fijos a los cinco estiraría tres marcas
+   registradas: la deformación no daría error, se vería «casi bien».*
+   ⇒ Cada uno se escala **conteniendo**, con la caja como techo. Es el mismo
+   principio del `contentFit: contain` de `LogoNegocio`: **un logo estirado a
+   sangre grita «acá falló algo»**. */
+const ARCHIVOS: Record<string, { Svg: React.FC<{ width: number; height: number }>; w: number; h: number }> = {
+  vi: { Svg: Visa, w: 56, h: 18 },
+  mc: { Svg: Mastercard, w: 56, h: 37 },
+  di: { Svg: Diners, w: 32, h: 21 },
+  ax: { Svg: Amex, w: 32, h: 21 },
+  dc: { Svg: Discover, w: 32, h: 21 },
+};
+
+/* El aire interno es del CONTENIDO, no de la caja: la caja sigue midiendo
+   56×32 exactos, y el logo vive adentro sin tocar los bordes. */
+const CONTENIDO_ANCHO = 44;
+const CONTENIDO_ALTO = 22;
+
 export function LogoFranquicia({ marca }: { marca: string | null }) {
   const { theme } = useTheme();
   const codigo = marca?.toLowerCase() ?? '';
+  const archivo = ARCHIVOS[codigo];
   /* Una marca que el proveedor manda y no conocemos **se dibuja igual**, con
      su propio código en mayúsculas. *Es más honesto que un genérico: dice
      exactamente lo que sabemos.* */
@@ -70,7 +106,25 @@ export function LogoFranquicia({ marca }: { marca: string | null }) {
         overflow: 'hidden',
       }}
     >
-      {texto ? (
+      {archivo ? (
+        /* La marca con archivo: su SVG, contenido en la caja. El orden importa
+           — **este brazo va PRIMERO y el de texto queda intacto detrás**: así
+           el fallback sigue sirviendo a las 19 marcas del catálogo del
+           proveedor que no vendorizamos, sin una sola rama nueva. */
+        (() => {
+          const escala = Math.min(
+            CONTENIDO_ANCHO / archivo.w,
+            CONTENIDO_ALTO / archivo.h,
+          );
+          const { Svg } = archivo;
+          return (
+            <Svg
+              width={Math.round(archivo.w * escala)}
+              height={Math.round(archivo.h * escala)}
+            />
+          );
+        })()
+      ) : texto ? (
         <Texto variante="dato" numberOfLines={1}>{texto}</Texto>
       ) : (
         /* Sin marca: el glifo de pagos de la casa. **La rama vacía no existe.** */

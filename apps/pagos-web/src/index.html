@@ -301,18 +301,99 @@
      ⇒ Con `en` se sobrescriben las que la familia lee. *Se declara que esto
      toca API del proveedor: si un día renombra estas constantes, el formulario
      vuelve al español **sin romperse** — degrada, no falla.* */
+  /* 🔴 EL CENSO DE LAS VEINTE — *la degradación silenciosa gana síntoma*
+     (orden de mesa, relevo 4). **El modo de falla de depender de un interno
+     ajeno no es que explote: es que un día deje de existir y nadie se entere.**
+     Si el proveedor renombra una constante, nuestra asignación se vuelve una
+     propiedad huérfana que **nadie lee**, y el campo vuelve al español **sin un
+     solo error en la consola**.
+     ⇒ Antes de asignar se CENSA: las veinte que medimos en el SDK tienen que
+     seguir existiendo. Si faltan, se dicen POR NOMBRE. *Un aviso que no nombra
+     cuál falta obliga a re-medir el SDK entero para saber qué se rompió.* */
+  var CLAVES_SDK = [
+    'CREDIT_CARD_NUMBER_PLACEHOLDER', 'NAME_PLACEHOLDER', 'EXPIRY_PLACEHOLDER',
+    'CVC_PLACEHOLDER', 'EMAIL_PLACEHOLDER', 'CELLPHONE_PLACEHOLDER',
+    'FISCAL_NUMBER_PLACEHOLDER', 'VERIFICATION_MESSAGE', 'VERIFICATION_PLACEHOLDER',
+    'INVALID_CARD_TYPE_MESSAGE', 'NIP_PLACEHOLDER', 'OTP_PLACEHOLDER_ADD',
+    'OTP_PLACEHOLDER_CHECKOUT', 'OTP_EXPLICATION_ADD', 'OTP_EXPLICATION_CHECKOUT',
+    'CELLPHONE_MASK', 'EXPIRY_MASK', 'AUTH_CVC', 'AUTH_NIP', 'AUTH_OTP',
+  ];
+
+  /* Las que la FAMILIA LEE. Las otras del censo son máscaras y códigos internos
+     (`XX / YY`, `AUTH_OTP`): **traducirlas sería romperlas**, y por eso se
+     vigilan sin tocarse. */
+  var TRADUCCIONES_SDK = {
+    CREDIT_CARD_NUMBER_PLACEHOLDER: 'Card number',
+    NAME_PLACEHOLDER: 'Cardholder name',
+    EXPIRY_PLACEHOLDER: 'MM / YY',
+    CVC_PLACEHOLDER: 'CVC',
+    EMAIL_PLACEHOLDER: 'E-mail',
+    CELLPHONE_PLACEHOLDER: 'Mobile',
+    FISCAL_NUMBER_PLACEHOLDER: 'ID document',
+    VERIFICATION_MESSAGE: 'This operation requires verification',
+    VERIFICATION_PLACEHOLDER: 'OTP code',
+    INVALID_CARD_TYPE_MESSAGE: 'This card type is not valid for this operation.',
+  };
+
   function traducirWidget() {
-    if (LANG !== 'en' || typeof PaymentForm === 'undefined') return;
-    PaymentForm.CREDIT_CARD_NUMBER_PLACEHOLDER = 'Card number';
-    PaymentForm.NAME_PLACEHOLDER = 'Cardholder name';
-    PaymentForm.EXPIRY_PLACEHOLDER = 'MM / YY';
-    PaymentForm.CVC_PLACEHOLDER = 'CVC';
-    PaymentForm.EMAIL_PLACEHOLDER = 'E-mail';
-    PaymentForm.CELLPHONE_PLACEHOLDER = 'Mobile';
-    PaymentForm.FISCAL_NUMBER_PLACEHOLDER = 'ID document';
-    PaymentForm.VERIFICATION_MESSAGE = 'This operation requires verification';
-    PaymentForm.VERIFICATION_PLACEHOLDER = 'OTP code';
-    PaymentForm.INVALID_CARD_TYPE_MESSAGE = 'This card type is not valid for this operation.';
+    if (typeof PaymentForm === 'undefined') {
+      /* Se avisa SIEMPRE, no solo en inglés: si el SDK no expuso `PaymentForm`
+         está roto el widget entero, y eso no es un problema de idioma. */
+      avisarSdk('PaymentForm ausente: el SDK no expuso su formulario.', []);
+      return;
+    }
+
+    var faltantes = [];
+    for (var i = 0; i < CLAVES_SDK.length; i++) {
+      if (typeof PaymentForm[CLAVES_SDK[i]] === 'undefined') faltantes.push(CLAVES_SDK[i]);
+    }
+    /* 🔴 El censo corre SIEMPRE — también en español. *Si esperáramos a que
+       alguien abra la página en inglés para enterarnos de que el proveedor
+       renombró sus constantes, el síntoma llegaría meses tarde.* */
+    if (faltantes.length) {
+      avisarSdk(
+        'El SDK cambió: ' + (CLAVES_SDK.length - faltantes.length) + '/' +
+        CLAVES_SDK.length + ' claves presentes. El formulario en inglés degrada a español.',
+        faltantes
+      );
+    }
+
+    if (LANG !== 'en') return;
+    for (var k in TRADUCCIONES_SDK) {
+      if (typeof PaymentForm[k] !== 'undefined') PaymentForm[k] = TRADUCCIONES_SDK[k];
+    }
+  }
+
+  /* La constancia. ⚠️ **Jamás toca el formulario ni su contenido** — solo dice
+     QUÉ CLAVE falta, que es metadata del SDK y no dato de nadie. *El principio
+     innegociable de esta página sigue rigiendo: acá no se registra nada que
+     venga del formulario.*
+
+     🔴 **EL `fuente` ES DISTINTO A PROPÓSITO, y esto casi cuesta caro.** Medido
+     en el consumidor (`app/pagos/alta-tarjeta.tsx:114-122`): el `onMessage` de
+     la app **no mira el contenido** — con que el `fuente` sea
+     `'epetplace-alta-tarjeta'`, **da el trámite por terminado y CIERRA la
+     pantalla**. Como este censo corre al ARRANCAR, mandarlo con el `fuente` del
+     desenlace **habría cerrado el alta apenas cargara**, antes de que la persona
+     tipeara nada, y solo cuando el proveedor renombrara algo — *el defecto
+     aparecería el día que el diagnóstico hiciera falta.*
+     ⇒ Va como `…-diagnostico`, que el handler descarta por su propio guard.
+     **Agregar un sujeto nuevo a un puente obliga a censar a su consumidor**
+     (`L-318`): acá el consumidor no ignora lo que no conoce — ACTÚA. */
+  function avisarSdk(mensaje, faltantes) {
+    try {
+      if (window.console && console.warn) {
+        console.warn('[alta-tarjeta] ' + mensaje, faltantes);
+      }
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          fuente: 'epetplace-alta-tarjeta-diagnostico',
+          aviso: 'sdk_claves',
+          mensaje: mensaje,
+          faltantes: faltantes,
+        }));
+      }
+    } catch (e) { /* un aviso que rompe la página es peor que el aviso perdido */ }
   }
 
   function aplicarIdioma() {

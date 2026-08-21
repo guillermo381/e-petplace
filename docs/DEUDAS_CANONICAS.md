@@ -18628,6 +18628,57 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-859 🟢 · EL IDIOMA DEL WIDGET DEL ALTA CUELGA DE CONSTANTES NO DOCUMENTADAS DEL PROVEEDOR — **deuda ACEPTADA por el founder**
+> S101-D · 21-ago-2026 · **medida en la fuente del SDK, no preguntada**
+
+El circuito de pago habla **es/en** por firma del founder. La página del alta
+traduce **lo suyo** por diccionario propio (`lang` en la URL desde la app), pero
+**los campos los pinta el widget de Nuvei** y ahí el idioma no es nuestro.
+
+**Lo medido en `payment_stable.min.js`, el que la página carga:**
+
+| | |
+|---|---|
+| `Payment.init(env_mode, app_code, app_key)` | **sin parámetro de idioma** |
+| `Payment.addCard(uid, email, card, ok, fail, payment_form)` | **sin parámetro de idioma** |
+| el `locale` es/en/pt que documenta Nuvei | pertenece a **`init_reference`** — **otra API** (el checkout hospedado), que `paymentez.js` **no usa** |
+
+⇒ **La única vía es asignar sus 20 propiedades estáticas de `PaymentForm`**
+(`CREDIT_CARD_NUMBER_PLACEHOLDER`, `VERIFICATION_PLACEHOLDER`,
+`INVALID_CARD_TYPE_MESSAGE`…), que **se leen al iniciar el formulario y no al
+cargar el script** — medido contando ocurrencias: **cada clave tiene una
+asignación y una lectura, y la lectura vive dentro del `prototype`**. Por eso
+asignarlas desde nuestra página, antes de montar, funciona.
+
+**🔴 LA DEUDA, dicha sin maquillar: eso es API NO DOCUMENTADA de un tercero.**
+Si el proveedor renombra una constante, **nuestra asignación queda huérfana y el
+campo vuelve al español**. *No se rompe nada: se degrada — y ése es exactamente
+el modo de falla que no tiene síntoma.*
+
+✅ **ACEPTADA POR EL FOUNDER** (21-ago-2026), **con su canario construido en el
+mismo acto**: `traducirWidget()` **censa las veinte claves en cada carga —también
+en español— y avisa por consola y por el puente nombrando CUÁLES faltan.**
+*Un aviso que no nombra la clave obliga a re-medir el SDK entero para saber qué
+se rompió.*
+
+> 🔴 **Y el canario destapó un defecto propio antes de existir**, que vale
+> registrar: el aviso iba a viajar por el puente con `fuente:
+> 'epetplace-alta-tarjeta'` — **y el `onMessage` de la app no mira el contenido:
+> con ese `fuente` da el trámite por terminado y CIERRA la pantalla**
+> (`app/pagos/alta-tarjeta.tsx:114-122`). Como el censo corre al arrancar,
+> **habría cerrado el alta apenas cargara, y solo el día que el diagnóstico
+> hiciera falta.** Va con `fuente: '…-diagnostico'`, que su propio guard
+> descarta. **Es `L-318` invertida: acá el consumidor no ignora lo que no
+> conoce — ACTÚA.**
+
+**Dueño:** la pasada que toque la página del alta.
+☠️ **Disparo de cierre: la migración a Stripe la vuelve irrelevante** (decisión
+founder del 21-ago: Stripe a los ~1000 usuarios; Nuvei queda como riel de
+Ecuador). *Hasta entonces la deuda vive con su canario.*
+**La pregunta a Erick sobre el idioma del widget queda RETIRADA de toda lista.**
+
+---
+
 ### D-858 🟢 · EL VOSEO DEL PRESTADOR — 37 cadenas, medidas y FUERA del territorio de `D-857`
 > S101-D · 21-ago-2026 · **apareció barriendo el cliente, no buscando el prestador**
 
