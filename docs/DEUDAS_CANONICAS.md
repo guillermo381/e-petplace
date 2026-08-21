@@ -18532,3 +18532,55 @@ que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora
 suma existe para la tercera cosa que quiera entrar.
 
 - **L-316** — **EL CRUDO SE ABRE ANTES DE DIAGNOSTICAR: una tabla de estados dice QUÉ pasó, y el payload guardado dice POR QUÉ.** S101-A lo pagó en el mismo día y en la misma fila. El débito rebotó 403 y el error se leyó **dos veces mal desde lo genérico** —primero como *«configuración de Nuvei, carrier/operación no habilitada»*, después como *«el intento quedó en vuelo y bloquea el reintento»*— y **una sola vez bien, abriendo `pagos_intentos.payload_crudo`**, donde decía literal `order.vat Invalid`. **Las dos lecturas equivocadas mandaban a esperar a un tercero; la correcta era un campo de nuestro propio request.** Y el mismo `SELECT` que lo destapó corrigió de paso la otra premisa: el intento **no** estaba `iniciado`, estaba `rechazado` — el hueco real era que su `motivo_rechazo` y su `cerrado_en` estaban en NULL, porque el error venía en un objeto `error` de primer nivel y el lector solo miraba `transaction.message`. **Corolario operativo:** guardar el crudo no alcanza — *un crudo que nadie abre es un dato que no existe*, y por eso todo rechazo debe destilar **su motivo a una columna legible** (jamás NULL: con `http_<status>` como último recurso), porque **un payload jsonb no se puede listar, contar ni agrupar, y nadie lo abre cuando hay una explicación plausible a mano.** Hermana de L-166 (todo dato vivo se lee del objeto al usarlo) aplicada al diagnóstico de errores ajenos. Origen: S101-A, el 403 de Nuvei.
+
+### D-854 🔴 · LA PUERTA DE SERVICIOS NO PASA POR EL MOTOR DE PAGOS
+> S101-B · 20-ago-2026 · **hallazgo del founder EN EL APARATO** (pagó un paseo y
+> el flujo se declaró pagado a sí mismo) · censo:
+> `docs/relevamientos/2026-08-20-s101b-censo-puerta-de-servicios.md`
+
+Los cuatro oficios montan **una sola pieza** (`components/checkout-reserva.tsx`)
+que llama a `confirmar_cita_pagada`, y esa función escribe
+`metadata.pago_simulado = true`. **No es un descuido escondido: está declarado.**
+
+🔴 **Lo que cambió es el mundo alrededor.** Con el motor de cobro real vivo al
+lado (S101-B), *una puerta que se declara pagada sola dejó de ser un andamio
+aceptable para pasar a ser la puerta por la que se sale sin pagar.*
+
+**Lo que ya está y no se reconstruye:** doce compuertas escritas
+(`hold_expirado` · `cuenta_no_activa` · `sin_fee_config` · `direccion_requerida`
+…). *Lo que falta no es el criterio: es el cobro.*
+
+**Los tres huecos del contrato, medidos** — y son **el índice de la letra de
+S101-C**: ① `pagos_intentos` **no puede apuntar a una cita** (hoy **0**) · ② **no
+hay desglose congelado de cita** — la compuerta 2 del motor compara contra algo
+que acá no existe · ③ **el reverso y el saldo tienen letra propia**
+(`LETRA_SALDO` §3, cancelación ≥24 h como fuente) que el motor de despensa no
+implementa.
+
+**Dueño:** S101-C. **Disparo:** 🔴 **PRE-LANZAMIENTO OBLIGATORIO — octubre abre
+con SERVICIOS.** **Orden firmado:** letra del contrato de la cita → `REVOKE` con
+el reemplazo listo → el enchufe reusando el motor entero.
+
+**Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
+resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-855 🔴 · `confirmar_cita_pagada` ES EJECUTABLE POR `authenticated`
+> S101-B · 20-ago-2026 · medido
+
+| | |
+|---|---|
+| `confirmar_cita_pagada` ejecutable por `authenticated` | **`true`** 🔴 |
+| `confirmar_pago_compra` (despensa) | **`false`** ✅ |
+
+**Cualquiera con una cuenta puede declarar pagada su propia cita.** La despensa
+cerró esa puerta en S101-B; servicios la tiene abierta.
+
+> *La asimetría es la medida exacta de la deuda: el mismo producto, dos puertas,
+> una con candado.*
+
+🔴 **PRODUCCIÓN JAMÁS ABRE CON ESTA RPC VIVA.**
+
+**Muere con el `REVOKE` de S101-C** — y **jamás antes del reemplazo**: revocar sin
+puerta nueva deja a los cuatro oficios sin poder reservar.

@@ -67,6 +67,17 @@ fecha. El destino incluye:
 > renovación 72 h del plan (P14) — hoy ambos escriben a una tabla que
 > ninguna superficie del cliente muestra con push real.
 
+> **PRECONDICIÓN SUMADA EN S101-B (20-ago-2026) — LA SEGUNDA PUERTA DE PAGO:**
+> ③ **LA PUERTA DE SERVICIOS CONECTADA AL MOTOR (`D-854`).** El circuito de pago
+> real quedó vivo para la **despensa**; **los servicios siguen declarándose
+> pagados a sí mismos** (`confirmar_cita_pagada` escribe `pago_simulado: true`).
+> **Octubre abre con SERVICIOS** ⇒ es 🔴 pre-lanzamiento obligatorio.
+> ④ 🔴 **`confirmar_cita_pagada` REVOCADA DE `authenticated` (`D-855`).** Hoy
+> **cualquiera con una cuenta puede declarar pagada su propia cita** — la
+> despensa cerró esa puerta y servicios no. **PRODUCCIÓN JAMÁS ABRE CON ESA RPC
+> VIVA**, y muere con el REVOKE de S101-C, **jamás antes del reemplazo**:
+> revocar sin puerta nueva deja a los cuatro oficios sin poder reservar.
+
 > **NOTA DE OPERACIÓN — LA LETRA UBER (founder S70, 19 Jul 2026;
 > letra completa en `POLITICAS_EPETPLACE.md` P21).** Todo lo que sigue
 > en esta sección es **operación**, y la operación **sí** es por país:
