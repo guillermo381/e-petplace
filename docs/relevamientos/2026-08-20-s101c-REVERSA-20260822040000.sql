@@ -1,0 +1,14 @@
+-- REVERSA de 20260822040000 — el acceso a la mascota con el usuario explícito.
+-- ESCRITA ANTES.
+--
+-- 🔴 QUÉ NO DESHACE, y por qué esta reversa es delicada: el original vuelve a
+--    llevar su lógica adentro (se restaura tal cual estaba). **Pero si para
+--    entonces algo llama a la variante `_como`, queda sin función** — y lo que
+--    la llama es el cobro de citas. *Revertir esto apaga el cobro de servicios.*
+-- 🔴 Y el riesgo verdadero: `user_tiene_acceso_a_mascota` la usan **62 policies
+--    y 28 funciones**. Esta reversa restaura el cuerpo original textual; si
+--    alguien lo editó en el medio, **ese cambio se pierde**. Se lee antes de
+--    correrla.
+DROP FUNCTION IF EXISTS public.user_tiene_acceso_a_mascota_como(uuid, uuid);
+-- El cuerpo original de `user_tiene_acceso_a_mascota` se restaura desde el
+-- volcado que acompaña a esta reversa: docs/relevamientos/2026-08-20-s101c-CUERPO-ORIGINAL-acceso.sql

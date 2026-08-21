@@ -91,9 +91,22 @@ Deno.serve(async (req) => {
 
   // ── La app manda IDS. Nada más. ───────────────────────────────────────────
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  /* ═══ 🔴 S101-C · EL SUJETO DEL COBRO — compra O cita, EXACTAMENTE UNO ═════
+     La letra `LETRA_PAGO_CITAS` §1 lo dice y el motor lo cumple sin
+     reescribirse: **la cita entra como lo que es, jamás disfrazada de compra.**
+     Todo lo que sigue —pertenencia, monto del desglose congelado, compuertas,
+     intento antes de disparar, débito, señal optimista— **es idéntico**. Lo
+     único que cambia es qué objeto se resuelve. */
   const compraId = typeof body.compra_id === 'string' ? body.compra_id : '';
+  const citaId = typeof body.cita_id === 'string' ? body.cita_id : '';
   const tarjetaId = typeof body.tarjeta_id === 'string' ? body.tarjeta_id : '';
-  if (!UUID_RE.test(compraId) || !UUID_RE.test(tarjetaId)) {
+  const hayCompra = UUID_RE.test(compraId);
+  const hayCita = UUID_RE.test(citaId);
+  /* 🔴 «Exactamente uno» también en la puerta, no solo en el CHECK: *un
+     llamador que manda los dos no está pidiendo dos cosas — está pidiendo algo
+     que no existe, y adivinar cuál quiso es cómo se cobra el objeto
+     equivocado.* */
+  if (hayCompra === hayCita || !UUID_RE.test(tarjetaId)) {
     return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   }
   /* 🔴 Si alguna vez llega un `monto`, es señal de que un llamador cree que
@@ -107,12 +120,34 @@ Deno.serve(async (req) => {
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
   // ── ③ PERTENENCIA ─────────────────────────────────────────────────────────
-  const { data: compra } = await db.from('compras')
-    .select('id, user_id, moneda').eq('id', compraId).maybeSingle();
-  if (!compra || compra.user_id !== userId) {
-    // Misma respuesta para «no existe» y «es de otro»: distinguirlas convertiría
-    // esto en un oráculo de compras ajenas.
-    return json({ ok: false, codigo: 'compra_no_existe' }, 409);
+  /* 🔴 La respuesta es la MISMA para «no existe» y «es de otro» — en los dos
+     sujetos. *Distinguirlas convertiría esto en un oráculo de compras o de
+     citas ajenas.* */
+  let moneda = 'USD';
+  if (hayCompra) {
+    const { data: compra } = await db.from('compras')
+      .select('id, user_id, moneda').eq('id', compraId).maybeSingle();
+    if (!compra || compra.user_id !== userId) {
+      return json({ ok: false, codigo: 'compra_no_existe' }, 409);
+    }
+    moneda = compra.moneda ?? 'USD';
+  } else {
+    /* La cita no tiene `user_id`: pertenece a una MASCOTA, y el acceso lo dice
+       la familia. Se pregunta por el camino de la casa —`user_tiene_acceso_a_mascota`
+       vía la vista de la cita— en vez de inventar una regla nueva. */
+    const { data: cita } = await db.from('evento_cita_servicio')
+      .select('id, mascota_id, estado_reserva').eq('id', citaId).maybeSingle();
+    if (!cita) return json({ ok: false, codigo: 'cita_no_existe' }, 409);
+    /* 🔴 La variante CON USUARIO EXPLÍCITO, no la de `auth.uid()`: acá el
+       cliente corre con `service_role` y `auth.uid()` es NULL — la original
+       diría que no siempre. *Es la misma trampa que el `uid` del proveedor: una
+       función correcta que, llamada desde otro lado, contesta otra cosa.*
+       Y es la MISMA implementación que usan las 62 policies: el original
+       delega en ésta. */
+    const { data: puede } = await db.rpc('user_tiene_acceso_a_mascota_como', {
+      p_user_id: userId, p_mascota_id: cita.mascota_id,
+    });
+    if (puede !== true) return json({ ok: false, codigo: 'cita_no_existe' }, 409);
   }
 
   const { data: tarjeta } = await db.from('tarjetas_guardadas')
@@ -127,15 +162,31 @@ Deno.serve(async (req) => {
   const uidProveedor = (tarjeta as { proveedor_uid?: string | null }).proveedor_uid ?? '';
   if (!uidProveedor) return json({ ok: false, codigo: 'tarjeta_sin_uid' }, 409);
 
-  // ── ② EL MONTO SALE DEL DESGLOSE CONGELADO ────────────────────────────────
-  const { data: desglose } = await db.from('compra_desglose')
-    .select('pedido_id, subtotal, impuesto, envio, total').eq('compra_id', compraId);
-  if (!desglose || desglose.length === 0) {
-    return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+  // ── ② EL MONTO SALE DEL DESGLOSE CONGELADO — del sujeto que sea ───────────
+  let monto = 0, iva = 0, base = 0, pedidoDelIntento: string | null = null;
+  if (hayCompra) {
+    const { data: desglose } = await db.from('compra_desglose')
+      .select('pedido_id, subtotal, impuesto, envio, total').eq('compra_id', compraId);
+    if (!desglose || desglose.length === 0) {
+      return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    }
+    monto = desglose.reduce((a, d) => a + Number(d.total ?? 0), 0);
+    iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
+    base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
+    pedidoDelIntento = desglose[0].pedido_id;
+  } else {
+    const { data: d } = await db.from('cita_desglose')
+      .select('subtotal, impuesto, total, moneda').eq('cita_id', citaId).maybeSingle();
+    /* 🔴 FAIL-CLOSED, igual que la compra: **sin desglose congelado no hay
+       cobro.** *El desglose es lo que se le prometió al cliente al reservar;
+       cobrar sin él sería cobrar un número que nadie le mostró.* */
+    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number(d.total ?? 0);
+    iva = Number(d.impuesto ?? 0);
+    base = Number(d.subtotal ?? 0);
+    moneda = d.moneda ?? 'USD';
   }
-  const monto = desglose.reduce((a, d) => a + Number(d.total ?? 0), 0);
-  const iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
-  const base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
+  const sujeto = hayCompra ? compraId : citaId;
 
   /* 🔑 LA FORMA DEL `order` CON IVA 0 — respuesta de Erick, 20-ago (letra §6bis):
      `vat: 0` es válido **siempre que vayan también `tax_percentage: 0` y
@@ -152,20 +203,26 @@ Deno.serve(async (req) => {
      real sería declararle al proveedor algo falso sobre la venta.* */
   if (iva > 0) {
     await db.from('pagos_intentos').insert({
-      pedido_id: desglose[0].pedido_id, compra_id: compraId, proveedor: 'nuvei',
-      proveedor_referencia: compraId, monto, moneda: compra.moneda ?? 'USD',
+      pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
+      compra_id: hayCompra ? compraId : null, proveedor: 'nuvei',
+      proveedor_referencia: sujeto, monto, moneda,
       forma: 'tokenizacion', estado: 'rechazado',
       motivo_rechazo: `iva_no_cero_sin_probar: iva=${iva} pct=${pct}`,
       cerrado_en: new Date().toISOString(),
-      clave_idempotencia: `cobro:iva:${compraId}:${Date.now()}`,
+      clave_idempotencia: `cobro:iva:${sujeto}:${Date.now()}`,
     });
     return json({ ok: false, codigo: 'iva_no_probado' }, 409);
   }
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
-  const { data: g } = await db.rpc('verificar_compuertas_pre_cobro', {
-    p_compra_id: compraId, p_token: tarjeta.token,
-  });
+  /* 🔴 Las compuertas de la COMPRA son de la compra. **La cita ya trae las
+     suyas** —doce, medidas en el censo: hold, cuenta activa, fee, dirección…—
+     y corren en su propia reserva, ANTES de este cobro (letra §3, orden 1).
+     *No se reconstruyen acá: duplicar una compuerta es garantizar que algún
+     día las dos digan cosas distintas.* */
+  const { data: g } = hayCompra
+    ? await db.rpc('verificar_compuertas_pre_cobro', { p_compra_id: compraId, p_token: tarjeta.token })
+    : { data: { ok: true, no_evaluables: ['compuertas_de_la_cita_corren_en_su_reserva'] } };
   const gate = (g ?? {}) as Record<string, unknown>;
   if (gate.ok !== true) {
     return json({ ok: false, codigo: gate.codigo ?? 'no_se_pudo_completar',
@@ -177,10 +234,11 @@ Deno.serve(async (req) => {
      que se disparó. Sin ella el caso ④ (no llega ninguno) es indetectable: no
      habría contra qué barrer. Y deja la compuerta 0 armada. */
   const { data: intento, error: eI } = await db.from('pagos_intentos').insert({
-    pedido_id: desglose[0].pedido_id, compra_id: compraId, proveedor: 'nuvei',
-    proveedor_referencia: compraId, monto, moneda: compra.moneda ?? 'USD',
+    pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
+    compra_id: hayCompra ? compraId : null, proveedor: 'nuvei',
+    proveedor_referencia: sujeto, monto, moneda,
     forma: 'tokenizacion', estado: 'iniciado',
-    clave_idempotencia: `cobro:${compraId}:${Date.now()}`,
+    clave_idempotencia: `cobro:${sujeto}:${Date.now()}`,
   }).select('id').single();
   if (eI) return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
 
