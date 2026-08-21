@@ -292,6 +292,51 @@ nunca para decidir.*
 
 ---
 
+## ⑦bis · LECCIÓN A DEPOSITAR — **SIN NÚMERO** *(orden de mesa; A asigna al depositar)*
+
+> **⚠️ Y esta vez la regla del número se atrapó ANTES de escribirlo, que es la
+> primera vez que pasa.** La orden decía *«número por grep»*. **Mi grep dio
+> `L-329` y `L-330` LIBRES** en mi árbol… **y las dos ya son de A** en
+> `origin/pista/s101-d`. *Lo vi porque esta vez medí también contra la rama de
+> A, que es la mejora que las dos colisiones anteriores implicaban y que no
+> había hecho.* **Aun así viaja sin número: A puede tener más sin pushear.**
+
+---
+
+### **LA CAPA QUE AHORRA RUIDO SE SACA EN EL MOMENTO DE DECIDIR**
+
+> ### **Mirar puede ser cómodo. Concluir tiene que ser crudo.**
+
+**El ruido y el diagnóstico salen por el mismo caño.** Toda capa que se pone
+para ver menos —un `sed`, un `tail`, un `head`, un `|| fallback`, un
+`slice()`— **no distingue lo que sobra de lo que decide**, porque para
+distinguirlo habría que haberlo leído.
+
+**Es la segunda mitad de «el crudo antes de diagnosticar»:** la primera dice
+*mirá el objeto*; ésta dice *y mirálo SIN la capa que te pusiste para leerlo
+cómodo*.
+
+### La evidencia, y es lo que la vuelve regla y no anécdota: DOS PISTAS, EL MISMO DÍA
+
+| pista | la capa | qué borró |
+|---|---|---|
+| **A** | `\| tail; echo $?` sobre `verify-manifest-apk` | **un `EXIT 1`** — casi declara verde el guard que le estaba salvando la sesión |
+| **B** | `\| tail -6; echo $?` sobre `verify-censo` | **un crash entero** — leyó `0` sobre un `SyntaxError` |
+| **B** | `sed -n '/rows/,$p'` sobre el CLI | **tres errores de SQL**, uno de ellos un `42501` en una medición de seguridad |
+| **B** | `(stderr \|\| stdout)` en `lib-db.mjs` | **la causa de todo fallo, para 27 verify, durante 40 días** |
+
+> **Ninguna de las dos pistas fue descuidada: las dos conocían `L-191` y una de
+> ellas la había citado ese mismo día.** *Cuando dos personas distintas caen en
+> la misma trampa el mismo día, el problema dejó de ser la disciplina y pasó a
+> ser la forma del comando.*
+
+### Lo exigible
+
+**Cuando lo que se mide es un EXIT o una CAUSA, la salida va a un archivo y se
+lee después.** *El pipe es para mirar, nunca para decidir.*
+
+---
+
 ## ⑧ · LA FORMA QUE TIENEN LOS SEIS EN COMÚN
 
 **Ninguno fue un error de razonamiento. Los seis fueron una CAPA entre la

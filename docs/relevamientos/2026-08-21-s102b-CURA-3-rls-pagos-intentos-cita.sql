@@ -115,8 +115,26 @@ END $rev$;
 BEGIN;
 
 -- ── Guard de estado: se firmó sobre lo que se midió ────────────────────────
+--
+-- 🔴 EL SNAPSHOT DE ABAJO SE VUELVE A TOMAR, NO SE EDITA — `L-329` (A, 21-ago),
+--    y nació de ESTA migración: sus números `citas=7 · pedidos=34` se midieron
+--    el 21-ago bajo veda, y al ir a aplicarla la base ya decía otra cosa.
+--    **El guard abortó, que es exactamente lo que tenía que hacer.**
+--
+--    ⚠️ **La cura NO es cambiar el 7 y el 34 por los de hoy.** Eso sería editar
+--    un snapshot para que pase, y un guard que se ajusta hasta pasar dejó de
+--    ser un guard. **La cura es RE-MEDIR bajo la veda de esta tanda y
+--    reemplazar los dos números como MEDICIÓN NUEVA, declarada con su hora**,
+--    en el mismo acto en que se aplica.
+--
+--    *Y lo que el aborto informa no es «el número está viejo»: informa que
+--     ENTRE la firma y el apply hubo tráfico — o sea que la veda no cubrió la
+--     ventana, y eso es lo que hay que mirar antes de volver a correr.*
 DO $guard$
 DECLARE v_q text; v_citas int; v_ped int;
+  -- ↓↓↓ RE-MEDIR bajo veda inmediatamente antes de aplicar. Declarar la hora.
+  c_citas_esperadas CONSTANT int := 7;   -- medido 21-ago-2026 bajo veda
+  c_ped_esperados   CONSTANT int := 34;  -- medido 21-ago-2026 bajo veda
 BEGIN
   SELECT qual INTO v_q FROM pg_policies
    WHERE schemaname='public' AND tablename='pagos_intentos' AND policyname='pagos_select';
@@ -132,10 +150,12 @@ BEGIN
     INTO v_citas, v_ped FROM public.pagos_intentos;
 
   -- Snapshot-ancla del backfill. Si el mundo se movió, la firma se dio sobre otro.
-  IF v_citas <> 7 OR v_ped <> 34 THEN
+  IF v_citas <> c_citas_esperadas OR v_ped <> c_ped_esperados THEN
     RAISE EXCEPTION
-      'ABORTA (76g): la población cambió — citas=% (medidas 7), pedidos=% (medidos 34). La veda no se respetó o hay tráfico nuevo.',
-      v_citas, v_ped;
+      'ABORTA (76g): la población cambió — citas=% (esperadas %), pedidos=% (esperados %). '
+      'Hubo tráfico entre la medición y el apply ⇒ la veda no cubrió la ventana. '
+      'NO se editan los esperados para que pase: se RE-MIDE bajo veda y se declara la hora (L-329).',
+      v_citas, c_citas_esperadas, v_ped, c_ped_esperados;
   END IF;
 END $guard$;
 
