@@ -1601,7 +1601,7 @@ función.
 | **D-745** | **Ficha del piloto con el vendedor real** | 🔴 **VIVE, y subió de prioridad.** Ahora también define el flete (D-754) y el panel (D-755) |
 | **D-746** | Limpieza de los 4 objetos de fábrica de VTEX | ☠️ **MUERTA** por la decisión de S95 |
 | **D-747** | Las 7 preguntas a VTEX | **ACOTADA** a tres: facturación desde febrero · Monto Terminación · y la nueva D-751. El resto muere (§13) |
-| **D-748** | El 20% vivo en `seller_comisiones` contra el 10% firmado | **VIVE.** Es plata viva y es tabla NUESTRA: la decisión de S95 no la toca |
+| **D-748** | El 20% vivo en `seller_comisiones` contra el 10% firmado | ☠️ **PAGADA por eliminación del objeto** — `DROP TABLE public.seller_comisiones` en `20260811120000_s95_m1_limpieza_comercio.sql:129`, que la nombra por número. Medido S102-B: `to_regclass` → NULL. **⚠️ Su muerte creó un defecto NUEVO: `e-petplace-admin` sigue consultando y ESCRIBIENDO esa tabla, así que sus tres `?? 14` dejaron de ser fallback y son constantes permanentes — ver D-759.** |
 | **D-749** | Los 137 pedidos huérfanos del prototipo v2 | **VIVE.** Se limpian o se marcan antes del primer pedido real |
 | **D-750** | Modelar la despensa como **fee, no como GMV con margen** | **VIVE y se simplifica**: sin take rate de terceros, el fee es limpio |
 | **D-751** | 🔴 **¿Vender fuera del OMS con contrato VTEX vivo activa 6.1.7.1?** | **NUEVA.** Founder/legal. **Bloquea la primera venta real** |
