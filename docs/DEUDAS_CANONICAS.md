@@ -18579,6 +18579,8 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-329** — **UN SNAPSHOT SE VUELVE A TOMAR, NO SE EDITA.** El guard de una migración con backfill llevaba `citas=7 · pedidos=34`, medidos bajo veda. Al ir a aplicarla, la base decía **35**: entró una compra real —`5f8dea53`, 19:02 UTC— entre la medición y el apply. **La salida obvia era subirle el número al guard para que pasara, y es la que corrompe el instrumento**: *ese 34 no es una constante, es la huella de un instante en que nadie estaba escribiendo; cambiarlo por 35 lo convierte en un número que se acomoda al mundo, y un guard que se acomoda no guarda nada.* ⇒ **Cuando el guard aborta porque la población cambió, el guard FUNCIONÓ.** Lo que se rehace es la ventana: declarar la veda, re-medir, y escribir el snapshot nuevo **como snapshot nuevo**, con su fecha. **Hermana de la ley de los verdes flojos (S95): se corrige el INSTRUMENTO cuando mide mal, jamás el UMBRAL para que el resultado entre.** Y su corolario de secuencia, que salió del mismo día: **una veda no se puede declarar sobre una ventana que uno mismo va a violar** — el gate del aparato dispara cobros, así que la veda se abre DESPUÉS del gate, no antes. Origen: S101-D, freno de la tanda de aplicación.
+
 - **L-328** — **EL PATRÓN CORRECTO PARA UNA CLASE PUEDE SER LA CURA EQUIVOCADA PARA UN MIEMBRO DE ESA CLASE.** *(Depositada por A desde el pedido de S102-B. **B la redactó como `L-327` con su grep bien corrido sobre `origin`; al depositar, `L-327` ya era de A y vivía sin pushear en su worktree** — el número se asigna al DEPOSITAR, jamás al redactar. Es la misma regla que corrió las cuatro fichas de B a `D-860`–`D-863`, cobrada dos veces el mismo día.)*
   **La clase:** vistas de `public` con grant a `anon` y sin `security_invoker` — corren como su dueño y **bypassean la RLS de las tablas de abajo**. La casa ya la conoce: **S54 curó cuatro vistas del motor exactamente así**, y la cura fue correcta.
   **El miembro que la rompe, medido:** `v_ranking_usuarios` está en esa clase —`reloptions` NULL, `anon` con SELECT, 1 fila visible como anónimo— **y `security_invoker = true` la MATARÍA**: `profiles_select` es `USING (auth.uid() = id)` y `pu_own` es `USING (user_id = auth.uid() OR is_admin())` ⇒ cada usuario vería **solo su propia fila**. *Un ranking que solo te muestra a vos no es un ranking: es un espejo.* La vista quedaría **técnicamente segura y funcionalmente muerta, y el verde del guard no lo diría.**
@@ -18663,6 +18665,56 @@ el reemplazo listo → el enchufe reusando el motor entero.
 
 **Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
 resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-864 🟡 · LAS 8 CITAS `pendiente_pago` SON **INCOBRABLES POR CONSTRUCCIÓN** — no les falta un dato: les falta el productor
+> S101-D · 21-ago-2026 · **medido acá, con el enum leído y no adivinado**
+
+**Medido:**
+
+| `estado_reserva` | citas | **sin `cita_desglose`** |
+|---|---|---|
+| `pagada` | 145 | 139 |
+| `expirada` | 40 | 36 |
+| **`pendiente_pago`** | **8** | **8 — el 100 %** |
+| `null` | 2 | 2 |
+
+**El mecanismo, leído del objeto:**
+
+```
+trg_cita_congela_desglose  →  AFTER INSERT ON evento_cita_servicio
+```
+
+**`AFTER INSERT` y nada más — no lleva `OR UPDATE`.** ⇒ una cita **nacida antes
+del trigger**, o que llegó a `pendiente_pago` **por un UPDATE**, no tiene ni va a
+tener desglose: *el disparo ya pasó y no vuelve.*
+
+> ***No es un dato faltante: es un dato sin productor.*** Un dato faltante se
+> completa; a éste **no hay puerta que lo genere**, y el motor de pago exige el
+> desglose congelado para cobrar. **Son incobrables por construcción, no por
+> estado.**
+
+🔴 **NO SE COMPLETAN A MANO.** *Escribirles un desglose sería fabricar el precio
+congelado de una reserva que nadie congeló — un dato del que nadie puede decir si
+se midió o se dedujo, que es exactamente lo que `D-862` acaba de nombrar como
+inservible ante un contracargo.*
+
+⇒ **Quedan como DATOS DECLARADOS**, mismo patrón que las **138 citas
+`pago_simulado`** de `D-856`: **las resuelve el corte semilla/real ya firmado.**
+
+> ⚠️ **NOTA DE MÉTODO, y es el aporte de la ficha:** mi primera medición dio
+> **CERO** — porque busqué `estado='pendiente_pago'` y **ese valor no existe en la
+> columna `estado`** (sus valores son `confirmada`·`completada`·`pendiente`·
+> `cancelada`·`no_show`·`en_curso`). El estado de pago vive en **otra columna:
+> `estado_reserva`**. *Un cero contra la columna equivocada se ve igual que un
+> cero de verdad, y me habría llevado a contradecir un hallazgo correcto.* Lo cazó
+> **leer el enum en vez de suponerlo** — la misma orden que la mesa acababa de dar
+> por el caso `activa`/`guardada`.
+
+**Dueño:** el corte semilla/real. **☠️ Disparo:** el mismo del corte.
+**Se cruza con `D-856`** (las 138 declaradas) y con **`D-862`** (el dato deducido
+que no sirve como prueba).
 
 ---
 
