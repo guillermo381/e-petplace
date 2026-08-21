@@ -1,8 +1,14 @@
-# S102-B → PISTA A · FICHA NUEVA, **SIN NÚMERO** *(la abre quien la midió; el número lo pone quien deposita — `L-331`)*
+# `D-865` — S102-B · UN PERFIL DE BUILD PROMETE LO QUE LAS DEPENDENCIAS NO DAN
 
-> **Medido el 21-ago:** `D-865` y `D-866` dan cero en mi árbol **y** en
-> `origin/pista/s101-d`. **`D-864` daba cero en el mío y ya era de A** — tercera
-> vez que la ventana del worktree muerde. **Por eso viaja sin número: A lo pone.**
+> ✅ **Número asignado por A el 21-ago**, medido en los dos árboles como dueña
+> del territorio (`L-331`). *Ver la nota de §⓪: `D-865` parecía tomado en MI
+> árbol y era mi propio borrador nombrándolo.*
+
+> **⚠️ REGISTRO DE CÓMO SE LLEGÓ AL NÚMERO, porque el porqué no se borra:**
+> viajó **sin número** a propósito. `D-864` daba cero en mi árbol **y ya era de
+> A** — y después `D-865`/`D-866` dieron «2» en el mío, **que era mi propio
+> borrador nombrándolos**. *Mi grep contó MENCIONES; A midió ASIGNACIONES y
+> resultaron libres.* **Las dos trampas, la misma clase, el mismo día.**
 
 ---
 

@@ -133,8 +133,17 @@ BEGIN;
 DO $guard$
 DECLARE v_q text; v_citas int; v_ped int;
   -- ↓↓↓ RE-MEDIR bajo veda inmediatamente antes de aplicar. Declarar la hora.
-  c_citas_esperadas CONSTANT int := 7;   -- medido 21-ago-2026 bajo veda
-  c_ped_esperados   CONSTANT int := 34;  -- medido 21-ago-2026 bajo veda
+  --
+  -- 🔴 AVISO MEDIDO, 21-ago 22:08 UTC — **ESTOS DOS NÚMEROS YA ESTÁN VENCIDOS**:
+  --    la base dice **citas=8 · pedidos=35** (el gate de A creó uno de cada uno).
+  --    **NO se editan acá a 8/35 y se deja así.** *Entre esta línea y el apply
+  --    todavía va a haber tráfico —el founder camina el gate ahora— y editarlos
+  --    para que pasen sería exactamente lo que L-329 prohíbe: un guard que se
+  --    ajusta hasta pasar dejó de ser un guard.*
+  --    ⇒ **Se re-miden bajo VEDA, en el mismo acto del apply, y se declara la
+  --    hora.** El 8/35 de arriba es un DATO de contexto, no el valor a poner.
+  c_citas_esperadas CONSTANT int := 7;   -- medido 21-ago-2026 bajo veda · ⚠️ VENCIDO
+  c_ped_esperados   CONSTANT int := 34;  -- medido 21-ago-2026 bajo veda · ⚠️ VENCIDO
 BEGIN
   SELECT qual INTO v_q FROM pg_policies
    WHERE schemaname='public' AND tablename='pagos_intentos' AND policyname='pagos_select';

@@ -1,7 +1,8 @@
-# S102-B → PISTA A · DOS FICHAS DEL CENSO DE RESPUESTAS, **SIN NÚMERO**
+# S102-B · DOS FICHAS DEL CENSO DE RESPUESTAS — `D-867` y `D-868`
 
-> **`L-331` rige: el número lo pone quien deposita.** Medido el 21-ago: libres en
-> **los dos árboles** desde **`D-867`** *(el techo de A es `D-864`)*.
+> ✅ **Números asignados por A el 21-ago**, midiendo ASIGNACIONES y no menciones.
+
+> **`L-331` rige: el número lo pone quien deposita — y lo puso A.**
 >
 > ⚠️ **Y una trampa propia, declarada, porque es del mismo día:** `D-865` y
 > `D-866` dieron **2 en mi árbol** — **y era mi propio texto**: mis dos fichas
@@ -9,13 +10,12 @@
 > iba a leer asignaciones.** *La misma clase que este relevamiento documenta,
 > ahora sobre el instrumento que la regla del número usa.*
 >
-> **🔴 A TIENE CUATRO FICHAS MÍAS SIN NÚMERO, y conviene que estén en una lista:**
-> ① el perfil que promete lo que no tiene · ② `requireCommit` · ③ y ④ las de
-> abajo. *Se dice para que ninguna se pierda entre mensajes.*
+> **LAS CUATRO DE LA TANDA, ya numeradas:** `D-865` el perfil · `D-866`
+> `requireCommit` · **`D-867`** y **`D-868`** las de abajo.
 
 ---
 
-## FICHA ③ — 🔴 TODO LO NO APROBADO COLAPSA EN UNA SOLA SALIDA
+## `D-867` — 🔴 TODO LO NO APROBADO COLAPSA EN UNA SOLA SALIDA
 
 > ### **La ley define SIETE causas con voz. El actuador tiene DOS salidas. Y las tres reales que la base vio caen en la de SOPORTE.**
 
@@ -86,12 +86,12 @@ viaja en el render). **La consigue la MESA por Erick — hilo activo.**
 > **☠️ MUERTE:** un no-aprobado con causa conocida y uno sin causa **se
 > distinguen en el registro y en la salida**, y se pueden contar por separado.
 > **Se cruza con:** `LETRA_MOTOR_PAGOS_S101` §7 (la ley que hoy no se cumple
-> entera) · la ficha ④ de abajo.
+> entera) · `D-868` (abajo).
 > Origen: S102-B, censo del catálogo de respuestas.
 
 ---
 
-## FICHA ④ — 🟡 LOS ESTADOS DE TARJETA `review` · `pending` · `rejected` NUNCA SE EJERCITARON
+## `D-868` — 🟡 LOS ESTADOS DE TARJETA `review` · `pending` · `rejected` NUNCA SE EJERCITARON
 
 🟡 **ALTA.**
 
@@ -128,7 +128,7 @@ intermedio aplastado contra uno de los bordes.*
 > **☠️ MUERTE:** los tres estados **tienen camino medido** —con su voz y su
 > salida— **y al menos uno se ejercitó contra el proveedor**, no contra un
 > fixture.
-> **Se cruza con:** la ficha ③ (misma forma) · `LETRA_MOTOR_PAGOS_S101` §7.
+> **Se cruza con:** `D-867` (misma forma) · `LETRA_MOTOR_PAGOS_S101` §7.
 > Origen: S102-B, censo del catálogo de respuestas.
 
 ---

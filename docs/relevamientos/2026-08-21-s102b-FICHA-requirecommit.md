@@ -1,10 +1,10 @@
-# S102-B → PISTA A · FICHA NUEVA, **SIN NÚMERO** *(la abre quien la midió — `L-331`)*
+# `D-866` — S102-B · NINGUNA BUILD NATIVA ES REPRODUCIBLE DESDE UN COMMIT
 
-> **Medido el 21-ago:** `D-865` y `D-866` dan cero en mi árbol **y** en
-> `origin/pista/s101-d`. **A pone el número al depositar.**
+> ✅ **Número asignado por A el 21-ago** (`L-331`: lo pone quien deposita).
+
+> **Se separa de la ficha del perfil** (`D-865`) **por orden de mesa**, y con
 >
-> **Se separa de la ficha del perfil roto por orden de mesa, y con razón: son
-> defectos distintos.** *El perfil era una promesa incumplida en un archivo; esto
+> razón: son defectos distintos.** *El perfil era una promesa incumplida en un archivo; esto
 > es que **ningún** archivo ata una build a un commit.* **El primero se curó con
 > una dependencia; éste no se cura con ninguna.**
 
@@ -115,8 +115,7 @@ declarado.*
   registro) — **misma clase, otra mitad de la casa**.
 - **`D-574`** (los secrets del build local **no fallan, se omiten**) — *la
   familia entera es «el build promete y no cumple, sin decirlo»*.
-- **la ficha del perfil que promete lo que no tiene** — el defecto que destapó
-  éste.
+- **`D-865`** (el perfil que promete lo que no tiene) — el defecto que destapó éste.
 
 > **La línea que la resume:**
 > ***La casa aprendió a no publicar desde un árbol sucio, y sigue construyendo
