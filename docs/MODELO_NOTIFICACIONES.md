@@ -1028,10 +1028,24 @@ Los tres casos, cada uno una capa más arriba:
 2. **El arnés** llamaba al actuador **directo** — y por eso no podía ver ①.
 3. **El hook de espera**: la pantalla lo invocaba y **no leía su resultado**. La
    compra quedaba `pagada` a los 34 s y la pantalla decía «confirmando» a los 78.
+4. **La plantilla del correo** (gate ⑤, cuarta vez): la intención llevaba los dos
+   códigos, Resend entregó… y el correo decía **«Tienes una novedad en
+   e-PetPlace»**. La plantilla no conocía esas claves y caía al genérico. *Y
+   adentro había un segundo motor sin puerta: la función que arma las filas se
+   llamaba `bloqueDetalle` y **una const del mismo nombre la sombreaba** — nunca
+   se invocó, y ningún correo salió jamás con sus filas.*
 
 **Consecuencia exigible:**
 
-> **Todo productor nuevo —hook, actuador, RPC— se prueba DESDE SU CONSUMIDOR REAL
-> al menos una vez antes de declararse verde. La pieza sola no alcanza.**
+> **Todo productor nuevo —hook, actuador, RPC, plantilla— se prueba DESDE SU
+> CONSUMIDOR REAL al menos una vez antes de declararse verde. La pieza sola no
+> alcanza.**
+>
+> 🔴 **Y la enmienda que agregó el cuarto caso: SE VERIFICA EL ARTEFACTO QUE EL
+> REQUISITO DESCRIBE, NO SU MATERIA PRIMA.** El requisito de Erick habla del
+> **correo**; yo verifiqué **la fila de la intención** y el `proveedor_id` de
+> Resend, y las dos cosas estaban bien mientras el correo no certificaba.
+> *Confundir «el dato salió» con «el artefacto cumple» es la forma más cómoda de
+> un verde: mira el eslabón que uno construyó, no el que el otro va a leer.*
 
-*Los tres pasaron sus pruebas. Ninguna prueba tocaba el cable.*
+*Los cuatro pasaron sus pruebas. Ninguna prueba tocaba el cable.*

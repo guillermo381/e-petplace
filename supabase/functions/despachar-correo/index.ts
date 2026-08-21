@@ -101,17 +101,45 @@ type Datos = {
   negocio?: string;
   fecha?: string;
   hora?: string;
+  /* ═══ 🔴 S101-B · EL COMPROBANTE DE PAGO ════════════════════════════════
+     **Requisito de certificación de Nuvei** (Erick, 20-ago): el correo tiene
+     que llevar el **id de transacción** y el **código de autorización**
+     **a la vista**.
+
+     Medido en el gate: la intención llevaba los dos códigos, Resend entregó,
+     y **el correo decía «Tienes una novedad en e-PetPlace»** — porque la
+     plantilla no conocía estas claves y caía al genérico.
+     *Es motor-sin-puerta en la capa de plantilla, y la lección es del
+      instrumento: yo verifiqué la MATERIA PRIMA (la fila de la intención) y
+      el requisito habla del ARTEFACTO (el correo renderizado).* */
+  transaction_id?: string;
+  authorization_code?: string;
+  monto?: number | string;
+  moneda?: string;
 };
 
 /** El bloque de detalle de la cita — proporciones de la espec: etiqueta 13px
  *  tinta.65, valor 16px tinta, LA HORA EN MONO (voz de máquina de la casa).
  *  Solo se pinta con datos reales; jamás inventa una fila vacía. */
-function bloqueDetalle(d: Datos): string {
+/* 🔴 ESTA FUNCIÓN ESTABA MUERTA: se llamaba `bloqueDetalle`, y adentro de
+   `plantillaHtml` **una const del mismo nombre la sombreaba**. Nadie la
+   invocaba, y por eso sus filas nunca salieron en ningún correo.
+   *Un nombre repetido en dos alcances no rompe nada, no avisa nada, y deja
+    código que se lee como vivo.* Renombrada y cableada. */
+function bloqueCodigosPago(d: Datos): string {
   const filas: Array<[string, string, boolean]> = [];
   if (d.mascota_nombre) filas.push(['Mascota', d.mascota_nombre, false]);
   if (d.negocio) filas.push(['Con', d.negocio, false]);
   if (d.fecha) filas.push(['Fecha', d.fecha, true]);
+  /* 🔴 Los dos códigos que la certificación exige, **en MONO**: son voz de
+     máquina, y el que los va a leer los está comparando carácter por carácter
+     contra un estado de cuenta. */
+  if (d.monto !== undefined && d.monto !== null)
+    filas.push(['Monto', `${d.moneda ?? 'USD'} ${Number(d.monto).toFixed(2)}`, true]);
+  if (d.transaction_id) filas.push(['Transacción', d.transaction_id, true]);
+  if (d.authorization_code) filas.push(['Autorización', d.authorization_code, true]);
   if (d.hora) filas.push(['Hora', d.hora, true]);
+  if (filas.length === 0) return '';
   if (filas.length === 0) return '';
   const filasHtml = filas
     .map(
@@ -213,6 +241,7 @@ function plantillaHtml(d: Datos, tipo: string, idioma: string): string {
     <p class="txt" style="margin:0;font-family:${SANS};font-size:16px;line-height:24px;color:${TINTA};">${mensaje}</p>
   </td></tr>
   ${bloqueDetalle}
+  ${bloqueCodigosPago(d)}
   ${bloqueCodigo}
 
   <tr><td style="padding:32px 32px 28px 32px;">
