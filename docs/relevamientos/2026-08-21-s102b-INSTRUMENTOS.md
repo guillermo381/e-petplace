@@ -503,6 +503,54 @@ la próxima medición equivocada de alguien.*
 
 ---
 
+### ⓔ — **CUANDO EL CERO ES UNIVERSAL, SE SOSPECHA DEL INSTRUMENTO, NO DEL DATO** *(aporte de A, 21-ago)*
+
+**Es el DETECTOR que le faltaba a `L-332` y al ① de este archivo.** Las dos
+dicen *qué* falla; ésta dice **cómo darse cuenta a tiempo**.
+
+**El caso:** A fue a confirmar mis números y su consulta dio **`mascotas = 0` en
+las 37 cuentas** — incluida la que yo medía con 6. *Un cero en una cuenta es un
+dato. **Un cero en todas es una confesión.***
+
+**Tres nombres adivinados, encadenados, cada uno cazado por chocar:**
+
+```
+familia_miembros   → no existe (es familia_miembro, singular)
+medios_pago        → no existe (es tarjetas_guardadas)
+estado_vida='vivo' → ese valor NO existe: 75 filas, todas 'activa'
+```
+
+> 🔴 **El tercero es el ① de este archivo repitiéndose EL MISMO DÍA en que lo
+> documenté** —filtrar por un valor que no existe—. **Y no lo evitó haberlo
+> escrito: lo evitó el control positivo.** *Las leyes curan lectores; a ella la
+> curó el control.*
+
+**Por qué el universal es la señal y no la magnitud:** *un instrumento roto rara
+vez devuelve números plausibles y variados — devuelve **el mismo valor para
+todo**, porque está fallando antes de mirar los datos.* **Un resultado
+sospechosamente limpio es más barato de verificar que uno sospechosamente raro.**
+
+---
+
+### 📌 UNA MEDICIÓN AJENA YA HECHA ES UN CONTROL POSITIVO GRATIS
+
+**Los números coincidieron exactos con los nombres corregidos: 6 mascotas · 7
+tarjetas.** **Dos instrumentos independientes, en dos árboles, sobre la misma
+base.**
+
+> **Es el control positivo más fuerte del día, y salió gratis de que la otra
+> pista hubiera medido antes.**
+
+*Y su valor no es la coincidencia: es que la DIVERGENCIA fue lo que disparó la
+revisión.* **Sin mi 6 previo, el `0` universal de A habría sido simplemente su
+resultado** — creíble, publicable, y equivocado.
+
+**⇒ Cuando dos pistas van a medir lo mismo, la segunda declara el número de la
+primera ANTES de correr el suyo.** *No para copiarlo: para que la diferencia,
+si existe, sea imposible de no ver.*
+
+---
+
 ### 📐 PRINCIPIO REGISTRADO — **LA CURA ES CORTAR UNA FUGA, NO AMPUTAR UNA FUNCIÓN** *(dictamen de mesa, 21-ago)*
 
 **Nace de la revisión del juez de A.** Su rama dev-client tenía **una línea** que
