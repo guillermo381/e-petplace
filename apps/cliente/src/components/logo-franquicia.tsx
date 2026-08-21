@@ -117,12 +117,15 @@ export function LogoFranquicia({ marca }: { marca: string | null }) {
             CONTENIDO_ALTO / archivo.h,
           );
           const { Svg } = archivo;
-          return (
-            <Svg
-              width={Math.round(archivo.w * escala)}
-              height={Math.round(archivo.h * escala)}
-            />
-          );
+          /* 🔴 SIN `Math.round`, y lo enseñó el instrumento antes del gate: mi
+             v1 redondeaba **las dos dimensiones por separado**, y eso
+             DEFORMA — medido, hasta 0,032 de desvío de aspecto en Visa
+             (3,111 → 3,143). *Un logo de marca registrada torcido no da error:
+             se ve «casi bien», que es justo el criterio que este paso existe
+             para juzgar.*
+             El SVG escala continuo dentro de su `viewBox`, así que un tamaño
+             fraccionario conserva el aspecto EXACTO. */
+          return <Svg width={archivo.w * escala} height={archivo.h * escala} />;
         })()
       ) : texto ? (
         <Texto variante="dato" numberOfLines={1}>{texto}</Texto>
