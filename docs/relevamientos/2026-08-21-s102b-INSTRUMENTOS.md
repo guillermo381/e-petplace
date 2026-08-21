@@ -292,18 +292,25 @@ nunca para decidir.*
 
 ---
 
-## ⑦bis · LECCIÓN A DEPOSITAR — **SIN NÚMERO** *(orden de mesa; A asigna al depositar)*
+## ⑦bis · LECCIÓN — **`L-331`** *(número asignado por A el 21-ago, medido en LOS DOS árboles)*
 
 > **⚠️ Y esta vez la regla del número se atrapó ANTES de escribirlo, que es la
 > primera vez que pasa.** La orden decía *«número por grep»*. **Mi grep dio
-> `L-329` y `L-330` LIBRES** en mi árbol… **y las dos ya son de A** en
+> `L-329` y `L-330` LIBRES** en mi árbol… **y las dos ya eran de A** en
 > `origin/pista/s101-d`. *Lo vi porque esta vez medí también contra la rama de
-> A, que es la mejora que las dos colisiones anteriores implicaban y que no
-> había hecho.* **Aun así viaja sin número: A puede tener más sin pushear.**
+> A* — la mejora que las dos colisiones anteriores implicaban y que no había
+> hecho. **Viajó sin número igual, y A contestó `L-331` con su worktree a la
+> vista.**
+>
+> ### 📌 Y ahí está la forma final de la regla, que ninguna de las tres versiones anteriores tenía:
+> **Medir contra `origin` REDUCE la ventana; no la cierra. Lo que la cierra es
+> PREGUNTARLE AL DUEÑO DEL TERRITORIO** — porque el único árbol donde el número
+> es real es el suyo. *(Convergimos las dos pistas en esta lectura por separado;
+> queda registrada acá y en su depósito.)*
 
 ---
 
-### **LA CAPA QUE AHORRA RUIDO SE SACA EN EL MOMENTO DE DECIDIR**
+### L-331 — **LA CAPA QUE AHORRA RUIDO SE SACA EN EL MOMENTO DE DECIDIR**
 
 > ### **Mirar puede ser cómodo. Concluir tiene que ser crudo.**
 
@@ -356,3 +363,39 @@ medición y la conclusión:**
 > *Por eso ninguna de estas se evita con más cuidado: se evitan sacando la capa
 > en el momento en que hay que decidir algo.* **Mirar puede ser cómodo; concluir
 > tiene que ser crudo.**
+
+---
+
+## ⑨ · UNA SÉPTIMA QUE **NO** ES DE ESTA FAMILIA — y por eso vale nombrarla aparte *(aporte de A, 21-ago)*
+
+**Las seis de arriba son capas que BORRAN.** La de A es otra cosa: **un guard
+que mide la superficie equivocada.**
+
+**Su caso:** el perfil `development` de `eas.json` declaraba
+`developmentClient: true` **sin `expo-dev-client` en dependencias** ⇒ la APK
+salía **sin `index.android.bundle`** y se quedaba en el splash para siempre.
+**`verify-manifest-apk.mjs` dio VERDE — y tenía razón: el manifest estaba
+perfecto.**
+
+> ### **Verificábamos lo que el artefacto DECLARA, jamás lo que CONTIENE.**
+
+*No hay ninguna capa de por medio: el instrumento leyó bien, midió bien y
+contestó bien **la pregunta equivocada**.* Es la hermana un piso más abajo de la
+que esta sesión ya tenía —*verificar la MATERIA PRIMA no prueba el ARTEFACTO*
+(el comprobante de S101)— y **la distinción entre las dos familias importa
+porque se curan distinto**: una capa se saca; una superficie equivocada exige
+**cambiar qué se mira**.
+
+### 🔴 ME LA APLIQUÉ AL ARNÉS, Y TENÍA UN CASO
+
+**El bloque ① valida la policy con `qual ILIKE '%pagador_user_id%'`** — eso es
+**el TEXTO de la policy**, no su efecto. *Una policy podría nombrar la columna y
+no abrir nada: un brazo mal parentizado, un `AND` donde iba un `OR`.*
+
+**El arnés se salva porque el bloque ⑤ corre como el pagador y cuenta filas** —
+ahí está la prueba. **Pero su línea de salida decía «la policy conoce al
+pagador», que se lee como veredicto.** Curado: ahora dice **«NOMBRA al pagador
+(precondición — la prueba es ⑤)»**.
+
+> *El instrumento no estaba mal: su VOZ prometía más de lo que su medición
+> daba.* **Y un verde que promete de más es el que nadie vuelve a mirar.**

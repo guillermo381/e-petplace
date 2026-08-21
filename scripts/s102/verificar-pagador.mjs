@@ -60,7 +60,15 @@ try {
   if (hayCol) ok('las dos columnas existen'); else mal(`faltan columnas (hay ${r.cols} de 2) — la migración NO está aplicada`);
   if (Number(r.check_validado) === 1) ok('chk_intento_de_cita_declara_pagador existe y está VALIDADO');
   else mal('el CHECK no existe o no está validado — el cinturón de la tanda no está puesto');
-  if (Number(r.policy_ensanchada) === 1) ok('la policy pagos_select conoce al pagador');
+  /* 🔴 PRECONDICIÓN, NO PRUEBA — y hay que decirlo en la pantalla o el verde
+     miente. Esto es `ILIKE` sobre el TEXTO de la policy: mide lo que la policy
+     DECLARA, jamás lo que HACE. Una policy podría nombrar la columna y no
+     abrir nada (un brazo mal parentizado, un `AND` donde iba un `OR`).
+     **La prueba vive en el bloque ⑤**, que corre como el pagador y cuenta filas.
+     *Aporte de A, 21-ago: su `verify-manifest-apk` dio VERDE y tenía razón —el
+      manifest estaba perfecto— mientras la APK no traía el bundle adentro.
+      «Se verifica el artefacto, no la materia prima», un piso más abajo.* */
+  if (Number(r.policy_ensanchada) === 1) ok('la policy pagos_select NOMBRA al pagador (precondición — la prueba es ⑤)');
   else mal('la policy NO nombra pagador_user_id — el dueño no puede ver su intento de cita');
 } catch (e) {
   mal(`no se pudo leer la estructura: ${String(e.message).slice(0, 160)}`);
