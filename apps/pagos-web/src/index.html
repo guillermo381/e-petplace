@@ -139,6 +139,18 @@
          border:0;background:var(--cta);color:var(--cta-letra);cursor:pointer;
          -webkit-appearance:none}
   button[disabled]{opacity:.4;cursor:default}
+  /* 🔴 S101-D · EL BOTÓN DEL PROVEEDOR SE OCULTA — orden del founder: *«mismo
+     botón en diseño, pero integras las dos funcionalidades»*.
+     **Medido en el SDK, no supuesto:** `initVerificationInput()` crea
+     `<input class='verification-btn' value='Validar'>` dentro de
+     `.verification-btn-wrapper`, y su click llama `verifyTransaction()`.
+     ⇒ Al aparecer el desafío había **DOS botones** en pantalla: el nuestro
+     apagado y el suyo, con su propia anatomía y su propio idioma (su `value`
+     está en español FIJO en el SDK, así que en inglés habría dicho «Validar»).
+     *Dos botones para un solo acto no es una elección: es la pantalla sin
+     terminar de decidir.* Se oculta el suyo y **el nuestro hace el trabajo**,
+     llamando al MISMO `verifyTransaction()` que él llamaba. */
+  #tarjeta .verification-btn-wrapper{display:none}
   .alias-label{display:block;font-size:14px;font-weight:500;margin:4px 0 6px}
   .alias-label span{font-weight:400;color:var(--gris)}
   .alias{width:100%;font:inherit;padding:12px 14px;border-radius:10px;
@@ -240,6 +252,7 @@
       aliasPlaceholder: 'Visa de Kari',
       aliasAyuda: 'Para reconocerla después. Puedes dejarlo vacío.',
       guardar: 'Guardar tarjeta',
+      validar: 'Validar',
       sello: 'Procesado por',
       pie: 'Tus datos de tarjeta viajan cifrados a tu procesador de pagos. e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que puedas reconocerla.',
       guardada: 'Listo, tu tarjeta quedó guardada.',
@@ -268,6 +281,7 @@
       aliasPlaceholder: "Kari's Visa",
       aliasAyuda: 'So you can recognize it later. You can leave it empty.',
       guardar: 'Save card',
+      validar: 'Verify',
       sello: 'Processed by',
       pie: 'Your card details travel encrypted to your payment processor. e-PetPlace only stores the brand and the last four digits, so you can recognize it.',
       guardada: 'Done — your card is saved.',
@@ -521,6 +535,18 @@
     return;
   }
 
+  /* 🔴 NACE APAGADO (founder ①). No es cosmética: **hasta hoy el botón entraba
+     encendido con el formulario vacío**, y tocarlo caía en el rebote genérico
+     «Revisa los datos» — *un control que invita a tocarlo para decirte que no
+     era el momento*. Apagado, la pantalla dice sin palabras qué falta.
+     El encendido lo decide `refrescarBoton()` con la validación DEL SDK, y el
+     `$(...)` difiere la primera evaluación a DOM-ready, que es cuando el
+     propio SDK instancia el widget sobre `.payment-form` (medido en su fuente:
+     `$(function(){ $(".payment-form").not(".checkout").each(… PaymentForm()) })`).
+     *Evaluar antes daría `null` y lo dejaría apagado sin razón.* */
+  btn.disabled = true;
+  try { $(function () { refrescarBoton(); }); } catch (e) { btn.disabled = false; }
+
   /* ── 🔴 S101-B · EL CAMINO DEL DESAFÍO (OTP), Y POR QUÉ FALTABA ────────
      Medido en la fuente del SDK (`Payment.createToken`), su contrato es:
 
@@ -541,8 +567,88 @@
   var TIMEOUT_MS = 30000;
   var reloj = null;
   var desafioVisto = false;
+  var enVuelo = false;   /* hay una llamada al proveedor sin desenlace */
 
   function pararReloj() { if (reloj) { clearTimeout(reloj); reloj = null; } }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     🔴 S101-D · UN SOLO BOTÓN PARA LOS DOS MOMENTOS DE LA PANTALLA
+     Orden del founder (21-ago), sus dos mitades:
+       ① *«al entrar, el botón guardar se vea más claro — mismo efecto que
+          usamos cuando aún no está activo; se activa al agregar los datos»*
+       ② *«cuando genere OTP, el botón cambia de guardar tarjeta a validar,
+          mismo botón en diseño, pero integras las dos funcionalidades»*
+
+     **La verdad de «¿está completo?» NO se inventa acá: la tiene el SDK**, y
+     expone las dos que hacen falta — `isValidData()` para la tarjeta e
+     `isVerificationValueValid()` para el código. *Reimplementar esa validación
+     sería fabricar una segunda opinión sobre el mismo dato, y el día que
+     difieran gana la equivocada — la que apaga un botón que sí podía enviar.*
+
+     Por eso el estado del botón se **DERIVA** en cada tecla, jamás se guarda:
+     un booleano propio es una copia, y una copia se desincroniza. Es la misma
+     forma que la casa ya usó para curar el P0 del paseo (S92-BIS): *la fase se
+     deriva de si hay datos; los guards leen un espejo vivo.*
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /** La instancia del SDK. Se lee AL MOMENTO y no se cachea: el plugin la
+   *  cuelga del nodo, y tomarla antes de que exista guardaría un `undefined`
+   *  para siempre. */
+  function formulario() {
+    try { return $('#tarjeta').data('paymentform') || null; } catch (e) { return null; }
+  }
+
+  /* 🔴 **`isValidData()` NO SE USA, y el aparato enseñó por qué.** Su nombre
+     dice consulta y su cuerpo es una PASADA DE VALIDACIÓN: llama a los ocho
+     `refresh*Validation()`, que **pintan**. Preguntarle *«¿está completo?»* al
+     abrir la pantalla dejaba **los cuatro campos con borde rojo antes de que la
+     persona tocara nada** — *un formulario que te recibe marcándote errores que
+     todavía no cometiste*, y peor que el botón encendido que vine a curar.
+
+     ⇒ Se compone **la misma conjunción que `isValidData()` arma**, con sus
+     predicados **PUROS** (`is*Valid()` no tocan el DOM; verificado uno por uno
+     en la fuente del SDK). *No es reimplementar la validación: es llamar a las
+     mismas funciones del proveedor sin el efecto secundario.* La única línea
+     copiada de su cuerpo es el guard de expiración, literal.
+
+     **La regla que deja:** *un método público que se llama `isX` puede ser una
+     acción — el nombre no es contrato.* Se lee la fuente antes de usarlo en un
+     camino que corre solo. */
+  function tarjetaCompleta(pf) {
+    var expiraOk = !pf.expiryContainerAdded() ||
+      PaymentForm.isExpiryValid(pf.getExpiryMonth(), pf.getExpiryYear());
+    return pf.isCardHolderNameValid() && pf.isCardNumberValid() && pf.isCvcValid() &&
+           pf.isEmailValid() && pf.isCellPhoneValid() && pf.isFiscalNumberValid() &&
+           pf.isNipValid() && expiraOk;
+  }
+
+  /** El único lugar que decide si el botón está encendido y qué dice. */
+  function refrescarBoton() {
+    if (enVuelo) return;                    /* mientras espera, manda el vuelo */
+    var pf = formulario();
+    btn.textContent = desafioVisto ? T.validar : T.guardar;
+    if (!pf) { btn.disabled = true; return; }
+    try {
+      btn.disabled = !(desafioVisto ? pf.isVerificationValueValid() : tarjetaCompleta(pf));
+    } catch (e) {
+      /* 🔴 Si el SDK cambió y su validación ya no responde, **se ENCIENDE**.
+         *Un botón apagado por un error nuestro deja a la familia sin poder
+         pagar y sin poder saber por qué; encendido, en el peor caso el
+         proveedor rebota con su mensaje.* Fail-open acá es lo prudente, y es
+         al revés que en la puerta de un permiso — la asimetría es a propósito. */
+      btn.disabled = false;
+    }
+  }
+
+  /* Un solo oyente en el contenedor, en fase de captura: alcanza a los campos
+     del proveedor —que se crean DESPUÉS de este código— sin tener que
+     re-cablear nada cuando los monta. *Escuchar al padre es lo que hace que
+     esto no dependa de cuándo nace cada hijo.* */
+  ['input', 'keyup', 'change', 'blur', 'paste'].forEach(function (ev) {
+    document.getElementById('tarjeta').addEventListener(ev, function () {
+      setTimeout(refrescarBoton, 0);        /* después de que el SDK formatee */
+    }, true);
+  });
 
   /** ① Vigila la aparición del desafío. Si aparece, la espera deja de ser
    *  muda: pasa a decir lo que la persona tiene que hacer. */
@@ -554,6 +660,11 @@
         pararReloj();                       /* el desafío NO es un cuelgue */
         /* Tuteo neutro, la voz de la casa (regla 27 / L-148): decía «Escribilo». */
         decir(T.otpEnviado);
+        /* 🔴 El vuelo TERMINÓ acá aunque no haya desenlace: el proveedor
+           devolvió la pelota y ahora espera al usuario. Sin esto el botón
+           quedaría apagado con el código ya escrito. */
+        enVuelo = false;
+        refrescarBoton();                   /* pasa a decir «Validar» */
         obs.disconnect();
       }
     });
@@ -566,6 +677,28 @@
   }
 
   btn.onclick = function () {
+    /* ── 🔴 EL SEGUNDO TRABAJO DEL MISMO BOTÓN: validar el código ──────────
+       Cuando el desafío está en pantalla, este botón deja de guardar y pasa a
+       VALIDAR — llamando **exactamente** al `verifyTransaction()` que el botón
+       oculto del proveedor llamaba. *No es una reimplementación del paso: es
+       el mismo paso con otra puerta.*
+       Y se sale acá arriba a propósito: abajo vive el camino de `addCard`, que
+       en este estado **volvería a crear la tarjeta** en vez de confirmarla. */
+    if (desafioVisto) {
+      var pf = formulario();
+      if (!pf) { decir(T.noAbrio, 'error'); return; }
+      enVuelo = true;
+      btn.disabled = true;
+      decir(T.guardando);
+      /* El SDK deshabilita su propio input mientras verifica, y al terminar
+         llama a los callbacks que `addCard` ya recibió — o sea que el
+         desenlace entra por el MISMO camino que el resto de la pantalla. */
+      try { pf.verifyTransaction(); }
+      catch (e) { enVuelo = false; decir(T.defectoNuestroReintento, 'error'); refrescarBoton(); }
+      return;
+    }
+
+    enVuelo = true;
     btn.disabled = true;
     decir(T.guardando);
     desafioVisto = false;
@@ -578,7 +711,7 @@
     pararReloj();
     reloj = setTimeout(function () {
       if (desafioVisto) return;
-      btn.disabled = false;
+      enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
       decir(T.tardando, 'error');
     }, TIMEOUT_MS);
 
@@ -595,13 +728,13 @@
          *El `try/catch` no alcanzaba: no había excepción que atrapar.* */
       if (!tarjeta) {
         pararReloj();
-        btn.disabled = false;
+        enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
         decir(T.revisaDatos, 'error');
         return;
       }
     } catch (e) {
       pararReloj();
-      btn.disabled = false;
+      enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
       /* El SDK valida sus propios campos. Su queja es sobre la forma del
          dato, no sobre el dato: no se registra ni se reenvía. */
       decir(T.revisaDatos, 'error');
@@ -619,7 +752,7 @@
         pararReloj();
         var card = (resp && resp.card) ? resp.card : {};
         if (!card.token) {
-          btn.disabled = false;
+          enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
           /* 🔴 Una respuesta OK sin token **no es un veredicto del emisor**: es
              una anomalía nuestra o del proveedor. *Decirle «probá con otra» la
              manda a probar tarjetas que van a fallar todas igual.* */
@@ -651,13 +784,13 @@
         .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
         .then(function () { terminar('guardada'); })
         .catch(function () {
-          btn.disabled = false;
+          enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
           decir(T.sinTerminar, 'error');
         });
       },
       function (resp) {
         pararReloj();
-        btn.disabled = false;
+        enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
 
         /* ═══ 🔴 QUIÉN HABLÓ: ¿EL EMISOR, O NOSOTROS? ═════════════════════
            Este callback lo dispara el SDK ante **cualquier** fallo — el banco
