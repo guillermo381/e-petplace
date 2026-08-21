@@ -464,6 +464,45 @@ control que existe y cubre la mitad de abajo.**
 
 ---
 
+### ⓓ — **UN MARCADOR SE MIDE POR LA DIFERENCIA ENTRE EL CASO BUENO Y EL MALO, NUNCA POR SU PRESENCIA EN EL MALO** *(sin número — hallazgo de A, 21-ago)*
+
+**Es el corolario operativo de ⓒ**, y lo produjo la calibración que ⓒ obligó a
+construir.
+
+**Lo medido por A, con las dos APKs del día:**
+
+| marcador | APK rota | dev build real | ¿sirve? |
+|---|---|---|---|
+| `devlauncher` **(-i)** | **14** | 377 | ❌ |
+| `DevLauncher` | **14** | 139 | ❌ |
+| `expo/modules/devlauncher` | **0** | 285 | ✅ |
+| `expo/modules/devmenu` | **0** | 166 | ✅ |
+
+**Su guard usaba el flag `-i`.** La forma CamelCase **aparece igual en una APK
+SIN dev-client** —la nombran otros módulos de Expo— ⇒ **habría dicho
+«dev-launcher presente» sobre la APK que no arranca.** *Falso verde, sobre el
+caso exacto que motivó el archivo.*
+
+> ### **Un marcador que aparece en el caso bueno Y en el malo no es un marcador: es ruido con nombre.**
+>
+> **Y su verde es indistinguible de uno correcto**, porque el número es real —
+> solo que no significa lo que uno cree.
+
+**La forma exigible, en una línea:** *un marcador no se valida contra el caso
+malo — se valida contra LOS DOS, y lo que se mide es la **diferencia**.* **Un
+cero solo vale si el caso bueno da distinto de cero** (`L-330`).
+
+> **Y la frase de A, que es la lectura completa:** ***«la calibración no confirmó
+> mis marcas: me salvó de un falso verde»*** — *y no lo encontró leer el código:
+> lo encontró correr el control positivo con las dos APKs.*
+
+**Su nota de honestidad, que va con el caso:** los números de esa tabla son
+**líneas** (`grep -c`) y el guard cuenta **apariciones** (1.884, no 285). Lo
+aclaró en el archivo — *un comentario que contradice a su propio instrumento es
+la próxima medición equivocada de alguien.*
+
+---
+
 ### 📐 PRINCIPIO REGISTRADO — **LA CURA ES CORTAR UNA FUGA, NO AMPUTAR UNA FUNCIÓN** *(dictamen de mesa, 21-ago)*
 
 **Nace de la revisión del juez de A.** Su rama dev-client tenía **una línea** que

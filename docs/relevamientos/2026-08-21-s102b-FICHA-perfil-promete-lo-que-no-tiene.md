@@ -10,6 +10,12 @@
 
 🔴 **ALTA.**
 
+> ### **EL CHEQUEO MÁS BARATO ENCONTRÓ EL DEFECTO MÁS VIEJO.**
+>
+> **Seis semanas**, y lo cazó **la mitad de un guard que no necesita APK ni
+> build**. *Fue invisible todo ese tiempo porque la casa gatea con `preview`,
+> que sí trae su bundle: el perfil roto era el que casi nadie usaba.*
+
 ### ① EL CASO, con su antigüedad medida
 
 `apps/cliente/eas.json` declara en su perfil `development`:
@@ -59,37 +65,20 @@ llegue a `main`.
 
 ---
 
-## 🔴 ④ EL SEGUNDO FILO, Y ES MÁS GRANDE QUE EL PRIMERO
+## ④ EL SEGUNDO FILO SE MUDÓ A FICHA PROPIA *(orden de mesa, 21-ago)*
 
-**Medido:** **ni `apps/cliente/eas.json` ni `apps/prestador/eas.json` fijan
-`requireCommit`.**
+**Medir este defecto destapó otro, y la mesa dictaminó que son distintos:**
+`requireCommit` no está fijado en ninguna de las dos apps ⇒ **EAS archiva el
+árbol, no el commit.**
 
-⇒ **EAS archiva el ÁRBOL DE TRABAJO, no el commit.** Una build sale de lo que
-había en el disco en ese instante — **y de nada que un hash pueda nombrar.**
+> **Son defectos de clase distinta y por eso van separados:** *el perfil era una
+> promesa incumplida EN un archivo; aquello es que **ningún** archivo ata una
+> build a un commit.* **El primero se curó con una dependencia; el segundo no se
+> cura con ninguna.**
 
-> ### **Ninguna build de esta casa es reproducible desde un commit, y ningún acta puede probar de qué salió.**
-
-**Por qué esto importa acá y no es una preferencia de configuración:** este canon
-**cita hashes para todo** — el ancla de cada OTA, cada acta, cada ficha. La casa
-ya pagó por la versión OTA de este mismo problema:
-
-> *«el registro publicado NO expone el estado del árbol ⇒ **un publish sucio es
-> inauditable después**»* (S91) — y por eso nació `publicar-ota.mjs`, que **falla
-> si el árbol está sucio**.
-
-**Para las BUILDS no existe ese guard.** *El OTA tiene su veda y su acto único;
-la build nativa no tiene ninguno de los dos.*
-
-**El episodio de hoy lo muestra en vivo y por eso vale como evidencia:** A tenía
-`expo-dev-client` **sin commitear**, la build salió de `76f83f5f` —que no lo
-tiene— **y probablemente lleve el paquete igual**, porque el árbol viajó. *Ella
-lo dijo con la palabra correcta: «probablemente» no es un veredicto.*
-
-**⇒ Con `requireCommit` sin fijar, la pregunta «¿qué hay adentro de esta APK?»
-NO tiene respuesta documental — solo se puede abrir el ZIP.** Que es,
-exactamente, la razón por la que `verify-apk-contenido.mjs` tuvo que existir.
-
----
+**⇒ `docs/relevamientos/2026-08-21-s102b-FICHA-requirecommit.md`**, con su prueba
+medida (la APK del gate trae `expo/modules/devlauncher` ×1.884 y salió de un
+commit que no lo tiene) y su disparo bloqueante.
 
 ## ⑤ LA FICHA, PARA DEPOSITAR
 
@@ -98,23 +87,19 @@ build y la cura en vuelo** ⇒ **A ejecuta y declara**, C se entera.
 *(La mesa adjudicó «quien tenga el territorio de la app cliente»; se declara la
 tensión con la tabla en vez de resolverla acá.)*
 
-**☠️ DISPARO — DOS, y el segundo es el que no puede esperar:**
-1. **La primera build de `development` del cliente** — hoy rebotaría por el guard.
-2. 🔴 **`requireCommit`: antes del próximo build nativo de CUALQUIERA de las dos
-   apps.** *Cada build que salga sin él es un artefacto más cuya procedencia no
-   se puede reconstruir, y eso no se arregla después.*
+**☠️ DISPARO: la primera build de `development` del cliente** — hoy rebotaría
+por el guard de coherencia. *(El disparo del `requireCommit` NO vive acá: es de
+su propia ficha. **Dos fichas no reclaman el mismo disparo** — si lo hicieran,
+cerrar una parecería cerrar la otra.)*
 
-**☠️ MUERTE:**
-- `verify-apk-contenido.mjs --coherencia` en **VERDE en las dos apps sobre
-  `main`** *(hoy verde solo en la rama de A)*.
-- **`requireCommit` fijado**, y una build cuyo `gitCommitHash` se pueda cotejar
-  contra el ZIP.
+**☠️ MUERTE:** `verify-apk-contenido.mjs --coherencia` en **VERDE en las dos apps
+sobre `main`** — *hoy verde solo en la rama de A, y por eso la ficha sigue
+abierta aunque la cura exista.*
 
 **Se cruza con:** `D-574` (los secrets del build local **no fallan, se omiten** —
-misma familia: el build promete y no cumple, en silencio) · la enmienda S91 de la
-regla 82 (**el asterisco es un destello, no un registro**) · `L-330` (un cero sin
-control positivo no es un cero).
+misma familia: **el build promete y no cumple, en silencio**) · **la ficha del
+`requireCommit`**, que este defecto destapó · `L-330` (un cero sin control
+positivo no es un cero).
 
-> **Y la línea que resume las dos mitades:**
-> ***Un perfil de build es una promesa sobre un artefacto que nadie leía, hecha
-> en un archivo que nadie ata a un commit.***
+> **La línea que la resume:**
+> ***Un perfil de build es una promesa sobre un artefacto que nadie leía.***
