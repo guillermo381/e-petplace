@@ -366,6 +366,67 @@ medición y la conclusión:**
 
 ---
 
+## ⑧bis · LAS DOS LECCIONES QUE LA MESA MANDÓ FUNDAR — **SIN NÚMERO** *(A asigna; `L-332` y `L-333` dan cero en los dos árboles al 21-ago, pero eso REDUCE la ventana y no la cierra)*
+
+### ⓐ — **CAPA QUE BORRA ≠ SUPERFICIE EQUIVOCADA. SE CURAN DISTINTO.**
+
+**Dos familias que se confunden porque las dos terminan en un verde falso:**
+
+| | **capa que borra** | **superficie equivocada** |
+|---|---|---|
+| qué pasa | el instrumento **no ve** el dato | el instrumento **ve bien** |
+| dónde falla | entre la medición y la conclusión | en QUÉ se eligió medir |
+| síntoma | vacío, cero, un exit ajeno | **un verde correcto y sin valor** |
+| cura | **sacar la capa** | **cambiar qué se mira** |
+| casos | `sed` · `tail` · `\|\|` · `slice()` | el manifest perfecto sobre una APK sin bundle |
+
+> ### **En la segunda no hay nada roto: el instrumento leyó bien, midió bien, y contestó bien LA PREGUNTA EQUIVOCADA.**
+
+**Y por eso no se pueden meter en la misma bolsa: la cura de una parecería
+cubrir a la otra.** *Sacarle el `tail` a un guard que mide el manifest no lo
+acerca ni un paso a mirar dentro del ZIP.*
+
+**El caso fundador:** `verify-manifest-apk.mjs` dio **VERDE con razón** —el
+manifest tenía sus cuatro claves— **mientras la APK no traía
+`index.android.bundle` y se quedaba en el splash para siempre**.
+
+> **Complementa la tríada de mesa un nivel más fino** —*controles curan
+> instrumentos · leyes curan lectores · invariantes curan resultados
+> plausibles*— **partiendo el primer término: hay control que cura una capa y
+> control que cura una superficie, y no son el mismo control.**
+>
+> ⚠️ *Ese literal de la tríada me lo dio A. **Lo busqué por grep y encontré un
+> homónimo** —la tríada del hub «Mis paseos» (Próximos·Agenda·Historial) en
+> `D-366`—. **Buscar la PALABRA en vez del concepto es la misma clase que este
+> archivo documenta**, así que se declara en lugar de citarla como si la
+> hubiera medido.*
+
+---
+
+### ⓑ — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR**
+
+> ### **Un verde que promete de más es el que nadie vuelve a mirar.**
+
+**Es sub-especie de la ⓐ y merece número propio porque su cura es distinta y es
+barata: no se toca la medición, se baja la línea.**
+
+**Los dos casos, del mismo día y de las dos pistas:**
+
+| instrumento | decía | mide | curado a |
+|---|---|---|---|
+| `verificar-pagador` ① (B) | «la policy **conoce** al pagador» | `ILIKE` sobre el TEXTO de la policy | «**NOMBRA** al pagador (precondición — la prueba es ⑤)» |
+| `verify-apk-contenido` (A) | «trae el bundle — **arranca sola**» | que hay JS que cargar | «tiene JS que cargar sin Metro» *(propuesto en la revisión)* |
+
+**La prueba de si una voz está calibrada, en una pregunta:** *¿podría esta línea
+salir verde con la cosa rota?* **Si sí, la línea promete de más.**
+
+**Y el matiz que la vuelve útil en vez de purista:** en el caso de B **la
+medición estaba bien y la prueba real ya existía en otro bloque** — *lo único
+equivocado era el rótulo.* **Curar la voz no debilitó nada: hizo visible dónde
+vivía la prueba.**
+
+---
+
 ## ⑨ · UNA SÉPTIMA QUE **NO** ES DE ESTA FAMILIA — y por eso vale nombrarla aparte *(aporte de A, 21-ago)*
 
 **Las seis de arriba son capas que BORRAN.** La de A es otra cosa: **un guard
