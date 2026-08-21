@@ -18717,6 +18717,16 @@ un anónimo puede leer no es solo confidencial: además está mal por un orden d
 magnitud** (`D-759`). **Curar solo el front del admin deja el `0.14` vivo en la
 fuente: las dos curas van juntas o el número sobrevive.**
 
+> 🔴 **ADVERTENCIA DE DISEÑO — ESTA FICHA HEREDA `L-328`** *(encargo de mesa vía
+> S102-B, 21-ago)*: **las seis NO se curan aplicando un patrón de clase sin medir
+> el consumidor real de CADA una.** `v_ranking_usuarios` —que salió de este mismo
+> censo— ya probó que **el patrón correcto para la clase puede ser la cura
+> equivocada para un miembro**: ahí `security_invoker` habría dejado la vista
+> *técnicamente segura y funcionalmente muerta*, y su cinturón natural habría
+> dado verde igual. *Acá el riesgo tiene nombre propio: `v_pitch_metrics`
+> sostiene el pitch deck.* ⇒ **una por una, midiendo qué deja de servirle a quien
+> SÍ debe verla.**
+
 > **Dueño:** pista A (es DB).
 > **☠️ DISPARO: antes del soft launch**, y **antes de mostrar `/inversores` a
 > alguien de afuera** — el mismo disparo de `D-759`.

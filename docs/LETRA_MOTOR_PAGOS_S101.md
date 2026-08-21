@@ -53,6 +53,16 @@ Qué hay que medir, y el resultado se escribe aunque sea "no existe":
    > sesión a buscar plata donde no hay tabla. Distinto es el REPORTE de haberlo
    > hecho —`S101-A.md:17`, ⑦ VERDE— que **no se reescribe: es una orden
    > cumplida y su registro es correcto.*** Hallazgo: **S102-B**.
+   >
+   > ⏪ **CORRECCIÓN DE MI PROPIO REGISTRO (S101-D, mismo día).** Al depositar
+   > escribí que *«el grep de B no alcanzó esta ocurrencia»*. **Es falso, y lo
+   > corrigió B: su grep SÍ la devolvió** —corrió sobre `docs/` completo— **y el
+   > recorte fue suyo**, al acotar el pedido a las tres que describen el ESTADO
+   > de la deuda, sin declararlo.
+   > *La distinción no es de cortesía y por eso se escribe: **un instrumento
+   > ciego se cura cambiándolo; un filtro no declarado se repite.*** Atribuirlo
+   > al instrumento habría mandado a la próxima sesión a arreglar un grep que
+   > funcionaba.
 
 ---
 
