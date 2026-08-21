@@ -496,3 +496,42 @@ Hoy ya se sabe uno: **① no cierra sin credenciales de staging verificadas y ca
   columna o función estaba medido** y que **si la fuente la contradecía, gana la fuente**.
   *Es exactamente lo que pasó: el censo B0 la contradijo en §3 y la letra se enmendó en
   vez de defenderse.*
+
+
+---
+
+## §9 · TRES LECCIONES DE INSTRUMENTO (S101-C · 20-ago-2026)
+
+### (a) Probar los productores conocidos prueba la LISTA, no la DEFENSA
+
+> Siete funciones insertan citas. Un arnés que las prueba a las siete **prueba
+> que la lista está cubierta hoy** — y nada sobre la octava.
+>
+> **El INSERT directo prueba la defensa**: si el trigger dispara desde una
+> puerta que nadie enumeró, dispara desde cualquiera. *Y la octava función la va
+> a escribir alguien en seis meses sin leer esta letra — ése es el caso que hay
+> que cubrir, no los que ya conocemos.*
+
+### (b) Sin baseline no hay «no cambió»
+
+> La delegación de `user_tiene_acceso_a_mascota` **no podía cambiar ni un
+> veredicto** de las 62 policies que la usan. *Afirmarlo sin haber medido antes
+> habría sido una promesa, no una verificación.*
+>
+> **Se tomaron 12 pares (usuario, mascota) ANTES de tocar nada**, y se
+> compararon después. **La medición del «después» no existe sin la del
+> «antes»** — y el antes se pierde para siempre en el momento en que aplicás.
+
+### (c) El censo de una columna incluye `is_nullable`
+
+> **Medido tarde y a costa de una migración que no podía funcionar:**
+> `pagos_intentos.pedido_id` era `NOT NULL`, así que un intento de CITA era
+> **inexpresable** — el invariante «exactamente uno» no podía existir.
+>
+> 🔴 **Por qué el censo no lo vio:** midió qué columnas hay y qué contienen. Y
+> **todas las filas tenían pedido** ⇒ *un dato que siempre está presente se ve
+> exactamente igual esté o no obligado.* La obligatoriedad **no se deduce de los
+> datos: se lee del esquema.**
+>
+> Lo cazó el cinturón **intentando crear el estado malo a propósito**, que es
+> literalmente para lo que existe.
