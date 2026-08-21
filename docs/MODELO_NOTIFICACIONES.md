@@ -1077,6 +1077,27 @@ Los tres casos, cada uno una capa más arriba:
    llamaba `bloqueDetalle` y **una const del mismo nombre la sombreaba** — nunca
    se invocó, y ningún correo salió jamás con sus filas.*
 
+### 🔴 SU VARIANTE MÁS GRAVE — el actuador que IGNORA un sujeto (S101-C)
+
+Los cuatro casos de arriba son piezas **desconectadas**. Éste es peor: la pieza
+**está conectada y funciona** — y **no reconoce lo que le llega**.
+
+> **Un actuador que no conoce un sujeto no falla: lo IGNORA, que es peor.**
+
+**Medido:** el webhook del primer paseo real llegó, **validó su stoken**, quedó
+`autenticado=true`… y la cita **no se movió**. El actuador sabía confirmar
+compras y **nada de citas**. *No hubo error, no hubo log, no hubo síntoma: hubo
+silencio con cara de normalidad.*
+
+**Y su gemelo, del mismo día:** el `dev_reference` mandaba el id de la compra —
+para una cita salía **vacío**.
+> **Un cobro que sale sin referencia es plata que se mueve sin traza.**
+
+⇒ **La regla que dejan los dos: agregar un SUJETO al motor obliga a censar TODOS
+los consumidores del evento, no solo la puerta de entrada.** *La puerta fue lo
+fácil —una condición y un `if`—; lo que faltaba estaba tres piezas más adelante,
+en quien lee el evento al final.*
+
 **Consecuencia exigible:**
 
 > **Todo productor nuevo —hook, actuador, RPC, plantilla— se prueba DESDE SU

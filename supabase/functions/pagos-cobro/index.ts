@@ -259,7 +259,12 @@ Deno.serve(async (req) => {
         order: {
           amount: Number(monto.toFixed(2)),
           description: `e-PetPlace compra ${compraId.slice(0, 8)}`,
-          dev_reference: compraId,          // 🔴 LA COMPRA, jamás un pedido
+        /* 🔴 EL SUJETO, jamás un pedido — y jamás el otro sujeto.
+           **Medido: con `compraId` fijo, el cobro de una cita mandaba
+           `dev_reference: ""`** y el callback quedaba sin a quién apuntar. *Un
+           cobro que sale sin referencia es un cobro que el webhook no puede
+           reconocer: la plata se mueve y la traza no.* */
+          dev_reference: sujeto,
           // 🔑 Los TRES juntos — forma exacta de Erick, derivada del desglose.
           vat: Number(iva.toFixed(2)),
           taxable_amount: iva > 0 ? Number(base.toFixed(2)) : 0,
