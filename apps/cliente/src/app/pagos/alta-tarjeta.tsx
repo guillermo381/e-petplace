@@ -115,7 +115,22 @@ export default function AltaTarjeta() {
             /* 🔴 Se lee SOLO para saber que terminó. Ni el desenlace que trae
                ni su forma deciden nada — abajo se relee el servidor. */
             try {
-              const m = JSON.parse(e.nativeEvent.data) as { fuente?: string };
+              const m = JSON.parse(e.nativeEvent.data) as {
+                fuente?: string; nivel?: string; mensaje?: string; faltantes?: string[]
+              };
+              /* 🔴 EL CANAL DE DIAGNÓSTICO SE LEE. Antes caía en el `return` de
+                 abajo junto con todo lo ajeno: la página emitía su censo del SDK
+                 y MORÍA acá, sin traza. *Es motor sin puerta (`L-318`) en su
+                 forma exacta — la pieza construida, probada y desconectada del
+                 único lugar donde su resultado importa.* Se registra y NO cierra
+                 nada: el cierre sigue atado a la fuente exacta del desenlace. */
+              if (m?.fuente === 'epetplace-alta-tarjeta-diagnostico') {
+                console.log(
+                  `[alta-tarjeta] ${m.nivel ?? 'aviso'}: ${m.mensaje ?? ''}`,
+                  m.faltantes ?? [],
+                );
+                return;
+              }
               if (m?.fuente !== 'epetplace-alta-tarjeta') return;
             } catch { return; }
             void cerrarLeyendoElServidor();

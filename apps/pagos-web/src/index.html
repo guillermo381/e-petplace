@@ -356,6 +356,17 @@
         CLAVES_SDK.length + ' claves presentes. El formulario en inglés degrada a español.',
         faltantes
       );
+    } else {
+      /* 🔴 EL CENSO SE DECLARA TAMBIÉN CUANDO SALE BIEN, y no es cortesía.
+         Sin esta línea el silencio de la consola significa DOS cosas
+         incompatibles —«20/20, todo en orden» y «esta función nunca corrió»— y
+         no hay forma de distinguirlas mirando. *Una verificación cuyo modo de
+         falla es el silencio no es una verificación* (`L-192`), y el control
+         viaja CON el número, jamás en la confianza de quien lo corrió
+         (`L-330`). */
+      reportarSdk('ok',
+        'SDK ' + CLAVES_SDK.length + '/' + CLAVES_SDK.length +
+        ' claves presentes · idioma ' + LANG + '.', []);
     }
 
     if (LANG !== 'en') return;
@@ -380,21 +391,29 @@
      ⇒ Va como `…-diagnostico`, que el handler descarta por su propio guard.
      **Agregar un sujeto nuevo a un puente obliga a censar a su consumidor**
      (`L-318`): acá el consumidor no ignora lo que no conoce — ACTÚA. */
-  function avisarSdk(mensaje, faltantes) {
+  function reportarSdk(nivel, mensaje, faltantes) {
     try {
-      if (window.console && console.warn) {
-        console.warn('[alta-tarjeta] ' + mensaje, faltantes);
+      if (window.console) {
+        var escribir = (nivel === 'ok' ? console.log : console.warn) || function () {};
+        escribir.call(console, '[alta-tarjeta] ' + mensaje, faltantes);
       }
       if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
         window.ReactNativeWebView.postMessage(JSON.stringify({
+          /* 🔴 Fuente DISTINTA de la del desenlace a propósito: el `onMessage`
+             de la app cierra la pantalla ante `epetplace-alta-tarjeta`, así que
+             un diagnóstico con esa fuente CERRARÍA el alta al arrancar — justo
+             el día que hiciera falta diagnosticar. */
           fuente: 'epetplace-alta-tarjeta-diagnostico',
           aviso: 'sdk_claves',
+          nivel: nivel,
           mensaje: mensaje,
           faltantes: faltantes,
         }));
       }
     } catch (e) { /* un aviso que rompe la página es peor que el aviso perdido */ }
   }
+
+  function avisarSdk(mensaje, faltantes) { reportarSdk('aviso', mensaje, faltantes); }
 
   function aplicarIdioma() {
     document.documentElement.lang = LANG;
