@@ -18551,7 +18551,8 @@ suma existe para la tercera cosa que quiera entrar.
 
 - **L-327** — **UN INSTRUMENTO PUEDE SER CIEGO A LA CLASE ENTERA QUE VINO A MEDIR, Y SU SÍNTOMA ES UN NÚMERO CHICO QUE PARECE UNA BUENA NOTICIA.** Censando el voseo del cliente, el medidor daba **5** cuando el archivo tenía **32**. La causa no era la lista de verbos: **`\b` en JavaScript está definido sobre el alfabeto ASCII**, así que después de una vocal acentuada **no hay frontera de palabra** y `\b(probá)\b` **nunca** matchea «Probá de nuevo». ⇒ **Todo imperativo voseo —que por definición termina en á/é/í— era INVISIBLE**, y solo pasaban las formas terminadas en `s` (`Tenés` · `seguís` · `Pagás` · `vos`). *El instrumento no fallaba al azar: fallaba exactamente en la clase que definía la deuda, y su verde parcial se leía como avance.* **Cura: fronteras por lookaround Unicode (`(?<!\p{L})…(?!\p{L})` con flag `u`), jamás `\b`, en todo censo sobre español.**
   **② Su gemela del mismo día, que infla en vez de encoger: UNA FORMA QUE LAS DOS VOCES COMPARTEN NO DISCRIMINA NADA.** `vas` y `estás` se leen como voseo y **no lo son** —el verbo es idéntico en tuteo («tú vas a ver» = «vos vas a ver»)—; incluirlos llevó el censo **de 5 a 20 con quince cadenas que no había que tocar**. *Prueba viva en el propio archivo: `es.ts:1326` dice «Vas a borrar… pero **puedes** volver» — tuteo puro con un «vas» adentro.* ⇒ **antes de sumar un token a un censo se pregunta si el token existe también del otro lado; si existe, no mide.**
-  **③ Y LA CONTRAPRUEBA, que es lo reutilizable y lo que cazó ①:** un **barrido de recall independiente** —contar toda palabra terminada en á/é/í dentro de comillas— devolvió `Probá`×7 · `Elegí`×6 · `Ingresá`×2 **contra un instrumento que reportaba 0 de esas formas**. *Dos instrumentos que miden lo mismo y no coinciden: uno está roto, y **el que da el número más chico es el sospechoso**.* Hermana de L-321 (*un censo que devuelve vacío se prueba antes contra un caso con resultado conocido*) — acá el caso conocido lo fabricó el recall, no la memoria. Origen: S101-D.
+  **③ Y LA CONTRAPRUEBA, que es lo reutilizable y lo que cazó ①:** un **barrido de recall independiente** —contar toda palabra terminada en á/é/í dentro de comillas— devolvió `Probá`×7 · `Elegí`×6 · `Ingresá`×2 **contra un instrumento que reportaba 0 de esas formas**. *Dos instrumentos que miden lo mismo y no coinciden: uno está roto, y **el que da el número más chico es el sospechoso**.* Hermana de L-321 (*un censo que devuelve vacío se prueba antes contra un caso con resultado conocido*) — acá el caso conocido lo fabricó el recall, no la memoria.
+  **④ Y LA MÁS GENERAL DE LAS CUATRO, que apareció DESPUÉS de reportar el número y por eso vale doble: LA REGLA EN QUE SE APOYA TU INSTRUMENTO PUEDE TENER UNA EXCEPCIÓN, Y LA EXCEPCIÓN NO SE VE MIRANDO LA LISTA DE CASOS — SE VE MIRANDO LO QUE EL BARRIDO ESTÁ POR TOCAR.** Curado ① y ②, el medidor se apoyaba en *«el imperativo voseo siempre lleva tilde»*. **Es falso en cuanto hay enclítico:** `contá`+`nos` = **«contanos»**, la tónica deja de ser la última y **la tilde desaparece** (igual `escribila` · `escribinos` · `corregilo` · `fijate`). ⇒ el instrumento era **ciego a la clase entera de enclíticos** y el conteo subió **32 → 34** en el cliente y **36 → 37** en el prestador *después* de estar reportado. *Lo que lo destapó no fue otro censo: fue ir a escribir el mapa de reemplazos y preguntarse cómo se conjuga cada forma.* **Corolario operativo: antes de barrer, se lee en voz alta la regla que el instrumento asume y se busca su excepción gramatical — el barrido es el último momento barato para encontrarla.** Origen: S101-D.
 
 - **L-326** — **CUANDO EL ORDEN IMPORTA, SE ESCRIBE COMO CINTURÓN Y NO COMO NOTA.** El orden *«REVOKE con el reemplazo listo, JAMÁS antes»* estaba firmado, escrito en la ficha y repetido en la letra — **y aun así el reemplazo no estaba listo cuando llegó el turno de revocar.** *Una precondición que vive en un comentario se cumple mientras alguien la lea; y el día que no la lean es justo el día en que el que ejecuta viene con la orden en la mano y la da por cumplida.* ⇒ La migración del `REVOKE` lleva su precondición como `DO $$ … RAISE EXCEPTION`: si el desglose, el trigger, el actuador o el lector de acceso no están en pie, **aborta con el agujero todavía cerrado**. Y su cinturón de salida lleva **discriminador**: sin él, un `has_function_privilege` que devolviera `false` para todo haría pasar los dos asserts sin medir nada. Origen: S101-C.
 
@@ -18627,7 +18628,7 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
-### D-858 🟢 · EL VOSEO DEL PRESTADOR — 36 cadenas, medidas y FUERA del territorio de `D-857`
+### D-858 🟢 · EL VOSEO DEL PRESTADOR — 37 cadenas, medidas y FUERA del territorio de `D-857`
 > S101-D · 21-ago-2026 · **apareció barriendo el cliente, no buscando el prestador**
 
 La casa habla **tuteo neutro** (regla 27 / L-148) **en las DOS apps** — la ley nunca
@@ -18636,9 +18637,16 @@ sobre los tres diccionarios, y el resultado reparte solo:
 
 | Archivo | Cadenas con voseo |
 |---|---|
-| `apps/cliente/src/i18n/es.ts` | **32** → territorio de `D-857` |
-| **`apps/prestador/src/i18n/es.ts`** | **36** → **esta ficha** |
+| `apps/cliente/src/i18n/es.ts` | **34** → territorio de `D-857` — **ya barridas a tuteo en S101-D** |
+| **`apps/prestador/src/i18n/es.ts`** | **37** → **esta ficha, sin tocar** |
 | `packages/ui/src/i18n/es.ts` | **0** ✅ *el paquete compartido ya habla tuteo* |
+
+⚠️ **El 37 no es el 36 del primer reporte: subió al cerrarse la QUINTA trampa del
+instrumento** — *el imperativo voseo pierde la tilde cuando lleva enclítico*
+(`contanos` · `escribila` · `corregilo`), y el medidor se apoyaba en la tilde.
+**Su muestra `«Corregilo según el motivo…»` (L3183) es justo de esa clase.**
+⇒ **Quien ejecute esta ficha re-mide con el instrumento de `L-327` completo**, no
+con este número: 37 es un piso medido, no un inventario cerrado.
 
 Muestras medidas: *«Volvé a buscar a la mascota y probá de nuevo»* (L2404) ·
 *«No tenés avisos»* (L2844) · *«Aceptá y entrás a tus entregas»* (L3092) ·
@@ -18648,7 +18656,7 @@ tu negocio»* (L3669) · *«Elegí al menos un día»* (L3591).
 🔴 **Por qué nace ficha propia en vez de ensancharse `D-857`:** su ficha acota el
 territorio a `es.ts` **del cliente**, con nombre y ruta. *Ensanchar el territorio de
 un vocabulario cerrado de paso es exactamente lo que L-325 prohíbe* — y acá el costo
-no es teórico: **son 36 cadenas repartidas en pantallas de otro actor, cada una con
+no es teórico: **son 37 cadenas repartidas en pantallas de otro actor, cada una con
 su gate.** La pasada de diseño del cliente no puede gatearlas.
 
 ⚠️ **Y el número se re-mide antes de barrer, con el instrumento curado por `L-327`:**
@@ -18688,14 +18696,18 @@ pantalla que habría que volver a mirar.
 el regex pedía espacio después del verbo — `Elegí ` con mayúscula al principio
 de la frase no matcheaba. *El número chico no era la deuda: era el instrumento.*
 
-> ### 🔴 ENMIENDA S101-D (21-ago-2026) — **el resto no es 10: son 32.** Y la propia advertencia de arriba se cobró DOS VECES MÁS
+> ### ✅ ENMIENDA S101-D (21-ago-2026) — **el resto no era 10: eran 34. BARRIDAS LAS 34.** Y la propia advertencia de arriba se cobró TRES VECES MÁS
 >
 > Se re-midió con instrumento propio, como esta ficha ordenaba. **El resto vivo en
-> `apps/cliente/src/i18n/es.ts` es 32 cadenas**, no 10. El «17 medidas» del título y
-> el «7 curadas» del cuerpo **no se tocan**: son el registro de S101-C y siguen
+> `apps/cliente/src/i18n/es.ts` eran 34 cadenas**, no 10. El «17 medidas» del título
+> y el «7 curadas» del cuerpo **no se tocan**: son el registro de S101-C y siguen
 > siendo ciertos de lo que S101-C midió con el instrumento que tenía.
 >
-> **Las cuatro trampas del censo, en orden** (la ley que salió de acá es **`L-327`**):
+> **Estado: las 34 CURADAS a tuteo** (barrido acotado a valores entre comillas, mapa
+> explícito, `vos` por frase completa). **Censo post-barrido: 0. Typecheck verde.**
+> *Falta su gate en dispositivo — el número está cerrado, el ojo no.*
+>
+> **Las CINCO trampas del censo, en orden** (la ley que salió de acá es **`L-327`**):
 > ① la de esta ficha (el espacio) · ② **comentarios leídos como voz** —43 falsos: el
 > archivo comenta su propia historia en voseo (L-170)— · ③ **`vas` y `estás` NO son
 > voseo** —el verbo es idéntico en tuteo; incluirlos infló el censo de 5 a 20 con 15
@@ -18708,8 +18720,21 @@ de la frase no matcheaba. *El número chico no era la deuda: era el instrumento.
 > **Lo que cazó ④:** un **barrido de recall independiente** devolvió `Probá`×7 ·
 > `Elegí`×6 · `Ingresá`×2 contra un instrumento que reportaba **0** de esas formas.
 >
-> **Territorio confirmado, no ensanchado:** las **36 del prestador** son **`D-858`**,
-> ficha aparte con dueño propio. `packages/ui` está en **0**.
+> 🔴 **⑤ Y LA QUINTA APARECIÓ AL IR A BARRER, cuando el número ya estaba reportado:
+> «el imperativo voseo SIEMPRE lleva tilde» ES FALSO EN CUANTO HAY ENCLÍTICO.**
+> `contá` + `nos` = **«contanos»**: la sílaba tónica deja de ser la última y **la
+> tilde desaparece**. Igual `escribila` · `escribinos` · `corregilo` · `fijate`.
+> ⇒ El instrumento curado por ④ —que se apoyaba en la tilde— **era ciego a la clase
+> entera de enclíticos**: se perdía `Contanos quién recibe.` y `Escribinos al…`.
+> **32 → 34.** *La regla de la que dependía el instrumento tenía una excepción
+> gramatical entera, y la excepción no se ve mirando la lista de verbos: se ve
+> mirando la lista de lo que el barrido está por tocar.* **Y la ficha lo predecía
+> sin saberlo: su propio texto de S101-C nombra `Ingresalo` — un enclítico sin
+> tilde — entre las formas vivas.**
+>
+> **Territorio confirmado, no ensanchado:** las **37 del prestador** (36 + 1 que
+> destapó la quinta trampa) son **`D-858`**, ficha aparte con dueño propio.
+> `packages/ui` está en **0**.
 
 **Dueño:** la pasada de diseño. **Disparo:** su sesión, junto a las cinco marcas
 firmadas del gate ⑤.

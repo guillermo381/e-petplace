@@ -65,7 +65,7 @@ el de la cola A1 del plan; el estado corrige a la cola donde la fuente lo exige.
 | **4** | Columnas del comprobante cuando el valor envuelve | Ley 3 (voz) + Ley 18 (estructura) | ➡️ **REASIGNADA A PISTA B — sale de la cola de A, NO se borra** *(dictamen de mesa, relevo 2)*. **El comprobante no es una pantalla:** vive en `supabase/functions/despachar-correo/index.ts` L154-158 (`<tr>` de dos `<td>`), con `font-size` y `line-height` **inline** (L156-157) porque **una edge function no puede importar tokens**. Es **territorio server**. *Su clase de defecto sí es conocida y viaja con el puntero: es el mismo «DINER / S» que S101-C curó midiendo contra la palabra más larga + `numberOfLines` — acá el equivalente es medir la etiqueta más larga de L137-149 y decidir el ancho de la columna, jamás dejar que envuelva sola* |
 | **5** | La voz vieja del éxito | **Ley 17.3** (una acción, un nombre, todo el flujo) + Ley 17.4 | 🔴 **VIVA Y LOCALIZADA: `apps/cliente/src/i18n/es.ts:1858`** — *«Te avisamos cuando el vendedor lo confirme. Puedes seguirlo en Tus pedidos.»* **Describe el mundo anterior al motor**: hoy lo que se confirma es **el PAGO** (webhook/barrido), no el vendedor. Su vecindad ya dice la verdad (`pago.esperaTitulo` = «Estamos confirmando tu pago») ⇒ **la línea quedó sola contra su propio namespace** |
 | **6** | Sección bajo el fold · título truncado | §9 composición + Ley 18 | 🟡 **NO MEDIBLE LEYENDO.** §8② puso la sección dentro de `Tarjeta` y §8① el pie fijo — si **hoy** sigue naciendo bajo el fold es cuestión de alto de pantalla y de contenido. ⇒ **exige dispositivo con pedido FRESCO** (`D-851`: toda medición usa compra fresca) |
-| **7** | **D-857** — el voseo restante | **regla 27 / L-148** (la app habla en tuteo) | 🔴 **RE-MEDIDO: son 32 cadenas, no 10.** Detalle y método en §6 |
+| **7** | **D-857** — el voseo restante | **regla 27 / L-148** (la app habla en tuteo) | 🔴 **RE-MEDIDO: son 34 cadenas (no 10), y quedaron BARRIDAS.** Detalle y método en §6 |
 | **8** | La animación de la espera | — | ⏸️ **CONDICIONADA POR LA PROPIA COLA: «solo si el founder lo pide».** No se toca. La pieza (`EsperaDeTrabajo` L83) cumple hoy su regla firmada: el segmento **viaja, no crece**, sin porcentaje ni `value` en a11y |
 
 ### 🔎 Marcas NUEVAS con ley, que la cola no tenía
@@ -175,13 +175,14 @@ frenos.* **Ninguno se «resolvió» achicando el alcance: el ④ tiene dueño nu
 
 ---
 
-## §6 · D-857 RE-MEDIDA — **32 cadenas, no 10**, y el instrumento es la historia
+## §6 · D-857 RE-MEDIDA Y BARRIDA — **eran 34, no 10**, y el instrumento es la historia
 
 La ficha advierte con todas las letras que su primer censo **dio 5 por culpa del
 regex** — *«el número chico no era la deuda: era el instrumento»*. Se re-midió con
-instrumento propio, y **la advertencia se cobró otra vez, en dos formas nuevas.**
+instrumento propio, y **la advertencia se cobró TRES VECES MÁS** — la última
+**después** de que el número ya estuviera reportado.
 
-### Las cuatro trampas, en orden de aparición
+### Las CINCO trampas, en orden de aparición
 
 | # | Trampa | Efecto medido |
 |---|---|---|
@@ -189,6 +190,7 @@ instrumento propio, y **la advertencia se cobró otra vez, en dos formas nuevas.
 | ② | **comentarios leídos como voz** (L-170) | 43 falsos en la primera pasada — el archivo comenta su propia historia en voseo |
 | ③ | **`vas` y `estás` NO son voseo** | el verbo es **idéntico en tuteo** («tú vas a ver» = «vos vas a ver»). Incluirlos infló el censo **de 5 a 20** con 15 cadenas que no hay que tocar. **Prueba viva: `es.ts:1326` dice «Vas a borrar… pero PUEDES volver» — tuteo puro con un «vas» adentro** |
 | ④ | 🔴 **`\b` en JavaScript es ASCII** | después de una vocal acentuada **no hay frontera de palabra** ⇒ `\b(probá)\b` **nunca** matchea «Probá de nuevo». **Todo imperativo voseo —que por definición termina en á/é/í— era INVISIBLE**, y solo pasaban las formas terminadas en `s` (`Tenés`·`seguís`·`Pagás`·`vos`). El censo decía **5** y el archivo tenía **32** |
+| ⑤ | 🔴 **«el imperativo voseo SIEMPRE lleva tilde» es FALSO con enclítico** | `contá`+`nos` = **«contanos»**: la tónica deja de ser la última y **la tilde desaparece** (igual `escribila` · `escribinos` · `corregilo` · `fijate`). El instrumento curado por ④ **seguía apoyado en la tilde** ⇒ **ciego a la clase entera**: perdía `«Contanos quién recibe.»` y `«Escribinos al {{numero}}.»`. **32 → 34** · prestador **36 → 37** |
 
 **Cómo se cazó ④, que es lo reutilizable:** un barrido de *recall* independiente
 —contar toda palabra terminada en á/é/í dentro de comillas— devolvió `Probá`×7,
@@ -196,22 +198,37 @@ instrumento propio, y **la advertencia se cobró otra vez, en dos formas nuevas.
 *Dos instrumentos que miden lo mismo y no coinciden: uno está roto, y el que da el
 número más chico es el sospechoso.*
 
+🔴 **Cómo se cazó ⑤, que es lo que vale más:** **no la cazó un censo — la cazó ir a
+escribir el mapa de reemplazos.** Al conjugar `contá` para el barrido apareció que
+con enclítico pierde la tilde, y de ahí que la regla del instrumento tuviera una
+excepción gramatical entera. *El número ya estaba reportado al founder: **32 y 36
+eran cifras equivocadas que ya habían salido de la casa**.* ⇒ **El barrido es el
+último momento barato para descubrir que el censo estaba corto** — y por eso la ley
+(`L-327` ④) es leer en voz alta la regla que el instrumento asume, **antes** de
+tocar nada.
+
 ### El resultado
 
-| Archivo | Cadenas con voseo |
-|---|---|
-| `apps/cliente/src/i18n/es.ts` | **32** ← territorio de `D-857` |
-| `apps/prestador/src/i18n/es.ts` | **36** ← **FUERA del territorio declarado de la ficha** |
-| `packages/ui/src/i18n/es.ts` | **0** ✅ *el paquete compartido ya habla tuteo* |
+| Archivo | Cadenas con voseo | Estado |
+|---|---|---|
+| `apps/cliente/src/i18n/es.ts` | **34** | ✅ **BARRIDAS a tuteo** — censo post-barrido **0**, typecheck verde. *Falta su gate en dispositivo* |
+| `apps/prestador/src/i18n/es.ts` | **37** | 🔒 **sin tocar** — `D-858`, dueño la sesión del prestador |
+| `packages/ui/src/i18n/es.ts` | **0** ✅ | *el paquete compartido ya habla tuteo* |
 
-🔴 **Las 36 del prestador NO se tocan y se declaran con dueño.** La ficha acota
+**Cómo se barrió, para que se pueda auditar:** mapa **explícito** de formas (jamás
+heurística), aplicado **solo al contenido entre comillas** —un comentario en voseo
+no es voz—, y **`vos` por FRASE COMPLETA** porque su tuteo depende de la sintaxis:
+*«casi como vos»* → **tú**, pero *«te llegó a vos»* → **ti**. *Un mapa
+palabra-a-palabra lo habría traducido mal en dos de los tres casos.*
+
+🔴 **Las 37 del prestador NO se tocan y se declaran con dueño.** La ficha acota
 `D-857` a `es.ts` del cliente; ensanchar el territorio de paso es exactamente lo que
 la ley de la sesión prohíbe (*un vocabulario cerrado no se amplía de paso*).
 **Necesitan ficha propia o una enmienda firmada de D-857 — no una decisión de esta
 pista.** *La regla 27 alcanza a las dos apps: lo que falta es el dueño, no la ley.*
 
 > **La ficha se enmienda con el número medido, no con el heredado.** Su cuerpo dice
-> «las 10 restantes»; el resto real es **32**. El instrumento vive en el scratchpad
+> «las 10 restantes»; el resto real era **34**, hoy barridas. El instrumento vive en el scratchpad
 > de la sesión y se deposita al ejecutar la marca, para que el próximo barrido no
 > vuelva a pagar las cuatro trampas.
 
@@ -240,7 +257,7 @@ pista.** *La regla 27 alcanza a las dos apps: lo que falta es el dueño, no la l
 | 4 | ③ **la elegida inconfundible** y ⑧ **la animación** | juicio de píxeles, en dispositivo |
 
 **Ya resueltos por el relevo 2 — no vuelven a la mesa:** el idioma (**firmado: es/en**) ·
-las 36 del prestador (**`D-858`**, dueño la sesión del prestador) · la lección del
+las 37 del prestador (**`D-858`**, dueño la sesión del prestador) · la lección del
 instrumento (**`L-327`**) · la marca ④ (**reasignada a Pista B**) · el doble §8
 (**curado: `§8bis`/`§8ter`, letra a v1.4**) · los assets (**kit pedido a Nuvei**).
 
