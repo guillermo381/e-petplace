@@ -55,7 +55,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, useRouter, useSegments } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ALTO_FILA_TABS, BarraTabs, CarritoFlotante, Icono, type BarraTabsItem } from '@epetplace/ui';
@@ -106,13 +106,28 @@ const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
  *
  *  **El aire sobre la barra se MIDE**: su alto cambia con el inset del aparato
  *  y con el largo de las etiquetas. */
-function FlotanteDelCarrito({ ruta, altoBarra }: { ruta: string; altoBarra: number }) {
+function FlotanteDelCarrito({ altoBarra }: { altoBarra: number }) {
   const { t } = useTraduccion();
   const router = useRouter();
   const items = useCarrito();
+  /* 🔴 S101-C · EL GUARD ESTABA ESCRITO Y ERA LETRA MUERTA — orden ⑥ del
+     founder, y la causa se midió antes de tocar nada.
+
+     Recibía `state.routes[state.index].name`, que es **el nombre del TAB**
+     (`despensa`, `explorar`, …). **Nunca vale `'checkout'`.** Su propio JSDoc
+     decía dónde tenía que callarse y la comparación miraba otra cosa.
+
+     > *Un guard que compara contra un valor que su fuente no puede producir no
+     > falla: pasa siempre. Y su comentario lo hace peor, porque el que lo lee
+     > cree que está cubierto.*
+
+     `useSegments()` sí devuelve la ruta ANIDADA — el checkout de despensa y el
+     de reserva quedan cubiertos por el mismo predicado. */
+  const segmentos = useSegments() as string[];
+  const enCheckout = segmentos.some((s) => s === 'carrito' || s === 'checkout');
   const unidades = items.reduce((n, i) => n + i.cantidad, 0);
   if (unidades <= 0) return null;
-  if (ruta === 'carrito' || ruta === 'checkout') return null;
+  if (enCheckout) return null;
   return (
     <CarritoFlotante
       cuenta={unidades}
@@ -323,7 +338,7 @@ export default function TabsLayout() {
               del cliente y la pieza es de `packages/ui`. Se toca acá porque el
               montaje ES la firma —el flotante deja de ser de una pantalla— y
               se declara en vez de hacerse callado. */}
-          <FlotanteDelCarrito ruta={state.routes[state.index].name} altoBarra={altoBarra} />
+          <FlotanteDelCarrito altoBarra={altoBarra} />
           <View
             onLayout={(e) => {
               const alto = e.nativeEvent.layout.height;

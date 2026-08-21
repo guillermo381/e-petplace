@@ -1481,6 +1481,12 @@ export const clienteEs = {
   //    voz copiada es una voz que un día alguien afina de un solo lado.*
   pago: {
     comoPagas: 'Cómo quieres pagar',
+    /* ③ ☠️ MURIÓ `medioElegido: 'Elegido'`. *Era una etiqueta contando lo
+       que la fila ya mostraba, y ocupaba el único lugar donde tenía que
+       estar la acción.* Hoy esa zona es CTA. */
+    medioCambiar: 'Cambiar',
+    /* ① El botón de pagar de la casa: UNA voz para las dos puertas. */
+    pagar: 'Pagar',
     sinMedios: 'Todavía no guardas una tarjeta.',
     elegiMedio: 'Elige con cuál quieres pagar.',
     // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.

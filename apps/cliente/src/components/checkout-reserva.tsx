@@ -39,11 +39,11 @@ import {
   Boton,
   Celda,
   Encabezado,
-  EsperaDeMarca,
+  EsperaDeTrabajo,
   EstadoVacio,
-  Hoja,
   Icono,
   Insignia,
+  PantallaConPie,
   Separador,
   Tarjeta,
   Texto,
@@ -52,9 +52,9 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
-import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
-import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
+import {
+  BotonPagar, SeccionMedioDePago, useMedioDePago,
+} from '@/components/seccion-medio-de-pago';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
@@ -121,34 +121,13 @@ export function CheckoutReserva({
     Math.max(0, Math.floor((new Date(expiraEn).getTime() - Date.now()) / 1000)),
   );
 
-  // ── EL MEDIO DE PAGO ────────────────────────────────────────────────────
-  const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
-  const [medioElegido, setMedioElegido] = useState<string | null>(null);
-  const [eligiendoMedio, setEligiendoMedio] = useState(false);
-
-  const leerMedios = useCallback(async () => {
-    const r = await listarTarjetasGuardadas();
-    if (!r.ok) return;
-    setMedios(r.data);
-    /* 🔴 Preselección **solo cuando hay UNA**: con una sola tarjeta preguntar
-       es fricción sin decisión. Con dos o más **no se elige por la familia** —
-       ése era el andamio que la Fase 5 vino a matar. */
-    setMedioElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
-  }, []);
-
-  useEffect(() => {
-    if (fase === 'resumen') void leerMedios();
-  }, [fase, leerMedios]);
-
-  /* 🔴 AGREGAR SIN PERDER LA RESERVA: el alta abre su WebView y al volver esta
-     pantalla relee sus medios. *El horario ya está apartado — salir a guardar
-     una tarjeta no puede costarlo.* Y el hold sigue corriendo a la vista. */
-  const agregarMedio = useCallback(async () => {
-    setEligiendoMedio(false);
-    const r = await abrirAltaDeTarjeta();
-    if (!r.ok) mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
-    await leerMedios();
-  }, [mostrar, t, leerMedios]);
+  /* ☠️ ACÁ VIVÍA EL ESTADO DE LOS MEDIOS, **copiado del checkout de la
+     despensa** — mismo `useState`, misma regla de preselección, misma función
+     de agregar. Hoy sale de `useMedioDePago`, la MISMA pieza que monta la
+     despensa (orden del founder ⑤).
+     *Dos copias no divergen el día que se escriben: divergen el día que
+     alguien afina una — y la que no se afina no da error, se queda vieja.* */
+  const medio = useMedioDePago(fase === 'resumen');
 
   // El contador del hold — voz honesta; al llegar a 0 el horario se
   // liberó (el server lo garantiza perezoso; esto es la verdad visible).
@@ -195,7 +174,7 @@ export function CheckoutReserva({
   const pagar = useCallback(async () => {
     if (trabajando) return;
     setTrabajando(true);
-    const cobro = await cobrar({ tipo: 'cita', id: citaId }, medioElegido);
+    const cobro = await cobrar({ tipo: 'cita', id: citaId }, medio.elegido);
     setTrabajando(false);
 
     if (!cobro.ok) {
@@ -205,7 +184,7 @@ export function CheckoutReserva({
       return;
     }
     setFase('confirmando');
-  }, [citaId, medioElegido, mostrar, t, trabajando]);
+  }, [citaId, medio.elegido, mostrar, t, trabajando]);
 
   const mm = String(Math.floor(restanteSeg / 60)).padStart(2, '0');
   const ss = String(restanteSeg % 60).padStart(2, '0');
@@ -214,9 +193,10 @@ export function CheckoutReserva({
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
-          <EsperaDeMarca />
           <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
           <Texto variante="cuerpo">{t('pago.esperaCuerpoCita')}</Texto>
+          {/* ⑦ La rampa que trabaja — la MISMA que la despensa. */}
+          <EsperaDeTrabajo />
           {/* 🔴 El tope habla y **NO declara desenlace**: la reserva sigue en
               pie y el barrido mismo-día la resuelve. *Un tope que se dibuja
               como «rechazado» hace que la familia pague dos veces.* */}
@@ -297,7 +277,22 @@ export function CheckoutReserva({
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('checkout.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
+      {/* ① EL PIE FIJO — **el mismo que la despensa**. Antes el botón de pagar
+          vivía suelto en el scroll y era chico; *no hay una razón de producto
+          por la que pagar un paseo tenga menos presencia que pagar comida.*
+          `PantallaConPie` además RESERVA el alto del pie midiéndolo, así que la
+          sección de pago deja de quedar debajo del botón. */}
+      <PantallaConPie
+        contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}
+        pie={
+          <BotonPagar
+            medio={medio}
+            trabajando={trabajando}
+            deshabilitadoPorLaPantalla={!puedePagar}
+            onPagar={() => void pagar()}
+          />
+        }
+      >
         {/* el ítem (forma de carrito: hoy UNO) */}
         <View style={{ gap: spacing[2] }}>
           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
@@ -330,83 +325,16 @@ export function CheckoutReserva({
         {/* la sección propia del servicio (dirección del hogar / el dónde) */}
         {seccionExtra}
 
-        {/* ═══ CÓMO QUIERES PAGAR — la MISMA sección que la despensa ═══════
-            🔴 Se llama igual, se ve igual y se comporta igual **a propósito**:
-            es la mitad visible de «una casa, un motor, dos puertas». */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('pago.comoPagas')}</Texto>
-          {medios.length === 0 ? (
-            <>
-              <Texto variante="apoyo">{t('pago.sinMedios')}</Texto>
-              <Boton
-                variante="secundario"
-                etiqueta={t('cuenta.medioAgregar')}
-                onPress={() => void agregarMedio()}
-              />
-            </>
-          ) : (
-            <>
-              <FilaMedioDePago
-                tarjeta={medios.find((m) => m.id === medioElegido) ?? medios[0]}
-                elegida={medioElegido !== null}
-                onPress={() => setEligiendoMedio(true)}
-              />
-              {/* 🔴 Con DOS o más y ninguna elegida, la pantalla lo DICE en vez
-                  de elegir sola. */}
-              {medioElegido === null ? (
-                <Texto variante="apoyo">{t('pago.elegiMedio')}</Texto>
-              ) : null}
-            </>
-          )}
-        </View>
+        {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta la despensa**.
+            Ya no es «igual a»: es LA MISMA. */}
+        <SeccionMedioDePago medio={medio} />
 
-        {/* ☠️ ACÁ VIVÍA «Fase de pruebas: el pago es simulado — no se cobra
-            nada real.» **Con el enchufe de S101-C el cobro es real**, así que
-            la banda pasó de honesta a falsa de un día para el otro.
-            *Una advertencia que dejó de ser cierta no es inofensiva: le enseña
-            a la familia a no creerle a las advertencias.* (Ley 37, y el mismo
-            entierro que la banda de la despensa.) */}
-
-        <Boton
-          variante="primario"
-          etiqueta={t('checkout.pagar')}
-          deshabilitado={!puedePagar || medioElegido === null}
-          cargando={trabajando}
-          onPress={() => void pagar()}
-        />
-
-        {/* ☠️ EL SIMULADOR `__DEV__` MURIÓ ACÁ (Ley 37). Sus dos caminos
-            —rechazo y timeout— **fabricaban desenlaces que el motor nunca
-            dijo**. Hoy el rechazo real se prueba con la tarjeta de prueba que
-            el proveedor rechaza, y el «tarda» con el tope de la espera.
-            *Un simulador que sobrevive a su motor real no es una herramienta:
-            es una segunda verdad.* */}
-      </ScrollView>
-
-      {/* LA HOJA DE ELECCIÓN — idéntica a la de la despensa. */}
-      <Hoja
-        visible={eligiendoMedio}
-        onCerrar={() => setEligiendoMedio(false)}
-        titulo={t('pago.comoPagas')}
-      >
-        <View style={{ gap: spacing[2] }}>
-          {medios.map((m) => (
-            <FilaMedioDePago
-              key={m.id}
-              tarjeta={m}
-              elegida={m.id === medioElegido}
-              onPress={() => { setMedioElegido(m.id); setEligiendoMedio(false); }}
-            />
-          ))}
-          {/* 🔴 AGREGAR DESDE ACÁ, sin perder la reserva en curso. */}
-          <Boton
-            variante="secundario"
-            etiqueta={t('cuenta.medioAgregar')}
-            bloque
-            onPress={() => void agregarMedio()}
-          />
-        </View>
-      </Hoja>
+        {/* ☠️ ACÁ VIVÍA «Fase de pruebas: el pago es simulado» y el simulador
+            `__DEV__` con sus dos pantallas (Ley 37). La banda pasó de honesta a
+            falsa el día del enchufe real; el simulador **fabricaba desenlaces
+            que el motor nunca dijo**. *Un simulador que sobrevive a su motor
+            real no es una herramienta: es una segunda verdad.* */}
+      </PantallaConPie>
 
       {fueraDeScroll}
     </SafeAreaView>

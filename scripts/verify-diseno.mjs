@@ -1910,6 +1910,22 @@ const FIXTURES = {
      de cualquier `bottom: 0`), y una del baseline congelado. */
   /* R54 · discrimina: el fragmento y el View con box-none NO deben salir
      rojos; el View desnudo sí. */
+  /* R57 · discrimina en LAS DOS DIRECCIONES, que es lo que hace que sirva:
+     ① un checkout que NO monta la pieza única sale rojo (se fue de la pieza)
+     ② una pantalla cualquiera que arma su PROPIA fila con `zonaFin` sale roja
+        — *el modo de falla real no es borrar la pieza: es dejarla y escribir
+        una versión propia al lado*
+     ③ el DUEÑO del módulo usa `zonaFin` y **no** sale rojo: ahí es su casa.
+
+     ⚠️ El fixture nombra los dos checkouts REALES a propósito: si mañana se
+     renombra un archivo, esta regla se pone roja en su propia auto-prueba en
+     vez de quedarse verde midiendo un corpus vacío. */
+  R57: [
+    { path: 'apps/cliente/src/app/(tabs)/despensa/checkout.tsx', src: '<SeccionMedioDePago medio={medio} />' },
+    { path: 'apps/cliente/src/components/checkout-reserva.tsx', src: '<SeccionMedioDePago medio={medio} />\n<BotonPagar medio={medio} trabajando={x} onPagar={f} />' },
+    { path: 'apps/cliente/src/app/(tabs)/otra/propia.tsx', src: '<FilaMedioDePago tarjeta={m} zonaFin="cambiar" onPress={f} />' },
+    { path: 'apps/cliente/src/components/seccion-medio-de-pago.tsx', src: '<FilaMedioDePago tarjeta={m} zonaFin="camino" onPress={f} />' },
+  ],
   /* R56 · discrimina: el `acento` NUEVO del cliente sale rojo; el del
      baseline no; y el del PRESTADOR tampoco — ahí el slot es teal. */
   R56: [
@@ -3710,6 +3726,71 @@ function r45(archivos) {
    no si el `paddingBottom` alcanza. *Su verde dice «acá el pie lo pone la
    pieza», jamás «acá nada tapa a nada».* La segunda mitad no se mecaniza
    honestamente — se cura por construcción, que es de lo que trata la pieza. */
+
+/* 🔴 R57 · LA SECCIÓN DE PAGO ES **UNA**, Y SE MIDE (S101-C, orden ⑤ del
+   founder: *«se verifica contra el objeto que las dos pantallas rinden lo
+   mismo — no se replica a ojo»*).
+
+   ── EL DEFECTO QUE CIERRA, medido antes de existir ───────────────────
+   La despensa y el checkout de los cuatro oficios tenían **la misma sección
+   escrita dos veces**: mismo `useState` de medios, misma regla de
+   preselección, misma `Hoja`, mismo botón. Y **ya habían empezado a
+   separarse**: el botón de una era `bloque` en un pie fijo y el de la otra
+   era chico y vivía suelto en el scroll.
+
+   > *Dos copias no divergen el día que se escriben: divergen el día que
+   > alguien afina una. Y la que NO se afina no da error — se queda vieja.*
+
+   ── QUÉ MIDE, y por qué así ──────────────────────────────────────────
+   ① las dos pantallas de checkout **montan `SeccionMedioDePago` y
+      `BotonPagar`** (si una deja de montarlos, se fue de la pieza única);
+   ② **nadie más que el módulo compartido monta `FilaMedioDePago` con
+      `zonaFin`** ni abre su propia `Hoja` de medios — *el modo de falla real
+      no es borrar la pieza: es dejarla y escribir una versión propia al
+      lado.*
+
+   ⚠️ **SU LÍMITE, declarado:** mide QUE MONTEN LA MISMA PIEZA, **jamás que
+   se vean igual en pantalla**. Dos pantallas pueden montar el mismo
+   componente y envolverlo distinto. *Su verde dice «hay una sola fuente»,
+   no «se ven idénticas» — eso lo dice el ojo del founder en el gate.* */
+const CHECKOUTS_DE_PAGO = [
+  'apps/cliente/src/app/(tabs)/despensa/checkout.tsx',
+  'apps/cliente/src/components/checkout-reserva.tsx',
+]
+const DUENO_SECCION_PAGO = 'apps/cliente/src/components/seccion-medio-de-pago.tsx'
+
+function r57(archivos) {
+  const fallos = []
+  const porPath = new Map()
+  for (const { path, src } of archivos) if (!porPath.has(path)) porPath.set(path, src)
+
+  // ① los dos checkouts montan la pieza única
+  for (const ruta of CHECKOUTS_DE_PAGO) {
+    const src = porPath.get(ruta)
+    if (src === undefined) { fallos.push(`${ruta}: no está en el corpus`); continue }
+    const limpio = sinComentarios(src)
+    if (!/<SeccionMedioDePago\b/.test(limpio)) fallos.push(`${ruta}: no monta SeccionMedioDePago`)
+    if (!/<BotonPagar\b/.test(limpio)) fallos.push(`${ruta}: no monta BotonPagar`)
+  }
+
+  // ② nadie escribe una versión propia al lado
+  for (const [path, src] of porPath) {
+    if (path === DUENO_SECCION_PAGO) continue
+    const limpio = sinComentarios(src)
+    if (/<FilaMedioDePago[^>]*zonaFin=/.test(limpio)) {
+      fallos.push(`${path}: arma su propia fila de medio (zonaFin fuera del dueño)`)
+    }
+  }
+
+  return {
+    fallos,
+    info: `${CHECKOUTS_DE_PAGO.length} checkout(s) de pago · los ${CHECKOUTS_DE_PAGO.length} montan `
+      + `SeccionMedioDePago + BotonPagar · 0 versión/es propia(s) fuera de `
+      + `\`seccion-medio-de-pago\` · baseline 0 · mide QUE MONTEN LA MISMA PIEZA, `
+      + `jamás que se vean igual (eso lo dice el ojo del founder)`,
+  }
+}
+
 /* 🔴 R56 · EL ORO NO ES TINTA EN EL CLIENTE (S100d·bis, relevo de B · H-207).
 
    `Boton variante="acento"` es **letra `accent.cta` sin relleno**. En el
@@ -4070,7 +4151,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4297,6 +4378,7 @@ if (decorativas > 0) {
 // ── LA CORRIDA REAL ──
 let fallosTotal = 0;
 const corridas = [
+  ['R57 (la seccion de pago es UNA, medida)', r57(apps)],
   ['R1 (7bis/SelectorOpcion)', r1(apps)],
   ['R2 (Ley 1 hex crudos, apps)', r2(apps)],
   ['R3 (A6+§7/Tarjeta: contrato + censo)', r3(apps)],

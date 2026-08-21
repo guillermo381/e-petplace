@@ -54,6 +54,7 @@ import {
   Campo,
   CeldaNavegacion,
   Encabezado,
+  EsperaDeTrabajo,
   EstadoVacio,
   EvitaTeclado,
   GotaUbicacion,
@@ -99,8 +100,9 @@ import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
 import { cobrar } from '@/lib/pagos/cobro';
-import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
-import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
+import {
+  BotonPagar, SeccionMedioDePago, useMedioDePago,
+} from '@/components/seccion-medio-de-pago';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
 
@@ -179,35 +181,12 @@ export default function DespensaCheckout() {
      `confirmando`: pasarle `null` en las otras fases es lo que impide que el
      checkout sondee por existir. *La lección del andamio del alta otra vez:
      las pantallas no hacen cosas por estar abiertas.* */
-  /* ═══ FASE 5 · EL MEDIO DE PAGO ELEGIDO ═══════════════════════════════
-     🔴 Se lee al llegar al RESUMEN, no al montar el checkout: *antes de que
-     haya un total que pagar, con qué se paga no es una pregunta.* */
-  const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
-  const [medioElegido, setMedioElegido] = useState<string | null>(null);
-  const [eligiendoMedio, setEligiendoMedio] = useState(false);
-
-  const leerMedios = useCallback(async () => {
-    const r = await listarTarjetasGuardadas();
-    if (!r.ok) return;
-    setMedios(r.data);
-    /* 🔴 Preselección **solo cuando hay UNA**: con una sola tarjeta preguntar
-       es fricción sin decisión. Con dos o más **no se elige por la familia** —
-       ése era el andamio. */
-    setMedioElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
-  }, []);
-
-  useEffect(() => {
-    if (fase === 'resumen') void leerMedios();
-  }, [fase, leerMedios]);
-
-  /* 🔴 AGREGAR SIN PERDER LA COMPRA: el alta abre su WebView y al volver esta
-     pantalla relee sus medios. *La compra ya vive en el motor — salir a
-     guardar una tarjeta no puede costarla.* */
-  const agregarMedio = useCallback(async () => {
-    setEligiendoMedio(false);
-    const r = await abrirAltaDeTarjeta();
-    if (!r.ok) mostrar({ texto: t('cuenta.altaNoAbrio'), variante: 'error' });
-  }, [mostrar, t]);
+  /* ☠️ EL ESTADO DE LOS MEDIOS SALE DE ACÁ (orden del founder ⑤): vivía
+     copiado entre esta pantalla y el checkout de reserva. Hoy lo tiene
+     `useMedioDePago`, una sola vez.
+     🔴 Se activa en el RESUMEN y no antes: *mientras no haya un total que
+     pagar, «con qué pagás» no es una pregunta.* */
+  const medio = useMedioDePago(fase === 'resumen');
 
   const espera = useEsperaDeConfirmacion(
     fase === 'confirmando' && compraId ? { tipo: 'compra', id: compraId } : null,
@@ -567,7 +546,6 @@ export default function DespensaCheckout() {
        de sus tarjetas se cobra es exactamente lo que una pantalla de medios de
        pago existe para no hacer.** Ahora se cobra **la que ella eligió**, y si
        no eligió ninguna la pantalla se lo pide antes de tocar nada. */
-    const medio = medioElegido;
 
     /* ═══ 🔴 LAS COMPUERTAS NO SE LLAMAN DESDE ACÁ, Y NO ES POR UN GRANT ═══
        Medido: `verificar_compuertas_pre_cobro` **no es ejecutable por
@@ -589,7 +567,7 @@ export default function DespensaCheckout() {
     // ③④ El débito y la espera declarada — **por el cobro de la casa**.
     //    ☠️ El andamio `cobrarConTarjetaGuardada` murió acá: su lápida decía
     //    «muere en la Fase 5», y la Fase 5 cerró.
-    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio);
+    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.elegido);
     setTrabajando(false);
     if (!cobro.ok) {
       mostrar({ texto: t(cobro.voz), variante: 'error' });
@@ -729,11 +707,10 @@ export default function DespensaCheckout() {
          Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
          label sin chevron. */
       <>
-        <Boton
-          etiqueta={t('despensa.pagarSimulado')}
-          bloque
-          cargando={trabajando}
-          onPress={() => void pagar()}
+        <BotonPagar
+          medio={medio}
+          trabajando={trabajando}
+          onPagar={() => void pagar()}
         />
         <Boton
           variante="ghost"
@@ -1234,39 +1211,13 @@ export default function DespensaCheckout() {
               )}
             </View>
 
-            {/* ═══ FASE 5 · CÓMO QUERÉS PAGAR ═══════════════════════════════
-                🔴 **La sección se llama CÓMO QUERÉS PAGAR, no «tu tarjeta»** —
-                y no es copy: es arquitectura. **DeUna entra como segundo riel
-                sobre el mismo contrato de compra.** *Si esta sección se llama
-                «tus tarjetas», el día que entre DeUna hay que rehacerla; si se
-                llama «cómo querés pagar», DeUna es una fila más.* */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Separador />
-              <Texto variante="seccion">{t('pago.comoPagas')}</Texto>
-              {medios.length === 0 ? (
-                <>
-                  <Texto variante="apoyo">{t('pago.sinMedios')}</Texto>
-                  <Boton
-                    variante="secundario"
-                    etiqueta={t('cuenta.medioAgregar')}
-                    onPress={() => void agregarMedio()}
-                  />
-                </>
-              ) : (
-                <>
-                  <FilaMedioDePago
-                    tarjeta={medios.find((m) => m.id === medioElegido) ?? medios[0]}
-                    elegida={medioElegido !== null}
-                    onPress={() => setEligiendoMedio(true)}
-                  />
-                  {/* 🔴 Con DOS o más y ninguna elegida, la pantalla lo DICE en
-                      vez de elegir sola. *Elegir por la familia es el andamio
-                      que esta fase vino a matar.* */}
-                  {medioElegido === null ? (
-                    <Texto variante="apoyo">{t('pago.elegiMedio')}</Texto>
-                  ) : null}
-                </>
-              )}
+            {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta el
+                checkout de los cuatro oficios** (orden del founder ⑤).
+                ☠️ Acá vivía su copia: mismo texto, misma hoja, misma regla de
+                preselección. *Ya no es «igual a»: es LA MISMA, y por eso no hay
+                de dónde sacar una versión propia.* */}
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <SeccionMedioDePago medio={medio} />
             </View>
 
             {/* ☠️ S101-B · LA BANDA DE «PAGO SIMULADO» MUERE (Ley 37).
@@ -1284,6 +1235,11 @@ export default function DespensaCheckout() {
           <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
             <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
             <Texto variante="cuerpo">{t('pago.esperaCuerpo')}</Texto>
+            {/* ⑦ LA RAMPA QUE TRABAJA — **la misma que el checkout de reserva**.
+                Antes acá no había NADA en movimiento y en el paseo respiraba una
+                huella: *dos pantallas que dicen la misma frase y se mueven
+                distinto son dos productos.* */}
+            <EsperaDeTrabajo />
             {/* El tope habla y **no declara desenlace**: la compra sigue viva
                 y el barrido la resuelve el mismo día. */}
             {espera.fase === 'sigue_abierta' ? (
@@ -1382,31 +1338,9 @@ export default function DespensaCheckout() {
       </PantallaConPie>
       </EvitaTeclado>
 
-      {/* ═══ FASE 5 · ELEGIR EL MEDIO DE PAGO ═══════════════════════════ */}
-      <Hoja
-        visible={eligiendoMedio}
-        onCerrar={() => setEligiendoMedio(false)}
-        titulo={t('pago.comoPagas')}
-      >
-        <View style={{ gap: spacing[2] }}>
-          {medios.map((m) => (
-            <FilaMedioDePago
-              key={m.id}
-              tarjeta={m}
-              elegida={m.id === medioElegido}
-              onPress={() => { setMedioElegido(m.id); setEligiendoMedio(false); }}
-            />
-          ))}
-          {/* 🔴 AGREGAR DESDE ACÁ, sin perder la compra en curso: la compra ya
-              existe en el motor y esta pantalla vuelve a su fase. */}
-          <Boton
-            variante="secundario"
-            etiqueta={t('cuenta.medioAgregar')}
-            bloque
-            onPress={() => void agregarMedio()}
-          />
-        </View>
-      </Hoja>
+      {/* ☠️ LA HOJA DE ELECCIÓN SALIÓ DE ACÁ: vive dentro de
+          `SeccionMedioDePago`, junto a la fila que la abre. *Una hoja que vive
+          a 200 líneas del control que la dispara es la mitad de una pieza.* */}
 
       {/* LA HOJA DE DIRECCIÓN — la captura es UNA en toda la casa (el
           formulario compartido de S79); agregar sin salir del flujo (§7). */}

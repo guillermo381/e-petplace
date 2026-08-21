@@ -260,6 +260,7 @@ export { ClipSesion, type ClipSesionProps } from './components/ClipSesion'
 // prohibida.
 export { VozComision, type VozComisionProps } from './components/VozComision'
 export { EsperaDeMarca } from './brand/EsperaDeMarca'
+export { EsperaDeTrabajo } from './brand/EsperaDeTrabajo'
 // MarcaEleccion — S82 r37: LA PATA que pisa lo elegido. Sube a primitiva
 // porque ya marca en TRES controles y una gramática copiada en tres
 // archivos no es gramática: son tres coincidencias esperando divergir.

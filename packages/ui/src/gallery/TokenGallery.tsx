@@ -91,6 +91,7 @@ import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
+import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, EvidenciaFotoThumbnail, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
@@ -5128,6 +5129,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — la huella a tinta secundaria, el trazo se conserva; el destello NO destella (§2.8)">
                 <EjemploSetBPrima />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* S101-C · LA ESPERA DEL PAGO — la rampa que trabaja. */}
+        <Seccion titulo="EsperaDeTrabajo S101-C — la espera del pago en las DOS puertas (despensa y servicios). El segmento NO CRECE: VIAJA — una barra de progreso afirma cuánto falta, y el tiempo lo tiene el proveedor. Memorial y reduce-motion: quieta y centrada.">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — la rampa de la firma cruzando (~1,6 s, easeInOut de la casa)">
+                <EsperaDeTrabajo />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="oscuro — la rampa vívida sobre la pista hundida">
+                <EsperaDeTrabajo />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — QUIETA y en tinta: nada respira en memorial (§2.8)">
+                <EsperaDeTrabajo />
               </PanelTema>
             </ThemeProvider>
           </View>

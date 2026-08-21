@@ -1256,6 +1256,8 @@ export const clienteEn = {
   // was never a pantry sentence. Shared by the pantry and by services.
   pago: {
     comoPagas: 'How do you want to pay',
+    medioCambiar: 'Change',
+    pagar: 'Pay',
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',
     esperaTitulo: "We're confirming your payment",

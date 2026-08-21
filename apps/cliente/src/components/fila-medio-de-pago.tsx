@@ -24,8 +24,9 @@
  */
 
 import { View } from 'react-native';
-import { Celda, Texto, spacing } from '@epetplace/ui';
+import { Celda, Chevron, Texto, spacing } from '@epetplace/ui';
 import type { TarjetaGuardada } from '@epetplace/api';
+import { LogoFranquicia } from '@/components/logo-franquicia';
 import { useTraduccion } from '@/i18n';
 
 /** Las marcas que el proveedor devuelve, en la voz que la familia reconoce. */
@@ -56,14 +57,31 @@ export function vencida(t: TarjetaGuardada, ahora = new Date()): boolean | null 
 
 export type FilaMedioDePagoProps = {
   tarjeta: TarjetaGuardada;
-  /** Marca de selección. Solo la usa el checkout; la lista de Cuenta no elige. */
-  elegida?: boolean;
+  /**
+   * 🔴 S101-C · LA ZONA DERECHA DICE QUÉ HACE LA FILA, y por eso es una unión
+   *    y no un boolean:
+   *
+   *    · `cambiar` — la fila de la ELEGIDA en el checkout: **«Cambiar ›»**.
+   *      ☠️ Reemplaza a la etiqueta «Elegido» (orden del founder ③).
+   *      *«Elegido» describía un estado que la fila ya mostraba sola —era una
+   *      etiqueta contando lo obvio— y **escondía la única acción que ahí
+   *      importa**: cambiarla. Un CTA invisible es un camino que no existe.*
+   *
+   *    · `camino` — cada medio DENTRO de la hoja: un **«›»**. *La fila tiene
+   *      forma de camino porque lo es, y el día que entre DeUna es una fila
+   *      más sin tocar nada.*
+   *
+   *    · `ninguna` — la lista de Cuenta, que trae su propia acción por `fin`.
+   */
+  zonaFin?: 'cambiar' | 'camino' | 'ninguna';
   onPress?: () => void;
   /** La acción de fila (borrar). La lista la trae; el checkout no. */
   fin?: React.ReactNode;
 };
 
-export function FilaMedioDePago({ tarjeta, elegida, onPress, fin }: FilaMedioDePagoProps) {
+export function FilaMedioDePago({
+  tarjeta, zonaFin = 'ninguna', onPress, fin,
+}: FilaMedioDePagoProps) {
   const { t } = useTraduccion();
   const marca = nombreDeMarca(tarjeta.marca);
   const cuatro = tarjeta.ultimos4 ?? '';
@@ -91,7 +109,19 @@ export function FilaMedioDePago({ tarjeta, elegida, onPress, fin }: FilaMedioDeP
      *No hay una voz honesta para «no lo sabemos» que le sirva de algo a la
      familia: solo la confundiría sobre una tarjeta que funciona bien.* */
 
-  const zonaFin = fin ?? (elegida ? <Texto variante="dato">{t('cuenta.medioElegido')}</Texto> : undefined);
+  /* 🔴 El `fin` explícito del consumidor GANA — la lista de Cuenta trae su
+     botón de borrar y no quiere ni «Cambiar» ni chevron. */
+  const derecha = fin ?? (
+    zonaFin === 'cambiar' ? (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+        <Texto variante="dato">{t('pago.medioCambiar')}</Texto>
+        {/* E14: LLEVA (abre la hoja que lo resuelve) ⇒ «›», jamás «⌄». */}
+        <Chevron direccion="derecha" />
+      </View>
+    ) : zonaFin === 'camino' ? (
+      <Chevron direccion="derecha" />
+    ) : undefined
+  );
 
   /* 🔴 `Celda` exige `interactiva` + rol cuando hay `onPress` — su contrato es
      una unión discriminada a propósito, para que ninguna fila sea tocable sin
@@ -103,13 +133,15 @@ export function FilaMedioDePago({ tarjeta, elegida, onPress, fin }: FilaMedioDeP
       interactiva
       accessibilityRole="button"
       onPress={onPress}
-      fin={zonaFin}
+      fin={derecha}
+      inicio={<LogoFranquicia marca={tarjeta.marca} />}
     />
   ) : (
     <Celda
       titulo={titulo}
       subtitulo={partes.length ? partes.join(' · ') : undefined}
-      fin={zonaFin}
+      fin={derecha}
+      inicio={<LogoFranquicia marca={tarjeta.marca} />}
     />
   );
 }
