@@ -43,7 +43,6 @@ import {
 } from '@epetplace/ui';
 import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
 import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
-import { LogoFranquicia } from '@/components/logo-franquicia';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -162,7 +161,11 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
               interactiva
               accessibilityRole="button"
               onPress={medio.abrirEleccion}
-              inicio={<LogoFranquicia marca={null} />}
+              /* 🔴 SIN recuadro de franquicia: **la invitación no es una
+                 tarjeta y no se viste de una.** *Un recuadro de marca vacío al
+                 lado de «Elige cómo quieres pagar» insinúa que ya hay un medio
+                 puesto — el mismo defecto que esta rama vino a curar, un paso
+                 más chico.* */
               fin={<Chevron direccion="derecha" />}
             />
           )}
