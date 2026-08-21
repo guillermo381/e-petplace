@@ -97,6 +97,20 @@ END $rev$;
 -- ╔═══════════════════════════════════════════════════════════════════════════╗
 -- ║ ② LA MIGRACIÓN                                                            ║
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
+--
+-- 📌 CÓMO SE PARTE ESTE ARCHIVO SEGÚN LA SECUENCIA QUE FIRME LA MESA
+--    (detalle y voto en `…-s102b-TANDA-DE-APLICACION.md` §⓪):
+--
+--    SECUENCIA ① (2 actos, con ventana roja) → **todo esto junto**, y el deploy
+--      de `pagos-cobro` inmediatamente después.
+--
+--    SECUENCIA ② (3 actos, SIN ventana roja) → **se corta en dos migraciones**:
+--      · MIGRACIÓN A = guard + bloques ①, ② y ③   (columna, marca, backfill)
+--      · ── deploy de `pagos-cobro` cableado ──
+--      · MIGRACIÓN B = bloques ③bis y ④ + cinturón (CHECK validado y policy)
+--      **El corte está marcado abajo con `═══ FIN MIGRACIÓN A ═══`.**
+--      *En ② el CHECK valida además las filas nacidas entre medio, así que
+--       prueba MÁS, no menos.*
 
 BEGIN;
 
@@ -174,6 +188,12 @@ UPDATE public.pagos_intentos pi
    AND pi.pedido_id IS NULL
    AND pi.pagador_user_id IS NULL
    AND m.user_id IS NOT NULL;
+
+-- ═══════════════ FIN MIGRACIÓN A (secuencia ②) ═══════════════════════════
+-- Si se aplica la secuencia ②: acá va `COMMIT;`, y lo de abajo espera al
+-- deploy de `pagos-cobro`. Si se aplica la ①, seguir de largo.
+-- ═════════════════════════════════════════════════════════════════════════
+
 
 -- ── ③bis 🔴 EL CINTURÓN DE LA TANDA, HECHO MECANISMO ───────────────────────
 -- Orden de mesa (21-ago): *«migración + cableado de pagos-cobro juntos, en ese
