@@ -1016,6 +1016,48 @@ cumple otra cosa es peor que un rojo.*
 
 ---
 
+## §7quater · EL TECHO NO ALCANZA A LOS COMPROBANTES
+*(enmienda S101-B · 20-ago-2026 · firma de mesa)*
+
+**§8 difiere por techo lo que satura.** Esa regla es buena y **no se toca** para
+avisos. **No aplica a un comprobante.**
+
+### El caso que la parió, con su literal
+
+**Medido en el gate del founder:** el pago cerró, la pantalla pasó sola, **y el
+correo no llegó**. La fila lo dijo:
+
+> `estado: diferida` · `gate_que_corto: "diferida_techo"` · `canal_elegido: email`
+
+Categoría `operacion`, **techo 20 en 24 h**, el destinatario en **20 de 20** — las
+compras de prueba del día lo agotaron. **El techo hizo exactamente su trabajo.**
+*Lo que estaba mal es que el comprobante estuviera sujeto a él.*
+
+### Los dos porqués
+
+**① Un comprobante es RESPALDO de una transacción, no un aviso.** El techo existe
+porque *avisar todo enseña a ignorar los avisos* — y esa razón no aplica acá:
+**nadie compra diez veces en un día por error, y si lo hace, cada compra necesita
+su comprobante.**
+
+**② Es requisito de certificación del proveedor** (literal de Erick, §7bis).
+> **Un requisito no se somete a un techo de frecuencia, por la misma razón por la
+> que no se somete al selector de canal.**
+
+### La regla
+
+> `cat_notificacion_tipos.ignora_techo` exime a un tipo del techo de su
+> categoría. **Solo para lo que es RESPALDO de un hecho** — jamás para avisos.
+> Es **DATO del catálogo**, como `canal_forzado`: se ve en una tabla, no leyendo
+> una función.
+
+🔴 **CINTURÓN EXIGIBLE, y no es decorativo:** hoy **exactamente un** tipo lo
+tiene. **Más de uno = revisión de mesa obligatoria.** *Si la mitad del catálogo
+ignora el techo, el techo dejó de existir — y nadie se entera hasta que una
+familia recibe veinte correos.*
+
+---
+
 ## §7ter · ⚖️ LA LEY DEL MOTOR SIN PUERTA
 *(depositada S101-B · tres casos medidos el mismo día)*
 
