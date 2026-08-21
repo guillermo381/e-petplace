@@ -83,6 +83,41 @@ resumieron.**
 > vuelve mucho más barato de escribir. *Se dice acá porque la secuencia natural
 > (plazo → qué hacer) es la cara.*
 
+### 📌 PRE-CARGA DE LA PREGUNTA 4 — LA REGLA 7.8 YA EMPUJA EN UN SENTIDO
+
+**`MODELO_FINANCIERO` §7.8 «Cómo se borra algo», literal:**
+
+> **No se borra.** Eventos, liquidaciones, cuentas comerciales, roles: nunca
+> DELETE en producción. Usar estados.
+
+⇒ **Para el lado financiero la casa ya decidió, y decidió que NO se borra.** Eso
+**pre-carga la pregunta 4 hacia ANONIMIZAR**: si la fila del pago no puede
+desaparecer, la única forma de honrar un derecho de supresión es **quitarle el
+dato personal y conservar el respaldo**.
+
+> ### ⚠️ PERO LA 7.8 NO ALCANZA SOLA, Y HAY QUE DECIR POR QUÉ — medido contra el literal
+>
+> **① Su alcance NO nombra estas tablas.** Dice *«eventos, liquidaciones,
+> cuentas comerciales, roles»*. **`pagos_intentos`, `pagos_eventos` y
+> `webhook_events` no están en esa lista.** *Extender una regla por parecido es
+> exactamente cómo `cuenta_comercial_id` entró a una lista de veredictos por
+> vecindad y rompió ocho policies (S91).* **Si la 7.8 va a cubrirlas, se
+> ENSANCHA con firma; no se asume.**
+>
+> **② La 7.8 dice «usar estados», NO dice «anonimizar».** *Son dos cosas
+> distintas: un estado marca la fila como inactiva y **el `holder_name` sigue
+> ahí**.* **La anonimización es una operación que la 7.8 no describe** y que
+> esta letra tendría que definir: qué campos se vacían, con qué se reemplazan, y
+> **cómo se prueba que se hizo**.
+>
+> 🔴 **Y por eso se anota acá:** el insumo de D-405 (`docs/INSUMO_D405_PRIVACIDAD.md`,
+> fila 1) resume la 7.8 como *«la plata no se borra: se anonimiza la referencia
+> personal»*. **La segunda mitad de esa frase NO está en el literal de §7.8.**
+> *El insumo se depositó VERBATIM por orden de mesa y no se edita; la
+> divergencia se declara acá, que es donde se va a construir.* **Y su propia
+> regla de precedencia lo resuelve: «si este insumo contradice al repo, gana la
+> fuente».**
+
 ---
 
 ## §3 · LA FORMA QUE EL CAPÍTULO DEBERÍA TENER — esto sí es propuesta de pista
