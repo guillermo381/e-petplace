@@ -1,5 +1,22 @@
 # S102-B · FIRMA #2 — LOS `?? 14` DEL ADMIN MUEREN
 
+> ## 🔴 ESTE ARCHIVO ES UN RELEVAMIENTO, **NO ES CÓDIGO COMMITEADO**
+>
+> **Orden de mesa (relevo 3, punto 7):** *«Patch del admin: SIN commitear hasta
+> tanda propia con compilación + verificación runtime.»*
+>
+> **Estado real, para que la distinción no se pierda:**
+>
+> | qué | dónde | estado |
+> |---|---|---|
+> | **el CÓDIGO del patch** | `e-petplace-admin` | ❌ **no existe en ningún lado** — ese repo **no se tocó** (limpio, en `main`, sin cambios desde el 10-may) |
+> | **este DOCUMENTO** | `docs/relevamientos/` de `pista/s102-b` | ✅ commiteado, como los demás relevamientos de S102 |
+>
+> *Se commitea el documento porque es una MEDICIÓN —los nueve literales, el
+> camino de auth verificado, el argumento del `?? 10`— y una medición que vive
+> solo en un chat no la puede releer nadie. **Lo que espera tanda propia con
+> compilación y runtime es el patch aplicado, y no está aplicado.***
+
 > **🔴 ESTADO: PATCH PREPARADO, NO APLICADO Y NO PUSHEADO.**
 >
 > **Y el árbol del admin NO se tocó — decisión declarada, con su razón:**

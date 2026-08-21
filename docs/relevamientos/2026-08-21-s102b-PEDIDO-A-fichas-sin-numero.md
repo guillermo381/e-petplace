@@ -275,14 +275,35 @@ fuente: las dos curas van juntas o el número sobrevive.**
 
 ---
 
-## ⑥ · CORRECCIÓN DE FICHA EXISTENTE — **D-748 ESTÁ PAGADA Y SU FICHA DICE `VIVE`**
+## ⑥ · CORRECCIÓN DE FICHA EXISTENTE — **D-748 ESTÁ PAGADA Y SIGUE DICIENDO `VIVE`**
 
-**Ubicación exacta:** `docs/DEUDAS_CANONICAS.md` **línea 1604**, dentro de la
-tabla de estado. Texto actual, verbatim:
+> ### ⚠️ CORRECCIÓN DE MI PROPIA VERSIÓN ANTERIOR, y también amplía la lista de la mesa
+>
+> **La versión previa de este pedido decía «`docs/DEUDAS_CANONICAS.md` línea
+> 1604». Es FALSO: esa línea vive en `docs/MODELO_DESPENSA.md`.** *Arrastré el
+> número de línea de un grep que había corrido sobre OTRO archivo. Es el mismo
+> error de forma que la casa ya tiene medido: un dato correcto citado contra la
+> fuente equivocada.*
+>
+> **Y la mesa nombró `:13972` y `:14274` — son las dos de `DEUDAS_CANONICAS`.
+> Falta la tercera, que es justamente la que dice la palabra `VIVE`.**
+>
+> **Medido por grep sobre `docs/` completo: son TRES ocurrencias en DOS archivos.**
 
-```
-| **D-748** | El 20% vivo en `seller_comisiones` contra el 10% firmado | **VIVE.** Es plata viva y es tabla NUESTRA: la decisión de S95 no la toca |
-```
+| # | archivo · línea | literal actual |
+|---|---|---|
+| 1 | **`docs/MODELO_DESPENSA.md:1604`** | `\| **D-748** \| El 20% vivo en \`seller_comisiones\` contra el 10% firmado \| **VIVE.** Es plata viva y es tabla NUESTRA: la decisión de S95 no la toca \|` |
+| 2 | `docs/DEUDAS_CANONICAS.md:13972` | `#### D-748 — 🔴 \`take_rate_pct = 20.00\` VIVO EN LA BASE contra el 10% firmado: es PLATA, no letra vieja` |
+| 3 | `docs/DEUDAS_CANONICAS.md:14274` | `> **D-748** (el \`take_rate_pct = 20\` vivo).` |
+
+> **🔴 Y UN DATO QUE AGRAVA LA DEUDA DE CANON, medido en el mismo barrido:**
+> `docs/relevamientos/2026-08-19-s101-censo-pagos.md:53` **YA LO DECÍA**, hace
+> dos días: *«`seller_comisiones` YA NO EXISTE. Fue jubilada. La tabla que
+> sostenía el `take_rate_pct = 20.00` de D-748 no está en la base.»*
+>
+> ⇒ **El hallazgo no es nuevo: es que nadie cerró la ficha.** *Un relevamiento
+> que mide bien y no transpone deja el canon diciendo lo contrario de lo que la
+> casa ya sabe — y el canon es lo que la próxima sesión lee.*
 
 **Lo medido el 21-ago-2026:**
 
@@ -307,6 +328,61 @@ migración que la pagó **la nombra por número en su propio comentario.**
 > de S95 no la toca»*— **es falsa desde el 11-ago**: la decisión de S95 fue
 > exactamente lo que la borró. *Una ficha que describe un mundo anterior no es
 > una ficha vieja: es una instrucción equivocada con formato de dato.*
+
+---
+
+## ⑥bis · LECCIÓN NUEVA A DEPOSITAR — **`L-327`** *(orden de mesa, relevo 3 punto 5)*
+
+> **Número medido por grep el 21-ago:** techo del canon **`L-326`**; `L-327` y
+> `L-328` dan **0 archivos** en `docs/`, `scripts/`, `packages/`, `apps/`,
+> `supabase/`.
+> **⚠️ Con la misma advertencia que la regla de §⓪ acaba de dejar escrita: ese
+> grep mide MI árbol y origin, no los worktrees ajenos. A confirma al depositar.**
+
+---
+
+### L-327 — EL PATRÓN CORRECTO PARA UNA CLASE PUEDE SER LA CURA EQUIVOCADA PARA UN MIEMBRO DE ESA CLASE
+
+**La clase:** vistas de `public` con grant a `anon` y sin `security_invoker` —
+corren como su dueño y **bypassean la RLS de las tablas de abajo**. La casa ya
+la conoce: **S54 curó cuatro vistas del motor exactamente así**, y la cura fue
+correcta.
+
+**El miembro que la rompe, medido en S102-B:** `v_ranking_usuarios` está en esa
+clase —`reloptions` NULL, `anon` con SELECT, 1 fila visible como anónimo— **y
+`security_invoker = true` la MATARÍA**:
+
+```
+profiles_select  →  USING (auth.uid() = id)          ← SOLO UNO MISMO
+pu_own           →  USING (user_id = auth.uid() OR is_admin())
+```
+
+⇒ cada usuario vería **solo su propia fila**. *Un ranking que solo te muestra a
+vos no es un ranking: es un espejo.* La vista quedaría **técnicamente segura y
+funcionalmente muerta**, y el verde del guard no lo diría.
+
+> ### **La diferencia no está en el permiso: está en el PROPÓSITO.**
+> **`security_invoker` cura vistas que NO deberían agregar datos ajenos. Una
+> vista de ranking los agrega POR DEFINICIÓN.** *Su problema nunca fue de RLS —
+> es de QUÉ PUBLICA.*
+
+**Lo exigible, en una línea:** antes de aplicarle a un miembro el patrón de su
+clase, **se mide qué hace el patrón CON ESE MIEMBRO** — no qué hizo con los
+anteriores.
+
+**Su parienta, y por qué esto no es un caso aislado:** es la misma forma que
+**L-283** (*«un plano y un arco no producen un cambio de signo: producen un
+codo»* — la anatomía incapaz del efecto que se le pedía). **Allá la forma no
+admitía el efecto; acá el efecto no admite la forma.** *Las dos se descubren
+igual: preguntando si la pieza puede hacer lo que se le pide, en vez de
+insistir con el método que funcionó al lado.*
+
+**Y el costo que habría tenido no medirla:** la cura se veía obvia, tenía
+precedente en la casa, y su cinturón natural —«`anon` ya no lee»— **habría dado
+VERDE**. *El defecto solo aparece mirando lo que la vista deja de servirle a
+quien sí debe verla.*
+
+> Origen: S102-B, curas de seguridad del relevo 2 (21-ago-2026).
 
 ---
 
