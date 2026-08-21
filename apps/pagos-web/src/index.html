@@ -30,7 +30,16 @@
 
 <link rel="stylesheet" href="__SDK_CSS__">
 <style>
-  :root{--tinta:#221E19;--papel:#FAF9F7;--linea:#E6E2DC;--magenta:#8E1F68;--gris:#6B6560}
+  /* 🔴 LOS HEX VAN COPIADOS, y se dice por qué: esta página es HTML plano
+     servido por nuestro host — **no puede importar los tokens de
+     `packages/ui`**. Los valores salen MEDIDOS de `palette.ts`, jamás de un
+     ojo. *Si algún día el ocre cambia allá, esta línea queda vieja y nadie se
+     entera: es deuda declarada, no descuido.* */
+  :root{--tinta:#221E19;--papel:#FAF9F7;--linea:#E6E2DC;--magenta:#8E1F68;--gris:#6B6560;
+        --cta:#FCBC1D;--cta-letra:#221E19;
+        /* El SECUNDARIO de la casa es TONAL, no un contorno vacío:
+           `bg.overlay` = `palette.light3`. Medido, no elegido. */
+        --sec:#EDEBF5;--sec-borde:rgba(0,0,0,.05)}
   *{box-sizing:border-box}
   body{font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
        color:var(--tinta);background:var(--papel);margin:0;padding:24px 20px 48px}
@@ -38,8 +47,97 @@
   h1{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:0 0 4px}
   .sub{color:var(--gris);font-size:14px;margin:0 0 24px}
   .payment-form{margin-bottom:20px}
+
+  /* ═══ 🔴 LOS CAMPOS DEL SDK, CON LA ANATOMÍA DE LA CASA ═══════════════════
+     ⏪ **Hasta hoy `.payment-form` tenía UN margen y nada más**: los campos de
+     tarjeta y el del código salían con el look por defecto del SDK. *Una
+     puerta de pago que no se parece al resto de la app es donde la familia se
+     pregunta si sigue en el mismo producto — justo cuando le pide su tarjeta.*
+
+     La anatomía es la MISMA del campo `.alias` de esta página (radio 10, borde
+     de 1 px en `--linea`, fondo transparente, letra tinta): no se inventa un
+     estilo nuevo, **se le presta a los campos ajenos el que la página ya
+     tiene.**
+
+     ⚠️ **SU LÍMITE, DECLARADO Y MEDIBLE:** esto alcanza a lo que el SDK monte
+     **en NUESTRO DOM**. Si algún campo viviera dentro de un `iframe` suyo
+     —lo habitual para el PAN por PCI— **este CSS no lo toca y no puede**.
+     *Se declara en vez de darlo por hecho: lo confirma el aparato.* */
+  /* 🔴 EL PADDING NO SE TOCA — y lo enseñó el aparato en el primer intento.
+     Mi v1 puso `padding:12px 14px` «para igualar el campo `.alias`», y **los
+     íconos del SDK quedaron encima del placeholder**: «👤ombre del titular»,
+     «💳úmero de tarjeta».
+     *El SDK ya tenía su padding izquierdo calibrado para dejarle lugar a su
+     propio ícono. Normalizarlo no fue igualar: fue borrar una medida que
+     alguien había tomado.*
+     ⇒ Se presta el MARCO (borde, radio, fondo, letra) y **se respeta el
+     interior**. Solo se toca el alto, con `padding-block`, que no compite con
+     nada. */
+  /* 🔴 `:not([type=button])` NO ES DEFENSIVO: es una cura medida. Sin él, el
+     **botón «Validar» del desafío** —que el SDK monta como `input`— salía
+     pintado con borde de campo y letra de campo: *se leía como un segundo
+     casillero vacío debajo del código.* **Un botón disfrazado de campo es
+     peor que uno feo: la persona no lo toca porque no sabe que es un botón**,
+     y ahí es donde el trámite se muere sin error. */
+  #tarjeta input:not([type=button]):not([type=submit]), #tarjeta select{
+    font:inherit;padding-block:12px;border-radius:10px;
+    border:1px solid var(--linea);background:transparent;color:var(--tinta);
+    -webkit-appearance:none;box-sizing:border-box}
+  #tarjeta input::placeholder{color:var(--gris)}
+  #tarjeta label{display:block;font-size:14px;font-weight:500;margin:4px 0 6px}
+
+  /* El «Validar» del desafío, con la anatomía de botón SECUNDARIO de la casa
+     — el primario de esta página es «Guardar tarjeta», y **una pantalla tiene
+     un solo sólido**. */
+  /* 🔴 CON FONDO, NO CON CONTORNO (founder, 21-ago). El secundario de la casa
+     es **TONAL**: `bg.overlay` con letra tinta y un borde apenas perceptible —
+     no una caja vacía. *Un contorno transparente como acción es exactamente lo
+     que la Ley 19.7 sacó de la casa; dejarlo acá sería reponerlo en la única
+     pantalla donde nadie lo estaba mirando.* */
+  #tarjeta input[type=button], #tarjeta input[type=submit], #tarjeta button{
+    width:auto;font:inherit;font-weight:600;padding:12px 20px;border-radius:10px;
+    border:1px solid var(--sec-borde);background:var(--sec);color:var(--tinta);
+    letter-spacing:normal;text-align:center;cursor:pointer;margin-top:8px}
+
+  /* ── EL CÓDIGO DE CONFIRMACIÓN (OTP) ──────────────────────────────────
+     🔴 **Un código es VALOR DE MÁQUINA y se lee dígito por dígito** — la regla
+     de voz de la casa (Ley 3): mono, tabular, y con aire entre caracteres.
+     *Con la letra del cuerpo, `1` y `l` y `0` y `O` se confunden en el único
+     campo donde equivocarse cuesta repetir todo el trámite.*
+     Centrado y grande porque **es el único dato de esa pantalla**. */
+  /* 🔴 EL `:not(...)` ACÁ TAMBIÉN, y la causa fue MI PROPIA CASCADA, medida en
+     el CSS y no adivinada: esta regla decía `… input`, y **el botón «Validar»
+     ES un `input` dentro del contenedor de verificación**. Al venir DESPUÉS
+     que la regla de botones, le pisaba el `letter-spacing:normal` — por eso
+     seguía saliendo «V a l i d a r» aun con la regla de botón ya escrita.
+     *No era que el selector del botón no lo alcanzara: lo alcanzaba y perdía.*
+     El tratamiento de dígitos es para el CAMPO del código, y solo para él. */
+  #tarjeta .verification-container input:not([type=button]):not([type=submit]),
+  #tarjeta .verification-wrapper input:not([type=button]):not([type=submit]),
+  #tarjeta .otp-wrapper input:not([type=button]):not([type=submit]){
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:.28em;
+    text-align:center}
+  /* 🔴 EL TRATAMIENTO ES PARA LOS DÍGITOS, NO PARA LA INVITACIÓN. Con el mono
+     y el `letter-spacing` heredados, el placeholder salía **«C ó d i g o
+     O T P»** — ilegible y a la vez desalineado con el resto de la página.
+     *La regla de voz de la casa dice que el VALOR de máquina va en mono; el
+     texto que le habla a la persona nunca lo fue.* */
+  #tarjeta .verification-container input:not([type=button])::placeholder,
+  #tarjeta .verification-wrapper input:not([type=button])::placeholder,
+  #tarjeta .otp-wrapper input:not([type=button])::placeholder{
+    font-family:inherit;font-size:15px;letter-spacing:normal}
+  /* ☠️ EL BOTÓN NEGRO MURIÓ ACÁ (founder, 21-ago: *«en la webview de agregar
+     tarjeta nueva, el botón guardar tarjeta aún es negro»*).
+     🔴 **F-OCRE, firmada:** *«el ocre NO se usa como tinta sobre fondo — se usa
+     como RELLENO con letra tinta encima»*. Relleno `#FCBC1D`, letra tinta:
+     **9,96 de contraste**, el par que la casa ya midió.
+     *El alta vive en nuestra página web y por eso se le pasó al barrido de la
+     app: un CTA que cambia de color en la casa y no en la puerta de al lado
+     deja de ser el CTA de la casa.* */
   button{font:inherit;font-weight:600;width:100%;padding:15px 20px;border-radius:12px;
-         border:0;background:var(--tinta);color:#fff;cursor:pointer;-webkit-appearance:none}
+         border:0;background:var(--cta);color:var(--cta-letra);cursor:pointer;
+         -webkit-appearance:none}
   button[disabled]{opacity:.4;cursor:default}
   .alias-label{display:block;font-size:14px;font-weight:500;margin:4px 0 6px}
   .alias-label span{font-weight:400;color:var(--gris)}
@@ -55,7 +153,15 @@
        color:var(--gris);font-size:13px}
   @media (prefers-color-scheme:dark){
     :root{--tinta:#F2EFEA;--papel:#17150F;--linea:#332F28;--gris:#A39C93;--magenta:#FF6FC0}
-    button{background:#F2EFEA;color:#17150F}
+    /* 🔴 EL CTA NO SE INVIERTE CON EL TEMA. En claro y en oscuro es el MISMO
+       relleno ocre con letra tinta — *el ocre es el color de la acción, no una
+       consecuencia del fondo*. Acá la rama oscura pisaba `--tinta`, que en
+       oscuro es casi blanco, y el botón se volvía claro con letra negra: dos
+       botones distintos para la misma acción.
+       Por eso `--cta` y `--cta-letra` **no se redefinen**.
+       El SECUNDARIO sí: es una superficie, y las superficies cambian con el
+       tema (`bg.overlay` = `palette.dark3` en oscuro). */
+    :root{--sec:#1A1A24;--sec-borde:rgba(255,255,255,.08)}
   }
 </style>
 </head>
@@ -220,7 +326,8 @@
       if (campoTieneDesafio()) {
         desafioVisto = true;
         pararReloj();                       /* el desafío NO es un cuelgue */
-        decir('Te enviamos un código para confirmar la tarjeta. Escribilo acá arriba.');
+        /* Tuteo neutro, la voz de la casa (regla 27 / L-148): decía «Escribilo». */
+        decir('Te enviamos un código para confirmar la tarjeta. Escríbelo acá arriba.');
         obs.disconnect();
       }
     });
