@@ -39,8 +39,16 @@ const NOMBRE_CORTO: Record<string, string> = {
   dc: 'DISC',
 };
 
-export const ANCHO_LOGO = 44;
-const ALTO_LOGO = 30;
+/* 🔴 EL ANCHO SALE DE LA PALABRA MÁS LARGA, MEDIDO EN EL APARATO — no de un
+   número redondo. Con 44 px, «DINERS» **envolvía a dos líneas y el recuadro
+   quedaba partido** («DINER / S»).
+   *Un recuadro roto ES el hueco que la orden prohíbe: no importa que haya
+   contenido si lo que se ve es un accidente.*
+   Con 56 px entran las seis letras del nombre más largo del set, y el
+   `numberOfLines={1}` garantiza que **ninguna marca futura pueda volver a
+   partirlo** — si no entra, trunca; jamás envuelve. */
+export const ANCHO_LOGO = 56;
+const ALTO_LOGO = 32;
 
 export function LogoFranquicia({ marca }: { marca: string | null }) {
   const { theme } = useTheme();
@@ -63,7 +71,7 @@ export function LogoFranquicia({ marca }: { marca: string | null }) {
       }}
     >
       {texto ? (
-        <Texto variante="dato">{texto}</Texto>
+        <Texto variante="dato" numberOfLines={1}>{texto}</Texto>
       ) : (
         /* Sin marca: el glifo de pagos de la casa. **La rama vacía no existe.** */
         <Icono nombre="pagos" tamano={18} />
