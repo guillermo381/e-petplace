@@ -18531,6 +18531,8 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-317** — **UN REEMPLAZO SE MIDE DESDE EL CONSUMIDOR QUE VA A REEMPLAZAR, JAMÁS DESDE UN ARNÉS.** S101-C abrió con la orden firmada *«REVOKE con el reemplazo funcionando»* y con la evidencia en la mano: la noche anterior un paseo real se había cobrado por la puerta nueva, punta a punta, con su comprobante. **Y el reemplazo NO estaba listo:** `components/checkout-reserva.tsx` —la pieza única que montan **los cuatro oficios**— seguía llamando a la RPC vieja. *El arnés había estrenado la puerta nueva y dejado la vieja en uso, y las dos cosas son ciertas a la vez sin contradecirse: por eso no hay síntoma.* **Revocar ahí habría dejado a paseo, grooming, veterinaria y adiestramiento sin poder reservar — con la ficha diciendo «cerrada».** ⇒ **Un productor probado solo por su arnés está probado como productor, no como reemplazo:** el arnés demuestra que la puerta nueva ABRE, jamás que la vieja dejó de usarse. **Lo segundo es un censo de consumidores, y es lo único que autoriza cerrar la vieja.** **Corolario mecánico, aplicado en la misma migración:** *cuando el orden importa, se escribe como CINTURÓN y no como nota* — la del `REVOKE` verifica que el reemplazo esté en pie y **aborta con el agujero todavía cerrado** si falta algo, porque *una precondición que vive en un comentario se cumple mientras alguien la lea.* Hermana de la ley del motor sin puerta, del otro lado: ahí faltaba el consumidor; acá **sobraba el viejo**. Origen: S101-C, el enchufe de los cuatro oficios.
+
 - **L-316** — **EL CRUDO SE ABRE ANTES DE DIAGNOSTICAR: una tabla de estados dice QUÉ pasó, y el payload guardado dice POR QUÉ.** S101-A lo pagó en el mismo día y en la misma fila. El débito rebotó 403 y el error se leyó **dos veces mal desde lo genérico** —primero como *«configuración de Nuvei, carrier/operación no habilitada»*, después como *«el intento quedó en vuelo y bloquea el reintento»*— y **una sola vez bien, abriendo `pagos_intentos.payload_crudo`**, donde decía literal `order.vat Invalid`. **Las dos lecturas equivocadas mandaban a esperar a un tercero; la correcta era un campo de nuestro propio request.** Y el mismo `SELECT` que lo destapó corrigió de paso la otra premisa: el intento **no** estaba `iniciado`, estaba `rechazado` — el hueco real era que su `motivo_rechazo` y su `cerrado_en` estaban en NULL, porque el error venía en un objeto `error` de primer nivel y el lector solo miraba `transaction.message`. **Corolario operativo:** guardar el crudo no alcanza — *un crudo que nadie abre es un dato que no existe*, y por eso todo rechazo debe destilar **su motivo a una columna legible** (jamás NULL: con `http_<status>` como último recurso), porque **un payload jsonb no se puede listar, contar ni agrupar, y nadie lo abre cuando hay una explicación plausible a mano.** Hermana de L-166 (todo dato vivo se lee del objeto al usarlo) aplicada al diagnóstico de errores ajenos. Origen: S101-A, el 403 de Nuvei.
 
 ### D-854 🔴 · LA PUERTA DE SERVICIOS NO PASA POR EL MOTOR DE PAGOS
@@ -18566,6 +18568,41 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-856 🟡 · TRES PUERTAS DE PAGO SIGUEN SIMULADAS — y lo dicen
+> S101-C · 20-ago-2026 · **lo encontró el typecheck**, no un censo
+
+Al matar la voz «Pagar (simulado)» del checkout de reserva, el typecheck rebotó
+con **tres consumidores más** de la misma key:
+
+| pantalla | qué contrata | motor |
+|---|---|---|
+| `components/plan-hoja.tsx` | el **plan** de paseo | `contratar_plan_paseo` |
+| `components/paquete-hoja.tsx` | el **paquete de salidas** | `comprar_paquete_salidas` |
+| `explorar/adiestramiento/confirmar-programa.tsx` | el **programa** | `contratar_programa` |
+
+**Las tres contratan por su RPC sin tocar la tarjeta — y las tres LO DICEN en
+pantalla.** No son la deuda de `D-855`: ahí el defecto era que la puerta se
+declaraba pagada **con el motor real vivo al lado y sin decirlo**; acá el aviso
+es cierto.
+
+> 🔴 *Mi censo había mirado UNA puerta. Borrar la banda de las tres habría
+> convertido tres avisos honestos en tres silencios falsos —* que es peor que la
+> deuda que estaba curando: **una advertencia que dejó de existir le enseña a la
+> familia a no buscar advertencias.**
+
+**Lo que hace falta y no es código:** el plan y el paquete cobran **un período**,
+no una reserva — su desglose congelado, su recurrencia y su renovación son
+decisiones de letra (`MODELO_FINANCIERO` Decisión S y §7.14 ya las tocan). *El
+enchufe técnico es el mismo motor; lo que no está resuelto es qué se cobra
+cuándo.*
+
+**Dueño:** mesa (la letra) → pista (el enchufe).
+**Disparo:** 🔴 **antes de que octubre abra con planes vendibles** — hoy son
+honestas, y el día que el resto de la casa cobre de verdad **la asimetría vuelve
+a ser la de `D-855`**.
+
+---
+
 ### D-855 🔴 · `confirmar_cita_pagada` ES EJECUTABLE POR `authenticated`
 > S101-B · 20-ago-2026 · medido
 
@@ -18584,3 +18621,30 @@ cerró esa puerta en S101-B; servicios la tiene abierta.
 
 **Muere con el `REVOKE` de S101-C** — y **jamás antes del reemplazo**: revocar sin
 puerta nueva deja a los cuatro oficios sin poder reservar.
+
+---
+
+## ✅ CERRADA — S101-C, 20-ago-2026 · migración `20260822050000`
+
+**Las dos puntas, con evidencia por lado y ninguna supuesta:**
+
+| punta | qué se midió | resultado |
+|---|---|---|
+| ① la puerta vieja | `has_function_privilege('authenticated', …)` | **`false`** |
+| ① la puerta vieja | **intento REAL** `SET ROLE authenticated` + ejecutar sobre una cita real | **REBOTÓ · SQLSTATE 42501** |
+| ① discriminador | `crear_bloqueo_agenda` sigue concedida | **`true`** — reservar sigue vivo |
+| ② la puerta nueva | paseo `59808781` pagado **desde la app, en el aparato** | `confirmada · pagada` · `tx=DF-2099054` · `auth=KIifUu` · `confirmado_por=webhook` |
+| ② el comprobante | **el correo RECIBIDO, leído** — no la fila | «Con: Paseos Andres · **Concepto: Paseo de Mascotas** · USD 6.00 · DF-2099054 · KIifUu» |
+
+🔴 **Y LA PRECONDICIÓN QUE ESTA FICHA CASI SE COME:** al abrir S101-C,
+`checkout-reserva.tsx` **todavía llamaba a la RPC**. El paseo de la noche
+anterior había estrenado la puerta nueva **desde un arnés**, no desde su
+consumidor real.
+
+> *Un arnés puede llamar a la puerta nueva y dejar la vieja en uso sin que nadie
+> lo note. Revocar ahí habría dejado a los cuatro oficios sin poder reservar —
+> con la ficha diciendo «cerrada».*
+
+⇒ El `REVOKE` se hizo **después del enchufe**, y su migración lleva la
+precondición **como cinturón**: si el reemplazo no está en pie, **aborta con el
+agujero todavía cerrado**. ⇒ **L-317**.

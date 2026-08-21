@@ -57,8 +57,6 @@
 -- trabajo aparte, con su propia letra. *Cerrar esta puerta no las cierra, y
 -- decir que sí sería declarar seguro lo que no se midió.*
 
-BEGIN;
-
 -- ── ① EL CINTURÓN DE PRECONDICIÓN ─────────────────────────────────────────
 -- 🔴 **Esto es lo que hace que el orden firmado sea mecánico y no una promesa.**
 --    Si el reemplazo no está en pie, la migración **aborta con el agujero
@@ -156,4 +154,3 @@ BEGIN
   END IF;
 END $$;
 
-COMMIT;
