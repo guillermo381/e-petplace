@@ -157,6 +157,55 @@ equivoca: contradice a quien midió bien.*
 
 ---
 
+## §1bis · 🔴 ADDENDUM DEL MISMO DÍA — **EL ⑥ SE REPITIÓ DESPUÉS DE ESTAR ESCRITO**
+
+> **Se agrega y no se reescribe el cuerpo:** los seis de arriba son los que la
+> mesa pidió y quedan como están. Esto es evidencia **sobre este archivo**, y por
+> eso vale más acá que en la bitácora.
+
+Horas después de escribir el ⑥ —*«filtré por un valor que no existe en esa
+columna»*—, preparando el terreno del gate, **encadené tres adivinanzas de la
+misma familia**:
+
+| lo que supuse | lo que era | cómo se cazó |
+|---|---|---|
+| `familia_miembros` | **`familia_miembro`** (singular) | chocó: `42P01` |
+| `medios_pago` | **`tarjetas_guardadas`** | chocó: `42P01` |
+| `estado_vida = 'vivo'` | **`'activa'`** — 75 filas, todas | **no chocó: devolvió 0 en las 37 cuentas** |
+
+**Las dos primeras son baratas: un nombre que no existe rebota con error.** *Un
+instrumento que grita se arregla en el minuto uno.* **La tercera es la cara del
+⑥ y es la cara cara:** un valor inexistente dentro de una columna que sí existe
+**no rebota — filtra a cero**, y un cero tiene la forma exacta de un dato.
+
+### 🔴 LO QUE ESTO PRUEBA, Y ES INCÓMODO
+
+> ### **Haber escrito la lección NO evitó la repetición. La evitó el control.**
+
+El cero salió **universal** —las 37 cuentas en 0, incluida una que otra pista ya
+había medido con 6— y *esa universalidad* fue la señal, no mi memoria del ⑥. **Es
+exactamente la distinción que la mesa puso en la cabecera de este archivo,
+cobrándose sobre su propio autor el mismo día:** *los controles curan
+instrumentos, las leyes curan lectores* — **y acá el lector era yo, con la ley
+recién escrita, y falló igual.**
+
+### ✅ Y LA MEJOR VALIDACIÓN DEL DÍA SALIÓ GRATIS
+
+La corrección la disparó tener **una medición ajena e independiente** (S102-B, en
+otro árbol, con otra consulta) que decía **6 mascotas · 7 tarjetas**. Con los
+nombres medidos, mis números dieron **6 y 7**.
+
+> ***Dos instrumentos distintos, dos manos distintas, el mismo objeto: es el
+> control positivo más fuerte que tuvimos hoy — y no lo diseñó nadie, salió de
+> que la otra pista hubiera medido antes y lo hubiera dicho con números.***
+
+**Corolario práctico, y es el que conviene llevarse:** cuando otra pista publica
+un número, **cotejarlo no es cortesía — es un control positivo gratis**. Y
+cuando el propio resultado *no* coincide con él, **el orden correcto es sospechar
+del instrumento antes que del dato ajeno.**
+
+---
+
 ## §2 · LO QUE ESTE RELEVAMIENTO **NO** HACE
 
 - **No funda una lección.** *(Ver §3 — se propone, no se deposita.)*
