@@ -206,6 +206,51 @@ del instrumento antes que del dato ajeno.**
 
 ---
 
+## §1ter · 🔴 SEGUNDO ADDENDUM — DOS DEL GATE, y una es de una clase nueva
+
+### ⑦ · La precedencia supuesta — `.env.local` contra la variable del shell
+
+| | |
+|---|---|
+| **Qué medía** | *(no medía: configuraba)* qué página del alta abría el WebView durante el gate |
+| **Por qué su resultado era creíble** | arranqué Metro con `EXPO_PUBLIC_PAGOS_ALTA_URL=…8899` en el shell. **La variable estaba puesta, el servidor local respondía 200, el puente `adb reverse` estaba vivo.** *Todo lo que yo controlaba estaba bien* |
+| **Qué lo cazó** | **tres síntomas a la vez**: página entera en español con el header nativo en inglés · el botón nuevo **encendido** · el canario ausente. *Tres defectos independientes el mismo minuto es la firma de una sola causa* |
+| **Qué control lo habría cazado antes** | **abrir la página con una marca imposible de confundir** —o mirar la URL— **antes** de juzgar su contenido. Costaba una línea |
+
+**El defecto real:** en Expo **`.env.local` GANA sobre la variable del shell**, y
+yo supuse lo contrario. Estuve mirando **la página desplegada en Vercel**
+—código ajeno, sin ninguno de mis cambios— **convencida de mirar la mía**.
+⚠️ **Su clase es la del ⑥ y la del enum:** *una precedencia supuesta en vez de
+medida.* Y su costo fue el peor del día: **estuve a punto de reportar en rojo
+tres cosas que funcionaban.**
+
+### ⑧ · 🔴 EL CASO NULO QUE SE VE IGUAL — el español de la página
+
+| | |
+|---|---|
+| **Qué medía** | si la página del alta habla los dos idiomas |
+| **Por qué su resultado era creíble** | abrí la app en español, la página salió **en español entero y correcto**. *Es exactamente lo que se esperaba ver si todo funciona* |
+| **Qué lo cazó** | **leer el HTML servido**: «Ponle un nombre», «Agregar tarjeta», «Puedes dejarlo vacío» **están en el marcado estático** |
+| **Qué control lo habría cazado antes** | correr **primero el caso que discrimina** (inglés), y solo después el que no |
+
+> ### **El español se ve idéntico con la maquinaria andando y con la maquinaria muerta.**
+
+🔴 **Y por eso es de una clase que las otras siete no tienen.** Los seis del
+cuerpo son **instrumentos que fallan**; el ⑦ es **una configuración supuesta**.
+Éste **no falla nada**: el instrumento estaba sano, la app estaba sana, la
+pantalla estaba bien. **Lo que estaba mal era la ELECCIÓN DEL CASO.**
+
+⇒ *Un control positivo prueba el instrumento; acá el instrumento no necesitaba
+prueba — lo que faltaba era preguntarse **si el caso elegido puede distinguir el
+éxito del fracaso**. Un caso que se ve igual en los dos mundos no es un test
+flojo: es un test que no existe, con toda la apariencia de uno que pasó.*
+
+**Corolario para todo gate, y vale más que este caso:** al armar los pasos, de
+cada uno se declara **qué se vería si estuviera roto**. Si la respuesta es *«lo
+mismo»*, el paso **no es un paso** — es una captura.
+
+---
+
 ## §2 · LO QUE ESTE RELEVAMIENTO **NO** HACE
 
 - **No funda una lección.** *(Ver §3 — se propone, no se deposita.)*

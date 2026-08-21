@@ -634,8 +634,20 @@
       /* 🔴 Si el SDK cambió y su validación ya no responde, **se ENCIENDE**.
          *Un botón apagado por un error nuestro deja a la familia sin poder
          pagar y sin poder saber por qué; encendido, en el peor caso el
-         proveedor rebota con su mensaje.* Fail-open acá es lo prudente, y es
-         al revés que en la puerta de un permiso — la asimetría es a propósito. */
+         proveedor rebota con su mensaje.*
+
+         ⚠️ **LA FRONTERA, Y NO ES OPCIONAL** (dictamen de mesa, 21-ago):
+         **la SUPERFICIE puede fallar abierta SOLO PORQUE EL MOTOR FALLA
+         CERRADO.** Este botón no autoriza nada — abre un formulario que el
+         proveedor va a validar y un endpoint que va a rechazar. *Lo que
+         protege el dinero está del otro lado, y por eso acá alcanza con no
+         estorbar.*
+         🔴 **Esta regla es DIRECCIONAL y JAMÁS se copia hacia el servidor:**
+         una compuerta de permisos, una RPC o una policy que ante un error
+         propio deje pasar **no es amable, es una puerta abierta**. *El día que
+         alguien lea este comentario buscando precedente para un `catch` que
+         concede, la respuesta está escrita acá: el precedente NO existe para
+         ese lado.* */
       btn.disabled = false;
     }
   }
