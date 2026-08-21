@@ -90,16 +90,41 @@ import { fileURLToPath } from 'node:url'
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
-/* Marcas que un dev-launcher deja en el ZIP. **SIN CALIBRAR** — ver la
-   declaración de arriba. `--calibrar` es lo que las vuelve utilizables. */
-const MARCAS_DEV_LAUNCHER = [
-  'expo-dev-launcher',
-  'expo-dev-menu',
-  'EXDevLauncher',
-  'EXDevMenu',
-  'devlauncher',
-  'dev_launcher',
-]
+/* ── LAS MARCAS DEL DEV-LAUNCHER — **CALIBRADAS**, y la calibración cambió dos
+ *    cosas que yo tenía mal (21-ago, dos APKs del mismo día como par):
+ *
+ *    ① **NO viven en el listado del ZIP.** Son clases Java: viven adentro de
+ *       `classes*.dex`, cuyo contenido `unzip -l` no lista. Mi primera versión
+ *       las buscaba en el listado y **daba cero en las dos APKs** — un cero
+ *       idéntico para el caso bueno y el malo, o sea ninguna información.
+ *
+ *    ② 🔴 **La búsqueda insensible a mayúsculas NO discrimina** — y ésa era la
+ *       que yo tenía. Medido en el par:
+ *
+ *         marcador                    APK rota   dev build real
+ *         ──────────────────────────  ────────   ──────────────
+ *         `devlauncher` (-i) .......      14          377     ← NO sirve
+ *         `DevLauncher` ............      14          139     ← NO sirve
+ *         `expo/modules/devlauncher`       0          285     ← discrimina
+ *         `expo/modules/devmenu` ...       0          166     ← discrimina
+ *
+ *       ⚠️ Esos números son **líneas** (`grep -c`, que cuenta líneas que
+ *       contienen la aguja, no apariciones). El guard cuenta **apariciones** y
+ *       por eso reporta `×1884` / `×894` sobre la misma APK. **Se aclara acá
+ *       porque un archivo cuyo comentario contradice a su propio instrumento es
+ *       la próxima medición equivocada de alguien.** Lo que importa —y es lo
+ *       mismo en las dos escalas— es el **cero contra el no-cero**.
+ *
+ *       *La forma CamelCase aparece igual en una APK sin dev-client* (la
+ *       nombran otros módulos de Expo) ⇒ con el flag `i` el guard habría dicho
+ *       **«dev-launcher presente»** sobre la APK que no arranca. **La
+ *       calibración no confirmó mis marcas: me salvó de un falso verde.**
+ *
+ *    ⇒ Se busca la **RUTA DE PAQUETE, sensible a mayúsculas**, dentro del dex.
+ *      Si algún día expo renombra el paquete, `--calibrar` vuelve a dar rojo y
+ *      el caso ③ degrada a NO CONCLUYENTE. *El guard pierde filo antes que
+ *      mentir.* */
+const MARCAS_DEV_LAUNCHER = ['expo/modules/devlauncher', 'expo/modules/devmenu']
 
 /* Un bundle de RN pesa megas. Bajo esto, algo pasó — B, corrección ②. */
 const BUNDLE_SOSPECHOSO_BYTES = 100 * 1024
@@ -145,15 +170,36 @@ function bundleEnListado(listado) {
   return { presente: true, bytes: Number(m[1]) }
 }
 
-/** ¿El ZIP muestra un dev-launcher? Tres respuestas, no dos. */
-function devLauncherEnListado(listado) {
-  const halladas = MARCAS_DEV_LAUNCHER.filter((m) =>
-    new RegExp(m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(listado),
-  )
+/** ¿El dev-launcher está DENTRO del artefacto? Se lee del bytecode, no del
+ *  listado — ver la calibración arriba. Tres respuestas, no dos. */
+function devLauncherEnDex(ruta) {
+  let dex
+  try {
+    dex = execFileSync('unzip', ['-p', ruta, 'classes*.dex'], {
+      maxBuffer: 512 * 1024 * 1024,
+      encoding: 'buffer',
+    })
+  } catch (e) {
+    return { veredicto: 'indeterminado', halladas: [], motivo: `no pude leer el bytecode (${e?.message ?? e})` }
+  }
+  if (!dex || dex.length === 0) {
+    return { veredicto: 'indeterminado', halladas: [], motivo: 'la APK no trae `classes*.dex`' }
+  }
+
+  const halladas = []
+  for (const m of MARCAS_DEV_LAUNCHER) {
+    /* Conteo, no presencia: el número es lo que hizo auditable la calibración.
+       Búsqueda binaria SENSIBLE a mayúsculas — el flag `i` era el defecto. */
+    const aguja = Buffer.from(m, 'utf8')
+    let n = 0
+    let i = dex.indexOf(aguja)
+    while (i !== -1) { n++; i = dex.indexOf(aguja, i + 1) }
+    if (n > 0) halladas.push(`${m}×${n}`)
+  }
   if (halladas.length) return { veredicto: 'presente', halladas }
-  /* 🔴 Acá NO se devuelve 'ausente'. Las marcas no están calibradas: un cero
-     de una marca que no sé si aparecería no es evidencia de ausencia. */
-  return { veredicto: 'indeterminado', halladas: [] }
+  /* Cero de una marca CALIBRADA sí es evidencia: se midió que en una dev build
+     real aparece 285 veces y en la rota 0. */
+  return { veredicto: 'ausente', halladas: [] }
 }
 
 /** El par perfil↔dependencia. **Repo contra repo — las dos mitades del mismo
@@ -175,15 +221,41 @@ function coherenciaPerfil(nombreApp) {
     .filter(([, p]) => p && p.developmentClient === true)
     .map(([n]) => n)
 
+  const fallos = []
+
   if (perfilesConDevClient.length > 0 && !tieneDevClient) {
-    return {
-      ok: false,
-      perfilesConDevClient,
-      motivo:
-        `el/los perfil(es) [${perfilesConDevClient.join(', ')}] declaran developmentClient:true ` +
+    fallos.push(
+      `el/los perfil(es) [${perfilesConDevClient.join(', ')}] declaran developmentClient:true ` +
         `y expo-dev-client NO está en dependencias ⇒ esos builds salen SIN bundle y SIN quién se lo dé`,
-    }
+    )
   }
+
+  /* 🔴 `requireCommit` — su porqué vive ACÁ porque `eas.json` no lo admite: su
+     esquema rechaza la clave `"//"` (medido, 21-ago; el intento de dejar la nota
+     adentro falló con «cli.// is not allowed»). ⇒ **la razón se vuelve mecánica
+     en vez de comentario** — un comentario se borra sin que nadie se entere; un
+     guard en rojo obliga a leer por qué.
+
+     Sin `requireCommit`, EAS archiva el **ÁRBOL**, no el commit. Medido en vivo:
+     una build salió de `76f83f5f` —que NO tenía `expo-dev-client`— y la APK
+     resultante lo traía (`expo/modules/devlauncher` ×1884). *No es que la build
+     IGNORE lo no commiteado: **lo usa**, y después el hash del acta apunta a un
+     código que nunca se construyó.*
+
+     Esta casa cita hashes para todo, y **el gate del founder no se corre sobre
+     un artefacto de procedencia irreconstruible**: un veredicto que no se puede
+     volver a producir no se puede citar, y entonces no es un gate. Es la gemela
+     nativa de lo que S91 curó en OTA (`publicar-ota.mjs`, veda + acto único —
+     *«un publish sucio es inauditable después»*); allá el riesgo era
+     estructural, acá hubo **un artefacto concreto instalado en un teléfono**. */
+  if (eas.cli?.requireCommit !== true) {
+    fallos.push(
+      'eas.json no fija `cli.requireCommit: true` ⇒ la build archiva el ÁRBOL y no el commit: ' +
+        'el artefacto que salga NO se puede atar a un hash, y un gate sin ancla no es un gate',
+    )
+  }
+
+  if (fallos.length) return { ok: false, perfilesConDevClient, motivo: fallos.join(' · TAMBIÉN: ') }
   return { ok: true, perfilesConDevClient }
 }
 
@@ -211,19 +283,26 @@ function juzgarApk(ruta) {
     }
   }
 
-  const dl = devLauncherEnListado(z.listado)
+  const dl = devLauncherEnDex(ruta)
   if (dl.veredicto === 'presente') {
     return {
       veredicto: 'verde',
-      motivos: [`no trae bundle, pero el ZIP muestra el dev-launcher [${dl.halladas.join(', ')}] — puede bajarlo de Metro`],
+      motivos: [`no trae bundle, pero el bytecode trae el dev-launcher [${dl.halladas.join(' · ')}] — puede bajarlo de Metro`],
+    }
+  }
+  if (dl.veredicto === 'ausente') {
+    return {
+      veredicto: 'rojo',
+      motivos: [
+        'no trae `assets/index.android.bundle` Y el bytecode no trae el dev-launcher ⇒ ' +
+          'NO PUEDE CARGAR JS POR NINGUNA VÍA. Se instala, arranca y se queda en el splash para siempre.',
+        `(marcas buscadas: ${MARCAS_DEV_LAUNCHER.join(', ')} — calibradas 21-ago: 0 en la APK rota, 285 en la dev build real)`,
+      ],
     }
   }
   return {
     veredicto: 'no_concluyente',
-    motivos: [
-      'no trae `assets/index.android.bundle` y el ZIP no muestra ninguna marca conocida de dev-launcher',
-      '⚠️ las marcas NO están calibradas contra una dev build real ⇒ su ausencia no prueba ausencia. Corré `--calibrar` con una APK que se sepa con dev-client.',
-    ],
+    motivos: [dl.motivo ?? 'no pude determinar si trae dev-launcher', 'no paso por no saber'],
   }
 }
 
@@ -233,10 +312,10 @@ if (calibrar) {
   const z = listarZip(apk)
   if (!z.ok) { console.error('ROJO —', z.motivo); process.exit(2) }
   const b = bundleEnListado(z.listado)
-  const dl = devLauncherEnListado(z.listado)
+  const dl = devLauncherEnDex(apk)
   console.log('CALIBRACIÓN sobre', apk)
   console.log('  bundle ..........', b.presente ? `presente (${b.bytes} bytes)` : 'ausente')
-  console.log('  marcas halladas .', dl.halladas.length ? dl.halladas.join(', ') : '(ninguna)')
+  console.log('  marcas halladas .', dl.halladas.length ? dl.halladas.join(' · ') : '(ninguna)')
   if (!dl.halladas.length) {
     console.log()
     console.log('  ⇒ NINGUNA marca aparece en una APK que se dice con dev-client.')
@@ -278,6 +357,7 @@ if (coh.ok) {
       ? `perfil↔dependencia coherentes (dev-client declarado en [${coh.perfilesConDevClient.join(', ')}] y presente)`
       : 'ningún perfil declara developmentClient — no aplica el par',
   )
+  verdes.push('`cli.requireCommit: true` — el artefacto se va a poder atar a un commit')
 } else {
   fallos.push(coh.motivo)
 }
@@ -293,8 +373,17 @@ if (!soloCoherencia) {
   else dudas.push(...r.motivos)
 }
 
+/* B ③ aplicada también acá: en `--coherencia` NO hay APK, así que el título no
+   puede hablar de una. *La voz dice lo que se midió, ni una palabra más.* */
+const TITULO_ROJO = soloCoherencia
+  ? 'ROJO — LA CONFIGURACIÓN NO PUEDE PRODUCIR UNA BUILD SANA:'
+  : 'ROJO — LA BUILD NO PUEDE CARGAR SU JS:'
+const TITULO_VERDE = soloCoherencia
+  ? 'VERDE — la configuración puede producir una build sana:'
+  : 'VERDE — la APK tiene JS que cargar:'
+
 if (fallos.length) {
-  console.log('ROJO — LA BUILD NO PUEDE CARGAR SU JS:')
+  console.log(TITULO_ROJO)
   for (const f of fallos) console.log(`  ✗ ${f}`)
   for (const d of dudas) console.log(`  ? ${d}`)
   for (const v of verdes) console.log(`  ✓ ${v}`)
@@ -308,6 +397,6 @@ if (dudas.length) {
   process.exit(3)
 }
 
-console.log('VERDE — la APK tiene JS que cargar:')
+console.log(TITULO_VERDE)
 for (const v of verdes) console.log(`  ✓ ${v}`)
 process.exit(0)
