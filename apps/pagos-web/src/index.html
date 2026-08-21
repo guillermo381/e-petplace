@@ -167,8 +167,8 @@
 </head>
 <body>
 <main>
-  <h1>Agregar tarjeta</h1>
-  <p class="sub">Los campos los muestra directamente tu procesador de pagos.
+  <h1 id="t-titulo">Agregar tarjeta</h1>
+  <p class="sub" id="t-sub">Los campos los muestra directamente tu procesador de pagos.
      El número de tu tarjeta no pasa por e-PetPlace.</p>
 
   <!-- 🔴 El widget del SDK monta ACÁ sus propios campos. No hay inputs nuestros. -->
@@ -178,7 +178,7 @@
        un dato de tarjeta. Va FUERA del widget a propósito. *Meterlo adentro lo
        pondría en el mismo formulario que el PAN, y lo que vale de ese
        formulario es que solo tiene datos de tarjeta.* -->
-  <label class="alias-label" for="alias">Ponle un nombre <span>(opcional)</span></label>
+  <label class="alias-label" for="alias"><span id="t-alias-label">Ponle un nombre</span> <span id="t-alias-opcional">(opcional)</span></label>
   <input id="alias" class="alias" type="text" maxlength="40" autocomplete="off"
          placeholder="Visa de Kari" aria-describedby="alias-ayuda">
   <p id="alias-ayuda" class="alias-ayuda">Para reconocerla después. Puedes dejarlo vacío.</p>
@@ -186,9 +186,9 @@
   <button id="guardar">Guardar tarjeta</button>
   <p class="estado" id="estado" role="status" aria-live="polite"></p>
 
-  <p class="sello" aria-hidden="false">Procesado por <strong>Nuvei</strong></p>
+  <p class="sello" aria-hidden="false"><span id="t-sello">Procesado por</span> <strong>Nuvei</strong></p>
 
-  <p class="pie">Tus datos de tarjeta viajan cifrados a tu procesador de pagos.
+  <p class="pie" id="t-pie">Tus datos de tarjeta viajan cifrados a tu procesador de pagos.
      e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que
      puedas reconocerla.</p>
 </main>
@@ -209,6 +209,132 @@
     est.textContent = texto || '';
     if (tono) { est.setAttribute('data-tono', tono); } else { est.removeAttribute('data-tono'); }
   }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     🔴 EL IDIOMA (S101-D · firma del founder: el circuito de pago habla LOS
+     DOS idiomas de la app). Esta página **no puede importar `@epetplace/i18n`**
+     —es HTML plano servido aparte— así que el idioma **LLEGA POR LA URL** desde
+     la app, que es la única que sabe cuál eligió la familia.
+
+     ⚠️ **JAMÁS `navigator.language`.** En un WebView eso reporta el locale del
+     SISTEMA, **no la preferencia elegida en la app** — y son cosas distintas:
+     `D-316` existe justamente porque el idioma se persiste como preferencia.
+     *Adivinarlo acá haría que la pantalla del pago contradiga a la app que la
+     abrió, y en la pantalla donde la familia entrega su tarjeta.*
+
+     Sin `lang` en la URL cae a `es` — el default de la casa, no del navegador.
+     ══════════════════════════════════════════════════════════════════════ */
+  var LANG = (function () {
+    var m = /[?&]lang=([a-zA-Z-]{2,5})/.exec(location.search);
+    var v = m ? m[1].slice(0, 2).toLowerCase() : '';
+    return v === 'en' ? 'en' : 'es';
+  })();
+
+  var VOCES = {
+    es: {
+      docTitulo: 'Agregar tarjeta · e-PetPlace',
+      titulo: 'Agregar tarjeta',
+      sub: 'Los campos los muestra directamente tu procesador de pagos. El número de tu tarjeta no pasa por e-PetPlace.',
+      aliasLabel: 'Ponle un nombre',
+      aliasOpcional: '(opcional)',
+      aliasPlaceholder: 'Visa de Kari',
+      aliasAyuda: 'Para reconocerla después. Puedes dejarlo vacío.',
+      guardar: 'Guardar tarjeta',
+      sello: 'Procesado por',
+      pie: 'Tus datos de tarjeta viajan cifrados a tu procesador de pagos. e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que puedas reconocerla.',
+      guardada: 'Listo, tu tarjeta quedó guardada.',
+      noGuardada: 'No pudimos guardar la tarjeta.',
+      guardadaCerrar: 'Listo, tu tarjeta quedó guardada. Ya puedes cerrar esta ventana.',
+      noGuardadaCerrar: 'No pudimos guardar la tarjeta. Ya puedes cerrar esta ventana.',
+      enlaceInvalido: 'Este enlace no es válido. Vuelve a intentarlo desde la app.',
+      noAbrio: 'No pudimos abrir el formulario de pago. Prueba de nuevo en un momento.',
+      otpEnviado: 'Te enviamos un código para confirmar la tarjeta. Escríbelo acá arriba.',
+      guardando: 'Guardando…',
+      tardando: 'Esto está tardando más de lo normal. Puedes intentar de nuevo, o cerrar y volver desde la app.',
+      revisaDatos: 'Revisa los datos de la tarjeta.',
+      defectoNuestro: 'No pudimos guardar la tarjeta. Ya lo estamos viendo.',
+      /* ☠️ S101-D — acá vivía la ÚNICA línea en VOSEO de toda esta superficie
+         («probá de nuevo»), contra las otras 19 en tuteo. Curada con el resto. */
+      defectoNuestroReintento: 'No pudimos guardar la tarjeta. Ya lo estamos viendo — prueba de nuevo en un momento.',
+      sinTerminar: 'Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Prueba de nuevo.',
+      probaOtra: 'No pudimos guardar la tarjeta. Prueba con otra.',
+    },
+    en: {
+      docTitulo: 'Add card · e-PetPlace',
+      titulo: 'Add card',
+      sub: 'These fields come straight from your payment processor. Your card number never passes through e-PetPlace.',
+      aliasLabel: 'Give it a name',
+      aliasOpcional: '(optional)',
+      aliasPlaceholder: "Kari's Visa",
+      aliasAyuda: 'So you can recognize it later. You can leave it empty.',
+      guardar: 'Save card',
+      sello: 'Processed by',
+      pie: 'Your card details travel encrypted to your payment processor. e-PetPlace only stores the brand and the last four digits, so you can recognize it.',
+      guardada: 'Done — your card is saved.',
+      noGuardada: "We couldn't save the card.",
+      guardadaCerrar: 'Done — your card is saved. You can close this window.',
+      noGuardadaCerrar: "We couldn't save the card. You can close this window.",
+      enlaceInvalido: 'This link is no longer valid. Try again from the app.',
+      noAbrio: "We couldn't open the payment form. Try again in a moment.",
+      otpEnviado: 'We sent you a code to confirm the card. Type it above.',
+      guardando: 'Saving…',
+      tardando: 'This is taking longer than usual. You can try again, or close and come back from the app.',
+      revisaDatos: 'Check the card details.',
+      defectoNuestro: "We couldn't save the card. We're already looking into it.",
+      defectoNuestroReintento: "We couldn't save the card. We're already looking into it — try again in a moment.",
+      sinTerminar: "We saved your card with the processor, but couldn't finish. Try again.",
+      probaOtra: "We couldn't save the card. Try another one.",
+    },
+  };
+  var T = VOCES[LANG];
+
+  /* 🔴 LOS TEXTOS DEL WIDGET SON DEL PROVEEDOR, Y VIENEN EN ESPAÑOL SIEMPRE.
+     Medido en la fuente del SDK (`payment_stable.min.js`):
+       · `Payment.init(env_mode, app_code, app_key)` y
+         `Payment.addCard(uid, email, card, ok, fail, payment_form)`
+         **no tienen parámetro de idioma** — el `locale` es/en/pt que la doc
+         documenta pertenece a `init_reference`, que es OTRA API (el checkout
+         hospedado), no a `paymentez.js`.
+       · Pero sus veinte textos viven como **propiedades estáticas de
+         `PaymentForm`** y **se LEEN al iniciar el formulario, no al cargar el
+         script** — o sea que asignarlas acá, antes de montar, SÍ las cambia.
+     ⇒ Con `en` se sobrescriben las que la familia lee. *Se declara que esto
+     toca API del proveedor: si un día renombra estas constantes, el formulario
+     vuelve al español **sin romperse** — degrada, no falla.* */
+  function traducirWidget() {
+    if (LANG !== 'en' || typeof PaymentForm === 'undefined') return;
+    PaymentForm.CREDIT_CARD_NUMBER_PLACEHOLDER = 'Card number';
+    PaymentForm.NAME_PLACEHOLDER = 'Cardholder name';
+    PaymentForm.EXPIRY_PLACEHOLDER = 'MM / YY';
+    PaymentForm.CVC_PLACEHOLDER = 'CVC';
+    PaymentForm.EMAIL_PLACEHOLDER = 'E-mail';
+    PaymentForm.CELLPHONE_PLACEHOLDER = 'Mobile';
+    PaymentForm.FISCAL_NUMBER_PLACEHOLDER = 'ID document';
+    PaymentForm.VERIFICATION_MESSAGE = 'This operation requires verification';
+    PaymentForm.VERIFICATION_PLACEHOLDER = 'OTP code';
+    PaymentForm.INVALID_CARD_TYPE_MESSAGE = 'This card type is not valid for this operation.';
+  }
+
+  function aplicarIdioma() {
+    document.documentElement.lang = LANG;
+    document.title = T.docTitulo;
+    var pon = function (id, txt) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    };
+    pon('t-titulo', T.titulo);
+    pon('t-sub', T.sub);
+    pon('t-alias-label', T.aliasLabel);
+    pon('t-alias-opcional', T.aliasOpcional);
+    pon('alias-ayuda', T.aliasAyuda);
+    pon('t-sello', T.sello);
+    pon('t-pie', T.pie);
+    pon('guardar', T.guardar);
+    var al = document.getElementById('alias');
+    if (al) al.setAttribute('placeholder', T.aliasPlaceholder);
+    traducirWidget();
+  }
+  aplicarIdioma();
 
   /* ── LOS PARÁMETROS DE LA URL ──────────────────────────────────────────
      `alta`   — handle OPACO del alta. **No es un secreto y no identifica a
@@ -259,8 +385,8 @@
           fuente: 'epetplace-alta-tarjeta', desenlace: desenlace, alta: alta,
         }));
         decir(desenlace === 'guardada'
-          ? 'Listo, tu tarjeta quedó guardada.'
-          : 'No pudimos guardar la tarjeta.',
+          ? T.guardada
+          : T.noGuardada,
           desenlace === 'guardada' ? null : 'error');
         return;
       }
@@ -268,8 +394,8 @@
 
     if (!volverPermitido(volver)) {
       decir(desenlace === 'guardada'
-        ? 'Listo, tu tarjeta quedó guardada. Ya puedes cerrar esta ventana.'
-        : 'No pudimos guardar la tarjeta. Ya puedes cerrar esta ventana.',
+        ? T.guardadaCerrar
+        : T.noGuardadaCerrar,
         desenlace === 'guardada' ? null : 'error');
       return;
     }
@@ -281,7 +407,7 @@
 
   if (!alta) {
     btn.disabled = true;
-    decir('Este enlace no es válido. Vuelve a intentarlo desde la app.', 'error');
+    decir(T.enlaceInvalido, 'error');
     return;
   }
 
@@ -291,7 +417,7 @@
     Payment.init(CONFIG.MODO, CONFIG.APP_CODE, CONFIG.APP_KEY);
   } catch (e) {
     btn.disabled = true;
-    decir('No pudimos abrir el formulario de pago. Prueba de nuevo en un momento.', 'error');
+    decir(T.noAbrio, 'error');
     return;
   }
 
@@ -327,7 +453,7 @@
         desafioVisto = true;
         pararReloj();                       /* el desafío NO es un cuelgue */
         /* Tuteo neutro, la voz de la casa (regla 27 / L-148): decía «Escribilo». */
-        decir('Te enviamos un código para confirmar la tarjeta. Escríbelo acá arriba.');
+        decir(T.otpEnviado);
         obs.disconnect();
       }
     });
@@ -341,7 +467,7 @@
 
   btn.onclick = function () {
     btn.disabled = true;
-    decir('Guardando…');
+    decir(T.guardando);
     desafioVisto = false;
     vigilarDesafio();
 
@@ -353,7 +479,7 @@
     reloj = setTimeout(function () {
       if (desafioVisto) return;
       btn.disabled = false;
-      decir('Esto está tardando más de lo normal. Puedes intentar de nuevo, o cerrar y volver desde la app.', 'error');
+      decir(T.tardando, 'error');
     }, TIMEOUT_MS);
 
     var campo = $('#tarjeta');
@@ -370,7 +496,7 @@
       if (!tarjeta) {
         pararReloj();
         btn.disabled = false;
-        decir('Revisa los datos de la tarjeta.', 'error');
+        decir(T.revisaDatos, 'error');
         return;
       }
     } catch (e) {
@@ -378,7 +504,7 @@
       btn.disabled = false;
       /* El SDK valida sus propios campos. Su queja es sobre la forma del
          dato, no sobre el dato: no se registra ni se reenvía. */
-      decir('Revisa los datos de la tarjeta.', 'error');
+      decir(T.revisaDatos, 'error');
       return;
     }
 
@@ -397,7 +523,7 @@
           /* 🔴 Una respuesta OK sin token **no es un veredicto del emisor**: es
              una anomalía nuestra o del proveedor. *Decirle «probá con otra» la
              manda a probar tarjetas que van a fallar todas igual.* */
-          decir('No pudimos guardar la tarjeta. Ya lo estamos viendo.', 'error');
+          decir(T.defectoNuestro, 'error');
           return;
         }
         /* 🔴 Al servidor viajan el token y los METADATOS DE RECONOCIMIENTO.
@@ -426,7 +552,7 @@
         .then(function () { terminar('guardada'); })
         .catch(function () {
           btn.disabled = false;
-          decir('Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Prueba de nuevo.', 'error');
+          decir(T.sinTerminar, 'error');
         });
       },
       function (resp) {
@@ -460,7 +586,7 @@
           /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
              la causa fina la resuelve la app con la taxonomía de la letra §7.
              «Fondos insuficientes» jamás se nombra. */
-          decir('No pudimos guardar la tarjeta. Prueba con otra.', 'error');
+          decir(T.probaOtra, 'error');
           terminar('rechazada');
           return;
         }
@@ -469,7 +595,7 @@
            abierta** (vence sola) y la voz no le pide nada a la familia.
            ⚠️ El mapa de `type` está incompleto a propósito: se cierra
            midiendo un rechazo real en sandbox, no enumerando de memoria. */
-        decir('No pudimos guardar la tarjeta. Ya lo estamos viendo — probá de nuevo en un momento.', 'error');
+        decir(T.defectoNuestroReintento, 'error');
       },
       campo
     );
