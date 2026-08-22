@@ -32,6 +32,9 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { timingSafeEqual } from 'node:crypto';
+/* El predicado de la verdad verificada vive aparte para poder testearlo sin
+   montar el cliente de Supabase — ver `_verdad.ts`. */
+import { esVerdadVerificada } from './_verdad.ts';
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 const API_KEY = Deno.env.get('DEUNA_API_KEY') ?? '';
@@ -165,14 +168,9 @@ Deno.serve(async (req) => {
       const t = (await r.text()).slice(0, 4000);
       try { infoCrudo = JSON.parse(t); } catch { /* el crudo alcanza */ }
 
-      /* 🔴 EL FANTASMA — S103-D §2quater. Una consulta por algo que NO EXISTE
-         devuelve **HTTP 200 con `status: PENDING` y `amount: 0`**, jamás
-         `NOT_FOUND`. Así que un 200 NO alcanza para dar por verificado nada:
-         se exige APPROVED **con monto**. *El proveedor no falla: contesta algo
-         verosímil, y eso sobrevive a cualquier revisión de código.* */
-      verificado = r.ok
-        && String(infoCrudo.status ?? '').toUpperCase() === 'APPROVED'
-        && Number(infoCrudo.amount ?? 0) > 0;
+      /* 🔴 EL FANTASMA — el predicado vive arriba, exportado y con test propio
+         sobre la respuesta REAL grabada de QA. */
+      verificado = esVerdadVerificada(r.ok, infoCrudo);
     } catch (e) {
       /* No pudimos preguntar ≠ el pago es falso. Queda `no_verificado` y **el
          barrido lo va a encontrar**: no se confirma, y tampoco se rechaza. */

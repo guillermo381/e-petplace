@@ -1,0 +1,60 @@
+{
+  "_nota": "Respuestas REALES de payment/info del ambiente QA de DeUna, grabadas por S103-D el 22-ago-2026. NO tienen dato personal: los campos ordererName/ordererIdentification vinieron vacios porque las transacciones consultadas no existen. Si algun dia se graba una respuesta de una transaccion REAL, la cedula y el nombre NO entran a este archivo — §9 de LETRA_DEUNA dice que ese dato vive solo en el crudo del buzon.",
+
+  "fantasma_idType_0": {
+    "_como_se_obtuvo": "POST /merchant/v1/payment/info con idType '0' y idTransacionReference '00000000-0000-4000-8000-000000000000' (un uuid inventado). HTTP 200.",
+    "_lo_que_prueba": "Una transaccion INEXISTENTE no devuelve NOT_FOUND: devuelve PENDING con amount 0 y una frase tranquilizadora. Es el hallazgo que obliga a que el corte de la ventana lo ponga nuestro reloj.",
+    "status": "PENDING",
+    "internalTransactionReference": "",
+    "amount": 0,
+    "transactionId": "00000000-0000-4000-8000-000000000000",
+    "transferNumber": "",
+    "date": "",
+    "branchId": "",
+    "posId": "",
+    "currency": "USD",
+    "description": "Your payment is being synchronized. Please check back in a moment.",
+    "ordererName": "",
+    "ordererIdentification": ""
+  },
+
+  "fantasma_idType_1": {
+    "_como_se_obtuvo": "Igual pero con idType '1' y NUESTRA referencia inexistente 'EPQAnoexiste01'. HTTP 200.",
+    "_lo_que_prueba": "Peor que el anterior: devuelve el ECO de la referencia que mandamos, con cara de registro existente.",
+    "status": "PENDING",
+    "internalTransactionReference": "EPQAnoexiste01",
+    "amount": 0,
+    "transactionId": "",
+    "transferNumber": "",
+    "date": "",
+    "branchId": "",
+    "posId": "",
+    "currency": "USD",
+    "description": "Your payment is being synchronized. Please check back in a moment.",
+    "ordererName": "",
+    "ordererIdentification": ""
+  },
+
+  "_sinteticos": {
+    "_nota": "Estos NO son respuestas grabadas: son variaciones construidas sobre la forma real de arriba, y se declaran como sinteticas para que nadie las cite como medicion. Existen para cubrir los casos que QA no nos deja producir sin pointOfSale.",
+
+    "aprobada_con_monto": {
+      "_lo_que_prueba": "El unico caso que debe verificar.",
+      "status": "APPROVED", "amount": 24.5, "transactionId": "sintetico-aprobada",
+      "transferNumber": "123456", "currency": "USD"
+    },
+    "aprobada_sin_monto": {
+      "_lo_que_prueba": "EL CASO FILOSO: si el proveedor algun dia contestara APPROVED sobre un registro vacio, sin el candado del monto lo dariamos por cobrado.",
+      "status": "APPROVED", "amount": 0, "transactionId": "sintetico-fantasma-aprobado",
+      "transferNumber": "", "currency": "USD"
+    },
+    "reversada": {
+      "_lo_que_prueba": "REVERSED no confirma.",
+      "status": "REVERSED", "amount": 24.5, "transactionId": "sintetico-reversada"
+    },
+    "reverso_fallido": {
+      "_lo_que_prueba": "REVERSED_FAILED tampoco: es caso de soporte, jamas se resuelve solo.",
+      "status": "REVERSED_FAILED", "amount": 24.5, "transactionId": "sintetico-reverso-fallido"
+    }
+  }
+}
