@@ -203,6 +203,22 @@ export function FilaDeUna() {
   );
 }
 
+/**
+ * 🔴 ¿DEUNA SE PUEDE ELEGIR? — **UNA sola constante, y es el interruptor.**
+ *
+ * Hoy `false` **por un dato del comercio que no tenemos**: el `pointOfSale`
+ * (medido por D: obligatorio, numérico, y **no lo expone ningún endpoint** —
+ * 16 sondeos, 404 en los 16). Sin él no se crea ni una transacción.
+ * **Dueño: el founder.**
+ *
+ * ⚠️ **NO alcanza con ponerla en `true` para encender el riel.** Cuando el
+ * dato llegue hacen falta las dos mitades: **ésta** y **la puerta de D**
+ * (`pagos-deuna-solicitud`). *Se escribe acá para que quien la flipee no crea
+ * que terminó — una constante que enciende media función es peor que una
+ * apagada.*
+ */
+export const DEUNA_ELEGIBLE = false;
+
 /** El bloque de una fila vencida, para cuando la pantalla quiera explicarlo. */
 export function VozVencida({ visible }: { visible: boolean }) {
   const { t } = useTraduccion();

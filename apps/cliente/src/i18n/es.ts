@@ -1576,20 +1576,35 @@ export const clienteEs = {
     /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
        pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
     deunaCodigoVence: 'El código vence en {{tiempo}}',
-    /* 🔴 «Copiar código» — **dictamen del founder, 22-ago**, que corrige su
-       propia instrucción anterior («solo deja la palabra copiar») **y llega a
-       la salida buena por el camino correcto**:
+    /* 🔴 «Copiar» — **FIRMA FINAL del founder, 22-ago.** Su razón, literal:
+       *es redundante en pantalla —hay un código y un botón al lado, la palabra
+       repite lo que el ojo ya sabe— y recupera los ~60 px que le quitaba al
+       código, que es lo único que esa pantalla vino a mostrar.*
 
-       > *la visible ES el nombre accesible, así que la salida no es romper la
-       > pieza pidiendo una etiqueta aparte: es que la visible diga el objeto.*
+       ── EL RECORRIDO COMPLETO, con su porqué, PARA QUE NADIE LO REVIERTA ──
+       `Copiar código` → `Copiar` → `Copiar código` → **`Copiar`**.
+       *Cuatro etapas y dos pares que se ven idénticos: sin esta nota, el
+       próximo que lea el código va a ver una oscilación sin sentido y va a
+       "corregirla".*
 
-       ⇒ **una sola cadena dice lo mismo a quien ve y a quien escucha.**
-       ⏪ Pasó por «Copiar código» → «Copiar» → «Copiar código». *La primera y
-       la última se ven iguales y NO lo son: la primera era mi lectura del
-       contrato, la última es la firma del founder con el argumento resuelto.
-       Se deja escrito para que nadie la «simplifique» de nuevo creyendo que
-       ahorra ancho — el ancho ya se midió (ver la nota del componente).* */
-    deunaCopiar: 'Copiar código',
+       ① `Copiar código` — mi lectura del contrato de `BotonCopiar`: la
+          etiqueta visible ES el nombre accesible, así que debe decir el objeto.
+       ② `Copiar` — craft del founder: la caja competía con el código.
+       ③ `Copiar código` — el founder corrige su propia instrucción anterior
+          (había pedido una etiqueta accesible aparte, y **el contrato la
+          prohíbe con razón**: dos nodos `role="button"` anidados).
+       ④ **`Copiar`** — firma final, con el costo medido y ACEPTADO.
+
+       ⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO:** quien no ve la pantalla
+       escucha **«Copiar» sin el objeto**. **Se acepta**, y la razón es la que
+       hay que conservar: *el lector de pantalla **acaba de leer el código** —
+       el contexto está a un elemento de distancia.*
+       🔴 **Esto NO es una omisión de accesibilidad pendiente de curar.** Es
+       una decisión tomada con su costo a la vista. *Quien la "arregle"
+       alargando la etiqueta va a estar deshaciendo una firma, no corrigiendo
+       un olvido.* **La cadena visible sigue siendo el nombre accesible y NO
+       nace una prop aparte.** */
+    deunaCopiar: 'Copiar',
     deunaCopiado: 'Código copiado',
     deunaCodigoVencido: 'El código venció.',
     deunaCodigoNuevo: 'Generar un código nuevo',

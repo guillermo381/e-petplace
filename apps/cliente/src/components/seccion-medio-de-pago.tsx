@@ -79,7 +79,31 @@ export function useMedioDePago(activo: boolean): MedioDePago {
     setMedios(r.data);
     /* 🔴 Preselección **solo cuando hay UNA**: con una sola tarjeta preguntar
        es fricción sin decisión. Con dos o más **no se elige por la familia** —
-       ése era el andamio que la Fase 5 vino a matar. */
+       ése era el andamio que la Fase 5 vino a matar.
+
+       ── 🔴 LA FIRMA DEL DEFAULT (founder, 22-ago), Y POR QUÉ NO ESTÁ ACÁ ──
+       Firmado: **DeUna viene preseleccionada, salvo que el cliente haya
+       elegido otro medio antes** — *«por defecto a menos que el usuario lo
+       cambie»*. **El default es para quien no eligió nunca, no un reset por
+       compra.**
+
+       **Dos bloqueantes MEDIDOS, y ninguno es de esta pantalla:**
+       ① **DeUna no es elegible** (`DEUNA_ELEGIBLE === false`, falta el
+          `pointOfSale`) ⇒ el default **no puede aplicarse a nada todavía**.
+       ② 🔴 **NO HAY DÓNDE RECORDAR LA ELECCIÓN PREVIA.** Medido el 22-ago:
+          `elegido` vive en `useState` y **muere con la pantalla**;
+          `user_preferencias` tiene **solo `idioma`**; y el carrito declara
+          explícitamente que **no persiste en AsyncStorage**.
+          ⇒ *«salvo que el cliente haya elegido otro medio antes» exige una
+          memoria que no existe.* **Sin ella, un default de DeUna pisaría la
+          elección del cliente en CADA compra — que es exactamente el «reset
+          por compra» que la firma prohíbe.**
+
+       ⇒ **Se construye el ORDEN (regla 1, que no depende de nada) y se
+         declara el DEFAULT (regla 2) con su contrato pedido a A.** *Son dos
+         reglas separadas y el founder las separó a propósito: una se puede
+         hoy y la otra no.* **Poner el default sin la memoria sería cumplir la
+         mitad visible de la firma rompiendo su mitad importante.** */
     setElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
   }, []);
 
@@ -184,6 +208,22 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
         titulo={t('pago.comoPagas')}
       >
         <View style={{ gap: spacing[2] }}>
+          {/* 🔴 REGLA 1 DE LA FIRMA (founder, 22-ago): **DeUna es SIEMPRE la
+              primera fila, sin condición.**
+
+              ⏪ Nació debajo de las tarjetas con el argumento de que «es un
+              medio, no una acción» — cierto, y **insuficiente**: el founder
+              firmó el ORDEN, no solo la pertenencia. *La regla vieja decía
+              dónde NO va (al lado de «agregar»); ésta dice dónde VA.*
+
+              **Sin condición** quiere decir que **no se mueve cuando no es
+              elegible.** Una opción que cambia de lugar según su estado obliga
+              a buscarla, y el founder la puso primera para que no haya que
+              hacerlo. *Su estado lo dice su propia fila, no su posición.*
+
+              Y por esto la sección se llama «cómo quieres pagar» y no «tus
+              tarjetas» (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤). */}
+          <FilaDeUna />
           {medios.map((m) => (
             <FilaMedioDePago
               key={m.id}
@@ -192,17 +232,6 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
               onPress={() => medio.elegir(m.id)}
             />
           ))}
-          {/* 🔴 S103-C · DEUNA ES UNA FILA MÁS — y por eso esta sección se
-              llama «cómo quieres pagar» y no «tus tarjetas»
-              (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤).
-
-              Va **debajo de las tarjetas y encima de «agregar»**: es un medio,
-              no una acción. *Ponerla al lado del botón de agregar la leería
-              como «agregar Deuna», que es exactamente lo que NO es — DeUna no
-              tiene alta ni token (`LETRA_DEUNA` §1).*
-
-              Presente y no elegible: el porqué medido vive en `FilaDeUna`. */}
-          <FilaDeUna />
           <Boton
             variante="secundario"
             etiqueta={t('cuenta.medioAgregar')}
