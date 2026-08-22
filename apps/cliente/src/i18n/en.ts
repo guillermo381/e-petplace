@@ -1293,6 +1293,7 @@ export const clienteEn = {
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',
     deunaFila: 'Deuna',
+    deunaNoDisponibleAhora: "Deuna isn't available yet — for now you pay by card.",
     deunaPronto: "Soon you'll be able to pay from your Deuna app.",
     deunaEsperaTitulo: 'Enter this code in your Deuna app',
     deunaEsperaCuerpo: 'Open your Deuna app, enter the code and confirm the payment.',

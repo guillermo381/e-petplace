@@ -1572,6 +1572,9 @@ export const clienteEs = {
        honesta y temporal: el riel está bloqueado por un dato del comercio
        (el `pointOfSale`), medido por la pista D. */
     deunaFila: 'Deuna',
+    /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
+       default cae a tarjeta y jamás cambia en silencio. */
+    deunaNoDisponibleAhora: 'Deuna todavía no está disponible: por ahora se paga con tarjeta.',
     deunaPronto: 'Muy pronto vas a poder pagar desde tu app Deuna.',
     /* La espera del código: **misma pantalla, otra voz** (§6, firma ② del
        founder: «funciona exactamente igual que si fuera tarjeta»). */

@@ -567,7 +567,7 @@ export default function DespensaCheckout() {
     // ③④ El débito y la espera declarada — **por el cobro de la casa**.
     //    ☠️ El andamio `cobrarConTarjetaGuardada` murió acá: su lápida decía
     //    «muere en la Fase 5», y la Fase 5 cerró.
-    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.elegido);
+    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.idTarjeta);
     setTrabajando(false);
     if (!cobro.ok) {
       mostrar({ texto: t(cobro.voz), variante: 'error' });
