@@ -3391,6 +3391,34 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="StepperCantidad · el número EDITABLE lleva la caja del campo (S103-B)">
+          <View style={{ gap: spacing[3] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <StepperCantidad valor={3} min={1} max={99} onCambio={() => {}} etiqueta="Editable" editable />
+              <StepperCantidad valor={3} min={1} max={99} onCambio={() => {}} etiqueta="Solo muestra" />
+            </View>
+            <Texto variante="apoyo">
+              El discriminador son los DOS juntos, y antes de esta tanda eran el MISMO objeto: el
+              TextInput y el Text compartían ancho, centrado, mono tabular, tracking y color — la única
+              diferencia era un padding en cero. La firma del founder: un número suelto se lee como
+              resultado, no como control. El de la izquierda se puede tipear y lo dice sin decirlo; el de
+              la derecha es un dato y no promete edición.
+            </Texto>
+            <Texto variante="apoyo">
+              No nace una pastilla nueva: es la caja del campo de la casa (N11/N11′), la misma anatomía
+              que llevan Campo, CampoCodigo y CampoFecha — contorno con piso de 3:1 vigilado por R43,
+              interior claro, y foco con acento más elevación. Tocalo y mirá el borde: cambia de COLOR y
+              nunca de grosor, que es lo que evita que el layout se corra mientras alguien tipea. El alto
+              sale derivado del lado de los botones de paso, así que los tres se alinean por construcción.
+            </Texto>
+            <Texto variante="apoyo">
+              Lo que NO está acá y se declara: sobre el bloque lleno (tamano ancho, la vitrina) la caja no
+              se monta. Su interior está definido contra el fondo base y ahí pondría una caja blanca sobre
+              un bloque de CTA. Es 1 de los 3 montajes editables vivos y espera decisión del founder.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="Mutacion (S100d·bis) — lo que cambia de forma sin irse">
           <View style={{ gap: spacing[3], maxWidth: 200 }}>
             <Mutacion

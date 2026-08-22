@@ -1,6 +1,6 @@
 # LETRA_DEUNA.md — e-PetPlace · el segundo riel
 
-> **Versión:** v1.6 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
+> **Versión:** v1.7 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
 > 22-ago-2026 (mesa 104) contra el **ambiente QA real** · **Estado:** RIGE —
 > firmas ①②③ del founder (§11), la ③ **ya no es supuesto: es hecho
 > confirmado por el proveedor**.
@@ -320,6 +320,23 @@ mide qué existe).
 - `REVERSED_FAILED` (el reverso que DeUna no pudo acreditar) es **caso de
   soporte 🔴 con registro** — plata del cliente en el limbo jamás se archiva
   sola.
+
+### 🔴 QUIÉN LO CONSTRUYE — dictamen de mesa, 22-ago-2026
+
+**Lo levantó la pista D en su inventario, y con razón: no tenía dueño, y las dos
+letras discrepaban.** Esta decía *«vía manual»* sin decir quién la hace;
+`LETRA_MOTOR_PAGOS_S101` §9 **excluía el reembolso de su alcance**. *Entre las
+dos, nadie lo construía — y eso no se descubre hasta que alguien pregunta cómo
+se devuelve un cobro.*
+
+| | |
+|---|---|
+| **El refund por API es de la PISTA DEL RIEL (D)** | es **una llamada al proveedor con su autenticación y su ventana de mismo día** — misma clase que la solicitud y el buzón, no una pieza de motor |
+| **Lo que NO es de D** | **cuándo se reversa y qué recibe el cliente** — ya firmado en `LETRA_SALDO`: **vía automática = saldo · medio original = vía manual** |
+| **NO entra en el v1** | el reverso por API es **camino manual de soporte**: se construye **después** del circuito de cobro |
+
+*Dato bueno de D: `transactionReverseId` **ya tiene columna esperándolo** en su
+M2, así que el día que se construya **no pide migración**.*
 - La promesa exacta de cara al cliente (plazos, texto de T&C §9.2) es de la
   **letra v3.0 / S102**, con este dato adentro.
 
@@ -393,6 +410,15 @@ como dato, no como consulta.
 ---
 
 ## Historial
+
+- **v1.7 (22-ago-2026, mesa 104):** **§8 gana dueño.** La pista D levantó que el
+  reverso por API **no lo construía nadie** y que las dos letras discrepaban
+  —ésta decía «vía manual» sin decir quién, y `LETRA_MOTOR_PAGOS_S101` §9 lo
+  excluía de su alcance—. **Dictamen: el refund por API es de la pista del riel**
+  (es una llamada al proveedor con su autenticación y su ventana, misma clase
+  que la solicitud y el buzón); **cuándo se reversa y qué recibe el cliente ya
+  está firmado en `LETRA_SALDO`**; y **no entra en v1** — es camino manual de
+  soporte y se construye después del circuito de cobro.
 
 - **v1.6 (22-ago-2026, mesa 104):** nace **§6bis — DeUna es la PRIMERA opción y
   el medio POR DEFECTO**, con la elección previa del cliente ganándole al

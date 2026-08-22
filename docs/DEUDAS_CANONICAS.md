@@ -18579,6 +18579,27 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-349** — **UN TRASPASO ES UN MAPA DE DÓNDE RETOMAR, NO UNA FUENTE DE DATOS VIVOS.** *(Autoría S103-B; depositada por A.)*
+  **Y se cobró en la misma sesión en que se escribió**, que es lo que la vuelve creíble: el traspaso de B llevaba una tabla de ramas sin mergear que **envejeció entre que se armó y que se reportó**. *No por descuido: una lista de pendientes se arma ANTES de que el merge ocurra — es estructural* (`METODO_TRES_PISTAS` §S91-④ ya lo había medido tres veces en un día).
+  ⇒ **Todo documento de traspaso lleva su propia ley de lectura ARRIBA DE TODO:** lo que dice sobre el mundo **se re-mide antes de usarse**; lo que sirve es **dónde retomar y con qué criterio**, que no caduca.
+  **Lo que un traspaso SÍ debe llevar, y por eso vale:** qué mide cada instrumento **y qué NO mide** · las condiciones de uso · las trampas del entorno · lo pendiente **como instrucción ejecutable**. *Todo eso sobrevive; los SHA, los contadores y las listas de pendientes no.*
+  **Su hermana operativa:** la sección de compactación del canon dice lo mismo para el resumen de una sesión. **Un traspaso es el resumen de una pista entera — el mismo riesgo, con más superficie.** Origen: S103-B.
+
+- **L-350** — **UN INVENTARIO DE CIRCUITO ENCUENTRA LO QUE NINGÚN TEST DE PIEZA PUEDE ENCONTRAR.** *(Autoría S103-D — cobrada sobre su propia pista; depositada por A.)*
+  **El caso:** `pagos-deuna-barrido/` tenía `_reloj.ts` y `_ritmo.ts` con **24 tests verdes**… **y ningún `index.ts`.** Lógica probada, **ninguna función desplegable que la use**. Es **`L-318`** —*motor sin puerta*— cobrada por quien más la había citado ese día.
+  🔴 **Y lo que la vuelve ley nueva en vez de otra aplicación de `L-318`: ni los tests ni el gate PODÍAN notarlo.** Los tests medían **la pieza**; el gate medía **símbolos**. *Los dos contestaban bien su pregunta, y la pregunta «¿esto es alcanzable desde afuera?» no era la de ninguno.*
+  > ### **Un test prueba que la pieza funciona. Solo recorrer el circuito prueba que la pieza está ENCHUFADA.**
+  **⇒ Lo exigible: antes de declarar un riel listo, se recorre de punta a punta enumerando SUS PIEZAS Y SUS UNIONES** —no la lista de pendientes, que solo tiene lo que alguien recordó anotar—. *El inventario de D encontró además **dos huecos de OTRA pista** que no estaban en ningún plan ni en ninguna cola: el actuador ciego al proveedor nuevo y un wrapper inexistente.* **Ninguno de los tres se deduce leyendo el repo: los tres aparecen al preguntar «¿qué toca a qué?».**
+  **Su parentesco:** `L-318` nombra el defecto (*motor sin puerta*); **ésta nombra el INSTRUMENTO que lo encuentra**, y por eso son distintas: *saber que existe la clase no sirve si nada la busca.* Origen: S103-D, inventario de aptitud del riel DeUna.
+
+- **L-348** — 🔴 **«MERGEADO» Y «EMPUJADO» SON DOS AFIRMACIONES DISTINTAS — Y LA CLASE NO SE CIERRA RELEYENDO: SE CIERRA DECLARANDO CONTRA QUÉ OBJETO MEDISTE.** *(Autoría de la segunda mitad: S103-B. Firmada por la mesa, 22-ago-2026.)*
+  **① La frontera corrida un paso.** `L-217` fijó que *«en origin» y «en el canon» son dos afirmaciones distintas*. **Falta un escalón antes:** un merge que no se empujó **no está en ninguno de los dos**, y **muere con la máquina**. *El precedente es caro y es de la casa: S92 abrió rescatando cuatro artefactos —la letra del LOOP escrita para ejecutarse ese día, dos skills y el volcado con nueve hallazgos probados— que vivían en `pista/s90-b`, **y el acta de S90 decía «TODO en origin» y era CIERTA**.*
+  ⇒ **La cadena completa: escrito → commiteado → mergeado → EMPUJADO → en el canon.** Cada eslabón se verifica contra su propio objeto, y **`push` se verifica con `ls-remote` contra el remoto, jamás contra la copia local de la ref** — *`origin/main` tiene forma de ref remoto y naturaleza de dato en caché.*
+  **② Y LA MITAD QUE CIERRA LA CLASE, que es de B y vale más que el caso:** dos pistas reportaron lo contrario sobre el mismo hecho —*«está mergeada»* / *«no está»*— y **las dos tenían razón**. A midió `merge-base --is-ancestor <sha> main`; B midió contra `origin/main`. **Dos preguntas distintas, las dos correctas, reportadas con la misma frase.**
+  > ### **Ninguno de los dos estaba desactualizado: medían objetos distintos y los llamaban igual.**
+  🔴 **Por eso `L-166` no alcanza acá.** *«Todo dato vivo se lee al momento de usarlo»* cura el dato que **envejece** — y **los dos habían releído**. Lo que no cura es el dato **correcto medido contra otro referente**, que **se ve idéntico a un acuerdo** hasta que alguien actúa sobre él.
+  ⇒ **Lo exigible: todo reporte sobre estado de repo declara SU OBJETO** — `main` local · `origin/main` · `ls-remote`. **Es la ley de los frenos de S84 (*todo freno declara contra qué midió*) aplicada al reporte entre pistas**, y es igual de barata: una palabra al lado del verbo. Origen: S103, tercer push demorado del día, con una pista bloqueada del otro lado.
+
 - **L-347** — **UN INSTRUMENTO QUE MIDE LA FORMA QUE ÉL ESPERA, EN VEZ DE LA QUE EL ARCHIVO USA, DA VERDE SOBRE NADA.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
   **Tres veces el mismo defecto en UNA sola tanda**, y las tres con síntomas distintos:
   · el reconocedor de secciones **esperaba una sangría que los archivos no tienen** ⇒ **VERDE midiendo CERO secciones**;
@@ -18798,6 +18819,85 @@ el reemplazo listo → el enchufe reusando el motor entero.
 
 **Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
 resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-872 🔴 · EL CAMINO PRINCIPAL DE LA DESPENSA ESTÁ CERRADO: «VER EL TOTAL» NO SE PUEDE TOCAR CON ENVÍO A DOMICILIO
+
+🔴 **ALTA.** *Elevada por el founder sobre el recorrido medido de S103:*
+**«eso es más grave que cualquier píxel de esta mesa».**
+
+**Medido en el aparato el 22-ago**, cuenta real, pedido fresco de un producto,
+Metro sobre `main` (`901c5322`):
+
+| | |
+|---|---|
+| método de entrega | **«Envío a domicilio»** (el que viene elegido por defecto) |
+| botón «Ver el total» | **DESHABILITADO** — relleno pálido, texto gris |
+| voz al pie | *«No hay ventana de entrega disponible — revisa la fecha o prueba retiro en tienda.»* |
+| dirección usada | `170135 Quito, Ecuador · Quito · Shyris y suecia Edificio Iqon` (dato sembrado, válido) |
+| con «Retiro en tienda» | **el botón se habilita y el camino sigue** |
+
+> ### **El camino por el que la despensa vende —el envío a domicilio— no llega al pago.** Solo llega el retiro en tienda.
+
+**Qué lo hace grave y no un borde:** *el envío es el camino principal del
+producto*, y **está cerrado en el aparato del founder, con dirección válida y
+pedido fresco**. **Ningún typecheck, lint ni juez lo ve** — porque **no falla:
+se niega, y lo dice bien.** *Es la clase de defecto que solo aparece caminando,
+y apareció caminando.*
+
+**Lo que la voz hace BIEN, y por eso no es un callejón:** nombra la causa y
+ofrece dos salidas concretas (*revisá la fecha · probá retiro en tienda*). **La
+honestidad está; lo que falta es la ventana.**
+
+🔴 **LO QUE NO SE MIDIÓ, declarado para que nadie lo lea como diagnóstico
+cerrado:** **no se determinó POR QUÉ no hay ventana.** Las hipótesis obvias —sin
+cupo del vendedor para la fecha · sin zona de cobertura para esa dirección · sin
+repartidor configurado · la fecha por defecto cae fuera de toda ventana— **no se
+midieron contra la base**, y son curas completamente distintas. *Diagnosticar sin
+medir acá sería exactamente lo que esta casa cobra caro.*
+
+**Primer paso de quien la tome:** medir **contra la base**, para esa dirección y
+esa fecha, cuál de las cuatro es — y recién ahí decidir si es dato de siembra o
+defecto de motor. *Si resulta lo primero, la ficha muere y se convierte en una
+línea del corte semilla/real; si resulta lo segundo, bloquea el soft launch.*
+
+**Disparo: antes de que la despensa venda a alguien real.**
+
+---
+
+### D-871 🟡 · UN RATCHET VIGILADO POR LITERAL ES CIEGO A LOS DEFAULTS DE `packages/ui`
+
+🟡 **MEDIA. AUTORIZADA COMO TANDA PROPIA** (founder, 22-ago-2026) — *no de la
+tanda en curso, y para quien tenga contexto.* **Autoría del hallazgo: S103-B,
+sobre un defecto que S103-C encontró consumiéndolo.**
+
+**El caso, medido:** el default de `BotonCopiar` era `variante = 'compacto'`, que
+es la variante **JUBILADA** que `R47` vigila **solo-baja** (38 usos, baseline 39).
+
+🔴 **Y era peor que un uso de más: un DEFAULT no emite el literal
+`variante="compacto"`, así que `R47` NO PODÍA CONTARLO.** La pieza montaba la
+variante jubilada **en cada consumidor**, y **el trinquete no se movía un punto.**
+
+> ### **Una jubilación vigilada por literal es ciega a los defaults de `packages/ui` — y por ahí una variante muerta revive repartida en N pantallas sin que ningún gate se entere.**
+
+*El caso se curó* (`426a3dc3`: el default pasa a `secundario`, que es lo que el
+mensaje de la propia `R47` prescribe por Ley 22c; medido antes y después,
+**38/38**). **Lo que queda abierto es la CLASE.**
+
+**Qué haría la tanda:** ensanchar **`R47` y `R48`** para que barran también los
+**defaults de parámetro** de `packages/ui`, no solo los literales en los
+consumidores.
+
+🔴 **SU FRENO, DECLARADO POR B Y RATIFICADO POR LA MESA — y es la razón por la
+que no se hace de paso:** **toca un ratchet VIVO.** *Un barrido nuevo sobre un
+contador solo-baja puede subir el número de golpe y poner en rojo un juez de la
+casa — y el rojo sería CIERTO, lo que lo vuelve caro de distinguir de una
+regresión.* ⇒ **se hace con su freno: medir el delta ANTES de enganchar, y
+declarar el baseline nuevo como baseline nuevo, jamás editar el viejo para que
+entre** (`L-329`).
+
+**Disparo:** cuando la mesa la convoque con contexto. **No se hace de paso.**
 
 ---
 
