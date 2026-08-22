@@ -3714,6 +3714,54 @@ function GaleriaInterna() {
         </Seccion>
 
 
+        <Seccion titulo="Boton · la alineación vuelve al padre (S103-B · D-882 de forma) — los TRES contextos">
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">
+              LA PRUEBA DE NO-REGRESIÓN: los tres contextos juntos. El de arriba es el que se curó; los
+              otros dos son los que NO se podían romper. Juzgar solo el curado sería media prueba.
+            </Texto>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">① padre que CENTRA — antes quedaba a la izquierda</Texto>
+              <View style={{ alignItems: 'center', gap: spacing[2], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Texto centrado, de referencia</Texto>
+                <Boton etiqueta="Generar nuevo código" variante="secundario" onPress={() => {}} />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">② padre por DEFAULT — tiene que seguir abrazando y a la izquierda</Texto>
+              <View style={{ gap: spacing[2], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Texto al ras, de referencia</Texto>
+                <Boton etiqueta="Abraza su contenido" variante="secundario" onPress={() => {}} />
+                <Boton etiqueta="Y bloque sigue ocupando todo" bloque onPress={() => {}} />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">③ padre en FILA que centra vertical — el botón alinea con el texto</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Al lado</Texto>
+                <Boton etiqueta="Acción" variante="secundario" tamaño="sm" onPress={() => {}} />
+              </View>
+            </View>
+
+            <Texto variante="apoyo">
+              Por qué no alcanzaba borrar el alignSelf: el default de un contenedor es stretch, así que
+              todos los botones que hoy abrazan pasarían a ocupar el ancho entero. No existe un valor que
+              diga «no te estires PERO obedecé al padre» — el slot es uno y quien lo escribe gana. La
+              salida es no ocuparlo: el envoltorio va sin alignSelf y es una FILA, así hereda la
+              alineación del padre y el botón sigue abrazando.
+            </Texto>
+            <Texto variante="apoyo">
+              bloque conserva su stretch explícito y no por simetría: si heredara, un bloque dentro de un
+              contenedor que centra dejaría de ocupar el ancho, que es lo único que bloque promete. Y el
+              envoltorio lleva box-none: estirado a todo el ancho, un View sin eso recibiría los toques
+              del aire a los costados — lo que R54 existe para cazar.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="BotonCopiar (S103) — un toque copia, y el botón mismo lo confirma">
           {/* Vive al lado de `CodigoAEscala` a propósito: su consumidor es
               el código de 6 dígitos de DeUna, y la galería debería
