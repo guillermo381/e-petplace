@@ -395,6 +395,25 @@ Y `pagando` **es una intención, no un estado** (firma del founder, S100): la le
 
 ## §9 · LO QUE NO ENTRA, Y LA RAZÓN
 
+> ### ✏️ ENMIENDA 22-ago-2026 — EL REVERSO GANA DUEÑO, y esta sección era la mitad del hueco
+>
+> **Esta §9 excluía el reembolso de su alcance y `LETRA_DEUNA` §8 lo llamaba
+> «vía manual» sin decir quién la hace.** *Entre las dos, nadie lo construía* —
+> y **eso no se descubre hasta que alguien pregunta cómo se devuelve un cobro**,
+> que es exactamente cuando ya es tarde. Lo levantó la pista D recorriendo el
+> riel de punta a punta (`L-350`).
+>
+> **Dictamen de mesa:** el **refund por API es de la pista del riel** —es una
+> llamada al proveedor con su autenticación y su ventana, misma clase que la
+> solicitud y el buzón, **no una pieza de motor**—; **cuándo se reversa y qué
+> recibe el cliente** ya está firmado en `LETRA_SALDO` (automática = saldo ·
+> medio original = manual); y **no entra en el v1**.
+>
+> ⇒ **Esta exclusión SIGUE SIENDO CORRECTA** —el reverso no es del motor— **y
+> deja de ser un hueco**, porque ahora dice de quién es. *Una exclusión sin
+> destinatario no delimita: abandona.*
+
+
 **El ledger. El devengo. La comisión. La liquidación.**
 
 No es orden de alcance: es una razón medida. `MODELO_FINANCIERO` §3.2 **congela el fee en el evento y prohíbe recalcular eventos viejos**. Hoy conviven **tres números** para la misma comisión — 10 % firmado, 14 % en la letra y en los seeds, 20 % vivo en `seller_comisiones`. **Si el webhook se cablea al ledger antes de que exista un solo número, cada cobro congela una comisión equivocada de forma irreversible por diseño.**
