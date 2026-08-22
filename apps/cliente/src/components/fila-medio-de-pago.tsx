@@ -146,6 +146,63 @@ export function FilaMedioDePago({
   );
 }
 
+/**
+ * 🔴 S103-C · LA FILA «DEUNA» — el segundo riel, presente y todavía no elegible.
+ *
+ * **Es la promesa del encabezado de este archivo cumplida al pie:** *«el día
+ * que entre DeUna es una fila más»*. Lo es — **sin tocar una línea de
+ * `FilaMedioDePago`, ni de la hoja, ni del estado de la elección.**
+ *
+ * ── POR QUÉ SE DIBUJA Y NO SE PUEDE ELEGIR ────────────────────────────────
+ *
+ * **No es una decisión de diseño: es lo que está medido.** La pista D midió el
+ * ambiente QA el 22-ago y el riel tiene **un bloqueante único**: falta el
+ * `pointOfSale` del comercio, *«obligatorio y solo numérico»*, que **no expone
+ * ningún endpoint** (control: 16 sondeos → 404 en los 16). Sin él **no se
+ * puede crear ni una transacción** ⇒ no hay `numericCode`, no hay pantalla de
+ * código, no hay cobro. **Dueño: el founder.**
+ *
+ * · **Se DIBUJA** porque `LETRA_PUERTA_DE_PAGO_S101B` §0.4 es literal:
+ *   *ningún estado se dibuja mudo.* Una fila ausente no informa nada.
+ * · **No se puede ELEGIR** por la Ley 23 de la casa (*«la puerta no ofrece lo
+ *   que va a rechazar»*). *Dejarla tocable para rebotar después es el patrón
+ *   exacto que esa ley mató.*
+ *
+ * ── LO QUE ESTA PIEZA NO INVENTA, Y ES DELIBERADO ─────────────────────────
+ *
+ * **No nace ningún tipo nuevo para «qué medio se eligió».** Hoy la elección
+ * sigue siendo `elegido: string | null` (el id de una tarjeta), y **está
+ * bien**: mientras DeUna no se pueda elegir, una unión discriminada sería un
+ * modelo de datos para un caso que no puede ocurrir. *`PLAN_MESA_104` §1: «C
+ * no inventa contratos: consume lo que A y D declaren».* **El contrato de la
+ * elección nace cuando D entregue su puerta, con su forma real.**
+ *
+ * ⚠️ **LA SEGUNDA RAZÓN DE NO-ELEGIBLE, declarada y NO construida:**
+ * `LETRA_COBRO_RECURRENTE` §8 dice que **DeUna no puede sostener una serie**
+ * (*«ese riel es push… no hay cobro sin presencia posible»*) y ordena
+ * *«y así se le dice al elegir medio»*. **Hoy esa rama es INALCANZABLE por
+ * construcción**: medido, la recurrencia se activa en la pantalla de ÉXITO
+ * (`checkout.tsx`, `activarRecurrencia`), o sea **después** de elegir medio —
+ * cuando se elige, todavía no hay serie que proteger. *Construir su voz hoy
+ * sería letra muerta, y una rama que nunca corre es una rama que nadie prueba.*
+ * **Disparo: el día que «que llegue solo» se decida ANTES del pago.**
+ *
+ * **La marca:** `LogoFranquicia` la resuelve **sin tocarlo** — su fallback de
+ * texto dibuja las marcas sin archivo, y «DEUNA» entra en los 56 px que su
+ * comentario declara medidos contra «DINERS». *Misma caja, mismo radio, mismo
+ * aire que las cinco tarjetas: es lo que esa pieza existe para garantizar.*
+ */
+export function FilaDeUna() {
+  const { t } = useTraduccion();
+  return (
+    <Celda
+      titulo={t('pago.deunaFila')}
+      subtitulo={t('pago.deunaPronto')}
+      inicio={<LogoFranquicia marca="deuna" />}
+    />
+  );
+}
+
 /** El bloque de una fila vencida, para cuando la pantalla quiera explicarlo. */
 export function VozVencida({ visible }: { visible: boolean }) {
   const { t } = useTraduccion();

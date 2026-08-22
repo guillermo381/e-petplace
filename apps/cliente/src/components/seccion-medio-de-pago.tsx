@@ -42,7 +42,7 @@ import {
   Boton, Celda, Chevron, Hoja, Tarjeta, Texto, spacing, useAviso,
 } from '@epetplace/ui';
 import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
-import { FilaMedioDePago } from '@/components/fila-medio-de-pago';
+import { FilaDeUna, FilaMedioDePago } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -192,6 +192,17 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
               onPress={() => medio.elegir(m.id)}
             />
           ))}
+          {/* 🔴 S103-C · DEUNA ES UNA FILA MÁS — y por eso esta sección se
+              llama «cómo quieres pagar» y no «tus tarjetas»
+              (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤).
+
+              Va **debajo de las tarjetas y encima de «agregar»**: es un medio,
+              no una acción. *Ponerla al lado del botón de agregar la leería
+              como «agregar Deuna», que es exactamente lo que NO es — DeUna no
+              tiene alta ni token (`LETRA_DEUNA` §1).*
+
+              Presente y no elegible: el porqué medido vive en `FilaDeUna`. */}
+          <FilaDeUna />
           <Boton
             variante="secundario"
             etiqueta={t('cuenta.medioAgregar')}
