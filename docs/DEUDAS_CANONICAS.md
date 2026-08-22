@@ -19999,3 +19999,20 @@ bastó para suponer que venía de ahí.* **Cambia dueño y gravedad.**
 los dos gates de B, y **los overlays de error se montan encima**. *Un gate
 interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
 **Disparo: antes del gate de B sobre el glifo y el stepper.**
+- **L-363** — **UN ENSAYO QUE TERMINA EN VERDES PRODUCE UN TABLERO INDISTINGUIBLE DEL DE UNA CORRIDA REAL.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, sobre su ensayo en seco del riel DeUna.* **El problema NO es el ensayo** —correr el guion contra un simulador antes de tener credenciales es exactamente lo que hay que hacer—: **el problema es que su SALIDA sobreviva al contexto que la explicaba.** *Quien vio correr el ensayo sabe que era en seco. El que abre el archivo el lunes ve una fila de verdes.* > ### **El instrumento tiene que declarar, EN SU PROPIA SALIDA, que no midió.** *No en el mensaje que lo acompaña, no en la bitácora, no en la cabecera del archivo: **en la línea que alguien va a copiar**.* **Un verde que no dice contra qué corrió es un verde que se va a citar como si hubiera corrido contra el mundo.** *Parentesco: es `L-141` (la prosa decae, el objeto no) aplicada a la salida de un instrumento — el contexto decae, el verde no.*
+- **L-364** — **UN ❌ PRODUCIDO POR EL INSTRUMENTO SE LEE COMO UNA MEDICIÓN, Y SE ARCHIVA CON MÁS FACILIDAD QUE UN VERDE FALSO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**.* En el ensayo en seco **el simulador devolvía el fantasma SIEMPRE**; el guion probaba el supuesto del `amount` contra él, **y salía ❌**. *Ese ❌ no medía nada —el simulador no podía contestar otra cosa— pero **habría quedado archivado como «ya refutado»**, moviendo una orden de mesa **sobre la base de nada**.* > ### **Un rojo falso es tan caro como un verde falso — y es MÁS peligroso, porque el verde flojo por lo menos incomoda y el rojo pasa por virtud.** *Nadie audita un instrumento que «encuentra problemas»: encontrarlos es lo que se espera de él.* **Hermana de `L-342` y del brazo anti-verde-vacío, y cierra con ellas la misma familia: todo veredicto —de cualquier signo— se prueba contra un caso de RESULTADO CONOCIDO antes de creerle.**
+- **L-365** — **UN SIMULADOR QUE ACEPTA UNA CREDENCIAL REAL PUEDE MEDIR CONTRA EL AMBIENTE REAL CON UN NÚMERO INVENTADO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, que lo previó y le puso candado antes de que pasara.* **El modo ensayo y el modo real no se distinguen por INTENCIÓN: se distinguen por lo que el aparato puede alcanzar.** *Un simulador al que se le puede pasar la credencial buena deja de ser un simulador el día que alguien la pasa por comodidad — y su salida sigue teniendo cara de ensayo.* > ### **El candado, que es la lección hecha mecanismo: modo ensayo SÓLO contra `localhost`, y el identificador de comercio por VARIABLE — jamás leído del keychain.** *No alcanza con no hacerlo: hay que volverlo imposible.* **Corolario: todo modo de prueba declara qué NO puede alcanzar, y esa declaración es código, no comentario.**
+
+> ### 📌 NOTA OPERATIVA DEL ALTA DEL WEBHOOK DEUNA — **el orden no es preferencia** (S103-D, firmada 22-ago-2026)
+>
+> **Se DESPLIEGA primero y se REGISTRA la URL después. Jamás al revés.**
+> *Registrar el webhook antes de desplegar deja una ventana en la que el
+> proveedor llama a una URL que no existe* — y **sus reintentos son TRES, cada
+> 30 segundos: se agotan en minuto y medio.** ⇒ **los eventos de esa ventana no
+> vuelven.** *Es el mismo precedente que `D-713` (el orden cron→deploy) con otro
+> proveedor: la pieza que LLAMA se enciende última, siempre.*
+>
+> **Y su gemela para el lunes, que es de coordinación y no de técnica: a C se le
+> avisa apenas salga el PASO 3 del guion, no al terminarlo.** *Su desbloqueo está
+> en el primer minuto del día 1; hacerla esperar el final es dejarla parada
+> mirando un guion que ya la había liberado.*
