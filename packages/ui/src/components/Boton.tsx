@@ -443,6 +443,21 @@ export function Boton({
       ? { boxShadow: theme.elevacion.reposo }
       : null),
     ...(c.borde ? { borderWidth: theme.border.width, borderColor: c.borde } : null),
+    /* ⚠️ ESTA LÍNEA YA NO DECIDE DÓNDE SE PARA EL BOTÓN, y decirlo acá no
+       es prolijidad: **es la línea que se cita para diagnosticar mal.**
+       Desde la cura del envoltorio (ver el `return`, abajo) el `Pressable`
+       vive adentro de un `flexDirection:'row'`, donde `alignSelf` gobierna
+       el eje TRANSVERSAL —el vertical—: `flex-start` acá es «arriba», no
+       «a la izquierda». **Quien la lea sin el envoltorio a la vista va a
+       concluir que el botón no se puede centrar, y va a envolverlo en la
+       pantalla** — pasó el mismo día de la cura: una pista escribió TRES
+       envoltorios `alignSelf:'center'` citando esta línea por su número.
+       *Medido: los escribió contra un árbol que todavía no tenía la cura;
+       la observación era cierta y quedó vieja al mergear.*
+       ⇒ **Un comentario no frena a un compilador —eso lo aprendimos con
+       `destacada`, que se anunciaba NO-OP y se aceptó igual— pero SÍ es la
+       herramienta correcta para frenar a un LECTOR, que es el modo de
+       falla de acá.** Quien la mueva: el que manda es el envoltorio. */
     ...(bloque ? { alignSelf: 'stretch' as const } : { alignSelf: 'flex-start' as const }),
   }
 

@@ -224,23 +224,32 @@ function MuestraBarraPorCapacidad() {
   // donde es el tercero de cuatro). El repartidor no tiene fila porque
   // §2.2 le niega la barra entera — una barra compartida es la promesa
   // de que hay mas de un lugar donde ir.
+  /* ☠️ LAPIDA DE `destacada` EN LA GALERIA (S103-B). Las tres filas de
+     abajo montaban `destacada: true` y NO DIBUJABAN NADA: la rama de
+     render de esa prop murio en S99-B —el disco del activo paso a ser el
+     unico enfasis— y solo sobrevivio la prop en el tipo. Una lamina de
+     gate que monta una prop muerta le muestra al founder una funcion que
+     no existe, y esta misma galeria ya declaraba la muerte mas abajo:
+     decia las dos cosas a la vez. Vigilado por `R61`, que las cuenta por
+     la FORMA `destacada:` y por eso no toca al `destacada` de
+     `FilaMonto`, que es otra prop y esta viva. */
   const PERFILES: Array<{ rotulo: string; items: BarraTabsItem[] }> = [
     {
       rotulo: 'titular / administrador con local — CINCO (ATENDER cae al centro geometrico)',
       items: [
         { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
         { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
-        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true, badge: 3 },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), badge: 3 },
         { key: 'negocio', etiqueta: 'Negocio', icono: G('negocio') },
         { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
       ],
     },
     {
-      rotulo: 'recepcion — CUATRO · 🔴 EL CASO QUE MANDA: ATENDER es el TERCERO DE CUATRO, NO el centro. Si el destaque dependiera de la posicion, esta fila lo rompe.',
+      rotulo: 'recepcion — CUATRO · 🔴 EL CASO QUE MANDA: ATENDER es el TERCERO DE CUATRO, NO el centro. ⏪ Decia «si el destaque dependiera de la posicion, esta fila lo rompe» — el destaque MURIO (ver la lapida arriba). La fila sigue mandando por otra razon, que es la viva: prueba que el disco viaja al activo sea cual sea su posicion.',
       items: [
         { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
         { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
-        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender') },
         { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
       ],
     },
@@ -248,7 +257,7 @@ function MuestraBarraPorCapacidad() {
       rotulo: 'vendedor puro — TRES (sin DATOS; ATENDER vuelve al centro)',
       items: [
         { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
-        { key: 'atender', etiqueta: 'Atender', icono: G('atender'), destacada: true },
+        { key: 'atender', etiqueta: 'Atender', icono: G('atender') },
         { key: 'cuenta', etiqueta: 'Cuenta', icono: G('cuenta') },
       ],
     },
