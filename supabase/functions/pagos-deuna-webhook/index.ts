@@ -32,13 +32,31 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { timingSafeEqual } from 'node:crypto';
+/* El predicado de la verdad verificada vive aparte para poder testearlo sin
+   montar el cliente de Supabase — ver `_verdad.ts`. */
+import { esVerdadVerificada } from './_verdad.ts';
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 const API_KEY = Deno.env.get('DEUNA_API_KEY') ?? '';
 const API_SECRET = Deno.env.get('DEUNA_API_SECRET') ?? '';
 /* ① Nuestro secreto, no el suyo. Lo generamos, lo registramos con DeUna como
-   header del webhook, y se rota cambiando este secret. */
+   header del webhook, y se rota cambiando este secret.
+
+   🔴 SON DOS, Y ESA ES LA ROTACIÓN SIN VENTANA CIEGA. El secreto viaja en un
+   header ESTÁTICO que se registra del lado del proveedor: entre que
+   desplegamos un valor nuevo y que ellos lo cargan pasa un tiempo que no
+   controlamos. Con un solo secret, ese tiempo es **una ventana en la que todo
+   webhook legítimo se rechaza** — y los rechazados no se reintentan
+   indefinidamente.
+   Aceptar el ACTUAL y el SIGUIENTE a la vez convierte la rotación en dos
+   despliegues sin corte. Procedimiento completo:
+   `docs/relevamientos/S103-D-ALTA-Y-ROTACION-WEBHOOK-DEUNA.md`.
+
+   ⚠️ Los dos son válidos MIENTRAS DURE la rotación. Dejar `_SIGUIENTE` cargado
+   para siempre es tener dos llaves vivas sin razón: el paso 2 existe
+   justamente para retirarlo, y el procedimiento lo pide con su verificación. */
 const WEBHOOK_SECRET = Deno.env.get('DEUNA_WEBHOOK_SECRET') ?? '';
+const WEBHOOK_SECRET_SIGUIENTE = Deno.env.get('DEUNA_WEBHOOK_SECRET_SIGUIENTE') ?? '';
 const HEADER_SECRETO = 'x-epetplace-secret';
 
 const BASE = AMBIENTE === 'produccion'
@@ -52,14 +70,30 @@ const db = createClient(
   { auth: { persistSession: false } },
 );
 
-/** Comparación en tiempo constante: una comparación con `===` filtra el
- *  secreto por el tiempo que tarda en fallar. */
-function secretoValido(recibido: string): boolean {
-  if (!WEBHOOK_SECRET || !recibido) return false;
+/** Comparación en tiempo constante contra UN candidato: una comparación con
+ *  `===` filtra el secreto por el tiempo que tarda en fallar. */
+function coincide(recibido: string, esperado: string): boolean {
+  if (!esperado || !recibido) return false;
   const a = new TextEncoder().encode(recibido);
-  const b = new TextEncoder().encode(WEBHOOK_SECRET);
-  if (a.length !== b.length) return false;      // longitud distinta ⇒ no es
+  const b = new TextEncoder().encode(esperado);
+  /* La diferencia de longitud se filtra igual (es observable), pero comparar
+     buffers de distinto largo lanza. Es la concesión conocida del patrón. */
+  if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
+}
+
+/**
+ * ¿El header trae un secreto válido? Acepta el ACTUAL o el SIGUIENTE.
+ *
+ * 🔴 **Se evalúan LOS DOS SIEMPRE, sin cortocircuito.** Un `||` devolvería
+ * antes cuando acierta el primero, y esa diferencia de tiempo dice *cuál* de
+ * los dos acertó. *Es poca información, pero es información sobre un secreto y
+ * no cuesta nada no darla.*
+ */
+function secretoValido(recibido: string): boolean {
+  const a = coincide(recibido, WEBHOOK_SECRET);
+  const b = coincide(recibido, WEBHOOK_SECRET_SIGUIENTE);
+  return a || b;
 }
 
 /** Guarda el crudo y devuelve el id. Lo mínimo indispensable: si esto falla,
@@ -165,14 +199,9 @@ Deno.serve(async (req) => {
       const t = (await r.text()).slice(0, 4000);
       try { infoCrudo = JSON.parse(t); } catch { /* el crudo alcanza */ }
 
-      /* 🔴 EL FANTASMA — S103-D §2quater. Una consulta por algo que NO EXISTE
-         devuelve **HTTP 200 con `status: PENDING` y `amount: 0`**, jamás
-         `NOT_FOUND`. Así que un 200 NO alcanza para dar por verificado nada:
-         se exige APPROVED **con monto**. *El proveedor no falla: contesta algo
-         verosímil, y eso sobrevive a cualquier revisión de código.* */
-      verificado = r.ok
-        && String(infoCrudo.status ?? '').toUpperCase() === 'APPROVED'
-        && Number(infoCrudo.amount ?? 0) > 0;
+      /* 🔴 EL FANTASMA — el predicado vive arriba, exportado y con test propio
+         sobre la respuesta REAL grabada de QA. */
+      verificado = esVerdadVerificada(r.ok, infoCrudo);
     } catch (e) {
       /* No pudimos preguntar ≠ el pago es falso. Queda `no_verificado` y **el
          barrido lo va a encontrar**: no se confirma, y tampoco se rechaza. */
