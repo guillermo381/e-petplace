@@ -19808,3 +19808,41 @@ consumidor real.
 ⇒ El `REVOKE` se hizo **después del enchufe**, y su migración lleva la
 precondición **como cinturón**: si el reemplazo no está en pie, **aborta con el
 agujero todavía cerrado**. ⇒ **L-317**.
+
+---
+
+### D-875 🟠 · LA AUTORÍA DEL PRESTADOR ESTÁ ATADA DE DOS FORMAS OPUESTAS — Y «UNIFORMARLAS» BORRA EL EXPEDIENTE CLÍNICO EN SILENCIO
+
+🟠 **MEDIA-ALTA. Hallazgo de S103-D** (contraste de `D-405`), **numerada por A.**
+**Dueño: A** (motor/DB).
+
+**Lo medido, y son dos columnas que hacen lo mismo y se comportan al revés:**
+
+| columna | `ON DELETE` |
+|---|---|
+| `eventos_mascota.prestador_id` | **`SET NULL`** |
+| `evento_historia_clinica_registrada.prestador_id` | **`RESTRICT`** |
+
+**Hoy gana el `RESTRICT`, y está bien:** el expediente clínico **no deja
+desaparecer a su autor.**
+
+> ### 🔴 **El riesgo no es el estado actual: es la CURA QUE PARECE CORRECTA.**
+> *El día que alguien «uniforme» ese `RESTRICT` a `SET NULL` por consistencia
+> —que es exactamente lo que parece prolijo mirando la tabla de al lado— **el
+> expediente clínico pierde de quién vino cada dato, en silencio y sin fallar**.*
+
+**Y lo que se pierde no es metadata: es la distinción que sostiene el
+expediente.** **Sin autor, un diagnóstico de veterinario y una observación de la
+familia quedan INDISTINGUIBLES** — que es justo lo que la procedencia
+(`declarado_por_familia` / `declarado_por_prestador` / `verificado_por_prestador`)
+existe para separar. **Hay 12 eventos vivos con `procedencia =
+declarado_por_prestador`** que hoy sí saben de quién vinieron.
+
+**La cura NO es tocar nada: es dejar escrito POR QUÉ es distinto**, con un
+comentario en la constraint o un cinturón que aborte toda migración que la
+afloje. *Una asimetría deliberada sin su porqué escrito es indistinguible de un
+descuido — y el próximo que pase la va a «arreglar».*
+
+**Disparo: la próxima migración que toque la autoría de eventos, o el arco de
+`P15` cuando construya el cierre de cuenta** (que es cuando alguien va a mirar
+en serio las FKs hacia `auth.users` y va a ver las dos juntas).
