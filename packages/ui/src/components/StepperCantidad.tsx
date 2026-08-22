@@ -32,6 +32,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
 import { Icono } from './Icono'
+import { estiloDeCaja } from './caja-de-campo'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
@@ -307,6 +308,21 @@ export interface StepperCantidadProps {
   salida?: 'quita-el-item' | 'vuelve-al-boton'
 }
 
+/** El lado del botón de paso. **Se extrae porque ahora lo consumen DOS:**
+ *  el botón y la caja del número editable, que toma esta misma altura para
+ *  quedar alineada con ellos **por construcción y no por coincidencia**.
+ *  *Un segundo lugar que derivara el mismo número por su cuenta sería la
+ *  copia que `caja-de-campo` existe para no repetir, un piso más abajo.* */
+function ladoDelPaso(tamano: TamanoStepper) {
+  return tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON_ANCHO
+}
+
+/** El ancho reservado al número — el mismo para el editable y el que solo
+ *  muestra, **para que encender `editable` no corra el layout**. */
+function anchoDelNumero(tamano: TamanoStepper) {
+  return tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8]
+}
+
 function BotonPaso({
   signo,
   habilitado,
@@ -326,8 +342,7 @@ function BotonPaso({
   etiqueta: string
   tamano: TamanoStepper
 }) {
-  const lado =
-    tamano === 'menudo' ? BOTON_MENUDO : tamano === 'compacto' ? BOTON_COMPACTO : BOTON_ANCHO
+  const lado = ladoDelPaso(tamano)
   const holgura =
     tamano === 'menudo'
       ? HOLGURA_MENUDA
@@ -566,32 +581,95 @@ export function StepperCantidad({
            afuera —el motor recortando al stock— se refleja solo. *Si el campo
            fuera la fuente de verdad, el recorte del servidor no podría
            corregirlo y la persona vería 50 sobre un stock de 12.* */
-        <TextInput
-          value={borrador ?? String(v)}
-          onChangeText={(t) => setBorrador(t.replace(/[^0-9]/g, ''))}
-          onFocus={() => setBorrador(String(v))}
-          onEndEditing={confirmar}
-          onSubmitEditing={confirmar}
-          keyboardType="number-pad"
-          returnKeyType="done"
-          selectTextOnFocus
-          accessibilityLabel={etiqueta}
-          style={{
-            minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
-            textAlign: 'center',
-            padding: 0,
-            fontFamily: typography.family.mono.regular,
-            fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
-            fontVariant: ['tabular-nums'],
-            letterSpacing: typography.tracking.mono,
-            // MISMA fuente que los signos — ver `tintaDelControl`.
-            color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
-          }}
-        />
+        /* ── S103-B · LA SUPERFICIE DEL NÚMERO EDITABLE (firma del founder)
+           *«un número suelto se lee como resultado, no como control»*. El
+           defecto estaba en el código y no era una impresión: el `TextInput`
+           y el `Text` de abajo compartían `minWidth`, `textAlign`, la mono
+           tabular, el `letterSpacing` y el color condicional — **la única
+           diferencia era un `padding: 0`.** El editable y el que solo
+           muestra eran el mismo objeto.
+
+           🔴 **NO NACE UNA PRIMITIVA: se monta la caja del campo que la casa
+           ya tiene** (`caja-de-campo`, N11/N11′). Y no es economía — es que
+           el número editable **ES un campo**, así que lleva la anatomía que
+           lleva todo campo de la casa: contorno `border.campo` con piso
+           ≥3:1 vigilado por R43, interior claro, y foco con acento +
+           elevación. *Inventar una pastilla propia habría fabricado los dos
+           estilos de campo que N11 prohíbe conviviendo.*
+
+           **LOS DOS LÍMITES DEL FOUNDER SE CUMPLEN POR CONSTRUCCIÓN, no por
+           cuidado:** el borde **jamás cambia de grosor** (`BORDE_CAMPO` es
+           1.5 en todo estado — regla rectora de la pieza desde S43: *un
+           borde que engorda corre el layout mientras alguien tipea*), y el
+           alto sale **derivado** de `ladoDelPaso`, el mismo de los botones
+           ⇒ los tres elementos quedan alineados sin números tecleados y
+           **encender `editable` no mueve la fila: crece el borde y nada
+           más.**
+
+           El foco no necesita estado nuevo: `borrador` ya vive mientras se
+           escribe y vuelve a `null` en `confirmar()`.
+
+           ⚠️ **LO QUE QUEDA DECLARADO Y NO ADIVINADO — el bloque lleno.**
+           Sobre `tamano="ancho"` (`sobreBloqueLleno`) la caja NO se monta:
+           `interiorDeCaja` está definido contra `bg.base` y ahí pondría una
+           caja blanca encima de un bloque de CTA. **El contrato del módulo
+           no cubre esa superficie**, y tallarle una excepción sería
+           inventar tokens para el único caso que la letra no alcanza. Es 1
+           de los 3 montajes editables (`TarjetaProducto`, la vitrina) y va
+           al gate del founder con el resto — *ahí el bloque entero ya se
+           lee como control, que es justo la ambigüedad que esta firma vino
+           a sacar, pero eso es un argumento y no una medición: lo digo como
+           lo que es.* */
+        (() => {
+          const campo = (
+            <TextInput
+              value={borrador ?? String(v)}
+              onChangeText={(t) => setBorrador(t.replace(/[^0-9]/g, ''))}
+              onFocus={() => setBorrador(String(v))}
+              onEndEditing={confirmar}
+              onSubmitEditing={confirmar}
+              keyboardType="number-pad"
+              returnKeyType="done"
+              selectTextOnFocus
+              accessibilityLabel={etiqueta}
+              style={{
+                /* El ancho lo reserva SIEMPRE el campo, no la caja: un
+                   `width: '100%'` contra un contenedor que se dimensiona por
+                   su contenido es circular en Yoga y colapsa. La caja envuelve
+                   y no mide. */
+                minWidth: anchoDelNumero(tamano),
+                textAlign: 'center',
+                padding: 0,
+                fontFamily: typography.family.mono.regular,
+                fontSize: tamano === 'menudo' ? typography.size.sm : typography.size.md,
+                fontVariant: ['tabular-nums'],
+                letterSpacing: typography.tracking.mono,
+                // MISMA fuente que los signos — ver `tintaDelControl`.
+                color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
+              }}
+            />
+          )
+          if (sobreBloqueLleno) return campo
+          return (
+            <View
+              style={{
+                // El estilo se consume ENTERO, jamás por partes: una que
+                // tome el borde y se escriba el fondo vuelve a ser otra
+                // copia con otro nombre (regla del propio módulo).
+                ...estiloDeCaja(theme, { enfocado: borrador !== null }),
+                height: ladoDelPaso(tamano),
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {campo}
+            </View>
+          )
+        })()
       ) : (
         <Text
           style={{
-            minWidth: tamano === 'menudo' ? NUMERO_MENUDO : tamano === 'compacto' ? spacing[7] : spacing[8],
+            minWidth: anchoDelNumero(tamano),
             textAlign: 'center',
             // dato de máquina: mono tabular (Ley 3)
             fontFamily: typography.family.mono.regular,
