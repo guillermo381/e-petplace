@@ -1315,6 +1315,10 @@ export const clienteEs = {
     mediosSub: 'Con qué pagas en e-PetPlace',
     mediosVacioTitulo: 'Todavía no guardas ninguno',
     mediosVacio: 'Guarda una tarjeta para pagar más rápido. Puedes borrarla cuando quieras.',
+    /* 🔴 SOLO aparece cuando dos filas serían idénticas — ver `desempatarMedios`.
+       *No dice «duplicada» ni acusa a nadie de nada: dice el único dato que
+       las separa.* */
+    medioAgregadaEl: 'Agregada el {{fecha}}',
     medioAgregar: 'Agregar tarjeta',
     medioElegido: 'Elegido',
     medioVence: 'Vence {{fecha}}',
@@ -1519,6 +1523,18 @@ export const clienteEs = {
     montoDesconocido: 'Lo vas a ver en el aviso, 48 horas antes.',
     medio: 'Con qué se paga',
     medioDesconocido: 'Todavía no lo mostramos aquí.',
+    /* 🔴 EL VACÍO DE LA PANTALLA — voz PROPIA, y no la del medio de pago.
+       ⏪ El estado vacío reusaba `medioDesconocido` y repetía el título del
+       encabezado. **Lo cazó caminar la pantalla, no leer el código**: en el
+       aparato se veía «Que llegue solo / Que llegue solo / Todavía no lo
+       mostramos aquí» — el eco que la casa llama Chanel, y encima una frase
+       escrita para OTRA cosa (el medio), que sobre la pantalla entera hace
+       pensar que la serie existe y se la esconde.
+       🔴 Y sigue sin decir «no tienes envíos automáticos»: eso sería una
+       afirmación sobre los datos, y lo que pasa es que todavía no sabemos
+       leerlos. La segunda línea existe para que nadie se asuste: nada cambió. */
+    sinLectorTitulo: 'Todavía no podemos mostrarla',
+    sinLectorCuerpo: 'Estamos terminando esta pantalla. Tus envíos automáticos siguen como estaban.',
     aDondeLlega: 'A dónde llega',
     avisoPrevio: 'Te avisamos 48 horas antes de cada cobro.',
     /* §6: pausa ≠ cancelación, y la salida es del cliente. */
@@ -1556,6 +1572,9 @@ export const clienteEs = {
        honesta y temporal: el riel está bloqueado por un dato del comercio
        (el `pointOfSale`), medido por la pista D. */
     deunaFila: 'Deuna',
+    /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
+       default cae a tarjeta y jamás cambia en silencio. */
+    deunaNoDisponibleAhora: 'Deuna todavía no está disponible: por ahora se paga con tarjeta.',
     deunaPronto: 'Muy pronto vas a poder pagar desde tu app Deuna.',
     /* La espera del código: **misma pantalla, otra voz** (§6, firma ② del
        founder: «funciona exactamente igual que si fuera tarjeta»). */
@@ -1564,11 +1583,50 @@ export const clienteEs = {
     /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
        pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
     deunaCodigoVence: 'El código vence en {{tiempo}}',
+    /* 🔴 «Copiar» — **FIRMA FINAL del founder, 22-ago.** Su razón, literal:
+       *es redundante en pantalla —hay un código y un botón al lado, la palabra
+       repite lo que el ojo ya sabe— y recupera los ~60 px que le quitaba al
+       código, que es lo único que esa pantalla vino a mostrar.*
+
+       ── EL RECORRIDO COMPLETO, con su porqué, PARA QUE NADIE LO REVIERTA ──
+       `Copiar código` → `Copiar` → `Copiar código` → **`Copiar`**.
+       *Cuatro etapas y dos pares que se ven idénticos: sin esta nota, el
+       próximo que lea el código va a ver una oscilación sin sentido y va a
+       "corregirla".*
+
+       ① `Copiar código` — mi lectura del contrato de `BotonCopiar`: la
+          etiqueta visible ES el nombre accesible, así que debe decir el objeto.
+       ② `Copiar` — craft del founder: la caja competía con el código.
+       ③ `Copiar código` — el founder corrige su propia instrucción anterior
+          (había pedido una etiqueta accesible aparte, y **el contrato la
+          prohíbe con razón**: dos nodos `role="button"` anidados).
+       ④ **`Copiar`** — firma final, con el costo medido y ACEPTADO.
+
+       ⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO:** quien no ve la pantalla
+       escucha **«Copiar» sin el objeto**. **Se acepta**, y la razón es la que
+       hay que conservar: *el lector de pantalla **acaba de leer el código** —
+       el contexto está a un elemento de distancia.*
+       🔴 **Esto NO es una omisión de accesibilidad pendiente de curar.** Es
+       una decisión tomada con su costo a la vista. *Quien la "arregle"
+       alargando la etiqueta va a estar deshaciendo una firma, no corrigiendo
+       un olvido.* **La cadena visible sigue siendo el nombre accesible y NO
+       nace una prop aparte.** */
+    deunaCopiar: 'Copiar',
+    deunaCopiado: 'Código copiado',
     deunaCodigoVencido: 'El código venció.',
     deunaCodigoNuevo: 'Generar un código nuevo',
     /* Cuando el hold murió NO nace otro código: rige la voz del rearme que
        la casa ya tiene (`esperaExpirada`), y esta línea dice el porqué. */
     deunaHoldVencido: 'El tiempo que apartamos se terminó. No te cobramos nada.',
+    /* §6 · `APPROVED` verificado. La pantalla NO lo declara: lo dice el
+       servidor y ella lo dibuja. */
+    deunaAprobada: 'Pago confirmado',
+    deunaAprobadaCuerpo: 'Listo, recibimos tu pago.',
+    /* 🔴 §6 · `NOT_FOUND` en ventana y `REVERSED_FAILED`. Defecto NUESTRO: no
+       se culpa al cliente, y el nombre técnico del hallazgo se registra pero
+       JAMÁS se le muestra. */
+    deunaHallazgo: 'No pudimos confirmar tu pago',
+    deunaHallazgoCuerpo: 'Ya lo estamos revisando. Escríbenos y lo resolvemos.',
     // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',
@@ -1870,7 +1928,7 @@ export const clienteEs = {
     metodoDespacho: 'Envío a domicilio',
     metodoRetiro: 'Retiro en tienda',
     retiroDetalle:
-      'Lo retirás en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
+      'Lo retiras en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
     aDonde: 'A dónde te lo llevamos',
     sinDireccion: 'Todavía no nos contaste tu dirección.',
     agregarDireccion: 'Agregar mi dirección',
@@ -1896,6 +1954,19 @@ export const clienteEs = {
     promesaFallo: 'No pudimos calcular la ventana de entrega. Prueba de nuevo.',
     promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
     saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    // 🔴 D-872 (b) · LAS DOS CAUSAS QUE `saltoPorCupo` NO PUEDE DECIR.
+    // `saltoPorCupo` afirma ESCASEZ. El motor distingue `sin_operacion`
+    // (ese día el vendedor no reparte: domingo, feriado propio) de
+    // `cupo_lleno`, y son cosas distintas para quien decide comprar.
+    saltoPorSinOperacion:
+      'El día más cercano el vendedor no reparte, así que la entrega pasa al siguiente día que sí.',
+    // Para `mixto` y para `null` (motor viejo o valor desconocido): dice que
+    // la entrega corrió SIN afirmar por qué. Fail-closed de significado.
+    saltoSinCausa:
+      'El día más cercano no estaba disponible, así que la entrega pasa al siguiente con lugar.',
+    // La ley de la firma: qué NO se puede, qué SÍ, y termina en pregunta.
+    promesaFichaSinEntrega:
+      'Este vendedor no hace entregas a domicilio por ahora. Puedes retirar tu pedido en la tienda, ¿te sirve así?',
     // S100 · F5: la división se declara ANTES de pagar. La voz dice lo
     // CONCRETO —cuántas entregas y qué va en cada una—, no el hecho abstracto:
     // que llegue en partes no molesta; que llegue una parte cuando esperabas

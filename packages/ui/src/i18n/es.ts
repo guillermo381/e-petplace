@@ -134,6 +134,7 @@ export const uiEs = {
   // inventario ajeno (firma S99).
   tarjetaProducto: {
     sinStock: 'Sin stock',
+    sinEntrega: 'No entrega por ahora',
     agregar: 'Agregar {{nombre}} al carrito',
     cantidad: 'Cantidad de {{nombre}}',
     agregarCorto: 'Agregar',

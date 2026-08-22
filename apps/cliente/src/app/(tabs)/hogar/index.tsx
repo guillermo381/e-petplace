@@ -105,7 +105,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
-import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
+import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { CoachHoja } from '@/components/coach';
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
@@ -1131,7 +1131,24 @@ export default function Hogar() {
               preside.promesa_desde !== null && preside.promesa_hasta !== null
                 ? [
                     t('despensa.promesaCorta', {
-                      dia: fechaLargaHumana(preside.promesa_desde, idioma),
+                      /* 🔴 `D-881` · **DÍA CORTO ACÁ Y SOLO ACÁ.** El detalle
+                         de `FilaReco` es `numberOfLines={1}` **por diseño** —
+                         una lista donde cada fila crece a su antojo deja de
+                         ser lista—, así que la cura no es dejarlo respirar:
+                         **es que entre.**
+
+                         *«20 de agosto, 2:00 p.m.–6:00 p.m.»* no entra, y el
+                         founder lo vio cortado a *«…6:00 p. …»*. **Y esta fila
+                         es la más apretada de las tres que montan
+                         `promesaCorta`:** paga una placa de 42, un chevron y
+                         un título de hasta dos líneas.
+
+                         ⚠️ **Por eso se cambia el ARGUMENTO y no la voz.**
+                         `promesaCorta` la usan también la lista de pedidos y
+                         el detalle, **que tienen el ancho entero y no
+                         reportaron el defecto** — *acortarles el día a los
+                         tres sería curar dos superficies que nadie midió.* */
+                      dia: `${diaSemanaCorto(preside.promesa_desde, idioma)} ${Number(preside.promesa_desde.slice(8, 10))}`,
                       desde: horaLocal(preside.promesa_desde),
                       hasta: horaLocal(preside.promesa_hasta),
                     }),

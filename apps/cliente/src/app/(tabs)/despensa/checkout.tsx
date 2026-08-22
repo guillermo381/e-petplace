@@ -567,7 +567,7 @@ export default function DespensaCheckout() {
     // ③④ El débito y la espera declarada — **por el cobro de la casa**.
     //    ☠️ El andamio `cobrarConTarjetaGuardada` murió acá: su lápida decía
     //    «muere en la Fase 5», y la Fase 5 cerró.
-    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.elegido);
+    const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.idTarjeta);
     setTrabajando(false);
     if (!cobro.ok) {
       mostrar({ texto: t(cobro.voz), variante: 'error' });
@@ -1007,9 +1007,33 @@ export default function DespensaCheckout() {
                           })}
                         </Texto>
                         {promesa.saltos_por_cupo > 0 ? (
-                          /* El día pedido estaba lleno y la promesa corrió —
-                             SE DICE (§7.3: el excedente no rompe, se corre). */
-                          <Texto variante="apoyo">{t('despensa.saltoPorCupo')}</Texto>
+                          /* La promesa corrió — SE DICE (§7.3: el excedente no
+                             rompe, se corre).
+
+                             🔴 S103-C · LO QUE SE CURÓ ACÁ, Y NO ES ESTILO:
+                             esta línea decía `saltoPorCupo` —*«El día más
+                             cercano estaba COMPLETO»*— **con `saltos > 0` a
+                             secas**. Es el rojo del 18-ago que la cabecera de
+                             `PromesaDeVendedor` documenta: **el número dice que
+                             la ventana se corrió, NO por qué.** Un domingo la
+                             causa es que el vendedor no reparte, y la frase
+                             afirmaba una escasez que no existe — *hacer perder
+                             una venta por un inventario imaginario*.
+
+                             ⚠️ **Por qué la voz genérica y no la precisa:**
+                             `calcularPromesaDespensa` —el lector de ESTA
+                             pantalla— **no expone `motivoCorrimiento`**
+                             (medido: el campo vive solo en
+                             `promesaPorVendedor`). Sin la causa, la única voz
+                             verdadera es la que **no afirma ninguna**.
+                             *Perder precisión es barato; afirmar falso no.*
+
+                             📮 **La precisión vuelve sola** el día que A
+                             exponga el campo en este lector: ahí esta línea
+                             recupera `saltoPorCupo` para `cupo_lleno` y gana
+                             `saltoPorSinOperacion`, igual que la ficha. **Se
+                             pidió; no se escribe desde acá (motor es de A).** */
+                          <Texto variante="apoyo">{t('despensa.saltoSinCausa')}</Texto>
                         ) : null}
                       </>
                     )}

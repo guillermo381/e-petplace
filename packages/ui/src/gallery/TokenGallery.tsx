@@ -1462,20 +1462,37 @@ function EjemploSetBPrima() {
           <Icono key={n} nombre={n} tamano={28} registro="aa" />
         ))}
       </View>
-      {/* LOTE 3 (S58, D-361): 28 de diseño + la fila del gate a 21px */}
+      {/* LOTE 3 (S58, D-361): 28 de diseño + la fila del gate a 21px
+
+          🔴 LA CLAVE VA POR POSICIÓN, y NO es prolijidad (D-882, S103-B):
+          `LOTE3` REPITE tres glifos A PROPÓSITO — `carnet`, `caso` y
+          `documento` aparecen dos veces cada uno, porque lo que estas
+          filas tienen que dejar ver a 21px **no es que cada ícono se
+          entienda solo: es que el nuevo no se confunda con sus vecinos**.
+          La vecindad ES el gate.
+
+          ⇒ deduplicar la lista habría matado la comparación que el
+          founder viene a hacer. Con `key={nombre}` React veía tres pares
+          de hermanos con la misma clave y tiraba dos overlays rojos
+          ENCIMA de la galería. **Un gate interrumpido por un error no es
+          un gate: es una pregunta sobre el error.**
+
+          El índice es clave legítima acá y en pocos lugares más: la tira
+          es ESTÁTICA y ordenada a mano — nada se inserta, nada se
+          reordena, nada tiene estado propio. */}
       <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
-        {LOTE3.map((n) => (
-          <Icono key={n} nombre={n} tamano={28} />
+        {LOTE3.map((n, i) => (
+          <Icono key={`${n}-${i}`} nombre={n} tamano={28} />
         ))}
       </View>
       <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
-        {LOTE3.map((n) => (
-          <Icono key={n} nombre={n} tamano={21} />
+        {LOTE3.map((n, i) => (
+          <Icono key={`${n}-${i}`} nombre={n} tamano={21} />
         ))}
       </View>
       <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
-        {LOTE3.map((n) => (
-          <Icono key={n} nombre={n} tamano={28} registro="aa" />
+        {LOTE3.map((n, i) => (
+          <Icono key={`${n}-${i}`} nombre={n} tamano={28} registro="aa" />
         ))}
       </View>
     </View>
@@ -2503,6 +2520,128 @@ function GaleriaInterna() {
             —«la lámina del moto estaba en la sección 81 de 95»— repitiéndose
             con lo recién construido. Se MUEVEN, no se copian: la muestra es
             una sola y vive donde se la mira. */}
+        {/* ╔═══════════════════════════════════════════════════════════════
+            ⭐ GATE S103-B — LO QUE ESPERA TU OJO HOY. VA PRIMERO.
+            ═══════════════════════════════════════════════════════════════
+            Por `D-833`, con tu literal: *«la lámina del moto estaba en la
+            sección 81 de 95»*. Esta galería tiene 106 secciones, así que lo
+            que espera firma **se MUEVE acá arriba, no se copia** — la
+            muestra es una sola y vive donde se la mira.
+
+            Son TRES y se caminan en este orden:
+              ① el glifo `copiar` a 21px — ¿se separa de `documentos`?
+                 Si a 21 no se distinguen, el que se mueve es `copiar`.
+              ② el stepper con número EDITABLE — ¿se lee como control?
+              ③ la Celda ELEGIDA — ¿se ve cuál rige, sin leer?
+
+            ⚠️ Y una que NO se puede gatear hoy, para que no la reportes
+            como defecto: **`BotonCopiar` va a aparecer APAGADO a
+            propósito** (más abajo, en su sección). `expo-clipboard` es un
+            módulo NATIVO y no viaja por OTA: llega con la próxima build.
+            Lo que SÍ se puede mirar hoy es que su apagado sea honesto.
+
+            Cuando estas tres tengan veredicto, se retiran de la vista
+            —no del registro— como `D-833` ya hizo con las de S99.
+            ═══════════════════════════════════════════════════════════ */}
+        <Seccion titulo="copiar (S103) — el glifo, contra sus hermanos de control y contra su pariente">
+          {/* LA COMPARACIÓN ES LA MUESTRA. Arriba a 24 (la grilla de
+              diseño) y abajo a 21 (el gate §2.9), porque el riesgo de este
+              glifo NO se ve grande: es el pariente más cercano del
+              registry —`documentos` es su espejo— y lo que los separa es
+              la HUELLA, que a 21px es justo lo que puede empastarse. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">Hermanos de CONTROL (los cinco sin huella) · 24px</Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={24} registro="tinta" />
+                <Icono nombre="compartir" tamano={24} registro="tinta" />
+                <Icono nombre="descargar" tamano={24} registro="tinta" />
+                <Icono nombre="lapiz" tamano={24} registro="tinta" />
+                <Icono nombre="filtro" tamano={24} registro="tinta" />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">Los mismos a 21px — el gate por ícono (§2.9)</Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={21} registro="tinta" />
+                <Icono nombre="compartir" tamano={21} registro="tinta" />
+                <Icono nombre="descargar" tamano={21} registro="tinta" />
+                <Icono nombre="lapiz" tamano={21} registro="tinta" />
+                <Icono nombre="filtro" tamano={21} registro="tinta" />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">
+                ⚠️ El pariente: `copiar` (control, sin huella) contra `documentos` (mundo, CON
+                huella). Son espejo — si a 21px no se separan, el que se mueve es `copiar`.
+              </Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={24} />
+                <Icono nombre="documentos" tamano={24} />
+                <Icono nombre="copiar" tamano={21} />
+                <Icono nombre="documentos" tamano={21} />
+              </View>
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="StepperCantidad · el número EDITABLE lleva la caja del campo (S103-B)">
+          <View style={{ gap: spacing[3] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <StepperCantidad valor={3} min={1} max={99} onCambio={() => {}} etiqueta="Editable" editable />
+              <StepperCantidad valor={3} min={1} max={99} onCambio={() => {}} etiqueta="Solo muestra" />
+            </View>
+            <Texto variante="apoyo">
+              El discriminador son los DOS juntos, y antes de esta tanda eran el MISMO objeto: el
+              TextInput y el Text compartían ancho, centrado, mono tabular, tracking y color — la única
+              diferencia era un padding en cero. La firma del founder: un número suelto se lee como
+              resultado, no como control. El de la izquierda se puede tipear y lo dice sin decirlo; el de
+              la derecha es un dato y no promete edición.
+            </Texto>
+            <Texto variante="apoyo">
+              No nace una pastilla nueva: es la caja del campo de la casa (N11/N11′), la misma anatomía
+              que llevan Campo, CampoCodigo y CampoFecha — contorno con piso de 3:1 vigilado por R43,
+              interior claro, y foco con acento más elevación. Tocalo y mirá el borde: cambia de COLOR y
+              nunca de grosor, que es lo que evita que el layout se corra mientras alguien tipea. El alto
+              sale derivado del lado de los botones de paso, así que los tres se alinean por construcción.
+            </Texto>
+            <Texto variante="apoyo">
+              Lo que NO está acá y se declara: sobre el bloque lleno (tamano ancho, la vitrina) la caja no
+              se monta. Su interior está definido contra el fondo base y ahí pondría una caja blanca sobre
+              un bloque de CTA. Es 1 de los 3 montajes editables vivos y espera decisión del founder.
+            </Texto>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Celda · LA ELEGIDA se dice en letra, sin huella (S103-B · §14)">
+          <View style={{ gap: spacing[3] }}>
+            <Tarjeta>
+              <Celda titulo="Visa terminada en 4482" subtitulo="Vence 08/28" elegida interactiva accessibilityRole="radio" onPress={() => {}} />
+              <Separador />
+              <Celda titulo="Visa terminada en 4481" subtitulo="Vence 03/27" interactiva accessibilityRole="radio" onPress={() => {}} />
+              <Separador />
+              <Celda titulo="Mastercard terminada en 9010" subtitulo="Vence 11/26" interactiva accessibilityRole="radio" onPress={() => {}} />
+            </Tarjeta>
+            <Texto variante="apoyo">
+              El caso vivo es la hoja de «Cómo quieres pagar»: con siete tarjetas y dos pares casi
+              idénticos, abrir «Cambiar» sin ver cuál es la actual no es cambiar — es elegir de nuevo a
+              ciegas. Los dos primeros son el discriminador: mismo banco, un dígito de diferencia.
+            </Texto>
+            <Texto variante="apoyo">
+              SIN HUELLA a propósito (§14): una tarjeta no es alguien, es un instrumento. La huella marca
+              SUJETOS. Y el peso no cambia — solo el color —, porque sumarle peso movería el ancho del
+              texto y la fila saltaría al elegirla.
+            </Texto>
+            <Texto variante="apoyo">
+              La prop es `elegida`, un booleano, no un color: N23 pide IMPEDIR que alguien tiña un texto
+              «porque hace falta destacar un dato». Con un booleano semántico el tinte no está al alcance
+              de quien monta la pieza, y R58 vigila que `Texto` no gane esa puerta.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S99 — LOS CUATRO GLIFOS DE NODO Y LA TRANSICIÓN DIRECCIONAL · qué decide: (a) si a 12 px cada nodo dice QUÉ ES sin leer, y (b) si la ventana se siente venir del lado del botón que tocaste">
           <View style={{ gap: spacing[6] }}>
             {/* 🔴 S99-B · EL GATE DE LOS CUATRO GLIFOS DE NODO — Y SE
@@ -2904,12 +3043,12 @@ function GaleriaInterna() {
 
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «YA NO ESPERA DECISIÓN», en su propio título.
          *  Decía: «✅ FIRMADO S85 (3-ago: «llevala al 5») — CUÁNTO PAPEL VERDE EN CLARO · YA NO ESPERA DECISIÓN: corre el 5% (#F0F8F6). Queda como registro de l…»
          *  Cuánto papel verde en claro: corre el 5%, firma del 3-ago («llevala al 5»). Vive en el token.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
         <Seccion titulo="① ⭐ GATE S83 — CUÁNTO TAPIZ · qué decide: el founder gateó DOS VECES que el 3% es 'muy muy leve'. Acá está la escala con su par card/base, y el número DA VUELTA la premisa — ver el rótulo">
           <ThemeProvider defaultMode="dark" cta="oficio">
@@ -3031,12 +3170,12 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «SUPERSEDED por la de arriba», en su propio título.
          *  Decía: «① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE (SUPERSEDED por la de arriba: su fondo es palette.light0 pintado a mano, que dejó de ser el fond…»
          *  El agua copiada del cliente: su propio título declaraba que la de arriba la reemplaza.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
         <Seccion titulo="① ⭐ GATE S83 — LA ATMOSFERA EN LA CASA MAGENTA · qué decide: el mismo glow firmado para el prestador, del lado del cliente. NO necesitó nada nuevo: la pieza pide su color y la pantalla declara su capa">
           <ThemeProvider defaultMode="dark">
@@ -3086,12 +3225,12 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «lo FIRMADO», en su propio título.
          *  Decía: «① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598…»
          *  Cuál verde para el estado activo. Vive en `accent.active` de las dos casas, y R27 lo vigila.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
         <Seccion titulo="① ⭐ GATE S83 — EL GLOW EN LA CASA VERDE · qué decide: cómo se separa la superficie del fondo cuando YA SE GATEÓ que el fondo al 3% NO COMUNICA y el halo NO ALCANZA. Las tres capas sobre las Tarjetas planas de D-589 (par 1.009: a efectos prácticos, el mismo color que el fondo)">
           <ThemeProvider defaultMode="dark" cta="oficio">
@@ -3161,21 +3300,21 @@ function GaleriaInterna() {
             el contorno que hace de caja, y una caja necesita CUATRO
             lados. El día que alguien lo dibuje en los cuatro, eso sí es
             un borde con otro nombre y ahí sí hace falta mesa. */}
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «FIRMADO (S82)», en su propio título.
          *  Decía: «EL HALO — FIRMADO en su forma direccional (S82). El canto de luz que separa la superficie en oscuro, donde la sombra no puede: A6 intacta po…»
          *  El halo direccional. Vive en los tokens de elevación; acá solo repetía una firma.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
         {/* ④ FIRMADO (S82 r37): gana SelectorSegmentado con los dos
             agregados del founder. Baja de "espera firma" a MUESTRA. */}
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «FIRMADA (S82)», en su propio título.
          *  Decía: «LA ELECCIÓN EXCLUYENTE — FIRMADA (S82): SelectorSegmentado con la letra en magenta y LA PATA pisando la elegida…»
          *  La elección excluyente. Vive en `SelectorSegmentado`; acá solo repetía una firma.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
         {/* PROMOVIDA S83-B1 desde apps/prestador (Ley 11: cuatro
             superficies vivas). Pasó el gate global del founder el
@@ -3189,12 +3328,12 @@ function GaleriaInterna() {
         {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
             que se vea qué queda pendiente de curar (orden founder r16).
             No espera firma — ya la tuvo, y es la deuda que dejó. */}
-        /* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
+        {/* ☠️ RETIRADA DE LA VISTA (S99-B · D-833) — su veredicto YA LLEGÓ.
          *  Literal que la descarta: «RECHAZADO EN GATE», en su propio título.
          *  Decía: «⑤ ⛔ RECHAZADO EN GATE — NO espera tu firma: ya la tuvo. Es lo que sigue vivo en el código y falta curar…»
          *  Su contenido NO era historia: listaba lo que «sigue vivo en el código y falta curar». Se retira de la VISTA porque su veredicto ya llegó —«NO espera tu firma: ya la tuvo»— y lo pendiente se sigue por su deuda, no por una sección que el founder tiene que saltear cada vez.
          *  Se retira de la VISTA, no del registro: la galería es donde el
-         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */
+         *  founder gatea, y lo que ya tiene firma tapa lo que la espera. */}
 
 
         {/* Paleta */}
@@ -3391,6 +3530,8 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+
+
         <Seccion titulo="Mutacion (S100d·bis) — lo que cambia de forma sin irse">
           <View style={{ gap: spacing[3], maxWidth: 200 }}>
             <Mutacion
@@ -3538,49 +3679,6 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="copiar (S103) — el glifo, contra sus hermanos de control y contra su pariente">
-          {/* LA COMPARACIÓN ES LA MUESTRA. Arriba a 24 (la grilla de
-              diseño) y abajo a 21 (el gate §2.9), porque el riesgo de este
-              glifo NO se ve grande: es el pariente más cercano del
-              registry —`documentos` es su espejo— y lo que los separa es
-              la HUELLA, que a 21px es justo lo que puede empastarse. */}
-          <View style={{ gap: spacing[6] }}>
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="apoyo">Hermanos de CONTROL (los cinco sin huella) · 24px</Texto>
-              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-                <Icono nombre="copiar" tamano={24} registro="tinta" />
-                <Icono nombre="compartir" tamano={24} registro="tinta" />
-                <Icono nombre="descargar" tamano={24} registro="tinta" />
-                <Icono nombre="lapiz" tamano={24} registro="tinta" />
-                <Icono nombre="filtro" tamano={24} registro="tinta" />
-              </View>
-            </View>
-
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="apoyo">Los mismos a 21px — el gate por ícono (§2.9)</Texto>
-              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-                <Icono nombre="copiar" tamano={21} registro="tinta" />
-                <Icono nombre="compartir" tamano={21} registro="tinta" />
-                <Icono nombre="descargar" tamano={21} registro="tinta" />
-                <Icono nombre="lapiz" tamano={21} registro="tinta" />
-                <Icono nombre="filtro" tamano={21} registro="tinta" />
-              </View>
-            </View>
-
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="apoyo">
-                ⚠️ El pariente: `copiar` (control, sin huella) contra `documentos` (mundo, CON
-                huella). Son espejo — si a 21px no se separan, el que se mueve es `copiar`.
-              </Texto>
-              <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
-                <Icono nombre="copiar" tamano={24} />
-                <Icono nombre="documentos" tamano={24} />
-                <Icono nombre="copiar" tamano={21} />
-                <Icono nombre="documentos" tamano={21} />
-              </View>
-            </View>
-          </View>
-        </Seccion>
 
         <Seccion titulo="BotonCopiar (S103) — un toque copia, y el botón mismo lo confirma">
           {/* Vive al lado de `CodigoAEscala` a propósito: su consumidor es

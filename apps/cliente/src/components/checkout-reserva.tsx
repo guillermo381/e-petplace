@@ -174,7 +174,7 @@ export function CheckoutReserva({
   const pagar = useCallback(async () => {
     if (trabajando) return;
     setTrabajando(true);
-    const cobro = await cobrar({ tipo: 'cita', id: citaId }, medio.elegido);
+    const cobro = await cobrar({ tipo: 'cita', id: citaId }, medio.idTarjeta);
     setTrabajando(false);
 
     if (!cobro.ok) {

@@ -20,6 +20,7 @@
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  */
 
+import ts from 'typescript'
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
@@ -2005,6 +2006,34 @@ const FIXTURES = {
     { path: 'apps/prestador/src/app/eco-literal.tsx', src: `<Campo label="Diagnóstico" placeholder="diagnóstico" />` },
     { path: 'apps/prestador/src/app/eco-clave.tsx', src: `<Campo label={t('v.medicamento')} placeholder={t('v.medicamento')} />` },
   ],
+  /* R58 · la union ENTERA con sus miembros legítimos + el `accent` que
+     N23 existe para impedir. Los legítimos son el peso de la prueba
+     (L-236): sin ellos el ancla sería lo que pinta el rojo, y la regla
+     estaría probando que sabe contar cero. */
+  R58: [
+    {
+      path: 'packages/ui/src/components/Texto.tsx',
+      src: "export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'accent'",
+    },
+  ],
+  /* R59 · el comentario JSX sin llaves (el caso real de D-882) + un
+     comentario BIEN escrito (con llaves) y un `<Texto>` con contenido
+     legítimo: los dos últimos son el peso de la prueba (L-236) — si la
+     regla los contara, gritaría en cada archivo de la casa.
+     ⚠️ El fixture vive en una CADENA y no en un comentario a propósito:
+     escribir el ejemplo bien formado adentro de un bloque `/* … *``/`
+     lo cierra en el medio. Me pasó al escribir esta misma regla. */
+  R59: [
+    {
+      path: 'packages/ui/src/gallery/X.tsx',
+      src:
+        '<View>\n' +
+        '  {' + '/* comentario BIEN escrito, con llaves */' + '}\n' +
+        '  <Texto variante="apoyo">esto SI se muestra, y es legitimo</Texto>\n' +
+        '  ' + '/* comentario SIN llaves — el defecto */' + '\n' +
+        '</View>',
+    },
+  ],
   /* R48 · las 5 del baseline + UNA sexta. Y trae además una LÁPIDA de
      `Campo` —la palabra suelta en un comentario— que NO debe contarse:
      el fixture prueba que la regla mide `variante="…"` y no la palabra. */
@@ -2013,6 +2042,10 @@ const FIXTURES = {
     { path: 'apps/prestador/src/app/b.tsx', src: '<Boton variante="sinCaja" />\n'.repeat(2) },
     { path: 'packages/ui/src/components/Campo.tsx', src: '/* sinCaja MURIO, derogada por N11 */' },
     { path: 'apps/cliente/src/app/nueva.tsx', src: '<Boton variante="sinCaja" etiqueta="x" />' },
+    /* S103-B · una pieza SANA de ui, para que el ancla del brazo nuevo no
+       sea lo que pinta este fixture: el rojo tiene que seguir siendo el
+       del contador de `apps/`, que es lo que este fixture vino a probar. */
+    { path: 'packages/ui/src/components/PiezaSana.tsx', src: '<Boton variante="secundario" />' },
   ],
   /* R47 · el fixture trae las 39 del baseline repartidas + UNA
      cuadragésima. Lo único que tiene que salir rojo es la que sube el
@@ -2022,6 +2055,11 @@ const FIXTURES = {
     { path: 'apps/prestador/src/app/a.tsx', src: '<Boton variante="compacto" />\n'.repeat(20) },
     { path: 'apps/cliente/src/app/b.tsx', src: '<Boton variante="compacto" />\n'.repeat(19) },
     { path: 'apps/prestador/src/app/nueva.tsx', src: '<Boton variante="compacto" etiqueta="Ver completo" />' },
+    /* S103-B · igual que en R48: una pieza sana de ui satisface el ancla
+       del brazo nuevo, así el único rojo sigue siendo el que sube el
+       contador de `apps/`. Sin ella, este fixture pasaría a salir rojo
+       por DOS razones y dejaría de discriminar cuál. */
+    { path: 'packages/ui/src/components/PiezaSana.tsx', src: '<Boton variante="secundario" />' },
   ],
   /* R46 · TRES casos, y las dos legítimas son el peso de la prueba
      (L-236): la que COMPONE el selector · la que MUESTRA y lo declara ·
@@ -3436,6 +3474,247 @@ function r49(archivos) {
   }
 }
 
+/** R59 · UN COMENTARIO JSX SIN LLAVES ES TEXTO QUE SE RENDERIZA (S103-B · D-882).
+ *
+ *  🔴 EL DEFECTO, medido y no supuesto: en la galería vivían **SEIS**
+ *  bloques de comentario escritos SIN las llaves adentro de un `<View>`.
+ *  **En JSX eso no es un comentario: es un nodo de texto** — y en React
+ *  Native tira «Text strings must be rendered within a Text», que se
+ *  monta como overlay ROJO encima de la pantalla.
+ *
+ *  **Su costo real no fue estético: interrumpió un gate.** El founder iba
+ *  a caminar esa galería, y *un gate interrumpido por un error no es un
+ *  gate: es una pregunta sobre el error.*
+ *
+ *  ── 🔴 POR QUÉ HACE FALTA UN JUEZ, Y NO «MÁS CUIDADO» ──────────────
+ *  **El typecheck da 0 con el defecto adentro** — los seis convivieron
+ *  con cuatro typechecks verdes durante sesiones, y ningún lint de la
+ *  casa los veía. *Es la clase que este canon nombra: produce salida
+ *  creíble y no rompe ningún build; el único que lo dice es el aparato,
+ *  tarde y encima de otra cosa.*
+ *
+ *  ── POR QUÉ AST Y NO REGEX, con su medición ────────────────────────
+ *  Se intentó primero por líneas y **sobre-disparó feo: 25 bloques cuando
+ *  los reales eran 6** — el resto eran JSDoc de nivel superior, y el
+ *  primero era la cabecera del archivo. *Un regex no puede saber si un
+ *  comentario está adentro de JSX; el árbol sí.* Cuesta **~265 ms sobre
+ *  329 archivos**, medido, que es lo que hace que quepa en el hook.
+ *
+ *  ⚠️ **Y una ironía con lección adentro: esta misma cabecera se rompió
+ *  DOS veces al escribirla**, porque citar el ejemplo bien formado en
+ *  prosa cierra el bloque que lo contiene. *La secuencia de cierre no se
+ *  escribe adentro de un comentario ni para dar un ejemplo* — por eso
+ *  acá se describe con palabras y el ejemplo vive en el fixture, que es
+ *  una cadena.
+ *
+ *  Mide **texto crudo** y **expresiones que producen string** como hijos
+ *  directos de un elemento que NO es de texto. */
+const BASELINE_R59 = 0
+const PIEZAS_DE_TEXTO = new Set(['Text', 'Texto', 'PrecioText', 'CodigoAEscala'])
+function r59(archivos) {
+  const fallos = []
+  const ofensores = []
+  let elementos = 0
+  for (const { path, src } of archivos) {
+    const arbol = ts.createSourceFile(path, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+    const linea = (n) => arbol.getLineAndCharacterOfPosition(n.getStart(arbol)).line + 1
+    const caminar = (n) => {
+      if (ts.isJsxElement(n)) {
+        elementos++
+        const tag = n.openingElement.tagName.getText(arbol)
+        if (!PIEZAS_DE_TEXTO.has(tag) && !/^Texto\./.test(tag)) {
+          for (const h of n.children) {
+            if (ts.isJsxText(h) && h.text.trim() !== '')
+              ofensores.push(`${path}:${linea(h)} <${tag}> «${h.text.trim().slice(0, 40)}…»`)
+            if (ts.isJsxExpression(h) && h.expression !== undefined) {
+              const e = h.expression
+              if (
+                ts.isStringLiteral(e) ||
+                ts.isTemplateExpression(e) ||
+                ts.isNoSubstitutionTemplateLiteral(e)
+              )
+                ofensores.push(`${path}:${linea(h)} <${tag}> ${e.getText(arbol).slice(0, 40)}`)
+            }
+          }
+        }
+      }
+      n.forEachChild(caminar)
+    }
+    caminar(arbol)
+  }
+  if (ofensores.length > BASELINE_R59)
+    fallos.push(
+      `R59: ${ofensores.length} texto(s) crudo(s) fuera de una pieza de texto — ${ofensores.slice(0, 6).join(' · ')}${ofensores.length > 6 ? ` · …y ${ofensores.length - 6} más` : ''}. Si querías un COMENTARIO, en JSX va con llaves: \`{/* … */}\` — sin ellas es un nodo de texto y React Native lo tira como overlay rojo encima de la pantalla. Si querías MOSTRAR ese texto, va adentro de \`<Texto>\`.`,
+    )
+  // ANCLA: sin elementos JSX que recorrer, el cero diría «no miré».
+  fallos.push(...ancla('R59', elementos, 100, 'elemento(s) JSX recorridos'))
+  return { fallos, info: `${ofensores.length} texto(s) crudo(s) · ${elementos} elementos JSX recorridos · DURA EN ${BASELINE_R59}` }
+}
+
+/** R58 · `Texto` NO GANA UN COLOR DE ACENTO (S103-B · `N23`).
+ *
+ *  LA LEY, y es la única de la casa que pide IMPEDIR en vez de curar. Su
+ *  propio censo lo dijo con todas las letras: *«la ley ya se cumple por
+ *  construcción… no hay nada que curar, hay algo que IMPEDIR. El riesgo
+ *  no es el código de hoy: es el `accent` que alguien le agregue mañana a
+ *  `TextoColor` porque hace falta destacar un dato»*.
+ *
+ *  🔴 **Y HASTA HOY ESA LEY NO TENÍA MECANISMO** — vivía en un documento,
+ *  que es donde vive lo que se cumple mientras alguien lo lea. *Una ley
+ *  cuyo enunciado es «que nadie escriba esta línea» y que no puede ver la
+ *  línea es una intención.*
+ *
+ *  ── QUÉ MIDE, Y POR QUÉ NO ES LA PALABRA ──────────────────────────
+ *  Los MIEMBROS de la union `TextoColor`, no el archivo: `Texto.tsx`
+ *  nombra `accent` legítimamente en prosa y en el header de esta misma
+ *  clase de discusión. Cualquier miembro que **empiece con `accent`**
+ *  —`accent`, `accentDark`, `accentControl`— es la línea que N23 nombra.
+ *
+ *  ── LO QUE ESTA REGLA NO PROHÍBE, y es la mitad que la vuelve justa ──
+ *  **El color por ESTADO sigue siendo legal**, y N23 lo dice: sus tres
+ *  familias son acción, **estado** y marca firmada. Lo que se prohíbe es
+ *  la puerta GENÉRICA — un slot de color abierto en la pieza de texto,
+ *  que el consumidor usa para «destacar un dato». La salida correcta
+ *  existe y está construida: **una prop SEMÁNTICA en la pieza que tiene
+ *  el estado** (`Celda.elegida`, §14), donde el tinte no está al alcance
+ *  de quien la monta. *No se cierra el camino: se cierra el atajo.* */
+const BASELINE_R58 = 0
+function r58(archivos) {
+  const fallos = []
+  let miembros = 0
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (!/\/Texto\.tsx$/.test(path)) continue
+    const m = sinComentarios(src).match(/export type TextoColor\s*=\s*([^\n]+)/)
+    if (m === null) continue
+    for (const bruto of m[1].split('|')) {
+      const nombre = bruto.trim().replace(/^'|'$/g, '')
+      if (nombre === '') continue
+      miembros++
+      if (/^accent/i.test(nombre)) ofensores.push(nombre)
+    }
+  }
+  if (ofensores.length > BASELINE_R58)
+    fallos.push(
+      `R58: \`TextoColor\` ganó ${ofensores.length} miembro(s) de acento (${ofensores.join(' · ')}). N23: EL COLOR MARCA CLASE, JAMÁS IMPORTANCIA — lo importante dentro de un texto se marca con PESO o TAMAÑO, y el acento se reserva para lo ACCIONABLE y para lo que necesita ALARMA. Si lo que querés decir es un ESTADO ("ésta es la elegida"), no va acá: va como prop SEMÁNTICA en la pieza que tiene ese estado — el molde es \`Celda.elegida\` (§14), donde el consumidor declara el hecho y el tinte no está a su alcance.`,
+    )
+  // ANCLA: si `Texto` se renombra o su union se reescribe, este contador
+  // daría 0 y su verde diría «no miré» en vez de «no hay» (L-192).
+  fallos.push(...ancla('R58', miembros, 3, 'miembro(s) de la union TextoColor'))
+  return { fallos, info: `${miembros} miembro(s) en TextoColor · ${ofensores.length} de acento · DURA EN ${BASELINE_R58}` }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   EL ENSANCHE DE R47 Y R48 A `packages/ui` (S103-B, tanda de mesa).
+
+   🔴 EL DEFECTO QUE LO PIDIÓ, medido y no supuesto: **R47 y R48 cuentan
+   un LITERAL, y su corpus es `apps/`.** Las dos cosas juntas dejan una
+   puerta abierta del tamaño del design system: **una variante jubilada
+   montada DENTRO de una pieza de `packages/ui` no emite literal en
+   ninguna pantalla y no vive en el corpus** ⇒ revive repartida en N
+   consumidores **sin mover el trinquete un punto**.
+
+   El caso vivo que lo destapó: `BotonCopiar` nació con
+   `variante = 'compacto'` de default. Cada consumidor que la montara sin
+   pasar la prop habría puesto la variante muerta en su pantalla, y R47
+   habría seguido diciendo 38. *Un trinquete vigilado por literal es
+   ciego a lo que la pieza decide por vos.*
+
+   ── SON DOS VÍAS, Y LA SEGUNDA ES LA PEOR ──────────────────────────
+   ① **por DEFAULT** — la pieza propone y el consumidor puede corregir.
+   ② **por LITERAL adentro de la pieza** — el consumidor **no tiene prop
+      que pasar**: es un default sin puerta de salida. Se cuentan las dos
+      porque, desde la pantalla que monta la pieza, **son la misma cosa**:
+      montás un componente de la casa y te llevás una variante muerta sin
+      haber escrito nunca su nombre.
+
+   ── LOS TRES CUIDADOS QUE LA HACEN MEDIR LO QUE DICE ───────────────
+   · **CONTADORES SEPARADOS, JAMÁS SUMADOS AL DE `apps/`.** Un literal en
+     una pantalla es UN uso; un default en una pieza es una FUENTE de N
+     usos, con N desconocido sin parsear a los consumidores. *Un agregado
+     sobre objetos distintos no mide ninguno* (S99). Por eso el número de
+     R47 sigue siendo el suyo y este ensanche no lo toca.
+   · **SE MIDE EL TAG, NO LA PALABRA** — la misma disciplina que R48 ya
+     tenía escrita. Medido en vivo: la galería monta
+     `HeroMarca variante="compacto"` y `ChipEntidad` tiene
+     `tamano = 'compacto'`; **contar la palabra habría gritado por dos
+     piezas que no son `Boton`.** El default solo cuenta si su
+     identificador **llega de verdad** a `<Boton variante={…}>`.
+   · **LA GALERÍA QUEDA AFUERA, y no lo decide esta regla:** `RAICES_UI`
+     es `components` + `brand`. La galería tiene 4 `Boton compacto` vivos
+     y son de otra clase — *una pieza decide por todos sus consumidores;
+     la galería no le llega a nadie más que a nosotros.* Se declara acá
+     para que se sepa que el número existe y quedó fuera a propósito. */
+const ES_PIEZA_UI = (p) => /packages\/ui\/src\/(components|brand)\//.test(p);
+
+/** Los tags `<Boton …>` de un archivo. Cierra en el `>` de profundidad 0
+ *  de llaves y fuera de comilla, así que un `titulo={a > b}` no lo parte
+ *  al medio. `(?![A-Za-z0-9_])` es lo que evita que `<BotonCopiar` entre
+ *  como si fuera `<Boton` — el prefijo compartido es una trampa real,
+ *  porque la pieza del caso se llama justamente así. */
+function tagsDeBoton(src) {
+  const out = [];
+  for (const m of src.matchAll(/<Boton(?![A-Za-z0-9_])/g)) {
+    let i = m.index + m[0].length, llaves = 0, comilla = null;
+    for (; i < src.length; i++) {
+      const c = src[i];
+      if (comilla !== null) { if (c === comilla) comilla = null; continue; }
+      if (c === '"' || c === "'" || c === '`') { comilla = c; continue; }
+      if (c === '{') llaves++;
+      else if (c === '}') llaves--;
+      else if (c === '>' && llaves === 0) break;
+    }
+    out.push({ tag: src.slice(m.index, i + 1), index: m.index });
+  }
+  return out;
+}
+
+/** Las dos vías de una variante jubilada adentro de `packages/ui`.
+ *  Devuelve además `montajes` — cuántas piezas montan `<Boton>` — que es
+ *  el ANCLA: sin piezas que lo monten, este brazo no está mirando nada y
+ *  su verde diría "no miré" en vez de "no hay" (L-192). */
+function jubiladaEnPiezasUi(archivos, jubilada) {
+  const porDefault = [], porLiteral = [];
+  let montajes = 0;
+  for (const { path, src: crudo } of archivos) {
+    if (!ES_PIEZA_UI(path)) continue;
+    const src = sinComentarios(crudo);
+    const tags = tagsDeBoton(src);
+    if (tags.length === 0) continue;
+    montajes++;
+    for (const { tag, index } of tags)
+      if (tag.includes(`variante="${jubilada}"`))
+        porLiteral.push(`${path}:${lineaDe(src, index)}`);
+    // El default (o el const) que ALIMENTA a Boton. El identificador se
+    // captura y se exige que llegue: `tamano = 'compacto'` de otra pieza
+    // no reenvía a `Boton` y por eso no cuenta.
+    for (const d of src.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\s*(?::[^=;{}]*?)?=\s*'([A-Za-z]+)'/g)) {
+      if (d[2] !== jubilada) continue;
+      const re = new RegExp(`variante=\\{\\s*${d[1]}\\s*\\}`);
+      if (tags.some((t) => re.test(t.tag))) porDefault.push(`${path}:${lineaDe(src, d.index)}`);
+    }
+  }
+  return { porDefault, porLiteral, montajes };
+}
+
+/** El brazo compartido: mismos dos conteos, distinta variante muerta.
+ *  Vive una vez porque R47 y R48 se diferencian SOLO en el literal —
+ *  Ley 11 aplicada al propio juez. */
+function brazoUi(regla, archivos, jubilada, baseLiteral, reemplazo) {
+  const { porDefault, porLiteral, montajes } = jubiladaEnPiezasUi(archivos, jubilada);
+  const fallos = [];
+  if (porDefault.length > 0)
+    fallos.push(
+      `${regla}: ${porDefault.length} pieza(s) de packages/ui montan \`Boton\` con \`${jubilada}\` POR DEFAULT (${porDefault.join(' · ')}). Un default NO emite el literal en ninguna pantalla ⇒ el contador de \`apps/\` sigue igual mientras la variante muerta se reparte por todos los consumidores. ${reemplazo} DURA EN 0: nació sin ofensores, así que prohíbe hacia adelante sin pedirle a nadie que cure nada hoy.`,
+    );
+  if (porLiteral.length > baseLiteral)
+    fallos.push(
+      `${regla}: \`Boton variante="${jubilada}"\` hardcodeado adentro de piezas de packages/ui subió a ${porLiteral.length} (baseline ${baseLiteral}, SOLO-BAJA) — ${porLiteral.join(' · ')}. Es peor que un default: el consumidor NO tiene prop que pasar para corregirlo. ${reemplazo}`,
+    );
+  fallos.push(...ancla(`${regla}·ui`, montajes, 1, 'pieza(s) de packages/ui que montan <Boton>'));
+  return { fallos, porDefault, porLiteral, montajes };
+}
+
 /** R48 · EL ALIAS RENOMBRADO NO CRECE — `Boton sinCaja` → `apoyada`
  *  (S99-B, adjudicación de mesa).
  *
@@ -3458,12 +3737,28 @@ function r49(archivos) {
  *  una deuda ajena.** *Medir por la palabra habría sido la misma
  *  imprudencia que renombrar por grep.* */
 const BASELINE_R48 = 5
+/** El literal hardcodeado de `sinCaja` en piezas de `ui`: **medido en 0**
+ *  al abrir la tanda. DURA EN 0 como el de default. */
+const BASELINE_R48_UI = 0
 function r48(archivos) {
   const fallos = []
   let usos = 0
-  for (const { src } of archivos) {
+  // ⚠️ EL FILTRO NO ES PROLIJIDAD: este contador es el de `apps/` y tiene
+  // baseline propio. Si el corpus nuevo entrara acá, el número subiría
+  // por un ensanche del instrumento y no por un uso nuevo — que es
+  // exactamente lo que un trinquete no puede hacer.
+  for (const { path, src } of archivos) {
+    if (ES_PIEZA_UI(path)) continue
     usos += (sinComentarios(src).match(/variante="sinCaja"/g) ?? []).length
   }
+  const ui = brazoUi(
+    'R48',
+    archivos,
+    'sinCaja',
+    BASELINE_R48_UI,
+    'Cambiá el literal por `variante="apoyada"`: la pieza pinta EXACTAMENTE igual (el alias se resuelve en un solo lugar), así que es un cambio de nombre sin riesgo visual.',
+  )
+  fallos.push(...ui.fallos)
   if (usos > BASELINE_R48)
     fallos.push(
       `R48: \`Boton variante="sinCaja"\` subió a ${usos} (baseline ${BASELINE_R48}, SOLO-BAJA). Está RENOMBRADA a \`apoyada\` — el nombre viejo dice que no tiene caja y la variante tiene superficie propia (\`accent.apoyada\`). Cambiá el literal por \`variante="apoyada"\`: la pieza pinta EXACTAMENTE igual (el alias se resuelve en un solo lugar), así que es un cambio de nombre sin riesgo visual.`,
@@ -3471,7 +3766,7 @@ function r48(archivos) {
   fallos.push(...ancla('R48', usos, 1, 'usos vivos del alias (0 = muere el alias, con firma)'))
   return {
     fallos,
-    info: `${usos} uso(s) del alias \`sinCaja\` · baseline ${BASELINE_R48} solo-baja · muere cuando llegue a 0`,
+    info: `${usos} uso(s) del alias \`sinCaja\` en apps · baseline ${BASELINE_R48} solo-baja · muere cuando llegue a 0 · ui: ${ui.porDefault.length} por default (DURA EN 0) · ${ui.porLiteral.length} hardcodeado(s) en piezas (baseline ${BASELINE_R48_UI}) sobre ${ui.montajes} pieza(s) que montan Boton`,
   }
 }
 
@@ -3500,16 +3795,43 @@ function r48(archivos) {
  *  *Lo que sí se puede medir hoy se mide hoy; lo que no, se dice que no
  *  se midió. Media regla honesta vale más que una entera que miente.* */
 const BASELINE_R47 = 39
+/** 🔴 EL NÚMERO QUE EL ENSANCHE DESTAPÓ: **DOS piezas vivas** de
+ *  `packages/ui/src/components` hardcodean la variante jubilada —
+ *  `AvisoAlergia` y `SelectorVentana`—, y **R47 contaba 0 por las dos**
+ *  (corpus `apps/`). Cada pantalla que monta esas piezas se lleva el
+ *  contorno transparente que la 19.7 mató, sin escribir su nombre.
+ *
+ *  Nace CONGELADO en 2 y solo-baja, no en 0: ponerlo en 0 dejaría el gate
+ *  de la casa en rojo para todos hoy, por dos casos que son de C y de D y
+ *  se curan al tocar su pantalla. **Mismo trato que la casa le dio a los
+ *  39 y a los 5: se congela con lápida, no se borra optimista.**
+ *
+ *  *Y el detalle que lo vuelve caro: `SelectorVentana` lleva encima el
+ *  comentario «Comando con consecuencias → viste de botón (Ley 22c)» —
+ *  la misma ley que el mensaje de R47 cita para mandarla a `secundario`.
+ *  La pieza invoca la ley que condena su elección.* */
+const BASELINE_R47_UI = 2
 function r47(archivos) {
   const fallos = []
   let usos = 0
   for (const { path, src } of archivos) {
+    // ⚠️ El filtro conserva el corpus de este contador (ver R48): su
+    // baseline es de `apps/` y un ensanche del instrumento no puede
+    // moverlo. Lo de `packages/ui` lo cuenta el brazo de abajo, aparte.
+    if (ES_PIEZA_UI(path)) continue
     // Sin comentarios: la lápida de la pieza y este propio header nombran
     // la variante, y contarlos haría que documentar la deuda la aumente.
     const n = (sinComentarios(src).match(/variante="compacto"/g) ?? []).length
     if (n > 0) usos += n
-    void path
   }
+  const ui = brazoUi(
+    'R47',
+    archivos,
+    'compacto',
+    BASELINE_R47_UI,
+    'Reemplazo POR LO QUE LA ACCIÓN HACE: NAVEGA → label con chevron (`ghost` + `chevron`) · EJECUTA → label sin chevron (`ghost`) · y si tiene consecuencia de verdad no era terciaria: sube a `secundario` (Ley 22c).',
+  )
+  fallos.push(...ui.fallos)
   if (usos > BASELINE_R47)
     fallos.push(
       `R47: \`Boton variante="compacto"\` subió a ${usos} (baseline ${BASELINE_R47}, SOLO-BAJA). Está JUBILADA: el contorno transparente como acción murió en la 19.7 y esta variante ES el contorno transparente. Reemplazo POR LO QUE LA ACCIÓN HACE: NAVEGA → label con chevron (\`ghost\` + \`chevron\`) o \`CeldaNavegacion\` si es fila · EJECUTA → label sin chevron (\`ghost\`) · y si tiene consecuencia de verdad no era terciaria: sube a \`secundario\` (Ley 22c). ⚙️ El baseline BAJA solo: cada lote que toque una de sus pantallas la migra y el número queda abajo para siempre.`,
@@ -3519,7 +3841,7 @@ function r47(archivos) {
   fallos.push(...ancla('R47', usos, 1, 'usos vivos de la variante jubilada (0 = muere la regla, con firma)'))
   return {
     fallos,
-    info: `${usos} uso(s) de la variante jubilada · baseline ${BASELINE_R47} solo-baja · muere cuando llegue a 0`,
+    info: `${usos} uso(s) de la variante jubilada en apps · baseline ${BASELINE_R47} solo-baja · muere cuando llegue a 0 · ui: ${ui.porDefault.length} por default (DURA EN 0) · ${ui.porLiteral.length} hardcodeado(s) en piezas (baseline ${BASELINE_R47_UI}) sobre ${ui.montajes} pieza(s) que montan Boton`,
   }
 }
 
@@ -4151,7 +4473,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4228,6 +4550,50 @@ const EXTRAS_R16 = [
  *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
  *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
 const EXTRAS_BRAZOS = [
+  /* ── S103-B · LOS TRES BRAZOS NUEVOS DE R47 Y R48, uno por rojo ───────
+     El fixture genérico de cada regla ya sale rojo por el contador de
+     `apps/`, así que **no probaría nada de esto**: un brazo que nunca se
+     ejecuta no está probado, aunque la regla salga roja. Cada fixture de
+     acá enciende UN solo brazo — los otros dos quedan por debajo de su
+     baseline a propósito, para que el rojo diga cuál. */
+  /* ⚠️ CADA UNO LLEVA UN ARCHIVO DE `apps/` QUE NO ES DECORADO: sin él, el
+     fixture sale rojo TAMBIÉN por el ancla del contador viejo (que no
+     encontraría un solo uso), y entonces **el brazo nuevo podría dejar de
+     andar sin que la auto-prueba se entere** — seguiría roja por la otra
+     razón. *Se encontró midiendo estos mismos fixtures, no leyéndolos.* */
+  ['R47·ui · el DEFAULT de una pieza que alimenta a Boton', r47, [
+    { path: 'apps/cliente/src/app/ancla.tsx', src: '<Boton variante="compacto" />' },
+    {
+      path: 'packages/ui/src/components/BotonX.tsx',
+      src: "export function BotonX({ variante = 'compacto' }) {\n  return <Boton variante={variante} etiqueta=\"x\" />\n}",
+    },
+  ]],
+  ['R47·ui · el LITERAL hardcodeado sube sobre su baseline', r47, [
+    { path: 'apps/cliente/src/app/ancla.tsx', src: '<Boton variante="compacto" />' },
+    { path: 'packages/ui/src/components/A.tsx', src: '<Boton variante="compacto" />' },
+    { path: 'packages/ui/src/components/B.tsx', src: '<Boton variante="compacto" />' },
+    { path: 'packages/ui/src/components/C.tsx', src: '<Boton variante="compacto" />' },
+  ]],
+  /* El ancla: SOLO apps. Si algún día el brazo dejara de encontrar piezas
+     —un rename de carpeta, un corpus que se mueve— su silencio diría "no
+     miré" y no "no hay". */
+  ['R47·ui · el ANCLA (ninguna pieza de ui monta Boton)', r47, [
+    { path: 'apps/cliente/src/app/x.tsx', src: '<Boton variante="compacto" />' },
+  ]],
+  ['R48·ui · el DEFAULT de una pieza que alimenta a Boton', r48, [
+    { path: 'apps/cliente/src/app/ancla.tsx', src: '<Boton variante="sinCaja" />' },
+    {
+      path: 'packages/ui/src/components/BotonY.tsx',
+      src: "export function BotonY({ variante = 'sinCaja' }) {\n  return <Boton variante={variante} etiqueta=\"y\" />\n}",
+    },
+  ]],
+  ['R48·ui · el LITERAL hardcodeado sube sobre su baseline (0)', r48, [
+    { path: 'apps/cliente/src/app/ancla.tsx', src: '<Boton variante="sinCaja" />' },
+    { path: 'packages/ui/src/components/D.tsx', src: '<Boton variante="sinCaja" />' },
+  ]],
+  ['R48·ui · el ANCLA (ninguna pieza de ui monta Boton)', r48, [
+    { path: 'apps/cliente/src/app/y.tsx', src: '<Boton variante="sinCaja" />' },
+  ]],
   /* ── R34 brazo B: la lista de red que arranca vacía (S92-BIS) ──────────
      Su rojo va APARTE del brazo A a propósito: el fixture de A no tiene
      `useState<T[]>([])` y el de B no tiene `ofrecibles()`, así que ninguno
@@ -4300,6 +4666,41 @@ for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
     console.error(`AUTO-PRUEBA ✗ ${nombre} no salió roja — BRAZO DECORATIVO (L-192)`);
     decorativas++;
+  }
+}
+
+/* ── S103-B · LA PRUEBA NEGATIVA DEL BRAZO DE `ui` ────────────────────
+   Todo lo de arriba prueba que la regla SUENA. Esto prueba lo otro, que
+   en un ratchet es igual de caro: **que no suena donde no debe.** Su
+   cabecera afirma que mide el TAG y no la palabra, y una afirmación que
+   un gate hace sobre sí mismo tiene que ser medible o es decoración.
+   Los cuatro casos son REALES, medidos en el árbol vivo al abrir la
+   tanda — no inventados para que pasen. */
+{
+  const NO_DEBEN_CONTAR = [
+    ['otra pieza con la misma palabra (`HeroMarca variante="compacto"`, 7 vivos en la galería)',
+     '<Boton variante="secundario" />\n<HeroMarca variante="compacto" />'],
+    ['otra prop con la misma palabra y sin llegar a Boton (`ChipEntidad tamano = \'compacto\'`)',
+     "export function Chip({ tamano = 'compacto' }) {\n  return <Boton variante=\"secundario\" etiqueta={tamano} />\n}"],
+    ['el PREFIJO compartido (`<BotonCopiar variante="compacto">`) — la pieza del caso se llama así',
+     '<Boton variante="secundario" />\n<BotonCopiar variante="compacto" />'],
+    ['la palabra en un comentario (documentar una muerte no puede aumentarla)',
+     '<Boton variante="secundario" />\n/* la lápida de variante="compacto" */'],
+  ];
+  for (const [queEs, src] of NO_DEBEN_CONTAR) {
+    const r = jubiladaEnPiezasUi([{ path: 'packages/ui/src/components/N.tsx', src }], 'compacto');
+    if (r.porLiteral.length > 0 || r.porDefault.length > 0) {
+      console.error(
+        `AUTO-PRUEBA ✗ R47·ui contó lo que NO debe: ${queEs}. Un ratchet que sobre-dispara se apaga a la semana, y con él se apagan los brazos que sí eran defectos.`,
+      );
+      decorativas++;
+    }
+    // Y que el ancla siga viva en el mismo caso: si `montajes` cayera a 0,
+    // el cero de arriba diría "no miré" en vez de "no contó" (L-192).
+    if (r.montajes !== 1) {
+      console.error(`AUTO-PRUEBA ✗ R47·ui perdió el ancla midiendo el caso negativo: ${queEs}`);
+      decorativas++;
+    }
   }
 }
 
@@ -4433,8 +4834,15 @@ corridas.push(['R43 (N11: el contorno del campo tiene piso)', r43(FUENTES_R43)])
 corridas.push(['R44 (N12.4: el error dice QUE esta mal)', r44(CORPUS_R44)]);
 corridas.push(['R45 (D-828: el lector de rango no se consume en silencio)', r45([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)', r46(apps)]);
-corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47(apps)]);
-corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r48(apps)]);
+/* S103-B · el corpus se ENSANCHA y los contadores viejos NO se mueven:
+   cada función filtra `packages/ui` fuera de su conteo de `apps/`. Se
+   pasa junto y se separa adentro porque la auto-prueba genérica le da UN
+   solo array a la regla — meter dos parámetros habría dejado el brazo
+   nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R59 (un comentario JSX sin llaves es texto: D-882)', r59([...apps, ...ui, ...galeria])]);
+corridas.push(['R58 (Texto no gana un color de acento: N23)', r58(ui)]);
+corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47([...apps, ...ui])]);
+corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r48([...apps, ...ui])]);
 corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps)]);
 corridas.push(['R50 (elegir uno de varios sin decir cual)', r50([...apps, ...appsCodigo, ...leer(archivosCodigo('packages/api/src'))])]);
 corridas.push(['R51 (un token legado no entra a una pieza nueva)', r51([...apps, ...ui])]);

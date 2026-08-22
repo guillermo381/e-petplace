@@ -22,7 +22,7 @@ import {
   Boton, Encabezado, EstadoVacio, EsqueletoGrupo, Hoja, Separador, Texto, spacing, useTheme,
 } from '@epetplace/ui';
 import { listarTarjetasGuardadas, borrarTarjetaGuardada, type TarjetaGuardada } from '@epetplace/api';
-import { FilaMedioDePago, VozVencida, nombreDeMarca, vencida } from '@/components/fila-medio-de-pago';
+import { FilaMedioDePago, VozVencida, desempatarMedios, nombreDeMarca, vencida } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -115,6 +115,11 @@ export default function MediosDePago() {
                 <FilaMedioDePago
                   key={m.id}
                   tarjeta={m}
+                  /* Mismo desempate que en la hoja del checkout: la lista es
+                     donde la persona BORRA, así que distinguir dos filas
+                     idénticas acá no es comodidad — es lo que evita que borre
+                     la que no era. */
+                  desempate={desempatarMedios(medios).get(m.id) ?? null}
                   fin={
                     <Boton
                       variante="secundario"

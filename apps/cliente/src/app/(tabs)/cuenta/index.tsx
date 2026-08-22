@@ -116,14 +116,42 @@ export default function Cuenta() {
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     /* 🔴 «Medios de pago» es OTRA cosa que «Pagos»: aquélla es el historial de
        lo que pagaste; ésta es CON QUÉ pagás. *Meterlas en una sola pantalla
-       mezclaría un registro con una configuración.* */
-    { etiqueta: t('cuenta.medios'), ruta: '/cuenta/medios' as const, icono: 'preferencias' as const },
+       mezclaría un registro con una configuración.*
+
+       🔴 `D-877` · **Y HASTA HOY LAS DOS COSAS DISTINTAS SE VEÍAN IGUAL QUE
+       UNA TERCERA:** esta fila llevaba `preferencias`, el mismo glifo que
+       «Preferencias» — *el comentario de arriba se toma el trabajo de
+       explicar que son cosas distintas y el glifo decía lo contrario*.
+       `bancario` es el dato: **con qué pagás**. La distinción queda en los
+       tres: `pagos` = el historial · `bancario` = el instrumento ·
+       `preferencias` = cómo querés que se comporte la app. */
+    { etiqueta: t('cuenta.medios'), ruta: '/cuenta/medios' as const, icono: 'bancario' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
-    // S74 — ENTRADA TEMPORAL del gate de la fusión del avatar (la lámina
-    // se juzga en DISPOSITIVO: Chromium aplica borderCurve y no puede
-    // desmentir el engaño que produjo). MUERE con la firma del founder,
-    // junto a la lámina (Ley 37 — precedente lámina S73).
-    { etiqueta: t('cuenta.laminaFusion'), ruta: '/lamina-fusion' as const, icono: 'preferencias' as const },
+    /* S74 — ENTRADA TEMPORAL del gate de la fusión del avatar (la lámina
+       se juzga en DISPOSITIVO: Chromium aplica borderCurve y no puede
+       desmentir el engaño que produjo). MUERE con la firma del founder,
+       junto a la lámina (Ley 37 — precedente lámina S73).
+
+       🔴 `D-878` · **SE DECLARA COMO LO QUE ES, igual que la galería.** Vive
+       en la superficie real sin `__DEV__`, y **no se mató**: su comentario
+       ata su muerte a una firma del founder que **no puedo verificar desde
+       acá** — *retirar un instrumento de gate antes de su gate es peor que
+       dejarlo visible un día más*. Lo que sí se cura hoy es que **no decía
+       que no era producto**.
+
+       🔴 `D-877` · **Y LLEVA EL MISMO GLIFO QUE LA GALERÍA A PROPÓSITO** —
+       no es la repetición que la ley prohíbe: **es la marca de una CLASE**.
+       Las dos son herramientas de sesión con fecha de retiro, las dos lo
+       dicen en su `detalle`, y **que se vean iguales entre sí y distintas
+       del resto es exactamente lo que hay que comunicar.** *Buscarle un
+       cuarto glifo por prolijidad las habría disfrazado de filas de
+       producto, que es el defecto que `D-878` nombra.* */
+    {
+      etiqueta: t('cuenta.laminaFusion'),
+      ruta: '/lamina-fusion' as const,
+      icono: 'lapiz' as const,
+      detalle: 'herramienta de sesión — no es pantalla de producto',
+    },
   ];
 
   return (
@@ -139,6 +167,10 @@ export default function Cuenta() {
                 <CeldaNavegacion
                   icono={lugar.icono}
                   titulo={lugar.etiqueta}
+                  /* `D-878`: solo las herramientas de sesión traen `detalle`,
+                     y por eso se pregunta por presencia en vez de agregarle
+                     `undefined` a las nueve filas de producto. */
+                  detalle={'detalle' in lugar ? lugar.detalle : undefined}
                   onPress={() => router.push(lugar.ruta)}
                 />
               </View>
@@ -157,8 +189,21 @@ export default function Cuenta() {
           {/* ── Sesión y cuenta ── */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('cuenta.sesion')} />
+            {/* 🔴 `D-879` · **19.7 APLICADA: por superficie UNA caja, el resto
+                baja a label.** Acá había dos botones apilados y el de abajo
+                era `compacto` — **borde + fondo transparente**, que es
+                literalmente *la caja vacía del medio* que la 19.7 mató.
+
+                **Cerrar sesión conserva la caja** porque es la acción real de
+                esta zona. **Eliminar cuenta baja a label** — y no es solo
+                obediencia a la ley: *es una acción destructiva e
+                irreversible, y darle el mismo peso visual que a cerrar sesión
+                la invitaba.* **Sin chevron, porque EJECUTA y no navega.**
+
+                ✅ **De paso muere un uso de la variante jubilada `compacto`**
+                ⇒ `R47` baja de 38 a 37. *La regla es solo-baja y muere en 0.* */}
             <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            <Boton variante="compacto" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
+            <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>
 
           {/* ── S74-A · EL MARCADOR RENDERIZADO (L-160 enmendada / L-161):
@@ -186,7 +231,26 @@ export default function Cuenta() {
                       ).padStart(2, '0')}`
                     : ''
                 }`
-              : 'bundle embebido / dev'}
+              /* 🔴 S103-C · LOS DOS CASOS SE SEPARAN — antes decían lo mismo.
+               *
+               * ⏪ Este fallback era **`'bundle embebido / dev'` para los dos**:
+               * el bundle horneado en la APK **y** Metro sirviendo una rama
+               * cualquiera. *El discriminador ya existía en la línea de arriba
+               * (`isEmbeddedLaunch`) y el pie lo tiraba a la basura.*
+               *
+               * **Y costó casi un veredicto falso, medido hoy:** la pista A
+               * tomó el aparato mientras C tenía Metro corriendo desde su
+               * worktree, leyó `bundle embebido / dev` e **iba a reportar que
+               * su gate corría sobre el bundle de la APK. Era el de C.**
+               *
+               * *`L-336`: un objeto verosímil del origen equivocado no se caza
+               * leyendo mejor — A leyó bien, y el pie contestó bien una
+               * pregunta más angosta que la que el gate necesita.* **El
+               * marcador nació (L-160) para decir QUÉ corre sin cable, y en el
+               * único caso peligroso decía lo mismo que en el inocente.** */
+              : Updates.isEmbeddedLaunch
+                ? 'bundle embebido'
+                : 'metro · dev'}
           </Texto>
 
           {/* ── S82-B r13 · LA ENTRADA A LA GALERÍA DE TOKENS ──
@@ -221,7 +285,12 @@ export default function Cuenta() {
               es una herramienta de sesión con fecha de retiro, y meterle
               keys al diccionario dejaría basura que sobrevive a la deuda. */}
           <CeldaNavegacion
-            icono="preferencias"
+            /* `D-877`: `lapiz`, el mismo que la lámina — **la repetición acá
+               es deliberada y marca CLASE**: las dos son herramientas de
+               sesión, no filas de producto, y las dos lo dicen en su
+               `detalle`. Lo que la ley prohíbe es que dos cosas DISTINTAS se
+               vean iguales; esto es lo contrario. */
+            icono="lapiz"
             titulo="Galería de tokens"
             detalle="herramienta de sesión — no es pantalla de producto"
             onPress={() => router.push('/gallery')}
