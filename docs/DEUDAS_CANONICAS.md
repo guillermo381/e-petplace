@@ -18716,6 +18716,43 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-870 🟢 · 89 ERRORES DE TIPADO FUERA DE CLASE EN SIETE EDGE FUNCTIONS VIVAS
+
+🟢 **BAJA. Declarados y NO gateados a propósito.**
+
+**Medido por S103-B** al construir `verify-edge-deno.mjs`: `deno check` sobre las
+**23** edge functions devuelve **90 errores**. **Uno** es de la clase que el gate
+juzga —«usa algo que no existe»— y **89 no**:
+
+| código | cuántos | qué son |
+|---|---|---|
+| `TS2339` | 77 | inferencia de `supabase-js` |
+| `TS2345` | 9 | librería |
+| `TS7006` | 3 | parámetro implícito `any` |
+
+**En:** `barrer-storage` · `despachar-whatsapp` · `documento-carnet` ·
+`documento-certificado` · `documento-ficha-identidad` ·
+`documento-historia-clinica` · `documento-receta`.
+
+🔴 **POR QUÉ NO SE GATEAN, y es la parte que hay que no revertir:** las siete
+están **vivas y con gate impreso pasado** (los cinco papeles de S90). Son
+**artefactos de tipado, no defectos de runtime**. Gatearlos reproduciría, con
+peor proporción, el fracaso que el juez anterior **ya tenía documentado en su
+propia cabecera**: *«20 rojos sobre 22 funciones y casi todos falsos… un gate
+que grita siempre es un gate que nadie mira — y eso es peor que no tenerlo,
+porque además da la sensación de estar cubierto»*. **Acá la proporción sería
+89 a 1.**
+
+**Lo que se hizo en su lugar:** el gate juzga **la clase** (`TS2304`/`TS2552`) y
+**declara los 89 al pie, en cada corrida, sin gatearlos.** *Callarlos habría
+sido el defecto de al lado: un gate que esconde lo que no mide.*
+
+**Disparo:** cuando alguien toque una de esas siete funciones, o cuando se
+decida auditar el tipado de edge functions como frente propio. **Hasta
+entonces, verlos en la salida del gate es lo correcto, no una alarma.**
+
+---
+
 ### D-869 🟡 · EL AVISO DEL RECURRENTE PROMETE «SALTAR» Y «MOVER», Y NINGUNA DE LAS DOS EXISTE
 
 🟡 **MEDIA. Dueño: PRODUCTO** (no es deuda técnica).
