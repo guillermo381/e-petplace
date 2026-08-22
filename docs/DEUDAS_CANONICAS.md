@@ -18579,6 +18579,19 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-346** — **UNA CONSTANTE QUE ENCIENDE MEDIA FUNCIÓN ES PEOR QUE UNA APAGADA.** *(Autoría S103-C; depositada por A.)*
+  **El caso:** `DEUNA_ELEGIBLE` prende la fila de DeUna en la hoja de medios. **Pero la fila es solo la mitad:** la otra es **la puerta del riel** —la edge que crea la solicitud y devuelve el código—, que es de otra pista y todavía no está desplegada. **Encender solo la constante deja una opción elegible que no puede cobrar.**
+  > ### **Una perilla que enciende la mitad visible de una función construye exactamente el defecto que la función venía a evitar: la promesa sin camino.**
+  *Y su modo de falla es peor que el de la función ausente: la ausente no promete nada; la media encendida se ofrece, se elige, y falla DESPUÉS de que la persona apostó por ella.* **En un medio de pago eso ocurre con el carrito lleno.**
+  **Lo exigible: toda bandera declara SUS DOS MITADES** —la superficie y su productor— **y no se enciende hasta que las dos estén en pie.** *Es hermana del gate mecánico de la vitrina (S78): aquel se abre solo el día que el artefacto que lo condiciona existe, en vez de esperar que alguien se acuerde.* ⇒ **el patrón preferido no es una constante que alguien flipea, sino una condición que se vuelve verdadera sola cuando su otra mitad nace.** Origen: S103-C.
+
+- **L-345** — **UNA OPCIÓN NO CAMBIA DE LUGAR SEGÚN SU ESTADO: SU ESTADO LO DICE SU FILA, NO SU POSICIÓN.** *(Autoría S103-C; depositada por A.)*
+  **El caso:** la firma del founder pone a **DeUna primera y por defecto** (`LETRA_DEUNA` §6bis). Cuando **no es elegible** —hoy le falta el `pointOfSale`— la salida intuitiva es **mandarla al fondo de la lista**, que es donde efectivamente está.
+  **Y es la salida equivocada**, porque *mover una opción según su estado le enseña a la persona un orden que va a cambiar sin aviso*: el día que DeUna se vuelva elegible, **salta del último lugar al primero** y la lista que la persona ya había aprendido a recorrer deja de servirle. **El costo lo paga el que ya sabía usarla.**
+  > ### **La posición comunica IMPORTANCIA y es estable. El estado comunica DISPONIBILIDAD y cambia. Mezclarlos hace que lo estable se mueva y que lo que cambia no se vea.**
+  ⇒ **La opción se queda en su lugar y su fila dice qué le pasa** —apagada, con su razón, con voz—. *Una fila apagada en el primer lugar enseña que existe y que hoy no se puede; una fila movida al fondo enseña un orden falso.*
+  **Su límite, declarado:** no dice que todo tenga que estar siempre visible — dice que **la posición no es el canal para comunicar estado**. Ocultar una opción que no aplica a esta persona (no a este momento) sigue siendo legítimo. Origen: S103-C, sobre la hoja de medios.
+
 - **L-344** — 🔴 **UNA DEPENDENCIA NATIVA NO VIAJA POR OTA — Y `pnpm` LA HACE PARECER QUE SÍ.** *(Autoría S103-B; depositada por A. **Advertencia de CLASE, no del caso.**)*
   **El caso:** `expo-clipboard` es nativo. `L-134` ya decía que un módulo nativo exige build. **Lo nuevo, y es lo que engaña:** *pnpm auto-instala los peers*, así que **un bundle nuevo sobre un binario viejo RESUELVE EL JS** — el `import` funciona, el componente monta, el botón se dibuja habilitado — **y falla recién AL LLAMAR.**
   > ### **Un botón habilitado cuyo toque no hace nada es peor que uno apagado.**
