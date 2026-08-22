@@ -18579,6 +18579,17 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-347** — **UN INSTRUMENTO QUE MIDE LA FORMA QUE ÉL ESPERA, EN VEZ DE LA QUE EL ARCHIVO USA, DA VERDE SOBRE NADA.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **Tres veces el mismo defecto en UNA sola tanda**, y las tres con síntomas distintos:
+  · el reconocedor de secciones **esperaba una sangría que los archivos no tienen** ⇒ **VERDE midiendo CERO secciones**;
+  · después buscó **un literal donde el archivo usa un helper** ⇒ **18 rojos falsos**;
+  · y el contador de párrafos fue por su **tercera** versión: las dos primeras **contaban el formateo, no el contenido**.
+  > ### **El primero es el peligroso: los rojos falsos se investigan; el VERDE VACÍO se archiva.**
+  *Un instrumento que no encontró nada y uno que midió y no halló defectos **producen exactamente la misma salida**, y la diferencia entre los dos es todo.*
+  **⇒ EL REMEDIO ES DE CLASE, no del caso: el BRAZO ANTI-VERDE-VACÍO.** *Todo instrumento que cuenta declara un mínimo por debajo del cual su propio resultado es imposible, y ahí sale **ROJO**.* En el caso fundador: **tres documentos con cero secciones no puede ser cierto** — así que cero secciones dejó de ser verde.
+  **Cómo se elige ese mínimo sin inventarlo:** *no es un umbral de calidad, es una **imposibilidad**.* Se pregunta **«¿qué valor solo puede salir si el instrumento no miró?»** — y ése, y solo ése, es el que se vuelve rojo. *Un mínimo puesto por gusto se convierte en el umbral que alguien afloja cuando molesta.*
+  **Su parentesco:** hermana de **`L-342`** (*el veredicto no concluyente necesita su propio código*) — **las dos atacan la misma raíz por lados opuestos**: aquella impide que un instrumento sin veredicto diga verde; ésta impide que un instrumento **sin muestra** diga verde. Y prima de **`L-330`**: el control positivo caza al instrumento ciego **cuando alguien se acuerda de correrlo**; el brazo anti-verde-vacío lo caza **siempre**, porque vive adentro. Origen: S103-B, jueces del sitio.
+
 - **L-346** — **UNA CONSTANTE QUE ENCIENDE MEDIA FUNCIÓN ES PEOR QUE UNA APAGADA.** *(Autoría S103-C; depositada por A.)*
   **El caso:** `DEUNA_ELEGIBLE` prende la fila de DeUna en la hoja de medios. **Pero la fila es solo la mitad:** la otra es **la puerta del riel** —la edge que crea la solicitud y devuelve el código—, que es de otra pista y todavía no está desplegada. **Encender solo la constante deja una opción elegible que no puede cobrar.**
   > ### **Una perilla que enciende la mitad visible de una función construye exactamente el defecto que la función venía a evitar: la promesa sin camino.**
