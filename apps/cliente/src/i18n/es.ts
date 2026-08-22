@@ -1576,13 +1576,18 @@ export const clienteEs = {
     /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
        pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
     deunaCodigoVence: 'El código vence en {{tiempo}}',
+    /* «Copiar» a secas — **firma del founder, 22-ago** («solo deja la palabra
+       copiar»). El glifo de dos hojas ya dice de qué se trata y el código está
+       al lado.
+
+       ⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO:** por contrato de `BotonCopiar`
+       la etiqueta visible **es también el nombre accesible**, y ese contrato
+       **prohíbe** una prop de label aparte (dos nodos `role="button"` anidados
+       ⇒ un lector anuncia dos controles). ⇒ **quien no ve la pantalla ahora
+       escucha «Copiar» sin el objeto.** *No hay forma de dar las dos cosas sin
+       romper el contrato de la pieza: se elige, y acá eligió el founder.*
+       → reportado a B, que es la dueña del contrato. */
     deunaCopiar: 'Copiar',
-    /* 🔴 La etiqueta para lectores de pantalla es MÁS EXPLÍCITA que el label
-       visible (pedido del founder): en pantalla «Copiar» basta porque el
-       código está al lado y se ve; **quien no ve la pantalla necesita saber
-       QUÉ copia.** *El label visible y el accesible no tienen por qué ser el
-       mismo texto — tienen que decir lo mismo a dos personas distintas.* */
-    deunaCopiarA11y: 'Copiar código',
     deunaCopiado: 'Código copiado',
     deunaCodigoVencido: 'El código venció.',
     deunaCodigoNuevo: 'Generar un código nuevo',

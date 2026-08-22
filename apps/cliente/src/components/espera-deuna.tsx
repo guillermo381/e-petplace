@@ -67,9 +67,20 @@
  * tabular; todo lo demás, en la voz normal.
  *
  * ⚠️ **NO es `CampoCodigo`** — esa pieza existe para INGRESAR un código. Acá
- * el código **se muestra para copiarlo a otra app**. Por eso es
- * `seleccionable`: *un código de 6 dígitos que no se puede copiar obliga a
- * memorizarlo mientras se cambia de aplicación.*
+ * el código **se muestra para copiarlo a otra app**, y sigue `seleccionable`
+ * a mano: **`BotonCopiar` se suma, no reemplaza** el camino que la persona ya
+ * conoce.
+ *
+ * ── ⚠️ COPIAR DEPENDE DE UNA BUILD, Y SE DECLARA ─────────────────────────
+ * `BotonCopiar` (S103-B) usa **`expo-clipboard`, que es NATIVO y NO viaja por
+ * OTA** (L-134). **Medido el 22-ago:** el JS resuelve (pnpm lo instaló), pero
+ * el binario del aparato es **1.0.4 y no lo trae** ⇒ la llamada falla y la
+ * pieza cae en **su segunda degradación**: se apaga y **no vuelve a
+ * prometer**. *Eso es la conducta correcta, no un defecto — un botón
+ * habilitado cuyo toque no hace nada es peor que uno apagado.*
+ * ⇒ **La función de copiar llega con la próxima build nativa.** Hasta
+ *   entonces el código **se copia a mano**, que es para lo que sigue siendo
+ *   `seleccionable`.
  *
  * ═══ 🔴 ENCHUFE PENDIENTE CON NOMBRE ══════════════════════════════════════
  * **Esta pieza todavía NO tiene consumidor, y es deliberado.** `numericCode` y
@@ -81,9 +92,9 @@
  * pantalla nueva.**
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { Clipboard, Pressable, Text, View } from 'react-native';
-import { Boton, Texto, spacing, typography, useAviso, useTheme } from '@epetplace/ui';
+import { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import { Boton, BotonCopiar, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
 import type { EstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { useTraduccion } from '@/i18n';
@@ -106,33 +117,6 @@ function segundosHasta(iso: string): number {
 export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaProps) {
   const { t } = useTraduccion();
   const { theme } = useTheme();
-  const { mostrar } = useAviso();
-
-  /**
-   * 🔴 COPIAR — **sin dependencia nueva y por lo tanto sin build nativa.**
-   *
-   * `Clipboard` del core de React Native **sigue existiendo y funciona**
-   * (medido: `node_modules/react-native/index.js:217`). Está **deprecado** —
-   * su propio warning dice *«will be removed in a future release»*— y el
-   * reemplazo tiene nombre: **`expo-clipboard`**.
-   *
-   * **Por qué NO se agrega `expo-clipboard` hoy:** es un módulo nativo, y
-   * L-134 es literal — *módulo nativo nuevo = build nueva*. Eso volvería esta
-   * pantalla **no gateable hoy** y no viajaría por OTA. *El precedente de la
-   * casa es D-456, el micrófono: la pieza espera el tren que otra cosa
-   * obligue, jamás pide un build para ella sola.*
-   *
-   * ☠️ **Condición de muerte:** la próxima build nativa se lleva
-   * `expo-clipboard` y esta línea. **Disparo declarado, no descubierto.**
-   *
-   * **Copiar NO toca ningún reloj** (pedido del founder): no hay `setState`
-   * de tiempo acá, así que ni la cuenta regresiva ni el hold se enteran.
-   */
-  const copiar = useCallback(() => {
-    if (estado.fase !== 'esperando') return;
-    Clipboard.setString(estado.codigo);
-    mostrar({ texto: t('pago.deunaCopiado'), variante: 'exito' });
-  }, [estado, mostrar, t]);
 
   /* Los relojes solo existen en `esperando`. En las otras fases se pasan
      instantes ya vencidos: **los hooks se llaman siempre, en el mismo orden**
@@ -265,36 +249,51 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
         >
           {estado.codigo}
         </Text>
-        {/* 🔴 SIN CAJA — corrección de craft del founder (22-ago): *«la caja
-            compite con el código, que es la única pieza que la pantalla vino
-            a mostrar»*.
+        {/* ✅ LA PIEZA DE B, ENCHUFADA — `BotonCopiar` (S103-B).
+            ☠️ Murieron acá: el `Pressable` con label de texto, el `Clipboard`
+            del core de RN y el `useAviso`. **Los tres los reemplaza el
+            contrato**, y dos de ellos porque él los prohíbe:
 
-            **El pulgar necesita blanco; la vista no necesita caja** — por eso
-            el área táctil se declara con `hitSlop` y no agrandando el dibujo:
-            **48×48 efectivos** sobre un affordance visualmente mínimo.
+            · **La confirmación es el propio botón, NO un toast** — desvío que
+              B declara y que esta pantalla es la razón de que exista: *«un
+              toast aparece SOBRE el contenido, y el contenido de esta pantalla
+              ES el código que la persona está mirando mientras copia»*.
+              *Mi `useAviso` hacía exactamente eso: tapaba el código en el
+              único momento en que se lo está leyendo.*
+            · **El módulo nativo lo carga la pieza**, con sus dos degradaciones.
 
-            ⚠️ **PUENTE DECLARADO — esto todavía NO es lo que el founder pidió.**
-            Pidió **el glifo de copiar** (dos hojas superpuestas, trazo, sin
-            relleno). **Medido: ese glifo NO existe en el registry**, y los
-            cercanos tienen su semántica ocupada y escrita — `documentos` es
-            *«dónde viven los papeles»* (una carpeta) y `documento` es *«una
-            cédula con retrato»*. **Reusar cualquiera sería un glifo con dos
-            sentidos**, que es lo que la Ley 12 prohíbe.
-            ⇒ **`packages/ui` es de B y el glifo se le PIDE, no se escribe**
-            (orden del founder). Hasta que llegue, la palabra hace el trabajo
-            **sin caja**: cumple *«sin caja ni borde, al lado del código»* y
-            deja de competir. **Cuando el glifo exista, se cambia esta línea.**
+            **`variante="secundario"` y NO el default `compacto`**, y no es
+            gusto: `compacto` es **variante JUBILADA** y `R47` la vigila
+            solo-baja (38 hoy, baseline 39). *Montar el default habría subido
+            el contador y puesto en rojo a un juez de la casa.* → reportado a B.
 
-            El toast **no mueve el layout**: es overlay de la casa (`useAviso`),
-            no empuja al código. *Verificado en el aparato.* */}
-        <Pressable
-          onPress={copiar}
-          accessibilityRole="button"
-          accessibilityLabel={t('pago.deunaCopiarA11y')}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-        >
-          <Texto variante="apoyo">{t('pago.deunaCopiar')}</Texto>
-        </Pressable>
+            **`glifo`: encendido.** B lo dejó opt-in porque *«un botón de
+            copiar solo al pie de un código no tiene hermanos de los que
+            distinguirse»* — y su prop existe justamente para que **la
+            pantalla**, que es la única que ve la vecindad, decida. **El
+            founder lo pidió explícitamente para esta pantalla.** ⚠️ Su lectura
+            y la de B difieren: se declara para la mesa, no se resuelve acá.
+
+            **La etiqueta accesible ES la visible** (contrato de B), y por eso
+            **murió `deunaCopiarA11y`** — una prop de label aparte deja dos
+            nodos `role="button"` anidados y un lector anuncia dos controles.
+            ⚠️ El founder firmó **«Copiar» a secas**: el glifo y el código al
+            lado lo explican a la vista, **y el lector de pantalla pierde el
+            objeto**. *El costo está escrito en la voz, y es de la mesa.*
+
+            **`vencido` es defensa en profundidad:** en esta rama el reloj
+            siempre es > 0 (si no, el early-return de arriba ya se llevó el
+            código). *Se pasa igual para que la intención esté escrita y no
+            dependa del orden de dos ramas.* */}
+        <BotonCopiar
+          valor={estado.codigo}
+          etiqueta={t('pago.deunaCopiar')}
+          etiquetaCopiado={t('pago.deunaCopiado')}
+          vencido={restanteCodigo === 0}
+          razonVencido={t('pago.deunaCodigoVencido')}
+          glifo
+          variante="secundario"
+        />
       </View>
 
       <Texto variante="cuerpo">{t('pago.deunaEsperaCuerpo')}</Texto>
