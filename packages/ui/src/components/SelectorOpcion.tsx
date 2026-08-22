@@ -37,6 +37,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
+import { superficieDelChip } from './superficies'
 
 // Mismo grosor que SelectorEspecie/Campo/CitaEnVivo.
 const BORDE = 1.5
@@ -205,7 +206,7 @@ function Chip({
     const timer = setTimeout(() => setMostrarSpinner(true), motion.duration.fast)
     return () => clearTimeout(timer)
   }, [cargando])
-  const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
+  const fondoReposo = superficieDelChip(theme)
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
   // LEY 22 (S58): la selección entre pares es TONAL — borde en el
@@ -280,9 +281,7 @@ function Chip({
   const llenoActivo = hayLleno && seleccionada
   const fondoEntidad = llenoActivo
     ? (theme.accent as { controlLleno: string }).controlLleno
-    : theme.mode === 'dark'
-      ? theme.bg.elevated
-      : theme.bg.card
+    : superficieDelChip(theme)
   // S74 (E3, clase L-159): DERIVADA, jamás tipeada — el único número del
   // provisional vive en TALLA_AVATAR_ENTIDAD (AvatarMascota).
   const SOBRA_ENTIDAD = (TALLA_AVATAR_ENTIDAD - ALTO) / 2

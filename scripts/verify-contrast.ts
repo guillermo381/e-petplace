@@ -25,6 +25,8 @@
 
 import { lightTheme, darkTheme, memorialTheme, getTheme, type Theme } from '../packages/ui/src/themes'
 import { palette } from '../packages/ui/src/tokens/palette'
+import { superficieDelSegmentoActivo, superficieDelChip } from '../packages/ui/src/components/superficies'
+import { interiorDeCaja } from '../packages/ui/src/components/caja-de-campo'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -94,12 +96,20 @@ type Pair = {
   noTextual?: boolean
 }
 
-/** El interior del campo, tal como lo resuelve `caja-de-campo.ts` — se
- *  espeja acá en vez de importarse porque este script no monta React, y
- *  un espejo de UNA línea con su fuente nombrada es más barato que
- *  arrastrar el módulo. Si la fuente cambia, R43 sigue midiendo el borde
- *  y este par se corrige junto con ella. */
-const INTERIOR_CAMPO = (t: Theme): string => (t.mode === 'light' ? t.bg.card : t.bg.overlay)
+/** El interior del campo — **IMPORTADO de `caja-de-campo.ts`, que es
+ *  donde la pieza lo resuelve.**
+ *
+ *  ⏪ **Acá había un espejo de una línea, y su razón escrita era esta:**
+ *  *«se espeja acá en vez de importarse porque este script no monta
+ *  React»*. **Medido en S103-B: es falsa.** `caja-de-campo.ts` importa
+ *  `Theme`, `motion`, `radius`, `spacing` y `typography` — **cero React,
+ *  cero react-native**; el módulo se importa sin arrastrar nada.
+ *
+ *  *Un espejo con una razón que se puede falsar es peor que uno sin
+ *  razón: la razón hace que nadie lo revise.* Y el costo de la clase ya
+ *  está medido en esta misma tanda — la otra copia de este archivo dejó
+ *  al gate en VERDE con la pata invisible. */
+const INTERIOR_CAMPO = interiorDeCaja
 
 function paresDe(t: Theme, nombre: string): Pair[] {
   const p: Pair[] = []
@@ -238,7 +248,10 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // riel, precedente del agarre de la Hoja), compositado sobre bg.overlay.
   // El texto INACTIVO (text.secondary / bg.overlay) ya está gateado por el
   // par del fallback de Avatar de arriba — mismo par exacto.
-  const superficieSegmentoActivo = t.mode === 'light' ? t.bg.card : t.border.default
+  // 🔴 IMPORTADO, JAMÁS REIMPLEMENTADO (S103-B): esta línea era una
+  // copia de la pieza, y una copia no se mueve cuando la pieza se rompe.
+  // Probado: con la superficie cambiada EN LA PIEZA, el gate seguía verde.
+  const superficieSegmentoActivo = superficieDelSegmentoActivo(t)
   add(
     'SelectorSegmentado activo text.primary / superficie activa⊕overlay',
     t.text.primary,
@@ -340,7 +353,7 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add(
     'SelectorSegmentado: la PATA / superficie activa⊕riel',
     t.accent.marcaEleccion,
-    t.mode === 'light' ? t.bg.card : t.border.default,
+    superficieDelSegmentoActivo(t),
     t.bg.hundido,
     3,
   )
@@ -370,7 +383,8 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   }
 
   // tres registros de SelectorOpcion: control · oficio · capa (moribundo).
-  const superficieChip = t.mode === 'light' ? t.bg.card : t.bg.elevated
+  // IMPORTADO, jamás reimplementado — ver `superficies.ts`.
+  const superficieChip = superficieDelChip(t)
   if ('capaBg' in t && 'control' in t.accent) {
     // S98-B (D-813): el tonal de control mide su tinte NUEVO, por lo mismo
     // que el par de arriba — el borde y el relleno son la misma señal y
