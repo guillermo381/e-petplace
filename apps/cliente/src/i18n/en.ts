@@ -1541,6 +1541,12 @@ export const clienteEn = {
     promesaFallo: "We couldn't calculate the delivery window. Please try again.",
     promesaVentana: 'Arrives on {{dia}}, between {{desde}} and {{hasta}}.',
     saltoPorCupo: 'The nearest day was full, so delivery moved to the next one with room.',
+    saltoPorSinOperacion:
+      "The seller doesn't deliver on the nearest day, so delivery moves to the next day they do.",
+    saltoSinCausa:
+      "The nearest day wasn't available, so delivery moves to the next one with room.",
+    promesaFichaSinEntrega:
+      "This seller doesn't deliver to your door right now. You can pick your order up at the store — does that work for you?",
     divisionTitulo: 'Your order arrives in {{n}} deliveries',
     divisionDetalle:
       'These are independent orders, one per store: they arrive separately and you track them separately. You pay once.',
