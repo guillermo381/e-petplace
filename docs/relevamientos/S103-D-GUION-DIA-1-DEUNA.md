@@ -19,11 +19,11 @@
 ```bash
 security add-generic-password -s DEUNA_POINT_OF_SALE -a epetplace -w '<el POS>'
 cd <worktree>
-bash scripts/deuna/correr-tests.sh     # 40/40 antes de tocar la red
+bash scripts/deuna/correr-tests.sh     # 45/45 antes de tocar la red
 node scripts/deuna/sondeo-qa.mjs       # falla limpio si falta una llave
 ```
 
-**Control de arranque:** los 40 tests en verde **antes** de medir. *Si el
+**Control de arranque:** los 45 tests en verde **antes** de medir. *Si el
 código ya estaba roto, todo lo que la red conteste después se va a interpretar
 mal.*
 
@@ -79,7 +79,7 @@ lo que no existe.**
 
 ### 🔴 Si sale rojo — qué se hace, para no improvisarlo ese día
 
-1. **No seguir con los pasos 2-5.** Se pueden medir después; interpretarlos con
+1. **No seguir con los pasos 3-6.** Se pueden medir después; interpretarlos con
    un discriminador falso es peor que no medirlos.
 2. **El fantasma deja de reconocerse por forma y pasa a reconocerse por
    tiempo.** La regla de reemplazo: `PENDING` + `amount 0` que **persiste más
@@ -100,7 +100,86 @@ lo que no existe.**
 
 ---
 
-## §2 · PASO 2 — EL `numericCode` (firma ① del founder)
+## §2 · PASO 2 — 🔴 ¿`idType "0"` DEVUELVE LA REFERENCIA?
+
+### La pregunta
+
+**Una transacción REAL consultada por `idType "0"`, ¿devuelve
+`internalTransactionReference` con su valor, o lo devuelve VACÍO?**
+
+### Por qué está acá y no más abajo
+
+Medido el 22-ago: por `idType "0"` sobre una transacción **inexistente**, ese
+campo vuelve **vacío** — y **el actuador resuelve el sujeto SÓLO por él**. Si
+una transacción real hiciera lo mismo, una consulta perfecta volvería **sin la
+llave para saber a quién aplicarle el pago**, y el actuador contestaría
+`sin_referencia_corta` sobre un cobro que sí ocurrió.
+
+**Por eso el buzón ya prefiere `idType "1"`** (dictamen de mesa, 22-ago): por
+esa vía la referencia **vuelve por eco**, medido en la misma corrida.
+
+⇒ **Este paso no decide si la cura se hace — ya está hecha. Decide QUÉ ES.**
+
+### Qué correr
+
+```
+POST /merchant/v1/payment/info   { "idType":"0", "idTransacionReference":"<txId real>" }
+```
+Sobre la transacción **real** creada en el paso 1. Mirar `internalTransactionReference`.
+
+### El control
+
+Compará contra `fantasma_idType_0` de las fixtures: **ya sabemos que en una
+inexistente viene vacío.** *La pregunta es si la diferencia la hace existir o no
+— y eso sólo se ve teniendo una que exista.*
+
+### 🔴 Criterio de parada
+
+| resultado | veredicto | qué cambia |
+|---|---|---|
+| viene **con su valor** | ✅ | la preferencia por `"1"` es **una mejora** (redundancia sana). El fallback a `"0"` queda como camino válido |
+| viene **VACÍA** | 🔴 | **la preferencia por `"1"` deja de ser mejora y pasa a ser REQUISITO** |
+
+**Si viene vacía — qué se hace, escrito de antemano:**
+
+1. El fallback a `idType "0"` del buzón **deja de ser aceptable como camino de
+   verificación**: por ahí el actuador nunca podría resolver el sujeto.
+2. ⇒ **Un webhook sin `internalTransactionReference` se vuelve INVERIFICABLE**
+   por esta vía. No se puede confirmar y **no se debe rechazar**: queda
+   `no_verificado` y **lo resuelve el barrido**, que consulta por nuestra
+   referencia desde `pagos_intentos` y no depende del webhook.
+3. **Hay que medir entonces si el webhook trae la referencia** — hoy es ⚪ (su
+   forma nunca se observó). *Si no la trajera y `"0"` viniera vacío, el webhook
+   quedaría inútil para resolver el sujeto y el barrido sería el ÚNICO camino
+   — eso es dato de mesa, no decisión de pista.*
+
+⚠️ **No se parchea el actuador para tolerar la referencia vacía.** La mesa ya lo
+dictaminó: *agregaría tolerancia justo donde la casa acaba de decidir
+fail-closed.*
+
+### 🔴 EL OTRO LEG, QUE TAMPOCO ESTÁ MEDIDO — se verifica en la misma corrida
+
+**¿Una transacción REAL por `idType "1"` devuelve la referencia por eco?**
+
+Lo medido es el eco sobre una **inexistente**. *Que una real lo haga es
+plausible por exactamente la misma razón por la que lo era el supuesto del
+`amount` — y esa clase de supuesto ya nos costó dos fallas.*
+
+**No se trata como confirmado en ninguna dirección** (declarado por A y
+ratificado por la mesa). Es una llamada más en la misma corrida:
+
+```
+POST /merchant/v1/payment/info   { "idType":"1", "idTransacionReference":"<ref real>" }
+```
+
+| resultado | veredicto |
+|---|---|
+| devuelve la referencia | ✅ la cura del buzón funciona como se diseñó |
+| **NO la devuelve** | 🔴 **ninguna de las dos vías resuelve el sujeto desde el webhook** ⇒ el barrido queda como **único** camino, y eso es dato de mesa |
+
+---
+
+## §3 · PASO 3 — EL `numericCode` (firma ① del founder)
 
 ### La pregunta
 
@@ -142,7 +221,7 @@ Mirar si la respuesta trae **`expiredAt`** (o equivalente).
 
 ---
 
-## §3 · PASO 3 — `payment/info` por los dos `idType`
+## §4 · PASO 4 — `payment/info` por los dos `idType`
 
 ### La pregunta
 
@@ -167,7 +246,7 @@ que con una real devuelve **más que el eco**.
 
 ---
 
-## §4 · PASO 4 — LA REGENERACIÓN (§12.6: se mide, no se pregunta)
+## §5 · PASO 5 — LA REGENERACIÓN (§12.6: se mide, no se pregunta)
 
 ### La pregunta
 
@@ -196,7 +275,7 @@ Consultar el **primer** `transactionId` después de regenerar:
 
 ---
 
-## §5 · PASO 5 — EL REFUND SOBRE TRANSACCIÓN PROPIA
+## §6 · PASO 6 — EL REFUND SOBRE TRANSACCIÓN PROPIA
 
 ⚠️ **Requiere una transacción APROBADA**, o sea **pagarla de verdad en la app
 Deuna de QA**. Si el ambiente no lo permite, esto queda ⚪ y **se pregunta**
@@ -231,7 +310,7 @@ promueven por parecerse.
 
 ---
 
-## §6 · PASO 6 — CERRAR LOS 7 ⚪
+## §7 · PASO 7 — CERRAR LOS 7 ⚪
 
 Con lo de arriba, el script cierra la tabla del §2 de la bitácora sin trabajo
 extra:
@@ -252,7 +331,7 @@ a la pregunta #3. **Se declaran ⚪ hasta entonces, no se dan por buenos.**
 
 ---
 
-## §7 · AL TERMINAR — tres cosas, en este orden
+## §8 · AL TERMINAR — tres cosas, en este orden
 
 1. **Reemplazar las sintéticas por las medidas** y **volver a correr
    `correr-tests.sh`**. *Un test que pasó con una fixture inventada y no se
@@ -265,7 +344,7 @@ a la pregunta #3. **Se declaran ⚪ hasta entonces, no se dan por buenos.**
 
 ---
 
-## §8 · LO QUE NO SE HACE ESE DÍA, aunque tiente
+## §9 · LO QUE NO SE HACE ESE DÍA, aunque tiente
 
 - **No se despliega nada** sin autorización del founder por tanda.
 - **No se aplican migraciones** — las numera y deposita A.

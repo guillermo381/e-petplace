@@ -34,7 +34,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { timingSafeEqual } from 'node:crypto';
 /* El predicado de la verdad verificada vive aparte para poder testearlo sin
    montar el cliente de Supabase — ver `_verdad.ts`. */
-import { esVerdadVerificada } from './_verdad.ts';
+import { cuerpoDeConsulta, esVerdadVerificada } from './_verdad.ts';
 
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 const API_KEY = Deno.env.get('DEUNA_API_KEY') ?? '';
@@ -182,7 +182,31 @@ Deno.serve(async (req) => {
             · `idType` es **STRING** "0"/"1" — un 0 numérico rebota;
             · el campo se llama **`idTransacionReference`** — con el typo del
               proveedor (*Transacion*), no `transactionId`.
-       Se prefiere `idType "0"` (su id); la referencia nuestra es el respaldo. */
+       ═══ 🔴 SE PREFIERE `idType "1"` — NUESTRA REFERENCIA ═══════════════════
+       *(dictamen de mesa, 22-ago. Antes era al revés: `"0"` con `"1"` de
+       respaldo.)*
+
+       **La razón está MEDIDA, no argumentada:** la respuesta real de QA por
+       `idType "0"` trae **`internalTransactionReference` VACÍO**. Y el actuador
+       resuelve el sujeto **sólo** por ese campo. ⇒ Con `"0"`, una consulta
+       perfecta puede volver **sin la llave para saber a quién aplicarle el
+       pago**, y el actuador contestaría `sin_referencia_corta` sobre un cobro
+       que sí ocurrió.
+
+       Por `idType "1"` la respuesta **devuelve la referencia de vuelta por
+       eco** — medido en la misma corrida. *La consulta que hacemos con nuestra
+       llave nos devuelve nuestra llave.*
+
+       🔴 **POR QUÉ ESTA CURA VA ACÁ Y NO EN EL ACTUADOR** (el argumento de la
+       mesa, que es el que importa): parchear el actuador para tolerar una
+       referencia vacía **agregaría tolerancia justo donde la casa acaba de
+       decidir fail-closed**. Esta cura deja el actuador intacto y **no toca el
+       webhook para nada** — la fuente de verdad sigue siendo `info`, entera.
+
+       ⚠️ **El fallback a `"0"` se conserva** para el caso de un webhook que no
+       traiga referencia (⚪ no medido: la forma del webhook nunca se observó).
+       *No es simetría con lo de antes: es que sin referencia no hay `"1"`
+       posible, y preguntar con `"0"` es mejor que no preguntar.* */
     let verificado = false;
     let infoCrudo: Record<string, unknown> = {};
     try {
@@ -192,9 +216,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
           'x-api-key': API_KEY, 'x-api-secret': API_SECRET,
         },
-        body: JSON.stringify(txId
-          ? { idType: '0', idTransacionReference: txId }
-          : { idType: '1', idTransacionReference: refCorta }),
+        body: JSON.stringify(cuerpoDeConsulta(txId, refCorta)),
       });
       const t = (await r.text()).slice(0, 4000);
       try { infoCrudo = JSON.parse(t); } catch { /* el crudo alcanza */ }

@@ -9,8 +9,8 @@
 //    correr:  deno test --allow-read supabase/functions/pagos-deuna-webhook/
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { assert, assertFalse } from 'jsr:@std/assert@1';
-import { esVerdadVerificada } from './_verdad.ts';
+import { assert, assertEquals, assertFalse } from 'jsr:@std/assert@1';
+import { cuerpoDeConsulta, esVerdadVerificada } from './_verdad.ts';
 
 const fx = JSON.parse(await Deno.readTextFile(
   new URL('./fixtures-qa-deuna.json', import.meta.url)));
@@ -61,4 +61,44 @@ Deno.test('CONTROL POSITIVO: el predicado SÍ verifica el caso bueno', () => {
      «no deja pasar nada».* */
   assert(esVerdadVerificada(true, fx._sinteticos.aprobada_con_monto),
     'el predicado no deja pasar ni una transaccion aprobada con monto');
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// CON QUÉ LLAVE SE PREGUNTA — dictamen de mesa, 22-ago
+//
+// 🔴 El motivo es MEDIDO: la respuesta real de QA por `idType "0"` trae
+//    `internalTransactionReference` VACÍO (ver `fantasma_idType_0` arriba), y
+//    el actuador resuelve el sujeto SÓLO por ese campo. Por `"1"` la respuesta
+//    devuelve la referencia por eco — también medido.
+// ════════════════════════════════════════════════════════════════════════════
+
+Deno.test('con referencia, se pregunta por idType "1" — la que vuelve por eco', () => {
+  assertEquals(cuerpoDeConsulta('tx-abc', 'EPsim0001'),
+    { idType: '1', idTransacionReference: 'EPsim0001' });
+});
+
+Deno.test('la referencia GANA aunque haya transactionId', () => {
+  /* Es el corazón del dictamen: antes ganaba el txId, y por ahí volvía sin la
+     llave para resolver el sujeto. */
+  const c = cuerpoDeConsulta('tx-abc', 'EPsim0001');
+  assertEquals(c?.idType, '1', 'volvio a preferir el txId — se perdio la cura');
+});
+
+Deno.test('sin referencia, cae a idType "0" — preguntar es mejor que no preguntar', () => {
+  assertEquals(cuerpoDeConsulta('tx-abc', ''),
+    { idType: '0', idTransacionReference: 'tx-abc' });
+});
+
+Deno.test('sin ninguna llave devuelve null, que NO es un cuerpo vacio', () => {
+  /* `null` significa «no hay a quien preguntarle» — distinto de una consulta
+     que se hizo y falló. El llamador los trata distinto. */
+  assertEquals(cuerpoDeConsulta('', ''), null);
+});
+
+Deno.test('🔴 REAL · el eco de idType "1" es lo que la cura compra', () => {
+  /* La fixture REAL de idType 1 devuelve la referencia que mandamos; la de
+     idType 0 la devuelve VACIA. Si esto cambiara, la cura pierde su razon. */
+  assertEquals(fx.fantasma_idType_1.internalTransactionReference, 'EPQAnoexiste01');
+  assertEquals(fx.fantasma_idType_0.internalTransactionReference, '',
+    'la fixture de idType 0 ya no viene vacia — re-evaluar el dictamen');
 });
