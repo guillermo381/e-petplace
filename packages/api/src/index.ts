@@ -1342,6 +1342,14 @@ export {
   type CodigoCobro, type SenalDeCobro, type SujetoDeCobro,
 } from './wrappers/pagos-cobro';
 
+// S103-A · LA PUERTA DEL RIEL DEUNA — misma forma que el cobro con tarjeta a
+// propósito: `una casa, un motor, dos puertas`. Lo que devuelve es una
+// INVITACIÓN A PAGAR (un código para tipear en otra app), jamás un pago.
+export {
+  pedirCodigoDeuna, pedirCodigoDeunaCompra, pedirCodigoDeunaCita,
+  type CodigoDeuna, type SujetoDeuna, type SolicitudDeuna,
+} from './wrappers/pagos-deuna';
+
 export {
   leerEstadoCompra, leerEstadoCita,
   type EstadoCompra, type EsperaCompra, type EstadoCita, type EsperaCita,
