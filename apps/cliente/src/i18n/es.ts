@@ -1519,6 +1519,18 @@ export const clienteEs = {
     montoDesconocido: 'Lo vas a ver en el aviso, 48 horas antes.',
     medio: 'Con qué se paga',
     medioDesconocido: 'Todavía no lo mostramos aquí.',
+    /* 🔴 EL VACÍO DE LA PANTALLA — voz PROPIA, y no la del medio de pago.
+       ⏪ El estado vacío reusaba `medioDesconocido` y repetía el título del
+       encabezado. **Lo cazó caminar la pantalla, no leer el código**: en el
+       aparato se veía «Que llegue solo / Que llegue solo / Todavía no lo
+       mostramos aquí» — el eco que la casa llama Chanel, y encima una frase
+       escrita para OTRA cosa (el medio), que sobre la pantalla entera hace
+       pensar que la serie existe y se la esconde.
+       🔴 Y sigue sin decir «no tienes envíos automáticos»: eso sería una
+       afirmación sobre los datos, y lo que pasa es que todavía no sabemos
+       leerlos. La segunda línea existe para que nadie se asuste: nada cambió. */
+    sinLectorTitulo: 'Todavía no podemos mostrarla',
+    sinLectorCuerpo: 'Estamos terminando esta pantalla. Tus envíos automáticos siguen como estaban.',
     aDondeLlega: 'A dónde llega',
     avisoPrevio: 'Te avisamos 48 horas antes de cada cobro.',
     /* §6: pausa ≠ cancelación, y la salida es del cliente. */
@@ -1564,11 +1576,28 @@ export const clienteEs = {
     /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
        pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
     deunaCodigoVence: 'El código vence en {{tiempo}}',
+    deunaCopiar: 'Copiar',
+    /* 🔴 La etiqueta para lectores de pantalla es MÁS EXPLÍCITA que el label
+       visible (pedido del founder): en pantalla «Copiar» basta porque el
+       código está al lado y se ve; **quien no ve la pantalla necesita saber
+       QUÉ copia.** *El label visible y el accesible no tienen por qué ser el
+       mismo texto — tienen que decir lo mismo a dos personas distintas.* */
+    deunaCopiarA11y: 'Copiar código',
+    deunaCopiado: 'Código copiado',
     deunaCodigoVencido: 'El código venció.',
     deunaCodigoNuevo: 'Generar un código nuevo',
     /* Cuando el hold murió NO nace otro código: rige la voz del rearme que
        la casa ya tiene (`esperaExpirada`), y esta línea dice el porqué. */
     deunaHoldVencido: 'El tiempo que apartamos se terminó. No te cobramos nada.',
+    /* §6 · `APPROVED` verificado. La pantalla NO lo declara: lo dice el
+       servidor y ella lo dibuja. */
+    deunaAprobada: 'Pago confirmado',
+    deunaAprobadaCuerpo: 'Listo, recibimos tu pago.',
+    /* 🔴 §6 · `NOT_FOUND` en ventana y `REVERSED_FAILED`. Defecto NUESTRO: no
+       se culpa al cliente, y el nombre técnico del hallazgo se registra pero
+       JAMÁS se le muestra. */
+    deunaHallazgo: 'No pudimos confirmar tu pago',
+    deunaHallazgoCuerpo: 'Ya lo estamos revisando. Escríbenos y lo resolvemos.',
     // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',

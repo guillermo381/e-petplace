@@ -81,32 +81,65 @@
  * pantalla nueva.**
  */
 
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import { Boton, Texto, spacing, typography, useTheme } from '@epetplace/ui';
+import { useCallback, useEffect, useState } from 'react';
+import { Clipboard, Pressable, Text, View } from 'react-native';
+import { Boton, Texto, spacing, typography, useAviso, useTheme } from '@epetplace/ui';
 
+import type { EstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { useTraduccion } from '@/i18n';
 
 export type EsperaDeUnaProps = {
-  /** Los 6 dígitos, tal como los devolvió el proveedor. */
-  codigo: string;
-  /** 🔴 INSTANTE ISO del vencimiento **del código**, del servidor. */
-  venceEn: string;
-  /** INSTANTE ISO del vencimiento **del hold del sujeto** (stock o agenda). */
-  holdVenceEn: string;
+  /** 🔴 El estado viene YA RESUELTO de la costura única
+   *  (`lib/pagos/deuna-estado`). **La pantalla no sabe de dónde sale**, y ésa
+   *  es exactamente la propiedad que hace que conectarla sea una línea. */
+  estado: EstadoDeUna;
   /** Pide un código nuevo. Solo se ofrece mientras el hold viva (§5). */
   onGenerarNuevo: () => void;
+  /** El camino a soporte del hallazgo — jamás una pantalla sin salida. */
+  onSoporte: () => void;
 };
 
 function segundosHasta(iso: string): number {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
 
-export function EsperaDeUna({
-  codigo, venceEn, holdVenceEn, onGenerarNuevo,
-}: EsperaDeUnaProps) {
+export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaProps) {
   const { t } = useTraduccion();
   const { theme } = useTheme();
+  const { mostrar } = useAviso();
+
+  /**
+   * 🔴 COPIAR — **sin dependencia nueva y por lo tanto sin build nativa.**
+   *
+   * `Clipboard` del core de React Native **sigue existiendo y funciona**
+   * (medido: `node_modules/react-native/index.js:217`). Está **deprecado** —
+   * su propio warning dice *«will be removed in a future release»*— y el
+   * reemplazo tiene nombre: **`expo-clipboard`**.
+   *
+   * **Por qué NO se agrega `expo-clipboard` hoy:** es un módulo nativo, y
+   * L-134 es literal — *módulo nativo nuevo = build nueva*. Eso volvería esta
+   * pantalla **no gateable hoy** y no viajaría por OTA. *El precedente de la
+   * casa es D-456, el micrófono: la pieza espera el tren que otra cosa
+   * obligue, jamás pide un build para ella sola.*
+   *
+   * ☠️ **Condición de muerte:** la próxima build nativa se lleva
+   * `expo-clipboard` y esta línea. **Disparo declarado, no descubierto.**
+   *
+   * **Copiar NO toca ningún reloj** (pedido del founder): no hay `setState`
+   * de tiempo acá, así que ni la cuenta regresiva ni el hold se enteran.
+   */
+  const copiar = useCallback(() => {
+    if (estado.fase !== 'esperando') return;
+    Clipboard.setString(estado.codigo);
+    mostrar({ texto: t('pago.deunaCopiado'), variante: 'exito' });
+  }, [estado, mostrar, t]);
+
+  /* Los relojes solo existen en `esperando`. En las otras fases se pasan
+     instantes ya vencidos: **los hooks se llaman siempre, en el mismo orden**
+     (regla de React), y el early-return vive DESPUÉS. */
+  const enEspera = estado.fase === 'esperando';
+  const venceEn = enEspera ? estado.venceEn : new Date(0).toISOString();
+  const holdVenceEn = enEspera ? estado.holdVenceEn : new Date(0).toISOString();
 
   const [restanteCodigo, setRestanteCodigo] = useState(() => segundosHasta(venceEn));
   const [restanteHold, setRestanteHold] = useState(() => segundosHasta(holdVenceEn));
@@ -125,6 +158,44 @@ export function EsperaDeUna({
   const mm = String(Math.floor(restanteCodigo / 60)).padStart(2, '0');
   const ss = String(restanteCodigo % 60).padStart(2, '0');
 
+  /* ── APROBADA (§6: `APPROVED` / webhook verificado) ──────────────────────
+     La voz del éxito. **Esta pantalla NO la declara por su cuenta**: llega
+     porque la costura leyó verdad verificada del servidor. *La pantalla pasa
+     sola a pagada, jamás decide que lo está* (§3.4). */
+  if (estado.fase === 'aprobada') {
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="titulo">{t('pago.deunaAprobada')}</Texto>
+        <Texto variante="cuerpo">{t('pago.deunaAprobadaCuerpo')}</Texto>
+      </View>
+    );
+  }
+
+  /* ── HALLAZGO (§6: `NOT_FOUND` en ventana · `REVERSED_FAILED`) ───────────
+     🔴 *«Hallazgo con nombre — jamás voz de éxito ni silencio»*, y
+     `REVERSED_FAILED` **jamás se resuelve solo**.
+
+     **El nombre técnico NO se le muestra a la familia**: `nombre` es para el
+     registro y para soporte. *A la persona se le dice que el problema es
+     nuestro y se le da el camino — decirle «huerfano_deuna_vencido» sería
+     mostrarle nuestra taxonomía en vez de resolverle el problema.*
+
+     Y **tiene salida**: es la misma regla que las tres compuertas de
+     `LETRA_PUERTA_DE_PAGO_S101B` §3.1 que hablan hacia soporte. */
+  if (estado.fase === 'hallazgo') {
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="titulo">{t('pago.deunaHallazgo')}</Texto>
+        <Texto variante="cuerpo">{t('pago.deunaHallazgoCuerpo')}</Texto>
+        <Boton
+          variante="secundario"
+          etiqueta={t('cuenta.soporteBoton')}
+          onPress={onSoporte}
+        />
+      </View>
+    );
+  }
+
   /* 🔴 EL HOLD MANDA SOBRE EL CÓDIGO. Muerto el hold no nacen más códigos
      (§5: «Hold muerto → no nacen más códigos, compuerta 1»), así que se
      evalúa PRIMERO: ofrecer «generar otro» sobre un hold vencido sería
@@ -142,11 +213,21 @@ export function EsperaDeUna({
     return (
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
         <Texto variante="titulo">{t('pago.deunaCodigoVencido')}</Texto>
-        <Boton
-          variante="secundario"
-          etiqueta={t('pago.deunaCodigoNuevo')}
-          onPress={onGenerarNuevo}
-        />
+        {/* 🔴 CENTRADO — pedido del founder (22-ago), y hacía falta el
+            envoltorio: **`Boton` sin `bloque` fuerza `alignSelf:'flex-start'`
+            en su PROPIO estilo** (`Boton.tsx:446`), que gana sobre el
+            `alignItems:'center'` del padre. *Por eso quedaba pegado a la
+            izquierda aunque su contenedor centrara.*
+            El wrapper se centra a sí mismo y el botón conserva su ancho
+            natural adentro — **sin `bloque`**, que lo estiraría de punta a
+            punta y es otra cosa que la que se pidió. */}
+        <View style={{ alignSelf: 'center' }}>
+          <Boton
+            variante="secundario"
+            etiqueta={t('pago.deunaCodigoNuevo')}
+            onPress={onGenerarNuevo}
+          />
+        </View>
       </View>
     );
   }
@@ -166,18 +247,55 @@ export function EsperaDeUna({
           El `letterSpacing` es lo que lo vuelve legible de un vistazo al
           cambiar de app: seis dígitos pegados se leen como un número, y lo que
           la persona tiene que hacer es transcribirlos de a uno. */}
-      <Text
-        selectable
-        style={{
-          fontFamily: typography.family.mono.regular,
-          fontSize: typography.size['3xl'],
-          letterSpacing: 4,
-          color: theme.text.primary,
-          fontVariant: ['tabular-nums'],
-        }}
-      >
-        {codigo}
-      </Text>
+      {/* 🔴 EL CÓDIGO Y SU BOTÓN DE COPIAR VIVEN EN LA MISMA FILA
+          (pedido del founder, 22-ago): *«el affordance vive junto al código,
+          no debajo ni en el pie: el pulgar tiene que llegar sin buscar»*. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        <Text
+          /* Sigue seleccionable a mano — **el botón se suma, no reemplaza**:
+             copiar con el dedo es el camino que la persona ya conoce. */
+          selectable
+          style={{
+            fontFamily: typography.family.mono.regular,
+            fontSize: typography.size['3xl'],
+            letterSpacing: 4,
+            color: theme.text.primary,
+            fontVariant: ['tabular-nums'],
+          }}
+        >
+          {estado.codigo}
+        </Text>
+        {/* 🔴 SIN CAJA — corrección de craft del founder (22-ago): *«la caja
+            compite con el código, que es la única pieza que la pantalla vino
+            a mostrar»*.
+
+            **El pulgar necesita blanco; la vista no necesita caja** — por eso
+            el área táctil se declara con `hitSlop` y no agrandando el dibujo:
+            **48×48 efectivos** sobre un affordance visualmente mínimo.
+
+            ⚠️ **PUENTE DECLARADO — esto todavía NO es lo que el founder pidió.**
+            Pidió **el glifo de copiar** (dos hojas superpuestas, trazo, sin
+            relleno). **Medido: ese glifo NO existe en el registry**, y los
+            cercanos tienen su semántica ocupada y escrita — `documentos` es
+            *«dónde viven los papeles»* (una carpeta) y `documento` es *«una
+            cédula con retrato»*. **Reusar cualquiera sería un glifo con dos
+            sentidos**, que es lo que la Ley 12 prohíbe.
+            ⇒ **`packages/ui` es de B y el glifo se le PIDE, no se escribe**
+            (orden del founder). Hasta que llegue, la palabra hace el trabajo
+            **sin caja**: cumple *«sin caja ni borde, al lado del código»* y
+            deja de competir. **Cuando el glifo exista, se cambia esta línea.**
+
+            El toast **no mueve el layout**: es overlay de la casa (`useAviso`),
+            no empuja al código. *Verificado en el aparato.* */}
+        <Pressable
+          onPress={copiar}
+          accessibilityRole="button"
+          accessibilityLabel={t('pago.deunaCopiarA11y')}
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+        >
+          <Texto variante="apoyo">{t('pago.deunaCopiar')}</Texto>
+        </Pressable>
+      </View>
 
       <Texto variante="cuerpo">{t('pago.deunaEsperaCuerpo')}</Texto>
 
