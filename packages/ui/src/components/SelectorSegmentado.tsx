@@ -83,6 +83,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
+import { superficieDelSegmentoActivo } from './superficies'
 import { MarcaEleccion, MONTA } from '../brand/MarcaEleccion'
 
 // riel radius.md (12) − padding spacing[1] (4) = 8 → el activo es radius.sm
@@ -142,7 +143,7 @@ export function SelectorSegmentado({
   const anchoSegmento = anchoRiel > 0 ? (anchoRiel - RELLENO_RIEL * 2) / segmentos.length : 0
 
   // Paso de luminancia del activo por tema (ver doc de cabecera)
-  const superficieActiva = theme.mode === 'light' ? theme.bg.card : theme.border.default
+  const superficieActiva = superficieDelSegmentoActivo(theme)
 
   // ═══ EL AIRE DE LA PATA — la verificación de overflow, resuelta ACÁ ═══
   // La pata monta MONTA px sobre el canto superior del segmento activo, y

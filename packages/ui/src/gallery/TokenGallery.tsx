@@ -2608,9 +2608,31 @@ function GaleriaInterna() {
               sale derivado del lado de los botones de paso, así que los tres se alinean por construcción.
             </Texto>
             <Texto variante="apoyo">
-              Lo que NO está acá y se declara: sobre el bloque lleno (tamano ancho, la vitrina) la caja no
-              se monta. Su interior está definido contra el fondo base y ahí pondría una caja blanca sobre
-              un bloque de CTA. Es 1 de los 3 montajes editables vivos y espera decisión del founder.
+              ⭐ GATE — LOS DOS CONTEXTOS, LADO A LADO. Arriba el de la FICHA; abajo el de la GRILLA,
+              el que aparece al dar «Agregar». El pedido era que se vean EXACTAMENTE IGUAL: hoy tienen
+              los mismos botones hundidos, el mismo número con la caja de campo de la casa y el mismo
+              contenedor sin relleno. Lo único que los separa es el reparto del ancho — la grilla tiene
+              su renglón completo, que es lo que S100d·bis firmó.
+            </Texto>
+            <Texto variante="apoyo">
+              MEDIDO PRIMERO, como pedía el encargo: NO eran la misma instancia con distinta resolución
+              de tokens. Eran dos tratamientos — la ficha monta el tamaño normal y la grilla montaba el
+              ancho SOBRE UN BLOQUE DE ORO. La persona veía dos cosas donde hay una.
+            </Texto>
+            <Texto variante="apoyo">
+              Y por qué sacar el bloque no contradice a S100d·bis: esa firma es de GEOMETRÍA, no de
+              color. Sus tres razones escritas son de caja y de renglón — la MISMA caja que ocupaba
+              «Agregar», medida de Laika; la tarjeta que no cambia de alto; los 44 de blanco sin hitSlop
+              forzado. El oro entró como consecuencia de «es la misma caja que el botón», nunca como
+              razón propia. La caja se conserva entera; lo que se va es el relleno.
+            </Texto>
+            <Texto variante="apoyo">
+              EL SEGUNDO PEDIDO —borde más suave, interior más claro— queda resuelto por el primero, y
+              por eso NO se tocó ningún tono. El contorno de la grilla era la tinta del CTA sobre el
+              bloque: un 9,96, duro por necesidad porque era la única tinta legible ahí. Al adoptar la
+              caja de la casa pasa a border.campo, con piso 3 vigilado por R43, y gana interior claro.
+              Mover el token habría cambiado Campo, CampoCodigo y CampoFecha en las dos apps para curar
+              una pantalla.
             </Texto>
           </View>
         </Seccion>
@@ -3679,6 +3701,54 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+
+        <Seccion titulo="Boton · la alineación vuelve al padre (S103-B · D-882 de forma) — los TRES contextos">
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">
+              LA PRUEBA DE NO-REGRESIÓN: los tres contextos juntos. El de arriba es el que se curó; los
+              otros dos son los que NO se podían romper. Juzgar solo el curado sería media prueba.
+            </Texto>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">① padre que CENTRA — antes quedaba a la izquierda</Texto>
+              <View style={{ alignItems: 'center', gap: spacing[2], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Texto centrado, de referencia</Texto>
+                <Boton etiqueta="Generar nuevo código" variante="secundario" onPress={() => {}} />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">② padre por DEFAULT — tiene que seguir abrazando y a la izquierda</Texto>
+              <View style={{ gap: spacing[2], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Texto al ras, de referencia</Texto>
+                <Boton etiqueta="Abraza su contenido" variante="secundario" onPress={() => {}} />
+                <Boton etiqueta="Y bloque sigue ocupando todo" bloque onPress={() => {}} />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">③ padre en FILA que centra vertical — el botón alinea con el texto</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[3], backgroundColor: theme.bg.overlay, borderRadius: radius.md }}>
+                <Texto variante="cuerpo">Al lado</Texto>
+                <Boton etiqueta="Acción" variante="secundario" tamaño="sm" onPress={() => {}} />
+              </View>
+            </View>
+
+            <Texto variante="apoyo">
+              Por qué no alcanzaba borrar el alignSelf: el default de un contenedor es stretch, así que
+              todos los botones que hoy abrazan pasarían a ocupar el ancho entero. No existe un valor que
+              diga «no te estires PERO obedecé al padre» — el slot es uno y quien lo escribe gana. La
+              salida es no ocuparlo: el envoltorio va sin alignSelf y es una FILA, así hereda la
+              alineación del padre y el botón sigue abrazando.
+            </Texto>
+            <Texto variante="apoyo">
+              bloque conserva su stretch explícito y no por simetría: si heredara, un bloque dentro de un
+              contenedor que centra dejaría de ocupar el ancho, que es lo único que bloque promete. Y el
+              envoltorio lleva box-none: estirado a todo el ancho, un View sin eso recibiría los toques
+              del aire a los costados — lo que R54 existe para cazar.
+            </Texto>
+          </View>
+        </Seccion>
 
         <Seccion titulo="BotonCopiar (S103) — un toque copia, y el botón mismo lo confirma">
           {/* Vive al lado de `CodigoAEscala` a propósito: su consumidor es

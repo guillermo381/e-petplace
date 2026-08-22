@@ -559,61 +559,110 @@ export function Boton({
     </>
   )
 
+  /* 🔴 EL ENVOLTORIO QUE DEVUELVE LA ALINEACIÓN AL PADRE (S103-B · D de C).
+   *
+   * **El defecto, medido:** un `Boton` sin `bloque` forzaba
+   * `alignSelf: 'flex-start'` en su propio Pressable, y **`alignSelf`
+   * SIEMPRE le gana al `alignItems` del padre** — es la especificación,
+   * no un detalle de RN. ⇒ un contenedor que centra **no podía centrar
+   * un botón**, y el consumidor se enteraba mirando.
+   *
+   * **Por qué no alcanzaba curarlo por consumidor**, que es la razón por
+   * la que esto sube a la pieza: se curó el 22-ago envolviendo un caso a
+   * mano, y **el defecto reapareció veinte líneas más abajo, en el mismo
+   * archivo, con un bloque nacido después.** *Una corrección aplicada a
+   * un caso no protege al hermano que nace al día siguiente.* Censo al
+   * abrir: **22 montajes vivos** dentro de un contenedor que centra.
+   *
+   * ── POR QUÉ UNA FILA, Y POR QUÉ NO SE PUEDE SIMPLEMENTE BORRAR ─────
+   * Borrar el `flex-start` no servía: el default de un contenedor es
+   * `stretch`, así que **todos los botones que hoy abrazan su contenido
+   * pasarían a ocupar el ancho entero.** No hay un valor de `alignSelf`
+   * que diga «no te estires PERO obedecé al padre»: el slot es uno solo
+   * y quien lo escribe gana.
+   *
+   * **La salida es no ocupar el slot.** El envoltorio va SIN `alignSelf`,
+   * así que hereda el del padre, y es una FILA para que el botón siga
+   * abrazando:
+   *   · padre por default (`stretch`) → el envoltorio se estira, el botón
+   *     abraza y queda a la izquierda ⇒ **idéntico a hoy, cero regresión**;
+   *   · padre que centra → el envoltorio abraza su contenido y **el botón
+   *     queda centrado** ⇒ curado;
+   *   · padre en fila → el `alignItems` del padre gobierna la vertical,
+   *     que es lo que siempre quiso.
+   *
+   * ⚠️ **`bloque` CONSERVA su `stretch` explícito**, y no es simetría: si
+   * heredara, un `bloque` adentro de un contenedor que centra dejaría de
+   * ocupar el ancho — que es lo único que `bloque` promete.
+   *
+   * *Es la misma forma que ya existía escrita a mano en tres pantallas;
+   * lo único que cambia es quién se tiene que acordar.* */
   return (
-    <Pressable
-      // conRazon: el toque va a `onRazon`, JAMÁS a `onPress` — un botón
-      // apagado no ejecuta su acción por explicarse.
-      onPress={conRazon ? onRazon : inactivo ? undefined : onPress}
-      onPressIn={handlers.onPressIn}
-      onPressOut={handlers.onPressOut}
-      onFocus={() => setEnfocado(true)}
-      onBlur={() => setEnfocado(false)}
-      // `disabled` del Pressable mata los eventos; con razón queda vivo
-      // para poder contarla (era exactamente por esto que el patrón
-      // obligaba a un Pressable padre en la pantalla).
-      disabled={conRazon ? false : inactivo}
-      hitSlop={tamaño === 'sm' ? (44 - TAMAÑOS.sm.alto) / 2 : undefined}
-      accessibilityRole="button"
-      // La a11y dice LA VERDAD: sigue deshabilitado aunque acepte el
-      // toque — y el hint entrega el motivo AL ENFOCAR, sin exigirlo.
-      accessibilityState={{ disabled: inactivo, busy: cargando }}
-      accessibilityHint={conRazon ? razonDeshabilitado : undefined}
-      accessibilityLabel={etiqueta}
-      style={bloque ? { alignSelf: 'stretch' } : { alignSelf: 'flex-start' }}
+    <View
+      /* 🔴 `box-none` NO ES PRUDENCIA: con el padre por default el
+         envoltorio se ESTIRA a todo el ancho, y un View estirado sin esto
+         recibe los toques del aire que sobra a los costados del botón.
+         En una columna eso no se nota; sobre un pie flotante taparía lo
+         que hay debajo — que es exactamente lo que R54 existe para cazar.
+         Con `box-none` la caja no atrapa nada y sus hijos sí. */
+      pointerEvents="box-none"
+      style={bloque ? { alignSelf: 'stretch' } : { flexDirection: 'row' }}
     >
-      <Animated.View
-        style={[
-          estiloPresionado,
-          {
-            opacity: deshabilitado ? opacity.disabled : 1,
-            borderRadius: radius.md,
-            ...(bloque ? { alignSelf: 'stretch' as const } : null),
-          },
-          // Focus visible en web (RN-web lo exige): outline accent.active
-          Platform.OS === 'web' && enfocado
-            ? ({
-                outlineWidth: 2,
-                outlineColor: 'active' in theme.accent ? theme.accent.active : theme.accent.primary,
-                outlineStyle: 'solid',
-                outlineOffset: 2,
-              } as unknown as ViewStyle)
-            : null,
-        ]}
+      <Pressable
+        // conRazon: el toque va a `onRazon`, JAMÁS a `onPress` — un botón
+        // apagado no ejecuta su acción por explicarse.
+        onPress={conRazon ? onRazon : inactivo ? undefined : onPress}
+        onPressIn={handlers.onPressIn}
+        onPressOut={handlers.onPressOut}
+        onFocus={() => setEnfocado(true)}
+        onBlur={() => setEnfocado(false)}
+        // `disabled` del Pressable mata los eventos; con razón queda vivo
+        // para poder contarla (era exactamente por esto que el patrón
+        // obligaba a un Pressable padre en la pantalla).
+        disabled={conRazon ? false : inactivo}
+        hitSlop={tamaño === 'sm' ? (44 - TAMAÑOS.sm.alto) / 2 : undefined}
+        accessibilityRole="button"
+        // La a11y dice LA VERDAD: sigue deshabilitado aunque acepte el
+        // toque — y el hint entrega el motivo AL ENFOCAR, sin exigirlo.
+        accessibilityState={{ disabled: inactivo, busy: cargando }}
+        accessibilityHint={conRazon ? razonDeshabilitado : undefined}
+        accessibilityLabel={etiqueta}
+        style={bloque ? { alignSelf: 'stretch' } : { alignSelf: 'flex-start' }}
       >
-        {esMarca ? (
-          <LinearGradient
-            colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
-            locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
-            start={{ x: 0.13, y: 0 }}
-            end={{ x: 0.87, y: 1 }}
-            style={cuerpo}
-          >
-            {contenido}
-          </LinearGradient>
-        ) : (
-          <View style={cuerpo}>{contenido}</View>
-        )}
-      </Animated.View>
-    </Pressable>
+        <Animated.View
+          style={[
+            estiloPresionado,
+            {
+              opacity: deshabilitado ? opacity.disabled : 1,
+              borderRadius: radius.md,
+              ...(bloque ? { alignSelf: 'stretch' as const } : null),
+            },
+            // Focus visible en web (RN-web lo exige): outline accent.active
+            Platform.OS === 'web' && enfocado
+              ? ({
+                  outlineWidth: 2,
+                  outlineColor: 'active' in theme.accent ? theme.accent.active : theme.accent.primary,
+                  outlineStyle: 'solid',
+                  outlineOffset: 2,
+                } as unknown as ViewStyle)
+              : null,
+          ]}
+        >
+          {esMarca ? (
+            <LinearGradient
+              colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
+              locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
+              start={{ x: 0.13, y: 0 }}
+              end={{ x: 0.87, y: 1 }}
+              style={cuerpo}
+            >
+              {contenido}
+            </LinearGradient>
+          ) : (
+            <View style={cuerpo}>{contenido}</View>
+          )}
+        </Animated.View>
+      </Pressable>
+    </View>
   )
 }

@@ -376,7 +376,10 @@ function BotonPaso({
           borderRadius: radius.suave,
           // Dentro del bloque de `ancho` la superficie ya la pone el
           // contenedor: una caja adentro de otra rompería el bloque en tres.
-          backgroundColor: tamano === 'ancho' ? 'transparent' : theme.bg.hundido,
+          // S103-B · UNO SOLO. El `ancho` los dejaba transparentes porque
+          // el bloque ponía el material; sin bloque, el hundido de siempre —
+          // el mismo que ve la ficha.
+          backgroundColor: theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: atenuado ? 0.4 : 1,
@@ -471,8 +474,30 @@ export function StepperCantidad({
      árbol dio verde: medía la capa equivocada.* **Es la segunda vez en la misma
      pieza y en la misma vuelta que el árbol dice «está» sobre algo que el ojo
      no tiene** (la primera fue el pie opaco tapando el control). */
-  const sobreBloqueLleno = tamano === 'ancho' && !esMemorial
-  const tintaDelControl = sobreBloqueLleno ? theme.accent.ctaTexto : acento
+  /* ☠️ EL BLOQUE LLENO MUERE — firma del founder (S103-B): *«que el
+     stepper de la grilla se vea EXACTAMENTE IGUAL que el de la ficha»*.
+     Eran DOS TRATAMIENTOS del mismo control, medido y no supuesto: la
+     ficha monta `normal` (contenedor sin fondo, botones hundidos) y la
+     grilla montaba `ancho` sobre un bloque de `accent.cta`. **La persona
+     veía dos cosas donde hay una.**
+
+     🔴 **POR QUÉ NO CONTRADICE A `S100d·bis`:** esa firma es de
+     GEOMETRÍA, no de color. Sus tres razones escritas son de caja y de
+     renglón —*«la MISMA caja»* que ocupaba «Agregar», medida de Laika
+     (130,8 × 28,8 contra 129,0 × 27,4) · la tarjeta que no cambia de
+     alto · los 44 de blanco sin `hitSlop` forzado—. **El oro entró como
+     consecuencia de «es la misma caja que el botón», jamás como razón
+     propia.** ⇒ *la caja se conserva entera; lo que se va es el relleno.*
+
+     **Y esto resuelve el SEGUNDO pedido sin tocar ningún tono**, que es
+     por lo que no se tocó: el contorno de la grilla era `ctaTexto` sobre
+     el bloque —un **9,96**, duro por necesidad porque era la única tinta
+     legible ahí—. Al adoptar la caja de la casa pasa a `border.campo`
+     (piso 3, vigilado por R43) **con interior claro**: *más suave y más
+     claro salen de la unificación, no de un ajuste aparte.* Mover el
+     token habría cambiado `Campo`, `CampoCodigo` y `CampoFecha` en las
+     dos apps para curar una pantalla. */
+  const tintaDelControl = acento
 
   /* LAS TRES REGLAS DEL CAMPO, en un solo lugar (ver la prop `editable`):
      vacío ⇒ vuelve el anterior · cero ⇒ lo mismo que la papelera · resto ⇒
@@ -537,7 +562,8 @@ export function StepperCantidad({
           ? {
               width: '100%',
               justifyContent: 'space-between' as const,
-              backgroundColor: esMemorial ? theme.bg.hundido : theme.accent.cta,
+              // ☠️ Acá vivía `accent.cta`. La caja se conserva ENTERA —es lo
+              // que la firma mide— y queda SIN relleno, como la de la ficha.
               borderRadius: radius.suave,
               overflow: 'hidden' as const,
             }
@@ -555,11 +581,9 @@ export function StepperCantidad({
         color={
           v > min || onBorrar !== undefined
             ? tintaDelControl
-            : sobreBloqueLleno
-              ? tintaDelControl
-              : theme.text.tertiary
+            : theme.text.tertiary
         }
-        atenuado={!(v > min || onBorrar !== undefined) && sobreBloqueLleno}
+        atenuado={false}
         onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
         /* La voz del destino dice QUÉ pasa, y por eso depende de `salida`:
            en el carrito el ítem se va de la lista; en la vitrina la tarjeta
@@ -609,17 +633,46 @@ export function StepperCantidad({
            El foco no necesita estado nuevo: `borrador` ya vive mientras se
            escribe y vuelve a `null` en `confirmar()`.
 
-           ⚠️ **LO QUE QUEDA DECLARADO Y NO ADIVINADO — el bloque lleno.**
-           Sobre `tamano="ancho"` (`sobreBloqueLleno`) la caja NO se monta:
-           `interiorDeCaja` está definido contra `bg.base` y ahí pondría una
-           caja blanca encima de un bloque de CTA. **El contrato del módulo
-           no cubre esa superficie**, y tallarle una excepción sería
-           inventar tokens para el único caso que la letra no alcanza. Es 1
-           de los 3 montajes editables (`TarjetaProducto`, la vitrina) y va
-           al gate del founder con el resto — *ahí el bloque entero ya se
-           lee como control, que es justo la ambigüedad que esta firma vino
-           a sacar, pero eso es un argumento y no una medición: lo digo como
-           lo que es.* */
+           ── 🔴 EL BLOQUE LLENO TIENE SU PROPIA CAJA (S103-B · pedido del
+           founder: *«el número editable no se lee como campo»* en la grilla).
+
+           **Y LA MEDICIÓN CORRIGIÓ EL DIAGNÓSTICO, así que se escribe:** el
+           pedido decía que la superficie *«desaparece perceptualmente en el
+           tamaño de la grilla»*. **No es el tamaño: `normal` y `ancho` miden
+           IGUAL** — `ladoDelPaso` da 34 en los dos y `anchoDelNumero` da 32
+           en los dos. *Lo que pasaba es que sobre el bloque lleno la caja no
+           se montaba nunca* — el hueco que esta pieza había declarado y no
+           adivinado. **No había que achicar nada: había que cerrarlo.**
+
+           ── LAS DOS SALIDAS QUE LA CASA YA TENÍA, Y POR QUÉ NINGUNA SIRVE ─
+           · **`estiloDeCaja` tal cual NO** — su `interiorDeCaja` está
+             definido contra `bg.base` y pondría una caja de papel encima de
+             un bloque de CTA.
+           · **La inversión de `§15b.2`** (*«sobre el muro el acento
+             funcional es PAPEL»*, la que usa `Boton.superficie="muro"`)
+             **tampoco, y lo dice el número:** papel sobre el bloque de oro
+             del cliente mide **1.62**, y el dígito en oro sobre papel mide
+             **1.62** — ilegible. *Esa firma es para el muro TEAL del
+             prestador (5.51); el bloque de oro es otro muro.* **El
+             precedente correcto aplicado a la superficie equivocada habría
+             dado un número que no se puede leer.**
+
+           ── LO QUE SÍ MIDE: EL CONTORNO EN LA TINTA DEL BLOQUE ──────────
+           `tintaDelControl` es la única tinta legible ahí, **y ya está
+           medida**: 9.96 en el cliente · 5.51 en el prestador claro · 11.01
+           en el oscuro. Es la misma anatomía de N11 —*se contornea lo que se
+           fija*— con la mitad que esa superficie sí admite.
+
+           ⚠️ **Y el relleno NO se suma, a propósito:** un pozo de vidrio
+           sobre el bloque mide **1.30–1.50**, que es la banda que `§14` ya
+           declaró *«no está trabajando»*. Agregarlo sería sumar una señal
+           que no informa — decoración, no información.
+
+           ⚠️ **El foco no cambia el contorno acá**, y es limitación
+           declarada, no olvido: sobre el bloque **hay UNA sola tinta
+           legible**, así que no existe un color de foco disponible. Lo que
+           avisa es la selección entera del número (`selectTextOnFocus`). El
+           grosor sigue sin moverse: **jamás** engorda. */
         (() => {
           const campo = (
             <TextInput
@@ -632,6 +685,20 @@ export function StepperCantidad({
               returnKeyType="done"
               selectTextOnFocus
               accessibilityLabel={etiqueta}
+              /* 🔴 N8 TAMBIÉN RIGE ACÁ, y el número es un control desde que
+                 es editable. Medido: la caja mide **34 de alto** (derivado
+                 de `ladoDelPaso`, para alinear con los botones) y **51 de
+                 ancho** (32 + 8·2 de aire + 1.5·2 de borde) ⇒ **el ancho ya
+                 cumple los 44 y lo que falta son 5 por lado ARRIBA Y ABAJO.**
+
+                 ⚠️ **El `hitSlop` es SOLO VERTICAL, y no es prolijidad:** los
+                 botones de paso ya extienden el suyo hacia los lados
+                 (`holgura`), así que sumar blanco horizontal acá **haría que
+                 las áreas se pisen** — y esta pieza ya tiene escrito, dos
+                 veces, por qué eso es peor que un control apretado: *un
+                 stepper que a veces resta cuando quisiste sumar*. Acá sería
+                 peor todavía: abriría el teclado al querer sumar. */
+              hitSlop={{ top: (BOTON - ladoDelPaso(tamano)) / 2, bottom: (BOTON - ladoDelPaso(tamano)) / 2 }}
               style={{
                 /* El ancho lo reserva SIEMPRE el campo, no la caja: un
                    `width: '100%'` contra un contenedor que se dimensiona por
@@ -645,11 +712,10 @@ export function StepperCantidad({
                 fontVariant: ['tabular-nums'],
                 letterSpacing: typography.tracking.mono,
                 // MISMA fuente que los signos — ver `tintaDelControl`.
-                color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
+                color: theme.text.primary,
               }}
             />
           )
-          if (sobreBloqueLleno) return campo
           return (
             <View
               style={{
@@ -677,7 +743,7 @@ export function StepperCantidad({
             fontVariant: ['tabular-nums'],
             letterSpacing: typography.tracking.mono,
             // MISMA fuente que los signos — ver `tintaDelControl`.
-            color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
+            color: theme.text.primary,
           }}
         >
           {v}
@@ -686,8 +752,8 @@ export function StepperCantidad({
       <BotonPaso
         signo="mas"
         habilitado={v < max}
-        color={v < max ? tintaDelControl : sobreBloqueLleno ? tintaDelControl : theme.text.tertiary}
-        atenuado={v >= max && sobreBloqueLleno}
+        color={v < max ? tintaDelControl : theme.text.tertiary}
+        atenuado={false}
         onPress={() => irA(v + 1)}
         etiqueta={t('stepperCantidad.mas')}
         tamano={tamano}

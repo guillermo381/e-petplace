@@ -44,7 +44,7 @@ function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorVetAtencion> {
     | CodigoErrorVetAtencion
     | undefined;
   const c = codigo ?? 'error_desconocido';
-  return { ok: false, codigo: (c === 'error_desconocido' ? 'datos_inconsistentes' : c) as CodigoErrorVetAtencion, mensaje: MENSAJES[c] };
+  return { ok: false, codigo: (c === 'error_desconocido' ? 'datos_inconsistentes' : c) as CodigoErrorVetAtencion, mensaje: MENSAJES[c] ?? MENSAJES.error_desconocido };
 }
 
 // El embed de presupuesto va INLINE (literal) — postgrest-js infiere el tipo

@@ -25,6 +25,8 @@
 
 import { lightTheme, darkTheme, memorialTheme, getTheme, type Theme } from '../packages/ui/src/themes'
 import { palette } from '../packages/ui/src/tokens/palette'
+import { superficieDelSegmentoActivo, superficieDelChip } from '../packages/ui/src/components/superficies'
+import { interiorDeCaja } from '../packages/ui/src/components/caja-de-campo'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -94,12 +96,20 @@ type Pair = {
   noTextual?: boolean
 }
 
-/** El interior del campo, tal como lo resuelve `caja-de-campo.ts` — se
- *  espeja acá en vez de importarse porque este script no monta React, y
- *  un espejo de UNA línea con su fuente nombrada es más barato que
- *  arrastrar el módulo. Si la fuente cambia, R43 sigue midiendo el borde
- *  y este par se corrige junto con ella. */
-const INTERIOR_CAMPO = (t: Theme): string => (t.mode === 'light' ? t.bg.card : t.bg.overlay)
+/** El interior del campo — **IMPORTADO de `caja-de-campo.ts`, que es
+ *  donde la pieza lo resuelve.**
+ *
+ *  ⏪ **Acá había un espejo de una línea, y su razón escrita era esta:**
+ *  *«se espeja acá en vez de importarse porque este script no monta
+ *  React»*. **Medido en S103-B: es falsa.** `caja-de-campo.ts` importa
+ *  `Theme`, `motion`, `radius`, `spacing` y `typography` — **cero React,
+ *  cero react-native**; el módulo se importa sin arrastrar nada.
+ *
+ *  *Un espejo con una razón que se puede falsar es peor que uno sin
+ *  razón: la razón hace que nadie lo revise.* Y el costo de la clase ya
+ *  está medido en esta misma tanda — la otra copia de este archivo dejó
+ *  al gate en VERDE con la pata invisible. */
+const INTERIOR_CAMPO = interiorDeCaja
 
 function paresDe(t: Theme, nombre: string): Pair[] {
   const p: Pair[] = []
@@ -238,7 +248,10 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // riel, precedente del agarre de la Hoja), compositado sobre bg.overlay.
   // El texto INACTIVO (text.secondary / bg.overlay) ya está gateado por el
   // par del fallback de Avatar de arriba — mismo par exacto.
-  const superficieSegmentoActivo = t.mode === 'light' ? t.bg.card : t.border.default
+  // 🔴 IMPORTADO, JAMÁS REIMPLEMENTADO (S103-B): esta línea era una
+  // copia de la pieza, y una copia no se mueve cuando la pieza se rompe.
+  // Probado: con la superficie cambiada EN LA PIEZA, el gate seguía verde.
+  const superficieSegmentoActivo = superficieDelSegmentoActivo(t)
   add(
     'SelectorSegmentado activo text.primary / superficie activa⊕overlay',
     t.text.primary,
@@ -311,6 +324,54 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
   // superficie real del chip (card en claro, elevated en dark). Los
+  /* S103-B · LA PATA DE `SelectorSegmentado` — el ÚNICO otro caso de la
+     clase que destapó el par del CTA, y salió de un censo, no de una
+     corazonada.
+
+     **El censo:** de los **10 slots que cambian entre la casa del cliente
+     y la del oficio**, el gate medía resueltos 5; de los otros cinco,
+     `ctaElevado` es un BOOLEANO (no hay par posible), `controlBg` sí
+     estaba medido —mi primer chequeo dio falso positivo por buscar
+     `t.accent.controlBg` cuando entra por una expresión guardada—, y
+     `atmosfera` es un lavado de fondo con `aria-hidden` (no tiene primer
+     plano: un gate de contraste no puede juzgarlo).
+
+     ⇒ **queda ÉSTE.** `SelectorSegmentado` tenía su par de TEXTO medido
+     (`text.primary` sobre la superficie activa) y **la PATA no**, aunque
+     `accent.marcaEleccion` resuelve por casa: magenta en el cliente, teal
+     en el prestador. *El gate hablaba del texto del segmento elegido y
+     callaba sobre la marca que dice CUÁL está elegido.*
+
+     **Piso 3 y no 4.5:** la pata es GRÁFICA — el marcador de la elección,
+     no texto. Mismo criterio que el disco de `BarraTabs`.
+
+     ⚠️ **La superficie se COMPOSITA, y no es prolijidad:** en memorial
+     `border.default` es un rgba, así que medir contra él directo daba
+     **NaN** — un par que no se puede evaluar, o sea un verde que no
+     significa nada. Va sobre `bg.hundido`, el riel donde la pieza lo
+     pinta. */
+  add(
+    'SelectorSegmentado: la PATA / superficie activa⊕riel',
+    t.accent.marcaEleccion,
+    superficieDelSegmentoActivo(t),
+    t.bg.hundido,
+    3,
+  )
+
+  /* ☠️ ⏪ ACÁ VIVÍA EL PAR DEL CONTORNO SOBRE EL BLOQUE LLENO — se retira
+     EN EL MISMO COMMIT que le saca el bloque a `StepperCantidad` (firma
+     del founder: la grilla se ve igual que la ficha), y **esa
+     simultaneidad es la regla de este archivo, no prolijidad**: *un gate
+     que mide una anatomía que la pieza ya no tiene sigue dando verde y
+     deja de estar midiendo el producto.* Esta casa lo pagó dos veces —el
+     par del avatar en S98 y el `bgCampo` de S99— y **el par de abajo, el
+     que yo mismo agregué ayer, se habría convertido en el tercero.**
+
+     Lo que medía (`accent.ctaTexto / accent.cta`: 9,96 · 5,51 · 11,01)
+     **no se pierde**: el contorno del número pasa a ser el de la caja de
+     campo de la casa, que ya tiene su piso vigilado por `R43` y su par
+     `border.campo / bg.base` cinco líneas más arriba. */
+
   /* S103-B · EL TÍTULO DE LA CELDA ELEGIDA (`DIRECCION_ARTE` §14 — el medio
      de pago elegido va en letra magenta, sin huella).
      🔴 **Se declara porque si no, el gate calla sobre un par que existe.**
@@ -324,7 +385,8 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   }
 
   // tres registros de SelectorOpcion: control · oficio · capa (moribundo).
-  const superficieChip = t.mode === 'light' ? t.bg.card : t.bg.elevated
+  // IMPORTADO, jamás reimplementado — ver `superficies.ts`.
+  const superficieChip = superficieDelChip(t)
   if ('capaBg' in t && 'control' in t.accent) {
     // S98-B (D-813): el tonal de control mide su tinte NUEVO, por lo mismo
     // que el par de arriba — el borde y el relleno son la misma señal y
