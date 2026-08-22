@@ -18822,6 +18822,50 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-872 🔴 · EL CAMINO PRINCIPAL DE LA DESPENSA ESTÁ CERRADO: «VER EL TOTAL» NO SE PUEDE TOCAR CON ENVÍO A DOMICILIO
+
+🔴 **ALTA.** *Elevada por el founder sobre el recorrido medido de S103:*
+**«eso es más grave que cualquier píxel de esta mesa».**
+
+**Medido en el aparato el 22-ago**, cuenta real, pedido fresco de un producto,
+Metro sobre `main` (`901c5322`):
+
+| | |
+|---|---|
+| método de entrega | **«Envío a domicilio»** (el que viene elegido por defecto) |
+| botón «Ver el total» | **DESHABILITADO** — relleno pálido, texto gris |
+| voz al pie | *«No hay ventana de entrega disponible — revisa la fecha o prueba retiro en tienda.»* |
+| dirección usada | `170135 Quito, Ecuador · Quito · Shyris y suecia Edificio Iqon` (dato sembrado, válido) |
+| con «Retiro en tienda» | **el botón se habilita y el camino sigue** |
+
+> ### **El camino por el que la despensa vende —el envío a domicilio— no llega al pago.** Solo llega el retiro en tienda.
+
+**Qué lo hace grave y no un borde:** *el envío es el camino principal del
+producto*, y **está cerrado en el aparato del founder, con dirección válida y
+pedido fresco**. **Ningún typecheck, lint ni juez lo ve** — porque **no falla:
+se niega, y lo dice bien.** *Es la clase de defecto que solo aparece caminando,
+y apareció caminando.*
+
+**Lo que la voz hace BIEN, y por eso no es un callejón:** nombra la causa y
+ofrece dos salidas concretas (*revisá la fecha · probá retiro en tienda*). **La
+honestidad está; lo que falta es la ventana.**
+
+🔴 **LO QUE NO SE MIDIÓ, declarado para que nadie lo lea como diagnóstico
+cerrado:** **no se determinó POR QUÉ no hay ventana.** Las hipótesis obvias —sin
+cupo del vendedor para la fecha · sin zona de cobertura para esa dirección · sin
+repartidor configurado · la fecha por defecto cae fuera de toda ventana— **no se
+midieron contra la base**, y son curas completamente distintas. *Diagnosticar sin
+medir acá sería exactamente lo que esta casa cobra caro.*
+
+**Primer paso de quien la tome:** medir **contra la base**, para esa dirección y
+esa fecha, cuál de las cuatro es — y recién ahí decidir si es dato de siembra o
+defecto de motor. *Si resulta lo primero, la ficha muere y se convierte en una
+línea del corte semilla/real; si resulta lo segundo, bloquea el soft launch.*
+
+**Disparo: antes de que la despensa venda a alguien real.**
+
+---
+
 ### D-871 🟡 · UN RATCHET VIGILADO POR LITERAL ES CIEGO A LOS DEFAULTS DE `packages/ui`
 
 🟡 **MEDIA. AUTORIZADA COMO TANDA PROPIA** (founder, 22-ago-2026) — *no de la

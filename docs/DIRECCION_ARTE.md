@@ -1606,3 +1606,82 @@ cambia es cuánto vale, no de dónde sale.*
 > **La cura de B (el header a 120) NO cierra D-795:** curar el comentario
 > quita la fuente del error, **no decide qué dice el Norte**. Las dos cosas
 > son distintas y solo la segunda necesita firma.
+
+---
+
+## §14 · LA ELECCIÓN SE DICE POR CLASE, NO POR UNA DOSIS ÚNICA
+*(firma del founder, 22-ago-2026 — sobre el recorrido medido de S103)*
+
+> ### **No hay UNA forma de «elegida». Hay CUATRO, y cada una corresponde a una clase de elección distinta.**
+
+**Qué lo destapó, con su número:** el recorrido de S103 midió que **el relleno
+separa la elegida de la no elegida a 1,18:1** en el chip de mascota y **1,22:1**
+en «¿Cómo te llega?». *O sea que el relleno **no está trabajando**.* Lo que
+separa de verdad es **el color del texto** (6,99:1 y 6,76:1) y, donde existe, el
+borde. **La firma no elige una dosis mejor: reparte el trabajo por clase.**
+
+### Los CUATRO mecanismos
+
+| # | clase de elección | mecanismo | caso vivo |
+|---|---|---|---|
+| **①** | **Selección de un SUJETO en un tap** | **la huella pisándola, y la superficie CEDE: la elegida se hunde** | el chip de mascota |
+| **②** | **Selección MÚLTIPLE de opciones** | **magenta claro** | preferencias de notificaciones |
+| **③** | **Encendido / apagado** | **toggle magenta oscuro** | «que llegue solo» |
+| **④** | **Elegir UNA entre pocas** | **magenta claro** | baño vs. baño + corte |
+
+### 🔴 EL PORQUÉ DEL ①, que es el que hay que no perder
+
+**El hundimiento NO es un canal separado de la huella: es su consecuencia
+física.**
+
+> ### **Donde pisa la huella, la superficie cede.**
+
+*Por eso el hundimiento **no se puede trasplantar** a las otras tres clases: sin
+huella no hay pisada, y sin pisada un hundimiento es una textura arbitraria.*
+⇒ **el ① aplica SOLO donde hay huella — o sea, solo donde hay SUJETO.**
+
+**Y esto reinterpreta lo que el recorrido había reportado como anomalía:** *«la
+elegida es la única que pierde la elevación; lo elegido se hunde y lo no elegido
+flota»*. **No era una anomalía: era el mecanismo ① funcionando.** *Lo que
+faltaba no era corregir el hundimiento — era la ley que lo explica.*
+
+### El medio de pago: LETRA MAGENTA, sin huella
+
+**El medio de pago elegido va en letra magenta y NO lleva huella — porque no es
+un sujeto.** *Una tarjeta no es alguien: es un instrumento.* Y la medición lo
+sostiene sola: **el relleno separa 1,18:1 y el texto 6,99:1** ⇒ **el color del
+texto ya era lo que estaba haciendo el trabajo**; la firma lo vuelve explícito
+en vez de accidental.
+
+### Lo que esta sección deroga
+
+**El intento de encontrar «la dosis canónica de elegida».** *La pregunta estaba
+mal planteada: no hay una dosis porque no hay una clase.* **Toda superficie
+nueva declara a cuál de los cuatro mecanismos pertenece su elección, y usa ése.**
+
+---
+
+## §15 · EL FOLD CORTA POR LÍNEA COMPLETA, Y ANUNCIA CON ESTRUCTURA
+*(firma del founder, 22-ago-2026 — sobre la medición de ⑥)*
+
+> ### **Nunca se parte una frase. El corte cae entre líneas, jamás sobre una.**
+> ### **Y lo que anuncia que hay más es ESTRUCTURA —el borde superior del bloque siguiente—, jamás un texto mutilado.**
+
+**El estado medido que la firma corrige** (S103, aparato de 1080×2340, DPR 3):
+
+| | medido | firmado |
+|---|---|---|
+| de la línea cortada se ve | **23 px de ~38** (~61 %) | **0 % o 100 %** — nunca una fracción |
+| tarjeta debajo de la última tinta | **1 px** | el corte cae **entre** líneas |
+| qué anuncia que hay más | **media palabra** | **el borde superior del bloque siguiente** |
+
+**El porqué, y es de significado y no de prolijidad:** *media línea de texto no
+comunica «hay más» — comunica «esto se rompió».* **Un texto mutilado es un
+defecto en cualquier otro contexto, así que usarlo como señal enseña a leer un
+defecto como una señal.** En cambio **el borde de un bloque que asoma es
+inequívoco**: existe para eso, y no puede confundirse con una falla.
+
+**Lo exigible:** toda superficie con contenido que puede exceder el alto
+**corta por línea completa** y **deja asomar el borde superior de lo que sigue**.
+*Cuánto tiene que asomar es del ojo del founder; que asome ESTRUCTURA y no TEXTO
+es ley.*
