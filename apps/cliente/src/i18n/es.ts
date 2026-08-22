@@ -1633,7 +1633,6 @@ export const clienteEs = {
     deunaCausaVendedorNoActivo: 'Este vendedor no está recibiendo pedidos ahora mismo.',
     deunaCausaMontoDivergente: 'El total cambió desde que empezaste. Vuelve atrás para verlo actualizado.',
     deunaCausaCompraSinPedidos: 'Esta compra quedó sin productos. Vuelve a armarla.',
-    deunaCausaDesgloseIncompleto: 'Nos falta información del total para poder cobrarte. Vuelve atrás e inténtalo otra vez.',
     // ④ LA RED — no es rechazo. Y jamás dice «cerrá sesión».
     deunaRedTitulo: 'No pudimos conectarnos',
     deunaRedCuerpo: 'No es un rechazo: no llegamos a preguntar. Prueba de nuevo.',
@@ -1643,7 +1642,13 @@ export const clienteEs = {
     // ③ EL PROVEEDOR RECHAZÓ
     deunaRechazoCuerpo: 'Deuna no pudo completar el cobro. Escríbenos y lo revisamos.',
     // ⑤ AMBIGUO A PROPÓSITO — «no existe o es de otro». No se afina.
-    deunaAmbiguoCuerpo: 'No encontramos esta compra. Vuelve atrás y prueba de nuevo.',
+    // 🔴 SIN SUSTANTIVO DEL SUJETO (dictamen de mesa, 23-ago). Decía «esta
+    // COMPRA», y este código lo emiten los DOS sujetos: `cita_no_existe`
+    // recibía una voz que nombraba algo que la pantalla no sabe cuál es.
+    // Es el mismo defecto que la casa ya pagó con el comprobante que decía
+    // «compra» para un paseo, entrando por la voz de error.
+    // «este pago» SÍ se puede afirmar: es la pantalla donde está parada.
+    deunaAmbiguoCuerpo: 'No pudimos abrir este pago. Vuelve atrás y prueba de nuevo.',
     deunaSesionCuerpo: 'Tu sesión terminó. Vuelve a entrar para seguir.',
     deunaVolver: 'Volver',
     deunaAprobada: 'Pago confirmado',

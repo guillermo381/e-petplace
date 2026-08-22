@@ -117,7 +117,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Boton, BotonCopiar, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
-import type { EstadoDeUna } from '@/lib/pagos/deuna-estado';
+import { vozDeFallo, type EstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { useTraduccion } from '@/i18n';
 
 export type EsperaDeUnaProps = {
@@ -135,37 +135,6 @@ function segundosHasta(iso: string): number {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
 
-/**
- * 🔴 LA CAUSA DE CADA COMPUERTA — **mapa explícito, no clave interpolada.**
- *
- * *Mi primera versión armaba la clave con `` `pago.deunaCausa_${codigo}` ``, y
- * eso **se salta el riel entero**: las claves del diccionario son tipadas
- * EXIGIBLES —una clave inexistente rompe el typecheck— y una clave construida
- * en runtime **no la ve nadie**. El modo de falla no es un error: es la
- * persona leyendo `pago.deunaCausa_reserva_vencida` en pantalla.*
- *
- * Con el mapa, **agregar un código de compuerta sin su voz no compila.**
- */
-const CAUSA_DE_COMPUERTA = {
-  pago_en_proceso: 'pago.deunaCausaPagoEnProceso',
-  reserva_vencida: 'pago.deunaCausaReservaVencida',
-  vendedor_no_activo: 'pago.deunaCausaVendedorNoActivo',
-  monto_divergente: 'pago.deunaCausaMontoDivergente',
-  compra_sin_pedidos: 'pago.deunaCausaCompraSinPedidos',
-  desglose_incompleto: 'pago.deunaCausaDesgloseIncompleto',
-  /* El resto de los códigos no es compuerta —lo garantiza `FAMILIA_DE` en la
-     costura—, pero el índice tiene que ser total: si alguien mueve un código
-     a `compuerta` sin darle causa, **cae en la voz honesta de defecto nuestro
-     en vez de dejar la pantalla muda.** */
-} as const;
-
-type ClaveCausa = (typeof CAUSA_DE_COMPUERTA)[keyof typeof CAUSA_DE_COMPUERTA];
-
-function causaDeCompuerta(codigo: string): ClaveCausa | 'pago.deunaNuestroCuerpo' {
-  return codigo in CAUSA_DE_COMPUERTA
-    ? CAUSA_DE_COMPUERTA[codigo as keyof typeof CAUSA_DE_COMPUERTA]
-    : 'pago.deunaNuestroCuerpo';
-}
 
 export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaProps) {
   const { t } = useTraduccion();
@@ -234,42 +203,27 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
      Y `nuestro` **no ofrece reintentar**: *pedirle que reintente algo que no
      va a cambiar es hacerle perder el tiempo con cara de ayuda.* */
   if (estado.fase === 'fallo') {
-    const reintentable = estado.familia === 'red';
+    /* 🔴 LA VOZ SALE DE LA COSTURA (`vozDeFallo`), NO DE ACÁ. La pantalla
+       DIBUJA; **elegir qué se dice según la familia es lógica**, y vive donde
+       un instrumento puede medirla sin reimplementarla. */
+    const voz = vozDeFallo(estado.codigo);
     return (
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
-        <Texto variante="titulo">
-          {t(
-            estado.familia === 'compuerta'
-              ? 'pago.deunaCompuertaTitulo'
-              : reintentable
-                ? 'pago.deunaRedTitulo'
-                : 'pago.deunaFalloTitulo',
+        <Texto variante="titulo">{t(voz.titulo)}</Texto>
+        <Texto variante="cuerpo">{t(voz.cuerpo)}</Texto>
+        <Boton
+          variante="secundario"
+          etiqueta={t(
+            voz.accion === 'reintentar'
+              ? 'pago.deunaReintentar'
+              : voz.accion === 'volver'
+                ? 'pago.deunaVolver'
+                : 'cuenta.soporteBoton',
           )}
-        </Texto>
-        <Texto variante="cuerpo">
-          {t(
-            estado.familia === 'compuerta'
-              ? causaDeCompuerta(estado.codigo)
-              : estado.familia === 'red'
-                ? 'pago.deunaRedCuerpo'
-                : estado.familia === 'ambiguo'
-                  ? 'pago.deunaAmbiguoCuerpo'
-                  : estado.familia === 'sesion'
-                    ? 'pago.deunaSesionCuerpo'
-                    : estado.familia === 'rechazo'
-                      ? 'pago.deunaRechazoCuerpo'
-                      : 'pago.deunaNuestroCuerpo',
-          )}
-        </Texto>
-        {reintentable ? (
-          <Boton variante="secundario" etiqueta={t('pago.deunaReintentar')} onPress={onGenerarNuevo} />
-        ) : estado.familia === 'compuerta' || estado.familia === 'ambiguo' ? (
-          /* La compuerta y el ambiguo se resuelven VOLVIENDO, no en soporte:
-             la reserva se rearma y la compra ajena no existe para vos. */
-          <Boton variante="secundario" etiqueta={t('pago.deunaVolver')} onPress={onSoporte} />
-        ) : (
-          <Boton variante="secundario" etiqueta={t('cuenta.soporteBoton')} onPress={onSoporte} />
-        )}
+          /* 🔴 **`reintentar` vuelve a PEDIR EL CÓDIGO, no manda a soporte** —
+             la red no es un rechazo. Las otras dos salen de la pantalla. */
+          onPress={voz.accion === 'reintentar' ? onGenerarNuevo : onSoporte}
+        />
       </View>
     );
   }

@@ -126,7 +126,14 @@ const FAMILIA_DE: Record<CodigoDeFallo, FamiliaDeuna> = {
   vendedor_no_activo: 'compuerta',
   monto_divergente: 'compuerta',
   compra_sin_pedidos: 'compuerta',
-  desglose_incompleto: 'compuerta',
+  /* 🔴 ENMIENDA DE MESA AL CONTRATO (23-ago) — el contrato lo listaba en
+     COMPUERTA y la mesa lo movió acá, con su razón: **el desglose congelado
+     es artefacto NUESTRO.** Si está incompleto no hay nada que la persona
+     pueda corregir, y mandarla a «volver e intentar» la hace repetir un
+     camino que va a fallar igual. *Misma ley que el monto que diverge del
+     desglose.* **Y a diferencia de la compuerta, esto no depende del
+     sujeto.** */
+  desglose_incompleto: 'nuestro',
   // ③ el proveedor rechazó
   no_se_pudo_completar: 'rechazo',
   // ④ la red — NO es rechazo
@@ -230,6 +237,47 @@ export const ENSAYO = {
     holdVenceEn: new Date(Date.now() + 8_000).toISOString(),
   }),
   aprobada: () => ({ fase: 'aprobada' as const }),
+  /* 🔴 UNA POR FAMILIA — para poder CAMINARLAS, no solo medirlas.
+     El código de cada una es real (sale del contrato), así que lo que se
+     dibuja es la voz que la persona vería de verdad. */
+  falloCompuerta: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('reserva_vencida'),
+    codigo: 'reserva_vencida' as const,
+  }),
+  falloRed: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('sin_respuesta'),
+    codigo: 'sin_respuesta' as const,
+  }),
+  falloNuestro: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('servidor_sin_configurar'),
+    codigo: 'servidor_sin_configurar' as const,
+  }),
+  falloAmbiguo: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('compra_no_existe'),
+    codigo: 'compra_no_existe' as const,
+  }),
+  falloRechazo: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('no_se_pudo_completar'),
+    codigo: 'no_se_pudo_completar' as const,
+  }),
+  falloSesion: () => ({
+    fase: 'fallo' as const,
+    familia: familiaDeFallo('sin_sesion'),
+    codigo: 'sin_sesion' as const,
+  }),
+  /* 🔴 EL CASO DEL HOLD DESCONOCIDO — el que la mesa quiere ver: con
+     `holdVenceEn: null` **no se pinta NADA como vencido**. */
+  holdDesconocido: () => ({
+    fase: 'esperando' as const,
+    codigo: '778899',
+    venceEn: new Date(Date.now() + 3 * 60_000).toISOString(),
+    holdVenceEn: null,
+  }),
   /** El nombre viaja del servidor; acá se ensaya el de la letra §3.5. */
   hallazgo: () => ({ fase: 'hallazgo' as const, nombre: 'huerfano_deuna_vencido' }),
 } satisfies Record<string, () => EstadoDeUna>;
@@ -320,3 +368,102 @@ export function useEstadoDeUna(entrada: SujetoDeuna | { ensayo: GuionDeEnsayo })
 export function pendienteDeConectar_sondeo(): void {
   /* intencionalmente vacío — ver el comentario de arriba */
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   🔴 LA VOZ DEL FALLO — **vive ACÁ y no en el componente, a propósito.**
+
+   Elegir qué se le dice a la persona según la familia **es lógica, no
+   dibujo**: tiene un árbol de decisión con seis ramas y tres acciones
+   distintas, y es exactamente lo que la mesa quiere poder VERIFICAR.
+
+   **Y la razón fuerte es de instrumento:** con el árbol adentro del `.tsx`,
+   cualquier script que lo midiera tendría que **reimplementar la fórmula** —
+   y entonces mediría su propio eco, no la pieza. *La casa ya se cobró eso
+   con la barra: el instrumento bueno extrae del archivo real.* Con la voz
+   acá, **el recorrido mide la MISMA función que la pantalla monta.**
+   ════════════════════════════════════════════════════════════════════════ */
+
+const CAUSA_DE_COMPUERTA = {
+  pago_en_proceso: 'pago.deunaCausaPagoEnProceso',
+  reserva_vencida: 'pago.deunaCausaReservaVencida',
+  vendedor_no_activo: 'pago.deunaCausaVendedorNoActivo',
+  monto_divergente: 'pago.deunaCausaMontoDivergente',
+  compra_sin_pedidos: 'pago.deunaCausaCompraSinPedidos',
+  /* ☠️ `desglose_incompleto` SALIÓ de acá con la enmienda de mesa: ya no es
+     compuerta, así que no tiene causa que decir — habla la voz de defecto
+     nuestro. */
+} as const;
+
+/** Qué se le ofrece a la persona. **`reintentar` SOLO para la red** — las
+ *  otras familias no se curan repitiendo. */
+export type AccionDeFallo = 'reintentar' | 'volver' | 'soporte';
+
+/** 🔴 **Las claves van como LITERALES, no como `string`.** El riel las valida
+ *  al compilar (una clave inexistente rompe el typecheck) y `string` apagaría
+ *  esa validación justo en el archivo que las elige. *Tipar esto como `string`
+ *  habría dejado pasar un error de tipeo hasta la pantalla.* */
+export type VozDeFallo = {
+  titulo:
+    | 'pago.deunaCompuertaTitulo'
+    | 'pago.deunaRedTitulo'
+    | 'pago.deunaFalloTitulo';
+  cuerpo:
+    | (typeof CAUSA_DE_COMPUERTA)[keyof typeof CAUSA_DE_COMPUERTA]
+    | 'pago.deunaRedCuerpo'
+    | 'pago.deunaAmbiguoCuerpo'
+    | 'pago.deunaSesionCuerpo'
+    | 'pago.deunaRechazoCuerpo'
+    | 'pago.deunaNuestroCuerpo';
+  accion: AccionDeFallo;
+};
+
+/** Las causas de compuerta, una por código. **Mapa explícito y no clave
+ *  interpolada:** las claves del diccionario son tipadas exigibles, y una
+ *  construida en runtime no la valida nadie — *su modo de falla es la persona
+ *  leyendo `pago.deunaCausa_reserva_vencida` en pantalla.* */
+
+
+/**
+ * De un código a su voz. **Total sobre `CodigoDeFallo`**: no hay rama que
+ * devuelva `undefined`, y por eso ningún código puede quedarse mudo.
+ *
+ * 🔴 Las tres reglas que el contrato marca como intocables, aplicadas acá:
+ * · **compuerta NO dice «falló el pago»** — el proveedor nunca se enteró.
+ * · **red ofrece REINTENTAR y jamás soporte** — no es un rechazo.
+ * · **`sesion_no_verificable` cae en `red`**, así que **nunca dice «cerrá
+ *   sesión»**: es un 503 de auth y la sesión probablemente esté bien.
+ */
+export function vozDeFallo(codigo: CodigoDeFallo): VozDeFallo {
+  const familia = familiaDeFallo(codigo);
+  if (familia === 'compuerta') {
+    return {
+      titulo: 'pago.deunaCompuertaTitulo',
+      cuerpo:
+        codigo in CAUSA_DE_COMPUERTA
+          ? CAUSA_DE_COMPUERTA[codigo as keyof typeof CAUSA_DE_COMPUERTA]
+          : /* Inalcanzable mientras `FAMILIA_DE` sea la única fuente de
+               familias; queda por si alguien mueve un código a `compuerta`
+               sin darle causa — **cae en voz honesta, jamás en silencio.** */
+            'pago.deunaNuestroCuerpo',
+      accion: 'volver',
+    };
+  }
+  if (familia === 'red') {
+    return { titulo: 'pago.deunaRedTitulo', cuerpo: 'pago.deunaRedCuerpo', accion: 'reintentar' };
+  }
+  if (familia === 'ambiguo') {
+    return { titulo: 'pago.deunaFalloTitulo', cuerpo: 'pago.deunaAmbiguoCuerpo', accion: 'volver' };
+  }
+  if (familia === 'sesion') {
+    return { titulo: 'pago.deunaFalloTitulo', cuerpo: 'pago.deunaSesionCuerpo', accion: 'volver' };
+  }
+  if (familia === 'rechazo') {
+    return { titulo: 'pago.deunaFalloTitulo', cuerpo: 'pago.deunaRechazoCuerpo', accion: 'soporte' };
+  }
+  return { titulo: 'pago.deunaFalloTitulo', cuerpo: 'pago.deunaNuestroCuerpo', accion: 'soporte' };
+}
+
+/** Los 17 códigos que el wrapper puede devolver — **lista derivada del mapa,
+ *  jamás tecleada aparte.** *Dos listas del mismo conjunto divergen el día
+ *  que alguien agrega a una sola.* Su consumidor es el recorrido. */
+export const CODIGOS_DE_FALLO = Object.keys(FAMILIA_DE) as CodigoDeFallo[];
