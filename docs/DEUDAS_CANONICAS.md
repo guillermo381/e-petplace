@@ -18579,6 +18579,16 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-341** — **PREGUNTAR TIENE LATENCIA DE DÍAS; MEDIR TUVO LATENCIA DE MINUTOS — Y EN DOS DE TRES CASOS LA RESPUESTA YA ESTABA ESCRITA EN UN MENSAJE DE ERROR QUE NADIE HABÍA LEÍDO COMPLETO.** *(Autoría S103-D; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **El caso:** `LETRA_DEUNA` §12 abrió con **nueve preguntas al grupo de soporte del proveedor**, todas legítimas —la casa no adivina—. **Tres se cerraron midiendo contra QA**, en minutos, sin escribirle a nadie:
+  · **la ventana del refund** — el propio mensaje de error del proveedor dice *«only valid for the purchase day»*. La letra la tenía como *supuesto declarado más restrictivo* esperando confirmación; **el dato estaba en el rebote.**
+  · **el header `Ocp-Apim`** — resultó innecesario, medido probando sin él.
+  · **el rate limit** — `429 · "Try again in 1 seconds"` con dos llamadas seguidas.
+  **De nueve quedaron seis.**
+  🔴 **Lo que hay que no leer mal:** esto **no dice «no preguntes»** — la letra que manda preguntar en vez de adivinar sigue rigiendo entera, y las seis que quedan **se preguntan**. Dice **en qué ORDEN**: *antes de mandar una pregunta que va a tardar días, se mira si el ambiente ya la contesta* — y muy especialmente **se lee el mensaje de error ENTERO**, que es donde estaba dos de tres veces.
+  **La forma general:** *un rebote del proveedor no es solo un «no»: es documentación que llega gratis y que casi nadie lee más allá del código de estado.* **Hermana de `L-316`** (el motivo que se aplasta): allá se perdía el texto útil al construir el mensaje; acá se perdía al no leerlo.
+  **Y su límite, declarado:** lo medible en QA es lo que QA implementa. **Una respuesta de soporte sobre política comercial, contrato o producción NO se sustituye midiendo sandbox** — las seis que quedan abiertas son justamente de esa clase (`pointOfSale`, alta del webhook, firma más fuerte, simulación de reversos). Origen: S103-D, censo contra el ambiente QA.
+
 - **L-340** — 🔴 **DONDE NO HAY SESIÓN, LA AUTORIZACIÓN ES UN ACTO GUARDADO — JAMÁS UNA SESIÓN SIMULADA.** *(Firmada por el founder, 22-ago-2026, sobre el arranque del cobro recurrente.)*
   **El caso:** `pagos-cobro` abre con `if (!auth.startsWith('Bearer ')) return { codigo: 'sin_sesion' }` — **su primera compuerta es la sesión, y de ahí cuelga todo lo demás**: pertenencia, monto, compuertas. El cobro recurrente **no tiene sesión: lo dispara un reloj.** Con esa función tal cual, todo cobro automático muere en `sin_sesion`.
   **La salida obvia era fabricar un JWT del usuario con `service_role`.** Técnicamente se puede, en dos líneas, y **está PROHIBIDA.**
