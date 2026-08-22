@@ -18579,6 +18579,23 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-339** — **UNA MEDICIÓN HISTÓRICA SE MARCA, JAMÁS SE REESCRIBE.** *(Firmada por la mesa, 22-ago-2026.)*
+  **El caso:** `CLAUDE.md` citaba `verify-edge-simbolos` en **dos lugares**, y la orden fue curar los dos. **No eran la misma clase y no se curaron igual:**
+  · la fila de `supabase/` **declaraba el gate VIGENTE** ⇒ se reemplaza por el nuevo, con su porqué;
+  · el operativo de S101 decía **«`verify-edge-simbolos` 22/0»**, que es **una medición de ese día** ⇒ **se MARCA** (jubilado, con puntero al reemplazo) **y el número se deja intacto**.
+  > ### **El 22/0 era CIERTO. Lo que estaba mal era el instrumento, no el número — y reescribir una medición pasada es falsificar el registro.**
+  *Un acta que se corrige hacia atrás deja de poder decir qué sabíamos y cuándo lo sabíamos,* y ésa es justo la pregunta que se hace quien investiga por qué algo no se vio a tiempo. **Quien lea un reporte viejo que cita ese 22/0 tiene que poder ver que citaba la letra vigente de su día, y no concluir que se equivocó.**
+  **La regla operativa, en una pregunta:** *¿esta línea AFIRMA algo sobre el presente, o REGISTRA algo que se midió?* **Lo primero se actualiza; lo segundo se anota al margen.** Hermana del precedente de las letras (*lo corregido va tachado en su lugar, no borrado*) y de la enmienda del `update:list` en S86, que quedó **con su versión vieja declarada al lado**. Origen: S103-A.
+
+- **L-338** — **`NOT VALID` NO INDULTA A LA FILA: INDULTA AL PASADO.** *(Firmada por la mesa, 22-ago-2026.)*
+  **El caso, medido:** cerrar la fila `CO` de `fee_configs` era un `UPDATE` de tres columnas y **abortó con `23514`** contra `chk_fee_pedido_declara_base`. La fila **no declaraba `base`** y se la creía exenta —**el CHECK nació `NOT VALID`**, y la propia cura de S102-B lo decía con todas las letras: *«exenta del CHECK … porque nació NOT VALID»*.
+  **La lectura era falsa, y su forma exacta importa:** `NOT VALID` **exime del escaneo inicial de la tabla**; **toda escritura posterior sobre esa fila la vuelve a someter.**
+  > ### **Una fila «exenta» deja de estarlo en el momento en que la tocás — y tocarla es exactamente lo que una migración de cierre viene a hacer.**
+  ⇒ **El indulto y el trabajo se cruzan siempre**, porque las filas que uno quiere cerrar son justo las viejas, que son justo las indultadas. *Por eso no es un caso raro: es el caso típico.*
+  **Lo exigible: antes de escribir sobre una fila vieja, se leen los constraints `NOT VALID` de su tabla** —`convalidated = false`, un `pg_constraint` de una línea— **y se decide qué se va a hacer con el campo que falta ANTES de correr**, no cuando el `23514` aborta.
+  **Y la salida no es técnica: es de letra.** Acá hubo tres —inventar la base, validar el constraint primero, o `{"base": null}`— y **la eligió el founder**, con su razón: *Ecuador es la única operación viva y **un número colombiano inventado se lee como cierto la próxima vez que alguien lo mire**.* **Hueco declarado antes que dato falso** — la misma ley que rigió el mismo día en las páginas legales. *`?` mide existencia de la clave, no su valor: el `null` satisface el CHECK **diciendo la verdad**.*
+  **Su parienta:** `L-326` (*cuando el orden importa, se escribe como cinturón y no como nota*) — allá la precondición vivía en un comentario; acá **la exención vivía en la palabra «NOT VALID»**, que promete menos de lo que la gente le lee. Origen: S103-A, paso 4 de la tanda de S102.
+
 - **L-337** — **UN GATE QUE CORROMPE EL REPO CADA VEZ QUE CORRE ES PEOR QUE NO TENER GATE.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
   **El caso, medido:** `deno` corrido **dentro del monorepo** no solo lee — **escribe**: migra su configuración y **agrega una clave `workspaces` al `package.json` raíz** (*«Migrated its workspace configuration into…»*), además de comerse el salto de línea final. *La casa usa **pnpm workspaces**, así que esa clave es **una segunda declaración del mismo hecho**, y el día que difieran gana la que lea la herramienta que estés usando.*
   🔴 **Y su modo de falla es el peligroso: el cambio queda SIN COMMITEAR**, listo para viajar dentro del commit de otra cosa — con el índice compartido de tres pistas, eso es 76(f2) esperando a pasar. **Le ocurrió a DOS pistas el mismo día:** B lo cazó porque su árbol quedó sucio y lo revirtió; **D lo tenía vivo en su worktree** y se le avisó desde afuera.
