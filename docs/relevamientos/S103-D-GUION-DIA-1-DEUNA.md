@@ -530,3 +530,83 @@ adelantó.*
 - **El comprobante sin `transferNumber`** (§3.6 lo exige por nombre).
 - **La voz de `cita_no_existe` diciendo «compra»** — ver el hallazgo del cruce
   con C, si el gate se corre sobre una cita.
+
+---
+
+## §13 · 🔴 LO NO EJERCIDO — cruce con la lista de C (23-ago)
+
+**Orden de mesa:** *lo no ejercido que no está en el guion se convierte en verde
+por olvido.* Se cruzaron los cinco ítems de C contra este guion.
+
+> ⚠️ **Declarado: busqué la lista literal en `docs/loop/S103-C.md` y NO la
+> encontré con esos términos** (sí `①ter · LOS TRES GATES QUE ESPERAN APARATO`).
+> **Se cruza el enunciado de la mesa**, que es la fuente autorizada acá — no se
+> reconstruye de memoria un literal que no se pudo leer.
+
+| # | lo no ejercido (C) | ¿tenía paso? | dónde queda |
+|---|---|---|---|
+| 1 | **que el servidor emita cada código** | 🔴 **NO** | **cerrado hoy — §13.1** |
+| 2 | código de 6 dígitos real **con su `expiraEn` real** | 🟡 parcial | **paso 3**, reforzado abajo |
+| 3 | transición a pagada **por consulta activa** | ✅ | **paso 8** (§12), con sus tres filas |
+| 4 | **el pegado** | ⚪ **no es mío** | de C · **bloqueado por build nativa**, no por el POS |
+| 5 | el recorrido en pantalla | ✅ | **paso 8** |
+
+### §13.1 · 🔴 EL HUECO REAL — y se cerró sin esperar al lunes
+
+**Medido:** de los 12 códigos que la puerta emite, el E2E ejercía **6**. Los
+otros **6 estaban declarados** (contrato), **tipados** (wrapper) y **con voz**
+(pantalla)… **y nadie había visto a la puerta emitirlos.**
+
+> *Un código con contrato, tipo y voz se ve exactamente igual que uno que
+> funciona — hasta que alguien lo provoca.* **Tres capas de acuerdo no son una
+> medición.**
+
+⇒ El simulador ganó un **endpoint de control** (`POST /sim/caso`) para forzar
+escenarios. *Va por endpoint y no por header porque **la puerta hace sus propias
+llamadas y no propaga headers ajenos** — un header de entrada no llega a la
+salida.*
+
+**Los 6 que faltaban, ejercidos contra la puerta real:**
+
+| escenario forzado | código emitido |
+|---|---|
+| compra que no existe | `compra_no_existe` |
+| **compra DE OTRO** | **`compra_no_existe`** ← *el mismo, a propósito* |
+| cita que no existe | `cita_no_existe` |
+| compra sin desglose | `desglose_incompleto` |
+| desglose con total 0 | `monto_invalido` |
+| auth no responde (500) | `sesion_no_verificable` ← *no `sin_sesion`* |
+| **DeUna en puerto muerto** | **`sin_respuesta`** |
+
+**✅ 12 de 12 ejercidos**, con control positivo (el camino feliz sigue dando
+`ok:true` con su código).
+
+🔴 **Y las dos filas que valen más que el conteo:**
+
+- **«no existe» y «es de otro» devuelven el MISMO código.** Era una promesa
+  escrita en mi contrato —*distinguirlas convertiría esto en un oráculo de
+  compras ajenas*— **y nadie la había verificado.** Ahora está medida.
+- **`sesion_no_verificable` y no `sin_sesion`** cuando auth cae. *La diferencia
+  decide si a la persona se le dice «volvé a entrar» —mandándola a un login que
+  no arregla nada— o «reintentá».*
+
+### §13.2 · El `expiraEn` real — criterio de rojo propio (refuerza el paso 3)
+
+El paso 3 lo tenía como nota al pie de la tensión. **Sube a criterio**, porque
+la pantalla de C ya pinta su cuenta regresiva contra ese valor:
+
+| resultado | veredicto |
+|---|---|
+| la respuesta trae `expiredAt` (o equivalente) | ✅ la puerta lo prefiere sobre su supuesto de 3 min — ya está cableado así |
+| **no lo trae** | 🟡 la puerta cae a **3 min asumidos**. ⇒ **probar mandando `expiredTime: 5`**: si el vencimiento cambia, la doc miente y **C no puede hardcodear 3 minutos** |
+| lo trae pero **≠ 3 min** | 🔴 la doc del proveedor es falsa · **la cuenta regresiva de C está mintiendo** y hay que avisarle en el momento |
+
+### §13.3 · Lo que NO se cerró, con dueño
+
+**El pegado (#4) no es de este guion y no debe estarlo.** Es de **C**, y su
+disparo es **la próxima build nativa** (`expo-clipboard` es nativo y no viaja
+por OTA) — **no el `pointOfSale`**.
+
+⚠️ **Se anota acá igual, porque el riesgo del founder aplica: si no está en
+NINGÚN guion, se da por bueno.** *Este documento no lo cubre; que quede escrito
+que su dueño es C y su llave es otra.*
