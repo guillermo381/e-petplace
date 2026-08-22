@@ -63,7 +63,7 @@ export const clienteEs = {
     // S88-D · las razones del apagado (Boton razonDeshabilitado): una
     // por causa — la de la clave repite la voz del wrapper
     // (password_debil) a propósito: una sola voz para una sola regla.
-    razonCampos: 'Completá los campos para crear tu cuenta.',
+    razonCampos: 'Completa los campos para crear tu cuenta.',
     razonPasswordCorta: 'La contraseña necesita al menos {{n}} caracteres.',
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
@@ -228,7 +228,7 @@ export const clienteEs = {
     // eje de Ponte al día no es el TIEMPO, es ACCIÓN vs INFORMACIÓN — lo
     // que espera acción preside y no colapsa; el colapso rige sobre lo
     // informativo»*. Un pedido en vuelo no espera nada del dueño.
-    recoPedidosVarios: 'Tenés {{n}} pedidos en curso',
+    recoPedidosVarios: 'Tienes {{n}} pedidos en curso',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
@@ -440,7 +440,7 @@ export const clienteEs = {
     indicesTodavia: 'Índice de salud y descanso se construyen con su expediente. Todavía no hay con qué.',
     // S91 · P5 — la narrativa del vínculo, en VOZ. El número que la elige
     // NUNCA se muestra (MODELO_LOYALTY §2: ni score, ni barra, ni checklist).
-    vinculoMucho: 'Ya conocemos a {{nombre}} casi como vos.',
+    vinculoMucho: 'Ya conocemos a {{nombre}} casi como tú.',
     vinculoAlgo: 'Vamos conociendo a {{nombre}}. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
     vinculoPoco: 'Todavía estamos conociendo a {{nombre}}. Su expediente se completa de a poco.',
     // S91 · P7 — el acuario: su campo dos y su fecha propia.
@@ -468,7 +468,7 @@ export const clienteEs = {
     habitantesOtraPlaceholder: 'La que no esté en la lista',
     habitantesOtraAgregar: 'Agregar esta especie',
     habitantesHojaTitulo: 'Quiénes viven en {{nombre}}',
-    habitantesHojaAyuda: 'Elegí las especies y contá cuántas hay de cada una. No hace falta que sea exacto.',
+    habitantesHojaAyuda: 'Elige las especies y cuenta cuántas hay de cada una. No hace falta que sea exacto.',
     habitantesHojaElegir: 'Especies',
     habitantesHojaGuardar: 'Guardar',
     pastillaPendientesUno: '1 por resolver',
@@ -728,10 +728,10 @@ export const clienteEs = {
     // esto no tenía voz porque la pantalla elegía otra en silencio.
     mascotaNoReservable: '{{nombre}} no puede reservar un paseo',
     mascotaNoEncontrada: 'No encontramos esa mascota',
-    mascotaNoReservableDetalle: 'No armamos la reserva para no hacerla con la mascota equivocada. Elegí vos a quién.',
+    mascotaNoReservableDetalle: 'No armamos la reserva para no hacerla con la mascota equivocada. Elige tú a quién.',
     elegirOtraMascota: 'Elegir a quién',
     cuandoDiaCerrado: 'Ese día no se atiende',
-    cuandoDiaCerradoPorque: 'El negocio no abre ese día. Elegí otro y seguimos.',
+    cuandoDiaCerradoPorque: 'El negocio no abre ese día. Elige otro y seguimos.',
     cuandoSinIniciosPorque: 'Los paseadores no tienen lugar libre ese día para esa duración.',
     cuandoSinInicios: 'Ese día no hay horarios libres para este bloque. Prueba con otro día.',
     // S61-A5 cura 1 — §6ter: el camino tocable del día sin lugar (LOTE S61)
@@ -1136,17 +1136,17 @@ export const clienteEs = {
        tener perros y no saber todavía son dos cosas distintas y una de las dos
        era mentira. */
     catalogoCargandoTitulo: 'Un segundo',
-    catalogoCargandoDetalle: 'Estamos terminando de cargar los datos del paseo. Probá de nuevo en un momento.',
+    catalogoCargandoDetalle: 'Estamos terminando de cargar los datos del paseo. Prueba de nuevo en un momento.',
     catalogoErrorTitulo: 'No pudimos cargar los datos del paseo',
-    catalogoErrorDetalle: 'Revisá tu conexión y volvé a entrar. Tus mascotas están bien: lo que no llegó es la información del servicio.',
+    catalogoErrorDetalle: 'Revisa tu conexión y vuelve a entrar. Tus mascotas están bien: lo que no llegó es la información del servicio.',
     /* 🔴 P0 REABIERTO (9-ago) — GATE PENDIENTE. Las MASCOTAS también tienen
        tres estados, y sin estas voces el fallo de su lectura se contestaba
        con «tu hogar no tiene un perro registrado»: una afirmación sobre el
        hogar de alguien, hecha sobre un dato que nunca llegó. */
     misMascotasCargandoTitulo: 'Un segundo',
-    misMascotasCargandoDetalle: 'Estamos terminando de cargar tus mascotas. Probá de nuevo en un momento.',
+    misMascotasCargandoDetalle: 'Estamos terminando de cargar tus mascotas. Prueba de nuevo en un momento.',
     misMascotasErrorTitulo: 'No pudimos cargar tus mascotas',
-    misMascotasErrorDetalle: 'Están bien: lo que falló es la conexión con tus datos, no ellas. Probá de nuevo.',
+    misMascotasErrorDetalle: 'Están bien: lo que falló es la conexión con tus datos, no ellas. Prueba de nuevo.',
     presetsEtiqueta: '¿Cuántas salidas?',
     presetSalidas: '{{n}} salidas',
     vigenciaVoz: 'Las salidas duran un mes desde la compra. Si compras otro paquete antes de esa fecha, las que no usaste se suman al nuevo.',
@@ -1197,7 +1197,7 @@ export const clienteEs = {
     ubicada: 'Ubicada en el mapa.',
     // S96-D — el punto movible (LETRA_RECORRIDO §7): si Places no
     // encuentra la casa, el punto igual existe.
-    sinResultados: 'No encontramos esa dirección. Escribila igual y poné el punto a mano en el mapa.',
+    sinResultados: 'No encontramos esa dirección. Escríbela igual y pon el punto a mano en el mapa.',
     /* A-03 (S100c) · el buscador apagado LO DICE. Antes se apagaba en silencio
        y desde la pantalla se veía igual que «no encontré nada» y que «estoy
        buscando» — tres estados con una sola pinta (L-218).
@@ -1208,9 +1208,9 @@ export const clienteEs = {
     aliasLabel: 'Nombre de esta dirección',
     aliasAyuda: 'Para reconocerla después: «Oficina», «Casa de mamá».',
     agregarOtra: 'Agregar otra dirección',
-    buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escribila a mano y poné el punto en el mapa.',
-    puntoEtiqueta: 'Mové el mapa para ajustar el punto de entrega',
-    puntoAyuda: 'Ajustá el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
+    buscadorApagado: 'La búsqueda de direcciones no está disponible por ahora. Escríbela a mano y pon el punto en el mapa.',
+    puntoEtiqueta: 'Mueve el mapa para ajustar el punto de entrega',
+    puntoAyuda: 'Ajusta el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
     faltaPunto: 'Falta el punto en el mapa: es lo que encuentra tu casa cuando la dirección no alcanza.',
     // 🔴 S100d·bis · LAS DOS PUERTAS EXPLÍCITAS. Antes el campo y el mapa
@@ -1222,7 +1222,7 @@ export const clienteEs = {
     cambiarDireccion: 'Cambiar la dirección',
     ajustarPunto: 'Ajustar el punto en el mapa',
     confirmarPunto: 'Confirmar punto',
-    mapaBloqueado: 'El mapa está fijo. Tocá «Ajustar punto» para moverlo.',
+    mapaBloqueado: 'El mapa está fijo. Toca «Ajustar punto» para moverlo.',
     guardarComoOtra: 'Guardar como otra dirección',
     guardarComoOtraAyuda: 'Un nombre para reconocerla después — «Oficina», «Casa de mamá».',
   },
@@ -1630,7 +1630,7 @@ export const clienteEs = {
     // Dice el número Y el camino: sin la segunda mitad sería un aviso que
     // informa un límite y no ofrece salida (Ley 13, el callejón).
     techoVitrina:
-      'Te mostramos {{mostrados}} de {{total}} productos. Buscá por nombre o marca para llegar al resto.',
+      'Te mostramos {{mostrados}} de {{total}} productos. Busca por nombre o marca para llegar al resto.',
 
     // S96 · la advertencia de alergia (§5.4) — nombra mascota y alérgeno,
     // jamás esconde. El paso explícito gatea el agregar.
@@ -1639,7 +1639,7 @@ export const clienteEs = {
     alergiaContieneDetalle: 'Puedes comprarlo igual — la decisión es tuya. Solo queremos que la tomes sabiendo.',
     alergiaSinComposicion: 'No tenemos los ingredientes de este producto, así que no podemos confirmar si es seguro para {{nombre}}.',
     alergiaSinVerificar:
-      'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisá la etiqueta antes de dárselo.',
+      'La composición la declaró el fabricante y todavía no la verificamos. Por las alergias de {{nombre}}, revisa la etiqueta antes de dárselo.',
     // La coincidencia IMPRECISA (relaciones del vocabulario: ave ⊃ pollo).
     // Mismo registro que la exacta — cambia la palabra, no el matiz.
     alergiaImprecisa: 'Este alimento contiene {{lista}} — y el expediente de {{nombre}} registra esa alergia.',
@@ -1674,7 +1674,7 @@ export const clienteEs = {
     // lado del glifo él no lo relaciona solo.
     irAlCarrito: 'Ir al carrito',
     irAlCarritoCon: 'Ir al carrito · {{n}} en el carrito',
-    faltaPresentacion: 'Elegí una presentación para agregarlo.',
+    faltaPresentacion: 'Elige una presentación para agregarlo.',
     /** El precio de la presentación más barata, mientras no haya una
      *  elegida. Es la escalera del precio honesto de S82: **lo que varía
      *  dice «desde»**. Sin esto la ficha de un producto con varias
@@ -1714,7 +1714,7 @@ export const clienteEs = {
     itemSeAgoto: 'Se agotó mientras lo tenías guardado.',
     itemYaNoEsta: 'Ya no está a la venta.',
     itemPrecioCambio: 'El precio cambió: ahora es {{precio}}.',
-    faltaSacarNoDisponibles: 'Sacá del carrito lo que ya no está disponible para seguir.',
+    faltaSacarNoDisponibles: 'Saca del carrito lo que ya no está disponible para seguir.',
 
     // S96 · las otras puertas
     tusPedidos: 'Tus pedidos',
@@ -1728,9 +1728,9 @@ export const clienteEs = {
     chipCancelados: 'Cancelados',
     pedirDeNuevo: 'Pedir de nuevo',
     pedidosHistorial: 'Historial',
-    tusPedidosDetalle: 'Seguí lo que pediste, del más reciente al más viejo.',
+    tusPedidosDetalle: 'Sigue lo que pediste, del más reciente al más viejo.',
     reclamoEntrada: '¿Compraste en el local?',
-    reclamoEntradaDetalle: 'Ingresá el código de tu factura y la compra entra a su expediente.',
+    reclamoEntradaDetalle: 'Ingresa el código de tu factura y la compra entra a su expediente.',
 
     // S96 · el carrito (§6.3/§6.4/§5.2)
     carritoTitulo: 'Tu carrito',
@@ -1814,9 +1814,9 @@ export const clienteEs = {
     sinVendedorDetalle:
       'Todavía no podemos calcular la entrega de este pedido desde la app. Estamos terminando esa conexión.',
     promesaCargando: 'Calculando la próxima ventana de entrega…',
-    sinCupoEseDia: 'Ese día no hay capacidad de reparto. Elegí otro.',
+    sinCupoEseDia: 'Ese día no hay capacidad de reparto. Elige otro.',
     vendedorSinReparto: 'Este vendedor todavía no tiene reparto configurado.',
-    promesaFallo: 'No pudimos calcular la ventana de entrega. Probá de nuevo.',
+    promesaFallo: 'No pudimos calcular la ventana de entrega. Prueba de nuevo.',
     promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
     saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
     // S100 · F5: la división se declara ANTES de pagar. La voz dice lo
@@ -1825,7 +1825,7 @@ export const clienteEs = {
     // todo, sí.
     divisionTitulo: 'Tu compra llega en {{n}} entregas',
     divisionDetalle:
-      'Son pedidos independientes, uno por tienda: llegan por separado y los seguís por separado. Pagás una sola vez.',
+      'Son pedidos independientes, uno por tienda: llegan por separado y los sigues por separado. Pagas una sola vez.',
     preparaTienda: 'Lo prepara: {{tienda}}',
     bloqueEntrega: 'Entrega {{i}} de {{n}}',
     ventanaProxima: 'La más próxima',
@@ -1855,7 +1855,18 @@ export const clienteEs = {
     pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
     exitoTitulo: 'Listo',
     exitoCuerpo: 'Tu pedido quedó creado.',
-    exitoDetalle: 'Te avisamos cuando el vendedor lo confirme. Puedes seguirlo en Tus pedidos.',
+    /* 🔴 S101-D · ⑤ LA VOZ VIEJA DEL ÉXITO. Decía «Te avisamos cuando el
+       vendedor lo confirme» — la frase del mundo ANTERIOR al motor de pagos,
+       cuando no había cobro y lo único que podía pasar después era que la
+       tienda mirara el pedido. **Hoy lo que se confirma es EL PAGO.**
+       Medido antes de reescribirla, porque una voz de éxito que se cambia sin
+       medir su momento fabrica una mentira nueva: esta fase se alcanza SOLO
+       con `espera.estado === 'pagada'` (`checkout.tsx:208`), o sea con el
+       servidor diciendo pagada — el webhook o el barrido, jamás la respuesta
+       síncrona que §0 de la letra prohíbe tratar como confirmación.
+       ⇒ Puede decir «confirmado» sin mentir. Y NO promete un aviso que esta
+       pantalla no controla: dice el hecho y ofrece el camino. */
+    exitoDetalle: 'Tu pago quedó confirmado. Puedes seguir el pedido en Tus pedidos.',
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
     pagarSimulado: 'Pagar',
@@ -1865,9 +1876,9 @@ export const clienteEs = {
     faltaCargando: 'Cargando tu dirección…',
     faltaDireccion: 'Falta tu dirección de entrega.',
     faltaPunto: 'A tu dirección le falta el punto en el mapa. Abrila y ajustalo — es lo que encuentra tu casa.',
-    faltaReceptor: 'Contanos quién recibe.',
+    faltaReceptor: 'Cuéntanos quién recibe.',
     faltaTelefono: 'Falta un teléfono de contacto.',
-    faltaPromesa: 'No hay ventana de entrega disponible — revisá la fecha o probá retiro en tienda.',
+    faltaPromesa: 'No hay ventana de entrega disponible — revisa la fecha o prueba retiro en tienda.',
 
     // S96 · la recurrencia (§6.1 — el mensaje honesto es VERBATIM de la letra)
     recurrenciaTitulo: 'Que llegue solo',
@@ -1926,7 +1937,7 @@ export const clienteEs = {
     // S100-D · L2 · EN CAMINO. La ventana es RANGO y jamás el minuto (N14):
     // prometer un minuto que no podemos cumplir es peor que no prometer.
     enCaminoEntrada: 'Seguir el pedido',
-    enCaminoEntradaDetalle: 'Mirá por dónde va',
+    enCaminoEntradaDetalle: 'Mira por dónde va',
     enCaminoCta: 'Ver por dónde va',
     enCaminoTitulo: 'En camino',
     enCaminoSinTrack: 'Todavía no tenemos su ubicación. Apenas salga, vas a poder seguirlo acá.',
@@ -1975,7 +1986,7 @@ export const clienteEs = {
     pedidoTitulo: 'Tu pedido',
     errorPedidoTitulo: 'No pudimos cargar este pedido',
     codigoPuerta: 'El código de tu entrega',
-    codigoPuertaDetalle: 'Decíselo a quien te lleve el pedido. Es lo que confirma que te llegó a vos.',
+    codigoPuertaDetalle: 'Díselo a quien te lleve el pedido. Es lo que confirma que te llegó a ti.',
     codigoMostrador: 'El código para el mostrador',
     codigoMostradorDetalle: 'Mostralo en el local cuando retires tu pedido.',
     quePediste: 'Qué pediste',
@@ -1994,7 +2005,7 @@ export const clienteEs = {
     // 🔏 Horario FIRMADO por el founder (12-ago-2026, vía A): 8:00–21:00.
     problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 8:00 a 21:00.',
     problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',
-    problemaFallback: 'No pudimos abrir WhatsApp. Escribinos al {{numero}}.',
+    problemaFallback: 'No pudimos abrir WhatsApp. Escríbenos al {{numero}}.',
     paraQuienFue: '¿Para quién fue?',
     atarConfirmar: 'Sumar a su expediente',
     atadoOk: 'Listo: quedó atado. Entra a su expediente al entregarse.',
@@ -2006,8 +2017,8 @@ export const clienteEs = {
       'Si compraste en el local, tu factura tiene un código. Ingrésalo, elige para quién fue, y la compra entra a su expediente.',
     reclamoCodigoLabel: 'Código',
     reclamoCodigoPlaceholder: 'El código impreso en tu factura',
-    reclamoFaltaCodigo: 'Ingresá el código de la factura.',
-    reclamoFaltaMascota: 'Elegí para quién fue la compra.',
+    reclamoFaltaCodigo: 'Ingresa el código de la factura.',
+    reclamoFaltaMascota: 'Elige para quién fue la compra.',
     reclamoSinMascotasTitulo: 'Todavía no registraste ninguna mascota',
     reclamoSinMascotasDetalle: 'La compra entra al expediente de una mascota. Registrala primero — tarda un minuto.',
     reclamoCta: 'Sumar al expediente',
@@ -2026,11 +2037,11 @@ export const clienteEs = {
     // Los errores — dicen qué pasó y qué hacer (Ley 17.4)
     errorMascotasTitulo: 'No pudimos cargar tus mascotas',
     errorVitrinaTitulo: 'No pudimos cargar la despensa',
-    errorVitrinaDetalle: 'Puede ser la conexión. Probá de nuevo.',
+    errorVitrinaDetalle: 'Puede ser la conexión. Prueba de nuevo.',
     errorRecoTitulo: 'No pudimos armar la recomendación',
-    errorRecoDetalle: 'Probá de nuevo en un momento.',
+    errorRecoDetalle: 'Prueba de nuevo en un momento.',
     errorFichaTitulo: 'No pudimos cargar este producto',
-    errorFichaDetalle: 'Puede ser la conexión. Probá de nuevo.',
+    errorFichaDetalle: 'Puede ser la conexión. Prueba de nuevo.',
     // 🔴 La verificación fail-closed del wrapper. NO es "no hay nada":
     // es "no podemos garantizar que sea seguro", y se dice así.
     exclusionRotaTitulo: 'Preferimos no mostrarte nada',

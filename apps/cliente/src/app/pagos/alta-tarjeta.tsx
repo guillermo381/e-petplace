@@ -23,6 +23,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { WebView } from 'react-native-webview';
 import { Encabezado, EsperaDeMarca, useTheme, useAviso } from '@epetplace/ui';
 import { obtenerAltaTarjeta, type EstadoAlta } from '@epetplace/api';
+import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 
@@ -69,7 +70,22 @@ export default function AltaTarjeta() {
 
   if (!alta || !BASE) return null;
 
-  const url = `${BASE}?alta=${encodeURIComponent(String(alta))}`;
+  /* 🔴 EL IDIOMA VIAJA POR LA URL (S101-D · firma del founder: el circuito de
+     pago habla los DOS idiomas de la app).
+
+     La página del alta es HTML plano servido aparte — **no puede importar el
+     riel i18n**, así que el idioma tiene que LLEGARLE, y la única que sabe cuál
+     eligió la familia es esta app.
+
+     ⚠️ **Se manda `obtenerIdiomaActual()`, JAMÁS se deja que la página lo
+     adivine con `navigator.language`:** dentro de un WebView eso reporta el
+     locale del SISTEMA, no la preferencia elegida — y son cosas distintas
+     (`D-316` existe porque el idioma se persiste como preferencia propia).
+     *Si la página adivinara, contradiría a la app que la abrió, en la pantalla
+     donde la familia entrega su tarjeta.* */
+  const url =
+    `${BASE}?alta=${encodeURIComponent(String(alta))}` +
+    `&lang=${encodeURIComponent(obtenerIdiomaActual())}`;
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -99,7 +115,22 @@ export default function AltaTarjeta() {
             /* 🔴 Se lee SOLO para saber que terminó. Ni el desenlace que trae
                ni su forma deciden nada — abajo se relee el servidor. */
             try {
-              const m = JSON.parse(e.nativeEvent.data) as { fuente?: string };
+              const m = JSON.parse(e.nativeEvent.data) as {
+                fuente?: string; nivel?: string; mensaje?: string; faltantes?: string[]
+              };
+              /* 🔴 EL CANAL DE DIAGNÓSTICO SE LEE. Antes caía en el `return` de
+                 abajo junto con todo lo ajeno: la página emitía su censo del SDK
+                 y MORÍA acá, sin traza. *Es motor sin puerta (`L-318`) en su
+                 forma exacta — la pieza construida, probada y desconectada del
+                 único lugar donde su resultado importa.* Se registra y NO cierra
+                 nada: el cierre sigue atado a la fuente exacta del desenlace. */
+              if (m?.fuente === 'epetplace-alta-tarjeta-diagnostico') {
+                console.log(
+                  `[alta-tarjeta] ${m.nivel ?? 'aviso'}: ${m.mensaje ?? ''}`,
+                  m.faltantes ?? [],
+                );
+                return;
+              }
               if (m?.fuente !== 'epetplace-alta-tarjeta') return;
             } catch { return; }
             void cerrarLeyendoElServidor();

@@ -13969,7 +13969,34 @@ construcción; bloquean DECISIONES**, y tres de ellas tienen número:
 
 ## Deudas S94-B (enmiendas de mesa al depósito — 10 Ago 2026)
 
-#### D-748 — 🔴 `take_rate_pct = 20.00` VIVO EN LA BASE contra el 10% firmado: es PLATA, no letra vieja
+#### ☠️ D-748 — **PAGADA (S101-D, 21-ago-2026) por eliminación del objeto.** ~~🔴 `take_rate_pct = 20.00` VIVO EN LA BASE contra el 10% firmado: es PLATA, no letra vieja~~
+
+> **Medido:** `to_regclass('public.seller_comisiones')` → **NULL**. La borró
+> `supabase/migrations/20260811120000_s95_m1_limpieza_comercio.sql:129`
+> (`DROP TABLE public.seller_comisiones; -- D-748: el 20 % vivo`), **que la
+> nombra por número en su propio comentario**.
+>
+> 🔴 **Y el dato que agrava la deuda de CANON, no la de plata:**
+> `docs/relevamientos/2026-08-19-s101-censo-pagos.md:53` **ya lo decía dos días
+> antes** — *«`seller_comisiones` YA NO EXISTE… La tabla que sostenía el
+> `take_rate_pct = 20.00` de D-748 no está en la base»*. **El hallazgo no era
+> nuevo: nadie había cerrado la ficha.** *Un relevamiento que mide bien y no
+> transpone deja el canon diciendo lo contrario de lo que la casa ya sabe — y el
+> canon es lo que lee la próxima sesión.*
+>
+> **Por qué la corrección importaba más que la prolijidad:** esta ficha **mandaba
+> a buscar plata en una tabla que no existe**, y su nota —*«la decisión de S95 no
+> la toca»*— **era falsa desde el 11-ago**: la decisión de S95 fue exactamente lo
+> que la borró. *Una ficha que describe un mundo anterior no es una ficha vieja:
+> es una instrucción equivocada con formato de dato.*
+>
+> **⚠️ SU MUERTE CREÓ UN DEFECTO NUEVO, y por eso no cierra sola:**
+> `e-petplace-admin` **sigue consultando y ESCRIBIENDO** esa tabla ⇒ sus tres
+> `?? 14` **dejaron de ser fallback y son constantes permanentes** — vive en
+> **`D-759`**.
+>
+> *El cuerpo original queda abajo, tachado y no borrado: describe el mundo en el
+> que la deuda fue cierta.* Hallazgo y texto: **S102-B**; depósito: **S101-D**.
 
 **Medido en el censo S94-A, no leído:** la tabla `seller_comisiones` tiene
 **dos filas activas** con **`take_rate_pct = 20.00`** — una `tipo='global'` y
@@ -14271,7 +14298,10 @@ las dos **con el `0.14` embebido en el SQL de la vista**.
 > **☠️ MUERTE:** cero ocurrencias de `0.14`/`14` como tasa en código y en
 > vistas, y el tablero de despensa reporta **fee**, no GMV.
 > **Se cruza con D-750** (la despensa entra al P&L como fee) y con
-> **D-748** (el `take_rate_pct = 20` vivo).
+> **D-748** (~~el `take_rate_pct = 20` vivo~~ — ☠️ **PAGADA S101-D: la tabla
+> `seller_comisiones` fue borrada por `20260811120000`. ⚠️ Y su muerte es
+> justamente lo que vuelve PERMANENTES los tres `?? 14` de esta ficha: dejaron
+> de ser un fallback que espera datos y pasaron a ser el único valor posible**).
 > Origen: S95-F, `MODELO_FINANCIERO` §8.10 enmienda S95-F.
 
 #### D-760 — 🟡 `seller_perfil` NO SE PUEDE BORRAR TODAVÍA: sostiene el tablero de inversores
@@ -18549,6 +18579,59 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-333** — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR.** *(Autoría S102-B; depositada por A.)*
+  > ### **Un verde que promete de más es el que nadie vuelve a mirar.**
+  **Su cura es distinta y es barata: no se toca la medición, se baja la línea.** Los dos casos, del mismo día y de las dos pistas: `verificar-pagador` decía *«la policy CONOCE al pagador»* y medía un `ILIKE` sobre el **texto** de la policy ⇒ curado a *«NOMBRA al pagador (precondición — la prueba es ⑤)»*; `verify-apk-contenido` decía *«trae el bundle — **arranca sola**»* y mide que **hay JS que cargar** ⇒ curado a eso.
+  **La prueba de si una voz está calibrada, en una pregunta:** *¿podría esta línea salir verde con la cosa rota?* **Si sí, promete de más.**
+  **Y el matiz que la vuelve útil en vez de purista:** en el caso de B **la medición estaba bien y la prueba real ya existía en otro bloque** — lo único equivocado era el rótulo. ***Curar la voz no debilitó nada: hizo visible dónde vivía la prueba.*** Origen: S102-B / S101-D.
+
+- **L-332** — **CAPA QUE BORRA ≠ SUPERFICIE EQUIVOCADA. SE CURAN DISTINTO.** *(Autoría S102-B; depositada por A.)*
+  **Dos familias que se confunden porque las dos terminan en un verde falso.** En la **capa que borra** el instrumento **no ve** el dato —un `sed`, un `tail`, un `||`, un `slice()` entre la medición y la conclusión— y su síntoma es un vacío o un exit ajeno; **se cura sacando la capa.** En la **superficie equivocada** el instrumento **ve bien, mide bien y contesta bien LA PREGUNTA EQUIVOCADA**; su síntoma es **un verde correcto y sin valor**, y **se cura cambiando qué se mira.**
+  **El caso fundador:** `verify-manifest-apk.mjs` dio **VERDE con razón** —el manifest tenía sus cuatro claves— **mientras la APK no traía `index.android.bundle` y se quedaba en el splash para siempre.**
+  🔴 **Por qué no se pueden meter en la misma bolsa: la cura de una PARECERÍA cubrir a la otra.** *Sacarle el `tail` a un guard que mide el manifest no lo acerca ni un paso a mirar dentro del ZIP.*
+  **Complementa la tríada de mesa un nivel más fino** —*controles curan instrumentos · leyes curan lectores · invariantes curan resultados plausibles*— **partiendo el primer término: hay control que cura una capa y control que cura una superficie, y no son el mismo control.** Origen: S102-B / S101-D.
+
+- **L-331** — **MEDIR CONTRA `origin` REDUCE LA VENTANA; NO LA CIERRA. LO QUE LA CIERRA ES PREGUNTARLE AL DUEÑO DEL TERRITORIO.** *(Autoría S102-B; depositada por A.)*
+  El número de una ficha o una lección **se asigna al DEPOSITAR, jamás al redactar** — y entre pistas paralelas el único árbol donde el número es real es **el del dueño del archivo**. Medir contra `origin` mejora la puntería *y sigue sin ver* lo que la otra pista tiene commiteado sin pushear, o simplemente prometido en un mensaje.
+  **Se cobró CUATRO veces en un solo día, y las cuatro por caminos distintos:** ① `D-858` colisionó · ② `L-327` colisionó · ③ la tercera se atajó **antes** de escribir el número · ④ **la peor y la más fina: un grep sobre BORRADORES PROPIOS contó `D-865`/`D-866` como tomados porque el propio texto los nombraba como candidatos** — *el instrumento contó MENCIONES donde se iba a leer ASIGNACIONES*, y midiendo asignaciones resultaron libres.
+  ⚠️ **Y su prueba más honesta es autorreferente:** *la regla que dice «el número se asigna al depositar» vivió toda una tarde solo en mensajes entre dos pistas* — **que es exactamente el estado que ella nombra como insuficiente.** Origen: S102-B.
+
+- **L-335** — **UN CONTROL DE INSTRUMENTO EXIGE UN VEREDICTO, NO UNA DETECCIÓN.** *(Autoría S102-B; número asignado y depositado por A como dueña del territorio — `L-331`.)*
+  > ### **Probar que el termómetro marca no es probar que el médico diagnostique.**
+  **Es la generalización de `L-333`:** allá **la VOZ** prometía más que la medición; acá **el CONTROL cubre menos que el instrumento**. *En las dos el verde es cierto y no alcanza.*
+  **El caso fundador, medido sobre `verify-apk-contenido.mjs`:** su `--autoprueba` corría **solo el detector** (`traeBundle`) y verificaba que reconociera una APK sin bundle. **Podía dar VERDE mientras el juez daba un FALSO VERDE sobre la MISMA APK** — la APK mala no trae bundle ⇒ el detector la detecta ⇒ verde; y el juez, sobre esa misma APK, entraba por una rama que leía el `package.json` **de hoy** ⇒ verde también. ***Los dos verdes ciertos, y el conjunto mintiendo.***
+  **Lo exigible, en una pregunta:** *¿el control ejercita la DECISIÓN completa, o solo una pieza de ella?* ⇒ un control de guard **exige un veredicto** —rojo o no-concluyente, **jamás verde**— sobre el caso malo. Curado así, el mismo control cazó después el falso verde real: la APK que antes pasaba ahora sale **NO CONCLUYENTE**. Origen: S101-D / S102-B.
+
+- **L-334** — **UN MÉTODO QUE SE LLAMA `isX` PUEDE SER UNA ACCIÓN: EL NOMBRE NO ES CONTRATO.** *Antes de usar una función ajena en un camino que corre solo, se lee su cuerpo — sobre todo si su nombre promete que solo pregunta.*
+  **El caso, S101-D (21-ago), y lo encontró el aparato y no el diff:** la página del alta necesitaba saber si la tarjeta estaba completa para encender el botón. El SDK del proveedor expone **`isValidData()`**, que es exactamente esa pregunta por su nombre. **Su cuerpo, medido en la fuente, llama a los OCHO `refresh*Validation()` — y esos PINTAN.** ⇒ preguntarle *«¿está completo?»* al abrir la pantalla **dejaba los cuatro campos con borde rojo antes de que la persona tocara nada**. *Un formulario que te recibe marcándote errores que todavía no cometiste es peor que el defecto que la cura venía a arreglar.*
+  **La cura, y su forma importa:** se compuso **la misma conjunción que `isValidData()` arma**, con los predicados **puros** del propio SDK (`isCardNumberValid`, `isCvcValid`, … verificados uno por uno) más el estático `PaymentForm.isExpiryValid`. **No es reimplementar la validación —eso fabricaría una segunda opinión sobre el mismo dato, y el día que difieran gana la equivocada—: es llamar a las mismas funciones del proveedor sin el efecto secundario.**
+  🔴 **Enlaza con `L-332` y `L-333` como las DOS DIRECCIONES DE LA MISMA PROMESA ROTA:** allá **nuestra voz prometía más que nuestra medición** (*«la policy conoce al pagador»*, *«la APK arranca sola»*); acá **el nombre AJENO prometía menos de lo que su cuerpo hacía**. *Escribiendo se cura bajando la línea; leyendo se cura abriendo la fuente — y la segunda es la que no depende de que el autor haya sido honesto.*
+  **Su límite, declarado:** no dice *«desconfiá de todo nombre»* —eso es impagable—. Dice **dónde** se paga leer: en código de terceros, en un camino que corre **sin que nadie lo mire** (arranque, efecto, guard), y **cuando el costo del efecto secundario es invisible** — que es justo cuando nadie lo va a atribuir a la llamada.
+
+- **L-330** — **EL CONTROL POSITIVO VIAJA CON EL NÚMERO, NO CON LA CONFIANZA DE QUIEN LO CORRIÓ.** *Al reportar una medición se declara, junto al resultado, **qué control se corrió y qué devolvió**.*
+  **Por qué NO duplica `L-321`, y la distinción es el punto:** `L-321` ordena **PROBAR** el instrumento — es un acto **del que mide**, y muere en su cabeza. Ésta ordena **DECLARAR** el control — es un acto **del que reporta**, y queda **auditable por el que lee**. *Un instrumento probado y no declarado protege a esa medición; un control declarado protege a todas las que vengan después, porque el próximo lector puede ver si hubo o no.*
+  **Su evidencia, medida:** de los **seis instrumentos fallados** de S101-D (`docs/relevamientos/2026-08-21-s101d-SEIS-INSTRUMENTOS-FALLADOS.md`), **cinco fueron un verde o un cero FALSO** — *el modo dominante no es el instrumento que grita, es el que calla: un cero tiene la forma exacta de una buena noticia, y una buena noticia no se audita.* **Cuatro de los seis se cazaron exactamente con este gesto**, y en todos los casos **después** de tener el número, no antes.
+  🔴 **SE FUNDA CON SUS DOS HUECOS ESCRITOS ADENTRO, porque una ley que no declara lo que no cubre invita a usarla donde no sirve:**
+  · **No cubre el RESULTADO PLAUSIBLE.** Cuando no hay cero ni verde sino un número que se ve bien —`Math.round` deformando cinco marcas registradas hasta 0,032 de aspecto— no hay control positivo que lo cace: **eso pide un INVARIANTE DE SALIDA** (*el aspecto de salida debe ser idéntico al del `viewBox`*).
+  · **No cubre al LECTOR DISTRAÍDO.** El guard de manifest **no calló: gritó `ROJO`**, y se leyó el exit del pipe en vez del comando. **Ahí la ley ya existía (`L-191`) y se rompió igual.**
+  ⇒ **La forma general que ordena las tres: los CONTROLES curan instrumentos; las LEYES curan lectores; los INVARIANTES curan resultados plausibles. No son intercambiables, y elegir el remedio equivocado deja el defecto vivo con cara de atendido.** Origen: S101-D.
+
+- **L-329** — **UN SNAPSHOT SE VUELVE A TOMAR, NO SE EDITA.** El guard de una migración con backfill llevaba `citas=7 · pedidos=34`, medidos bajo veda. Al ir a aplicarla, la base decía **35**: entró una compra real —`5f8dea53`, 19:02 UTC— entre la medición y el apply. **La salida obvia era subirle el número al guard para que pasara, y es la que corrompe el instrumento**: *ese 34 no es una constante, es la huella de un instante en que nadie estaba escribiendo; cambiarlo por 35 lo convierte en un número que se acomoda al mundo, y un guard que se acomoda no guarda nada.* ⇒ **Cuando el guard aborta porque la población cambió, el guard FUNCIONÓ.** Lo que se rehace es la ventana: declarar la veda, re-medir, y escribir el snapshot nuevo **como snapshot nuevo**, con su fecha. **Hermana de la ley de los verdes flojos (S95): se corrige el INSTRUMENTO cuando mide mal, jamás el UMBRAL para que el resultado entre.**
+  ➕ **Y la mitad que la vuelve diagnóstico en vez de queja, aportada por S102-B —autora del guard que abortó—: *el aborto NO informa «el número está viejo». Informa que hubo TRÁFICO entre la firma y el apply*** — o sea que **la veda no cubrió la ventana**. *Leerlo como «dato vencido» manda a re-medir y volver a intentar; leerlo como «entró tráfico» manda a mirar QUIÉN escribió y CUÁNDO, que es la pregunta que de verdad decide si se puede aplicar.* Por eso la secuencia lleva **RE-MEDIR bajo veda declarada** adentro, y no un simple reintento. Y su corolario de secuencia, que salió del mismo día: **una veda no se puede declarar sobre una ventana que uno mismo va a violar** — el gate del aparato dispara cobros, así que la veda se abre DESPUÉS del gate, no antes. Origen: S101-D, freno de la tanda de aplicación.
+
+- **L-328** — **EL PATRÓN CORRECTO PARA UNA CLASE PUEDE SER LA CURA EQUIVOCADA PARA UN MIEMBRO DE ESA CLASE.** *(Depositada por A desde el pedido de S102-B. **B la redactó como `L-327` con su grep bien corrido sobre `origin`; al depositar, `L-327` ya era de A y vivía sin pushear en su worktree** — el número se asigna al DEPOSITAR, jamás al redactar. Es la misma regla que corrió las cuatro fichas de B a `D-860`–`D-863`, cobrada dos veces el mismo día.)*
+  **La clase:** vistas de `public` con grant a `anon` y sin `security_invoker` — corren como su dueño y **bypassean la RLS de las tablas de abajo**. La casa ya la conoce: **S54 curó cuatro vistas del motor exactamente así**, y la cura fue correcta.
+  **El miembro que la rompe, medido:** `v_ranking_usuarios` está en esa clase —`reloptions` NULL, `anon` con SELECT, 1 fila visible como anónimo— **y `security_invoker = true` la MATARÍA**: `profiles_select` es `USING (auth.uid() = id)` y `pu_own` es `USING (user_id = auth.uid() OR is_admin())` ⇒ cada usuario vería **solo su propia fila**. *Un ranking que solo te muestra a vos no es un ranking: es un espejo.* La vista quedaría **técnicamente segura y funcionalmente muerta, y el verde del guard no lo diría.**
+  ⇒ **La diferencia no está en el permiso: está en el PROPÓSITO.** `security_invoker` cura vistas que **NO deberían** agregar datos ajenos; **una vista de ranking los agrega POR DEFINICIÓN.** *Su problema nunca fue de RLS — es de QUÉ PUBLICA.*
+  **Lo exigible, en una línea:** antes de aplicarle a un miembro el patrón de su clase, **se mide qué hace el patrón CON ESE MIEMBRO** — no qué hizo con los anteriores.
+  **Su parienta:** es la misma forma que **L-283** (*«un plano y un arco no producen un cambio de signo: producen un codo»*). **Allá la forma no admitía el efecto; acá el efecto no admite la forma.** *Las dos se descubren igual: preguntando si la pieza puede hacer lo que se le pide, en vez de insistir con el método que funcionó al lado.*
+  **Y el costo de no medirla:** la cura se veía obvia, tenía precedente en la casa, y su cinturón natural —«`anon` ya no lee»— **habría dado VERDE**. *El defecto solo aparece mirando lo que la vista deja de servirle a quien sí debe verla.* Origen: S102-B, curas de seguridad del relevo 2.
+
+- **L-327** — **UN INSTRUMENTO PUEDE SER CIEGO A LA CLASE ENTERA QUE VINO A MEDIR, Y SU SÍNTOMA ES UN NÚMERO CHICO QUE PARECE UNA BUENA NOTICIA.** Censando el voseo del cliente, el medidor daba **5** cuando el archivo tenía **32**. La causa no era la lista de verbos: **`\b` en JavaScript está definido sobre el alfabeto ASCII**, así que después de una vocal acentuada **no hay frontera de palabra** y `\b(probá)\b` **nunca** matchea «Probá de nuevo». ⇒ **Todo imperativo voseo —que por definición termina en á/é/í— era INVISIBLE**, y solo pasaban las formas terminadas en `s` (`Tenés` · `seguís` · `Pagás` · `vos`). *El instrumento no fallaba al azar: fallaba exactamente en la clase que definía la deuda, y su verde parcial se leía como avance.* **Cura: fronteras por lookaround Unicode (`(?<!\p{L})…(?!\p{L})` con flag `u`), jamás `\b`, en todo censo sobre español.**
+  **② Su gemela del mismo día, que infla en vez de encoger: UNA FORMA QUE LAS DOS VOCES COMPARTEN NO DISCRIMINA NADA.** `vas` y `estás` se leen como voseo y **no lo son** —el verbo es idéntico en tuteo («tú vas a ver» = «vos vas a ver»)—; incluirlos llevó el censo **de 5 a 20 con quince cadenas que no había que tocar**. *Prueba viva en el propio archivo: `es.ts:1326` dice «Vas a borrar… pero **puedes** volver» — tuteo puro con un «vas» adentro.* ⇒ **antes de sumar un token a un censo se pregunta si el token existe también del otro lado; si existe, no mide.**
+  **③ Y LA CONTRAPRUEBA, que es lo reutilizable y lo que cazó ①:** un **barrido de recall independiente** —contar toda palabra terminada en á/é/í dentro de comillas— devolvió `Probá`×7 · `Elegí`×6 · `Ingresá`×2 **contra un instrumento que reportaba 0 de esas formas**. *Dos instrumentos que miden lo mismo y no coinciden: uno está roto, y **el que da el número más chico es el sospechoso**.* Hermana de L-321 (*un censo que devuelve vacío se prueba antes contra un caso con resultado conocido*) — acá el caso conocido lo fabricó el recall, no la memoria.
+  **④ Y LA MÁS GENERAL DE LAS CUATRO, que apareció DESPUÉS de reportar el número y por eso vale doble: LA REGLA EN QUE SE APOYA TU INSTRUMENTO PUEDE TENER UNA EXCEPCIÓN, Y LA EXCEPCIÓN NO SE VE MIRANDO LA LISTA DE CASOS — SE VE MIRANDO LO QUE EL BARRIDO ESTÁ POR TOCAR.** Curado ① y ②, el medidor se apoyaba en *«el imperativo voseo siempre lleva tilde»*. **Es falso en cuanto hay enclítico:** `contá`+`nos` = **«contanos»**, la tónica deja de ser la última y **la tilde desaparece** (igual `escribila` · `escribinos` · `corregilo` · `fijate`). ⇒ el instrumento era **ciego a la clase entera de enclíticos** y el conteo subió **32 → 34** en el cliente y **36 → 37** en el prestador *después* de estar reportado. *Lo que lo destapó no fue otro censo: fue ir a escribir el mapa de reemplazos y preguntarse cómo se conjuga cada forma.* **Corolario operativo: antes de barrer, se lee en voz alta la regla que el instrumento asume y se busca su excepción gramatical — el barrido es el último momento barato para encontrarla.** Origen: S101-D.
+
 - **L-326** — **CUANDO EL ORDEN IMPORTA, SE ESCRIBE COMO CINTURÓN Y NO COMO NOTA.** El orden *«REVOKE con el reemplazo listo, JAMÁS antes»* estaba firmado, escrito en la ficha y repetido en la letra — **y aun así el reemplazo no estaba listo cuando llegó el turno de revocar.** *Una precondición que vive en un comentario se cumple mientras alguien la lea; y el día que no la lean es justo el día en que el que ejecuta viene con la orden en la mano y la da por cumplida.* ⇒ La migración del `REVOKE` lleva su precondición como `DO $$ … RAISE EXCEPTION`: si el desglose, el trigger, el actuador o el lector de acceso no están en pie, **aborta con el agujero todavía cerrado**. Y su cinturón de salida lleva **discriminador**: sin él, un `has_function_privilege` que devolviera `false` para todo haría pasar los dos asserts sin medir nada. Origen: S101-C.
 
 - **L-325** — **UN VOCABULARIO CERRADO NO SE AMPLÍA DE PASO.** Tres veces en la misma sesión inventé un valor contra un `CHECK` cerrado —`resultado='recibido_sin_analizar'`, `categoria='pagos'`, `tipo='boolean'`— **porque el valor que necesitaba no estaba y el que había no encajaba**. Las tres veces el `CHECK` tenía razón: *el vocabulario es una decisión de letra, y agregarle un valor para que la migración pase es tomar esa decisión sin que nadie la firme.* La cura correcta es siempre la misma: **usar el valor que ya significa eso, o parar y pedir la letra.** Origen: S101-B.
@@ -18623,6 +18706,458 @@ resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
 
 ---
 
+### D-865 🔴 · UN PERFIL DE BUILD PROMETE UNA CAPACIDAD QUE LAS DEPENDENCIAS NO DAN
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHA-perfil-promete-lo-que-no-tiene.md`** · depositada por A, número medido en los dos árboles (`L-331`)
+
+`apps/cliente/eas.json` declara `developmentClient: true` desde **`71364782`, 8-jul-2026 (S45)**, y **`expo-dev-client` nunca se agregó**: cero commits hasta hoy. ⇒ **ese perfil construye una APK sin bundle y sin quién se lo baje: nació roto y nunca funcionó — SEIS SEMANAS.**
+
+> **Su modo de falla es el peor posible: la APK se instala, arranca, y se queda en el splash para siempre.** *No hay crash, no hay log, no hay síntoma que nombre la causa.* Y nadie lo notó porque la casa gatea con `preview`, que sí trae bundle — **el perfil roto era el que casi nadie usaba, hasta que S101-D lo usó.**
+
+🔴 **LO QUE LA VUELVE ÚTIL NO ES EL DEFECTO: ES QUIÉN LO ENCONTRÓ.** *No lo encontró una build ni un gate: lo encontró **la mitad de un guard que no necesita APK ni build** (`verify-apk-contenido.mjs --coherencia`), corrida sobre las dos apps **antes** de gastar un ciclo de EAS.* **El chequeo más barato del juez cazó el defecto más viejo.**
+
+**Estado: la cura está EN VUELO** (`expo-dev-client ~57.0.14` commiteado en `pista/s101-d`) ⇒ **lo que queda no es curar: es verificar con el guard cuando llegue a `main`.** *No se fabrica deuda fantasma por un trabajo ya hecho.*
+
+---
+
+### D-866 🔴 · NINGUNA BUILD NATIVA DE ESTA CASA ES REPRODUCIBLE DESDE UN COMMIT
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHA-requirecommit.md`**
+
+Ni `apps/cliente` ni `apps/prestador` fijaban `cli.requireCommit` ⇒ **EAS archiva el ÁRBOL, no el commit.**
+
+**Y no es un riesgo teórico: se midió el mismo día.** La build salió de `76f83f5f` —que **no** tiene `expo-dev-client`— y **la APK resultante lo trae** (`expo/modules/devlauncher` ×1884).
+
+> ### **No es que EAS ignore lo no commiteado: LO USA.**
+> *Y eso empeora el problema en vez de mejorarlo — el hash del acta apunta a un código que nunca se construyó.* **Esta casa cita hashes para todo, y un gate del founder sobre un artefacto de procedencia irreconstruible no se puede repetir ni citar: entonces no es un gate.**
+
+**Es la gemela nativa de lo que S91 curó en OTA** (`publicar-ota.mjs`, veda + acto único: *«un publish sucio es inauditable después»*). **Allá el riesgo era estructural; acá hubo un artefacto concreto instalado en un teléfono.**
+
+**✅ CURADA EN S101-D**, en las dos apps —es de clase, no de instancia— y **con su razón vuelta MECÁNICA**: el esquema de `eas.json` rechaza la clave de comentario (`"cli.// is not allowed"`, medido antes de gastar un build), así que **el porqué vive en un guard que exige la bandera**. *Un comentario se borra sin que nadie se entere; un guard en rojo obliga a leer por qué.*
+
+---
+
+### D-867 🔴 · EL ACTUADOR COLAPSA SIETE CAUSAS EN `desconocido`, Y ESA VOZ ES LA DE «SOPORTE»
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
+
+La letra define **siete** causas de rechazo con voz propia; **el actuador tiene DOS salidas**. Los tres rechazos reales que la base vio —`0/31`, `2/32`, `5/14`— **caen los tres en `desconocido`**.
+
+> ### **Un rechazo del banco saca al cliente del flujo Y genera un ticket que no era. Se paga dos veces.**
+
+**La cura es de FORMA, no de vocabulario:** separar *«no aprobado con causa conocida»* de *«no aprobado sin causa»*. **No nacen voces nuevas.**
+
+🔒 **BLOQUEADA por la tabla de códigos de Erick:** sin saber qué significa `31` no se puede mapear, y **mapear por parecido sería exactamente el defecto que el censo vino a medir.**
+
+⚠️ **Y su límite, nombrado como silencio y no como verde ni como ficha aparte:** *la rama no-aprobada **nunca corrió contra un intento real*** — los 8 casos `desconocido` son sondas del arnés sin intento ligado.
+
+---
+
+### D-868 🟡 · TRES ESTADOS DEL PROVEEDOR NUNCA SE EJERCITARON
+> S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
+
+`review` · `pending` · `rejected` están contemplados en el código y **jamás los produjo un intento real**. *Un camino que nadie pisó no tiene síntoma hasta que alguien real lo pisa* — la lección madre de S96, aplicada al vocabulario del proveedor. **Disparo: la ventana de certificación, donde el proveedor los puede provocar a pedido.**
+
+---
+
+### D-864 🟡 · LAS 8 CITAS `pendiente_pago` SON **INCOBRABLES POR CONSTRUCCIÓN** — no les falta un dato: les falta el productor
+> S101-D · 21-ago-2026 · **medido acá, con el enum leído y no adivinado**
+
+**Medido:**
+
+| `estado_reserva` | citas | **sin `cita_desglose`** |
+|---|---|---|
+| `pagada` | 145 | 139 |
+| `expirada` | 40 | 36 |
+| **`pendiente_pago`** | **8** | **8 — el 100 %** |
+| `null` | 2 | 2 |
+
+**El mecanismo, leído del objeto:**
+
+```
+trg_cita_congela_desglose  →  AFTER INSERT ON evento_cita_servicio
+```
+
+**`AFTER INSERT` y nada más — no lleva `OR UPDATE`.** ⇒ una cita **nacida antes
+del trigger**, o que llegó a `pendiente_pago` **por un UPDATE**, no tiene ni va a
+tener desglose: *el disparo ya pasó y no vuelve.*
+
+> ***No es un dato faltante: es un dato sin productor.*** Un dato faltante se
+> completa; a éste **no hay puerta que lo genere**, y el motor de pago exige el
+> desglose congelado para cobrar. **Son incobrables por construcción, no por
+> estado.**
+
+🔴 **NO SE COMPLETAN A MANO.** *Escribirles un desglose sería fabricar el precio
+congelado de una reserva que nadie congeló — un dato del que nadie puede decir si
+se midió o se dedujo, que es exactamente lo que `D-862` acaba de nombrar como
+inservible ante un contracargo.*
+
+⇒ **Quedan como DATOS DECLARADOS**, mismo patrón que las **138 citas
+`pago_simulado`** de `D-856`: **las resuelve el corte semilla/real ya firmado.**
+
+> ⚠️ **NOTA DE MÉTODO, y es el aporte de la ficha:** mi primera medición dio
+> **CERO** — porque busqué `estado='pendiente_pago'` y **ese valor no existe en la
+> columna `estado`** (sus valores son `confirmada`·`completada`·`pendiente`·
+> `cancelada`·`no_show`·`en_curso`). El estado de pago vive en **otra columna:
+> `estado_reserva`**. *Un cero contra la columna equivocada se ve igual que un
+> cero de verdad, y me habría llevado a contradecir un hallazgo correcto.* Lo cazó
+> **leer el enum en vez de suponerlo** — la misma orden que la mesa acababa de dar
+> por el caso `activa`/`guardada`.
+
+**Dueño:** el corte semilla/real. **☠️ Disparo:** el mismo del corte.
+**Se cruza con `D-856`** (las 138 declaradas) y con **`D-862`** (el dato deducido
+que no sirve como prueba).
+
+---
+
+> ## 📥 DEPÓSITO DE LAS CUATRO FICHAS DE PISTA B (S101-D · 21-ago-2026)
+>
+> **Texto VERBATIM de `pista/s102-b`** (`c98b7d0a`, archivo
+> `docs/relevamientos/2026-08-21-s102b-PEDIDO-A-fichas-sin-numero.md` §② a §⑤).
+> **B las redactó SIN número a propósito** y A las numeró **al depositar**,
+> midiendo por grep en su propio árbol — la regla que la mesa firmó hoy.
+>
+> **Y la regla se cobró en el acto, dos veces:** B había medido `D-858`→`D-861`
+> libres con el grep bien corrido, **pero su grep miraba `origin` y mis números
+> vivían en mi worktree sin pushear**. Al depositar, `D-858` y `D-859` ya eran
+> mías ⇒ **las cuatro corrieron a `D-860`–`D-863`**. *Lo único que se toca del
+> texto de B son los números y sus dos cruces.*
+
+### D-863 🟡 · SEIS VISTAS DE MÉTRICAS DE NEGOCIO SON LEGIBLES POR CUALQUIER ANÓNIMO
+
+🟡 **ALTA.**
+
+> **⚠️ ALCANCE declarado: esto NO es dato personal** —salvo `v_ranking_usuarios`,
+> que tiene ficha propia—. **Es confidencial de NEGOCIO.** *Salió de la misma
+> medición y comparte causa y cura; si la mesa lo considera fuera de alcance, se
+> archiva sin costo.*
+
+**Medido con rojo producido (`SET LOCAL ROLE anon`):**
+
+| vista | `security_invoker` | filas que ve `anon` | qué publica |
+|---|---|---|---|
+| `v_pitch_metrics` | **null** | **1** | GMV mes/histórico, revenue, MAU, ticket, DAU/MAU, sellers y prestadores activos — **los 12 KPI del pitch deck** |
+| `v_metricas_tiempo_real` | **null** | **1** | GMV y revenue del mes y del día, MAU, mascotas, citas |
+| `v_mrr` | **null** | **1** | MRR mensual, anual prorrateado, altas y bajas |
+| `v_crecimiento_usuarios` | **null** | **5** | usuarios nuevos y acumulados por mes |
+| `v_gmv_mensual` | **null** | 0 *(sin datos, **no** por permiso)* | GMV y revenue por mes y país |
+| `v_ranking_usuarios` | **null** | 1 | → `D-860` |
+
+**Las seis tienen `reloptions = null`** ⇒ corren como su dueño y bypassean la
+RLS de abajo. *Las otras seis vistas alcanzables por `anon` —`v_conversion_funnel`,
+`v_criaderos_publicos`, `v_daas_eligible_users`, `v_dashboard_logistico`,
+`v_resenas_todas`, `v_vitrina_publicada`— **sí** tienen `security_invoker = true`*
+⇒ **la casa ya sabe hacerlo y estas seis quedaron afuera del barrido de S54.**
+
+**✅ Un matiz que evita inflar la ficha:** la ACL da `arwdDxtm` a `anon`
+(escritura incluida), **pero las seis son NO ACTUALIZABLES**
+(`is_insertable_into = NO`, `is_updatable = NO`) ⇒ **los grants de escritura son
+INERTES. La exposición es de LECTURA, y es real.**
+
+**Y el cruce que la vuelve concreta:** dos de ellas llevan el `0.14` **embebido
+en el SQL** (`v_gmv_mensual`: `(sum(total) * 0.14) AS revenue` ·
+`v_metricas_tiempo_real`: `(gmv_mes_actual * 0.14) AS revenue_mes`) ⇒ **lo que
+un anónimo puede leer no es solo confidencial: además está mal por un orden de
+magnitud** (`D-759`). **Curar solo el front del admin deja el `0.14` vivo en la
+fuente: las dos curas van juntas o el número sobrevive.**
+
+> 🔴 **ADVERTENCIA DE DISEÑO — ESTA FICHA HEREDA `L-328`** *(encargo de mesa vía
+> S102-B, 21-ago)*: **las seis NO se curan aplicando un patrón de clase sin medir
+> el consumidor real de CADA una.** `v_ranking_usuarios` —que salió de este mismo
+> censo— ya probó que **el patrón correcto para la clase puede ser la cura
+> equivocada para un miembro**: ahí `security_invoker` habría dejado la vista
+> *técnicamente segura y funcionalmente muerta*, y su cinturón natural habría
+> dado verde igual. *Acá el riesgo tiene nombre propio: `v_pitch_metrics`
+> sostiene el pitch deck.* ⇒ **una por una, midiendo qué deja de servirle a quien
+> SÍ debe verla.**
+
+> **Dueño:** pista A (es DB).
+> **☠️ DISPARO: antes del soft launch**, y **antes de mostrar `/inversores` a
+> alguien de afuera** — el mismo disparo de `D-759`.
+> **☠️ MUERTE:** `anon` no lee ninguna de las seis, **medido**, y el tablero de
+> inversores sigue vivo con su credencial propia.
+> **Se cruza con `D-758` · `D-759` · `D-760`** (⚠️ `v_pitch_metrics` sostiene el
+> pitch deck: **cualquier cura acá tiene que no romperlo**).
+> Origen: S102-B, censo transversal.
+
+---
+
+### D-862 🟡 · EL COMPROBANTE DE UNA CITA VA AL DUEÑO DE LA MASCOTA, NO A QUIEN PAGÓ
+
+🟡 **ALTA — con dictamen de mesa YA DADO y cura EN COLA.**
+
+**Literal de `aplicar_evento_de_pago`, leído con `pg_get_functiondef`:**
+
+```sql
+-- rama CITA (líneas 77-78):
+SELECT m.user_id INTO v_user FROM evento_cita_servicio c
+  JOIN mascotas m ON m.id = c.mascota_id WHERE c.id = v_ref;
+
+-- rama COMPRA (línea 122):
+SELECT c.user_id, c.moneda INTO v_user, v_moneda FROM compras c WHERE c.id = v_ref;
+```
+
+⇒ **Despensa manda el comprobante a quien compró. Servicios lo manda al dueño
+registrado de la mascota. Las dos ramas del mismo motor eligen distinto y
+ninguna lo declara.**
+
+#### ✅ DICTAMEN DE MESA, 21-ago-2026 — YA RESUELTO
+
+> **EL COMPROBANTE VA A QUIEN PAGÓ.** Base: `LETRA_SALDO` §2 (RIGE, firma del
+> founder 19-ago) — *«Del usuario que pagó. La plata vuelve a quien la puso, no
+> al hogar ni a la familia.»* **El pago tiene dueño y el comprobante es del
+> pago.**
+>
+> **Y su mitad complementaria: el aviso al dueño de la mascota es una
+> NOTIFICACIÓN APARTE, jamás el comprobante.** *Son dos hechos distintos —«te
+> cobraron» y «tu mascota tiene una cita paga»— y mezclarlos en un solo correo
+> obliga a mandárselo a las dos personas o a ninguna.*
+
+#### ⚖️ HOY NO DIVERGE, y se midió
+
+| medición | valor |
+|---|---|
+| familias con más de un miembro | **0** de 82 |
+| citas cuya mascota tiene `user_id` NULL | **0** de 194 |
+
+⇒ **con los datos de hoy, pagador y dueño son la misma persona.** *La cura es
+estructural, no urgente — pero su ventana se cierra con la primera familia de
+dos adultos.*
+
+#### 🔴 EL SEGUNDO FILO DE LAS MISMAS DOS LÍNEAS, y ése es de motor
+
+**`notificacion_intencion.destinatario_user_id` es `NOT NULL`.**
+**`mascotas.user_id` es NULL en 51 de 75 mascotas (68 %).**
+**`aplicar_evento_de_pago` NO tiene manejador de excepción** — *verificado
+leyendo las líneas: su único `EXCEPTION` es un `RAISE EXCEPTION`.*
+
+⇒ Una cita pagada de una mascota sin `user_id` haría **fallar el INSERT de la
+intención, y con él la aplicación entera del pago**: la cita no pasaría a
+`pagada`, el intento no se cerraría, y el proveedor reintentaría contra el mismo
+error. **Hoy no ocurre porque las 194 citas tienen dueño — pero no hay candado.**
+
+> ***Lo que hoy lo evita son los datos, no el diseño.***
+
+> **⚠️ NOTA DE MÉTODO, declarada:** la primera medición de «¿tiene handler?» usó
+> `~* 'EXCEPTION'` y **dio true** — era el `RAISE`. *El instrumento midió la
+> palabra; el reporte iba a hablar de la estructura.* **El verde falso habría
+> invertido esta conclusión.**
+
+> **Dueño:** el destinatario es **producto → founder (YA DICTAMINADO)**; el
+> candado del NULL y la columna de pagador son **motor → pista A**.
+> **🔗 DEPENDENCIA MEDIDA:** esta cura y el ensanche de RLS de `pagos_intentos`
+> **necesitan la misma pieza que falta — `pagos_intentos` no registra quién
+> pagó**. *Son la misma cura y conviene construirlas juntas* (detalle y las dos
+> variantes en `…-s102b-CURA-3-rls-pagos-intentos-cita.sql` §⓪).
+> **☠️ DISPARO: la primera familia con dos miembros, o el primer cobro de
+> mostrador de una cita.**
+> **☠️ MUERTE:** el comprobante llega a quien pagó, el aviso al dueño de la
+> mascota existe como notificación propia, y una cita de mascota sin `user_id`
+> es inexpresable o está manejada.
+> Origen: S102-B, censo transversal · dictamen de mesa 21-ago.
+
+---
+
+### D-861 🔴 · EL DATO PERSONAL DEL PAGO NO SE BORRA NUNCA: NO HAY POLÍTICA DE RETENCIÓN, Y LA LETRA QUE FALTA YA TIENE TRES ACREEDORES
+
+🔴 **ALTA.**
+
+**Qué persiste, medido por NOMBRE DE CLAVE** (jamás por su valor):
+
+| tabla | columna | filas | dato personal |
+|---|---|---|---|
+| `pagos_intentos` | `payload_crudo` | 41 | `card.holder_name` · `user.email` · `card.bin` · últimos 4 · mes/año |
+| `pagos_eventos` | `payload` | 38 | idem |
+| `webhook_events` | `payload` | 60 | `holder_name` · `email` · `bin` · últimos 4 |
+
+**✅ Lo que NO hay, y es un resultado medido, no un supuesto:** **cero PAN** —
+`card.number` mide **4 caracteres en las 94 filas**, solo dígitos, **cero con
+forma de PAN (13-19)** — y **cero CVV/CVC** en ninguna clave de ninguna de las
+tres. *La clave se llama `number` y eso es una trampa de lectura.*
+
+**La retención, medida:**
+
+```
+jobs de cron totales                                     14
+… que purgan payloads de pago                             0
+funciones con DELETE FROM webhook_events / pagos_eventos  0
+```
+
+> **No es una retención larga: es la AUSENCIA de política.** *Una retención
+> larga se defiende con un argumento; una ausencia solo se explica.*
+
+**Y lo que esta ficha aporta no es su contenido: `D-732` y `D-733` están 🔒
+BLOQUEADAS desde S92-BIS por exactamente la misma letra que falta — el plazo de
+retención.** *La casa ya midió entonces que «la ventana de gracia del barredor
+no es un número técnico que se elige, es el plazo de retención con otro
+nombre».*
+
+**⇒ Ahora la misma letra bloquea material de CERTIFICACIÓN DE PAGOS**, que es
+de otra clase: tiene contraparte externa (Nuvei) y reglas propias.
+
+> ***Una deuda de letra que acumula acreedores deja de ser una deuda de letra y
+> pasa a ser un cuello de botella.***
+
+> **Dueño: founder + legales** — *ninguna pista puede elegir un plazo de
+> retención.* **Insumo servido:**
+> `docs/relevamientos/2026-08-21-s102b-CAPITULO-RETENCION-v3.md`.
+> **☠️ DISPARO: la primera transacción con la tarjeta de una persona real** —
+> hoy el ambiente es sandbox de punta a punta y eso es lo único que lo contiene.
+> **☠️ MUERTE:** hay plazo escrito, y hay barrido que lo ejecuta, **verificado
+> por una corrida real que borre algo**.
+> **Se cruza con `D-732` · `D-733` · `D-405`** y con **`P23`** de `POLITICAS`.
+> Origen: S102-B, censo transversal.
+
+---
+
+### D-860 🔴 · `v_ranking_usuarios` PUBLICA NOMBRE Y AVATAR A CUALQUIER ANÓNIMO, Y PARA UN TERCIO DE LA BASE EL «NOMBRE» ES EL CORREO
+
+🔴 **BLOQUEANTE PRE-LANZAMIENTO.**
+
+**Medido, con rojo producido** (`SET LOCAL ROLE anon`, regla 68):
+
+| medición | valor |
+|---|---|
+| `reloptions` | **`null`** — sin `security_invoker` ⇒ **bypassea la RLS de `profiles`** |
+| `has_table_privilege('anon', …, 'SELECT')` | **true** |
+| filas visibles como `anon` | **1**, con `nombre` poblado |
+| columnas | `user_id, nombre, avatar_url, puntos_totales, puntos_mes, racha_dias, nivel, …` |
+
+**Lo que lo vuelve grave no es el nombre: es de dónde sale.** Medido sobre los
+165 perfiles con cuenta: **57 tienen `profiles.nombre` == el local-part de su
+correo** (cola del sembrador `handle_new_user`, S81). ⇒ **publicar ese campo a
+un anónimo no publica un apodo: publica una dirección de correo sin su dominio**
+— y en esta base el dominio es adivinable.
+
+**Y el daño escala con el éxito.** Hoy expone 1 fila porque `puntos_usuario`
+casi no tiene filas: el motor de lealtad está **muerto** (`D-314`). **El día que
+se encienda, la vista publica el nombre y el avatar de cada usuario con puntos,
+a cualquiera con la anon key — que viaja en el bundle.**
+
+> ***Un defecto cuyo alcance es proporcional al éxito del producto no se
+> descubre creciendo: se descubre cuando ya creció.***
+
+**Cura preparada y NO aplicada:**
+`docs/relevamientos/2026-08-21-s102b-CURA-2-ranking-fuera-de-anon.sql`
+(REVOKE de `anon` y de `PUBLIC`, con reversa escrita antes y cinturón de dos
+brazos que verifica que `authenticated` y `service_role` NO se rompieron).
+
+> **🔴 Y LA OPCIÓN QUE SE DESCARTÓ MIDIENDO, que es el aporte de la ficha:**
+> `security_invoker = true` —el patrón que S54 aplicó a cuatro vistas del
+> motor— **acá MATARÍA la vista.** `profiles_select` es `USING (auth.uid() = id)`
+> ⇒ cada usuario vería **solo su propia fila**. *Un ranking que solo te muestra
+> a vos no es un ranking.* **El patrón correcto para una clase de defecto puede
+> ser la cura equivocada para un miembro de esa clase: una vista de ranking
+> agrega datos ajenos POR DEFINICIÓN — su problema no es de RLS, es de QUÉ
+> PUBLICA.**
+
+> **Dueño:** pista A (es DB) · **la decisión de qué se publica de un tercero es
+> del founder.**
+> **⚠️ FRENO DE LA CURA (L-215):** el censo de consumidores dio **cero en este
+> monorepo**; **los otros cinco repos NO se censaron**, y ese censo es parte de
+> la cura. *Un REVOKE es barato de aplicar y caro de descubrir.*
+> **☠️ DISPARO: antes del soft launch**, y en todo caso **antes de encender
+> cualquier motor de puntos**.
+> **☠️ MUERTE:** `anon` no puede leer la vista, **medido con `SET LOCAL ROLE
+> anon`**, y ningún consumidor legítimo quedó roto.
+> **Se cruza con `D-863`** (misma clase, otras cinco) y con
+> **`D-314`** (el motor que la va a poblar).
+> Origen: S102-B, censo transversal.
+
+---
+
+### D-859 🟢 · EL IDIOMA DEL WIDGET DEL ALTA CUELGA DE CONSTANTES NO DOCUMENTADAS DEL PROVEEDOR — **deuda ACEPTADA por el founder**
+> S101-D · 21-ago-2026 · **medida en la fuente del SDK, no preguntada**
+
+El circuito de pago habla **es/en** por firma del founder. La página del alta
+traduce **lo suyo** por diccionario propio (`lang` en la URL desde la app), pero
+**los campos los pinta el widget de Nuvei** y ahí el idioma no es nuestro.
+
+**Lo medido en `payment_stable.min.js`, el que la página carga:**
+
+| | |
+|---|---|
+| `Payment.init(env_mode, app_code, app_key)` | **sin parámetro de idioma** |
+| `Payment.addCard(uid, email, card, ok, fail, payment_form)` | **sin parámetro de idioma** |
+| el `locale` es/en/pt que documenta Nuvei | pertenece a **`init_reference`** — **otra API** (el checkout hospedado), que `paymentez.js` **no usa** |
+
+⇒ **La única vía es asignar sus 20 propiedades estáticas de `PaymentForm`**
+(`CREDIT_CARD_NUMBER_PLACEHOLDER`, `VERIFICATION_PLACEHOLDER`,
+`INVALID_CARD_TYPE_MESSAGE`…), que **se leen al iniciar el formulario y no al
+cargar el script** — medido contando ocurrencias: **cada clave tiene una
+asignación y una lectura, y la lectura vive dentro del `prototype`**. Por eso
+asignarlas desde nuestra página, antes de montar, funciona.
+
+**🔴 LA DEUDA, dicha sin maquillar: eso es API NO DOCUMENTADA de un tercero.**
+Si el proveedor renombra una constante, **nuestra asignación queda huérfana y el
+campo vuelve al español**. *No se rompe nada: se degrada — y ése es exactamente
+el modo de falla que no tiene síntoma.*
+
+✅ **ACEPTADA POR EL FOUNDER** (21-ago-2026), **con su canario construido en el
+mismo acto**: `traducirWidget()` **censa las veinte claves en cada carga —también
+en español— y avisa por consola y por el puente nombrando CUÁLES faltan.**
+*Un aviso que no nombra la clave obliga a re-medir el SDK entero para saber qué
+se rompió.*
+
+> 🔴 **Y el canario destapó un defecto propio antes de existir**, que vale
+> registrar: el aviso iba a viajar por el puente con `fuente:
+> 'epetplace-alta-tarjeta'` — **y el `onMessage` de la app no mira el contenido:
+> con ese `fuente` da el trámite por terminado y CIERRA la pantalla**
+> (`app/pagos/alta-tarjeta.tsx:114-122`). Como el censo corre al arrancar,
+> **habría cerrado el alta apenas cargara, y solo el día que el diagnóstico
+> hiciera falta.** Va con `fuente: '…-diagnostico'`, que su propio guard
+> descarta. **Es `L-318` invertida: acá el consumidor no ignora lo que no
+> conoce — ACTÚA.**
+
+**Dueño:** la pasada que toque la página del alta.
+☠️ **Disparo de cierre: la migración a Stripe la vuelve irrelevante** (decisión
+founder del 21-ago: Stripe a los ~1000 usuarios; Nuvei queda como riel de
+Ecuador). *Hasta entonces la deuda vive con su canario.*
+**La pregunta a Erick sobre el idioma del widget queda RETIRADA de toda lista.**
+
+---
+
+### D-858 🟢 · EL VOSEO DEL PRESTADOR — 37 cadenas, medidas y FUERA del territorio de `D-857`
+> S101-D · 21-ago-2026 · **apareció barriendo el cliente, no buscando el prestador**
+
+La casa habla **tuteo neutro** (regla 27 / L-148) **en las DOS apps** — la ley nunca
+distinguió. Al re-medir `D-857` con instrumento propio se corrió el mismo censo
+sobre los tres diccionarios, y el resultado reparte solo:
+
+| Archivo | Cadenas con voseo |
+|---|---|
+| `apps/cliente/src/i18n/es.ts` | **34** → territorio de `D-857` — **ya barridas a tuteo en S101-D** |
+| **`apps/prestador/src/i18n/es.ts`** | **37** → **esta ficha, sin tocar** |
+| `packages/ui/src/i18n/es.ts` | **0** ✅ *el paquete compartido ya habla tuteo* |
+
+⚠️ **El 37 no es el 36 del primer reporte: subió al cerrarse la QUINTA trampa del
+instrumento** — *el imperativo voseo pierde la tilde cuando lleva enclítico*
+(`contanos` · `escribila` · `corregilo`), y el medidor se apoyaba en la tilde.
+**Su muestra `«Corregilo según el motivo…»` (L3183) es justo de esa clase.**
+⇒ **Quien ejecute esta ficha re-mide con el instrumento de `L-327` completo**, no
+con este número: 37 es un piso medido, no un inventario cerrado.
+
+Muestras medidas: *«Volvé a buscar a la mascota y probá de nuevo»* (L2404) ·
+*«No tenés avisos»* (L2844) · *«Aceptá y entrás a tus entregas»* (L3092) ·
+*«Corregilo según el motivo y volvé a proponerlo»* (L3183) · *«Escribí el nombre de
+tu negocio»* (L3669) · *«Elegí al menos un día»* (L3591).
+
+🔴 **Por qué nace ficha propia en vez de ensancharse `D-857`:** su ficha acota el
+territorio a `es.ts` **del cliente**, con nombre y ruta. *Ensanchar el territorio de
+un vocabulario cerrado de paso es exactamente lo que L-325 prohíbe* — y acá el costo
+no es teórico: **son 37 cadenas repartidas en pantallas de otro actor, cada una con
+su gate.** La pasada de diseño del cliente no puede gatearlas.
+
+⚠️ **Y el número se re-mide antes de barrer, con el instrumento curado por `L-327`:**
+`\b` en JS es ASCII y deja invisible **todo** imperativo acentuado; `vas`/`estás` no
+son voseo. **36 salió del instrumento con las cuatro trampas ya pagadas** — pero es
+un conteo de CADENAS, no de pantallas, y quien lo ejecute mide de nuevo sobre su
+árbol.
+
+**Dueño:** **la sesión del prestador** (su pasada de diseño o su próximo lote de
+strings). **Disparo:** cuando esa sesión abra — *no antes: barrer strings de un
+actor cuyas pantallas nadie va a mirar es cómo se queman los gates* (el mismo
+argumento con el que S101-C dejó vivas las suyas a propósito).
+
+---
+
 ### D-857 🟢 · EL VOSEO SOBREVIVIÓ A SU BARRIDA — 17 líneas medidas
 > S101-C · 20-ago-2026 · **apareció comparando las dos puertas de pago**
 
@@ -18646,6 +19181,46 @@ pantalla que habría que volver a mirar.
 ⚠️ **Y la trampa medida, para quien las barra:** el primer censo dio **5** porque
 el regex pedía espacio después del verbo — `Elegí ` con mayúscula al principio
 de la frase no matcheaba. *El número chico no era la deuda: era el instrumento.*
+
+> ### ✅ ENMIENDA S101-D (21-ago-2026) — **el resto no era 10: eran 34. BARRIDAS LAS 34.** Y la propia advertencia de arriba se cobró TRES VECES MÁS
+>
+> Se re-midió con instrumento propio, como esta ficha ordenaba. **El resto vivo en
+> `apps/cliente/src/i18n/es.ts` eran 34 cadenas**, no 10. El «17 medidas» del título
+> y el «7 curadas» del cuerpo **no se tocan**: son el registro de S101-C y siguen
+> siendo ciertos de lo que S101-C midió con el instrumento que tenía.
+>
+> **Estado: las 34 CURADAS a tuteo** (barrido acotado a valores entre comillas, mapa
+> explícito, `vos` por frase completa). **Censo post-barrido: 0. Typecheck verde.**
+> *Falta su gate en dispositivo — el número está cerrado, el ojo no.*
+>
+> **Las CINCO trampas del censo, en orden** (la ley que salió de acá es **`L-327`**):
+> ① la de esta ficha (el espacio) · ② **comentarios leídos como voz** —43 falsos: el
+> archivo comenta su propia historia en voseo (L-170)— · ③ **`vas` y `estás` NO son
+> voseo** —el verbo es idéntico en tuteo; incluirlos infló el censo de 5 a 20 con 15
+> cadenas que no hay que tocar, y la prueba viva está en este mismo archivo: `es.ts:1326`
+> dice *«Vas a borrar… pero **puedes** volver»*, tuteo puro con un «vas» adentro— ·
+> 🔴 ④ **`\b` en JavaScript es ASCII**: después de una vocal acentuada no hay frontera
+> de palabra ⇒ `\b(probá)\b` **nunca** matchea «Probá de nuevo», y **todo imperativo
+> voseo era invisible**; solo pasaban las formas terminadas en `s`.
+>
+> **Lo que cazó ④:** un **barrido de recall independiente** devolvió `Probá`×7 ·
+> `Elegí`×6 · `Ingresá`×2 contra un instrumento que reportaba **0** de esas formas.
+>
+> 🔴 **⑤ Y LA QUINTA APARECIÓ AL IR A BARRER, cuando el número ya estaba reportado:
+> «el imperativo voseo SIEMPRE lleva tilde» ES FALSO EN CUANTO HAY ENCLÍTICO.**
+> `contá` + `nos` = **«contanos»**: la sílaba tónica deja de ser la última y **la
+> tilde desaparece**. Igual `escribila` · `escribinos` · `corregilo` · `fijate`.
+> ⇒ El instrumento curado por ④ —que se apoyaba en la tilde— **era ciego a la clase
+> entera de enclíticos**: se perdía `Contanos quién recibe.` y `Escribinos al…`.
+> **32 → 34.** *La regla de la que dependía el instrumento tenía una excepción
+> gramatical entera, y la excepción no se ve mirando la lista de verbos: se ve
+> mirando la lista de lo que el barrido está por tocar.* **Y la ficha lo predecía
+> sin saberlo: su propio texto de S101-C nombra `Ingresalo` — un enclítico sin
+> tilde — entre las formas vivas.**
+>
+> **Territorio confirmado, no ensanchado:** las **37 del prestador** (36 + 1 que
+> destapó la quinta trampa) son **`D-858`**, ficha aparte con dueño propio.
+> `packages/ui` está en **0**.
 
 **Dueño:** la pasada de diseño. **Disparo:** su sesión, junto a las cinco marcas
 firmadas del gate ⑤.

@@ -1,9 +1,28 @@
 /**
  * Cuenta · Pagos (S55-B3) — el espejo dueño de Cobros: historial de
  * pagos propios (citas pagadas por RLS, SOLO lectura — el ledger no se
- * toca: financiero v2.4, el evento nace al cerrar) con "Pago simulado"
- * DECLARADO por fila mientras el pago sea simulado. Métodos de pago =
- * en preparación honesto.
+ * toca: financiero v2.4, el evento nace al cerrar).
+ *
+ * 🔴 ENMIENDA S101-D — ESTE ENCABEZADO DECÍA DOS COSAS QUE DEJARON DE SER
+ * CIERTAS, y las dos se corrigen por separado porque NO son el mismo caso:
+ *
+ *  ① Decía *«"Pago simulado" DECLARADO por fila **mientras el pago sea
+ *    simulado**»*. **El motor de pagos está VIVO desde S101** (despensa y los
+ *    cuatro oficios cobran de verdad). La marca por fila **NO se toca y sigue
+ *    siendo correcta**: es condicional al flag de LA FILA (`p.pago_simulado`,
+ *    abajo), y las citas históricas con `pago_simulado: true` **quedan como
+ *    datos declarados**. *Lo que caducó no es la marca: es la cláusula que
+ *    hablaba del producto en presente, como si simular fuera su estado.*
+ *
+ *  ② Decía *«Métodos de pago = en preparación honesto»*. **Falso**: la sección
+ *    apunta a `cuenta/medios`, con su voz `pagosMetodosYaEsta`. *La clave vieja
+ *    `pagosMetodosPronto` sigue viva en el diccionario y quedó huérfana* — se
+ *    declara y NO se borra acá: barrer claves es Ley 37 y va con su tanda.
+ *
+ * *Por qué se cura un COMENTARIO: es `D-855` en su forma más barata — una banda
+ * que dejó de ser cierta. Ningún typecheck la ve, y quien abra este archivo para
+ * tocar pagos hereda la premisa equivocada de que acá no se cobra.*
+ *
  * Escalera (historial): peldaño 0 = vacío honesto que dice dónde va a
  * vivir; peldaño 1 = las filas tal cual (poco es poco); la densidad
  * llega con pagos reales, no con versión.
