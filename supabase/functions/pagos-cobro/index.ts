@@ -210,6 +210,11 @@ Deno.serve(async (req) => {
       motivo_rechazo: `iva_no_cero_sin_probar: iva=${iva} pct=${pct}`,
       cerrado_en: new Date().toISOString(),
       clave_idempotencia: `cobro:iva:${sujeto}:${Date.now()}`,
+      /* 🔴 S102 · QUIÉN PAGÓ. **El rechazado también lo lleva, y no es celo:**
+         es la fila que prueba que ESTA persona intentó pagar y no pudo — justo
+         la que va a querer ver. Ver el bloque del INSERT de abajo para el
+         porqué de que vaya explícito. */
+      pagador_user_id: userId, pagador_origen: 'sesion',
     });
     return json({ ok: false, codigo: 'iva_no_probado' }, 409);
   }
@@ -239,6 +244,27 @@ Deno.serve(async (req) => {
     proveedor_referencia: sujeto, monto, moneda,
     forma: 'tokenizacion', estado: 'iniciado',
     clave_idempotencia: `cobro:${sujeto}:${Date.now()}`,
+    /* ═══ 🔴 S102 · QUIÉN PAGÓ — la mitad que hacía falta ═══════════════════
+       `LETRA_SALDO` §2 (RIGE, firma founder 19-ago): *«Del usuario que pagó.
+       La plata vuelve a quien la puso, no al hogar ni a la familia.»* Hasta
+       hoy esta tabla no lo registraba: para el pedido se derivaba de
+       `pedidos.user_id`, y **para la cita no había de dónde**.
+
+       `userId` sale de `comoUsuario.auth.getUser()` con el header de la
+       petición (línea ~90) ⇒ **la sesión ES el pagador.** No se deriva de la
+       mascota ni del hogar: se registra a quien está pagando.
+
+       🔴 **VA EXPLÍCITO Y JAMÁS COMO `DEFAULT auth.uid()` EN LA COLUMNA.**
+       Medido, y este mismo archivo ya lo dice en su comentario de más arriba:
+       **`db` corre con `service_role`, y ahí `auth.uid()` es NULL.** Un
+       default habría escrito NULL en cada fila **sin fallar y sin avisar** —
+       la forma exacta del defecto que esta línea viene a cerrar.
+
+       `pagador_origen='sesion'` es la PROCEDENCIA: distingue para siempre lo
+       que registró la puerta de las 7 filas históricas que el backfill de
+       S102 marcó como `backfill_s102`. *Un dato del que no se puede decir si
+       se midió o se dedujo no sirve para responder una contracargo.* */
+    pagador_user_id: userId, pagador_origen: 'sesion',
   }).select('id').single();
   if (eI) return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
 
