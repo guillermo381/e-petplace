@@ -386,3 +386,75 @@ BEGIN
 END $cinturon$;
 
 COMMIT;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ②  `cerrar_y_renovar_planes` POR EL MISMO CUERPO — el DISEÑO, medido
+--
+-- **Firma de la mesa:** *«los dos sujetos de la letra pasan por la misma
+-- puerta»*. Acá va **qué hay que cambiar y por qué**, medido contra el cuerpo
+-- vivo (264 líneas, cron `cerrar-renovar-planes` a las 08:00 diario).
+--
+-- ── 🔴 LO QUE HACE HOY, Y ES PEOR DE LO QUE EL NOMBRE SUGIERE ──────────────
+--
+-- La condición que decide renovar es:
+--     `IF v_susc.auto_renovar AND v_mascota_activa AND NOT v_gracia_vencida`
+-- **No hay cobro en ninguna parte.** Y a continuación:
+--     `v_pagado_en := now();`  …  `'pago_simulado', true`
+-- ⇒ **marca el período como cobrado, y `_generar_citas_plan` crea las citas
+--    CONFIRMADAS.** *La familia recibe un mes de paseos y el aviso
+--    «plan_renovado», y nadie cobró un centavo.*
+--
+-- 🔴 **Y LO QUE LO VUELVE EL CASO TESTIGO DE `L-372`: el mecanismo de GRACIA
+--    YA ESTÁ CONSTRUIDO PARA UN COBRO QUE NUNCA EXISTIÓ.** Su propio
+--    comentario dice: *«El fallo de cobro abre gracia (handler de abajo); acá
+--    solo se decide si la ventana venció.»* — **siete días de gracia, firmados
+--    por el founder el 6-ago, esperando un fallo que no puede ocurrir porque
+--    no hay cobro.** *Una pieza entera construida contra una condición que
+--    nadie fue a verificar si llegó.*
+--
+-- ── EL CAMBIO, y NO es «meterle el cobro adentro» ──────────────────────────
+--
+-- 🔴 **El reparto lo prohíbe: la base no cobra.** Si `cerrar_y_renovar_planes`
+--    cobrara sincrónicamente, el cron estaría llamando al proveedor desde
+--    Postgres — y volvemos a `L-340`.
+--
+-- **La forma correcta parte la renovación en DOS ACTOS, y el segundo no lo
+-- dispara el reloj sino LA PLATA:**
+--
+--   **ACTO 1 · el cron SELECCIONA Y CONGELA** (lo que hoy hace `recurrencias_
+--   vencidas_pendientes` para la despensa). La suscripción vencida deja de
+--   renovarse sola: **congela su desglose del período** y **abre su intento**.
+--   *No toca `periodo_fin`, no genera citas, no manda `plan_renovado`.*
+--
+--   **ACTO 2 · la renovación ocurre CUANDO EL COBRO ENTRA**, y la dispara el
+--   ACTUADOR —el mismo que confirma una compra o una cita—, no el reloj.
+--   *Recién ahí: `periodo_fin` avanza, nacen las citas y sale el aviso.*
+--
+-- > **La regla que esto restaura, y que la letra ya firmaba: primero entra la
+-- > plata, después sale el servicio.** *Hoy está al revés, y lo tapa un
+-- > `pago_simulado: true` que se lee como «esto todavía no cobra» cuando en
+-- > realidad dice «esto ya entregó».*
+--
+-- ── LO QUE **NO** HAY QUE TOCAR, medido y declarado ────────────────────────
+--   · **La gracia de 7 días** — nace de verdad recién ahora. *Su handler ya
+--     está escrito y probado contra el par; lo único que le faltaba era un
+--     fallo real que lo despertara.*
+--   · **El aviso de 72 h** — es ANTES del cobro y sigue igual.
+--   · **El crédito por sobrantes** y su nota de no-sumar-desde-metadata (*el
+--     par lo cazó: reembolso 12 donde correspondía 6*). **No se toca.**
+--   · **El unitario derivado** y la reforma S79. **No se tocan.**
+--
+-- ⚠️ **PRECONDICIÓN QUE ESTE ARCHIVO NO PUEDE RESOLVER SOLO:** el sujeto
+--    `suscripcion` **no existe todavía en `pagos_intentos`** — el CHECK admite
+--    `pedido`, `cita` y (con la migración ①) `recurrencia`. **La suscripción
+--    de plan es un CUARTO sujeto**, y ensancharlo es decisión de la misma mesa
+--    que decidió el tercero. *Escribir el ACTO 1 contra una columna que no
+--    existe sería exactamente lo que la precondición del founder vino a
+--    impedir — y ya se pagó sola una vez con `recurrencia_desglose`.*
+--
+-- ⇒ **SERVIDO A LA MESA, con su voto:** el cuarto sujeto se llama
+--    `suscripcion_servicio_id` y viaja con su `periodo`, **espejo exacto del
+--    tercero**. *Voto de A: mismo tratamiento, porque la alternativa —reusar
+--    `recurrencia_id` para una suscripción— es el `compra_id` para una cita
+--    otra vez: el dato del camino viejo colándose en el nuevo.*
