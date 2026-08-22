@@ -1620,6 +1620,37 @@ export const clienteEs = {
     deunaHoldVencido: 'El tiempo que apartamos se terminó. No te cobramos nada.',
     /* §6 · `APPROVED` verificado. La pantalla NO lo declara: lo dice el
        servidor y ella lo dibuja. */
+    // 🔴 S103-C · LAS CINCO FAMILIAS DE FALLO (CONTRATO_WRAPPER_DEUNA §4).
+    // Cada familia tiene voz propia porque cada una manda a la persona a un
+    // lugar distinto: soporte, reintentar, o volver atrás.
+    deunaPidiendoCodigo: 'Pidiendo tu código…',
+    deunaFalloTitulo: 'No pudimos generar tu código',
+    // ② LA COMPUERTA — nuestro motor. El proveedor NUNCA se enteró, así que
+    // el título no puede decir «falló el pago»: el pago no se intentó.
+    deunaCompuertaTitulo: 'Antes de cobrarte, algo cambió',
+    deunaCausaPagoEnProceso: 'Ya hay un pago en curso para esta compra. Espera un momento y vuelve a intentarlo.',
+    deunaCausaReservaVencida: 'La reserva venció y soltamos los productos. Vuelve a armar tu pedido.',
+    deunaCausaVendedorNoActivo: 'Este vendedor no está recibiendo pedidos ahora mismo.',
+    deunaCausaMontoDivergente: 'El total cambió desde que empezaste. Vuelve atrás para verlo actualizado.',
+    deunaCausaCompraSinPedidos: 'Esta compra quedó sin productos. Vuelve a armarla.',
+    // ④ LA RED — no es rechazo. Y jamás dice «cerrá sesión».
+    deunaRedTitulo: 'No pudimos conectarnos',
+    deunaRedCuerpo: 'No es un rechazo: no llegamos a preguntar. Prueba de nuevo.',
+    deunaReintentar: 'Probar de nuevo',
+    // ① DEFECTO NUESTRO — jamás «reintentá»: no va a cambiar.
+    deunaNuestroCuerpo: 'Es un problema nuestro y no se arregla reintentando. Escríbenos y lo resolvemos.',
+    // ③ EL PROVEEDOR RECHAZÓ
+    deunaRechazoCuerpo: 'Deuna no pudo completar el cobro. Escríbenos y lo revisamos.',
+    // ⑤ AMBIGUO A PROPÓSITO — «no existe o es de otro». No se afina.
+    // 🔴 SIN SUSTANTIVO DEL SUJETO (dictamen de mesa, 23-ago). Decía «esta
+    // COMPRA», y este código lo emiten los DOS sujetos: `cita_no_existe`
+    // recibía una voz que nombraba algo que la pantalla no sabe cuál es.
+    // Es el mismo defecto que la casa ya pagó con el comprobante que decía
+    // «compra» para un paseo, entrando por la voz de error.
+    // «este pago» SÍ se puede afirmar: es la pantalla donde está parada.
+    deunaAmbiguoCuerpo: 'No pudimos abrir este pago. Vuelve atrás y prueba de nuevo.',
+    deunaSesionCuerpo: 'Tu sesión terminó. Vuelve a entrar para seguir.',
+    deunaVolver: 'Volver',
     deunaAprobada: 'Pago confirmado',
     deunaAprobadaCuerpo: 'Listo, recibimos tu pago.',
     /* 🔴 §6 · `NOT_FOUND` en ventana y `REVERSED_FAILED`. Defecto NUESTRO: no
@@ -1660,6 +1691,43 @@ export const clienteEs = {
     cobroRechazado: 'El banco no autorizó el pago. Prueba con otra tarjeta.',
     cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
     cobroConfirmando: 'Estamos confirmando tu pago.',
+  },
+  /**
+   * S103-C · SEGURIDAD — la contraseña del cliente.
+   *
+   * 🔴 **Las once primeras son VERBATIM del prestador**, y eso es
+   * deliberado: ya estaban en tuteo neutro y es **la misma función para el
+   * mismo humano**. *Dos frases distintas para el mismo acto es cómo dos
+   * superficies empiezan a desacordar sin síntoma.*
+   *
+   * Las tres últimas son propias porque **la salida del caso solo-Google es
+   * distinta acá**: el cliente no tiene `/recuperar` (medido), así que
+   * termina en soporte y no en una puerta que rebota.
+   */
+  seguridad: {
+    tituloPantalla: 'Seguridad',
+    titulo: 'Contraseña',
+    ayuda: 'La clave con la que entras a la app.',
+    actual: 'Tu contraseña actual',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos {{n}} caracteres.',
+    confirmar: 'Repite la nueva contraseña',
+    // El único error que el servidor no puede cazar: para él las dos son
+    // válidas. La voz no culpa a nadie — describe el hecho.
+    noCoinciden: 'Las dos contraseñas no coinciden. Escríbelas de nuevo.',
+    cambiar: 'Cambiar contraseña',
+    listo: 'Listo — tu contraseña quedó cambiada.',
+    esperaConNumero: 'Probaste varias veces seguidas. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Probaste varias veces seguidas. Espera un momento y vuelve a intentar.',
+    // 🔴 ENMENDADA respecto del prestador: la suya ofrece crear la clave
+    // desde `/recuperar`, y esa ruta NO EXISTE en el cliente. Prometerla
+    // sería mandar a una puerta que no abre.
+    soloGoogle:
+      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Escríbenos y te ayudamos a crear una.',
+    irASoporte: 'Escribirle al equipo',
+    mensajeSoporte:
+      'Hola, entro a e-PetPlace con Google y quiero crear una contraseña para mi cuenta.',
+    soporteFallback: 'Escríbenos por WhatsApp al {{numero}}.',
   },
   despensa: {
     titulo: 'Despensa',

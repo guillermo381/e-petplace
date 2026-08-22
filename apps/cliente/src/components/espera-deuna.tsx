@@ -117,7 +117,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Boton, BotonCopiar, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
-import type { EstadoDeUna } from '@/lib/pagos/deuna-estado';
+import { vozDeFallo, type EstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { useTraduccion } from '@/i18n';
 
 export type EsperaDeUnaProps = {
@@ -135,6 +135,7 @@ function segundosHasta(iso: string): number {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
 
+
 export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaProps) {
   const { t } = useTraduccion();
   const { theme } = useTheme();
@@ -144,10 +145,17 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
      (regla de React), y el early-return vive DESPUÉS. */
   const enEspera = estado.fase === 'esperando';
   const venceEn = enEspera ? estado.venceEn : new Date(0).toISOString();
+  /* 🔴 `null` = **no sabemos cuándo vence el hold**, y es el caso REAL hoy:
+     el contrato de la puerta (§3) dice que el hold lo declara el SUJETO, no
+     el wrapper de DeUna. *Rellenarlo con el reloj del código mezclaría los
+     dos relojes — la pantalla ofrecería «generá otro código» cuando lo que
+     venció fue la reserva, y el código nuevo tampoco serviría.* */
   const holdVenceEn = enEspera ? estado.holdVenceEn : new Date(0).toISOString();
 
   const [restanteCodigo, setRestanteCodigo] = useState(() => segundosHasta(venceEn));
-  const [restanteHold, setRestanteHold] = useState(() => segundosHasta(holdVenceEn));
+  const [restanteHold, setRestanteHold] = useState<number | null>(() =>
+    holdVenceEn === null ? null : segundosHasta(holdVenceEn),
+  );
 
   /* Los dos relojes se leen del MISMO tick — si corrieran en dos intervalos
      podrían reportar estados incoherentes por un segundo, y ese segundo es
@@ -155,13 +163,86 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
   useEffect(() => {
     const timer = setInterval(() => {
       setRestanteCodigo(segundosHasta(venceEn));
-      setRestanteHold(segundosHasta(holdVenceEn));
+      setRestanteHold(holdVenceEn === null ? null : segundosHasta(holdVenceEn));
     }, 1000);
     return () => clearInterval(timer);
   }, [venceEn, holdVenceEn]);
 
   const mm = String(Math.floor(restanteCodigo / 60)).padStart(2, '0');
   const ss = String(restanteCodigo % 60).padStart(2, '0');
+
+  /* ── CARGANDO — todavía no pedimos el código, o está en vuelo.
+     Sin voz de error y sin código inventado: *una pantalla de pago que
+     muestra un hueco donde va el código se lee como defecto del proveedor.* */
+  if (estado.fase === 'cargando') {
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="cuerpo">{t('pago.deunaPidiendoCodigo')}</Texto>
+      </View>
+    );
+  }
+
+  /* ── FALLO · LAS CINCO FAMILIAS (`CONTRATO_WRAPPER_DEUNA` §4) ────────────
+     🔴 **La familia decide la voz, y confundir dos manda a la persona al
+     lugar equivocado.** Las tres que no se pueden «mejorar»:
+
+     ① **`compuerta` NO dice «no se pudo procesar el pago»** — llega con la
+        causa real **y el proveedor nunca se enteró**: es la letra madre de
+        §7, *primero se verifica que se pueda entregar, después se pide la
+        plata*. **Decir que el pago falló ahí sería mentir: nunca se
+        intentó**, y mandaría a soporte por algo que se resuelve rearmando.
+
+     ② **`red` NO ES UN RECHAZO** ⇒ botón de REINTENTAR, jamás soporte. Y
+        `sesion_no_verificable` **jamás dice «cerrá sesión»**: es un 503 de
+        auth y la sesión probablemente esté bien.
+
+     ③ **`ambiguo` NO SE AFINA.** «No existe o es de otro» dan la misma
+        respuesta A PROPÓSITO — *distinguirlas convertiría la puerta en un
+        oráculo de compras ajenas.*
+
+     Y `nuestro` **no ofrece reintentar**: *pedirle que reintente algo que no
+     va a cambiar es hacerle perder el tiempo con cara de ayuda.* */
+  if (estado.fase === 'fallo') {
+    /* 🔴 LA VOZ SALE DE LA COSTURA (`vozDeFallo`), NO DE ACÁ. La pantalla
+       DIBUJA; **elegir qué se dice según la familia es lógica**, y vive donde
+       un instrumento puede medirla sin reimplementarla. */
+    const voz = vozDeFallo(estado.codigo);
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="titulo">{t(voz.titulo)}</Texto>
+        <Texto variante="cuerpo">{t(voz.cuerpo)}</Texto>
+        {/* 🔴 CENTRADO — **hallazgo de MI PROPIO recorrido en aparato
+            (23-ago), no de una revisión de código.** Los tres fallos que
+            caminé dibujaban su botón **pegado al borde izquierdo** aunque el
+            contenedor centra: `Boton` sin `bloque` fuerza
+            `alignSelf:'flex-start'` en su propio estilo y gana sobre el
+            `alignItems:'center'` del padre.
+
+            ⚠️ **Es la MISMA cura que el founder ya pidió para «Generar nuevo
+            código» el 22-ago, y yo la escribí veinte líneas más abajo** — el
+            bloque de fallo nació después y no la heredó. *Una corrección
+            aplicada a un caso no protege al hermano que nace al día
+            siguiente: lo que protege es la pieza, y acá la pieza es de B.*
+            **Se declara como deuda de forma, no se cura en `packages/ui` por
+            mi cuenta.** */}
+        <View style={{ alignSelf: 'center' }}>
+          <Boton
+            variante="secundario"
+            etiqueta={t(
+              voz.accion === 'reintentar'
+                ? 'pago.deunaReintentar'
+                : voz.accion === 'volver'
+                  ? 'pago.deunaVolver'
+                  : 'cuenta.soporteBoton',
+            )}
+            /* 🔴 **`reintentar` vuelve a PEDIR EL CÓDIGO, no manda a soporte** —
+               la red no es un rechazo. Las otras dos salen de la pantalla. */
+            onPress={voz.accion === 'reintentar' ? onGenerarNuevo : onSoporte}
+          />
+        </View>
+      </View>
+    );
+  }
 
   /* ── APROBADA (§6: `APPROVED` / webhook verificado) ──────────────────────
      La voz del éxito. **Esta pantalla NO la declara por su cuenta**: llega
@@ -205,6 +286,10 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
      (§5: «Hold muerto → no nacen más códigos, compuerta 1»), así que se
      evalúa PRIMERO: ofrecer «generar otro» sobre un hold vencido sería
      ofrecer lo que el servidor va a rechazar. */
+  /* 🔴 `null` NO entra acá, y es deliberado: **no saber cuándo vence el hold
+     no es lo mismo que saber que venció.** Con `null` la pantalla sigue
+     ofreciendo el código, que es lo único que sí conoce. *Tratar «no sé» como
+     «venció» mandaría a rearmar una reserva que probablemente esté viva.* */
   if (restanteHold === 0) {
     return (
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
