@@ -244,9 +244,16 @@ REVOKE ALL ON FUNCTION public._deuna_base36(bigint)   FROM anon, authenticated, 
 ALTER TABLE public.pagos_intentos
   ADD COLUMN IF NOT EXISTS referencia_corta text;
 
+-- 🔴 EL LÍMITE ES `<= 20`, MEDIDO CONTRA QA — no `< 20` como dice la letra §4.
+--    El proveedor responde literal: «internalTransactionReference must be at
+--    most 20 characters long.» Probado con 20 (pasa el esquema) y 21·25·30·36·
+--    40·50·64·100 (todos rebotan con el mismo mensaje).
+--    *Un CHECK más estricto que el proveedor no es «más seguro»: es una regla
+--     nuestra disfrazada de regla suya, y el día que alguien necesite el
+--     carácter 20 va a ir a buscar el límite a la doc equivocada.*
 ALTER TABLE public.pagos_intentos
   ADD CONSTRAINT chk_referencia_corta_cabe
-    CHECK (referencia_corta IS NULL OR length(referencia_corta) < 20);
+    CHECK (referencia_corta IS NULL OR length(referencia_corta) <= 20);
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_pagos_intentos_referencia_corta
   ON public.pagos_intentos (referencia_corta)
