@@ -1246,6 +1246,45 @@ export default function DespensaProducto() {
                 ficha.composicion_estado !== 'ausente' &&
                 ficha.ingredientes_activos.length > 0;
 
+              /**
+               * 🔴 `D-876` · QUÉ HAY QUE DECIR SOBRE LA COMPOSICIÓN — **UN
+               * valor, tres consumidores.**
+               *
+               * **El rojo (recorrido de A):** la sección decía, en dos líneas
+               * seguidas, *«No tenemos los ingredientes de este producto. El
+               * fabricante no los declaró.»* y *«Declarada por el fabricante,
+               * todavía sin verificar.»* **Las dos afirmaciones son
+               * contradictorias y las dos estaban bien escritas.**
+               *
+               * 🔴 **La causa NO era la redacción — era la FORMA:** la
+               * ausencia y la fuente vivían en **dos condiciones
+               * independientes** (`estado === 'ausente' || sin datos` para una,
+               * `estado !== 'no_aplica'` para la otra) **que había que
+               * mantener de acuerdo a mano.** Con `ausente` **las dos daban
+               * `true`.** *Dos condiciones que deben excluirse pero no se
+               * miran entre sí no están sincronizadas: están de acuerdo por
+               * casualidad hasta que un estado las separa.*
+               *
+               * **Por qué un valor derivado y no un `&&` más:** agregar la
+               * negación al guard de la fuente arreglaba ESTE caso y dejaba
+               * viva la forma que lo produjo — el próximo estado del
+               * vocabulario volvería a poder encender las dos. **Con el valor
+               * único, «ausente + fuente» es INEXPRESABLE.**
+               *
+               * `sin_lista` = no hay ingredientes **pero sí alérgenos
+               * declarados** ⇒ **sí hay composición que atribuir**, y la
+               * fuente corresponde. *Es el caso que separa «no hay lista» de
+               * «no hay nada».*
+               */
+              const composicion: 'plegable' | 'no_aplica' | 'ausente' | 'sin_lista' = puedePlegar
+                ? 'plegable'
+                : ficha.composicion_estado === 'no_aplica'
+                  ? 'no_aplica'
+                  : ficha.composicion_estado === 'ausente' ||
+                      (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0)
+                    ? 'ausente'
+                    : 'sin_lista';
+
               /** La advertencia de alérgeno — SIEMPRE a la vista, plegada la
                *  sección o no. Se compone una vez y se monta en las dos
                *  ramas: *dos copias de una advertencia de salud es como se
@@ -1359,21 +1398,24 @@ export default function DespensaProducto() {
                     <Texto variante="seccion">{t('despensa.composicion')}</Texto>
                   )}
 
-                  {puedePlegar ? null : ficha.composicion_estado === 'no_aplica' ? (
+                  {composicion === 'no_aplica' ? (
                     <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
-                  ) : ficha.composicion_estado === 'ausente' ||
-                    (ficha.ingredientes_activos.length === 0 &&
-                      ficha.alergenos.length === 0) ? (
+                  ) : composicion === 'ausente' ? (
                     <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
                   ) : null}
 
                   {advertencia}
 
-                  {/* La fuente: con el plegado, adentro; sin él, a la vista.
-                      `no_aplica` no la lleva — no es un dato que falte. */}
-                  {(puedePlegar ? composicionAbierta : ficha.composicion_estado !== 'no_aplica') ? (
+                  {/* 🔴 `D-876` · LA FUENTE SOLO EXISTE SI HAY ALGO QUE
+                      ATRIBUIR. Con el plegado va adentro; sin él, a la vista.
+                      **`ausente` y `no_aplica` NO la llevan** — *atribuirle a
+                      un fabricante una composición que no declaró es la
+                      contradicción que A midió.* Y ahora sale del MISMO valor
+                      que la voz de arriba, así que las dos no pueden
+                      desacordar. */}
+                  {composicion === 'sin_lista' || (composicion === 'plegable' && composicionAbierta) ? (
                     <>
-                      {puedePlegar ? (
+                      {composicion === 'plegable' ? (
                         <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
                       ) : null}
                       <Texto variante="apoyo">
