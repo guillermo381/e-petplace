@@ -3540,6 +3540,13 @@ function r49(archivos) {
  *  **razón escrita** que hace que la prop parezca viva y enforced — y
  *  por eso nadie la revisa. *Un espejo con una razón que se puede falsar
  *  es peor que uno sin razón, porque la razón hace que nadie lo mire.*
+ *
+ *  **Y su forma más afilada, de la pista C, que es la vuelta de tuerca
+ *  sobre su propia ley del instrumento apagado:**
+ *  > *Un instrumento apagado dice «todo bien». Uno vigilando un cadáver
+ *  > dice «esto importa».* **Es PEOR que el silencio, porque el ruido se
+ *  > lee como cobertura — y nadie audita algo que tiene un invariante
+ *  > cuidándolo.**
  *  Su credencial: convivió con **52 reglas y 4 typechecks en verde**.
  *
  *  ⚠️ **EL DISCRIMINADOR, y no es un detalle de forma:** `destacada`
@@ -3555,9 +3562,30 @@ function r49(archivos) {
  *  por grep* — es la advertencia literal de la cabecera de R48, cobrada.
  *
  *  **Contadores SEPARADOS, jamás sumados** (un agregado sobre objetos
- *  distintos no mide ninguno): `apps/` nace en 1 y es de C/D; `ui/` se
- *  limpió en esta tanda y DURA EN 0. Cuando los dos lleguen a 0 se
- *  retiran en el mismo acto la prop, su guard y esta regla. */
+ *  distintos no mide ninguno): `apps/` nace en 1 y es de **C**; `ui/` se
+ *  limpió en esta tanda y DURA EN 0.
+ *
+ *  ── CÓMO SE RETIRA, Y POR QUÉ NO SE PUEDE TODAVÍA ──────────────────
+ *  **C ya borró su montaje** (`fb28b94e`) y **medido con su parche
+ *  aplicado, este contador da 0** — con NUEVE `destacada` vivos en
+ *  `apps/` que la regla no cuenta, que es la prueba del discriminador
+ *  contra el árbol real y no contra un fixture.
+ *
+ *  🔴 **PERO EL RETIRO ES UN ACTO CON ORDEN, y hacerlo antes rompe
+ *  `main`:** el commit de C **todavía no está en `origin/main`**, así que
+ *  ahí la línea 607 sigue viva. **Sacar la prop del tipo hoy le rompe el
+ *  typecheck a `main`** si estas ramas se mergean en el orden equivocado.
+ *  *Es la clase de L-179: un cambio que quita una superficie se secuencia
+ *  contra lo que todavía la consume, no contra lo que uno tiene en su
+ *  disco.*
+ *
+ *  **La instrucción, cuando `fb28b94e` esté en `origin/main`:** se
+ *  retiran EN EL MISMO COMMIT ① la prop `destacada?: boolean` del tipo,
+ *  ② su guard de invariante (el `filter`/conteo/warning), ③ su lápida
+ *  larga y ④ esta regla con su fixture y su prueba negativa. **Los cuatro
+ *  juntos o ninguno:** dejar el guard sin la prop es un instrumento
+ *  vigilando algo que ya no existe, que es exactamente el defecto que
+ *  esta regla vino a cazar. */
 const BASELINE_R61_APPS = 1
 const BASELINE_R61_UI = 0
 function r61(archivos) {
