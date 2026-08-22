@@ -18579,6 +18579,20 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-349** — **UN TRASPASO ES UN MAPA DE DÓNDE RETOMAR, NO UNA FUENTE DE DATOS VIVOS.** *(Autoría S103-B; depositada por A.)*
+  **Y se cobró en la misma sesión en que se escribió**, que es lo que la vuelve creíble: el traspaso de B llevaba una tabla de ramas sin mergear que **envejeció entre que se armó y que se reportó**. *No por descuido: una lista de pendientes se arma ANTES de que el merge ocurra — es estructural* (`METODO_TRES_PISTAS` §S91-④ ya lo había medido tres veces en un día).
+  ⇒ **Todo documento de traspaso lleva su propia ley de lectura ARRIBA DE TODO:** lo que dice sobre el mundo **se re-mide antes de usarse**; lo que sirve es **dónde retomar y con qué criterio**, que no caduca.
+  **Lo que un traspaso SÍ debe llevar, y por eso vale:** qué mide cada instrumento **y qué NO mide** · las condiciones de uso · las trampas del entorno · lo pendiente **como instrucción ejecutable**. *Todo eso sobrevive; los SHA, los contadores y las listas de pendientes no.*
+  **Su hermana operativa:** la sección de compactación del canon dice lo mismo para el resumen de una sesión. **Un traspaso es el resumen de una pista entera — el mismo riesgo, con más superficie.** Origen: S103-B.
+
+- **L-348** — 🔴 **«MERGEADO» Y «EMPUJADO» SON DOS AFIRMACIONES DISTINTAS — Y LA CLASE NO SE CIERRA RELEYENDO: SE CIERRA DECLARANDO CONTRA QUÉ OBJETO MEDISTE.** *(Autoría de la segunda mitad: S103-B. Firmada por la mesa, 22-ago-2026.)*
+  **① La frontera corrida un paso.** `L-217` fijó que *«en origin» y «en el canon» son dos afirmaciones distintas*. **Falta un escalón antes:** un merge que no se empujó **no está en ninguno de los dos**, y **muere con la máquina**. *El precedente es caro y es de la casa: S92 abrió rescatando cuatro artefactos —la letra del LOOP escrita para ejecutarse ese día, dos skills y el volcado con nueve hallazgos probados— que vivían en `pista/s90-b`, **y el acta de S90 decía «TODO en origin» y era CIERTA**.*
+  ⇒ **La cadena completa: escrito → commiteado → mergeado → EMPUJADO → en el canon.** Cada eslabón se verifica contra su propio objeto, y **`push` se verifica con `ls-remote` contra el remoto, jamás contra la copia local de la ref** — *`origin/main` tiene forma de ref remoto y naturaleza de dato en caché.*
+  **② Y LA MITAD QUE CIERRA LA CLASE, que es de B y vale más que el caso:** dos pistas reportaron lo contrario sobre el mismo hecho —*«está mergeada»* / *«no está»*— y **las dos tenían razón**. A midió `merge-base --is-ancestor <sha> main`; B midió contra `origin/main`. **Dos preguntas distintas, las dos correctas, reportadas con la misma frase.**
+  > ### **Ninguno de los dos estaba desactualizado: medían objetos distintos y los llamaban igual.**
+  🔴 **Por eso `L-166` no alcanza acá.** *«Todo dato vivo se lee al momento de usarlo»* cura el dato que **envejece** — y **los dos habían releído**. Lo que no cura es el dato **correcto medido contra otro referente**, que **se ve idéntico a un acuerdo** hasta que alguien actúa sobre él.
+  ⇒ **Lo exigible: todo reporte sobre estado de repo declara SU OBJETO** — `main` local · `origin/main` · `ls-remote`. **Es la ley de los frenos de S84 (*todo freno declara contra qué midió*) aplicada al reporte entre pistas**, y es igual de barata: una palabra al lado del verbo. Origen: S103, tercer push demorado del día, con una pista bloqueada del otro lado.
+
 - **L-347** — **UN INSTRUMENTO QUE MIDE LA FORMA QUE ÉL ESPERA, EN VEZ DE LA QUE EL ARCHIVO USA, DA VERDE SOBRE NADA.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
   **Tres veces el mismo defecto en UNA sola tanda**, y las tres con síntomas distintos:
   · el reconocedor de secciones **esperaba una sangría que los archivos no tienen** ⇒ **VERDE midiendo CERO secciones**;
@@ -18798,6 +18812,41 @@ el reemplazo listo → el enchufe reusando el motor entero.
 
 **Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
 resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-871 🟡 · UN RATCHET VIGILADO POR LITERAL ES CIEGO A LOS DEFAULTS DE `packages/ui`
+
+🟡 **MEDIA. AUTORIZADA COMO TANDA PROPIA** (founder, 22-ago-2026) — *no de la
+tanda en curso, y para quien tenga contexto.* **Autoría del hallazgo: S103-B,
+sobre un defecto que S103-C encontró consumiéndolo.**
+
+**El caso, medido:** el default de `BotonCopiar` era `variante = 'compacto'`, que
+es la variante **JUBILADA** que `R47` vigila **solo-baja** (38 usos, baseline 39).
+
+🔴 **Y era peor que un uso de más: un DEFAULT no emite el literal
+`variante="compacto"`, así que `R47` NO PODÍA CONTARLO.** La pieza montaba la
+variante jubilada **en cada consumidor**, y **el trinquete no se movía un punto.**
+
+> ### **Una jubilación vigilada por literal es ciega a los defaults de `packages/ui` — y por ahí una variante muerta revive repartida en N pantallas sin que ningún gate se entere.**
+
+*El caso se curó* (`426a3dc3`: el default pasa a `secundario`, que es lo que el
+mensaje de la propia `R47` prescribe por Ley 22c; medido antes y después,
+**38/38**). **Lo que queda abierto es la CLASE.**
+
+**Qué haría la tanda:** ensanchar **`R47` y `R48`** para que barran también los
+**defaults de parámetro** de `packages/ui`, no solo los literales en los
+consumidores.
+
+🔴 **SU FRENO, DECLARADO POR B Y RATIFICADO POR LA MESA — y es la razón por la
+que no se hace de paso:** **toca un ratchet VIVO.** *Un barrido nuevo sobre un
+contador solo-baja puede subir el número de golpe y poner en rojo un juez de la
+casa — y el rojo sería CIERTO, lo que lo vuelve caro de distinguir de una
+regresión.* ⇒ **se hace con su freno: medir el delta ANTES de enganchar, y
+declarar el baseline nuevo como baseline nuevo, jamás editar el viejo para que
+entre** (`L-329`).
+
+**Disparo:** cuando la mesa la convoque con contexto. **No se hace de paso.**
 
 ---
 
