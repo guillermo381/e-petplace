@@ -3538,6 +3538,50 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="copiar (S103) — el glifo, contra sus hermanos de control y contra su pariente">
+          {/* LA COMPARACIÓN ES LA MUESTRA. Arriba a 24 (la grilla de
+              diseño) y abajo a 21 (el gate §2.9), porque el riesgo de este
+              glifo NO se ve grande: es el pariente más cercano del
+              registry —`documentos` es su espejo— y lo que los separa es
+              la HUELLA, que a 21px es justo lo que puede empastarse. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">Hermanos de CONTROL (los cinco sin huella) · 24px</Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={24} registro="tinta" />
+                <Icono nombre="compartir" tamano={24} registro="tinta" />
+                <Icono nombre="descargar" tamano={24} registro="tinta" />
+                <Icono nombre="lapiz" tamano={24} registro="tinta" />
+                <Icono nombre="filtro" tamano={24} registro="tinta" />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">Los mismos a 21px — el gate por ícono (§2.9)</Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={21} registro="tinta" />
+                <Icono nombre="compartir" tamano={21} registro="tinta" />
+                <Icono nombre="descargar" tamano={21} registro="tinta" />
+                <Icono nombre="lapiz" tamano={21} registro="tinta" />
+                <Icono nombre="filtro" tamano={21} registro="tinta" />
+              </View>
+            </View>
+
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">
+                ⚠️ El pariente: `copiar` (control, sin huella) contra `documentos` (mundo, CON
+                huella). Son espejo — si a 21px no se separan, el que se mueve es `copiar`.
+              </Texto>
+              <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+                <Icono nombre="copiar" tamano={24} />
+                <Icono nombre="documentos" tamano={24} />
+                <Icono nombre="copiar" tamano={21} />
+                <Icono nombre="documentos" tamano={21} />
+              </View>
+            </View>
+          </View>
+        </Seccion>
+
         <Seccion titulo="BotonCopiar (S103) — un toque copia, y el botón mismo lo confirma">
           {/* Vive al lado de `CodigoAEscala` a propósito: su consumidor es
               el código de 6 dígitos de DeUna, y la galería debería

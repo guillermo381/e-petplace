@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { View, type LayoutChangeEvent } from 'react-native'
 import { Boton, type BotonTamaño, type BotonVariante } from './Boton'
+import { Icono } from './Icono'
 
 /**
  * BotonCopiar — UN TOQUE COPIA, Y EL BOTÓN MISMO LO CONFIRMA.
@@ -79,12 +80,19 @@ import { Boton, type BotonTamaño, type BotonVariante } from './Boton'
  * corresponde. Al confirmar, el nombre accesible pasa a «Copiado» solo:
  * el cambio de nombre ES el anuncio.
  *
+ * ── EL GLIFO ES OPT-IN, Y NO ES PEREZA ─────────────────────────────────
+ * `copiar` existe en el registry desde S103-B, y aun así el default es
+ * **sin glifo**: la Ley 12 enmendada dice que *el glifo marca lo que
+ * VARÍA dentro de la unidad de barrido*, y un botón de copiar solo al pie
+ * de un código **no tiene hermanos de los que distinguirse** — ahí el
+ * glifo es adorno, y la regla Chanel lo saca. Con `glifo`, la pantalla lo
+ * enciende cuando SÍ tiene vecinos (una fila de acciones donde conviven
+ * copiar, compartir y descargar): esa decisión es de la pantalla, que es
+ * la única que ve la vecindad.
+ *
  * ── LO QUE NO HACE ─────────────────────────────────────────────────────
- * No lleva glifo. El registry b′ no tiene uno de «copiar», y un glifo
- * nuevo exige su propio proceso —hoja de contacto, variantes, gate POR
- * ÍCONO (`DIRECCION_ARTE` §6b)—, que es una tanda aparte y no ésta.
- * Tampoco muestra datos del expediente ⇒ **la escalera §4b no aplica** y
- * se declara en vez de omitirse.
+ * No muestra datos del expediente ⇒ **la escalera §4b no aplica** y se
+ * declara en vez de omitirse.
  */
 
 /**
@@ -123,6 +131,11 @@ export interface BotonCopiarProps {
   vencido?: boolean
   /** Por qué está apagado, para el lector de pantalla. Ver el JSDoc. */
   razonVencido?: string
+  /**
+   * Monta el glifo `copiar` a la izquierda. **Default false a propósito**
+   * — ver el JSDoc: un glifo sin vecindad es adorno.
+   */
+  glifo?: boolean
   /** Telemetría. **Jamás para reiniciar relojes** — ver el JSDoc. */
   onCopiado?: () => void
   variante?: BotonVariante
@@ -136,6 +149,7 @@ export function BotonCopiar({
   etiquetaCopiado,
   vencido = false,
   razonVencido,
+  glifo = false,
   onCopiado,
   variante = 'compacto',
   tamaño = 'md',
@@ -220,6 +234,7 @@ export function BotonCopiar({
         bloque={bloque}
         deshabilitado={apagado}
         razonDeshabilitado={razon}
+        iconoIzq={glifo ? <Icono nombre="copiar" tamano={18} registro="tinta" /> : undefined}
       />
     </View>
   )
