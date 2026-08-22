@@ -2049,6 +2049,7 @@ export type Database = {
           codigo: string
           descripcion: string
           en_sombra: boolean
+          ignora_techo: boolean
         }
         Insert: {
           activo?: boolean
@@ -2058,6 +2059,7 @@ export type Database = {
           codigo: string
           descripcion: string
           en_sombra?: boolean
+          ignora_techo?: boolean
         }
         Update: {
           activo?: boolean
@@ -2067,6 +2069,7 @@ export type Database = {
           codigo?: string
           descripcion?: string
           en_sombra?: boolean
+          ignora_techo?: boolean
         }
         Relationships: [
           {
@@ -3102,6 +3105,44 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cita_desglose: {
+        Row: {
+          cita_id: string
+          congelado_en: string
+          fee_config_id: string | null
+          impuesto: number
+          moneda: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          cita_id: string
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto?: number
+          moneda: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          cita_id?: string
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto?: number
+          moneda?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cita_desglose_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: true
+            referencedRelation: "evento_cita_servicio"
             referencedColumns: ["id"]
           },
         ]
@@ -12386,6 +12427,7 @@ export type Database = {
           authorization_code: string | null
           bin: string | null
           cerrado_en: string | null
+          cita_id: string | null
           clave_idempotencia: string
           compra_id: string | null
           confirmado_por: string | null
@@ -12397,8 +12439,10 @@ export type Database = {
           moneda: string
           monto: number
           motivo_rechazo: string | null
+          pagador_origen: string | null
+          pagador_user_id: string | null
           payload_crudo: Json
-          pedido_id: string
+          pedido_id: string | null
           proveedor: string
           proveedor_referencia: string | null
           proveedor_transaction_id: string | null
@@ -12410,6 +12454,7 @@ export type Database = {
           authorization_code?: string | null
           bin?: string | null
           cerrado_en?: string | null
+          cita_id?: string | null
           clave_idempotencia: string
           compra_id?: string | null
           confirmado_por?: string | null
@@ -12421,8 +12466,10 @@ export type Database = {
           moneda?: string
           monto: number
           motivo_rechazo?: string | null
+          pagador_origen?: string | null
+          pagador_user_id?: string | null
           payload_crudo?: Json
-          pedido_id: string
+          pedido_id?: string | null
           proveedor: string
           proveedor_referencia?: string | null
           proveedor_transaction_id?: string | null
@@ -12434,6 +12481,7 @@ export type Database = {
           authorization_code?: string | null
           bin?: string | null
           cerrado_en?: string | null
+          cita_id?: string | null
           clave_idempotencia?: string
           compra_id?: string | null
           confirmado_por?: string | null
@@ -12445,8 +12493,10 @@ export type Database = {
           moneda?: string
           monto?: number
           motivo_rechazo?: string | null
+          pagador_origen?: string | null
+          pagador_user_id?: string | null
           payload_crudo?: Json
-          pedido_id?: string
+          pedido_id?: string | null
           proveedor?: string
           proveedor_referencia?: string | null
           proveedor_transaction_id?: string | null
@@ -12454,6 +12504,13 @@ export type Database = {
           url_redireccion?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pagos_intentos_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pagos_intentos_compra_id_fkey"
             columns: ["compra_id"]
@@ -17837,20 +17894,34 @@ export type Database = {
       user_preferencias: {
         Row: {
           idioma: string | null
+          medio_pago_preferido: string | null
+          tarjeta_preferida_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           idioma?: string | null
+          medio_pago_preferido?: string | null
+          tarjeta_preferida_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           idioma?: string | null
+          medio_pago_preferido?: string | null
+          tarjeta_preferida_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_preferencias_tarjeta_preferida_id_fkey"
+            columns: ["tarjeta_preferida_id"]
+            isOneToOne: false
+            referencedRelation: "tarjetas_guardadas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -19650,6 +19721,7 @@ export type Database = {
         }
         Returns: string
       }
+      _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }
       _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {
         Args: {
@@ -20871,6 +20943,10 @@ export type Database = {
           p_sector?: string
           p_telefono?: string
         }
+        Returns: Json
+      }
+      guardar_medio_pago_preferido: {
+        Args: { p_medio?: string; p_tarjeta_id?: string }
         Returns: Json
       }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
@@ -22170,6 +22246,10 @@ export type Database = {
       }
       user_tiene_acceso_a_mascota: {
         Args: { p_mascota_id: string }
+        Returns: boolean
+      }
+      user_tiene_acceso_a_mascota_como: {
+        Args: { p_mascota_id: string; p_user_id: string }
         Returns: boolean
       }
       validar_identificacion_fiscal: {
