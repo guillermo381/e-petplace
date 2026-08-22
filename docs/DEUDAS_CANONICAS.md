@@ -19030,6 +19030,57 @@ tiene el producto en la mano.*
 prueba; el día que un vendedor real publique sin cortes, la familia paga el
 descubrimiento en el último paso del checkout.*
 
+> ### ⚠️ **NO LE CARGUEN CORTES A `Clínica Aurora` PARA PROBAR OTRA COSA.**
+> *Advertencia de S103-D, y evita un daño que no se deshace con un `UPDATE`:*
+> **ese vendedor es el ÚNICO caso vivo de «publica sin poder entregar», y es el
+> fixture que esta ficha va a necesitar el día que la mesa elija entre gatear la
+> publicación o filtrar la vista.** Ya existe y no hay que fabricarlo. *Quien le
+> declare turnos «para destrabar el checkout» va a borrar, sin saberlo, el único
+> discriminador de la clase — y el próximo que quiera medirla va a tener que
+> inventar un vendedor, que es exactamente lo que vuelve floja una medición.*
+> **La cura (a) de `D-872` tiene DOS caminos por algo: si hay que destrabar hoy,
+> se sacan sus 18 ofertas de la vitrina — eso conserva el caso.**
+
+---
+
+### D-874 🟠 · UN MÓDULO NATIVO QUE NINGUNA APP DECLARA — ANDA HOY POR UN ACCIDENTE DE `pnpm`
+
+🟠 **MEDIA-ALTA. Hallazgo de S103-B**, verificando que sus gates fueran
+alcanzables (`L-161`). **Dueño: `apps/` ⇒ C, con visto de A** (toca el árbol de
+dependencias del monorepo).
+
+**Lo medido:** `expo-clipboard` —módulo **NATIVO**, el que hace funcionar
+`BotonCopiar`— **no lo declara ninguna app.** Vive **solo como
+`peerDependencies` de `packages/ui`**, y resuelve porque **pnpm auto-instala los
+peers del workspace y los iza a la raíz**: en el lockfile, el importer que lo
+trae es `packages/ui`, **no una app**.
+
+> ### **Funciona en desarrollo, y por eso el hueco es invisible.**
+
+**Por qué no es lo mismo que la Ley 10 del design system, aunque se le parezca:**
+esa ley vigila que **el peer nativo lleve el rango del app**. Acá **el rango está
+bien** — lo que falta es que **alguien lo declare**. *Es la misma ley un piso más
+abajo, y el piso de abajo no tiene guard.*
+
+**El costo concreto, hoy:** `BotonCopiar` **no puede gatearse copiando de verdad
+por OTA** (`L-134`: módulo nativo ⇒ exige build). Y el riesgo hacia adelante es
+peor que el gate: **una build nativa futura podría salir sin él** y nadie se
+entera hasta que alguien toque el botón — *exactamente la clase del APK sin
+`geo.API_KEY` de S80, que vivió tres sesiones invisible.*
+
+**Lo que la pieza SÍ tiene resuelto y hay que no romper:** `require` en
+try/catch y **`HAY_PORTAPAPELES` exportado** ⇒ **sin el nativo el botón nace
+apagado y la pantalla puede explicarlo**, en vez de mostrar un botón muerto.
+*Esa degradación honesta es gateable HOY por OTA, y vale la pena verla.*
+
+**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
+que montan la pieza, con el rango que el peer exige** — y **verificar contra el
+lockfile que el importer pasa a ser la app**, no `packages/ui`. *Declararlo sin
+re-medir el lockfile deja la ficha cerrada sobre la misma duda.*
+
+**Disparo: ANTES de la próxima build nativa** — que es también el tren del gate
+completo de `BotonCopiar`.
+
 ---
 
 ### D-871 🟡 · UN RATCHET VIGILADO POR LITERAL ES CIEGO A LOS DEFAULTS DE `packages/ui`
