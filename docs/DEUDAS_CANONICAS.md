@@ -18579,6 +18579,16 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-336** — **UN OBJETO VEROSÍMIL DEL ORIGEN EQUIVOCADO NO SE CAZA LEYENDO MEJOR: SE CAZA CON DISCRIMINADOR.** *(Firmada por la mesa, 22-ago-2026, sobre tres casos de dos días.)*
+  **La forma, y es la misma en los tres: el instrumento leyó BIEN y contestó BIEN una pregunta que no era la que había que hacer.** *Por eso no hay lectura más atenta que los salve — la salida es correcta; lo que está mal es de dónde vino.*
+  **Los tres casos, medidos:**
+  · **El `PENDING` con monto 0 de DeUna.** Una transacción inexistente vuelve `200 / PENDING / amount 0 / date ""`. **Un fantasma tiene la forma exacta de un pago en curso**, y ninguna lectura del estado los distingue. El discriminador es **otro campo** (`amount > 0`) y **nuestro propio reloj** para el corte — jamás un estado del proveedor.
+  · **El servidor de `main` respondiendo en el puerto 4321.** Cinco `astro` peleando el puerto; el que contestaba estaba montado sobre `main`. La pista veía **404 en las 8 páginas nuevas y 200 en las 4 viejas** — *coherente, creíble, y midiendo el objeto equivocado*. El discriminador no es mirar mejor la respuesta: es **preguntar quién la sirve**.
+  · **`verify-edge-simbolos.mjs` VERDE sobre el `KEY_CLIENT` vivo.** El juez mide «símbolo de MÓDULO usado sin importar»; `KEY_CLIENT` es un identificador libre. **Verde cierto, pregunta más angosta que su propósito** — y ocho eventos del proveedor sin validar durante un día.
+  🔴 **LO EXIGIBLE, en una pregunta: *¿qué resultado tendría este mismo instrumento si el objeto fuera el equivocado?* Si la respuesta es «el mismo», no hay medición: hay una coincidencia.** ⇒ se agrega un campo, un origen o un caso conocido que **separe los dos mundos** antes de creerle al número.
+  **Su parentesco, y por qué NO alcanza con las que ya existen:** `L-321` manda **probar** el instrumento contra un caso conocido —y en los tres casos el instrumento **estaba bien**—; `L-330` manda **declarar** el control —y un control del mismo origen equivocado declara con la misma confianza—; `L-333` cubre la **voz** que promete de más. **Ésta cubre el ORIGEN del objeto medido**, que ninguna de las tres mira. *Los controles curan instrumentos, las leyes curan lectores, los invariantes curan resultados plausibles — y ésta cura la PROCEDENCIA.*
+  Origen: S103 (mesa 104), sobre hallazgos de las pistas A, B y D.
+
 - **L-333** — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR.** *(Autoría S102-B; depositada por A.)*
   > ### **Un verde que promete de más es el que nadie vuelve a mirar.**
   **Su cura es distinta y es barata: no se toca la medición, se baja la línea.** Los dos casos, del mismo día y de las dos pistas: `verificar-pagador` decía *«la policy CONOCE al pagador»* y medía un `ILIKE` sobre el **texto** de la policy ⇒ curado a *«NOMBRA al pagador (precondición — la prueba es ⑤)»*; `verify-apk-contenido` decía *«trae el bundle — **arranca sola**»* y mide que **hay JS que cargar** ⇒ curado a eso.
@@ -18703,6 +18713,34 @@ el reemplazo listo → el enchufe reusando el motor entero.
 
 **Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
 resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-869 🟡 · EL AVISO DEL RECURRENTE PROMETE «SALTAR» Y «MOVER», Y NINGUNA DE LAS DOS EXISTE
+
+🟡 **MEDIA. Dueño: PRODUCTO** (no es deuda técnica).
+
+**Medido (S103, censo de A):** la carga de `avisar_recurrencias_proximas()`
+lleva `'puede': 'saltar, mover o cancelar'`. Las funciones de recurrencia de la
+base son **cuatro** —`configurar_recurrencia`, `alternar_recurrencia`,
+`avisar_recurrencias_proximas`, `ejecutar_recurrencias_vencidas`— y **ninguna
+saltea una entrega ni mueve su fecha.** Solo existe cancelar.
+
+> **Dos tercios de una promesa sin camino no son una funcionalidad pendiente:
+> son una mentira con fecha.**
+
+**Por qué es de PRODUCTO y no de código, que es lo que decide quién la paga:**
+**saltar** un período obliga a decidir **qué pasa con el cobro de ese período**
+(¿no se cobra? ¿se corre?) y **mover** una fecha obliga a decidir **si la
+cadencia se corre o se mantiene**. *Las dos son decisiones de letra que nadie
+firmó* — construirlas «ya que estamos» sería tomarlas sin mesa.
+
+**Cura de v1, ya dictada (`LETRA_COBRO_RECURRENTE` v1.2 §3):** **el aviso deja
+de prometerlas.** La pantalla de la familia ya nació con un solo botón —cortar—,
+así que hoy **el que diverge es el payload, no la superficie**.
+
+**Disparo:** cuando el founder quiera saltar/mover como funcionalidad. **Hasta
+entonces `LETRA_COBRO_RECURRENTE` §8 las declara fuera de v1.**
 
 ---
 
