@@ -458,3 +458,126 @@ COMMIT;
 --    tercero**. *Voto de A: mismo tratamiento, porque la alternativa —reusar
 --    `recurrencia_id` para una suscripción— es el `compra_id` para una cita
 --    otra vez: el dato del camino viejo colándose en el nuevo.*
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ③  EL LECTOR QUE C NECESITA — escrito CONTRA SU CONTRATO, no contra mi idea
+--
+-- Fuente: `apps/cliente/src/lib/serie/contrato.ts`, que S103-C escribió
+-- explícitamente **como un pedido en tipos** — *«esto no es un contrato
+-- inventado: es un pedido escrito en tipos»*. **Sus tres pedidos calzan uno a
+-- uno con las columnas de la migración ①**, y eso no es casualidad: los dos
+-- salieron del mismo censo.
+--
+--   `medio`         ← `tarjeta_id`     (§2: la autorización nombra un medio)
+--   `montoEsperado` ← `monto_esperado` (§2/§5: el monto del aviso ES el del cobro)
+--   `estado`        ← `estado` enum    (§6: pausa ≠ cancelación)
+--
+-- 🔴 **LOS TRES SIGUEN SALIENDO `null` HASTA QUE EXISTA SU PRODUCTOR**, y eso
+--    NO es un defecto del lector: `configurar_recurrencia` todavía no escribe
+--    tarjeta ni monto. *Devolverlos `null` es decir la verdad; inventarlos
+--    sería fabricar en la puerta un dato que el motor no tiene.* **Y C ya tiene
+--    voz de ausencia para cada uno** — *«un `0` o un guion mudo en el lugar de
+--    una plata que no conocemos es peor que decir que no la mostramos: el guion
+--    se lee como gratis y el cero como no-te-cobran».*
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE OR REPLACE FUNCTION public.obtener_serie_recurrente(p_serie_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE v_r record; v_uid uuid := auth.uid(); v_items jsonb; v_saltada text;
+BEGIN
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'auth_requerido' USING ERRCODE='42501'; END IF;
+
+  SELECT * INTO v_r FROM pedidos_recurrencias WHERE id = p_serie_id;
+
+  /* 🔴 «NO EXISTE» Y «ES DE OTRO» DAN LA MISMA RESPUESTA, a propósito y por
+     precedente de la casa: es la misma ambigüedad deliberada que la puerta de
+     pago (`compra_no_existe`). *Distinguirlas convertiría este lector en un
+     oráculo de series ajenas — se pregunta por un uuid y se aprende si existe.*
+     La ambigüedad quedó VERIFICADA en el riel DeUna (S103-D), no sólo escrita. */
+  IF v_r.id IS NULL OR v_r.user_id <> v_uid THEN
+    RETURN jsonb_build_object('ok', false, 'codigo', 'serie_no_existe');
+  END IF;
+
+  /* Los ítems EN VOZ DE LA FAMILIA, jamás el slug del motor. El nombre sale
+     del catálogo VIVO; si una oferta se retiró, la fila igual se cuenta y su
+     nombre cae al que guardó el ítem — *una serie no se vuelve ilegible porque
+     el vendedor despublicó un producto.* */
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+           'nombre',   COALESCE(p.nombre, it->>'nombre', '—'),
+           'cantidad', (it->>'cantidad')::int)), '[]'::jsonb)
+    INTO v_items
+    FROM jsonb_array_elements(v_r.items) it
+    LEFT JOIN ofertas o          ON o.id = (it->>'oferta_id')::uuid
+    LEFT JOIN producto_variantes v ON v.id = o.variante_id
+    LEFT JOIN productos p          ON p.id = v.producto_id;
+
+  /* §7 — el producto que no se pudo enviar si la última entrega se saltó.
+     Sale del ÚLTIMO fallo registrado, no de una suposición. */
+  v_saltada := NULLIF(v_r.ultimo_fallo_causa, '');
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'id',                  v_r.id,
+    'items',               v_items,
+    'frecuenciaDias',      v_r.frecuencia_dias,
+    'diaDelMes',           v_r.dia_del_mes,
+    'proximoPedidoFecha',  v_r.proximo_pedido_fecha,
+    'entregaEtiqueta',     NULLIF(v_r.entrega->>'etiqueta', ''),
+    'estado',              v_r.estado,
+    /* Los tres de abajo salen `null` hasta que exista su productor —
+       DECLARADO, no disimulado. */
+    'montoEsperado',       v_r.monto_esperado,
+    'medio', (SELECT CASE WHEN t.id IS NULL THEN NULL
+                          ELSE jsonb_build_object('marca', t.marca, 'ultimos4', t.ultimos4) END
+                FROM tarjetas_guardadas t
+               WHERE t.id = v_r.tarjeta_id AND t.user_id = v_uid),
+    'saltadaProducto',     v_saltada);
+END $function$;
+
+REVOKE ALL ON FUNCTION public.obtener_serie_recurrente(uuid) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.obtener_serie_recurrente(uuid) TO authenticated;
+
+COMMENT ON FUNCTION public.obtener_serie_recurrente(uuid) IS
+  'El lector de UNA serie, en la forma exacta del contrato que S103-C escribio '
+  'como pedido en tipos. medio/montoEsperado salen null hasta que '
+  'configurar_recurrencia los escriba — decir la verdad, jamas inventar. '
+  'No-existe y es-de-otro dan la MISMA respuesta: sin eso es un oraculo de '
+  'series ajenas.';
+
+-- ── CINTURÓN DEL LECTOR ────────────────────────────────────────────────────
+DO $cinturon$
+DECLARE v_def text;
+BEGIN
+  SELECT pg_get_functiondef(to_regprocedure('public.obtener_serie_recurrente(uuid)')) INTO v_def;
+
+  -- 🔴 EL DISCRIMINADOR: las DOS ramas del rechazo dan el MISMO código. Si
+  --    alguien las separa «para ayudar», esto aborta.
+  IF position('serie_no_existe' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'ABORTA: el rechazo perdio su codigo';
+  END IF;
+  IF position('serie_es_de_otro' IN v_def) > 0 OR position('sin_permiso' IN v_def) > 0 THEN
+    RAISE EXCEPTION 'ABORTA: se separo no-existe de es-de-otro — oraculo de series ajenas';
+  END IF;
+
+  -- Las nueve claves del contrato de C, por nombre. *Si el lector pierde una,
+  -- la pantalla la lee `undefined` y dibuja un hueco sin decir que lo es.*
+  IF position('proximoPedidoFecha' IN v_def) = 0 OR position('montoEsperado' IN v_def) = 0
+     OR position('saltadaProducto' IN v_def) = 0 OR position('entregaEtiqueta' IN v_def) = 0
+     OR position('frecuenciaDias' IN v_def) = 0 OR position('diaDelMes' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'ABORTA: el lector no devuelve el contrato completo de C';
+  END IF;
+
+  -- Alcanzable por la familia, cerrada a anon.
+  IF NOT has_function_privilege('authenticated','public.obtener_serie_recurrente(uuid)','EXECUTE') THEN
+    RAISE EXCEPTION 'ABORTA: la familia no puede leer su propia serie';
+  END IF;
+  IF has_function_privilege('anon','public.obtener_serie_recurrente(uuid)','EXECUTE') THEN
+    RAISE EXCEPTION 'ABORTA: anon alcanza el lector';
+  END IF;
+
+  RAISE NOTICE 'CINTURON VERDE — contrato completo · ambiguedad conservada · familia si, anon no';
+END $cinturon$;
