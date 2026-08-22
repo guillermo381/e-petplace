@@ -1928,7 +1928,7 @@ export const clienteEs = {
     metodoDespacho: 'Envío a domicilio',
     metodoRetiro: 'Retiro en tienda',
     retiroDetalle:
-      'Lo retirás en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
+      'Lo retiras en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
     aDonde: 'A dónde te lo llevamos',
     sinDireccion: 'Todavía no nos contaste tu dirección.',
     agregarDireccion: 'Agregar mi dirección',
