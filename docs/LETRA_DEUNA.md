@@ -1,6 +1,6 @@
 # LETRA_DEUNA.md — e-PetPlace · el segundo riel
 
-> **Versión:** v1.4 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
+> **Versión:** v1.5 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
 > 22-ago-2026 (mesa 104) contra el **ambiente QA real** · **Estado:** RIGE —
 > firmas ①②③ del founder (§11), la ③ **ya no es supuesto: es hecho
 > confirmado por el proveedor**.
@@ -137,6 +137,17 @@ El circuito es el del motor, pieza por pieza:
    (`huerfano_deuna_vencido` o el que la pista fije). **El barrido espacia sus
    consultas por el límite de ~1 req/s, y un `429` no cuenta como intento
    fallido.**
+
+   ⏰ **HORA DECLARADA (firma del founder, 22-ago-2026): `03:00` de Guayaquil**
+   —lejos del cron de avisos de las 08:00—. **Su porqué, porque una hora sin
+   argumento se cambia sin argumento:**
+   · **El barrido es RED DE SEGURIDAD, no camino principal.** El webhook y la
+     consulta activa resuelven en segundos; *si el barrido fuera lo que hace
+     llegar la plata, el problema no sería su horario.*
+   · **A esa hora su ventana de reintentos no compite con clientes pagando en
+     vivo** — y el rate limit de ~1 req/s se reparte entre los dos si coinciden.
+   · **Lo que escale a soporte espera igual a la mañana del founder**, así que
+     correrlo antes no adelanta ninguna resolución: solo adelanta el hallazgo.
 6. **Comprobante por correo** — el requisito de certificación de la casa rige
    para todo medio: id de transacción (su `transactionId`) + `transferNumber`
    (el análogo del código de autorización). Va **a quien pagó** (dictamen
@@ -342,6 +353,12 @@ como dato, no como consulta.
 ---
 
 ## Historial
+
+- **v1.5 (22-ago-2026, mesa 104):** el barrido gana **hora declarada: `03:00`
+  Guayaquil**, lejos del cron de avisos de las 08:00, con su argumento escrito
+  —es red de seguridad y no camino principal; a esa hora no compite por el rate
+  limit con clientes pagando en vivo; y lo que escale a soporte espera igual a
+  la mañana—. *Una hora sin argumento se cambia sin argumento.*
 
 - **v1.4 (22-ago-2026, mesa 104 — sale del parte de C):** **§5 deja de mentir
   sobre de quién es una decisión.** `expiredTime` **es un campo del request**,
