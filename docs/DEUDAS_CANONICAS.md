@@ -18866,6 +18866,97 @@ línea del corte semilla/real; si resulta lo segundo, bloquea el soft launch.*
 
 ---
 
+## 🔬 DIAGNÓSTICO — S103-A, 22-ago-2026. **NINGUNA DE LAS CUATRO HIPÓTESIS.**
+
+**El motor está SANO y contesta bien.** `calcular_promesa_despensa` devuelve
+`ok: true` para **cuatro de los cinco** vendedores con oferta publicada, con
+ventana y cupo respaldado. *La pregunta «¿por qué no hay ventana?» tenía adentro
+una premisa falsa: sí hay ventana — para casi todos.*
+
+**LA CAUSA, medida por llamada directa con discriminador en las dos direcciones:**
+
+| vendedor | `calcular_promesa_despensa(…, now(), NULL, 'estandar')` |
+|---|---|
+| **`Clínica Aurora`** (`de680000…00cc`) | 🔴 `ok:false` · **`sin_turnos_de_entrega`** |
+| `Despensa de Pruebas` (control positivo) | ✅ `ok:true` · hoy 15:00–19:00 · cupo 19/20 |
+
+**Y el cruce que lo vuelve una CLASE y no un caso:**
+
+| vendedor | ofertas **publicadas** | `entrega_turnos` activos | capacidad de reparto |
+|---|---|---|---|
+| Despensa de Pruebas | 452 | 2 | 20 |
+| Tienda Pura | 50 | 2 | 15 |
+| Dueño todos los servicios | 26 | 1 | 10 |
+| **`Clínica Aurora`** | **18** | **0** ← | **20** |
+| DESPENSA DE PRUEBAS S97 | 17 | 2 | 15 |
+
+> ### 🔴 **`Clínica Aurora` tiene 18 productos publicados en la vitrina, VEINTE unidades de capacidad de reparto — y CERO cortes de entrega declarados.**
+
+**Por qué las cuatro hipótesis fallaron, una por una — y esto es lo que hay que
+no repetir:**
+
+| hipótesis | veredicto medido |
+|---|---|
+| sin cupo del vendedor | ❌ **capacidad 20**, consumido 0 |
+| sin zona de cobertura | ❌ **la cobertura NO participa de esta función** — no se la consulta en ninguna rama |
+| sin repartidor configurado | ❌ **tiene repartidor activo**, 20/día, lunes a sábado |
+| fecha fuera de toda ventana | ❌ el camino automático **salta solo** hasta 14 días (`saltos_por_cupo`) |
+
+**La causa real es una quinta que nadie había escrito: el vendedor declaró su
+RECURSO de reparto y nunca sus CORTES.** Son **dos tablas distintas
+—`recursos_reparto` y `entrega_turnos`— y nada las ata**: se puede tener camión
+y no tener horario. *La hipótesis «sin repartidor» estaba tan cerca que se lee
+como la misma cosa, y es justo la que habría mandado a curar la tabla que ya
+estaba bien.*
+
+**El motor se comporta EXACTAMENTE como su letra manda** — su propio comentario
+lo dice: *«Sin turnos declarados no hay promesa: prometer sin corte sería
+inventar una ventana (L-139). El vendedor se configura solo (§2.1) — y hasta que
+lo haga, esto lo dice.»* **No hay defecto de motor. El defecto es de MOMENTO.**
+
+> ### **La vitrina publica 18 productos de un vendedor que el motor ya sabe que no puede entregar — y la persona se entera en el último paso, después de elegir dirección, receptor y teléfono.**
+
+🔴 **Y EL SEGUNDO HALLAZGO ES DEL MISMO TAMAÑO QUE EL PRIMERO — `L-318`,
+MOTOR SIN PUERTA, otra vez.** La pieza que existe **precisamente para decirlo
+antes** —`promesaPorVendedor`, con la firma del founder del 18-ago escrita en su
+cabecera: *«decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es
+información, y la persona todavía puede elegir»*— **tiene CERO consumidores en
+`apps/`.** Medido por grep con control positivo (`calcularPromesaDespensa`
+aparece en `checkout.tsx`; `promesaPorVendedor` no aparece en ninguna parte).
+
+*La firma que resolvía este defecto se dio hace cuatro días, la pieza se
+construyó, y nadie la enchufó. El síntoma que el founder caminó **es** esa firma
+sin cablear.*
+
+**🔴 LO QUE NO MEDÍ, y lo digo porque cambia la fuerza de la conclusión:** **no
+medí que el carrito del founder tuviera un producto de `Clínica Aurora`.** Lo
+que está probado es que **existe una causa suficiente, viva y reproducible que
+produce ese literal exacto** — no que sea la que él pisó. *Para cerrarlo del
+todo hace falta el primer vendedor del carrito de ese recorrido, y ese dato no
+quedó registrado.*
+
+**LAS DOS CURAS, y son de nivel distinto — decide la mesa:**
+
+**(a) EL DATO, hoy** — o `Clínica Aurora` declara sus cortes, o **sus 18 ofertas
+salen de la vitrina de la despensa**. *Una clínica veterinaria vendiendo 18
+productos de despensa es, además, candidata del corte semilla/real.* Destraba el
+camino **hoy** y **no cierra la clase**: el próximo vendedor sin cortes repite
+el defecto entero.
+
+**(b) LA CLASE, y es la que vale** — **enchufar `promesaPorVendedor` en la
+vitrina y en la ficha**, que es lo que la firma del 18-ago ya ordenó. Con eso el
+vendedor sin cortes **lo dice donde todavía se puede elegir otra cosa**, en vez
+de al final. *No hay que construir nada: hay que conectar lo construido.*
+
+**Voto de A: las dos, en ese orden** — (a) porque el camino principal está
+cerrado hoy y cuesta una fila; (b) porque sin ella la ficha vuelve sola.
+**Y (b) NO es de A: es superficie de la despensa** ⇒ dueño natural **C**.
+
+**Lo que queda 🔴 hasta que la mesa firme.** *Lo que deja de ser rojo es el
+diagnóstico: la causa está medida y las curas nombradas.*
+
+---
+
 ### D-871 🟡 · UN RATCHET VIGILADO POR LITERAL ES CIEGO A LOS DEFAULTS DE `packages/ui`
 
 🟡 **MEDIA. AUTORIZADA COMO TANDA PROPIA** (founder, 22-ago-2026) — *no de la
