@@ -20058,3 +20058,46 @@ interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
 > **Y es el ÚNICO paso que puede destapar al actuador ignorando un evento EN SILENCIO** — la variante grave de `L-318`. *Eso no se ve mirando la pantalla: la pantalla se queda esperando, que es lo que haría si el pago todavía no entró.*
 >
 > ⚠️ **Con su precondición declarada, para que nadie lea la demora como falla:** el deploy **pide autorización del founder por tanda**, y **si el webhook no está dado de alta, el pago se confirma POR BARRIDO** — más lento, y funciona.
+
+---
+
+### D-883 🟡 · NADIE PREGUNTA SI LA CONDICIÓN DE UNA GUARDA YA SE CUMPLIÓ
+
+🟡 **MEDIA. Abierta por orden de la mesa** (founder, 22-ago-2026) sobre `L-372`.
+**Dueño: A.**
+
+**El caso que la abre, y lo que lo vuelve una clase:** el cuerpo de
+`ejecutar_recurrencias_vencidas` se negaba con `pasarela_no_afiliada`, y su
+comentario nombraba **el artefacto exacto que lo abriría** — *«el día que la
+pasarela exista (`D-778` muere), este cuerpo cobra»*. **La pasarela existe desde
+S101. Nadie volvió al cuerpo.**
+
+> ### 🔴 **La disciplina de `L-171` —«el orden nombra el ARTEFACTO que abre»— SE CUMPLIÓ, y no alcanzó.**
+> *Nombrar la condición hace la guarda auditable. **No hace que alguien la
+> audite.*** **La ficha que dice «mi condición se cumplió» no existe hasta que
+> alguien la escriba — y el remedio es que la escriba un INSTRUMENTO.**
+
+**Lo que hay que construir: un CENSO INVERSO periódico de guardas con condición
+declarada.** Dos mitades, y ninguna sirve sola:
+
+**① La condición se escribe de forma VERIFICABLE, no en prosa.** *«Cuando la
+pasarela exista» no lo puede evaluar nada. Una marca que nombre el artefacto —
+una función, una tabla, una ficha con su número — sí.*
+
+**② Algo CORRE y pregunta.** Recorre las guardas marcadas y, por cada una,
+evalúa si su artefacto ya existe. **Lo que encuentra no es un error: es una
+lista de guardas que sobreviven a su razón** — *la clase que `L-372` nombra y que
+nadie audita porque «está protegiendo».*
+
+**El precedente de la casa que lo hace barato:** ya existe el patrón de
+`to_regprocedure(…) IS NOT NULL` como gate mecánico —el trigger de la vitrina de
+S78 se abre solo el día que su aviso existe—. *Lo que falta no es la técnica: es
+correrla en la dirección contraria, preguntando por las que ya deberían haberse
+abierto.*
+
+⚠️ **Y su primer habitante ya está medido:** `D-778`, cuya condición se cumplió
+en S101 y **cuya ficha todavía no lo dice**.
+
+**Disparo: la próxima tanda de instrumentos, o antes si aparece una segunda
+guarda vencida.** *Dos ya son una clase.*
+- **L-373** — **EL DISCRIMINADOR DE UN CENSO ES LO REUTILIZABLE; EL CONTEO ES DEL DÍA.** *Firmada por la mesa el 22-ago-2026, sobre dos censos del mismo día que llegaron a números distintos y a la misma forma.* **Un censo que reporta «son 3» envejece con la primera línea que alguien escriba; uno que reporta CÓMO SE DISTINGUEN los 3 de los otros 18 sigue sirviendo el año que viene.** > ### **LOS DOS DISCRIMINADORES, depositados por su valor y no por su resultado:** > **① EL DEL HUECO DE CÓDIGOS (S103-A):** *el hueco vive **solo** donde hay un `as CodigoX` sobre un string del **servidor** MÁS una indexación del mapa.* **Con código LITERAL lo garantiza TypeScript** ⇒ de 21 mapas, **18 son seguros POR CONSTRUCCIÓN, no por suerte**, y los 3 restantes se nombran sin leerlos. > **② EL DEL CENSO DE CONTRASTE (S103-B):** *el censo va sobre **los slots que varían POR CASA**, jamás sobre los literales.* Un par medido contra el valor **fijo** de un tema mide lo que el tema declara, **no lo que la familia ve** — y **«medido como fijo» y «no medido» son la misma falla con dos caras**: las dos producen un verde sobre una superficie que nadie evaluó. > **Y su corolario, que vale para todo instrumento numérico: un par que NO SE PUEDE EVALUAR —un `NaN` sobre un `rgba`— es un VERDE QUE NO SIGNIFICA NADA.** *No falla, no avisa, y suma uno al total.* **Familia de `L-364`: hay que exigirle al instrumento que declare qué no pudo medir, porque callarlo se ve idéntico a haberlo aprobado.**
