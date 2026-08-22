@@ -31,9 +31,23 @@ const DETAIL_MAX = 50;                     // "shorter than or equal to 50"  —
 
 const registro = [];                        // lo que pasó, para el reporte
 
+/* ═══ 🔴 EL SIMULADOR RECUERDA LO QUE CREÓ — y esto lo destapó el ensayo ═════
+   La v1 devolvía SIEMPRE el fantasma en `/info`, existiera o no la
+   transacción. Consecuencia medida en el primer ensayo en seco: el paso del
+   `amount` salió **❌**, y ese ❌ **se lee como una medición** — alguien podría
+   creer que el supuesto ya quedó refutado cuando lo único que pasó es que el
+   instrumento no sabe distinguir.
+   *Un simulador que contesta siempre lo mismo no simula: convierte el ensayo
+   en una tautología, y encima con veredicto.*
+   ⇒ Ahora guarda lo que creó y responde distinto para lo suyo. **Lo que NO
+   sabe —cómo se ve una transacción real— sigue sin saberlo, y por eso el
+   ensayo NO reemplaza al día 1: lo prepara.** */
+const creadas = new Map();   // transactionId → { ref, amount, creado }
+let seq = 0;
+
 // ⚠️ SINTÉTICA — nunca observamos una respuesta exitosa de payment/request.
 const respuestaRequest = (ref) => ({
-  transactionId: '11111111-2222-4333-8444-555555555555',
+  transactionId: `11111111-2222-4333-8444-${String(++seq).padStart(12, '0')}`,
   numericCode: '483920',                    // ⚠️ SINTÉTICO (la firma ① depende de este nombre)
   internalTransactionReference: ref,
   qr: 'data:image/png;base64,SIMULADO',     // ⚠️ SINTÉTICO — reserva sin pantalla
@@ -106,7 +120,18 @@ const servidor = createServer(async (req, res) => {
         message: 'Entity does not exist in system', statusCode: 400,
         errors: [{ code: 2000, reason: `Hierarchy tree parent ${cuerpo.pointOfSale}  not found` }] } } });
     }
-    return json(res, 200, respuestaRequest(cuerpo.internalTransactionReference));
+    {
+      const r = respuestaRequest(cuerpo.internalTransactionReference);
+      /* 🔴 Cada request nace con su PROPIO transactionId. La v1 devolvía uno
+         fijo, y por eso el paso de regeneración salía «mismo txId ⇒ idempotente
+         por referencia» — **una conclusión falsa fabricada por el instrumento**,
+         sobre la pregunta §12.6 que el plan manda MEDIR. */
+      creadas.set(r.transactionId, {
+        ref: cuerpo.internalTransactionReference,
+        amount: Number(cuerpo.amount), creado: new Date().toISOString(),
+      });
+      return json(res, 200, r);
+    }
   }
 
   if (ruta === '/merchant/v1/payment/info') {
@@ -120,10 +145,48 @@ const servidor = createServer(async (req, res) => {
       return json(res, 400, { statusCode: 400, message: { response: {
         message: ['idTransacionReference is required.'], error: 'Bad Request', statusCode: 400 } } });
     }
-    const eco = String(cuerpo.idType) === '1'
-      ? { internalTransactionReference: cuerpo.idTransacionReference, transactionId: '' }
-      : { transactionId: cuerpo.idTransacionReference };
-    return json(res, 200, { ...FANTASMA_REAL, ...eco });   // ✅ el fantasma REAL
+    /* ¿La conoce? Por su id (`"0"`) o por nuestra referencia (`"1"`). */
+    const id = String(cuerpo.idTransacionReference);
+    const hit = String(cuerpo.idType) === '1'
+      ? [...creadas.entries()].find(([, v]) => v.ref === id)
+      : (creadas.has(id) ? [id, creadas.get(id)] : undefined);
+
+    if (!hit) {
+      // ✅ NO la conoce → el fantasma REAL, tal cual QA lo devolvió.
+      const eco = String(cuerpo.idType) === '1'
+        ? { internalTransactionReference: id, transactionId: '' }
+        : { transactionId: id };
+      return json(res, 200, { ...FANTASMA_REAL, ...eco });
+    }
+
+    /* ⚠️ SINTÉTICO Y ES EL CAMPO MÁS DELICADO DEL SIMULADOR: qué devuelve una
+       transacción que SÍ existe y no se pagó. **Nunca lo observamos** — es
+       justamente el PASO 1 del guion del día 1.
+       Acá se asume lo plausible (trae su monto y su fecha) **para que el
+       ensayo pueda correr**, y el guion lo dice: *el ensayo no responde esa
+       pregunta, la deja lista para preguntarla.* */
+    const [txid, v] = hit;
+    return json(res, 200, {
+      ...FANTASMA_REAL, status: 'PENDING',
+      internalTransactionReference: v.ref, transactionId: txid,
+      amount: v.amount, date: v.creado, transferNumber: '',
+      description: 'SINTETICO: transaccion conocida por el simulador',
+    });
+  }
+
+  /* 🔴 `/refund` — el ensayo lo destapó: la v1 no lo tenía y devolvía 404, que
+     el guion leía como «rebota, correcto». *Un 404 de ruta inexistente y un
+     rechazo de negocio se ven parecidos en una tabla de veredictos.* */
+  if (ruta === '/merchant/v1/payment/refund') {
+    if (!['0', '1'].includes(String(cuerpo.idType))) {
+      return json(res, 400, { statusCode: 400, message: { response: {
+        message: ['idType must be one of the following string values: 0, 1'],
+        error: 'Bad Request', statusCode: 400 } } });
+    }
+    // ✅ REAL: el literal del rechazo, que confirma la ventana de mismo día.
+    return json(res, 404, { statusCode: 404, message: 'Http Exception', error: { response: {
+      cancelError: `Transaction not found with transactionId: ${cuerpo.idTransacionReference}.`,
+      reverseError: `The transfer number ${cuerpo.idTransacionReference} is invalid, not found, or only valid for the purchase day. Please verify the number and try again.` } } });
   }
 
   // ══════════ SUPABASE (lo mínimo que la función toca) ══════════

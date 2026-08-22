@@ -352,3 +352,100 @@ a la pregunta #3. **Se declaran ⚪ hasta entonces, no se dan por buenos.**
   N2 y lo escribe A contra el cuerpo vivo.
 - **No se registra el webhook** antes de verificar que el buzón responde 200
   (paso 3 del procedimiento de alta).
+
+---
+
+## §10 · ENSAYO EN SECO — corrido el 22-ago contra el simulador
+
+**Orden de mesa: que el lunes el guion se ejecute, no se lea por primera vez.**
+Se corrió entero **dos veces**. Modo:
+
+```bash
+node scripts/deuna/simulador-local.mjs 8787 &
+DEUNA_SIMULADOR=http://localhost:8787 DEUNA_POS_ENSAYO=9999 \
+  node scripts/deuna/sondeo-qa.mjs
+```
+
+> 🔴 **El modo ensayo NO toca el keychain.** `DEUNA_SIMULADOR` sólo acepta
+> `localhost` (candado en el script) y el POS sale de `DEUNA_POS_ENSAYO`.
+> *Depositar un POS falso «para probar» es exactamente cómo el lunes alguien
+> mide contra QA real con un número inventado.*
+
+### 🔴 LO QUE EL ENSAYO ENCONTRÓ — tres huecos, los tres del INSTRUMENTO
+
+**Ninguno era del guion. Los tres habrían producido veredictos falsos.**
+
+| # | qué pasó | por qué importaba |
+|---|---|---|
+| ① | El simulador devolvía **el fantasma siempre**, existiera o no la transacción ⇒ el paso del `amount` salió **❌** | **Ese ❌ se lee como una medición.** Alguien podría archivar que el supuesto del paso 1 «ya quedó refutado» cuando lo único que pasó es que el instrumento no distingue |
+| ② | `transactionId` **fijo** ⇒ la regeneración salió *«mismo txId ⇒ idempotente por referencia»* | **Una conclusión falsa fabricada por el instrumento**, sobre la pregunta §12.6 que el plan manda **medir** |
+| ③ | `/refund` **no existía** ⇒ 404 leído como *«rebota, correcto»* | *Un 404 de ruta inexistente y un rechazo de negocio se ven parecidos en una tabla de veredictos* |
+
+**Curados los tres** (el simulador recuerda lo que creó, cada request nace con
+su id, y `/refund` responde con el literal real). **Segunda corrida: 9 ✅ · 0 ❌
+· 0 ⚪, 0,3 s.**
+
+> 🔴 **Y ESE VERDE ES LA TRAMPA MÁS PELIGROSA DE TODAS, así que el script ahora
+> la grita:** el tablero de la segunda corrida es **indistinguible** del que
+> produciría una corrida real contra QA. *Un ensayo que termina en verdes se
+> archiva como si hubiera medido.* El script imprime, en modo ensayo:
+> **«ESTOS VEREDICTOS NO SON MEDICIONES · NO copiar a ningún reporte».**
+
+### ⏱ Cronometraje
+
+| tramo | ensayo | estimado contra QA |
+|---|---|---|
+| las 7-9 llamadas | 0,3 s | **~12 s** (espaciado 1,4 s por el rate limit) |
+| pasos 1-4 y 7 | — | **minutos**, sin intervención |
+| **paso 5 (regeneración)** | — | + el tiempo de leer 2 respuestas |
+| **paso 6 (refund)** | — | 🔴 **no acotable — §10.2** |
+
+**El guion sin el refund se corre en menos de diez minutos.**
+
+### §10.1 · Lo que se puede correr SOLO — y es casi todo
+
+**Pasos 1, 2, 3, 4, 5 y 7 no necesitan a nadie.** Se corren con el script, sin
+decisión humana ni pieza de otra pista. *Ése era el objetivo y se cumplió.*
+
+### §10.2 · 🔴 DÓNDE SE TRABA — tres puntos, y hay que saberlos hoy
+
+**① El paso 6 (refund) EXIGE PAGAR DE VERDAD** en la app Deuna de QA.
+No es una llamada más: **necesita una persona con la app instalada, una cuenta
+de QA y el código de 6 dígitos en la mano, dentro de los 3 minutos que vive.**
+⇒ **Es el único paso que no se puede correr solo, y su duración no depende de
+nosotros.** *Si el lunes no hay quién pague, el paso 6 queda ⚪ y se declara —
+no se simula.*
+
+**② El paso 1 puede PARAR TODO** y esa parada **es decisión de mesa, no de
+quien corre.** Si el `amount` viene en 0, la regla de reemplazo (fantasma por
+tiempo en vez de por forma) **mueve una orden firmada**. ⇒ **Quien corra tiene
+que poder alcanzar a la mesa ese día**, o el guion se detiene ahí con su
+medición escrita.
+
+**③ El paso 5 puede abrir trabajo de MOTOR.** Si los dos códigos conviven tras
+regenerar, aparece **riesgo de pago doble** ⇒ decisión de mesa + posible cambio
+en el actuador (**territorio de A**). *No lo resuelve quien corre el guion.*
+
+### §10.3 · Qué se paraleliza
+
+| en paralelo con el guion | quién | por qué se puede |
+|---|---|---|
+| **Mandar el correo a soporte** (`S103-D-PAQUETE-ALTA-WEBHOOK.md` §1) | founder | independiente, y **contiene el pedido del `pointOfSale`** |
+| **N3 + redeploy de `pagos-conciliar`** | A | no depende de estas mediciones |
+| **La pantalla del código** | C | 🔴 **salvo el nombre del campo** — se desbloquea con el **paso 3**, que corre en el primer minuto ⇒ *avisarle apenas salga, no al terminar el guion* |
+| **El alta del webhook** | founder | bloqueada por soporte, no por el guion |
+
+**Lo que NO se paraleliza:** los pasos entre sí. **El 1 puede invalidar al
+resto** y el 2 decide si una cura ya aplicada era mejora o requisito.
+
+### §10.4 · Lo que el ensayo NO probó, y hay que decirlo
+
+**El ensayo prueba que el guion CORRE. No prueba una sola de sus respuestas.**
+
+Lo sintético que el simulador devuelve —la respuesta entera de
+`payment/request`, y **cómo se ve una transacción real sin pagar**— es
+**exactamente lo que el día 1 viene a medir**. *El simulador asume lo plausible
+para que el ensayo pueda correr; si asumiera otra cosa, el ensayo correría
+igual.*
+
+⇒ **El ensayo no reemplaza al día 1: lo prepara.**
