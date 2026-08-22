@@ -135,6 +135,38 @@ function segundosHasta(iso: string): number {
   return Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
 }
 
+/**
+ * 🔴 LA CAUSA DE CADA COMPUERTA — **mapa explícito, no clave interpolada.**
+ *
+ * *Mi primera versión armaba la clave con `` `pago.deunaCausa_${codigo}` ``, y
+ * eso **se salta el riel entero**: las claves del diccionario son tipadas
+ * EXIGIBLES —una clave inexistente rompe el typecheck— y una clave construida
+ * en runtime **no la ve nadie**. El modo de falla no es un error: es la
+ * persona leyendo `pago.deunaCausa_reserva_vencida` en pantalla.*
+ *
+ * Con el mapa, **agregar un código de compuerta sin su voz no compila.**
+ */
+const CAUSA_DE_COMPUERTA = {
+  pago_en_proceso: 'pago.deunaCausaPagoEnProceso',
+  reserva_vencida: 'pago.deunaCausaReservaVencida',
+  vendedor_no_activo: 'pago.deunaCausaVendedorNoActivo',
+  monto_divergente: 'pago.deunaCausaMontoDivergente',
+  compra_sin_pedidos: 'pago.deunaCausaCompraSinPedidos',
+  desglose_incompleto: 'pago.deunaCausaDesgloseIncompleto',
+  /* El resto de los códigos no es compuerta —lo garantiza `FAMILIA_DE` en la
+     costura—, pero el índice tiene que ser total: si alguien mueve un código
+     a `compuerta` sin darle causa, **cae en la voz honesta de defecto nuestro
+     en vez de dejar la pantalla muda.** */
+} as const;
+
+type ClaveCausa = (typeof CAUSA_DE_COMPUERTA)[keyof typeof CAUSA_DE_COMPUERTA];
+
+function causaDeCompuerta(codigo: string): ClaveCausa | 'pago.deunaNuestroCuerpo' {
+  return codigo in CAUSA_DE_COMPUERTA
+    ? CAUSA_DE_COMPUERTA[codigo as keyof typeof CAUSA_DE_COMPUERTA]
+    : 'pago.deunaNuestroCuerpo';
+}
+
 export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaProps) {
   const { t } = useTraduccion();
   const { theme } = useTheme();
@@ -144,10 +176,17 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
      (regla de React), y el early-return vive DESPUÉS. */
   const enEspera = estado.fase === 'esperando';
   const venceEn = enEspera ? estado.venceEn : new Date(0).toISOString();
+  /* 🔴 `null` = **no sabemos cuándo vence el hold**, y es el caso REAL hoy:
+     el contrato de la puerta (§3) dice que el hold lo declara el SUJETO, no
+     el wrapper de DeUna. *Rellenarlo con el reloj del código mezclaría los
+     dos relojes — la pantalla ofrecería «generá otro código» cuando lo que
+     venció fue la reserva, y el código nuevo tampoco serviría.* */
   const holdVenceEn = enEspera ? estado.holdVenceEn : new Date(0).toISOString();
 
   const [restanteCodigo, setRestanteCodigo] = useState(() => segundosHasta(venceEn));
-  const [restanteHold, setRestanteHold] = useState(() => segundosHasta(holdVenceEn));
+  const [restanteHold, setRestanteHold] = useState<number | null>(() =>
+    holdVenceEn === null ? null : segundosHasta(holdVenceEn),
+  );
 
   /* Los dos relojes se leen del MISMO tick — si corrieran en dos intervalos
      podrían reportar estados incoherentes por un segundo, y ese segundo es
@@ -155,13 +194,85 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
   useEffect(() => {
     const timer = setInterval(() => {
       setRestanteCodigo(segundosHasta(venceEn));
-      setRestanteHold(segundosHasta(holdVenceEn));
+      setRestanteHold(holdVenceEn === null ? null : segundosHasta(holdVenceEn));
     }, 1000);
     return () => clearInterval(timer);
   }, [venceEn, holdVenceEn]);
 
   const mm = String(Math.floor(restanteCodigo / 60)).padStart(2, '0');
   const ss = String(restanteCodigo % 60).padStart(2, '0');
+
+  /* ── CARGANDO — todavía no pedimos el código, o está en vuelo.
+     Sin voz de error y sin código inventado: *una pantalla de pago que
+     muestra un hueco donde va el código se lee como defecto del proveedor.* */
+  if (estado.fase === 'cargando') {
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="cuerpo">{t('pago.deunaPidiendoCodigo')}</Texto>
+      </View>
+    );
+  }
+
+  /* ── FALLO · LAS CINCO FAMILIAS (`CONTRATO_WRAPPER_DEUNA` §4) ────────────
+     🔴 **La familia decide la voz, y confundir dos manda a la persona al
+     lugar equivocado.** Las tres que no se pueden «mejorar»:
+
+     ① **`compuerta` NO dice «no se pudo procesar el pago»** — llega con la
+        causa real **y el proveedor nunca se enteró**: es la letra madre de
+        §7, *primero se verifica que se pueda entregar, después se pide la
+        plata*. **Decir que el pago falló ahí sería mentir: nunca se
+        intentó**, y mandaría a soporte por algo que se resuelve rearmando.
+
+     ② **`red` NO ES UN RECHAZO** ⇒ botón de REINTENTAR, jamás soporte. Y
+        `sesion_no_verificable` **jamás dice «cerrá sesión»**: es un 503 de
+        auth y la sesión probablemente esté bien.
+
+     ③ **`ambiguo` NO SE AFINA.** «No existe o es de otro» dan la misma
+        respuesta A PROPÓSITO — *distinguirlas convertiría la puerta en un
+        oráculo de compras ajenas.*
+
+     Y `nuestro` **no ofrece reintentar**: *pedirle que reintente algo que no
+     va a cambiar es hacerle perder el tiempo con cara de ayuda.* */
+  if (estado.fase === 'fallo') {
+    const reintentable = estado.familia === 'red';
+    return (
+      <View style={{ gap: spacing[3], alignItems: 'center' }}>
+        <Texto variante="titulo">
+          {t(
+            estado.familia === 'compuerta'
+              ? 'pago.deunaCompuertaTitulo'
+              : reintentable
+                ? 'pago.deunaRedTitulo'
+                : 'pago.deunaFalloTitulo',
+          )}
+        </Texto>
+        <Texto variante="cuerpo">
+          {t(
+            estado.familia === 'compuerta'
+              ? causaDeCompuerta(estado.codigo)
+              : estado.familia === 'red'
+                ? 'pago.deunaRedCuerpo'
+                : estado.familia === 'ambiguo'
+                  ? 'pago.deunaAmbiguoCuerpo'
+                  : estado.familia === 'sesion'
+                    ? 'pago.deunaSesionCuerpo'
+                    : estado.familia === 'rechazo'
+                      ? 'pago.deunaRechazoCuerpo'
+                      : 'pago.deunaNuestroCuerpo',
+          )}
+        </Texto>
+        {reintentable ? (
+          <Boton variante="secundario" etiqueta={t('pago.deunaReintentar')} onPress={onGenerarNuevo} />
+        ) : estado.familia === 'compuerta' || estado.familia === 'ambiguo' ? (
+          /* La compuerta y el ambiguo se resuelven VOLVIENDO, no en soporte:
+             la reserva se rearma y la compra ajena no existe para vos. */
+          <Boton variante="secundario" etiqueta={t('pago.deunaVolver')} onPress={onSoporte} />
+        ) : (
+          <Boton variante="secundario" etiqueta={t('cuenta.soporteBoton')} onPress={onSoporte} />
+        )}
+      </View>
+    );
+  }
 
   /* ── APROBADA (§6: `APPROVED` / webhook verificado) ──────────────────────
      La voz del éxito. **Esta pantalla NO la declara por su cuenta**: llega
@@ -205,6 +316,10 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
      (§5: «Hold muerto → no nacen más códigos, compuerta 1»), así que se
      evalúa PRIMERO: ofrecer «generar otro» sobre un hold vencido sería
      ofrecer lo que el servidor va a rechazar. */
+  /* 🔴 `null` NO entra acá, y es deliberado: **no saber cuándo vence el hold
+     no es lo mismo que saber que venció.** Con `null` la pantalla sigue
+     ofreciendo el código, que es lo único que sí conoce. *Tratar «no sé» como
+     «venció» mandaría a rearmar una reserva que probablemente esté viva.* */
   if (restanteHold === 0) {
     return (
       <View style={{ gap: spacing[3], alignItems: 'center' }}>

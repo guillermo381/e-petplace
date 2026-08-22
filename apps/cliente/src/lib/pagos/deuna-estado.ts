@@ -37,7 +37,111 @@
  * base, cero llamadas a QA. *Compatible con la veda 76(g) de A.*
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+import {
+  pedirCodigoDeunaCita,
+  pedirCodigoDeunaCompra,
+  type CodigoDeuna,
+  type SujetoDeuna,
+} from '@epetplace/api';
+
+/**
+ * 🔴 LAS CINCO FAMILIAS DE FALLO — `CONTRATO_WRAPPER_DEUNA` §4.
+ *
+ * **Cada una pide una voz distinta, y confundir dos manda a la persona al
+ * lugar equivocado.** Las dos que el contrato marca como intocables:
+ *
+ * · **`compuerta` llega con LA CAUSA REAL y el proveedor NUNCA SE ENTERÓ** —
+ *   es la letra madre de §7: *primero se verifica que se pueda entregar,
+ *   después se pide la plata.* **Decir «no se pudo procesar el pago» acá
+ *   sería mentir: el pago nunca se intentó.**
+ * · **`red` NO ES UN RECHAZO.** Se reintenta. Y `sesion_no_verificable`
+ *   **jamás dice «cerrá sesión»**: es un 503 de auth, la sesión
+ *   probablemente esté bien.
+ */
+export type FamiliaDeuna =
+  /** ① Defecto NUESTRO: no hizo nada mal y no puede arreglarlo. Disculpa +
+   *  soporte, **jamás «reintentá»** — no va a cambiar. */
+  | 'nuestro'
+  /** ② La COMPUERTA: nuestro motor diciendo que no se puede entregar. */
+  | 'compuerta'
+  /** ③ El PROVEEDOR rechazó — viene con `motivo`. */
+  | 'rechazo'
+  /** ④ La RED: nadie falló. **REINTENTAR.** */
+  | 'red'
+  /** ⑤ AMBIGUO A PROPÓSITO: «no existe O es de otro». **No se afina** —
+   *  distinguirlas convertiría la puerta en un oráculo de compras ajenas. */
+  | 'ambiguo'
+  /** El 401: no es defecto de nadie. Volver a entrar. */
+  | 'sesion';
+
+/**
+ * 🔴 **EL MAPA ES `Record<CodigoDeuna, …>` A PROPÓSITO, Y ES LA DEFENSA
+ * ENTERA DE ESTE ARCHIVO.**
+ *
+ * **El caso que lo justifica ya ocurrió y está escrito en el tipo de A:** la
+ * lista de códigos se armó contra un contrato a mano que declaraba **10 de
+ * los 12** que la puerta emite, y `monto_invalido` **habría quedado sin voz**
+ * — *un `switch` con `default` habría compilado diciendo que cubrió todo.*
+ *
+ * **Con `Record` exhaustivo, agregar un código al tipo de A ROMPE MI
+ * TYPECHECK** hasta que alguien decida su familia. *No es prolijidad: es la
+ * diferencia entre enterarse al compilar y enterarse por una persona mirando
+ * una pantalla que no sabe qué decirle.*
+ */
+/**
+ * 🔴 **Y EL TIPO ES MÁS ANCHO QUE `CodigoDeuna` — LO DESCUBRIÓ EL TYPECHECK,
+ * NO YO.**
+ *
+ * `ResultadoWrapper` agrega **`error_desconocido`** y **`datos_inconsistentes`**
+ * a los códigos del dominio. **Son dos que `CodigoDeuna` no lista y que el
+ * wrapper sí puede devolver** ⇒ con `Record<CodigoDeuna, …>` a secas,
+ * `FAMILIA_DE[codigo]` habría dado **`undefined` en runtime** y la pantalla
+ * habría quedado sin voz **justo en el fallo que menos sabemos explicar**.
+ *
+ * *Es el mismo agujero que el mapa vino a cerrar, entrando por la otra
+ * puerta: no por un código nuevo del dominio, sino por la envoltura común.*
+ * **Los dos son DEFECTO NUESTRO** — `datos_inconsistentes` es el wrapper
+ * diciendo que la respuesta no tenía la forma prometida, y `error_desconocido`
+ * es literalmente «no sé»: *ofrecer «reintentá» sobre un fallo sin nombre es
+ * prometer una cura que no se midió.*
+ */
+type CodigoDeFallo = CodigoDeuna | 'error_desconocido' | 'datos_inconsistentes';
+
+const FAMILIA_DE: Record<CodigoDeFallo, FamiliaDeuna> = {
+  error_desconocido: 'nuestro',
+  datos_inconsistentes: 'nuestro',
+  // ① nuestro — la persona no hizo nada mal
+  datos_invalidos: 'nuestro',
+  monto_no_se_recibe: 'nuestro',
+  servidor_sin_configurar: 'nuestro',
+  /** 409 · el desglose existe y su total no es > 0. Nuestro. */
+  monto_invalido: 'nuestro',
+  /** 405 · improbable desde acá (siempre POST), pero la puerta lo emite. */
+  metodo_no_permitido: 'nuestro',
+  // ② compuerta — nuestro motor, y el proveedor ni se enteró
+  pago_en_proceso: 'compuerta',
+  reserva_vencida: 'compuerta',
+  vendedor_no_activo: 'compuerta',
+  monto_divergente: 'compuerta',
+  compra_sin_pedidos: 'compuerta',
+  desglose_incompleto: 'compuerta',
+  // ③ el proveedor rechazó
+  no_se_pudo_completar: 'rechazo',
+  // ④ la red — NO es rechazo
+  sin_respuesta: 'red',
+  sesion_no_verificable: 'red',
+  // ⑤ ambiguo a propósito
+  compra_no_existe: 'ambiguo',
+  cita_no_existe: 'ambiguo',
+  // el 401
+  sin_sesion: 'sesion',
+};
+
+export function familiaDeFallo(codigo: CodigoDeFallo): FamiliaDeuna {
+  return FAMILIA_DE[codigo];
+}
 
 /**
  * Los estados que la PANTALLA distingue, derivados de la tabla §6 de
@@ -56,15 +160,36 @@ export type EstadoDeUna =
       codigo: string;
       /** 🔴 INSTANTE ISO del vencimiento del código — **del servidor**. */
       venceEn: string;
-      /** INSTANTE ISO del hold del sujeto (stock o agenda). */
-      holdVenceEn: string;
+      /**
+       * INSTANTE ISO del hold del sujeto (stock o agenda).
+       *
+       * 🔴 **`null` = NO LO SABEMOS, y es el caso real hoy.** El contrato §3
+       * es explícito: **el hold lo dice el SUJETO, no el wrapper de DeUna** —
+       * éste solo devuelve el reloj del código. *Rellenarlo con `expiraEn`
+       * mezclaría los dos relojes, que es exactamente lo que el contrato
+       * prohíbe: la pantalla ofrecería «generá otro código» cuando lo que
+       * venció fue la reserva, y el código nuevo tampoco serviría.*
+       *
+       * **Con `null` la pantalla no puede afirmar nada sobre el hold** — que
+       * es la verdad — en vez de afirmar algo falso con cara de dato.
+       */
+      holdVenceEn: string | null;
     }
   /** `APPROVED` / webhook `SUCCESS` **verificado por consulta activa**. */
   | { fase: 'aprobada' }
   /** 🔴 `NOT_FOUND` dentro de ventana · `REVERSED_FAILED`.
    *  §6: *hallazgo con nombre — jamás voz de éxito ni silencio*, y
    *  `REVERSED_FAILED` **jamás se resuelve solo**. */
-  | { fase: 'hallazgo'; nombre: string };
+  | { fase: 'hallazgo'; nombre: string }
+  /** 🔴 No se pudo pedir el código. **La familia viaja con el fallo**, porque
+   *  es lo que decide la voz — y `codigo` va al lado **sin traducirse**, para
+   *  que soporte y el tablero cuenten lo mismo que dice el motor.
+   *
+   *  ⚠️ **`cargando` es una fase y no un booleano suelto** por lo mismo que
+   *  el resto de la unión: *un `cargando` al lado del estado deja expresable
+   *  «cargando y aprobada a la vez».* */
+  | { fase: 'fallo'; familia: FamiliaDeuna; codigo: CodigoDeFallo; motivo?: string }
+  | { fase: 'cargando' };
 
 /* ════════════════════════════════════════════════════════════════════════
    ☠️ ANDAMIO DE ENSAYO — muere entero cuando llegue el `pointOfSale`.
@@ -117,20 +242,69 @@ export type GuionDeEnsayo = keyof typeof ENSAYO;
  * @param guion **solo del andamio** — desaparece con él. La firma real va a
  *        recibir el sujeto (`{tipo:'compra'|'cita', id}`), como `cobrar()`.
  */
-export function useEstadoDeUna(guion: GuionDeEnsayo): {
+export function useEstadoDeUna(entrada: SujetoDeuna | { ensayo: GuionDeEnsayo }): {
   estado: EstadoDeUna;
-  /** Pide un código nuevo (§5). En el ensayo, renueva el reloj en memoria. */
+  /** Pide un código nuevo (§5) — **el reloj del CÓDIGO, jamás el del hold**. */
   regenerar: () => void;
 } {
   const [semilla, setSemilla] = useState(0);
+  const [real, setReal] = useState<EstadoDeUna>({ fase: 'cargando' });
+  const esEnsayo = 'ensayo' in entrada;
 
-  /* El estado se re-deriva al regenerar. `useMemo` y no `useState` porque
-     **el instante de vencimiento se calcula UNA vez por código** — recalcularlo
-     en cada render movería el reloj hacia adelante para siempre y la cuenta
-     regresiva nunca bajaría. */
-  const estado = useMemo<EstadoDeUna>(() => ENSAYO[guion](), [guion, semilla]);
+  /* El estado de ensayo se re-deriva al regenerar. `useMemo` y no `useState`
+     porque **el instante de vencimiento se calcula UNA vez por código** —
+     recalcularlo en cada render movería el reloj hacia adelante para siempre y
+     la cuenta regresiva nunca bajaría. */
+  const deEnsayo = useMemo<EstadoDeUna | null>(
+    () => (esEnsayo ? ENSAYO[(entrada as { ensayo: GuionDeEnsayo }).ensayo]() : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [esEnsayo, esEnsayo ? (entrada as { ensayo: GuionDeEnsayo }).ensayo : null, semilla],
+  );
 
-  return { estado, regenerar: () => setSemilla((s) => s + 1) };
+  const sujetoTipo = esEnsayo ? null : (entrada as SujetoDeuna).tipo;
+  const sujetoId = esEnsayo ? null : (entrada as SujetoDeuna).id;
+
+  useEffect(() => {
+    if (sujetoTipo === null || sujetoId === null) return;
+    let vigente = true;
+    setReal({ fase: 'cargando' });
+    void (sujetoTipo === 'compra'
+      ? pedirCodigoDeunaCompra(sujetoId)
+      : pedirCodigoDeunaCita(sujetoId)
+    ).then((r) => {
+      if (!vigente) return;
+      if (r.ok) {
+        setReal({
+          fase: 'esperando',
+          codigo: r.data.codigo,
+          /* 🔴 EL RELOJ DEL CÓDIGO, y **solo** ése. `holdVenceEn` NO sale de
+             acá: el contrato §3 dice que **el hold lo dice el sujeto, no este
+             wrapper**. *Rellenarlo con `expiraEn` haría que la pantalla
+             ofreciera «generá otro código» cuando lo que venció fue la
+             reserva — y el código nuevo tampoco serviría.* */
+          venceEn: r.data.expiraEn,
+          holdVenceEn: null,
+        });
+        return;
+      }
+      setReal({
+        fase: 'fallo',
+        familia: familiaDeFallo(r.codigo),
+        /* El código viaja SIN traducir — §4: *para que un tablero cuente lo
+           mismo que el motor dice.* */
+        codigo: r.codigo,
+        motivo: 'motivo' in r && typeof r.motivo === 'string' ? r.motivo : undefined,
+      });
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [sujetoTipo, sujetoId, semilla]);
+
+  return {
+    estado: deEnsayo ?? real,
+    regenerar: () => setSemilla((s) => s + 1),
+  };
 }
 
 /**

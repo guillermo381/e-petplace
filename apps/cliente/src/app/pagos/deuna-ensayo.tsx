@@ -42,7 +42,7 @@ export default function DeUnaEnsayo() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const [guion, setGuion] = useState<GuionDeEnsayo>('esperando');
-  const { estado, regenerar } = useEstadoDeUna(guion);
+  const { estado, regenerar } = useEstadoDeUna({ ensayo: guion });
 
   if (!__DEV__) {
     return (

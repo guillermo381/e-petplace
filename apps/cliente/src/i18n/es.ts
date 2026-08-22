@@ -1620,6 +1620,32 @@ export const clienteEs = {
     deunaHoldVencido: 'El tiempo que apartamos se terminó. No te cobramos nada.',
     /* §6 · `APPROVED` verificado. La pantalla NO lo declara: lo dice el
        servidor y ella lo dibuja. */
+    // 🔴 S103-C · LAS CINCO FAMILIAS DE FALLO (CONTRATO_WRAPPER_DEUNA §4).
+    // Cada familia tiene voz propia porque cada una manda a la persona a un
+    // lugar distinto: soporte, reintentar, o volver atrás.
+    deunaPidiendoCodigo: 'Pidiendo tu código…',
+    deunaFalloTitulo: 'No pudimos generar tu código',
+    // ② LA COMPUERTA — nuestro motor. El proveedor NUNCA se enteró, así que
+    // el título no puede decir «falló el pago»: el pago no se intentó.
+    deunaCompuertaTitulo: 'Antes de cobrarte, algo cambió',
+    deunaCausaPagoEnProceso: 'Ya hay un pago en curso para esta compra. Espera un momento y vuelve a intentarlo.',
+    deunaCausaReservaVencida: 'La reserva venció y soltamos los productos. Vuelve a armar tu pedido.',
+    deunaCausaVendedorNoActivo: 'Este vendedor no está recibiendo pedidos ahora mismo.',
+    deunaCausaMontoDivergente: 'El total cambió desde que empezaste. Vuelve atrás para verlo actualizado.',
+    deunaCausaCompraSinPedidos: 'Esta compra quedó sin productos. Vuelve a armarla.',
+    deunaCausaDesgloseIncompleto: 'Nos falta información del total para poder cobrarte. Vuelve atrás e inténtalo otra vez.',
+    // ④ LA RED — no es rechazo. Y jamás dice «cerrá sesión».
+    deunaRedTitulo: 'No pudimos conectarnos',
+    deunaRedCuerpo: 'No es un rechazo: no llegamos a preguntar. Prueba de nuevo.',
+    deunaReintentar: 'Probar de nuevo',
+    // ① DEFECTO NUESTRO — jamás «reintentá»: no va a cambiar.
+    deunaNuestroCuerpo: 'Es un problema nuestro y no se arregla reintentando. Escríbenos y lo resolvemos.',
+    // ③ EL PROVEEDOR RECHAZÓ
+    deunaRechazoCuerpo: 'Deuna no pudo completar el cobro. Escríbenos y lo revisamos.',
+    // ⑤ AMBIGUO A PROPÓSITO — «no existe o es de otro». No se afina.
+    deunaAmbiguoCuerpo: 'No encontramos esta compra. Vuelve atrás y prueba de nuevo.',
+    deunaSesionCuerpo: 'Tu sesión terminó. Vuelve a entrar para seguir.',
+    deunaVolver: 'Volver',
     deunaAprobada: 'Pago confirmado',
     deunaAprobadaCuerpo: 'Listo, recibimos tu pago.',
     /* 🔴 §6 · `NOT_FOUND` en ventana y `REVERSED_FAILED`. Defecto NUESTRO: no
