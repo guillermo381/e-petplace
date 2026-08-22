@@ -25,6 +25,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+/* El motivo del rechazo se lee de la forma REAL del error de DeUna, que viene
+   anidado. Vive aparte para poder probarlo contra los errores grabados. */
+import { motivoDeError } from './_motivo.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -37,9 +40,15 @@ const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 /* 🔴 QA Y PDN SON HOSTS DISTINTOS Y EL AMBIENTE LO DECIDE UN SECRET, jamás una
    bandera del request. *Una bandera compartida entre la prueba y la plata es un
    solo error de configuración de distancia.* (misma ley que el buzón de Nuvei) */
+/* 🔴 EL OVERRIDE EXISTE PARA EL SIMULADOR LOCAL, Y TIENE CANDADO:
+   **en producción se ignora, siempre.** Sin ese candado, una variable de
+   entorno mal puesta podría mandar cobros reales a un host que no es el
+   proveedor. *Una perilla de pruebas que también funciona en producción no es
+   una perilla de pruebas: es un agujero con buenas intenciones.* */
+const OVERRIDE = Deno.env.get('DEUNA_BASE_URL') ?? '';
 const BASE = AMBIENTE === 'produccion'
   ? 'https://apis-merchant.pdn.deunalab.com'
-  : 'https://apis-merchant.qa.deunalab.com';
+  : (OVERRIDE || 'https://apis-merchant.qa.deunalab.com');
 
 /* 🔴 SIN EL `api/`. Medido contra QA: `/merchant/api/v1/payment/*` devuelve 404
    y `/merchant/v1/payment/*` responde. La doc del proveedor dice lo primero.
@@ -218,10 +227,10 @@ Deno.serve(async (req) => {
     /* 🔴 EL MOTIVO JAMÁS QUEDA NULL (L-316), con `http_<status>` de último
        recurso. Un rechazo sin motivo obliga a abrir el crudo, y nadie lo abre
        cuando hay una explicación plausible a mano. */
-    const motivo = [
-      (resp as { message?: unknown }).message, !txId && 'sin transactionId',
-      !codigo && 'sin numericCode',
-    ].filter(Boolean).map(String).join(': ').slice(0, 400) || `http_${status}`;
+    const faltantes = [!txId && 'sin transactionId', !codigo && 'sin numericCode']
+      .filter(Boolean).join(' · ');
+    const motivo = [motivoDeError(resp, status), faltantes]
+      .filter(Boolean).join(' | ').slice(0, 400);
     await db.from('pagos_intentos').update({
       estado: 'rechazado', motivo_rechazo: motivo,
       cerrado_en: new Date().toISOString(), payload_crudo: resp,
