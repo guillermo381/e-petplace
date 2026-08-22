@@ -18579,6 +18579,13 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-337** — **UN GATE QUE CORROMPE EL REPO CADA VEZ QUE CORRE ES PEOR QUE NO TENER GATE.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **El caso, medido:** `deno` corrido **dentro del monorepo** no solo lee — **escribe**: migra su configuración y **agrega una clave `workspaces` al `package.json` raíz** (*«Migrated its workspace configuration into…»*), además de comerse el salto de línea final. *La casa usa **pnpm workspaces**, así que esa clave es **una segunda declaración del mismo hecho**, y el día que difieran gana la que lea la herramienta que estés usando.*
+  🔴 **Y su modo de falla es el peligroso: el cambio queda SIN COMMITEAR**, listo para viajar dentro del commit de otra cosa — con el índice compartido de tres pistas, eso es 76(f2) esperando a pasar. **Le ocurrió a DOS pistas el mismo día:** B lo cazó porque su árbol quedó sucio y lo revirtió; **D lo tenía vivo en su worktree** y se le avisó desde afuera.
+  ⇒ **Todo chequeo con una herramienta que pueda escribir corre sobre COPIA, en directorio temporal FUERA del repo.** *Correrla «con cuidado» adentro no alcanza: el efecto no depende de la intención.*
+  **La forma general, que es lo reutilizable:** *un instrumento de verificación tiene que ser **de solo lectura sobre lo que verifica**, y si no puede serlo, se lo aísla.* **La pregunta que lo caza antes de instalarlo: ¿qué ESCRIBE esta herramienta cuando la corro?** — y no se contesta leyendo su descripción, que habla de lo que mide, sino mirando el árbol después de la primera corrida.
+  **Su parentesco:** hermana de la ley de los verdes flojos (S95) por el lado contrario — *allá el instrumento medía mal y había que curarlo; acá mide bien y **el daño lo hace su efecto secundario**, que ningún resultado del gate va a reportar.* Origen: S103-B, al jubilar `verify-edge-simbolos` por `deno check`.
+
 - **L-336** — **UN OBJETO VEROSÍMIL DEL ORIGEN EQUIVOCADO NO SE CAZA LEYENDO MEJOR: SE CAZA CON DISCRIMINADOR.** *(Firmada por la mesa, 22-ago-2026, sobre tres casos de dos días.)*
   **La forma, y es la misma en los tres: el instrumento leyó BIEN y contestó BIEN una pregunta que no era la que había que hacer.** *Por eso no hay lectura más atenta que los salve — la salida es correcta; lo que está mal es de dónde vino.*
   **Los tres casos, medidos:**
@@ -18750,6 +18757,30 @@ sido el defecto de al lado: un gate que esconde lo que no mide.*
 **Disparo:** cuando alguien toque una de esas siete funciones, o cuando se
 decida auditar el tipado de edge functions como frente propio. **Hasta
 entonces, verlos en la salida del gate es lo correcto, no una alarma.**
+
+> ### ⚠️ CONDICIÓN DE USO DEL INSTRUMENTO QUE LOS MIDE — y no es prolijidad
+>
+> 🔴 **`deno` dentro del monorepo NO SOLO LEE: ESCRIBE.** Al correrlo sobre el
+> repo, migra su configuración y **agrega una clave `workspaces` al
+> `package.json` raíz** (*«Migrated its workspace configuration into…»*), además
+> de comerse el salto de línea final.
+>
+> **Es peligroso por partida doble:** esta casa usa **pnpm workspaces**
+> (`pnpm-workspace.yaml`), así que esa clave es **una segunda declaración del
+> mismo hecho** —y el día que difieran gana la que lea la herramienta que estés
+> usando—; y **queda sin commitear**, lista para viajar dentro del commit de
+> otra cosa.
+>
+> **Medido el 22-ago: le pasó a DOS pistas el mismo día.** B lo cazó porque su
+> árbol quedó sucio y lo revirtió; **D lo tenía vivo en su worktree sin
+> commitear** y se le avisó. Los otros dos worktrees estaban en cero.
+>
+> ⇒ **Todo chequeo con `deno` corre sobre COPIA, en directorio temporal FUERA
+> del repo.** Correrlo «con cuidado» adentro no alcanza: el efecto no depende de
+> la intención.
+>
+> **La ley, de B, y vale más que el caso:** *un gate que corrompe el repo cada
+> vez que corre es peor que no tener gate.*
 
 ---
 

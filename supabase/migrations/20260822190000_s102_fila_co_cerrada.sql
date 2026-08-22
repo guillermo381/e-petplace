@@ -35,16 +35,47 @@ END $guard$;
 -- `activo=false` es lo que la saca del resolutor.
 -- `vigencia_hasta` deja la historia coherente: rigió hasta hoy.
 -- `notas` es la MARCA — el porqué viaja con el dato, no solo en un acta.
+/* 🔴 S103-A — LA LÍNEA QUE EL FRENO OBLIGÓ A AGREGAR, con su firma.
+   **El primer intento de esta migración ABORTÓ** (22-ago): `chk_fee_pedido_declara_base`
+   rebotó el UPDATE con `23514`. La causa no era el CHECK: era una lectura mía de
+   `NOT VALID`.
+
+   > **`NOT VALID` no indulta a la FILA: indulta al PASADO.** Exime del escaneo
+   > inicial, pero **toda escritura posterior sobre esa fila la vuelve a someter.**
+
+   *Una fila «exenta» deja de estarlo en el momento en que la tocás — y tocarla es
+   exactamente lo que esta migración viene a hacer.*
+
+   **La salida, firmada por el founder el 22-ago con el voto de la pista:
+   `base: null`.** Las otras dos se descartaron y su razón queda escrita:
+     · inventar una base (`total_con_impuesto`) para una fila que estamos CERRANDO
+       sería fabricar un dato de plata que nadie decidió;
+     · validar el constraint primero es otra tanda y **merece su propia firma**
+       (lo dice la propia tanda de S102 en su §⑦).
+
+   **El porqué del founder, al pie de la letra:** *Ecuador es la única operación
+   viva, la responsable es la sociedad ecuatoriana desde el 14-ago, y **un número
+   colombiano inventado se lee como cierto la próxima vez que alguien lo mire**.*
+
+   > ### **Hueco declarado antes que dato falso** — la misma ley que acaba de regir en las páginas legales.
+
+   `?` mide EXISTENCIA de la clave, no su valor ⇒ `{"base": null}` **satisface el
+   CHECK diciendo la verdad: esta fila nunca declaró una base.** */
 UPDATE public.fee_configs
    SET activo         = false,
        vigencia_hasta = now(),
+       parametros     = parametros || '{"base": null}'::jsonb,
        notas          = 'S102-B (21-ago-2026): CERRADA por firma del founder. '
                      || 'Llevaba el 14 % DEROGADO (S95 firmó 10 % para EC y cerró la fila EC, '
                      || 'y esta quedo abierta) y ademas NO declaraba `base`, exenta del CHECK '
                      || 'chk_fee_pedido_declara_base porque nacio NOT VALID. '
                      || 'Colombia no esta en v1 (MODELO_DESPENSA: USD/Ecuador). '
                      || 'El dia que CO abra, su fee NACE DE CERO con firma propia y base declarada '
-                     || '— esta fila NO se reactiva.'
+                     || '— esta fila NO se reactiva. '
+                     || 'S103-A (22-ago-2026): se le agrega `base: null` para poder CERRARLA. '
+                     || 'NOT VALID exime al pasado, no a la fila: el UPDATE la vuelve a someter al CHECK. '
+                     || 'El null es honesto — nunca declaro una base — y evita inventar un numero de plata. '
+                     || 'Firma del founder: hueco declarado antes que dato falso.'
  WHERE id = '3b75b736-a0c1-4a4a-ba70-a749b08b1554';
 
 -- ── CINTURÓN, con DISCRIMINADOR ────────────────────────────────────────────
