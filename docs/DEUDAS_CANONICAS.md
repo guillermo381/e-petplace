@@ -19073,10 +19073,38 @@ try/catch y **`HAY_PORTAPAPELES` exportado** ⇒ **sin el nativo el botón nace
 apagado y la pantalla puede explicarlo**, en vez de mostrar un botón muerto.
 *Esa degradación honesta es gateable HOY por OTA, y vale la pena verla.*
 
-**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
+## 🔴 ENUNCIADO CORREGIDO — S103-C, 22-ago-2026. **LA PREMISA ERA FALSA.**
+
+**Lo que decía esta ficha:** *«no lo declara ninguna app»* ⇒ *«cura: declararlo»*.
+**Medido por C con el control que decide —EL ANTES—, revirtiendo y reinstalando:**
+
+| | autolinking ve `expo-clipboard` |
+|---|---|
+| **con** la cura (declarado en las dos apps) | **SÍ** |
+| **sin** la cura | **SÍ**, con path y version resueltos igual |
+
+⇒ **la cura no curaba nada. Revertida; árbol y lockfile intactos.**
+
+**Por qué ya lo veía:** **`packages/ui/package.json:12` lo declara, y el
+autolinking recorre el WORKSPACE ENTERO**, no el `package.json` de la app.
+*«Ninguna app lo declara» es cierto como frase y **falso como diagnóstico**: no
+hace falta que lo declare la app.*
+
+**LA CAUSA REAL, y estaba escrita hace rato en la cabecera de `BotonCopiar`:**
+**el binario 1.0.4 es anterior y `expo-clipboard` es NATIVO ⇒ no viaja por OTA
+(`L-134`).** **Falta UNA BUILD, no una declaración.**
+
+**La ficha queda ABIERTA** con este enunciado y **disparo: la próxima build
+nativa** — la misma que destraba el gate del pegado real. *Lo que sobrevive del
+análisis original es el RIESGO (una build futura podría salir sin él) y su
+cinturón; lo que muere es la cura propuesta.*
+
+~~**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
 que montan la pieza, con el rango que el peer exige** — y **verificar contra el
 lockfile que el importer pasa a ser la app**, no `packages/ui`. *Declararlo sin
 re-medir el lockfile deja la ficha cerrada sobre la misma duda.*
+
+y **verificar contra el lockfile que el importer pasa a ser la app**~~ ← *tachada: medida como no-op.*
 
 **Disparo: ANTES de la próxima build nativa** — que es también el tren del gate
 completo de `BotonCopiar`.
@@ -19858,3 +19886,4 @@ en serio las FKs hacia `auth.users` y va a ver las dos juntas).
 - **L-359** — **NOMBRAR UN RIESGO NO LO NEUTRALIZA.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**.* Al proponer un `COALESCE(payload->'info', payload)` como puente, su autor **escribió al lado la advertencia exacta**: *«si algún día el buzón cambia otra vez, **el fallback la esconde**»*. **La advertencia era correcta — y no cambiaba nada: el fallback seguía escondiéndolo.** > ### **Si el riesgo es que algo se esconda, ponerlo y avisar ES exactamente ponerlo.** *Un comentario no se ejecuta.* **La nota al lado del defecto sirve para el que lee el archivo; el defecto sirve a todos los que no lo leen** — y son más. **Regla: una advertencia acompaña a una decisión, jamás la sustituye. Cuando el riesgo nombrado es del mecanismo mismo, la salida no es documentarlo mejor: es no ponerlo.**
 - **L-360** — **PEDIR UNA EXCEPCIÓN A UNA LETRA LLAMÁNDOLA «NO ES UNA EXCEPCIÓN» SIGUE SIENDO PEDIR LA EXCEPCIÓN.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D, que lo declaró sobre su propia propuesta**.* El argumento era **técnicamente correcto** —la referencia del pago es **llave**, no verdad, y `LETRA_DEUNA` §7 prohíbe *confiar en la señal para confirmar*, no *usarla para encontrar el sujeto*—. **Y aun así se rechazó.** > ### **La objeción no fue sobre si era correcto: fue sobre si SOBREVIVE.** *«Una regla que necesita un párrafo para no ser malinterpretada es una regla que va a ser malinterpretada.»* **Dentro de tres sesiones alguien lee «el actuador lee del webhook» y no lee el párrafo.** **Y la formulación que la cierra la escribió quien había hecho la propuesta:** *«una regla con una excepción justificada es una regla con excepciones»*. **§7 vale precisamente porque no las tiene.** *Corolario operativo: cuando una excepción exige explicarse para no parecer lo que parece, el costo real no es el de hoy — es el de todas las lecturas futuras que no van a traer el contexto.*
 - **L-361** — **UN DOCUMENTO QUE DECLARA CONTEOS Y ESTADOS DE MERGE SE ENVEJECE SOLO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, que se la aplicó a sí misma tras ver `L-357` cobrada sobre A.* Un traspaso que dice *«40 tests verdes»* y *«nada mergeado a `main`»* hace **dos afirmaciones con fecha de vencimiento** que el lector del lunes va a tomar por ciertas — *y la del conteo ya había vencido el mismo día en que se escribió.* > ### **Un número en un documento es una medición con fecha de vencimiento: se saca de CORRER el instrumento, jamás de recordarlo.** *Es `L-141` (la prosa decae, el objeto no) aplicada al documento que uno mismo escribe — el lugar donde menos se sospecha, porque uno sabe que lo midió… en algún momento.* **Regla: todo conteo o estado de merge en un traspaso se re-corre al cerrarlo, y si no se puede re-correr, se escribe el COMANDO en vez del número.**
+- **L-362** — **UNA CURA SIN SU «ANTES» MEDIDO NO SE DISTINGUE DE UN NO-OP.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-C**, que la propuso sobre su propio trabajo.* Curó `D-874` declarando `expo-clipboard` en las dos apps, corrió el autolinking, **salió verde** — y sólo entonces midió el estado contrario: **sin la cura, el autolinking lo veía igual** (`packages/ui` lo declara y el autolinking recorre el workspace entero). **La cura no curaba nada.** > ### **Cuando una cura sale verde al primer intento sobre una deuda que llevaba días abierta, el «antes» es OBLIGATORIO: lo barato de la cura es la señal de sospecha, no la de éxito.** *Y el costo de no medirlo es peor que el no-op: la ficha se cierra, **el síntoma queda vivo y sin dueño**, y nadie busca la causa verdadera.* **Su hermandad con `L-357`, que C nombró y es la parte que trasciende el caso:** son **la misma clase en direcciones opuestas** — *uno mide «¿está?» cuando cree que sí; el otro mide «¿ya estaba?» cuando cree que no.* **El instrumento es el mismo: medir el estado contrario al que uno espera.**
