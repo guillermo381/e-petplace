@@ -39,6 +39,17 @@ export type CodigoDeuna =
   | 'sin_sesion' | 'sesion_no_verificable' | 'datos_invalidos'
   | 'monto_no_se_recibe' | 'compra_no_existe' | 'cita_no_existe'
   | 'desglose_incompleto' | 'sin_respuesta'
+  /* 🔴 LLEGARON TARDE, y la razón importa más que los dos códigos (S103-D):
+     esta lista se escribió contra el CONTRATO A MANO de la puerta, y ese
+     contrato declaraba 10 de los 12 que la función emite. **Un contrato escrito
+     a mano diverge de la función que describe en el momento exacto en que
+     alguien agrega un `return` — y nadie lo nota, porque el contrato sigue
+     siendo cierto sobre todo lo que sí menciona.**
+     Y el daño no era de runtime: el `as CodigoDeuna` de abajo los deja pasar
+     igual. Era de TIPO — un `switch` exhaustivo habría compilado diciendo que
+     cubrió todo, y `monto_invalido` habría quedado **sin voz**. */
+  | 'monto_invalido'        // 409 · el desglose existe y su total no es > 0 ⇒ DEFECTO NUESTRO
+  | 'metodo_no_permitido'   // 405 · improbable desde acá (siempre POST), pero la puerta lo emite
   | 'no_se_pudo_completar' | 'servidor_sin_configurar'
   /* Los de COMPUERTA: viajan tal cual desde el 409 del servidor. */
   | 'pago_en_proceso' | 'reserva_vencida' | 'vendedor_no_activo'

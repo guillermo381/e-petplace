@@ -19073,10 +19073,38 @@ try/catch y **`HAY_PORTAPAPELES` exportado** ⇒ **sin el nativo el botón nace
 apagado y la pantalla puede explicarlo**, en vez de mostrar un botón muerto.
 *Esa degradación honesta es gateable HOY por OTA, y vale la pena verla.*
 
-**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
+## 🔴 ENUNCIADO CORREGIDO — S103-C, 22-ago-2026. **LA PREMISA ERA FALSA.**
+
+**Lo que decía esta ficha:** *«no lo declara ninguna app»* ⇒ *«cura: declararlo»*.
+**Medido por C con el control que decide —EL ANTES—, revirtiendo y reinstalando:**
+
+| | autolinking ve `expo-clipboard` |
+|---|---|
+| **con** la cura (declarado en las dos apps) | **SÍ** |
+| **sin** la cura | **SÍ**, con path y version resueltos igual |
+
+⇒ **la cura no curaba nada. Revertida; árbol y lockfile intactos.**
+
+**Por qué ya lo veía:** **`packages/ui/package.json:12` lo declara, y el
+autolinking recorre el WORKSPACE ENTERO**, no el `package.json` de la app.
+*«Ninguna app lo declara» es cierto como frase y **falso como diagnóstico**: no
+hace falta que lo declare la app.*
+
+**LA CAUSA REAL, y estaba escrita hace rato en la cabecera de `BotonCopiar`:**
+**el binario 1.0.4 es anterior y `expo-clipboard` es NATIVO ⇒ no viaja por OTA
+(`L-134`).** **Falta UNA BUILD, no una declaración.**
+
+**La ficha queda ABIERTA** con este enunciado y **disparo: la próxima build
+nativa** — la misma que destraba el gate del pegado real. *Lo que sobrevive del
+análisis original es el RIESGO (una build futura podría salir sin él) y su
+cinturón; lo que muere es la cura propuesta.*
+
+~~**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
 que montan la pieza, con el rango que el peer exige** — y **verificar contra el
 lockfile que el importer pasa a ser la app**, no `packages/ui`. *Declararlo sin
 re-medir el lockfile deja la ficha cerrada sobre la misma duda.*
+
+y **verificar contra el lockfile que el importer pasa a ser la app**~~ ← *tachada: medida como no-op.*
 
 **Disparo: ANTES de la próxima build nativa** — que es también el tren del gate
 completo de `BotonCopiar`.
@@ -19855,3 +19883,136 @@ en serio las FKs hacia `auth.users` y va a ver las dos juntas).
 - **L-356** — **EL MOTIVO DISTINTO SE PAGÓ ANTES DEL PRIMER EVENTO REAL.** *Firmada por la mesa el 22-ago-2026.* Al escribir el actuador multiproveedor se decidió **agregar** `sin_referencia_corta` (DeUna) en vez de reusar `sin_dev_reference` (Nuvei), con este argumento: *un tablero que cuenta dos cosas bajo el mismo nombre no cuenta ninguna, y cambiar el viejo movería lo que ese tablero ya muestra — ninguna de las dos: se agrega.* **Horas después, el defecto de `L-355` salió por esa etiqueta exacta.** *Con el nombre de Nuvei reusado, un defecto de DeUna habría salido bajo una etiqueta de Nuvei y la búsqueda habría empezado en el lugar equivocado.* > ### **El costo de un código nuevo es una línea; el de un código reusado es una búsqueda que arranca mal.** *Se cobró antes de que existiera el primer evento real — que es lo más barato que un nombre bien puesto puede costar.*
 - **L-357** — **UN PEDIDO CON UNA PREMISA FALSA ADENTRO ES PEOR QUE NO MANDARLO: SU LECTOR LA HEREDA.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-C**.* Un pedido entre pistas no viaja solo con su encargo: viaja con **todo lo que afirma de paso**, y el receptor **no tiene forma de saber cuál mitad se midió**. *Un pedido bien escrito con un dato flojo adentro es más peligroso que uno mal escrito, porque su prolijidad le presta credibilidad al dato.* **Y la raíz que C nombró después de verlo TRES VECES en su propia pista: afirmar un paso más allá de lo medido.** > ### **El paso de más no se siente como una afirmación: se siente como redondear.** *«Medí X, y entonces obviamente Y» — y Y es lo que el otro va a construir.* **Regla: en un pedido, lo medido y lo inferido se separan explícitamente, y lo inferido se marca como tal aunque sea obvio.** *Precedente de la casa en la dirección contraria: `L-330` pide control declarado junto a cada medición; ésta pide **frontera declarada** entre medición e inferencia.*
 - **L-358** — **NO SE CAMBIA DE LECTOR POR UN CAMPO — se mide de qué depende el que está.** *Firmada por la mesa el 22-ago-2026, sobre la decisión de NO migrar el checkout a `promesaPorVendedor`.* Los dos lectores **no reportan el fallo de la misma forma**: uno lo entrega **fuera del dato** (`r.codigo`), el otro **adentro de la fila con `r.ok: true`**. Y el checkout depende del primero **en seis lugares, de los cuales DOS no son voz: el gate del botón de pagar y el selector de ventanas.** > ### **Cambiar de lector para ganar un campo habría tocado el BOTÓN DE PAGAR como efecto colateral de una cura de VOZ.** *Dos lectores que devuelven «lo mismo» con formas de fallo distintas no son intercambiables — son dos contratos, y el que decide si alguien puede pagar merece que su cambio sea una decisión y no una consecuencia.* **Se registra para que nadie la re-litigue leyendo sólo que «ya existe un lector mejor».**
+- **L-359** — **NOMBRAR UN RIESGO NO LO NEUTRALIZA.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**.* Al proponer un `COALESCE(payload->'info', payload)` como puente, su autor **escribió al lado la advertencia exacta**: *«si algún día el buzón cambia otra vez, **el fallback la esconde**»*. **La advertencia era correcta — y no cambiaba nada: el fallback seguía escondiéndolo.** > ### **Si el riesgo es que algo se esconda, ponerlo y avisar ES exactamente ponerlo.** *Un comentario no se ejecuta.* **La nota al lado del defecto sirve para el que lee el archivo; el defecto sirve a todos los que no lo leen** — y son más. **Regla: una advertencia acompaña a una decisión, jamás la sustituye. Cuando el riesgo nombrado es del mecanismo mismo, la salida no es documentarlo mejor: es no ponerlo.**
+- **L-360** — **PEDIR UNA EXCEPCIÓN A UNA LETRA LLAMÁNDOLA «NO ES UNA EXCEPCIÓN» SIGUE SIENDO PEDIR LA EXCEPCIÓN.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D, que lo declaró sobre su propia propuesta**.* El argumento era **técnicamente correcto** —la referencia del pago es **llave**, no verdad, y `LETRA_DEUNA` §7 prohíbe *confiar en la señal para confirmar*, no *usarla para encontrar el sujeto*—. **Y aun así se rechazó.** > ### **La objeción no fue sobre si era correcto: fue sobre si SOBREVIVE.** *«Una regla que necesita un párrafo para no ser malinterpretada es una regla que va a ser malinterpretada.»* **Dentro de tres sesiones alguien lee «el actuador lee del webhook» y no lee el párrafo.** **Y la formulación que la cierra la escribió quien había hecho la propuesta:** *«una regla con una excepción justificada es una regla con excepciones»*. **§7 vale precisamente porque no las tiene.** *Corolario operativo: cuando una excepción exige explicarse para no parecer lo que parece, el costo real no es el de hoy — es el de todas las lecturas futuras que no van a traer el contexto.*
+- **L-361** — **UN DOCUMENTO QUE DECLARA CONTEOS Y ESTADOS DE MERGE SE ENVEJECE SOLO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, que se la aplicó a sí misma tras ver `L-357` cobrada sobre A.* Un traspaso que dice *«40 tests verdes»* y *«nada mergeado a `main`»* hace **dos afirmaciones con fecha de vencimiento** que el lector del lunes va a tomar por ciertas — *y la del conteo ya había vencido el mismo día en que se escribió.* > ### **Un número en un documento es una medición con fecha de vencimiento: se saca de CORRER el instrumento, jamás de recordarlo.** *Es `L-141` (la prosa decae, el objeto no) aplicada al documento que uno mismo escribe — el lugar donde menos se sospecha, porque uno sabe que lo midió… en algún momento.* **Regla: todo conteo o estado de merge en un traspaso se re-corre al cerrarlo, y si no se puede re-correr, se escribe el COMANDO en vez del número.**
+- **L-362** — **UNA CURA SIN SU «ANTES» MEDIDO NO SE DISTINGUE DE UN NO-OP.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-C**, que la propuso sobre su propio trabajo.* Curó `D-874` declarando `expo-clipboard` en las dos apps, corrió el autolinking, **salió verde** — y sólo entonces midió el estado contrario: **sin la cura, el autolinking lo veía igual** (`packages/ui` lo declara y el autolinking recorre el workspace entero). **La cura no curaba nada.** > ### **Cuando una cura sale verde al primer intento sobre una deuda que llevaba días abierta, el «antes» es OBLIGATORIO: lo barato de la cura es la señal de sospecha, no la de éxito.** *Y el costo de no medirlo es peor que el no-op: la ficha se cierra, **el síntoma queda vivo y sin dueño**, y nadie busca la causa verdadera.* **Su hermandad con `L-357`, que C nombró y es la parte que trasciende el caso:** son **la misma clase en direcciones opuestas** — *uno mide «¿está?» cuando cree que sí; el otro mide «¿ya estaba?» cuando cree que no.* **El instrumento es el mismo: medir el estado contrario al que uno espera.**
+
+---
+
+### D-876 🔴 · LA TARJETA «COMPOSICIÓN» SE CONTRADICE A SÍ MISMA EN DOS LÍNEAS SEGUIDAS
+
+🔴 **ALTA. Elevada por la mesa** (founder, 22-ago-2026): *«es lo más grave del
+cajón 2 y es voz que MIENTE, no preferencia».* **Hallada caminando, no
+leyendo.** **Dueño: C** (`apps/cliente`).
+
+**Medido en aparato**, ficha de un producto con `composicion_estado = 'ausente'`:
+
+> *«No tenemos los ingredientes de este producto. **El fabricante no los declaró.**»*
+> *«**Declarada por el fabricante**, todavía sin verificar.»*
+
+> ### **La primera dice que el fabricante NO declaró. La segunda dice que SÍ. Están una debajo de la otra, en la misma tarjeta.**
+
+**Las dos claves, localizadas:** `despensa.composicionAusente` (`es.ts:1731`) y
+`despensa.composicionFuente` (`es.ts:1733`). **El defecto no es de texto: es de
+CONDICIÓN** — `composicionFuente` se monta **siempre**, también cuando el estado
+es `ausente`.
+
+**Discriminador medido, que prueba que es condicional y no de redacción:** en un
+producto **CON** composición la tarjeta muestra *«Declara contener: Cerdo,
+Pescado, Pollo, Res, Soja.»* **y ninguna contradicción.** *La segunda línea es
+correcta donde hay algo que atribuir; el defecto es que aparece donde no lo hay.*
+
+**Cura: `composicionFuente` sólo cuando la composición EXISTE.** *No se toca su
+texto — el texto está bien.*
+
+**Por qué no es cosmético:** `MODELO_DESPENSA` §6 y la letra de la alergia hacen
+que **el silencio sobre composición se lea como «no tiene»**, y por eso la casa
+exige que la ausencia **se DIGA**. **Una tarjeta que dice las dos cosas deja al
+dueño sin saber cuál creer — que es peor que cualquiera de las dos sola.**
+
+**Disparo: antes del gate del founder sobre la despensa.**
+
+---
+
+### D-877 🟡 · CINCO FILAS DE CUENTA COMPARTEN EL MISMO GLIFO
+
+🟡 **MEDIA.** Hallada caminando (S103-A, 22-ago). **Dueño: C.**
+Medido en aparato: **Preferencias · Medios de pago · Lámina S74 · Galería de
+tokens** montan **el mismo glifo** (sol con cara). *La ley del glifo dice que no
+se repite: un glifo repetido deja de ser un identificador y pasa a ser
+decoración — y una lista donde cuatro filas de cinco llevan el mismo dibujo se
+lee más lento que una sin dibujos.* **Disparo: la próxima pasada de Cuenta.**
+
+---
+
+### D-878 🟢 · UNA LÁMINA DE SESIÓN VIVE EN CUENTA SIN DECLARARSE
+
+🟢 **BAJA. Orden de la mesa: «curalo o declaralo como la galería».**
+**Dueño: C.** *«Lámina S74 · la fusión del avatar»* es una **herramienta de
+sesión** montada en superficie de producto, **sin `__DEV__` y sin decir lo que
+es**. **La galería, a dos filas de distancia, SÍ se declara** —*«herramienta de
+sesión — no es pantalla de producto»*— *así que el precedente está en la misma
+pantalla y a la vista.* **Disparo: la próxima pasada de Cuenta.**
+
+---
+
+### D-879 🟡 · DOS BOTONES APILADOS, Y EL DE ABAJO ES LA CAJA VACÍA QUE LA 19.7 MATÓ
+
+🟡 **MEDIA.** Hallada caminando. **Dueño: C.** En `Cuenta → Sesión y cuenta`,
+`Cerrar sesión` va **sólido** y `Eliminar cuenta` va **con contorno
+transparente**, apilados. **La 19.7 dice: por superficie UN sólido; el resto
+baja a label — nunca la caja vacía del medio.** ⚠️ **Y hay una razón de producto
+encima de la de forma: el contorno le da a «Eliminar cuenta» un peso visual que
+compite con «Cerrar sesión», que es la acción cotidiana.** *La destructiva no
+tiene que verse más liviana ni más pesada: tiene que verse DISTINTA.*
+**Disparo: la pasada de Cuenta, o el arco de `P15` cuando construya el cierre.**
+
+---
+
+### D-880 🟢 · EL CARRITO FLOTANTE SE SUPERPONE A LA BARRA DE TABS
+
+🟢 **BAJA.** Medido en aparato en dos pantallas (Cuenta, ficha de producto): el
+FAB del carrito **cae sobre la zona de la barra** y tapa parte de la tab de la
+derecha. **Dueño: C.** *No impide tocar la tab —el FAB no la cubre entera— pero
+la corona.* **Disparo: la próxima pasada de la despensa.**
+
+---
+
+### D-881 🟢 · EL SUBTÍTULO DE «PONTE AL DÍA» SE TRUNCA A MITAD DE HORA
+
+🟢 **BAJA.** Medido: *«Tienes 18 pedidos en curso / 20 de agosto, 2:00 p. m.–6:00
+p. …»* — **la ventana de entrega se corta en la segunda hora.** **Dueño: C.**
+*El dato truncado es justamente el que la fila existe para dar: la ventana.*
+⚠️ **Los 18 pedidos son dato de prueba; el truncado NO** — con una sola ventana
+larga vuelve a pasar. **Disparo: la próxima pasada del Hogar.**
+
+---
+
+### D-882 🟡 · LA GALERÍA TIENE DOS ERRORES DE CONSOLA VIVOS, Y VAN A TAPAR EL GATE
+
+🟡 **MEDIA — y su urgencia es de CALENDARIO, no de gravedad.** **Dueño: B.**
+Medido en aparato con su fuente exacta:
+
+| error | origen |
+|---|---|
+| `Encountered two children with the same key, 'carnet'` (y `'caso'`) | **`TokenGallery.tsx (5234:17)`**, `<EjemploSetBPrima />` |
+| `Text strings must be rendered within a <Text> component` | **`TokenGallery.tsx (2434:7)`** |
+
+🔴 **CORRECCIÓN DE UN REPORTE PROPIO, declarada:** A los reportó primero como
+defecto de **producto** (`H5` del recorrido) **antes de leer su origen.** **Son
+de la GALERÍA** — herramienta de sesión. *Es `L-357` otra vez: afirmar un paso
+más allá de lo medido; la clave `carnet` existe en pantallas de producto y eso
+bastó para suponer que venía de ahí.* **Cambia dueño y gravedad.**
+
+**Por qué entra igual y con fecha: el founder va a caminar ESA galería** para
+los dos gates de B, y **los overlays de error se montan encima**. *Un gate
+interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
+**Disparo: antes del gate de B sobre el glifo y el stepper.**
+- **L-363** — **UN ENSAYO QUE TERMINA EN VERDES PRODUCE UN TABLERO INDISTINGUIBLE DEL DE UNA CORRIDA REAL.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, sobre su ensayo en seco del riel DeUna.* **El problema NO es el ensayo** —correr el guion contra un simulador antes de tener credenciales es exactamente lo que hay que hacer—: **el problema es que su SALIDA sobreviva al contexto que la explicaba.** *Quien vio correr el ensayo sabe que era en seco. El que abre el archivo el lunes ve una fila de verdes.* > ### **El instrumento tiene que declarar, EN SU PROPIA SALIDA, que no midió.** *No en el mensaje que lo acompaña, no en la bitácora, no en la cabecera del archivo: **en la línea que alguien va a copiar**.* **Un verde que no dice contra qué corrió es un verde que se va a citar como si hubiera corrido contra el mundo.** *Parentesco: es `L-141` (la prosa decae, el objeto no) aplicada a la salida de un instrumento — el contexto decae, el verde no.*
+- **L-364** — **UN ❌ PRODUCIDO POR EL INSTRUMENTO SE LEE COMO UNA MEDICIÓN, Y SE ARCHIVA CON MÁS FACILIDAD QUE UN VERDE FALSO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**.* En el ensayo en seco **el simulador devolvía el fantasma SIEMPRE**; el guion probaba el supuesto del `amount` contra él, **y salía ❌**. *Ese ❌ no medía nada —el simulador no podía contestar otra cosa— pero **habría quedado archivado como «ya refutado»**, moviendo una orden de mesa **sobre la base de nada**.* > ### **Un rojo falso es tan caro como un verde falso — y es MÁS peligroso, porque el verde flojo por lo menos incomoda y el rojo pasa por virtud.** *Nadie audita un instrumento que «encuentra problemas»: encontrarlos es lo que se espera de él.* **Hermana de `L-342` y del brazo anti-verde-vacío, y cierra con ellas la misma familia: todo veredicto —de cualquier signo— se prueba contra un caso de RESULTADO CONOCIDO antes de creerle.**
+- **L-365** — **UN SIMULADOR QUE ACEPTA UNA CREDENCIAL REAL PUEDE MEDIR CONTRA EL AMBIENTE REAL CON UN NÚMERO INVENTADO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, que lo previó y le puso candado antes de que pasara.* **El modo ensayo y el modo real no se distinguen por INTENCIÓN: se distinguen por lo que el aparato puede alcanzar.** *Un simulador al que se le puede pasar la credencial buena deja de ser un simulador el día que alguien la pasa por comodidad — y su salida sigue teniendo cara de ensayo.* > ### **El candado, que es la lección hecha mecanismo: modo ensayo SÓLO contra `localhost`, y el identificador de comercio por VARIABLE — jamás leído del keychain.** *No alcanza con no hacerlo: hay que volverlo imposible.* **Corolario: todo modo de prueba declara qué NO puede alcanzar, y esa declaración es código, no comentario.**
+
+> ### 📌 NOTA OPERATIVA DEL ALTA DEL WEBHOOK DEUNA — **el orden no es preferencia** (S103-D, firmada 22-ago-2026)
+>
+> **Se DESPLIEGA primero y se REGISTRA la URL después. Jamás al revés.**
+> *Registrar el webhook antes de desplegar deja una ventana en la que el
+> proveedor llama a una URL que no existe* — y **sus reintentos son TRES, cada
+> 30 segundos: se agotan en minuto y medio.** ⇒ **los eventos de esa ventana no
+> vuelven.** *Es el mismo precedente que `D-713` (el orden cron→deploy) con otro
+> proveedor: la pieza que LLAMA se enciende última, siempre.*
+>
+> **Y su gemela para el lunes, que es de coordinación y no de técnica: a C se le
+> avisa apenas salga el PASO 3 del guion, no al terminarlo.** *Su desbloqueo está
+> en el primer minuto del día 1; hacerla esperar el final es dejarla parada
+> mirando un guion que ya la había liberado.*
