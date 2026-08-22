@@ -126,7 +126,13 @@ async function codigoDeErrorInvoke(error: unknown): Promise<CodigoErrorLugares> 
 }
 
 function fallo<T>(codigo: CodigoErrorLugares): ResultadoWrapper<T, CodigoErrorLugares> {
-  return { ok: false, codigo, mensaje: MENSAJES[codigo] };
+  /* 🔴 EL FALLBACK NO ES PRUDENCIA: es que el `as` de arriba puede producir una
+  clave que el mapa no tiene. `ResultadoWrapper` agrega `error_desconocido` y
+  `datos_inconsistentes` a TODO wrapper, y un código nuevo del servidor entra
+  igual por el cast ⇒ sin esto, `mensaje` sale `undefined` y **la voz queda
+  MUDA justo en el fallo que menos sabemos explicar** (S103-C, `L-369`).
+  Cae al genérico del propio mapa — jamás se inventa una causa. */
+  return { ok: false, codigo, mensaje: MENSAJES[codigo] ?? MENSAJES.error_desconocido };
 }
 
 // ── Búsqueda (Autocomplete) ──────────────────────────────────────────────
