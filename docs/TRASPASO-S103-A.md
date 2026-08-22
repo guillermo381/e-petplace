@@ -1,390 +1,227 @@
-# TRASPASO — S103 · PISTA A (conductora)
+# TRASPASO · PISTA A (conductora) · S103 · 22-ago-2026
 
-> # 🔴 LEY DE LECTURA DE ESTE DOCUMENTO — antes que nada
+> ## 🔴 LEY DE LECTURA — se lee ANTES que el contenido
 >
-> ### **Un traspaso es un mapa de dónde retomar, NO una fuente de datos vivos** (`L-349`).
+> **Esto es un MAPA DE DÓNDE RETOMAR, no una fuente de datos vivos.**
 >
-> **Todo SHA, contador y estado de aquí se re-mide contra el objeto en el turno
-> en que se usa** (`L-166`) — **y al reportarlo se declara CONTRA QUÉ OBJETO se
-> midió** (`L-348`): `main` local, `origin/main` o `ls-remote` son tres
-> preguntas distintas que se responden con la misma frase.
+> Todo número, SHA, conteo o estado que leas acá **se re-mide contra el objeto
+> en el turno en que lo uses** — y al usarlo, **declarás contra qué objeto
+> mediste**. *`main` local, `origin/main` y un `ls-remote` son **tres preguntas
+> distintas**, y las tres devuelven un sha con cara de verdad única.*
 >
-> *Esta ley se cobró hoy tres veces, y una de ellas sobre el traspaso de B, en
-> la misma sesión en que se escribió.*
+> **Esta sesión se cobró esa confusión CINCO veces** (`L-351`), incluida una en
+> la que afirmé que un OTA llevaba trabajo que no llevaba. **La regla operativa:
+> cuando tu medición contradice a alguien, la sospechosa es la TUYA hasta saber
+> contra qué midió cada uno.**
 >
-> **Lo que SÍ sobrevive y es por lo que este documento vale:** qué mide cada
-> instrumento **y qué NO mide** · las trampas del entorno · las decisiones **con
-> su argumento** · y lo pendiente **como instrucción ejecutable**.
-
-**Medido el 22-ago-2026 al cierre de contexto de A.**
+> Y su gemela, que también se cobró acá: **un conteo en un documento vence solo**
+> (`L-361`). Donde puedas, **corré el comando en vez de citar el número.**
 
 ---
 
-## §1 · ESTADO DE LOS REPOS Y LAS CUATRO PISTAS
+## §1 · EL RECURRENTE — APLICADO, Y CON UN CABLE FALTANTE
 
-**Monorepo `main` = `5bea705d`** (más el merge de C, ver abajo) · **sitio
-`main` = `25dbade`** · **los dos con `origin` idéntico, verificado por
-`ls-remote`** contra el remoto, no contra la copia.
+### Lo que quedó VIVO en la base (verificado tras aplicar)
 
-| pista | rama | HEAD | estado |
-|---|---|---|---|
-| **A** (yo) | `pista/s103-a` | `ff24e886` | **todo mergeado y empujado** |
-| **B** | `pista/s103-b-jueces` (monorepo) · `pista/s103-b` (sitio) | `426a3dc3` · `0179796` | **mergeadas las dos.** B **declaró estar baja de contexto** y dejó su traspaso en `docs/TRASPASO-S103-B.md` **del repo del sitio** (su territorio) |
-| **C** | `pista/s103-c` | `29ee66e5` | **mergeada.** Activa |
-| **D** | `pista/s103-d` | `29c7310f` | **mergeada.** Activa, **bloqueada por el `pointOfSale`** |
+| pieza | qué hace |
+|---|---|
+| **cuarto sujeto** | `pagos_intentos` admite `pedido · cita · recurrencia · suscripcion_servicio_id`, invariante «exactamente uno» de CUATRO |
+| `recurrencia_desglose` · `suscripcion_desglose` | el monto **congelado por período**, uno por cobro |
+| `recurrencias_vencidas_pendientes()` | **la base ELIGE y CONGELA** — no cobra |
+| `planes_vencidos_pendientes()` | ídem para el plan de paseos |
+| `verificar_compuertas_recurrencia(uuid,date)` | las compuertas del sujeto, **cuatro evaluadas + dos declaradas** |
+| `renovar_plan_cobrado(uuid,date)` | **ACTO 2** — lo dispara la plata, exige intento `aprobado` |
+| `obtener_serie_recurrente(uuid)` | **el lector de C**, en la forma exacta de su contrato |
+| `ejecutar_recurrencias_vencidas()` | **el cron: un timbre**, `net.http_post` a la edge |
 
-**Migraciones: 381 locales**, todas aplicadas *(se re-mide con
-`ls supabase/migrations/*.sql | wc -l` y `supabase migration list --linked` —
-el canon declara el comando, jamás el número)*.
-**Canon: `D-872` · `L-350`** son los más altos. **Siguiente libre: `D-873` ·
-`L-351`** *(verificar por `grep`, jamás por esta línea)*.
+**Migraciones:** `20260822235000` (el motor + el arnés adentro) · `20260822236000`
+(el corte del camino viejo). **Snapshot bajo veda: `2026-08-22 22:15:02 UTC` /
+`17:15:02 Guayaquil` — intentos 44 · series 0 · suscripciones_plan 1 · tarjetas 7
+· citas_de_plan 49. RESIDUO CERO en las cinco, verificado post-aplicación.**
 
-### 🔴 EL APARATO — de quién es y en qué estado quedó
+### 🔴 EL CABLE QUE FALTA — y lo encontró `P-CIRCUITO` a los diez minutos de nacer
 
-**Samsung SM-S938B · `R5CY201ZDVL` · lo tengo YO.**
+```
+recurrencias_vencidas_pendientes → 0 llamadores
+planes_vencidos_pendientes       → 0 llamadores
+renovar_plan_cobrado             → 0 llamadores
+app_config: recurrente_vivo · url_cobro_recurrente · secreto_despacho → NINGUNA existe
+```
+
+> **El motor entero está aplicado, con cuatro cinturones verdes y 17 asserts
+> verdes, y NADA LO LLAMA.** *Los gates miden la pieza; ninguno puede notar que
+> falta el cable.*
+
+**Para enchufarlo hacen falta TRES cosas, y ninguna es código nuevo:**
+① **la edge `pagos-cobro-recurrente`** (la hermana — territorio D/A, no escrita) ·
+② **las tres claves de `app_config`** · ③ **el cron apuntando al selector**.
+
+⚠️ **Y el ACTO 2 necesita su cable propio: el actuador debe llamar a
+`renovar_plan_cobrado` cuando confirma un intento de suscripción.** *Hoy no lo
+hace — es la misma clase de `L-393` esperando a que alguien la enchufe.*
+
+### Lo que YA se neutralizó, y por qué no podía esperar
+
+**`cerrar_y_renovar_planes` renovaba SIN COBRAR** —`v_pagado_en := now()`,
+`pago_simulado: true`, citas confirmadas— **con su cron ACTIVO a las 08:00
+diarias.** **Cortada la rama** (`20260822236000`), conservando **el aviso de 72 h,
+la gracia y el crédito**.
+
+> ⚠️ **CONSECUENCIA DECLARADA: hoy los planes NO se renuevan solos — VENCEN.**
+> *Es peor servicio y es honesto; lo otro era regalar un mes de paseos.*
+> **Se cura enchufando el motor nuevo, no revirtiendo esto.**
+
+### 🔴 LO QUE EL ARNÉS **NO** PRUEBA — se lee antes de festejar
+
+**NO SE MOVIÓ UN CENTAVO.** La función que habla con el proveedor **no está
+desplegada**; el arnés escribió el estado que ella escribiría.
+
+**No probado:** que el proveedor acepte o rechace de verdad · **el aviso al
+cliente** (sigue en sombra) · **y la CAUSA FINA de un rechazo** — 🔴 *espera la
+tabla de `status_detail` de Erick. **Cajón construido, etiqueta NO adivinada.***
+
+### El arnés falsó CINCO supuestos míos, y dos eran fatales
+
+*Ninguno lo había falsado releer.* ① dos columnas mal nombradas · ②
+**`estado_vida` vale `'activa'`, no `'vivo'`** — mi fusible habría frenado **todos
+los planes** · ③ **el orden congelar/verificar estaba invertido** — la compuerta
+miraba un desglose inexistente ⇒ **nunca habría cobrado** · ④ el vocabulario de
+`pagador_origen` no admitía `'recurrencia'` · ⑤ **mi propio cinturón midiendo su
+lápida** (`L-170`).
+
+---
+
+## §2 · DEUNA — una sola llave
+
+**Todo lo del riel está medido contra EL TIPO y LA COSTURA, jamás contra una
+respuesta real del proveedor. 51 verdes no es circuito probado.**
 
 | | |
 |---|---|
-| corriendo | **Metro sobre `main`**, puerto **8082** con `adb reverse` |
-| sesión | **Guillermo** (la real; Thor · Zeus · Jack) — **no la toqué** |
-| dónde quedó | en el **gate de ③/⑥**, pantalla de pago con un medio elegido |
-| pendiente | **el founder no caminó ③ ni ⑥ todavía** |
+| actuador multiproveedor | ✅ **vivo**, lee `info` (la verdad verificada), fail-closed sin ella |
+| wrapper `pagos-deuna` | ✅ en `main`, 3 funciones + 3 tipos, contrato en `docs/CONTRATO_WRAPPER_DEUNA.md` |
+| pantalla de C | ✅ construida, cinco familias de fallo caminadas |
+| **`pagos-deuna-solicitud`** | 🔴 **ESCRITA Y NO DESPLEGADA** |
+| **bloqueante ÚNICO** | 🔴 **el `pointOfSale`** |
 
-🔴 **NO SE PUEDE GATEAR SOBRE LA APK INSTALADA.** Es un **Development Build sin
-bundle embebido utilizable** (`D-865`/`D-866`): abre en el **Expo Dev Launcher**
-pidiendo `npx expo start`. **Sin Metro no hay producto que mirar.**
-⇒ **el preview build de EAS entra a la cola con su costo declarado** — Metro
-alcanza para hoy y ata el veredicto a un commit, **pero no para un gate que
-exija binario atado a commit, y el soft launch lo va a exigir.**
+**Pendiente con ventana propia: `N3` + el redeploy de `pagos-conciliar` EN LA
+MISMA** — N3 cambia una firma que `pagos-conciliar` todavía llama. **Y ahí entra
+la línea del `info: {}`** que D dejó redactada en su bitácora.
 
-**Reparto de puertos acordado: C en 8081, A en 8082.** *Nunca
-`adb reverse --remove-all` — borra los de todas; se usa `--remove tcp:<puerto>`.*
+⚠️ **El typo del proveedor es REAL: `idTransacionReference`** — *Transacion*, no
+*Transaction*. **Quien lo «corrija» rompe todas las consultas.**
 
 ---
 
-## §2 · EL FRENTE DEL COBRO RECURRENTE — lo que define esta sesión
+## §3 · EL CICLO DE CUENTA — censado, con P15 firmada
 
-### §2.1 · LO QUE YA EXISTÍA Y NADIE SABÍA (censo de tanda 0)
+**Censo:** `docs/relevamientos/2026-08-22-s103-CENSO-CICLO-DE-CUENTA.md`.
 
-**El motor de recurrencia YA ESTABA CONSTRUIDO.** No había que empezar de cero:
+> **El ciclo no está roto: está AUSENTE, y lo dice.** *Ninguna divergencia de
+> promesa al usuario — «va a estar acá» y «Pronto» no prometen y fallan.*
 
-| pieza | estado medido |
-|---|---|
-| `pedidos_recurrencias` | **existe**, 14 columnas, **0 filas** |
-| `configurar_recurrencia` | **crea la fila y devuelve `ok:true`** — no rebota |
-| `alternar_recurrencia` | prende/apaga |
-| `avisar_recurrencias_proximas()` | **construida, correcta, idempotente** |
-| cron **`avisar-recurrencias`** | **VIVO**, `0 13 * * *` = **08:00 Guayaquil** |
-| `aviso_dias` | **`DEFAULT 2`** = **las 48 h de la firma ①, por accidente** |
-| **`ejecutar_recurrencias_vencidas()`** | 🔴 **STUB** — devuelve `pasarela_no_afiliada`, `pedidos_creados: 0` |
-| cron de ejecución | **NO EXISTE** |
-| `pedido_recurrente` (tipo de notificación) | 🔴 **`en_sombra = true`** — se registra y **no se entrega** |
-
-> **La población en cero NO es porque el motor lo impida:** `configurar_recurrencia`
-> inserta bien. **Es porque nadie tocó el interruptor.**
-
-🔴 **Y el stub declara su propia condición:** *«el día que la pasarela exista
-(D-778 muere), este cuerpo cobra y llama a `crear_pedido_despensa`»*.
-**La pasarela existe desde S101. Nadie volvió al cuerpo.**
-
-### §2.2 · LA MIGRACIÓN ESCRITA — `docs/relevamientos/S103-A-recurrente-SIN-NUMERO.sql`
-
-**SIN NÚMERO Y SIN APLICAR, a propósito:** en `supabase/migrations/` un
-`db push` la aplicaría sola. **Reversa escrita antes, con lo que NO deshace.**
-
-#### Las CUATRO decisiones, con su argumento
-
-**① `activo` NO se borra: pasa a `GENERATED ALWAYS AS (estado = 'activa')`.**
-*Lo obvio era borrarlo.* **Dos razones para no hacerlo:** tres funciones lo leen
-y **una se reescribe en la tanda siguiente por otra razón** —*cambiar dos veces
-la misma función en dos migraciones distintas es cómo se pierde un cuerpo*—; y
-sobre todo:
-
-> **Copiado, `activo` sería un invariante que alguien tiene que RECORDAR mantener. Generado, la contradicción es INEXPRESABLE.**
-
-*Costo pagado una vez: `alternar_recurrencia` ya no puede escribirlo y hubo que
-reescribirla — a cambio de que nadie pueda desincronizarlos nunca.*
-
-**② El UNIQUE del período es PARCIAL sobre `estado='aprobado'`.**
-*Uno total prohibiría **reintentar**, y §6 firma tres días de reintento.*
-
-> **Lo que no puede ocurrir dos veces es un cobro EXITOSO, no un intento.**
-
-*El caso que lo obliga no es exótico: **un cron que corre dos veces**.*
-
-**③ El backfill traduce `activo=false` → `'cancelada'`, jamás `'pausada'`.**
-Hoy la única vía a `false` es que **el cliente** apague. **No existe todavía
-ninguna pausa por fallo**, así que `'pausada'` **inventaría un fallo que nunca
-ocurrió** — *y lo inventaría en el registro de por qué se cortó el servicio de
-alguien.*
-
-**④ `tarjeta_id` NULLABLE — hueco DECLARADO, no permiso.**
-El instinto correcto es `NOT NULL` (§2 exige que la autorización **nombre** un
-medio). **No se puede hoy:** `configurar_recurrencia` es la única puerta y
-**todavía no escribe tarjeta** ⇒ `NOT NULL` **dejaría el alta rota entre esta
-migración y la del cobro.**
-
-> **El endurecimiento va CON su productor** — `L-326`: el `REVOKE` corre con el
-> reemplazo listo, jamás antes.
-
-*Y lo que lo separa de una omisión: **está declarado en el `COMMENT` de la
-columna**. Un hueco que el esquema confiesa se cierra; uno que nadie escribió se
-descubre en producción.*
-**Hermana:** `ON DELETE SET NULL` y **no** `CASCADE` — *borrarle la serie por
-borrar una tarjeta sería tomar por él una decisión que no tomó.*
-
-#### 🔴 `recurrencia_desglose` — POR QUÉ APARECIÓ, y es la prueba de la precondición
-
-**Faltaba, y lo destapó ESCRIBIR EL CUERPO DEL COBRO — no releer la migración.**
-
-> **Aplicada como estaba, el esquema declaraba un sujeto cobrable SIN DÓNDE
-> CONGELAR SU MONTO**, y la **compuerta 2** —*sin desglose no hay cobro*—
-> **habría rebotado TODO cobro recurrente**, con el esquema ya aplicado y el
-> defecto a una migración de distancia.
-
-**Por qué el período ES sujeto propio y no se cobra un pedido** *(tres razones,
-la segunda cierra la discusión)*:
-· **§6** manda cobrar **antes** de que salga la entrega — *un pedido creado para
-poder cobrarlo sería una entrega comprometida antes de que entre la plata*;
-· **el plan de paseos no produce pedido alguno**, y es el sujeto ① de la letra;
-· **§5** exige **precio vigente** ⇒ el desglose nace **por cobro**, no por serie
-— *uno por serie cobraría para siempre el precio del día en que se suscribió.*
-**Por eso el período va en la PK.** FK `CASCADE` (a diferencia de `tarjeta_id`):
-*el desglose no tiene vida propia sin su serie — es su fotografía.* **Sin policy
-de escritura**: lo congela el motor, jamás el cliente.
-
-### §2.3 · LA HERMANA — y la prohibición que la funda
-
-**`pagos-cobro` NO PUEDE servir al recurrente.** Medido (`index.ts:78-89`): su
-**primera compuerta es la sesión** (`sin_sesion` → 401), y **el recurrente no
-tiene sesión: lo dispara un reloj.**
-
-🔴 **PROHIBIDO (`L-340`, firma del founder): que el disparador fabrique un JWT
-de usuario con `service_role`.**
-
-> **No rompe UNA compuerta: rompe el SIGNIFICADO de todas.** El día que el reloj
-> pueda producir la misma señal que una persona, **nadie puede volver a
-> distinguir un cobro pedido de uno inventado** — y es **RETROACTIVO**: degrada
-> también los cobros ya ocurridos, porque desde ese día ningún registro anterior
-> puede probar de qué lado nació.
-
-⇒ **HERMANA con el mismo contrato de seguridad y otra RAÍZ:** la **fila de la
-serie** como acto guardado (quién · cuándo · qué medio · qué cadencia) **+
-secreto compartido** para el cron (patrón `D-713`). **Compuertas E3 enteras e
-idénticas; lo único que cambia es de dónde sale el pagador.**
-*Letra: `LETRA_COBRO_RECURRENTE` **v1.3** §4.0 y §4.0bis.*
-
-**El reparto, ratificado:** **la base ELIGE y CONGELA · la edge COBRA · el cron
-llama por `net.http_post`** (patrón push/whatsapp/conciliar — *no nace mecanismo
-nuevo*). **El desglose congelado nace POR COBRO y ANTES de debitar,
-fail-closed.**
-
-### §2.4 · QUÉ FALTA PARA QUE EL COBRO SEA REAL — en orden ejecutable
-
-1. **Numerar y aplicar** `S103-A-recurrente-SIN-NUMERO.sql` — **pero NO antes de
-   (2) y (3)**: ver la precondición de §3.
-2. **Escribir el cuerpo**: `recurrencias_vencidas_pendientes()` en la base (elige
-   + congela el desglose del período) y **la hermana** `pagos-cobro-recurrente`
-   (cobra, con `pagador_user_id` explícito de la fila).
-3. **`cerrar_y_renovar_planes` pasa por el mismo cuerpo.** 🔴 **Medido: hoy NO
-   toca el motor de pagos** (control: sí toca `suscripciones_servicio`), y hay
-   **1 suscripción ACTIVA con próximo cobro `2026-09-13`** ⇒ **en esa fecha un
-   plan se renueva solo y gratis.**
-4. **El cron de ejecución con hora declarada.**
-5. **Los avisos**: 48 h · día 0 de fallo · reintentos 1-2 · **pausa día 3 sin
-   deuda hacia atrás** · **salto de entrega por falta de stock (§7: jamás
-   sustitución)**.
-6. **El arnés camino real**, con **la serie que falla a propósito** — §2.5.
-7. **AL FINAL: sacar `pedido_recurrente` de `en_sombra`**, y que el aviso **gane
-   monto y medio**. 🔴 **Encenderlo antes mandaría el anuncio de un cobro que no
-   va a ocurrir.**
-
-**Y lo que el aviso promete hoy y no existe:** su payload dice
-`'puede': 'saltar, mover o cancelar'` y **solo existe cancelar** ⇒ **`D-869`**,
-dueño **producto**, fuera de v1 (`LETRA_COBRO_RECURRENTE` v1.2 §8).
-
-### §2.5 · EL CASO CANÓNICO DEL ARNÉS (firma del founder)
-
-**Todos los datos de la app son de prueba.** La suscripción que renueva el
-**`2026-09-13`** es **el sujeto del arnés**: tiene que **renovar cobrando por el
-motor**, y **una gemela de prueba tiene que FALLAR A PROPÓSITO y recorrer los
-tres días hasta la pausa.**
-
-> *El camino feliz de un cobro recurrente se parece demasiado al de un cobro
-> normal; **lo único que esta letra agrega de verdad es qué pasa cuando NO entra
-> la plata**.*
-
----
-
-## §3 · 🔒 LA PRECONDICIÓN DEL FOUNDER — repetida entera
-
-> **La migración del recurrente NO SE APLICA hasta que el cuerpo del cobro esté
-> escrito y su arnés recorrido — incluida la serie que falla a propósito hasta
-> la pausa.**
-
-**Es `LETRA_PAGO_CITAS` §9 aplicada antes del daño:**
-
-> ### **Un productor probado por su arnés está probado como PRODUCTOR, jamás como REEMPLAZO.**
-
-**Y YA SE PAGÓ SOLA UNA VEZ:** escribir el cuerpo destapó que faltaba
-`recurrencia_desglose`. *Sin la precondición, el esquema estaría aplicado y todo
-cobro recurrente rebotaría en la compuerta 2.*
-
----
-
-## §4 · EL ORDEN DE TRABAJO QUE LA MESA FIJÓ
-
-### ① 🔴 `D-872` — el camino principal de la despensa está cerrado
-
-**Con «Envío a domicilio», «Ver el total» está DESHABILITADO**; con «Retiro en
-tienda» el camino sigue. Medido en el aparato, cuenta real, dirección válida
-(`170135 Quito · Shyris y suecia Edificio Iqon`), pedido fresco.
-Voz: *«No hay ventana de entrega disponible — revisa la fecha o prueba retiro en
-tienda.»*
-
-🔴 **VA CON DIAGNÓSTICO ANTES DE CURA.** **No se midió POR QUÉ no hay ventana**,
-y las cuatro hipótesis son **curas completamente distintas**: sin cupo del
-vendedor para la fecha · sin zona de cobertura para esa dirección · sin
-repartidor configurado · la fecha por defecto cae fuera de toda ventana.
-*Si resulta dato de siembra, la ficha muere y pasa al corte semilla/real; si
-resulta motor, **bloquea el soft launch**.*
-
-### ② El actuador de DeUna — y su orden es obligatorio
-
-**`M1·M2·M3 → N1·N2·N3 → wrapper`.** *Escribir N2 contra una columna ausente
-sería construir sobre lo que no existe.* **Medido: `referencia_corta`,
-`codigo_numerico`, `codigo_push` y `_evento_autenticado` NO EXISTEN todavía.**
-
-**El defecto que cura:** `aplicar_evento_de_pago` autentica con
-`detalle NOT ILIKE '%credencial=SERVER%'` — **un concepto de Nuvei**. Un evento
-DeUna **llega, se guarda y se descarta sin error, sin log y sin síntoma.**
-**Sin esto, el lunes se cobra y el pedido no avanza.**
-*Las migraciones las escribió D (`S103-D-migracion-motor-multiproveedor-SIN-NUMERO.sql`
-y `S103-D-migraciones-deuna-SIN-NUMERO.sql`); **A las numera al depositar**
-(`L-331`).*
-
-🔴 **Tres condiciones de D al numerar:** N1 agrega rama a `_pago_aprobado` y **la
-de Nuvei queda byte-idéntica** · **N3 CAMBIA LA FIRMA de
-`pagos_pendientes_de_conciliar`** ⇒ **el DROP+CREATE va en la MISMA ventana que
-el redeploy de `pagos-conciliar`**, o el barrido queda roto (precedente
-cron→deploy de `D-713`) · **N2 vino como diff conceptual a propósito**: el cuerpo
-se escribe **contra el objeto leído**, jamás de memoria.
-
-### ③ El cuerpo del recurrente — §2.4
-
----
-
-## §5 · LA TANDA DE S102 — COMPLETA
-
-**Los cinco pasos aplicados.** Snapshot **re-medido bajo veda** (22-ago 15:00:18
-UTC, `citas=8 · pedidos=35`; control: **8+35 = 43 = total de `pagos_intentos`**).
-Paso 1 (columna + backfill de 8) · paso 2 (`pagos-cobro` **v8→v9**) · paso 3
-(CHECK + policy) · paso 4 (fila CO cerrada con **`base: null`**) · paso 5
-(`v_ranking` fuera de `anon`, **desbloqueado por censo**: 2 consumidores, los dos
-en el admin, que entra con `signInWithPassword` ⇒ corre como `authenticated`).
-
-**Dos cosas las encontró el guard, no la lectura:** el snapshot **vivía en dos
-lugares** y re-medí solo uno · y el **`RESET ROLE` del cinturón deshizo la
-elevación del propio CLI**, dejando la migración **aplicada y sin registrar** —
-*un estado que no grita*. Reparado con `migration repair` y curado en el archivo.
-
-### Fichas abiertas con dueño
-
-| ficha | qué | dueño |
+| | cliente | prestador |
 |---|---|---|
-| **`D-872`** 🔴 | el camino de envío cerrado | **A** — diagnóstico primero |
-| **`D-871`** 🟡 | R47/R48 ciegos a los **defaults** de `packages/ui` | **B nueva** — *autorizada como tanda propia, con freno: toca un ratchet vivo* |
-| **`D-870`** 🟢 | 89 errores de tipado fuera de clase, **declarados y no gateados** | — |
-| **`D-869`** 🟡 | el aviso promete **saltar/mover** y solo existe cancelar | **producto** |
-| **`D-862`** | comprobante a quien pagó — **trabajo sobre `aplicar_evento_de_pago`**, choca con N2 | **A** |
-| **`D-778`** | su condición (la pasarela) **ya se cumplió**; la ficha no lo dice | **A** |
+| cambiar clave | ❌ *(C montó la pantalla — gate pendiente)* | ✅ |
+| cambiar correo | ❌ | ❌ |
+| cerrar cuenta | 🟡 voz honesta | 🟡 voz honesta |
+| invitar a la familia | 🟡 «Pronto» | — |
 
-**Y el corte semilla/real es la TANDA DE CIERRE de S103**, ya firmado, con su
-propia autorización: **138 citas `pago_simulado`** · las series de prueba · los
-pedidos de prueba · **y las 7 tarjetas del arnés de S101** (dos BINs de prueba,
-un solo dueño).
+**`P15` FIRMADA** (`POLITICAS_EPETPLACE` §P15): **cerrar la cuenta la vuelve
+INALCANZABLE, no destruye el registro.** Su argumento medido: **62 FKs a
+`auth.users`, 24 BLOQUEANTES** —`pagos_intentos`, `pedidos`, `compras`,
+**`consentimientos`**— **y 21 CASCADE**. *Un `DELETE` rebota; forzarlo a CASCADE
+se llevaría los consentimientos.*
 
----
+⚠️ **`7.8` sostiene la mitad MECÁNICA de P15 y NO la legal** — su literal dice
+sólo *«no se borra… usar estados»* y **jamás menciona anonimizar**. **Enmendarla
+es firma del founder.**
 
-## §6 · LO QUE ESPERA A OTRAS PISTAS
-
-**C** — tres gates en el aparato (**cliente nuevo · cliente con elección previa ·
-DeUna no elegible**); **el segundo ya es observable**, el wrapper está en
-`origin`. Y **el pedido del `StepperCantidad`**, con su trampa medida:
-
-> **8 consumidores, solo 2 editables.** *La superficie va SOLO en la rama
-> `editable`: ponerla en las dos le daría a los otros seis una caja que promete
-> edición — el defecto exacto de la firma, al revés y multiplicado.*
-
-Y le pedí **curar el voseo vivo `retirás`** en su próximo commit (*se lo pasé a
-ella en vez de tocarlo yo: está editando ese `es.ts` ahora, y un conflicto cuesta
-más que la cura, que es una palabra*).
-
-🔴 **Y DOS PEDIDOS DE C QUE ESPERAN A `packages/ui` — los dos de la misma
-pieza-territorio, así que van juntos:**
-
-**(a) LA HOJA DE MEDIOS NO MARCA CUÁL ESTÁ ELEGIDO.** Medido por C: **cero
-referencias a `elegido` dentro de la `Hoja`.** Tocar elige **y cierra**, así que
-**al abrir «Cambiar ›» la persona no ve cuál está activa.**
-
-> *Y se cruza feo con lo que ya sabemos: **siete tarjetas, con dos pares que solo
-> se distinguen por la fecha**. Abrir «Cambiar» sobre siete filas sin saber cuál
-> es la actual **no es cambiar: es elegir de nuevo a ciegas.***
-
-**§14 le da la ley exacta** —*letra magenta, sin huella*— **y C no puede
-montarla**: `Celda` no expone color/tono del título, y `Texto` **no tiene color
-de acento A PROPÓSITO** (N23). *Meterle un color inline sería saltarse N23 el
-mismo día que se firmó §14.*
-
-**(b) §15 (el fold) toca a `Hoja`**, que también es de B: la hoja de medios es
-justo *«contenido que puede exceder el alto»* — siete tarjetas + DeUna.
-
-**B (nueva)** — **`D-871`** autorizada. **Y los dos pedidos de C de arriba, más
-el `StepperCantidad`: son TRES y los tres son de `packages/ui`.** **B vieja quedó sin contexto** y su
-traspaso vive en el **repo del sitio**.
-
-**D** — bloqueada por el **`pointOfSale`**; su inventario dice que **ninguna de
-las 11 piezas está en verde**. **El cuello de botella del lunes NO es el POS: es
-② de §4** — el actuador y el wrapper, que son de A.
+**La máquina de invitación EXISTE, construida para el otro actor**
+(`empleado_invitaciones` + 6 RPCs). *El molde sirve; el ALCANCE es letra.*
 
 ---
 
-## §7 · 🔴 LAS TRAMPAS DEL ENTORNO — cada una costó una medición
+## §4 · LA PRÁCTICA NUEVA · `P-CIRCUITO`
 
-*Ninguna se deduce leyendo el repo. **No se recortan.***
+**Al cierre de TODO frente, antes de darlo por cerrado: inventario de punta a
+punta que declara PIEZA POR PIEZA si está ALCANZABLE DESDE AFUERA.** *No «si
+existe». No «si pasa sus tests».*
 
-**De esta pista:**
-1. **`eas-cli` SIEMPRE desde `apps/<app>/`, aunque solo estés MIRANDO.** Desde la raíz scaffoldea un `app.json` stub — **y lo hace hasta con un comando de LECTURA**.
-2. **El worktree nuevo no trae `node_modules` ni `.env.local` ni `supabase/.temp`.** El `.env.local` se busca **POR APP**, no en la raíz (`L-332`). **Sin `node_modules`, el gate del commit da rojo por módulos ausentes — y el rojo NO es de tu cambio.**
-3. **`supabase db query` con SQL inline y comentarios falla** — se usa `--file`.
-4. **`RESET ROLE` dentro de una migración deshace la elevación del CLI** y la deja **aplicada sin registrar**. Se guarda el rol previo y se restaura **ése**.
-5. **`NOT VALID` no indulta a la fila: indulta al pasado** (`L-338`). Cualquier UPDATE la vuelve a someter.
-6. **El pie de Cuenta NO distinguía Metro de bundle embebido** — los dos decían `bundle embebido / dev`. **C lo curó**; la cura viaja en su rama.
-7. **`adb reverse --remove-all` borra los de TODAS las pistas.** Usar `--remove tcp:<puerto>`.
+**Tres estados y ninguno es «verde»:** ALCANZABLE (con su llamador nombrado) ·
+ESCRITA Y NO ALCANZABLE · **NO MEDIDO** *(se escribe; omitirlo lo vuelve
+indistinguible de alcanzable)*.
 
-**Del parte de B:**
-8. 🔴 **`deno` dentro del monorepo ESCRIBE**: agrega `"workspaces"` al `package.json` raíz. **Le pasó a dos pistas el mismo día.** ⇒ todo chequeo con `deno` corre **sobre copia, fuera del repo** (`L-337`).
-9. **El juez de edge functions ensanchado a las 23 funciones da 90 errores, 89 ruido.** Gatearlos reproduce el fracaso ya documentado (*«20 rojos sobre 22 y casi todos falsos»*). **Se juzga la CLASE `TS2304`/`TS2552`** y los 89 se **declaran al pie** (`D-870`).
-10. **`expo-clipboard` es nativo y NO viaja por OTA** — y **`pnpm` lo hace parecer que sí**: el JS resuelve, el botón se dibuja habilitado y **falla al tocarlo**. El `require` en try/catch **no alcanza** (`L-344`).
-11. **Metro NO rebundlea solo en estos worktrees.** Toda cura se verifica con **`force-stop` + relanzar**, jamás con fast refresh. Y **i18next no recarga diccionarios** con fast refresh: se ve la **clave cruda**.
-12. **Cinco `astro` peleando el puerto 4321** — el que contesta puede ser el de `main`.
+**Sus cuatro casos, cuatro territorios, el mismo día** (`L-393`): el barrido con
+24 tests verdes y **ningún `index.ts`** · **`destacada: true` aceptada y NO-OP**
+tres semanas con 52 reglas verdes · **`promesaPorVendedor` con cero
+consumidores** · y **seis códigos con contrato, tipo y voz, jamás ejercidos**.
 
-**Del parte de D:**
-13. 🔴 **El campo se llama `idTransacionReference`** —*Transacion*, no *Transaction*—. **Es un typo del proveedor: quien lo «corrija» rompe todas las consultas.**
-14. **`NOT_FOUND` no existe**: una transacción inexistente vuelve **`200 / PENDING / amount 0 / date ""`** ⇒ **el fantasma tiene la forma exacta de un pago en curso**, y **aprobado exige `APPROVED` Y `amount > 0`**.
-15. **`idType` viaja como TEXTO** (`"0"`/`"1"`) pero **`expiredTime` como número**.
-16. **Las rutas son `/merchant/v1/payment/*`** — sin `api/`.
-17. **`currency` rebota el request entero.**
-18. **Rate limit ~1 req/s**; **un `429` JAMÁS es fallo de pago**: es nuestra prisa.
-19. **El refund es MISMO DÍA**, confirmado por el propio mensaje de error del proveedor (*«only valid for the purchase day»*).
+> **A las cuatro las encontró RECORRER EL CIRCUITO. A ninguna, un gate.**
 
 ---
 
-## §8 · LO QUE NO SE HIZO, SIN MAQUILLAR
+## §5 · RAMAS Y OTA
 
-- **El founder no caminó ③ ni ⑥.** El aparato está en ese estado; el parte medido está en `docs/relevamientos/2026-08-22-s103-GATE-S101D-3-Y-6.md`.
-- **`D-872` sin diagnosticar** — es el ① del orden.
-- **El actuador y el wrapper de DeUna: no arrancados.** Es el cuello de botella del lunes.
-- **El cuerpo del recurrente: no escrito.** La migración está escrita y **no aplicada**, por precondición.
-- **El voseo `retirás`: pasado a C**, no curado por mí.
-- **Las migraciones de D: no numeradas.**
+**Pendiente de merge (medir su ancla contra el objeto, jamás contra un mensaje):**
+`pista/s103-b-jueces` (monorepo) y `pista/s103-b` (sitio) — B pidió los dos.
+**Y el OTA queda de A, con autorización del founder: todo lo visual de S103-B
+espera ahí.**
+
+**La práctica del publish, adoptada tras el error de esta sesión:** *la lista de
+lo que lleva un OTA se MIDE por ancestría contra el ancla, pista por pista, y va
+en el mensaje con su resultado* — **no «lleva lo de C», sino `49a831d3 → SÍ`**,
+con control negativo.
+
+---
+
+## §6 · TRAMPAS DEL ENTORNO — no se deducen leyendo el repo
+
+**🔴 LA MÍA, cuatro veces en un día:** una cadena que empieza con
+`cd <worktree>` **arrastra TODO el comando al worktree**. Ahí `main` no está
+checkouteado, el `git merge` corre **contra la propia rama** y devuelve
+**«Already up to date»** — *lo mismo que diría un merge correcto sin nada que
+traer*. **Las cuatro se recuperaron midiendo el SHA después, y eso es
+RECUPERACIÓN, no defensa.** ⇒ **usá `node scripts/merge-a-main.mjs <rama>
+"<msg>"`**, que verifica el sitio ANTES de correr (mide la FORMA de `.git`:
+directorio vs archivo) y exige que `main` se haya movido.
+
+**`eas-cli` SIEMPRE desde `apps/<app>/`, aunque sólo estés MIRANDO** — corrido
+desde la raíz **scaffoldea un `app.json` stub**, y un árbol sucio saca el ancla
+con asterisco. **Pasó otra vez hoy.**
+
+**El `db query` devuelve SOLO la última sentencia** ⇒ una consulta, con
+`jsonb_build_object`.
+
+**`RAISE NOTICE` no llega al reporte del cliente SQL** — si querés que el gate
+muestre lo recorrido, **escribí a una tabla temporal y hacé `SELECT`**.
+
+**`pg_get_functiondef` devuelve LOS COMENTARIOS** ⇒ un cinturón que busca un
+literal **se dispara contra su propia lápida** (`L-170`). Strip antes de medir.
+
+**Metro puede NO rebundlear** — *«la pantalla se ve bien, sólo que es la vieja»*.
+**Contá los `Bundled` del log**, y arrancá con `--clear` si dudás.
+
+**Sin `.expo/types/router.d.ts` la validación de rutas se APAGA y el typecheck
+da VERDE** (`L-391`). **Verificá que el archivo exista antes de creerle.**
+
+**El aparato se duerme y queda BLOQUEADO** — `KEYCODE_WAKEUP` lo despierta pero
+**no lo desbloquea**, y los toques a ciegas caen en la pantalla de bloqueo.
+*Terminé en el marcador de emergencia; verificado `mCallState=0`.* **Leé la
+captura antes de tocar.**
+
+**Protocolo del aparato entre pistas:** cada una su puerto, **`--remove tcp:<mío>`
+y JAMÁS `--remove-all`**, y **se avisa al soltar Y AL RETOMAR**.
+
+---
+
+## §7 · LO PRIMERO PARA LA SUCESORA
+
+1. **🔴 Enchufar el recurrente** — la edge hermana, las tres claves, el cron, y
+   **el actuador llamando a `renovar_plan_cobrado`**. *Sin eso el motor entero es
+   `L-393`.*
+2. **El inventario de circuito** completo del frente, con sus tres estados.
+3. **El merge de las dos ramas de B y el OTA**, con la ancestría medida.
+4. **El ciclo de cuenta**, completo y no a medias (firma del founder).
+5. **Y el corte semilla/real** antes del soft launch — 138 citas `pago_simulado`,
+   series y pedidos de prueba. **Ya firmado, sin ejecutar.**

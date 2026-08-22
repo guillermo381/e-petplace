@@ -44,6 +44,31 @@ ALTER TABLE public.pagos_intentos
   + ((suscripcion_servicio_id IS NOT NULL))::integer = 1
   );
 
+-- ═══ EL VOCABULARIO DEL PAGADOR GANA SU TERCER ORIGEN ═══
+--
+-- 🔴 **Lo destapó el arnés, no la lectura.** `chk_pagador_viaja_con_su_origen`
+--    admitía **`'sesion'` y `'backfill_s102'`**, y nada más. **Un cobro
+--    recurrente NO TIENE SESIÓN — ése es exactamente su punto** ⇒ el INSERT
+--    rebotaba con `23514`.
+--
+-- **La constraint estaba haciendo su trabajo: rechazó un valor que nadie había
+-- declarado.** *No era un obstáculo — era el modelo defendiéndose, igual que
+-- los CHECKs de procedencia que frenaron el borrado de las sondas en S92.*
+--
+-- ⇒ **`'recurrencia'` entra como TERCER origen, no como excepción.** Y la
+--    distinción importa más allá del CHECK: **`pagador_origen` dice si había
+--    alguien mirando la pantalla**, y eso cambia qué se le puede reclamar a la
+--    persona y cómo se le avisa. *Un cobro que nadie vio no se explica igual
+--    que uno que alguien apretó.*
+ALTER TABLE public.pagos_intentos DROP CONSTRAINT chk_pagador_viaja_con_su_origen;
+ALTER TABLE public.pagos_intentos
+  ADD CONSTRAINT chk_pagador_viaja_con_su_origen
+  CHECK (
+    (pagador_user_id IS NULL AND pagador_origen IS NULL)
+    OR (pagador_user_id IS NOT NULL
+        AND pagador_origen = ANY (ARRAY['sesion','backfill_s102','recurrencia']))
+  );
+
 -- PARCIAL sobre `aprobado`, igual que el tercero: lo que no puede haber dos
 -- veces es un cobro EXITOSO, no un intento — §6 firma tres reintentos.
 CREATE UNIQUE INDEX uq_suscripcion_periodo_aprobado
@@ -97,7 +122,11 @@ BEGIN
   LOOP
     /* El fusible del motor de D-657(b): sin mascota activa no se renueva.
        *Se conserva tal cual — no es de este arco y su razón sigue viva.* */
-    SELECT (m.estado_vida = 'vivo') INTO v_masc FROM mascotas m WHERE m.id = v_s.mascota_id;
+    /* 🔴 EL VALOR SE MIDIÓ, NO SE SUPUSO: `estado_vida` vale **`'activa'`**, no
+       `'vivo'`. *Con el literal equivocado este fusible habría frenado TODOS
+       los planes con `mascota_no_activa` — un motor apagado que se ve como un
+       motor prudente.* Es `L-364` en su forma más cara: el rojo total y prolijo. */
+    SELECT (m.estado_vida = 'activa') INTO v_masc FROM mascotas m WHERE m.id = v_s.mascota_id;
     IF NOT COALESCE(v_masc, false) THEN
       v_frenadas := v_frenadas || jsonb_build_object(
         'suscripcion_id', v_s.id, 'periodo', v_s.periodo_fin, 'motivo', 'mascota_no_activa');
@@ -250,7 +279,16 @@ REVOKE ALL ON FUNCTION public.renovar_plan_cobrado(uuid, date) FROM anon, authen
 
 -- ── CINTURÓN ───────────────────────────────────────────────────────────────
 DO $cinturon$
-DECLARE v_def text; v_n int;
+DECLARE
+  v_def text; v_n int;
+  /* 🔴 SIN COMENTARIOS AL MEDIR. `pg_get_functiondef` los devuelve, y este
+     cinturón se disparó contra su PROPIA LÁPIDA: el comentario que declara que
+     el flag murió **contenía el flag**. **Es `L-170` —un censo por
+     `functiondef` lee los comentarios como código— cobrada sobre quien la citó
+     en otro archivo el mismo día.**
+     *Cambiar el comentario habría curado el caso y dejado viva la clase: el
+     próximo que escriba el literal en una lápida vuelve a romper el gate.* */
+  v_limpio text;
 BEGIN
   -- (a) El invariante es de CUATRO.
   IF (SELECT pg_get_constraintdef(oid) FROM pg_constraint
@@ -260,20 +298,22 @@ BEGIN
 
   -- (b) 🔴 EL DISCRIMINADOR DEL ARCO: la renovación EXIGE cobro aprobado.
   SELECT pg_get_functiondef(to_regprocedure('public.renovar_plan_cobrado(uuid,date)')) INTO v_def;
-  IF position('sin_cobro_aprobado' IN v_def) = 0 THEN
+  v_limpio := regexp_replace(regexp_replace(v_def, '/\*.*?\*/', '', 'gs'), '--[^\n]*', '', 'g');
+  IF position('sin_cobro_aprobado' IN v_limpio) = 0 THEN
     RAISE EXCEPTION 'ABORTA: la renovacion no exige el cobro — vuelve a renovar por confianza';
   END IF;
 
   -- (c) ☠️ `pago_simulado` MUERTO en el camino nuevo.
-  IF position('pago_simulado' IN v_def) > 0 THEN
+  IF position('pago_simulado' IN v_limpio) > 0 THEN
     RAISE EXCEPTION 'ABORTA: sobrevivio pago_simulado — la bandera que decia ya entrego';
   END IF;
 
   -- (d) El selector NO renueva ni avisa. *Si alguien le mete la renovación
   --     adentro, volvemos al reloj disparando el servicio.*
   SELECT pg_get_functiondef(to_regprocedure('public.planes_vencidos_pendientes()')) INTO v_def;
-  IF position('_generar_citas_plan' IN v_def) > 0
-     OR position('plan_renovado' IN v_def) > 0 THEN
+  v_limpio := regexp_replace(regexp_replace(v_def, '/\*.*?\*/', '', 'gs'), '--[^\n]*', '', 'g');
+  IF position('_generar_citas_plan' IN v_limpio) > 0
+     OR position('plan_renovado' IN v_limpio) > 0 THEN
     RAISE EXCEPTION 'ABORTA: el ACTO 1 renueva o avisa — los dos actos se fusionaron';
   END IF;
 

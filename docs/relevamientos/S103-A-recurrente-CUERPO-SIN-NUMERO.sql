@@ -127,51 +127,16 @@ BEGIN
       CONTINUE;
     END IF;
 
-    /* ── ⓑ LAS COMPUERTAS ───────────────────────────────────────────────────
-       🔴 **ACÁ HAY UNA DECISIÓN DE MESA PENDIENTE, Y NO LA TOMO SOLO.**
-
-       La mesa firmó *«compuertas E3 enteras»*. **Medido contra el objeto:
-       `verificar_compuertas_pre_cobro(p_compra_id uuid, p_token text)` es
-       COMPRA-ONLY** — lee `compras`, `pedidos` e `inventario_reservas`, y **una
-       recurrencia no tiene ninguna de las tres.** *Llamarla pasando el
-       `recurrencia_id` como `compra_id` habría devuelto `compra_no_existe` en
-       el 100 % de los casos: un freno que se ve como una compuerta funcionando.*
-
-       **Y no es que falte adaptarla: DOS DE SUS COMPUERTAS NO APLICAN, con su
-       razón:**
-         · **1 · reserva de stock** — no hay pedido todavía. **§6 firma que
-           primero se cobra y DESPUÉS sale la entrega**; exigir reserva antes
-           del cobro invertiría esa firma.
-         · **compra sin pedidos** — por lo mismo: el pedido nace después.
-       **Y DOS SÍ, con el mismo espíritu y otro sujeto:**
-         · **0 · intento en vuelo** — íntegra. *Protege la tarjeta del cliente
-           del segundo débito, que es lo caro.*
-         · **monto contra desglose congelado** — construida arriba, en ⓒ.
-
-       ⚖️ **LAS DOS SALIDAS, servidas para la mesa:**
-       **(a) ensanchar `verificar_compuertas_pre_cobro` a tres sujetos** — es
-       cirugía sobre la función que HOY cobra plata real de Nuvei, exactamente
-       lo que S103-D se negó a hacer por el mismo motivo.
-       **(b) `verificar_compuertas_recurrencia(uuid, date)` propia**, con cada
-       predicado **extraído del cuerpo vivo** y con las dos que no aplican
-       **declaradas por nombre**. ⚠️ Riesgo declarado: `L-375` — reimplementar
-       es medir el propio eco; se mitiga extrayendo, no reescribiendo.
-       **Voto de A: (b)**, porque la mitad que no aplica no se puede parametrizar
-       sin volver la compuerta de compras más difícil de leer, *y porque una
-       firma que no se puede cumplir literalmente se declara, no se fuerza.*
-
-       ✅ **RESUELTO por (b), y el mapeo completo vive en ④ al pie de este
-       archivo: CUATRO evaluadas + cobertura declarada no-evaluable + reserva
-       declarada no-aplica.** *Mi propio conteo de arriba decía «dos» — estaba
-       hecho sobre medio cuerpo leído.* */
-    v_compuertas := verificar_compuertas_recurrencia(v_r.id, v_r.proximo_pedido_fecha);
-    IF COALESCE((v_compuertas->>'ok')::boolean, false) IS NOT TRUE THEN
-      v_frenadas := v_frenadas || jsonb_build_object(
-        'recurrencia_id', v_r.id, 'periodo', v_r.proximo_pedido_fecha,
-        'motivo', COALESCE(v_compuertas->>'codigo', 'compuerta_sin_codigo'),
-        'compuertas', v_compuertas);
-      CONTINUE;
-    END IF;
+    /* ── ⓑ↔ⓒ 🔴 EL ORDEN LO CORRIGIÓ EL ARNÉS, NO LA LECTURA ─────────────
+       **Estaban al revés: la compuerta 2 verifica el monto CONTRA EL DESGLOSE
+       CONGELADO, y el desglose se congelaba DESPUÉS.** ⇒ toda serie salía
+       frenada con `desglose_incompleto`, **siempre**.
+       *Leído, el cuerpo se ve correcto —«primero se verifica, después se
+       congela» suena bien—; corrido, no cobra jamás.* **Y su modo de falla es
+       de los que se archivan: un freno con nombre propio, prolijo, que parece
+       una compuerta funcionando.** (`L-372`)
+       ⇒ **CONGELAR y después VERIFICAR.** La compuerta necesita el número
+       para poder compararlo. */
 
     /* ── ⓒ EL DESGLOSE DEL PERÍODO, CONGELADO AL PRECIO DE HOY ─────────────
        §5: **precio VIGENTE al momento del cobro**, no el del día en que el
@@ -224,6 +189,52 @@ BEGIN
        se congela UNA vez.** *Si un reintento lo recalculara, el segundo intento
        podría cobrar un monto distinto del que el primero rechazó — y el
        cliente vería dos números para el mismo mes.* */
+
+    /* ── ⓑ LAS COMPUERTAS ───────────────────────────────────────────────────
+       🔴 **ACÁ HAY UNA DECISIÓN DE MESA PENDIENTE, Y NO LA TOMO SOLO.**
+
+       La mesa firmó *«compuertas E3 enteras»*. **Medido contra el objeto:
+       `verificar_compuertas_pre_cobro(p_compra_id uuid, p_token text)` es
+       COMPRA-ONLY** — lee `compras`, `pedidos` e `inventario_reservas`, y **una
+       recurrencia no tiene ninguna de las tres.** *Llamarla pasando el
+       `recurrencia_id` como `compra_id` habría devuelto `compra_no_existe` en
+       el 100 % de los casos: un freno que se ve como una compuerta funcionando.*
+
+       **Y no es que falte adaptarla: DOS DE SUS COMPUERTAS NO APLICAN, con su
+       razón:**
+         · **1 · reserva de stock** — no hay pedido todavía. **§6 firma que
+           primero se cobra y DESPUÉS sale la entrega**; exigir reserva antes
+           del cobro invertiría esa firma.
+         · **compra sin pedidos** — por lo mismo: el pedido nace después.
+       **Y DOS SÍ, con el mismo espíritu y otro sujeto:**
+         · **0 · intento en vuelo** — íntegra. *Protege la tarjeta del cliente
+           del segundo débito, que es lo caro.*
+         · **monto contra desglose congelado** — construida arriba, en ⓒ.
+
+       ⚖️ **LAS DOS SALIDAS, servidas para la mesa:**
+       **(a) ensanchar `verificar_compuertas_pre_cobro` a tres sujetos** — es
+       cirugía sobre la función que HOY cobra plata real de Nuvei, exactamente
+       lo que S103-D se negó a hacer por el mismo motivo.
+       **(b) `verificar_compuertas_recurrencia(uuid, date)` propia**, con cada
+       predicado **extraído del cuerpo vivo** y con las dos que no aplican
+       **declaradas por nombre**. ⚠️ Riesgo declarado: `L-375` — reimplementar
+       es medir el propio eco; se mitiga extrayendo, no reescribiendo.
+       **Voto de A: (b)**, porque la mitad que no aplica no se puede parametrizar
+       sin volver la compuerta de compras más difícil de leer, *y porque una
+       firma que no se puede cumplir literalmente se declara, no se fuerza.*
+
+       ✅ **RESUELTO por (b), y el mapeo completo vive en ④ al pie de este
+       archivo: CUATRO evaluadas + cobertura declarada no-evaluable + reserva
+       declarada no-aplica.** *Mi propio conteo de arriba decía «dos» — estaba
+       hecho sobre medio cuerpo leído.* */
+    v_compuertas := verificar_compuertas_recurrencia(v_r.id, v_r.proximo_pedido_fecha);
+    IF COALESCE((v_compuertas->>'ok')::boolean, false) IS NOT TRUE THEN
+      v_frenadas := v_frenadas || jsonb_build_object(
+        'recurrencia_id', v_r.id, 'periodo', v_r.proximo_pedido_fecha,
+        'motivo', COALESCE(v_compuertas->>'codigo', 'compuerta_sin_codigo'),
+        'compuertas', v_compuertas);
+      CONTINUE;
+    END IF;
 
     /* ── ⓓ EL INTENTO, CON PAGADOR EXPLÍCITO ───────────────────────────────
        🔴 `pagador_user_id` NO se deriva: se escribe. *El defecto que S102 curó
