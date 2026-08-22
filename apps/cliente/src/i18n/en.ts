@@ -1127,6 +1127,7 @@ export const clienteEn = {
     mediosSub: 'How you pay on e-PetPlace',
     mediosVacioTitulo: "You haven't saved any yet",
     mediosVacio: 'Save a card to pay faster. You can delete it whenever you want.',
+    medioAgregadaEl: 'Added {{fecha}}',
     medioAgregar: 'Add card',
     medioElegido: 'Selected',
     medioVence: 'Expires {{fecha}}',

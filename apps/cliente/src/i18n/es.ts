@@ -1315,6 +1315,10 @@ export const clienteEs = {
     mediosSub: 'Con qué pagas en e-PetPlace',
     mediosVacioTitulo: 'Todavía no guardas ninguno',
     mediosVacio: 'Guarda una tarjeta para pagar más rápido. Puedes borrarla cuando quieras.',
+    /* 🔴 SOLO aparece cuando dos filas serían idénticas — ver `desempatarMedios`.
+       *No dice «duplicada» ni acusa a nadie de nada: dice el único dato que
+       las separa.* */
+    medioAgregadaEl: 'Agregada el {{fecha}}',
     medioAgregar: 'Agregar tarjeta',
     medioElegido: 'Elegido',
     medioVence: 'Vence {{fecha}}',

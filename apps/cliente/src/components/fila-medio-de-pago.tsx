@@ -27,6 +27,7 @@ import { View } from 'react-native';
 import { Celda, Chevron, Texto, spacing } from '@epetplace/ui';
 import type { TarjetaGuardada } from '@epetplace/api';
 import { LogoFranquicia } from '@/components/logo-franquicia';
+import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
 /** Las marcas que el proveedor devuelve, en la voz que la familia reconoce. */
@@ -77,12 +78,56 @@ export type FilaMedioDePagoProps = {
   onPress?: () => void;
   /** La acción de fila (borrar). La lista la trae; el checkout no. */
   fin?: React.ReactNode;
+  /**
+   * 🔴 EL DESEMPATE — **solo cuando esta fila sería idéntica a otra.**
+   * Lo calcula quien tiene la lista (`desempatarMedios`), porque **una fila no
+   * puede saber que tiene una gemela.** `null` en el caso normal.
+   */
+  desempate?: string | null;
 };
 
+/**
+ * 🔴 **DOS ALTAS DE LA MISMA TARJETA PRODUCEN DOS FILAS IDÉNTICAS** — y la
+ * clase es real, no un artefacto de los datos de prueba.
+ *
+ * **Medido por A (22-ago):** el único UNIQUE de `tarjetas_guardadas` es
+ * `uq_tarjeta_token`, **sobre el token — que el proveedor genera fresco en
+ * cada alta**. ⇒ **nada impide dar de alta dos veces la misma tarjeta**, y
+ * cada alta trae token y `proveedor_uid` distintos.
+ *
+ * *El fixture del arnés de S101 —siete tarjetas de dos BINs de prueba— no es
+ * la causa: es el que lo hizo visible. **El ensayo solo llegó primero.***
+ *
+ * ── POR QUÉ EL DESEMPATE ES LA FECHA, y por qué solo a veces ─────────────
+ *
+ * Lo que hay para distinguirlas: `alias` (una sola de siete lo tiene),
+ * `expiraMes/Anio` (**solo lo sabemos de dos**, y en gemelas reales coincide),
+ * y **`creadaEn`, que existe siempre y siempre difiere.**
+ *
+ * ⚠️ **Se muestra SOLO en las que colisionan.** *Poner «Agregada el…» en todas
+ * las filas para cubrir un borde ensucia el caso normal —que es el 99 %— con
+ * un dato que a nadie le importa cuando no hay ambigüedad.* **La regla de oro
+ * de N1–N10 rige: quitá antes que agregar.**
+ */
+export function desempatarMedios(medios: TarjetaGuardada[]): Map<string, string | null> {
+  /* La huella es lo que la fila DIBUJA — no la tarjeta real. *Dos tarjetas
+     distintas que se dibujan igual también colisionan, y son el mismo problema
+     para quien mira.* */
+  const huella = (t: TarjetaGuardada) => `${t.alias ?? ''}|${t.marca ?? ''}|${t.ultimos4 ?? ''}`;
+  const cuenta = new Map<string, number>();
+  for (const t of medios) cuenta.set(huella(t), (cuenta.get(huella(t)) ?? 0) + 1);
+
+  const salida = new Map<string, string | null>();
+  for (const t of medios) {
+    salida.set(t.id, (cuenta.get(huella(t)) ?? 0) > 1 ? t.creadaEn : null);
+  }
+  return salida;
+}
+
 export function FilaMedioDePago({
-  tarjeta, zonaFin = 'ninguna', onPress, fin,
+  tarjeta, zonaFin = 'ninguna', onPress, fin, desempate = null,
 }: FilaMedioDePagoProps) {
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const marca = nombreDeMarca(tarjeta.marca);
   const cuatro = tarjeta.ultimos4 ?? '';
 
@@ -105,6 +150,13 @@ export function FilaMedioDePago({
         : t('cuenta.medioVence', { fecha: `${mm}/${tarjeta.expiraAnio}` }),
     );
   }
+  /* 🔴 EL DESEMPATE va ÚLTIMO en el subtítulo: es lo menos importante de la
+     fila y solo existe cuando hace falta. *Adelante van los datos que dicen
+     QUÉ tarjeta es; la fecha solo dice CUÁL de las dos.* */
+  if (desempate !== null) {
+    partes.push(t('cuenta.medioAgregadaEl', { fecha: fechaCortaMono(desempate, idioma) }));
+  }
+
   /* 🔴 Cuando NO sabemos el vencimiento, la fila **no dice nada** sobre él.
      *No hay una voz honesta para «no lo sabemos» que le sirva de algo a la
      familia: solo la confundiría sobre una tarjeta que funciona bien.* */

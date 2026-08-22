@@ -42,7 +42,7 @@ import {
   Boton, Celda, Chevron, Hoja, Tarjeta, Texto, spacing, useAviso,
 } from '@epetplace/ui';
 import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
-import { FilaDeUna, FilaMedioDePago } from '@/components/fila-medio-de-pago';
+import { FilaDeUna, FilaMedioDePago, desempatarMedios } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -236,14 +236,20 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
               Y por esto la sección se llama «cómo quieres pagar» y no «tus
               tarjetas» (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤). */}
           <FilaDeUna />
-          {medios.map((m) => (
-            <FilaMedioDePago
-              key={m.id}
-              tarjeta={m}
-              zonaFin="camino"
-              onPress={() => medio.elegir(m.id)}
-            />
-          ))}
+          {/* El desempate se calcula UNA vez para toda la lista: la fila no
+              puede saber que tiene una gemela. */}
+          {(() => {
+            const desempates = desempatarMedios(medios);
+            return medios.map((m) => (
+              <FilaMedioDePago
+                key={m.id}
+                tarjeta={m}
+                zonaFin="camino"
+                desempate={desempates.get(m.id) ?? null}
+                onPress={() => medio.elegir(m.id)}
+              />
+            ));
+          })()}
           <Boton
             variante="secundario"
             etiqueta={t('cuenta.medioAgregar')}
