@@ -211,19 +211,35 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
         <Texto variante="titulo">{t(voz.titulo)}</Texto>
         <Texto variante="cuerpo">{t(voz.cuerpo)}</Texto>
-        <Boton
-          variante="secundario"
-          etiqueta={t(
-            voz.accion === 'reintentar'
-              ? 'pago.deunaReintentar'
-              : voz.accion === 'volver'
-                ? 'pago.deunaVolver'
-                : 'cuenta.soporteBoton',
-          )}
-          /* 🔴 **`reintentar` vuelve a PEDIR EL CÓDIGO, no manda a soporte** —
-             la red no es un rechazo. Las otras dos salen de la pantalla. */
-          onPress={voz.accion === 'reintentar' ? onGenerarNuevo : onSoporte}
-        />
+        {/* 🔴 CENTRADO — **hallazgo de MI PROPIO recorrido en aparato
+            (23-ago), no de una revisión de código.** Los tres fallos que
+            caminé dibujaban su botón **pegado al borde izquierdo** aunque el
+            contenedor centra: `Boton` sin `bloque` fuerza
+            `alignSelf:'flex-start'` en su propio estilo y gana sobre el
+            `alignItems:'center'` del padre.
+
+            ⚠️ **Es la MISMA cura que el founder ya pidió para «Generar nuevo
+            código» el 22-ago, y yo la escribí veinte líneas más abajo** — el
+            bloque de fallo nació después y no la heredó. *Una corrección
+            aplicada a un caso no protege al hermano que nace al día
+            siguiente: lo que protege es la pieza, y acá la pieza es de B.*
+            **Se declara como deuda de forma, no se cura en `packages/ui` por
+            mi cuenta.** */}
+        <View style={{ alignSelf: 'center' }}>
+          <Boton
+            variante="secundario"
+            etiqueta={t(
+              voz.accion === 'reintentar'
+                ? 'pago.deunaReintentar'
+                : voz.accion === 'volver'
+                  ? 'pago.deunaVolver'
+                  : 'cuenta.soporteBoton',
+            )}
+            /* 🔴 **`reintentar` vuelve a PEDIR EL CÓDIGO, no manda a soporte** —
+               la red no es un rechazo. Las otras dos salen de la pantalla. */
+            onPress={voz.accion === 'reintentar' ? onGenerarNuevo : onSoporte}
+          />
+        </View>
       </View>
     );
   }
