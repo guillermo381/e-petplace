@@ -91,6 +91,41 @@ export type IconoNombre =
   //    compartir MANDA el papel afuera, descargar lo TRAE al teléfono.
   //    Gate por ícono a 21px PENDIENTE (§2.9), como sus vecinos.
   | 'descargar'
+  // ── S103-B · COPIAR — LAS DOS HOJAS, y NO nace por falta de dibujo sino
+  //    por falta de OBJETO LIBRE. El censo se hizo antes de dibujar y dio
+  //    un candidato real: **`documentos` YA es dos hojas apiladas**. No se
+  //    reusó, y las dos razones están medidas:
+  //      · **Su objeto es otro, declarado en su propia entrada:** «DÓNDE
+  //        VIVEN LOS PAPELES». Copiar no es un lugar, es un ACTO —
+  //        prestarlo es la sustitución genérica que la Ley 12 prohíbe (el
+  //        mismo descarte con el que `compartir` no pudo servir de
+  //        `contacto`).
+  //      · **Su familia es otra:** `documentos` lleva Huella porque nombra
+  //        un mundo; los CONTROLES no la llevan —`lapiz`, `filtro`,
+  //        `compartir`, `descargar`, los cuatro sin huella y dicho en sus
+  //        entradas—. `copiar` es control: nace sin huella.
+  //
+  //    EL DIBUJO ES EL ESPEJO EXACTO DEL APILADO, y eso es deliberado: la
+  //    orden pide la de atrás asomando ARRIBA-IZQUIERDA y `documentos` la
+  //    asoma arriba-derecha, así que **se mirroreó su geometría en vez de
+  //    inventar una nueva** — mismas hojas de 10.5, mismo desfase de 3.5 en
+  //    los dos ejes, mismo tuck de 3.5 antes del borde de la hoja de
+  //    adelante. *Un hermano se construye con la métrica del hermano, no
+  //    con una proporción parecida.* Re-centrado en la grilla 24 (bbox
+  //    5→19 en los dos ejes, el mismo footprint que `compartir`) porque sin
+  //    huella no hay que reservarle la esquina.
+  //
+  //    ⚠️ EL RIESGO, DECLARADO Y NO DISIMULADO: es el pariente más cercano
+  //    que tiene este registry — `documentos` y `copiar` son espejo. Los
+  //    separan DOS cosas y conviene saber cuáles: **la huella** (uno la
+  //    lleva, el otro no) y **que jamás comparten unidad de barrido** —
+  //    `documentos` vive en una fila de navegación del perfil, `copiar` al
+  //    lado de un código. La Ley 12 enmendada S71 mide la colisión DENTRO
+  //    de la unidad, y acá no hay una común. **Si el founder los ve juntos
+  //    a 21px y no los separa, el que se mueve es éste.**
+  //    ⚠️ **GATE POR ÍCONO A 21px PENDIENTE (§2.9)**, con el límite de
+  //    siempre: en este entorno no hay rasterizador de SVG.
+  | 'copiar'
   // ── S82-B r10: LA VACUNA gana su glifo (orden founder). Hasta hoy la
   //    fila de vacunas del perfil pintaba `veterinaria` (medido:
   //    `mascota/[mascotaId].tsx:863`) — la sustitución genérica que la
@@ -1494,6 +1529,22 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   //
   // Sin huella, como todo control (§6bis sigue pendiente): `huella`
   // queda sin usar a propósito.
+  // Copiar: el espejo de `documentos` sin su huella (ver el tipo). La hoja
+  // de adelante es un rectángulo cerrado; la de atrás asoma arriba-izquierda
+  // y se dibuja SOLO con sus dos aristas visibles —el borde superior y el
+  // izquierdo—, igual que el apilado dibuja las suyas: una hoja tapada no
+  // muestra el contorno que queda detrás, y trazarlo entero la volvería un
+  // marco flotante en vez de una hoja atrás.
+  //
+  // Las esquinas redondeadas salen del `strokeLinejoin: 'round'` de
+  // `trazo()`, como en TODO el set — no de un `rx`. Es lo que lo vuelve
+  // hermano y no injerto: mismo peso (1.9), mismos remates, misma grilla.
+  copiar: ({ tinta }) => (
+    <>
+      <Path d="M15.5 5H5V15.5" {...trazo(tinta)} />
+      <Path d="M19 8.5H8.5V19H19Z" {...trazo(tinta)} />
+    </>
+  ),
   descargar: ({ tinta }) => (
     <>
       <Path d="M12 3.6v9.8" {...trazo(tinta)} />
@@ -1673,6 +1724,8 @@ export function Icono({
     // S89-B: descargar entra a la familia de sus vecinos — mismo criterio
     // (un control no pertenece a una capa) y misma resolución.
     descargar: { pura: colorTinta, aa: colorTinta },
+    /* Control: tinta en los dos registros, como sus cuatro hermanos. */
+    copiar: { pura: colorTinta, aa: colorTinta },
     // S88 — la campana: OBJETO sin capa (un aviso no pertenece a un
     // oficio) ⇒ tinta en los dos registros, como los controles — sin
     // fundar §6bis: el criterio acá es «sin capa de la que tomar color».
