@@ -51,6 +51,7 @@ BEGIN;
 -- El orden importa: primero las funciones que usan las columnas, después las
 -- columnas. Al revés, el DROP falla por dependencia y deja media reversa.
 
+DROP TABLE IF EXISTS public.recurrencia_desglose;
 DROP INDEX IF EXISTS public.uq_recurrencia_periodo_aprobado;
 
 ALTER TABLE public.pagos_intentos
@@ -275,6 +276,67 @@ CREATE UNIQUE INDEX uq_recurrencia_periodo_aprobado
   WHERE recurrencia_id IS NOT NULL AND estado = 'aprobado';
 
 
+-- ── ⑤bis  EL DESGLOSE CONGELADO DEL PERÍODO ───────────────────────────────
+--
+-- 🔴 **ESTA TABLA FALTABA, y el hueco lo destapó ESCRIBIR EL CUERPO DEL COBRO,
+--    no releer la migración.** *La precondición que la mesa puso —«no se aplica
+--    hasta que el cuerpo esté escrito»— se pagó sola acá: aplicada como estaba,
+--    el esquema declaraba un sujeto cobrable **sin dónde congelar su monto**, y
+--    la compuerta 2 del motor (`sin desglose no hay cobro`) habría rebotado
+--    TODO cobro recurrente — con el esquema ya aplicado y el defecto a una
+--    migración de distancia.*
+--
+-- **Por qué el período ES sujeto propio y no se cobra un pedido:**
+--   · **§6 lo exige:** *«el período impago no se presta… para la despensa, esa
+--     entrega no sale»* ⇒ **primero se cobra, después sale la entrega.** Un
+--     pedido creado para poder cobrarlo sería una entrega comprometida antes
+--     de que entre la plata.
+--   · **El plan de paseos no produce pedido alguno** y es el sujeto ① de esta
+--     letra. Sin período-como-sujeto, `cerrar_y_renovar_planes` no tendría qué
+--     cobrar.
+--   · **§5 lo obliga a nacer por cobro:** el monto es **el precio vigente al
+--     momento del cobro**, no el del día en que el cliente se suscribió.
+--     *Un desglose que se congela una vez y se reusa cobraría para siempre el
+--     precio de la suscripción.*
+--
+-- La forma es la de sus dos hermanos (`compra_desglose`, `cita_desglose`), y su
+-- clave lleva el PERÍODO adentro: **un desglose por cobro, no por serie.**
+CREATE TABLE public.recurrencia_desglose (
+  recurrencia_id  uuid NOT NULL REFERENCES public.pedidos_recurrencias(id) ON DELETE CASCADE,
+  periodo         date NOT NULL,
+  subtotal        numeric(12,2) NOT NULL CHECK (subtotal >= 0),
+  impuesto        numeric(12,2) NOT NULL DEFAULT 0 CHECK (impuesto >= 0),
+  envio           numeric(12,2) NOT NULL DEFAULT 0 CHECK (envio >= 0),
+  total           numeric(12,2) NOT NULL CHECK (total > 0),
+  moneda          text NOT NULL DEFAULT 'USD',
+  congelado_en    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (recurrencia_id, periodo)
+);
+
+COMMENT ON TABLE public.recurrencia_desglose IS
+  'El desglose congelado de UN cobro de una serie. La PK lleva el período '
+  'adentro a propósito: §5 firma precio VIGENTE al momento del cobro, así que '
+  'cada período congela el suyo. Un desglose por serie cobraria para siempre el '
+  'precio del dia en que el cliente se suscribio.';
+
+-- CASCADE y no SET NULL, al revés que `tarjeta_id`: **el desglose no tiene vida
+-- propia sin su serie** — es su fotografía, no un dato del cliente. *Conservar
+-- desgloses de una serie borrada sería guardar el monto de algo que ya nadie
+-- puede explicar.*
+
+ALTER TABLE public.recurrencia_desglose ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY recurrencia_desglose_select ON public.recurrencia_desglose
+  FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.pedidos_recurrencias r
+                  WHERE r.id = recurrencia_desglose.recurrencia_id
+                    AND (r.user_id = auth.uid() OR is_admin())));
+
+-- 🔴 Sin policy de escritura, y es deliberado: **lo congela el motor
+--    (`SECURITY DEFINER`), jamás el cliente.** *Un desglose que el pagador
+--    puede escribir es la compuerta 2 verificando el monto contra un número que
+--    el pagador eligió.*
+
 -- ── ⑥  LAS DOS PUERTAS QUE CAMBIAN DE FORMA ────────────────────────────────
 --
 -- `alternar_recurrencia` **conserva su firma** `(uuid, boolean)` para que el
@@ -427,6 +489,12 @@ BEGIN
    WHERE conrelid='public.pagos_intentos'::regclass AND conname='chk_intento_un_solo_sujeto';
   IF NOT COALESCE(v_ok,false) THEN
     RAISE EXCEPTION 'ABORTA: el invariante no conoce a la recurrencia.';
+  END IF;
+
+  -- (e bis) El sujeto nuevo tiene DÓNDE congelar su monto. *Un sujeto cobrable
+  --         sin desglose es un cobro que la compuerta 2 rebota siempre.*
+  IF to_regclass('public.recurrencia_desglose') IS NULL THEN
+    RAISE EXCEPTION 'ABORTA: la serie es sujeto cobrable y no tiene desglose congelado.';
   END IF;
 
   -- (e) NO quedaron dos versiones de la puerta (L-119: el DROP explícito).
