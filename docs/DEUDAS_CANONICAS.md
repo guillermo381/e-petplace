@@ -18579,6 +18579,48 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-347** — **UN INSTRUMENTO QUE MIDE LA FORMA QUE ÉL ESPERA, EN VEZ DE LA QUE EL ARCHIVO USA, DA VERDE SOBRE NADA.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **Tres veces el mismo defecto en UNA sola tanda**, y las tres con síntomas distintos:
+  · el reconocedor de secciones **esperaba una sangría que los archivos no tienen** ⇒ **VERDE midiendo CERO secciones**;
+  · después buscó **un literal donde el archivo usa un helper** ⇒ **18 rojos falsos**;
+  · y el contador de párrafos fue por su **tercera** versión: las dos primeras **contaban el formateo, no el contenido**.
+  > ### **El primero es el peligroso: los rojos falsos se investigan; el VERDE VACÍO se archiva.**
+  *Un instrumento que no encontró nada y uno que midió y no halló defectos **producen exactamente la misma salida**, y la diferencia entre los dos es todo.*
+  **⇒ EL REMEDIO ES DE CLASE, no del caso: el BRAZO ANTI-VERDE-VACÍO.** *Todo instrumento que cuenta declara un mínimo por debajo del cual su propio resultado es imposible, y ahí sale **ROJO**.* En el caso fundador: **tres documentos con cero secciones no puede ser cierto** — así que cero secciones dejó de ser verde.
+  **Cómo se elige ese mínimo sin inventarlo:** *no es un umbral de calidad, es una **imposibilidad**.* Se pregunta **«¿qué valor solo puede salir si el instrumento no miró?»** — y ése, y solo ése, es el que se vuelve rojo. *Un mínimo puesto por gusto se convierte en el umbral que alguien afloja cuando molesta.*
+  **Su parentesco:** hermana de **`L-342`** (*el veredicto no concluyente necesita su propio código*) — **las dos atacan la misma raíz por lados opuestos**: aquella impide que un instrumento sin veredicto diga verde; ésta impide que un instrumento **sin muestra** diga verde. Y prima de **`L-330`**: el control positivo caza al instrumento ciego **cuando alguien se acuerda de correrlo**; el brazo anti-verde-vacío lo caza **siempre**, porque vive adentro. Origen: S103-B, jueces del sitio.
+
+- **L-346** — **UNA CONSTANTE QUE ENCIENDE MEDIA FUNCIÓN ES PEOR QUE UNA APAGADA.** *(Autoría S103-C; depositada por A.)*
+  **El caso:** `DEUNA_ELEGIBLE` prende la fila de DeUna en la hoja de medios. **Pero la fila es solo la mitad:** la otra es **la puerta del riel** —la edge que crea la solicitud y devuelve el código—, que es de otra pista y todavía no está desplegada. **Encender solo la constante deja una opción elegible que no puede cobrar.**
+  > ### **Una perilla que enciende la mitad visible de una función construye exactamente el defecto que la función venía a evitar: la promesa sin camino.**
+  *Y su modo de falla es peor que el de la función ausente: la ausente no promete nada; la media encendida se ofrece, se elige, y falla DESPUÉS de que la persona apostó por ella.* **En un medio de pago eso ocurre con el carrito lleno.**
+  **Lo exigible: toda bandera declara SUS DOS MITADES** —la superficie y su productor— **y no se enciende hasta que las dos estén en pie.** *Es hermana del gate mecánico de la vitrina (S78): aquel se abre solo el día que el artefacto que lo condiciona existe, en vez de esperar que alguien se acuerde.* ⇒ **el patrón preferido no es una constante que alguien flipea, sino una condición que se vuelve verdadera sola cuando su otra mitad nace.** Origen: S103-C.
+
+- **L-345** — **UNA OPCIÓN NO CAMBIA DE LUGAR SEGÚN SU ESTADO: SU ESTADO LO DICE SU FILA, NO SU POSICIÓN.** *(Autoría S103-C; depositada por A.)*
+  **El caso:** la firma del founder pone a **DeUna primera y por defecto** (`LETRA_DEUNA` §6bis). Cuando **no es elegible** —hoy le falta el `pointOfSale`— la salida intuitiva es **mandarla al fondo de la lista**, que es donde efectivamente está.
+  **Y es la salida equivocada**, porque *mover una opción según su estado le enseña a la persona un orden que va a cambiar sin aviso*: el día que DeUna se vuelva elegible, **salta del último lugar al primero** y la lista que la persona ya había aprendido a recorrer deja de servirle. **El costo lo paga el que ya sabía usarla.**
+  > ### **La posición comunica IMPORTANCIA y es estable. El estado comunica DISPONIBILIDAD y cambia. Mezclarlos hace que lo estable se mueva y que lo que cambia no se vea.**
+  ⇒ **La opción se queda en su lugar y su fila dice qué le pasa** —apagada, con su razón, con voz—. *Una fila apagada en el primer lugar enseña que existe y que hoy no se puede; una fila movida al fondo enseña un orden falso.*
+  **Su límite, declarado:** no dice que todo tenga que estar siempre visible — dice que **la posición no es el canal para comunicar estado**. Ocultar una opción que no aplica a esta persona (no a este momento) sigue siendo legítimo. Origen: S103-C, sobre la hoja de medios.
+
+- **L-344** — 🔴 **UNA DEPENDENCIA NATIVA NO VIAJA POR OTA — Y `pnpm` LA HACE PARECER QUE SÍ.** *(Autoría S103-B; depositada por A. **Advertencia de CLASE, no del caso.**)*
+  **El caso:** `expo-clipboard` es nativo. `L-134` ya decía que un módulo nativo exige build. **Lo nuevo, y es lo que engaña:** *pnpm auto-instala los peers*, así que **un bundle nuevo sobre un binario viejo RESUELVE EL JS** — el `import` funciona, el componente monta, el botón se dibuja habilitado — **y falla recién AL LLAMAR.**
+  > ### **Un botón habilitado cuyo toque no hace nada es peor que uno apagado.**
+  *El apagado explica; el habilitado-inerte le hace creer a la persona que el error es suyo — que tocó mal, que no se copió, que el aparato anda lento.*
+  🔴 **Y la trampa dentro de la trampa: `require` en try/catch NO alcanza.** Es la defensa refleja de la casa (precedente `DictadoEnVivo`, S78) y acá **no sirve**, porque lo que falta no es el módulo JS —que resuelve— sino el binario debajo. ⇒ **la degradación va en DOS momentos: al montar** (¿existe el nativo?) **y al primer fallo de la llamada**, que es el único que prueba que de verdad está.
+  **La forma general, que es por lo que se deposita como clase:** *cada vez que una pieza nueva entra por OTA, la pregunta no es «¿compila?» sino **«¿alguno de sus imports necesita un binario que este APK no tiene?»*** — y si la respuesta es sí o es «no sé», **la pieza nace apagada y honesta**, con su bandera exportada para que la pantalla pueda explicar por qué. Origen: S103-B, `BotonCopiar`.
+
+- **L-343** — **UNA RAMA QUE NUNCA SE EJECUTÓ NO ESTÁ PROBADA.** *(Autoría S103-B; depositada por A.)*
+  **Suena obvio y se rompe seguido**, porque un test suite en verde **se lee como «esto anda»** y no como «anda lo que corrí». *La cobertura de un arnés no es la lista de sus asserts: es la lista de los CAMINOS que sus asserts hicieron pasar.*
+  **Su forma exigible:** un caso que solo ejercita el camino feliz **no autoriza a afirmar nada del de fallo** — y en un motor de pagos el de fallo es el que importa, porque el feliz se parece a cualquier otro cobro. *Es la razón por la que la mesa exigió que el arnés del recurrente recorra la serie que falla a propósito hasta la pausa: sin esa rama, `§6` está escrita, no probada.*
+  **Hermana de `L-321`** (*se prueba la defensa, no la lista*) y del dictamen de `LETRA_PAGO_CITAS` §9 (*un productor probado por su arnés está probado como productor, jamás como reemplazo*). **Las tres dicen lo mismo desde tres ángulos: el verde cubre lo que se corrió, y solo eso.** Origen: S103-B.
+
+- **L-342** — **UN INSTRUMENTO QUE CONTAMINÓ SU PROPIA MUESTRA NO TIENE VEREDICTO: NI VERDE NI ROJO.** *(Autoría S103-B; depositada por A.)*
+  **El caso:** el gate de edge functions corre `deno`, y `deno` **escribe** dentro del repo (`L-337`). Un guard que se limita a *no* contaminar sigue dependiendo de que quien lo corra se acuerde. **La cura de B es que el propio script lo verifique al final** —`git diff --quiet -- package.json pnpm-workspace.yaml`— **y si el repo quedó tocado, salga con `exit 3`.**
+  🔴 **Y el punto está en el TERCER código de salida.** No es verde: el instrumento se movió el piso. **Tampoco es rojo:** rojo significa *«encontré un defecto en lo medido»*, y acá el defecto es del instrumento. *Reportarlo como rojo mandaría a arreglar código sano; reportarlo como verde archivaría una medición que no vale.*
+  > ### **«No concluyente» es un veredicto, y hay que tener dónde escribirlo.** Un instrumento con solo dos salidas **está obligado a mentir** cuando lo que le pasa no es ni una cosa ni la otra.
+  **Su parentesco:** es la misma familia que `L-197` (*si el guard no puede medir, sale ROJO y jamás verde*) — pero **la afina**: aquella dice «ante la duda no digas verde»; ésta dice **«y si además no podés decir rojo con honestidad, tené un tercer código»**. *La ley se verifica, no se promete — que es exactamente el error que el script viene a impedir, así que no puede confiar en la memoria de quien lo corre.* Origen: S103-B.
+
 - **L-341** — **PREGUNTAR TIENE LATENCIA DE DÍAS; MEDIR TUVO LATENCIA DE MINUTOS — Y EN DOS DE TRES CASOS LA RESPUESTA YA ESTABA ESCRITA EN UN MENSAJE DE ERROR QUE NADIE HABÍA LEÍDO COMPLETO.** *(Autoría S103-D; depositada por A. Firmada por la mesa, 22-ago-2026.)*
   **El caso:** `LETRA_DEUNA` §12 abrió con **nueve preguntas al grupo de soporte del proveedor**, todas legítimas —la casa no adivina—. **Tres se cerraron midiendo contra QA**, en minutos, sin escribirle a nadie:
   · **la ventana del refund** — el propio mensaje de error del proveedor dice *«only valid for the purchase day»*. La letra la tenía como *supuesto declarado más restrictivo* esperando confirmación; **el dato estaba en el rebote.**

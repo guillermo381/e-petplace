@@ -328,6 +328,11 @@ export {
   // firma o revierte.
   guardarPreferenciaCanal,
   obtenerCatalogoNotificaciones,
+  // S103 — la memoria del medio de pago. Sale por la puerta única: sin este
+  // export, la pantalla tendría que llamar a `supabase.rpc()` directo, que es
+  // exactamente lo que la regla madre prohíbe y lo que C frenó bien.
+  guardarMedioPagoPreferido,
+  type MedioPagoPreferido,
   type Preferencias,
   type CodigoErrorPreferencias,
   type CanalNotificacion,

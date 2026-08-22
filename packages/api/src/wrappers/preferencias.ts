@@ -23,6 +23,11 @@ const MENSAJES = {
     'Estos avisos siempre llegan. Podés elegir por dónde, no si te llegan.',
   opt_in_sin_evidencia:
     'Para activar WhatsApp necesitamos tu confirmación explícita.',
+  // S103 — el medio de pago preferido. Voces en TUTEO (regla de la casa).
+  medio_invalido: 'Ese medio de pago no existe.',
+  tarjeta_requerida: 'Elige cuál tarjeta quieres recordar.',
+  tarjeta_no_disponible: 'Esa tarjeta ya no está disponible.',
+  deuna_no_lleva_tarjeta: 'Deuna no usa una tarjeta guardada.',
 } as const;
 
 export type CodigoErrorPreferencias = keyof typeof MENSAJES;
@@ -46,6 +51,32 @@ export interface Preferencias {
    * reinstala el defecto que S87 curó.
    */
   notificaciones: Record<string, boolean>;
+  /**
+   * S103 — LA MEMORIA DEL MEDIO DE PAGO.
+   *
+   * 🔴 **`null` NO significa «no tiene medio»: significa «nunca eligió»**, y esa
+   * distinción es la que vuelve ejecutable la firma de `LETRA_DEUNA` §6bis
+   * (*DeUna por defecto, **salvo que el cliente haya elegido otro***).
+   * *Sin esta señal el default pisaría la elección en cada compra — el «reset
+   * por compra» que la firma prohíbe.*
+   */
+  medioPago: MedioPagoPreferido;
+}
+
+/**
+ * Son DOS campos y no uno, y la razón es de dominio: **DeUna no es una
+ * tarjeta.** No tiene fila en `tarjetas_guardadas` —no hay alta, no hay token
+ * (`LETRA_DEUNA` §1)—, así que un solo id no puede expresar esa elección.
+ *
+ * El estado incoherente (`'tarjeta'` sin id, `'deuna'` con id) **es
+ * inexpresable en la base**: lo prohíbe un CHECK. *La pantalla no tiene que
+ * defenderse de eso.*
+ */
+export interface MedioPagoPreferido {
+  /** `null` = nunca eligió ⇒ rige el default de la letra. */
+  medio: 'deuna' | 'tarjeta' | null;
+  /** Solo cuando `medio === 'tarjeta'`. */
+  tarjetaId: string | null;
 }
 
 /**
@@ -198,7 +229,11 @@ export async function obtenerPreferencias(): Promise<ResultadoWrapper<Preferenci
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
 
   const [pref, notifs] = await Promise.all([
-    cliente.from('user_preferencias').select('idioma').eq('user_id', uid).maybeSingle(),
+    cliente
+      .from('user_preferencias')
+      .select('idioma, medio_pago_preferido, tarjeta_preferida_id')
+      .eq('user_id', uid)
+      .maybeSingle(),
     cliente.from('user_notificacion_prefs').select('categoria, canal, habilitada').eq('user_id', uid),
   ]);
   if (pref.error || notifs.error) {
@@ -208,7 +243,76 @@ export async function obtenerPreferencias(): Promise<ResultadoWrapper<Preferenci
   const idioma = pref.data?.idioma === 'es' || pref.data?.idioma === 'en' ? pref.data.idioma : null;
   const notificaciones: Record<string, boolean> = {};
   for (const fila of notifs.data) notificaciones[`${fila.categoria}:${fila.canal}`] = fila.habilitada;
-  return { ok: true, data: { idioma, notificaciones } };
+  /* Se angosta VERIFICANDO, jamás con un cast (regla 34): si el CHECK de la
+     base ganara un valor nuevo, esta pantalla no lo dibuja pero tampoco
+     revienta — y el `null` cae del lado correcto, que es «nunca eligió». */
+  const medioCrudo = pref.data?.medio_pago_preferido;
+  const medio: MedioPagoPreferido['medio'] =
+    medioCrudo === 'deuna' || medioCrudo === 'tarjeta' ? medioCrudo : null;
+  const medioPago: MedioPagoPreferido = {
+    medio,
+    tarjetaId: medio === 'tarjeta' ? (pref.data?.tarjeta_preferida_id ?? null) : null,
+  };
+
+  return { ok: true, data: { idioma, notificaciones, medioPago } };
+}
+
+/**
+ * S103 — RECUERDA EL MEDIO DE PAGO ELEGIDO.
+ *
+ * Pasar `medio: null` es **«olvidá mi preferencia»** y es legal: sirve el día
+ * que la superficie ofrezca «no recordar».
+ *
+ * 🔴 **La tarjeta se verifica del lado del SERVIDOR** —que sea tuya y esté
+ * guardada—, y el rebote es el MISMO para «no existe» y «es de otro».
+ * *Distinguirlos convertiría esto en un oráculo de tarjetas ajenas.*
+ *
+ * ⚠️ **Borrar la tarjeta preferida borra la preferencia** (trigger en el motor):
+ * la persona vuelve a «nunca eligió» y el default vuelve a regir. Es lo
+ * correcto —no podemos preferirle una tarjeta que ya no existe— **pero es un
+ * cambio silencioso de su elección**: si alguna superficie muestra la
+ * preferencia como un ajuste, ahí hay una voz que decir.
+ */
+export async function guardarMedioPagoPreferido(input: {
+  medio: 'deuna' | 'tarjeta' | null;
+  tarjetaId?: string | null;
+}): Promise<ResultadoWrapper<MedioPagoPreferido, CodigoErrorPreferencias>> {
+  /* 🔴 Se OMITEN los argumentos en vez de mandar `null`, y no es cosmético: la
+     firma declara los dos con `DEFAULT NULL`, así que **omitir ES decir NULL**
+     — y es la única forma que el cliente tipado acepta. *Mandar `null`
+     explícito no compila; mandar `''` inventaría un medio inexistente.* */
+  const args: { p_medio?: string; p_tarjeta_id?: string } = {};
+  if (input.medio !== null) args.p_medio = input.medio;
+  if (input.medio === 'tarjeta' && input.tarjetaId) args.p_tarjeta_id = input.tarjetaId;
+
+  const { data, error } = await getClient().rpc('guardar_medio_pago_preferido', args);
+  if (error) {
+    const codigo = codigoDeReboteMedio(error.message);
+    return { ok: false, codigo, mensaje: MENSAJES[codigo] };
+  }
+  if (typeof data !== 'object' || data === null || (data as { ok?: unknown }).ok !== true) {
+    return { ok: false, codigo: 'error_guardar', mensaje: MENSAJES.error_guardar };
+  }
+  /* Se devuelve lo que el SERVIDOR confirmó, no lo que la pantalla mandó — así
+     el estado local no puede quedar adelantado de la base. */
+  const d = data as { medio?: unknown; tarjeta_id?: unknown };
+  const medio =
+    d.medio === 'deuna' || d.medio === 'tarjeta' ? d.medio : null;
+  return {
+    ok: true,
+    data: { medio, tarjetaId: typeof d.tarjeta_id === 'string' ? d.tarjeta_id : null },
+  };
+}
+
+/** Mismo criterio que `codigoDeRebote`: se mapea por CÓDIGO estable, jamás por
+ *  literal humano — retocar la voz rompería el mapeo (D-565). */
+function codigoDeReboteMedio(mensaje: string | undefined): CodigoErrorPreferencias {
+  if (mensaje?.includes('auth_requerido')) return 'sin_sesion';
+  if (mensaje?.includes('medio_invalido')) return 'medio_invalido';
+  if (mensaje?.includes('tarjeta_requerida')) return 'tarjeta_requerida';
+  if (mensaje?.includes('tarjeta_no_disponible')) return 'tarjeta_no_disponible';
+  if (mensaje?.includes('deuna_no_lleva_tarjeta')) return 'deuna_no_lleva_tarjeta';
+  return 'error_guardar';
 }
 
 /** Persiste el idioma elegido en DB (la verdad multi-dispositivo). */

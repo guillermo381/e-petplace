@@ -80,15 +80,26 @@ import { Icono } from './Icono'
  * corresponde. Al confirmar, el nombre accesible pasa a «Copiado» solo:
  * el cambio de nombre ES el anuncio.
  *
- * ── EL GLIFO ES OPT-IN, Y NO ES PEREZA ─────────────────────────────────
- * `copiar` existe en el registry desde S103-B, y aun así el default es
- * **sin glifo**: la Ley 12 enmendada dice que *el glifo marca lo que
- * VARÍA dentro de la unidad de barrido*, y un botón de copiar solo al pie
- * de un código **no tiene hermanos de los que distinguirse** — ahí el
- * glifo es adorno, y la regla Chanel lo saca. Con `glifo`, la pantalla lo
- * enciende cuando SÍ tiene vecinos (una fila de acciones donde conviven
- * copiar, compartir y descargar): esa decisión es de la pantalla, que es
- * la única que ve la vecindad.
+ * ── EL GLIFO ES OPT-IN, Y EL ARGUMENTO PARA ENCENDERLO ES DEL FOUNDER ──
+ * `copiar` existe en el registry desde S103-B. **La prop sigue siendo
+ * opt-in** —la pieza no decide por la pantalla— pero el argumento del
+ * consumidor lo firmó el founder (S103) y queda escrito acá para que
+ * nadie lo revierta citando «adorno»:
+ *
+ *   **El glifo de copiar se reconoce SIN LEER, y la persona está mirando
+ *   seis dígitos con un reloj corriendo.**
+ *
+ * ⚠️ Y el matiz importa, porque es el que impide que se vuelva a razonar
+ * mal: **NO se enciende por función discriminante frente a vecinos.** Ese
+ * era mi argumento —la Ley 12 enmendada mide la variación DENTRO de la
+ * unidad de barrido, y un botón solo no tiene de qué distinguirse— y el
+ * founder lo dio por correcto **en ese eje**. Lo que agrega es otro eje,
+ * que la Ley 12 no cubre: **la lectura instantánea bajo presión de
+ * tiempo.** Un glifo universalmente reconocible no está compitiendo por
+ * separarse de nada — está ahorrando la lectura de la etiqueta en el
+ * momento exacto en que la persona no tiene atención para leerla.
+ * *Cuando los dos ejes se contradicen, éste manda en superficies con
+ * reloj.*
  *
  * ── LO QUE NO HACE ─────────────────────────────────────────────────────
  * No muestra datos del expediente ⇒ **la escalera §4b no aplica** y se
@@ -138,6 +149,28 @@ export interface BotonCopiarProps {
   glifo?: boolean
   /** Telemetría. **Jamás para reiniciar relojes** — ver el JSDoc. */
   onCopiado?: () => void
+  /**
+   * Default **`secundario`**. ☠️ Nació apuntando a `compacto` y era un
+   * defecto: esa variante está **JUBILADA** —el contorno transparente como
+   * acción murió en la 19.7 y `compacto` ES el contorno transparente—,
+   * congelada por `R47` en solo-baja.
+   *
+   * 🔴 **Y era peor que un uso de más, por una razón que conviene no
+   * olvidar: un DEFAULT no emite el literal `variante="compacto"`, así que
+   * `R47` no podía contarlo.** La pieza montaba la variante jubilada en
+   * cada consumidor **sin mover el trinquete un punto** — una jubilación
+   * que se vigila por literal es ciega a los defaults de `packages/ui`, y
+   * ésta es la clase de agujero por el que una variante muerta revive
+   * repartida en N pantallas sin que ningún gate se entere.
+   *
+   * El reemplazo no se eligió: **lo prescribe el mensaje de la propia
+   * R47** — *«si tiene consecuencia de verdad no era terciaria: sube a
+   * `secundario`»* (Ley 22c). Copiar tiene consecuencia real: el
+   * portapapeles cambia y la persona se lo lleva a otra app. *Lo encontró
+   * C montándola, y su pantalla ya escribía `secundario` a mano para
+   * esquivarlo — el default ahora dice lo que el consumidor tuvo que
+   * corregir.*
+   */
   variante?: BotonVariante
   tamaño?: BotonTamaño
   bloque?: boolean
@@ -151,7 +184,7 @@ export function BotonCopiar({
   razonVencido,
   glifo = false,
   onCopiado,
-  variante = 'compacto',
+  variante = 'secundario',
   tamaño = 'md',
   bloque = false,
 }: BotonCopiarProps) {
