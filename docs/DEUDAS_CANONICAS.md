@@ -18579,6 +18579,59 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-341** — **PREGUNTAR TIENE LATENCIA DE DÍAS; MEDIR TUVO LATENCIA DE MINUTOS — Y EN DOS DE TRES CASOS LA RESPUESTA YA ESTABA ESCRITA EN UN MENSAJE DE ERROR QUE NADIE HABÍA LEÍDO COMPLETO.** *(Autoría S103-D; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **El caso:** `LETRA_DEUNA` §12 abrió con **nueve preguntas al grupo de soporte del proveedor**, todas legítimas —la casa no adivina—. **Tres se cerraron midiendo contra QA**, en minutos, sin escribirle a nadie:
+  · **la ventana del refund** — el propio mensaje de error del proveedor dice *«only valid for the purchase day»*. La letra la tenía como *supuesto declarado más restrictivo* esperando confirmación; **el dato estaba en el rebote.**
+  · **el header `Ocp-Apim`** — resultó innecesario, medido probando sin él.
+  · **el rate limit** — `429 · "Try again in 1 seconds"` con dos llamadas seguidas.
+  **De nueve quedaron seis.**
+  🔴 **Lo que hay que no leer mal:** esto **no dice «no preguntes»** — la letra que manda preguntar en vez de adivinar sigue rigiendo entera, y las seis que quedan **se preguntan**. Dice **en qué ORDEN**: *antes de mandar una pregunta que va a tardar días, se mira si el ambiente ya la contesta* — y muy especialmente **se lee el mensaje de error ENTERO**, que es donde estaba dos de tres veces.
+  **La forma general:** *un rebote del proveedor no es solo un «no»: es documentación que llega gratis y que casi nadie lee más allá del código de estado.* **Hermana de `L-316`** (el motivo que se aplasta): allá se perdía el texto útil al construir el mensaje; acá se perdía al no leerlo.
+  **Y su límite, declarado:** lo medible en QA es lo que QA implementa. **Una respuesta de soporte sobre política comercial, contrato o producción NO se sustituye midiendo sandbox** — las seis que quedan abiertas son justamente de esa clase (`pointOfSale`, alta del webhook, firma más fuerte, simulación de reversos). Origen: S103-D, censo contra el ambiente QA.
+
+- **L-340** — 🔴 **DONDE NO HAY SESIÓN, LA AUTORIZACIÓN ES UN ACTO GUARDADO — JAMÁS UNA SESIÓN SIMULADA.** *(Firmada por el founder, 22-ago-2026, sobre el arranque del cobro recurrente.)*
+  **El caso:** `pagos-cobro` abre con `if (!auth.startsWith('Bearer ')) return { codigo: 'sin_sesion' }` — **su primera compuerta es la sesión, y de ahí cuelga todo lo demás**: pertenencia, monto, compuertas. El cobro recurrente **no tiene sesión: lo dispara un reloj.** Con esa función tal cual, todo cobro automático muere en `sin_sesion`.
+  **La salida obvia era fabricar un JWT del usuario con `service_role`.** Técnicamente se puede, en dos líneas, y **está PROHIBIDA.**
+  > ### **No rompe UNA compuerta: rompe el SIGNIFICADO de todas.**
+  **El porqué, con su literal del founder:** *el día que el reloj pueda producir la misma señal que una persona, **nadie puede volver a distinguir un cobro pedido de uno inventado** — y ese costo se paga entero el día del primer reclamo, que es cuando la evidencia es lo único que tenemos.*
+  🔴 **Lo que la vuelve peor que un agujero común: es RETROACTIVA.** No degrada los cobros que vengan — **degrada los que ya ocurrieron**, porque a partir de ese día ningún registro anterior puede probar de qué lado nació. *Un permiso de más se cierra; una ambigüedad sembrada en el rastro no se puede sacar después.*
+  ⇒ **La forma correcta: una HERMANA con el mismo contrato de seguridad y otra RAÍZ de autorización.** Las compuertas corren **enteras e idénticas**; lo único que cambia es **de dónde sale el pagador** — de la **fila de la serie**, que guarda el acto (quién autorizó, cuándo, sobre qué medio, con qué cadencia), más un **secreto compartido** para el disparador (patrón `D-713`). *La columna `pagador_user_id` existe exactamente porque acá no hay de dónde derivarlo* (cura 3 de S102).
+  **La regla general, para el próximo camino sin persona detrás** (barridos, conciliadores, reintentos, webhooks): **no se pregunta «¿cómo consigo una sesión?» sino «¿QUÉ ACTO GUARDADO autoriza esto?»**. Si la respuesta es «ninguno», **el camino no puede existir todavía** — le falta el acto, no la credencial. Origen: S103-A.
+
+- **L-339** — **UNA MEDICIÓN HISTÓRICA SE MARCA, JAMÁS SE REESCRIBE.** *(Firmada por la mesa, 22-ago-2026.)*
+  **El caso:** `CLAUDE.md` citaba `verify-edge-simbolos` en **dos lugares**, y la orden fue curar los dos. **No eran la misma clase y no se curaron igual:**
+  · la fila de `supabase/` **declaraba el gate VIGENTE** ⇒ se reemplaza por el nuevo, con su porqué;
+  · el operativo de S101 decía **«`verify-edge-simbolos` 22/0»**, que es **una medición de ese día** ⇒ **se MARCA** (jubilado, con puntero al reemplazo) **y el número se deja intacto**.
+  > ### **El 22/0 era CIERTO. Lo que estaba mal era el instrumento, no el número — y reescribir una medición pasada es falsificar el registro.**
+  *Un acta que se corrige hacia atrás deja de poder decir qué sabíamos y cuándo lo sabíamos,* y ésa es justo la pregunta que se hace quien investiga por qué algo no se vio a tiempo. **Quien lea un reporte viejo que cita ese 22/0 tiene que poder ver que citaba la letra vigente de su día, y no concluir que se equivocó.**
+  **La regla operativa, en una pregunta:** *¿esta línea AFIRMA algo sobre el presente, o REGISTRA algo que se midió?* **Lo primero se actualiza; lo segundo se anota al margen.** Hermana del precedente de las letras (*lo corregido va tachado en su lugar, no borrado*) y de la enmienda del `update:list` en S86, que quedó **con su versión vieja declarada al lado**. Origen: S103-A.
+
+- **L-338** — **`NOT VALID` NO INDULTA A LA FILA: INDULTA AL PASADO.** *(Firmada por la mesa, 22-ago-2026.)*
+  **El caso, medido:** cerrar la fila `CO` de `fee_configs` era un `UPDATE` de tres columnas y **abortó con `23514`** contra `chk_fee_pedido_declara_base`. La fila **no declaraba `base`** y se la creía exenta —**el CHECK nació `NOT VALID`**, y la propia cura de S102-B lo decía con todas las letras: *«exenta del CHECK … porque nació NOT VALID»*.
+  **La lectura era falsa, y su forma exacta importa:** `NOT VALID` **exime del escaneo inicial de la tabla**; **toda escritura posterior sobre esa fila la vuelve a someter.**
+  > ### **Una fila «exenta» deja de estarlo en el momento en que la tocás — y tocarla es exactamente lo que una migración de cierre viene a hacer.**
+  ⇒ **El indulto y el trabajo se cruzan siempre**, porque las filas que uno quiere cerrar son justo las viejas, que son justo las indultadas. *Por eso no es un caso raro: es el caso típico.*
+  **Lo exigible: antes de escribir sobre una fila vieja, se leen los constraints `NOT VALID` de su tabla** —`convalidated = false`, un `pg_constraint` de una línea— **y se decide qué se va a hacer con el campo que falta ANTES de correr**, no cuando el `23514` aborta.
+  **Y la salida no es técnica: es de letra.** Acá hubo tres —inventar la base, validar el constraint primero, o `{"base": null}`— y **la eligió el founder**, con su razón: *Ecuador es la única operación viva y **un número colombiano inventado se lee como cierto la próxima vez que alguien lo mire**.* **Hueco declarado antes que dato falso** — la misma ley que rigió el mismo día en las páginas legales. *`?` mide existencia de la clave, no su valor: el `null` satisface el CHECK **diciendo la verdad**.*
+  **Su parienta:** `L-326` (*cuando el orden importa, se escribe como cinturón y no como nota*) — allá la precondición vivía en un comentario; acá **la exención vivía en la palabra «NOT VALID»**, que promete menos de lo que la gente le lee. Origen: S103-A, paso 4 de la tanda de S102.
+
+- **L-337** — **UN GATE QUE CORROMPE EL REPO CADA VEZ QUE CORRE ES PEOR QUE NO TENER GATE.** *(Autoría S103-B; depositada por A. Firmada por la mesa, 22-ago-2026.)*
+  **El caso, medido:** `deno` corrido **dentro del monorepo** no solo lee — **escribe**: migra su configuración y **agrega una clave `workspaces` al `package.json` raíz** (*«Migrated its workspace configuration into…»*), además de comerse el salto de línea final. *La casa usa **pnpm workspaces**, así que esa clave es **una segunda declaración del mismo hecho**, y el día que difieran gana la que lea la herramienta que estés usando.*
+  🔴 **Y su modo de falla es el peligroso: el cambio queda SIN COMMITEAR**, listo para viajar dentro del commit de otra cosa — con el índice compartido de tres pistas, eso es 76(f2) esperando a pasar. **Le ocurrió a DOS pistas el mismo día:** B lo cazó porque su árbol quedó sucio y lo revirtió; **D lo tenía vivo en su worktree** y se le avisó desde afuera.
+  ⇒ **Todo chequeo con una herramienta que pueda escribir corre sobre COPIA, en directorio temporal FUERA del repo.** *Correrla «con cuidado» adentro no alcanza: el efecto no depende de la intención.*
+  **La forma general, que es lo reutilizable:** *un instrumento de verificación tiene que ser **de solo lectura sobre lo que verifica**, y si no puede serlo, se lo aísla.* **La pregunta que lo caza antes de instalarlo: ¿qué ESCRIBE esta herramienta cuando la corro?** — y no se contesta leyendo su descripción, que habla de lo que mide, sino mirando el árbol después de la primera corrida.
+  **Su parentesco:** hermana de la ley de los verdes flojos (S95) por el lado contrario — *allá el instrumento medía mal y había que curarlo; acá mide bien y **el daño lo hace su efecto secundario**, que ningún resultado del gate va a reportar.* Origen: S103-B, al jubilar `verify-edge-simbolos` por `deno check`.
+
+- **L-336** — **UN OBJETO VEROSÍMIL DEL ORIGEN EQUIVOCADO NO SE CAZA LEYENDO MEJOR: SE CAZA CON DISCRIMINADOR.** *(Firmada por la mesa, 22-ago-2026, sobre tres casos de dos días.)*
+  **La forma, y es la misma en los tres: el instrumento leyó BIEN y contestó BIEN una pregunta que no era la que había que hacer.** *Por eso no hay lectura más atenta que los salve — la salida es correcta; lo que está mal es de dónde vino.*
+  **Los tres casos, medidos:**
+  · **El `PENDING` con monto 0 de DeUna.** Una transacción inexistente vuelve `200 / PENDING / amount 0 / date ""`. **Un fantasma tiene la forma exacta de un pago en curso**, y ninguna lectura del estado los distingue. El discriminador es **otro campo** (`amount > 0`) y **nuestro propio reloj** para el corte — jamás un estado del proveedor.
+  · **El servidor de `main` respondiendo en el puerto 4321.** Cinco `astro` peleando el puerto; el que contestaba estaba montado sobre `main`. La pista veía **404 en las 8 páginas nuevas y 200 en las 4 viejas** — *coherente, creíble, y midiendo el objeto equivocado*. El discriminador no es mirar mejor la respuesta: es **preguntar quién la sirve**.
+  · **`verify-edge-simbolos.mjs` VERDE sobre el `KEY_CLIENT` vivo.** El juez mide «símbolo de MÓDULO usado sin importar»; `KEY_CLIENT` es un identificador libre. **Verde cierto, pregunta más angosta que su propósito** — y ocho eventos del proveedor sin validar durante un día.
+  🔴 **LO EXIGIBLE, en una pregunta: *¿qué resultado tendría este mismo instrumento si el objeto fuera el equivocado?* Si la respuesta es «el mismo», no hay medición: hay una coincidencia.** ⇒ se agrega un campo, un origen o un caso conocido que **separe los dos mundos** antes de creerle al número.
+  **Su parentesco, y por qué NO alcanza con las que ya existen:** `L-321` manda **probar** el instrumento contra un caso conocido —y en los tres casos el instrumento **estaba bien**—; `L-330` manda **declarar** el control —y un control del mismo origen equivocado declara con la misma confianza—; `L-333` cubre la **voz** que promete de más. **Ésta cubre el ORIGEN del objeto medido**, que ninguna de las tres mira. *Los controles curan instrumentos, las leyes curan lectores, los invariantes curan resultados plausibles — y ésta cura la PROCEDENCIA.*
+  Origen: S103 (mesa 104), sobre hallazgos de las pistas A, B y D.
+
 - **L-333** — **LA VOZ DE UN INSTRUMENTO SE CALIBRA CONTRA LO QUE MIDE, NO CONTRA LO QUE UNO QUERÍA MEDIR.** *(Autoría S102-B; depositada por A.)*
   > ### **Un verde que promete de más es el que nadie vuelve a mirar.**
   **Su cura es distinta y es barata: no se toca la medición, se baja la línea.** Los dos casos, del mismo día y de las dos pistas: `verificar-pagador` decía *«la policy CONOCE al pagador»* y medía un `ILIKE` sobre el **texto** de la policy ⇒ curado a *«NOMBRA al pagador (precondición — la prueba es ⑤)»*; `verify-apk-contenido` decía *«trae el bundle — **arranca sola**»* y mide que **hay JS que cargar** ⇒ curado a eso.
@@ -18703,6 +18756,95 @@ el reemplazo listo → el enchufe reusando el motor entero.
 
 **Las 138 citas con `pago_simulado: true` quedan como DATOS DECLARADOS** — las
 resuelve el corte semilla/real ya firmado. *No se tocan ahora.*
+
+---
+
+### D-870 🟢 · 89 ERRORES DE TIPADO FUERA DE CLASE EN SIETE EDGE FUNCTIONS VIVAS
+
+🟢 **BAJA. Declarados y NO gateados a propósito.**
+
+**Medido por S103-B** al construir `verify-edge-deno.mjs`: `deno check` sobre las
+**23** edge functions devuelve **90 errores**. **Uno** es de la clase que el gate
+juzga —«usa algo que no existe»— y **89 no**:
+
+| código | cuántos | qué son |
+|---|---|---|
+| `TS2339` | 77 | inferencia de `supabase-js` |
+| `TS2345` | 9 | librería |
+| `TS7006` | 3 | parámetro implícito `any` |
+
+**En:** `barrer-storage` · `despachar-whatsapp` · `documento-carnet` ·
+`documento-certificado` · `documento-ficha-identidad` ·
+`documento-historia-clinica` · `documento-receta`.
+
+🔴 **POR QUÉ NO SE GATEAN, y es la parte que hay que no revertir:** las siete
+están **vivas y con gate impreso pasado** (los cinco papeles de S90). Son
+**artefactos de tipado, no defectos de runtime**. Gatearlos reproduciría, con
+peor proporción, el fracaso que el juez anterior **ya tenía documentado en su
+propia cabecera**: *«20 rojos sobre 22 funciones y casi todos falsos… un gate
+que grita siempre es un gate que nadie mira — y eso es peor que no tenerlo,
+porque además da la sensación de estar cubierto»*. **Acá la proporción sería
+89 a 1.**
+
+**Lo que se hizo en su lugar:** el gate juzga **la clase** (`TS2304`/`TS2552`) y
+**declara los 89 al pie, en cada corrida, sin gatearlos.** *Callarlos habría
+sido el defecto de al lado: un gate que esconde lo que no mide.*
+
+**Disparo:** cuando alguien toque una de esas siete funciones, o cuando se
+decida auditar el tipado de edge functions como frente propio. **Hasta
+entonces, verlos en la salida del gate es lo correcto, no una alarma.**
+
+> ### ⚠️ CONDICIÓN DE USO DEL INSTRUMENTO QUE LOS MIDE — y no es prolijidad
+>
+> 🔴 **`deno` dentro del monorepo NO SOLO LEE: ESCRIBE.** Al correrlo sobre el
+> repo, migra su configuración y **agrega una clave `workspaces` al
+> `package.json` raíz** (*«Migrated its workspace configuration into…»*), además
+> de comerse el salto de línea final.
+>
+> **Es peligroso por partida doble:** esta casa usa **pnpm workspaces**
+> (`pnpm-workspace.yaml`), así que esa clave es **una segunda declaración del
+> mismo hecho** —y el día que difieran gana la que lea la herramienta que estés
+> usando—; y **queda sin commitear**, lista para viajar dentro del commit de
+> otra cosa.
+>
+> **Medido el 22-ago: le pasó a DOS pistas el mismo día.** B lo cazó porque su
+> árbol quedó sucio y lo revirtió; **D lo tenía vivo en su worktree sin
+> commitear** y se le avisó. Los otros dos worktrees estaban en cero.
+>
+> ⇒ **Todo chequeo con `deno` corre sobre COPIA, en directorio temporal FUERA
+> del repo.** Correrlo «con cuidado» adentro no alcanza: el efecto no depende de
+> la intención.
+>
+> **La ley, de B, y vale más que el caso:** *un gate que corrompe el repo cada
+> vez que corre es peor que no tener gate.*
+
+---
+
+### D-869 🟡 · EL AVISO DEL RECURRENTE PROMETE «SALTAR» Y «MOVER», Y NINGUNA DE LAS DOS EXISTE
+
+🟡 **MEDIA. Dueño: PRODUCTO** (no es deuda técnica).
+
+**Medido (S103, censo de A):** la carga de `avisar_recurrencias_proximas()`
+lleva `'puede': 'saltar, mover o cancelar'`. Las funciones de recurrencia de la
+base son **cuatro** —`configurar_recurrencia`, `alternar_recurrencia`,
+`avisar_recurrencias_proximas`, `ejecutar_recurrencias_vencidas`— y **ninguna
+saltea una entrega ni mueve su fecha.** Solo existe cancelar.
+
+> **Dos tercios de una promesa sin camino no son una funcionalidad pendiente:
+> son una mentira con fecha.**
+
+**Por qué es de PRODUCTO y no de código, que es lo que decide quién la paga:**
+**saltar** un período obliga a decidir **qué pasa con el cobro de ese período**
+(¿no se cobra? ¿se corre?) y **mover** una fecha obliga a decidir **si la
+cadencia se corre o se mantiene**. *Las dos son decisiones de letra que nadie
+firmó* — construirlas «ya que estamos» sería tomarlas sin mesa.
+
+**Cura de v1, ya dictada (`LETRA_COBRO_RECURRENTE` v1.2 §3):** **el aviso deja
+de prometerlas.** La pantalla de la familia ya nació con un solo botón —cortar—,
+así que hoy **el que diverge es el payload, no la superficie**.
+
+**Disparo:** cuando el founder quiera saltar/mover como funcionalidad. **Hasta
+entonces `LETRA_COBRO_RECURRENTE` §8 las declara fuera de v1.**
 
 ---
 

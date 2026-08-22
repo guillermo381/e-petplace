@@ -26,6 +26,29 @@ import { createHash, createHmac } from 'node:crypto';
 const AMBIENTE = Deno.env.get('PAGOS_AMBIENTE') ?? 'sandbox';
 const APP_CODE = Deno.env.get('NUVEI_APP_CODE_SERVER') ?? '';
 const APP_KEY = Deno.env.get('NUVEI_APP_KEY_SERVER') ?? '';
+/* 🔴 S103-A · LA CURA DE `KEY_CLIENT`, y el aviso de arriba se cobró a sí mismo.
+   El comentario de la línea 19 describe EXACTAMENTE esta clase de defecto —un
+   símbolo usado y nunca definido, ReferenceError en runtime, invisible al
+   typecheck— y **sesenta líneas más abajo el archivo la cometía otra vez**:
+   `verificarStoken` usaba `KEY_CLIENT` y nadie lo declaraba nunca.
+
+   **Medido, no supuesto:** las 8 filas CLIENT del 21-ago en `webhook_events`
+   dicen, las ocho, `analisis_fallo: ReferenceError: KEY_CLIENT is not defined`.
+   Las 20 filas SERVER del mismo día validaron (`stoken_valido = true`) — el
+   corte cae exacto sobre la credencial, porque la rama SERVER usa `APP_KEY`,
+   que sí estaba declarada.
+
+   *La advertencia vivía en un comentario, y un comentario se cumple mientras
+   alguien lo lea* (`L-326`). Lo que de verdad cierra esta clase es el juez de
+   símbolos — y **está ciego a ella**: mide «símbolo de MÓDULO usado sin
+   importar», y esto es un identificador libre. Su verde con el defecto vivo
+   quedó medido y declarado para B, que es su dueña.
+
+   El `?? ''` no es adorno: mantiene el fail-closed que el resto del archivo ya
+   tiene —sin credencial, `verificarStoken` devuelve `valido: null` y lo dice en
+   `detalle`— en vez de romper. **Un secreto ausente tiene que producir un nulo
+   honesto, jamás un 500 que mate los reintentos del proveedor.** */
+const KEY_CLIENT = Deno.env.get('NUVEI_APP_KEY_CLIENT') ?? '';
 
 const db = createClient(
   Deno.env.get('SUPABASE_URL')!,

@@ -1,8 +1,15 @@
 # LETRA_DEUNA.md — e-PetPlace · el segundo riel
 
-> **Versión:** v1.1 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE —
-> firmas ①②③ del founder recibidas el 21-ago (§11); la construcción arranca
-> al recibir las credenciales QA.
+> **Versión:** v1.4 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
+> 22-ago-2026 (mesa 104) contra el **ambiente QA real** · **Estado:** RIGE —
+> firmas ①②③ del founder (§11), la ③ **ya no es supuesto: es hecho
+> confirmado por el proveedor**.
+> **⚠️ ESTA VERSIÓN CORRIGE AFIRMACIONES DE §2 QUE ERAN FALSAS.** La v1.1 las
+> tomó de la doc en papel y las declaró re-verificables; **el censo de la pista
+> D contra QA las midió y varias no sobrevivieron.** *La regla del literal
+> funcionó exactamente como estaba escrita: gana la fuente viva.* Lo corregido
+> va marcado ~~así~~ en su lugar, **no borrado** — quien lea un reporte anterior
+> tiene que poder ver que citaba la letra vigente de su día.
 > **Fuentes que obedece:** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101` (el
 > motor rige entero) · `LETRA_SALDO` v1.1 · `LETRA_PAGO_CITAS` v1.1 (el patrón
 > de sujeto) · `POLITICAS_EPETPLACE` · `MODELO_FINANCIERO` · **la documentación
@@ -38,28 +45,60 @@ quieres pagar» no gestiona nada: se elige y se paga.
 - **Ambientes:** QA `apis-merchant.qa.deunalab.com` · PDN
   `apis-merchant.pdn.deunalab.com`.
 - **Autenticación:** headers `x-api-key` + `x-api-secret` en cada request.
-  **Los secretos viven SOLO en secrets de Edge Functions** — jamás en cliente,
-  jamás en el repo (la ley de Nuvei rige idéntica).
+  **`x-api-key` es la *subscription key*** (medido: no es un identificador de
+  comercio). **Los secretos viven SOLO en secrets de Edge Functions** — jamás
+  en cliente, jamás en el repo (la ley de Nuvei rige idéntica).
+- **Rutas reales, medidas contra QA:** **`/merchant/v1/payment/*`** —
+  ~~`/merchant/api/v1/payment/*`~~. *La v1.1 tenía **dos rutas mal**: el
+  `request` sin `api` y el `info`/`refund` con él. Ninguna de las dos formas
+  mezcladas existe.*
 - **`POST /merchant/v1/payment/request`** — crea la solicitud. Campos que esta
   letra fija: `qrType: "dynamic"` (una transacción única con vencimiento) ·
   `format` según §5 · `amount` = **el total del desglose congelado, centavo a
   centavo** (compuerta 2 del motor rige) · `detail` ≤ 50 (no se muestra al
-  cliente; sin datos personales) · `internalTransactionReference` según §4 ·
+  cliente; sin datos personales) · la referencia corta según §4 ·
   `expiredTime` según §6 · `callbackUrl` según §5.
+- 🔴 **EL CAMPO DE LA REFERENCIA SE LLAMA `idTransacionReference`** —
+  ~~`internalTransactionReference`~~. **Es un typo del proveedor y se respeta
+  tal cual**: el nombre del campo es parte de su contrato, no de nuestra
+  ortografía. *Corregirlo «bien» es que la petición falle.* Se escribe con un
+  comentario al lado en todo lugar donde aparezca, para que nadie lo «arregle».
 - **Respuesta:** `transactionId` (UUID de DeUna) **se persiste
   obligatoriamente** en el intento — es la llave de consulta y reverso.
-- **`POST /merchant/api/v1/payment/info`** — consulta activa. Se consulta por
-  `idType 0` (su `transactionId`); el `idType 1` (nuestra referencia) queda de
-  respaldo. Estados: `APPROVED` · `PENDING` · `REVERSED` · `REVERSED_FAILED` ·
-  `NOT_FOUND` (no existe **o pasaron >7 días**).
+- **`POST /merchant/v1/payment/info`** — consulta activa. **`idType` viaja como
+  TEXTO, `"0"` / `"1"`, jamás como número.** Se consulta por `idType "0"` (su
+  `transactionId`); el `"1"` (nuestra referencia) queda de respaldo.
+- 🔴 **`NOT_FOUND` NO EXISTE. Es la corrección más cara de esta versión.**
+  Medido contra QA: **una transacción inexistente devuelve `200` con estado
+  `PENDING`, `amount = 0` y `date = ""`.** ~~`NOT_FOUND` (no existe o pasaron
+  >7 días)~~.
+
+  > ### **El proveedor no distingue «todavía no pagó» de «esto no existe»: las dos son `PENDING`.**
+  >
+  > *Un fantasma tiene la forma exacta de un pago en curso.* ⇒ **el corte de
+  > huérfanos lo pone NUESTRO reloj —el hold y la ventana de 7 días—, jamás un
+  > estado del proveedor.** Esperar un `NOT_FOUND` que nunca llega es un
+  > barrido que no termina nunca.
+- 🔴 **APROBADO EXIGE DOS COSAS: `APPROVED` **Y** `amount > 0`.** *Con el
+  fantasma devolviendo `amount = 0`, un solo campo no alcanza para afirmar que
+  entró plata.* **Fail-closed: si el monto es 0, no está aprobado, diga lo que
+  diga el estado.**
+- **Estados vivos:** `APPROVED` · `PENDING` · `REVERSED` · `REVERSED_FAILED`.
+- ⏱️ **RATE LIMIT ~1 request/segundo.** El barrido **espacia sus consultas**, y
+  **un `429` NO es un fallo del pago**: es nuestra prisa. Se reintenta con
+  espera; jamás se traduce a rechazo ni a huérfano. *Un límite de tasa leído
+  como veredicto del proveedor inventa fracasos que no ocurrieron.*
 - **Webhook de pagos exitosos:** URL https (sin IP, ≤200 chars), con **headers
   opcionales** (key ≤50, value ≤100) que son nuestro único mecanismo de
   autenticación → §7. Reintentos del proveedor: 3, cada 30 s, solo ante el
   primer fallo. **El payload trae `customerIdentification` (cédula) y
   `customerFullName`** → §9.
-- **`POST /merchant/api/v1/payment/refund`** — devolución **solo del monto
-  total** (sin parciales), **solo mismo día** → §8. `transactionReverseId`
-  se persiste.
+- **`POST /merchant/v1/payment/refund`** — devolución **solo del monto total**
+  (sin parciales), **solo mismo día** → §8. `transactionReverseId` se persiste.
+  🔴 **El refund se pide por la MISMA PAREJA `idType` + id que el `info`** —
+  ~~por `transactionId` suelto~~. *Es el mismo contrato de identificación en
+  las tres rutas; tratarlo distinto en el reverso era una asimetría inventada
+  por nosotros.*
 - **Tarifario firmado en la solicitud comercial: 2 % + IVA** sobre ventas
   procesadas (factura mensual 15-20, corte 10 a 10, débito automático el 25).
   Este número entra a `MODELO_FINANCIERO` / letra v3.0 como **costo de riel**
@@ -77,7 +116,11 @@ El circuito es el del motor, pieza por pieza:
    cliente · pertenencia verificada · `pagador_user_id` de la sesión, explícito
    — la letra de la cura 3 rige). La puerta crea el intento
    (`proveedor='deuna'`), llama `payment/request`, persiste `transactionId` y
-   devuelve el deeplink a la pantalla.
+   devuelve a la pantalla **el código y un `expira_en` TIMESTAMP absoluto** —
+   jamás una duración en segundos. *Un «te quedan 180 s» se desincroniza con el
+   viaje de red, con la pantalla dormida y con el reloj del teléfono; un
+   instante absoluto no. La cuenta regresiva la dibuja la pantalla restando
+   contra ese instante.*
 3. **La espera con voz** — la misma pantalla que espera hoy, con voz nueva:
    «Abrí tu app Deuna y confirmá el pago» + botón que dispara el deeplink.
    Jamás spinner mudo, jamás rechazo por timeout: si el TTL vence, la voz lo
@@ -86,9 +129,14 @@ El circuito es el del motor, pieza por pieza:
    primero. **El actuador solo transiciona con verdad verificada del
    servidor**; la pantalla pasa sola a pagada, jamás declara.
 5. **Consulta activa + barrido:** el barrido existente gana los intentos
-   `deuna` pendientes. **Toda su ventana corre DENTRO de los 7 días** — pasado
-   eso el proveedor responde `NOT_FOUND` y el hallazgo se escala a soporte con
-   nombre (`huerfano_deuna_vencido` o el que la pista fije).
+   `deuna` pendientes. **Toda su ventana corre DENTRO de los 7 días** — y
+   **el corte lo pone NUESTRO reloj**, porque ~~pasado eso el proveedor
+   responde `NOT_FOUND`~~ **el proveedor nunca dice que algo no existe**
+   (§2: el fantasma vuelve `PENDING`). Vencida la ventana sin `APPROVED` con
+   monto > 0, el hallazgo se escala a soporte con nombre
+   (`huerfano_deuna_vencido` o el que la pista fije). **El barrido espacia sus
+   consultas por el límite de ~1 req/s, y un `429` no cuenta como intento
+   fallido.**
 6. **Comprobante por correo** — el requisito de certificación de la casa rige
    para todo medio: id de transacción (su `transactionId`) + `transferNumber`
    (el análogo del código de autorización). Va **a quien pagó** (dictamen
@@ -96,8 +144,22 @@ El circuito es el del motor, pieza por pieza:
 
 ## §4 · LA REFERENCIA CORTA — el delta más filoso
 
-`internalTransactionReference` admite **< 20 caracteres**. Nuestros UUID (36)
-**no caben** — el `dev_reference = compra` de Nuvei no se replica acá.
+**`idTransacionReference`** *(el typo es del proveedor — §2)* admite
+**≤ 20 caracteres** ~~< 20~~ — **firmado por la mesa el 22-ago sobre el barrido
+de la pista D**, que es la fuente:
+
+> `"internalTransactionReference must be at most 20 characters long."`
+> **20 pasa · 21 · 25 · 30 · 36 · 40 · 50 · 64 · 100 rebotan, todos con ese
+> mismo literal.** *Un solo 21 habría probado que 21 no entra; el barrido
+> prueba que el tope es 20 y que no hay un segundo tope más arriba.*
+
+> ### 🔴 **Y LA RAZÓN POR LA QUE UN CARÁCTER IMPORTA: un CHECK más estricto que el proveedor no es «más seguro» — es una regla NUESTRA disfrazada de regla SUYA.**
+>
+> *El día que alguien necesite el carácter 20 va a ir a buscar el límite a la
+> doc equivocada, y la doc equivocada vamos a ser nosotros.* **Todo `CHECK` del
+> generador dice `<= 20`.**
+Nuestros UUID (36) **no caben** — el `dev_reference = compra` de Nuvei no se
+replica acá.
 
 La letra fija el contrato del generador; la forma exacta la fija la pista:
 
@@ -114,9 +176,24 @@ La letra fija el contrato del generador; la forma exacta la fija la pista:
 - **El cliente paga con el CÓDIGO ÚNICO de 6 dígitos** (`numericCode`): la
   pantalla de espera lo muestra grande, con su cuenta regresiva, y la voz
   dice qué hacer: «Abrí tu app Deuna e ingresá este código».
-- **Reloj del código: 3 minutos FIJOS, no configurables** (literal del
-  proveedor). La ley que se deriva: **el código vive 3 minutos; la sesión de
-  pago vive lo que viva el hold** (§6). Código vencido con hold vivo →
+- 🔴 **Reloj del código: 3 minutos PORQUE LOS PEDIMOS NOSOTROS** —
+  ~~fijos, no configurables (literal del proveedor)~~. **`expiredTime` es un
+  campo del request**, medido por D y consumido por C: *la v1.1 leyó el papel y
+  llamó «límite ajeno» a una elección propia.*
+
+  > **La diferencia no es de trivia: cambia de quién es la decisión.** Un
+  > límite del proveedor no se discute; **una elección nuestra se revisa** — y
+  > mientras se creyó ajena, nadie iba a preguntarse si 3 minutos es el número
+  > correcto.
+
+  **Rige: pedimos 3 minutos, por elección nuestra** — coherente con su doc y
+  **protege el hold** (dos relojes, y el del código tiene que morir antes).
+  **Decisión revisable, no límite.**
+- 🔴 **La pantalla lee el instante que devuelve el servidor, JAMÁS una
+  constante.** *Si el número vive en dos lugares, el día que cambie uno la
+  cuenta regresiva miente sin que nadie lo note.* La puerta devuelve `expira_en`
+  (§3.2) y la pantalla resta contra eso. La ley que se deriva: **el código vive
+  lo que el servidor diga; la sesión de pago vive lo que viva el hold** (§6). Código vencido con hold vivo →
   botón «Generar un código nuevo» (nueva `payment/request`, nuevo intento
   del candado o el mismo según lo que el censo determine — la pista mide el
   patrón contra el UNIQUE). Hold muerto → no nacen más códigos (compuerta 1).
@@ -150,8 +227,9 @@ La letra fija el contrato del generador; la forma exacta la fija la pista:
 | `PENDING` con código vivo | en vuelo | «Ingresá el código en tu app Deuna» + cuenta regresiva |
 | Código vencido, hold vivo | en vuelo, regenerable | «El código venció — generá uno nuevo» |
 | Hold vencido | vencido | La del rearme existente (se rearma contra stock/agenda vigente) |
-| `APPROVED` / webhook `SUCCESS` verificado | pagada | La del éxito vigente |
-| `NOT_FOUND` dentro de ventana | según barrido | Hallazgo con nombre — jamás voz de éxito ni silencio |
+| `APPROVED` **y `amount > 0`** verificado | pagada | La del éxito vigente |
+| ~~`NOT_FOUND` dentro de ventana~~ **`PENDING` con `amount = 0` y `date = ""`** | **fantasma — no es un pago** | 🔴 **jamás voz de éxito, jamás silencio.** El corte lo pone nuestro reloj (hold + 7 días), nunca el proveedor |
+| `429` del proveedor | **sin cambio de estado** | Ninguna al cliente — es nuestro límite de tasa, no su respuesta |
 | `REVERSED` | reversada | La del reverso, con su camino (§8) |
 | `REVERSED_FAILED` | 🔴 hallazgo | Caso de soporte con nombre — **jamás se resuelve solo** |
 
@@ -177,10 +255,12 @@ mide qué existe).
 
 - **Por API:** solo el monto **total**, solo **mismo día**. Los parciales NO
   existen en este riel.
-- ⚠️ **Ambigüedad de su propia doc, declarada:** un recuadro dice «dentro de
-  las 24 horas», otro «solo mismo día de la venta». **Rige el SUPUESTO
-  DECLARADO más restrictivo (mismo día)** hasta la respuesta del grupo de
-  soporte — la pregunta ya está en la lista (§12). *(Firma ③ — §11.)*
+- ✅ **RESUELTO — ya no es supuesto.** ~~Ambigüedad de su propia doc: un
+  recuadro dice «dentro de las 24 horas», otro «solo mismo día».~~ **El
+  proveedor lo confirmó por mensaje: MISMO DÍA.** *La firma ③ del founder
+  eligió el supuesto más restrictivo y el dato le dio la razón — la letra deja
+  de apoyarse en una elección prudente y pasa a apoyarse en un hecho.* **Sale
+  de §12: ya no es pregunta abierta.**
 - **La vía automática es el saldo** (`LETRA_SALDO` rige — segunda
   ratificación medida de la arquitectura saldo-céntrica): cancelaciones en
   ventana acreditan saldo; el reverso al medio original es vía manual
@@ -221,23 +301,29 @@ antes de las credenciales QA.
 |---|---|---|
 | ① | Formato v1: **el código de 6 dígitos** — «por el tipo de comercio que somos» (literal founder). Transposición: `format:"5"` + `qrType:"dynamic"`; la UI muestra SOLO el código; deeplink/QR reserva sin pantalla | ✅ **FIRMADA — founder, 21-ago-2026** |
 | ② | **La experiencia es idéntica a pagar con tarjeta** — misma selección, misma espera con voz, misma transición sola, mismo comprobante. El hold gobierna la sesión; el código vive sus 3 min fijos | ✅ **FIRMADA — founder, 21-ago-2026** |
-| ③ | Reverso: supuesto declarado **mismo día** (el más restrictivo) hasta dato del grupo de soporte | ✅ **FIRMADA — founder, 21-ago-2026** |
+| ③ | Reverso: ~~supuesto declarado~~ **mismo día — CONFIRMADO por el proveedor (22-ago)**. La firma eligió el más restrictivo y el dato coincidió: **pasa de supuesto a hecho** | ✅ **FIRMADA — founder, 21-ago-2026 · CONFIRMADA — proveedor, 22-ago-2026** |
 | ④ | Todo lo demás | Rige por letra ya firmada (motor · saldo · citas · curas S102) |
 
 > **Esta letra no tiene firmas pendientes: RIGE completa.**
 
 ## §12 · PREGUNTAS ABIERTAS AL GRUPO DE SOPORTE (se preguntan, no se adivinan)
 
-1. ¿La ventana del refund por API es **mismo día o 24 h** desde la compra?
-2. ¿Qué `pointOfSale` corresponde a un **canal digital** (app), y quién lo
-   emite?
-3. ¿Cómo se **registra y rota** la URL del webhook y sus headers en QA y PDN?
-4. ¿Existe firma/autenticación del webhook **más fuerte** que headers
+**Quedan CUATRO.** *~~La 1 (ventana del refund)~~ la contestó el proveedor por
+mensaje: **mismo día** (§8). Las otras cinco se re-ordenan y una se reescribe,
+porque el censo contra QA cambió lo que hay que preguntar.*
+
+1. 🔴 **`pointOfSale`: ¿qué valor corresponde a un canal digital (app), y quién
+   lo emite?** — **es el BLOQUEANTE del riel**, no una duda fina: sin él la
+   solicitud no se puede formar.
+2. ¿Cómo se **registra y rota** la URL del webhook y sus headers en QA y PDN?
+3. ¿Existe firma/autenticación del webhook **más fuerte** que headers
    estáticos?
-5. ¿El ambiente QA permite **simular** `REVERSED` y `REVERSED_FAILED`?
-6. ¿Regenerar un código vencido exige nueva `payment/request` completa, y
-   la anterior queda `NOT_FOUND` o mantiene estado propio? ¿Hay límite de
-   regeneraciones?
+4. ¿El ambiente QA permite **simular** `REVERSED` y `REVERSED_FAILED`?
+
+**Y la que dejó de ser pregunta porque se midió** *(la vieja 6 —regenerar un
+código vencido)*: ya no se pregunta si la anterior queda `NOT_FOUND`, **porque
+`NOT_FOUND` no existe** (§2). Lo que la pista mida sobre regeneración entra
+como dato, no como consulta.
 
 ## §13 · ORDEN DE CONSTRUCCIÓN (cuando lleguen las credenciales — sesión propia)
 
@@ -256,6 +342,46 @@ antes de las credenciales QA.
 ---
 
 ## Historial
+
+- **v1.4 (22-ago-2026, mesa 104 — sale del parte de C):** **§5 deja de mentir
+  sobre de quién es una decisión.** `expiredTime` **es un campo del request**,
+  no un límite del proveedor: la v1.1 lo leyó del papel y escribió «3 minutos
+  fijos, no configurables». **Rige: pedimos 3 minutos por elección propia,
+  declarada REVISABLE**, coherente con su doc y elegida para que el reloj del
+  código muera antes que el hold. *Mientras se creyó ajena, nadie iba a
+  preguntarse si el número era el correcto.* Y entra su corolario: **la pantalla
+  lee el `expira_en` que devuelve el servidor, jamás una constante** — un número
+  que vive en dos lugares es una cuenta regresiva que algún día miente.
+
+- **v1.3 (22-ago-2026, mesa 104):** la referencia corta queda en **`≤ 20`** por
+  firma de la mesa, con el **barrido** de la pista D como fuente (20 pasa; 21,
+  25, 30, 36, 40, 50, 64 y 100 rebotan con el literal del proveedor). Deja de
+  ser una marca de pista y pasa a ley, con su porqué escrito: **un CHECK más
+  estricto que el proveedor no es más seguro — es una regla nuestra disfrazada
+  de regla suya**, y el día que alguien busque el límite va a leer la doc
+  equivocada, que vamos a ser nosotros.
+
+- **v1.2 (22-ago-2026, mesa 104 — la primera versión escrita contra el
+  ambiente REAL):** entra con el parte de la pista D del mismo día. **La regla
+  del literal que la v1.0 se puso a sí misma se cobró entera:** de las
+  afirmaciones de §2 tomadas de la doc en papel, **varias eran falsas**, y la
+  más cara es que **`NOT_FOUND` no existe** — una transacción inexistente vuelve
+  `200 / PENDING / amount 0 / date ""`, o sea que **el fantasma tiene la forma
+  exacta de un pago en curso**. De ahí salen dos leyes nuevas: **el corte de
+  huérfanos lo pone nuestro reloj** (hold + 7 días), y **aprobado exige
+  `APPROVED` Y `amount > 0`** — con un solo campo, fail-closed es imposible.
+  Se corrigen además **las rutas** (`/merchant/v1/payment/*`, las dos formas de
+  la v1.1 estaban mal), **`idType` como texto `"0"`/`"1"`**, el nombre del campo
+  de la referencia — **`idTransacionReference`, con el typo del proveedor
+  respetado a propósito** —, **el refund por la misma pareja `idType`+id** y no
+  por `transactionId` suelto, y **`x-api-key` = subscription key**. Entran el
+  **límite de ~1 req/s** con su consecuencia (`429` ≠ fallo: el barrido espacia)
+  y **`expira_en` como timestamp absoluto** desde la puerta. **La firma ③ pasa
+  de supuesto a hecho**: el proveedor confirmó *mismo día* por mensaje. **§12
+  baja de seis preguntas a cuatro**, y la que queda primera es la que bloquea el
+  riel: **`pointOfSale` para canal digital**. *Nada del motor cambia: siguen
+  intactos el puntero, el invariante «exactamente uno», el desglose congelado y
+  las compuertas.*
 
 - **v1.1 (21-ago-2026, misma mesa):** **las tres firmas del founder entran y la
   letra RIGE.** La ① modifica la propuesta: el formato de v1 es **el código de
