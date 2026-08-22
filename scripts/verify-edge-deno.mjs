@@ -55,13 +55,15 @@
  *   node scripts/verify-edge-deno.mjs              → chequea todas
  *   node scripts/verify-edge-deno.mjs --autoprueba → se prueba a sí mismo
  */
-import { execFileSync, execSync } from 'node:child_process'
+import { execFileSync, execSync, spawnSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, cpSync, writeFileSync, readdirSync, existsSync, rmSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
 const DIR = 'supabase/functions'
 const AUTOPRUEBA = process.argv.includes('--autoprueba')
+const PROBAR_CINTURON = process.argv.includes('--probar-cinturon')
 
 /**
  * ⚠️ LA CLASE QUE ESTE GATE JUZGA — y por qué no juzga todo lo que `deno`
@@ -108,30 +110,94 @@ function hayDeno() {
 }
 
 /**
- * Copia el árbol de funciones a un temporal FUERA del repo y lo chequea.
- * Se copia el árbol ENTERO (no función por función) para que los imports
- * relativos a `_shared/` sigan resolviendo como en producción.
+ * EL CINTURON DEL AISLAMIENTO -- mecanico, no una nota al pie.
+ *
+ * MEDIDO (S103-B): `deno` corrido dentro del monorepo no solo falla --
+ * lee el `pnpm-workspace.yaml` vecino y ESCRIBE una clave `workspaces`
+ * dentro de `package.json` ("Migrated its workspace configuration into
+ * ..."). Un gate que corrompe el arbol cada vez que corre es peor que no
+ * tener gate.
+ *
+ * El aislamiento ya es POR CONSTRUCCION: `chequear()` copia a un temporal
+ * fuera del repo y corre ahi. Pero una precondicion que vive en un
+ * comentario se cumple mientras alguien la lea, y el dia que alguien
+ * "simplifique" el runner para correr en sitio, el defecto vuelve callado.
+ *
+ * Por eso ademas se MIDE: se toma la huella de `package.json` antes y
+ * despues de cada corrida de deno. Si cambio, el gate RESTAURA el archivo
+ * y ABORTA -- no reporta verde ni rojo, porque en ese estado no midio
+ * nada: midio un arbol que el mismo ensucio.
  */
-function chequear(mutar) {
-  const base = mkdtempSync(join(tmpdir(), 'epp-edge-'))
+const PKG = 'package.json'
+const huella = (f) => (existsSync(f) ? createHash('sha256').update(readFileSync(f)).digest('hex') : 'ausente')
+
+function abortarPorMutacion(contenidoOriginal) {
+  if (contenidoOriginal !== null) writeFileSync(PKG, contenidoOriginal)
+  console.error('\nABORTADO -- el gate modifico `package.json` y NO puede medir.\n')
+  console.error('   `deno` escribio en el archivo (el caso medido: una clave `workspaces`')
+  console.error('   migrada desde `pnpm-workspace.yaml`). El aislamiento se rompio: la')
+  console.error('   corrida ocurrio dentro del repo, no sobre una copia.')
+  console.error('\n   El archivo fue RESTAURADO a su contenido previo.')
+  console.error('   No hay veredicto: un gate que ensucia el arbol que mide, no lo mide.\n')
+  process.exit(3)
+}
+
+/**
+ * Copia el arbol de funciones a un temporal FUERA del repo y lo chequea.
+ * Se copia el arbol ENTERO (no funcion por funcion) para que los imports
+ * relativos a `_shared/` sigan resolviendo como en produccion.
+ *
+ * `enSitio` existe SOLO para `--probar-cinturon`: corre deno dentro del
+ * repo a proposito, para que el cinturon tenga contra que dispararse. Un
+ * cinturon que nunca se probo en rojo no es un cinturon.
+ */
+function chequear(mutar, enSitio = false) {
+  const antesHuella = huella(PKG)
+  const antesContenido = existsSync(PKG) ? readFileSync(PKG, 'utf8') : null
+
+  const base = enSitio ? null : mkdtempSync(join(tmpdir(), 'epp-edge-'))
   try {
-    cpSync(DIR, join(base, 'functions'), { recursive: true })
-    writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
-
-    if (mutar) mutar(join(base, 'functions'))
-
-    const entradas = readdirSync(join(base, 'functions'), { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(join(base, 'functions', d.name, 'index.ts')))
-      .map((d) => `functions/${d.name}/index.ts`)
-
-    try {
-      execFileSync('deno', ['check', ...entradas], { cwd: base, stdio: 'pipe', encoding: 'utf8' })
-      return { verde: true, salida: '', total: entradas.length }
-    } catch (e) {
-      return { verde: false, salida: `${e.stdout || ''}${e.stderr || ''}`, total: entradas.length }
+    let cwd, entradasDir
+    if (enSitio) {
+      cwd = process.cwd()
+      entradasDir = DIR
+    } else {
+      cpSync(DIR, join(base, 'functions'), { recursive: true })
+      writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
+      if (mutar) mutar(join(base, 'functions'))
+      cwd = base
+      entradasDir = join(base, 'functions')
     }
+
+    const entradas = readdirSync(entradasDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && existsSync(join(entradasDir, d.name, 'index.ts')))
+      .map((d) => (enSitio ? `${DIR}/${d.name}/index.ts` : `functions/${d.name}/index.ts`))
+
+    // Solo bajo `--probar-cinturon`: simula que algo mutó el archivo DURANTE
+    // la corrida aislada, para ejercitar la rama que ABORTA. Sin esto, esa
+    // rama nunca se ejecuta y quedaría sin probar -- que es el defecto que
+    // este archivo entero viene a cerrar.
+    if (process.env.EPP_SIMULAR_MUTACION === '1' && !enSitio) {
+      writeFileSync(PKG, readFileSync(PKG, 'utf8') + '\n')
+    }
+
+    let r
+    try {
+      execFileSync('deno', ['check', ...entradas], { cwd, stdio: 'pipe', encoding: 'utf8' })
+      r = { verde: true, salida: '', total: entradas.length }
+    } catch (e) {
+      r = { verde: false, salida: `${e.stdout || ''}${e.stderr || ''}`, total: entradas.length }
+    }
+
+    // EL CINTURON: se mide DESPUES de cada corrida, siempre.
+    if (huella(PKG) !== antesHuella) {
+      r.mutado = true
+      if (!enSitio) abortarPorMutacion(antesContenido)
+      else if (antesContenido !== null) writeFileSync(PKG, antesContenido)
+    }
+    return r
   } finally {
-    rmSync(base, { recursive: true, force: true })
+    if (base) rmSync(base, { recursive: true, force: true })
   }
 }
 
@@ -154,6 +220,58 @@ if (!hayDeno()) {
 }
 
 // ── AUTOPRUEBA · exige veredicto sobre el CASO MALO (L-333) ─────────────
+// -- PRUEBA DEL CINTURON: corre deno EN SITIO para que se dispare --------
+if (PROBAR_CINTURON) {
+  console.log('\n. Cinturon: corro deno DENTRO del repo a proposito y exijo que lo detecte.\n')
+  const antes = readFileSync(PKG, 'utf8')
+  const huellaAntes = huella(PKG)
+
+  const r = chequear(null, true)
+
+  const huellaDespues = huella(PKG)
+  const restaurado = readFileSync(PKG, 'utf8') === antes
+
+  if (!r.mutado) {
+    console.log('  NO CONCLUYENTE: deno NO toco `package.json` en esta corrida.')
+    console.log(`     huella antes/despues: ${huellaAntes.slice(0, 12)} / ${huellaDespues.slice(0, 12)}`)
+    console.log('     El cinturon no se pudo probar -- puede ser otra version de deno,')
+    console.log('     u otro layout. NO se reporta verde: no se probo nada.\n')
+    process.exit(2)
+  }
+
+  console.log('  OK deno MUTO `package.json` al correr en sitio -- el caso medido existe.')
+  console.log(`  OK el cinturon lo DETECTO (huella distinta) y restauro: ${restaurado ? 'si' : 'NO'}`)
+  if (!restaurado) {
+    console.error('\nROJO EL CINTURON ESTA ROTO: detecto la mutacion y NO restauro el archivo.\n')
+    process.exit(1)
+  }
+  // BRAZO 2 -- la rama que ABORTA. En modo aislado deno no toca el repo, asi
+  // que esa rama nunca corre sola: se ejercita en un SUBPROCESO simulando la
+  // mutacion. Una rama de codigo que nunca se ejecuto no esta probada.
+  console.log('\n. Brazo 2: simulo mutacion DURANTE la corrida aislada y exijo ABORTO.\n')
+  const antes2 = readFileSync(PKG, 'utf8')
+  const hijo = spawnSync(process.execPath, [process.argv[1]], {
+    env: { ...process.env, EPP_SIMULAR_MUTACION: '1' },
+    encoding: 'utf8',
+  })
+  const restaurado2 = readFileSync(PKG, 'utf8') === antes2
+  const abortoBien = hijo.status === 3
+
+  console.log(`  ${abortoBien ? 'OK' : 'ROJO'} salida del gate: ${hijo.status} (3 = abortado por mutacion)`)
+  console.log(`  ${restaurado2 ? 'OK' : 'ROJO'} package.json restaurado: ${restaurado2 ? 'si' : 'NO'}`)
+  if (!abortoBien || !restaurado2) {
+    console.error('\nROJO EL CINTURON ESTA ROTO en su rama de aborto.\n')
+    console.error((hijo.stdout || '') + (hijo.stderr || ''))
+    process.exit(1)
+  }
+  const dijoAbortado = ((hijo.stdout || '') + (hijo.stderr || '')).includes('ABORTADO')
+  console.log(`  ${dijoAbortado ? 'OK' : 'ROJO'} y lo DIJO en voz alta`)
+  if (!dijoAbortado) process.exit(1)
+
+  console.log('\nOK Cinturon probado en sus DOS ramas: detecta+restaura, y aborta sin dar veredicto.\n')
+  process.exit(0)
+}
+
 if (AUTOPRUEBA) {
   console.log('\n. Autoprueba: fabrico el defecto y exijo ROJO por la razon correcta.\n')
 

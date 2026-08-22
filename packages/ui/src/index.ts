@@ -207,6 +207,22 @@ export {
 export { leerBytes, leerBase64, uriLegible } from './components/leer-archivo'
 export { usePresionado } from './components/usePresionado'
 export { Cronometro, type CronometroProps } from './components/Cronometro'
+
+/**
+ * BotonCopiar — S103-B: un toque copia, y el botón mismo lo confirma.
+ *
+ * Pedido de C con su consumidor nombrado: el código de 6 dígitos de DeUna,
+ * que la familia lleva a otra app para pagar. COMPONE `Boton` (Ley 11:
+ * reusar > adaptar > crear) y le agrega lo único que `Boton` no puede
+ * saber: cómo confirma, cuánto dura, qué pasa cuando el valor venció, y
+ * que NO toca ningún reloj de la pantalla.
+ *
+ * ⚠️ DEPENDE DE `expo-clipboard`, que es NATIVO: **no viaja por OTA**
+ * (L-134). Hasta la próxima build el módulo no existe en el binario y la
+ * pieza **se apaga sola y honesta** en vez de romper la pantalla —
+ * `HAY_PORTAPAPELES` lo dice, para que una superficie pueda explicarlo.
+ */
+export { BotonCopiar, HAY_PORTAPAPELES, type BotonCopiarProps } from './components/BotonCopiar'
 export {
   EvidenciaFoto,
   EvidenciaFotoCapturar,
