@@ -42,7 +42,7 @@ export {
   type ServicioAplicadoFamilia,
   type CodigoErrorTimeline,
 } from './wrappers/timeline';
-export type { ResultadoWrapper } from './resultado';
+export type { ResultadoWrapper, CodigoDeFallo } from './resultado';
 export {
   agregarNotaAtencion,
   agregarIncidenciaAtencion,
