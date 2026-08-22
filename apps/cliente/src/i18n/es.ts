@@ -1451,9 +1451,33 @@ export const clienteEs = {
     // Ayuda y legales
     terminosTitulo: 'Términos y condiciones',
     privacidadTitulo: 'Política de privacidad',
-    legalPlaceholder: 'Los textos legales definitivos están en preparación. Esta app está en fase de pruebas: no se cobra dinero real y tus datos se usan solo para operar el servicio.',
-    ayudaCanal: 'Canal de ayuda',
-    ayudaPronto: 'Pronto — un lugar digno para pedir ayuda.',
+    /* La puerta ÚNICA al índice legal del sitio (A, con la fuente de B). */
+    legalesTitulo: 'Términos y privacidad',
+    /* ☠️ `legalPlaceholder` MURIÓ (S103-C, mesa 104). Decía, publicado:
+       «Esta app está en fase de pruebas: NO SE COBRA DINERO REAL…».
+       **Era cierta cuando se escribió y dejó de serlo sin que nadie la
+       tocara**: S101 conectó el motor de cobro de punta a punta. *La única
+       pantalla donde la app hace una afirmación legal sobre el dinero
+       afirmaba lo contrario de lo que el motor hace.* Su reemplazo declara
+       QUÉ documento se está leyendo, que es el dato que faltaba. */
+    legalEstado:
+      'Por ahora estos son los documentos del sitio de e-PetPlace. Los de la app están en preparación y los vas a encontrar aquí cuando existan.',
+    // El soporte del soft launch: WhatsApp del founder con mensaje
+    // pre-escrito (patrón de `apps/prestador/solicitar-acceso`).
+    // ☠️ Mueren `ayudaCanal` y `ayudaPronto`: el canal dejó de ser una
+    // promesa y pasó a ser un botón.
+    soporteTitulo: '¿Necesitas ayuda?',
+    soporteCuerpo: 'Escríbenos por WhatsApp y te respondemos.',
+    soporteBoton: 'Escribir por WhatsApp',
+    /* El mensaje pre-escrito. **No lleva dato de la cuenta**: viaja por un
+       canal que no controlamos y lo escribe la persona si quiere. */
+    soporteMensaje: 'Hola, necesito ayuda con la app de e-PetPlace.',
+    soporteFallback: 'Si no se abre WhatsApp, escríbenos al {{numero}}.',
+    /* El camino de las TRES compuertas que hablan hacia soporte
+       (`monto_divergente` · `compra_sin_pedidos` · `desglose_incompleto`,
+       `LETRA_PUERTA_DE_PAGO_S101B` §3.1). *Su voz decía «Ya lo estamos
+       viendo» y no tenía a dónde ir.* */
+    soporteDesdeCobro: 'Hola, tuve un problema al pagar en e-PetPlace.',
     // Eliminar cuenta — letra (a): visible con voz honesta (espec P15 en docs)
     eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, tus co-dueños y tus hitos — una vida documentada no se borra a la ligera.',
     entendido: 'Entendido',
@@ -1479,6 +1503,41 @@ export const clienteEs = {
   //    que los servicios se cobran por el mismo motor, la voz es de LA CASA.
   //    *Dejarlas allá obligaba a copiarlas para el checkout de la cita — y una
   //    voz copiada es una voz que un día alguien afina de un solo lado.*
+  /* ══ S103-C · LA SERIE RECURRENTE — «Que llegue solo», del lado de quien ya
+        la tiene andando (`LETRA_COBRO_RECURRENTE` §2: «la pantalla dice la
+        verdad completa: qué se va a cobrar, cuándo es el próximo cobro, a qué
+        medio, y cómo se corta»).
+        🔴 **La voz jamás inventa lo que el motor no guarda.** Hoy la tabla no
+        tiene ni medio de pago ni monto esperado (censo de A, divergencias #3 y
+        #4): para esos dos hay voz de AUSENCIA, no un valor de relleno. */
+  serie: {
+    titulo: 'Que llegue solo',
+    queLlega: 'Qué te llega',
+    cada: 'Cada {{dias}} días',
+    proximoCobro: 'Próximo cobro',
+    /* La ausencia dicha con su nombre — jamás un guion mudo ni un cero. */
+    montoDesconocido: 'Lo vas a ver en el aviso, 48 horas antes.',
+    medio: 'Con qué se paga',
+    medioDesconocido: 'Todavía no lo mostramos aquí.',
+    aDondeLlega: 'A dónde llega',
+    avisoPrevio: 'Te avisamos 48 horas antes de cada cobro.',
+    /* §6: pausa ≠ cancelación, y la salida es del cliente. */
+    pausada: 'Quedó en pausa: no pudimos completar el cobro.',
+    comoReanudar: 'Actualiza tu medio de pago para reanudarla.',
+    /* §7: la falta de stock salta la entrega y **jamás sustituye**. */
+    saltada: 'Este mes no pudimos enviar {{producto}}.',
+    saltadaSigue: 'La serie sigue activa para la próxima entrega.',
+    /* Cortar: UN botón, sin soporte de por medio (§2). */
+    cancelar: 'Cancelar envíos',
+    cancelarConfirma: '¿Cancelas los envíos automáticos?',
+    cancelarDetalle: 'No se cobra nada más. Puedes volver a activarlos cuando quieras.',
+    cancelarSi: 'Sí, cancelar',
+    cancelada: 'Listo: cancelamos los envíos automáticos.',
+    /* El fallo dice QUÉ falló, jamás un genérico: la familia acaba de tocar
+       «cancelar» y necesita saber que **la serie sigue viva**. */
+    errorCancelar: 'No pudimos cancelar los envíos. Siguen activos — prueba de nuevo.',
+    volver: 'Volver',
+  },
   pago: {
     comoPagas: 'Cómo quieres pagar',
     /* ③ ☠️ MURIÓ `medioElegido: 'Elegido'`. *Era una etiqueta contando lo
@@ -1492,6 +1551,24 @@ export const clienteEs = {
     pagar: 'Pagar',
     sinMedios: 'Todavía no guardas una tarjeta.',
     elegiMedio: 'Elige con cuál quieres pagar.',
+    /* ── S103-C · DEUNA (`LETRA_DEUNA` §5 y §6) ───────────────────────────
+       El nombre es propio y **no se traduce**. La voz de «todavía no» es
+       honesta y temporal: el riel está bloqueado por un dato del comercio
+       (el `pointOfSale`), medido por la pista D. */
+    deunaFila: 'Deuna',
+    deunaPronto: 'Muy pronto vas a poder pagar desde tu app Deuna.',
+    /* La espera del código: **misma pantalla, otra voz** (§6, firma ② del
+       founder: «funciona exactamente igual que si fuera tarjeta»). */
+    deunaEsperaTitulo: 'Ingresa este código en tu app Deuna',
+    deunaEsperaCuerpo: 'Abre tu app Deuna, ingresa el código y confirma el pago.',
+    /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
+       pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
+    deunaCodigoVence: 'El código vence en {{tiempo}}',
+    deunaCodigoVencido: 'El código venció.',
+    deunaCodigoNuevo: 'Generar un código nuevo',
+    /* Cuando el hold murió NO nace otro código: rige la voz del rearme que
+       la casa ya tiene (`esperaExpirada`), y esta línea dice el porqué. */
+    deunaHoldVencido: 'El tiempo que apartamos se terminó. No te cobramos nada.',
     // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.
     esperaTitulo: 'Estamos confirmando tu pago',
     esperaTituloCorto: 'Tu pago',
@@ -1892,7 +1969,24 @@ export const clienteEs = {
     recurrenciaElegiCada: 'Elige cada cuánto quieres que llegue y queda configurado.',
     recurrenciaQueEs: 'Qué es «Que llegue solo»',
     recurrenciaDias: 'Cada {{n}} días',
-    recurrenciaLista: 'Listo: quedó configurado. Lo manejás desde Tus pedidos.',
+    /* ☠️ S103-C · MUERE EL VOSEO **y muere la promesa de lugar**, que era la
+       mitad cara. Decía: *«Listo: quedó configurado. Lo **manejás** desde Tus
+       pedidos.»*
+
+       · **`manejás`** era el ÚNICO voseo vivo en un valor de cadena del
+         diccionario del cliente (medido: los otros hits son comentarios).
+         `D-857` declaró las 34 barridas en S101-D y **ésta sobrevivió**,
+         porque aquel barrido cubría *«las SEIS SUPERFICIES DE PAGO»* y esta
+         cadena es de despensa.
+       · 🔴 **«Lo manejas desde Tus pedidos» apuntaba a una superficie que no
+         existe.** Medido: las cuatro rutas de `(tabs)/pedidos/` no mencionan
+         la serie, y no hay lector. *No es una promesa vaga: es una promesa con
+         dirección — le dice a la familia dónde ir, y ahí no hay nada.*
+
+       ⇒ **La frase dice lo que hoy es verdad y nada más.** El camino vuelve
+       cuando el lector de A exista y la entrada se pueda dibujar. *Se publica
+       lo incompleto, jamás lo falso.* */
+    recurrenciaLista: 'Listo: quedó configurado.',
     recurrenciaActiva: 'La compra recurrente quedó configurada.',
     recurrenciaApagada: 'Listo: la compra recurrente quedó apagada.',
 
