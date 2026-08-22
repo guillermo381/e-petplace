@@ -3514,6 +3514,27 @@ function r49(archivos) {
  *  invariante, y no pasa NADA. *No hubo error, ni log, ni síntoma: hubo
  *  silencio con cara de normalidad* (L-318, su variante grave).
  *
+ *  🔴 **LA DOCUMENTACIÓN ERA PERFECTA Y NO SIRVIÓ DE NADA** (medición
+ *  independiente de la pista D, verificada acá contra la fuente). La
+ *  lápida de la pieza —líneas 73-88— **no insinúa: dice verbatim**
+ *  *«`destacada` es NO-OP: la prop se acepta y no pinta nada»*. **La
+ *  frase exacta que describe el defecto vivía adentro del archivo que lo
+ *  acepta, y cuatro consumidores lo montaron tres semanas igual.**
+ *  ⇒ *un comentario que dice «esto ya no hace nada» no protege de nada
+ *  mientras la prop siga siendo aceptable: el compilador gana.* **Por eso
+ *  esto tenía que ser una REGLA y no una lápida mejor escrita** — la
+ *  lápida ya estaba, y era buena.
+ *
+ *  🔴 **LA CLASE, y es la CARA INVERSA de `L-318` «motor sin puerta»**
+ *  (nombrada por D el mismo día, sobre tres casos de tres pistas):
+ *  · **motor sin puerta** — la pieza existe y nadie la llama. *No hace
+ *    nada, y se nota como AUSENCIA.*
+ *  · **puerta sin motor** — ésta: **la prop se acepta y no hay nada
+ *    detrás.** *Es peor de detectar: **typechequea, pasa el guard, y el
+ *    llamador cree que pidió algo.***
+ *  **Las tres las encontró RECORRER EL CIRCUITO, ninguna un gate: los
+ *  gates miden la pieza, y ninguno puede notar que falta el cable.**
+ *
  *  🔴 **Y LO QUE LA VOLVIÓ INVISIBLE ES SU PROPIO GUARD.** La pieza
  *  valida que no haya DOS `destacada` a la vez. Esa validación es la
  *  **razón escrita** que hace que la prop parezca viva y enforced — y
