@@ -2034,6 +2034,15 @@ const FIXTURES = {
         '</View>',
     },
   ],
+  /* R60 · el exterior con `alignSelf` puesto fuera de `bloque` — el
+     defecto exacto. Trae el `bloque ? …` para que la regla tenga que
+     distinguir la rama legítima y no gritar por la palabra suelta. */
+  R60: [
+    {
+      path: 'packages/ui/src/components/Boton.tsx',
+      src: "  return (\n    <View style={bloque ? { alignSelf: 'stretch' } : { alignSelf: 'flex-start' }}>\n",
+    },
+  ],
   /* R48 · las 5 del baseline + UNA sexta. Y trae además una LÁPIDA de
      `Campo` —la palabra suelta en un comentario— que NO debe contarse:
      el fixture prueba que la regla mide `variante="…"` y no la palabra. */
@@ -3474,6 +3483,55 @@ function r49(archivos) {
   }
 }
 
+/** R60 · `Boton` NO OCUPA EL SLOT `alignSelf` DE SU EXTERIOR (S103-B · D de C).
+ *
+ *  LA LEY: un botón sin `bloque` **abraza su contenido sin decidir dónde
+ *  se para** — eso lo decide el padre. Su exterior va SIN `alignSelf`
+ *  (una FILA que hereda), y el `alignSelf` explícito queda **solo para
+ *  `bloque`**, que es lo único que promete ancho completo.
+ *
+ *  🔴 **POR QUÉ NECESITA UN JUEZ, y no es paranoia:** el envoltorio
+ *  **parece peso muerto** —un `View` sin estilo visible alrededor de un
+ *  `Pressable`— y su razón es de flexbox, invisible al leer. *Es la clase
+ *  exacta de línea que alguien borra por prolijidad*, y borrarla no rompe
+ *  nada que se note: **vuelve a ganarle al `alignItems` del padre**, en
+ *  silencio, en las 22 pantallas que hoy lo usan.
+ *
+ *  **Y el precedente que la justifica ya está pagado:** el defecto se curó
+ *  por consumidor el 22-ago y **reapareció veinte líneas más abajo en el
+ *  mismo archivo** con un bloque nacido después. *Una corrección aplicada
+ *  a un caso no protege al hermano que nace al día siguiente.*
+ *
+ *  Mide el ELEMENTO EXTERIOR del `return` de la pieza: si su `style`
+ *  nombra `alignSelf` fuera de la rama `bloque`, el slot volvió a estar
+ *  ocupado. */
+const BASELINE_R60 = 0
+function r60(archivos) {
+  const fallos = []
+  let piezas = 0
+  for (const { path, src } of archivos) {
+    if (!/\/Boton\.tsx$/.test(path)) continue
+    piezas++
+    const limpio = sinComentarios(src)
+    // El exterior: el primer elemento tras el `return (` del componente.
+    const m = limpio.match(/return \(\s*\n\s*<View([\s\S]{0,400}?)>/)
+    if (m === null) {
+      fallos.push(
+        'R60: el `return` de `Boton` ya no abre con un `<View>`. El envoltorio que devuelve la alineación al padre no está — sin él, `alignSelf` vuelve a ganarle al `alignItems` del contenedor y ningún padre puede centrar un botón. Ver su porqué en la pieza.',
+      )
+      continue
+    }
+    const atributos = m[1]
+    const fueraDeBloque = atributos.replace(/bloque \?[^:]*:/g, '')
+    if (/alignSelf/.test(fueraDeBloque))
+      fallos.push(
+        `R60: el exterior de \`Boton\` declara \`alignSelf\` fuera de la rama \`bloque\`. Ese slot es del PADRE: quien lo escribe le gana al \`alignItems\` del contenedor, y un botón deja de poder centrarse. \`bloque\` sí lo conserva —es lo único que promete ancho completo—; el resto hereda.`,
+      )
+  }
+  fallos.push(...ancla('R60', piezas, 1, 'archivo(s) Boton.tsx en el corpus'))
+  return { fallos, info: `${piezas} pieza(s) medida(s) · DURA EN ${BASELINE_R60}` }
+}
+
 /** R59 · UN COMENTARIO JSX SIN LLAVES ES TEXTO QUE SE RENDERIZA (S103-B · D-882).
  *
  *  🔴 EL DEFECTO, medido y no supuesto: en la galería vivían **SEIS**
@@ -4473,7 +4531,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4839,6 +4897,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);
 corridas.push(['R59 (un comentario JSX sin llaves es texto: D-882)', r59([...apps, ...ui, ...galeria])]);
 corridas.push(['R58 (Texto no gana un color de acento: N23)', r58(ui)]);
 corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47([...apps, ...ui])]);
