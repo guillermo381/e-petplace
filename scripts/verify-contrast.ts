@@ -358,17 +358,19 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     3,
   )
 
-  /* S103-B · LA CAJA DEL NÚMERO SOBRE EL BLOQUE LLENO (`StepperCantidad`
-     en `tamano="ancho"` — la grilla de la despensa).
-     🔴 **Se declara porque el contorno de ese campo ES esta tinta**, y el
-     gate tenía pares de CTA *fijos* (papel/tealDark) pero NO el par
-     RESUELTO POR CASA — que en el cliente es el bloque de ORO y en el
-     prestador el teal. *Sin esta línea, el gate calla justo sobre la
-     superficie donde el founder dijo que no se lee el campo.*
-     El mínimo es el de TEXTO y no el de superficie: la misma tinta pinta
-     los dígitos y los signos, así que si el contorno pasara con 3 y el
-     dígito no, el número quedaría ilegible adentro de una caja legible. */
-  add('§15 contorno del número sobre el bloque: accent.ctaTexto / accent.cta', t.accent.ctaTexto, t.accent.cta)
+  /* ☠️ ⏪ ACÁ VIVÍA EL PAR DEL CONTORNO SOBRE EL BLOQUE LLENO — se retira
+     EN EL MISMO COMMIT que le saca el bloque a `StepperCantidad` (firma
+     del founder: la grilla se ve igual que la ficha), y **esa
+     simultaneidad es la regla de este archivo, no prolijidad**: *un gate
+     que mide una anatomía que la pieza ya no tiene sigue dando verde y
+     deja de estar midiendo el producto.* Esta casa lo pagó dos veces —el
+     par del avatar en S98 y el `bgCampo` de S99— y **el par de abajo, el
+     que yo mismo agregué ayer, se habría convertido en el tercero.**
+
+     Lo que medía (`accent.ctaTexto / accent.cta`: 9,96 · 5,51 · 11,01)
+     **no se pierde**: el contorno del número pasa a ser el de la caja de
+     campo de la casa, que ya tiene su piso vigilado por `R43` y su par
+     `border.campo / bg.base` cinco líneas más arriba. */
 
   /* S103-B · EL TÍTULO DE LA CELDA ELEGIDA (`DIRECCION_ARTE` §14 — el medio
      de pago elegido va en letra magenta, sin huella).
