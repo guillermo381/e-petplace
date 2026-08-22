@@ -2005,6 +2005,16 @@ const FIXTURES = {
     { path: 'apps/prestador/src/app/eco-literal.tsx', src: `<Campo label="Diagnóstico" placeholder="diagnóstico" />` },
     { path: 'apps/prestador/src/app/eco-clave.tsx', src: `<Campo label={t('v.medicamento')} placeholder={t('v.medicamento')} />` },
   ],
+  /* R58 · la union ENTERA con sus miembros legítimos + el `accent` que
+     N23 existe para impedir. Los legítimos son el peso de la prueba
+     (L-236): sin ellos el ancla sería lo que pinta el rojo, y la regla
+     estaría probando que sabe contar cero. */
+  R58: [
+    {
+      path: 'packages/ui/src/components/Texto.tsx',
+      src: "export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'accent'",
+    },
+  ],
   /* R48 · las 5 del baseline + UNA sexta. Y trae además una LÁPIDA de
      `Campo` —la palabra suelta en un comentario— que NO debe contarse:
      el fixture prueba que la regla mide `variante="…"` y no la palabra. */
@@ -3445,6 +3455,59 @@ function r49(archivos) {
   }
 }
 
+/** R58 · `Texto` NO GANA UN COLOR DE ACENTO (S103-B · `N23`).
+ *
+ *  LA LEY, y es la única de la casa que pide IMPEDIR en vez de curar. Su
+ *  propio censo lo dijo con todas las letras: *«la ley ya se cumple por
+ *  construcción… no hay nada que curar, hay algo que IMPEDIR. El riesgo
+ *  no es el código de hoy: es el `accent` que alguien le agregue mañana a
+ *  `TextoColor` porque hace falta destacar un dato»*.
+ *
+ *  🔴 **Y HASTA HOY ESA LEY NO TENÍA MECANISMO** — vivía en un documento,
+ *  que es donde vive lo que se cumple mientras alguien lo lea. *Una ley
+ *  cuyo enunciado es «que nadie escriba esta línea» y que no puede ver la
+ *  línea es una intención.*
+ *
+ *  ── QUÉ MIDE, Y POR QUÉ NO ES LA PALABRA ──────────────────────────
+ *  Los MIEMBROS de la union `TextoColor`, no el archivo: `Texto.tsx`
+ *  nombra `accent` legítimamente en prosa y en el header de esta misma
+ *  clase de discusión. Cualquier miembro que **empiece con `accent`**
+ *  —`accent`, `accentDark`, `accentControl`— es la línea que N23 nombra.
+ *
+ *  ── LO QUE ESTA REGLA NO PROHÍBE, y es la mitad que la vuelve justa ──
+ *  **El color por ESTADO sigue siendo legal**, y N23 lo dice: sus tres
+ *  familias son acción, **estado** y marca firmada. Lo que se prohíbe es
+ *  la puerta GENÉRICA — un slot de color abierto en la pieza de texto,
+ *  que el consumidor usa para «destacar un dato». La salida correcta
+ *  existe y está construida: **una prop SEMÁNTICA en la pieza que tiene
+ *  el estado** (`Celda.elegida`, §14), donde el tinte no está al alcance
+ *  de quien la monta. *No se cierra el camino: se cierra el atajo.* */
+const BASELINE_R58 = 0
+function r58(archivos) {
+  const fallos = []
+  let miembros = 0
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (!/\/Texto\.tsx$/.test(path)) continue
+    const m = sinComentarios(src).match(/export type TextoColor\s*=\s*([^\n]+)/)
+    if (m === null) continue
+    for (const bruto of m[1].split('|')) {
+      const nombre = bruto.trim().replace(/^'|'$/g, '')
+      if (nombre === '') continue
+      miembros++
+      if (/^accent/i.test(nombre)) ofensores.push(nombre)
+    }
+  }
+  if (ofensores.length > BASELINE_R58)
+    fallos.push(
+      `R58: \`TextoColor\` ganó ${ofensores.length} miembro(s) de acento (${ofensores.join(' · ')}). N23: EL COLOR MARCA CLASE, JAMÁS IMPORTANCIA — lo importante dentro de un texto se marca con PESO o TAMAÑO, y el acento se reserva para lo ACCIONABLE y para lo que necesita ALARMA. Si lo que querés decir es un ESTADO ("ésta es la elegida"), no va acá: va como prop SEMÁNTICA en la pieza que tiene ese estado — el molde es \`Celda.elegida\` (§14), donde el consumidor declara el hecho y el tinte no está a su alcance.`,
+    )
+  // ANCLA: si `Texto` se renombra o su union se reescribe, este contador
+  // daría 0 y su verde diría «no miré» en vez de «no hay» (L-192).
+  fallos.push(...ancla('R58', miembros, 3, 'miembro(s) de la union TextoColor'))
+  return { fallos, info: `${miembros} miembro(s) en TextoColor · ${ofensores.length} de acento · DURA EN ${BASELINE_R58}` }
+}
+
 /* ─────────────────────────────────────────────────────────────────────
    EL ENSANCHE DE R47 Y R48 A `packages/ui` (S103-B, tanda de mesa).
 
@@ -4314,7 +4377,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4680,6 +4743,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R58 (Texto no gana un color de acento: N23)', r58(ui)]);
 corridas.push(['R47 (la variante jubilada no crece: Boton compacto)', r47([...apps, ...ui])]);
 corridas.push(['R48 (el alias renombrado no crece: Boton sinCaja -> apoyada)', r48([...apps, ...ui])]);
 corridas.push(['R49 (N11-prima: el placeholder no repite la etiqueta)', r49(apps)]);

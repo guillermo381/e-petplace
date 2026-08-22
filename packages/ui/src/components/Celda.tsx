@@ -78,6 +78,39 @@ type Comun = ZonaFin & {
    *  silencioso (un nombre cortado que nadie sabe que estaba cortado),
    *  esta casa elige el visible: el silencioso no se descubre nunca.* */
   tituloEntero?: boolean
+  /** ESTA ES LA ELEGIDA — el título se tiñe (S103-B · `DIRECCION_ARTE` §14).
+   *
+   *  **Su caso vivo:** la hoja de «Cómo quieres pagar». Con siete tarjetas
+   *  y dos pares casi idénticos, **abrir «Cambiar ›» sin ver cuál es la
+   *  actual no es cambiar: es elegir de nuevo a ciegas.**
+   *
+   *  ── 🔴 POR QUÉ ES UN BOOLEANO Y NO UN COLOR ────────────────────────
+   *  **`N23` dice que el color marca CLASE y jamás IMPORTANCIA**, y su
+   *  censo cerró con una orden: *«no hay nada que curar, hay algo que
+   *  IMPEDIR — el riesgo es el `accent` que alguien le agregue mañana a
+   *  `TextoColor` porque hace falta destacar un dato»*. **Una prop de
+   *  color acá sería esa línea, escrita en otra pieza.** Con un booleano
+   *  semántico el consumidor declara un ESTADO y **el tinte no está a su
+   *  alcance**: la ley se cumple por construcción y no por disciplina.
+   *
+   *  **Y no choca con `N23`: choca con una lectura suya.** Sus tres
+   *  familias legales son acción, **ESTADO** y marca firmada — *«elegida»
+   *  es estado, exactamente como el `Badge` y la `BarraTabs` que su
+   *  propio censo declara legales.* No dice «este dato importa más»: dice
+   *  «ésta es la que rige».
+   *
+   *  ── EL SLOT, y por qué no es el otro ──────────────────────────────
+   *  **`accent.control`** — la variante AA para texto y elemento
+   *  funcional (Ley 2: el hex PURO es gráfica). Magenta oscuro en el
+   *  cliente, teal en el prestador, y **serena sola en memorial** (Ley 8).
+   *  **NO es `marcaEleccion`**: ése es el color de LA PATA, y §14 dice con
+   *  todas las letras que el medio de pago va **sin huella** —
+   *  *una tarjeta no es alguien: es un instrumento*.
+   *
+   *  ⚠️ **El color no viaja solo:** se acompaña de `accessibilityState`,
+   *  porque un estado dicho únicamente en color no existe para quien no
+   *  lo ve. */
+  elegida?: boolean
 }
 
 export type CeldaProps =
@@ -85,7 +118,7 @@ export type CeldaProps =
   | (Comun & { interactiva: true; onPress: () => void; accessibilityRole: AccessibilityRole })
 
 export function Celda(props: CeldaProps) {
-  const { titulo, subtitulo, inicio, densidad = 'normal', tituloEntero = false } = props
+  const { titulo, subtitulo, inicio, densidad = 'normal', tituloEntero = false, elegida = false } = props
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
@@ -157,7 +190,11 @@ export function Celda(props: CeldaProps) {
           style={{
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.base,
-            color: theme.text.primary,
+            // ⚠️ El PESO no cambia con `elegida`. §14 midió que lo que
+            // separa es el color (6,99:1 contra 1,18:1 del relleno);
+            // sumarle peso movería el ancho del texto y **la fila
+            // elegida saltaría al elegirla**.
+            color: elegida ? theme.accent.control : theme.text.primary,
             // El interlineado SOLO cuando puede haber dos líneas: con una
             // sola, fijarlo movería el centrado de las 161 filas vivas.
             ...(tituloEntero
@@ -263,6 +300,20 @@ export function Celda(props: CeldaProps) {
       onPressOut={() => setPresionada(false)}
       accessibilityRole={props.accessibilityRole}
       accessibilityLabel={etiqueta}
+      /* 🔴 EL ESTADO NO VIAJA SOLO EN EL COLOR. Un lector de pantalla no
+         ve magenta, y quien no distingue el tinte tampoco. El nombre de
+         la bandera depende del rol porque las dos existen y no son
+         intercambiables: `radio`/`checkbox` se dicen con `checked` —es
+         lo que la casa ya usa en `SelectorOpcion`—, y cualquier otro rol
+         con `selected`. *Poner las dos «por las dudas» le haría anunciar
+         dos veces el mismo hecho.* */
+      accessibilityState={
+        elegida
+          ? props.accessibilityRole === 'radio' || props.accessibilityRole === 'checkbox'
+            ? { checked: true }
+            : { selected: true }
+          : undefined
+      }
     >
       <Animated.View
         style={[

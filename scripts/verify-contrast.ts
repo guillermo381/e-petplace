@@ -311,6 +311,18 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
   // superficie real del chip (card en claro, elevated en dark). Los
+  /* S103-B · EL TÍTULO DE LA CELDA ELEGIDA (`DIRECCION_ARTE` §14 — el medio
+     de pago elegido va en letra magenta, sin huella).
+     🔴 **Se declara porque si no, el gate calla sobre un par que existe.**
+     La `Celda` es transparente en reposo, así que el fondo real es el de su
+     contenedor: se mide contra `bg.base` Y contra `bg.card`, porque la hoja
+     de medios de pago la monta sobre una y las listas de Cuenta sobre la
+     otra — *medir solo la más clara dejaría la otra sin verificar.* */
+  if ('control' in t.accent) {
+    add('§14 Celda elegida: accent.control / bg.base', t.accent.control, t.bg.base)
+    add('§14 Celda elegida: accent.control / bg.card', t.accent.control, t.bg.card)
+  }
+
   // tres registros de SelectorOpcion: control · oficio · capa (moribundo).
   const superficieChip = t.mode === 'light' ? t.bg.card : t.bg.elevated
   if ('capaBg' in t && 'control' in t.accent) {

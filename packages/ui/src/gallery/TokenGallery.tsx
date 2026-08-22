@@ -3419,6 +3419,33 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="Celda · LA ELEGIDA se dice en letra, sin huella (S103-B · §14)">
+          <View style={{ gap: spacing[3] }}>
+            <Tarjeta>
+              <Celda titulo="Visa terminada en 4482" subtitulo="Vence 08/28" elegida interactiva accessibilityRole="radio" onPress={() => {}} />
+              <Separador />
+              <Celda titulo="Visa terminada en 4481" subtitulo="Vence 03/27" interactiva accessibilityRole="radio" onPress={() => {}} />
+              <Separador />
+              <Celda titulo="Mastercard terminada en 9010" subtitulo="Vence 11/26" interactiva accessibilityRole="radio" onPress={() => {}} />
+            </Tarjeta>
+            <Texto variante="apoyo">
+              El caso vivo es la hoja de «Cómo quieres pagar»: con siete tarjetas y dos pares casi
+              idénticos, abrir «Cambiar» sin ver cuál es la actual no es cambiar — es elegir de nuevo a
+              ciegas. Los dos primeros son el discriminador: mismo banco, un dígito de diferencia.
+            </Texto>
+            <Texto variante="apoyo">
+              SIN HUELLA a propósito (§14): una tarjeta no es alguien, es un instrumento. La huella marca
+              SUJETOS. Y el peso no cambia — solo el color —, porque sumarle peso movería el ancho del
+              texto y la fila saltaría al elegirla.
+            </Texto>
+            <Texto variante="apoyo">
+              La prop es `elegida`, un booleano, no un color: N23 pide IMPEDIR que alguien tiña un texto
+              «porque hace falta destacar un dato». Con un booleano semántico el tinte no está al alcance
+              de quien monta la pieza, y R58 vigila que `Texto` no gane esa puerta.
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="Mutacion (S100d·bis) — lo que cambia de forma sin irse">
           <View style={{ gap: spacing[3], maxWidth: 200 }}>
             <Mutacion
