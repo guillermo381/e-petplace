@@ -122,8 +122,8 @@ export default function SerieDePedidos() {
              un vacío: cierra la pregunta con la respuesta equivocada.* */
           <EstadoVacio
             registro="pantalla"
-            titulo={t('serie.titulo')}
-            descripcion={t('serie.medioDesconocido')}
+            titulo={t('serie.sinLectorTitulo')}
+            descripcion={t('serie.sinLectorCuerpo')}
           />
         ) : (
           <SerieRecurrenteVista

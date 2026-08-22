@@ -186,7 +186,26 @@ export default function Cuenta() {
                       ).padStart(2, '0')}`
                     : ''
                 }`
-              : 'bundle embebido / dev'}
+              /* 🔴 S103-C · LOS DOS CASOS SE SEPARAN — antes decían lo mismo.
+               *
+               * ⏪ Este fallback era **`'bundle embebido / dev'` para los dos**:
+               * el bundle horneado en la APK **y** Metro sirviendo una rama
+               * cualquiera. *El discriminador ya existía en la línea de arriba
+               * (`isEmbeddedLaunch`) y el pie lo tiraba a la basura.*
+               *
+               * **Y costó casi un veredicto falso, medido hoy:** la pista A
+               * tomó el aparato mientras C tenía Metro corriendo desde su
+               * worktree, leyó `bundle embebido / dev` e **iba a reportar que
+               * su gate corría sobre el bundle de la APK. Era el de C.**
+               *
+               * *`L-336`: un objeto verosímil del origen equivocado no se caza
+               * leyendo mejor — A leyó bien, y el pie contestó bien una
+               * pregunta más angosta que la que el gate necesita.* **El
+               * marcador nació (L-160) para decir QUÉ corre sin cable, y en el
+               * único caso peligroso decía lo mismo que en el inocente.** */
+              : Updates.isEmbeddedLaunch
+                ? 'bundle embebido'
+                : 'metro · dev'}
           </Texto>
 
           {/* ── S82-B r13 · LA ENTRADA A LA GALERÍA DE TOKENS ──

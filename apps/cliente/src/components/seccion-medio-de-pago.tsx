@@ -41,18 +41,47 @@ import { View } from 'react-native';
 import {
   Boton, Celda, Chevron, Hoja, Tarjeta, Texto, spacing, useAviso,
 } from '@epetplace/ui';
-import { listarTarjetasGuardadas, type TarjetaGuardada } from '@epetplace/api';
-import { FilaDeUna, FilaMedioDePago } from '@/components/fila-medio-de-pago';
+import {
+  guardarMedioPagoPreferido, listarTarjetasGuardadas, obtenerPreferencias,
+  type TarjetaGuardada,
+} from '@epetplace/api';
+import {
+  DEUNA_ELEGIBLE, FilaDeUna, FilaMedioDePago, desempatarMedios,
+} from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
+/**
+ * 🔴 QUÉ ELIGIÓ LA FAMILIA — unión discriminada, y **ahora sí corresponde**.
+ *
+ * ⏪ Hasta hoy esto era `string | null` (el id de una tarjeta) y **estaba
+ * bien**: mientras DeUna no se pudiera elegir, una unión habría sido un modelo
+ * de datos para un caso que no podía ocurrir. **Lo que cambió es la firma del
+ * founder**: DeUna es el default, así que *«qué eligió»* ya tiene **dos
+ * clases** y un id de tarjeta no puede expresar la segunda.
+ *
+ * *Es la misma razón por la que A hizo DOS columnas y no una FK: **DeUna no es
+ * una tarjeta** — no tiene alta, no tiene token, no tiene fila.*
+ */
+export type MedioElegido =
+  | { tipo: 'tarjeta'; id: string }
+  | { tipo: 'deuna' };
+
 export type MedioDePago = {
   medios: TarjetaGuardada[];
-  elegido: string | null;
+  elegido: MedioElegido | null;
+  /**
+   * El id de tarjeta, **solo si lo elegido es una tarjeta**. Es lo que la
+   * puerta de cobro de hoy sabe recibir. *Con DeUna vale `null` y el botón de
+   * pagar se apaga: su puerta es de D y todavía no existe.*
+   */
+  idTarjeta: string | null;
   eligiendo: boolean;
+  /** 🔴 Por qué el default NO pudo ser DeUna. `null` = no hay nada que decir. */
+  vozDefault: string | null;
   abrirEleccion: () => void;
   cerrarEleccion: () => void;
-  elegir: (id: string) => void;
+  elegir: (m: MedioElegido) => void;
   agregar: () => Promise<void>;
   releer: () => Promise<void>;
 };
@@ -70,18 +99,64 @@ export function useMedioDePago(activo: boolean): MedioDePago {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
-  const [elegido, setElegido] = useState<string | null>(null);
+  const [elegido, setElegido] = useState<MedioElegido | null>(null);
   const [eligiendo, setEligiendo] = useState(false);
+  const [vozDefault, setVozDefault] = useState<string | null>(null);
 
   const releer = useCallback(async () => {
-    const r = await listarTarjetasGuardadas();
-    if (!r.ok) return;
-    setMedios(r.data);
-    /* 🔴 Preselección **solo cuando hay UNA**: con una sola tarjeta preguntar
-       es fricción sin decisión. Con dos o más **no se elige por la familia** —
-       ése era el andamio que la Fase 5 vino a matar. */
-    setElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
-  }, []);
+    /* Las dos lecturas van en paralelo: **la preferencia no depende de las
+       tarjetas y las tarjetas no dependen de la preferencia.** Encadenarlas
+       pagaría dos peajes de red por un dato que no se necesitan entre sí
+       (L-223: el costo está en el viaje, no en la consulta). */
+    const [rTarjetas, rPref] = await Promise.all([
+      listarTarjetasGuardadas(),
+      obtenerPreferencias(),
+    ]);
+    if (!rTarjetas.ok) return;
+    setMedios(rTarjetas.data);
+
+    /* 🔴 UNA PREFERENCIA QUE NO SE PUDO LEER **NO ES «nunca eligió»**. Si la
+       lectura falla, no se aplica ningún default: *pisar la elección de la
+       familia por un error de red es exactamente el «reset por compra» que la
+       firma prohíbe, con otra causa.* */
+    const pref = rPref.ok ? rPref.data.medioPago : undefined;
+
+    setElegido((prev) => {
+      if (prev !== null) return prev;                    // ya eligió en esta pantalla
+      if (pref === undefined) return null;               // no sabemos: no inventamos
+
+      /* ── ① LA ELECCIÓN PREVIA GANA SOBRE EL DEFAULT ──────────────────────
+         Firma del founder: *«por defecto a menos que el usuario lo cambie»*.
+         **El default es para quien no eligió nunca, no un reset por compra.** */
+      if (pref.medio === 'deuna') {
+        if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
+        /* Eligió DeUna y hoy no se puede: **se dice, no se cambia en
+           silencio** (borde 1 de la firma). Y NO se cae a una tarjeta
+           cualquiera — eso sería `medios[0]`, el andamio que la Fase 5 mató. */
+        setVozDefault(t('pago.deunaNoDisponibleAhora'));
+        return null;
+      }
+      if (pref.medio === 'tarjeta' && pref.tarjetaId !== null) {
+        /* La tarjeta preferida **puede haber sido borrada**: el trigger de A
+           limpia la preferencia, pero esta pantalla pudo leerla antes. Se
+           verifica contra la lista viva. */
+        const vive = rTarjetas.data.some((m) => m.id === pref.tarjetaId);
+        if (vive) return { tipo: 'tarjeta', id: pref.tarjetaId };
+      }
+
+      /* ── ② NUNCA ELIGIÓ (`null`) ⇒ RIGE EL DEFAULT ───────────────────────── */
+      if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
+
+      /* Borde 1 vigente: DeUna todavía no se puede elegir ⇒ **el default cae a
+         tarjeta y la pantalla lo DICE**. La regla vieja sigue rigiendo debajo:
+         con UNA sola tarjeta se preselecciona (preguntar sería fricción sin
+         decisión); **con dos o más NO se elige por la familia**. */
+      setVozDefault(t('pago.deunaNoDisponibleAhora'));
+      return rTarjetas.data.length === 1
+        ? { tipo: 'tarjeta', id: rTarjetas.data[0].id }
+        : null;
+    });
+  }, [t]);
 
   useEffect(() => {
     if (activo) void releer();
@@ -98,12 +173,36 @@ export function useMedioDePago(activo: boolean): MedioDePago {
     await releer();
   }, [mostrar, t, releer]);
 
+  /**
+   * Elegir **también RECUERDA** — es la mitad que hace cierta la firma: sin
+   * persistir, «salvo que el cliente haya elegido antes» no tendría de dónde
+   * saberlo en la próxima compra.
+   *
+   * 🔴 **La pantalla no espera al guardado ni lo dibuja.** La elección es
+   * local e inmediata; recordarla es un efecto. *Bloquear la compra porque una
+   * preferencia no se guardó sería castigar a la familia por un lujo nuestro.*
+   * Si falla, el cobro sigue con lo elegido y la próxima vez vuelve a preguntar.
+   */
+  const elegir = useCallback((m: MedioElegido) => {
+    setElegido(m);
+    setEligiendo(false);
+    setVozDefault(null);   // eligió: ya no hay default que explicar
+    void guardarMedioPagoPreferido(
+      m.tipo === 'deuna' ? { medio: 'deuna' } : { medio: 'tarjeta', tarjetaId: m.id },
+    );
+  }, []);
+
   return {
-    medios, elegido, eligiendo,
+    medios,
+    elegido,
+    idTarjeta: elegido?.tipo === 'tarjeta' ? elegido.id : null,
+    eligiendo,
+    vozDefault,
     abrirEleccion: () => setEligiendo(true),
     cerrarEleccion: () => setEligiendo(false),
-    elegir: (id: string) => { setElegido(id); setEligiendo(false); },
-    agregar, releer,
+    elegir,
+    agregar,
+    releer,
   };
 }
 
@@ -127,12 +226,22 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
                 onPress={() => void medio.agregar()}
               />
             </>
+          ) : elegido?.tipo === 'deuna' ? (
+            /* La elegida es DeUna: **no hay tarjeta que dibujar** — no tiene
+               marca, ni últimos 4, ni alias. Su fila es la suya. */
+            <Celda
+              titulo={t('pago.deunaFila')}
+              interactiva
+              accessibilityRole="button"
+              onPress={medio.abrirEleccion}
+              fin={<Texto variante="dato">{t('pago.medioCambiar')}</Texto>}
+            />
           ) : elegido !== null ? (
             /* ③ HAY UNA ELEGIDA: se muestra, **«Cambiar» significa cambiar**, y
                `BotonPagar` está habilitado — *se paga directo, sin entrar a
                ningún lado.* (Corrección del founder, 21-ago.) */
             <FilaMedioDePago
-              tarjeta={medios.find((m) => m.id === elegido)!}
+              tarjeta={medios.find((m) => m.id === elegido.id)!}
               zonaFin="cambiar"
               onPress={medio.abrirEleccion}
             />
@@ -173,6 +282,14 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
               fin={<Chevron direccion="derecha" />}
             />
           )}
+
+          {/* 🔴 EL DEFAULT NUNCA CAMBIA EN SILENCIO (borde de la firma):
+              cuando DeUna no pudo ser el default, la pantalla DICE por qué.
+              *Un default que se corre sin avisar convierte una decisión de la
+              casa en una sorpresa de la familia.* */}
+          {medio.vozDefault !== null ? (
+            <Texto variante="apoyo">{medio.vozDefault}</Texto>
+          ) : null}
         </View>
       </Tarjeta>
 
@@ -184,25 +301,36 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
         titulo={t('pago.comoPagas')}
       >
         <View style={{ gap: spacing[2] }}>
-          {medios.map((m) => (
-            <FilaMedioDePago
-              key={m.id}
-              tarjeta={m}
-              zonaFin="camino"
-              onPress={() => medio.elegir(m.id)}
-            />
-          ))}
-          {/* 🔴 S103-C · DEUNA ES UNA FILA MÁS — y por eso esta sección se
-              llama «cómo quieres pagar» y no «tus tarjetas»
-              (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤).
+          {/* 🔴 REGLA 1 DE LA FIRMA (founder, 22-ago): **DeUna es SIEMPRE la
+              primera fila, sin condición.**
 
-              Va **debajo de las tarjetas y encima de «agregar»**: es un medio,
-              no una acción. *Ponerla al lado del botón de agregar la leería
-              como «agregar Deuna», que es exactamente lo que NO es — DeUna no
-              tiene alta ni token (`LETRA_DEUNA` §1).*
+              ⏪ Nació debajo de las tarjetas con el argumento de que «es un
+              medio, no una acción» — cierto, y **insuficiente**: el founder
+              firmó el ORDEN, no solo la pertenencia. *La regla vieja decía
+              dónde NO va (al lado de «agregar»); ésta dice dónde VA.*
 
-              Presente y no elegible: el porqué medido vive en `FilaDeUna`. */}
+              **Sin condición** quiere decir que **no se mueve cuando no es
+              elegible.** Una opción que cambia de lugar según su estado obliga
+              a buscarla, y el founder la puso primera para que no haya que
+              hacerlo. *Su estado lo dice su propia fila, no su posición.*
+
+              Y por esto la sección se llama «cómo quieres pagar» y no «tus
+              tarjetas» (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤). */}
           <FilaDeUna />
+          {/* El desempate se calcula UNA vez para toda la lista: la fila no
+              puede saber que tiene una gemela. */}
+          {(() => {
+            const desempates = desempatarMedios(medios);
+            return medios.map((m) => (
+              <FilaMedioDePago
+                key={m.id}
+                tarjeta={m}
+                zonaFin="camino"
+                desempate={desempates.get(m.id) ?? null}
+                onPress={() => medio.elegir({ tipo: 'tarjeta', id: m.id })}
+              />
+            ));
+          })()}
           <Boton
             variante="secundario"
             etiqueta={t('cuenta.medioAgregar')}
@@ -243,7 +371,16 @@ export function BotonPagar({
       etiqueta={t('pago.pagar')}
       bloque
       cargando={trabajando}
-      deshabilitado={deshabilitadoPorLaPantalla || medio.elegido === null}
+      /* 🔴 EL GATE MIRA `idTarjeta`, NO `elegido` — y la diferencia apareció
+         al montar el default.
+         Con DeUna elegido, `elegido` NO es null ⇒ con la condición vieja el
+         botón quedaba **habilitado sin poder cobrar**: `cobrar()` recibiría
+         `null` y fallaría contra el servidor. *Un botón que se deja tocar y
+         rebota es peor que uno apagado — la persona no sabe si pagó.*
+         ☠️ Cuando D entregue la puerta de DeUna, esta línea pasa a preguntar
+         «¿hay medio elegido Y su puerta existe?». **Hoy la única puerta viva
+         es la de tarjeta, y eso es lo que la condición dice.** */
+      deshabilitado={deshabilitadoPorLaPantalla || medio.idTarjeta === null}
       onPress={onPagar}
     />
   );
