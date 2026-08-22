@@ -3598,8 +3598,10 @@ function GaleriaInterna() {
                 : 'Sin `expo-clipboard` en este binario (llega con la próxima build, L-134): los botones se apagan solos.'}
             </Texto>
 
+            {/* CON glifo: es el caso que el founder firmó — se reconoce sin
+                leer, y acá la persona mira seis dígitos contra reloj. */}
             <CodigoAEscala etiqueta="Código para pagar en Deuna" codigo="482716" />
-            <BotonCopiar valor="482716" etiqueta="Copiar código" etiquetaCopiado="Copiado" />
+            <BotonCopiar valor="482716" etiqueta="Copiar código" etiquetaCopiado="Copiado" glifo />
 
             <Texto variante="apoyo">Vencido — apagado sereno, jamás en danger:</Texto>
             <BotonCopiar
