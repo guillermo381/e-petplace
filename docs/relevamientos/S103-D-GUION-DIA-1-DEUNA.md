@@ -7,6 +7,11 @@
 > **Precondición única:** `DEUNA_POINT_OF_SALE` en el keychain, cuenta
 > `epetplace`. Todo lo demás ya está.
 >
+> ⚠️ **REVISADO EL 22-ago CONTRA EL ESTADO REAL.** Este guion se escribió
+> cuando el riel era **sólo mediciones**. Hoy hay más piezas vivas y eso cambió
+> dos cosas — ver **§11**. *Un guion que envejeció en silencio se descubre el
+> día que se corre.*
+>
 > 🔴 **EL ORDEN NO ES SUGERENCIA.** El paso 1 puede **invalidar el diseño del
 > clasificador de fantasmas**. Si sale rojo, se para y se reordena — no se
 > sigue midiendo lo de abajo, porque lo de abajo se interpretaría con un
@@ -19,11 +24,11 @@
 ```bash
 security add-generic-password -s DEUNA_POINT_OF_SALE -a epetplace -w '<el POS>'
 cd <worktree>
-bash scripts/deuna/correr-tests.sh     # 45/45 antes de tocar la red
+bash scripts/deuna/correr-tests.sh     # 51/51 antes de tocar la red
 node scripts/deuna/sondeo-qa.mjs       # falla limpio si falta una llave
 ```
 
-**Control de arranque:** los 45 tests en verde **antes** de medir. *Si el
+**Control de arranque:** los 51 tests en verde **antes** de medir. *Si el
 código ya estaba roto, todo lo que la red conteste después se va a interpretar
 mal.*
 
@@ -199,7 +204,7 @@ transactionId · numericCode · qr · deeplink · expiredAt (?)
 
 | resultado | veredicto |
 |---|---|
-| viene `numericCode`, 6 dígitos | ✅ — **avisar a C en el momento**, es su desbloqueo |
+| viene `numericCode`, 6 dígitos | ✅ — **avisar a C igual**, aunque ya no la desbloquee: le CONFIRMA lo que construyó |
 | viene con **otro nombre** | 🟡 anotar el nombre real y corregir `pagos-deuna-solicitud` (una línea) + avisar a C |
 | **no viene** | 🔴 la firma ① no es construible como está — **es de la mesa, no de la pista** |
 
@@ -449,3 +454,79 @@ para que el ensayo pueda correr; si asumiera otra cosa, el ensayo correría
 igual.*
 
 ⇒ **El ensayo no reemplaza al día 1: lo prepara.**
+
+---
+
+## §11 · 🔴 LO QUE CAMBIÓ DESDE QUE ESTE GUION SE ESCRIBIÓ (revisado 22-ago)
+
+**Medido, no recordado:**
+
+| pieza | al escribir el guion | hoy |
+|---|---|---|
+| Actuador con rama DeUna | ❌ no existía | ✅ **aplicado y vivo** |
+| Wrapper `pagos-deuna.ts` | ❌ | ✅ **en `main`** |
+| Pantalla de espera de C | ❌ | ✅ **enchufada contra el contrato** |
+| Edge `pagos-deuna-solicitud` | escrita | **escrita y SIN DESPLEGAR** ← *sigue igual* |
+
+### ① El aviso a C cambió de naturaleza — y hay que decírselo distinto
+
+El guion decía *«avisar a C, es su desbloqueo»*. **Ya no la desbloquea: C
+construyó contra el contrato y su pantalla existe.**
+
+⇒ Lo que el paso 3 hace hoy es **confirmarle o desmentirle** lo que ya
+construyó. **El aviso sigue siendo urgente, por la razón inversa:** si el campo
+se llama distinto, C tiene código escrito contra un nombre equivocado, y eso es
+peor que estar esperando.
+
+### ② 🔴 EL DÍA 1 YA NO TERMINA EN MEDICIONES — puede haber CIRCUITO
+
+Cuando escribí esto, medir el API era todo lo que se podía hacer. **Hoy, con el
+actuador vivo, el wrapper en `main` y la pantalla enchufada, falta UNA cosa para
+que el circuito exista de punta a punta: desplegar la puerta.**
+
+⇒ **Nace el `PASO 8` (abajo).** *No estaba antes porque era imposible; hoy es lo
+único que separa «medimos el API» de «cobramos».*
+
+---
+
+## §12 · PASO 8 — EL CIRCUITO REAL *(nuevo, 22-ago)*
+
+⚠️ **PRECONDICIÓN: desplegar `pagos-deuna-solicitud`** — y eso **pide
+autorización del founder por tanda**. Sin ese deploy no hay paso 8.
+
+⚠️ **Y una segunda: el webhook.** Si su alta no está hecha (depende de soporte,
+pregunta #3), **el pago se confirma por BARRIDO y no por webhook** — más lento,
+pero funciona. *Se declara para que nadie lea la demora como una falla.*
+
+### El recorrido
+
+1. La familia elige **Deuna** en «Cómo quieres pagar».
+2. La pantalla muestra **el código de 6 dígitos** con su cuenta regresiva.
+3. Se paga **de verdad** en la app Deuna de QA.
+4. **La pantalla pasa sola a pagada.**
+5. Llega el **comprobante** con `transactionId` + `transferNumber`.
+
+### 🔴 El discriminador — y no es que la pantalla cambie
+
+**La verdad la da `payment/info`, no el webhook ni la pantalla.** Antes de
+cantar victoria:
+
+```sql
+select estado, proveedor_transaction_id, transfer_number, hallazgo
+  from pagos_intentos where referencia_corta = '<la del intento>';
+select resultado, detalle from webhook_events
+ where proveedor='deuna' order by recibido_en desc limit 3;
+```
+
+**Verde exige las tres:** el intento en `aprobado` · el evento con
+`verificado=si` en su detalle · el sujeto pagado.
+*Una pantalla que dice «pagado» sin esas tres filas es una pantalla que se
+adelantó.*
+
+### Lo que este paso puede destapar y los anteriores no
+
+- **El actuador ignorando el evento en silencio** — el modo de falla que `L-318`
+  nombra. Sólo se ve mirando el sujeto, no la pantalla.
+- **El comprobante sin `transferNumber`** (§3.6 lo exige por nombre).
+- **La voz de `cita_no_existe` diciendo «compra»** — ver el hallazgo del cruce
+  con C, si el gate se corre sobre una cita.
