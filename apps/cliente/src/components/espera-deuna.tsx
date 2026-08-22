@@ -82,6 +82,27 @@
  *   entonces el código **se copia a mano**, que es para lo que sigue siendo
  *   `seleccionable`.
  *
+ * 🔒 **GATE DIFERIDO CON DISPARO EXPLÍCITO** (dictamen del founder, 22-ago):
+ * el **pegado real con la pieza de B** se verifica en **la próxima build
+ * nativa**. **No se simula y no se cuenta como verde.** *Lo que sí quedó
+ * probado hoy, y conviene no confundirlo: que la pieza **nace apagada** de
+ * verdad —cero píxeles cambiaron al tocarla— y que **el pegado real
+ * funciona**, medido esta mañana con el `Clipboard` del core (`654321`, con
+ * discriminador contra el `123456` previo). **Lo que falta no es «si se puede
+ * copiar»: es «si copia la pieza».***
+ *
+ * ── 📐 EL ANCHO DE LA FILA — medido de dos capturas reales, no estimado ───
+ *
+ * Con **«Copiar código»** el botón es más ancho y **el código se comprime
+ * hacia la izquierda, pero ENTRA**: los seis dígitos se dibujan completos en
+ * la misma fila, sin truncar ni envolver. Comparado contra **«Copiar»**, el
+ * código gana ~60 px de caja.
+ *
+ * ⇒ **Entra, y el founder tiene el dato para decidir si el costo le gusta**
+ * (`scripts/capturas/s103-c-deuna-copiar-codigo.png` vs `…-copiar-corto.png`).
+ * *Se declara en vez de resolverse acá: la letra dijo «si el ancho no entra,
+ * declaralo» — entra, y aun así el trade-off es visible y es de mesa.*
+ *
  * ═══ 🔴 ENCHUFE PENDIENTE CON NOMBRE ══════════════════════════════════════
  * **Esta pieza todavía NO tiene consumidor, y es deliberado.** `numericCode` y
  * su vencimiento salen de un `payment/request` exitoso, **bloqueado por el
@@ -267,19 +288,22 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
             solo-baja (38 hoy, baseline 39). *Montar el default habría subido
             el contador y puesto en rojo a un juez de la casa.* → reportado a B.
 
-            **`glifo`: encendido.** B lo dejó opt-in porque *«un botón de
-            copiar solo al pie de un código no tiene hermanos de los que
-            distinguirse»* — y su prop existe justamente para que **la
-            pantalla**, que es la única que ve la vecindad, decida. **El
-            founder lo pidió explícitamente para esta pantalla.** ⚠️ Su lectura
-            y la de B difieren: se declara para la mesa, no se resuelve acá.
+            **`glifo`: encendido, con el argumento CORREGIDO por el founder.**
+            B lo dejó opt-in porque *«un botón de copiar solo al pie de un
+            código no tiene hermanos de los que distinguirse»* — **y eso sigue
+            siendo cierto: acá el glifo NO distingue de vecinos.** Lo que el
+            founder agregó es otra razón, que la regla de B no contemplaba:
+            **es reconocible sin leer, con el reloj corriendo.**
+            *La vecindad no es el único motivo por el que un glifo gana su
+            lugar; la prisa también.* ⇒ **no es una excepción a su ley: es un
+            caso que su ley no cubría**, y por eso su prop —que delega en la
+            pantalla— fue el mecanismo correcto.
 
-            **La etiqueta accesible ES la visible** (contrato de B), y por eso
-            **murió `deunaCopiarA11y`** — una prop de label aparte deja dos
-            nodos `role="button"` anidados y un lector anuncia dos controles.
-            ⚠️ El founder firmó **«Copiar» a secas**: el glifo y el código al
-            lado lo explican a la vista, **y el lector de pantalla pierde el
-            objeto**. *El costo está escrito en la voz, y es de la mesa.*
+            **La etiqueta visible ES el nombre accesible** (contrato de B), y
+            por eso murió `deunaCopiarA11y`. **Dictamen del founder: la visible
+            dice el objeto** — *«la salida no es romper la pieza: es que la
+            visible diga el objeto, así dice lo mismo para quien ve y para
+            quien escucha»*. **Una sola cadena, los dos canales, sin costo.**
 
             **`vencido` es defensa en profundidad:** en esta rama el reloj
             siempre es > 0 (si no, el early-return de arriba ya se llevó el

@@ -1296,7 +1296,7 @@ export const clienteEn = {
     deunaEsperaTitulo: 'Enter this code in your Deuna app',
     deunaEsperaCuerpo: 'Open your Deuna app, enter the code and confirm the payment.',
     deunaCodigoVence: 'The code expires in {{tiempo}}',
-    deunaCopiar: 'Copy',
+    deunaCopiar: 'Copy code',
     deunaCopiado: 'Code copied',
     deunaCodigoVencido: 'The code expired.',
     deunaCodigoNuevo: 'Get a new code',

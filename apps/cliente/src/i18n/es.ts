@@ -1576,18 +1576,20 @@ export const clienteEs = {
     /* 🔴 «vence en», jamás «faltan»: lo que se acaba es el CÓDIGO, no el
        pedido. *Un reloj sin sujeto hace pensar que se pierde la compra.* */
     deunaCodigoVence: 'El código vence en {{tiempo}}',
-    /* «Copiar» a secas — **firma del founder, 22-ago** («solo deja la palabra
-       copiar»). El glifo de dos hojas ya dice de qué se trata y el código está
-       al lado.
+    /* 🔴 «Copiar código» — **dictamen del founder, 22-ago**, que corrige su
+       propia instrucción anterior («solo deja la palabra copiar») **y llega a
+       la salida buena por el camino correcto**:
 
-       ⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO:** por contrato de `BotonCopiar`
-       la etiqueta visible **es también el nombre accesible**, y ese contrato
-       **prohíbe** una prop de label aparte (dos nodos `role="button"` anidados
-       ⇒ un lector anuncia dos controles). ⇒ **quien no ve la pantalla ahora
-       escucha «Copiar» sin el objeto.** *No hay forma de dar las dos cosas sin
-       romper el contrato de la pieza: se elige, y acá eligió el founder.*
-       → reportado a B, que es la dueña del contrato. */
-    deunaCopiar: 'Copiar',
+       > *la visible ES el nombre accesible, así que la salida no es romper la
+       > pieza pidiendo una etiqueta aparte: es que la visible diga el objeto.*
+
+       ⇒ **una sola cadena dice lo mismo a quien ve y a quien escucha.**
+       ⏪ Pasó por «Copiar código» → «Copiar» → «Copiar código». *La primera y
+       la última se ven iguales y NO lo son: la primera era mi lectura del
+       contrato, la última es la firma del founder con el argumento resuelto.
+       Se deja escrito para que nadie la «simplifique» de nuevo creyendo que
+       ahorra ancho — el ancho ya se midió (ver la nota del componente).* */
+    deunaCopiar: 'Copiar código',
     deunaCopiado: 'Código copiado',
     deunaCodigoVencido: 'El código venció.',
     deunaCodigoNuevo: 'Generar un código nuevo',
