@@ -70,6 +70,7 @@ import { CELDA_DE_GRILLA, GRILLA_DE_DOS } from '../components/grilla-de-dos'
 import { FilaEntrega } from '../components/FilaEntrega'
 import { AvisoAlergia } from '../components/AvisoAlergia'
 import { CodigoAEscala } from '../components/CodigoAEscala'
+import { BotonCopiar, HAY_PORTAPAPELES } from '../components/BotonCopiar'
 import { BuscadorDeLugar } from '../components/BuscadorDeLugar'
 import { PinMovible } from '../components/PinMovible'
 import { SelectorVentana } from '../components/SelectorVentana'
@@ -3534,6 +3535,44 @@ function GaleriaInterna() {
               expira="Vence el 10 de noviembre"
             />
             <CodigoAEscala etiqueta="Con separadores del emisor" codigo="8765-4321" />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="BotonCopiar (S103) — un toque copia, y el botón mismo lo confirma">
+          {/* Vive al lado de `CodigoAEscala` a propósito: su consumidor es
+              el código de 6 dígitos de DeUna, y la galería debería
+              mostrarlos juntos como se van a ver.
+
+              ⚠️ SIN `expo-clipboard` en el binario, los tres salen
+              APAGADOS — y eso ES la muestra: la pieza degrada honesta en
+              vez de romper. El estado del módulo se dice acá arriba para
+              que nadie lea el apagado como un defecto de la galería. */}
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">
+              {HAY_PORTAPAPELES
+                ? 'Módulo de portapapeles presente: los botones copian de verdad.'
+                : 'Sin `expo-clipboard` en este binario (llega con la próxima build, L-134): los botones se apagan solos.'}
+            </Texto>
+
+            <CodigoAEscala etiqueta="Código para pagar en Deuna" codigo="482716" />
+            <BotonCopiar valor="482716" etiqueta="Copiar código" etiquetaCopiado="Copiado" />
+
+            <Texto variante="apoyo">Vencido — apagado sereno, jamás en danger:</Texto>
+            <BotonCopiar
+              valor="482716"
+              etiqueta="Copiar código"
+              etiquetaCopiado="Copiado"
+              vencido
+              razonVencido="El código venció. Generá uno nuevo para copiarlo."
+            />
+
+            <Texto variante="apoyo">A ancho completo, para pie de pantalla:</Texto>
+            <BotonCopiar
+              valor="482716"
+              etiqueta="Copiar código"
+              etiquetaCopiado="Copiado"
+              bloque
+            />
           </View>
         </Seccion>
 
