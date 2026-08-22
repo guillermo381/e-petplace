@@ -18765,6 +18765,9 @@ suma existe para la tercera cosa que quiera entrar.
 - **L-319** — **EL ARTEFACTO NO ES LA MATERIA PRIMA.** El `stoken` se buscó durante horas probando ~200.000 recetas de hash sobre la familia equivocada, porque se asumió que era un digest de una cadena. **Era un HMAC** — y la diferencia no es de algoritmo: es que **la clave entra por otro lado**. *Ninguna cantidad de fuerza bruta sobre la familia equivocada encuentra la respuesta, y el fracaso se lee como «me falta un ingrediente» en vez de «estoy en la familia equivocada».* ⇒ Antes de barrer combinaciones se pregunta **de qué CLASE es el artefacto**; y cuando el tercero puede contestarlo, **se pregunta**: el correo a Erick costó un día y la fuerza bruta no habría terminado nunca. Origen: S101-B.
 
 - **L-318** — **MOTOR SIN PUERTA: LAS CUATRO APARICIONES DEL MISMO DÍA, Y LA VARIANTE QUE NO TIENE SÍNTOMA.** La pieza estaba bien construida, probada… y desconectada del único lugar donde su resultado importa. **Apareció cuatro veces en una sesión, una capa más arriba cada vez:** ① el actuador construido y nunca llamado desde el webhook · ② el arnés llamándolo directo, salteando el productor real · ③ `useEsperaDeConfirmacion` llamado y **su resultado nunca leído** (la compra quedó `pagada` a los 34 s y la pantalla decía «Estamos confirmando» a los 78) · ④ el constructor de filas del comprobante, escrito y jamás insertado en la plantilla. **🔴 Y su variante MÁS GRAVE, que es de otra clase: el actuador que recibe un sujeto que no conoce y LO IGNORA.** *No falla: no hace nada.* No hubo error, ni log, ni síntoma — hubo **silencio con cara de normalidad**. ⇒ **Toda pieza nueva se prueba desde su CONSUMIDOR REAL**, y **agregar un sujeto obliga a censar todos los consumidores del evento**, no solo la puerta. Origen: S101-B/C.
+  - **🔴 ENMIENDA S103-A (founder, 22-ago-2026) — LA QUINTA APARICIÓN, Y ES SOBRE UNA FIRMA DEL FOUNDER, NO SOBRE UN MOTOR.** `promesaPorVendedor` se construyó **precisamente para cumplir una firma** —*«decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es información»*, 18-ago-2026, escrita en la cabecera de la propia pieza— y al medirla cuatro días después tenía **CERO consumidores en `apps/`** (grep con control positivo: `calcularPromesaDespensa` sí aparece). **El síntoma que el founder caminó —el camino de envío a domicilio cerrado— ES esa firma sin cablear.**
+  > ### **Una pieza construida para cumplir una firma, sin consumidores, ES LA FIRMA SIN CABLEAR.**
+  **Y la ley de método que la mesa deposita con ella, que es lo que la vuelve útil hacia adelante:** *el censo de consumidores no es solo para jubilar código viejo — **también dice si lo nuevo llegó a alguien**.* **Se corre en las dos direcciones: hacia atrás para saber qué murió, hacia adelante para saber qué nació y no llegó.** *La casa venía usando ese censo solo como podadora; en esta aplicación fue el único instrumento que podía distinguir «la firma no se cumplió» de «la firma se cumplió en un archivo que nadie importa».*
 
 - **L-317** — **UN REEMPLAZO SE MIDE DESDE EL CONSUMIDOR QUE VA A REEMPLAZAR, JAMÁS DESDE UN ARNÉS.** S101-C abrió con la orden firmada *«REVOKE con el reemplazo funcionando»* y con la evidencia en la mano: la noche anterior un paseo real se había cobrado por la puerta nueva, punta a punta, con su comprobante. **Y el reemplazo NO estaba listo:** `components/checkout-reserva.tsx` —la pieza única que montan **los cuatro oficios**— seguía llamando a la RPC vieja. *El arnés había estrenado la puerta nueva y dejado la vieja en uso, y las dos cosas son ciertas a la vez sin contradecirse: por eso no hay síntoma.* **Revocar ahí habría dejado a paseo, grooming, veterinaria y adiestramiento sin poder reservar — con la ficha diciendo «cerrada».** ⇒ **Un productor probado solo por su arnés está probado como productor, no como reemplazo:** el arnés demuestra que la puerta nueva ABRE, jamás que la vieja dejó de usarse. **Lo segundo es un censo de consumidores, y es lo único que autoriza cerrar la vieja.** **Corolario mecánico, aplicado en la misma migración:** *cuando el orden importa, se escribe como CINTURÓN y no como nota* — la del `REVOKE` verifica que el reemplazo esté en pie y **aborta con el agujero todavía cerrado** si falta algo, porque *una precondición que vive en un comentario se cumple mientras alguien la lea.* Hermana de la ley del motor sin puerta, del otro lado: ahí faltaba el consumidor; acá **sobraba el viejo**. Origen: S101-C, el enchufe de los cuatro oficios.
 
@@ -18952,8 +18955,80 @@ de al final. *No hay que construir nada: hay que conectar lo construido.*
 cerrado hoy y cuesta una fila; (b) porque sin ella la ficha vuelve sola.
 **Y (b) NO es de A: es superficie de la despensa** ⇒ dueño natural **C**.
 
-**Lo que queda 🔴 hasta que la mesa firme.** *Lo que deja de ser rojo es el
-diagnóstico: la causa está medida y las curas nombradas.*
+---
+
+## ✅ FIRMA DE LA MESA — founder, 22-ago-2026. **LAS DOS, EN ESE ORDEN.**
+
+**(a) FIRMADA — y con su etiqueta puesta por orden expresa del founder:
+DESTRABA HOY Y NO CIERRA LA CLASE.** *«Anotalo así, para que nadie lo lea como
+cura.»* O `Clínica Aurora` declara sus cortes, o **sus 18 ofertas salen de la
+vitrina**. **Es un movimiento de DATO, no una cura** — el próximo vendedor sin
+cortes repite el defecto entero, y quien cierre la ficha con esto la va a ver
+volver.
+
+**(b) FIRMADA — enchufar `promesaPorVendedor` en vitrina y ficha. DUEÑO: C**
+(es superficie). **Y se le pasa citando la cabecera de la propia pieza**, que es
+donde la firma ya estaba escrita:
+
+> *«Decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es información,
+> y la persona todavía puede elegir.»* — **firma del founder, 18-ago-2026**
+
+**Esa firma existía y nunca se cableó: el síntoma ES la firma sin consumidor.**
+
+**(c) NACE `D-873`** — la clase que sale de este diagnóstico. Ver su ficha.
+
+**La ficha queda 🔴 hasta que (a) y (b) estén ejecutadas.** *Lo que dejó de ser
+rojo es el diagnóstico: la causa está medida, las curas nombradas y firmadas.*
+
+---
+
+### D-873 🔴 · SE PUEDE TENER CAMIÓN Y NO TENER HORARIO: NADA ATA EL RECURSO DE REPARTO CON LOS CORTES DE ENTREGA
+
+🔴 **ALTA. Abierta por orden de la mesa** (founder, 22-ago-2026) sobre el
+diagnóstico de `D-872`: *«es de clase, no de caso».* **Dueño de la decisión: la
+mesa. Dueño de la medición: A — ejecutada, abajo.**
+
+**LA CLASE, en una línea:** `recursos_reparto` y `entrega_turnos` son **dos
+tablas y nada las ata**. Un vendedor puede tener **veinte unidades de capacidad
+de reparto y cero cortes declarados** — y **publicar 18 productos que el motor
+ya sabe que no puede entregar.** *No es una inconsistencia de datos: es un
+estado que el modelo permite expresar.*
+
+**LO QUE EXISTE HOY, medido contra la base (22-ago) — y la respuesta es
+NINGUNO DE LOS DOS:**
+
+| pieza | ¿mira los cortes? |
+|---|---|
+| `publicar_oferta_sku(uuid,numeric,text)` — **la única puerta de publicación** | **NO** — cero menciones de `entrega_turnos` en su cuerpo |
+| `v_vitrina_publicada` — **la vista de la vitrina** | **NO** — cero menciones en su definición |
+
+**Control positivo del censo:** `entrega_turnos` **sí** se nombra en **3**
+funciones de la base ⇒ *la búsqueda encuentra lo que hay; lo que no hay es el
+gate.* **Ni la publicación lo impide ni la vitrina lo filtra.**
+
+**LAS DOS SALIDAS, y la mesa elige — no son equivalentes:**
+
+**① EN LA PUERTA** — `publicar_oferta_sku` **impide o advierte** publicar sin
+cortes declarados. *Ventaja: el vendedor se entera cuando puede arreglarlo, en
+su panel.* **Riesgo declarado: impedir la publicación es más duro que lo que la
+letra dice hoy** —`MODELO_DESPENSA` §2.1 dice que **el vendedor se configura
+solo**—, así que **«impedir» exige enmienda de letra y «advertir» no.**
+
+**② EN LA VITRINA** — la vista **filtra por promesa viva**. *Ventaja: cierra la
+clase sin tocar la letra del panel.* **Riesgo declarado: esconde producto sin
+decirle al vendedor por qué**, y eso es exactamente lo que `D-872` cobró del
+otro lado — *un vendedor que no entiende por qué no vende es el espejo de una
+familia que no entiende por qué no puede comprar.*
+
+**Voto de A: ① en su forma de ADVERTIR, no de impedir** — porque respeta
+`§2.1` sin enmienda, porque avisa **donde se puede arreglar**, y porque **②
+sola dejaría al vendedor a ciegas**. *Y ninguna de las dos reemplaza a `(b)` de
+`D-872`: decirlo en la vitrina sigue siendo necesario para la familia que ya
+tiene el producto en la mano.*
+
+**Disparo: antes del soft launch de la despensa.** *Hoy vive con datos de
+prueba; el día que un vendedor real publique sin cortes, la familia paga el
+descubrimiento en el último paso del checkout.*
 
 ---
 
