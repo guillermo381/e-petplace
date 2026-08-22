@@ -311,6 +311,40 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
   // superficie real del chip (card en claro, elevated en dark). Los
+  /* S103-B · LA PATA DE `SelectorSegmentado` — el ÚNICO otro caso de la
+     clase que destapó el par del CTA, y salió de un censo, no de una
+     corazonada.
+
+     **El censo:** de los **10 slots que cambian entre la casa del cliente
+     y la del oficio**, el gate medía resueltos 5; de los otros cinco,
+     `ctaElevado` es un BOOLEANO (no hay par posible), `controlBg` sí
+     estaba medido —mi primer chequeo dio falso positivo por buscar
+     `t.accent.controlBg` cuando entra por una expresión guardada—, y
+     `atmosfera` es un lavado de fondo con `aria-hidden` (no tiene primer
+     plano: un gate de contraste no puede juzgarlo).
+
+     ⇒ **queda ÉSTE.** `SelectorSegmentado` tenía su par de TEXTO medido
+     (`text.primary` sobre la superficie activa) y **la PATA no**, aunque
+     `accent.marcaEleccion` resuelve por casa: magenta en el cliente, teal
+     en el prestador. *El gate hablaba del texto del segmento elegido y
+     callaba sobre la marca que dice CUÁL está elegido.*
+
+     **Piso 3 y no 4.5:** la pata es GRÁFICA — el marcador de la elección,
+     no texto. Mismo criterio que el disco de `BarraTabs`.
+
+     ⚠️ **La superficie se COMPOSITA, y no es prolijidad:** en memorial
+     `border.default` es un rgba, así que medir contra él directo daba
+     **NaN** — un par que no se puede evaluar, o sea un verde que no
+     significa nada. Va sobre `bg.hundido`, el riel donde la pieza lo
+     pinta. */
+  add(
+    'SelectorSegmentado: la PATA / superficie activa⊕riel',
+    t.accent.marcaEleccion,
+    t.mode === 'light' ? t.bg.card : t.border.default,
+    t.bg.hundido,
+    3,
+  )
+
   /* S103-B · LA CAJA DEL NÚMERO SOBRE EL BLOQUE LLENO (`StepperCantidad`
      en `tamano="ancho"` — la grilla de la despensa).
      🔴 **Se declara porque el contorno de ese campo ES esta tinta**, y el
