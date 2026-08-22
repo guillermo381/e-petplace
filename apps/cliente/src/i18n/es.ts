@@ -1928,7 +1928,7 @@ export const clienteEs = {
     metodoDespacho: 'Envío a domicilio',
     metodoRetiro: 'Retiro en tienda',
     retiroDetalle:
-      'Lo retirás en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
+      'Lo retiras en el local del vendedor. Cuando esté listo, vas a tener un código para mostrar en el mostrador.',
     aDonde: 'A dónde te lo llevamos',
     sinDireccion: 'Todavía no nos contaste tu dirección.',
     agregarDireccion: 'Agregar mi dirección',
@@ -1954,6 +1954,19 @@ export const clienteEs = {
     promesaFallo: 'No pudimos calcular la ventana de entrega. Prueba de nuevo.',
     promesaVentana: 'Te llega el {{dia}}, entre {{desde}} y {{hasta}}.',
     saltoPorCupo: 'El día más cercano estaba completo, así que la entrega corrió al siguiente con lugar.',
+    // 🔴 D-872 (b) · LAS DOS CAUSAS QUE `saltoPorCupo` NO PUEDE DECIR.
+    // `saltoPorCupo` afirma ESCASEZ. El motor distingue `sin_operacion`
+    // (ese día el vendedor no reparte: domingo, feriado propio) de
+    // `cupo_lleno`, y son cosas distintas para quien decide comprar.
+    saltoPorSinOperacion:
+      'El día más cercano el vendedor no reparte, así que la entrega pasa al siguiente día que sí.',
+    // Para `mixto` y para `null` (motor viejo o valor desconocido): dice que
+    // la entrega corrió SIN afirmar por qué. Fail-closed de significado.
+    saltoSinCausa:
+      'El día más cercano no estaba disponible, así que la entrega pasa al siguiente con lugar.',
+    // La ley de la firma: qué NO se puede, qué SÍ, y termina en pregunta.
+    promesaFichaSinEntrega:
+      'Este vendedor no hace entregas a domicilio por ahora. Puedes retirar tu pedido en la tienda, ¿te sirve así?',
     // S100 · F5: la división se declara ANTES de pagar. La voz dice lo
     // CONCRETO —cuántas entregas y qué va en cada una—, no el hecho abstracto:
     // que llegue en partes no molesta; que llegue una parte cuando esperabas

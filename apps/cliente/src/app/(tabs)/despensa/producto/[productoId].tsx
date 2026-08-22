@@ -84,16 +84,23 @@ import {
   usePresionado,
   useTheme,
 } from '@epetplace/ui';
-import { precioPorKg, MONEDA_FALLBACK, type IdiomaSoportado } from '@epetplace/i18n';
+import {
+  precioPorKg,
+  fechaDiaSemanaHumana,
+  MONEDA_FALLBACK,
+  type IdiomaSoportado,
+} from '@epetplace/i18n';
 import {
   expandirAlergenosAVigilar,
   listarAlergenos,
   obtenerFichaProducto,
   obtenerPerfilMascota,
   maximoComprableDeOfertas,
+  promesaPorVendedor,
   registrarEntendimientoAlergia,
   type AlergenoVigilado,
   type FichaProducto,
+  type PromesaDeVendedor,
   type VarianteDeProducto,
 } from '@epetplace/api';
 import { LienzoProducto } from '@/components/despensa-piezas';
@@ -294,6 +301,20 @@ export default function DespensaProducto() {
   /** A-01(b): la consulta del máximo está en vuelo. Bloquea el doble toque —
    *  sin esto, dos toques rápidos agregan dos veces mientras se pregunta. */
   const [consultandoMaximo, setConsultandoMaximo] = useState(false);
+  /**
+   * 🔴 D-872 (b) · LA PROMESA DE ENTREGA, DICHA ANTES DE COMPRAR.
+   *
+   * Firma del founder (18-ago): *decirlo DESPUÉS de comprar es una
+   * disculpa; decirlo ANTES es información, y la persona todavía puede
+   * elegir.* Hasta hoy la promesa nacía en el checkout — o sea **después
+   * de elegir dirección, receptor y teléfono**: el peor momento posible
+   * para enterarse de que el vendedor no entrega.
+   *
+   * `null` = todavía no se pidió · `'cargando'` · mapa cuenta → promesa.
+   */
+  const [promesas, setPromesas] = useState<'cargando' | Map<string, PromesaDeVendedor> | null>(
+    null,
+  );
 
   const idMascota =
     typeof mascotaId === 'string' && mascotaId.trim().length > 0 ? mascotaId : null;
@@ -402,6 +423,73 @@ export default function DespensaProducto() {
   }, [comprables, varianteId]);
 
   const variante = comprables.find((v) => v.variante_id === varianteId) ?? null;
+
+  /**
+   * 🔴 LOS VENDEDORES **DISTINTOS** — la regla de uso de la pieza, literal:
+   * *«quien llame pasa los vendedores DISTINTOS de lo que va a pintar»*.
+   *
+   * **Por qué importa acá y no es una optimización:** la promesa depende de
+   * la CUENTA y el día, **no del SKU**. Un producto con cuatro
+   * presentaciones del mismo vendedor son CUATRO variantes y **UNA sola
+   * pregunta**. Mandar una por variante daría cuatro respuestas idénticas y
+   * enseñaría el patrón equivocado a la vitrina, que es donde el número
+   * duele (~400 productos, 5 cuentas).
+   */
+  const vendedores = useMemo(
+    () => [...new Set(comprables.map((v) => v.cuenta_comercial_id))],
+    [comprables],
+  );
+
+  useEffect(() => {
+    if (vendedores.length === 0) {
+      setPromesas(null);
+      return;
+    }
+    let vigente = true;
+    setPromesas('cargando');
+    void promesaPorVendedor(vendedores).then((r) => {
+      if (!vigente) return;
+      // Un fallo del wrapper deja el mapa VACÍO, no un mapa con entradas
+      // falsas: abajo la ausencia de la clave se pinta como fallo dicho,
+      // jamás como «no hay promesa» (L-218 — un vacío con dos significados).
+      setPromesas(r.ok ? new Map(r.data.map((p) => [p.cuenta_comercial_id, p])) : new Map());
+    });
+    return () => {
+      vigente = false;
+    };
+    // `vendedores` es una lista nueva en cada render; la clave estable es su
+    // contenido. Sin esto el efecto se re-dispara para siempre.
+  }, [vendedores.join('|')]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * 🔴 DE QUIÉN ES LA PROMESA QUE SE PINTA — y por qué a veces no se pinta.
+   *
+   * · Con presentación elegida → la de SU vendedor. Inequívoca.
+   * · Sin elegir y **un solo** vendedor → esa. También inequívoca.
+   * · Sin elegir y **varios** vendedores → **`null`: no se pinta.**
+   *   *Una promesa que no sabemos de quién es no se dice.* Elegir la
+   *   presentación la resuelve, y elegir ya es el gesto que la ficha pide.
+   */
+  const promesaVisible: PromesaDeVendedor | 'cargando' | 'sin_dato' | null = useMemo(() => {
+    const cuenta =
+      variante !== null
+        ? variante.cuenta_comercial_id
+        : vendedores.length === 1
+          ? vendedores[0]
+          : null;
+    if (cuenta === null) return null;
+    if (promesas === null || promesas === 'cargando') return 'cargando';
+    return promesas.get(cuenta) ?? 'sin_dato';
+  }, [variante, vendedores, promesas]);
+
+  /** La hora en el idioma de la APP, no el del aparato — mismo par que
+   *  `fechas.ts` y que el checkout (vara de C: teléfono en inglés + app en
+   *  español pintaba «Wednesday» en un checkout en español). */
+  const horaLocal = (iso: string) =>
+    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   /** La presentación COMPRABLE más barata — la que sostiene el «desde»
    *  mientras no haya una elegida.
@@ -1354,6 +1442,64 @@ export default function DespensaProducto() {
                 de una presentación agotada **se sigue pudiendo elegir**. Elegirla
                 es legal —así se ve su precio y se entiende por qué no se puede—;
                 lo que ya no es legal es AGREGARLA. */}
+            {/* 🔴 D-872 (b) · CUÁNDO LLEGA — la promesa ANTES de comprar.
+                Vive en ⑥ y no en una sección propia porque **es
+                disponibilidad real**: la pregunta que ⑥ contesta es «¿puedo
+                tener esto?», y «no te lo entregan» es tan parte de esa
+                respuesta como «no hay stock».
+
+                ⚠️ **La ley de la firma, y las tres partes se cumplen acá:**
+                dice QUÉ NO SE PUEDE **y QUÉ SÍ** —jamás solo el rechazo— y
+                **termina en pregunta**: la familia decide.
+
+                🔴 **`saltos_por_cupo > 0` NO decide la voz — `motivoCorrimiento`
+                sí.** Es el rojo del 18-ago escrito en la cabecera de la pieza:
+                prometía con `saltos: 1` y **el cupo VACÍO**, porque era
+                domingo. *Decir «estaba completo» un domingo hace perder una
+                venta por una escasez que no existe.* Con motivo `null` (motor
+                viejo, o valor desconocido) **no se afirma causa**: se dice que
+                corrió y nada más. */}
+            {promesaVisible !== null ? (
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
+                {promesaVisible === 'cargando' ? (
+                  <Texto variante="apoyo">{t('despensa.promesaCargando')}</Texto>
+                ) : promesaVisible === 'sin_dato' ? (
+                  <Texto variante="apoyo" color="warning">
+                    {t('despensa.promesaFallo')}
+                  </Texto>
+                ) : promesaVisible.ok &&
+                  promesaVisible.fecha !== null &&
+                  promesaVisible.desde !== null &&
+                  promesaVisible.hasta !== null ? (
+                  <>
+                    <Texto variante="cuerpo">
+                      {t('despensa.promesaVentana', {
+                        dia: fechaDiaSemanaHumana(promesaVisible.fecha, idioma as IdiomaSoportado),
+                        desde: horaLocal(promesaVisible.desde),
+                        hasta: horaLocal(promesaVisible.hasta),
+                      })}
+                    </Texto>
+                    {promesaVisible.saltos_por_cupo > 0 ? (
+                      <Texto variante="apoyo">
+                        {promesaVisible.motivoCorrimiento === 'cupo_lleno'
+                          ? t('despensa.saltoPorCupo')
+                          : promesaVisible.motivoCorrimiento === 'sin_operacion'
+                            ? t('despensa.saltoPorSinOperacion')
+                            : t('despensa.saltoSinCausa')}
+                      </Texto>
+                    ) : null}
+                  </>
+                ) : (
+                  <Texto variante="apoyo" color="warning">
+                    {promesaVisible.error === 'sin_cupo_ese_dia'
+                      ? t('despensa.sinCupoEseDia')
+                      : t('despensa.promesaFichaSinEntrega')}
+                  </Texto>
+                )}
+              </View>
+            ) : null}
+
             {sinOferta.length > 0 ? (
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <Texto variante="apoyo">
