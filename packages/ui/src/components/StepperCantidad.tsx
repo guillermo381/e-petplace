@@ -32,7 +32,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
 import { Icono } from './Icono'
-import { estiloDeCaja, BORDE_CAMPO } from './caja-de-campo'
+import { estiloDeCaja } from './caja-de-campo'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
@@ -376,7 +376,10 @@ function BotonPaso({
           borderRadius: radius.suave,
           // Dentro del bloque de `ancho` la superficie ya la pone el
           // contenedor: una caja adentro de otra rompería el bloque en tres.
-          backgroundColor: tamano === 'ancho' ? 'transparent' : theme.bg.hundido,
+          // S103-B · UNO SOLO. El `ancho` los dejaba transparentes porque
+          // el bloque ponía el material; sin bloque, el hundido de siempre —
+          // el mismo que ve la ficha.
+          backgroundColor: theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: atenuado ? 0.4 : 1,
@@ -471,8 +474,30 @@ export function StepperCantidad({
      árbol dio verde: medía la capa equivocada.* **Es la segunda vez en la misma
      pieza y en la misma vuelta que el árbol dice «está» sobre algo que el ojo
      no tiene** (la primera fue el pie opaco tapando el control). */
-  const sobreBloqueLleno = tamano === 'ancho' && !esMemorial
-  const tintaDelControl = sobreBloqueLleno ? theme.accent.ctaTexto : acento
+  /* ☠️ EL BLOQUE LLENO MUERE — firma del founder (S103-B): *«que el
+     stepper de la grilla se vea EXACTAMENTE IGUAL que el de la ficha»*.
+     Eran DOS TRATAMIENTOS del mismo control, medido y no supuesto: la
+     ficha monta `normal` (contenedor sin fondo, botones hundidos) y la
+     grilla montaba `ancho` sobre un bloque de `accent.cta`. **La persona
+     veía dos cosas donde hay una.**
+
+     🔴 **POR QUÉ NO CONTRADICE A `S100d·bis`:** esa firma es de
+     GEOMETRÍA, no de color. Sus tres razones escritas son de caja y de
+     renglón —*«la MISMA caja»* que ocupaba «Agregar», medida de Laika
+     (130,8 × 28,8 contra 129,0 × 27,4) · la tarjeta que no cambia de
+     alto · los 44 de blanco sin `hitSlop` forzado—. **El oro entró como
+     consecuencia de «es la misma caja que el botón», jamás como razón
+     propia.** ⇒ *la caja se conserva entera; lo que se va es el relleno.*
+
+     **Y esto resuelve el SEGUNDO pedido sin tocar ningún tono**, que es
+     por lo que no se tocó: el contorno de la grilla era `ctaTexto` sobre
+     el bloque —un **9,96**, duro por necesidad porque era la única tinta
+     legible ahí—. Al adoptar la caja de la casa pasa a `border.campo`
+     (piso 3, vigilado por R43) **con interior claro**: *más suave y más
+     claro salen de la unificación, no de un ajuste aparte.* Mover el
+     token habría cambiado `Campo`, `CampoCodigo` y `CampoFecha` en las
+     dos apps para curar una pantalla. */
+  const tintaDelControl = acento
 
   /* LAS TRES REGLAS DEL CAMPO, en un solo lugar (ver la prop `editable`):
      vacío ⇒ vuelve el anterior · cero ⇒ lo mismo que la papelera · resto ⇒
@@ -537,7 +562,8 @@ export function StepperCantidad({
           ? {
               width: '100%',
               justifyContent: 'space-between' as const,
-              backgroundColor: esMemorial ? theme.bg.hundido : theme.accent.cta,
+              // ☠️ Acá vivía `accent.cta`. La caja se conserva ENTERA —es lo
+              // que la firma mide— y queda SIN relleno, como la de la ficha.
               borderRadius: radius.suave,
               overflow: 'hidden' as const,
             }
@@ -555,11 +581,9 @@ export function StepperCantidad({
         color={
           v > min || onBorrar !== undefined
             ? tintaDelControl
-            : sobreBloqueLleno
-              ? tintaDelControl
-              : theme.text.tertiary
+            : theme.text.tertiary
         }
-        atenuado={!(v > min || onBorrar !== undefined) && sobreBloqueLleno}
+        atenuado={false}
         onPress={() => (v <= min && onBorrar !== undefined ? onBorrar() : irA(v - 1))}
         /* La voz del destino dice QUÉ pasa, y por eso depende de `salida`:
            en el carrito el ítem se va de la lista; en la vitrina la tarjeta
@@ -688,28 +712,10 @@ export function StepperCantidad({
                 fontVariant: ['tabular-nums'],
                 letterSpacing: typography.tracking.mono,
                 // MISMA fuente que los signos — ver `tintaDelControl`.
-                color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
+                color: theme.text.primary,
               }}
             />
           )
-          if (sobreBloqueLleno)
-            return (
-              <View
-                style={{
-                  // Mismo radio y mismo grosor que la caja de campo de la
-                  // casa: cambia el material, no la anatomía.
-                  borderRadius: radius.md,
-                  borderWidth: BORDE_CAMPO,
-                  borderColor: tintaDelControl,
-                  height: ladoDelPaso(tamano),
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingHorizontal: spacing[2],
-                }}
-              >
-                {campo}
-              </View>
-            )
           return (
             <View
               style={{
@@ -737,7 +743,7 @@ export function StepperCantidad({
             fontVariant: ['tabular-nums'],
             letterSpacing: typography.tracking.mono,
             // MISMA fuente que los signos — ver `tintaDelControl`.
-            color: sobreBloqueLleno ? tintaDelControl : theme.text.primary,
+            color: theme.text.primary,
           }}
         >
           {v}
@@ -746,8 +752,8 @@ export function StepperCantidad({
       <BotonPaso
         signo="mas"
         habilitado={v < max}
-        color={v < max ? tintaDelControl : sobreBloqueLleno ? tintaDelControl : theme.text.tertiary}
-        atenuado={v >= max && sobreBloqueLleno}
+        color={v < max ? tintaDelControl : theme.text.tertiary}
+        atenuado={false}
         onPress={() => irA(v + 1)}
         etiqueta={t('stepperCantidad.mas')}
         tamano={tamano}

@@ -2608,43 +2608,31 @@ function GaleriaInterna() {
               sale derivado del lado de los botones de paso, así que los tres se alinean por construcción.
             </Texto>
             <Texto variante="apoyo">
-              ⭐ GATE — LOS DOS CONTEXTOS, LADO A LADO. Arriba: sobre superficie normal (el carrito y la
-              ficha). Abajo: sobre el BLOQUE LLENO, que es el de la grilla de la despensa — el que el
-              founder señaló. El defecto solo aparecía abajo, así que juzgarlo arriba sería contestar la
-              pregunta equivocada.
-            </Texto>
-            <View style={{ maxWidth: 200, gap: spacing[2] }}>
-              <Texto variante="apoyo" color="tertiary">sobre el bloque lleno (la grilla)</Texto>
-              <StepperCantidad
-                valor={3}
-                min={1}
-                max={12}
-                onCambio={() => {}}
-                etiqueta="Cantidad"
-                registro="compra"
-                tamano="ancho"
-                editable
-                onBorrar={() => {}}
-              />
-            </View>
-            <Texto variante="apoyo">
-              LA MEDICIÓN CORRIGIÓ EL PEDIDO, y conviene saberlo: no era que la superficie se achicara.
-              Los dos miden IGUAL — 34 de alto y 32 de número en ambos. Lo que pasaba es que sobre el
-              bloque lleno la caja no se montaba nunca. No había que achicar nada: había que cerrar ese
-              hueco.
+              ⭐ GATE — LOS DOS CONTEXTOS, LADO A LADO. Arriba el de la FICHA; abajo el de la GRILLA,
+              el que aparece al dar «Agregar». El pedido era que se vean EXACTAMENTE IGUAL: hoy tienen
+              los mismos botones hundidos, el mismo número con la caja de campo de la casa y el mismo
+              contenedor sin relleno. Lo único que los separa es el reparto del ancho — la grilla tiene
+              su renglón completo, que es lo que S100d·bis firmó.
             </Texto>
             <Texto variante="apoyo">
-              Y ahí la caja cambia de material, no de anatomía: mismo radio y mismo grosor, contorno en la
-              tinta del bloque (9,96 en el cliente · 5,51 y 11,01 en el prestador). La inversión a papel
-              que §15b.2 firmó para el muro TEAL no sirve acá y lo dice el número: papel sobre el bloque
-              de oro mide 1,62, y el dígito en oro sobre papel también 1,62 — ilegible. El precedente
-              correcto sobre la superficie equivocada daba un número que no se puede leer.
+              MEDIDO PRIMERO, como pedía el encargo: NO eran la misma instancia con distinta resolución
+              de tokens. Eran dos tratamientos — la ficha monta el tamaño normal y la grilla montaba el
+              ancho SOBRE UN BLOQUE DE ORO. La persona veía dos cosas donde hay una.
             </Texto>
             <Texto variante="apoyo">
-              Tampoco lleva relleno: un pozo de vidrio sobre el bloque mide 1,30–1,50, la misma banda que
-              §14 ya declaró que no está trabajando. Sumarlo sería decoración, no información. Y el número
-              es un control: 34 de alto más hitSlop 5 por lado dan los 44 de N8 — vertical solamente, para
-              no pisar el blanco de los botones.
+              Y por qué sacar el bloque no contradice a S100d·bis: esa firma es de GEOMETRÍA, no de
+              color. Sus tres razones escritas son de caja y de renglón — la MISMA caja que ocupaba
+              «Agregar», medida de Laika; la tarjeta que no cambia de alto; los 44 de blanco sin hitSlop
+              forzado. El oro entró como consecuencia de «es la misma caja que el botón», nunca como
+              razón propia. La caja se conserva entera; lo que se va es el relleno.
+            </Texto>
+            <Texto variante="apoyo">
+              EL SEGUNDO PEDIDO —borde más suave, interior más claro— queda resuelto por el primero, y
+              por eso NO se tocó ningún tono. El contorno de la grilla era la tinta del CTA sobre el
+              bloque: un 9,96, duro por necesidad porque era la única tinta legible ahí. Al adoptar la
+              caja de la casa pasa a border.campo, con piso 3 vigilado por R43, y gana interior claro.
+              Mover el token habría cambiado Campo, CampoCodigo y CampoFecha en las dos apps para curar
+              una pantalla.
             </Texto>
           </View>
         </Seccion>
