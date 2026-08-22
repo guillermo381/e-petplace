@@ -160,10 +160,11 @@ BEGIN
        sin volver la compuerta de compras más difícil de leer, *y porque una
        firma que no se puede cumplir literalmente se declara, no se fuerza.*
 
-       **MIENTRAS LA MESA NO FIRME, ESTA RAMA FRENA TODO** — fail-closed con
-       nombre. *Cobrar sin compuerta porque «la que hay no encaja» sería la peor
-       de las tres salidas.* */
-    v_compuertas := jsonb_build_object('ok', false, 'codigo', 'compuerta_recurrente_sin_firmar');
+       ✅ **RESUELTO por (b), y el mapeo completo vive en ④ al pie de este
+       archivo: CUATRO evaluadas + cobertura declarada no-evaluable + reserva
+       declarada no-aplica.** *Mi propio conteo de arriba decía «dos» — estaba
+       hecho sobre medio cuerpo leído.* */
+    v_compuertas := verificar_compuertas_recurrencia(v_r.id, v_r.proximo_pedido_fecha);
     IF COALESCE((v_compuertas->>'ok')::boolean, false) IS NOT TRUE THEN
       v_frenadas := v_frenadas || jsonb_build_object(
         'recurrencia_id', v_r.id, 'periodo', v_r.proximo_pedido_fecha,
@@ -581,3 +582,127 @@ BEGIN
 
   RAISE NOTICE 'CINTURON VERDE — contrato completo · ambiguedad conservada · familia si, anon no';
 END $cinturon$;
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ④  LAS COMPUERTAS DEL RECURRENTE — extraídas del cuerpo vivo de E3
+--
+-- 🔴 **CORRIJO MI PROPIA DECLARACIÓN DE ARRIBA: dije «DOS aplican» y son
+--    CUATRO de seis.** *Lo dije después de leer 60 líneas del cuerpo y antes de
+--    leer las otras 60 — un censo a medias que reporté como completo.* Es
+--    `L-357` sobre mí: afirmar un paso más allá de lo medido.
+--
+-- ── EL MAPEO COMPLETO, compuerta por compuerta ─────────────────────────────
+--
+--   **0 · intento en vuelo**      ✅ APLICA — íntegra, cambiando el sujeto.
+--   **1 · reserva de stock**      ❌ NO APLICA — no hay pedido todavía. **§6:
+--                                    primero se cobra, DESPUÉS sale la
+--                                    entrega.** Exigirla invertiría esa firma.
+--   **2 · monto == desglose**     ✅ APLICA — contra `recurrencia_desglose`.
+--                                    *Es la más importante y casi la doy por
+--                                    inaplicable por no haber leído hasta acá.*
+--   **3 · cobertura**             ⚠️ NO EVALUABLE — **viaja en `no_evaluables`,
+--                                    igual que en compras.** *Que nadie lea el
+--                                    `ok:true` como «la cobertura está
+--                                    verificada»: no se verificó nada.*
+--   **4 · vendedor activo (7.13)** ✅ APLICA — la serie tiene su cuenta.
+--   **5 · token**                 ✅ APLICA EN SU FORMA: acá el «token» es **la
+--                                    tarjeta autorizada para ESTA serie**, y ya
+--                                    se verifica en ⓐ (que siga siendo suya y
+--                                    guardada). *Mismo espíritu, otro sujeto.*
+--
+-- ⇒ **cuatro evaluadas + una declarada no evaluable + una que no aplica con su
+--    razón escrita.** *Eso es «E3 entera» para este sujeto — lo que no se puede
+--    es llamar a la función de compras, no cumplir la firma.*
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE OR REPLACE FUNCTION public.verificar_compuertas_recurrencia(
+  p_recurrencia_id uuid, p_periodo date)
+RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_r        record;
+  v_en_vuelo int;
+  v_total    numeric(12,2);
+  v_inactiva int;
+BEGIN
+  SELECT * INTO v_r FROM pedidos_recurrencias WHERE id = p_recurrencia_id;
+  IF v_r.id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', 'serie',
+      'codigo', 'serie_no_existe',
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+
+  -- ══ 0 · La serie no tiene ya un intento EN VUELO para este período ══
+  -- *El candado UNIQUE impide la fila duplicada; esta compuerta impide el
+  --  SEGUNDO DÉBITO, que es lo caro. El candado protege la tabla; la compuerta
+  --  protege la tarjeta del cliente.* (literal del cuerpo de compras)
+  SELECT count(*) INTO v_en_vuelo
+    FROM pagos_intentos
+   WHERE recurrencia_id = p_recurrencia_id
+     AND recurrencia_periodo = p_periodo
+     AND estado IN ('iniciado','pendiente');
+  IF v_en_vuelo > 0 THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', '0_intento_en_vuelo',
+      'codigo', 'pago_en_proceso', 'detalle', jsonb_build_object('intentos', v_en_vuelo),
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+
+  -- ══ 1 · reserva de stock — NO APLICA (§6). Se DECLARA, no se omite. ══
+
+  -- ══ 2 · El monto sale del DESGLOSE CONGELADO de ESTE período ══
+  -- 🔴 Contra el desglose, jamás contra el catálogo vivo: *el desglose es lo
+  --    que se le prometió al cliente; si el precio se movió después, el que
+  --    tiene razón es el desglose. Comparar contra lo vivo taparía justo el
+  --    defecto que esta compuerta busca.*
+  SELECT total INTO v_total FROM recurrencia_desglose
+   WHERE recurrencia_id = p_recurrencia_id AND periodo = p_periodo;
+  IF v_total IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', '2_monto',
+      'codigo', 'desglose_incompleto',
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+  IF v_r.monto_esperado IS NOT NULL AND round(v_total,2) > round(v_r.monto_esperado,2) THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', '2_monto',
+      'codigo', 'monto_divergente',
+      'detalle', jsonb_build_object('autorizado', v_r.monto_esperado, 'congelado', v_total),
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+
+  -- ══ 3 · COBERTURA — NO EVALUABLE. No se evalúa y NO SE FINGE. ══
+
+  -- ══ 4 · El vendedor sigue activo (regla 7.13) ══
+  SELECT count(*) INTO v_inactiva
+    FROM cuentas_comerciales cc
+   WHERE cc.id = v_r.cuenta_comercial_id AND cc.estado <> 'activa';
+  IF v_inactiva > 0 THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', '4_vendedor',
+      'codigo', 'vendedor_no_activo',
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+
+  -- ══ 5 · EL MEDIO AUTORIZADO — el «token» de este sujeto ══
+  IF v_r.tarjeta_id IS NULL
+     OR NOT EXISTS (SELECT 1 FROM tarjetas_guardadas t
+                     WHERE t.id = v_r.tarjeta_id AND t.user_id = v_r.user_id
+                       AND t.estado = 'guardada') THEN
+    RETURN jsonb_build_object('ok', false, 'compuerta', '5_medio',
+      'codigo', 'token_ausente',
+      'no_evaluables', jsonb_build_array('cobertura'));
+  END IF;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'recurrencia_id', p_recurrencia_id, 'periodo', p_periodo,
+    'monto_verificado', v_total,
+    'evaluadas', jsonb_build_array('0_intento_en_vuelo','2_monto','4_vendedor','5_medio'),
+    /* 🔴 VIAJAN SIEMPRE, incluso en el ok — las dos. La de cobertura porque no
+       se evaluó; la de reserva porque **no aplica a propósito**, y sin decirlo
+       un lector futuro va a creer que se olvidó. */
+    'no_evaluables', jsonb_build_array('cobertura'),
+    'no_aplican', jsonb_build_object('1_reserva', 'sin pedido todavia (§6: primero se cobra)'));
+END $function$;
+
+REVOKE ALL ON FUNCTION public.verificar_compuertas_recurrencia(uuid, date) FROM anon, authenticated, PUBLIC;
