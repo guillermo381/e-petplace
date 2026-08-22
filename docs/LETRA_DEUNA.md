@@ -1,6 +1,6 @@
 # LETRA_DEUNA.md — e-PetPlace · el segundo riel
 
-> **Versión:** v1.5 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
+> **Versión:** v1.6 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
 > 22-ago-2026 (mesa 104) contra el **ambiente QA real** · **Estado:** RIGE —
 > firmas ①②③ del founder (§11), la ③ **ya no es supuesto: es hecho
 > confirmado por el proveedor**.
@@ -244,6 +244,46 @@ La letra fija el contrato del generador; la forma exacta la fija la pista:
 | `REVERSED` | reversada | La del reverso, con su camino (§8) |
 | `REVERSED_FAILED` | 🔴 hallazgo | Caso de soporte con nombre — **jamás se resuelve solo** |
 
+## §6bis · EL LUGAR DE DEUNA EN LA HOJA — primera y por defecto
+*(firma del founder, 22-ago-2026)*
+
+> ### **DeUna es la PRIMERA opción de «Cómo quieres pagar» y el medio POR DEFECTO. La elección previa del cliente gana sobre el default.**
+
+**El argumento de negocio, escrito para que la posición no se discuta cada vez:**
+· **costo de riel 2 % + IVA**, contra el de tarjeta;
+· **no exige alta ni token** — se elige y se paga, sin 3DS ni OTP;
+· **el cliente ecuatoriano ya tiene la app.**
+*No es una preferencia estética: es el medio más barato para la casa y el de
+menos fricción para la familia.*
+
+**«Por defecto» y «primera» no son lo mismo y las dos rigen:** primera es
+**posición**; por defecto es **preselección**. Y **la elección previa del cliente
+le gana al default** — *un default que pisa lo que la persona ya eligió deja de
+ser una sugerencia y pasa a ser una corrección.*
+
+### Sus TRES BORDES, y ninguno es opcional
+
+| # | borde | por qué |
+|---|---|---|
+| ① | **No elegible sin `pointOfSale`** | es el bloqueante medido del riel (§12.1). *Ofrecer como default un medio que no puede formar la solicitud es prometer el camino más barato y entregar un rebote.* |
+| ② | 🔴 **JAMÁS en cobro recurrente** | DeUna es **push**: exige que la persona confirme en su app. **No hay cobro sin presencia posible** (§8 de `LETRA_COBRO_RECURRENTE`). *Ser el default del pago único no lo vuelve default de la serie* — y ahí el default sigue siendo tarjeta tokenizada, **y así se le dice al elegir medio.** |
+| ③ | **Cae a tarjeta en pago mixto con saldo** cuando ese motor exista (S102) | y **la pantalla lo DICE con voz**, jamás cambia el medio en silencio. *Un default que se reemplaza solo sin avisar es la forma más barata de que alguien pague con lo que no quería.* |
+
+### ⚠️ ESTADO MEDIDO DE LA PANTALLA AL FIRMARSE ESTO — la letra y la superficie están invertidas
+
+**Medido en el aparato el 22-ago, sobre `main`:** la fila «Deuna» **existe** en la
+hoja, **y está ÚLTIMA** —debajo de las seis tarjetas guardadas—, **apagada**, con
+voz de próximamente: *«Muy pronto vas a poder pagar desde tu app Deuna.»*
+**Y queda debajo del fold: hay que scrollear para verla.**
+
+> **No es un defecto de quien la construyó:** la letra vigente ese día **no decía
+> nada del orden**, así que ponerla al final junto a «Agregar tarjeta» era una
+> lectura razonable. **Lo que cambió es la letra.**
+
+⇒ **Esta firma reordena la hoja**, y su ejecución es de la pista de superficie.
+*Se declara acá para que nadie lea la pantalla de hoy como si ya cumpliera esta
+sección.*
+
 ## §7 · EL WEBHOOK — señal, no verdad
 
 Su autenticación son **headers estáticos** (nuestra key/value registrada) —
@@ -353,6 +393,17 @@ como dato, no como consulta.
 ---
 
 ## Historial
+
+- **v1.6 (22-ago-2026, mesa 104):** nace **§6bis — DeUna es la PRIMERA opción y
+  el medio POR DEFECTO**, con la elección previa del cliente ganándole al
+  default. Su argumento de negocio queda escrito (**2 % + IVA**, sin alta ni
+  token, y el cliente ecuatoriano ya tiene la app) para que la posición no se
+  re-litigue. **Tres bordes, ninguno opcional:** no elegible sin `pointOfSale` ·
+  **jamás en cobro recurrente** —es push y no hay cobro sin presencia— · y cae a
+  tarjeta en pago mixto **diciéndolo con voz**. Y se declara el estado medido de
+  la pantalla ese día: **la fila existe, está ÚLTIMA, apagada y bajo el fold** —
+  *la letra y la superficie quedaron invertidas, y no por defecto de quien
+  construyó: la letra no decía nada del orden hasta hoy.*
 
 - **v1.5 (22-ago-2026, mesa 104):** el barrido gana **hora declarada: `03:00`
   Guayaquil**, lejos del cron de avisos de las 08:00, con su argumento escrito
