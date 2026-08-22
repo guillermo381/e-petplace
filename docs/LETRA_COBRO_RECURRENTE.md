@@ -1,6 +1,6 @@
 # LETRA_COBRO_RECURRENTE.md — e-PetPlace · el cobro que llega solo
 
-> **Versión:** v1.2 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
+> **Versión:** v1.3 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
 > COMPLETA — las cinco firmas del founder recibidas (21-ago). Sin firmas
 > pendientes.
 > **Fuentes que obedece:** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101`
@@ -91,7 +91,62 @@ no pide permiso: informa, y el cobro corre igual.
   del cobro, con id de transacción y código de autorización (requisito de
   certificación) y va **a quien pagó** (dictamen S102).
 
-## §4 · EL CIRCUITO — el mismo motor, sin nadie mirando
+## §4 · EL CIRCUITO — el mismo motor, y ahora se dice CÓMO
+
+> **⚠️ ENMIENDA DEL 22-ago-2026 (firma del founder).** Esta sección decía *«el
+> mismo motor, sin nadie mirando»* y **eso era una intención, no un contrato**:
+> al ir a construirlo apareció que **la puerta única no puede ser la misma
+> función**. Se escribe el cómo.
+
+### §4.0 · LA HERMANA, Y POR QUÉ NO ES LA MISMA PUERTA
+
+**Medido en `pagos-cobro`:** su **primera compuerta es la sesión**
+(`if (!auth.startsWith('Bearer ')) → sin_sesion`), y de ahí cuelga todo lo
+demás — pertenencia, monto, compuertas. **El cobro recurrente no tiene sesión:
+lo dispara un reloj.** Con esa función tal cual, **todo cobro automático muere
+en `sin_sesion`.**
+
+🔴 **PROHIBIDO, y es la firma más dura de esta letra: que el disparador fabrique
+un JWT de usuario con `service_role`.** *No rompe una compuerta: rompe el
+significado de todas.* **El día que el reloj pueda producir la misma señal que
+una persona, nadie puede volver a distinguir un cobro pedido de uno inventado**
+— y ese costo se paga entero el día del primer reclamo, que es cuando la
+evidencia es lo único que tenemos. **Y es retroactivo:** degrada también los
+cobros ya ocurridos, porque desde ese día ningún registro anterior puede probar
+de qué lado nació. (`L-340`.)
+
+> ### **La sesión es la autorización. Donde no hay sesión, la autorización es un ACTO GUARDADO — jamás una sesión simulada.**
+
+**⇒ Se construye una HERMANA** —`pagos-cobro-recurrente` o el nombre que la
+pista fije contra la base— **con el MISMO contrato de seguridad de `pagos-cobro`
+y otra RAÍZ de autorización:**
+
+| | `pagos-cobro` | la hermana |
+|---|---|---|
+| **raíz de autorización** | la **sesión** del cliente | **la fila de la serie** (§2: quién autorizó · cuándo · sobre qué medio · con qué cadencia) **+ secreto compartido** para el disparador (patrón `D-713`) |
+| **de dónde sale el pagador** | de la sesión | **explícito, de la fila** (`pagador_user_id`, cura 3 de S102) |
+| **compuertas E3** | enteras | **enteras e IDÉNTICAS** |
+| **monto** | del desglose congelado | **del desglose congelado** |
+
+**Lo único que cambia es de dónde sale el pagador.** *Todo lo demás se reusa, y
+si alguna compuerta se ablandara «porque es automático», la hermana dejaría de
+ser hermana.*
+
+### §4.0bis · EL REPARTO — la base elige, la edge cobra
+
+**Ratificado por el founder.** Una función de base **no puede cobrar**: no tiene
+credenciales del proveedor ni debe tenerlas.
+
+1. **LA BASE ELIGE Y CONGELA** — resuelve qué series vencen, y **congela el
+   desglose de ESE cobro antes de que nadie debite**.
+2. **LA EDGE COBRA** — la hermana, con el contrato de arriba.
+3. **EL CRON LLAMA POR `net.http_post`** — el patrón que ya usan `despachar-push`,
+   `despachar-whatsapp` y `pagos-conciliar`. *No nace mecanismo nuevo.*
+
+**El desglose congelado nace POR COBRO y ANTES de debitar, fail-closed: sin
+desglose no hay débito.** *Es el patrón de la cita, sin una coma de diferencia.*
+
+---
 
 El reloj reemplaza al dedo; **todo lo demás es idéntico**:
 
@@ -105,9 +160,11 @@ El reloj reemplaza al dedo; **todo lo demás es idéntico**:
 3. **Desglose congelado por cobro**: cada ejecución de la serie congela **su
    propio** desglose antes de debitar (patrón de la cita: sin desglose
    congelado no hay cobro, fail-closed).
-4. **Débito con el token guardado**, por la puerta única server-side. El
-   pagador es el titular de la autorización, explícito — jamás derivado
-   (`pagador_user_id`, cura 3 de S102).
+4. **Débito con el token guardado**, por **la hermana** (§4.0), que es la
+   puerta única de este camino. El pagador es el titular de la autorización,
+   **explícito — jamás derivado** (`pagador_user_id`, cura 3 de S102).
+   *Esa columna existe exactamente porque acá no hay sesión de la cual
+   derivarlo.*
 5. **Webhook / consulta activa / barrido**: idénticos. El actuador
    transiciona solo con verdad verificada del servidor.
 6. **Comprobante por correo** tras cada cobro exitoso.
@@ -230,6 +287,19 @@ trenza).
 ---
 
 ## Historial
+
+- **v1.3 (22-ago-2026, mesa 104 — al ir a construir):** **§4 pasa de intención a
+  contrato.** Decía *«el mismo motor, sin nadie mirando»*, y la construcción
+  destapó que **la puerta única no puede ser la misma función**: la primera
+  compuerta de `pagos-cobro` es la sesión, y el recurrente no tiene ninguna.
+  Nacen **§4.0 (la hermana)** y **§4.0bis (el reparto)**: mismo contrato de
+  seguridad, **otra raíz de autorización** —la fila de la serie como acto
+  guardado, más secreto compartido para el cron—, **compuertas enteras e
+  idénticas**, y **lo único que cambia es de dónde sale el pagador**. Con su
+  prohibición firmada: **el disparador jamás fabrica un JWT de usuario con
+  `service_role`** (`L-340`) — *no rompe una compuerta, rompe el significado de
+  todas, y es retroactivo*. Reparto ratificado: **la base elige y congela, la
+  edge cobra, el cron llama por `net.http_post`.**
 
 - **v1.2 (22-ago-2026, mesa 104 — sale del censo de S103):** **§3 gana la
   corrección del aviso y §8 gana `D-869`.** El aviso vivo promete *«saltar,

@@ -18579,6 +18579,15 @@ scrollea y los paga.** Se anota **como freno**, no como deuda: *dos crecimientos
 que nadie suma es como se llega a una pantalla que no termina nunca* — y ahora la
 suma existe para la tercera cosa que quiera entrar.
 
+- **L-340** — 🔴 **DONDE NO HAY SESIÓN, LA AUTORIZACIÓN ES UN ACTO GUARDADO — JAMÁS UNA SESIÓN SIMULADA.** *(Firmada por el founder, 22-ago-2026, sobre el arranque del cobro recurrente.)*
+  **El caso:** `pagos-cobro` abre con `if (!auth.startsWith('Bearer ')) return { codigo: 'sin_sesion' }` — **su primera compuerta es la sesión, y de ahí cuelga todo lo demás**: pertenencia, monto, compuertas. El cobro recurrente **no tiene sesión: lo dispara un reloj.** Con esa función tal cual, todo cobro automático muere en `sin_sesion`.
+  **La salida obvia era fabricar un JWT del usuario con `service_role`.** Técnicamente se puede, en dos líneas, y **está PROHIBIDA.**
+  > ### **No rompe UNA compuerta: rompe el SIGNIFICADO de todas.**
+  **El porqué, con su literal del founder:** *el día que el reloj pueda producir la misma señal que una persona, **nadie puede volver a distinguir un cobro pedido de uno inventado** — y ese costo se paga entero el día del primer reclamo, que es cuando la evidencia es lo único que tenemos.*
+  🔴 **Lo que la vuelve peor que un agujero común: es RETROACTIVA.** No degrada los cobros que vengan — **degrada los que ya ocurrieron**, porque a partir de ese día ningún registro anterior puede probar de qué lado nació. *Un permiso de más se cierra; una ambigüedad sembrada en el rastro no se puede sacar después.*
+  ⇒ **La forma correcta: una HERMANA con el mismo contrato de seguridad y otra RAÍZ de autorización.** Las compuertas corren **enteras e idénticas**; lo único que cambia es **de dónde sale el pagador** — de la **fila de la serie**, que guarda el acto (quién autorizó, cuándo, sobre qué medio, con qué cadencia), más un **secreto compartido** para el disparador (patrón `D-713`). *La columna `pagador_user_id` existe exactamente porque acá no hay de dónde derivarlo* (cura 3 de S102).
+  **La regla general, para el próximo camino sin persona detrás** (barridos, conciliadores, reintentos, webhooks): **no se pregunta «¿cómo consigo una sesión?» sino «¿QUÉ ACTO GUARDADO autoriza esto?»**. Si la respuesta es «ninguno», **el camino no puede existir todavía** — le falta el acto, no la credencial. Origen: S103-A.
+
 - **L-339** — **UNA MEDICIÓN HISTÓRICA SE MARCA, JAMÁS SE REESCRIBE.** *(Firmada por la mesa, 22-ago-2026.)*
   **El caso:** `CLAUDE.md` citaba `verify-edge-simbolos` en **dos lugares**, y la orden fue curar los dos. **No eran la misma clase y no se curaron igual:**
   · la fila de `supabase/` **declaraba el gate VIGENTE** ⇒ se reemplaza por el nuevo, con su porqué;
