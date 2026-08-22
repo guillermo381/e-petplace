@@ -87,23 +87,35 @@ export function useMedioDePago(activo: boolean): MedioDePago {
        cambie»*. **El default es para quien no eligió nunca, no un reset por
        compra.**
 
-       **Dos bloqueantes MEDIDOS, y ninguno es de esta pantalla:**
+       **Dos bloqueantes, y el segundo AVANZÓ — su estado exacto importa:**
        ① **DeUna no es elegible** (`DEUNA_ELEGIBLE === false`, falta el
           `pointOfSale`) ⇒ el default **no puede aplicarse a nada todavía**.
-       ② 🔴 **NO HAY DÓNDE RECORDAR LA ELECCIÓN PREVIA.** Medido el 22-ago:
-          `elegido` vive en `useState` y **muere con la pantalla**;
-          `user_preferencias` tiene **solo `idioma`**; y el carrito declara
-          explícitamente que **no persiste en AsyncStorage**.
-          ⇒ *«salvo que el cliente haya elegido otro medio antes» exige una
-          memoria que no existe.* **Sin ella, un default de DeUna pisaría la
-          elección del cliente en CADA compra — que es exactamente el «reset
-          por compra» que la firma prohíbe.**
+       ② **La memoria YA EXISTE EN LA BASE** (A, 22-ago): dos columnas en
+          `user_preferencias` —`medio_pago_preferido` + `tarjeta_preferida_id`—
+          con su RPC `guardar_medio_pago_preferido`, sus cinco errores tipados
+          y el estado incoherente **inexpresable por CHECK**. `NULL` = *nunca
+          eligió*, que es justo la señal que este default necesita.
+          🔴 **Pero NO hay puerta**, medido el 22-ago: la RPC y las columnas
+          **no están en `database.types.ts`** (falta `gen:types`) y **no hay
+          wrapper en `packages/api`**.
+          ⇒ *montarlo hoy exigiría `supabase.rpc()` crudo en la app, que es la
+          regla madre de la casa rota* —«los apps jamás llaman `supabase.rpc()`
+          directo»— **y ni siquiera compilaría.** *Saltarse la puerta única
+          para llegar tres días antes es una deuda que paga otro.*
 
-       ⇒ **Se construye el ORDEN (regla 1, que no depende de nada) y se
-         declara el DEFAULT (regla 2) con su contrato pedido a A.** *Son dos
-         reglas separadas y el founder las separó a propósito: una se puede
-         hoy y la otra no.* **Poner el default sin la memoria sería cumplir la
-         mitad visible de la firma rompiendo su mitad importante.** */
+       ⇒ **Se construye el ORDEN (regla 1, que no depende de nada) y el
+         DEFAULT espera UNA cosa: el wrapper.** *Son dos reglas separadas y el
+         founder las separó a propósito.* **Poner el default sin la memoria
+         sería cumplir la mitad visible de la firma rompiendo su mitad
+         importante — y esa mitad ya no falta, solo le falta su puerta.**
+
+       ⚠️ **Y una consecuencia de producto que A me pasó y es MÍA:** borrar la
+       tarjeta preferida **borra la preferencia** (trigger `BEFORE DELETE`, sin
+       él el CHECK volvía imposible borrar la tarjeta). Es correcto —no se
+       puede preferir una tarjeta que no existe— **pero es un cambio silencioso
+       de la elección de la persona.** *El día que la preferencia se muestre
+       como ajuste, ahí hay una voz que decir.* Hoy no se muestra ⇒ no hay
+       nada que decir todavía, y queda escrito para que no se descubra tarde. */
     setElegido((prev) => prev ?? (r.data.length === 1 ? r.data[0].id : null));
   }, []);
 
