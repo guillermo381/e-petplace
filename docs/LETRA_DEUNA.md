@@ -1,6 +1,6 @@
 # LETRA_DEUNA.md — e-PetPlace · el segundo riel
 
-> **Versión:** v1.2 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
+> **Versión:** v1.4 · **Nace:** 21-ago-2026 (mesa 103) · **Enmendada:**
 > 22-ago-2026 (mesa 104) contra el **ambiente QA real** · **Estado:** RIGE —
 > firmas ①②③ del founder (§11), la ③ **ya no es supuesto: es hecho
 > confirmado por el proveedor**.
@@ -145,9 +145,19 @@ El circuito es el del motor, pieza por pieza:
 ## §4 · LA REFERENCIA CORTA — el delta más filoso
 
 **`idTransacionReference`** *(el typo es del proveedor — §2)* admite
-**≤ 20 caracteres** ~~< 20~~ *(medido contra QA por la pista D; entra por la
-regla del literal que esta misma letra declara en su §2 — gana la fuente viva
-sobre el papel. **No estaba en la dictación de la mesa y se marca por eso.**)*.
+**≤ 20 caracteres** ~~< 20~~ — **firmado por la mesa el 22-ago sobre el barrido
+de la pista D**, que es la fuente:
+
+> `"internalTransactionReference must be at most 20 characters long."`
+> **20 pasa · 21 · 25 · 30 · 36 · 40 · 50 · 64 · 100 rebotan, todos con ese
+> mismo literal.** *Un solo 21 habría probado que 21 no entra; el barrido
+> prueba que el tope es 20 y que no hay un segundo tope más arriba.*
+
+> ### 🔴 **Y LA RAZÓN POR LA QUE UN CARÁCTER IMPORTA: un CHECK más estricto que el proveedor no es «más seguro» — es una regla NUESTRA disfrazada de regla SUYA.**
+>
+> *El día que alguien necesite el carácter 20 va a ir a buscar el límite a la
+> doc equivocada, y la doc equivocada vamos a ser nosotros.* **Todo `CHECK` del
+> generador dice `<= 20`.**
 Nuestros UUID (36) **no caben** — el `dev_reference = compra` de Nuvei no se
 replica acá.
 
@@ -166,9 +176,24 @@ La letra fija el contrato del generador; la forma exacta la fija la pista:
 - **El cliente paga con el CÓDIGO ÚNICO de 6 dígitos** (`numericCode`): la
   pantalla de espera lo muestra grande, con su cuenta regresiva, y la voz
   dice qué hacer: «Abrí tu app Deuna e ingresá este código».
-- **Reloj del código: 3 minutos FIJOS, no configurables** (literal del
-  proveedor). La ley que se deriva: **el código vive 3 minutos; la sesión de
-  pago vive lo que viva el hold** (§6). Código vencido con hold vivo →
+- 🔴 **Reloj del código: 3 minutos PORQUE LOS PEDIMOS NOSOTROS** —
+  ~~fijos, no configurables (literal del proveedor)~~. **`expiredTime` es un
+  campo del request**, medido por D y consumido por C: *la v1.1 leyó el papel y
+  llamó «límite ajeno» a una elección propia.*
+
+  > **La diferencia no es de trivia: cambia de quién es la decisión.** Un
+  > límite del proveedor no se discute; **una elección nuestra se revisa** — y
+  > mientras se creyó ajena, nadie iba a preguntarse si 3 minutos es el número
+  > correcto.
+
+  **Rige: pedimos 3 minutos, por elección nuestra** — coherente con su doc y
+  **protege el hold** (dos relojes, y el del código tiene que morir antes).
+  **Decisión revisable, no límite.**
+- 🔴 **La pantalla lee el instante que devuelve el servidor, JAMÁS una
+  constante.** *Si el número vive en dos lugares, el día que cambie uno la
+  cuenta regresiva miente sin que nadie lo note.* La puerta devuelve `expira_en`
+  (§3.2) y la pantalla resta contra eso. La ley que se deriva: **el código vive
+  lo que el servidor diga; la sesión de pago vive lo que viva el hold** (§6). Código vencido con hold vivo →
   botón «Generar un código nuevo» (nueva `payment/request`, nuevo intento
   del candado o el mismo según lo que el censo determine — la pista mide el
   patrón contra el UNIQUE). Hold muerto → no nacen más códigos (compuerta 1).
@@ -317,6 +342,24 @@ como dato, no como consulta.
 ---
 
 ## Historial
+
+- **v1.4 (22-ago-2026, mesa 104 — sale del parte de C):** **§5 deja de mentir
+  sobre de quién es una decisión.** `expiredTime` **es un campo del request**,
+  no un límite del proveedor: la v1.1 lo leyó del papel y escribió «3 minutos
+  fijos, no configurables». **Rige: pedimos 3 minutos por elección propia,
+  declarada REVISABLE**, coherente con su doc y elegida para que el reloj del
+  código muera antes que el hold. *Mientras se creyó ajena, nadie iba a
+  preguntarse si el número era el correcto.* Y entra su corolario: **la pantalla
+  lee el `expira_en` que devuelve el servidor, jamás una constante** — un número
+  que vive en dos lugares es una cuenta regresiva que algún día miente.
+
+- **v1.3 (22-ago-2026, mesa 104):** la referencia corta queda en **`≤ 20`** por
+  firma de la mesa, con el **barrido** de la pista D como fuente (20 pasa; 21,
+  25, 30, 36, 40, 50, 64 y 100 rebotan con el literal del proveedor). Deja de
+  ser una marca de pista y pasa a ley, con su porqué escrito: **un CHECK más
+  estricto que el proveedor no es más seguro — es una regla nuestra disfrazada
+  de regla suya**, y el día que alguien busque el límite va a leer la doc
+  equivocada, que vamos a ser nosotros.
 
 - **v1.2 (22-ago-2026, mesa 104 — la primera versión escrita contra el
   ambiente REAL):** entra con el parte de la pista D del mismo día. **La regla

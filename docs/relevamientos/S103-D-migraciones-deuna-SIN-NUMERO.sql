@@ -152,7 +152,8 @@ COMMENT ON COLUMN public.pagos_intentos.transfer_number IS
 -- ───────────────────────────────────────────────────────────────────────────
 -- M3 · LA REFERENCIA CORTA — el delta más filoso (LETRA_DEUNA §4)
 --
--- `internalTransactionReference` admite **< 20 caracteres**. Nuestros UUID
+-- `idTransacionReference` admite **<= 20 caracteres** (firma de mesa 22-ago,
+-- LETRA_DEUNA v1.3 sobre el barrido de QA). Nuestros UUID
 -- miden 36. El `dev_reference = compra` de Nuvei NO se replica.
 --
 -- La letra fija cuatro condiciones. Cómo las cumple esta forma:
@@ -174,7 +175,7 @@ COMMENT ON COLUMN public.pagos_intentos.transfer_number IS
 --  ④ SE RESUELVE A INTENTO POR TABLA, JAMÁS POR PARSING
 --     → columna con UNIQUE + índice. Nunca se lee el string para deducir nada.
 --
--- Longitud: prefijo 'EP' + 8 chars base36 = **10** (< 20, con margen).
+-- Longitud: prefijo 'EP' + 8 chars base36 = **10** (<= 20, con margen).
 -- Espacio: 36^8 ≈ 2,8 billones. A 1.000 pagos/día son ~7.700 años de secuencia.
 -- ───────────────────────────────────────────────────────────────────────────
 
@@ -270,7 +271,14 @@ BEGIN
   v_b := deuna_nueva_referencia();
 
   -- ① longitud
-  IF length(v_a) >= 20 THEN RAISE EXCEPTION 'cinturon M3: referencia >= 20 (%)', length(v_a); END IF;
+  -- 🔴 AJUSTE S103-A (dictamen de mesa, 22-ago): era `>= 20`, o sea que
+  --    **rechazaba el 20, que es LEGAL**. El CHECK de arriba ya decía `<= 20`;
+  --    el cinturón era más estricto que el CHECK y que el proveedor.
+  --    *Un guard más estricto que la regla que vigila no es más seguro: es una
+  --    segunda regla, nuestra, disfrazada de la suya — y el día que difieran
+  --    gana la equivocada.* No dispara hoy (el generador produce 10), y por eso
+  --    mismo habría vivido años sin que nadie lo midiera.
+  IF length(v_a) > 20 THEN RAISE EXCEPTION 'cinturon M3: referencia > 20 (%)', length(v_a); END IF;
   IF length(v_a) <> length(v_b) THEN RAISE EXCEPTION 'cinturon M3: longitud no es fija'; END IF;
 
   -- ② no consecutiva: dos seguidas NO pueden diferir sólo en el último char.

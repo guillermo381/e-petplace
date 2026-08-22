@@ -1,6 +1,6 @@
 # LETRA_COBRO_RECURRENTE.md — e-PetPlace · el cobro que llega solo
 
-> **Versión:** v1.1 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
+> **Versión:** v1.2 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
 > COMPLETA — las cinco firmas del founder recibidas (21-ago). Sin firmas
 > pendientes.
 > **Fuentes que obedece:** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101`
@@ -70,7 +70,20 @@ no pide permiso: informa, y el cobro corre igual.
   monto que se cobra** — si entre el aviso y el cobro el monto cambiara, rige
   §5.
 - **Canal:** el que `MODELO_NOTIFICACIONES` ya tenga para esta clase (la
-  pista mide; no nace canal nuevo).
+  pista mide; no nace canal nuevo). **Medido en S103: es
+  `pedido_recurrente`**, y hoy está `en_sombra = true` — se registra y no se
+  entrega. *Sale de sombra AL FINAL, cuando el cobro exista* (§10.4bis).
+- 🔴 **EL AVISO SE CORRIGE A SU ALCANCE REAL** *(dictamen de mesa, 22-ago)*.
+  El aviso vigente promete, literal en su carga, **«saltar, mover o cancelar»**
+  — y **medido: solo existe cancelar.** Las funciones de recurrencia son cuatro
+  y **ninguna saltea ni mueve.**
+
+  > ### **Dos tercios de una promesa sin camino no son una funcionalidad pendiente: son una mentira con fecha.**
+
+  **Rige: el aviso dice lo que se puede hacer, que es cortar.** *La pantalla de
+  la familia ya se construyó así —un solo botón— así que hoy el que miente es
+  el payload, no la superficie.* **Saltar y mover NO se construyen en v1**: no
+  están en ninguna firma y son producto nuevo (§8 · `D-869`).
 - **La ventana de 48 h es también la ventana de gracia:** cancelar dentro de
   ella cancela **ese** cobro y la serie hacia adelante, sin costo — porque
   todavía no se cobró nada.
@@ -170,6 +183,12 @@ sustituye sin que el cliente lo pida, nunca».
 
 ## §8 · LO QUE NO ENTRA EN v1
 
+🔴 **SALTAR UNA ENTREGA y MOVER SU FECHA — `D-869`, dueño PRODUCTO.** *El aviso
+las prometía y el motor nunca las tuvo.* **No son deuda técnica: son producto
+que nadie firmó** — saltar un período plantea qué pasa con el cobro de ese
+período, y mover una fecha plantea si la cadencia se corre o se mantiene. **Las
+dos son decisiones de letra, no de código**, y por eso no se construyen
+«mientras estamos acá». *La cura de v1 es que el aviso deje de prometerlas.* ·
 Paquete de salidas (pago único, P16) · programa de adiestramiento (espera su
 firma ③ en D-856) · sustitución de productos por iniciativa de la casa — prohibida por §7, no diferida · cobro
 recurrente en DeUna (ese riel es push: el cliente confirma en su app — **no
@@ -211,6 +230,17 @@ trenza).
 ---
 
 ## Historial
+
+- **v1.2 (22-ago-2026, mesa 104 — sale del censo de S103):** **§3 gana la
+  corrección del aviso y §8 gana `D-869`.** El aviso vivo promete *«saltar,
+  mover o cancelar»* y **solo existe cancelar** —medido: las cuatro funciones de
+  recurrencia no saltean ni mueven—. *La pantalla de la familia ya se había
+  construido con un solo botón, así que el que diverge es el payload.* **Saltar
+  y mover salen de v1 con ficha y dueño (producto):** no son deuda técnica sino
+  decisiones de letra que nadie firmó —qué pasa con el cobro del período que se
+  saltea, si mover corre la cadencia o la mantiene—. Y se registra el canal
+  medido: **`pedido_recurrente`, hoy `en_sombra = true`**, que sale de sombra
+  **al final**, cuando el cobro exista.
 
 - **v1.1 (21-ago-2026, misma mesa):** entra la **firma ⑤** y la letra
   queda sin pendientes. §7 pasa de dos salidas abiertas a ley: se
