@@ -20016,3 +20016,23 @@ interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
 > avisa apenas salga el PASO 3 del guion, no al terminarlo.** *Su desbloqueo está
 > en el primer minuto del día 1; hacerla esperar el final es dejarla parada
 > mirando un guion que ya la había liberado.*
+- **L-366** — **UN CONTRATO ESCRITO A MANO DIVERGE DE LA FUNCIÓN QUE DESCRIBE EN EL MOMENTO EXACTO EN QUE ALGUIEN AGREGA UN `return` — Y ENVEJECE POR OMISIÓN, NO POR ERROR.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**.* La puerta de DeUna emite **12** códigos; su contrato D→C declaraba **10**; el wrapper que lo tradujo declaró **10**. **Nadie se equivocó: el contrato seguía siendo CIERTO sobre todo lo que sí mencionaba.** > ### **Un documento que envejece por omisión no se puede pescar releyéndolo — porque cada línea que tiene sigue estando bien.** *Un error se ve al revisar; una ausencia sólo se ve comparando contra la fuente, y nadie compara contra la fuente lo que ya leyó.* 🔴 **Y el daño NO era de runtime:** el `as CodigoDeuna` deja pasar el código igual. **Era de TIPO — un `switch` exhaustivo habría compilado diciendo que cubrió todo, y `monto_invalido` habría quedado SIN VOZ**, que es lo que `LETRA_DEUNA` §7 prohíbe. *El cast estaba bien donde estaba; lo que estaba mal era la lista contra la que casteaba.* **EL REMEDIO ES DE CLASE Y NO DE CUIDADO: el contrato se EXTRAE del código, no se mantiene al lado.** El gate que D construyó lo hace **en las dos direcciones** —un emitido sin declarar rompe, y un declarado sin emisor también—, *porque **una voz para un caso imposible se ve igual que una voz que falta**.* **Familia de `L-365`: no alcanza con la disciplina; hay que volver imposible lo otro.**
+
+> ### 🔴 PATRÓN DE LA SESIÓN S103 — **LA TRADUCCIÓN ENTRE PIEZAS PIERDE ALGO, Y PASÓ CUATRO VECES EN UN DÍA**
+>
+> *Se registra como PATRÓN y no como cuatro fichas sueltas, por orden de la mesa (22-ago-2026), porque leídas juntas dicen algo que ninguna dice sola.*
+>
+> | # | qué se tradujo | qué se perdió | lo cazó |
+> |---|---|---|---|
+> | ① | el diff conceptual del actuador → el cuerpo | **4 de 5 extracciones del payload** (`L-353`) | escribir el cuerpo contra el objeto |
+> | ② | el contrato del buzón → el actuador | **la anidación `{webhook, info}`**, cambiada después de entregado (`L-355`) | el cruce de D contra su propia pieza |
+> | ③ | el contrato de la puerta → el tipo del wrapper | **2 de 12 códigos** (`L-366`) | el gate que extrae del archivo |
+> | ④ | «lo que lleva el OTA» → el mensaje a C | **los 4 commits de C**, afirmados sin medir (`L-357`) | C, midiendo por ancestría |
+>
+> **Lo que tienen en común, y es la parte que sirve:** en los cuatro **el traductor fue FIEL** — tradujo exactamente lo que tenía delante. *Nadie leyó mal. Lo que falló fue que **la fuente ya no era la fuente**: había cambiado, o estaba incompleta, o era un recuerdo.*
+>
+> > **La fidelidad no alcanza si no sabés contra qué estás siendo fiel.**
+>
+> **Y las cuatro las cazó lo mismo: volver a la FUENTE en vez de al INTERMEDIARIO** — el objeto vivo, el archivo, la ancestría. **Ninguna la cazó releer el documento.**
+>
+> ⇒ **Regla de la casa que sale de esto: toda pieza que traduce otra declara CONTRA QUÉ VERSIÓN tradujo, y todo contrato entre pistas se extrae de su fuente o lleva un gate que lo compare.** *Las cuatro fueron entre pistas distintas; ninguna habría existido dentro de una sola cabeza.* **Es el costo del paralelo, y se paga con instrumentos, no con cuidado.**
