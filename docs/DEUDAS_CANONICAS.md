@@ -19887,3 +19887,115 @@ en serio las FKs hacia `auth.users` y va a ver las dos juntas).
 - **L-360** — **PEDIR UNA EXCEPCIÓN A UNA LETRA LLAMÁNDOLA «NO ES UNA EXCEPCIÓN» SIGUE SIENDO PEDIR LA EXCEPCIÓN.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D, que lo declaró sobre su propia propuesta**.* El argumento era **técnicamente correcto** —la referencia del pago es **llave**, no verdad, y `LETRA_DEUNA` §7 prohíbe *confiar en la señal para confirmar*, no *usarla para encontrar el sujeto*—. **Y aun así se rechazó.** > ### **La objeción no fue sobre si era correcto: fue sobre si SOBREVIVE.** *«Una regla que necesita un párrafo para no ser malinterpretada es una regla que va a ser malinterpretada.»* **Dentro de tres sesiones alguien lee «el actuador lee del webhook» y no lee el párrafo.** **Y la formulación que la cierra la escribió quien había hecho la propuesta:** *«una regla con una excepción justificada es una regla con excepciones»*. **§7 vale precisamente porque no las tiene.** *Corolario operativo: cuando una excepción exige explicarse para no parecer lo que parece, el costo real no es el de hoy — es el de todas las lecturas futuras que no van a traer el contexto.*
 - **L-361** — **UN DOCUMENTO QUE DECLARA CONTEOS Y ESTADOS DE MERGE SE ENVEJECE SOLO.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-D**, que se la aplicó a sí misma tras ver `L-357` cobrada sobre A.* Un traspaso que dice *«40 tests verdes»* y *«nada mergeado a `main`»* hace **dos afirmaciones con fecha de vencimiento** que el lector del lunes va a tomar por ciertas — *y la del conteo ya había vencido el mismo día en que se escribió.* > ### **Un número en un documento es una medición con fecha de vencimiento: se saca de CORRER el instrumento, jamás de recordarlo.** *Es `L-141` (la prosa decae, el objeto no) aplicada al documento que uno mismo escribe — el lugar donde menos se sospecha, porque uno sabe que lo midió… en algún momento.* **Regla: todo conteo o estado de merge en un traspaso se re-corre al cerrarlo, y si no se puede re-correr, se escribe el COMANDO en vez del número.**
 - **L-362** — **UNA CURA SIN SU «ANTES» MEDIDO NO SE DISTINGUE DE UN NO-OP.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-C**, que la propuso sobre su propio trabajo.* Curó `D-874` declarando `expo-clipboard` en las dos apps, corrió el autolinking, **salió verde** — y sólo entonces midió el estado contrario: **sin la cura, el autolinking lo veía igual** (`packages/ui` lo declara y el autolinking recorre el workspace entero). **La cura no curaba nada.** > ### **Cuando una cura sale verde al primer intento sobre una deuda que llevaba días abierta, el «antes» es OBLIGATORIO: lo barato de la cura es la señal de sospecha, no la de éxito.** *Y el costo de no medirlo es peor que el no-op: la ficha se cierra, **el síntoma queda vivo y sin dueño**, y nadie busca la causa verdadera.* **Su hermandad con `L-357`, que C nombró y es la parte que trasciende el caso:** son **la misma clase en direcciones opuestas** — *uno mide «¿está?» cuando cree que sí; el otro mide «¿ya estaba?» cuando cree que no.* **El instrumento es el mismo: medir el estado contrario al que uno espera.**
+
+---
+
+### D-876 🔴 · LA TARJETA «COMPOSICIÓN» SE CONTRADICE A SÍ MISMA EN DOS LÍNEAS SEGUIDAS
+
+🔴 **ALTA. Elevada por la mesa** (founder, 22-ago-2026): *«es lo más grave del
+cajón 2 y es voz que MIENTE, no preferencia».* **Hallada caminando, no
+leyendo.** **Dueño: C** (`apps/cliente`).
+
+**Medido en aparato**, ficha de un producto con `composicion_estado = 'ausente'`:
+
+> *«No tenemos los ingredientes de este producto. **El fabricante no los declaró.**»*
+> *«**Declarada por el fabricante**, todavía sin verificar.»*
+
+> ### **La primera dice que el fabricante NO declaró. La segunda dice que SÍ. Están una debajo de la otra, en la misma tarjeta.**
+
+**Las dos claves, localizadas:** `despensa.composicionAusente` (`es.ts:1731`) y
+`despensa.composicionFuente` (`es.ts:1733`). **El defecto no es de texto: es de
+CONDICIÓN** — `composicionFuente` se monta **siempre**, también cuando el estado
+es `ausente`.
+
+**Discriminador medido, que prueba que es condicional y no de redacción:** en un
+producto **CON** composición la tarjeta muestra *«Declara contener: Cerdo,
+Pescado, Pollo, Res, Soja.»* **y ninguna contradicción.** *La segunda línea es
+correcta donde hay algo que atribuir; el defecto es que aparece donde no lo hay.*
+
+**Cura: `composicionFuente` sólo cuando la composición EXISTE.** *No se toca su
+texto — el texto está bien.*
+
+**Por qué no es cosmético:** `MODELO_DESPENSA` §6 y la letra de la alergia hacen
+que **el silencio sobre composición se lea como «no tiene»**, y por eso la casa
+exige que la ausencia **se DIGA**. **Una tarjeta que dice las dos cosas deja al
+dueño sin saber cuál creer — que es peor que cualquiera de las dos sola.**
+
+**Disparo: antes del gate del founder sobre la despensa.**
+
+---
+
+### D-877 🟡 · CINCO FILAS DE CUENTA COMPARTEN EL MISMO GLIFO
+
+🟡 **MEDIA.** Hallada caminando (S103-A, 22-ago). **Dueño: C.**
+Medido en aparato: **Preferencias · Medios de pago · Lámina S74 · Galería de
+tokens** montan **el mismo glifo** (sol con cara). *La ley del glifo dice que no
+se repite: un glifo repetido deja de ser un identificador y pasa a ser
+decoración — y una lista donde cuatro filas de cinco llevan el mismo dibujo se
+lee más lento que una sin dibujos.* **Disparo: la próxima pasada de Cuenta.**
+
+---
+
+### D-878 🟢 · UNA LÁMINA DE SESIÓN VIVE EN CUENTA SIN DECLARARSE
+
+🟢 **BAJA. Orden de la mesa: «curalo o declaralo como la galería».**
+**Dueño: C.** *«Lámina S74 · la fusión del avatar»* es una **herramienta de
+sesión** montada en superficie de producto, **sin `__DEV__` y sin decir lo que
+es**. **La galería, a dos filas de distancia, SÍ se declara** —*«herramienta de
+sesión — no es pantalla de producto»*— *así que el precedente está en la misma
+pantalla y a la vista.* **Disparo: la próxima pasada de Cuenta.**
+
+---
+
+### D-879 🟡 · DOS BOTONES APILADOS, Y EL DE ABAJO ES LA CAJA VACÍA QUE LA 19.7 MATÓ
+
+🟡 **MEDIA.** Hallada caminando. **Dueño: C.** En `Cuenta → Sesión y cuenta`,
+`Cerrar sesión` va **sólido** y `Eliminar cuenta` va **con contorno
+transparente**, apilados. **La 19.7 dice: por superficie UN sólido; el resto
+baja a label — nunca la caja vacía del medio.** ⚠️ **Y hay una razón de producto
+encima de la de forma: el contorno le da a «Eliminar cuenta» un peso visual que
+compite con «Cerrar sesión», que es la acción cotidiana.** *La destructiva no
+tiene que verse más liviana ni más pesada: tiene que verse DISTINTA.*
+**Disparo: la pasada de Cuenta, o el arco de `P15` cuando construya el cierre.**
+
+---
+
+### D-880 🟢 · EL CARRITO FLOTANTE SE SUPERPONE A LA BARRA DE TABS
+
+🟢 **BAJA.** Medido en aparato en dos pantallas (Cuenta, ficha de producto): el
+FAB del carrito **cae sobre la zona de la barra** y tapa parte de la tab de la
+derecha. **Dueño: C.** *No impide tocar la tab —el FAB no la cubre entera— pero
+la corona.* **Disparo: la próxima pasada de la despensa.**
+
+---
+
+### D-881 🟢 · EL SUBTÍTULO DE «PONTE AL DÍA» SE TRUNCA A MITAD DE HORA
+
+🟢 **BAJA.** Medido: *«Tienes 18 pedidos en curso / 20 de agosto, 2:00 p. m.–6:00
+p. …»* — **la ventana de entrega se corta en la segunda hora.** **Dueño: C.**
+*El dato truncado es justamente el que la fila existe para dar: la ventana.*
+⚠️ **Los 18 pedidos son dato de prueba; el truncado NO** — con una sola ventana
+larga vuelve a pasar. **Disparo: la próxima pasada del Hogar.**
+
+---
+
+### D-882 🟡 · LA GALERÍA TIENE DOS ERRORES DE CONSOLA VIVOS, Y VAN A TAPAR EL GATE
+
+🟡 **MEDIA — y su urgencia es de CALENDARIO, no de gravedad.** **Dueño: B.**
+Medido en aparato con su fuente exacta:
+
+| error | origen |
+|---|---|
+| `Encountered two children with the same key, 'carnet'` (y `'caso'`) | **`TokenGallery.tsx (5234:17)`**, `<EjemploSetBPrima />` |
+| `Text strings must be rendered within a <Text> component` | **`TokenGallery.tsx (2434:7)`** |
+
+🔴 **CORRECCIÓN DE UN REPORTE PROPIO, declarada:** A los reportó primero como
+defecto de **producto** (`H5` del recorrido) **antes de leer su origen.** **Son
+de la GALERÍA** — herramienta de sesión. *Es `L-357` otra vez: afirmar un paso
+más allá de lo medido; la clave `carnet` existe en pantallas de producto y eso
+bastó para suponer que venía de ahí.* **Cambia dueño y gravedad.**
+
+**Por qué entra igual y con fecha: el founder va a caminar ESA galería** para
+los dos gates de B, y **los overlays de error se montan encima**. *Un gate
+interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
+**Disparo: antes del gate de B sobre el glifo y el stepper.**
