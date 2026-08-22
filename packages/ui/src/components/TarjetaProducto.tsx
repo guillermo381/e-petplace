@@ -310,6 +310,15 @@ export interface TarjetaProductoProps {
    * lado; esta prop solo deja de romperla.*
    */
   alcance?: string | null
+  /** ESTE VENDEDOR NO PUEDE ENTREGAR — acotado a `ok:false` (pedido de C).
+   *
+   *  **La ventana feliz NO va acá:** una tarjeta de vitrina no es el lugar
+   *  para *«llega el jueves»* — eso se dice donde se decide la entrega.
+   *  Esto dice **una sola cosa y es una imposibilidad**.
+   *
+   *  El porqué de que sea prop nueva —y no `hayStock` ni `alcance`— vive
+   *  donde se dibuja, junto a su precedencia y a lo que NO hace. */
+  sinEntrega?: boolean
   /** Abrir la ficha. La FOTO y el NOMBRE llevan acá; el `+` no. */
   onPress: () => void
   /**
@@ -368,6 +377,7 @@ export function TarjetaProducto({
   fotoUrl,
   compra,
   alcance = null,
+  sinEntrega = false,
   onPress,
   alergia,
 }: TarjetaProductoProps) {
@@ -473,6 +483,46 @@ export function TarjetaProducto({
             </View>
           ) : (
             <Image source={{ uri: fotoUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          )}
+
+          {/* 🔴 NO PUEDE ENTREGAR — el cartel va EN la puerta (S103-B).
+              Misma anatomía que «sin stock» y por la MISMA ley de la
+              cabecera: *el cartel de cerrado va en la puerta del local, no
+              en la vereda*. Avisarlo en el checkout obliga a llenar un
+              carrito para enterarse.
+
+              ── POR QUÉ NO SIRVE NINGUNA DE LAS DOS SALIDAS QUE YA HABÍA ──
+              · `hayStock:false` **MENTIRÍA**: hay stock, lo que falta es
+                reparto. Y la mentira no es gratis —esa prop es la que le
+                dice a la familia *«¿puedo comprar esto?»*—; el día que el
+                vendedor abra un corte de entrega, el producto vuelve solo.
+              · `alcance` **no llega**: su contrato dice que la cara
+                CLIENTE la recibe en `null` —el veredicto es del vendedor—
+                y esto es justamente lo que la familia tiene que ver.
+
+              ⚠️ **PRECEDENCIA, y es una decisión: sin stock GANA.** Si no
+              hay unidades, «no entrega» es ruido — ya no se puede comprar
+              por una razón anterior. *Dos carteles sobre la misma foto
+              obligan a leer dos veces para saber lo mismo.*
+
+              ⚠️ **Y LO QUE ESTA PROP NO HACE, declarado: no apaga el `+`.**
+              Solo DICE. Si un vendedor sin reparto igual vende para retiro
+              en tienda, apagar el botón acá lo rompería — y esa decisión
+              es de producto, no de la pieza. */}
+          {compra.modo === 'espejo' || !compra.hayStock || !sinEntrega ? null : (
+            <View
+              style={{
+                position: 'absolute',
+                left: spacing[2],
+                bottom: spacing[2],
+                paddingHorizontal: spacing[2],
+                paddingVertical: spacing[1],
+                borderRadius: radius.sm,
+                backgroundColor: theme.bg.base,
+              }}
+            >
+              <Texto variante="apoyo">{t('tarjetaProducto.sinEntrega')}</Texto>
+            </View>
           )}
 
           {/* Sin stock: el cartel va EN la puerta (ver la cabecera). */}

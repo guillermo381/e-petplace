@@ -49,6 +49,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  Children,
   type ReactNode,
 } from 'react'
 import {
@@ -88,6 +89,22 @@ import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
 const AnimatedGHScrollView = Animated.createAnimatedComponent(GHScrollView)
+
+/** El aire de arriba del scroll. Se nombra porque el corte por bloque lo
+ *  SUMA: el `y` que reporta un hijo es relativo al contenido, no a la caja. */
+const PAD_TOP_SCROLL = spacing[1]
+
+/** CUÁNTO ASOMA EL BLOQUE SIGUIENTE (§15).
+ *
+ *  §15 deja el número al ojo del founder y fija la ley: **que asome
+ *  ESTRUCTURA y no TEXTO.** Por eso no es un número suelto — es
+ *  `spacing[2]`, **el mismo relleno vertical que usa `Celda`**: lo que
+ *  entra en la ventana es su padding y ni un píxel de glifo.
+ *
+ *  ⚠️ *Si un bloque futuro tuviera menos relleno que esto, asomaría letra
+ *  y la ley se rompería.* Es el número a mover si eso pasa, y por eso vive
+ *  con nombre en vez de estar tecleado abajo. */
+const ASOMO_DEL_FOLD = spacing[2]
 
 // El pan del swipe-to-close, expuesto a los descendientes para que un
 // scrollable interno pueda bloquearlo en su área (ver HojaScroll).
@@ -131,6 +148,20 @@ export interface HojaProps {
    *  cuando el botón gris está a la vista. *Un botón apagado cuya razón
    *  no se ve es peor que uno sin razón: manda a adivinar.* */
   pie?: ReactNode
+  /** EL FOLD CORTA POR BLOQUE (`DIRECCION_ARTE` §15 — el porqué completo
+   *  vive donde se calcula, en el cuerpo de la pieza).
+   *
+   *  Enciéndelo en una Hoja cuyo contenido **puede exceder el alto** y
+   *  esté hecho de bloques repetidos (una lista de `Celda`, de tarjetas).
+   *  Sin esto, el corte cae **sobre** una línea: medido en la hoja de
+   *  medios de pago, **23 px de una línea de 38**.
+   *
+   *  ⚠️ **Opt-in, y no por prudencia:** para saber dónde termina cada
+   *  bloque hay que **envolver a cada hijo en un `View` que mide**, y eso
+   *  cambia el árbol — un hijo con `flex` no se comporta igual adentro de
+   *  un envoltorio. *Las hojas que no desbordan no tienen por qué
+   *  pagarlo.* */
+  cortePorBloques?: boolean
 }
 
 export interface HojaScrollProps {
@@ -222,6 +253,7 @@ export function Hoja({
   conCerrar = false,
   apertura = 'default',
   pie,
+  cortePorBloques = false,
 }: HojaProps) {
   const { theme } = useTheme()
   const { height: altoVentana } = useWindowDimensions()
@@ -271,6 +303,69 @@ export function Hoja({
   const altoHoja =
     altura === 'media' ? altoVentana * 0.5 : altura === 'completa' ? altoVentana * 0.9 : undefined
   const altoMax = altura === 'contenido' ? altoVentana * 0.6 : undefined
+
+  /* ═══ EL FOLD CORTA POR BLOQUE (S103-B · `DIRECCION_ARTE` §15) ═══════
+     LA LEY: *«nunca se parte una frase; el corte cae ENTRE líneas, jamás
+     sobre una. Y lo que anuncia que hay más es ESTRUCTURA —el borde
+     superior del bloque siguiente—, jamás un texto mutilado.»*
+
+     **El porqué es de significado:** media línea no comunica «hay más»,
+     comunica «esto se rompió». *Un texto mutilado es un defecto en
+     cualquier otro contexto, así que usarlo como señal enseña a leer un
+     defecto como una señal.* Medido en el caso vivo (la hoja de medios de
+     pago): **se veían 23 px de una línea de 38.**
+
+     🔴 **POR QUÉ SE MIDEN LOS BLOQUES Y NO SE CALCULA UN PASO.** Lo obvio
+     era pedirle al consumidor el alto de una fila y cortar en múltiplos.
+     **No sirve, y lo dice la propia `Celda`:** su `ALTURA_MIN` es un
+     MÍNIMO y su cabecera declara *«la fila CRECE»*. Un paso fijo funciona
+     hasta que un nombre envuelve a dos líneas — y ahí vuelve a cortar por
+     el medio **sin que nada avise**. *Sería el instrumento midiendo el
+     formato que espera en vez del que el contenido tiene.*
+
+     ⚠️ **OPT-IN**, y no por prudencia: envolver cada hijo en un `View`
+     que mide **cambia el árbol**, y un hijo con `flex` no se comporta
+     igual adentro de un envoltorio. Las hojas que hoy no desbordan no
+     tienen por qué pagar eso. */
+  const [bordes, setBordes] = useState<number[]>([])
+  const [presupuesto, setPresupuesto] = useState(0)
+
+  const bloquesMedidos = useMemo(
+    () =>
+      Children.map(children, (hijo, i) =>
+        hijo === null || hijo === undefined || hijo === false ? null : (
+          <View
+            key={i}
+            onLayout={(e) => {
+              const { y, height } = e.nativeEvent.layout
+              const borde = y + height
+              setBordes((prev) => {
+                if (prev[i] === borde) return prev
+                const sig = [...prev]
+                sig[i] = borde
+                return sig
+              })
+            }}
+          >
+            {hijo}
+          </View>
+        ),
+      ),
+    [children],
+  )
+
+  /** El tope del scroll, snapeado al último borde de bloque que entra.
+   *  `undefined` = sin corte, y sus TRES casos son distintos a propósito:
+   *  no se pidió · no desborda (no hay nada que cortar) · **un solo bloque
+   *  es más alto que la hoja entera** — ahí no existe un corte por bloque
+   *  y forzar uno dejaría la hoja vacía. *Se declara en vez de inventarse.* */
+  const topeDelCorte = useMemo(() => {
+    if (!cortePorBloques || presupuesto === 0) return undefined
+    if (altoContenido <= presupuesto + 1) return undefined
+    const cabe = bordes.filter((b) => typeof b === 'number' && b + PAD_TOP_SCROLL + ASOMO_DEL_FOLD <= presupuesto)
+    if (cabe.length === 0) return undefined
+    return Math.max(...cabe) + PAD_TOP_SCROLL + ASOMO_DEL_FOLD
+  }, [cortePorBloques, presupuesto, altoContenido, bordes])
 
   const translateY = useSharedValue(altoVentana)
   const backdrop = useSharedValue(0)
@@ -588,13 +683,23 @@ export function Hoja({
                    *  slot vino a curar, un piso más abajo. Con pie o sin
                    *  él, es además lo correcto bajo `maxHeight`: la caja
                    *  que puede desbordar es la que tiene que ceder. */
-                  style={{ flexShrink: 1 }}
-                  onLayout={(e) => setAltoVisible(e.nativeEvent.layout.height)}
+                  style={{ flexShrink: 1, maxHeight: topeDelCorte }}
+                  onLayout={(e) => {
+                    const h = e.nativeEvent.layout.height
+                    setAltoVisible(h)
+                    // El presupuesto es el alto SIN capar. Se guarda el
+                    // máximo visto porque el corte solo achica: si se leyera
+                    // el alto de ahora, cada corte encogería el presupuesto y
+                    // el siguiente cortaría más — un lazo que se come la hoja.
+                    setPresupuesto((p) => (h > p ? h : p))
+                  }}
                   onContentSizeChange={(_a, alto) => setAltoContenido(alto)}
-                  contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[1] }}
+                  contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: PAD_TOP_SCROLL }}
                   keyboardShouldPersistTaps="handled"
                 >
-                  <HojaPanContext.Provider value={pan}>{children}</HojaPanContext.Provider>
+                  <HojaPanContext.Provider value={pan}>
+                    {cortePorBloques ? bloquesMedidos : children}
+                  </HojaPanContext.Provider>
                 </AnimatedGHScrollView>
               </GestureDetector>
 

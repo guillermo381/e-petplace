@@ -114,6 +114,7 @@ export const uiEn = {
   // inventario ajeno (firma S99).
   tarjetaProducto: {
     sinStock: 'Out of stock',
+    sinEntrega: 'No delivery for now',
     agregar: 'Add {{nombre}} to cart',
     cantidad: 'Quantity of {{nombre}}',
     agregarCorto: 'Add',
