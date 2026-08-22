@@ -29,6 +29,21 @@
  *   *Es el patrón que el hold del checkout de reserva ya usa (`expiraEn`), y
  *   deriva en vez de emparejar.*
  *
+ * ✅ **LA MESA RESOLVIÓ LA TENSIÓN A FAVOR DE ESTO** (firma del founder,
+ * 22-ago-2026): *«el vencimiento del código sigue leyéndose del servidor —
+ * correcto, la letra se enmienda»*. **Este código no cambia: ya era la
+ * conducta firmada.**
+ *
+ * ⚠️ **Y la distinción que hay que conservar, porque no es la misma cosa:
+ * está FIRMADO, NO DEPOSITADO.** Medido contra `origin/main` el 22-ago:
+ * `LETRA_DEUNA` sigue en **v1.1** y su §5 sigue diciendo *«3 minutos FIJOS,
+ * no configurables»*. **El depósito es de A** (`docs/` es su territorio).
+ * *Hasta que llegue, quien lea la letra va a encontrar la versión vieja — por
+ * eso este comentario NO afirma que la letra ya dice otra cosa: dice qué se
+ * firmó y qué falta. Una firma que vive solo en un parte no está firmada
+ * (N11′), y un comentario que le atribuye a un documento algo que el
+ * documento no dice es la otra mitad del mismo defecto.*
+ *
  * ── LOS DOS RELOJES, QUE JAMÁS SE CONFUNDEN (§6) ─────────────────────────
  *
  * **Solo el del CÓDIGO se dibuja como reloj.** El del hold **no**: se dibuja

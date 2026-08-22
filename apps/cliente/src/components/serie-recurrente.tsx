@@ -21,6 +21,29 @@
  * tienen camino.* ⇒ **se dibuja lo que existe.** Un botón que promete saltar
  * una entrega y no puede es peor que su ausencia.
  *
+ * ✅ **Ratificado por la mesa (22-ago-2026):** *«el texto del aviso se corrige
+ * al alcance real: solo cancelar; saltar y mover salen de la voz porque no
+ * existen ni se construyen en v1»*.
+ *
+ * 🔴 **PERO EL ALCANCE DE ESA CORRECCIÓN ES POR SUJETO, Y ESTÁ MEDIDO — quien
+ * la ejecute tiene que leer esto antes de barrer cadenas:**
+ *
+ * | sujeto | ¿saltar / mover existen? | medido |
+ * |---|---|---|
+ * | **despensa recurrente** (esta pantalla) | ❌ **NO** | 4 funciones `~*'recurrenc'`, ninguna |
+ * | **plan de paseos** | ✅ **SÍ, y con consumidores vivos** | `saltar_cita_plan` en la base · wrapper `saltarCitaPlan` (`planes.ts:322`) · **2 pantallas lo montan** (`hogar/paseos.tsx`, `confirmar-programa.tsx`) |
+ *
+ * ⇒ **La frase que se corrige vive en el MOTOR, no acá**
+ * (`20260812180000_s96_b9_recurrencia.sql:154` — territorio de A), y las
+ * cadenas `mover*` / `resumenMover` del diccionario del cliente **son del PLAN
+ * y NO se tocan**: ahí la función existe y P14 la firma.
+ *
+ * *Un barrido de «saltar/mover» por nombre sobre el diccionario apagaría una
+ * función viva del plan creyendo que limpia una promesa falsa de la despensa.
+ * Los dos sujetos comparten mecanismo y NO comparten alcance* —
+ * `LETRA_COBRO_RECURRENTE` §1 dice *«dos sujetos, un mecanismo»*, y ésta es
+ * justo la línea donde esa frase se cobra.
+ *
  * ── LOS DOS DATOS QUE ESTA PANTALLA **NO PUEDE** DECIR, y los dice ───────
  *
  * `LETRA_COBRO_RECURRENTE` §2 pide **monto esperado** y **medio de pago**.
