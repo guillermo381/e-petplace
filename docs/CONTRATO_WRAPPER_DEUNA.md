@@ -95,14 +95,24 @@ colapsan acá, *para que un tablero cuente lo mismo que el motor dice*. **Y se
 clasifican en cinco familias, porque cada una pide una voz distinta:**
 
 ### ① DEFECTO NUESTRO — la persona no hizo nada mal y no puede arreglarlo
-`datos_invalidos` · `monto_no_se_recibe` · `servidor_sin_configurar`
+`datos_invalidos` · `monto_no_se_recibe` · `servidor_sin_configurar` ·
+**`desglose_incompleto`** *(movido acá por dictamen de mesa, 22-ago)*
 *(hoy `servidor_sin_configurar` es el `pointOfSale` que falta).*
 **Voz: disculparse y ofrecer soporte. Jamás pedirle que reintente algo que no
 va a cambiar.**
 
 ### ② LA COMPUERTA — nuestro motor diciendo QUE NO SE PUEDE ENTREGAR
 `pago_en_proceso` · `reserva_vencida` · `vendedor_no_activo` ·
-`monto_divergente` · `compra_sin_pedidos` · `desglose_incompleto`
+`monto_divergente` · `compra_sin_pedidos`
+
+> ⚠️ **`desglose_incompleto` SALIÓ de esta familia** — dictamen de mesa,
+> 22-ago-2026: **pasa a ① DEFECTO NUESTRO, y no depende del sujeto.** *El
+> desglose congelado es artefacto nuestro; la persona no tiene nada que
+> corregir volviendo atrás, ni en una compra ni en una cita.* **Voz: soporte,
+> jamás «reintentá».**
+> *Se corrige acá el mismo día del dictamen porque un contrato que conserva la
+> clasificación vieja **envejece por omisión** — sigue siendo cierto sobre todo
+> lo demás que menciona, que es exactamente `L-369`.*
 🔴 **Estos llegan con LA CAUSA REAL y el proveedor NUNCA SE ENTERÓ** — es la
 letra madre de §7: *primero se verifica que se pueda entregar, después se pide
 la plata.* **Voz: la causa concreta y su salida** (rearmar, elegir otro día,
