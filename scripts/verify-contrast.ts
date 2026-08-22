@@ -311,6 +311,18 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
   // superficie real del chip (card en claro, elevated en dark). Los
+  /* S103-B · LA CAJA DEL NÚMERO SOBRE EL BLOQUE LLENO (`StepperCantidad`
+     en `tamano="ancho"` — la grilla de la despensa).
+     🔴 **Se declara porque el contorno de ese campo ES esta tinta**, y el
+     gate tenía pares de CTA *fijos* (papel/tealDark) pero NO el par
+     RESUELTO POR CASA — que en el cliente es el bloque de ORO y en el
+     prestador el teal. *Sin esta línea, el gate calla justo sobre la
+     superficie donde el founder dijo que no se lee el campo.*
+     El mínimo es el de TEXTO y no el de superficie: la misma tinta pinta
+     los dígitos y los signos, así que si el contorno pasara con 3 y el
+     dígito no, el número quedaría ilegible adentro de una caja legible. */
+  add('§15 contorno del número sobre el bloque: accent.ctaTexto / accent.cta', t.accent.ctaTexto, t.accent.cta)
+
   /* S103-B · EL TÍTULO DE LA CELDA ELEGIDA (`DIRECCION_ARTE` §14 — el medio
      de pago elegido va en letra magenta, sin huella).
      🔴 **Se declara porque si no, el gate calla sobre un par que existe.**

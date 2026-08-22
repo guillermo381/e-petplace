@@ -2608,9 +2608,43 @@ function GaleriaInterna() {
               sale derivado del lado de los botones de paso, así que los tres se alinean por construcción.
             </Texto>
             <Texto variante="apoyo">
-              Lo que NO está acá y se declara: sobre el bloque lleno (tamano ancho, la vitrina) la caja no
-              se monta. Su interior está definido contra el fondo base y ahí pondría una caja blanca sobre
-              un bloque de CTA. Es 1 de los 3 montajes editables vivos y espera decisión del founder.
+              ⭐ GATE — LOS DOS CONTEXTOS, LADO A LADO. Arriba: sobre superficie normal (el carrito y la
+              ficha). Abajo: sobre el BLOQUE LLENO, que es el de la grilla de la despensa — el que el
+              founder señaló. El defecto solo aparecía abajo, así que juzgarlo arriba sería contestar la
+              pregunta equivocada.
+            </Texto>
+            <View style={{ maxWidth: 200, gap: spacing[2] }}>
+              <Texto variante="apoyo" color="tertiary">sobre el bloque lleno (la grilla)</Texto>
+              <StepperCantidad
+                valor={3}
+                min={1}
+                max={12}
+                onCambio={() => {}}
+                etiqueta="Cantidad"
+                registro="compra"
+                tamano="ancho"
+                editable
+                onBorrar={() => {}}
+              />
+            </View>
+            <Texto variante="apoyo">
+              LA MEDICIÓN CORRIGIÓ EL PEDIDO, y conviene saberlo: no era que la superficie se achicara.
+              Los dos miden IGUAL — 34 de alto y 32 de número en ambos. Lo que pasaba es que sobre el
+              bloque lleno la caja no se montaba nunca. No había que achicar nada: había que cerrar ese
+              hueco.
+            </Texto>
+            <Texto variante="apoyo">
+              Y ahí la caja cambia de material, no de anatomía: mismo radio y mismo grosor, contorno en la
+              tinta del bloque (9,96 en el cliente · 5,51 y 11,01 en el prestador). La inversión a papel
+              que §15b.2 firmó para el muro TEAL no sirve acá y lo dice el número: papel sobre el bloque
+              de oro mide 1,62, y el dígito en oro sobre papel también 1,62 — ilegible. El precedente
+              correcto sobre la superficie equivocada daba un número que no se puede leer.
+            </Texto>
+            <Texto variante="apoyo">
+              Tampoco lleva relleno: un pozo de vidrio sobre el bloque mide 1,30–1,50, la misma banda que
+              §14 ya declaró que no está trabajando. Sumarlo sería decoración, no información. Y el número
+              es un control: 34 de alto más hitSlop 5 por lado dan los 44 de N8 — vertical solamente, para
+              no pisar el blanco de los botones.
             </Texto>
           </View>
         </Seccion>
