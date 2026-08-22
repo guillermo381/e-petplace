@@ -1,6 +1,7 @@
 # LETRA_COBRO_RECURRENTE.md — e-PetPlace · el cobro que llega solo
 
-> **Versión:** v1.3 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
+> **Versión:** v1.4 · **Nace:** 21-ago-2026 (mesa 103) · **Estado:** RIGE
+> **v1.4 (22-ago):** nace §4bis — las compuertas del recurrente, con las DOS que no se corren y su razón (firma del founder).
 > COMPLETA — las cinco firmas del founder recibidas (21-ago). Sin firmas
 > pendientes.
 > **Fuentes que obedece:** el repo y su bitácora · `LETRA_MOTOR_PAGOS_S101`
@@ -171,6 +172,43 @@ El reloj reemplaza al dedo; **todo lo demás es idéntico**:
 7. **Idempotencia por período:** un período de una serie **no puede tener dos
    cobros exitosos**. El candado es de base, no de código (el precedente:
    S101 probó que un UNIQUE bien elegido es más barato que una convención).
+
+## §4bis · LAS COMPUERTAS DEL RECURRENTE *(firma del founder, 22-ago-2026)*
+
+**El cobro recurrente pasa por las MISMAS compuertas que el cobro con cliente
+presente — con DOS excepciones, que se escriben acá y no en un comentario.**
+
+> 🔴 **Por qué en la letra:** *una compuerta salteada sin registro es una que
+> alguien reactiva o borra sin saber qué decidió la mesa.* **Un comentario en el
+> código lo lee quien toca esa función; una excepción de seguridad la tiene que
+> poder leer quien audita el motor sin abrirlo.**
+
+### Las que NO se corren, y por qué
+
+**① `1 · reserva de stock` — NO APLICA.** *No hay pedido todavía.* **§6 manda
+cobrar ANTES de que salga la entrega** ⇒ exigir una reserva viva sería **pedir
+un estado que la propia letra prohíbe que exista** en ese momento.
+
+**② `3 · cobertura` — NO EVALUABLE**, igual que en compras. **Viaja declarada en
+`no_evaluables`, también cuando el resultado es `ok`.** *Que nadie lea ese `true`
+como «la cobertura está verificada»: no se verificó nada de cobertura.*
+
+### Las que SÍ, enteras
+
+**`0 · intento en vuelo`** · **`2 · monto contra el desglose congelado`** ·
+**`4 · vendedor activo` (7.13)** · **`5 · el medio autorizado`** *(el «token» de
+este sujeto: la tarjeta que el cliente eligió PARA ESTA SERIE)*.
+
+> ### 🔴 **Y la #0 es CRÍTICA acá, más que con cliente presente: sin nadie mirando la pantalla, la compuerta es la ÚNICA defensa.**
+> **Un cron que corre dos veces no cobra dos veces.** *Con el dedo, la persona ve
+> que ya pagó y no vuelve a apretar; acá no hay nadie que lo note hasta el
+> resumen de la tarjeta.*
+
+**Y las dos exclusiones VIAJAN EN LA RESPUESTA**, no sólo en esta letra: la de
+cobertura en `no_evaluables` y la de reserva en `no_aplican`, con su razón.
+*Sin eso, un lector futuro va a creer que se olvidaron.*
+
+---
 
 ## §5 · EL MONTO — precio vigente, con aviso *(firma ② del founder, 21-ago)*
 
