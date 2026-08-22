@@ -85,7 +85,7 @@ ALTER TABLE public.pedidos_recurrencias
 -- Las dos funciones vuelven a su forma anterior. Sus cuerpos viejos están en
 -- las migraciones que las crearon; acá se restauran las FIRMAS.
 DROP FUNCTION IF EXISTS public.alternar_recurrencia(uuid, boolean);
-DROP FUNCTION IF EXISTS public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid);
+DROP FUNCTION IF EXISTS public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid, numeric);
 -- ⚠️ Y hay que RE-CREARLAS con su cuerpo original, o el alta y el apagado
 --    quedan sin puerta. Esta reversa NO las reconstruye: exige recuperar el
 --    cuerpo de su migración de origen. *Se dice acá porque una reversa que
@@ -464,8 +464,8 @@ BEGIN
                             'nota', 'El cobro corre cuando ejecutar_recurrencias_vencidas deje de ser stub (tanda siguiente).');
 END $function$;
 
-REVOKE ALL ON FUNCTION public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid) FROM anon, PUBLIC;
-GRANT EXECUTE ON FUNCTION public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid, numeric) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.configurar_recurrencia(uuid, jsonb, jsonb, integer, integer, text, uuid, numeric) TO authenticated;
 REVOKE ALL ON FUNCTION public.alternar_recurrencia(uuid, boolean) FROM anon, PUBLIC;
 GRANT EXECUTE ON FUNCTION public.alternar_recurrencia(uuid, boolean) TO authenticated;
 

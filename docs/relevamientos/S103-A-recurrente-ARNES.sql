@@ -28,6 +28,12 @@
 
 BEGIN;
 
+/* 🔴 LOS RESULTADOS VIAJAN EN UNA TABLA, NO EN `RAISE NOTICE`. *Un NOTICE no
+   llega al reporte del cliente SQL: el arnés salía verde y su evidencia se
+   perdía — el gate del founder es sobre lo RECORRIDO, y lo recorrido tiene que
+   poder verse.* (`L-321`: un instrumento que no imprime no midió nada.) */
+CREATE TEMP TABLE _arnes (n int GENERATED ALWAYS AS IDENTITY, caso text, assert text, resultado text);
+
 DO $arnes$
 DECLARE
   v_uid      uuid;
@@ -40,6 +46,8 @@ DECLARE
   v_n        int;
   v_estado   text;
   v_reint    int;
+  v_susc     uuid;
+  v_meta     jsonb;
 BEGIN
   -- ── ⓪ EL TERRENO — de datos VIVOS, no fabricados ─────────────────────────
   -- 🔴 Se toma un vendedor REAL con turnos y una oferta REAL publicada. *Un
@@ -64,8 +72,14 @@ BEGIN
   END IF;
   IF v_uid IS NULL THEN RAISE EXCEPTION 'ARNES ABORTA: no hay usuario'; END IF;
 
-  INSERT INTO tarjetas_guardadas (user_id, estado, marca, ultimos4, bin, token_proveedor)
-  VALUES (v_uid, 'guardada', 'VISA', '4242', '424242', 'arnes-tok-' || gen_random_uuid()::text)
+  /* 🔴 Las columnas SE MIDIERON: `token` y `proveedor` son NOT NULL y no se
+     llaman como uno supondría (`token_proveedor` no existe). *Escribirlas de
+     memoria hizo fallar la primera corrida — y ese fallo es barato porque
+     ocurrió acá; el mismo supuesto dentro del cuerpo del cobro habría salido
+     verde en el arnés y roto en producción.* */
+  INSERT INTO tarjetas_guardadas (user_id, estado, marca, ultimos4, bin, token, proveedor)
+  VALUES (v_uid, 'guardada', 'VISA', '4242', '424242',
+          'arnes-tok-' || gen_random_uuid()::text, 'nuvei')
   RETURNING id INTO v_tarjeta;
 
   -- ══════════════════════════════════════════════════════════════════════════
@@ -127,6 +141,12 @@ BEGIN
     RAISE EXCEPTION 'A6 FALLA: se lista una serie ya cobrada';
   END IF;
 
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A1','VERDE · la serie vencida ENTRA a para_cobrar');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A2','VERDE · el desglose del periodo se CONGELO (1 fila)');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A3','VERDE · el intento nace con pagador_user_id Y pagador_origen=recurrencia');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A4','VERDE · 🔴 el cron corre DOS VECES y la compuerta 0 contiene el segundo');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A4b','VERDE · el freno dice su motivo: pago_en_proceso');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('A','A6','VERDE · con el cobro aprobado la serie NO vuelve a listarse');
   RAISE NOTICE 'CASO A VERDE — entra · congela · pagador explicito · el cron dos veces NO cobra dos veces · cobrada sale';
 
   -- ══════════════════════════════════════════════════════════════════════════
@@ -203,6 +223,12 @@ BEGIN
   SELECT reintentos INTO v_reint FROM pedidos_recurrencias WHERE id = v_serie_no;
   IF v_reint <> 0 THEN RAISE EXCEPTION 'B4 FALLA: reactivar no limpio el conteo'; END IF;
 
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B0','VERDE · la serie se lista y se cobra en los TRES intentos');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B1','VERDE · 🔴 PAUSA al TERCER fallo — ni antes ni despues');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B1b','VERDE · reintentos = 3 exactos');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B2','VERDE · PAUSADA != CANCELADA: conserva su rastro de fallo (reanudable)');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B3','VERDE · una serie PAUSADA ya no se lista para cobro');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('B','B4','VERDE · reactivar LIMPIA el conteo (no arrastra reintentos viejos)');
   RAISE NOTICE 'CASO B VERDE — 3 fallos · pausa al TERCERO · pausada != cancelada · pausada no se cobra · reactivar limpia';
 
   -- ══════════════════════════════════════════════════════════════════════════
@@ -226,12 +252,63 @@ BEGIN
     RAISE EXCEPTION 'C2 FALLA: con el medio muerto no freno — pudo saltar a otra tarjeta';
   END IF;
 
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('C','C1','VERDE · sin medio autorizado frena con su nombre');
+  INSERT INTO _arnes(caso,assert,resultado) VALUES ('C','C2','VERDE · 🔴 §2: con el medio MUERTO la serie NO salta a otra tarjeta');
   RAISE NOTICE 'CASO C VERDE — sin medio frena con nombre · medio muerto NO salta a otra tarjeta';
+
+  -- ══════════════════════════════════════════════════════════════════════════
+  -- CASO D · EL PLAN — sin cobro no renueva, y `pago_simulado` está muerto
+  -- ══════════════════════════════════════════════════════════════════════════
+  SELECT id INTO v_susc FROM suscripciones_servicio
+   WHERE tipo_servicio='paseo_mensual' LIMIT 1;
+
+  IF v_susc IS NULL THEN
+    INSERT INTO _arnes(caso,assert,resultado) VALUES
+      ('D','D0','⚠️ NO CONCLUYENTE · no hay suscripcion de plan viva para medir');
+  ELSE
+    -- D1 · 🔴 SIN INTENTO APROBADO NO RENUEVA. *Es el gate que separa este arco
+    --      del cuerpo viejo, que renovaba por confianza.*
+    v_r := renovar_plan_cobrado(v_susc, (SELECT periodo_fin FROM suscripciones_servicio WHERE id=v_susc));
+    IF COALESCE((v_r->>'ok')::boolean, true) IS NOT FALSE
+       OR v_r->>'motivo' <> 'sin_cobro_aprobado' THEN
+      RAISE EXCEPTION 'D1 FALLA: renovo sin cobro aprobado. %', v_r;
+    END IF;
+    INSERT INTO _arnes(caso,assert,resultado) VALUES
+      ('D','D1','VERDE · 🔴 sin intento APROBADO del periodo, el plan NO renueva');
+
+    -- D2 · con el cobro aprobado, renueva y las citas nacen
+    INSERT INTO suscripcion_desglose (suscripcion_servicio_id, periodo, subtotal, impuesto, total)
+      SELECT v_susc, periodo_fin, 100, 0, 100 FROM suscripciones_servicio WHERE id=v_susc
+      ON CONFLICT DO NOTHING;
+    INSERT INTO pagos_intentos (suscripcion_servicio_id, suscripcion_periodo, monto, moneda,
+                                estado, forma, proveedor, pagador_user_id, pagador_origen,
+                                clave_idempotencia)
+      SELECT v_susc, periodo_fin, 100, 'USD', 'aprobado', 'tokenizacion', 'nuvei',
+             user_id, 'recurrencia', 'arnes-plan-' || gen_random_uuid()::text
+        FROM suscripciones_servicio WHERE id=v_susc;
+
+    v_r := renovar_plan_cobrado(v_susc, (SELECT periodo_fin FROM suscripciones_servicio WHERE id=v_susc));
+    IF COALESCE((v_r->>'renovado')::boolean,false) IS NOT TRUE THEN
+      RAISE EXCEPTION 'D2 FALLA: con cobro aprobado no renovo. %', v_r;
+    END IF;
+    INSERT INTO _arnes(caso,assert,resultado) VALUES
+      ('D','D2','VERDE · con el cobro APROBADO renueva y las citas nacen');
+
+    -- D3 · ☠️ `pago_simulado` NO aparece en el cobro nuevo
+    SELECT pago_metadata->'cobros'->-1 INTO v_meta
+      FROM suscripciones_servicio WHERE id=v_susc;
+    IF v_meta ? 'pago_simulado' THEN
+      RAISE EXCEPTION 'D3 FALLA: el cobro nuevo sigue marcando pago_simulado';
+    END IF;
+    INSERT INTO _arnes(caso,assert,resultado) VALUES
+      ('D','D3','VERDE · ☠️ la bandera que decia "ya entrego" no aparece en el cobro nuevo');
+  END IF;
 
   RAISE NOTICE '════ ARNES COMPLETO: A (cobra sola) · B (falla hasta la pausa) · C (raiz de autorizacion) ════';
 END $arnes$;
 
--- ── RESIDUO: se verifica ANTES del rollback, y tiene que dar 0 al volver ────
+SELECT n, caso, assert, resultado FROM _arnes ORDER BY n;
+
 ROLLBACK;
 
 -- Verificación post-rollback (fuera de la transacción):
