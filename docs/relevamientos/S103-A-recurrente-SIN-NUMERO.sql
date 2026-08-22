@@ -391,7 +391,18 @@ CREATE FUNCTION public.configurar_recurrencia(
   p_frecuencia_dias integer DEFAULT NULL,
   p_dia_del_mes integer DEFAULT NULL,
   p_metodo_entrega text DEFAULT 'despacho',
-  p_tarjeta_id uuid DEFAULT NULL
+  p_tarjeta_id uuid DEFAULT NULL,
+  /* 🔴 EL MONTO ESPERADO — §2: la autorización nombra **qué monto**.
+     Opcional por la misma razón que la tarjeta: **la pantalla de C llama a esta
+     puerta hoy** y no lo manda. *Se ensancha; no se cambia el contrato bajo los
+     pies de quien lo consume.*
+     ⚠️ **Y su ausencia NO es neutral, está declarada:** sin monto esperado, el
+     freno de §2 («no se cobra más de lo autorizado») **no puede disparar** —
+     `recurrencias_vencidas_pendientes` sólo compara cuando el valor existe.
+     *Una serie sin monto esperado se cobra a lo que salga, y eso es
+     exactamente lo que una autorización recurrente NO autoriza.* Es un hueco
+     conocido, no un permiso. */
+  p_monto_esperado numeric DEFAULT NULL
 ) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public','pg_temp'
 AS $function$
@@ -432,14 +443,24 @@ BEGIN
 
   INSERT INTO public.pedidos_recurrencias (user_id, cuenta_comercial_id, frecuencia_dias,
                                     dia_del_mes, items, entrega, metodo_entrega,
-                                    proximo_pedido_fecha, tarjeta_id)
+                                    proximo_pedido_fecha, tarjeta_id,
+                                    monto_esperado, autorizada_en)
     VALUES (v_uid, p_cuenta_comercial_id, p_frecuencia_dias, p_dia_del_mes,
-            p_items, p_entrega, p_metodo_entrega, v_prox, p_tarjeta_id)
+            p_items, p_entrega, p_metodo_entrega, v_prox, p_tarjeta_id,
+            p_monto_esperado,
+            /* 🔴 `autorizada_en` SE ESCRIBE ACÁ, aunque la columna tenga
+               DEFAULT now(). *Un default se dispara igual si alguien inserta
+               por otro camino; escribirlo en LA PUERTA dice que la marca de
+               autorización nace en el acto del cliente, no en el reloj de la
+               tabla.* La raíz de §2 es «quién, cuándo y sobre qué medio», y las
+               tres tienen que salir del mismo lugar. */
+            now())
     RETURNING id INTO v_id;
 
   RETURN jsonb_build_object('ok', true, 'recurrencia_id', v_id,
                             'proximo_pedido_fecha', v_prox,
                             'tarjeta_id', p_tarjeta_id,
+                            'monto_esperado', p_monto_esperado,
                             'nota', 'El cobro corre cuando ejecutar_recurrencias_vencidas deje de ser stub (tanda siguiente).');
 END $function$;
 
