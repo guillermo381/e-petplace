@@ -12,7 +12,9 @@
     "verify:contrast": "tsx scripts/verify-contrast.ts",
     "verify:diseno": "node scripts/verify-diseno.mjs",
     "_comentario_censo": "S87-B→S88 (D-651 ②; renombrado por mesa — nació verify:premisas, linaje en el header): REGRESIÓN DE CENSO — lo que la casa midió una vez y puede decaer en silencio se re-mide contra su fuente. NO va en el hook — necesita la DB, y un gate que exige red se saltea por costumbre. Su lugar es el paso ⓪ / el cierre, al lado de verify-ota. Por L-197 sale ROJO si no puede medir; el escape es --sin-motor, ruidoso y se declara.",
-    "verify:censo": "node scripts/verify-censo.mjs"
+    "verify:censo": "node scripts/verify-censo.mjs",
+    "_comentario_edge": "S103-B: `verify:edge-deno` REEMPLAZA a `scripts/verify-edge-simbolos.mjs`, que daba VERDE con un defecto vivo de su propia clase (`KEY_CLIENT` usado y nunca declarado — 8 eventos del proveedor sin validar, un dia entero con el gate en verde). El viejo medía media clase: símbolos de MÓDULO sin importar, contra lista fija. `deno check` cubre las DOS mitades sin heurística. NO se ensanchó el viejo a propósito: su cabecera ya documentaba que la versión ancha dio 20 rojos falsos sobre 22. El gate juzga SOLO la clase TS2304/TS2552 («usa algo que no existe»); los otros 89 errores de tipo se DECLARAN al pie y no se gatean — son artefactos de tipado de supabase-js sobre funciones vivas y con gate pasado, y gatearlos mataría el gate. EXIGE `deno`: sin él sale NO CONCLUYENTE (exit 2), jamás verde.",
+    "verify:edge-deno": "node scripts/verify-edge-deno.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",
