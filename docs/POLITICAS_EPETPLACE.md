@@ -319,13 +319,98 @@ nunca queda en un limbo).
 
 ---
 
-## P15 — Eliminación de cuenta del dueño (CANDIDATA — S55, pendiente de firma del founder)
+## P15 — Cierre de cuenta ✅ **FIRMADA** (founder, 22-ago-2026 — S103)
 
-> **Estado: CANDIDATA.** Redactada como espec (S55-B3, letra (a) de Cuenta v1);
-> NO rige hasta la firma. La UI de Cuenta muestra "Eliminar cuenta" con voz
-> honesta y NO ejecuta nada. El disparo de implementación es la compuerta de
-> tiendas (B6: la eliminación de cuenta es requisito de Play/App Store).
+> **Estado: FIRMADA y RIGE.** *Fue CANDIDATA desde S55 (once sesiones) y se
+> firmó sobre el censo medido de S103-A.* El disparo de implementación sigue
+> siendo la compuerta de tiendas (B6: el cierre de cuenta es requisito de
+> Play/App Store) **y la letra ya no lo bloquea.**
 > Nota de numeración: P14 = el plan de paseo (FIRMADA S55-B5).
+
+### ✅ LA FIRMA, en sus cinco cláusulas
+
+> ### **Cerrar la cuenta la vuelve INALCANZABLE. No destruye el registro.**
+
+1. **La persona pierde el acceso.** El cierre es terminal desde su lado: no
+   vuelve a entrar con esas credenciales.
+2. **Su identidad se ANONIMIZA donde la ley lo permite.**
+3. **Lo que la ley obliga a conservar —consentimientos, plata, obligación
+   fiscal— SE CONSERVA, desligado de la persona.**
+4. **Se le dice EXACTAMENTE eso antes de confirmar.** *No «vamos a borrar todo»:
+   qué se va, qué queda y por qué.*
+5. **Se le ofrece SU COPIA antes de irse** — portabilidad (LOPDP).
+
+**Coherencia declarada: con `P23`** (*el borrado deja el archivo inalcanzable,
+no lo sobrescribe; ante un derecho de supresión la respuesta honesta es «ya no
+es accesible por ningún medio del producto», jamás «fue destruido»*) **y con la
+regla 7.8.**
+
+> ### ⚠️ **Y ACÁ VA UNA ACLARACIÓN QUE LA FIRMA NECESITA, MEDIDA EL MISMO DÍA: `7.8` SOSTIENE LA MITAD MECÁNICA DE `P15` Y NO LA MITAD LEGAL.**
+>
+> **Su literal COMPLETO, medido en `MODELO_FINANCIERO` §7.8:**
+> *«**No se borra.** Eventos, liquidaciones, cuentas comerciales, roles: nunca
+> DELETE en producción. Usar estados.»*
+>
+> **Eso es todo lo que dice. No menciona anonimización** — verificado por grep
+> sobre el documento entero, con control positivo (`anonimiz` **sí** aparece en
+> otros cinco documentos de `docs/`, o sea que la búsqueda encuentra lo que hay).
+>
+> **Por qué importa y no es prolijidad:** *«no se borra» a secas es
+> **incompatible** con el derecho de supresión. «No se borra, **pero se anonimiza
+> la referencia personal**» **sí** es compatible — y es el argumento que una
+> política puede sostener ante la autoridad.* **La mitad que vuelve defendible a
+> la regla es exactamente la que no está escrita.**
+>
+> **`P15` la agrega en su cláusula ②** y por eso las dos son coherentes **hacia
+> adelante**; lo que queda debiendo es que **`7.8` lo diga en su propio archivo**
+> — *y eso es enmienda de `MODELO_FINANCIERO`, firma del founder, no de esta
+> política.* **Se declara acá para que nadie cite `7.8` como si ya lo dijera.**
+> *Hallazgo de S103-D; medido de primera mano por S103-A antes de depositarlo.*
+
+### 🔴 Y EL ARRASTRE QUE `P15` §1 TEME **YA ESTÁ EXPRESADO EN LA BASE**
+
+**Entre las 21 FKs en `CASCADE` están `familia_miembro` y `mascota_codueño`.**
+⇒ *Borrar al humano desengancha su vínculo con la mascota **sin preguntar por
+los otros cuidadores**.* **Es literalmente el arrastre que §1 de esta política
+declara temer — y no es hipotético: es el comportamiento vigente.**
+
+*Otra razón, y de las buenas, por las que la firma eligió inalcanzable sobre
+destruido: el `DELETE` no solo rebota contra 24 constraints — donde NO rebota,
+hace daño callado.* Hallazgo de S103-D.
+
+### 🔬 EL ARGUMENTO MEDIDO QUE SOSTIENE LA FIRMA — al acta por orden del founder
+
+**No es una preferencia de diseño: es lo que la base permite y lo que no.**
+Medido contra el remoto el 22-ago (`docs/relevamientos/2026-08-22-s103-CENSO-CICLO-DE-CUENTA.md` §④):
+
+| | |
+|---|---|
+| FKs que apuntan a `auth.users` | **62** |
+| **BLOQUEANTES** (`NO ACTION`/`RESTRICT`) | **24** |
+| `CASCADE` | **21** |
+| `SET NULL` | 17 |
+| *control positivo* | *657 FKs en la base ⇒ la consulta mide* |
+
+**Las dos mitades del argumento, y las dos apuntan a la misma conclusión:**
+
+**① Un `DELETE` de usuario REBOTA hoy** — 24 FKs lo impiden, entre ellas
+`pagos_intentos`, `pedidos`, `compras`, `consentimientos`, `evento_cita_servicio`,
+`bonos` y `suscripciones_servicio`.
+
+**② Y «arreglar» eso pasando las 24 a `CASCADE` sería PEOR que el rebote: se
+llevaría los consentimientos y los intentos de pago.**
+
+> ### **El registro de que alguien aceptó algo es justamente el que hay que conservar para poder demostrar qué se le prometió.**
+> *Un producto que borra el consentimiento junto con la cuenta se queda sin la
+> única prueba de que actuó bien — y se la lleva puesta en el momento exacto en
+> que más la va a necesitar.*
+
+**Precedente de la casa que la firma hereda:** las **64 cuentas de sonda de
+S92** se resolvieron así — **cuentas borradas de `auth`, datos MARCADOS**, no
+destruidos. *Y la marca no fue un rodeo para esquivar los CHECKs: era lo que los
+CHECKs pedían.*
+
+### Lo que la implementación TODAVÍA tiene que resolver (la firma fija la forma, no el detalle)
 
 **El principio:** una vida documentada no se borra a la ligera. Eliminar la
 CUENTA de un humano no puede destruir por arrastre el expediente de una

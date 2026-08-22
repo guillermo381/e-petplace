@@ -18765,6 +18765,9 @@ suma existe para la tercera cosa que quiera entrar.
 - **L-319** — **EL ARTEFACTO NO ES LA MATERIA PRIMA.** El `stoken` se buscó durante horas probando ~200.000 recetas de hash sobre la familia equivocada, porque se asumió que era un digest de una cadena. **Era un HMAC** — y la diferencia no es de algoritmo: es que **la clave entra por otro lado**. *Ninguna cantidad de fuerza bruta sobre la familia equivocada encuentra la respuesta, y el fracaso se lee como «me falta un ingrediente» en vez de «estoy en la familia equivocada».* ⇒ Antes de barrer combinaciones se pregunta **de qué CLASE es el artefacto**; y cuando el tercero puede contestarlo, **se pregunta**: el correo a Erick costó un día y la fuerza bruta no habría terminado nunca. Origen: S101-B.
 
 - **L-318** — **MOTOR SIN PUERTA: LAS CUATRO APARICIONES DEL MISMO DÍA, Y LA VARIANTE QUE NO TIENE SÍNTOMA.** La pieza estaba bien construida, probada… y desconectada del único lugar donde su resultado importa. **Apareció cuatro veces en una sesión, una capa más arriba cada vez:** ① el actuador construido y nunca llamado desde el webhook · ② el arnés llamándolo directo, salteando el productor real · ③ `useEsperaDeConfirmacion` llamado y **su resultado nunca leído** (la compra quedó `pagada` a los 34 s y la pantalla decía «Estamos confirmando» a los 78) · ④ el constructor de filas del comprobante, escrito y jamás insertado en la plantilla. **🔴 Y su variante MÁS GRAVE, que es de otra clase: el actuador que recibe un sujeto que no conoce y LO IGNORA.** *No falla: no hace nada.* No hubo error, ni log, ni síntoma — hubo **silencio con cara de normalidad**. ⇒ **Toda pieza nueva se prueba desde su CONSUMIDOR REAL**, y **agregar un sujeto obliga a censar todos los consumidores del evento**, no solo la puerta. Origen: S101-B/C.
+  - **🔴 ENMIENDA S103-A (founder, 22-ago-2026) — LA QUINTA APARICIÓN, Y ES SOBRE UNA FIRMA DEL FOUNDER, NO SOBRE UN MOTOR.** `promesaPorVendedor` se construyó **precisamente para cumplir una firma** —*«decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es información»*, 18-ago-2026, escrita en la cabecera de la propia pieza— y al medirla cuatro días después tenía **CERO consumidores en `apps/`** (grep con control positivo: `calcularPromesaDespensa` sí aparece). **El síntoma que el founder caminó —el camino de envío a domicilio cerrado— ES esa firma sin cablear.**
+  > ### **Una pieza construida para cumplir una firma, sin consumidores, ES LA FIRMA SIN CABLEAR.**
+  **Y la ley de método que la mesa deposita con ella, que es lo que la vuelve útil hacia adelante:** *el censo de consumidores no es solo para jubilar código viejo — **también dice si lo nuevo llegó a alguien**.* **Se corre en las dos direcciones: hacia atrás para saber qué murió, hacia adelante para saber qué nació y no llegó.** *La casa venía usando ese censo solo como podadora; en esta aplicación fue el único instrumento que podía distinguir «la firma no se cumplió» de «la firma se cumplió en un archivo que nadie importa».*
 
 - **L-317** — **UN REEMPLAZO SE MIDE DESDE EL CONSUMIDOR QUE VA A REEMPLAZAR, JAMÁS DESDE UN ARNÉS.** S101-C abrió con la orden firmada *«REVOKE con el reemplazo funcionando»* y con la evidencia en la mano: la noche anterior un paseo real se había cobrado por la puerta nueva, punta a punta, con su comprobante. **Y el reemplazo NO estaba listo:** `components/checkout-reserva.tsx` —la pieza única que montan **los cuatro oficios**— seguía llamando a la RPC vieja. *El arnés había estrenado la puerta nueva y dejado la vieja en uso, y las dos cosas son ciertas a la vez sin contradecirse: por eso no hay síntoma.* **Revocar ahí habría dejado a paseo, grooming, veterinaria y adiestramiento sin poder reservar — con la ficha diciendo «cerrada».** ⇒ **Un productor probado solo por su arnés está probado como productor, no como reemplazo:** el arnés demuestra que la puerta nueva ABRE, jamás que la vieja dejó de usarse. **Lo segundo es un censo de consumidores, y es lo único que autoriza cerrar la vieja.** **Corolario mecánico, aplicado en la misma migración:** *cuando el orden importa, se escribe como CINTURÓN y no como nota* — la del `REVOKE` verifica que el reemplazo esté en pie y **aborta con el agujero todavía cerrado** si falta algo, porque *una precondición que vive en un comentario se cumple mientras alguien la lea.* Hermana de la ley del motor sin puerta, del otro lado: ahí faltaba el consumidor; acá **sobraba el viejo**. Origen: S101-C, el enchufe de los cuatro oficios.
 
@@ -18863,6 +18866,220 @@ defecto de motor. *Si resulta lo primero, la ficha muere y se convierte en una
 línea del corte semilla/real; si resulta lo segundo, bloquea el soft launch.*
 
 **Disparo: antes de que la despensa venda a alguien real.**
+
+---
+
+## 🔬 DIAGNÓSTICO — S103-A, 22-ago-2026. **NINGUNA DE LAS CUATRO HIPÓTESIS.**
+
+**El motor está SANO y contesta bien.** `calcular_promesa_despensa` devuelve
+`ok: true` para **cuatro de los cinco** vendedores con oferta publicada, con
+ventana y cupo respaldado. *La pregunta «¿por qué no hay ventana?» tenía adentro
+una premisa falsa: sí hay ventana — para casi todos.*
+
+**LA CAUSA, medida por llamada directa con discriminador en las dos direcciones:**
+
+| vendedor | `calcular_promesa_despensa(…, now(), NULL, 'estandar')` |
+|---|---|
+| **`Clínica Aurora`** (`de680000…00cc`) | 🔴 `ok:false` · **`sin_turnos_de_entrega`** |
+| `Despensa de Pruebas` (control positivo) | ✅ `ok:true` · hoy 15:00–19:00 · cupo 19/20 |
+
+**Y el cruce que lo vuelve una CLASE y no un caso:**
+
+| vendedor | ofertas **publicadas** | `entrega_turnos` activos | capacidad de reparto |
+|---|---|---|---|
+| Despensa de Pruebas | 452 | 2 | 20 |
+| Tienda Pura | 50 | 2 | 15 |
+| Dueño todos los servicios | 26 | 1 | 10 |
+| **`Clínica Aurora`** | **18** | **0** ← | **20** |
+| DESPENSA DE PRUEBAS S97 | 17 | 2 | 15 |
+
+> ### 🔴 **`Clínica Aurora` tiene 18 productos publicados en la vitrina, VEINTE unidades de capacidad de reparto — y CERO cortes de entrega declarados.**
+
+**Por qué las cuatro hipótesis fallaron, una por una — y esto es lo que hay que
+no repetir:**
+
+| hipótesis | veredicto medido |
+|---|---|
+| sin cupo del vendedor | ❌ **capacidad 20**, consumido 0 |
+| sin zona de cobertura | ❌ **la cobertura NO participa de esta función** — no se la consulta en ninguna rama |
+| sin repartidor configurado | ❌ **tiene repartidor activo**, 20/día, lunes a sábado |
+| fecha fuera de toda ventana | ❌ el camino automático **salta solo** hasta 14 días (`saltos_por_cupo`) |
+
+**La causa real es una quinta que nadie había escrito: el vendedor declaró su
+RECURSO de reparto y nunca sus CORTES.** Son **dos tablas distintas
+—`recursos_reparto` y `entrega_turnos`— y nada las ata**: se puede tener camión
+y no tener horario. *La hipótesis «sin repartidor» estaba tan cerca que se lee
+como la misma cosa, y es justo la que habría mandado a curar la tabla que ya
+estaba bien.*
+
+**El motor se comporta EXACTAMENTE como su letra manda** — su propio comentario
+lo dice: *«Sin turnos declarados no hay promesa: prometer sin corte sería
+inventar una ventana (L-139). El vendedor se configura solo (§2.1) — y hasta que
+lo haga, esto lo dice.»* **No hay defecto de motor. El defecto es de MOMENTO.**
+
+> ### **La vitrina publica 18 productos de un vendedor que el motor ya sabe que no puede entregar — y la persona se entera en el último paso, después de elegir dirección, receptor y teléfono.**
+
+🔴 **Y EL SEGUNDO HALLAZGO ES DEL MISMO TAMAÑO QUE EL PRIMERO — `L-318`,
+MOTOR SIN PUERTA, otra vez.** La pieza que existe **precisamente para decirlo
+antes** —`promesaPorVendedor`, con la firma del founder del 18-ago escrita en su
+cabecera: *«decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es
+información, y la persona todavía puede elegir»*— **tiene CERO consumidores en
+`apps/`.** Medido por grep con control positivo (`calcularPromesaDespensa`
+aparece en `checkout.tsx`; `promesaPorVendedor` no aparece en ninguna parte).
+
+*La firma que resolvía este defecto se dio hace cuatro días, la pieza se
+construyó, y nadie la enchufó. El síntoma que el founder caminó **es** esa firma
+sin cablear.*
+
+**🔴 LO QUE NO MEDÍ, y lo digo porque cambia la fuerza de la conclusión:** **no
+medí que el carrito del founder tuviera un producto de `Clínica Aurora`.** Lo
+que está probado es que **existe una causa suficiente, viva y reproducible que
+produce ese literal exacto** — no que sea la que él pisó. *Para cerrarlo del
+todo hace falta el primer vendedor del carrito de ese recorrido, y ese dato no
+quedó registrado.*
+
+**LAS DOS CURAS, y son de nivel distinto — decide la mesa:**
+
+**(a) EL DATO, hoy** — o `Clínica Aurora` declara sus cortes, o **sus 18 ofertas
+salen de la vitrina de la despensa**. *Una clínica veterinaria vendiendo 18
+productos de despensa es, además, candidata del corte semilla/real.* Destraba el
+camino **hoy** y **no cierra la clase**: el próximo vendedor sin cortes repite
+el defecto entero.
+
+**(b) LA CLASE, y es la que vale** — **enchufar `promesaPorVendedor` en la
+vitrina y en la ficha**, que es lo que la firma del 18-ago ya ordenó. Con eso el
+vendedor sin cortes **lo dice donde todavía se puede elegir otra cosa**, en vez
+de al final. *No hay que construir nada: hay que conectar lo construido.*
+
+**Voto de A: las dos, en ese orden** — (a) porque el camino principal está
+cerrado hoy y cuesta una fila; (b) porque sin ella la ficha vuelve sola.
+**Y (b) NO es de A: es superficie de la despensa** ⇒ dueño natural **C**.
+
+---
+
+## ✅ FIRMA DE LA MESA — founder, 22-ago-2026. **LAS DOS, EN ESE ORDEN.**
+
+**(a) FIRMADA — y con su etiqueta puesta por orden expresa del founder:
+DESTRABA HOY Y NO CIERRA LA CLASE.** *«Anotalo así, para que nadie lo lea como
+cura.»* O `Clínica Aurora` declara sus cortes, o **sus 18 ofertas salen de la
+vitrina**. **Es un movimiento de DATO, no una cura** — el próximo vendedor sin
+cortes repite el defecto entero, y quien cierre la ficha con esto la va a ver
+volver.
+
+**(b) FIRMADA — enchufar `promesaPorVendedor` en vitrina y ficha. DUEÑO: C**
+(es superficie). **Y se le pasa citando la cabecera de la propia pieza**, que es
+donde la firma ya estaba escrita:
+
+> *«Decirlo DESPUÉS de comprar es una disculpa; decirlo ANTES es información,
+> y la persona todavía puede elegir.»* — **firma del founder, 18-ago-2026**
+
+**Esa firma existía y nunca se cableó: el síntoma ES la firma sin consumidor.**
+
+**(c) NACE `D-873`** — la clase que sale de este diagnóstico. Ver su ficha.
+
+**La ficha queda 🔴 hasta que (a) y (b) estén ejecutadas.** *Lo que dejó de ser
+rojo es el diagnóstico: la causa está medida, las curas nombradas y firmadas.*
+
+---
+
+### D-873 🔴 · SE PUEDE TENER CAMIÓN Y NO TENER HORARIO: NADA ATA EL RECURSO DE REPARTO CON LOS CORTES DE ENTREGA
+
+🔴 **ALTA. Abierta por orden de la mesa** (founder, 22-ago-2026) sobre el
+diagnóstico de `D-872`: *«es de clase, no de caso».* **Dueño de la decisión: la
+mesa. Dueño de la medición: A — ejecutada, abajo.**
+
+**LA CLASE, en una línea:** `recursos_reparto` y `entrega_turnos` son **dos
+tablas y nada las ata**. Un vendedor puede tener **veinte unidades de capacidad
+de reparto y cero cortes declarados** — y **publicar 18 productos que el motor
+ya sabe que no puede entregar.** *No es una inconsistencia de datos: es un
+estado que el modelo permite expresar.*
+
+**LO QUE EXISTE HOY, medido contra la base (22-ago) — y la respuesta es
+NINGUNO DE LOS DOS:**
+
+| pieza | ¿mira los cortes? |
+|---|---|
+| `publicar_oferta_sku(uuid,numeric,text)` — **la única puerta de publicación** | **NO** — cero menciones de `entrega_turnos` en su cuerpo |
+| `v_vitrina_publicada` — **la vista de la vitrina** | **NO** — cero menciones en su definición |
+
+**Control positivo del censo:** `entrega_turnos` **sí** se nombra en **3**
+funciones de la base ⇒ *la búsqueda encuentra lo que hay; lo que no hay es el
+gate.* **Ni la publicación lo impide ni la vitrina lo filtra.**
+
+**LAS DOS SALIDAS, y la mesa elige — no son equivalentes:**
+
+**① EN LA PUERTA** — `publicar_oferta_sku` **impide o advierte** publicar sin
+cortes declarados. *Ventaja: el vendedor se entera cuando puede arreglarlo, en
+su panel.* **Riesgo declarado: impedir la publicación es más duro que lo que la
+letra dice hoy** —`MODELO_DESPENSA` §2.1 dice que **el vendedor se configura
+solo**—, así que **«impedir» exige enmienda de letra y «advertir» no.**
+
+**② EN LA VITRINA** — la vista **filtra por promesa viva**. *Ventaja: cierra la
+clase sin tocar la letra del panel.* **Riesgo declarado: esconde producto sin
+decirle al vendedor por qué**, y eso es exactamente lo que `D-872` cobró del
+otro lado — *un vendedor que no entiende por qué no vende es el espejo de una
+familia que no entiende por qué no puede comprar.*
+
+**Voto de A: ① en su forma de ADVERTIR, no de impedir** — porque respeta
+`§2.1` sin enmienda, porque avisa **donde se puede arreglar**, y porque **②
+sola dejaría al vendedor a ciegas**. *Y ninguna de las dos reemplaza a `(b)` de
+`D-872`: decirlo en la vitrina sigue siendo necesario para la familia que ya
+tiene el producto en la mano.*
+
+**Disparo: antes del soft launch de la despensa.** *Hoy vive con datos de
+prueba; el día que un vendedor real publique sin cortes, la familia paga el
+descubrimiento en el último paso del checkout.*
+
+> ### ⚠️ **NO LE CARGUEN CORTES A `Clínica Aurora` PARA PROBAR OTRA COSA.**
+> *Advertencia de S103-D, y evita un daño que no se deshace con un `UPDATE`:*
+> **ese vendedor es el ÚNICO caso vivo de «publica sin poder entregar», y es el
+> fixture que esta ficha va a necesitar el día que la mesa elija entre gatear la
+> publicación o filtrar la vista.** Ya existe y no hay que fabricarlo. *Quien le
+> declare turnos «para destrabar el checkout» va a borrar, sin saberlo, el único
+> discriminador de la clase — y el próximo que quiera medirla va a tener que
+> inventar un vendedor, que es exactamente lo que vuelve floja una medición.*
+> **La cura (a) de `D-872` tiene DOS caminos por algo: si hay que destrabar hoy,
+> se sacan sus 18 ofertas de la vitrina — eso conserva el caso.**
+
+---
+
+### D-874 🟠 · UN MÓDULO NATIVO QUE NINGUNA APP DECLARA — ANDA HOY POR UN ACCIDENTE DE `pnpm`
+
+🟠 **MEDIA-ALTA. Hallazgo de S103-B**, verificando que sus gates fueran
+alcanzables (`L-161`). **Dueño: `apps/` ⇒ C, con visto de A** (toca el árbol de
+dependencias del monorepo).
+
+**Lo medido:** `expo-clipboard` —módulo **NATIVO**, el que hace funcionar
+`BotonCopiar`— **no lo declara ninguna app.** Vive **solo como
+`peerDependencies` de `packages/ui`**, y resuelve porque **pnpm auto-instala los
+peers del workspace y los iza a la raíz**: en el lockfile, el importer que lo
+trae es `packages/ui`, **no una app**.
+
+> ### **Funciona en desarrollo, y por eso el hueco es invisible.**
+
+**Por qué no es lo mismo que la Ley 10 del design system, aunque se le parezca:**
+esa ley vigila que **el peer nativo lleve el rango del app**. Acá **el rango está
+bien** — lo que falta es que **alguien lo declare**. *Es la misma ley un piso más
+abajo, y el piso de abajo no tiene guard.*
+
+**El costo concreto, hoy:** `BotonCopiar` **no puede gatearse copiando de verdad
+por OTA** (`L-134`: módulo nativo ⇒ exige build). Y el riesgo hacia adelante es
+peor que el gate: **una build nativa futura podría salir sin él** y nadie se
+entera hasta que alguien toque el botón — *exactamente la clase del APK sin
+`geo.API_KEY` de S80, que vivió tres sesiones invisible.*
+
+**Lo que la pieza SÍ tiene resuelto y hay que no romper:** `require` en
+try/catch y **`HAY_PORTAPAPELES` exportado** ⇒ **sin el nativo el botón nace
+apagado y la pantalla puede explicarlo**, en vez de mostrar un botón muerto.
+*Esa degradación honesta es gateable HOY por OTA, y vale la pena verla.*
+
+**Cura: declarar `expo-clipboard` en el `package.json` de la app (o de las dos)
+que montan la pieza, con el rango que el peer exige** — y **verificar contra el
+lockfile que el importer pasa a ser la app**, no `packages/ui`. *Declararlo sin
+re-medir el lockfile deja la ficha cerrada sobre la misma duda.*
+
+**Disparo: ANTES de la próxima build nativa** — que es también el tren del gate
+completo de `BotonCopiar`.
 
 ---
 
@@ -19591,3 +19808,44 @@ consumidor real.
 ⇒ El `REVOKE` se hizo **después del enchufe**, y su migración lleva la
 precondición **como cinturón**: si el reemplazo no está en pie, **aborta con el
 agujero todavía cerrado**. ⇒ **L-317**.
+
+---
+
+### D-875 🟠 · LA AUTORÍA DEL PRESTADOR ESTÁ ATADA DE DOS FORMAS OPUESTAS — Y «UNIFORMARLAS» BORRA EL EXPEDIENTE CLÍNICO EN SILENCIO
+
+🟠 **MEDIA-ALTA. Hallazgo de S103-D** (contraste de `D-405`), **numerada por A.**
+**Dueño: A** (motor/DB).
+
+**Lo medido, y son dos columnas que hacen lo mismo y se comportan al revés:**
+
+| columna | `ON DELETE` |
+|---|---|
+| `eventos_mascota.prestador_id` | **`SET NULL`** |
+| `evento_historia_clinica_registrada.prestador_id` | **`RESTRICT`** |
+
+**Hoy gana el `RESTRICT`, y está bien:** el expediente clínico **no deja
+desaparecer a su autor.**
+
+> ### 🔴 **El riesgo no es el estado actual: es la CURA QUE PARECE CORRECTA.**
+> *El día que alguien «uniforme» ese `RESTRICT` a `SET NULL` por consistencia
+> —que es exactamente lo que parece prolijo mirando la tabla de al lado— **el
+> expediente clínico pierde de quién vino cada dato, en silencio y sin fallar**.*
+
+**Y lo que se pierde no es metadata: es la distinción que sostiene el
+expediente.** **Sin autor, un diagnóstico de veterinario y una observación de la
+familia quedan INDISTINGUIBLES** — que es justo lo que la procedencia
+(`declarado_por_familia` / `declarado_por_prestador` / `verificado_por_prestador`)
+existe para separar. **Hay 12 eventos vivos con `procedencia =
+declarado_por_prestador`** que hoy sí saben de quién vinieron.
+
+**La cura NO es tocar nada: es dejar escrito POR QUÉ es distinto**, con un
+comentario en la constraint o un cinturón que aborte toda migración que la
+afloje. *Una asimetría deliberada sin su porqué escrito es indistinguible de un
+descuido — y el próximo que pase la va a «arreglar».*
+
+**Disparo: la próxima migración que toque la autoría de eventos, o el arco de
+`P15` cuando construya el cierre de cuenta** (que es cuando alguien va a mirar
+en serio las FKs hacia `auth.users` y va a ver las dos juntas).
+
+- **L-351** — **CUANDO TU MEDICIÓN CONTRADICE A ALGUIEN, LA SOSPECHOSA ES LA TUYA HASTA SABER CONTRA QUÉ MIDIÓ CADA UNO.** *Firmada por la mesa el 22-ago-2026, con crédito de S103-B, después de que la casa la pagara **TRES VECES EN UN DÍA**:* ① A y B se contradijeron sobre una tabla de merges —A medía `main` local, B `origin/main`, **los dos tenían razón** · ② el censo del `StepperCantidad` — A contó **archivos** y los entregó como **ocurrencias**; el montaje que faltaba era el único que la solución no podía cubrir · ③ B midió `P15` contra `origin/main`, le dio *«sigue CANDIDATA»*, **y estuvo a un paso de desmentir a A** — estaba FIRMADA en `origin/pista/s103-a`. > ### **Medir no alcanza: hay que saber contra qué objeto midió el otro.** *`main` local, `origin/main` y un `ls-remote` son **tres preguntas distintas**, y las tres devuelven un sha con cara de verdad única.* **La regla operativa: ante un choque de mediciones, la primera pregunta no es «¿quién se equivocó?» sino «¿contra qué objeto midió cada uno?» — y hasta contestarla, la sospechosa es la propia.** *Lo que salvó el tercer caso no fue una medición mejor: fue no confiar en la propia para desmentir a alguien.* Parentesco: es la cara operativa de `L-141` (*la prosa decae, el objeto no*) — **L-141 dice que midas; L-351 dice que declares el objeto.**
+- **L-352** — **LA REGLA FUNCIONÓ; NADIE SE AVIVÓ. Y ESA ES LA DIFERENCIA QUE HAY QUE PODER REPETIR.** *Firmada por la mesa el 22-ago-2026, sobre el hallazgo que destrabó `P15`.* `P15` se iba a depositar declarando coherencia con la regla `7.8` **citada de memoria**; al medir su literal apareció que `7.8` dice **solo** *«no se borra… usar estados»* y **jamás menciona anonimizar** — *y ésa es precisamente la mitad que vuelve la regla compatible con el derecho de supresión.* **Quien lo encontró lo dijo así, y por eso entra al canon:** *«no fue una idea — fue leer el literal en vez de citarlo de memoria, que es lo que la casa manda hacer y yo casi no hago».* > ### **Una casa no puede depender de que alguien se avive: tiene que depender de que la regla se obedezca.** *Un hallazgo atribuido a la sagacidad no se puede planificar; uno atribuido a una regla, sí — y por eso conviene atribuirlo a la regla aun cuando duela menos lo contrario.* **La próxima sesión no tiene que ser más despierta: tiene que medir el literal antes de citarlo, y sobre todo antes de citarlo DENTRO DE UNA FIRMA** — *porque una política firmada es exactamente cuando deja de revisarse.*
