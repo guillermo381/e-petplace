@@ -126,6 +126,13 @@ export default function Cuenta() {
        tres: `pagos` = el historial · `bancario` = el instrumento ·
        `preferencias` = cómo querés que se comporte la app. */
     { etiqueta: t('cuenta.medios'), ruta: '/cuenta/medios' as const, icono: 'bancario' as const },
+    /* 🔴 S103-C · LA PUERTA QUE FALTABA. El motor de contraseña vive en
+       `packages/api` desde S84 y **su único consumidor era el prestador**:
+       una familia no tenía NINGÚN camino para cambiar su clave. *No faltaba
+       motor, faltaba esta fila.*
+       Mismo glifo (`seguros`) y misma ruta relativa que en el prestador —
+       **la misma función para el mismo humano se busca en el mismo lugar.** */
+    { etiqueta: t('seguridad.tituloPantalla'), ruta: '/cuenta/seguridad' as const, icono: 'seguros' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
     /* S74 — ENTRADA TEMPORAL del gate de la fusión del avatar (la lámina
        se juzga en DISPOSITIVO: Chromium aplica borderCurve y no puede

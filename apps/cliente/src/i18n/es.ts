@@ -1692,6 +1692,43 @@ export const clienteEs = {
     cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
     cobroConfirmando: 'Estamos confirmando tu pago.',
   },
+  /**
+   * S103-C · SEGURIDAD — la contraseña del cliente.
+   *
+   * 🔴 **Las once primeras son VERBATIM del prestador**, y eso es
+   * deliberado: ya estaban en tuteo neutro y es **la misma función para el
+   * mismo humano**. *Dos frases distintas para el mismo acto es cómo dos
+   * superficies empiezan a desacordar sin síntoma.*
+   *
+   * Las tres últimas son propias porque **la salida del caso solo-Google es
+   * distinta acá**: el cliente no tiene `/recuperar` (medido), así que
+   * termina en soporte y no en una puerta que rebota.
+   */
+  seguridad: {
+    tituloPantalla: 'Seguridad',
+    titulo: 'Contraseña',
+    ayuda: 'La clave con la que entras a la app.',
+    actual: 'Tu contraseña actual',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos {{n}} caracteres.',
+    confirmar: 'Repite la nueva contraseña',
+    // El único error que el servidor no puede cazar: para él las dos son
+    // válidas. La voz no culpa a nadie — describe el hecho.
+    noCoinciden: 'Las dos contraseñas no coinciden. Escríbelas de nuevo.',
+    cambiar: 'Cambiar contraseña',
+    listo: 'Listo — tu contraseña quedó cambiada.',
+    esperaConNumero: 'Probaste varias veces seguidas. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Probaste varias veces seguidas. Espera un momento y vuelve a intentar.',
+    // 🔴 ENMENDADA respecto del prestador: la suya ofrece crear la clave
+    // desde `/recuperar`, y esa ruta NO EXISTE en el cliente. Prometerla
+    // sería mandar a una puerta que no abre.
+    soloGoogle:
+      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Escríbenos y te ayudamos a crear una.',
+    irASoporte: 'Escribirle al equipo',
+    mensajeSoporte:
+      'Hola, entro a e-PetPlace con Google y quiero crear una contraseña para mi cuenta.',
+    soporteFallback: 'Escríbenos por WhatsApp al {{numero}}.',
+  },
   despensa: {
     titulo: 'Despensa',
     tituloProducto: 'Producto',
