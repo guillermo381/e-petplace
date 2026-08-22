@@ -1,7 +1,12 @@
 # CONTRATO A→C · el wrapper de la puerta DeUna
 
 **Pieza:** `packages/api/src/wrappers/pagos-deuna.ts` · exportado desde
-`@epetplace/api` · **medido en `main`: 162 líneas, 6 símbolos, typecheck 0.**
+`@epetplace/api`.
+
+> ⚠️ **Acá NO va un conteo de líneas.** Lo había, decía «162», y **venció el
+> mismo día** — `L-361`: *un número en un documento es una medición con fecha de
+> vencimiento.* **Se mide con el comando, no con la memoria:**
+> `git show main:packages/api/src/wrappers/pagos-deuna.ts | wc -l`
 
 **Autoría del contrato de servidor: S103-D**
 (`docs/relevamientos/S103-D-CONTRATO-PUERTA-DEUNA-para-C.md`).
@@ -95,15 +100,26 @@ colapsan acá, *para que un tablero cuente lo mismo que el motor dice*. **Y se
 clasifican en cinco familias, porque cada una pide una voz distinta:**
 
 ### ① DEFECTO NUESTRO — la persona no hizo nada mal y no puede arreglarlo
-`datos_invalidos` · `monto_no_se_recibe` · `servidor_sin_configurar`
+`datos_invalidos` · `monto_no_se_recibe` · `servidor_sin_configurar` ·
+**`desglose_incompleto`** *(movido acá por dictamen de mesa, 22-ago)*
 *(hoy `servidor_sin_configurar` es el `pointOfSale` que falta).*
 **Voz: disculparse y ofrecer soporte. Jamás pedirle que reintente algo que no
 va a cambiar.**
 
 ### ② LA COMPUERTA — nuestro motor diciendo QUE NO SE PUEDE ENTREGAR
 `pago_en_proceso` · `reserva_vencida` · `vendedor_no_activo` ·
-`monto_divergente` · `compra_sin_pedidos` · `desglose_incompleto`
-🔴 **Estos llegan con LA CAUSA REAL y el proveedor NUNCA SE ENTERÓ** — es la
+`monto_divergente` · `compra_sin_pedidos`
+
+> ⚠️ **`desglose_incompleto` SALIÓ de esta familia** — dictamen de mesa,
+> 22-ago-2026: **pasa a ① DEFECTO NUESTRO, y no depende del sujeto.** *El
+> desglose congelado es artefacto nuestro; la persona no tiene nada que
+> corregir volviendo atrás, ni en una compra ni en una cita.* **Voz: soporte,
+> jamás «reintentá».**
+> *Se corrige acá el mismo día del dictamen porque un contrato que conserva la
+> clasificación vieja **envejece por omisión** — sigue siendo cierto sobre todo
+> lo demás que menciona, que es exactamente `L-369`.*
+
+🔴 **Los que QUEDAN en esta familia llegan con LA CAUSA REAL y el proveedor NUNCA SE ENTERÓ** — es la
 letra madre de §7: *primero se verifica que se pueda entregar, después se pide
 la plata.* **Voz: la causa concreta y su salida** (rearmar, elegir otro día,
 volver atrás). *Decir «no se pudo procesar el pago» acá sería mentir: el pago
@@ -142,7 +158,7 @@ No es defecto de nadie: **volver a entrar.**
 
 | | |
 |---|---|
-| wrapper en `main` | ✅ 162 líneas · 6 símbolos exportados · typecheck 0 |
+| wrapper en `main` | ✅ exportado · typecheck 0 *(el largo se mide, no se cita)* |
 | edge `pagos-deuna-solicitud` | 🔴 **ESCRITA Y NO DESPLEGADA** |
 | bloqueante | **el `pointOfSale`** (D) — hasta que llegue, la puerta contesta `servidor_sin_configurar` |
 
