@@ -10,7 +10,15 @@ const MENSAJE_ERROR_GUARDAR = 'No pudimos guardar los cambios. Prueba de nuevo.'
 
 export interface MiPerfil {
   nombre: string | null;
-  /** Del auth (read-only en el producto — cambiarlo es otro ciclo). */
+  /** **La fuente es `auth.users`, jamás la copia de `profiles`.**
+   *
+   *  Medido S104-A: `profiles.email` es un ESPEJO (lo mantiene el trigger
+   *  `on_auth_user_email_changed`), y antes de esta tanda este wrapper leía
+   *  la copia PRIMERO. No divergía por suerte, no por diseño: el trigger de
+   *  `auth.users` era `AFTER INSERT` y **solo INSERT**, así que nadie había
+   *  podido cambiar su correo todavía. El día que exista esa pantalla, leer
+   *  la copia primero mostraría el correo VIEJO como si fuera el de la
+   *  cuenta — y la persona no tendría forma de saber cuál es la verdad. */
   email: string | null;
   /** E.164 sin '+' (regla 28); el display es del frontend. */
   telefono: string | null;
@@ -34,7 +42,10 @@ export async function obtenerMiPerfil(): Promise<ResultadoWrapper<MiPerfil, 'sin
     ok: true,
     data: {
       nombre: data?.nombre ?? null,
-      email: data?.email ?? sesion.session?.user.email ?? null,
+      /* AUTH PRIMERO, la copia como CACHE — el orden es la cura de S104-A.
+         `profiles.email` queda como respaldo para el caso raro de una sesión
+         sin email (cuentas del legado); jamás como la verdad. */
+      email: sesion.session?.user.email ?? data?.email ?? null,
       telefono: data?.telefono ?? null,
       foto_url: data?.foto_url ?? null,
     },

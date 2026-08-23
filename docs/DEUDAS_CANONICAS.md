@@ -20378,3 +20378,78 @@ guarda vencida.** *Dos ya son una clase.*
 > **El precedente que la justifica solo:** un barrido con **24 tests verdes** y **ningún `index.ts`** — *lógica probada, ninguna función desplegable que la use.* **Ningún gate de la casa podía verlo, y los 24 verdes eran ciertos.**
 >
 > **Su salida tiene tres estados y NINGUNO es «verde»:** **ALCANZABLE** (con su llamador nombrado) · **ESCRITA Y NO ALCANZABLE** (con lo que falta) · **NO MEDIDO**. *«No medido» se escribe; no se omite — omitirlo lo vuelve indistinguible de alcanzable.*
+
+---
+
+## Deudas S104 (D-890 → D-892) — depositadas por A el 23-ago-2026 · números verificados libres por grep contra este archivo
+
+#### D-890 — ✅ CURADA EN SESIÓN (23-ago) · `_prestador_empleados_protege_gobierno` era DEFINER y NO FRENABA
+✅ **NACIÓ Y MURIÓ EL 23-ago-2026** (migración `20260823150000`). **Subió a la tanda 1 por firma del founder** con su razón: *con 27 empleados con acceso, un guard que no frena es agujero vivo, no deuda.*
+
+**EL PAR, medido:** ANTES `no_gestores FRENADOS=0 AGUJEROS=8` · DESPUÉS `FRENADOS=8 AGUJEROS=0`, con **contra-caso verde** (`GESTOR PASA, filas=1`).
+
+**⚠️ Y LA PRIMERA MEDICIÓN CASI INDUCE UN ERROR — se deja escrito porque es el método:** el primer rojo se produjo sobre `limit 1` de la tabla, **sin mirar si esa fila era la de un gestor**. El guard tiene DOS condiciones (`current_user` **y** `NOT user_gestiona_prestador`), así que sobre un titular habría dado «pasa» **legítimamente**. *Un rojo por la razón equivocada está tan roto como un verde por la razón equivocada.* El discriminador correcto fue **filas de NO-gestores + `row_count`**.
+
+**¿CLASE O CASO? — censado, y es CASO.** De las 4 funciones que gatean por `current_user`, solo ésta era DEFINER. De los 16 triggers DEFINER que levantan excepción, los otros 15 **no gatean por identidad de rol** (validan dominio: acuario, tallas, orden de programa) — y para eso DEFINER es correcto. ⇒ **el defecto no es DEFINER: es DEFINER *combinado con* `current_user`.**
+
+**Cierra de paso D-528** (abierto desde S76): los escritores de `prestador_empleados` son **cuatro y los cuatro DEFINER**; el único escritor directo del repo (`empleado-matricula.ts`) toca columnas que el guard no vigila ⇒ cerrar no rompió nada.
+
+<details><summary>Texto original de la ficha (23-ago, antes de curar)</summary>
+
+🔴 **ALTA — MEDIDO CON DISCRIMINADOR, NO SUPUESTO.** El guard que S76 construyó para cerrar el agujero A0bis (D-526) —que un empleado desactivado se reactive solo, o se escriba `rol='dueño'` en su propia fila— **está vivo y no frena.**
+
+**La medición, y por qué el primer resultado no alcanzaba:** un `UPDATE prestador_empleados SET activo = NOT activo` con `set local role authenticated` **pasó sin excepción**. Eso solo no prueba nada — un UPDATE que la RLS corta devuelve éxito con **0 filas**, y el trigger `BEFORE UPDATE` nunca se evalúa. **El discriminador es `GET DIAGNOSTICS row_count`: dio `1`.** Una fila real cambió. *La puerta está abierta.*
+
+**La causa:** la función es `SECURITY DEFINER` y gatea por `current_user = 'authenticated'`. **En una función DEFINER, `current_user` es el OWNER de la función**, no el rol que la invocó ⇒ la condición es SIEMPRE falsa. El molde correcto de la casa, `_prestadores_protege_columnas` (D-389), es **INVOKER**, y por eso el suyo sí funciona.
+
+**Lo que lo vuelve más grave que un descuido:** S76 lo verificó **4/4 por camino real** y obtuvo `42501`. O sea que **frenaba cuando nació.** El comentario vivo de la función empieza con `-- D-660: la puerta única. Antes decía «t…»` ⇒ **una migración posterior la recreó para cambiarle el cuerpo y le cambió el modo de seguridad**, apagando el guard sin que nadie lo notara y sin que ningún gate lo viera. *Un `CREATE OR REPLACE FUNCTION` que omite `SECURITY INVOKER` no falla: cambia la semántica del guard y sigue verde.*
+
+**Por qué NO se curó en S104:** apareció como hallazgo colateral de la tanda 1 (frente de cuenta), en territorio de otra pieza. Curarlo dentro de una migración que vino a otra cosa es lo que la casa no hace. **Además exige censo previo:** hay que medir qué escritores legítimos de `prestador_empleados` pasan hoy por el hueco, o cerrarlo rompe algo vivo (L-215).
+
+</details>
+
+**Disparo (histórico):** ANTES de cualquier tanda que toque equipo, roles o el ciclo de empleados. **Y su primer acto no es curar: es censar TODAS las funciones `*protege*` de la casa preguntando `prosecdef`** — si dos guards nacieron con el mismo defecto, es clase y no caso.
+☠️ **Condición de muerte:** cuando la función sea INVOKER **y** su rojo esté producido con `row_count` (no con «no lanzó excepción»).
+
+#### D-891 — ✅ CURADA EN SESIÓN · el consentimiento era falsificable por cualquiera, incluso sin sesión
+✅ **NACIÓ Y MURIÓ EL 23-ago-2026** (migración `20260823140000`). Se ficha igual porque **el modo de falla vale más que la cura**.
+
+`consentimientos_insert` tenía `roles = {anon, authenticated}` y **`with_check = TRUE`** ⇒ cualquiera, **sin sesión**, podía insertar una fila con el `user_id` de otra persona. **P23 promete poder demostrar qué aceptó cada quien**, y un registro que un extraño puede fabricar a nombre de un tercero **no demuestra nada, ni a favor ni en contra**.
+
+**No tenía síntoma porque el monorepo nunca escribió ahí:** las 59 filas vivas (`tipo='registro'`, `version='v1.0'`, 25-abr → 10-may-2026) son del legado `e-petplace-v2`. *La puerta estaba abierta y nadie la había cruzado — apareció el día que A fue a escribir el primer consentimiento del monorepo.*
+
+Curada a `to authenticated with check (auth.uid() = user_id)`, con rojo producido (ajeno rebota) **y contra-caso** (propio pasa). **Lo que la cura NO resuelve, escrito en la migración:** exige sesión, y `signUp` deja de darla el día que se encienda la verificación de correo (firma 5.5). **La cura de ese día es una RPC DEFINER, jamás reabrir la policy.**
+
+#### D-892 — 🔴 `epetplace.com` NO TIENE MX: `privacidad@` es una promesa incumplida, no una deuda técnica
+🔴 **BLOQUEANTE DE PROMESA.** Declarado por D el 23-ago-2026. El dominio **no puede recibir correo**: `hola@` y `privacidad@` existen como **remitentes**, no como buzones.
+
+Dos consecuencias, y la segunda no es de infraestructura: **① quien responde un correo nuestro le escribe a nadie** · **② `privacidad@` es el canal prometido en las páginas legales publicadas y en P15** (el camino para ejercer derechos y para revertir un cierre de cuenta dentro de los 30 días). *Prometer por escrito un canal que no existe no es una deuda: es una promesa incumplida, y está publicada.*
+
+**Frena el DMARC con `rua`** (D tiene el valor listo y no se puede cargar: el reporte no tendría dónde llegar). **Y toca la tanda 3**: la ventana de arrepentimiento de 30 días se ejerce escribiendo a un buzón que hoy no recibe.
+**Firma del founder pendiente sobre el camino:** reenvío del registrador ahora · Workspace antes del soft launch.
+☠️ **Condición de muerte:** un correo enviado a `privacidad@epetplace.com` llega a una bandeja que el founder abre.
+
+---
+
+### Lecciones S104 (L-410 → L-411) — depositadas por A el 23-ago-2026
+
+#### L-410 — `SECURITY DEFINER` desactiva todo guard que gatee por `current_user`, y el apply sale VERDE
+**Origen: DOS casos el mismo día, uno propio y uno ajeno, con 47 sesiones de distancia entre ellos.**
+
+En una función `SECURITY DEFINER`, **`current_user` es el owner de la función**, no el rol que la invocó. Un guard que dice `if current_user = 'authenticated' then raise` **nunca dispara** si la función es DEFINER. Y no hay síntoma: el `CREATE` no falla, el trigger existe, y un cinturón que pregunta *«¿existe el trigger?»* da verde.
+
+- **Caso propio (S104-A):** el guard de `profiles.email` nació DEFINER. **El cinturón de su migración dijo VERDE** porque medía existencia. Lo cazó **producir el rojo**: `set local role authenticated` + UPDATE del propio correo **PASÓ**.
+- **Caso ajeno (D-890):** `_prestador_empleados_protege_gobierno` **frenaba cuando nació** (S76 lo midió 4/4) y hoy no frena — una migración posterior lo recreó y le cambió el modo de seguridad.
+
+⇒ **La regla en dos mitades.** ① Todo guard de columna nace **INVOKER**, y la propiedad se copia del molde (`_prestadores_protege_columnas`, D-389) **leyendo `prosecdef` del objeto, no el nombre del patrón**. ② **Un cinturón que pregunta si el guard EXISTE no mide nada: tiene que preguntar si FRENA** — con su rojo y con su contra-caso, porque un guard que rebota TODO también «frena». *Es L-192 y L-321 en un solo caso: la verificación cuyo modo de falla es el silencio, y la lista que se lee en vez de la defensa que se prueba.*
+
+**Corolario que agrega este día:** *un `CREATE OR REPLACE FUNCTION` para cambiar el CUERPO puede cambiar la SEMÁNTICA DE SEGURIDAD sin que nada avise.* Toda edición de una función `*protege*` re-declara su modo explícitamente.
+
+#### L-411 — un cinturón que hace `SET LOCAL ROLE` deja la migración APLICADA Y SIN REGISTRAR
+**Medido dos veces en la misma sesión, con el mismo resultado.**
+
+Una migración cuyo bloque de verificación usa `set local role <rol>` para probar una defensa **aplica bien** (el DDL entra, el cinturón corre y dice verde) **pero el CLI falla después con `permission denied for schema supabase_migrations`**: la sesión queda sin poder escribir su propio registro. Resultado: **migración viva en el esquema y ausente de `schema_migrations`** — el estado que el canon ya se cobró antes («dos nacieron aplicadas y sin registrar, y lo cazó la medición, no un aviso»).
+
+Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la tabla que el fixture vigila.** El `DELETE` de limpieza rebotó con `permission denied` sobre `consentimientos` — *y estaba bien que rebotara*: `authenticated` no tiene DELETE ahí porque **un consentimiento no se borra**. **Un arnés que necesita permiso de borrado para probar algo está pidiendo que se afloje justo lo que vino a cuidar.**
+
+⇒ **Tres reglas.** ① El brazo que escribe corre en **subtransacción que se deshace sola** (`raise` capturado): residuo 0 **por construcción, no por limpieza** — L-406 aplicada a un fixture de migración. ② Toda lectura del fixture usa **el rol que puede leer**, no el de la sesión. ③ **Después de una migración con `set local role`, se VERIFICA el registro** (`schema_migrations`) y se completa a mano si falta: el `db push` puede decir ERROR con el trabajo hecho y verde.
