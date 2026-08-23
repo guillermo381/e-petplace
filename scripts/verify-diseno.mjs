@@ -3560,7 +3560,25 @@ function r49(archivos) {
  *  entra como **`fotoUrl`**. ⇒ **la prop es vestigio del plan superado, no
  *  semilla esperando**, y por eso se retira en vez de protegerse.
  *  *Su costo hoy no es teórico: `foto-mascota.tsx:195` computa
- *  `esEspecieUi(especie) ? especie : undefined` para nada.* */
+ *  `esEspecieUi(especie) ? especie : undefined` para nada.*
+ *
+ *  ⚠️ **EL LÍMITE DE SU VERDE, y no es prudencia — se cobró el mismo día**
+ *  (medición de C, ley de D): **su verde dice «no se monta», JAMÁS «no se
+ *  computa».** *Retirar un montaje sin barrer lo que lo alimentaba deja el
+ *  CÓMPUTO VIVO y la RAZÓN MUERTA* — la versión chica de lo que esta misma
+ *  regla vigila en grande. Al retirar los 15 de `apps/`, los tres casos
+ *  **parecían el mismo y solo uno lo era:** en `PasoFoto` quedó un import
+ *  huérfano (lo cazó el typecheck), en `PasoRaza` el cómputo **seguía
+ *  vivo y legítimo** (alimenta el título), y en `foto-mascota` el estado
+ *  quedó **escribiéndose sin lector** — 🔴 **y el typecheck lo dio por
+ *  bueno, porque `setEspecie` es un uso válido de la variable.**
+ *  ⇒ **el barrido de lo que alimentaba al montaje es MANUAL y va con la
+ *  cura; ningún gate lo pide, ni éste.**
+ *
+ *  🔴 **LA SECUENCIA DE `FilaCita`, acordada con C (misma que la de
+ *  `destacada`):** su campo lo consume `apps/prestador/historico.tsx`.
+ *  **C saca el consumidor PRIMERO y esta pieza suelta la prop DESPUÉS** —
+ *  al revés, el typecheck de `main` se rompe entre los dos merges. */
 const JUBILADAS = [
   {
     id: 'AvatarMascota.especie',
