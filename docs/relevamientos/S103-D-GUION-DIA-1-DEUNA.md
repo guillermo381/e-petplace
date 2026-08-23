@@ -499,8 +499,25 @@ que el circuito exista de punta a punta: desplegar la puerta.**
 autorización del founder por tanda**. Sin ese deploy no hay paso 8.
 
 ⚠️ **Y una segunda: el webhook.** Si su alta no está hecha (depende de soporte,
-pregunta #3), **el pago se confirma por BARRIDO y no por webhook** — más lento,
-pero funciona. *Se declara para que nadie lea la demora como una falla.*
+pregunta #3), el pago **tendría que** confirmarse por barrido — más lento, pero
+funcionando.
+
+> 🔴 **ESTA LÍNEA QUEDÓ FALSA Y SE CURA EN VEZ DE BORRARSE.** Se escribió el
+> 22-ago, **antes** de que el inventario de circuito encontrara que **el barrido
+> detecta el pago y nadie lo aplica** (§6septies B.1 de la bitácora): el
+> actuador exige una fila de `webhook_events`, y el caso del barrido es
+> justamente **el webhook que nunca llegó**.
+>
+> ⇒ **Hoy, sin webhook, el pago NO se confirma por ningún camino.**
+>
+> *Se conserva tachada porque es el ejemplo exacto de lo que este guion viene a
+> evitar: **una precondición que envejeció sin que nadie la tocara**, y que el
+> lunes se habría leído como «tranquilo, lo agarra el barrido».*
+
+**PRECONDICIÓN CORREGIDA (23-ago):** o **el webhook está dado de alta**, o
+**existe el aplicador del barrido (§15 paso ③)**. **Sin ninguno de los dos, el
+paso 8 no se corre** — porque un pago que se cobra y no se puede confirmar es
+peor que uno que no arranca.
 
 ### El recorrido
 
