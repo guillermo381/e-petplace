@@ -4862,17 +4862,62 @@ function r63(archivos) {
   let literales = 0;
   let deeplinks = 0;
   let apps = 0;
+  /** Las apps donde el brazo C NO PUDO medir (Metro nunca corrió en este
+   *  worktree). Se declara en la línea de info: un instrumento que no
+   *  midió lo dice, jamás lo calla (L-197). */
+  const sinMedir = [];
 
   for (const { app, dir, scheme } of RUTAS_APPS) {
     const rutas = rutasServidas(dir);
     if (rutas.size === 0) continue;
     apps++;
 
-    // ── BRAZO C · ¿el compilador puede ver? ────────────────────────────
+    /* ── BRAZO C · ¿el compilador puede ver? ────────────────────────────
+     *
+     * 🔴 **ESTE BRAZO DABA FALSO ROJO EN TODO WORKTREE DE PISTA, y lo
+     * midió D en tres worktrees antes de que yo lo viera.** Exige
+     * `apps/*​/.expo/types/router.d.ts`, que es **generado y gitignored**
+     * (`apps/cliente/.gitignore:7 → .expo/`): existe SOLO donde alguien
+     * corrió `expo start`. ⇒ una pista trabajando en su worktree tenía
+     * R63 en rojo **hasta commiteando un markdown**, y D tuvo que
+     * commitear con `SALTAR_GATE` declarado.
+     *
+     * ⚠️ **Y eso es peor que un rojo molesto: un gate que todos saltan
+     * deja de ser un gate.** Se vuelve trámite, y el día que se ponga
+     * rojo de verdad nadie va a leer el motivo. *La sustancia del brazo
+     * es correcta —sin el `.d.ts`, `typedRoutes` degrada `Href` a
+     * `string` y las rutas dejan de medirse EN SILENCIO— pero estaba
+     * puesto donde no podía cumplirse.*
+     *
+     * ✅ **LA CURA: el brazo distingue «está mal» de «no puedo medir».**
+     * `.expo/` es el discriminador, y **se midió que discrimina** antes
+     * de confiar en él: existe en el worktree primario y en el de B
+     * (donde corrió Metro) y **está AUSENTE en los de C y D**.
+     *   · `.expo/` ausente ⇒ **Metro nunca corrió acá: NO SE MIDE y se
+     *     DICE.** Cero fallo. No es un verde: es un «no concluyente»
+     *     declarado en la línea de info, el mismo criterio con el que
+     *     `verify-edge-deno` trata la falta de `deno`.
+     *   · `.expo/` presente y el `.d.ts` ausente o incompleto ⇒ **Metro
+     *     corrió y los tipos están mal: FALLA**, que es real.
+     *
+     * 🔴 **POR QUÉ CALLAR ACÁ NO REPITE EL DEFECTO QUE R63 VINO A CAZAR:**
+     * porque **el BRAZO A no depende del `.d.ts`** — resuelve los
+     * literales contra el árbol de rutas del filesystem. En un worktree
+     * sin Metro, A sigue midiendo exactamente el defecto que el
+     * compilador ciego dejaría pasar. *El brazo C no es la red: es el
+     * aviso de que la red del compilador no está puesta.* Y la red de
+     * esta casa sigue puesta.
+     *
+     * ⚠️ **LÍMITE DECLARADO:** si algún comando de Expo creara `.expo/`
+     * sin generar los tipos, este brazo fallaría en un worktree que
+     * nunca corrió Metro. No se vio en la medición de hoy; se anota en
+     * vez de suponer que no puede pasar. */
     const dts = join(RAIZ_REPO, dir, '.expo/types/router.d.ts');
-    if (!existsSync(dts)) {
+    if (!existsSync(join(RAIZ_REPO, dir, '.expo'))) {
+      sinMedir.push(app);
+    } else if (!existsSync(dts)) {
       fallos.push(
-        `R63·C ${app}: NO existe \`.expo/types/router.d.ts\`. Con \`typedRoutes: true\` y sin ese archivo, \`Href\` degrada a \`string\` y **toda ruta inventada compila en verde**: el typecheck no está midiendo rutas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
+        `R63·C ${app}: \`.expo/\` existe pero NO su \`types/router.d.ts\`. Con \`typedRoutes: true\` y sin ese archivo, \`Href\` degrada a \`string\` y **toda ruta inventada compila en verde**: el typecheck no está midiendo rutas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
       );
     } else {
       /* ⚠️ SE COMPARA ESTRUCTURA, JAMÁS mtime — y la primera versión de este
@@ -4926,7 +4971,11 @@ function r63(archivos) {
   fallos.push(...ancla('R63', apps, 2, 'app(s) con árbol de rutas legible en src/app'));
   return {
     fallos,
-    info: `${literales} literal(es) de navegación · ${deeplinks} deep link(s) · ${apps} app(s) · el compilador cubre los literales SOLO si su .d.ts está al día (brazo C)`,
+    info:
+      `${literales} literal(es) de navegación · ${deeplinks} deep link(s) · ${apps} app(s)` +
+      (sinMedir.length > 0
+        ? ` · ⚠️ brazo C NO MEDIDO en ${sinMedir.join('/')} (Metro nunca corrió en este worktree ⇒ su typecheck NO está midiendo rutas; el brazo A sí las mide y no depende del .d.ts)`
+        : ` · brazo C medido en las ${apps}: cada ruta del filesystem está en el union que lee el compilador`),
   };
 }
 
