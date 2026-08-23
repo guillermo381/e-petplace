@@ -409,6 +409,50 @@ como dato, no como consulta.
 
 ---
 
+## §13bis · 🔴 LAS TRES REGLAS DE ENCENDIDO *(firma de la mesa, 22-ago-2026 · crédito de S103-D)*
+
+> **Se leen ANTES de mover una sola palanca.** No son estilo: cada una nació de
+> un modo de falla medido en la sesión, y las tres describen cómo se rompe esto
+> **el día que anda**, no el día que se construye.
+
+### ① LO ÚLTIMO QUE SE ENCIENDE ES LA PUERTA DEL CLIENTE — y jamás antes de que exista quien confirme
+
+**Un pago cobrado y nunca confirmado, con la plata ya movida, es PEOR que uno
+que no se puede iniciar.** *El segundo es una molestia; el primero es una
+persona a la que le sacaron plata y no tiene nada a cambio, y del otro lado no
+hay ningún proceso que lo note.*
+
+⇒ **la fila de DeUna se ofrece recién cuando el circuito de confirmación está
+completo y CORRIDO** — no escrito: corrido.
+
+### ② FLIP ① SIN FLIP ② SE APAGA DE INMEDIATO — **son DOS, no uno**
+
+Poner `DEUNA_ELEGIBLE = true` **enciende la fila pero NO conecta la pantalla**:
+`useEstadoDeUna` todavía tiene el cuerpo de `ENSAYO`, y su propio archivo declara
+que ese cuerpo *«muere entero»* al enchufarse.
+
+🔴 **Quien flipee sólo el primero va a ver la fila encendida y una pantalla que
+sigue simulando** — *y eso se lee como «DeUna anda» hasta que alguien mire la
+base.* **Una fila que promete un medio que no existe es peor que no ofrecerlo.**
+
+### ③ EL CRON DEL BARRIDO NO SE ENCIENDE HASTA QUE EL APLICADOR EXISTA Y HAYA CORRIDO A MANO UNA VEZ
+
+**Un barrido que escala lo mismo en cada pasada entrena a ignorarlo.** *La
+primera alerta se lee; la quinta idéntica se archiva; para la décima el canal
+está muerto y nadie lo declaró muerto.*
+
+Y su razón de fondo, que vale para todo reloj de esta casa: **agendar un barrido
+es empezar a tocar plata en un horario.** Eso pide firma, no configuración.
+
+> ⚠️ **La forma correcta de tender un cable sin encenderlo, ya con precedente en
+> la casa:** el cron de `cobrar-recurrencias` (`20260822240000`) **existe y nace
+> INERTE** — su timbre lee `app_config.recurrente_vivo` y sin esa clave devuelve
+> `recurrente_apagado`. **El cron es el CABLE; la llave es del founder.** *Un
+> cable que se tiende bajo presión se tiende mal; éste se tendió con la
+> corriente cortada.*
+
+---
+
 ## Historial
 
 - **v1.7 (22-ago-2026, mesa 104):** **§8 gana dueño.** La pista D levantó que el
