@@ -218,21 +218,12 @@ function MuestraBarraPorCapacidad() {
     <Icono nombre={n as IconoNombre} tinta={color} huella={colorHuella} activa={activa} />
   )
   // LA TABLA FIRMADA de `docs/LA_CASA_DEL_PRESTADOR.md` §2, verbatim en
-  // sus cinco filas. Se monta ENTERA porque el gate del destino central
-  // no se puede juzgar en un caso: hay que ver que ATENDER pese igual
-  // cuando cae al centro geometrico (5 y 3) y cuando NO cae (recepcion,
-  // donde es el tercero de cuatro). El repartidor no tiene fila porque
-  // §2.2 le niega la barra entera — una barra compartida es la promesa
-  // de que hay mas de un lugar donde ir.
-  /* ☠️ LAPIDA DE `destacada` EN LA GALERIA (S103-B). Las tres filas de
-     abajo montaban `destacada: true` y NO DIBUJABAN NADA: la rama de
-     render de esa prop murio en S99-B —el disco del activo paso a ser el
-     unico enfasis— y solo sobrevivio la prop en el tipo. Una lamina de
-     gate que monta una prop muerta le muestra al founder una funcion que
-     no existe, y esta misma galeria ya declaraba la muerte mas abajo:
-     decia las dos cosas a la vez. Vigilado por `R61`, que las cuenta por
-     la FORMA `destacada:` y por eso no toca al `destacada` de
-     `FilaMonto`, que es otra prop y esta viva. */
+  // sus cinco filas. Se monta ENTERA porque el gate de la barra no se
+  // puede juzgar en un caso: hay que ver el disco viajando con CINCO
+  // destinos, con CUATRO y con DOS, y que el valle se derive del ancho
+  // medido y no de una cuenta contra «4 tabs». El repartidor no tiene
+  // fila porque §2.2 le niega la barra entera — una barra compartida es
+  // la promesa de que hay mas de un lugar donde ir.
   const PERFILES: Array<{ rotulo: string; items: BarraTabsItem[] }> = [
     {
       rotulo: 'titular / administrador con local — CINCO (ATENDER cae al centro geometrico)',
@@ -245,7 +236,7 @@ function MuestraBarraPorCapacidad() {
       ],
     },
     {
-      rotulo: 'recepcion — CUATRO · 🔴 EL CASO QUE MANDA: ATENDER es el TERCERO DE CUATRO, NO el centro. ⏪ Decia «si el destaque dependiera de la posicion, esta fila lo rompe» — el destaque MURIO (ver la lapida arriba). La fila sigue mandando por otra razon, que es la viva: prueba que el disco viaja al activo sea cual sea su posicion.',
+      rotulo: 'recepcion — CUATRO · 🔴 EL CASO QUE MANDA: con cuatro destinos el centro geometrico cae ENTRE dos items, asi que ninguno lo ocupa. Prueba que el disco viaja al ACTIVO sea cual sea su posicion, que es lo unico que marca en esta barra.',
       items: [
         { key: 'index', etiqueta: 'Hoy', icono: G('hoy') },
         { key: 'mascotas', etiqueta: 'Datos', icono: G('datos') },
@@ -5830,12 +5821,12 @@ function GaleriaInterna() {
           <EjemploBadge />
         </Seccion>
 
-        <Seccion titulo="BarraTabs (S97+) — el destino CENTRAL y la composicion por capacidad">
+        <Seccion titulo="BarraTabs (S97+) — la composicion por capacidad">
           {/* LOS CINCO CASOS JUNTOS, porque la comparacion ES la ley: la
               barra tiene que leerse igual con 5, con 3 y con 2, y el
               centro de una de 4 cae ENTRE dos items. La pieza no elige
-              cual destacar ni cuantas tabs hay — las compone quien sabe
-              que puede cada quien.
+              cuantas tabs hay — las compone quien sabe que puede cada
+              quien.
               El toggle enciende la CANDIDATA §5.4 (overshoot 280 ms), que
               nace apagada: su gate es del founder, en dispositivo. */}
           <MuestraBarraPorCapacidad />

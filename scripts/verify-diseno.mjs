@@ -2034,21 +2034,6 @@ const FIXTURES = {
         '</View>',
     },
   ],
-  /* R61 · dos montajes de la prop muerta sobre su baseline de apps (1),
-     y con ellos las DOS trampas del caso adentro: el atributo JSX de
-     `FilaMonto` —otra pieza, prop VIVA— y la palabra en un comentario.
-     Si la regla midiera la palabra en vez de la forma, contaría 4 y el
-     rojo saldría por la razón equivocada, que es tan caro como un
-     verde. Trae también su `BarraTabs.tsx` para que el ancla no sea lo
-     que lo pinta de rojo (un fixture rojo por el ancla no prueba el
-     brazo). */
-  R61: [
-    { path: 'packages/ui/src/components/BarraTabs.tsx', src: 'destacada?: boolean' },
-    {
-      path: 'apps/prestador/src/app/a.tsx',
-      src: "{ key: 'atender', destacada: true }\n{ key: 'otro', destacada: true }\n<FilaMonto etiqueta=\"x\" destacada />\n/* la lapida de destacada: true */",
-    },
-  ],
   /* R60 · el exterior con `alignSelf` puesto fuera de `bloque` — el
      defecto exacto. Trae el `bloque ? …` para que la regla tenga que
      distinguir la rama legítima y no gritar por la palabra suelta. */
@@ -3498,137 +3483,6 @@ function r49(archivos) {
   }
 }
 
-/** R61 · LA PROP JUBILADA NO SE SIGUE MONTANDO — `BarraTabs.destacada`
- *  (S103-B · hallazgo del censo que la tanda de R47/R48 obligó a correr).
- *
- *  LA LEY: `destacada` **murió en S99-B** —su rama de render se retiró
- *  cuando el disco del activo pasó a ser el único énfasis de la barra—
- *  **pero la prop sobrevivió en el tipo.** Medido: tiene CUATRO
- *  apariciones vivas en la pieza y **ninguna dibuja** — la declaración,
- *  un `filter`, un conteo y el string de un warning.
- *
- *  🔴 **POR QUÉ ES PEOR QUE LA VARIANTE JUBILADA que vigilan R47/R48:**
- *  una variante muerta al menos **cambia lo que se ve**, así que alguien
- *  la nota. Ésta **acepta y no hace nada**: el consumidor la pasa, el
- *  typecheck la aprueba, el guard de la pieza hasta le valida la
- *  invariante, y no pasa NADA. *No hubo error, ni log, ni síntoma: hubo
- *  silencio con cara de normalidad* (L-318, su variante grave).
- *
- *  🔴 **LA DOCUMENTACIÓN ERA PERFECTA Y NO SIRVIÓ DE NADA** (medición
- *  independiente de la pista D, verificada acá contra la fuente). La
- *  lápida de la pieza —líneas 73-88— **no insinúa: dice verbatim**
- *  *«`destacada` es NO-OP: la prop se acepta y no pinta nada»*. **La
- *  frase exacta que describe el defecto vivía adentro del archivo que lo
- *  acepta, y cuatro consumidores lo montaron tres semanas igual.**
- *  ⇒ *un comentario que dice «esto ya no hace nada» no protege de nada
- *  mientras la prop siga siendo aceptable: el compilador gana.* **Por eso
- *  esto tenía que ser una REGLA y no una lápida mejor escrita** — la
- *  lápida ya estaba, y era buena.
- *
- *  🔴 **LA CLASE, y es la CARA INVERSA de `L-318` «motor sin puerta»**
- *  (nombrada por D el mismo día, sobre tres casos de tres pistas):
- *  · **motor sin puerta** — la pieza existe y nadie la llama. *No hace
- *    nada, y se nota como AUSENCIA.*
- *  · **puerta sin motor** — ésta: **la prop se acepta y no hay nada
- *    detrás.** *Es peor de detectar: **typechequea, pasa el guard, y el
- *    llamador cree que pidió algo.***
- *  **Las tres las encontró RECORRER EL CIRCUITO, ninguna un gate: los
- *  gates miden la pieza, y ninguno puede notar que falta el cable.**
- *
- *  🔴 **Y LO QUE LA VOLVIÓ INVISIBLE ES SU PROPIO GUARD.** La pieza
- *  valida que no haya DOS `destacada` a la vez. Esa validación es la
- *  **razón escrita** que hace que la prop parezca viva y enforced — y
- *  por eso nadie la revisa. *Un espejo con una razón que se puede falsar
- *  es peor que uno sin razón, porque la razón hace que nadie lo mire.*
- *
- *  **Y su forma más afilada, de la pista C, que es la vuelta de tuerca
- *  sobre su propia ley del instrumento apagado:**
- *  > *Un instrumento apagado dice «todo bien». Uno vigilando un cadáver
- *  > dice «esto importa».* **Es PEOR que el silencio, porque el ruido se
- *  > lee como cobertura — y nadie audita algo que tiene un invariante
- *  > cuidándolo.**
- *  Su credencial: convivió con **52 reglas y 4 typechecks en verde**.
- *
- *  ⚠️ **EL DISCRIMINADOR, y no es un detalle de forma:** `destacada`
- *  vive en DOS piezas —`BarraTabs` (muerta) y el `FilaMonto` local del
- *  cliente (**VIVA**, otra semántica, dos montajes legítimos)—. Contar
- *  la palabra suelta metería a `FilaMonto` en el contador de `BarraTabs`
- *  **y haría que usar una prop viva aumente una deuda ajena.** Se cuenta
- *  la forma de PROPIEDAD DE OBJETO (`destacada: true`), que es como se
- *  monta en los `items` de la barra; el atributo JSX (`<FilaMonto …
- *  destacada />`) queda afuera **por forma, no por lista de excepciones**.
- *  Medido antes de escribir la regla: **4 contra 2, cero solape.**
- *  *Medir por la palabra habría sido la misma imprudencia que renombrar
- *  por grep* — es la advertencia literal de la cabecera de R48, cobrada.
- *
- *  **Contadores SEPARADOS, jamás sumados** (un agregado sobre objetos
- *  distintos no mide ninguno): `apps/` nace en 1 y es de **C**; `ui/` se
- *  limpió en esta tanda y DURA EN 0.
- *
- *  ── CÓMO SE RETIRA, Y POR QUÉ NO SE PUEDE TODAVÍA ──────────────────
- *  **C ya borró su montaje** (`fb28b94e`) y **medido con su parche
- *  aplicado, este contador da 0** — con NUEVE `destacada` vivos en
- *  `apps/` que la regla no cuenta, que es la prueba del discriminador
- *  contra el árbol real y no contra un fixture.
- *
- *  🔴 **PERO EL RETIRO ES UN ACTO CON ORDEN, y hacerlo antes rompe
- *  `main`:** el commit de C **todavía no está en `origin/main`**, así que
- *  ahí la línea 607 sigue viva. **Sacar la prop del tipo hoy le rompe el
- *  typecheck a `main`** si estas ramas se mergean en el orden equivocado.
- *  *Es la clase de L-179: un cambio que quita una superficie se secuencia
- *  contra lo que todavía la consume, no contra lo que uno tiene en su
- *  disco.*
- *
- *  **La instrucción, cuando `fb28b94e` esté en `origin/main`:** se
- *  retiran EN EL MISMO COMMIT ① la prop `destacada?: boolean` del tipo,
- *  ② su guard de invariante (el `filter`/conteo/warning), ③ su lápida
- *  larga y ④ esta regla con su fixture y su prueba negativa. **Los cuatro
- *  juntos o ninguno:** dejar el guard sin la prop es un instrumento
- *  vigilando algo que ya no existe, que es exactamente el defecto que
- *  esta regla vino a cazar. */
-const BASELINE_R61_APPS = 1
-const BASELINE_R61_UI = 0
-function r61(archivos) {
-  const fallos = []
-  const enApps = []
-  const enUi = []
-  let piezas = 0
-  /* Blanquea comentarios CONSERVANDO offsets. No reusa `sinComentarios`
-     porque ése los BORRA, y entonces la línea reportada apunta más
-     arriba de donde está el defecto — un número que manda al lugar
-     equivocado es peor que no dar número. */
-  const enBlanco = (s) =>
-    s
-      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
-      .replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
-  for (const { path, src: crudo } of archivos) {
-    // La pieza dueña queda afuera: su declaración y su guard NO son montajes.
-    if (/\/BarraTabs\.tsx$/.test(path)) {
-      piezas++
-      continue
-    }
-    const src = enBlanco(crudo)
-    for (const m of src.matchAll(/\bdestacada:\s*(?:true|false)\b/g)) {
-      const donde = `${path}:${lineaDe(src, m.index)}`
-      if (path.startsWith('packages/ui/')) enUi.push(donde)
-      else enApps.push(donde)
-    }
-  }
-  if (enApps.length > BASELINE_R61_APPS)
-    fallos.push(
-      `R61: montajes de la prop JUBILADA \`BarraTabs.destacada\` en apps/ subieron a ${enApps.length} (baseline ${BASELINE_R61_APPS}, SOLO-BAJA) — ${enApps.join(' · ')}. Su rama de render murió en S99-B: la prop se acepta, typechequea y NO DIBUJA NADA. Se saca el \`destacada: true\` del item; no hay reemplazo porque no hay nada que reemplazar — el disco del activo es el único énfasis de la barra.`,
-    )
-  if (enUi.length > BASELINE_R61_UI)
-    fallos.push(
-      `R61: montajes de \`BarraTabs.destacada\` dentro de packages/ui subieron a ${enUi.length} (DURA EN ${BASELINE_R61_UI}) — ${enUi.join(' · ')}. En la galería es peor que en una pantalla: una lámina que monta una prop muerta le muestra al founder una función que no existe, y su propia prosa ya declara que ATENDER dejó de estar destacada.`,
-    )
-  fallos.push(...ancla('R61', piezas, 1, 'archivo(s) BarraTabs.tsx en el corpus'))
-  return {
-    fallos,
-    info: `${enApps.length} montaje(s) de la prop jubilada en apps (baseline ${BASELINE_R61_APPS} solo-baja) · ui: ${enUi.length} (DURA EN ${BASELINE_R61_UI}) · mide la PROPIEDAD DE OBJETO, no la palabra: el \`destacada\` de \`FilaMonto\` es otra prop VIVA y queda afuera por forma`,
-  }
-}
-
 /** R60 · `Boton` NO OCUPA EL SLOT `alignSelf` DE SU EXTERIOR (S103-B · D de C).
  *
  *  LA LEY: un botón sin `bloque` **abraza su contenido sin decidir dónde
@@ -4677,7 +4531,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R61: r61, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4891,40 +4745,6 @@ for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
     ['la palabra en un comentario (documentar una muerte no puede aumentarla)',
      '<Boton variante="secundario" />\n/* la lápida de variante="compacto" */'],
   ];
-  /* ── S103-B · LA PRUEBA NEGATIVA DE R61 ───────────────────────────
-     Su cabecera afirma algo fuerte: que separa DOS props homónimas de
-     piezas distintas midiendo la FORMA, y que por eso usar la prop viva
-     de `FilaMonto` no aumenta la deuda de `BarraTabs`. Esa afirmación es
-     medible, así que se mide — un ratchet que sobre-dispara se apaga a
-     la semana. Los tres casos son REALES, del árbol vivo. */
-  {
-    const R61_NO_DEBE_CONTAR = [
-      ['el atributo JSX de `FilaMonto` (2 montajes VIVOS y legitimos en el cliente)',
-       '<FilaMonto etiqueta="Total" monto="$10" destacada />'],
-      ['la prop declarada en la pieza local que la define (`destacada?: boolean` de despensa-piezas)',
-       'destacada?: boolean\n  destacada = false,'],
-      ['la palabra en un comentario (documentar una muerte no puede aumentarla)',
-       '/* la rama de destacada: true murio en S99-B */'],
-    ]
-    for (const [queEs, src] of R61_NO_DEBE_CONTAR) {
-      /* El caso va DOS VECES a proposito: el baseline de `apps/` es 1, asi
-         que UN solo falso positivo quedaria absorbido por el piso y este
-         test pasaria sin haber medido nada. Se encontro rompiendo la
-         regla a proposito: de los tres casos, dos pasaban por el piso y
-         no por la forma. */
-      const r = r61([
-        { path: 'packages/ui/src/components/BarraTabs.tsx', src: 'destacada?: boolean' },
-        { path: 'apps/cliente/src/app/n.tsx', src: src + '\n' + src },
-      ])
-      if (r.fallos.length > 0) {
-        console.error(
-          `AUTO-PRUEBA ✗ R61 conto lo que NO debe: ${queEs}. Medir por la palabra habria metido una prop VIVA de otra pieza en el contador de una muerta.`,
-        )
-        decorativas++
-      }
-    }
-  }
-
   for (const [queEs, src] of NO_DEBEN_CONTAR) {
     const r = jubiladaEnPiezasUi([{ path: 'packages/ui/src/components/N.tsx', src }], 'compacto');
     if (r.porLiteral.length > 0 || r.porDefault.length > 0) {
@@ -5077,7 +4897,6 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
-corridas.push(['R61 (la prop jubilada no se sigue montando: BarraTabs destacada)', r61([...apps, ...ui, ...galeria])]);
 corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);
 corridas.push(['R59 (un comentario JSX sin llaves es texto: D-882)', r59([...apps, ...ui, ...galeria])]);
 corridas.push(['R58 (Texto no gana un color de acento: N23)', r58(ui)]);

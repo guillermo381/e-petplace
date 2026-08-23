@@ -604,24 +604,6 @@ export default function TabsLayout() {
   }).map((key) => ({
     key,
     etiqueta: t(KEY_ETIQUETA_TAB[key]),
-    /* ☠️ S103-C · MURIÓ `destacada: true` (pedido de B, verificado acá antes
-       de borrar). **Su rama de render se retiró en S99-B** —cuando el disco
-       del activo pasó a ser el único énfasis— **y la prop sobrevivió en el
-       tipo**: se aceptaba, typechequeaba, y **no dibujaba nada.** Tres
-       semanas así, con 52 reglas y cuatro typechecks en verde.
-
-       🔴 **Lo que la volvió invisible fue su propio GUARD.** `BarraTabs`
-       valida que no haya DOS destacadas, y esa validación **la hace parecer
-       viva y vigilada** — *nadie audita una prop que tiene un invariante
-       cuidándola.* Es `L-391` en su forma más cruel: no es que el
-       instrumento callara, es que **había un instrumento hablando FUERTE
-       sobre una prop muerta.**
-
-       **Control propio antes de borrar** (no me fié del reporte): cero usos
-       de `destacada` para dibujar en la pieza — solo el tipo y el guard.
-       **No hay reemplazo porque no hay nada que reemplazar.**
-       Vigilado por `R61` (baseline apps 1, SOLO-BAJA): con esto llega a 0 y
-       **se retiran en el mismo acto la prop, su guard y la regla.** */
     icono: ({ color, activa, colorHuella }) => (
       <Icono nombre={GLIFO_TAB[key]} tinta={color} huella={colorHuella} activa={activa} />
     ),

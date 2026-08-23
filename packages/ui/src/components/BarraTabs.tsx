@@ -70,31 +70,25 @@ import { Badge, useEtiquetaBadge } from './Badge'
 
 const AnimatedPath = Animated.createAnimatedComponent(Path)
 
-/** ☠️ EL LADO DE LA DESTACADA — LÁPIDA (S99-B, firma de mesa).
+/** LA BARRA TIENE UN SOLO ÉNFASIS, Y ES EL DISCO DEL ACTIVO — ley, no
+ *  preferencia (S99-B, firma de mesa; ejecutada del todo en S103).
  *
- *  **ATENDER deja de estar destacada permanentemente. `destacada` es
- *  NO-OP: la prop se acepta y no pinta nada.**
+ *  **No existe destino central permanente, y el argumento es medido:**
+ *  con L-251 **ATENDER PUEDE NO EXISTIR** —la barra se compone por
+ *  capacidad— y ***un tab que a veces no está no puede ser el centro de
+ *  gravedad permanente***. Con el disco del activo viajando, un tab
+ *  destacado e inactivo dejaba **DOS cosas pidiendo ser el centro**:
+ *  importancia y ubicación peleando por el mismo píxel.
  *
- *  **El argumento que la mató, para que nadie la reabra:** con L-251
- *  **ATENDER PUEDE NO EXISTIR** — la barra se compone por capacidad — y
- *  ***un tab que a veces no está no puede ser el centro de gravedad
- *  permanente***. La destacada nació cuando ATENDER era fija; dejó de
- *  serlo **en esta misma sesión**.
+ *  ⇒ **Quien vuelva a proponer un tab pesado en reposo tiene que
+ *  contestar primero cómo se comporta cuando ese tab no está.** Se
+ *  escribe acá y no en un acta porque el modo de falla es que alguien lo
+ *  reabra sin saber que ya se midió.
  *
- *  Y el defecto que producía, medido contra la barra nueva: con el disco
- *  del activo viajando, **una ATENDER destacada e inactiva dejaba DOS
- *  cosas pidiendo ser el centro** — importancia y ubicación peleando por
- *  el mismo píxel.
- *
- *  ⚠️ **No se borra del tipo:** C y D la pasan hoy y sacarla del tipo les
- *  rompe el typecheck para quitar algo que ya no hace nada. **Sin
- *  ratchet a propósito:** una prop no-op no crece en daño, y poner un
- *  instrumento a vigilar algo inofensivo es instrumento para nadie. Se
- *  retira al tocar cada pantalla.
- *
- *  ⚠️ Y su constante MURIÓ del todo: `DESTACADA_LADO = 44` no la lee
- *  nadie. Se borra en vez de dejarse — *una constante sin consumidor es
- *  la próxima que alguien usa creyendo que significa algo* (Ley 37). */
+ *  ☠️ **Lo que quedaba de aquella prop MURIÓ ENTERO en S103** —prop,
+ *  guard, lápida y la regla que la vigilaba, en un solo acto—. *Su
+ *  historia completa vive en el commit del retiro; acá queda la ley, que
+ *  es lo único que sigue sirviendo.* */
 
 /** ── EL VALLE Y EL DISCO (S99-B · firma de mesa sobre la referencia) ──
  *  La barra deja de ser un rectángulo con un borde: **es UN SOLO VECTOR
@@ -503,24 +497,6 @@ export type BarraTabsItem = {
   icono: (estado: { color: string; activa: boolean; colorHuella: string }) => ReactNode
   /** Contador entero — "3 pendientes" del prestador. */
   badge?: number
-  /** S97+-B · EL DESTINO CENTRAL (firma de arquitectura, mesa 13-ago):
-   *  Mostrador sube de chip a TAB, y la tab de atender es el destino
-   *  destacado de la barra del prestador.
-   *
-   *  LA PIEZA NO ELIGE CUÁL: la declara quien la monta, igual que
-   *  `badge`. La composición por capacidad —titular con local ve cuatro,
-   *  recepción tres, profesional puro dos, vendedor puro tres— es del
-   *  app, que es el único que sabe qué puede cada quien. Meter esa
-   *  decisión acá sería que `packages/ui` leyera roles.
-   *
-   *  SU FORMA, y por qué NO es un color: la destacada gana SUPERFICIE y
-   *  un paso de tamaño, jamás un acento propio. N5 manda un acento por
-   *  pantalla y en esta barra ya está tomado —la huella de la tab activa
-   *  ES `accent.active` desde §2.6—, así que pintar la central de color
-   *  pondría dos acentos peleando, y el que perdería es el que dice
-   *  DÓNDE ESTOY. *Destacar no es competir con el estado: es pesar más
-   *  en reposo.* */
-  destacada?: boolean
 }
 
 export function BarraTabs({
@@ -580,29 +556,6 @@ export function BarraTabs({
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
 
-  /** LA INVARIANTE DE LA BARRA: **una sola destacada**. «Destino
-   *  central» en plural no significa nada — dos tabs pesando igual es
-   *  ninguna pesando.
-   *
-   *  Por qué un aviso de DEV y no un rebote: la barra es la navegación
-   *  raíz, y una barra que no monta deja la app sin piso. Un warning en
-   *  desarrollo llega a quien la compone, en el momento en que la
-   *  compone; un throw en producción castiga al usuario por un error de
-   *  quien la montó. *(Si algún día `destacada` pasa a ser prop de la
-   *  BARRA en vez del ítem, este estado se vuelve inexpresable y este
-   *  guard muere — que sería mejor. Hoy no se hace porque el consumidor
-   *  arma la lista con spreads condicionales por capacidad, y ahí la
-   *  marca viaja NATURALMENTE con el ítem que puede o no existir.)* */
-  if (__DEV__) {
-    const destacadas = items.filter((i) => i.destacada === true)
-    if (destacadas.length > 1) {
-      console.warn(
-        `[BarraTabs] ${destacadas.length} tabs marcadas como \`destacada\` (${destacadas
-          .map((d) => d.key)
-          .join(', ')}). El destino central es UNO: dos pesando igual es ninguna pesando. Se destacan todas — la pieza no elige por vos.`,
-      )
-    }
-  }
   const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
 
   /** El ancho se MIDE (onLayout): el valle viaja al centro del tab
@@ -874,9 +827,6 @@ export function BarraTabs({
                   dónde vas en los que NO estás.* */}
               <View style={{ height: ALTO_CAJA_ICONO, justifyContent: 'center' }}>
               <HuellaDeTab activa={esActivo}>
-                {/* ☠️ La rama de `destacada` MURIÓ acá (ver su lápida
-                    arriba): ya no hay superficie propia. El disco del
-                    activo es el ÚNICO énfasis de la barra. */}
                 <Badge n={item.badge ?? 0}>
                   {item.icono({
                     color,
