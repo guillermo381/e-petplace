@@ -75,11 +75,29 @@ BEGIN
   EXCEPTION WHEN check_violation THEN NULL;
   END;
 
-  RAISE NOTICE 'cinturon M1 OK: codigo_push y reverso_fallido entran; lo invalido rebota';
+  /* 🔴 LA LIMPIEZA VA ACÁ, NO DELEGADA — y esto se corrige porque ya falló.
+     La v1 decía: «el cinturón escribe una fila; A decide si corre con ROLLBACK
+     aparte o si le agrega el DELETE». **A aplicó la migración y el residuo
+     quedó** — `05e56e9d…`, con `clave_idempotencia = 'cinturon-m1-…'`.
+
+     Y no quedó en un estado cualquiera: quedó en **`reverso_fallido`**, que la
+     letra §6 marca *«🔴 caso de soporte, jamás se resuelve solo»*.
+     ⇒ **el fixture fabricó un caso de soporte falso** — y de hecho apareció
+     así: A lo encontró barriendo la ventana en que el actuador estuvo muerto,
+     y tuvo que medirlo para descartar que fuera plata real.
+
+     *Un cinturón que escribe y delega su limpieza no está limpio: está
+     esperando que alguien se acuerde.* La casa ya tenía la regla —fixtures
+     in-txn con ROLLBACK, residuo 0— y yo escribí una excepción sin decir que
+     lo era. */
+  DELETE FROM pagos_intentos WHERE clave_idempotencia LIKE 'cinturon-m1-%';
+
+  IF EXISTS (SELECT 1 FROM pagos_intentos WHERE clave_idempotencia LIKE 'cinturon-m1-%') THEN
+    RAISE EXCEPTION 'cinturon M1: quedo residuo';   -- residuo 0, verificado
+  END IF;
+
+  RAISE NOTICE 'cinturon M1 OK: codigo_push y reverso_fallido entran; lo invalido rebota; residuo 0';
 END $$;
--- ⚠️ El cinturón escribe una fila. **Va dentro de la transacción de la
---    migración y se limpia**: A decide si corre con ROLLBACK aparte o si le
---    agrega el DELETE por `clave_idempotencia LIKE 'cinturon-m1-%'`.
 
 -- ── REVERSA M1 (escrita ANTES de aplicar) ──────────────────────────────────
 --   ⚠️ QUÉ NO DESHACE: si ya existieran filas con forma='codigo_push' o
