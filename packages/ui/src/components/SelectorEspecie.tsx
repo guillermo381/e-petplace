@@ -185,7 +185,6 @@ function Ficha({
       >
         <AvatarMascota
           nombre={opcion.nombre}
-          especie={opcion.codigo}
           {...(opcion.fotoUrl !== undefined ? { fotoUrl: opcion.fotoUrl } : null)}
           tamano="md"
         />

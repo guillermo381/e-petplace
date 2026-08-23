@@ -11,7 +11,9 @@
  * es dueña del upload. No porta estados de red.
  * ═══════════════════════════════════════════════════════════════════
  *
- * Vacío: círculo grande AvatarMascota (huella digna; `especie` del
+ * Vacío: círculo grande AvatarMascota (huella digna; la cara por especie la resuelve el LLAMADOR y llega
+ * como `fotoUrl` — ver la lápida de `AvatarMascota.especie`. Lo viejo:
+ * `especie` del
  * contexto queda lista para el set ilustrado D-288 — cuando lleguen
  * los assets entran por AvatarMascota y este componente no cambia)
  * + invitación en voz humana.
@@ -40,7 +42,7 @@ import { spacing } from '../tokens/spacing'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
-import { AvatarMascota, radioSquircle, type AvatarMascotaEspecie } from './AvatarMascota'
+import { AvatarMascota, radioSquircle } from './AvatarMascota'
 import { Boton } from './Boton'
 import { Celda } from './Celda'
 import { Hoja } from './Hoja'
@@ -58,8 +60,6 @@ export interface SelectorAvatarFoto {
 export interface SelectorAvatarProps {
   /** Nombre de la mascota (a11y del avatar y del botón). */
   nombre: string
-  /** Código real de cat_especies — la huella la ilustrará D-288. */
-  especie?: AvatarMascotaEspecie
   /** La pantalla es dueña del valor. */
   foto?: SelectorAvatarFoto | null
   /** foto nueva al elegir · null al "Quitar". "Por ahora no" NO llama. */
@@ -71,7 +71,6 @@ export interface SelectorAvatarProps {
 
 export function SelectorAvatar({
   nombre,
-  especie,
   foto = null,
   onCambiar,
   invitacion,
@@ -154,7 +153,7 @@ export function SelectorAvatar({
             />
           </View>
         ) : (
-          <AvatarMascota nombre={nombre} especie={especie} tamano="lg" />
+          <AvatarMascota nombre={nombre} tamano="lg" />
         )}
         {!conFoto ? (
           <Text
