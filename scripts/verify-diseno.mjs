@@ -2034,6 +2034,24 @@ const FIXTURES = {
         '</View>',
     },
   ],
+  /* R62 · CUATRO montajes sobre su baseline de 3, y con las dos trampas
+     REALES del árbol adentro: la CLAVE DE ARGUMENTO en la misma línea que
+     un `<AvatarMascota>` (el `caraDeMascotaPorRuta({ especie: … })` de
+     `disponibles.tsx`, que NO es un pase y mi propio grep contó mal antes
+     de existir la regla) y la palabra en un comentario. Si midiera por
+     línea o por palabra contaría 6 y el rojo saldría por la razón
+     equivocada, que es tan caro como un verde. Trae su pieza para que el
+     ancla no sea lo que lo pinta de rojo. */
+  R62: [
+    { path: 'packages/ui/src/components/AvatarMascota.tsx', src: 'especie?: AvatarMascotaEspecie' },
+    {
+      path: 'apps/cliente/src/app/a.tsx',
+      src:
+        '<AvatarMascota nombre={n} especie={e} />\n'.repeat(16) +
+        '<AvatarMascota nombre={n} fotoUrl={caraDeMascotaPorRuta({ especie: p.especie, rutaImagen: r })} />\n' +
+        '/* la lapida de especie={x} */',
+    },
+  ],
   /* R60 · el exterior con `alignSelf` puesto fuera de `bloque` — el
      defecto exacto. Trae el `bloque ? …` para que la regla tenga que
      distinguir la rama legítima y no gritar por la palabra suelta. */
@@ -3483,6 +3501,138 @@ function r49(archivos) {
   }
 }
 
+/** R62 · LA TABLA DE JUBILACIONES — una prop jubilada no se sigue montando
+ *  (S103-B · nace del censo «el modo de falla decide la herramienta»).
+ *
+ *  🔴 **POR QUÉ ES UNA TABLA Y NO UNA REGLA POR CASO, con su medición:**
+ *  el censo de S103-B intentó DETECTAR jubilaciones mirando el código y
+ *  **falló en las dos direcciones, medido:** contando solo comparaciones,
+ *  marcó **133 de 298 miembros (45% del corpus)** — *un instrumento que
+ *  denuncia media casa mide su propia ceguera*; contando además las tablas
+ *  de lookup, **perdió el ancla**, porque `compacto` **está COMPLETAMENTE
+ *  IMPLEMENTADA** y jubilada **por política**.
+ *  ⇒ ***un valor prohibido por política es indistinguible de uno vivo
+ *  mirando el código: solo la prosa dice que está prohibido.*** Por eso
+ *  `R47`/`R48`/`R58` son ratchets de NOMBRE y **no se derivan**, y por eso
+ *  cada jubilación nueva **paga su propia fila acá**.
+ *
+ *  🔴 **Y POR QUÉ UNA REGLA Y NO UN COMENTARIO MEJOR:** el caso anterior
+ *  de esta clase (`BarraTabs.destacada`, R61, retirada al llegar a 0)
+ *  **se anunciaba NO-OP EN NEGRITA adentro del archivo que la aceptaba**,
+ *  y sobrevivió tres semanas con 52 reglas y 4 typechecks en verde.
+ *  *Un comentario no frena a un compilador.* **El destinatario del freno
+ *  acá es el LLAMADOR, y al llamador no lo alcanza ninguna prosa que viva
+ *  en la pieza.**
+ *
+ *  ⚠️ **`forma` es lo que separa una prop de su homónima de otra pieza —
+ *  y las dos trampas son REALES, medidas en el árbol vivo:**
+ *  · `objeto` — `prop: true` adentro de un item.
+ *  · `jsx` — `prop={…}` en el tag de SU pieza. **`especie:` como clave de
+ *    argumento (`caraDeMascotaPorRuta({ especie: … })`) vive en la MISMA
+ *    LÍNEA que un `<AvatarMascota>` y NO es un pase**: medir por línea
+ *    contaba un falso positivo del árbol real.
+ *  *Medir por la palabra habría hecho que usar una prop VIVA de otra pieza
+ *  aumente una deuda ajena.*
+ *
+ *  ⚠️ **LA CONDICIÓN DE USO DEL CENSO QUE PARIÓ ESTA REGLA (crédito de la
+ *  pista C, que refutó un caso mío con ella):** *un grep por ACCESO A
+ *  PROPIEDAD no ve el paso del OBJETO ENTERO.* El caso: se declararon
+ *  muertos `alergia.composicion` y `.coincidencia` porque la pieza «solo
+ *  lee `alergia.senal`» — **cierto como grep y falso como conclusión**: el
+ *  objeto entero viaja a `temperaturaDeAlergia({ composicion, coincidencia })`
+ *  en tres sitios, y esos dos campos deciden **si la señal se dibuja, el
+ *  `accessibilityRole` y el color**. `alergia.composicion` no aparece
+ *  nunca y gobierna cada render.
+ *  ⇒ **antes de declarar muerto un campo hay que ver si el objeto que lo
+ *  contiene se pasa completo a algún lado.** *No es reproche al método —
+ *  censar por forma sintáctica es lo que lo hace escalar—: es su condición
+ *  de uso.* **`AvatarMascota.especie` la pasa en su forma más fuerte:
+ *  adentro de la pieza NO EXISTE ningún objeto que pasar** — la firma
+ *  desestructura, `props` aparece 0 veces y hay 0 spreads.
+ *
+ *  ── LA FILA VIVA ───────────────────────────────────────────────────
+ *  **`AvatarMascota.especie` — no murió: NUNCA NACIÓ.** La ficha de
+ *  `D-288` dice *«la API de AvatarMascota ya recibe `especie`»* y es
+ *  cierto que la RECIBE — **la pieza ni siquiera la desestructura**.
+ *  Medido: la integración de D-288 **llegó por OTRA puerta** y ya está
+ *  viva — `caraDeMascotaPorRuta({ especie, rutaImagen, fotoUri })`
+ *  resuelve la escalera raza → genérico → huella en `@epetplace/api` y
+ *  entra como **`fotoUrl`**. ⇒ **la prop es vestigio del plan superado, no
+ *  semilla esperando**, y por eso se retira en vez de protegerse.
+ *  *Su costo hoy no es teórico: `foto-mascota.tsx:195` computa
+ *  `esEspecieUi(especie) ? especie : undefined` para nada.* */
+const JUBILADAS = [
+  {
+    id: 'AvatarMascota.especie',
+    pieza: 'AvatarMascota',
+    prop: 'especie',
+    forma: 'jsx',
+    baseApps: 15,
+    baseUi: 1,
+    murio: 'nunca nació: la integración de D-288 llegó por otra puerta y ya está viva',
+    cura:
+      'La cara por especie la resuelve el LLAMADOR con `caraDeMascotaPorRuta(...)` y llega como `fotoUrl`. Se borra el `especie={...}`; en `foto-mascota` desaparece además un `esEspecieUi(...)` computado para nada. Cuando los dos contadores lleguen a 0 se retiran EN EL MISMO COMMIT la prop, su doc y esta fila.',
+  },
+]
+function r62(archivos) {
+  const fallos = []
+  const infos = []
+  /* Blanquea comentarios CONSERVANDO offsets: `sinComentarios` los BORRA
+     y la línea reportada quedaría más arriba del defecto. Un número que
+     manda al lugar equivocado es peor que no dar número. */
+  const enBlanco = (s) =>
+    s
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
+  for (const j of JUBILADAS) {
+    const enApps = []
+    const enUi = []
+    let piezas = 0
+    const suArchivo = new RegExp('/' + j.pieza + '\\.tsx$')
+    for (const { path, src: crudo } of archivos) {
+      // La pieza dueña queda afuera: su declaración NO es un montaje.
+      if (suArchivo.test(path)) {
+        piezas++
+        continue
+      }
+      const src = enBlanco(crudo)
+      const anotar = (idx) => {
+        const donde = path + ':' + lineaDe(src, idx)
+        if (path.startsWith('packages/ui/')) enUi.push(donde)
+        else enApps.push(donde)
+      }
+      if (j.forma === 'objeto') {
+        const re = new RegExp('\\b' + j.prop + ':\\s*(?:true|false)\\b', 'g')
+        for (const m of src.matchAll(re)) anotar(m.index)
+      } else {
+        const dentroDelTag = new RegExp('\\b' + j.prop + '(?:=|\\s*/?>|\\s)')
+        for (const { tag, index } of tagsDe(src, j.pieza))
+          if (dentroDelTag.test(tag)) anotar(index)
+      }
+    }
+    if (enApps.length > j.baseApps)
+      fallos.push(
+        'R62 · ' + j.id + ': montajes de la prop JUBILADA en apps/ subieron a ' + enApps.length +
+          ' (baseline ' + j.baseApps + ', SOLO-BAJA) — ' + enApps.join(' · ') +
+          '. ' + j.murio + '. La prop se acepta, typechequea y NO DIBUJA NADA: el llamador cree que pidió algo. ' + j.cura,
+      )
+    if (enUi.length > j.baseUi)
+      fallos.push(
+        'R62 · ' + j.id + ': montajes dentro de packages/ui subieron a ' + enUi.length +
+          ' (DURA EN ' + j.baseUi + ') — ' + enUi.join(' · ') +
+          '. En la galería es peor que en una pantalla: una lámina que monta una prop muerta le muestra al founder una función que no existe.',
+      )
+    fallos.push(...ancla('R62·' + j.id, piezas, 1, 'archivo(s) de la pieza en el corpus'))
+    infos.push(j.id + ' apps ' + enApps.length + '/' + j.baseApps + ' · ui ' + enUi.length + '/' + j.baseUi)
+  }
+  return {
+    fallos,
+    info:
+      JUBILADAS.length + ' jubilación/es en tabla — ' + infos.join(' · ') +
+      ' · mide la FORMA (tag de su pieza u objeto), jamás la palabra: una clave de argumento en la misma línea NO cuenta',
+  }
+}
+
 /** R60 · `Boton` NO OCUPA EL SLOT `alignSelf` DE SU EXTERIOR (S103-B · D de C).
  *
  *  LA LEY: un botón sin `bloque` **abraza su contenido sin decidir dónde
@@ -3611,6 +3761,20 @@ function r59(archivos) {
 
 /** R58 · `Texto` NO GANA UN COLOR DE ACENTO (S103-B · `N23`).
  *
+ *  🔴 **POR QUÉ ESTO ES UN RATCHET DE NOMBRE Y NO SE DERIVA DEL CÓDIGO**
+ *  (medido en S103-B, y cierra la pregunta de por qué cada jubilación paga
+ *  su propia línea en vez de salir de un detector genérico):
+ *  el censo intentó DETECTAR jubilaciones mirando el código y **falló en
+ *  las dos direcciones** — contando solo comparaciones marcó **133 de 298
+ *  miembros, el 45% del corpus** (*un instrumento que denuncia media casa
+ *  mide su propia ceguera*); contando además las tablas de lookup
+ *  **perdió el ancla**, porque `compacto` **está COMPLETAMENTE
+ *  IMPLEMENTADA** y jubilada **por POLÍTICA**.
+ *  ⇒ ***un valor prohibido por política es indistinguible de uno vivo
+ *  mirando el código: solo la prosa dice que está prohibido.***
+ *  **Cada jubilación nueva necesita su propia línea. No se derivan.**
+ *
+ *
  *  LA LEY, y es la única de la casa que pide IMPEDIR en vez de curar. Su
  *  propio censo lo dijo con todas las letras: *«la ley ya se cumple por
  *  construcción… no hay nada que curar, hay algo que IMPEDIR. El riesgo
@@ -3710,9 +3874,14 @@ const ES_PIEZA_UI = (p) => /packages\/ui\/src\/(components|brand)\//.test(p);
  *  al medio. `(?![A-Za-z0-9_])` es lo que evita que `<BotonCopiar` entre
  *  como si fuera `<Boton` — el prefijo compartido es una trampa real,
  *  porque la pieza del caso se llama justamente así. */
-function tagsDeBoton(src) {
+/** S103-B · el extractor deja de ser de `Boton` y pasa a ser de CUALQUIER
+ *  pieza — Ley 11 aplicada al propio juez. `tagsDeBoton` sobrevive como
+ *  envoltorio para que R47/R48 no se toquen: su medición se re-verifica
+ *  igual (37 y 5, idénticas antes y después). */
+const tagsDeBoton = (src) => tagsDe(src, 'Boton')
+function tagsDe(src, nombre) {
   const out = [];
-  for (const m of src.matchAll(/<Boton(?![A-Za-z0-9_])/g)) {
+  for (const m of src.matchAll(new RegExp(`<${nombre}(?![A-Za-z0-9_])`, 'g'))) {
     let i = m.index + m[0].length, llaves = 0, comilla = null;
     for (; i < src.length; i++) {
       const c = src[i];
@@ -3774,6 +3943,20 @@ function brazoUi(regla, archivos, jubilada, baseLiteral, reemplazo) {
 }
 
 /** R48 · EL ALIAS RENOMBRADO NO CRECE — `Boton sinCaja` → `apoyada`
+ *
+ *  🔴 **POR QUÉ ESTO ES UN RATCHET DE NOMBRE Y NO SE DERIVA DEL CÓDIGO**
+ *  (medido en S103-B, y cierra la pregunta de por qué cada jubilación paga
+ *  su propia línea en vez de salir de un detector genérico):
+ *  el censo intentó DETECTAR jubilaciones mirando el código y **falló en
+ *  las dos direcciones** — contando solo comparaciones marcó **133 de 298
+ *  miembros, el 45% del corpus** (*un instrumento que denuncia media casa
+ *  mide su propia ceguera*); contando además las tablas de lookup
+ *  **perdió el ancla**, porque `compacto` **está COMPLETAMENTE
+ *  IMPLEMENTADA** y jubilada **por POLÍTICA**.
+ *  ⇒ ***un valor prohibido por política es indistinguible de uno vivo
+ *  mirando el código: solo la prosa dice que está prohibido.***
+ *  **Cada jubilación nueva necesita su propia línea. No se derivan.**
+ *
  *  (S99-B, adjudicación de mesa).
  *
  *  LA LEY: el nombre mentía y **lo confesaba la propia pieza** (*«NO ES
@@ -3829,6 +4012,20 @@ function r48(archivos) {
 }
 
 /** R47 · LA VARIANTE JUBILADA NO CRECE — `Boton compacto` (S99-B).
+ *
+ *  🔴 **POR QUÉ ESTO ES UN RATCHET DE NOMBRE Y NO SE DERIVA DEL CÓDIGO**
+ *  (medido en S103-B, y cierra la pregunta de por qué cada jubilación paga
+ *  su propia línea en vez de salir de un detector genérico):
+ *  el censo intentó DETECTAR jubilaciones mirando el código y **falló en
+ *  las dos direcciones** — contando solo comparaciones marcó **133 de 298
+ *  miembros, el 45% del corpus** (*un instrumento que denuncia media casa
+ *  mide su propia ceguera*); contando además las tablas de lookup
+ *  **perdió el ancla**, porque `compacto` **está COMPLETAMENTE
+ *  IMPLEMENTADA** y jubilada **por POLÍTICA**.
+ *  ⇒ ***un valor prohibido por política es indistinguible de uno vivo
+ *  mirando el código: solo la prosa dice que está prohibido.***
+ *  **Cada jubilación nueva necesita su propia línea. No se derivan.**
+ *
  *
  *  LA LEY: **el contorno transparente como acción murió en la 19.7**, y
  *  `variante="compacto"` ES el contorno transparente. Jubilada por orden
@@ -4531,7 +4728,7 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -4608,6 +4805,17 @@ const EXTRAS_R16 = [
  *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
  *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
 const EXTRAS_BRAZOS = [
+  /* S103-B · EL BRAZO `ui` DE R62, aislado. El fixture principal supera el
+     baseline de `apps/` (15) y por eso saldría rojo igual con este brazo
+     apagado: un brazo que nunca se ejecuta no está probado aunque la regla
+     salga roja. Acá `apps/` queda en 1 —debajo de su piso— y los DOS
+     montajes de `ui` son lo único que puede pintarlo. */
+  ['R62·ui · el montaje dentro de packages/ui sube sobre su baseline', r62, [
+    { path: 'packages/ui/src/components/AvatarMascota.tsx', src: 'especie?: X' },
+    { path: 'apps/cliente/src/app/ancla.tsx', src: '<AvatarMascota nombre={n} especie={e} />' },
+    { path: 'packages/ui/src/components/A.tsx', src: '<AvatarMascota nombre={n} especie={e} />' },
+    { path: 'packages/ui/src/components/B.tsx', src: '<AvatarMascota nombre={n} especie={e} />' },
+  ]],
   /* ── S103-B · LOS TRES BRAZOS NUEVOS DE R47 Y R48, uno por rojo ───────
      El fixture genérico de cada regla ya sale rojo por el contador de
      `apps/`, así que **no probaría nada de esto**: un brazo que nunca se
@@ -4897,6 +5105,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
 corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);
 corridas.push(['R59 (un comentario JSX sin llaves es texto: D-882)', r59([...apps, ...ui, ...galeria])]);
 corridas.push(['R58 (Texto no gana un color de acento: N23)', r58(ui)]);

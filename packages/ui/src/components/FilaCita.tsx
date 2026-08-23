@@ -68,6 +68,11 @@ export interface FilaCitaProps {
    *  fila sin sujeto, que es otra pieza. Con la cara apagada el dato no
    *  se dibuja pero no es basura: es la identidad de la fila, y el día
    *  que quiera decir la especie o mostrar la foto la tiene. */
+  /* ☠️ `especie` VIAJA Y NO PINTA (S103-B): `AvatarMascota` la acepta y
+     no la usa — ni la desestructura. NO se retira acá porque su campo
+     tiene un consumidor en `apps/prestador/historico.tsx`, y sacarlo le
+     rompe el typecheck: el retiro se secuencia contra quien todavía lo
+     consume. Vigilada por `R62` en baseline 1, SOLO-BAJA. */
   mascota: { nombre: string; fotoUrl?: string; especie?: AvatarMascotaEspecie }
   /**
    * ¿SE DIBUJA LA CARA? Default `true` — cero consumidores existentes

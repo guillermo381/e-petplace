@@ -1651,8 +1651,8 @@ function EjemploSelectorAvatar() {
   })
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
-      <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
-      <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+      <SelectorAvatar nombre="Zeus" foto={sinFoto} onCambiar={setSinFoto} />
+      <SelectorAvatar nombre="Zeus" foto={conFoto} onCambiar={setConFoto} />
     </View>
   )
 }
@@ -1764,7 +1764,7 @@ function EjemploPinEnMapa() {
   return (
     <View style={{ gap: spacing[3], alignItems: 'center' }}>
       <LienzoMapa alto={180}>
-        <PinEnMapa nombre="Zeus" especie="perro" x={lejos ? 70 : -70} y={lejos ? -32 : 28} />
+        <PinEnMapa nombre="Zeus" x={lejos ? 70 : -70} y={lejos ? -32 : 28} />
         <PinEnMapa variante="moto" nombre="El repartidor" x={lejos ? -60 : 60} y={lejos ? 30 : -26} />
       </LienzoMapa>
       <Boton

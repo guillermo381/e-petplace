@@ -83,7 +83,7 @@ import Animated, {
 
 import Svg, { G, Circle, Defs, Ellipse, Path, RadialGradient, Stop } from 'react-native-svg'
 
-import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
+import { AvatarMascota } from './AvatarMascota'
 import { motion } from '../tokens/motion'
 import { ISOTIPO_PATH, ISOTIPO_VB_W } from '../brand/Isotipo'
 import { palette } from '../tokens/palette'
@@ -153,7 +153,6 @@ export interface PinEnMapaProps {
   variante?: 'mascota' | 'moto' | 'destino'
   nombre: string
   fotoUrl?: string | number | null
-  especie?: AvatarMascotaEspecie
   /** El desplazamiento en píxeles respecto del centro del contenedor.
    *  Quien monta el pin traduce lat/lng → píxeles (el mapa sabe hacerlo;
    *  la pieza no tiene por qué saber de proyecciones). **La pieza anima
@@ -341,7 +340,7 @@ export function MarcaDeMapa({
   return variante === 'moto' ? <ObjetoMoto lado={lado} /> : <ObjetoDestino lado={lado} />
 }
 
-export function PinEnMapa({ variante = 'mascota', nombre, fotoUrl, especie, x, y }: PinEnMapaProps) {
+export function PinEnMapa({ variante = 'mascota', nombre, fotoUrl, x, y }: PinEnMapaProps) {
   const { theme } = useTheme()
   /** El hook se llama SUELTO y se combina después — `memorial || hook()`
    *  es una llamada CONDICIONAL a un hook (la lección de forma de S98-B,
@@ -412,7 +411,6 @@ export function PinEnMapa({ variante = 'mascota', nombre, fotoUrl, especie, x, y
         <AvatarMascota
           nombre={nombre}
           fotoUrl={fotoUrl ?? undefined}
-          especie={especie}
           tamano="sm"
           capa="cuidado"
         />
