@@ -1380,7 +1380,7 @@ export const clienteEn = {
     esperaConNumero: 'You tried several times in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You tried several times in a row. Wait a moment and try again.',
     soloGoogle:
-      "You sign in to e-PetPlace with Google, so you don't have a password of your own yet. You can create one now: we'll email you a code.",
+      "You sign in to e-PetPlace with Google, so you don't have a password of your own yet. You can create one from recover: we'll email you a code.",
     irARecuperar: 'Create a password',
   },
   despensa: {
