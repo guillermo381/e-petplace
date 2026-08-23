@@ -80,14 +80,25 @@ const ESPERADOS = [
     porque: 'sin esto hola@ y privacidad@ dejan de recibir y nadie se entera',
   },
   {
-    id: 'DMARC',
+    id: 'DMARC · política Y destino de reportes',
     nombre: `_dmarc.${DOMINIO}`,
     tipo: 'TXT',
-    modo: 'contiene',
-    valor: 'v=DMARC1',
-    porque: 'es la política del dominio; si lleva rua, además es el único monitoreo',
+    modo: 'contieneTodos',
+    valor: ['v=DMARC1', 'rua=mailto:'],
+    porque:
+      'sin `rua` el registro existe y NO REPORTA A NADIE — monitoreo sin destinatario, ' +
+      'que se lee como vigilancia y no lo es',
   },
 ];
+
+// ⚠️ POR QUÉ EL DMARC EXIGE `rua` Y NO ALCANZA CON `v=DMARC1` (S104-D, 23-ago):
+// la primera versión de este archivo pedía solo `v=DMARC1`, y por eso dio VERDE
+// sobre un `v=DMARC1; p=none` sin `rua` — justo el estado que el trabajo del día
+// existía para sacar. **El instrumento certificaba como sano el defecto que
+// venía a cazar.** Es el mismo verde flojo que ya se había corregido en su
+// auto-prueba, cometido dos veces en el mismo archivo: la primera midiendo con
+// el control equivocado, la segunda midiendo con la vara demasiado ancha.
+// *Que el registro exista no es que el registro sirva.*
 
 function consultar(servidor, tipo, nombre) {
   const salida = execFileSync('dig', [`@${servidor}`, tipo, nombre, '+short', '+time=5', '+tries=2'], {
@@ -115,6 +126,10 @@ function evaluar(esperado, obtenido) {
   if (!limpio) return 'AUSENTE';
   if (esperado.modo === 'igual') {
     return limpio === esperado.valor.replace(/\s/g, '') ? 'OK' : 'DISTINTO';
+  }
+  if (esperado.modo === 'contieneTodos') {
+    const faltan = esperado.valor.filter((v) => !obtenido.includes(v));
+    return faltan.length === 0 ? 'OK' : `INCOMPLETO(falta ${faltan.join(', ')})`;
   }
   return obtenido.includes(esperado.valor) ? 'OK' : 'DISTINTO';
 }
@@ -155,6 +170,8 @@ function medir(lista, etiquetaDominio) {
         } else {
           console.log(`      ⓘ los públicos tampoco lo tienen ⇒ NO es propagación pendiente: no está`);
         }
+      } else if (estado.startsWith('INCOMPLETO')) {
+        console.log(`      ⓘ el registro existe pero le FALTA una parte ⇒ no es un borrado: es que nunca se completó`);
       } else if (estado === 'DISTINTO') {
         console.log(`      ⓘ el registro EXISTE pero no es el esperado ⇒ alguien lo reescribió, no lo borró`);
       }
