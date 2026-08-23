@@ -20513,3 +20513,26 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 ☠️ **Condición de muerte:** los tres pasos ejecutados **en ese orden**, con el gate del ② corrido por el founder.
 
 **Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
+
+#### D-894 — 🟠 EL ALTA DE BUZONES EN HOSTINGER BORRÓ EL DKIM DE RESEND
+🟠 **MEDIDO POR D (23-ago-2026), NO TEORIZADO — y el registro está borrado, no propagándose.**
+
+Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, confirmado con correo de prueba), **Hostinger escribió sus tres `_domainkey` y se llevó el ajeno**: `resend._domainkey.epetplace.com` **ya no existe**.
+
+**Cinco vías, todas coincidentes:** `ns1` NODATA (SOA en autoridad) · `ns2` vacío · `8.8.8.8` vacío · `1.1.1.1` vacío · tampoco como CNAME. **Y el control positivo vive DENTRO de la misma medición: la misma consulta al mismo servidor SÍ encontró tres `_domainkey`** — los de Hostinger (`hostingermail-a/b/c`). *El instrumento lee bien; Hostinger no falló al escribir: escribió los suyos y borró el que no era suyo.* **Sobrevivieron el SPF, el MX de `send.epetplace.com` (return-path y rebotes) y el `_dmarc`.**
+
+**🟠 y no 🔴, con la precisión que D pidió que no se exagere:** **DMARC pasa igual**, porque alinea SPF — el return-path es `send.epetplace.com` y el `From` es `hola@epetplace.com`, que en alineación relajada comparten dominio organizativo. **El correo no va a ser rechazado**, y lo primero que D hizo fue preguntarle al camino real: **un `recover` a las 22:53 UTC devolvió HTTP 200 — Resend sigue aceptando.**
+
+**Lo que sí se perdió, y son tres cosas:**
+1. **La firma no se puede verificar**: Resend firma con `s=resend` y quien recibe no encuentra la clave pública ⇒ **DKIM falla en destino**.
+2. **Resend puede des-verificar el dominio** en su próxima revisión y dejar de enviar. **No se puede medir sin su API key**, y es **el riesgo de mecha más corta**: el correo de recuperación es HOY el único correo de auth que la casa manda de verdad — *o sea, el camino de vuelta del login*.
+3. **🔴 La ironía exacta, y es lo que más pesa: EL REENVÍO RECIÉN MONTADO QUEDA EXPUESTO.** Al reenviar, **SPF se rompe siempre** (quien reenvía no está autorizado por el dominio original) y **lo único que sobrevive un reenvío es DKIM**. ⇒ **la misma acción que creó el reenvío rompió lo único que hace que un reenvío sobreviva.**
+
+**LA CURA EXISTE Y HUBO SUERTE:** D tiene **el valor exacto del registro**, capturado en su medición de las 15:30 de ese día, **horas antes del borrado**. Sin esa captura habría que pedírselo a Resend.
+
+**🔴 EL ORDEN, Y NO ES EL DE LA TANDA:** ① restaurar el DKIM ② verificarlo contra el autoritativo ③ **recién ahí** cargar el DMARC. **D NO cargó el DMARC**, por orden del founder (*«si algo se pisó, reportá antes de tocar»*) y por una razón propia que vale como método: *encender el `rua` con el DKIM roto haría que los primeros reportes vengan llenos de fallos de DKIM, y quien los lea sin contexto va a diagnosticar un problema de Resend que en realidad es un registro borrado.* **Encender el instrumento con el paciente roto produce una medición que después hay que desmentir.**
+
+**CÓMO APARECIÓ, y es lo que hay que copiar:** no lo encontró un gate ni una sospecha. **Lo encontró que el founder pusiera «verificá que no haya pisado a Resend» en la orden.** *Sin esa línea, el DMARC se cargaba y el DKIM se descubría semanas después por deliverability.* ⇒ **toda alta de servicio sobre un DNS compartido se cierra RE-MIDIENDO los registros de los otros servicios, no solo los propios.**
+
+**Dueño:** founder (es su panel de DNS). **Evidencia:** `docs/relevamientos/2026-08-23-s104d-HOSTINGER-PISO-EL-DKIM-DE-RESEND.md`.
+☠️ **Condición de muerte:** `resend._domainkey.epetplace.com` responde en los dos NS autoritativos **y** D lo verifica; recién entonces se carga el DMARC.
