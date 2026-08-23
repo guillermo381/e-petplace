@@ -32,11 +32,28 @@
  *
  * ── 🔴 LAS DIFERENCIAS CON EL PRESTADOR, Y CADA UNA CON SU MEDICIÓN ──────
  *
- * **① SIN `MarcaDeAgua`.** Medido: el cliente **no la usa en `login` ni en
- * `registro`** (grep = 0), que son sus pantallas hermanas fuera de tabs.
- * *Heredarla habría metido un elemento de la casa del prestador en una
- * superficie que no lo tiene — copiar el molde en vez de mirar el destino,
- * que es lo que `L-368` nombra.*
+ * ⏪ **① SIN `MarcaDeAgua`** — ☠️ **DEROGADA EN S104-B: ahora SÍ la lleva.**
+ * ~~Medido: el cliente **no la usa en `login` ni en `registro`** (grep = 0),
+ * que son sus pantallas hermanas fuera de tabs. *Heredarla habría metido un
+ * elemento de la casa del prestador en una superficie que no lo tiene —
+ * copiar el molde en vez de mirar el destino, que es lo que `L-368`
+ * nombra.*~~
+ *
+ * 🔴 **POR QUÉ CAE, y es la clase de derogación que conviene mirar: el
+ * razonamiento era CORRECTO y su PREMISA caducó.** Decía «no la usa en login
+ * ni en registro» y de ahí concluía «acá tampoco». **En S104-B el founder
+ * ordenó montarla en las tres**, así que el hecho que sostenía la excepción
+ * dejó de ser cierto — y con él, la conclusión se invierte sola: hoy la
+ * coherencia con sus hermanas EXIGE la marca en vez de prohibirla.
+ * *Un freno que declara contra qué midió se puede reabrir cuando eso cambia;
+ * uno sin su medición adentro habría quedado permanente por accidente*
+ * (la ley de S84, cobrando su dividendo otra vez).
+ *
+ * ⚠️ **Y `L-368` NO queda desmentida:** sigue siendo cierto que copiar el
+ * molde del prestador sin mirar el destino está mal. Lo que cambió es el
+ * destino — la marca dejó de ser «un elemento de la casa del prestador» y
+ * pasó a ser la del arco de entrada del cliente, medido: `MarcaDeAgua`
+ * tenía 70 consumidores allá y 0 acá, y ése era el defecto, no la cura.
  *
  * **② LA ENTRADA DESDE EL LOGIN NACE CON ESTO, y no es un extra.** Medido:
  * `apps/cliente/src/app/login.tsx` **no ofrecía ninguna salida** —solo
@@ -58,7 +75,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   LARGO_CODIGO_RECUPERACION,
   MIN_LARGO_CONTRASENA,
@@ -185,6 +202,9 @@ export default function Recuperar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* S104-B — ver la derogación de ① en la cabecera: la marca entra en
+          las tres pantallas del arco de entrada, no en dos de tres. */}
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('recuperar.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
         <ScrollView

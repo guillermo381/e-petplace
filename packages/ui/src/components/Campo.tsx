@@ -56,6 +56,7 @@ import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
+import { Icono } from './Icono'
 
 /** ⏪ S99-B · `BORDE` y el fondo salen ahora de `caja-de-campo.ts` — la
  *  anatomía vivía copiada en tres piezas (ver su cabecera). Acá quedan
@@ -342,15 +343,43 @@ export function Campo({
         />
 
         {secure ? (
+          /* ── S104-B · LA PALABRA «Ver» PASA A SER EL OJO ───────────────
+             Orden del founder (la referencia web pedía glifo, no palabra).
+             El par `ojo`/`ojoTachado` nace en este mismo lote; el censo
+             probó que **ninguno de los 52 glifos del registry servía** y
+             que ninguno era prestable sin caer en la sustitución genérica
+             que la Ley 12 prohíbe.
+
+             🔴 **EL ESTADO SIGUE DICIÉNDOSE, y eso es lo que había que no
+             perder.** El texto «Ver»/«Ocultar» comunicaba el estado por sí
+             solo; un glifo único obligaría a decirlo por color u opacidad,
+             que es peor. Por eso son DOS dibujos: ojo abierto = «tocá para
+             ver» · ojo tachado = «tocá para ocultar». *La misma información,
+             en menos espacio — no menos información.*
+
+             ⚠️ **EL TARGET SUBE A 44 SIN MOVER EL LAYOUT, y el número no es
+             elegido: es derivado.** El glifo se pinta a 20 y el `hitSlop`
+             aporta 12 por lado ⇒ 20 + 12·2 = **44** exacto. Medido lo que
+             había antes: el texto «Ver» daba ~28×18 y con `hitSlop 8`
+             llegaba a ~44×34 — **ancho suficiente y alto corto**. Se
+             resuelve con hitSlop y no agrandando la pieza a propósito:
+             un Pressable de 44×44 real le comería 44 px de ancho al input
+             dentro de una caja de 48, y el campo de clave es justo donde
+             menos sobra el ancho.
+
+             La voz accesible NO cambia: siguen `campo.mostrarContrasena` /
+             `campo.ocultarContrasena`, que ya decían el ACTO y no el
+             dibujo. ☠️ Las claves `campo.ver` / `campo.ocultar` quedan sin
+             consumidor — **no se borran en este lote**: son del diccionario
+             de `packages/ui` y su retiro es una pasada de Ley 37 propia,
+             con su grep. */
           <Pressable
             onPress={() => setOculto((x) => !x)}
             accessibilityRole="button"
             accessibilityLabel={oculto ? t('campo.mostrarContrasena') : t('campo.ocultarContrasena')}
-            hitSlop={8}
+            hitSlop={12}
           >
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {oculto ? t('campo.ver') : t('campo.ocultar')}
-            </Text>
+            <Icono nombre={oculto ? 'ojo' : 'ojoTachado'} tamano={20} registro="tinta" />
           </Pressable>
         ) : iconoDer ? (
           <View style={multilinea ? { paddingTop: spacing[1] } : null}>{iconoDer}</View>

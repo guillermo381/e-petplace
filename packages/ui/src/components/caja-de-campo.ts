@@ -158,8 +158,15 @@ export interface EstadoCaja {
  *  (ver la derogación en la cabecera). */
 export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): string {
   if (error) return theme.status.danger
-  if (enfocado) return 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  if (enfocado) return theme.text.primary
   return theme.border.campo
+}
+
+/** El grosor del contorno. S104-B: el foco suma **1** sobre el reposo —
+ *  el «+1pt» de la orden. Vive acá y no en la pieza porque el grosor es
+ *  anatomía y las tres cajas la comparten. */
+export function grosorDeContorno({ enfocado }: EstadoCaja): number {
+  return enfocado ? BORDE_CAMPO + 1 : BORDE_CAMPO
 }
 
 /** El interior: **lo más claro de su región** (N11). En claro es blanco
@@ -172,17 +179,76 @@ export function interiorDeCaja(theme: Theme): string {
 /** El estilo COMPLETO de la caja — las tres piezas lo consumen entero,
  *  jamás por partes: una que tome el borde y se escriba el fondo vuelve
  *  a ser una cuarta copia con otro nombre. */
+/* ═══════════════════════════════════════════════════════════════════
+ * 🔴 S104-B · EL FOCO PASA A TINTA PLENA +1 — ORDEN DEL FOUNDER, Y
+ *    CHOCA CONTRA LETRA FIRMADA. SE DECLARA, NO SE RESUELVE ACÁ.
+ *
+ * ⏪ **Lo que regía hasta hoy:** el contorno enfocado tomaba
+ * `accent.active` — magenta en el cliente, tealDark en el prestador —
+ * por **Ley 5** (*«el campo enfocado ES el elemento activo de la
+ * vista»*) y por el SEXTO SLOT de S83-B13, que resolvió `accent.active`
+ * POR CASA justamente para que el foco hablara con el acento de cada
+ * una. `CampoCodigo` cita esa ley palabra por palabra en su cabecera.
+ *
+ * **Lo que ordena S104-B:** *«el foco del campo: borde a tinta plena
+ * +1pt, 150ms»*. ⇒ el foco deja de ser un acento y pasa a ser peso.
+ *
+ * ⚠️ **QUÉ SE PIERDE, dicho para que la mesa decida con el dato y no
+ * con el gusto:** en el cliente el magenta del foco era **la única
+ * aparición de `accent.active` en todo el arco de entrada** — con esto,
+ * login/registro/recuperar quedan sin un solo píxel de acento de marca
+ * salvo la marca de agua. En el prestador se pierde el teal del oficio
+ * en el foco. **`N26` no se toca** (habla de ocre/magenta en CONTROLES
+ * que accionan o seleccionan; un campo enfocado no es ninguno de los
+ * dos), pero **Ley 5 sí queda enmendada de hecho**.
+ *
+ * ✅ **QUÉ MEJORA, y es medible:** tinta plena contra el interior
+ * blanco da un contraste muy por encima del piso de 3:1 que N11 exige
+ * para el contorno, en los tres temas y sin depender del acento — el
+ * magenta en oscuro venía siendo el par más justo. Y el +1 hace que el
+ * foco se lea **sin depender del color**, que es lo que un daltónico
+ * necesita.
+ *
+ * 🔴 **EL COSTO QUE NADIE PIDIÓ Y HAY QUE ANOTAR:** subir el borde de
+ * 1.5 a 2.5 achica el área interior 1 px por lado. El alto es fijo y el
+ * contenido va centrado ⇒ **verticalmente no se mueve nada**; el texto
+ * sí se corre **1 px horizontal** al enfocar. Es el único movimiento
+ * que este cambio introduce, y se declara en vez de descubrirse en el
+ * gate. **N11′ queda INTACTA: la etiqueta vive afuera y no se entera.**
+ *
+ * ⇒ **Rige la orden del founder. La enmienda de Ley 5 la firma la mesa,
+ * no esta pieza.**
+ * ═══════════════════════════════════════════════════════════════════ */
 export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
   return {
     borderRadius: radius.md,
-    borderWidth: BORDE_CAMPO,
+    borderWidth: grosorDeContorno(estado),
     borderColor: colorDeContorno(theme, estado),
     backgroundColor: interiorDeCaja(theme),
     /** La presencia del foco (N11). En reposo NO hay sombra: el contorno
      *  ya contiene, y sombrear todo campo llenaría de material una
      *  pantalla de formulario. */
     boxShadow: estado.enfocado && !estado.error ? theme.elevacion.reposo : undefined,
-    // única animación permitida: color del borde (Ley 6 · regla rectora)
+    /* S104-B — `fast` YA vale **150**, exactamente la duración que la orden
+     * pide: no se tecleó un número nuevo ni se fundó una excepción.
+     *
+     * ⚠️ **SE ANIMA EL COLOR, NO EL GROSOR — y se declara en vez de
+     * disimularse.** El intento de listar las dos (`'borderColor,
+     * borderWidth'` y su forma de array) **rompió el typecheck del
+     * prestador**: con el `as const` del objeto la lista se vuelve tupla
+     * readonly y el estilo deja de ser asignable. **Lo cazó `tsc`, no el
+     * ojo** — y el baseline del worktree primario probó que el rojo era
+     * mío y no heredado.
+     *
+     * ⇒ El grosor **salta** de 1.5 a 2.5 y el color recorre sus 150 ms.
+     * En pantalla el gesto se lee igual: el salto de `border.campo` a
+     * tinta plena es el cambio dominante y 1 px aparece dentro de esa
+     * transición. *Perseguir la animación del grosor habría costado sacar
+     * el `as const` de una anatomía que TRES piezas consumen entera — el
+     * precio no lo paga el efecto.*
+     *
+     * Sigue sin animarse nada más (Ley 6 · regla rectora: nada se mueve
+     * mientras alguien tipea). */
     transitionProperty: 'borderColor',
     transitionDuration: motion.duration.fast,
   } as const

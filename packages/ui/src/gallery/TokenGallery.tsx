@@ -17,6 +17,8 @@ import { radius } from '../tokens/radius'
 import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { MarcaDeAgua } from '../brand/MarcaDeAgua'
+import { PaseoDeHuellas } from '../brand/PaseoDeHuellas'
+import { RespiroDeMarca, HuellaDeLlegada } from '../brand/RitualDeEntrada'
 import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
@@ -3747,6 +3749,49 @@ function GaleriaInterna() {
               envoltorio lleva box-none: estirado a todo el ancho, un View sin eso recibiría los toques
               del aire a los costados — lo que R54 existe para cazar.
             </Texto>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="S104 · EL RITUAL DE ENTRADA — las tres piezas, para el gate del founder">
+          {/* ⚠️ LAS TRES NACEN CON FRENO DECLARADO: `RITUAL_DE_ENTRADA.md`
+              **no existe en el repo** (buscado por nombre en todo el árbol).
+              Se construyeron contra el literal de la orden, que alcanza para
+              la FÍSICA y no para la COMPOSICIÓN — dónde se montan y en qué
+              orden lo dice la letra que no viajó. Acá se muestran SUELTAS.
+
+              🔴 Y ESTA SECCIÓN EXISTE PORQUE R17 LA EXIGIÓ: las tres se
+              exportaban sin aparecer en galería y el juez lo cazó con su
+              literal — *«una pieza que nadie puede mirar no se puede
+              firmar»*. El founder pidió gate en dispositivo; sin esta
+              sección no habría dónde hacerlo. */}
+          <View style={{ gap: spacing[6] }}>
+            <Texto variante="apoyo">
+              Las tres degradan solas en memorial y con reduce-motion. Cambiá el tema arriba para verlo:
+              el paseo NO se monta en memorial · el respiro y la huella se quedan quietos.
+            </Texto>
+
+            {/* PaseoDeHuellas — es FONDO absoluto, así que necesita un
+                contenedor con alto propio para poder verse en galería. */}
+            <View>
+              <Texto variante="apoyo">PaseoDeHuellas — se traza con escalón 120 y SE QUEDA. Alfa subido a 0.35 para que se vea acá (en producción es 0.09).</Texto>
+              <View style={{ height: 260, borderRadius: 12, overflow: 'hidden', marginTop: spacing[2] }}>
+                <PaseoDeHuellas alfa={0.35} tamano={26} />
+              </View>
+            </View>
+
+            <View>
+              <Texto variante="apoyo">RespiroDeMarca — 1.0 → 1.03 → 1.0 en 520 (`duration.grande`). El gesto se nota y no se puede señalar: ése es el punto.</Texto>
+              <View style={{ alignItems: 'center', paddingVertical: spacing[5] }}>
+                <RespiroDeMarca><Isotipo size={72} variant="gradiente" /></RespiroDeMarca>
+              </View>
+            </View>
+
+            <View>
+              <Texto variante="apoyo">HuellaDeLlegada — el motivo de `EsperaDeMarca` usado UNA vez como celebración. 300 (`estandar`): la orden pedía ~400 y R51 lo bajó al vocabulario cerrado de N10.</Texto>
+              <View style={{ alignItems: 'center', paddingVertical: spacing[5] }}>
+                <HuellaDeLlegada tamano={48} />
+              </View>
+            </View>
           </View>
         </Seccion>
 
