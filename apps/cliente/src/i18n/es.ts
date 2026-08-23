@@ -43,6 +43,7 @@ export const clienteEs = {
     probarDeNuevo: 'Probar de nuevo',
   },
   login: {
+    olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
     emailLabel: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
@@ -1704,6 +1705,29 @@ export const clienteEs = {
    * distinta acá**: el cliente no tiene `/recuperar` (medido), así que
    * termina en soporte y no en una puerta que rebota.
    */
+  /** S103-C · RECUPERAR — heredadas VERBATIM del prestador: ya estaban en
+   *  tuteo neutro y es el mismo acto para el mismo humano. */
+  recuperar: {
+    titulo: 'Recuperar tu contraseña',
+    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.',
+    email: 'Tu correo',
+    pedir: 'Enviar el código',
+    // NUNCA declara si el correo existe: la misma frase exista o no.
+    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de {{n}} dígitos.',
+    // D-628 (🟠 abierta): se dice ANTES de que lo busque, no después de que
+    // crea que no llegó. Muere con la deuda, no por su cuenta.
+    avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
+    codigo: 'El código de {{n}} dígitos',
+    codigoVerificado: 'Código verificado. Ahora elige tu nueva contraseña.',
+    verificar: 'Verificar el código',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos {{n}} caracteres.',
+    cambiar: 'Cambiar contraseña y entrar',
+    otroCodigo: 'Enviar otro código',
+    listo: 'Listo — ya puedes entrar.',
+    esperaConNumero: 'Pediste varios códigos seguidos. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
+  },
   seguridad: {
     tituloPantalla: 'Seguridad',
     titulo: 'Contraseña',
@@ -1722,12 +1746,13 @@ export const clienteEs = {
     // 🔴 ENMENDADA respecto del prestador: la suya ofrece crear la clave
     // desde `/recuperar`, y esa ruta NO EXISTE en el cliente. Prometerla
     // sería mandar a una puerta que no abre.
+    // ⏪ ENMENDADA (S103-C): decía «Escríbenos y te ayudamos a crear una»
+    // porque `/recuperar` NO existía en el cliente. Ya existe, así que la
+    // familia solo-Google puede crearse la clave SOLA — que era el hueco.
+    // ☠️ Con esto murieron `irASoporte`, `mensajeSoporte` y `soporteFallback`.
     soloGoogle:
-      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Escríbenos y te ayudamos a crear una.',
-    irASoporte: 'Escribirle al equipo',
-    mensajeSoporte:
-      'Hola, entro a e-PetPlace con Google y quiero crear una contraseña para mi cuenta.',
-    soporteFallback: 'Escríbenos por WhatsApp al {{numero}}.',
+      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Puedes crear una ahora: te enviamos un código a tu correo.',
+    irARecuperar: 'Crear una contraseña',
   },
   despensa: {
     titulo: 'Despensa',
