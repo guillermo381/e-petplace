@@ -20383,7 +20383,19 @@ guarda vencida.** *Dos ya son una clase.*
 
 ## Deudas S104 (D-890 → D-892) — depositadas por A el 23-ago-2026 · números verificados libres por grep contra este archivo
 
-#### D-890 — 🔴 `_prestador_empleados_protege_gobierno` NO FRENA: es DEFINER, y en DEFINER `current_user` es el owner
+#### D-890 — ✅ CURADA EN SESIÓN (23-ago) · `_prestador_empleados_protege_gobierno` era DEFINER y NO FRENABA
+✅ **NACIÓ Y MURIÓ EL 23-ago-2026** (migración `20260823150000`). **Subió a la tanda 1 por firma del founder** con su razón: *con 27 empleados con acceso, un guard que no frena es agujero vivo, no deuda.*
+
+**EL PAR, medido:** ANTES `no_gestores FRENADOS=0 AGUJEROS=8` · DESPUÉS `FRENADOS=8 AGUJEROS=0`, con **contra-caso verde** (`GESTOR PASA, filas=1`).
+
+**⚠️ Y LA PRIMERA MEDICIÓN CASI INDUCE UN ERROR — se deja escrito porque es el método:** el primer rojo se produjo sobre `limit 1` de la tabla, **sin mirar si esa fila era la de un gestor**. El guard tiene DOS condiciones (`current_user` **y** `NOT user_gestiona_prestador`), así que sobre un titular habría dado «pasa» **legítimamente**. *Un rojo por la razón equivocada está tan roto como un verde por la razón equivocada.* El discriminador correcto fue **filas de NO-gestores + `row_count`**.
+
+**¿CLASE O CASO? — censado, y es CASO.** De las 4 funciones que gatean por `current_user`, solo ésta era DEFINER. De los 16 triggers DEFINER que levantan excepción, los otros 15 **no gatean por identidad de rol** (validan dominio: acuario, tallas, orden de programa) — y para eso DEFINER es correcto. ⇒ **el defecto no es DEFINER: es DEFINER *combinado con* `current_user`.**
+
+**Cierra de paso D-528** (abierto desde S76): los escritores de `prestador_empleados` son **cuatro y los cuatro DEFINER**; el único escritor directo del repo (`empleado-matricula.ts`) toca columnas que el guard no vigila ⇒ cerrar no rompió nada.
+
+<details><summary>Texto original de la ficha (23-ago, antes de curar)</summary>
+
 🔴 **ALTA — MEDIDO CON DISCRIMINADOR, NO SUPUESTO.** El guard que S76 construyó para cerrar el agujero A0bis (D-526) —que un empleado desactivado se reactive solo, o se escriba `rol='dueño'` en su propia fila— **está vivo y no frena.**
 
 **La medición, y por qué el primer resultado no alcanzaba:** un `UPDATE prestador_empleados SET activo = NOT activo` con `set local role authenticated` **pasó sin excepción**. Eso solo no prueba nada — un UPDATE que la RLS corta devuelve éxito con **0 filas**, y el trigger `BEFORE UPDATE` nunca se evalúa. **El discriminador es `GET DIAGNOSTICS row_count`: dio `1`.** Una fila real cambió. *La puerta está abierta.*
@@ -20394,7 +20406,9 @@ guarda vencida.** *Dos ya son una clase.*
 
 **Por qué NO se curó en S104:** apareció como hallazgo colateral de la tanda 1 (frente de cuenta), en territorio de otra pieza. Curarlo dentro de una migración que vino a otra cosa es lo que la casa no hace. **Además exige censo previo:** hay que medir qué escritores legítimos de `prestador_empleados` pasan hoy por el hueco, o cerrarlo rompe algo vivo (L-215).
 
-**Disparo:** ANTES de cualquier tanda que toque equipo, roles o el ciclo de empleados. **Y su primer acto no es curar: es censar TODAS las funciones `*protege*` de la casa preguntando `prosecdef`** — si dos guards nacieron con el mismo defecto, es clase y no caso.
+</details>
+
+**Disparo (histórico):** ANTES de cualquier tanda que toque equipo, roles o el ciclo de empleados. **Y su primer acto no es curar: es censar TODAS las funciones `*protege*` de la casa preguntando `prosecdef`** — si dos guards nacieron con el mismo defecto, es clase y no caso.
 ☠️ **Condición de muerte:** cuando la función sea INVOKER **y** su rojo esté producido con `row_count` (no con «no lanzó excepción»).
 
 #### D-891 — ✅ CURADA EN SESIÓN · el consentimiento era falsificable por cualquiera, incluso sin sesión
