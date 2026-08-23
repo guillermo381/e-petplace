@@ -5344,6 +5344,24 @@ y si se puede desactivar.
 
 #### D-628 — EL CORREO DE RECUPERACIÓN LLEGA EN INGLÉS Y DE UN REMITENTE AJENO 🟠
 
+> ### ⚠️ ENMIENDA S104 (23-ago-2026) — **CERRADA A MEDIAS, Y LA MITAD QUE FALTA LA ENCONTRÓ LA PISTA QUE LA HABÍA CERRADO**
+>
+> **Lo que SÍ murió hoy y no se reabre:** el remitente ajeno · el enlace que iba al portal viejo · y el flujo por código, que **corre punta a punta** (una cuenta real lo completó en 34 segundos).
+>
+> **🔴 Lo que NO está hecho, con la vara correcta:** la orden de mesa dice **«D-628 al idioma del usuario»** (`ORDEN_ARRANQUE_MESA_105.md:253`). Lo entregado está **AL ESPAÑOL**, que **no es lo mismo**. Las apps son bilingües **es/en desde S51 por firma del founder** ⇒ **un usuario en inglés recibiría hoy el correo en español: el mismo defecto de D-628 con el idioma invertido.**
+>
+> **CÓMO APARECIÓ, porque es el método y no la suerte:** **lo reportó D contra sí misma**, releyendo la orden después de que A corrigiera *otra* línea de esa misma orden. **No lo encontró ningún gate: lo encontró volver a la vara.** *Un gate mide lo que se le pidió medir; la vara dice qué había que pedir.* **Y el modo de falla es el más caro de esta ficha: se midió «¿está en español?» cuando la pregunta era «¿está en el idioma de quien lo lee?»** — la medición fue correcta y la pregunta no.
+>
+> **ALCANCE MEDIDO — el costo HOY es CERO, y por eso no frena nada:** de 165 usuarios, **ninguno** tiene idioma en `user_meta_data`; el idioma vive en `user_preferencias` (**4 filas, las 4 `es`**) y **la plantilla no puede leer esa tabla**. Las otras 161 caen al default, también español. **No hay un solo usuario recibiendo el idioma equivocado.** *Es deuda futura, no daño presente — pero **no se archiva como cerrada**, que es exactamente el error que esta ficha ya cometió una vez.*
+>
+> **Las dos patas técnicas, medidas:** la plataforma **sí** permite branchear (`{{ .Data }}` expone `user_metadata` y los condicionales Go funcionan), pero **no hay multi-idioma nativo**: una plantilla por tipo.
+>
+> **VOTO DE D, registrado con su razón:** ❌ **en contra de espejar el idioma en `user_metadata`** — *crea una segunda verdad que hay que sincronizar, y esta casa pagó ese patrón el mismo día con las 17 filas divergentes de `profiles.email`* · ✅ **a favor del Send Email Hook**: Supabase delega el envío a una función nuestra que lee `user_preferencias` —una sola verdad— y **converge con `despachar-correo`, que ya existe y ya habla dos idiomas**.
+>
+> **Evidencia:** `docs/relevamientos/2026-08-23-s104d-CORRECCION-D628-idioma-del-usuario.md`.
+> ☠️ **Condición de muerte (actualizada):** un usuario con preferencia `en` recibe el correo de recuperación **en inglés**, verificado en una bandeja real.
+
+
 **Estado conocido, declarado al construir — no descubierto después.**
 
 El motor de recuperación por código está **cableado y funcionando** (S84-A27).
