@@ -4875,20 +4875,24 @@ function r63(archivos) {
         `R63·C ${app}: NO existe \`.expo/types/router.d.ts\`. Con \`typedRoutes: true\` y sin ese archivo, \`Href\` degrada a \`string\` y **toda ruta inventada compila en verde**: el typecheck no está midiendo rutas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
       );
     } else {
-      const tDts = statSync(dts).mtimeMs;
-      let masNueva = 0;
-      const caminar = (d) => {
-        for (const e of readdirSync(d)) {
-          const p = join(d, e);
-          if (statSync(p).isDirectory()) caminar(p);
-          else masNueva = Math.max(masNueva, statSync(p).mtimeMs);
-        }
-      };
-      caminar(join(RAIZ_REPO, dir, 'src/app'));
-      if (masNueva > tDts) {
-        const dias = ((masNueva - tDts) / 86400000).toFixed(1);
+      /* ⚠️ SE COMPARA ESTRUCTURA, JAMÁS mtime — y la primera versión de este
+         brazo SÍ usaba mtime. Salía roja con «0.1 días de atraso» apenas se
+         editaba UNA pantalla, aunque no naciera ninguna ruta: **cualquier
+         commit que tocara una pantalla dejaba el lint en rojo.** Un juez que
+         grita en cada commit se aprende a ignorar, y ahí deja de ser juez.
+         La pregunta correcta no es «¿quién es más nuevo?» sino **«¿está cada
+         ruta real en el union que el compilador lee?»** — que es lo que de
+         verdad decide si el typecheck puede ver. */
+      const textoDts = readFileSync(dts, 'utf8');
+      const ausentes = [...rutas].filter((r) => {
+        if (r === '/') return false; // la raíz viaja en varias formas
+        // El union declara las dinámicas con su `[param]` y también como
+        // template; alcanza con que el literal del segmento aparezca.
+        return !textoDts.includes(`\`${r}\``) && !textoDts.includes(`${r}\``);
+      });
+      if (ausentes.length > 0) {
         fallos.push(
-          `R63·C ${app}: el árbol de rutas cambió DESPUÉS del \`.d.ts\` generado (${dias} día(s) de atraso). Las rutas nacidas en ese intervalo no están en el union ⇒ el compilador las deja pasar sin verlas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
+          `R63·C ${app}: ${ausentes.length} ruta(s) del filesystem NO están en \`.expo/types/router.d.ts\` ⇒ el compilador no puede verlas y \`router.push\` hacia ellas pasa sin control: ${ausentes.slice(0, 5).join(' · ')}${ausentes.length > 5 ? ' …' : ''}. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
         );
       }
     }

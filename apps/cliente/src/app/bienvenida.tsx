@@ -88,12 +88,22 @@ export default function Bienvenida() {
         <Entrada orden={1}>
           <View style={{ gap: spacing[2] }}>
             <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-            {/* S82-B r5 — LA PANTALLA DEL GATE de 'sinCaja' (única
-                consumidora hasta la firma): el rol secundario en tinte
-                sin borde (A6 candidata). Si el founder la firma, muere
-                el contorno del secundario (enmienda Ley 22 en mesa); si
-                no, esta línea vuelve a variante="secundario". */}
-            <Boton variante="sinCaja" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
+            {/* ⏪ S82-B r5 — ESTA ERA LA PANTALLA DEL GATE de `sinCaja` (su
+                única consumidora hasta la firma), esperando que el founder
+                decidiera entre el tinte sin borde y el contorno.
+
+                ☠️ **S104-B — EL GATE SE CIERRA POR LETRA, NO POR FIRMA
+                SOBRE PÍXELES:** `RITUAL_DE_ENTRADA` §2.4 dicta *«**Ya tengo
+                cuenta** en `ghost`»*. Ni `sinCaja` ni `secundario`: la
+                tercera opción, que es la que la 19.7 pedía desde siempre —
+                por superficie UN sólido (acá el `marca` de arriba) y el
+                resto baja a label.
+
+                ⚠️ **Y baja el trinquete de `R48` de 5 a 4**, que es
+                solo-baja: el alias jubilado pierde su consumidor más
+                visible. *La variante que esperaba gate se resolvió al
+                quedar sin pantalla que la defendiera.* */}
+            <Boton variante="ghost" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
           </View>
         </Entrada>
         <Entrada orden={2}>

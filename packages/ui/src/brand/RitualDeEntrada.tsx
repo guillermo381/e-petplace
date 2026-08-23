@@ -130,7 +130,20 @@ export function RespiroDeMarca({
  *
  *  ⚠️ **Si el founder mira el gate y le resulta corto, la salida NO es
  *  volver a `legacy_slow`: es que la mesa suba el gesto a `grande` (520) o
- *  enmiende N10.** Queda escrito para que nadie lo "arregle" tecleando 400. */
+ *  enmiende N10.** Queda escrito para que nadie lo "arregle" tecleando 400.
+ *
+ *  🔴 **Y LA LETRA LLEGÓ DESPUÉS Y DICE ~400 — el choque se declara acá y
+ *  NO se resuelve solo.** `RITUAL_DE_ENTRADA` §5 pide *«~400ms»*, y su §7
+ *  afirma que *«no inventa física nueva: cada número de este documento ya
+ *  estaba firmado en el canon»*. **Esa afirmación es falsa para este
+ *  número: 400 NO pertenece al vocabulario cerrado de N10** (150 · 300 ·
+ *  520) — es un `legacy_` que R51 congeló.
+ *
+ *  ⇒ **Se conserva 300 y se reporta**, porque bajar un juez mecanizado
+ *  para acomodar un número que la propia letra cree canónico y no lo es
+ *  sería exactamente al revés: *el instrumento está bien y la letra tiene
+ *  un dato que nadie verificó.* **Lo arbitra la mesa: o N10 se enmienda
+ *  con su cuarto valor, o §5 baja a 300 (o sube a 520).** */
 const LLEGADA = motion.duration.estandar
 
 export function HuellaDeLlegada({
