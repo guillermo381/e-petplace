@@ -476,6 +476,36 @@ Tampoco entran: el reembolso y la postventa · el catálogo · las cinco deudas 
 
 ---
 
+## §13 · 🔴 EL REVERSO MISMO-DÍA: DESCRITO POR DOS LETRAS, ASIGNADO POR NINGUNA *(S103-A, 22-ago-2026)*
+
+**Medido al cerrar S103: cero código del reverso en cualquier territorio.**
+
+Y la razón por la que sobrevivió tanto tiempo sin que nadie lo notara **no es que
+se olvidara: es que está DESCRITO dos veces.** Esta letra lo trata como parte del
+motor (§5.0 lo invoca como el fundamento entero de las compuertas pre-cobro:
+*«el reverso es MISMO-DÍA ⇒ la plata que no se cobra mal no hay que
+devolverla»*), y `LETRA_DEUNA` §8 lo describe con su forma (*mismo día, total,
+sin parciales*). **Ninguna de las dos dice QUIÉN LO ESCRIBE.**
+
+> ### **Una pieza que dos letras describen y ninguna asigna es una pieza que cada pista cree que es de la otra.**
+> *Y ésta en particular es la que se usa cuando algo ya salió mal — o sea, el peor
+> momento posible para descubrir que no existe.*
+
+⚠️ **Lo que lo vuelve concreto y no académico: el VOCABULARIO YA ESTÁ
+CONSTRUIDO.** `pagos_intentos` admite el estado **`reverso_fallido`**, y
+`chk_hallazgo_vocabulario` admite **`reversado_mismo_dia`**. *Un estado que nada
+puede producir es un cajón con etiqueta y sin fondo* — y esta sesión lo tocó de
+la peor manera posible: **un fixture ajeno dejó una fila en `reverso_fallido`, y
+hubo que medirla para descartar que fuera plata real de una familia.** El caso de
+soporte era falso; el trabajo de descartarlo, no.
+
+**⚡ ESTADO: 🔴 SIN DUEÑO — decisión de mesa** (ficha `D-888`). **No lo toma
+nadie por iniciativa:** repartirlo mal es peor que dejarlo declarado, y esta
+sección existe para que la próxima sesión lo encuentre asignable en vez de
+volver a descubrir que falta.
+
+---
+
 ## §12 · LO QUE ESTA SESIÓN DECLARA QUE NO PUDO
 
 Se escribe al cerrar, con nombre y razón. **Se publica lo incompleto, jamás lo falso.**

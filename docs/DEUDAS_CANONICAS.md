@@ -20061,6 +20061,103 @@ interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
 
 ---
 
+### D-887 🔴 · EL BARRIDO DE DEUNA DETECTA EL PAGO Y NADIE LO APLICA
+
+🔴 **ALTA. Abierta 22-ago-2026, hallazgo de S103-D.** **Dueño: A (motor).**
+**Contrato ya escrito: `docs/CONTRATO_APLICADOR_BARRIDO_DEUNA.md`.**
+
+**El barrido clasifica `confirmado` y ahí se acaba.** Su comentario decía *«lo
+aplica el actuador»* — y el actuador arranca con `SELECT * FROM webhook_events
+WHERE id = p_evento_id`: **necesita una fila de evento.** Pero el caso que el
+barrido existe para resolver es **el webhook que nunca llegó** ⇒ no hay fila, no
+hay a quién pasarle nada, **y el sujeto no se mueve.**
+
+**El contraste que lo prueba, medido:** Nuvei llama a `resolver_consulta_activa`,
+que existe y aplica. **Las únicas funciones `%deuna%` de la base son
+`_deuna_base36` y `deuna_nueva_referencia`** — las dos del generador de
+referencia. **No hay aplicador.**
+
+> **Consecuencia: un pago cobrado y nunca confirmado, con la plata ya movida del
+> lado del cliente** — que es literalmente lo que el barrido viene a impedir.
+
+**El diseño, decidido y medido (no es «hermana o ensanche»):** 🔴 **el barrido
+NO confirma: ALIMENTA al único actuador** —escribe la fila de `webhook_events`
+con `payload.info` y lo llama—. *Dos piezas que confirman pagos es cómo se
+confirma dos veces.* **Es seguro:** `webhook_events` tiene RLS con cero policies
+y grants sólo `postgres`/`service_role` — nadie desde afuera fabrica un evento.
+
+**Y su costura ya está puesta:** la columna `origen` (`webhook · barrido ·
+consulta_activa`) nació en `20260822260000` **para esto**. Falta **su rama en
+`_evento_autenticado`**: `origen='barrido' AND verificado IS TRUE`.
+⛔ **Jamás `stoken_valido = true` desde el barrido — sería firmar una
+verificación que no ocurrió.** No hubo header: la columna queda NULL con su
+significado correcto.
+
+**⚡ Disparo: ANTES de encender la fila de DeUna.** *Sin esto, encenderla sería
+encender un cobro que nadie puede confirmar* — regla ① de encendido
+(`LETRA_DEUNA` §13bis).
+
+**☠️ Condición de muerte:** cuando el aplicador exista, tenga su rama en el gate
+y **haya corrido a mano una vez** (regla ③).
+
+---
+
+### D-888 🔴 · EL REVERSO MISMO-DÍA NO TIENE DUEÑO Y NO TIENE CÓDIGO
+
+🔴 **ALTA. Abierta 22-ago-2026.** **Dueño: 🔴 NINGUNO — decisión de mesa.**
+
+**Medido: cero código en cualquier territorio**, y **las dos letras no coinciden
+en quién lo construye.** `LETRA_DEUNA` §8 lo describe *(mismo día, total, sin
+parciales)*; `LETRA_MOTOR_PAGOS_S101` lo trata como parte del motor. **Ninguna
+dice quién lo escribe.**
+
+> **Una pieza que dos letras describen y ninguna asigna es una pieza que cada
+> pista cree que es de la otra.** *Y esta en particular es la que se usa cuando
+> algo ya salió mal — o sea, el peor momento para descubrir que no existe.*
+
+⚠️ **Lo que lo vuelve urgente y no académico:** `pagos_intentos` ya tiene el
+estado **`reverso_fallido`** y `chk_hallazgo_vocabulario` ya admite
+`reversado_mismo_dia`. **El vocabulario está construido y el acto no.** *Un
+estado que nada puede producir es un cajón con etiqueta y sin fondo.*
+
+**⚡ Disparo: la mesa asigna dueño.** Hasta entonces **no lo toma nadie por
+iniciativa** — repartirlo mal es peor que dejarlo declarado.
+
+---
+
+### D-889 🟠 · LA LEY DEL «SOLO-BAJA» VIVE ÚNICAMENTE EN PROSA
+
+🟠 **MEDIA-ALTA. Abierta 22-ago-2026, hallazgo de S103-B.** **Dueño: A + B.**
+**Toca a los 54 jueces.**
+
+**Medido:** **36 constantes de baseline · CERO mecanismos** que comparen con el
+valor anterior · **44 % de las reglas** con su veredicto atado a un baseline.
+
+**Probado EN ROJO, no argumentado:** bajar `BASELINE_R47` de 39 a **37 —el valor
+de hoy—** da **EXIT 0, verde y silencio**, y la línea del reporte queda *«37 usos
+· baseline 37»*, **que se lee más apretada de lo que estaba.**
+
+> ### **El edit que DESARMA el guard y el que lo MEJORA son indistinguibles sin conocer el valor previo.**
+> *La dirección exige memoria. El juez no la tiene. **Git sí la tiene, y el juez
+> no la consulta.***
+
+**Precedente pagado, misma clase por otra puerta: `L-226`** — el lint que se
+apagó por un cambio de extensión y **bajó su contador dando verde**, porque en
+un lint un número más chico se lee como progreso.
+
+**La forma de la cura, sin construirla acá:** el juez lee los baselines del
+`HEAD` anterior (`git show HEAD:scripts/verify-diseno.mjs`) y **exige que ninguno
+haya SUBIDO ni bajado sin declararlo**. *Un baseline que baja es una buena
+noticia que igual tiene que decirse.*
+
+**⚡ Disparo: la próxima tanda que toque `verify-diseno.mjs` por otra razón.**
+*No se abre una sesión para esto; se paga cuando ya se está adentro.*
+
+**☠️ Condición de muerte:** cuando bajar un baseline sin declararlo ponga el
+juez en rojo.
+
+---
+
 ### D-885 🔴 · EL SECRETO DE DESPACHO VIVE EN CLARO DENTRO DE `cron.job.command`
 
 🔴 **ALTA. Abierta por S103-A, 22-ago-2026, encontrada al construir
@@ -20269,6 +20366,8 @@ guarda vencida.** *Dos ya son una clase.*
 - **L-405** — **🔴 TODA REGLA DECLARA QUÉ *NO* DICE SU VERDE.** *Firmada por la mesa el 22-ago-2026, **crédito de S103-B**.* El verde de `R62` dice **«no se monta»** — **jamás «no se computa»**. Su caso lo prueba: los tres restos que quedaron **parecían el mismo** y sólo uno lo era — ① un import huérfano, **cazado por el typecheck** · ② un cómputo **vivo y legítimo** · ③ **un estado escribiéndose sin lector, con el typecheck dándolo por bueno porque `setEspecie` ES un uso válido de la variable.** > ### **Una regla acota su pregunta para poder ser exacta, y esa misma acotación es lo que su verde NO cubre.** ⇒ **el barrido de lo que ALIMENTABA al montaje es MANUAL y va CON la cura; ningún gate lo pide.** **Y la ironía que la vuelve ley: es la misma cláusula que el censo de B acababa de elogiar en otras siete reglas, y su regla nueva no la tenía** — *el censo se aplicó a sí mismo con una hora de retraso, porque **quien escribe una regla es el que menos ve su límite**.* ⇒ **la cláusula «qué no dice este verde» la revisa alguien que no escribió la regla.**
 - **L-406** — **🔴 UN ARNÉS QUE PARA PROBAR EL CIRCUITO LO EJECUTA DE VERDAD ES UN ARNÉS QUE HACE LO QUE VINO A VIGILAR.** *Firmada por la mesa el 22-ago-2026, crédito de S103-A, sobre una trampa propia cazada antes de aplicar.* El brazo que recorría el cobro recurrente de punta a punta **disparaba el ACTO 2 sobre la única suscripción VIVA de la base**: sin protección la habría **renovado de verdad** — período movido, **citas generadas**, precios reescritos y **un aviso saliendo a una familia** —, todo **desde una migración que nadie autorizó a mover negocio**. > ### **El arnés más valioso —el que corre el camino real— es exactamente el que puede causar el daño que vigila, y por la misma razón: porque no simula.** *Un fixture inventado no rompe nada y tampoco prueba nada; uno que toca el objeto vivo prueba todo y puede romperlo todo.* ⇒ **el arnés que escribe corre en SUBTRANSACCIÓN QUE SE DESHACE SOLA, y la DDL queda afuera** (`BEGIN … RAISE 'DESHACER' … EXCEPTION WHEN SQLSTATE 'P0001'`): **el esquema queda, sus datos no.** Precedente: `20260822235000`. **Y el verde se declara con lo que se deshizo, medido después:** la suscripción idéntica, 49 citas sin cambio, **26 → 26 notificaciones — cero avisos enviados**.
 - **L-407** — **UN NOMBRE QUE DESCRIBE EL ALCANCE VIEJO ES UNA LÁPIDA QUE NADIE VE COMO LÁPIDA.** *Firmada por la mesa el 22-ago-2026, hallazgo de paso de S103-A.* `chk_intento_de_cita_declara_pagador` gobierna **los CUATRO sujetos** —pedido, cita, recurrencia y suscripción— y su nombre dice *«de_cita»*. Nació cuando eran dos; el CHECK creció y el nombre no. > ### **A diferencia de un comentario viejo, un nombre viejo no se lee como prosa: se lee como CLASIFICACIÓN.** *Quien busque «qué defiende a las recurrencias» va a saltear esa fila, y quien la lea va a creer que sólo aplica a citas.* **Familia de `L-395`** (el puente que sobrevive a su río), con el agravante de que **el nombre es el índice por el que se busca**. ⇒ **cuando un objeto ensancha su alcance, su NOMBRE entra al censo de consumidores igual que su código.** *(Y su compañía del mismo día, las dos correcciones propias que el arnés produjo antes de aplicar: `suscripciones_servicio` tiene `created_at` y no `creado_en` — un `ORDER BY` que habría abortado— y el fixture del intento sin `pagador_user_id`, que **el CHECK cazó**. **Las dos las encontró correr, ninguna releer.**)*
+- **L-408** — **EL MOLDE NOMBRADO PUEDE ENSANCHAR EL AGUJERO: SE MIDE LA AUDIENCIA DE CADA TABLA ANTES DE MOVER UN SECRETO DE UNA A OTRA.** *Firmada por la mesa el 22-ago-2026, crédito de S103-A, sobre `D-885`.* El dictamen decía *«el molde de la cura ya existe en la casa»* —`app_config`, de donde `ejecutar_recurrencias_vencidas` lee su secreto—. **Medido, ese destino era PEOR:** `cron.job` no lo alcanza **nadie por API** (`USAGE` sobre el schema es `false` para anon, authenticated **y** service_role), mientras que **`app_config` lo leen los ADMIN** (`app_config_admin [ALL] using=is_admin()`). > ### **Una cura que mueve un secreto a un lugar con MÁS lectores es una regresión con cara de prolijidad.** *Y el molde no protege de eso: un patrón de la casa dice CÓMO se hace algo, jamás si el destino es el correcto para ESTE dato.* ⇒ **antes de mover un secreto se mide quién alcanza el origen y quién alcanza el destino** — y la respuesta puede invertir la cura. *(Acá invirtió: fue al `vault`, misma audiencia y **cifrado en reposo**.)*
+- **L-409** — **SACAR UN SECRETO DEL TEXTO REDUCE LA SUPERFICIE FUTURA; SÓLO LA ROTACIÓN CIERRA EL PASADO.** *Firmada por la mesa el 22-ago-2026, crédito de S103-A.* El secreto de despacho salió del `command` de cinco crones y fue al vault. **Eso no lo des-ve: el valor YA ESTUVO en claro en una tabla del sistema**, y cualquiera que lo haya leído antes lo sigue teniendo. > ### **Mover un secreto y rotarlo son dos actos con efectos en direcciones distintas del tiempo: uno protege lo que viene, el otro anula lo que fue.** *Hacer sólo el primero y darlo por curado es la forma más común de cerrar un incidente de credenciales a medias.* ⇒ **y el ORDEN importa: primero sale del texto, después se rota** — rotar sin sacarlo reescribe el mismo problema con otro valor. **Precedente de la casa que sí cerró las dos puntas: `ARNES_SECRET` en S101, BORRADO en vez de rotado** — *un secreto que no existe no se puede filtrar.*
 
 > ### 📌 PRÁCTICA `P-CIRCUITO` — **EL INVENTARIO DE CIRCUITO AL CERRAR UN FRENTE** *(firmada por la mesa, 22-ago-2026)*
 >

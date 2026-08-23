@@ -409,6 +409,69 @@ como dato, no como consulta.
 
 ---
 
+## §13ter · LO QUE S103 ENMENDÓ EN EL RIEL *(S103-A + S103-D, 22-ago-2026)*
+
+> **Donde esta letra y el código discrepen, gana el código.**
+
+### 🔴 El gate de autenticación DEJÓ DE LEER UN CAMPO DE LOG
+
+**§7 describe la capa ② como *«la marca `verificado=si` sólo la escribe el buzón
+después de que `payment/info` confirmó»*.** Eso **ya no vive en `detalle`.**
+
+**El defecto, reproducido en SELECT puro:** `detalle` es texto libre y el buzón
+escribe ahí `analisis_fallo: ${String(e)}` ⇒ **un mensaje de excepción
+autenticaba el evento** — y no sólo en DeUna: **Nuvei tenía la misma forma.**
+
+> **Un campo que un humano lee para DIAGNOSTICAR y una función lee para AUTORIZAR
+> tiene dos dueños con intereses opuestos — y el que escribe para diagnosticar no
+> sabe que está firmando.**
+
+**Severidad acotada, medida:** sin `stoken_valido` el gate da `false` en los
+cinco casos ⇒ **quien lo use ya tiene el secreto.** *Erosión de defensa en
+profundidad, no puerta abierta.* **(Reportarlo sin esa cota lo habría inflado, y
+eso es defecto de reporte, no de medición.)**
+
+**El gate vigente, en columnas** (`20260822260000`):
+
+```
+deuna → coalesce(stoken_valido,false) AND verificado IS TRUE
+nuvei → coalesce(stoken_valido,false) AND credencial = 'SERVER'
+else  → false   (fail-closed: un proveedor que nadie enseñó no se autentica)
+```
+
+**`verificado` tiene TRES estados y no dos** (decisión de D): **NULL** = sin
+veredicto, todavía no preguntamos · **`false`** = preguntamos y no confirmó ·
+**`true`** = `payment/info` confirmó con monto. *Colapsar los dos primeros haría
+que un secreto inválido se vea igual que un evento sin analizar.*
+
+⚠️ **Y `origen` (`webhook · barrido · consulta_activa`) ya existe** para que el
+aplicador del barrido autentique **honestamente**. **Su rama del gate NO está
+escrita** — sería puerta sin motor. ⛔ **Jamás `stoken_valido = true` desde el
+barrido: sería firmar una verificación que no ocurrió.** El barrido no tiene
+header, y la columna queda NULL con su significado correcto.
+
+### 🔴 El actuador que este riel usa ESTABA MUERTO
+
+`aplicar_evento_de_pago` abortaba en su **primer gate**, en **toda llamada**,
+para **los dos proveedores** — `cannot cast type record to webhook_events`.
+**Nunca fue llamado por un evento legítimo**, así que no hubo síntoma. Curado en
+`20260822250000`; **daño CERO, medido.**
+
+*Lo digo en esta letra porque la conclusión toca al riel entero:* **cuando D
+declaró el actuador «vivo, lee `info`, fail-closed sin ella», la lectura del
+código era CORRECTA.** Lo que no estaba medido es **que alguien lo hubiera
+ejecutado.** ⇒ **`¿corrió alguna vez?` es una pregunta distinta de `¿está
+alcanzable?`, y el riel necesita las dos antes del lunes.**
+
+### El barrido detecta el pago y NADIE LO APLICA
+
+**§6 dice que el barrido cubre el caso «no llega ninguno».** Hoy **no lo cubre**:
+clasifica `confirmado` y ahí se acaba — **no hay aplicador** (`D-887`). *Un pago
+cobrado y nunca confirmado, con la plata ya movida.* **Es la razón por la que la
+regla ① de §13bis no es teórica.**
+
+---
+
 ## §13bis · 🔴 LAS TRES REGLAS DE ENCENDIDO *(firma de la mesa, 22-ago-2026 · crédito de S103-D)*
 
 > **Se leen ANTES de mover una sola palanca.** No son estilo: cada una nació de

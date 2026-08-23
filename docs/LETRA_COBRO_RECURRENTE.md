@@ -324,6 +324,94 @@ trenza).
 
 ---
 
+## §11 · LO CONSTRUIDO, Y LO QUE LA CONSTRUCCIÓN ENMENDÓ *(S103-A, 22-ago-2026)*
+
+> **Regla de esta sección: donde la letra y el código discrepen, GANA EL CÓDIGO
+> y la letra se corrige acá.** *Dos letras firmadas que se contradicen son
+> peores que una equivocada — cualquiera cita la que le conviene y está «en
+> regla».*
+
+### Lo que quedó vivo
+
+| pieza | dónde |
+|---|---|
+| el motor (selectores · desglose congelado · compuertas · `renovar_plan_cobrado`) | `20260822235000`, arnés 17/17 |
+| **el camino viejo que renovaba SIN COBRAR, cortado** | `20260822236000` |
+| **el reloj `cobrar-recurrencias`** · 09:00 Guayaquil · **INERTE** | `20260822240000` |
+| el actuador con **los cuatro sujetos** y el ACTO 2 de despensa | `20260822270000` |
+| **la hermana `pagos-cobro-recurrente`**, desplegada | `supabase/functions/` |
+
+**El reloj nace INERTE por diseño:** el timbre lee `app_config.recurrente_vivo`
+y sin esa clave devuelve `recurrente_apagado`. **El cron es el CABLE; la llave
+es del founder.** *Un cable que se tiende bajo presión se tiende mal.*
+
+### 🔴 ENMIENDA ① · §4bis decía que la compuerta 5 corre entera. **Para el PLAN no puede.**
+
+**Medido antes de escribir la puerta:** `suscripciones_servicio` **no tiene
+columna de tarjeta**, y `planes_vencidos_pendientes` **nunca mira ninguna** — su
+ítem no emite `tarjeta_id`. Su hermana de despensa (`pedidos_recurrencias`) sí
+tiene `tarjeta_id`, `autorizada_en` y `monto_esperado`.
+
+⇒ **la compuerta 5 —*el medio autorizado*— es INEVALUABLE para planes, y la
+puerta los FRENA A TODOS** con `sin_medio_autorizado`, uno por uno con su razón.
+
+> **Un plan que se renueva solo sin registrar quién autorizó ese cobro, cuándo y
+> sobre qué medio, no tiene raíz de autorización: tiene una costumbre.** *Y una
+> costumbre no se puede mostrar ante un contracargo.*
+
+**Eso NO se ablanda.** *Adivinar cuál de las tarjetas de la persona autorizó una
+renovación que nadie registró es la clase de suposición que no se hace sobre
+plata.* **Ficha `D-886`**, con la cura: el espejo de la hermana de despensa —la
+columna del medio, **escrita por su productor** (`L-326`)— y las series vivas
+migradas o pidiéndole al cliente que elija.
+
+### 🔴 ENMIENDA ② · El aviso ofrecía tres caminos y **sólo existe uno**
+
+`avisar_recurrencias_proximas` mandaba `'puede': 'saltar, mover o cancelar'`.
+**Medido: no existe ninguna función de saltar ni de mover** — sólo
+`alternar_recurrencia` y `configurar_recurrencia`. **Corregido a `'cancelar'`.**
+
+> *Un aviso que ofrece dos caminos inexistentes no es un texto optimista: es una
+> promesa que la app va a incumplir delante de la familia, y en el peor momento
+> posible — cuando está por cobrársele.*
+
+⇒ **§8 gana dos habitantes: `saltar` y `mover` NO entran a v1** hasta que una
+firma los ponga. **Ficha `D-884`, dueño PRODUCTO** — no es deuda de código, es
+decisión de alcance.
+
+### ENMIENDA ③ · El usuario dejó de ser AMBIENTE y pasó a ser PARÁMETRO
+
+`crear_pedido_despensa` exigía `auth.uid()`, y **el motor corre sin sesión**.
+Gana `p_user_id` **aditivo y guardado** (*un cliente no puede pedir a nombre de
+otro*), y `movido_por_rol` pasa a **`'sistema'`** cuando el pedido lo crea el
+motor. ⛔ **La salida prohibida sigue prohibida:** fabricar un JWT de usuario con
+`service_role` (`L-340`).
+
+### Lo que el arnés PROBÓ y lo que NO
+
+**Probó** el circuito entero sobre una suscripción viva: evento → autenticación →
+sujeto reconocido → intento **aprobado** → **ACTO 2 ejecutado**, con no-regresión
+del huérfano y del camino del cliente.
+
+🔴 **Y corrió en SUBTRANSACCIÓN QUE SE DESHACE SOLA**, porque sin eso **habría
+renovado esa suscripción de verdad** — período movido, citas generadas, precios
+reescritos y **un aviso saliendo a una familia**, desde una migración que nadie
+autorizó a mover negocio (`L-406`).
+
+**NO probó:** que se mueva un centavo · **la rama de DESPENSA del ACTO 2**
+(*cero recurrencias en la base ⇒ escrita y no ejercida*) · el aviso fuera de
+sombra · **y la CAUSA FINA de un rechazo, que espera la tabla de `status_detail`
+de Erick — cajón construido, etiqueta NO adivinada.**
+
+### Lo que falta para cobrar de verdad, y ninguna es de motor
+
+🔑 **Las tres claves de `app_config`** (`recurrente_vivo` · `url_cobro_recurrente`
+· `secreto_despacho`) — **medidas ausentes las tres. Son del founder y van
+ÚLTIMAS.** *Encenderlas antes habría sido cobrar sin saber aplicar; ahora es al
+revés: todo sabe aplicar y falta la llave.*
+
+---
+
 ## Historial
 
 - **v1.3 (22-ago-2026, mesa 104 — al ir a construir):** **§4 pasa de intención a
