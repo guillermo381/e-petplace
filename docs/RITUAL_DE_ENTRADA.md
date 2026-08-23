@@ -76,6 +76,15 @@ toca antes, corta la ceremonia sin castigo (N15).
   borde del campo activo pasa a tinta plena y gana 1pt, 150ms. El movimiento
   vive en el borde, no en la etiqueta.
 - **Ojo** en el campo de clave (el componente nuevo de B, gate por ícono).
+- ☠️ **EL FOCO A TINTA PLENA SE RETIRA — enmienda firmada (founder, 23-ago-2026):**
+  la v1.0 pedía que el borde del campo enfocado pasara a **tinta plena**. **Vuelve
+  a `accent.active`** (Ley 5 + el sexto slot de S83-B13), y **B revierte en
+  `Campo`, `CampoFecha` y `CampoCodigo` de LAS DOS APPS**. Literal del founder:
+  *«fue orden mía sin ver el choque»*. **Lo que SÍ queda: el borde gana 1pt en
+  150ms** — el movimiento vive en el borde, no en la etiqueta (N11′ intacta).
+  *Se registra la enmienda en vez de reescribir la letra en silencio: B aplicó lo
+  pedido Y declaró el choque en la fuente, y ése es el motivo por el que la mesa
+  pudo revisarlo antes de que llegara a un gate.*
 - Jerarquía N26: **Entrar** en ocre pleno · «¿Olvidaste tu contraseña?» en
   `ghost` · gap `spacing[6]`.
 - Validación al salir del campo (N12.3), `Campo.error + PieDeCampo`.
@@ -86,7 +95,7 @@ toca antes, corta la ceremonia sin castigo (N15).
 ## 5. El momento que se recuerda: la llegada
 
 Al autenticar bien, **la huella se completa**: una huella central se traza
-entera (~400ms, el motivo de espera de marca usado UNA vez como celebración) y
+entera (**300ms**, el motivo de espera de marca usado UNA vez como celebración) y
 la app abre al Hogar — que recibe con nombre y mascotas. El enamoramiento no
 es la animación del login: es que la puerta se abra a algo vivo. La animación
 solo es el umbral.
@@ -112,7 +121,32 @@ confetti · no splash animado fingido · no toca prestador en v1 (hereda el
 lenguaje en su propia mesa) · no inventa física nueva: cada número de este
 documento ya estaba firmado en el canon.
 
+> **⚠️ ENMIENDA FIRMADA (founder, 23-ago-2026) — esta última afirmación era
+> FALSA para un número, y se corrige en vez de taparse.** La v1.0 pedía
+> «~400ms» en §5, y **400 no está en el vocabulario cerrado de N10**
+> (150 · 300 · 520): es un `legacy_` congelado por **R51**, que **rechazó el
+> intento de usarlo**. ⇒ **§5 dice 300ms** y **el 400 queda declarado como error
+> de esta letra, no como número del canon**.
+>
+> *Lo encontró el juez, no un lector: B reportó el choque en vez de bajar la
+> regla para que su código pasara.* **Ésa es la conducta que la casa quiere** —
+> una letra que se contradice con el canon se arbitra en la mesa; un juez que
+> estorba no se apaga. *Y la lección de forma: una sección que afirma «todo acá
+> ya estaba firmado» es una afirmación medible, y por lo tanto falsable — si se
+> escribe, alguien la va a poder contradecir con un grep.*
+
 ## Historial
 - v1.0 propuesta (Mesa 105): escrita sobre DIRECCION_ARTE §1/§5,
   DIRECCION_DISENO N11′/N15/N16/N26 y la medición S104-B del login.
 - **Depositada por A en S104 (23-ago-2026), verbatim.**
+- **v1.1 — TRES ENMIENDAS FIRMADAS POR EL FOUNDER (23-ago-2026), aplicadas por A
+  el mismo día.** Las dos primeras nacieron de que **B reportó el choque en vez de
+  bajar el juez**, y las dos corrigen a la letra, no al código:
+  ① **§5: la huella de llegada es 300ms, no ~400** — 400 no está en N10 y R51 lo
+  rechazó; **§7 queda corregida: el 400 fue error de esta letra, no un número del
+  canon** · ② **☠️ §4: el foco a tinta plena SE RETIRA** y vuelve a
+  `accent.active` (Ley 5 / S83-B13), con reversión de B en las tres piezas de las
+  dos apps · ③ *(fuera de este documento, se anota por trazabilidad)* **cae el
+  punto 4 de la tanda 1** —el `redirectTo` del wrapper de recuperación— porque
+  **el flujo usa `verifyOtp` con código, no enlace**: era letra escrita contra un
+  flujo que esta casa no usa.
