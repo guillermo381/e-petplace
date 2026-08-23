@@ -20473,3 +20473,19 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 **Contexto que la vuelve urgente y no académica:** el `_dmarc` vivo hoy (`v=DMARC1; p=none;`) **nunca tuvo `rua`** ⇒ nunca reportó a nadie. *Nadie decidió eso: quedó así.* Y su gemela de producto es **D-892**: `privacidad@` es el canal que las páginas legales publicadas y **P15** prometen para ejercer derechos y para revertir un cierre dentro de los 30 días. **La ley y la deuda son la misma medición vista desde dos lados.**
 
 **☠️ Condición de muerte:** ninguna. Es regla de método, no deuda.
+
+#### D-893 — 💣 APAGAR `mailer_autoconfirm` Y ARREGLAR `Confirm signup` SON **UN SOLO ACTO**, no dos tareas
+🔴 **BLOQUEANTE DE LA FIRMA 5.5.** Medido por la pista D (S104, 23-ago-2026) al contrastar `MODELO_LOGIN` contra la config viva; depositado por A.
+
+**La mina:** `MODELO_LOGIN` §2.3 firma que la verificación de correo **se va a encender** y que el flujo es **código de 8 dígitos**. Pero la plantilla `Confirm signup` está hoy **en inglés de fábrica y usa `{{ .ConfirmationURL }}` — un ENLACE, no `{{ .Token }}`**.
+
+⇒ **El día que se apague `mailer_autoconfirm`, no sale «un correo en inglés»: EL REGISTRO SE ROMPE PARA TODOS.** La pantalla va a pedir un código que ese correo no trae. **Y el síntoma aparece en producción, no en un gate**, porque hasta ese momento la plantilla no dispara nunca.
+
+**Es el defecto exacto de D-628 (S85), en otra pieza.** Y es **la ley de secuencia de `MODELO_NOTIFICACIONES` §0ter aplicada al correo: la pieza ANTES del flip.** *Push se abrió así —lector → pieza → gate → flip— y fue el primer canal que la casa abrió entero.*
+
+**Por qué se ficha en vez de curarse ya:** `Confirm signup` **NO se tocó por orden explícita** en la tanda 1 de D. Tocarla sin apagar el autoconfirm no sirve de nada, y apagarlo sin tocarla rompe el alta. **Van juntas o no van.**
+
+**El orden, en piedra:** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
+☠️ **Condición de muerte:** los tres pasos ejecutados **en ese orden**, con el gate del ② corrido por el founder.
+
+**Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
