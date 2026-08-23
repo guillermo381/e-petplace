@@ -234,7 +234,13 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
             gobierna el eje TRANSVERSAL: `flex-start` ahí es «arriba», no «a
             la izquierda». *Señalé la línea correcta con el mecanismo
             equivocado, y eso es más caro que no señalar nada: el próximo
-            lector la lee y da el diagnóstico por hecho.* */}
+            lector la lee y da el diagnóstico por hecho.*
+
+            ✅ **GATEADO EN APARATO (23-ago, R5CY201ZDVL):** corrido el test
+            falsable que propuso B —sacar el envoltorio y mirar—. **Los dos
+            botones siguen CENTRADOS sin él.** Capturas:
+            `scripts/capturas/s103-c-centrado-sin-envoltorio-*.png`. *El
+            retiro dejó de apoyarse en la medición ajena y tiene ojo propio.* */}
         <Boton
             variante="secundario"
             etiqueta={t(
@@ -321,7 +327,11 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
             imponía su propia alineación— y dejó de hacer falta cuando la
             pieza devolvió ese slot al padre (`cb146a18`, `R60`). *Dos
             parches idénticos en un mismo archivo eran la señal de que el
-            defecto no era del archivo: era de la pieza.* */}
+            defecto no era del archivo: era de la pieza.*
+
+            ✅ **Y SU PEDIDO SIGUE CUMPLIDO, verificado en aparato:** «El
+            código venció.» con «Generar un código nuevo» **centrado**, sin
+            envoltorio. */}
         <Boton
           variante="secundario"
           etiqueta={t('pago.deunaCodigoNuevo')}
