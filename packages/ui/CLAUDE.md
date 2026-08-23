@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S97+ — 65 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+**Estado: S103 — 81 componentes, sistema exigible y consumido por los flujos reales de AMBOS apps.**
+
+> ⏪ **RE-MEDIDO S103-A (`L-141`), y la brecha era de 29:** esta línea decía **52**. Método idéntico y auditable: `ls src/components/*.tsx` = **85**, menos **3** variantes `.web` y la infra `capturaFoto` = **81**. **El contador EXIGIBLE no es éste y por eso éste se atrasa: es `verify:diseno` R17**, leído del propio lint — **`exportaciones=106 · en-galería=97`**. *Cuando los dos discrepen, gana R17 y esta línea se corrige, jamás al revés.* **Cruce de territorio declarado:** `packages/ui` es de B; A corrige el contador al cerrar la sesión porque **una cifra derivada que envejece desinforma más que una ausente**, y B cerró.
 
 > **S97+-B · DOS PIEZAS NUEVAS Y EL JUEZ CON SEIS REGLAS MÁS.**
 > Contador re-medido por el método auditable de siempre (L-141): `ls
