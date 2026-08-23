@@ -30,30 +30,15 @@
  * · **El largo se IMPORTA** (`LARGO_CODIGO_RECUPERACION`, `MIN_LARGO_CONTRASENA`)
  *   — el «6 vs 8» nació de dos pantallas hardcodeando su propia verdad.
  *
- * ── 🔴 LAS DIFERENCIAS CON EL PRESTADOR, Y CADA UNA CON SU MEDICIÓN ──────
- *
- * ⏪ **① SIN `MarcaDeAgua`** — ☠️ **DEROGADA EN S104-B: ahora SÍ la lleva.**
- * ~~Medido: el cliente **no la usa en `login` ni en `registro`** (grep = 0),
- * que son sus pantallas hermanas fuera de tabs. *Heredarla habría metido un
- * elemento de la casa del prestador en una superficie que no lo tiene —
- * copiar el molde en vez de mirar el destino, que es lo que `L-368`
- * nombra.*~~
- *
- * 🔴 **POR QUÉ CAE, y es la clase de derogación que conviene mirar: el
- * razonamiento era CORRECTO y su PREMISA caducó.** Decía «no la usa en login
- * ni en registro» y de ahí concluía «acá tampoco». **En S104-B el founder
- * ordenó montarla en las tres**, así que el hecho que sostenía la excepción
- * dejó de ser cierto — y con él, la conclusión se invierte sola: hoy la
- * coherencia con sus hermanas EXIGE la marca en vez de prohibirla.
- * *Un freno que declara contra qué midió se puede reabrir cuando eso cambia;
- * uno sin su medición adentro habría quedado permanente por accidente*
- * (la ley de S84, cobrando su dividendo otra vez).
- *
- * ⚠️ **Y `L-368` NO queda desmentida:** sigue siendo cierto que copiar el
- * molde del prestador sin mirar el destino está mal. Lo que cambió es el
- * destino — la marca dejó de ser «un elemento de la casa del prestador» y
- * pasó a ser la del arco de entrada del cliente, medido: `MarcaDeAgua`
- * tenía 70 consumidores allá y 0 acá, y ése era el defecto, no la cura.
+ * ── EL RITUAL DE ENTRADA (S104-C, firma founder 23-ago) ──────────────────
+ * Esta pantalla hereda la puerta (`RITUAL_DE_ENTRADA.md` §4-§5): **tapiz +
+ * MarcaDeAgua + la senda** (`PaseoDeHuellas`) de fondo, el **isotipo recogido
+ * en la esquina** (la continuidad), autofill en email y clave, y **la huella
+ * de llegada** al validar la clave nueva (§5) — el umbral, no el premio.
+ * ⏪ Esta cabecera decía «① SIN MarcaDeAgua» con su medición «el cliente no la
+ * usa» — VENCIDA por la firma del ritual, que la manda en las tres pantallas
+ * del arco del cliente. La nota se conserva tachada porque su medición era
+ * cierta el día que se escribió: lo que cambió fue la letra, no el grep.
  *
  * **② LA ENTRADA DESDE EL LOGIN NACE CON ESTO, y no es un extra.** Medido:
  * `apps/cliente/src/app/login.tsx` **no ofrecía ninguna salida** —solo
@@ -62,20 +47,35 @@
  * está adentro. *Una pantalla de recuperación que exige haber entrado no
  * recupera nada.*
  *
- * ⚠️ **③ EL AVISO DEL CORREO EN INGLÉS SE CONSERVA, y se declara por qué:**
- * `D-628` sigue **🟠 abierta** en el canon (medido: su ficha dice que las
- * plantillas las revisa el founder, y no hay registro de cierre). *No medí
- * el correo real desde el cliente — heredo la advertencia del prestador,
- * porque el costo de decirlo de más es una línea y el de callarlo es que la
- * persona crea que no llegó y gaste su cupo de 2-3 por hora.*
- * ☠️ Muere con `D-628`, no por su cuenta.
+ * ☠️ **③ EL AVISO DEL CORREO EN INGLÉS MURIÓ (S104-C, firma founder 23-ago).**
+ * Decía *«puede llegar en inglés y de una dirección que no es la nuestra»* — y
+ * eso HOY ES FALSO: la prueba de recuperación real de esta misma sesión
+ * (satorilatam, una de las 8 solo-Google) recibió el código y entró con clave
+ * nueva. `D-628` se cierra por medición, no por promesa. *Un aviso que
+ * advierte de un problema que ya no existe no protege: desconfía de un correo
+ * que llega bien.* Muere en las DOS apps y en los dos idiomas, con su key
+ * (Ley 37).
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  CampoCodigo,
+  Encabezado,
+  EvitaTeclado,
+  HuellaDeLlegada,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  Texto,
+  spacing,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import {
   LARGO_CODIGO_RECUPERACION,
   MIN_LARGO_CONTRASENA,
@@ -115,6 +115,9 @@ export default function Recuperar() {
   const [nueva, setNueva] = useState('');
   const [trabajando, setTrabajando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+  /** §5 · la llegada: al quedar la clave nueva, la huella se completa una
+   *  vez y recién ahí se entra — el umbral, igual que el login. */
+  const [llegando, setLlegando] = useState(false);
 
   /* LA SESIÓN FANTASMA, cerrada en el desmontaje: `verifyOtp` deja sesión
      al verificar (es la que autoriza el paso 2 — el diseño, no un
@@ -196,18 +199,28 @@ export default function Recuperar() {
     completadoRef.current = true;
     mostrar({ variante: 'exito', texto: t('recuperar.listo') });
     // la sesión del paso 1 es la que queda: se entra derecho, sin
-    // pedirle que vuelva a escribir la clave que acaba de elegir.
-    router.replace('/');
+    // pedirle que vuelva a escribir la clave que acaba de elegir. §5: la
+    // huella de llegada primero, y recién ahí el Hogar.
+    setLlegando(true);
+    setTimeout(() => router.replace('/'), 460);
   }
+
+  /** El isotipo recogido en la esquina — la continuidad del ritual. */
+  const ISOTIPO_ESQUINA = 28;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* S104-B — ver la derogación de ① en la cabecera: la marca entra en
-          las tres pantallas del arco de entrada, no en dos de tres. */}
+      {/* EL TAPIZ heredado del ritual (§4) — las dos capas de fondo. */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
+
       <Encabezado variante="navegacion" titulo={t('recuperar.titulo')} atras onAtras={() => router.back()} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
+      </View>
       <EvitaTeclado>
         <ScrollView
+          style={{ backgroundColor: 'transparent' }}
           contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[2] }}
           keyboardShouldPersistTaps="handled"
         >
@@ -220,6 +233,8 @@ export default function Recuperar() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoComplete="email"
+                textContentType="username"
               />
               {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
               <View style={{ paddingTop: spacing[4] }}>
@@ -231,9 +246,6 @@ export default function Recuperar() {
               {/* LA MISMA FRASE EXISTA O NO LA CUENTA. El condicional está
                   en el "si", no en nuestro conocimiento. */}
               <Texto variante="cuerpo">{t('recuperar.siTieneCuenta', { email, n: LARGO_CODIGO })}</Texto>
-              {/* D-628 — se dice ANTES de que lo busque, no después de que
-                  crea que no llegó. */}
-              <Texto variante="apoyo">{t('recuperar.avisoCorreo')}</Texto>
 
               {/* Las cajas por dígito (S88-B). El rebote viaja por su
                   prop `error` — PieDeCampo lo anuncia (liveRegion) y las
@@ -281,6 +293,8 @@ export default function Recuperar() {
                 onChangeText={setNueva}
                 secure
                 autoCapitalize="none"
+                autoComplete="new-password"
+                textContentType="newPassword"
                 /* la regla viene del wrapper — el hardcodeo «Al menos 8»
                    murió con el «6 vs 8» de registro (regla única). */
                 ayuda={t('recuperar.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
@@ -293,6 +307,27 @@ export default function Recuperar() {
           )}
         </ScrollView>
       </EvitaTeclado>
+
+      {/* §5 · LA LLEGADA — al validar la clave nueva, la huella se completa.
+          R53-DECLARADO: NO es un pie fijo — es un overlay de PANTALLA COMPLETA
+          (top:0 Y bottom:0) durante la celebración, y la pantalla se desmonta
+          al navegar. Nada debajo que este `bottom:0` tape. */}
+      {llegando && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.bg.base,
+          }}
+        >
+          <HuellaDeLlegada tamano={64} />
+        </View>
+      )}
     </View>
   );
 }

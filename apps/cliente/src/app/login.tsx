@@ -1,16 +1,58 @@
 /**
- * Login mínimo (S45-B4) — "Ya tengo cuenta". Al entrar, la ruta raíz
- * decide a dónde va según el estado real (familia o no).
+ * Login — LA PUERTA (RITUAL §4, S104-C; el QUÉ vive en MODELO_LOGIN.md).
+ *
+ * ── LA COMPOSICIÓN (de C) SOBRE LAS PIEZAS (de B) ────────────────────────
+ * · Fondo: **tapiz + MarcaDeAgua + la senda heredada** (`PaseoDeHuellas`) —
+ *   jamás blanco pelado (§4).
+ * · El **isotipo recogido en la esquina** — la continuidad del Acto III: en
+ *   la bienvenida preside grande y centrado; acá vive chico arriba a la
+ *   derecha. *La casa sigue siendo la casa, cambiaste de habitación.*
+ * · Campos N11′ (etiqueta afuera, quieta) con **el foco que respira** y **el
+ *   ojo** — los dos viven DENTRO de `Campo` (piezas de B), transparentes acá.
+ * · Jerarquía N26: **Entrar** en ocre pleno · «¿Olvidaste…?» en `ghost` · el
+ *   aire entre el formulario y las acciones es `spacing[6]` (la cura S81-C
+ *   del prestador, que el cliente no tenía — la propuesta S104-B la midió).
+ * · Teclado: el formulario sube, las acciones ancladas jamás quedan tapadas.
+ * · **La llegada (§5):** al autenticar, la huella se completa una vez y recién
+ *   ahí se abre el Hogar — el umbral, no el premio.
+ *
+ * ── LA CONTINUIDAD ENTRE PANTALLAS, declarada ────────────────────────────
+ * «El isotipo VIAJA» y «la senda PERSISTE» (§3) son shared-element entre
+ * rutas. Pixel-perfect exige un layout compartido de auth, y esas rutas viven
+ * sueltas en `app/` (agruparlas toca deep-links y el guard raíz). C no
+ * reestructura la navegación sin firma: la continuidad se monta per-pantalla
+ * (isotipo en su posición, senda en las cuatro). El shared-element real queda
+ * propuesto aparte.
+ *
+ * TESIS: "ya vivís acá — pasá." FIRMA: el isotipo recogido + la huella que
+ * completa la llegada.
  */
 
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, MarcaDeAgua, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  Encabezado,
+  Entrada,
+  EvitaTeclado,
+  HuellaDeLlegada,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  spacing,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+/** El isotipo recogido: ~0.4 del tamaño de la bienvenida (72 → 28), en la
+ *  esquina superior. La continuidad del Acto III, montada per-pantalla. */
+const ISOTIPO_ESQUINA = 28;
 
 export default function Login() {
   const router = useRouter();
@@ -23,6 +65,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  /** §5 — la llegada: entre el «ok» del servidor y el Hogar, la huella se
+   *  completa una vez. Cubre la pantalla para que el pase sea el umbral. */
+  const [llegando, setLlegando] = useState(false);
 
   const puedeEnviar = email.trim().length > 0 && password.length > 0;
 
@@ -31,9 +76,9 @@ export default function Login() {
     setCargando(true);
     setError(undefined);
     const r = await iniciarSesion({ email: email.trim(), password });
-    setCargando(false);
 
     if (!r.ok) {
+      setCargando(false);
       if (r.codigo === 'credenciales_invalidas' || r.codigo === 'email_no_confirmado') {
         setError(r.mensaje);
       } else {
@@ -41,110 +86,106 @@ export default function Login() {
       }
       return;
     }
-    router.replace('/');
+    // §5: la huella de llegada, y recién después el Hogar. El guard del raíz
+    // re-decide con la sesión nueva (7.5: estado real).
+    setLlegando(true);
+    setTimeout(() => router.replace('/'), 460);
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ── S104-B · LA MARCA ENTRA SIN OCUPAR LUGAR ────────────────────
-          Medido antes de montarla: `MarcaDeAgua` tenía **70 consumidores en
-          el prestador y UNO en el cliente** (`recuperar.tsx`). Ésa —y no el
-          color del CTA— es la causa medida de que login y registro "parezcan
-          de otro producto": son las dos únicas pantallas del arco de entrada
-          **sin una sola marca encima**, entre una bienvenida con isotipo en
-          gradiente y un Hogar con techo de marca.
-          Es el isotipo al 4 %, quieto, `pointerEvents="none"`: cero frames,
-          cero costo, y degrada solo en memorial desde la fuente. */}
+      {/* EL TAPIZ — las dos capas de fondo (pointerEvents none). */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
+
       <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
+      {/* EL ISOTIPO RECOGIDO — la continuidad, en la esquina. */}
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
+      </View>
+
       <EvitaTeclado>
-      {/* ── S104-B · EL AIRE ES LA JERARQUÍA (Ley 18) ───────────────────
-          ⏪ Esto era `gap: spacing[2]` uniforme, y los dos botones quedaban
-          **pegados sin un píxel entre ellos** (eran hermanos dentro del
-          mismo `<Entrada>`, que no aporta gap: el 8 de arriba separaba
-          bloques, no botones).
+        <ScrollView
+          style={{ backgroundColor: 'transparent' }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: spacing[5],
+            paddingBottom: insets.bottom + spacing[6],
+            gap: spacing[6],
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Entrada>
+            <View style={{ gap: spacing[2] }}>
+              <Campo
+                label={t('login.emailLabel')}
+                placeholder={t('login.emailPlaceholder')}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+                textContentType="username"
+              />
+              <Campo
+                label={t('login.passwordLabel')}
+                value={password}
+                onChangeText={setPassword}
+                error={error}
+                secure
+                autoCapitalize="none"
+                autoComplete="current-password"
+                textContentType="password"
+              />
+            </View>
+          </Entrada>
 
-          🔴 **La cura no se inventó acá: se copió del prestador**, que la
-          tiene desde S81-C con su porqué escrito — *«antes todo iba a gap
-          uniforme [2] y el CTA quedaba pegado al último campo: nada
-          mandaba»*. **El cliente era la versión anterior a esa cura**: se
-          hizo, se firmó y nunca cruzó el espejo. *Una cura que vive en una
-          sola mitad de un espejo es media cura.*
+          {/* el aire que empuja las acciones al pie (spacing[6] entre bloques
+              lo da el `gap`; el spacer las ancla abajo cuando el contenido es
+              corto y deja scrollear cuando el teclado achica). */}
+          <View style={{ flex: 1 }} />
 
-          La forma: `spacing[6]` (24) ENTRE bloques · `spacing[2]` (8)
-          DENTRO de cada uno. El formulario y la acción son dos cosas. */}
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* §5 firmada (S81): el formulario entra ordenando lectura */}
-        <Entrada>
-        <View style={{ gap: spacing[2] }}>
-        <Campo
-          label={t('login.emailLabel')}
-          placeholder={t('login.emailPlaceholder')}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <Campo
-          label={t('login.passwordLabel')}
-          value={password}
-          onChangeText={setPassword}
-          error={error}
-          secure
-          autoCapitalize="none"
-        />
-        </View>
-        </Entrada>
-        <Entrada orden={1}>
-        <View style={{ gap: spacing[2] }}>
-        <Boton
-          etiqueta={t('login.entrar')}
-          bloque
-          cargando={cargando}
-          deshabilitado={!puedeEnviar}
-          onPress={() => void entrar()}
-        />
-        {/* 🔴 S103-C · LA SALIDA QUE FALTABA, Y ES LA QUE MÁS IMPORTA.
-            Medido: este login **no ofrecía ninguna** — solo «Entrar».
-
-            **Y `/recuperar` la usa justamente QUIEN NO PUDO ENTRAR:** sin esta
-            línea, su única puerta sería Cuenta, alcanzable solo por quien ya
-            está adentro. *Una pantalla de recuperación que exige haber
-            entrado no recupera nada.*
-
-            **`apoyada` y no un botón con caja:** por 19.7 la superficie ya
-            tiene su sólido —«Entrar»— y el resto baja a label. *Darle la
-            misma presencia a «olvidé mi contraseña» que a entrar sugeriría
-            que las dos son igual de probables.*
-
-            🔴 **S104-B — EL COMENTARIO DE ARRIBA DECÍA LA LEY Y LA LÍNEA DE
-            ABAJO LA DESOBEDECÍA.** Invocaba la 19.7 (*«el resto baja a
-            label»*) y montaba `variante="apoyada"`, que **no es un label: es
-            una superficie tonal llena con elevación** (`accent.apoyada` +
-            `elevacion.reposo`). En pantalla se leía como una segunda caja
-            compitiendo con «Entrar» — el founder lo reportó exactamente así.
-
-            La variante correcta ya existía y el prestador ya la usa acá
-            mismo: **`ghost`** (`fondo: 'transparent'`). *No hizo falta
-            construir nada: hizo falta montar la que la ley pedía.*
-            ⚠️ Y el modo de falla vale anotarlo: **un comentario que cita la
-            ley correcta no frena a nadie** — la 19.7 estaba escrita cuatro
-            líneas arriba del incumplimiento y sobrevivió así desde S103.
-            Lo que frena es R63 y sus hermanas, no la prosa (L-396). */}
-        <Boton
-          variante="ghost"
-          etiqueta={t('login.olvide')}
-          bloque
-          onPress={() => router.push('/recuperar')}
-        />
-        </View>
-        </Entrada>
-      </ScrollView>
+          <Entrada orden={1}>
+            <View style={{ gap: spacing[2] }}>
+              <Boton
+                etiqueta={t('login.entrar')}
+                bloque
+                cargando={cargando}
+                deshabilitado={!puedeEnviar}
+                onPress={() => void entrar()}
+              />
+              <Boton
+                variante="ghost"
+                etiqueta={t('login.olvide')}
+                bloque
+                onPress={() => router.push('/recuperar')}
+              />
+            </View>
+          </Entrada>
+        </ScrollView>
       </EvitaTeclado>
+
+      {/* §5 · LA LLEGADA — la huella se completa una vez, sobre el tapiz.
+          R53-DECLARADO: NO es un pie fijo — es un overlay de PANTALLA COMPLETA
+          (top:0 Y bottom:0) que cubre todo a propósito durante la celebración,
+          y la pantalla se desmonta al navegar (460 ms). No hay contenido
+          debajo que este `bottom:0` esté tapando: es el umbral, no una barra. */}
+      {llegando && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.bg.base,
+          }}
+        >
+          <HuellaDeLlegada tamano={64} />
+        </View>
+      )}
     </View>
   );
 }

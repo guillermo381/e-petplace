@@ -60,6 +60,8 @@ export const prestadorEn = {
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
     paraPrestadores: 'for providers',
+    // S104-C (paridad): terms visible on every door into the ecosystem.
+    terminos: 'By continuing you accept our Terms and our Privacy Policy.',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
     // S87-C: el ES pasó a segunda persona («mereces», firma founder) — el
     // espejo dice LO MISMO o los dos idiomas cuentan frases distintas.
@@ -519,7 +521,6 @@ export const prestadorEn = {
     email: 'Your email',
     pedir: 'Send the code',
     siTieneCuenta: 'If {{email}} has an account, we just sent it an {{n}}-digit code.',
-    avisoCorreo: "The email may arrive in English and from an address that isn't ours. If you don't see it, check spam.",
     codigo: 'The {{n}}-digit code',
     codigoVerificado: 'Code verified. Now choose your new password.',
     verificar: 'Verify the code',

@@ -47,11 +47,17 @@ import {
   aceptarInvitacionEquipo,
   cerrarSesion,
   obtenerInvitacionPendiente,
+  obtenerSesion,
+  registrarConsentimiento,
   resolverUrlLogoNegocio,
   type InvitacionPendiente,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+/** La traza del texto legal mostrado (mismo marcador que registro): NO es
+ *  una URL navegable (D-336). */
+const URL_LEGAL = 'terminos-inline-v1';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -113,6 +119,17 @@ export default function Invitacion() {
       setAceptando(false);
       mostrar({ variante: 'error', texto: vozRebote(r.codigo) });
       return;
+    }
+    /* S104-C (LEY DE PARIDAD DE CUENTA, firma founder 23-ago): aceptar la
+       invitación ES entrar al ecosistema, así que el consentimiento se
+       registra acá, con tipo `acceso_prestador` (motor de A). Best-effort y
+       DESPUÉS del `aceptar` exitoso: entrar es lo primario — si la traza del
+       consentimiento fallara, no se le cierra la puerta a quien ya aceptó
+       (los términos se mostraron y se aceptaron; el registro es evidencia,
+       no un segundo gate). El userId sale de la sesión viva. */
+    const sesion = await obtenerSesion();
+    if (sesion.ok && sesion.data !== null) {
+      await registrarConsentimiento(sesion.data.user_id, 'acceso_prestador', URL_LEGAL);
     }
     // La puerta está abierta (R1): el vínculo ya es activo → entrar. El
     // guard re-resuelve y lleva a las tabs (sin rol → sin NEGOCIO).
@@ -197,6 +214,13 @@ export default function Invitacion() {
           cargando={saliendo}
           onPress={salir}
         />
+        {/* S104-C (paridad, firma founder 23-ago): aceptar la invitación
+            ES entrar al ecosistema — los términos son visibles acá, como en
+            toda puerta de entrada. Al pie del bloque, tenue (secondary):
+            informa sin competir con «Entrar». Honesta sin link (D-336). */}
+        <Texto variante="apoyo" color="secondary">
+          {t('bienvenida.terminos')}
+        </Texto>
       </View>
     );
   })();

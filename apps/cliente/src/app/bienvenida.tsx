@@ -1,26 +1,52 @@
 /**
- * Bienvenida (S45-B4 → REESCRITA S61-A8, letra firmada founder sobre
- * propuesta Claude Design — TRADUCIDA a la casa, no verbatim):
- * composición vertical serena — isotipo en gradiente oficial (el UNO
- * por pantalla; el isotipo va FUERA de la contabilidad de dosis, Ley 4)
- * · lockup e.petplace (la línea mono del ecosistema MURIÓ en S82 —
- * Chanel contra la vara "el sujeto sin explicación")
- * · el titular EL NORTE en DM Sans light display (Playfair
- * PROHIBIDA; el acento en "una vida" es GRÁFICA — palette.pink, la
- * reserva del destello) · Boton marca (gradiente = la dosis del
- * contexto cerrado) · secundario · legales HONESTOS sin link muerto
- * (D-336: los textos definitivos no existen — la línea declara, no
- * finge navegar). El movimiento de marca = D-395 (v1 estática digna).
+ * Bienvenida — EL ACTO I DEL RITUAL DE ENTRADA (S104-C, coreografía founder
+ * 23-ago; reparto: B provee los gestos, C compone).
  *
- * TESIS: "acá vive la vida de tu mascota — entrá". FIRMA: el titular
- * de EL NORTE con su destello en "una vida". Memorial N/A (pre-sesión);
- * Boton marca degrada solo si algún día aplica.
+ * ── LA CEREMONIA (composición de C sobre los gestos de B) ────────────────
+ * ① el isotipo RESPIRA una vez (`RespiroDeMarca` de B, 1.0→1.03→1.0) → ② la
+ * SENDA se traza y queda (`PaseoDeHuellas` de B, diagonal desde
+ * abajo-izquierda) → ③ el MANIFIESTO entra (`Entrada`, 300/120/translateY 15)
+ * → ④ las ACCIONES al pie. **Nada bloquea el toque:** `PaseoDeHuellas` y
+ * `MarcaDeAgua` son `pointerEvents="none"`, y `RespiroDeMarca`/`Entrada` no
+ * capturan el toque de sus hijos — los botones responden aunque la ceremonia
+ * corra. *Tocar una acción durante el gesto navega igual: la interacción
+ * gana a la coreografía.*
+ *
+ * ── LO QUE MUERE (Ley 37) ────────────────────────────────────────────────
+ * El wordmark `e.petplace` → **`e-PetPlace`** (firma founder: muere la
+ * variante con punto, la única que el usuario veía como wordmark).
+ *
+ * ── LA CONTINUIDAD ENTRE PANTALLAS, declarada ────────────────────────────
+ * «El isotipo viaja a la esquina del login» y «el paseo persiste» son
+ * coreografía ENTRE rutas (shared-element). Hacerlo pixel-perfect exige un
+ * layout compartido de las pantallas de entrada — y esas rutas viven sueltas
+ * en `app/`, así que agruparlas toca la navegación (deep-links, el guard
+ * raíz). **C no reestructura la navegación sin firma:** la continuidad se
+ * monta PER-PANTALLA (el isotipo grande y centrado acá; chico en la esquina
+ * en login/registro/recuperar; la senda en las cuatro, misma diagonal). La
+ * transición nativa de expo-router hace el «se corre». El shared-element real
+ * queda propuesto como refinamiento aparte.
+ *
+ * TESIS: "acá vive la vida de tu mascota — entrá." FIRMA: el isotipo que
+ * respira y la senda que se traza — la marca en movimiento sereno. Memorial
+ * N/A (pre-sesión); los gestos de B degradan solos.
  */
 
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Entrada, Isotipo, palette, spacing, typography, useTheme } from '@epetplace/ui';
+import {
+  Boton,
+  Entrada,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  RespiroDeMarca,
+  palette,
+  spacing,
+  typography,
+  useTheme,
+} from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -40,15 +66,21 @@ export default function Bienvenida() {
         paddingHorizontal: spacing[5],
       }}
     >
-      {/* La identidad — el isotipo preside, el lockup lo rotula.
-          S82 (vara: "se entra sabiendo que el sujeto es la mascota, sin
-          que nadie lo explique") — Chanel: murió la línea mono "el
-          ecosistema del mundo mascota". Era la única línea que EXPLICABA
-          (y hablaba de la plataforma, no de la mascota); el lockup ya
-          rotula la marca. El titular queda solo con su trabajo. */}
+      {/* EL TAPIZ — las dos capas de fondo, las dos pointerEvents none:
+          el papel tapiz (isotipo tenue) y la senda que se traza. */}
+      <MarcaDeAgua />
+      <PaseoDeHuellas />
+
+      {/* ① LA IDENTIDAD — el isotipo respira una vez (gesto de B), el
+          wordmark lo rotula. El isotipo va FUERA de la contabilidad de
+          dosis (Ley 4), UNO por pantalla. */}
       <View style={{ alignItems: 'center', gap: spacing[3] }}>
-        <Isotipo size={72} variant="gradiente" />
-        {/* el lockup — nombre de marca, identidad (no es string de voz) */}
+        <RespiroDeMarca>
+          <Isotipo size={72} variant="gradiente" />
+        </RespiroDeMarca>
+        {/* el lockup — identidad de marca. ☠️ `e.petplace` MURIÓ: era la
+            única variante con punto que el usuario veía, y decía otra cosa
+            que las 95 del cuerpo (`e-PetPlace`). */}
         <Text
           style={{
             fontFamily: typography.family.sans.medium,
@@ -56,16 +88,12 @@ export default function Bienvenida() {
             color: theme.text.primary,
           }}
         >
-          e.petplace
+          e-PetPlace
         </Text>
       </View>
 
-      {/* EL NORTE — el titular respira en el centro.
-          S81 (regla 80 · §5 LA ENTRADA): la lectura entra escalonada —
-          titular → CTAs → legales. La IDENTIDAD (isotipo/lockup) NO se
-          envuelve: es el ancla del lugar, no ordena lectura (L-c —
-          decisión declarada para el gate; la pantalla no tiene
-          subtítulo nombrable: la línea mono es identidad). */}
+      {/* ③ EL MANIFIESTO — EL NORTE respira en el centro, entra escalonado
+          (Entrada: 300 duración · 120 stagger · translateY 15). */}
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <Entrada>
           <Text
@@ -83,26 +111,16 @@ export default function Bienvenida() {
         </Entrada>
       </View>
 
-      {/* Los caminos + los legales honestos */}
+      {/* ④ LAS ACCIONES al pie + los legales honestos. Entran después del
+          manifiesto (orden 1 y 2). Tocar acá corta la ceremonia — la
+          interacción no está bloqueada por ningún gesto. */}
       <View style={{ gap: spacing[2] }}>
         <Entrada orden={1}>
           <View style={{ gap: spacing[2] }}>
             <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-            {/* ⏪ S82-B r5 — ESTA ERA LA PANTALLA DEL GATE de `sinCaja` (su
-                única consumidora hasta la firma), esperando que el founder
-                decidiera entre el tinte sin borde y el contorno.
-
-                ☠️ **S104-B — EL GATE SE CIERRA POR LETRA, NO POR FIRMA
-                SOBRE PÍXELES:** `RITUAL_DE_ENTRADA` §2.4 dicta *«**Ya tengo
-                cuenta** en `ghost`»*. Ni `sinCaja` ni `secundario`: la
-                tercera opción, que es la que la 19.7 pedía desde siempre —
-                por superficie UN sólido (acá el `marca` de arriba) y el
-                resto baja a label.
-
-                ⚠️ **Y baja el trinquete de `R48` de 5 a 4**, que es
-                solo-baja: el alias jubilado pierde su consumidor más
-                visible. *La variante que esperaba gate se resolvió al
-                quedar sin pantalla que la defendiera.* */}
+            {/* `ghost`, no `sinCaja` (RITUAL §2.4): sobre esta pantalla la
+                acción real es «Crear cuenta» en marca; «ya tengo cuenta» baja
+                a enlace. */}
             <Boton variante="ghost" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
           </View>
         </Entrada>

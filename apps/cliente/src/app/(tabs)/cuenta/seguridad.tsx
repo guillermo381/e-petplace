@@ -192,12 +192,18 @@ export default function Seguridad() {
               y abierto no debería alcanzar para cambiarle la clave a alguien. */}
           <Texto variante="apoyo">{t('seguridad.ayuda')}</Texto>
 
+          {/* S104-C · AUTOFILL DECLARADO (punto 5). `current-password` en la
+              actual y `new-password` en las dos nuevas: el llavero ofrece la
+              clave guardada donde va, y sugiere una fuerte donde toca crear
+              una. `textContentType` es la mitad de iOS de la misma señal. */}
           <Campo
             label={t('seguridad.actual')}
             value={actual}
             onChangeText={setActual}
             secure
             autoCapitalize="none"
+            autoComplete="current-password"
+            textContentType="password"
           />
           <Campo
             label={t('seguridad.nueva')}
@@ -205,6 +211,8 @@ export default function Seguridad() {
             onChangeText={setNueva}
             secure
             autoCapitalize="none"
+            autoComplete="new-password"
+            textContentType="newPassword"
             /* El mínimo se INTERPOLA desde la constante del motor, jamás se
                teclea: el hardcodeo ya parió una vez el «6 vs 8» (D-721). */
             ayuda={t('seguridad.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
@@ -215,6 +223,8 @@ export default function Seguridad() {
             onChangeText={setConfirmacion}
             secure
             autoCapitalize="none"
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
 
           {listo && (

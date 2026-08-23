@@ -58,7 +58,20 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  CampoCodigo,
+  Encabezado,
+  EvitaTeclado,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  Texto,
+  spacing,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import {
   LARGO_CODIGO_RECUPERACION,
   MIN_LARGO_CONTRASENA,
@@ -185,10 +198,17 @@ export default function Recuperar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* El ritual en dosis prestador (§7): senda + isotipo recogido, sin
+          respiración ni celebración de llegada. */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
       <Encabezado variante="navegacion" titulo={t('recuperar.titulo')} atras onAtras={() => router.back()} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={28} variant="gradiente" />
+      </View>
       <EvitaTeclado>
         <ScrollView
+          style={{ backgroundColor: 'transparent' }}
           contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[2] }}
           keyboardShouldPersistTaps="handled"
         >
@@ -201,6 +221,8 @@ export default function Recuperar() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoComplete="email"
+                textContentType="username"
               />
               {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
               <View style={{ paddingTop: spacing[4] }}>
@@ -212,9 +234,6 @@ export default function Recuperar() {
               {/* LA MISMA FRASE EXISTA O NO LA CUENTA. El condicional está
                   en el "si", no en nuestro conocimiento. */}
               <Texto variante="cuerpo">{t('recuperar.siTieneCuenta', { email, n: LARGO_CODIGO })}</Texto>
-              {/* D-628 — se dice ANTES de que lo busque, no después de que
-                  crea que no llegó. */}
-              <Texto variante="apoyo">{t('recuperar.avisoCorreo')}</Texto>
 
               {/* Las cajas por dígito (S88-B). El rebote viaja por su
                   prop `error` — PieDeCampo lo anuncia (liveRegion) y las
@@ -262,6 +281,8 @@ export default function Recuperar() {
                 onChangeText={setNueva}
                 secure
                 autoCapitalize="none"
+                autoComplete="new-password"
+                textContentType="newPassword"
                 /* la regla viene del wrapper — el hardcodeo «Al menos 8»
                    murió con el «6 vs 8» de registro (regla única). */
                 ayuda={t('recuperar.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
