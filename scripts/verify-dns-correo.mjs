@@ -24,6 +24,7 @@
 //   0 → los cinco están y son los esperados
 //   1 → falta alguno o cambió  (ROJO)
 //   2 → no se pudo medir (sin `dig`) — NO CONCLUYENTE, jamás verde
+//   3 → PROPAGANDO: unos servidores ya lo tienen y otros no. Ni verde ni rojo.
 //
 // El 2 es deliberado y copia el criterio de `verify-edge-deno` y del brazo C de
 // R63: **«no puedo medir» no es «está bien»**. Un instrumento que da verde
@@ -136,6 +137,7 @@ function evaluar(esperado, obtenido) {
 
 function medir(lista, etiquetaDominio) {
   let rojos = 0;
+  let propagando = 0;
   for (const e of lista) {
     const porServidor = [];
     for (const srv of [...AUTORITATIVOS, ...PUBLICOS]) {
@@ -147,15 +149,35 @@ function medir(lista, etiquetaDominio) {
       }
       porServidor.push({ srv, veredicto });
     }
-    const autoritativos = porServidor.filter((p) => AUTORITATIVOS.includes(p.srv));
-    const malAutoritativo = autoritativos.some((p) => p.veredicto !== 'OK');
+    // ⚠️ NINGÚN PUNTO DE VISTA SOLO ES «EL OBJETO» (S104-D, 23-ago, medido):
+    // `ns1/ns2.dns-parking.com` son ANYCAST detrás de Cloudflare — resuelven a
+    // UNA ip cada uno, pero atrás hay una flota, y los nodos NO se actualizan
+    // juntos. Medido en vivo: con el `rua` recién cargado, las dos ips
+    // autoritativas servían el valor VIEJO mientras 8.8.8.8 y 208.67.222.222 ya
+    // servían el NUEVO. Este archivo lo reportó como ROJO, sobre un registro
+    // que estaba bien publicado — **un falso rojo, hermano exacto del falso
+    // verde que se curó una hora antes, y con la misma raíz: tomar UN punto de
+    // vista por la verdad.**
+    //   ⇒ Por eso el veredicto es por CONSENSO, y «unos sí y otros no» es un
+    //     TERCER estado —PROPAGANDO—, que no es un defecto ni es un verde.
+    const ok = porServidor.filter((p) => p.veredicto === 'OK').length;
+    const respondieron = porServidor.filter((p) => p.veredicto !== 'SIN_RESPUESTA').length;
     const publicosOk = porServidor.filter((p) => !AUTORITATIVOS.includes(p.srv) && p.veredicto === 'OK').length;
+    const autoritativos = porServidor.filter((p) => AUTORITATIVOS.includes(p.srv));
 
-    if (!malAutoritativo) {
+    if (respondieron > 0 && ok === respondieron) {
       console.log(`  ✓ ${e.id}`);
+    } else if (ok > 0) {
+      // Unos lo tienen y otros no: una escritura reciente todavía repartiéndose.
+      propagando++;
+      console.log(`  🟡 ${e.id} — PROPAGANDO (${ok}/${respondieron} servidores ya lo tienen)`);
+      console.log(`      ${e.nombre} (${e.tipo})`);
+      console.log(`      no es un defecto y tampoco es un verde: la escritura entró y todavía se reparte.`);
+      console.log(`      volvé a medir en unos minutos; si en una hora sigue mixto, ahí sí mirá el panel.`);
+      continue;
     } else {
       rojos++;
-      const estado = autoritativos[0].veredicto;
+      const estado = autoritativos[0]?.veredicto ?? 'SIN_RESPUESTA';
       console.log(`  ✗ ${e.id} — ${estado} en el autoritativo`);
       console.log(`      ${e.nombre} (${e.tipo})`);
       console.log(`      por qué importa: ${e.porque}`);
@@ -177,7 +199,7 @@ function medir(lista, etiquetaDominio) {
       }
     }
   }
-  return rojos;
+  return { rojos, propagando };
 }
 
 // ── AUTO-PRUEBA ─────────────────────────────────────────────────────────────
@@ -208,7 +230,7 @@ if (process.argv.includes('--autoprueba')) {
       porque: 'control: este nombre no existe y tiene que salir AUSENTE',
     },
   ];
-  const rojosA = medir(ausentes, DOMINIO);
+  const rojosA = medir(ausentes, DOMINIO).rojos;
 
   console.log('\n(b) DISTINTO — el DKIM REAL, con el valor esperado corrompido:');
   const corruptos = [
@@ -219,7 +241,7 @@ if (process.argv.includes('--autoprueba')) {
       porque: 'control: el registro está, pero no es el esperado ⇒ tiene que salir DISTINTO',
     },
   ];
-  const rojosB = medir(corruptos, DOMINIO);
+  const rojosB = medir(corruptos, DOMINIO).rojos;
 
   console.log('');
   if (rojosA === 1 && rojosB === 1) {
@@ -239,12 +261,19 @@ if (!hayDig()) {
 }
 
 console.log(`── verify-dns-correo · ${DOMINIO} · autoritativos ${AUTORITATIVOS.join(' + ')}`);
-const rojos = medir(ESPERADOS, DOMINIO);
+const { rojos, propagando } = medir(ESPERADOS, DOMINIO);
 console.log('');
 
-if (rojos === 0) {
+if (rojos === 0 && propagando === 0) {
   console.log(`✓ VERDE — los ${ESPERADOS.length} registros del correo están y son los esperados.`);
   process.exit(0);
+}
+
+if (rojos === 0) {
+  console.log(`🟡 SIN VEREDICTO — ${propagando} registro(s) PROPAGANDO, ninguno roto.`);
+  console.log('   La escritura entró y todavía se reparte entre los nodos. Volvé a medir en unos minutos.');
+  console.log('   Esto NO es verde (todavía no está firme) y NO es rojo (no falta nada).');
+  process.exit(3);
 }
 
 console.log(`✗ ROJO — ${rojos} de ${ESPERADOS.length} registros fallan.`);
