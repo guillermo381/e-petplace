@@ -101,6 +101,11 @@ function secretoValido(recibido: string): boolean {
 async function guardarCrudo(payload: unknown): Promise<string> {
   const { data, error } = await db.from('webhook_events').insert({
     ambiente: AMBIENTE, proveedor: 'deuna', payload,
+    /* 🔴 `origen` desde el INSERT: dice por qué puerta entró este evento.
+       `verificado` NO se escribe acá — todavía no preguntamos nada, y **su
+       ausencia es la verdad**: NULL significa «sin veredicto», que es distinto
+       de `false` («preguntamos y no confirmó»). */
+    origen: 'webhook',
     /* `desconocido` y no un valor nuevo: el CHECK de `resultado` tiene
        vocabulario cerrado y ampliarlo es decisión de letra, no atajo de
        código. Dice exactamente lo que pasó —llegó y su desenlace no se
@@ -125,7 +130,7 @@ Deno.serve(async (req) => {
   } catch {
     try {
       await db.from('webhook_events').insert({
-        ambiente: AMBIENTE, proveedor: 'deuna',
+        ambiente: AMBIENTE, proveedor: 'deuna', origen: 'webhook',
         payload: { crudo_no_json: texto.slice(0, 10_000) },
         resultado: 'ilegible', detalle: 'body no parseable como JSON',
       });
@@ -155,7 +160,7 @@ Deno.serve(async (req) => {
          webhook con secreto inválido es la traza de un intento de fraude, y
          descartarlo sin guardarlo es perder la única evidencia. */
       await db.from('webhook_events').update({
-        stoken_valido: false, resultado: 'secreto_invalido',
+        stoken_valido: false, verificado: false, resultado: 'secreto_invalido',
         detalle: `secreto=invalido · header=${HEADER_SECRETO} · verificado=no`,
       }).eq('id', idFila);
       // 200: no queremos que reintente 3 veces algo que va a rechazar igual.
@@ -168,7 +173,7 @@ Deno.serve(async (req) => {
 
     if (!txId && !refCorta) {
       await db.from('webhook_events').update({
-        stoken_valido: true, resultado: 'desconocido',
+        stoken_valido: true, verificado: false, resultado: 'desconocido',
         detalle: 'secreto=ok · verificado=no · sin transactionId ni referencia',
       }).eq('id', idFila);
       return new Response('ok', { status: 200 });
@@ -242,6 +247,20 @@ Deno.serve(async (req) => {
     await db.from('webhook_events').update({
       transaction_id: txId || null,
       stoken_valido: true,                 // capa ① pasó
+      /* ═══ 🔴 EL VEREDICTO VA A SU COLUMNA, NO AL TEXTO ══════════════════
+         `_evento_autenticado` lee **`verificado IS TRUE`**. Antes leía
+         `detalle ILIKE '%verificado=si%'` — y `detalle` es el campo de
+         DIAGNÓSTICO, donde este mismo archivo escribe el mensaje de una
+         excepción. **Medido: un `analisis_fallo` que contuviera la cadena
+         autenticaba el evento.**
+
+         *Un campo que un humano lee para diagnosticar y una función lee para
+         autorizar tiene dos dueños con intereses opuestos — y el que escribe
+         para diagnosticar no sabe que está firmando.*
+
+         ⚠️ El texto de `detalle` **se conserva igual**: sirve para leerlo en un
+         tablero. Lo que cambió es **quién manda**. */
+      verificado,
       resultado: verificado ? 'recibido' : 'no_verificado',
       detalle,
       /* 🔴 El crudo se ENRIQUECE con la respuesta de la consulta, porque es la

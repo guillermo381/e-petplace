@@ -102,3 +102,48 @@ Deno.test('🔴 REAL · el eco de idType "1" es lo que la cura compra', () => {
   assertEquals(fx.fantasma_idType_0.internalTransactionReference, '',
     'la fixture de idType 0 ya no viene vacia — re-evaluar el dictamen');
 });
+
+// ════════════════════════════════════════════════════════════════════════════
+// 🔴 EL VEREDICTO VIVE EN SU COLUMNA — no en `detalle`
+//
+// `_evento_autenticado` lee `verificado IS TRUE`. Si el buzón dejara de
+// escribir esa columna, **NINGÚN evento de DeUna autenticaría** y el fallo
+// sería silencioso: los eventos llegarían, se guardarían, y el sujeto no se
+// movería. Es «motor sin puerta» del lado de la escritura.
+//
+// Este test lee el ARCHIVO, igual que el censo de códigos: la conexión no se
+// puede probar sin base, pero **sí se puede probar que sigue escrita**.
+// ════════════════════════════════════════════════════════════════════════════
+
+const fuenteBuzon = await Deno.readTextFile(new URL('./index.ts', import.meta.url));
+
+const sinComentarios = (s: string) =>
+  s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+Deno.test('🔴 el buzón escribe la columna `verificado` en el update del veredicto', () => {
+  const src = sinComentarios(fuenteBuzon);
+  assert(/^\s*verificado,\s*$/m.test(src) || /verificado:\s*verificado/.test(src),
+    'el veredicto dejó de ir a su columna — ningun evento DeUna autenticaria');
+});
+
+Deno.test('el buzón marca `origen` al persistir el crudo', () => {
+  const src = sinComentarios(fuenteBuzon);
+  assert(src.includes("origen: 'webhook'"),
+    'sin `origen`, el aplicador del barrido no puede distinguir por qué puerta entró');
+});
+
+Deno.test('los rechazos escriben verificado=false EXPLÍCITO, no lo dejan NULL', () => {
+  /* NULL significa «sin veredicto»; false significa «preguntamos y no
+     confirmó». *Colapsarlos haría que un secreto invalido se vea igual que un
+     evento que todavía no se analizó.* */
+  const src = sinComentarios(fuenteBuzon);
+  const n = (src.match(/verificado:\s*false/g) ?? []).length;
+  assert(n >= 2, `solo ${n} rechazos marcan verificado=false; se esperaban al menos 2`);
+});
+
+Deno.test('🔴 CONTROL POSITIVO: el detector ve su ausencia', () => {
+  /* Sin esto, un regex roto pasaría los tres de arriba con verde. */
+  const falso = sinComentarios("await db.update({ stoken_valido: true, resultado: 'recibido' });");
+  assertFalse(/^\s*verificado,\s*$/m.test(falso) || /verificado:\s*verificado/.test(falso));
+  assertFalse(falso.includes("origen: 'webhook'"));
+});
