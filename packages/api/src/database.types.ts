@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -12429,11 +12454,15 @@ export type Database = {
           cerrado_en: string | null
           cita_id: string | null
           clave_idempotencia: string
+          codigo_expira_en: string | null
+          codigo_numerico: string | null
           compra_id: string | null
           confirmado_por: string | null
           creado_en: string
           estado: string
           forma: string
+          hallazgo: string | null
+          hallazgo_en: string | null
           id: string
           marca: string | null
           moneda: string
@@ -12445,7 +12474,14 @@ export type Database = {
           pedido_id: string | null
           proveedor: string
           proveedor_referencia: string | null
+          proveedor_reverso_id: string | null
           proveedor_transaction_id: string | null
+          recurrencia_id: string | null
+          recurrencia_periodo: string | null
+          referencia_corta: string | null
+          suscripcion_periodo: string | null
+          suscripcion_servicio_id: string | null
+          transfer_number: string | null
           ultimos4: string | null
           url_redireccion: string | null
         }
@@ -12456,11 +12492,15 @@ export type Database = {
           cerrado_en?: string | null
           cita_id?: string | null
           clave_idempotencia: string
+          codigo_expira_en?: string | null
+          codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
           creado_en?: string
           estado?: string
           forma: string
+          hallazgo?: string | null
+          hallazgo_en?: string | null
           id?: string
           marca?: string | null
           moneda?: string
@@ -12472,7 +12512,14 @@ export type Database = {
           pedido_id?: string | null
           proveedor: string
           proveedor_referencia?: string | null
+          proveedor_reverso_id?: string | null
           proveedor_transaction_id?: string | null
+          recurrencia_id?: string | null
+          recurrencia_periodo?: string | null
+          referencia_corta?: string | null
+          suscripcion_periodo?: string | null
+          suscripcion_servicio_id?: string | null
+          transfer_number?: string | null
           ultimos4?: string | null
           url_redireccion?: string | null
         }
@@ -12483,11 +12530,15 @@ export type Database = {
           cerrado_en?: string | null
           cita_id?: string | null
           clave_idempotencia?: string
+          codigo_expira_en?: string | null
+          codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
           creado_en?: string
           estado?: string
           forma?: string
+          hallazgo?: string | null
+          hallazgo_en?: string | null
           id?: string
           marca?: string | null
           moneda?: string
@@ -12499,7 +12550,14 @@ export type Database = {
           pedido_id?: string | null
           proveedor?: string
           proveedor_referencia?: string | null
+          proveedor_reverso_id?: string | null
           proveedor_transaction_id?: string | null
+          recurrencia_id?: string | null
+          recurrencia_periodo?: string | null
+          referencia_corta?: string | null
+          suscripcion_periodo?: string | null
+          suscripcion_servicio_id?: string | null
+          transfer_number?: string | null
           ultimos4?: string | null
           url_redireccion?: string | null
         }
@@ -12538,6 +12596,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_pedidos_narrativa"
             referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "pagos_intentos_recurrencia_id_fkey"
+            columns: ["recurrencia_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos_recurrencias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagos_intentos_suscripcion_servicio_id_fkey"
+            columns: ["suscripcion_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "suscripciones_servicio"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -13148,50 +13220,71 @@ export type Database = {
       }
       pedidos_recurrencias: {
         Row: {
-          activo: boolean
+          activo: boolean | null
+          autorizada_en: string
           aviso_dias: number
           aviso_enviado_para: string | null
           created_at: string
           cuenta_comercial_id: string
           dia_del_mes: number | null
           entrega: Json
+          estado: string
           frecuencia_dias: number | null
           id: string
           items: Json
           metodo_entrega: string
+          monto_esperado: number | null
           proximo_pedido_fecha: string
+          reintentos: number
+          tarjeta_id: string | null
+          ultimo_fallo_causa: string | null
+          ultimo_fallo_en: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          activo?: boolean
+          activo?: boolean | null
+          autorizada_en?: string
           aviso_dias?: number
           aviso_enviado_para?: string | null
           created_at?: string
           cuenta_comercial_id: string
           dia_del_mes?: number | null
           entrega: Json
+          estado?: string
           frecuencia_dias?: number | null
           id?: string
           items: Json
           metodo_entrega?: string
+          monto_esperado?: number | null
           proximo_pedido_fecha: string
+          reintentos?: number
+          tarjeta_id?: string | null
+          ultimo_fallo_causa?: string | null
+          ultimo_fallo_en?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          activo?: boolean
+          activo?: boolean | null
+          autorizada_en?: string
           aviso_dias?: number
           aviso_enviado_para?: string | null
           created_at?: string
           cuenta_comercial_id?: string
           dia_del_mes?: number | null
           entrega?: Json
+          estado?: string
           frecuencia_dias?: number | null
           id?: string
           items?: Json
           metodo_entrega?: string
+          monto_esperado?: number | null
           proximo_pedido_fecha?: string
+          reintentos?: number
+          tarjeta_id?: string | null
+          ultimo_fallo_causa?: string | null
+          ultimo_fallo_en?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -13209,6 +13302,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "pedidos_recurrencias_tarjeta_id_fkey"
+            columns: ["tarjeta_id"]
+            isOneToOne: false
+            referencedRelation: "tarjetas_guardadas"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "pedidos_recurrencias_user_id_fkey"
@@ -15450,6 +15550,47 @@ export type Database = {
           },
         ]
       }
+      recurrencia_desglose: {
+        Row: {
+          congelado_en: string
+          envio: number
+          impuesto: number
+          moneda: string
+          periodo: string
+          recurrencia_id: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          congelado_en?: string
+          envio?: number
+          impuesto?: number
+          moneda?: string
+          periodo: string
+          recurrencia_id: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          congelado_en?: string
+          envio?: number
+          impuesto?: number
+          moneda?: string
+          periodo?: string
+          recurrencia_id?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurrencia_desglose_recurrencia_id_fkey"
+            columns: ["recurrencia_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos_recurrencias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurso_reparto_excepciones: {
         Row: {
           created_at: string
@@ -17174,6 +17315,44 @@ export type Database = {
         }
         Relationships: []
       }
+      suscripcion_desglose: {
+        Row: {
+          congelado_en: string
+          impuesto: number
+          moneda: string
+          periodo: string
+          subtotal: number
+          suscripcion_servicio_id: string
+          total: number
+        }
+        Insert: {
+          congelado_en?: string
+          impuesto?: number
+          moneda?: string
+          periodo: string
+          subtotal: number
+          suscripcion_servicio_id: string
+          total: number
+        }
+        Update: {
+          congelado_en?: string
+          impuesto?: number
+          moneda?: string
+          periodo?: string
+          subtotal?: number
+          suscripcion_servicio_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suscripcion_desglose_suscripcion_servicio_id_fkey"
+            columns: ["suscripcion_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "suscripciones_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suscripciones: {
         Row: {
           auto_renovar: boolean
@@ -18679,8 +18858,10 @@ export type Database = {
       webhook_events: {
         Row: {
           ambiente: string
+          credencial: string | null
           detalle: string | null
           id: string
+          origen: string
           pago_id: string | null
           payload: Json
           proveedor: string
@@ -18688,11 +18869,14 @@ export type Database = {
           resultado: string
           stoken_valido: boolean | null
           transaction_id: string | null
+          verificado: boolean | null
         }
         Insert: {
           ambiente: string
+          credencial?: string | null
           detalle?: string | null
           id?: string
+          origen?: string
           pago_id?: string | null
           payload: Json
           proveedor: string
@@ -18700,11 +18884,14 @@ export type Database = {
           resultado: string
           stoken_valido?: boolean | null
           transaction_id?: string | null
+          verificado?: boolean | null
         }
         Update: {
           ambiente?: string
+          credencial?: string | null
           detalle?: string | null
           id?: string
+          origen?: string
           pago_id?: string | null
           payload?: Json
           proveedor?: string
@@ -18712,6 +18899,7 @@ export type Database = {
           resultado?: string
           stoken_valido?: boolean | null
           transaction_id?: string | null
+          verificado?: boolean | null
         }
         Relationships: []
       }
@@ -19768,6 +19956,7 @@ export type Database = {
         Args: { p_item_id: string; p_mascota_id: string; p_uid: string }
         Returns: string
       }
+      _deuna_base36: { Args: { p_n: number }; Returns: string }
       _dias_sin_repetidos: { Args: { p_dias: number[] }; Returns: boolean }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
       _empleado_matricula_ok: {
@@ -19779,6 +19968,12 @@ export type Database = {
         Returns: boolean
       }
       _estados_cita_contables: { Args: never; Returns: string[] }
+      _evento_autenticado: {
+        Args: {
+          p_evento: Database["public"]["Tables"]["webhook_events"]["Row"]
+        }
+        Returns: boolean
+      }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
         Returns: boolean
@@ -20257,13 +20452,14 @@ export type Database = {
       }
       configurar_recurrencia: {
         Args: {
-          p_aviso_dias?: number
           p_cuenta_comercial_id: string
           p_dia_del_mes?: number
           p_entrega: Json
           p_frecuencia_dias?: number
           p_items: Json
           p_metodo_entrega?: string
+          p_monto_esperado?: number
+          p_tarjeta_id?: string
         }
         Returns: Json
       }
@@ -20497,6 +20693,10 @@ export type Database = {
         }
         Returns: string
       }
+      crear_pedido_de_recurrencia_cobrada: {
+        Args: { p_periodo: string; p_recurrencia_id: string }
+        Returns: Json
+      }
       crear_pedido_despensa: {
         Args: {
           p_bodega_id?: string
@@ -20507,6 +20707,7 @@ export type Database = {
           p_items: Json
           p_metodo_entrega?: string
           p_servicio_envio?: string
+          p_user_id?: string
         }
         Returns: Json
       }
@@ -20673,6 +20874,7 @@ export type Database = {
         Args: { p_pedido_id: string; p_repartidor_id: string }
         Returns: Json
       }
+      deuna_nueva_referencia: { Args: never; Returns: string }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
         Returns: string
@@ -21584,6 +21786,7 @@ export type Database = {
           peso_kg: number
         }[]
       }
+      obtener_serie_recurrente: { Args: { p_serie_id: string }; Returns: Json }
       obtener_slots_disponibles: {
         Args: {
           p_desde: string
@@ -21672,6 +21875,7 @@ export type Database = {
         }[]
       }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
+      planes_vencidos_pendientes: { Args: never; Returns: Json }
       poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
@@ -21759,6 +21963,7 @@ export type Database = {
         Args: { p_motivo: string; p_sku_id: string }
         Returns: Json
       }
+      recurrencias_vencidas_pendientes: { Args: never; Returns: Json }
       registrar_aprobacion_presencial: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -22002,6 +22207,10 @@ export type Database = {
       registrar_visita_campana: { Args: { p_app: string }; Returns: Json }
       renombrar_negocio: {
         Args: { p_cuenta_comercial_id: string; p_nombre: string }
+        Returns: Json
+      }
+      renovar_plan_cobrado: {
+        Args: { p_periodo: string; p_suscripcion_id: string }
         Returns: Json
       }
       reordenar_fotos_prestador: {
@@ -22282,6 +22491,10 @@ export type Database = {
         Args: { p_compra_id: string; p_token?: string }
         Returns: Json
       }
+      verificar_compuertas_recurrencia: {
+        Args: { p_periodo: string; p_recurrencia_id: string }
+        Returns: Json
+      }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }
         Returns: {
@@ -22530,6 +22743,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [
