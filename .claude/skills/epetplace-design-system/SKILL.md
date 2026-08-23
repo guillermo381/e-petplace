@@ -16,7 +16,8 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + **52 componentes** + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + **81 componentes** + 3 temas).
+*(⏪ **RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29.** Método: `ls src/components/*.tsx` = **85**, menos **3** variantes `.web` y la infra `capturaFoto` = **81**. 🔴 **El exigible NO es éste: es `R17` del lint** — hoy `exportaciones=106 · en-galería=97`—, **y cuando discrepen gana R17.** Esta cifra vive acá para orientar, no para citarse: **una skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a un lector — desinforma a cada construcción.** **Cruce de territorio declarado:** la skill es de B, que ya cerró.)*
 *(Contador RE-MEDIDO S88 contra el objeto — L-141: 55 `.tsx` en `src/components/` menos las 2 variantes `.web` y la infra `capturaFoto`. El exigible es R17 del lint: `exportaciones=75 · pendientes=0`. La cifra anterior decía 48, de S85.)*
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
