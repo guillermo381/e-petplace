@@ -211,22 +211,37 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
         <Texto variante="titulo">{t(voz.titulo)}</Texto>
         <Texto variante="cuerpo">{t(voz.cuerpo)}</Texto>
-        {/* 🔴 CENTRADO — **hallazgo de MI PROPIO recorrido en aparato
-            (23-ago), no de una revisión de código.** Los tres fallos que
-            caminé dibujaban su botón **pegado al borde izquierdo** aunque el
-            contenedor centra: `Boton` sin `bloque` fuerza
-            `alignSelf:'flex-start'` en su propio estilo y gana sobre el
-            `alignItems:'center'` del padre.
+        {/* ⏪ ACÁ VIVÍA UN `<View style={{alignSelf:'center'}}>`, Y SE RETIRA
+            (Ley 37 · S103-C, hallazgo de B verificado acá).
 
-            ⚠️ **Es la MISMA cura que el founder ya pidió para «Generar nuevo
-            código» el 22-ago, y yo la escribí veinte líneas más abajo** — el
-            bloque de fallo nació después y no la heredó. *Una corrección
-            aplicada a un caso no protege al hermano que nace al día
-            siguiente: lo que protege es la pieza, y acá la pieza es de B.*
-            **Se declara como deuda de forma, no se cura en `packages/ui` por
-            mi cuenta.** */}
-        <View style={{ alignSelf: 'center' }}>
-          <Boton
+            **Existió por una razón que era CIERTA y quedó VIEJA en horas.**
+            Caminando los tres fallos en el aparato medí que el botón salía
+            pegado al borde izquierdo, lo declaré como deuda de forma de
+            `packages/ui` y lo puenteé con este envoltorio. **B curó la pieza
+            el mismo día, más tarde** (`cb146a18`: `Boton` devuelve la
+            alineación al padre, vigilado por `R60`) **y mi rama la tiene
+            desde que mergeé `main`** — medido: `cb146a18` NO era ancestro de
+            mis commits `36c0f00c` ni `206bee9b`, y SÍ lo es de `HEAD`.
+
+            ⇒ **El envoltorio pasó a ser peso muerto y el comentario describía
+            en presente un defecto ya curado**, que es peor que el peso: *un
+            puente que sobrevive a su río manda al próximo a construir otro.*
+
+            🔴 **Y la parte que me toca del diagnóstico:** yo cité
+            `Boton.tsx:446` como la causa. **La línea existe y es real, pero
+            no hacía lo que le atribuí** — B midió que desde su cura ese
+            `Pressable` vive en un `flexDirection:'row'`, donde `alignSelf`
+            gobierna el eje TRANSVERSAL: `flex-start` ahí es «arriba», no «a
+            la izquierda». *Señalé la línea correcta con el mecanismo
+            equivocado, y eso es más caro que no señalar nada: el próximo
+            lector la lee y da el diagnóstico por hecho.*
+
+            ✅ **GATEADO EN APARATO (23-ago, R5CY201ZDVL):** corrido el test
+            falsable que propuso B —sacar el envoltorio y mirar—. **Los dos
+            botones siguen CENTRADOS sin él.** Capturas:
+            `scripts/capturas/s103-c-centrado-sin-envoltorio-*.png`. *El
+            retiro dejó de apoyarse en la medición ajena y tiene ojo propio.* */}
+        <Boton
             variante="secundario"
             etiqueta={t(
               voz.accion === 'reintentar'
@@ -238,8 +253,7 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
             /* 🔴 **`reintentar` vuelve a PEDIR EL CÓDIGO, no manda a soporte** —
                la red no es un rechazo. Las otras dos salen de la pantalla. */
             onPress={voz.accion === 'reintentar' ? onGenerarNuevo : onSoporte}
-          />
-        </View>
+        />
       </View>
     );
   }
@@ -303,21 +317,26 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
     return (
       <View style={{ gap: spacing[3], alignItems: 'center' }}>
         <Texto variante="titulo">{t('pago.deunaCodigoVencido')}</Texto>
-        {/* 🔴 CENTRADO — pedido del founder (22-ago), y hacía falta el
-            envoltorio: **`Boton` sin `bloque` fuerza `alignSelf:'flex-start'`
-            en su PROPIO estilo** (`Boton.tsx:446`), que gana sobre el
-            `alignItems:'center'` del padre. *Por eso quedaba pegado a la
-            izquierda aunque su contenedor centrara.*
-            El wrapper se centra a sí mismo y el botón conserva su ancho
-            natural adentro — **sin `bloque`**, que lo estiraría de punta a
-            punta y es otra cosa que la que se pidió. */}
-        <View style={{ alignSelf: 'center' }}>
-          <Boton
-            variante="secundario"
-            etiqueta={t('pago.deunaCodigoNuevo')}
-            onPress={onGenerarNuevo}
-          />
-        </View>
+        {/* ⏪ Y ACÁ VIVÍA EL OTRO `alignSelf:'center'` — el ORIGINAL, del
+            pedido del founder del 22-ago. **Se retira por la misma cura de
+            B**, y se declara con cuidado porque **esto NO deroga su pedido**:
+            él pidió que el botón quedara CENTRADO, y sigue centrado. *Lo que
+            muere es el andamio que lo lograba, no la firma que lo pidió.*
+
+            **El envoltorio era correcto el 22-ago** —`Boton` sin `bloque`
+            imponía su propia alineación— y dejó de hacer falta cuando la
+            pieza devolvió ese slot al padre (`cb146a18`, `R60`). *Dos
+            parches idénticos en un mismo archivo eran la señal de que el
+            defecto no era del archivo: era de la pieza.*
+
+            ✅ **Y SU PEDIDO SIGUE CUMPLIDO, verificado en aparato:** «El
+            código venció.» con «Generar un código nuevo» **centrado**, sin
+            envoltorio. */}
+        <Boton
+          variante="secundario"
+          etiqueta={t('pago.deunaCodigoNuevo')}
+          onPress={onGenerarNuevo}
+        />
       </View>
     );
   }
