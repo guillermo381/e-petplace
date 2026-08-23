@@ -20453,3 +20453,23 @@ Una migración cuyo bloque de verificación usa `set local role <rol>` para prob
 Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la tabla que el fixture vigila.** El `DELETE` de limpieza rebotó con `permission denied` sobre `consentimientos` — *y estaba bien que rebotara*: `authenticated` no tiene DELETE ahí porque **un consentimiento no se borra**. **Un arnés que necesita permiso de borrado para probar algo está pidiendo que se afloje justo lo que vino a cuidar.**
 
 ⇒ **Tres reglas.** ① El brazo que escribe corre en **subtransacción que se deshace sola** (`raise` capturado): residuo 0 **por construcción, no por limpieza** — L-406 aplicada a un fixture de migración. ② Toda lectura del fixture usa **el rol que puede leer**, no el de la sesión. ③ **Después de una migración con `set local role`, se VERIFICA el registro** (`schema_migrations`) y se completa a mano si falta: el `db push` puede decir ERROR con el trabajo hecho y verde.
+
+#### L-412 — un canal de reporte se apunta a una dirección que se VIO RECIBIR, jamás a una que figura en un panel
+**Firmada por el founder (23-ago-2026), sobre el caso del `rua` de DMARC.**
+**Medida y redactada por la pista D; depositada por A** (`DEUDAS_CANONICAS.md` es territorio de A y D mandó el literal autocontenido en vez de escribirlo — `docs/relevamientos/2026-08-23-s104d-PEDIDO-A-A-ley-del-rua.md`).
+
+> ⚠️ **NOTA DE NUMERACIÓN, y es un caso de la propia ley que la casa ya tiene escrita.** D la midió como **`L-410`** contra el archivo, **y tenía razón en el momento en que midió**: `L-409` era el techo. Entre su medición y el depósito, **A depositó `L-410` y `L-411`** (la tanda 1 de la copia y del consentimiento) ⇒ **el número quedó tomado y la lección entra como `L-412`.** *Es L-166 en su forma más chica: todo dato vivo se lee al momento de USARLO, no al momento de escribirlo — y en una sesión de cuatro pistas, el techo de la numeración es exactamente esa clase de dato.* **D hizo lo correcto: mandó el literal y dijo «A verifica antes de depositar — el número es suyo».** Se registra para que la próxima pista que reserve un número sepa que reservarlo no lo congela.
+
+**El caso que la funda:** el registro `_dmarc` de `epetplace.com` iba a apuntar sus reportes a `privacidad@epetplace.com`, una dirección que el founder iba a crear por el mismo camino que `hola@`. **Medido contra los dos NS autoritativos antes de cargarlo: el dominio no tiene MX, y el fallback al registro `A` tiene los puertos 25, 587 y 465 cerrados** ⇒ ninguna de las dos direcciones puede recibir correo de afuera. **El registro se habría cargado bien formado y los reportes se habrían caído en silencio.**
+
+> **La ley: una dirección que va a RECIBIR algo que nos importa se verifica recibiendo — con un correo de prueba que llegó y se vio llegar. Que figure creada en un panel no es evidencia de que recibe: es evidencia de que alguien la escribió.**
+
+**Por qué es una clase y no un caso:** vale para todo destino de reporte, alerta o rebote — `rua` y `ruf` de DMARC, la casilla de errores de un cron, el correo de un webhook, el destinatario de un aviso de sistema. **Todos comparten el modo de falla más caro que hay: fallan hacia el silencio.** *Un canal de reporte roto no avisa que está roto — deja de avisar, que es lo mismo que un canal sano en un día tranquilo.*
+
+**El discriminador, y es barato:** mandar un correo a esa dirección y **verlo llegar**. Si rebota, no existe. **La prueba la corre quien tiene acceso al buzón de destino, no quien configura el registro** — porque el rebote llega del lado que recibe.
+
+**Hermanas:** `L-402` (*no basta «¿está alcanzable desde afuera?» — hace falta «¿CORRIÓ ALGUNA VEZ?»*) y `L-321` (*se prueba la defensa, no la lista*). **Esta es la misma familia aplicada a un canal de salida en vez de a una puerta de entrada.**
+
+**Contexto que la vuelve urgente y no académica:** el `_dmarc` vivo hoy (`v=DMARC1; p=none;`) **nunca tuvo `rua`** ⇒ nunca reportó a nadie. *Nadie decidió eso: quedó así.* Y su gemela de producto es **D-892**: `privacidad@` es el canal que las páginas legales publicadas y **P15** prometen para ejercer derechos y para revertir un cierre dentro de los 30 días. **La ley y la deuda son la misma medición vista desde dos lados.**
+
+**☠️ Condición de muerte:** ninguna. Es regla de método, no deuda.

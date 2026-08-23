@@ -5,6 +5,7 @@
 // SOLO vía startsWith de códigos conocidos (regla 35 / L-115).
 
 import { getClient } from '../client';
+import { normalizarEmail } from './_email';
 // El largo mínimo vive en UN lugar (firma founder S88): seguridad.ts.
 import { MIN_LARGO_CONTRASENA } from './seguridad';
 import type { ResultadoWrapper } from '../resultado';
@@ -79,26 +80,9 @@ function nombreDeMetadata(metadata: Record<string, unknown> | undefined): string
   return typeof v === 'string' && v.length > 0 ? v : null;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// LA NORMALIZACIÓN DEL CORREO — en la puerta, una sola vez
-// ═══════════════════════════════════════════════════════════════════════════
-/**
- * `trim` + minúsculas. **Se normaliza acá y no en cada pantalla** (S104-A).
- *
- * Medido: 17 de 165 filas de `profiles.email` divergían de `auth.users.email`,
- * y **las 17 divergían SOLO por mayúsculas** — `auth` normaliza, la copia
- * guardaba lo tipeado. La divergencia no nació de un bug del motor: nació de
- * que nadie normalizó en el campo. *La cura del backfill limpió las 17; ésta
- * es la que evita las próximas.*
- *
- * También cierra un modo de falla del login que no se ve: alguien que se
- * registró como `Luis@x.com` y al día siguiente tipea `luis@x.com` es la MISMA
- * cuenta para Supabase — pero cualquier búsqueda nuestra por igualdad exacta
- * contra la copia diría que no existe.
- */
-export function normalizarEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
+// La normalización del correo vive en `_email.ts` (una sola implementación
+// para todas las puertas; acá se re-exporta para no romper consumidores).
+export { normalizarEmail } from './_email';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EL CONSENTIMIENTO — P23 hecho fila

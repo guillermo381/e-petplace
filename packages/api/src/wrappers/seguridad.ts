@@ -33,6 +33,7 @@
  */
 
 import { getClient } from '../client';
+import { normalizarEmail } from './_email';
 import type { ResultadoWrapper } from '../resultado';
 
 const CODIGOS_ERROR_SEGURIDAD = [
@@ -275,7 +276,7 @@ export async function pedirCodigoRecuperacion(input: {
 }): Promise<ResultadoWrapper<{ segundosEspera: number | null }, CodigoErrorSeguridad>> {
   // NO se consulta si el email existe. Ver la regla en la cabecera: una
   // validación previa acá convertiría esto en un censo de usuarios.
-  const { error } = await getClient().auth.resetPasswordForEmail(input.email.trim());
+  const { error } = await getClient().auth.resetPasswordForEmail(normalizarEmail(input.email));
 
   if (error) {
     if (esRateLimit(error.message, error.status)) {
