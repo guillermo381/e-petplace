@@ -20061,6 +20061,73 @@ interrumpido por un error rojo no es un gate: es una pregunta sobre el error.*
 
 ---
 
+### D-885 🔴 · EL SECRETO DE DESPACHO VIVE EN CLARO DENTRO DE `cron.job.command`
+
+🔴 **ALTA. Abierta por S103-A, 22-ago-2026, encontrada al construir
+`pagos-cobro-recurrente`.** **Dueño: A + founder (rotación).**
+
+**Medido, y NO se transcribe acá:** los comandos de `barrer-storage-tick`,
+`despachar-push-tick` y los dos `pagos-conciliar-*` llevan el valor literal de
+`x-despacho-secret` **incrustado en el texto del cron**.
+
+> **Ese secreto es lo único que gatea el barrido de pagos y el despachador de
+> avisos** (`D-713`: `verify_jwt` no protege a estas funciones porque la anon
+> key ES un JWT válido). **Y está en una tabla consultable.**
+
+**Lo que lo hace peor de lo que parece:** el patrón `D-713` puso el guard
+adentro **justamente porque el perímetro no alcanzaba** — y después el secreto
+que sostiene ese guard quedó en claro en el mismo lugar donde cualquiera que
+audite el cron lo va a leer. *La defensa se movió adentro y su llave se quedó
+afuera.*
+
+⚠️ **Y el precedente de la casa aplica entero:** en S101 se BORRÓ `ARNES_SECRET`
+en vez de rotarlo, con su razón — *un secreto que no existe no se puede
+filtrar*. Acá no se puede borrar (hay cuatro consumidores vivos), así que la
+cura es **sacarlo del texto**: que el comando lo LEA de `app_config` o de
+`vault`, como ya hace `ejecutar_recurrencias_vencidas` (`SELECT valor INTO
+v_secreto FROM app_config WHERE clave = 'secreto_despacho'`) — **el molde ya
+existe en la casa y es de hoy**.
+
+🔴 **La rotación es del founder** y va DESPUÉS de la cura: rotar sin sacarlo del
+texto reescribe el mismo problema con otro valor.
+
+**☠️ Condición de muerte:** cuando los cuatro comandos lean el secreto en vez de
+llevarlo, **y** el valor viejo esté rotado.
+
+---
+
+### D-886 🟡 · EL PLAN DE PASEOS NO REGISTRA CON QUÉ MEDIO SE RENUEVA
+
+🟡 **MEDIA. Abierta por S103-A, 22-ago-2026.** **Dueño: A (motor) + founder (letra).**
+
+**Medido antes de escribir la puerta del cobro:** `suscripciones_servicio` **no
+tiene columna de tarjeta**, y `planes_vencidos_pendientes` **nunca mira
+ninguna** — su ítem no emite `tarjeta_id`. Su hermana de despensa
+(`pedidos_recurrencias`) sí tiene **`tarjeta_id`, `autorizada_en` y
+`monto_esperado`**.
+
+⇒ **la compuerta 5 de `LETRA_COBRO_RECURRENTE` §4bis —*el medio autorizado*— es
+INEVALUABLE para planes.**
+
+**Conducta hoy, y es la correcta:** `pagos-cobro-recurrente` **frena todos los
+planes** con `sin_medio_autorizado`, uno por uno con su razón. *La alternativa
+sería adivinar cuál de las tarjetas de la persona autorizó una renovación que
+nadie registró — que es exactamente la clase de suposición que no se hace sobre
+plata.*
+
+> **Un plan que se renueva solo sin registrar quién autorizó ese cobro, cuándo y
+> sobre qué medio, no tiene raíz de autorización: tiene una costumbre.** *Y una
+> costumbre no se puede mostrar ante un contracargo.*
+
+**Lo que falta:** las tres columnas en la suscripción (quién · cuándo · sobre
+qué medio), su captura en el momento en que la familia contrata el plan, y la
+letra que diga qué pasa cuando esa tarjeta vence.
+
+**☠️ Condición de muerte:** cuando la suscripción registre su raíz de
+autorización y el selector la emita — ahí el frenado desaparece solo.
+
+---
+
 ### D-884 🟡 · EL AVISO DE LA RECURRENCIA OFRECÍA SALTAR Y MOVER, Y NINGUNA DE LAS DOS EXISTE
 
 🟡 **MEDIA. Abierta por dictamen de la mesa** (founder, 22-ago-2026).
