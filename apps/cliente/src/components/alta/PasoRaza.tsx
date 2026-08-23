@@ -141,7 +141,6 @@ export function PasoRaza({
           <View style={{ alignItems: 'center', paddingTop: spacing[2] }}>
             <AvatarMascota
               nombre={nombre}
-              especie={especieUi}
               fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: eleccion.slug })}
               tamano="lg"
             />

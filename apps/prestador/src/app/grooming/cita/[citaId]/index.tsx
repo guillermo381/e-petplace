@@ -316,7 +316,6 @@ export default function AntesGrooming() {
                     fotoUri: fotoFirmada,
                   }) ?? undefined
                 }
-                especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
                 tamano="lg"
               />
               <View style={{ alignItems: 'center', gap: spacing[1] }}>

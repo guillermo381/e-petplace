@@ -190,7 +190,6 @@ export default function AntesAdiestramiento() {
                   caraDeMascota({ especie: ficha.especie, razaSlug: null, fotoUri: fotoFirmada }) ??
                   undefined
                 }
-                especie={esEspecie(ficha.especie) ? ficha.especie : undefined}
                 tamano="lg"
               />
               <View style={{ alignItems: 'center', gap: spacing[1] }}>
