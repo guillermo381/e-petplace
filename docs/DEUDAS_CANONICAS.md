@@ -5356,7 +5356,13 @@ y si se puede desactivar.
 >
 > **Las dos patas técnicas, medidas:** la plataforma **sí** permite branchear (`{{ .Data }}` expone `user_metadata` y los condicionales Go funcionan), pero **no hay multi-idioma nativo**: una plantilla por tipo.
 >
-> **VOTO DE D, registrado con su razón:** ❌ **en contra de espejar el idioma en `user_metadata`** — *crea una segunda verdad que hay que sincronizar, y esta casa pagó ese patrón el mismo día con las 17 filas divergentes de `profiles.email`* · ✅ **a favor del Send Email Hook**: Supabase delega el envío a una función nuestra que lee `user_preferencias` —una sola verdad— y **converge con `despachar-correo`, que ya existe y ya habla dos idiomas**.
+> **VOTO DE D, registrado con su razón:** ❌ **en contra de espejar el idioma en `user_metadata`** — *crea una segunda verdad que hay que sincronizar, y esta casa pagó ese patrón el mismo día con las 17 filas divergentes de `profiles.email`* · ✅ **a favor del Send Email Hook**: Supabase delega el envío a una función nuestra que lee `user_preferencias` —una sola verdad— y **converge con `despachar-correo`, que ya existe**.
+>
+> > **⚠️ CORRECCIÓN DE LA CORRECCIÓN (23-ago, misma sesión) — la frase original de esta línea decía que `despachar-correo` «ya habla dos idiomas», y ES FALSA. La depositó A tomándola del voto de D; la midió D después, contra su propio texto ya publicado en este canónico.** Medido: dentro de `plantillaHtml(d, tipo, idioma)` (`despachar-correo/index.ts:172-268`) el parámetro `idioma` se usa **exactamente dos veces** — la firma y `<html lang="…">` (`:212`) — y **las frases en inglés en todo el archivo son CERO**. ⇒ **la función resuelve bien QUIÉN habla qué y después escribe en español igual: `idioma` es un parámetro que se acepta y no hace nada.** *Puerta sin motor en su forma de manual — typechequea, pasa el guard, y el llamador cree que pidió un correo en inglés.*
+> >
+> > **Lo que SÍ está construido, y no es poco:** la mitad difícil (`:390-397`, S88-A) — **el idioma del DESTINATARIO gobierna**, leído de `user_preferencias`. *Lo que falta no es la resolución: son las frases.* **Eso ACHICA el trabajo de cerrar D-628, no lo agranda.**
+> >
+> > *Se deja la frase vieja tachada y la corrección al lado, en vez de reescribir la línea: una razón depositada en un canónico que nadie volvió a medir se vuelve cita, y la próxima mesa la usa como premisa.* **La encontró D volviendo sobre su propio voto porque había quedado escrito con su razón adentro.**
 >
 > **Evidencia:** `docs/relevamientos/2026-08-23-s104d-CORRECCION-D628-idioma-del-usuario.md`.
 > ☠️ **Condición de muerte (actualizada):** un usuario con preferencia `en` recibe el correo de recuperación **en inglés**, verificado en una bandeja real.
