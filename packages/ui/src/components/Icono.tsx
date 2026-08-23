@@ -126,6 +126,37 @@ export type IconoNombre =
   //    ⚠️ **GATE POR ÍCONO A 21px PENDIENTE (§2.9)**, con el límite de
   //    siempre: en este entorno no hay rasterizador de SVG.
   | 'copiar'
+  /* ── S104-B · EL PAR VER/OCULTAR DE LA CLAVE ────────────────────────
+   *  Nacen POR PEDIDO DEL FOUNDER (la referencia web pedía «ojo, no la
+   *  palabra Ver»). **El censo se hizo antes de dibujar: de los 52 glifos
+   *  del registry NINGUNO es un ojo, y ninguno es prestable** — el más
+   *  cercano conceptualmente sería `info`, y prestarlo sería exactamente
+   *  la sustitución genérica que la Ley 12 prohíbe.
+   *
+   *  **SON DOS Y NO UNO, y es decisión:** el control tiene dos estados y
+   *  cada uno tiene que decir el suyo. Un solo dibujo obligaría a la
+   *  pantalla a comunicar el estado por otro canal (color, opacidad), que
+   *  es justo lo que el texto «Ver/Ocultar» hacía bien y no queremos
+   *  perder al cambiar a glifo.
+   *
+   *  FAMILIA DE CONTROL ⇒ **sin huella**, tinta en los dos registros —
+   *  como `lapiz`, `filtro`, `compartir`, `descargar` y `copiar`.
+   *
+   *  EL DIBUJO, y por qué éste: almendra simétrica + pupila. El tachado
+   *  **suelta la pupila a propósito** — a 21 px almendra + círculo + barra
+   *  son tres trazos peleando en 21 px de lado, y la barra ya dice
+   *  «apagado» sola. *Un glifo de estado se lee por su diferencia, no por
+   *  su detalle.* La barra va a 45° exacto, de 4.5 a 19.5, para que la
+   *  diferencia entre los dos hermanos sea UNA línea y no una silueta
+   *  nueva.
+   *
+   *  ⚠️ **GATE POR ÍCONO A 21px PENDIENTE (§2.9)** — como sus vecinos, y
+   *  acá con más razón: el trazo lo elegí yo por orden explícita del
+   *  founder («elegí vos; el founder corrige después»). **No hay hoja de
+   *  contacto de 2-3 variantes**, que es lo que §6b pide — se declara el
+   *  atajo en vez de disimularlo: la orden fue construir directo y gatear
+   *  sobre lo publicado. */
+  | 'ojo' | 'ojoTachado'
   // ── S82-B r10: LA VACUNA gana su glifo (orden founder). Hasta hoy la
   //    fila de vacunas del perfil pintaba `veterinaria` (medido:
   //    `mascota/[mascotaId].tsx:863`) — la sustitución genérica que la
@@ -1552,6 +1583,25 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M5 14v5.5h14V14" {...trazo(tinta)} />
     </>
   ),
+  /* S104-B · la almendra + la pupila. Simétrica en los dos ejes: el ojo
+   * es la única figura del set que no tiene "arriba" propio, así que
+   * cualquier asimetría se lee como error de dibujo y no como estilo. */
+  ojo: ({ tinta }) => (
+    <>
+      <Path d="M2.8 12C2.8 12 6.9 6.2 12 6.2S21.2 12 21.2 12 17.1 17.8 12 17.8 2.8 12 2.8 12Z" {...trazo(tinta)} />
+      <Path d="M14.7 12a2.7 2.7 0 1 1-5.4 0 2.7 2.7 0 0 1 5.4 0Z" {...trazo(tinta)} />
+    </>
+  ),
+  /* La MISMA almendra, byte a byte, + la barra. **La pupila se suelta a
+   * propósito** (ver la entrada del tipo): a 21 px tres trazos compiten y
+   * la barra ya dice apagado sola. Copiar la almendra y no re-dibujarla es
+   * lo que garantiza que los dos hermanos sean la misma silueta. */
+  ojoTachado: ({ tinta }) => (
+    <>
+      <Path d="M2.8 12C2.8 12 6.9 6.2 12 6.2S21.2 12 21.2 12 17.1 17.8 12 17.8 2.8 12 2.8 12Z" {...trazo(tinta)} />
+      <Path d="M4.5 4.5 19.5 19.5" {...trazo(tinta)} />
+    </>
+  ),
 }
 
 export function Icono({
@@ -1726,6 +1776,11 @@ export function Icono({
     descargar: { pura: colorTinta, aa: colorTinta },
     /* Control: tinta en los dos registros, como sus cuatro hermanos. */
     copiar: { pura: colorTinta, aa: colorTinta },
+    /* S104-B · el par ver/ocultar: control puro. Tinta en los dos
+     * registros, sin huella — su `registro="capa"` resuelve a tinta a
+     * propósito, igual que `lapiz` y `filtro`. */
+    ojo: { pura: colorTinta, aa: colorTinta },
+    ojoTachado: { pura: colorTinta, aa: colorTinta },
     // S88 — la campana: OBJETO sin capa (un aviso no pertenece a un
     // oficio) ⇒ tinta en los dos registros, como los controles — sin
     // fundar §6bis: el criterio acá es «sin capa de la que tomar color».

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, MarcaDeAgua, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
 import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -73,14 +73,26 @@ export default function Registro() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* S104-B — la marca entra sin ocupar lugar. El porqué medido (70
+          consumidores en el prestador contra 1 en el cliente) vive en
+          `login.tsx`, su hermana: las dos eran las únicas pantallas del
+          arco de entrada sin una sola marca encima. */}
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
+      {/* S104-B — el aire es la jerarquía (Ley 18): `spacing[6]` entre el
+          formulario y la acción, `spacing[2]` dentro de cada bloque. La cura
+          se copió del prestador (S81-C); el porqué completo está en
+          `login.tsx`. Acá el defecto era el mismo con un agravante: la ayuda
+          «Al menos 8 caracteres» quedaba a 8 px del CTA, así que la regla
+          del campo se leía como si fuera la razón del botón. */}
       <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
+        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
         keyboardShouldPersistTaps="handled"
       >
         {/* §5 firmada (S81): el formulario entra ordenando lectura */}
         <Entrada>
+        <View style={{ gap: spacing[2] }}>
         <Campo
           label={t('registro.nombreLabel')}
           placeholder={t('registro.nombrePlaceholder')}
@@ -107,9 +119,10 @@ export default function Registro() {
           secure
           autoCapitalize="none"
         />
+        </View>
         </Entrada>
         <Entrada orden={1}>
-                <Boton
+        <Boton
           etiqueta={t('registro.crearMiCuenta')}
           bloque
           cargando={cargando}

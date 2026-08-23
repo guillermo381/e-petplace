@@ -133,7 +133,29 @@ const galeria = leer(archivosTsx('packages/ui/src/gallery'));
  *  primer disparo real del ratchet R2 fue un hex en PROSA (el
  *  comentario de C en bienvenida-dia1:110). Se despojan // y ／* *／
  *  antes de contar. */
-const sinComentarios = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+/** 🔴 S104-B · ESTE REGEX CEGABA A UNA CLASE ENTERA, y lo encontró R63
+ *  produciendo su propio rojo — no una revisión de código.
+ *
+ *  EL CASO: el regex de comentario de línea no distinguía un comentario
+ *  de un doble-slash DENTRO de un string. Sobre la URL de un deep link
+ *  (`'cliente:` + tres barras + `cuenta/exportar'`) se comía la
+ *  URL desde el segundo slash y dejaba `'cliente:/`. El brazo de deep
+ *  links de R63 **medía CERO y su silencio se leía como «no hay ninguno
+ *  roto»** — L-192 exacto, un piso más abajo: no falló la regla, falló su
+ *  preprocesado.
+ *
+ *  ⚠️ **NO ERA UN DEFECTO DE R63: es de esta función, que TODAS las reglas
+ *  de esta familia comparten.** Cualquier regla futura que busque
+ *  `scheme://`, una URL, o un `https://` en el código nacía ciega por la
+ *  misma causa, y nunca lo habría sabido.
+ *
+ *  LA CURA: no se toca un `//` precedido por `:` (protocolo) ni por otro
+ *  `/`, ni el que abre una tercera barra. **Sigue siendo un regex y no un
+ *  parser, y eso es deliberado:** un parser de JS acá sería el remedio
+ *  caro para un problema de conteo. Lo que se cierra es la clase medida,
+ *  con su fixture — no toda forma imaginable de string con barras. */
+const sinComentarios = (src) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:/'"`])\/\/(?!\/)[^\n]*/g, '$1');
 const lineaDe = (src, index) => src.slice(0, index).split('\n').length;
 
 /** EL ANCLA — TERCERA CAPA DE L-192 (S82-B r36).
@@ -1848,6 +1870,14 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
+  /* R63 · el fixture apunta al brazo A, que es el que se puede violar con
+     una línea de código. Los brazos B y C se probaron en rojo contra un
+     árbol de rutas sintético al escribir la regla (ver su cabecera); acá
+     alcanza con que la regla DEMUESTRE que sabe decir que no.
+     ⚠️ El `path` arranca con `apps/cliente/` a propósito: sin eso la regla
+     descarta el archivo por no pertenecer a ninguna app y el fixture
+     saldría VERDE — que es justo el verde flojo que L-192 persigue. */
+  R63: [{ path: 'apps/cliente/src/app/(tabs)/cuenta/fixture.tsx', src: "router.push('/cuenta/esta-ruta-no-existe-r63')" }],
   R1: [{ path: '(fixture)', src: '<SelectorOpcion naturaleza="foo" />\n<SelectorOpcion entidad naturaleza="existe" />' }],
   R2: [{ path: '(fixture)', src: Array(BASELINE_HEX + 1).fill("color: '#ABC123'").join('\n') }],
   /* R35 · SU FIXTURE LLEGA UNA SESIÓN TARDE, y el porqué es el hallazgo
@@ -4746,7 +4776,157 @@ function r52(archivos) {
   }
 }
 
-const REGLAS = { R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/* ═══════════════════════════════════════════════════════════════════
+ * R63 · UNA SUPERFICIE NO PROMETE UNA RUTA QUE NADIE SIRVE (S104-B).
+ *
+ * 🔴 LA MEDICIÓN QUE DIO VUELTA EL DISEÑO, y hay que leerla antes de
+ *    tocar esta regla: **`typedRoutes: true` está encendido en las dos
+ *    apps**, y `.expo/types/router.d.ts` declara `href` como un UNION DE
+ *    LITERALES de cada ruta real. ⇒ `router.push('/no-existe')` **ya no
+ *    compila**. El que frena es el COMPILADOR, no un lint (L-396: el modo
+ *    de falla decide la herramienta).
+ *
+ *    ⚠️ **PERO ESE ARCHIVO ES GENERADO Y ESTÁ EN `.gitignore`.** No existe
+ *    en un worktree recién creado ni en un clon limpio, y se regenera solo
+ *    cuando alguien corre `expo start`. **Medido al escribir esta regla:
+ *    el del prestador tenía SEIS DÍAS de atraso respecto de su árbol de
+ *    rutas.** Sin ese archivo, `Href` degrada a `string` y toda ruta
+ *    inventada compila en VERDE.
+ *
+ * ⇒ **ESTA REGLA NO RE-IMPLEMENTA LO QUE EL COMPILADOR HACE MEJOR.**
+ *   Resuelve contra el ÁRBOL DE RUTAS REAL DEL FILESYSTEM —jamás contra el
+ *   `.d.ts`, que es justo lo que puede estar viejo— y cubre lo que al
+ *   compilador se le escapa:
+ *
+ *   · BRAZO A — literales de navegación sin archivo que los sirva. Red de
+ *     seguridad para cuando el `.d.ts` falta o venció.
+ *   · BRAZO B — **deep links `scheme://ruta`. `typedRoutes` NO los tipa:
+ *     cobertura CERO hoy.** Y este brazo nació ciego: el `sinComentarios`
+ *     de esta misma casa se comía el doble-slash de la URL y el brazo
+ *     medía 0 con cara de verde. La cura vive arriba, en esa función.
+ *   · BRAZO C — **el que más importa: ¿el compilador PUEDE ver?** Si el
+ *     `.d.ts` falta o es más viejo que el árbol, el verde del typecheck
+ *     sobre rutas no significa nada, y eso hay que decirlo en voz alta.
+ *
+ * FALSOS POSITIVOS CONOCIDOS Y CÓMO SE DESARMAN (los 10 de la primera
+ * corrida fueron míos): los grupos `(tabs)` se normalizan **en los DOS
+ * lados** —`router.push('/(tabs)')` es forma legal y el union generado la
+ * incluye—; los segmentos dinámicos `[id]` se comparan por posición. Lo
+ * que NO alcanza esta regla y se declara: rutas armadas por variable o
+ * template — no son literales y salen del alcance a propósito.
+ *
+ * ☠️ CONDICIÓN DE MUERTE: ninguna mientras `.expo/types` siga siendo
+ *   generado y gitignored. Si algún día se versiona, el brazo C sobra. */
+const RUTAS_APPS = [
+  { app: 'cliente', dir: 'apps/cliente', scheme: 'cliente' },
+  { app: 'prestador', dir: 'apps/prestador', scheme: 'prestador' },
+];
+
+/** El árbol de rutas REAL: cada archivo de `src/app` es una ruta servida. */
+function rutasServidas(dir) {
+  const base = join(RAIZ_REPO, dir, 'src/app');
+  const rutas = new Set();
+  if (!existsSync(base)) return rutas;
+  const caminar = (d) => {
+    for (const e of readdirSync(d)) {
+      const p = join(d, e);
+      if (statSync(p).isDirectory()) caminar(p);
+      else if (/\.(tsx|ts)$/.test(p)) {
+        const rel = p.slice(base.length + 1).replace(/\.(tsx|ts)$/, '');
+        if (/(^|\/)_layout$/.test(rel)) continue;
+        let r = ('/' + rel).replace(/\/\([^)]+\)/g, '').replace(/\/index$/, '');
+        rutas.add(r === '' ? '/' : r);
+      }
+    }
+  };
+  caminar(base);
+  return rutas;
+}
+
+/** ¿La ruta pedida la sirve algún archivo? Normaliza los DOS lados. */
+function rutaServida(pedida, rutas) {
+  const limpia =
+    pedida.split('?')[0].split('#')[0].replace(/\/\([^)]+\)/g, '').replace(/\/$/, '') || '/';
+  if (rutas.has(limpia)) return true;
+  const partes = limpia.split('/');
+  for (const r of rutas) {
+    const rp = r.split('/');
+    if (rp.length !== partes.length) continue;
+    if (rp.every((seg, i) => seg === partes[i] || /^\[.+\]$/.test(seg))) return true;
+  }
+  return false;
+}
+
+function r63(archivos) {
+  const fallos = [];
+  let literales = 0;
+  let deeplinks = 0;
+  let apps = 0;
+
+  for (const { app, dir, scheme } of RUTAS_APPS) {
+    const rutas = rutasServidas(dir);
+    if (rutas.size === 0) continue;
+    apps++;
+
+    // ── BRAZO C · ¿el compilador puede ver? ────────────────────────────
+    const dts = join(RAIZ_REPO, dir, '.expo/types/router.d.ts');
+    if (!existsSync(dts)) {
+      fallos.push(
+        `R63·C ${app}: NO existe \`.expo/types/router.d.ts\`. Con \`typedRoutes: true\` y sin ese archivo, \`Href\` degrada a \`string\` y **toda ruta inventada compila en verde**: el typecheck no está midiendo rutas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
+      );
+    } else {
+      const tDts = statSync(dts).mtimeMs;
+      let masNueva = 0;
+      const caminar = (d) => {
+        for (const e of readdirSync(d)) {
+          const p = join(d, e);
+          if (statSync(p).isDirectory()) caminar(p);
+          else masNueva = Math.max(masNueva, statSync(p).mtimeMs);
+        }
+      };
+      caminar(join(RAIZ_REPO, dir, 'src/app'));
+      if (masNueva > tDts) {
+        const dias = ((masNueva - tDts) / 86400000).toFixed(1);
+        fallos.push(
+          `R63·C ${app}: el árbol de rutas cambió DESPUÉS del \`.d.ts\` generado (${dias} día(s) de atraso). Las rutas nacidas en ese intervalo no están en el union ⇒ el compilador las deja pasar sin verlas. Se regenera corriendo \`expo start\` en \`apps/${app}\`.`,
+        );
+      }
+    }
+
+    // ── BRAZOS A y B · las promesas ────────────────────────────────────
+    const reDeep = new RegExp(`['"\`]${scheme}://([^'"\`]*)['"\`]`, 'g');
+    for (const { path, src } of archivos) {
+      if (!path.startsWith(dir)) continue;
+      const limpio = sinComentarios(src);
+      for (const m of limpio.matchAll(/router\.(?:push|replace|navigate)\(\s*'(\/[^']*)'/g)) {
+        literales++;
+        if (!rutaServida(m[1], rutas))
+          fallos.push(`R63·A ${path}:${lineaDe(limpio, m.index)} navega a '${m[1]}' y ningún archivo de \`src/app\` la sirve.`);
+      }
+      for (const m of limpio.matchAll(/pathname:\s*'(\/[^']*)'/g)) {
+        literales++;
+        if (!rutaServida(m[1], rutas))
+          fallos.push(`R63·A ${path}:${lineaDe(limpio, m.index)} declara \`pathname: '${m[1]}'\` y ningún archivo de \`src/app\` la sirve.`);
+      }
+      for (const m of limpio.matchAll(reDeep)) {
+        deeplinks++;
+        const r = '/' + m[1].replace(/^\/+/, '');
+        if (!rutaServida(r, rutas))
+          fallos.push(`R63·B ${path}:${lineaDe(limpio, m.index)} promete el deep link '${scheme}://${m[1]}' y ningún archivo de \`src/app\` lo sirve. \`typedRoutes\` NO tipa deep links: acá no hay compilador que lo cace.`);
+      }
+    }
+  }
+
+  /* ANCLA — escrita contra el modo de falla de ESTA regla: sin árbol de
+     rutas no hay contra qué resolver y los tres brazos callarían. */
+  fallos.push(...ancla('R63', apps, 2, 'app(s) con árbol de rutas legible en src/app'));
+  return {
+    fallos,
+    info: `${literales} literal(es) de navegación · ${deeplinks} deep link(s) · ${apps} app(s) · el compilador cubre los literales SOLO si su .d.ts está al día (brazo C)`,
+  };
+}
+
+const REGLAS = { R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -5123,6 +5303,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
 corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);
 corridas.push(['R59 (un comentario JSX sin llaves es texto: D-882)', r59([...apps, ...ui, ...galeria])]);

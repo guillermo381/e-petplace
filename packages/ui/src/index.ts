@@ -246,6 +246,18 @@ export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 // S82-B r10 — el papel tapiz: pieza del FONDO compartido (el número del
 // alfa vive UNA vez; el montaje lo hace ThemeProvider marcaDeAgua).
 export { MarcaDeAgua } from './brand/MarcaDeAgua'
+// PaseoDeHuellas — S104-B: la senda que se traza y SE QUEDA. Familia de
+// `MarcaDeAgua` (fondo: absoluto, sin toque, memorial la apaga en la
+// fuente), no de `Entrada` — no ordena lectura, es textura. Solo `opacity`
+// en hilo de UI; reduce-motion la deja TRAZADA, no más rápida.
+// ⚠️ Nace con freno declarado: `RITUAL_DE_ENTRADA.md` no existe en el repo.
+export { PaseoDeHuellas } from './brand/PaseoDeHuellas'
+// RitualDeEntrada — S104-B: los DOS gestos de la llegada, sueltos y sin
+// cablear. `RespiroDeMarca` (1.0→1.03→1.0, 520 = `duration.grande`) envuelve
+// al isotipo · `HuellaDeLlegada` (~400) reusa el motivo de `EsperaDeMarca`
+// UNA vez como celebración. **No componen entre sí**: dónde y en qué orden
+// se montan lo dice la letra que no viajó.
+export { RespiroDeMarca, HuellaDeLlegada } from './brand/RitualDeEntrada'
 export { Atmosfera, type AtmosferaProps, type OrigenAtmosfera } from './brand/Atmosfera'
 export { TokenGallery } from './gallery/TokenGallery'
 
