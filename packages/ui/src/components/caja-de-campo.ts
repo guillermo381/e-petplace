@@ -158,7 +158,7 @@ export interface EstadoCaja {
  *  (ver la derogación en la cabecera). */
 export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): string {
   if (error) return theme.status.danger
-  if (enfocado) return theme.text.primary
+  if (enfocado) return 'active' in theme.accent ? theme.accent.active : theme.accent.primary
   return theme.border.campo
 }
 
@@ -180,44 +180,44 @@ export function interiorDeCaja(theme: Theme): string {
  *  jamás por partes: una que tome el borde y se escriba el fondo vuelve
  *  a ser una cuarta copia con otro nombre. */
 /* ═══════════════════════════════════════════════════════════════════
- * 🔴 S104-B · EL FOCO PASA A TINTA PLENA +1 — ORDEN DEL FOUNDER, Y
- *    CHOCA CONTRA LETRA FIRMADA. SE DECLARA, NO SE RESUELVE ACÁ.
+ * ☠️ S104-B · EL FOCO A TINTA PLENA — APLICADO Y RETIRADO EL MISMO DÍA.
+ *    EL ARCO COMPLETO QUEDA ESCRITO, PORQUE ES LO ÚNICO QUE EVITA QUE
+ *    LA PRÓXIMA MESA LO VUELVA A PEDIR.
  *
- * ⏪ **Lo que regía hasta hoy:** el contorno enfocado tomaba
- * `accent.active` — magenta en el cliente, tealDark en el prestador —
- * por **Ley 5** (*«el campo enfocado ES el elemento activo de la
- * vista»*) y por el SEXTO SLOT de S83-B13, que resolvió `accent.active`
- * POR CASA justamente para que el foco hablara con el acento de cada
- * una. `CampoCodigo` cita esa ley palabra por palabra en su cabecera.
+ * **① La orden:** *«el foco del campo: borde a tinta plena +1pt,
+ * 150ms»*. Se aplicó.
  *
- * **Lo que ordena S104-B:** *«el foco del campo: borde a tinta plena
- * +1pt, 150ms»*. ⇒ el foco deja de ser un acento y pasa a ser peso.
+ * **② El choque, declarado ACÁ y no en un parte:** el contorno enfocado
+ * tomaba `accent.active` —magenta en el cliente, tealDark en el
+ * prestador— por **Ley 5** (*«el campo enfocado ES el elemento activo
+ * de la vista»*) y por el **SEXTO SLOT de S83-B13**, que resolvió
+ * `accent.active` POR CASA justamente para que el foco hablara con el
+ * acento de cada una. `CampoCodigo` cita esa ley palabra por palabra.
+ * Se anotó también el alcance: **UNA definición, TRES piezas** (`Campo`,
+ * `CampoFecha`, `CampoCodigo`) **en LAS DOS APPS**.
  *
- * ⚠️ **QUÉ SE PIERDE, dicho para que la mesa decida con el dato y no
- * con el gusto:** en el cliente el magenta del foco era **la única
- * aparición de `accent.active` en todo el arco de entrada** — con esto,
- * login/registro/recuperar quedan sin un solo píxel de acento de marca
- * salvo la marca de agua. En el prestador se pierde el teal del oficio
- * en el foco. **`N26` no se toca** (habla de ocre/magenta en CONTROLES
- * que accionan o seleccionan; un campo enfocado no es ninguno de los
- * dos), pero **Ley 5 sí queda enmendada de hecho**.
+ * **③ ☠️ LA ENMIENDA — el founder RETIRA la orden.** Literal:
+ * *«fue orden mía sin ver el choque»*. **Vuelve `accent.active`.**
  *
- * ✅ **QUÉ MEJORA, y es medible:** tinta plena contra el interior
- * blanco da un contraste muy por encima del piso de 3:1 que N11 exige
- * para el contorno, en los tres temas y sin depender del acento — el
- * magenta en oscuro venía siendo el par más justo. Y el +1 hace que el
- * foco se lea **sin depender del color**, que es lo que un daltónico
- * necesita.
+ * ✅ **LO QUE SÍ QUEDA, y no es el resto: es la mitad buena.** El
+ * **+1pt en 150 ms** sobrevive — *el movimiento vive en el borde, no en
+ * la etiqueta* (N11′ intacta). El foco ahora se lee por **color Y
+ * peso**, que además es lo que un daltónico necesita: el color solo
+ * nunca fue suficiente.
  *
- * 🔴 **EL COSTO QUE NADIE PIDIÓ Y HAY QUE ANOTAR:** subir el borde de
- * 1.5 a 2.5 achica el área interior 1 px por lado. El alto es fijo y el
- * contenido va centrado ⇒ **verticalmente no se mueve nada**; el texto
- * sí se corre **1 px horizontal** al enfocar. Es el único movimiento
- * que este cambio introduce, y se declara en vez de descubrirse en el
- * gate. **N11′ queda INTACTA: la etiqueta vive afuera y no se entera.**
+ * 🔴 **LA NOTA DE MÉTODO, que es lo que vale de todo esto:** la enmienda
+ * existe **porque se aplicó lo pedido Y se declaró el choque en la
+ * fuente**. Aplicarlo callado habría llegado al gate en dispositivo con
+ * la Ley 5 ya rota en tres piezas de dos apps, y el founder habría
+ * estado juzgando un desvío sin saber que lo era.
+ * *Declarar un choque no es desobedecer una orden: es lo que permite
+ * que quien la dio pueda revisarla.*
  *
- * ⇒ **Rige la orden del founder. La enmienda de Ley 5 la firma la mesa,
- * no esta pieza.**
+ * ⚠️ **Costo que YA NO aplica** (se conserva por si alguien reabre): con
+ * tinta plena, el texto se corría 1 px horizontal al enfocar, porque el
+ * borde pasaba de 1.5 a 2.5. **Ese px sigue existiendo — el +1pt
+ * quedó** — pero ahora es el único cambio, no el acompañante de un
+ * cambio de color.
  * ═══════════════════════════════════════════════════════════════════ */
 export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
   return {
