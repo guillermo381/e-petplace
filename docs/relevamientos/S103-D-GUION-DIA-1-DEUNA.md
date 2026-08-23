@@ -467,6 +467,10 @@ igual.*
 | Wrapper `pagos-deuna.ts` | ❌ | ✅ **en `main`** |
 | Pantalla de espera de C | ❌ | ✅ **enchufada contra el contrato** |
 | Edge `pagos-deuna-solicitud` | escrita | **escrita y SIN DESPLEGAR** ← *sigue igual* |
+| Contrato del wrapper | ❌ | ✅ **`docs/CONTRATO_WRAPPER_DEUNA.md` en `main`** |
+| Pantalla con **cinco familias** de fallo | ❌ | ✅ **enchufada contra el contrato** |
+| **Aplicador del barrido para DeUna** | *(nadie lo había notado)* | 🔴 **NO EXISTE — cable faltante, cura de A** |
+| `N3` (firma con proveedor) | pendiente | **retenida a propósito** — medido: firma vieja viva, nueva ausente |
 
 ### ① El aviso a C cambió de naturaleza — y hay que decírselo distinto
 
@@ -610,3 +614,148 @@ por OTA) — **no el `pointOfSale`**.
 ⚠️ **Se anota acá igual, porque el riesgo del founder aplica: si no está en
 NINGÚN guion, se da por bueno.** *Este documento no lo cubre; que quede escrito
 que su dueño es C y su llave es otra.*
+
+---
+
+## §14 · PASO 9 — 🔴 LOS DOS FLIPS *(nuevo, 23-ago)*
+
+### La pregunta
+
+**¿La pantalla está conectada de verdad, o sigue simulando con la fila
+encendida?**
+
+### Por qué tiene paso propio y no es una nota al pie
+
+Encender DeUna **son DOS actos, no uno**:
+
+| # | flip | qué enciende |
+|---|---|---|
+| ① | `DEUNA_ELEGIBLE = true` (`fila-medio-de-pago.tsx:272`) | **la fila** en «Cómo quieres pagar» |
+| ② | el cuerpo de `useEstadoDeUna` deja de ser `ENSAYO` | **la conexión real con la puerta** |
+
+**Con sólo el ①, la fila aparece y la pantalla sigue simulando.** El propio
+archivo de C lo dice: ese cuerpo *«muere entero»* al enchufarse.
+
+> 🔴 *Y así se ve exactamente igual que si funcionara: hay fila, hay código de
+> 6 dígitos, hay cuenta regresiva. **Se lee «DeUna anda» hasta que alguien mire
+> la base.*** Es la misma clase que las cuatro de ayer — una promesa que
+> compila.
+
+### 🔴 El discriminador — **se mira la BASE, no la pantalla**
+
+La pantalla **no puede** distinguirlos: en los dos casos muestra un código.
+
+```sql
+-- Después de pedir un código en la app, con su referencia a mano:
+select id, proveedor, forma, estado, codigo_numerico, referencia_corta, creado_en
+  from pagos_intentos
+ where proveedor = 'deuna'
+ order by creado_en desc limit 3;
+```
+
+| resultado | veredicto |
+|---|---|
+| **hay fila** con `forma='codigo_push'` y el **mismo código** que muestra la app | ✅ **conectada de verdad** |
+| **cero filas** | 🔴 **sólo el flip ①** — la pantalla simula, y la fila encendida está mintiendo |
+
+**Control positivo del discriminador:** correr la misma consulta **antes** de
+pedir el código. *Si ya había filas, el «hay fila» no prueba nada — hay que ver
+una fila NUEVA, con su `creado_en` de hace segundos.*
+
+### Criterio
+
+| # | situación | qué hacer |
+|---|---|---|
+| 1 | los dos flips dados y hay fila nueva | ✅ seguir al **paso 8** (circuito real) |
+| 2 | flip ① sin flip ② | 🔴 **apagar el ① inmediatamente.** *Una fila que promete un medio que no existe es peor que no ofrecerlo* — la persona elige Deuna, paga en su app, y del lado nuestro no hay intento que confirmar |
+| 3 | ninguno | ⏸️ esperado — no es un fallo |
+
+⚠️ **Los dos flips son de C.** Este paso **verifica**, no flipea.
+
+---
+
+## §15 · 🔴 EL ORDEN DE ENCENDIDO DEL LUNES — secuencia ejecutable
+
+> **La regla que ordena todo:** *un pago cobrado y nunca confirmado —con la
+> plata ya movida del lado del cliente— es **peor** que un pago que no se puede
+> iniciar.* **Por eso lo último que se enciende es la puerta del cliente, y no
+> se enciende hasta que exista quien confirme.**
+
+### Estado medido al escribir esto (23-ago)
+
+| pieza | estado |
+|---|---|
+| actuador multiproveedor | ✅ **vivo** |
+| wrapper + contrato | ✅ **en `main`** |
+| pantalla de C | ✅ enchufada, **con los dos flips en `false`** |
+| `N3` | **retenida** — firma vieja viva, nueva ausente |
+| guard `info: {}` | **pendiente** — va en la misma ventana que N3 |
+| **aplicador del barrido DeUna** | 🔴 **NO EXISTE** |
+| edge `pagos-deuna-solicitud` | **escrita, sin desplegar** |
+
+### La secuencia
+
+**① MEDIR — corre solo, sin autorización.** *Nada de esto toca la base ni
+despliega.*
+`bash scripts/deuna/correr-tests.sh` (51/51) → `node scripts/deuna/sondeo-qa.mjs`
+→ **pasos 1 a 7** del guion.
+⇒ **Salida:** los 7 ⚪ cerrados, y **el `numericCode` confirmado o desmentido a
+C en el primer minuto**.
+
+**② LA VENTANA DE MOTOR — 🔑 firma del founder · las TRES JUNTAS.**
+
+- `N3` (firma con `p_proveedor`)
+- **redeploy de `pagos-conciliar`**
+- la línea del `info: {}` en el actuador
+
+> 🔴 **Van en la misma ventana porque `N3` CAMBIA UNA FIRMA que
+> `pagos-conciliar` todavía llama.** Aplicar `N3` sin el redeploy deja **el
+> barrido de Nuvei roto** — *y Nuvei es el que hoy cobra plata real.*
+> Precedente: el orden cron→deploy de `D-713`.
+>
+> La del `info: {}` entra acá **porque es el próximo `CREATE OR REPLACE` del
+> actuador**, y una migración por una línea de precisión no se paga sola.
+
+**③ EL APLICADOR DEL BARRIDO — 🔑 firma · 🔴 BLOQUEA EL PASO ⑤.**
+La hermana de `resolver_consulta_activa` para DeUna *(de A)*.
+**Sin esto, el barrido detecta pagos confirmados y no hay quién los aplique.**
+
+**④ DESPLEGAR LA PUERTA — 🔑 firma por tanda.**
+`npx supabase functions deploy pagos-deuna-solicitud --use-api`
+⚠️ **Requiere `DEUNA_POINT_OF_SALE` cargado en secrets**, o la puerta responde
+`servidor_sin_configurar` — que es su fallo correcto, pero fallo.
+
+**⑤ LOS DOS FLIPS — de C · 🔴 NO ANTES DE ③.**
+Y **los dos juntos**: el §14 explica por qué el ① solo es peor que ninguno.
+
+**⑥ EL BUZÓN — 🔑 firma + tercero.**
+Cargar el secreto → desplegar → **verificar que responde 200** → *recién ahí*
+registrar con DeUna (`S103-D-PAQUETE-ALTA-WEBHOOK.md` §5).
+⚠️ **Registrar antes de desplegar deja una ventana en la que DeUna llama a una
+URL que no existe**, y sus reintentos son 3 cada 30 s.
+
+**⑦ EL CRON DEL BARRIDO — 🔑 firma, y va ÚLTIMO.**
+*Agendar un barrido es empezar a tocar plata en un horario.*
+
+### 🔴 Qué NO se enciende, y hasta cuándo
+
+| no encender | hasta que | por qué |
+|---|---|---|
+| **los dos flips (⑤)** | **exista el aplicador (③)** | sin él, un pago cobrado por el camino del barrido **no se confirma nunca**, con la plata ya movida |
+| **el cron (⑦)** | el aplicador exista **y** haya corrido a mano una vez | un barrido que escala lo mismo cada pasada entrena a ignorarlo |
+| **producción** | credenciales PDN + su propio secreto | fuera de alcance de esta mesa |
+
+### Autorización — qué pide firma y qué no
+
+| corre SOLO | pide 🔑 firma del founder POR TANDA |
+|---|---|
+| los 51 tests | aplicar `N3` |
+| el sondeo QA (pasos 1-7) | el redeploy de `pagos-conciliar` |
+| el ensayo en seco | la línea del `info: {}` |
+| leer la base | el aplicador del barrido |
+| mandar el correo a soporte | **desplegar la puerta** |
+| — | **desplegar el buzón** |
+| — | **registrar la URL con DeUna** |
+| — | agendar el cron |
+
+**Los dos flips son de C** y su condición no es una firma: **es que ③ exista.**
