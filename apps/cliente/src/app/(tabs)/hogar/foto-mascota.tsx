@@ -34,7 +34,6 @@ import { EncuadreFoto } from '@/components/EncuadreFoto';
 import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { ENCUADRE_DEFAULT, clampEncuadre, type DimFoto, type Encuadre } from '@/components/foto-encuadre';
 import { subirAvatar } from '@/lib/subir-avatar';
-import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 
 type FotoVigente =
@@ -52,7 +51,13 @@ export default function FotoMascota() {
   const params = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
   const mascotaId = params.mascotaId ?? '';
   const [nombre, setNombre] = useState(params.nombre ?? '');
-  const [especie, setEspecie] = useState<string | undefined>(undefined);
+  /* ☠️ S103-C — MURIÓ el estado `especie`. Su único lector era el
+     `especie={…}` de `AvatarMascota`, que **nunca se desestructuró en la
+     pieza**: se aceptaba y no pintaba. Al retirar el montaje, este estado
+     quedó **escribiéndose sin que nadie lo leyera** — y eso el typecheck no
+     lo ve, porque `setEspecie` es un uso válido de la variable.
+     *Retirar el montaje sin barrer lo que lo alimentaba deja el cómputo
+     vivo y la razón muerta.* */
 
   const [vigente, setVigente] = useState<FotoVigente>({ t: 'cargando' });
   const [fotoNueva, setFotoNueva] = useState<FotoCapturada | null>(null);
@@ -76,7 +81,6 @@ export default function FotoMascota() {
         return;
       }
       setNombre(r.data.mascota.nombre);
-      if (esEspecieUi(r.data.mascota.especie)) setEspecie(r.data.mascota.especie);
       const declarado: Encuadre = {
         cx: r.data.mascota.foto_cx,
         cy: r.data.mascota.foto_cy,
@@ -192,7 +196,7 @@ export default function FotoMascota() {
 
         {vigente.t === 'sin_foto' && fotoNueva === null ? (
           <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-            <AvatarMascota nombre={nombre} especie={esEspecieUi(especie) ? especie : undefined} tamano="lg" />
+            <AvatarMascota nombre={nombre} tamano="lg" />
             <Texto variante="apoyo" centrado>
               {t('fotoEncuadre.elegirDetalle')}
             </Texto>

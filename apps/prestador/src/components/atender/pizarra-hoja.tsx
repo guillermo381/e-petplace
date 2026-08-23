@@ -346,7 +346,6 @@ export function PizarraHoja({ visible, onCerrar }: PizarraHojaProps) {
                     inicio={
                       <AvatarMascota
                         nombre={c.mascotaNombre}
-                        especie={esEspecie(c.mascotaEspecie) ? c.mascotaEspecie : undefined}
                         /* ⭐ S98-C · LA CARA (D-806). Sin esto la pizarra
                            dibuja la huella genérica para TODAS — el defecto
                            que el founder vio navegando.

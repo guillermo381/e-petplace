@@ -223,7 +223,6 @@ export default function DetalleCitaVet() {
                         fotoUri: pantalla.fotoUrl,
                       }) ?? undefined
                     }
-                    especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
                     tamano="lg"
                   />
                   <View style={{ flex: 1, gap: spacing[1] }}>

@@ -43,6 +43,7 @@ export const clienteEs = {
     probarDeNuevo: 'Probar de nuevo',
   },
   login: {
+    olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
     emailLabel: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
@@ -1695,15 +1696,54 @@ export const clienteEs = {
   /**
    * S103-C · SEGURIDAD — la contraseña del cliente.
    *
-   * 🔴 **Las once primeras son VERBATIM del prestador**, y eso es
-   * deliberado: ya estaban en tuteo neutro y es **la misma función para el
-   * mismo humano**. *Dos frases distintas para el mismo acto es cómo dos
-   * superficies empiezan a desacordar sin síntoma.*
+   * 🔴 **LAS CATORCE SON VERBATIM DEL PRESTADOR**, y eso es deliberado: ya
+   * estaban en tuteo neutro y es **la misma función para el mismo humano**.
+   * *Dos frases distintas para el mismo acto es cómo dos superficies
+   * empiezan a desacordar sin síntoma.*
    *
-   * Las tres últimas son propias porque **la salida del caso solo-Google es
-   * distinta acá**: el cliente no tiene `/recuperar` (medido), así que
-   * termina en soporte y no en una puerta que rebota.
+   * ⏪ **ACÁ DECÍA OTRA COSA, Y ERA FALSA — hallazgo de D.** Decía *«las tres
+   * últimas son propias porque el cliente no tiene `/recuperar` **(medido)**,
+   * así que termina en soporte»*. **Era cierto cuando se escribió y esta
+   * misma rama lo derogó horas después**, al montar `/recuperar` — que se
+   * define **trece líneas más abajo, en este archivo**.
+   *
+   * 🔴 **Y el sello «(medido)» es lo que lo volvía peligroso, no la
+   * afirmación:** una frase falsa SIN él invita a verificar; **con él suena
+   * verificada y apaga la sospecha del que lee.** *Es la hermana invertida
+   * de `destacada`: allá un guard hacía parecer viva una prop muerta; acá un
+   * sello de medición hace parecer medida una afirmación vencida. **Las dos
+   * sobreviven por lo mismo: son comentarios, no rompen nada y no fallan
+   * ningún gate.***
+   *
+   * ⇒ **Y la medición de la cura corrigió el número que yo iba a escribir:**
+   * fui a arreglar «tres propias» por «dos» y **las catorce claves existen en
+   * el prestador**. La única que difería era `soloGoogle`, por tres palabras
+   * («ahora» en vez de «desde recuperar») — **alineada, porque mi propio
+   * argumento de arriba la obligaba.**
    */
+  /** S103-C · RECUPERAR — heredadas VERBATIM del prestador: ya estaban en
+   *  tuteo neutro y es el mismo acto para el mismo humano. */
+  recuperar: {
+    titulo: 'Recuperar tu contraseña',
+    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.',
+    email: 'Tu correo',
+    pedir: 'Enviar el código',
+    // NUNCA declara si el correo existe: la misma frase exista o no.
+    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de {{n}} dígitos.',
+    // D-628 (🟠 abierta): se dice ANTES de que lo busque, no después de que
+    // crea que no llegó. Muere con la deuda, no por su cuenta.
+    avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
+    codigo: 'El código de {{n}} dígitos',
+    codigoVerificado: 'Código verificado. Ahora elige tu nueva contraseña.',
+    verificar: 'Verificar el código',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos {{n}} caracteres.',
+    cambiar: 'Cambiar contraseña y entrar',
+    otroCodigo: 'Enviar otro código',
+    listo: 'Listo — ya puedes entrar.',
+    esperaConNumero: 'Pediste varios códigos seguidos. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
+  },
   seguridad: {
     tituloPantalla: 'Seguridad',
     titulo: 'Contraseña',
@@ -1722,12 +1762,13 @@ export const clienteEs = {
     // 🔴 ENMENDADA respecto del prestador: la suya ofrece crear la clave
     // desde `/recuperar`, y esa ruta NO EXISTE en el cliente. Prometerla
     // sería mandar a una puerta que no abre.
+    // ⏪ ENMENDADA (S103-C): decía «Escríbenos y te ayudamos a crear una»
+    // porque `/recuperar` NO existía en el cliente. Ya existe, así que la
+    // familia solo-Google puede crearse la clave SOLA — que era el hueco.
+    // ☠️ Con esto murieron `irASoporte`, `mensajeSoporte` y `soporteFallback`.
     soloGoogle:
-      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Escríbenos y te ayudamos a crear una.',
-    irASoporte: 'Escribirle al equipo',
-    mensajeSoporte:
-      'Hola, entro a e-PetPlace con Google y quiero crear una contraseña para mi cuenta.',
-    soporteFallback: 'Escríbenos por WhatsApp al {{numero}}.',
+      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Puedes crear una desde recuperar: te enviamos un código a tu correo.',
+    irARecuperar: 'Crear una contraseña',
   },
   despensa: {
     titulo: 'Despensa',

@@ -80,6 +80,24 @@ export default function Login() {
           deshabilitado={!puedeEnviar}
           onPress={() => void entrar()}
         />
+        {/* 🔴 S103-C · LA SALIDA QUE FALTABA, Y ES LA QUE MÁS IMPORTA.
+            Medido: este login **no ofrecía ninguna** — solo «Entrar».
+
+            **Y `/recuperar` la usa justamente QUIEN NO PUDO ENTRAR:** sin esta
+            línea, su única puerta sería Cuenta, alcanzable solo por quien ya
+            está adentro. *Una pantalla de recuperación que exige haber
+            entrado no recupera nada.*
+
+            **`apoyada` y no un botón con caja:** por 19.7 la superficie ya
+            tiene su sólido —«Entrar»— y el resto baja a label. *Darle la
+            misma presencia a «olvidé mi contraseña» que a entrar sugeriría
+            que las dos son igual de probables.* */}
+        <Boton
+          variante="apoyada"
+          etiqueta={t('login.olvide')}
+          bloque
+          onPress={() => router.push('/recuperar')}
+        />
         </Entrada>
       </ScrollView>
       </EvitaTeclado>

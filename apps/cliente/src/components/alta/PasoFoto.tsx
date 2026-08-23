@@ -39,7 +39,6 @@ import {
 import { EncuadreFoto, PreviewSuperficies } from '@/components/EncuadreFoto';
 import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { ENCUADRE_DEFAULT, type Encuadre } from '@/components/foto-encuadre';
-import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import type { BorradorAlta } from './tipos';
@@ -130,7 +129,6 @@ export function PasoFoto({
             <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
               <AvatarMascota
                 nombre={nombre}
-                especie={esEspecieUi(borrador.especie) ? borrador.especie : undefined}
                 fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
                 tamano="lg"
               />

@@ -41,18 +41,19 @@
  * recorte: porque un estado de carga que no carga nada es un estado que
  * miente.*
  *
- * **② LA SALIDA DE LAS CUENTAS SOLO-GOOGLE ES SOPORTE, NO `/recuperar`.**
- * Medido: **`/recuperar` NO existe en el cliente** (`apps/cliente/src/app/`
- * no la tiene; el prestador sí). *Copiar el botón habría dado una puerta que
- * rebota — Ley 23 en su forma más barata de evitar.* El cliente **sí** tiene
- * camino a soporte (`lib/contacto.ts`, estrenado en `cuenta/ayuda`), y una
- * persona sin contraseña que llega por ahí sale con una respuesta humana.
+ * **② LA SALIDA DE LAS CUENTAS SOLO-GOOGLE APUNTA A `/recuperar`.**
  *
- * 🔴 **Esto NO cierra el hueco, lo puentea, y hay que decirlo:** la familia
- * solo-Google **sigue sin poder crearse una clave sola**. Lo correcto es que
- * el cliente tenga su `/recuperar` como el prestador — *es pantalla, no
- * motor: las cuatro funciones ya están*. **Queda declarado como lo que
- * falta, no disimulado con un botón que va a otro lado.**
+ * ⏪ **Nació apuntando a SOPORTE, y el cambio es la historia que vale:** al
+ * montar esta pantalla medí que **`/recuperar` no existía en el cliente**, así
+ * que el botón habría sido una puerta que rebota (Ley 23). Lo puenteé por
+ * WhatsApp **declarando que puenteaba y no cerraba**: *«la familia solo-Google
+ * sigue sin poder crearse una clave sola»*.
+ *
+ * ✅ **S103-C — la ruta ya existe** (`apps/cliente/src/app/recuperar.tsx`) y el
+ * botón la apunta. **Canjear un código deja una clave establecida donde no
+ * había ninguna**, que es lo que esa familia necesita.
+ * ☠️ **Con eso murieron `abrirSoporte`, sus dos imports y dos voces** (Ley 37)
+ * — *el puente se retira en el mismo acto en que llega el camino.*
  *
  * ── TESIS · FIRMA · CHANEL ───────────────────────────────────────────────
  * TESIS: tu cuenta es tuya, y podés cerrarle la puerta a cualquiera.
@@ -63,7 +64,7 @@
  */
 
 import { useState } from 'react';
-import { Linking, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -79,7 +80,6 @@ import {
 import { cambiarContrasena, MIN_LARGO_CONTRASENA, segundosDeEspera } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 
 export default function Seguridad() {
   const router = useRouter();
@@ -95,22 +95,9 @@ export default function Seguridad() {
   const [listo, setListo] = useState(false);
   /** El rebote se muestra EN LA PANTALLA y no solo en un toast: los de
    *  seguridad hay que poder releerlos, y un toast se va. */
-  const [rebote, setRebote] = useState<{ texto: string; salida: 'soporte' | null } | null>(null);
+  const [rebote, setRebote] = useState<{ texto: string; salida: 'recuperar' | null } | null>(null);
 
-  async function abrirSoporte() {
-    const url = urlWhatsApp(t('seguridad.mensajeSoporte'));
-    try {
-      await Linking.openURL(url);
-    } catch {
-      /* Sin WhatsApp instalado el enlace no abre. **El número humano se dice
-         en vez de dejar a la persona sin nada** — mismo fallback que
-         `cuenta/ayuda`. */
-      mostrar({
-        variante: 'neutro',
-        texto: t('seguridad.soporteFallback', { numero: WHATSAPP_EQUIPO_HUMANO }),
-      });
-    }
-  }
+
 
   async function cambiarClave() {
     if (cambiando) return;
@@ -135,10 +122,18 @@ export default function Seguridad() {
       if (r.codigo === 'sin_contrasena') {
         /* ⚠️ LAS CUENTAS SOLO-GOOGLE. A alguien que NO TIENE contraseña
            decirle «la actual no coincide» es mandarlo a probar variantes de
-           algo que no existe. **En el cliente la salida es soporte y no
-           `/recuperar`, porque esa ruta no existe acá** (ver la cabecera):
-           mejor una persona que responde que un botón que rebota. */
-        setRebote({ texto: t('seguridad.soloGoogle'), salida: 'soporte' });
+           algo que no existe.
+
+           ✅ **S103-C · LA SALIDA YA NO ES SOPORTE: ES `/recuperar`.** Cuando
+           monté esta pantalla, esa ruta **no existía en el cliente** y el
+           botón la habría mandado a una puerta que rebota, así que la puenteé
+           por WhatsApp **declarando que puenteaba y no cerraba**. Hoy la ruta
+           existe (`apps/cliente/src/app/recuperar.tsx`) y **canjear un código
+           deja una clave establecida donde no había ninguna** — que es la
+           salida que de verdad le sirve.
+           *El puente se retira en el mismo acto en que llega el camino: un
+           puente que sobrevive a su río manda al próximo a construir otro.* */
+        setRebote({ texto: t('seguridad.soloGoogle'), salida: 'recuperar' });
         return;
       }
       if (r.codigo === 'demasiados_intentos') {
@@ -233,12 +228,12 @@ export default function Seguridad() {
               <Texto variante="apoyo" color="danger">
                 {rebote.texto}
               </Texto>
-              {rebote.salida === 'soporte' && (
+              {rebote.salida === 'recuperar' && (
                 <View style={{ alignSelf: 'flex-start' }}>
                   <Boton
                     variante="secundario"
-                    etiqueta={t('seguridad.irASoporte')}
-                    onPress={() => void abrirSoporte()}
+                    etiqueta={t('seguridad.irARecuperar')}
+                    onPress={() => router.push('/recuperar')}
                   />
                 </View>
               )}

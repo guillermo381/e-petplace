@@ -830,7 +830,6 @@ function FilaSalida({
                       fotoUri: c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined,
                     }) ?? undefined
                   }
-                  especie={c.mascota && esEspecie(c.mascota.especie) ? c.mascota.especie : undefined}
                   tamano="xs"
                 />
               </View>

@@ -165,7 +165,6 @@ export default function Mostrador() {
                        la pieza, vive en `components/atender/pizarra-hoja`. */
                     <AvatarMascota
                       nombre={m.nombre}
-                      especie={esEspecie(m.especie) ? m.especie : undefined}
                       fotoUrl={caraDeMascota({ especie: m.especie, razaSlug: null }) ?? undefined}
                       tamano="sm"
                     />

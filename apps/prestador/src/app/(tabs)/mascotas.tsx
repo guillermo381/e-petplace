@@ -596,7 +596,6 @@ export default function Mascotas() {
                           fotoUri: m.foto_url ? urlsFotos.get(m.foto_url) : undefined,
                         }) ?? undefined
                       }
-                      especie={esEspecie(m.especie) ? m.especie : undefined}
                       tamano="sm"
                     />
                   }

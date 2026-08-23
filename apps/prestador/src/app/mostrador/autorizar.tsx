@@ -267,7 +267,7 @@ export default function AutorizarMostrador() {
                     }}
                     titulo={m.nombre}
                     inicio={
-                      <AvatarMascota nombre={m.nombre} fotoUrl={m.fotoUrl ?? undefined} especie={undefined} tamano="sm" />
+                      <AvatarMascota nombre={m.nombre} fotoUrl={m.fotoUrl ?? undefined} tamano="sm" />
                     }
                   />
                 </View>
@@ -289,7 +289,7 @@ export default function AutorizarMostrador() {
           <>
             <Tarjeta elevacion="reposo" relleno="amplio">
               <View style={{ alignItems: 'center', gap: spacing[3] }}>
-                <AvatarMascota nombre={elegida.nombre} fotoUrl={elegida.fotoUrl ?? undefined} especie={undefined} tamano="lg" />
+                <AvatarMascota nombre={elegida.nombre} fotoUrl={elegida.fotoUrl ?? undefined} tamano="lg" />
                 <Texto variante="titulo" centrado>{elegida.nombre}</Texto>
               </View>
             </Tarjeta>

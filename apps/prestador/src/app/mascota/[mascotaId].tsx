@@ -252,7 +252,6 @@ export default function DetalleMascota() {
               caraDeMascota({ especie: mascota.especie, razaSlug: null, fotoUri: fotoFirmada }) ??
               undefined
             }
-            especie={esEspecie(mascota.especie) ? mascota.especie : undefined}
             tamano="lg"
           />
           <Text
