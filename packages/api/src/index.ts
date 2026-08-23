@@ -8,6 +8,15 @@ export {
   iniciarSesion,
   cerrarSesion,
   obtenerSesion,
+  // ⚠️ S104-C · HUNK ADITIVO (regla 76(c)/(d), a RATIFICACIÓN de A): estas
+  // funciones YA viven en `wrappers/auth.ts` (S104-A) pero no estaban en el
+  // index, así que eran inalcanzables desde `@epetplace/api`. La invitación de
+  // empleado del prestador las necesita para registrar el consentimiento
+  // (LEY DE PARIDAD DE CUENTA). `registrarse` ya registra el suyo — esto es
+  // para el consumo DIRECTO de las puertas que no pasan por el alta.
+  registrarConsentimiento,
+  normalizarEmail,
+  type TipoConsentimiento,
   type SesionDueno,
   type InputRegistrarse,
   type InputIniciarSesion,

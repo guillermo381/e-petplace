@@ -256,12 +256,15 @@ export default function Seguridad() {
                 la clave a alguien. */}
             <Texto variante="apoyo">{t('seguridad.ayuda')}</Texto>
 
+            {/* S104-C · AUTOFILL DECLARADO (punto 5), espejo del cliente. */}
             <Campo
               label={t('seguridad.actual')}
               value={actual}
               onChangeText={setActual}
               secure
               autoCapitalize="none"
+              autoComplete="current-password"
+              textContentType="password"
             />
             <Campo
               label={t('seguridad.nueva')}
@@ -269,6 +272,8 @@ export default function Seguridad() {
               onChangeText={setNueva}
               secure
               autoCapitalize="none"
+              autoComplete="new-password"
+              textContentType="newPassword"
               ayuda={t('seguridad.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
             />
             <Campo
@@ -277,6 +282,8 @@ export default function Seguridad() {
               onChangeText={setConfirmacion}
               secure
               autoCapitalize="none"
+              autoComplete="new-password"
+              textContentType="newPassword"
             />
 
             {listo && (

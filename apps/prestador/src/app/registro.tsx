@@ -25,11 +25,29 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, EvitaTeclado, MarcaDeAgua, spacing, Texto, useAviso, useTheme } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  Encabezado,
+  Entrada,
+  EvitaTeclado,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  spacing,
+  Texto,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
 import { useTraduccion } from '@/i18n';
+
+/** La traza del texto legal mostrado (mismo marcador que el cliente): NO es
+ *  una URL navegable (D-336), es la marca estable de QUÉ vio la persona,
+ *  para el registro de consentimiento de A. */
+const URL_LEGAL = 'terminos-inline-v1';
 
 export default function Registro() {
   const router = useRouter();
@@ -50,7 +68,14 @@ export default function Registro() {
     if (!puedeEnviar || cargando) return;
     setCargando(true);
     setErrores({});
-    const r = await registrarse({ nombre: nombre.trim(), email: email.trim(), password });
+    const r = await registrarse({
+      nombre: nombre.trim(),
+      email: email.trim(),
+      password,
+      // el consentimiento viaja con el alta (motor de A): tipo `registro`,
+      // con la traza del texto legal mostrado.
+      urlLegalMostrada: URL_LEGAL,
+    });
     setCargando(false);
 
     if (!r.ok) {
@@ -80,8 +105,14 @@ export default function Registro() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* El ritual en dosis prestador (§7): senda + isotipo recogido, sin
+          respiración ni celebración. */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
       <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={28} variant="gradiente" />
+      </View>
       <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
@@ -102,6 +133,8 @@ export default function Registro() {
             value={nombre}
             onChangeText={setNombre}
             autoCapitalize="words"
+            autoComplete="name"
+            textContentType="name"
           />
           <Campo
             label={t('registro.emailLabel')}
@@ -111,6 +144,7 @@ export default function Registro() {
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
+            textContentType="username"
           />
           <Campo
             label={t('registro.passwordLabel')}
@@ -122,17 +156,26 @@ export default function Registro() {
             error={errores.password}
             secure
             autoCapitalize="none"
+            autoComplete="new-password"
+            textContentType="newPassword"
           />
         </View>
         </Entrada>
         <Entrada orden={2}>
-        <Boton
-          etiqueta={t('registro.crearMiCuenta')}
-          bloque
-          cargando={cargando}
-          deshabilitado={!puedeEnviar}
-          onPress={() => void crearCuenta()}
-        />
+        <View style={{ gap: spacing[3] }}>
+          <Boton
+            etiqueta={t('registro.crearMiCuenta')}
+            bloque
+            cargando={cargando}
+            deshabilitado={!puedeEnviar}
+            onPress={() => void crearCuenta()}
+          />
+          {/* la línea de términos (§4) — el consentimiento se registra con el
+              alta (motor de A). Honesta sin link (D-336). */}
+          <Texto variante="apoyo" color="secondary">
+            {t('bienvenida.terminos')}
+          </Texto>
+        </View>
         </Entrada>
       </ScrollView>
       </EvitaTeclado>

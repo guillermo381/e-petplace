@@ -75,6 +75,15 @@ export default function SolicitarAcceso() {
           )}
         </View>
         </Entrada>
+        {/* S104-C (paridad, firma founder 23-ago): los términos son
+            visibles en TODA puerta de entrada al ecosistema — esta es una
+            de ellas, aunque derive al equipo. Al pie y tenue (color
+            secondary): informa, no compite con la acción. Honesta sin link
+            (D-336). El spacer la ancla abajo sin romper el gap de la carta. */}
+        <View style={{ flex: 1 }} />
+        <Texto variante="apoyo" color="secondary">
+          {t('bienvenida.terminos')}
+        </Texto>
       </View>
     </View>
   );
