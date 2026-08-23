@@ -1,0 +1,14 @@
+{
+  "mailer_subjects_confirmation": "Confirm Your Signup",
+  "mailer_templates_confirmation_content": "<h2>Confirm your signup</h2>\n\n<p>Follow this link to confirm your user:</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Confirm your mail</a></p>",
+  "mailer_subjects_invite": "You have been invited",
+  "mailer_templates_invite_content": "<h2>You have been invited</h2>\n\n<p>You have been invited to create a user on {{ .SiteURL }}. Follow this link to accept the invite:</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Accept the invite</a></p>",
+  "mailer_subjects_magic_link": "Your Magic Link",
+  "mailer_templates_magic_link_content": "<h2>Magic Link</h2>\n\n<p>Follow this link to login:</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Log In</a></p>",
+  "mailer_subjects_email_change": "Confirm Email Change",
+  "mailer_templates_email_change_content": "<h2>Confirm Change of Email</h2>\n\n<p>Follow this link to confirm the update of your email from {{ .Email }} to {{ .NewEmail }}:</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Change Email</a></p>",
+  "mailer_subjects_recovery": "Reset Your Password",
+  "mailer_templates_recovery_content": "<div lang=\"es\" style=\"font-family: sans-serif; max-width: 480px; margin: 0 auto;\">\n  <h2>Restablece tu contraseña</h2>\n  <p>Usa este código en la app para crear una contraseña nueva:</p>\n  <p style=\"font-size: 32px; font-weight: bold; letter-spacing: 6px; text-align: center; padding: 16px 0;\">{{ .Token }}</p>\n  <p>El código vence pronto. Si no pediste este cambio, ignora este correo — tu contraseña sigue igual.</p>\n  <p style=\"color: #666; font-size: 13px;\">Nadie de e-PetPlace te va a pedir este código.</p>\n</div>",
+  "mailer_subjects_reauthentication": "Confirm Reauthentication",
+  "mailer_templates_reauthentication_content": "<h2>Confirm reauthentication</h2>\n\n<p>Enter the code: {{ .Token }}</p>"
+}
