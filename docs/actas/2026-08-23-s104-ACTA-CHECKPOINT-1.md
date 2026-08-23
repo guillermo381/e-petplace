@@ -72,7 +72,7 @@ pedir.*
 
 ---
 
-## ⑤ EL MÉTODO SE MIRÓ A SÍ MISMO — cuatro autocorrecciones en un día
+## ⑤ EL MÉTODO SE MIRÓ A SÍ MISMO — CINCO autocorrecciones en un día
 
 Se registran **porque son el activo**, no la anécdota:
 
@@ -91,8 +91,16 @@ Se registran **porque son el activo**, no la anécdota:
    y la segunda **corrigió a la orden del propio founder**, que la dio *«sin ver el
    choque»*.
 
+5. **D encontró un verde flojo DENTRO del instrumento escrito para no tenerlos.**
+   La auto-prueba de `verify-dns-correo.mjs` daba **5/5 rojo por la razón
+   equivocada**: medía contra `example.com` con un NS que **no es autoritativo para
+   ese dominio** ⇒ detectaba *«este servidor no contesta»*, no *«el registro no
+   está»*. **Color bueno, motivo malo.** *Un instrumento cuya auto-prueba pasa por
+   la razón equivocada certifica su propia ceguera.*
+
 **Y una del founder que vale igual:** la línea *«verificá que no haya pisado a
 Resend»* es la única razón por la que el DKIM no se descubrió semanas después.
+**Ninguna de las cinco autocorrecciones la produjo un gate.**
 
 ---
 
@@ -116,7 +124,8 @@ Resend»* es la única razón por la que el DKIM no se descubrió semanas despu�
 
 | qué | dueño | nota |
 |---|---|---|
-| **D-894** restaurar el DKIM → verificar → **recién ahí** el DMARC | **founder** (es su panel) | D tiene el valor exacto, capturado horas antes del borrado |
+| ✅ **D-894 CERRADA el mismo día**: DKIM restaurado y verificado en los 4 resolvers · **daño final CERO medido** (el correo de las 22:53 llegó a bandeja, no a spam) | — | lo salvó una captura de 3 h antes ⇒ **L-413** y `verify-dns-correo.mjs` |
+| 🔴 **El DMARC sigue sin cargar** — y **no es freno de D: no tiene la credencial de DNS** (verificado) | **founder** | el valor está listo |
 | **D-892** el buzón: `privacidad@` ya reenvía ✅ — falta cerrar la promesa de P15 | founder | el alta de buzones es lo que disparó D-894 |
 | **D-893** 💣 `Confirm signup` + apagar `mailer_autoconfirm` = **UN SOLO ACTO** | mesa | si se apaga primero, **el registro se rompe para todos** |
 | **D-628** cerrada a medias: falta el **idioma del usuario** | mesa | costo hoy **cero** (0 usuarios en inglés); **no se archiva como cerrada** |
@@ -131,8 +140,8 @@ Resend»* es la única razón por la que el DKIM no se descubrió semanas despu�
 
 **396 migraciones locales = 396 remoto** · **4 typechecks VERDE** · **`verify:diseno`
 VERDE con 54 reglas** (nace **R63**) · **4 migraciones de A**, las cuatro con
-**reversa escrita ANTES** y **76(g) declarada** · **fichas hasta D-894** ·
-**lecciones hasta L-412** · **las cuatro ramas de pista en 0 commits fuera de
+**reversa escrita ANTES** y **76(g) declarada** · **fichas hasta D-894** (D-891 y D-894 nacidas y cerradas el mismo día) ·
+**lecciones hasta L-413** · **las cuatro ramas de pista en 0 commits fuera de
 `main`**, verificado por conteo.
 
 ⚠️ **Nota operativa que costó dos veces (L-411):** una migración cuyo cinturón usa

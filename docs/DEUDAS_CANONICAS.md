@@ -20514,7 +20514,17 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 **Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
 
-#### D-894 — 🟠 EL ALTA DE BUZONES EN HOSTINGER BORRÓ EL DKIM DE RESEND
+#### D-894 — ✅ CURADA EL MISMO DÍA · el alta de buzones en Hostinger borró el DKIM de Resend
+✅ **RESTAURADA Y VERIFICADA CONTRA EL OBJETO (23-ago-2026).** El founder recargó `resend._domainkey` con el valor que D había capturado a las 15:30 —**tres horas antes del borrado**— y D lo verificó **byte a byte contra los DOS NS autoritativos y contra `8.8.8.8` y `1.1.1.1`: idéntico en los cuatro.** Resto de Resend intacto.
+
+**DAÑO FINAL: CERO, Y MEDIDO — no supuesto.** El correo de recuperación de las 22:53 UTC (dentro de la ventana sin DKIM) **llegó a BANDEJA DE ENTRADA, no a spam**, confirmado por el founder. *Ni siquiera durante la ventana se degradó la entrega.* Y su severidad 🟠 —no 🔴— resultó correcta por la razón que D dio al fichar: **DMARC alineaba por SPF igual.**
+
+**Lo que deja como mecanismo, por dictado del founder (*«vale una re-medición programada, no confianza»*): `scripts/verify-dns-correo.mjs`.** Ver **L-413**, y sobre todo la confesión de método de su auto-prueba.
+
+🔴 **LO QUE SIGUE ABIERTO Y ES DEL FOUNDER: el DMARC no está cargado.** Y la precisión importa: **no es un freno de D — D no tiene la credencial de DNS** (verificado: cero credenciales de DNS en el keychain, cero config de DNS en el repo). *D lo declaró como imprecisión propia por no haberlo aclarado dos turnos antes, cuando aceptó «cargá el DMARC» sin decir que el DNS nunca fue suyo.* **El valor está listo; la llave es del founder.**
+
+<details><summary>Texto original de la ficha (23-ago, antes de curar)</summary>
+
 🟠 **MEDIDO POR D (23-ago-2026), NO TEORIZADO — y el registro está borrado, no propagándose.**
 
 Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, confirmado con correo de prueba), **Hostinger escribió sus tres `_domainkey` y se llevó el ajeno**: `resend._domainkey.epetplace.com` **ya no existe**.
@@ -20535,4 +20545,30 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **CÓMO APARECIÓ, y es lo que hay que copiar:** no lo encontró un gate ni una sospecha. **Lo encontró que el founder pusiera «verificá que no haya pisado a Resend» en la orden.** *Sin esa línea, el DMARC se cargaba y el DKIM se descubría semanas después por deliverability.* ⇒ **toda alta de servicio sobre un DNS compartido se cierra RE-MIDIENDO los registros de los otros servicios, no solo los propios.**
 
 **Dueño:** founder (es su panel de DNS). **Evidencia:** `docs/relevamientos/2026-08-23-s104d-HOSTINGER-PISO-EL-DKIM-DE-RESEND.md`.
-☠️ **Condición de muerte:** `resend._domainkey.epetplace.com` responde en los dos NS autoritativos **y** D lo verifica; recién entonces se carga el DMARC.
+</details>
+
+☠️ **Condición de muerte (CUMPLIDA para el DKIM; PENDIENTE para el DMARC):** `resend._domainkey` responde en los dos NS autoritativos **y** D lo verificó ✅; **falta cargar el DMARC**, que es la llave del founder.
+
+#### L-413 — un panel que administra un servicio puede BARRER los registros de otro, y no lo avisa
+**Firmada por el founder (23-ago-2026), sobre el caso del DKIM de Resend.**
+**Medida y redactada por la pista D; depositada por A** (territorio). *D mandó el literal **sin número**, con su razón: «la última vez se me corrió entre la medición y el depósito» (L-410 → L-412). **Aprendió del caso anterior en el mismo día** — se asigna acá: **L-413**.*
+
+**El caso:** activar el correo del dominio en el panel de Hostinger escribió sus tres selectores DKIM (`hostingermail-a/b/c`), sus MX y un SPF de apex — **y en el mismo acto BORRÓ `resend._domainkey`**, el registro que firma el correo saliente de la casa. **Nadie lo tocó a mano: el panel lo hizo al «administrar el correo del dominio».**
+
+> **La ley: cuando un proveedor toma la administración de una zona o de un servicio, hay que MEDIR los registros de los otros proveedores que viven ahí. No alcanza con que el alta haya salido bien: el alta salió bien Y se llevó algo puesto.**
+
+**Por qué es una clase y no un caso — el modo de falla es el SILENCIO, y es de los caros:** un DKIM borrado **no tira ningún error**. El correo se sigue enviando, el proveedor lo sigue aceptando, y la degradación ocurre **del otro lado** —reputación, y sobre todo **REENVÍO**, donde SPF se rompe siempre y **lo único que sobrevive es DKIM**. *Un registro que desaparece no avisa: deja de avisar.*
+
+**La ironía que lo vuelve memorable:** *la misma acción que creó el reenvío rompió lo único que hace que un reenvío sobreviva.*
+
+**Lo que lo cazó, y no fue un gate:** que el founder pusiera en la orden *«verificá que no haya pisado los registros de Resend»*. **Sin esa línea se cargaba el DMARC y el DKIM se descubría semanas después por deliverability.**
+
+**Lo que salvó el arreglo:** el valor exacto estaba capturado en una medición de **tres horas antes**. Sin esa captura había que pedírselo al proveedor. ⇒ **COROLARIO: antes de tocar la administración de un servicio, se captura el estado de la zona** — *la captura cuesta un `dig` y es la diferencia entre restaurar en un minuto y abrir un ticket.*
+
+**Mecanizada:** `scripts/verify-dns-correo.mjs` mide los cinco registros contra los autoritativos, con los públicos como control de propagación, y **sin `dig` sale exit 2 NO CONCLUYENTE, jamás verde** (mismo criterio que `verify-edge-deno` y que el brazo C de R63: *«no puedo medir» no es «está bien»*).
+
+> **⚠️ Y su auto-prueba trae la confesión de método que más vale de todo el episodio, porque el defecto ocurrió DENTRO del archivo escrito para no tenerlo:** la primera versión medía los cinco registros sobre `example.com` y daba **5/5 rojo — por la razón equivocada**. `ns1.dns-parking.com` **no es autoritativo para `example.com`**, así que lo que detectaba era *«este servidor no contesta por ese dominio»*, no *«el registro no está»*. **Color bueno, motivo malo: el verde flojo exacto que ese archivo existe para evitar.** Corregida: ahora prueba **los dos caminos de rojo contra NUESTRO dominio** — un selector que de verdad no existe (**AUSENTE**) y el DKIM real contra un valor corrompido (**DISTINTO**). *Un instrumento cuya auto-prueba pasa por la razón equivocada certifica su propia ceguera.*
+
+**Hermanas:** `L-402` (*no basta «¿está alcanzable?» — hace falta «¿corrió alguna vez?»*) y `L-412` (*un canal de reporte se apunta a una dirección que se vio recibir*). **Las tres son la misma familia: lo que no se mide no avisa que se rompió.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
