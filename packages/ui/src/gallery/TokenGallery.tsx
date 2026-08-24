@@ -21,6 +21,9 @@ import { PaseoDeHuellas } from '../brand/PaseoDeHuellas'
 import { RespiroDeMarca, HuellaDeLlegada } from '../brand/RitualDeEntrada'
 import { LockupMarca } from '../brand/LockupMarca'
 import { PantallaDeCandado, type EstadoCandado } from '../components/PantallaDeCandado'
+import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestructiva'
+import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
+import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
@@ -1907,6 +1910,27 @@ function EjemploBadge() {
 /** El ojo en su consumidor real: un campo `secure` vivo. Existe para que
  *  el gate no juzgue el glifo suelto sino EL CONTROL — que es donde el
  *  founder lo va a ver. */
+/** La confirmación destructiva necesita estado para abrirse: la Hoja es
+ *  el PASO 2 y el disparador es el paso 1 — la galería monta los dos para
+ *  que el gate vea el patrón entero y no una Hoja suelta. */
+function EjemploConfirmacionDestructiva() {
+  const [abierta, setAbierta] = useState(false)
+  return (
+    <>
+      <Boton variante="secundario" etiqueta="Borrar la tarjeta" onPress={() => setAbierta(true)} />
+      <HojaConfirmacionDestructiva
+        visible={abierta}
+        onCerrar={() => setAbierta(false)}
+        titulo="Borrar medio de pago"
+        sujeto="Visa ···· 4821"
+        etiquetaConfirmar="Borrar la tarjeta"
+        etiquetaCancelar="Cancelar"
+        onConfirmar={() => setAbierta(false)}
+      />
+    </>
+  )
+}
+
 function EjemploCampoClave() {
   const [v, setV] = useState('unaclave123')
   return <Campo label="Contraseña" value={v} onChangeText={setV} secure autoCapitalize="none" />
@@ -3759,6 +3783,53 @@ function GaleriaInterna() {
               envoltorio lleva box-none: estirado a todo el ancho, un View sin eso recibiría los toques
               del aire a los costados — lo que R54 existe para cazar.
             </Texto>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="S104 · LA SALIDA (P15) — las tres piezas del cierre de cuenta">
+          {/* ⚠️ LAS TRES NACEN INERTES: medido, el motor de cierre es CERO
+              (cero `cerrar_cuenta`, cero `anonimizar`, cero `baja_cuenta` en
+              packages/api). Se pueden mirar y gatear igual — lo que se juzga
+              acá es la VOZ y la jerarquía.
+
+              🔴 Lo que hay que mirar en la del medio: las DOS columnas. P15
+              §4 prohíbe con todas las letras el «vamos a borrar todo», y por
+              eso la pieza no deja montar una sola. */}
+          <View style={{ gap: spacing[6] }}>
+            <Texto variante="apoyo">
+              ① «Esto se va, esto queda» — cada consecuencia declara su respaldo (el wrapper que la ejecuta,
+              o `sin_motor`). Eso es lo que hace mecanizable a R64.
+            </Texto>
+            <ConsecuenciasDelCierre
+              seVa={[
+                { texto: 'Tu forma de entrar', respaldo: 'sin_motor' },
+                { texto: 'Los avisos que te llegaban', respaldo: 'sin_motor' },
+              ]}
+              queda={[
+                {
+                  texto: 'Tus facturas y pagos',
+                  razon: 'La ley obliga a conservarlos, desligados de vos.',
+                  respaldo: 'sin_motor',
+                },
+                {
+                  texto: 'La historia de tus mascotas que compartís con otra familia',
+                  razon: 'Es de ellos también: sale tu vínculo, no su expediente.',
+                  respaldo: 'sin_motor',
+                },
+              ]}
+            />
+
+            <Separador />
+            <Texto variante="apoyo">
+              ② El estado mientras la ventana corre. Dice FECHA y no contador — el porqué (medido) vive en la pieza.
+            </Texto>
+            <CierreEnCurso fecha="2026-09-23" onCancelar={() => {}} />
+
+            <Separador />
+            <Texto variante="apoyo">
+              ③ La segunda confirmación. El sujeto PRESIDE y es obligatorio; un sólido (el destructivo) y la salida en ghost.
+            </Texto>
+            <EjemploConfirmacionDestructiva />
           </View>
         </Seccion>
 
