@@ -180,6 +180,9 @@ export {
 } from './components/SelectorSegmentado'
 export { SliderPrecio, type SliderPrecioProps } from './components/SliderPrecio'
 export { Interruptor, type InterruptorProps } from './components/Interruptor'
+// S104-C · la ACEPTACIÓN legal (checkbox). NO reemplaza a Interruptor (switch):
+// §4.3/§38.10 del T&C exigen «casilla», y un switch no cumple ese literal.
+export { Casilla, type CasillaProps } from './components/Casilla'
 export { StepperCantidad, ALTO_STEPPER_COMPACTO, ALTO_STEPPER_MENUDO, ALTO_STEPPER_ANCHO, type StepperCantidadProps, type TamanoStepper } from './components/StepperCantidad'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
 export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'

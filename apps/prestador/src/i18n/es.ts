@@ -3901,4 +3901,20 @@ export const prestadorEs = {
     error: 'No pudimos preparar tu copia ahora. Prueba de nuevo en un momento.',
     pedirDeNuevo: 'Pedirla de nuevo',
   },
+
+  // S104-C · la aceptación EXPLÍCITA del prestador (firma founder (a)). El
+  // label se parte antes/enlace para que el enlace sea un tocable propio que
+  // abre el documento SIN marcar la casilla.
+  aceptacion: {
+    tycAntes: 'Acepto los',
+    tycEnlace: 'Términos y Condiciones Pet Professional',
+    tycAccesible: 'Acepto los Términos y Condiciones Pet Professional',
+    privAntes: 'Acepto la',
+    privEnlace: 'Política de Privacidad',
+    privAccesible: 'Acepto la Política de Privacidad',
+    arbitraje: 'Acepto resolver las controversias por arbitraje (opcional)',
+    arbitrajeAccesible: 'Acepto resolver las controversias por arbitraje. Es opcional.',
+    arbitrajeNota:
+      'Si no marcas esto, el contrato igual rige y las controversias van a los jueces del Ecuador.',
+  },
 } as const;

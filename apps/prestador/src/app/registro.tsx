@@ -39,9 +39,21 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
+import {
+  MIN_LARGO_CONTRASENA,
+  VERSION_LEGAL,
+  decidirConsentimiento,
+  registrarse,
+  type CodigoErrorAuth,
+} from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
+import {
+  ACEPTACION_INICIAL,
+  AceptacionTerminos,
+  aceptacionCompleta,
+  urlTycProfesional,
+} from '@/components/aceptacion-terminos';
 import { useTraduccion } from '@/i18n';
 
 export default function Registro() {
@@ -56,11 +68,14 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState<{ email?: string; password?: string }>({});
+  // S104-C · la aceptación explícita (firma founder (a)): dos checks
+  // obligatorios (T&C profesional + privacidad) + el arbitraje opcional.
+  const [aceptacion, setAceptacion] = useState(ACEPTACION_INICIAL);
 
   const puedeEnviar = nombre.trim().length > 0 && email.trim().length > 0 && password.length > 0;
 
   async function crearCuenta() {
-    if (!puedeEnviar || cargando) return;
+    if (!puedeEnviar || !aceptacionCompleta(aceptacion) || cargando) return;
     setCargando(true);
     setErrores({});
     const r = await registrarse({
@@ -90,14 +105,29 @@ export default function Registro() {
 
     if (!r.data.sesion_activa) {
       // el proyecto exige confirmar el correo: el registro gana un paso —
-      // la pantalla de código (S104-C, misma mecánica que el cliente). El
-      // consentimiento se persiste al confirmar (D-893); la URL la resuelve
-      // `URL_LEGAL` en packages/api, no viaja por la pantalla.
-      router.replace({ pathname: '/verificar-correo', params: { email: email.trim() } });
+      // la pantalla de código (S104-C). El consentimiento OBLIGATORIO se
+      // persiste al confirmar (D-893). El ARBITRAJE es un acto aparte y sin
+      // sesión no se puede escribir, así que su elección VIAJA por parámetro
+      // y se registra al confirmar (misma razón que los documentos).
+      router.replace({
+        pathname: '/verificar-correo',
+        params: { email: email.trim(), arbitraje: aceptacion.arbitraje ? 'si' : 'no' },
+      });
       return;
     }
-    // la sesión está viva y la cuenta VACÍA: el guard raíz re-decide y
-    // la rama sin_rol habla con la tercera voz ("Tu cuenta está lista").
+    // la sesión está viva (autoconfirm): el arbitraje se registra AHORA, con
+    // su fecha —true o false—, porque un consentimiento que solo sabe decir
+    // que sí no es un consentimiento (§38.10). Best-effort: entrar es lo
+    // primario. La URL y la versión salen de packages/api (L-166).
+    await decidirConsentimiento({
+      acto: 'arbitraje',
+      aceptado: aceptacion.arbitraje,
+      version: VERSION_LEGAL.terminos_professional,
+      url: urlTycProfesional(),
+      contexto: 'registro_profesional',
+    });
+    // la cuenta nace VACÍA: el guard raíz re-decide y la rama sin_rol habla
+    // con la tercera voz ("Tu cuenta está lista").
     marcarRegistroReciente(email);
     router.replace('/');
   }
@@ -161,19 +191,22 @@ export default function Registro() {
         </View>
         </Entrada>
         <Entrada orden={2}>
-        <View style={{ gap: spacing[3] }}>
+        <View style={{ gap: spacing[5] }}>
+          {/* S104-C · la aceptación EXPLÍCITA (firma founder (a)) reemplaza la
+              línea de términos implícita: dos checks obligatorios con enlace a
+              su documento + el arbitraje opcional. Los documentos quedan
+              disponibles ANTES del acto de aceptación (§4.2). */}
+          <AceptacionTerminos
+            estado={aceptacion}
+            onCambio={(p) => setAceptacion((a) => ({ ...a, ...p }))}
+          />
           <Boton
             etiqueta={t('registro.crearMiCuenta')}
             bloque
             cargando={cargando}
-            deshabilitado={!puedeEnviar}
+            deshabilitado={!puedeEnviar || !aceptacionCompleta(aceptacion)}
             onPress={() => void crearCuenta()}
           />
-          {/* la línea de términos (§4) — el consentimiento se registra con el
-              alta (motor de A). Honesta sin link (D-336). */}
-          <Texto variante="apoyo" color="secondary">
-            {t('bienvenida.terminos')}
-          </Texto>
         </View>
         </Entrada>
       </ScrollView>

@@ -3098,4 +3098,17 @@ export const prestadorEn = {
     error: 'We couldn’t prepare your copy right now. Please try again in a moment.',
     pedirDeNuevo: 'Request it again',
   },
+
+  aceptacion: {
+    tycAntes: 'I accept the',
+    tycEnlace: 'Pet Professional Terms and Conditions',
+    tycAccesible: 'I accept the Pet Professional Terms and Conditions',
+    privAntes: 'I accept the',
+    privEnlace: 'Privacy Policy',
+    privAccesible: 'I accept the Privacy Policy',
+    arbitraje: 'I agree to resolve disputes through arbitration (optional)',
+    arbitrajeAccesible: 'I agree to resolve disputes through arbitration. It is optional.',
+    arbitrajeNota:
+      'If you don’t check this, the contract still applies and disputes go to the courts of Ecuador.',
+  },
 } as const satisfies Espejo<typeof prestadorEs>;
