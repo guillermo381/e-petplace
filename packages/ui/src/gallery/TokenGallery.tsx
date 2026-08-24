@@ -51,6 +51,7 @@ import { TarjetaEstado } from '../components/TarjetaEstado'
 import { SliderPrecio } from '../components/SliderPrecio'
 import { VozComision } from '../components/VozComision'
 import { Interruptor } from '../components/Interruptor'
+import { Casilla } from '../components/Casilla'
 import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { Texto } from '../components/Texto'
@@ -2294,6 +2295,9 @@ function EjemploAcentoControl() {
   const [i, setI] = useState(1)
   const [avisos, setAvisos] = useState(true)
   const [ofrece, setOfrece] = useState(true)
+  // S104-C · las casillas de aceptación (checkbox, NO switch)
+  const [aceptoT, setAceptoT] = useState(false)
+  const [acepto2, setAcepto2] = useState(true)
   return (
     <View style={{ gap: spacing[4] }}>
       {/* TONAL — selección entre pares (Ley 22) */}
@@ -2321,6 +2325,34 @@ function EjemploAcentoControl() {
           interruptor · oficio (la B: “Ofrecer esta duración”)
         </Text>
       </View>
+      {/* CASILLA — la ACEPTACIÓN (checkbox), NO el Interruptor (switch).
+          El link inline abre sin marcar; sin marcar jamás dice error. */}
+      <Casilla
+        marcada={aceptoT}
+        onCambio={setAceptoT}
+        etiquetaAccesible="Acepto los Términos y Condiciones"
+        registro="oficio"
+      >
+        <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          Acepto los{' '}
+          <Text
+            onPress={() => {}}
+            style={{ color: theme.accent.primary, textDecorationLine: 'underline' }}
+          >
+            Términos y Condiciones
+          </Text>
+          {'  '}· casilla · oficio (obligatorio — el link abre sin marcar)
+        </Text>
+      </Casilla>
+      <Casilla
+        marcada={acepto2}
+        onCambio={setAcepto2}
+        etiquetaAccesible="Casilla de control, cliente"
+      >
+        <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          casilla · control (magenta) — sin marcar es estado, jamás error
+        </Text>
+      </Casilla>
       <SliderPrecio pasos={pasos} indice={i} onCambio={setI} etiqueta="Precio" registro="control" />
       <EjemploStepper />
       <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
