@@ -20887,6 +20887,9 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Nota de alcance, para que nadie lea el 100 % como catástrofe:** hoy **no hay usuarios reales**, y **por eso es el momento**. *El día que los haya, esta decisión se toma con gente adentro y con expedientes que ya importan.*
 
+✅ **RESUELTA POR FIRMA (24-ago-2026): el cierre se lleva las mascotas.** El brazo de familia **salió del pre-chequeo** (`20260824210000`) y **el flujo lo vuelve honesto invirtiendo el orden**: la pregunta *«¿alguien más va a cuidarlas?»* se hace **ANTES de confirmar**, y si dice que sí **el cierre no se solicita todavía** — invita, y cierra después. *Nada queda en espera porque nada se solicitó.*
+**Medido antes y después, con discriminador en las dos direcciones:** usuarios con mascota que rebotan **19 de 19 → 2 de 18** (los 2 rebotan por ser **además** dueños de negocio, o sea por el brazo correcto) · **dueños de negocio: 6 de 6 siguen rebotando** — *sin ese segundo número, un «ya no rebota nadie» sería indistinguible de haber roto el guard.*
+
 **Dueño:** founder + producto (la decisión) · legal (contra §19.4 y §18) · producto (la superficie, si gana el camino 2).
 **Disparo: ANTES de abrir el cierre de cuenta a usuarios reales** — o sea antes de encender `cierre_cuenta_vivo` de forma permanente.
 ☠️ **Condición de muerte:** existe una firma que dice qué pasa con las mascotas cuando se va el único adulto, **y el pre-chequeo la implementa** — sea ofreciendo transferencia, sea declarando el destino, sea confirmando que el camino asistido es la respuesta correcta **y entonces la app lo dice sin llamarlo excepción**.
@@ -20972,6 +20975,51 @@ rol_invitado text not null default 'adulto_autorizado'
 
 ⚠️ **Y una observación que aplica a los tres, medida:** el correo es **el único canal** con alguien cuya cuenta está cerrada. ⇒ **cualquiera de los tres depende de un motor de correo que hoy está en sombra.**
 
+✅ **RESUELTA POR FIRMA (24-ago-2026), y el choque ② fue el que la mató.** **El flujo con invitación NO se construye así.** Se invierte el orden: la pregunta va **antes**, y si dice que sí **el cierre no se solicita** — la persona invita, y cierra después, cuando la otra ya está adentro. ⇒ **el limbo desaparece porque el estado de espera deja de existir**, y con él muere la pregunta *«¿y si nunca acepta?»*: **no hay nada esperando.** *La cura no fue elegir uno de los tres caminos servidos: fue quitar el estado que los hacía necesarios.* El acto que faltaba se ficha aparte en **`D-906`**.
+
 **Dueño:** founder (los dos choques y la elección) · producto (el traspaso de titularidad, que es construcción nueva).
 **Disparo: ANTES de construir el flujo** — *el motor de invitación no puede sostenerlo como está.*
 ☠️ **Condición de muerte:** existe un acto de traspaso de titularidad **con consentimiento del que recibe**, y una respuesta firmada a *«¿y si nunca acepta?»* — **con su ventana medida contra la del cierre, no supuesta igual.**
+
+#### D-906 — 🔴 TRASPASAR LA TITULARIDAD DE UNA FAMILIA: el acto que no existe, y **no es ensanchar un CHECK**
+🔴 **ES LETRA, NO CÓDIGO.** Nace del freno de `D-905` (24-ago-2026) y **el founder firmó que NO se construye hoy.**
+
+**El hueco, medido:** `familia_invitaciones.rol_invitado` tiene `check (rol_invitado = 'adulto_autorizado')`. ⇒ **una invitación puede SUMAR a alguien, jamás traspasarle la titularidad.** *El CHECK se escribió a propósito en la tanda 2 —«heredar el molde, JAMÁS su alcance»— y era correcto para su caso.*
+
+⚠️ **Por qué NO se resuelve ensanchando ese CHECK, que es la salida barata:** *«sumate a mi familia» y «hacete responsable de este expediente» son dos decisiones distintas, y la segunda la toma quien RECIBE.* **Un CHECK más ancho convertiría una invitación normal en un traspaso silencioso** — y el que acepta creería estar haciendo lo primero.
+
+**Las dos preguntas que la letra tiene que contestar, y son del founder:**
+1. **¿Qué acepta exactamente quien recibe?** *La titularidad no es solo un permiso: es quedar como responsable del expediente de un animal que quizá ni conoce, con sus citas, su historia clínica y su continuidad de cuidado.*
+2. **¿Y si después se arrepiente?** *La familia ya se quedó sin el titular anterior — que se fue. Un traspaso que se puede devolver a alguien que ya no existe no se puede devolver.*
+
+**Y una tercera que sale de medir, no de razonar:** el traspaso **le da acceso a un expediente que ya existe, con historia anterior**. ⇒ *¿ve todo lo pasado, o solo desde que entró?* **La casa ya tuvo que contestar esto para el prestador (`A3` del Bio-Expediente); acá el sujeto es otro y la respuesta puede ser distinta.**
+
+**Dueño:** founder (la letra) · producto (la superficie y su consentimiento).
+**Disparo:** cuando alguien necesite irse **dejando sus mascotas con otra persona**. *Hoy el flujo firmado lo esquiva invirtiendo el orden —se invita primero y se cierra después—, así que **no bloquea el cierre**; bloquea el caso de quien quiere traspasar sin cerrar.*
+☠️ **Condición de muerte:** existe un acto de traspaso con consentimiento explícito del que recibe, y su letra dice qué acepta y qué pasa si se arrepiente.
+
+#### D-907 — 🟡 `estado_vida` SABE EXPRESAR LA BAJA, NO LA EQUIVOCACIÓN
+🟡 **Primer paso de `D-904`, ejecutado como MEDICIÓN antes de construir** (orden del founder: *«medir si la casa ya sabe expresar la baja de una mascota antes de construir una puerta nueva»*).
+
+**Medido:**
+
+| | |
+|---|---|
+| valores que admite | `CHECK (estado_vida = ANY (ARRAY['activa','perdida','fallecida']))` |
+| en uso hoy | **`activa` = 78. Las otras dos: cero.** |
+| quién lo lee o escribe | **15 funciones** — entre ellas `_trg_mascotas_memorial_planes`, `_trg_mascotas_purga_cola_memorial`, `_mascota_elegible_servicio` |
+
+✅ **La casa SÍ sabe expresar «esta mascota ya no está» sin borrarla** — y con consecuencias reales: el memorial **apaga planes y encola purgas**. *Ese motor existe, está probado y no hay que construirlo.*
+
+🔴 **PERO no cubre el caso frecuente de `D-904`.** Los tres valores son **hechos de la vida del animal**; el caso que no tiene salida es **un error de carga**: un duplicado, una mascota tecleada mal, una que nunca existió.
+
+> **Un duplicado cargado por error no está «fallecido». Marcarlo así sería registrar una muerte que no ocurrió — en el expediente cuya razón de existir es no mentir.**
+
+⚠️ **Y las consecuencias lo vuelven inaceptable, no solo impreciso:** `fallecida` **dispara el memorial** — apaga los planes, encola purgas y cambia la voz del producto. *Usarlo para limpiar un duplicado le mandaría a una familia el tono de un duelo por un animal que nunca existió.*
+
+⇒ **Falta un cuarto estado, o un camino aparte, para «esta ficha no debería existir».** *No es sinónimo de los otros tres y no puede compartir sus efectos.*
+
+**Lo que esta medición SÍ ahorra:** el caso *«la mascota murió o se perdió»* **ya está resuelto y no entra a `D-904`**. **`D-904` se achica a un solo caso: el error de carga.** *Un frente que parecía «no se puede dar de baja una mascota» resultó ser «no se puede corregir un error de carga» — y eso es más chico y más claro.*
+
+**Dueño:** producto. **Disparo:** con `D-904`.
+☠️ **Condición de muerte:** existe un camino para retirar una ficha cargada por error **que no la declara muerta ni dispara el memorial**.
