@@ -182,6 +182,15 @@ export default function CerrarCuenta() {
           <Texto variante="cuerpo" color="secondary">
             {t('cerrarCuenta.confirmarCuerpo', { correo: CORREO_PRIVACIDAD })}
           </Texto>
+          {/* S104-C · firma del founder (vía A): la imagen del carnet se
+              REPRODUCE en las impresiones que la familia ya generó. Al borrarse
+              (con el cierre definitivo, día 30) esas impresiones quedan sin
+              ella — y quien cierra tiene que enterarse ANTES de confirmar, no
+              después. Va acá, en el punto sin retorno, además de la lista del
+              paso 1. */}
+          <Texto variante="cuerpo" color="secondary">
+            {t('cerrarCuenta.confirmarCarnet')}
+          </Texto>
           <View style={{ paddingTop: spacing[4], gap: spacing[3] }}>
             <Boton
               variante="destructivo"

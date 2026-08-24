@@ -2537,6 +2537,10 @@ export const clienteEs = {
     // ésta es la última pantalla que ve — después no puede volver a leerlo.
     confirmarCuerpo:
       'Al confirmar, pierdes el acceso ahora mismo. Tienes 30 días para volver atrás escribiendo a {{correo}}; pasado ese plazo, ya no podrás entrar ni recuperarla. Guarda ese correo antes de continuar.',
+    // Firma founder: la imagen del carnet se reproduce en las impresiones ya
+    // generadas; al borrarse (cierre definitivo) quedan sin ella.
+    confirmarCarnet:
+      'Y algo que solo se ve al cerrar: cuando el cierre sea definitivo, las fotos del carnet de tus mascotas se borran, y las impresiones que ya generaste quedan sin ellas.',
     confirmarCta: 'Eliminar mi cuenta',
     volver: 'No, volver',
     listoTitulo: 'Tu cuenta quedó en proceso de cierre',

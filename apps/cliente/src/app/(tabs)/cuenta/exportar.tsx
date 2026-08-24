@@ -46,7 +46,7 @@ export default function ExportarDatos() {
       setEstado({ fase: 'error' });
       return;
     }
-    setEstado({ fase: 'enviado', correo: r.data.enviada_a, yaEstaba: r.data.ya_estaba });
+    setEstado({ fase: 'enviado', correo: r.data.enviado_a, yaEstaba: r.data.ya_estaba });
   }
 
   return (

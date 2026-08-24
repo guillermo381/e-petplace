@@ -1955,6 +1955,8 @@ export const clienteEn = {
     confirmarTitulo: 'Delete your account?',
     confirmarCuerpo:
       'When you confirm, you lose access right away. You have 30 days to undo it by writing to {{correo}}; after that, you won’t be able to sign in or recover it. Save that email before continuing.',
+    confirmarCarnet:
+      'And something you only notice at closing: when the closure becomes final, your pets’ vaccination-card photos are deleted, and the printouts you already generated will be left without them.',
     confirmarCta: 'Delete my account',
     volver: 'No, go back',
     listoTitulo: 'Your account is now closing',
