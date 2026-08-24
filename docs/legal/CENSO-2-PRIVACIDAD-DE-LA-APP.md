@@ -23,7 +23,7 @@
 | **Teléfono / WhatsApp** | familia y profesional | perfil | contacto operativo (una visita, un pedido) | Supabase | ídem |
 | **Foto de perfil** | familia y profesional | perfil | reconocimiento visual | Supabase (almacenamiento **privado**) | **se borra de verdad** al cerrar la cuenta |
 | **Dirección y ubicación en el mapa** | familia (domicilio) · profesional (sede) | alta de dirección / perfil del negocio | llevar un servicio a domicilio; mostrar cobertura | Supabase · **Google Places** (al escribir la dirección) | mientras la cuenta exista |
-| **Documento de identidad** | **solo profesional** | verificación del negocio | comprobar que quien ofrece un servicio es quien dice ser | Supabase (almacenamiento **privado**) · **Anthropic** (lectura asistida del documento) | ⚠️ ver §4 |
+| **Documento de identidad** | **solo profesional** | verificación del negocio | comprobar que quien ofrece un servicio es quien dice ser | Supabase (almacenamiento **privado**) — 🔴 **Anthropic NO: ver la corrección de §3** | ⚠️ ver §4 |
 | **Datos de tarjeta** | familia | pantalla de pago | cobrar | **Nuvei/Paymentez** — ⚠️ **e-PetPlace NO los recibe ni los guarda**: guarda solo un identificador que la pasarela devuelve | los conserva la pasarela |
 | **Registro de aceptación de términos** | ambos | registro | poder demostrar qué aceptó cada persona y cuándo | Supabase | **se conserva aunque la cuenta se cierre** (§5) |
 | **Ubicación durante un servicio** | profesional en curso | mientras dura un paseo o una entrega | mostrarle a la familia el recorrido | Supabase | queda unido al servicio prestado |
@@ -64,7 +64,7 @@ internacional de datos.**
 | tercero | qué procesa | para qué | dónde está |
 |---|---|---|---|
 | **Supabase** | **todo**: base de datos, archivos, cuentas y contraseñas | es la infraestructura del producto | EE.UU. |
-| 🔴 **Anthropic** | **texto de notas clínicas dictadas**, **fotos de carnets de vacunación** y **documentos de identidad de profesionales** | leer un carnet en papel y volcarlo al expediente; estructurar lo que el veterinario dicta; asistente de ayuda | EE.UU. |
+| 🔴 **Anthropic** | **texto de notas clínicas dictadas** y **fotos de carnets de vacunación** | leer un carnet en papel y volcarlo al expediente; estructurar lo que el veterinario dicta | EE.UU. |
 | **Nuvei / Paymentez** | datos de tarjeta y monto | cobrar | regional |
 | **DeUna (Banco Pichincha)** | datos del cobro | cobrar por billetera | Ecuador |
 | **Resend** | correo y nombre del destinatario | mandar correos | EE.UU. |
@@ -74,14 +74,29 @@ internacional de datos.**
 | **Meta (WhatsApp)** | número de teléfono | avisos por WhatsApp | EE.UU. |
 | **Expo / EAS** | ninguno personal | distribuir actualizaciones de la app | EE.UU. |
 
+> ### 🔴 CORRECCIÓN A ESTE MISMO DOCUMENTO (24-ago-2026, posterior a su primera entrega)
+>
+> **La primera versión de este censo atribuyó a Anthropic DOS tratamientos que HOY NO OCURREN**, y se corrige acá en vez de reescribirse en silencio porque **el abogado ya redactó sobre la versión anterior**:
+>
+> **① «documentos de identidad de profesionales» — NO SE PROCESAN CON IA HOY.** Existe una función (`extract-documento`, construida en set-2026) **diseñada para eso**: su propia cabecera dice *«la foto del documento pre-llena el alta; la persona CORRIGE, no digita»*. **Pero no tiene UN SOLO consumidor**: ninguna pantalla ni wrapper la llama. Está desplegada y exige sesión válida, **y nadie la invoca** ⇒ **ninguna foto de documento de identidad ha sido enviada a Anthropic por esta vía.**
+>
+> **② «asistente de ayuda» — NO EXISTE.** La función `chat-ayuda` **fue dada de baja** y **no está desplegada**; su código sobrevive en el repositorio como respaldo histórico. **No hay asistente conversacional en las apps.**
+>
+> ⇒ **Lo que SÍ procesa Anthropic hoy, y son dos cosas, las dos de salud:** el **texto que el veterinario dicta** en una consulta, y las **fotos de carnets de vacunación en papel** que la familia sube. **Nada más.**
+>
+> ⚠️ **Por qué la corrección importa en las dos direcciones:** declarar un tratamiento que no ocurre es tan impreciso como omitir uno que sí — *un aviso de IA que menciona el documento de identidad le pide a un profesional que consienta algo que nadie le está haciendo, y el día que la función se conecte nadie va a volver a mirar el texto porque «ya estaba avisado».*
+>
+> 🔴 **Y una consecuencia operativa que no es del abogado:** `extract-documento` **sigue desplegada y es facturable** aunque nadie la use. Conviene decidir si se conecta (y entonces el aviso de IA la incluye) o si se retira (y entonces no).
+
 ⚠️ **Dos aclaraciones importantes:**
 - **Meta/WhatsApp está construido pero APAGADO.** Hoy **no sale ningún mensaje**
   y ningún número se envía a Meta. Conviene decidir si el texto lo menciona
   como uso futuro o lo omite hasta que se encienda.
 - 🔴 **Anthropic merece mención propia y explícita**, porque es el único
-  tercero que procesa **datos de salud** e **imágenes de documentos de
-  identidad**. Un texto de privacidad que liste «proveedores de infraestructura»
-  sin nombrarlo estaría siendo impreciso justo en el punto más sensible.
+  tercero que procesa **datos de salud** (ver la corrección de arriba: son dos
+  usos, y el documento de identidad **no** es uno de ellos). Un texto de
+  privacidad que liste «proveedores de infraestructura» sin nombrarlo estaría
+  siendo impreciso justo en el punto más sensible.
 
 ---
 
@@ -104,6 +119,32 @@ del producto»*, **nunca «fue destruido»**.
 
 **HECHO — hay 30 días de arrepentimiento** entre el pedido de cierre y la
 anonimización.
+
+> ### 🔴 LA PREGUNTA DE FONDO: ¿ES ANONIMIZACIÓN O SEUDONIMIZACIÓN?
+>
+> **La respuesta honesta hoy es: NO SE PUEDE AFIRMAR NINGUNA DE LAS DOS, porque
+> el cierre de cuenta TODAVÍA NO ESTÁ CONSTRUIDO.** Existe la política firmada y
+> existe la pantalla que lo promete; **no existe el mecanismo**. *No hay una sola
+> cuenta cerrada contra la cual medirlo.*
+>
+> **Lo que sí se puede afirmar del diseño acordado, y es lo que el texto debe
+> reflejar:** la fila de la persona **no se destruye** — se vuelve inalcanzable
+> (sin acceso, sin identidades externas, sin sesiones) y sus datos de contacto se
+> reemplazan. ⇒ **mientras esa fila exista con su identificador interno, la
+> correspondencia con lo que quedó a su nombre NO se destruye: se corta el camino
+> para llegar a ella.**
+>
+> ⇒ **Eso es SEUDONIMIZACIÓN, no anonimización**, y conviene que el documento lo
+> diga con ese nombre. *Prometer «anonimización» cuando el identificador sigue
+> uniendo los registros es la clase de afirmación que no sobrevive a una
+> auditoría — y la diferencia no es de matiz: una es reversible por quien tiene
+> acceso a la base, la otra no.*
+>
+> **Lo que haría falta para que fuera anonimización de verdad** —y es decisión de
+> negocio, no técnica—: romper la unión entre el identificador y todo lo que
+> quedó, lo que implica **perder la trazabilidad de pagos y consentimientos** que
+> P15 y P23 obligan a conservar. **Las dos cosas no se pueden tener a la vez, y
+> el documento tiene que elegir cuál promete.**
 
 🔴 **NO RESUELTO — y es lo que más urge para este documento: NO EXISTE UN PLAZO
 DE RETENCIÓN ESCRITO.** No hay definido por cuánto tiempo se conservan los
