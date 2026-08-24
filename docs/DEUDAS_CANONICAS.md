@@ -20864,3 +20864,29 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 **La cura fue hacia atrás, y también es regla:** ganó **el nombre que el receptor ya había escrito**, no el que el emisor prefería. *Entre tener razón gramatical y hacerle tocar cuatro archivos a quien construyó contra lo que se le dio, gana lo segundo — sobre todo cuando la divergencia la introdujo el emisor.*
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### D-903 — 🔴 EL CAMINO ASISTIDO NO ES LA EXCEPCIÓN: ES LA PUERTA. **19 de 19 usuarios con mascota rebotan — el 100 %**
+🔴 **BLOQUEANTE DE PRODUCTO, y es LETRA antes que código.** Hallazgo del founder durante el gate del cierre (24-ago-2026), sobre el motor de S104-A.
+
+**El choque, en dos hechos que por separado son correctos:**
+- **El onboarding OBLIGA a crear una mascota.** No hay cuenta de familia sin mascota.
+- **`_cierre_requiere_camino_asistido` rebota a todo `adulto_titular` único de una familia que tiene mascotas.** *Y eso también es correcto: cerrar esa cuenta dejaría un expediente sin nadie.*
+
+⇒ **Juntos producen una puerta cerrada.** **Medido, y el número no admite matices: de los 19 usuarios con mascota, rebotan 19. Pasan CERO.** *(Predicado: `familia_miembro` vigente con `exists(mascotas)` en su familia, evaluado contra `_cierre_requiere_camino_asistido`.)*
+
+> **El backstop se diseñó como excepción para el caso raro. Es la regla — y de hecho es el 100 %.**
+
+⚠️ **Por qué esto NO se cura tocando el pre-chequeo:** *el pre-chequeo tiene razón.* Si el único adulto se va, **el expediente queda sin nadie que lo gobierne** — y §19.4, ya publicada, promete que *«la mascota puede cambiar de familia y su historia le pertenece a ella»*. **Ablandarlo para desatascar el cierre sería exactamente el arrastre que `P15 §1` declara temer**, y que las FKs en CASCADE ya expresan en la base. ⇒ **lo que falta no es un guard más flojo: es una DECISIÓN que nunca se firmó.**
+
+🔴 **Y esa decisión ya estaba anotada como pendiente y nadie la vio venir hasta hoy:** el plan de la tanda decía *«si es único adulto → **destino de las mascotas según firma**»*. **Esa firma no existe.** *El motor se construyó dejando el hueco abierto y el hueco resultó ser la puerta principal.*
+
+**Lo que la mesa tiene que decidir, y son preguntas distintas:**
+1. **¿El expediente sobrevive sin familia?** §19.4 dice que la historia es de la mascota — *pero una mascota sin familia no tiene quién la reserve, quién la lleve al veterinario ni quién autorice nada.* **Sobrevivir no es lo mismo que quedar operable.**
+2. **¿Se ofrece TRANSFERIR a otra familia antes de cerrar?** Es el camino que más respeta la letra publicada. **Exige superficie nueva** —elegir destinatario, que acepte— y **no existe nada de eso**.
+3. **¿O el cierre del único adulto arrastra el expediente a un estado terminal declarado?** *Honesto, y el más caro de decir en pantalla.*
+
+**Nota de alcance, para que nadie lea el 100 % como catástrofe:** hoy **no hay usuarios reales**, y **por eso es el momento**. *El día que los haya, esta decisión se toma con gente adentro y con expedientes que ya importan.*
+
+**Dueño:** founder + producto (la decisión) · legal (contra §19.4 y §18) · producto (la superficie, si gana el camino 2).
+**Disparo: ANTES de abrir el cierre de cuenta a usuarios reales** — o sea antes de encender `cierre_cuenta_vivo` de forma permanente.
+☠️ **Condición de muerte:** existe una firma que dice qué pasa con las mascotas cuando se va el único adulto, **y el pre-chequeo la implementa** — sea ofreciendo transferencia, sea declarando el destino, sea confirmando que el camino asistido es la respuesta correcta **y entonces la app lo dice sin llamarlo excepción**.
