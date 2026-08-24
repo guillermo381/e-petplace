@@ -103,7 +103,7 @@ Tres leyes de la puerta:
 | Biométrico | se construye — tanda 2 |
 | Invitar a la familia | se construye — tanda 2 |
 | Exportar datos | se construye — tanda 3 (P15) |
-| Cerrar cuenta | se construye — tanda 3 (P15: exportar → decir la verdad → inalcanzable → 30 días) |
+| Cerrar cuenta | se construye — tanda 3 (**P15**: exportar → decir la verdad → inalcanzable · **§19.2 de la Política publicada**: los 30 días) |
 
 ## 4. Los proveedores — hoja de ruta honesta
 
