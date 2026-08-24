@@ -137,9 +137,14 @@ export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_pre
  *
  * ⚠️ Exige SESIÓN ACTIVA — la policy es `auth.uid() = user_id` (S104-A, cerrada
  * porque antes admitía a `anon` con `with_check=true` y cualquiera podía
- * fabricar el consentimiento de otro). Hoy alcanza: con la verificación de
- * correo apagada (D-299), `signUp` devuelve sesión. **El día que se encienda,
- * hace falta una RPC DEFINER — no aflojar la policy.**
+ * fabricar el consentimiento de otro). Con la verificación de correo apagada,
+ * `signUp` devuelve sesión y esto entra en el mismo acto.
+ *
+ * ✅ **Y con la verificación ENCENDIDA tampoco hace falta aflojar nada ni sumar
+ * superficie: entra por `confirmarAltaConCodigo()`, porque `verifyOtp` DEVUELVE
+ * SESIÓN.** *La respuesta no era una RPC con privilegios: era registrar el
+ * consentimiento un momento después, cuando la cuenta empieza a existir de
+ * verdad.* (Firma del founder, 24-ago — ver la ficha D-893.)
  */
 export async function registrarConsentimiento(
   userId: string,
@@ -264,6 +269,71 @@ export async function registrarConsentimientos(
   const { data, error } = await getClient().from('consentimientos').insert(filas).select('id');
   if (error) return { registrados: 0, total: filas.length };
   return { registrados: data?.length ?? filas.length, total: filas.length };
+}
+
+/**
+ * CONFIRMAR EL ALTA CON EL CÓDIGO DE 8 DÍGITOS — y registrar el consentimiento
+ * **en el mismo acto**.
+ *
+ * ── POR QUÉ ESTA FUNCIÓN EXISTE Y LA RPC DEFINER NO SE USA ───────────────
+ * Con `mailer_autoconfirm` apagado, `signUp` **no devuelve sesión** ⇒ el
+ * consentimiento no se puede registrar ahí (la policy es `auth.uid() =
+ * user_id`). Se midió de verdad: la cuenta sonda del gate de D-893 quedó con
+ * `consentimientos = 0` (**D-896**).
+ *
+ * La primera respuesta fue una RPC `SECURITY DEFINER`. **La descartó el
+ * founder con la razón correcta: `verifyOtp` DEVUELVE SESIÓN**, así que
+ * alcanza con registrar el consentimiento un momento después — **sin aflojar la
+ * policy y sin sumar una superficie con privilegios.**
+ *
+ * **Lo que se pierde con esperar al código: nada.** *Si alguien abandona entre
+ * crear la cuenta y canjear el código, no hay cuenta usable que necesite
+ * evidencia.* El consentimiento se registra **cuando la cuenta empieza a
+ * existir**, que es exactamente cuando P23 lo necesita.
+ *
+ * *(La RPC `registrar_consentimiento_de_alta` **queda viva y declarada** como el
+ * camino del invitado que acepta por enlace — no se borra, no se usa acá.)*
+ */
+export async function confirmarAltaConCodigo(input: {
+  email: string;
+  codigo: string;
+  urlsLegales?: Partial<Record<DocumentoLegal, string>>;
+}): Promise<
+  ResultadoWrapper<
+    SesionDueno & { consentimiento_registrado: boolean },
+    CodigoErrorAuth | 'codigo_invalido'
+  >
+> {
+  const { data, error } = await getClient().auth.verifyOtp({
+    email: normalizarEmail(input.email),
+    token: input.codigo.trim(),
+    type: 'signup',
+  });
+
+  if (error) {
+    /* Un código malo y uno vencido son la misma respuesta a propósito: decir
+       cuál falló le confirma a un extraño que ese correo tiene cuenta. */
+    return { ok: false, codigo: 'codigo_invalido', mensaje: 'Ese código no es válido o ya venció. Pedí uno nuevo.' };
+  }
+  if (!data.user) return mapeoErrorAuth(undefined, 'datos_inconsistentes');
+
+  /* Acá SÍ hay sesión — es el punto entero de esta función. El consentimiento
+     entra por la policy normal, sin privilegios prestados. */
+  const r = await registrarConsentimientos(
+    data.user.id,
+    'registro',
+    documentosVigentes('registro', input.urlsLegales ?? {}),
+  );
+
+  return {
+    ok: true,
+    data: {
+      user_id: data.user.id,
+      email: data.user.email ?? null,
+      nombre: nombreDeMetadata(data.user.user_metadata),
+      consentimiento_registrado: r.total > 0 && r.registrados === r.total,
+    },
+  };
 }
 
 export interface InputRegistrarse {

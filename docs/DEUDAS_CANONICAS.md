@@ -20511,7 +20511,17 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 > ### 🔴 ENMIENDA FIRMADA (founder, 23-ago-2026) — **SON TRES ACTOS, NO DOS, Y EL DEL MEDIO ES NUEVO**
 >
-> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② una RPC DEFINER que registre el consentimiento SIN SESIÓN** — ✅ **construida el mismo día** (`20260824000000`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② el consentimiento cableado al `verifyOtp`** — ✅ **hecho** (`confirmarAltaConCodigo()`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+>
+> ### ⚠️ EL ACTO ② CAMBIÓ DE FORMA EL MISMO DÍA, Y LA VERSIÓN QUE QUEDÓ ES LA QUE **NO** SUMA SUPERFICIE
+>
+> **Primero se construyó una RPC `SECURITY DEFINER`** (`20260824000000`) con cinco gates, porque sin sesión no hay `auth.uid()` que preguntar. **La descartó el founder** con la razón que A había servido junto con lo construido: **`verifyOtp` DEVUELVE SESIÓN** (está escrito en la propia casa, `seguridad.ts:312`) ⇒ **alcanza con registrar el consentimiento un momento después, con la policy normal y sin privilegios prestados.**
+>
+> **Lo que se pierde esperando al código: nada.** *Si alguien abandona entre crear la cuenta y canjear el código, no hay cuenta usable que necesite evidencia.* **El consentimiento se registra cuando la cuenta empieza a existir**, que es justo cuando P23 lo necesita.
+>
+> ⇒ *La respuesta no era una RPC con privilegios: era hacerlo un momento después.* **Menos superficie es menos que cuidar** — y se llegó ahí porque lo firmado se construyó **y** se sirvió la alternativa, en vez de elegir una sola.
+>
+> **☠️ `registrar_consentimiento_de_alta` NO SE BORRA:** queda **viva y declarada** como el camino del **invitado que acepta por enlace**, por si hace falta. *Una pieza que no se usa hoy y tiene un uso nombrado no es letra muerta: es una pieza con su disparo escrito.*
 >
 > **Lo que convirtió al ② en CONDICIÓN y no en mejora, y es una medición y no un razonamiento:** la cuenta `guillo381+test1` (**D-896**), creada durante la ventana de 18 minutos con `autoconfirm=false`, **quedó con `consentimientos = 0`**. Sin sesión, `auth.uid()` es NULL y la policy no deja entrar el INSERT ⇒ **con autoconfirm apagado, TODO registro nacería sin evidencia de consentimiento, desde el primero.**
 >
@@ -20614,3 +20624,24 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **Se MARCA en vez de borrarse, y el motivo no es el precedente:** *en S92 las 64 sondas tuvieron sus **cuentas borradas** y solo se marcaron los datos que los CHECK no dejaban borrar.* Acá se conserva por otra razón — **es el único testigo de que apagar `autoconfirm` deja cuentas sin evidencia de consentimiento**, y esa es la prueba empírica de D-893. Marcada en `raw_user_meta_data` con `sonda_de_gate='S104-D893'`, el motivo, y por qué sus `consentimientos = 0` **es lo esperado y no un fallo**.
 
 ⇒ **Lo que esta fila prueba, y va a la ficha de D-893:** el día que `autoconfirm` se apague en serio, **TODO registro nace sin evidencia de consentimiento**, y **P23 promete poder demostrar qué aceptó cada quien**. *La RPC DEFINER no es una mejora: es la condición para que apagar autoconfirm no rompa una promesa de política.* **Jamás se afloja la policy.**
+
+#### L-414 — una medición que habilita una decisión AJENA viaja con su PREDICADO, no solo con su número
+**Firmada por el founder (24-ago-2026), sobre el caso del nombre sembrado. Propuesta por la pista D después de que el número de A casi le hiciera shipear el corte equivocado.**
+
+**El caso, en tres pasos:**
+1. **D** iba a cortar el envío del correo de invitación cuando el nombre de quien invita estuviera **sembrado** (el local-part del correo que `handle_new_user` pone sin metadata).
+2. **A midió y reportó: «de 16 titulares, `nombre_es_email = 0` ⇒ tu corte no dispara contra nadie real».** El número era **correcto**.
+3. **Pero contestaba otra pregunta.** A comparó `nombre` contra el **correo entero**; el predicado de la decisión de D era `nombre = LOCAL-PART`. **Re-medido: 2 de 16.**
+
+⇒ **D estuvo a punto de shipear un corte `fail-closed` sobre ese cero**, que habría dejado a **dos titulares sin poder invitar a nadie** — y **en silencio**, porque la cola no tenía columna de motivo y ese `fallido` era indistinguible de un rebote del proveedor.
+
+> **La ley: cuando una medición va a habilitar una decisión de OTRO, viaja con el predicado escrito, no solo con el resultado. «Medí `nombre = correo entero`: 0» se puede contradecir en el acto; «no dispara contra nadie» no.**
+
+**Por qué es la forma MÁS PELIGROSA de las cuatro que este día cobró** — y las otras tres fueron: ① un guard `DEFINER` cuyo `current_user` nunca coincide, con **el apply en verde** · ② una RPC que **no podía correr** y un cinturón que decía VERDE · ③ tres `curl` que rebotaban con el guard **de la plataforma** y no con el propio.
+**Esas tres son instrumentos contestando por una razón que no era la medida: llegan como un verde y un verde se puede sospechar.** *Ésta llega como **dato duro, en un mensaje, de una pista competente y con el número bien calculado** — y del otro lado no hay nada para sospechar.* **Es la única de las cuatro que viaja ENTRE pistas, y la única donde el error de una se convierte en el código de otra.**
+
+**Lo que la vuelve barata de cumplir:** el predicado ya está escrito cuando se mide — es el `WHERE`. **Copiarlo al mensaje cuesta una línea.** *No hace falta medir mejor: hace falta decir contra qué se midió* — que es **L-285** («declarar contra qué mediste te salva de la geometría vieja») aplicada a un mensaje entre pistas en vez de a un freno propio.
+
+**Y el detalle de forma que lo produjo, porque va a volver a pasar:** *el nombre del predicado sugería la comparación equivocada.* `nombre_es_email` invita a buscar un `@`, y el dato sembrado **no tiene `@`**. **Un alias mal puesto en una consulta se convierte en la pregunta que uno cree haber hecho.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
