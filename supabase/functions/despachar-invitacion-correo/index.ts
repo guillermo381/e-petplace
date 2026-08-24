@@ -253,7 +253,11 @@ Deno.serve(async (req) => {
       quienInvita: quienTexto,
       familia: familia ?? 'su familia',
       nombreInvitado: inv.nombre,
-      urlInvitacion: `${base}/invitacion?t=${encodeURIComponent(inv.token)}`,
+      // ⚠️ `?token=` y NO `?t=`: es el contrato de C, leído de su código
+      // (`urlInvitacion()` en cuenta/familia.tsx), no de un mensaje. El enlace
+      // que copia quien invita y el que va en este correo tienen que apuntar al
+      // MISMO lado. La baja sí usa `?t=`, porque así lo lee `baja.tsx`.
+      urlInvitacion: `${base}/invitacion?token=${encodeURIComponent(inv.token)}`,
       urlBaja: `${base}/baja?t=${encodeURIComponent(inv.token)}`,
       expira: new Date(inv.expira_en).toLocaleDateString('es-EC', { timeZone: 'America/Guayaquil' }),
     });
