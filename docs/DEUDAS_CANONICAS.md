@@ -20810,3 +20810,24 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo).
 ☠️ **Condición de muerte:** o existe un camino de alta manual de vacuna **medido de punta a punta** —una vacuna registrada sin tocar la cámara—, o §14.5 deja de prometer una equivalencia que no hay **y la Política se versiona** (no se edita en silencio: ya está publicada, y `L-415`/versionado inmutable rigen).
+
+#### L-416 — un REEMPLAZO se mide contra todo lo que el original ya resolvía, no solo contra el defecto que lo motivó
+**S104-A, 24-ago-2026. Duodécima forma del defecto de la jornada, y la primera que se cobra sobre una CORRECCIÓN en vez de sobre una construcción.**
+
+**El caso, en cuatro pasos, y el cuarto es el que enseña:**
+1. Se halló que el T&C depositado se remitía a una **Disposición Transitoria Primera que no contenía** (`L-415`).
+2. Otra pista diagnosticó la causa: **el archivo se subió truncado**. *Razonable, y explicaba el síntoma.*
+3. Llegó el reemplazo **con la Transitoria completa**, y con una orden de verificación explícita y correcta: *«medí que PRIMERA.1 a PRIMERA.6 estén enteras y que el índice la liste»*.
+4. **Esa medición dio VERDE COMPLETO — 6 de 6 y el índice.** Y el reemplazo, medido en lo que nadie pidió medir, **desandaba cuatro resoluciones que el depositado ya tenía**: la fecha (`[__ de ____ de 2026]`), el canal comercial (`[correo de soporte]`), **el número de árbitros sin resolver** (`[un (1) / tres (3)]`), **seis notas internas** y **un recuadro de borrador**.
+
+⇒ **Obedecer la orden habría cambiado un defecto por once.** *El documento habría ganado la cláusula que le faltaba y perdido todo lo que ya estaba decidido.*
+
+> **La ley: cuando un reemplazo llega a curar un defecto, se mide contra el estado que reemplaza — no contra el defecto. La pregunta no es «¿trae lo que faltaba?», es «¿trae lo que faltaba SIN llevarse lo que había?».**
+
+**Es un test de regresión, y por eso la lección no es sobre documentos:** *toda corrección es candidata a regresión, y el que la pide está mirando el defecto — por eso el que la aplica es el único que puede mirar el resto.* **La orden de verificación era correcta y aun así insuficiente: medía la CURA, no la REGRESIÓN.**
+
+🔴 **Y la medición además corrigió el diagnóstico, lo que decidió que NO se compusiera a mano:** el depositado **no estaba truncado**. Un archivo cortado al subirse **no conserva su pie**, y el depositado **termina completo** (`Versión 1.0 — vigente desde el 24 de agosto de 2026`). Medido: además de la Transitoria **le falta la §4.5 entera** —*Vigencia diferida de las disposiciones económicas*, que es la que hace que el Usuario Profesional **declare haberla leído**— y **su §4.4 es más corta** que la del otro. ⇒ **son dos VERSIONES distintas del documento, no un original y su recorte.** *Con un truncado, pegar el bloque perdido es restaurar; con dos versiones, es redactar contrato — y aparecieron dos diferencias de cuerpo sin buscarlas, así que no hay razón para creer que sean las únicas.* **Se frenó la composición y se devolvió al abogado, que es de quien tiene que salir UNA versión con las dos mitades.**
+
+**El corolario práctico, barato:** *un truncado se distingue de una versión distinta mirando el FINAL del archivo.* **Si el pie está entero, no hubo corte.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
