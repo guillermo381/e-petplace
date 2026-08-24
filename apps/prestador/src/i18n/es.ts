@@ -229,6 +229,18 @@ export const prestadorEs = {
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
+  // S104-C · verificar correo. Aparece solo cuando el proyecto exige
+  // confirmar el correo (registrarse devuelve sesion_activa=false).
+  verificarCorreo: {
+    titulo: 'Confirmá tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    codigoLabel: 'Código',
+    codigoAyuda: '8 dígitos',
+    confirmar: 'Confirmar',
+    reenviar: 'Reenviar el código',
+    reenviarEn: 'Reenviar en {{n}}s',
+    reenviado: 'Te enviamos un código nuevo.',
+  },
   // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
   // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
   // verdad verificable, jamás promete un acceso que la puerta niega.

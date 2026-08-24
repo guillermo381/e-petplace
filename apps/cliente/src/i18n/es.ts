@@ -69,6 +69,18 @@ export const clienteEs = {
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
+  // S104-C · verificar correo. Aparece solo cuando el proyecto exige
+  // confirmar el correo (registrarse devuelve sesion_activa=false).
+  verificarCorreo: {
+    titulo: 'Confirmá tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    codigoLabel: 'Código',
+    codigoAyuda: '8 dígitos',
+    confirmar: 'Confirmar',
+    reenviar: 'Reenviar el código',
+    reenviarEn: 'Reenviar en {{n}}s',
+    reenviado: 'Te enviamos un código nuevo.',
+  },
   // S55-A A3 (D-315): onboarding S45 al riel. Voz de marca APROBADA
   // por founder (lote S55, es y en).
   // ══ S91-D · EL ALTA DE MASCOTA — UNA voz para las DOS entradas ═══════════

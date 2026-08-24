@@ -138,6 +138,16 @@ export const prestadorEn = {
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },
+  verificarCorreo: {
+    titulo: 'Confirm your email',
+    intro: 'We sent an 8-digit code to {{email}}. Enter it to come in.',
+    codigoLabel: 'Code',
+    codigoAyuda: '8 digits',
+    confirmar: 'Confirm',
+    reenviar: 'Resend the code',
+    reenviarEn: 'Resend in {{n}}s',
+    reenviado: 'We sent you a new code.',
+  },
   // S75-B1: the handshake — the inactive invitee lands here from the root.
   invitacion: {
     titulo: '{{negocio}} added you to their team',

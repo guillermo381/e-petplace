@@ -96,11 +96,12 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
-      // el proyecto exige confirmar el correo: no hay «llegada» que celebrar
-      // porque todavía no se entra — se dice y se vuelve al login.
+      // el proyecto exige confirmar el correo: el registro gana un paso —
+      // la pantalla de código (S104-C). El consentimiento NO se pudo escribir
+      // en el alta (sin sesión) y se persiste al confirmar (D-893): por eso
+      // viaja la traza legal que se mostró acá.
       setCargando(false);
-      aviso.mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
-      router.replace('/login');
+      router.replace({ pathname: '/verificar-correo', params: { email: email.trim(), urlLegal: URL_LEGAL } });
       return;
     }
     // §5 · la huella de llegada, y recién ahí el onboarding.
