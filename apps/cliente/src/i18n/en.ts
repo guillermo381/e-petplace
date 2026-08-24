@@ -631,7 +631,7 @@ export const clienteEn = {
     proxGuarderia: 'Daycare',
     proxSeguros: 'Insurance',
     proxTelemedicina: 'Telemedicine',
-    proxPrime: 'ePetPlace Prime',
+    proxPrime: 'e-PetPlace Prime',
   },
   // S54-B3.3 — single-item checkout with cart shape
   checkout: {
