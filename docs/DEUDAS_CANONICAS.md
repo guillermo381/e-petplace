@@ -20681,6 +20681,14 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método. **Candidata a regla de la casa:** todo documento legal que se deposite declara que sus remisiones internas fueron verificadas.
 
+✅ **EL CASO CERRÓ (24-ago-2026): el reemplazo trae la Disposición entera** — `Transitoria` pasa de **1 ocurrencia a 5**, el índice la lista, y entra la **§4.5** que la anuncia en el momento de la aceptación. *El instrumento que la halló ahora la da verde: eso es lo que lo vuelve un instrumento y no una anécdota.*
+
+⚠️ **Pero la CAUSA se corrige, y el matiz decide dónde mira el próximo:** se atribuyó a *«un archivo cortado al subirse»*, y **la medición no lo sostiene**. Un archivo truncado **no conserva su pie**, y el depositado terminaba completo. Y sobre todo: al reemplazarlo, lo que faltaba **no estaba solo al final** — faltaban también la **§4.5** y las **§31.5-31.7** (dictado por voz), que viven **en el medio del documento**. *Un corte al final no quita una sección del medio.* ⇒ **era una VERSIÓN ANTERIOR, no un recorte.**
+
+**Por qué el matiz no es pedantería:** *«se cortó al subirse» manda a mirar el final del archivo; «es una versión anterior» manda a diffear el documento entero.* **La segunda es la que encuentra las §31.5-31.7.**
+
+🟢 **Y la ley salió REFORZADA, no invalidada:** cambió la causa del caso, **no lo que el barrido de marcas puede ver**. *Sin el barrido de remisiones nadie habría notado que faltaba la Disposición, y se habría publicado un contrato al que le faltaban tres secciones — una de ellas la que difiere la vigencia de dos Títulos enteros.*
+
 #### D-897 — 🔴 CINCO FRENOS DE PUBLICACIÓN (tres del abogado + §14.4 + el consentimiento que la letra promete y el motor no pide)
 🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
 

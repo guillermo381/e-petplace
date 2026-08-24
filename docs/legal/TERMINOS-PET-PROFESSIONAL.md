@@ -26,6 +26,8 @@
 
 **Título VII — Vigencia y controversias** · 36. Suspensión y terminación · 37. Responsabilidad, garantías e indemnidad · 38. Disposiciones finales, ley aplicable, mediación y arbitraje
 
+**Disposiciones Transitorias** · Primera — Vigencia diferida de los Títulos IV y V
+
 ---
 
 # TÍTULO I — LA RELACIÓN ENTRE LAS PARTES
@@ -82,7 +84,9 @@ k) **Expediente:** el conjunto de registros de salud, cuidado y atención asocia
 
 **4.3.** La cláusula de mediación y arbitraje de la §38 requiere **aceptación expresa y separada**, manifestada mediante una casilla específica distinta de la aceptación general de estos Términos. Si el Usuario Profesional no la acepta, el contrato subsiste íntegramente y las controversias se someten a la justicia ordinaria ecuatoriana.
 
-**4.4.** La Compañía conserva registro del momento y de la versión de los documentos aceptados, conforme a los plazos de la Política de Privacidad.
+**4.4.** La Compañía conserva registro del momento y de la versión de los documentos aceptados, conforme a los plazos de la Política de Privacidad. El registro identifica **por separado** la versión de estos Términos y la de la Política de Privacidad aceptadas por el Usuario Profesional, dado que ambos documentos se versionan de forma independiente.
+
+**4.5. Vigencia diferida de las disposiciones económicas.** A la fecha de aceptación, los **Títulos IV y V** de este contrato —las disposiciones sobre Comisión, mandato de recaudación, facturación, liquidación, cancelaciones y reembolsos— **no se encuentran en vigor**, en los términos de la **Disposición Transitoria Primera**, que el Usuario Profesional declara haber leído. El resto del contrato rige íntegramente desde su perfeccionamiento.
 
 ---
 
@@ -401,7 +405,21 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 
 **31.4. Responsabilidad por el contenido confirmado.** El Usuario Profesional es el **único responsable** del contenido clínico que valida, guarda y publica en el Expediente de sus pacientes, así como del texto de presentación de su negocio, con independencia de que ese contenido haya sido propuesto inicialmente por un sistema asistido. La confirmación por parte del Usuario Profesional hace suyo el contenido.
 
-**31.5.** El uso de estas funcionalidades es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a este tratamiento conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
+**31.5. Dictado por voz y tratamiento de la voz del Usuario Profesional.** La función de dictado de la nota clínica utiliza el **servicio de reconocimiento de voz del propio dispositivo** del Usuario Profesional —el de Google en dispositivos Android y el de Apple en dispositivos iOS—. El Usuario Profesional reconoce y acepta que:
+
+a) según el dispositivo y su configuración, **ese servicio puede transmitir el audio de su dictado a servidores del fabricante del sistema operativo, ubicados fuera del Ecuador**;
+
+b) ese tratamiento **no lo realiza la Compañía ni un encargado suyo**, sino el fabricante, bajo sus propios términos y su propia política de privacidad, con quien el Usuario Profesional mantiene una relación directa como usuario del dispositivo, de modo que **la Compañía no puede determinar, instruir, auditar ni limitar** dicho tratamiento y no responde por él;
+
+c) lo que se transmite al fabricante es **su voz** y aquello que dicte, que puede incluir el nombre del paciente, el de su establecimiento y la descripción clínica de la atención;
+
+d) **la Compañía no recibe, no procesa y no conserva en ningún momento la grabación de audio**: recibe únicamente el texto ya transcrito.
+
+**31.6. Consentimiento del dictado.** Por lo anterior, el uso del dictado requiere el **consentimiento previo, específico e informado** del Usuario Profesional, que se recaba mediante un aviso en la aplicación la primera vez que utiliza la función, de forma **separada** de la aceptación de estos Términos. El Usuario Profesional puede retirarlo en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com, y puede en todo caso redactar la nota clínica manualmente.
+
+**31.7. Información a la familia.** Cuando el Usuario Profesional dicte información relativa a una mascota o a su familia, es su responsabilidad no incorporar al dictado datos personales de terceros que excedan lo necesario para el registro clínico de la atención.
+
+**31.8.** El uso de las funcionalidades de esta sección es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a estos tratamientos conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
 
 ## 32. Protección de datos: distribución de papeles
 
@@ -414,6 +432,7 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 | Conservación del Expediente tras el cierre de la cuenta del Usuario Cliente | **la Compañía** | — |
 | Puesta a disposición del Expediente a un profesional posterior o a una nueva familia de la mascota | **la Compañía** | — |
 | Tratamiento del contenido mediante sistemas de inteligencia artificial | **la Compañía** | — |
+| **Transcripción de la voz del Usuario Profesional por el servicio del dispositivo** (§31.5) | **el fabricante del sistema operativo**, como responsable independiente | La Compañía no interviene en ese tratamiento ni recibe el audio |
 
 **32.2.** El fundamento de esta distribución es quién decide cada tratamiento. El Usuario Profesional decide **qué se asienta** en el Expediente, bajo su *lex artis* y sus obligaciones profesionales. La Compañía decide **qué hace la Plataforma con ese contenido** una vez asentado.
 
@@ -535,6 +554,38 @@ c) subsisten las obligaciones de confidencialidad (§34), las de protección de 
 > ☐ **Declaro haber leído y comprendido las cláusulas 38.8 y 38.9, y acepto expresamente someter las controversias derivadas de este contrato a mediación y arbitraje en la ciudad de Quito, renunciando a la jurisdicción ordinaria.**
 
 Esta aceptación se recaba mediante casilla específica, **distinta e independiente** de la aceptación general de estos Términos, y se conserva con constancia de su fecha. Si el Usuario Profesional no la otorga, el contrato subsiste en todo lo demás y las controversias se someten a los jueces competentes de la República del Ecuador.
+
+---
+
+# DISPOSICIONES TRANSITORIAS
+
+## Disposición Transitoria Primera — Vigencia diferida de los Títulos IV y V
+
+**PRIMERA.1. Alcance.** Los **Títulos IV** (secciones 14 a 24) y **V** (secciones 25 a 29) de estos Términos **no entran en vigor** conjuntamente con el resto del contrato. Todas las demás disposiciones —Títulos I, II, III, VI y VII— rigen íntegramente desde el perfeccionamiento del contrato conforme a la §4.
+
+**PRIMERA.2. Entrada en vigor.** Los Títulos IV y V entrarán en vigor, respecto de cada Usuario Profesional, en la primera de las siguientes fechas que ocurra:
+
+a) la fecha que la Compañía comunique como de habilitación del cobro de Tarifas a través de la Plataforma para ese Usuario Profesional, comunicada por correo electrónico y notificación en la Plataforma con una antelación **no menor a quince (15) días calendario**; o
+
+b) **en todo caso**, la fecha de la primera Operación cuya Tarifa sea efectivamente cobrada al Usuario Cliente a través de la Plataforma respecto de ese Usuario Profesional.
+
+El literal b) opera de pleno derecho, con independencia de que la comunicación del literal a) se hubiere practicado o no.
+
+**PRIMERA.3. Régimen durante el período diferido.** Mientras los Títulos IV y V no estén en vigor:
+
+a) la Plataforma **no recauda** valor alguno por cuenta del Usuario Profesional y el mandato de la §17 no produce efecto;
+b) **no se devenga Comisión** de ninguna naturaleza, cualquiera sea el número de Servicios Profesionales prestados;
+c) **no se practican Liquidaciones** ni existen saldos a favor del Usuario Profesional frente a la Compañía;
+d) **la Compañía no gestiona reembolsos**, por no haber recaudado valor alguno;
+e) el precio del Servicio Profesional **se acuerda y se paga directamente entre el Usuario Cliente y el Usuario Profesional, fuera de la Plataforma**. La Compañía no interviene en ese pago, no lo garantiza y no responde por él ni por su falta;
+f) el Usuario Profesional conserva el uso pleno de las funcionalidades de perfil, agenda, registro de atenciones, expediente y comunicación descritas en el Título VI, sin costo alguno;
+g) el Usuario Profesional **sigue siendo el único responsable** de emitir los comprobantes de venta que la normativa tributaria le exija por los Servicios Profesionales que preste, con independencia de que el pago se haya efectuado fuera de la Plataforma.
+
+**PRIMERA.4. Facultad de terminar sin penalidad.** Dentro de los **quince (15) días calendario** siguientes a la comunicación del literal a) de PRIMERA.2, o siguientes a la entrada en vigor por el literal b), el Usuario Profesional podrá **terminar este contrato sin penalidad ni preaviso alguno**, comunicándolo por cualquiera de los canales de la §1.4. Las Operaciones ya confirmadas se honran o se reembolsan, y los valores recaudados se liquidan conforme a la §36.5.b.
+
+**PRIMERA.5. Constancia.** La Compañía conserva constancia de la fecha de entrada en vigor de los Títulos IV y V respecto de cada Usuario Profesional, y la pone a su disposición cuando la solicite.
+
+**PRIMERA.6. Vigencia de esta Disposición.** Esta Disposición Transitoria se suprimirá del documento cuando la totalidad de los Usuarios Profesionales se encuentre bajo el régimen pleno, mediante una nueva versión de estos Términos publicada conforme a la §38.1.
 
 ---
 
