@@ -46,6 +46,13 @@ export const uiEn = {
     ver: 'Show',
     ocultar: 'Hide',
   },
+  candado: {
+    bloqueada: 'Your session is open. Unlock to get back in.',
+    verificando: 'Waiting for your phone to recognize you.',
+    rechazada: "Your phone couldn't recognize you. Try again or use your password.",
+    desbloquear: 'Unlock',
+    usarClave: 'Use my password',
+  },
   esqueleto: {
     cargando: 'Loading',
   },
