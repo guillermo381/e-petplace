@@ -179,3 +179,26 @@ profesional; solo el incumplimiento del propio profesional le corta el cobro.*
 | **Reembolso real de dinero** | 🔴 **NO RESUELTO** — hoy es solo un asiento contable |
 | **Cancelación del profesional** | 🔴 **NO RESUELTO** |
 | Ambiente de pagos | ⚠️ **pruebas (sandbox)**, sin dinero real |
+
+---
+
+## 8. Verificación de la cláusula §14.4 de los T&C (24-ago-2026)
+
+Los Términos redactados afirman que **las comisiones del Procesador de Pago las
+asume la Compañía con cargo a su Comisión, y no se trasladan al Usuario
+Profesional ni se descuentan de la Liquidación**.
+
+**Medido contra el motor: la afirmación es consistente.** Sobre las 36
+operaciones registradas, `comisión de plataforma + monto del profesional`
+suma **exactamente** el bruto cobrado (58,24 + 330,01 = 388,25). ⇒ **la fee de
+la pasarela no sale del bolsillo del profesional.**
+
+⚠️ **Pero se cumple POR CONSTRUCCIÓN, no POR EJERCICIO, y la diferencia importa
+para un contrato:** el campo que guarda la comisión de la pasarela está en
+**0,00 en las 36 operaciones**, porque el ambiente es de pruebas y **nunca se
+cobró una comisión real**. *El reparto es correcto en un mundo donde ese número
+es cero; el día que deje de serlo, hay que volver a verificar que siga saliendo
+de la Comisión y no del pago al profesional.*
+
+**Recomendación:** que esa verificación sea parte de la salida del ambiente de
+pruebas, junto con los otros tres frenos ya marcados.

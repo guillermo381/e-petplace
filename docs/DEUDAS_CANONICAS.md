@@ -20686,7 +20686,18 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **La decisión es binaria y no se puede diferir sin costo:** **conectarla** (y entonces el aviso de IA la incluye con razón) **o retirarla** (y entonces el aviso no la menciona). *Dejarla desplegada y sin conectar es el peor de los tres estados: paga, no sirve, y confunde a quien la censa.*
 ☠️ **Condición de muerte:** o tiene un consumidor vivo medido, o no está desplegada.
 
-#### D-899 — 🔴 EL AUDIO DEL DICTADO VA AL MOTOR DE VOZ DEL SISTEMA (Google / Apple): una transferencia internacional NO DECLARADA
+#### D-899 — ✅ DECLARADA EN LA LETRA (24-ago) · el audio del dictado va al motor de voz del sistema
+✅ **RESUELTA POR DECLARACIÓN, no por cambio de código, y el abogado la resolvió MEJOR de lo que A la planteó.**
+
+A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o declarar la transferencia**. El abogado tomó el segundo **y corrigió el encuadre**: *no es una transferencia nuestra*. **Google y Apple NO son encargados nuestros** — *«no los contratamos, no podemos instruirlos, y tratan ese audio bajo sus propios términos y su relación directa con usted como usuario del dispositivo»*. ⇒ el aviso lo separa en un apartado propio (**«B — Motor de voz del teléfono»**, distinto de **«A — Proveedor de IA»**) y la privacidad lo repite en §16.2 y §17.B.
+
+**Lo que quedó escrito y es exacto contra lo medido:** *«e-PetPlace no recibe, no procesa y no conserva en ningún momento la grabación de audio: recibe únicamente el texto ya transcrito»* — verificado: `estructurar-nota-clinica` recibe `{ texto }`.
+
+🟡 **Lo que NO se cerró y queda con dueño de producto:** la cura técnica sigue disponible (`requiresOnDeviceRecognition: true`) y **nadie la midió en dispositivo**. *Declarar el tratamiento lo vuelve lícito, no lo vuelve deseable:* la voz de un veterinario describiendo una consulta sigue saliendo del teléfono. **Disparo: cuando alguien pueda medir en el aparato si el modelo local existe y con qué calidad.**
+
+<details><summary>Texto original de la ficha (24-ago, antes de que el aviso la declarara)</summary>
+
+🔴 **EL AUDIO DEL DICTADO VA AL MOTOR DE VOZ DEL SISTEMA (Google / Apple): una transferencia internacional NO DECLARADA**
 🔴 **ALTA.** Medido el 24-ago-2026 al contrastar el **Aviso de IA** del abogado contra el código. **Su §6 («el audio del dictado») preguntaba exactamente esto y la respuesta es que sí.**
 
 **Lo medido, en tres piezas:**
@@ -20704,4 +20715,6 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **La cura técnica existe y es una línea:** `requiresOnDeviceRecognition: true` fuerza el reconocimiento **local**. **No se aplicó sin medir**, porque tiene costo real: no todos los dispositivos lo soportan, y donde no hay modelo local descargado **el dictado deja de funcionar** en vez de degradarse. ⇒ **Hay que medirlo en el aparato antes de decidir**, y son dos caminos legítimos: forzar local (y perder cobertura) o **declarar la transferencia** en el aviso.
 
 **Dueño:** producto + legales. **Disparo: ANTES de publicar el Aviso de IA** — es el único de los frenos que hace que un documento ya redactado sea **incompleto**, no solo mejorable.
-☠️ **Condición de muerte:** o el reconocimiento corre on-device verificado en dispositivo, o el aviso declara a Google/Apple como encargado de la transcripción.
+</details>
+
+☠️ **Condición de muerte (la mitad de LETRA está CUMPLIDA):** el aviso ya declara a Google/Apple y **con el encuadre correcto — como tercero que NO es encargado nuestro**. Queda la mitad de producto: medir el reconocimiento on-device en dispositivo y decidir.

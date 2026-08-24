@@ -407,7 +407,21 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 
 **31.4. Responsabilidad por el contenido confirmado.** El Usuario Profesional es el **único responsable** del contenido clínico que valida, guarda y publica en el Expediente de sus pacientes, así como del texto de presentación de su negocio, con independencia de que ese contenido haya sido propuesto inicialmente por un sistema asistido. La confirmación por parte del Usuario Profesional hace suyo el contenido.
 
-**31.5.** El uso de estas funcionalidades es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a este tratamiento conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
+**31.5. Dictado por voz y tratamiento de la voz del Usuario Profesional.** La función de dictado de la nota clínica utiliza el **servicio de reconocimiento de voz del propio dispositivo** del Usuario Profesional —el de Google en dispositivos Android y el de Apple en dispositivos iOS—. El Usuario Profesional reconoce y acepta que:
+
+a) según el dispositivo y su configuración, **ese servicio puede transmitir el audio de su dictado a servidores del fabricante del sistema operativo, ubicados fuera del Ecuador**;
+
+b) ese tratamiento **no lo realiza la Compañía ni un encargado suyo**, sino el fabricante, bajo sus propios términos y su propia política de privacidad, con quien el Usuario Profesional mantiene una relación directa como usuario del dispositivo, de modo que **la Compañía no puede determinar, instruir, auditar ni limitar** dicho tratamiento y no responde por él;
+
+c) lo que se transmite al fabricante es **su voz** y aquello que dicte, que puede incluir el nombre del paciente, el de su establecimiento y la descripción clínica de la atención;
+
+d) **la Compañía no recibe, no procesa y no conserva en ningún momento la grabación de audio**: recibe únicamente el texto ya transcrito.
+
+**31.6. Consentimiento del dictado.** Por lo anterior, el uso del dictado requiere el **consentimiento previo, específico e informado** del Usuario Profesional, que se recaba mediante un aviso en la aplicación la primera vez que utiliza la función, de forma **separada** de la aceptación de estos Términos. El Usuario Profesional puede retirarlo en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com, y puede en todo caso redactar la nota clínica manualmente.
+
+**31.7. Información a la familia.** Cuando el Usuario Profesional dicte información relativa a una mascota o a su familia, es su responsabilidad no incorporar al dictado datos personales de terceros que excedan lo necesario para el registro clínico de la atención.
+
+**31.8.** El uso de las funcionalidades de esta sección es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a estos tratamientos conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
 
 ## 32. Protección de datos: distribución de papeles
 
@@ -420,6 +434,7 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 | Conservación del Expediente tras el cierre de la cuenta del Usuario Cliente | **la Compañía** | — |
 | Puesta a disposición del Expediente a un profesional posterior o a una nueva familia de la mascota | **la Compañía** | — |
 | Tratamiento del contenido mediante sistemas de inteligencia artificial | **la Compañía** | — |
+| **Transcripción de la voz del Usuario Profesional por el servicio del dispositivo** (§31.5) | **el fabricante del sistema operativo**, como responsable independiente | La Compañía no interviene en ese tratamiento ni recibe el audio |
 
 **32.2.** El fundamento de esta distribución es quién decide cada tratamiento. El Usuario Profesional decide **qué se asienta** en el Expediente, bajo su *lex artis* y sus obligaciones profesionales. La Compañía decide **qué hace la Plataforma con ese contenido** una vez asentado.
 

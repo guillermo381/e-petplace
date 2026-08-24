@@ -62,7 +62,9 @@ Las formulaciones 1 a 4 y la 7 van en la **Política de Privacidad**, como secci
 **Texto:**
 
 > **1. Estructuración de la nota clínica (aplicación para profesionales)**
-> Cuando un médico veterinario dicta por voz el desarrollo de una consulta, el sistema distribuye el contenido dictado en los campos de la ficha clínica. **Datos tratados:** únicamente el contenido que el profesional dicta durante esa consulta, referido a la mascota y a la atención prestada. **Finalidad:** reducir el tiempo de registro clínico. **Intervención humana:** el profesional revisa, edita y confirma la ficha antes de guardarla; el sistema está diseñado para no incorporar contenido que no haya sido dictado, de modo que un campo no dictado permanece vacío. Ninguna ficha se almacena sin la confirmación del profesional.
+> Cuando un médico veterinario dicta por voz el desarrollo de una consulta, su voz es convertida a texto por el **servicio de reconocimiento de voz del propio teléfono** —de Google en dispositivos Android y de Apple en dispositivos iOS—, y e-PetPlace recibe **únicamente el texto ya transcrito**, que el sistema distribuye en los campos de la ficha clínica. **e-PetPlace no recibe, no procesa y no conserva la grabación de audio en ningún momento.** **Datos tratados por e-PetPlace:** únicamente el texto transcrito de lo que el profesional dicta durante esa consulta, referido a la mascota y a la atención prestada. **Finalidad:** reducir el tiempo de registro clínico. **Intervención humana:** el profesional revisa, edita y confirma la ficha antes de guardarla; el sistema está diseñado para no incorporar contenido que no haya sido dictado, de modo que un campo no dictado permanece vacío. Ninguna ficha se almacena sin la confirmación del profesional.
+>
+> Sobre el tratamiento de su voz por el servicio del teléfono, vea el apartado de transferencias internacionales.
 >
 > **2. Lectura del carnet de vacunas (aplicación para clientes)**
 > Cuando usted fotografía el carnet de vacunación de su mascota, el sistema lee la imagen y propone las vacunas registradas con su denominación y fecha. **Datos tratados:** la fotografía que usted carga y la información contenida en ella. La imagen del carnet puede contener datos de terceros —en particular el nombre, la firma o el número de registro del profesional que emitió el documento—, que e-PetPlace trata únicamente como parte integrante del documento cargado, sin extraerlos, indexarlos ni utilizarlos con otra finalidad. **Finalidad:** incorporar el historial de vacunación a la ficha de su mascota. **Intervención humana:** usted revisa cada vacuna propuesta de forma individual y la confirma, edita o descarta; no se almacena ningún registro que usted no haya confirmado. **Conservación:** la fotografía original del carnet se conserva junto con la ficha de la mascota y se reproduce en las impresiones que usted genere desde la Plataforma.
@@ -120,12 +122,32 @@ Las formulaciones 1 a 4 y la 7 van en la **Política de Privacidad**, como secci
 
 | Momento | Funcionalidad | Etiqueta |
 |---|---|---|
+| **Antes de dictar, primera vez** | Nota clínica | Diálogo de consentimiento — ver el bloque bajo esta tabla |
+| **Mientras dicta** | Nota clínica | *"Transcribiendo con el servicio de voz de su teléfono · el audio puede procesarse fuera del dispositivo"* |
 | Antes de confirmar | Nota clínica | *"Borrador organizado con asistencia de IA a partir de su dictado. Revise y confirme antes de guardar. Los campos que no fueron dictados quedan vacíos."* |
 | Antes de confirmar | Carnet de vacunas | *"Estas vacunas fueron leídas automáticamente de la fotografía. Revise cada una antes de guardarla."* — y por ítem: *"Leído de la imagen · verificar"* |
 | Antes de publicar | Presentación del negocio | *"Texto sugerido con asistencia de IA a partir de los datos de su negocio. Edítelo antes de publicarlo."* |
 | Después de confirmar | Nota clínica y vacunas | *"Registro asistido por IA · confirmado por [nombre] el [fecha]"* |
 
-**Nota de uso — la fila más importante es la última.** La marca que queda *después* de confirmar cumple dos funciones: le dice al que lee la ficha más adelante cómo se originó ese dato, y le da a la Compañía la evidencia de que hubo revisión humana. Esa evidencia debe existir en el registro, no solo en la pantalla: guardar quién confirmó, cuándo, y si editó el contenido propuesto. Sin ese rastro, la afirmación de "revisión humana obligatoria" que sostiene todo este aviso no es demostrable ante la SPDP. Es el punto donde el texto legal depende de una decisión de ingeniería.
+**Diálogo de primer uso del dictado.** El aviso en pantalla que propusieron —*"tu dictado se transcribe con el servicio de voz de tu teléfono"*— apunta al problema correcto pero se queda corto en el punto decisivo: no dice que **el audio puede salir del dispositivo**. Peor aún, "el servicio de voz de tu teléfono" sugiere lo contrario, que todo ocurre localmente. Un aviso que induce a creer que el audio no viaja es más frágil que no tener aviso, porque documenta que se informó mal. Además es una afirmación, no una elección, y para que el consentimiento sea la base de legitimación hace falta un acto.
+
+Propuesta, en dos capas:
+
+> **Cómo se transcribe su dictado**
+>
+> Para convertir su voz en texto, e-PetPlace utiliza el servicio de reconocimiento de voz de su propio teléfono. Según el dispositivo y su configuración, **ese servicio puede enviar el audio a servidores de Google o de Apple ubicados fuera del Ecuador**, donde se procesa conforme a los términos de esos fabricantes y no a los nuestros.
+>
+> **Nosotros no recibimos ni conservamos la grabación**: recibimos únicamente el texto transcrito.
+>
+> Tenga presente que lo que dicte incluye su voz y el contenido de la consulta —el nombre del paciente, el de la clínica y lo que usted describa—.
+>
+> Puede escribir la nota manualmente en cualquier momento, sin usar el dictado.
+>
+> **[ Activar el dictado ]  [ Prefiero escribir ]**  ·  *Más detalle en la Política de Privacidad*
+
+La segunda capa es el indicador persistente de la tabla, visible **mientras** se dicta. El diálogo se muestra una vez y la decisión se guarda; el indicador aparece siempre, porque es el que cumple la intención que ustedes plantearon — que la persona lo sepa en el momento en que habla.
+
+**Nota de uso — de la tabla, la fila más importante es la última.** La marca que queda *después* de confirmar cumple dos funciones: le dice al que lee la ficha más adelante cómo se originó ese dato, y le da a la Compañía la evidencia de que hubo revisión humana. Esa evidencia debe existir en el registro, no solo en la pantalla: guardar quién confirmó, cuándo, y si editó el contenido propuesto. Sin ese rastro, la afirmación de "revisión humana obligatoria" que sostiene todo este aviso no es demostrable ante la SPDP. Es el punto donde el texto legal depende de una decisión de ingeniería.
 
 ---
 
@@ -147,11 +169,34 @@ Las formulaciones 1 a 4 y la 7 van en la **Política de Privacidad**, como secci
 
 ---
 
-## Formulación 7 — Transferencia internacional
+## Formulación 7 — Transferencias internacionales *(son dos, y son muy distintas)*
 
-**Por qué es obligatoria.** Las funciones de IA corren sobre Claude, de Anthropic PBC, alojado fuera del Ecuador. Cada una es una **transferencia internacional de datos personales** sujeta a la Resolución SPDP-SPD-2026-0004-R. En el caso del carnet, lo transferido incluye la imagen completa con los datos del veterinario emisor.
+**Por qué es obligatoria.** Las funcionalidades descritas dan lugar a **dos** transferencias internacionales de datos personales, sujetas ambas a la Resolución SPDP-SPD-2026-0004-R. Tienen naturaleza jurídica distinta y **no se pueden declarar juntas sin inducir a error**.
 
-**Estado del instrumento.** El DPA de Anthropic existe, se incorpora por referencia a los Términos Comerciales de Servicio y lleva Cláusulas Contractuales Tipo adentro. Reparto de papeles confirmado en su sección B.1: **SATORI INOV LATAM S.A.S. es el responsable y Anthropic PBC el encargado**. La evaluación completa del instrumento contra la norma ecuatoriana está en el documento *Evaluación de transferencia internacional — Anthropic PBC*, que además es la documentación que el Art. 4 obliga a conservar tres años.
+| | **A — Proveedor de IA** | **B — Motor de voz del teléfono** |
+|---|---|---|
+| Quién | Anthropic PBC | Google (Android) / Apple (iOS) |
+| Qué se transfiere | Texto de notas clínicas, imágenes de carnets, datos de negocio | **La voz del veterinario**, con el nombre del paciente, el de la clínica y lo que describa |
+| Papel del tercero | **Encargado** — trata por nuestra cuenta y según nuestras instrucciones | **Responsable independiente** — trata bajo sus propios términos con el usuario del dispositivo |
+| Instrumento | DPA con cláusulas contractuales tipo | **Ninguno.** No existe contrato entre e-PetPlace y el fabricante para este flujo |
+| Base de legitimación | Garantías adecuadas (con las brechas del Art. 21) + consentimiento | **Consentimiento informado del profesional**, única base disponible |
+| Qué recibe e-PetPlace | Los datos que envía | **Nada del audio.** Solo el texto ya transcrito |
+
+**La diferencia que hay que entender antes de redactar.** En la transferencia A, e-PetPlace instruye a un encargado y puede prometer cosas en su nombre. **En la B no puede prometer nada**, porque no hay contrato: el fabricante procesa la voz bajo su propia relación con el dueño del teléfono, para sus propios fines, y e-PetPlace no tiene forma de instruirlo, auditarlo ni limitarlo. Lo único que e-PetPlace decidió —y por eso responde— es **construir una funcionalidad que envía la voz de un profesional a ese servicio**. Eso lo convierte en responsable de la decisión, no del tratamiento posterior.
+
+De ahí se sigue la regla de redacción: **sobre la transferencia B el texto informa y advierte; nunca garantiza.**
+
+**Sobre la voz como dato.** La voz del veterinario es un dato personal suyo. **No** constituye dato biométrico en sentido técnico mientras se utilice para transcribir y no para identificar a la persona, que es el caso. Conviene dejarlo dicho, porque si algún día el flujo se usara para identificación, entraría en la categoría de datos sensibles y cambiaría todo el análisis.
+
+**Quién es el titular aquí, y dónde va el consentimiento.** En la transferencia B el titular es **el veterinario**, no la familia. Por eso el consentimiento se recaba en la aplicación de profesionales y la obligación se refleja además en los Términos Pet Professional, no solo en la Política de Privacidad.
+
+**Sobre la decisión de no forzar transcripción local.** El razonamiento es sólido: el modo local no está en todos los dispositivos y ahí la función fallaría en vez de degradarse. Declarar es mejor que romper. Pero hay una tercera opción que no rompe nada y reduce el problema: **preferir el modo local cuando el dispositivo lo soporte, y recurrir al de nube solo cuando no**, informándolo en ambos casos. Muchas versiones recientes de Android e iOS ya lo permiten. Con eso, la transferencia B deja de ocurrir en buena parte de los dispositivos, y la función sigue operando en todos.
+
+---
+
+### A — Proveedor de inteligencia artificial
+
+**Estado del instrumento.****Estado del instrumento.** El DPA de Anthropic existe, se incorpora por referencia a los Términos Comerciales de Servicio y lleva Cláusulas Contractuales Tipo adentro. Reparto de papeles confirmado en su sección B.1: **SATORI INOV LATAM S.A.S. es el responsable y Anthropic PBC el encargado**. La evaluación completa del instrumento contra la norma ecuatoriana está en el documento *Evaluación de transferencia internacional — Anthropic PBC*, que además es la documentación que el Art. 4 obliga a conservar tres años.
 
 **Resumen de esa evaluación.** El DPA cubre cinco de las siete condiciones mínimas del Art. 21 de la Resolución SPDP-SPD-2026-0004-R. **No cubre dos**, y no por descuido sino por alcance: sus Cláusulas Contractuales Tipo son las europeas, con derecho y foro de Irlanda (Schedule 3, A.1.c y A.1.d), y el DPA trae addenda para el Reino Unido y Suiza pero **ninguno para Ecuador**. Quedan sin satisfacer la **aceptación de la jurisdicción ecuatoriana** y los **mecanismos de reparación integral**. El Art. 25 prevé este supuesto y pone en el responsable la carga de incorporar lo que falte.
 
@@ -172,6 +217,30 @@ Las formulaciones 1 a 4 y la 7 van en la **Política de Privacidad**, como secci
 **Nota de uso.** Los compromisos del segundo párrafo son los que más tranquilizan a un titular y los que más caro se pagan si dejan de ser ciertos: dependen del plan contratado y de la configuración de la cuenta. Si se activa una modalidad con retención extendida o con uso distinto de los datos, la frase deja de ser verdadera y hay que versionar el aviso el mismo día. El corchete solo se abre cuando la fuente del plazo esté verificada y archivada.
 
 **Y una consecuencia del alcance verificado:** como el documento de identidad **no** se envía al proveedor, la exposición de esta transferencia se limita a notas clínicas dictadas, imágenes de carnets y datos de negocio. Es un perímetro sensiblemente más estrecho, y conviene mantenerlo así: si alguna vez se conecta el componente latente de lectura del documento de identidad, la evaluación de la transferencia hay que rehacerla antes, no después.
+
+---
+
+### B — Motor de reconocimiento de voz del dispositivo
+
+**Texto:**
+
+> **Transcripción de su dictado por el servicio de voz de su teléfono**
+>
+> La función de dictado de la nota clínica utiliza el **servicio de reconocimiento de voz del propio dispositivo** del profesional: el de Google en dispositivos Android y el de Apple en dispositivos iOS. Según el dispositivo y su configuración, **ese servicio puede transmitir el audio a servidores de esos fabricantes ubicados fuera del Ecuador**.
+>
+> Ese tratamiento **no lo realiza e-PetPlace ni un encargado suyo**: lo realiza el fabricante del sistema operativo bajo sus propios términos y su propia política de privacidad, con los que usted mantiene una relación directa como usuario del dispositivo. **e-PetPlace no puede determinar, instruir ni limitar** lo que el fabricante haga con ese audio, y no le resultan aplicables las garantías descritas en el apartado anterior.
+>
+> **e-PetPlace no recibe, no procesa y no conserva en ningún momento la grabación de audio.** Recibe únicamente el texto ya transcrito.
+>
+> Lo que se transmite al fabricante es **su voz** y aquello que usted dicte, que puede incluir el nombre del paciente, el de su establecimiento y la descripción clínica de la atención.
+>
+> Por esta razón, el uso del dictado requiere su **consentimiento previo, específico e informado**, que se le solicita la primera vez que utiliza la función y que puede retirar en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com. Puede redactar la nota clínica manualmente, sin utilizar el dictado, sin que ello afecte ninguna otra funcionalidad.
+>
+> Si desea conocer o modificar el tratamiento que su dispositivo hace de su voz, consulte la configuración de reconocimiento de voz de su teléfono y la política de privacidad de su fabricante.
+
+**Nota de uso.** Tres cosas que este texto hace a propósito y conviene no suavizar al editarlo. Primero, **dice que e-PetPlace no puede controlarlo** — es la afirmación incómoda y es la que protege, porque evita que el profesional entienda que e-PetPlace responde por lo que Google o Apple hagan. Segundo, **enumera qué va en el audio**, incluido el nombre del establecimiento: un profesional que lee "su voz" quizá no dimensione que también va el nombre de su clínica. Tercero, **remite al fabricante**, que es donde el profesional efectivamente puede cambiar algo.
+
+**Lo que no debe decir.** No debe afirmar que el audio "se procesa de forma segura", ni que "no se conserva", ni que "no se usa para otros fines". e-PetPlace no está en condiciones de saberlo ni de comprometerlo.
 
 ---
 
@@ -211,7 +280,7 @@ Mantener al pie del aviso: `Versión X.Y — vigente desde [fecha]`, y conservar
 
 **Del censo técnico, pendientes:**
 
-6. **El audio del dictado.** No consta si la grabación se conserva, por cuánto tiempo, ni si la transcripción de voz a texto la realiza el mismo proveedor u otro distinto. Si interviene un segundo proveedor, hay una segunda transferencia internacional no declarada.
+6. **El audio del dictado — resuelto y declarado.** Verificado: la grabación nunca entra a los sistemas de e-PetPlace ni llega al proveedor de IA; la transcripción la realiza el motor de voz del sistema operativo. Queda incorporado como transferencia B de la Formulación 7. **Pendiente derivado:** evaluar la preferencia por transcripción local cuando el dispositivo la soporte, y verificar si la configuración del dispositivo permite detectar en qué modo se está operando para poder informarlo con precisión.
 7. **Rastro de la confirmación humana** (Formulación 5): verificar que se registre quién confirmó, cuándo y si editó.
 8. **Vía manual alternativa** para las tres funciones (Formulación 3, literal c).
 9. **Retención de la imagen del carnet.** Se conserva de forma indefinida junto a la ficha y se reproduce en las impresiones. Hay que fijar un plazo o vincularlo expresamente a la vida de la ficha de la mascota, y definir qué ocurre con la imagen cuando el usuario elimina su cuenta — arrastra datos del veterinario emisor.

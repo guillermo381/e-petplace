@@ -112,7 +112,7 @@ Nuestras aplicaciones solicitan los siguientes permisos. **Todos son opcionales*
 |---|---|---|
 | **Cámara** | Fotografiar el carnet de vacunas, la mascota o el perfil | Puede cargar imágenes desde su galería |
 | **Galería / archivos** | Seleccionar imágenes ya existentes | No podrá adjuntar imágenes |
-| **Micrófono** | Solo en la aplicación de profesionales: dictar la nota clínica | El profesional escribe la nota manualmente |
+| **Micrófono** | Solo en la aplicación de profesionales: dictar la nota clínica. **Su voz se transcribe con el servicio de reconocimiento de voz del teléfono, que puede procesarla fuera del dispositivo** — ver §14.2 y §17 | El profesional escribe la nota manualmente |
 | **Ubicación** | Ver la §10 | Deberá escribir su dirección manualmente |
 | **Notificaciones** | Ver la §9 | No recibirá avisos |
 | **Biometría del dispositivo** | Ver la §11 | Entrará con su contraseña |
@@ -176,7 +176,7 @@ Nuestras aplicaciones solicitan los siguientes permisos. **Todos son opcionales*
 
 **14.1.** Algunas funcionalidades operan mediante sistemas de inteligencia artificial, es decir, mediante tratamiento automatizado. Todas son **asistivas**: proponen un resultado que una persona revisa, corrige o descarta antes de que produzca efecto alguno.
 
-**14.2. Estructuración de la nota clínica** *(aplicación de profesionales)*. Cuando un veterinario dicta por voz el desarrollo de una consulta, el sistema distribuye lo dictado en los campos de la ficha. **Datos tratados:** únicamente el contenido dictado en esa consulta. **Finalidad:** reducir el tiempo de registro clínico. **Intervención humana:** el profesional revisa, edita y confirma antes de guardar; el sistema está diseñado para no incorporar contenido que no haya sido dictado, de modo que un campo no dictado permanece vacío. Ninguna ficha se guarda sin su confirmación.
+**14.2. Estructuración de la nota clínica** *(aplicación de profesionales)*. Cuando un veterinario dicta por voz el desarrollo de una consulta, ocurren dos cosas distintas y conviene distinguirlas. Primero, **el servicio de reconocimiento de voz del propio teléfono** —de Google en Android, de Apple en iOS— convierte su voz en texto; ese servicio puede procesar el audio fuera del dispositivo, conforme se explica en la §17.B. Después, ya con el texto, nuestro sistema lo distribuye en los campos de la ficha. **e-PetPlace no recibe, no procesa y no conserva en ningún momento la grabación de audio: recibe únicamente el texto transcrito.** **Datos tratados por nosotros:** únicamente ese texto, referido a la mascota y a la atención prestada. **Finalidad:** reducir el tiempo de registro clínico. **Intervención humana:** el profesional revisa, edita y confirma antes de guardar; el sistema está diseñado para no incorporar contenido que no haya sido dictado, de modo que un campo no dictado permanece vacío. Ninguna ficha se guarda sin su confirmación.
 
 **14.3. Lectura del carnet de vacunas** *(aplicación de familias)*. Cuando usted fotografía el carnet, el sistema lee la imagen y propone las vacunas con su denominación y fecha. **Datos tratados:** la fotografía y la información contenida en ella, incluidos los datos del emisor en los términos de la §7. **Finalidad:** incorporar el historial de vacunación a la ficha. **Intervención humana:** usted revisa cada vacuna una por una y la confirma, edita o descarta; no se guarda nada que usted no haya confirmado.
 
@@ -215,21 +215,39 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 
 **16.1. Sobre Anthropic, con nombre propio.** Lo señalamos de manera destacada porque **es el único proveedor que trata información de salud de las mascotas e imágenes de documentos cargados**. Actuamos como responsables y Anthropic PBC como encargado, en virtud de un acuerdo de tratamiento de datos que le obliga a tratar la información únicamente conforme a nuestras instrucciones documentadas, a no venderla, compartirla ni combinarla con datos de terceros, a notificarnos cualquier brecha de seguridad dentro de las 48 horas y a mantener medidas de seguridad auditadas anualmente por terceros independientes. **La información que le enviamos no se utiliza para entrenar sus modelos.**
 
-**16.2.** Cada uno de estos proveedores está sujeto a obligaciones contractuales de confidencialidad y seguridad. La lista se mantiene actualizada en esta Política; su modificación se comunica conforme a la §24.
+**16.2. Un tercero que no es encargado nuestro: el servicio de voz de su teléfono.** Cuando un profesional usa el dictado, **Google o Apple** —según el sistema operativo del dispositivo— transcriben su voz. **No actúan como encargados nuestros**: no los contratamos para ello, no podemos instruirlos y tratan ese audio bajo sus propios términos y su relación directa con usted como usuario del dispositivo. Lo detallamos en la §17.B. Nosotros no recibimos el audio en ningún momento.
 
-**16.3.** También comunicamos datos: a los **Usuarios Profesionales** que usted elige, en la medida necesaria para prestarle el servicio contratado; y a **autoridades competentes**, cuando exista requerimiento legal fundado.
+**16.3.** Cada uno de los proveedores de la tabla está sujeto a obligaciones contractuales de confidencialidad y seguridad. La lista se mantiene actualizada en esta Política; su modificación se comunica conforme a la §24.
 
-**16.4.** No vendemos sus datos personales ni los cedemos a terceros con fines publicitarios.
+**16.4.** También comunicamos datos: a los **Usuarios Profesionales** que usted elige, en la medida necesaria para prestarle el servicio contratado; y a **autoridades competentes**, cuando exista requerimiento legal fundado.
+
+**16.5.** No vendemos sus datos personales ni los cedemos a terceros con fines publicitarios.
 
 ## 17. Transferencias internacionales
 
-**17.1.** La mayoría de nuestros proveedores están ubicados fuera del Ecuador, principalmente en los Estados Unidos de América. Por lo tanto, **la operación del servicio implica transferencias internacionales de datos personales**.
+**17.1.** La mayoría de nuestros proveedores están ubicados fuera del Ecuador, principalmente en los Estados Unidos de América. La operación del servicio implica, por tanto, transferencias internacionales de datos personales. Son de **dos clases distintas** y las explicamos por separado, porque nuestras posibilidades de protegerle no son las mismas en una y en otra.
 
-**17.2.** Estas transferencias se amparan en acuerdos de tratamiento de datos que incorporan **cláusulas contractuales tipo** como garantía adecuada, conforme a la LOPDP y a la normativa expedida por la SPDP, y, en lo que respecta a las funcionalidades de la §14, además en **su consentimiento**, que usted otorga al activarlas y puede retirar en cualquier momento.
+### 17.A — Proveedores que trabajan por nuestra cuenta
 
-**17.3.** Conservamos la documentación que respalda la legalidad de cada transferencia y la ponemos a disposición de la autoridad de control cuando lo requiera.
+**17.A.1.** Los proveedores de la tabla de la §16 tratan sus datos **siguiendo nuestras instrucciones**, en virtud de acuerdos de tratamiento que incorporan **cláusulas contractuales tipo** como garantía adecuada, conforme a la LOPDP y a la normativa expedida por la SPDP. En el caso de las funcionalidades de la §14, la transferencia se apoya además en **su consentimiento**, que usted otorga al activarlas y puede retirar en cualquier momento.
 
-**17.4.** Los datos se transfieren únicamente para las finalidades descritas en esta Política y no para finalidades distintas.
+**17.A.2.** Conservamos la documentación que respalda la legalidad de cada una de estas transferencias y la ponemos a disposición de la autoridad de control cuando lo requiera.
+
+**17.A.3.** Los datos se transfieren únicamente para las finalidades descritas en esta Política.
+
+### 17.B — El servicio de voz de su teléfono
+
+**17.B.1.** La función de dictado de la nota clínica utiliza el **servicio de reconocimiento de voz del propio dispositivo**: el de Google en dispositivos Android y el de Apple en dispositivos iOS. Según el dispositivo y su configuración, **ese servicio puede transmitir el audio a servidores de esos fabricantes ubicados fuera del Ecuador**.
+
+**17.B.2.** Ese tratamiento **no lo realizamos nosotros ni un encargado nuestro**: lo realiza el fabricante del sistema operativo, bajo sus propios términos y su propia política de privacidad, con los que usted mantiene una relación directa como usuario del dispositivo. **No podemos determinar, instruir ni limitar** lo que el fabricante haga con ese audio, y a ese tratamiento no le resultan aplicables las garantías descritas en la §17.A.
+
+**17.B.3.** **No recibimos, no procesamos y no conservamos en ningún momento la grabación de audio.** Recibimos únicamente el texto ya transcrito.
+
+**17.B.4.** Lo que se transmite al fabricante es **la voz del profesional** y aquello que dicte, que puede incluir el nombre del paciente, el del establecimiento y la descripción clínica de la atención.
+
+**17.B.5.** Por esta razón, el uso del dictado requiere el **consentimiento previo, específico e informado** del profesional, que se le solicita la primera vez que utiliza la función y que puede retirar en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com. La nota clínica puede redactarse manualmente, sin utilizar el dictado, sin que ello afecte ninguna otra funcionalidad.
+
+**17.B.6.** Si desea conocer o modificar el tratamiento que su dispositivo hace de su voz, consulte la configuración de reconocimiento de voz de su teléfono y la política de privacidad de su fabricante.
 
 > 🔴 *Nota interna.* Antes de publicar: cerrar la evaluación del instrumento del proveedor de IA contra el Art. 21 de la Resolución SPDP-SPD-2026-0004-R (dos de las siete condiciones siguen abiertas), y verificar la fuente del plazo de conservación del proveedor antes de incorporar cualquier cifra a este texto.
 
