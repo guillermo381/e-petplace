@@ -2579,6 +2579,8 @@ export const prestadorEs = {
     micCta: 'Dictar con el micrófono',
     micParar: 'Parar el dictado',
     micEscuchando: '● Escuchando — toca de nuevo para parar',
+    // S104-C · D-899 — el aviso de privacidad del dictado (firma founder).
+    micPrivacidad: 'Tu dictado se transcribe con el servicio de voz de tu teléfono.',
     micPermisoDenegado: 'Sin permiso de micrófono. Actívalo en los ajustes del teléfono; escribir sigue funcionando.',
     micCorte: 'La escucha se cortó. Lo dictado quedó en la nota.',
     dictadoLabel: 'Nota de la consulta',

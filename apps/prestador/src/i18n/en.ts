@@ -2047,6 +2047,8 @@ export const prestadorEn = {
     micCta: 'Dictate with the microphone',
     micParar: 'Stop dictating',
     micEscuchando: '● Listening — tap again to stop',
+    // S104-C · D-899 — dictation privacy notice (founder-signed).
+    micPrivacidad: 'Your dictation is transcribed by your phone’s voice service.',
     micPermisoDenegado: 'No microphone permission. Enable it in your phone settings; typing still works.',
     micCorte: 'Listening stopped. What you dictated stays in the note.',
     dictadoLabel: 'Consultation note',
