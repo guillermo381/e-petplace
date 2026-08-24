@@ -53,12 +53,17 @@ import { useTraduccion } from '@/i18n';
 
 type TraductorCuenta = ReturnType<typeof useTraduccion>['t'];
 
-/** El enlace que se comparte. Apunta al SITIO con instrucciones (firma
- *  founder). `/unirse` es la ruta canónica propuesta — la página del sitio es
- *  una dependencia declarada (funcional, no legal). Reversible: es una
- *  constante. */
+/** La base de los enlaces de la app (invitación, baja). **Tiene que ser la
+ *  MISMA que A carga en `URL_APP_BASE` del transporte** — si divergen, el enlace
+ *  que copia quien invita y el que va en el correo apuntan a lados distintos.
+ *  Se lee de la env pública; el fallback es el dominio de la casa. El founder
+ *  fija el valor final en las dos puntas. */
+const APP_BASE = process.env.EXPO_PUBLIC_APP_BASE_URL ?? 'https://epetplace.com';
+
+/** El enlace que se comparte. Ruta `/invitacion?token=` (la que nombró el
+ *  founder). Lleva a la app (web) con las instrucciones y el paso de aceptar. */
 function urlInvitacion(token: string): string {
-  return `https://epetplace.com/unirse?token=${encodeURIComponent(token)}`;
+  return `${APP_BASE}/invitacion?token=${encodeURIComponent(token)}`;
 }
 
 // rol del modelo → voz humana (Ley 3: el código jamás visible)
@@ -76,7 +81,7 @@ function vozRol(rol: string, t: TraductorCuenta): string {
 type Invitacion =
   | { fase: 'formulario' }
   | { fase: 'creando' }
-  | { fase: 'listo'; enlace: string; email: string; avisoPorCorreo: boolean };
+  | { fase: 'listo'; enlace: string; email: string; avisoPorCorreo: boolean; correoSuprimido: boolean };
 
 export default function FamiliaCuenta() {
   const router = useRouter();
@@ -159,6 +164,7 @@ export default function FamiliaCuenta() {
       // El `?? false` es la lectura honesta: si el wrapper no lo dice, se
       // asume que NO salió correo — el error seguro es prometer de menos.
       avisoPorCorreo: r.data.avisoPorCorreo ?? false,
+      correoSuprimido: r.data.correoSuprimido ?? false,
     });
   }
 
@@ -249,12 +255,14 @@ export default function FamiliaCuenta() {
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
             {inv.fase === 'listo' ? (
               <>
-                {/* La voz depende de avisoPorCorreo: nunca promete un correo
-                    que no sale. */}
+                {/* Tres estados, y ninguno promete un correo que no sale:
+                    sale correo · suprimido (pidió no recibir) · sin cuenta. */}
                 <Texto variante="cuerpo">
                   {inv.avisoPorCorreo
                     ? t('cuenta.familiaInvitarCorreoYEnlace', { email: inv.email })
-                    : t('cuenta.familiaInvitarSoloEnlace', { email: inv.email })}
+                    : inv.correoSuprimido
+                      ? t('cuenta.familiaInvitarSuprimido', { email: inv.email })
+                      : t('cuenta.familiaInvitarSoloEnlace', { email: inv.email })}
                 </Texto>
                 <Texto variante="dato" seleccionable>
                   {inv.enlace}

@@ -1204,6 +1204,7 @@ export const clienteEn = {
     familiaInvitarCrear: 'Create the invitation',
     familiaInvitarComoFamiliar: 'They join as an authorized family member: they can see the records of your family’s pets.',
     familiaInvitarSoloEnlace: 'Share this link with {{email}} — over WhatsApp, for example. It’s how they join.',
+    familiaInvitarSuprimido: '{{email}} asked not to get our emails, so we won’t write to them. The invitation still works: share this link with them yourself.',
     familiaInvitarCorreoYEnlace: 'We emailed {{email}}. You can also share this link:',
     familiaCopiarEnlace: 'Copy the link',
     familiaEnlaceCopiado: 'Link copied',
@@ -1377,6 +1378,13 @@ export const clienteEn = {
     listo: 'Done — you can sign in now.',
     esperaConNumero: 'You requested several codes in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You requested several codes in a row. Wait a moment and try again.',
+  },
+  // S104-C · Unsubscribe from emails, one tap (motor de A, anon grant).
+  baja: {
+    titulo: 'Stop receiving emails',
+    cuerpo: 'Do you want to stop receiving e-PetPlace invitations and notices at this email?',
+    confirmar: 'Yes, no more emails',
+    listo: 'Done. We won’t write to this email again.',
   },
   seguridad: {
     tituloPantalla: 'Security',

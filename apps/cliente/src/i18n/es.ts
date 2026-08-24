@@ -1406,6 +1406,10 @@ export const clienteEs = {
     // avisoPorCorreo=false: el invitado no tiene cuenta, el correo NO sale —
     // la pantalla lo dice, jamás promete un correo que no va a llegar.
     familiaInvitarSoloEnlace: 'Compartí este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
+    // correoSuprimido=true: esa dirección pidió no recibir más. La invitación
+    // vale y el enlace sirve, pero la casa NO le escribe. Callarlo dejaría a
+    // quien invita esperando un correo que nunca sale (firma A).
+    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compartile vos este enlace.',
     // avisoPorCorreo=true: el correo sí sale; el enlace es el respaldo.
     familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
     familiaCopiarEnlace: 'Copiar el enlace',
@@ -1764,6 +1768,15 @@ export const clienteEs = {
     listo: 'Listo — ya puedes entrar.',
     esperaConNumero: 'Pediste varios códigos seguidos. Espera {{s}} segundos y vuelve a intentar.',
     esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
+  },
+  // S104-C · DARSE DE BAJA de los correos, en un clic (motor de A, grant a
+  // anon). Sin sesión, sin login. La pantalla dice lo mismo exista o no el
+  // token — distinguir sería un oráculo de tokens válidos (firma A).
+  baja: {
+    titulo: 'Dejar de recibir correos',
+    cuerpo: '¿Querés dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
+    confirmar: 'Sí, no quiero más correos',
+    listo: 'Listo. No te vamos a escribir más a este correo.',
   },
   seguridad: {
     tituloPantalla: 'Seguridad',
