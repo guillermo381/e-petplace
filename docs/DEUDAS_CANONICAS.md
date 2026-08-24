@@ -20920,3 +20920,58 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 **Dueño:** founder + producto (la letra) · producto (la superficie).
 **Disparo:** con `D-903`, **antes de abrir el cierre de cuenta a usuarios reales** — *son la misma decisión mirada desde dos lados.*
 ☠️ **Condición de muerte:** existe un camino en la app para que una familia saque una mascota de su ficha, **con la letra que dice qué pasa con su expediente** — y **medido de punta a punta, no con un `DELETE` que rebota contra 40 constraints.**
+
+#### D-905 — 🔴 EL FLUJO FIRMADO DEL CIERRE CON MASCOTAS CHOCA CON DOS COSAS MEDIDAS. **Se frena antes de construir**
+🔴 **FRENO DECLARADO (24-ago-2026), por orden del founder: *«si medís que alguna parte de este flujo choca con lo publicado, frená y decilo antes de construir»*.** **Chocó, y no contra lo publicado: contra el propio motor.**
+
+**El flujo firmado:** al cerrar, se pregunta si alguien más va a cuidar las mascotas · **sí** → se invita y el cierre **queda en espera** hasta que acepte · **no** → segunda confirmación y el expediente queda **inalcanzable, no borrado**.
+
+✅ **Contra la LETRA PUBLICADA no hay choque, y conviene decirlo primero:** *«dejan de estar disponibles, NO se borran»* es exactamente `§19.4` + `§19.5` + la fila de `§18` (*«expediente de salud: vida del animal más 5 años, **seudonimizado desde el cierre**»*). **La corrección del founder sobre su propia frase —«perderás el expediente» decía destrucción y el motor hace inalcanzabilidad— es la correcta y ya está aplicada.**
+
+---
+
+### 🔴 CHOQUE ① — LA INVITACIÓN NO PUEDE CREAR OTRO TITULAR. **Es un CHECK, no un olvido**
+
+**Medido en `familia_invitaciones`:**
+```
+rol_invitado text not null default 'adulto_autorizado'
+             check (rol_invitado = 'adulto_autorizado')
+```
+
+⇒ **La invitación SOLO puede crear `adulto_autorizado`.** Y `_cierre_requiere_camino_asistido` mira **`adulto_titular`**.
+
+**La consecuencia, en tres pasos:** se invita a alguien → entra como **autorizado** → el titular se va ⇒ **la familia queda con CERO adultos titulares.** *Que es literalmente la «familia acéfala» que `P15 §1` declara temer, alcanzada por el camino que el flujo propone para evitarla.*
+
+> **El motor de invitación existe, pero no hace lo que este flujo necesita: puede sumar a alguien, no puede TRASPASAR LA TITULARIDAD.**
+
+*El CHECK se escribió a propósito en la tanda 2 —«heredar el molde, JAMÁS su alcance»— para que una invitación no pudiera fabricar titulares. **La restricción era correcta para su caso y es exactamente el obstáculo en éste.***
+
+**Lo que falta es un acto que no existe: TRASPASAR LA TITULARIDAD**, con su propio consentimiento del que la recibe. *No es ensanchar el CHECK: es que alguien acepte volverse responsable de un expediente ajeno, que es una decisión distinta de «sumate a mi familia».*
+
+---
+
+### 🔴 CHOQUE ② — LAS DOS VENTANAS SON DE 30 DÍAS Y EMPATAN
+
+**Medido:** `familia_invitaciones.expira_en` = `now() + 30 días` · `cierre_cuenta.programado_para` = `now() + 30 días`.
+
+⇒ **La invitación expira EXACTAMENTE el día en que el cierre iba a ejecutarse.** *El cierre no puede «esperar a que acepte» cuando su propia ventana es igual de larga que la del que tiene que aceptar.*
+
+---
+
+### LA PREGUNTA QUE EL FOUNDER DEJÓ ABIERTA: **¿y si nunca acepta?**
+
+**Medido primero, porque cambia el peso de la respuesta:** hoy la persona **ya perdió el acceso el día 1**. ⇒ **mientras el cierre está «en espera», está baneada y no puede entrar a cancelar, ni a re-invitar, ni a ver qué pasó.** *Un estado de espera que la persona no puede observar ni abandonar no es una espera: es un limbo.*
+
+**TRES CAMINOS, sin decidir ninguno:**
+
+| | qué pasa al día 30 sin aceptación | a favor | en contra |
+|---|---|---|---|
+| **(a) El cierre procede igual** | se ejecuta y el expediente queda inalcanzable — lo mismo que si hubiera dicho «no» | **Nada queda colgado**, y la persona ya eligió irse | *Le prometimos que alguien más iba a cuidarlas y no pasó.* **Se le tiene que avisar** — y hoy no puede entrar a leerlo |
+| **(b) El cierre se cancela y vuelve el acceso** | se revierte solo, con aviso | **Fail-safe**: ante la duda, nadie pierde nada | *Alguien que quiso irse se encuentra con la cuenta abierta otra vez.* Y **puede repetirse para siempre** |
+| **(c) Se corta en el intento, no en el reloj** | tras N recordatorios sin respuesta, se le pregunta a quien se va: ¿procede o cancela? | **Devuelve la decisión a quien la tomó** | **Exige poder alcanzarla — y el correo es el único canal**, porque la app está cerrada para ella |
+
+⚠️ **Y una observación que aplica a los tres, medida:** el correo es **el único canal** con alguien cuya cuenta está cerrada. ⇒ **cualquiera de los tres depende de un motor de correo que hoy está en sombra.**
+
+**Dueño:** founder (los dos choques y la elección) · producto (el traspaso de titularidad, que es construcción nueva).
+**Disparo: ANTES de construir el flujo** — *el motor de invitación no puede sostenerlo como está.*
+☠️ **Condición de muerte:** existe un acto de traspaso de titularidad **con consentimiento del que recibe**, y una respuesta firmada a *«¿y si nunca acepta?»* — **con su ventana medida contra la del cierre, no supuesta igual.**
