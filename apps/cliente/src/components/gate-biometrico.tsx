@@ -13,7 +13,10 @@
  *   · Al ARRANCAR en frío, si el candado está activo y hay sesión guardada →
  *     la cortina baja y **se pide la huella de una** (no una pantalla donde
  *     tocar «Desbloquear» primero). Pasa → adentro.
- *   · Al VOLVER del segundo plano (background → active), mismas condiciones.
+ *   · Al VOLVER del segundo plano (background → active), mismas condiciones,
+ *     PERO con umbral de inactividad: volver antes de 5 min NO pide nada —la
+ *     app sigue donde estaba—; después de 5 min, pide huella. (Enmienda
+ *     founder: pedir en cada vuelta cansa.)
  *   · Sin sesión (venció o se cerró a propósito) → login normal, SIN huella:
  *     no hay sesión que desbloquear.
  *   · La salida SIEMPRE visible («Entrar con otra cuenta») lleva al login.
@@ -43,6 +46,11 @@ import { cerrarSesion, obtenerSesion } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 import { bloqueoActivado, pedirIdentidad } from '@/lib/bloqueo-biometrico';
 
+/** Umbral de inactividad (enmienda founder, 23-ago): volver del segundo plano
+ *  ANTES de 5 min NO pide huella —la app sigue donde estaba—; después, sí. El
+ *  arranque en frío pide SIEMPRE, sin importar el tiempo (otro efecto). */
+const UMBRAL_INACTIVIDAD_MS = 5 * 60 * 1000;
+
 export function GateBiometrico({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { theme } = useTheme();
@@ -54,6 +62,8 @@ export function GateBiometrico({ children }: { children: ReactNode }) {
 
   const enPrompt = useRef(false);
   const armado = useRef(false);
+  // Reloj del dispositivo al pasar a segundo plano (para el umbral).
+  const fondoEn = useRef(0);
   const bloqueadoRef = useRef(false);
   bloqueadoRef.current = bloqueado;
 
@@ -91,11 +101,19 @@ export function GateBiometrico({ children }: { children: ReactNode }) {
       if (siguiente === 'background') {
         // El prompt del SO no arma el bloqueo (si armara, volver de él
         // re-bloquearía en bucle).
-        if (!enPrompt.current) armado.current = true;
+        if (!enPrompt.current) {
+          armado.current = true;
+          fondoEn.current = Date.now();
+        }
       } else if (siguiente === 'active') {
         if (enPrompt.current) return; // volver del prompt no re-bloquea
         if (!armado.current) return;
         armado.current = false;
+        // UMBRAL DE INACTIVIDAD: volver antes de 5 min NO pide nada — la app
+        // sigue donde estaba. Reloj del dispositivo; si saltó hacia atrás
+        // (transcurrido < 0) se trata como VENCIDO y se pide, nunca al revés.
+        const transcurrido = Date.now() - fondoEn.current;
+        if (transcurrido >= 0 && transcurrido < UMBRAL_INACTIVIDAD_MS) return;
         void (async () => {
           if (await debeBloquear()) {
             setBloqueado(true);
