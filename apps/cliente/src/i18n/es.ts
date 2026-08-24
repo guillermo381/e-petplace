@@ -1778,6 +1778,27 @@ export const clienteEs = {
     confirmar: 'Sí, no quiero más correos',
     listo: 'Listo. No te vamos a escribir más a este correo.',
   },
+  // S104-C · la pantalla del INVITADO de familia (motor de A:
+  // aceptarInvitacionFamilia). Tres láminas cortas + aceptar.
+  invitacionFamilia: {
+    titulo: 'Te invitaron a una familia',
+    lamina1Titulo: 'Sos parte de una familia',
+    lamina1Cuerpo: 'Alguien te sumó a su familia en e-PetPlace para cuidar juntos a sus mascotas.',
+    lamina2Titulo: 'Vas a ver su expediente',
+    lamina2Cuerpo: 'La vida de cada mascota, documentada: vacunas, paseos, visitas al veterinario y más.',
+    lamina3Titulo: 'Cuidá con ellos',
+    lamina3Cuerpo: 'Vas a estar al día con lo que cada mascota necesita, y seguir sus cuidados.',
+    siguiente: 'Siguiente',
+    unirme: 'Unirme a la familia',
+    // Sin sesión: se guía a entrar/crear cuenta CON EL MISMO CORREO (el motor
+    // exige que la sesión coincida con el invitado — email_no_coincide).
+    sinSesionCuerpo: 'Para unirte, entrá o creá tu cuenta con el mismo correo al que te invitaron.',
+    entrar: 'Ya tengo cuenta',
+    crearCuenta: 'Crear mi cuenta',
+    otraCuenta: 'Entrar con otra cuenta',
+    sinToken: 'Este enlace no es válido o ya venció. Pedile a quien te invitó que te mande uno nuevo.',
+    listo: 'Listo, ya sos parte de la familia.',
+  },
   seguridad: {
     tituloPantalla: 'Seguridad',
     titulo: 'Contraseña',
