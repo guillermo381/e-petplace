@@ -44,8 +44,10 @@ import {
   Entrada,
 } from '@epetplace/ui';
 import {
+  VERSION_LEGAL,
   aceptarInvitacionEquipo,
   cerrarSesion,
+  decidirConsentimiento,
   obtenerInvitacionPendiente,
   obtenerSesion,
   registrarConsentimiento,
@@ -53,6 +55,12 @@ import {
   type InvitacionPendiente,
 } from '@epetplace/api';
 
+import {
+  ACEPTACION_INICIAL,
+  AceptacionTerminos,
+  aceptacionCompleta,
+  urlTycProfesional,
+} from '@/components/aceptacion-terminos';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -72,6 +80,10 @@ export default function Invitacion() {
   const [intento, setIntento] = useState(0);
   const [aceptando, setAceptando] = useState(false);
   const [saliendo, setSaliendo] = useState(false);
+  // S104-C · aceptar la invitación ES aceptar el T&C profesional (firma
+  // founder (a)): dos checks obligatorios + el arbitraje opcional, ANTES de
+  // entrar. Acá hay sesión, así que todo se registra en el mismo acto.
+  const [aceptacion, setAceptacion] = useState(ACEPTACION_INICIAL);
 
   useFocusEffect(
     useCallback(() => {
@@ -106,7 +118,7 @@ export default function Invitacion() {
   }
 
   async function aceptar(datos: InvitacionPendiente) {
-    if (aceptando) return;
+    if (aceptando || !aceptacionCompleta(aceptacion)) return;
     setAceptando(true);
     const r = await aceptarInvitacionEquipo(datos.empleadoId);
     if (!r.ok && r.codigo !== 'ya_activado') {
@@ -129,6 +141,17 @@ export default function Invitacion() {
       // 3er argumento se omite (su default ya es null → el motor la resuelve).
       await registrarConsentimiento(sesion.data.user_id, 'acceso_prestador');
     }
+    // S104-C · el ARBITRAJE, en el mismo acto y con su fecha —true o false—:
+    // aceptar la invitación es la puerta `acceso_prestador`, así que el
+    // contexto lo dice (§38.10). Best-effort, DESPUÉS de aceptar: entrar es
+    // lo primario. Versión y URL de packages/api (L-166).
+    await decidirConsentimiento({
+      acto: 'arbitraje',
+      aceptado: aceptacion.arbitraje,
+      version: VERSION_LEGAL.terminos_professional,
+      url: urlTycProfesional(),
+      contexto: 'acceso_prestador',
+    });
     // La puerta está abierta (R1): el vínculo ya es activo → entrar. El
     // guard re-resuelve y lleva a las tabs (sin rol → sin NEGOCIO).
     router.replace('/');
@@ -198,11 +221,22 @@ export default function Invitacion() {
             <Texto variante="apoyo">{t('invitacion.invitadoComo', { nombre: datos.nombreInvitado })}</Texto>
           </View>
         </Entrada>
+        {/* S104-C · la aceptación EXPLÍCITA reemplaza la línea de términos
+            implícita (firma founder (a)): dos checks obligatorios con enlace +
+            el arbitraje opcional. `stretch` para que las casillas se alineen a
+            la izquierda dentro de la composición centrada. */}
+        <View style={{ alignSelf: 'stretch' }}>
+          <AceptacionTerminos
+            estado={aceptacion}
+            onCambio={(p) => setAceptacion((a) => ({ ...a, ...p }))}
+          />
+        </View>
         <Entrada orden={1}>
         <Boton
           etiqueta={t('invitacion.entrar')}
           bloque
           cargando={aceptando}
+          deshabilitado={!aceptacionCompleta(aceptacion)}
           onPress={() => void aceptar(datos)}
         />
         </Entrada>
@@ -212,13 +246,6 @@ export default function Invitacion() {
           cargando={saliendo}
           onPress={salir}
         />
-        {/* S104-C (paridad, firma founder 23-ago): aceptar la invitación
-            ES entrar al ecosistema — los términos son visibles acá, como en
-            toda puerta de entrada. Al pie del bloque, tenue (secondary):
-            informa sin competir con «Entrar». Honesta sin link (D-336). */}
-        <Texto variante="apoyo" color="secondary">
-          {t('bienvenida.terminos')}
-        </Texto>
       </View>
     );
   })();

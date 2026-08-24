@@ -31,9 +31,15 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { confirmarAltaConCodigo, reenviarCodigoAlta } from '@epetplace/api';
+import {
+  VERSION_LEGAL,
+  confirmarAltaConCodigo,
+  decidirConsentimiento,
+  reenviarCodigoAlta,
+} from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
+import { urlTycProfesional } from '@/components/aceptacion-terminos';
 import { useTraduccion } from '@/i18n';
 
 const LARGO_CODIGO = 8;
@@ -46,7 +52,9 @@ export default function VerificarCorreo() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const { email = '' } = useLocalSearchParams<{ email?: string }>();
+  // `arbitraje` ('si'|'no') viaja desde el registro: el acto NO se pudo
+  // escribir sin sesión (§38.10), y acá SÍ hay sesión tras confirmar.
+  const { email = '', arbitraje } = useLocalSearchParams<{ email?: string; arbitraje?: string }>();
 
   const [codigo, setCodigo] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -91,6 +99,18 @@ export default function VerificarCorreo() {
       }
       return;
     }
+
+    // El ARBITRAJE se registra ACÁ, que es donde hay sesión — con su fecha,
+    // true o false (el «no» es un valor legítimo, §38.10). Best-effort: la
+    // cuenta ya existe; si esta traza fallara, no se le cierra la puerta a
+    // quien ya confirmó. La versión y la URL salen de packages/api (L-166).
+    await decidirConsentimiento({
+      acto: 'arbitraje',
+      aceptado: arbitraje === 'si',
+      version: VERSION_LEGAL.terminos_professional,
+      url: urlTycProfesional(),
+      contexto: 'registro_profesional',
+    });
 
     // Dosis prestador: sin celebración. La sesión está viva y la cuenta VACÍA;
     // el guard raíz re-decide y la rama sin_rol habla con la tercera voz.
