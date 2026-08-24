@@ -1379,3 +1379,11 @@ export {
   type InvitacionAceptada,
   type CodigoInvitacionFamilia,
 } from './wrappers/familia-invitacion';
+
+// S104-A · el freno del enlace de invitación (freno de mesa, 24-ago): una sola
+// verdad que las dos apps consumen, en vez de una disciplina por pantalla.
+export {
+  ENLACE_INVITACION_HABILITADO,
+  APP_BASE_URL,
+  urlInvitacion,
+} from './wrappers/_enlace-invitacion';
