@@ -523,6 +523,14 @@ export const prestadorEn = {
     irARecuperar: 'Create a password',
     esperaConNumero: 'You tried several times in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You tried several times in a row. Wait a moment and try again.',
+    biometricoTitulo: 'App lock',
+    biometricoEtiqueta: 'Lock when you come back to the app',
+    biometricoAyuda:
+      'When you leave and come back, your phone will ask you to prove it’s you before showing your session. If it can’t, you sign in with your password.',
+    biometricoNoDisponible:
+      'Set up your phone’s unlock (fingerprint or face) to use the lock.',
+    biometricoPrompt: 'Confirm it’s you',
+    biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   recuperar: {
     titulo: 'Recover your password',

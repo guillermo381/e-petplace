@@ -1845,6 +1845,17 @@ export const clienteEs = {
     soloGoogle:
       'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Puedes crear una desde recuperar: te enviamos un código a tu correo.',
     irARecuperar: 'Crear una contraseña',
+    // S104-C · el candado biométrico sobre la sesión (§2.5). La voz no nombra
+    // el método (huella/rostro): depende del teléfono, y el SO ya lo dice en
+    // su propio prompt.
+    biometricoTitulo: 'Candado de la app',
+    biometricoEtiqueta: 'Bloquear al volver a la app',
+    biometricoAyuda:
+      'Cuando salgas y vuelvas, tu teléfono te va a pedir que te reconozca antes de mostrar tu sesión. Si no puede, entras con tu contraseña.',
+    biometricoNoDisponible:
+      'Configura el desbloqueo de tu teléfono (huella o rostro) para usar el candado.',
+    biometricoPrompt: 'Confirma que eres tú',
+    biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
     titulo: 'Despensa',

@@ -1434,6 +1434,14 @@ export const clienteEn = {
     soloGoogle:
       "You sign in to e-PetPlace with Google, so you don't have a password of your own yet. You can create one from recover: we'll email you a code.",
     irARecuperar: 'Create a password',
+    biometricoTitulo: 'App lock',
+    biometricoEtiqueta: 'Lock when you come back to the app',
+    biometricoAyuda:
+      'When you leave and come back, your phone will ask you to prove it’s you before showing your session. If it can’t, you sign in with your password.',
+    biometricoNoDisponible:
+      'Set up your phone’s unlock (fingerprint or face) to use the lock.',
+    biometricoPrompt: 'Confirm it’s you',
+    biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
     titulo: 'Pantry',
