@@ -1195,8 +1195,21 @@ export const clienteEn = {
     rolMenor: 'Minor',
     rolCuidadorExterno: 'External caregiver',
     familiaSoloTitular: 'Only the primary adult can change the name.',
+    // S104-C · Invite to family (motor de A). familiaInvitarPronto died (Ley 37).
     familiaInvitar: 'Invite someone from your family',
-    familiaInvitarPronto: 'Soon',
+    familiaInvitarSoloTitular: 'Only the person who created the family can invite.',
+    familiaInvitarAyuda: 'You share a link so they can join your family.',
+    familiaInvitarEmailLabel: 'Their email',
+    familiaInvitarNombreLabel: 'Their name (optional)',
+    familiaInvitarCrear: 'Create the invitation',
+    familiaInvitarComoFamiliar: 'They join as an authorized family member: they can see the records of your family’s pets.',
+    familiaInvitarSoloEnlace: 'Share this link with {{email}} — over WhatsApp, for example. It’s how they join.',
+    familiaInvitarSuprimido: '{{email}} asked not to get our emails, so we won’t write to them. The invitation still works: share this link with them yourself.',
+    familiaInvitarCorreoYEnlace: 'We emailed {{email}}. You can also share this link:',
+    familiaCopiarEnlace: 'Copy the link',
+    familiaEnlaceCopiado: 'Link copied',
+    familiaInvitarOtra: 'Invite someone else',
+    familiaInvitarListo: 'Done',
     // Lote 4 (S88-D) — see es.ts for the Ley 37 tombstone and sources.
     notifLey: 'Choose how updates reach you. Some always arrive — you choose how.',
     notifFilaOperacion: 'Your appointments and services',
@@ -1249,7 +1262,8 @@ export const clienteEn = {
     soporteMensaje: 'Hi, I need help with the e-PetPlace app.',
     soporteFallback: "If WhatsApp doesn't open, message us at {{numero}}.",
     soporteDesdeCobro: 'Hi, I had a problem paying on e-PetPlace.',
-    eliminarVoz: "It will live here, done right. First we need to properly resolve what happens to your pets' story, your co-owners and your milestones — a documented life is not deleted lightly.",
+    // S104-C (founder signature 5.1): «co-owners» → «the people in your family».
+    eliminarVoz: "It will live here, done right. First we need to properly resolve what happens to your pets' story, the people in your family and your milestones — a documented life is not deleted lightly.",
     entendido: 'Got it',
   },
   ajustes: {
@@ -1364,6 +1378,13 @@ export const clienteEn = {
     listo: 'Done — you can sign in now.',
     esperaConNumero: 'You requested several codes in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You requested several codes in a row. Wait a moment and try again.',
+  },
+  // S104-C · Unsubscribe from emails, one tap (motor de A, anon grant).
+  baja: {
+    titulo: 'Stop receiving emails',
+    cuerpo: 'Do you want to stop receiving e-PetPlace invitations and notices at this email?',
+    confirmar: 'Yes, no more emails',
+    listo: 'Done. We won’t write to this email again.',
   },
   seguridad: {
     tituloPantalla: 'Security',
