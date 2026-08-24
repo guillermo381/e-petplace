@@ -49,6 +49,7 @@ export const clienteEs = {
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
     entrar: 'Entrar',
+    conGoogle: 'Continuar con Google',
   },
   registro: {
     titulo: 'Crear cuenta',
