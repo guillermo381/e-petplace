@@ -20662,7 +20662,7 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
-#### D-897 — 🔴 TRES FRENOS DE PUBLICACIÓN marcados por el abogado: no se abre al público hasta que funcionen
+#### D-897 — 🔴 CUATRO FRENOS DE PUBLICACIÓN (tres del abogado + la verificación de §14.4): no se abre al público hasta que funcionen
 🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
 
 **① El reembolso no devuelve dinero.** Existe la función que revierte el asiento contable; **no hay devolución real** a la tarjeta ni a la billetera. Hoy, cancelar con derecho a reembolso **anota el derecho y no paga**. ⇒ *Unos T&C que prometen reembolso con un motor que solo asienta es la clase de promesa que se descubre el día del primer reclamo.*
@@ -20671,8 +20671,10 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 **③ Falta la leyenda «no es factura» en el comprobante.** El sistema emite un comprobante de pago que **no es factura fiscal**, y **no lo dice**. ⇒ *Un documento con monto, fecha y concepto que no aclara qué NO es, se lee como lo que no es.*
 
-**Dueño:** producto + el frente de pagos. **Disparo:** los tres, **antes de la primera venta real a un tercero**.
-☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido.
+**④ Verificar §14.4 el día que la fee del procesador deje de ser cero.** Los T&C afirman que **la comisión del procesador la asume la Compañía con cargo a su Comisión y NO se descuenta de la Liquidación**. Medido hoy: `plataforma + payout = bruto` **exacto** (58,24 + 330,01 = 388,25) ⇒ **consistente**. ⚠️ **Pero se cumple por CONSTRUCCIÓN y no por EJERCICIO**: el campo de la fee está en **0,00 en las 36 operaciones**, porque el ambiente es de pruebas. *El reparto es correcto en un mundo donde ese número es cero.* ⇒ **con la primera fee real, re-verificar que siga saliendo de la Comisión y no del pago al profesional.** *Es una cláusula que hoy nadie puede contradecir porque nadie la ejerció — y por eso es exactamente la clase que se descubre rota en la primera liquidación.*
+
+**Dueño:** producto + el frente de pagos. **Disparo:** los cuatro, **antes de la primera venta real a un tercero**.
+☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido · ④ una operación con fee de procesador **distinta de cero** en la que `plataforma + payout` siga sumando el bruto.
 
 #### D-898 — 🟡 `extract-documento` está desplegada, es facturable y NADIE la llama
 🟡 **MEDIA.** Apareció al contrastar el censo de privacidad contra el sistema (S104-A, 24-ago-2026).
@@ -20718,3 +20720,18 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 </details>
 
 ☠️ **Condición de muerte (la mitad de LETRA está CUMPLIDA):** el aviso ya declara a Google/Apple y **con el encuadre correcto — como tercero que NO es encargado nuestro**. Queda la mitad de producto: medir el reconocimiento on-device en dispositivo y decidir.
+
+#### D-900 — 🔴 EL SISTEMA NO EXPRESA EL MANDATO DE RECAUDACIÓN QUE EL CONTRATO YA FIRMÓ
+🔴 **ALTA.** La figura **quedó decidida en la letra** (founder, 24-ago-2026): **§17 de los T&C Pet Professional es un MANDATO DE RECAUDACIÓN.** *«El Usuario Profesional confiere mandato a la Compañía para que, **en su nombre y por su cuenta**, recaude de los Usuarios Clientes las Tarifas»*, limitado a la recaudación, remunerado por la Comisión, con facultad de compensación (§17.5).
+
+**🔴 EL SISTEMA NO SABE ESO, y lo que lo vuelve grave es que TAMPOCO FALLA.** Medido en el censo de S104-A: el motor **registra un cobro y un reparto** (bruto · comisión de pasarela · comisión de plataforma · monto del profesional) **y nada más**. ⇒ **«e-PetPlace cobra por cuenta y orden del profesional» y «e-PetPlace cobra en nombre propio y después le paga» producen HOY exactamente los mismos registros.** *No hay ningún campo, ninguna función y ninguna restricción que distinga las dos figuras — y son fiscalmente opuestas.*
+
+**Por qué no es un detalle contable:**
+- **De la figura depende quién emite la factura al cliente final.** Con mandato, factura el profesional; en nombre propio, factura la Compañía. **Hoy no se emite ninguna** (ver D-897 ③), así que la ambigüedad todavía no se materializó — *y por eso conviene cerrarla antes y no después de la primera factura, que es el acto que la vuelve irreversible hacia atrás.*
+- **§17.5 da facultad de compensación** contra los valores recaudados. **El motor no tiene el concepto de «valores recaudados por cuenta ajena»**: tiene montos repartidos. Compensar sobre algo que el sistema no distingue de ingreso propio es exactamente lo que un mandato no debe hacer.
+- **Un mandato exige rendición de cuentas** (§17 lo dice: se rinde por la Liquidación y su detalle de Operaciones). **Nunca se rindió ninguna** — 0 liquidaciones (D-897 ②).
+
+**Lo que haría falta, sin diseñarlo acá:** que el sistema **distinga contablemente lo recaudado por cuenta ajena de lo propio**, y que la Liquidación **sea la rendición de ese mandato** y no solo una transferencia calculada.
+
+**Dueño:** producto + el frente de pagos, con la mesa. **Disparo: ANTES DE LA PRIMERA LIQUIDACIÓN REAL** — porque la primera liquidación es el primer acto de rendición del mandato, y rendir cuentas de algo que el sistema no modeló como ajeno es donde la figura se rompe.
+☠️ **Condición de muerte:** el sistema distingue lo recaudado por cuenta ajena, y la Liquidación se emite como rendición del mandato con su detalle de Operaciones.
