@@ -21023,3 +21023,25 @@ rol_invitado text not null default 'adulto_autorizado'
 
 **Dueño:** producto. **Disparo:** con `D-904`.
 ☠️ **Condición de muerte:** existe un camino para retirar una ficha cargada por error **que no la declara muerta ni dispara el memorial**.
+
+#### D-908 — 🔴 LA EVALUACIÓN DE TRANSFERENCIAS SE REVISA CUANDO ANTHROPIC RESPONDA. **Disparo externo con fecha**
+🔴 **DISPARO EXTERNO. Dueño: el founder, porque él recibe la respuesta.** *Se ficha justamente por eso: una deuda cuyo disparo llega al correo de una persona se pierde si vive solo en su bandeja.*
+
+**El acto ya ocurrido (24-ago-2026):** el founder envió un **requerimiento formal** a `privacy@anthropic.com`, con copia a `support@`, invocando las cláusulas **I.4** y **B.6** del DPA — la medida **M-6** de la propia evaluación. **Cuatro preguntas:**
+1. ¿Existe un **addendum específico para Ecuador o Latinoamérica**, comparable a los de Reino Unido y Suiza?
+2. ¿Aceptarían las **cláusulas modelo de la RIPD** u otro instrumento que **acepte jurisdicción ecuatoriana**?
+3. ¿Cuál es el **plazo de retención de logs e inputs/outputs** del plan contratado?
+4. ¿Nuestro uso —**texto clínico veterinario e imágenes de carnets**— sigue siendo consistente con su declaración de que **no se transfieren categorías especiales**?
+
+**QUÉ HACER CON CADA DESENLACE — y los tres son evidencia, incluido el silencio:**
+
+| desenlace | qué se hace |
+|---|---|
+| **Confirman que NO hay addendum para Ecuador** | **La evaluación no cambia.** Esa respuesta pasa a ser **la prueba de que las medidas compensatorias se adoptaron porque no había alternativa, no por comodidad.** Se archiva junto a la evaluación |
+| **Ofrecen un instrumento aplicable** | Se incorpora y **la §7 se revisa conforme a la cláusula 13 de la propia evaluación** |
+| **No responden en 30 días** | 🔴 **La ausencia TAMBIÉN es evidencia y se asienta con fecha.** *Es exactamente lo que el Anexo A §11.3 pide conservar: «el requerimiento y su respuesta, **o constancia de la ausencia de respuesta**»* |
+
+⚠️ **Por qué el silencio vale tanto como un «no», y conviene entenderlo antes de que llegue el día:** la evaluación **§7 admite que dos de las siete condiciones del Art. 21 no se satisfacen y no pueden satisfacerse** con este instrumento, y sostiene la licitud sobre **medidas compensatorias del Art. 25**. *Ese argumento se apoya en haber intentado.* **Un requerimiento sin respuesta documentado prueba el intento; un requerimiento del que no queda rastro no prueba nada** — y a los seis meses nadie recuerda si se mandó.
+
+**Disparo: la respuesta de Anthropic, o el 23 de septiembre de 2026 — lo que ocurra primero.**
+☠️ **Condición de muerte:** la respuesta (o la constancia fechada de su ausencia) **está archivada en `docs/legal/anexo-a/`**, y la §7 de la evaluación se revisó o se ratificó **por escrito**.
