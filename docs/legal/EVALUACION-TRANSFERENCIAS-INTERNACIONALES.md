@@ -13,9 +13,9 @@
 | **Domicilio** | Av. de los Shyris y Av. República de El Salvador, esquina, Edificio IQON, oficina 2705, La Carolina, Quito, Pichincha |
 | **Plataforma** | e-PetPlace (marca comercial) |
 | **Canal de privacidad** | privacidad@epetplace.com |
-| **Fecha de la evaluación** | [__ de ____ de 2026] |
-| **Próxima revisión** | [fecha de la evaluación + 12 meses] |
-| **Elaborado por** | [nombre y cargo] |
+| **Fecha de la evaluación** | 24 de agosto de 2026 |
+| **Próxima revisión** | 24 de agosto de 2027, y antes si ocurre cualquiera de los hechos de la §13 |
+| **Elaborado por** | Oscar Mauricio Sánchez, abogado independiente |
 | **Aprobado por** | Luis Guillermo Suárez González, representante legal |
 
 ---
@@ -181,7 +181,7 @@ El representante legal de SATORI INOV LATAM S.A.S., conocida esta evaluación, *
 | **Firma** | ______________________________ |
 | **Nombre** | Luis Guillermo Suárez González |
 | **Cargo** | Representante legal |
-| **Lugar y fecha** | Quito, __ de ________ de 2026 |
+| **Lugar y fecha** | Quito, 24 de agosto de 2026 |
 
 <br>
 
