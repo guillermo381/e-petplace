@@ -1387,3 +1387,12 @@ export {
   APP_BASE_URL,
   urlInvitacion,
 } from './wrappers/_enlace-invitacion';
+
+// S104-A · entrar con Google (solo cliente). El navegador lo abre la app: este
+// paquete es agnóstico de Expo y así se queda.
+export {
+  iniciarSesionConGoogle,
+  type AbrirSesionAuth,
+  type ResultadoNavegador,
+  type CodigoGoogle,
+} from './wrappers/auth-google';
