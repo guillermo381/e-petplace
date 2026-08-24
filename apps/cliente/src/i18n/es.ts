@@ -1417,6 +1417,11 @@ export const clienteEs = {
     familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
     familiaCopiarEnlace: 'Copiar el enlace',
     familiaEnlaceCopiado: 'Enlace copiado',
+    // S104-C · «Enviar por…» (Share API nativa). La casa NO manda nada: entrega
+    // el enlace por un camino más corto. El texto lleva el enlace y a quién se
+    // cuida — NUNCA el correo de quien invita (firma founder).
+    familiaEnviarPor: 'Enviar por…',
+    familiaMensajeCompartir: 'Te invito a nuestra familia en e-PetPlace para cuidar juntos a nuestras mascotas. Uníte acá: {{enlace}}',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
     familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Probá más tarde.',

@@ -1209,6 +1209,8 @@ export const clienteEn = {
     familiaInvitarCorreoYEnlace: 'We emailed {{email}}. You can also share this link:',
     familiaCopiarEnlace: 'Copy the link',
     familiaEnlaceCopiado: 'Link copied',
+    familiaEnviarPor: 'Send via…',
+    familiaMensajeCompartir: 'I’m inviting you to our family on e-PetPlace to care for our pets together. Join here: {{enlace}}',
     familiaInvitarOtra: 'Invite someone else',
     familiaInvitarListo: 'Done',
     familiaInvitarSinEnlace: 'The link isn’t available yet. Try again later.',

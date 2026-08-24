@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Share, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
@@ -183,6 +183,18 @@ export default function FamiliaCuenta() {
     mostrar({ texto: t('cuenta.familiaEnlaceCopiado'), variante: 'exito' });
   }
 
+  /** «Enviar por…» — la hoja de compartir nativa (Share API). La casa NO manda
+   *  nada: la persona elige el canal (WhatsApp, mensajes…). El texto lleva el
+   *  enlace y a quién se cuida, JAMÁS el correo de quien invita (firma founder).
+   *  Sujeto al mismo freno: solo se ofrece con enlace válido (fase 'listo'). */
+  async function compartirEnlace(enlace: string) {
+    try {
+      await Share.share({ message: t('cuenta.familiaMensajeCompartir', { enlace }) });
+    } catch {
+      // el usuario canceló la hoja: no es un error que anunciar.
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.familia')} atras onAtras={() => router.back()} />
@@ -291,7 +303,8 @@ export default function FamiliaCuenta() {
                 <Texto variante="dato" seleccionable>
                   {inv.enlace}
                 </Texto>
-                <Boton etiqueta={t('cuenta.familiaCopiarEnlace')} bloque onPress={() => void copiarEnlace(inv.enlace)} />
+                <Boton etiqueta={t('cuenta.familiaEnviarPor')} bloque onPress={() => void compartirEnlace(inv.enlace)} />
+                <Boton variante="secundario" etiqueta={t('cuenta.familiaCopiarEnlace')} bloque onPress={() => void copiarEnlace(inv.enlace)} />
                 <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarOtra')} bloque onPress={abrirInvitar} />
                 <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarListo')} bloque onPress={() => setInvitarAbierta(false)} />
               </>
