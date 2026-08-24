@@ -20788,3 +20788,25 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Dueño:** founder + legales (el plazo) · producto (el mecanismo). **Disparo: antes de publicar la Política de Privacidad.**
 ☠️ **Condición de muerte:** o existe un barrido por antigüedad verificado con un archivo borrado de verdad, o §18 dice lo que el sistema hace.
+
+#### D-902 — 🔴 LA POLÍTICA **YA PUBLICADA** PROMETE «VÍA MANUAL EQUIVALENTE» PARA LAS TRES FUNCIONES DE IA, Y EL CARNET NO LA TIENE
+🔴 **BLOQUEANTE, y con una agravante de forma: el documento ya está publicado.** Apareció al contestar una pregunta de S104-C sobre si la Transferencia A necesitaba su propio gate de consentimiento (24-ago-2026). *La pregunta era buena; la medición encontró que el problema estaba un piso más abajo.*
+
+**§14.5, literal, en el texto vivo:** *«El uso de estas funcionalidades es opcional y existe una **vía manual equivalente** para registrar la misma información. Puede no activarlas, u oponerse a ellas en cualquier momento, **sin que ello afecte su acceso al resto de la plataforma**.»*
+
+**Medido, función por función:**
+
+| función de §14 | vía manual | medición |
+|---|---|---|
+| **14.2** nota clínica | ✅ **existe** | la pantalla de consulta tiene **19 campos propios**; `DictadoEnVivo` es un input más sobre un campo que también se tipea |
+| **14.4** presentación del negocio | ✅ **existe** | `EscribaHistoria` monta un `Campo` con `onChangeText`; su propia cabecera dice *«Campo vacío ⇒ no ofrece mejorar: PREGUNTA»* |
+| **14.3** carnet de vacunas | 🔴 **NO EXISTE** | **cero** caminos de alta manual en el cliente · **cero** «Agregar» en la revisión del carnet (solo se edita o descarta lo que la IA extrajo) · y el **único** acceso desde el Hogar es `router.push('/carnet')`, o sea la foto |
+
+⇒ **Hoy una familia no puede registrar una vacuna sin pasar por la IA.** *La revisión no cuenta como vía manual: se puede corregir lo que la IA leyó, no cargar lo que la IA no vio.*
+
+🔴 **Y la consecuencia que ordena en qué orden se cura, que es lo que esta ficha viene a decir:** **construir el gate de consentimiento de la Transferencia A ANTES que la vía manual convertiría el consentimiento en coacción.** *Si decir «no» te deja sin la única forma de cargar vacunas, eso no es consentimiento libre — y la libertad del consentimiento es requisito de la LOPDP, no una cortesía de diseño.* **Primero la alternativa, después la pregunta.** Un gate sobre una función sin salida no protege al titular: **le documenta que aceptó porque no tenía opción.**
+
+**Distinción con `D-897 ⑤`, porque son vecinas y no la misma:** ⑤ dice *falta el acto de consentir*; ésta dice *falta la alternativa que hace libre a ese acto*. **⑤ no se puede cerrar bien mientras ésta esté abierta.**
+
+**Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo).
+☠️ **Condición de muerte:** o existe un camino de alta manual de vacuna **medido de punta a punta** —una vacuna registrada sin tocar la cámara—, o §14.5 deja de prometer una equivalencia que no hay **y la Política se versiona** (no se edita en silencio: ya está publicada, y `L-415`/versionado inmutable rigen).
