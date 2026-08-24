@@ -100,20 +100,62 @@ export { normalizarEmail } from './_email';
  * ⚠️ **Las dos de términos nacen en `1.0` porque son DOCUMENTOS NUEVOS** — el
  * abogado partió el único `/terminos` (que C midió en **v1.1**) en dos textos
  * distintos: consumo y B2B. *Heredar el `1.1` del documento viejo diría que
- * alguien aceptó una v1.1 de un texto que nunca existió en v1.0.* La privacidad
- * **sí** conserva su `1.1`: es la misma, común a los dos, con secciones 3.1 y
- * 3.2 separadas adentro.
+ * alguien aceptó una v1.1 de un texto que nunca existió en v1.0.*
  *
- * 🔴 **Y el freno que este archivo ya se cobró una vez:** `tratamiento_datos`
- * se registró como tipo y nunca tuvo página. **Antes de que una pantalla ofrezca
- * estos dos, C confirma contra el sitio que las URLs existen** — un check que
- * apunta a una página que no está le pide a alguien que acepte algo que no
- * puede leer.
+ * ⚠️ **LA PRIVACIDAD VA EN `1.1`, Y EL DOCUMENTO SE SUBIÓ A ELLA — no al revés.
+ * Firma del founder (24-ago-2026), sobre un choque que encontró C.** El texto
+ * del abogado llegó rotulado `1.0` y esta constante decía `1.1`: publicar así
+ * habría dejado consentimientos apuntando a una versión que la pantalla no
+ * muestra, *que es exactamente lo que el versionado inmutable existe para
+ * impedir*. **La razón de resolverlo hacia arriba: el motor YA emitió filas con
+ * `1.1`, y el documento todavía no estaba publicado ⇒ mover el papel es gratis,
+ * mover la constante deja filas huérfanas.** *Se corrige el lado que todavía no
+ * tiene evidencia colgando.* Publicado por C y medido: la página sirve
+ * `data-epp-version="1.1"`.
+ *
+ * 🔴 **Y mi razonamiento anterior estaba mal, por si vuelve a tentar:** decía
+ * que la privacidad «conserva su 1.1 porque es la misma, común a los dos». Eso
+ * describía **la del SITIO**; el documento del abogado es otro —se titula
+ * *«Aplicaciones móviles e-PetPlace»*— y le tocaba la misma regla que a los
+ * términos. *Apliqué bien la regla a dos de tres campos y en el tercero razoné
+ * sobre un documento distinto del que se iba a mostrar.*
+ *
+ * 🔴 **El freno que este archivo ya se cobró una vez:** `tratamiento_datos` se
+ * registró como tipo y nunca tuvo página. **Antes de que una pantalla ofrezca
+ * un documento, su URL se mide contra el sitio** — un check que apunta a una
+ * página que no está le pide a alguien que acepte algo que no puede leer.
  */
 export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
   terminos_parent: '1.0',
   terminos_professional: '1.0',
   privacidad: '1.1',
+};
+
+/**
+ * LA URL DE CADA DOCUMENTO — **el ARCHIVO INMUTABLE, jamás la página viva.**
+ *
+ * *La página viva cambia de texto cuando nace una versión nueva; el archivo no.*
+ * Si la evidencia guardara la viva, el día de la v1.2 todos los consentimientos
+ * de la v1.1 pasarían a apuntar a un texto que sus firmantes nunca vieron —
+ * **P23 dejaría de poder demostrar qué se mostró, que es lo único que promete.**
+ *
+ * ⚠️ **Vive acá, al lado de `VERSION_LEGAL`, porque versión y URL son EL MISMO
+ * DATO: qué texto exacto vio la persona.** Tenerlos separados —la versión en el
+ * paquete y la URL en cada pantalla— es lo que permitió que divergieran hasta
+ * que C lo cazó. ☠️ Con esto muere el `URL_LEGAL = 'terminos-inline-v1'` que
+ * vivía **duplicado en cuatro pantallas** de las dos apps, y que era peor que un
+ * `null`: *un marcador con forma de URL afirma que hay un documento enlazado.*
+ *
+ * 🔴 **Los dos de términos van `null` A PROPÓSITO y no por olvido: sus páginas
+ * NO EXISTEN.** El T&C profesional está frenado (se remite a una Disposición
+ * Transitoria que no contiene, `L-415`) y el de consumo no se publicó. **`null`
+ * es la verdad; el marcador era una promesa.** Entran acá el día que su URL
+ * responda 200 medido con control negativo, y es una línea.
+ */
+export const URL_LEGAL: Record<DocumentoLegal, string | null> = {
+  terminos_parent: null,
+  terminos_professional: null,
+  privacidad: 'https://www.epetplace.com/legales/privacidad-app/1-1',
 };
 
 export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_prestador';
@@ -162,11 +204,19 @@ export async function registrarConsentimiento(
  * tiene documento ni URL** (medido por C contra el sitio). *El tercer check de
  * la firma entra el día que exista la página — y entonces es una línea acá.*
  *
- * ⚠️ `privacidad` se registra sabiendo que **la publicada excluye a las apps
- * móviles**; la de la app es borrador (D-405). **Se registra igual porque es lo
- * que la persona efectivamente vio**, y P23 promete demostrar QUÉ se le mostró
- * — no que lo mostrado fuera suficiente. *Confundir las dos cosas haría que el
- * registro mienta en la dirección cómoda.*
+ * ✅ **`privacidad` ya tiene documento propio de las apps, publicado y medido**
+ * (24-ago-2026, S104-C): `/legales/privacidad-app/1-1`, archivo inmutable,
+ * `data-epp-version="1.1"`. *Hasta hoy esta nota decía que la publicada excluía
+ * a las apps móviles y que la de la app era borrador — **envejeció en horas**,
+ * y se corrige acá en vez de dejarse: un comentario vencido en la puerta del
+ * consentimiento manda a la próxima sesión a construir un hueco que ya se
+ * cerró.*
+ *
+ * ⚠️ **La URL sale de `URL_LEGAL` por defecto; el parámetro `urls` solo la
+ * PISA.** Ese orden importa: si la pantalla tuviera que aportarla, cada pantalla
+ * sería una oportunidad de aportar otra —o ninguna— y la evidencia dependería de
+ * cuál puerta se cruzó. *La casa tiene UNA respuesta a «qué texto vio», y no la
+ * decide la pantalla.*
  */
 export function documentosVigentes(
   contexto: TipoConsentimiento,
@@ -181,8 +231,8 @@ export function documentosVigentes(
     contexto === 'acceso_prestador' ? 'terminos_professional' : 'terminos_parent';
 
   return [
-    { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? null },
-    { documento: 'privacidad', version: VERSION_LEGAL['privacidad'], url: urls['privacidad'] ?? null },
+    { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? URL_LEGAL[terminos] },
+    { documento: 'privacidad', version: VERSION_LEGAL['privacidad'], url: urls['privacidad'] ?? URL_LEGAL['privacidad'] },
   ];
 }
 

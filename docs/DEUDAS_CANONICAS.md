@@ -20662,7 +20662,26 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
-#### D-897 — 🔴 CUATRO FRENOS DE PUBLICACIÓN (tres del abogado + la verificación de §14.4): no se abre al público hasta que funcionen
+#### L-415 — un documento que se remite a una pieza que no contiene pasa TODOS los barridos de marcas
+**S104-A, 24-ago-2026. Décima forma del defecto de la jornada, y la más limpia de las diez: el instrumento contestó, y contestó bien, una pregunta que no era la que se creía hacerle.**
+
+**El caso.** El T&C `v1.0 FINAL` llegó para reemplazar al que tenía el recuadro «NO PUBLICAR TODAVÍA». Se barrió como corresponde y el barrido salió **impecable**: cero recuadros, cero sellos de borrador, cero corchetes sin llenar, cero notas internas. Y las cuatro afirmaciones del founder sobre él se verificaron una por una y **las cuatro eran ciertas**.
+
+**Lo que el barrido no podía ver:** el encabezado dice *«Títulos IV y V en vigencia diferida, conforme a la **Disposición Transitoria Primera**»* — y **`Transitoria` aparece UNA sola vez en todo el documento: en esa remisión.** El documento **termina en §38.10 sin disposiciones transitorias**.
+
+⚠️ **Y esa pieza ausente es justamente la que reemplaza al sello que se quitó.** El recuadro decía *«publicar antes de que estas cuatro funciones operen convierte cada cláusula en incumplimiento desde la primera transacción»*; la solución del abogado fue **diferir la vigencia de los Títulos IV y V**, que cubren exactamente esas cuatro funciones. ⇒ **el sello no desapareció porque su razón se hubiera resuelto: desapareció porque su razón se convirtió en un mecanismo — y el mecanismo no está escrito.**
+
+> **La ley: un barrido de marcas responde «¿quedan marcas de borrador?». No responde «¿el documento está completo?». Son dos preguntas, y la segunda se contesta verificando que TODA remisión tenga destino.**
+
+**Por qué es más peligrosa que un corchete abierto:** un corchete **grita** — es visualmente anómalo y cualquiera lo ve. Una remisión a una cláusula inexistente **se lee como un documento bien organizado**: tiene forma de referencia cruzada, que es señal de rigor. *Lo que la delata no es leerla: es ir a buscar lo que nombra.*
+
+**El instrumento que la caza, y cuesta un `grep`:** por cada `Disposición`, `Anexo`, `Título` o `§` que un documento **cite**, contar sus ocurrencias. **Si el término aparece una sola vez, esa vez es la remisión y el destino no existe.** Se corrió sobre los tres documentos de la tanda: el T&C dio **1** (rojo), la evaluación dio **4** para «Anexo A» (verde: §11 lo desarrolla y la carpeta existe), la Política dio **cero remisiones colgadas**.
+
+**Y el corolario que ordena las diez formas del día:** *un gate mide lo que se le pidió medir; la vara dice qué había que pedir.* **No alcanza con mirar el color: hay que preguntar quién lo produjo** — y, cuando el color es verde, **qué pregunta contestó.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método. **Candidata a regla de la casa:** todo documento legal que se deposite declara que sus remisiones internas fueron verificadas.
+
+#### D-897 — 🔴 CINCO FRENOS DE PUBLICACIÓN (tres del abogado + §14.4 + el consentimiento que la letra promete y el motor no pide)
 🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
 
 **① El reembolso no devuelve dinero.** Existe la función que revierte el asiento contable; **no hay devolución real** a la tarjeta ni a la billetera. Hoy, cancelar con derecho a reembolso **anota el derecho y no paga**. ⇒ *Unos T&C que prometen reembolso con un motor que solo asienta es la clase de promesa que se descubre el día del primer reclamo.*
@@ -20673,8 +20692,12 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 **④ Verificar §14.4 el día que la fee del procesador deje de ser cero.** Los T&C afirman que **la comisión del procesador la asume la Compañía con cargo a su Comisión y NO se descuenta de la Liquidación**. Medido hoy: `plataforma + payout = bruto` **exacto** (58,24 + 330,01 = 388,25) ⇒ **consistente**. ⚠️ **Pero se cumple por CONSTRUCCIÓN y no por EJERCICIO**: el campo de la fee está en **0,00 en las 36 operaciones**, porque el ambiente es de pruebas. *El reparto es correcto en un mundo donde ese número es cero.* ⇒ **con la primera fee real, re-verificar que siga saliendo de la Comisión y no del pago al profesional.** *Es una cláusula que hoy nadie puede contradecir porque nadie la ejerció — y por eso es exactamente la clase que se descubre rota en la primera liquidación.*
 
-**Dueño:** producto + el frente de pagos. **Disparo:** los cuatro, **antes de la primera venta real a un tercero**.
-☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido · ④ una operación con fee de procesador **distinta de cero** en la que `plataforma + payout` siga sumando el bruto.
+**⑤ 🔴 EL CONSENTIMIENTO DE IA Y DE DICTADO POR VOZ NO SE RECABA, Y DOS TEXTOS YA REDACTADOS SE APOYAN EN ÉL COMO BASE DE LEGITIMACIÓN.** Medido contra `consentimientos` (24-ago-2026): `registro` **60** · `terminos_parent` **2** · `privacidad` **2** · **cualquier fila que mencione IA, voz o dictado: 0**. **Y el cero no es por falta de uso: es porque el sistema no lo pide** — el acto está previsto en el código (`ActoConsentible` contempla `dictado_voz`) y **ningún flujo lo escribe**. *Motor sin puerta (`L-318`), en su versión legal.*
+
+⚠️ **Lo que lo vuelve bloqueante y no pendiente:** no es cortesía en ninguno de los dos textos. La **evaluación de transferencias**, Parte II §9, funda la **Transferencia B** —el audio que sale al fabricante del sistema operativo— **en ese consentimiento**; y la **Política §17.B.5** dice ante el titular, en presente, que el dictado *«requiere el consentimiento previo, específico e informado del profesional, que se le solicita la primera vez que utiliza la función»*. ⇒ **publicar antes de construirlo convierte una promesa al titular en una afirmación falsa, y deja la Transferencia B sin la base que su propia evaluación le asigna.** *No es un hueco del expediente: es un hueco del motor que el expediente hizo visible.* Es además el **ítem 7 del Anexo A** (`docs/legal/anexo-a/README.md`), la única de las ocho evidencias que se pudo medir contra el sistema — y salió en cero.
+
+**Dueño:** producto + el frente de pagos (⑤ es de producto, cliente **y** prestador por la ley de paridad). **Disparo:** los cinco, **antes de la primera venta real a un tercero**; ⑤ además **bloquea la publicación de la Política y del Aviso de IA**.
+☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido · ④ una operación con fee de procesador **distinta de cero** en la que `plataforma + payout` siga sumando el bruto · ⑤ **una fila de consentimiento de dictado por voz escrita por el camino real** —el profesional tocando el micrófono por primera vez— **y no por un fixture**.
 
 #### D-898 — 🟡 `extract-documento` está desplegada, es facturable y NADIE la llama
 🟡 **MEDIA.** Apareció al contrastar el censo de privacidad contra el sistema (S104-A, 24-ago-2026).

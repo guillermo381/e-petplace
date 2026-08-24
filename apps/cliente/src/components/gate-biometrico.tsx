@@ -157,7 +157,7 @@ export function GateBiometrico({ children }: { children: ReactNode }) {
         <PantallaDeCandado
           estado={estado}
           onDesbloquear={() => void desbloquear()}
-          onUsarClave={() => void usarClave()}
+          onSalirDeLaSesion={() => void usarClave()}
         />
       )}
     </View>
