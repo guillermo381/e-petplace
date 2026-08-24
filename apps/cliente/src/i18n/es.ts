@@ -1392,8 +1392,30 @@ export const clienteEs = {
     rolMenor: 'Menor',
     rolCuidadorExterno: 'Cuidador externo',
     familiaSoloTitular: 'Solo el adulto titular puede cambiar el nombre.',
+    // S104-C · INVITAR A LA FAMILIA (motor de A listo). ☠️ Murió
+    // `familiaInvitarPronto` (Ley 37): la fila deja de ser inerte.
     familiaInvitar: 'Invitar a alguien de tu familia',
-    familiaInvitarPronto: 'Pronto',
+    familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
+    familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
+    familiaInvitarEmailLabel: 'Su correo',
+    familiaInvitarNombreLabel: 'Su nombre (opcional)',
+    familiaInvitarCrear: 'Crear la invitación',
+    // La voz del escalón (firma 5.1): qué gana quien entra. NO se ofrece
+    // configurar permisos — en v1 el permiso ES el escalón (deuda declarada).
+    familiaInvitarComoFamiliar: 'Se une como familiar autorizado: va a poder ver el expediente de las mascotas de tu familia.',
+    // avisoPorCorreo=false: el invitado no tiene cuenta, el correo NO sale —
+    // la pantalla lo dice, jamás promete un correo que no va a llegar.
+    familiaInvitarSoloEnlace: 'Compartí este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
+    // correoSuprimido=true: esa dirección pidió no recibir más. La invitación
+    // vale y el enlace sirve, pero la casa NO le escribe. Callarlo dejaría a
+    // quien invita esperando un correo que nunca sale (firma A).
+    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compartile vos este enlace.',
+    // avisoPorCorreo=true: el correo sí sale; el enlace es el respaldo.
+    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
+    familiaCopiarEnlace: 'Copiar el enlace',
+    familiaEnlaceCopiado: 'Enlace copiado',
+    familiaInvitarOtra: 'Invitar a otra persona',
+    familiaInvitarListo: 'Listo',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
@@ -1484,7 +1506,10 @@ export const clienteEs = {
        viendo» y no tenía a dónde ir.* */
     soporteDesdeCobro: 'Hola, tuve un problema al pagar en e-PetPlace.',
     // Eliminar cuenta — letra (a): visible con voz honesta (espec P15 en docs)
-    eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, tus co-dueños y tus hitos — una vida documentada no se borra a la ligera.',
+    // S104-C (firma founder 5.1): «co-dueños» → «las personas de tu familia».
+    // En v1 quien entra es FAMILIAR AUTORIZADO, no co-dueño (v2). La voz se
+    // alinea a la de invitar («alguien de tu familia»).
+    eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, las personas de tu familia y tus hitos — una vida documentada no se borra a la ligera.',
     entendido: 'Entendido',
   },
   ajustes: {
@@ -1743,6 +1768,15 @@ export const clienteEs = {
     listo: 'Listo — ya puedes entrar.',
     esperaConNumero: 'Pediste varios códigos seguidos. Espera {{s}} segundos y vuelve a intentar.',
     esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
+  },
+  // S104-C · DARSE DE BAJA de los correos, en un clic (motor de A, grant a
+  // anon). Sin sesión, sin login. La pantalla dice lo mismo exista o no el
+  // token — distinguir sería un oráculo de tokens válidos (firma A).
+  baja: {
+    titulo: 'Dejar de recibir correos',
+    cuerpo: '¿Querés dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
+    confirmar: 'Sí, no quiero más correos',
+    listo: 'Listo. No te vamos a escribir más a este correo.',
   },
   seguridad: {
     tituloPantalla: 'Seguridad',
