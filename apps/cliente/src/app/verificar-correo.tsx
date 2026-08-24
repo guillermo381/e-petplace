@@ -87,6 +87,9 @@ export default function VerificarCorreo() {
     // `confirmarAltaConCodigo` registra terminos + privacidad; la URL de cada
     // uno la resuelve `URL_LEGAL` en packages/api — la pantalla NO la aporta.
     const r = await confirmarAltaConCodigo({
+      /* S104-A · contexto OBLIGATORIO: sin él, el prestador quedaba registrado
+         con el T&C del CLIENTE. El valor lo sabe el binario, no se infiere. */
+      contexto: 'registro',
       email,
       codigo,
     });

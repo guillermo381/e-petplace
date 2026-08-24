@@ -56,6 +56,15 @@ export const uiEn = {
     desbloquear: 'Unlock',
     usarClave: 'Sign in with another account',
   },
+  cierre: {
+    seVa: 'This goes',
+    queda: 'This stays',
+    titular: 'Closing your account makes it unreachable. It does not destroy what the law requires us to keep.',
+    enCursoTitulo: 'Your account is closing',
+    enCursoFecha: 'It closes on {{fecha}}. Until then you can come back.',
+    cancelarCierre: 'Cancel the closure',
+    enCursoNota: 'If you cancel, everything stays as it was.',
+  },
   esqueleto: {
     cargando: 'Loading',
   },
