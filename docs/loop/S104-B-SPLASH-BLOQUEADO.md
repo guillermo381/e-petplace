@@ -1,7 +1,58 @@
-# S104-B · EL SPLASH (§1 del ritual) — BLOQUEADO, con sus dos causas medidas
+# S104-B · EL SPLASH (§1 del ritual) — RESUELTO A MEDIAS POR FIRMA, con lo que falta declarado
 
-**No lo construí, y no es una omisión: son dos bloqueos duros, los dos medidos.**
-Va con la spec completa para que quien pueda hacerlo no tenga que re-medir nada.
+> ## ✅ ENMIENDA (firma del founder, 23-ago) — EL CAMINO INTERMEDIO, APLICADO
+>
+> **El cliente adopta el asset del prestador + `tapizDark`.** Ya está en el repo:
+>
+> | qué | antes | ahora |
+> |---|---|---|
+> | asset | el **chevron del template de Expo** | **el isotipo de la casa** (copia byte-idéntica del prestador, sha256 verificado) |
+> | `backgroundColor` | `#208AEF` (hex huérfano del template) | **`#0D050D`** (`palette.tapizDark`, token de fondo **del cliente**) |
+> | `imageWidth` | 76 | **122** (derivado — ver abajo) |
+>
+> ### 🔴 DOS CORRECCIONES A LO QUE ESTE MISMO DOCUMENTO DECÍA
+>
+> **① «Ninguno de los dos assets es el isotipo» era FALSO para el prestador, y el
+> error fue mío: medí el LIENZO y no el CUERPO.** Decodificado el alfa, el
+> contenido del PNG del prestador es **245×168 → aspecto 1.458**, contra **1.456**
+> del `viewBox` del `Isotipo`. Coincide a la tercera decimal: **es el isotipo**, con
+> padding en el lienzo. *El mismo modo de falla que la casa ya tiene nombrado —
+> medir el nombre en vez del cuerpo.* Corroborado por una segunda fuente
+> independiente: `apps/prestador/src/components/animated-icon.tsx:7` ya declaraba
+> que el `splash-icon` del template *«era el mismo caret de Expo»* — que es
+> exactamente lo que el decode mostró del lado del cliente.
+>
+> **② `tapizDark` NO da «el menor salto a bienvenida»** (así quedó dicho en la
+> firma). Da **el mayor**: 0.919 contra 0.674 del azul de hoy. **La decisión sigue
+> siendo la correcta por los otros tres motivos** —token de fondo del cliente ·
+> 20.10:1 de contraste, el mejor de los cuatro · no deshace S96-C— pero la razón se
+> corrige acá para que no se re-discuta sobre una premisa falsa.
+>
+> ### Por qué NO se copió también el fondo del prestador
+> `#0A7268` es **tealDark, el muro del oficio del prestador** (§15b.2). Y S96-C lo
+> puso ahí con el propósito contrario: *«icono launcher: gradiente INTACTO sobre
+> tealDark — **las dos apps dejan de ser gemelas**»*. Copiar el splash entero las
+> volvía gemelas **justo en el frame donde se establece la diferencia**.
+>
+> ### El `imageWidth: 122`, derivado y no elegido
+> El lienzo mide 285 y el contenido 245 ⇒ ratio **0.8596**. Bienvenida monta
+> `Isotipo size={72}` (el `size` es el ALTO) ⇒ ancho 72 × 1.456 = **104.8**.
+> ⇒ `imageWidth = 104.8 / 0.8596 = ` **122**, que renderiza el isotipo a **72.0 dp
+> de alto: exactamente el de bienvenida.**
+> **No se usó el 140 del prestador**, y es la única desviación de «el mismo splash»:
+> §1 pide *«misma posición, misma escala»* y **la escala es la mitad alcanzable**
+> (la posición no lo es — ver el bloqueo 3, que sigue vivo). Con 140 el isotipo
+> saldría a 82.7 y el salto de escala se vería.
+>
+> ### Lo que esta enmienda NO resuelve
+> **El splash del ritual sigue pendiente**: tapiz claro + isotipo entintado +
+> wordmark. Exige un asset que este entorno **no puede producir** (bloqueo 1) y su
+> coincidencia de POSICIÓN sigue siendo imposible (bloqueo 3). La spec de abajo es
+> el insumo para quien lo dibuje con herramienta de diseño.
+
+---
+
+## Los tres bloqueos, tal como se midieron (siguen vigentes para el splash del ritual)
 
 ---
 
