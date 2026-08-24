@@ -40,7 +40,8 @@ import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
-import { Texto, radius, spacing, usePresionado, useTheme } from '@epetplace/ui';
+import { Boton, Hoja, Texto, radius, spacing, usePresionado, useTheme } from '@epetplace/ui';
+import { consultarConsentimiento, decidirConsentimiento, VERSION_LEGAL } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
@@ -88,6 +89,11 @@ function DictadoVivoInterno({
 
   const [escuchando, setEscuchando] = useState(false);
   const [voz, setVoz] = useState<string | null>(null);
+  // §31.6 · el consentimiento del dictado. `consentidoRef` cachea que ya
+  // consintió (no re-consulta en cada toque); `pidiendo` muestra la Hoja.
+  const consentidoRef = useRef(false);
+  const [pidiendo, setPidiendo] = useState(false);
+  const [guardandoConsent, setGuardandoConsent] = useState(false);
   // El texto CONFIRMADO (base) y el parcial en vuelo. Si el valor del
   // campo no coincide con base+parcial, el vet TIPEÓ en el medio: se
   // rebasa — lo tipeado jamás se pisa (letra del boceto).
@@ -136,13 +142,8 @@ function DictadoVivoInterno({
     setEscuchando(false);
   });
 
-  async function alternar() {
-    if (escuchando) {
-      s.ExpoSpeechRecognitionModule.stop();
-      setEscuchando(false);
-      return;
-    }
-    setVoz(null);
+  // El arranque real del reconocedor — separado del gate de consentimiento.
+  async function arrancar() {
     const permiso = await s.ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!permiso.granted) {
       // denegado: voz honesta con camino; el teclado sigue siendo la vía
@@ -158,6 +159,48 @@ function DictadoVivoInterno({
       continuous: true,
     });
     setEscuchando(true);
+  }
+
+  async function alternar() {
+    if (escuchando) {
+      s.ExpoSpeechRecognitionModule.stop();
+      setEscuchando(false);
+      return;
+    }
+    setVoz(null);
+    // §31.6: consentimiento PREVIO, específico y separado la 1ª vez. Avisar no
+    // es consentir — el micro-copy no alcanza. Si ya consintió (fila vigente),
+    // arranca directo; si no, se pide y NO arranca hasta que acepte.
+    if (!consentidoRef.current) {
+      const estado = await consultarConsentimiento('dictado_voz');
+      if (estado.ok && estado.data.vigente) {
+        consentidoRef.current = true;
+      } else {
+        setPidiendo(true);
+        return;
+      }
+    }
+    await arrancar();
+  }
+
+  async function aceptarDictado() {
+    if (guardandoConsent) return;
+    setGuardandoConsent(true);
+    const r = await decidirConsentimiento({
+      acto: 'dictado_voz',
+      aceptado: true,
+      // La versión del acto es la del T&C del que es cláusula (§31.6), jamás un
+      // número tecleado.
+      version: VERSION_LEGAL.terminos_professional,
+    });
+    setGuardandoConsent(false);
+    if (!r.ok) {
+      setVoz(r.mensaje);
+      return;
+    }
+    consentidoRef.current = true;
+    setPidiendo(false);
+    await arrancar();
   }
 
   if (disponibleRef.current !== true) return null;
@@ -230,6 +273,28 @@ function DictadoVivoInterno({
           verdad puede salir del teléfono. */}
       <Texto variante="apoyo">{t('consulta.micPrivacidad')}</Texto>
       {voz !== null ? <Texto variante="apoyo">{voz}</Texto> : null}
+
+      {/* §31.6 · el consentimiento PREVIO del dictado — se pide la 1ª vez, antes
+          de arrancar. No arranca hasta que acepte; puede escribir la nota a
+          mano y revocar después desde Cuenta. */}
+      <Hoja visible={pidiendo} onCerrar={() => setPidiendo(false)} titulo={t('consulta.dictadoConsentTitulo')}>
+        <View style={{ gap: spacing[4] }}>
+          <Texto>{t('consulta.dictadoConsentCuerpo')}</Texto>
+          <Texto variante="apoyo">{t('consulta.dictadoConsentOpcional')}</Texto>
+          <Boton
+            etiqueta={t('consulta.dictadoConsentAcepto')}
+            bloque
+            cargando={guardandoConsent}
+            onPress={() => void aceptarDictado()}
+          />
+          <Boton
+            variante="ghost"
+            etiqueta={t('consulta.dictadoConsentAhoraNo')}
+            bloque
+            onPress={() => setPidiendo(false)}
+          />
+        </View>
+      </Hoja>
     </View>
   );
 }

@@ -23,6 +23,11 @@ export {
   documentosVigentes,
   consultarConsentimiento,
   decidirConsentimiento,
+  // S104-C · la versión POR DOCUMENTO (76(c), a ratificación de A). Las
+  // pantallas de los actos consentibles (arbitraje §38.10 · dictado §31.6) la
+  // necesitan: su versión es la del T&C professional del que son cláusula
+  // (`VERSION_LEGAL.terminos_professional`), jamás un número tecleado (D-720).
+  VERSION_LEGAL,
   type ActoConsentible,
   type TipoRegistrable,
   type EstadoConsentimiento,

@@ -46,7 +46,7 @@ export default function VerificarCorreo() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const { email = '', urlLegal } = useLocalSearchParams<{ email?: string; urlLegal?: string }>();
+  const { email = '' } = useLocalSearchParams<{ email?: string }>();
 
   const [codigo, setCodigo] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -71,10 +71,11 @@ export default function VerificarCorreo() {
     setCargando(true);
     setError(undefined);
 
+    // La URL de cada documento la resuelve `URL_LEGAL` en packages/api — la
+    // pantalla NO la aporta.
     const r = await confirmarAltaConCodigo({
       email,
       codigo,
-      urlsLegales: urlLegal ? { privacidad: urlLegal } : undefined,
     });
 
     if (!r.ok) {

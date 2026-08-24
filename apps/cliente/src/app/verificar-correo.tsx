@@ -14,9 +14,8 @@
  * (D-893). Con el correo por confirmar, `signUp` no devuelve sesión ⇒ el
  * consentimiento no se puede escribir en el alta (la policy es `auth.uid()
  * = user_id`). `confirmarAltaConCodigo` lo registra en el MISMO acto que canjea
- * el código, cuando la sesión por fin existe. La traza legal (`urlLegal`)
- * viaja desde el registro por parámetro: es lo que la persona efectivamente
- * vio.
+ * el código, cuando la sesión por fin existe. La URL de cada documento la
+ * resuelve `URL_LEGAL` en packages/api (S104-A); la pantalla NO la aporta.
  *
  * ── LA DOSIS DEL RITUAL (cliente) ──
  * Ceremonia entera, igual que el registro: tapiz + senda + isotipo recogido +
@@ -56,7 +55,7 @@ export default function VerificarCorreo() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
-  const { email = '', urlLegal } = useLocalSearchParams<{ email?: string; urlLegal?: string }>();
+  const { email = '' } = useLocalSearchParams<{ email?: string }>();
 
   const [codigo, setCodigo] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -85,13 +84,11 @@ export default function VerificarCorreo() {
     setCargando(true);
     setError(undefined);
 
+    // `confirmarAltaConCodigo` registra terminos + privacidad; la URL de cada
+    // uno la resuelve `URL_LEGAL` en packages/api — la pantalla NO la aporta.
     const r = await confirmarAltaConCodigo({
       email,
       codigo,
-      // La MISMA traza que el registro mostró (D-893). `confirmarAltaConCodigo`
-      // registra terminos + privacidad; la URL viaja en privacidad, igual que
-      // en el alta con sesión (registrarConsentimiento).
-      urlsLegales: urlLegal ? { privacidad: urlLegal } : undefined,
     });
 
     if (!r.ok) {

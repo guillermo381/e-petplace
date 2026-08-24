@@ -55,10 +55,13 @@ import {
 } from '@epetplace/ui';
 import { cambiarIdioma, type IdiomaSoportado } from '@epetplace/i18n';
 import {
+  consultarConsentimiento,
+  decidirConsentimiento,
   guardarIdiomaPreferido,
   guardarPreferenciaCanal,
   obtenerCatalogoNotificaciones,
   obtenerPreferencias,
+  VERSION_LEGAL,
   type CanalNotificacion,
   type CatalogoNotificaciones,
 } from '@epetplace/api';
@@ -84,6 +87,40 @@ export default function PreferenciasCuenta() {
   const [permisoPush, setPermisoPush] = useState<PermisoPush>('no_medible');
   const [consentimientoWa, setConsentimientoWa] = useState<string | null>(null);
   const [guardandoWa, setGuardandoWa] = useState(false);
+  // §31.6 · el dictado por voz, revocable desde acá. `null` = la persona nunca
+  // decidió (nunca usó el dictado) ⇒ la sección NO se muestra: solo aparece
+  // para quien ya se pronunció, para poder revocar o volver a permitir.
+  const [dictadoVigente, setDictadoVigente] = useState<boolean | null>(null);
+  const [guardandoDictado, setGuardandoDictado] = useState(false);
+
+  useEffect(() => {
+    let vivo = true;
+    void (async () => {
+      const r = await consultarConsentimiento('dictado_voz');
+      if (!vivo || !r.ok) return;
+      // Solo se muestra si ya hubo una decisión (decidido_en no es null).
+      if (r.data.decidido_en !== null) setDictadoVigente(r.data.vigente);
+    })();
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
+  async function alternarDictado(permitir: boolean) {
+    if (guardandoDictado) return;
+    setGuardandoDictado(true);
+    const r = await decidirConsentimiento({
+      acto: 'dictado_voz',
+      aceptado: permitir,
+      version: VERSION_LEGAL.terminos_professional,
+    });
+    setGuardandoDictado(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setDictadoVigente(permitir);
+  }
 
   useEffect(() => {
     let vigente = true;
@@ -391,6 +428,20 @@ export default function PreferenciasCuenta() {
                   </Tarjeta>
                 );
               })
+          )}
+
+          {/* §31.6 · el dictado por voz — revocable desde config. Solo aparece
+              para quien ya decidió (usó el dictado alguna vez). */}
+          {dictadoVigente !== null && (
+            <View style={{ gap: spacing[3], paddingTop: spacing[6] }}>
+              <Texto variante="seccion">{t('miCuenta.dictadoTitulo')}</Texto>
+              <Interruptor
+                encendido={dictadoVigente}
+                onCambio={(v) => void alternarDictado(v)}
+                etiqueta={t('miCuenta.dictadoToggle')}
+              />
+              <Texto variante="apoyo">{t('miCuenta.dictadoAyuda')}</Texto>
+            </View>
           )}
         </View>
       </ScrollView>
