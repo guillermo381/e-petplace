@@ -1,50 +1,58 @@
 # S104-C — TRASPASO
 
-Dos repos. **Monorepo:** rama `pista/s104-c` = `acb5f95c` (pusheada, verde: 4 typechecks + `verify:diseno` 54 reglas). Lo anterior de S104-C ya está en `main`; **TANDA 3 —las superficies de la salida— espera que A mergee su motor + mis superficies juntos** (mi rama ya sincronizó su `928552a7`). **Sitio `epetplace-web`:** ya en `main`, Vercel despliega solo. Nada sin commitear.
+Dos repos, los dos al día. **Monorepo:** `pista/s104-c` **mergeada por A a `main`** — todo mi trabajo es ancestro de `origin/main`. **Sitio `epetplace-web`:** en `main`, Vercel despliega solo. **Nada sin commitear.**
 
-Mapa de dónde retomar, no fuente de datos vivos: los números (migraciones, reglas, versiones libres) se re-miden del objeto; acá solo SHA y hechos estructurales.
+Mapa de dónde retomar, no fuente de datos vivos: las cifras (migraciones, reglas, versiones libres) se re-miden del objeto; acá solo SHA y hechos estructurales.
 
-## 1. QUÉ QUEDÓ (SHA · pieza)
+## 1. QUÉ QUEDÓ EN MAIN (SHA · pieza)
 
-**Sitio (`main` de epetplace-web):**
-- `ff7837f` — `/invitacion?token=` y `/baja?t=`, las dos páginas del enlace del correo (esquema `cliente://` porque los App Links siguen PENDIENTE; `/baja` postea a la edge `baja-correo`).
-- `4d17af0` — **Política de Privacidad de las apps, PUBLICADA** con versionado inmutable: `/legales/privacidad-app` (viva, indexada) + `/legales/privacidad-app/1-1` (archivo inmutable v1.1, noindex, la URL de evidencia). Renderiza el markdown del doc del abogado. Enlazada desde `/legales`.
+**Sitio (`epetplace-web` main):**
+- `4d17af0` — Política de Privacidad de las apps PUBLICADA con versionado inmutable: `/legales/privacidad-app` (viva) + `/legales/privacidad-app/1-1` (archivo, la URL de evidencia).
+- `f694f55` — T&C Pet Professional PUBLICADO **top-level**: `/terminos-profesional` (viva, `index.astro` dentro del dir) + `/terminos-profesional/1-0` (archivo inmutable) + `/en`. Enlazado desde `/legales`.
 
-**Monorepo (`pista/s104-c`):**
-- (mergeado ya por A antes) el arco de entrada con el ritual, la superficie de invitar a la familia + `/invitacion` del invitado + «Enviar por…», el freno del enlace.
-- `c5445b7c` — pantallas de código `/verificar-correo` (las dos apps), detrás del flag del SERVIDOR (rama `!sesion_activa`).
-- `6a706e36`·`24d7f899`·`5900a9c7` — biométrico como PUERTA DE ENTRADA + umbral de inactividad de 5 min (las dos apps).
-- `fb4fc11f` — «Pegar» en `CampoCodigo` (sonda `requireOptionalNativeModule`, ui).
-- `9a8cde83` — botón «Entrar con Google» en el login del cliente + ruta `/auth/callback`. (El flujo lo curó A con `flowType:'pkce'` en client.ts — mi lado app no cambió.)
-- `66040b4e` — D-899, aviso de privacidad del dictado (visible en pantalla).
-- `51d73e6a` — §31.6, consentimiento del dictado por voz: gate de 1ª vez + toggle de revocación en preferencias.
-- `58df3147` — doc `POLITICA-PRIVACIDAD-APP.md` a v1.1 + fecha + quitar el recuadro (autorizado founder).
-- `33f9281a` — **borrado el marcador `terminos-inline-v1`** de las 6 superficies ⇒ el consentimiento ya guarda la URL de evidencia que A puso en `URL_LEGAL`.
-- **TANDA 3 · las superficies de la salida** (`aa3bc717`·`acb5f95c`, en `pista/s104-c`, espera merge de A): `/cuenta/cerrar` (DOBLE PASO — qué se va / qué queda, P15 cl.4, alineado a la Política §19.3/§19.4/§19.5: es SEUDONIMIZACIÓN, no borrado, jamás «borrar todo») + `/cuenta/exportar` (cl.5), las dos apps. Contra el motor de A (`cuenta-salida.ts`): `solicitarCierreCuenta()` → `{ programado_para, ya_estaba }` · error `requiere_camino_asistido` (backstop) · `exportarMisDatos()` → `{ enviado_a, ya_estaba }`. **Borde de A:** al confirmar se pierde el acceso EN EL ACTO (anonimización al día 30, §19.2) ⇒ el mensaje completo (fecha + correo de vuelta + el carnet) va en la pantalla de CONFIRMAR, el punto sin retorno. **Prestador:** los DOS caminos (cerrar cuenta = motor · cerrar negocio = trámite asistido, no desde la app) + aviso de único-con-acceso (leído con `obtenerMiPosicionEnPrestador` + `obtenerEquipoNegocio`). ☠️ mueren las dos Hojas de voz + claves `eliminarVoz`/`entendido`.
+**Monorepo (main):**
+- (previo, ya en main) el arco de entrada: ritual, invitar familia + `/invitacion`, código `/verificar-correo`, biométrico puerta-de-entrada + umbral 5 min, «Pegar» en `CampoCodigo`, «Entrar con Google» (cliente + PKCE de A), D-899 aviso de dictado, §31.6 consentimiento de dictado, borrado del marcador `terminos-inline-v1`.
+- `aa3bc717`·`acb5f95c` — TANDA 3, la salida en las DOS apps: `/cuenta/cerrar` (doble paso, P15 cl.4 alineado a §19.3/§19.4/§19.5) + `/cuenta/exportar` (cl.5). Prestador: dos caminos (cerrar cuenta = motor de A · cerrar negocio = trámite asistido, no desde la app) + aviso único-con-acceso. ☠️ mueren las Hojas de «voz honesta».
+- `f573415a` — el `—` de la verificación de documentos del prestador recibe su voz §5.2 (imagen destruida al concluir; los TRES estados de A, restringido a `aprobado` porque el trigger anula la imagen también al rechazar).
+- `51f94136` — nace `Casilla` (checkbox, `packages/ui`, cruce autorizado por A): §4.3/§38.10 exigen «casilla», un switch no cumple. **NO reemplaza a `Interruptor`** (JSDoc). Gate del founder en `/gallery` pendiente.
+- `39d46bef` — aceptación EXPLÍCITA del prestador: `AceptacionTerminos` (dos checks obligatorios con enlace + arbitraje opcional) en `registro` e `invitacion`; el «no» del arbitraje se registra con fecha.
+
+**De A (motor, para contexto):** el cierre de cuenta (soft-delete 30 días + seudonimización), `solicitarCierreCuenta`/`exportarMisDatos`, `documentoUltimos4`, el contexto `registro_profesional` OBLIGATORIO, `URL_LEGAL.terminos_professional`, y **el vigilante de URLs de evidencia (`534c8962`)**.
 
 ## 2. QUÉ QUEDA ABIERTO (bloqueo · dueño)
 
-- **Publicar el T&C Pet Professional en el sitio — ✅ YA SE PUEDE (A completó el texto en `main` = `d8edd333`, `L-415` CERRADA).** La Disposición Transitoria Primera ya existe en el texto (5 ocurrencias, era 1); A midió los 4 criterios del founder + la regresión. **Falta publicarlo en `epetplace-web`** (mismo patrón que Privacidad: página viva + archivo inmutable). **Dueño: C**, junto con la casilla §38.10 y en el push del sitio. §4.5 exige que la Transitoria sea alcanzable desde la pantalla de aceptación.
-- **La evaluación de transferencias internacionales — no existe como documento.** La produce el ABOGADO sobre `REGISTROS-PARA-EL-EXPEDIENTE.md §5` (interno, tiene la fecha del DPA 27-abr pero no la estructura de firma). **Dueño: abogado.**
-- **Arbitraje §38.10** — casilla SEPARADA y OPCIONAL del prestador, con el «no» registrado. Motor de A listo (`decidirConsentimiento`, acepta `aceptado=false`). El T&C ya se puede publicar ⇒ se desbloqueó esa mitad. **Bloqueado ahora SOLO por: dónde va la casilla** (el T&C profesional se acepta en solicitar-acceso; el empleado NO acepta arbitraje). **Dueño: C hace la casilla tras la decisión de superficie del founder.**
-- **Consentimiento del proveedor de IA §17.A — D-897 ⑤ → 🔴 `D-902` · FIRMADO por el founder (24-ago): NO se construye ahora.** La mitad de VOZ (§17.B) ya la cura mi §31.6 (`51d73e6a`, en main). Para la mitad de IA: **el gate de IA y el alta manual del carnet van JUNTOS y NO se construyen ahora** — sin vía manual el consentimiento no sería libre (LOPDP). La Política §14.5 publicada promete vía manual equivalente para las tres funciones y hoy NO existe para el carnet (§14.3: cero «Agregar» en la revisión; corregir lo que la IA leyó ≠ cargar lo que no vio). **La ficha D-902 queda ABIERTA con su disparo, no cerrada: ANTES de que haya usuarios reales que puedan reclamarla, O el día que se construya el gate de IA — lo que ocurra primero.** El registro canónico de la ficha lo lleva A (`DEUDAS_CANONICAS`).
-- **El aviso de IA NO es una página** — vive DENTRO de la Privacidad §14-17 (medido por A, mapeo formulación-por-formulación). No reabrir esto: publicarlo aparte expondría el andamio de trabajo.
+- **Gate del founder de `Casilla`** (en `/gallery`) + **gates en dispositivo** de TANDA 3, las pantallas de aceptación y la de verificación — **dueño: founder** (parte del OTA grande, nada más de código).
+- **§17.A consentimiento del proveedor de IA — 🔴 `D-902`, FIRMADO: NO se construye ahora.** Va JUNTO con el alta manual del carnet (sin vía manual el consentimiento no sería libre, LOPDP). Ficha ABIERTA con disparo: antes de que haya usuarios reales que puedan reclamarla, O el día que se construya el gate de IA. **Dueño: founder/abogado**; registro canónico en `DEUDAS_CANONICAS` (A).
+- **El «avise» PROACTIVO del vigilante** — hoy REGISTRA las caídas en `v_urls_legales_caidas` (visible, no silencioso), pero no hay push (correo/notificación): el canal de la casa está en sombra. **Dueño: A** (el canal) / **founder** (decide si la vista alcanza o quiere el empujón).
+- **La evaluación de transferencias internacionales** — no existe como documento. **Dueño: abogado.**
+- **Publicar el T&C ≠ abrir el alta de prestadores** — el alta sigue frenada por `D-897`. **Dueño: founder/abogado.**
 
 ## 3. LAS FIRMAS QUE RIGEN
 
-- **Biométrico = PUERTA DE ENTRADA (banca):** la huella desbloquea una sesión que YA existe, jamás crea una. Arranque en frío pide siempre (incluye matar-y-reabrir); volver del 2º plano pide solo tras 5 min; sin sesión → login sin huella; salida «Entrar con otra cuenta» = cerrar sesión + login.
-- **Versión y URL del consentimiento viven JUNTOS en `packages/api`** (`URL_LEGAL` al lado de `VERSION_LEGAL`); la pantalla NO aporta la URL — tenerlas separadas fue lo que las dejó divergir (L-166). El consentimiento guarda el ARCHIVO inmutable (`…/1-1`), jamás la viva.
-- **La Privacidad de la app es OTRO documento** que el `/privacidad` del sitio (otra categoría de sensibilidad); su versionado ES también el del aviso de IA (Anexo B), y la página lo dice.
-- **El invitado entra como familiar autorizado** (5.1); co-dueño es v2. **Dos T&C por la puerta** (cliente `terminos_parent`, prestador `terminos_professional`) + una privacidad común.
-- **Google:** client ID NUNCA en la app (Supabase lo lee de su config); flujo PKCE; redirect `cliente://auth/callback`; solo en el cliente (1ª excepción de la ley de paridad).
-- **El dictado por voz:** consentimiento previo, específico y separado la 1ª vez (avisar no es consentir) y revocable desde config. Es libre PORQUE hay salida (la nota se escribe a mano — §17.B.5 lo exige justamente porque la voz sale a un tercero que NO es nuestro encargado). **Detalle a vigilar, no freno (medido por A):** guarda `VERSION_LEGAL.terminos_professional`, y ese T&C no está publicado (URL `null`, L-415) ⇒ la evidencia queda anclada a un texto hoy solo verificable dentro del repo. No invalida el consentimiento (la Hoja explica en pantalla qué se acepta, no manda a leer una página). **Se resuelve solo al publicar el T&C** — ahí su URL entra en `URL_LEGAL` y es una línea. Queda dicho para que nadie lo descubra en un reclamo.
+- **Biométrico = PUERTA DE ENTRADA:** la huella desbloquea una sesión que YA existe; arranque en frío pide siempre; volver del 2º plano pide solo tras 5 min; salida «Entrar con otra cuenta» = cerrar sesión.
+- **Versión y URL del consentimiento viven JUNTOS en `packages/api`** (`URL_LEGAL` al lado de `VERSION_LEGAL`); la pantalla NO aporta la URL — la resuelve `documentosVigentes` (L-166). Guarda el ARCHIVO inmutable, jamás la viva.
+- **El cierre es SEUDONIMIZACIÓN, no borrado** (Política §19.5): la pantalla dice «qué se va / qué queda», jamás «borrar todo». Pierde acceso HOY, anonimización al día 30 (§19.2); el mensaje completo va en la pantalla de CONFIRMAR — la única sin segunda oportunidad.
+- **El documento se deriva de la PUERTA, no de la persona:** `registro`→parent (cliente), `registro_profesional`→professional (prestador auto-alta), `acceso_prestador`→professional (invitación). El contexto es OBLIGATORIO.
+- **`Casilla` ≠ `Interruptor`:** una aceptación se conserva como prueba (§4.3); un ajuste se desanda. Unificarlas rompe §4.3.
+- **Aceptación del prestador:** dos checks obligatorios (T&C profesional + privacidad, cada uno con enlace al archivo inmutable) + arbitraje OPCIONAL (§38.10) con el «no» fechado; documentos disponibles ANTES de aceptar (§4.2); la Transitoria alcanzable desde el enlace del T&C (§4.5).
+- **Google:** client ID nunca en la app; PKCE; solo en el cliente (1ª excepción de la ley de paridad).
+- **Dictado por voz:** consentimiento previo, específico y separado la 1ª vez, revocable desde config.
 
 ## 4. DÓNDE MEDIR
 
-- **Privacidad publicada:** HTTP 200 en `https://www.epetplace.com/legales/privacidad-app` y `…/1-1`, con control + (`/legales` 200) y − (ruta inventada 404). El HTML de la viva trae `data-epp-version` y NO es noindex; el `/1-1` SÍ.
-- **URL de evidencia del consentimiento:** `URL_LEGAL` en `packages/api/src/wrappers/auth.ts` (`privacidad` = la archivo `/1-1`; los dos términos `null` hasta que sus páginas den 200).
-- **Marcador borrado:** grep `terminos-inline-v1` en `apps/` → cero.
-- **Consentimientos registrados:** tabla `consentimientos` (fila por documento, con versión y URL en `metadata`). Estado del dictado: `consultarConsentimiento('dictado_voz')`.
-- **T&C bloqueado (L-415):** `docs/legal/TERMINOS-PET-PROFESSIONAL.md` — el recuadro en su cabecera, y buscar «Disposición Transitoria Primera» (1 sola aparición = la remisión rota).
-- **Router types (R63·C):** `apps/<app>/.expo/types/router.d.ts` (generado, gitignored; se regenera con `expo start`). Por eso rutas nuevas se commitearon con SALTAR_GATE cuando no estaban regeneradas.
+- **Legales publicados:** HTTP contra `www.epetplace.com` **con control negativo** (una versión inventada tiene que dar 404 — un 200 sin un 404 al lado prueba que el server contesta, no que el deploy salió). ⚠️ El prefijo `/legales/` NO es sospechoso por sí mismo (`/legales/privacidad-app` vive ahí y da 200); si una ruta VIVA de legal da 404, es anomalía de Vercel específica de esa ruta — se cura moviendo a top-level con la viva como `index.astro` DENTRO del dir (sin el conflicto page/directorio).
+- **URL de evidencia del consentimiento:** `URL_LEGAL` en `packages/api/src/wrappers/auth.ts`. Los `null` son la verdad hasta que su página dé 200 (no un olvido).
+- **Consentimientos registrados:** tabla `consentimientos` (una fila por documento; `metadata->>'url'` = la URL de evidencia, `metadata->>'contexto'` = la puerta). Estado de un acto: `consultarConsentimiento(acto)`.
+- **El vigilante de URLs:** `verificar_urls_legales()` (dispara vía `pg_net`) + `recolectar_urls_legales()` (juzga en el tick siguiente, porque `pg_net` responde DESPUÉS del commit) + vista `v_urls_legales_caidas`. **Probar el camino real:** insertar una fila de `consentimientos` con una URL rota, correr las dos funciones con ~15 s de separación, leer el log `url_legal_chequeo` de esa corrida, y LIMPIAR (fila de consentimiento + filas de log del test) verificando residuo 0 en las tres (consent · log · vista).
+- **Router types (R63·C):** `apps/<app>/.expo/types/router.d.ts` (gitignored, per-worktree; se regenera con `expo start`). Reportar R63 verde SIEMPRE con «en mi worktree».
 - **Migraciones:** `ls supabase/migrations/*.sql` vs `npx supabase migration list --linked`.
+
+## 5. LO QUE APRENDÍ (con su caso)
+
+- **El reporte lleva el LITERAL, no «calza el contrato».** A cambió el nombre de un campo (`enviado_a` ↔ `enviada_a`) entre dos mensajes; lo cacé porque escribí los call sites explícitos. Un rojo TAPADO por otro (el error de campo tapado por el `TS2305` del import ausente) se destapa recién en el merge y se le atribuye al último que tocó, no al que lo causó.
+- **Un contrato entre pistas se cierra UNA vez; si cambia, se anuncia COMO cambio** — no se reescribe entero confiando en que el otro note la diferencia (misma raíz que el punto anterior).
+- **El documento se deriva de la PUERTA, no de la persona.** El prestador auto-registrado quedaba con el T&C del cliente porque `registrarse` no distinguía; hacer el contexto OBLIGATORIO hizo que el compilador marcara los cuatro callers — un opcional con default habría fallado hacia el lado malo en silencio.
+- **La anomalía de ruta de Vercel no era el prefijo.** `/legales/privacidad-app` (idéntico) daba 200; el 404 del T&C sobrevivió a un rebuild limpio (origen, no caché). Curó moverlo a top-level con la viva como `index.astro` dentro del dir. Lección: medir con control negativo distingue «el server contesta» de «el deploy salió».
+- **El control negativo prueba el INSTRUMENTO, no solo el dato.** En el vigilante, sin él un servidor con catch-all (todo 200) pasaría en falso; y probó el fail-closed solo (dijo `no_concluyente`, jamás «todas vivas», cuando no pudo medir). *Un instrumento que no puede medir y lo declara sirve; el que en ese caso dice verde hace daño.*
+- **La pieza más confiable es la que no agrega piezas.** El vigilante salió sin edge function ni secreto nuevo (`pg_net` + `pg_cron` ya viven en la casa) — cero superficie desplegada nueva.
+- **Un cambio de URL en `URL_LEGAL` es gratis SÓLO si ninguna fila de `consentimientos` la tiene guardada.** El del T&C salió gratis por timing (cero filas). El día que una URL ya sea evidencia, moverla es dejar evidencia apuntando a un 404 — se decide, no se reescribe. Por eso el vigilante mide las URLs REALES de la base, no una lista a mano.
