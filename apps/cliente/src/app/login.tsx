@@ -65,10 +65,6 @@ const ISOTIPO_ESQUINA = 28;
  *  intercepta, no navega la app. */
 const REDIRECT_GOOGLE = 'cliente://auth/callback';
 
-/** La traza legal que la pantalla muestra (mismo marcador que registro): el
- *  entrar-con-Google puede ser un ALTA, y el alta acepta términos (P23). */
-const URL_LEGAL = 'terminos-inline-v1';
-
 export default function Login() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -119,9 +115,10 @@ export default function Login() {
         const res = await WebBrowser.openAuthSessionAsync(url, redirectTo);
         return res.type === 'success' ? { tipo: 'exito', url: res.url } : { tipo: 'cancelado' };
       },
-      // Si es la primera vez, es un alta: el wrapper registra el consentimiento
-      // con la traza que la pantalla muestra (la línea de términos de abajo).
-      urlsLegales: { privacidad: URL_LEGAL },
+      // Si es la primera vez, es un alta y el wrapper registra el
+      // consentimiento. La URL de cada documento la resuelve `URL_LEGAL` en
+      // packages/api (S104-A) — la pantalla NO la aporta: versión y URL son el
+      // mismo dato y viven juntos, para que no puedan divergir (L-166).
     });
 
     if (!r.ok) {
