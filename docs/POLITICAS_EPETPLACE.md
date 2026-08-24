@@ -333,12 +333,54 @@ nunca queda en un limbo).
 
 1. **La persona pierde el acceso.** El cierre es terminal desde su lado: no
    vuelve a entrar con esas credenciales.
-2. **Su identidad se ANONIMIZA donde la ley lo permite.**
+2. ~~**Su identidad se ANONIMIZA donde la ley lo permite.**~~ → **SU IDENTIDAD SE SEUDONIMIZA.**
+
+   > 🔴 **ENMENDADA POR LA LETRA PUBLICADA (24-ago-2026), y se enmienda ACÁ y no solo en una ficha.** *Dos letras firmadas que se contradicen son peores que una equivocada: cualquiera cita la que le conviene y está «en regla».* **Tercer cobro del mismo precedente** — el magenta (S83), la plata (S83/S88), y ahora la palabra del cierre. Hallazgo de **S104-D**, que lo frenó escribiendo el correo en vez de copiar la palabra del canon.
+   >
+   > **Gana `POLITICA-PRIVACIDAD-APP §19.5`, y el criterio de por qué es de D:** *manda la que la persona LEYÓ y la que se sostiene ante la autoridad.* Su literal se compromete con las dos negativas: **«No le decimos que su información fue destruida, porque no lo fue; ni que fue anonimizada, porque anonimizarla de verdad exigiría romper ese vínculo interno, y con él la trazabilidad que la ley nos obliga a mantener.»**
+   >
+   > ⚠️ **Y la reconciliación es más fina que «una estaba mal», porque el matiz decide si esto se puede volver a torcer:** *el `donde la ley lo permite` de la redacción original ya contenía la salida* — resulta que **la ley no lo permite en ninguna parte completamente**, precisamente porque exige conservar la trazabilidad de pagos y consentimientos. ⇒ **la cláusula no era falsa: era imprecisa, y su imprecisión terminaba en la palabra que se le dice al titular.** *Y ahí la imprecisión deja de ser un matiz: «anonimizado» le promete a alguien que ya no se lo puede reidentificar, y eso no es cierto.*
+   >
+   > **Lo que NO cambia:** el resto de las cinco cláusulas, y el resultado mecánico —qué se conserva y qué se vuelve inalcanzable— **es exactamente el mismo**. Cambia el nombre correcto del acto, que es lo que se publica. **Y con la palabra cambia una consecuencia real, no cosmética: `§19.6` de la publicada — la información seudonimizada SIGUE SIENDO DATO PERSONAL y el titular conserva sus derechos sobre ella.** *Eso es justamente lo que «anonimizada» habría negado.*
 3. **Lo que la ley obliga a conservar —consentimientos, plata, obligación
    fiscal— SE CONSERVA, desligado de la persona.**
 4. **Se le dice EXACTAMENTE eso antes de confirmar.** *No «vamos a borrar todo»:
    qué se va, qué queda y por qué.*
 5. **Se le ofrece SU COPIA antes de irse** — portabilidad (LOPDP).
+
+6. **LA VENTANA DE 30 DÍAS** ✅ **FIRMADA (founder, 24-ago-2026 — S104).** *Entra
+   como cláusula porque hasta hoy vivía como «Propuesta» y una pista estuvo a
+   punto de construir contra ella (hallazgo de S104-B).*
+
+   a) **Al solicitar el cierre, la cuenta se vuelve inalcanzable DE INMEDIATO.**
+   b) **Durante 30 días la persona puede recuperarla** escribiendo a
+      `privacidad@epetplace.com`.
+   c) **Cumplidos los 30 días corre la SEUDONIMIZACIÓN definitiva — jamás un
+      borrado duro.** ☠️ *El «borrado duro programado» de la propuesta se retira:
+      es letra imposible.* **Rebota contra las FKs bloqueantes, y donde NO
+      rebota hace daño callado** — `familia_miembro` y `mascota_codueño` están
+      en CASCADE ⇒ desengancharían a la mascota de sus otros cuidadores sin
+      preguntarles. *(El conteo exacto **se mide, no se cita**: envejece. Al
+      cerrar S104 eran 64 FKs con 26 bloqueantes; el censo firmado de S103 decía
+      62/24 y era exacto ese día — **nuestra propia tanda lo movió**. Comando en
+      `docs/loop/S104-A-TRASPASO.md` §4.)*
+   d) **Lo que SÍ se borra de verdad, a los 30 días:** los objetos del bucket
+      `{uid}/`, **la imagen del carnet de vacunas** y **las fotos y videos de
+      atenciones**.
+
+   > ⚠️ **CONSECUENCIA DE PRODUCTO QUE VA EN LA PANTALLA, no solo acá:** la
+   > imagen del carnet **se reproduce en las impresiones que la familia ya
+   > generó**. Borrarla **deja esas impresiones sin ella**. *Es lo correcto, y
+   > quien cierra su cuenta tiene que enterarse **antes** de confirmar, no
+   > después.*
+
+   > 🔴 **Y EL BORDE QUE LA IMPLEMENTACIÓN DESTAPÓ, porque (a) y (b) chocan si
+   > se leen literal:** *si al solicitar se retiraran las identidades externas,
+   > quien entra con Google **no podría ejercer los 30 días de (b)** — la
+   > recuperación existiría en la letra y no en la vida.* ⇒ **el motor parte el
+   > acto en dos**: hoy `banned_until` + sesiones (que es lo que vuelve
+   > inalcanzable **y es reversible**); al día 30, lo terminal. **(a) y (b) se
+   > cumplen las dos; lo que no puede cumplirse es hacerlo todo el primer día.**
 
 **Coherencia declarada: con `P23`** (*el borrado deja el archivo inalcanzable,
 no lo sobrescribe; ante un derecho de supresión la respuesta honesta es «ya no
@@ -436,8 +478,32 @@ prestador (P6), ni registros con obligación legal/fiscal.
    eliminación de cuenta anonimiza la referencia personal, no el ledger.
 5. **Auth y storage.** auth.users + objetos del bucket en su carpeta
    ({uid}/…) se eliminan de verdad; los paths huérfanos se barren.
-6. **Ventana de arrepentimiento.** Propuesta: soft-delete con 30 días de
-   gracia comunicados, luego borrado duro programado.
+6. **Ventana de arrepentimiento.** ~~Propuesta: soft-delete con 30 días de
+   gracia comunicados, luego borrado duro programado.~~
+
+   > ✅ **RESUELTA POR LA LETRA PUBLICADA (24-ago-2026), y en las dos mitades
+   > por separado — hallazgo de S104-B, que frenó en vez de construir contra
+   > una «Propuesta».**
+   >
+   > **La ventana: FIRMADA, y no acá.** `POLITICA-PRIVACIDAD-APP §19.2` —
+   > *«Tiene 30 días para arrepentirse… durante los cuales puede revertirlo»*—
+   > más tres filas de su §18. **Ya no es una propuesta interna: es una promesa
+   > publicada ante el titular**, que es más fuerte que una firma nuestra.
+   > *B midió que P15 no los dice y tenía razón; los 30 días viven en la letra
+   > que la persona lee.*
+   >
+   > ☠️ **El «borrado duro programado»: MUERTO, por dos vías independientes.**
+   > **Por letra** — `§19.5` publicada se compromete a lo contrario y da su
+   > razón: *«no destruimos el registro… anonimizarla de verdad exigiría romper
+   > ese vínculo interno, y con él la trazabilidad que la ley nos obliga a
+   > mantener»*. **Y por mecánica, que es lo que lo vuelve inapelable** — el
+   > `DELETE` rebota contra **26 FKs bloqueantes**, y **donde NO rebota hace
+   > daño callado**: `familia_miembro` y `mascota_codueño` están en CASCADE ⇒
+   > desengancharían a la mascota de sus otros cuidadores sin preguntarles.
+   >
+   > *Esta línea llevaba desde S103 diciendo «borrado duro» debajo de una
+   > política cuyo titular firmado es «la vuelve INALCANZABLE, no destruye el
+   > registro». **Convivían en el mismo archivo, a cien líneas de distancia.***
 
 **Implementación:** deuda D-337 (disparo: pre-compuerta B6, DESPUÉS de la
 firma de esta política).

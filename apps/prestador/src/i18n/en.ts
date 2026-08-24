@@ -644,9 +644,8 @@ export const prestadorEn = {
     updDescargando: 'Downloading the update…',
     updDescargado: 'Ready. It applies the next time you open the app.',
     updNoSePudo: "We couldn't check for a new version.",
-    eliminarVoz:
-      "It will live here, done right. First we need to properly resolve what happens to your paid appointments, your active plans and your pending payouts — a business with commitments isn't deleted lightly.",
-    entendido: 'Got it',
+    // ☠️ S104-C · `eliminarVoz` and `entendido` died with the honest-voice Hoja
+    // (Ley 37): the entry now navigates to `/cuenta/cerrar`.
     enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
     // S60-B2 — Espejo de es.ts · LOTE S60, GATE PENDIENTE
     negocioTitulo: 'Your business',
@@ -3036,5 +3035,65 @@ export const prestadorEn = {
       modalVoz:
         'We look at every business before showing it to families. That\'s what makes being here mean something. We\'ll let you know as soon as it\'s done.',
     },
+  },
+
+  cerrarCuenta: {
+    titulo: 'Delete account',
+    intro: 'Deleting your account doesn’t wipe everything at once. Here’s exactly what goes and what stays.',
+    seVaTitulo: 'What goes',
+    seVaAcceso: 'Your access and sessions: you won’t sign in again with this email and password.',
+    seVaExternas: 'The ways you sign in with other accounts, if you used them.',
+    seVaArchivos: 'Your personal files and your profile photo.',
+    quedaTitulo: 'What stays, detached from you',
+    quedaConsentimientos:
+      'The record of what you agreed to: it’s the proof of what you were promised, and the law requires keeping it.',
+    quedaPagos: 'Your payments and settlements, for tax obligations.',
+    quedaHitos: 'The milestones of your work as a provider, now without your personal data.',
+    quedaNegocio:
+      'If your business continues with other people, the business and its history stay with the team. Only you leave.',
+    ventana:
+      'You have 30 days to change your mind: write to {{correo}} and we’ll undo it all. After 30 days, the closure is final.',
+    exportarCta: 'Export my data before I go',
+    exportarDetalle: 'We’ll email you a copy of everything.',
+    continuar: 'Continue',
+    confirmarTitulo: 'Delete your account?',
+    confirmarCuerpo:
+      'When you confirm, you lose access right away. You have 30 days to undo it by writing to {{correo}}; after that, you won’t be able to sign in or recover it. Save that email before continuing.',
+    confirmarCta: 'Delete my account',
+    volver: 'No, go back',
+    listoTitulo: 'Your account is now closing',
+    yaEstabaTitulo: 'Your account was already closing',
+    listoCuerpo:
+      'You’ve lost access. You have until {{fecha}} to undo it by writing to {{correo}}. After that, the closure is final.',
+    escribir: 'Write to privacy',
+    salir: 'Exit',
+    asistidoTitulo: 'We’ll sort this out with you',
+    asistidoCuerpo:
+      'Your account is linked to something that can’t be closed with a button without leaving other people without access. Write to us at {{correo}} and we’ll sort it out together.',
+    errorGenerico: 'We couldn’t delete your account right now. Please try again in a moment.',
+    reintentar: 'Try again',
+    elegirIntro: 'What do you want to close? These are two different things.',
+    elegirMiCuenta: 'Close my account',
+    elegirMiCuentaDetalle: 'Closes your user. The business stays if other people have access.',
+    elegirNegocio: 'Close the business',
+    elegirNegocioDetalle: 'This isn’t done from the app. We’ll explain why.',
+    negocioTitulo: 'The business is closed with us',
+    negocioCuerpo:
+      'A business with already-paid appointments, employees with access, and payouts to settle can’t be closed with a button: each thing has to be resolved so no one is left halfway. That’s why we do it with you, not from the app.',
+    negocioUnico:
+      'On top of that, you’re the only person with access to this business: closing your account would leave it with no one.',
+    negocioContacto: 'Write to us at {{correo}} and we’ll get started.',
+  },
+  exportarDatos: {
+    titulo: 'Export my data',
+    intro:
+      'Ask us for a copy of everything e-PetPlace keeps about you and your business. It’s your right, and we’ll give it to you.',
+    detalle: 'We prepare the file and email it to you, with a link that expires. It may take a while.',
+    cta: 'Request my copy',
+    enviado:
+      'Done. We sent your copy to {{correo}}. Check your email (and the spam folder) in the next few hours.',
+    yaEnCamino: 'We’re already preparing it. It’s going to {{correo}} — check your email in the next few hours.',
+    error: 'We couldn’t prepare your copy right now. Please try again in a moment.',
+    pedirDeNuevo: 'Request it again',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

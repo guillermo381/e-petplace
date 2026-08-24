@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -3108,6 +3133,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cierre_cuenta: {
+        Row: {
+          ejecutado_en: string | null
+          estado: string
+          motivo_reversion: string | null
+          programado_para: string
+          revertido_en: string | null
+          revertido_por: string | null
+          solicitado_en: string
+          user_id: string
+        }
+        Insert: {
+          ejecutado_en?: string | null
+          estado?: string
+          motivo_reversion?: string | null
+          programado_para: string
+          revertido_en?: string | null
+          revertido_por?: string | null
+          solicitado_en?: string
+          user_id: string
+        }
+        Update: {
+          ejecutado_en?: string | null
+          estado?: string
+          motivo_reversion?: string | null
+          programado_para?: string
+          revertido_en?: string | null
+          revertido_por?: string | null
+          solicitado_en?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       cita_desglose: {
         Row: {
@@ -9916,6 +9974,42 @@ export type Database = {
           },
         ]
       }
+      exportacion_datos: {
+        Row: {
+          archivo_path: string | null
+          enviada_en: string | null
+          enviado_a: string | null
+          estado: string
+          expira_en: string | null
+          id: string
+          motivo_fallo: string | null
+          solicitada_en: string
+          user_id: string
+        }
+        Insert: {
+          archivo_path?: string | null
+          enviada_en?: string | null
+          enviado_a?: string | null
+          estado?: string
+          expira_en?: string | null
+          id?: string
+          motivo_fallo?: string | null
+          solicitada_en?: string
+          user_id: string
+        }
+        Update: {
+          archivo_path?: string | null
+          enviada_en?: string | null
+          enviado_a?: string | null
+          estado?: string
+          expira_en?: string | null
+          id?: string
+          motivo_fallo?: string | null
+          solicitada_en?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       facturas: {
         Row: {
           archivo_url: string | null
@@ -10716,6 +10810,7 @@ export type Database = {
           estado: string
           intentos: number
           invitacion_id: string
+          motivo: string | null
         }
         Insert: {
           created_at?: string
@@ -10724,6 +10819,7 @@ export type Database = {
           estado?: string
           intentos?: number
           invitacion_id: string
+          motivo?: string | null
         }
         Update: {
           created_at?: string
@@ -10732,6 +10828,7 @@ export type Database = {
           estado?: string
           intentos?: number
           invitacion_id?: string
+          motivo?: string | null
         }
         Relationships: [
           {
@@ -13813,8 +13910,9 @@ export type Database = {
       }
       prestador_documentos: {
         Row: {
-          archivo_url: string
+          archivo_url: string | null
           created_at: string
+          documento_ultimos4: string | null
           estado: string
           fecha_emision: string | null
           fecha_vencimiento: string | null
@@ -13828,8 +13926,9 @@ export type Database = {
           tipo: string
         }
         Insert: {
-          archivo_url: string
+          archivo_url?: string | null
           created_at?: string
+          documento_ultimos4?: string | null
           estado?: string
           fecha_emision?: string | null
           fecha_vencimiento?: string | null
@@ -13843,8 +13942,9 @@ export type Database = {
           tipo: string
         }
         Update: {
-          archivo_url?: string
+          archivo_url?: string | null
           created_at?: string
+          documento_ultimos4?: string | null
           estado?: string
           fecha_emision?: string | null
           fecha_vencimiento?: string | null
@@ -19981,6 +20081,10 @@ export type Database = {
         Args: { p_atencion_id: string }
         Returns: Record<string, unknown>
       }
+      _cierre_requiere_camino_asistido: {
+        Args: { p_user: string }
+        Returns: boolean
+      }
       _cita_despegable: {
         Args: { p_cita_id: string; p_empleado_id: string }
         Returns: boolean
@@ -20975,6 +21079,7 @@ export type Database = {
         Args: { p_tipo_servicio: string }
         Returns: string
       }
+      ejecutar_cierres_vencidos: { Args: never; Returns: Json }
       ejecutar_recurrencias_vencidas: { Args: never; Returns: Json }
       elegir_modo_horarios: { Args: { p_modo: string }; Returns: string }
       eliminar_vehiculo_repartidor: {
@@ -21072,6 +21177,7 @@ export type Database = {
       expirar_citas_pendientes: { Args: never; Returns: undefined }
       expirar_pedidos_sin_pago: { Args: never; Returns: Json }
       expirar_reservas_vencidas: { Args: never; Returns: Json }
+      exportar_mis_datos: { Args: never; Returns: Json }
       fijar_fecha_procedimiento: {
         Args: {
           p_cita: string
@@ -22022,6 +22128,13 @@ export type Database = {
         Args: { p_prestador_id: string }
         Returns: boolean
       }
+      purgar_documentos_vencidos: {
+        Args: never
+        Returns: {
+          encolados: number
+          motivo: string
+        }[]
+      }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
@@ -22399,6 +22512,10 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_paso: string }
         Returns: Json
       }
+      revertir_cierre_cuenta: {
+        Args: { p_motivo: string; p_user: string }
+        Returns: Json
+      }
       revisar_documento_cuenta: {
         Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
@@ -22490,6 +22607,7 @@ export type Database = {
         }
         Returns: Json
       }
+      solicitar_cierre_cuenta: { Args: never; Returns: Json }
       solicitar_naturaleza_comercial: {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
@@ -22852,6 +22970,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [

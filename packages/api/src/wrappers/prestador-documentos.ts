@@ -120,7 +120,34 @@ export interface DocumentoVerificacion {
   nombre: string;
   estado: EstadoDocumento;
   /** PATH dentro del bucket privado (jamás URL pública — patrón S47). */
-  archivoPath: string;
+  /**
+   * 🔴 **PUEDE SER `null`, y eso NO es un dato faltante: es el estado CORRECTO
+   * de un documento ya verificado.** `POLITICA-PRIVACIDAD-APP §5.2` promete que
+   * *«concluida la verificación no conservamos la imagen del documento»*, y
+   * desde S104-A un trigger la encola para destruir y limpia este puntero **en
+   * el mismo acto**. *Si el puntero sobreviviera al borrado, la ficha diría que
+   * hay una imagen que ya nadie puede garantizar.*
+   *
+   * ⚠️ Nació `string` y pasó a `string | null` al regenerar tipos — **la
+   * migración es de ayer y la consecuencia en el tipo quedó latente un día,
+   * porque los tipos no se regeneraron en la misma tanda.** La superficie tiene
+   * que mostrar la ausencia como lo que es: el documento se verificó y su
+   * imagen se destruyó, no «falta subirlo».
+   */
+  archivoPath: string | null;
+  /**
+   * Los últimos cuatro dígitos del documento.
+   *
+   * **§5.2 los conserva JUNTO CON la destrucción de la imagen**, y ése es el
+   * punto: *sin el identificador parcial, después de borrar la imagen el
+   * sistema podría decir «se aprobó un título profesional» **pero no cuál**.*
+   * La idoneidad se sostiene en el registro, no en la imagen.
+   *
+   * ⚠️ **`null` = registro anterior a la columna** (nació el 24-ago-2026) **y
+   * no se puede reconstruir**, porque esas imágenes ya no están. *La superficie
+   * tolera el null sin inventar: dice que no se registró, jamás un número.*
+   */
+  documentoUltimos4: string | null;
   notasRevision: string | null;
   createdAt: string;
   /** ISO-3166-1 alfa-2 del país que EMITIÓ el documento. **null = no
@@ -156,7 +183,7 @@ export async function obtenerDocumentosVerificacion(
 ): Promise<ResultadoWrapper<DocumentoVerificacion[], CodigoErrorDocumentos>> {
   const { data, error } = await getClient()
     .from('prestador_documentos')
-    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor')
+    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor, documento_ultimos4')
     .eq('prestador_id', prestadorId)
     .in('tipo', [...TIPOS_DOCUMENTO_VERIFICACION])
     .order('created_at', { ascending: false });
@@ -175,6 +202,7 @@ export async function obtenerDocumentosVerificacion(
       nombre: f.nombre,
       estado: f.estado,
       archivoPath: f.archivo_url,
+      documentoUltimos4: typeof f.documento_ultimos4 === 'string' ? f.documento_ultimos4 : null,
       notasRevision: f.notas_revision,
       createdAt: f.created_at,
     });
@@ -241,7 +269,7 @@ export async function registrarDocumentoVerificacion(
       // sin país ⇒ null explícito, que es "no declarado" y no un default.
       pais_emisor: input.paisEmisor ?? null,
     })
-    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor')
+    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor, documento_ultimos4')
     .single();
 
   if (error || data === null) {
@@ -258,6 +286,7 @@ export async function registrarDocumentoVerificacion(
       nombre: data.nombre,
       estado: data.estado,
       archivoPath: data.archivo_url,
+      documentoUltimos4: typeof data.documento_ultimos4 === 'string' ? data.documento_ultimos4 : null,
       notasRevision: data.notas_revision,
       createdAt: data.created_at,
       paisEmisor: typeof data.pais_emisor === 'string' ? data.pais_emisor : null,

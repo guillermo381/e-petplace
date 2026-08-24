@@ -1393,6 +1393,17 @@ export {
   type CodigoInvitacionFamilia,
 } from './wrappers/familia-invitacion';
 
+// S104-A · tanda 3 — LA SALIDA. Vive en packages/api por la LEY DE PARIDAD:
+// el cierre PERSONAL y la copia nacen en las dos apps. El cierre del NEGOCIO
+// no está acá y no es deuda: es la excepción ② de esa ley (trámite asistido).
+export {
+  solicitarCierreCuenta,
+  exportarMisDatos,
+  type CierreSolicitado,
+  type CopiaSolicitada,
+  type ErrorCierre,
+} from './wrappers/cuenta-salida';
+
 // S104-A · el freno del enlace de invitación (freno de mesa, 24-ago): una sola
 // verdad que las dos apps consumen, en vez de una disciplina por pantalla.
 export {

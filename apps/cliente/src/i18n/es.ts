@@ -1529,10 +1529,9 @@ export const clienteEs = {
     soporteDesdeCobro: 'Hola, tuve un problema al pagar en e-PetPlace.',
     // Eliminar cuenta — letra (a): visible con voz honesta (espec P15 en docs)
     // S104-C (firma founder 5.1): «co-dueños» → «las personas de tu familia».
-    // En v1 quien entra es FAMILIAR AUTORIZADO, no co-dueño (v2). La voz se
-    // alinea a la de invitar («alguien de tu familia»).
-    eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, las personas de tu familia y tus hitos — una vida documentada no se borra a la ligera.',
-    entendido: 'Entendido',
+    // ☠️ S104-C · `eliminarVoz` y `entendido` MURIERON con la Hoja de voz
+    // honesta (Ley 37): P15 FIRMADA + motor de A ⇒ la entrada navega a
+    // `/cuenta/cerrar` (namespace `cerrarCuenta`), no abre una Hoja de espera.
   },
   ajustes: {
     titulo: 'Ajustes',
@@ -2509,5 +2508,63 @@ export const clienteEs = {
     error: 'No pudimos completar la acción. Prueba de nuevo.',
     cerrar: 'Cerrar',
     cargando: 'Cargando…',
+  },
+
+  // S104-C · TANDA 3 — la salida. Cerrar la cuenta con motor (P15 cl.4) +
+  // exportar (cl.5). El texto se ALINEA a la Política publicada (§19.3/§19.4/
+  // §19.5): el cierre NO borra, es seudonimización — jamás «borrar todo».
+  cerrarCuenta: {
+    titulo: 'Eliminar cuenta',
+    intro: 'Eliminar tu cuenta no borra todo de golpe. Esto es exactamente qué se va y qué queda.',
+    seVaTitulo: 'Qué se va',
+    seVaAcceso: 'Tu acceso y tus sesiones: no vuelves a entrar con este correo y esta clave.',
+    seVaExternas: 'Tus formas de entrar con otras cuentas, como Google, si las usaste.',
+    seVaArchivos: 'Tus archivos personales y tu foto de perfil.',
+    seVaCarnet: 'Las fotos del carnet de tus mascotas desaparecen de las impresiones que ya generaste.',
+    quedaTitulo: 'Qué queda, desligado de ti',
+    quedaConsentimientos:
+      'El registro de qué aceptaste: es la prueba de qué se te prometió, y la ley obliga a conservarla.',
+    quedaPagos: 'Tus pagos, por obligación fiscal.',
+    quedaExpediente:
+      'Los hechos del expediente de tu mascota, porque tu mascota puede cambiar de familia y su historia le pertenece a ella.',
+    ventana:
+      'Tienes 30 días para arrepentirte: escribe a {{correo}} y volvemos todo atrás. Pasados los 30 días, el cierre es definitivo.',
+    exportarCta: 'Exportar mis datos antes de irme',
+    exportarDetalle: 'Te enviamos una copia de todo a tu correo.',
+    continuar: 'Continuar',
+    confirmarTitulo: '¿Eliminamos tu cuenta?',
+    // El mensaje va COMPLETO acá: al confirmar pierde el acceso EN EL ACTO, y
+    // ésta es la última pantalla que ve — después no puede volver a leerlo.
+    confirmarCuerpo:
+      'Al confirmar, pierdes el acceso ahora mismo. Tienes 30 días para volver atrás escribiendo a {{correo}}; pasado ese plazo, ya no podrás entrar ni recuperarla. Guarda ese correo antes de continuar.',
+    // Firma founder: la imagen del carnet se reproduce en las impresiones ya
+    // generadas; al borrarse (cierre definitivo) quedan sin ella.
+    confirmarCarnet:
+      'Y algo que solo se ve al cerrar: cuando el cierre sea definitivo, las fotos del carnet de tus mascotas se borran, y las impresiones que ya generaste quedan sin ellas.',
+    confirmarCta: 'Eliminar mi cuenta',
+    volver: 'No, volver',
+    listoTitulo: 'Tu cuenta quedó en proceso de cierre',
+    yaEstabaTitulo: 'Tu cuenta ya estaba en proceso de cierre',
+    listoCuerpo:
+      'Perdiste el acceso. Tienes hasta el {{fecha}} para volver atrás escribiendo a {{correo}}. Después, el cierre es definitivo.',
+    escribir: 'Escribir a privacidad',
+    salir: 'Salir',
+    asistidoTitulo: 'Esto lo resolvemos contigo',
+    asistidoCuerpo:
+      'Tu cuenta está enlazada a algo que no se puede cerrar con un botón sin dejar a otras personas sin acceso. Escríbenos a {{correo}} y lo resolvemos juntos.',
+    errorGenerico: 'No pudimos eliminar tu cuenta ahora. Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
+  exportarDatos: {
+    titulo: 'Exportar mis datos',
+    intro:
+      'Pídenos una copia de todo lo que e-PetPlace guarda sobre ti y tus mascotas. Es tu derecho, y te la damos.',
+    detalle: 'Preparamos el archivo y te lo enviamos a tu correo, con un enlace que vence. Puede tardar un rato.',
+    cta: 'Pedir mi copia',
+    enviado:
+      'Listo. Te enviamos tu copia a {{correo}}. Revisa tu correo (y la carpeta de spam) en las próximas horas.',
+    yaEnCamino: 'Ya te la estamos preparando. Te llega a {{correo}}: revisa tu correo en las próximas horas.',
+    error: 'No pudimos preparar tu copia ahora. Prueba de nuevo en un momento.',
+    pedirDeNuevo: 'Pedirla de nuevo',
   },
 } as const;

@@ -265,7 +265,17 @@ export default function VerificacionVeterinaria() {
                       digno con nombre y tipo, jamás miniatura rota */}
                   {doc !== null && (
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                      {esImagen(doc.archivoPath) && previews[doc.archivoPath] != null ? (
+                      {/* 🔴 S104-A · `archivoPath` puede ser null y NO es un dato
+                          faltante: §5.2 promete que la imagen se destruye al
+                          concluir la verificación, y desde S104-A un trigger la
+                          borra y limpia el puntero en el mismo acto. El caso cae
+                          al placeholder de abajo. ⚠️ CURA MECÁNICA de A para
+                          desbloquear el typecheck que su propia migración volvió
+                          rojo — LA VOZ ES DE LA PISTA DE ESTA PANTALLA: hoy ese
+                          placeholder dice «—», y lo honesto es decir que el
+                          documento se verificó y su imagen se destruyó, jamás
+                          dejar un guión que se lee como «falta subirlo». */}
+                      {doc.archivoPath !== null && esImagen(doc.archivoPath) && previews[doc.archivoPath] != null ? (
                         <Image
                           source={{ uri: previews[doc.archivoPath] as string }}
                           accessibilityLabel={vozTipo(tipo)}
@@ -289,13 +299,13 @@ export default function VerificacionVeterinaria() {
                           }}
                         >
                           <Texto variante="dato">
-                            {extension(doc.archivoPath) || '—'}
+                            {doc.archivoPath !== null ? extension(doc.archivoPath) || '—' : '—'}
                           </Texto>
                         </View>
                       )}
                       <View style={{ flex: 1 }}>
                         <Texto variante="dato" numberOfLines={2}>
-                          {nombreArchivo(doc.archivoPath).toLowerCase()}
+                          {doc.archivoPath !== null ? nombreArchivo(doc.archivoPath).toLowerCase() : ''}
                         </Texto>
                       </View>
                     </View>
