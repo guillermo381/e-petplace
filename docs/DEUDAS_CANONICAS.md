@@ -20661,3 +20661,27 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **Y el detalle de forma que lo produjo, porque va a volver a pasar:** *el nombre del predicado sugería la comparación equivocada.* `nombre_es_email` invita a buscar un `@`, y el dato sembrado **no tiene `@`**. **Un alias mal puesto en una consulta se convierte en la pregunta que uno cree haber hecho.**
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### D-897 — 🔴 TRES FRENOS DE PUBLICACIÓN marcados por el abogado: no se abre al público hasta que funcionen
+🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
+
+**① El reembolso no devuelve dinero.** Existe la función que revierte el asiento contable; **no hay devolución real** a la tarjeta ni a la billetera. Hoy, cancelar con derecho a reembolso **anota el derecho y no paga**. ⇒ *Unos T&C que prometen reembolso con un motor que solo asienta es la clase de promesa que se descubre el día del primer reclamo.*
+
+**② La liquidación nunca corrió de punta a punta.** Medido: **0 liquidaciones** en la base, con el modelo completo (retenciones, holdback, ajustes, disputa). **Plazo, medio y retenciones no existen como decisión.** ⇒ *Firmar un contrato que dice cuándo se le paga al profesional, sin haberle pagado nunca a nadie, es firmar sobre una pieza sin ejercer.*
+
+**③ Falta la leyenda «no es factura» en el comprobante.** El sistema emite un comprobante de pago que **no es factura fiscal**, y **no lo dice**. ⇒ *Un documento con monto, fecha y concepto que no aclara qué NO es, se lee como lo que no es.*
+
+**Dueño:** producto + el frente de pagos. **Disparo:** los tres, **antes de la primera venta real a un tercero**.
+☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido.
+
+#### D-898 — 🟡 `extract-documento` está desplegada, es facturable y NADIE la llama
+🟡 **MEDIA.** Apareció al contrastar el censo de privacidad contra el sistema (S104-A, 24-ago-2026).
+
+`extract-documento` (S97-A) fue construida para que **la foto del documento pre-llene el alta del profesional** — su propia cabecera lo dice: *«la persona CORRIGE, no digita»*. **Está `ACTIVE`, exige sesión válida, y tiene CERO consumidores**: ninguna pantalla ni wrapper la invoca.
+
+**Las dos consecuencias, y la segunda es la que pesa:**
+- **Es superficie desplegada y facturable que no rinde nada** (misma familia que `chat-ayuda`, D-717, que sí se retiró).
+- 🔴 **Contaminó un documento legal.** El censo de privacidad de S104 le atribuyó a Anthropic el tratamiento de **documentos de identidad** basándose en que la función existe — **y el abogado redactó el aviso de IA sobre eso**. *La función existía; el tratamiento no. **Existir y correr son dos cosas distintas, y un censo que mira lo primero contesta por lo segundo** — es L-402 aplicada a un inventario legal en vez de a un circuito.*
+
+**La decisión es binaria y no se puede diferir sin costo:** **conectarla** (y entonces el aviso de IA la incluye con razón) **o retirarla** (y entonces el aviso no la menciona). *Dejarla desplegada y sin conectar es el peor de los tres estados: paga, no sirve, y confunde a quien la censa.*
+☠️ **Condición de muerte:** o tiene un consumidor vivo medido, o no está desplegada.
