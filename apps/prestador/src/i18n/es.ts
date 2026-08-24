@@ -2216,6 +2216,12 @@ export const prestadorEs = {
     permisoCamara: 'Necesitamos la cámara para la foto del documento. Puedes habilitarla desde los ajustes del teléfono, o elegirla de la galería.',
     errorRed: 'No se pudo subir — revisa tu conexión.',
     errorSubida: 'No se pudo subir el documento. Prueba de nuevo.',
+    // S104-C · la voz honesta cuando la imagen se destruyó al concluir la
+    // verificación (§5.2). El identificador parcial se muestra si está; se
+    // OMITE sin mentir cuando es null (registros previos, sin imagen para
+    // reconstruir): «verificado» sin el número, jamás un hueco ni un inventado.
+    imagenDestruida: 'No conservamos la imagen del documento: se destruyó al concluir la verificación.',
+    terminaEn: 'Termina en •••• {{ultimos4}}',
   },
   // El detalle de UNA cita de veterinaria — destino del tap de la jornada
   // (S69-B, M0). Read-only: el Durante clínico llega con V4 · LOTE S69,
