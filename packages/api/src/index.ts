@@ -15,6 +15,10 @@ export {
   // (LEY DE PARIDAD DE CUENTA). `registrarse` ya registra el suyo — esto es
   // para el consumo DIRECTO de las puertas que no pasan por el alta.
   registrarConsentimiento,
+  registrarConsentimientos,
+  documentosVigentes,
+  type DocumentoLegal,
+  type DocumentoAceptado,
   normalizarEmail,
   type TipoConsentimiento,
   type SesionDueno,
@@ -1363,3 +1367,13 @@ export {
   leerEstadoCompra, leerEstadoCita,
   type EstadoCompra, type EsperaCompra, type EstadoCita, type EsperaCita,
 } from './wrappers/pagos-espera';
+
+// S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).
+export {
+  invitarAFamilia,
+  aceptarInvitacionFamilia,
+  revocarInvitacionFamilia,
+  type InvitacionCreada,
+  type InvitacionAceptada,
+  type CodigoInvitacionFamilia,
+} from './wrappers/familia-invitacion';
