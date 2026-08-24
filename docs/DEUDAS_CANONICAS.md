@@ -20733,5 +20733,35 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Lo que haría falta, sin diseñarlo acá:** que el sistema **distinga contablemente lo recaudado por cuenta ajena de lo propio**, y que la Liquidación **sea la rendición de ese mandato** y no solo una transferencia calculada.
 
+> ### ✅ FIRMA DEL FOUNDER (24-ago-2026) — la figura NO se decide, ya está decidida
+>
+> **Es MANDATO DE RECAUDACIÓN, §17 de los T&C.** *Lo que falta no es decidir: es que el sistema lo exprese.* **Las tres implicancias, para la sesión que lo construya:**
+>
+> **① Los valores recaudados tienen que ser distinguibles de ingreso propio EN EL MOTOR, no solo en el reparto.** Hoy hay cuatro montos por operación y ninguno dice *de quién es el dinero mientras está en tránsito*. **Repartir bien no es lo mismo que declarar de quién es** — y la diferencia es la que separa un mandato de una compraventa.
+>
+> **② La compensación de §17.5 opera sobre esa distinción.** El contrato permite compensar deudas del profesional *contra los valores recaudados*. **Sin ① eso no se puede ejecutar correctamente**: compensar contra un monto que el sistema no distingue de ingreso propio es cobrarse de la caja, no del mandato.
+>
+> **③ La Liquidación es el ACTO DE RENDICIÓN del mandato** ⇒ **su primera corrida es también la primera prueba de la figura.** *No es una transferencia con un informe adjunto: es el informe, y la transferencia es su consecuencia.* Esto además ata D-900 a D-897 ②: **la liquidación no se puede probar sin probar el mandato, y viceversa.**
+
 **Dueño:** producto + el frente de pagos, con la mesa. **Disparo: ANTES DE LA PRIMERA LIQUIDACIÓN REAL** — porque la primera liquidación es el primer acto de rendición del mandato, y rendir cuentas de algo que el sistema no modeló como ajeno es donde la figura se rompe.
 ☠️ **Condición de muerte:** el sistema distingue lo recaudado por cuenta ajena, y la Liquidación se emite como rendición del mandato con su detalle de Operaciones.
+
+#### D-901 — 🔴 LA PRIVACIDAD PROMETE BORRAR LOS DOCUMENTOS DE IDENTIDAD A LOS 90 DÍAS Y **61 DE 64 YA LOS PASARON**
+🔴 **ALTA — BLOQUEA LA PUBLICACIÓN DE LA POLÍTICA DE PRIVACIDAD.** Medido el 24-ago-2026, al verificar el freno que levantó la pista C.
+
+**Lo que el documento promete (§18):** *«Imagen del documento de identidad del profesional — **se elimina al completarse la verificación**, y en todo caso **a los 90 días de su carga**»*. Y para los datos de contacto: *«mientras su cuenta exista, **más 30 días**»*.
+
+**Lo medido en el bucket `prestador-documentos`:**
+- **64 archivos vivos** · el más viejo del **4-may-2026**
+- 🔴 **61 de 64 tienen MÁS de 90 días.**
+
+**Y no hay mecanismo que pueda cumplirlo:** los dos crones vivos son `barrer-storage-tick` (la cola de **D-731**, que borra por **trigger de DELETE de fila**, no por edad) y `expirar-citas-pendientes`. **No existe ninguna función de retención, purga ni anonimización por antigüedad.** *El sistema no conserva de más por un fallo: conserva de más porque nadie construyó lo contrario.*
+
+⇒ **Publicar §18 hoy sería afirmarle al usuario un hecho falso sobre el producto, y falso de forma verificable: 61 archivos lo contradicen.** *Es peor que no publicar, porque una política que promete un borrado que no ocurre no protege a nadie y además documenta el incumplimiento.*
+
+**Esto CONFIRMA con número lo que el censo de S104 marcó como lo más urgente:** *«NO EXISTE UN PLAZO DE RETENCIÓN ESCRITO… sin ese plazo, el sistema conserva indefinidamente»*. **Ahora el plazo está escrito —en un documento legal— y sigue sin existir en el sistema. La brecha no se cerró: se volvió exigible.**
+
+**Los dos caminos, y los dos son legítimos:** **(a)** construir el barrido por antigüedad **antes** de publicar · **(b)** ajustar §18 a lo que el sistema hace hoy y publicar el plazo cuando exista. **Lo que NO es legítimo es publicarlo así.**
+
+**Dueño:** founder + legales (el plazo) · producto (el mecanismo). **Disparo: antes de publicar la Política de Privacidad.**
+☠️ **Condición de muerte:** o existe un barrido por antigüedad verificado con un archivo borrado de verdad, o §18 dice lo que el sistema hace.
