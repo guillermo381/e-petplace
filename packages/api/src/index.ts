@@ -16,6 +16,7 @@ export {
   // para el consumo DIRECTO de las puertas que no pasan por el alta.
   registrarConsentimiento,
   registrarConsentimientos,
+  confirmarAltaConCodigo,
   documentosVigentes,
   type DocumentoLegal,
   type DocumentoAceptado,

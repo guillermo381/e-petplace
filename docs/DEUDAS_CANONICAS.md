@@ -20511,7 +20511,17 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 > ### 🔴 ENMIENDA FIRMADA (founder, 23-ago-2026) — **SON TRES ACTOS, NO DOS, Y EL DEL MEDIO ES NUEVO**
 >
-> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② una RPC DEFINER que registre el consentimiento SIN SESIÓN** — ✅ **construida el mismo día** (`20260824000000`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② el consentimiento cableado al `verifyOtp`** — ✅ **hecho** (`confirmarAltaConCodigo()`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+>
+> ### ⚠️ EL ACTO ② CAMBIÓ DE FORMA EL MISMO DÍA, Y LA VERSIÓN QUE QUEDÓ ES LA QUE **NO** SUMA SUPERFICIE
+>
+> **Primero se construyó una RPC `SECURITY DEFINER`** (`20260824000000`) con cinco gates, porque sin sesión no hay `auth.uid()` que preguntar. **La descartó el founder** con la razón que A había servido junto con lo construido: **`verifyOtp` DEVUELVE SESIÓN** (está escrito en la propia casa, `seguridad.ts:312`) ⇒ **alcanza con registrar el consentimiento un momento después, con la policy normal y sin privilegios prestados.**
+>
+> **Lo que se pierde esperando al código: nada.** *Si alguien abandona entre crear la cuenta y canjear el código, no hay cuenta usable que necesite evidencia.* **El consentimiento se registra cuando la cuenta empieza a existir**, que es justo cuando P23 lo necesita.
+>
+> ⇒ *La respuesta no era una RPC con privilegios: era hacerlo un momento después.* **Menos superficie es menos que cuidar** — y se llegó ahí porque lo firmado se construyó **y** se sirvió la alternativa, en vez de elegir una sola.
+>
+> **☠️ `registrar_consentimiento_de_alta` NO SE BORRA:** queda **viva y declarada** como el camino del **invitado que acepta por enlace**, por si hace falta. *Una pieza que no se usa hoy y tiene un uso nombrado no es letra muerta: es una pieza con su disparo escrito.*
 >
 > **Lo que convirtió al ② en CONDICIÓN y no en mejora, y es una medición y no un razonamiento:** la cuenta `guillo381+test1` (**D-896**), creada durante la ventana de 18 minutos con `autoconfirm=false`, **quedó con `consentimientos = 0`**. Sin sesión, `auth.uid()` es NULL y la policy no deja entrar el INSERT ⇒ **con autoconfirm apagado, TODO registro nacería sin evidencia de consentimiento, desde el primero.**
 >
