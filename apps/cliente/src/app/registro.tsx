@@ -1,17 +1,50 @@
 /**
- * Registro (S45-B4) — email+password, sin social (decisión B1).
- * Errores del wrapper en voz humana, cada uno en SU campo.
+ * Registro — LA PUERTA, cara «crear cuenta» (RITUAL §4, S104-C).
+ *
+ * Mismo esqueleto que el login (tapiz + senda + isotipo recogido + acciones
+ * ancladas + huella de llegada), con tres cambios que pide el ritual:
+ *  · **tres campos** (nombre · email · password) con su autofill.
+ *  · **la línea de términos** al pie (la misma de bienvenida, honesta sin
+ *    link — D-336).
+ *  · **el consentimiento QUEDA REGISTRADO**: `registrarse()` (motor de A,
+ *    tanda 1) escribe el consentimiento tipo `registro` con la URL legal
+ *    mostrada — no hay una segunda llamada acá, viaja con el alta. Se le pasa
+ *    `urlLegalMostrada` para que quede la traza de QUÉ se mostró.
+ *
+ * Se conserva entera la lógica del guard local (S88-D): `causaNoEnvia` +
+ * `razonDeshabilitado` — la puerta no ofrece la clave corta que el server iba
+ * a rebotar, y el toque jamás queda muerto.
  */
 
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, MarcaDeAgua, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  Encabezado,
+  Entrada,
+  EvitaTeclado,
+  HuellaDeLlegada,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  spacing,
+  typography,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { causaNoEnvia } from '@/lib/registro-guard';
+
+/** La traza del texto legal mostrado. NO es una URL navegable (los
+ *  documentos definitivos no existen todavía — D-336): es un marcador
+ *  estable de QUÉ vio la persona, para el registro de consentimiento de A. */
+const URL_LEGAL = 'terminos-inline-v1';
+const ISOTIPO_ESQUINA = 28;
 
 export default function Registro() {
   const router = useRouter();
@@ -25,18 +58,10 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState<{ email?: string; password?: string }>({});
+  const [llegando, setLlegando] = useState(false);
 
-  // S88-D · EL GUARD LOCAL (Ley 23): la puerta deja de ofrecer la clave
-  // corta que el server iba a rebotar. El predicado vive en lib/ para
-  // que su par discrimine contra la fuente.
   const causa = causaNoEnvia({ nombre, email, password });
   const puedeEnviar = causa === null;
-  // Las DOS capas del apagado (contrato de Boton, S82-B r14 + S63-B
-  // «el Confirmar apagado dice QUÉ FALTA, siempre»): la regla del largo
-  // ya es VISIBLE en la ayuda del Campo; la razón hace que el toque
-  // jamás quede muerto y se anuncia al enfocar. Cada causa su voz —
-  // una razón genérica sobre una clave corta sería el mensaje que
-  // miente (la familia de D-659 ②).
   const razon =
     causa === 'campos_vacios'
       ? t('registro.razonCampos')
@@ -48,10 +73,17 @@ export default function Registro() {
     if (!puedeEnviar || cargando) return;
     setCargando(true);
     setErrores({});
-    const r = await registrarse({ nombre: nombre.trim(), email: email.trim(), password });
-    setCargando(false);
+    const r = await registrarse({
+      nombre: nombre.trim(),
+      email: email.trim(),
+      password,
+      // el consentimiento viaja con el alta (motor de A): al crear la cuenta,
+      // se registra que se aceptaron los términos, con la traza de qué se vio.
+      urlLegalMostrada: URL_LEGAL,
+    });
 
     if (!r.ok) {
+      setCargando(false);
       const enEmail: CodigoErrorAuth[] = ['email_ya_registrado', 'email_invalido'];
       if (enEmail.includes(r.codigo as CodigoErrorAuth)) {
         setErrores({ email: r.mensaje });
@@ -64,86 +96,136 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
+      // el proyecto exige confirmar el correo: no hay «llegada» que celebrar
+      // porque todavía no se entra — se dice y se vuelve al login.
+      setCargando(false);
       aviso.mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
       router.replace('/login');
       return;
     }
-    router.replace('/onboarding');
+    // §5 · la huella de llegada, y recién ahí el onboarding.
+    setLlegando(true);
+    setTimeout(() => router.replace('/onboarding'), 460);
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* S104-B — la marca entra sin ocupar lugar. El porqué medido (70
-          consumidores en el prestador contra 1 en el cliente) vive en
-          `login.tsx`, su hermana: las dos eran las únicas pantallas del
-          arco de entrada sin una sola marca encima. */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
+
       <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
+      </View>
+
       <EvitaTeclado>
-      {/* S104-B — el aire es la jerarquía (Ley 18): `spacing[6]` entre el
-          formulario y la acción, `spacing[2]` dentro de cada bloque. La cura
-          se copió del prestador (S81-C); el porqué completo está en
-          `login.tsx`. Acá el defecto era el mismo con un agravante: la ayuda
-          «Al menos 8 caracteres» quedaba a 8 px del CTA, así que la regla
-          del campo se leía como si fuera la razón del botón. */}
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* §5 firmada (S81): el formulario entra ordenando lectura */}
-        <Entrada>
-        <View style={{ gap: spacing[2] }}>
-        <Campo
-          label={t('registro.nombreLabel')}
-          placeholder={t('registro.nombrePlaceholder')}
-          value={nombre}
-          onChangeText={setNombre}
-          autoCapitalize="words"
-        />
-        <Campo
-          label={t('registro.emailLabel')}
-          placeholder={t('registro.emailPlaceholder')}
-          value={email}
-          onChangeText={setEmail}
-          error={errores.email}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <Campo
-          label={t('registro.passwordLabel')}
-          ayuda={t('registro.passwordAyuda', { n: MIN_LARGO_CONTRASENA })}
-          value={password}
-          onChangeText={setPassword}
-          error={errores.password}
-          secure
-          autoCapitalize="none"
-        />
-        </View>
-        </Entrada>
-        <Entrada orden={1}>
-        <Boton
-          etiqueta={t('registro.crearMiCuenta')}
-          bloque
-          cargando={cargando}
-          deshabilitado={!puedeEnviar}
-          razonDeshabilitado={razon}
-          onRazon={() => {
-            // La pantalla decide cómo se cuenta (contrato onRazon): la
-            // clave corta se señala EN SU CAMPO con la misma voz; los
-            // campos vacíos, en aviso — pintarlos de error sin que nadie
-            // los haya tocado sería decir «falla» donde hay «todavía no».
-            if (causa === 'password_corta') {
-              setErrores({ password: t('registro.razonPasswordCorta', { n: MIN_LARGO_CONTRASENA }) });
-            } else if (razon !== undefined) {
-              aviso.mostrar({ variante: 'neutro', texto: razon });
-            }
+        <ScrollView
+          style={{ backgroundColor: 'transparent' }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: spacing[5],
+            paddingBottom: insets.bottom + spacing[6],
+            gap: spacing[6],
           }}
-          onPress={() => void crearCuenta()}
-        />
-        </Entrada>
-      </ScrollView>
+          keyboardShouldPersistTaps="handled"
+        >
+          <Entrada>
+            <View style={{ gap: spacing[2] }}>
+              <Campo
+                label={t('registro.nombreLabel')}
+                placeholder={t('registro.nombrePlaceholder')}
+                value={nombre}
+                onChangeText={setNombre}
+                autoCapitalize="words"
+                autoComplete="name"
+                textContentType="name"
+              />
+              <Campo
+                label={t('registro.emailLabel')}
+                placeholder={t('registro.emailPlaceholder')}
+                value={email}
+                onChangeText={setEmail}
+                error={errores.email}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+                textContentType="username"
+              />
+              <Campo
+                label={t('registro.passwordLabel')}
+                ayuda={t('registro.passwordAyuda', { n: MIN_LARGO_CONTRASENA })}
+                value={password}
+                onChangeText={setPassword}
+                error={errores.password}
+                secure
+                autoCapitalize="none"
+                autoComplete="new-password"
+                textContentType="newPassword"
+              />
+            </View>
+          </Entrada>
+
+          <View style={{ flex: 1 }} />
+
+          <Entrada orden={1}>
+            <View style={{ gap: spacing[3] }}>
+              <Boton
+                etiqueta={t('registro.crearMiCuenta')}
+                bloque
+                cargando={cargando}
+                deshabilitado={!puedeEnviar}
+                razonDeshabilitado={razon}
+                onRazon={() => {
+                  if (causa === 'password_corta') {
+                    setErrores({ password: t('registro.razonPasswordCorta', { n: MIN_LARGO_CONTRASENA }) });
+                  } else if (razon !== undefined) {
+                    aviso.mostrar({ variante: 'neutro', texto: razon });
+                  }
+                }}
+                onPress={() => void crearCuenta()}
+              />
+              {/* la línea de términos — la misma de bienvenida (§4). */}
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.xs,
+                  lineHeight: Math.round(typography.size.xs * typography.leading.normal),
+                  color: theme.text.tertiary,
+                  textAlign: 'center',
+                }}
+              >
+                {t('bienvenida.legales')}
+              </Text>
+              <Boton
+                variante="ghost"
+                etiqueta={t('bienvenida.yaTengoCuenta')}
+                bloque
+                onPress={() => router.replace('/login')}
+              />
+            </View>
+          </Entrada>
+        </ScrollView>
       </EvitaTeclado>
+
+      {/* R53-DECLARADO: NO es un pie fijo — es el overlay de LLEGADA a pantalla
+          completa (top:0 Y bottom:0); cubre todo durante la celebración y la
+          pantalla se desmonta al navegar. Nada debajo que reservar. */}
+      {llegando && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.bg.base,
+          }}
+        >
+          <HuellaDeLlegada tamano={64} />
+        </View>
+      )}
     </View>
   );
 }

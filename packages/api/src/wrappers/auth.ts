@@ -87,23 +87,34 @@ export { normalizarEmail } from './_email';
 // ═══════════════════════════════════════════════════════════════════════════
 // EL CONSENTIMIENTO — P23 hecho fila
 // ═══════════════════════════════════════════════════════════════════════════
+/* ☠️ `VERSION_TERMINOS_VIGENTE = 'legales-2026-08'` MURIÓ el 24-ago-2026, el
+   mismo día que nació. Era una versión ÚNICA y provisional, inventada cuando el
+   canon no fijaba vocabulario legal. **La reemplaza `VERSION_LEGAL`**, que da
+   una versión POR DOCUMENTO — que es lo que el abogado entregó y lo que P23
+   necesita. Se retira en vez de dejarse: dos fuentes de «qué versión escribo»
+   conviviendo es el defecto que esta misma tanda vino a cerrar en el correo. */
+
 /**
- * La versión de términos que se le mostró a quien acepta.
+ * LA VERSIÓN DE CADA DOCUMENTO, por separado.
  *
- * ⚠️ **NO es `v1.0`, y la diferencia importa.** Las 59 filas vivas de
- * `consentimientos` dicen `version='v1.0'` y son del LEGADO (25-abr → 10-may
- * 2026, escritas por `e-petplace-v2`). **Las páginas legales se corrigieron y
- * republicaron en S103** ⇒ escribir `v1.0` hoy afirmaría que esta persona
- * aceptó el mismo documento que aquellas 59, y es falso.
+ * ⚠️ **Las dos de términos nacen en `1.0` porque son DOCUMENTOS NUEVOS** — el
+ * abogado partió el único `/terminos` (que C midió en **v1.1**) en dos textos
+ * distintos: consumo y B2B. *Heredar el `1.1` del documento viejo diría que
+ * alguien aceptó una v1.1 de un texto que nunca existió en v1.0.* La privacidad
+ * **sí** conserva su `1.1`: es la misma, común a los dos, con secciones 3.1 y
+ * 3.2 separadas adentro.
  *
- * 🔴 **Es provisional y se declara como tal:** hoy los documentos legales no
- * tienen versión propia — son 26 de letra firmada, 10 medidas y **17 esperando
- * abogado** (D-405). El día que el abogado entregue documentos versionados,
- * esta constante toma SU versión y deja de ser una fecha. *Se guarda además la
- * URL exacta en `metadata`, porque lo que P23 promete demostrar no es un
- * número: es QUÉ se le mostró.*
+ * 🔴 **Y el freno que este archivo ya se cobró una vez:** `tratamiento_datos`
+ * se registró como tipo y nunca tuvo página. **Antes de que una pantalla ofrezca
+ * estos dos, C confirma contra el sitio que las URLs existen** — un check que
+ * apunta a una página que no está le pide a alguien que acepte algo que no
+ * puede leer.
  */
-export const VERSION_TERMINOS_VIGENTE = 'legales-2026-08';
+export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
+  terminos_parent: '1.0',
+  terminos_professional: '1.0',
+  privacidad: '1.1',
+};
 
 export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_prestador';
 
@@ -135,14 +146,124 @@ export async function registrarConsentimiento(
   tipo: TipoConsentimiento,
   urlMostrada: string | null = null,
 ): Promise<boolean> {
-  const { error } = await getClient().from('consentimientos').insert({
+  const r = await registrarConsentimientos(userId, tipo, documentosVigentes(tipo, urlMostrada ? { privacidad: urlMostrada } : {}));
+  return r.registrados === r.total;
+}
+
+/**
+ * Los documentos que HOY se pueden aceptar de verdad, con su versión medida.
+ *
+ * **Son DOS, no tres**, y el motivo no es alcance: `tratamiento_datos` **no
+ * tiene documento ni URL** (medido por C contra el sitio). *El tercer check de
+ * la firma entra el día que exista la página — y entonces es una línea acá.*
+ *
+ * ⚠️ `privacidad` se registra sabiendo que **la publicada excluye a las apps
+ * móviles**; la de la app es borrador (D-405). **Se registra igual porque es lo
+ * que la persona efectivamente vio**, y P23 promete demostrar QUÉ se le mostró
+ * — no que lo mostrado fuera suficiente. *Confundir las dos cosas haría que el
+ * registro mienta en la dirección cómoda.*
+ */
+export function documentosVigentes(
+  contexto: TipoConsentimiento,
+  urls: Partial<Record<DocumentoLegal, string>> = {},
+): DocumentoAceptado[] {
+  /* 🔴 EL DOCUMENTO LO DECIDE LA PUERTA, y las dos que se confunden fácil son
+     `acceso_prestador` (solicitar acceso Y aceptar invitación de empleado):
+     **las dos son puertas del PRESTADOR**, así que va el documento profesional
+     aunque la persona sea la misma que en el cliente. *El registro guarda el
+     documento que se vio de verdad, no el que le correspondería a la persona.* */
+  const terminos: DocumentoLegal =
+    contexto === 'acceso_prestador' ? 'terminos_professional' : 'terminos_parent';
+
+  return [
+    { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? null },
+    { documento: 'privacidad', version: VERSION_LEGAL['privacidad'], url: urls['privacidad'] ?? null },
+  ];
+}
+
+
+/**
+ * UN REGISTRO POR DOCUMENTO — **jamás un booleano «aceptó todo»** (firma
+ * founder, tanda 2).
+ *
+ * *Una sola fila que dice «aceptó» no puede contestar la única pregunta que
+ * P23 promete contestar: **qué**, exactamente, aceptó esta persona.* El día que
+ * un documento cambie de versión, una fila agregada no permite saber cuál de
+ * los tres se aceptó en cuál versión — y ése es justo el día en que hace falta.
+ *
+ * ⚠️ **LO QUE HOY NO SE PUEDE CUMPLIR, y se declara en vez de fingirse:** la
+ * app conoce **UNA sola URL legal** — `urlLegales()` devuelve el índice
+ * `/legales`, **por decisión declarada de S103-C** (*«si mañana nace un
+ * documento nuevo, la app no toca una línea»*). **No existen URLs por
+ * documento**, y el canon no fija un vocabulario cerrado de cuáles son los
+ * tres. ⇒ **este wrapper ya acepta N documentos con su versión y su URL, pero
+ * hasta que esas URLs existan el llamador solo puede pasar `legales`.**
+ * *Inventar acá los nombres `terminos`/`privacidad` sería fabricar un
+ * vocabulario que ningún documento publicado respalda — y la fila diría que
+ * alguien aceptó algo que nadie escribió con ese nombre.*
+ * **El vocabulario y las URLs son firma de mesa; el motor ya está.**
+ *
+ * **Best-effort por fila y con cuenta honesta:** devuelve cuántas entraron de
+ * cuántas se intentaron. No lanza — la cuenta ya existe cuando esto corre — y
+ * **tampoco se traga el fallo**: el llamador recibe los dos números.
+ */
+/**
+ * EL VOCABULARIO, MEDIDO CONTRA EL SITIO POR C (23-ago) — no inventado acá.
+ *
+ * | documento | estado |
+ * |---|---|
+ * | `terminos` | **VIVO**, `/terminos`, **v1.1** (22-ago) |
+ * | `privacidad` | **VIVO**, `/privacidad`, **v1.1** — ⚠️ la publicada **excluye la app**; la de la app es BORRADOR (D-405, sin publicar) |
+ * | `tratamiento_datos` | 🔴 **NO EXISTE**: ni documento ni URL. El concepto vive DENTRO de privacidad |
+ *
+ * ⇒ **El tercer check que la firma pide no tiene a dónde enlazar.** Se declara
+ * en el tipo **y se deja fuera del default**: *un check que apunta a una página
+ * que no existe le pide a alguien que acepte algo que no puede leer.*
+ * **Escalado al founder por C y por acá.**
+ */
+export type DocumentoLegal = 'terminos_parent' | 'terminos_professional' | 'privacidad';
+
+export interface DocumentoAceptado {
+  documento: DocumentoLegal;
+  /** La versión de ESE documento, jamás una global — hoy `terminos` y
+   *  `privacidad` van en `1.1`, medidas del sitio. */
+  version: string;
+  /** La URL exacta que se le mostró. */
+  url: string | null;
+}
+
+export async function registrarConsentimientos(
+  userId: string,
+  tipo: TipoConsentimiento,
+  documentos: DocumentoAceptado[],
+): Promise<{ registrados: number; total: number }> {
+  if (documentos.length === 0) return { registrados: 0, total: 0 };
+
+  /* Se insertan como LOTE de filas separadas — una por documento — y no como
+     un objeto con tres claves adentro de un solo `metadata`: una fila por
+     documento es lo que hace que «¿aceptó la privacidad v2?» sea una consulta
+     y no una lectura de jsonb. */
+  const filas = documentos.map((d) => ({
     user_id: userId,
-    tipo,
+    /* 🔴 EL EJE DEL REGISTRO ES EL **DOCUMENTO**, no el momento (rediseño de C,
+       aceptado: la firma pide un registro por documento, y `tipo` distinguía
+       cuándo se aceptó, no qué). El MOMENTO —registro · invitación · acceso del
+       prestador— baja a `metadata.contexto`, donde sigue siendo consultable sin
+       ocupar el eje que P23 necesita. */
+    tipo: d.documento,
     aceptado: true,
-    version: VERSION_TERMINOS_VIGENTE,
-    metadata: { url: urlMostrada, origen: 'app', registrado_en: new Date().toISOString() },
-  });
-  return error === null;
+    version: d.version,
+    metadata: {
+      contexto: tipo,
+      url: d.url,
+      origen: 'app',
+      registrado_en: new Date().toISOString(),
+    },
+  }));
+
+  const { data, error } = await getClient().from('consentimientos').insert(filas).select('id');
+  if (error) return { registrados: 0, total: filas.length };
+  return { registrados: data?.length ?? filas.length, total: filas.length };
 }
 
 export interface InputRegistrarse {

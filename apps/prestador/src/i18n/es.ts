@@ -119,6 +119,12 @@ export const prestadorEs = {
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
     paraPrestadores: 'para prestadores',
+    // S104-C (firma founder 23-ago, paridad): los términos son VISIBLES en
+    // toda puerta de entrada al ecosistema, no solo al crear cuenta. Voz
+    // neutral («al continuar») porque la misma línea sirve a solicitar-acceso
+    // (una carta que deriva al equipo) y a la invitación (aceptar y entrar).
+    // Honesta sin link: los documentos definitivos no existen (D-336).
+    terminos: 'Al continuar aceptas nuestros Términos y nuestra Política de privacidad.',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
     // ⭐ S87-C (firma founder, L-148): «que merece» → «que mereces». La
     // tercera persona dejaba al lector afuera de su propia bienvenida —
@@ -774,8 +780,8 @@ export const prestadorEs = {
     pedir: 'Enviar el código',
     // la MISMA frase exista o no la cuenta
     siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de {{n}} dígitos.',
-    // D-628 — se retira cuando S86 ponga plantilla y remitente propios
-    avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
+    // ☠️ `avisoCorreo` MURIÓ (S104-C, D-628 cerrada por medición): el correo
+    // ya no llega en inglés ni de dirección ajena (Ley 37).
     codigo: 'El código de {{n}} dígitos',
     // S88-C (D-659): el paso 2 abre diciendo que el código YA quedó atrás —
     // sin esta frase, un rebote de clave se lee como "algo del código".

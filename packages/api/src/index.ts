@@ -8,6 +8,19 @@ export {
   iniciarSesion,
   cerrarSesion,
   obtenerSesion,
+  // ⚠️ S104-C · HUNK ADITIVO (regla 76(c)/(d), a RATIFICACIÓN de A): estas
+  // funciones YA viven en `wrappers/auth.ts` (S104-A) pero no estaban en el
+  // index, así que eran inalcanzables desde `@epetplace/api`. La invitación de
+  // empleado del prestador las necesita para registrar el consentimiento
+  // (LEY DE PARIDAD DE CUENTA). `registrarse` ya registra el suyo — esto es
+  // para el consumo DIRECTO de las puertas que no pasan por el alta.
+  registrarConsentimiento,
+  registrarConsentimientos,
+  documentosVigentes,
+  type DocumentoLegal,
+  type DocumentoAceptado,
+  normalizarEmail,
+  type TipoConsentimiento,
   type SesionDueno,
   type InputRegistrarse,
   type InputIniciarSesion,
@@ -1354,3 +1367,14 @@ export {
   leerEstadoCompra, leerEstadoCita,
   type EstadoCompra, type EsperaCompra, type EstadoCita, type EsperaCita,
 } from './wrappers/pagos-espera';
+
+// S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).
+export {
+  invitarAFamilia,
+  aceptarInvitacionFamilia,
+  revocarInvitacionFamilia,
+  darDeBajaCorreo,
+  type InvitacionCreada,
+  type InvitacionAceptada,
+  type CodigoInvitacionFamilia,
+} from './wrappers/familia-invitacion';

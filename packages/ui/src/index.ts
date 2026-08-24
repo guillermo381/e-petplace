@@ -258,6 +258,18 @@ export { PaseoDeHuellas } from './brand/PaseoDeHuellas'
 // UNA vez como celebración. **No componen entre sí**: dónde y en qué orden
 // se montan lo dice la letra que no viajó.
 export { RespiroDeMarca, HuellaDeLlegada } from './brand/RitualDeEntrada'
+// LockupMarca — S104-B: el NOMBRE de la casa, en un solo lugar. Nace del
+// censo que halló TRES variantes vivas (`e-PetPlace` 95 · `ePetPlace` 3 ·
+// `e.petplace` 1, y esa última era el wordmark de la primera pantalla).
+// ⚠️ El nombre NO es prop de texto libre —eso es lo que produjo las tres—:
+// vive adentro y el consumidor declara la CASA sobre un union cerrado.
+export { LockupMarca, type LockupMarcaProps } from './brand/LockupMarca'
+// PantallaDeCandado — S104-B (MODELO_LOGIN §2.5): la cortina sobre la sesión
+// existente, JAMÁS un factor de auth. Presentacional a propósito: no importa
+// `expo-local-authentication` (que además NO está instalado y es NATIVO ⇒ no
+// viaja por OTA, L-134). El fallback a contraseña se dibuja en LOS TRES
+// estados, incluso verificando — es la única salida si el sensor falla.
+export { PantallaDeCandado, type PantallaDeCandadoProps, type EstadoCandado } from './components/PantallaDeCandado'
 export { Atmosfera, type AtmosferaProps, type OrigenAtmosfera } from './brand/Atmosfera'
 export { TokenGallery } from './gallery/TokenGallery'
 

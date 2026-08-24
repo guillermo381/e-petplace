@@ -151,7 +151,34 @@ export function PaseoDeHuellas({
   alfa,
   /** Tamaño de cada pisada en px. Default: derivado del ancho (≈26 a 390). */
   tamano,
-}: { alfa?: number; tamano?: number } = {}) {
+  /**
+   * **La senda YA TRAZADA, sin gesto** — pedido de C para el prestador
+   * (§7). Aparece entera y quieta: mismo dibujo, mismo alfa, cero
+   * animación.
+   *
+   * 🔴 **POR QUÉ ES UNA PROP Y NO OTRA PIEZA, que es la decisión:** el
+   * estado final ya existía adentro —es exactamente lo que produce
+   * `reduce-motion`— así que una pieza hermana sería **un clon cuyo
+   * único aporte es no llamar a un hook**. Y el precedente de esta casa
+   * es duro con eso: `MarcaDeAgua` nació justamente porque la misma
+   * pieza copiada en dos pantallas se había desincronizado (0.06 contra
+   * 0.04, hallazgo r8). *Dos piezas que deben verse igual y salen de dos
+   * archivos se separan; la pregunta no es si, es cuándo.*
+   *
+   * ⚠️ **Y NO SE REUSÓ `reduceMotion` COMO SI FUERA LO MISMO.** Son dos
+   * variables y se combinan, no se cuelgan una de la otra — el patrón
+   * de `EsperaDeMarca`: *reducir movimiento es una preferencia de
+   * accesibilidad; una senda deliberadamente quieta es una decisión de
+   * diseño.* Que hoy produzcan el mismo píxel no las vuelve la misma
+   * cosa, y colgarlas juntas haría que cambiar una cambiara la otra.
+   *
+   * ⚠️ **§7 DEL RITUAL DICE QUE NO TOCA PRESTADOR EN v1** (*«hereda el
+   * lenguaje en su propia mesa»*). Esta prop **habilita** el uso, no lo
+   * autoriza: montarla en el prestador es decisión de esa mesa, no de
+   * esta pieza.
+   */
+  estatica = false,
+}: { alfa?: number; tamano?: number; estatica?: boolean } = {}) {
   const { theme } = useTheme()
   const { width, height } = useWindowDimensions()
   const reduceMotion = useReducedMotion()
@@ -159,7 +186,10 @@ export function PaseoDeHuellas({
   // Memorial: la pieza no se monta (Ley 8 — degrada en la fuente, igual
   // que `MarcaDeAgua`).
   const esMemorial = theme.mode === 'memorial'
-  const quieta = reduceMotion
+  /* Las DOS razones para no moverse, combinadas y no colgadas una de la
+     otra (ver el JSDoc de `estatica`): una es preferencia del sistema, la
+     otra es decisión de la pantalla. */
+  const quieta = reduceMotion || estatica
   if (esMemorial) return null
 
   const lado = tamano ?? Math.round(width * 0.067)

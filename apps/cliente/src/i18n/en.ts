@@ -631,7 +631,7 @@ export const clienteEn = {
     proxGuarderia: 'Daycare',
     proxSeguros: 'Insurance',
     proxTelemedicina: 'Telemedicine',
-    proxPrime: 'ePetPlace Prime',
+    proxPrime: 'e-PetPlace Prime',
   },
   // S54-B3.3 — single-item checkout with cart shape
   checkout: {
@@ -1354,7 +1354,6 @@ export const clienteEn = {
     email: 'Your email',
     pedir: 'Send the code',
     siTieneCuenta: 'If {{email}} has an account, we already sent it a {{n}}-digit code.',
-    avisoCorreo: "The email may arrive in English and from an address that isn't ours. If you don't see it, check spam.",
     codigo: 'The {{n}}-digit code',
     codigoVerificado: 'Code verified. Now choose your new password.',
     verificar: 'Verify the code',

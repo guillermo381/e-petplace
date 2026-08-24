@@ -757,7 +757,7 @@ export const clienteEs = {
     proxGuarderia: 'Guardería',
     proxSeguros: 'Seguros',
     proxTelemedicina: 'Telemedicina',
-    proxPrime: 'ePetPlace Prime',
+    proxPrime: 'e-PetPlace Prime',
   },
   // S54-B3.3 — checkout mono-ítem con forma de carrito
   checkout: {
@@ -1730,9 +1730,9 @@ export const clienteEs = {
     pedir: 'Enviar el código',
     // NUNCA declara si el correo existe: la misma frase exista o no.
     siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de {{n}} dígitos.',
-    // D-628 (🟠 abierta): se dice ANTES de que lo busque, no después de que
-    // crea que no llegó. Muere con la deuda, no por su cuenta.
-    avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
+    // ☠️ `avisoCorreo` MURIÓ (S104-C, D-628 cerrada por medición): el correo
+    // ya no llega en inglés ni de dirección ajena — probado con una cuenta
+    // real que recuperó su clave y entró (Ley 37).
     codigo: 'El código de {{n}} dígitos',
     codigoVerificado: 'Código verificado. Ahora elige tu nueva contraseña.',
     verificar: 'Verificar el código',

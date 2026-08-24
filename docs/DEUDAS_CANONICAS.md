@@ -20509,7 +20509,108 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 **Por qué se ficha en vez de curarse ya:** `Confirm signup` **NO se tocó por orden explícita** en la tanda 1 de D. Tocarla sin apagar el autoconfirm no sirve de nada, y apagarlo sin tocarla rompe el alta. **Van juntas o no van.**
 
-**El orden, en piedra:** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
+> ### 🔴 ENMIENDA FIRMADA (founder, 23-ago-2026) — **SON TRES ACTOS, NO DOS, Y EL DEL MEDIO ES NUEVO**
+>
+> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② una RPC DEFINER que registre el consentimiento SIN SESIÓN** — ✅ **construida el mismo día** (`20260824000000`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+>
+> **Lo que convirtió al ② en CONDICIÓN y no en mejora, y es una medición y no un razonamiento:** la cuenta `guillo381+test1` (**D-896**), creada durante la ventana de 18 minutos con `autoconfirm=false`, **quedó con `consentimientos = 0`**. Sin sesión, `auth.uid()` es NULL y la policy no deja entrar el INSERT ⇒ **con autoconfirm apagado, TODO registro nacería sin evidencia de consentimiento, desde el primero.**
+>
+> ⇒ **Con ② faltando, ③ no es «un flip que se puede hacer cuando quieran»: es un flip que incumple P23 desde su primer registro.**
+>
+> **Y la línea que no se negocia, ratificada por el founder: JAMÁS SE AFLOJA LA POLICY.** Se cerró hoy porque admitía escritura anónima a nombre de terceros (D-891); *abrirla para resolver esto sería pagar el problema con el agujero que se acaba de tapar.* La RPC **agrega un camino angosto y gateado** (cinco gates: existe · email coincide · sin confirmar · ventana de 15 min · sin consentimientos previos), **no ensancha el existente**.
+>
+> ⚠️ **Alternativa servida a la mesa, que podría volver innecesario el ②:** **`verifyOtp` devuelve sesión** —está escrito en la propia casa (`seguridad.ts:312`)— así que registrar el consentimiento **justo después de confirmar el código** bastaría con la policy normal, **sin RPC DEFINER y sin superficie nueva**. Su costo: el registro queda unos minutos después del momento en que la persona aceptó. **Se construyó lo firmado y se sirve la alternativa.**
+
+**El orden ORIGINAL de la ficha (superado por la enmienda de arriba):** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
 ☠️ **Condición de muerte:** los tres pasos ejecutados **en ese orden**, con el gate del ② corrido por el founder.
 
 **Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
+
+#### D-894 — ✅ CURADA EL MISMO DÍA · el alta de buzones en Hostinger borró el DKIM de Resend
+✅ **RESTAURADA Y VERIFICADA CONTRA EL OBJETO (23-ago-2026).** El founder recargó `resend._domainkey` con el valor que D había capturado a las 15:30 —**tres horas antes del borrado**— y D lo verificó **byte a byte contra los DOS NS autoritativos y contra `8.8.8.8` y `1.1.1.1`: idéntico en los cuatro.** Resto de Resend intacto.
+
+**DAÑO FINAL: CERO, Y MEDIDO — no supuesto.** El correo de recuperación de las 22:53 UTC (dentro de la ventana sin DKIM) **llegó a BANDEJA DE ENTRADA, no a spam**, confirmado por el founder. *Ni siquiera durante la ventana se degradó la entrega.* Y su severidad 🟠 —no 🔴— resultó correcta por la razón que D dio al fichar: **DMARC alineaba por SPF igual.**
+
+**Lo que deja como mecanismo, por dictado del founder (*«vale una re-medición programada, no confianza»*): `scripts/verify-dns-correo.mjs`.** Ver **L-413**, y sobre todo la confesión de método de su auto-prueba.
+
+🔴 **LO QUE SIGUE ABIERTO Y ES DEL FOUNDER: el DMARC no está cargado.** Y la precisión importa: **no es un freno de D — D no tiene la credencial de DNS** (verificado: cero credenciales de DNS en el keychain, cero config de DNS en el repo). *D lo declaró como imprecisión propia por no haberlo aclarado dos turnos antes, cuando aceptó «cargá el DMARC» sin decir que el DNS nunca fue suyo.* **El valor está listo; la llave es del founder.**
+
+<details><summary>Texto original de la ficha (23-ago, antes de curar)</summary>
+
+🟠 **MEDIDO POR D (23-ago-2026), NO TEORIZADO — y el registro está borrado, no propagándose.**
+
+Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, confirmado con correo de prueba), **Hostinger escribió sus tres `_domainkey` y se llevó el ajeno**: `resend._domainkey.epetplace.com` **ya no existe**.
+
+**Cinco vías, todas coincidentes:** `ns1` NODATA (SOA en autoridad) · `ns2` vacío · `8.8.8.8` vacío · `1.1.1.1` vacío · tampoco como CNAME. **Y el control positivo vive DENTRO de la misma medición: la misma consulta al mismo servidor SÍ encontró tres `_domainkey`** — los de Hostinger (`hostingermail-a/b/c`). *El instrumento lee bien; Hostinger no falló al escribir: escribió los suyos y borró el que no era suyo.* **Sobrevivieron el SPF, el MX de `send.epetplace.com` (return-path y rebotes) y el `_dmarc`.**
+
+**🟠 y no 🔴, con la precisión que D pidió que no se exagere:** **DMARC pasa igual**, porque alinea SPF — el return-path es `send.epetplace.com` y el `From` es `hola@epetplace.com`, que en alineación relajada comparten dominio organizativo. **El correo no va a ser rechazado**, y lo primero que D hizo fue preguntarle al camino real: **un `recover` a las 22:53 UTC devolvió HTTP 200 — Resend sigue aceptando.**
+
+**Lo que sí se perdió, y son tres cosas:**
+1. **La firma no se puede verificar**: Resend firma con `s=resend` y quien recibe no encuentra la clave pública ⇒ **DKIM falla en destino**.
+2. **Resend puede des-verificar el dominio** en su próxima revisión y dejar de enviar. **No se puede medir sin su API key**, y es **el riesgo de mecha más corta**: el correo de recuperación es HOY el único correo de auth que la casa manda de verdad — *o sea, el camino de vuelta del login*.
+3. **🔴 La ironía exacta, y es lo que más pesa: EL REENVÍO RECIÉN MONTADO QUEDA EXPUESTO.** Al reenviar, **SPF se rompe siempre** (quien reenvía no está autorizado por el dominio original) y **lo único que sobrevive un reenvío es DKIM**. ⇒ **la misma acción que creó el reenvío rompió lo único que hace que un reenvío sobreviva.**
+
+**LA CURA EXISTE Y HUBO SUERTE:** D tiene **el valor exacto del registro**, capturado en su medición de las 15:30 de ese día, **horas antes del borrado**. Sin esa captura habría que pedírselo a Resend.
+
+**🔴 EL ORDEN, Y NO ES EL DE LA TANDA:** ① restaurar el DKIM ② verificarlo contra el autoritativo ③ **recién ahí** cargar el DMARC. **D NO cargó el DMARC**, por orden del founder (*«si algo se pisó, reportá antes de tocar»*) y por una razón propia que vale como método: *encender el `rua` con el DKIM roto haría que los primeros reportes vengan llenos de fallos de DKIM, y quien los lea sin contexto va a diagnosticar un problema de Resend que en realidad es un registro borrado.* **Encender el instrumento con el paciente roto produce una medición que después hay que desmentir.**
+
+**CÓMO APARECIÓ, y es lo que hay que copiar:** no lo encontró un gate ni una sospecha. **Lo encontró que el founder pusiera «verificá que no haya pisado a Resend» en la orden.** *Sin esa línea, el DMARC se cargaba y el DKIM se descubría semanas después por deliverability.* ⇒ **toda alta de servicio sobre un DNS compartido se cierra RE-MIDIENDO los registros de los otros servicios, no solo los propios.**
+
+**Dueño:** founder (es su panel de DNS). **Evidencia:** `docs/relevamientos/2026-08-23-s104d-HOSTINGER-PISO-EL-DKIM-DE-RESEND.md`.
+</details>
+
+☠️ **Condición de muerte (CUMPLIDA para el DKIM; PENDIENTE para el DMARC):** `resend._domainkey` responde en los dos NS autoritativos **y** D lo verificó ✅; **falta cargar el DMARC**, que es la llave del founder.
+
+#### L-413 — un panel que administra un servicio puede BARRER los registros de otro, y no lo avisa
+**Firmada por el founder (23-ago-2026), sobre el caso del DKIM de Resend.**
+**Medida y redactada por la pista D; depositada por A** (territorio). *D mandó el literal **sin número**, con su razón: «la última vez se me corrió entre la medición y el depósito» (L-410 → L-412). **Aprendió del caso anterior en el mismo día** — se asigna acá: **L-413**.*
+
+**El caso:** activar el correo del dominio en el panel de Hostinger escribió sus tres selectores DKIM (`hostingermail-a/b/c`), sus MX y un SPF de apex — **y en el mismo acto BORRÓ `resend._domainkey`**, el registro que firma el correo saliente de la casa. **Nadie lo tocó a mano: el panel lo hizo al «administrar el correo del dominio».**
+
+> **La ley: cuando un proveedor toma la administración de una zona o de un servicio, hay que MEDIR los registros de los otros proveedores que viven ahí. No alcanza con que el alta haya salido bien: el alta salió bien Y se llevó algo puesto.**
+
+**Por qué es una clase y no un caso — el modo de falla es el SILENCIO, y es de los caros:** un DKIM borrado **no tira ningún error**. El correo se sigue enviando, el proveedor lo sigue aceptando, y la degradación ocurre **del otro lado** —reputación, y sobre todo **REENVÍO**, donde SPF se rompe siempre y **lo único que sobrevive es DKIM**. *Un registro que desaparece no avisa: deja de avisar.*
+
+**La ironía que lo vuelve memorable:** *la misma acción que creó el reenvío rompió lo único que hace que un reenvío sobreviva.*
+
+**Lo que lo cazó, y no fue un gate:** que el founder pusiera en la orden *«verificá que no haya pisado los registros de Resend»*. **Sin esa línea se cargaba el DMARC y el DKIM se descubría semanas después por deliverability.**
+
+**Lo que salvó el arreglo:** el valor exacto estaba capturado en una medición de **tres horas antes**. Sin esa captura había que pedírselo al proveedor. ⇒ **COROLARIO: antes de tocar la administración de un servicio, se captura el estado de la zona** — *la captura cuesta un `dig` y es la diferencia entre restaurar en un minuto y abrir un ticket.*
+
+**Mecanizada:** `scripts/verify-dns-correo.mjs` mide los cinco registros contra los autoritativos, con los públicos como control de propagación, y **sin `dig` sale exit 2 NO CONCLUYENTE, jamás verde** (mismo criterio que `verify-edge-deno` y que el brazo C de R63: *«no puedo medir» no es «está bien»*).
+
+> **⚠️ Y su auto-prueba trae la confesión de método que más vale de todo el episodio, porque el defecto ocurrió DENTRO del archivo escrito para no tenerlo:** la primera versión medía los cinco registros sobre `example.com` y daba **5/5 rojo — por la razón equivocada**. `ns1.dns-parking.com` **no es autoritativo para `example.com`**, así que lo que detectaba era *«este servidor no contesta por ese dominio»*, no *«el registro no está»*. **Color bueno, motivo malo: el verde flojo exacto que ese archivo existe para evitar.** Corregida: ahora prueba **los dos caminos de rojo contra NUESTRO dominio** — un selector que de verdad no existe (**AUSENTE**) y el DKIM real contra un valor corrompido (**DISTINTO**). *Un instrumento cuya auto-prueba pasa por la razón equivocada certifica su propia ceguera.*
+
+**Hermanas:** `L-402` (*no basta «¿está alcanzable?» — hace falta «¿corrió alguna vez?»*) y `L-412` (*un canal de reporte se apunta a una dirección que se vio recibir*). **Las tres son la misma familia: lo que no se mide no avisa que se rompió.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### D-895 — 🟠 EL TOKEN DE PUSH DEL PRESTADOR NO SE SINCRONIZA: TRES CAPAS DE SILENCIO APILADAS
+🟠 **Diagnosticado por D (23-ago-2026) con dos discriminadores; fichado por A. Dueño: las apps (C).**
+
+**El síntoma:** el token de push del prestador sigue `activo=false`, con último uso del 16-ago, **aunque el founder confirmó que las DOS apps tienen permiso de notificaciones concedido.** Con eso caen las causas baratas: el permiso está, el código existe desde el 7-ago (`b1254158`, S90-B) y el llamado está bien puesto (`status==='granted'` → `sincronizarTokenSiHayPermiso`).
+
+**Las tres capas, en `apps/*/src/components/invitacion-avisos.tsx`:**
+1. **`await registrarTokenDeAparato(...)` devuelve `{ok, codigo}` y NADIE LO MIRA** — y su primer guard es `if (uidActual() === null) return falla('sin_sesion')`.
+2. **El `try/catch` que envuelve todo** con el comentario *«sin módulo nativo — y no es un fallo»* ⇒ **un fallo REAL queda indistinguible de correr en web o Expo Go.**
+3. **Corre UNA sola vez al montar**, sin reintento cuando la sesión sí está lista.
+
+**Causa más probable: una CARRERA.** `InvitacionAvisos` se monta en HOY, que es la primera pantalla con sesión; **si la sesión no se restauró todavía**, el wrapper devuelve `sin_sesion`, la capa 1 lo descarta, la capa 2 no lo ve y la capa 3 no reintenta.
+
+**Los dos discriminadores que la sostienen, y son lo que vuelve esto un diagnóstico y no una hipótesis:**
+- **El token del CLIENTE sí se actualizó hoy (16:07) con el MISMO código** ⇒ *no es código ausente: es condición de arranque.*
+- **Si el token del SO hubiera rotado, la RPC habría INSERTADO fila nueva** (reasigna por token). **Hay dos filas, no tres** ⇒ *la sincronización no llegó a escribir.*
+
+**La cura:** leer el `ok` del wrapper y **reintentar cuando la sesión esté lista**, en vez de solo al montar. *Un `await` cuyo resultado nadie mira es una llamada que no se puede diagnosticar — y envuelta en un catch que explica de antemano por qué podría fallar, deja de poder distinguir el caso que explica del que no.*
+☠️ **Condición de muerte:** el token del prestador vuelve a `activo=true` **y** una notificación real llega a ese aparato.
+
+#### D-896 — 🟢 LA CUENTA SONDA DEL GATE DE D-893 QUEDA MARCADA, NO BORRADA
+🟢 **BAJA — resuelta y anotada para que nadie la lea como anomalía.**
+
+`guillo381+test1@gmail.com` (`b85cbf41`) se creó el 24-ago 00:23:10 UTC, **dentro de la ventana de 18 minutos** (00:12:18 → 00:30:49) en que D apagó `mailer_autoconfirm` para gatear **D-893**. **Queda SIN CONFIRMAR, y con autoconfirm otra vez en `true` ese estado ya no se puede reproducir.**
+
+**Medido antes de decidir:** `profiles=1 · identities=1 · familia_miembro=0 · familias=0 · mascotas=0 · consentimientos=0` ⇒ **no cuelga nada.**
+
+**Se MARCA en vez de borrarse, y el motivo no es el precedente:** *en S92 las 64 sondas tuvieron sus **cuentas borradas** y solo se marcaron los datos que los CHECK no dejaban borrar.* Acá se conserva por otra razón — **es el único testigo de que apagar `autoconfirm` deja cuentas sin evidencia de consentimiento**, y esa es la prueba empírica de D-893. Marcada en `raw_user_meta_data` con `sonda_de_gate='S104-D893'`, el motivo, y por qué sus `consentimientos = 0` **es lo esperado y no un fallo**.
+
+⇒ **Lo que esta fila prueba, y va a la ficha de D-893:** el día que `autoconfirm` se apague en serio, **TODO registro nace sin evidencia de consentimiento**, y **P23 promete poder demostrar qué aceptó cada quien**. *La RPC DEFINER no es una mejora: es la condición para que apagar autoconfirm no rompa una promesa de política.* **Jamás se afloja la policy.**

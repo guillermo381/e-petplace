@@ -14,7 +14,19 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, EvitaTeclado, MarcaDeAgua, spacing, useAviso, useTheme } from '@epetplace/ui';
+import {
+  Boton,
+  Campo,
+  Encabezado,
+  Entrada,
+  EvitaTeclado,
+  Isotipo,
+  MarcaDeAgua,
+  PaseoDeHuellas,
+  spacing,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -54,8 +66,19 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* EL RITUAL EN DOSIS PRESTADOR (enmienda §7, firma founder 23-ago):
+          misma casa, senda quieta, SIN respiración ni celebración. La senda
+          hereda la continuidad; el isotipo se recoge en la esquina igual que
+          en el cliente, pero acá no respira. ⚠️ `PaseoDeHuellas` se traza al
+          montar (no expone prop `estatica`) — para «YA trazada y quieta»
+          exacto hace falta esa prop de B; declarado en el parte para su tanda.
+          La celebración de llegada NO va (§7): al entrar, replace directo. */}
       <MarcaDeAgua />
+      <PaseoDeHuellas />
       <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
+        <Isotipo size={28} variant="gradiente" />
+      </View>
       <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
@@ -76,6 +99,7 @@ export default function Login() {
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
+            textContentType="username"
           />
           <Campo
             label={t('login.password')}
@@ -84,6 +108,8 @@ export default function Login() {
             error={error}
             secure
             autoCapitalize="none"
+            autoComplete="current-password"
+            textContentType="password"
           />
         </View>
         </Entrada>
