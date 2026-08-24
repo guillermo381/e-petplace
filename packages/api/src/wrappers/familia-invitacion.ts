@@ -62,6 +62,9 @@ export interface InvitacionCreada {
   /** La credencial. Se comparte en el enlace; no se muestra suelto. */
   token: string;
   expira_en: string;
+  /** `false` ⇒ el invitado no tiene cuenta y el correo NO va a salir: la única
+   *  vía es el enlace copiable. **La pantalla lo dice; no lo adivina.** */
+  avisoPorCorreo?: boolean;
 }
 
 export async function invitarAFamilia(input: {
@@ -77,7 +80,25 @@ export async function invitarAFamilia(input: {
   if (error) return mapear(error.message);
   const fila = Array.isArray(data) ? data[0] : data;
   if (!fila) return mapear('error_desconocido');
-  return { ok: true, data: fila as InvitacionCreada };
+
+  /* LA PUERTA DEL TOKEN — sin esto, `invitar_a_familia` devolvía `ok` y nada
+     entregaba nada (motor sin puerta). Best-effort: si el aviso falla, la
+     invitación YA existe y el enlace copiable sigue sirviendo. */
+  const aviso = await getClient().rpc('avisar_invitacion_familia', {
+    p_invitacion_id: (fila as InvitacionCreada).id,
+  });
+
+  return {
+    ok: true,
+    data: {
+      ...(fila as InvitacionCreada),
+      /* 🔴 LO QUE LA PANTALLA NECESITA PARA NO MENTIR: si el invitado no tiene
+         cuenta, el motor de notificaciones no puede alcanzarlo (exige user_id)
+         ⇒ NO va a salir ningún correo, y la pantalla tiene que decir «compartí
+         el enlace» en vez de «le mandamos un correo». */
+      avisoPorCorreo: aviso.data === 'intencion_registrada',
+    },
+  };
 }
 
 export interface InvitacionAceptada {

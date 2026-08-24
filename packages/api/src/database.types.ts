@@ -20375,6 +20375,10 @@ export type Database = {
         Args: { p_item_id: string; p_mascota_id: string }
         Returns: Json
       }
+      avisar_invitacion_familia: {
+        Args: { p_invitacion_id: string }
+        Returns: string
+      }
       avisar_recurrencias_proximas: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
