@@ -228,13 +228,35 @@ export function documentosVigentes(
  */
 export type DocumentoLegal = 'terminos_parent' | 'terminos_professional' | 'privacidad';
 
+/**
+ * LO QUE SE PUEDE REGISTRAR COMO CONSENTIMIENTO — y son DOS clases distintas.
+ *
+ * `DocumentoLegal` son **textos que la persona leyó y aceptó**. Los dos de
+ * abajo **no son documentos: son ACTOS** que el contrato exige consentir por
+ * separado, y por eso no se meten en el mismo union sin decirlo.
+ *
+ * · **`arbitraje`** (§38.10 de los T&C): **opcional y separado**. Si el
+ *   profesional NO lo acepta, **el contrato subsiste** y la vía es la justicia
+ *   ordinaria ⇒ **hay que poder registrar el «NO», con su fecha.** *Un
+ *   consentimiento que solo sabe decir que sí no es un consentimiento: es una
+ *   condición.*
+ * · **`dictado_voz`** (§31.6): **previo, específico, separado y REVOCABLE.**
+ *   El microcopy de la pantalla no alcanza — *avisar no es consentir*.
+ */
+export type ActoConsentible = 'arbitraje' | 'dictado_voz';
+export type TipoRegistrable = DocumentoLegal | ActoConsentible;
+
 export interface DocumentoAceptado {
-  documento: DocumentoLegal;
+  documento: TipoRegistrable;
   /** La versión de ESE documento, jamás una global — hoy `terminos` y
    *  `privacidad` van en `1.1`, medidas del sitio. */
   version: string;
   /** La URL exacta que se le mostró. */
   url: string | null;
+  /** **`false` es un valor legítimo, no un error.** El arbitraje se puede
+   *  rechazar y el contrato sigue en pie; el dictado se puede revocar. Por
+   *  defecto `true`, que es el caso de los documentos. */
+  aceptado?: boolean;
 }
 
 export async function registrarConsentimientos(
@@ -256,7 +278,7 @@ export async function registrarConsentimientos(
        prestador— baja a `metadata.contexto`, donde sigue siendo consultable sin
        ocupar el eje que P23 necesita. */
     tipo: d.documento,
-    aceptado: true,
+    aceptado: d.aceptado ?? true,
     version: d.version,
     metadata: {
       contexto: tipo,
@@ -436,4 +458,80 @@ export async function obtenerSesion(): Promise<ResultadoWrapper<SesionDueno | nu
       nombre: nombreDeMetadata(data.session.user.user_metadata),
     },
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOS DOS ACTOS CONSENTIBLES — arbitraje (§38.10) y dictado por voz (§31.6)
+// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * 🔴 **REVOCAR ES AGREGAR, NUNCA EDITAR NI BORRAR.**
+ *
+ * `consentimientos` no tiene policy de UPDATE ni de DELETE, **y está bien que
+ * no la tenga**: si una fila de consentimiento se pudiera reescribir, dejaría
+ * de poder demostrar nada — que es lo único que P23 le pide.
+ *
+ * ⇒ **el estado vigente de un acto es su fila MÁS RECIENTE**, y revocar es
+ * escribir una nueva con `aceptado = false`. *Así queda registrado no solo qué
+ * decidió la persona, sino cuándo cambió de opinión — que es exactamente lo que
+ * un consentimiento revocable tiene que poder mostrar.* (Mismo criterio que
+ * D-544: corregir una nota sedimentada es agregar, no editar.)
+ */
+export interface EstadoConsentimiento {
+  vigente: boolean;
+  /** `null` si la persona nunca se pronunció — que NO es lo mismo que un «no». */
+  decidido_en: string | null;
+  version: string | null;
+}
+
+export async function consultarConsentimiento(
+  acto: TipoRegistrable,
+): Promise<ResultadoWrapper<EstadoConsentimiento, 'sin_sesion' | 'error_desconocido'>> {
+  const cliente = getClient();
+  const { data: sesion } = await cliente.auth.getSession();
+  const uid = sesion.session?.user.id;
+  if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: 'No hay una sesión activa.' };
+
+  const { data, error } = await cliente
+    .from('consentimientos')
+    .select('aceptado, created_at, version')
+    .eq('user_id', uid)
+    .eq('tipo', acto)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos leer tu preferencia.' };
+  }
+  /* Nunca se pronunció ⇒ `vigente:false` con `decidido_en:null`. La pantalla
+     tiene que distinguir «dijo que no» de «todavía no le preguntamos»: el
+     primero se respeta, el segundo se pregunta. */
+  if (!data) return { ok: true, data: { vigente: false, decidido_en: null, version: null } };
+  return {
+    ok: true,
+    data: { vigente: data.aceptado === true, decidido_en: data.created_at, version: data.version },
+  };
+}
+
+/** Registra la decisión sobre un acto. `aceptado:false` es una respuesta
+ *  legítima —no un fallo—: el arbitraje se rechaza y el dictado se revoca. */
+export async function decidirConsentimiento(input: {
+  acto: TipoRegistrable;
+  aceptado: boolean;
+  version: string;
+  url?: string | null;
+  contexto?: TipoConsentimiento;
+}): Promise<ResultadoWrapper<null, 'sin_sesion' | 'error_desconocido'>> {
+  const cliente = getClient();
+  const { data: sesion } = await cliente.auth.getSession();
+  const uid = sesion.session?.user.id;
+  if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: 'No hay una sesión activa.' };
+
+  const r = await registrarConsentimientos(uid, input.contexto ?? 'registro', [
+    { documento: input.acto, version: input.version, url: input.url ?? null, aceptado: input.aceptado },
+  ]);
+  if (r.registrados !== r.total) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos guardar tu decisión.' };
+  }
+  return { ok: true, data: null };
 }
