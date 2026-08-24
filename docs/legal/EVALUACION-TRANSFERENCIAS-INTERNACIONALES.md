@@ -132,8 +132,6 @@ El responsable concluye que la transferencia es **lícita y sostenible** sobre l
 
 **M-10 — Minimización a cargo del profesional.** Los Términos Pet Professional obligan al profesional a no incorporar al dictado datos personales de terceros que excedan lo necesario para el registro clínico.
 
-**M-11 — Reducción técnica pendiente.** Se evaluará **preferir la transcripción local cuando el dispositivo la soporte**, recurriendo al modo en nube únicamente cuando no esté disponible, e informar en ambos casos. La medida elimina la transferencia en una parte del parque de dispositivos sin degradar la funcionalidad. **Responsable: [nombre] · Plazo: [fecha].**
-
 ## 10. Conclusión sobre la Transferencia B
 
 La transferencia es **lícita** sobre la base del consentimiento informado del titular, adoptadas las medidas M-7 a M-10. Se hace constar que **no está amparada por garantías adecuadas** en el sentido del Art. 21, por inexistencia de instrumento, y que esa circunstancia se comunica al titular con claridad antes de recabar su consentimiento.
