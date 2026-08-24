@@ -262,52 +262,65 @@ export default function VerificacionVeterinaria() {
                   </Texto>
                   {/* S68-B7: lo SUBIDO se ve — miniatura firmada del
                       bucket privado; no-imagen (PDF) = placeholder
-                      digno con nombre y tipo, jamás miniatura rota */}
-                  {doc !== null && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                      {/* 🔴 S104-A · `archivoPath` puede ser null y NO es un dato
-                          faltante: §5.2 promete que la imagen se destruye al
-                          concluir la verificación, y desde S104-A un trigger la
-                          borra y limpia el puntero en el mismo acto. El caso cae
-                          al placeholder de abajo. ⚠️ CURA MECÁNICA de A para
-                          desbloquear el typecheck que su propia migración volvió
-                          rojo — LA VOZ ES DE LA PISTA DE ESTA PANTALLA: hoy ese
-                          placeholder dice «—», y lo honesto es decir que el
-                          documento se verificó y su imagen se destruyó, jamás
-                          dejar un guión que se lee como «falta subirlo». */}
-                      {doc.archivoPath !== null && esImagen(doc.archivoPath) && previews[doc.archivoPath] != null ? (
-                        <Image
-                          source={{ uri: previews[doc.archivoPath] as string }}
-                          accessibilityLabel={vozTipo(tipo)}
-                          style={{
-                            width: 72,
-                            height: 72,
-                            borderRadius: radius.suave,
-                            backgroundColor: theme.bg.overlay,
-                          }}
-                          resizeMode="cover"
-                        />
-                      ) : (
-                        <View
-                          style={{
-                            width: 72,
-                            height: 72,
-                            borderRadius: radius.suave,
-                            backgroundColor: theme.bg.overlay,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Texto variante="dato">
-                            {doc.archivoPath !== null ? extension(doc.archivoPath) || '—' : '—'}
+                      digno con nombre y tipo, jamás miniatura rota.
+                      🔴 S104-C: pero SOLO mientras la imagen exista. Al
+                      concluir la verificación se destruye (§5.2), y ahí la
+                      ficha dice la VERDAD en vez del «—». */}
+                  {doc !== null && doc.archivoPath !== null && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                        {esImagen(doc.archivoPath) && previews[doc.archivoPath] != null ? (
+                          <Image
+                            source={{ uri: previews[doc.archivoPath] as string }}
+                            accessibilityLabel={vozTipo(tipo)}
+                            style={{
+                              width: 72,
+                              height: 72,
+                              borderRadius: radius.suave,
+                              backgroundColor: theme.bg.overlay,
+                            }}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              width: 72,
+                              height: 72,
+                              borderRadius: radius.suave,
+                              backgroundColor: theme.bg.overlay,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Texto variante="dato">{extension(doc.archivoPath) || '—'}</Texto>
+                          </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Texto variante="dato" numberOfLines={2}>
+                            {nombreArchivo(doc.archivoPath).toLowerCase()}
                           </Texto>
                         </View>
-                      )}
-                      <View style={{ flex: 1 }}>
-                        <Texto variante="dato" numberOfLines={2}>
-                          {doc.archivoPath !== null ? nombreArchivo(doc.archivoPath).toLowerCase() : ''}
-                        </Texto>
                       </View>
+                    )}
+                  {/* 🔴 S104-C · LA IMAGEN SE DESTRUYÓ AL CONCLUIR LA
+                      VERIFICACIÓN (§5.2) — recibe su voz la cura mecánica de A
+                      (`archivoPath` null). Antes acá había un «—» que se leía
+                      como «falta subirlo»; la verdad es la contraria: no
+                      conservamos la imagen porque ya cumplió su función.
+                      ⚠️ SOLO para APROBADO: el trigger anula la imagen también
+                      al RECHAZAR (mig. 20260824030000), y ahí el mensaje que
+                      manda es «necesitamos otra foto» + «Subir de nuevo», no
+                      «imagen destruida». Los TRES estados de A: hay imagen ·
+                      imagen destruida CON los 4 dígitos · imagen destruida SIN
+                      dígitos (histórico pre-columna, NO un error) — el 3º dice
+                      «verificado» sin el número, jamás un hueco ni un inventado. */}
+                  {doc !== null && doc.archivoPath === null && doc.estado === 'aprobado' && (
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="apoyo">{t('verificacionVet.imagenDestruida')}</Texto>
+                      {doc.documentoUltimos4 !== null && (
+                        <Texto variante="dato">
+                          {t('verificacionVet.terminaEn', { ultimos4: doc.documentoUltimos4 })}
+                        </Texto>
+                      )}
                     </View>
                   )}
                   {/* aprobado no re-sube (nada que reparar); el resto sí */}
