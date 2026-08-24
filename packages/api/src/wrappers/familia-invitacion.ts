@@ -62,9 +62,14 @@ export interface InvitacionCreada {
   /** La credencial. Se comparte en el enlace; no se muestra suelto. */
   token: string;
   expira_en: string;
-  /** `false` ⇒ el invitado no tiene cuenta y el correo NO va a salir: la única
-   *  vía es el enlace copiable. **La pantalla lo dice; no lo adivina.** */
+  /** `false` ⇒ no va a salir ningún correo y la única vía es el enlace
+   *  copiable. **La pantalla lo dice; no lo adivina.** */
   avisoPorCorreo?: boolean;
+  /** 🔴 `true` ⇒ esa dirección **pidió no recibir más correo**. La invitación
+   *  existe y el enlace sirve, pero **la casa no le escribe**. La pantalla
+   *  tiene que decirlo: *«ya no le enviamos correos; compartile el enlace vos»*.
+   *  *Callarlo dejaría a quien invita esperando un correo que nunca sale.* */
+  correoSuprimido?: boolean;
 }
 
 export async function invitarAFamilia(input: {
@@ -96,7 +101,14 @@ export async function invitarAFamilia(input: {
          cuenta, el motor de notificaciones no puede alcanzarlo (exige user_id)
          ⇒ NO va a salir ningún correo, y la pantalla tiene que decir «compartí
          el enlace» en vez de «le mandamos un correo». */
-      avisoPorCorreo: aviso.data === 'intencion_registrada',
+      /* Tres respuestas posibles del productor, y la pantalla necesita las
+         tres distinguidas — no un booleano:
+           intencion_registrada     → tiene cuenta, va por el motor de avisos
+           encolado_sin_cuenta      → no tiene cuenta, va por la cola propia
+           suprimido_no_se_escribe  → pidió no recibir más: NO se le escribe */
+      avisoPorCorreo:
+        aviso.data === 'intencion_registrada' || aviso.data === 'encolado_sin_cuenta',
+      correoSuprimido: aviso.data === 'suprimido_no_se_escribe',
     },
   };
 }
@@ -122,5 +134,23 @@ export async function revocarInvitacionFamilia(
 ): Promise<ResultadoWrapper<null, CodigoInvitacionFamilia>> {
   const { error } = await getClient().rpc('revocar_invitacion_familia', { p_id: id });
   if (error) return mapear(error.message);
+  return { ok: true, data: null };
+}
+
+/**
+ * LA BAJA EN UN CLIC — se ejerce **sin cuenta** (firma del founder, ④).
+ *
+ * El token de la invitación es la credencial: solo lo tiene quien recibió el
+ * correo. *No se pide cuenta para ejercer un derecho que se ejerce justamente
+ * porque no se quiere tener cuenta.*
+ *
+ * **Contesta lo mismo siempre**, exista o no el token: distinguir convertiría
+ * la baja en un oráculo de tokens válidos.
+ */
+export async function darDeBajaCorreo(token: string): Promise<ResultadoWrapper<null, 'error_desconocido'>> {
+  const { error } = await getClient().rpc('dar_de_baja_correo', { p_token: token });
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos completar la baja. Probá de nuevo.' };
+  }
   return { ok: true, data: null };
 }

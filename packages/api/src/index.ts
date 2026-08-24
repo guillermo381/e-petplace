@@ -16,6 +16,7 @@ export {
   // para el consumo DIRECTO de las puertas que no pasan por el alta.
   registrarConsentimiento,
   registrarConsentimientos,
+  confirmarAltaConCodigo,
   documentosVigentes,
   type DocumentoLegal,
   type DocumentoAceptado,
@@ -1373,6 +1374,7 @@ export {
   invitarAFamilia,
   aceptarInvitacionFamilia,
   revocarInvitacionFamilia,
+  darDeBajaCorreo,
   type InvitacionCreada,
   type InvitacionAceptada,
   type CodigoInvitacionFamilia,

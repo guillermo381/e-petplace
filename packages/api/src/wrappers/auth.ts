@@ -87,23 +87,34 @@ export { normalizarEmail } from './_email';
 // ═══════════════════════════════════════════════════════════════════════════
 // EL CONSENTIMIENTO — P23 hecho fila
 // ═══════════════════════════════════════════════════════════════════════════
+/* ☠️ `VERSION_TERMINOS_VIGENTE = 'legales-2026-08'` MURIÓ el 24-ago-2026, el
+   mismo día que nació. Era una versión ÚNICA y provisional, inventada cuando el
+   canon no fijaba vocabulario legal. **La reemplaza `VERSION_LEGAL`**, que da
+   una versión POR DOCUMENTO — que es lo que el abogado entregó y lo que P23
+   necesita. Se retira en vez de dejarse: dos fuentes de «qué versión escribo»
+   conviviendo es el defecto que esta misma tanda vino a cerrar en el correo. */
+
 /**
- * La versión de términos que se le mostró a quien acepta.
+ * LA VERSIÓN DE CADA DOCUMENTO, por separado.
  *
- * ⚠️ **NO es `v1.0`, y la diferencia importa.** Las 59 filas vivas de
- * `consentimientos` dicen `version='v1.0'` y son del LEGADO (25-abr → 10-may
- * 2026, escritas por `e-petplace-v2`). **Las páginas legales se corrigieron y
- * republicaron en S103** ⇒ escribir `v1.0` hoy afirmaría que esta persona
- * aceptó el mismo documento que aquellas 59, y es falso.
+ * ⚠️ **Las dos de términos nacen en `1.0` porque son DOCUMENTOS NUEVOS** — el
+ * abogado partió el único `/terminos` (que C midió en **v1.1**) en dos textos
+ * distintos: consumo y B2B. *Heredar el `1.1` del documento viejo diría que
+ * alguien aceptó una v1.1 de un texto que nunca existió en v1.0.* La privacidad
+ * **sí** conserva su `1.1`: es la misma, común a los dos, con secciones 3.1 y
+ * 3.2 separadas adentro.
  *
- * 🔴 **Es provisional y se declara como tal:** hoy los documentos legales no
- * tienen versión propia — son 26 de letra firmada, 10 medidas y **17 esperando
- * abogado** (D-405). El día que el abogado entregue documentos versionados,
- * esta constante toma SU versión y deja de ser una fecha. *Se guarda además la
- * URL exacta en `metadata`, porque lo que P23 promete demostrar no es un
- * número: es QUÉ se le mostró.*
+ * 🔴 **Y el freno que este archivo ya se cobró una vez:** `tratamiento_datos`
+ * se registró como tipo y nunca tuvo página. **Antes de que una pantalla ofrezca
+ * estos dos, C confirma contra el sitio que las URLs existen** — un check que
+ * apunta a una página que no está le pide a alguien que acepte algo que no
+ * puede leer.
  */
-export const VERSION_TERMINOS_VIGENTE = 'legales-2026-08';
+export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
+  terminos_parent: '1.0',
+  terminos_professional: '1.0',
+  privacidad: '1.1',
+};
 
 export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_prestador';
 
@@ -126,16 +137,21 @@ export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_pre
  *
  * ⚠️ Exige SESIÓN ACTIVA — la policy es `auth.uid() = user_id` (S104-A, cerrada
  * porque antes admitía a `anon` con `with_check=true` y cualquiera podía
- * fabricar el consentimiento de otro). Hoy alcanza: con la verificación de
- * correo apagada (D-299), `signUp` devuelve sesión. **El día que se encienda,
- * hace falta una RPC DEFINER — no aflojar la policy.**
+ * fabricar el consentimiento de otro). Con la verificación de correo apagada,
+ * `signUp` devuelve sesión y esto entra en el mismo acto.
+ *
+ * ✅ **Y con la verificación ENCENDIDA tampoco hace falta aflojar nada ni sumar
+ * superficie: entra por `confirmarAltaConCodigo()`, porque `verifyOtp` DEVUELVE
+ * SESIÓN.** *La respuesta no era una RPC con privilegios: era registrar el
+ * consentimiento un momento después, cuando la cuenta empieza a existir de
+ * verdad.* (Firma del founder, 24-ago — ver la ficha D-893.)
  */
 export async function registrarConsentimiento(
   userId: string,
   tipo: TipoConsentimiento,
   urlMostrada: string | null = null,
 ): Promise<boolean> {
-  const r = await registrarConsentimientos(userId, tipo, documentosVigentes(urlMostrada));
+  const r = await registrarConsentimientos(userId, tipo, documentosVigentes(tipo, urlMostrada ? { privacidad: urlMostrada } : {}));
   return r.registrados === r.total;
 }
 
@@ -152,12 +168,24 @@ export async function registrarConsentimiento(
  * — no que lo mostrado fuera suficiente. *Confundir las dos cosas haría que el
  * registro mienta en la dirección cómoda.*
  */
-export function documentosVigentes(urlIndice: string | null = null): DocumentoAceptado[] {
+export function documentosVigentes(
+  contexto: TipoConsentimiento,
+  urls: Partial<Record<DocumentoLegal, string>> = {},
+): DocumentoAceptado[] {
+  /* 🔴 EL DOCUMENTO LO DECIDE LA PUERTA, y las dos que se confunden fácil son
+     `acceso_prestador` (solicitar acceso Y aceptar invitación de empleado):
+     **las dos son puertas del PRESTADOR**, así que va el documento profesional
+     aunque la persona sea la misma que en el cliente. *El registro guarda el
+     documento que se vio de verdad, no el que le correspondería a la persona.* */
+  const terminos: DocumentoLegal =
+    contexto === 'acceso_prestador' ? 'terminos_professional' : 'terminos_parent';
+
   return [
-    { documento: 'terminos',   version: '1.1', url: urlIndice },
-    { documento: 'privacidad', version: '1.1', url: urlIndice },
+    { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? null },
+    { documento: 'privacidad', version: VERSION_LEGAL['privacidad'], url: urls['privacidad'] ?? null },
   ];
 }
+
 
 /**
  * UN REGISTRO POR DOCUMENTO — **jamás un booleano «aceptó todo»** (firma
@@ -198,7 +226,7 @@ export function documentosVigentes(urlIndice: string | null = null): DocumentoAc
  * que no existe le pide a alguien que acepte algo que no puede leer.*
  * **Escalado al founder por C y por acá.**
  */
-export type DocumentoLegal = 'terminos' | 'privacidad' | 'tratamiento_datos';
+export type DocumentoLegal = 'terminos_parent' | 'terminos_professional' | 'privacidad';
 
 export interface DocumentoAceptado {
   documento: DocumentoLegal;
@@ -241,6 +269,71 @@ export async function registrarConsentimientos(
   const { data, error } = await getClient().from('consentimientos').insert(filas).select('id');
   if (error) return { registrados: 0, total: filas.length };
   return { registrados: data?.length ?? filas.length, total: filas.length };
+}
+
+/**
+ * CONFIRMAR EL ALTA CON EL CÓDIGO DE 8 DÍGITOS — y registrar el consentimiento
+ * **en el mismo acto**.
+ *
+ * ── POR QUÉ ESTA FUNCIÓN EXISTE Y LA RPC DEFINER NO SE USA ───────────────
+ * Con `mailer_autoconfirm` apagado, `signUp` **no devuelve sesión** ⇒ el
+ * consentimiento no se puede registrar ahí (la policy es `auth.uid() =
+ * user_id`). Se midió de verdad: la cuenta sonda del gate de D-893 quedó con
+ * `consentimientos = 0` (**D-896**).
+ *
+ * La primera respuesta fue una RPC `SECURITY DEFINER`. **La descartó el
+ * founder con la razón correcta: `verifyOtp` DEVUELVE SESIÓN**, así que
+ * alcanza con registrar el consentimiento un momento después — **sin aflojar la
+ * policy y sin sumar una superficie con privilegios.**
+ *
+ * **Lo que se pierde con esperar al código: nada.** *Si alguien abandona entre
+ * crear la cuenta y canjear el código, no hay cuenta usable que necesite
+ * evidencia.* El consentimiento se registra **cuando la cuenta empieza a
+ * existir**, que es exactamente cuando P23 lo necesita.
+ *
+ * *(La RPC `registrar_consentimiento_de_alta` **queda viva y declarada** como el
+ * camino del invitado que acepta por enlace — no se borra, no se usa acá.)*
+ */
+export async function confirmarAltaConCodigo(input: {
+  email: string;
+  codigo: string;
+  urlsLegales?: Partial<Record<DocumentoLegal, string>>;
+}): Promise<
+  ResultadoWrapper<
+    SesionDueno & { consentimiento_registrado: boolean },
+    CodigoErrorAuth | 'codigo_invalido'
+  >
+> {
+  const { data, error } = await getClient().auth.verifyOtp({
+    email: normalizarEmail(input.email),
+    token: input.codigo.trim(),
+    type: 'signup',
+  });
+
+  if (error) {
+    /* Un código malo y uno vencido son la misma respuesta a propósito: decir
+       cuál falló le confirma a un extraño que ese correo tiene cuenta. */
+    return { ok: false, codigo: 'codigo_invalido', mensaje: 'Ese código no es válido o ya venció. Pedí uno nuevo.' };
+  }
+  if (!data.user) return mapeoErrorAuth(undefined, 'datos_inconsistentes');
+
+  /* Acá SÍ hay sesión — es el punto entero de esta función. El consentimiento
+     entra por la policy normal, sin privilegios prestados. */
+  const r = await registrarConsentimientos(
+    data.user.id,
+    'registro',
+    documentosVigentes('registro', input.urlsLegales ?? {}),
+  );
+
+  return {
+    ok: true,
+    data: {
+      user_id: data.user.id,
+      email: data.user.email ?? null,
+      nombre: nombreDeMetadata(data.user.user_metadata),
+      consentimiento_registrado: r.total > 0 && r.registrados === r.total,
+    },
+  };
 }
 
 export interface InputRegistrarse {

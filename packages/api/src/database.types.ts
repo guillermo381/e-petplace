@@ -3533,6 +3533,27 @@ export type Database = {
         }
         Relationships: []
       }
+      correo_suprimido: {
+        Row: {
+          created_at: string
+          email: string
+          motivo: string
+          origen: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          motivo?: string
+          origen?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          motivo?: string
+          origen?: string | null
+        }
+        Relationships: []
+      }
       country_config: {
         Row: {
           beta_only: boolean | null
@@ -10683,6 +10704,41 @@ export type Database = {
             columns: ["sku_id"]
             isOneToOne: false
             referencedRelation: "vendedor_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitacion_correo_pendiente: {
+        Row: {
+          created_at: string
+          email: string
+          enviado_en: string | null
+          estado: string
+          intentos: number
+          invitacion_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          enviado_en?: string | null
+          estado?: string
+          intentos?: number
+          invitacion_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          enviado_en?: string | null
+          estado?: string
+          intentos?: number
+          invitacion_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitacion_correo_pendiente_invitacion_id_fkey"
+            columns: ["invitacion_id"]
+            isOneToOne: true
+            referencedRelation: "familia_invitaciones"
             referencedColumns: ["id"]
           },
         ]
@@ -20806,6 +20862,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_fecha: string }
         Returns: Json
       }
+      dar_de_baja_correo: { Args: { p_token: string }; Returns: string }
       dar_de_baja_empleado: { Args: { p_empleado_id: string }; Returns: Json }
       debug_estado_user: {
         Args: { p_email: string }
@@ -22075,6 +22132,10 @@ export type Database = {
       registrar_cobro_presencial: {
         Args: { p_cita_id: string; p_medio: string; p_monto: number }
         Returns: string
+      }
+      registrar_consentimiento_de_alta: {
+        Args: { p_documentos: Json; p_email: string; p_user_id: string }
+        Returns: number
       }
       registrar_desparasitacion: {
         Args: {

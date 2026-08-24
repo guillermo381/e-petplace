@@ -20509,7 +20509,29 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 **Por qué se ficha en vez de curarse ya:** `Confirm signup` **NO se tocó por orden explícita** en la tanda 1 de D. Tocarla sin apagar el autoconfirm no sirve de nada, y apagarlo sin tocarla rompe el alta. **Van juntas o no van.**
 
-**El orden, en piedra:** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
+> ### 🔴 ENMIENDA FIRMADA (founder, 23-ago-2026) — **SON TRES ACTOS, NO DOS, Y EL DEL MEDIO ES NUEVO**
+>
+> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② el consentimiento cableado al `verifyOtp`** — ✅ **hecho** (`confirmarAltaConCodigo()`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+>
+> ### ⚠️ EL ACTO ② CAMBIÓ DE FORMA EL MISMO DÍA, Y LA VERSIÓN QUE QUEDÓ ES LA QUE **NO** SUMA SUPERFICIE
+>
+> **Primero se construyó una RPC `SECURITY DEFINER`** (`20260824000000`) con cinco gates, porque sin sesión no hay `auth.uid()` que preguntar. **La descartó el founder** con la razón que A había servido junto con lo construido: **`verifyOtp` DEVUELVE SESIÓN** (está escrito en la propia casa, `seguridad.ts:312`) ⇒ **alcanza con registrar el consentimiento un momento después, con la policy normal y sin privilegios prestados.**
+>
+> **Lo que se pierde esperando al código: nada.** *Si alguien abandona entre crear la cuenta y canjear el código, no hay cuenta usable que necesite evidencia.* **El consentimiento se registra cuando la cuenta empieza a existir**, que es justo cuando P23 lo necesita.
+>
+> ⇒ *La respuesta no era una RPC con privilegios: era hacerlo un momento después.* **Menos superficie es menos que cuidar** — y se llegó ahí porque lo firmado se construyó **y** se sirvió la alternativa, en vez de elegir una sola.
+>
+> **☠️ `registrar_consentimiento_de_alta` NO SE BORRA:** queda **viva y declarada** como el camino del **invitado que acepta por enlace**, por si hace falta. *Una pieza que no se usa hoy y tiene un uso nombrado no es letra muerta: es una pieza con su disparo escrito.*
+>
+> **Lo que convirtió al ② en CONDICIÓN y no en mejora, y es una medición y no un razonamiento:** la cuenta `guillo381+test1` (**D-896**), creada durante la ventana de 18 minutos con `autoconfirm=false`, **quedó con `consentimientos = 0`**. Sin sesión, `auth.uid()` es NULL y la policy no deja entrar el INSERT ⇒ **con autoconfirm apagado, TODO registro nacería sin evidencia de consentimiento, desde el primero.**
+>
+> ⇒ **Con ② faltando, ③ no es «un flip que se puede hacer cuando quieran»: es un flip que incumple P23 desde su primer registro.**
+>
+> **Y la línea que no se negocia, ratificada por el founder: JAMÁS SE AFLOJA LA POLICY.** Se cerró hoy porque admitía escritura anónima a nombre de terceros (D-891); *abrirla para resolver esto sería pagar el problema con el agujero que se acaba de tapar.* La RPC **agrega un camino angosto y gateado** (cinco gates: existe · email coincide · sin confirmar · ventana de 15 min · sin consentimientos previos), **no ensancha el existente**.
+>
+> ⚠️ **Alternativa servida a la mesa, que podría volver innecesario el ②:** **`verifyOtp` devuelve sesión** —está escrito en la propia casa (`seguridad.ts:312`)— así que registrar el consentimiento **justo después de confirmar el código** bastaría con la policy normal, **sin RPC DEFINER y sin superficie nueva**. Su costo: el registro queda unos minutos después del momento en que la persona aceptó. **Se construyó lo firmado y se sirve la alternativa.**
+
+**El orden ORIGINAL de la ficha (superado por la enmienda de arriba):** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
 ☠️ **Condición de muerte:** los tres pasos ejecutados **en ese orden**, con el gate del ② corrido por el founder.
 
 **Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
@@ -20572,3 +20594,33 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **Hermanas:** `L-402` (*no basta «¿está alcanzable?» — hace falta «¿corrió alguna vez?»*) y `L-412` (*un canal de reporte se apunta a una dirección que se vio recibir*). **Las tres son la misma familia: lo que no se mide no avisa que se rompió.**
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### D-895 — 🟠 EL TOKEN DE PUSH DEL PRESTADOR NO SE SINCRONIZA: TRES CAPAS DE SILENCIO APILADAS
+🟠 **Diagnosticado por D (23-ago-2026) con dos discriminadores; fichado por A. Dueño: las apps (C).**
+
+**El síntoma:** el token de push del prestador sigue `activo=false`, con último uso del 16-ago, **aunque el founder confirmó que las DOS apps tienen permiso de notificaciones concedido.** Con eso caen las causas baratas: el permiso está, el código existe desde el 7-ago (`b1254158`, S90-B) y el llamado está bien puesto (`status==='granted'` → `sincronizarTokenSiHayPermiso`).
+
+**Las tres capas, en `apps/*/src/components/invitacion-avisos.tsx`:**
+1. **`await registrarTokenDeAparato(...)` devuelve `{ok, codigo}` y NADIE LO MIRA** — y su primer guard es `if (uidActual() === null) return falla('sin_sesion')`.
+2. **El `try/catch` que envuelve todo** con el comentario *«sin módulo nativo — y no es un fallo»* ⇒ **un fallo REAL queda indistinguible de correr en web o Expo Go.**
+3. **Corre UNA sola vez al montar**, sin reintento cuando la sesión sí está lista.
+
+**Causa más probable: una CARRERA.** `InvitacionAvisos` se monta en HOY, que es la primera pantalla con sesión; **si la sesión no se restauró todavía**, el wrapper devuelve `sin_sesion`, la capa 1 lo descarta, la capa 2 no lo ve y la capa 3 no reintenta.
+
+**Los dos discriminadores que la sostienen, y son lo que vuelve esto un diagnóstico y no una hipótesis:**
+- **El token del CLIENTE sí se actualizó hoy (16:07) con el MISMO código** ⇒ *no es código ausente: es condición de arranque.*
+- **Si el token del SO hubiera rotado, la RPC habría INSERTADO fila nueva** (reasigna por token). **Hay dos filas, no tres** ⇒ *la sincronización no llegó a escribir.*
+
+**La cura:** leer el `ok` del wrapper y **reintentar cuando la sesión esté lista**, en vez de solo al montar. *Un `await` cuyo resultado nadie mira es una llamada que no se puede diagnosticar — y envuelta en un catch que explica de antemano por qué podría fallar, deja de poder distinguir el caso que explica del que no.*
+☠️ **Condición de muerte:** el token del prestador vuelve a `activo=true` **y** una notificación real llega a ese aparato.
+
+#### D-896 — 🟢 LA CUENTA SONDA DEL GATE DE D-893 QUEDA MARCADA, NO BORRADA
+🟢 **BAJA — resuelta y anotada para que nadie la lea como anomalía.**
+
+`guillo381+test1@gmail.com` (`b85cbf41`) se creó el 24-ago 00:23:10 UTC, **dentro de la ventana de 18 minutos** (00:12:18 → 00:30:49) en que D apagó `mailer_autoconfirm` para gatear **D-893**. **Queda SIN CONFIRMAR, y con autoconfirm otra vez en `true` ese estado ya no se puede reproducir.**
+
+**Medido antes de decidir:** `profiles=1 · identities=1 · familia_miembro=0 · familias=0 · mascotas=0 · consentimientos=0` ⇒ **no cuelga nada.**
+
+**Se MARCA en vez de borrarse, y el motivo no es el precedente:** *en S92 las 64 sondas tuvieron sus **cuentas borradas** y solo se marcaron los datos que los CHECK no dejaban borrar.* Acá se conserva por otra razón — **es el único testigo de que apagar `autoconfirm` deja cuentas sin evidencia de consentimiento**, y esa es la prueba empírica de D-893. Marcada en `raw_user_meta_data` con `sonda_de_gate='S104-D893'`, el motivo, y por qué sus `consentimientos = 0` **es lo esperado y no un fallo**.
+
+⇒ **Lo que esta fila prueba, y va a la ficha de D-893:** el día que `autoconfirm` se apague en serio, **TODO registro nace sin evidencia de consentimiento**, y **P23 promete poder demostrar qué aceptó cada quien**. *La RPC DEFINER no es una mejora: es la condición para que apagar autoconfirm no rompa una promesa de política.* **Jamás se afloja la policy.**
