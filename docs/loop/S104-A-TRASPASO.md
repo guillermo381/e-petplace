@@ -98,13 +98,34 @@ segundo plano» sino **abrir la app en frío con sesión guardada**, y sobre tod
 **el sensor FALLANDO a propósito** (dedo mojado) — para ver que la salida está y
 que al tocarla cae al login.
 
-### 🔴 Publicar los tres legales
-**Bloqueado.** Falta: **archivar la versión aceptada del DPA de Anthropic** y su
-evaluación contra las siete condiciones del Art. 21 (**el equipo técnico no puede
-hacerla**: exige leer el instrumento) · **quitar los recuadros** · **poner la
-fecha** · y los dos borrados de arriba. **Dueño: founder + abogado.**
-**C publica en el acto** cuando los finales estén commiteados sin recuadro, con
-versionado inmutable ya diseñado.
+### Publicar los legales — ✅ UNO PUBLICADO, DOS FRENADOS *(actualizado 24-ago)*
+
+**✅ La Política de Privacidad de las apps ESTÁ PUBLICADA** (S104-C): archivo
+inmutable `/legales/privacidad-app/1-1`, `data-epp-version="1.1"`, medido con
+control negativo. **El DPA quedó archivado** en `docs/legal/anexo-a/` y **su
+evaluación contra las siete condiciones del Art. 21 la entregó el abogado** —
+era la pieza que el equipo técnico declaró no poder producir, y no la produjo:
+la produjo quien correspondía, sobre `REGISTROS-PARA-EL-EXPEDIENTE.md §5` como
+insumo.
+
+**🔴 Los dos que siguen frenados, con su causa exacta:**
+- **T&C Pet Professional** — `L-415`: se remite a una **Disposición Transitoria
+  Primera que el documento no contiene** (el término aparece **una sola vez**, y
+  es la propia remisión). *Y esa pieza ausente es justo la que reemplaza al sello
+  retirado: difiere los Títulos IV y V, que cubren las cuatro funciones que el
+  recuadro nombraba.* **Dueño: abogado.**
+- **La evaluación** — depositada **sin firmar**: cuatro huecos (fecha, próxima
+  revisión, elaborado por, y los nombres de M-4 y M-11). **Dueño: founder.**
+
+**🔴 Y un freno que ninguno de los dos tenía, y bloquea texto ya publicado
+hacia adelante:** **D-897 ⑤** — el **consentimiento de IA y de dictado por voz
+no se recaba** (medido: cero filas, y no por falta de uso). La evaluación §9
+funda la Transferencia B en él y la **Política §17.B.5, ya publicada, se lo
+promete al titular en presente**. ⇒ *entra como cura, no reabre la publicación.*
+
+**El Anexo A tiene su mapa:** `docs/legal/anexo-a/README.md` — las ocho
+evidencias que el Art. 4 obliga a conservar tres años, contra lo que existe.
+**Tres están; cinco no**, cada una con dueño.
 
 ### 🟡 Otras con dueño
 **D-892** buzón/DMARC · **D-893 acto ③** (apagar `autoconfirm`, sus dos
@@ -168,9 +189,9 @@ canon ya se cobró esa confusión tres veces.
 
 ---
 
-## 5 · LAS NUEVE FORMAS DEL MISMO DEFECTO, Y SU LEY
+## 5 · LAS ONCE FORMAS DEL MISMO DEFECTO, Y SU LEY
 
-**Un instrumento contestó, pero no la pregunta que se creía hecha.** Las nueve
+**Un instrumento contestó, pero no la pregunta que se creía hecha.** Las once
 dieron **el color esperado**:
 
 1. Un guard `DEFINER` cuyo `current_user` es el owner ⇒ **no frenaba, y el apply
@@ -196,10 +217,31 @@ dieron **el color esperado**:
    y la mitad que lee **suponían flujos distintos**. No falló al escribirse, no
    falló al compilar, **y el tipo no puede expresar «estas dos piezas hablan el
    mismo protocolo»**.
+10. **L-415 — el T&C que se remite a una cláusula que no contiene.** El barrido
+    de marcas salió **impecable**: cero recuadros, cero sellos, cero corchetes,
+    cero notas internas. *Contestó «¿quedan marcas de borrador?», que no es
+    «¿el documento está completo?».* **Un corchete grita; una remisión sin
+    destino se lee como rigor.**
+11. **La versión legal, y la encontró C mirando lo que yo no crucé.** `VERSION_LEGAL.privacidad`
+    decía `1.1` y el documento del abogado decía `1.0`. **Los dos valores eran
+    defendibles por separado**; nadie había comparado **pantalla contra
+    constante**. *Yo apliqué bien la regla a dos de tres campos y en el tercero
+    razoné sobre un documento distinto del que se iba a mostrar* — el del sitio,
+    no el de las apps. **Ningún typecheck ve esto: los dos lados compilan.**
 
 > ## **No alcanza con mirar el color: hay que preguntar quién lo produjo.**
 
-**Y el corolario que la sesión pagó nueve veces:** *un gate mide lo que se le
-pidió medir; la vara dice qué había que pedir.* **Ninguna de las nueve la
+**Y el corolario que la sesión pagó once veces:** *un gate mide lo que se le
+pidió medir; la vara dice qué había que pedir.* **Ninguna de las once la
 encontró un gate corriendo** — las encontró **producir el rojo**, **volver a la
 vara**, o **que otra pista mirara lo mismo con otra pregunta**.
+
+**Las dos últimas afinan el reparto, y conviene que quede escrito:** la **10** la
+encontré yo, *pero solo porque fui a buscar el destino de lo que el documento
+nombraba* — el barrido no me iba a llevar ahí. La **11** **no podía encontrarla
+yo**: el defecto vivía en el cruce entre mi constante y el papel del abogado, y
+**yo escribí una de las dos mitades**. *El que construyó recuerda haber decidido
+cada cosa, y ese recuerdo se lee igual que una medición* (`L-398`). ⇒ **la
+proporción de la jornada — cuatro de once halladas por otra pista — es el
+argumento medido a favor de trabajar en pistas paralelas, y de que ninguna
+audite lo que ella misma escribió.**

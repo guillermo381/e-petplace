@@ -20681,6 +20681,14 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método. **Candidata a regla de la casa:** todo documento legal que se deposite declara que sus remisiones internas fueron verificadas.
 
+✅ **EL CASO CERRÓ (24-ago-2026): el reemplazo trae la Disposición entera** — `Transitoria` pasa de **1 ocurrencia a 5**, el índice la lista, y entra la **§4.5** que la anuncia en el momento de la aceptación. *El instrumento que la halló ahora la da verde: eso es lo que lo vuelve un instrumento y no una anécdota.*
+
+⚠️ **Pero la CAUSA se corrige, y el matiz decide dónde mira el próximo:** se atribuyó a *«un archivo cortado al subirse»*, y **la medición no lo sostiene**. Un archivo truncado **no conserva su pie**, y el depositado terminaba completo. Y sobre todo: al reemplazarlo, lo que faltaba **no estaba solo al final** — faltaban también la **§4.5** y las **§31.5-31.7** (dictado por voz), que viven **en el medio del documento**. *Un corte al final no quita una sección del medio.* ⇒ **era una VERSIÓN ANTERIOR, no un recorte.**
+
+**Por qué el matiz no es pedantería:** *«se cortó al subirse» manda a mirar el final del archivo; «es una versión anterior» manda a diffear el documento entero.* **La segunda es la que encuentra las §31.5-31.7.**
+
+🟢 **Y la ley salió REFORZADA, no invalidada:** cambió la causa del caso, **no lo que el barrido de marcas puede ver**. *Sin el barrido de remisiones nadie habría notado que faltaba la Disposición, y se habría publicado un contrato al que le faltaban tres secciones — una de ellas la que difiere la vigencia de dos Títulos enteros.*
+
 #### D-897 — 🔴 CINCO FRENOS DE PUBLICACIÓN (tres del abogado + §14.4 + el consentimiento que la letra promete y el motor no pide)
 🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
 
@@ -20788,3 +20796,46 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Dueño:** founder + legales (el plazo) · producto (el mecanismo). **Disparo: antes de publicar la Política de Privacidad.**
 ☠️ **Condición de muerte:** o existe un barrido por antigüedad verificado con un archivo borrado de verdad, o §18 dice lo que el sistema hace.
+
+#### D-902 — 🔴 LA POLÍTICA **YA PUBLICADA** PROMETE «VÍA MANUAL EQUIVALENTE» PARA LAS TRES FUNCIONES DE IA, Y EL CARNET NO LA TIENE
+🔴 **BLOQUEANTE, y con una agravante de forma: el documento ya está publicado.** Apareció al contestar una pregunta de S104-C sobre si la Transferencia A necesitaba su propio gate de consentimiento (24-ago-2026). *La pregunta era buena; la medición encontró que el problema estaba un piso más abajo.*
+
+**§14.5, literal, en el texto vivo:** *«El uso de estas funcionalidades es opcional y existe una **vía manual equivalente** para registrar la misma información. Puede no activarlas, u oponerse a ellas en cualquier momento, **sin que ello afecte su acceso al resto de la plataforma**.»*
+
+**Medido, función por función:**
+
+| función de §14 | vía manual | medición |
+|---|---|---|
+| **14.2** nota clínica | ✅ **existe** | la pantalla de consulta tiene **19 campos propios**; `DictadoEnVivo` es un input más sobre un campo que también se tipea |
+| **14.4** presentación del negocio | ✅ **existe** | `EscribaHistoria` monta un `Campo` con `onChangeText`; su propia cabecera dice *«Campo vacío ⇒ no ofrece mejorar: PREGUNTA»* |
+| **14.3** carnet de vacunas | 🔴 **NO EXISTE** | **cero** caminos de alta manual en el cliente · **cero** «Agregar» en la revisión del carnet (solo se edita o descarta lo que la IA extrajo) · y el **único** acceso desde el Hogar es `router.push('/carnet')`, o sea la foto |
+
+⇒ **Hoy una familia no puede registrar una vacuna sin pasar por la IA.** *La revisión no cuenta como vía manual: se puede corregir lo que la IA leyó, no cargar lo que la IA no vio.*
+
+🔴 **Y la consecuencia que ordena en qué orden se cura, que es lo que esta ficha viene a decir:** **construir el gate de consentimiento de la Transferencia A ANTES que la vía manual convertiría el consentimiento en coacción.** *Si decir «no» te deja sin la única forma de cargar vacunas, eso no es consentimiento libre — y la libertad del consentimiento es requisito de la LOPDP, no una cortesía de diseño.* **Primero la alternativa, después la pregunta.** Un gate sobre una función sin salida no protege al titular: **le documenta que aceptó porque no tenía opción.**
+
+**Distinción con `D-897 ⑤`, porque son vecinas y no la misma:** ⑤ dice *falta el acto de consentir*; ésta dice *falta la alternativa que hace libre a ese acto*. **⑤ no se puede cerrar bien mientras ésta esté abierta.**
+
+**Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo).
+☠️ **Condición de muerte:** o existe un camino de alta manual de vacuna **medido de punta a punta** —una vacuna registrada sin tocar la cámara—, o §14.5 deja de prometer una equivalencia que no hay **y la Política se versiona** (no se edita en silencio: ya está publicada, y `L-415`/versionado inmutable rigen).
+
+#### L-416 — un REEMPLAZO se mide contra todo lo que el original ya resolvía, no solo contra el defecto que lo motivó
+**S104-A, 24-ago-2026. Duodécima forma del defecto de la jornada, y la primera que se cobra sobre una CORRECCIÓN en vez de sobre una construcción.**
+
+**El caso, en cuatro pasos, y el cuarto es el que enseña:**
+1. Se halló que el T&C depositado se remitía a una **Disposición Transitoria Primera que no contenía** (`L-415`).
+2. Otra pista diagnosticó la causa: **el archivo se subió truncado**. *Razonable, y explicaba el síntoma.*
+3. Llegó el reemplazo **con la Transitoria completa**, y con una orden de verificación explícita y correcta: *«medí que PRIMERA.1 a PRIMERA.6 estén enteras y que el índice la liste»*.
+4. **Esa medición dio VERDE COMPLETO — 6 de 6 y el índice.** Y el reemplazo, medido en lo que nadie pidió medir, **desandaba cuatro resoluciones que el depositado ya tenía**: la fecha (`[__ de ____ de 2026]`), el canal comercial (`[correo de soporte]`), **el número de árbitros sin resolver** (`[un (1) / tres (3)]`), **seis notas internas** y **un recuadro de borrador**.
+
+⇒ **Obedecer la orden habría cambiado un defecto por once.** *El documento habría ganado la cláusula que le faltaba y perdido todo lo que ya estaba decidido.*
+
+> **La ley: cuando un reemplazo llega a curar un defecto, se mide contra el estado que reemplaza — no contra el defecto. La pregunta no es «¿trae lo que faltaba?», es «¿trae lo que faltaba SIN llevarse lo que había?».**
+
+**Es un test de regresión, y por eso la lección no es sobre documentos:** *toda corrección es candidata a regresión, y el que la pide está mirando el defecto — por eso el que la aplica es el único que puede mirar el resto.* **La orden de verificación era correcta y aun así insuficiente: medía la CURA, no la REGRESIÓN.**
+
+🔴 **Y la medición además corrigió el diagnóstico, lo que decidió que NO se compusiera a mano:** el depositado **no estaba truncado**. Un archivo cortado al subirse **no conserva su pie**, y el depositado **termina completo** (`Versión 1.0 — vigente desde el 24 de agosto de 2026`). Medido: además de la Transitoria **le falta la §4.5 entera** —*Vigencia diferida de las disposiciones económicas*, que es la que hace que el Usuario Profesional **declare haberla leído**— y **su §4.4 es más corta** que la del otro. ⇒ **son dos VERSIONES distintas del documento, no un original y su recorte.** *Con un truncado, pegar el bloque perdido es restaurar; con dos versiones, es redactar contrato — y aparecieron dos diferencias de cuerpo sin buscarlas, así que no hay razón para creer que sean las únicas.* **Se frenó la composición y se devolvió al abogado, que es de quien tiene que salir UNA versión con las dos mitades.**
+
+**El corolario práctico, barato:** *un truncado se distingue de una versión distinta mirando el FINAL del archivo.* **Si el pie está entero, no hubo corte.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.

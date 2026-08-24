@@ -120,7 +120,21 @@ export interface DocumentoVerificacion {
   nombre: string;
   estado: EstadoDocumento;
   /** PATH dentro del bucket privado (jamás URL pública — patrón S47). */
-  archivoPath: string;
+  /**
+   * 🔴 **PUEDE SER `null`, y eso NO es un dato faltante: es el estado CORRECTO
+   * de un documento ya verificado.** `POLITICA-PRIVACIDAD-APP §5.2` promete que
+   * *«concluida la verificación no conservamos la imagen del documento»*, y
+   * desde S104-A un trigger la encola para destruir y limpia este puntero **en
+   * el mismo acto**. *Si el puntero sobreviviera al borrado, la ficha diría que
+   * hay una imagen que ya nadie puede garantizar.*
+   *
+   * ⚠️ Nació `string` y pasó a `string | null` al regenerar tipos — **la
+   * migración es de ayer y la consecuencia en el tipo quedó latente un día,
+   * porque los tipos no se regeneraron en la misma tanda.** La superficie tiene
+   * que mostrar la ausencia como lo que es: el documento se verificó y su
+   * imagen se destruyó, no «falta subirlo».
+   */
+  archivoPath: string | null;
   notasRevision: string | null;
   createdAt: string;
   /** ISO-3166-1 alfa-2 del país que EMITIÓ el documento. **null = no
