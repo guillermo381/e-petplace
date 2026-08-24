@@ -81,7 +81,6 @@ export default function Cuenta() {
 
   const [salirAbierta, setSalirAbierta] = useState(false);
   const [cerrando, setCerrando] = useState(false);
-  const [eliminarAbierta, setEliminarAbierta] = useState(false);
 
   // S58 (D-361): el freno del grupo se LEVANTA — el lote 3 trae los
   // íconos y las entradas hablan la Ley 19.1 (perfil usa la chapita
@@ -210,7 +209,10 @@ export default function Cuenta() {
                 ✅ **De paso muere un uso de la variante jubilada `compacto`**
                 ⇒ `R47` baja de 38 a 37. *La regla es solo-baja y muere en 0.* */}
             <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
+            {/* S104-C · TANDA 3: dejó de ser voz sin motor. Navega a la
+                pantalla de doble paso que dice qué se va y qué queda, y cierra
+                de verdad (motor de A). */}
+            <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => router.push('/cuenta/cerrar')} />
           </View>
 
           {/* ── S74-A · EL MARCADOR RENDERIZADO (L-160 enmendada / L-161):
@@ -330,18 +332,10 @@ export default function Cuenta() {
         </View>
       </Hoja>
 
-      {/* Eliminar cuenta — letra (a): la voz honesta; la política P15
-          (destino del expediente, las personas de la familia, hitos) se
-          firma ANTES de que esto ejecute nada (firma 5.1: familiar
-          autorizado, no co-dueño). */}
-      <Hoja visible={eliminarAbierta} onCerrar={() => setEliminarAbierta(false)} titulo={t('cuenta.eliminarCuenta')} conCerrar>
-        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary }}>
-            {t('cuenta.eliminarVoz')}
-          </Text>
-          <Boton variante="secundario" etiqueta={t('cuenta.entendido')} bloque onPress={() => setEliminarAbierta(false)} />
-        </View>
-      </Hoja>
+      {/* ☠️ S104-C · TANDA 3 — LA HOJA DE «VOZ HONESTA» MURIÓ (Ley 37). Era la
+          letra (a): «va a estar acá, con todas las de la ley». Ya está: P15
+          FIRMADA (S103) y el motor de A. La entrada ahora navega a
+          `/cuenta/cerrar`, el doble paso con qué se va / qué queda. */}
     </SafeAreaView>
   );
 }

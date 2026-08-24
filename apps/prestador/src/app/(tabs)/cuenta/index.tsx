@@ -185,7 +185,6 @@ export default function Cuenta() {
 
   const [salirAbierta, setSalirAbierta] = useState(false);
   const [cerrando, setCerrando] = useState(false);
-  const [eliminarAbierta, setEliminarAbierta] = useState(false);
   /* ⭐ S86-C · D-649 — BUSCAR ACTUALIZACIONES A MANO.
      LO QUE LO OBLIGA (D-650, medido por A): el GPS del paseo mantiene VIVO
      el proceso ⇒ nunca hay cold start ⇒ `expo-updates` nunca busca. Y el
@@ -852,7 +851,10 @@ export default function Cuenta() {
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('sesion.titulo')}</Texto>
             <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
+            {/* S104-C · TANDA 3: dejó de ser voz sin motor. Navega al doble
+                paso (dos caminos: cerrar mi cuenta con el motor de A, o cerrar
+                el negocio con trámite asistido). */}
+            <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => router.push('/cuenta/cerrar')} />
           </View>
 
           
@@ -961,17 +963,9 @@ export default function Cuenta() {
         </View>
       </Hoja>
 
-      {/* Eliminar cuenta — P17 §4: la entrada existe y dice su verdad;
-          las reglas (citas pagadas, planes vivos, saldo por liquidar)
-          se escriben como enmienda de letra ANTES de construir. */}
-      <Hoja visible={eliminarAbierta} onCerrar={() => setEliminarAbierta(false)} titulo={t('miCuenta.eliminarCuenta')} conCerrar>
-        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          <Texto variante="cuerpo" color="secondary">
-            {t('miCuenta.eliminarVoz')}
-          </Texto>
-          <Boton variante="secundario" etiqueta={t('miCuenta.entendido')} bloque onPress={() => setEliminarAbierta(false)} />
-        </View>
-      </Hoja>
+      {/* ☠️ S104-C · TANDA 3 — LA HOJA DE «VOZ HONESTA» MURIÓ (Ley 37). Era
+          P17 §4: «va a estar acá». Ya está: la entrada navega a
+          `/cuenta/cerrar`, el doble paso con los dos caminos del prestador. */}
       {/* el velo del muro — la barra de estado jamás queda blanca */}
       <VeloBarraEstadoOficio />
     </View>

@@ -1277,9 +1277,9 @@ export const clienteEn = {
     soporteMensaje: 'Hi, I need help with the e-PetPlace app.',
     soporteFallback: "If WhatsApp doesn't open, message us at {{numero}}.",
     soporteDesdeCobro: 'Hi, I had a problem paying on e-PetPlace.',
-    // S104-C (founder signature 5.1): «co-owners» → «the people in your family».
-    eliminarVoz: "It will live here, done right. First we need to properly resolve what happens to your pets' story, the people in your family and your milestones — a documented life is not deleted lightly.",
-    entendido: 'Got it',
+    // ☠️ S104-C · `eliminarVoz` and `entendido` died with the honest-voice Hoja
+    // (Ley 37): the entry now navigates to `/cuenta/cerrar` (namespace
+    // `cerrarCuenta`).
   },
   ajustes: {
     titulo: 'Settings',
@@ -1931,5 +1931,56 @@ export const clienteEn = {
     error: "We couldn't complete the action. Please try again.",
     cerrar: 'Close',
     cargando: 'Loading…',
+  },
+
+  cerrarCuenta: {
+    titulo: 'Delete account',
+    intro: 'Deleting your account doesn’t wipe everything at once. Here’s exactly what goes and what stays.',
+    seVaTitulo: 'What goes',
+    seVaAcceso: 'Your access and sessions: you won’t sign in again with this email and password.',
+    seVaExternas: 'The ways you sign in with other accounts, like Google, if you used them.',
+    seVaArchivos: 'Your personal files and your profile photo.',
+    seVaCarnet: 'Your pets’ vaccination-card photos disappear from the printouts you already generated.',
+    quedaTitulo: 'What stays, detached from you',
+    quedaConsentimientos:
+      'The record of what you agreed to: it’s the proof of what you were promised, and the law requires keeping it.',
+    quedaPagos: 'Your payments, for tax obligations.',
+    quedaExpediente:
+      'The facts in your pet’s record, because your pet can move to another family and its history belongs to it.',
+    ventana:
+      'You have 30 days to change your mind: write to {{correo}} and we’ll undo it all. After 30 days, the closure is final.',
+    exportarCta: 'Export my data before I go',
+    exportarDetalle: 'We’ll email you a copy of everything.',
+    continuar: 'Continue',
+    confirmarTitulo: 'Delete your account?',
+    confirmarCuerpo:
+      'When you confirm, you lose access right away. You have 30 days to undo it by writing to {{correo}}; after that, you won’t be able to sign in or recover it. Save that email before continuing.',
+    confirmarCarnet:
+      'And something you only notice at closing: when the closure becomes final, your pets’ vaccination-card photos are deleted, and the printouts you already generated will be left without them.',
+    confirmarCta: 'Delete my account',
+    volver: 'No, go back',
+    listoTitulo: 'Your account is now closing',
+    yaEstabaTitulo: 'Your account was already closing',
+    listoCuerpo:
+      'You’ve lost access. You have until {{fecha}} to undo it by writing to {{correo}}. After that, the closure is final.',
+    escribir: 'Write to privacy',
+    salir: 'Exit',
+    asistidoTitulo: 'We’ll sort this out with you',
+    asistidoCuerpo:
+      'Your account is linked to something that can’t be closed with a button without leaving other people without access. Write to us at {{correo}} and we’ll sort it out together.',
+    errorGenerico: 'We couldn’t delete your account right now. Please try again in a moment.',
+    reintentar: 'Try again',
+  },
+  exportarDatos: {
+    titulo: 'Export my data',
+    intro:
+      'Ask us for a copy of everything e-PetPlace keeps about you and your pets. It’s your right, and we’ll give it to you.',
+    detalle: 'We prepare the file and email it to you, with a link that expires. It may take a while.',
+    cta: 'Request my copy',
+    enviado:
+      'Done. We sent your copy to {{correo}}. Check your email (and the spam folder) in the next few hours.',
+    yaEnCamino: 'We’re already preparing it. It’s going to {{correo}} — check your email in the next few hours.',
+    error: 'We couldn’t prepare your copy right now. Please try again in a moment.',
+    pedirDeNuevo: 'Request it again',
   },
 } as const satisfies Espejo<typeof clienteEs>;
