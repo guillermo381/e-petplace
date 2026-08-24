@@ -142,6 +142,17 @@ Deno.serve(async (req) => {
     });
   }
 
+  /** UNA sola forma de dejar una fila caída, y siempre CON MOTIVO. La columna
+   *  `motivo` la agregó A al leer mi propio argumento: un corte que no se puede
+   *  leer es peor que el correo feo que evita. «No se pudo componer» y «el
+   *  proveedor rebotó» dejan de ser la misma fila — y solo uno de los dos se
+   *  cura escribiendo código. */
+  const caer = (id: string, motivo: string, intentos?: number) =>
+    supabase
+      .from('invitacion_correo_pendiente')
+      .update({ estado: 'fallido', motivo, ...(intentos === undefined ? {} : { intentos }) })
+      .eq('invitacion_id', id);
+
   let enviados = 0;
   let suprimidos = 0;
   let fallidos = 0;
@@ -156,10 +167,7 @@ Deno.serve(async (req) => {
       .eq('email', f.email)
       .maybeSingle();
     if (sup) {
-      await supabase
-        .from('invitacion_correo_pendiente')
-        .update({ estado: 'fallido' })
-        .eq('invitacion_id', f.invitacion_id);
+      await caer(f.invitacion_id, 'baja_solicitada');
       suprimidos++;
       continue;
     }
@@ -173,10 +181,7 @@ Deno.serve(async (req) => {
     // Una invitación que ya no está pendiente no se anuncia. Puede haberse
     // aceptado o revocado entre el encolado y ahora.
     if (!inv || inv.estado !== 'pendiente') {
-      await supabase
-        .from('invitacion_correo_pendiente')
-        .update({ estado: 'fallido' })
-        .eq('invitacion_id', f.invitacion_id);
+      await caer(f.invitacion_id, inv ? `invitacion_${inv.estado}` : 'invitacion_inexistente');
       fallidos++;
       continue;
     }
@@ -216,10 +221,7 @@ Deno.serve(async (req) => {
     // tampoco se manda, porque «alguien te invitó» sin decir quién es
     // exactamente el correo que la condición ② existe para no mandar.
     if (!quien?.nombre) {
-      await supabase
-        .from('invitacion_correo_pendiente')
-        .update({ estado: 'fallido', intentos: f.intentos + 1 })
-        .eq('invitacion_id', f.invitacion_id);
+      await caer(f.invitacion_id, 'sin_quien_invita', f.intentos + 1);
       fallidos++;
       continue;
     }
@@ -227,13 +229,15 @@ Deno.serve(async (req) => {
     // Con el nombre sembrado se nombra a la familia; sin ella, tampoco se
     // manda: quedarían las dos referencias vacías y el correo sería anónimo.
     const familia = fam?.nombre ?? null;
+    // ⚠️ ESTE CORTE DISPARA CONTRA UN CASO REAL, medido el 24-ago: de 16
+    // titulares, 2 tienen el nombre sembrado, y de esos dos UNO tiene
+    // `familia.nombre` en NULL — NULL de verdad, verificado con
+    // `nombre IS NULL`, no un «(sin nombre)» de un COALESCE de reporte.
+    // Ese titular no va a poder invitar por correo hasta que su familia tenga
+    // nombre o él declare el suyo, y ahora la fila lo DICE.
     if (nombreEsSembrado && !familia) {
-      await supabase
-        .from('invitacion_correo_pendiente')
-        .update({ estado: 'fallido', intentos: f.intentos + 1 })
-        .eq('invitacion_id', f.invitacion_id);
+      await caer(f.invitacion_id, 'sin_quien_invita_ni_familia', f.intentos + 1);
       fallidos++;
-      console.error(`sin_quien_invita: invitacion ${f.invitacion_id} — nombre sembrado y familia sin nombre`);
       continue;
     }
     if (nombreEsSembrado) {
@@ -274,12 +278,8 @@ Deno.serve(async (req) => {
       enviados++;
     } else {
       const causa = await r.text();
-      await supabase
-        .from('invitacion_correo_pendiente')
-        .update({ estado: 'fallido', intentos: f.intentos + 1 })
-        .eq('invitacion_id', f.invitacion_id);
+      await caer(f.invitacion_id, `resend_${r.status}: ${causa.slice(0, 120)}`, f.intentos + 1);
       fallidos++;
-      console.error(`resend_${r.status}: ${causa.slice(0, 180)}`);
     }
   }
 
