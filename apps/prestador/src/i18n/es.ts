@@ -952,9 +952,8 @@ export const prestadorEs = {
     updDescargando: 'Descargando la actualización…',
     updDescargado: 'Lista. Se aplica la próxima vez que abras la app.',
     updNoSePudo: 'No pudimos consultar si hay una versión nueva.',
-    eliminarVoz:
-      'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con tus citas ya pagadas, tus planes vivos y tu saldo por liquidar — un negocio con compromisos no se borra a la ligera.',
-    entendido: 'Entendido',
+    // ☠️ S104-C · `eliminarVoz` y `entendido` MURIERON con la Hoja de voz (Ley
+    // 37): la entrada navega a `/cuenta/cerrar` (namespace `cerrarCuenta`).
     enConstruccion: 'Este paso se monta sobre lo que ya existe: en cuanto entre su composición, va a aparecer acá.',
     // S60-B2 — la sección de la ENTIDAD en Tu perfil (P17 v1.1, visto
     // del arquitecto) · LOTE S60, GATE PENDIENTE. Reuso declarado:
@@ -3830,5 +3829,70 @@ export const prestadorEs = {
       modalVoz:
         'Miramos cada negocio antes de mostrarlo a las familias. Es lo que hace que estar acá signifique algo. Te avisamos apenas termine.',
     },
+  },
+
+  // S104-C · TANDA 3 — la salida (P15 cl.4/cl.5). Hermana del cliente, con
+  // los DOS caminos del prestador: cerrar mi cuenta (motor) vs cerrar el
+  // negocio (trámite asistido, no desde la app). Texto alineado a la Política
+  // publicada (§19.3/§19.4/§19.5): el cierre es seudonimización, no borrado.
+  cerrarCuenta: {
+    titulo: 'Eliminar cuenta',
+    intro: 'Eliminar tu cuenta no borra todo de golpe. Esto es exactamente qué se va y qué queda.',
+    seVaTitulo: 'Qué se va',
+    seVaAcceso: 'Tu acceso y tus sesiones: no vuelves a entrar con este correo y esta clave.',
+    seVaExternas: 'Tus formas de entrar con otras cuentas, si las usaste.',
+    seVaArchivos: 'Tus archivos personales y tu foto de perfil.',
+    quedaTitulo: 'Qué queda, desligado de ti',
+    quedaConsentimientos:
+      'El registro de qué aceptaste: es la prueba de qué se te prometió, y la ley obliga a conservarla.',
+    quedaPagos: 'Tus pagos y liquidaciones, por obligación fiscal.',
+    quedaHitos: 'Los hitos de tu trabajo como prestador, ya sin tus datos personales.',
+    quedaNegocio:
+      'Si tu negocio sigue con otras personas, el negocio y su historia quedan con el equipo. Solo sales tú.',
+    ventana:
+      'Tienes 30 días para arrepentirte: escribe a {{correo}} y volvemos todo atrás. Pasados los 30 días, el cierre es definitivo.',
+    exportarCta: 'Exportar mis datos antes de irme',
+    exportarDetalle: 'Te enviamos una copia de todo a tu correo.',
+    continuar: 'Continuar',
+    confirmarTitulo: '¿Eliminamos tu cuenta?',
+    confirmarCuerpo:
+      'Al confirmar, pierdes el acceso ahora mismo. Tienes 30 días para volver atrás escribiendo a {{correo}}; pasado ese plazo, ya no podrás entrar ni recuperarla. Guarda ese correo antes de continuar.',
+    confirmarCta: 'Eliminar mi cuenta',
+    volver: 'No, volver',
+    listoTitulo: 'Tu cuenta quedó en proceso de cierre',
+    yaEstabaTitulo: 'Tu cuenta ya estaba en proceso de cierre',
+    listoCuerpo:
+      'Perdiste el acceso. Tienes hasta el {{fecha}} para volver atrás escribiendo a {{correo}}. Después, el cierre es definitivo.',
+    escribir: 'Escribir a privacidad',
+    salir: 'Salir',
+    asistidoTitulo: 'Esto lo resolvemos contigo',
+    asistidoCuerpo:
+      'Tu cuenta está enlazada a algo que no se puede cerrar con un botón sin dejar a otras personas sin acceso. Escríbenos a {{correo}} y lo resolvemos juntos.',
+    errorGenerico: 'No pudimos eliminar tu cuenta ahora. Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+    // Los dos caminos (punto 3) + el único-con-acceso (punto 4).
+    elegirIntro: '¿Qué quieres cerrar? Son dos cosas distintas.',
+    elegirMiCuenta: 'Cerrar mi cuenta',
+    elegirMiCuentaDetalle: 'Cierra tu usuario. El negocio sigue si otras personas tienen acceso.',
+    elegirNegocio: 'Cerrar el negocio',
+    elegirNegocioDetalle: 'Esto no se hace desde la app. Te explicamos por qué.',
+    negocioTitulo: 'El negocio se cierra con nosotros',
+    negocioCuerpo:
+      'Un negocio con citas ya pagadas, empleados con acceso y pagos por liquidar no se cierra con un botón: hay que resolver bien cada cosa para no dejar a nadie a mitad de camino. Por eso lo hacemos contigo, no desde la app.',
+    negocioUnico:
+      'Además, eres la única persona con acceso a este negocio: cerrar tu cuenta lo dejaría sin nadie.',
+    negocioContacto: 'Escríbenos a {{correo}} y empezamos.',
+  },
+  exportarDatos: {
+    titulo: 'Exportar mis datos',
+    intro:
+      'Pídenos una copia de todo lo que e-PetPlace guarda sobre ti y tu negocio. Es tu derecho, y te la damos.',
+    detalle: 'Preparamos el archivo y te lo enviamos a tu correo, con un enlace que vence. Puede tardar un rato.',
+    cta: 'Pedir mi copia',
+    enviado:
+      'Listo. Te enviamos tu copia a {{correo}}. Revisa tu correo (y la carpeta de spam) en las próximas horas.',
+    yaEnCamino: 'Ya te la estamos preparando. Te llega a {{correo}}: revisa tu correo en las próximas horas.',
+    error: 'No pudimos preparar tu copia ahora. Prueba de nuevo en un momento.',
+    pedirDeNuevo: 'Pedirla de nuevo',
   },
 } as const;
