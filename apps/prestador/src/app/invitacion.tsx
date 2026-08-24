@@ -55,10 +55,6 @@ import {
 
 import { useTraduccion } from '@/i18n';
 
-/** La traza del texto legal mostrado (mismo marcador que registro): NO es
- *  una URL navegable (D-336). */
-const URL_LEGAL = 'terminos-inline-v1';
-
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'invitacion'; datos: InvitacionPendiente }
@@ -129,7 +125,9 @@ export default function Invitacion() {
        no un segundo gate). El userId sale de la sesión viva. */
     const sesion = await obtenerSesion();
     if (sesion.ok && sesion.data !== null) {
-      await registrarConsentimiento(sesion.data.user_id, 'acceso_prestador', URL_LEGAL);
+      // La URL de cada documento la resuelve `URL_LEGAL` en packages/api; el
+      // 3er argumento se omite (su default ya es null → el motor la resuelve).
+      await registrarConsentimiento(sesion.data.user_id, 'acceso_prestador');
     }
     // La puerta está abierta (R1): el vínculo ya es activo → entrar. El
     // guard re-resuelve y lleva a las tabs (sin rol → sin NEGOCIO).

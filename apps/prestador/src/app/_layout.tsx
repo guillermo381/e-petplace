@@ -26,6 +26,8 @@ import '@/lib/api';
 import '@/lib/track-gps-fondo';
 // Riel i18n (S51-B1a): namespaces prestador + ui, keys tipadas exigibles.
 import { recursos } from '@/i18n';
+// S104-C · el candado biométrico sobre la sesión (§2.5): envuelve el Stack.
+import { GateBiometrico } from '@/components/gate-biometrico';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -231,11 +233,13 @@ export default function RootLayout() {
                 sea que la transición de regreso **se derive del gesto** en
                 lugar de configurarse (dictado del founder, 16-ago).
                 Ver `@/lib/dia-en-vista`. */}
-            <DiaEnVistaProvider>
-              <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-                <Stack.Screen name="(tabs)" />
-              </Stack>
-            </DiaEnVistaProvider>
+            <GateBiometrico>
+              <DiaEnVistaProvider>
+                <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+                  <Stack.Screen name="(tabs)" />
+                </Stack>
+              </DiaEnVistaProvider>
+            </GateBiometrico>
           </AvisoProvider>
         </EpetThemeProvider>
       </ProveedorI18n>

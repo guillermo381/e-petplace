@@ -58,6 +58,11 @@ export const uiEs = {
     ver: 'Ver',
     ocultar: 'Ocultar',
   },
+  // S104-C · el botón Pegar de CampoCodigo. Solo aparece si expo-clipboard
+  // resolvió (require en try/catch): el prestador no lo tiene horneado.
+  campoCodigo: {
+    pegar: 'Pegar',
+  },
   candado: {
     // S104-B · MODELO_LOGIN §2.5 — el candado sobre la sesión.
     // La voz NUNCA nombra el método (huella / rostro): depende del
@@ -70,7 +75,12 @@ export const uiEs = {
     // misma frase, porque es el momento en que hace falta.
     rechazada: 'Tu teléfono no pudo reconocerte. Prueba otra vez o entra con tu contraseña.',
     desbloquear: 'Desbloquear',
-    usarClave: 'Entrar con mi contraseña',
+    // S104-C · enmienda founder (23-ago): «Entrar con otra cuenta», no «con mi
+    // contraseña». Dos razones: la salida CIERRA la sesión y va al login, donde
+    // se puede entrar con CUALQUIER cuenta; y un usuario solo-Google NO TIENE
+    // contraseña, así que prometerle «con mi contraseña» miente. A ratificación
+    // de B (es su pieza).
+    usarClave: 'Entrar con otra cuenta',
   },
   esqueleto: {
     cargando: 'Cargando',

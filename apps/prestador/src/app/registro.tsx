@@ -44,11 +44,6 @@ import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetpl
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
 import { useTraduccion } from '@/i18n';
 
-/** La traza del texto legal mostrado (mismo marcador que el cliente): NO es
- *  una URL navegable (D-336), es la marca estable de QUÉ vio la persona,
- *  para el registro de consentimiento de A. */
-const URL_LEGAL = 'terminos-inline-v1';
-
 export default function Registro() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -72,9 +67,9 @@ export default function Registro() {
       nombre: nombre.trim(),
       email: email.trim(),
       password,
-      // el consentimiento viaja con el alta (motor de A): tipo `registro`,
-      // con la traza del texto legal mostrado.
-      urlLegalMostrada: URL_LEGAL,
+      // El consentimiento viaja con el alta (motor de A). La URL de cada
+      // documento la resuelve `URL_LEGAL` en packages/api; la pantalla NO la
+      // aporta —versión y URL son el mismo dato y viven juntos (L-166)—.
     });
     setCargando(false);
 
@@ -91,10 +86,11 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
-      // el proyecto exige confirmación de email: la sesión no nació —
-      // se dice y se vuelve al login (misma mecánica que el cliente).
-      mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
-      router.replace('/login');
+      // el proyecto exige confirmar el correo: el registro gana un paso —
+      // la pantalla de código (S104-C, misma mecánica que el cliente). El
+      // consentimiento se persiste al confirmar (D-893); la URL la resuelve
+      // `URL_LEGAL` en packages/api, no viaja por la pantalla.
+      router.replace({ pathname: '/verificar-correo', params: { email: email.trim() } });
       return;
     }
     // la sesión está viva y la cuenta VACÍA: el guard raíz re-decide y

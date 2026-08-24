@@ -20595,7 +20595,21 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
-#### D-895 — 🟠 EL TOKEN DE PUSH DEL PRESTADOR NO SE SINCRONIZA: TRES CAPAS DE SILENCIO APILADAS
+#### D-895 — 🟢 NO HAY DEFECTO: el token SÍ sincroniza. Queda como ENDURECIMIENTO de tres capas de silencio
+🟢 **BAJA — ENMENDADA EL 24-ago-2026, EL DÍA DESPUÉS DE FICHARLA. La retractación es de D, con el par medido, y A la verificó antes de reescribir la ficha.**
+
+**EL PAR, medido contra la base:** ANTES (23-ago, binario 1.0.5) **2 filas · 1 activa** · DESPUÉS (24-ago, binario 1.0.6 instalado y app abierta) **4 filas · 3 activas**, con **fila nueva y token nuevo EN LAS DOS APPS** (01:27 y 01:34). ⇒ **El SO emitió un token distinto con el binario nuevo y `registrar_push_token` hizo exactamente lo suyo: reasigna por token, así que un token nuevo es una fila nueva. La sincronización FUNCIONA.**
+
+**🔴 DÓNDE FALLÓ EL DIAGNÓSTICO, en las palabras de D y sin suavizar:** *«medí bien, razoné bien sobre lo medido, y la premisa que metí en el medio —**«permiso concedido = app abierta»**— no la medí»*. Su discriminador (*«si el token hubiera rotado habría una tercera fila; hay dos, luego no escribió»*) **era correcto**; **el estado del mundo al que lo aplicó, no**. *Un token muerto no revive: lo reemplaza uno nuevo, y para eso hay que abrir la app.* **Nunca hubo carrera de arranque.**
+
+⇒ **Primo de L-414, y por eso vale registrarlo:** allá un número viajó **sin su predicado**; acá un razonamiento viajó **con una premisa que nadie pidió verificar, empezando por quien la puso**. *Es la octava forma del defecto de la jornada y la única donde el que se equivocó tenía un dato duro en la mano.*
+
+**LO QUE SIGUE SIENDO CIERTO, y se ficha como lo que es —ENDURECIMIENTO, no defecto—:** las tres capas de silencio existen en `apps/*/src/components/invitacion-avisos.tsx`. **No fueron la causa acá**, pero son **la razón por la que D no pudo distinguir «no corrió» de «corrió y falló» sin un binario nuevo de por medio**, y esa ceguera sí es real. **Sin dueño ni urgencia.**
+
+**🟢 Nota de tránsito, para que nadie la lea como basura:** `guillo381+8` quedó con **dos filas activas** (la vieja y la nueva). El despachador manda a todos los tokens activos y **el viejo va a rebotar como muerto y la propia función lo va a retirar** (`tokenMuerto` → `activo=false`). **Se cura solo en el primer envío real.**
+
+<details><summary>Texto original de la ficha (23-ago, diagnóstico retractado)</summary>
+
 🟠 **Diagnosticado por D (23-ago-2026) con dos discriminadores; fichado por A. Dueño: las apps (C).**
 
 **El síntoma:** el token de push del prestador sigue `activo=false`, con último uso del 16-ago, **aunque el founder confirmó que las DOS apps tienen permiso de notificaciones concedido.** Con eso caen las causas baratas: el permiso está, el código existe desde el 7-ago (`b1254158`, S90-B) y el llamado está bien puesto (`status==='granted'` → `sincronizarTokenSiHayPermiso`).
@@ -20612,7 +20626,9 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 - **Si el token del SO hubiera rotado, la RPC habría INSERTADO fila nueva** (reasigna por token). **Hay dos filas, no tres** ⇒ *la sincronización no llegó a escribir.*
 
 **La cura:** leer el `ok` del wrapper y **reintentar cuando la sesión esté lista**, en vez de solo al montar. *Un `await` cuyo resultado nadie mira es una llamada que no se puede diagnosticar — y envuelta en un catch que explica de antemano por qué podría fallar, deja de poder distinguir el caso que explica del que no.*
-☠️ **Condición de muerte:** el token del prestador vuelve a `activo=true` **y** una notificación real llega a ese aparato.
+</details>
+
+☠️ **Condición de muerte (CUMPLIDA para el token; el endurecimiento queda):** el token del prestador volvió a `activo=true` el 24-ago 01:34. **Falta la mitad que sigue valiendo: que una notificación real llegue a ese aparato.**
 
 #### D-896 — 🟢 LA CUENTA SONDA DEL GATE DE D-893 QUEDA MARCADA, NO BORRADA
 🟢 **BAJA — resuelta y anotada para que nadie la lea como anomalía.**
@@ -20643,5 +20659,175 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **Lo que la vuelve barata de cumplir:** el predicado ya está escrito cuando se mide — es el `WHERE`. **Copiarlo al mensaje cuesta una línea.** *No hace falta medir mejor: hace falta decir contra qué se midió* — que es **L-285** («declarar contra qué mediste te salva de la geometría vieja») aplicada a un mensaje entre pistas en vez de a un freno propio.
 
 **Y el detalle de forma que lo produjo, porque va a volver a pasar:** *el nombre del predicado sugería la comparación equivocada.* `nombre_es_email` invita a buscar un `@`, y el dato sembrado **no tiene `@`**. **Un alias mal puesto en una consulta se convierte en la pregunta que uno cree haber hecho.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-415 — un documento que se remite a una pieza que no contiene pasa TODOS los barridos de marcas
+**S104-A, 24-ago-2026. Décima forma del defecto de la jornada, y la más limpia de las diez: el instrumento contestó, y contestó bien, una pregunta que no era la que se creía hacerle.**
+
+**El caso.** El T&C `v1.0 FINAL` llegó para reemplazar al que tenía el recuadro «NO PUBLICAR TODAVÍA». Se barrió como corresponde y el barrido salió **impecable**: cero recuadros, cero sellos de borrador, cero corchetes sin llenar, cero notas internas. Y las cuatro afirmaciones del founder sobre él se verificaron una por una y **las cuatro eran ciertas**.
+
+**Lo que el barrido no podía ver:** el encabezado dice *«Títulos IV y V en vigencia diferida, conforme a la **Disposición Transitoria Primera**»* — y **`Transitoria` aparece UNA sola vez en todo el documento: en esa remisión.** El documento **termina en §38.10 sin disposiciones transitorias**.
+
+⚠️ **Y esa pieza ausente es justamente la que reemplaza al sello que se quitó.** El recuadro decía *«publicar antes de que estas cuatro funciones operen convierte cada cláusula en incumplimiento desde la primera transacción»*; la solución del abogado fue **diferir la vigencia de los Títulos IV y V**, que cubren exactamente esas cuatro funciones. ⇒ **el sello no desapareció porque su razón se hubiera resuelto: desapareció porque su razón se convirtió en un mecanismo — y el mecanismo no está escrito.**
+
+> **La ley: un barrido de marcas responde «¿quedan marcas de borrador?». No responde «¿el documento está completo?». Son dos preguntas, y la segunda se contesta verificando que TODA remisión tenga destino.**
+
+**Por qué es más peligrosa que un corchete abierto:** un corchete **grita** — es visualmente anómalo y cualquiera lo ve. Una remisión a una cláusula inexistente **se lee como un documento bien organizado**: tiene forma de referencia cruzada, que es señal de rigor. *Lo que la delata no es leerla: es ir a buscar lo que nombra.*
+
+**El instrumento que la caza, y cuesta un `grep`:** por cada `Disposición`, `Anexo`, `Título` o `§` que un documento **cite**, contar sus ocurrencias. **Si el término aparece una sola vez, esa vez es la remisión y el destino no existe.** Se corrió sobre los tres documentos de la tanda: el T&C dio **1** (rojo), la evaluación dio **4** para «Anexo A» (verde: §11 lo desarrolla y la carpeta existe), la Política dio **cero remisiones colgadas**.
+
+**Y el corolario que ordena las diez formas del día:** *un gate mide lo que se le pidió medir; la vara dice qué había que pedir.* **No alcanza con mirar el color: hay que preguntar quién lo produjo** — y, cuando el color es verde, **qué pregunta contestó.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método. **Candidata a regla de la casa:** todo documento legal que se deposite declara que sus remisiones internas fueron verificadas.
+
+#### D-897 — 🔴 CINCO FRENOS DE PUBLICACIÓN (tres del abogado + §14.4 + el consentimiento que la letra promete y el motor no pide)
+🔴 **BLOQUEANTES DE APERTURA.** Marcados por el abogado (24-ago-2026) sobre los censos de S104-A, y **los tres son de PRODUCTO, no de texto**: *no se resuelven redactando mejor — se resuelven construyendo, o el documento promete algo que el sistema no hace.*
+
+**① El reembolso no devuelve dinero.** Existe la función que revierte el asiento contable; **no hay devolución real** a la tarjeta ni a la billetera. Hoy, cancelar con derecho a reembolso **anota el derecho y no paga**. ⇒ *Unos T&C que prometen reembolso con un motor que solo asienta es la clase de promesa que se descubre el día del primer reclamo.*
+
+**② La liquidación nunca corrió de punta a punta.** Medido: **0 liquidaciones** en la base, con el modelo completo (retenciones, holdback, ajustes, disputa). **Plazo, medio y retenciones no existen como decisión.** ⇒ *Firmar un contrato que dice cuándo se le paga al profesional, sin haberle pagado nunca a nadie, es firmar sobre una pieza sin ejercer.*
+
+**③ Falta la leyenda «no es factura» en el comprobante.** El sistema emite un comprobante de pago que **no es factura fiscal**, y **no lo dice**. ⇒ *Un documento con monto, fecha y concepto que no aclara qué NO es, se lee como lo que no es.*
+
+**④ Verificar §14.4 el día que la fee del procesador deje de ser cero.** Los T&C afirman que **la comisión del procesador la asume la Compañía con cargo a su Comisión y NO se descuenta de la Liquidación**. Medido hoy: `plataforma + payout = bruto` **exacto** (58,24 + 330,01 = 388,25) ⇒ **consistente**. ⚠️ **Pero se cumple por CONSTRUCCIÓN y no por EJERCICIO**: el campo de la fee está en **0,00 en las 36 operaciones**, porque el ambiente es de pruebas. *El reparto es correcto en un mundo donde ese número es cero.* ⇒ **con la primera fee real, re-verificar que siga saliendo de la Comisión y no del pago al profesional.** *Es una cláusula que hoy nadie puede contradecir porque nadie la ejerció — y por eso es exactamente la clase que se descubre rota en la primera liquidación.*
+
+**⑤ 🔴 EL CONSENTIMIENTO DE IA Y DE DICTADO POR VOZ NO SE RECABA, Y DOS TEXTOS YA REDACTADOS SE APOYAN EN ÉL COMO BASE DE LEGITIMACIÓN.** Medido contra `consentimientos` (24-ago-2026): `registro` **60** · `terminos_parent` **2** · `privacidad` **2** · **cualquier fila que mencione IA, voz o dictado: 0**. **Y el cero no es por falta de uso: es porque el sistema no lo pide** — el acto está previsto en el código (`ActoConsentible` contempla `dictado_voz`) y **ningún flujo lo escribe**. *Motor sin puerta (`L-318`), en su versión legal.*
+
+⚠️ **Lo que lo vuelve bloqueante y no pendiente:** no es cortesía en ninguno de los dos textos. La **evaluación de transferencias**, Parte II §9, funda la **Transferencia B** —el audio que sale al fabricante del sistema operativo— **en ese consentimiento**; y la **Política §17.B.5** dice ante el titular, en presente, que el dictado *«requiere el consentimiento previo, específico e informado del profesional, que se le solicita la primera vez que utiliza la función»*. ⇒ **publicar antes de construirlo convierte una promesa al titular en una afirmación falsa, y deja la Transferencia B sin la base que su propia evaluación le asigna.** *No es un hueco del expediente: es un hueco del motor que el expediente hizo visible.* Es además el **ítem 7 del Anexo A** (`docs/legal/anexo-a/README.md`), la única de las ocho evidencias que se pudo medir contra el sistema — y salió en cero.
+
+**Dueño:** producto + el frente de pagos (⑤ es de producto, cliente **y** prestador por la ley de paridad). **Disparo:** los cinco, **antes de la primera venta real a un tercero**; ⑤ además **bloquea la publicación de la Política y del Aviso de IA**.
+☠️ **Condición de muerte:** ① un reembolso ejecutado contra la pasarela y verificado en el extracto · ② una liquidación generada, aprobada y pagada, con su referencia de transferencia · ③ la leyenda visible en un comprobante emitido · ④ una operación con fee de procesador **distinta de cero** en la que `plataforma + payout` siga sumando el bruto · ⑤ **una fila de consentimiento de dictado por voz escrita por el camino real** —el profesional tocando el micrófono por primera vez— **y no por un fixture**.
+
+#### D-898 — 🟡 `extract-documento` está desplegada, es facturable y NADIE la llama
+🟡 **MEDIA.** Apareció al contrastar el censo de privacidad contra el sistema (S104-A, 24-ago-2026).
+
+`extract-documento` (S97-A) fue construida para que **la foto del documento pre-llene el alta del profesional** — su propia cabecera lo dice: *«la persona CORRIGE, no digita»*. **Está `ACTIVE`, exige sesión válida, y tiene CERO consumidores**: ninguna pantalla ni wrapper la invoca.
+
+**Las dos consecuencias, y la segunda es la que pesa:**
+- **Es superficie desplegada y facturable que no rinde nada** (misma familia que `chat-ayuda`, D-717, que sí se retiró).
+- 🔴 **Contaminó un documento legal.** El censo de privacidad de S104 le atribuyó a Anthropic el tratamiento de **documentos de identidad** basándose en que la función existe — **y el abogado redactó el aviso de IA sobre eso**. *La función existía; el tratamiento no. **Existir y correr son dos cosas distintas, y un censo que mira lo primero contesta por lo segundo** — es L-402 aplicada a un inventario legal en vez de a un circuito.*
+
+**La decisión es binaria y no se puede diferir sin costo:** **conectarla** (y entonces el aviso de IA la incluye con razón) **o retirarla** (y entonces el aviso no la menciona). *Dejarla desplegada y sin conectar es el peor de los tres estados: paga, no sirve, y confunde a quien la censa.*
+☠️ **Condición de muerte:** o tiene un consumidor vivo medido, o no está desplegada.
+
+#### D-899 — ✅ DECLARADA EN LA LETRA (24-ago) · el audio del dictado va al motor de voz del sistema
+✅ **RESUELTA POR DECLARACIÓN, no por cambio de código, y el abogado la resolvió MEJOR de lo que A la planteó.**
+
+A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o declarar la transferencia**. El abogado tomó el segundo **y corrigió el encuadre**: *no es una transferencia nuestra*. **Google y Apple NO son encargados nuestros** — *«no los contratamos, no podemos instruirlos, y tratan ese audio bajo sus propios términos y su relación directa con usted como usuario del dispositivo»*. ⇒ el aviso lo separa en un apartado propio (**«B — Motor de voz del teléfono»**, distinto de **«A — Proveedor de IA»**) y la privacidad lo repite en §16.2 y §17.B.
+
+**Lo que quedó escrito y es exacto contra lo medido:** *«e-PetPlace no recibe, no procesa y no conserva en ningún momento la grabación de audio: recibe únicamente el texto ya transcrito»* — verificado: `estructurar-nota-clinica` recibe `{ texto }`.
+
+🟡 **Lo que NO se cerró y queda con dueño de producto:** la cura técnica sigue disponible (`requiresOnDeviceRecognition: true`) y **nadie la midió en dispositivo**. *Declarar el tratamiento lo vuelve lícito, no lo vuelve deseable:* la voz de un veterinario describiendo una consulta sigue saliendo del teléfono. **Disparo: cuando alguien pueda medir en el aparato si el modelo local existe y con qué calidad.**
+
+<details><summary>Texto original de la ficha (24-ago, antes de que el aviso la declarara)</summary>
+
+🔴 **EL AUDIO DEL DICTADO VA AL MOTOR DE VOZ DEL SISTEMA (Google / Apple): una transferencia internacional NO DECLARADA**
+🔴 **ALTA.** Medido el 24-ago-2026 al contrastar el **Aviso de IA** del abogado contra el código. **Su §6 («el audio del dictado») preguntaba exactamente esto y la respuesta es que sí.**
+
+**Lo medido, en tres piezas:**
+1. **El dictado usa un módulo propio, no el teclado**: `expo-speech-recognition` está instalado, **declarado como plugin nativo** en `apps/prestador/app.json` con su texto de permiso, y **vivo** en `dictado-en-vivo.tsx` (encendido en S78; la decisión de S72 de «seguir con el del teclado» quedó atrás).
+2. 🔴 **Arranca con `start({ lang: 'es-EC' })` y SIN `requiresOnDeviceRecognition`** ⇒ **usa el motor por defecto del sistema operativo**, que en Android es **Google Speech Services** y **puede transcribir en la nube**.
+3. ✅ **A nuestro servidor NUNCA llega audio**: `estructurar-nota-clinica` recibe `{ texto: string }` y nada más.
+
+⇒ **Las tres respuestas al abogado:**
+- **¿Se conserva la grabación?** **No, y no puede: el audio nunca entra a nuestros sistemas.**
+- **¿La transcripción la hace Anthropic?** **No.** La hace **el motor de voz del dispositivo**, antes de que exista texto.
+- **¿Hay un segundo proveedor?** **SÍ — Google (Android) o Apple (iOS), recibiendo la voz del veterinario dictando una consulta clínica.** **No está declarado en ninguno de los tres documentos.**
+
+**Por qué es 🔴 y no un detalle:** *lo que se transfiere no es un dato de contacto — es la voz de un profesional describiendo el estado de salud de un animal, con el nombre del paciente y de la clínica adentro.* Y el usuario **no lo puede inferir**: la pantalla dice «dictar» y nada sugiere que su voz salga del teléfono.
+
+**La cura técnica existe y es una línea:** `requiresOnDeviceRecognition: true` fuerza el reconocimiento **local**. **No se aplicó sin medir**, porque tiene costo real: no todos los dispositivos lo soportan, y donde no hay modelo local descargado **el dictado deja de funcionar** en vez de degradarse. ⇒ **Hay que medirlo en el aparato antes de decidir**, y son dos caminos legítimos: forzar local (y perder cobertura) o **declarar la transferencia** en el aviso.
+
+**Dueño:** producto + legales. **Disparo: ANTES de publicar el Aviso de IA** — es el único de los frenos que hace que un documento ya redactado sea **incompleto**, no solo mejorable.
+</details>
+
+☠️ **Condición de muerte (la mitad de LETRA está CUMPLIDA):** el aviso ya declara a Google/Apple y **con el encuadre correcto — como tercero que NO es encargado nuestro**. Queda la mitad de producto: medir el reconocimiento on-device en dispositivo y decidir.
+
+#### D-900 — 🔴 EL SISTEMA NO EXPRESA EL MANDATO DE RECAUDACIÓN QUE EL CONTRATO YA FIRMÓ
+🔴 **ALTA.** La figura **quedó decidida en la letra** (founder, 24-ago-2026): **§17 de los T&C Pet Professional es un MANDATO DE RECAUDACIÓN.** *«El Usuario Profesional confiere mandato a la Compañía para que, **en su nombre y por su cuenta**, recaude de los Usuarios Clientes las Tarifas»*, limitado a la recaudación, remunerado por la Comisión, con facultad de compensación (§17.5).
+
+**🔴 EL SISTEMA NO SABE ESO, y lo que lo vuelve grave es que TAMPOCO FALLA.** Medido en el censo de S104-A: el motor **registra un cobro y un reparto** (bruto · comisión de pasarela · comisión de plataforma · monto del profesional) **y nada más**. ⇒ **«e-PetPlace cobra por cuenta y orden del profesional» y «e-PetPlace cobra en nombre propio y después le paga» producen HOY exactamente los mismos registros.** *No hay ningún campo, ninguna función y ninguna restricción que distinga las dos figuras — y son fiscalmente opuestas.*
+
+**Por qué no es un detalle contable:**
+- **De la figura depende quién emite la factura al cliente final.** Con mandato, factura el profesional; en nombre propio, factura la Compañía. **Hoy no se emite ninguna** (ver D-897 ③), así que la ambigüedad todavía no se materializó — *y por eso conviene cerrarla antes y no después de la primera factura, que es el acto que la vuelve irreversible hacia atrás.*
+- **§17.5 da facultad de compensación** contra los valores recaudados. **El motor no tiene el concepto de «valores recaudados por cuenta ajena»**: tiene montos repartidos. Compensar sobre algo que el sistema no distingue de ingreso propio es exactamente lo que un mandato no debe hacer.
+- **Un mandato exige rendición de cuentas** (§17 lo dice: se rinde por la Liquidación y su detalle de Operaciones). **Nunca se rindió ninguna** — 0 liquidaciones (D-897 ②).
+
+**Lo que haría falta, sin diseñarlo acá:** que el sistema **distinga contablemente lo recaudado por cuenta ajena de lo propio**, y que la Liquidación **sea la rendición de ese mandato** y no solo una transferencia calculada.
+
+> ### ✅ FIRMA DEL FOUNDER (24-ago-2026) — la figura NO se decide, ya está decidida
+>
+> **Es MANDATO DE RECAUDACIÓN, §17 de los T&C.** *Lo que falta no es decidir: es que el sistema lo exprese.* **Las tres implicancias, para la sesión que lo construya:**
+>
+> **① Los valores recaudados tienen que ser distinguibles de ingreso propio EN EL MOTOR, no solo en el reparto.** Hoy hay cuatro montos por operación y ninguno dice *de quién es el dinero mientras está en tránsito*. **Repartir bien no es lo mismo que declarar de quién es** — y la diferencia es la que separa un mandato de una compraventa.
+>
+> **② La compensación de §17.5 opera sobre esa distinción.** El contrato permite compensar deudas del profesional *contra los valores recaudados*. **Sin ① eso no se puede ejecutar correctamente**: compensar contra un monto que el sistema no distingue de ingreso propio es cobrarse de la caja, no del mandato.
+>
+> **③ La Liquidación es el ACTO DE RENDICIÓN del mandato** ⇒ **su primera corrida es también la primera prueba de la figura.** *No es una transferencia con un informe adjunto: es el informe, y la transferencia es su consecuencia.* Esto además ata D-900 a D-897 ②: **la liquidación no se puede probar sin probar el mandato, y viceversa.**
+
+**Dueño:** producto + el frente de pagos, con la mesa. **Disparo: ANTES DE LA PRIMERA LIQUIDACIÓN REAL** — porque la primera liquidación es el primer acto de rendición del mandato, y rendir cuentas de algo que el sistema no modeló como ajeno es donde la figura se rompe.
+☠️ **Condición de muerte:** el sistema distingue lo recaudado por cuenta ajena, y la Liquidación se emite como rendición del mandato con su detalle de Operaciones.
+
+#### D-901 — 🔴 LA PRIVACIDAD PROMETE BORRAR LOS DOCUMENTOS DE IDENTIDAD A LOS 90 DÍAS Y **61 DE 64 YA LOS PASARON**
+🔴 **ALTA — BLOQUEA LA PUBLICACIÓN DE LA POLÍTICA DE PRIVACIDAD.** Medido el 24-ago-2026, al verificar el freno que levantó la pista C.
+
+**Lo que el documento promete (§18):** *«Imagen del documento de identidad del profesional — **se elimina al completarse la verificación**, y en todo caso **a los 90 días de su carga**»*. Y para los datos de contacto: *«mientras su cuenta exista, **más 30 días**»*.
+
+**Lo medido en el bucket `prestador-documentos`:**
+- **64 archivos vivos** · el más viejo del **4-may-2026**
+- 🔴 **61 de 64 tienen MÁS de 90 días.**
+
+**Y no hay mecanismo que pueda cumplirlo:** los dos crones vivos son `barrer-storage-tick` (la cola de **D-731**, que borra por **trigger de DELETE de fila**, no por edad) y `expirar-citas-pendientes`. **No existe ninguna función de retención, purga ni anonimización por antigüedad.** *El sistema no conserva de más por un fallo: conserva de más porque nadie construyó lo contrario.*
+
+⇒ **Publicar §18 hoy sería afirmarle al usuario un hecho falso sobre el producto, y falso de forma verificable: 61 archivos lo contradicen.** *Es peor que no publicar, porque una política que promete un borrado que no ocurre no protege a nadie y además documenta el incumplimiento.*
+
+**Esto CONFIRMA con número lo que el censo de S104 marcó como lo más urgente:** *«NO EXISTE UN PLAZO DE RETENCIÓN ESCRITO… sin ese plazo, el sistema conserva indefinidamente»*. **Ahora el plazo está escrito —en un documento legal— y sigue sin existir en el sistema. La brecha no se cerró: se volvió exigible.**
+
+**Los dos caminos, y los dos son legítimos:** **(a)** construir el barrido por antigüedad **antes** de publicar · **(b)** ajustar §18 a lo que el sistema hace hoy y publicar el plazo cuando exista. **Lo que NO es legítimo es publicarlo así.**
+
+**Dueño:** founder + legales (el plazo) · producto (el mecanismo). **Disparo: antes de publicar la Política de Privacidad.**
+☠️ **Condición de muerte:** o existe un barrido por antigüedad verificado con un archivo borrado de verdad, o §18 dice lo que el sistema hace.
+
+#### D-902 — 🔴 LA POLÍTICA **YA PUBLICADA** PROMETE «VÍA MANUAL EQUIVALENTE» PARA LAS TRES FUNCIONES DE IA, Y EL CARNET NO LA TIENE
+🔴 **BLOQUEANTE, y con una agravante de forma: el documento ya está publicado.** Apareció al contestar una pregunta de S104-C sobre si la Transferencia A necesitaba su propio gate de consentimiento (24-ago-2026). *La pregunta era buena; la medición encontró que el problema estaba un piso más abajo.*
+
+**§14.5, literal, en el texto vivo:** *«El uso de estas funcionalidades es opcional y existe una **vía manual equivalente** para registrar la misma información. Puede no activarlas, u oponerse a ellas en cualquier momento, **sin que ello afecte su acceso al resto de la plataforma**.»*
+
+**Medido, función por función:**
+
+| función de §14 | vía manual | medición |
+|---|---|---|
+| **14.2** nota clínica | ✅ **existe** | la pantalla de consulta tiene **19 campos propios**; `DictadoEnVivo` es un input más sobre un campo que también se tipea |
+| **14.4** presentación del negocio | ✅ **existe** | `EscribaHistoria` monta un `Campo` con `onChangeText`; su propia cabecera dice *«Campo vacío ⇒ no ofrece mejorar: PREGUNTA»* |
+| **14.3** carnet de vacunas | 🔴 **NO EXISTE** | **cero** caminos de alta manual en el cliente · **cero** «Agregar» en la revisión del carnet (solo se edita o descarta lo que la IA extrajo) · y el **único** acceso desde el Hogar es `router.push('/carnet')`, o sea la foto |
+
+⇒ **Hoy una familia no puede registrar una vacuna sin pasar por la IA.** *La revisión no cuenta como vía manual: se puede corregir lo que la IA leyó, no cargar lo que la IA no vio.*
+
+🔴 **Y la consecuencia que ordena en qué orden se cura, que es lo que esta ficha viene a decir:** **construir el gate de consentimiento de la Transferencia A ANTES que la vía manual convertiría el consentimiento en coacción.** *Si decir «no» te deja sin la única forma de cargar vacunas, eso no es consentimiento libre — y la libertad del consentimiento es requisito de la LOPDP, no una cortesía de diseño.* **Primero la alternativa, después la pregunta.** Un gate sobre una función sin salida no protege al titular: **le documenta que aceptó porque no tenía opción.**
+
+**Distinción con `D-897 ⑤`, porque son vecinas y no la misma:** ⑤ dice *falta el acto de consentir*; ésta dice *falta la alternativa que hace libre a ese acto*. **⑤ no se puede cerrar bien mientras ésta esté abierta.**
+
+**Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo).
+☠️ **Condición de muerte:** o existe un camino de alta manual de vacuna **medido de punta a punta** —una vacuna registrada sin tocar la cámara—, o §14.5 deja de prometer una equivalencia que no hay **y la Política se versiona** (no se edita en silencio: ya está publicada, y `L-415`/versionado inmutable rigen).
+
+#### L-416 — un REEMPLAZO se mide contra todo lo que el original ya resolvía, no solo contra el defecto que lo motivó
+**S104-A, 24-ago-2026. Duodécima forma del defecto de la jornada, y la primera que se cobra sobre una CORRECCIÓN en vez de sobre una construcción.**
+
+**El caso, en cuatro pasos, y el cuarto es el que enseña:**
+1. Se halló que el T&C depositado se remitía a una **Disposición Transitoria Primera que no contenía** (`L-415`).
+2. Otra pista diagnosticó la causa: **el archivo se subió truncado**. *Razonable, y explicaba el síntoma.*
+3. Llegó el reemplazo **con la Transitoria completa**, y con una orden de verificación explícita y correcta: *«medí que PRIMERA.1 a PRIMERA.6 estén enteras y que el índice la liste»*.
+4. **Esa medición dio VERDE COMPLETO — 6 de 6 y el índice.** Y el reemplazo, medido en lo que nadie pidió medir, **desandaba cuatro resoluciones que el depositado ya tenía**: la fecha (`[__ de ____ de 2026]`), el canal comercial (`[correo de soporte]`), **el número de árbitros sin resolver** (`[un (1) / tres (3)]`), **seis notas internas** y **un recuadro de borrador**.
+
+⇒ **Obedecer la orden habría cambiado un defecto por once.** *El documento habría ganado la cláusula que le faltaba y perdido todo lo que ya estaba decidido.*
+
+> **La ley: cuando un reemplazo llega a curar un defecto, se mide contra el estado que reemplaza — no contra el defecto. La pregunta no es «¿trae lo que faltaba?», es «¿trae lo que faltaba SIN llevarse lo que había?».**
+
+**Es un test de regresión, y por eso la lección no es sobre documentos:** *toda corrección es candidata a regresión, y el que la pide está mirando el defecto — por eso el que la aplica es el único que puede mirar el resto.* **La orden de verificación era correcta y aun así insuficiente: medía la CURA, no la REGRESIÓN.**
+
+🔴 **Y la medición además corrigió el diagnóstico, lo que decidió que NO se compusiera a mano:** el depositado **no estaba truncado**. Un archivo cortado al subirse **no conserva su pie**, y el depositado **termina completo** (`Versión 1.0 — vigente desde el 24 de agosto de 2026`). Medido: además de la Transitoria **le falta la §4.5 entera** —*Vigencia diferida de las disposiciones económicas*, que es la que hace que el Usuario Profesional **declare haberla leído**— y **su §4.4 es más corta** que la del otro. ⇒ **son dos VERSIONES distintas del documento, no un original y su recorte.** *Con un truncado, pegar el bloque perdido es restaurar; con dos versiones, es redactar contrato — y aparecieron dos diferencias de cuerpo sin buscarlas, así que no hay razón para creer que sean las únicas.* **Se frenó la composición y se devolvió al abogado, que es de quien tiene que salir UNA versión con las dos mitades.**
+
+**El corolario práctico, barato:** *un truncado se distingue de una versión distinta mirando el FINAL del archivo.* **Si el pie está entero, no hubo corte.**
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.

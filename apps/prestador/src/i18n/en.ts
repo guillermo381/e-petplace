@@ -138,6 +138,16 @@ export const prestadorEn = {
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },
+  verificarCorreo: {
+    titulo: 'Confirm your email',
+    intro: 'We sent an 8-digit code to {{email}}. Enter it to come in.',
+    codigoLabel: 'Code',
+    codigoAyuda: '8 digits',
+    confirmar: 'Confirm',
+    reenviar: 'Resend the code',
+    reenviarEn: 'Resend in {{n}}s',
+    reenviado: 'We sent you a new code.',
+  },
   // S75-B1: the handshake — the inactive invitee lands here from the root.
   invitacion: {
     titulo: '{{negocio}} added you to their team',
@@ -513,6 +523,14 @@ export const prestadorEn = {
     irARecuperar: 'Create a password',
     esperaConNumero: 'You tried several times in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You tried several times in a row. Wait a moment and try again.',
+    biometricoTitulo: 'App lock',
+    biometricoEtiqueta: 'Lock when you come back to the app',
+    biometricoAyuda:
+      'When you leave and come back, your phone will ask you to prove it’s you before showing your session. If it can’t, you sign in with your password.',
+    biometricoNoDisponible:
+      'Set up your phone’s unlock (fingerprint or face) to use the lock.',
+    biometricoPrompt: 'Confirm it’s you',
+    biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   recuperar: {
     titulo: 'Recover your password',
@@ -576,6 +594,11 @@ export const prestadorEn = {
        "push" is nobody's vocabulary. notifEj* are PROPOSED lines measured
        against the live catalog — the mesa signs them before they travel. */
     notifLey: 'You choose how they reach you, not whether.',
+    // S104-C · §31.6 — voice dictation, revocable here.
+    dictadoTitulo: 'Voice dictation',
+    dictadoToggle: 'Allow voice dictation',
+    dictadoAyuda:
+      'Dictation uses your phone’s voice service, which may send the audio to the maker’s servers outside Ecuador. e-PetPlace doesn’t keep the recording, only the text. If you turn it off, we’ll ask you again next time you want to dictate.',
     notifFilaOperacion: 'Your appointments and services',
     notifFilaSaludSeguridad: 'Care and health',
     notifFilaSeguridadCuenta: 'Your account security',
@@ -2029,6 +2052,16 @@ export const prestadorEn = {
     micCta: 'Dictate with the microphone',
     micParar: 'Stop dictating',
     micEscuchando: '● Listening — tap again to stop',
+    // S104-C · D-899 — dictation privacy notice (founder-signed).
+    micPrivacidad: 'Your dictation is transcribed by your phone’s voice service.',
+    // S104-C · §31.6 — prior, specific, separate consent asked the FIRST time.
+    dictadoConsentTitulo: 'Before you dictate',
+    dictadoConsentCuerpo:
+      'Dictation uses your phone’s voice recognition service (Google on Android, Apple on iOS). Depending on your device, that service may send the audio to the maker’s servers outside Ecuador. e-PetPlace never receives or keeps the recording: it only receives the transcribed text. What is transmitted is your voice and what you dictate, which may include the patient’s name, your practice’s name and the clinical description.',
+    dictadoConsentOpcional:
+      'It’s optional: you can type the note by hand. You can revoke this permission anytime from Account or by writing to privacidad@epetplace.com.',
+    dictadoConsentAcepto: 'I agree to use dictation',
+    dictadoConsentAhoraNo: 'Not now',
     micPermisoDenegado: 'No microphone permission. Enable it in your phone settings; typing still works.',
     micCorte: 'Listening stopped. What you dictated stays in the note.',
     dictadoLabel: 'Consultation note',

@@ -29,9 +29,10 @@
  */
 
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
 import {
   Boton,
   Campo,
@@ -43,16 +44,26 @@ import {
   MarcaDeAgua,
   PaseoDeHuellas,
   spacing,
+  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { iniciarSesion } from '@epetplace/api';
+import { iniciarSesion, iniciarSesionConGoogle } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+// Cierra la ventana de auth al volver (necesario en web y managed; inocuo en
+// nativo). Va a nivel módulo, una sola vez.
+WebBrowser.maybeCompleteAuthSession();
 
 /** El isotipo recogido: ~0.4 del tamaño de la bienvenida (72 → 28), en la
  *  esquina superior. La continuidad del Acto III, montada per-pantalla. */
 const ISOTIPO_ESQUINA = 28;
+
+/** Deep link de vuelta del OAuth. `cliente://**` ya está en el uri_allow_list
+ *  del proyecto (medido por A). No necesita ruta: `openAuthSessionAsync` lo
+ *  intercepta, no navega la app. */
+const REDIRECT_GOOGLE = 'cliente://auth/callback';
 
 export default function Login() {
   const router = useRouter();
@@ -64,6 +75,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [cargandoGoogle, setCargandoGoogle] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   /** §5 — la llegada: entre el «ok» del servidor y el Hogar, la huella se
    *  completa una vez. Cubre la pantalla para que el pase sea el umbral. */
@@ -88,6 +100,37 @@ export default function Login() {
     }
     // §5: la huella de llegada, y recién después el Hogar. El guard del raíz
     // re-decide con la sesión nueva (7.5: estado real).
+    setLlegando(true);
+    setTimeout(() => router.replace('/'), 460);
+  }
+
+  async function entrarConGoogle() {
+    if (cargandoGoogle || cargando) return;
+    setCargandoGoogle(true);
+    setError(undefined);
+    const r = await iniciarSesionConGoogle({
+      redirectTo: REDIRECT_GOOGLE,
+      // El navegador lo abre la app (el wrapper es agnóstico de Expo).
+      abrirNavegador: async (url, redirectTo) => {
+        const res = await WebBrowser.openAuthSessionAsync(url, redirectTo);
+        return res.type === 'success' ? { tipo: 'exito', url: res.url } : { tipo: 'cancelado' };
+      },
+      // Si es la primera vez, es un alta y el wrapper registra el
+      // consentimiento. La URL de cada documento la resuelve `URL_LEGAL` en
+      // packages/api (S104-A) — la pantalla NO la aporta: versión y URL son el
+      // mismo dato y viven juntos, para que no puedan divergir (L-166).
+    });
+
+    if (!r.ok) {
+      setCargandoGoogle(false);
+      // Cancelar NO es un error: es una decisión. Sin alerta roja — se vuelve
+      // al login y ya (el wrapper manda mensaje vacío a propósito).
+      if (r.codigo === 'cancelado_por_usuario') return;
+      aviso.mostrar({ variante: 'error', texto: r.mensaje });
+      return;
+    }
+    // Mismo umbral que el login con clave: la huella y recién ahí el Hogar. El
+    // guard del raíz decide onboarding (alta nueva) u Hogar (ya existía).
     setLlegando(true);
     setTimeout(() => router.replace('/'), 460);
   }
@@ -154,12 +197,36 @@ export default function Login() {
                 deshabilitado={!puedeEnviar}
                 onPress={() => void entrar()}
               />
+              {/* Entrar con Google — alternativa de entrada (solo cliente). Puede
+                  ser un ALTA: por eso lleva su línea de términos debajo. */}
+              <Boton
+                variante="secundario"
+                etiqueta={t('login.conGoogle')}
+                bloque
+                cargando={cargandoGoogle}
+                onPress={() => void entrarConGoogle()}
+              />
               <Boton
                 variante="ghost"
                 etiqueta={t('login.olvide')}
                 bloque
                 onPress={() => router.push('/recuperar')}
               />
+              {/* Google puede crear cuenta: la línea de términos, como en
+                  bienvenida y registro (§4). NO enlaza — los documentos
+                  definitivos son otra tanda (D-336). */}
+              <Text
+                style={{
+                  marginTop: spacing[1],
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.xs,
+                  lineHeight: Math.round(typography.size.xs * typography.leading.normal),
+                  color: theme.text.tertiary,
+                  textAlign: 'center',
+                }}
+              >
+                {t('bienvenida.legales')}
+              </Text>
             </View>
           </Entrada>
         </ScrollView>

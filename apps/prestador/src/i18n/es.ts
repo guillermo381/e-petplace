@@ -229,6 +229,18 @@ export const prestadorEs = {
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
+  // S104-C · verificar correo. Aparece solo cuando el proyecto exige
+  // confirmar el correo (registrarse devuelve sesion_activa=false).
+  verificarCorreo: {
+    titulo: 'Confirmá tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    codigoLabel: 'Código',
+    codigoAyuda: '8 dígitos',
+    confirmar: 'Confirmar',
+    reenviar: 'Reenviar el código',
+    reenviarEn: 'Reenviar en {{n}}s',
+    reenviado: 'Te enviamos un código nuevo.',
+  },
   // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
   // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
   // verdad verificable, jamás promete un acceso que la puerta niega.
@@ -767,6 +779,16 @@ export const prestadorEs = {
     irARecuperar: 'Crear una contraseña',
     esperaConNumero: 'Probaste varias veces seguidas. Espera {{s}} segundos y vuelve a intentar.',
     esperaSinNumero: 'Probaste varias veces seguidas. Espera un momento y vuelve a intentar.',
+    // S104-C · el candado biométrico sobre la sesión (§2.5). La voz no nombra
+    // el método: depende del teléfono, y el SO lo dice en su propio prompt.
+    biometricoTitulo: 'Candado de la app',
+    biometricoEtiqueta: 'Bloquear al volver a la app',
+    biometricoAyuda:
+      'Cuando salgas y vuelvas, tu teléfono te va a pedir que te reconozca antes de mostrar tu sesión. Si no puede, entras con tu contraseña.',
+    biometricoNoDisponible:
+      'Configura el desbloqueo de tu teléfono (huella o rostro) para usar el candado.',
+    biometricoPrompt: 'Confirma que eres tú',
+    biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   recuperar: {
     titulo: 'Recuperar tu contraseña',
@@ -863,6 +885,11 @@ export const prestadorEs = {
        Las líneas de ejemplo (notifEj*) son PROPUESTAS medidas contra el
        catálogo vivo: la mesa las firma antes de que viajen. */
     notifLey: 'Elegís por dónde te llegan, no si te llegan.',
+    // S104-C · §31.6 — el dictado por voz, revocable desde acá.
+    dictadoTitulo: 'Dictado por voz',
+    dictadoToggle: 'Permitir el dictado por voz',
+    dictadoAyuda:
+      'El dictado usa el servicio de voz de tu teléfono, que puede transmitir el audio a servidores del fabricante fuera del Ecuador. e-PetPlace no guarda la grabación, solo el texto. Si lo desactivás, te lo volveremos a pedir la próxima vez que quieras dictar.',
     notifFilaOperacion: 'Tus citas y servicios',
     notifFilaSaludSeguridad: 'Cuidado y salud',
     notifFilaSeguridadCuenta: 'La seguridad de tu cuenta',
@@ -2557,6 +2584,17 @@ export const prestadorEs = {
     micCta: 'Dictar con el micrófono',
     micParar: 'Parar el dictado',
     micEscuchando: '● Escuchando — toca de nuevo para parar',
+    // S104-C · D-899 — el aviso de privacidad del dictado (firma founder).
+    micPrivacidad: 'Tu dictado se transcribe con el servicio de voz de tu teléfono.',
+    // S104-C · §31.6 T&C — el CONSENTIMIENTO previo, específico y separado que
+    // se pide la PRIMERA vez que se usa el dictado (avisar no es consentir).
+    dictadoConsentTitulo: 'Antes de dictar',
+    dictadoConsentCuerpo:
+      'El dictado usa el servicio de reconocimiento de voz de tu teléfono (Google en Android, Apple en iOS). Según tu dispositivo, ese servicio puede transmitir el audio a servidores del fabricante fuera del Ecuador. e-PetPlace no recibe ni conserva la grabación: recibe únicamente el texto ya transcrito. Lo que se transmite es tu voz y lo que dictes, que puede incluir el nombre del paciente, el de tu establecimiento y la descripción clínica.',
+    dictadoConsentOpcional:
+      'Es opcional: podés escribir la nota a mano. Podés revocar este permiso cuando quieras desde Cuenta o escribiendo a privacidad@epetplace.com.',
+    dictadoConsentAcepto: 'Acepto usar el dictado',
+    dictadoConsentAhoraNo: 'Ahora no',
     micPermisoDenegado: 'Sin permiso de micrófono. Actívalo en los ajustes del teléfono; escribir sigue funcionando.',
     micCorte: 'La escucha se cortó. Lo dictado quedó en la nota.',
     dictadoLabel: 'Nota de la consulta',

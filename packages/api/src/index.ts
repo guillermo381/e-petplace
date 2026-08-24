@@ -17,7 +17,20 @@ export {
   registrarConsentimiento,
   registrarConsentimientos,
   confirmarAltaConCodigo,
+  // S104-C · reenvío del código de alta (76(c), a ratificación de A): la
+  // segunda mitad de la pantalla /verificar-correo. Gemela de confirmar.
+  reenviarCodigoAlta,
   documentosVigentes,
+  consultarConsentimiento,
+  decidirConsentimiento,
+  // S104-C · la versión POR DOCUMENTO (76(c), a ratificación de A). Las
+  // pantallas de los actos consentibles (arbitraje §38.10 · dictado §31.6) la
+  // necesitan: su versión es la del T&C professional del que son cláusula
+  // (`VERSION_LEGAL.terminos_professional`), jamás un número tecleado (D-720).
+  VERSION_LEGAL,
+  type ActoConsentible,
+  type TipoRegistrable,
+  type EstadoConsentimiento,
   type DocumentoLegal,
   type DocumentoAceptado,
   normalizarEmail,
@@ -1379,3 +1392,20 @@ export {
   type InvitacionAceptada,
   type CodigoInvitacionFamilia,
 } from './wrappers/familia-invitacion';
+
+// S104-A · el freno del enlace de invitación (freno de mesa, 24-ago): una sola
+// verdad que las dos apps consumen, en vez de una disciplina por pantalla.
+export {
+  ENLACE_INVITACION_HABILITADO,
+  APP_BASE_URL,
+  urlInvitacion,
+} from './wrappers/_enlace-invitacion';
+
+// S104-A · entrar con Google (solo cliente). El navegador lo abre la app: este
+// paquete es agnóstico de Expo y así se queda.
+export {
+  iniciarSesionConGoogle,
+  type AbrirSesionAuth,
+  type ResultadoNavegador,
+  type CodigoGoogle,
+} from './wrappers/auth-google';

@@ -19,6 +19,9 @@ import { ProveedorI18n } from '@epetplace/i18n';
 import '@/lib/api';
 // Riel i18n (S51-B1a): namespaces cliente + ui, keys tipadas exigibles.
 import { recursos } from '@/i18n';
+// S104-C · el candado biométrico sobre la sesión (§2.5): envuelve el Stack
+// y baja la cortina al volver del segundo plano si está activo y hay sesión.
+import { GateBiometrico } from '@/components/gate-biometrico';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -92,7 +95,9 @@ export default function RootLayout() {
               (S83-B29/B16), no acá. */}
           <Atmosfera origen="arriba-derecha" />
           <AvisoProvider>
-            <Stack screenOptions={{ headerShown: false }} />
+            <GateBiometrico>
+              <Stack screenOptions={{ headerShown: false }} />
+            </GateBiometrico>
           </AvisoProvider>
         </EpetThemeProvider>
       </ProveedorI18n>

@@ -6,10 +6,11 @@
  *  · **tres campos** (nombre · email · password) con su autofill.
  *  · **la línea de términos** al pie (la misma de bienvenida, honesta sin
  *    link — D-336).
- *  · **el consentimiento QUEDA REGISTRADO**: `registrarse()` (motor de A,
- *    tanda 1) escribe el consentimiento tipo `registro` con la URL legal
- *    mostrada — no hay una segunda llamada acá, viaja con el alta. Se le pasa
- *    `urlLegalMostrada` para que quede la traza de QUÉ se mostró.
+ *  · **el consentimiento QUEDA REGISTRADO**: `registrarse()` (motor de A)
+ *    escribe el consentimiento tipo `registro` — no hay una segunda llamada
+ *    acá, viaja con el alta. La URL de cada documento la resuelve `URL_LEGAL`
+ *    en packages/api (S104-A); la pantalla NO la aporta —versión y URL son el
+ *    mismo dato y viven juntos, para que no puedan divergir (L-166)—.
  *
  * Se conserva entera la lógica del guard local (S88-D): `causaNoEnvia` +
  * `razonDeshabilitado` — la puerta no ofrece la clave corta que el server iba
@@ -40,10 +41,6 @@ import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetpl
 import { useTraduccion } from '@/i18n';
 import { causaNoEnvia } from '@/lib/registro-guard';
 
-/** La traza del texto legal mostrado. NO es una URL navegable (los
- *  documentos definitivos no existen todavía — D-336): es un marcador
- *  estable de QUÉ vio la persona, para el registro de consentimiento de A. */
-const URL_LEGAL = 'terminos-inline-v1';
 const ISOTIPO_ESQUINA = 28;
 
 export default function Registro() {
@@ -77,9 +74,9 @@ export default function Registro() {
       nombre: nombre.trim(),
       email: email.trim(),
       password,
-      // el consentimiento viaja con el alta (motor de A): al crear la cuenta,
-      // se registra que se aceptaron los términos, con la traza de qué se vio.
-      urlLegalMostrada: URL_LEGAL,
+      // El consentimiento viaja con el alta (motor de A). La URL de cada
+      // documento la resuelve `URL_LEGAL` en packages/api (S104-A); la pantalla
+      // NO la aporta —versión y URL son el mismo dato y viven juntos (L-166)—.
     });
 
     if (!r.ok) {
@@ -96,11 +93,12 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
-      // el proyecto exige confirmar el correo: no hay «llegada» que celebrar
-      // porque todavía no se entra — se dice y se vuelve al login.
+      // el proyecto exige confirmar el correo: el registro gana un paso —
+      // la pantalla de código (S104-C). El consentimiento NO se pudo escribir
+      // en el alta (sin sesión) y se persiste al confirmar (D-893); la URL la
+      // resuelve `URL_LEGAL` en packages/api, no viaja por la pantalla.
       setCargando(false);
-      aviso.mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
-      router.replace('/login');
+      router.replace({ pathname: '/verificar-correo', params: { email: email.trim() } });
       return;
     }
     // §5 · la huella de llegada, y recién ahí el onboarding.
