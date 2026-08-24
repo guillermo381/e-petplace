@@ -1,0 +1,8 @@
+{
+  "mailer_autoconfirm": true,
+  "mailer_allow_unverified_email_sign_ins": false,
+  "mailer_otp_exp": 3600,
+  "mailer_otp_length": 8,
+  "mailer_subjects_confirmation": "Confirma tu cuenta · Confirm your account",
+  "mailer_templates_confirmation_content": "<div style=\"font-family: sans-serif; max-width: 480px; margin: 0 auto;\">\n  <div lang=\"es\">\n    <h2>Confirma tu cuenta</h2>\n    <p>Usa este código en la app para terminar de crear tu cuenta:</p>\n    <p style=\"font-size: 32px; font-weight: bold; letter-spacing: 6px; text-align: center; padding: 16px 0;\">{{ .Token }}</p>\n    <p>El código vive una hora. Si no creaste ninguna cuenta, ignora este correo — no se creó nada.</p>\n    <p style=\"color: #666; font-size: 13px;\">Nadie de e-PetPlace te va a pedir este código.</p>\n  </div>\n  <hr style=\"border: none; border-top: 1px solid #eee; margin: 28px 0;\">\n  <div lang=\"en\">\n    <h2>Confirm your account</h2>\n    <p>Use this code in the app to finish creating your account:</p>\n    <p style=\"font-size: 32px; font-weight: bold; letter-spacing: 6px; text-align: center; padding: 16px 0;\">{{ .Token }}</p>\n    <p>The code lasts one hour. If you didn't create an account, ignore this email — nothing was created.</p>\n    <p style=\"color: #666; font-size: 13px;\">No one from e-PetPlace will ever ask you for this code.</p>\n  </div>\n</div>"
+}
