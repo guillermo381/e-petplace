@@ -34,6 +34,20 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
       autoRefreshToken: true,
       // RN no es un browser: sin detección de tokens en URL.
       detectSessionInUrl: false,
+      /* 🔴 PKCE, Y NO ES UNA PREFERENCIA: es lo que el flujo de Google EXIGE.
+         El default de `auth-js` es `implicit`, que devuelve el token en el
+         FRAGMENTO de la URL (`#access_token=…`). `iniciarSesionConGoogle` lee
+         `?code=` con `searchParams` —que no ve el fragmento— y llama a
+         `exchangeCodeForSession`. ⇒ con el default, ese wrapper **NUNCA podía
+         funcionar**: devolvía `google_no_completo` en todas las vueltas.
+         Y no fallaba al escribirlo ni al compilar, porque las dos mitades son
+         válidas por separado: la que emite y la que lee **suponían flujos
+         distintos**, y nada en el tipo lo dice.
+         PKCE además es el flujo recomendado en móvil: guarda el `code_verifier`
+         en el storage de la sesión (que este cliente ya configura) y no expone
+         el token en una URL. `signInWithPassword` y los OTP son agnósticos del
+         flujo, así que la cura no toca login, alta ni recuperación. */
+      flowType: 'pkce',
       ...(opciones?.storageSesion ? { storage: opciones.storageSesion } : null),
     },
   });
