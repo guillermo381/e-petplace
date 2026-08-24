@@ -7,8 +7,23 @@
  * Supabase»*. ⇒ **esto no autentica a nadie.** La sesión ya existe y
  * sigue existiendo detrás de esta pantalla; lo único que hace el
  * candado es tapar el contenido hasta que la persona se identifique
- * ante SU TELÉFONO. *No es una puerta: es una cortina.*
+ * ante SU TELÉFONO.
  * ═══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ **ENMIENDA DEL FOUNDER — CAMBIÓ DÓNDE APARECE, NO QUÉ ES.**
+ * Nació describiéndose como *«no es una puerta: es una cortina»*, y esa
+ * frase quedó a medias: el founder la extendió al **patrón banca**, o
+ * sea **PUERTA DE ENTRADA** — al abrir la app con sesión guardada se
+ * pide la huella **en vez de tipear**, y la vuelta del segundo plano se
+ * mantiene.
+ *
+ * 🔴 **Y la distinción que hay que no perder es justamente la que la
+ * enmienda vuelve fácil de confundir: aunque ahora se vea al ABRIR, esto
+ * sigue SIN crear ninguna sesión.** Desbloquea una que ya existe. El día
+ * que alguien la lea como «el login biométrico» y la conecte contra
+ * Supabase, habrá convertido un candado en un factor de autenticación —
+ * que es literalmente lo único que §2.5 prohíbe.
+ * ⇒ *Cortina que ahora también se corre en la entrada, no puerta.*
  *
  * ── 🔴 LA PIEZA ES PRESENTACIONAL, Y NO POR PRUDENCIA ─────────────────
  * **No importa `expo-local-authentication` y no debe.** Dos razones, las
@@ -88,11 +103,27 @@ export interface PantallaDeCandadoProps {
   estado: EstadoCandado
   /** Vuelve a pedirle al SO. La pieza no sabe cómo: solo avisa. */
   onDesbloquear: () => void
-  /** 🔴 La salida que SIEMPRE se dibuja. Lleva al login normal. */
-  onUsarClave: () => void
+  /**
+   * 🔴 La salida que SIEMPRE se dibuja. **CIERRA LA SESIÓN** y lleva al
+   * login — re-autenticación completa, no una navegación.
+   *
+   * ☠️ **SE LLAMABA `onUsarClave` Y EL NOMBRE SE VOLVIÓ FALSO EL MISMO
+   * DÍA.** Lo nombré así cuando el botón decía «Entrar con mi
+   * contraseña»; C cambió esa voz a **«Entrar con otra cuenta»** con una
+   * razón medible que ratifico entera: **un usuario que entró con Google
+   * NO TIENE contraseña**, y con Google vivo en el cliente ese caso dejó
+   * de ser hipotético. La voz se curó y **el nombre de la prop se quedó
+   * describiendo una clave que puede no existir.**
+   *
+   * *Es exactamente la clase de deriva que esta pista censó para otros en
+   * su primer turno —el drift que sobrevive en lo que no se ve— y acá
+   * apareció en mi propia API.* Un nombre no lo lee un usuario: lo lee
+   * quien monta la pieza, y monta lo que el nombre promete.
+   */
+  onSalirDeLaSesion: () => void
 }
 
-export function PantallaDeCandado({ estado, onDesbloquear, onUsarClave }: PantallaDeCandadoProps) {
+export function PantallaDeCandado({ estado, onDesbloquear, onSalirDeLaSesion }: PantallaDeCandadoProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
 
@@ -151,7 +182,7 @@ export function PantallaDeCandado({ estado, onDesbloquear, onUsarClave }: Pantal
             salida, y esconderla mientras el sensor trabaja es cómo se
             deja a alguien afuera de su propia cuenta.
             `ghost` por 19.7: la superficie ya tiene su sólido. */}
-        <Boton variante="ghost" etiqueta={t('candado.usarClave')} bloque onPress={onUsarClave} />
+        <Boton variante="ghost" etiqueta={t('candado.usarClave')} bloque onPress={onSalirDeLaSesion} />
       </View>
     </View>
   )

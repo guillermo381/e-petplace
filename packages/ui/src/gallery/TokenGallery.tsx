@@ -3830,7 +3830,7 @@ function GaleriaInterna() {
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{e}</Texto>
                 <View style={{ height: 320, borderRadius: 12, overflow: 'hidden' }}>
-                  <PantallaDeCandado estado={e} onDesbloquear={() => {}} onUsarClave={() => {}} />
+                  <PantallaDeCandado estado={e} onDesbloquear={() => {}} onSalirDeLaSesion={() => {}} />
                 </View>
               </View>
             ))}
