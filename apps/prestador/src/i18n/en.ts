@@ -1712,6 +1712,8 @@ export const prestadorEn = {
     permisoCamara: 'We need the camera for the document photo. You can enable it in your phone settings, or pick it from the gallery.',
     errorRed: "It couldn't upload — check your connection.",
     errorSubida: "The document couldn't upload. Try again.",
+    imagenDestruida: 'We don’t keep the document image: it was destroyed once verification was completed.',
+    terminaEn: 'Ends in •••• {{ultimos4}}',
   },
   // Detail of ONE veterinary appointment — the tap destination of the day
   // (S69-B, M0). Read-only: the clinical Durante lands in V4 · LOTE S69,
