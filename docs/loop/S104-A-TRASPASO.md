@@ -245,3 +245,51 @@ cada cosa, y ese recuerdo se lee igual que una medición* (`L-398`). ⇒ **la
 proporción de la jornada — cuatro de once halladas por otra pista — es el
 argumento medido a favor de trabajar en pistas paralelas, y de que ninguna
 audite lo que ella misma escribió.**
+
+---
+
+## 6 · TANDA 3 — LA SALIDA *(agregado 24-ago, al cerrar)*
+
+**Cerrada de la mitad motor. OTA publicada.**
+
+| | |
+|---|---|
+| **Motor** | `solicitar_cierre_cuenta` · `exportar_mis_datos` · `revertir_cierre_cuenta` · `ejecutar_cierres_vencidos` |
+| **Arneses** | 8/8 y 4/4, **en subtransacción que se deshace sola** (`L-406`), residuo 0 |
+| **El reloj** | **nace INERTE** — `app_config.cierre_cuenta_vivo`. **La llave es del founder** |
+| **OTA** | cliente `5195099a` (rt 1.0.5) · prestador `0ecfc1ee` (rt 1.0.6) · **ancla `b7930aa6`, leída del objeto** |
+
+⚠️ **Sobre `dirty`: esta versión del CLI NO lo expone en `update:view`.** Se
+verificó `git status --porcelain` **en cero inmediatamente antes de bundlear**.
+*Es una medición del árbol, no una lectura del objeto — y se declara así en vez
+de escribir `dirty: None` como si lo hubiera leído.*
+
+### Lo que gobierna esta parte y no se puede olvidar
+
+> **Un defecto acá no se corrige con una OTA, porque los datos ya no están.**
+
+**Los DOS ACTOS, y por qué están separados** (firma founder 24-ago): **hoy** se
+quita el acceso —`banned_until` + sesiones, **reversible**—; **al día 30** corre
+lo terminal. *Retirar las identidades externas el primer día dejaría a quien
+entra con Google sin ninguna forma de ejercer los 30 días que §19.2 promete: la
+reversión existiría en la tabla y no en la vida.*
+
+### El discriminador que hay que conservar
+
+**El prefijo del path NO dice de quién es el archivo.** Solo `avatars` usa el
+uid; `mascotas` usa `mascota_id`, y las fotos de atención se atan por
+`evento_archivo_adjunto`. *Un barrido por `{uid}/` a secas habría sonado
+correcto, habría pasado cualquier revisión, y habría borrado el expediente
+visual de una mascota que sigue viva con otra familia.*
+
+### Abierto, con dueño
+
+- **El cierre del NEGOCIO** → `docs/BORRADOR_CIERRE_DE_NEGOCIO.md`. **Tres
+  obstáculos × tres caminos, sin decidir.** Firma en otra mesa.
+- **`D-902`** → firmada como *no se construye ahora*; **el gate de IA tampoco,
+  porque van juntos**. Ficha **abierta** con disparo.
+- **La casilla de arbitraje §38.10** → frenada por C: su premisa (*«debajo de
+  los dos checks»*) no existe — la aceptación del prestador es implícita. **Y
+  §4.5 del T&C nuevo va a exigir que declare haber leído la Transitoria.**
+- **Las llaves inertes** → `cierre_cuenta_vivo` · `INVITACION_CORREO_VIVO` ·
+  la de retención. **Todas del founder.**
