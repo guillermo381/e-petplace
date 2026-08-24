@@ -86,7 +86,7 @@ El responsable no puede modificar unilateralmente un instrumento de adhesión. P
 
 **M-3 — Consentimiento como base complementaria.** Las tres funcionalidades son **opcionales y cuentan con vía manual equivalente**, de modo que el consentimiento es libre en el sentido que exige la ley. Se recaba de forma específica e informada al activar cada funcionalidad y es revocable en cualquier momento.
 
-**M-4 — Vigilancia de subencargados.** Se asigna a **[nombre y cargo]** la revisión de los avisos de incorporación de subencargados y de la lista publicada por el proveedor, con periodicidad **mensual** y constancia escrita de cada revisión, a fin de que la ventana de objeción de 15 días no se agote por silencio.
+**M-4 — Vigilancia de subencargados.** Se asigna a **Luis Guillermo Suárez González, representante legal**, la revisión de los avisos de incorporación de subencargados y de la lista publicada por el proveedor, con periodicidad **mensual** y constancia escrita de cada revisión, a fin de que la ventana de objeción de 15 días no se agote por silencio.
 
 **M-5 — Minimización del perímetro.** La imagen del documento de identidad del profesional **no se transfiere** al proveedor. Cualquier ampliación del conjunto de datos transferidos exige rehacer esta evaluación **con carácter previo** al despliegue.
 

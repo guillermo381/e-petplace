@@ -21045,3 +21045,26 @@ rol_invitado text not null default 'adulto_autorizado'
 
 **Disparo: la respuesta de Anthropic, o el 23 de septiembre de 2026 — lo que ocurra primero.**
 ☠️ **Condición de muerte:** la respuesta (o la constancia fechada de su ausencia) **está archivada en `docs/legal/anexo-a/`**, y la §7 de la evaluación se revisó o se ratificó **por escrito**.
+
+#### D-909 — 🟡 AUTOMATIZAR LA VIGILANCIA DE SUBENCARGADOS. **No es «un recordatorio»: es que el sistema mire por vos**
+🟡 **MEDIA, pero con una consecuencia legal que la vuelve más pesada de lo que parece.** Pedida por el founder al aceptar M-4 (24-ago-2026).
+
+**El estado:** la medida **M-4** de la evaluación de transferencias asigna al founder la revisión **mensual** de la lista de subencargados de Anthropic, con **constancia escrita**. **Hoy se cumple a mano**, con `docs/legal/anexo-a/BITACORA-SUBENCARGADOS.md` como recordatorio **y** como evidencia.
+
+🔴 **Por qué el modo de falla importa más que el trabajo:** son ~5 minutos al mes. *El problema no es el costo — es que **nada avisa**.* **La medida se rompe el mes que nadie la haga, y ese mes es indistinguible de los otros once hasta que aparece un subencargado nuevo.** Y ahí el daño ya ocurrió: el DPA da **15 días** para objetar y **el silencio equivale a consentimiento** ⇒ *un mes salteado puede consentir por omisión un subencargado que nadie miró.*
+
+⚠️ **Y el costo de fallar no es solo operativo:** la condición 5 del Art. 21 está declarada *«satisfecha, **con carga operativa**»* **precisamente porque esta vigilancia existe**. *Si la vigilancia deja de ocurrir, esa condición deja de estar satisfecha — y la evaluación pasaría de dos condiciones abiertas a tres, sin que nadie lo note.*
+
+**⇒ LO QUE HACE FALTA NO ES UN RECORDATORIO.** *Un recordatorio mensual se ignora igual que un calendario, y su fatiga es peor: once avisos que dicen «no pasó nada» entrenan a ignorar el doceavo.*
+
+**Lo correcto: un proceso que compare la lista por su cuenta y avise SOLO si cambió.** *Un aviso que llega una vez al año, cuando algo pasó de verdad, sí se lee.* **Es la misma forma que ya rige en la casa** —el reloj del cierre devuelve cuántos ejecutó; el barredor deja los atascados en una vista— **y la misma que el propio abogado pidió para la red de retención: que la señal se pueda leer, no que se dispare siempre.**
+
+**La forma tiene precedente vivo y no hay que inventarla:** `pg_cron` + edge function, con **el patrón del `vault` para el secreto (`L-408`)** y **naciendo INERTE con llave en `app_config`** — igual que `cobrar-recurrencias`, `despachar-invitacion-correo` y el reloj del cierre.
+
+⚠️ **Dos frenos medidos que hay que resolver ANTES de construirlo, y el segundo es el que decide si se puede:**
+1. **La página del proveedor no es una API.** Compararla exige *scraping*, que se rompe cuando cambia el HTML — **y se rompe en silencio**, que es el peor modo para un vigilante. *Un vigilante que dejó de mirar y no lo dice es peor que no tenerlo.* ⇒ **el proceso tiene que distinguir «no cambió» de «no pude leer», y avisar en los dos casos.**
+2. 🔴 **Puede que no haga falta.** `D-908` le preguntó a Anthropic, entre otras cosas, por sus mecanismos — **si confirman que avisan por correo cada incorporación, la vigilancia deja de ser un barrido y pasa a ser una regla de reacción**, que es más barata y más fiable. **Construir el scraper antes de esa respuesta puede ser construir lo que no se necesita.**
+
+**Dueño:** producto (el mecanismo) · founder (mientras sea manual).
+**Disparo:** después de la respuesta de `D-908` — *ella decide si esto es un scraper o una regla de correo* — **o el 23-sep-2026 si no hay respuesta.**
+☠️ **Condición de muerte:** existe un proceso que detecta un cambio en la lista **sin que nadie se acuerde de mirar**, y que **avisa también cuando no pudo leerla**.
