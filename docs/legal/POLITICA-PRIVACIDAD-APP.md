@@ -1,9 +1,7 @@
 # POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS PERSONALES
 ## Aplicaciones móviles e-PetPlace
 
-**Versión:** 1.0 · **Fecha de última actualización:** [__ de ____ de 2026]
-
-> ⚠️ **BORRADOR PARA REVISIÓN LEGAL — NO PUBLICAR TODAVÍA.** Dos puntos deben cerrarse antes: (a) confirmar el instrumento de transferencia internacional y la fuente del plazo de conservación del proveedor de IA —§17—; y (b) implementar los plazos de la §18, que hoy no existen en el sistema. **Este recuadro se elimina antes de publicar.**
+**Versión:** 1.1 · **Fecha de última actualización:** 24 de agosto de 2026
 
 ---
 
@@ -357,4 +355,4 @@ Eso, con su nombre técnico, es **seudonimización**, no anonimización. La dife
 
 **SATORI INOV LATAM S.A.S.** — RUC 1793240435001 — Quito, Ecuador
 Marca comercial **e-PetPlace** · privacidad@epetplace.com
-Versión 1.0 — vigente desde [fecha]
+Versión 1.1 — vigente desde el 24 de agosto de 2026
