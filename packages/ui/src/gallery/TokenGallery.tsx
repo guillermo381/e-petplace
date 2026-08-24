@@ -19,6 +19,8 @@ import { Isotipo } from '../brand/Isotipo'
 import { MarcaDeAgua } from '../brand/MarcaDeAgua'
 import { PaseoDeHuellas } from '../brand/PaseoDeHuellas'
 import { RespiroDeMarca, HuellaDeLlegada } from '../brand/RitualDeEntrada'
+import { LockupMarca } from '../brand/LockupMarca'
+import { PantallaDeCandado, type EstadoCandado } from '../components/PantallaDeCandado'
 import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
@@ -1902,6 +1904,14 @@ function EjemploBadge() {
   )
 }
 
+/** El ojo en su consumidor real: un campo `secure` vivo. Existe para que
+ *  el gate no juzgue el glifo suelto sino EL CONTROL — que es donde el
+ *  founder lo va a ver. */
+function EjemploCampoClave() {
+  const [v, setV] = useState('unaclave123')
+  return <Campo label="Contraseña" value={v} onChangeText={setV} secure autoCapitalize="none" />
+}
+
 function EjemploCampoCodigo({ soloVivo = false }: { soloVivo?: boolean }) {
   // El probador VIVO tipea de verdad (tocá, tipeá, borrá, pegá el código
   // entero); los demás son estados congelados para el par visual.
@@ -3749,6 +3759,93 @@ function GaleriaInterna() {
               envoltorio lleva box-none: estirado a todo el ancho, un View sin eso recibiría los toques
               del aire a los costados — lo que R54 existe para cazar.
             </Texto>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="S104 · EL GATE DEL OJO A 21px (§2.9) — el par ver/ocultar entre sus vecinos">
+          {/* EL GATE POR ÍCONO, en la forma que §6b manda: **a 21 px y
+              junto a cinco del registry**. A ese tamaño la figura
+              sobrevive o es ruido (Ley 9), y un glifo solo no dice nada:
+              lo que se juzga es si el par se distingue de sus vecinos DE
+              UN VISTAZO, y si los DOS hermanos se distinguen ENTRE SÍ —
+              que es el trabajo real de este par, porque comunican estado.
+
+              ⚠️ SE MONTA CON SUS VECINOS DE FAMILIA, no con cualquiera:
+              los otros CONTROLES (`lapiz`, `filtro`, `copiar`,
+              `descargar`, `compartir`). Ésa es la unidad de barrido de la
+              Ley 12 enmendada — el ojo nunca va a convivir con `paseo` ni
+              con `vacuna`, así que compararlo contra ellos mediría una
+              colisión que no puede ocurrir.
+
+              ⚠️ **LO QUE ESTE MONTAJE NO PUEDE DAR, declarado:** en este
+              entorno no hay rasterizador de SVG, así que el trazo se
+              eligió sin poder verlo a 21 px. El juicio es del founder
+              sobre el aparato — por eso esta sección existe. */}
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              A 21px, entre los otros controles — ojo · ojoTachado · lapiz · filtro · copiar · descargar · compartir
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+              {(['ojo', 'ojoTachado', 'lapiz', 'filtro', 'copiar', 'descargar', 'compartir'] as IconoNombre[]).map((n) => (
+                <Icono key={n} nombre={n} tamano={21} />
+              ))}
+            </View>
+
+            <Texto variante="apoyo">
+              Los dos hermanos solos, a 21px — ¿se distinguen ENTRE SÍ? Es lo único que tienen que hacer.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <Icono nombre="ojo" tamano={21} />
+              <Icono nombre="ojoTachado" tamano={21} />
+            </View>
+
+            <Texto variante="apoyo">
+              Y a 44px, para ver el trazo — la almendra es la MISMA en los dos (copiada, no re-dibujada);
+              el tachado suelta la pupila a propósito.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[6], alignItems: 'center' }}>
+              <Icono nombre="ojo" tamano={44} />
+              <Icono nombre="ojoTachado" tamano={44} />
+            </View>
+
+            <Texto variante="apoyo">
+              En su consumidor real — el campo de clave. Tocá el ojo: el dibujo Y la etiqueta accesible cambian.
+            </Texto>
+            <EjemploCampoClave />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="S104 · EL CANDADO (MODELO_LOGIN §2.5) — la cortina sobre la sesión, en sus tres estados">
+          {/* ⚠️ INERTE HOY: `expo-local-authentication` NO está instalado
+              y es NATIVO ⇒ no viaja por OTA (L-134). La pieza es
+              presentacional a propósito y se puede gatear igual: lo que
+              se juzga acá es la VOZ y la jerarquía, no el sensor.
+              🔴 Lo que hay que mirar: **la salida a contraseña está en los
+              TRES estados, incluso verificando.** No es cortesía — si el
+              sensor falla y la salida se esconde, la persona queda afuera
+              de su propia cuenta. */}
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">Los tres estados, en cajas de 320 de alto (en la app cubre la pantalla entera).</Texto>
+            {(['bloqueada', 'verificando', 'rechazada'] as EstadoCandado[]).map((e) => (
+              <View key={e} style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{e}</Texto>
+                <View style={{ height: 320, borderRadius: 12, overflow: 'hidden' }}>
+                  <PantallaDeCandado estado={e} onDesbloquear={() => {}} onUsarClave={() => {}} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </Seccion>
+
+        <Seccion titulo="S104 · LockupMarca — el nombre de la casa, en un solo lugar">
+          {/* Nace del censo: TRES variantes vivas del nombre, y la más rara
+              (`e.petplace`) era el wordmark de la primera pantalla. El
+              nombre NO es prop de texto libre — vive adentro. */}
+          <View style={{ gap: spacing[3] }}>
+            <LockupMarca casa="cliente" />
+            <LockupMarca casa="prestador" />
+            <LockupMarca casa="cliente" tamano="xl" />
+            <LockupMarca casa="cliente" tamano="base" />
           </View>
         </Seccion>
 

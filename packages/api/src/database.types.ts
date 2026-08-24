@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -10151,6 +10126,59 @@ export type Database = {
           },
         ]
       }
+      familia_invitaciones: {
+        Row: {
+          aceptada_en: string | null
+          aceptada_por: string | null
+          created_at: string
+          email: string
+          estado: string
+          expira_en: string
+          familia_id: string
+          id: string
+          invitado_por: string
+          nombre: string | null
+          rol_invitado: string
+          token: string
+        }
+        Insert: {
+          aceptada_en?: string | null
+          aceptada_por?: string | null
+          created_at?: string
+          email: string
+          estado?: string
+          expira_en?: string
+          familia_id: string
+          id?: string
+          invitado_por: string
+          nombre?: string | null
+          rol_invitado?: string
+          token: string
+        }
+        Update: {
+          aceptada_en?: string | null
+          aceptada_por?: string | null
+          created_at?: string
+          email?: string
+          estado?: string
+          expira_en?: string
+          familia_id?: string
+          id?: string
+          invitado_por?: string
+          nombre?: string | null
+          rol_invitado?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familia_invitaciones_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       familia_miembro: {
         Row: {
           created_at: string
@@ -20175,6 +20203,13 @@ export type Database = {
         }
         Returns: string
       }
+      aceptar_invitacion_familia: {
+        Args: { p_token: string }
+        Returns: {
+          familia_id: string
+          mascotas_vinculadas: number
+        }[]
+      }
       aceptar_invitacion_pendiente_login: {
         Args: { p_empleado_id: string }
         Returns: Json
@@ -20339,6 +20374,10 @@ export type Database = {
       atar_item_a_mascota: {
         Args: { p_item_id: string; p_mascota_id: string }
         Returns: Json
+      }
+      avisar_invitacion_familia: {
+        Args: { p_invitacion_id: string }
+        Returns: string
       }
       avisar_recurrencias_proximas: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
@@ -21177,6 +21216,14 @@ export type Database = {
           documentos_insertados: number
           mensaje: string
           success: boolean
+        }[]
+      }
+      invitar_a_familia: {
+        Args: { p_email: string; p_familia_id: string; p_nombre?: string }
+        Returns: {
+          expira_en: string
+          id: string
+          token: string
         }[]
       }
       invitar_prestador: {
@@ -22299,6 +22346,7 @@ export type Database = {
         Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
       }
+      revocar_invitacion_familia: { Args: { p_id: string }; Returns: undefined }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
         Returns: Json
@@ -22743,9 +22791,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [

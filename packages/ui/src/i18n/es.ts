@@ -58,6 +58,20 @@ export const uiEs = {
     ver: 'Ver',
     ocultar: 'Ocultar',
   },
+  candado: {
+    // S104-B · MODELO_LOGIN §2.5 — el candado sobre la sesión.
+    // La voz NUNCA nombra el método (huella / rostro): depende del
+    // aparato, y prometer «poné el dedo» a quien desbloquea con la cara
+    // es el mensaje que miente. El SO ya lo dice en su propio prompt.
+    bloqueada: 'Tu sesión está abierta. Desbloquea para volver a entrar.',
+    verificando: 'Esperando que tu teléfono te reconozca.',
+    // No dice «error» ni culpa a nadie: el SO rechazó UNA lectura, que
+    // es cotidiano (dedo mojado, mala luz). Y ofrece la salida en la
+    // misma frase, porque es el momento en que hace falta.
+    rechazada: 'Tu teléfono no pudo reconocerte. Prueba otra vez o entra con tu contraseña.',
+    desbloquear: 'Desbloquear',
+    usarClave: 'Entrar con mi contraseña',
+  },
   esqueleto: {
     cargando: 'Cargando',
   },
