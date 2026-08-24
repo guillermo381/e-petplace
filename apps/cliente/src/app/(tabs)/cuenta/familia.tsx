@@ -1,37 +1,65 @@
 /**
- * Cuenta · Tu familia (S55-B3) — renombrar (solo titular, RLS es la
- * puerta), miembros en LECTURA (el nombre de un miembro ajeno no es
- * legible por RLS de profiles — null honesto, hueco P1), e invitar
- * invitar a un FAMILIAR AUTORIZADO como hueco declarado con "Pronto"
- * (firma 5.1: en v1 quien entra es familiar autorizado; co-dueño es v2).
- * Escalera: no muestra datos del expediente (la familia humana no es
- * el expediente de la mascota).
+ * Cuenta · Tu familia (S55-B3 → S104-C: INVITAR deja de decir "Pronto").
+ *
+ * - Renombrar (solo el adulto titular; la RLS es la puerta).
+ * - Miembros en LECTURA (el nombre de un miembro ajeno no es legible por RLS
+ *   de profiles — null honesto, hueco P1).
+ * - INVITAR (motor de A, tanda 2): solo el titular. Correo + nombre opcional →
+ *   `invitarAFamilia` devuelve el token; la pantalla arma el ENLACE y ofrece
+ *   COPIARLO — la casa no manda el WhatsApp, quien invita lo comparte.
+ *   · **`avisoPorCorreo=false` ⇒ la pantalla dice "compartí el enlace", jamás
+ *     promete un correo que no va a salir** (el invitado sin cuenta no es
+ *     alcanzable por el motor de avisos).
+ *   · **Quien entra es FAMILIAR AUTORIZADO** (firma 5.1) — la voz lo dice. NO
+ *     se ofrece configurar permisos: en v1 el permiso ES el escalón (la
+ *     columna existe y nadie la lee — deuda declarada, medida por A).
+ *
+ * ⚠️ EL ENLACE apunta al SITIO (`/unirse?token=…`) con instrucciones — no a un
+ * deep link ni a una descarga que no existe (firma founder). **La página del
+ * sitio es dependencia declarada**: es funcional (no legal), y hasta que exista
+ * el enlace lleva a un 404 con el nombre de la casa. Se reporta al founder.
+ *
+ * Escalera: no muestra datos del expediente (la familia humana no es el
+ * expediente de la mascota).
  */
 
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Clipboard from 'expo-clipboard';
 import {
   Boton,
   Campo,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
   useTheme,
-EvitaTeclado, } from '@epetplace/ui';
-import { obtenerMiFamilia, renombrarFamilia, type MiFamilia } from '@epetplace/api';
+  EvitaTeclado,
+} from '@epetplace/ui';
+import { invitarAFamilia, obtenerMiFamilia, renombrarFamilia, type MiFamilia } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
 type TraductorCuenta = ReturnType<typeof useTraduccion>['t'];
+
+/** El enlace que se comparte. Apunta al SITIO con instrucciones (firma
+ *  founder). `/unirse` es la ruta canónica propuesta — la página del sitio es
+ *  una dependencia declarada (funcional, no legal). Reversible: es una
+ *  constante. */
+function urlInvitacion(token: string): string {
+  return `https://epetplace.com/unirse?token=${encodeURIComponent(token)}`;
+}
 
 // rol del modelo → voz humana (Ley 3: el código jamás visible)
 function vozRol(rol: string, t: TraductorCuenta): string {
@@ -44,6 +72,12 @@ function vozRol(rol: string, t: TraductorCuenta): string {
   }
 }
 
+/** El estado del flujo de invitar dentro de la Hoja. */
+type Invitacion =
+  | { fase: 'formulario' }
+  | { fase: 'creando' }
+  | { fase: 'listo'; enlace: string; email: string; avisoPorCorreo: boolean };
+
 export default function FamiliaCuenta() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -55,6 +89,13 @@ export default function FamiliaCuenta() {
   const [nombre, setNombre] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [intento, setIntento] = useState(0);
+
+  // ── el flujo de invitar ──
+  const [invitarAbierta, setInvitarAbierta] = useState(false);
+  const [inv, setInv] = useState<Invitacion>({ fase: 'formulario' });
+  const [emailInv, setEmailInv] = useState('');
+  const [nombreInv, setNombreInv] = useState('');
+  const [reboteInv, setReboteInv] = useState<string | null>(null);
 
   useEffect(() => {
     let vigente = true;
@@ -86,6 +127,44 @@ export default function FamiliaCuenta() {
     }
     mostrar({ texto: t('cuenta.familiaGuardado'), variante: 'exito' });
     router.back();
+  }
+
+  function abrirInvitar() {
+    setInv({ fase: 'formulario' });
+    setEmailInv('');
+    setNombreInv('');
+    setReboteInv(null);
+    setInvitarAbierta(true);
+  }
+
+  async function crearInvitacion() {
+    if (inv.fase === 'creando' || typeof familia !== 'object') return;
+    setReboteInv(null);
+    setInv({ fase: 'creando' });
+    const r = await invitarAFamilia({
+      familiaId: familia.familia_id,
+      email: emailInv.trim(),
+      nombre: nombreInv.trim() === '' ? undefined : nombreInv.trim(),
+    });
+    if (!r.ok) {
+      // la voz la trae el wrapper (VOZ tipada por código); se muestra tal cual.
+      setReboteInv(r.mensaje);
+      setInv({ fase: 'formulario' });
+      return;
+    }
+    setInv({
+      fase: 'listo',
+      enlace: urlInvitacion(r.data.token),
+      email: emailInv.trim(),
+      // El `?? false` es la lectura honesta: si el wrapper no lo dice, se
+      // asume que NO salió correo — el error seguro es prometer de menos.
+      avisoPorCorreo: r.data.avisoPorCorreo ?? false,
+    });
+  }
+
+  async function copiarEnlace(enlace: string) {
+    await Clipboard.setStringAsync(enlace);
+    mostrar({ texto: t('cuenta.familiaEnlaceCopiado'), variante: 'exito' });
   }
 
   return (
@@ -144,22 +223,81 @@ export default function FamiliaCuenta() {
                   />
                 </View>
               ))}
-              <Separador />
-              {/* hueco P1 declarado: invitar a un familiar autorizado (firma
-                  5.1) llega con su canal */}
-              <Celda
-                titulo={t('cuenta.familiaInvitar')}
-                fin={
-                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                    {t('cuenta.familiaInvitarPronto')}
-                  </Text>
-                }
-              />
+              {/* INVITAR — solo el titular (Ley 23: no se ofrece lo que el
+                  server va a rebotar con solo_titular_invita). El invitado
+                  entra como familiar autorizado; el motor lo fija. */}
+              {esTitular ? (
+                <>
+                  <Separador />
+                  <CeldaNavegacion
+                    icono="familia"
+                    titulo={t('cuenta.familiaInvitar')}
+                    detalle={t('cuenta.familiaInvitarAyuda')}
+                    onPress={abrirInvitar}
+                  />
+                </>
+              ) : null}
             </Tarjeta>
           </View>
         </ScrollView>
         </EvitaTeclado>
       )}
+
+      {/* LA HOJA DE INVITAR — dos fases: el formulario y el enlace listo. */}
+      <Hoja visible={invitarAbierta} onCerrar={() => setInvitarAbierta(false)} titulo={t('cuenta.familiaInvitar')} conCerrar>
+        <EvitaTeclado>
+          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+            {inv.fase === 'listo' ? (
+              <>
+                {/* La voz depende de avisoPorCorreo: nunca promete un correo
+                    que no sale. */}
+                <Texto variante="cuerpo">
+                  {inv.avisoPorCorreo
+                    ? t('cuenta.familiaInvitarCorreoYEnlace', { email: inv.email })
+                    : t('cuenta.familiaInvitarSoloEnlace', { email: inv.email })}
+                </Texto>
+                <Texto variante="dato" seleccionable>
+                  {inv.enlace}
+                </Texto>
+                <Boton etiqueta={t('cuenta.familiaCopiarEnlace')} bloque onPress={() => void copiarEnlace(inv.enlace)} />
+                <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarOtra')} bloque onPress={abrirInvitar} />
+                <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarListo')} bloque onPress={() => setInvitarAbierta(false)} />
+              </>
+            ) : (
+              <>
+                <Texto variante="apoyo">{t('cuenta.familiaInvitarComoFamiliar')}</Texto>
+                <Campo
+                  label={t('cuenta.familiaInvitarEmailLabel')}
+                  value={emailInv}
+                  onChangeText={setEmailInv}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                />
+                <Campo
+                  label={t('cuenta.familiaInvitarNombreLabel')}
+                  value={nombreInv}
+                  onChangeText={setNombreInv}
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  textContentType="name"
+                />
+                {reboteInv !== null && (
+                  <Texto variante="apoyo" color="danger">{reboteInv}</Texto>
+                )}
+                <Boton
+                  etiqueta={t('cuenta.familiaInvitarCrear')}
+                  bloque
+                  cargando={inv.fase === 'creando'}
+                  deshabilitado={emailInv.trim().length === 0}
+                  onPress={() => void crearInvitacion()}
+                />
+              </>
+            )}
+          </View>
+        </EvitaTeclado>
+      </Hoja>
     </View>
   );
 }

@@ -1392,8 +1392,26 @@ export const clienteEs = {
     rolMenor: 'Menor',
     rolCuidadorExterno: 'Cuidador externo',
     familiaSoloTitular: 'Solo el adulto titular puede cambiar el nombre.',
+    // S104-C · INVITAR A LA FAMILIA (motor de A listo). ☠️ Murió
+    // `familiaInvitarPronto` (Ley 37): la fila deja de ser inerte.
     familiaInvitar: 'Invitar a alguien de tu familia',
-    familiaInvitarPronto: 'Pronto',
+    familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
+    familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
+    familiaInvitarEmailLabel: 'Su correo',
+    familiaInvitarNombreLabel: 'Su nombre (opcional)',
+    familiaInvitarCrear: 'Crear la invitación',
+    // La voz del escalón (firma 5.1): qué gana quien entra. NO se ofrece
+    // configurar permisos — en v1 el permiso ES el escalón (deuda declarada).
+    familiaInvitarComoFamiliar: 'Se une como familiar autorizado: va a poder ver el expediente de las mascotas de tu familia.',
+    // avisoPorCorreo=false: el invitado no tiene cuenta, el correo NO sale —
+    // la pantalla lo dice, jamás promete un correo que no va a llegar.
+    familiaInvitarSoloEnlace: 'Compartí este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
+    // avisoPorCorreo=true: el correo sí sale; el enlace es el respaldo.
+    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
+    familiaCopiarEnlace: 'Copiar el enlace',
+    familiaEnlaceCopiado: 'Enlace copiado',
+    familiaInvitarOtra: 'Invitar a otra persona',
+    familiaInvitarListo: 'Listo',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
