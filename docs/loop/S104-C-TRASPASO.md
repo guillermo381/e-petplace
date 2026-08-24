@@ -1,6 +1,6 @@
 # S104-C — TRASPASO
 
-Dos repos. **Monorepo:** rama `pista/s104-c`, todo pusheado, A la mergea a `main`. **Sitio `epetplace-web`:** ya en `main`, Vercel despliega solo. Nada sin commitear.
+Dos repos. **Monorepo:** rama `pista/s104-c` **YA MERGEADA por A a `main` = `4e79e4cd`** (4 typechecks verdes · `verify:diseno` verde con 54 reglas); mis dos hunks en territorio de A ratificados (export de `VERSION_LEGAL` + Política a 1.1). **Sitio `epetplace-web`:** ya en `main`, Vercel despliega solo. Nada sin commitear.
 
 Mapa de dónde retomar, no fuente de datos vivos: los números (migraciones, reglas, versiones libres) se re-miden del objeto; acá solo SHA y hechos estructurales.
 
@@ -26,7 +26,7 @@ Mapa de dónde retomar, no fuente de datos vivos: los números (migraciones, reg
 - **Publicar el T&C Pet Professional — 🔴 NO se puede.** Su encabezado remite a una *Disposición Transitoria Primera* que **el texto no contiene** (aparece 1 sola vez, y es la propia remisión) — **L-415**. Además su recuadro «NO PUBLICAR» sigue vivo y su versión final que el founder pegó por chat **no está commiteada**. **Dueño: abogado/founder.** No quitar el sello.
 - **La evaluación de transferencias internacionales — no existe como documento.** La produce el ABOGADO sobre `REGISTROS-PARA-EL-EXPEDIENTE.md §5` (interno, tiene la fecha del DPA 27-abr pero no la estructura de firma). **Dueño: abogado.**
 - **Arbitraje §38.10** — casilla SEPARADA y OPCIONAL del prestador, con el «no» registrado. Motor de A listo (`decidirConsentimiento`, acepta `aceptado=false`). **Bloqueado por: dónde va la casilla** (el T&C profesional se acepta en solicitar-acceso; el empleado NO acepta arbitraje) **+ el T&C sin publicar.** **Dueño: C hace la casilla tras la decisión de superficie.**
-- **Consentimiento del proveedor de IA §17.A — D-897 ⑤, la otra mitad.** La mitad de VOZ (§17.B) ya la cura mi §31.6 (`51d73e6a`) — cuando A mergee mi rama, deja de estar en cero. Falta si las tres funciones de IA (estructurar-nota-clinica · extract-vacuna · escribir-presencia) necesitan su gate propio «al activarlas». **Consultado a A. Dueño: A/founder modela, C hace la pantalla.**
+- **Consentimiento del proveedor de IA §17.A — D-897 ⑤ · RESPONDIDO por A → 🔴 `D-902`, y la respuesta es «TODAVÍA NO».** La mitad de VOZ (§17.B) ya la cura mi §31.6 (`51d73e6a`, mergeado). Para la mitad de IA, A midió un piso más abajo: la §14.5 YA PUBLICADA promete *«vía manual equivalente… sin que ello afecte su acceso»* para las tres funciones — y de las tres, **el CARNET (§14.3) NO tiene alta manual** (cero «Agregar» en la revisión; único acceso = cámara desde el Hogar; corregir lo que la IA leyó ≠ cargar lo que no vio). **⇒ construir el gate de IA ANTES de la vía manual convertiría el consentimiento en COACCIÓN** (consentimiento libre = requisito LOPDP, no cortesía). **Orden: primero la vía manual, después la pregunta — y lo decide founder + abogado** (el otro camino legítimo es enmendar §14.5, que ahora EXIGE versionar porque está publicada). **NO construir el gate todavía. Dueño de la secuencia: founder/abogado; C hace la pantalla cuando exista la salida.**
 - **El aviso de IA NO es una página** — vive DENTRO de la Privacidad §14-17 (medido por A, mapeo formulación-por-formulación). No reabrir esto: publicarlo aparte expondría el andamio de trabajo.
 
 ## 3. LAS FIRMAS QUE RIGEN
@@ -36,7 +36,7 @@ Mapa de dónde retomar, no fuente de datos vivos: los números (migraciones, reg
 - **La Privacidad de la app es OTRO documento** que el `/privacidad` del sitio (otra categoría de sensibilidad); su versionado ES también el del aviso de IA (Anexo B), y la página lo dice.
 - **El invitado entra como familiar autorizado** (5.1); co-dueño es v2. **Dos T&C por la puerta** (cliente `terminos_parent`, prestador `terminos_professional`) + una privacidad común.
 - **Google:** client ID NUNCA en la app (Supabase lo lee de su config); flujo PKCE; redirect `cliente://auth/callback`; solo en el cliente (1ª excepción de la ley de paridad).
-- **El dictado por voz:** consentimiento previo, específico y separado la 1ª vez (avisar no es consentir) y revocable desde config.
+- **El dictado por voz:** consentimiento previo, específico y separado la 1ª vez (avisar no es consentir) y revocable desde config. Es libre PORQUE hay salida (la nota se escribe a mano — §17.B.5 lo exige justamente porque la voz sale a un tercero que NO es nuestro encargado). **Detalle a vigilar, no freno (medido por A):** guarda `VERSION_LEGAL.terminos_professional`, y ese T&C no está publicado (URL `null`, L-415) ⇒ la evidencia queda anclada a un texto hoy solo verificable dentro del repo. No invalida el consentimiento (la Hoja explica en pantalla qué se acepta, no manda a leer una página). **Se resuelve solo al publicar el T&C** — ahí su URL entra en `URL_LEGAL` y es una línea. Queda dicho para que nadie lo descubra en un reclamo.
 
 ## 4. DÓNDE MEDIR
 
