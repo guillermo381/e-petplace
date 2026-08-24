@@ -14,17 +14,18 @@
  *     se ofrece configurar permisos: en v1 el permiso ES el escalón (la
  *     columna existe y nadie la lee — deuda declarada, medida por A).
  *
- * ⚠️ EL ENLACE apunta al SITIO (`/unirse?token=…`) con instrucciones — no a un
- * deep link ni a una descarga que no existe (firma founder). **La página del
- * sitio es dependencia declarada**: es funcional (no legal), y hasta que exista
- * el enlace lleva a un 404 con el nombre de la casa. Se reporta al founder.
+ * ⚠️ EL ENLACE apunta al SITIO (`/invitacion?token=…`) con instrucciones — no a
+ * un deep link ni a una descarga que no existe (firma founder). **La landing del
+ * sitio vive en `epetplace-web/src/pages/invitacion.astro`** (S104-C): la app la
+ * compone; el sitio la sirve. El parámetro es `?token=` (el de la baja es `?t=` —
+ * cada emisor con el suyo).
  *
  * Escalera: no muestra datos del expediente (la familia humana no es el
  * expediente de la mascota).
  */
 
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Share, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
@@ -47,24 +48,24 @@ import {
   useTheme,
   EvitaTeclado,
 } from '@epetplace/ui';
-import { invitarAFamilia, obtenerMiFamilia, renombrarFamilia, type MiFamilia } from '@epetplace/api';
+import {
+  ENLACE_INVITACION_HABILITADO,
+  invitarAFamilia,
+  obtenerMiFamilia,
+  renombrarFamilia,
+  urlInvitacion,
+  type MiFamilia,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
 type TraductorCuenta = ReturnType<typeof useTraduccion>['t'];
 
-/** La base de los enlaces de la app (invitación, baja). **Tiene que ser la
- *  MISMA que A carga en `URL_APP_BASE` del transporte** — si divergen, el enlace
- *  que copia quien invita y el que va en el correo apuntan a lados distintos.
- *  Se lee de la env pública; el fallback es el dominio de la casa. El founder
- *  fija el valor final en las dos puntas. */
-const APP_BASE = process.env.EXPO_PUBLIC_APP_BASE_URL ?? 'https://epetplace.com';
-
-/** El enlace que se comparte. Ruta `/invitacion?token=` (la que nombró el
- *  founder). Lleva a la app (web) con las instrucciones y el paso de aceptar. */
-function urlInvitacion(token: string): string {
-  return `${APP_BASE}/invitacion?token=${encodeURIComponent(token)}`;
-}
+/* ☠️ La constante local de la base y el `urlInvitacion` propio MURIERON (S104-C,
+   freno de A): ahora se consumen de `@epetplace/api`. **`urlInvitacion` devuelve
+   `string | null`** — null mientras el freno esté apagado (las páginas del sitio
+   dan 404). La base (`www` directo) y el encendido viven en UN solo lugar
+   (`_enlace-invitacion.ts`), no en cada pantalla — si no, vuelven a divergir. */
 
 // rol del modelo → voz humana (Ley 3: el código jamás visible)
 function vozRol(rol: string, t: TraductorCuenta): string {
@@ -157,9 +158,18 @@ export default function FamiliaCuenta() {
       setInv({ fase: 'formulario' });
       return;
     }
+    const enlace = urlInvitacion(r.data.token);
+    if (enlace === null) {
+      /* DEFENSA: la fila está gateada por `ENLACE_INVITACION_HABILITADO`, así
+         que no deberíamos llegar acá con el freno apagado. Si igual pasa, NO se
+         ofrece un enlace roto (el punto entero del freno de A). */
+      setReboteInv(t('cuenta.familiaInvitarSinEnlace'));
+      setInv({ fase: 'formulario' });
+      return;
+    }
     setInv({
       fase: 'listo',
-      enlace: urlInvitacion(r.data.token),
+      enlace,
       email: emailInv.trim(),
       // El `?? false` es la lectura honesta: si el wrapper no lo dice, se
       // asume que NO salió correo — el error seguro es prometer de menos.
@@ -171,6 +181,18 @@ export default function FamiliaCuenta() {
   async function copiarEnlace(enlace: string) {
     await Clipboard.setStringAsync(enlace);
     mostrar({ texto: t('cuenta.familiaEnlaceCopiado'), variante: 'exito' });
+  }
+
+  /** «Enviar por…» — la hoja de compartir nativa (Share API). La casa NO manda
+   *  nada: la persona elige el canal (WhatsApp, mensajes…). El texto lleva el
+   *  enlace y a quién se cuida, JAMÁS el correo de quien invita (firma founder).
+   *  Sujeto al mismo freno: solo se ofrece con enlace válido (fase 'listo'). */
+  async function compartirEnlace(enlace: string) {
+    try {
+      await Share.share({ message: t('cuenta.familiaMensajeCompartir', { enlace }) });
+    } catch {
+      // el usuario canceló la hoja: no es un error que anunciar.
+    }
   }
 
   return (
@@ -231,16 +253,30 @@ export default function FamiliaCuenta() {
               ))}
               {/* INVITAR — solo el titular (Ley 23: no se ofrece lo que el
                   server va a rebotar con solo_titular_invita). El invitado
-                  entra como familiar autorizado; el motor lo fija. */}
+                  entra como familiar autorizado; el motor lo fija.
+                  🔴 GATEADA por `ENLACE_INVITACION_HABILITADO` (freno de A):
+                  mientras las páginas del sitio den 404, la fila dice «Pronto»
+                  y no se crean invitaciones que no se pueden compartir. */}
               {esTitular ? (
                 <>
                   <Separador />
-                  <CeldaNavegacion
-                    icono="familia"
-                    titulo={t('cuenta.familiaInvitar')}
-                    detalle={t('cuenta.familiaInvitarAyuda')}
-                    onPress={abrirInvitar}
-                  />
+                  {ENLACE_INVITACION_HABILITADO ? (
+                    <CeldaNavegacion
+                      icono="familia"
+                      titulo={t('cuenta.familiaInvitar')}
+                      detalle={t('cuenta.familiaInvitarAyuda')}
+                      onPress={abrirInvitar}
+                    />
+                  ) : (
+                    <Celda
+                      titulo={t('cuenta.familiaInvitar')}
+                      fin={
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                          {t('cuenta.familiaInvitarPronto')}
+                        </Text>
+                      }
+                    />
+                  )}
                 </>
               ) : null}
             </Tarjeta>
@@ -267,7 +303,8 @@ export default function FamiliaCuenta() {
                 <Texto variante="dato" seleccionable>
                   {inv.enlace}
                 </Texto>
-                <Boton etiqueta={t('cuenta.familiaCopiarEnlace')} bloque onPress={() => void copiarEnlace(inv.enlace)} />
+                <Boton etiqueta={t('cuenta.familiaEnviarPor')} bloque onPress={() => void compartirEnlace(inv.enlace)} />
+                <Boton variante="secundario" etiqueta={t('cuenta.familiaCopiarEnlace')} bloque onPress={() => void copiarEnlace(inv.enlace)} />
                 <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarOtra')} bloque onPress={abrirInvitar} />
                 <Boton variante="ghost" etiqueta={t('cuenta.familiaInvitarListo')} bloque onPress={() => setInvitarAbierta(false)} />
               </>

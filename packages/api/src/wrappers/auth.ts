@@ -358,6 +358,30 @@ export async function confirmarAltaConCodigo(input: {
   };
 }
 
+/**
+ * REENVIAR EL CÓDIGO DE ALTA — la segunda mitad de la pantalla de verificación.
+ *
+ * ── 76(c): HUNK ADITIVO EN packages/api, A RATIFICACIÓN DE A ──────────────
+ * La pantalla `/verificar-correo` (pista C) necesita reenviar el código, y la
+ * puerta única prohíbe que el app llame a Supabase directo. Es la gemela de
+ * `confirmarAltaConCodigo`: mismo `type: 'signup'`, mismo email normalizado.
+ * `auth.resend` NO revela si el correo tiene cuenta (responde igual exista o
+ * no) — así que reenviar no filtra la existencia, igual que el canje.
+ *
+ * La cuenta regresiva de 60s es de la PANTALLA, no de acá: este wrapper solo
+ * dispara el reenvío y dice si salió.
+ */
+export async function reenviarCodigoAlta(
+  email: string,
+): Promise<ResultadoWrapper<null, CodigoErrorAuth>> {
+  const { error } = await getClient().auth.resend({
+    type: 'signup',
+    email: normalizarEmail(email),
+  });
+  if (error) return mapeoErrorAuth(error.code, error.message);
+  return { ok: true, data: null };
+}
+
 export interface InputRegistrarse {
   nombre: string;
   email: string;

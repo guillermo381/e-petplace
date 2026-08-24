@@ -17,6 +17,9 @@ export {
   registrarConsentimiento,
   registrarConsentimientos,
   confirmarAltaConCodigo,
+  // S104-C · reenvío del código de alta (76(c), a ratificación de A): la
+  // segunda mitad de la pantalla /verificar-correo. Gemela de confirmar.
+  reenviarCodigoAlta,
   documentosVigentes,
   consultarConsentimiento,
   decidirConsentimiento,

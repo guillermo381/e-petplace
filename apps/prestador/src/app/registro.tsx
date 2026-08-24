@@ -91,10 +91,11 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
-      // el proyecto exige confirmación de email: la sesión no nació —
-      // se dice y se vuelve al login (misma mecánica que el cliente).
-      mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
-      router.replace('/login');
+      // el proyecto exige confirmar el correo: el registro gana un paso —
+      // la pantalla de código (S104-C, misma mecánica que el cliente). El
+      // consentimiento se persiste al confirmar (D-893); por eso viaja la
+      // traza legal que se mostró acá.
+      router.replace({ pathname: '/verificar-correo', params: { email: email.trim(), urlLegal: URL_LEGAL } });
       return;
     }
     // la sesión está viva y la cuenta VACÍA: el guard raíz re-decide y

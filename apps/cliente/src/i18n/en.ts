@@ -45,6 +45,7 @@ export const clienteEn = {
     emailPlaceholder: 'e.g. ana@mail.com',
     passwordLabel: 'Password',
     entrar: 'Sign in',
+    conGoogle: 'Continue with Google',
   },
   registro: {
     titulo: 'Create account',
@@ -59,6 +60,16 @@ export const clienteEn = {
     razonPasswordCorta: 'The password needs at least {{n}} characters.',
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
+  },
+  verificarCorreo: {
+    titulo: 'Confirm your email',
+    intro: 'We sent an 8-digit code to {{email}}. Enter it to come in.',
+    codigoLabel: 'Code',
+    codigoAyuda: '8 digits',
+    confirmar: 'Confirm',
+    reenviar: 'Resend the code',
+    reenviarEn: 'Resend in {{n}}s',
+    reenviado: 'We sent you a new code.',
   },
   // S55-A A3 (D-315): S45 onboarding on the rail. Brand voice APPROVED
   // by founder (S55 batch).
@@ -1195,8 +1206,9 @@ export const clienteEn = {
     rolMenor: 'Minor',
     rolCuidadorExterno: 'External caregiver',
     familiaSoloTitular: 'Only the primary adult can change the name.',
-    // S104-C · Invite to family (motor de A). familiaInvitarPronto died (Ley 37).
+    // S104-C · Invite to family (motor de A). Gated by ENLACE_INVITACION_HABILITADO.
     familiaInvitar: 'Invite someone from your family',
+    familiaInvitarPronto: 'Soon',
     familiaInvitarSoloTitular: 'Only the person who created the family can invite.',
     familiaInvitarAyuda: 'You share a link so they can join your family.',
     familiaInvitarEmailLabel: 'Their email',
@@ -1208,8 +1220,11 @@ export const clienteEn = {
     familiaInvitarCorreoYEnlace: 'We emailed {{email}}. You can also share this link:',
     familiaCopiarEnlace: 'Copy the link',
     familiaEnlaceCopiado: 'Link copied',
+    familiaEnviarPor: 'Send via…',
+    familiaMensajeCompartir: 'I’m inviting you to our family on e-PetPlace to care for our pets together. Join here: {{enlace}}',
     familiaInvitarOtra: 'Invite someone else',
     familiaInvitarListo: 'Done',
+    familiaInvitarSinEnlace: 'The link isn’t available yet. Try again later.',
     // Lote 4 (S88-D) — see es.ts for the Ley 37 tombstone and sources.
     notifLey: 'Choose how updates reach you. Some always arrive — you choose how.',
     notifFilaOperacion: 'Your appointments and services',
@@ -1386,6 +1401,24 @@ export const clienteEn = {
     confirmar: 'Yes, no more emails',
     listo: 'Done. We won’t write to this email again.',
   },
+  // S104-C · the family INVITEE screen.
+  invitacionFamilia: {
+    titulo: 'You’ve been invited to a family',
+    lamina1Titulo: 'You’re part of a family',
+    lamina1Cuerpo: 'Someone added you to their family on e-PetPlace to care for their pets together.',
+    lamina2Titulo: 'You’ll see their records',
+    lamina2Cuerpo: 'Each pet’s life, documented: vaccines, walks, vet visits and more.',
+    lamina3Titulo: 'Care alongside them',
+    lamina3Cuerpo: 'You’ll stay on top of what each pet needs, and follow their care.',
+    siguiente: 'Next',
+    unirme: 'Join the family',
+    sinSesionCuerpo: 'To join, sign in or create your account with the same email you were invited with.',
+    entrar: 'I have an account',
+    crearCuenta: 'Create my account',
+    otraCuenta: 'Sign in with another account',
+    sinToken: 'This link isn’t valid or has expired. Ask whoever invited you to send a new one.',
+    listo: 'Done — you’re part of the family now.',
+  },
   seguridad: {
     tituloPantalla: 'Security',
     titulo: 'Password',
@@ -1402,6 +1435,14 @@ export const clienteEn = {
     soloGoogle:
       "You sign in to e-PetPlace with Google, so you don't have a password of your own yet. You can create one from recover: we'll email you a code.",
     irARecuperar: 'Create a password',
+    biometricoTitulo: 'App lock',
+    biometricoEtiqueta: 'Lock when you come back to the app',
+    biometricoAyuda:
+      'When you leave and come back, your phone will ask you to prove it’s you before showing your session. If it can’t, you sign in with your password.',
+    biometricoNoDisponible:
+      'Set up your phone’s unlock (fingerprint or face) to use the lock.',
+    biometricoPrompt: 'Confirm it’s you',
+    biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
     titulo: 'Pantry',

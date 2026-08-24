@@ -63,7 +63,7 @@
  * navegación al terminar. *Tres cosas que el patrón traía y acá sobran.*
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -72,6 +72,7 @@ import {
   Campo,
   Encabezado,
   EvitaTeclado,
+  Interruptor,
   Texto,
   spacing,
   useAviso,
@@ -80,6 +81,7 @@ import {
 import { cambiarContrasena, MIN_LARGO_CONTRASENA, segundosDeEspera } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { biometricoDisponible, bloqueoActivado, fijarBloqueo, pedirIdentidad } from '@/lib/bloqueo-biometrico';
 
 export default function Seguridad() {
   const router = useRouter();
@@ -97,7 +99,47 @@ export default function Seguridad() {
    *  seguridad hay que poder releerlos, y un toast se va. */
   const [rebote, setRebote] = useState<{ texto: string; salida: 'recuperar' | null } | null>(null);
 
+  // S104-C · el candado biométrico. `bioDisponible` es null mientras se
+  // consulta al SO: hasta saberlo, la sección no se dibuja (ni toggle ni nota).
+  const [bioDisponible, setBioDisponible] = useState<boolean | null>(null);
+  const [bioActivado, setBioActivado] = useState(false);
+  const [bioOcupado, setBioOcupado] = useState(false);
 
+  useEffect(() => {
+    let vivo = true;
+    void (async () => {
+      const [disp, act] = await Promise.all([biometricoDisponible(), bloqueoActivado()]);
+      if (!vivo) return;
+      setBioDisponible(disp);
+      // Si la biometría dejó de estar disponible (se borró la huella), no se
+      // muestra encendido aunque la preferencia siga guardada.
+      setBioActivado(act && disp);
+    })();
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
+  async function alternarBiometrico(encender: boolean) {
+    if (bioOcupado) return;
+    setBioOcupado(true);
+    if (!encender) {
+      await fijarBloqueo(false);
+      setBioActivado(false);
+      setBioOcupado(false);
+      return;
+    }
+    // Encender EXIGE probar que la persona puede identificarse: sin esto se
+    // activaría un candado que ella misma no podría abrir.
+    const ok = await pedirIdentidad(t('seguridad.biometricoPrompt'));
+    if (ok) {
+      await fijarBloqueo(true);
+      setBioActivado(true);
+    } else {
+      mostrar({ variante: 'neutro', texto: t('seguridad.biometricoRechazado') });
+    }
+    setBioOcupado(false);
+  }
 
   async function cambiarClave() {
     if (cambiando) return;
@@ -258,6 +300,27 @@ export default function Seguridad() {
               onPress={() => void cambiarClave()}
             />
           </View>
+
+          {/* S104-C · EL CANDADO BIOMÉTRICO (§2.5). Se dibuja solo cuando ya se
+              sabe si el teléfono tiene biometría configurada: sin biometría, una
+              nota que dice por qué; con ella, el interruptor. */}
+          {bioDisponible !== null && (
+            <View style={{ paddingTop: spacing[8], gap: spacing[3] }}>
+              <Texto variante="seccion">{t('seguridad.biometricoTitulo')}</Texto>
+              {bioDisponible ? (
+                <>
+                  <Interruptor
+                    encendido={bioActivado}
+                    onCambio={(v) => void alternarBiometrico(v)}
+                    etiqueta={t('seguridad.biometricoEtiqueta')}
+                  />
+                  <Texto variante="apoyo">{t('seguridad.biometricoAyuda')}</Texto>
+                </>
+              ) : (
+                <Texto variante="apoyo">{t('seguridad.biometricoNoDisponible')}</Texto>
+              )}
+            </View>
+          )}
         </ScrollView>
       </EvitaTeclado>
     </View>

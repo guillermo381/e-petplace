@@ -60,7 +60,45 @@ import { estiloDeCaja } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
+import { Boton } from './Boton'
 import { EtiquetaDeCampo, PieDeCampo } from './Campo'
+
+/**
+ * S104-C · EL BOTÓN «PEGAR» — con la sonda nativa de la casa (D-579/L-187).
+ *
+ * `expo-clipboard` es NATIVO y NO viaja por OTA (L-134): está horneado en el
+ * build del cliente, NO en el del prestador. Con `node-linker=hoisted` el JS
+ * del paquete SÍ resuelve desde `packages/ui` en las dos apps —así que un
+ * `require` a secas daría un botón que aparece y no funciona en el prestador—.
+ * La sonda `requireOptionalNativeModule` es la única que dice la verdad: null
+ * cuando el NATIVO no está en el binario, sin lanzar (L-190: la frontera JS no
+ * cubre el nativo). ⇒ el botón aparece SOLO donde el módulo puede correr de
+ * verdad, y el día que el prestador gane la dep en un build, aparece solo —
+ * sin que la pieza sepa quién la monta.
+ */
+function clipboardSiHayNativo(): typeof import('expo-clipboard') | null {
+  let sonda: unknown = null
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const core = require('expo-modules-core') as {
+      requireOptionalNativeModule?: (nombre: string) => unknown
+    }
+    sonda = core.requireOptionalNativeModule?.('ExpoClipboard') ?? null
+  } catch {
+    sonda = null
+  }
+  if (sonda === null) return null
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('expo-clipboard')
+  } catch {
+    return null
+  }
+}
+
+const Clipboard = clipboardSiHayNativo()
+const PEGAR_DISPONIBLE = Clipboard !== null && typeof Clipboard.getStringAsync === 'function'
 
 /** ⏪ S99-B · `BORDE` murió acá: sale de `caja-de-campo.ts` (Ley 37 —
  *  su razón se cumplió cuando la anatomía se extrajo).
@@ -111,6 +149,7 @@ export function CampoCodigo({
   deshabilitado = false,
 }: CampoCodigoProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const inputRef = useRef<TextInput>(null)
   const [enfocado, setEnfocado] = useState(false)
 
@@ -123,6 +162,18 @@ export function CampoCodigo({
     // Sanear SIEMPRE: solo dígitos, cortado a largo. Cubre tipeo, pegado
     // ("código: 1234-5678" → "12345678") y autofill por igual.
     onCambio(crudo.replace(/\D/g, '').slice(0, largo))
+  }
+
+  // El botón Pegar lee el portapapeles y lo mete por la misma puerta que el
+  // tipeo (alTipear sanea): pegar "código: 1234-5678" deposita los dígitos.
+  const pegar = async () => {
+    if (!Clipboard) return
+    try {
+      const texto = await Clipboard.getStringAsync()
+      if (texto) alTipear(texto)
+    } catch {
+      // portapapeles vacío o inaccesible: no rompe nada.
+    }
   }
 
   return (
@@ -220,6 +271,15 @@ export function CampoCodigo({
           }}
         />
       </Pressable>
+
+      {/* S104-C · «Pegar» — solo donde el nativo de expo-clipboard existe
+          (sonda arriba). El pegado por long-press del SO y el autofill
+          sms-otp siguen funcionando sin este botón. */}
+      {PEGAR_DISPONIBLE && !deshabilitado && (
+        <View style={{ alignSelf: 'flex-end', marginTop: spacing[1] }}>
+          <Boton variante="ghost" etiqueta={t('campoCodigo.pegar')} onPress={() => void pegar()} />
+        </View>
+      )}
 
       <PieDeCampo ayuda={ayuda} error={error} />
     </View>

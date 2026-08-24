@@ -138,6 +138,16 @@ export const prestadorEn = {
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },
+  verificarCorreo: {
+    titulo: 'Confirm your email',
+    intro: 'We sent an 8-digit code to {{email}}. Enter it to come in.',
+    codigoLabel: 'Code',
+    codigoAyuda: '8 digits',
+    confirmar: 'Confirm',
+    reenviar: 'Resend the code',
+    reenviarEn: 'Resend in {{n}}s',
+    reenviado: 'We sent you a new code.',
+  },
   // S75-B1: the handshake — the inactive invitee lands here from the root.
   invitacion: {
     titulo: '{{negocio}} added you to their team',
@@ -513,6 +523,14 @@ export const prestadorEn = {
     irARecuperar: 'Create a password',
     esperaConNumero: 'You tried several times in a row. Wait {{s}} seconds and try again.',
     esperaSinNumero: 'You tried several times in a row. Wait a moment and try again.',
+    biometricoTitulo: 'App lock',
+    biometricoEtiqueta: 'Lock when you come back to the app',
+    biometricoAyuda:
+      'When you leave and come back, your phone will ask you to prove it’s you before showing your session. If it can’t, you sign in with your password.',
+    biometricoNoDisponible:
+      'Set up your phone’s unlock (fingerprint or face) to use the lock.',
+    biometricoPrompt: 'Confirm it’s you',
+    biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   recuperar: {
     titulo: 'Recover your password',
@@ -2029,6 +2047,8 @@ export const prestadorEn = {
     micCta: 'Dictate with the microphone',
     micParar: 'Stop dictating',
     micEscuchando: '● Listening — tap again to stop',
+    // S104-C · D-899 — dictation privacy notice (founder-signed).
+    micPrivacidad: 'Your dictation is transcribed by your phone’s voice service.',
     micPermisoDenegado: 'No microphone permission. Enable it in your phone settings; typing still works.',
     micCorte: 'Listening stopped. What you dictated stays in the note.',
     dictadoLabel: 'Consultation note',

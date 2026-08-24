@@ -220,6 +220,15 @@ function DictadoVivoInterno({
           <Texto variante="apoyo">{t('consulta.micHint')}</Texto>
         )}
       </View>
+      {/* S104-C · D-899 — el aviso de privacidad del dictado (firma founder:
+          DECLARAR, no forzar el modo local). La transcripción la hace el
+          servicio de voz del SISTEMA (Google en Android, Apple en iOS) y puede
+          procesarse en la nube del fabricante: es una transferencia que la
+          persona no puede inferir de «dictar». Va VISIBLE en la pantalla, no
+          escondido en un ícono; y como este componente retorna null cuando el
+          dictado no está disponible, el aviso solo aparece cuando la voz de
+          verdad puede salir del teléfono. */}
+      <Texto variante="apoyo">{t('consulta.micPrivacidad')}</Texto>
       {voz !== null ? <Texto variante="apoyo">{voz}</Texto> : null}
     </View>
   );

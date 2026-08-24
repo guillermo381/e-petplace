@@ -49,6 +49,7 @@ export const clienteEs = {
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
     entrar: 'Entrar',
+    conGoogle: 'Continuar con Google',
   },
   registro: {
     titulo: 'Crear cuenta',
@@ -68,6 +69,18 @@ export const clienteEs = {
     razonPasswordCorta: 'La contraseña necesita al menos {{n}} caracteres.',
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
+  },
+  // S104-C · verificar correo. Aparece solo cuando el proyecto exige
+  // confirmar el correo (registrarse devuelve sesion_activa=false).
+  verificarCorreo: {
+    titulo: 'Confirmá tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    codigoLabel: 'Código',
+    codigoAyuda: '8 dígitos',
+    confirmar: 'Confirmar',
+    reenviar: 'Reenviar el código',
+    reenviarEn: 'Reenviar en {{n}}s',
+    reenviado: 'Te enviamos un código nuevo.',
   },
   // S55-A A3 (D-315): onboarding S45 al riel. Voz de marca APROBADA
   // por founder (lote S55, es y en).
@@ -1392,9 +1405,12 @@ export const clienteEs = {
     rolMenor: 'Menor',
     rolCuidadorExterno: 'Cuidador externo',
     familiaSoloTitular: 'Solo el adulto titular puede cambiar el nombre.',
-    // S104-C · INVITAR A LA FAMILIA (motor de A listo). ☠️ Murió
-    // `familiaInvitarPronto` (Ley 37): la fila deja de ser inerte.
+    // S104-C · INVITAR A LA FAMILIA (motor de A). La fila se GATEA por el
+    // freno `ENLACE_INVITACION_HABILITADO`: mientras las páginas del sitio
+    // (/invitacion, /baja) no existan (404 medido), la fila dice «Pronto» y no
+    // se crean invitaciones que no se pueden compartir (freno estructural de A).
     familiaInvitar: 'Invitar a alguien de tu familia',
+    familiaInvitarPronto: 'Pronto',
     familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
     familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
     familiaInvitarEmailLabel: 'Su correo',
@@ -1414,8 +1430,14 @@ export const clienteEs = {
     familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
     familiaCopiarEnlace: 'Copiar el enlace',
     familiaEnlaceCopiado: 'Enlace copiado',
+    // S104-C · «Enviar por…» (Share API nativa). La casa NO manda nada: entrega
+    // el enlace por un camino más corto. El texto lleva el enlace y a quién se
+    // cuida — NUNCA el correo de quien invita (firma founder).
+    familiaEnviarPor: 'Enviar por…',
+    familiaMensajeCompartir: 'Te invito a nuestra familia en e-PetPlace para cuidar juntos a nuestras mascotas. Uníte acá: {{enlace}}',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
+    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Probá más tarde.',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
@@ -1778,6 +1800,27 @@ export const clienteEs = {
     confirmar: 'Sí, no quiero más correos',
     listo: 'Listo. No te vamos a escribir más a este correo.',
   },
+  // S104-C · la pantalla del INVITADO de familia (motor de A:
+  // aceptarInvitacionFamilia). Tres láminas cortas + aceptar.
+  invitacionFamilia: {
+    titulo: 'Te invitaron a una familia',
+    lamina1Titulo: 'Sos parte de una familia',
+    lamina1Cuerpo: 'Alguien te sumó a su familia en e-PetPlace para cuidar juntos a sus mascotas.',
+    lamina2Titulo: 'Vas a ver su expediente',
+    lamina2Cuerpo: 'La vida de cada mascota, documentada: vacunas, paseos, visitas al veterinario y más.',
+    lamina3Titulo: 'Cuidá con ellos',
+    lamina3Cuerpo: 'Vas a estar al día con lo que cada mascota necesita, y seguir sus cuidados.',
+    siguiente: 'Siguiente',
+    unirme: 'Unirme a la familia',
+    // Sin sesión: se guía a entrar/crear cuenta CON EL MISMO CORREO (el motor
+    // exige que la sesión coincida con el invitado — email_no_coincide).
+    sinSesionCuerpo: 'Para unirte, entrá o creá tu cuenta con el mismo correo al que te invitaron.',
+    entrar: 'Ya tengo cuenta',
+    crearCuenta: 'Crear mi cuenta',
+    otraCuenta: 'Entrar con otra cuenta',
+    sinToken: 'Este enlace no es válido o ya venció. Pedile a quien te invitó que te mande uno nuevo.',
+    listo: 'Listo, ya sos parte de la familia.',
+  },
   seguridad: {
     tituloPantalla: 'Seguridad',
     titulo: 'Contraseña',
@@ -1803,6 +1846,17 @@ export const clienteEs = {
     soloGoogle:
       'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Puedes crear una desde recuperar: te enviamos un código a tu correo.',
     irARecuperar: 'Crear una contraseña',
+    // S104-C · el candado biométrico sobre la sesión (§2.5). La voz no nombra
+    // el método (huella/rostro): depende del teléfono, y el SO ya lo dice en
+    // su propio prompt.
+    biometricoTitulo: 'Candado de la app',
+    biometricoEtiqueta: 'Bloquear al volver a la app',
+    biometricoAyuda:
+      'Cuando salgas y vuelvas, tu teléfono te va a pedir que te reconozca antes de mostrar tu sesión. Si no puede, entras con tu contraseña.',
+    biometricoNoDisponible:
+      'Configura el desbloqueo de tu teléfono (huella o rostro) para usar el candado.',
+    biometricoPrompt: 'Confirma que eres tú',
+    biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
     titulo: 'Despensa',
