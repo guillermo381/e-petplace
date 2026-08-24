@@ -20509,7 +20509,19 @@ Y trae un segundo cobro: **el rol de sesión del CLI no tiene los grants de la t
 
 **Por qué se ficha en vez de curarse ya:** `Confirm signup` **NO se tocó por orden explícita** en la tanda 1 de D. Tocarla sin apagar el autoconfirm no sirve de nada, y apagarlo sin tocarla rompe el alta. **Van juntas o no van.**
 
-**El orden, en piedra:** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
+> ### 🔴 ENMIENDA FIRMADA (founder, 23-ago-2026) — **SON TRES ACTOS, NO DOS, Y EL DEL MEDIO ES NUEVO**
+>
+> **① plantilla con código de 8 dígitos** — ✅ **HECHO Y GATEADO** (el founder recibió el correo con código, no enlace) · **② una RPC DEFINER que registre el consentimiento SIN SESIÓN** — ✅ **construida el mismo día** (`20260824000000`) · **③ recién ahí apagar `mailer_autoconfirm`.**
+>
+> **Lo que convirtió al ② en CONDICIÓN y no en mejora, y es una medición y no un razonamiento:** la cuenta `guillo381+test1` (**D-896**), creada durante la ventana de 18 minutos con `autoconfirm=false`, **quedó con `consentimientos = 0`**. Sin sesión, `auth.uid()` es NULL y la policy no deja entrar el INSERT ⇒ **con autoconfirm apagado, TODO registro nacería sin evidencia de consentimiento, desde el primero.**
+>
+> ⇒ **Con ② faltando, ③ no es «un flip que se puede hacer cuando quieran»: es un flip que incumple P23 desde su primer registro.**
+>
+> **Y la línea que no se negocia, ratificada por el founder: JAMÁS SE AFLOJA LA POLICY.** Se cerró hoy porque admitía escritura anónima a nombre de terceros (D-891); *abrirla para resolver esto sería pagar el problema con el agujero que se acaba de tapar.* La RPC **agrega un camino angosto y gateado** (cinco gates: existe · email coincide · sin confirmar · ventana de 15 min · sin consentimientos previos), **no ensancha el existente**.
+>
+> ⚠️ **Alternativa servida a la mesa, que podría volver innecesario el ②:** **`verifyOtp` devuelve sesión** —está escrito en la propia casa (`seguridad.ts:312`)— así que registrar el consentimiento **justo después de confirmar el código** bastaría con la policy normal, **sin RPC DEFINER y sin superficie nueva**. Su costo: el registro queda unos minutos después del momento en que la persona aceptó. **Se construyó lo firmado y se sirve la alternativa.**
+
+**El orden ORIGINAL de la ficha (superado por la enmienda de arriba):** ① reescribir `Confirm signup` a español con `{{ .Token }}` ② gatearla en Gmail con una cuenta real ③ **recién ahí** apagar `mailer_autoconfirm`. **Jamás al revés.**
 ☠️ **Condición de muerte:** los tres pasos ejecutados **en ese orden**, con el gate del ② corrido por el founder.
 
 **Dato que la acompaña y que NO es un defecto:** las otras cuatro plantillas que D tradujo (`Invite` · `Magic link` · `Change email` · `Reauth`) **no han disparado NUNCA** — `user_invited`, `magiclink_requested`, `user_email_change_requested` y `user_reauthenticate_requested` están las cuatro en **0 en toda la historia**. *Es traducción PREVENTIVA, no correctiva, y el acta no la cuenta como defecto curado.*
