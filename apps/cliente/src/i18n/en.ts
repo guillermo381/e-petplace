@@ -1195,8 +1195,9 @@ export const clienteEn = {
     rolMenor: 'Minor',
     rolCuidadorExterno: 'External caregiver',
     familiaSoloTitular: 'Only the primary adult can change the name.',
-    // S104-C · Invite to family (motor de A). familiaInvitarPronto died (Ley 37).
+    // S104-C · Invite to family (motor de A). Gated by ENLACE_INVITACION_HABILITADO.
     familiaInvitar: 'Invite someone from your family',
+    familiaInvitarPronto: 'Soon',
     familiaInvitarSoloTitular: 'Only the person who created the family can invite.',
     familiaInvitarAyuda: 'You share a link so they can join your family.',
     familiaInvitarEmailLabel: 'Their email',
@@ -1210,6 +1211,7 @@ export const clienteEn = {
     familiaEnlaceCopiado: 'Link copied',
     familiaInvitarOtra: 'Invite someone else',
     familiaInvitarListo: 'Done',
+    familiaInvitarSinEnlace: 'The link isn’t available yet. Try again later.',
     // Lote 4 (S88-D) — see es.ts for the Ley 37 tombstone and sources.
     notifLey: 'Choose how updates reach you. Some always arrive — you choose how.',
     notifFilaOperacion: 'Your appointments and services',

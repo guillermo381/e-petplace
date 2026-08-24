@@ -1392,9 +1392,12 @@ export const clienteEs = {
     rolMenor: 'Menor',
     rolCuidadorExterno: 'Cuidador externo',
     familiaSoloTitular: 'Solo el adulto titular puede cambiar el nombre.',
-    // S104-C · INVITAR A LA FAMILIA (motor de A listo). ☠️ Murió
-    // `familiaInvitarPronto` (Ley 37): la fila deja de ser inerte.
+    // S104-C · INVITAR A LA FAMILIA (motor de A). La fila se GATEA por el
+    // freno `ENLACE_INVITACION_HABILITADO`: mientras las páginas del sitio
+    // (/invitacion, /baja) no existan (404 medido), la fila dice «Pronto» y no
+    // se crean invitaciones que no se pueden compartir (freno estructural de A).
     familiaInvitar: 'Invitar a alguien de tu familia',
+    familiaInvitarPronto: 'Pronto',
     familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
     familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
     familiaInvitarEmailLabel: 'Su correo',
@@ -1416,6 +1419,7 @@ export const clienteEs = {
     familiaEnlaceCopiado: 'Enlace copiado',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
+    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Probá más tarde.',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
