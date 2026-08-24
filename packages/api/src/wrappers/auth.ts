@@ -168,7 +168,26 @@ export const URL_LEGAL: Record<DocumentoLegal, string | null> = {
   privacidad: 'https://www.epetplace.com/legales/privacidad-app/1-1',
 };
 
-export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_prestador';
+export type TipoConsentimiento =
+  | 'registro'
+  /**
+   * 🔴 **El auto-registro en la app del PROFESIONAL. Nace el 24-ago-2026 para
+   * cerrar un defecto de EVIDENCIA que encontró S104-C, y la clase importa:**
+   * `registrarse()` está compartida por las dos apps y **hardcodeaba
+   * `'registro'`** ⇒ `documentosVigentes` mapeaba a **`terminos_parent`, el
+   * T&C del CLIENTE**. *El profesional veía en pantalla «T&C Pet Professional»
+   * y la evidencia guardaba que aceptó otro documento.* **P23 promete demostrar
+   * QUÉ se mostró; eso demostraba lo contrario de lo que pasó.**
+   *
+   * ⚠️ **Por qué un tipo nuevo y NO reusar `acceso_prestador`, que era la
+   * tentación barata:** ese significa *«pidió acceso a un negocio existente»*.
+   * **Los dos llevan al mismo documento pero son puertas distintas**, y
+   * confundirlas borra el único registro de **cómo entró esa persona**. *El
+   * documento se deriva de la puerta; la puerta no se deriva del documento.*
+   */
+  | 'registro_profesional'
+  | 'invitacion_familia'
+  | 'acceso_prestador';
 
 /**
  * Registra que alguien aceptó los términos. **Puerta única del consentimiento.**
@@ -238,7 +257,9 @@ export function documentosVigentes(
      aunque la persona sea la misma que en el cliente. *El registro guarda el
      documento que se vio de verdad, no el que le correspondería a la persona.* */
   const terminos: DocumentoLegal =
-    contexto === 'acceso_prestador' ? 'terminos_professional' : 'terminos_parent';
+    contexto === 'acceso_prestador' || contexto === 'registro_profesional'
+      ? 'terminos_professional'
+      : 'terminos_parent';
 
   return [
     { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? URL_LEGAL[terminos] },
@@ -379,6 +400,15 @@ export async function registrarConsentimientos(
 export async function confirmarAltaConCodigo(input: {
   email: string;
   codigo: string;
+  /**
+   * **QUIÉN confirma — OBLIGATORIO, por el mismo motivo que en `registrarse`.**
+   *
+   * ⚠️ Y acá el olvido sería **más difícil de ver**: esta función corre en la
+   * pantalla de confirmar código, **lejos de la que mostró los documentos**.
+   * *Quien la escriba puede no tener presente qué se le mostró a esa persona
+   * dos pantallas atrás* — por eso el tipo lo pregunta en vez de suponerlo.
+   */
+  contexto: Extract<TipoConsentimiento, 'registro' | 'registro_profesional'>;
   urlsLegales?: Partial<Record<DocumentoLegal, string>>;
 }): Promise<
   ResultadoWrapper<
@@ -403,8 +433,8 @@ export async function confirmarAltaConCodigo(input: {
      entra por la policy normal, sin privilegios prestados. */
   const r = await registrarConsentimientos(
     data.user.id,
-    'registro',
-    documentosVigentes('registro', input.urlsLegales ?? {}),
+    input.contexto,
+    documentosVigentes(input.contexto, input.urlsLegales ?? {}),
   );
 
   return {
@@ -446,6 +476,20 @@ export interface InputRegistrarse {
   nombre: string;
   email: string;
   password: string;
+  /**
+   * **QUIÉN se está registrando — OBLIGATORIO a propósito.**
+   *
+   * 🔴 *Un parámetro opcional es un parámetro que se olvida, y acá el default
+   * fallaba hacia el lado malo:* sin él, el prestador quedaba registrado con
+   * el T&C del cliente. **Al ser obligatorio, el compilador obliga a cada
+   * pantalla a declarar quién entra** — y una app que se agregue mañana no
+   * puede heredar el defecto por omisión.
+   *
+   * `'registro'` = la app de familias · `'registro_profesional'` = la de
+   * profesionales. *Los binarios son distintos, así que cada uno lo sabe con
+   * certeza: no es una inferencia, es un dato.*
+   */
+  contexto: Extract<TipoConsentimiento, 'registro' | 'registro_profesional'>;
   /** La URL de términos que la pantalla mostró (para la evidencia de P23). */
   urlLegalMostrada?: string;
 }
@@ -478,7 +522,7 @@ export async function registrarse(
      `false` que sale de acá es la verdad, no un error tragado. */
   const consentimiento_registrado =
     data.session !== null
-      ? await registrarConsentimiento(data.user.id, 'registro', input.urlLegalMostrada ?? null)
+      ? await registrarConsentimiento(data.user.id, input.contexto, input.urlLegalMostrada ?? null)
       : false;
 
   return {

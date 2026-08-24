@@ -64,6 +64,9 @@ export default function Registro() {
     setCargando(true);
     setErrores({});
     const r = await registrarse({
+      /* S104-A · contexto OBLIGATORIO: sin él, el prestador quedaba registrado
+         con el T&C del CLIENTE. El valor lo sabe el binario, no se infiere. */
+      contexto: 'registro_profesional',
       nombre: nombre.trim(),
       email: email.trim(),
       password,
