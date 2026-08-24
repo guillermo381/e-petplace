@@ -26,7 +26,24 @@
  * «no la hicieron» de «la hicieron en otro lado»**). Se cambia acá, en un
  * lugar, y viaja por OTA.
  */
-export const ENLACE_INVITACION_HABILITADO = false;
+/* ✅ ENCENDIDO el 24-ago-2026, cumpliendo la condición que esta misma constante
+   exigía: **200 medido con control positivo**, no declarado.
+   Verificado por A contra producción, después de que C desplegara:
+     /invitacion?token=  → 200   (era 404 antes del deploy ⇒ el 200 PRUEBA que
+                                  la página es nueva; no hay falso verde posible
+                                  sobre una ruta que no existía)
+     /baja?t=            → 200
+     /legales            → 200   ← control positivo
+     /ruta-inventada     → 404   ← control negativo: acá 404 sigue significando
+                                   «no existe», así que el 200 discrimina
+   Y el HTML desplegado trae lo FUNCIONAL, no una cáscara: `/baja` incluye la
+   llamada a `functions/v1/baja-correo` y `/invitacion` el esquema
+   `cliente://invitacion`. Las dos con `noindex`.
+
+   ⚠️ ESTO ENCIENDE EL ENLACE, NO EL CORREO. El correo a quien no tiene cuenta
+   sigue frenado por `INVITACION_CORREO_VIVO`, que es llave del founder y
+   decisión aparte. */
+export const ENLACE_INVITACION_HABILITADO = true;
 
 /** La base del enlace. `www` directo: el apex responde 308 y —medido— preserva
  *  el query string, pero cada salto en un correo frío es una oportunidad de que
