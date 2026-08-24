@@ -1870,6 +1870,12 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
+  /* R64 · dos fixtures, uno por brazo. El `path` no importa acá (R64 no
+     filtra por ruta: mira cualquier archivo que declare `respaldo`).
+     ⚠️ El del brazo A nombra un wrapper INVENTADO a propósito — es el modo
+     de falla real: se teclea el nombre del wrapper que uno PIENSA
+     construir, y sin el juez nadie nota que no existe. */
+  R64: [{ path: '(fixture)', src: "respaldo: 'wrapperQueNoExisteR64'" }],
   /* R63 · el fixture apunta al brazo A, que es el que se puede violar con
      una línea de código. Los brazos B y C se probaron en rojo contra un
      árbol de rutas sintético al escribir la regla (ver su cabecera); acá
@@ -4979,7 +4985,131 @@ function r63(archivos) {
   };
 }
 
-const REGLAS = { R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/* ═══════════════════════════════════════════════════════════════════
+ * R64 · UNA PANTALLA DE CIERRE NO PROMETE UN EFECTO QUE NADIE EJECUTA
+ *       (S104-B · P15 §4).
+ *
+ * 🔴 EL DEFECTO QUE CAZA, y es el de peor costo del producto: una
+ * pantalla de cierre de cuenta que dice *«se borra tu historial»* cuando
+ * nada lo borra. La persona se va tranquila y el dato sigue ahí. **No hay
+ * excepción de stack trace ni de test: una promesa falsa acá no falla —
+ * se cumple mal, en silencio, y del lado del usuario parece que funcionó.**
+ *
+ * ── POR QUÉ NO MIDE PROSA, que era el camino obvio ────────────────────
+ * La forma fácil era buscar verbos («borra», «elimina», «destruye») en
+ * las pantallas de cierre. **Se descartó con precedente propio:** esta
+ * casa ya jubiló `verify-edge-simbolos` por medir media clase con regex,
+ * y una lista de verbos falla igual — no ve las paráfrasis, se llena de
+ * falsos positivos con los comentarios, y **no sabría distinguir una
+ * promesa verdadera de una falsa aunque las encontrara todas.**
+ *
+ * ── LO QUE MIDE: ESTRUCTURA, y por eso la pieza se diseñó así ─────────
+ * `ConsecuenciasDelCierre` obliga a que **cada consecuencia declare su
+ * `respaldo`**: el nombre del wrapper de `@epetplace/api` que ejecuta ese
+ * efecto, o el literal `'sin_motor'`. ⇒ R64 tiene dos brazos:
+ *
+ *   · **A — el respaldo nombra algo que EXISTE.** Todo `respaldo` que no
+ *     sea `'sin_motor'` tiene que ser un símbolo **realmente exportado
+ *     por `packages/api`**. Un nombre inventado es una promesa con
+ *     coartada, y es el modo de falla más probable: se teclea el nombre
+ *     del wrapper que uno *piensa* construir.
+ *   · **B — trinquete solo-baja de `'sin_motor'`.** Prometer sin motor no
+ *     se prohíbe (hoy el motor de cierre es CERO y prohibirlo dejaría la
+ *     pantalla sin poder existir): **se cuenta, y solo puede bajar.** El
+ *     día que el motor llegue, el número cae; nunca sube sin que alguien
+ *     mueva el baseline a la vista.
+ *
+ * ⚠️ **LO QUE R64 NO PUEDE HACER, declarado en vez de insinuado:** no
+ * verifica que el wrapper nombrado haga LO QUE EL TEXTO DICE. Eso exige
+ * entender castellano y SQL a la vez. **Cierra la puerta de «prometí algo
+ * que no existe»; no la de «prometí mal algo que existe».** Esa segunda
+ * es del gate humano, y se dice para que nadie lea el verde de R64 como
+ * «las promesas son ciertas».
+ *
+ * ☠️ CONDICIÓN DE MUERTE: ninguna. El brazo B muere solo cuando llegue a
+ * 0, y ahí queda el A. */
+const BASELINE_SIN_MOTOR = 0
+
+/** Los símbolos que `packages/api` exporta de verdad — leídos de su
+ *  `index.ts`, no de una lista tecleada acá (que sería el segundo lugar
+ *  donde la verdad vive y el primero en envejecer). */
+function simbolosDeApi() {
+  const p = join(RAIZ_REPO, 'packages/api/src/index.ts')
+  if (!existsSync(p)) return null
+  const src = readFileSync(p, 'utf8')
+  const nombres = new Set()
+  for (const m of src.matchAll(/\b([a-zA-Z_$][\w$]*)\b/g)) nombres.add(m[1])
+  return nombres
+}
+
+/** ¿Este archivo es la galería? **El corpus de R64 la INCLUYE, y los dos
+ *  brazos la tratan distinto — a propósito:**
+ *   · **Brazo A SÍ la mira.** Un `respaldo` que nombra un wrapper
+ *     inexistente es un error aunque esté en un ejemplo — y peor: la
+ *     galería es de donde se COPIA el patrón. Un nombre falso ahí se
+ *     propaga al primer consumidor real.
+ *   · **Brazo B NO la cuenta.** El trinquete mide *«cuántas promesas sin
+ *     motor le mostramos a una persona»*, y un ejemplo de galería no se
+ *     le muestra a nadie. Contarlo dejaría el baseline atado a datos de
+ *     demo — y un retroceso REAL en producto podría esconderse borrando
+ *     un ejemplo.
+ *
+ *  🔴 **Y esto nació de un verde flojo propio, en su primera corrida:** el
+ *  corpus original no incluía la galería, R64 informó «0 respaldos» con
+ *  cuatro declarados a diez líneas de distancia, **y salió VERDE**. No
+ *  falló la regla: falló dónde estaba mirando. L-192 otra vez. */
+const ES_GALERIA = /packages\/ui\/src\/gallery\//
+
+function r64(archivos) {
+  const fallos = []
+  const api = simbolosDeApi()
+  let respaldos = 0
+  let sinMotor = 0
+  let sinMotorDemo = 0
+  let superficies = 0
+
+  /* ANCLA del corpus de la API: si `index.ts` no se pudo leer, el brazo A
+     no puede juzgar y su silencio significaría «no miré» (L-192). */
+  if (api === null) {
+    fallos.push(
+      'R64: no se pudo leer `packages/api/src/index.ts` — el brazo A no tiene contra qué resolver y su verde no significaría nada.',
+    )
+    return { fallos, info: 'NO CONCLUYENTE — sin corpus de api' }
+  }
+
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src)
+    if (!limpio.includes('respaldo')) continue
+    superficies++
+    for (const m of limpio.matchAll(/respaldo:\s*'([^']+)'/g)) {
+      respaldos++
+      const r = m[1]
+      if (r === 'sin_motor') {
+        if (ES_GALERIA.test(path)) sinMotorDemo++
+        else sinMotor++
+        continue
+      }
+      if (!api.has(r)) {
+        fallos.push(
+          `R64·A ${path}:${lineaDe(limpio, m.index)} declara \`respaldo: '${r}'\` y **\`packages/api\` no exporta ese símbolo**. Una consecuencia de cierre respaldada por un wrapper que no existe es una promesa con coartada. Si el motor todavía no está, el valor honesto es \`'sin_motor'\` — que R64 cuenta y solo deja bajar.`,
+        )
+      }
+    }
+  }
+
+  if (sinMotor > BASELINE_SIN_MOTOR) {
+    fallos.push(
+      `R64·B: ${sinMotor} consecuencia(s) de cierre declaradas \`'sin_motor'\` sobre un baseline de ${BASELINE_SIN_MOTOR}. Es trinquete SOLO-BAJA: prometer sin motor está permitido —hoy el motor de cierre es CERO— pero **no puede crecer sin que alguien suba este número a la vista**.`,
+    )
+  }
+
+  return {
+    fallos,
+    info: `${respaldos} respaldo(s) en ${superficies} superficie(s) · ${sinMotor} sin motor en PRODUCTO (baseline ${BASELINE_SIN_MOTOR} solo-baja) · ${sinMotorDemo} en galería (NO cuentan al trinquete: ver ES_GALERIA) · ⚠️ NO verifica que el wrapper haga lo que el texto dice`,
+  }
+}
+
+const REGLAS = { R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -5356,6 +5486,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    pasa junto y se separa adentro porque la auto-prueba genérica le da UN
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
+corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecuta)', r64([...apps, ...appsCodigo, ...ui, ...galeria])]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
 corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);

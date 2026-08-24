@@ -270,6 +270,33 @@ export { LockupMarca, type LockupMarcaProps } from './brand/LockupMarca'
 // viaja por OTA, L-134). El fallback a contraseña se dibuja en LOS TRES
 // estados, incluso verificando — es la única salida si el sensor falla.
 export { PantallaDeCandado, type PantallaDeCandadoProps, type EstadoCandado } from './components/PantallaDeCandado'
+// ── S104-B · LAS TRES PIEZAS DE LA SALIDA (P15) ──────────────────────────
+// HojaConfirmacionDestructiva — el patrón «P1 · la doble confirmación», que
+// vivía como INSTANCIA en cuenta/medios.tsx y no como pieza. `sujeto` es
+// OBLIGATORIO: un «¿estás seguro?» sin sujeto es un botón que se aprende a
+// apretar sin leer (y el caso medido eran dos tarjetas del mismo banco).
+export {
+  HojaConfirmacionDestructiva,
+  type HojaConfirmacionDestructivaProps,
+} from './components/HojaConfirmacionDestructiva'
+// ConsecuenciasDelCierre — «esto se va, esto queda» (P15 §4). Cada
+// consecuencia DECLARA su `respaldo`: el wrapper que la ejecuta, o
+// 'sin_motor'. Es lo que vuelve mecanizable a `R64` — sin eso, prometer de
+// más cuesta una línea y no lo nota nadie. Las DOS columnas son obligatorias:
+// montar solo `seVa` daría «vamos a borrar todo», la frase que P15 §4 prohíbe.
+export {
+  ConsecuenciasDelCierre,
+  type ConsecuenciasDelCierreProps,
+  type Consecuencia,
+  type RespaldoDeConsecuencia,
+} from './components/ConsecuenciasDelCierre'
+// CierreEnCurso — el estado mientras la ventana corre. ⚠️ NACE CON CHOQUE DE
+// LETRA DECLARADO: los «30 días» NO están en P15 (sus cinco cláusulas no los
+// mencionan) — viven como *Propuesta* sin firma, y su otra mitad («borrado
+// duro programado») choca con el titular firmado y además es INEJECUTABLE
+// (24 FKs bloqueantes). Por eso su voz dice fecha y cancelación, y NO promete
+// destrucción. Toma FECHA y no días: ver el porqué medido en la pieza.
+export { CierreEnCurso, type CierreEnCursoProps } from './components/CierreEnCurso'
 export { Atmosfera, type AtmosferaProps, type OrigenAtmosfera } from './brand/Atmosfera'
 export { TokenGallery } from './gallery/TokenGallery'
 

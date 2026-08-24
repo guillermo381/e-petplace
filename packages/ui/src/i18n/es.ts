@@ -82,6 +82,19 @@ export const uiEs = {
     // de B (es su pieza).
     usarClave: 'Entrar con otra cuenta',
   },
+  cierre: {
+    // S104-B · P15 §4 — «qué se va, qué queda y por qué».
+    seVa: 'Esto se va',
+    queda: 'Esto queda',
+    // El titular FIRMADO de P15, textual. No es opcional en la pieza:
+    // sin él las dos columnas se pueden volver a leer como «se borra todo».
+    titular: 'Cerrar la cuenta la vuelve inalcanzable. No destruye lo que la ley obliga a conservar.',
+    enCursoTitulo: 'Tu cuenta se está cerrando',
+    // FECHA y no contador: ver el porqué medido en la pieza.
+    enCursoFecha: 'Se cierra el {{fecha}}. Hasta entonces podés volver.',
+    cancelarCierre: 'Cancelar el cierre',
+    enCursoNota: 'Si cancelás, todo sigue como estaba.',
+  },
   esqueleto: {
     cargando: 'Cargando',
   },
