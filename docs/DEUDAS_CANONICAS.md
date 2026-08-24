@@ -20890,3 +20890,33 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 **Dueño:** founder + producto (la decisión) · legal (contra §19.4 y §18) · producto (la superficie, si gana el camino 2).
 **Disparo: ANTES de abrir el cierre de cuenta a usuarios reales** — o sea antes de encender `cierre_cuenta_vivo` de forma permanente.
 ☠️ **Condición de muerte:** existe una firma que dice qué pasa con las mascotas cuando se va el único adulto, **y el pre-chequeo la implementa** — sea ofreciendo transferencia, sea declarando el destino, sea confirmando que el camino asistido es la respuesta correcta **y entonces la app lo dice sin llamarlo excepción**.
+
+#### D-904 — 🔴 NO EXISTE ELIMINAR MASCOTA EN NINGUNA DE LAS DOS APPS, y con `D-903` cierra la única salida
+🔴 **BLOQUEANTE, hallazgo del founder durante el gate del cierre (24-ago-2026).** *Nadie lo había notado porque **hasta hoy nadie intentó irse**.*
+
+**El hecho:** una mascota creada por error, duplicada, o cargada mal **no tiene salida**. Se queda para siempre. **Medido durante la prueba: el founder no pudo quitar la suya desde la app y hubo que hacerlo por base.**
+
+🔴 **Y CIERRA UN CÍRCULO CON `D-903` QUE NINGUNO DE LOS DOS TIENE POR SEPARADO:**
+- el onboarding **obliga** a crear una mascota,
+- una mascota **no se puede eliminar**,
+- y el pre-chequeo del cierre **rebota a todo titular único de familia con mascotas**.
+
+⇒ **El camino asistido deja de ser la excepción y pasa a ser el ÚNICO camino real de salida.** *Tres decisiones razonables por separado producen una puerta que solo se abre escribiendo un correo.*
+
+⚠️ **EL ALCANCE, ANTES DE QUE ALGUIEN LO CONSTRUYA RÁPIDO — y esto es lo que la ficha viene a impedir: BORRAR UNA MASCOTA NO PUEDE SER UN `DELETE`.**
+
+**Medido el mismo día, sobre la mascota de prueba que había que quitar:**
+- **82 FKs apuntan a `mascotas`; 40 son BLOQUEANTES.**
+- **El `DELETE` rebotó contra `eventos_mascota`** — y la mascota tenía **exactamente 1 evento: su `hito_narrativo`**, creado por el propio onboarding.
+
+> 🔴 **NO EXISTE LA «MASCOTA VACÍA». Nace con expediente.** *Una mascota creada hace tres minutos y sin una sola atención ya tiene historia que borrar.*
+
+**Y su expediente tiene la MISMA razón que el del cierre de cuenta**, la que §19.4 ya publicó: *«la mascota puede cambiar de familia y **su historia le pertenece a ella**»*. **Puede además tener citas pagadas, eventos y fotos que subió un prestador** — *que no son de la familia por estar en su ficha, igual que no son del prestador por estar en su bucket* (mismo discriminador que ordenó los borrados del día 30).
+
+**⇒ Es el problema del cierre de cuenta, en chico, y admite las mismas tres respuestas:** el expediente **sobrevive sin dueño** · se **transfiere** · o se declara un **destino terminal**. **La diferencia es que acá el caso frecuente no es «me voy»: es «me equivoqué al cargarla»** — *y esos dos merecen respuestas distintas: un duplicado cargado por error no tiene historia que preservar, y una mascota que murió o cambió de familia sí.*
+
+**Nota de estado:** el modelo **ya tiene `estado_vida`** —el memorial— o sea que **la casa ya sabe expresar «esta mascota ya no está» sin borrarla**. *Puede que la respuesta a la mitad de los casos ya exista y lo que falte sea la puerta, no el motor.* **Medirlo es el primer paso, no construir.**
+
+**Dueño:** founder + producto (la letra) · producto (la superficie).
+**Disparo:** con `D-903`, **antes de abrir el cierre de cuenta a usuarios reales** — *son la misma decisión mirada desde dos lados.*
+☠️ **Condición de muerte:** existe un camino en la app para que una familia saque una mascota de su ficha, **con la letra que dice qué pasa con su expediente** — y **medido de punta a punta, no con un `DELETE` que rebota contra 40 constraints.**
