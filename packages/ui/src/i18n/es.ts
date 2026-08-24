@@ -58,6 +58,11 @@ export const uiEs = {
     ver: 'Ver',
     ocultar: 'Ocultar',
   },
+  // S104-C · el botón Pegar de CampoCodigo. Solo aparece si expo-clipboard
+  // resolvió (require en try/catch): el prestador no lo tiene horneado.
+  campoCodigo: {
+    pegar: 'Pegar',
+  },
   candado: {
     // S104-B · MODELO_LOGIN §2.5 — el candado sobre la sesión.
     // La voz NUNCA nombra el método (huella / rostro): depende del

@@ -46,6 +46,9 @@ export const uiEn = {
     ver: 'Show',
     ocultar: 'Hide',
   },
+  campoCodigo: {
+    pegar: 'Paste',
+  },
   candado: {
     bloqueada: 'Your session is open. Unlock to get back in.',
     verificando: 'Waiting for your phone to recognize you.',
