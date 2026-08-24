@@ -146,15 +146,25 @@ export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
  * vivía **duplicado en cuatro pantallas** de las dos apps, y que era peor que un
  * `null`: *un marcador con forma de URL afirma que hay un documento enlazado.*
  *
- * 🔴 **Los dos de términos van `null` A PROPÓSITO y no por olvido: sus páginas
- * NO EXISTEN.** El T&C profesional está frenado (se remite a una Disposición
- * Transitoria que no contiene, `L-415`) y el de consumo no se publicó. **`null`
- * es la verdad; el marcador era una promesa.** Entran acá el día que su URL
- * responda 200 medido con control negativo, y es una línea.
+ * 🔴 **`terminos_parent` va `null` A PROPÓSITO y no por olvido: su página no
+ * existe todavía.** *`null` es la verdad; el marcador era una promesa.* Entra
+ * acá el día que su URL responda 200 medido con control negativo, y es una
+ * línea — como fue la del profesional.
+ *
+ * *(Este comentario decía «los dos de términos» y envejeció en horas: el
+ * profesional se publicó el mismo día. **Se corrige acá en vez de dejarse** —
+ * un comentario vencido en la puerta del consentimiento manda a la próxima
+ * sesión a construir un hueco que ya se cerró.)*
  */
 export const URL_LEGAL: Record<DocumentoLegal, string | null> = {
   terminos_parent: null,
-  terminos_professional: null,
+  /* ✅ Publicado y medido con la vara de la casa (24-ago-2026, S104-C):
+     `/1-0` → **200** · `/9-9` → **404** (el control negativo: sin él, un 200
+     prueba que el servidor contesta, no que el deploy salió) · sirve
+     `data-epp-version="1.0"` y **la Disposición Transitoria Primera está
+     adentro**, que es la condición de `§4.5` — el profesional declara haberla
+     leído al aceptar, así que tiene que poder alcanzarla desde ahí. */
+  terminos_professional: 'https://www.epetplace.com/legales/terminos-profesional/1-0',
   privacidad: 'https://www.epetplace.com/legales/privacidad-app/1-1',
 };
 
