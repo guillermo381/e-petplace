@@ -20595,7 +20595,21 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
-#### D-895 — 🟠 EL TOKEN DE PUSH DEL PRESTADOR NO SE SINCRONIZA: TRES CAPAS DE SILENCIO APILADAS
+#### D-895 — 🟢 NO HAY DEFECTO: el token SÍ sincroniza. Queda como ENDURECIMIENTO de tres capas de silencio
+🟢 **BAJA — ENMENDADA EL 24-ago-2026, EL DÍA DESPUÉS DE FICHARLA. La retractación es de D, con el par medido, y A la verificó antes de reescribir la ficha.**
+
+**EL PAR, medido contra la base:** ANTES (23-ago, binario 1.0.5) **2 filas · 1 activa** · DESPUÉS (24-ago, binario 1.0.6 instalado y app abierta) **4 filas · 3 activas**, con **fila nueva y token nuevo EN LAS DOS APPS** (01:27 y 01:34). ⇒ **El SO emitió un token distinto con el binario nuevo y `registrar_push_token` hizo exactamente lo suyo: reasigna por token, así que un token nuevo es una fila nueva. La sincronización FUNCIONA.**
+
+**🔴 DÓNDE FALLÓ EL DIAGNÓSTICO, en las palabras de D y sin suavizar:** *«medí bien, razoné bien sobre lo medido, y la premisa que metí en el medio —**«permiso concedido = app abierta»**— no la medí»*. Su discriminador (*«si el token hubiera rotado habría una tercera fila; hay dos, luego no escribió»*) **era correcto**; **el estado del mundo al que lo aplicó, no**. *Un token muerto no revive: lo reemplaza uno nuevo, y para eso hay que abrir la app.* **Nunca hubo carrera de arranque.**
+
+⇒ **Primo de L-414, y por eso vale registrarlo:** allá un número viajó **sin su predicado**; acá un razonamiento viajó **con una premisa que nadie pidió verificar, empezando por quien la puso**. *Es la octava forma del defecto de la jornada y la única donde el que se equivocó tenía un dato duro en la mano.*
+
+**LO QUE SIGUE SIENDO CIERTO, y se ficha como lo que es —ENDURECIMIENTO, no defecto—:** las tres capas de silencio existen en `apps/*/src/components/invitacion-avisos.tsx`. **No fueron la causa acá**, pero son **la razón por la que D no pudo distinguir «no corrió» de «corrió y falló» sin un binario nuevo de por medio**, y esa ceguera sí es real. **Sin dueño ni urgencia.**
+
+**🟢 Nota de tránsito, para que nadie la lea como basura:** `guillo381+8` quedó con **dos filas activas** (la vieja y la nueva). El despachador manda a todos los tokens activos y **el viejo va a rebotar como muerto y la propia función lo va a retirar** (`tokenMuerto` → `activo=false`). **Se cura solo en el primer envío real.**
+
+<details><summary>Texto original de la ficha (23-ago, diagnóstico retractado)</summary>
+
 🟠 **Diagnosticado por D (23-ago-2026) con dos discriminadores; fichado por A. Dueño: las apps (C).**
 
 **El síntoma:** el token de push del prestador sigue `activo=false`, con último uso del 16-ago, **aunque el founder confirmó que las DOS apps tienen permiso de notificaciones concedido.** Con eso caen las causas baratas: el permiso está, el código existe desde el 7-ago (`b1254158`, S90-B) y el llamado está bien puesto (`status==='granted'` → `sincronizarTokenSiHayPermiso`).
@@ -20612,7 +20626,9 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 - **Si el token del SO hubiera rotado, la RPC habría INSERTADO fila nueva** (reasigna por token). **Hay dos filas, no tres** ⇒ *la sincronización no llegó a escribir.*
 
 **La cura:** leer el `ok` del wrapper y **reintentar cuando la sesión esté lista**, en vez de solo al montar. *Un `await` cuyo resultado nadie mira es una llamada que no se puede diagnosticar — y envuelta en un catch que explica de antemano por qué podría fallar, deja de poder distinguir el caso que explica del que no.*
-☠️ **Condición de muerte:** el token del prestador vuelve a `activo=true` **y** una notificación real llega a ese aparato.
+</details>
+
+☠️ **Condición de muerte (CUMPLIDA para el token; el endurecimiento queda):** el token del prestador volvió a `activo=true` el 24-ago 01:34. **Falta la mitad que sigue valiendo: que una notificación real llegue a ese aparato.**
 
 #### D-896 — 🟢 LA CUENTA SONDA DEL GATE DE D-893 QUEDA MARCADA, NO BORRADA
 🟢 **BAJA — resuelta y anotada para que nadie la lea como anomalía.**
