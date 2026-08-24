@@ -42,6 +42,22 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 // reputación son arco propio; hasta entonces rige el modo sombra.
 const REMITENTE = 'e-PetPlace <hola@epetplace.com>';
 
+/** 🔴 MATERIA DE PRIVACIDAD SALE POR EL CANAL DE PRIVACIDAD, y no es estética:
+ *  la Política publicada nombra `privacidad@epetplace.com` como **el** canal
+ *  para ejercer derechos (§21.2), pedir el cierre (§19.1) y consultar sobre
+ *  tratamiento (§7.3). Un correo sobre los datos de alguien que llega desde
+ *  `hola@` le dice que conteste al lugar equivocado — y la Política prometió
+ *  cuál es el lugar. */
+const REMITENTE_PRIVACIDAD = 'e-PetPlace · Privacidad <privacidad@epetplace.com>';
+const TIPOS_PRIVACIDAD = new Set(['copia_datos_lista', 'cierre_cuenta_confirmado']);
+const remitenteDe = (tipo: string) =>
+  TIPOS_PRIVACIDAD.has(tipo) ? REMITENTE_PRIVACIDAD : REMITENTE;
+/** La dirección sola, para el pie. ⚠️ El pie decía `hola@` HARDCODEADO: con el
+ *  remitente por tipo eso pasaría a ser MENTIRA en dos correos — el sobre diría
+ *  privacidad@ y la letra chica hola@. Se deriva del mismo lugar. */
+const correoDe = (tipo: string) =>
+  TIPOS_PRIVACIDAD.has(tipo) ? 'privacidad@epetplace.com' : 'hola@epetplace.com';
+
 // ── Los hex de la espec (fuente única palette.ts, transcritos por B) ────────
 const PAPEL_HEX = '#FAF9F7';
 const TINTA = '#221E19';
@@ -92,6 +108,10 @@ function agrupar(codigo: string): string {
 
 type Datos = {
   titulo?: string;
+  // S104-D · los dos correos de privacidad (contrato para el productor)
+  url_copia?: string;
+  copia_vence?: string;
+  cierre_efectivo?: string;
   mensaje?: string;
   codigo?: string;
   codigo_vigencia_min?: number | string;
@@ -167,6 +187,95 @@ function bloqueCodigosPago(d: Datos): string {
           </td></tr>
         </table>
       </td></tr>`;
+}
+
+/* ═══ 🔴 S104-D · LOS DOS CORREOS DE PRIVACIDAD ══════════════════════════
+   Son los únicos de este motor que llevan su cuerpo ACÁ y no en `datos`, y
+   hay una razón: **su texto no es voz de producto, es letra publicada.** Cada
+   frase de abajo sale de `docs/legal/POLITICA-PRIVACIDAD-APP.md` §18/§19/§21 y
+   de `P15` — no de lo que quede bien. Un aviso de cita se puede reescribir; un
+   correo que dice qué pasó con los datos de alguien tiene que decir lo que la
+   Política le prometió, con las mismas palabras.
+
+   ⚠️ Y LA PALABRA IMPORTA MÁS QUE EL TONO — es la trampa de estos dos:
+   `P15` §2 dice «se ANONIMIZA»; la Política publicada §19.5 dice explícitamente
+   que **NO** es anonimización sino **seudonimización**, y explica por qué:
+   *«anonimizarla de verdad exigiría romper ese vínculo interno, y con él la
+   trazabilidad que la ley nos obliga a mantener»*. Las dos letras divergen en
+   la palabra exacta. **Acá manda la PUBLICADA**, porque es la que la persona
+   leyó y la que se sostiene ante la autoridad — y porque la propia Política se
+   comprometió a no decir «destruida» ni «anonimizada». *Divergencia declarada
+   a la mesa; no se resuelve en un correo.*
+
+   BILINGÜE EN UN CUERPO por orden del founder, y acá el argumento es más
+   fuerte que en los otros: este motor elige UN idioma leyendo
+   `user_preferencias` — pero al cerrar la cuenta esa preferencia es
+   justamente uno de los datos que deja de ser accesible. *Un correo que
+   depende de la preferencia de alguien que se está yendo se queda sin base
+   para elegir.* Los dos idiomas no necesitan saber quién lee.
+
+   DATOS QUE ESPERA CADA UNO (contrato para el productor, que es de A):
+     copia_datos_lista        → url_copia (firmada) · copia_vence (texto)
+     cierre_cuenta_confirmado → cierre_efectivo (texto: la fecha del día 30)
+   Sin ellos NO se pinta el bloque: media verdad legal es peor que ninguna. */
+function bloqueLegal(tipo: string, d: Datos): string {
+  const p = (t: string) =>
+    `<p class="txt" style="margin:0 0 12px 0;font-family:${SANS};font-size:15px;line-height:23px;color:${TINTA};">${t}</p>`;
+  const li = (t: string) =>
+    `<li style="font-family:${SANS};font-size:15px;line-height:23px;color:${TINTA};margin-bottom:8px;">${t}</li>`;
+  const h = (t: string) =>
+    `<p class="txt" style="margin:0 0 10px 0;font-family:${SANS};font-size:17px;font-weight:600;line-height:24px;color:${TINTA};">${t}</p>`;
+  const sep = `<div class="hair" style="border-top:1px solid ${HAIRLINE};font-size:0;line-height:0;margin:24px 0;">&nbsp;</div>`;
+  const envolver = (es: string, en: string) =>
+    `<tr><td style="padding:22px 32px 0 32px;"><div lang="es">${es}</div>${sep}<div lang="en">${en}</div></td></tr>`;
+
+  if (tipo === 'copia_datos_lista') {
+    const url = d.url_copia ? escaparHtml(String(d.url_copia)) : null;
+    if (!url) return '';
+    const vence = d.copia_vence ? escaparHtml(String(d.copia_vence)) : null;
+    const boton = (txt: string) =>
+      `<p style="text-align:center;padding:8px 0 16px 0;"><a href="${url}" style="background:${TINTA};color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:10px;display:inline-block;font-family:${SANS};font-weight:600;">${txt}</a></p>`;
+    return envolver(
+      h('Tu copia de datos está lista') +
+        p('Preparamos tus datos en un formato estructurado y de uso común, como promete nuestra Política de Privacidad.') +
+        boton('Descargar mi copia') +
+        (vence ? p(`El enlace vence el <strong>${vence}</strong>. Después de esa fecha deja de funcionar y hay que pedir una copia nueva.`) : '') +
+        p('Es tuya y es gratuita. Si el enlace venció o algo no se ve bien, escribí a privacidad@epetplace.com y te preparamos otra.'),
+      h('Your data copy is ready') +
+        p('We prepared your data in a structured, commonly used format, as our Privacy Policy promises.') +
+        boton('Download my copy') +
+        (vence ? p(`The link expires on <strong>${vence}</strong>. After that it stops working and a new copy has to be requested.`) : '') +
+        p('It is yours and it is free. If the link expired or something looks wrong, write to privacidad@epetplace.com and we will prepare another one.'),
+    );
+  }
+
+  if (tipo === 'cierre_cuenta_confirmado') {
+    const efectivo = d.cierre_efectivo ? escaparHtml(String(d.cierre_efectivo)) : null;
+    return envolver(
+      h('Recibimos tu pedido de cierre') +
+        (efectivo
+          ? p(`Tu cuenta se cierra el <strong>${efectivo}</strong>. Hasta ese día podés arrepentirte: son <strong>30 días</strong>, y para revertirlo alcanza con escribir a privacidad@epetplace.com.`)
+          : p('Entre tu pedido y el cierre pasan <strong>30 días</strong>, y en ese tiempo podés revertirlo escribiendo a privacidad@epetplace.com.')) +
+        h('Qué se va') +
+        `<ul style="margin:0 0 14px 0;padding-left:20px;">${li('Tu acceso: no vas a poder volver a entrar con esas credenciales.')}${li('Tus sesiones abiertas y tus identidades externas.')}${li('Tus archivos personales y tu foto de perfil, que <strong>se eliminan</strong>.')}</ul>` +
+        h('Qué queda, y por qué') +
+        `<ul style="margin:0 0 14px 0;padding-left:20px;">${li('<strong>El registro de qué términos aceptaste y cuándo</strong>, porque es la prueba del contrato que existió entre nosotros.')}${li('<strong>Los registros de pagos y comprobantes</strong>, porque la ley nos obliga a conservarlos.')}${li('<strong>Los hechos del expediente de tu mascota</strong>, porque la mascota puede cambiar de familia y su historia le pertenece a ella, no a la cuenta desde la que fue registrada.')}</ul>` +
+        p('Eso que queda no lo destruimos ni lo anonimizamos: reemplazamos tus datos de contacto —nombre, teléfono, correo utilizable— de modo que <strong>deja de ser accesible por ningún medio del producto</strong>. Su nombre técnico es <strong>seudonimización</strong>, y lo decimos así porque sigue siendo un dato personal y sigue amparado por la ley.') +
+        p('Por eso mismo conservás tus derechos sobre esa información. Podés pedirnos que te informemos qué se conservó y por qué, escribiendo a privacidad@epetplace.com.'),
+      h('We received your closure request') +
+        (efectivo
+          ? p(`Your account closes on <strong>${efectivo}</strong>. Until then you can change your mind: it is <strong>30 days</strong>, and writing to privacidad@epetplace.com is enough to reverse it.`)
+          : p('There are <strong>30 days</strong> between your request and the closure, and during that time you can reverse it by writing to privacidad@epetplace.com.')) +
+        h('What goes') +
+        `<ul style="margin:0 0 14px 0;padding-left:20px;">${li('Your access: you will not be able to sign in again with those credentials.')}${li('Your open sessions and your external identities.')}${li('Your personal files and profile photo, which <strong>are deleted</strong>.')}</ul>` +
+        h('What stays, and why') +
+        `<ul style="margin:0 0 14px 0;padding-left:20px;">${li('<strong>The record of which terms you accepted and when</strong>, because it is the proof of the contract that existed between us.')}${li('<strong>Payment records and receipts</strong>, because the law requires us to keep them.')}${li('<strong>The facts in your pet&#39;s record</strong>, because a pet can change families and its history belongs to the pet, not to the account it was registered from.')}</ul>` +
+        `<p class="txt" style="margin:0 0 12px 0;font-family:${SANS};font-size:15px;line-height:23px;color:${TINTA};">What stays is not destroyed and not anonymised: we replace your contact details — name, phone, usable email — so that it <strong>stops being accessible by any means of the product</strong>. Its technical name is <strong>pseudonymisation</strong>, and we say it that way because it is still personal data and still protected by law.</p>` +
+        p('For that same reason you keep your rights over that information. You can ask us what was kept and why, by writing to privacidad@epetplace.com.'),
+    );
+  }
+
+  return '';
 }
 
 function plantillaHtml(d: Datos, tipo: string, idioma: string): string {
@@ -251,13 +360,14 @@ function plantillaHtml(d: Datos, tipo: string, idioma: string): string {
   ${bloqueDetalle}
   ${bloqueCodigosPago(d)}
   ${bloqueCodigo}
+  ${bloqueLegal(tipo, d)}
 
   <tr><td style="padding:32px 32px 28px 32px;">
     <div class="hair" style="border-top:1px solid ${HAIRLINE};font-size:0;line-height:0;margin-bottom:14px;">&nbsp;</div>
     <p class="txt65" style="margin:0 0 6px 0;font-family:${SANS};font-size:13px;font-weight:600;line-height:20px;color:${TINTA_65};">e-PetPlace</p>
     <p class="txt65" style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${TINTA_65};">
-      Este correo salió de hola@epetplace.com<br>
-      Puedes ajustar qué te avisamos desde Preferencias, en la app.
+      Este correo salió de ${correoDe(tipo)}<br>
+      ${TIPOS_PRIVACIDAD.has(tipo) ? 'Puedes responder a esta dirección para ejercer tus derechos. · You can reply to this address to exercise your rights.' : 'Puedes ajustar qué te avisamos desde Preferencias, en la app.'}
     </p>
   </td></tr>
 </table>
@@ -399,7 +509,7 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: REMITENTE,
+        from: remitenteDe(i.tipo),
         to: [email],
         subject: datos.titulo ?? 'Tienes una novedad en e-PetPlace',
         html: plantillaHtml(datos, i.tipo, idioma),
