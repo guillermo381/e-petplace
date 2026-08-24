@@ -20572,3 +20572,33 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 **Hermanas:** `L-402` (*no basta «¿está alcanzable?» — hace falta «¿corrió alguna vez?»*) y `L-412` (*un canal de reporte se apunta a una dirección que se vio recibir*). **Las tres son la misma familia: lo que no se mide no avisa que se rompió.**
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### D-895 — 🟠 EL TOKEN DE PUSH DEL PRESTADOR NO SE SINCRONIZA: TRES CAPAS DE SILENCIO APILADAS
+🟠 **Diagnosticado por D (23-ago-2026) con dos discriminadores; fichado por A. Dueño: las apps (C).**
+
+**El síntoma:** el token de push del prestador sigue `activo=false`, con último uso del 16-ago, **aunque el founder confirmó que las DOS apps tienen permiso de notificaciones concedido.** Con eso caen las causas baratas: el permiso está, el código existe desde el 7-ago (`b1254158`, S90-B) y el llamado está bien puesto (`status==='granted'` → `sincronizarTokenSiHayPermiso`).
+
+**Las tres capas, en `apps/*/src/components/invitacion-avisos.tsx`:**
+1. **`await registrarTokenDeAparato(...)` devuelve `{ok, codigo}` y NADIE LO MIRA** — y su primer guard es `if (uidActual() === null) return falla('sin_sesion')`.
+2. **El `try/catch` que envuelve todo** con el comentario *«sin módulo nativo — y no es un fallo»* ⇒ **un fallo REAL queda indistinguible de correr en web o Expo Go.**
+3. **Corre UNA sola vez al montar**, sin reintento cuando la sesión sí está lista.
+
+**Causa más probable: una CARRERA.** `InvitacionAvisos` se monta en HOY, que es la primera pantalla con sesión; **si la sesión no se restauró todavía**, el wrapper devuelve `sin_sesion`, la capa 1 lo descarta, la capa 2 no lo ve y la capa 3 no reintenta.
+
+**Los dos discriminadores que la sostienen, y son lo que vuelve esto un diagnóstico y no una hipótesis:**
+- **El token del CLIENTE sí se actualizó hoy (16:07) con el MISMO código** ⇒ *no es código ausente: es condición de arranque.*
+- **Si el token del SO hubiera rotado, la RPC habría INSERTADO fila nueva** (reasigna por token). **Hay dos filas, no tres** ⇒ *la sincronización no llegó a escribir.*
+
+**La cura:** leer el `ok` del wrapper y **reintentar cuando la sesión esté lista**, en vez de solo al montar. *Un `await` cuyo resultado nadie mira es una llamada que no se puede diagnosticar — y envuelta en un catch que explica de antemano por qué podría fallar, deja de poder distinguir el caso que explica del que no.*
+☠️ **Condición de muerte:** el token del prestador vuelve a `activo=true` **y** una notificación real llega a ese aparato.
+
+#### D-896 — 🟢 LA CUENTA SONDA DEL GATE DE D-893 QUEDA MARCADA, NO BORRADA
+🟢 **BAJA — resuelta y anotada para que nadie la lea como anomalía.**
+
+`guillo381+test1@gmail.com` (`b85cbf41`) se creó el 24-ago 00:23:10 UTC, **dentro de la ventana de 18 minutos** (00:12:18 → 00:30:49) en que D apagó `mailer_autoconfirm` para gatear **D-893**. **Queda SIN CONFIRMAR, y con autoconfirm otra vez en `true` ese estado ya no se puede reproducir.**
+
+**Medido antes de decidir:** `profiles=1 · identities=1 · familia_miembro=0 · familias=0 · mascotas=0 · consentimientos=0` ⇒ **no cuelga nada.**
+
+**Se MARCA en vez de borrarse, y el motivo no es el precedente:** *en S92 las 64 sondas tuvieron sus **cuentas borradas** y solo se marcaron los datos que los CHECK no dejaban borrar.* Acá se conserva por otra razón — **es el único testigo de que apagar `autoconfirm` deja cuentas sin evidencia de consentimiento**, y esa es la prueba empírica de D-893. Marcada en `raw_user_meta_data` con `sonda_de_gate='S104-D893'`, el motivo, y por qué sus `consentimientos = 0` **es lo esperado y no un fallo**.
+
+⇒ **Lo que esta fila prueba, y va a la ficha de D-893:** el día que `autoconfirm` se apague en serio, **TODO registro nace sin evidencia de consentimiento**, y **P23 promete poder demostrar qué aceptó cada quien**. *La RPC DEFINER no es una mejora: es la condición para que apagar autoconfirm no rompa una promesa de política.* **Jamás se afloja la policy.**
