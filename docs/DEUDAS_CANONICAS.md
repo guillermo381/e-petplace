@@ -20816,7 +20816,15 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 **Distinción con `D-897 ⑤`, porque son vecinas y no la misma:** ⑤ dice *falta el acto de consentir*; ésta dice *falta la alternativa que hace libre a ese acto*. **⑤ no se puede cerrar bien mientras ésta esté abierta.**
 
-**Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo).
+✅ **DECIDIDA POR EL FOUNDER (24-ago-2026): NO SE CONSTRUYE AHORA, y la ficha queda ABIERTA con su disparo — no cerrada.** *Se declara la decisión en vez de dejar la ficha muda, porque una deuda sin decisión visible se relee como olvido.*
+
+**Y la consecuencia va firmada CON ella, que es lo que la vuelve coherente:** **el gate de consentimiento de IA tampoco se construye. Los dos van juntos** — *sin vía manual, el consentimiento no sería libre*, y un gate sobre una función sin salida **le documenta al titular que aceptó porque no tenía opción**. ⇒ **`D-897 ⑤` queda atada a ésta: su mitad de IA no se puede cerrar bien mientras ésta esté abierta** (la mitad de VOZ sí cerró — S104-C, §31.6, con su alternativa viva porque la nota se escribe a mano).
+
+⚠️ **Lo que sigue siendo cierto y por eso la ficha no se cierra:** `§14.5` **publicada** promete vía manual equivalente **para las tres**, y **el T&C §31.8 lo repite** ⇒ **son DOS documentos vivos prometiéndolo**.
+
+**Disparo:** *antes de que haya usuarios reales que puedan reclamarla*, **o** el día que se construya el gate de IA — **lo que ocurra primero**.
+
+**Dueño:** producto (la pantalla de alta manual) · founder + abogado (si en cambio se decide enmendar §14.5, que es el otro camino legítimo — **y que ahora exige versionar las dos letras, no editarlas**).
 ☠️ **Condición de muerte:** o existe un camino de alta manual de vacuna **medido de punta a punta** —una vacuna registrada sin tocar la cámara—, o §14.5 deja de prometer una equivalencia que no hay **y la Política se versiona** (no se edita en silencio: ya está publicada, y `L-415`/versionado inmutable rigen).
 
 #### L-416 — un REEMPLAZO se mide contra todo lo que el original ya resolvía, no solo contra el defecto que lo motivó
@@ -20837,5 +20845,22 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 🔴 **Y la medición además corrigió el diagnóstico, lo que decidió que NO se compusiera a mano:** el depositado **no estaba truncado**. Un archivo cortado al subirse **no conserva su pie**, y el depositado **termina completo** (`Versión 1.0 — vigente desde el 24 de agosto de 2026`). Medido: además de la Transitoria **le falta la §4.5 entera** —*Vigencia diferida de las disposiciones económicas*, que es la que hace que el Usuario Profesional **declare haberla leído**— y **su §4.4 es más corta** que la del otro. ⇒ **son dos VERSIONES distintas del documento, no un original y su recorte.** *Con un truncado, pegar el bloque perdido es restaurar; con dos versiones, es redactar contrato — y aparecieron dos diferencias de cuerpo sin buscarlas, así que no hay razón para creer que sean las únicas.* **Se frenó la composición y se devolvió al abogado, que es de quien tiene que salir UNA versión con las dos mitades.**
 
 **El corolario práctico, barato:** *un truncado se distingue de una versión distinta mirando el FINAL del archivo.* **Si el pie está entero, no hubo corte.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-417 — un contrato entre pistas se cierra UNA vez; si cambia, el cambio se anuncia COMO cambio
+**Firmada por el founder (24-ago-2026), sobre un error propio de la pista A.**
+
+**El caso.** A le pasó a C el contrato de `exportarMisDatos()` en **dos mensajes**: en el primero el campo se llamaba **`enviado_a`**, en el segundo **`enviada_a`**. *El segundo mensaje reescribía el contrato entero para agregar un flag, y de paso mutó un nombre.* **C construyó cuatro pantallas contra el primero — correctamente, porque era el que tenía.**
+
+> **La ley: un contrato entre pistas se cierra UNA vez. Si cambia, el cambio se anuncia COMO cambio — no se reescribe el contrato entero confiando en que el otro note la diferencia.**
+
+🔴 **Lo que la vuelve grave no es el typo: es CUÁNDO se habría visto.** El typecheck de C **no llegaba a mirar los campos**, porque el módulo todavía no resolvía (`TS2305: has no exported member` — A aún no había mergeado). ⇒ **el error de campo estaba TAPADO por el error de import**, y se habría destapado **recién en el merge**. *Un rojo que aparece en el merge se atribuye al último que tocó, no al que lo causó* — se habría leído como *«el motor de A está mal»* en vez de *«el contrato mutó».*
+
+**Y esto la emparenta con `L-414` por el otro extremo:** ahí un **dato** correcto viajaba con el predicado equivocado; acá viaja un **contrato** correcto con un nombre cambiado. *En las dos, lo que se rompe está del lado del receptor y él no tiene con qué sospechar.*
+
+✅ **Cómo se cazó, y es lo que conviene copiar:** **C reportó sus call sites con los nombres de campo explícitos** —`leo r.data.enviado_a`— en vez de escribir *«calza el contrato»*. **Sin ese literal, A no la ve.** ⇒ *el receptor de un contrato lo devuelve CITADO, no resumido; el emisor lee esa cita como una medición de lo que realmente entregó.*
+
+**La cura fue hacia atrás, y también es regla:** ganó **el nombre que el receptor ya había escrito**, no el que el emisor prefería. *Entre tener razón gramatical y hacerle tocar cuatro archivos a quien construyó contra lo que se le dio, gana lo segundo — sobre todo cuando la divergencia la introdujo el emisor.*
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
