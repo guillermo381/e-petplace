@@ -87,23 +87,34 @@ export { normalizarEmail } from './_email';
 // ═══════════════════════════════════════════════════════════════════════════
 // EL CONSENTIMIENTO — P23 hecho fila
 // ═══════════════════════════════════════════════════════════════════════════
+/* ☠️ `VERSION_TERMINOS_VIGENTE = 'legales-2026-08'` MURIÓ el 24-ago-2026, el
+   mismo día que nació. Era una versión ÚNICA y provisional, inventada cuando el
+   canon no fijaba vocabulario legal. **La reemplaza `VERSION_LEGAL`**, que da
+   una versión POR DOCUMENTO — que es lo que el abogado entregó y lo que P23
+   necesita. Se retira en vez de dejarse: dos fuentes de «qué versión escribo»
+   conviviendo es el defecto que esta misma tanda vino a cerrar en el correo. */
+
 /**
- * La versión de términos que se le mostró a quien acepta.
+ * LA VERSIÓN DE CADA DOCUMENTO, por separado.
  *
- * ⚠️ **NO es `v1.0`, y la diferencia importa.** Las 59 filas vivas de
- * `consentimientos` dicen `version='v1.0'` y son del LEGADO (25-abr → 10-may
- * 2026, escritas por `e-petplace-v2`). **Las páginas legales se corrigieron y
- * republicaron en S103** ⇒ escribir `v1.0` hoy afirmaría que esta persona
- * aceptó el mismo documento que aquellas 59, y es falso.
+ * ⚠️ **Las dos de términos nacen en `1.0` porque son DOCUMENTOS NUEVOS** — el
+ * abogado partió el único `/terminos` (que C midió en **v1.1**) en dos textos
+ * distintos: consumo y B2B. *Heredar el `1.1` del documento viejo diría que
+ * alguien aceptó una v1.1 de un texto que nunca existió en v1.0.* La privacidad
+ * **sí** conserva su `1.1`: es la misma, común a los dos, con secciones 3.1 y
+ * 3.2 separadas adentro.
  *
- * 🔴 **Es provisional y se declara como tal:** hoy los documentos legales no
- * tienen versión propia — son 26 de letra firmada, 10 medidas y **17 esperando
- * abogado** (D-405). El día que el abogado entregue documentos versionados,
- * esta constante toma SU versión y deja de ser una fecha. *Se guarda además la
- * URL exacta en `metadata`, porque lo que P23 promete demostrar no es un
- * número: es QUÉ se le mostró.*
+ * 🔴 **Y el freno que este archivo ya se cobró una vez:** `tratamiento_datos`
+ * se registró como tipo y nunca tuvo página. **Antes de que una pantalla ofrezca
+ * estos dos, C confirma contra el sitio que las URLs existen** — un check que
+ * apunta a una página que no está le pide a alguien que acepte algo que no
+ * puede leer.
  */
-export const VERSION_TERMINOS_VIGENTE = 'legales-2026-08';
+export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
+  terminos_parent: '1.0',
+  terminos_professional: '1.0',
+  privacidad: '1.1',
+};
 
 export type TipoConsentimiento = 'registro' | 'invitacion_familia' | 'acceso_prestador';
 
@@ -135,7 +146,7 @@ export async function registrarConsentimiento(
   tipo: TipoConsentimiento,
   urlMostrada: string | null = null,
 ): Promise<boolean> {
-  const r = await registrarConsentimientos(userId, tipo, documentosVigentes(urlMostrada));
+  const r = await registrarConsentimientos(userId, tipo, documentosVigentes(tipo, urlMostrada ? { privacidad: urlMostrada } : {}));
   return r.registrados === r.total;
 }
 
@@ -152,12 +163,24 @@ export async function registrarConsentimiento(
  * — no que lo mostrado fuera suficiente. *Confundir las dos cosas haría que el
  * registro mienta en la dirección cómoda.*
  */
-export function documentosVigentes(urlIndice: string | null = null): DocumentoAceptado[] {
+export function documentosVigentes(
+  contexto: TipoConsentimiento,
+  urls: Partial<Record<DocumentoLegal, string>> = {},
+): DocumentoAceptado[] {
+  /* 🔴 EL DOCUMENTO LO DECIDE LA PUERTA, y las dos que se confunden fácil son
+     `acceso_prestador` (solicitar acceso Y aceptar invitación de empleado):
+     **las dos son puertas del PRESTADOR**, así que va el documento profesional
+     aunque la persona sea la misma que en el cliente. *El registro guarda el
+     documento que se vio de verdad, no el que le correspondería a la persona.* */
+  const terminos: DocumentoLegal =
+    contexto === 'acceso_prestador' ? 'terminos_professional' : 'terminos_parent';
+
   return [
-    { documento: 'terminos',   version: '1.1', url: urlIndice },
-    { documento: 'privacidad', version: '1.1', url: urlIndice },
+    { documento: terminos,     version: VERSION_LEGAL[terminos],     url: urls[terminos] ?? null },
+    { documento: 'privacidad', version: VERSION_LEGAL['privacidad'], url: urls['privacidad'] ?? null },
   ];
 }
+
 
 /**
  * UN REGISTRO POR DOCUMENTO — **jamás un booleano «aceptó todo»** (firma
@@ -198,7 +221,7 @@ export function documentosVigentes(urlIndice: string | null = null): DocumentoAc
  * que no existe le pide a alguien que acepte algo que no puede leer.*
  * **Escalado al founder por C y por acá.**
  */
-export type DocumentoLegal = 'terminos' | 'privacidad' | 'tratamiento_datos';
+export type DocumentoLegal = 'terminos_parent' | 'terminos_professional' | 'privacidad';
 
 export interface DocumentoAceptado {
   documento: DocumentoLegal;

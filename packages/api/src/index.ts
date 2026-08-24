@@ -1373,6 +1373,7 @@ export {
   invitarAFamilia,
   aceptarInvitacionFamilia,
   revocarInvitacionFamilia,
+  darDeBajaCorreo,
   type InvitacionCreada,
   type InvitacionAceptada,
   type CodigoInvitacionFamilia,
