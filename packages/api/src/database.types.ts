@@ -9977,8 +9977,8 @@ export type Database = {
       exportacion_datos: {
         Row: {
           archivo_path: string | null
-          enviada_a: string | null
           enviada_en: string | null
+          enviado_a: string | null
           estado: string
           expira_en: string | null
           id: string
@@ -9988,8 +9988,8 @@ export type Database = {
         }
         Insert: {
           archivo_path?: string | null
-          enviada_a?: string | null
           enviada_en?: string | null
+          enviado_a?: string | null
           estado?: string
           expira_en?: string | null
           id?: string
@@ -9999,8 +9999,8 @@ export type Database = {
         }
         Update: {
           archivo_path?: string | null
-          enviada_a?: string | null
           enviada_en?: string | null
+          enviado_a?: string | null
           estado?: string
           expira_en?: string | null
           id?: string

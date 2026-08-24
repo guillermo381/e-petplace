@@ -94,7 +94,7 @@ export async function solicitarCierreCuenta(): Promise<
 
 export type CopiaSolicitada = {
   /** El correo al que va. La pantalla lo dice: «te la enviamos a …». */
-  enviada_a: string;
+  enviado_a: string;
   /** `true` si ya había una en curso. Mismo criterio que en el cierre. */
   ya_estaba: boolean;
 };
@@ -115,7 +115,7 @@ export async function exportarMisDatos(): Promise<
 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: error.message };
 
-  const r = data as { ok: boolean; codigo?: string; enviada_a?: string; ya_estaba?: boolean };
+  const r = data as { ok: boolean; codigo?: string; enviado_a?: string; ya_estaba?: boolean };
 
   if (!r?.ok) {
     const codigo = (r?.codigo ?? 'error_desconocido') as 'sin_sesion' | 'error_desconocido';
@@ -124,6 +124,6 @@ export async function exportarMisDatos(): Promise<
 
   return {
     ok: true,
-    data: { enviada_a: r.enviada_a!, ya_estaba: r.ya_estaba ?? false },
+    data: { enviado_a: r.enviado_a!, ya_estaba: r.ya_estaba ?? false },
   };
 }
