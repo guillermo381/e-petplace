@@ -1,9 +1,7 @@
 # POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS PERSONALES
 ## Aplicaciones móviles e-PetPlace
 
-**Versión:** 1.0 · **Fecha de última actualización:** [__ de ____ de 2026]
-
-> ⚠️ **BORRADOR PARA REVISIÓN LEGAL — NO PUBLICAR TODAVÍA.** Dos puntos deben cerrarse antes: (a) confirmar el instrumento de transferencia internacional y la fuente del plazo de conservación del proveedor de IA —§17—; y (b) implementar los plazos de la §18, que hoy no existen en el sistema. **Este recuadro se elimina antes de publicar.**
+**Versión:** 1.0 · **Fecha de última actualización:** 24 de agosto de 2026
 
 ---
 
@@ -231,9 +229,11 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 
 **17.A.1.** Los proveedores de la tabla de la §16 tratan sus datos **siguiendo nuestras instrucciones**, en virtud de acuerdos de tratamiento que incorporan **cláusulas contractuales tipo** como garantía adecuada, conforme a la LOPDP y a la normativa expedida por la SPDP. En el caso de las funcionalidades de la §14, la transferencia se apoya además en **su consentimiento**, que usted otorga al activarlas y puede retirar en cualquier momento.
 
-**17.A.2.** Conservamos la documentación que respalda la legalidad de cada una de estas transferencias y la ponemos a disposición de la autoridad de control cuando lo requiera.
+**17.A.2. Compromisos que asumimos directamente ante usted.** Los acuerdos suscritos con nuestros proveedores se rigen por leyes y tribunales extranjeros. Para que eso no le traslade a usted la carga de reclamar fuera del país, asumimos dos compromisos con carácter vinculante: **nos sometemos a la jurisdicción ecuatoriana y a la competencia de la Superintendencia de Protección de Datos Personales** respecto de cualquier reclamación relacionada con estas transferencias, y **no le opondremos ley ni foro extranjeros**; y **asumimos frente a usted la obligación de reparación integral** por los daños que pudieran derivarse de ellas, **sin que usted deba dirigir su reclamación contra el proveedor ni ante autoridad o tribunal extranjero**.
 
-**17.A.3.** Los datos se transfieren únicamente para las finalidades descritas en esta Política.
+**17.A.3.** Conservamos la documentación que respalda la legalidad de cada una de estas transferencias y la ponemos a disposición de la autoridad de control cuando lo requiera.
+
+**17.A.4.** Los datos se transfieren únicamente para las finalidades descritas en esta Política.
 
 ### 17.B — El servicio de voz de su teléfono
 
@@ -248,8 +248,6 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 **17.B.5.** Por esta razón, el uso del dictado requiere el **consentimiento previo, específico e informado** del profesional, que se le solicita la primera vez que utiliza la función y que puede retirar en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com. La nota clínica puede redactarse manualmente, sin utilizar el dictado, sin que ello afecte ninguna otra funcionalidad.
 
 **17.B.6.** Si desea conocer o modificar el tratamiento que su dispositivo hace de su voz, consulte la configuración de reconocimiento de voz de su teléfono y la política de privacidad de su fabricante.
-
-> 🔴 *Nota interna.* Antes de publicar: cerrar la evaluación del instrumento del proveedor de IA contra el Art. 21 de la Resolución SPDP-SPD-2026-0004-R (dos de las siete condiciones siguen abiertas), y verificar la fuente del plazo de conservación del proveedor antes de incorporar cualquier cifra a este texto.
 
 ## 18. Plazos de conservación
 
@@ -276,6 +274,10 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 **18.2.** Cumplido el plazo, la información se elimina. Cuando el plazo recaiga sobre información que debemos seguir conservando por las razones de la §19.4, lo que se elimina son los datos que permiten identificarle directamente, en los términos de la §19.5.
 
 **18.3.** Podemos conservar información más allá de estos plazos únicamente cuando exista un reclamo o una controversia sin resolver, una obligación legal de conservación, o la necesidad de prevenir un fraude, y solo mientras esa circunstancia subsista.
+
+> *Nota interna — fundamento del plazo del documento de identidad.* Se verificó que **SATORI INOV LATAM S.A.S. no es sujeto obligado** de la Ley Orgánica de Prevención, Detección y Combate del Delito de Lavado de Activos: no figura entre las categorías de la ley —sector financiero, seguros, participantes del Sistema Nacional de Pagos, activos virtuales, servicios societarios y fiduciarios, abogados y contadores en operaciones determinadas— ni entre los sectores incorporados posteriormente. Bajo el mandato de recaudación, quienes participan del Sistema Nacional de Pagos y custodian los fondos son **Nuvei y DeUna**, no la Compañía. En consecuencia **no le aplica el plazo de conservación de diez (10) años** del artículo 24 del Reglamento de esa ley, y ninguna otra norma obliga a archivar el soporte del documento de identidad: la relación comercial se acredita con el RUC y el registro de aceptación de términos, no con la imagen de la cédula.
+>
+> **Condición que invalidaría este análisis, y que hay que vigilar:** si la Compañía comenzara a **custodiar fondos** —un saldo de usuario, una billetera, un crédito prepago— o fuera designada sujeto obligado, la obligación de conservar diez años se activa de inmediato y esta fila de la tabla cambia. La UAFE ha venido ampliando el listado, de modo que conviene revisarlo periódicamente y versionar esta Política si cambia.
 
 ## 19. Cierre de cuenta
 
@@ -357,4 +359,4 @@ Eso, con su nombre técnico, es **seudonimización**, no anonimización. La dife
 
 **SATORI INOV LATAM S.A.S.** — RUC 1793240435001 — Quito, Ecuador
 Marca comercial **e-PetPlace** · privacidad@epetplace.com
-Versión 1.0 — vigente desde [fecha]
+Versión 1.0 — vigente desde el 24 de agosto de 2026

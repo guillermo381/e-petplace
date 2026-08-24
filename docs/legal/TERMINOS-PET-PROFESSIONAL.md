@@ -1,10 +1,10 @@
 # TÉRMINOS Y CONDICIONES DE USO — USUARIO PROFESIONAL
 ## Plataforma e-PetPlace
 
-**Versión:** 1.0 · **Fecha de última actualización:** [__ de ____ de 2026]
+**Versión:** 1.0 · **Fecha de última actualización:** 24 de agosto de 2026
 **Vigencia:** desde su publicación y aceptación por el Usuario Profesional
 
-> ⚠️ **BORRADOR PARA REVISIÓN LEGAL — NO PUBLICAR TODAVÍA.** Cuatro cláusulas de este documento describen funciones que el sistema aún no ejecuta: el reembolso efectivo (§28), la emisión de factura electrónica (§§19 y 20), la liquidación (§21) y la salida del ambiente de pruebas. Publicar el contrato antes de que esas funciones operen convierte cada cláusula en un incumplimiento desde la primera transacción. Las notas al pie de cada sección marcan cuáles son. **Este recuadro se elimina antes de publicar.**
+> **Títulos IV y V en vigencia diferida**, conforme a la **Disposición Transitoria Primera**.
 >
 > *Alcance territorial: redactado para profesionales domiciliados en el Ecuador. La operación en Colombia queda fuera y necesitará su propia versión cuando se active.*
 
@@ -38,7 +38,7 @@
 
 **1.3.** El objeto de este contrato es poner a disposición del Usuario Profesional una plataforma tecnológica que le permite ofrecer sus Servicios Profesionales a los Usuarios Clientes, gestionar su agenda y sus registros, recibir el pago de sus tarifas mediante el mandato de recaudación regulado en la §17, y utilizar las herramientas de gestión descritas en la §30, a cambio de la Comisión establecida en el Título IV.
 
-**1.4.** Canal de contacto para asuntos de privacidad y protección de datos: **privacidad@epetplace.com**. Canal de contacto para asuntos comerciales y operativos: **[correo de soporte]**.
+**1.4.** Canal de contacto para asuntos de privacidad y protección de datos: **privacidad@epetplace.com**. Canal de contacto para asuntos comerciales y operativos: **hola@epetplace.com**.
 
 ## 2. Definiciones
 
@@ -101,7 +101,6 @@ f) disponer de una cuenta bancaria a su nombre o al de su sociedad, para efectos
 
 **5.2.** Los requisitos de las letras c) y d) son **condición esencial** del modelo de facturación de las §§19 y 20 y no admiten dispensa. Un profesional que no pueda emitir factura no puede operar bajo estos Términos.
 
-> *Nota interna: esta es la consecuencia directa de la figura de cobro adoptada. Excluye a profesionales informales. Si el negocio necesita incorporarlos, requiere una figura distinta y un análisis tributario propio.*
 
 ## 6. Registro y verificación de identidad
 
@@ -198,7 +197,6 @@ f) disponer de una cuenta bancaria a su nombre o al de su sociedad, para efectos
 
 **14.4.** Las comisiones que cobre el Procesador de Pago por la ejecución del cobro son **asumidas por la Compañía** con cargo a su Comisión, y **no se trasladan** al Usuario Profesional ni se descuentan de la Liquidación.
 
-> *Nota interna: la doble base es lícita porque se declara. Si más adelante se unifican, se hace por la vía de la §16.*
 
 ## 15. Devengo de la Comisión
 
@@ -255,7 +253,6 @@ d) la Compañía rinde cuentas del mandato mediante la Liquidación de la §21 y
 
 **19.4.** El incumplimiento reiterado de la obligación de facturar es causal de suspensión y, en su caso, de terminación conforme a la §36.
 
-> *Nota interna: §19.3 exige un cambio de producto — la leyenda debe aparecer en el comprobante. Hoy el sistema emite el comprobante sin ella.*
 
 ## 20. Facturación de la Comisión
 
@@ -286,7 +283,6 @@ Si la fecha de pago cae en día no hábil, el pago se realiza el día hábil inm
 
 **21.6.** El Usuario Profesional es responsable de mantener su información bancaria actualizada. Los costos y demoras derivados de datos bancarios erróneos o desactualizados son de su cargo.
 
-> *Nota interna: cero liquidaciones ejecutadas a la fecha. No publicar hasta que la primera corrida se haya probado de extremo a extremo.*
 
 ## 22. Mínimo de liquidación y saldo arrastrado
 
@@ -365,7 +361,6 @@ Si la fecha de pago cae en día no hábil, el pago se realiza el día hábil inm
 
 **28.4.** Cuando el reembolso obedezca a incumplimiento del Usuario Profesional conforme a la §27, el valor reembolsado se descuenta de los valores recaudados por su cuenta y, si no fueren suficientes, se compensa contra Liquidaciones futuras.
 
-> *Nota interna: 🔴 esta sección completa depende de que el reembolso ejecute devolución real de dinero. Hoy solo revierte el asiento contable. **No publicar hasta que funcione de extremo a extremo.***
 
 ## 29. Planes de sesiones múltiples
 
@@ -395,7 +390,6 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 
 **30.5.** El Usuario Profesional es responsable de conservar por sus propios medios la información que requiera para el cumplimiento de sus obligaciones profesionales y legales, sin perjuicio de las funciones de exportación que la Plataforma ofrezca.
 
-> *Nota interna: esta sección deja el modelo de suscripción **habilitado pero no vigente**, tal como recomendó el censo. No describe precios que hoy no se pueden cobrar.*
 
 ## 31. Funcionalidades asistidas por inteligencia artificial
 
@@ -407,21 +401,7 @@ c) la **pausa del plan opera como no renovación** hacia el período siguiente y
 
 **31.4. Responsabilidad por el contenido confirmado.** El Usuario Profesional es el **único responsable** del contenido clínico que valida, guarda y publica en el Expediente de sus pacientes, así como del texto de presentación de su negocio, con independencia de que ese contenido haya sido propuesto inicialmente por un sistema asistido. La confirmación por parte del Usuario Profesional hace suyo el contenido.
 
-**31.5. Dictado por voz y tratamiento de la voz del Usuario Profesional.** La función de dictado de la nota clínica utiliza el **servicio de reconocimiento de voz del propio dispositivo** del Usuario Profesional —el de Google en dispositivos Android y el de Apple en dispositivos iOS—. El Usuario Profesional reconoce y acepta que:
-
-a) según el dispositivo y su configuración, **ese servicio puede transmitir el audio de su dictado a servidores del fabricante del sistema operativo, ubicados fuera del Ecuador**;
-
-b) ese tratamiento **no lo realiza la Compañía ni un encargado suyo**, sino el fabricante, bajo sus propios términos y su propia política de privacidad, con quien el Usuario Profesional mantiene una relación directa como usuario del dispositivo, de modo que **la Compañía no puede determinar, instruir, auditar ni limitar** dicho tratamiento y no responde por él;
-
-c) lo que se transmite al fabricante es **su voz** y aquello que dicte, que puede incluir el nombre del paciente, el de su establecimiento y la descripción clínica de la atención;
-
-d) **la Compañía no recibe, no procesa y no conserva en ningún momento la grabación de audio**: recibe únicamente el texto ya transcrito.
-
-**31.6. Consentimiento del dictado.** Por lo anterior, el uso del dictado requiere el **consentimiento previo, específico e informado** del Usuario Profesional, que se recaba mediante un aviso en la aplicación la primera vez que utiliza la función, de forma **separada** de la aceptación de estos Términos. El Usuario Profesional puede retirarlo en cualquier momento desde la configuración de la aplicación o escribiendo a privacidad@epetplace.com, y puede en todo caso redactar la nota clínica manualmente.
-
-**31.7. Información a la familia.** Cuando el Usuario Profesional dicte información relativa a una mascota o a su familia, es su responsabilidad no incorporar al dictado datos personales de terceros que excedan lo necesario para el registro clínico de la atención.
-
-**31.8.** El uso de las funcionalidades de esta sección es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a estos tratamientos conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
+**31.5.** El uso de estas funcionalidades es **opcional**. El Usuario Profesional puede registrar la información de forma manual y puede oponerse a este tratamiento conforme a la Política de Privacidad, sin que ello afecte su acceso al resto de la Plataforma.
 
 ## 32. Protección de datos: distribución de papeles
 
@@ -434,7 +414,6 @@ d) **la Compañía no recibe, no procesa y no conserva en ningún momento la gra
 | Conservación del Expediente tras el cierre de la cuenta del Usuario Cliente | **la Compañía** | — |
 | Puesta a disposición del Expediente a un profesional posterior o a una nueva familia de la mascota | **la Compañía** | — |
 | Tratamiento del contenido mediante sistemas de inteligencia artificial | **la Compañía** | — |
-| **Transcripción de la voz del Usuario Profesional por el servicio del dispositivo** (§31.5) | **el fabricante del sistema operativo**, como responsable independiente | La Compañía no interviene en ese tratamiento ni recibe el audio |
 
 **32.2.** El fundamento de esta distribución es quién decide cada tratamiento. El Usuario Profesional decide **qué se asienta** en el Expediente, bajo su *lex artis* y sus obligaciones profesionales. La Compañía decide **qué hace la Plataforma con ese contenido** una vez asentado.
 
@@ -549,7 +528,7 @@ c) subsisten las obligaciones de confidencialidad (§34), las de protección de 
 
 **38.8. Mediación.** Toda controversia derivada de este contrato o relacionada con él se someterá, como paso previo, a **mediación** en el Centro de Arbitraje y Mediación de la Cámara de Comercio de Quito, conforme a su reglamento vigente.
 
-**38.9. Arbitraje.** Si la mediación no produjere acuerdo total dentro de los treinta (30) días siguientes a la primera audiencia, la controversia se resolverá mediante **arbitraje en derecho**, administrado por el Centro de Arbitraje y Mediación de la Cámara de Comercio de Quito, conforme a su reglamento, con **sede en Quito**, en **idioma castellano**, ante un tribunal de **[un (1) / tres (3)] árbitro(s)** designado(s) conforme a dicho reglamento. Las partes renuncian a la jurisdicción ordinaria y se obligan a acatar el laudo, que será definitivo y vinculante. Los árbitros podrán dictar medidas cautelares sin necesidad de acudir a juez ordinario.
+**38.9. Arbitraje.** Si la mediación no produjere acuerdo total dentro de los treinta (30) días siguientes a la primera audiencia, la controversia se resolverá mediante **arbitraje en derecho**, administrado por el Centro de Arbitraje y Mediación de la Cámara de Comercio de Quito, conforme a su reglamento, con **sede en Quito**, en **idioma castellano**, ante un tribunal de **un (1) árbitro** designado conforme a dicho reglamento. Las partes renuncian a la jurisdicción ordinaria y se obligan a acatar el laudo, que será definitivo y vinculante. Los árbitros podrán dictar medidas cautelares sin necesidad de acudir a juez ordinario.
 
 **38.10. Aceptación expresa de la cláusula arbitral.**
 
@@ -561,4 +540,4 @@ Esta aceptación se recaba mediante casilla específica, **distinta e independie
 
 **SATORI INOV LATAM S.A.S.** — RUC 1793240435001 — Quito, Ecuador
 Marca comercial **e-PetPlace** · privacidad@epetplace.com
-Versión 1.0 — vigente desde [fecha]
+Versión 1.0 — vigente desde el 24 de agosto de 2026
