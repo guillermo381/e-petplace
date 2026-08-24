@@ -158,13 +158,22 @@ export const VERSION_LEGAL: Record<DocumentoLegal, string> = {
  */
 export const URL_LEGAL: Record<DocumentoLegal, string | null> = {
   terminos_parent: null,
-  /* ✅ Publicado y medido con la vara de la casa (24-ago-2026, S104-C):
-     `/1-0` → **200** · `/9-9` → **404** (el control negativo: sin él, un 200
-     prueba que el servidor contesta, no que el deploy salió) · sirve
+  /* ⚠️ **La ruta se movió a TOP-LEVEL el 24-ago**, y la anterior
+     (`/legales/terminos-profesional/1-0`) **hoy da 404** — medido. La causa fue
+     una anomalía de ruteo de Vercel específica de esa ruta, que **sobrevivió a
+     un rebuild limpio**. *Cambiarla fue seguro porque **cero consentimientos la
+     tenían guardada**: se midió antes de tocar, no después.* **El día que una
+     URL de acá ya esté en filas de `consentimientos`, moverla NO es cambiar una
+     constante: es dejar evidencia apuntando a un 404, y eso se decide, no se
+     reescribe en silencio.**
+     ✅ Publicado y medido con la vara de la casa (24-ago-2026, S104-C):
+     `/terminos-profesional/1-0` → **200** · `/9-9` → **404** (el control
+     negativo: sin él, un 200 prueba que el servidor contesta, no que el deploy
+     salió) · sirve
      `data-epp-version="1.0"` y **la Disposición Transitoria Primera está
      adentro**, que es la condición de `§4.5` — el profesional declara haberla
      leído al aceptar, así que tiene que poder alcanzarla desde ahí. */
-  terminos_professional: 'https://www.epetplace.com/legales/terminos-profesional/1-0',
+  terminos_professional: 'https://www.epetplace.com/terminos-profesional/1-0',
   privacidad: 'https://www.epetplace.com/legales/privacidad-app/1-1',
 };
 
