@@ -20685,3 +20685,23 @@ Al activar los buzones (`hola@` y `privacidad@` reenvían al Gmail del founder, 
 
 **La decisión es binaria y no se puede diferir sin costo:** **conectarla** (y entonces el aviso de IA la incluye con razón) **o retirarla** (y entonces el aviso no la menciona). *Dejarla desplegada y sin conectar es el peor de los tres estados: paga, no sirve, y confunde a quien la censa.*
 ☠️ **Condición de muerte:** o tiene un consumidor vivo medido, o no está desplegada.
+
+#### D-899 — 🔴 EL AUDIO DEL DICTADO VA AL MOTOR DE VOZ DEL SISTEMA (Google / Apple): una transferencia internacional NO DECLARADA
+🔴 **ALTA.** Medido el 24-ago-2026 al contrastar el **Aviso de IA** del abogado contra el código. **Su §6 («el audio del dictado») preguntaba exactamente esto y la respuesta es que sí.**
+
+**Lo medido, en tres piezas:**
+1. **El dictado usa un módulo propio, no el teclado**: `expo-speech-recognition` está instalado, **declarado como plugin nativo** en `apps/prestador/app.json` con su texto de permiso, y **vivo** en `dictado-en-vivo.tsx` (encendido en S78; la decisión de S72 de «seguir con el del teclado» quedó atrás).
+2. 🔴 **Arranca con `start({ lang: 'es-EC' })` y SIN `requiresOnDeviceRecognition`** ⇒ **usa el motor por defecto del sistema operativo**, que en Android es **Google Speech Services** y **puede transcribir en la nube**.
+3. ✅ **A nuestro servidor NUNCA llega audio**: `estructurar-nota-clinica` recibe `{ texto: string }` y nada más.
+
+⇒ **Las tres respuestas al abogado:**
+- **¿Se conserva la grabación?** **No, y no puede: el audio nunca entra a nuestros sistemas.**
+- **¿La transcripción la hace Anthropic?** **No.** La hace **el motor de voz del dispositivo**, antes de que exista texto.
+- **¿Hay un segundo proveedor?** **SÍ — Google (Android) o Apple (iOS), recibiendo la voz del veterinario dictando una consulta clínica.** **No está declarado en ninguno de los tres documentos.**
+
+**Por qué es 🔴 y no un detalle:** *lo que se transfiere no es un dato de contacto — es la voz de un profesional describiendo el estado de salud de un animal, con el nombre del paciente y de la clínica adentro.* Y el usuario **no lo puede inferir**: la pantalla dice «dictar» y nada sugiere que su voz salga del teléfono.
+
+**La cura técnica existe y es una línea:** `requiresOnDeviceRecognition: true` fuerza el reconocimiento **local**. **No se aplicó sin medir**, porque tiene costo real: no todos los dispositivos lo soportan, y donde no hay modelo local descargado **el dictado deja de funcionar** en vez de degradarse. ⇒ **Hay que medirlo en el aparato antes de decidir**, y son dos caminos legítimos: forzar local (y perder cobertura) o **declarar la transferencia** en el aviso.
+
+**Dueño:** producto + legales. **Disparo: ANTES de publicar el Aviso de IA** — es el único de los frenos que hace que un documento ya redactado sea **incompleto**, no solo mejorable.
+☠️ **Condición de muerte:** o el reconocimiento corre on-device verificado en dispositivo, o el aviso declara a Google/Apple como encargado de la transcripción.
