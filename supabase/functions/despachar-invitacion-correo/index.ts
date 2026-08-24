@@ -183,8 +183,34 @@ Deno.serve(async (req) => {
 
     const [{ data: fam }, { data: quien }] = await Promise.all([
       supabase.from('familia').select('nombre').eq('id', inv.familia_id).maybeSingle(),
-      supabase.from('profiles').select('nombre').eq('id', inv.invitado_por).maybeSingle(),
+      supabase.from('profiles').select('nombre, email').eq('id', inv.invitado_por).maybeSingle(),
     ]);
+
+    // ⚠️ EL NOMBRE PUEDE NO SER UN NOMBRE, y no es hipótesis: `handle_new_user`
+    // cae al LOCAL-PART DEL CORREO cuando la cuenta nace sin metadata (canon
+    // S81), así que `profiles.nombre` puede valer `juan.perez99`. Ese valor NO
+    // es null y por lo tanto el guard de abajo no lo ve — el correo saldría
+    // diciendo «juan.perez99 te invitó», que a un desconocido le lee como spam
+    // y le quita credibilidad justo a la condición ② (decir quién invitó).
+    //   ⇒ Se detecta comparando contra el local-part de SU PROPIO correo, que
+    //     es una igualdad EXACTA y no una heurística: si coinciden, ese nombre
+    //     no lo declaró nadie — lo sembró el trigger.
+    //
+    // 🔴 Y ACÁ NO SE CORTA, POR UNA MEDICIÓN QUE CORRIGIÓ AL PLAN: de 16
+    // titulares activos, **2 tienen el local-part como nombre** (14 declarado).
+    // El aviso que traía este contrato decía 0 — midió `nombre = correo
+    // ENTERO`, y el trigger siembra el LOCAL-PART, que es otro predicado.
+    //   ⇒ Cortar habría dejado a 2 titulares REALES sin poder invitar a nadie,
+    //     **en silencio**: `invitacion_correo_pendiente` no tiene columna de
+    //     motivo, así que ese `fallido` sería indistinguible de un rebote de
+    //     Resend. *Un corte que no se puede leer es peor que el correo feo que
+    //     evita.*
+    //   ⇒ Se degrada en vez de cortar: se nombra a la FAMILIA, que es un dato
+    //     declarado por una persona, y nunca el username. No se inventa nada y
+    //     no se expone el correo del que invita a un desconocido.
+    const local = (quien?.email ?? '').split('@')[0].toLowerCase();
+    const nombreEsSembrado =
+      local.length > 0 && (quien?.nombre ?? '').trim().toLowerCase() === local;
 
     // NULL HONESTO: si no sabemos quién invitó, NO se inventa un nombre — pero
     // tampoco se manda, porque «alguien te invitó» sin decir quién es
@@ -198,9 +224,30 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    // Con el nombre sembrado se nombra a la familia; sin ella, tampoco se
+    // manda: quedarían las dos referencias vacías y el correo sería anónimo.
+    const familia = fam?.nombre ?? null;
+    if (nombreEsSembrado && !familia) {
+      await supabase
+        .from('invitacion_correo_pendiente')
+        .update({ estado: 'fallido', intentos: f.intentos + 1 })
+        .eq('invitacion_id', f.invitacion_id);
+      fallidos++;
+      console.error(`sin_quien_invita: invitacion ${f.invitacion_id} — nombre sembrado y familia sin nombre`);
+      continue;
+    }
+    if (nombreEsSembrado) {
+      console.error(`nombre_sembrado: invitacion ${f.invitacion_id} — se nombra la familia, no el usuario`);
+    }
+
+    // UNA sola resolución de «quién invitó», para que el asunto y el cuerpo no
+    // puedan divergir: un asunto con el username y un cuerpo sin él sería peor
+    // que cualquiera de los dos solo.
+    const quienTexto = nombreEsSembrado ? `alguien de ${familia}` : quien.nombre;
+
     const cuerpo = plantilla({
-      quienInvita: quien.nombre,
-      familia: fam?.nombre ?? 'su familia',
+      quienInvita: quienTexto,
+      familia: familia ?? 'su familia',
       nombreInvitado: inv.nombre,
       urlInvitacion: `${base}/invitacion?t=${encodeURIComponent(inv.token)}`,
       urlBaja: `${base}/baja?t=${encodeURIComponent(inv.token)}`,
@@ -213,7 +260,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: REMITENTE,
         to: f.email,
-        subject: `${quien.nombre} te invitó a e-PetPlace · ${quien.nombre} invited you`,
+        subject: `${quienTexto} te invitó a e-PetPlace · ${quienTexto} invited you`,
         html: cuerpo,
       }),
     });
