@@ -1249,7 +1249,8 @@ export const clienteEn = {
     soporteMensaje: 'Hi, I need help with the e-PetPlace app.',
     soporteFallback: "If WhatsApp doesn't open, message us at {{numero}}.",
     soporteDesdeCobro: 'Hi, I had a problem paying on e-PetPlace.',
-    eliminarVoz: "It will live here, done right. First we need to properly resolve what happens to your pets' story, your co-owners and your milestones — a documented life is not deleted lightly.",
+    // S104-C (founder signature 5.1): «co-owners» → «the people in your family».
+    eliminarVoz: "It will live here, done right. First we need to properly resolve what happens to your pets' story, the people in your family and your milestones — a documented life is not deleted lightly.",
     entendido: 'Got it',
   },
   ajustes: {

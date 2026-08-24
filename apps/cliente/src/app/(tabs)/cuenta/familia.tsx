@@ -2,7 +2,8 @@
  * Cuenta · Tu familia (S55-B3) — renombrar (solo titular, RLS es la
  * puerta), miembros en LECTURA (el nombre de un miembro ajeno no es
  * legible por RLS de profiles — null honesto, hueco P1), e invitar
- * co-dueño como hueco declarado con "Pronto".
+ * invitar a un FAMILIAR AUTORIZADO como hueco declarado con "Pronto"
+ * (firma 5.1: en v1 quien entra es familiar autorizado; co-dueño es v2).
  * Escalera: no muestra datos del expediente (la familia humana no es
  * el expediente de la mascota).
  */
@@ -144,7 +145,8 @@ export default function FamiliaCuenta() {
                 </View>
               ))}
               <Separador />
-              {/* hueco P1 declarado: invitar co-dueño llega con su canal */}
+              {/* hueco P1 declarado: invitar a un familiar autorizado (firma
+                  5.1) llega con su canal */}
               <Celda
                 titulo={t('cuenta.familiaInvitar')}
                 fin={

@@ -331,8 +331,9 @@ export default function Cuenta() {
       </Hoja>
 
       {/* Eliminar cuenta — letra (a): la voz honesta; la política P15
-          (destino del expediente, co-dueños, hitos) se firma ANTES de
-          que esto ejecute nada. */}
+          (destino del expediente, las personas de la familia, hitos) se
+          firma ANTES de que esto ejecute nada (firma 5.1: familiar
+          autorizado, no co-dueño). */}
       <Hoja visible={eliminarAbierta} onCerrar={() => setEliminarAbierta(false)} titulo={t('cuenta.eliminarCuenta')} conCerrar>
         <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary }}>

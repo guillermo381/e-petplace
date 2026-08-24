@@ -1484,7 +1484,10 @@ export const clienteEs = {
        viendo» y no tenía a dónde ir.* */
     soporteDesdeCobro: 'Hola, tuve un problema al pagar en e-PetPlace.',
     // Eliminar cuenta — letra (a): visible con voz honesta (espec P15 en docs)
-    eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, tus co-dueños y tus hitos — una vida documentada no se borra a la ligera.',
+    // S104-C (firma founder 5.1): «co-dueños» → «las personas de tu familia».
+    // En v1 quien entra es FAMILIAR AUTORIZADO, no co-dueño (v2). La voz se
+    // alinea a la de invitar («alguien de tu familia»).
+    eliminarVoz: 'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con la historia de tus mascotas, las personas de tu familia y tus hitos — una vida documentada no se borra a la ligera.',
     entendido: 'Entendido',
   },
   ajustes: {
