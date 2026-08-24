@@ -6,10 +6,17 @@
  * presentacional; acá vive el comportamiento: cuándo bloquear, cómo preguntar
  * al SO, y la salida.
  *
- * ── CUÁNDO BLOQUEA ────────────────────────────────────────────────────────
- *   · Al ARRANCAR en frío, si el candado está activo y hay sesión.
+ * ── LA HUELLA ES LA PUERTA DE ENTRADA (enmienda founder, 23-ago) ──────────
+ * El patrón es el de la banca: al abrir la app con una sesión guardada, se
+ * ENTRA CON HUELLA en vez de tipear correo y clave. La huella **desbloquea una
+ * sesión que ya existe**; jamás crea una nueva contra Supabase.
+ *   · Al ARRANCAR en frío, si el candado está activo y hay sesión guardada →
+ *     la cortina baja y **se pide la huella de una** (no una pantalla donde
+ *     tocar «Desbloquear» primero). Pasa → adentro.
  *   · Al VOLVER del segundo plano (background → active), mismas condiciones.
- * Nunca bloquea sin sesión: no tiene sentido tapar el login.
+ *   · Sin sesión (venció o se cerró a propósito) → login normal, SIN huella:
+ *     no hay sesión que desbloquear.
+ *   · La salida SIEMPRE visible («Entrar con otra cuenta») lleva al login.
  *
  * ── LOS DOS GUARDAS QUE EVITAN QUE SE ROMPA SOLO ─────────────────────────
  *   ① `enPrompt` — el prompt biométrico del SO puede mandar la app a
@@ -65,8 +72,11 @@ export function GateBiometrico({ children }: { children: ReactNode }) {
       const bloquear = await debeBloquear();
       if (!vivo) return;
       if (bloquear) {
-        setEstado('bloqueada');
         setBloqueado(true);
+        // BANCA: al abrir con sesión guardada, la huella ES la puerta — se
+        // pide de una, no una pantalla donde tocar «Desbloquear» primero. Si
+        // falla, el candado queda con su reintento y la salida visible.
+        void desbloquear();
       }
       setListoInicial(true);
     })();
@@ -88,8 +98,8 @@ export function GateBiometrico({ children }: { children: ReactNode }) {
         armado.current = false;
         void (async () => {
           if (await debeBloquear()) {
-            setEstado('bloqueada');
             setBloqueado(true);
+            void desbloquear(); // misma puerta: al volver, se pide la huella de una
           }
         })();
       }

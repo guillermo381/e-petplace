@@ -54,7 +54,7 @@ export const uiEn = {
     verificando: 'Waiting for your phone to recognize you.',
     rechazada: "Your phone couldn't recognize you. Try again or use your password.",
     desbloquear: 'Unlock',
-    usarClave: 'Use my password',
+    usarClave: 'Sign in with another account',
   },
   esqueleto: {
     cargando: 'Loading',
