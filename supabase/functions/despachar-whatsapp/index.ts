@@ -247,6 +247,25 @@ Deno.serve(async (req) => {
           for (const c of comps) {
             for (const m of String(c.text ?? '').matchAll(/\{\{(\w+)\}\}/g)) vars.add(m[1]);
           }
+          /* 🔴 Y LAS MISMAS VARIABLES, PERO **POR COMPONENTE** — sin esto el
+             mapeo NO SE PUEDE ESCRIBIR, y peor: se puede escribir MAL.
+             En la API de Meta cada component lleva su propio array de
+             `parameters`, y la numeración `{{1}}` **se reinicia en cada uno**:
+             el `{{1}}` del HEADER y el `{{1}}` del BODY son datos DISTINTOS que
+             viajan en listas distintas. *Un set unificado los funde en una sola
+             entrada y produce un mapeo que typechequea, se ve completo, y manda
+             el nombre de la familia en el lugar de la fecha.* */
+          const variablesPorComponente = comps
+            .map((c) => ({
+              tipo: String(c.type ?? '?'),
+              /* Los BUTTONS de tipo URL llevan su variable en `url`, no en
+                 `text` — se mira donde puede estar, no donde suele estar. */
+              variables: [...new Set([
+                ...String(c.text ?? '').matchAll(/\{\{(\w+)\}\}/g),
+                ...String(c.url ?? '').matchAll(/\{\{(\w+)\}\}/g),
+              ].map((m) => m[1]))],
+            }))
+            .filter((c) => c.variables.length > 0);
           return {
             name: t.name,
             language: t.language,
@@ -255,7 +274,17 @@ Deno.serve(async (req) => {
             /* Qué piezas trae (HEADER/BODY/FOOTER/BUTTONS) y **cuántas
                variables espera cada plantilla**: es lo que el mapeo necesita. */
             componentes: comps.map((c) => String(c.type ?? '?')),
+            /* ⚠️ `variables` es el conjunto UNIFICADO: sirve para contar de un
+               vistazo, **jamás para escribir el mapeo** — para eso está
+               `variables_por_componente`. */
             variables: [...vars].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b)),
+            variables_por_componente: variablesPorComponente,
+            /* El texto de CADA componente, no sólo el del BODY: el HEADER es
+               donde suele ir el dato que la familia ve primero. */
+            textos: comps.map((c) => ({
+              tipo: String(c.type ?? '?'),
+              texto: String(c.text ?? '').slice(0, 300),
+            })).filter((c) => c.texto),
             /* El texto del BODY, que es donde vive el mensaje que la familia
                lee. Se recorta: el diagnóstico es para decidir, no para
                archivar. */
