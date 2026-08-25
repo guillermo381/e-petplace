@@ -71,9 +71,24 @@ md5(`${token}_${APP_CODE_SERVER}_${alta}_${APP_KEY_SERVER}`)
 **Usa `alta` porque hoy `alta` ES el uid.** El día que `addCard` reciba otro uid,
 **esa fórmula tiene que usar el mismo uid, no `alta`.**
 
-> ### **Si ④ no sale con ②③, `stokenValido` pasa a `false` en TODAS las altas — y el detalle diría `formula=candidata_transaccion valido=false`, mandando a revisar una fórmula que va a estar bien.**
-> *El comentario está escrito dos veces, desde los dos lados, afirmando que no
-> pueden divergir. Describe exactamente la invariante que esta cura rompe.*
+> ### ⏪ **ESTO DECÍA:** ~~«Si ④ no sale con ②③, `stokenValido` pasa a `false` en TODAS las altas»~~ — **medido: es FALSO, seguiría en `null`.** Ver la corrección de §6.
+
+**Lo que sí es cierto, y por lo que ④ sale igual:** hoy el stoken **nunca llega**,
+así que no hay validación viva que romper. **Lo que hay es una bomba con
+temporizador puesta por un tercero:** el día que empiece a llegar, una fórmula
+con el campo viejo daría `false` en todas las altas a la vez.
+
+⚠️ **Y ④ es MÁS GRANDE de lo que este pedido decía** *(medición de D)*: **no es
+un reemplazo de variable.** El stoken se calcula **antes de que exista el cliente
+de Supabase**, y el uid estable vive en una tabla ⇒ **hay que mover el orden**.
+
+🔴 **Y hay una pregunta previa que puede tirar ④ entera:** **la fórmula es de
+NUVEI, no nuestra** — el stoken lo emite su SDK y nosotros solo lo reproducimos
+para comparar. **Hoy `alta` y el uid son el MISMO valor, así que la fórmula no se
+puede falsar**: el flip los separa y recién ahí se sabe cuál esperaba.
+***Si Nuvei espera el id de la operación y no el uid, ④ es el cambio
+equivocado.*** **La consulta a Erick está redactada** (`S105-D-PIEZA-4-STOKEN-uid-estable.md §3`)
+y va con el founder.
 
 **Territorio:** `supabase/functions/` es de **D**. **A lo coordina.**
 **C no toca ④.**
@@ -113,8 +128,35 @@ generación de un uid nuevo, así que **lo que hay que medir es su AUSENCIA:**
 1. **Dos altas del mismo usuario** ⇒ **el mismo `uid` en las dos URLs.**
 2. **`card/list?uid=<ese uid>`** ⇒ **`result_size` > 1** cuando haya dos tarjetas.
 3. **`altas_tarjeta.id` ≠ `uid`** — si vuelven a coincidir, la cura no llegó.
-4. 🔴 **`stokenValido` sigue en `true`** — *es el control negativo de ④, y sin él
-   una cura exitosa y una fórmula rota se ven igual.*
+
+### 🔴 CORRECCIÓN — 25-ago-2026. **EL CRITERIO 4 ERA INEJECUTABLE**
+
+**Decía:** ~~«`stokenValido` sigue en `true` — es el control negativo de ④»~~.
+
+**Medido por D y verificado por A contra el objeto: `altas_tarjeta` tiene 45
+filas y `stoken_valido` es NULL en las 45.** Ni un `true`, ni un `false`.
+`stoken_detalle` dice `stoken_de=ninguno` en 9 y NULL en 36.
+
+⇒ **El stoken NUNCA vino en el body, así que la fórmula de la línea 131 jamás se
+ejecutó. `stokenValido` nunca estuvo en `true`.**
+
+> ### **Un control que no puede fallar tampoco puede pasar.**
+> **Y su modo de falla era el peor:** quien lo corriera vería `null`, y **`null`
+> no distingue «④ falló» de «nunca hubo stoken».**
+
+**Y también era falsa la razón de §3:** ~~«si ④ no sale con ②③, `stokenValido`
+pasa a `false` en TODAS las altas»~~ — **no pasaría a `false`: seguiría en
+`null`**, porque el `if (st.valor)` no entra.
+
+**④ SIGUE SALIENDO CON ②③, pero por otro motivo:** no hay validación viva que
+romper — **hay una bomba con temporizador puesta por un tercero.** *El día que el
+stoken empiece a llegar —porque Erick lo habilite o porque cambie el SDK— una
+fórmula con el campo viejo daría `false` en todas las altas a la vez.*
+
+**4. ✅ EL CONTROL QUE SÍ ES EJECUTABLE** *(propuesto por D)*:
+**que `stoken_detalle` cambie de `formula=candidata_transaccion` a
+`formula=candidata_transaccion_uid`.** *Eso prueba que el código nuevo corrió y
+**no depende de que el proveedor mande nada**.*
 
 ---
 
