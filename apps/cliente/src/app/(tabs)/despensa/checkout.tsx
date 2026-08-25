@@ -565,7 +565,17 @@ export default function DespensaCheckout() {
    * El orden, y cada paso tiene su porqué:
    *   ① preparar la compra (reserva + desglose congelado) — ya existía
    *   ② **LAS COMPUERTAS, ANTES DE TOCAR LA TARJETA** — *la plata que no se
-   *      cobra mal no hay que devolverla, y el reverso es mismo-día*
+   *      cobra mal no hay que devolverla, y la ventana para devolverla es
+   *      angosta*
+   *
+   *      🔴 **Y ES POR RIEL, no una sola** (`LETRA_DEUNA` §8, firma del
+   *      24-ago): **Nuvei mismo día · DeUna 24 horas.** ⏪ Acá decía «el
+   *      reverso es mismo-día» a secas, y **era cierto cuando el único riel
+   *      era la tarjeta**; con dos rieles en esta misma pantalla pasó a
+   *      describir la mitad de los casos. *Una frase de riel único bajo una
+   *      pantalla de dos rieles no se vuelve falsa de golpe: se vuelve cierta
+   *      a medias, que es más difícil de ver.* **El argumento no cambia —
+   *      cobrar mal sigue siendo caro en los dos.**
    *   ③ el débito
    *   ④ `confirmando` — **la respuesta síncrona es SEÑAL OPTIMISTA, jamás
    *      confirmación**: confirma el webhook, o el barrido
@@ -1367,9 +1377,14 @@ export default function DespensaCheckout() {
               </>
             )}
             {/* El tope habla y **no declara desenlace**: la compra sigue viva
-                y el barrido la resuelve el mismo día. **Vale para los dos
-                rieles** — en DeUna llega más tarde porque el tope se corre con
-                el código, no porque se haya apagado. */}
+                y el barrido la resuelve. **Vale para los dos rieles** — en
+                DeUna llega más tarde porque el tope se corre con el código, no
+                porque se haya apagado.
+                ⚠️ **La cadencia del barrido NO se afirma acá.** Para tarjeta
+                está medida (mismo día); **para DeUna no la medí** y su
+                aplicador sigue abierto (`D-887`). *Extender «mismo día» al
+                riel nuevo porque suena parejo sería inventar una promesa
+                sobre un reloj ajeno.* */}
             {espera.fase === 'sigue_abierta' ? (
               <Texto variante="apoyo">{t('pago.esperaSigueAbierta')}</Texto>
             ) : null}

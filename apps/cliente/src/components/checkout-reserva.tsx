@@ -205,7 +205,8 @@ export function CheckoutReserva({
    *   ① el medio elegido (sin él no se toca nada)
    *   ② el débito por `pagos-cobro`, que corre las compuertas server-side
    *   ③ **la respuesta es SEÑAL OPTIMISTA, jamás confirmación**
-   *   ④ confirma el webhook, o el barrido mismo-día
+   *   ④ confirma el webhook, o el barrido *(su cadencia está medida para
+   *      tarjeta; para DeUna no — `D-887`)*
    *
    * 🔴 **Nada de esto nace por abrirse ni por re-renderizar.** Corre al TOCAR.
    */
@@ -282,10 +283,13 @@ export function CheckoutReserva({
             </>
           )}
           {/* 🔴 El tope habla y **NO declara desenlace**: la reserva sigue en
-              pie y el barrido mismo-día la resuelve. *Un tope que se dibuja
-              como «rechazado» hace que la familia pague dos veces.*
+              pie y el barrido la resuelve. *Un tope que se dibuja como
+              «rechazado» hace que la familia pague dos veces.*
               **Vale para los dos rieles** — en DeUna llega más tarde porque el
-              tope se corre con el código, no porque se haya apagado. */}
+              tope se corre con el código, no porque se haya apagado.
+              ⚠️ **La cadencia del barrido NO se afirma acá.** Medida para
+              tarjeta (mismo día); **para DeUna no la medí** y su aplicador
+              sigue abierto (`D-887`). */}
           {espera.fase === 'sigue_abierta' ? (
             <>
               <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>
