@@ -21585,6 +21585,174 @@ endpoint** — su peor caso deja sin códigos vivos a todos los demás.
 **Dueño:** **founder** (es firma). **Disparo:** antes de habilitar cualquiera de los dos oficios.
 ☠️ **Condición de muerte:** las tres fuentes dicen el mismo número **con la misma base**.
 
+#### D-921 — 🔴 EL `uid` ANTE NUVEI ES EL ID DEL ALTA: **para el proveedor, cada alta es una persona nueva**
+🔴 **ALTA · BLOQUEANTE DE LA CERTIFICACIÓN DE NUVEI.** *Erick ya lo vio — hay que poder decirle qué hicimos.* Hallado el 25-ago-2026 por el founder al comparar nuestras filas contra el `card/list` del proveedor.
+
+### El hecho, medido del código y no del comportamiento
+
+`resolver_alta_tarjeta` escribe `proveedor_uid` con **`v_a.id::text`** — el id de la fila de `altas_tarjeta` — bajo el comentario *«EL HANDLE DEL ALTA ES EL uid ANTE EL PROVEEDOR»*. Y la edge lo confirma: *«el handle como user_id (que es el `uid` con el que se tokenizó)»*.
+
+⇒ **El uid es un uuid nuevo cada vez que alguien abre un alta.**
+
+**Verificado contra el objeto, uno por uno:** los cuatro uid de la Visa `411111…1111` **existen como fila de `altas_tarjeta`** y **ninguno es un usuario de `auth`**.
+
+**Y el dato del proveedor lo cierra:** `card/list` para `f7a7001e…` devuelve **`result_size: 1`**.
+
+> ### **Del lado de Nuvei no hay una persona con ocho tarjetas: hay ocho personas con una tarjeta cada una.**
+> **Por eso tokeniza de cero y devuelve un token distinto**, y por eso nuestro `UNIQUE (proveedor, token)` **nunca colisiona: no hay dos altas que compartan uid.** *El índice está bien; lo que nunca se repite es el uid.*
+
+### 🔴 Por qué es SILENCIOSO — y es lo que lo hace peligroso
+
+`pagos-cobro` manda **el `proveedor_uid` guardado en la fila**, con su guard *«sin `proveedor_uid` no se puede cobrar: no se adivina»*. ⇒ **cada tarjeta cobra con SU par (token, uid), el mismo con el que nació** — y por eso **las viejas probablemente sigan cobrando bien**.
+
+> **Que funcione no es la buena noticia: es la que vuelve el defecto invisible.** *Si los tokens viejos fallaran, alguien lo habría notado hace cinco días.* **El sistema se ve sano desde adentro; la divergencia solo aparece mirando el `card/list` del proveedor.**
+
+### Lo que le hace a `LETRA_SALDO` §2
+
+§2 dice que **la tarjeta es de la PERSONA**. **De nuestro lado se sostiene** (las 8 filas comparten `user_id` y la RLS las ata). **Del lado del proveedor NO** ⇒ cualquier cosa que Nuvei razone *por titular* —listar, deduplicar, límites, antifraude por velocidad, un reverso que busque «las tarjetas de este cliente»— **razona sobre una identidad que existe solo para ese alta.**
+
+### ① EL DISEÑO DE LA CURA, con su tamaño *(diseño, NO construcción)*
+
+> **FIRMA DEL FOUNDER (25-ago):** el uid estable es **un IDENTIFICADOR PROPIO ANTE EL PROVEEDOR**, jamás el `user_id` nuestro.
+> **La razón, con sus palabras:** *el `user_id` vive en nuestra base y en nuestros logs; dárselo a un tercero lo vuelve un dato compartido que **no se puede des-compartir**, y si hay que rotarlo no se puede. Un identificador propio nace estable, es nuestro, y si mañana hay que cortar con el proveedor **no arrastra identidad interna**.*
+> **Es el mismo criterio por el que el monto no viaja desde el cliente: al tercero se le da lo que necesita y nada más.**
+>
+> 🔴 **Y su consecuencia, firmada para que quede escrita: si algún día entra un SEGUNDO proveedor de tarjetas, el identificador es POR PROVEEDOR — no se reusa el mismo ante dos terceros.** *Un identificador compartido entre dos proveedores los deja correlacionar a la misma persona entre ellos.*
+
+| pieza | qué |
+|---|---|
+| **dónde vive** | tabla propia, `(user_id, proveedor)` **UNIQUE** — no una columna en `profiles`: la clave es compuesta **por la firma de arriba** |
+| **quién lo produce** | **el ALTA, al abrirse**: si ya existe uid para ese `(user_id, proveedor)` **se reusa**; si no, se genera y se persiste **antes** de hablarle al proveedor |
+| **qué manda la edge** | ese uid, en lugar de `altas_tarjeta.id` |
+| **`tarjetas_guardadas.proveedor_uid`** | **se conserva** — pasa a ser *«con qué uid nació esta tarjeta»*, que es dato histórico y es lo que permite seguir cobrando las viejas |
+
+**Tamaño: chico.** Una tabla, un `SELECT … COALESCE … INSERT` en la apertura del alta, y un campo distinto en la llamada. **Cero migración de datos** (ver ②).
+
+✅ **Y un efecto de segundo orden que conviene ver: la cura hace que el dedupe YA EXISTENTE empiece a funcionar solo.** Con uid estable, Nuvei puede devolver **el mismo token** para el mismo PAN ⇒ **el `ON CONFLICT (proveedor, token)` que hoy nunca dispara pasa a ser el dedupe real, sin escribir una línea más.** *No hay que agregar unicidad por `bin+ultimos4`: había que arreglar la identidad, no el índice.*
+
+### ② 🔴 LAS 8 EXISTENTES — **conviven hasta morir solas**
+
+**Medido:** `pagos-cobro` usa el `proveedor_uid` de cada fila ⇒ **las viejas siguen siendo cobrables tal como están.** Invalidarlas rompería algo que hoy funciona.
+
+⚠️ **La pregunta que decide si esto es correcto NO es medible desde acá y es para Erick: ¿Nuvei permite MOVER una tarjeta de uid?** *Lo probable es que no* — en su modelo el token nace atado al uid, y moverlo equivaldría a re-tokenizar, que es exactamente lo que hace el alta.
+
+⇒ **Si la respuesta es «no se mueve», la salida es que CONVIVAN:** las viejas cobran con su uid histórico, las nuevas nacen con el uid estable, y el parque viejo **se extingue solo** cuando el usuario las borre o venzan. *No hay migración que hacer: hay que dejar de crear el problema.*
+
+### ③ EL ALCANCE — **cero usuarios reales**
+
+| medido | |
+|---|---|
+| tarjetas guardadas en toda la base | **8** |
+| **usuarios con tarjeta** | **1** — `guillo381+8@gmail.com` |
+| uid distintos de ese usuario | **8** |
+| **números de tarjeta distintos** | **2** (una Visa, una Diners) |
+| altas totales | 44, del mismo único usuario |
+| tarjetas sin uid | **0** |
+
+> ### **Todo el parque afectado es la cuenta de prueba del founder. La migración es gratis: no hay a quién romperle nada.**
+
+**Y eso decide ② sin esperar a Erick:** con 8 tarjetas de prueba y 2 números, **borrarlas y re-guardarlas es más barato que cualquier convivencia** — *la convivencia es la respuesta correcta para un parque real, y acá no hay parque real.* **La respuesta a Erick puede ser «lo corregimos y regeneramos», sin asteriscos.**
+
+### ④ EL CONSUMO QUE EL DISEÑO YA CONTEMPLA — y que vuelve a esta cura precondición de otra
+
+**El proveedor tiene un endpoint que dice qué tarjetas siguen válidas**, y consulta **POR `uid`**:
+
+```
+GET https://ccapi-stg.paymentez.com/v2/card/list?uid=<proveedor_uid>
+```
+
+**Contrato completo depositado en `docs/CONTRATO_CARD_LIST_NUVEI.md`** — *no vive en un mensaje.*
+
+> ### **Hoy ese endpoint no puede devolver las tarjetas de una persona: devuelve las de un ALTA.** `result_size: 1` no es casualidad del caso medido — **es lo único que puede devolver mientras el uid sea por alta.**
+
+Listar las 8 de ese usuario exigiría **8 llamadas y conocer los 8 uid de antemano** — justo el dato que esta ficha dice que no debería existir.
+
+✅ **El diseño de ① ya lo contempla, sin agregarle nada:** con el uid `(user_id, proveedor)` UNIQUE, **UNA sola llamada trae todas las tarjetas de la persona.** *La forma que el endpoint pide es exactamente la que la cura produce.*
+
+⇒ **Firma del founder: los dos se curan EN ORDEN — primero el uid estable, después el listado contra el proveedor.** *Construir el segundo primero daría un listado que consulta ocho veces para armar lo que una llamada debería traer, y que además se rompería al curar el primero.*
+
+✅ **Y abarata: `ccapi.paymentez.com` / `ccapi-stg` YA están cableados en nuestras edge**, con su par prod/staging y su autenticación funcionando. **No hay integración nueva que abrir.**
+
+**Dueño:** A (motor + tabla) · founder (la respuesta a Erick y la pregunta del uid móvil).
+**Disparo:** 🔴 **antes de la certificación** — *es lo que Erick vio, y una certificación que se pide sobre una identidad que el proveedor lee mal se pide dos veces.*
+☠️ **Condición de muerte:** dos altas del mismo usuario ante el mismo proveedor **mandan el mismo uid**, verificado contra `card/list` — y un segundo alta del mismo PAN **actualiza la fila en vez de crear otra**.
+
+#### D-922 — 🔴 EL LISTADO DE TARJETAS NO CONSULTA AL PROVEEDOR: mostramos ocho sobre un dato confirmado para una
+🔴 **ALTA · BLOQUEANTE DE PRODUCCIÓN, NO DE LA CERTIFICACIÓN.** *En sandbox, con bins de prueba que no caducan, no se manifiesta. Con tarjetas reales, sí.*
+**Misma raíz que `D-921` y ficha aparte porque se curan EN ORDEN** — sin uid estable no se puede consultar el status de todas las tarjetas de una persona.
+
+### Lo medido
+
+`listarTarjetasGuardadas()` filtra **por nuestro estado y solo por el nuestro**:
+
+```ts
+.select('id, marca, ultimos4, alias, expira_mes, expira_anio, creada_en')
+.eq('estado', 'guardada')
+```
+
+| pregunta | respuesta medida |
+|---|---|
+| ¿existe columna para el status del proveedor? | 🔴 **NINGUNA**, ni en `tarjetas_guardadas` ni en `altas_tarjeta` |
+| ¿el repo conoce algún valor de status? | **CERO menciones** de `valid` ni de ningún otro |
+| nuestros estados | `guardada · rechazada · abandonada` — **son de NUESTRO proceso de alta**, no del ciclo de vida en Nuvei |
+| las 8 filas | **las 8 en `guardada`** ⇒ **las 8 se muestran** |
+
+> ### **No es que el campo esté desactualizado: NUNCA EXISTIÓ.**
+
+> ### **El listado le afirma al usuario «tenés 8 tarjetas» sobre un dato confirmado para UNA** — Erick vio `result_size: 1` para una sola uid, y de las otras siete no sabemos nada.
+
+🔴 **Y por dónde entra la verdad hoy:** **solo cuando el cobro falla.** Nadie consulta al proveedor al listar ni antes de cobrar. ⇒ *la persona elige una tarjeta muerta y se entera **con el carrito lleno**, que es el peor momento posible.*
+
+⚠️ **EL MATIZ QUE EVITA INFLARLA, y va adentro a propósito:** **el cobro no adivina** — usa el par `(token, uid)` con el que la tarjeta nació, y ese par es correcto. **Lo que falta no es la llave: es saber si el proveedor todavía la honra.** *Y con bins `411111` / `364170` —de prueba, que no caducan— es **probable** que las ocho sigan válidas. **Probable, no medido.***
+
+### 🔑 LA RESPUESTA DE NUVEI QUE DECIDE LA CURA *(founder, 25-ago-2026)*
+
+> ### **NO HAY NOTIFICACIÓN. Nuvei no avisa cuando una tarjeta deja de ser válida. Los errores de expirada o fallida aparecen recién en el pago.**
+
+⇒ **Firma: la cura es CONSULTAR `card/list` y mostrar solo las que vengan `status: "valid"`.** *(Contrato en `docs/CONTRATO_CARD_LIST_NUVEI.md`.)*
+
+**Y esto mata la opción de cachear como verdad**, sin discusión: *una copia que envejece **sin que nada avise** no es una copia desactualizada — es una copia que no tiene forma de saber que lo está.*
+
+### 🔴 EL LÍMITE, FIRMADO, PARA QUE NADIE PROMETA DE MÁS
+
+> ### **El status del proveedor dice que el TOKEN sigue vivo, no que la tarjeta vaya a cobrar.**
+> **Una tarjeta caducada o bloqueada por el banco puede venir `valid` y fallar igual en el pago.** El filtro **mejora el listado; no convierte «aparece en tu lista» en «va a funcionar»**.
+> ⇒ **La voz del error de pago sigue siendo necesaria y NO se ablanda.**
+
+### EL DISEÑO *(sin construir — la mesa elige)*
+
+**① ¿Cuándo se consulta?**
+
+| | vía | costo |
+|---|---|---|
+| **(a)** | **al abrir el listado** | ✅ una sola verdad, siempre fresca · 🔴 una llamada a un tercero **en el camino de una pantalla que se abre para pagar** · 🔴 depende de que responda → ver ② |
+| **(b)** | **cacheado con vencimiento** | ✅ rápido · 🔴 **vuelve a crear dos verdades**, que es lo que esto vino a cerrar · 🔴 **sin notificación, TODA ventana elegida es una ventana de divergencia ciega** |
+
+⇒ **Con «no hay notificación» sobre la mesa, (b) pierde su único argumento bueno.** *Un caché se justifica cuando algo lo invalida; acá no hay quién.* **Voto de A: (a).**
+
+**② 🔴 Si el proveedor no contesta — y acá fail-closed es la respuesta equivocada**
+
+**Fail-closed** = no mostrar nada = **dejar a alguien sin poder pagar porque un tercero está lento.**
+**Fail-open** = mostrar la lista de siempre.
+
+> ### **El argumento no es de comodidad, es de comparación de peores casos: el peor caso del fail-open ES EL ESTADO DE HOY —una tarjeta muerta que falla al cobrar—; el peor caso del fail-closed es PEOR que hoy.**
+> *Un guard que empeora el estado que vino a mejorar no es prudente: es un guard mal puesto.* **Y es la excepción que confirma la regla de la casa: fail-closed rige cuando el riesgo es plata mal movida; acá el riesgo es plata que NO se mueve.**
+
+⚠️ **Con su condición, que no es opcional: la pantalla lo DICE.** *«No pudimos verificar tus tarjetas ahora»* — **se muestra la lista y se declara que no está verificada.** *Mostrar la lista vieja en silencio es reintroducir la segunda verdad justo cuando no se puede comprobar.*
+
+**③ ¿Dónde vive el status?**
+
+**EN VUELO. No nace columna** — coherente con ① (a) y con «no hay notificación». *Una columna de status sin productor de invalidación es un cajón con etiqueta y sin fondo, y ya van cuatro en esta mesa (`D-915`).*
+⚠️ **Lo único que podría persistirse es la ÚLTIMA CONSULTA con su timestamp**, y **como registro, jamás como fuente**: sirve para decir *«verificada hace 2 minutos»*, no para decidir qué se muestra.
+
+**④ La precondición, y no es negociable**
+
+**`D-921` primero.** Con uid por alta, **la consulta nunca traería todas** — `card/list` es por `uid`, y hoy cada alta es un uid. *Construir esto antes daría un listado que consulta ocho veces y se rompe al curar el uid.*
+
+**Dueño:** A (motor) · C (la voz del listado no verificado) · founder (elegir ① y ②).
+**Disparo:** 🔴 **antes de producción con tarjetas reales.** *En sandbox no se manifiesta, y por eso no bloquea la certificación.*
+☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid`, **y cuando no puede preguntar lo dice en vez de callarlo**.
+
 ### ✅ La verificación de §37.4, con su límite declarado
 
 **Pedido:** confirmar que el tope de seis meses de comisiones —**válido en B2B, NULO si se replica en Pet Parent**— no esté replicado.
