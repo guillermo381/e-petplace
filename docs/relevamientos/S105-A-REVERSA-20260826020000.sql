@@ -1,0 +1,22 @@
+-- ══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260826020000_s105a_cron_barrido_deuna.sql
+-- Escrita ANTES de aplicar.
+--
+-- QUÉ DESHACE: retira el job `pagos-deuna-barrido-tick`.
+--
+-- 🔴 QUÉ **NO** DESHACE:
+--   · Los pagos que el barrido ya haya conciliado **quedan conciliados**. Es
+--     correcto: la plata se movió de verdad.
+--   · Si el job estaba ENCENDIDO, retirarlo deja a DeUna **sin ninguna vía
+--     automática de confirmación** — y como el webhook de DeUna todavía no
+--     está de alta, eso significa que un pago cobrado se queda sin aplicar
+--     hasta que alguien corra el barrido a mano.
+--
+-- ⚠️ Si sólo se quiere APAGARLO —que es lo habitual— no se corre esta reversa:
+--     SELECT cron.alter_job((SELECT jobid FROM cron.job
+--                             WHERE jobname='pagos-deuna-barrido-tick'),
+--                           active := false);
+-- *Borrar un cable para apagar una luz es cómo se pierde el cable.*
+-- ══════════════════════════════════════════════════════════════════════════
+
+SELECT cron.unschedule('pagos-deuna-barrido-tick');
