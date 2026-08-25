@@ -9,11 +9,24 @@
 > **Qué se deposita:** la sección de abajo, entera, en `DIRECCION_ARTE.md`.
 > **Numeral sugerido: §6sexies.**
 >
-> ⚠️ **AL DEPOSITAR, un defecto del documento destino que NO es mío y que
-> conviene no heredar:** el numeral **`6ter` está usado por DOS secciones
-> distintas** — el historial de la v1.6 lo asigna a «EL GLOW» y el cuerpo del
-> documento (línea 556) a «LA MARCA DE MAPA». **`6sexies` está inequívocamente
-> libre**, pero el choque de `6ter` sigue ahí y es de A.
+> ⚠️ **UN DEFECTO DEL DOCUMENTO DESTINO QUE NO ES MÍO — y son DOS, no uno.**
+> Lo levanté por `6ter` y **A midió que `6bis` tiene el mismo patrón**: en los
+> dos casos, **un ítem de la lista numerada de §6 y una sección `##` comparten
+> número**.
+>
+> | numeral | ítem de la lista §6 | sección `##` |
+> |---|---|---|
+> | `6bis` | LA INSIGNIA DE COHORTE | REGISTRO S78 — el glifo del MICRÓFONO |
+> | `6ter` | EL GLOW | LA MARCA DE MAPA |
+>
+> **`6sexies` se eligió por eso: es el único inequívocamente libre.**
+> **NO se renumera** —esos numerales se citan desde afuera— y queda declarado
+> con su ficha.
+>
+> 🔴 **Y ME TOCÓ A MÍ:** este texto citaba `§6ter` dos veces apuntando a «LA
+> MARCA DE MAPA», o sea al numeral ambiguo. **Curado: las citas ahora llevan el
+> NOMBRE además del número.** *Un nombre desambigua hoy y además sobrevive a
+> un renumerado; un numeral solo hace ninguna de las dos.*
 >
 > ---
 >
@@ -24,7 +37,7 @@
 > comentarios de una pieza de `apps/cliente`: un lugar que nadie está obligado a
 > leer.*
 >
-> **Molde: §6ter (la marca de mapa)** — el precedente exacto: algo que no
+> **Molde: §6ter «LA MARCA DE MAPA»** — el precedente exacto: algo que no
 > pertenece al set de la casa y por eso gana clase propia en vez de forzarse
 > adentro.
 
@@ -140,8 +153,8 @@ de un comentario para ponerlas donde se buscan.**
 ## POR QUÉ NO SE ENSANCHÓ UNA LEY EXISTENTE (la salida descartada)
 
 La otra salida era ensanchar la Ley 12 con una excepción para «logos de
-terceros». **Se descartó por la misma razón que §6ter descartó la suya: la
-condición no se acota sola.** «De terceros» incluiría el logo del negocio que
+terceros». **Se descartó por la misma razón que **§6ter «LA MARCA DE MAPA»** descartó
+la suya: la condición no se acota sola.** «De terceros» incluiría el logo del negocio que
 sube un prestador (`LogoNegocio`), el avatar de una clínica, el escudo de un
 refugio — piezas que **sí** son contenido de usuario y **no** son marcas
 registradas que estemos citando.
