@@ -293,7 +293,11 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
     );
   }
 
-  /* ── HALLAZGO (§6: `NOT_FOUND` en ventana · `REVERSED_FAILED`) ───────────
+  /* ── HALLAZGO (§6: el fantasma · `REVERSED_FAILED`) ─────────────────────
+     ⚠️ **Cómo el servidor distingue un fantasma está EN REVISIÓN** (ver
+     `deuna-estado`): `NOT_FOUND` no existía, y su reemplazo —«`PENDING` con
+     `amount=0` y `date=""`»— también resultó falso. **Esta pantalla no lo
+     nota**: recibe la fase ya resuelta y nunca lee un campo del proveedor.
      🔴 *«Hallazgo con nombre — jamás voz de éxito ni silencio»*, y
      `REVERSED_FAILED` **jamás se resuelve solo**.
 
