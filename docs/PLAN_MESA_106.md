@@ -177,7 +177,7 @@ cada gate con el ojo, como siempre.*
 |---|---|
 | **A** *(conductora)* | conducción · **DB** · `packages/api` · `docs/` · **merges, push y OTA** |
 | **B** | `packages/ui` · tokens · **los jueces** · **el asset de marca de DeUna** |
-| **C** | `apps/cliente` · `apps/prestador` |
+| **C** | `apps/cliente` · `apps/prestador` · **`apps/pagos-web`** *(ver enmienda 2)* |
 | **D** | `supabase/functions/pagos-*` · **`supabase/functions/despachar-whatsapp`** *(ver enmienda)* |
 
 > ### 🔴 ENMIENDA — 25-ago-2026, firma del founder
@@ -198,6 +198,29 @@ cada gate con el ojo, como siempre.*
 > **Es asignación ACOTADA, no permanente:** *«mientras dure el frente de envío»*.
 > Cuando el frente cierre, el archivo vuelve a no tener dueño y **hay que
 > asignarlo de nuevo** — no se hereda por haberlo tocado.
+
+> ### 🔴 ENMIENDA 2 — `apps/pagos-web` es de **C**. Firma del founder, 25-ago-2026
+> **Un workspace entero no figuraba en el reparto.** `apps/pagos-web/`
+> —`src/index.html`, `build.mjs`, `vercel.json`— es la página del alta de tarjeta
+> que despliega a Vercel, **y ninguna pista la nombraba.**
+>
+> **El criterio firmado, y vale más que el caso:** *el territorio se define por
+> **la naturaleza de la pieza**, no por dónde está el archivo ni por a dónde
+> despliega.* **Es superficie del canal cliente ⇒ es de C.**
+>
+> ⚠️ **Y es el mismo hueco que la tabla de territorios ya tuvo con `apps/cliente`
+> en S91.** *Un workspace que ninguna pista nombra no es tierra de nadie: es
+> tierra que el primero que la toque va a creer suya.*
+>
+> **Cómo apareció, y es el dato de método:** **A la buscó por nombre y dio CERO**
+> —de ahí su conclusión equivocada de que «vive en otro repo»—; **C la encontró
+> por su HUELLA**, el `postMessage` con fuente `'epetplace-alta-tarjeta'` que su
+> propio WebView escucha. *Buscar por nombre encuentra lo que ya sabés cómo se
+> llama.*
+>
+> ⇒ **Consecuencia práctica sobre `D-921`: el circuito entero es UN SOLO REPO.**
+> No hay coordinación entre repos que resolver, y **la tanda es un commit
+> coordinado con veda, no dos trenes de despliegue.**
 
 **Lo que el reparto implica y conviene decir una vez:**
 
