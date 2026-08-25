@@ -178,7 +178,26 @@ cada gate con el ojo, como siempre.*
 | **A** *(conductora)* | conducción · **DB** · `packages/api` · `docs/` · **merges, push y OTA** |
 | **B** | `packages/ui` · tokens · **los jueces** · **el asset de marca de DeUna** |
 | **C** | `apps/cliente` · `apps/prestador` |
-| **D** | `supabase/functions/pagos-*` |
+| **D** | `supabase/functions/pagos-*` · **`supabase/functions/despachar-whatsapp`** *(ver enmienda)* |
+
+> ### 🔴 ENMIENDA — 25-ago-2026, firma del founder
+> **`supabase/functions/despachar-whatsapp` queda en la pista D MIENTRAS DURE EL
+> FRENTE DE ENVÍO.** Razón firmada: **D ya carga el contexto del instrumento y de
+> sus dos huecos** (`components` y `/debug_token`).
+>
+> **Se deposita acá y no solo en el parte de D, a pedido suyo y con su razón:**
+> *una asignación que vive solo en un parte de pista es exactamente lo que se
+> perdió con el contrato de `D-887` — existía, estaba bien escrito, y no estaba
+> donde se lo busca.*
+>
+> ⚠️ **Y corrige un error de A, que conviene que quede:** A le había dicho a D
+> *«es una línea y es tuya»* sobre ese archivo **cuando no era su territorio**.
+> **Asignar al vuelo en un mensaje es peor que no asignar, porque parece
+> asignado.** Lo levantó D, no A.
+>
+> **Es asignación ACOTADA, no permanente:** *«mientras dure el frente de envío»*.
+> Cuando el frente cierre, el archivo vuelve a no tener dueño y **hay que
+> asignarlo de nuevo** — no se hereda por haberlo tocado.
 
 **Lo que el reparto implica y conviene decir una vez:**
 
