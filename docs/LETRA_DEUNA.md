@@ -427,6 +427,28 @@ se devuelve un cobro.*
 | **Lo que NO es de D** | **cuándo se reversa y qué recibe el cliente** — ya firmado en `LETRA_SALDO`: **vía automática = saldo · medio original = vía manual** |
 | **NO entra en el v1** | el reverso por API es **camino manual de soporte**: se construye **después** del circuito de cobro |
 
+> ### 🔴 ENMENDADO POR FIRMA DEL FOUNDER — 25-ago-2026
+> ~~**NO entra en el v1** — el reverso por API es camino manual de soporte.~~
+> **EL REVERSO PASA A SER REQUISITO DE CERTIFICACIÓN.** *El banco exige que el
+> modelo de reverso sea NUESTRO, sobre todo para las pruebas productivas con
+> tarjetas reales.* **`D-888` pasa a bloqueante** — dueño **D** para el riel,
+> **A** para el motor.
+>
+> **Lo tachado no se borra:** era la letra vigente hasta hoy, y **`D-923` se
+> apoya en ella para declarar que el actuador no estaba incompleto sino fuera de
+> alcance.** *Borrarla convertiría una decisión en un olvido.*
+>
+> **Y con tres datos de Erick que la construcción obedece, y que son del
+> proveedor y no nuestros:**
+> · **el reverso en Ecuador es SIEMPRE TOTAL** — no hay parcial ⇒ el motor **no
+>   toca el desglose congelado**: revierte el intento entero. *Es restricción del
+>   país, no decisión nuestra: si algún día cambia, que se sepa qué la sostenía.*
+> · **la ventana cierra a las 17:00 `America/Guayaquil`**, no «mismo día
+>   calendario» ⇒ **es un reloj con huso, y se construye como restricción del
+>   motor.** *El huso ya está expresado en el cron del recurrente: se reusa.*
+> · **se puede ejercer en sandbox**: débito y después llamada al API de reverso.
+
+
 *Dato bueno de D: `transactionReverseId` **ya tiene columna esperándolo** en su
 M2, así que el día que se construya **no pide migración**.*
 - La promesa exacta de cara al cliente (plazos, texto de T&C §9.2) es de la

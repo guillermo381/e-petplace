@@ -21782,6 +21782,167 @@ Listar las 8 de ese usuario exigiría **8 llamadas y conocer los 8 uid de antema
 **Disparo:** 🔴 **antes de producción con tarjetas reales.** *En sandbox no se manifiesta, y por eso no bloquea la certificación.*
 ☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid` · **cuando no puede preguntar, lo dice en vez de callarlo** · y **una tarjeta que la persona vio y dejó de ver le explica su ausencia y le ofrece volver a agregarla**.
 
+#### D-923 — 🔴 EL ACTUADOR NO MANEJA `REVERSED`: un reverso del proveedor no mueve nada de nuestro lado
+🔴 **ALTA · BLOQUEANTE DE LA CERTIFICACIÓN.** **Texto de la pista D**, medido el 25-ago-2026 **con Erick al teléfono** al preparar el caso de reverso; **depositada por A** (`DEUDAS_CANONICAS` es su territorio). **Dueño: A** — el actuador es motor. **Va con `D-888`, que es su cura.**
+
+### El hecho, medido sobre la definición viva
+
+```
+aplicar_evento_de_pago · maneja 'REVERSED'  : false
+                       · maneja 'reversado' : false
+                       · maneja 'refund'    : false
+                       · solo mira status aprobado : true
+```
+
+**El actuador tiene una sola pregunta: ¿el status es aprobado?** Cualquier otro —`REVERSED` incluido— cae en `status_no_aprobado` y **devuelve `aplicado:false` sin tocar el sujeto.**
+
+> ### **Si el proveedor reversa, el webhook llega, se autentica, se registra… y el pedido sigue pagado y el intento sigue `aprobado`.**
+> **La plata ya volvió del lado del banco y nuestro lado sigue diciendo que se cobró.** *No es un estado feo: es una divergencia entre lo que el sistema afirma y lo que pasó con el dinero.*
+
+**El vocabulario ya lo contempla, y eso lo abarata:** `pagos_intentos.estado` y `webhook_events.resultado` **ya admiten `'reversado'` y `'reverso_fallido'`. Nadie los produce** — mismo patrón que `'expirado'` (`D-915`).
+
+### Lo que NO es, para no inflarlo
+
+- **No es del todo silencioso:** el evento queda con su `status_no_aprobado` ⇒ **hay traza. Falta el efecto, no el rastro.**
+- **No hay daño hoy:** **cero intentos en `'reversado'`** en toda la base, y jamás se ejerció un reverso. **El primero es el de la certificación.**
+- 🔴 **NO es defecto de quien escribió el actuador:** `LETRA_MOTOR_PAGOS_S101` §9 **excluía el reembolso de su alcance**. *Estaba fuera de alcance **por letra**, no por olvido.* **Lo que cambió es que la certificación lo pide** — y esa letra queda enmendada por firma del founder (25-ago).
+
+### 🔴 SU CRUCE CON `D-916`, Y EL ORDEN NO ES INTERCAMBIABLE
+
+**`D-916`** dice que el `UPDATE` del actuador **no tiene guard de estado** ⇒ un evento de aprobación posterior devuelve el intento a `'aprobado'`. **Hoy ese borde es INALCANZABLE porque nada produce `'reversado'`.**
+
+> ### **`D-923` es exactamente lo que lo vuelve alcanzable.**
+> ⇒ **se curan juntas y en este orden: PRIMERO el guard (`D-916`), DESPUÉS el productor (`D-923`).**
+> *Al revés se abre la puerta y después se pone la cerradura* — y en el medio queda una ventana donde un reverso puede deshacerse solo.
+
+**Disparo:** 🔴 **antes de la certificación (jueves).**
+☠️ **Condición de muerte:** un `REVERSED` del proveedor deja el intento en `'reversado'`, revierte el devengo por `aplicar_reembolso`, y el sujeto deja de decir que está pagado — **ejercido, no simulado**.
+
+---
+
+### ✅ ENMIENDA S105-A (25-ago-2026) — LA MITAD DEL RECONOCIMIENTO ESTÁ HECHA, Y LA OTRA MITAD RESULTÓ SER DE MESA
+
+**Ejecutado y en `main`** (`20260825210000`, cinturón verde **contra el evento real**, camino de aprobación probado byte-idéntico por diff):
+
+- 🟢 **el actuador RECONOCE el reverso.** El defecto medido no era «no maneja `REVERSED`» — era más fino y peor: **un reverso llega con `status=2`, exactamente igual que un rechazo**, y `_pago_aprobado` no los distingue. **No fallaba: los CONFUNDÍA** — y un evento confundido con otro no deja síntoma, deja un contador de rechazos que parece normal.
+- 🟢 **el discriminador es `status_detail`, no `status`** (dato del founder tras ejercer el reverso; **medido** sobre `DF-2102135`: `status_detail=7 · current_status=CANCELLED · carrier_code=ReversedByMerchant`). **Y `transaction.id` NO CAMBIA** ⇒ el intento se encuentra por él: *Nuvei no emite id de reverso propio, a diferencia de DeUna.*
+- 🟢 **el vocabulario vive en UN solo lugar** (`_nuvei_status_detail_es_reverso`) y está **separado a propósito** del de «qué clase de reverso es», que es de `registrar_reverso_nuvei` (pista D). *Dos preguntas distintas, dos dueños.*
+- 🟢 **la ventana YA RIGE y no había que construirla:** la puso D dentro de su función. **Medido con rojo producido:** un intento cobrado ayer rebota `fuera_de_ventana_otro_dia`. **El brazo de las 17:00 no se pudo ejercer** (la sonda corrió 15:59 local) y **no se forzó moviendo el reloj de la base** — queda por medir después del corte. ⇒ *la tanda 3 del reverso resultó ya construida por otra pista: lo que faltaba era verificarlo, no hacerlo.*
+
+### 🔴 LO QUE QUEDA, Y ES DECISIÓN DE MESA — NO DE MOTOR
+
+**El sujeto NO se mueve, y se declara en DOS lugares** (la respuesta de D y la del actuador) porque *nadie debería tener que abrir dos funciones para enterarse de que la compra sigue diciendo `pagada` sobre plata devuelta.*
+
+**No se hizo por una razón medida, no por falta de tiempo — el censo del 25-ago:**
+
+| Lo medido | Número |
+|---|---|
+| Sujetos que toca el actuador | **CUATRO**: compra · pedido · cita · recurrencia/suscripción |
+| Columnas de sujeto en `pagos_intentos` | 6 (`compra_id · pedido_id · cita_id · recurrencia_id · suscripcion_servicio_id` + pagador) |
+| Funciones que leen `compras.estado` | 9 |
+| **Funciones que leen `'cancelada'`** | 🔴 **CERO** — el CHECK lo admite y **nadie lo produjo nunca** |
+| Vistas sobre `compras` | 0 · policies que miren estado: 0 |
+
+> ### **Mover el sujeto es estrenar un estado que ningún lector conoce, en cuatro objetos distintos.**
+> Y el destino de tres de ellos **no es decisión de motor**: si una **cita** pagada se reversa, ¿vuelve a `pendiente_pago` y la familia conserva el horario, o se cancela y lo pierde? ¿El prestador ve la cita desaparecer de su agenda? ¿Alguien recibe un aviso? *Eso es producto.* **Es `L-318` en su variante grave: agregar un sujeto obliga a censar TODOS sus consumidores — y acá el consumidor del estado nuevo no existe todavía.**
+
+### 🔴 Y LA CONDICIÓN DE MUERTE DE ESTA FICHA SE APOYA EN UNA PREMISA QUE NO SE CUMPLE
+
+Dice *«revierte el devengo por `aplicar_reembolso`»*. **Medido el 25-ago:**
+
+- la compra reversada **NO TIENE evento económico** — y es correcto: en esta casa el devengo nace al **entregar** (despensa) o al **cerrar con calidad** (servicios), jamás al cobrar. *Una compra pagada y no entregada no devengó nada, así que no hay nada que revertir.*
+- 🔴 **`aplicar_reembolso` NO TIENE UN SOLO LLAMADOR EN TODA LA BASE.** Censado por `prosrc`: cero. **Es `L-318` en su forma pura** — construida, probada, y sin ninguna puerta.
+
+⇒ **la condición de muerte se enmienda:** el puente al ledger es **CONDICIONAL** (solo si hay evento económico), no incondicional. Escrito así, la ficha deja de exigir un acto que para el caso medido no tiene objeto.
+
+#### L-421 — UN CONTROL QUE NO PUEDE FALLAR TAMPOCO PUEDE PASAR
+**Firmada por el founder (25-ago-2026), sobre un error propio de la pista A.**
+
+**El caso.** A escribió un pedido a C con este criterio de verificación: *«`stokenValido` sigue en `true` — es el control negativo»*. **Medido después por D y verificado por A: `altas_tarjeta` tiene 45 filas y `stoken_valido` es NULL en las 45.** El stoken **nunca vino en el body**, así que **`stokenValido` jamás estuvo en `true`.**
+
+> ### **Un control que no puede fallar tampoco puede pasar.**
+
+🔴 **Y su modo de falla es lo que la vuelve ley, no anécdota:** quien corriera ese control **habría visto `null`** — y **`null` no distingue «la cura falló» de «nunca hubo qué medir».** *Un control roto que devuelve un valor ambiguo es peor que no tener control: el que no existe se nota; éste se lee como un resultado.*
+
+**Y el error de fondo era de la misma familia que `L-419`: razonamiento correcto sobre un hecho falso.** El pedido también afirmaba que sin la cura *«`stokenValido` pasa a `false` en todas las altas»* — **no pasaría a `false`: seguiría en `null`**, porque el `if (st.valor)` nunca entra.
+
+✅ **El control que lo reemplaza, y por qué sí sirve** *(propuesto por D)*: **que `stoken_detalle` cambie de `formula=candidata_transaccion` a `formula=candidata_transaccion_uid`.**
+
+> **La diferencia no es de redacción: el control nuevo NO DEPENDE DE UN TERCERO.** *El viejo necesitaba que el proveedor mandara algo para poder medirse; el nuevo prueba que nuestro código corrió, y eso está enteramente de nuestro lado.*
+
+⇒ **La pregunta que deja: ¿este control puede dar rojo hoy?** Si la respuesta es no —porque falta un dato, porque el camino no se ejerce, porque depende de un tercero— **no es un control: es una expresión de deseo.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-422 — EL NÚMERO DE MIGRACIÓN NO SE VERIFICA CON `ls` DEL WORKTREE
+**Firmada por el founder (25-ago-2026). Hallada por la pista D, y le costó una migración que el CLI dio por aplicada.**
+
+**El caso.** D eligió `20260825190000` para su migración. **Ese número ya estaba tomado por A** (`s105a_alta_devuelve_uid`), en **otro worktree**. Y así se enteró:
+
+```
+db push        → "Remote database is up to date"
+migration list → la versión figura APLICADA
+la función     → NO EXISTÍA en la base
+```
+
+> ### **El CLI no avisa de la colisión: la salta en silencio.** *Vio la versión ya registrada, la dio por hecha, y el archivo de D nunca corrió.*
+
+🔴 **La causa de fondo, y es lo que la vuelve ley con pistas paralelas:** **`ls supabase/migrations/` prueba que el número no está en MI árbol. El registro vive en `supabase_migrations.schema_migrations`, que es COMPARTIDO.**
+
+> **Con varias pistas sobre una base común, el árbol es la fuente equivocada: un objeto derivado no es evidencia.**
+
+⇒ **El número se verifica contra `schema_migrations`, no contra el directorio** — y **A cometió el mismo error sin enterarse**: tomó `…190000` mirando su propio `ls`, y lo salvó únicamente el orden en que se aplicaron.
+
+**Es la misma familia que todo lo de esta mesa:** *el retorno decía una cosa y el objeto otra* — y acá el retorno era **doblemente tranquilizador**, porque `db push` y `migration list` **coincidían entre sí** y los dos estaban describiendo la migración de otra pista.
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-423 — EL MERGE A MAIN NO SE ENCADENA A UN `cd`
+**Firmada por el founder (25-ago-2026), sobre un error propio de A que se repitió TRES veces en la misma jornada.**
+
+**El caso.** A escribió, tres veces, comandos de la forma:
+
+```
+cd <worktree-de-la-pista> && git commit … && git merge --no-ff pista/x && git push
+```
+
+**El `merge` corrió DENTRO del worktree de la pista, sobre su propia rama — no sobre `main`.** El archivo nunca llegó al canon, y el `git rev-parse` posterior imprimía el HEAD de la rama, **que se lee igual que el de main**.
+
+🔴 **Y la primera vez el efecto fue peor que no mergear:** `db push` contestó **«Remote database is up to date»** sobre una migración **que no existía en su árbol**. *Un verde que describe correctamente un mundo que no es el que se quería tocar.*
+
+**Las tres las cazó verificar contra el objeto** —que la función no llamaba al productor, que el archivo no estaba en `HEAD`— **nunca el retorno del comando.**
+
+---
+
+#### L-424 — UN GUARD QUE PUEDE DEVOLVER `NULL` NO ES UN BOOLEANO: ACIERTA POR CÓMO SQL TRATA LOS NULOS, NO POR DISEÑO
+**S105-A (25-ago-2026). La encontró un cinturón en su primer paso, antes de que la migración pasara** — y el hallazgo no es del caso: es de la clase.
+
+**El caso.** El vocabulario del reverso nació así:
+
+```sql
+SELECT p_detail IN ('7','34')
+```
+
+Se lee como un booleano y **no lo es**: con `p_detail = NULL` —un evento sin `status_detail`— `IN` devuelve **`NULL`, no `false`**. El cinturón lo cazó porque su propio assert encadenaba `AND NOT f(NULL)`, y el `AND` entero se volvió `NULL`.
+
+🔴 **Lo interesante es que el guard funcionaba igual.** En el `IF … AND f(...)` del actuador, un `NULL` hace que la rama **no se entre** — que es la respuesta correcta. **Acertaba.**
+
+> ### **Y esa es exactamente la trampa: acertaba por cómo `IF` trata los nulos, no porque alguien lo hubiera decidido.**
+> *Un guard que acierta por accidente deja de acertar el día que alguien lo niegue (`NOT f(x)` sobre `NULL` sigue siendo `NULL`), lo componga con un `OR`, o lo mueva a un `CASE WHEN`.* **Ninguno de esos tres cambios se ve como un cambio de comportamiento al leerlos** — y los tres lo son.
+
+**La cura fue de la FUNCIÓN, no del assert** —*curar el assert habría dejado el tri-estado vivo y sin testigo*—: `COALESCE(… , false)`, y la razón escrita en el cuerpo para que nadie lo lea como prolijidad y lo saque.
+
+**La regla:** *toda función que se consuma como condición devuelve `true` o `false` y nunca `NULL`* — y si el caso ausente es semánticamente distinto del negativo, entonces **no es un booleano y no debe fingir serlo**: devuelve un vocabulario de tres valores con nombre, o dos funciones.
+
+**Hermana de `L-192`** (una verificación cuyo modo de falla es el silencio no es una verificación): acá el silencio no era del guard sino **de su tipo**.
+
+> ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
+> *Encadenar mezcla dos contextos de directorio en una sola línea, y el segundo hereda el del primero sin decirlo.*
+
+⚠️ **Y su corolario, que es el que salva:** después de mergear, **se verifica que el archivo esté en `main` por contenido** (`git cat-file -e HEAD:<ruta>`), **no que el comando haya salido bien.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
 ### ✅ La verificación de §37.4, con su límite declarado
 
 **Pedido:** confirmar que el tope de seis meses de comisiones —**válido en B2B, NULO si se replica en Pet Parent**— no esté replicado.
