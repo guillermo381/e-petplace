@@ -1622,7 +1622,13 @@ export const clienteEs = {
     /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
        default cae a tarjeta y jamás cambia en silencio. */
     deunaNoDisponibleAhora: 'Deuna todavía no está disponible: por ahora se paga con tarjeta.',
-    deunaPronto: 'Muy pronto vas a poder pagar desde tu app Deuna.',
+    /* 🔴 ⏪ Fue `deunaPronto`: «Muy pronto vas a poder pagar desde tu app
+       Deuna.» **La clave se renombró con el texto** (firma del founder,
+       25-ago) porque una clave llamada `Pronto` sobre una frase que ya no
+       promete tiempo es exactamente el nombre que miente que esta mesa curó
+       dos veces hoy. *Con D-913 abierta y sin fecha, «muy pronto» promete
+       algo que no controlamos.* */
+    deunaPreparando: 'Estamos preparando el pago con Deuna.',
     /* La espera del código: **misma pantalla, otra voz** (§6, firma ② del
        founder: «funciona exactamente igual que si fuera tarjeta»). */
     deunaEsperaTitulo: 'Ingresa este código en tu app Deuna',
