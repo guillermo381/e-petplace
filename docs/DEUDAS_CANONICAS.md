@@ -20956,6 +20956,48 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
+#### L-419 — LA PROSA QUE NACE EQUIVOCADA AL LADO DE UN MECANISMO CORRECTO
+**Firmada por el founder (25-ago-2026). Texto de la pista B; depositada por A.**
+
+**Lo que la separa de `L-141` es lo que la hace útil:** aquella dice que la prosa **DECAE** — fue cierta y dejó de serlo, así que hay una fecha y una pasada de revisar-lo-viejo puede encontrarla. **Ésta no decayó: NACIÓ equivocada.**
+
+> ### **No hay fecha en que «dejó de ser cierta», así que ninguna revisión de lo viejo la encuentra: solo aparece cuando alguien la ejerce.**
+
+🔴 **Y el mecanismo del error es lo que hay que retener:** *un mecanismo correcto no PROTEGE a la prosa que lo acompaña — la EXPONE.* **La prosa que vive al lado de un cálculo se lee más y se verifica menos**, porque el mecanismo al lado da la sensación de que alguien ya comprobó.
+
+**Dos casos, los dos de B, los dos en dos turnos, y las dos veces el mecanismo tenía razón:**
+- *«`ALTO_LOGO` no baja de 32»* — falso: a 31 todavía entra. **Lo cazó la propia regla al probarla en rojo: esperaba rojo y salió verde con razón.**
+- *«nuestra caja deja 6 dp horizontales»* — describía el aire de un contenido nominal de 44 que el isotipo no llena; el aire real es 15,7. **Lo cazó C.**
+
+**La forma fue la misma las dos veces: un UMBRAL REDONDO escrito donde había una DESIGUALDAD.** *Un número redondo al lado de una fórmula es la señal.*
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-420 — LA ENTREGA DE UNA CAPACIDAD INCLUYE CENSAR QUIÉN DECLARA SU AUSENCIA
+**Firmada por el founder (25-ago-2026). Texto de la pista B, con un matiz de C; depositada por A.**
+
+**Familia de `L-419`** —*algo que era cierto al escribirse y dejó de serlo sin que nadie lo note*— **pero el disparo es distinto, y por eso tiene línea propia:** `L-419` dispara al **escribir prosa junto a un cálculo**; ésta dispara al **entregar una capacidad nueva**.
+
+> ### **Cuando una pieza gana una capacidad que antes no tenía, la entrega incluye censar las superficies que declaran su ausencia.**
+
+**El caso, entero y sin maquillar** (B lo cuenta de sí misma): vendorizó el asset de Deuna ⇒ **la marca pasó a tener logo**. Su pedido a C cubría **la fila** de la Hoja. **No censó el resto.** El resumen del medio elegido montaba una `Celda` sin logo, con este comentario adentro:
+
+> *«La elegida es DeUna: no hay tarjeta que dibujar — **no tiene marca**, ni últimos 4, ni alias.»*
+
+**Cierto el día que se escribió. Falso desde el día de la entrega. Llegó al teléfono del founder.**
+
+🔴 **Por qué ningún mecanismo iba a encontrarlo, y es un límite de CLASE:** `R65` estuvo verde todo ese tiempo **y tenía razón — lo que mide, estaba bien.**
+
+> **Una regla sobre una PIEZA es ciega a sus NO-CONSUMIDORES.**
+
+**Y el matiz de C es el que lo vuelve general:** *una superficie que no monta la pieza no es su no-consumidor **por error**: lo es **por omisión**, y las omisiones no tienen lugar donde aparecer.* **Un lint recorre lo que está escrito; una ausencia no está escrita en ninguna parte.**
+
+⇒ **Lo operativo:** el censo **no es un guard — es un paso de la entrega**.
+
+✅ **Y la decisión de NO construir el mecanismo va escrita JUNTO A SU MEDICIÓN, para que nadie reabra la discusión sin el número:** el censo dio **UNO** (el resumen era la única superficie). *La condición —«una regla nueva por un caso único no se paga»— se puso **antes** de medir, y la medición dio en contra de construir.* **Eso es el criterio funcionando, no el criterio perdiendo.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
 #### D-903 — 🔴 EL CAMINO ASISTIDO NO ES LA EXCEPCIÓN: ES LA PUERTA. **19 de 19 usuarios con mascota rebotan — el 100 %**
 🔴 **BLOQUEANTE DE PRODUCTO, y es LETRA antes que código.** Hallazgo del founder durante el gate del cierre (24-ago-2026), sobre el motor de S104-A.
 
@@ -21394,3 +21436,327 @@ endpoint** — su peor caso deja sin códigos vivos a todos los demás.
 **Dueño:** mesa (elegir camino) · **D** (b o c) · **A** (el productor de `expirado`, si gana (b)) · **founder** (la pregunta al proveedor, que hoy es la que destraba).
 **Disparo:** 🔴 **antes de que el riel reciba tráfico real** *(el flip de `DEUNA_ELEGIBLE` para gente que no sea la mesa)*. *Encender la puerta del cliente con esto abierto es estrenar el riel con un callejón de tres minutos.*
 ☠️ **Condición de muerte:** una persona regenera un código después de que el primero venció, **obtiene uno nuevo**, y **el viejo queda muerto de los dos lados** — el nuestro y el del proveedor.
+
+---
+
+#### D-914 — 🟢 DOS NUMERALES DUPLICADOS EN `DIRECCION_ARTE`, Y SE CITAN DESDE AFUERA
+🟢 **BAJA, pero con ficha porque el número ya está citado.** Levantado por B al entregar §6sexies; **al verificarlo eran DOS, no uno.**
+
+| numeral | ocupante 1 | ocupante 2 |
+|---|---|---|
+| **`6ter`** | **EL GLOW** (S85, ítem de la lista numerada de §6) | **LA MARCA DE MAPA** (S99-B, sección `##`) |
+| **`6bis`** | **LA INSIGNIA DE COHORTE** (S85, ítem de lista) | **REGISTRO S78 · el glifo del MICRÓFONO** (sección `##`) |
+
+**El patrón es el mismo en los dos: una entrada de la LISTA numerada de §6 y una SECCIÓN de nivel `##` comparten número.** *Son dos planos que usan la misma serie, y por eso el choque no se ve leyendo ninguno de los dos solo.*
+
+🔴 **NO SE RENUMERA, y la razón no es prudencia:** estos numerales **se citan desde afuera** — la propia ley de marca ajena citaba `§6ter` **dos veces**, y una sin desambiguar por contexto (*«§6ter descartó la suya»*), de modo que quien la buscara caía en «EL GLOW». **Renumerar rompería punteros en documentos que ese archivo no controla.**
+
+✅ **Cura aplicada, y es mejor que renumerar:** **las citas llevan el NOMBRE además del número** — `§6ter «LA MARCA DE MAPA»`. *Un nombre desambigua hoy **y** sobrevive a un renumerado; un numeral solo no hace ninguna de las dos.* **La encontró B revisando su propio texto después de que A midiera que eran dos.**
+
+**Dueño:** A (`docs/`). **Disparo:** la próxima tanda que toque `DIRECCION_ARTE` a fondo — **con censo de citas primero**, jamás renumerando de una.
+☠️ **Condición de muerte:** cada numeral identifica una sola sección, **o** toda cita del documento lleva nombre y el duplicado deja de poder confundir.
+
+---
+
+#### D-915 — 🟡 EL CHECK DE `pagos_intentos.estado` TIENE 3 DE 7 VALORES SIN PRODUCTOR, Y LOS TRES SON DEL MISMO CICLO
+🟡 **MEDIA.** **Censo ordenado por el founder** (25-ago-2026), tras la tercera aparición del mismo patrón en una sola mesa: *«van tres, y eso ya es patrón, no casualidad»*.
+
+**Medido valor por valor** — filas vivas · escritores en `pg_proc` (por `UPDATE`) · escritores en edge functions:
+
+| valor | filas | DB | edge | veredicto |
+|---|---|---|---|---|
+| `iniciado` | 0 | 3 | 2 | ✅ tiene productor |
+| `pendiente` | 3 | 1 | 7 | ✅ |
+| `aprobado` | 39 | 6 | 0 | ✅ |
+| `rechazado` | 2 | 0 | 5 | ✅ **nace en la edge** |
+| **`expirado`** | **0** | **0** | **0** | 🔴 **CAJÓN** |
+| **`reversado`** | **0** | **0** | **0** | 🔴 **CAJÓN** |
+| **`reverso_fallido`** | **0** | **0** | **0** | 🔴 **CAJÓN** |
+
+> ### **Los tres sin productor son EXACTAMENTE el ciclo de terminación: vencer, reversar, y fallar el reverso. No son tres valores sueltos — es un ciclo entero que no existe.**
+
+⚠️ **Nota de método sobre este censo, para que nadie lo lea de más:** el conteo de DB filtró por `UPDATE`, así que **no ve lo que nace en un `INSERT`** — por eso `rechazado` aparece con 0 en DB y 5 en edge, y **no es un cajón**: nace afuera. *El instrumento contesta «quién lo actualiza», no «quién lo crea», y las dos preguntas hicieron falta.*
+
+**Y el vocabulario de hallazgo, medido en la misma pasada:** `chk_hallazgo_vocabulario` admite **6 valores** y **las 44 filas de la tabla tienen `hallazgo` NULL** ⇒ **ninguno se ejerció jamás**, tenga productor o no. De ellos, `reversado_mismo_dia` aparece en **una sola** migración —la que lo declara— ⇒ **cajón también**.
+
+**Dueño:** A (el vocabulario y su motor) · **D** (el ciclo de reverso, que es `D-888`).
+**Disparo:** ninguno propio — **se cierra solo cuando `D-888` y `D-913` construyan sus productores.** *Esta ficha existe para que el patrón quede contado y nadie vuelva a descubrirlo por cuarta vez.*
+☠️ **Condición de muerte:** cada valor del CHECK tiene un productor identificable, **o** el valor sin productor se retira del CHECK. *Un cajón con etiqueta y sin fondo se cierra llenándolo o sacándole la etiqueta — dejarlo es lo único que no es una decisión.*
+
+---
+
+#### D-916 — 🟡 EL ACTUADOR NO GUARDA EL ESTADO AL APROBAR: UN INTENTO `reversado` PUEDE REVIVIR
+🟡 **MEDIA hoy, ALTA el día del primer reverso.** **Hallada por la pista D** (25-ago-2026) leyendo la definición viva **después** de que A le corrigiera el alcance de otra cosa — *la corrección era media medición de esto.*
+
+**El literal, en `aplicar_evento_de_pago`:**
+
+```
+112  UPDATE pagos_intentos
+113     SET estado='aprobado', confirmado_por='webhook', ...
+117   WHERE (v_intento IS NOT NULL AND id = v_intento)
+118      OR (v_intento IS NULL AND cita_id = v_ref AND proveedor_transaction_id = v_tx);
+```
+
+**No hay guard de estado en el `WHERE`.** ⇒ un intento en `'reversado'` o `'reverso_fallido'` que reciba un evento de aprobación **vuelve a `'aprobado'`** — y la cita pasa además a `confirmada` / `estado_reserva = 'pagada'`. **Plata devuelta que vuelve a contarse como cobrada, y una cita que revive.**
+
+> ### **Que no se encuentre un estado y que se encuentren TODOS son el mismo hecho con dos consecuencias opuestas.**
+> **No filtrar por estado es lo que hace que `'expirado'` se aplique (bien) y es lo mismo que hace que `'reversado'` se reaplique (mal).** *Por eso la cura no puede ser «agregar un filtro»: hay que decidir qué estados son terminales y cuáles no.*
+
+**Severidad acotada y medida, para que no se fiche más grande de lo que es:**
+- **Hoy INALCANZABLE:** estados vivos son `aprobado` 39 · `pendiente` 3 · `rechazado` 2. **Cero reversados, y jamás se ejerció un reverso.**
+- Se vuelve alcanzable **con el primer reverso**, y **la ventana de 24 h de DeUna lo hace más probable que la de mismo día de Nuvei**.
+- 🔴 **El disparo más cercano es un REPROCESO:** aplicar un evento viejo sobre un intento que **entretanto cambió de estado** es exactamente esta forma. *Con los cuatro de `D-912` no muerde —verificado por las dos pistas: ninguno está reversado— pero el reproceso **como mecanismo** tiene esta puerta abierta.*
+
+**⇒ La regla que deja, y vale más que la cura:** **todo reproceso mira el estado del intento AL MOMENTO de reprocesar, jamás el que tenía cuando se decidió reprocesarlo.**
+
+**La decisión que la cura necesita, y no es de una pista:** si un webhook de aprobación **posterior a un reverso** debe **ignorarse** (fail-closed) o **escalarse como hallazgo**. **Voto de D, que A comparte:** *escalar* — **un proveedor que aprueba algo que ya reversó es un caso de soporte, no un no-op silencioso**. Y el vocabulario ya existe: `reverso_fallido` está en `chk_hallazgo_vocabulario`.
+
+**Dueño:** A (el actuador es motor). **Disparo:** 🔴 **antes del primer reverso**, y **antes de cualquier reproceso futuro**.
+☠️ **Condición de muerte:** un evento de aprobación sobre un intento reversado **no lo revive** — lo escala con su hallazgo, verificado con rojo producido.
+
+---
+
+## 🔴 LOS CUATRO CHOQUES DEL MEMO DEL ABOGADO — 25-ago-2026
+
+> **Abiertas por orden del founder. NINGUNA se cura desde una pista: son de mesa.**
+> *Lo que A aporta acá es la medición de cuánto cuesta cada una, no la decisión.*
+
+#### D-917 — 🔴 EL SALDO NO PUEDE SER LA ÚNICA VÍA DE REEMBOLSO. **Y la buena noticia es que no hay nada construido**
+🔴 **ALTA de letra · 🟢 BARATA de motor.**
+
+**El choque:** `LETRA_SALDO` §3/§5 y `LETRA_PAGO_CITAS` §5 fijan que **la vía automática del reembolso es el saldo**. El abogado dice que **el saldo debe ser SIEMPRE OPCIONAL y jamás única vía** — **LODC Art. 71: el dinero era del cliente.**
+
+✅ **MEDICIÓN DE COSTO, contra la base viva, y da vuelta la urgencia:**
+
+| pregunta | respuesta medida |
+|---|---|
+| ¿existe tabla de saldo? | **NINGUNA.** `information_schema` → **cero** tablas `%saldo%` |
+| ¿hay funciones de saldo? | **No de dinero.** Las 12 que mencionan «saldo» son de **inventario** (`ajustar_stock_vendedor`, `_trg_inventario_aplicar_movimiento`) y de **paquetes de salidas** (`comprar_paquete_salidas`, `reservar_salida_paquete`) — ahí «saldo» son **salidas de un paquete, no plata** |
+
+> ### **`LETRA_SALDO` es letra sin motor: la vía automática no está construida.**
+> ⇒ **No hay nada que desarmar.** *La decisión se toma antes de construir, que es el mejor momento posible — y es exactamente lo que esta mesa buscaba mandando la letra al abogado antes que a una pantalla.*
+
+⚠️ **Lo que el memo agrega y NO es opcional cuando el saldo exista:** sin caducidad (**ya cumplido**) · **no se recarga con dinero nuevo** · **no se transfiere entre usuarios**. *La recarga cruza al perímetro del BCE y al COIP 323* — **deja de ser un crédito comercial y pasa a ser captación.**
+
+**Dueño:** mesa (la letra) · A (el motor, cuando exista).
+**Disparo:** **antes de construir el saldo.** Hoy no bloquea nada porque no hay nada.
+☠️ **Condición de muerte:** `LETRA_SALDO` dice que el reembolso ofrece **elección** y que el saldo es una de las opciones, jamás la única.
+
+#### D-918 — 🔴 LA EXENCIÓN TOTAL DE `LETRA_GUARDERIA` §3 ES NULA DE PLENO DERECHO
+🔴 **ALTA.** **La letra queda FRENADA ENTERA** — marcado en su propia puerta, no solo acá.
+
+**§3 decía:** *«Todo lo que ocurra desde la recogida hasta la entrega es responsabilidad única de la guardería. Nunca de e-PetPlace.»* **Veredicto: nula frente al consumidor.**
+
+🔴 **No se cae por estar mal redactada: se cae por lo que hace.** *Una plataforma que cobra comisión sobre el servicio no se exime de él con una cláusula.*
+
+✅ **Y la letra lo había anticipado ella misma** —*«puede no sostenerse en Ecuador, y descubrirlo después de construir es caro»*— **y por eso el freno llegó antes de construir.** *Es el mecanismo funcionando: mandarla al abogado antes que a una pantalla era exactamente para esto.*
+
+**Se frena ENTERA y no solo §3**, aunque §1, §2, §4 y §5 no fueron objetados: **§3 sostiene el reparto de responsabilidad del que cuelga todo el servicio**, y dejar el resto «vigente» invitaría a construir transporte y documentación sobre una línea que no existe.
+
+**Dueño:** mesa (reescritura) + abogado. **Disparo:** antes de cualquier construcción de guardería.
+☠️ **Condición de muerte:** §3 reescrita y validada por el abogado.
+
+#### D-919 — 🔴 LOS TRES DÍAS DE `LETRA_GUARDERIA` §6 TIENEN RIESGO PENAL
+🔴 **ALTA.** Misma suerte que `D-918`: **frenada**.
+
+**§6 decía:** *«Pasados tres días, el animal se lleva a un refugio.»* **Veredicto del abogado: riesgo penal.**
+
+*La letra ya había mandado la pregunta al abogado en su §8.3 —«¿qué figura legal es entregar un animal a un refugio pasados tres días?»— y la respuesta llegó antes que la construcción.* **La pregunta correcta, hecha a tiempo.**
+
+**Dueño:** mesa + abogado. ☠️ **Condición de muerte:** §6 reescrita con una figura que el abogado valide.
+
+#### D-920 — 🔴 LAS FIRMAS DE AYER DICEN 10 % Y LO QUE RIGE DICE 15 %
+🔴 **ALTA — es plata y es firma del founder, no cura de pista.**
+
+**Medido contra las TRES fuentes, y el resultado importa: dos ya concuerdan entre sí.**
+
+| fuente | servicios | base | productos |
+|---|---|---|---|
+| **T&C publicados** (`TERMINOS-PET-PROFESSIONAL.md:195-196`) | **15 %** | valor del servicio **sin impuestos** | 10 % con impuestos |
+| **`fee_configs`** (base viva, EC y CO, activas y vigentes) | **`pct: 15`** | — | `pct: 10`, base `total_con_impuesto` |
+| **`LETRA_TELEMEDICINA` §2 · `LETRA_GUARDERIA` §5** | 🔴 **10 %** | **no declarada** | — |
+
+> ### **No es un desacuerdo entre documentos viejos: es que las firmas de ayer dijeron un número distinto del que ya rige en dos lugares que coinciden.**
+
+⚠️ **Y telemedicina y guardería SON SERVICIOS** ⇒ por lo publicado les correspondería **15 %**.
+
+⚠️ **Un segundo hueco, más chico y de la misma clase:** las letras nuevas dicen «10 %» **sin declarar base**, y el propio censo legal ya había marcado que *«15 % del servicio» admite dos lecturas*. **Un porcentaje sin base no es un precio.**
+
+**Dueño:** **founder** (es firma). **Disparo:** antes de habilitar cualquiera de los dos oficios.
+☠️ **Condición de muerte:** las tres fuentes dicen el mismo número **con la misma base**.
+
+#### D-921 — 🔴 EL `uid` ANTE NUVEI ES EL ID DEL ALTA: **para el proveedor, cada alta es una persona nueva**
+🔴 **ALTA · BLOQUEANTE DE LA CERTIFICACIÓN DE NUVEI.** *Erick ya lo vio — hay que poder decirle qué hicimos.* Hallado el 25-ago-2026 por el founder al comparar nuestras filas contra el `card/list` del proveedor.
+
+### El hecho, medido del código y no del comportamiento
+
+`resolver_alta_tarjeta` escribe `proveedor_uid` con **`v_a.id::text`** — el id de la fila de `altas_tarjeta` — bajo el comentario *«EL HANDLE DEL ALTA ES EL uid ANTE EL PROVEEDOR»*. Y la edge lo confirma: *«el handle como user_id (que es el `uid` con el que se tokenizó)»*.
+
+⇒ **El uid es un uuid nuevo cada vez que alguien abre un alta.**
+
+**Verificado contra el objeto, uno por uno:** los cuatro uid de la Visa `411111…1111` **existen como fila de `altas_tarjeta`** y **ninguno es un usuario de `auth`**.
+
+**Y el dato del proveedor lo cierra:** `card/list` para `f7a7001e…` devuelve **`result_size: 1`**.
+
+> ### **Del lado de Nuvei no hay una persona con ocho tarjetas: hay ocho personas con una tarjeta cada una.**
+> **Por eso tokeniza de cero y devuelve un token distinto**, y por eso nuestro `UNIQUE (proveedor, token)` **nunca colisiona: no hay dos altas que compartan uid.** *El índice está bien; lo que nunca se repite es el uid.*
+
+### 🔴 Por qué es SILENCIOSO — y es lo que lo hace peligroso
+
+`pagos-cobro` manda **el `proveedor_uid` guardado en la fila**, con su guard *«sin `proveedor_uid` no se puede cobrar: no se adivina»*. ⇒ **cada tarjeta cobra con SU par (token, uid), el mismo con el que nació** — y por eso **las viejas probablemente sigan cobrando bien**.
+
+> **Que funcione no es la buena noticia: es la que vuelve el defecto invisible.** *Si los tokens viejos fallaran, alguien lo habría notado hace cinco días.* **El sistema se ve sano desde adentro; la divergencia solo aparece mirando el `card/list` del proveedor.**
+
+### Lo que le hace a `LETRA_SALDO` §2
+
+§2 dice que **la tarjeta es de la PERSONA**. **De nuestro lado se sostiene** (las 8 filas comparten `user_id` y la RLS las ata). **Del lado del proveedor NO** ⇒ cualquier cosa que Nuvei razone *por titular* —listar, deduplicar, límites, antifraude por velocidad, un reverso que busque «las tarjetas de este cliente»— **razona sobre una identidad que existe solo para ese alta.**
+
+### ① EL DISEÑO DE LA CURA, con su tamaño *(diseño, NO construcción)*
+
+> **FIRMA DEL FOUNDER (25-ago):** el uid estable es **un IDENTIFICADOR PROPIO ANTE EL PROVEEDOR**, jamás el `user_id` nuestro.
+> **La razón, con sus palabras:** *el `user_id` vive en nuestra base y en nuestros logs; dárselo a un tercero lo vuelve un dato compartido que **no se puede des-compartir**, y si hay que rotarlo no se puede. Un identificador propio nace estable, es nuestro, y si mañana hay que cortar con el proveedor **no arrastra identidad interna**.*
+> **Es el mismo criterio por el que el monto no viaja desde el cliente: al tercero se le da lo que necesita y nada más.**
+>
+> 🔴 **Y su consecuencia, firmada para que quede escrita: si algún día entra un SEGUNDO proveedor de tarjetas, el identificador es POR PROVEEDOR — no se reusa el mismo ante dos terceros.** *Un identificador compartido entre dos proveedores los deja correlacionar a la misma persona entre ellos.*
+
+| pieza | qué |
+|---|---|
+| **dónde vive** | tabla propia, `(user_id, proveedor)` **UNIQUE** — no una columna en `profiles`: la clave es compuesta **por la firma de arriba** |
+| **quién lo produce** | **el ALTA, al abrirse**: si ya existe uid para ese `(user_id, proveedor)` **se reusa**; si no, se genera y se persiste **antes** de hablarle al proveedor |
+| **qué manda la edge** | ese uid, en lugar de `altas_tarjeta.id` |
+| **`tarjetas_guardadas.proveedor_uid`** | **se conserva** — pasa a ser *«con qué uid nació esta tarjeta»*, que es dato histórico y es lo que permite seguir cobrando las viejas |
+
+**Tamaño: chico.** Una tabla, un `SELECT … COALESCE … INSERT` en la apertura del alta, y un campo distinto en la llamada. **Cero migración de datos** (ver ②).
+
+✅ **Y un efecto de segundo orden que conviene ver: la cura hace que el dedupe YA EXISTENTE empiece a funcionar solo.** Con uid estable, Nuvei puede devolver **el mismo token** para el mismo PAN ⇒ **el `ON CONFLICT (proveedor, token)` que hoy nunca dispara pasa a ser el dedupe real, sin escribir una línea más.** *No hay que agregar unicidad por `bin+ultimos4`: había que arreglar la identidad, no el índice.*
+
+### ② 🔴 LAS 8 EXISTENTES — **conviven hasta morir solas**
+
+**Medido:** `pagos-cobro` usa el `proveedor_uid` de cada fila ⇒ **las viejas siguen siendo cobrables tal como están.** Invalidarlas rompería algo que hoy funciona.
+
+⚠️ **La pregunta que decide si esto es correcto NO es medible desde acá y es para Erick: ¿Nuvei permite MOVER una tarjeta de uid?** *Lo probable es que no* — en su modelo el token nace atado al uid, y moverlo equivaldría a re-tokenizar, que es exactamente lo que hace el alta.
+
+⇒ **Si la respuesta es «no se mueve», la salida es que CONVIVAN:** las viejas cobran con su uid histórico, las nuevas nacen con el uid estable, y el parque viejo **se extingue solo** cuando el usuario las borre o venzan. *No hay migración que hacer: hay que dejar de crear el problema.*
+
+### ③ EL ALCANCE — **cero usuarios reales**
+
+| medido | |
+|---|---|
+| tarjetas guardadas en toda la base | **8** |
+| **usuarios con tarjeta** | **1** — `guillo381+8@gmail.com` |
+| uid distintos de ese usuario | **8** |
+| **números de tarjeta distintos** | **2** (una Visa, una Diners) |
+| altas totales | 44, del mismo único usuario |
+| tarjetas sin uid | **0** |
+
+> ### **Todo el parque afectado es la cuenta de prueba del founder. La migración es gratis: no hay a quién romperle nada.**
+
+**Y eso decide ② sin esperar a Erick:** con 8 tarjetas de prueba y 2 números, **borrarlas y re-guardarlas es más barato que cualquier convivencia** — *la convivencia es la respuesta correcta para un parque real, y acá no hay parque real.* **La respuesta a Erick puede ser «lo corregimos y regeneramos», sin asteriscos.**
+
+### ④ EL CONSUMO QUE EL DISEÑO YA CONTEMPLA — y que vuelve a esta cura precondición de otra
+
+**El proveedor tiene un endpoint que dice qué tarjetas siguen válidas**, y consulta **POR `uid`**:
+
+```
+GET https://ccapi-stg.paymentez.com/v2/card/list?uid=<proveedor_uid>
+```
+
+**Contrato completo depositado en `docs/CONTRATO_CARD_LIST_NUVEI.md`** — *no vive en un mensaje.*
+
+> ### **Hoy ese endpoint no puede devolver las tarjetas de una persona: devuelve las de un ALTA.** `result_size: 1` no es casualidad del caso medido — **es lo único que puede devolver mientras el uid sea por alta.**
+
+Listar las 8 de ese usuario exigiría **8 llamadas y conocer los 8 uid de antemano** — justo el dato que esta ficha dice que no debería existir.
+
+✅ **El diseño de ① ya lo contempla, sin agregarle nada:** con el uid `(user_id, proveedor)` UNIQUE, **UNA sola llamada trae todas las tarjetas de la persona.** *La forma que el endpoint pide es exactamente la que la cura produce.*
+
+⇒ **Firma del founder: los dos se curan EN ORDEN — primero el uid estable, después el listado contra el proveedor.** *Construir el segundo primero daría un listado que consulta ocho veces para armar lo que una llamada debería traer, y que además se rompería al curar el primero.*
+
+✅ **Y abarata: `ccapi.paymentez.com` / `ccapi-stg` YA están cableados en nuestras edge**, con su par prod/staging y su autenticación funcionando. **No hay integración nueva que abrir.**
+
+**Dueño:** A (motor + tabla) · founder (la respuesta a Erick y la pregunta del uid móvil).
+**Disparo:** 🔴 **antes de la certificación** — *es lo que Erick vio, y una certificación que se pide sobre una identidad que el proveedor lee mal se pide dos veces.*
+☠️ **Condición de muerte:** dos altas del mismo usuario ante el mismo proveedor **mandan el mismo uid**, verificado contra `card/list` — y un segundo alta del mismo PAN **actualiza la fila en vez de crear otra**.
+
+#### D-922 — 🔴 EL LISTADO DE TARJETAS NO CONSULTA AL PROVEEDOR: mostramos ocho sobre un dato confirmado para una
+🔴 **ALTA · BLOQUEANTE DE PRODUCCIÓN, NO DE LA CERTIFICACIÓN.** *En sandbox, con bins de prueba que no caducan, no se manifiesta. Con tarjetas reales, sí.*
+**Misma raíz que `D-921` y ficha aparte porque se curan EN ORDEN** — sin uid estable no se puede consultar el status de todas las tarjetas de una persona.
+
+### Lo medido
+
+`listarTarjetasGuardadas()` filtra **por nuestro estado y solo por el nuestro**:
+
+```ts
+.select('id, marca, ultimos4, alias, expira_mes, expira_anio, creada_en')
+.eq('estado', 'guardada')
+```
+
+| pregunta | respuesta medida |
+|---|---|
+| ¿existe columna para el status del proveedor? | 🔴 **NINGUNA**, ni en `tarjetas_guardadas` ni en `altas_tarjeta` |
+| ¿el repo conoce algún valor de status? | **CERO menciones** de `valid` ni de ningún otro |
+| nuestros estados | `guardada · rechazada · abandonada` — **son de NUESTRO proceso de alta**, no del ciclo de vida en Nuvei |
+| las 8 filas | **las 8 en `guardada`** ⇒ **las 8 se muestran** |
+
+> ### **No es que el campo esté desactualizado: NUNCA EXISTIÓ.**
+
+> ### **El listado le afirma al usuario «tenés 8 tarjetas» sobre un dato confirmado para UNA** — Erick vio `result_size: 1` para una sola uid, y de las otras siete no sabemos nada.
+
+🔴 **Y por dónde entra la verdad hoy:** **solo cuando el cobro falla.** Nadie consulta al proveedor al listar ni antes de cobrar. ⇒ *la persona elige una tarjeta muerta y se entera **con el carrito lleno**, que es el peor momento posible.*
+
+⚠️ **EL MATIZ QUE EVITA INFLARLA, y va adentro a propósito:** **el cobro no adivina** — usa el par `(token, uid)` con el que la tarjeta nació, y ese par es correcto. **Lo que falta no es la llave: es saber si el proveedor todavía la honra.** *Y con bins `411111` / `364170` —de prueba, que no caducan— es **probable** que las ocho sigan válidas. **Probable, no medido.***
+
+### 🔑 LA RESPUESTA DE NUVEI QUE DECIDE LA CURA *(founder, 25-ago-2026)*
+
+> ### **NO HAY NOTIFICACIÓN. Nuvei no avisa cuando una tarjeta deja de ser válida. Los errores de expirada o fallida aparecen recién en el pago.**
+
+⇒ **Firma: la cura es CONSULTAR `card/list` y mostrar solo las que vengan `status: "valid"`.** *(Contrato en `docs/CONTRATO_CARD_LIST_NUVEI.md`.)*
+
+**Y esto mata la opción de cachear como verdad**, sin discusión: *una copia que envejece **sin que nada avise** no es una copia desactualizada — es una copia que no tiene forma de saber que lo está.*
+
+### 🔴 EL LÍMITE, FIRMADO, PARA QUE NADIE PROMETA DE MÁS
+
+> ### **El status del proveedor dice que el TOKEN sigue vivo, no que la tarjeta vaya a cobrar.**
+> **Una tarjeta caducada o bloqueada por el banco puede venir `valid` y fallar igual en el pago.** El filtro **mejora el listado; no convierte «aparece en tu lista» en «va a funcionar»**.
+> ⇒ **La voz del error de pago sigue siendo necesaria y NO se ablanda.**
+
+### EL DISEÑO *(sin construir — la mesa elige)*
+
+**① ¿Cuándo se consulta?**
+
+| | vía | costo |
+|---|---|---|
+| **(a)** | **al abrir el listado** | ✅ una sola verdad, siempre fresca · 🔴 una llamada a un tercero **en el camino de una pantalla que se abre para pagar** · 🔴 depende de que responda → ver ② |
+| **(b)** | **cacheado con vencimiento** | ✅ rápido · 🔴 **vuelve a crear dos verdades**, que es lo que esto vino a cerrar · 🔴 **sin notificación, TODA ventana elegida es una ventana de divergencia ciega** |
+
+⇒ **Con «no hay notificación» sobre la mesa, (b) pierde su único argumento bueno.** *Un caché se justifica cuando algo lo invalida; acá no hay quién.* **Voto de A: (a).**
+
+**② 🔴 Si el proveedor no contesta — y acá fail-closed es la respuesta equivocada**
+
+**Fail-closed** = no mostrar nada = **dejar a alguien sin poder pagar porque un tercero está lento.**
+**Fail-open** = mostrar la lista de siempre.
+
+> ### **El argumento no es de comodidad, es de comparación de peores casos: el peor caso del fail-open ES EL ESTADO DE HOY —una tarjeta muerta que falla al cobrar—; el peor caso del fail-closed es PEOR que hoy.**
+> *Un guard que empeora el estado que vino a mejorar no es prudente: es un guard mal puesto.* **Y es la excepción que confirma la regla de la casa: fail-closed rige cuando el riesgo es plata mal movida; acá el riesgo es plata que NO se mueve.**
+
+⚠️ **Con su condición, que no es opcional: la pantalla lo DICE.** *«No pudimos verificar tus tarjetas ahora»* — **se muestra la lista y se declara que no está verificada.** *Mostrar la lista vieja en silencio es reintroducir la segunda verdad justo cuando no se puede comprobar.*
+
+**③ ¿Dónde vive el status?**
+
+**EN VUELO. No nace columna** — coherente con ① (a) y con «no hay notificación». *Una columna de status sin productor de invalidación es un cajón con etiqueta y sin fondo, y ya van cuatro en esta mesa (`D-915`).*
+⚠️ **Lo único que podría persistirse es la ÚLTIMA CONSULTA con su timestamp**, y **como registro, jamás como fuente**: sirve para decir *«verificada hace 2 minutos»*, no para decidir qué se muestra.
+
+**④ La precondición, y no es negociable**
+
+**`D-921` primero.** Con uid por alta, **la consulta nunca traería todas** — `card/list` es por `uid`, y hoy cada alta es un uid. *Construir esto antes daría un listado que consulta ocho veces y se rompe al curar el uid.*
+
+**Dueño:** A (motor) · C (la voz del listado no verificado) · founder (elegir ① y ②).
+**Disparo:** 🔴 **antes de producción con tarjetas reales.** *En sandbox no se manifiesta, y por eso no bloquea la certificación.*
+☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid`, **y cuando no puede preguntar lo dice en vez de callarlo**.
+
+### ✅ La verificación de §37.4, con su límite declarado
+
+**Pedido:** confirmar que el tope de seis meses de comisiones —**válido en B2B, NULO si se replica en Pet Parent**— no esté replicado.
+
+**Medido:** `37.4` y sus términos aparecen **solo en `TERMINOS-PET-PROFESSIONAL.md`**. **No está replicada.**
+
+⚠️ **Pero el alcance de esa afirmación es parcial y hay que decirlo: en `docs/legal/` NO EXISTE un archivo de T&C Pet Parent.** ⇒ **lo verificado es que no está replicada EN EL REPO, no que no lo esté en el documento publicado del cliente.** *Un grep que no encuentra el documento no puede decir que el documento está limpio.*
