@@ -79,6 +79,35 @@ quieres pagar» no gestiona nada: se elige y se paga.
   > huérfanos lo pone NUESTRO reloj —el hold y la ventana de 7 días—, jamás un
   > estado del proveedor.** Esperar un `NOT_FOUND` que nunca llega es un
   > barrido que no termina nunca.
+
+  🔴 **ENMIENDA 24-ago-2026 — LA FRASE DE ARRIBA ERA MÁS CIERTA DE LO QUE SU
+  AUTOR SABÍA, Y EL PÁRRAFO QUE LA PRECEDE INDUCE A LEERLA MAL.**
+  *(Medido por la pista D contra QA, sobre una transacción **REAL recién
+  creada**, no sobre un id inventado.)*
+
+  **Lo medido:** una transacción **real y todavía no pagada** devuelve
+  **`amount = 0`, `date = ""` y `transferNumber = ""`** — *exactamente la misma
+  forma que arriba se describe como la del fantasma.*
+
+  ⇒ **La lista «`PENDING` + `amount 0` + `date ""`» NO ES LA FIRMA DE UN
+  FANTASMA: es la firma de CUALQUIER transacción no pagada.** Leerla como
+  distintiva —que es como está escrita— lleva a construir un discriminador que
+  no puede funcionar.
+
+  > ### **No hay dos estados que se confundan: hay UN estado con dos causas.**
+  > **Y la consecuencia es sobre el futuro, no sobre el código de hoy: ningún
+  > campo del proveedor va a poder distinguirlos NUNCA** — no es que todavía no
+  > encontramos el campo bueno. *Quien vuelva a este problema no tiene que
+  > buscar mejor: tiene que dejar de buscar.*
+
+  ✅ **Lo que NO cambia, y conviene decirlo para que nadie lo reabra:** la
+  conclusión de este bullet **sigue en pie** —el corte de huérfanos lo pone
+  nuestro reloj— **y la regla de aprobación de abajo (`APPROVED` Y `amount > 0`)
+  también**, porque discrimina *aprobado* de *no aprobado*, que sí son dos
+  estados distintos, y sigue siendo fail-closed.
+  *Lo que caducó es la premisa, no la conclusión.* **Es `L-418` en otra forma:
+  la letra tenía razón por un motivo que no era el suyo, y eso solo se descubre
+  yendo a buscar el fundamento de lo que ya está funcionando.**
 - 🔴 **APROBADO EXIGE DOS COSAS: `APPROVED` **Y** `amount > 0`.** *Con el
   fantasma devolviendo `amount = 0`, un solo campo no alcanza para afirmar que
   entró plata.* **Fail-closed: si el monto es 0, no está aprobado, diga lo que
@@ -359,6 +388,30 @@ mide qué existe).
 - `REVERSED_FAILED` (el reverso que DeUna no pudo acreditar) es **caso de
   soporte 🔴 con registro** — plata del cliente en el limbo jamás se archiva
   sola.
+
+- 🔴 **`status: true` DEL REFUND NO SIGNIFICA QUE SE REVERSÓ NADA.**
+  *(Medido por la pista D contra QA, 24-ago-2026.)*
+  Un `refund` sobre una transacción **que nunca se pagó** devuelve **`200` con
+  `status: true`** y el mensaje *«The QR with id 4262774 has been successfully
+  cleaned»*, con **`transactionReverseId` en `null`**.
+
+  > ### **El discriminador es `transactionReverseId`, jamás `status`.**
+  > *Quien lea `status` como éxito va a marcar REVERSADA una transacción que
+  > nunca tuvo plata* — y eso escribe una devolución que no existió en el
+  > registro de un cliente. **Sin `transactionReverseId` no hubo reverso, diga
+  > lo que diga el status.**
+
+  ⚠️ **Y el `4262774` de ese mensaje es NUESTRO `pointOfSale`, no la
+  transacción.** *La respuesta habla de «limpiar el QR» de un id que resultó ser
+  el del punto de venta entero.* **No se volvió a ejercer hasta saber qué
+  limpia**, y esa cautela es la correcta: **es la única pregunta abierta cuyo
+  peor caso es dejar el punto de venta inutilizable.**
+
+- ⚠️ **`REVERSED` y `REVERSED_FAILED` NO SE PUDIERON EJERCER, y se declara en
+  vez de darse por probado:** `refund` exige una transacción **aprobada**, y
+  aprobar exige que **una persona pague desde su app**. El proveedor dijo el
+  24-ago que los reversos **se pueden simular** (`L-418`: con su fecha y su
+  canal) **pero no dijo cómo** — y ésa es la pregunta que queda.
 
 ### 🔴 QUIÉN LO CONSTRUYE — dictamen de mesa, 22-ago-2026
 
