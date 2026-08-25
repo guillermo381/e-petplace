@@ -5180,11 +5180,35 @@ function r64(archivos) {
  * cambia el formato» es exactamente la clase de cambio que no da síntoma.*
  *
  * ── LO QUE NO MIDE, DECLARADO ──────────────────────────────────────────────
- * **No verifica que nada más se dibuje dentro de la caja** (el tercer límite del
- * pedido a C). Contar hijos JSX sería frágil y su rojo no sería confiable —
+ * **① No verifica que nada más se dibuje dentro de la caja** (el tercer límite
+ * del pedido a C). Contar hijos JSX sería frágil y su rojo no sería confiable —
  * *una regla que se puede violar sin que nadie lo note es mala; una que grita
  * cuando no debe es peor, porque enseña a ignorarla.* Vive como límite escrito
  * en `PEDIDO.md` §2 y en la procedencia del asset.
+ *
+ * **② 🔴 ES CIEGA A SUS NO-CONSUMIDORES, y eso es un LÍMITE, no un defecto.**
+ * R65 vigila **la pieza**: la geometría y el resguardo dentro de la caja de
+ * `LogoFranquicia`. **No puede ver una superficie que muestra el mismo medio
+ * SIN pasar por la pieza vigilada.**
+ *
+ * *No es hipotético: pasó.* El resumen del medio elegido
+ * (`seccion-medio-de-pago.tsx`) montaba una `Celda` sin `inicio`, con un
+ * comentario que decía *«DeUna… no tiene marca»* — **cierto cuando se escribió,
+ * falso desde que el asset se vendorizó**. R65 estuvo verde todo ese tiempo y
+ * tenía razón: lo que mide, estaba bien.
+ *
+ * **Por qué ningún lint podía cazarlo** (matiz de la pista C, que mejora el
+ * diagnóstico): *una superficie que no monta la pieza no es su no-consumidor
+ * por error — lo es **por omisión**, y las omisiones no tienen lugar donde
+ * aparecer.* **Un lint recorre lo que está escrito; una ausencia no está
+ * escrita en ninguna parte.**
+ *
+ * ⇒ **Lo que cierra este hueco no es un mecanismo: es una práctica** — *cuando
+ * una pieza gana una capacidad que antes no tenía, la entrega incluye censar
+ * las superficies que declaran su ausencia.*
+ * **Y se decidió NO construir la regla que lo vigilaría**, con su medición: el
+ * censo de superficies con el hueco dio **UNO**. *Una regla nueva por un caso
+ * único no se paga — la condición se puso antes de medir.*
  */
 function r65(archivos) {
   const fallos = [];
@@ -5277,7 +5301,9 @@ function r65(archivos) {
       `caja ${cajaW}×${cajaH} · contenido ${contW}×${contH} · isotipo ${d(rw)}×${d(rh)} dp · ` +
       `X ${d(X)} dp (punto de ${punto.w}px, aspecto ${punto.aspecto.toFixed(2)}, relleno ${punto.llenado.toFixed(3)}) · ` +
       `resguardo pide ${d(necW)}×${d(necH)}, holgura ${d((cajaH - rh) / 2 - X)} dp por lado en el alto · ` +
-      `medido de ${ruta} · ⚠️ NO verifica que nada más se dibuje dentro de la caja`,
+      `medido de ${ruta} · ⚠️ su verde NO dice «la marca está bien en todas partes»: ` +
+      `no verifica que nada más se dibuje dentro de la caja, ` +
+      `ni que toda superficie que muestre la marca pase por la pieza (ver cabecera)`,
   };
 }
 
