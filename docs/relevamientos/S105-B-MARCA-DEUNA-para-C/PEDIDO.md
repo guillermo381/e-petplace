@@ -5,7 +5,9 @@
 > **Reparto firmado por el founder (S105): B produce, C monta.**
 >
 > **De:** pista B (`packages/ui`, tokens, jueces) · **Para:** pista C (`apps/cliente`)
-> **Fecha:** 24-ago-2026 · **Rama de origen:** `pista/s105-b`
+> **v2 · 25-ago-2026** — *la v1 dejaba dos decisiones abiertas. **Las dos se
+> firmaron** y el proveedor contestó las tres preguntas que faltaban. Este
+> documento ya no ofrece opciones: dice qué montar.*
 
 ---
 
@@ -21,193 +23,209 @@
 
 ---
 
-## §1 · QUÉ TE ESTOY ENTREGANDO
+## §1 · LO QUE MONTÁS — ya no hay opciones que elegir
 
-| archivo | qué es | lienzo | cuerpo | aspecto |
+| | |
+|---|---|
+| **archivo** | **`ic_deuna_isotipo.png`** — el isotipo `d!` |
+| **fondo de la caja** | **`#FFFFFF` FIJO, en los tres temas** |
+| **render** | **24.51 × 22.00 dp** (escala conteniendo en el contenido de 44×22) |
+| **el otro archivo** | `ic_deuna.png` (wordmark) **NO se monta.** Queda depositado por procedencia y por si el proveedor cambia su mínimo |
+
+### ✅ FIRMA ① — gana el ISOTIPO (founder, 25-ago-2026)
+
+**Y no es preferencia: el wordmark quedó fuera por el mínimo de reproducción del
+propio proveedor.**
+
+| | mínimo que exige Deuna | lo que da nuestra caja | |
+|---|---|---|---|
+| **wordmark** (versión principal) | **50 px** digital | **44.0 dp** de ancho | ❌ **no entra** |
+| **isotipo** (versión símbolo) | **16 px** digital | **22.0 dp** de lado menor | ✅ entra |
+
+*El ancho del wordmark es ambiguo si se leen píxeles físicos —a ×3 son 132— pero
+**se descartó por la lectura restrictiva**, y el isotipo entra bajo las dos
+lecturas (22 dp ✅ · 66 px físicos ✅), así que **la ambigüedad no hay que
+resolverla**. Mismo criterio que la firma ③ de `LETRA_DEUNA`: elegir el supuesto
+más restrictivo cuando el dato no alcanza.*
+
+### ✅ FIRMA ② — fondo BLANCO FIJO `#FFFFFF` (founder, 25-ago-2026)
+
+**La caja de Deuna NO hereda `theme.bg.hundido`.** El fundamento es medición:
+
+| tema | `bg.hundido` | contraste del morado `#4C1D80` |
+|---|---|---|
+| claro | `#EDEBF5` | 9.92:1 ✅ |
+| **oscuro** | `#050508` | **1.74:1** 🔴 |
+| **memorial** | `#141A14` | **1.51:1** 🔴 |
+
+En oscuro y memorial el logo sería casi invisible, **y ninguno de esos fondos
+está entre los que el manual autoriza.** Blanco da **11.70:1** y es el uso ✅ más
+literal de su lámina.
+
+⚠️ **La alternativa de pasar las cinco tarjetas a blanco fue evaluada y
+DESCARTADA por el founder**, con su razón: *«cambia cinco piezas firmadas para
+acomodar una nueva»*. ⇒ **Visa, Mastercard, Diners, Amex y Discover no se
+tocan.** Solo la caja de `deuna` lleva fondo fijo.
+
+---
+
+## §2 · 🔴 EL ÁREA DE RESERVA — regla nueva, y entra AL FILO
+
+**El proveedor la fijó** (grupo de WhatsApp, 25-ago-2026):
+
+> *1X mínimo a cada lado, donde **X = el grosor total del punto del signo de
+> exclamación**. Ningún elemento gráfico, fotográfico, tipográfico o de textura
+> invade ese espacio.*
+
+### X, medido del asset
+
+Aislé el punto por componentes conexas sobre el canal alfa. **Es un círculo
+perfecto** —aspecto **1.00**, llenado de elipse **0.989**— de **84 px** en el
+isotipo. *(Control cruzado: en el wordmark el mismo punto mide 83 px. El
+proveedor es consistente consigo mismo.)*
+
+```
+X = 84 px del asset  ×  escala 0.052381  =  4.400 dp en pantalla
+```
+
+### La cuenta contra la caja de 56×32
+
+| | requerido | caja | veredicto |
+|---|---|---|---|
+| ancho | 24.51 + 2×4.40 = **33.31** | 56 | ✅ sobran **22.69** |
+| **alto** | 22.00 + 2×4.40 = **30.80** | 32 | ✅ sobran **1.20** |
+
+> ## 🟢 **ENTRA — pero el alto manda y la holgura es de 0,60 dp por lado.**
+>
+> El aire vertical disponible es exactamente **5 dp** por lado y X pide **4,40**.
+> **Sobran seis décimas de punto.**
+
+### ⚠️ Y por eso, tres cosas que NO se pueden tocar
+
+1. **`ALTO_LOGO = 32` no baja.** A 31 el área de reserva se viola.
+2. **`CONTENIDO_ALTO = 22` no sube.** A 23 el isotipo crece, X crece con él, y
+   también se viola.
+3. **Nada se dibuja dentro de la caja además del logo** — ni un borde interno, ni
+   un badge, ni un check de seleccionado. *La regla dice «ningún elemento
+   gráfico», y adentro de la caja no hay excepción que valga.*
+
+**El modo de falla es silencioso:** cambiar una constante de layout **no da error,
+no rompe un test, y viola el manual de una marca registrada sin que nadie lo
+note.** ⇒ **Ofrezco mecanizarlo con una regla del juez** (`verify-diseno`, mi
+territorio): que falle si esas constantes se mueven sin recalcular el resguardo.
+**Decilo y la escribo** — no la construí ahora porque el founder priorizó que
+este pedido llegara antes que el gate.
+
+---
+
+## §3 · LO QUE TE ESTOY ENTREGANDO
+
+| archivo | qué | lienzo = cuerpo | aspecto | sha256 vs original |
 |---|---|---|---|---|
-| `ic_deuna.png` | **wordmark `deuna!`** — la marca principal (N1 del manual) | 1583×418 | **1583×418** | **3.787** |
-| `ic_deuna_isotipo.png` | **isotipo `d!`** | 468×420 | **468×420** | **1.114** |
+| **`ic_deuna_isotipo.png`** | **isotipo `d!` — el que va** | 468×420 | **1.114** | ✅ `c29721a65b127159…` |
+| `ic_deuna.png` | wordmark `deuna!` — no se monta | 1583×418 | 3.787 | ✅ `c476c26006c186c5…` |
 
 **Los dos vienen sin un píxel de padding: el cuerpo llena el lienzo exacto.**
-Medido con decodificación de alfa, no comparando lienzos — *la ley «medí el
-cuerpo, no el lienzo» ya nos cobró una vez (S104-B)*. El instrumento se validó
-antes de usarlo contra un caso de resultado conocido: reprodujo los 245×168 del
-splash del prestador que S104-B había medido. **Control verde declarado.**
+Medido decodificando el alfa, **no comparando lienzos** — *esa ley ya nos cobró
+una vez (S104-B)*. El instrumento se validó antes de usarlo contra un caso de
+resultado conocido y lo reprodujo exacto. **Está en el repo:
+`node scripts/medir-png.mjs` (sin argumentos corre su propio control).**
 
 ⇒ **No hay que recortar, ni centrar, ni compensar nada.** Le pasás `w` y `h` tal
 cual, igual que el mapa `ARCHIVOS` hace hoy con el `viewBox` de cada SVG.
 
 ### 🔴 Son PNG, no SVG — y eso te toca a vos
 
-El proveedor entregó **raster**. Tu `ARCHIVOS` de `logo-franquicia.tsx` está
-tipado para componentes de `react-native-svg` (`React.FC<{width,height}>`), así
-que **necesita una rama nueva** — un PNG se monta con `<Image>`, no como
-componente. **Es la única pieza de código que este cambio pide.**
+El proveedor entregó **raster**. Tu `ARCHIVOS` está tipado para componentes de
+`react-native-svg` (`React.FC<{width,height}>`), así que **necesita una rama
+nueva**: un PNG se monta con `<Image>`. **Es la única pieza de código que este
+cambio pide.**
 
-Dos datos para que no la sobre-pienses:
-- **No hacen falta `@2x`/`@3x`.** El wordmark tiene 1583 px de ancho y se
-  renderiza a 44 dp ⇒ a densidad ×3 son 132 px reales. Sobra resolución por un
-  factor de 12. **Downsamplea, nunca interpola hacia arriba.**
+- **No hacen falta `@2x`/`@3x`.** El isotipo tiene 468 px de ancho y se dibuja a
+  24.5 dp ⇒ a ×3 son 74 px reales: sobra resolución por un factor de 6.
+  **Downsamplea, nunca interpola hacia arriba.**
 - **`resizeMode="contain"`** reproduce exactamente la regla de escala del set.
 
-⚠️ **Si DeUna entrega SVG más adelante, se reemplaza y esta rama muere** — el
-pipeline vectorial ya existe (`metro.config.js` + `react-native-svg-transformer`)
-y es mejor. Lo pedí; hoy no lo tengo.
+⚠️ **Si Deuna entrega SVG, se reemplaza y esta rama muere** — el pipeline
+vectorial ya existe. Lo pedí; hoy no lo tengo.
 
 ---
 
-## §2 · CÓMO QUEDA EN LA CAJA — calculado, no estimado
+## §4 · LAS REGLAS DE FONDO DEL MANUAL (contexto — tu caso ya está firmado)
 
-La caja del set es **56×32 con contenido 44×22** (`ANCHO_LOGO`/`ALTO_LOGO` y
-`CONTENIDO_*` de tu pieza). Con la escala conteniendo de S101-D:
+De su lámina de usos sobre fondo, que marca cada combinación explícitamente:
 
-| marca | aspecto | render dp | alto |
-|---|---|---|---|
-| Visa | 3.111 | 44.0×14.1 | 14.1 |
-| Mastercard · Diners · Amex · Discover | ~1.52 | 33.4×22.0 | 22.0 |
-| **`deuna!` wordmark** | **3.787** | **44.0×11.6** | **11.6** |
-| **`d!` isotipo** | **1.114** | **24.5×22.0** | **22.0** |
+| fondo | logo | veredicto |
+|---|---|---|
+| blanco | morado | ✅ **← el nuestro** |
+| morado `#4C1D80` | blanco | ✅ |
+| verde `#008081` | morado | ✅ |
+| verde `#008081` | blanco | ❌ **prohibido** |
+| morado `#4C1D80` | verde | ⚠️ condicionado |
 
-> 🔴 **CUÁL DE LAS DOS VA ES DECISIÓN DEL FOUNDER EN EL GATE, NO MÍA NI TUYA.**
-> El wordmark queda **más bajo que cualquier tarjeta del set** (11.6 contra los
-> 14.1 de Visa, que es la más chata); el isotipo usa el alto completo pero pide
-> que la persona reconozca `d!`.
->
-> **Dato duro a favor del wordmark, y no es opinión:** al leer la lámina del
-> manual, un lector automático transcribió el isotipo como **«d1»** — con uno.
-> *Si una máquina entrenada en glifos lo lee mal, alguien que nunca usó la app
-> también puede.*
->
-> **Dato a favor del isotipo:** la fila **ya dice «Deuna» en su título**, así que
-> el nombre no depende del logo.
->
-> **Montá el wordmark como default** (es la marca principal N1 y el nombre se
-> lee) y dejá el isotipo listo para que el founder compare en el gate. **Si él
-> elige el otro, es cambiar una constante.**
+**El asterisco quedó contestado** (proveedor, grupo, 25-ago-2026): la combinación
+*queda sujeta a las necesidades del diseño, exige verificar legibilidad antes de
+aplicar, y **recomienda no usarla en formatos pequeños o reducidos***.
+**No nos toca por partida doble:** no es la combinación que montamos, **y nuestra
+caja es formato reducido** — su propio manual la desaconseja a nuestro tamaño.
+
+**Colores oficiales, medidos de los archivos:** morado **`#4C1D80`** (100 % de los
+píxeles opacos), verde `#008081` (el chip «Negocios»).
 
 ---
 
-## §3 · LAS REGLAS DE USO QUE EL MANUAL EXIGE — con su lámina como fuente
+## §5 · LA GRAFÍA DEL NOMBRE
 
-Todo esto sale de **la lámina de usos sobre fondo del manual oficial** (una de
-las páginas que el founder bajó del Corebook), que marca cada combinación con
-✅ / ❌ / ⚠️ explícitos:
+- **`deuna!`** (minúscula, con exclamación) es **el LOGOTIPO**. Existe **solo
+  como asset**. **Jamás se tipografía.**
+- **«Deuna»** (capital inicial, **sin exclamación**) es **el nombre en texto
+  corrido**, tal como su propio manual lo escribe en N3 y N4: *«Promos Deuna»,
+  «Club Deuna», «Lealtad Deuna»*.
+- **`deuna`** minúscula es clave de código, no es voz.
+- 🔴 **`DeUna` no existe en el manual.** Lo inventamos nosotros.
 
-| fondo | logo | veredicto del manual |
-|---|---|---|
-| blanco | morado | ✅ permitido |
-| morado `#4C1D80` | blanco | ✅ permitido |
-| verde `#008081` | morado | ✅ permitido |
-| verde `#008081` | **blanco** | ❌ **PROHIBIDO — X roja explícita** |
-| morado `#4C1D80` | **verde** | ⚠️ **condicionado** (asterisco; su nota al pie no está en la lámina que tengo) |
+✅ **TU i18n YA ESTÁ BIEN.** `deunaFila: 'Deuna'` y las doce voces `pago.deuna*`
+usan la forma correcta. **No toques ni una.**
 
-**El morado oficial es `#4C1D80`** — medido, no supuesto: es el **100 % de los
-píxeles opacos** del wordmark. El verde del chip «Negocios» es `#008081`.
-
-### 🔴 EL CHOQUE, MEDIDO: TU CAJA HEREDA EL TEMA Y EL MANUAL NO LO PERMITE
-
-`LogoFranquicia` pinta el fondo con `theme.bg.hundido`, **que cambia por tema**:
-
-| tema | `bg.hundido` | contraste del morado `#4C1D80` |
-|---|---|---|
-| claro | `#EDEBF5` | **9.92:1** ✅ |
-| oscuro | `#050508` | **1.74:1** 🔴 |
-| memorial | `#141A14` | **1.51:1** 🔴 |
-
-**En oscuro y en memorial el logo es prácticamente invisible** — y además
-**ninguno de esos dos fondos figura entre los que el manual autoriza.**
-
-⇒ **NO montes el asset heredando `bg.hundido` sin resolver esto.** Mi propuesta
-—que **decide el founder**, es su decisión ②— es **fondo blanco `#FFFFFF` fijo
-para la caja de DeUna en los tres temas**: es el uso ✅ más literal de la lámina
-(fila 1) y da 11.70:1.
-
-**Y hay una alternativa que el founder también tiene que ver, porque preserva el
-set:** que **todas** las cajas de marca pasen a fondo blanco fijo — Visa,
-Mastercard, Diners, Amex y Discover también son marcas registradas y sus
-manuales piden lo mismo. *Con la primera opción el set se rompe justo en la fila
-que el founder puso primera; con la segunda no se rompe, pero toca cinco filas
-que hoy nadie reportó como rotas.*
-
-### Una nota que vale para toda marca ajena
-
-El manual **aprueba morado sobre verde (2.45:1) y prohíbe blanco sobre verde
-(4.77:1)**: aprueba la combinación de menor contraste y prohíbe la de mayor.
-**No es un error del manual — es que no mide lo mismo que nosotros.** Su criterio
-es identidad de marca; el nuestro es legibilidad. **Sobre una marca ajena manda
-el manual**, porque un logo no es texto funcional. *No corrijas su lámina con
-nuestro medidor de WCAG.*
-
----
-
-## §4 · LA GRAFÍA DEL NOMBRE — el manual la fija y hoy vive triplicada
-
-Medido en el repo (código + letra, sin `node_modules`):
-
-| forma | ocurrencias | qué es |
-|---|---|---|
-| `DeUna` | **223** | 🔴 **no existe en el manual. Es invención nuestra.** |
-| `Deuna` | 44 | ✅ **la correcta para texto corrido** |
-| `deuna` | 186 | ✅ correcta como **clave de código** (no es voz) |
-
-**Lo que el manual establece**, visto en su lámina de arquitectura de marca
-(N1–N6, versión 14 de abril de 2025):
-
-- **El LOGOTIPO es `deuna!`** — minúscula, con signo de exclamación, en su
-  tipografía propia. **Existe solo como asset. Jamás se tipografía.**
-- **El NOMBRE en texto corrido es «Deuna»** — capital inicial, **sin
-  exclamación**. Es como el propio manual lo escribe en sus niveles N3 y N4:
-  *«Promos **Deuna**», «Club **Deuna**», «Lealtad **Deuna**»*.
-
-✅ **BUENA NOTICIA PARA VOS: tu i18n YA ESTÁ BIEN.** `deunaFila: 'Deuna'` y las
-doce voces de `pago.deuna*` usan la forma correcta. **No toques ni una.**
-
-⇒ Lo que está mal son las 223 de `DeUna`, y **viven en letra y comentarios, no en
-pantalla**. **No pido un barrido**: se curan al tocarse. Lo dejo dicho para que
-nadie escriba una nueva.
-
-⚠️ **El `!` no se escribe nunca en texto.** «Pagá con Deuna», jamás «Pagá con
+⚠️ **El `!` no se escribe nunca en texto.** «Pagá con Deuna», jamás «pagá con
 deuna!». El signo pertenece al logotipo.
 
+*(Las 223 ocurrencias de `DeUna` viven en letra y comentarios, **ninguna en
+pantalla**. No pido barrido: se curan al tocarse.)*
+
 ---
 
-## §5 · QUÉ HACER, EN ORDEN
+## §6 · QUÉ HACER, EN ORDEN
 
-1. **Copiá los dos PNG** de esta carpeta a `apps/cliente/assets/marcas/`.
-2. **Pegá el bloque de `PROCEDENCIA.md`** (archivo hermano en esta carpeta) al
-   final del `PROCEDENCIA.md` que ya existe ahí. **No lo reescribas**: el de las
-   cinco tarjetas sigue siendo verdad.
-3. **Agregá la rama de PNG** a `LogoFranquicia` y mapeá `deuna` al wordmark.
-4. **Resolvé el fondo** con lo de §3 — o dejalo explícitamente pendiente del gate
-   y montalo con blanco fijo mientras tanto, que es el uso ✅ del manual.
+1. **Copiá `ic_deuna_isotipo.png` y `ic_deuna.png`** a `apps/cliente/assets/marcas/`.
+2. **Pegá el bloque de `PROCEDENCIA.md`** (archivo hermano) al final del que ya
+   existe ahí. **No lo reescribas**: el de las cinco tarjetas sigue siendo verdad.
+3. **Agregá la rama de PNG** a `LogoFranquicia` y mapeá `deuna` → **isotipo**.
+4. **Fondo `#FFFFFF` fijo** para esa caja, en los tres temas (firma ②). Las cinco
+   tarjetas **no se tocan**.
 5. **No toques el fallback de texto** (§0).
-6. **Gate del founder**: montá las dos variantes en algo que él pueda comparar,
-   con los tres temas y con las cinco tarjetas al lado. Son sus tres decisiones y
-   ninguna se cierra sin sus ojos.
+6. **No muevas `ALTO_LOGO` ni `CONTENIDO_ALTO`** (§2).
 
-**Lo que NO cambia, y es la promesa que tu propia pieza ya hacía:** la caja sigue
+**Lo que no cambia, y es la promesa que tu propia pieza ya hacía:** la caja sigue
 midiendo 56×32, el radio no se toca, el alto de la fila no se mueve, y las cinco
 tarjetas quedan idénticas. *«Cambia el interior de esta caja y nada más.»*
 
+**El gate es en dispositivo y lo corre el founder** cuando el riel esté vivo en
+QA. Lo que él va a mirar es la pantalla de pago real — **no una galería**.
+
 ---
 
-## §6 · LO QUE NO SÉ, Y NO LO INVENTÉ
+## §7 · LO QUE SÉ Y LO QUE NO
 
-El manual completo vive en Corebook, que es una aplicación de una sola página:
-**no pude leerlo entero** (sin navegador conectado, la descarga directa devuelve
-solo el shell). Trabajé con **las láminas que el founder bajó** más medición
-directa de los archivos.
+**Las diez preguntas del manual quedaron cerradas:** siete con cita de sus
+láminas, tres con respuesta directa del proveedor (grupo de WhatsApp, 25-ago-2026,
+con fecha y canal).
 
-**Sigue sin respuesta, y hay que preguntárselo a DeUna — no resolverlo por
-criterio nuestro:**
+**Lo único que sigue sin respuesta, y no bloquea nada:**
+- **si tienen el logo en SVG** (mejoraría el montaje, no lo condiciona);
+- **si exigen leyenda de atribución** junto al logo.
 
-1. **Tamaño mínimo de reproducción.** Si su mínimo es mayor que 11.6 dp de alto,
-   **el wordmark queda fuera de norma en nuestra caja** y la decisión ① se cierra
-   sola a favor del isotipo. *Es la pregunta que más puede cambiar el resultado.*
-2. **Área de resguardo.** Nuestra caja deja 6 dp horizontales y 5 verticales de
-   aire alrededor del contenido. Falta saber si alcanza.
-3. **Qué dice el asterisco ⚠️** de la combinación morado+verde.
-4. **Si autorizan una variante monocroma o negativa** para fondos oscuros —
-   sería la salida limpia si el founder quiere conservar el fondo por tema.
-5. **Si tienen el logo en SVG.**
-6. **Si exigen leyenda de atribución** junto al logo.
+**No pude leer el manual completo** —Corebook es una aplicación de una sola
+página y no hay navegador conectado en mi entorno—, así que trabajé con **las
+láminas que el founder bajó** más **medición directa de los archivos**. *Lo que
+no pude leer no lo inventé: se preguntó.*

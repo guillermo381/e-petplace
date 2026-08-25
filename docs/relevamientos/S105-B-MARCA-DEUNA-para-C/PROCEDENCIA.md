@@ -62,6 +62,30 @@ mejor. Se pidió; al depositar esto no estaba.
 | morado Deuna | **`#4C1D80`** | **100 % de los píxeles opacos** del wordmark y del isotipo |
 | verde Deuna | `#008081` | el chip «Negocios» del lockup de producto |
 
+### 🔴 TAMAÑO MÍNIMO Y ÁREA DE RESERVA — respuesta directa del proveedor
+
+**Fuente: grupo de soporte de Deuna, 25-ago-2026** (canal y fecha declarados; no
+sale de sus láminas sino de una consulta escrita).
+
+| | impreso | digital |
+|---|---|---|
+| **versión principal** (logotipo `deuna!`) | 1,9 cm | **50 px** |
+| **versión símbolo** (isotipo `d!`) | 0,5 cm | **16 px** |
+
+**Área de reserva:** *1X mínimo a cada lado, donde **X = el grosor total del
+punto del signo de exclamación** (tanto en el logotipo como en el símbolo).
+Ningún elemento gráfico, fotográfico, tipográfico o de textura invade ese
+espacio.*
+
+**X medido de los assets** por componentes conexas sobre el canal alfa: el punto
+es **un círculo perfecto** (aspecto 1.00, llenado de elipse 0.989) de **84 px** en
+el isotipo y **83 px** en el wordmark — *el proveedor es consistente consigo
+mismo*. En la caja del set, **X = 4,400 dp**.
+
+⇒ **El isotipo con su resguardo entra en la caja de 56×32, y el alto manda:
+30,80 de 32, con 0,60 dp de holgura por lado.** ⚠️ **`ALTO_LOGO` no baja de 32,
+`CONTENIDO_ALTO` no sube de 22, y nada más se dibuja dentro de esa caja.**
+
 ### 🔴 REGLAS DE USO QUE SU MANUAL EXIGE
 
 De su lámina de usos sobre fondo, que marca cada combinación explícitamente:

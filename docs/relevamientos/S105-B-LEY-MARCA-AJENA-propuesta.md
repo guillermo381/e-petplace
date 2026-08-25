@@ -90,6 +90,24 @@ que nosotros.** Su criterio es identidad; el nuestro es legibilidad.
 familia necesita leer —«Deuna», «Visa»— lo dice el **título de la fila**, que sí
 es nuestro y sí cumple nuestras leyes de contraste.
 
+#### 🔴 Y NO ES INFERENCIA NUESTRA — EL PROVEEDOR LO DICE ÉL MISMO
+
+Preguntado por qué su lámina marca con asterisco la combinación morado+verde,
+Deuna contestó (grupo de soporte, **25-ago-2026**) que esa combinación:
+
+> *queda **sujeta a las necesidades del diseño**, exige **verificar la
+> legibilidad** antes de aplicar, y **se recomienda no usarla en formatos
+> pequeños o reducidos**.*
+
+**Leelo dos veces: el manual delega en «verificar la legibilidad» y NO da un
+número de contraste.** Un manual que midiera lo que mide WCAG habría contestado
+con un ratio. **Contestó con un juicio y con una condición de tamaño** — porque
+su criterio es **reconocimiento**, y el reconocimiento depende del tamaño y del
+contexto, no de una razón de luminancias.
+
+*Esta cita convierte la regla ⑤ de argumento en evidencia: no estamos
+interpretando su manual, estamos citando su respuesta.*
+
 ⇒ **Corolario operativo:** el verificador de contraste de la casa **no evalúa
 pares donde uno de los dos lados es una marca ajena**. Si hoy los evalúa, los
 exime **declarando por qué**, no bajando un umbral.
