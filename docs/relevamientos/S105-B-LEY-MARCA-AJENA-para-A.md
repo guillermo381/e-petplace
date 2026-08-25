@@ -1,35 +1,38 @@
-# S105-B → MESA · LA LEY DE LA MARCA AJENA (propuesta para `DIRECCION_ARTE`)
+# S105-B → A · LA LEY DE LA MARCA AJENA (texto FIRMADO, para depositar)
 
-> ## ⚠️ **ESTO NO RIGE. NO ESTÁ FIRMADO.**
-> Es un texto propuesto por la pista B para que la mesa lo firme, lo enmiende o
-> lo tire. **Hasta que el founder lo firme, la doctrina sigue viviendo donde
-> vive hoy: en comentarios de una pieza de `apps/cliente`.**
+> ## ✅ **FIRMADA POR EL FOUNDER — 25-ago-2026.**
+> **El texto es de B; el depósito es de A** (`docs/` es su territorio).
+> *Se entrega como archivo aparte y no editando `DIRECCION_ARTE` directamente,
+> porque una pista no escribe en el territorio de otra ni para depositar algo
+> firmado.*
 >
-> **Por qué se propone:** medido en S105-B, `DIRECCION_ARTE` **no tiene una sola
-> ley sobre marcas de terceros** — sus quince secciones son todas sobre la marca
-> propia. Y la casa ya vendorizó cinco marcas registradas (S101-D) y está por
-> vendorizar la sexta. *La ley que gobierna el logo de Deuna hoy se sostiene en
-> un comentario que nadie está obligado a leer.*
+> **Qué se deposita:** la sección de abajo, entera, en `DIRECCION_ARTE.md`.
+> **Numeral sugerido: §6sexies.**
 >
-> **Molde:** §6ter (la marca de mapa), que es el precedente exacto — algo que no
+> ⚠️ **AL DEPOSITAR, un defecto del documento destino que NO es mío y que
+> conviene no heredar:** el numeral **`6ter` está usado por DOS secciones
+> distintas** — el historial de la v1.6 lo asigna a «EL GLOW» y el cuerpo del
+> documento (línea 556) a «LA MARCA DE MAPA». **`6sexies` está inequívocamente
+> libre**, pero el choque de `6ter` sigue ahí y es de A.
+>
+> ---
+>
+> **POR QUÉ EXISTE.** Medido en S105-B: `DIRECCION_ARTE` **no tenía una sola ley
+> sobre marcas de terceros** — sus quince secciones son todas sobre la marca
+> propia. Y la casa ya vendorizó cinco marcas registradas (S101-D) y acaba de
+> vendorizar la sexta. *La doctrina que gobernaba el logo de Deuna vivía en
+> comentarios de una pieza de `apps/cliente`: un lugar que nadie está obligado a
+> leer.*
+>
+> **Molde: §6ter (la marca de mapa)** — el precedente exacto: algo que no
 > pertenece al set de la casa y por eso gana clase propia en vez de forzarse
 > adentro.
->
-> **Territorio:** `docs/` es de A. Por eso esto se deposita como propuesta en un
-> archivo aparte y **no se edita `DIRECCION_ARTE`**. Si la mesa firma, la
-> transposición es de A.
->
-> **Numeral sugerido: §6sexies.** ⚠️ *Al medir para elegirlo apareció un
-> defecto que no es mío y que declaro: el numeral `6ter` está usado por DOS
-> secciones distintas* — el historial de la v1.6 lo asigna a «EL GLOW» y el
-> cuerpo del documento (línea 556) lo asigna a «LA MARCA DE MAPA». **`6sexies`
-> está inequívocamente libre.** El choque de `6ter` es de A.
 
 ---
 
 ## §6sexies · LA MARCA AJENA — CLASE APARTE
 
-> **Estatuto: PROPUESTA (S105-B, 24-ago-2026). Sin firma.**
+> **Estatuto: FIRMADA — founder, 25-ago-2026.** Texto de B, depositada por A.
 > **La regla madre del trazo NO se enmienda. Las leyes del ícono NO se tocan.**
 
 **LA FRONTERA, en una línea: una marca ajena no es un glifo — es una CITA.**
