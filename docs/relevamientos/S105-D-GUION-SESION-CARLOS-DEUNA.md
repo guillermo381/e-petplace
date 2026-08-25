@@ -43,8 +43,38 @@ el riel entero salvo el último eslabón, y el último eslabón ya tiene ficha.*
 **Recomendación: (b), con (a) como respaldo si (b) se traba.** *Lo que hay que
 certificar es nuestro circuito, no el de ellos.*
 
-**(b) es viable, medido:** hay **34 compras en `esperando_pago`** ⇒ sujetos
-disponibles. Lo que hace falta es un JWT de usuario dueño de una de ellas.
+### 🔴 CORRECCIÓN MEDIDA — **las 34 compras NO SIRVEN**
+
+*Se probó la compuerta contra dos de ellas **antes** de la sesión, y por eso
+esto no pasó en vivo:*
+
+```
+verificar_compuertas_pre_cobro(a4f8f309…) →
+  {"ok": false, "codigo": "reserva_vencida",
+   "detalle": {"pedidos_sin_reserva": 1}, "compuerta": "1_reserva_vencida"}
+verificar_compuertas_pre_cobro(bd55346a…) → idéntico
+```
+
+> ### Las 34 están en `esperando_pago` **con la reserva de stock vencida**. La puerta las rebota en la compuerta 1, antes de hablarle a DeUna.
+>
+> *«Hay 34 sujetos disponibles» era cierto sobre el estado de la compra y falso
+> sobre lo que la puerta acepta. **Un sujeto no está disponible porque su
+> estado lo diga: lo está si la compuerta lo deja pasar** — y eso solo se sabe
+> preguntándole a la compuerta.*
+
+**Si esto se descubría en vivo, la sesión se quemaba con Carlos al teléfono**, y
+el síntoma —`reserva_vencida`— habría parecido un defecto del riel cuando es el
+sujeto el que está vencido.
+
+⇒ **HACE FALTA UNA COMPRA NUEVA, hecha desde la app poco antes.**
+
+**Y el margen es cómodo, medido:** `timeout_checkout_minutos = 120` ⇒ una
+reserva nueva vive **2 horas**, con el cron `expirar-reservas-vencidas` corriendo
+cada 5 min. *Dos horas contra los 3 minutos del código: **el reloj que aprieta
+sigue siendo el del código**, no el de la reserva.*
+
+**El usuario de esas compras es `guillo381+8@gmail.com`** (`dd024680…`) — la
+cuenta de prueba del founder, la misma que tiene las 8 tarjetas de `D-921`.
 
 ---
 
@@ -105,10 +135,27 @@ certificación pide. *Ése es el segundo caso, y sale gratis de esta sesión.*
 | `DEUNA_POINT_OF_SALE` = 4262774 | ✅ cargado y **ejercido**: `payment/request` responde 200 |
 | `DEUNA_WEBHOOK_SECRET` | ✅ cargado ⚠️ **pendiente de que DeUna lo registre** |
 | `PAGOS_AMBIENTE` = sandbox | ✅ fijado explícito |
-| Un JWT de usuario con compra en `esperando_pago` | ⏳ **lo único que falta, y es del founder** |
+| **Una compra NUEVA** (reserva viva) | ⏳ **del founder, desde la app** — las 34 viejas rebotan |
+| **El JWT de `guillo381+8`** | ⏳ **del founder, POR KEYCHAIN** — ver abajo |
 
-🔑 **Lo único que necesito para (b): una sesión de usuario.** Sin eso, el camino
-posible es (a), que prueba al proveedor y no a nosotros.
+### 🔑 CÓMO VIAJA EL JWT — **por keychain, jamás por chat**
+
+**Un access token es una credencial.** Pegado en un mensaje queda en el
+transcript para siempre — es `D-712`, que esta casa ya pagó: *un token de sesión
+commiteado durante una auditoría de seguridad.* **Y el precedente bueno también
+existe:** las llaves de DeUna y el secreto de despacho se leen del keychain **al
+momento de usarlos** y nunca se imprimen.
+
+```
+security add-generic-password -s DEUNA_SESION_JWT -a epetplace -w '<el access token>' -U
+```
+
+**Lo leo al momento, lo uso en el `Authorization: Bearer`, y no lo imprimo.**
+*Su vida de 1 hora juega a favor: es la credencial más acotada posible para
+esto — no es una clave, y se vence sola.*
+
+⚠️ **Depositalo cerca de la sesión**, no antes: si el token vence, la puerta
+devuelve `sin_sesion` (401) y hay que repetir el paso.
 
 ---
 
