@@ -110,6 +110,53 @@ export function cuerpo({ w, h, rgba }, umbral = 8) {
   return { x0, y0, x1, y1, w: x1 - x0 + 1, h: y1 - y0 + 1 };
 }
 
+/**
+ * Componentes conexas de píxeles opacos (4-vecinos, BFS iterativo), de mayor a
+ * menor. Nació para aislar **el punto del signo de exclamación** del isotipo de
+ * Deuna, que es la unidad `X` de su área de reserva.
+ */
+export function componentes({ w, h, rgba }, umbral = 8) {
+  const visto = new Uint8Array(w * h), out = [];
+  const op = (i) => rgba[i * 4 + 3] > umbral;
+  for (let s = 0; s < w * h; s++) {
+    if (visto[s] || !op(s)) continue;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1, n = 0;
+    const cola = [s]; visto[s] = 1;
+    while (cola.length) {
+      const i = cola.pop(), x = i % w, y = (i / w) | 0;
+      n++;
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const j = ny * w + nx;
+        if (!visto[j] && op(j)) { visto[j] = 1; cola.push(j); }
+      }
+    }
+    const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+    out.push({
+      x0, y0, x1, y1, w: cw, h: ch, px: n,
+      aspecto: cw / ch,
+      /** 1.0 = elipse perfectamente llena. Un punto tipográfico da ~0.99. */
+      llenado: n / (Math.PI * (cw / 2) * (ch / 2)),
+    });
+  }
+  return out.sort((a, b) => b.px - a.px);
+}
+
+/**
+ * El punto redondo más chico: aspecto ~1 y relleno de elipse ~1.
+ * **Devuelve `null` si no encuentra uno inequívoco** — jamás adivina, porque
+ * el número que sale de acá es la unidad de un área de reserva de marca ajena.
+ */
+export function puntoRedondo(img) {
+  const c = componentes(img).filter(
+    (k) => k.aspecto > 0.9 && k.aspecto < 1.1 && k.llenado > 0.9 && k.px > 16,
+  );
+  return c.length === 0 ? null : c[c.length - 1];
+}
+
 /** Histograma de colores de los píxeles opacos. */
 export function colores({ w, h, rgba }, topN = 8) {
   const m = new Map();

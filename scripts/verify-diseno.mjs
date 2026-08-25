@@ -24,7 +24,25 @@ import ts from 'typescript'
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-montaje.mjs';
+/* R65 · el instrumento de medición de assets raster. Vive aparte porque su
+   control positivo corre solo (`node scripts/medir-png.mjs`), y una regla que
+   se apoya en una medición tiene que poder señalar dónde se valida esa
+   medición. */
+import { decodificar as decodificarPng, cuerpo as cuerpoPng, puntoRedondo as puntoRedondoPng } from './medir-png.mjs';
+
+/** El sha256 del isotipo de Deuna **sobre el que se hizo la cuenta de R65**.
+ *  Clavado por orden del founder (25-ago-2026): el proveedor va a entregar SVG
+ *  y *«X es una propiedad del glifo dibujado, no del archivo»*. Cambiar el
+ *  asset pone R65·C en rojo pidiendo re-medición. **No se actualiza porque el
+ *  lint moleste: se actualiza cuando la cuenta se rehizo y dio.** */
+const SHA_ISOTIPO_MEDIDO = 'c29721a65b12715984b20c2a612d2ac5d1b7ab0bdd185e75f580c420a1816779';
+/** Mínimo de reproducción de la versión SÍMBOLO de Deuna, en px digitales.
+ *  Dato del proveedor (grupo de soporte, 25-ago-2026). Su versión principal
+ *  pide 50 px, y por eso el wordmark quedó afuera: daba 44. */
+const MIN_SIMBOLO_DEUNA = 16;
+const shaDe = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
 const RAICES_UI = ['packages/ui/src/components', 'packages/ui/src/brand'];
@@ -1870,6 +1888,18 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
+  /* R65 · el fixture ataca el brazo A (la cuenta del área de reserva), que es
+     el que se viola con UN número. Baja `ALTO_LOGO` de 32 a 28: con el isotipo
+     a 22 dp y X en 4,40, el resguardo pide 30,80 y ya no entra.
+     ⚠️ El `path` TIENE que terminar en `logo-franquicia.tsx`: la regla busca la
+     pieza por nombre y con cualquier otro path saldría NO CONCLUYENTE — que no
+     es verde, pero tampoco probaría que la regla sabe decir que no.
+     ⚠️ Y trae las CUATRO constantes: si falta una, la regla corta antes por
+     «constantes ilegibles» y el rojo sería por la razón equivocada. */
+  R65: [{
+    path: 'apps/cliente/src/components/logo-franquicia.tsx',
+    src: 'export const ANCHO_LOGO = 56;\nconst ALTO_LOGO = 28;\nconst CONTENIDO_ANCHO = 44;\nconst CONTENIDO_ALTO = 22;',
+  }],
   /* R64 · dos fixtures, uno por brazo. El `path` no importa acá (R64 no
      filtra por ruta: mira cualquier archivo que declare `respaldo`).
      ⚠️ El del brazo A nombra un wrapper INVENTADO a propósito — es el modo
@@ -5109,7 +5139,149 @@ function r64(archivos) {
   }
 }
 
-const REGLAS = { R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/**
+ * ═══ R65 · EL ÁREA DE RESERVA DE UNA MARCA AJENA (S105-B) ══════════════════
+ *
+ * **Firmada por el founder, 25-ago-2026**, con su razón: *el modo de falla es
+ * silencioso, y acá el que tiene que frenar es un compilador, no un lector.*
+ *
+ * ── QUÉ VIGILA ─────────────────────────────────────────────────────────────
+ * Deuna fija un **área de reserva** para su logo (respuesta del proveedor,
+ * grupo de soporte, 25-ago-2026):
+ *
+ *    «1X mínimo a cada lado, donde X = el grosor total del punto del signo de
+ *     exclamación. Ningún elemento gráfico, fotográfico, tipográfico o de
+ *     textura invade ese espacio.»
+ *
+ * En la caja del set (`logo-franquicia.tsx`, 56×32 con contenido 44×22) el
+ * isotipo renderiza a 24,51×22,00 dp y X vale **4,40 dp**. La cuenta:
+ *
+ *    ancho  24,51 + 2×4,40 = 33,31  ≤ 56   ✅ sobran 22,69
+ *    alto   22,00 + 2×4,40 = 30,80  ≤ 32   ✅ sobran  1,20
+ *
+ * **Entra, y el ALTO manda: la holgura es de 0,60 dp por lado.** Bajar
+ * `ALTO_LOGO` a 31 o subir `CONTENIDO_ALTO` a 23 **viola el manual de una marca
+ * registrada** — y no da error, no rompe un test y no se ve en un diff.
+ *
+ * ── POR QUÉ NO ES UN GUARD DE NÚMEROS MÁGICOS ──────────────────────────────
+ * La regla **no compara constantes contra un baseline que yo escribí**: lee las
+ * cuatro constantes del código, **mide el asset real** (aspecto y X, por
+ * decodificación de alfa y componentes conexas) y **rehace la cuenta**. Si
+ * cambian las constantes O cambia el dibujo, la cuenta se rehace sola.
+ * *Vigilar «no toques el 32» protege un número; rehacer la cuenta protege la
+ * regla del proveedor, que es lo que hay que cumplir.*
+ *
+ * ── EL BRAZO C, Y ES UNA ORDEN DEL FOUNDER ─────────────────────────────────
+ * Deuna va a entregar el logo en SVG. La orden, literal: *«no reemplaces el PNG
+ * por costumbre. X es una propiedad del glifo dibujado, no del archivo — si el
+ * SVG trae otro viewBox, otro padding o el punto con otro grosor relativo, los
+ * 4,40 dp dejan de valer»*. ⇒ **el hash del asset medido queda clavado acá.**
+ * Cambiar el archivo pone la regla ROJA pidiendo re-medición. *Un swap que «solo
+ * cambia el formato» es exactamente la clase de cambio que no da síntoma.*
+ *
+ * ── LO QUE NO MIDE, DECLARADO ──────────────────────────────────────────────
+ * **No verifica que nada más se dibuje dentro de la caja** (el tercer límite del
+ * pedido a C). Contar hijos JSX sería frágil y su rojo no sería confiable —
+ * *una regla que se puede violar sin que nadie lo note es mala; una que grita
+ * cuando no debe es peor, porque enseña a ignorarla.* Vive como límite escrito
+ * en `PEDIDO.md` §2 y en la procedencia del asset.
+ */
+function r65(archivos) {
+  const fallos = [];
+
+  /* ① LAS CONSTANTES, DEL CORPUS — por acá entra el fixture. */
+  const pieza = archivos.find((a) => /logo-franquicia\.tsx$/.test(a.path));
+  if (!pieza) {
+    return { fallos, info: 'NO CONCLUYENTE — `logo-franquicia.tsx` no está en el corpus' };
+  }
+  const limpio = sinComentarios(pieza.src);
+  const num = (nombre) => {
+    const m = limpio.match(new RegExp(`${nombre}\\s*=\\s*(\\d+(?:\\.\\d+)?)`));
+    return m ? Number(m[1]) : null;
+  };
+  const cajaW = num('ANCHO_LOGO'), cajaH = num('ALTO_LOGO');
+  const contW = num('CONTENIDO_ANCHO'), contH = num('CONTENIDO_ALTO');
+  if ([cajaW, cajaH, contW, contH].some((v) => v === null)) {
+    fallos.push(
+      'R65: no pude leer las cuatro constantes de la caja en `logo-franquicia.tsx` (`ANCHO_LOGO`, `ALTO_LOGO`, `CONTENIDO_ANCHO`, `CONTENIDO_ALTO`). **Si alguien las renombró, esta regla dejó de medir** — y su silencio se leería como que el resguardo está bien.',
+    );
+    return { fallos, info: 'NO CONCLUYENTE — constantes ilegibles' };
+  }
+
+  /* ② EL ASSET, DEL DISCO — medido, no supuesto. Se busca primero en su
+     destino final y después en el pedido, y se DECLARA cuál se leyó. */
+  const candidatos = [
+    'apps/cliente/assets/marcas/ic_deuna_isotipo.png',
+    'docs/relevamientos/S105-B-MARCA-DEUNA-para-C/ic_deuna_isotipo.png',
+  ];
+  const ruta = candidatos.find((p) => existsSync(p));
+  if (!ruta) {
+    return { fallos, info: 'NO CONCLUYENTE — el asset del isotipo no está en el árbol' };
+  }
+
+  let img, punto, sha;
+  try {
+    img = decodificarPng(ruta);
+    punto = puntoRedondoPng(img);
+    sha = shaDe(ruta);
+  } catch (e) {
+    fallos.push(`R65: no se pudo decodificar \`${ruta}\` (${e.message}). **Sin medir el glifo no hay cuenta que valga**, y un verde acá significaría «no miré».`);
+    return { fallos, info: 'NO CONCLUYENTE — asset ilegible' };
+  }
+
+  /* ③ BRAZO C · EL CANDADO DEL ASSET (orden del founder). */
+  if (sha !== SHA_ISOTIPO_MEDIDO) {
+    fallos.push(
+      `R65·C \`${ruta}\` **cambió**: su sha256 empieza en \`${sha.slice(0, 12)}\` y el medido es \`${SHA_ISOTIPO_MEDIDO.slice(0, 12)}\`. **X es una propiedad del glifo dibujado, no del archivo** — otro viewBox, otro padding o un punto con otro grosor relativo y los 4,40 dp dejan de valer, con solo 0,60 dp de holgura en el alto para perdonar. **Volvé a medirlo con \`node scripts/medir-png.mjs\` (control cruzado contra el wordmark) y actualizá \`SHA_ISOTIPO_MEDIDO\` recién cuando la cuenta dé.** Si difiere de lo medido, vuelve a mesa antes de tocar nada.`,
+    );
+  }
+
+  const cuerpoIso = cuerpoPng(img);
+  if (!punto) {
+    fallos.push(
+      'R65: no encontré en el asset un punto redondo inequívoco (aspecto ~1, relleno de elipse ~1). **`X` no se adivina**: es la unidad del área de reserva de una marca ajena.',
+    );
+    return { fallos, info: `NO CONCLUYENTE — sin X medible en ${ruta}` };
+  }
+
+  /* ④ BRAZO A · LA CUENTA, rehecha con lo medido. */
+  const escala = Math.min(contW / cuerpoIso.w, contH / cuerpoIso.h);
+  const rw = cuerpoIso.w * escala, rh = cuerpoIso.h * escala;
+  const X = punto.w * escala;
+  const necW = rw + 2 * X, necH = rh + 2 * X;
+  const d = (n) => n.toFixed(2).replace('.', ',');
+
+  if (necW > cajaW || necH > cajaH) {
+    fallos.push(
+      `R65·A **el área de reserva de Deuna ya no entra en la caja**. Con la caja en ${cajaW}×${cajaH} y el contenido en ${contW}×${contH}, el isotipo renderiza a ${d(rw)}×${d(rh)} dp y X vale ${d(X)} dp ⇒ hacen falta **${d(necW)}×${d(necH)}**. ` +
+      `Su manual exige 1X libre a cada lado y **ningún elemento puede invadirlo** (proveedor, 25-ago-2026). ` +
+      `${necH > cajaH ? `El ALTO es el que rompe: sobran ${d(cajaH - rh)} dp por lado y X pide ${d(X)}. ` : ''}` +
+      `**No es un umbral nuestro que se pueda ajustar: es la regla de una marca registrada.**`,
+    );
+  }
+
+  /* ⑤ BRAZO B · EL MÍNIMO DE REPRODUCCIÓN (16 px para la versión símbolo,
+     dato del proveedor, 25-ago-2026). Se mide el lado MENOR en dp, que es la
+     lectura restrictiva — la misma prudencia con la que se descartó el
+     wordmark, cuyos 44 dp de ancho no llegaban a sus 50. */
+  const menor = Math.min(rw, rh);
+  if (menor < MIN_SIMBOLO_DEUNA) {
+    fallos.push(
+      `R65·B el isotipo renderiza a ${d(menor)} dp de lado menor y Deuna fija **${MIN_SIMBOLO_DEUNA} px de mínimo para la versión símbolo**. Por debajo de su mínimo la marca deja de ser reproducible según su manual.`,
+    );
+  }
+
+  return {
+    fallos,
+    info:
+      `caja ${cajaW}×${cajaH} · contenido ${contW}×${contH} · isotipo ${d(rw)}×${d(rh)} dp · ` +
+      `X ${d(X)} dp (punto de ${punto.w}px, aspecto ${punto.aspecto.toFixed(2)}, relleno ${punto.llenado.toFixed(3)}) · ` +
+      `resguardo pide ${d(necW)}×${d(necH)}, holgura ${d((cajaH - rh) / 2 - X)} dp por lado en el alto · ` +
+      `medido de ${ruta} · ⚠️ NO verifica que nada más se dibuje dentro de la caja`,
+  };
+}
+
+const REGLAS = { R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -5487,6 +5659,7 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
 corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecuta)', r64([...apps, ...appsCodigo, ...ui, ...galeria])]);
+corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
 corridas.push(['R60 (Boton no ocupa el alignSelf del padre)', r60(ui)]);
