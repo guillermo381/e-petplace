@@ -479,10 +479,18 @@
                 nadie por sí solo**: el servidor es quien sabe de quién es.
      `volver` — a dónde devolver el navegador cuando el alta termina. Se
                 valida contra una lista blanca: un `volver` libre convertiría
-                esta página en un redirector abierto.                        */
+                esta página en un redirector abierto.
+     `uid`    — **la identidad ante el PROVEEDOR, estable por (usuario,
+                proveedor)** (`D-921` · S105-A). **No reemplaza a `alta`: son
+                dos cosas distintas** — `alta` es el handle de ESTE trámite y
+                sigue siendo lo que la edge resuelve; `uid` es quién es la
+                persona para Nuvei, y no cambia entre altas.
+                🔴 **Sin él, `addCard` recibe `alta` y todo se comporta como
+                hoy** — ver el `addCard` de abajo.                           */
   var qs = new URLSearchParams(location.search);
   var alta = qs.get('alta') || '';
   var volver = qs.get('volver') || '';
+  var uid = qs.get('uid') || '';
 
   function volverPermitido(u) {
     if (!u) return false;
@@ -778,10 +786,28 @@
     }
 
     Payment.addCard(
-      alta,                 /* el handle es el uid ante el proveedor: el mismo
-                               valor que el servidor usará para el `stoken`.
-                               Si divergieran, el stoken daría false por una
-                               razón que no es la fórmula. */
+      /* 🔴 EL UID ESTABLE, CON EL HANDLE COMO FALLBACK (`D-921` · S105-A).
+         ⏪ Acá iba `alta` a secas, con este comentario: *«el handle es el uid
+         ante el proveedor»*. **Era cierto y ES EL DEFECTO**: como cada alta
+         nace con un uuid nuevo, **para Nuvei cada alta era una persona
+         distinta** — tokenizaba de cero y su `card/list` nunca traía más de
+         una tarjeta. *Un valor que sirve de dos cosas a la vez funciona hasta
+         que las dos cosas necesitan ser distintas.*
+
+         **`uid || alta` no es prolijidad defensiva: es lo que hace seguro el
+         merge.** Sin el parámetro —hoy, y en cualquier despliegue de la página
+         que se adelante a la app— `addCard` recibe **exactamente lo de hoy**.
+         *No queremos una ventana en la que la página espere algo que el motor
+         todavía no manda.*
+
+         ⚠️ **Y LA MITAD QUE NO ES DE ESTA PÁGINA, escrita acá porque es donde
+         se rompe:** el servidor valida el `stoken` con
+         `md5(token_APPCODE_**alta**_APPKEY)` — usa `alta` **porque hoy `alta`
+         ES el uid**. El día que este argumento deje de serlo, **esa fórmula
+         tiene que usar el MISMO uid**. Es la pieza ④ del contrato: **de D, y
+         sale en el mismo acto que el flip.** *Si sale sola, `stokenValido`
+         pasa a `false` en todas las altas acusando a una fórmula correcta.* */
+      uid || alta,
       CONFIG.EMAIL_ALTA,
       tarjeta,
       function (resp) {
