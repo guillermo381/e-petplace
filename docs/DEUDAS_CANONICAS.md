@@ -21818,6 +21818,43 @@ aplicar_evento_de_pago · maneja 'REVERSED'  : false
 **Disparo:** 🔴 **antes de la certificación (jueves).**
 ☠️ **Condición de muerte:** un `REVERSED` del proveedor deja el intento en `'reversado'`, revierte el devengo por `aplicar_reembolso`, y el sujeto deja de decir que está pagado — **ejercido, no simulado**.
 
+---
+
+### ✅ ENMIENDA S105-A (25-ago-2026) — LA MITAD DEL RECONOCIMIENTO ESTÁ HECHA, Y LA OTRA MITAD RESULTÓ SER DE MESA
+
+**Ejecutado y en `main`** (`20260825210000`, cinturón verde **contra el evento real**, camino de aprobación probado byte-idéntico por diff):
+
+- 🟢 **el actuador RECONOCE el reverso.** El defecto medido no era «no maneja `REVERSED`» — era más fino y peor: **un reverso llega con `status=2`, exactamente igual que un rechazo**, y `_pago_aprobado` no los distingue. **No fallaba: los CONFUNDÍA** — y un evento confundido con otro no deja síntoma, deja un contador de rechazos que parece normal.
+- 🟢 **el discriminador es `status_detail`, no `status`** (dato del founder tras ejercer el reverso; **medido** sobre `DF-2102135`: `status_detail=7 · current_status=CANCELLED · carrier_code=ReversedByMerchant`). **Y `transaction.id` NO CAMBIA** ⇒ el intento se encuentra por él: *Nuvei no emite id de reverso propio, a diferencia de DeUna.*
+- 🟢 **el vocabulario vive en UN solo lugar** (`_nuvei_status_detail_es_reverso`) y está **separado a propósito** del de «qué clase de reverso es», que es de `registrar_reverso_nuvei` (pista D). *Dos preguntas distintas, dos dueños.*
+- 🟢 **la ventana YA RIGE y no había que construirla:** la puso D dentro de su función. **Medido con rojo producido:** un intento cobrado ayer rebota `fuera_de_ventana_otro_dia`. **El brazo de las 17:00 no se pudo ejercer** (la sonda corrió 15:59 local) y **no se forzó moviendo el reloj de la base** — queda por medir después del corte. ⇒ *la tanda 3 del reverso resultó ya construida por otra pista: lo que faltaba era verificarlo, no hacerlo.*
+
+### 🔴 LO QUE QUEDA, Y ES DECISIÓN DE MESA — NO DE MOTOR
+
+**El sujeto NO se mueve, y se declara en DOS lugares** (la respuesta de D y la del actuador) porque *nadie debería tener que abrir dos funciones para enterarse de que la compra sigue diciendo `pagada` sobre plata devuelta.*
+
+**No se hizo por una razón medida, no por falta de tiempo — el censo del 25-ago:**
+
+| Lo medido | Número |
+|---|---|
+| Sujetos que toca el actuador | **CUATRO**: compra · pedido · cita · recurrencia/suscripción |
+| Columnas de sujeto en `pagos_intentos` | 6 (`compra_id · pedido_id · cita_id · recurrencia_id · suscripcion_servicio_id` + pagador) |
+| Funciones que leen `compras.estado` | 9 |
+| **Funciones que leen `'cancelada'`** | 🔴 **CERO** — el CHECK lo admite y **nadie lo produjo nunca** |
+| Vistas sobre `compras` | 0 · policies que miren estado: 0 |
+
+> ### **Mover el sujeto es estrenar un estado que ningún lector conoce, en cuatro objetos distintos.**
+> Y el destino de tres de ellos **no es decisión de motor**: si una **cita** pagada se reversa, ¿vuelve a `pendiente_pago` y la familia conserva el horario, o se cancela y lo pierde? ¿El prestador ve la cita desaparecer de su agenda? ¿Alguien recibe un aviso? *Eso es producto.* **Es `L-318` en su variante grave: agregar un sujeto obliga a censar TODOS sus consumidores — y acá el consumidor del estado nuevo no existe todavía.**
+
+### 🔴 Y LA CONDICIÓN DE MUERTE DE ESTA FICHA SE APOYA EN UNA PREMISA QUE NO SE CUMPLE
+
+Dice *«revierte el devengo por `aplicar_reembolso`»*. **Medido el 25-ago:**
+
+- la compra reversada **NO TIENE evento económico** — y es correcto: en esta casa el devengo nace al **entregar** (despensa) o al **cerrar con calidad** (servicios), jamás al cobrar. *Una compra pagada y no entregada no devengó nada, así que no hay nada que revertir.*
+- 🔴 **`aplicar_reembolso` NO TIENE UN SOLO LLAMADOR EN TODA LA BASE.** Censado por `prosrc`: cero. **Es `L-318` en su forma pura** — construida, probada, y sin ninguna puerta.
+
+⇒ **la condición de muerte se enmienda:** el puente al ledger es **CONDICIONAL** (solo si hay evento económico), no incondicional. Escrito así, la ficha deja de exigir un acto que para el caso medido no tiene objeto.
+
 #### L-421 — UN CONTROL QUE NO PUEDE FALLAR TAMPOCO PUEDE PASAR
 **Firmada por el founder (25-ago-2026), sobre un error propio de la pista A.**
 
@@ -21874,6 +21911,30 @@ cd <worktree-de-la-pista> && git commit … && git merge --no-ff pista/x && git 
 🔴 **Y la primera vez el efecto fue peor que no mergear:** `db push` contestó **«Remote database is up to date»** sobre una migración **que no existía en su árbol**. *Un verde que describe correctamente un mundo que no es el que se quería tocar.*
 
 **Las tres las cazó verificar contra el objeto** —que la función no llamaba al productor, que el archivo no estaba en `HEAD`— **nunca el retorno del comando.**
+
+---
+
+#### L-424 — UN GUARD QUE PUEDE DEVOLVER `NULL` NO ES UN BOOLEANO: ACIERTA POR CÓMO SQL TRATA LOS NULOS, NO POR DISEÑO
+**S105-A (25-ago-2026). La encontró un cinturón en su primer paso, antes de que la migración pasara** — y el hallazgo no es del caso: es de la clase.
+
+**El caso.** El vocabulario del reverso nació así:
+
+```sql
+SELECT p_detail IN ('7','34')
+```
+
+Se lee como un booleano y **no lo es**: con `p_detail = NULL` —un evento sin `status_detail`— `IN` devuelve **`NULL`, no `false`**. El cinturón lo cazó porque su propio assert encadenaba `AND NOT f(NULL)`, y el `AND` entero se volvió `NULL`.
+
+🔴 **Lo interesante es que el guard funcionaba igual.** En el `IF … AND f(...)` del actuador, un `NULL` hace que la rama **no se entre** — que es la respuesta correcta. **Acertaba.**
+
+> ### **Y esa es exactamente la trampa: acertaba por cómo `IF` trata los nulos, no porque alguien lo hubiera decidido.**
+> *Un guard que acierta por accidente deja de acertar el día que alguien lo niegue (`NOT f(x)` sobre `NULL` sigue siendo `NULL`), lo componga con un `OR`, o lo mueva a un `CASE WHEN`.* **Ninguno de esos tres cambios se ve como un cambio de comportamiento al leerlos** — y los tres lo son.
+
+**La cura fue de la FUNCIÓN, no del assert** —*curar el assert habría dejado el tri-estado vivo y sin testigo*—: `COALESCE(… , false)`, y la razón escrita en el cuerpo para que nadie lo lea como prolijidad y lo saque.
+
+**La regla:** *toda función que se consuma como condición devuelve `true` o `false` y nunca `NULL`* — y si el caso ausente es semánticamente distinto del negativo, entonces **no es un booleano y no debe fingir serlo**: devuelve un vocabulario de tres valores con nombre, o dos funciones.
+
+**Hermana de `L-192`** (una verificación cuyo modo de falla es el silencio no es una verificación): acá el silencio no era del guard sino **de su tipo**.
 
 > ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
 > *Encadenar mezcla dos contextos de directorio en una sola línea, y el segundo hereda el del primero sin decirlo.*
