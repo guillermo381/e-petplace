@@ -21914,6 +21914,34 @@ cd <worktree-de-la-pista> && git commit … && git merge --no-ff pista/x && git 
 
 ---
 
+#### D-924 — 🟡 EL VOCABULARIO DEL IMPUESTO EXISTE EN PRODUCTOS Y NO EN SERVICIOS
+🟡 **MEDIA. Abierta 25-ago-2026, hallazgo de la pista D. Dueño: A (motor), y su decisión NO es de código.**
+
+**El hecho.** `cita_desglose` guarda `subtotal · impuesto · total · moneda · fee_config_id` — **y ni el CÓDIGO de tasa ni el PCT.** Del lado de productos, en cambio, cada ítem lleva su `impuesto_pct` y su código de tasa del catálogo.
+
+⇒ **Con el guard del IVA rediseñado (`§4.①` del contrato a D), una cita gravada rebotaría `iva_sin_tasa_declarada`** — el guard va a pedir el nominal para comparar y en servicios no hay de dónde sacarlo.
+
+### Por qué hoy no molesta, y por qué eso no la cierra
+
+Todos los servicios vivos son **IVA 0**: el impuesto es cero, no hay nominal contra el cual comparar, y el guard pasa. *El hueco es invisible mientras la respuesta correcta sea cero* — que es exactamente la forma que tuvo `D-889` y la que tuvo el `pct` recalculado antes de que un producto gravado lo destapara.
+
+### 🔴 Es el MISMO hueco que `tipos_servicio`, y por eso va junta con la del IVA de servicios
+
+**El vocabulario del impuesto se construyó del lado de la despensa y nunca cruzó a servicios.** Un producto sabe qué tasa le corresponde porque su catálogo se lo dice; **una cita no tiene catálogo de tasas.** No es que el dato falte en una fila: *falta el lugar donde el dato viviría.*
+
+### Lo que NO se decide acá
+
+**Si un servicio veterinario lleva IVA en Ecuador, y cuál** — no es decisión de motor. **Espera al contador**, junto con:
+- el régimen del IVA de servicios (la ficha hermana),
+- el redondeo **por línea vs sobre el total** (afecta la factura, no el guard).
+
+*Construir la columna antes de saber qué tasa va a llevar sería fabricar el lugar y llenarlo de un supuesto.*
+
+**Disparo:** ⚡ **la respuesta del contador**, o el primer servicio que deba cobrarse gravado — lo que llegue antes.
+☠️ **Condición de muerte:** `cita_desglose` declara su tasa por el mismo vocabulario que los productos, y una cita gravada pasa el guard con su nominal leído del catálogo, **no de una constante**.
+
+---
+
 #### L-424 — UN GUARD QUE PUEDE DEVOLVER `NULL` NO ES UN BOOLEANO: ACIERTA POR CÓMO SQL TRATA LOS NULOS, NO POR DISEÑO
 **S105-A (25-ago-2026). La encontró un cinturón en su primer paso, antes de que la migración pasara** — y el hallazgo no es del caso: es de la clase.
 
