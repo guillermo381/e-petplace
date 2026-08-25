@@ -45,11 +45,38 @@ omisión.** *Ése era el riesgo caro y no está.*
 | `crear_pedido_de_recurrencia_cobrada` · `planes_vencidos_pendientes` · `recurrencias_vencidas_pendientes` · `renovar_plan_cobrado` | `estado = 'aprobado'` | ✅ indiferentes |
 | `confirmar_pago_pedido` | **escribe** `'aprobado'` | ✅ indiferente |
 | `pagos_pendientes_de_conciliar` · `confirmar_pago_compra` · `resolver_consulta_activa` | leen el estado de **`compras`**, no del intento | ✅ no aplican |
-| 🔴 **`aplicar_evento_de_pago`** | **`i.estado IN ('iniciado','pendiente','aprobado')`** | 🔴 **queda afuera — y eso es el defecto** |
+| ~~🔴 `aplicar_evento_de_pago` · `i.estado IN ('iniciado','pendiente','aprobado')` · queda afuera y eso es el defecto~~ | **ENMENDADO — ver abajo** | |
+
+### ⚠️ ENMIENDA AL CENSO *(24-ago, mismo día · lo señaló A, lo verifiqué sobre la definición viva)*
+
+**La fila tachada atribuía al actuador entero un filtro que pertenece a UNA de
+sus tres ramas.** Medido línea por línea sobre `pg_get_functiondef`:
+
+| rama | busca por | ¿filtra estado? |
+|---|---|---|
+| **DeUna** (línea 61) | `i.referencia_corta = v_refcorta` | ❌ **NO filtra** |
+| **Nuvei** (línea 118) | `cita_id = v_ref AND proveedor_transaction_id = v_tx` | ❌ **NO filtra** |
+| **recurrencia** (líneas 157-159) | `recurrencia_id` / `suscripcion_servicio_id` | ✅ la única con lista — **y A ya le aplicó `'expirado'`** |
+
+⇒ **En compra y en cita, un intento `'expirado'` YA se encuentra hoy.**
+**El escenario de §3 no aplica al riel DeUna**, porque DeUna **jamás es
+recurrente** (`§6bis` borde ②). *La pieza ① nunca fue precondición de la (b), y
+saberlo evita esperar algo que ya estaba.*
+
+**Se corrige el alcance, no el diagnóstico** — y la distinción importa: `'expirado'`
+sigue siendo invisible para la compuerta, que es lo que la cura necesita.
 
 ## 3 · 🔴 LA RESTRICCIÓN QUE DEFINE EL DISEÑO
 
-> ### Marcar un intento `'expirado'` sin tocar el actuador **reproduce D-912 exactamente**: el actuador dejaría de aplicar ese pago, sin error y sin log.
+> ### ~~Marcar un intento `'expirado'` sin tocar el actuador **reproduce D-912 exactamente**: el actuador dejaría de aplicar ese pago, sin error y sin log.~~
+>
+> ⚠️ **ENMENDADO EL MISMO DÍA — y la conclusión sobrevive con OTRO fundamento.**
+> Para **compra y cita** esto es **falso**: esas ramas no filtran por estado, así
+> que el pago tardío **sí se aplica**. Era cierto **solo para recurrencia**, y
+> DeUna nunca es recurrente. **Lo que sigue es el escenario tal como se
+> escribió**, conservado porque *describe bien un modo de falla real —el que A
+> acaba de cerrar en la rama que sí lo tenía— y porque tacharlo sin dejarlo
+> legible haría ilegible la enmienda.*
 
 **El escenario, y no es raro:** la persona tiene el código viejo **ya tecleado
 en su app Deuna**. El código venció **de nuestro lado**; del lado del proveedor
@@ -63,21 +90,43 @@ puerta y con la misma firma: sin síntoma.
 ⇒ **De acá salen las dos leyes de este diseño, y ninguna es opcional:**
 
 **LEY ①  ·  Primero se ANULA con el proveedor; recién si el proveedor confirma
-la anulación se marca `'expirado'`.** *Expirar es dejar de escuchar, y no se
-puede dejar de escuchar por un código que todavía alguien puede pagar.* **Si la
-anulación falla, el intento NO se expira** — fail-closed: *un cliente trabado se
-queja; una plata perdida no avisa.*
+la anulación se marca `'expirado'`.** **Si la anulación falla, el intento NO se
+expira** — fail-closed: *un cliente trabado se queja; una plata perdida no
+avisa.*
+
+> ### 🔴 SU FUNDAMENTO CAMBIÓ CON LA ENMIENDA, Y LA LEY SOBREVIVE IGUAL — conviene no perder cuál de los dos rige
+>
+> **Se escribió con este motivo:** ~~*expirar es dejar de escuchar, y no se puede
+> dejar de escuchar por un código que todavía alguien puede pagar.*~~ **Ese motivo
+> se cayó**: en compra y cita el actuador no filtra, así que expirar **no** es
+> dejar de escuchar.
+>
+> **El motivo que la sostiene, y es el más fuerte de los dos:** *si expirás sin
+> anular, quedan **DOS códigos vivos del lado del proveedor** —medido en el
+> sondeo— **y los dos se pueden pagar**.* **Anular no es para poder dejar de
+> escuchar: es para que no haya dos bocas cobrando.**
+>
+> *Es el patrón que A nombró hoy en otra forma: **la letra tenía razón por un
+> motivo que no era el suyo.** Y no es cosmético — con el fundamento viejo,
+> alguien que midiera «el actuador igual lo aplica» concluiría que la ley ①
+> sobra, y ablandaría justo la pieza que evita el doble cobro.*
 
 **LEY ②  ·  Aun anulado, el actuador tiene que seguir aceptando `'expirado'`.**
 Entre que pedimos la anulación y el proveedor la ejecuta hay una carrera, y la
 persona puede pagar en el medio. **Un pago que llega tarde sobre un intento
 expirado es un pago igual.**
 
+> ✅ **YA SATISFECHA, no pendiente** — y por dos caminos distintos: en compra y
+> cita **sale gratis** (esas ramas no filtran por estado) y en recurrencia **A la
+> aplicó** con la pieza ①. *Se conserva escrita porque es un invariante que hay
+> que **defender**, no una tarea: el día que alguien agregue un filtro de estado
+> «para prolijidad», esta línea es lo que se lo impide.*
+
 ## 4 · LAS PIEZAS, CON SU TAMAÑO Y SU DUEÑO
 
 | # | pieza | tamaño | dueño |
 |---|---|---|---|
-| ① | **`aplicar_evento_de_pago` acepta `'expirado'`** en su lista | **una línea** + cinturón con su rojo producido | **A** (DB) |
+| ① | ~~**`aplicar_evento_de_pago` acepta `'expirado'`**~~ | ✅ **HECHA por A, firmada por el founder** — con reversa antes y **rojo producido**. ⚠️ **Cerró la rama de RECURRENCIA, que no es la de DeUna**: útil igual, pero **nunca fue precondición de la ②** | **A** (DB) |
 | ② | **La puerta anula-y-expira antes de crear el nuevo**: si hay intento `pendiente` con `codigo_expira_en` pasado → anular con DeUna → si confirma, marcar `'expirado'` → seguir | **el grueso**: ~40-60 líneas en `pagos-deuna-solicitud`, con su camino de fallo | **D** |
 | ③ | **El barrido sigue mirando los `'expirado'` recientes** — hoy solo levanta `pendiente` | chico, pero **es la red de la LEY ②** | **D** |
 | ④ | **La voz del rebote cuando la anulación falla** | **decisión de letra + código nuevo en el contrato con C** | **mesa → C** |
@@ -107,14 +156,64 @@ de forma. *Construir ② antes de esa respuesta es construir sobre un supuesto d
 proveedor — exactamente lo que la v1.1 de `LETRA_DEUNA` hizo y esta casa pasó
 una sesión corrigiendo.*
 
-## 6 · LO QUE SE PUEDE HACER YA, SIN LA RESPUESTA
+## 5bis · 🔴 EL BORDE QUE ABRIÓ LA PROPIA ENMIENDA — un hecho, dos consecuencias opuestas
 
-**① no depende del proveedor.** `aplicar_evento_de_pago` aceptando `'expirado'`
-es correcto **hoy**, tenga o no anulación DeUna: hace que un pago tardío sobre
-un intento expirado se aplique en vez de ignorarse. **Es una línea que cierra un
-agujero que ya existe** —cualquier futuro productor de `'expirado'`, de este
-riel o de otro, lo destaparía— **y no habilita nada por sí sola**, porque hoy
-nadie produce ese estado.
+**Salió de verificar la corrección de A, no de buscarlo.** Las mismas dos ramas
+que **no filtran por estado** —lo que hace que `'expirado'` se aplique, y está
+bien— hacen también que **`'reversado'` se reaplique**, y eso está mal:
 
-*Es la forma barata de esta casa: **dejar el motor listo y la puerta cerrada**,
-como el cron del recurrente que nace inerte.* **Dueño A; esta pista no lo toca.**
+```
+112  UPDATE pagos_intentos
+113     SET estado='aprobado', confirmado_por='webhook', …
+117   WHERE (v_intento IS NOT NULL AND id = v_intento)
+118      OR (v_intento IS NULL AND cita_id = v_ref AND proveedor_transaction_id = v_tx);
+```
+
+**Sin guard de estado en el `WHERE`.** Un intento en `'reversado'` o
+`'reverso_fallido'` que reciba un evento de aprobación **vuelve a `'aprobado'`**,
+y la línea 105 además deja la cita `'confirmada'` / `'pagada'`. **Plata devuelta
+que se cuenta otra vez como cobrada.**
+
+> ### No filtrar por estado es **la misma decisión** que resuelve un problema y abre el otro. Por eso una corrección que achica un diseño puede ser **media medición de otra cosa**.
+
+**Severidad, acotada y medida antes de reportarla:** **hoy inalcanzable** —
+`aprobado` 39 · `pendiente` 3 · `rechazado` 2, **cero reversados**, y jamás se
+ejerció un reverso. **Alcanzable el día del primero**, y **más probable en DeUna
+por su ventana de 24 h que en Nuvei por la de mismo día**.
+
+⚠️ **El disparo más cercano no es un pago: es un REPROCESO.** Reaplicar un
+evento viejo sobre un intento que entretanto cambió de estado tiene esta forma
+exacta. **Con los cuatro de `D-912` no muerde** (verificado por las dos pistas:
+ninguno está reversado), pero **el reproceso como mecanismo tiene la puerta
+abierta** ⇒ *todo reproceso mira el estado del intento **al momento de
+reprocesar**, jamás el que tenía cuando se decidió reprocesarlo.*
+
+**Dueño: A** (es el actuador). **Voto de esta pista, registrado:** entre ignorar
+(fail-closed) y **escalar como hallazgo**, gana **escalar** — *un proveedor que
+aprueba algo que ya reversó es un caso de soporte, no un no-op silencioso* — y
+el vocabulario ya tiene el valor (`reverso_fallido` en
+`chk_hallazgo_vocabulario`). **Lo decide la mesa.**
+
+## 6 · LO QUE SE PUDO HACER YA, SIN LA RESPUESTA — ✅ hecho
+
+**① no dependía del proveedor**, y por eso se pudo firmar y aplicar el mismo
+día. `aplicar_evento_de_pago` aceptando `'expirado'` **no habilita nada por sí
+sola** —hoy nadie produce ese estado— y **deja el motor listo con la puerta
+cerrada**, como el cron del recurrente que nace inerte. **La hizo A, con reversa
+antes y rojo producido.**
+
+⚠️ **Con su alcance real dicho, que no es el que este documento le atribuyó:**
+cerró **la rama de recurrencia**, la única que filtraba. **Para el riel DeUna no
+cambió nada** —DeUna nunca es recurrente— **y nunca fue precondición de la ②.**
+*Sigue siendo correcta y sigue valiendo la pena; lo que no hay que hacer es
+esperarla como si destrabara esto.*
+
+---
+
+## 7 · QUÉ QUEDA, EN UNA LÍNEA
+
+**El diseño está completo y su única precondición es externa:** la respuesta del
+proveedor sobre si su anulación es **por transacción** (el diseño rige) o **por
+punto de venta** (la LEY ① es inaplicable y se rehace). **Nada de lo que falta
+depende de nosotros**, y eso es una buena posición para esperar: *lo que se
+puede construir sin la respuesta ya está construido.*
