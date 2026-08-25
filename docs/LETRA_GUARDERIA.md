@@ -1,5 +1,32 @@
 # LETRA_GUARDERIA.md — e-PetPlace
 
+> # 🔴🔴 LETRA FRENADA — NO RIGE, NO SE CONSTRUYE, NO SE PUBLICA
+> **Frenada el 25-ago-2026 por el memo del abogado, horas después de
+> depositarse.** El cuerpo se conserva **entero y sin editar** porque es el
+> insumo que la mesa va a reescribir — *no porque siga vigente.*
+>
+> **DOS SECCIONES CAEN, y ninguna es un matiz de redacción:**
+>
+> | § | qué decía | veredicto del abogado |
+> |---|---|---|
+> | **§3** | la exención total de responsabilidad de e-PetPlace | 🔴 **NULA DE PLENO DERECHO frente al consumidor** |
+> | **§6** | el animal a un refugio pasados tres días | 🔴 **RIESGO PENAL** |
+>
+> **La §3 no se cae por estar mal escrita: se cae por lo que hace.** *Una
+> plataforma que cobra comisión sobre el servicio no se exime de él con una
+> cláusula* — y la propia letra lo había anticipado en su §3 (*«puede no
+> sostenerse en Ecuador, y descubrirlo después de construir es caro»*).
+> **El freno llegó antes de construir, que era exactamente el objetivo de
+> mandarla al abogado primero.**
+>
+> ⚠️ **Lo que esto NO invalida:** §1, §2, §4 y §5 no fueron objetados. **Pero la
+> letra queda frenada ENTERA**, porque §3 no es una cláusula suelta — es la que
+> sostiene el reparto de responsabilidad del que cuelga todo el servicio.
+> *Dejar el resto «vigente» invitaría a construir el transporte y la
+> documentación sobre una línea de responsabilidad que no existe.*
+>
+> **Dueño de la reescritura: la mesa.** Fichas: `D-918` (§3) · `D-919` (§6).
+
 > **Versión:** v1.0 · **Nace:** 25-ago-2026 (mesa founder + arquitecto).
 > **Fuentes que obedece:** el repo y su bitácora · la letra del paseo (el
 > motor de transporte, GPS y chips rige entero) · `LETRA_PAGO_CITAS` ·
