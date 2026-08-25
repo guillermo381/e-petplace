@@ -32,7 +32,7 @@
  */
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Linking, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import {
@@ -57,6 +57,9 @@ import {
 } from '@/components/seccion-medio-de-pago';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
+import { EsperaDeUna } from '@/components/espera-deuna';
+import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
+import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
 /**
@@ -141,12 +144,47 @@ export function CheckoutReserva({
     return () => clearInterval(timer);
   }, [fase, expiraEn]);
 
+  /* ═══ 🔴 EL RIEL EN CURSO — se congela AL TOCAR, no se lee del selector ═══
+     (S105-C · el enchufe de DeUna.)
+
+     `medio.elegido` es estado vivo del resumen; **la fase `confirmando` tiene
+     que saber por dónde entró la plata, y eso se decidió en el toque.** *Leer
+     el selector durante la espera dejaría expresable que el cuerpo cambie de
+     riel a mitad de una confirmación —la persona mirando un código de DeUna y
+     la pantalla pasando a la rampa de tarjeta— por un re-render que no tiene
+     nada que ver con lo que ella hizo.*
+
+     `null` = todavía no se tocó nada. **No hay default**: *un riel por omisión
+     es exactamente la clase de decisión que alguien toma en nombre de otro y
+     no queda registrada.* */
+  const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
+
+  /* ═══ EL CÓDIGO DE DEUNA ════════════════════════════════════════════════
+     🔴 Activo **solo en `confirmando` y solo si el riel es DeUna**. El `null`
+     de las otras combinaciones no es prolijidad: **pedir un código CREA un
+     intento de pago contra el proveedor**, así que sin ese freno abrir el
+     resumen fabricaría una transacción que nadie pidió. */
+  const enDeuna = fase === 'confirmando' && riel === 'deuna';
+  const deuna = useEstadoDeUna(enDeuna ? { tipo: 'cita', id: citaId } : null);
+
   /* ═══ LA ESPERA — la misma pieza que la despensa ════════════════════════
      🔴 Se activa **solo en `confirmando`**: pasarle `null` en las otras fases
-     es lo que impide que el checkout sondee por existir. */
+     es lo que impide que el checkout sondee por existir.
+
+     🔴 **Y ES LA MISMA PARA LOS DOS RIELES, que es el punto entero.** Esta
+     pieza lee **el SUJETO** (`leerEstadoCita`), no al proveedor ⇒ le da igual
+     si la plata entró por Nuvei o por DeUna: *una casa, un motor, dos
+     puertas.* **La transición a pagada no hubo que escribirla de nuevo.**
+     Lo único que cambia es **cuánto se mira** — ver `topeDeEspera`. */
   const espera = useEsperaDeConfirmacion(
     fase === 'confirmando' ? { tipo: 'cita', id: citaId } : null,
+    topeDeEspera(deuna.estado),
   );
+
+  /** El camino a soporte del hallazgo — jamás una pantalla sin salida. */
+  const irASoporte = useCallback(() => {
+    void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')));
+  }, [t]);
 
   /* 🔴 EL HOOK SE ESCUCHA. *La lección de la despensa, cobrada el 20-ago: la
      pieza estaba bien construida, probada, y desconectada del único lugar
@@ -167,12 +205,35 @@ export function CheckoutReserva({
    *   ① el medio elegido (sin él no se toca nada)
    *   ② el débito por `pagos-cobro`, que corre las compuertas server-side
    *   ③ **la respuesta es SEÑAL OPTIMISTA, jamás confirmación**
-   *   ④ confirma el webhook, o el barrido mismo-día
+   *   ④ confirma el webhook, o el barrido *(su cadencia está medida para
+   *      tarjeta; para DeUna no — `D-887`)*
    *
    * 🔴 **Nada de esto nace por abrirse ni por re-renderizar.** Corre al TOCAR.
    */
   const pagar = useCallback(async () => {
     if (trabajando) return;
+
+    /* ── 🔴 EL RIEL DE DEUNA NO PASA POR `cobrar()`, y no es un atajo ───────
+       `cobrar()` **debita una tarjeta**: es el riel de Nuvei entero. En DeUna
+       no hay nada que debitar desde acá — *lo que hacemos es pedir seis
+       dígitos para que la persona pague en OTRA app*, y la plata se mueve allá
+       o no se mueve.
+
+       ⇒ El toque **solo cambia de fase**. El código lo pide `useEstadoDeUna` al
+       activarse, que es lo que vuelve cierto el freno de arriba: **la puerta
+       del proveedor se toca al TOCAR, y solo al tocar.**
+
+       ⚠️ Y **no se prende `trabajando`**: no hay viaje que esperar en este
+       hilo. *Un botón que gira mientras la pantalla ya cambió promete un
+       trabajo que no existe.* El «pidiendo tu código» lo dice la fase
+       `cargando` de `EsperaDeUna`, que es donde de verdad se está esperando. */
+    if (medio.elegido?.tipo === 'deuna') {
+      setRiel('deuna');
+      setFase('confirmando');
+      return;
+    }
+
+    setRiel('tarjeta');
     setTrabajando(true);
     const cobro = await cobrar({ tipo: 'cita', id: citaId }, medio.idTarjeta);
     setTrabajando(false);
@@ -193,13 +254,42 @@ export function CheckoutReserva({
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
-          <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-          <Texto variante="cuerpo">{t('pago.esperaCuerpoCita')}</Texto>
-          {/* ⑦ La rampa que trabaja — la MISMA que la despensa. */}
-          <EsperaDeTrabajo />
+          {/* ══ 🔴 LA MISMA FASE, DOS CUERPOS (S105-C) ═══════════════════════
+              `LETRA_DEUNA` §6, firma ② del founder: *«funciona exactamente
+              igual que si fuera tarjeta»* — **misma pantalla, misma salida,
+              misma transición sola a pagada. Lo único que cambia es el
+              cuerpo.** *El cliente jamás aprende un circuito distinto por
+              cambiar de medio.*
+
+              🔴 **Y la asimetría que SÍ existe, escrita para que no sorprenda:
+              en tarjeta la familia ESPERA; en DeUna la familia TRABAJA.** Por
+              eso `EsperaDeTrabajo` **no se monta acá** (N15, *el movimiento se
+              calla donde hay apuro*): *una rampa que dice «estamos trabajando»
+              mientras la persona teclea afirma algo falso — la que trabaja es
+              ella.* Lo que ocupa ese lugar es la cuenta regresiva del código,
+              que es **información, no adorno**. */}
+          {riel === 'deuna' ? (
+            <EsperaDeUna
+              estado={deuna.estado}
+              onGenerarNuevo={deuna.regenerar}
+              onSoporte={irASoporte}
+            />
+          ) : (
+            <>
+              <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
+              <Texto variante="cuerpo">{t('pago.esperaCuerpoCita')}</Texto>
+              {/* ⑦ La rampa que trabaja — la MISMA que la despensa. */}
+              <EsperaDeTrabajo />
+            </>
+          )}
           {/* 🔴 El tope habla y **NO declara desenlace**: la reserva sigue en
-              pie y el barrido mismo-día la resuelve. *Un tope que se dibuja
-              como «rechazado» hace que la familia pague dos veces.* */}
+              pie y el barrido la resuelve. *Un tope que se dibuja como
+              «rechazado» hace que la familia pague dos veces.*
+              **Vale para los dos rieles** — en DeUna llega más tarde porque el
+              tope se corre con el código, no porque se haya apagado.
+              ⚠️ **La cadencia del barrido NO se afirma acá.** Medida para
+              tarjeta (mismo día); **para DeUna no la medí** y su aplicador
+              sigue abierto (`D-887`). */}
           {espera.fase === 'sigue_abierta' ? (
             <>
               <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>

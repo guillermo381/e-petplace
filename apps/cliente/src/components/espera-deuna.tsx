@@ -34,15 +34,21 @@
  * correcto, la letra se enmienda»*. **Este código no cambia: ya era la
  * conducta firmada.**
  *
- * ⚠️ **Y la distinción que hay que conservar, porque no es la misma cosa:
- * está FIRMADO, NO DEPOSITADO.** Medido contra `origin/main` el 22-ago:
- * `LETRA_DEUNA` sigue en **v1.1** y su §5 sigue diciendo *«3 minutos FIJOS,
- * no configurables»*. **El depósito es de A** (`docs/` es su territorio).
- * *Hasta que llegue, quien lea la letra va a encontrar la versión vieja — por
- * eso este comentario NO afirma que la letra ya dice otra cosa: dice qué se
- * firmó y qué falta. Una firma que vive solo en un parte no está firmada
- * (N11′), y un comentario que le atribuye a un documento algo que el
- * documento no dice es la otra mitad del mismo defecto.*
+ * ✅ **Y EL DEPÓSITO LLEGÓ.** ⏪ Acá vivía una advertencia que decía *«está
+ * FIRMADO, NO DEPOSITADO — `LETRA_DEUNA` sigue en v1.1 y su §5 sigue diciendo
+ * "3 minutos FIJOS, no configurables"»*. **Era cierta el 22-ago y hoy es
+ * falsa:** medido contra el objeto (S105-C), la letra está en **v1.7** y su §5
+ * dice *«3 minutos PORQUE LOS PEDIMOS NOSOTROS»*, con el texto viejo tachado
+ * y no borrado. **La decisión pasó de límite ajeno a elección nuestra —
+ * revisable.**
+ *
+ * 🔴 *Se retira en vez de dejarse: un comentario que manda a buscar una
+ * versión que ya no existe hace perder el tiempo con cara de rigor, y el
+ * próximo lector lo cree porque está en negrita.* **Un puente que sobrevive a
+ * su río manda al próximo a construir otro** (`L-395`). Lo que la advertencia
+ * protegía —que un comentario no le atribuya a un documento algo que el
+ * documento no dice— **sigue rigiendo, y es justo la regla que obligó a
+ * medirla antes de retirarla.**
  *
  * ── LOS DOS RELOJES, QUE JAMÁS SE CONFUNDEN (§6) ─────────────────────────
  *
@@ -103,14 +109,30 @@
  * *Se declara en vez de resolverse acá: la letra dijo «si el ancho no entra,
  * declaralo» — entra, y aun así el trade-off es visible y es de mesa.*
  *
- * ═══ 🔴 ENCHUFE PENDIENTE CON NOMBRE ══════════════════════════════════════
- * **Esta pieza todavía NO tiene consumidor, y es deliberado.** `numericCode` y
- * su vencimiento salen de un `payment/request` exitoso, **bloqueado por el
- * `pointOfSale`** (dueño: el founder). *`PLAN_MESA_104` §1 ordena: «mientras no
- * exista, C trabaja contra el contrato de la letra y marca el enchufe como
- * pendiente con nombre».* **Se monta en la fase `confirmando` de las dos
- * puertas el día que D entregue su contrato — y es una condición, no una
- * pantalla nueva.**
+ * ═══ ✅ ENCHUFADA — Y LO QUE FALTA YA NO ES DE ESTA PIEZA (S105-C) ═════════
+ *
+ * ⏪ Acá decía *«esta pieza todavía NO tiene consumidor, y es deliberado»*.
+ * **Dejó de ser cierto:** se monta como el cuerpo de la fase `confirmando` en
+ * **las dos puertas reales** — `despensa/checkout.tsx` y
+ * `components/checkout-reserva.tsx` (los cuatro oficios) —, exactamente como
+ * su propio encabezado anunciaba: *una condición, no una pantalla nueva.*
+ *
+ * 🔴 **Y la costura resultó ser lo que prometía: la pantalla no cambió una
+ * línea al enchufarse.** Todo lo que hizo falta vive afuera —el riel congelado
+ * al toque, el `null` que frena el pedido de código, el tope de la espera—.
+ * *Esa es la propiedad que se estaba comprando cuando se separó
+ * `deuna-estado` de este archivo, y se cobró entera.*
+ *
+ * ⚠️ **LO QUE SIGUE FALTANDO, con su dueño, para que nadie lo lea como
+ * terminado:**
+ * · **`pagos-deuna-solicitud` NO está desplegada** ⇒ el camino real todavía no
+ *   corre. El bloqueo medido no es el `pointOfSale` —que ya llegó (4262774)—
+ *   sino **el rescate de `s103-d` a `main`**, que conduce A.
+ * · **`DEUNA_ELEGIBLE` sigue en `false`** (`fila-medio-de-pago.tsx`) ⇒ nadie
+ *   puede elegir este riel todavía. **Se flipea DESPUÉS del despliegue y con
+ *   el ojo del founder en el aparato, jamás antes** — *mismo precedente que el
+ *   reloj del recurrente, que nació inerte a propósito: un cable que se tiende
+ *   bajo presión se tiende mal.*
  */
 
 import { useEffect, useState } from 'react';

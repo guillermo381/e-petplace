@@ -47,7 +47,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
   Boton,
@@ -104,6 +104,9 @@ import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
+import { EsperaDeUna } from '@/components/espera-deuna';
+import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
+import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
 /* 🔴 S101-B · FASE 3 — NACE `confirmando`.
@@ -188,9 +191,32 @@ export default function DespensaCheckout() {
      pagar, «con qué pagás» no es una pregunta.* */
   const medio = useMedioDePago(fase === 'resumen');
 
+  /* ═══ 🔴 EL RIEL EN CURSO — congelado AL TOCAR (S105-C) ══════════════════
+     La misma razón que en el checkout de reserva: **`confirmando` tiene que
+     saber por dónde entró la plata, y eso se decidió en el toque.** Leerlo del
+     selector durante la espera dejaría expresable que el cuerpo cambie de riel
+     a mitad de una confirmación. `null` = todavía no se tocó nada. */
+  const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
+
+  /* 🔴 El código de DeUna, activo **solo en `confirmando` y solo en su riel**.
+     El `null` es el freno: **pedir un código CREA un intento de pago contra el
+     proveedor**, así que sin él abrir el resumen fabricaría una transacción
+     que nadie pidió. */
+  const enDeuna = fase === 'confirmando' && riel === 'deuna';
+  const deuna = useEstadoDeUna(enDeuna && compraId ? { tipo: 'compra', id: compraId } : null);
+
+  /* 🔴 LA ESPERA ES LA MISMA PARA LOS DOS RIELES — lee **el SUJETO**
+     (`leerEstadoCompra`), no al proveedor. *Una casa, un motor, dos puertas:*
+     la transición a pagada no hubo que escribirla de nuevo para DeUna. Lo
+     único que cambia es **cuánto se mira** (`topeDeEspera`). */
   const espera = useEsperaDeConfirmacion(
     fase === 'confirmando' && compraId ? { tipo: 'compra', id: compraId } : null,
+    topeDeEspera(deuna.estado),
   );
+
+  const irASoporte = useCallback(() => {
+    void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')));
+  }, [t]);
 
   /* ═══ 🔴 EL HOOK SE ESCUCHA — porque antes NO ═══════════════════════════
      **Medido en el aparato el 20-ago:** la compra quedó `pagada` en la base a
@@ -205,7 +231,27 @@ export default function DespensaCheckout() {
     /* Solo `pagada` es éxito. Los otros desenlaces **no se dibujan como
        éxito ni como rechazo**: la pantalla los dice con su voz y la compra
        sigue viva donde corresponda. */
-    if (espera.estado === 'pagada') setFase('exito');
+    if (espera.estado === 'pagada') {
+      /* ── 🔴 EL CARRITO SE VACÍA ACÁ EN EL RIEL DE DEUNA, Y NO AL TOCAR ────
+         (S105-C.) En tarjeta se vacía apenas `cobrar()` contesta, y está bien:
+         **ahí la plata YA se movió** — la respuesta es señal optimista de un
+         débito que ocurrió.
+
+         **En DeUna, al tocar «Pagar» no se movió nada:** lo único que existe
+         es un código que la persona puede no llegar a usar —se le acaba la
+         batería, cierra la app, cambia de idea—. *Vaciarle el carrito por
+         haber pedido un código sería cobrarle el gesto de intentar: vuelve, no
+         encuentra nada, y lo que perdió no fue una compra sino el trabajo de
+         armarla.* La reserva vence sola y la mercadería se libera; **el
+         carrito tiene que seguir donde estaba.**
+
+         Vaciarlo contra `pagada` **es correcto en los dos rieles** —el hecho
+         es el mismo— y en tarjeta es un no-op porque ya está vacío. *Se llama
+         igual para los dos en vez de ramificar: una limpieza idempotente
+         atada al HECHO no puede desincronizarse de él.* */
+      vaciarCarrito();
+      setFase('exito');
+    }
   }, [espera]);
   /** El total DE LA COMPRA, tal como lo devolvió el motor. Esta pantalla
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
@@ -519,7 +565,17 @@ export default function DespensaCheckout() {
    * El orden, y cada paso tiene su porqué:
    *   ① preparar la compra (reserva + desglose congelado) — ya existía
    *   ② **LAS COMPUERTAS, ANTES DE TOCAR LA TARJETA** — *la plata que no se
-   *      cobra mal no hay que devolverla, y el reverso es mismo-día*
+   *      cobra mal no hay que devolverla, y la ventana para devolverla es
+   *      angosta*
+   *
+   *      🔴 **Y ES POR RIEL, no una sola** (`LETRA_DEUNA` §8, firma del
+   *      24-ago): **Nuvei mismo día · DeUna 24 horas.** ⏪ Acá decía «el
+   *      reverso es mismo-día» a secas, y **era cierto cuando el único riel
+   *      era la tarjeta**; con dos rieles en esta misma pantalla pasó a
+   *      describir la mitad de los casos. *Una frase de riel único bajo una
+   *      pantalla de dos rieles no se vuelve falsa de golpe: se vuelve cierta
+   *      a medias, que es más difícil de ver.* **El argumento no cambia —
+   *      cobrar mal sigue siendo caro en los dos.**
    *   ③ el débito
    *   ④ `confirmando` — **la respuesta síncrona es SEÑAL OPTIMISTA, jamás
    *      confirmación**: confirma el webhook, o el barrido
@@ -564,9 +620,37 @@ export default function DespensaCheckout() {
        tocar la tarjeta*— porque **la tarjeta no se toca hasta después de que
        las compuertas corrieron**; lo único que cambia es quién las corre. */
 
+    /* ── 🔴 ACÁ SE BIFURCAN LOS DOS RIELES, Y EL CORTE ESTÁ DONDE VA (S105-C)
+       **El paso ① es del SUJETO, no del riel**: `crearIntentoPago` aparta la
+       mercadería y **congela el desglose**, y el desglose congelado es
+       justamente de donde el servidor de DeUna saca el monto —por eso su
+       puerta puede contestar `desglose_incompleto`—. *Bifurcar antes de ①
+       habría mandado a pedir un código sobre una compra sin total congelado, y
+       el fallo habría salido del lado del proveedor por una omisión nuestra.*
+
+       **Lo que SÍ es del riel es el paso ③, el débito.** `cobrar()` debita una
+       tarjeta; en DeUna no hay nada que debitar desde acá — *pedimos seis
+       dígitos para que la persona pague en OTRA app.* El toque solo cambia de
+       fase; el código lo pide `useEstadoDeUna` al activarse.
+
+       ⚠️ **`trabajando` se apaga antes de cambiar de fase**: no hay viaje que
+       esperar en este hilo. *Un botón girando bajo una pantalla que ya cambió
+       promete un trabajo que no existe.* El «pidiendo tu código» lo dice la
+       fase `cargando` de `EsperaDeUna`, que es donde de verdad se espera.
+
+       ⚠️ **Y el carrito NO se vacía acá** — ver el efecto de la espera: en este
+       riel todavía no se movió un centavo. */
+    if (medio.elegido?.tipo === 'deuna') {
+      setTrabajando(false);
+      setRiel('deuna');
+      setFase('confirmando');
+      return;
+    }
+
     // ③④ El débito y la espera declarada — **por el cobro de la casa**.
     //    ☠️ El andamio `cobrarConTarjetaGuardada` murió acá: su lápida decía
     //    «muere en la Fase 5», y la Fase 5 cerró.
+    setRiel('tarjeta');
     const cobro = await cobrar({ tipo: 'compra', id: compraId }, medio.idTarjeta);
     setTrabajando(false);
     if (!cobro.ok) {
@@ -1263,15 +1347,44 @@ export default function DespensaCheckout() {
              exacto en que la familia acabó de entregar su tarjeta.
              *El silencio, en ese momento, se lee como que algo salió mal.* */
           <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-            <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-            <Texto variante="cuerpo">{t('pago.esperaCuerpo')}</Texto>
-            {/* ⑦ LA RAMPA QUE TRABAJA — **la misma que el checkout de reserva**.
-                Antes acá no había NADA en movimiento y en el paseo respiraba una
-                huella: *dos pantallas que dicen la misma frase y se mueven
-                distinto son dos productos.* */}
-            <EsperaDeTrabajo />
+            {/* ══ 🔴 LA MISMA FASE, DOS CUERPOS (S105-C) ═══════════════════
+                `LETRA_DEUNA` §6, firma ② del founder: *«funciona exactamente
+                igual que si fuera tarjeta»* — **misma pantalla, misma salida,
+                misma transición sola a pagada. Lo único que cambia es el
+                cuerpo.**
+
+                🔴 **La asimetría que sí existe: en tarjeta la familia ESPERA;
+                en DeUna la familia TRABAJA.** Por eso `EsperaDeTrabajo` no se
+                monta en este riel (N15): *una rampa que dice «estamos
+                trabajando» mientras la persona teclea afirma algo falso — la
+                que trabaja es ella.* Su lugar lo ocupa la cuenta regresiva del
+                código, que es información y no adorno. */}
+            {riel === 'deuna' ? (
+              <EsperaDeUna
+                estado={deuna.estado}
+                onGenerarNuevo={deuna.regenerar}
+                onSoporte={irASoporte}
+              />
+            ) : (
+              <>
+                <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
+                <Texto variante="cuerpo">{t('pago.esperaCuerpo')}</Texto>
+                {/* ⑦ LA RAMPA QUE TRABAJA — **la misma que el checkout de
+                    reserva**. Antes acá no había NADA en movimiento y en el
+                    paseo respiraba una huella: *dos pantallas que dicen la
+                    misma frase y se mueven distinto son dos productos.* */}
+                <EsperaDeTrabajo />
+              </>
+            )}
             {/* El tope habla y **no declara desenlace**: la compra sigue viva
-                y el barrido la resuelve el mismo día. */}
+                y el barrido la resuelve. **Vale para los dos rieles** — en
+                DeUna llega más tarde porque el tope se corre con el código, no
+                porque se haya apagado.
+                ⚠️ **La cadencia del barrido NO se afirma acá.** Para tarjeta
+                está medida (mismo día); **para DeUna no la medí** y su
+                aplicador sigue abierto (`D-887`). *Extender «mismo día» al
+                riel nuevo porque suena parejo sería inventar una promesa
+                sobre un reloj ajeno.* */}
             {espera.fase === 'sigue_abierta' ? (
               <Texto variante="apoyo">{t('pago.esperaSigueAbierta')}</Texto>
             ) : null}
