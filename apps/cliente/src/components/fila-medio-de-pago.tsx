@@ -244,13 +244,49 @@ export function FilaMedioDePago({
  * comentario declara medidos contra «DINERS». *Misma caja, mismo radio, mismo
  * aire que las cinco tarjetas: es lo que esa pieza existe para garantizar.*
  */
-export function FilaDeUna() {
+export function FilaDeUna({ onPress }: { onPress?: () => void }) {
   const { t } = useTraduccion();
+
+  /* 🔴 SIN `onPress` LA FILA SIGUE SIENDO LA DE ANTES: se dibuja, dice «muy
+     pronto» y no se toca. **Esa rama no es residuo — es el camino de vuelta**
+     si el riel se retira (ver `DEUNA_ELEGIBLE`). *Borrarla obligaría a
+     reconstruirla el día que haga falta apagar, que es justo el día en que
+     nadie tiene tiempo de construir nada.* */
+  if (!onPress) {
+    return (
+      <Celda
+        titulo={t('pago.deunaFila')}
+        subtitulo={t('pago.deunaPronto')}
+        inicio={<LogoFranquicia marca="deuna" />}
+      />
+    );
+  }
+
+  /* ── ELEGIBLE (25-ago) ────────────────────────────────────────────────────
+     Mismo contrato que `FilaMedioDePago` con `zonaFin="camino"`: `interactiva`
+     + rol + chevron. *`Celda` exige el rol cuando hay `onPress` a propósito,
+     para que ninguna fila sea tocable sin decirle al lector de pantalla qué
+     es. Se respeta, no se esquiva.*
+
+     🔴 **Y SIN SUBTÍTULO, que es un cambio y no un olvido.** ⏪ Decía *«Muy
+     pronto vas a poder pagar desde tu app Deuna»* — **cierto hasta hoy y falso
+     desde el flip.** *Una fila que se puede tocar mientras promete que todavía
+     no se puede es peor que cualquiera de los dos estados por separado.*
+     Las filas de tarjeta usan el subtítulo para decir CUÁL es (marca + últimos
+     cuatro); **DeUna no tiene un dato equivalente**, así que callar es lo
+     honesto. *Inventar acá una frase nueva sería meter una cadena a pantalla
+     sin el lote de strings del founder.*
+     ⇒ **Propuesta para su próximo lote, NO construida:** un subtítulo que diga
+     qué pasa al elegirlo («Pagás desde tu app Deuna»). Hoy la fila dice su
+     nombre y muestra su marca, que es lo que hace toda fila de medio. */
   return (
     <Celda
       titulo={t('pago.deunaFila')}
-      subtitulo={t('pago.deunaPronto')}
+      interactiva
+      accessibilityRole="button"
+      onPress={onPress}
       inicio={<LogoFranquicia marca="deuna" />}
+      fin={<Chevron direccion="derecha" />}
     />
   );
 }
@@ -258,18 +294,38 @@ export function FilaDeUna() {
 /**
  * 🔴 ¿DEUNA SE PUEDE ELEGIR? — **UNA sola constante, y es el interruptor.**
  *
- * Hoy `false` **por un dato del comercio que no tenemos**: el `pointOfSale`
- * (medido por D: obligatorio, numérico, y **no lo expone ningún endpoint** —
- * 16 sondeos, 404 en los 16). Sin él no se crea ni una transacción.
- * **Dueño: el founder.**
+ * ✅ **ENCENDIDA el 25-ago-2026, por firma del founder.** Las dos mitades que
+ * esta nota exigía están: **el `pointOfSale` llegó** (QA 4262774) y **la puerta
+ * de D responde** — `payment/request` devuelve `200` con `numericCode` de seis
+ * dígitos. *La advertencia de abajo cumplió su trabajo: nadie la flipeó
+ * creyendo que con eso alcanzaba.*
  *
- * ⚠️ **NO alcanza con ponerla en `true` para encender el riel.** Cuando el
- * dato llegue hacen falta las dos mitades: **ésta** y **la puerta de D**
- * (`pagos-deuna-solicitud`). *Se escribe acá para que quien la flipee no crea
- * que terminó — una constante que enciende media función es peor que una
- * apagada.*
+ * ⏪ Decía: *«hoy `false` por un dato del comercio que no tenemos — el
+ * `pointOfSale`, obligatorio, numérico, y no lo expone ningún endpoint (16
+ * sondeos, 404 en los 16)»*. **Se conserva tachada y no borrada**: quien lea un
+ * parte de la semana pasada tiene que poder ver que citaba la verdad de su día.
+ *
+ * ⚠️ **QUÉ ENCIENDE Y QUÉ NO — y esto sí hay que leerlo antes de tocarla.**
+ * Enciende **elegir el riel y pedir el código**. **NO enciende la
+ * confirmación**: el webhook **todavía no está registrado del lado de Deuna**,
+ * así que hoy la transición a pagada dependería **solo del sondeo**. *Y con la
+ * app de producción no se puede pagar un código de QA, así que el camino real
+ * se corta en el código.* **Lo que esta constante hace alcanzable es la
+ * pantalla, no el desenlace.**
+ *
+ * 🔴 **ES UN INTERRUPTOR DE OTA, NO UN KILL SWITCH.** Vive en el bundle: para
+ * apagarlo hay que publicar. *Un riel de plata que solo se apaga con un deploy
+ * no se apaga a las 3 de la mañana.* **El kill switch de verdad vive en
+ * `app_config`** —como `recurrente_vivo`, precedente de S103— **y es de A.**
+ * No lo construyo yo desde acá: se declara para que la diferencia esté a la
+ * vista el día que haga falta.
+ *
+ * ⚠️ **Y tipada `boolean` A PROPÓSITO, no inferida como `true`.** Con el
+ * literal, TypeScript daría por muertas las ramas de «DeUna no se puede
+ * elegir» de `useMedioDePago` — *y no están muertas: son el camino de vuelta
+ * si el riel se retira.*
  */
-export const DEUNA_ELEGIBLE = false;
+export const DEUNA_ELEGIBLE: boolean = true;
 
 /** El bloque de una fila vencida, para cuando la pantalla quiera explicarlo. */
 export function VozVencida({ visible }: { visible: boolean }) {

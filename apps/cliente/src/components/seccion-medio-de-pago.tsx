@@ -67,6 +67,35 @@ export type MedioElegido =
   | { tipo: 'tarjeta'; id: string }
   | { tipo: 'deuna' };
 
+/**
+ * 🔴 **QUÉ RIELES TIENEN PUERTA VIVA — `Record` exhaustivo, y ésa es la
+ * defensa entera.**
+ *
+ * Un medio se puede elegir sin que exista quien lo cobre: fue **el estado real
+ * de DeUna durante tres sesiones**. Mientras el gate del botón preguntaba por
+ * `idTarjeta`, ese caso se atajaba **de casualidad** —un id de tarjeta es nulo
+ * cuando lo elegido no es una tarjeta— y **la casualidad se acabó justo al
+ * encender el riel**: la misma línea que protegía pasó a apagar el botón sobre
+ * un medio que sí puede pagar.
+ *
+ * **Con `Record<MedioElegido['tipo'], …>`, agregar un tercer riel al tipo
+ * ROMPE EL TYPECHECK** hasta que alguien declare si tiene puerta. *No es
+ * prolijidad: es la diferencia entre enterarse al compilar y enterarse por una
+ * persona tocando un botón que rebota.* Es el mismo mecanismo que `FAMILIA_DE`
+ * en `deuna-estado`, y por la misma razón.
+ */
+const PUERTA_VIVA: Record<MedioElegido['tipo'], boolean> = {
+  /** `pagos-cobro` con la tarjeta tokenizada. */
+  tarjeta: true,
+  /** `pagos-deuna-solicitud` — viva desde el 25-ago-2026. */
+  deuna: true,
+};
+
+/** Sin medio elegido no se paga; con uno cuyo riel no tenga puerta, tampoco. */
+export function puedePagarCon(m: MedioElegido | null): boolean {
+  return m !== null && PUERTA_VIVA[m.tipo];
+}
+
 export type MedioDePago = {
   medios: TarjetaGuardada[];
   elegido: MedioElegido | null;
@@ -316,7 +345,12 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
 
               Y por esto la sección se llama «cómo quieres pagar» y no «tus
               tarjetas» (`LETRA_PUERTA_DE_PAGO_S101B` §8bis⑤). */}
-          <FilaDeUna />
+          {/* ✅ ENCENDIDA (25-ago). Sin `onPress` la fila vuelve sola a su
+              estado de «muy pronto» — el interruptor es uno solo y está en
+              `DEUNA_ELEGIBLE`, no repartido en dos lados. */}
+          <FilaDeUna
+            onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined}
+          />
           {/* El desempate se calcula UNA vez para toda la lista: la fila no
               puede saber que tiene una gemela. */}
           {(() => {
@@ -371,16 +405,16 @@ export function BotonPagar({
       etiqueta={t('pago.pagar')}
       bloque
       cargando={trabajando}
-      /* 🔴 EL GATE MIRA `idTarjeta`, NO `elegido` — y la diferencia apareció
-         al montar el default.
-         Con DeUna elegido, `elegido` NO es null ⇒ con la condición vieja el
-         botón quedaba **habilitado sin poder cobrar**: `cobrar()` recibiría
-         `null` y fallaría contra el servidor. *Un botón que se deja tocar y
-         rebota es peor que uno apagado — la persona no sabe si pagó.*
-         ☠️ Cuando D entregue la puerta de DeUna, esta línea pasa a preguntar
-         «¿hay medio elegido Y su puerta existe?». **Hoy la única puerta viva
-         es la de tarjeta, y eso es lo que la condición dice.** */
-      deshabilitado={deshabilitadoPorLaPantalla || medio.idTarjeta === null}
+      /* 🔴 EL GATE PREGUNTA «¿HAY MEDIO ELEGIDO **Y SU PUERTA EXISTE**?» —
+         que es literalmente lo que la versión anterior dejó escrito que había
+         que hacer *«cuando D entregue la puerta de DeUna»*. Entregó.
+         ⏪ Miraba `idTarjeta === null`, y era correcto mientras la única puerta
+         viva fuera la de tarjeta: con DeUna elegido el botón habría quedado
+         **habilitado sin poder cobrar**. *Un botón que se deja tocar y rebota
+         es peor que uno apagado — la persona no sabe si pagó.*
+         Hoy `idTarjeta` **subestimaría al revés**: apagaría el botón con DeUna
+         elegido, que sí puede pagar. */
+      deshabilitado={deshabilitadoPorLaPantalla || !puedePagarCon(medio.elegido)}
       onPress={onPagar}
     />
   );
