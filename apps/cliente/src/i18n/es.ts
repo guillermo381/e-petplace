@@ -2372,6 +2372,18 @@ export const clienteEs = {
     vehiculoCarro: 'Carro',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
+    /* 🔴 S105-C · LA VOZ QUE FALTABA, Y SU AUSENCIA ERA EL DEFECTO.
+       `pagando` era la UNICA de las siete narrativas sin voz propia en la
+       pantalla ⇒ caia a `narrativa_nombre`, o sea **la palabra del MOTOR**:
+       «Pagando». Y el catalogo dice de si mismo que su `nombre` es
+       *descripcion de referencia, no el copy final* — «la voz definitiva la
+       escribe la pantalla» (Ley 3 extendida). Estabamos mostrando el
+       vocabulario del motor en la unica fila donde la persona tiene algo
+       que hacer.
+       *«Pagando» es presente progresivo: dice que algo esta pasando ahora.
+       Sobre un intento que fallo hace dias no esta pasando nada, y la fila
+       quedaba indistinguible de un pedido comprado.* */
+    estadoPendientePago: 'Pendiente de pago',
     desvioCancelado: 'Cancelado',
 
     // S96 · Tus pedidos

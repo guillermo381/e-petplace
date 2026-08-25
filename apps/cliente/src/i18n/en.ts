@@ -1773,6 +1773,7 @@ export const clienteEn = {
     vehiculoCarro: 'Car',
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
+    estadoPendientePago: 'Payment pending',
     desvioCancelado: 'Canceled',
 
     // S96 · Your orders
