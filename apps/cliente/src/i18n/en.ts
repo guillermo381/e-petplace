@@ -1028,6 +1028,8 @@ export const clienteEn = {
   // S57-A P18 — single walk cancellation and rescheduling. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Single walk',
+    citaCancelada: 'Cancelled',
+    citaCanceladaVoz: 'This booking was cancelled.',
     detalleTitulo: 'This walk',
     ventanasVoz: 'You can cancel up to a day before; after that, you can only reschedule. With less than 2 hours, the walk is lost.',
     reagendar: 'Reschedule',

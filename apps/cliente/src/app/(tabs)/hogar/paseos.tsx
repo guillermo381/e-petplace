@@ -679,6 +679,31 @@ export default function MisPaseos() {
                               : 'suelto.citaSuelta',
                         )} · ${f.cita.duracion_minutos} min`}
                         metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)}`}
+                        /* 🔴 S105-C · LA MARCA DE CANCELADA, Y CURA UNA FILA
+                           QUE MENTÍA. `cerradaP` manda al historial todo lo
+                           que no es `confirmada`, y esta fila **no pintaba el
+                           estado**: una cita cancelada quedaba con el mismo
+                           título, el mismo origen, la misma fecha y la misma
+                           foto que un paseo que sí ocurrió.
+                           *Una ausencia se nota; una fila que miente, no* —
+                           por eso es peor que el silencio de los otros
+                           lectores, que directamente la excluyen.
+
+                           ⚠️ **Y no es un caso que espera al reverso: ya es
+                           alcanzable.** `cancelar_cita_suelta` (P18) está
+                           construida, publicada y llamada desde esta misma
+                           pantalla ⇒ **cualquiera que cancele su paseo hoy lo
+                           ve en el historial como si hubiera pasado.**
+
+                           `info` y no `atencion`: **cancelada no es una
+                           alarma.** Copia el criterio que la despensa ya usa
+                           para su desvío cancelado —tono neutro, sin drama—
+                           en vez de inventar uno nuevo. */
+                        fin={
+                          f.cita.estado === 'cancelada' ? (
+                            <Insignia estado="info" etiqueta={t('suelto.citaCancelada')} />
+                          ) : undefined
+                        }
                         mascota={{
                           nombre: nombre ?? t('explorar.paseoTitulo'),
                           fotoUrl: mascotasHogar.find((m) => m.id === idMascota)?.fotoUrl,
@@ -940,6 +965,22 @@ export default function MisPaseos() {
               subtitulo={t(detalle.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
               metadataMono={`${detalle.hora.slice(0, 5)} · ${detalle.duracion_minutos} min${detalle.precio !== null ? ` · $${detalle.precio.toFixed(2)}` : ''}`}
             />
+            {/* 🔴 S105-C · UNA CITA CANCELADA NO OFRECE NADA, Y CURA UN
+                TERCER DEFECTO que apareció midiendo los otros dos: acá abajo
+                viven «Reagendar» y «Cancelar», y **`cancelar_cita_suelta`
+                exige `estado = 'confirmada'`** ⇒ sobre una cancelada **los dos
+                rebotan**. *Es la Ley 23 al pie: la puerta no ofrece lo que va
+                a rechazar.* Y el de reagendar es peor que inútil: promete
+                recuperar un horario que ya se soltó.
+
+                La voz dice **el hecho y nada más** — ver `citaCanceladaVoz`:
+                el lector no trae el motivo y hoy hay DOS causas vivas que
+                escriben el mismo estado, así que nombrar una sería acertar la
+                mitad de las veces. */}
+            {detalle.estado === 'cancelada' ? (
+              <Texto variante="cuerpo">{t('suelto.citaCanceladaVoz')}</Texto>
+            ) : (
+              <>
             <Texto variante="apoyo">{t(detalle.origen === 'paquete' ? 'paquete.ventanasVoz' : 'suelto.ventanasVoz')}</Texto>
             {detalle.origen === 'suelta' ? (
               <>
@@ -966,6 +1007,8 @@ export default function MisPaseos() {
                 cargando={accionando}
                 onPress={() => void cancelarDePaquete(detalle)}
               />
+            )}
+              </>
             )}
           </View>
         ) : null}

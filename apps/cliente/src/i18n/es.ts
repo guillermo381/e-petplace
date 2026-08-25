@@ -1184,6 +1184,20 @@ export const clienteEs = {
   // S57-A P18 — cancelación y reagenda del paseo suelto. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Paseo suelto',
+    /* 🔴 S105-C · LA MARCA QUE FALTABA EN LA FILA. Sin ella una cita
+       cancelada se dibujaba en el historial IDENTICA a un paseo que
+       ocurrio: mismo titulo, mismo origen, misma fecha, misma foto.
+       *Una ausencia se nota; una fila que miente, no.* */
+    citaCancelada: 'Cancelada',
+    /* 🔴 LA VOZ NO DICE POR QUE, Y ES MEDIDO, NO PUDOR: el lector no trae
+       el motivo, y hoy hay DOS causas vivas que escriben el mismo estado —
+       la cancelacion del propio cliente (P18, con reembolso) y el reverso
+       del pago (S105-A). *Nombrar una de las dos seria acertar la mitad de
+       las veces, y la mitad equivocada le diria que le devolvieron plata
+       que nunca se movio, o al reves.* Lo que SI es cierto siempre es el
+       hecho. Ver el pedido a A: con `motivo` en el lector, la voz gana su
+       segunda linea. */
+    citaCanceladaVoz: 'Esta reserva quedó cancelada.',
     detalleTitulo: 'Este paseo',
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',
