@@ -20144,8 +20144,38 @@ estado **`reverso_fallido`** y `chk_hallazgo_vocabulario` ya admite
 `reversado_mismo_dia`. **El vocabulario está construido y el acto no.** *Un
 estado que nada puede producir es un cajón con etiqueta y sin fondo.*
 
-**⚡ Disparo: la mesa asigna dueño.** Hasta entonces **no lo toma nadie por
-iniciativa** — repartirlo mal es peor que dejarlo declarado.
+~~**⚡ Disparo: la mesa asigna dueño.** Hasta entonces **no lo toma nadie por
+iniciativa** — repartirlo mal es peor que dejarlo declarado.~~
+
+---
+
+### ✅ ENMENDADA — 24-ago-2026 · **YA TIENE DUEÑO Y YA TIENE DISPARO**
+
+> **Firma del founder, mesa 106:** **dueño D** · **disparo: después de que el
+> riel corra en QA.**
+
+**Y lo que la destrabó no fue una decisión: fue un dato.** La respuesta de DeUna
+del 24-ago —verbatim en `docs/DEUNA_RESPUESTA_2026-08-24.md` §1.4— dice que **los
+reversos SÍ se pueden simular**. ⇒ *dejó de ser una pieza que no se podía
+ensayar y pasó a ser construible.*
+
+> ### **Esta ficha estuvo dos días esperando a un proveedor y en realidad esperaba a un dueño; y el mensaje que le quitó el último argumento también le quitó la excusa.**
+
+**Estado medido hoy, al enmendarla** (contra la base viva, no contra el traspaso):
+**cero reversos de cualquier riel** · **`reverso_fallido` con cero filas** ·
+**`forma = tokenizacion` en las 44 de `pagos_intentos`**. ⇒ *el cajón con
+etiqueta sigue sin fondo, y ahora se sabe quién lo construye.*
+
+⚠️ **Y su ventana cambió el mismo día, así que se construye contra la nueva:**
+**24 horas en DeUna · mismo día en Nuvei** (`LETRA_DEUNA` §8, enmienda del
+24-ago). *Construirlo contra «mismo día» para los dos rieles sería construirlo
+mal para uno.*
+
+**Dueño:** **D** · **Disparo:** **después de que el riel corra en QA** — *no
+antes: un reverso que no se puede ensayar contra un cobro real es un reverso que
+se prueba el día que hace falta.*
+☠️ **Condición de muerte:** un reverso corrió de punta a punta en QA, **dentro de
+la ventana de su riel**, y `reverso_fallido` dejó de ser un estado sin productor.
 
 ---
 
@@ -20862,6 +20892,23 @@ A propuso dos caminos: forzar reconocimiento local (perdiendo cobertura) **o dec
 ✅ **Cómo se cazó, y es lo que conviene copiar:** **C reportó sus call sites con los nombres de campo explícitos** —`leo r.data.enviado_a`— en vez de escribir *«calza el contrato»*. **Sin ese literal, A no la ve.** ⇒ *el receptor de un contrato lo devuelve CITADO, no resumido; el emisor lee esa cita como una medición de lo que realmente entregó.*
 
 **La cura fue hacia atrás, y también es regla:** ganó **el nombre que el receptor ya había escrito**, no el que el emisor prefería. *Entre tener razón gramatical y hacerle tocar cuatro archivos a quien construyó contra lo que se le dio, gana lo segundo — sobre todo cuando la divergencia la introdujo el emisor.*
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-418 — toda respuesta de un proveedor se cita CON SU FECHA Y SU CANAL
+**Firmada por el founder (24-ago-2026), sobre un hallazgo de la pista A al enmendar `LETRA_DEUNA` §8.**
+
+**El caso.** §8 decía, en negrita y como hecho cerrado: *«El proveedor lo confirmó por mensaje: **MISMO DÍA**»*, y hasta tachaba la ambigüedad previa de su documentación como resuelta. **Se escribió el 22-ago y era cierto ese día.** El **24-ago el mismo proveedor, por el mismo canal, respondió 24 horas.**
+
+> **No fue su documentación la que era ambigua: fue el proveedor el que dio dos respuestas distintas a la misma pregunta, con dos días de diferencia.**
+
+🔴 **Lo que la vuelve regla y no anécdota es qué se hizo con la primera respuesta:** *se usó para CERRAR una pregunta abierta.* La letra la sacó de su §12 —*«ya no es pregunta abierta»*— y la convirtió en el fundamento de una promesa de cara al cliente que iba a los T&C. ⇒ **una respuesta sin fecha no envejece: se lee como permanente, y por eso puede clausurar una pregunta que el proveedor todavía tenía abierta.**
+
+**La ley: toda respuesta de un proveedor se cita con SU FECHA y SU CANAL.** *«DeUna dijo» ya significó dos cosas opuestas en la misma sección.* Y su corolario, que es el que decide qué hacer cuando pasa: **la más nueva rige; la vieja NO se borra — un proveedor que se contradice es un dato sobre el proveedor**, y ese dato vale para calibrar cuánto peso soporta su próxima respuesta.
+
+**Emparenta con `L-166`** (*todo dato vivo se lee al momento de usarlo*) **por un flanco que L-166 no cubre:** ahí el dato envejece **en nuestra base** y se puede re-medir cuando se quiera; acá envejece **en la boca de un tercero**, y **no hay forma de re-medirlo sin volver a preguntarle**. ⇒ *por eso la cita tiene que traer la fecha: es lo único que le dice al lector futuro cuán vieja es la única fuente que hay.*
+
+✅ **Y el efecto sobre el motor se midió en vez de suponerse, que es la otra mitad:** `LETRA_MOTOR_PAGOS_S101` §5.0 funda las compuertas pre-cobro en *«el reverso es mismo-día»*. Con la ventana real más ancha, **el motor venía siendo más conservador de lo necesario** ⇒ **no había defecto que curar: había margen que nadie usaba.** *Un cambio de premisa no siempre rompe algo hacia abajo; averiguar en qué dirección afloja es parte de la enmienda.*
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
