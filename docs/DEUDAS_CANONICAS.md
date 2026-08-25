@@ -20179,6 +20179,50 @@ la ventana de su riel**, y `reverso_fallido` dejó de ser un estado sin producto
 
 ---
 
+### 🔴 SUS TRES PRIMEROS CASOS REALES — 24-ago-2026, y ya no es hipotética
+
+**Aparecieron por accidente**, intentando reprocesar otra cosa: el reproceso de
+`D-912` abortó con `transicion_no_permitida: cancelado_cliente → pago_capturado`.
+**El founder ordenó el censo en el acto** —*«si hay dos, puede haber veinte»*— y
+el censo lo cerró.
+
+**Universo medido** (base de producción linkeada, 24-ago; `pagos_intentos` con
+`authorization_code` o `estado='aprobado'`, **excluidos** los proveedores
+sintéticos `seed_gate`/`simulado`/`siembra`): **28 intentos con plata real.**
+
+| | n | suma |
+|---|---|---|
+| ✅ **sanos** — compra `pagada` / cita `pagada`, intento `aprobado` | **25** | $358,30 |
+| 🔴 **plata contra un sujeto que ya no puede recibirla** | **3** | **$87,65** |
+
+| txid | monto | sujeto | su estado | `authorization_code` |
+|---|---|---|---|---|
+| `DF-2099041` | **70,90** | compra | pedido **`cancelado_cliente`** | `w9MeO3` |
+| `DF-2099049` | **6,00** | **cita** | **`expirada`** *(y su fecha ya pasó)* | `4MBzFW` |
+| `DF-2100043` | **10,75** | compra | pedido **`cancelado_cliente`** | `UacVQL` |
+
+> ### **Los tres sospechosos son EXACTAMENTE los tres intentos que quedaron `pendiente` con código de autorización. No es coincidencia: es la cadena.**
+> **El pago no se aplicó a tiempo → el sujeto se venció o lo cancelaron mientras
+> esperaba → ahora el pago ya no SE PUEDE aplicar.** *El defecto técnico de
+> `D-912` no solo dejó pagos sin registrar: **produjo el problema de plata**, y
+> lo produjo por el paso del tiempo, que es la única variable que nadie puede
+> deshacer.*
+
+⚠️ **Y el tercero es el que `D-912` acaba de destrabar.** `DF-2100043` es el
+único evento posterior a la cura de S103 — **su pedido también está
+`cancelado_cliente`.** ⇒ **quien lo reprocese creyendo que el sellador curado lo
+arregla va a chocar con la misma pared.** *La cura del sellador arregla el
+futuro; no resucita un sujeto muerto.*
+
+✅ **Lo que el censo también dice, y conviene leerlo:** **25 de 28 están
+perfectos.** *No hay una fuga sistemática — hay tres casos con una causa común y
+un techo conocido.*
+
+**Estos tres NO se aplican, por firma del founder.** Su salida es el reverso, que
+es esta ficha.
+
+---
+
 ### D-889 🟠 · LA LEY DEL «SOLO-BAJA» VIVE ÚNICAMENTE EN PROSA
 
 🟠 **MEDIA-ALTA. Abierta 22-ago-2026, hallazgo de S103-B.** **Dueño: A + B.**
@@ -21193,3 +21237,160 @@ rol_invitado text not null default 'adulto_autorizado'
 **Dueño:** pista del riel (D) para el sellador · A para el reproceso de los cuatro de ①.
 **Disparo:** 🔴 **antes de presentarle un caso a Erick.** *El paso 9 pide demostrar un cobro con DF + código de autorización: los datos están y el circuito de esos tres no cerró — un caso que no cierra no se puede presentar como caso.*
 ☠️ **Condición de muerte:** un cobro nuevo de Nuvei llega, **se sella su credencial desde el dato y no desde el texto**, se aplica, y el comprobante sale — **verificado sobre un cobro que nació después de la cura**, jamás sobre uno reprocesado a mano.
+
+---
+
+### 🔴 EL REPROCESO SE INTENTÓ Y SE FRENÓ — 24-ago-2026. **NINGUNO DE LOS CUATRO ERA APLICABLE**
+
+**Firmado por el founder** (con el dato que disolvía el freno original: *los
+correos de esas cuentas le llegan a él, así que no hay tercero recibiendo un
+comprobante sobre plata suya*). **Se midió antes de aplicar, y la medición lo
+frenó dos veces.**
+
+**Freno ①** — la sentencia abortó con `transicion_no_permitida:
+cancelado_cliente → pago_capturado`. **Rollback completo verificado**: los cuatro
+eventos siguen en `recibido` con `pago_id` NULL y el contador de `aplicado` sigue
+en 23. *Que fuera una sola sentencia con `UNION ALL` fue suerte de forma, no
+diseño: sueltos, tres se habrían aplicado antes de que el cuarto avisara.*
+
+**Freno ②** — con firma para correr el de la cita **solo**, se midió **el estado
+del SUJETO antes de aplicar** y apareció `estado_reserva = expirada`, con la
+fecha de la cita ya pasada. **No se aplicó.**
+
+🔴 **Y LO QUE LA MEDICIÓN CORRIGIÓ ES LA FICHA MISMA:** esta deuda decía *«cuatro
+cobros que no cerraron»*. **Falso, y el error es de quien la escribió (A):**
+
+| txid | lo que la ficha decía | lo que el objeto dice |
+|---|---|---|
+| `DF-2098177` · `DF-2098569` | atascados | ✅ **resueltos**: intento `aprobado`, pedido `pago_capturado`, compra **pagada** |
+| `DF-2099041` | atascado | 🔴 pedido **`cancelado_cliente`** — caso de reverso |
+| `DF-2099049` | atascado | 🟡 **no es una compra: es una CITA**, y su reserva **expiró** |
+
+> ### **Se leyó el estado del EVENTO y se lo reportó como estado del SUJETO.**
+> **Es el mismo defecto que esta sesión venía nombrando —mirar un color sin
+> preguntar qué mide— cometido por quien lo estaba nombrando.** *Dos de los
+> cuatro nunca necesitaron nada: su negocio se completó por otra vía y lo único
+> huérfano era el evento, que es cosmético.*
+
+**Firma del founder sobre los cuatro:** los dos de $8,05 **se dejan en
+`recibido`** —*un evento huérfano no molesta a nadie; un `UPDATE` sobre la tabla
+de webhooks queda en la historia para siempre*— y los otros dos **no se aplican**:
+van a `D-888` con el tercero que el censo encontró.
+
+---
+
+#### D-913 — 🔴 «GENERAR UN CÓDIGO NUEVO» NO PUEDE FUNCIONAR: **el primer código de una compra es el único que se puede pedir**
+🔴 **ALTA.** Hallada por la pista **D** (24-ago-2026) y **verificada contra el objeto por A antes de ficharla**, porque la ficha la firma quien la deposita.
+
+**La cadena, y ningún eslabón está mal por sí solo:**
+
+① `LETRA_DEUNA` §5 + **firma ② del founder** prometen que *mientras viva el hold, el cliente puede regenerar códigos* ⇒ existe el botón **«Generar un código nuevo»**.
+② El botón llama a la **misma puerta**.
+③ La puerta consulta `verificar_compuertas_pre_cobro` **antes** de crear el intento.
+④ La **compuerta 0** rebota `pago_en_proceso` con cualquier intento en `('iniciado','pendiente')` — **y NO mira `codigo_expira_en`.**
+⑤ El intento viejo **queda `pendiente` y nada lo cierra.**
+
+**Verificado por A contra `pg_proc`, no leído del reporte:** la compuerta **no menciona `codigo_expira_en`**, y **CERO funciones de la base lo mencionan** — *la columna existe y no la mira nadie.*
+
+> ### **El primer código de una compra es el único que se puede pedir. Vencido a los 3 minutos, la persona queda con el hold vivo y sin forma de obtener otro.**
+> **Y lo que recibe es `pago_en_proceso` — «ya tenés un pago en curso»— cuando lo
+> que tiene es un código muerto y ninguna plata en vuelo.** *Una voz correcta
+> para un estado que no es el suyo: el mensaje la manda a esperar algo que no va
+> a pasar.* **No falla, no lanza, no deja traza: devuelve un código tipado
+> legítimo.**
+
+🔴 **EL BORDE QUE NINGUNA CURA PUEDE IGNORAR:** si la compuerta simplemente
+**dejara de contar los vencidos**, quedarían **dos códigos vivos del lado del
+proveedor** —medido en el sondeo de D: regenerar con la misma referencia da
+`transactionId` nuevo y el viejo sigue `PENDING`— **y los dos se pueden pagar.**
+*La compuerta impide crear el segundo, no impide pagar el primero.*
+⇒ **ablandar la compuerta sin matar el código viejo cambia un cliente trabado
+por un DOBLE COBRO, que es peor.** **La cura tiene que MATAR el viejo, no
+ignorarlo.**
+
+**Tres caminos, y la mesa elige:**
+
+| | camino | dueño | estado |
+|---|---|---|---|
+| (a) | la compuerta ignora los vencidos | **A** | ⛔ **sola NO SIRVE** — es exactamente el borde de arriba |
+| (b) | la puerta **cierra** el intento viejo antes de abrir el nuevo | **D** | ✅ **más barato de lo que parecía — ver abajo** |
+| (c) | la regeneración **reusa** el mismo intento | **D** | pide medir el candado `UNIQUE` |
+
+✅ **EL DATO QUE ABARATA (b), Y NO LO TENÍA QUIEN LA HALLÓ:** D lo frenó porque
+*«pide vocabulario de estado (¿`expirado`?) y eso es letra»*. **Medido: el CHECK
+de `pagos_intentos.estado` YA ADMITE `'expirado'`** —junto a `iniciado`,
+`pendiente`, `aprobado`, `rechazado`, `reversado`, `reverso_fallido`—.
+⇒ **el vocabulario no hay que escribirlo: falta su productor.**
+
+> **Es la tercera vez en esta mesa que aparece la misma figura** —`reverso_fallido`
+> sin productor, `reversado_mismo_dia` sin productor, y ahora `expirado`—:
+> ***un cajón con etiqueta y sin fondo.*** **Vale la pena censar el CHECK entero
+> y preguntar, valor por valor, quién lo escribe.**
+
+💡 **HIPÓTESIS, declarada COMO hipótesis y NO como dato** (de D): el `refund` que
+devuelve *«The QR … has been successfully cleaned»* sobre una transacción no
+pagada **podría ser el mecanismo de ANULACIÓN DE CÓDIGO del proveedor** — o sea,
+justo lo que (b) necesita para matar el viejo **del lado de DeUna** y no solo del
+nuestro. ⚠️ **No se ejerce hasta tener respuesta:** el id que dice haber limpiado
+es **nuestro `pointOfSale`**, y si limpia el QR del punto de venta entero,
+usarlo para anular un código **tumbaría los códigos vivos de todos los demás.**
+
+**Qué NO es, para que nadie la infle:** **no bloquea el estreno** —el primer
+código funciona— y **hoy es teórica**: cero sujetos con más de un intento
+pendiente. *Pero deja de serlo con la primera persona que se distraiga tres
+minutos, y un TTL de 3 min hace eso probable, no excepcional.* **Y no es defecto
+de quien construyó la compuerta:** protege un invariante real y **la letra del
+riel nació después**. *Falta el eslabón entre las dos.*
+
+### 🔴🔴 AGRAVANTE — LA COMPUERTA ES POR **COMPRA**, NO POR RIEL *(hallazgo de C, verificado por A)*
+
+**Y esto es peor que todo lo de arriba.** La compuerta 0 cuenta así:
+
+```
+SELECT count(*) FROM pagos_intentos
+ WHERE compra_id = p_compra_id AND estado IN ('iniciado','pendiente')
+```
+
+**No hay filtro por `proveedor`.** ⇒ el intento de DeUna que queda `pendiente`
+para siempre **no bloquea solo a DeUna:**
+
+> ### **Pedir un código de DeUna deja la compra INPAGABLE POR CUALQUIER VÍA — tarjeta incluida — para siempre.**
+> *La persona que pide un código, se distrae tres minutos y decide pagar con
+> tarjeta, no puede.* **Y no hay pantalla que lo explique, porque el rebote dice
+> «ya tenés un pago en curso» y no lo tiene.**
+
+**Por qué nada lo limpia, medido:** el webhook **no está registrado** del lado de
+DeUna · el barrido de DeUna **no escribe `estado`** y **no tiene cron** (18
+crones, ninguno suyo — `D-887` abierta) · y **cero funciones miran
+`codigo_expira_en`**. *Tres piezas que podrían cerrarlo y ninguna existe.*
+
+🔴 **Consecuencia sobre la cura: (3) NO se arregla desde la pantalla.** Las dos
+primeras consecuencias son de superficie y de puerta; **ésta es de MOTOR**, y por
+eso el camino (a) —ablandar la compuerta— pasa de *insuficiente* a *urgente
+pero todavía insuficiente solo*: hay que **matar el intento viejo**, no dejar de
+contarlo.
+
+⚠️ **NOTA DE MÉTODO, y es incómoda:** A tenía **el literal de la compuerta a la
+vista** —lo leyó entero para contestar otra pregunta— **y no sacó esta
+conclusión**; incluso le dijo a C que su línea de defensa sería *«cortesía, no
+seguridad»*. **Falso: es un callejón garantizado.** *Leer el código correcto no
+alcanza si no se le hace la pregunta correcta* — y la pregunta *«¿esto filtra por
+riel?»* solo se le ocurrió a quien estaba montando el segundo riel.
+
+### 🔴 ALCANCE DEL BLOQUEO — firma del founder, 24-ago-2026
+
+> **Es BLOQUEANTE del riel para TRÁFICO REAL. NO bloquea el estreno visual.**
+
+**Y el corte es exacto, no prudencial: el primer código funciona.** *Lo que no
+funciona es el segundo* ⇒ una demo, un gate en dispositivo o cualquier recorrido
+que pida **un** código pasan sin tocar el defecto. **Lo que no puede pasar es una
+persona real con tres minutos de distracción.**
+
+⚠️ **La cura depende de una respuesta del proveedor que el founder pide mañana:**
+si el `refund` que devuelve *«The QR … has been successfully cleaned»* **anula un
+código** o **tumba el punto de venta entero**. **Hasta saberlo, NADIE ejerce ese
+endpoint** — su peor caso deja sin códigos vivos a todos los demás.
+
+**Dueño:** mesa (elegir camino) · **D** (b o c) · **A** (el productor de `expirado`, si gana (b)) · **founder** (la pregunta al proveedor, que hoy es la que destraba).
+**Disparo:** 🔴 **antes de que el riel reciba tráfico real** *(el flip de `DEUNA_ELEGIBLE` para gente que no sea la mesa)*. *Encender la puerta del cliente con esto abierto es estrenar el riel con un callejón de tres minutos.*
+☠️ **Condición de muerte:** una persona regenera un código después de que el primero venció, **obtiene uno nuevo**, y **el viejo queda muerto de los dos lados** — el nuestro y el del proveedor.
