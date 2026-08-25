@@ -32,3 +32,33 @@ export function esVerdadVerificada(httpOk: boolean, cuerpo: unknown): boolean {
     && String(c.status ?? '').toUpperCase() === 'APPROVED'
     && Number(c.amount ?? 0) > 0;
 }
+
+/**
+ * Con qué llave se le pregunta a `payment/info`.
+ *
+ * 🔴 **SE PREFIERE `idType "1"` — NUESTRA REFERENCIA** *(dictamen de mesa,
+ * 22-ago; antes era al revés)*. La razón está **medida**: la respuesta real de
+ * QA por `idType "0"` trae **`internalTransactionReference` vacío**, y el
+ * actuador resuelve el sujeto **sólo** por ese campo ⇒ con `"0"`, una consulta
+ * perfecta puede volver sin la llave para saber a quién aplicarle el pago.
+ * Por `"1"` la respuesta **devuelve la referencia por eco** — medido.
+ *
+ * *La cura vive de este lado y no en el actuador porque parchear el actuador
+ * para tolerar una referencia vacía agregaría tolerancia justo donde la casa
+ * acaba de decidir fail-closed.*
+ *
+ * 🔑 Dos formas del proveedor que nadie adivinaría: `idType` es **texto**
+ * `"0"`/`"1"` (un `0` numérico rebota) y el campo se llama
+ * **`idTransacionReference`** — con el typo del proveedor. **No se "corrige".**
+ *
+ * @returns el cuerpo del POST, o `null` si no hay ninguna llave — *y `null` no
+ * es un cuerpo vacío: es «no hay a quién preguntarle», que el llamador tiene
+ * que tratar distinto de una consulta que falló.*
+ */
+export function cuerpoDeConsulta(
+  txId: string, refCorta: string,
+): { idType: '0' | '1'; idTransacionReference: string } | null {
+  if (refCorta) return { idType: '1', idTransacionReference: refCorta };
+  if (txId) return { idType: '0', idTransacionReference: txId };
+  return null;
+}
