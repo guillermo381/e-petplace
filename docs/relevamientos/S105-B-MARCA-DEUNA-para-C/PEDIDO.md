@@ -100,21 +100,48 @@ X = 84 px del asset  ×  escala 0.052381  =  4.400 dp en pantalla
 > El aire vertical disponible es exactamente **5 dp** por lado y X pide **4,40**.
 > **Sobran seis décimas de punto.**
 
-### ⚠️ Y por eso, tres cosas que NO se pueden tocar
+### ⚠️ Y por eso, el límite — que es UNA desigualdad, no dos prohibiciones
 
-1. **`ALTO_LOGO = 32` no baja.** A 31 el área de reserva se viola.
-2. **`CONTENIDO_ALTO = 22` no sube.** A 23 el isotipo crece, X crece con él, y
-   también se viola.
-3. **Nada se dibuja dentro de la caja además del logo** — ni un borde interno, ni
-   un badge, ni un check de seleccionado. *La regla dice «ningún elemento
-   gráfico», y adentro de la caja no hay excepción que valga.*
+Como X sale del propio dibujo, escala con el contenido: **X = 0,2 × `CONTENIDO_ALTO`**.
+⇒ La condición entera se reduce a esto:
 
-**El modo de falla es silencioso:** cambiar una constante de layout **no da error,
-no rompe un test, y viola el manual de una marca registrada sin que nadie lo
-note.** ⇒ **Ofrezco mecanizarlo con una regla del juez** (`verify-diseno`, mi
-territorio): que falle si esas constantes se mueven sin recalcular el resguardo.
-**Decilo y la escribo** — no la construí ahora porque el founder priorizó que
-este pedido llegara antes que el gate.
+```
+CONTENIDO_ALTO × 1,4  ≤  ALTO_LOGO
+        22    × 1,4 = 30,80  ≤  32   ✅  hoy
+```
+
+**Hoy: 30,80 de 32.** Con 22 y 32 entra; con `CONTENIDO_ALTO` en 23 **no entra**
+(32,20 > 32); con `ALTO_LOGO` en 30 **no entra** (30,80 > 30).
+
+> ⏪ **CORRECCIÓN A LA v2 DE ESTE DOCUMENTO — y la hizo la regla, no yo.**
+> Acá decía *«`ALTO_LOGO` no baja de 32: a 31 el área de reserva se viola»*.
+> **Es falso: a 31 todavía entra** (30,80 ≤ 31), con 0,10 dp de holgura por lado.
+> Lo descubrí probando la regla en rojo contra el código real — **salió verde y
+> tenía razón.** *Escribí una prohibición redonda donde había una desigualdad, y
+> el mecanismo que construí para vigilar el límite fue el que encontró que yo lo
+> había escrito mal. Es exactamente para lo que se mecanizó.*
+
+**Y el tercer límite, que sigue en pie y NO está mecanizado:**
+**nada se dibuja dentro de la caja además del logo** — ni un borde interno, ni un
+badge, ni un check de seleccionado. *Su manual dice «ningún elemento gráfico», y
+adentro de la caja no hay excepción que valga.* **Esto lo tenés que cumplir vos:
+la regla no lo mide** (contar hijos JSX sería frágil, y una regla que grita
+cuando no debe enseña a ignorarla).
+
+### ✅ YA ESTÁ MECANIZADO — `R65` en `verify-diseno` (firmada por el founder)
+
+**No tenés que acordarte de nada de esto: si lo violás, el lint te frena.** La
+regla **no compara constantes contra un número que yo escribí** — lee las cuatro
+del código, **mide el asset real** (aspecto y X, por decodificación de alfa y
+componentes conexas) y **rehace la cuenta**.
+
+Tiene tres brazos, los tres probados en rojo contra el código real:
+- **A ·** la cuenta del resguardo, con el número impreso en el mensaje.
+- **B ·** el mínimo de reproducción de 16 px.
+- **C ·** 🔴 **el candado del asset.** Si el archivo cambia —por ejemplo cuando
+  llegue el SVG— la regla se pone roja **pidiendo re-medición**, porque *X es una
+  propiedad del glifo dibujado, no del archivo*. **No actualices el hash para que
+  el lint se calle: actualizalo cuando la cuenta se haya rehecho y dé.**
 
 ---
 
