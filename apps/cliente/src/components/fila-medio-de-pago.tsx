@@ -247,16 +247,23 @@ export function FilaMedioDePago({
 export function FilaDeUna({ onPress }: { onPress?: () => void }) {
   const { t } = useTraduccion();
 
-  /* 🔴 SIN `onPress` LA FILA SIGUE SIENDO LA DE ANTES: se dibuja, dice «muy
-     pronto» y no se toca. **Esa rama no es residuo — es el camino de vuelta**
-     si el riel se retira (ver `DEUNA_ELEGIBLE`). *Borrarla obligaría a
-     reconstruirla el día que haga falta apagar, que es justo el día en que
-     nadie tiene tiempo de construir nada.* */
+  /* 🔴 SIN `onPress` LA FILA SE DIBUJA Y NO SE TOCA. **Esa rama no es residuo —
+     es el camino de vuelta** si el riel se retira (ver `DEUNA_ELEGIBLE`), y el
+     25-ago se volvió la rama VIVA. *Borrarla habría obligado a reconstruirla
+     justo el día en que nadie tiene tiempo de construir nada.*
+
+     🔴 **Y SU VOZ YA NO PROMETE UNA FECHA — decisión del founder, 25-ago.**
+     ⏪ Decía *«Muy pronto vas a poder pagar desde tu app Deuna»*. **Con `D-913`
+     abierta y sin fecha, «muy pronto» promete algo que no controlamos**, y el
+     riel se apagó justo por una deuda que no tiene dueño de calendario.
+     *Una promesa de tiempo que hace la app y cumple un tercero es una promesa
+     que la app no puede hacer.* Hoy dice **lo que sí es cierto: que está en
+     preparación.** */
   if (!onPress) {
     return (
       <Celda
         titulo={t('pago.deunaFila')}
-        subtitulo={t('pago.deunaPronto')}
+        subtitulo={t('pago.deunaPreparando')}
         inicio={<LogoFranquicia marca="deuna" />}
       />
     );
@@ -325,7 +332,33 @@ export function FilaDeUna({ onPress }: { onPress?: () => void }) {
  * elegir» de `useMedioDePago` — *y no están muertas: son el camino de vuelta
  * si el riel se retira.*
  */
-export const DEUNA_ELEGIBLE: boolean = true;
+/**
+ * ☠️ **APAGADA EL 25-ago, DESPUÉS DEL GATE — firma del founder, y NO es un
+ * retroceso: es lo que el gate vino a permitir.**
+ *
+ * *Se encendió para que un ojo la viera y se apaga con ese ojo satisfecho.*
+ * **Gate VERDE** (fila primera y tocable · isotipo · blanco fijo en los tres
+ * temas · botón habilitado · sin giro · los seis dígitos con su reloj).
+ *
+ * 🔴 **Y el motivo del apagado NO es la pantalla — es `D-913` llegando a gente
+ * real POR EL DEFAULT.** La cadena, medida pieza por pieza:
+ * ① sin preferencia previa, `useMedioDePago` devuelve `{tipo:'deuna'}` —
+ * *nadie eligió DeUna; se la asignamos* · ② el botón queda habilitado · ③
+ * tocar «Pagar» pide el código y el intento queda `pendiente` · ④ **la compra
+ * queda impagable por cualquier vía, tarjeta incluida, para siempre** (la
+ * compuerta filtra por `compra_id` **sin filtrar por proveedor**).
+ * ⇒ **alguien que compra sin pensar rompe su propio carrito sin haber elegido
+ * DeUna jamás.** *El flip no expone el riel a quien lo quiera probar: se lo
+ * pone por delante a todo el mundo.*
+ *
+ * ✅ **CONDICIÓN DE RE-ENCENDIDO, escrita para que no dependa de que alguien
+ * se acuerde: `D-913` curada.** No hace falta el webhook ni un cron — el
+ * vocabulario `'expirado'` ya vive en el CHECK de `pagos_intentos.estado` desde
+ * S95, `codigo_expira_en` **se escribe y no lo lee nadie**, y la casa resuelve
+ * esta forma con **expiración perezosa** desde S54. *Es de A/D, no de esta
+ * constante.*
+ */
+export const DEUNA_ELEGIBLE: boolean = false;
 
 /** El bloque de una fila vencida, para cuando la pantalla quiera explicarlo. */
 export function VozVencida({ visible }: { visible: boolean }) {
