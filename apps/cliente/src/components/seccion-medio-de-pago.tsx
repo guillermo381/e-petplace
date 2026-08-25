@@ -48,6 +48,7 @@ import {
 import {
   DEUNA_ELEGIBLE, FilaDeUna, FilaMedioDePago, desempatarMedios,
 } from '@/components/fila-medio-de-pago';
+import { LogoFranquicia } from '@/components/logo-franquicia';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
 
@@ -257,12 +258,27 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
             </>
           ) : elegido?.tipo === 'deuna' ? (
             /* La elegida es DeUna: **no hay tarjeta que dibujar** — no tiene
-               marca, ni últimos 4, ni alias. Su fila es la suya. */
+               marca, ni últimos 4, ni alias. Su fila es la suya.
+
+               🔴 **PERO SÍ TIENE LOGO, y acá faltaba.** Hallazgo del gate del
+               founder (25-ago): en la hoja del selector la marca se veía y
+               **acá seguía siendo texto**, al lado de cinco tarjetas que sí
+               mostraban la suya.
+
+               **Es el residuo exacto de lo que yo mismo había predicho** y no
+               terminé de recorrer: escribí que el fallback de texto *«muere en
+               el acto en que se monta el asset»*, y **el acto cubrió la fila
+               del selector y no ésta** — dos superficies que dibujan la misma
+               marca, una migrada y la otra no. *Un enchufe se declara
+               completo por la pieza que se montó, y se mide por los LUGARES
+               donde esa pieza se dibuja: son dos preguntas distintas y yo
+               contesté la primera.* Lo encontró un ojo, no un gate. */
             <Celda
               titulo={t('pago.deunaFila')}
               interactiva
               accessibilityRole="button"
               onPress={medio.abrirEleccion}
+              inicio={<LogoFranquicia marca="deuna" />}
               fin={<Texto variante="dato">{t('pago.medioCambiar')}</Texto>}
             />
           ) : elegido !== null ? (
