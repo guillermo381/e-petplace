@@ -395,6 +395,39 @@ Y `pagando` **es una intención, no un estado** (firma del founder, S100): la le
 
 ## §9 · LO QUE NO ENTRA, Y LA RAZÓN
 
+> ### 🔴 ENMIENDA 25-ago-2026 — **EL REEMBOLSO YA NO ESTÁ FUERA DE ALCANCE. Firma del founder.**
+>
+> ~~Esta §9 excluía el reembolso del alcance del motor.~~ **El banco lo exige
+> como REQUISITO DE CERTIFICACIÓN**, sobre todo para las pruebas productivas con
+> tarjetas reales. ⇒ **`D-888` pasa a bloqueante** (dueño **D** el riel, **A** el
+> motor) y nace **`D-923`** — *el actuador no maneja `REVERSED`: hoy un reverso
+> del proveedor no mueve nada de nuestro lado.*
+>
+> 🔴 **Lo tachado NO se borra, y por una razón que se usa:** `D-923` **se apoya
+> en esta exclusión** para declarar que el actuador **no estaba incompleto sino
+> fuera de alcance**. *Borrar la letra vieja convertiría una decisión en un
+> olvido, y le echaría a quien lo escribió la culpa de haber obedecido.*
+>
+> **Tres datos de Erick que la construcción obedece — son del proveedor, no
+> nuestros:**
+> · **el reverso en Ecuador es SIEMPRE TOTAL**, no hay parcial ⇒ **el motor no
+>   toca el desglose congelado: revierte el intento entero.** *Restricción del
+>   país; si algún día cambia, que se sepa qué la sostenía.*
+> · **la ventana cierra a las 17:00 `America/Guayaquil`** — **no** «mismo día
+>   calendario» ⇒ **es un reloj con huso y se construye como restricción del
+>   motor.** *El huso ya está expresado en el cron del recurrente: se reusa esa
+>   expresión en vez de inventar otra.*
+> · **se puede ejercer en sandbox:** débito y después llamada al API de reverso.
+>   ⇒ **el plazo deja de depender de un tercero.**
+>
+> ✅ **Y una mitad ya existe, medida:** `aplicar_reembolso` **está construida, es
+> contable y no llama al proveedor** (toca el ledger, no toca `pagos_intentos`).
+> *Es la mitad delicada y ya está hecha; lo que falta es el otro lado y el puente
+> entre los dos.*
+>
+> **La certificación se aplazó al jueves por esto**, con su razón declarada:
+> ***esta casa no declara verde lo que no corrió.***
+
 > ### ✏️ ENMIENDA 22-ago-2026 — EL REVERSO GANA DUEÑO, y esta sección era la mitad del hueco
 >
 > **Esta §9 excluía el reembolso de su alcance y `LETRA_DEUNA` §8 lo llamaba

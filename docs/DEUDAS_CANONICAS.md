@@ -21782,6 +21782,61 @@ Listar las 8 de ese usuario exigiría **8 llamadas y conocer los 8 uid de antema
 **Disparo:** 🔴 **antes de producción con tarjetas reales.** *En sandbox no se manifiesta, y por eso no bloquea la certificación.*
 ☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid` · **cuando no puede preguntar, lo dice en vez de callarlo** · y **una tarjeta que la persona vio y dejó de ver le explica su ausencia y le ofrece volver a agregarla**.
 
+#### D-923 — 🔴 EL ACTUADOR NO MANEJA `REVERSED`: un reverso del proveedor no mueve nada de nuestro lado
+🔴 **ALTA · BLOQUEANTE DE LA CERTIFICACIÓN.** **Texto de la pista D**, medido el 25-ago-2026 **con Erick al teléfono** al preparar el caso de reverso; **depositada por A** (`DEUDAS_CANONICAS` es su territorio). **Dueño: A** — el actuador es motor. **Va con `D-888`, que es su cura.**
+
+### El hecho, medido sobre la definición viva
+
+```
+aplicar_evento_de_pago · maneja 'REVERSED'  : false
+                       · maneja 'reversado' : false
+                       · maneja 'refund'    : false
+                       · solo mira status aprobado : true
+```
+
+**El actuador tiene una sola pregunta: ¿el status es aprobado?** Cualquier otro —`REVERSED` incluido— cae en `status_no_aprobado` y **devuelve `aplicado:false` sin tocar el sujeto.**
+
+> ### **Si el proveedor reversa, el webhook llega, se autentica, se registra… y el pedido sigue pagado y el intento sigue `aprobado`.**
+> **La plata ya volvió del lado del banco y nuestro lado sigue diciendo que se cobró.** *No es un estado feo: es una divergencia entre lo que el sistema afirma y lo que pasó con el dinero.*
+
+**El vocabulario ya lo contempla, y eso lo abarata:** `pagos_intentos.estado` y `webhook_events.resultado` **ya admiten `'reversado'` y `'reverso_fallido'`. Nadie los produce** — mismo patrón que `'expirado'` (`D-915`).
+
+### Lo que NO es, para no inflarlo
+
+- **No es del todo silencioso:** el evento queda con su `status_no_aprobado` ⇒ **hay traza. Falta el efecto, no el rastro.**
+- **No hay daño hoy:** **cero intentos en `'reversado'`** en toda la base, y jamás se ejerció un reverso. **El primero es el de la certificación.**
+- 🔴 **NO es defecto de quien escribió el actuador:** `LETRA_MOTOR_PAGOS_S101` §9 **excluía el reembolso de su alcance**. *Estaba fuera de alcance **por letra**, no por olvido.* **Lo que cambió es que la certificación lo pide** — y esa letra queda enmendada por firma del founder (25-ago).
+
+### 🔴 SU CRUCE CON `D-916`, Y EL ORDEN NO ES INTERCAMBIABLE
+
+**`D-916`** dice que el `UPDATE` del actuador **no tiene guard de estado** ⇒ un evento de aprobación posterior devuelve el intento a `'aprobado'`. **Hoy ese borde es INALCANZABLE porque nada produce `'reversado'`.**
+
+> ### **`D-923` es exactamente lo que lo vuelve alcanzable.**
+> ⇒ **se curan juntas y en este orden: PRIMERO el guard (`D-916`), DESPUÉS el productor (`D-923`).**
+> *Al revés se abre la puerta y después se pone la cerradura* — y en el medio queda una ventana donde un reverso puede deshacerse solo.
+
+**Disparo:** 🔴 **antes de la certificación (jueves).**
+☠️ **Condición de muerte:** un `REVERSED` del proveedor deja el intento en `'reversado'`, revierte el devengo por `aplicar_reembolso`, y el sujeto deja de decir que está pagado — **ejercido, no simulado**.
+
+#### L-421 — UN CONTROL QUE NO PUEDE FALLAR TAMPOCO PUEDE PASAR
+**Firmada por el founder (25-ago-2026), sobre un error propio de la pista A.**
+
+**El caso.** A escribió un pedido a C con este criterio de verificación: *«`stokenValido` sigue en `true` — es el control negativo»*. **Medido después por D y verificado por A: `altas_tarjeta` tiene 45 filas y `stoken_valido` es NULL en las 45.** El stoken **nunca vino en el body**, así que **`stokenValido` jamás estuvo en `true`.**
+
+> ### **Un control que no puede fallar tampoco puede pasar.**
+
+🔴 **Y su modo de falla es lo que la vuelve ley, no anécdota:** quien corriera ese control **habría visto `null`** — y **`null` no distingue «la cura falló» de «nunca hubo qué medir».** *Un control roto que devuelve un valor ambiguo es peor que no tener control: el que no existe se nota; éste se lee como un resultado.*
+
+**Y el error de fondo era de la misma familia que `L-419`: razonamiento correcto sobre un hecho falso.** El pedido también afirmaba que sin la cura *«`stokenValido` pasa a `false` en todas las altas»* — **no pasaría a `false`: seguiría en `null`**, porque el `if (st.valor)` nunca entra.
+
+✅ **El control que lo reemplaza, y por qué sí sirve** *(propuesto por D)*: **que `stoken_detalle` cambie de `formula=candidata_transaccion` a `formula=candidata_transaccion_uid`.**
+
+> **La diferencia no es de redacción: el control nuevo NO DEPENDE DE UN TERCERO.** *El viejo necesitaba que el proveedor mandara algo para poder medirse; el nuevo prueba que nuestro código corrió, y eso está enteramente de nuestro lado.*
+
+⇒ **La pregunta que deja: ¿este control puede dar rojo hoy?** Si la respuesta es no —porque falta un dato, porque el camino no se ejerce, porque depende de un tercero— **no es un control: es una expresión de deseo.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
 ### ✅ La verificación de §37.4, con su límite declarado
 
 **Pedido:** confirmar que el tope de seis meses de comisiones —**válido en B2B, NULO si se replica en Pet Parent**— no esté replicado.
