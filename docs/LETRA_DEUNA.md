@@ -94,7 +94,9 @@ quieres pagar» no gestiona nada: se elige y se paga.
   primer fallo. **El payload trae `customerIdentification` (cédula) y
   `customerFullName`** → §9.
 - **`POST /merchant/v1/payment/refund`** — devolución **solo del monto total**
-  (sin parciales), **solo mismo día** → §8. `transactionReverseId` se persiste.
+  (sin parciales), ~~**solo mismo día**~~ **dentro de 24 HORAS** *(enmienda
+  24-ago-2026 — la ventana es POR RIEL: ver §8)* → §8.
+  `transactionReverseId` se persiste.
   🔴 **El refund se pide por la MISMA PAREJA `idType` + id que el `info`** —
   ~~por `transactionId` suelto~~. *Es el mismo contrato de identificación en
   las tres rutas; tratarlo distinto en el reverso era una asimetría inventada
@@ -284,6 +286,19 @@ voz de próximamente: *«Muy pronto vas a poder pagar desde tu app Deuna.»*
 *Se declara acá para que nadie lea la pantalla de hoy como si ya cumpliera esta
 sección.*
 
+> ## ☠️ **NOTA DE VENCIMIENTO — 24-ago-2026: EL RECUADRO DE ARRIBA YA NO DESCRIBE LA PANTALLA.**
+> **La fila de DeUna YA ES LA PRIMERA** (firma del founder, 24-ago). Lo que el
+> recuadro mide —última, apagada, bajo el fold— **fue cierto el 22-ago y dejó de
+> serlo.** Se conserva tachado y no borrado: *dice qué había que cambiar y que
+> se cambió.*
+>
+> **Por qué se marca en vez de eliminarse, que es la parte que sirve:** un
+> «estado medido» sin fecha de vencimiento **se sigue leyendo como presente**.
+> Quien abriera esta sección mañana leería que la superficie contradice la letra
+> —y saldría a arreglar algo que ya está arreglado—, que es exactamente el costo
+> que `L-395` midió: *un puente que sobrevive a su río manda al próximo a
+> construir otro.*
+
 ## §7 · EL WEBHOOK — señal, no verdad
 
 Su autenticación son **headers estáticos** (nuestra key/value registrada) —
@@ -302,20 +317,44 @@ Dedupe, registro crudo y tolerancia de reintentos: el patrón del buzón de
 Nuvei rige idéntico (mismo contrato, buzón hermano o extendido — la pista
 mide qué existe).
 
-## §8 · EL REVERSO — mismo día, total, sin parciales
+## §8 · EL REVERSO — **24 horas en DeUna · mismo día en Nuvei**, total, sin parciales
 
-- **Por API:** solo el monto **total**, solo **mismo día**. Los parciales NO
-  existen en este riel.
-- ✅ **RESUELTO — ya no es supuesto.** ~~Ambigüedad de su propia doc: un
-  recuadro dice «dentro de las 24 horas», otro «solo mismo día».~~ **El
-  proveedor lo confirmó por mensaje: MISMO DÍA.** *La firma ③ del founder
-  eligió el supuesto más restrictivo y el dato le dio la razón — la letra deja
-  de apoyarse en una elección prudente y pasa a apoyarse en un hecho.* **Sale
-  de §12: ya no es pregunta abierta.**
+- **Por API:** solo el monto **total**, y ~~solo **mismo día**~~ **dentro de la
+  ventana de SU RIEL** *(DeUna 24 h · Nuvei mismo día — firma 24-ago, abajo)*.
+  Los parciales NO existen en este riel.
+- 🔴 **LA VENTANA ES POR RIEL — firma del founder, 24-ago-2026.**
+  **DeUna: 24 HORAS** *(respuesta del proveedor del 24-ago; verbatim en
+  `docs/DEUNA_RESPUESTA_2026-08-24.md` §1.4).*
+  **Nuvei: MISMO DÍA** *(literal de Erick).*
+  *No es un detalle de implementación: es el plazo que la casa le promete al
+  cliente, y **difiere según por dónde pagó**. Una sola frase de superficie que
+  no nombre el riel va a ser falsa para la mitad de la gente.*
+
+  ⚠️ **CÓMO SE LLEGÓ ACÁ, y se escribe porque cambia el trato de toda respuesta
+  futura del proveedor.** Esto decía, hasta hoy:
+  > ~~✅ **RESUELTO — ya no es supuesto.** Ambigüedad de su propia doc: un
+  > recuadro dice «dentro de las 24 horas», otro «solo mismo día». **El
+  > proveedor lo confirmó por mensaje: MISMO DÍA.**~~
+
+  **Eso se escribió el 22-ago y era cierto ese día.** El **24-ago el mismo
+  proveedor respondió 24 horas**. ⇒ **no fue su documentación la que era
+  ambigua: fue el proveedor el que dio dos respuestas distintas a la misma
+  pregunta, con dos días de diferencia.**
+
+  > ### **La más nueva rige; la vieja no se borra — un proveedor que se contradice es un dato sobre el proveedor.**
+  > **Toda respuesta suya se cita con su fecha y su canal.** *«DeUna dijo» sin
+  > fecha ya significó dos cosas opuestas en esta misma sección.*
+
+  ✅ **Efecto sobre las compuertas pre-cobro, medido y no supuesto:**
+  `LETRA_MOTOR_PAGOS_S101` §5.0 las funda en *«el reverso es MISMO-DÍA»*.
+  Para DeUna la ventana real resultó **más ancha, no más angosta** ⇒ el motor
+  venía siendo **más conservador de lo necesario**. *No hay defecto que curar
+  acá: hay margen que nadie estaba usando.* **§5.0 no se toca en esta pasada.**
 - **La vía automática es el saldo** (`LETRA_SALDO` rige — segunda
   ratificación medida de la arquitectura saldo-céntrica): cancelaciones en
   ventana acreditan saldo; el reverso al medio original es vía manual
-  (API si mismo día y monto total; pasado eso, gestión administrativa por
+  (API si está dentro de la ventana de su riel —§8— y por el monto total;
+  pasado eso, gestión administrativa por
   soporte, declarada).
 - `REVERSED_FAILED` (el reverso que DeUna no pudo acreditar) es **caso de
   soporte 🔴 con registro** — plata del cliente en el limbo jamás se archiva
@@ -331,7 +370,7 @@ se devuelve un cobro.*
 
 | | |
 |---|---|
-| **El refund por API es de la PISTA DEL RIEL (D)** | es **una llamada al proveedor con su autenticación y su ventana de mismo día** — misma clase que la solicitud y el buzón, no una pieza de motor |
+| **El refund por API es de la PISTA DEL RIEL (D)** | es **una llamada al proveedor con su autenticación y su ventana** (24 h en DeUna, §8) — misma clase que la solicitud y el buzón, no una pieza de motor |
 | **Lo que NO es de D** | **cuándo se reversa y qué recibe el cliente** — ya firmado en `LETRA_SALDO`: **vía automática = saldo · medio original = vía manual** |
 | **NO entra en el v1** | el reverso por API es **camino manual de soporte**: se construye **después** del circuito de cobro |
 
@@ -369,7 +408,7 @@ antes de las credenciales QA.
 |---|---|---|
 | ① | Formato v1: **el código de 6 dígitos** — «por el tipo de comercio que somos» (literal founder). Transposición: `format:"5"` + `qrType:"dynamic"`; la UI muestra SOLO el código; deeplink/QR reserva sin pantalla | ✅ **FIRMADA — founder, 21-ago-2026** |
 | ② | **La experiencia es idéntica a pagar con tarjeta** — misma selección, misma espera con voz, misma transición sola, mismo comprobante. El hold gobierna la sesión; el código vive sus 3 min fijos | ✅ **FIRMADA — founder, 21-ago-2026** |
-| ③ | Reverso: ~~supuesto declarado~~ **mismo día — CONFIRMADO por el proveedor (22-ago)**. La firma eligió el más restrictivo y el dato coincidió: **pasa de supuesto a hecho** | ✅ **FIRMADA — founder, 21-ago-2026 · CONFIRMADA — proveedor, 22-ago-2026** |
+| ③ | Reverso: ~~supuesto declarado~~ ~~**mismo día — CONFIRMADO por el proveedor (22-ago)**~~ ☠️ **ENMENDADA 24-ago: la ventana es POR RIEL — DeUna 24 h, Nuvei mismo día (§8).** *El proveedor dio dos respuestas distintas con dos días de diferencia; rige la del 24-ago* | ✅ **FIRMADA — founder, 21-ago · CONFIRMADA — proveedor, 22-ago · ENMENDADA — founder, 24-ago** |
 | ④ | Todo lo demás | Rige por letra ya firmada (motor · saldo · citas · curas S102) |
 
 > **Esta letra no tiene firmas pendientes: RIGE completa.**
