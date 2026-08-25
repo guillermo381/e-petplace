@@ -44,8 +44,16 @@ const PASOS_MS = [2_000, 3_000, 5_000, 8_000, 12_000, 15_000] as const;
  *    **NO declara ningún desenlace**: la compra sigue viva y el barrido
  *    mismo-día la va a resolver. *Un tope que se dibuja como «rechazado» hace
  *    que la familia vuelva a pagar algo que quizá ya pagó.*
+ *
+ * 🔴 **QUÉ MIDE, y por eso se exporta (S105-C):** *cuánto esperamos al webhook
+ *    DESPUÉS de que la plata se movió.* Con tarjeta el débito ya ocurrió
+ *    cuando esta espera arranca, así que 90 s es todo el margen que hace
+ *    falta. **Con DeUna la plata todavía NO se movió**: la persona está
+ *    cambiando de app y tecleando seis dígitos. *El mismo número mediría dos
+ *    cosas distintas.* Por eso el riel de DeUna lo usa como **margen**, no
+ *    como tope — ver `topeDeEspera` en `deuna-estado`.
  */
-const TOPE_MS = 90_000;
+export const TOPE_MS = 90_000;
 
 /**
  * 🔴 QUÉ SE ESPERA — **el sujeto, explícito** (S101-C). La compra de despensa y
@@ -69,10 +77,61 @@ export type Espera =
 /**
  * Mira hasta que el sujeto se resuelva, se acabe el tope, o la pantalla pierda
  * el foco. **No escribe nada** — solo lee.
+ *
+ * @param topeMs **cuánto más, DESDE AHORA, tiene sentido seguir mirando.** Por
+ *        omisión `TOPE_MS`, que es la conducta de tarjeta y **no cambia**.
+ *
+ * 🔴 **ES UN MARGEN DESDE AHORA, NO UNA DURACIÓN TOTAL — y la diferencia la
+ * encontré trazando el reloj, no leyendo el código.** Mi primera versión lo
+ * comparaba contra *el tiempo transcurrido desde que la espera arrancó*,
+ * mientras `topeDeEspera` lo calcula *desde ahora*: **dos orígenes distintos
+ * para el mismo número.** Con tarjeta coincidían (la espera arranca cuando la
+ * plata ya se movió); con DeUna **el tope se disparaba justo al vencer el
+ * código**, porque el valor iba encogiendo mientras el reloj de comparación
+ * iba creciendo, y los dos se cruzaban ahí. *Compilaba, y el error era de
+ * aritmética del tiempo — la clase que solo aparece si uno se sienta a
+ * trazarla minuto a minuto.*
+ *
+ * ⇒ **Se guarda un INSTANTE LÍMITE absoluto, y SOLO SE MUEVE HACIA ADELANTE.**
+ * Anclado a `venceEn`, `Date.now() + topeMs` da **el mismo instante en cada
+ * render** aunque el margen encoja — o sea que el límite queda quieto solo
+ * mientras el código sea el mismo, y **se corre de verdad cuando nace uno
+ * nuevo.** *Un tope que puede retroceder deja a la pantalla rindiéndose antes
+ * que la persona.*
+ *
+ * 🔴 **Y va por REF, no por dependencia del efecto**: si `topeMs` remontara el
+ * sondeo, cada regeneración volvería el backoff a 2 s y el reloj a cero.
+ * *Sondear más rápido porque la persona pidió otro código es castigar al
+ * servidor por un gesto de ella.*
+ *
+ * ⚠️ Se escribe en un efecto y no en el render: *escribir una ref durante el
+ * render es de las cosas que funcionan hasta que StrictMode las mira.* Los
+ * efectos corren mucho antes del primer tick (2 s), así que el límite ya está
+ * puesto cuando se lo compara por primera vez.
+ *
+ * ⚠️ **LÍMITE CONOCIDO, declarado en vez de curado (S105-C):** si la persona
+ * **regenera el código DESPUÉS** de que el tope ya se cumplió, el sondeo ya se
+ * cortó y **no vuelve** — mover el límite no lo resucita. Medido qué cuesta:
+ * **nada de plata.** El pago se registra igual server-side y la pantalla
+ * conserva su salida; lo que se pierde es que **celebre sola**. Curarlo pide
+ * que el sondeo se REARME con cada código nuevo, y eso **no se construye a
+ * ciegas**: hoy el camino real no corre y no habría con qué probarlo.
  */
-export function useEsperaDeConfirmacion(sujeto: SujetoEnEspera | null): Espera {
+export function useEsperaDeConfirmacion(
+  sujeto: SujetoEnEspera | null,
+  topeMs: number = TOPE_MS,
+): Espera {
   const [espera, setEspera] = useState<Espera>({ fase: 'mirando' });
   const vivo = useRef(true);
+  /** El INSTANTE en que se deja de mirar. **Solo avanza**, dentro de una espera. */
+  const limite = useRef(0);
+  /** El último margen conocido — lo lee el arranque, que no puede depender de él. */
+  const margen = useRef(topeMs);
+  useEffect(() => {
+    margen.current = topeMs;
+    const propuesto = Date.now() + topeMs;
+    if (propuesto > limite.current) limite.current = propuesto;
+  }, [topeMs]);
   /* Las dos identidades por separado: son las dependencias reales del efecto.
      Pasar el objeto lo remontaría en cada render —un literal nuevo cada vez—
      y el sondeo arrancaría de cero para siempre, sin cerrar nunca. */
@@ -85,7 +144,19 @@ export function useEsperaDeConfirmacion(sujeto: SujetoEnEspera | null): Espera {
        closure no dependa de una prop que TS ve como nullable. */
     const id: string = sujetoId;
     vivo.current = true;
-    const desde = Date.now();
+    /* ☠️ Acá vivía `const desde = Date.now()`: el origen contra el que se medía
+       el tope viejo. **Murió con él** — hoy el corte es un INSTANTE absoluto
+       (`limite`) y no una duración, así que no hay desde qué contar.
+
+       🔴 **PERO EL LÍMITE SE ANCLA ACÁ, Y ESO NO ES OPCIONAL.** «Solo avanza»
+       vale DENTRO de una espera; **cada espera arranca con el suyo fresco.**
+       *Sin esto, un resumen que quedó abierto cinco minutos antes de que
+       alguien tocara «Pagar» heredaba un límite del MONTAJE —ya vencido— y la
+       pantalla decía «está tardando más de lo normal» **en el primer tick**,
+       sobre un cobro que acababa de empezar.* El defecto lo abrió el cambio de
+       duración a instante: *mover un origen de tiempo mueve todo lo que colgaba
+       de él, y lo que colgaba no avisa.* */
+    limite.current = Date.now() + margen.current;
     let paso = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -108,7 +179,7 @@ export function useEsperaDeConfirmacion(sujeto: SujetoEnEspera | null): Espera {
         return;                       // se corta solo, como el precedente
       }
 
-      if (Date.now() - desde > TOPE_MS) {
+      if (Date.now() > limite.current) {
         /* 🔴 NO es un desenlace. La compra sigue viva y el barrido la resuelve
            el mismo día. La pantalla lo dice con su voz y ofrece salida. */
         setEspera({ fase: 'sigue_abierta' });

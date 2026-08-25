@@ -46,6 +46,8 @@ import {
   type SujetoDeuna,
 } from '@epetplace/api';
 
+import { TOPE_MS } from '@/lib/pagos/espera-confirmacion';
+
 /**
  * 🔴 LAS CINCO FAMILIAS DE FALLO — `CONTRATO_WRAPPER_DEUNA` §4.
  *
@@ -287,17 +289,31 @@ export type GuionDeEnsayo = keyof typeof ENSAYO;
 /**
  * 🔴 **LA COSTURA.** Hoy resuelve contra `ENSAYO`; mañana contra la puerta de D.
  *
- * @param guion **solo del andamio** — desaparece con él. La firma real va a
- *        recibir el sujeto (`{tipo:'compra'|'cita', id}`), como `cobrar()`.
+ * @param entrada el sujeto real, un guion de ensayo, o **`null`**.
+ *
+ * 🔴 **`null` NO ES UN LUJO DE SIMETRÍA: ES EL FRENO (S105-C).** Sin él, este
+ * hook **pide un código por el hecho de montarse** — y pedir un código no es
+ * leer: **crea un intento de pago contra el proveedor.** *Una pantalla de
+ * checkout que abre su fase de resumen habría fabricado una transacción en
+ * DeUna sin que nadie tocara «Pagar», y el rastro quedaría del lado del
+ * proveedor, donde nadie de esta casa lo mira.*
+ *
+ * Es la misma ley que `useEsperaDeConfirmacion` ya cumple con su `null`
+ * (*«pasarle `null` en las otras fases es lo que impide que el checkout sondee
+ * por existir»*), y la misma que el andamio del alta se cobró: **las pantallas
+ * no hacen cosas por estar abiertas.** Con la diferencia que la vuelve más
+ * cara acá: *sondear de más cuesta viajes; pedir de más cuesta transacciones.*
  */
-export function useEstadoDeUna(entrada: SujetoDeuna | { ensayo: GuionDeEnsayo }): {
+export function useEstadoDeUna(
+  entrada: SujetoDeuna | { ensayo: GuionDeEnsayo } | null,
+): {
   estado: EstadoDeUna;
   /** Pide un código nuevo (§5) — **el reloj del CÓDIGO, jamás el del hold**. */
   regenerar: () => void;
 } {
   const [semilla, setSemilla] = useState(0);
   const [real, setReal] = useState<EstadoDeUna>({ fase: 'cargando' });
-  const esEnsayo = 'ensayo' in entrada;
+  const esEnsayo = entrada !== null && 'ensayo' in entrada;
 
   /* El estado de ensayo se re-deriva al regenerar. `useMemo` y no `useState`
      porque **el instante de vencimiento se calcula UNA vez por código** —
@@ -309,8 +325,9 @@ export function useEstadoDeUna(entrada: SujetoDeuna | { ensayo: GuionDeEnsayo })
     [esEnsayo, esEnsayo ? (entrada as { ensayo: GuionDeEnsayo }).ensayo : null, semilla],
   );
 
-  const sujetoTipo = esEnsayo ? null : (entrada as SujetoDeuna).tipo;
-  const sujetoId = esEnsayo ? null : (entrada as SujetoDeuna).id;
+  /* `null` y ensayo caen los dos acá: **ninguno de los dos toca la puerta.** */
+  const sujetoTipo = entrada === null || esEnsayo ? null : (entrada as SujetoDeuna).tipo;
+  const sujetoId = entrada === null || esEnsayo ? null : (entrada as SujetoDeuna).id;
 
   useEffect(() => {
     if (sujetoTipo === null || sujetoId === null) return;
@@ -463,7 +480,51 @@ export function vozDeFallo(codigo: CodigoDeFallo): VozDeFallo {
   return { titulo: 'pago.deunaFalloTitulo', cuerpo: 'pago.deunaNuestroCuerpo', accion: 'soporte' };
 }
 
-/** Los 17 códigos que el wrapper puede devolver — **lista derivada del mapa,
- *  jamás tecleada aparte.** *Dos listas del mismo conjunto divergen el día
- *  que alguien agrega a una sola.* Su consumidor es el recorrido. */
+/**
+ * Todos los códigos que la pantalla puede recibir — **lista derivada del mapa,
+ * jamás tecleada aparte.** *Dos listas del mismo conjunto divergen el día que
+ * alguien agrega a una sola.* Su consumidor es el recorrido.
+ *
+ * ⏪ **Acá decía «Los 17 códigos», y eran 19** (S105-C). Los 17 son los de
+ * `CodigoDeuna`; el mapa suma `error_desconocido` y `datos_inconsistentes`,
+ * que entran por `ResultadoWrapper` — *los dos que este archivo agregó a
+ * propósito, contados por todos lados menos por la frase que los presenta.*
+ * **El valor exportado siempre estuvo bien porque deriva; lo que envejeció
+ * fue el número escrito al lado** (`L-141`), así que se retira en vez de
+ * corregirse: *un contador a mano al lado de un contador derivado es una
+ * segunda fuente esperando su turno para mentir.*
+ */
 export const CODIGOS_DE_FALLO = Object.keys(FAMILIA_DE) as CodigoDeFallo[];
+
+/**
+ * 🔴 **CUÁNTO SE MIRA, EN EL RIEL DE DEUNA** — y no es el número de tarjeta.
+ *
+ * `TOPE_MS` mide *cuánto esperamos al webhook después de que la plata se
+ * movió*. **En DeUna, cuando esta espera arranca la plata NO se movió**: la
+ * persona recién recibió seis dígitos y todavía tiene que abrir otra app y
+ * teclearlos. **Con el tope de tarjeta la pantalla diría «está tardando más
+ * de lo normal» a los 90 segundos, mientras ella está tecleando** — *una
+ * pantalla que se rinde antes que la persona.* Y el defecto es **invisible en
+ * tarjeta**, que es lo que lo hace fácil de heredar sin notarlo.
+ *
+ * **Se DERIVA del reloj del código en vez de elegir un número:** se mira
+ * mientras el código pueda pagarse, **más el mismo margen de webhook que usa
+ * tarjeta**. *Elegir «seis minutos» habría sido inventar política sobre un
+ * vencimiento que decide el servidor* — y este archivo ya tiene escrito por
+ * qué el reloj se lee y no se supone.
+ *
+ * 🔴 **Y usa `venceEn` — el reloj del CÓDIGO — a propósito, jamás el del
+ * hold.** No es una mezcla de los dos relojes del §3: es que **mirar termina
+ * cuando el código deja de poder pagarse**, y eso lo dice `venceEn`. Del hold
+ * seguimos sin saber nada, y por eso no gobierna nada acá.
+ *
+ * Fuera de `esperando` (cargando · fallo · aprobada · hallazgo) devuelve el
+ * tope de siempre: **sin código vivo no hay nada que extender**, y el riel de
+ * tarjeta pasa por acá sin cambiar de conducta.
+ */
+export function topeDeEspera(estado: EstadoDeUna): number {
+  if (estado.fase !== 'esperando') return TOPE_MS;
+  const faltaCodigo = new Date(estado.venceEn).getTime() - Date.now();
+  /* Un código ya vencido no resta: el margen de webhook se cobra entero. */
+  return Math.max(0, faltaCodigo) + TOPE_MS;
+}
