@@ -21068,3 +21068,81 @@ rol_invitado text not null default 'adulto_autorizado'
 **Dueño:** producto (el mecanismo) · founder (mientras sea manual).
 **Disparo:** después de la respuesta de `D-908` — *ella decide si esto es un scraper o una regla de correo* — **o el 23-sep-2026 si no hay respuesta.**
 ☠️ **Condición de muerte:** existe un proceso que detecta un cambio en la lista **sin que nadie se acuerde de mirar**, y que **avisa también cuando no pudo leerla**.
+
+---
+
+#### D-910 — 🔴 EL CIERRE DE CUENTA QUEDA APAGADO HASTA QUE TENGA SU RELOJ Y SU COPIA. **Firma del founder, 24-ago-2026 (salida (a))**
+🔴 **ALTA.** Nace del hallazgo H2 del turno 0 de S105 y **se ejecuta en la misma sesión**.
+
+**Lo medido, contra `app_config` y contra los 18 jobs leídos CON SU `command`** —no por su nombre, que es la pregunta fácil que contesta otra cosa:
+
+| pieza | estado al encontrarlo |
+|---|---|
+| `cierre_cuenta_vivo` | 🔴 **`true`** — el traspaso de S104 decía *«nace INERTE, la llave es del founder»* |
+| `exportacion_datos_viva` | 🔴 **`false`** |
+| `ejecutar_cierres_vencidos` | **existe en `pg_proc` y NINGÚN cron la llama** |
+
+⇒ **El acto ① (quitar acceso, reversible) corría; el acto ② (día 30, terminal) no tenía quién lo dispare.** Y **P15 cl.5 promete la copia antes de irse** mientras la exportación está apagada ⇒ *alguien podía cerrar su cuenta y no poder llevarse nada.*
+
+> **Es la disciplina de la casa exactamente al revés: *el cable primero, la llave después*. Acá la llave estaba puesta y faltaba un cable.**
+
+**✅ EJECUTADO — `cierre_cuenta_vivo = false`**, verificado leyendo la clave después del `UPDATE`.
+
+**Lo que se midió ANTES de apagar, y es lo que hizo segura la salida (a):**
+- **`revertir_cierre_cuenta` NO lee la llave** ⇒ apagar **no encierra a nadie**: quien ya solicitó puede volver. *Si la reversión hubiera dependido de la misma llave, apagarla habría sido lo contrario de lo que la firma quería.*
+- `solicitar_cierre_cuenta` **sí** la lee ⇒ no entran solicitudes nuevas. `ejecutar_cierres_vencidos` **también** ⇒ doble seguro sobre el acto terminal.
+
+⚠️ **UN CIERRE PROGRAMADO QUEDA VIVO Y NO SE TOCÓ** (no estaba firmado tocarlo): `guillo381+test3@gmail.com`, solicitado el 24-ago 22:13, **programado para el 23-sep**, `banned_until = infinity`. **Es cuenta de prueba del gate de S104-C**, no una persona. *Hoy es inofensivo porque no hay cron; pero el día que el reloj se encienda, ejecutaría un cierre de prueba como si fuera real.* ⇒ **se limpia o se revierte ANTES de encender el cron**, y esa decisión es del founder.
+
+**La vía mientras tanto es SOPORTE, manual y declarada** (firma del founder). *No es un hueco: es la misma forma que ya rige para el cierre del negocio — un trámite asistido, dicho como tal.*
+
+**Dueño:** pista (el cron + el worker de exportación) · founder (la llave, y el destino de la fila de prueba).
+**Disparo:** 🔴 **antes del primer usuario real.** *Hoy no hay a quién dañar; ese es exactamente el margen que la firma compró.*
+☠️ **Condición de muerte:** existe el cron de `ejecutar_cierres_vencidos` **y** `exportacion_datos_viva = true` **y** un cierre recorrió los dos actos de punta a punta. **Las tres, no dos** — encender la llave con dos de tres reproduce el estado que esta ficha vino a apagar.
+
+---
+
+#### D-911 — 🟡 EL HOLD DE DEUNA NO TIENE RELOJ EN PANTALLA, Y LA PANTALLA LO DICE. **Estado FIRMADO, no defecto**
+🟡 **MEDIA.** Firma del founder, 24-ago-2026: ***`holdVenceEn` nulo es el estado firmado de esta mesa.*** Ficha abierta **para el lector futuro**, no para curar ahora.
+
+**Lo medido en el código real** (`apps/cliente/src/lib/pagos/deuna-estado.ts`): en el camino vivo `holdVenceEn` viaja **`null`**, con su razón escrita al lado — *«el reloj del código, y **solo** ése»* — y su consecuencia dicha en el mismo archivo: *«con `holdVenceEn: null` **no se pinta NADA como vencido**»*.
+
+⇒ **La pantalla muestra un solo reloj: el del código de 6 dígitos.** El hold del pedido corre por detrás y **la familia no lo ve vencer**.
+
+**Por qué es estado firmado y no defecto:** *un reloj que no se puede alimentar con la verdad es peor que ningún reloj.* Pintar un vencimiento que la pantalla no puede confirmar sería inventarle a la familia una certeza que el sistema no tiene — y el archivo **declara la ausencia en vez de fingirla**, que es la conducta correcta.
+
+🔴 **Lo que el lector futuro tiene que saber, y es la razón de esta ficha:** **el día que alguien vaya a «agregar el contador del hold» va a encontrar el campo ya cableado y en `null`, y va a leerlo como un olvido.** *No lo es.* **Se cambia solo si el hold pasa a viajar con su instante absoluto desde el servidor** —como ya hace `expira_en` del código (§3 de `LETRA_DEUNA`: *jamás una duración en segundos*)— **y nunca calculándolo en el cliente.**
+
+**Dueño:** pista de superficie (C), con contrato de la pista del riel (D) si el instante llega a viajar.
+**Disparo:** cuando el hold del pedido tenga instante absoluto server-side, **o** cuando una familia real reporte que no entendió por qué se le venció el pedido. *Lo segundo es el disparo honesto: hoy nadie lo sufrió.*
+☠️ **Condición de muerte:** la pantalla pinta el vencimiento del hold **desde un instante que le dio el servidor**, o la mesa firma que el hold jamás se muestra.
+
+---
+
+#### D-912 — 🔴 CINCO WEBHOOKS DE NUVEI AUTENTICABLES QUE NUNCA SE APLICARON — **y el único posterior a la cura de S103 falló por una causa NUEVA**
+🔴 **ALTA — muerde la certificación.** Investigación del turno 1 de S105 (ítem ② de la tanda). **Investigación, no cura:** no se tocó una sola fila de dinero.
+
+**El síntoma:** tres intentos de Nuvei en `pendiente` con `motivo_rechazo` y `hallazgo` en **NULL** —*no fallaron: no se resolvieron*— por **$10,75 (23-ago) · $6,00 · $70,90**, los tres con `transaction_id` y `authorization_code`.
+
+**La causa NO es una, son DOS, y el corte es la fecha:**
+
+**① Los del 20-21 de agosto (4 eventos, `credencial='SERVER'`, `stoken_valido=true`) AUTENTICAN HOY.** Pasan `_evento_autenticado` sin problema. Quedaron sin aplicar porque **el actuador estaba muerto en esa fecha** — el hallazgo de S103 (`cannot cast type record to webhook_events`). **Nadie los reprocesó después de curarlo.** *La cura arregló el futuro y no volvió por el pasado.*
+
+**② 🔴 EL DEL 23-AGO ES OTRA COSA, Y ES LA QUE ESTÁ VIVA.** `DF-2100043` tiene **`credencial = NULL`** ⇒ `_evento_autenticado` exige, para nuvei, `stoken_valido` **AND** `credencial = 'SERVER'` ⇒ **da false** ⇒ el actuador devuelve `evento_no_autenticado_o_no_server` **sin tocar el resultado** ⇒ el evento queda en `recibido` **para siempre**.
+
+**Por qué quedó NULL, medido en el cuerpo del sellador:** `_webhook_events_sella_credencial` es `BEFORE INSERT` y **deriva la credencial de `detalle` con `ILIKE '%credencial=SERVER%'`**. Pero el buzón **persiste antes de analizar** ⇒ **en el INSERT el `detalle` todavía no dice de qué credencial se trata**, y el trigger *«sella en el INSERT y NUNCA MÁS»*.
+
+> ### **La cura de S103 movió CUÁNDO se congela el veredicto, no DE DÓNDE sale.**
+> Cerró el modo de falla que buscaba —*un `UPDATE` con un mensaje de excepción ya no puede falsear la autenticación*— **y abrió el simétrico que nadie midió: un `INSERT` cuyo texto todavía no está escrito no puede producirla.** *El instrumento contestó «ya no se puede falsear», que no es «siempre se puede autenticar».*
+
+🔴 **Y el número que lo vuelve urgente: es 1 de 1.** **`DF-2100043` es el ÚNICO evento posterior a la cura de S103** — o sea que **el 100 % del tráfico nuevo cayó en esto.** *No hay síntoma porque no hay volumen, exactamente como en S103; y por eso otra vez lo encontró recorrer el circuito y no un gate.*
+
+✅ **Es FAIL-CLOSED, que es la dirección correcta:** no se confirma un pago que no se pudo autenticar. **El daño no es plata mal cobrada: es plata cobrada que la casa no registra** — el cliente pagó, Nuvei aprobó, y el pedido sigue esperando.
+
+**Dos hallazgos de paso, para que nadie los lea mal:**
+- **`pago_id` es NULL en los 23 `aplicado` también** ⇒ **no es el discriminador de nada**: es una columna que ningún camino llena. *La pregunta «¿por qué quedó nulo?» estaba mal formulada, y medirla la disolvió.*
+- **`dev_reference` apunta a `compra_id`** (4 de 4 comprobados) ⇒ **el vínculo con el intento existe y es sólido**; lo que falta no es la llave.
+
+**Dueño:** pista del riel (D) para el sellador · A para el reproceso de los cuatro de ①.
+**Disparo:** 🔴 **antes de presentarle un caso a Erick.** *El paso 9 pide demostrar un cobro con DF + código de autorización: los datos están y el circuito de esos tres no cerró — un caso que no cierra no se puede presentar como caso.*
+☠️ **Condición de muerte:** un cobro nuevo de Nuvei llega, **se sella su credencial desde el dato y no desde el texto**, se aplica, y el comprobante sale — **verificado sobre un cobro que nació después de la cura**, jamás sobre uno reprocesado a mano.

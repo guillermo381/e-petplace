@@ -18,9 +18,22 @@
 
 import { execFileSync } from 'node:child_process';
 
-const BASE = 'https://apis-merchant.qa.deunalab.com';
+/* ═══ MODO ENSAYO — para correr el guion en seco contra el simulador ═══════
+   🔴 CON CANDADO: sólo acepta `localhost`. *Un modo de prueba que puede
+   apuntar a cualquier host es un modo de prueba que algún día apunta a
+   producción.* Sin la variable, el host es la constante de QA y no hay forma
+   de moverlo.
+   🔴 Y EN MODO ENSAYO EL POS SALE DE `DEUNA_POS_ENSAYO`, jamás del keychain:
+   depositar un POS falso «para probar» es exactamente cómo el lunes alguien
+   mide contra QA real con un número inventado. */
+const SIM = process.env.DEUNA_SIMULADOR ?? '';
+if (SIM && !/^http:\/\/localhost:\d+$/.test(SIM)) {
+  console.error(`✖ DEUNA_SIMULADOR sólo admite http://localhost:<puerto> (recibí: ${SIM})`);
+  process.exit(1);
+}
+const BASE = SIM || 'https://apis-merchant.qa.deunalab.com';
 const RUTA = '/merchant/v1/payment';   // sin `api/` — medido 22-ago
-const ESPACIADO_MS = 1400;             // el rate limit real es ~1 req/s
+const ESPACIADO_MS = SIM ? 50 : 1400;  // el rate limit real es ~1 req/s
 
 // ── LAS TRES LLAVES, del keychain ─────────────────────────────────────────
 const faltan = [];
@@ -42,7 +55,8 @@ function delKeychain(nombre, cuenta = 'epetplace') {
 
 const API_KEY = delKeychain('DEUNA_API_KEY');
 const API_SECRET = delKeychain('DEUNA_API_SECRET');
-const POS = delKeychain('DEUNA_POINT_OF_SALE');
+const POS = SIM ? (process.env.DEUNA_POS_ENSAYO ?? '') : delKeychain('DEUNA_POINT_OF_SALE');
+if (SIM && !POS) { console.error('✖ modo ensayo: falta DEUNA_POS_ENSAYO'); process.exit(1); }
 
 if (faltan.length) {
   console.error('\n✖ NO SE PUEDE MEDIR — falta en el keychain:\n');
@@ -102,8 +116,14 @@ if (ref.length > 20) throw new Error('la referencia de sondeo no cabe');
 const veredictos = [];
 const anotar = (n, q, v, control) => veredictos.push({ n, q, v, control });
 
-console.log('═══ SONDEO QA DEUNA ═══');
-console.log(`host: ${BASE} · referencia: ${ref} (${ref.length} chars) · POS: ${POS.length} dígitos`);
+console.log(SIM ? '═══ SONDEO — MODO ENSAYO (SIMULADOR) ═══' : '═══ SONDEO QA DEUNA ═══');
+/* 🔴 Se imprimen los ÚLTIMOS dígitos del POS. No es un secreto —es un
+   identificador de comercio— y ver con cuál se midió evita el caso de creer
+   que se usó el bueno. *Un reporte que no dice contra qué midió obliga a
+   confiar en la memoria de quien lo corrió.* */
+console.log(`host: ${BASE} · referencia: ${ref} (${ref.length} chars)`);
+console.log(`POS: …${POS.slice(-4)} (${POS.length} dígitos)${SIM ? '  ⚠️ DE ENSAYO' : ''}`);
+const T0 = Date.now();
 
 // ── ⚪1 · payment/request con format "5" ───────────────────────────────────
 const req = await llamar('① payment/request · qrType dynamic + format 5', `${RUTA}/request`, {
@@ -179,6 +199,21 @@ function reportar() {
   for (const v of veredictos) console.log(`${v.v}  ${v.q}\n      control: ${v.control}`);
   const n = (s) => veredictos.filter((v) => v.v === s).length;
   console.log(`\n${n('✅')} ✅ · ${n('❌')} ❌ · ${n('⚪')} ⚪`);
+  console.log(`⏱  ${((Date.now() - T0) / 1000).toFixed(1)} s de reloj`);
+  if (SIM) {
+    /* 🔴 LA ADVERTENCIA MÁS IMPORTANTE DEL SCRIPT, y nace de un ensayo real:
+       con el simulador curado el guion sale **9 ✅ · 0 ❌**, y ese tablero es
+       indistinguible del que produciría una corrida contra QA.
+       *Un ensayo que termina en verdes se archiva como si hubiera medido.* */
+    console.log('\n' + '━'.repeat(72));
+    console.log('⚠️  MODO ENSAYO — ESTOS VEREDICTOS NO SON MEDICIONES.');
+    console.log('   Prueban que el GUION CORRE de punta a punta, nada más.');
+    console.log('   Las respuestas salieron del simulador; varias son SINTÉTICAS');
+    console.log('   (la de `payment/request` entera, y cómo se ve una transacción');
+    console.log('   real sin pagar — que es justamente el PASO 1 del día 1).');
+    console.log('   🔴 NO copiar esta tabla a ningún reporte ni bitácora.');
+    console.log('━'.repeat(72));
+  }
   console.log('\nLas credenciales nunca se imprimieron. Verificalo con:');
   console.log('  node scripts/deuna/sondeo-qa.mjs | grep -c "«API_KEY»\\|«API_SECRET»"   ← 0 = no hubo eco');
 }
