@@ -21837,6 +21837,51 @@ aplicar_evento_de_pago · maneja 'REVERSED'  : false
 
 ☠️ **Condición de muerte:** ninguna. Es regla de método.
 
+#### L-422 — EL NÚMERO DE MIGRACIÓN NO SE VERIFICA CON `ls` DEL WORKTREE
+**Firmada por el founder (25-ago-2026). Hallada por la pista D, y le costó una migración que el CLI dio por aplicada.**
+
+**El caso.** D eligió `20260825190000` para su migración. **Ese número ya estaba tomado por A** (`s105a_alta_devuelve_uid`), en **otro worktree**. Y así se enteró:
+
+```
+db push        → "Remote database is up to date"
+migration list → la versión figura APLICADA
+la función     → NO EXISTÍA en la base
+```
+
+> ### **El CLI no avisa de la colisión: la salta en silencio.** *Vio la versión ya registrada, la dio por hecha, y el archivo de D nunca corrió.*
+
+🔴 **La causa de fondo, y es lo que la vuelve ley con pistas paralelas:** **`ls supabase/migrations/` prueba que el número no está en MI árbol. El registro vive en `supabase_migrations.schema_migrations`, que es COMPARTIDO.**
+
+> **Con varias pistas sobre una base común, el árbol es la fuente equivocada: un objeto derivado no es evidencia.**
+
+⇒ **El número se verifica contra `schema_migrations`, no contra el directorio** — y **A cometió el mismo error sin enterarse**: tomó `…190000` mirando su propio `ls`, y lo salvó únicamente el orden en que se aplicaron.
+
+**Es la misma familia que todo lo de esta mesa:** *el retorno decía una cosa y el objeto otra* — y acá el retorno era **doblemente tranquilizador**, porque `db push` y `migration list` **coincidían entre sí** y los dos estaban describiendo la migración de otra pista.
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
+#### L-423 — EL MERGE A MAIN NO SE ENCADENA A UN `cd`
+**Firmada por el founder (25-ago-2026), sobre un error propio de A que se repitió TRES veces en la misma jornada.**
+
+**El caso.** A escribió, tres veces, comandos de la forma:
+
+```
+cd <worktree-de-la-pista> && git commit … && git merge --no-ff pista/x && git push
+```
+
+**El `merge` corrió DENTRO del worktree de la pista, sobre su propia rama — no sobre `main`.** El archivo nunca llegó al canon, y el `git rev-parse` posterior imprimía el HEAD de la rama, **que se lee igual que el de main**.
+
+🔴 **Y la primera vez el efecto fue peor que no mergear:** `db push` contestó **«Remote database is up to date»** sobre una migración **que no existía en su árbol**. *Un verde que describe correctamente un mundo que no es el que se quería tocar.*
+
+**Las tres las cazó verificar contra el objeto** —que la función no llamaba al productor, que el archivo no estaba en `HEAD`— **nunca el retorno del comando.**
+
+> ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
+> *Encadenar mezcla dos contextos de directorio en una sola línea, y el segundo hereda el del primero sin decirlo.*
+
+⚠️ **Y su corolario, que es el que salva:** después de mergear, **se verifica que el archivo esté en `main` por contenido** (`git cat-file -e HEAD:<ruta>`), **no que el comando haya salido bien.**
+
+☠️ **Condición de muerte:** ninguna. Es regla de método.
+
 ### ✅ La verificación de §37.4, con su límite declarado
 
 **Pedido:** confirmar que el tope de seis meses de comisiones —**válido en B2B, NULO si se replica en Pet Parent**— no esté replicado.
