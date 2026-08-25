@@ -21749,9 +21749,38 @@ Listar las 8 de ese usuario exigiría **8 llamadas y conocer los 8 uid de antema
 
 **`D-921` primero.** Con uid por alta, **la consulta nunca traería todas** — `card/list` es por `uid`, y hoy cada alta es un uid. *Construir esto antes daría un listado que consulta ocho veces y se rompe al curar el uid.*
 
-**Dueño:** A (motor) · C (la voz del listado no verificado) · founder (elegir ① y ②).
+### ✅ FIRMA QUE CIERRA EL DISEÑO *(founder, 25-ago-2026)*
+
+> ### **Se listan SOLO las `valid`. Las demás NO se eliminan y NO se reactivan: simplemente no se muestran. Si el usuario quiere volver a usar esa tarjeta, la agrega de nuevo y se tokeniza de cero.**
+
+**Por qué NO se borran, con su precedente verificado:** son **registro de que esa tokenización existió**, y borrarlas **rompería el puntero de cualquier cobro histórico que las nombre**. **`L-231` — *un ledger append-only no se corrige borrando filas*** (verificada contra el canon: nació en S95-K, cuando un desmontaje borró movimientos y dejó el saldo materializado en 2).
+
+🔴 **Y esto CIERRA la pregunta abierta de `CONTRATO_CARD_LIST_NUVEI` §4:** **ya no hace falta saber si algún status significa «recuperable».** *Cualquier valor distinto de `valid` recibe el mismo tratamiento y tiene el mismo camino de salida.* **El filtro es BINARIO.**
+
+⇒ **Se retira esa pregunta de la lista a Erick.** *La otra mitad —el conjunto completo de valores— sigue siendo útil para saber qué estamos escondiendo, pero **deja de ser bloqueante**.*
+
+### 🔴 LA VOZ — el criterio, para que C arme la pantalla
+
+> **«Desaparece en silencio» es lo más simple y lo más desconcertante** (founder). **La letra le debe al usuario una explicación de una ausencia.**
+
+**① La ausencia se NOMBRA; la causa NO se inventa.** **No sabemos por qué el proveedor la marcó no-`valid`** —§4: no conocemos el conjunto de valores— así que **decir «está vencida» sería inventar un motivo.** *Lo que sí se puede decir es que ya no se puede usar para pagar, que es lo único medido.*
+
+**② La salida existe y se ofrece en el mismo lugar donde se da la mala noticia:** *agregarla de nuevo.* **Es la firma de arriba hecha voz** — y evita el peor final, que es una persona mirando una lista más corta sin saber qué hacer.
+
+**③ 🔴 SON DOS CASOS DISTINTOS Y LA VOZ NO PUEDE SER LA MISMA, aunque el filtro los trate igual:**
+
+| caso | qué pasó | ¿hay algo que explicar? |
+|---|---|---|
+| **el alta sin OTP** | la persona **nunca vio esa tarjeta** en su lista | **NO.** *Que no aparezca es lo correcto, y avisar de la ausencia de algo que nunca existió para ella es ruido puro* |
+| **la que se invalidó** | la persona **la vio antes y ahora no está** | **SÍ.** *Ahí la ausencia es un cambio, y un cambio sin explicación es lo desconcertante* |
+
+⇒ **El aviso solo tiene sentido cuando la persona pudo haberla visto antes.** *Y eso es una condición sobre el pasado, no sobre el status* — lo cual es trabajo real de decidir: hoy **no guardamos «esta tarjeta se le llegó a mostrar»**.
+
+⚠️ **Un borde que se disuelve solo con el orden ya firmado:** hoy ese usuario tiene **cuatro «Visa ****1111»** (`D-921`), así que *«tu Visa ****1111 ya no está disponible»* **sería ambiguo entre cuatro filas**. **Con `D-921` curado el problema desaparece**, porque deja de haber duplicados del mismo número. **Otra razón para el orden, y no una nueva.**
+
+**Dueño:** A (motor) · **C (la pantalla y la voz — el criterio sale de acá)** · founder (elegir ① y ② del diseño).
 **Disparo:** 🔴 **antes de producción con tarjetas reales.** *En sandbox no se manifiesta, y por eso no bloquea la certificación.*
-☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid`, **y cuando no puede preguntar lo dice en vez de callarlo**.
+☠️ **Condición de muerte:** el listado muestra solo lo que el proveedor da por `valid` · **cuando no puede preguntar, lo dice en vez de callarlo** · y **una tarjeta que la persona vio y dejó de ver le explica su ausencia y le ofrece volver a agregarla**.
 
 ### ✅ La verificación de §37.4, con su límite declarado
 
