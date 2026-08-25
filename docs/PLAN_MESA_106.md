@@ -164,6 +164,38 @@ cada gate con el ojo, como siempre.*
 ---
 ---
 
+# §TERRITORIOS — **FIRMA DEL FOUNDER, 24-ago-2026**
+*(agregado por A tras la firma; el plan original NO lo traía)*
+
+> **Se deposita acá, en el documento que rige la mesa, para que ninguna pista lo
+> infiera.** *El plan del 105 declaraba pistas y territorios; el 106 no, y con
+> cuatro pistas vivas y A como única que mergea, el reparto hace falta igual — o
+> lo declara la mesa, o lo inventa cada una, que es como nacen los cruces que el
+> método existe para evitar.*
+
+| pista | territorio |
+|---|---|
+| **A** *(conductora)* | conducción · **DB** · `packages/api` · `docs/` · **merges, push y OTA** |
+| **B** | `packages/ui` · tokens · **los jueces** · **el asset de marca de DeUna** |
+| **C** | `apps/cliente` · `apps/prestador` |
+| **D** | `supabase/functions/pagos-*` |
+
+**Lo que el reparto implica y conviene decir una vez:**
+
+- **A es la única que mergea y publica** ⇒ cada pista suma cola sobre ella, y el
+  techo de la mesa no es el número de pistas sino esa cola **más el aparato
+  único** (los gates serializan sin importar cuántas pistas haya).
+- **El asset de marca de DeUna es de B y no de D**, aunque el riel sea de D: *el
+  manual de marca del proveedor manda sobre cómo se ve la fila de pago, y eso es
+  superficie, no transporte.*
+- **Todo pedido entre pistas viaja como texto completo autocontenido**, jamás por
+  referencia a un reporte ajeno (regla 76 · freno 76b). **Y el receptor lo
+  devuelve CITADO, no resumido** (`L-417`).
+- **Cada pista trabaja en su worktree** (regla 85), con el corolario de S99
+  presente: *el worktree aísla el árbol, **no necesariamente los paquetes**.*
+
+---
+
 # §COTEJO — *(agregado por A al depositar; NO es parte del plan)*
 
 > **Pregunta del founder: ¿es el mismo documento que `PLAN_MESA_105`?**
