@@ -157,9 +157,74 @@ Deno.serve(async (req) => {
       parece_un_id_numerico: /^[0-9]{5,20}$/.test(token),
     };
     const cab = { Authorization: `Bearer ${token}` };
+
+    /* ── ¿QUÉ PUEDE ESTE TOKEN? — `/debug_token`, y también es GET ──────────
+       🔴 NACE PORQUE EL DIAGNÓSTICO CONTESTABA UNA PREGUNTA DISTINTA DE LA QUE
+       SE LE CREÍA HECHA. Leer plantillas prueba `…_management` y NADA MÁS:
+       `…_messaging` es el permiso de ENVIAR, y este modo no manda a propósito.
+       ⇒ un token CON management y SIN messaging daba **verde entero** —
+       plantillas y número leídos— **y el primer envío real fallaba.**
+       *Mientras el token estuvo roto, el 401 tapaba todo y no había verde
+       posible; el día que el token sirve, el hueco pasa a hacer daño.*
+
+       Y `granular_scopes` resuelve de paso la OTRA pregunta cara: trae los
+       `target_ids` por permiso, o sea **a QUÉ WABA da acceso este token**.
+       *Sin eso, «¿estamos apuntando al WABA correcto?» sólo se puede
+       responder por descarte —cero plantillas— y **cero es ambiguo**: puede
+       ser el WABA vacío, el WABA equivocado, o un id que no existe.* */
+    const rD = await fetch(
+      `https://graph.facebook.com/v21.0/debug_token` +
+        `?input_token=${encodeURIComponent(token)}&access_token=${encodeURIComponent(token)}`,
+      { headers: cab },
+    );
+    const cD = await rD.json().catch(() => ({}));
+    const dat = (cD?.data ?? {}) as Record<string, unknown>;
+    const scopes: string[] = Array.isArray(dat.scopes) ? dat.scopes as string[] : [];
+    const granular = Array.isArray(dat.granular_scopes) ? dat.granular_scopes as Array<
+      { scope?: string; target_ids?: string[] }> : [];
+    /* Los dos que el founder necesita, dichos por nombre y no por conteo:
+       un «2 de 2» no dice CUÁLES, y son permisos distintos con consecuencias
+       distintas. */
+    const permisos = {
+      whatsapp_business_messaging: scopes.includes('whatsapp_business_messaging'),
+      whatsapp_business_management: scopes.includes('whatsapp_business_management'),
+    };
+    /* Los WABA que el token alcanza, con su número — para que elegir el
+       correcto sea LEER y no adivinar. Tope 5: es un diagnóstico, no un censo. */
+    const idsWaba = [...new Set(granular.flatMap((g) => g.target_ids ?? []))].slice(0, 5);
+    const wabaAlcanzables = [];
+    for (const id of idsWaba) {
+      const rW = await fetch(
+        `https://graph.facebook.com/v21.0/${id}?fields=name,timezone_id`, { headers: cab });
+      const cW = await rW.json().catch(() => ({}));
+      const rN = await fetch(
+        `https://graph.facebook.com/v21.0/${id}/phone_numbers` +
+          `?fields=display_phone_number,verified_name&limit=5`, { headers: cab });
+      const cN = await rN.json().catch(() => ({}));
+      wabaAlcanzables.push({
+        id,
+        name: cW?.name ?? null,
+        /* 🔴 El discriminador que el founder pidió, y sale del DATO:
+           el prefijo del número dice el país. `+593` es Ecuador, `+1` no. */
+        numeros: Array.isArray(cN?.data)
+          ? cN.data.map((n: Record<string, unknown>) => ({
+              display_phone_number: n.display_phone_number ?? null,
+              verified_name: n.verified_name ?? null,
+              es_ecuador: String(n.display_phone_number ?? '').replace(/\s/g, '').startsWith('+593'),
+            }))
+          : [],
+        /* ¿Es ESTE el que tenemos configurado? Comparación contra el secreto,
+           sin imprimir el secreto: el id ya viaja porque lo devolvió Meta. */
+        es_el_configurado: id === waba,
+      });
+    }
+
     const rT = await fetch(
+      /* 🔴 `components` — SIN ESTE CAMPO NO HAY VARIABLES `{{n}}`, y el mapeo
+         no se puede escribir. *El diagnóstico traía nombre, idioma, categoría y
+         estado: alcanzaba para decir «están aprobadas» y no para USARLAS.* */
       `https://graph.facebook.com/v21.0/${waba}/message_templates` +
-        `?fields=name,language,category,status,quality_score&limit=50`,
+        `?fields=name,language,category,status,quality_score,components&limit=50`,
       { headers: cab },
     );
     const cT = await rT.json().catch(() => ({}));
@@ -171,12 +236,32 @@ Deno.serve(async (req) => {
     const cP = await rP.json().catch(() => ({}));
 
     const plantillas = Array.isArray(cT?.data)
-      ? cT.data.map((t: Record<string, unknown>) => ({
-          name: t.name,
-          language: t.language,
-          category: t.category,
-          status: t.status,
-        }))
+      ? cT.data.map((t: Record<string, unknown>) => {
+          /* Las variables `{{n}}` viven adentro del texto de cada component.
+             Se extraen acá y no en el consumidor: **el mapeo se escribe contra
+             ESTA lista**, y una lista que hay que volver a parsear en cada
+             lector es una lista que algún día se parsea distinto. */
+          const comps = Array.isArray(t.components) ? t.components as Array<
+            Record<string, unknown>> : [];
+          const vars = new Set<string>();
+          for (const c of comps) {
+            for (const m of String(c.text ?? '').matchAll(/\{\{(\w+)\}\}/g)) vars.add(m[1]);
+          }
+          return {
+            name: t.name,
+            language: t.language,
+            category: t.category,
+            status: t.status,
+            /* Qué piezas trae (HEADER/BODY/FOOTER/BUTTONS) y **cuántas
+               variables espera cada plantilla**: es lo que el mapeo necesita. */
+            componentes: comps.map((c) => String(c.type ?? '?')),
+            variables: [...vars].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b)),
+            /* El texto del BODY, que es donde vive el mensaje que la familia
+               lee. Se recorta: el diagnóstico es para decidir, no para
+               archivar. */
+            body: String(comps.find((c) => c.type === 'BODY')?.text ?? '').slice(0, 400),
+          };
+        })
       : [];
     // El número que decide la tarea del founder: cuántas están en MARKETING
     // cuando deberían ser UTILITY (precio, ventana y riesgo de pausa).
@@ -187,6 +272,19 @@ Deno.serve(async (req) => {
     return Response.json({
       modo: 'verificar',
       token_forma: forma,
+      /* 🔴 LO PRIMERO QUE HAY QUE MIRAR, y va arriba a propósito: sin los dos
+         permisos, todo lo de abajo puede verse bien y el envío fallar igual. */
+      token_valido: dat.is_valid ?? null,
+      permisos,
+      permisos_completos: permisos.whatsapp_business_messaging
+        && permisos.whatsapp_business_management,
+      waba_alcanzables: wabaAlcanzables,
+      /* ⚠️ El id configurado ¿está entre los que el token alcanza? Si es
+         `false` con token válido, el problema NO es el token: es a qué
+         apunta. *Es la diferencia entre «no puedo» y «estoy mirando otra
+         cosa», y hasta ahora no se podía distinguir.* */
+      waba_configurado_alcanzable: idsWaba.includes(waba),
+      http_debug_token: rD.status,
       http_plantillas: rT.status,
       http_numero: rP.status,
       plantillas_total: plantillas.length,
