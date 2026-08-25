@@ -69,8 +69,17 @@ Deno.serve(async (req) => {
     return Response.json({ ok: false, error: 'servidor_sin_configurar' }, { status: 500 });
   }
 
+  const cuerpo = await req.json().catch(() => ({})) as Record<string, unknown>;
+
+  /* 🔴 LA GRACIA ES PARÁMETRO, y su default de 10 min tiene un modo de falla
+     propio: un intento recién nacido NO aparece, el barrido devuelve vacío, y
+     **eso se lee como «no había nada que hacer» cuando en realidad no llegó a
+     mirar.** *Un cero que viene de una ventana temporal se ve igual que un cero
+     medido.* Se acepta por el cuerpo para poder ejercerlo en el momento. */
+  const gracia = typeof cuerpo.minutos_de_gracia === 'number'
+    ? cuerpo.minutos_de_gracia : 10;
   const { data: pendientes, error } = await db.rpc('pagos_pendientes_de_conciliar', {
-    p_minutos_de_gracia: 10, p_proveedor: 'deuna',
+    p_minutos_de_gracia: gracia, p_proveedor: 'deuna',
   });
   if (error) {
     /* 🔴 Si la firma nueva no existe todavía, **se dice con su nombre** en vez
@@ -83,14 +92,46 @@ Deno.serve(async (req) => {
         : error.message }, { status: 500 });
   }
 
-  const resumen: Record<string, number> = {};
   const escalados: string[] = [];
+  /* Lo aplicado viaja APARTE de lo escalado: *un barrido que mezcla «lo
+     resolví» con «alguien tiene que mirar esto» entrena a ignorar las dos.* */
+  const aplicados: string[] = [];
+
+  /* ☠️ EL PUENTE MURIÓ — y lo mató el propio caso que lo justificaba.
+     Hubo que resolver `intento_id` acá porque el lector no lo devolvía. **A lo
+     ensanchó y ahora sí**, con el argumento que sale de esta misma corrida:
+     *la compra de Carlos tiene DOS intentos —uno rechazado de las 17:16 y el
+     bueno de las 17:18— así que buscarlo aparte es poder elegir el otro.*
+     ⇒ **el que sabe cuál eligió es el lector, y ahora lo dice.**
+     `fuera_de_ventana` se sigue derivando de `creado_en` con los 7 días. */
+  const DIAS_VENTANA = 7;
+  const candidatos: Candidato[] = ((pendientes ?? []) as Record<string, unknown>[])
+    .map((f) => ({
+      intento_id: String(f.intento_id ?? ''),
+      proveedor: String(f.proveedor ?? 'deuna'),
+      sujeto: 'compra',
+      sujeto_id: String(f.compra_id ?? ''),
+      transaction_id: (f.transaction_id as string) ?? null,
+      referencia_corta: (f.referencia_corta as string) ?? null,
+      creado_en: String(f.creado_en),
+      fuera_de_ventana:
+        (Date.now() - new Date(String(f.creado_en)).getTime()) / 86_400_000 > DIAS_VENTANA,
+    }))
+    /* 🔴 Sin `intento_id` NO se llama al aplicador: recibiría un `undefined` y
+       fallaría buscando una fila que no existe, que es un error mudo. */
+    .filter((c) => {
+      if (c.intento_id) return true;
+      escalados.push(`compra ${c.sujeto_id} (el lector no trajo intento_id)`);
+      return false;
+    });
+
+  const resumen: Record<string, number> = {};
   /* 🔴 UN SOLO `estado` COMPARTIDO ⇒ el espaciado es real entre TODAS las
      llamadas del barrido, no por-llamada. Con uno por iteración, N candidatos
      serían N ráfagas y el 429 volvería. */
   const ritmo = { ultima: 0 };
 
-  for (const c of (pendientes ?? []) as Candidato[]) {
+  for (const c of candidatos) {
     /* ── ① Fuera de ventana: NI SE PREGUNTA ──────────────────────────────
        Pasados 7 días el proveedor ya no responde de esta transacción.
        Consultarla gastaría una llamada del rate limit para recibir un
@@ -165,27 +206,55 @@ Deno.serve(async (req) => {
        son `_deuna_base36` y `deuna_nueva_referencia`, las dos del generador de
        referencia.
 
-       *Es «puerta sin motor» escrito como comentario: la promesa compilaba.*
+       *Era «puerta sin motor» escrito como comentario: la promesa compilaba.*
 
-       **Cura: es de MOTOR y por lo tanto de A** — una hermana de
-       `resolver_consulta_activa` para DeUna, o ensanchar la existente. **No la
-       escribo desde acá**: aplicar un pago desde el barrido, saltándose al
-       actuador, sería el segundo lugar del sistema que confirma plata — *dos
-       piezas que confirman pagos es cómo se confirma dos veces.*
-       Mientras tanto, el hallazgo queda marcado (`confirmado_tardio`) y
-       **escalado**, para que una persona lo vea. */
+       ✅ **`D-887` CERRADA — el aplicador existe** (`aplicar_consulta_activa_deuna`,
+       de A). **Este es el cable**, y el que faltaba era éste: la función estaba
+       viva y **nadie la llamaba.**
+
+       🔴 **Sigue valiendo por qué NO se aplica desde acá a mano:** aplicar un
+       pago saltándose al actuador sería **el segundo lugar del sistema que
+       confirma plata**, y *dos piezas que confirman pagos es cómo se confirma
+       dos veces.* Por eso esto **llama**, no resuelve: el aplicador es el único
+       que mueve el sujeto, y este barrido sólo le avisa que mire. */
     if (v.clase === 'confirmado') {
-      console.error(`[deuna-barrido] 🔴 ${c.intento_id} CONFIRMADO por el proveedor `
-        + `y NO HAY QUIEN LO APLIQUE (falta el equivalente de resolver_consulta_activa). `
-        + `Sujeto ${c.sujeto} ${c.sujeto_id} sigue sin mover.`);
-      escalados.push(`${c.intento_id} (confirmado sin aplicador — cable faltante)`);
+      const { data: aplicado, error: eAp } = await db.rpc('aplicar_consulta_activa_deuna', {
+        p_intento_id: c.intento_id,
+        /* 🔴 `r.cuerpo`, NO `v.crudo`: el clasificador devuelve el VEREDICTO,
+           no la respuesta. La primera versión de este cable escribió `v.crudo`
+           —que no existe— y habría mandado `{}` al aplicador: *el pago se
+           aplicaría con un crudo vacío, y la evidencia de por qué se aplicó
+           se perdería justo en el registro que existe para tenerla.*
+           La línea de arriba (`marcar`) ya usaba `r.cuerpo`: **el dato correcto
+           estaba a la vista y aun así lo escribí mal.** */
+        p_crudo: r.cuerpo ?? {},
+        p_origen: 'barrido',
+        /* ③ 🔴 EL AMBIENTE LO SABE ESTA EDGE Y NADIE MÁS: es la única pieza que
+           conoce contra qué host habló (`BASE` sale de `PAGOS_AMBIENTE`). El
+           aplicador tiene default `sandbox`, así que HOY no rompe — y por eso
+           mismo se cablea: *un default que hoy acierta es el que miente el día
+           de producción, sin cambiar una línea y sin avisar.* */
+        p_ambiente: AMBIENTE,
+      });
+      if (eAp) {
+        /* 🔴 Un fallo al aplicar NO se traga: el proveedor ya cobró y el sujeto
+           sigue quieto. *Es exactamente el estado que este cable vino a cerrar,
+           así que si el cable falla tiene que gritar.* */
+        console.error(`[deuna-barrido] 🔴 ${c.intento_id} confirmado y el aplicador FALLO`, eAp.message);
+        escalados.push(`${c.intento_id} (aplicador fallo: ${eAp.message})`);
+      } else {
+        console.log(`[deuna-barrido] ${c.intento_id} confirmado tardio → aplicado`,
+          JSON.stringify(aplicado));
+        aplicados.push(`${c.intento_id} → ${JSON.stringify(aplicado)}`);
+      }
     }
   }
 
   if (escalados.length) console.error('[deuna-barrido] ESCALADOS:', escalados.join(', '));
 
   return Response.json({
-    ok: true, revisados: (pendientes ?? []).length, resumen, escalados,
+    ok: true, gracia_min: gracia, candidatos: candidatos.length,
+    revisados: candidatos.length, resumen, aplicados, escalados,
   });
 });
 

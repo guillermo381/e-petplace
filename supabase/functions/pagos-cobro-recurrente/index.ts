@@ -67,6 +67,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { verificarIva, type LineaIva } from '../_shared/iva.ts';
 import { crypto } from 'jsr:@std/crypto@1';
 import { encodeHex } from 'jsr:@std/encoding@1/hex';
 import { guardDespacho } from '../_shared/despacho.ts';
@@ -223,19 +224,35 @@ Deno.serve(async (req) => {
     const iva = Number(d.impuesto ?? 0);
     const base = Number(d.subtotal ?? 0) + Number(d.envio ?? 0);
     const moneda = d.moneda ?? 'USD';
-    const pct = base > 0 ? Number(((iva / base) * 100).toFixed(2)) : 0;
+    /* ═══ EL GUARD DEL IVA — la MISMA pieza que `pagos-cobro` ═══════════
+       🔴 Se importa, no se copia. *Son el mismo cálculo, y dos copias
+       divergen el día que una se corrija* — sugerencia de A, tomada.
+       ☠️ Muere `iva_no_probado`: describía un estado del mundo que deja de
+       ser cierto en cuanto se prueba. */
+    const { data: itemsIva } = it.pedido_id
+      ? await db.from('pedido_items')
+          .select('subtotal, impuesto_monto, impuesto_pct, impuesto_codigo')
+          .eq('pedido_id', it.pedido_id)
+      : { data: null };
 
-    /* 🔴 FAIL-CLOSED HONESTO con IVA ≠ 0 — idéntico a `pagos-cobro`: es
-       territorio que nadie probó contra esta cuenta, y mandar ceros con un IVA
-       real sería declararle al proveedor algo falso sobre la venta. */
-    if (iva > 0) {
+    const lineasIva: LineaIva[] = (itemsIva ?? []).length > 0
+      ? (itemsIva ?? []).map((i) => ({
+          subtotal: Number(i.subtotal ?? 0),
+          impuesto: Number(i.impuesto_monto ?? 0),
+          pct: i.impuesto_pct != null ? Number(i.impuesto_pct) : null,
+          codigo: (i.impuesto_codigo as string) ?? null,
+        }))
+      : [{ subtotal: base, impuesto: iva, pct: null, codigo: null }];
+
+    const vIva = verificarIva(lineasIva);
+    if (!vIva.ok) {
       await db.from('pagos_intentos').update({
         estado: 'rechazado',
-        motivo_rechazo: `iva_no_cero_sin_probar: iva=${iva} pct=${pct}`,
+        motivo_rechazo: `${vIva.codigo}: ${vIva.detalle}`,
         cerrado_en: new Date().toISOString(),
       }).eq('id', it.intento_id);
       frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
-                      motivo: 'iva_no_probado' });
+                      motivo: vIva.codigo });
       continue;
     }
 
@@ -257,9 +274,10 @@ Deno.serve(async (req) => {
             /* 🔴 EL SUJETO es la SERIE, y por eso el actuador la reconoce: su
                rama nueva resuelve el intento desde `recurrencia_id`. */
             dev_reference: it.recurrencia_id,
-            vat: Number(iva.toFixed(2)),
-            taxable_amount: iva > 0 ? Number(base.toFixed(2)) : 0,
-            tax_percentage: pct,
+            /* Los tres del veredicto; `tax_percentage` es el NOMINAL. */
+            vat: vIva.vat,
+            taxable_amount: vIva.taxable_amount,
+            tax_percentage: vIva.tax_percentage,
           },
           card: { token: tarjeta.token },
         }),
