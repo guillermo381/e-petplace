@@ -253,9 +253,32 @@ Deno.serve(async (req) => {
       (v.valido === null ? ' · no evaluable: faltan datos o credencial' : '') +
       ` · stoken_de=${d.stokenDe} · dev_reference=${d.devRef} · status=${d.status}/${d.detail}`;
 
+    /* ═══ 🔴 D-912 · LA CREDENCIAL VA A SU COLUMNA, NO SÓLO AL TEXTO ═══════
+       Vivía sólo dentro de `detalle`, y el sellador la derivaba de ahí en un
+       BEFORE INSERT. Pero desde S103 el buzón **persiste antes de analizar**:
+       en el INSERT ese texto todavía no existe ⇒ la columna nacía NULL y se
+       sellaba «una vez y nunca más» ⇒ `_evento_autenticado` daba `false` para
+       siempre ⇒ **el cliente pagaba, Nuvei aprobaba, y el pedido no avanzaba.**
+       Sin error y sin log: 1 de 1 del tráfico posterior a la cura de S103.
+
+       Ahora la escribe **quien la mide**, desde el payload del proveedor
+       (`app_code` termina en `-SERVER`), y no un `ILIKE` sobre un campo de
+       diagnóstico. El guard `trg_webhook_events_credencial_una_vez` permite
+       este sellado tardío (NULL → valor) y prohíbe cambiarlo después.
+
+       🔴 EL MAPEO NO ES COSMÉTICO: `verificarStoken` puede devolver
+       `'desconocida'`, y el CHECK vivo es `credencial IS NULL OR IN
+       ('SERVER','CLIENT')`. Mandarla tal cual **haría fallar este UPDATE** y
+       el análisis entero caería al catch — *cambiaríamos un evento sin
+       veredicto por un evento sin análisis.* NULL es además el valor
+       semánticamente correcto: «no se pudo determinar». */
+    const credencialSellable =
+      v.credencial === 'SERVER' || v.credencial === 'CLIENT' ? v.credencial : null;
+
     await db.from('webhook_events').update({
       transaction_id: d.txId || null,
       stoken_valido: v.valido,
+      credencial: credencialSellable,
       resultado: v.valido === false ? 'stoken_invalido' : 'recibido',
       detalle,
     }).eq('id', idFila);
