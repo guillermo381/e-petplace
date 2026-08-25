@@ -287,7 +287,7 @@ END $function$
 
 -- -- CINTURON -----------------------------------------------------------------
 DO $cint$
-DECLARE d text; v_n int; BEGIN
+DECLARE d text; v_n int; v_id uuid; v_prev text; BEGIN
   SELECT pg_get_functiondef(p.oid) INTO d FROM pg_proc p
     JOIN pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public' AND p.proname='aplicar_evento_de_pago';
@@ -304,27 +304,33 @@ DECLARE d text; v_n int; BEGIN
     RAISE EXCEPTION 'cinturon: la funcion dejo de ser DEFINER';
   END IF;
 
-  -- (c) 🔴 EL DISCRIMINADOR FUNCIONAL, sobre una fila que se deshace sola.
+  -- (c) 🔴 EL DISCRIMINADOR FUNCIONAL, sobre una fila REAL que se restaura.
   --     Sin esto el verde solo diria "el texto esta", que no es "el guard frena".
-  CREATE TEMP TABLE _t AS SELECT * FROM public.pagos_intentos WHERE false;
-  BEGIN
-    INSERT INTO public.pagos_intentos (id, proveedor, monto, moneda, forma, estado, clave_idempotencia)
-    VALUES ('00000000-0000-4000-8000-00000000d916','nuvei',1.00,'USD','tokenizacion','reversado','d916-cint');
+  --     ⚠️ NO se inserta una fila sintetica: `pagos_intentos` exige EXACTAMENTE
+  --     un sujeto y un pagador, y un fixture que pelea con los CHECK de una
+  --     tabla de dinero es un fixture que va a mentir de otra forma. Se toma un
+  --     intento YA RECHAZADO --sin plata viva-- y se lo restaura.
+  SELECT id, estado INTO v_id, v_prev
+    FROM public.pagos_intentos WHERE estado = 'rechazado' ORDER BY creado_en DESC LIMIT 1;
+  IF v_id IS NULL THEN
+    RAISE EXCEPTION 'cinturon: no hay intento rechazado contra el cual medir el guard';
+  END IF;
 
-    UPDATE public.pagos_intentos SET estado='aprobado'
-     WHERE id='00000000-0000-4000-8000-00000000d916'
-       AND estado NOT IN ('reversado','reverso_fallido');
-    GET DIAGNOSTICS v_n = ROW_COUNT;
+  UPDATE public.pagos_intentos SET estado='reversado' WHERE id = v_id;
 
-    IF v_n <> 0 THEN
-      RAISE EXCEPTION 'cinturon: el guard NO frena — un intento reversado se dejo aprobar';
-    END IF;
+  UPDATE public.pagos_intentos SET estado='aprobado'
+   WHERE id = v_id AND estado NOT IN ('reversado','reverso_fallido');
+  GET DIAGNOSTICS v_n = ROW_COUNT;
 
-    DELETE FROM public.pagos_intentos WHERE id='00000000-0000-4000-8000-00000000d916';
-  END;
+  -- se restaura SIEMPRE, antes de decidir si el assert pasa
+  UPDATE public.pagos_intentos SET estado = v_prev WHERE id = v_id;
 
-  SELECT count(*) INTO v_n FROM public.pagos_intentos WHERE clave_idempotencia='d916-cint';
-  IF v_n <> 0 THEN RAISE EXCEPTION 'cinturon: quedo residuo'; END IF;
+  IF v_n <> 0 THEN
+    RAISE EXCEPTION 'cinturon: el guard NO frena — un intento reversado se dejo aprobar';
+  END IF;
+
+  SELECT count(*) INTO v_n FROM public.pagos_intentos WHERE estado IN ('reversado','reverso_fallido');
+  IF v_n <> 0 THEN RAISE EXCEPTION 'cinturon: quedo residuo, % en estado terminal', v_n; END IF;
 
   RAISE NOTICE 'cinturon OK: guard en los DOS updates, frena de verdad, residuo 0';
 END $cint$;
