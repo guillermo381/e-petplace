@@ -148,12 +148,37 @@ Deno.serve(async (req) => {
       escalados.push(`${c.intento_id} (${v.clase}: ${v.razon})`);
     }
 
-    /* ⑤ CONFIRMADO: **no se confirma desde acá.** Se deja el hallazgo y el
-       actuador —único que mueve sujetos, y sólo con verdad verificada— lo
-       resuelve por su camino. *Dos piezas que confirman pagos es cómo se
-       confirma dos veces.* */
+    /* ⑤ 🔴 CONFIRMADO — **ACÁ FALTA EL CABLE, Y ESTA LÍNEA LO DECÍA AL REVÉS.**
+
+       Decía *«lo aplica el actuador»* y **es falso**: el actuador arranca con
+       `SELECT * FROM webhook_events WHERE id = p_evento_id`, o sea que
+       **necesita una fila de evento**. Y el caso que este barrido existe para
+       resolver es justamente **el webhook que nunca llegó** ⇒ no hay fila, no
+       hay a quién pasarle nada, y el sujeto **no se mueve**.
+
+       ⇒ **El barrido detecta el pago y nadie lo aplica.** Sin error, sin log de
+       fallo: con un `console.log` que afirmaba lo contrario.
+
+       **El contraste que lo prueba:** el barrido de Nuvei llama a
+       `resolver_consulta_activa(uuid, jsonb, text)` —que existe y aplica—.
+       **DeUna no tiene equivalente**: las únicas funciones `%deuna%` en la base
+       son `_deuna_base36` y `deuna_nueva_referencia`, las dos del generador de
+       referencia.
+
+       *Es «puerta sin motor» escrito como comentario: la promesa compilaba.*
+
+       **Cura: es de MOTOR y por lo tanto de A** — una hermana de
+       `resolver_consulta_activa` para DeUna, o ensanchar la existente. **No la
+       escribo desde acá**: aplicar un pago desde el barrido, saltándose al
+       actuador, sería el segundo lugar del sistema que confirma plata — *dos
+       piezas que confirman pagos es cómo se confirma dos veces.*
+       Mientras tanto, el hallazgo queda marcado (`confirmado_tardio`) y
+       **escalado**, para que una persona lo vea. */
     if (v.clase === 'confirmado') {
-      console.log(`[deuna-barrido] confirmado tardio ${c.intento_id} — lo aplica el actuador`);
+      console.error(`[deuna-barrido] 🔴 ${c.intento_id} CONFIRMADO por el proveedor `
+        + `y NO HAY QUIEN LO APLIQUE (falta el equivalente de resolver_consulta_activa). `
+        + `Sujeto ${c.sujeto} ${c.sujeto_id} sigue sin mover.`);
+      escalados.push(`${c.intento_id} (confirmado sin aplicador — cable faltante)`);
     }
   }
 

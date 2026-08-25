@@ -60,6 +60,8 @@ el código y **qué le pasó de verdad al cliente**, que es lo que decide el tex
 | `monto_no_se_recibe` | 400 | el cliente mandó un monto | defecto nuestro |
 | `compra_no_existe` / `cita_no_existe` | 409 | no existe **o es de otro** — *la misma respuesta a propósito: distinguirlas sería un oráculo de compras ajenas* | volver atrás |
 | `desglose_incompleto` | 409 | no hay desglose congelado | no se cobra; soporte |
+| **`monto_invalido`** | 409 | **el desglose existe pero su total no es > 0** — defecto nuestro, no del cliente | no se cobra; soporte. *Jamás «tu pago falló»: la persona no tiene nada que corregir* |
+| `metodo_no_permitido` | 405 | no llegó por POST | defecto nuestro; el wrapper siempre usa POST |
 | `<código de compuerta>` | 409 | E3: stock vencido, vendedor inactivo… | **la causa real, y la tarjeta nunca se enteró** (§7 letra madre) |
 | `sin_respuesta` | 504 | DeUna no contestó | **NO es rechazo.** Reintentar |
 | `no_se_pudo_completar` | 409/500 | el proveedor rechazó la solicitud | soporte, con `motivo` |
@@ -68,6 +70,17 @@ el código y **qué le pasó de verdad al cliente**, que es lo que decide el tex
 > 🔴 **`sin_respuesta` y `sesion_no_verificable` no son rechazos y no pueden
 > vestirse como tales.** *Un timeout dibujado como rechazo hace que el cliente
 > vuelva a pagar algo que ya pagó — es la clase de error que cuesta doble.*
+
+> ⚠️ **`monto_invalido` y `metodo_no_permitido` se agregaron el 22-ago, tarde.**
+> La puerta los emitía desde el principio y **este contrato no los declaraba**;
+> aparecieron cruzando la tabla contra los códigos que la función emite de
+> verdad. **A tradujo fielmente un contrato incompleto**, así que
+> `CodigoDeuna` en `packages/api` tampoco los tiene — y su `codigo as
+> CodigoDeuna` los deja pasar en runtime **sin que TypeScript se entere**.
+>
+> *Un contrato escrito a mano diverge de la función que describe en el momento
+> exacto en que alguien agrega un `return` — y nadie lo nota, porque el
+> contrato sigue siendo cierto sobre todo lo que sí menciona.*
 
 ---
 
