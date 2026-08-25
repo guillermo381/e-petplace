@@ -186,9 +186,22 @@ export type EstadoDeUna =
     }
   /** `APPROVED` / webhook `SUCCESS` **verificado por consulta activa**. */
   | { fase: 'aprobada' }
-  /** 🔴 `NOT_FOUND` dentro de ventana · `REVERSED_FAILED`.
+  /** 🔴 El fantasma y `REVERSED_FAILED`.
    *  §6: *hallazgo con nombre — jamás voz de éxito ni silencio*, y
-   *  `REVERSED_FAILED` **jamás se resuelve solo**. */
+   *  `REVERSED_FAILED` **jamás se resuelve solo**.
+   *
+   *  ⚠️ **EL DISCRIMINADOR DEL FANTASMA ES DEL SERVIDOR, Y ESTÁ EN REVISIÓN
+   *  (25-ago).** ⏪ Acá se nombraba `NOT_FOUND`; medido contra QA, **ese código
+   *  no existe** y §6 lo reemplazó por *«`PENDING` con `amount = 0` y
+   *  `date = ""`»*. **Y A midió que ESE también es falso: una transacción REAL
+   *  en `PENDING` da lo mismo.** Su enmienda está en curso.
+   *
+   *  🔴 **Nada de esta pantalla depende de cómo termine.** La superficie
+   *  **recibe el veredicto, no lo calcula** — acá no se lee `amount`, ni
+   *  `date`, ni ningún código del proveedor. *Por eso el mecanismo se nombra
+   *  como «el del servidor, en revisión» en vez de citar un discriminador
+   *  concreto: **es la tercera versión de esa regla en cuatro días**, y un
+   *  comentario que cita la de hoy va a estar viejo el viernes.* */
   | { fase: 'hallazgo'; nombre: string }
   /** 🔴 No se pudo pedir el código. **La familia viaja con el fallo**, porque
    *  es lo que decide la voz — y `codigo` va al lado **sin traducirse**, para
@@ -368,6 +381,36 @@ export function useEstadoDeUna(
 
   return {
     estado: deEnsayo ?? real,
+    /**
+     * 🔴 **REGENERAR NO REEMPLAZA AL CÓDIGO VIEJO — LOS DOS QUEDAN VIVOS.**
+     * Medición de D contra QA (25-ago): pedir un código con **la misma
+     * referencia** es **ACEPTADA** y devuelve un `transactionId` nuevo; **el
+     * anterior queda `PENDING`.** *Esta pantalla muestra uno solo, así que
+     * después de regenerar hay un código pagable que la persona ya no ve.*
+     *
+     * ✅ **LO QUE YA ES SEGURO, y no por suerte:** la plata **no se pierde con
+     * ninguno de los dos.** La espera no mira al intento: mira **al SUJETO**
+     * (`useEsperaDeConfirmacion` → `leerEstadoCompra`/`Cita`), y los dos
+     * intentos comparten referencia ⇒ **pague con el que pague, el actuador
+     * resuelve el mismo sujeto y la pantalla celebra igual.** *Es la segunda
+     * vez en esta mesa que «leer el sujeto, no al proveedor» paga sin que
+     * hubiera que escribir nada.*
+     *
+     * 🔴 **LO QUE NO SE RESUELVE ACÁ, POR CONTRATO:** cuál de los dos se
+     * MUESTRA, y si el viejo debe morir al nacer el nuevo. **D dice que el
+     * servidor es quien sabe** y la mesa lo declaró decisión de superficie
+     * **con contrato de D** ⇒ *elegir yo solo sería inventarle una regla al
+     * riel del proveedor desde una pantalla.* **Hoy se muestra el más nuevo**,
+     * que es lo que la persona acaba de pedir — y se declara como estado
+     * vigente, no como decisión tomada.
+     *
+     * ⚠️ **El riesgo real que esto abre, y es de PLATA:** dos códigos vivos
+     * sobre una compra son dos pagos posibles. *La defensa no puede vivir en
+     * esta pantalla —una persona puede tener el viejo tecleado en otra app
+     * antes de tocar este botón—: vive en la compuerta `pago_en_proceso` del
+     * servidor.* **Nombrado para que quien cierre el contrato lo tenga a la
+     * vista, no para curarlo desde acá.**
+     */
     regenerar: () => setSemilla((s) => s + 1),
   };
 }
