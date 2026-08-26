@@ -26,6 +26,9 @@
  *   CITA_TELE=<uuid>     # teleconsulta pagada, EN ventana
  *   CITA_FUERA=<uuid>    # teleconsulta pagada, FUERA de ventana
  *   CITA_CANCELADA=<uuid>
+ *   CITA_TIPO_SIN_MODALIDAD=<uuid>   # tipo_servicio='telemedicina' PERO
+ *                                    # modalidad='local' — el discriminador
+ *                                    # del eje (ver el caso al final)
  *     node arnes.mjs
  *
  * Las que falten se saltean **declarándolo** — un caso omitido en silencio es
@@ -138,6 +141,18 @@ await caso('cita cancelada', {
 await caso('cita inexistente', {
   jwt: JWT_DUENO, cita: '00000000-0000-0000-0000-000000000000',
   espera: 'sin_token', codigo: 'cita_inexistente',
+});
+/* 🔴 EL DISCRIMINADOR DEL EJE — no es un caso de laboratorio.
+   `LETRA_TELEMEDICINA` v1.1 §7 ② firma que la marca de teleconsulta es
+   `modalidad='telemedicina'` (BIO_EXPEDIENTE D13.6), NO `tipo_servicio`.
+   Y el hold hoy **rechaza** esa modalidad y cae a `'local'` por default ⇒
+   una teleconsulta reservada nace pareciendo presencial.
+   Si este caso ENTREGA token, el gate está leyendo el eje equivocado, y la
+   consecuencia no es un token de más: es una teleconsulta marcada como
+   presencial en el expediente de la mascota. */
+await caso('tipo_servicio=telemedicina pero modalidad=local', {
+  jwt: JWT_DUENO, cita: process.env.CITA_TIPO_SIN_MODALIDAD,
+  espera: 'sin_token', codigo: 'no_es_teleconsulta',
 });
 
 console.log('\n  ─────────────────────────────────────────────────────────────');

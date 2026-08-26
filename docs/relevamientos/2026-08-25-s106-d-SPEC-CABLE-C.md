@@ -116,8 +116,47 @@ OTA.** El tren lo decide la mesa.
 
 ## §4 · LOS TOKENS DE PRUEBA — no esperes a la edge
 
-**No hace falta `video-token` para probar el cable.** Dejé una herramienta
-local:
+> ### ✅ LAS CLAVES YA ESTÁN — verificado contra el objeto, 26-ago-2026
+> `npx supabase secrets list --project-ref zyltipqscdsdsxnjclhp` devuelve las
+> tres con el **nombre exacto** que la edge lee, las tres selladas
+> `2026-08-26T04:30:31Z`:
+> **`LIVEKIT_API_KEY` · `LIVEKIT_API_SECRET` · `LIVEKIT_URL`.**
+> *(Lo verifiqué en vez de creerlo: «están cargadas» es una declaración, y un
+> nombre con un typo se ve idéntico a uno correcto hasta que la edge devuelve
+> `video_sin_configurar`.)*
+
+### 🔴 Pero los dos tokens NO los puedo generar yo, y es a propósito
+
+`secrets list` devuelve **hashes, no valores** — que es exactamente lo que
+tiene que hacer. **Yo no tengo las claves, y no debo tenerlas.** Pedirlas
+para generarte dos tokens sería sacarlas del único lugar donde están seguras
+y meterlas en un chat. *`D-712`: los artefactos de una auditoría son un vector
+nuevo.*
+
+**Las genera quien tiene las claves. Un solo comando, en la terminal del
+founder** (o en la tuya, si él te las pasa por un canal que no sea texto
+plano):
+
+```bash
+cd supabase/functions/video-token
+
+LIVEKIT_API_KEY='...' \
+LIVEKIT_API_SECRET='...' \
+LIVEKIT_URL='wss://...' \
+  node generar-token-prueba.mjs
+```
+
+**Lo que sale de ahí sí puede viajar hacia vos**: la URL y dos tokens de
+**una hora**, para una **sala de juguete**, sin acceso a ninguna cita ni a
+ningún dato. *Un token de `cable-quito` no abre nada más que `cable-quito`.*
+
+⚠️ **Aun así no los pegues en un commit.** Vencen en una hora, pero un
+secreto en el historial de git no vence nunca.
+
+---
+
+**No hace falta `video-token` para probar el cable.** La herramienta es local
+y no tiene dependencias:
 
 ```bash
 cd supabase/functions/video-token

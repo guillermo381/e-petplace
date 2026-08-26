@@ -40,6 +40,17 @@ lea ni la escriba**, y que su adjudicación siga siendo de la mesa como vos
 dejaste planteado. *Lo digo acá para que nadie "complete" la pieza conectándola
 por prolijidad.*
 
+> ### ✅ RESUELTO POR LA MESA — 26-ago-2026, y más fuerte de lo que pedí
+> **`D-930`: la tabla se MATA**, no se deja quieta. La ficha toma las cuatro
+> razones y la letra v1.1 §7 agrega la firma ⓪ — **la teleconsulta no se
+> graba en v1**, con `roomRecord` en `false` **explícito** en mi edge y no
+> heredado del default. *Un default que hoy es `false` puede cambiar con una
+> versión del SDK; una línea que dice `false` no.*
+>
+> **Esta sección queda como registro de por qué**, no como pedido vivo.
+> Lo único que sigue rigiendo para vos: **la RPC no la toca** — y si el
+> DROP entra en tu tanda, mejor.
+
 ---
 
 ## §1 · QUÉ NECESITO — una sola función
@@ -101,12 +112,66 @@ Medidos contra `pg_proc` en la DB viva, los dos `DEFINER` y `boolean`:
 subimos a la mesa** — prefiero un pedido trabado a un predicado paralelo que
 mañana diverja del que usa la RLS.
 
-### 2.3 · Que sea teleconsulta
-`cita.tipo_servicio = 'telemedicina'` — el código que vos mismo medís en
-`tipos_servicio` (`codigo=telemedicina`, `categoria=telemedicina`).
-Cualquier otro ⇒ `no_es_teleconsulta`.
+### 2.3 · Que sea teleconsulta — 🔴 ENMENDADO POR LA LETRA v1.1
+
+> ⚠️ **Corrección de este pedido, 26-ago-2026.** La primera versión decía
+> `cita.tipo_servicio = 'telemedicina'`. **Está mal**, y lo corrige la firma
+> de CP1: `LETRA_TELEMEDICINA` v1.1 §7 ② firma que la marca se resuelve **por
+> `BIO_EXPEDIENTE` D13.6**, o sea **`modalidad='telemedicina'`** sobre la
+> propia cita. *La letra se enmendó después de que escribí el pedido; el
+> pedido se enmienda, no la letra.*
+
+**El discriminador es `cita.modalidad = 'telemedicina'`.** Cualquier otra
+⇒ `no_es_teleconsulta`.
+
+**Medido en la DB viva (26-ago):** el CHECK ya lo admite —
+`modalidad = ANY (ARRAY['presencial','telemedicina','domicilio','emergencia_movil','local'])`.
+
+**Y son dos ejes distintos, no sinónimos** — las combinaciones vivas lo
+muestran: `domicilio`+`grooming_completo`, `presencial`+`paseo_30min`.
+**`modalidad` es CÓMO se presta; `tipo_servicio` es QUÉ se presta.**
+
+⚠️ **La ambigüedad que hay que saber que existe:** «telemedicina» aparece en
+**los dos ejes** — hay una fila `tipos_servicio.codigo='telemedicina'` (que
+vos mediste, con `categoria='telemedicina'`) **y** un valor `modalidad`
+homónimo. **La letra firmó la modalidad.** *Lo declaro para que nadie
+"arregle" el gate cambiándolo al otro eje por parecerle más natural.*
 
 🔴 **Un token de sala para una cita presencial no debería poder existir.**
+
+---
+
+### 2.3bis · 🔴 LA DEPENDENCIA DURA — sin esto la RPC es correcta y no sirve
+
+**Medido por vos, y es literal del cuerpo del hold:**
+
+```
+v_modalidad := COALESCE(p_modalidad, 'local');
+IF v_modalidad NOT IN ('local', 'domicilio') THEN
+    RAISE EXCEPTION 'modalidad_invalida'
+```
+
+⇒ **La única puerta que crea citas RECHAZA `'telemedicina'`**, y si no se le
+pasa nada, la cita **nace con `'local'`**.
+
+> ### **Consecuencia: si la RPC gatea por `modalidad='telemedicina'` y el hold no la deja nacer, el gate está perfecto y NINGUNA teleconsulta pasa jamás.**
+> *Es «motor sin puerta» (`L-318`) en su forma exacta — con el agravante de
+> que **no falla**: devuelve `no_es_teleconsulta`, que se lee como un rechazo
+> legítimo. Un gate correcto sobre un dato que nadie escribe no tiene
+> síntoma.*
+
+**Y el camino de al lado es peor, no mejor.** Si para esquivarlo el gate se
+mudara a `tipo_servicio`, la cita entraría igual **con `modalidad='local'`**
+— y §7 dice que **la marca del expediente es la modalidad**. Quedaría una
+teleconsulta registrada como *presencial en el local*. Tus palabras: *«no hay
+error, no hay log, hay un dato equivocado con cara de normal»*.
+
+⇒ **Pido que las dos cosas viajen JUNTAS, o que se declare cuál falta:**
+① abrir `'telemedicina'` en el hold *(tu ⑤.1, ya nombrado)* · ② esta RPC.
+
+**Yo no puedo hacer ni una ni otra: las dos son motor y son tuyas.** Si por
+alcance sólo entra una, **decime cuál** y lo declaro en mi reporte como
+pieza construida y no ejercida — *jamás como probada.*
 
 ### 2.4 · Que esté pagada y no cancelada
 Con el vocabulario real de `estado` / `estado_reserva` — **el que midas vos,
@@ -172,7 +237,14 @@ corrió no probó nada) necesita ejercer los rojos **a propósito**:
 | **un tercero cualquiera** | `puede: false, motivo: "ajeno_a_la_cita"` |
 | **el mismo dueño, 3 h antes** | `puede: false, motivo: "fuera_de_ventana"` |
 | **cita cancelada** | `puede: false, motivo: "cita_cancelada"` |
-| **cita presencial** | `puede: false, motivo: "no_es_teleconsulta"` |
+| **cita presencial** (`modalidad='local'`) | `puede: false, motivo: "no_es_teleconsulta"` |
+| 🔴 **`tipo_servicio='telemedicina'` PERO `modalidad='local'`** | `puede: false, motivo: "no_es_teleconsulta"` |
+
+🔴 **El último es EL discriminador de §2.3, y no es un caso de laboratorio:**
+es **exactamente lo que produce el hold hoy** si alguien reserva una
+teleconsulta sin que ①  esté hecho. *Si ese caso pasa, el gate está leyendo
+el eje equivocado y una teleconsulta va a quedar marcada como presencial en
+el expediente.*
 
 ⚠️ **Ojo con el estado de la base, que lo mediste vos:** `acepta_telemedicina`
 está en **false en 11 de 11 prestadores** y hay **0 citas de telemedicina**.
