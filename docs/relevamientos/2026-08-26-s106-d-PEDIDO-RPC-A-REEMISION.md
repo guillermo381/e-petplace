@@ -60,9 +60,38 @@ SET search_path = public, pg_temp
 Y al pie, **obligatorio** (L-140):
 
 ```sql
-REVOKE ALL ON FUNCTION public.puede_entrar_a_videollamada(uuid, uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.puede_entrar_a_videollamada(uuid, uuid)
+  FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.puede_entrar_a_videollamada(uuid, uuid) TO service_role;
 ```
+
+> ### 🔴 CORRECCIÓN — MI PIE ESTABA INCOMPLETO, Y EL CINTURÓN DE A LO CAZÓ
+> **Yo escribí `FROM PUBLIC, anon` y me faltó `authenticated`.** Los default
+> privileges de Supabase **le conceden EXECUTE a `authenticated` en el propio
+> `CREATE`**, y ese grant es **directo al rol, no heredado de `PUBLIC`** ⇒
+> **revocar `PUBLIC` no lo alcanza.**
+>
+> **Por qué era grave acá y no un detalle de prolijidad:** esta RPC recibe
+> **`p_user_id` como PARÁMETRO** en vez de leerlo de la sesión. ⇒ **cualquiera
+> logueado podría haber preguntado por citas ajenas pasando otro uid.**
+>
+> > **Una función que recibe la identidad como parámetro tiene TODO su gate en
+> > el ACL.** *En una que lee `auth.uid()`, un EXECUTE de más es una molestia;
+> > en una que la recibe, es la puerta entera.*
+>
+> **Es `L-216` en una variante que yo no tenía vista:** su enunciado conocido
+> es *«un REVOKE FROM anon que deja PUBLIC intacto no cierra nada»* — y acá el
+> que quedaba abierto **no era `PUBLIC` sino `authenticated`**, que es
+> justamente el rol de toda persona con la app instalada.
+>
+> ⇒ **AL MOLDE, para toda spec futura mía:** el pie de una DEFINER nombra
+> **`PUBLIC, anon, authenticated`**, y se verifica con
+> **`has_function_privilege(rol, oid, 'EXECUTE')`**, *jamás con un `LIKE`
+> sobre `proacl`* — el error ② de S91 abortó una migración de seguridad con
+> el agujero abierto por medir así.
+>
+> **Verificado hoy contra el objeto** tras la ampliación de A:
+> `anon:false · authenticated:false · service_role:true` · DEFINER · STABLE.
 
 **Sólo la llama `video-token` con `service_role`.** `p_user_id` sale de
 `getUser()` en la edge, **jamás del cliente** — molde literal de

@@ -24,6 +24,8 @@
  *   JWT_DUENO=...        # sesión del dueño de la mascota de la cita
  *   JWT_VET=...          # sesión del veterinario de la cita (borde §4)
  *   JWT_AJENO=...        # sesión de cualquier otra persona
+ *   ANON_KEY=...         # la anon key PÚBLICA del proyecto (no es secreto:
+ *                        # viaja en el bundle). Prueba el guard de D-714.
  *   CITA_TELE=<uuid>     # teleconsulta pagada, EN ventana
  *   CITA_FUERA=<uuid>    # teleconsulta pagada, FUERA de ventana
  *   CITA_CANCELADA=<uuid>
@@ -138,8 +140,21 @@ await caso('🔴 vet solo, el dueño nunca entró (borde §4)', {
 });
 
 console.log('\n  ── ROJOS A PROPÓSITO: la puerta tiene que cerrarse ──');
-await caso('sin sesión', {
-  jwt: 'no-es-un-jwt', cita: CITA_TELE, espera: 'sin_token',
+/* 🔴 LA ANON KEY, no un string basura — y el cambio lo ordenó CORRER esto.
+   Con `Authorization: Bearer no-es-un-jwt` el gateway de Supabase rebota
+   `UNAUTHORIZED_INVALID_JWT_FORMAT` **antes de que esta function ejecute una
+   sola línea** ⇒ ese caso probaba la plataforma, no mi guard.
+
+   La prueba que SÍ llega al cuerpo es **la anon key**: es un JWT válido, pasa
+   `verify_jwt`, y **viaja en el bundle de las apps** — o sea que la tiene
+   cualquiera con el teléfono. Es exactamente el agujero que `D-714` midió en
+   S92-BIS. Acá tiene que morir contra `getUser()`, que no devuelve persona.
+
+   *Un caso que rebota una capa más afuera de la que querés probar da verde
+   sin haber tocado tu código.* */
+await caso('anon key (JWT válido, sin persona) — D-714', {
+  jwt: process.env.ANON_KEY, cita: CITA_TELE,
+  espera: 'sin_token', codigo: 'sin_sesion',
 });
 await caso('ajeno a la cita', {
   jwt: JWT_AJENO, cita: CITA_TELE, espera: 'sin_token', codigo: 'ajeno_a_la_cita',
