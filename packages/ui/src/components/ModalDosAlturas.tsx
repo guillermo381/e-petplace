@@ -1,0 +1,205 @@
+/**
+ * ModalDosAlturas — la ficha clínica mientras se atiende (S106-B, OBRA 6).
+ *
+ * **El veterinario escribe SIN dejar de ver al animal.** Ése es el acto entero,
+ * y de ahí sale cada decisión de abajo.
+ *
+ * ── TRES POSICIONES CON IMÁN, Y NINGUNA ES «DONDE LO SOLTASTE» ─────────────
+ * `cerrado` (solo el asa) · `medio` (~50 %) · `completo` (~90 %). Se arrastra
+ * libre y **al soltar va a la más cercana**, con la velocidad contando: un
+ * envión hacia arriba lleva a la de arriba aunque el dedo no haya llegado.
+ * *Eso es lo que hace que se sienta físico en vez de obediente.*
+ *
+ * ── 🔴 AUN EN COMPLETO QUEDA VIDEO ARRIBA — y no es estética ───────────────
+ * `completo` es **90 %, jamás 100 %**. La franja que queda es el animal.
+ * *Un panel que tapa el 100 % convierte «atender por video» en «llenar un
+ * formulario», que es exactamente el acto que esta pantalla no es.*
+ *
+ * ── LA FÍSICA: RESORTE SUAVE, JAMÁS REBOTE DE JUGUETE ──────────────────────
+ * `withSpring` con amortiguación ALTA (`damping: 22`): llega, se asienta y se
+ * queda. **`motion.easing.spring` —el bezier con overshoot— está PROHIBIDO
+ * acá**: ese rebote es para confirmaciones táctiles alegres (Ley 6), y esta
+ * pantalla es una consulta médica. *Un panel que hace «boing» sobre un animal
+ * enfermo es la clase de detalle que hace desconfiar de todo lo demás.*
+ *
+ * ── EL TECLADO NO EMPUJA EL VIDEO ──────────────────────────────────────────
+ * Cuando el teclado sube, **el modal NO se mueve**: crece por dentro (su
+ * contenido scrollea y reserva el alto del teclado). *Si el video saltara cada
+ * vez que se toca un campo, no se podría mirar al animal y escribir a la vez —
+ * que es literalmente lo que el veterinario está haciendo.*
+ *
+ * ── 🔴 BAJAR NO PUEDE PERDER TRABAJO ───────────────────────────────────────
+ * Con `hayCambiosSinGuardar`, bajar a `cerrado` **pide confirmación** en vez de
+ * cerrar. *Perder una nota clínica a medio escribir por un gesto es de los
+ * errores que no se perdonan* — y el gesto de bajar es fácil de hacer sin
+ * querer, que es justo lo que lo vuelve peligroso.
+ * **La confirmación la hace el consumidor** (`onPedirConfirmacion`): la pieza
+ * no monta una Hoja adentro de otra.
+ *
+ * ── EL ASA NUNCA SE ESCONDE ────────────────────────────────────────────────
+ * Es la única pista de que hay algo abajo. Con el chrome oculto, sigue.
+ * (Ver `SuperficieLlamada`, OBRA 4.)
+ */
+
+import { useCallback, useEffect, type ReactNode } from 'react'
+import { View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import Animated, { runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
+
+import { radius } from '../tokens/radius'
+import { spacing } from '../tokens/spacing'
+import { sobreVideo } from '../tokens/sobreVideo'
+import { useTheme } from '../ThemeProvider'
+
+export type AlturaModal = 'cerrado' | 'medio' | 'completo'
+
+export interface ModalDosAlturasProps {
+  altura: AlturaModal
+  onAltura: (a: AlturaModal) => void
+  /** Alto total de la pantalla. Las tres posiciones se derivan de acá. */
+  altoPantalla: number
+  children: ReactNode
+  /** Voz del asa (a11y). */
+  etiquetaAsa: string
+  /** Si hay texto sin guardar, bajar a `cerrado` pide confirmación. */
+  hayCambiosSinGuardar?: boolean
+  /** Lo llama en vez de cerrar cuando hay cambios. El consumidor decide cómo pregunta. */
+  onPedirConfirmacion?: () => void
+  /** Alto que ocupa el teclado. El modal crece POR DENTRO — el video no se mueve. */
+  altoTeclado?: number
+  insetBottom?: number
+}
+
+/** Fracciones del alto de pantalla que ocupa el panel en cada posición. */
+const FRACCION: Record<AlturaModal, number> = {
+  cerrado: 0,
+  medio: 0.5,
+  /* 90 y no 100: la franja que sobra es el animal. */
+  completo: 0.9,
+}
+
+const ASA_ALTO = 28
+
+/** Resorte SUAVE. `damping` alto = llega y se queda; sin overshoot. */
+const RESORTE = { damping: 22, stiffness: 220, mass: 0.9 } as const
+
+export function ModalDosAlturas({
+  altura,
+  onAltura,
+  altoPantalla,
+  children,
+  etiquetaAsa,
+  hayCambiosSinGuardar = false,
+  onPedirConfirmacion,
+  altoTeclado = 0,
+  insetBottom = 0,
+}: ModalDosAlturasProps) {
+  const { theme } = useTheme()
+  /* R41 · el hook va SUELTO y se combina después: `memorial || useReducedMotion()`
+     sería una llamada condicional. Se comparte brazo con memorial (Ley 8) —
+     **reducir movimiento es quitarle el VIAJE, no el momento**: el panel llega
+     a la misma altura, sin resorte. */
+  const reduceMotion = useReducedMotion()
+  const sinViaje = theme.mode === 'memorial' || reduceMotion
+  const asentar = useCallback(
+    (destino: number) => (sinViaje ? withTiming(destino, { duration: 0 }) : withSpring(destino, RESORTE)),
+    [sinViaje],
+  )
+
+  const altoDe = useCallback((a: AlturaModal) => Math.round(altoPantalla * FRACCION[a]) + ASA_ALTO, [altoPantalla])
+
+  const h = useSharedValue(altoDe(altura))
+  const iniH = useSharedValue(0)
+
+  useEffect(() => {
+    h.value = asentar(altoDe(altura))
+  }, [altura, altoDe, asentar, h])
+
+  /** A dónde va al soltar: la más cercana, con el envión contando. */
+  const resolver = useCallback(
+    (altoActual: number, velocidad: number) => {
+      // El envión vale ~120 ms de recorrido: un flick corto ya cambia de destino.
+      const proyectado = altoActual + velocidad * 0.12
+      const candidatas: AlturaModal[] = ['cerrado', 'medio', 'completo']
+      let mejor: AlturaModal = 'cerrado'
+      let min = Infinity
+      for (const c of candidatas) {
+        const d = Math.abs(altoDe(c) - proyectado)
+        if (d < min) { min = d; mejor = c }
+      }
+      // 🔴 Bajar del todo con trabajo sin guardar: se pregunta, no se cierra.
+      if (mejor === 'cerrado' && hayCambiosSinGuardar && onPedirConfirmacion) {
+        h.value = asentar(altoDe(altura))
+        onPedirConfirmacion()
+        return
+      }
+      onAltura(mejor)
+    },
+    [altoDe, altura, asentar, h, hayCambiosSinGuardar, onAltura, onPedirConfirmacion],
+  )
+
+  const arrastre = Gesture.Pan()
+    .onStart(() => { iniH.value = h.value })
+    .onUpdate((e) => {
+      // Arrastrar hacia ARRIBA (translationY negativo) hace crecer el panel.
+      const siguiente = iniH.value - e.translationY
+      const tope = altoDe('completo')
+      const piso = altoDe('cerrado')
+      h.value = Math.min(tope, Math.max(piso, siguiente))
+    })
+    .onEnd((e) => {
+      runOnJS(resolver)(h.value, -e.velocityY)
+    })
+
+  const estilo = useAnimatedStyle(() => ({ height: h.value }))
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: theme.bg.card,
+          borderTopLeftRadius: radius.xl,
+          borderTopRightRadius: radius.xl,
+          overflow: 'hidden',
+        },
+        estilo,
+      ]}
+    >
+      {/* ── EL ASA. Nunca se esconde: es la única pista de que hay algo abajo. */}
+      <GestureDetector gesture={arrastre}>
+        <View
+          accessibilityRole="adjustable"
+          accessibilityLabel={etiquetaAsa}
+          accessibilityValue={{ text: altura }}
+          style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: theme.border.default }} />
+        </View>
+      </GestureDetector>
+
+      {/* ── El contenido. El teclado se compensa ACÁ ADENTRO: el panel reserva
+             su alto y el video de arriba no se entera. */}
+      <View style={{ flex: 1, paddingBottom: altoTeclado > 0 ? altoTeclado : insetBottom, paddingHorizontal: spacing[4] }}>
+        {children}
+      </View>
+    </Animated.View>
+  )
+}
+
+/** El asa suelta, para montarla sobre el video cuando el panel está cerrado. */
+export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () => void }) {
+  return (
+    <View
+      accessibilityRole="button"
+      accessibilityLabel={etiqueta}
+      onTouchEnd={onPress}
+      style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: sobreVideo.contenido, opacity: 0.7 }} />
+    </View>
+  )
+}

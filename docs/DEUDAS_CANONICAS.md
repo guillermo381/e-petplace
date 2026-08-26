@@ -22486,3 +22486,57 @@ gastó.*
 **Disparo:** la próxima pasada que toque `app_config`. **Cura:** censar
 consumidores y, si son cero, retirarla **con lápida** — jamás borrarla en
 silencio, que es cómo se pierde la memoria de por qué existía.
+
+---
+
+### D-937 🟡 · LA MATRIZ DE CUENTAS DE PRUEBA PROMETE «UNA SOLA CLAVE» Y TIENE EXCEPCIONES SIN MARCAR
+
+**Nace S106 tanda 2, 26-ago-2026.** Hallazgo de medición al buscar la
+credencial del profesional.
+
+`docs/relevamientos/2026-08-13-s97a-matriz-cuentas-prueba.md` dice en su
+encabezado, en negrita: *«La clave es una sola para todas»*.
+
+🔴 **Medido: `guillo381+7@gmail.com` NO entra con esa clave.** Su login rebota.
+La unificación de S97 alcanzó a las cuentas que esa sesión tocó —el propio
+documento lo dice más abajo, *«11 usuarios creados por Admin API»* y *«clave
+reseteada»* caso por caso— **pero el encabezado promete un universal que el
+cuerpo no sostiene.**
+
+*El costo no es la clave que falta: es que quien lea el encabezado y falle un
+login va a diagnosticar un problema de auth que no existe. Una excepción sin
+marcar convierte cada uso futuro del documento en una investigación.*
+
+**Y la razón por la que importa ahora:** `+7` es el empleado al que el motor
+asignó una de las citas semilla. *La cuenta que no entra es justamente la que
+el balanceo elige.*
+
+**Cura:** dos columnas en la matriz — *clave unificada ✅/❌* y *login
+verificado, con fecha*. **Lo que NO se hace es unificar `+7` de paso**: tocar
+credenciales de cuentas vivas es acto del founder, no de una pista.
+
+## ✅ CURADA EN LA MISMA TANDA (firma del founder, 26-ago-2026) — y el número era MUCHO peor
+
+Se midió **por login real contra las 42 cuentas `guillo381+*` vivas**, no
+contra el documento:
+
+> **17 entran con la clave compartida. 25 NO.**
+
+⇒ La ficha nació diciendo *«tiene excepciones sin marcar»* y **la medición dio
+vuelta la proporción: la excepción es la mayoría.**
+
+🔴 **Y el documento se contradecía a sí mismo:** su cura ① de S97-A declara para
+`vet2` *«clave → la compartida ✅»*, y **hoy `vet2` rebota**. No está sola: **el
+equipo `vet*` ENTERO rebota mientras el `ser*` ENTERO entra.** *Esa asimetría no
+es azar — o la unificación del lado médico nunca corrió, o algo la revirtió.*
+**Queda abierta para el founder**; la afirmación de S97 se marcó con su fecha en
+vez de borrarse, porque no sabemos si era falsa entonces — sabemos que lo es hoy.
+
+**La consecuencia operativa, que es la que muerde:** `+7`, `+9`, `+s87prof`,
+`+s87recep`, `+s88admin` y `+s88rolpuro` están todas del lado que rebota **y
+varias son empleados activos de Clínica Aurora** ⇒ **el balanceo del motor puede
+asignarle una cita a alguien cuya sesión después nadie puede acuñar.** *Ya pasó:
+la primera corrida del borde de §4 falló por eso.*
+
+**Lo que queda vivo y es del founder:** unificar las 25. A anotó el estado, no lo
+cambió.

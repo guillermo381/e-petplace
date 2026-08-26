@@ -41,6 +41,7 @@ import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
+import { opacity } from '../tokens/opacity'
 
 export type CeldaDensidad = 'normal' | 'compacta'
 
@@ -111,6 +112,22 @@ type Comun = ZonaFin & {
    *  porque un estado dicho únicamente en color no existe para quien no
    *  lo ve. */
   elegida?: boolean
+  /** S106-B · LA FILA QUE TODAVÍA NO SE PUEDE TOCAR.
+   *
+   *  **Aditiva y con default `false`:** los 161 usos vivos no cambian en nada.
+   *
+   *  🔴 **Y no es «gris porque sí»: se enciende SOLO cuando el usuario puede
+   *  hacer algo para habilitarla.** Su caso de origen es el aviso de
+   *  teleconsulta, donde «Continuar» espera una casilla que está a dos
+   *  centímetros — *el usuario ve la fila apagada, ve la casilla, y la relación
+   *  es evidente sin que nadie se la explique.*
+   *
+   *  ⚠️ **Si NO hay nada que el usuario pueda hacer, esto es el control
+   *  equivocado**: una fila apagada para siempre no informa, frustra. Ahí la
+   *  fila no se dibuja, o dice por qué (Ley 13).
+   *
+   *  El estado viaja a a11y con `disabled`, jamás solo en la opacidad. */
+  deshabilitada?: boolean
 }
 
 export type CeldaProps =
@@ -118,7 +135,7 @@ export type CeldaProps =
   | (Comun & { interactiva: true; onPress: () => void; accessibilityRole: AccessibilityRole })
 
 export function Celda(props: CeldaProps) {
-  const { titulo, subtitulo, inicio, densidad = 'normal', tituloEntero = false, elegida = false } = props
+  const { titulo, subtitulo, inicio, densidad = 'normal', tituloEntero = false, elegida = false, deshabilitada = false } = props
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
@@ -295,9 +312,10 @@ export function Celda(props: CeldaProps) {
 
   return (
     <Pressable
-      onPress={props.onPress}
-      onPressIn={() => setPresionada(true)}
-      onPressOut={() => setPresionada(false)}
+      onPress={deshabilitada ? undefined : props.onPress}
+      onPressIn={deshabilitada ? undefined : () => setPresionada(true)}
+      onPressOut={deshabilitada ? undefined : () => setPresionada(false)}
+      disabled={deshabilitada}
       accessibilityRole={props.accessibilityRole}
       accessibilityLabel={etiqueta}
       /* 🔴 EL ESTADO NO VIAJA SOLO EN EL COLOR. Un lector de pantalla no
@@ -308,7 +326,9 @@ export function Celda(props: CeldaProps) {
          con `selected`. *Poner las dos «por las dudas» le haría anunciar
          dos veces el mismo hecho.* */
       accessibilityState={
-        elegida
+        deshabilitada
+          ? { disabled: true }
+          : elegida
           ? props.accessibilityRole === 'radio' || props.accessibilityRole === 'checkbox'
             ? { checked: true }
             : { selected: true }
@@ -319,6 +339,9 @@ export function Celda(props: CeldaProps) {
         style={[
           layout,
           {
+            /* Deshabilitada: se atenúa, y el estado YA viajó por a11y arriba
+               — la opacidad es el canal visual, jamás el único. */
+            opacity: deshabilitada ? opacity.disabled : 1,
             backgroundColor: presionada ? theme.bg.overlay : 'transparent',
             transitionProperty: 'backgroundColor',
             transitionDuration: motion.duration.fast,
