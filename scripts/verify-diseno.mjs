@@ -5646,13 +5646,38 @@ function avisoDeLaLetra(md) {
 
   // Solo las líneas del blockquote; se les quita el «> » y se reunen los
   // párrafos (el markdown envuelve a 80 columnas y eso no es contenido).
-  const lineas = seccion.split('\n').filter((l) => l.trimStart().startsWith('>'));
+  /* 🔴 SOLO EL **PRIMER** BLOQUE CITADO — el aviso, y nada de lo que venga
+     después.
+     **Lo destapó el discriminador contra la letra real, no una lectura:** §3
+     tiene MÁS blockquotes además del aviso (la nota de la enmienda, que trae su
+     propia lista de claves). Filtrando «toda línea que empiece con `>`» los dos
+     bloques se fusionaban y el juez contaba **SIETE signos**, uno de ellos
+     `avisoTeleSigno1..6` — *o sea, la regla habría vigilado como signo clínico
+     un fragmento de documentación interna.*
+     Un blockquote es CONTIGUO: la primera línea sin `>` lo cierra. Eso es
+     estructura, no heurística. */
+  const todas = seccion.split('\n');
+  const desde = todas.findIndex((l) => l.trimStart().startsWith('>'));
+  if (desde < 0) return null;
+  const lineas = [];
+  for (let k = desde; k < todas.length; k++) {
+    if (!todas[k].trimStart().startsWith('>')) break;
+    lineas.push(todas[k]);
+  }
   if (lineas.length === 0) return null;
 
+  /* 🔴 EL ANCLA ES ESTRUCTURAL: `^> - ` marca UN SIGNO.
+     **Los ítems se sacan ANTES de armar párrafos**, porque si no el armador los
+     pega entre sí (van sin línea en blanco) y seis signos vuelven a ser uno —
+     que es literalmente el defecto del que esta regla viene saliendo.
+     *Un ancla estructural no se la roba un comentario ni la borra un cambio de
+     tipografía; los em-dashes sí se fueron, y con ellos se habría ido el juez.* */
+  const itemsLetra = [];
   const parrafos = [];
   let actual = [];
   for (const l of lineas) {
     const t = l.trimStart().replace(/^>\s?/, '').trim();
+    if (/^[-*·]\s+/.test(t)) { itemsLetra.push(t.replace(/^[-*·]\s+/, '').trim()); continue; }
     if (t === '') { if (actual.length) { parrafos.push(actual.join(' ')); actual = []; } continue; }
     actual.push(t);
   }
@@ -5675,9 +5700,20 @@ function avisoDeLaLetra(md) {
      (L-192) — en vez de que el juez se quedara ciego dando verde.
      *Un extractor que se ata a la POSICIÓN se rompe cuando la fuente crece; uno
      atado al CONTENIDO sobrevive a que la mesa agregue un párrafo.* */
+  /* ✅ FORMA ② · LA LISTA (firma del founder, 26-ago). Si hay ítems, ésos SON
+     los signos: cero heurística de puntuación.
+     ⏪ La forma vieja (un párrafo con los signos entre em-dashes) se conserva
+     como respaldo **y no por nostalgia**: mientras la letra en lista viva en
+     una rama y no en `main`, las dos formas existen a la vez. *Un lector que
+     solo entiende la forma nueva convierte el orden de merge en un rojo.* */
   const conSignos = prosa.find((p) => /—[^—]+—/.test(p));
-  if (!conSignos) return null;
-  const signos = conSignos.match(/—([^—]+)—/)[1].split(',').map((s) => s.trim()).filter(Boolean);
+  const signos =
+    itemsLetra.length > 0
+      ? itemsLetra
+      : conSignos
+        ? conSignos.match(/—([^—]+)—/)[1].split(',').map((s) => s.trim()).filter(Boolean)
+        : null;
+  if (signos == null) return null;
 
   /* ⚠️ LA LÍNEA DE TRÁNSITO (v1.1 ②) — nace marcada **PROVISIONAL** por la
      propia letra: rige hasta que el abogado conteste la pregunta 4 de §10
@@ -5688,13 +5724,28 @@ function avisoDeLaLetra(md) {
      copiarse a un baseline. */
   const transito = prosa.find((p) => p !== conSignos && /videollamada/i.test(p) && /graba|transmite|proveedor/i.test(p));
 
+  /* 🔴 EL CUERPO FIRMADO, ENTERO — y contra esto se mide cada fragmento de C.
+     **Por qué el texto completo y no párrafo contra párrafo:** la letra y el
+     diccionario pueden PARTIR distinto el mismo contenido (la letra tiene la
+     advertencia sola y el cierre aparte; C podría juntarlos), y **§3 prohíbe
+     resumir y acortar — no prohíbe dónde se corta**. Lo que no se negocia es
+     que cada palabra que se muestra sea de la letra.
+     La línea de las acciones y la casilla (`☐`) quedan fuera: son NOTACIÓN de
+     mesa, no prosa que el usuario lea corrido. */
+  const cuerpo = [...prosa, ...itemsLetra].join(' ');
+
   return {
     titulo: prosa[0],
     intro: prosa[1],
-    // El párrafo de los signos trae la frase dura + la entrada + el cierre.
-    advertenciaYSignos: conSignos,
+    /** El cuerpo entero: la vara del brazo ②. */
+    cuerpo,
+    /** ⏪ Nombre viejo, conservado para no romper a quien lo lea. */
+    advertenciaYSignos: cuerpo,
     signos,
     transito: transito ?? null,
+    /** Cuántos signos declara la letra POR ESTRUCTURA — se informa para que el
+     *  verde diga de dónde sacó la cuenta. */
+    porItems: itemsLetra.length > 0,
   };
 }
 
@@ -5880,8 +5931,8 @@ function r67(archivos) {
       );
     }
   };
-  par('el título', firmado.titulo, puesto.titulo);
-  par('el párrafo de para-qué-sirve', firmado.intro, puesto.intro);
+  par('el título', firmado.cuerpo, puesto.titulo);
+  par('el párrafo de para-qué-sirve', firmado.cuerpo, puesto.intro);
   /* 🔴 CON LISTA, EL CUERPO SE COMPARA PIEZA POR PIEZA — jamás recompuesto.
      **Lo destapó el discriminador, no una lectura:** al medir el escenario de C
      apareció un SEGUNDO rojo que era RUIDO — el párrafo recompuesto («…riesgo:
@@ -5893,15 +5944,15 @@ function r67(archivos) {
      Con lista se comparan las TRES piezas de prosa —advertencia · intro ·
      cierre— y los signos los cubre el brazo ①: **más estricto, no menos.** */
   if (puesto.signos != null) {
-    par('la advertencia dura', firmado.advertenciaYSignos, puesto.advertencia);
-    par('la entrada a los signos', firmado.advertenciaYSignos, puesto.signosIntro);
-    par('el cierre tras los signos', firmado.advertenciaYSignos, puesto.signosCierre);
+    par('la advertencia dura', firmado.cuerpo, puesto.advertencia);
+    par('la entrada a los signos', firmado.cuerpo, puesto.signosIntro);
+    par('el cierre tras los signos', firmado.cuerpo, puesto.signosCierre);
   } else {
-    par('el párrafo de la advertencia y los signos', firmado.advertenciaYSignos, puesto.duro);
+    par('el párrafo de la advertencia y los signos', firmado.cuerpo, puesto.duro);
   }
   /* Tránsito y acciones: SOLO si la fuente los trae. Una regla no puede exigir
      lo que su letra no firma, ni sobre una forma que no se acordó. */
-  if (firmado.transito) par('la línea de tránsito', firmado.transito, puesto.transito);
+  if (firmado.transito) par('la línea de tránsito', firmado.cuerpo, puesto.transito);
   for (const a of puesto.acciones) {
     if (!/Ir a urgencias|Reservar cita presencial|Continuar con la videoconsulta/.test(a)) {
       fallos.push(`R67 **la acción «${a}» no es ninguna de las tres firmadas** en §3.`);
@@ -5913,6 +5964,7 @@ function r67(archivos) {
     info:
       `los ${esperados.length} signos firmados, verificados en el texto que se muestra` +
       ` · **forma leída: ${puesto.forma}**` +
+      ` · la letra los declara ${firmado.porItems ? 'POR ÍTEMS (`> - `, ancla estructural)' : 'en un párrafo (forma vieja)'}` +
       (puesto.acciones.length ? ` · ${puesto.acciones.length} acción(es) verificadas` : '') +
       ` · vara EXTRAÍDA de \`${LETRA_TELE}\` en esta corrida (cero baseline transcrito)` +
       ` · ⚠️ **NO mide tipografía** (un verbatim en letra chica pasaría y violaría §3)` +
