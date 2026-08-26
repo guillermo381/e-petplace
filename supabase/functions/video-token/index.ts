@@ -110,8 +110,26 @@ Deno.serve(async (req) => {
   /* «No hay sesión» y «no se pudo verificar» son cosas distintas: tratarlas
      igual esconde una caída del proveedor de auth detrás de un 401 del
      usuario, y manda a la familia a revisar su contraseña por un problema
-     nuestro. */
-  if (eU) return json({ ok: false, codigo: 'sesion_no_verificable' }, 503);
+     nuestro.
+     ────────────────────────────────────────────────────────────────────────
+     🔴 PERO LA DISTINCIÓN SE HACE POR EL STATUS, NO POR «hubo error» — y esta
+     línea la corrigió CORRER EL ARNÉS, no leerla.
+     Medido el 26-ago contra `/auth/v1/user`: con la **anon key** el auth
+     responde **HTTP 403 `bad_jwt` («missing sub claim»)**, o sea un ERROR —
+     y la versión anterior lo mapeaba a `sesion_no_verificable` (503).
+     **Un 4xx del proveedor dice «esta credencial no sirve»; sólo un 5xx dice
+     «el proveedor se cayó».**
+     *Y lo caro no era el código equivocado: era que **el agujero de `D-714`
+     quedaba disfrazado de incidente de infraestructura**. Un 503 invita a
+     reintentar, y en nuestro monitoreo alguien sondeando con la clave del
+     bundle se habría visto como un problema nuestro.* */
+  if (eU) {
+    const status = (eU as { status?: number }).status ?? 0;
+    const esCredencialMala = status >= 400 && status < 500;
+    return esCredencialMala
+      ? json({ ok: false, codigo: 'sin_sesion' }, 401)
+      : json({ ok: false, codigo: 'sesion_no_verificable' }, 503);
+  }
   if (!u?.user) return json({ ok: false, codigo: 'sin_sesion' }, 401);
   const userId = u.user.id;
 

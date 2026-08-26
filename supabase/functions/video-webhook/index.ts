@@ -78,7 +78,13 @@ Deno.serve(async (req) => {
      real llegando — y cuando llegue, esta línea se puede simplificar. */
   const authHeader = req.headers.get('Authorization') ?? req.headers.get('Authorize') ?? '';
 
-  let evento: { event?: string; room?: { name?: string }; participant?: { identity?: string }; createdAt?: unknown };
+  let evento: {
+    id?: string;
+    event?: string;
+    room?: { name?: string };
+    participant?: { identity?: string };
+    createdAt?: bigint | number | string;
+  };
   try {
     const receiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
     evento = await receiver.receive(bodyRaw, authHeader) as typeof evento;
@@ -93,6 +99,21 @@ Deno.serve(async (req) => {
   const nombreEvento = evento?.event ?? '';
   const sala = evento?.room?.name ?? null;
   const participante = evento?.participant?.identity ?? null;
+  const eventoId = evento?.id ?? null;
+
+  /* 🔴 `createdAt` es **`bigint`** en el protocolo (`int64` de protobuf), y eso
+     tiene dos consecuencias que no las ve ningún typecheck:
+       ① `JSON.stringify` de un BigInt **LANZA** `TypeError` — por eso nunca
+          entra a un objeto que se vaya a serializar;
+       ② viene en **segundos**, no en milisegundos: pasarlo crudo a `new Date()`
+          daría **1970**, una fecha perfectamente válida y perfectamente falsa.
+     *Un hecho de sala fechado en 1970 no rompe nada: se guarda, se lee, y
+     miente para siempre.* */
+  let ocurridoEn: string | null = null;
+  try {
+    const seg = Number(evento?.createdAt ?? 0);
+    if (Number.isFinite(seg) && seg > 0) ocurridoEn = new Date(seg * 1000).toISOString();
+  } catch { /* si no se puede fechar, va NULL honesto — jamás una fecha inventada */ }
 
   /* 🔴 NO SE FILTRA NINGÚN EVENTO ACÁ, y es la firma en acto.
      De los 12 que LiveKit publica, hoy sólo cuatro le interesan a la letra
@@ -100,11 +121,18 @@ Deno.serve(async (req) => {
      `participant_connection_aborted`). **Igual se entregan los doce.**
      *Filtrar en la edge sería juzgar cuál hecho importa, y esa decisión es de
      la puerta — que además puede cambiar de opinión sin redeployar esto.* */
-  const { error } = await db().rpc('registrar_evento_videollamada', {
+  /* ⚠️ La firma real la construyó A y NO es la que yo había pedido: se llama
+     `registrar_hecho_de_sala` y toma dos parámetros más — `p_ocurrido_en` y
+     **`p_evento_id`**, que es la idempotencia que pedí, resuelta mejor de lo
+     que la pedí. *Se cablea contra la firma medida en `pg_proc`, jamás contra
+     la que yo había escrito en el pedido.* */
+  const { error } = await db().rpc('registrar_hecho_de_sala', {
     p_sala: sala,
     p_evento: nombreEvento,
+    p_ocurrido_en: ocurridoEn,
+    p_crudo: JSON.parse(bodyRaw),
     p_participante: participante,
-    p_payload: JSON.parse(bodyRaw),
+    p_evento_id: eventoId,
   });
 
   if (error) {
