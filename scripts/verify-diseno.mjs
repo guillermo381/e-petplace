@@ -47,22 +47,31 @@ const SHA_ISOTIPO_MEDIDO = 'c29721a65b12715984b20c2a612d2ac5d1b7ab0bdd185e75f580
  *  pide 50 px, y por eso el wordmark quedó afuera: daba 44. */
 const MIN_SIMBOLO_DEUNA = 16;
 /**
- * R66 · el voseo que YA ESTÁ, por archivo, **medido con la lista COMPLETA**
- * (la vieja subcontaba: ver `lib-voz.mjs` ⑨). **Trinquete solo-baja.**
+ * R66 · el voseo que YA ESTÁ, por archivo. **Trinquete solo-baja.**
  *
- * ⚠️ **`apps/cliente/src/i18n/es.ts` tiene fecha de vencimiento y es lo más
- * importante de esta tabla:** hoy vale 8 en `main`, pero **la pista C ya los
- * curó en `pista/s105-c` — medido ahí: 0**. ⇒ **en cuanto ese merge entre,
- * este número BAJA A 0. Si no baja, algo del trabajo de C se perdió en el
- * camino**, y este baseline es lo que lo va a gritar. *No es una excusa: es un
- * detector de pérdida de trabajo con su fecha adentro.*
+ * ⚠️ **TODO NÚMERO DE ACÁ SE MIDE CONTRA `origin/main`, JAMÁS CONTRA EL ÁRBOL
+ * DE LA PISTA** — y está escrito porque ya se cobró:
  *
- * `apps/prestador/src/i18n/es.ts` es **deuda declarada, sin dueño asignado en
- * esta mesa** — nunca se barrió entero (S77 curó 8/8 del prestador y 6/6 del
- * cliente, que era otra cosa).
+ * > La v1 de esta tabla puso **8** en el cliente. **Salió de mi worktree, que
+ * > no tenía el merge de la barrida de C.** En `origin/main` valía **0** desde
+ * > antes de que yo escribiera la línea que decía *«baja a 0 cuando ese merge
+ * > entre»*. **Ya había entrado.**
+ * >
+ * > Lo frenó la pista C midiendo contra `origin/main` y las ramas. *Un baseline
+ * > POR ENCIMA de la realidad no bloquea: **da permiso** — habría dejado
+ * > crecer el voseo del cliente de 0 a 8 sin que la regla dijera nada, que es
+ * > exactamente el defecto que R66 vino a cerrar.*
+ * >
+ * > **Y la trampa fina: el árbol de una pista es un objeto legítimo para
+ * > medir CUALQUIER cosa menos un techo compartido.** Un baseline es una
+ * > afirmación sobre lo que hay en la casa, no sobre lo que hay en mi mesa.
+ *
+ * `apps/prestador/src/i18n/es.ts` es **deuda declarada, sin dueño en esta
+ * mesa** — nunca se barrió entero (S77 curó 8/8 del prestador, que era otro
+ * lote). Verificado contra `origin/main`: **47**.
  */
 const BASELINE_VOSEO = {
-  'apps/cliente/src/i18n/es.ts': 8,      // ⏳ baja a 0 con el merge de C
+  'apps/cliente/src/i18n/es.ts': 0,      // ✅ barrido por C — DURO EN 0
   'apps/prestador/src/i18n/es.ts': 47,   // deuda: nunca barrido entero
 };
 const shaDe = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
