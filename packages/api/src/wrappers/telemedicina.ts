@@ -162,6 +162,35 @@ export async function prestadorAceptoMinimos(
   return { ok: true, data };
 }
 
+/* ── §4 · LA VENTANA, PARA DECIRLA ANTES ────────────────────────────────── */
+
+/**
+ * Los minutos de ventana de cancelación de un tipo de servicio.
+ *
+ * 🔴 **Existe para que la pantalla pueda DECIR la ventana antes de cancelar,
+ * sin hardcodearla.** Hasta ahora el número solo volvía dentro del resultado
+ * de `cancelarTeleconsulta` — o sea, *después*, que es cuando ya no sirve
+ * para avisar.
+ *
+ * *Un `30` escrito en la app envejece el día que el founder mueva el
+ * parámetro, y su modo de falla es el peor: la pantalla sigue diciendo un
+ * número con toda confianza y el motor rebota por otro.*
+ *
+ * Hoy devuelve **30** para `telemedicina` y **1440** (24 h) para el resto.
+ * Un tipo desconocido cae al default de 1440 — el motor es fail-safe hacia
+ * el lado seguro, jamás hacia «sin ventana».
+ */
+export async function ventanaCancelacionMinutos(
+  tipoServicio: string,
+): Promise<ResultadoWrapper<number, CodigoErrorTelemedicina>> {
+  const { data, error } = await getClient().rpc('_ventana_cancelacion_minutos', {
+    p_tipo_servicio: tipoServicio,
+  });
+  if (error) return aError(error.message);
+  if (typeof data !== 'number' || !Number.isFinite(data)) return aError('datos_inconsistentes');
+  return { ok: true, data };
+}
+
 /* ── §5 · LA CONSULTA QUE SE CORTA ──────────────────────────────────────── */
 
 export interface ResultadoDevolucion {
