@@ -22362,3 +22362,30 @@ decide quién cobra.*
 
 ☠️ **Disparo: la firma del founder, que está resolviendo.** Hasta entonces,
 **escrita y sin construir.**
+
+---
+
+## 🟡 D-932 — LA CADENA DE CÁMARA DEL CLIENTE HABLA DE OTRA COSA · **hallazgo de C, S106**
+
+**iOS admite UNA SOLA cadena por permiso.** La del cliente hoy dice, en
+sustancia, *«para la foto de tu mascota»* — **y es lo que va a leer una
+familia el día que entre a una videoconsulta y el sistema le pida la
+cámara.**
+
+🔴 **No es un texto feo: es un texto que no describe el uso que está
+pidiendo permiso.** Y en iOS eso tiene dos costos, uno de producto y uno
+regulatorio: la familia no entiende por qué se lo piden **y** la cadena deja
+de cumplir su función de aviso informado.
+
+**Lo que la vuelve trampa:** la app va a pedir cámara en dos contextos
+legítimos y distintos —la foto del perfil y la videoconsulta— y **el sistema
+operativo solo deja explicar uno**. ⇒ la cadena tiene que cubrir a los dos
+sin mentirle a ninguno; no alcanza con reemplazar «foto» por «videollamada».
+
+**Hermana:** `NSMicrophoneUsageDescription` **nace bien** en esta misma
+tanda (redactada por C, va al lote de strings del founder) — el problema es
+solo el de la cámara, que **ya existía y ahora cambia de significado**.
+
+☠️ **Disparo: la tanda 2**, junto con el módulo nativo — antes de que la
+primera familia vea el diálogo. *Es ficha y no obra a propósito: la cadena
+nueva es decisión de voz y la firma el founder con el lote.*

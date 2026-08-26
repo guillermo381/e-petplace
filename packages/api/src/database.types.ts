@@ -497,6 +497,7 @@ export type Database = {
           estado: string
           expira_en: string
           id: string
+          incidentes: Json
           motivo: string | null
           proveedor: string
           stoken_detalle: string | null
@@ -510,6 +511,7 @@ export type Database = {
           estado?: string
           expira_en: string
           id?: string
+          incidentes?: Json
           motivo?: string | null
           proveedor?: string
           stoken_detalle?: string | null
@@ -523,6 +525,7 @@ export type Database = {
           estado?: string
           expira_en?: string
           id?: string
+          incidentes?: Json
           motivo?: string | null
           proveedor?: string
           stoken_detalle?: string | null
@@ -3180,118 +3183,6 @@ export type Database = {
           },
         ]
       }
-      cita_telemedicina_detalle: {
-        Row: {
-          cita_id: string
-          country_code: string
-          created_at: string
-          duracion_minutos: number | null
-          estado: string
-          fin_real: string | null
-          grabacion_consentida: boolean | null
-          grabacion_url: string | null
-          id: string
-          inicio_programado: string
-          inicio_real: string | null
-          mascota_id: string
-          pet_parent_id: string
-          prestador_id: string
-          proveedor: string
-          room_name: string | null
-          room_url: string | null
-          token_cliente: string | null
-          token_prestador: string | null
-          updated_at: string
-        }
-        Insert: {
-          cita_id: string
-          country_code?: string
-          created_at?: string
-          duracion_minutos?: number | null
-          estado?: string
-          fin_real?: string | null
-          grabacion_consentida?: boolean | null
-          grabacion_url?: string | null
-          id?: string
-          inicio_programado: string
-          inicio_real?: string | null
-          mascota_id: string
-          pet_parent_id: string
-          prestador_id: string
-          proveedor?: string
-          room_name?: string | null
-          room_url?: string | null
-          token_cliente?: string | null
-          token_prestador?: string | null
-          updated_at?: string
-        }
-        Update: {
-          cita_id?: string
-          country_code?: string
-          created_at?: string
-          duracion_minutos?: number | null
-          estado?: string
-          fin_real?: string | null
-          grabacion_consentida?: boolean | null
-          grabacion_url?: string | null
-          id?: string
-          inicio_programado?: string
-          inicio_real?: string | null
-          mascota_id?: string
-          pet_parent_id?: string
-          prestador_id?: string
-          proveedor?: string
-          room_name?: string | null
-          room_url?: string | null
-          token_cliente?: string | null
-          token_prestador?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cita_telemedicina_detalle_cita_id_fkey"
-            columns: ["cita_id"]
-            isOneToOne: true
-            referencedRelation: "evento_cita_servicio"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cita_telemedicina_detalle_mascota_id_fkey"
-            columns: ["mascota_id"]
-            isOneToOne: false
-            referencedRelation: "mascotas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cita_telemedicina_detalle_pet_parent_id_fkey"
-            columns: ["pet_parent_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cita_telemedicina_detalle_pet_parent_id_fkey"
-            columns: ["pet_parent_id"]
-            isOneToOne: false
-            referencedRelation: "v_daas_eligible_users"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "cita_telemedicina_detalle_prestador_id_fkey"
-            columns: ["prestador_id"]
-            isOneToOne: false
-            referencedRelation: "prestadores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cita_telemedicina_detalle_prestador_id_fkey"
-            columns: ["prestador_id"]
-            isOneToOne: false
-            referencedRelation: "v_prestadores_publicos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cliente_pendiente_registro: {
         Row: {
           completado_en: string | null
@@ -3536,6 +3427,7 @@ export type Database = {
       consentimientos: {
         Row: {
           aceptado: boolean | null
+          cita_id: string | null
           created_at: string | null
           id: string
           ip_hash: string | null
@@ -3546,6 +3438,7 @@ export type Database = {
         }
         Insert: {
           aceptado?: boolean | null
+          cita_id?: string | null
           created_at?: string | null
           id?: string
           ip_hash?: string | null
@@ -3556,6 +3449,7 @@ export type Database = {
         }
         Update: {
           aceptado?: boolean | null
+          cita_id?: string | null
           created_at?: string | null
           id?: string
           ip_hash?: string | null
@@ -3564,7 +3458,15 @@ export type Database = {
           user_id?: string | null
           version?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "consentimientos_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       correo_suprimido: {
         Row: {
@@ -14230,6 +14132,55 @@ export type Database = {
           },
         ]
       }
+      prestador_minimos_aceptados: {
+        Row: {
+          aceptado_en: string
+          aceptado_por: string
+          id: string
+          prestador_id: string
+          servicio_codigo: string
+          version: string
+        }
+        Insert: {
+          aceptado_en?: string
+          aceptado_por: string
+          id?: string
+          prestador_id: string
+          servicio_codigo: string
+          version: string
+        }
+        Update: {
+          aceptado_en?: string
+          aceptado_por?: string
+          id?: string
+          prestador_id?: string
+          servicio_codigo?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_minimos_aceptados_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_minimos_aceptados_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_minimos_aceptados_servicio_codigo_fkey"
+            columns: ["servicio_codigo"]
+            isOneToOne: false
+            referencedRelation: "tipos_servicio"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       prestador_programas: {
         Row: {
           activo: boolean
@@ -14614,7 +14565,6 @@ export type Database = {
       prestadores: {
         Row: {
           acepta_emergencias: boolean | null
-          acepta_telemedicina: boolean | null
           aprobado_en: string | null
           aprobado_por: string | null
           calificacion_promedio: number | null
@@ -14657,7 +14607,6 @@ export type Database = {
         }
         Insert: {
           acepta_emergencias?: boolean | null
-          acepta_telemedicina?: boolean | null
           aprobado_en?: string | null
           aprobado_por?: string | null
           calificacion_promedio?: number | null
@@ -14700,7 +14649,6 @@ export type Database = {
         }
         Update: {
           acepta_emergencias?: boolean | null
-          acepta_telemedicina?: boolean | null
           aprobado_en?: string | null
           aprobado_por?: string | null
           calificacion_promedio?: number | null
@@ -17320,6 +17268,62 @@ export type Database = {
           },
         ]
       }
+      solicitudes_devolucion: {
+        Row: {
+          cita_id: string
+          creada_por: string
+          created_at: string
+          detalle: string | null
+          estado: string
+          id: string
+          moneda: string
+          monto: number
+          motivo: string
+          nota_soporte: string | null
+          resuelta_en: string | null
+          resuelta_por: string | null
+          user_id: string
+        }
+        Insert: {
+          cita_id: string
+          creada_por: string
+          created_at?: string
+          detalle?: string | null
+          estado?: string
+          id?: string
+          moneda?: string
+          monto: number
+          motivo: string
+          nota_soporte?: string | null
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          user_id: string
+        }
+        Update: {
+          cita_id?: string
+          creada_por?: string
+          created_at?: string
+          detalle?: string | null
+          estado?: string
+          id?: string
+          moneda?: string
+          monto?: number
+          motivo?: string
+          nota_soporte?: string | null
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitudes_devolucion_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: true
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       solicitudes_emergencia: {
         Row: {
           asignado_en: string | null
@@ -18065,6 +18069,7 @@ export type Database = {
           requiere_validacion_admin: boolean
           reserva_solo_hoy: boolean
           reservable: boolean
+          ventana_cancelacion_minutos: number
         }
         Insert: {
           activo?: boolean
@@ -18088,6 +18093,7 @@ export type Database = {
           requiere_validacion_admin?: boolean
           reserva_solo_hoy?: boolean
           reservable?: boolean
+          ventana_cancelacion_minutos?: number
         }
         Update: {
           activo?: boolean
@@ -18111,6 +18117,7 @@ export type Database = {
           requiere_validacion_admin?: boolean
           reserva_solo_hoy?: boolean
           reservable?: boolean
+          ventana_cancelacion_minutos?: number
         }
         Relationships: []
       }
@@ -19764,7 +19771,6 @@ export type Database = {
       v_prestadores_publicos: {
         Row: {
           acepta_emergencias: boolean | null
-          acepta_telemedicina: boolean | null
           calificacion_promedio: number | null
           ciudad: string | null
           clip_url: string | null
@@ -19789,7 +19795,6 @@ export type Database = {
         }
         Insert: {
           acepta_emergencias?: boolean | null
-          acepta_telemedicina?: boolean | null
           calificacion_promedio?: number | null
           ciudad?: string | null
           clip_url?: string | null
@@ -19814,7 +19819,6 @@ export type Database = {
         }
         Update: {
           acepta_emergencias?: boolean | null
-          acepta_telemedicina?: boolean | null
           calificacion_promedio?: number | null
           ciudad?: string | null
           clip_url?: string | null
@@ -20391,6 +20395,12 @@ export type Database = {
           valido: boolean
         }[]
       }
+      _ventana_cancelacion_minutos: {
+        Args: { p_tipo_servicio: string }
+        Returns: number
+      }
+      _version_aviso_teleconsulta: { Args: never; Returns: string }
+      _version_minimos_telemedicina: { Args: never; Returns: string }
       _vet_ofertas_cobrables: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -20435,6 +20445,10 @@ export type Database = {
       }
       aceptar_invitacion_pendiente_login: {
         Args: { p_empleado_id: string }
+        Returns: Json
+      }
+      aceptar_minimos_servicio: {
+        Args: { p_prestador_id: string; p_servicio_codigo: string }
         Returns: Json
       }
       aceptar_vinculo_repartidor: { Args: never; Returns: Json }
@@ -20572,6 +20586,10 @@ export type Database = {
         Args: { p_activo: boolean; p_recurrencia_id: string }
         Returns: Json
       }
+      anotar_incidente_alta: {
+        Args: { p_alta_id: string; p_forma?: string; p_motivo: string }
+        Returns: Json
+      }
       aplicar_consulta_activa_deuna: {
         Args: {
           p_ambiente?: string
@@ -20649,6 +20667,7 @@ export type Database = {
         Returns: Json
       }
       cancelar_reserva_paquete: { Args: { p_cita_id: string }; Returns: Json }
+      cancelar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
       capturar_lead: {
         Args: {
           p_ciudad: string
@@ -20851,6 +20870,7 @@ export type Database = {
       crear_alta_tarjeta: { Args: { p_proveedor?: string }; Returns: Json }
       crear_bloqueo_agenda: {
         Args: {
+          p_acepta_teleconsulta?: boolean
           p_empleado_id?: string
           p_fecha: string
           p_hora: string
@@ -21531,6 +21551,10 @@ export type Database = {
         Returns: boolean
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
+      marcar_teleconsulta_no_realizable: {
+        Args: { p_cita_id: string; p_detalle?: string }
+        Returns: Json
+      }
       maximo_comprable_de_ofertas: { Args: { p_items: Json }; Returns: Json }
       mi_email: { Args: never; Returns: string }
       mi_firma_clinica: {
@@ -22179,6 +22203,10 @@ export type Database = {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
       }
+      prestador_acepto_minimos: {
+        Args: { p_prestador_id: string; p_servicio_codigo: string }
+        Returns: boolean
+      }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
       promesa_por_vendedor: {
@@ -22212,6 +22240,10 @@ export type Database = {
         Returns: Json
       }
       puede_encender_vitrina: { Args: never; Returns: boolean }
+      puede_entrar_a_videollamada: {
+        Args: { p_cita_id: string; p_user_id: string }
+        Returns: Json
+      }
       puede_ofrecer_rol_recepcion: {
         Args: { p_prestador_id: string }
         Returns: boolean
