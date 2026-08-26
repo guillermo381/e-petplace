@@ -148,8 +148,29 @@ Deno.serve(async (req) => {
      `no_evaluables` en vez de callarse — *una compuerta que no puede evaluar y
      calla es peor que una que falta: la que falta se nota* (§5.0). */
   if (hayCompra) {
-    const { data: g } = await db.rpc('verificar_compuertas_pre_cobro',
-      { p_compra_id: compraId, p_token: null });
+    const { data: g } = await db.rpc('verificar_compuertas_pre_cobro', {
+      p_compra_id: compraId,
+      p_token: null,
+      /* 🔴 LA COMPUERTA 5 NO APLICA A ESTE RIEL, y hasta hoy se aplicaba igual.
+         `LETRA_DEUNA` §3.1 lo decía desde su v1.0 —*«todas menos la #5
+         (tarjeta/token vigente), que NO APLICA: no hay tarjeta»*— pero la
+         función no tenía cómo saberlo: la corría siempre, y esta puerta le
+         mandaba `p_token: null`, **que es exactamente el valor que rechaza.**
+
+         ⇒ **la puerta de DeUna no podía pasar su propia compuerta, y nunca
+         pudo**: cero intentos `deuna` en toda la base. *No es que falló hoy;
+         es que hoy fue el primer día que llegamos lo bastante lejos para
+         tocarlo* — los frenos de antes (reserva vencida, desglose sin
+         congelar) lo tapaban.
+
+         🔴 SE PASA EXPLÍCITO Y NO SE APROVECHA EL DEFAULT: el default es
+         `true`, así que omitirlo dejaría el bug. Y decirlo por nombre hace
+         legible la INTENCIÓN —«este riel no tiene tarjeta»— en vez de un
+         silencio que el próximo lector tendría que deducir.
+         *`token_ausente` sigue vivo para el riel de tarjeta, donde sí es un
+         defecto real.* */
+      p_exige_token: false,
+    });
     const gate = (g ?? {}) as Record<string, unknown>;
     if (gate.ok !== true) {
       return json({ ok: false, codigo: gate.codigo ?? 'no_se_pudo_completar',
@@ -208,8 +229,24 @@ Deno.serve(async (req) => {
       }),
     });
     status = r.status;
-    crudo = (await r.text()).slice(0, 4000);
-    try { resp = JSON.parse(crudo); } catch { /* el crudo queda igual */ }
+    /* 🔴 SE PARSEA EL TEXTO COMPLETO Y RECIÉN DESPUÉS SE TRUNCA PARA EL REGISTRO.
+       Al revés estaba, y costó la primera corrida del riel: `slice(0, 4000)`
+       **antes** de `JSON.parse` **parte el JSON al medio** —la respuesta mide
+       **7844 bytes** porque trae el QR en base64— y el `catch` mudo dejaba
+       `resp` vacío.
+
+       ⇒ El rebote decía **`sin transactionId · sin numericCode`**, o sea
+       acusaba al proveedor de no mandar lo que sí había mandado. *Un truncado
+       de log convertido en veredicto sobre un tercero.*
+
+       **Se probó con la MISMA referencia, monto y detail por curl: DeUna
+       devolvió el código.** El request nunca estuvo mal; el defecto era
+       nuestro y estaba a dos líneas del parseo. */
+    const textoCompleto = await r.text();
+    try { resp = JSON.parse(textoCompleto); } catch { /* queda el crudo */ }
+    /* El truncado sigue existiendo —el QR no aporta nada a un log y ocupa
+       todo— pero **ya no decide nada**: es registro, no fuente. */
+    crudo = textoCompleto.slice(0, 4000);
   } catch (e) {
     /* Red caída ≠ rechazo. El intento queda en vuelo y el barrido lo encuentra
        — no se cierra como rechazado por no haber podido preguntar. */

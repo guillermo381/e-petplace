@@ -40,6 +40,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { verificarIva, type LineaIva } from '../_shared/iva.ts';
 import { crypto } from 'jsr:@std/crypto@1';
 import { encodeHex } from 'jsr:@std/encoding@1/hex';
 
@@ -195,29 +196,48 @@ Deno.serve(async (req) => {
      🔴 Y van DERIVADOS del desglose, jamás literales: *un cero tecleado a mano
      funciona hoy porque todo el catálogo es `EC_IVA_0`, y miente el día que
      entre un producto gravado.* */
-  const pct = base > 0 ? Number(((iva / base) * 100).toFixed(2)) : 0;
+  /* ═══ EL GUARD DEL IVA — contrato de A, firmado por el founder 25-ago ═══
+     ☠️ MURIÓ `iva_no_probado`: describía un estado del mundo —«esto nunca se
+     probó»— y ese estado deja de ser cierto cuando se prueba. *Un código que
+     caduca solo es un código que algún día miente.*
 
-  /* 🔴 FAIL-CLOSED HONESTO: con IVA ≠ 0 estamos en territorio que **nadie
-     probó** contra esta cuenta. Se corta con código propio en vez de mandar
-     números que no sabemos si el proveedor acepta. *Mandar ceros con un IVA
-     real sería declararle al proveedor algo falso sobre la venta.* */
-  if (iva > 0) {
+     🔴 La tasa NO se infiere dividiendo: se lee del NOMINAL congelado en el
+     ítem (`pedido_items.impuesto_pct`). *Inferirla da exactamente el 14,98 que
+     este guard existe para no volver a producir.* Medido: los 81 ítems vivos
+     tienen su `impuesto_pct` limpio (0.00 o 15.00). */
+  const { data: itemsIva } = pedidoDelIntento
+    ? await db.from('pedido_items')
+        .select('subtotal, impuesto_monto, impuesto_pct, impuesto_codigo')
+        .eq('pedido_id', pedidoDelIntento)
+    : { data: null };
+
+  const lineasIva: LineaIva[] = (itemsIva ?? []).length > 0
+    ? (itemsIva ?? []).map((i) => ({
+        subtotal: Number(i.subtotal ?? 0),
+        impuesto: Number(i.impuesto_monto ?? 0),
+        pct: i.impuesto_pct != null ? Number(i.impuesto_pct) : null,
+        codigo: (i.impuesto_codigo as string) ?? null,
+      }))
+    /* Sin ítems —una CITA— no hay tasa declarada: `cita_desglose` guarda
+       `subtotal/impuesto/total/moneda` y **ningún código**. Con IVA 0 pasa
+       igual; con IVA > 0 rebota `iva_sin_tasa_declarada`, que es la verdad. */
+    : [{ subtotal: base, impuesto: iva, pct: null, codigo: null }];
+
+  const vIva = verificarIva(lineasIva);
+  if (!vIva.ok) {
     await db.from('pagos_intentos').insert({
       pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
       compra_id: hayCompra ? compraId : null, proveedor: 'nuvei',
       proveedor_referencia: sujeto, monto, moneda,
       forma: 'tokenizacion', estado: 'rechazado',
-      motivo_rechazo: `iva_no_cero_sin_probar: iva=${iva} pct=${pct}`,
+      motivo_rechazo: `${vIva.codigo}: ${vIva.detalle}`,
       cerrado_en: new Date().toISOString(),
       clave_idempotencia: `cobro:iva:${sujeto}:${Date.now()}`,
-      /* 🔴 S102 · QUIÉN PAGÓ. **El rechazado también lo lleva, y no es celo:**
-         es la fila que prueba que ESTA persona intentó pagar y no pudo — justo
-         la que va a querer ver. Ver el bloque del INSERT de abajo para el
-         porqué de que vaya explícito. */
       pagador_user_id: userId, pagador_origen: 'sesion',
     });
-    return json({ ok: false, codigo: 'iva_no_probado' }, 409);
+    return json({ ok: false, codigo: vIva.codigo, detalle: vIva.detalle }, 409);
   }
+
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
   /* 🔴 Las compuertas de la COMPRA son de la compra. **La cita ya trae las
@@ -292,9 +312,12 @@ Deno.serve(async (req) => {
            reconocer: la plata se mueve y la traza no.* */
           dev_reference: sujeto,
           // 🔑 Los TRES juntos — forma exacta de Erick, derivada del desglose.
-          vat: Number(iva.toFixed(2)),
-          taxable_amount: iva > 0 ? Number(base.toFixed(2)) : 0,
-          tax_percentage: pct,
+          /* 🔴 LOS TRES SALEN DEL VEREDICTO, y `tax_percentage` es el NOMINAL
+             (15), jamás el recalculado: *mandarle 14,98 al proveedor sería
+             declararle una tasa que no existe en Ecuador.* */
+          vat: vIva.vat,
+          taxable_amount: vIva.taxable_amount,
+          tax_percentage: vIva.tax_percentage,
         },
         card: { token: tarjeta.token },
       }),
