@@ -25,8 +25,33 @@ export type CodigoAltaTarjeta =
 export type EstadoAlta = 'pendiente' | 'guardada' | 'rechazada' | 'abandonada';
 
 export type AltaEmitida = {
-  /** El handle. Viaja en la URL de la página y es el `uid` ante el proveedor. */
+  /**
+   * El handle de ESTA alta. Viaja en la URL de la página.
+   *
+   * 🔴 **YA NO ES el `uid` ante el proveedor, y ese cambio es `D-921`.** Este
+   * comentario decía que sí, y era la descripción exacta del defecto: como el
+   * `altaId` es nuevo en cada alta, **el proveedor veía a la misma persona como
+   * un usuario distinto cada vez que guardaba una tarjeta** — y por eso
+   * `card/list` devolvía `result_size: 1` con dos tarjetas guardadas.
+   */
   altaId: string;
+  /**
+   * 🔴 LA IDENTIDAD ESTABLE ANTE EL PROVEEDOR — `D-921`.
+   *
+   * Es **nuestro** identificador para esa persona en ese riel: mismo usuario +
+   * mismo proveedor ⇒ **siempre el mismo valor**, alta tras alta. Es lo que va
+   * en el `uid` de la página de pago.
+   *
+   * ⚠️ **NO es el `user_id` de la sesión y no debe reemplazarse por él.**
+   * Mandarle nuestro identificador interno a un tercero es justo lo que la
+   * firma prohíbe — son dos identidades para dos mundos, y el motor las
+   * mantiene separadas a propósito.
+   *
+   * Viaja en el MISMO acto que el alta: *el alta y su identidad ante el
+   * proveedor se deciden juntas, así que no hay ventana donde una exista sin
+   * la otra* — y es un viaje, no dos (`L-223`).
+   */
+  uid: string;
   expiraEn: string;
 };
 
@@ -71,10 +96,22 @@ export async function crearAltaTarjeta(
       typeof data.codigo === 'string' ? (data.codigo as CodigoAltaTarjeta) : undefined,
     );
   }
-  if (typeof data.alta_id !== 'string' || typeof data.expira_en !== 'string') {
+  /* 🔴 EL `uid` SE EXIGE, NO SE TOLERA AUSENTE. Un alta sin identidad estable
+     es exactamente el defecto de `D-921` volviendo por la puerta de atrás:
+     funcionaría —la página abre igual— y el proveedor volvería a ver un
+     usuario nuevo. *Un campo que falta y no rompe nada es un campo que va a
+     faltar en producción sin que nadie se entere.* */
+  if (
+    typeof data.alta_id !== 'string' ||
+    typeof data.expira_en !== 'string' ||
+    typeof data.uid !== 'string' || data.uid.length === 0
+  ) {
     return fallo('datos_inconsistentes');
   }
-  return { ok: true, data: { altaId: data.alta_id, expiraEn: data.expira_en } };
+  return {
+    ok: true,
+    data: { altaId: data.alta_id, uid: data.uid, expiraEn: data.expira_en },
+  };
 }
 
 /**
