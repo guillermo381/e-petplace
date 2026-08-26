@@ -70,6 +70,13 @@ const HTTP_POR_MOTIVO: Record<string, number> = {
   no_es_teleconsulta: 409,
   cita_no_pagada: 409,
   cita_cancelada: 409,
+  /* Los dos de abajo salen del vocabulario REAL de `estado`, re-medido el
+     26-ago contra el CHECK vivo: `no_realizable` lo creó S106-A para §5 de
+     la letra, y `completada`/`no_show`/`rechazada` son actos ya ocurridos.
+     *Una sala que sigue abierta después de que el veterinario cerró la
+     consulta es una puerta sin dueño.* */
+  cita_no_realizable: 409,
+  cita_finalizada: 409,
   fuera_de_ventana: 425, // Too Early — es exactamente lo que pasó
 };
 

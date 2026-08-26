@@ -22,6 +22,7 @@
  * ── USO ─────────────────────────────────────────────────────────────────────
  *   SUPABASE_URL=... \
  *   JWT_DUENO=...        # sesión del dueño de la mascota de la cita
+ *   JWT_VET=...          # sesión del veterinario de la cita (borde §4)
  *   JWT_AJENO=...        # sesión de cualquier otra persona
  *   CITA_TELE=<uuid>     # teleconsulta pagada, EN ventana
  *   CITA_FUERA=<uuid>    # teleconsulta pagada, FUERA de ventana
@@ -125,6 +126,17 @@ console.log('  ─────────────────────�
 console.log('\n  ── VERDE: el camino feliz ──');
 await caso('dueño en ventana, cita pagada', { jwt: JWT_DUENO, cita: CITA_TELE, espera: 'token' });
 
+/* 🔴 EL BORDE DE §4 — y es un VERDE que parece un rojo.
+   `LETRA_TELEMEDICINA` §4 firma que la consulta se cobra aunque el dueño no
+   asista: «si el veterinario entra y determina que el caso necesita atención
+   presencial, eso ES el servicio prestado». ⇒ el token del profesional se
+   emite AUNQUE EL DUEÑO NUNCA ENTRE, y la ventana jamás exige que haya dos.
+   Si esto rebota, alguien "arregló" la sala para que se abra con ambos y le
+   sacó al veterinario el derecho a cobrar que la letra le dio. */
+await caso('🔴 vet solo, el dueño nunca entró (borde §4)', {
+  jwt: process.env.JWT_VET, cita: CITA_TELE, espera: 'token',
+});
+
 console.log('\n  ── ROJOS A PROPÓSITO: la puerta tiene que cerrarse ──');
 await caso('sin sesión', {
   jwt: 'no-es-un-jwt', cita: CITA_TELE, espera: 'sin_token',
@@ -142,12 +154,20 @@ await caso('cita inexistente', {
   jwt: JWT_DUENO, cita: '00000000-0000-0000-0000-000000000000',
   espera: 'sin_token', codigo: 'cita_inexistente',
 });
-/* 🔴 EL DISCRIMINADOR DEL EJE — no es un caso de laboratorio.
+/* 🔴 EL DISCRIMINADOR DEL EJE — y cambió de sentido, no de valor.
    `LETRA_TELEMEDICINA` v1.1 §7 ② firma que la marca de teleconsulta es
    `modalidad='telemedicina'` (BIO_EXPEDIENTE D13.6), NO `tipo_servicio`.
-   Y el hold hoy **rechaza** esa modalidad y cae a `'local'` por default ⇒
-   una teleconsulta reservada nace pareciendo presencial.
-   Si este caso ENTREGA token, el gate está leyendo el eje equivocado, y la
+
+   ⚠️ ACTUALIZADO 26-ago: cuando escribí este caso, el hold rechazaba la
+   modalidad y caía a `'local'` por default ⇒ una teleconsulta nacía
+   pareciendo presencial. **S106-A lo curó, y mejor:** ahora la modalidad
+   **se DERIVA de la categoría del servicio y el cliente no la manda**
+   (`v_es_tele := (v_categoria = 'telemedicina')`), así que para citas nuevas
+   este estado es **inexpresable**, no sólo ilegal.
+
+   ⇒ El caso QUEDA, con otro sentido: ya no cubre el camino normal sino
+   **citas viejas o creadas por otra vía**. Es red, no bloqueante.
+   Si ENTREGA token, el gate está leyendo el eje equivocado, y la
    consecuencia no es un token de más: es una teleconsulta marcada como
    presencial en el expediente de la mascota. */
 await caso('tipo_servicio=telemedicina pero modalidad=local', {
