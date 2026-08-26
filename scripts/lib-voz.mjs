@@ -84,6 +84,11 @@ export const CON_TILDE = ['probá','tocá','elegí','escribí','andá','mirá','
   'cancelá','atendé','decí','subí','trabajá','vendé'];
 export const ENCL = ['contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila'];
 export const PRON = ['tenés','podés','querés','sabés','debés','necesitás','hacés','ponés','compartís'];
+/** ⑪ · `sos` (voseo de «eres»). Va aparte porque, como `vos`, es CORTO y
+ *  necesita frontera de vecino: «esos», «presos», «sospecha», «nosotros» lo
+ *  contienen y no son voz. Control corrido: 0 falsos positivos en los siete
+ *  casos probados. */
+const SOS = /(^|[^a-záéíóúñ])sos([^a-záéíóúñ]|$)/i;
 
 /** Los que exigen frontera derecha (trampa ⑧). Los enclíticos NO: son palabras enteras. */
 const CON_FRONTERA = [...CON_TILDE, ...PRON];
@@ -115,6 +120,11 @@ export function hitsDeVoseo(src) {
 
     for (const m of l.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
       const v = m[1] ?? m[2];
+      /* ⑩ — UN IDENTIFICADOR NO ES UNA FRASE. `no_sos_del_equipo` es un código
+         de error tipado, no voz: cambiarlo rompe el matching y no le habla a
+         nadie. Se descarta por FORMA (snake_case puro), que es inequívoco —
+         ninguna voz de producto se escribe así. */
+      if (/^[a-z0-9_]+$/.test(v)) continue;
       const b = v.toLowerCase();
 
       /* Enclíticos: palabra entera, sin frontera derecha (ya la traen). */
@@ -136,6 +146,8 @@ export function hitsDeVoseo(src) {
 
       /* trampa ⑦ — `vos` necesita vecino, no `\b` (inservible tras tilde). */
       if (!t && /(^|[^a-záéíóúñ])vos([^a-záéíóúñ]|$)/i.test(b)) t = 'vos';
+      /* ⑪ — `sos`, misma física que `vos`. */
+      if (!t && SOS.test(b)) t = 'sos';
 
       if (t) hits.push({ n: i + 1, t, v });
     }

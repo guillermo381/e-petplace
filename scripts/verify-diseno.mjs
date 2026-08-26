@@ -71,9 +71,56 @@ const MIN_SIMBOLO_DEUNA = 16;
  * lote). Verificado contra `origin/main`: **47**.
  */
 const BASELINE_VOSEO = {
-  'apps/cliente/src/i18n/es.ts': 0,      // ✅ barrido por C — DURO EN 0
+  /* ── VOZ DE LAS APPS ──────────────────────────────────────────────────── */
+  'apps/cliente/src/i18n/es.ts': 2,      // ⚠️ ver ⑪: las destapó `sos`, no son nuevas
   'apps/prestador/src/i18n/es.ts': 47,   // deuda: nunca barrido entero
+
+  /* ── `packages/api` — LOS MENSAJES DE ERROR DE LOS WRAPPERS ────────────
+     **Entra por firma del founder (25-ago)**, y su razón es la más fuerte de
+     la tabla: *A curó 160 voseos acá y nada lo sostenía* — que es exactamente
+     el estado del que R66 vino a sacarnos. Y es donde viven **los mensajes que
+     aparecen en el peor momento**: cuando algo falló.
+
+     🔴 **LA FIRMA DECÍA «0 DURO CON UNA EXCEPCIÓN DE 1» Y LA MEDICIÓN DICE
+     OTRA COSA — se aplica el espíritu, no la cifra.** Medido contra
+     `origin/main` con la lista ampliada (⑩ y ⑪): **5 hits, no 1.** El censo que
+     reportó 1 corrió con la lista anterior, que no tenía `trabajá`, `atendé`
+     ni `sos`. *Poner 0 acá sería un techo POR DEBAJO de la realidad — y eso no
+     protege: bloquea. Es la misma ley que esta tabla ya se cobró una vez, con
+     el signo invertido.* */
+  'packages/api/src/wrappers/equipo.ts': 1,           // ✅ EL MATCHER — ver abajo
+  'packages/api/src/wrappers/certificados.ts': 1,     // 🔴 voz real — deuda de A
+  'packages/api/src/wrappers/pizarra.ts': 2,          // 🔴 voz real — deuda de A
+  'packages/api/src/wrappers/_despensa-comun.ts': 1,  // 🔴 voz real — deuda de A
 };
+
+/**
+ * 🔴 **EL ÚNICO 1 QUE NO ES DEUDA: `equipo.ts`.**
+ *
+ * `'No tenés permiso para aceptar esta invitación'` **no es voz: es el LITERAL
+ * DEL MOTOR contra el que se matchea**, medido del cuerpo de
+ * `aceptar_invitacion_pendiente_login`. A lo curó en su barrida, **el mapeo se
+ * rompió** —el código caía a genérico— **y ningún typecheck lo vio, porque un
+ * string que deja de coincidir compila perfecto.** Está revertido a propósito.
+ *
+ * *Un matcher y su fuente son un solo par: mover uno solo es cómo se rompen los
+ * dos.* ⇒ **cuando el motor hable tuteo, los dos se mueven en el MISMO commit**
+ * y este baseline baja a 0.
+ *
+ * **Por qué un baseline y no un mecanismo de exención:** es UN caso. *Una regla
+ * nueva por un caso único no se paga — y un mecanismo de exención tampoco.* El
+ * día que sean tres, se construye; hoy sería vigilar un caso que además es
+ * fácil de ver.
+ *
+ * ⚠️ **LAS OTRAS TRES ENTRADAS DE `packages/api` SÍ SON DEUDA, con su literal
+ * para que nadie las busque:**
+ *   · `certificados.ts:28`   «Trabajás en más de un negocio: emití el certificado…»
+ *   · `pizarra.ts:110`       «No sos parte del equipo de este negocio.»
+ *   · `pizarra.ts:111`       «Esa cita es de un servicio que no atendés.»
+ *   · `_despensa-comun.ts:175` «No sos el vendedor de este pedido.»
+ * **Son de A** (`packages/api` es su territorio). Cuando las cure, esta tabla
+ * queda en **una sola entrada: el matcher.**
+ */
 const shaDe = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
@@ -5816,7 +5863,7 @@ corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecu
    exactamente el defecto que `archivosCodigo` existe para evitar desde S82.
    *Un lint que se apaga por una extensión no dice «ya no miro»: dice un número
    más chico, y eso se lee como progreso.* */
-corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...galeria])]);
+corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
