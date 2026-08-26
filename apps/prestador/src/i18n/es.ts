@@ -2169,6 +2169,31 @@ export const prestadorEs = {
     otraDuracion: 'Otra duración',
     otraDuracionAyuda: 'En pasos de 5 minutos — de 10 a 240.',
     otraDuracionUsar: 'Usar esta duración',
+
+    /* ══ §6/§8 · LOS MÍNIMOS DE LA TELEMEDICINA ══
+       🔴 **Se ven ENTEROS antes de aceptar** — la letra §6 es una
+       DECLARACIÓN, y una declaración que se acepta sin leerse no declara
+       nada. Los cuatro van completos, con su matiz: la cámara **no** exige
+       resolución («un requisito que suena serio y no filtra nada») y los
+       auriculares son recomendados, **no exigidos**.
+       ⚠️ Y la última línea es la que la letra manda decir en vez de
+       prometer: **el sistema NO los mide.** */
+    minimosTitulo: 'Antes de ofrecer videoconsultas',
+    minimosIntro: 'Para atender por videollamada hace falta que de tu lado estén estas cuatro cosas:',
+    minimosConexion: 'Conexión: 1,5 Mbps de subida sostenida.',
+    minimosCamara: 'Cámara: la del teléfono. No pedimos una resolución mínima.',
+    minimosLuz: 'Iluminación: un ambiente bien iluminado. Un animal mal iluminado no se puede evaluar por más megapíxeles que tenga la cámara.',
+    minimosAudio: 'Audio: auriculares recomendados, no exigidos.',
+    minimosNoSeMiden: 'El sistema no mide nada de esto: es una declaración tuya.',
+    minimosAceptar: 'Acepto y activo las videoconsultas',
+    /* El estado de Aurora: prendida por él, sin publicar por nosotros. La
+       voz DICE las dos mitades — apagarla en pantalla mentiría sobre lo que
+       configuró; no decir nada la dejaría creyendo que está publicada. */
+    minimosPendiente: 'Pendiente: acepta los mínimos para que las familias la vean',
+    minimosPendienteAyuda: 'La dejaste activa, pero todavía no se publica.',
+    minimosRevisar: 'Ver los mínimos',
+    minimosAceptados: 'Mínimos aceptados',
+    minimosErrorGuardar: 'No pudimos registrar tu aceptación. Prueba de nuevo.',
   },
   veterinaria: {
     titulo: 'Veterinaria',
@@ -2676,6 +2701,26 @@ export const prestadorEs = {
     proximoTitulo: 'Próxima consulta sugerida',
     proximoDetalle: '{{control}}',
     cerrar: 'Listo',
+
+    /* ══ §5 · LA CONSULTA QUE SE CORTA ══
+       🔴 **Nada de esto sugiere que el sistema sabe qué falló**, porque no lo
+       sabe y no puede saberlo: no mide la conexión de nadie. La letra §5 lo
+       dice literal — *no se investiga la culpa*, y el motor guarda
+       `atribucion: 'no_se_investiga'`. **Ninguna de estas cadenas pregunta ni
+       insinúa de quién fue.**
+       🔴 Y la promesa de plata dice **«a tu medio de pago»** con plazo
+       honesto: JAMÁS «al instante» ni «como saldo». Quien devuelve es una
+       persona en el panel del proveedor; el sistema REGISTRA. */
+    noRealizableAccion: 'La consulta no se pudo realizar',
+    noRealizableTitulo: '¿Marcar que no se pudo realizar?',
+    noRealizableCuerpo:
+      'Se cierra esta videoconsulta sin nota clínica y se registra la devolución del pago.',
+    noRealizableDevolucion:
+      'El pago vuelve al medio de pago del cliente. Lo gestiona soporte, así que puede tardar unos días.',
+    noRealizableConfirmar: 'Marcar como no realizada',
+    noRealizableHecho: 'Quedó marcada. Soporte se encarga de la devolución.',
+    noRealizableHechoSinPago: 'Quedó marcada. No había pago que devolver.',
+    noRealizableError: 'No pudimos marcarla. Prueba de nuevo.',
   },
   equipo: {
     titulo: 'Tu negocio',

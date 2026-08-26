@@ -29,6 +29,7 @@ import {
   Boton,
   Campo,
   Celda,
+  Hoja,
   CeldaNavegacion,
   Encabezado,
   EsperaDeMarca,
@@ -57,6 +58,7 @@ import {
   obtenerPerfilMascota,
   obtenerPresupuestosPrestador,
   sedimentarNotaClinica,
+  marcarTeleconsultaNoRealizable,
   type CasoActivo,
   type CasoRef,
   type EstadoPresupuesto,
@@ -164,6 +166,14 @@ export default function ConsultaVeterinaria() {
   // Contexto (cargado una vez en focus).
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(false);
+  /* §5 · sólo las teleconsultas pueden marcarse «no realizable». El dato ya
+     viajaba en la cita (`tipo_servicio`) y la pantalla no lo guardaba.
+     🔴 Se guarda para NO OFRECER lo que el motor va a rechazar (Ley 23): sin
+     esto, el botón aparecería en toda consulta y rebotaría
+     `cita_no_es_teleconsulta` — una puerta que promete y no cumple. */
+  const [esTeleconsulta, setEsTeleconsulta] = useState(false);
+  const [hojaNoRealizable, setHojaNoRealizable] = useState(false);
+  const [marcando, setMarcando] = useState(false);
   // S76-B2 (D-525): la RED del gate de ausencia — la entrada ya no se
   // muestra a quien no atiende, pero un deep-link o una pila vieja
   // pueden aterrizar acá igual: la ruta dice su verdad con voz honesta
@@ -240,6 +250,7 @@ export default function ConsultaVeterinaria() {
       if (!vigente) return;
       let mId = mascotaId;
       let mNombre = mascotaNombre;
+      if (citaR.ok) setEsTeleconsulta(citaR.data.tipo_servicio === 'telemedicina');
       if (citaR.ok && citaR.data.mascota !== null) {
         mId = citaR.data.mascota.id;
         mNombre = citaR.data.mascota.nombre;
@@ -362,6 +373,29 @@ export default function ConsultaVeterinaria() {
     cuentaId !== null &&
     empleadoId !== null &&
     !sedimentando;
+
+  /* §5 · MARCAR NO REALIZABLE. Cierra la cita sin nota y registra la
+     solicitud de devolución. **El sistema REGISTRA, no devuelve ni promete**
+     — por eso el mensaje de éxito distingue si había plata que devolver: si
+     no la había, prometer una devolución sería inventarla. */
+  async function marcarNoRealizable() {
+    if (marcando) return;
+    setMarcando(true);
+    const r = await marcarTeleconsultaNoRealizable(citaId);
+    setMarcando(false);
+    if (!r.ok) {
+      mostrar({ texto: t('consulta.noRealizableError'), variante: 'error' });
+      return;
+    }
+    setHojaNoRealizable(false);
+    mostrar({
+      texto: r.data.devolucion_registrada
+        ? t('consulta.noRealizableHecho')
+        : t('consulta.noRealizableHechoSinPago'),
+      variante: 'exito',
+    });
+    router.back();
+  }
 
   function construirCaso(): CasoRef {
     if (modoCaso === 'nuevo') return { modo: 'nuevo', condicion: casoCondicion.trim() };
@@ -557,6 +591,20 @@ export default function ConsultaVeterinaria() {
             </View>
 
             <Boton variante="primario" bloque etiqueta={t('consulta.iniciar')} onPress={() => setFase('dictado')} />
+
+            {/* §5 · LA SALIDA CUANDO LA VIDEOLLAMADA NO SE PUDO.
+                Va DEBAJO de iniciar y en `ghost`: es la excepción, no el
+                camino. *Ponerla arriba insinuaría que fallar es lo esperable.*
+                Sólo en teleconsultas — una consulta presencial no tiene este
+                modo de falla y el motor la rechazaría. */}
+            {esTeleconsulta && (
+              <Boton
+                variante="ghost"
+                bloque
+                etiqueta={t('consulta.noRealizableAccion')}
+                onPress={() => setHojaNoRealizable(true)}
+              />
+            )}
           </>
         ) : fase === 'dictado' ? (
           <>
@@ -822,6 +870,25 @@ export default function ConsultaVeterinaria() {
         )}
       </ScrollView>
       </EvitaTeclado>
+      <Hoja
+        visible={hojaNoRealizable}
+        onCerrar={() => setHojaNoRealizable(false)}
+        titulo={t('consulta.noRealizableTitulo')}
+      >
+        <View style={{ gap: spacing[4] }}>
+          <Texto variante="cuerpo">{t('consulta.noRealizableCuerpo')}</Texto>
+          {/* La promesa de plata, con su plazo honesto y sin «al instante». */}
+          <Texto variante="apoyo">{t('consulta.noRealizableDevolucion')}</Texto>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('consulta.noRealizableConfirmar')}
+            onPress={() => void marcarNoRealizable()}
+            cargando={marcando}
+          />
+        </View>
+      </Hoja>
+
     </View>
   );
 }

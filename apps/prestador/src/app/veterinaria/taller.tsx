@@ -74,9 +74,12 @@ import {
   type ModoHorarios,
   type OfertaVeterinariaPropia,
   type TipoVeterinariaCatalogo,
+  aceptarMinimosServicio,
+  prestadorAceptoMinimos,
 } from '@epetplace/api';
 
 import { EvitaTeclado } from '@/components/evita-teclado';
+import { HojaMinimosTelemedicina } from '@/components/hoja-minimos-telemedicina';
 import { useTraduccion } from '@/i18n';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
@@ -206,6 +209,11 @@ export default function TallerVeterinaria() {
   const [otras, setOtras] = useState<string[]>([]);
   const [espBase, setEspBase] = useState<{ ids: string[]; libres: string[] }>({ ids: [], libres: [] });
   const [hojaOtra, setHojaOtra] = useState(false);
+  /* §6/§8 · los mínimos de la telemedicina. `null` = todavía no se leyó (la
+     pantalla NO decide con un `false` que en realidad es "no sé" — Ley 13). */
+  const [minimosAceptados, setMinimosAceptados] = useState<boolean | null>(null);
+  const [hojaMinimos, setHojaMinimos] = useState(false);
+  const [guardandoMinimos, setGuardandoMinimos] = useState(false);
   const [otraTexto, setOtraTexto] = useState('');
   // horarios (sección compartida + D-386)
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
@@ -264,6 +272,11 @@ export default function TallerVeterinaria() {
         setPantalla({ estado: 'error' });
         return;
       }
+      /* §6 · se lee EN LA MISMA carga única. Si esto viviera en su propio
+         efecto, el taller pintaría un instante con el estado equivocado —
+         y el estado equivocado acá dice "publicada" sobre algo que no lo
+         está. */
+      const rMinimos = prestadorAceptoMinimos(prestador.data.id, 'telemedicina');
       const [rCat, rMundo, rFranjas, rModo, rCuenta, rComision, rCatEsp, rEspPropias] = await Promise.all([
         obtenerCatalogoVeterinaria(),
         obtenerMundoVeterinariaPropio(prestador.data.id),
@@ -279,6 +292,13 @@ export default function TallerVeterinaria() {
         setPantalla({ estado: 'error' });
         return;
       }
+      /* El fallo de lectura NO se degrada a `false`: `false` significaría
+         "no aceptó" y pintaría un pendiente que quizá no existe. Queda en
+         `null` y la superficie no afirma nada (Ley 13). */
+      const minimos = await rMinimos;
+      if (!vigente) return;
+      setMinimosAceptados(minimos.ok ? minimos.data : null);
+
       setCatalogoEsp(rCatEsp.data);
       const idsGuardados = rEspPropias.data
         .map((f) => f.especialidadId)
@@ -416,6 +436,26 @@ export default function TallerVeterinaria() {
     ofertaId === null || franjas === null
       ? 0
       : franjas.filter((f) => f.servicioId === ofertaId && !f.quitar).length;
+
+  /* §8 · ACEPTAR LOS MÍNIMOS. Idempotente del lado del motor, así que
+     re-aceptar no es un error — pero sólo se llama desde la Hoja.
+     🔴 El toggle se prende **después** de que el servidor confirmó: si se
+     prendiera antes, un fallo de red dejaría la pantalla diciendo que
+     acepta algo que nadie registró. */
+  async function aceptarMinimos() {
+    if (guardandoMinimos || pantalla.estado !== 'listo') return;
+    setGuardandoMinimos(true);
+    const r = await aceptarMinimosServicio(pantalla.prestadorId, 'telemedicina');
+    setGuardandoMinimos(false);
+    if (!r.ok) {
+      mostrar({ texto: t('tallerVeterinaria.minimosErrorGuardar'), variante: 'error' });
+      return;
+    }
+    setMinimosAceptados(true);
+    setHojaMinimos(false);
+    actualizarItem('telemedicina', { ofrecido: true });
+    desplegar('telemedicina');
+  }
 
   // EL GUARDADO ÚNICO — diff en secuencia por la puerta única
   async function guardarTodo() {
@@ -603,6 +643,16 @@ export default function TallerVeterinaria() {
                             registro="oficio"
                             encendido={d.ofrecido}
                             onCambio={(v) => {
+                              /* §8 · PRENDER TELEMEDICINA EXIGE ACEPTAR §6.
+                                 El toggle NO se mueve hasta que la Hoja se
+                                 acepte: *un interruptor que se prende y
+                                 después pide permiso ya prometió algo.*
+                                 Apagar nunca pregunta — retirarse de una
+                                 declaración no necesita declararse. */
+                              if (esTele && v && minimosAceptados !== true) {
+                                setHojaMinimos(true);
+                                return;
+                              }
                               actualizarItem(i, { ofrecido: v });
                               // prender un servicio plegado lo despliega
                               // (la config recién prendida tiene que verse)
@@ -615,6 +665,34 @@ export default function TallerVeterinaria() {
                             (letra del pedido S68), visible con el toggle
                             en cualquier estado */}
                         {esTele && <Texto variante="apoyo">{t('tallerVeterinaria.telemedicinaHonesta')}</Texto>}
+
+                        {/* 🔴 EL ESTADO DE AURORA · «prendido sin aceptación».
+                            Se lee de DOS piezas (contrato ③ de A): la oferta
+                            prendida (`d.ofrecido`) Y `prestador_acepto_minimos`
+                            en false. **La oferta se muestra PRENDIDA y con una
+                            condición pendiente, jamás apagada**: apagarla
+                            mentiría sobre lo que él configuró; decir «pendiente»
+                            dice la verdad y da el camino.
+                            `null` (no se pudo leer) NO pinta nada — no afirma. */}
+                        {esTele && d.ofrecido && minimosAceptados === false && (
+                          <View style={{ gap: spacing[2] }}>
+                            <Texto variante="seccion">{t('tallerVeterinaria.minimosPendiente')}</Texto>
+                            <Texto variante="apoyo">{t('tallerVeterinaria.minimosPendienteAyuda')}</Texto>
+                            <Boton
+                              variante="secundario"
+                              etiqueta={t('tallerVeterinaria.minimosRevisar')}
+                              onPress={() => setHojaMinimos(true)}
+                            />
+                          </View>
+                        )}
+
+                        {esTele && minimosAceptados === true && (
+                          <Boton
+                            variante="ghost"
+                            etiqueta={t('tallerVeterinaria.minimosAceptados')}
+                            onPress={() => setHojaMinimos(true)}
+                          />
+                        )}
 
                         {!d.ofrecido ? (
                           d.base !== null && <Texto variante="apoyo">{t('servicios.pausada')}</Texto>
@@ -842,6 +920,14 @@ export default function TallerVeterinaria() {
       </Hoja>
 
       {/* Hoja: "Otra" especialidad — texto libre (draft, CONECTAR-A) */}
+      <HojaMinimosTelemedicina
+        visible={hojaMinimos}
+        onCerrar={() => setHojaMinimos(false)}
+        onAceptar={() => void aceptarMinimos()}
+        guardando={guardandoMinimos}
+        soloLectura={minimosAceptados === true}
+      />
+
       <Hoja visible={hojaOtra} onCerrar={() => setHojaOtra(false)} titulo={t('tallerVeterinaria.otraTitulo')}>
         <View style={{ padding: spacing[4], paddingBottom: spacing[4] + insets.bottom, gap: spacing[4] }}>
           <Campo
