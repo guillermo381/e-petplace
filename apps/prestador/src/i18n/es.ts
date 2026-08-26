@@ -1003,6 +1003,17 @@ export const prestadorEs = {
     tituloPaseo: 'Paseo',
     noDisponible: 'Esta cita ya no está disponible',
     noDisponibleDetalle: 'Puede haberse movido o cancelado. Vuelve a la agenda para ver tus paseos de hoy.',
+    /* 🔴 S105-C · LA CONJETURA DEJA DE SERLO CUANDO SE PUEDE PROBAR.
+       `noDisponibleDetalle` dice «PUEDE haberse movido o cancelado» — es
+       honesta cuando no sabemos, y sigue viva para ese caso. Estas dos son
+       para cuando el servidor SI lo dice.
+       Viven en el namespace GENERICO y no en el de un oficio: la pieza que
+       las monta sirve a los cinco.
+       ⚠️ **Y NO NOMBRAN LA CAUSA, ni siquiera con un reverso**: decirle «se
+       revirtio el pago» expondria un movimiento financiero del cliente. Lo
+       que el necesita saber es que SU HORARIO SE LIBERO. */
+    canceladaTitulo: 'Esta cita se canceló',
+    canceladaDetalle: 'Tu horario volvió a quedar libre.',
     noDisponibleDetalleCorto: 'Vuelve a la agenda para ver tus paseos de hoy.',
     volverAgenda: 'Volver a la agenda',
     estadoPorConfirmar: 'Por confirmar',

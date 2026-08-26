@@ -58,6 +58,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { SeccionDireccion } from '@/components/seccion-direccion';
 import { useTraduccion } from '@/i18n';
+import { CitaNoDisponible } from '@/components/cita-no-disponible';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -284,7 +285,8 @@ export default function AntesGrooming() {
         )}
 
         {pantalla.estado === 'no_existe' && (
-          <EstadoVacio
+          <CitaNoDisponible
+            citaId={citaId}
             titulo={t('citaGrooming.noDisponible')}
             descripcion={t('citaGrooming.noDisponibleDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('citaGrooming.volverHoy')} onPress={() => router.back()} />}

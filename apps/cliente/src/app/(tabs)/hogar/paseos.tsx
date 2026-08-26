@@ -28,7 +28,7 @@
  * pantalla manda sobre la del control suelto.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,6 +60,7 @@ import {
   obtenerMascotasDeFamilia,
   resolverUrlsFotos,
   cancelarCitaSuelta,
+  leerCitaResuelta,
   cancelarReservaPaquete,
   configurarRenovacionPlan,
   obtenerCitasDePlan,
@@ -101,6 +102,12 @@ export default function MisPaseos() {
   const idioma = obtenerIdiomaActual();
 
   const [segmento, setSegmento] = useState<Segmento>('proximos');
+  /* 🔴 LA CAUSA DE UNA CANCELACIÓN — **se pide solo al abrir una cancelada.**
+     `null` = todavía no sabemos, y NO se dibuja como «otra causa»: mientras
+     viaja, la voz es la del hecho pelado, que es cierta siempre.
+     *Un `null` que se pinta como un valor concreto es cómo una espera se
+     disfraza de respuesta.* */
+  const [causaCancelacion, setCausaCancelacion] = useState<string | null>(null);
   // r12 · LOS TRES EJES DEL LOG. El de FECHA solo existe en historial:
   // en próximos NO PARTE LOS DATOS (lo que viene es futuro por
   // definición) y un eje que no parte no se dibuja.
@@ -137,6 +144,21 @@ export default function MisPaseos() {
   const [guardandoMovida, setGuardandoMovida] = useState(false);
   // P18/P16b: el DETALLE de la cita (suelta o de paquete) con sus acciones
   const [detalle, setDetalle] = useState<CitaPaseoDueno | null>(null);
+
+  /* Se dispara SOLO con una cita cancelada abierta. Sin esa guarda, abrir
+     cualquier detalle pediría al servidor una causa que no existe. */
+  useEffect(() => {
+    setCausaCancelacion(null);
+    if (detalle === null || detalle.estado !== 'cancelada') return;
+    let vigente = true;
+    void leerCitaResuelta(detalle.id).then((r) => {
+      if (!vigente) return;
+      /* Un fallo deja `null` ⇒ la voz cae al hecho pelado. *Un error de red no
+         puede convertirse en una afirmación sobre por qué se canceló.* */
+      if (r.ok) setCausaCancelacion(r.data.causaCancelacion);
+    });
+    return () => { vigente = false; };
+  }, [detalle]);
   // S60-A6: ventana de la lista fusionada (10 + "Cargar más" — patrón
   // del pie de LineaDeVida; jamás lista infinita sin paginar)
   const [ventana, setVentana] = useState(10);
@@ -978,7 +1000,25 @@ export default function MisPaseos() {
                 escriben el mismo estado, así que nombrar una sería acertar la
                 mitad de las veces. */}
             {detalle.estado === 'cancelada' ? (
-              <Texto variante="cuerpo">{t('suelto.citaCanceladaVoz')}</Texto>
+              /* 🔴 LA SEGUNDA LÍNEA, que hasta hoy no se podía escribir. El
+                 lector de la lista no trae el motivo, así que la voz decía
+                 solo el hecho. `leerCitaResuelta` lo resuelve **por id y sin
+                 filtrar por estado** ⇒ acá SÍ se puede nombrar la causa.
+
+                 **Se pide solo al ABRIR una cita cancelada** —no por fila y no
+                 al montar la lista—: *un viaje por fila para un caso raro es
+                 pagar el peaje de red N veces por una frase* (`L-223`).
+
+                 Y **solo se ramifica `pago_reversado`**: las otras causas caen
+                 en el hecho pelado. *`desconocida` existe porque hay citas
+                 canceladas antes de que nadie guardara el porqué — decir «otra
+                 razón» ahí afirmaría que hubo una registrada.* La pantalla
+                 dice lo que sabe. */
+              <Texto variante="cuerpo">
+                {t(causaCancelacion === 'pago_reversado'
+                  ? 'suelto.citaCanceladaPorReverso'
+                  : 'suelto.citaCanceladaVoz')}
+              </Texto>
             ) : (
               <>
             <Texto variante="apoyo">{t(detalle.origen === 'paquete' ? 'paquete.ventanasVoz' : 'suelto.ventanasVoz')}</Texto>

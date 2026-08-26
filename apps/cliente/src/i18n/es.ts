@@ -1198,6 +1198,15 @@ export const clienteEs = {
        hecho. Ver el pedido a A: con `motivo` en el lector, la voz gana su
        segunda linea. */
     citaCanceladaVoz: 'Esta reserva quedó cancelada.',
+    /* 🔴 LA SEGUNDA LÍNEA, que la firma del founder pedía y el lector no
+       permitía escribir hasta hoy: `causaCancelacion` distingue las causas.
+       ⚠️ **Dice «el banco devolvió el pago» y NO «se revirtió el pago», a
+       propósito:** es el MISMO marco que el aviso `pago_reversado` que ya le
+       llega al prestador. *Dos superficies contando el mismo hecho con dos
+       vocabularios se leen como dos historias.*
+       Y la segunda frase es la que contesta lo que de verdad se pregunta:
+       si quedó cobrada. */
+    citaCanceladaPorReverso: 'Esta reserva se canceló porque el banco devolvió el pago. No te cobramos nada.',
     detalleTitulo: 'Este paseo',
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',

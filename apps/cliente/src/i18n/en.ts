@@ -1030,6 +1030,7 @@ export const clienteEn = {
     citaSuelta: 'Single walk',
     citaCancelada: 'Cancelled',
     citaCanceladaVoz: 'This booking was cancelled.',
+    citaCanceladaPorReverso: 'This booking was cancelled because the bank returned the payment. You were not charged.',
     detalleTitulo: 'This walk',
     ventanasVoz: 'You can cancel up to a day before; after that, you can only reschedule. With less than 2 hours, the walk is lost.',
     reagendar: 'Reschedule',
