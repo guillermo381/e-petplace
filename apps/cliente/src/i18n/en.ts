@@ -1028,6 +1028,8 @@ export const clienteEn = {
   // S57-A P18 — single walk cancellation and rescheduling. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Single walk',
+    citaCancelada: 'Cancelled',
+    citaCanceladaVoz: 'This booking was cancelled.',
     detalleTitulo: 'This walk',
     ventanasVoz: 'You can cancel up to a day before; after that, you can only reschedule. With less than 2 hours, the walk is lost.',
     reagendar: 'Reschedule',
@@ -1151,7 +1153,7 @@ export const clienteEn = {
     medioBorrarConfirmar: 'Yes, delete',
     medioBorrarCancelar: 'No, keep it',
     medioBorrado: 'Done, we deleted it.',
-    medioBorrarFallo: "We couldn't delete it. We're looking into it.",
+    medioBorrarFallo: "We couldn't delete it. Try again in a moment.",
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
     laminaFusion: 'S74 plate · avatar fusion',
@@ -1374,9 +1376,9 @@ export const clienteEn = {
     cobroElegiMedio: 'Choose which card you want to pay with.',
     cobroCompraNoExiste: "We couldn't find this purchase.",
     cobroCitaNoExiste: "We couldn't find this booking.",
-    cobroDefectoNuestro: "We couldn't complete the charge. We're already looking into it.",
+    cobroDefectoNuestro: "We couldn't complete the charge. The problem is on our side — try again in a moment.",
     cobroRechazado: "The bank didn't authorise the payment. Try another card.",
-    cobroDesconocido: "We couldn't complete the charge. We're already looking into it.",
+    cobroDesconocido: "We couldn't complete the charge. Try again in a moment.",
     cobroConfirmando: "We're confirming your payment.",
   },
   recuperar: {
@@ -1771,6 +1773,7 @@ export const clienteEn = {
     vehiculoCarro: 'Car',
     desvioNoLlego: "The delivery couldn't be made",
     desvioNoLlegoDetalle: "The order went back to the seller. We'll reschedule it over WhatsApp.",
+    estadoPendientePago: 'Payment pending',
     desvioCancelado: 'Canceled',
 
     // S96 · Your orders

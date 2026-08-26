@@ -1184,6 +1184,20 @@ export const clienteEs = {
   // S57-A P18 — cancelación y reagenda del paseo suelto. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Paseo suelto',
+    /* 🔴 S105-C · LA MARCA QUE FALTABA EN LA FILA. Sin ella una cita
+       cancelada se dibujaba en el historial IDENTICA a un paseo que
+       ocurrio: mismo titulo, mismo origen, misma fecha, misma foto.
+       *Una ausencia se nota; una fila que miente, no.* */
+    citaCancelada: 'Cancelada',
+    /* 🔴 LA VOZ NO DICE POR QUE, Y ES MEDIDO, NO PUDOR: el lector no trae
+       el motivo, y hoy hay DOS causas vivas que escriben el mismo estado —
+       la cancelacion del propio cliente (P18, con reembolso) y el reverso
+       del pago (S105-A). *Nombrar una de las dos seria acertar la mitad de
+       las veces, y la mitad equivocada le diria que le devolvieron plata
+       que nunca se movio, o al reves.* Lo que SI es cierto siempre es el
+       hecho. Ver el pedido a A: con `motivo` en el lector, la voz gana su
+       segunda linea. */
+    citaCanceladaVoz: 'Esta reserva quedó cancelada.',
     detalleTitulo: 'Este paseo',
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',
@@ -1345,7 +1359,9 @@ export const clienteEs = {
     medioBorrarConfirmar: 'Sí, borrar',
     medioBorrarCancelar: 'No, dejarla',
     medioBorrado: 'Listo, la borramos.',
-    medioBorrarFallo: 'No pudimos borrarla. Ya lo estamos viendo.',
+    /* ⏪ Decía «…Ya lo estamos viendo.» — retirado por criterio del founder
+       (25-ago): un borrado fallido no crea NADA que nadie mire. */
+    medioBorrarFallo: 'No pudimos borrarla. Prueba de nuevo en un momento.',
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
     laminaFusion: 'Lámina S74 · la fusión del avatar',
@@ -1730,19 +1746,40 @@ export const clienteEs = {
     // 🔴 Cada una habla ANTES de tocar la tarjeta. La regla madre: la familia
     //    jamás descubre un problema de su pedido —o de su reserva— a través
     //    del cobro. Y las de «defecto nuestro» NO la culpan ni le piden que
-    //    revise nada: le decimos que lo estamos viendo nosotros.
+    //    revise nada.
+    //
+    // 🔴 ⏪ ACÁ DECÍA «le decimos que lo estamos viendo nosotros», Y ERA LA
+    //    REGLA QUE PRODUJO TRES VOCES FALSAS (firma del founder, 25-ago).
+    //    *Curar los strings sin curar el comentario deja que el próximo los
+    //    vuelva a escribir: un criterio equivocado se reaplica solo.*
+    //
+    //    EL CRITERIO REAL: **se promete revisión SOLO donde hay alguien del
+    //    otro lado.** Del lado del prestador «lo estamos revisando» es cierto
+    //    —un admin aprueba documentos y SKUs, con su ciclo construido—; del
+    //    lado del cliente no hay nadie mirando un cobro que falló.
+    //    *La misma frase es honesta de un lado y falsa del otro, y lo que
+    //    decide no es la redacción: es si existe quien revise.*
+    //
+    //    ⚠️ Y la restricción que fija la forma: estas dos salen por AVISO
+    //    (`mostrar(...)`), que **no tiene botón** ⇒ «escríbenos» sería una
+    //    instrucción sin camino. Lo único accionable desde un toast es
+    //    reintentar, y por eso es lo que dicen.
     cobroPagoEnProceso: 'Tu pago anterior se está procesando.',
     cobroReservaVencida: 'Tu reserva venció. Vamos a revisar que todo siga disponible.',
     cobroVendedorNoActivo: 'Esta tienda no está recibiendo pedidos en este momento.',
     cobroElegiMedio: 'Elige con qué tarjeta quieres pagar.',
     cobroCompraNoExiste: 'No encontramos esta compra.',
     cobroCitaNoExiste: 'No encontramos esta reserva.',
-    // Las nuestras comparten voz a propósito: la causa fina es de soporte,
-    // no de la familia — distinguirlas en pantalla sería contarle un problema
-    // interno que no puede resolver.
-    cobroDefectoNuestro: 'No pudimos completar el cobro. Ya lo estamos viendo.',
+    // 🔴 LAS NUESTRAS COMPARTEN VOZ A PROPÓSITO: la causa fina es interna y
+    // contarla no le sirve a la familia. **Lo que NO comparten es una promesa
+    // de gestión**: acá no hay nadie del otro lado, así que la voz dice lo
+    // único que la familia puede hacer desde un toast — volver a intentar.
+    cobroDefectoNuestro: 'No pudimos completar el cobro. El problema es nuestro — prueba de nuevo en un momento.',
     cobroRechazado: 'El banco no autorizó el pago. Prueba con otra tarjeta.',
-    cobroDesconocido: 'No pudimos completar el cobro. Ya lo estamos viendo.',
+    /* Sin causa leída **no se le atribuye a nadie**: se dice qué pasó y la
+       única acción disponible. *Nombrar un culpable que no medimos sería
+       inventar, y ofrecer soporte desde un toast sería un camino sin toque.* */
+    cobroDesconocido: 'No pudimos completar el cobro. Prueba de nuevo en un momento.',
     cobroConfirmando: 'Estamos confirmando tu pago.',
   },
   /**
@@ -2335,6 +2372,18 @@ export const clienteEs = {
     vehiculoCarro: 'Carro',
     desvioNoLlego: 'La entrega no se pudo hacer',
     desvioNoLlegoDetalle: 'El pedido volvió con el vendedor. Lo coordinamos de nuevo por WhatsApp.',
+    /* 🔴 S105-C · LA VOZ QUE FALTABA, Y SU AUSENCIA ERA EL DEFECTO.
+       `pagando` era la UNICA de las siete narrativas sin voz propia en la
+       pantalla ⇒ caia a `narrativa_nombre`, o sea **la palabra del MOTOR**:
+       «Pagando». Y el catalogo dice de si mismo que su `nombre` es
+       *descripcion de referencia, no el copy final* — «la voz definitiva la
+       escribe la pantalla» (Ley 3 extendida). Estabamos mostrando el
+       vocabulario del motor en la unica fila donde la persona tiene algo
+       que hacer.
+       *«Pagando» es presente progresivo: dice que algo esta pasando ahora.
+       Sobre un intento que fallo hace dias no esta pasando nada, y la fila
+       quedaba indistinguible de un pedido comprado.* */
+    estadoPendientePago: 'Pendiente de pago',
     desvioCancelado: 'Cancelado',
 
     // S96 · Tus pedidos

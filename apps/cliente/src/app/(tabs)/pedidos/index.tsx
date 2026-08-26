@@ -250,9 +250,39 @@ export default function DespensaPedidos() {
            `estado`»— se cumple **por construcción**: `portador`
            vale `'estado'` exactamente cuando la escalera no
            dibuja, y eso lo vigila el guard. */
+        /* 🔴 S105-C · `pagando` GANA VOZ PROPIA, Y SU AUSENCIA ERA EL DEFECTO.
+           ⏪ Acá iba `p.narrativa_nombre` a secas para todo portador de
+           estado. **Medido: `pagando` era la ÚNICA de las siete narrativas sin
+           voz de pantalla** —las otras seis ya viven en `voces`, arriba— así
+           que caía a la palabra del MOTOR: «Pagando».
+
+           **Y el catálogo dice de sí mismo que eso está mal:** su `COMMENT`
+           declara que el `nombre` es *«descripción de referencia, no el copy
+           final»* y que *«la voz definitiva la escribe la pantalla»* (Ley 3
+           extendida). *Estábamos mostrando el vocabulario del motor justo en
+           la única fila donde la persona tiene algo que hacer.*
+
+           🔴 **Por qué importa la palabra:** «Pagando» es presente progresivo
+           —dice que algo está pasando ahora—. Sobre un intento que falló hace
+           días **no está pasando nada**, y la fila quedaba **indistinguible de
+           un pedido comprado**. *Es la misma familia que la cita cancelada que
+           parecía cumplida: una fila que se lee como algo que sí ocurrió.*
+
+           **`atencion` y no `info`**, y es lo único que separa esta fila de
+           las otras seis: las demás informan; **ésta pide algo.** *El default
+           `info` de la pieza existe porque «todavía no pasó nada» no es una
+           alerta — cierto para un pago en vuelo de tres segundos, falso para
+           uno que quedó sin completar.*
+
+           ⚠️ **Sin botón para completar, y NO es olvido** — ver el reporte:
+           medido, **no existe camino** (el checkout no acepta una compra por
+           parámetro y el detalle no ofrece pagar) **y `D-913` lo rebotaría**
+           igual. *Ofrecerlo sería la Ley 23 con dos causas a la vez.* */
         estado={
           portador === 'estado'
-            ? { etiqueta: p.narrativa_nombre, tono: 'info' }
+            ? p.narrativa === 'pagando'
+              ? { etiqueta: t('despensa.estadoPendientePago'), tono: 'atencion' as const }
+              : { etiqueta: p.narrativa_nombre, tono: 'info' as const }
             : undefined
         }
         monto={`$ ${p.total.toFixed(2)}`}

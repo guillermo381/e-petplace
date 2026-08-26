@@ -358,7 +358,26 @@ export function FilaDeUna({ onPress }: { onPress?: () => void }) {
  * esta forma con **expiración perezosa** desde S54. *Es de A/D, no de esta
  * constante.*
  */
-export const DEUNA_ELEGIBLE: boolean = false;
+/* ✅ ENCENDIDA OTRA VEZ el 26-ago, por firma del founder — y esta vez con el
+   riel corrido de punta a punta: **pago por webhook, aplicación automática y
+   reverso ejercido.** *La primera vez se encendió para que un ojo mirara una
+   pantalla; ésta, porque el circuito entregó.*
+
+   ⚠️ **Y EL RESIDUO DE `D-913` QUE SIGUE VIVO, medido y no supuesto** — la
+   firma dice *«ya no rompe carritos»* y es cierto **para el intento que se
+   RESUELVE**: el barrido diario consulta al proveedor y aplica su veredicto,
+   así que un pago aprobado o reversado sale de `('iniciado','pendiente')` y
+   libera la compuerta.
+   🔴 **Lo que NO cambió es el intento que nadie pagó nunca.** Medido: **nadie
+   escribe `'expirado'`** (el único hit del valor es su propio CHECK) y **nadie
+   lee `codigo_expira_en`**; el proveedor sigue diciendo `PENDING` sobre un
+   código que caducó, así que el barrido lo deja donde está. ⇒ **una compra
+   abandonada a mitad de pago sigue quedando impagable por cualquier riel**,
+   porque la compuerta 0 cuenta por `compra_id` y sin filtrar por proveedor.
+   *El radio se achicó muchísimo —de «cualquiera que toque» a «quien abandone»—
+   pero no es cero, y la diferencia importa porque el default vuelve a ser
+   DeUna.* */
+export const DEUNA_ELEGIBLE: boolean = true;
 
 /** El bloque de una fila vencida, para cuando la pantalla quiera explicarlo. */
 export function VozVencida({ visible }: { visible: boolean }) {

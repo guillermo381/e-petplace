@@ -158,7 +158,20 @@
          margin-bottom:6px;-webkit-appearance:none}
   .alias-ayuda{margin:0 0 18px;font-size:13px;color:var(--gris)}
   .estado{margin-top:18px;font-size:14px;min-height:1.4em}
-  .estado[data-tono="error"]{color:var(--magenta)}
+  /* 🔴 RESALTADO, NO EN GRIS — pedido del founder (25-ago), y el diagnóstico
+     no era el que la frase sugiere: **el color ya era magenta**, no gris. Lo
+     que lo hacía leerse como una nota al pie era el PESO y el TAMAÑO: 14 px
+     regular, el mismo par que `.alias-ayuda`, `.sello` y `.pie` — los tres
+     grises de esta página. *Rodeado de tres notas con su misma silueta, el
+     mensaje que más importa se lee como la cuarta.*
+     ⇒ Sube a la medida del cuerpo y gana peso. **El color no se toca**: ya
+     era el correcto, y cambiarlo habría sido curar el síntoma que no era.
+     El fondo tonal lo separa del texto de al lado sin gritar — misma familia
+     que el secundario de la casa, que también es relleno y no contorno. */
+  .estado[data-tono="error"]{
+    color:var(--magenta);font-size:16px;font-weight:600;
+    background:var(--sec);border:1px solid var(--sec-borde);
+    border-radius:10px;padding:12px 14px}
   .sello{margin-top:20px;font-size:13px;color:var(--gris);text-align:center;
          letter-spacing:.01em}
   .pie{margin-top:20px;padding-top:16px;border-top:1px solid var(--linea);
@@ -265,12 +278,23 @@
       guardando: 'Guardando…',
       tardando: 'Esto está tardando más de lo normal. Puedes intentar de nuevo, o cerrar y volver desde la app.',
       revisaDatos: 'Revisa los datos de la tarjeta.',
-      defectoNuestro: 'No pudimos guardar la tarjeta. Ya lo estamos viendo.',
+      /* ⏪ Decía «…Ya lo estamos viendo.» — **retirado por criterio del
+         founder (25-ago), y el criterio vale más que el caso:** *«ya lo
+         estamos viendo» promete una gestión que nadie está haciendo.* Acá el
+         alta queda abierta y vence sola; **nadie la mira.** Lo que sí es
+         cierto es que el problema es nuestro y que reintentar puede servir. */
+      defectoNuestro: 'No pudimos guardar la tarjeta. El problema es nuestro.',
       /* ☠️ S101-D — acá vivía la ÚNICA línea en VOSEO de toda esta superficie
          («probá de nuevo»), contra las otras 19 en tuteo. Curada con el resto. */
-      defectoNuestroReintento: 'No pudimos guardar la tarjeta. Ya lo estamos viendo — prueba de nuevo en un momento.',
+      /* ⏪ Igual que la de arriba: se le quita la gestion que nadie hace y se
+         le deja LA ACCION, que aca es distinta a la del rechazo — con un
+         defecto tecnico probar OTRA tarjeta no sirve: ninguna va a andar. */
+      defectoNuestroReintento: 'No pudimos guardar la tarjeta. El problema es nuestro — prueba de nuevo en un momento.',
       sinTerminar: 'Guardamos tu tarjeta con el procesador, pero no pudimos terminar. Prueba de nuevo.',
-      probaOtra: 'No pudimos guardar la tarjeta. Prueba con otra.',
+      /* 🔴 LITERAL DEL FOUNDER (25-ago). Es familia ② del contrato del
+         wrapper —la causa concreta y su salida—, jamas ①: **una tarjeta que
+         el emisor rechaza no va a soporte, va a otra tarjeta.** */
+      probaOtra: 'No pudimos guardar tu tarjeta, intenta con otra.',
     },
     en: {
       docTitulo: 'Add card · e-PetPlace',
@@ -294,10 +318,10 @@
       guardando: 'Saving…',
       tardando: 'This is taking longer than usual. You can try again, or close and come back from the app.',
       revisaDatos: 'Check the card details.',
-      defectoNuestro: "We couldn't save the card. We're already looking into it.",
-      defectoNuestroReintento: "We couldn't save the card. We're already looking into it — try again in a moment.",
+      defectoNuestro: "We couldn't save the card. The problem is on our side.",
+      defectoNuestroReintento: "We couldn't save the card. The problem is on our side — try again in a moment.",
       sinTerminar: "We saved your card with the processor, but couldn't finish. Try again.",
-      probaOtra: "We couldn't save the card. Try another one.",
+      probaOtra: "We couldn't save your card, try another one.",
     },
   };
   var T = VOCES[LANG];
@@ -455,10 +479,18 @@
                 nadie por sí solo**: el servidor es quien sabe de quién es.
      `volver` — a dónde devolver el navegador cuando el alta termina. Se
                 valida contra una lista blanca: un `volver` libre convertiría
-                esta página en un redirector abierto.                        */
+                esta página en un redirector abierto.
+     `uid`    — **la identidad ante el PROVEEDOR, estable por (usuario,
+                proveedor)** (`D-921` · S105-A). **No reemplaza a `alta`: son
+                dos cosas distintas** — `alta` es el handle de ESTE trámite y
+                sigue siendo lo que la edge resuelve; `uid` es quién es la
+                persona para Nuvei, y no cambia entre altas.
+                🔴 **Sin él, `addCard` recibe `alta` y todo se comporta como
+                hoy** — ver el `addCard` de abajo.                           */
   var qs = new URLSearchParams(location.search);
   var alta = qs.get('alta') || '';
   var volver = qs.get('volver') || '';
+  var uid = qs.get('uid') || '';
 
   function volverPermitido(u) {
     if (!u) return false;
@@ -754,10 +786,28 @@
     }
 
     Payment.addCard(
-      alta,                 /* el handle es el uid ante el proveedor: el mismo
-                               valor que el servidor usará para el `stoken`.
-                               Si divergieran, el stoken daría false por una
-                               razón que no es la fórmula. */
+      /* 🔴 EL UID ESTABLE, CON EL HANDLE COMO FALLBACK (`D-921` · S105-A).
+         ⏪ Acá iba `alta` a secas, con este comentario: *«el handle es el uid
+         ante el proveedor»*. **Era cierto y ES EL DEFECTO**: como cada alta
+         nace con un uuid nuevo, **para Nuvei cada alta era una persona
+         distinta** — tokenizaba de cero y su `card/list` nunca traía más de
+         una tarjeta. *Un valor que sirve de dos cosas a la vez funciona hasta
+         que las dos cosas necesitan ser distintas.*
+
+         **`uid || alta` no es prolijidad defensiva: es lo que hace seguro el
+         merge.** Sin el parámetro —hoy, y en cualquier despliegue de la página
+         que se adelante a la app— `addCard` recibe **exactamente lo de hoy**.
+         *No queremos una ventana en la que la página espere algo que el motor
+         todavía no manda.*
+
+         ⚠️ **Y LA MITAD QUE NO ES DE ESTA PÁGINA, escrita acá porque es donde
+         se rompe:** el servidor valida el `stoken` con
+         `md5(token_APPCODE_**alta**_APPKEY)` — usa `alta` **porque hoy `alta`
+         ES el uid**. El día que este argumento deje de serlo, **esa fórmula
+         tiene que usar el MISMO uid**. Es la pieza ④ del contrato: **de D, y
+         sale en el mismo acto que el flip.** *Si sale sola, `stokenValido`
+         pasa a `false` en todas las altas acusando a una fórmula correcta.* */
+      uid || alta,
       CONFIG.EMAIL_ALTA,
       tarjeta,
       function (resp) {
