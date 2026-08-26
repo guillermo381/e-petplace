@@ -2615,7 +2615,8 @@ function GaleriaInterna() {
                 'sangrado',
                 'convulsiones',
                 'golpe fuerte',
-                'dolor intenso o decaimiento repentino',
+                'dolor intenso',
+                'decaimiento repentino',
               ],
               signosCierre: 'llévala a una clínica ahora mismo.',
               transito:

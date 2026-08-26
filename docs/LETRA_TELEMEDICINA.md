@@ -30,7 +30,7 @@ una pantalla.* Todo lo demás del oficio ya está construido.
 comisión de e-PetPlace es del **10%**, idéntica al resto. *(Firma del
 founder, 25-ago-2026.)*
 
-## §3 · EL AVISO PREVIO — se muestra antes de confirmar, siempre
+## §3 · EL AVISO PREVIO ( se muestra antes de confirmar, siempre
 
 Antes de que el dueño confirme una teleconsulta, la app le muestra:
 
@@ -39,28 +39,105 @@ Antes de que el dueño confirme una teleconsulta, la app le muestra:
 > Las consultas por videollamada sirven para orientación, seguimiento y
 > casos que el veterinario pueda evaluar viendo a tu mascota por pantalla.
 >
-> **No reemplazan una atención presencial ni sirven para emergencias.** Si
-> notas que tu mascota está en riesgo —dificultad para respirar, sangrado,
-> convulsiones, golpe fuerte, dolor intenso o decaimiento repentino—
-> llévala a una clínica ahora mismo.
+> **No reemplazan una atención presencial ni sirven para emergencias.**
+>
+> Si notas que tu mascota está en riesgo:
+>
+> - Dificultad para respirar
+> - Sangrado
+> - Convulsiones
+> - Golpe fuerte
+> - Dolor intenso
+> - Decaimiento repentino
+>
+> Llévala a una clínica ahora mismo.
 >
 > La videollamada no se graba y se transmite a través de la infraestructura
 > de nuestro proveedor de video.
 >
-> [ Ir a urgencias ] · [ Reservar cita presencial ] · [ Continuar con la
-> videoconsulta ]
+> ☐ Entiendo que una videoconsulta no reemplaza una atención presencial.
+>
+> [ Ir a urgencias ] · [ Reservar cita presencial ] · [ Continuar con la videoconsulta ]
 
 🔴 **Los signos concretos no son decoración.** Decir «si creés que está en
-riesgo» le pide al dueño un juicio clínico que no tiene; nombrar cinco
-signos le da un criterio. *No se resume, no se acorta, no se convierte en
-una línea de letra chica.*
+riesgo» le pide al dueño un juicio clínico que no tiene; nombrar ~~cinco~~
+**seis** signos le da un criterio. *No se resume, no se acorta, no se
+convierte en una línea de letra chica.*
 
-> ### ✅ ENMIENDA — firma founder CP1 S106, 25-ago-2026
+> ### ✅ ENMIENDA DE FORMA ) firma del founder, 26-ago-2026
+>
+> **EL PÁRRAFO DE LOS SIGNOS PASA A LISTA.** Deja de ser prosa corrida entre
+> em-dashes y se muestra como **seis ítems, uno por línea**.
+>
+> 🔴 **Por qué la coma no alcanzaba, que es el argumento entero:** la enmienda
+> anterior separó la «o» porque fundía dos motivos distintos. Pero **una coma
+> resuelve eso a medias** ( sigue siendo un párrafo corrido donde **seis
+> peligros se leen de un tirón**. *Una lista de seis ítems separados es lo que
+> ese argumento pedía de verdad, y es como lee una persona asustada mirando el
+> teléfono con su animal raro al lado.*
+>
+> **Y no viola §3, que conviene decirlo con su literal:** §3 prohíbe
+> **resumir**, **acortar** y **convertir en letra chica**. Pasar de párrafo a
+> lista **no quita una palabra ni un signo ) los vuelve más visibles.** *Es más
+> fiel al espíritu de §3 que la prosa original.*
+>
+> ⚠️ **EL VERBATIM DE ARRIBA ES EXACTO, no aproximado.** Se tomó **del objeto**
+> (las claves `avisoTele*` de `apps/cliente/src/i18n/es.ts`), no de la memoria
+> ni de una transcripción: título · intro · advertencia · `avisoTeleSignosIntro`
+> · `avisoTeleSigno1..6` con su capitalización · `avisoTeleSignosCierre` ·
+> casilla · tránsito · las tres acciones. **`R67` compara carácter por
+> carácter: una letra «aproximadamente igual» lo deja sin poder trabajar.**
+>
+> 🔴 **Consecuencia declarada para `R67`:** su extractor busca hoy un párrafo
+> con `(…)`, y **ese párrafo ya no existe**. La regla queda ROJA hasta que
+> aprenda la forma partida ( **es de B, está avisado, y el rojo es esperado y
+> no un defecto nuevo.**
+
+> ### ✅ ENMIENDA DE PUNTUACIÓN ) firma del founder, 26-ago-2026
+>
+> **La «o» que unía los dos últimos signos pasa a COMA.** La v1.1 decía
+> ~~«dolor intenso **o** decaimiento repentino»~~; ahora dice **«dolor intenso,
+> decaimiento repentino»**.
+>
+> **No viola §3 y conviene decir por qué:** no se agrega, no se quita, no se
+> resume, no se acorta ( **se separa lo que ya estaba enumerado.**
+>
+> 🔴 **Esa «o» hacía dos daños a la vez, y el segundo es el que importa:**
+> ① el extractor de `R67` partía por coma y los contaba como **UNO** )de ahí su
+> *«los 5 signos firmados»* y de ahí que la tupla de `packages/ui` naciera con
+> cinco(; ② **la familia que lee rápido los lee como una sola cosa**, cuando son
+> **dos motivos distintos para salir corriendo a la clínica**.
+>
+> **Se descartó parchear el extractor** para que partiera también por « o ».
+> *Es frágil )un signo futuro con «o» adentro, como «vómito o diarrea», se
+> partiría mal( y deja el texto de la familia fundido igual.* **La puntuación
+> que arregla al juez es la misma que arregla lo que se lee**, y por eso se
+> corrige el texto y no el instrumento.
+
+> ### ✅ ENMIENDA DE CONTEO ) firma de la mesa, 26-ago-2026
+>
+> **La enumeración SIEMPRE tuvo seis** (dificultad para respirar · sangrado ·
+> convulsiones · golpe fuerte · dolor intenso · decaimiento repentino) **y la
+> prosa decía «cinco» en dos lugares.** Se corrige **el número, jamás la
+> lista**.
+>
+> 🔴 **Y la razón por la que la salida barata era la peligrosa:** cuadrar el
+> número borrando un signo es **exactamente lo que este párrafo prohíbe**.
+> *Un aviso que existe para que un dueño reconozca una urgencia no se recorta
+> para que una prosa cierre ( y el signo que sobraba iba a ser el que menos
+> «suena» grave, que es justamente el que hace falta nombrar porque nadie lo
+> asocia con riesgo.*
+>
+> **Consumidores avisados:** `packages/ui` (pasa la tupla) y **`R67`, que
+> cuenta los signos y hoy cuenta cinco** ) su baseline se corrige con esta
+> firma, no antes.
+
+> ### ✅ ENMIENDA ( firma founder CP1 S106, 25-ago-2026
 >
 > **① La conjugación pasa a TUTEO NEUTRO, sin tocar el contenido.** La v1.0
 > decía ~~«Si **notás** que tu mascota está en riesgo … **llevala** a una
-> clínica»~~; ahora dice **«notas»** y **«llévala»**. *Los cinco signos y
-> las tres acciones quedan intactos* — la prohibición de §3 es contra
+> clínica»~~; ahora dice **«notas»** y **«llévala»**. *Los ~~cinco~~ **seis**
+> signos y las tres acciones quedan intactos* ) la prohibición de §3 es contra
 > resumir y acortar, no contra hablar la voz de la casa (tuteo neutro,
 > decisión founder S51; la familia `R66` vigila el voseo con baseline 0).
 >
@@ -363,3 +440,51 @@ que el T&C y el motor pueden sostener a la vez.
   por B: **cero webrtc/livekit/daily/agora/twilio/jitsi en todo el monorepo**;
   `ClipSesion` reproduce un archivo grabado y no es transporte.
 - **§7 · el aviso de IA de T&C §14** — se cita sin enmendarlo.
+
+---
+
+# ANEXO · LAS FORMAS ANTERIORES DE §3 — historia, no letra vigente
+
+> 🔴 **ESTE ANEXO NO ES LA LETRA. Lo que rige es §3 y sólo §3.**
+>
+> **Y vive acá abajo por una razón MEDIDA, no por prolijidad:** cuando la forma
+> vieja se dejó tachada *dentro* de §3, **el extractor de `R67` la tomó a ella**
+> —los signos salían en minúscula, como en la prosa muerta— en vez de leer la
+> lista viva. *Un párrafo tachado sigue siendo un párrafo para quien parsea, y
+> el tachado es tipografía: no existe para un regex.*
+>
+> ⇒ **Regla que deja este episodio: la letra derogada se saca de la sección que
+> un juez lee.** Conservarla al lado del texto vigente no es archivar — es
+> dejar un señuelo.
+
+**Durante unas horas del 26-ago-2026 esta letra tuvo TRES formas.** Se listan
+para que quien lea un commit de ese día pueda ubicarse.
+
+### Forma ① — la original, con «o» *(hasta el 26-ago)*
+
+~~**No reemplazan una atención presencial ni sirven para emergencias.** Si notas
+que tu mascota está en riesgo -dificultad para respirar, sangrado,
+convulsiones, golpe fuerte, dolor intenso **o** decaimiento repentino- llévala
+a una clínica ahora mismo.~~
+
+**Por qué murió:** la «o» fundía dos signos en uno. El extractor de `R67` los
+contaba como **uno** —de ahí su «5 signos» y la tupla de cinco de
+`packages/ui`— **y la familia que lee rápido los leía como una sola cosa.**
+
+### Forma ② — con coma, prosa corrida *(vivió unas horas del 26-ago)*
+
+~~**No reemplazan una atención presencial ni sirven para emergencias.** Si notas
+que tu mascota está en riesgo -dificultad para respirar, sangrado,
+convulsiones, golpe fuerte, dolor intenso, decaimiento repentino- llévala a una
+clínica ahora mismo.~~
+
+**Por qué murió:** resolvía el conteo **a medias**. Seguía siendo un párrafo
+corrido donde **seis peligros se leen de un tirón**.
+
+### Forma ③ — LISTA. **Es la vigente y vive en §3.**
+
+*Lo que el argumento de la forma ② pedía de verdad: seis ítems separados, como
+lee una persona asustada mirando el teléfono con su animal raro al lado.*
+
+*(Los guiones de este anexo son simples a propósito: con em-dashes, los
+párrafos de arriba volverían a ser señuelos para el mismo extractor.)*

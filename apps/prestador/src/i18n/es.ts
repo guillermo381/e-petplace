@@ -2721,6 +2721,20 @@ export const prestadorEs = {
     noRealizableHecho: 'Quedó marcada. Soporte se encarga de la devolución.',
     noRealizableHechoSinPago: 'Quedó marcada. No había pago que devolver.',
     noRealizableError: 'No pudimos marcarla. Prueba de nuevo.',
+
+    /* ══ EL VEREDICTO DE ENTRADA · los OCHO motivos, en voz del profesional ══
+       Misma ley que del lado familia: **el botón EXISTE solo cuando el
+       servidor dice que sí**, los motivos NO se colapsan, y DOS no pintan
+       nada — `no_es_teleconsulta` (no es error de nadie) y `ajeno_a_la_cita`
+       (**jamás «no tienes permiso»: confirmaría que la cita existe**). */
+    entrarBoton: 'Entrar a la videoconsulta',
+    entrarFueraDeVentana: 'La sala abre a las {{hora}}.',
+    entrarNoPagada: 'La familia todavía no pagó esta videoconsulta.',
+    entrarCancelada: 'Esta videoconsulta está cancelada.',
+    entrarNoRealizable: 'Ya la marcaste como no realizada.',
+    entrarFinalizada: 'Esta videoconsulta ya terminó.',
+    entrarInexistente: 'No encontramos esta videoconsulta.',
+    entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
   },
   equipo: {
     titulo: 'Tu negocio',

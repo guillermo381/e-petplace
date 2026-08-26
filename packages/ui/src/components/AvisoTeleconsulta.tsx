@@ -126,10 +126,29 @@ export interface AvisoTeleconsultaProps {
     /** La frase que introduce los signos. */
     signosIntro: string
     /**
-     * 🔴 LOS CINCO. **Tupla: cuatro no compila.** El orden es el de la
-     * letra y lo conserva el consumidor — la pieza no reordena.
+     * 🔴 LOS SEIS. **Tupla: cinco no compila.** El orden es el de la letra y
+     * lo conserva el consumidor — la pieza no reordena.
+     *
+     * ⏪ **NACIÓ COMO TUPLA DE CINCO, Y ESE ERA EL ERROR** (firma de mesa,
+     * 26-ago). La letra enumera **seis** —*dificultad para respirar ·
+     * sangrado · convulsiones · golpe fuerte · dolor intenso · decaimiento
+     * repentino*— pero **su propio comentario decía «cinco»**, y los dos
+     * últimos van unidos por «o» en vez de coma, así que se leían como uno.
+     *
+     * 🔴 **El candado funcionó A PESAR DE ESTAR MAL CALIBRADO, y esa es la
+     * parte que hay que no perder:** la tupla no sabía cuántos eran —
+     * replicaba el número equivocado de la prosa—, pero **obligó a alguien a
+     * CONTAR para llenarla**, y ahí apareció el sexto. *Un candado que exige
+     * una cuenta convierte una discrepancia de prosa en un error de
+     * compilación; sin él salía a producción un aviso con un signo clínico
+     * menos y nadie se enteraba.*
+     *
+     * *Y el matiz honesto: si el consumidor hubiera puesto «dolor intenso o
+     * decaimiento repentino» como un solo elemento, habría compilado igual.
+     * **El candado obliga a contar; no puede obligar a contar bien.** Esa
+     * mitad la cubre `R67`, que compara contra la letra.*
      */
-    signos: readonly [string, string, string, string, string]
+    signos: readonly [string, string, string, string, string, string]
     /** El cierre después de los signos («llévala a una clínica ahora mismo»). */
     signosCierre: string
     /**

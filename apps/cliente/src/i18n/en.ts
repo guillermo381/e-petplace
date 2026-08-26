@@ -734,8 +734,16 @@ export const clienteEn = {
     avisoTeleTitulo: 'Before you continue',
     avisoTeleParaQue:
       'Video consultations are for guidance, follow-up, and cases the vet can assess by seeing your pet on screen.',
-    avisoTeleNoReemplaza:
-      'They do not replace in-person care and are not for emergencies. If you notice your pet is at risk —difficulty breathing, bleeding, seizures, a hard blow, severe pain, or sudden lethargy— take them to a clinic right now.',
+    avisoTeleNoReemplaza: 'They do not replace in-person care and are not for emergencies.',
+    avisoTeleSignosIntro: 'If you notice your pet is at risk:',
+    avisoTeleSigno1: 'Difficulty breathing',
+    avisoTeleSigno2: 'Bleeding',
+    avisoTeleSigno3: 'Seizures',
+    avisoTeleSigno4: 'A hard blow',
+    avisoTeleSigno5: 'Severe pain',
+    avisoTeleSigno6: 'Sudden lethargy',
+    avisoTeleSignosCierre: 'Take them to a clinic right now.',
+    avisoTeleConsentimiento: 'I understand a video consultation does not replace in-person care.',
     avisoTeleTransito:
       'The video call is not recorded and is transmitted through our video provider’s infrastructure.',
     avisoTeleIrUrgencias: 'Go to urgent care',
@@ -760,6 +768,17 @@ export const clienteEn = {
     citaTeleError: 'We could not cancel it. Please try again.',
     citaTeleNoRealizada: 'This video consultation could not take place.',
     citaTeleNoRealizadaDevolucion: 'The payment goes back to your payment method.',
+
+    /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    entrarBoton: 'Join the video consultation',
+    entrarFueraDeVentana: 'The room opens at {{hora}}.',
+    entrarNoPagada: 'This video consultation is not paid yet.',
+    entrarCancelada: 'This video consultation is cancelled.',
+    entrarNoRealizable:
+      'The professional marked it as not completed. The payment goes back to your payment method.',
+    entrarFinalizada: 'This video consultation has ended.',
+    entrarInexistente: 'We could not find this video consultation.',
+    entrarNoSePudoConsultar: 'We could not check whether the room is open.',
   },
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)

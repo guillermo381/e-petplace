@@ -10,7 +10,8 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Para que el veterinario pueda escucharte durante tu videoconsulta."
+        "NSMicrophoneUsageDescription": "Para que el veterinario pueda escucharte durante tu videoconsulta.",
+        "NSCameraUsageDescription": "Para la foto de tu mascota y para tus videoconsultas con el veterinario."
       }
     },
     "android": {
@@ -59,7 +60,7 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "La app usa la cámara para la foto de tu mascota.",
+          "cameraPermission": "Para la foto de tu mascota y para tus videoconsultas con el veterinario.",
           "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen para tu mascota."
         }
       ]

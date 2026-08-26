@@ -2160,6 +2160,16 @@ export const prestadorEn = {
     noRealizableHecho: 'Marked. Support will handle the refund.',
     noRealizableHechoSinPago: 'Marked. There was no payment to refund.',
     noRealizableError: 'We could not mark it. Please try again.',
+
+    /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    entrarBoton: 'Join the video consultation',
+    entrarFueraDeVentana: 'The room opens at {{hora}}.',
+    entrarNoPagada: 'The family has not paid for this video consultation yet.',
+    entrarCancelada: 'This video consultation is cancelled.',
+    entrarNoRealizable: 'You already marked it as not completed.',
+    entrarFinalizada: 'This video consultation has ended.',
+    entrarInexistente: 'We could not find this video consultation.',
+    entrarNoSePudoConsultar: 'We could not check whether the room is open.',
   },
   equipo: {
     titulo: 'Your business',

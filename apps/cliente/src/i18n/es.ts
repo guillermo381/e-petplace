@@ -876,8 +876,41 @@ export const clienteEs = {
     avisoTeleTitulo: 'Antes de continuar',
     avisoTeleParaQue:
       'Las consultas por videollamada sirven para orientación, seguimiento y casos que el veterinario pueda evaluar viendo a tu mascota por pantalla.',
-    avisoTeleNoReemplaza:
-      'No reemplazan una atención presencial ni sirven para emergencias. Si notas que tu mascota está en riesgo —dificultad para respirar, sangrado, convulsiones, golpe fuerte, dolor intenso o decaimiento repentino— llévala a una clínica ahora mismo.',
+    /* 🔴 EL PÁRRAFO DE §3, PARTIDO PARA LA PIEZA — sin tocar una palabra.
+       La pieza de B pide advertencia · intro · los signos · cierre, porque los
+       dibuja como lista con viñetas.
+
+       **Lo que cambió y lo que NO, declarado para que se pueda auditar:**
+       · CERO palabras agregadas, quitadas o reordenadas.
+       · Los dos guiones largos que abrían y cerraban la enumeración pasan a
+         ser la ESTRUCTURA de la lista (eran el signo de puntuación que hacía
+         de lista en prosa corrida).
+       · Las iniciales siguen a la nueva oración: en prosa iban en minúscula
+         adentro del guión; como ítems arrancan en mayúscula.
+       · **La ÚNICA palabra que no sobrevive es la conjunción «o»** de «dolor
+         intenso o decaimiento repentino» — en una lista, la coordinación ES
+         la lista. *Se declara porque lo encontró un control de palabras, no
+         el ojo: cero contenido clínico perdido, cero palabra agregada.*
+       *§3 prohíbe resumir, acortar y volverlo letra chica. Una lista con
+       viñetas es lo contrario de las tres: son MÁS visibles, no menos.*
+
+       🔴 **SON SEIS** (firma de la mesa, 26-ago). El «cinco» del comentario de
+       la letra era un error de conteo de la prosa. **Ninguno sale: cada uno es
+       un motivo real por el que una mascota se muere esa tarde.** */
+    avisoTeleNoReemplaza: 'No reemplazan una atención presencial ni sirven para emergencias.',
+    avisoTeleSignosIntro: 'Si notas que tu mascota está en riesgo:',
+    avisoTeleSigno1: 'Dificultad para respirar',
+    avisoTeleSigno2: 'Sangrado',
+    avisoTeleSigno3: 'Convulsiones',
+    avisoTeleSigno4: 'Golpe fuerte',
+    avisoTeleSigno5: 'Dolor intenso',
+    avisoTeleSigno6: 'Decaimiento repentino',
+    avisoTeleSignosCierre: 'Llévala a una clínica ahora mismo.',
+    /* La casilla (Obra 6). **Desmarcada por defecto**, habilita SOLO
+       «Continuar»: las dos salidas quedan siempre disponibles. *Nadie tiene
+       que marcar una casilla para irse a urgencias.* */
+    avisoTeleConsentimiento:
+      'Entiendo que una videoconsulta no reemplaza una atención presencial.',
     /* ⚠️ PROVISIONAL por la enmienda ② de CP1: rige hasta que el abogado
        conteste la pregunta 4 de §10 (LOPDP), que puede exigir nombrar al
        proveedor, su país o la base de licitud. */
@@ -912,6 +945,33 @@ export const clienteEs = {
        falla porque el sistema no lo sabe** (`atribucion: 'no_se_investiga'`). */
     citaTeleNoRealizada: 'Esta videoconsulta no se pudo realizar.',
     citaTeleNoRealizadaDevolucion: 'El pago vuelve a tu medio de pago.',
+
+    /* ══ EL VEREDICTO DE ENTRADA · los OCHO motivos ══
+       🔴 **NO se colapsan en «no puedes entrar».** Cada uno dice QUÉ PASÓ y,
+       donde existe, qué hacer. La regla que los ordena: **el botón EXISTE solo
+       cuando el servidor dice que sí**; el resto pinta el MOTIVO, jamás un
+       botón apagado con un cartel al lado (Ley 23).
+       🔴 Dos motivos NO pintan NADA, y cada uno por su razón:
+        · `no_es_teleconsulta` — no es un error de nadie: es una cita presencial.
+        · `ajeno_a_la_cita` — **jamás «no tienes permiso»: eso confirmaría que
+          la cita existe.** Se comporta como si no hubiera nada.
+          *(Criterio registrado por la mesa, 26-ago.)* */
+    entrarBoton: 'Entrar a la videoconsulta',
+    /* EL caso que más va a pasar. Lleva la HORA, del `abre_en` del servidor:
+       decirle «no puedes entrar» a alguien que llegó veinte minutos antes lo
+       manda a llamar por teléfono. */
+    entrarFueraDeVentana: 'La sala abre a las {{hora}}.',
+    entrarNoPagada: 'Esta videoconsulta todavía no está pagada.',
+    entrarCancelada: 'Esta videoconsulta está cancelada.',
+    /* §5 — y NO nombra culpa: el sistema no la sabe. */
+    entrarNoRealizable:
+      'El profesional marcó que no se pudo realizar. El pago vuelve a tu medio de pago.',
+    entrarFinalizada: 'Esta videoconsulta ya terminó.',
+    entrarInexistente: 'No encontramos esta videoconsulta.',
+    /* Fallo de red al pedir el veredicto — NO es ninguno de los ocho, y por eso
+       tiene voz propia: confundirlo con «no puedes entrar» sería afirmar algo
+       que no sabemos. */
+    entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)
