@@ -760,6 +760,17 @@ export const clienteEn = {
     citaTeleError: 'We could not cancel it. Please try again.',
     citaTeleNoRealizada: 'This video consultation could not take place.',
     citaTeleNoRealizadaDevolucion: 'The payment goes back to your payment method.',
+
+    /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    entrarBoton: 'Join the video consultation',
+    entrarFueraDeVentana: 'The room opens at {{hora}}.',
+    entrarNoPagada: 'This video consultation is not paid yet.',
+    entrarCancelada: 'This video consultation is cancelled.',
+    entrarNoRealizable:
+      'The professional marked it as not completed. The payment goes back to your payment method.',
+    entrarFinalizada: 'This video consultation has ended.',
+    entrarInexistente: 'We could not find this video consultation.',
+    entrarNoSePudoConsultar: 'We could not check whether the room is open.',
   },
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)

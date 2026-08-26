@@ -8,7 +8,11 @@
     "scheme": "prestador",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Para las fotos de cada atención, los clips de adiestramiento y tus videoconsultas.",
+        "NSMicrophoneUsageDescription": "Para dictar la nota de la consulta, el audio de los clips de adiestramiento y tus videoconsultas."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -40,7 +44,7 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "La app usa el micrófono para dictar la nota de la consulta.",
+          "microphonePermission": "Para dictar la nota de la consulta, el audio de los clips de adiestramiento y tus videoconsultas.",
           "speechRecognitionPermission": "La app usa el reconocimiento de voz para convertir tu dictado en la nota de la consulta.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox"
@@ -58,7 +62,7 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "La app usa la cámara para registrar la evidencia de cada atención (fotos del servicio).",
+          "cameraPermission": "Para las fotos de cada atención, los clips de adiestramiento y tus videoconsultas.",
           "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen como evidencia de una atención."
         }
       ],
@@ -75,8 +79,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "La app usa la cámara para grabar clips cortos del progreso en las sesiones de adiestramiento.",
-          "microphonePermission": "La app usa el micrófono para que los clips de adiestramiento se escuchen (las órdenes son parte del progreso).",
+          "cameraPermission": "Para las fotos de cada atención, los clips de adiestramiento y tus videoconsultas.",
+          "microphonePermission": "Para dictar la nota de la consulta, el audio de los clips de adiestramiento y tus videoconsultas.",
           "recordAudioAndroid": true
         }
       ],

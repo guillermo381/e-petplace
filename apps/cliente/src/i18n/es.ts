@@ -912,6 +912,33 @@ export const clienteEs = {
        falla porque el sistema no lo sabe** (`atribucion: 'no_se_investiga'`). */
     citaTeleNoRealizada: 'Esta videoconsulta no se pudo realizar.',
     citaTeleNoRealizadaDevolucion: 'El pago vuelve a tu medio de pago.',
+
+    /* ══ EL VEREDICTO DE ENTRADA · los OCHO motivos ══
+       🔴 **NO se colapsan en «no puedes entrar».** Cada uno dice QUÉ PASÓ y,
+       donde existe, qué hacer. La regla que los ordena: **el botón EXISTE solo
+       cuando el servidor dice que sí**; el resto pinta el MOTIVO, jamás un
+       botón apagado con un cartel al lado (Ley 23).
+       🔴 Dos motivos NO pintan NADA, y cada uno por su razón:
+        · `no_es_teleconsulta` — no es un error de nadie: es una cita presencial.
+        · `ajeno_a_la_cita` — **jamás «no tienes permiso»: eso confirmaría que
+          la cita existe.** Se comporta como si no hubiera nada.
+          *(Criterio registrado por la mesa, 26-ago.)* */
+    entrarBoton: 'Entrar a la videoconsulta',
+    /* EL caso que más va a pasar. Lleva la HORA, del `abre_en` del servidor:
+       decirle «no puedes entrar» a alguien que llegó veinte minutos antes lo
+       manda a llamar por teléfono. */
+    entrarFueraDeVentana: 'La sala abre a las {{hora}}.',
+    entrarNoPagada: 'Esta videoconsulta todavía no está pagada.',
+    entrarCancelada: 'Esta videoconsulta está cancelada.',
+    /* §5 — y NO nombra culpa: el sistema no la sabe. */
+    entrarNoRealizable:
+      'El profesional marcó que no se pudo realizar. El pago vuelve a tu medio de pago.',
+    entrarFinalizada: 'Esta videoconsulta ya terminó.',
+    entrarInexistente: 'No encontramos esta videoconsulta.',
+    /* Fallo de red al pedir el veredicto — NO es ninguno de los ocho, y por eso
+       tiene voz propia: confundirlo con «no puedes entrar» sería afirmar algo
+       que no sabemos. */
+    entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)
