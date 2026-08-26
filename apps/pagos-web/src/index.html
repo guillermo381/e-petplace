@@ -643,6 +643,44 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
+     🔴 S105-C/D · LA TRAZA DURABLE — `desenlace:'incidente'`, que **NO CIERRA
+     EL HANDLE**.
+
+     Ayer esto no se pudo hacer y el freno era correcto: el único camino que
+     existía (`desenlace:'rechazada'`) **mataba el alta**, y con ella la única
+     acción que la voz le ofrece a la persona —probar con otra tarjeta—. D
+     construyó la puerta que faltaba (`D-925`) y su cinturón ejerce
+     exactamente ese caso: anota y DESPUÉS resuelve con el mismo handle.
+     ⇒ `cerro:false` es contrato, no cortesía.
+
+     TRES REGLAS DE ESTA FUNCIÓN, y las tres son sobre no estorbar:
+     ① **No se espera.** Es diagnóstico nuestro; la persona no puede quedar
+        mirando una pantalla porque nuestro log tarda.
+     ② **No cambia nada de lo que se ve.** Ni la voz, ni el botón, ni
+        `enVuelo`. *Un rastro que altera el camino que observa deja de
+        observarlo.*
+     ③ **No puede fallar hacia afuera.** Todo va en `try` + `.catch` mudo: si
+        la red se cayó, la persona ya tiene su mensaje y su salida.
+
+     La `forma` va enmascarada desde acá **y la base vuelve a enmascarar** —
+     decisión de D, y es la correcta: *un enmascarado que depende de que el
+     llamador lo haya hecho bien no es un enmascarado, es una promesa.*      */
+  function anotarIncidente(motivo, resp) {
+    try {
+      fetch(CONFIG.API_ALTA, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          alta: alta,
+          desenlace: 'incidente',
+          motivo: motivo,
+          forma: forma(resp)
+        })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
      🔴 S101-D · UN SOLO BOTÓN PARA LOS DOS MOMENTOS DE LA PANTALLA
      Orden del founder (21-ago), sus dos mitades:
        ① *«al entrar, el botón guardar se vea más claro — mismo efecto que
@@ -894,12 +932,15 @@
              *Un rastro que rompe la salida que la voz promete es peor que la
              falta de rastro.*
 
-             ⇒ La traza durable exige un camino que ANOTE SIN CERRAR. Es de D
-             (la edge y la RPC son suyas), y es **`D-925`**.
+             ⇒ ✅ **`D-925` HECHA (D, 26-ago)**: nació `desenlace:'incidente'`,
+             que anota y **deja el handle vivo** (`cerro:false` por contrato).
+             *El freno duró un día y se levantó con la pieza puesta, que es
+             como tiene que levantarse un freno.*
 
              *(Y el número se midió: acá decía `D-923`, que ya es «el actuador
              no maneja REVERSED». L-141 cobrando sobre quien la cita.)*        */
           try { console.warn('[alta] OK del proveedor SIN token · resp=' + forma(resp)); } catch (e) {}
+          anotarIncidente('sdk_ok_sin_token', resp);
           decir(T.probaOtra, 'error');
           return;
         }

@@ -56,6 +56,7 @@ import {
   renombrarFamilia,
   urlInvitacion,
   type MiFamilia,
+  type YaInvitada,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -106,7 +107,13 @@ export default function FamiliaCuenta() {
   /* 🔴 S105-C · EL CASO «YA INVITADA» — un rebote con SALIDA, no una frase.
      `null` = no es ese caso. Trae el id porque **sin él la voz sabría el
      problema y no podría hacer nada con él**. */
-  const [yaInvitada, setYaInvitada] = useState<{ fecha: string; invitacionId: string } | null>(null);
+  /* 🔴 El tipo sale del wrapper y NO se re-declara a mano: cuando `YaInvitada`
+     creció con el token, una copia local habría seguido compilando sin él —
+     que es exactamente cómo un dato nuevo se pierde en silencio. */
+  const [yaInvitada, setYaInvitada] = useState<YaInvitada | null>(null);
+  /* El enlace de la invitación ANTERIOR, derivado. `urlInvitacion` devuelve
+     `null` con el freno de A encendido, y ese `null` decide si el botón existe. */
+  const enlaceAnterior = yaInvitada === null ? null : urlInvitacion(yaInvitada.token);
   const [cancelandoInv, setCancelandoInv] = useState(false);
 
   useEffect(() => {
@@ -186,18 +193,22 @@ export default function FamiliaCuenta() {
          semanas. *Una voz que pide reintentar sobre un guard que no cede es la
          misma familia que «ya lo estamos viendo»: promete una salida que no
          existe.* Acá la salida SÍ existe y se ofrece. */
-      /* ⏸️ ACÁ VA LA RAMA, Y ESTÁ FRENADA POR UN TIPO — no por falta de dato.
-         `mapear()` devuelve `& { yaInvitada?: YaInvitada }` y el valor VIAJA en
-         runtime, **pero la firma pública de `invitarAFamilia` no lo declara**:
-         `Promise<ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia>>`.
-         *El ensanche se pierde en el borde público.*
+      /* ✅ DESCONGELADA (S105-A ensanchó el tipo, y de paso trajo el TOKEN).
+         Acá estuvo el freno: el dato viajaba en runtime y la firma pública no
+         lo declaraba. **No se casteó** — se pidió la línea y llegó, con las
+         dos salidas que el founder dictó: *«compartile el enlace o cancelá esa
+         invitación»*.
 
-         🔴 **Alcanzarlo pide un cast, y no se hace.** Un `as` sobre nuestro
-         PROPIO wrapper es peor que sobre un borde ajeno: acá el tipo se puede
-         arreglar, y castear sería tapar la única señal de que está mal.
-         ⇒ **Pedido a A: ensanchar el retorno de `invitarAFamilia`.** Es una
-         línea, y el día que esté, esta rama son seis. Todo lo demás —las
-         voces, el estado, el botón, `cancelarAnterior`— ya está y compila. */
+         ⚠️ Se exige `r.yaInvitada` PRESENTE, no `codigo === 'ya_invitada'` a
+         secas: el código puede llegar sin sus datos si el `RAISE` cambia de
+         formato, y ahí **la pantalla ofrecería dos acciones que no puede
+         cumplir**. Sin datos cae a la voz de siempre, que es honesta. */
+      if (r.codigo === 'ya_invitada' && r.yaInvitada) {
+        setYaInvitada(r.yaInvitada);
+        setReboteInv(null);   /* la tarjeta de acciones REEMPLAZA al rebote: dos voces sobre lo mismo compiten */
+        setInv({ fase: 'formulario' });
+        return;
+      }
       // el resto: la voz la trae el wrapper (VOZ tipada por código).
       setReboteInv(r.mensaje);
       setYaInvitada(null);
@@ -381,18 +392,29 @@ export default function FamiliaCuenta() {
                     único que destraba — con el costo ADELANTE: *cancelar
                     invalida el enlace que la persona quizá ya compartió, y eso
                     se sabe antes de tocar, no después.*
-                    ⚠️ **No se ofrece «compartir el enlace anterior», y no es
-                    olvido:** `yaInvitada` trae `fecha` e `invitacionId` pero
-                    **no el token**, y `urlInvitacion` lo necesita. *Un botón
-                    que no puede armar el enlace es una puerta sin destino.*
-                    Pedido a A; mientras tanto cancelar + volver a invitar es un
-                    camino completo, porque la nueva invitación sí trae token. */}
+                    ✅ **YA SON LAS DOS SALIDAS** (S105-A trajo el token): la
+                    de bajo costo PRIMERO —compartir el enlace que ya existe—
+                    y cancelar debajo, que es la destructiva.
+                    *El orden es la recomendación: quien vino a invitar quiere
+                    que la persona entre, no borrar una invitación.*
+
+                    ⚠️ `urlInvitacion` puede devolver `null` (la fila está
+                    gateada por `ENLACE_INVITACION_HABILITADO`) ⇒ **el botón se
+                    monta sólo si el enlace se pudo armar**. Un botón que no
+                    puede armar su destino es una puerta sin destino, y con el
+                    freno encendido cancelar sigue siendo camino completo. */}
                 {yaInvitada !== null && (
                   <View style={{ gap: spacing[2] }}>
                     <Texto variante="apoyo" color="danger">
                       {t('cuenta.familiaYaInvitada', { fecha: yaInvitada.fecha })}
                     </Texto>
                     <Texto variante="apoyo">{t('cuenta.familiaYaInvitadaAviso')}</Texto>
+                    {enlaceAnterior !== null && (
+                      <Boton
+                        etiqueta={t('cuenta.familiaYaInvitadaCompartir')}
+                        onPress={() => void compartirEnlace(enlaceAnterior)}
+                      />
+                    )}
                     <Boton
                       variante="secundario"
                       etiqueta={t('cuenta.familiaYaInvitadaCancelar')}
