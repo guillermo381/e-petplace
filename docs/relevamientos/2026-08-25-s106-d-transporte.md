@@ -135,7 +135,7 @@ Unidad de comparación que armé para que la mesa lea algo útil:
 
 | Proveedor | free tier / mes | ≈ consultas gratis | precio post-free | base mensual | objeto |
 |---|---|---|---|---|---|
-| **LiveKit Cloud** | **5.000** WebRTC min + 50 GB ⚠️ | **≈ 125** | $0,0005/min → **$0,02/consulta** ⚠️ | $0 (Build) · **desde $50 (Ship)** | livekit.com/pricing + panel ⚠️ |
+| **LiveKit Cloud** | 5.000 min **y 50 GB** | 🔴 **≈ 50–110** *(corta el GB)* | $0,0005/min **+ $0,12/GB** → **≈$0,11/consulta** | $0 (Build) · **desde $50 (Ship)** | **panel real** ✅ |
 | **Daily** | **10.000** part-min | **≈ 250** | $0,0040/min → **$0,16/consulta** | **$0** | daily.co/pricing/video-sdk |
 | **Agora** | **10.000** RTC min | **≈ 250** | $0,00059/min → **$0,024/consulta** | **$0** | agora.io/en/pricing |
 | **100ms** | **10.000** min | **≈ 250** | $0,004/min → **$0,16/consulta** | $0 | 100ms.live/pricing |
@@ -145,36 +145,90 @@ Unidad de comparación que armé para que la mesa lea algo útil:
 | **LiveKit self-host** | infra propia | — | costo de servidor | — | Apache-2.0 |
 | **Jitsi self-host** | infra propia | — | costo de servidor | — | Apache-2.0 |
 
-### ⚠️ LA CELDA DE LIVEKIT, CERRADA — *(medición del founder en el panel real, 26-ago-2026)*
+### ✅ LA CELDA DE LIVEKIT, CERRADA DEL OBJETO — *(medición del founder en el panel, 26-ago-2026)*
 
-**Se midió con la cuenta creada, y el resultado es PARCIAL. Se cierra así, no
-mejor de lo que es:**
+**Los números públicos resultaron EXACTOS**, y ahora están verificados contra
+la cuenta real:
 
-| dato | estado | fuente |
+| | Build | Ship | Scale |
+|---|---|---|---|
+| **WebRTC minutes** | **5.000** | **150.000**, luego **$0,0005/min** | 1,5 M, luego $0,0004/min |
+| **Downstream data transfer** | **50 GB** | **250 GB**, luego **$0,12/GB** | — |
+| concurrencia | **100** | — | — |
+| uptime | 99,99 % | 99,99 % | 99,99 % |
+| base | $0 | **«STARTING AT $50/mo»** | — |
+
+⚠️ **«STARTING AT» sigue siendo PISO, no precio cerrado.** *Un número con
+«desde» adelante dice que no va a costar menos, y no dice cuánto va a costar.*
+
+⚠️ *(Todo lo demás del panel es del producto de agentes de voz —inference,
+telephony, TTS— y no nos toca.)*
+
+---
+
+### 🔴 EL SEGUNDO EJE DE COSTO — y da vuelta mi propia cuenta
+
+**Mi tabla comparó UN eje, y LiveKit cobra DOS.** El ancho de banda no estaba
+en ninguna de mis columnas.
+
+**Cuánto pesa una teleconsulta, anclado en la letra y no en una estimación
+suelta:** `LETRA_TELEMEDICINA` §6 fija **1,5 Mbps de subida sostenida**. Dos
+participantes, 20 min, cada uno recibiendo al otro:
+
+```
+2 × 1,5 Mbps × 1200 s = 3.600 Mbit ≈ 450 MB ≈ 0,45 GB
+```
+Con overhead y algo más de bitrate: **0,45 – 1 GB por consulta.**
+
+| tope | aguanta | ¿quién corta primero? |
 |---|---|---|
-| plan actual = **Build**, $0, sin tarjeta | ✅ **verificado en el panel** | objeto |
-| Ship = **«STARTING AT $50/mo»** | ✅ **verificado en el panel** | objeto |
-| **5.000 min incluidos** (Build) | 🔴 **PÚBLICO, no verificado en panel** | `livekit.com/pricing` |
-| **$0,0005/min de excedente** | 🔴 **PÚBLICO, no verificado en panel** | `livekit.com/pricing` |
+| **5.000 min** (÷ 40 part-min) | **≈ 125 consultas** | |
+| **50 GB** (÷ 0,45–1 GB) | **≈ 50 – 110 consultas** | 🔴 **el ancho de banda** |
 
-🔴 **Por qué no se pudo cerrar mejor, y es un hallazgo, no una excusa:** el
-comparador del panel **no muestra minutos incluidos ni precio de excedente en
-ningún plan** — compara *features*, y su vocabulario está volcado a **agentes
-de voz** (inference credits, custom voices, telephony). **Los dos números que
-deciden cuándo esto deja de ser gratis no están en el panel.**
+> ### **El techo real del plan gratis lo marca el ancho de banda, no los minutos** — y en casi todo el rango corta antes.
+> ⇒ **Mi «≈125 consultas gratis» era optimista. El número honesto es 50–110.**
 
-🔴 **Y «STARTING AT» no es «$50».** Es un **piso**, no un precio cerrado. *Un
-número con «desde» adelante no se puede meter en un presupuesto: dice que no
-va a costar menos, y no dice cuánto va a costar.* Cualquier cuenta que use
-esa cifra tiene que decir que es piso.
+**Y el costo por consulta también cambia**, sumando los dos ejes:
 
-**⏰ DISPARO DE RE-MEDICIÓN, con número y no con adjetivo:** el panel **sí
-muestra uso**. *(Firma del founder: «cuando el consumo real se acerque a los
-5.000 min/mes».)* ⇒ **se mira el panel al llegar a ~3.000 min/mes (60 % del
-tope público)**, no a 5.000.
-*Preguntar el precio del excedente el día que se cruza el límite es
-preguntarlo tarde: para entonces ya se está pagando. El margen de 2.000
-minutos es el tiempo de decidir sin apuro.*
+```
+minutos : 40 × $0,0005  = $0,02
+GB      : ~0,75 × $0,12 = $0,09
+                          ─────
+                          ≈ $0,11 por consulta
+```
+
+🔴 **LiveKit pasa de $0,02 a ≈$0,11.** Sigue por debajo de Daily / 100ms /
+Twilio ($0,16), **pero la ventaja se achica de ~8× a ~1,5×** — y **Agora
+($0,024) queda claramente más barato**.
+
+⚠️ **Con una salvedad honesta, para no arreglar el error en la otra
+dirección:** *no verifiqué si Daily, Agora o 100ms facturan el ancho de banda
+aparte.* Su precio se publica como participante-minuto **y aparenta incluirlo**,
+pero **no lo medí** ⇒ **NO MEDIDO**. *Comparar mi LiveKit-con-GB contra un
+Agora-sin-verificar volvería a ser la misma clase de error, al revés.*
+
+**Lo que sí queda firme:** la ventaja de costo de LiveKit era **menor de lo
+que dije**, y el costo **nunca fue** la razón por la que lo recomendé (§3).
+
+### 🔧 La palanca — con su costo escondido, que es de letra y no técnico
+
+**La resolución configurada baja GB mucho más rápido que minutos**: los
+minutos son lineales en el tiempo, los GB lo son en el **bitrate**. Bajar de
+1,5 a 0,8 Mbps casi **duplica** las consultas que entran en los 50 GB, sin
+tocar una línea de la duración.
+
+🔴 **Pero no es un parámetro libre:** `LETRA_TELEMEDICINA` §6 **declara los
+1,5 Mbps como requisito mínimo que el profesional acepta al habilitar el
+servicio**. *Bajar el bitrate para ahorrar ancho de banda toca una firma de
+la letra, no una constante del código* — y del otro lado está lo que §6
+protege: *«un animal mal iluminado no se puede evaluar»*, y uno mal
+comprimido tampoco.
+
+⇒ **Parámetro de la tanda 2, con la letra en la mano. No se toca ahora.**
+
+**⏰ DISPARO DE RE-MEDICIÓN, corregido por este hallazgo:** el panel muestra
+uso ⇒ **se mira a ~30 GB/mes (60 % de 50 GB)**, **no** a 3.000 minutos.
+*Vigilar el eje que no corta primero es no vigilar nada.*
 
 ---
 
@@ -297,10 +351,27 @@ en npm hace 691 días** y con **237 issues abiertas**.
    pie — cambiamos de cloud a self-host con el mismo código.*
 5. Cliente y servidor de la **misma casa**, los dos vivos.
 
-**Su peor número, dicho sin maquillar:** **el free tier más chico del set**
-(5.000 min = ~125 consultas/mes, la mitad de Daily/Agora/100ms), y salta a
-**$50/mes fijo** cuando se pasa, mientras los otros son pay-as-you-go sin
-base.
+**Su peor número, dicho sin maquillar — y es PEOR de lo que dije al
+principio:** el free tier más chico del set, y **el techo real no son los
+5.000 minutos sino los 50 GB de ancho de banda**, que cortan primero:
+**≈50–110 consultas/mes**, no 125 (§1⑤). Salta a **«desde» $50/mes** cuando
+se pasa, mientras Daily/Agora/100ms son pay-as-you-go sin base. Y con los dos
+ejes sumados el costo por consulta es **≈$0,11, no $0,02** — sigue por debajo
+de Daily/100ms/Twilio, pero **la ventaja se achica de ~8× a ~1,5×** y **Agora
+queda claramente más barato**.
+
+✅ **Lo que esto NO cambia, y conviene que quede dicho:** el costo **nunca fue
+una de las cinco razones** de esta recomendación — está listado como *su peor
+número* desde la primera versión. Las cinco razones (SDK posterior a nuestra
+vara · Deno limpio · newArch · **Apache-2.0 self-hosteable** · una sola casa)
+**no las toca este hallazgo**. *Corrijo el número porque estaba mal, no
+porque mueva la conclusión — y si la mesa prioriza costo, Agora ya estaba
+declarado como el segundo lugar honesto.*
+
+🔧 **Y hay una mitigación que el propio ④ ya traía:** en **self-host el eje
+de GB de LiveKit Cloud desaparece** — se paga el ancho de banda del servidor
+propio, que se factura muy distinto. *La salida sin lock-in también es una
+salida de costo.*
 
 ⚠️ **Y el riesgo que la recomendación NO cierra:** el **config plugin de Expo
 de LiveKit no se toca desde el 17-mar-2026 — tres meses antes de que SDK 57
