@@ -35,22 +35,22 @@ const MENSAJES_ERROR_ONBOARDING: Record<
   CodigoErrorOnboarding | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  no_autenticado:              'Necesitás iniciar sesión para continuar.',
-  nombre_familia_requerido:    'Contanos cómo se llama tu familia.',
-  nombre_mascota_requerido:    'Contanos cómo se llama tu mascota.',
-  familia_ya_existe:           'Ya tenés una familia creada.',
+  no_autenticado:              'Necesitas iniciar sesión para continuar.',
+  nombre_familia_requerido:    'Cuéntanos cómo se llama tu familia.',
+  nombre_mascota_requerido:    'Cuéntanos cómo se llama tu mascota.',
+  familia_ya_existe:           'Ya tienes una familia creada.',
   sin_familia_activa:          'Tu familia todavía no existe — el primer paso es el onboarding.',
   especie_invalida_o_inactiva: 'Esa especie no está disponible por ahora.',
   sexo_invalido:               'El sexo elegido no es válido.',
   precision_fecha_invalida:    'La precisión de la fecha no es válida.',
-  precision_sin_fecha:         'Elegí una fecha para poder guardar su precisión.',
-  raza_no_aplica_acuario:      'Un acuario no tiene raza — contanos su tipo de agua.',
+  precision_sin_fecha:         'Elige una fecha para poder guardar su precisión.',
+  raza_no_aplica_acuario:      'Un acuario no tiene raza — cuéntanos su tipo de agua.',
   tipo_agua_invalida:          'El tipo de agua tiene que ser dulce o marino.',
   tipo_agua_solo_pez:          'El tipo de agua es solo para acuarios.',
   origen_invalido:             'Ese origen no es válido.',
   fecha_montaje_solo_acuario:  'La fecha de montaje es solo para acuarios.',
   datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:           'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:           'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorOnboarding | 'error_desconocido' {

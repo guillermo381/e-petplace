@@ -39,7 +39,7 @@ import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES_PIZARRA = {
   sin_sesion: 'No hay sesión activa.',
-  sin_acceso: 'No tenés acceso a este negocio.',
+  sin_acceso: 'No tienes acceso a este negocio.',
   error_desconocido: 'No pudimos leer la pizarra.',
 } as const;
 
@@ -111,7 +111,7 @@ const MENSAJES_TOMAR = {
   no_es_tu_especialidad: 'Esa cita es de un servicio que no atendés.',
   /** ⚠️ EL CÓDIGO QUE NO SE PUEDE PERDER (ver ① de la cabecera). */
   ya_tomada: 'Alguien del equipo la tomó primero.',
-  error_desconocido: 'No pudimos tomar la cita. Probá de nuevo.',
+  error_desconocido: 'No pudimos tomar la cita. Prueba de nuevo.',
 } as const;
 
 export type CodigoErrorTomarCita = keyof typeof MENSAJES_TOMAR;
@@ -160,17 +160,17 @@ export async function tomarCita(
 
 const MENSAJES_CREAR = {
   sin_sesion: 'No hay sesión activa.',
-  sin_acceso: 'No tenés acceso a este negocio.',
+  sin_acceso: 'No tienes acceso a este negocio.',
   fecha_en_el_pasado: 'Esa fecha ya pasó.',
   prestador_sin_cuenta: 'Tu negocio todavía no está habilitado para agendar.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   mascota_no_existe: 'Esa mascota ya no está.',
   servicio_no_activo: 'Ese servicio no está activo en tu negocio.',
   prestador_bloqueado: 'Ese día está bloqueado en tu agenda.',
   slot_ocupado: 'Esa hora ya no está disponible.',
   /** ⚠️ Distinto de `slot_ocupado` POR DISEÑO DEL MOTOR — ver cabecera. */
   sin_quien_la_tome: 'La hora está libre, pero no queda nadie que pueda tomarla.',
-  error_desconocido: 'No pudimos agendar la cita. Probá de nuevo.',
+  error_desconocido: 'No pudimos agendar la cita. Prueba de nuevo.',
 } as const;
 
 export type CodigoErrorCrearCitaNegocio = keyof typeof MENSAJES_CREAR;

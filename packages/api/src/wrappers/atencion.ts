@@ -33,20 +33,20 @@ const MENSAJES_ERROR_ATENCION: Record<
   CodigoErrorAtencion | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:            'No tenés acceso a esta atención.',
+  acceso_denegado:            'No tienes acceso a esta atención.',
   atencion_no_existe:         'La atención no existe.',
   atencion_no_en_curso:       'La atención no está en curso.',
   atencion_estado_invalido:   'El estado de la atención no permite esta acción.',
   via_invalida:               'La vía de captura no es válida.',
   categoria_invalida:         'La categoría no es válida.',
-  texto_required:             'Escribí el texto de la nota.',
+  texto_required:             'Escribe el texto de la nota.',
   incidencia_codigo_invalido: 'La incidencia elegida no existe en el catálogo.',
   incidencia_codigo_inactivo: 'La incidencia elegida ya no está disponible.',
   severidad_invalida:         'La severidad no es válida.',
   categoria_archivo_invalida: 'La categoría del archivo no es válida.',
   categoria_archivo_inactiva: 'La categoría del archivo ya no está disponible.',
   datos_inconsistentes:       'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:          'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:          'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function esCodigoErrorAtencion(v: string): v is CodigoErrorAtencion {

@@ -78,12 +78,12 @@ const MENSAJES: Record<CodigoErrorLugares, string> = {
   sin_sesion: 'No hay sesión activa.',
   // La voz honesta del preparado-apagado: la búsqueda de direcciones
   // todavía no está habilitada en este entorno.
-  sin_configuracion: 'La búsqueda de direcciones no está disponible por ahora. Podés escribirla a mano.',
-  entrada_invalida: 'Revisá lo que escribiste e intentá de nuevo.',
-  lugar_invalido: 'No pudimos ubicar esa dirección en el mapa. Elegí otra o escribila a mano.',
-  google_rechazo: 'El buscador de direcciones rechazó la consulta. Probá de nuevo en un momento.',
-  red: 'Revisá tu conexión e intentá de nuevo.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  sin_configuracion: 'La búsqueda de direcciones no está disponible por ahora. Puedes escribirla a mano.',
+  entrada_invalida: 'Revisa lo que escribiste e intenta de nuevo.',
+  lugar_invalido: 'No pudimos ubicar esa dirección en el mapa. Elige otra o escríbela a mano.',
+  google_rechazo: 'El buscador de direcciones rechazó la consulta. Prueba de nuevo en un momento.',
+  red: 'Revisa tu conexión e intenta de nuevo.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 // ── Sesión de búsqueda (token de facturación por sesión de Google) ───────

@@ -41,7 +41,7 @@ const CODIGOS = [
 export type CodigoInvitacionFamilia = (typeof CODIGOS)[number];
 
 const VOZ: Record<CodigoInvitacionFamilia, string> = {
-  auth_required:          'Necesitás iniciar sesión.',
+  auth_required:          'Necesitas iniciar sesión.',
   solo_titular_invita:    'Solo quien creó la familia puede invitar.',
   solo_titular_revoca:    'Solo quien creó la familia puede cancelar una invitación.',
   email_invalido:         'Ese correo no parece válido.',
@@ -58,7 +58,7 @@ const VOZ: Record<CodigoInvitacionFamilia, string> = {
   /* La voz dice el hecho SIN regalar información: no confirma a qué correo fue
      dirigida (MODELO_LOGIN §1.3 — los errores no enumeran cuentas). */
   email_no_coincide:      'Esta invitación es para otra dirección de correo.',
-  error_desconocido:      'No pudimos completar la invitación. Probá de nuevo.',
+  error_desconocido:      'No pudimos completar la invitación. Prueba de nuevo.',
 };
 
 /**
@@ -185,7 +185,7 @@ export async function revocarInvitacionFamilia(
 export async function darDeBajaCorreo(token: string): Promise<ResultadoWrapper<null, 'error_desconocido'>> {
   const { error } = await getClient().rpc('dar_de_baja_correo', { p_token: token });
   if (error) {
-    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos completar la baja. Probá de nuevo.' };
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos completar la baja. Prueba de nuevo.' };
   }
   return { ok: true, data: null };
 }

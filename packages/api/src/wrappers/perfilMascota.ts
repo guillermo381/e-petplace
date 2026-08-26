@@ -7,7 +7,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos cargar el perfil. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos cargar el perfil. Prueba de nuevo.';
 
 export interface VacunaDeMascota {
   evento_id: string | null;
@@ -369,7 +369,7 @@ export async function actualizarRazaMascota(
       mensaje:
         codigo === 'raza_no_aplica_acuario'
           ? 'Un acuario no tiene raza.'
-          : 'No pudimos guardar la raza. Probá de nuevo.',
+          : 'No pudimos guardar la raza. Prueba de nuevo.',
     };
   }
   const o = data as Record<string, unknown> | null;
@@ -511,7 +511,7 @@ export async function declararCensoDelAcuario(
             ? 'Esa especie no está en el catálogo.'
             : codigo === 'cantidad_invalida'
               ? 'La cantidad no puede ser negativa.'
-              : 'No pudimos guardar el censo. Probá de nuevo.',
+              : 'No pudimos guardar el censo. Prueba de nuevo.',
     };
   }
   const o = (data ?? {}) as Record<string, unknown>;

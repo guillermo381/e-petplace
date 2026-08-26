@@ -58,13 +58,13 @@ const MENSAJES: Record<
   CodigoErrorAdiestramientoReserva | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:          'No tenés acceso para hacer esto.',
+  acceso_denegado:          'No tienes acceso para hacer esto.',
   mascota_no_elegible:      'El adiestramiento todavía no está disponible para esta mascota.',
   servicio_no_disponible:   'Esta oferta ya no está disponible.',
   programa_no_disponible:   'Este programa ya no está disponible.',
   programa_duplicado:       'Tu mascota ya tiene este programa en curso.',
   slot_invalido:            'El horario elegido no es válido.',
-  slot_en_pasado:           'Esa fecha ya pasó — elegí una desde mañana.',
+  slot_en_pasado:           'Esa fecha ya pasó — elige una desde mañana.',
   fuera_de_horario:         'El adiestrador no atiende en ese horario.',
   fecha_sin_cupo:           'Una de las fechas del programa ya no tiene lugar.',
   prestador_no_disponible:  'El adiestrador no está disponible en esas fechas.',
@@ -74,7 +74,7 @@ const MENSAJES: Record<
   parte_no_existe:          'Todavía no hay un parte para esta sesión.',
   parte_no_disponible:      'El parte estará listo cuando el adiestrador cierre la sesión.',
   datos_inconsistentes:     'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:        'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:        'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(

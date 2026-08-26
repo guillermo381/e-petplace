@@ -48,7 +48,7 @@ const MENSAJES: Record<
   CodigoErrorGroomingReserva | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:      'No tenés acceso para hacer esto.',
+  acceso_denegado:      'No tienes acceso para hacer esto.',
   talla_no_declarada:   'Falta declarar la talla de tu mascota.',
   mascota_no_elegible:  'El grooming todavía no está disponible para esta mascota.',
   servicio_invalido:    'Este servicio ya no está disponible.',
@@ -57,7 +57,7 @@ const MENSAJES: Record<
   pelaje_invalido:      'El pelaje elegido no es válido.',
   mascota_sin_familia:  'Esta mascota todavía no tiene una familia armada.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorGroomingReserva | 'error_desconocido' {

@@ -48,20 +48,20 @@ const MENSAJES_ERROR_PLAN: Record<
   CodigoErrorPlan | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:      'No tenés acceso para hacer esto.',
-  dias_invalidos:       'Elegí al menos un día de la semana.',
-  frecuencia_invalida:  'Elegí una frecuencia para el plan.',
+  acceso_denegado:      'No tienes acceso para hacer esto.',
+  dias_invalidos:       'Elige al menos un día de la semana.',
+  frecuencia_invalida:  'Elige una frecuencia para el plan.',
   slot_invalido:        'El horario elegido no es válido.',
-  slot_en_pasado:       'Ese horario ya pasó — elegí otro.',
+  slot_en_pasado:       'Ese horario ya pasó — elige otro.',
   prestador_inactivo:   'Este paseador no está disponible.',
   servicio_no_disponible: 'Este servicio ya no está disponible.',
-  plan_duplicado:       'Ya tenés un plan activo con este paseador para esta mascota.',
-  plan_sin_citas:       'Con esos días no queda ninguna salida en el mes — revisá la selección.',
-  fecha_sin_cupo:       'Una de las fechas del plan ya está ocupada — probá otro horario o menos días.',
+  plan_duplicado:       'Ya tienes un plan activo con este paseador para esta mascota.',
+  plan_sin_citas:       'Con esos días no queda ninguna salida en el mes — revisa la selección.',
+  fecha_sin_cupo:       'Una de las fechas del plan ya está ocupada — prueba otro horario o menos días.',
   fuera_de_horario:     'El paseador no atiende en ese horario.',
-  slot_ocupado:         'Ese horario acaba de ocuparse — elegí otro.',
+  slot_ocupado:         'Ese horario acaba de ocuparse — elige otro.',
   pago_no_disponible:   'Este paseador todavía no puede recibir pagos por la app.',
-  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
+  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elige otro horario.',
   plan_no_encontrado:   'El plan no existe o ya no es accesible.',
   plan_no_activo:       'Este plan ya no está activo.',
   cita_no_encontrada:   'La salida no existe o ya no es accesible.',
@@ -71,7 +71,7 @@ const MENSAJES_ERROR_PLAN: Record<
   fuera_del_periodo:    'La nueva fecha tiene que caer dentro del período de tu plan.',
   sin_sesion:           'No hay sesión activa.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorPlan | 'error_desconocido' {

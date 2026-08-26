@@ -966,6 +966,19 @@ export type CodigoAceptar =
 const REBOTES_ACEPTAR: ReadonlyArray<{ literal: string; codigo: CodigoAceptar }> = [
   { literal: 'Sin sesión', codigo: 'sin_sesion' },
   { literal: 'Empleado no encontrado o ya activado', codigo: 'ya_activado' },
+  /* 🔴 ESTE VOSEO **NO SE CURA**: no es voz de la app, es LA FRASE DEL MOTOR
+     contra la que se matchea. `aceptar_invitacion_pendiente_login` levanta
+     literalmente *«No tenés permiso para aceptar esta invitación»* — medido en
+     su cuerpo el 25-ago.
+
+     **El barrido de voseo de S105-A lo cambió a «tienes» y ROMPIÓ el mapeo**:
+     el código caía a genérico y ningún typecheck lo veía, *porque un string
+     que deja de coincidir compila perfecto*. Revertido acá, y curado de raíz
+     en la migración del mismo día que hace hablar al motor en tuteo — cuando
+     ésa aplique, este literal se actualiza **en el mismo acto**, jamás antes.
+
+     *Un matcher y su fuente son un solo par: mover uno solo es cómo se rompen
+     los dos.* */
   { literal: 'No tenés permiso para aceptar esta invitación', codigo: 'no_es_tuya' },
 ];
 

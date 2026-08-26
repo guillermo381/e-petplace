@@ -10,7 +10,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos cargar las mascotas. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos cargar las mascotas. Prueba de nuevo.';
 
 export interface MascotaAtendida {
   mascota_id: string;

@@ -49,7 +49,7 @@ export async function buscarMascotasAccesibles(
     .ilike('nombre', patron)
     .order('nombre', { ascending: true })
     .limit(20);
-  if (error) return { ok: false, codigo: 'error_busqueda', mensaje: 'No pudimos buscar. Probá de nuevo.' };
+  if (error) return { ok: false, codigo: 'error_busqueda', mensaje: 'No pudimos buscar. Prueba de nuevo.' };
   return {
     ok: true,
     data: (data ?? []).map((m) => ({
@@ -80,11 +80,11 @@ const CODIGOS_BUSQUEDA_CLIENTE = ['email_invalido', 'telefono_invalido', 'acceso
 export type CodigoBusquedaCliente = (typeof CODIGOS_BUSQUEDA_CLIENTE)[number];
 
 const MENSAJES_BUSQUEDA: Record<CodigoBusquedaCliente | 'error_desconocido', string> = {
-  email_invalido: 'Escribí un email válido para buscar.',
-  telefono_invalido: 'Escribí un teléfono válido para buscar.',
-  acceso_denegado: 'No tenés permiso para buscar clientes.',
+  email_invalido: 'Escribe un email válido para buscar.',
+  telefono_invalido: 'Escribe un teléfono válido para buscar.',
+  acceso_denegado: 'No tienes permiso para buscar clientes.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function falloBusquedaCliente(raw: string): ResultadoWrapper<ResultadoBusquedaCliente, CodigoBusquedaCliente> {
@@ -210,16 +210,16 @@ const CODIGOS_ALTA = [
 export type CodigoAltaMostrador = (typeof CODIGOS_ALTA)[number];
 
 const MENSAJES_ALTA: Record<CodigoAltaMostrador | 'error_desconocido', string> = {
-  acceso_denegado: 'No tenés permiso para registrar en este negocio.',
-  contacto_requerido: 'Poné un email o un teléfono del cliente.',
-  nombre_cliente_requerido: 'Poné el nombre del cliente.',
-  nombre_mascota_requerido: 'Poné el nombre de la mascota.',
-  especie_invalida: 'Elegí una especie válida.',
+  acceso_denegado: 'No tienes permiso para registrar en este negocio.',
+  contacto_requerido: 'Pon un email o un teléfono del cliente.',
+  nombre_cliente_requerido: 'Pon el nombre del cliente.',
+  nombre_mascota_requerido: 'Pon el nombre de la mascota.',
+  especie_invalida: 'Elige una especie válida.',
   country_invalido: 'El país no es válido.',
   cliente_ya_registrado: 'Ese cliente ya está en e-PetPlace — buscalo por su contacto para sumarle la mascota.',
   pendiente_ya_existe: 'Ya hay un registro pendiente con ese contacto.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'No pudimos registrar. Probá de nuevo.',
+  error_desconocido: 'No pudimos registrar. Prueba de nuevo.',
 };
 
 function falloAlta(raw: string): ResultadoWrapper<AltaAsistidaMostradorResultado, CodigoAltaMostrador> {
@@ -306,11 +306,11 @@ const CODIGOS_ATENCION_MOSTRADOR = [
 export type CodigoAtencionMostrador = (typeof CODIGOS_ATENCION_MOSTRADOR)[number];
 
 const MENSAJES_ATENCION: Record<CodigoAtencionMostrador | 'error_desconocido', string> = {
-  acceso_denegado: 'No tenés acceso a este negocio o esta mascota.',
+  acceso_denegado: 'No tienes acceso a este negocio o esta mascota.',
   // prestador_sin_cuenta: el negocio no tiene cuenta comercial (hoy imposible
   // por el NOT NULL de la columna; voz honesta por si la letra cambia — Ley 13).
   prestador_sin_cuenta: 'Tu negocio todavía no está habilitado para registrar atenciones.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   tipo_no_medico: 'Ese servicio no es de veterinaria.',
   servicio_no_activo: 'Ese servicio no está activo en tu consultorio.',
   precio_invalido: 'El precio no es válido.',
@@ -320,11 +320,11 @@ const MENSAJES_ATENCION: Record<CodigoAtencionMostrador | 'error_desconocido', s
   // colapsaba en `error_desconocido` y la superficie no podía decir la
   // regla que el motor le está aplicando.
   el_mostrador_registra_no_reserva:
-    'El mostrador registra atenciones que ya pasaron. Para agendar a futuro, usá la agenda.',
+    'El mostrador registra atenciones que ya pasaron. Para agendar a futuro, usa la agenda.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   // Último recurso — solo lo verdaderamente desconocido cae acá (Ley 13: la
   // lista de arriba cubre CADA código que la RPC levanta).
-  error_desconocido: 'No pudimos registrar la atención. Probá de nuevo.',
+  error_desconocido: 'No pudimos registrar la atención. Prueba de nuevo.',
 };
 
 function falloAtencion(raw: string): ResultadoWrapper<string, CodigoAtencionMostrador> {
@@ -383,14 +383,14 @@ export type CodigoCobroPresencial = (typeof CODIGOS_COBRO)[number];
 const MENSAJES_COBRO: Record<CodigoCobroPresencial | 'error_desconocido', string> = {
   // auth_required (sesión caída) — la RPC lo levanta; sin branch caía al
   // genérico (Ley 13). Misma familia que el resto del mostrador.
-  acceso_denegado: 'No tenés permiso para registrar el cobro.',
+  acceso_denegado: 'No tienes permiso para registrar el cobro.',
   cita_no_existe: 'Esa atención ya no existe.',
   no_opera_cuenta: 'No operás este negocio.',
   monto_invalido: 'El monto no es válido.',
-  medio_invalido: 'Elegí un medio de cobro válido.',
+  medio_invalido: 'Elige un medio de cobro válido.',
   cobro_ya_registrado: 'Esta atención ya tiene un cobro registrado.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'No pudimos registrar el cobro. Probá de nuevo.',
+  error_desconocido: 'No pudimos registrar el cobro. Prueba de nuevo.',
 };
 
 function falloCobro(raw: string): ResultadoWrapper<string, CodigoCobroPresencial> {
@@ -457,13 +457,13 @@ const CODIGOS_VACUNA = [
 export type CodigoVacunaMostrador = (typeof CODIGOS_VACUNA)[number];
 
 const MENSAJES_VACUNA: Record<CodigoVacunaMostrador | 'error_desconocido', string> = {
-  acceso_denegado: 'No tenés permiso para registrar en este negocio.',
+  acceso_denegado: 'No tienes permiso para registrar en este negocio.',
   cita_no_existe: 'Esa atención ya no existe.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
-  vacuna_xor: 'Elegí una vacuna del catálogo o escribí una — no ambas.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
+  vacuna_xor: 'Elige una vacuna del catálogo o escribe una — no ambas.',
   vacuna_codigo_invalido: 'Esa vacuna no está en el catálogo.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'No pudimos registrar la vacuna. Probá de nuevo.',
+  error_desconocido: 'No pudimos registrar la vacuna. Prueba de nuevo.',
 };
 
 function falloVacuna(raw: string): ResultadoWrapper<string, CodigoVacunaMostrador> {

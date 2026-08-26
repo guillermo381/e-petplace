@@ -56,7 +56,7 @@ const MENSAJES_SOLICITUD: Record<CodigoErrorSolicitud, string> = {
   no_opera_cuenta: 'No operás este negocio.',
   cuenta_no_activa: 'El negocio todavía no está activo.',
   tipo_invalido: 'Tipo de solicitud inválido.',
-  mascota_requerida: 'Elegí una mascota.',
+  mascota_requerida: 'Elige una mascota.',
   mascota_no_existe: 'Esa mascota ya no existe.',
   destino_requerido: 'Falta el cliente destinatario.',
   payload_alta_invalido: 'Faltan datos de la mascota (nombre y especie).',
@@ -66,10 +66,10 @@ const MENSAJES_SOLICITUD: Record<CodigoErrorSolicitud, string> = {
   solicitud_no_pendiente: 'Esta solicitud ya fue respondida.',
   no_es_familia: 'Solo la familia puede responder esta solicitud.',
   accion_invalida: 'Acción inválida.',
-  sin_familia: 'No tenés una familia activa.',
-  familia_ambigua: 'Tenés más de una familia; no pudimos elegir una sola.',
+  sin_familia: 'No tienes una familia activa.',
+  familia_ambigua: 'Tienes más de una familia; no pudimos elegir una sola.',
   especie_invalida: 'La especie no es válida.',
-  datos_invalidos: 'Revisá los datos.',
+  datos_invalidos: 'Revisa los datos.',
 };
 
 function fallo<T>(error: { code?: string; message: string }): ResultadoWrapper<T, CodigoErrorSolicitud> {

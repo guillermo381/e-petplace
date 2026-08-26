@@ -41,8 +41,8 @@ const MENSAJES: Record<CodigoErrorGaleria, string> = {
   // la RLS es titular-only: el rebote se dice como lo que es, no como
   // "error inesperado" (L-178: un permiso denegado se lee coherente).
   sin_permiso:       'Solo el titular del negocio puede editar la galería.',
-  lista_invalida:    'La lista de fotos no coincide con la galería. Volvé a cargarla.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  lista_invalida:    'La lista de fotos no coincide con la galería. Vuelve a cargarla.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 export interface FotoGaleria {

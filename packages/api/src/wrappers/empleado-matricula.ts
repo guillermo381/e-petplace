@@ -34,10 +34,10 @@ import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
   sin_sesion: 'No hay sesión activa.',
-  matricula_vacia: 'Escribí el número de matrícula.',
-  sin_permiso: 'No podés editar los datos de esta persona.',
-  error_lectura: 'No pudimos leer la matrícula. Probá de nuevo.',
-  error_escritura: 'No pudimos guardar la matrícula. Probá de nuevo.',
+  matricula_vacia: 'Escribe el número de matrícula.',
+  sin_permiso: 'No puedes editar los datos de esta persona.',
+  error_lectura: 'No pudimos leer la matrícula. Prueba de nuevo.',
+  error_escritura: 'No pudimos guardar la matrícula. Prueba de nuevo.',
 } as const;
 
 export type CodigoMatricula = keyof typeof MENSAJES;
