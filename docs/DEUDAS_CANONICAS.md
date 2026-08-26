@@ -21966,6 +21966,62 @@ Se lee como un booleano y **no lo es**: con `p_detail = NULL` —un evento sin `
 
 ---
 
+#### D-925 — 🟢 ANOTAR SIN CERRAR: el alta que falla sin dejar traza
+🟢 **BAJA (ya CURADA el mismo día). Abierta y cerrada el 25-ago-2026, pista D.**
+**Depositada por A** (`DEUDAS_CANONICAS` es su territorio).
+
+### El defecto, medido
+
+El SDK de Nuvei devuelve `status:"success"` **sin `card.token`**. La página
+llamaba con `desenlace:'guardada'` y sin token; `pagos-alta-tarjeta` cortaba en
+`token_ausente` **antes de la RPC** ⇒ **no quedaba una sola traza**: el alta se
+veía `pendiente`, *exactamente igual que si la persona hubiera cerrado la
+ventana*.
+
+> **Dos cosas muy distintas —«se distrajo» y «el proveedor nos devolvió una
+> respuesta rota»— eran indistinguibles desde la base.**
+
+### La cura, y su decisión de fondo
+
+`altas_tarjeta.incidentes` (append-only) + `anotar_incidente_alta()`, con el
+desenlace nuevo `'incidente'` en la edge.
+
+🔴 **Este camino NO pasa por `resolver_alta_tarjeta`, y ésa es toda la
+decisión.** Esa RPC **cierra** el alta y el handle es de un solo uso ⇒ reportar
+por ahí le sacaría a la persona la única acción que la voz le acaba de ofrecer:
+*probar con otra tarjeta*. **Un rastro que rompe la salida que la voz promete es
+peor que la falta de rastro.** (Hallazgo de C.)
+
+### ✅ EJERCIDO POR EL CABLE REAL (25-ago, firma del founder)
+
+**El `prueba_de_cable` que C propuso y el founder firmó** — *«si en una semana
+`incidentes` tiene 0 filas, sin esto no sabemos si es "no pasó" o "no llega el
+POST". Probar el instrumento antes de confiar en su silencio.»*
+
+```
+POST /functions/v1/pagos-alta-tarjeta
+  { alta, desenlace:'incidente', motivo:'prueba_de_cable' }   → 200 {ok:true, cerro:false}
+
+verificado en la base:  incidentes = 1
+                        estado del alta = pendiente
+                        cerrada_en = NULL   ← ✅ ANOTÓ SIN CERRAR
+```
+
+⚠️ **Y la prueba destapó un límite del instrumento, que vale más que la prueba:**
+la edge **valida el `Origin`** y rebota `origen_no_permitido` (403) a cualquier
+llamada que no venga de la página. ⇒ **el cable NO se puede ejercer desde una
+terminal sin reproducir el origen de la página.** *Es correcto que el guard esté
+—protege contra sitios de terceros— pero significa que este instrumento sólo se
+prueba desde el navegador real o reproduciendo su cabecera, y eso hay que
+saberlo antes de concluir que «no llega el POST».*
+
+☠️ **Condición de muerte: CUMPLIDA.** La puerta existe, está desplegada, y el
+cable quedó probado de punta a punta con una fila real.
+⚠️ **Lo que sigue abierto y NO es de esta ficha:** la página no la llama sola
+todavía — el conteo real de incidentes en uso normal sigue en **0**.
+
+---
+
 #### L-425 · UN BASELINE EN 0 NO DICE «NO HAY»: DICE «NO VI, CON LA LISTA DE HOY»
 
 **Un trinquete mide con un instrumento, y el instrumento tiene alcance.** Su
