@@ -17,7 +17,12 @@
         "backgroundColor": "#0A7268"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.epetplace.prestador"
+      "package": "com.epetplace.prestador",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE_CAMERA",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "output": "static",
