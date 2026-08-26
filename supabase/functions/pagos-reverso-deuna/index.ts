@@ -35,7 +35,8 @@
 //    que el proveedor había dicho de palabra, y es lo que descongeló este
 //    endpoint después de media jornada.*
 //
-// 🔴 NO MUEVE EL SUJETO — `D-923`, de A. La respuesta lo DICE.
+// ✅ EL SUJETO SÍ SE MUEVE (trigger de A sobre la transición del intento). La
+// respuesta lo MIDE leyendo `payload_crudo.sujeto_no_movido`, no lo afirma.
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -211,15 +212,26 @@ Deno.serve(async (req) => {
     }, 500);
   }
 
+  /* Mismo mecanismo que la hermana de Nuvei, y a propósito: el trigger de A
+     vive sobre la transición del intento, **no cableado por riel**. *Cablear
+     el movimiento dentro de cada registrador es exactamente cómo el segundo
+     riel se olvida* — y este archivo es el segundo riel. */
+  const { data: post } = await db.from('pagos_intentos')
+    .select('payload_crudo').eq('id', intentoId).maybeSingle();
+  const sujetoNoMovido =
+    ((post?.payload_crudo ?? {}) as Record<string, unknown>).sujeto_no_movido ?? null;
+
   return json({
     ok: true,
     registro: reg,
     reverso_id: reversoId,
     estado_info: estadoInfo,
     monto: montoInfo,
-    /* Se repite acá lo que la RPC ya dice: quien llama a la edge no siempre
-       lee el objeto anidado, y **el sujeto NO se movió** (`D-923`). */
-    sujeto_movido: false,
+    /* 🔴 MEDIDO, NO AFIRMADO — ver la nota larga en `pagos-reverso`. Hasta la
+       cura de `D-923` acá vivía un `false` cableado que pasó a mentir el día
+       que el trigger nació. */
+    sujeto_movido: sujetoNoMovido === null,
+    ...(sujetoNoMovido ? { sujeto_no_movido: sujetoNoMovido } : {}),
     crudo_refund: crudoRefund,
     crudo_info: crudoInfo,
   });

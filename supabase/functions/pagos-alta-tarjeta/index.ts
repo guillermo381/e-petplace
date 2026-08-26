@@ -110,10 +110,65 @@ Deno.serve(async (req) => {
       { status: 400, headers: cabeceras });
   }
 
-  const desenlace = body.desenlace === 'rechazada' ? 'rechazada' : 'guardada';
+  /* 🔴 EL PARSEO PASA A SER ESTRICTO, Y NO ES PROLIJIDAD.
+     Antes decía `body.desenlace === 'rechazada' ? 'rechazada' : 'guardada'`:
+     **cualquier valor desconocido se convertía en «guardada» en silencio.**
+     Con `'incidente'` recién nacido eso sería fatal —un typo del llamador
+     terminaría intentando guardar y muriendo en `token_ausente`, o sea que la
+     puerta nueva sería invisible—. *La coerción silenciosa es cómo un camino
+     nuevo nace muerto sin que nadie lo note* (`L-318`).
+     Ausente sigue siendo `'guardada'`: eso es lo que la página manda hoy. */
+  const crudo = body.desenlace;
+  const desenlace = crudo === undefined || crudo === null ? 'guardada' : crudo;
+  if (desenlace !== 'guardada' && desenlace !== 'rechazada' && desenlace !== 'incidente') {
+    return new Response(JSON.stringify({ ok: false, codigo: 'desenlace_invalido' }),
+      { status: 400, headers: cabeceras });
+  }
+
   const token = typeof body.token === 'string' ? body.token.trim() : '';
 
+  const sb = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // `D-925` · ANOTAR SIN CERRAR
+  //
+  // 🔴 ESTE CAMINO **NO PASA POR `resolver_alta_tarjeta`**, y ésa es toda la
+  //    decisión. Esa RPC cierra el alta y **el handle es de un solo uso** ⇒
+  //    reportar por ahí le sacaría a la persona la única acción que la voz le
+  //    acaba de ofrecer: probar con otra tarjeta.
+  //    *Un rastro que rompe la salida que la voz promete es peor que la falta
+  //    de rastro.* (Hallazgo de C.)
+  //
+  // ⚠️ Lo que entra acá es la FORMA enmascarada de la respuesta del SDK, no la
+  //    respuesta. La página ya enmascara; **la base vuelve a enmascarar**,
+  //    porque un enmascarado que depende del llamador es una promesa, y del
+  //    otro lado de esa promesa hay un PAN.
+  // ═══════════════════════════════════════════════════════════════════════
+  if (desenlace === 'incidente') {
+    const { data, error } = await sb.rpc('anotar_incidente_alta', {
+      p_alta_id: alta,
+      p_motivo: typeof body.motivo === 'string' ? body.motivo : 'sin_motivo',
+      p_forma: typeof body.forma === 'string' ? body.forma : null,
+    });
+    if (error) {
+      console.error('[alta-tarjeta] anotar', error.message);
+      return new Response(JSON.stringify({ ok: false, codigo: 'no_se_pudo_anotar' }),
+        { status: 500, headers: cabeceras });
+    }
+    const a = (data ?? {}) as Record<string, unknown>;
+    /* Se devuelve `cerro:false` explícito: quien llama tiene que poder confiar
+       en que su handle sigue vivo sin ir a mirarlo. */
+    return new Response(
+      JSON.stringify({ ok: a.ok === true, codigo: a.codigo ?? null, cerro: false }),
+      { status: a.ok === true ? 200 : 409, headers: cabeceras },
+    );
+  }
+
   if (desenlace === 'guardada' && !token) {
+    /* 🔴 EL CORTE QUE NO DEJABA RASTRO. Ahora al menos loguea — pero **el log
+       no es el rastro**: la traza que sirve es la anotación de arriba, que la
+       página tiene que mandar. Esto es la red por si no la manda. */
+    console.warn('[alta-tarjeta] token_ausente alta=', alta.slice(0, 8));
     return new Response(JSON.stringify({ ok: false, codigo: 'token_ausente' }),
       { status: 400, headers: cabeceras });
   }
@@ -134,8 +189,6 @@ Deno.serve(async (req) => {
       stokenDetalle += ' formula=no_evaluada:faltan_credenciales_server';
     }
   }
-
-  const sb = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
   // 🔴 TODA la decisión vive en la función de la base: handle vigente, un solo
   //    uso, dueño del alta, y la tarjeta naciendo por la única puerta. Acá no
