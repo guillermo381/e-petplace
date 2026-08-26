@@ -1413,6 +1413,7 @@ export {
   type CodigoInvitacionFamilia,
   estadoCorreoInvitacion,
   type EstadoCorreoInvitacion,
+  type YaInvitada,
 } from './wrappers/familia-invitacion';
 
 // S104-A · tanda 3 — LA SALIDA. Vive en packages/api por la LEY DE PARIDAD:
