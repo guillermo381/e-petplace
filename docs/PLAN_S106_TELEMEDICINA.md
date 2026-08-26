@@ -197,9 +197,20 @@ que el motor lo da, después escribir).
 - **Wrappers** en `packages/api` (puerta única, voz tuteo neutro, R66).
 - Todas las migraciones: **reversa escrita ANTES**, 76(g) declarada,
   verificadas contra el objeto.
-- **Docs**: la enmienda firmada de `LETRA_SALDO` §3 (letra vieja tachada,
-  no borrada) + depositar este plan + toda enmienda que CP1 firme sobre
-  `LETRA_TELEMEDICINA`.
+- **Docs**: ~~la enmienda firmada de `LETRA_SALDO` §3 (letra vieja tachada,
+  no borrada)~~ **SIN OBJETO — ver abajo** + depositar este plan + toda
+  enmienda que CP1 firme sobre `LETRA_TELEMEDICINA`.
+
+> ### 🔴 ENMIENDA v1.1 — `LETRA_SALDO` §3 **NO SE TOCA**. Firma founder CP1
+>
+> Con la firma ③ (la devolución va **al medio de pago**), telemedicina **no
+> agrega ninguna fuente** a la lista cerrada de §3 ⇒ **la enmienda que el
+> freno de depósito pedía queda SIN OBJETO, no pendiente.**
+>
+> *Enmendar una lista ajena por un choque que ya se cerró es trabajo que
+> ensucia:* dejaría en el canon una distinción presencial/teleconsulta sobre
+> fuentes que este oficio dejó de usar. **El freno se disuelve por la
+> adjudicación, no por enmienda** — acta de CP1, firma ⑨.
 
 **B — las piezas y el juez:**
 
