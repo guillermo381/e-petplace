@@ -25,6 +25,12 @@ const CODIGOS = [
   'solo_titular_revoca',
   'email_invalido',
   'ya_es_miembro',
+  /* 🔴 S105-A · La persona YA tiene una invitación viva a esta familia.
+     Antes esto lo rechazaba el índice `ux_familia_inv_pendiente` con un `23505`
+     pelado ⇒ caía en `error_desconocido` ⇒ «probá de nuevo» **sobre algo que
+     iba a fallar durante cuatro semanas**. *Un guard que vive en un índice no
+     puede explicarse: sólo puede negarse.* */
+  'ya_invitada',
   'invitacion_inexistente',
   'invitacion_ya_aceptada',
   'invitacion_no_vigente',
@@ -40,6 +46,11 @@ const VOZ: Record<CodigoInvitacionFamilia, string> = {
   solo_titular_revoca:    'Solo quien creó la familia puede cancelar una invitación.',
   email_invalido:         'Ese correo no parece válido.',
   ya_es_miembro:          'Esa persona ya es parte de la familia.',
+  /* 🔴 LA VOZ NO ALCANZA SOLA: el caller tiene la fecha y el id en
+     `yaInvitada` para poder decir «ya la invitaste el 23 de agosto» y ofrecer
+     cancelar aquella. *Un código sin su dato es el mismo callejón con mejor
+     etiqueta.* */
+  ya_invitada:            'Ya invitaste a esa persona y su invitación sigue abierta.',
   invitacion_inexistente: 'No encontramos esa invitación.',
   invitacion_ya_aceptada: 'Esa invitación ya fue aceptada.',
   invitacion_no_vigente:  'Esa invitación ya no está vigente.',
@@ -50,11 +61,35 @@ const VOZ: Record<CodigoInvitacionFamilia, string> = {
   error_desconocido:      'No pudimos completar la invitación. Probá de nuevo.',
 };
 
+/**
+ * Datos que acompañan a `ya_invitada`. **Sin esto la pantalla sólo podría
+ * repetir la voz genérica con otro nombre** — con esto puede decir la fecha y
+ * ofrecer cancelar la invitación previa.
+ */
+export interface YaInvitada {
+  /** `YYYY-MM-DD`, en hora de Guayaquil. */
+  fecha: string;
+  /** La invitación que sigue abierta — para poder ofrecer cancelarla. */
+  invitacionId: string;
+}
+
 /** El motor habla por `message`; acá se traduce a código de la casa (regla 35). */
-function mapear<T>(mensaje: string): ResultadoWrapper<T, CodigoInvitacionFamilia> {
+function mapear<T>(
+  mensaje: string,
+): ResultadoWrapper<T, CodigoInvitacionFamilia> & { yaInvitada?: YaInvitada } {
   const hit = CODIGOS.find((c) => c !== 'error_desconocido' && mensaje.includes(c));
   const codigo: CodigoInvitacionFamilia = hit ?? 'error_desconocido';
-  return { ok: false, codigo, mensaje: VOZ[codigo] };
+  const base = { ok: false as const, codigo, mensaje: VOZ[codigo] };
+
+  /* 🔴 EL DATO SE EXTRAE DEL MENSAJE, que es donde el motor puede ponerlo: un
+     `RAISE` no devuelve jsonb. Formato: `ya_invitada|YYYY-MM-DD|<uuid>`.
+     *Si el formato cambiara, esto degrada a la voz sin dato en vez de romper —
+     una pantalla sin fecha es peor que ésta, pero mucho mejor que un crash.* */
+  if (codigo === 'ya_invitada') {
+    const m = /ya_invitada\|([0-9]{4}-[0-9]{2}-[0-9]{2})\|([0-9a-f-]{36})/.exec(mensaje);
+    if (m) return { ...base, yaInvitada: { fecha: m[1], invitacionId: m[2] } };
+  }
+  return base;
 }
 
 export interface InvitacionCreada {
