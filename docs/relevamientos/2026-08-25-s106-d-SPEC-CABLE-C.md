@@ -195,7 +195,37 @@ misma sala.*
 
 ---
 
-## §5 · CRITERIO DE VERDE — escrito ANTES de correr
+## ✅✅ VERDE — GATE DEL FOUNDER, 26-ago-2026
+
+**Los cinco puntos pasaron, en dos dispositivos, con APK autónomos (preview
+local, sha256 verificados), en la red real de Quito.**
+
+| # | qué | |
+|---|---|---|
+| ① | compila e instala | ✅ en los dos teléfonos |
+| ② | los dos entran a `cable-quito` | ✅ |
+| ③ | **se ven en AMBOS sentidos** | ✅ *cada aparato vio la cámara del OTRO* |
+| ④ | **se oyen en AMBOS sentidos** | ✅ |
+| ⑤ | red real de Quito | ✅ |
+
+🔴 **La forma del ③ es la que hace válido el verde:** *nadie se vio a sí mismo
+y creyó que anduvo* — que era el modo de falla que esta spec nombró antes de
+correr. **El criterio escrito de antemano hizo su trabajo.**
+
+⇒ **LiveKit Cloud queda FIRMADO SIN CONDICIÓN.** La escalera de caída
+(① plugin genérico de Expo · ② Agora) **se retira: ya no hay condición que la
+dispare.**
+
+**Observación del founder, menor y para tanda 2 — no defecto:** la pantalla
+del cable no muestra preview propio. **No es transporte, es vista local**, y
+esta pantalla existía para probar el cable, no para ser completa — es
+literalmente lo que §7 de esta spec declaró (*«no es la pantalla de
+teleconsulta; dos cuadritos alcanzan»*). **La in-call real de tanda 2 sí lo
+lleva.**
+
+---
+
+## §5 · CRITERIO DE VERDE — escrito ANTES de correr *(cumplido; se conserva como registro)*
 
 **Verde es TODO esto junto. Falta uno solo ⇒ rojo.**
 
