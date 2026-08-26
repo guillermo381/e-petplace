@@ -8,7 +8,10 @@
     "scheme": "cliente",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Para que el veterinario pueda escucharte durante tu videoconsulta."
+      }
     },
     "android": {
       "package": "com.epetplace.cliente",
@@ -38,6 +41,12 @@
           "backgroundColor": "#0D050D",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 122
+        }
+      ],
+      [
+        "@livekit/react-native-expo-plugin",
+        {
+          "enableScreenShareService": false
         }
       ],
       [
