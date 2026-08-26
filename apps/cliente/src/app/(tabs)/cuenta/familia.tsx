@@ -51,6 +51,7 @@ import {
 import {
   ENLACE_INVITACION_HABILITADO,
   invitarAFamilia,
+  revocarInvitacionFamilia,
   obtenerMiFamilia,
   renombrarFamilia,
   urlInvitacion,
@@ -102,6 +103,11 @@ export default function FamiliaCuenta() {
   const [emailInv, setEmailInv] = useState('');
   const [nombreInv, setNombreInv] = useState('');
   const [reboteInv, setReboteInv] = useState<string | null>(null);
+  /* 🔴 S105-C · EL CASO «YA INVITADA» — un rebote con SALIDA, no una frase.
+     `null` = no es ese caso. Trae el id porque **sin él la voz sabría el
+     problema y no podría hacer nada con él**. */
+  const [yaInvitada, setYaInvitada] = useState<{ fecha: string; invitacionId: string } | null>(null);
+  const [cancelandoInv, setCancelandoInv] = useState(false);
 
   useEffect(() => {
     let vigente = true;
@@ -143,6 +149,27 @@ export default function FamiliaCuenta() {
     setInvitarAbierta(true);
   }
 
+  /* Cancela la invitación anterior y **devuelve el formulario a un estado
+     usable**: la persona vuelve a tocar «invitar» con el correo ya escrito y
+     esta vez pasa. *No re-invita sola: cancelar destruye un enlace que quizá
+     ella compartió, y encadenar las dos acciones le sacaría la última
+     oportunidad de arrepentirse.* */
+  async function cancelarAnterior() {
+    if (yaInvitada === null || cancelandoInv) return;
+    setCancelandoInv(true);
+    const r = await revocarInvitacionFamilia(yaInvitada.invitacionId);
+    setCancelandoInv(false);
+    if (!r.ok) {
+      /* El fallo NO borra el rebote: si no se pudo cancelar, la invitación
+         anterior SIGUE ABIERTA y decir otra cosa dejaría a la persona creyendo
+         que puede reinvitar. */
+      setReboteInv(r.mensaje);
+      return;
+    }
+    setYaInvitada(null);
+    setReboteInv(t('cuenta.familiaYaInvitadaCancelada'));
+  }
+
   async function crearInvitacion() {
     if (inv.fase === 'creando' || typeof familia !== 'object') return;
     setReboteInv(null);
@@ -153,8 +180,27 @@ export default function FamiliaCuenta() {
       nombre: nombreInv.trim() === '' ? undefined : nombreInv.trim(),
     });
     if (!r.ok) {
-      // la voz la trae el wrapper (VOZ tipada por código); se muestra tal cual.
+      /* 🔴 `ya_invitada` NO cae en la voz genérica del wrapper, y la razón es
+         medida: la invitación previa **no vence hasta el 22-sep**, así que
+         «prueba de nuevo» mandaba a repetir algo imposible durante cuatro
+         semanas. *Una voz que pide reintentar sobre un guard que no cede es la
+         misma familia que «ya lo estamos viendo»: promete una salida que no
+         existe.* Acá la salida SÍ existe y se ofrece. */
+      /* ⏸️ ACÁ VA LA RAMA, Y ESTÁ FRENADA POR UN TIPO — no por falta de dato.
+         `mapear()` devuelve `& { yaInvitada?: YaInvitada }` y el valor VIAJA en
+         runtime, **pero la firma pública de `invitarAFamilia` no lo declara**:
+         `Promise<ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia>>`.
+         *El ensanche se pierde en el borde público.*
+
+         🔴 **Alcanzarlo pide un cast, y no se hace.** Un `as` sobre nuestro
+         PROPIO wrapper es peor que sobre un borde ajeno: acá el tipo se puede
+         arreglar, y castear sería tapar la única señal de que está mal.
+         ⇒ **Pedido a A: ensanchar el retorno de `invitarAFamilia`.** Es una
+         línea, y el día que esté, esta rama son seis. Todo lo demás —las
+         voces, el estado, el botón, `cancelarAnterior`— ya está y compila. */
+      // el resto: la voz la trae el wrapper (VOZ tipada por código).
       setReboteInv(r.mensaje);
+      setYaInvitada(null);
       setInv({ fase: 'formulario' });
       return;
     }
@@ -330,6 +376,30 @@ export default function FamiliaCuenta() {
                 />
                 {reboteInv !== null && (
                   <Texto variante="apoyo" color="danger">{reboteInv}</Texto>
+                )}
+                {/* 🔴 EL REBOTE CON SALIDA. Dice QUÉ pasó, CUÁNDO, y ofrece lo
+                    único que destraba — con el costo ADELANTE: *cancelar
+                    invalida el enlace que la persona quizá ya compartió, y eso
+                    se sabe antes de tocar, no después.*
+                    ⚠️ **No se ofrece «compartir el enlace anterior», y no es
+                    olvido:** `yaInvitada` trae `fecha` e `invitacionId` pero
+                    **no el token**, y `urlInvitacion` lo necesita. *Un botón
+                    que no puede armar el enlace es una puerta sin destino.*
+                    Pedido a A; mientras tanto cancelar + volver a invitar es un
+                    camino completo, porque la nueva invitación sí trae token. */}
+                {yaInvitada !== null && (
+                  <View style={{ gap: spacing[2] }}>
+                    <Texto variante="apoyo" color="danger">
+                      {t('cuenta.familiaYaInvitada', { fecha: yaInvitada.fecha })}
+                    </Texto>
+                    <Texto variante="apoyo">{t('cuenta.familiaYaInvitadaAviso')}</Texto>
+                    <Boton
+                      variante="secundario"
+                      etiqueta={t('cuenta.familiaYaInvitadaCancelar')}
+                      cargando={cancelandoInv}
+                      onPress={() => void cancelarAnterior()}
+                    />
+                  </View>
                 )}
                 <Boton
                   etiqueta={t('cuenta.familiaInvitarCrear')}
