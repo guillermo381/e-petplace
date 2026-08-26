@@ -1454,3 +1454,24 @@ export {
   type ResultadoNavegador,
   type CodigoGoogle,
 } from './wrappers/auth-google';
+
+// ⚠️ HUNK ADITIVO DECLARADO (76f) — `index.ts` es archivo compartido: esto se
+// agrega AL FINAL y no toca ninguna línea existente.
+//
+// S106-A · TELEMEDICINA, el quinto oficio. `LETRA_TELEMEDICINA` v1.1.
+// 🔴 NO se exporta `puede_entrar_a_videollamada`: es `service_role` y la
+// llama `video-token` desde el servidor. Un wrapper suyo sería una puerta a
+// algo que la casa decidió que no tuviera puerta de cliente.
+// 🔴 El consentimiento NO tiene función propia: viaja como
+// `acepta_teleconsulta` dentro de `crearBloqueoAgenda` (agendamiento.ts), en
+// el MISMO acto que el hold.
+export {
+  aceptarMinimosServicio,
+  prestadorAceptoMinimos,
+  marcarTeleconsultaNoRealizable,
+  cancelarTeleconsulta,
+  type MinimosAceptados,
+  type ResultadoDevolucion,
+  type ResultadoCancelacionTeleconsulta,
+  type CodigoErrorTelemedicina,
+} from './wrappers/telemedicina';

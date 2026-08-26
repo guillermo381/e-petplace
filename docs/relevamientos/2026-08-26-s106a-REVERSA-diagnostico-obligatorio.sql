@@ -1,0 +1,15 @@
+-- REVERSA de 20260826270000_s106a_diagnostico_obligatorio.sql — ANTES.
+--
+-- QUÉ DESHACE: quita el guard `nota_sin_diagnostico` de
+-- `completar_historia_clinica`. Su cuerpo vuelve al estado previo.
+--
+-- 🔴 QUÉ SIGNIFICA REVERTIRLA, dicho sin adorno: **vuelve a ser posible
+-- sedimentar medicación prescrita sin diagnóstico** — que es, en palabras
+-- del abogado, «una receta defectuosa». No revierte datos (el guard no
+-- escribe nada); revierte una obligación legal.
+--
+-- QUÉ NO TOCA: `sedimentar_nota_clinica`, el productor VIVO, que exige
+-- diagnóstico desde antes de esta migración y sigue exigiéndolo.
+--
+-- El cuerpo previo se restaura desde la migración misma quitando el bloque
+-- marcado «S106 · SIN DIAGNÓSTICO NO SE PRESCRIBE».
