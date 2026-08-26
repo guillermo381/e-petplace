@@ -117,11 +117,62 @@ imposible de evaluar, y eso no aparece en ninguna de estas cuentas.*
 > de abrir un panel. *Una vigilancia que depende de la memoria de una persona
 > ocupada no es una vigilancia: es una intención.*
 
-**No lo curo acá porque no tengo con qué, y lo digo en vez de dejarlo
-implícito:** **NO MEDIDO** si LiveKit expone consumo por API en el plan Build
-—lo que permitiría un cron que avise solo, como el de las 03:00 de S105— ni
-si el plan Build admite alertas de uso. **Es la primera pregunta de quien
-retome esto.**
+### ✅ MEDIDO (encargo del founder): ¿LiveKit expone el consumo por API?
+
+**Sí existe. NO la tenemos.**
+
+| | |
+|---|---|
+| **cómo se llama** | **Analytics API** |
+| **endpoints** | `GET /api/project/{PROJECT_ID}/sessions` · `…/sessions/{SESSION_ID}`, en `https://cloud-api.livekit.io`, con Bearer |
+| **qué reporta** | **`bandwidth` facturable**, connection minutes, bitrate por track — *exactamente lo que necesitamos* |
+| 🔴 **quién puede usarla** | literal de la doc: ***«Analytics API is only available to LiveKit Cloud customers with a Scale plan or higher»*** |
+
+**Scale cuesta $500/mes. Nosotros estamos en Build ($0).**
+
+> ### 🔴 Y ahí está la ironía, que es el hallazgo y no una queja:
+> **el instrumento que nos diría cuándo hay que empezar a pagar $50 sólo se
+> compra en el plan de $500.** *El dato para decidir si conviene subir de plan
+> está detrás de subir dos planes.*
+
+⇒ **El cron que avise solo NO se puede construir contra LiveKit.**
+**La debilidad de §anterior queda declarada y aceptada como está**, según la
+instrucción del founder.
+
+### 🔧 PERO HAY UNA TERCERA VÍA, y la propongo porque la medición la habilita
+
+**Podemos estimar el consumo NOSOTROS, con datos que ya vamos a tener.**
+
+El webhook de esta misma tanda (`video-webhook`) entrega
+`participant_joined` · `participant_left` · `room_finished`. De ahí sale,
+**sin pedirle nada a LiveKit**:
+
+```
+participante-minutos  =  Σ (salida − entrada) por participante
+GB estimados          =  participante-minutos × bitrate del preset ÷ 8
+```
+
+🔴 **Y su error cae del lado seguro, que es lo que lo vuelve usable:**
+estimamos con el **preset nominal** (`h720`), pero `adaptiveStream` **baja el
+bitrate real** cuando el video se muestra chico ⇒ **la estimación queda por
+ENCIMA del consumo facturado** ⇒ **la alerta suena antes de tiempo, nunca
+después.**
+
+> *Para una alarma, un proxy que sobreestima vale más que un número exacto que
+> llega tarde. No necesitamos saber cuántos GB gastamos: necesitamos saber
+> cuándo ir a mirar.*
+
+**Lo que NO es, dicho antes de que alguien lo confunda:** **no es el número de
+facturación** y no debe presentarse como tal. Es un **disparador**, no un
+estado de cuenta.
+
+**Condiciones para que exista:** ① el webhook dado de alta y vivo · ② la RPC
+de A guardando los eventos · ③ un cron que sume el mes y avise al cruzar
+**30 GB estimados**.
+⇒ **No lo construyo en esta tanda:** depende de ① y ② que todavía no existen,
+y **un contador que corre sobre una tabla vacía informaría cero para siempre**
+— que es peor que no tenerlo. **Disparo: cuando el webhook registre su primer
+evento real.**
 
 ---
 
