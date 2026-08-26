@@ -118,6 +118,28 @@ Deno.serve(async (req) => {
     return json({ ok: false, codigo: 'sin_transaction_id' }, 409);
   }
 
+  /* ═══ 🔴 LA VENTANA SE PREGUNTA **ANTES** DE TOCAR PLATA ═══════════════
+     Esto estaba DESPUÉS del refund: se le pedía la devolución al proveedor y
+     recién al registrarla se miraba si la ventana estaba abierta. *Si el
+     proveedor aceptaba fuera de nuestra ventana, la plata volvía y el registro
+     rebotaba: **plata devuelta sin rastro nuestro.***
+
+     Que hoy sea inalcanzable —porque el proveedor probablemente rechace
+     igual— **no lo vuelve seguro: lo vuelve seguro POR EL PROVEEDOR**, y eso es
+     depender de un tercero para nuestra propia integridad.
+
+     🔴 Es la MISMA función que usa el registro, no una segunda opinión: dos
+     lugares que calculan la misma ventana se desincronizan el día que una se
+     corrija — y acá las ventanas ya difieren por riel. */
+  const { data: puede, error: ePv } = await db.rpc('puede_reversar_nuvei', {
+    p_intento_id: intentoId,
+  });
+  if (ePv) return json({ ok: false, codigo: 'no_se_pudo_verificar_ventana' }, 500);
+  if ((puede as Record<string, unknown>)?.ok !== true) {
+    /* Se corta SIN haber llamado al proveedor: no hay plata en movimiento. */
+    return json({ ok: false, ...(puede as Record<string, unknown>) }, 409);
+  }
+
   // ── LA LLAMADA, con su política de reintento ──────────────────────────────
   const cuerpo = {
     transaction: { id: it.proveedor_transaction_id },
