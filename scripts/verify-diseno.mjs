@@ -1977,6 +1977,24 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
+  /* R67 · EL MODO DE FALLA REAL, y es el único que importa: **el aviso con
+     CUATRO signos.** Se le pasa un diccionario del cliente con el bloque
+     `avisoTeleconsulta` completo pero **sin «sangrado»** — que compila, corre y
+     se ve perfecto. Si la regla no lo caza, no sirve para nada.
+     ⚠️ El `path` TIENE que ser el del diccionario `es` del cliente: con
+     cualquier otro, el ancla ② corta antes y saldría NO CONCLUYENTE — que no
+     es verde, pero tampoco probaría que la regla sabe contar hasta cinco.
+     ⚠️ Y trae el bloque ENTERO a propósito: si faltara una clave, el rojo
+     vendría por «falta la clave» y no por el signo amputado, que es la razón
+     equivocada. */
+  R67: [{
+    path: 'apps/cliente/src/i18n/es.ts',
+    src:
+      "const a = { avisoTeleconsulta: { titulo: 'Antes de continuar', intro: 'x', " +
+      "advertencia: 'y', signosIntro: 'z', " +
+      "signos: ['dificultad para respirar', 'convulsiones', 'golpe fuerte', 'dolor intenso o decaimiento repentino'], " +
+      "signosCierre: 'w' } }",
+  }],
   /* R66 · el fixture usa un path de diccionario para que el ANCLA no sea lo
      que lo ponga rojo (la regla exige ver al menos un `i18n` o se declara no
      concluyente), y un archivo SIN baseline — que es el modo de falla real:
@@ -5489,7 +5507,217 @@ function r66(archivos) {
   };
 }
 
-const REGLAS = { R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/**
+ * ═══ R67 · EL AVISO DE TELECONSULTA NO SE ACORTA (S106-B) ═══════════════════
+ *
+ * **La letra que lo pide, `LETRA_TELEMEDICINA` §3, y es su línea roja:**
+ * *«Los signos concretos no son decoración. Decir "si creés que está en riesgo"
+ * le pide al dueño un juicio clínico que no tiene; nombrar cinco signos le da
+ * un criterio. **No se resume, no se acorta, no se convierte en una línea de
+ * letra chica.»***
+ *
+ * *Una prohibición que solo vigila un ojo se rompe el día que nadie mira. Y su
+ * modo de falla es el peor de todos: **un aviso con cuatro signos compila,
+ * corre y se ve perfecto.***
+ *
+ * ── 🔴 CONTRA QUÉ MIDE: LA LETRA, NO UN BASELINE TRANSCRITO ────────────────
+ * La vara se EXTRAE de `docs/LETRA_TELEMEDICINA.md` en cada corrida. **No hay
+ * copia del texto acá, a propósito** — es el mismo argumento con el que `R66`
+ * se negó a reimplementar el matcher de `lib-voz`: *una copia que diverge sin
+ * avisar, y su modo de falla es el PEOR: funciona*. Un baseline transcrito
+ * seguiría verde contra la versión vieja el día que la mesa enmiende §3.
+ *
+ * ── LOS DOS BRAZOS, y por qué son dos ──────────────────────────────────────
+ * **① LOS CINCO SIGNOS — el brazo duro.** Los cinco son sintagmas NOMINALES
+ * («dificultad para respirar», «sangrado», «convulsiones», «golpe fuerte»,
+ * «dolor intenso o decaimiento repentino»): **ninguno lleva verbo conjugado,
+ * así que son idénticos en voseo y en tuteo.** Ese brazo es exigible HOY y es
+ * inmune a la enmienda de conjugación pendiente.
+ *
+ * **② EL CUERPO — igualdad exacta.** Intro, advertencia, entrada a los signos
+ * y cierre, carácter por carácter. **No es trinquete solo-baja**: un deslinde
+ * no tiene versión intermedia aceptable.
+ *
+ * *Los dos juntos DISCRIMINAN la causa sin adivinar: si los cinco están y el
+ * cuerpo diverge, es redacción o conjugación; si falta un signo, es amputación
+ * — que es el defecto que esta regla existe para cazar.*
+ *
+ * ── ⚠️ EL CHOQUE VIVO AL NACER, declarado acá para que no sorprenda ────────
+ * **Al 25-ago-2026 la letra sigue en v1.0 y su §3 está en VOSEO** («notás»,
+ * «llevala»), mientras la casa firmó TUTEO NEUTRO (S51, y `R66` lo vigila).
+ * ⇒ **el día que C deposite el texto en tuteo, el brazo ② va a salir ROJO, y
+ * el rojo va a ser VERDADERO**: el texto renderizado no será el firmado. **La
+ * cura no es de esta regla — es la enmienda de conjugación que el plan de A
+ * dejó servida (§4 ítem 4) y que todavía no llegó al repo.** *Un guard que se
+ * ablanda para no molestar deja de ser un guard.*
+ *
+ * ── LAS ANCLAS: NUNCA VERDE POR NO HABER MIRADO (L-192 · L-425) ────────────
+ * · sin la letra, o sin poder extraer §3 → **NO CONCLUYENTE**
+ * · sin las claves de C → **NO CONCLUYENTE**, y el mensaje dice «C no llegó»,
+ *   que es distinto de «el texto divergió». *Un rojo mal atribuido manda a
+ *   arreglar lo que no está roto.*
+ *
+ * ── 🔴 LOS DOS LÍMITES, ESCRITOS ADENTRO DEL PROPIO JUEZ ───────────────────
+ * **(a) NO MIDE TIPOGRAFÍA.** La letra prohíbe TRES cosas y esta regla alcanza
+ * dos: *no se resume* ✓ · *no se acorta* ✓ · ***«no se convierte en una línea
+ * de letra chica»*** ✗ — eso es RENDER. **Un aviso verbatim en `size.xs`
+ * pasaría esta regla y violaría la letra.** Esa mitad la cubre la pieza
+ * (`AvisoTeleconsulta` usa la prosa del sistema) y el ojo del founder.
+ *
+ * **(b) VIGILA SOLO EL ESPAÑOL.** La letra está firmada en español; el `en` es
+ * una traducción que **nadie firmó**. C deposita un `en` porque el typecheck de
+ * paridad del riel lo exige — **esta regla lo DICE, no lo bendice.** El día que
+ * el founder firme la traducción, entra como segunda vara.
+ */
+const LETRA_TELE = 'docs/LETRA_TELEMEDICINA.md';
+
+/** Extrae el aviso de §3: el blockquote, en párrafos, sin markdown. */
+function avisoDeLaLetra(md) {
+  const i = md.indexOf('## §3');
+  if (i < 0) return null;
+  const resto = md.slice(i);
+  const j = resto.indexOf('\n## ', 3);
+  const seccion = j < 0 ? resto : resto.slice(0, j);
+
+  // Solo las líneas del blockquote; se les quita el «> » y se reunen los
+  // párrafos (el markdown envuelve a 80 columnas y eso no es contenido).
+  const lineas = seccion.split('\n').filter((l) => l.trimStart().startsWith('>'));
+  if (lineas.length === 0) return null;
+
+  const parrafos = [];
+  let actual = [];
+  for (const l of lineas) {
+    const t = l.trimStart().replace(/^>\s?/, '').trim();
+    if (t === '') { if (actual.length) { parrafos.push(actual.join(' ')); actual = []; } continue; }
+    actual.push(t);
+  }
+  if (actual.length) parrafos.push(actual.join(' '));
+
+  // `**negrita**` es marcado, no texto.
+  const limpio = parrafos.map((p) => p.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim());
+  // La línea de las acciones («[ Ir a urgencias ] · …») es NOTACIÓN de mesa:
+  // dice qué acciones existen, no es prosa que el usuario lea. Fuera.
+  const prosa = limpio.filter((p) => !/^\[/.test(p));
+  /* TRES párrafos, medido contra la letra viva: título · para-qué-sirve · el
+     que trae la advertencia dura + los cinco signos + el cierre, todo junto.
+     El umbral estaba en 4 y la auto-prueba lo cazó: la regla salía NO
+     CONCLUYENTE por su propio extractor y habría sido decorativa. */
+  if (prosa.length < 3) return null;
+
+  // Los cinco signos viven entre guiones largos dentro del último párrafo.
+  const conSignos = prosa[prosa.length - 1];
+  const m = conSignos.match(/—([^—]+)—/);
+  if (!m) return null;
+  const signos = m[1].split(',').map((s) => s.trim()).filter(Boolean);
+
+  return {
+    titulo: prosa[0],
+    intro: prosa[1],
+    // El párrafo de la advertencia trae la frase dura + la entrada a los signos.
+    advertenciaYSignos: conSignos,
+    signos,
+  };
+}
+
+/** Lee el bloque `avisoTeleconsulta` del diccionario `es` del cliente. */
+function avisoDelDiccionario(src) {
+  const i = src.indexOf('avisoTeleconsulta:');
+  if (i < 0) return null;
+  const trozo = src.slice(i, i + 4000);
+  const leer = (clave) => {
+    const m = trozo.match(new RegExp(`${clave}\\s*:\\s*(['"\`])([\\s\\S]*?)\\1`));
+    return m ? m[2].replace(/\s+/g, ' ').trim() : null;
+  };
+  const arr = trozo.match(/signos\s*:\s*\[([\s\S]*?)\]/);
+  const signos = arr
+    ? [...arr[1].matchAll(/(['"`])([\s\S]*?)\1/g)].map((m) => m[2].replace(/\s+/g, ' ').trim())
+    : null;
+  return {
+    titulo: leer('titulo'),
+    intro: leer('intro'),
+    advertencia: leer('advertencia'),
+    signosIntro: leer('signosIntro'),
+    signosCierre: leer('signosCierre'),
+    signos,
+  };
+}
+
+function r67(archivos) {
+  const fallos = [];
+
+  // ── ANCLA ①: LA VARA. Sin la letra no hay contra qué comparar.
+  if (!existsSync(LETRA_TELE)) {
+    return { fallos, info: `NO CONCLUYENTE — no encontré \`${LETRA_TELE}\`: sin la fuente firmada esta regla no puede juzgar nada` };
+  }
+  const firmado = avisoDeLaLetra(readFileSync(LETRA_TELE, 'utf8'));
+  if (!firmado) {
+    return { fallos, info: `NO CONCLUYENTE — \`${LETRA_TELE}\` existe pero no pude extraer el aviso de §3 (¿cambió su forma?). **Su silencio no dice «coincide»: dice «no pude leer la vara»**` };
+  }
+
+  // ── ANCLA ②: EL TEXTO RENDERIZADO. Sin las claves de C, no hay qué juzgar.
+  const dic = archivos.find((a) => /apps\/cliente\/src\/i18n\/es\.ts$/.test(a.path));
+  if (!dic) {
+    return { fallos, info: 'NO CONCLUYENTE — el diccionario `es` del cliente no está en el corpus: el cero significaría «no miré»' };
+  }
+  const puesto = avisoDelDiccionario(dic.src);
+  if (!puesto) {
+    return {
+      fallos,
+      info:
+        'NO CONCLUYENTE — **C todavía no depositó `avisoTeleconsulta`** en `apps/cliente/src/i18n/es.ts`. ' +
+        'Esto NO es «el texto divergió»: es que el texto todavía no existe. ' +
+        'El contrato que esta regla espera: `avisoTeleconsulta: { titulo · intro · advertencia · signosIntro · signos[5] · signosCierre }`',
+    };
+  }
+
+  // ── BRAZO ① · LOS CINCO SIGNOS (exigible hoy, inmune a la conjugación).
+  const esperados = firmado.signos;
+  const puestos = puesto.signos;
+  if (!puestos) {
+    fallos.push('R67: `avisoTeleconsulta.signos` no es un arreglo legible en el diccionario del cliente — los cinco signos son lo que la letra defiende con más fuerza y no se pueden verificar.');
+  } else {
+    if (puestos.length !== esperados.length) {
+      fallos.push(
+        `R67 **los signos no son ${esperados.length}, son ${puestos.length}**. La letra: *«nombrar cinco signos le da un criterio»* — y **cuatro signos compilan igual que cinco**. ` +
+        `Firmados: ${esperados.map((s) => `«${s}»`).join(' · ')}`,
+      );
+    }
+    for (const s of esperados) {
+      if (!puestos.some((p) => p.toLowerCase() === s.toLowerCase())) {
+        fallos.push(`R67 **falta el signo «${s}»** entre los que se le muestran al dueño. *No se resume, no se acorta* — §3.`);
+      }
+    }
+  }
+
+  // ── BRAZO ② · EL CUERPO, carácter por carácter.
+  const par = (rotulo, esperadoEn, valor) => {
+    if (valor == null) { fallos.push(`R67: falta \`avisoTeleconsulta.${rotulo}\` en el diccionario del cliente.`); return; }
+    if (!esperadoEn.includes(valor)) {
+      fallos.push(
+        `R67 **\`${rotulo}\` no coincide con el texto firmado**.\n` +
+        `      renderiza: «${valor}»\n` +
+        `      la letra:  «${esperadoEn}»\n` +
+        `      *Si los cinco signos están bien y esto no coincide, mirá primero la CONJUGACIÓN: la letra sigue en v1.0 y su §3 está en voseo — la enmienda es de mesa, no de C.*`,
+      );
+    }
+  };
+  par('titulo', firmado.titulo, puesto.titulo);
+  par('intro', firmado.intro, puesto.intro);
+  par('advertencia', firmado.advertenciaYSignos, puesto.advertencia);
+  par('signosIntro', firmado.advertenciaYSignos, puesto.signosIntro);
+  par('signosCierre', firmado.advertenciaYSignos, puesto.signosCierre);
+
+  return {
+    fallos,
+    info:
+      `${esperados.length} signo(s) firmados en §3, verificados contra el diccionario del cliente` +
+      ` · vara EXTRAÍDA de \`${LETRA_TELE}\` en esta corrida (cero baseline transcrito)` +
+      ` · ⚠️ **NO mide tipografía** (un verbatim en letra chica pasaría y violaría §3)` +
+      ` · ⚠️ **vigila SOLO el español**: el \`en\` no tiene fuente firmada`,
+  };
+}
+
+const REGLAS = { R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -5873,6 +6101,9 @@ corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecu
    exactamente el defecto que `archivosCodigo` existe para evitar desde S82.
    *Un lint que se apaga por una extensión no dice «ya no miro»: dice un número
    más chico, y eso se lee como progreso.* */
+/* R67 · su corpus es SOLO el diccionario `es` del cliente — la vara la lee de
+   la letra con `readFileSync`, no del corpus. `appsCodigo` lo contiene. */
+corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
