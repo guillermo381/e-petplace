@@ -36,6 +36,19 @@ la segunda vuelta.
 
 ---
 
+## ✅ EJECUTADO — 26-ago-2026
+
+**Cuenta creada (plan Build), y las tres claves cargadas y verificadas.**
+`secrets list` devuelve `LIVEKIT_API_KEY` · `LIVEKIT_API_SECRET` ·
+`LIVEKIT_URL` con el **nombre exacto** que la edge lee, selladas
+`2026-08-26T04:30:31Z`.
+
+**Y la medición de §2 se corrió, con resultado PARCIAL — el hallazgo está
+abajo, en §2.** *Este pedido queda cumplido; se conserva porque su §2 explica
+por qué la celda de costo quedó como quedó.*
+
+---
+
 ## §2 · LA CELDA QUE QUEDÓ SIN MEDIR — y sólo se ve desde adentro
 
 En mi tabla del turno ⓪ hay una fila que **no pude cerrar desde afuera**, y
@@ -65,6 +78,28 @@ que la mesa necesita para saber cuándo deja de ser gratis.*
 
 **Si el panel muestra números distintos a esa tabla, ganan los del panel** —
 y hay que avisarlo, porque la recomendación se fundó en los públicos.
+
+### 🔴 RESULTADO DE LA MEDICIÓN — parcial, y el hallazgo es POR QUÉ
+
+**Verificado en el panel:** plan actual **Build** ($0, sin tarjeta) · Ship
+figura como **«STARTING AT $50/mo»**, que coincide con lo público.
+
+**NO verificable en el panel:** 🔴 **el comparador no muestra minutos
+incluidos ni precio de excedente en NINGÚN plan.** Compara *features*, y su
+vocabulario está volcado a **agentes de voz** (inference credits, custom
+voices, telephony).
+
+⇒ **Los dos números que deciden cuándo esto deja de ser gratis siguen siendo
+DATO PÚBLICO, no del objeto.** Se cierran así en la tabla del relevamiento —
+*una celda que no se pudo verificar no se marca verificada porque el intento
+haya sido serio.*
+
+⇒ **Y «STARTING AT $50» es un PISO, no un precio.** *Un número con «desde»
+adelante dice que no va a costar menos, y no dice cuánto va a costar.*
+
+**⏰ Disparo de re-medición:** el panel **sí muestra uso** ⇒ **mirar el uso al
+llegar a ~3.000 min/mes** (60 % del tope público de 5.000). *Preguntar el
+precio del excedente el día que se cruza el límite es preguntarlo tarde.*
 
 ---
 

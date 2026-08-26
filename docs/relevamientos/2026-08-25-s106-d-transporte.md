@@ -135,7 +135,7 @@ Unidad de comparación que armé para que la mesa lea algo útil:
 
 | Proveedor | free tier / mes | ≈ consultas gratis | precio post-free | base mensual | objeto |
 |---|---|---|---|---|---|
-| **LiveKit Cloud** | **5.000** WebRTC min + 50 GB | **≈ 125** | $0,0005/min → **$0,02/consulta** | $0 (Build) · **$50 (Ship)** | livekit.com/pricing |
+| **LiveKit Cloud** | **5.000** WebRTC min + 50 GB ⚠️ | **≈ 125** | $0,0005/min → **$0,02/consulta** ⚠️ | $0 (Build) · **desde $50 (Ship)** | livekit.com/pricing + panel ⚠️ |
 | **Daily** | **10.000** part-min | **≈ 250** | $0,0040/min → **$0,16/consulta** | **$0** | daily.co/pricing/video-sdk |
 | **Agora** | **10.000** RTC min | **≈ 250** | $0,00059/min → **$0,024/consulta** | **$0** | agora.io/en/pricing |
 | **100ms** | **10.000** min | **≈ 250** | $0,004/min → **$0,16/consulta** | $0 | 100ms.live/pricing |
@@ -144,6 +144,39 @@ Unidad de comparación que armé para que la mesa lea algo útil:
 | **Vonage** | **NO MEDIDO** | — | **NO MEDIDO** | — | 🔴 **HTTP 403** |
 | **LiveKit self-host** | infra propia | — | costo de servidor | — | Apache-2.0 |
 | **Jitsi self-host** | infra propia | — | costo de servidor | — | Apache-2.0 |
+
+### ⚠️ LA CELDA DE LIVEKIT, CERRADA — *(medición del founder en el panel real, 26-ago-2026)*
+
+**Se midió con la cuenta creada, y el resultado es PARCIAL. Se cierra así, no
+mejor de lo que es:**
+
+| dato | estado | fuente |
+|---|---|---|
+| plan actual = **Build**, $0, sin tarjeta | ✅ **verificado en el panel** | objeto |
+| Ship = **«STARTING AT $50/mo»** | ✅ **verificado en el panel** | objeto |
+| **5.000 min incluidos** (Build) | 🔴 **PÚBLICO, no verificado en panel** | `livekit.com/pricing` |
+| **$0,0005/min de excedente** | 🔴 **PÚBLICO, no verificado en panel** | `livekit.com/pricing` |
+
+🔴 **Por qué no se pudo cerrar mejor, y es un hallazgo, no una excusa:** el
+comparador del panel **no muestra minutos incluidos ni precio de excedente en
+ningún plan** — compara *features*, y su vocabulario está volcado a **agentes
+de voz** (inference credits, custom voices, telephony). **Los dos números que
+deciden cuándo esto deja de ser gratis no están en el panel.**
+
+🔴 **Y «STARTING AT» no es «$50».** Es un **piso**, no un precio cerrado. *Un
+número con «desde» adelante no se puede meter en un presupuesto: dice que no
+va a costar menos, y no dice cuánto va a costar.* Cualquier cuenta que use
+esa cifra tiene que decir que es piso.
+
+**⏰ DISPARO DE RE-MEDICIÓN, con número y no con adjetivo:** el panel **sí
+muestra uso**. *(Firma del founder: «cuando el consumo real se acerque a los
+5.000 min/mes».)* ⇒ **se mira el panel al llegar a ~3.000 min/mes (60 % del
+tope público)**, no a 5.000.
+*Preguntar el precio del excedente el día que se cruza el límite es
+preguntarlo tarde: para entonces ya se está pagando. El margen de 2.000
+minutos es el tiempo de decidir sin apuro.*
+
+---
 
 🔴 **Dos lecturas opuestas del mismo cuadro, y las dos importan:**
 - **LiveKit tiene el free tier MÁS CHICO del set** (5.000 vs 10.000): la mitad
@@ -187,6 +220,32 @@ pregunta a la mesa (§5), no un dato que yo pueda completar.
 | **Vonage** | `Vonage/vonage-video-react-native-sdk` | 🔴 **3** | 🔴 **81** | 25-ago-2026 | Apache-2.0 *(client SDK: propietaria)* | 🔴 |
 | Jitsi | `jitsi/jitsi-meet` | 29.808 | 146 | 25-ago-2026 | Apache-2.0 | 🔴 **incompatible por pin** |
 | Twilio | `blackuy/react-native-twilio-video-webrtc` | 629 | 🔴 **237** | 30-ene-2026 | MIT | 🔴 **wrapper de comunidad** |
+
+### ⚠️ SEÑAL DE PRODUCTO — la trajo la medición del panel, y no la estaba buscando
+
+**El panel de LiveKit tiene su vocabulario volcado a agentes de voz**
+(inference credits, custom voices, telephony) — y su propia página de precios
+lidera con *«agent session minutes»*, dejando *«WebRTC minutes»* como una
+línea más abajo.
+
+> **LiveKit está comunicando que su producto es infraestructura para agentes
+> de IA por voz.** El WebRTC de dos personas hablando —que es lo único que
+> nosotros usamos— **sigue existiendo, pero dejó de ser el titular.**
+
+🔴 **Por qué se anota:** *el mercado ya nos mostró un EOL de video* (Twilio,
+§2). Cuando la comunicación de un proveedor se corre de tu caso de uso, es
+la primera señal — mucho antes que un anuncio.
+
+✅ **Y por qué NO cambia la recomendación, que es lo justo de decir:** esto es
+**exactamente lo que la razón ④ de §3 ya cubría**. El servidor de LiveKit es
+**Apache-2.0, self-hosteable y con TURN embebido**. *Si mañana LiveKit
+Cloud se vuelve una plataforma de agentes y nuestro caso queda de segunda,
+nos vamos a self-host con el mismo código de cliente.* **Ningún otro
+candidato del set ofrece esa salida** — y es la diferencia entre una señal
+que se anota y una que asusta.
+
+⇒ **Se registra como observación, no como bandera roja.** Se vuelve a mirar
+en la misma pasada del disparo de ⑤.
 
 ---
 
@@ -388,6 +447,9 @@ Declarado para que nadie lo dé por hecho:
   plugin.
 - ❌ **Regiones/latencia Ecuador**, **precio de Vonage**, **minSdk/target/peso
   del binario**, **TURN de los cloud**: NO MEDIDO.
+- ⚠️ **Los minutos incluidos y el excedente de LiveKit siguen siendo PÚBLICO,
+  no del objeto** — se intentó contra la cuenta real y **el panel no los
+  expone** (§1⑤). *El intento no convierte una celda en verificada.*
 - ❌ **No toqué nada de S105**: ni `pagos-*`, ni el deploy de `pagos-web`, ni
   el guard del IVA, ni la puerta de retomar.
 
