@@ -606,6 +606,43 @@
   function pararReloj() { if (reloj) { clearTimeout(reloj); reloj = null; } }
 
   /* ══════════════════════════════════════════════════════════════════════════
+     🔴 S105-C · DESCRIBIR UNA RESPUESTA DEL PROVEEDOR SIN EMITIR UN SOLO
+     VALOR SENSIBLE.
+
+     Existe por una firma del founder (26-ago): el caso «OK sin token» **no
+     dejaba una sola traza**, así que nadie podía diagnosticarlo. Pero volcar
+     `resp` crudo a la consola sería peor que no tener nada: *los artefactos de
+     un diagnóstico son un vector nuevo* (precedente D-712) — un PAN escrito en
+     un log es un PAN que alguien pega de buena fe en un chat.
+
+     ⇒ Se emite la FORMA —qué claves vinieron, de qué tipo, si están vacías—,
+     que es exactamente lo que hace falta para entender por qué el proveedor
+     contestó OK sin tokenizar. Y **toda corrida de 4 o más dígitos se
+     enmascara**, en strings Y en números: con eso un PAN, un token y un
+     vencimiento son INEXPRESABLES por acá, no «cuidados».                    */
+  function sinDigitos(v) {
+    return String(v).replace(/\d{4,}/g, '#').slice(0, 60);
+  }
+
+  function forma(v, prof) {
+    prof = prof || 0;
+    if (v === null) return 'null';
+    if (v === undefined) return 'undefined';
+    var t = typeof v;
+    if (t === 'string') return 'str(' + v.length + ')"' + sinDigitos(v) + '"';
+    if (t === 'number' || t === 'boolean') return t + ':' + sinDigitos(v);
+    if (t !== 'object') return t;
+    if (prof >= 3) return '{…}';           /* la profundidad se acota: un log ilegible no diagnostica */
+    if (Object.prototype.toString.call(v) === '[object Array]') return '[' + v.length + ']';
+    var partes = [];
+    for (var k in v) {
+      if (!Object.prototype.hasOwnProperty.call(v, k)) continue;
+      partes.push(k + '=' + forma(v[k], prof + 1));
+    }
+    return '{' + partes.join(' · ') + '}';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
      🔴 S101-D · UN SOLO BOTÓN PARA LOS DOS MOMENTOS DE LA PANTALLA
      Orden del founder (21-ago), sus dos mitades:
        ① *«al entrar, el botón guardar se vea más claro — mismo efecto que
@@ -836,6 +873,33 @@
              pantalla que le informa DE QUIÉN ES LA CULPA y no QUÉ HACER.*
              Ahora dice lo que pasó y lo único que puede destrabarlo, **sin
              atribuir una causa que no medimos.** */
+          /* 🔴 EL RASTRO (firma founder, 26-ago): *«sin eso ese caso no deja
+             traza y D no puede diagnosticar nada»*. Va la FORMA de `resp`,
+             enmascarada — ver `forma()` arriba.
+
+             ⚠️ Y ACÁ SE DECLARA LO QUE ESTE RASTRO **NO** COMPRA, porque
+             creerlo suficiente sería peor que no tenerlo: **esto vive en la
+             consola del navegador de la familia y no nos llega**. Sirve con el
+             aparato del founder a mano; para alguien en la calle, no existe.
+
+             🔴 LA TRAZA DURABLE ESTÁ A UN PASO Y **NO SE PUEDE DAR HOY** — y
+             la razón es una trampa MEDIDA, no una precaución:
+             `pagos-alta-tarjeta` YA acepta `desenlace:'rechazada'` con
+             `motivo`, y esta página **nunca lo llama** (motor sin puerta,
+             L-318). Pero `resolver_alta_tarjeta` cierra el alta al recibirlo
+             —`estado='rechazada', cerrada_en=now()`, y el handle es de UN SOLO
+             USO: `IF v_a.estado <> 'pendiente' THEN … duplicado`—.
+             ⇒ **Reportar acá mataría el handle, y con él la única acción que
+             le acabamos de ofrecer a la persona: intentar con otra tarjeta.**
+             *Un rastro que rompe la salida que la voz promete es peor que la
+             falta de rastro.*
+
+             ⇒ La traza durable exige un camino que ANOTE SIN CERRAR. Es de D
+             (la edge y la RPC son suyas), y es **`D-925`**.
+
+             *(Y el número se midió: acá decía `D-923`, que ya es «el actuador
+             no maneja REVERSED». L-141 cobrando sobre quien la cita.)*        */
+          try { console.warn('[alta] OK del proveedor SIN token · resp=' + forma(resp)); } catch (e) {}
           decir(T.probaOtra, 'error');
           return;
         }
