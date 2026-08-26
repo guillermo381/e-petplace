@@ -137,7 +137,7 @@ Unidad de comparación que armé para que la mesa lea algo útil:
 |---|---|---|---|---|---|
 | **LiveKit Cloud** | 5.000 min **y 50 GB** | 🔴 **≈ 50–110** *(corta el GB)* | $0,0005/min **+ $0,12/GB** → **≈$0,11/consulta** | $0 (Build) · **desde $50 (Ship)** | **panel real** ✅ |
 | **Daily** | **10.000** part-min | **≈ 250** | $0,0040/min → **$0,16/consulta** | **$0** | daily.co/pricing/video-sdk |
-| **Agora** | **10.000** RTC min | **≈ 250** | $0,00059/min → **$0,024/consulta** | **$0** | agora.io/en/pricing |
+| **Agora** | **10.000** RTC min | **≈ 250** | 🔴 **Video HD** $0,00399/min → **$0,16/consulta** *(el $0,59/1000 era su «starts at» = audio)* | **$0** | agora.io/en/pricing/video-calling |
 | **100ms** | **10.000** min | **≈ 250** | $0,004/min → **$0,16/consulta** | $0 | 100ms.live/pricing |
 | **Stream** | $100 en créditos | NO MEDIDO (video) | $0,30/1000 part-min *(audio only)* | — | getstream.io/video/pricing |
 | **Twilio** | crédito de prueba, **monto NO MEDIDO** | — | $0,004/min → **$0,16/consulta** | $0 | twilio.com/en-us/video/pricing |
@@ -197,18 +197,70 @@ GB      : ~0,75 × $0,12 = $0,09
                           ≈ $0,11 por consulta
 ```
 
-🔴 **LiveKit pasa de $0,02 a ≈$0,11.** Sigue por debajo de Daily / 100ms /
-Twilio ($0,16), **pero la ventaja se achica de ~8× a ~1,5×** — y **Agora
-($0,024) queda claramente más barato**.
+🔴 **LiveKit pasa de $0,02 a ≈$0,11.**
 
-⚠️ **Con una salvedad honesta, para no arreglar el error en la otra
-dirección:** *no verifiqué si Daily, Agora o 100ms facturan el ancho de banda
-aparte.* Su precio se publica como participante-minuto **y aparenta incluirlo**,
-pero **no lo medí** ⇒ **NO MEDIDO**. *Comparar mi LiveKit-con-GB contra un
-Agora-sin-verificar volvería a ser la misma clase de error, al revés.*
+---
 
-**Lo que sí queda firme:** la ventaja de costo de LiveKit era **menor de lo
-que dije**, y el costo **nunca fue** la razón por la que lo recomendé (§3).
+### ✅ LA SALVEDAD, CERRADA — y destapó un error mío MÁS GRANDE
+
+*(Encargo de la mesa, 26-ago-2026: verificar si los demás facturan ancho de
+banda aparte. Mismo objeto: sus páginas de pricing.)*
+
+**① ¿Cobran ancho de banda aparte? NO — ninguno de los tres.**
+
+| | línea de bandwidth / data transfer / GB | literal |
+|---|---|---|
+| **Daily** | **ninguna** | pricing por participante-minuto, sin ítem de GB |
+| **Agora** | **ninguna** | *«Minutes are per participant»* |
+| **100ms** | **ninguna** | *«No unpredictable resolution based pricing for video conferencing»* |
+
+> ### 🔴 **LiveKit es el ÚNICO del set con dos ejes de cobro.** Eso pesa y se declara: su factura tiene una variable más que las demás, y es la que corta primero.
+
+**② Y al medirlo apareció que YO tenía mal el precio de Agora.**
+Su página detallada de Video Calling cobra **por resolución**:
+
+| Agora | por 1.000 min |
+|---|---|
+| Audio only | $0,99 |
+| **Video HD** | **$3,99** |
+| Video Full HD | $8,99 |
+| Video 2K | $15,99 |
+
+🔴 **El `$0,59/1000 min` que usé en mi tabla es su «STARTS AT» — el piso, que
+corresponde a audio.** El precio real de una teleconsulta con video HD es
+**$0,00399/min ⇒ $0,16/consulta**, no $0,024.
+
+> **Es exactamente el error de forma que yo mismo le señalé a LiveKit tres
+> párrafos más arriba** —*«STARTING AT no es un precio»*— **y me lo tragué con
+> Agora sin verlo.** *Detectar un patrón en la letra de otro no vacuna contra
+> cometerlo: la vacuna es abrir la página detallada.*
+
+**③ La tabla, ahora sí comparando lo mismo** *(40 participante-minutos +
+~0,75 GB por consulta)*:
+
+| proveedor | $/consulta | ejes de cobro | free tier → consultas |
+|---|---|---|---|
+| **LiveKit** | **≈$0,11** 🥇 | 🔴 **2** (min + GB) | 50 GB → **50–110** |
+| Agora **Video HD** | $0,16 | 1 | 10.000 min → ~250 |
+| Daily | $0,16 | 1 | 10.000 min → ~250 |
+| 100ms | $0,16 | 1 | 10.000 min → ~250 |
+| Twilio | $0,16 | 1 | crédito NO MEDIDO |
+
+**④ El resultado, con las dos correcciones puestas juntas:**
+
+- 🔴 **Mi «Agora queda claramente más barato» de la corrección anterior era
+  FALSO.** Se retracta.
+- ✅ **LiveKit vuelve a ser el más barato del set por consulta**, **aun
+  contando sus GB** — $0,11 contra $0,16 de todos los demás.
+- ⚠️ **Lo que NO cambia: su free tier sigue siendo el más chico por lejos**
+  (50–110 consultas contra ~250). *Es más barato cuando se paga, y se empieza
+  a pagar mucho antes.*
+- 🔴 **Y sigue siendo el único con dos ejes**, que es la observación que la
+  mesa pidió declarar: **una variable más que vigilar en la factura.**
+
+*Dos correcciones sobre la misma celda, en direcciones opuestas. Se dejan las
+dos escritas — **una celda que cambió dos veces merece que se vea cuántas
+veces cambió**, no que se presente como si siempre hubiera dicho esto.*
 
 ### 🔧 La palanca — con su costo escondido, que es de letra y no técnico
 
@@ -217,14 +269,24 @@ minutos son lineales en el tiempo, los GB lo son en el **bitrate**. Bajar de
 1,5 a 0,8 Mbps casi **duplica** las consultas que entran en los 50 GB, sin
 tocar una línea de la duración.
 
-🔴 **Pero no es un parámetro libre:** `LETRA_TELEMEDICINA` §6 **declara los
-1,5 Mbps como requisito mínimo que el profesional acepta al habilitar el
-servicio**. *Bajar el bitrate para ahorrar ancho de banda toca una firma de
-la letra, no una constante del código* — y del otro lado está lo que §6
-protege: *«un animal mal iluminado no se puede evaluar»*, y uno mal
-comprimido tampoco.
+> 🔴 **CORRECCIÓN DE MESA (26-ago-2026) — yo había colapsado dos cosas
+> distintas.** Escribí que bajar el bitrate *«toca una firma de la letra»*.
+> **No la toca.** §6 declara los 1,5 Mbps como **requisito de la CONEXIÓN del
+> profesional**, no como **promesa de calidad del STREAM**. *Pedir mejor
+> conexión que la que se usa no es una contradicción: es margen* — y el
+> margen es justamente lo que hace que la videollamada no se caiga cuando la
+> red real de Quito hace lo que hace.
+>
+> ⇒ **Configurar un bitrate menor NO contradice §6.**
+>
+> **Lo que sí es firma del founder es el PISO DE CALIDAD VISUAL** — y **se
+> decide viendo un animal en pantalla, no en una tabla.** *Es la misma clase
+> de juicio que el de la foto de la vitrina: el riesgo nunca fue que pesara
+> de más, sino que se viera peor — y eso no lo dictamina un número.*
 
-⇒ **Parámetro de la tanda 2, con la letra en la mano. No se toca ahora.**
+⇒ **Parámetro de la tanda 2: es configuración, no enmienda.** Su límite no
+es la letra sino **el ojo del founder sobre una mascota real**, y por eso se
+decide con el cable ya probado y no antes.
 
 **⏰ DISPARO DE RE-MEDICIÓN, corregido por este hallazgo:** el panel muestra
 uso ⇒ **se mira a ~30 GB/mes (60 % de 50 GB)**, **no** a 3.000 minutos.
@@ -355,23 +417,34 @@ en npm hace 691 días** y con **237 issues abiertas**.
 principio:** el free tier más chico del set, y **el techo real no son los
 5.000 minutos sino los 50 GB de ancho de banda**, que cortan primero:
 **≈50–110 consultas/mes**, no 125 (§1⑤). Salta a **«desde» $50/mes** cuando
-se pasa, mientras Daily/Agora/100ms son pay-as-you-go sin base. Y con los dos
-ejes sumados el costo por consulta es **≈$0,11, no $0,02** — sigue por debajo
-de Daily/100ms/Twilio, pero **la ventaja se achica de ~8× a ~1,5×** y **Agora
-queda claramente más barato**.
+se pasa, mientras los demás son pay-as-you-go sin base. Y con los dos ejes
+sumados el costo por consulta es **≈$0,11, no $0,02**.
+
+🔴 **Y sigue siendo el ÚNICO del set con dos ejes de cobro** (§1⑤): su
+factura tiene una variable más que las demás, y es la que corta primero.
+
+⚠️ *(Acá había una segunda afirmación —«Agora queda claramente más barato»—
+**y era FALSA**: se retracta en §1⑤. El $0,59/1000 min de Agora es su
+«starts at» de audio; su video HD cuesta $0,16/consulta, **más** que LiveKit
+con GB incluidos. **Medido después de escribir esto.**)*
 
 ✅ **Lo que esto NO cambia, y conviene que quede dicho:** el costo **nunca fue
-una de las cinco razones** de esta recomendación — está listado como *su peor
-número* desde la primera versión. Las cinco razones (SDK posterior a nuestra
-vara · Deno limpio · newArch · **Apache-2.0 self-hosteable** · una sola casa)
-**no las toca este hallazgo**. *Corrijo el número porque estaba mal, no
-porque mueva la conclusión — y si la mesa prioriza costo, Agora ya estaba
-declarado como el segundo lugar honesto.*
+una de las cinco razones** — está listado como *su peor número* desde la
+primera versión. Las cinco (SDK posterior a nuestra vara · Deno limpio ·
+newArch · **Apache-2.0 self-hosteable** · una sola casa) **no las toca ningún
+hallazgo de costo.**
 
-🔧 **Y hay una mitigación que el propio ④ ya traía:** en **self-host el eje
-de GB de LiveKit Cloud desaparece** — se paga el ancho de banda del servidor
-propio, que se factura muy distinto. *La salida sin lock-in también es una
-salida de costo.*
+**Y el encuadre de escala lo puso la mesa, con su número** *(26-ago-2026)*:
+> **el peor caso son $50 fijos al mes contra ~$1.000 de comisión mensual.**
+> *El transporte del quinto oficio, en su escenario más caro, es ~5 % de lo
+> que ese oficio factura. Un 5 % no elige arquitectura.*
+
+🔧 **Y si algún día el costo pasara a mandar, la salida NO es Agora: es
+self-host** — donde **el eje de GB desaparece** y se paga el ancho de banda
+del servidor propio, que se factura muy distinto.
+🔴 **Esa puerta existe SÓLO por haber elegido licencia abierta, que era la
+razón ④.** *La razón que parecía la más abstracta de las cinco es la que
+resuelve el problema más concreto.*
 
 ⚠️ **Y el riesgo que la recomendación NO cierra:** el **config plugin de Expo
 de LiveKit no se toca desde el 17-mar-2026 — tres meses antes de que SDK 57
@@ -380,11 +453,21 @@ existiera.** No hay issues reportadas de SDK 57 en ningún repo del set, pero
 config declarativa (permisos, flags), así que el riesgo es acotado — **pero
 sólo una build de prueba lo cierra, y esa build es un acto de la mesa.**
 
-**Segundo lugar real: Agora.** El precio más bajo, free tier doble,
-`codegenConfig` presente. Cae al segundo puesto por: **sin self-host
-(lock-in total)**, `react-native-agora` sin publicar hace 173 días y
-`agora-token` hace 453. *Si la mesa prioriza costo sobre soberanía, Agora es
-la elección honesta y hay que decirlo.*
+**Segundo lugar real: Agora.** Free tier **más del doble** (≈250 consultas
+contra 50–110) y `codegenConfig` presente. Cae al segundo puesto por: **sin
+self-host (lock-in total)**, `react-native-agora` sin publicar hace 173 días
+y `agora-token` hace 453.
+
+> ⚠️ **ENMENDADO 26-ago:** este párrafo decía *«el precio más bajo»* y
+> **cerraba con que si la mesa priorizaba costo, Agora era la elección
+> honesta.** **Medido: es FALSO.** Su video HD cuesta **$0,16/consulta**
+> contra **≈$0,11** de LiveKit con GB incluidos — el $0,59/1000 min que yo
+> había tomado es su **«starts at» de audio**.
+> ⇒ **Agora no es más barato: tiene free tier más grande.** *Son dos cosas
+> distintas y las había fundido en una.*
+>
+> **Lo que sí sigue en pie de ese párrafo:** su free tier más que dobla al de
+> LiveKit, y ésa es la única ventaja de plata real que conserva.
 
 ---
 
