@@ -446,12 +446,24 @@ del servidor propio, que se factura muy distinto.
 razón ④.** *La razón que parecía la más abstracta de las cinco es la que
 resuelve el problema más concreto.*
 
-⚠️ **Y el riesgo que la recomendación NO cierra:** el **config plugin de Expo
-de LiveKit no se toca desde el 17-mar-2026 — tres meses antes de que SDK 57
-existiera.** No hay issues reportadas de SDK 57 en ningún repo del set, pero
-**ausencia de reportes no es evidencia de compatibilidad**. El plugin es
-config declarativa (permisos, flags), así que el riesgo es acotado — **pero
-sólo una build de prueba lo cierra, y esa build es un acto de la mesa.**
+> ## ✅✅ EL RIESGO QUE FUNDABA TODO ESTO: CERRADO — gate del founder, 26-ago-2026
+>
+> **Yo había escrito:** *«el config plugin de Expo de LiveKit no se toca desde
+> el 17-mar-2026 — tres meses antes de que SDK 57 existiera. Ausencia de
+> reportes no es evidencia de compatibilidad. Sólo una build de prueba lo
+> cierra.»*
+>
+> **La build se hizo y el cable dio VERDE en los cinco puntos**, en dos
+> dispositivos con APK autónomos, en la red real de Quito — **incluido «se ven
+> y se oyen en AMBOS sentidos»**, con cada aparato viendo la cámara del otro.
+>
+> ⇒ **LiveKit Cloud queda FIRMADO SIN CONDICIÓN. La escalera de caída se
+> retira** — ya no hay condición que la dispare.
+>
+> *La incertidumbre era real y no se resolvió razonando: se resolvió con dos
+> teléfonos en Quito. **Nada de lo que yo podía medir desde el registro npm
+> iba a contestar esa pregunta**, y por eso la recomendación salió condicionada
+> en vez de firme.*
 
 **Segundo lugar real: Agora.** Free tier **más del doble** (≈250 consultas
 contra 50–110) y `codegenConfig` presente. Cae al segundo puesto por: **sin
@@ -599,8 +611,16 @@ Declarado para que nadie lo dé por hecho:
 - ❌ **Cero código.** No existe `video-token`.
 - ❌ **Ninguna build de prueba** — y es justo lo que cerraría el riesgo del
   plugin.
-- ❌ **Regiones/latencia Ecuador**, **precio de Vonage**, **minSdk/target/peso
-  del binario**, **TURN de los cloud**: NO MEDIDO.
+- ⚠️ **Regiones / latencia Ecuador — CERRADO EN LO QUE IMPORTA, no en el
+  número.** El gate del 26-ago probó **video y audio en ambos sentidos en la
+  red real de Quito** ⇒ **es usable**, que era la pregunta de producto.
+  **Pero sigue sin haber una latencia medida en milisegundos**, y ningún
+  proveedor publica su footprint. *«Anduvo» y «anduvo con qué latencia» son
+  dos datos distintos; tenemos el primero.*
+- ⚠️ **minSdk / target / peso del APK: el dato YA EXISTE** — C hizo las builds
+  del gate — **pero no llegó a este relevamiento.** *Lo declaro como pendiente
+  de traspaso, no como no medible.*
+- ❌ **Precio de Vonage** y **TURN de los cloud**: siguen NO MEDIDO.
 - ⚠️ **Los minutos incluidos y el excedente de LiveKit siguen siendo PÚBLICO,
   no del objeto** — se intentó contra la cuenta real y **el panel no los
   expone** (§1⑤). *El intento no convierte una celda en verificada.*
