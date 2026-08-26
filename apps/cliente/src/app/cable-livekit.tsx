@@ -25,6 +25,29 @@
  * **no tiene entrada desde ninguna pantalla** — se llega por URL. *Que sea
  * alcanzable en preview no la vuelve una pantalla de producto.*
  *
+ *
+ * ── ✅ GATE PASADO (26-ago-2026) · LiveKit FIRMADO SIN CONDICIÓN ───────────
+ * Los cinco puntos de §5 en verde, dos aparatos, red real de Quito, APK
+ * autónomos. **La escalera de caída (plugin genérico → Agora) se retiró: ya
+ * no hay condición que la dispare.** *Esta pantalla ya rindió: lo que queda
+ * es su condición de muerte.*
+ *
+ * ── 🔴 UN DEFECTO MÍO QUE TANDA 2 NO TIENE QUE REDESCUBRIR ────────────────
+ * **El tile «Vos» NO renderizó.** No es que la pantalla no lo intentara —lo
+ * cablée y no anduvo—, así que se dice como defecto y no como alcance.
+ *
+ * **Diagnóstico, con lo que lo sostiene:** el cast `'camera' as never` **NO
+ * es la causa** — el tile REMOTO usa el mismo y sí funcionó en el gate. Lo
+ * que falla es la fuente: `useParticipantTracks(...)` sobre la identidad del
+ * participante **local** no devuelve su publicación de cámara.
+ *
+ * ⇒ **Para la in-call de tanda 2: la vista propia sale de
+ * `useLocalParticipant().cameraTrack`** (`TrackPublication | undefined`,
+ * medido en `@livekit/components-react`), no del hook de tracks por
+ * identidad.
+ *
+ * *No se cura acá a propósito: este archivo muere con la superficie real, y
+ * curar un andamio que ya rindió es trabajo que se tira dos veces.*
  * **Lo que esta prueba NO es** (spec §7): no es la pantalla de teleconsulta ·
  * no toca citas reales · no prueba autorización (eso es `video-token` + la RPC
  * de A) · **no graba nada** — la letra no menciona grabación.
