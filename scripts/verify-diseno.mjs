@@ -1990,10 +1990,11 @@ const FIXTURES = {
   R67: [{
     path: 'apps/cliente/src/i18n/es.ts',
     src:
-      "const a = { avisoTeleconsulta: { titulo: 'Antes de continuar', intro: 'x', " +
-      "advertencia: 'y', signosIntro: 'z', " +
-      "signos: ['dificultad para respirar', 'convulsiones', 'golpe fuerte', 'dolor intenso o decaimiento repentino'], " +
-      "signosCierre: 'w', transito: 'v' } }",
+      "const a = { avisoTeleTitulo: 'Antes de continuar', avisoTeleParaQue: 'x', " +
+      "avisoTeleNoReemplaza: 'No reemplazan una atención presencial ni sirven para emergencias. " +
+      "Si notas que tu mascota está en riesgo —dificultad para respirar, convulsiones, golpe fuerte, " +
+      "dolor intenso o decaimiento repentino— llévala a una clínica ahora mismo.', " +
+      "avisoTeleTransito: 'v' }",
   }],
   /* R66 · el fixture usa un path de diccionario para que el ANCLA no sea lo
      que lo ponga rojo (la regla exige ver al menos un `i18n` o se declara no
@@ -5644,27 +5645,67 @@ function avisoDeLaLetra(md) {
   };
 }
 
-/** Lee el bloque `avisoTeleconsulta` del diccionario `es` del cliente. */
+/** Lee UNA cadena del diccionario, tolerando el salto de línea de Prettier. */
+function cadena(src, clave) {
+  const m = src.match(new RegExp(`\\b${clave}\\s*:\\s*(['"\`])([\\s\\S]*?)\\1`));
+  return m ? m[2].replace(/\s+/g, ' ').trim() : null;
+}
+
+/**
+ * Lee el aviso del diccionario `es` del cliente **EN CUALQUIERA DE SUS DOS
+ * FORMAS**, y esa tolerancia no es comodidad: es la corrección de un defecto
+ * REAL de este juez.
+ *
+ * 🔴 **Lo que pasó, medido (26-ago):** esta regla buscaba `avisoTeleconsulta:
+ * { … }` —el contrato que ella misma publicaba— y salía **NO CONCLUYENTE**
+ * diciendo *«C todavía no depositó»*. **Pero C YA había depositado**, en claves
+ * planas (`veterinaria.avisoTele*`), y **el aviso ya se le mostraba a una
+ * familia real.** ⇒ *el juez estaba protegiendo SU CONTRATO en vez de LA
+ * LETRA, y su «no concluyente» inducía una conclusión falsa: que no había nada
+ * que vigilar.*
+ *
+ * **La lección, que vale más que el caso: un juez se ata al TEXTO QUE EL
+ * USUARIO LEE, jamás a la forma en que un consumidor lo guardó.** La forma es
+ * de quien la escribe; la letra es de la casa.
+ *
+ * Devuelve una forma NORMALIZADA — así el juicio no se ramifica.
+ */
 function avisoDelDiccionario(src) {
+  // ── FORMA ① · anidada: el contrato de `packages/ui` (tupla de cinco).
   const i = src.indexOf('avisoTeleconsulta:');
-  if (i < 0) return null;
-  const trozo = src.slice(i, i + 4000);
-  const leer = (clave) => {
-    const m = trozo.match(new RegExp(`${clave}\\s*:\\s*(['"\`])([\\s\\S]*?)\\1`));
-    return m ? m[2].replace(/\s+/g, ' ').trim() : null;
-  };
-  const arr = trozo.match(/signos\s*:\s*\[([\s\S]*?)\]/);
-  const signos = arr
-    ? [...arr[1].matchAll(/(['"`])([\s\S]*?)\1/g)].map((m) => m[2].replace(/\s+/g, ' ').trim())
-    : null;
+  if (i >= 0) {
+    const trozo = src.slice(i, i + 4000);
+    const arr = trozo.match(/signos\s*:\s*\[([\s\S]*?)\]/);
+    const signos = arr
+      ? [...arr[1].matchAll(/(['"`])([\s\S]*?)\1/g)].map((m) => m[2].replace(/\s+/g, ' ').trim())
+      : [];
+    const partes = ['advertencia', 'signosIntro', 'signosCierre'].map((k) => cadena(trozo, k));
+    return {
+      forma: 'anidada (contrato de packages/ui)',
+      titulo: cadena(trozo, 'titulo'),
+      intro: cadena(trozo, 'intro'),
+      /* El texto duro se junta: en esta forma vive partido, en la otra entero.
+         Lo que la letra protege es el CONTENIDO, no cómo se guardó. */
+      duro: [partes[0], partes[1], signos.join(', '), partes[2]].filter(Boolean).join(' '),
+      transito: cadena(trozo, 'transito'),
+      acciones: [],
+    };
+  }
+
+  // ── FORMA ② · plana: la que C depositó (`veterinaria.avisoTele*`).
+  const titulo = cadena(src, 'avisoTeleTitulo');
+  if (!titulo) return null;
   return {
-    titulo: leer('titulo'),
-    intro: leer('intro'),
-    advertencia: leer('advertencia'),
-    signosIntro: leer('signosIntro'),
-    signosCierre: leer('signosCierre'),
-    transito: leer('transito'),
-    signos,
+    forma: 'plana (`avisoTele*` del cliente)',
+    titulo,
+    intro: cadena(src, 'avisoTeleParaQue'),
+    duro: cadena(src, 'avisoTeleNoReemplaza'),
+    transito: cadena(src, 'avisoTeleTransito'),
+    acciones: [
+      cadena(src, 'avisoTeleIrUrgencias'),
+      cadena(src, 'avisoTelePresencial'),
+      cadena(src, 'avisoTeleContinuar'),
+    ].filter(Boolean),
   };
 }
 
@@ -5696,52 +5737,53 @@ function r67(archivos) {
     };
   }
 
-  // ── BRAZO ① · LOS CINCO SIGNOS (exigible hoy, inmune a la conjugación).
+  // ── BRAZO ① · LOS CINCO SIGNOS, contados sobre TODO el texto que se muestra.
+  //    Se busca en el blob y no en un arreglo: así el brazo vale igual si el
+  //    párrafo vive entero (forma plana) o partido (tupla). **Lo que la letra
+  //    protege es que el dueño los LEA, no cómo estén guardados.**
   const esperados = firmado.signos;
-  const puestos = puesto.signos;
-  if (!puestos) {
-    fallos.push('R67: `avisoTeleconsulta.signos` no es un arreglo legible en el diccionario del cliente — los cinco signos son lo que la letra defiende con más fuerza y no se pueden verificar.');
-  } else {
-    if (puestos.length !== esperados.length) {
-      fallos.push(
-        `R67 **los signos no son ${esperados.length}, son ${puestos.length}**. La letra: *«nombrar cinco signos le da un criterio»* — y **cuatro signos compilan igual que cinco**. ` +
-        `Firmados: ${esperados.map((s) => `«${s}»`).join(' · ')}`,
-      );
-    }
-    for (const s of esperados) {
-      if (!puestos.some((p) => p.toLowerCase() === s.toLowerCase())) {
-        fallos.push(`R67 **falta el signo «${s}»** entre los que se le muestran al dueño. *No se resume, no se acorta* — §3.`);
-      }
-    }
+  const duro = puesto.duro ?? '';
+  const faltantes = esperados.filter((s) => !duro.toLowerCase().includes(s.toLowerCase()));
+  for (const s of faltantes) {
+    fallos.push(
+      `R67 **falta el signo «${s}»** en el aviso que se le muestra al dueño. ` +
+      `*«Los signos concretos no son decoración… nombrar cinco signos le da un criterio»* (§3) — ` +
+      `y **cuatro signos compilan igual que cinco**.`,
+    );
   }
 
-  // ── BRAZO ② · EL CUERPO, carácter por carácter.
+  // ── BRAZO ② · EL CUERPO, carácter por carácter contra la letra.
   const par = (rotulo, esperadoEn, valor) => {
-    if (valor == null) { fallos.push(`R67: falta \`avisoTeleconsulta.${rotulo}\` en el diccionario del cliente.`); return; }
+    if (valor == null) { fallos.push(`R67: falta \`${rotulo}\` en el diccionario del cliente.`); return; }
     if (!esperadoEn.includes(valor)) {
       fallos.push(
-        `R67 **\`${rotulo}\` no coincide con el texto firmado**.\n` +
+        `R67 **\`${rotulo}\` no coincide con el texto firmado de §3**.\n` +
         `      renderiza: «${valor}»\n` +
-        `      la letra:  «${esperadoEn}»\n` +
-        `      *Si los cinco signos están bien y esto no coincide, mirá primero la CONJUGACIÓN: la letra sigue en v1.0 y su §3 está en voseo — la enmienda es de mesa, no de C.*`,
+        `      la letra:  «${esperadoEn}»`,
       );
     }
   };
-  par('titulo', firmado.titulo, puesto.titulo);
-  par('intro', firmado.intro, puesto.intro);
-  par('advertencia', firmado.advertenciaYSignos, puesto.advertencia);
-  par('signosIntro', firmado.advertenciaYSignos, puesto.signosIntro);
-  par('signosCierre', firmado.advertenciaYSignos, puesto.signosCierre);
-  /* La línea de tránsito: se exige SOLO si la letra la trae — la v1.0 no la
-     tenía y una regla no puede pedir lo que su fuente no firma. */
-  if (firmado.transito) par('transito', firmado.transito, puesto.transito);
+  par('el título', firmado.titulo, puesto.titulo);
+  par('el párrafo de para-qué-sirve', firmado.intro, puesto.intro);
+  par('el párrafo de la advertencia y los signos', firmado.advertenciaYSignos, puesto.duro);
+  /* Tránsito y acciones: SOLO si la fuente los trae. Una regla no puede exigir
+     lo que su letra no firma, ni sobre una forma que no se acordó. */
+  if (firmado.transito) par('la línea de tránsito', firmado.transito, puesto.transito);
+  for (const a of puesto.acciones) {
+    if (!/Ir a urgencias|Reservar cita presencial|Continuar con la videoconsulta/.test(a)) {
+      fallos.push(`R67 **la acción «${a}» no es ninguna de las tres firmadas** en §3.`);
+    }
+  }
 
   return {
     fallos,
     info:
-      `${esperados.length} signo(s) firmados en §3, verificados contra el diccionario del cliente` +
+      `los ${esperados.length} signos firmados, verificados en el texto que se muestra` +
+      ` · forma leída: ${puesto.forma}` +
+      (puesto.acciones.length ? ` · ${puesto.acciones.length} acción(es) verificadas` : '') +
       ` · vara EXTRAÍDA de \`${LETRA_TELE}\` en esta corrida (cero baseline transcrito)` +
       ` · ⚠️ **NO mide tipografía** (un verbatim en letra chica pasaría y violaría §3)` +
+      ` · ⚠️ **NO mide la PARIDAD de las tres acciones** — que ninguna presida es firma del founder y se ve, no se grepea` +
       ` · ⚠️ **vigila SOLO el español**: el \`en\` no tiene fuente firmada`,
   };
 }
